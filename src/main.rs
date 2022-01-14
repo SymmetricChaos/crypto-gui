@@ -1,7 +1,5 @@
-mod app;
 pub mod ciphers;
 pub mod cipher_panels;
-use app::CryptoApp;
 use cipher_panels::CaesarApp;
 
 fn main() {
