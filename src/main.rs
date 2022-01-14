@@ -1,6 +1,6 @@
 pub mod ciphers;
-pub mod cipher_panels;
-use cipher_panels::CaesarApp;
+pub mod caesar_panel;
+use caesar_panel::CaesarApp;
 
 fn main() {
     let app = CaesarApp::default();
