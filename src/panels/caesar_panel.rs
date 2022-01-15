@@ -1,8 +1,10 @@
-use eframe::{egui::{self, TextStyle}, epi};
+use eframe::{egui::{self, TextStyle}};
 
 use crate::ciphers::{LATIN, Cipher};
 
 use crate::ciphers::Caesar;
+
+use super::cipher_windows::View;
 
 #[derive(Debug, PartialEq)]
 pub enum Mode {
@@ -10,7 +12,7 @@ pub enum Mode {
     Decrypt,
 }
 
-pub struct CaesarApp {
+pub struct CaesarWindow {
     plaintext: String,
     ciphertext: String,
     alphabet: String,
@@ -18,7 +20,7 @@ pub struct CaesarApp {
     mode: Mode,
 }
 
-impl Default for CaesarApp {
+impl Default for CaesarWindow {
     fn default() -> Self {
         Self {
             plaintext: String::new(),
@@ -30,26 +32,13 @@ impl Default for CaesarApp {
     }
 }
 
-impl epi::App for CaesarApp {
-    fn name(&self) -> &str {
-        "Caesar Cipher"
-    }
 
-    /// Called once before the first frame.
-    fn setup(
-        &mut self,
-        _ctx: &egui::CtxRef,
-        _frame: &epi::Frame,
-        _storage: Option<&dyn epi::Storage>,
-    ) {
-    }
+impl crate::panels::cipher_windows::View for CaesarWindow {
+    fn ui(&mut self, ui: &mut egui::Ui) {
 
-    fn update(&mut self, ctx: &egui::CtxRef, frame: &epi::Frame) {
         let Self{ plaintext, ciphertext, alphabet, key, mode } = self;
 
-
-
-        egui::SidePanel::left("control_panel").show(ctx, |ui| {
+        egui::SidePanel::left("control_panel").show_inside(ui, |ui| {
             ui.add_space(16.0);
             ui.label("Alphabet");
             ui.add(egui::TextEdit::singleline(alphabet));
@@ -86,7 +75,7 @@ impl epi::App for CaesarApp {
 
         });
 
-        egui::CentralPanel::default().show(ctx, |ui| {
+        egui::CentralPanel::default().show_inside(ui, |ui| {
 
             ui.label("Description:\nThe Caesar Cipher is one of the oldest and simplest forms of cryptography. The key is any positive whole number. Each letter of the plaintext is shifted that many positions in the alphabet, wrapping around at the end.");
 
@@ -102,5 +91,21 @@ impl epi::App for CaesarApp {
         });
         
 
+    }
+}
+
+
+impl crate::panels::cipher_windows::CipherFrame for CaesarWindow {
+    fn name(&self) -> &'static str {
+        "Caesar Cipher"
+    }
+
+    fn show(&mut self, ctx: &egui::CtxRef, open: &mut bool) {
+        let window = egui::Window::new("Caesar Cipher")
+            .default_width(600.0)
+            .default_height(400.0)
+            .vscroll(false)
+            .open(open);
+        window.show(ctx, |ui| self.ui(ui));
     }
 }
