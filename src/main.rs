@@ -1,6 +1,7 @@
 pub mod ciphers;
 pub mod panels;
 pub mod app;
+pub mod math;
 
 fn main() {
     let app = app::DemoApp::default();

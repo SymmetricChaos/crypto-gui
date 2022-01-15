@@ -1,24 +1,7 @@
 use rand::Rng;
 use super::cipher_trait::Cipher;
 
-fn egcd(a: i64, b: i64) -> (i64,i64,i64) {
-    if a == 0 {
-        (b,0,1)
-    } else {
-        let (g, y, x) = egcd(b%a, a);
-        (g,x-(b/a)*y,y)
-    }
-}
-
-pub fn mul_inv(num: usize, modulus: usize) -> Option<usize> {
-    let (g, x, _) = egcd(num  as i64, modulus as i64);
-    if g != 1 {
-        None 
-    } else {
-        let t = x as usize;
-        Some( t.rem_euclid(modulus) )
-    }
-}
+use crate::math::mul_inv;
 
 pub struct Affine {
     add_key: usize,
@@ -47,7 +30,7 @@ impl Cipher for Affine {
     fn encrypt(&self, text: &str) -> Result<String,&'static str> {
         let symbols = text.chars();
         let mut out = "".to_string();
-        let mki = match self.mul_key_inv {
+        match self.mul_key_inv {
             Some(n) => n,
             None => return Err("The multiplicative key of an Affine Cipher must have an inverse modulo the length of the alphabet")
         };

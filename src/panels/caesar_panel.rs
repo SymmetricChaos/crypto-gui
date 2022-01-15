@@ -1,16 +1,8 @@
 use eframe::{egui::{self, TextStyle}};
-
-use crate::ciphers::{LATIN, Cipher};
-
+use crate::ciphers::LATIN;
 use crate::ciphers::Caesar;
+use super::{cipher_windows::View, Mode, run_cipher};
 
-use super::cipher_windows::View;
-
-#[derive(Debug, PartialEq)]
-pub enum Mode {
-    Encrypt,
-    Decrypt,
-}
 
 pub struct CaesarWindow {
     plaintext: String,
@@ -60,22 +52,14 @@ impl crate::panels::cipher_windows::View for CaesarWindow {
                 *ciphertext = String::new();
             }
             
-            let caesar = Caesar::new(*key as usize, alphabet);
-            if *mode == Mode::Encrypt {
-                match caesar.encrypt(&plaintext) {
-                    Ok(text) => *ciphertext = text ,
-                    Err(e) => *ciphertext = String::from(e),
-                }
-            } else {
-                match caesar.decrypt(&ciphertext) {
-                    Ok(text) => *plaintext = text ,
-                    Err(e) => *plaintext = String::from(e),
-                }
-            }
+            let cipher = Caesar::new(*key as usize, alphabet);
+            run_cipher(mode, &cipher, plaintext, ciphertext);
 
         });
 
-        egui::CentralPanel::default().show_inside(ui, |ui| {
+        egui::SidePanel::right("caesar_display_panel")
+            .default_width(500.0)
+            .show_inside(ui, |ui| {
 
             ui.label("Description:\nThe Caesar Cipher is one of the oldest and simplest forms of cryptography. The key is any positive whole number. Each letter of the plaintext is shifted that many positions in the alphabet, wrapping around at the end.");
 
