@@ -1,4 +1,4 @@
-use rand::Rng;
+use rand::{Rng, prelude::ThreadRng};
 use super::cipher_trait::Cipher;
 
 use crate::math::mul_inv;
@@ -71,8 +71,7 @@ impl Cipher for Affine {
         Ok(out)
     }
 
-    fn randomize(&mut self) {
-        let mut rng = rand::thread_rng();
+    fn randomize(&mut self, rng: &mut ThreadRng) {
         let length = self.alphabet.len();
         self.add_key = rng.gen_range(0..length);
         let (mul, mult_inv) = loop  {

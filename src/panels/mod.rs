@@ -3,6 +3,7 @@ use crate::ciphers::Cipher;
 pub mod caesar_panel;
 pub mod cipher_windows;
 pub mod affine_panel;
+pub mod substitution_panel;
 
 #[derive(Debug, PartialEq)]
 pub enum Mode {

@@ -2,7 +2,7 @@ use std::{collections::BTreeSet};
 
 use eframe::egui::{self, CtxRef};
 
-use super::{caesar_panel::CaesarWindow, affine_panel::AffineWindow};
+use super::{caesar_panel::CaesarWindow, affine_panel::AffineWindow, substitution_panel::SubstitutionWindow};
 
 /// Something to view in the cipher windows
 pub trait View {
@@ -28,7 +28,8 @@ impl Default for Ciphers {
     fn default() -> Self {
         Self::from_ciphers(vec![
             Box::new(CaesarWindow::default()),
-            Box::new(AffineWindow::default())])
+            Box::new(AffineWindow::default()),
+            Box::new(SubstitutionWindow::default())])
     }
 }
 

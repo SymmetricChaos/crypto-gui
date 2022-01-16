@@ -1,15 +1,15 @@
-use rand::Rng;
+use rand::{Rng, prelude::ThreadRng};
 use super::cipher_trait::Cipher;
 
 pub struct Caesar {
-    key: usize,
+    shift: usize,
     alphabet: String,
     length: usize,
 }
 
 impl Caesar {
-    pub fn new(key: usize, alphabet: &str) -> Caesar {
-        Caesar{ key, alphabet: alphabet.to_string(), length: alphabet.chars().count() }
+    pub fn new(shift: usize, alphabet: &str) -> Caesar {
+        Caesar{ shift, alphabet: alphabet.to_string(), length: alphabet.chars().count() }
     }
 
     fn char_to_val(&self, c: char) -> Option<usize> {
@@ -28,7 +28,7 @@ impl Cipher for Caesar {
         for s in symbols {
             let val = self.char_to_val(s);
             let n = match val {
-                Some(v) => (v + self.key) % self.length,
+                Some(v) => (v + self.shift) % self.length,
                 None => return Err("Unknown character encountered")
             };
             let char = match self.val_to_char(n) {
@@ -46,7 +46,7 @@ impl Cipher for Caesar {
         for s in symbols {
             let val = self.char_to_val(s);
             let n = match val {
-                Some(v) => (v + self.length - self.key) % self.length,
+                Some(v) => (v + self.length - self.shift) % self.length,
                 None => return Err("Unknown character encountered")
             };
             let char = match self.val_to_char(n) {
@@ -58,9 +58,8 @@ impl Cipher for Caesar {
         Ok(out)
     }
 
-    fn randomize(&mut self) {
-        let mut rng = rand::thread_rng();
+    fn randomize(&mut self, rng: &mut ThreadRng) {
         let length = self.alphabet.len();
-        self.key = rng.gen_range(0..length);
+        self.shift = rng.gen_range(0..length);
     }
 }

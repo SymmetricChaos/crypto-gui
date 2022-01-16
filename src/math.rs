@@ -1,3 +1,5 @@
+use rand::prelude::{ThreadRng, SliceRandom};
+
 fn egcd(a: i64, b: i64) -> (i64,i64,i64) {
     if a == 0 {
         (b,0,1)
@@ -49,4 +51,13 @@ pub fn prime_factors(n: usize) -> Vec<usize> {
     let mut out = prime_factorization(n);
     out.dedup();
     out
+}
+
+
+
+pub fn shuffle_str(s: &str, rng: &mut ThreadRng) -> String {
+    let mut graphemes = s.chars().collect::<Vec<char>>();
+    let slice = graphemes.as_mut_slice();
+    slice.shuffle(rng);
+    slice.iter().map(|x| *x).collect::<String>()
 }
