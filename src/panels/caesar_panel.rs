@@ -1,14 +1,14 @@
-use eframe::{egui::{self, TextStyle}};
+use eframe::egui;
 use crate::ciphers::LATIN;
 use crate::ciphers::Caesar;
-use super::{cipher_windows::View, Mode, run_cipher};
+use super::randomize_button;
+use super::{cipher_windows::View, Mode, display_panel, clear_button, mode_selector, run_button, input_alphabet};
 
 
 pub struct CaesarWindow {
     plaintext: String,
     ciphertext: String,
-    alphabet: String,
-    key: u32,
+    cipher: Caesar,
     mode: Mode,
 }
 
@@ -17,8 +17,7 @@ impl Default for CaesarWindow {
         Self {
             plaintext: String::new(),
             ciphertext: String::new(),
-            alphabet: String::from(LATIN),
-            key: 0,
+            cipher: Caesar::new(0, LATIN),
             mode: Mode::Encrypt,
         }
     }
@@ -28,55 +27,40 @@ impl Default for CaesarWindow {
 impl crate::panels::cipher_windows::View for CaesarWindow {
     fn ui(&mut self, ui: &mut egui::Ui) {
 
-        let Self{ plaintext, ciphertext, alphabet, key, mode } = self;
+        let Self{ plaintext, ciphertext, cipher, mode } = self;
 
         egui::SidePanel::left("control_panel").show_inside(ui, |ui| {
             ui.add_space(16.0);
-            ui.label("Alphabet");
-            ui.add(egui::TextEdit::singleline(alphabet));
+            input_alphabet(ui, cipher);
             ui.add_space(16.0);
 
             ui.label("Key");
-            let alpha_range = 0u32..=((alphabet.chars().count()-1) as u32);
-            ui.add(egui::Slider::new(key, alpha_range));
+            let alpha_range = 0..=((cipher.length()-1));
+            ui.add(egui::Slider::new(&mut cipher.shift, alpha_range));
             ui.add_space(16.0);
 
-            ui.horizontal(|ui| {
-                ui.selectable_value(mode, Mode::Encrypt, "Encrypt");
-                ui.selectable_value(mode, Mode::Decrypt, "Decrypt");
-            });
+            mode_selector(ui, mode);
             ui.add_space(16.0);
 
-            if ui.button("Clear").clicked() {
-                *plaintext = String::new();
-                *ciphertext = String::new();
-            }
-            
-            let cipher = Caesar::new(*key as usize, alphabet);
-            run_cipher(mode, &cipher, plaintext, ciphertext);
+            run_button(ui, mode, cipher, plaintext, ciphertext);
+            ui.add_space(32.0);
+
+            clear_button(ui, plaintext, ciphertext);
+            ui.add_space(16.0);
+
+            randomize_button(ui, cipher);
 
         });
 
-        egui::SidePanel::right("caesar_display_panel")
-            .default_width(500.0)
-            .show_inside(ui, |ui| {
-
-            ui.label("Description:\nThe Caesar Cipher is one of the oldest and simplest forms of cryptography. The key is any positive whole number. Each letter of the plaintext is shifted that many positions in the alphabet, wrapping around at the end.");
-
-            ui.add_space(16.0);
-            ui.separator();
-            ui.add_space(16.0);
-
-            ui.label("Plaintext");
-            ui.add(egui::TextEdit::multiline(plaintext).hint_text("Plaintext Here").text_style(TextStyle::Monospace));
-            ui.add_space(16.0);
-            ui.label("Ciphertext");
-            ui.add(egui::TextEdit::multiline(ciphertext).hint_text("Ciphertext Here").text_style(TextStyle::Monospace));
-        });
-        
-
+        display_panel(ui, 
+            "The Caesar Cipher is one of the oldest and simplest forms of cryptography. The key is any positive whole number. Each letter of the plaintext is shifted that many positions in the alphabet, wrapping around at the end.",
+            plaintext, 
+            ciphertext, 
+        );
     }
 }
+
+
 
 
 impl crate::panels::cipher_windows::CipherFrame for CaesarWindow {

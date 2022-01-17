@@ -1,21 +1,21 @@
 use rand::prelude::{ThreadRng, SliceRandom};
+use num::Integer;
 
-fn egcd(a: i64, b: i64) -> (i64,i64,i64) {
-    if a == 0 {
-        (b,0,1)
+fn egcd<N: Integer + Copy>(a: N, b: N) -> (N,N,N) {
+    if a.is_zero() {
+        (b,N::zero(),N::one())
     } else {
-        let (g, y, x) = egcd(b%a, a);
+        let (g, y, x) = egcd(b.mod_floor(&a), a);
         (g,x-(b/a)*y,y)
     }
 }
 
-pub fn mul_inv(num: usize, modulus: usize) -> Option<usize> {
-    let (g, x, _) = egcd(num  as i64, modulus as i64);
-    if g != 1 {
+pub fn mul_inv<N: Integer + Copy>(num: N, modulus: N) -> Option<N> {
+    let (g, x, _) = egcd(num, modulus);
+    if !g.is_one() {
         None 
     } else {
-        let t = x as usize;
-        Some( t.rem_euclid(modulus) )
+        Some( x.mod_floor(&modulus) )
     }
 }
 
@@ -56,8 +56,8 @@ pub fn prime_factors(n: usize) -> Vec<usize> {
 
 
 pub fn shuffle_str(s: &str, rng: &mut ThreadRng) -> String {
-    let mut graphemes = s.chars().collect::<Vec<char>>();
-    let slice = graphemes.as_mut_slice();
+    let mut characters = s.chars().collect::<Vec<char>>();
+    let slice = characters.as_mut_slice();
     slice.shuffle(rng);
     slice.iter().map(|x| *x).collect::<String>()
 }

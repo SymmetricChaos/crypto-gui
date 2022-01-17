@@ -18,6 +18,11 @@ pub trait CipherFrame {
     fn show(&mut self, ctx: &egui::CtxRef, open: &mut bool);
 }
 
+pub enum CipherName {
+    Caesar,
+    Affine,
+    General,
+}
 
 pub struct Ciphers {
     ciphers: Vec<Box<dyn CipherFrame>>,

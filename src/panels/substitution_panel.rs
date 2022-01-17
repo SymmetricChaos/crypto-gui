@@ -1,15 +1,14 @@
-use eframe::{egui::{self, TextStyle}};
-use rand::prelude::ThreadRng;
-use crate::{ciphers::LATIN, math::shuffle_str};
-use crate::ciphers::Substitution;
-use super::{cipher_windows::View, Mode, run_cipher};
+use eframe::egui::{self, TextStyle};
+use crate::ciphers::LATIN;
+use crate::ciphers::{Substitution, Cipher};
+use super::{input_alphabet, mode_selector, clear_button, randomize_button};
+use super::{cipher_windows::View, Mode, run_button};
 
 
 pub struct SubstitutionWindow {
     plaintext: String,
     ciphertext: String,
-    alphabet1: String,
-    alphabet2: String,
+    cipher: Substitution,
     mode: Mode,
 }
 
@@ -18,8 +17,7 @@ impl Default for SubstitutionWindow {
         Self {
             plaintext: String::new(),
             ciphertext: String::new(),
-            alphabet1: LATIN.to_string(),
-            alphabet2: LATIN.to_string(),
+            cipher: Substitution::new(LATIN, LATIN),
             mode: Mode::Encrypt,
         }
     }
@@ -29,37 +27,28 @@ impl Default for SubstitutionWindow {
 impl crate::panels::cipher_windows::View for SubstitutionWindow {
     fn ui(&mut self, ui: &mut egui::Ui) {
 
-        let Self{ plaintext, ciphertext, alphabet1, alphabet2, mode } = self;
 
-        egui::SidePanel::left("subs_control_panel").show_inside(ui, |ui| {
-            ui.add_space(16.0);
-            ui.label("Plaintext Alphabet");
-            ui.add(egui::TextEdit::singleline(alphabet1));
-            ui.add_space(16.0);
+        let Self{ plaintext, ciphertext, cipher, mode } = self;
 
+        egui::SidePanel::left("control_panel").show_inside(ui, |ui| {
             ui.add_space(16.0);
-            ui.label("Ciphertext Alphabet");
-            ui.add(egui::TextEdit::singleline(alphabet2));
+            input_alphabet(ui, cipher);
             ui.add_space(16.0);
 
-            ui.horizontal(|ui| {
-                ui.selectable_value(mode, Mode::Encrypt, "Encrypt");
-                ui.selectable_value(mode, Mode::Decrypt, "Decrypt");
-            });
+            ui.label("Cipher Alphabet");
+            ui.add(egui::TextEdit::singleline(cipher.output_alphabet()).text_style(TextStyle::Monospace));
             ui.add_space(16.0);
 
-            if ui.button("Clear").clicked() {
-                *plaintext = String::new();
-                *ciphertext = String::new();
-            }
+            mode_selector(ui, mode);
+            ui.add_space(16.0);
 
-            let rng = &mut ThreadRng::default();
-            if ui.button("Randomize").clicked() {
-                *alphabet2 = shuffle_str(alphabet1, rng)
-            }
-            
-            let cipher = Substitution::new(alphabet1, alphabet2);
-            run_cipher(mode, &cipher, plaintext, ciphertext);
+            run_button(ui, mode, cipher, plaintext, ciphertext);
+            ui.add_space(32.0);
+
+            clear_button(ui, plaintext, ciphertext);
+            ui.add_space(16.0);
+
+            randomize_button(ui, cipher);
 
         });
 

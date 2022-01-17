@@ -1,15 +1,13 @@
-use eframe::{egui::{self, TextStyle}};
+use eframe::egui;
 use crate::{ciphers::LATIN, math::prime_factors};
 use crate::ciphers::Affine;
-use super::{cipher_windows::View, Mode, run_cipher};
+use super::{cipher_windows::View, Mode, display_panel, run_button, clear_button, mode_selector, input_alphabet, randomize_button};
 
 
 pub struct AffineWindow {
     plaintext: String,
     ciphertext: String,
-    add_key: u32,
-    mul_key: u32,
-    alphabet: String,
+    cipher: Affine,
     mode: Mode,
 }
 
@@ -18,9 +16,7 @@ impl Default for AffineWindow {
         Self {
             plaintext: String::new(),
             ciphertext: String::new(),
-            alphabet: String::from(LATIN),
-            add_key: 0,
-            mul_key: 1,
+            cipher: Affine::new(0, 1, LATIN),
             mode: Mode::Encrypt,
         }
     }
@@ -30,60 +26,43 @@ impl Default for AffineWindow {
 impl crate::panels::cipher_windows::View for AffineWindow {
     fn ui(&mut self, ui: &mut egui::Ui) {
 
-        let Self{ plaintext, ciphertext, add_key, mul_key, alphabet, mode } = self;
+        let Self{ plaintext, ciphertext, cipher, mode } = self;
 
-        egui::SidePanel::left("affine_control_panel").show_inside(ui, |ui| {
+        egui::SidePanel::left("control_panel").show_inside(ui, |ui| {
             ui.add_space(16.0);
-            ui.label("Alphabet");
-            ui.add(egui::TextEdit::singleline(alphabet));
+            input_alphabet(ui, cipher);
             ui.add_space(16.0);
-            
-            let alpha_range = 0u32..=((alphabet.chars().count()-1) as u32);
 
             ui.label("Additive Key");
-            ui.add(egui::Slider::new(add_key, alpha_range.clone()));
+            let alpha_range = 0..=((cipher.length()-1));
+            ui.add(egui::Slider::new(&mut cipher.add_key, alpha_range.clone()));
             ui.add_space(16.0);
 
             ui.label("Multiplicative Key");
-            ui.add(egui::Slider::new(mul_key, alpha_range));
+            ui.label(format!("Must not be divisible by the following numbers: {:?}",prime_factors(cipher.length())));
+            ui.add(egui::Slider::new(&mut cipher.mul_key, alpha_range));
             ui.add_space(16.0);
 
-            ui.horizontal(|ui| {
-                ui.selectable_value(mode, Mode::Encrypt, "Encrypt");
-                ui.selectable_value(mode, Mode::Decrypt, "Decrypt");
-            });
+            mode_selector(ui, mode);
             ui.add_space(16.0);
 
-            if ui.button("Clear").clicked() {
-                *plaintext = String::new();
-                *ciphertext = String::new();
-            }
-            
-            let cipher = Affine::new(*add_key as usize, *mul_key as usize, &alphabet);
-            run_cipher(mode, &cipher, plaintext, ciphertext);
+            run_button(ui, mode, cipher, plaintext, ciphertext);
+            ui.add_space(32.0);
 
+            clear_button(ui, plaintext, ciphertext);
+            ui.add_space(16.0);
+
+            randomize_button(ui, cipher);
 
         });
 
-        egui::SidePanel::right("affine_display_panel")
-            .default_width(500.0)
-            .show_inside(ui, |ui| {
 
-            ui.label("Description:\n");
-            let alpha_len = alphabet.chars().count();
-            ui.label(format!("Because the alphabet has {} characters the multiplicative key must not be divisible by the following numbers: {:?}",alpha_len,prime_factors(alpha_len)));
+        display_panel(ui, 
+            "The Caesar Cipher is one of the oldest and simplest forms of cryptography. The key is any positive whole number. Each letter of the plaintext is shifted that many positions in the alphabet, wrapping around at the end.",
+            plaintext, 
+            ciphertext, 
+        );
 
-            ui.add_space(16.0);
-            ui.separator();
-            ui.add_space(16.0);
-
-            ui.label("Plaintext");
-            ui.add(egui::TextEdit::multiline(plaintext).hint_text("Plaintext Here").text_style(TextStyle::Monospace));
-            ui.add_space(16.0);
-            ui.label("Ciphertext");
-            ui.add(egui::TextEdit::multiline(ciphertext).hint_text("Ciphertext Here").text_style(TextStyle::Monospace));
-        });
-        
 
     }
 }

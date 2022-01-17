@@ -4,8 +4,8 @@ use std::collections::HashMap;
 use crate::math::shuffle_str;
 
 pub struct Substitution {
-    pub alphabet1: String,
-    pub alphabet2: String,
+    alphabet1: String,
+    alphabet2: String,
     map: HashMap<char,char>,
     map_inv: HashMap<char,char>,
 }
@@ -20,7 +20,6 @@ impl Substitution {
             map_inv.insert(b, a);
         }
         Substitution{ alphabet1: alphabet1.to_string(), alphabet2: alphabet2.to_string(), map, map_inv }
-        
     }
 
 }
@@ -49,15 +48,20 @@ impl Cipher for Substitution {
     }
 
     fn randomize(&mut self, rng: &mut ThreadRng) {
-        self.alphabet2 = self.alphabet1.clone();
-        shuffle_str(&self.alphabet2, rng);
-        let mut map = HashMap::new();
-        let mut map_inv = HashMap::new();
+        self.alphabet2 = shuffle_str(&self.alphabet1, rng);
+        self.map.clear();
+        self.map_inv.clear();
         for (a, b) in self.alphabet1.chars().zip(self.alphabet2.chars()) {
-            map.insert(a, b);
-            map_inv.insert(b, a);
+            self.map.insert(a, b);
+            self.map_inv.insert(b, a);
         }
-        self.map = map;
-        self.map_inv = map_inv;
+    }
+
+    fn input_alphabet(&mut self) -> &mut String {
+        &mut self.alphabet1
+    }
+
+    fn output_alphabet(&mut self) -> &mut String {
+        &mut self.alphabet2
     }
 }
