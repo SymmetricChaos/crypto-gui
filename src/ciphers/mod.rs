@@ -4,6 +4,8 @@ pub mod affine;
 pub use affine::Affine;
 pub mod substitution;
 pub use substitution::Substitution;
+pub mod decoder_ring;
+pub use decoder_ring::DecoderRing;
 
 pub mod cipher_trait;
 pub use cipher_trait::{LATIN,Cipher};
