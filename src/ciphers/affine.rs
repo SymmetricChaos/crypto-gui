@@ -27,12 +27,16 @@ impl Affine {
     pub fn length(&self) -> usize {
         self.alphabet.chars().count()
     }
+
+    pub fn set_inverse(&mut self) {
+        self.mul_key_inv = mul_inv(self.mul_key, self.alphabet.chars().count());
+    }
 }
 
 impl Cipher for Affine {
     fn encrypt(&self, text: &str) -> Result<String,&'static str> {
         let symbols = text.chars();
-        let mut out = "".to_string();
+        let mut out = String::with_capacity(text.len());
         match self.mul_key_inv {
             Some(n) => n,
             None => return Err("The multiplicative key of an Affine Cipher must have an inverse modulo the length of the alphabet")
@@ -43,18 +47,15 @@ impl Cipher for Affine {
                 Some(v) => (v * self.mul_key + self.add_key) % self.length(),
                 None => return Err("Unknown character encountered")
             };
-            let char = match self.val_to_char(n) {
-                Some(c) => c,
-                None => return Err("Unknown character encountered")
-            };
-            out.push(char)
+            // Unwrap is justified because the modulo operation forces n to be a valid index
+            out.push(self.val_to_char(n).unwrap())
         }
         Ok(out)
     }
 
     fn decrypt(&self, text: &str) -> Result<String,&'static str> {
         let symbols = text.chars();
-        let mut out = "".to_string();
+        let mut out = String::with_capacity(text.len());
         let mki = match self.mul_key_inv {
             Some(n) => n,
             None => return Err("The multiplicative key of an Affine Cipher must have an inverse modulo the length of the alphabet")
@@ -65,11 +66,8 @@ impl Cipher for Affine {
                 Some(v) => ((v + self.length() - self.add_key) * mki) % self.length(),
                 None => return Err("Unknown character encountered")
             };
-            let char = match self.val_to_char(n) {
-                Some(c) => c,
-                None => return Err("Unknown character encountered")
-            };
-            out.push(char)
+            // Unwrap is justified because the modulo operation forces n to be a valid index
+            out.push(self.val_to_char(n).unwrap())
         }
         Ok(out)
     }

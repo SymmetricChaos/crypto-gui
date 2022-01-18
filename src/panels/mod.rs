@@ -19,7 +19,7 @@ fn clear_button(ui: &mut egui::Ui, plaintext: &mut String, ciphertext: &mut Stri
 }
 
 fn encrypt_button(ui: &mut egui::Ui, cipher: &dyn Cipher, input: &mut String, output: &mut String) {
-    if ui.button(RichText::from("ENCRYPT").color(Color32::GREEN)).clicked() {
+    if ui.button(RichText::from("ENCRYPT").color(Color32::GOLD)).clicked() {
         match cipher.encrypt(input) {
             Ok(text) => *output = text,
             Err(e) => *output = String::from(e),
@@ -28,14 +28,13 @@ fn encrypt_button(ui: &mut egui::Ui, cipher: &dyn Cipher, input: &mut String, ou
 }
 
 fn decrypt_button(ui: &mut egui::Ui, cipher: &dyn Cipher, input: &mut String, output: &mut String) {
-    if ui.button(RichText::from("DECRYPT").color(Color32::RED)).clicked() {
+    if ui.button(RichText::from("DECRYPT").color(Color32::GOLD)).clicked() {
         match cipher.decrypt(input) {
             Ok(text) => *output = text,
             Err(e) => *output = String::from(e),
         }
     }
 }
-
 
 fn randomize_button(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
     let mut rng = ThreadRng::default();
@@ -45,6 +44,7 @@ fn randomize_button(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
 }
 
 
+// Other common elements of the interface
 fn input_alphabet(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
     ui.label("Alphabet");
     ui.add(egui::TextEdit::singleline(cipher.input_alphabet()).text_style(TextStyle::Monospace));

@@ -39,7 +39,9 @@ impl crate::panels::cipher_windows::View for AffineWindow {
 
             ui.label("Multiplicative Key");
             ui.label(format!("Must not be divisible by the following numbers: {:?}",prime_factors(cipher.length())));
+            let alpha_range = 1..=((cipher.length()-1));
             ui.add(egui::Slider::new(&mut cipher.mul_key, alpha_range));
+            cipher.set_inverse();
             ui.add_space(16.0);
 
             ui.horizontal(|ui| {
@@ -57,7 +59,7 @@ impl crate::panels::cipher_windows::View for AffineWindow {
 
 
         display_panel(ui, 
-            "The Caesar Cipher is one of the oldest and simplest forms of cryptography. The key is any positive whole number. Each letter of the input is shifted that many positions in the alphabet, wrapping around at the end.",
+            "The Affine Cipher is a slight improvement on the Caesar Cipher. Rather than just adding a value to each letter's position the value is also multiplied, thus increasing the number of possible keys. This introduces a slight difficulty since multiplication does not have an unique inverse modulo 'n' unless the the multiplier is coprime to 'n'.",
             input, 
             output, 
         );

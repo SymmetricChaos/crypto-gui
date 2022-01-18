@@ -14,7 +14,7 @@ impl Default for DemoApp {
 
 impl epi::App for DemoApp {
     fn name(&self) -> &str {
-        "Ciphers"
+        "Classical Cryptography"
     }
 
     fn setup(
@@ -25,7 +25,9 @@ impl epi::App for DemoApp {
     ) {
     }
 
-    fn update(&mut self, ctx: &CtxRef, _frame: &epi::Frame) {
+    fn update(&mut self, ctx: &CtxRef, frame: &epi::Frame) {
         self.cipher_windows.ui(ctx);
+        frame.set_window_size((1000.0,600.0).into());
+        ctx.set_pixels_per_point(1.2);
     }
 }
