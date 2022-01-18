@@ -1,13 +1,14 @@
-use rand::prelude::{ThreadRng, SliceRandom};
-use num::{Integer, ToPrimitive};
+use num::{Integer, ToPrimitive, One, FromPrimitive};
 
 
-pub fn mul_inv<N: Integer + Copy >(num: N, modulus: N) -> Option<N> {
+pub fn mul_inv<N: Integer + Copy + ToPrimitive + FromPrimitive>(num: N, modulus: N) -> Option<N> {
+    let num = num.to_isize()?;
+    let modulus = modulus.to_isize()?;
     let egcd = num.extended_gcd(&modulus);
     if !egcd.gcd.is_one() {
         None 
     } else {
-        Some( egcd.x.mod_floor(&modulus) )
+        Some( N::from_isize(egcd.x.mod_floor(&modulus))? )
     }
 }
 
@@ -44,13 +45,4 @@ pub fn prime_factors<N: Integer + Copy>(n: N) -> Vec<N> {
     let mut out = prime_factorization(n);
     out.dedup();
     out
-}
-
-
-
-pub fn shuffle_str(s: &str, rng: &mut ThreadRng) -> String {
-    let mut characters = s.chars().collect::<Vec<char>>();
-    let slice = characters.as_mut_slice();
-    slice.shuffle(rng);
-    slice.iter().map(|x| *x).collect::<String>()
 }

@@ -1,7 +1,7 @@
 use rand::prelude::ThreadRng;
+use crate::text_functions::shuffled_str;
 use super::cipher_trait::Cipher;
 use std::collections::HashMap;
-use crate::math::shuffle_str;
 
 pub struct Substitution {
     alphabet1: String,
@@ -48,7 +48,7 @@ impl Cipher for Substitution {
     }
 
     fn randomize(&mut self, rng: &mut ThreadRng) {
-        self.alphabet2 = shuffle_str(&self.alphabet1, rng);
+        self.alphabet2 = shuffled_str(&self.alphabet1, rng);
         self.map.clear();
         self.map_inv.clear();
         for (a, b) in self.alphabet1.chars().zip(self.alphabet2.chars()) {

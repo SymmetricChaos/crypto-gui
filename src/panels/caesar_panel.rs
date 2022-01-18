@@ -1,24 +1,24 @@
 use eframe::egui;
 use crate::ciphers::LATIN;
 use crate::ciphers::Caesar;
+use super::decrypt_button;
+use super::encrypt_button;
 use super::randomize_button;
-use super::{cipher_windows::View, Mode, display_panel, clear_button, mode_selector, run_button, input_alphabet};
+use super::{cipher_windows::View, display_panel, clear_button, input_alphabet};
 
 
 pub struct CaesarWindow {
-    plaintext: String,
-    ciphertext: String,
+    input: String,
+    output: String,
     cipher: Caesar,
-    mode: Mode,
 }
 
 impl Default for CaesarWindow {
     fn default() -> Self {
         Self {
-            plaintext: String::new(),
-            ciphertext: String::new(),
+            input: String::new(),
+            output: String::new(),
             cipher: Caesar::new(0, LATIN),
-            mode: Mode::Encrypt,
         }
     }
 }
@@ -27,7 +27,7 @@ impl Default for CaesarWindow {
 impl crate::panels::cipher_windows::View for CaesarWindow {
     fn ui(&mut self, ui: &mut egui::Ui) {
 
-        let Self{ plaintext, ciphertext, cipher, mode } = self;
+        let Self{ input, output, cipher } = self;
 
         egui::SidePanel::left("control_panel").show_inside(ui, |ui| {
             ui.add_space(16.0);
@@ -39,13 +39,13 @@ impl crate::panels::cipher_windows::View for CaesarWindow {
             ui.add(egui::Slider::new(&mut cipher.shift, alpha_range));
             ui.add_space(16.0);
 
-            mode_selector(ui, mode);
-            ui.add_space(16.0);
-
-            run_button(ui, mode, cipher, plaintext, ciphertext);
+            ui.horizontal(|ui| {
+                encrypt_button(ui, cipher, input, output);
+                decrypt_button(ui, cipher, input, output);
+            });
             ui.add_space(32.0);
 
-            clear_button(ui, plaintext, ciphertext);
+            clear_button(ui, input, output);
             ui.add_space(16.0);
 
             randomize_button(ui, cipher);
@@ -53,9 +53,9 @@ impl crate::panels::cipher_windows::View for CaesarWindow {
         });
 
         display_panel(ui, 
-            "The Caesar Cipher is one of the oldest and simplest forms of cryptography. The key is any positive whole number. Each letter of the plaintext is shifted that many positions in the alphabet, wrapping around at the end.",
-            plaintext, 
-            ciphertext, 
+            "The Caesar Cipher is one of the oldest and simplest forms of cryptography. The key is any positive whole number. Each letter of the input is shifted that many positions in the alphabet, wrapping around at the end.",
+            input, 
+            output, 
         );
     }
 }
@@ -63,7 +63,7 @@ impl crate::panels::cipher_windows::View for CaesarWindow {
 
 
 
-impl crate::panels::cipher_windows::CipherFrame for CaesarWindow {
+impl crate::panels::cipher_windows::CipherWindow for CaesarWindow {
     fn name(&self) -> &'static str {
         "Caesar Cipher"
     }

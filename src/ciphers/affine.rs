@@ -1,7 +1,7 @@
 use rand::{Rng, prelude::ThreadRng};
 use super::cipher_trait::Cipher;
 
-use crate::math::mul_inv;
+use crate::math_functions::mul_inv;
 
 pub struct Affine {
     pub add_key: usize,

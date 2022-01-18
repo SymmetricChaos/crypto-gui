@@ -1,24 +1,22 @@
 use eframe::egui::{self, TextStyle};
 use crate::ciphers::LATIN;
 use crate::ciphers::{Substitution, Cipher};
-use super::{input_alphabet, mode_selector, clear_button, randomize_button};
-use super::{cipher_windows::View, Mode, run_button};
+use super::{input_alphabet, clear_button, randomize_button, encrypt_button, decrypt_button};
+use super::cipher_windows::View;
 
 
 pub struct SubstitutionWindow {
-    plaintext: String,
-    ciphertext: String,
+    input: String,
+    output: String,
     cipher: Substitution,
-    mode: Mode,
 }
 
 impl Default for SubstitutionWindow {
     fn default() -> Self {
         Self {
-            plaintext: String::new(),
-            ciphertext: String::new(),
+            input: String::new(),
+            output: String::new(),
             cipher: Substitution::new(LATIN, LATIN),
-            mode: Mode::Encrypt,
         }
     }
 }
@@ -27,8 +25,7 @@ impl Default for SubstitutionWindow {
 impl crate::panels::cipher_windows::View for SubstitutionWindow {
     fn ui(&mut self, ui: &mut egui::Ui) {
 
-
-        let Self{ plaintext, ciphertext, cipher, mode } = self;
+        let Self{ input, output, cipher } = self;
 
         egui::SidePanel::left("control_panel").show_inside(ui, |ui| {
             ui.add_space(16.0);
@@ -39,13 +36,13 @@ impl crate::panels::cipher_windows::View for SubstitutionWindow {
             ui.add(egui::TextEdit::singleline(cipher.output_alphabet()).text_style(TextStyle::Monospace));
             ui.add_space(16.0);
 
-            mode_selector(ui, mode);
-            ui.add_space(16.0);
-
-            run_button(ui, mode, cipher, plaintext, ciphertext);
+            ui.horizontal(|ui| {
+                encrypt_button(ui, cipher, input, output);
+                decrypt_button(ui, cipher, input, output);
+            });
             ui.add_space(32.0);
 
-            clear_button(ui, plaintext, ciphertext);
+            clear_button(ui, input, output);
             ui.add_space(16.0);
 
             randomize_button(ui, cipher);
@@ -62,11 +59,11 @@ impl crate::panels::cipher_windows::View for SubstitutionWindow {
             ui.separator();
             ui.add_space(16.0);
 
-            ui.label("Plaintext");
-            ui.add(egui::TextEdit::multiline(plaintext).hint_text("Plaintext Here").text_style(TextStyle::Monospace));
+            ui.label("input");
+            ui.add(egui::TextEdit::multiline(input).hint_text("input Here").text_style(TextStyle::Monospace));
             ui.add_space(16.0);
-            ui.label("Ciphertext");
-            ui.add(egui::TextEdit::multiline(ciphertext).hint_text("Ciphertext Here").text_style(TextStyle::Monospace));
+            ui.label("output");
+            ui.add(egui::TextEdit::multiline(output).hint_text("output Here").text_style(TextStyle::Monospace));
         });
         
 
@@ -74,7 +71,7 @@ impl crate::panels::cipher_windows::View for SubstitutionWindow {
 }
 
 
-impl crate::panels::cipher_windows::CipherFrame for SubstitutionWindow {
+impl crate::panels::cipher_windows::CipherWindow for SubstitutionWindow {
     fn name(&self) -> &'static str {
         "Substitution Cipher"
     }

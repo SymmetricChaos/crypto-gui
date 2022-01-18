@@ -1,23 +1,22 @@
 use eframe::egui;
-use crate::{ciphers::LATIN, math::prime_factors};
+use crate::{ciphers::LATIN, math_functions::prime_factors};
 use crate::ciphers::Affine;
-use super::{cipher_windows::View, Mode, display_panel, run_button, clear_button, mode_selector, input_alphabet, randomize_button};
+use super::{decrypt_button, encrypt_button};
+use super::{cipher_windows::View, display_panel, clear_button, input_alphabet, randomize_button};
 
 
 pub struct AffineWindow {
-    plaintext: String,
-    ciphertext: String,
+    input: String,
+    output: String,
     cipher: Affine,
-    mode: Mode,
 }
 
 impl Default for AffineWindow {
     fn default() -> Self {
         Self {
-            plaintext: String::new(),
-            ciphertext: String::new(),
+            input: String::new(),
+            output: String::new(),
             cipher: Affine::new(0, 1, LATIN),
-            mode: Mode::Encrypt,
         }
     }
 }
@@ -26,7 +25,7 @@ impl Default for AffineWindow {
 impl crate::panels::cipher_windows::View for AffineWindow {
     fn ui(&mut self, ui: &mut egui::Ui) {
 
-        let Self{ plaintext, ciphertext, cipher, mode } = self;
+        let Self{ input, output, cipher } = self;
 
         egui::SidePanel::left("control_panel").show_inside(ui, |ui| {
             ui.add_space(16.0);
@@ -43,13 +42,13 @@ impl crate::panels::cipher_windows::View for AffineWindow {
             ui.add(egui::Slider::new(&mut cipher.mul_key, alpha_range));
             ui.add_space(16.0);
 
-            mode_selector(ui, mode);
-            ui.add_space(16.0);
-
-            run_button(ui, mode, cipher, plaintext, ciphertext);
+            ui.horizontal(|ui| {
+                encrypt_button(ui, cipher, input, output);
+                decrypt_button(ui, cipher, input, output);
+            });
             ui.add_space(32.0);
 
-            clear_button(ui, plaintext, ciphertext);
+            clear_button(ui, input, output);
             ui.add_space(16.0);
 
             randomize_button(ui, cipher);
@@ -58,9 +57,9 @@ impl crate::panels::cipher_windows::View for AffineWindow {
 
 
         display_panel(ui, 
-            "The Caesar Cipher is one of the oldest and simplest forms of cryptography. The key is any positive whole number. Each letter of the plaintext is shifted that many positions in the alphabet, wrapping around at the end.",
-            plaintext, 
-            ciphertext, 
+            "The Caesar Cipher is one of the oldest and simplest forms of cryptography. The key is any positive whole number. Each letter of the input is shifted that many positions in the alphabet, wrapping around at the end.",
+            input, 
+            output, 
         );
 
 
@@ -70,7 +69,7 @@ impl crate::panels::cipher_windows::View for AffineWindow {
 
 
 
-impl crate::panels::cipher_windows::CipherFrame for AffineWindow {
+impl crate::panels::cipher_windows::CipherWindow for AffineWindow {
     fn name(&self) -> &'static str {
         "Affine Cipher"
     }

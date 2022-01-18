@@ -1,7 +1,8 @@
 pub mod ciphers;
 pub mod panels;
 pub mod app;
-pub mod math;
+pub mod math_functions;
+pub mod text_functions;
 
 fn main() {
     let app = app::DemoApp::default();

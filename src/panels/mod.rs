@@ -18,12 +18,24 @@ fn clear_button(ui: &mut egui::Ui, plaintext: &mut String, ciphertext: &mut Stri
     }
 }
 
-
-fn run_button(ui: &mut egui::Ui, mode: &mut Mode, cipher: &dyn Cipher, plaintext: &mut String, ciphertext: &mut String) {
-    if ui.button(RichText::from("RUN").color(Color32::RED)).clicked() {
-        run_cipher(mode, cipher, plaintext, ciphertext)
+fn encrypt_button(ui: &mut egui::Ui, cipher: &dyn Cipher, input: &mut String, output: &mut String) {
+    if ui.button(RichText::from("ENCRYPT").color(Color32::GREEN)).clicked() {
+        match cipher.encrypt(input) {
+            Ok(text) => *output = text,
+            Err(e) => *output = String::from(e),
+        }
     }
 }
+
+fn decrypt_button(ui: &mut egui::Ui, cipher: &dyn Cipher, input: &mut String, output: &mut String) {
+    if ui.button(RichText::from("DECRYPT").color(Color32::RED)).clicked() {
+        match cipher.decrypt(input) {
+            Ok(text) => *output = text,
+            Err(e) => *output = String::from(e),
+        }
+    }
+}
+
 
 fn randomize_button(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
     let mut rng = ThreadRng::default();
@@ -31,21 +43,6 @@ fn randomize_button(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
         cipher.randomize(&mut rng)
     }
 }
-
-// ENCRYPT/DECRYPT
-#[derive(Debug, PartialEq)]
-pub enum Mode {
-    Encrypt,
-    Decrypt,
-}
-
-fn mode_selector(ui: &mut egui::Ui, mode: &mut Mode) {
-    ui.horizontal(|ui| {
-        ui.selectable_value(mode, Mode::Encrypt, "Encrypt");
-        ui.selectable_value(mode, Mode::Decrypt, "Decrypt");
-    });
-}
-
 
 
 fn input_alphabet(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
@@ -64,27 +61,10 @@ fn display_panel(ui: &mut egui::Ui, description: &str, plaintext: &mut dyn TextB
         ui.separator();
         ui.add_space(16.0);
 
-        ui.label("Plaintext");
-        ui.add(egui::TextEdit::multiline(plaintext).hint_text("Plaintext Here").text_style(TextStyle::Monospace));
+        ui.label("INPUT TEXT");
+        ui.add(egui::TextEdit::multiline(plaintext).hint_text("").text_style(TextStyle::Monospace));
         ui.add_space(16.0);
-        ui.label("Ciphertext");
-        ui.add(egui::TextEdit::multiline(ciphertext).hint_text("Ciphertext Here").text_style(TextStyle::Monospace));
+        ui.label("OUTPUT TEST");
+        ui.add(egui::TextEdit::multiline(ciphertext).hint_text("").text_style(TextStyle::Monospace));
     });
-}
-
-
-
-// Just in case we need to call this independent of the button
-fn run_cipher(mode: &mut Mode, cipher: &dyn Cipher, plaintext: &mut String, ciphertext: &mut String) {
-    if *mode == Mode::Encrypt {
-        match cipher.encrypt(plaintext) {
-            Ok(text) => *ciphertext = text,
-            Err(e) => *ciphertext = String::from(e),
-        }
-    } else {
-        match cipher.decrypt(ciphertext) {
-            Ok(text) => *plaintext = text,
-            Err(e) => *plaintext = String::from(e),
-        }
-    }
 }

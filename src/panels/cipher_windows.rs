@@ -10,7 +10,7 @@ pub trait View {
 }
 
 /// Something to view
-pub trait CipherFrame {
+pub trait CipherWindow {
     /// `&'static` so we can also use it as a key to store open/close state.
     fn name(&self) -> &'static str;
 
@@ -18,14 +18,8 @@ pub trait CipherFrame {
     fn show(&mut self, ctx: &egui::CtxRef, open: &mut bool);
 }
 
-pub enum CipherName {
-    Caesar,
-    Affine,
-    General,
-}
-
 pub struct Ciphers {
-    ciphers: Vec<Box<dyn CipherFrame>>,
+    ciphers: Vec<Box<dyn CipherWindow>>,
     open: BTreeSet<String>,
 }
 
@@ -40,7 +34,7 @@ impl Default for Ciphers {
 }
 
 impl Ciphers {
-    pub fn from_ciphers(ciphers: Vec<Box<dyn CipherFrame>>) -> Self {
+    pub fn from_ciphers(ciphers: Vec<Box<dyn CipherWindow>>) -> Self {
         let open = BTreeSet::new();
         Self { ciphers, open }
     }
@@ -95,12 +89,6 @@ impl CipherWindows {
             ciphers.checkboxes(ui);
         });
 
-        self.windows(ctx)
-        
-    }
-
-    fn windows(&mut self, ctx: &CtxRef) {
-        let Self{ ciphers } = self;
         ciphers.windows(ctx)
     }
 }
