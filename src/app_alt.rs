@@ -1,13 +1,13 @@
 use eframe::{egui::CtxRef, epi};
-use crate::panels::cipher_windows::CipherWindows;
+use crate::panels::cipher_windows_alt::Ciphers;
 
 pub struct DemoApp {
-    cipher_windows: CipherWindows,
+    ciphers: Ciphers,
 }
 
 impl Default for DemoApp {
     fn default() -> Self {
-        Self { cipher_windows: CipherWindows::default() }
+        Self { ciphers: Ciphers::default() }
     }
 }
 
@@ -26,8 +26,8 @@ impl epi::App for DemoApp {
     }
 
     fn update(&mut self, ctx: &CtxRef, frame: &epi::Frame) {
-        self.cipher_windows.ui(ctx);
-        frame.set_window_size((1000.0,550.0).into());
+        self.ciphers.ui(ctx);
+        frame.set_window_size((1000.0,600.0).into());
         ctx.set_pixels_per_point(1.2);
     }
 }

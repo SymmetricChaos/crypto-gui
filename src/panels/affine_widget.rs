@@ -1,17 +1,21 @@
+use crate::math_functions::prime_factors;
 use eframe::egui;
-use crate::{ciphers::LATIN, math_functions::prime_factors};
+use eframe::egui::Response;
+use crate::ciphers::LATIN;
 use crate::ciphers::Affine;
-use super::{decrypt_button, encrypt_button};
-use super::{cipher_windows::View, display_panel, clear_button, input_alphabet, randomize_button};
+use super::decrypt_button;
+use super::encrypt_button;
+use super::randomize_button;
+use super::{clear_button, input_alphabet};
 
 
-pub struct AffineWindow {
+pub struct AffineWidget {
     input: String,
     output: String,
     cipher: Affine,
 }
 
-impl Default for AffineWindow {
+impl Default for AffineWidget {
     fn default() -> Self {
         Self {
             input: String::new(),
@@ -22,12 +26,14 @@ impl Default for AffineWindow {
 }
 
 
-impl crate::panels::cipher_windows::View for AffineWindow {
-    fn ui(&mut self, ui: &mut egui::Ui) {
+impl egui::Widget for &mut AffineWidget {
+    fn ui(self, ui: &mut egui::Ui) -> Response {
 
-        let Self{ input, output, cipher } = self;
+        let cipher = &mut self.cipher;
+        let input = &mut self.input;
+        let output = &mut self.output;
 
-        egui::SidePanel::left("control_panel").show_inside(ui, |ui| {
+        egui::CentralPanel::default().show_inside(ui, |ui| {
             ui.add_space(16.0);
             input_alphabet(ui, cipher);
             ui.add_space(16.0);
@@ -57,33 +63,6 @@ impl crate::panels::cipher_windows::View for AffineWindow {
 
             randomize_button(ui, cipher);
 
-        });
-
-
-        display_panel(ui, 
-            "The Affine Cipher is a slight improvement on the Caesar Cipher. Rather than just adding a value to each letter's position the value is also multiplied, thus increasing the number of possible keys. This introduces a slight difficulty since multiplication does not have an unique inverse modulo 'n' unless the the multiplier is coprime to 'n'.",
-            input, 
-            output, 
-        );
-
-
-    }
-}
-
-
-
-
-impl crate::panels::cipher_windows::CipherWindow for AffineWindow {
-    fn name(&self) -> &'static str {
-        "Affine Cipher"
-    }
-
-    fn show(&mut self, ctx: &egui::CtxRef, open: &mut bool) {
-        let window = egui::Window::new("Affine Cipher")
-            .default_width(600.0)
-            .default_height(400.0)
-            .vscroll(false)
-            .open(open);
-        window.show(ctx, |ui| self.ui(ui));
+        }).response
     }
 }

@@ -8,6 +8,9 @@ pub mod cipher_windows;
 pub mod affine_panel;
 pub mod substitution_panel;
 mod decorder_ring_panel;
+pub mod cipher_windows_alt;
+pub mod caesar_widget;
+pub mod affine_widget;
 
 
 // BUTTONS
@@ -50,7 +53,7 @@ fn input_alphabet(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
     ui.add(egui::TextEdit::singleline(cipher.input_alphabet()).text_style(TextStyle::Monospace));
 }
 
-fn display_panel(ui: &mut egui::Ui, description: &str, plaintext: &mut dyn TextBuffer, ciphertext: &mut dyn TextBuffer) {
+fn display_panel(ui: &mut egui::Ui, description: &str, input: &mut dyn TextBuffer, output: &mut dyn TextBuffer) {
     egui::SidePanel::right("caesar_display_panel")
         .default_width(500.0)
         .show_inside(ui, |ui| {
@@ -62,9 +65,9 @@ fn display_panel(ui: &mut egui::Ui, description: &str, plaintext: &mut dyn TextB
         ui.add_space(16.0);
 
         ui.label("INPUT TEXT");
-        ui.add(egui::TextEdit::multiline(plaintext).hint_text("").text_style(TextStyle::Monospace));
+        ui.add(egui::TextEdit::multiline(input).hint_text("").text_style(TextStyle::Monospace));
         ui.add_space(16.0);
         ui.label("OUTPUT TEST");
-        ui.add(egui::TextEdit::multiline(ciphertext).hint_text("").text_style(TextStyle::Monospace));
+        ui.add(egui::TextEdit::multiline(output).hint_text("").text_style(TextStyle::Monospace));
     });
 }
