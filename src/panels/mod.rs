@@ -2,15 +2,13 @@ use eframe::egui::{self, TextStyle, TextBuffer, RichText, Color32};
 use rand::prelude::ThreadRng;
 
 use crate::ciphers::Cipher;
+use crate::codes::Code;
 
 pub mod caesar_panel;
 pub mod cipher_windows;
 pub mod affine_panel;
 pub mod substitution_panel;
 mod decorder_ring_panel;
-pub mod cipher_windows_alt;
-pub mod caesar_widget;
-pub mod affine_widget;
 
 
 // BUTTONS
@@ -51,6 +49,19 @@ fn randomize_button(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
 fn input_alphabet(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
     ui.label("Alphabet");
     ui.add(egui::TextEdit::singleline(cipher.input_alphabet()).text_style(TextStyle::Monospace));
+}
+
+fn general_controls(ui: &mut egui::Ui, cipher: &mut dyn Cipher, input: &mut String, output: &mut String) {
+    ui.horizontal(|ui| {
+        encrypt_button(ui, cipher, input, output);
+        decrypt_button(ui, cipher, input, output);
+    });
+    ui.add_space(32.0);
+
+    clear_button(ui, input, output);
+    ui.add_space(16.0);
+
+    randomize_button(ui, cipher);
 }
 
 fn display_panel(ui: &mut egui::Ui, description: &str, input: &mut dyn TextBuffer, output: &mut dyn TextBuffer) {

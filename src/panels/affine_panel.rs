@@ -1,8 +1,7 @@
 use eframe::egui;
 use crate::{ciphers::LATIN, math_functions::prime_factors};
 use crate::ciphers::Affine;
-use super::{decrypt_button, encrypt_button};
-use super::{cipher_windows::View, display_panel, clear_button, input_alphabet, randomize_button};
+use super::{cipher_windows::View, display_panel, general_controls, input_alphabet};
 
 
 pub struct AffineWindow {
@@ -46,16 +45,7 @@ impl crate::panels::cipher_windows::View for AffineWindow {
             // Currently we call this every frame even though we only need to do so when the Multiplicative Key slider is changed
             cipher.set_inverse();
 
-            ui.horizontal(|ui| {
-                encrypt_button(ui, cipher, input, output);
-                decrypt_button(ui, cipher, input, output);
-            });
-            ui.add_space(32.0);
-
-            clear_button(ui, input, output);
-            ui.add_space(16.0);
-
-            randomize_button(ui, cipher);
+            general_controls(ui, cipher, input, output);
 
         });
 

@@ -7,5 +7,14 @@ pub use substitution::Substitution;
 pub mod decoder_ring;
 pub use decoder_ring::DecoderRing;
 
-pub mod cipher_trait;
-pub use cipher_trait::{LATIN,Cipher};
+use rand::prelude::ThreadRng;
+
+pub trait Cipher {
+    fn encrypt(&self, text: &str) -> Result<String,&'static str>;
+    fn decrypt(&self, text: &str) -> Result<String,&'static str>;
+    fn randomize(&mut self, rng: &mut ThreadRng);
+    fn input_alphabet(&mut self) -> &mut String;
+    fn output_alphabet(&mut self) -> &mut String;
+}
+
+pub const LATIN: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";

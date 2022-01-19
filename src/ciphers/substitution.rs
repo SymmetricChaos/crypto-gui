@@ -1,6 +1,6 @@
 use rand::prelude::ThreadRng;
 use crate::text_functions::shuffled_str;
-use super::cipher_trait::Cipher;
+use super::Cipher;
 use std::collections::HashMap;
 
 pub struct Substitution {

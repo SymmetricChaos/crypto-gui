@@ -1,10 +1,7 @@
 use eframe::egui;
 use crate::ciphers::LATIN;
 use crate::ciphers::DecoderRing;
-use super::decrypt_button;
-use super::encrypt_button;
-use super::randomize_button;
-use super::{cipher_windows::View, display_panel, clear_button, input_alphabet};
+use super::{cipher_windows::View, display_panel, input_alphabet, general_controls};
 
 
 pub struct DecoderRingWindow {
@@ -48,16 +45,7 @@ impl crate::panels::cipher_windows::View for DecoderRingWindow {
                 }
             });
 
-            ui.horizontal(|ui| {
-                encrypt_button(ui, cipher, input, output);
-                decrypt_button(ui, cipher, input, output);
-            });
-            ui.add_space(32.0);
-
-            clear_button(ui, input, output);
-            ui.add_space(16.0);
-
-            randomize_button(ui, cipher);
+            general_controls(ui, cipher, input, output);
 
         });
 

@@ -1,5 +1,5 @@
 use rand::{Rng, prelude::ThreadRng};
-use super::cipher_trait::Cipher;
+use super::Cipher;
 
 pub struct Caesar {
     pub shift: usize,
