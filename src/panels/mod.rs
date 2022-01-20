@@ -2,7 +2,6 @@ use eframe::egui::{self, TextStyle, TextBuffer, RichText, Color32};
 use rand::prelude::ThreadRng;
 
 use crate::ciphers::Cipher;
-use crate::codes::Code;
 
 pub mod caesar_panel;
 pub mod cipher_windows;

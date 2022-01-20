@@ -1,5 +1,4 @@
 pub mod ciphers;
-pub mod codes;
 pub mod panels;
 pub mod app;
 pub mod math_functions;
