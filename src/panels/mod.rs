@@ -8,6 +8,7 @@ pub mod cipher_windows;
 pub mod affine_panel;
 pub mod substitution_panel;
 mod decorder_ring_panel;
+pub mod m209_panel;
 
 
 // BUTTONS
