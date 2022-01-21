@@ -1,6 +1,6 @@
 use eframe::egui;
 use crate::ciphers::M209;
-use super::{cipher_windows::View, display_panel, general_controls, input_alphabet};
+use super::{cipher_windows::View, display_panel, general_controls};
 
 
 pub struct M209Window {
@@ -27,16 +27,24 @@ impl crate::panels::cipher_windows::View for M209Window {
 
         egui::SidePanel::left("control_panel").show_inside(ui, |ui| {
             ui.add_space(16.0);
-            input_alphabet(ui, cipher);
+            ui.label("Alphabet");
+            ui.label("ABDCEFGHIJKLMNOPQRSTUVWXYZ");
             ui.add_space(16.0);
 
             ui.label("Pins");
+            //cipher.set_pins();
             ui.add_space(16.0);
 
             ui.label("Lugs");
+            //cipher.set_lugs();
             ui.add_space(16.0);
 
             general_controls(ui, cipher, input, output);
+
+            for rotor in cipher.rotors() {
+                ui.label(rotor.to_string());
+            }
+            
 
         });
 

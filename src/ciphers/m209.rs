@@ -6,7 +6,7 @@ use std::{collections::VecDeque, fmt};
 
 use itertools::Itertools;
 
-#[derive(Clone,Debug)]
+#[derive(Copy,Clone,Debug)]
 pub struct Cage {
     bars: [(usize,usize); 27]
 }
@@ -17,7 +17,7 @@ impl Default for Cage {
                 (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0),
                 (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0),
                 (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0)
-            ]  }
+            ]}
     }
 }
 
@@ -117,7 +117,6 @@ impl fmt::Display for Rotor {
     }
 }
 
-
 //The rotor alphabets all have coprime lengths
 lazy_static! {
     pub static ref M209_ROTORS: [Rotor; 6] = {
@@ -150,6 +149,7 @@ fn atbash_encrypt(n: usize, k: usize, l: usize) -> usize {
 
 
 
+
 pub struct M209 {
     wheels: [Rotor; 6],
     cage: Cage,
@@ -164,10 +164,8 @@ impl Default for M209 {
 
 impl M209 {
 
-    pub fn set_pins(&mut self, settings: &str) {
-        for (r, c) in self.wheels.iter_mut().zip(settings.chars()) {
-            r.set_display(c)
-        }
+    pub fn set_pins(&mut self, rotor: usize, pins: &str) {
+        todo!()
     }
 
     pub fn set_wheels(&mut self, settings: &str) {
@@ -182,9 +180,11 @@ impl M209 {
                 w.step()
             }
         }
-
     }
 
+    pub fn rotors(&mut self) -> std::slice::IterMut<'_, Rotor> {
+        self.wheels.iter_mut()
+    }
 }
 
 impl Cipher for M209 {
@@ -216,7 +216,6 @@ impl Cipher for M209 {
                         continue;
                     }
                 }
-
             }
 
             // This encryption step should be a modified atbash
@@ -241,7 +240,7 @@ impl Cipher for M209 {
     }
 
     fn input_alphabet(&mut self) -> &mut String {
-        unimplemented!("the M209 alphabet is fixed")
+        &mut self.alphabet
     }
 
     fn output_alphabet(&mut self) -> &mut String {

@@ -29,7 +29,9 @@ impl Default for Ciphers {
             Box::new(CaesarWindow::default()),
             Box::new(AffineWindow::default()),
             Box::new(SubstitutionWindow::default()),
-            Box::new(DecoderRingWindow::default())])
+            Box::new(DecoderRingWindow::default()),
+            ],
+        )
     }
 }
 
