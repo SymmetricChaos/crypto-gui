@@ -3,6 +3,11 @@ use crate::ciphers::M209;
 use super::{cipher_windows::View, display_panel, general_controls};
 
 
+fn lug_pair(ui: &mut egui::Ui, pair: &mut (usize,usize)) {
+    ui.add(egui::DragValue::new(&mut pair.0).clamp_range(0usize..=6).speed(0.1));
+    ui.add(egui::DragValue::new(&mut pair.1).clamp_range(0usize..=6).speed(0.1));
+}
+
 pub struct M209Window {
     input: String,
     output: String,
@@ -37,16 +42,13 @@ impl crate::panels::cipher_windows::View for M209Window {
 
             let lugs = &mut cipher.lugs;
             ui.label("Lugs");
-            for pair in lugs.chunks_exact_mut(3) {
+            for triple in lugs.chunks_exact_mut(3) {
                 ui.horizontal(|ui| {
-                    ui.add(egui::DragValue::new(&mut pair[0].0).clamp_range(0..=6));
-                    ui.add(egui::DragValue::new(&mut pair[0].1).clamp_range(0..=6));
+                    lug_pair(ui, &mut triple[0]);
                     ui.add_space(4.0);
-                    ui.add(egui::DragValue::new(&mut pair[1].0).clamp_range(0..=6));
-                    ui.add(egui::DragValue::new(&mut pair[1].1).clamp_range(0..=6));
+                    lug_pair(ui, &mut triple[1]);
                     ui.add_space(4.0);
-                    ui.add(egui::DragValue::new(&mut pair[2].0).clamp_range(0..=6));
-                    ui.add(egui::DragValue::new(&mut pair[2].1).clamp_range(0..=6));
+                    lug_pair(ui, &mut triple[2]);
                 });
             }
 
