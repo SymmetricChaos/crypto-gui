@@ -8,12 +8,12 @@ use itertools::Itertools;
 
 #[derive(Copy,Clone,Debug)]
 pub struct Cage {
-    bars: [(usize,usize); 27]
+    lugs: [(usize,usize); 27]
 }
 
 impl Default for Cage {
     fn default() -> Self {
-        Self { bars: [
+        Self { lugs: [
                 (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0),
                 (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0),
                 (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0)
@@ -23,8 +23,8 @@ impl Default for Cage {
 
 
 impl Cage {
-    pub fn set_bars(&mut self, bars: [(usize,usize); 27]) {
-        self.bars = bars
+    pub fn set_lugs(&mut self, lugs: [(usize,usize); 27]) {
+        self.lugs = lugs
     }
 }
 
@@ -32,7 +32,7 @@ impl Cage {
 impl fmt::Display for Cage {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut s = "Cage\n".to_string();
-        for b in self.bars.chunks(9).collect_vec() {
+        for b in self.lugs.chunks(9).collect_vec() {
             for lug in b {
                 let entry = format!("{}-{}  ",lug.0,lug.1);
                 s.push_str(&entry)
@@ -152,20 +152,33 @@ fn atbash_encrypt(n: usize, k: usize, l: usize) -> usize {
 
 pub struct M209 {
     wheels: [Rotor; 6],
-    cage: Cage,
+    pub lugs: [(usize,usize); 27],
     alphabet: String,
 }
 
 impl Default for M209 {
     fn default() -> Self {
-        Self { wheels: M209_ROTORS.clone(), cage: Default::default(), alphabet: String::from(LATIN) }
+        Self { 
+            wheels: M209_ROTORS.clone(), 
+            lugs: [ (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0),
+                    (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0),
+                    (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0)
+            ], 
+            alphabet: String::from(LATIN) }
     }
 }
 
 impl M209 {
 
-    pub fn set_pins(&mut self, rotor: usize, pins: &str) {
-        todo!()
+    pub fn set_pins(&mut self, pins: [&str; 6]) -> Result<(),&'static str> {
+        for (r, p) in self.get_wheels().zip(pins) {
+            r.set_pins(p)?
+        }
+        Ok(())
+    }
+
+    pub fn set_lugs(&mut self, lugs: [(usize,usize); 27]) {
+        self.lugs = lugs
     }
 
     pub fn set_wheels(&mut self, settings: &str) {
@@ -174,16 +187,37 @@ impl M209 {
         }
     }
 
-    pub fn step_n(&mut self, n: usize) {
-        for _ in 0..n {
-            for w in self.wheels.iter_mut() {
-                w.step()
-            }
+    pub fn get_wheels(&mut self) -> std::slice::IterMut<'_, Rotor> {
+        self.wheels.iter_mut()
+    }
+
+    pub fn step(&mut self) {
+        for w in self.wheels.iter_mut() {
+            w.step()
         }
     }
 
-    pub fn rotors(&mut self) -> std::slice::IterMut<'_, Rotor> {
-        self.wheels.iter_mut()
+
+
+    pub fn print_cage(&self) -> String {
+        let mut out = "Cage\n".to_string();
+        for b in self.lugs.chunks(9).collect_vec() {
+            for lug in b {
+                let entry = format!("{}-{}  ",lug.0,lug.1);
+                out.push_str(&entry)
+            }
+            out.push('\n')
+        }
+        out
+    }
+
+    pub fn print_wheels(&self) -> String {
+        let mut out = String::new();
+        for wheel in self.wheels.iter() {
+            out.push_str(&wheel.to_string());
+            out.push('\n');
+        }
+        out
     }
 }
 
@@ -192,25 +226,23 @@ impl Cipher for M209 {
         let nums = text.chars().map(|x| char_to_usize(x)).collect_vec();
         let mut out = String::with_capacity(text.len());
 
-        let cage = &self.cage;
+        // The wheels move during encryption but we don't want the cipher to get into an unknown position so we just clone them all
         let mut wheels = self.wheels.clone();
         
         for n in nums {
             let mut sh = 0;
-            // Check each bar. 
+            
+            // Each tuple represents the two lugs of a bar
+            // A lug set to zero is inactive and is ignored
             // If either lug hits an active effective pin increase the shift by one
-            for (lug_a, lug_b) in cage.bars.iter() {
-                if lug_a == &0 {
-                    // do nothing
-                } else {
+            for (lug_a, lug_b) in self.lugs {
+                if lug_a != 0 {
                     if wheels[lug_a-1].active_is_effective() {
                         sh += 1;
                         continue;
                     }
                 }
-                if lug_b == &0 {
-                    // do nothing
-                } else {
+                if lug_b != 0 {
                     if wheels[lug_b-1].active_is_effective() {
                         sh += 1;
                         continue;
@@ -222,7 +254,10 @@ impl Cipher for M209 {
             let c = usize_to_char(atbash_encrypt(n,sh,26));
             out.push(c);
             
-            // advance the wheels
+            /*
+            finally advance all the wheels by one step
+            because the wheels all have coprime lengths this steps them through every possible permutation
+            */
             for w in wheels.iter_mut() {
                 w.step()
             }
@@ -244,6 +279,6 @@ impl Cipher for M209 {
     }
 
     fn output_alphabet(&mut self) -> &mut String {
-        unimplemented!("the M209 alphabet is fixed")
+        &mut self.alphabet
     }
 }

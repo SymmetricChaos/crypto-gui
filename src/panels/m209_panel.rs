@@ -35,15 +35,28 @@ impl crate::panels::cipher_windows::View for M209Window {
             //cipher.set_pins();
             ui.add_space(16.0);
 
+            let lugs = &mut cipher.lugs;
             ui.label("Lugs");
-            //cipher.set_lugs();
+            for pair in lugs.chunks_exact_mut(3) {
+                ui.horizontal(|ui| {
+                    ui.add(egui::DragValue::new(&mut pair[0].0).clamp_range(0..=6));
+                    ui.add(egui::DragValue::new(&mut pair[0].1).clamp_range(0..=6));
+                    ui.add_space(4.0);
+                    ui.add(egui::DragValue::new(&mut pair[1].0).clamp_range(0..=6));
+                    ui.add(egui::DragValue::new(&mut pair[1].1).clamp_range(0..=6));
+                    ui.add_space(4.0);
+                    ui.add(egui::DragValue::new(&mut pair[2].0).clamp_range(0..=6));
+                    ui.add(egui::DragValue::new(&mut pair[2].1).clamp_range(0..=6));
+                });
+            }
+
+            
             ui.add_space(16.0);
 
             general_controls(ui, cipher, input, output);
 
-            for rotor in cipher.rotors() {
-                ui.label(rotor.to_string());
-            }
+            
+            
             
 
         });
