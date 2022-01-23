@@ -1,6 +1,6 @@
 use rand::prelude::ThreadRng;
 use super::Cipher;
-use crate::text_functions::LATIN;
+use crate::text_functions::LATIN_UPPER;
 use lazy_static::lazy_static;
 use std::{collections::VecDeque, fmt};
 
@@ -164,7 +164,7 @@ impl Default for M209 {
                     (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0),
                     (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0)
             ], 
-            alphabet: String::from(LATIN) }
+            alphabet: String::from(LATIN_UPPER) }
     }
 }
 

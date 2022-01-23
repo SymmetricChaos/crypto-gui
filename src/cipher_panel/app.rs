@@ -5,6 +5,8 @@ use super::View;
 pub struct ClassicCrypto {
     display: super::DisplayPanel,
     control: super::ControlPanel,
+    input: String,
+    output: String,
 
 }
 
@@ -13,6 +15,8 @@ impl Default for ClassicCrypto {
         Self { 
             display: super::DisplayPanel::default(),
             control: super::ControlPanel::default(),
+            input: String::new(),
+            output: String::new(),
         }
     }
 }
@@ -35,10 +39,10 @@ impl epi::App for ClassicCrypto {
         frame.set_window_size((1000.0,550.0).into());
         ctx.set_pixels_per_point(1.2);
         SidePanel::right("display_panel").show(ctx, |ui| {
-            self.display.ui(ui)
+            self.display.ui(ui, &mut self.input, &mut self.output)
         });
         CentralPanel::default().show(ctx, |ui| {
-            self.control.ui(ui)
+            self.control.ui(ui, &mut self.input, &mut self.output)
         });
     }
 }

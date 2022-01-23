@@ -3,14 +3,14 @@ use crate::text_functions::shuffled_str;
 use super::Cipher;
 use std::collections::HashMap;
 
-pub struct Substitution {
+pub struct GeneralSubstitution {
     alphabet1: String,
     alphabet2: String,
     map: HashMap<char,char>,
     map_inv: HashMap<char,char>,
 }
 
-impl Substitution {
+impl GeneralSubstitution {
     // The alphabets must be the same length but we need to handle that in the panel itself
     pub fn new(alphabet1: &str, alphabet2: &str) -> Self {
         let mut map = HashMap::new();
@@ -19,12 +19,12 @@ impl Substitution {
             map.insert(a, b);
             map_inv.insert(b, a);
         }
-        Substitution{ alphabet1: alphabet1.to_string(), alphabet2: alphabet2.to_string(), map, map_inv }
+        GeneralSubstitution{ alphabet1: alphabet1.to_string(), alphabet2: alphabet2.to_string(), map, map_inv }
     }
 
 }
 
-impl Cipher for Substitution {
+impl Cipher for GeneralSubstitution {
     fn encrypt(&self, text: &str) -> Result<String,&'static str> {
         let mut out = "".to_string();
         for c in text.chars() {

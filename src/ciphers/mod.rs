@@ -5,7 +5,7 @@ pub mod affine;
 pub use affine::Affine;
 
 pub mod substitution;
-pub use substitution::Substitution;
+pub use substitution::GeneralSubstitution;
 
 pub mod decoder_ring;
 pub use decoder_ring::DecoderRing;

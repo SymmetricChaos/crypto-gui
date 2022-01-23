@@ -1,6 +1,7 @@
 use rand::prelude::{ThreadRng, SliceRandom};
 
-pub const LATIN: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+pub const LATIN_UPPER: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+pub const LATIN_LOWER: &str = "abcdefghijklmnopqrstuvwxyz";
 
 pub fn shuffled_str(s: &str, rng: &mut ThreadRng) -> String {
     let mut characters = s.chars().collect::<Vec<char>>();
