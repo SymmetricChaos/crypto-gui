@@ -1,4 +1,4 @@
-use eframe::egui::{self, TextStyle};
+use eframe::egui;
 
 
 use crate::ciphers::*;
@@ -29,34 +29,20 @@ impl Default for CipherID {
     }
 }
 
-pub struct DisplayPanel {
-    description: &'static str,
-}
-
-impl Default for DisplayPanel {
-    fn default() -> Self {
-        Self { description: "" }
+impl CipherID {
+    pub fn description(&self) -> &'static str {
+        match self {
+            CipherID::Caesar => "The Caesar Cipher is perhaps the oldest and simplest of ciphers. A value is chosen that shifts each letter of the alphabet that many positions. For example a shift of 2 turna A in C and Y into A.",
+            CipherID::Affine => "The Affine Cipher is a simple extension of the Caesar Cipher that applies an affine transform to the alphabet. Each letter's position has a value added to it and then is multiplied by a certain value. The need for a unique inverse to the multiplication adds some complexity to this cipher.",
+            CipherID::Decoder => "A Decoder Ring (as popularized by Little Orphan Annie and Captain Midnight) is a variable on the Caesar cipher. Rather than shift the letters each letter replaced with its numerical value which is then shifted.",
+            CipherID::Substitution => "The General Substituion Cipher maps a set of symbols one-to-one onto another arbitary set. This implementation allows only maping the symbols of an alphabet but all simple substitution ciphers are included in principle.",
+            CipherID::M209 => "The M209 was an entirely mechanical cipher machine used by the US Military.",
+        }
     }
 }
 
-impl View for DisplayPanel {
-    fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String) {
-        ui.label(format!{"Description:\n{}",self.description});
-
-        ui.add_space(16.0);
-        ui.separator();
-        ui.add_space(16.0);
-
-        ui.label("INPUT TEXT");
-        ui.add(egui::TextEdit::multiline(input).text_style(TextStyle::Monospace));
-        ui.add_space(16.0);
-        ui.label("OUTPUT TEXT");
-        ui.add(egui::TextEdit::multiline(output).text_style(TextStyle::Monospace));
-    }
-}
 
 pub struct ControlPanel {
-    active_cipher: CipherID,
     caesar: Caesar,
     affine: Affine,
     decoder_ring: DecoderRing,
@@ -67,7 +53,6 @@ pub struct ControlPanel {
 impl Default for ControlPanel {
     fn default() -> Self {
         Self{ 
-            active_cipher: CipherID::Caesar,
             caesar: Caesar::default(),
             affine: Affine::default(),
             decoder_ring: DecoderRing::default(),
@@ -77,21 +62,22 @@ impl Default for ControlPanel {
     }
 }
 
-impl View for ControlPanel {
-    fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String) {
+impl ControlPanel {
+    pub fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String, active_cipher: &mut CipherID) {
+        
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.active_cipher, CipherID::Caesar, "Caesar");
-            ui.selectable_value(&mut self.active_cipher, CipherID::Affine, "Affine");
-            ui.selectable_value(&mut self.active_cipher, CipherID::Decoder, "Decoder Ring");
-            ui.selectable_value(&mut self.active_cipher, CipherID::Substitution, "General Substitution");
-            ui.selectable_value(&mut self.active_cipher, CipherID::M209, "M209");
+            ui.selectable_value(active_cipher, CipherID::Caesar, "Caesar");
+            ui.selectable_value(active_cipher, CipherID::Decoder, "Decoder Ring");
+            ui.selectable_value(active_cipher, CipherID::Affine, "Affine");
+            ui.selectable_value(active_cipher, CipherID::Substitution, "General Substitution");
+            ui.selectable_value(active_cipher, CipherID::M209, "M209");
         });
 
         ui.add_space(16.0);
         ui.separator();
         ui.add_space(16.0);
 
-        match self.active_cipher {
+        match active_cipher {
             CipherID::Caesar => self.caesar.ui(ui, input, output),
             CipherID::Affine => self.affine.ui(ui, input, output),
             CipherID::Decoder => self.decoder_ring.ui(ui, input, output),

@@ -1,5 +1,5 @@
 use rand::prelude::ThreadRng;
-use crate::text_functions::{shuffled_str, LATIN_UPPER, LATIN_LOWER};
+use crate::text_functions::{shuffled_str, LATIN_UPPER};
 use super::Cipher;
 use std::collections::HashMap;
 
