@@ -1,23 +1,13 @@
 use eframe::egui::{self, TextStyle};
 
+use self::caesar_controls::CaesarControls;
+
 pub mod app;
+pub mod caesar_controls;
+pub mod generic_components;
 
 pub trait View {
     fn ui(&mut self, ui: &mut egui::Ui);
-}
-
-pub struct ControlPanel;
-
-impl Default for ControlPanel {
-    fn default() -> Self {
-        Self {  }
-    }
-}
-
-impl View for ControlPanel {
-    fn ui(&mut self, ui: &mut egui::Ui) {
-        ui.label("controls vary with cipher");
-    }
 }
 
 #[derive(PartialEq)]
@@ -32,28 +22,6 @@ pub enum CipherID {
 impl Default for CipherID {
     fn default() -> Self {
         Self::Caesar
-    }
-}
-
-pub struct SelectorPanel {
-    active_panel: CipherID
-}
-
-impl Default for SelectorPanel {
-    fn default() -> Self {
-        Self { active_panel: CipherID::default() }
-    }
-}
-
-impl View for SelectorPanel {
-    fn ui(&mut self, ui: &mut egui::Ui) {
-        ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.active_panel, CipherID::Caesar, "Caesar");
-            ui.selectable_value(&mut self.active_panel, CipherID::Affine, "Affine");
-            ui.selectable_value(&mut self.active_panel, CipherID::Decoder, "Decoder");
-            ui.selectable_value(&mut self.active_panel, CipherID::Substitution, "Substitution");
-            ui.selectable_value(&mut self.active_panel, CipherID::M209, "M209");
-        });
     }
 }
 
@@ -85,7 +53,40 @@ impl View for DisplayPanel {
     }
 }
 
-pub struct CipherPanel {
-    controls: ControlPanel,
-    display: DisplayPanel
+pub struct ControlPanel {
+    active_cipher: CipherID,
+    caesar: CaesarControls,
+}
+
+impl Default for ControlPanel {
+    fn default() -> Self {
+        Self{ 
+            active_cipher: CipherID::Caesar,
+            caesar: CaesarControls::default(),
+        }
+    }
+}
+
+impl View for ControlPanel {
+    fn ui(&mut self, ui: &mut egui::Ui) {
+        ui.horizontal(|ui| {
+            ui.selectable_value(&mut self.active_cipher, CipherID::Caesar, "Caesar");
+            ui.selectable_value(&mut self.active_cipher, CipherID::Affine, "Affine");
+            ui.selectable_value(&mut self.active_cipher, CipherID::Decoder, "Decoder");
+            ui.selectable_value(&mut self.active_cipher, CipherID::Substitution, "Substitution");
+            ui.selectable_value(&mut self.active_cipher, CipherID::M209, "M209");
+        });
+
+        ui.add_space(16.0);
+        ui.separator();
+        ui.add_space(16.0);
+
+        match self.active_cipher {
+            CipherID::Caesar => self.caesar.ui(ui),
+            CipherID::Affine => todo!("cipher controls not implemented"),
+            CipherID::Decoder => todo!("cipher controls not implemented"),
+            CipherID::Substitution => todo!("cipher controls not implemented"),
+            CipherID::M209 => todo!("cipher controls not implemented"),
+        }
+    }
 }

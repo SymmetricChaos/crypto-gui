@@ -1,9 +1,8 @@
-use eframe::{egui::{CtxRef, self, TopBottomPanel, SidePanel, CentralPanel}, epi};
+use eframe::{egui::{CtxRef, SidePanel, CentralPanel}, epi};
 
 use super::View;
 
 pub struct ClassicCrypto {
-    selector: super::SelectorPanel,
     display: super::DisplayPanel,
     control: super::ControlPanel,
 
@@ -12,7 +11,6 @@ pub struct ClassicCrypto {
 impl Default for ClassicCrypto {
     fn default() -> Self {
         Self { 
-            selector: super::SelectorPanel::default(),
             display: super::DisplayPanel::default(),
             control: super::ControlPanel::default(),
         }
@@ -33,12 +31,9 @@ impl epi::App for ClassicCrypto {
     ) {
     }
 
-    
-
     fn update(&mut self, ctx: &CtxRef, frame: &epi::Frame) {
-        TopBottomPanel::top("selector_panel").show(ctx, |ui| {
-            self.selector.ui(ui)
-        });
+        frame.set_window_size((1000.0,550.0).into());
+        ctx.set_pixels_per_point(1.2);
         SidePanel::right("display_panel").show(ctx, |ui| {
             self.display.ui(ui)
         });
