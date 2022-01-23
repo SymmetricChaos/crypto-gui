@@ -1,4 +1,5 @@
 use eframe::egui;
+use eframe::egui::Slider;
 use super::View;
 use super::generic_components::*;
 use crate::ciphers::M209;
@@ -16,7 +17,12 @@ impl View for M209 {
         ui.add_space(16.0);
 
         ui.label("Pins");
-        ui.label("WORD IN PROGRESS");
+        for rotor in self.get_wheels() {
+            let len = rotor.rotor_length()-1;
+            ui.add( Slider::new(&mut rotor.active, 0..=len).show_value(false));
+            ui.label(format!("{}",rotor));
+        }
+        
         ui.add_space(16.0);
 
         let lugs = &mut self.lugs;

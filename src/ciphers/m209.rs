@@ -1,7 +1,7 @@
 use rand::prelude::ThreadRng;
 use rand::Fill;
 use super::Cipher;
-use crate::text_functions::LATIN_UPPER;
+use crate::text_functions::{LATIN_UPPER,random_char_vec};
 use lazy_static::lazy_static;
 use std::{collections::VecDeque, fmt};
 
@@ -51,8 +51,8 @@ impl fmt::Display for Cage {
 #[derive(Clone,Debug)]
 pub struct Rotor {
     alphabet: VecDeque<char>,
-    pins: Vec<char>,
-    active: usize,
+    pub pins: Vec<char>,
+    pub active: usize,
 }
 
 impl Rotor {
@@ -97,6 +97,10 @@ impl Rotor {
 
     pub fn active_is_effective(&self) -> bool {
         self.pins.contains(&self.alphabet[self.active])
+    }
+
+    pub fn rotor_length(&self) -> usize {
+        self.alphabet.len()
     }
 
 }
@@ -165,7 +169,8 @@ impl Default for M209 {
                     (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0),
                     (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0)
             ], 
-            alphabet: String::from(LATIN_UPPER) }
+            alphabet: String::from(LATIN_UPPER) 
+        }
     }
 }
 
@@ -197,8 +202,6 @@ impl M209 {
             w.step()
         }
     }
-
-
 
     pub fn print_cage(&self) -> String {
         let mut out = "Cage\n".to_string();
@@ -278,7 +281,17 @@ impl Cipher for M209 {
         data.try_fill(rng).unwrap();
         self.lugs = data.chunks_exact(2).map(|x| ((x[0]%7) as usize, (x[1]%7) as usize)).collect::<Vec<(usize,usize)>>().try_into().unwrap();
 
-        //TODO: randomize pins
+        let pins1 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 13, rng);
+        let pins2 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVXYZ", 12, rng);
+        let pins3 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVX",12, rng);
+        let pins4 = random_char_vec("ABCDEFGHIJKLMNOPQRSTU",12, rng);
+        let pins5 = random_char_vec("ABCDEFGHIJKLMNOPQRS",12, rng);
+        let pins6 = random_char_vec("ABCDEFGHIJKLMNOPQ",12, rng);
+
+        for (rotor, new_pins) in self.get_wheels().zip([pins1, pins2, pins3, pins4, pins5, pins6].iter()) {
+            rotor.pins = new_pins.clone()
+        }
+
     }
 
     fn input_alphabet(&mut self) -> &mut String {

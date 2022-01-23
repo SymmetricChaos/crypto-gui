@@ -1,4 +1,4 @@
-use eframe::{egui::{CtxRef, SidePanel, CentralPanel, TextStyle, TextEdit}, epi};
+use eframe::{egui::{CtxRef, SidePanel, CentralPanel, TextStyle, TextEdit, ScrollArea}, epi};
 
 use crate::cipher_panel::{ControlPanel, CipherID};
 
@@ -55,7 +55,9 @@ impl epi::App for ClassicCrypto {
         });
 
         CentralPanel::default().show(ctx, |ui| {
-            self.control.ui(ui, &mut self.input, &mut self.output, &mut self.active_cipher)
+            ScrollArea::vertical().show(ui, |ui| {
+                self.control.ui(ui, &mut self.input, &mut self.output, &mut self.active_cipher)
+            });
         });
     }
 }
