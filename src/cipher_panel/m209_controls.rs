@@ -16,7 +16,7 @@ impl View for M209 {
         ui.label("ABDCEFGHIJKLMNOPQRSTUVWXYZ");
         ui.add_space(16.0);
 
-        ui.label("Pins");
+        ui.label("Rotor Settings");
         for rotor in self.get_wheels() {
             let len = rotor.rotor_length()-1;
             ui.add( Slider::new(&mut rotor.active, 0..=len).show_value(false));
