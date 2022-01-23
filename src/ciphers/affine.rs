@@ -1,19 +1,17 @@
 use rand::{Rng, prelude::ThreadRng};
 use super::Cipher;
-
 use crate::math_functions::mul_inv;
+use crate::text_functions::LATIN_UPPER;
 
 pub struct Affine {
     pub add_key: usize,
     pub mul_key: usize,
-    mul_key_inv: Option<usize>,
     alphabet: String,
 }
 
 impl Affine {
     pub fn new(add_key: usize, mul_key: usize, alphabet: &str) -> Self {
-        let mul_key_inv = mul_inv(mul_key, alphabet.chars().count());
-        Self{ add_key, mul_key, mul_key_inv, alphabet: alphabet.to_string() }
+        Self{ add_key, mul_key, alphabet: alphabet.to_string() }
     }
 
     fn char_to_val(&self, c: char) -> Option<usize> {
@@ -28,8 +26,14 @@ impl Affine {
         self.alphabet.chars().count()
     }
 
-    pub fn set_inverse(&mut self) {
-        self.mul_key_inv = mul_inv(self.mul_key, self.alphabet.chars().count());
+    pub fn find_inverse(&self) -> Option<usize> {
+        mul_inv(self.mul_key, self.alphabet.chars().count())
+    }
+}
+
+impl Default for Affine {
+    fn default() -> Self {
+        Self { add_key: 0, mul_key: 1, alphabet: String::from(LATIN_UPPER) }
     }
 }
 
@@ -37,7 +41,7 @@ impl Cipher for Affine {
     fn encrypt(&self, text: &str) -> Result<String,&'static str> {
         let symbols = text.chars();
         let mut out = String::with_capacity(text.len());
-        match self.mul_key_inv {
+        match self.find_inverse() {
             Some(n) => n,
             None => return Err("The multiplicative key of an Affine Cipher must have an inverse modulo the length of the alphabet")
         };
@@ -56,7 +60,7 @@ impl Cipher for Affine {
     fn decrypt(&self, text: &str) -> Result<String,&'static str> {
         let symbols = text.chars();
         let mut out = String::with_capacity(text.len());
-        let mki = match self.mul_key_inv {
+        let mki = match self.find_inverse() {
             Some(n) => n,
             None => return Err("The multiplicative key of an Affine Cipher must have an inverse modulo the length of the alphabet")
         };
@@ -75,14 +79,14 @@ impl Cipher for Affine {
     fn randomize(&mut self, rng: &mut ThreadRng) {
         let length = self.alphabet.len();
         self.add_key = rng.gen_range(0..length);
-        let (mul, mult_inv) = loop  {
-            let mul = rng.gen_range(0..length);
-            if let Some(n) = mul_inv(mul, self.length()) {
-                break (mul, n)
+        loop {
+            let mul = rng.gen_range(1..length);
+            if mul_inv(mul, self.length()).is_some() {
+                self.mul_key = mul;
+                break
             };
         };
-        self.mul_key = mul;
-        self.mul_key_inv = Some(mult_inv);
+    
     }
 
     fn input_alphabet(&mut self) -> &mut String {

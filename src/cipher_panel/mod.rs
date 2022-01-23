@@ -1,10 +1,8 @@
 use eframe::egui::{self, TextStyle};
 
-use crate::ciphers::GeneralSubstitution;
 
-use self::{caesar_controls::CaesarControls, affine_controls::AffineControls, decoder_ring_controls::DecoderRingControls, m209_controls::M209Controls, general_sub_controls::GeneralSubstitutionControls};
+use crate::ciphers::*;
 
-pub mod app;
 pub mod caesar_controls;
 pub mod generic_components;
 pub mod affine_controls;
@@ -52,29 +50,29 @@ impl View for DisplayPanel {
         ui.label("INPUT TEXT");
         ui.add(egui::TextEdit::multiline(input).text_style(TextStyle::Monospace));
         ui.add_space(16.0);
-        ui.label("OUTPUT TEST");
+        ui.label("OUTPUT TEXT");
         ui.add(egui::TextEdit::multiline(output).text_style(TextStyle::Monospace));
     }
 }
 
 pub struct ControlPanel {
     active_cipher: CipherID,
-    caesar: CaesarControls,
-    affine: AffineControls,
-    decoder_ring: DecoderRingControls,
-    gen_sub: GeneralSubstitutionControls,
-    m209: M209Controls,
+    caesar: Caesar,
+    affine: Affine,
+    decoder_ring: DecoderRing,
+    gen_sub: GeneralSubstitution,
+    m209: M209,
 }
 
 impl Default for ControlPanel {
     fn default() -> Self {
         Self{ 
             active_cipher: CipherID::Caesar,
-            caesar: CaesarControls::default(),
-            affine: AffineControls::default(),
-            decoder_ring: DecoderRingControls::default(),
-            gen_sub: GeneralSubstitutionControls::default(),
-            m209: M209Controls::default(),
+            caesar: Caesar::default(),
+            affine: Affine::default(),
+            decoder_ring: DecoderRing::default(),
+            gen_sub: GeneralSubstitution::default(),
+            m209: M209::default(),
         }
     }
 }

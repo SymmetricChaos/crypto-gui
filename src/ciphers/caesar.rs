@@ -1,4 +1,6 @@
 use rand::{Rng, prelude::ThreadRng};
+use crate::text_functions::LATIN_UPPER;
+
 use super::Cipher;
 
 pub struct Caesar {
@@ -21,6 +23,12 @@ impl Caesar {
 
     pub fn length(&self) -> usize {
         self.alphabet.chars().count()
+    }
+}
+
+impl Default for Caesar {
+    fn default() -> Self {
+        Self { shift: 0, alphabet: String::from(LATIN_UPPER) }
     }
 }
 

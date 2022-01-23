@@ -1,34 +1,22 @@
 use eframe::egui::Slider;
 use super::View;
 use super::generic_components::*;
-use crate::{ciphers::Caesar, text_functions::LATIN_UPPER};
+use crate::ciphers::Caesar;
 
-pub struct CaesarControls {
-    cipher: Caesar,
-}
-
-impl Default for CaesarControls {
-    fn default() -> Self {
-        Self { 
-            cipher: Caesar::new(0, LATIN_UPPER),
-        }
-    }
-}
-
-impl View for CaesarControls {
+impl View for Caesar {
     fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, output: &mut String) {
         ui.add_space(16.0);
-        input_alphabet(ui, &mut self.cipher);
+        input_alphabet(ui, self);
         ui.add_space(16.0);
 
         ui.label("Key");
-        let alpha_range = 0..=((self.cipher.length()-1));
-        ui.add(Slider::new(&mut self.cipher.shift, alpha_range));
+        let alpha_range = 0..=((self.length()-1));
+        ui.add(Slider::new(&mut self.shift, alpha_range));
         ui.add_space(16.0);
 
-        encrypt_decrypt(ui, &mut self.cipher, input, output);
+        encrypt_decrypt(ui, self, input, output);
         ui.add_space(16.0);
-        randomize_button(ui, &mut self.cipher);
+        randomize_button(ui, self);
         ui.add_space(16.0);
         clear_button(ui, input, output);
     }

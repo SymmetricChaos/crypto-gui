@@ -32,6 +32,12 @@ impl DecoderRing {
     }
 }
 
+impl Default for DecoderRing {
+    fn default() -> Self {
+        Self { index: 0, alphabet: String::from("_ABCDEFGHIJKLMNOPWRSTUVWXYZ") }
+    }
+}
+
 impl Cipher for DecoderRing {
 
     fn encrypt(&self, text: &str) -> Result<String,&'static str> {

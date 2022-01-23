@@ -1,4 +1,5 @@
 use rand::prelude::ThreadRng;
+use rand::Fill;
 use super::Cipher;
 use crate::text_functions::LATIN_UPPER;
 use lazy_static::lazy_static;
@@ -271,7 +272,13 @@ impl Cipher for M209 {
     }
 
     fn randomize(&mut self, rng: &mut ThreadRng) {
-        todo!("randomization for M209 not yet implemented")
+        // Fill up an array with random bytes. Then map that to pairs of usize.
+        // Unwrap here is justified by the fixed sizes of everything involved.
+        let mut data = [0u8; 54];
+        data.try_fill(rng).unwrap();
+        self.lugs = data.chunks_exact(2).map(|x| ((x[0]%7) as usize, (x[1]%7) as usize)).collect::<Vec<(usize,usize)>>().try_into().unwrap();
+
+        //TODO: randomize pins
     }
 
     fn input_alphabet(&mut self) -> &mut String {

@@ -22,5 +22,3 @@ pub trait Cipher {
     fn input_alphabet(&mut self) -> &mut String;
     fn output_alphabet(&mut self) -> &mut String;
 }
-
-pub const LATIN: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";

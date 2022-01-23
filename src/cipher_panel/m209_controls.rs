@@ -9,29 +9,17 @@ fn lug_pair(ui: &mut egui::Ui, pair: &mut (usize,usize)) {
 }
 
 
-pub struct M209Controls {
-    cipher: M209,
-}
-
-impl Default for M209Controls {
-    fn default() -> Self {
-        Self { 
-            cipher: M209::default(),
-        }
-    }
-}
-
-impl View for M209Controls {
+impl View for M209 {
     fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, output: &mut String) {
         ui.label("Alphabet");
         ui.label("ABDCEFGHIJKLMNOPQRSTUVWXYZ");
         ui.add_space(16.0);
 
         ui.label("Pins");
-        //cipher.set_pins();
+        ui.label("WORD IN PROGRESS");
         ui.add_space(16.0);
 
-        let lugs = &mut self.cipher.lugs;
+        let lugs = &mut self.lugs;
         ui.label("Lugs");
         for triple in lugs.chunks_exact_mut(3) {
             ui.horizontal(|ui| {
@@ -43,9 +31,9 @@ impl View for M209Controls {
             });
         }
 
-        encrypt_decrypt(ui, &mut self.cipher, input, output);
+        encrypt_decrypt(ui, self, input, output);
         ui.add_space(16.0);
-        randomize_button(ui, &mut self.cipher);
+        randomize_button(ui, self);
         ui.add_space(16.0);
         clear_button(ui, input, output);
     }

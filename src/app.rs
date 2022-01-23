@@ -1,10 +1,11 @@
 use eframe::{egui::{CtxRef, SidePanel, CentralPanel}, epi};
 
-use super::View;
+use crate::cipher_panel::{DisplayPanel, ControlPanel, View};
+
 
 pub struct ClassicCrypto {
-    display: super::DisplayPanel,
-    control: super::ControlPanel,
+    display: DisplayPanel,
+    control: ControlPanel,
     input: String,
     output: String,
 
@@ -13,8 +14,8 @@ pub struct ClassicCrypto {
 impl Default for ClassicCrypto {
     fn default() -> Self {
         Self { 
-            display: super::DisplayPanel::default(),
-            control: super::ControlPanel::default(),
+            display: DisplayPanel::default(),
+            control: ControlPanel::default(),
             input: String::new(),
             output: String::new(),
         }
