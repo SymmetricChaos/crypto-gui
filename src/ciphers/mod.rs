@@ -13,6 +13,9 @@ pub use decoder_ring::DecoderRing;
 pub mod m209;
 pub use m209::M209;
 
+pub mod vigenere;
+pub use vigenere::Vigenere;
+
 use rand::prelude::ThreadRng;
 
 pub trait Cipher {

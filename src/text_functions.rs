@@ -14,6 +14,14 @@ pub fn shuffled_str(s: &str, rng: &mut ThreadRng) -> String {
     slice.iter().map(|x| *x).collect::<String>()
 }
 
+pub fn random_sample_replace(s: &str, n: usize, rng: &mut ThreadRng) -> String {
+    let mut out = String::with_capacity(n);
+    for _ in 0..n {
+        out.push(s.chars().choose(rng).unwrap())
+    }
+    out
+}
+
 pub fn random_char_vec(s: &str, n: usize, rng: &mut ThreadRng) -> Vec<char> {
     s.chars().choose_multiple(rng, n)
 }
