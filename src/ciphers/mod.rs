@@ -13,9 +13,6 @@ pub use decoder_ring::DecoderRing;
 pub mod m209;
 pub use m209::M209;
 
-pub mod polybius;
-pub use polybius::PolybiusSquare;
-
 use rand::prelude::ThreadRng;
 
 pub trait Cipher {
