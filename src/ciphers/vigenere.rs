@@ -2,9 +2,15 @@ use rand::prelude::ThreadRng;
 use super::Cipher;
 use crate::text_functions::{LATIN_UPPER, random_sample_replace};
 
+pub enum VigenereMode {
+    Standard,
+    Autokey,
+}
+
 pub struct Vigenere {
     pub key_word: String,
     alphabet: String,
+    mode: VigenereMode,
 }
 
 impl Vigenere {
@@ -26,7 +32,7 @@ impl Vigenere {
 
 impl Default for Vigenere {
     fn default() -> Self {
-        Self { key_word: String::new(), alphabet: String::from(LATIN_UPPER) }
+        Self { key_word: String::new(), alphabet: String::from(LATIN_UPPER), mode: VigenereMode::Standard }
     }
 }
 
