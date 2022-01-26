@@ -4,6 +4,7 @@ use eframe::egui::TextStyle;
 use super::View;
 use super::generic_components::*;
 use crate::ciphers::Vigenere;
+use crate::ciphers::vigenere::VigenereMode;
 
 
 impl View for Vigenere {
@@ -14,6 +15,12 @@ impl View for Vigenere {
 
         ui.label("Key Word");
         ui.add(TextEdit::singleline(&mut self.key_word).text_style(TextStyle::Monospace));
+
+        ui.label("Mode");
+        ui.horizontal(|ui| {
+            ui.selectable_value(&mut self.mode, VigenereMode::Standard, "Standard");
+            ui.selectable_value(&mut self.mode, VigenereMode::Autokey, "Autokey");
+        });
 
         encrypt_decrypt(ui, self, input, output);
         ui.add_space(16.0);

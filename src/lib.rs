@@ -7,6 +7,7 @@ pub mod math_functions;
 pub mod text_functions;
 pub mod cipher_panel;
 mod app;
+pub mod grid;
 
 
 // ----------------------------------------------------------------------------

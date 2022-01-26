@@ -302,3 +302,26 @@ impl Cipher for M209 {
         &mut self.alphabet
     }
 }
+
+
+
+// #[cfg(test)]
+// mod m209_tests {
+
+//     use super::*;
+
+//     const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+//     const CIPHERTEXT: &'static str = "";
+
+//     #[test]
+//     fn encrypt_test() {
+//         let cipher = M209
+//         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+//     }
+
+//     #[test]
+//     fn decrypt_test() {
+//         let cipher = M209
+//         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+//     }
+// }

@@ -84,3 +84,27 @@ impl Cipher for DecoderRing {
         &mut self.alphabet
     }
 }
+
+
+
+
+#[cfg(test)]
+mod decoder_ring_tests {
+
+    use super::*;
+
+    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CIPHERTEXT: &'static str = "21 11 18 23 26 8 2 13 20 1 17 7 22 12 17 14 19 26 9 16 5 17 10 18 1 21 11 18 6 4 24 0 15 17 25";
+
+    #[test]
+    fn encrypt_test() {
+        let cipher = DecoderRing::new(3,"_ASLWIMVHFKXDPOEJBTNQZGUYRC");
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+    }
+
+    #[test]
+    fn decrypt_test() {
+        let cipher = DecoderRing::new(3,"_ASLWIMVHFKXDPOEJBTNQZGUYRC");
+        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+    }
+}

@@ -1,7 +1,10 @@
+use std::collections::VecDeque;
+
 use rand::prelude::ThreadRng;
 use super::Cipher;
 use crate::text_functions::{LATIN_UPPER, random_sample_replace};
 
+#[derive(Debug,Copy,Clone,PartialEq, Eq)]
 pub enum VigenereMode {
     Standard,
     Autokey,
@@ -10,7 +13,7 @@ pub enum VigenereMode {
 pub struct Vigenere {
     pub key_word: String,
     alphabet: String,
-    mode: VigenereMode,
+    pub mode: VigenereMode,
 }
 
 impl Vigenere {
@@ -28,6 +31,69 @@ impl Vigenere {
         }
         Ok(())
     }
+
+    fn encrypt_char(&self, t: usize, k: usize, l: usize) -> char {
+        self.alphabet.chars().nth( (t+k) % l ).unwrap()
+    }
+
+    fn decrypt_char(&self, t: usize, k: usize, l: usize) -> char {
+        self.alphabet.chars().nth( (l+t-k) % l ).unwrap()
+    }
+
+    fn encrypt_standard(&self, text: &str) -> Result<String,&'static str> {
+        self.validate_key()?;
+        let alpha_len = self.alpahbet_len();
+        let nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
+        let mut out = String::with_capacity(nums.len());
+        for (n,k) in nums.iter().zip(self.key_vals()) {
+            out.push(self.encrypt_char(*n,k,alpha_len) )
+        }
+        Ok(out)
+    }
+
+    fn decrypt_standard(&self, text: &str) -> Result<String,&'static str> {
+        self.validate_key()?;
+        let alpha_len = self.alpahbet_len();
+        let length = self.alpahbet_len();
+        let nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() + length ).collect();
+        let mut out = String::with_capacity(nums.len());
+        for (n,k) in nums.iter().zip(self.key_vals()) {
+            out.push(self.decrypt_char(*n,k,alpha_len) )
+        }
+        Ok(out)
+    }
+
+
+
+    fn encrypt_autokey(&self, text: &str) -> Result<String,&'static str> {
+        self.validate_key()?;
+        let alpha_len = self.alpahbet_len();
+        let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
+        let mut akey: VecDeque<usize> = self.key_vals().collect();
+        let mut out = String::with_capacity(text_nums.len());
+
+        for n in text_nums {
+            akey.push_back(n);
+            let k = akey.pop_front().unwrap();
+            out.push(self.encrypt_char(n,k,alpha_len) )
+        }
+        Ok(out)
+    }
+
+    fn decrypt_autokey(&self, text: &str) -> Result<String,&'static str> {
+        self.validate_key()?;
+        let alpha_len = self.alpahbet_len();
+        let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
+        let mut akey: VecDeque<usize> = self.key_vals().collect();
+        let mut out = String::with_capacity(text_nums.len());
+
+        for n in text_nums {
+            akey.push_back(n);
+            let k = akey.pop_front().unwrap();
+            out.push(self.decrypt_char(n,k,alpha_len) )
+        }
+        Ok(out)
+    }
 }
 
 impl Default for Vigenere {
@@ -38,25 +104,17 @@ impl Default for Vigenere {
 
 impl Cipher for Vigenere {
     fn encrypt(&self, text: &str) -> Result<String,&'static str> {
-        self.validate_key()?;
-        let length = self.alpahbet_len();
-        let nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
-        let mut out = String::with_capacity(nums.len());
-        for (n,k) in nums.iter().zip(self.key_vals()) {
-            out.push(self.alphabet.chars().nth( (n+k)%length ).unwrap() )
+        match self.mode {
+            VigenereMode::Standard => self.encrypt_standard(text),
+            VigenereMode::Autokey => self.encrypt_autokey(text),
         }
-        Ok(out)
     }
 
     fn decrypt(&self, text: &str) -> Result<String,&'static str> {
-        self.validate_key()?;
-        let length = self.alpahbet_len();
-        let nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() + length ).collect();
-        let mut out = String::with_capacity(nums.len());
-        for (n,k) in nums.iter().zip(self.key_vals()) {
-            out.push(self.alphabet.chars().nth( (n-k)%length ).unwrap() )
+        match self.mode {
+            VigenereMode::Standard => self.decrypt_standard(text),
+            VigenereMode::Autokey => self.decrypt_autokey(text),
         }
-        Ok(out)
     }
 
     fn randomize(&mut self, rng: &mut ThreadRng) {

@@ -97,3 +97,24 @@ impl Cipher for Affine {
         &mut self.alphabet
     }
 }
+
+
+#[cfg(test)]
+mod affine_tests {
+    use super::*;
+
+    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CIPHERTEXT: &'static str = "UMXFZRNBIKVJQCVOWZLAPVEXKUMXGDYTSVH";
+
+    #[test]
+    fn encrypt_test() {
+        let cipher = Affine::new(3,5,LATIN_UPPER);
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+    }
+
+    #[test]
+    fn decrypt_test() {
+        let cipher = Affine::new(3,5,LATIN_UPPER);
+        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+    }
+}

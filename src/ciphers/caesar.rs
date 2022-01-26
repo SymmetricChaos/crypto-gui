@@ -82,3 +82,27 @@ impl Cipher for Caesar {
         &mut self.alphabet
     }
 }
+
+
+
+
+
+#[cfg(test)]
+mod caesar_tests {
+    use super::*;
+
+    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CIPHERTEXT: &'static str = "WKHTXLFNEURZQIRAMXPSVRYHUWKHODCBGRJ";
+
+    #[test]
+    fn encrypt_test() {
+        let cipher = Caesar::new(3,LATIN_UPPER);
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+    }
+
+    #[test]
+    fn decrypt_test() {
+        let cipher = Caesar::new(3,LATIN_UPPER);
+        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+    }
+}
