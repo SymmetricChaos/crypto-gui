@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use rand::prelude::{ThreadRng, SliceRandom, IteratorRandom};
 
 pub const LATIN_UPPER: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -24,4 +25,21 @@ pub fn random_sample_replace(s: &str, n: usize, rng: &mut ThreadRng) -> String {
 
 pub fn random_char_vec(s: &str, n: usize, rng: &mut ThreadRng) -> Vec<char> {
     s.chars().choose_multiple(rng, n)
+}
+
+pub fn validate_alphabet(alphabet: &str) -> bool {
+
+    // Most basic check, symbols in an alphabet must be unique
+    if alphabet.chars().count() != alphabet.chars().unique().count() {
+        return false
+    }
+
+    // Eliminate potentiually confusing characters
+    for symbol in alphabet.chars() {
+        if symbol.is_control() || symbol.is_whitespace() {
+            return false
+        }
+    };
+
+    true
 }

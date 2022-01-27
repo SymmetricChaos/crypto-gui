@@ -3,6 +3,7 @@ use std::collections::VecDeque;
 use rand::prelude::ThreadRng;
 use super::Cipher;
 use crate::text_functions::{LATIN_UPPER, random_sample_replace};
+use crate::errors::CipherError;
 
 #[derive(Debug,Copy,Clone,PartialEq, Eq)]
 pub enum VigenereMode {

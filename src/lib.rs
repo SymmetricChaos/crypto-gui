@@ -9,6 +9,8 @@ pub mod cipher_panel;
 mod app;
 pub mod grid;
 
+pub mod errors;
+
 
 // ----------------------------------------------------------------------------
 // When compiling for web:

@@ -2,6 +2,8 @@ pub mod ciphers;
 pub mod math_functions;
 pub mod text_functions;
 pub mod cipher_panel;
+pub mod errors;
+use errors::CipherError;
 mod app;
 
 #[cfg(not(target_arch = "wasm32"))]
