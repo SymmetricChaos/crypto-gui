@@ -2,6 +2,7 @@ use rand::{Rng, prelude::ThreadRng};
 use super::Cipher;
 use crate::math_functions::mul_inv;
 use crate::text_functions::LATIN_UPPER;
+use crate::errors::CipherError;
 
 pub struct Affine {
     pub add_key: usize,
@@ -38,18 +39,18 @@ impl Default for Affine {
 }
 
 impl Cipher for Affine {
-    fn encrypt(&self, text: &str) -> Result<String,&'static str> {
+    fn encrypt(&self, text: &str) -> Result<String,CipherError> {
         let symbols = text.chars();
         let mut out = String::with_capacity(text.len());
         match self.find_inverse() {
             Some(n) => n,
-            None => return Err("The multiplicative key of an Affine Cipher must have an inverse modulo the length of the alphabet")
+            None => return Err(CipherError::key("The multiplicative key of an Affine Cipher must have an inverse modulo the length of the alphabet"))
         };
         for s in symbols {
             let val = self.char_to_val(s);
             let n = match val {
                 Some(v) => (v * self.mul_key + self.add_key) % self.length(),
-                None => return Err("Unknown character encountered")
+                None => return Err(CipherError::Input(format!("invalid character `{}` encountered", s)))
             };
             // Unwrap is justified because the modulo operation forces n to be a valid index
             out.push(self.val_to_char(n).unwrap())
@@ -57,18 +58,18 @@ impl Cipher for Affine {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String,&'static str> {
+    fn decrypt(&self, text: &str) -> Result<String,CipherError> {
         let symbols = text.chars();
         let mut out = String::with_capacity(text.len());
         let mki = match self.find_inverse() {
             Some(n) => n,
-            None => return Err("The multiplicative key of an Affine Cipher must have an inverse modulo the length of the alphabet")
+            None => return Err(CipherError::key("The multiplicative key of an Affine Cipher must have an inverse modulo the length of the alphabet"))
         };
         for s in symbols {
             let val = self.char_to_val(s);
             let n = match val {
                 Some(v) => ((v + self.length() - self.add_key) * mki) % self.length(),
-                None => return Err("Unknown character encountered")
+                None => return Err(CipherError::Input(format!("invalid character `{}` encountered", s)))
             };
             // Unwrap is justified because the modulo operation forces n to be a valid index
             out.push(self.val_to_char(n).unwrap())

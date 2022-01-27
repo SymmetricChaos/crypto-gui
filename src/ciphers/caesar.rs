@@ -1,6 +1,6 @@
 use rand::{Rng, prelude::ThreadRng};
 use crate::text_functions::LATIN_UPPER;
-
+use crate::errors::CipherError;
 use super::Cipher;
 
 pub struct Caesar {
@@ -33,36 +33,36 @@ impl Default for Caesar {
 }
 
 impl Cipher for Caesar {
-    fn encrypt(&self, text: &str) -> Result<String,&'static str> {
+    fn encrypt(&self, text: &str) -> Result<String,CipherError> {
         let symbols = text.chars();
         let mut out = "".to_string();
         for s in symbols {
             let val = self.char_to_val(s);
             let n = match val {
                 Some(v) => (v + self.shift) % self.length(),
-                None => return Err("Unknown character encountered")
+                None => return Err(CipherError::input("invalid character"))
             };
             let char = match self.val_to_char(n) {
                 Some(c) => c,
-                None => return Err("Unknown character encountered")
+                None => return Err(CipherError::input("invalid character"))
             };
             out.push(char)
         }
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String,&'static str> {
+    fn decrypt(&self, text: &str) -> Result<String,CipherError> {
         let symbols = text.chars();
         let mut out = "".to_string();
         for s in symbols {
             let val = self.char_to_val(s);
             let n = match val {
                 Some(v) => (v + self.length() - self.shift) % self.length(),
-                None => return Err("Unknown character encountered")
+                None => return Err(CipherError::input("invalid character"))
             };
             let char = match self.val_to_char(n) {
                 Some(c) => c,
-                None => return Err("Unknown character encountered")
+                None => return Err(CipherError::input("invalid character"))
             };
             out.push(char)
         }
@@ -97,7 +97,7 @@ mod caesar_tests {
     #[test]
     fn encrypt_test() {
         let cipher = Caesar::new(3,LATIN_UPPER);
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 
     #[test]

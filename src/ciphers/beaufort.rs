@@ -1,5 +1,5 @@
 use std::collections::VecDeque;
-
+use crate::errors::CipherError;
 use rand::prelude::ThreadRng;
 use super::Cipher;
 use crate::text_functions::{LATIN_UPPER, random_sample_replace};
@@ -25,16 +25,16 @@ impl Beaufort {
         self.alphabet.chars().count()
     }
 
-    fn validate_key(&self) -> Result<(),&'static str> {
+    fn validate_key(&self) -> Result<(),CipherError> {
         for c in self.key_word.chars() {
-            if !self.alphabet.contains(c) { return Err("unknown character in key") }
+            if !self.alphabet.contains(c) { return Err(CipherError::Key(format!("invalid character `{}` encountered",c))) }
         }
         Ok(())
     }
 
-    fn validate_input(&self, text: &str) -> Result<(),&'static str> {
+    fn validate_input(&self, text: &str) -> Result<(),CipherError> {
         for c in text.chars() {
-            if !self.alphabet.contains(c) { return Err("unknown character in key") }
+            if !self.alphabet.contains(c) { return Err(CipherError::Input(format!("invalid character `{}` encountered",c))) }
         }
         Ok(())
     }
@@ -44,7 +44,7 @@ impl Beaufort {
         self.alphabet.chars().nth( (l+k-t) % l ).unwrap()
     }
 
-    fn encrypt_standard(&self, text: &str) -> Result<String,&'static str> {
+    fn encrypt_standard(&self, text: &str) -> Result<String,CipherError> {
         self.validate_key()?;
         self.validate_input(text)?;
         let alpha_len = self.alpahbet_len();
@@ -57,13 +57,13 @@ impl Beaufort {
     }
 
     // The Beaufort cipher is reciprocal
-    fn decrypt_standard(&self, text: &str) -> Result<String,&'static str> {
+    fn decrypt_standard(&self, text: &str) -> Result<String,CipherError> {
         self.encrypt_standard(text)
     }
 
 
 
-    fn encrypt_autokey(&self, text: &str) -> Result<String,&'static str> {
+    fn encrypt_autokey(&self, text: &str) -> Result<String,CipherError> {
         self.validate_key()?;
         let alpha_len = self.alpahbet_len();
         let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
@@ -78,7 +78,7 @@ impl Beaufort {
         Ok(out)
     }
 
-    fn decrypt_autokey(&self, text: &str) -> Result<String,&'static str> {
+    fn decrypt_autokey(&self, text: &str) -> Result<String,CipherError> {
         self.encrypt_autokey(text)
     }
 }
@@ -90,14 +90,14 @@ impl Default for Beaufort {
 }
 
 impl Cipher for Beaufort {
-    fn encrypt(&self, text: &str) -> Result<String,&'static str> {
+    fn encrypt(&self, text: &str) -> Result<String,CipherError> {
         match self.mode {
             BeaufortMode::Standard => self.encrypt_standard(text),
             BeaufortMode::Autokey => self.encrypt_autokey(text),
         }
     }
 
-    fn decrypt(&self, text: &str) -> Result<String,&'static str> {
+    fn decrypt(&self, text: &str) -> Result<String,CipherError> {
         match self.mode {
             BeaufortMode::Standard => self.decrypt_standard(text),
             BeaufortMode::Autokey => self.decrypt_autokey(text),

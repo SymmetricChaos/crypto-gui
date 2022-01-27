@@ -27,7 +27,7 @@ impl View for Beaufort {
         if ui.button(RichText::from("ENCRYPT / DECRYPT").color(Color32::GOLD)).clicked() {
             match self.encrypt(input) {
                 Ok(text) => *output = text,
-                Err(e) => *output = String::from(e),
+                Err(e) => *output = e.to_string(),
             }
         };
         ui.add_space(16.0);

@@ -7,13 +7,13 @@ pub fn encrypt_decrypt(ui: &mut egui::Ui, cipher: &dyn Cipher, input: &mut Strin
         if ui.button(RichText::from("ENCRYPT").color(Color32::GOLD)).clicked() {
             match cipher.encrypt(input) {
                 Ok(text) => *output = text,
-                Err(e) => *output = String::from(e),
+                Err(e) => *output = e.to_string(),
             }
         };
         if ui.button(RichText::from("DECRYPT").color(Color32::GOLD)).clicked() {
             match cipher.decrypt(input) {
                 Ok(text) => *output = text,
-                Err(e) => *output = String::from(e),
+                Err(e) => *output = e.to_string(),
             }
         }
     });

@@ -1,5 +1,6 @@
 use rand::{Rng, prelude::ThreadRng};
 use super::Cipher;
+use crate::errors::CipherError;
 
 pub struct DecoderRing {
     pub index: usize,
@@ -24,10 +25,10 @@ impl DecoderRing {
         self.alphabet = String::from("_AEXDTZKNYCJWSGUMBOQHRIVFPL");
     }
 
-    fn valid_code_group(&self, s: &str) -> Result<usize, &'static str> {
+    fn valid_code_group(&self, s: &str) -> Result<usize, CipherError> {
         match s.parse::<usize>() {
-            Ok(n) => if n < self.length() { Ok(n) } else { Err("Invalid code group") },
-            Err(_) => return Err("Code groups must be numbers"),
+            Ok(n) => if n < self.length() { Ok(n) } else { Err(CipherError::input("invalid code group")) },
+            Err(_) => return Err(CipherError::input("invalid code group")),
         }
     }
 }
@@ -40,21 +41,21 @@ impl Default for DecoderRing {
 
 impl Cipher for DecoderRing {
 
-    fn encrypt(&self, text: &str) -> Result<String,&'static str> {
+    fn encrypt(&self, text: &str) -> Result<String,CipherError> {
         let symbols = text.chars();
         let mut out = Vec::new();
         for s in symbols {
             let pos = self.alphabet.chars().position(|x| x == s);
             let n = match pos {
                 Some(v) => (v + self.index) % self.length(),
-                None => return Err("Unknown character encountered"),
+                None => return Err(CipherError::input("invalid character"))
             };
             out.push( format!("{}",n) )
         }
         Ok(out.join(" "))
     }
 
-    fn decrypt(&self, text: &str) -> Result<String,&'static str> {
+    fn decrypt(&self, text: &str) -> Result<String,CipherError> {
         let code_groups = text.split(' ');
         let nums =  {
             let mut v = Vec::with_capacity(code_groups.clone().count());

@@ -26,16 +26,16 @@ impl Vigenere {
         self.alphabet.chars().count()
     }
 
-    fn validate_key(&self) -> Result<(),&'static str> {
+    fn validate_key(&self) -> Result<(),CipherError> {
         for c in self.key_word.chars() {
-            if !self.alphabet.contains(c) { return Err("unknown character in key") }
+            if !self.alphabet.contains(c) { return Err(CipherError::key("invalid character")) }
         }
         Ok(())
     }
 
-    fn validate_input(&self, text: &str) -> Result<(),&'static str> {
+    fn validate_input(&self, text: &str) -> Result<(),CipherError> {
         for c in text.chars() {
-            if !self.alphabet.contains(c) { return Err("unknown character in key") }
+            if !self.alphabet.contains(c) { return Err(CipherError::input("invalid character")) }
         }
         Ok(())
     }
@@ -48,7 +48,7 @@ impl Vigenere {
         self.alphabet.chars().nth( (l+t-k) % l ).unwrap()
     }
 
-    fn encrypt_standard(&self, text: &str) -> Result<String,&'static str> {
+    fn encrypt_standard(&self, text: &str) -> Result<String,CipherError> {
         self.validate_key()?;
         self.validate_input(text)?;
         let alpha_len = self.alpahbet_len();
@@ -60,7 +60,7 @@ impl Vigenere {
         Ok(out)
     }
 
-    fn decrypt_standard(&self, text: &str) -> Result<String,&'static str> {
+    fn decrypt_standard(&self, text: &str) -> Result<String,CipherError> {
         self.validate_key()?;
         self.validate_input(text)?;
         let alpha_len = self.alpahbet_len();
@@ -75,8 +75,9 @@ impl Vigenere {
 
 
 
-    fn encrypt_autokey(&self, text: &str) -> Result<String,&'static str> {
+    fn encrypt_autokey(&self, text: &str) -> Result<String,CipherError> {
         self.validate_key()?;
+        self.validate_input(text)?;
         let alpha_len = self.alpahbet_len();
         let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
         let mut akey: VecDeque<usize> = self.key_vals().collect();
@@ -90,8 +91,9 @@ impl Vigenere {
         Ok(out)
     }
 
-    fn decrypt_autokey(&self, text: &str) -> Result<String,&'static str> {
+    fn decrypt_autokey(&self, text: &str) -> Result<String,CipherError> {
         self.validate_key()?;
+        self.validate_input(text)?;
         let alpha_len = self.alpahbet_len();
         let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
         let mut akey: VecDeque<usize> = self.key_vals().collect();
@@ -113,14 +115,14 @@ impl Default for Vigenere {
 }
 
 impl Cipher for Vigenere {
-    fn encrypt(&self, text: &str) -> Result<String,&'static str> {
+    fn encrypt(&self, text: &str) -> Result<String,CipherError> {
         match self.mode {
             VigenereMode::Standard => self.encrypt_standard(text),
             VigenereMode::Autokey => self.encrypt_autokey(text),
         }
     }
 
-    fn decrypt(&self, text: &str) -> Result<String,&'static str> {
+    fn decrypt(&self, text: &str) -> Result<String,CipherError> {
         match self.mode {
             VigenereMode::Standard => self.decrypt_standard(text),
             VigenereMode::Autokey => self.decrypt_autokey(text),
