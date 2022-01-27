@@ -32,6 +32,13 @@ impl Vigenere {
         Ok(())
     }
 
+    fn validate_input(&self, text: &str) -> Result<(),&'static str> {
+        for c in text.chars() {
+            if !self.alphabet.contains(c) { return Err("unknown character in key") }
+        }
+        Ok(())
+    }
+
     fn encrypt_char(&self, t: usize, k: usize, l: usize) -> char {
         self.alphabet.chars().nth( (t+k) % l ).unwrap()
     }
@@ -42,6 +49,7 @@ impl Vigenere {
 
     fn encrypt_standard(&self, text: &str) -> Result<String,&'static str> {
         self.validate_key()?;
+        self.validate_input(text)?;
         let alpha_len = self.alpahbet_len();
         let nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
         let mut out = String::with_capacity(nums.len());
@@ -53,6 +61,7 @@ impl Vigenere {
 
     fn decrypt_standard(&self, text: &str) -> Result<String,&'static str> {
         self.validate_key()?;
+        self.validate_input(text)?;
         let alpha_len = self.alpahbet_len();
         let length = self.alpahbet_len();
         let nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() + length ).collect();

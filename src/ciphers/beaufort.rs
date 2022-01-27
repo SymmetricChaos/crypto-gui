@@ -32,6 +32,13 @@ impl Beaufort {
         Ok(())
     }
 
+    fn validate_input(&self, text: &str) -> Result<(),&'static str> {
+        for c in text.chars() {
+            if !self.alphabet.contains(c) { return Err("unknown character in key") }
+        }
+        Ok(())
+    }
+
     // The Beaufort cipher is reciprocal so no inverse method is needed
     fn encrypt_char(&self, t: usize, k: usize, l: usize) -> char {
         self.alphabet.chars().nth( (l+k-t) % l ).unwrap()
@@ -39,10 +46,11 @@ impl Beaufort {
 
     fn encrypt_standard(&self, text: &str) -> Result<String,&'static str> {
         self.validate_key()?;
+        self.validate_input(text)?;
         let alpha_len = self.alpahbet_len();
-        let nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
-        let mut out = String::with_capacity(nums.len());
-        for (n,k) in nums.iter().zip(self.key_vals()) {
+        let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
+        let mut out = String::with_capacity(text_nums.len());
+        for (n,k) in text_nums.iter().zip(self.key_vals()) {
             out.push(self.encrypt_char(*n,k,alpha_len) )
         }
         Ok(out)
