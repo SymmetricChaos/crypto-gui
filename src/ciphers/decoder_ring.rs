@@ -48,7 +48,7 @@ impl Cipher for DecoderRing {
             let pos = self.alphabet.chars().position(|x| x == s);
             let n = match pos {
                 Some(v) => (v + self.index) % self.length(),
-                None => return Err(CipherError::input("invalid character"))
+                None => return Err(CipherError::invalid_input_char(s))
             };
             out.push( format!("{}",n) )
         }

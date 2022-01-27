@@ -50,7 +50,7 @@ impl Cipher for Affine {
             let val = self.char_to_val(s);
             let n = match val {
                 Some(v) => (v * self.mul_key + self.add_key) % self.length(),
-                None => return Err(CipherError::Input(format!("invalid character `{}` encountered", s)))
+                None => return Err(CipherError::invalid_input_char(s))
             };
             // Unwrap is justified because the modulo operation forces n to be a valid index
             out.push(self.val_to_char(n).unwrap())
@@ -69,7 +69,7 @@ impl Cipher for Affine {
             let val = self.char_to_val(s);
             let n = match val {
                 Some(v) => ((v + self.length() - self.add_key) * mki) % self.length(),
-                None => return Err(CipherError::Input(format!("invalid character `{}` encountered", s)))
+                None => return Err(CipherError::invalid_input_char(s))
             };
             // Unwrap is justified because the modulo operation forces n to be a valid index
             out.push(self.val_to_char(n).unwrap())

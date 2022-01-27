@@ -27,14 +27,14 @@ impl Beaufort {
 
     fn validate_key(&self) -> Result<(),CipherError> {
         for c in self.key_word.chars() {
-            if !self.alphabet.contains(c) { return Err(CipherError::Key(format!("invalid character `{}` encountered",c))) }
+            if !self.alphabet.contains(c) { return Err(CipherError::invalid_key_char(c)) }
         }
         Ok(())
     }
 
     fn validate_input(&self, text: &str) -> Result<(),CipherError> {
         for c in text.chars() {
-            if !self.alphabet.contains(c) { return Err(CipherError::Input(format!("invalid character `{}` encountered",c))) }
+            if !self.alphabet.contains(c) { return Err(CipherError::invalid_input_char(c)) }
         }
         Ok(())
     }

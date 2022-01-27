@@ -28,14 +28,14 @@ impl Vigenere {
 
     fn validate_key(&self) -> Result<(),CipherError> {
         for c in self.key_word.chars() {
-            if !self.alphabet.contains(c) { return Err(CipherError::key("invalid character")) }
+            if !self.alphabet.contains(c) { return Err(CipherError::invalid_alphabet_char(c)) }
         }
         Ok(())
     }
 
     fn validate_input(&self, text: &str) -> Result<(),CipherError> {
         for c in text.chars() {
-            if !self.alphabet.contains(c) { return Err(CipherError::input("invalid character")) }
+            if !self.alphabet.contains(c) { return Err(CipherError::invalid_input_char(c)) }
         }
         Ok(())
     }

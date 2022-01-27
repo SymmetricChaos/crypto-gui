@@ -40,11 +40,11 @@ impl Cipher for Caesar {
             let val = self.char_to_val(s);
             let n = match val {
                 Some(v) => (v + self.shift) % self.length(),
-                None => return Err(CipherError::input("invalid character"))
+                None => return Err(CipherError::invalid_input_char(s))
             };
             let char = match self.val_to_char(n) {
                 Some(c) => c,
-                None => return Err(CipherError::input("invalid character"))
+                None => return Err(CipherError::invalid_input_char(s))
             };
             out.push(char)
         }
@@ -58,11 +58,11 @@ impl Cipher for Caesar {
             let val = self.char_to_val(s);
             let n = match val {
                 Some(v) => (v + self.length() - self.shift) % self.length(),
-                None => return Err(CipherError::input("invalid character"))
+                None => return Err(CipherError::invalid_input_char(s))
             };
             let char = match self.val_to_char(n) {
                 Some(c) => c,
-                None => return Err(CipherError::input("invalid character"))
+                None => return Err(CipherError::invalid_input_char(s))
             };
             out.push(char)
         }

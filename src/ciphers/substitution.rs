@@ -44,7 +44,7 @@ impl Cipher for GeneralSubstitution {
         for c in text.chars() {
             match self.map.get(&c) {
                 Some(o) => out.push(*o),
-                None => return Err(CipherError::input("invalid character")),
+                None => return Err(CipherError::invalid_input_char(c))
             }
         }
         Ok(out)
@@ -55,7 +55,7 @@ impl Cipher for GeneralSubstitution {
         for c in text.chars() {
             match self.map_inv.get(&c) {
                 Some(o) => out.push(*o),
-                None => return Err(CipherError::input("invalid character")),
+                None => return Err(CipherError::invalid_input_char(c))
             }
         }
         Ok(out)
