@@ -16,6 +16,9 @@ pub use m209::M209;
 pub mod vigenere;
 pub use vigenere::Vigenere;
 
+pub mod beaufort;
+pub use beaufort::Beaufort;
+
 use rand::prelude::ThreadRng;
 
 pub trait Cipher {
