@@ -1,4 +1,5 @@
 pub mod caesar;
+pub mod playfair;
 pub use caesar::Caesar;
 
 pub mod affine;
@@ -28,4 +29,12 @@ pub trait Cipher {
     fn randomize(&mut self, rng: &mut ThreadRng);
     fn input_alphabet(&mut self) -> &mut String;
     fn output_alphabet(&mut self) -> &mut String;
+    //fn validate_settings(&self) -> Result<(),CipherError>;
+}
+
+#[derive(Debug,Copy,Clone,PartialEq, Eq)]
+pub enum PolyalphabeticMode {
+    Cyclic,
+    Autokey,
+    Progressive,
 }

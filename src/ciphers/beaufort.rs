@@ -1,19 +1,15 @@
 use std::collections::VecDeque;
 use crate::errors::CipherError;
 use rand::prelude::ThreadRng;
-use super::Cipher;
+use super::{Cipher,PolyalphabeticMode};
 use crate::text_functions::{LATIN_UPPER, random_sample_replace};
 
-#[derive(Debug,Copy,Clone,PartialEq, Eq)]
-pub enum BeaufortMode {
-    Standard,
-    Autokey,
-}
+
 
 pub struct Beaufort {
     pub key_word: String,
     alphabet: String,
-    pub mode: BeaufortMode,
+    pub mode: PolyalphabeticMode,
 }
 
 impl Beaufort {
@@ -88,26 +84,37 @@ impl Beaufort {
     fn decrypt_autokey(&self, text: &str) -> Result<String,CipherError> {
         self.encrypt_autokey(text)
     }
+
+
+    fn encrypt_progressive_key(&self, text: &str) -> Result<String,CipherError> {
+        todo!()
+    }
+
+    fn decrypt_progressive_key(&self, text: &str) -> Result<String,CipherError> {
+        self.encrypt_progressive_key(text)
+    }
 }
 
 impl Default for Beaufort {
     fn default() -> Self {
-        Self { key_word: String::new(), alphabet: String::from(LATIN_UPPER), mode: BeaufortMode::Standard }
+        Self { key_word: String::new(), alphabet: String::from(LATIN_UPPER), mode: PolyalphabeticMode::Cyclic }
     }
 }
 
 impl Cipher for Beaufort {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
         match self.mode {
-            BeaufortMode::Standard => self.encrypt_standard(text),
-            BeaufortMode::Autokey => self.encrypt_autokey(text),
+            PolyalphabeticMode::Cyclic => self.encrypt_standard(text),
+            PolyalphabeticMode::Autokey => self.encrypt_autokey(text),
+            PolyalphabeticMode::Progressive => self.encrypt_progressive_key(text),
         }
     }
 
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
         match self.mode {
-            BeaufortMode::Standard => self.decrypt_standard(text),
-            BeaufortMode::Autokey => self.decrypt_autokey(text),
+            PolyalphabeticMode::Cyclic => self.decrypt_standard(text),
+            PolyalphabeticMode::Autokey => self.decrypt_autokey(text),
+            PolyalphabeticMode::Progressive => self.decrypt_progressive_key(text),
         }
     }
 

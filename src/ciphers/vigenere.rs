@@ -1,20 +1,15 @@
 use std::collections::VecDeque;
 
 use rand::prelude::ThreadRng;
-use super::Cipher;
+use super::{Cipher,PolyalphabeticMode};
 use crate::text_functions::{LATIN_UPPER, random_sample_replace};
 use crate::errors::CipherError;
 
-#[derive(Debug,Copy,Clone,PartialEq, Eq)]
-pub enum VigenereMode {
-    Standard,
-    Autokey,
-}
 
 pub struct Vigenere {
     pub key_word: String,
     alphabet: String,
-    pub mode: VigenereMode,
+    pub mode: PolyalphabeticMode,
 }
 
 impl Vigenere {
@@ -122,22 +117,24 @@ impl Vigenere {
 
 impl Default for Vigenere {
     fn default() -> Self {
-        Self { key_word: String::new(), alphabet: String::from(LATIN_UPPER), mode: VigenereMode::Standard }
+        Self { key_word: String::new(), alphabet: String::from(LATIN_UPPER), mode: PolyalphabeticMode::Cyclic }
     }
 }
 
 impl Cipher for Vigenere {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
         match self.mode {
-            VigenereMode::Standard => self.encrypt_standard(text),
-            VigenereMode::Autokey => self.encrypt_autokey(text),
+            PolyalphabeticMode::Cyclic => self.encrypt_standard(text),
+            PolyalphabeticMode::Autokey => self.encrypt_autokey(text),
+            PolyalphabeticMode::Progressive => todo!(),
         }
     }
 
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
         match self.mode {
-            VigenereMode::Standard => self.decrypt_standard(text),
-            VigenereMode::Autokey => self.decrypt_autokey(text),
+            PolyalphabeticMode::Cyclic => self.decrypt_standard(text),
+            PolyalphabeticMode::Autokey => self.decrypt_autokey(text),
+            PolyalphabeticMode::Progressive => todo!(),
         }
     }
 

@@ -3,8 +3,7 @@ use eframe::egui::TextStyle;
 
 use super::View;
 use super::generic_components::*;
-use crate::ciphers::Vigenere;
-use crate::ciphers::vigenere::VigenereMode;
+use crate::ciphers::{Vigenere,PolyalphabeticMode};
 
 
 impl View for Vigenere {
@@ -18,8 +17,8 @@ impl View for Vigenere {
 
         ui.label("Mode");
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.mode, VigenereMode::Standard, "Standard");
-            ui.selectable_value(&mut self.mode, VigenereMode::Autokey, "Autokey");
+            ui.selectable_value(&mut self.mode, PolyalphabeticMode::Cyclic, "Standard");
+            ui.selectable_value(&mut self.mode, PolyalphabeticMode::Autokey, "Autokey");
         });
 
         encrypt_decrypt(ui, self, input, output);

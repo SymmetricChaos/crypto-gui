@@ -5,8 +5,7 @@ use eframe::egui::TextStyle;
 
 use super::View;
 use super::generic_components::*;
-use crate::ciphers::{Cipher,Beaufort};
-use crate::ciphers::beaufort::BeaufortMode;
+use crate::ciphers::{Cipher,Beaufort,PolyalphabeticMode};
 
 
 impl View for Beaufort {
@@ -20,8 +19,8 @@ impl View for Beaufort {
 
         ui.label("Mode");
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.mode, BeaufortMode::Standard, "Standard");
-            ui.selectable_value(&mut self.mode, BeaufortMode::Autokey, "Autokey");
+            ui.selectable_value(&mut self.mode, PolyalphabeticMode::Cyclic, "Standard");
+            ui.selectable_value(&mut self.mode, PolyalphabeticMode::Autokey, "Autokey");
         });
 
         if ui.button(RichText::from("ENCRYPT / DECRYPT").color(Color32::GOLD)).clicked() {
