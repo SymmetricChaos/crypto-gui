@@ -44,7 +44,8 @@ pub fn validate_alphabet(alphabet: &str) -> bool {
     true
 }
 
-fn string_chunks(text: &str) -> Vec<&str> {
+// Standard provisos about unicode character apply
+fn string_pairs(text: &str) -> Vec<&str> {
     let mut idxs = text.char_indices();
     let mut out = Vec::with_capacity(text.len()/2);
     let mut start = 0;

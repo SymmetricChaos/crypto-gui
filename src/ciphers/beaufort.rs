@@ -17,8 +17,12 @@ pub struct Beaufort {
 }
 
 impl Beaufort {
-    fn key_vals(&self) -> impl Iterator<Item = usize> + '_ {
+    fn cyclic_key_vals(&self) -> impl Iterator<Item = usize> + '_ {
         self.key_word.chars().map(|x| self.alphabet.chars().position(|c| c == x).unwrap()).cycle()
+    }
+
+    fn key_vals(&self) -> impl Iterator<Item = usize> + '_ {
+        self.key_word.chars().map(|x| self.alphabet.chars().position(|c| c == x).unwrap())
     }
 
     fn alpahbet_len(&self) -> usize {
@@ -26,6 +30,9 @@ impl Beaufort {
     }
 
     fn validate_key(&self) -> Result<(),CipherError> {
+        if self.key_word.len() == 0 {
+            return Err(CipherError::Key(String::from("No key word provided")))
+        }
         for c in self.key_word.chars() {
             if !self.alphabet.contains(c) { return Err(CipherError::invalid_key_char(c)) }
         }
@@ -50,7 +57,7 @@ impl Beaufort {
         let alpha_len = self.alpahbet_len();
         let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
         let mut out = String::with_capacity(text_nums.len());
-        for (n,k) in text_nums.iter().zip(self.key_vals()) {
+        for (n,k) in text_nums.iter().zip(self.cyclic_key_vals()) {
             out.push(self.encrypt_char(*n,k,alpha_len) )
         }
         Ok(out)
