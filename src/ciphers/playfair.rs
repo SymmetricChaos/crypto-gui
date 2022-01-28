@@ -1,63 +1,120 @@
 use rand::prelude::ThreadRng;
 use super::Cipher;
-use crate::text_functions::{LATIN_UPPER, string_pairs};
-use crate::errors::CipherError;
+use crate::{errors::CipherError, text_functions::shuffled_str};
 
 
 pub struct Playfair {
-    pub key_word: String,
     alphabet: String,
+    spacer: char,
 }
 
 impl Playfair {
 
-    fn validate_key(&self) -> Result<(),CipherError> {
-        if self.key_word.len() == 0 {
-            return Err(CipherError::Key(String::from("No key word provided")))
+    fn validate_settings(&self) -> Result<(),CipherError> {
+        
+        if !&self.alphabet.contains(self.spacer) {
+            return Err(CipherError::Key(format!("spacer character {} is not in the alphabet",self.spacer)))
         }
-        for c in self.key_word.chars() {
-            if !self.alphabet.contains(c) { return Err(CipherError::invalid_alphabet_char(c)) }
-        }
+        todo!("need to validate alphabet");
         Ok(())
     }
 
-    fn validate_input(&self, text: &str) -> Result<(),CipherError> {
-        if self.key_word.len() == 0 {
-            return Err(CipherError::Input(String::from("No input text provided")))
+    fn pairs(&self, text: &str) -> Result<Vec<(char,char)>,CipherError> {
+        let mut symbols: Vec<char> = text.chars().rev().collect();
+        let mut out = Vec::with_capacity(text.len()/2);
+        while symbols.len() >= 2 {
+            //unwrap justified by condition above
+            let l = symbols.pop().unwrap();
+            let r = symbols.pop().unwrap();
+            if l == r {
+                symbols.push(r);
+                out.push((l,self.spacer));
+            } else {
+                out.push((l,r));
+            }
         }
-        for c in text.chars() {
-            if !self.alphabet.contains(c) { return Err(CipherError::invalid_input_char(c)) }
+        match symbols.len() == 0 {
+            true => Ok(out),
+            false => Err(CipherError::input("Input text does not divide into pairs. Input text may have an odd number of characters or a double letter may have changed the number of characters.")),
         }
-        Ok(())
     }
 
-    fn encrypt_char(&self, t: usize, k: usize, l: usize) -> char {
-        self.alphabet.chars().nth( (t+k) % l ).unwrap()
+    fn size(&self) -> usize {
+        self.alphabet.chars().count()
     }
 
-    fn decrypt_char(&self, t: usize, k: usize, l: usize) -> char {
-        self.alphabet.chars().nth( (l+t-k) % l ).unwrap()
+    fn char_to_position(&self,symbol: char) -> Result<(usize,usize),CipherError> {
+        let num = match self.alphabet.chars().position(|x| x == symbol) {
+            Some(n) => n,
+            None => return Err(CipherError::invalid_input_char(symbol)),
+        };
+        Ok((num / self.size(), num % self.size()))
+    }
+    
+    // The inputs to this come only from internal functions that will never give invalid positions
+    fn position_to_char(&self,position: (usize,usize)) -> char {
+        let num = position.0*self.size() + position.1;
+        self.alphabet.chars().nth(num).unwrap()
+    }
+
+    // Shift characters according to playfairs method
+    fn playfair_shift(&self, lpos: (usize,usize), rpos: (usize,usize), shift: usize, size: usize, output: &mut String) {
+        // The playfair_pairs() function ensures l and r never match so that case is not handled
+        if lpos.0 == rpos.0 {
+            let x = lpos.0;
+            output.push(self.position_to_char((x, (lpos.1+shift)%size )));
+            output.push(self.position_to_char((x, (rpos.1+shift)%size )));
+        } else if lpos.1 == rpos.1 {
+            let y = lpos.1;
+            output.push(self.position_to_char(( (lpos.0+shift)%size, y )));
+            output.push(self.position_to_char(( (rpos.0+shift)%size, y )));
+        } else {
+            output.push(self.position_to_char((lpos.0, rpos.1) ));
+            output.push(self.position_to_char((rpos.0, lpos.1) ));
+        }
     }
 
 }
 
 impl Default for Playfair {
     fn default() -> Self {
-        todo!()
+        Self{ alphabet: String::from("ABCDEFGHIJKLMNOPRSTUVWXYZ"), spacer: 'X' }
     }
 }
 
 impl Cipher for Playfair {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
-        todo!()
+        let pairs = self.pairs(text)?;
+        let mut out = String::with_capacity(text.chars().count());
+        let size = self.size();
+        let s = size+1;
+        for (l,r) in pairs {
+            let lpos = self.char_to_position(l)?;
+            let rpos = self.char_to_position(r)?;
+            
+            // The playfair_pairs() function ensures l and r never match
+            self.playfair_shift(lpos, rpos, size, s, &mut out);
+        }
+        Ok(out)
     }
-
+    
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
-        todo!()
+        let pairs = self.pairs(text)?;
+        let mut out = String::with_capacity(text.chars().count());
+        let size = self.size();
+        let s = size-1;
+        for (l,r) in pairs {
+            let lpos = self.char_to_position(l)?;
+            let rpos = self.char_to_position(r)?;
+            
+            // The playfair_pairs() function ensures l and r never match
+            self.playfair_shift(lpos, rpos, size, s, &mut out);
+        }
+        Ok(out)
     }
 
     fn randomize(&mut self, rng: &mut ThreadRng) {
-        todo!()
+        self.alphabet = shuffled_str(&self.alphabet, rng)
     }
 
     fn input_alphabet(&mut self) -> &mut String {
