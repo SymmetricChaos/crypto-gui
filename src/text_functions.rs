@@ -43,3 +43,24 @@ pub fn validate_alphabet(alphabet: &str) -> bool {
 
     true
 }
+
+fn string_chunks(text: &str) -> Vec<&str> {
+    let mut idxs = text.char_indices();
+    let mut out = Vec::with_capacity(text.len()/2);
+    let mut start = 0;
+    let last = text.len();
+    idxs.next();
+    loop {
+        idxs.next();
+        let end = match idxs.next() {
+            Some(n) => n.0,
+            None => {
+                out.push(&text[start..last]);
+                return out
+            }
+    };
+    out.push(&text[start..end]);
+    start = end;
+   
+    }
+}
