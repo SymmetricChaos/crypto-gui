@@ -101,6 +101,7 @@ impl Vigenere {
     fn decrypt_autokey(&self, text: &str) -> Result<String,CipherError> {
         self.validate_key()?;
         self.validate_input(text)?;
+
         let alpha_len = self.alpahbet_len();
         let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
         let mut akey: VecDeque<usize> = self.key_vals().collect();
@@ -110,6 +111,50 @@ impl Vigenere {
             akey.push_back(n);
             let k = akey.pop_front().unwrap();
             out.push(self.decrypt_char(n,k,alpha_len) )
+        }
+        Ok(out)
+    }
+
+    fn encrypt_progressive_key(&self, text: &str, shift: u8) -> Result<String,CipherError> {
+        self.validate_key()?;
+        self.validate_input(text)?;
+
+        let alpha_len = self.alpahbet_len();
+        let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
+        let mut out = String::with_capacity(text_nums.len());
+        
+        let mut cur_shift = 0 as usize;
+        let mut ctr = 0;
+        let key_len = self.key_vals().count();
+
+        for (n,k) in text_nums.iter().zip(self.cyclic_key_vals()) {
+            out.push(self.encrypt_char(*n, k+cur_shift, alpha_len) );
+            ctr = (ctr+1) % key_len;
+            if ctr == 0 {
+                cur_shift += shift as usize;
+            }
+        }
+        Ok(out)
+    }
+
+    fn decrypt_progressive_key(&self, text: &str, shift: u8) -> Result<String,CipherError> {
+        self.validate_key()?;
+        self.validate_input(text)?;
+        
+        let alpha_len = self.alpahbet_len();
+        let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
+        let mut out = String::with_capacity(text_nums.len());
+        
+        let mut cur_shift = 0;
+        let mut ctr = 0;
+        let key_len = self.key_vals().count();
+
+        for (n,k) in text_nums.iter().zip(self.cyclic_key_vals()) {
+            out.push(self.decrypt_char(*n, k+cur_shift, alpha_len) );
+            ctr = (ctr+1) % key_len;
+            if ctr == 0 {
+                cur_shift += shift as usize;
+            }
         }
         Ok(out)
     }
@@ -126,7 +171,7 @@ impl Cipher for Vigenere {
         match self.mode {
             PolyalphabeticMode::Cyclic => self.encrypt_standard(text),
             PolyalphabeticMode::Autokey => self.encrypt_autokey(text),
-            PolyalphabeticMode::Progressive(n) => todo!(),
+            PolyalphabeticMode::Progressive(shift) => self.encrypt_progressive_key(text, shift),
         }
     }
 
@@ -134,7 +179,7 @@ impl Cipher for Vigenere {
         match self.mode {
             PolyalphabeticMode::Cyclic => self.decrypt_standard(text),
             PolyalphabeticMode::Autokey => self.decrypt_autokey(text),
-            PolyalphabeticMode::Progressive(n) => todo!(),
+            PolyalphabeticMode::Progressive(shift) => self.decrypt_progressive_key(text, shift),
         }
     }
 

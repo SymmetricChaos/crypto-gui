@@ -78,7 +78,6 @@ impl Beaufort {
         Ok(out)
     }
 
-
     fn encrypt_progressive_key(&self, text: &str, shift: u8) -> Result<String,CipherError> {
         self.validate_key()?;
         self.validate_input(text)?;
