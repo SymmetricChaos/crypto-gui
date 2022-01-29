@@ -126,7 +126,7 @@ impl Cipher for Vigenere {
         match self.mode {
             PolyalphabeticMode::Cyclic => self.encrypt_standard(text),
             PolyalphabeticMode::Autokey => self.encrypt_autokey(text),
-            PolyalphabeticMode::Progressive => todo!(),
+            PolyalphabeticMode::Progressive(n) => todo!(),
         }
     }
 
@@ -134,7 +134,7 @@ impl Cipher for Vigenere {
         match self.mode {
             PolyalphabeticMode::Cyclic => self.decrypt_standard(text),
             PolyalphabeticMode::Autokey => self.decrypt_autokey(text),
-            PolyalphabeticMode::Progressive => todo!(),
+            PolyalphabeticMode::Progressive(n) => todo!(),
         }
     }
 

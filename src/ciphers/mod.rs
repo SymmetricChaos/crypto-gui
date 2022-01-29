@@ -38,5 +38,5 @@ pub trait Cipher {
 pub enum PolyalphabeticMode {
     Cyclic,
     Autokey,
-    Progressive,
+    Progressive(u8),
 }

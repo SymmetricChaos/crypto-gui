@@ -13,6 +13,11 @@ pub struct Beaufort {
 }
 
 impl Beaufort {
+
+    pub fn set_mode(&mut self, mode: PolyalphabeticMode) {
+        self.mode = mode
+    }
+
     fn cyclic_key_vals(&self) -> impl Iterator<Item = usize> + '_ {
         self.key_word.chars().map(|x| self.alphabet.chars().position(|c| c == x).unwrap()).cycle()
     }
@@ -42,7 +47,7 @@ impl Beaufort {
         Ok(())
     }
 
-    // The Beaufort cipher is reciprocal so no inverse method is needed
+    // The Beaufort cipher is reciprocal so no decrypt methods are needed
     fn encrypt_char(&self, t: usize, k: usize, l: usize) -> char {
         self.alphabet.chars().nth( (l+k-t) % l ).unwrap()
     }
@@ -54,17 +59,10 @@ impl Beaufort {
         let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
         let mut out = String::with_capacity(text_nums.len());
         for (n,k) in text_nums.iter().zip(self.cyclic_key_vals()) {
-            out.push(self.encrypt_char(*n,k,alpha_len) )
+            out.push(self.encrypt_char(*n, k, alpha_len) )
         }
         Ok(out)
     }
-
-    // The Beaufort cipher is reciprocal
-    fn decrypt_standard(&self, text: &str) -> Result<String,CipherError> {
-        self.encrypt_standard(text)
-    }
-
-
 
     fn encrypt_autokey(&self, text: &str) -> Result<String,CipherError> {
         self.validate_key()?;
@@ -72,26 +70,32 @@ impl Beaufort {
         let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
         let mut akey: VecDeque<usize> = self.key_vals().collect();
         let mut out = String::with_capacity(text_nums.len());
-
         for n in text_nums {
             akey.push_back(n);
             let k = akey.pop_front().unwrap();
-            out.push(self.encrypt_char(n,k,alpha_len) )
+            out.push(self.encrypt_char(n, k, alpha_len) )
         }
         Ok(out)
     }
 
-    fn decrypt_autokey(&self, text: &str) -> Result<String,CipherError> {
-        self.encrypt_autokey(text)
-    }
 
-
-    fn encrypt_progressive_key(&self, text: &str) -> Result<String,CipherError> {
-        todo!()
-    }
-
-    fn decrypt_progressive_key(&self, text: &str) -> Result<String,CipherError> {
-        self.encrypt_progressive_key(text)
+    fn encrypt_progressive_key(&self, text: &str, shift: u8) -> Result<String,CipherError> {
+        self.validate_key()?;
+        self.validate_input(text)?;
+        let alpha_len = self.alpahbet_len();
+        let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
+        let mut out = String::with_capacity(text_nums.len());
+        let mut cur_shift = 0 as usize;
+        let mut ctr = 0;
+        let key_len = self.key_vals().count();
+        for (n,k) in text_nums.iter().zip(self.cyclic_key_vals()) {
+            out.push(self.encrypt_char(*n, k+cur_shift, alpha_len) );
+            ctr = (ctr+1) % key_len;
+            if ctr == 0 {
+                cur_shift += shift as usize;
+            }
+        }
+        Ok(out)
     }
 }
 
@@ -106,15 +110,15 @@ impl Cipher for Beaufort {
         match self.mode {
             PolyalphabeticMode::Cyclic => self.encrypt_standard(text),
             PolyalphabeticMode::Autokey => self.encrypt_autokey(text),
-            PolyalphabeticMode::Progressive => self.encrypt_progressive_key(text),
+            PolyalphabeticMode::Progressive(shift) => self.encrypt_progressive_key(text, shift),
         }
     }
 
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
         match self.mode {
-            PolyalphabeticMode::Cyclic => self.decrypt_standard(text),
-            PolyalphabeticMode::Autokey => self.decrypt_autokey(text),
-            PolyalphabeticMode::Progressive => self.decrypt_progressive_key(text),
+            PolyalphabeticMode::Cyclic => self.encrypt_standard(text),
+            PolyalphabeticMode::Autokey => self.encrypt_autokey(text),
+            PolyalphabeticMode::Progressive(shift) => self.encrypt_progressive_key(text, shift),
         }
     }
 
