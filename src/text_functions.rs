@@ -1,6 +1,8 @@
 use itertools::Itertools;
 use rand::prelude::{ThreadRng, SliceRandom, IteratorRandom};
 
+use crate::errors::CipherError;
+
 pub const LATIN_UPPER: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 pub const LATIN_LOWER: &str = "abcdefghijklmnopqrstuvwxyz";
 pub const LATIN_UPPER_NO_J: &'static str = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
@@ -27,21 +29,21 @@ pub fn random_char_vec(s: &str, n: usize, rng: &mut ThreadRng) -> Vec<char> {
     s.chars().choose_multiple(rng, n)
 }
 
-pub fn validate_alphabet(alphabet: &str) -> bool {
+pub fn validate_alphabet(alphabet: &str) -> Result<(),CipherError> {
 
     // Most basic check, symbols in an alphabet must be unique
     if alphabet.chars().count() != alphabet.chars().unique().count() {
-        return false
+        return Err(CipherError::Alphabet(String::from("characters must all be unique")))
     }
 
     // Eliminate potentiually confusing characters
     for symbol in alphabet.chars() {
         if symbol.is_control() || symbol.is_whitespace() {
-            return false
+            return Err(CipherError::Alphabet(String::from("whitespace and control characters are not allowed")))
         }
     };
 
-    true
+    Ok(())
 }
 
 // Standard provisos about unicode character apply

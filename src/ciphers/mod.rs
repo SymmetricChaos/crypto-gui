@@ -1,5 +1,4 @@
 pub mod caesar;
-pub mod playfair;
 pub use caesar::Caesar;
 
 pub mod affine;
@@ -19,6 +18,9 @@ pub use vigenere::Vigenere;
 
 pub mod beaufort;
 pub use beaufort::Beaufort;
+
+pub mod playfair;
+pub use playfair::Playfair;
 
 use rand::prelude::ThreadRng;
 use crate::errors::CipherError;

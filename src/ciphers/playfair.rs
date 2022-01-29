@@ -1,7 +1,18 @@
+use std::fmt;
+
+use num::integer::Roots;
 use rand::prelude::ThreadRng;
 use super::Cipher;
 use crate::{errors::CipherError, text_functions::shuffled_str};
 
+use crate::text_functions::{LATIN_UPPER_NO_J, LATIN_UPPER_NO_Q, LATIN_UPPER_DIGITS, validate_alphabet};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PlayfairMode {
+    NoQ,
+    NoJ,
+    AlphaNum,
+}
 
 pub struct Playfair {
     alphabet: String,
@@ -10,12 +21,23 @@ pub struct Playfair {
 
 impl Playfair {
 
+    pub fn set_mode(&mut self, mode: PlayfairMode) {
+        match mode {
+            PlayfairMode::NoQ => self.alphabet = String::from(LATIN_UPPER_NO_Q),
+            PlayfairMode::NoJ => self.alphabet = String::from(LATIN_UPPER_NO_J),
+            PlayfairMode::AlphaNum => self.alphabet = String::from(LATIN_UPPER_DIGITS),
+        };
+    }
+
     fn validate_settings(&self) -> Result<(),CipherError> {
         
+        validate_alphabet(&self.alphabet)?;
         if !&self.alphabet.contains(self.spacer) {
             return Err(CipherError::Key(format!("spacer character {} is not in the alphabet",self.spacer)))
         }
-        todo!("need to validate alphabet");
+        if self.size() != self.grid_size().pow(2) {
+            return Err(CipherError::Alphabet(String::from("alphabet length must be a square number in order to exactly fill the grid")))
+        }
         Ok(())
     }
 
@@ -39,8 +61,12 @@ impl Playfair {
         }
     }
 
-    fn size(&self) -> usize {
+    pub fn size(&self) -> usize {
         self.alphabet.chars().count()
+    }
+
+    pub fn grid_size(&self) -> usize {
+        self.size().sqrt()
     }
 
     fn char_to_position(&self,symbol: char) -> Result<(usize,usize),CipherError> {
@@ -84,6 +110,7 @@ impl Default for Playfair {
 
 impl Cipher for Playfair {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
+        self.validate_settings()?;
         let pairs = self.pairs(text)?;
         let mut out = String::with_capacity(text.chars().count());
         let size = self.size();
@@ -99,6 +126,7 @@ impl Cipher for Playfair {
     }
     
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
+        self.validate_settings()?;
         let pairs = self.pairs(text)?;
         let mut out = String::with_capacity(text.chars().count());
         let size = self.size();
@@ -123,5 +151,19 @@ impl Cipher for Playfair {
 
     fn output_alphabet(&mut self) -> &mut String {
         &mut self.alphabet
+    }
+}
+
+
+impl fmt::Display for Playfair {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut square = String::new();
+        for (n, c) in self.alphabet.chars().enumerate() {
+            if n % self.grid_size() == 0 {
+                square.push_str("\n")
+            }
+            square.push_str(&format!("{} ",c))
+        };
+        write!(f, "{}", square)
     }
 }

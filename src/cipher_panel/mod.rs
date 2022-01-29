@@ -10,6 +10,7 @@ pub mod m209_controls;
 pub mod general_sub_controls;
 pub mod vigenere_controls;
 pub mod beaufort_controls;
+pub mod playfair_controls;
 
 pub trait View {
     fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String);
@@ -24,6 +25,7 @@ pub enum CipherID {
     M209,
     Vigenere,
     Beaufort,
+    Playfair,
 }
 
 impl Default for CipherID {
@@ -42,6 +44,7 @@ impl CipherID {
             CipherID::M209 => "The M209 was an entirely mechanical cipher machine used by the US Military with very complex key settings. The positions of the pins and lugs were set once a day. The exteral positions of the rotors were changed with each message.",
             CipherID::Vigenere => "There Vigenere cipher is the oldest polyalphabetic cipher and was belived to be unbreakable upon its invention.",
             CipherID::Beaufort => "The Beaufort cipher is a slightly improved Vigenere cipher that has identical security but for which encryption and decryption are identical.",
+            CipherID::Playfair => "The Playfair cipher swaps letters on a grid to encrypt letters pair by pair.",
         }
     }
 }
@@ -55,6 +58,7 @@ pub struct ControlPanel {
     m209: M209,
     vigenere: Vigenere,
     beaufort: Beaufort,
+    playfair: Playfair,
 }
 
 impl Default for ControlPanel {
@@ -67,6 +71,7 @@ impl Default for ControlPanel {
             m209: M209::default(),
             vigenere: Vigenere::default(),
             beaufort: Beaufort::default(),
+            playfair: Playfair::default(),
         }
     }
 }
@@ -82,6 +87,7 @@ impl ControlPanel {
             ui.selectable_value(active_cipher, CipherID::M209, "M209");
             ui.selectable_value(active_cipher, CipherID::Vigenere, "Vigenere");
             ui.selectable_value(active_cipher, CipherID::Beaufort, "Beaufort");
+            ui.selectable_value(active_cipher, CipherID::Playfair, "Playfair");
         });
 
         ui.add_space(16.0);
@@ -96,6 +102,7 @@ impl ControlPanel {
             CipherID::M209 => self.m209.ui(ui, input, output),
             CipherID::Vigenere => self.vigenere.ui(ui, input, output),
             CipherID::Beaufort => self.beaufort.ui(ui, input, output),
+            CipherID::Playfair => self.playfair.ui(ui, input, output),
         }
     }
 }
