@@ -8,9 +8,10 @@ pub mod affine_controls;
 pub mod decoder_ring_controls;
 pub mod m209_controls;
 pub mod general_sub_controls;
-pub mod vigenere_controls;
-pub mod beaufort_controls;
 pub mod playfair_controls;
+pub mod cyclic_key_controls;
+pub mod autokey_controls;
+pub mod progressive_key_controls;
 
 pub trait View {
     fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String);
@@ -23,9 +24,10 @@ pub enum CipherID {
     Decoder,
     Substitution,
     M209,
-    Vigenere,
-    Beaufort,
     Playfair,
+    CyclicKey,
+    Autokey,
+    ProgressiveKey,
 }
 
 impl Default for CipherID {
@@ -42,9 +44,10 @@ impl CipherID {
             CipherID::Decoder => "A Decoder Ring (as popularized by Little Orphan Annie and Captain Midnight) is a variable on the Caesar cipher. Rather than shift the letters each letter replaced with its numerical value which is then shifted.",
             CipherID::Substitution => "The General Substituion Cipher maps a set of symbols one-to-one onto another arbitary set. This implementation allows only maping the symbols of an alphabet but all simple substitution ciphers are included in principle.",
             CipherID::M209 => "The M209 was an entirely mechanical cipher machine used by the US Military with very complex key settings. The positions of the pins and lugs were set once a day. The exteral positions of the rotors were changed with each message.",
-            CipherID::Vigenere => "There Vigenere cipher is the oldest polyalphabetic cipher and was belived to be unbreakable upon its invention.",
-            CipherID::Beaufort => "The Beaufort cipher is a slightly improved Vigenere cipher that has identical security but for which encryption and decryption are identical.",
             CipherID::Playfair => "The Playfair cipher swaps letters on a grid to encrypt letters pair by pair.",
+            CipherID::CyclicKey => "Cyclic key ciphers repeat their keyword over and over",
+            CipherID::Autokey => "Autokey ciphers draw their key from the text itself.",
+            CipherID::ProgressiveKey => "Progressive key ciphers repeat their key like a cyclic key cipher but apply a shift at each repetition to stretch it out",
         }
     }
 }
@@ -56,8 +59,9 @@ pub struct ControlPanel {
     decoder_ring: DecoderRing,
     gen_sub: GeneralSubstitution,
     m209: M209,
-    vigenere: Vigenere,
-    beaufort: Beaufort,
+    cyclic_key: CyclicKey,
+    autokey: Autokey,
+    progressive_key: ProgressiveKey,
     playfair: Playfair,
 }
 
@@ -69,9 +73,10 @@ impl Default for ControlPanel {
             decoder_ring: DecoderRing::default(),
             gen_sub: GeneralSubstitution::default(),
             m209: M209::default(),
-            vigenere: Vigenere::default(),
-            beaufort: Beaufort::default(),
+            cyclic_key: CyclicKey::default(),
+            autokey: Autokey::default(),
             playfair: Playfair::default(),
+            progressive_key: ProgressiveKey::default(),
         }
     }
 }
@@ -79,14 +84,26 @@ impl Default for ControlPanel {
 impl ControlPanel {
     pub fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String, active_cipher: &mut CipherID) {
         
+        ui.label("Simple Substitution");
         ui.horizontal(|ui| {
             ui.selectable_value(active_cipher, CipherID::Caesar, "Caesar");
             ui.selectable_value(active_cipher, CipherID::Decoder, "Decoder Ring");
             ui.selectable_value(active_cipher, CipherID::Affine, "Affine");
             ui.selectable_value(active_cipher, CipherID::Substitution, "General Substitution");
+        });
+        ui.add_space(10.0);
+
+        ui.label("Polyalphabetic Substitution");
+        ui.horizontal(|ui| {
+            ui.selectable_value(active_cipher, CipherID::CyclicKey, "Cyclic Key");
+            ui.selectable_value(active_cipher, CipherID::Autokey, "Autokey");
+            ui.selectable_value(active_cipher, CipherID::ProgressiveKey, "Progressive");
+        });
+        ui.add_space(10.0);
+
+        ui.label("Other");
+        ui.horizontal(|ui| {
             ui.selectable_value(active_cipher, CipherID::M209, "M209");
-            ui.selectable_value(active_cipher, CipherID::Vigenere, "Vigenere");
-            ui.selectable_value(active_cipher, CipherID::Beaufort, "Beaufort");
             ui.selectable_value(active_cipher, CipherID::Playfair, "Playfair");
         });
 
@@ -100,8 +117,9 @@ impl ControlPanel {
             CipherID::Decoder => self.decoder_ring.ui(ui, input, output),
             CipherID::Substitution => self.gen_sub.ui(ui, input, output),
             CipherID::M209 => self.m209.ui(ui, input, output),
-            CipherID::Vigenere => self.vigenere.ui(ui, input, output),
-            CipherID::Beaufort => self.beaufort.ui(ui, input, output),
+            CipherID::CyclicKey => self.cyclic_key.ui(ui, input, output),
+            CipherID::Autokey => self.autokey.ui(ui, input, output),
+            CipherID::ProgressiveKey => self.progressive_key.ui(ui, input, output),
             CipherID::Playfair => self.playfair.ui(ui, input, output),
         }
     }

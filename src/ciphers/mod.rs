@@ -13,14 +13,17 @@ pub use decoder_ring::DecoderRing;
 pub mod m209;
 pub use m209::M209;
 
-pub mod vigenere;
-pub use vigenere::Vigenere;
-
-pub mod beaufort;
-pub use beaufort::Beaufort;
-
 pub mod playfair;
 pub use playfair::Playfair;
+
+pub mod cyclic_key;
+pub use cyclic_key::CyclicKey;
+
+pub mod autokey;
+pub use autokey::Autokey;
+
+pub mod progressive_key;
+pub use progressive_key::ProgressiveKey;
 
 use rand::prelude::ThreadRng;
 use crate::errors::CipherError;
@@ -34,9 +37,9 @@ pub trait Cipher {
     //fn validate_settings(&self) -> Result<(),CipherError>;
 }
 
+
 #[derive(Debug,Copy,Clone,PartialEq, Eq)]
-pub enum PolyalphabeticMode {
-    Cyclic,
-    Autokey,
-    Progressive(u8),
+pub enum PolyMode {
+    Vigenere,
+    Beaufort,
 }

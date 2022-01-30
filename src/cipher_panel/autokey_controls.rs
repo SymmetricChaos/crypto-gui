@@ -1,14 +1,12 @@
-use eframe::egui::Color32;
-use eframe::egui::RichText;
 use eframe::egui::TextEdit;
 use eframe::egui::TextStyle;
 
 use super::View;
 use super::generic_components::*;
-use crate::ciphers::{Cipher,Beaufort,PolyalphabeticMode};
+use crate::ciphers::{Autokey,PolyMode};
 
 
-impl View for Beaufort {
+impl View for Autokey {
     fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, output: &mut String) {
         ui.add_space(16.0);
         input_alphabet(ui, self);
@@ -19,16 +17,11 @@ impl View for Beaufort {
 
         ui.label("Mode");
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.mode, PolyalphabeticMode::Cyclic, "Standard");
-            ui.selectable_value(&mut self.mode, PolyalphabeticMode::Autokey, "Autokey");
+            ui.selectable_value(&mut self.mode, PolyMode::Vigenere, "Vigenere");
+            ui.selectable_value(&mut self.mode, PolyMode::Beaufort, "Beaufort");
         });
 
-        if ui.button(RichText::from("ENCRYPT / DECRYPT").color(Color32::GOLD)).clicked() {
-            match self.encrypt(input) {
-                Ok(text) => *output = text,
-                Err(e) => *output = e.to_string(),
-            }
-        };
+        encrypt_decrypt(ui, self, input, output);
         ui.add_space(16.0);
         randomize_button(ui, self);
         ui.add_space(16.0);
