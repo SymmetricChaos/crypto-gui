@@ -302,6 +302,10 @@ impl Cipher for M209 {
     fn output_alphabet(&mut self) -> &mut String {
         &mut self.alphabet
     }
+
+    fn validate_settings(&self) -> Result<(),crate::errors::CipherErrors> {
+        todo!()
+    }
 }
 
 

@@ -1,24 +1,24 @@
-use std::collections::VecDeque;
-
 use rand::prelude::ThreadRng;
 use super::{Cipher, PolyMode};
 use crate::text_functions::{LATIN_UPPER, random_sample_replace};
 use crate::errors::CipherError;
 
 
-pub struct Autokey {
+pub struct CyclicKey {
     pub key_word: String,
     alphabet: String,
+    prog_shift: usize,
+    tableaux: Vec<&[char]>,
     pub mode: PolyMode,
 }
 
-impl Autokey {
+impl CyclicKey {
 
     fn key_vals(&self) -> impl Iterator<Item = usize> + '_ {
-        self.key_word.chars().map(|x| self.alphabet.chars().position(|c| c == x).unwrap())
+        self.key_word.chars().map(|x| self.alphabet.chars().position(|c| c == x).unwrap()).cycle()
     }
 
-    pub fn alpahbet_len(&self) -> usize {
+    fn alpahbet_len(&self) -> usize {
         self.alphabet.chars().count()
     }
 
@@ -63,34 +63,24 @@ impl Autokey {
     fn encrypt_vigenere(&self, text: &str) -> Result<String,CipherError> {
         self.validate_key()?;
         self.validate_input(text)?;
-
         let alpha_len = self.alpahbet_len();
-        let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
-        let mut akey: VecDeque<usize> = self.key_vals().collect();
-        let mut out = String::with_capacity(text_nums.len());
-        
-        for n in text_nums {
-            akey.push_back(n);
-            let k = akey.pop_front().unwrap();
-            out.push(self.encrypt_char_vig(n,k,alpha_len) )
+        let nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
+        let mut out = String::with_capacity(nums.len());
+        for (n,k) in nums.iter().zip(self.key_vals()) {
+            out.push(self.encrypt_char_vig(*n,k,alpha_len) )
         }
-
         Ok(out)
     }
 
     fn decrypt_vigenere(&self, text: &str) -> Result<String,CipherError> {
         self.validate_key()?;
         self.validate_input(text)?;
-
         let alpha_len = self.alpahbet_len();
-        let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
-        let mut akey: VecDeque<usize> = self.key_vals().collect();
-        let mut out = String::with_capacity(text_nums.len());
-
-        for n in text_nums {
-            akey.push_back(n);
-            let k = akey.pop_front().unwrap();
-            out.push(self.decrypt_char_vig(n,k,alpha_len) )
+        let length = self.alpahbet_len();
+        let nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() + length ).collect();
+        let mut out = String::with_capacity(nums.len());
+        for (n,k) in nums.iter().zip(self.key_vals()) {
+            out.push(self.decrypt_char_vig(*n,k,alpha_len) )
         }
         Ok(out)
     }
@@ -98,27 +88,24 @@ impl Autokey {
     // There is no decrypt for Beaufort because it is reciprocal
     fn encrypt_beaufort(&self, text: &str) -> Result<String,CipherError> {
         self.validate_key()?;
+        self.validate_input(text)?;
         let alpha_len = self.alpahbet_len();
         let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
-        let mut akey: VecDeque<usize> = self.key_vals().collect();
         let mut out = String::with_capacity(text_nums.len());
-        for n in text_nums {
-            akey.push_back(n);
-            let k = akey.pop_front().unwrap();
-            out.push(self.encrypt_char_beau(n, k, alpha_len) )
+        for (n,k) in text_nums.iter().zip(self.key_vals()) {
+            out.push(self.encrypt_char_beau(*n, k, alpha_len) )
         }
         Ok(out)
     }
-
 }
 
-impl Default for Autokey {
+impl Default for CyclicKey {
     fn default() -> Self {
         Self { key_word: String::new(), alphabet: String::from(LATIN_UPPER), mode: PolyMode::Vigenere }
     }
 }
 
-impl Cipher for Autokey {
+impl Cipher for CyclicKey {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
         match self.mode {
             PolyMode::Vigenere => self.encrypt_vigenere(text),

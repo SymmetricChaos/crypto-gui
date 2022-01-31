@@ -1,5 +1,25 @@
 use std::fmt::Display;
 
+use itertools::Itertools;
+
+
+pub struct CipherErrors {
+    errors: Vec<CipherError>
+}
+
+impl CipherErrors {
+    pub fn new(errors: Vec<CipherError>) -> Self {
+        Self { errors }
+    }
+}
+
+impl Display for CipherErrors {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let err_list = self.errors.clone().into_iter().map(|x| x.to_string()).join("\n");
+        write!(f, "{}",err_list)
+    }
+}
+
 #[derive(Debug,Clone)]
 pub enum CipherError {
     General(String),
@@ -13,6 +33,7 @@ impl CipherError {
         CipherError::General(format!("{}",error))
     }
 
+
     pub fn invalid_input_char(c: char) -> Self {
         CipherError::Input(format!("invalid character: {}",c))
     }
@@ -21,6 +42,7 @@ impl CipherError {
         CipherError::Input(format!("{}",error))
     }
 
+
     pub fn invalid_key_char(c: char) -> Self {
         CipherError::Key(format!("invalid character: {}",c))
     }
@@ -28,6 +50,7 @@ impl CipherError {
     pub fn key(error: &str) -> Self {
         CipherError::Key(format!("{}",error))
     }
+
 
     pub fn alphabet(error: &str) -> Self {
         CipherError::Alphabet(format!("{}",error))

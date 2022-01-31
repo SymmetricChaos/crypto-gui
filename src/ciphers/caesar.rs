@@ -1,6 +1,6 @@
 use rand::{Rng, prelude::ThreadRng};
 use crate::text_functions::LATIN_UPPER;
-use crate::errors::CipherError;
+use crate::errors::{CipherError, CipherErrors};
 use super::Cipher;
 
 pub struct Caesar {
@@ -21,7 +21,7 @@ impl Caesar {
         self.alphabet.chars().nth(v)
     }
 
-    pub fn length(&self) -> usize {
+    pub fn alphabet_len(&self) -> usize {
         self.alphabet.chars().count()
     }
 }
@@ -39,7 +39,7 @@ impl Cipher for Caesar {
         for s in symbols {
             let val = self.char_to_val(s);
             let n = match val {
-                Some(v) => (v + self.shift) % self.length(),
+                Some(v) => (v + self.shift) % self.alphabet_len(),
                 None => return Err(CipherError::invalid_input_char(s))
             };
             let char = match self.val_to_char(n) {
@@ -57,7 +57,7 @@ impl Cipher for Caesar {
         for s in symbols {
             let val = self.char_to_val(s);
             let n = match val {
-                Some(v) => (v + self.length() - self.shift) % self.length(),
+                Some(v) => (v + self.alphabet_len() - self.shift) % self.alphabet_len(),
                 None => return Err(CipherError::invalid_input_char(s))
             };
             let char = match self.val_to_char(n) {
@@ -80,6 +80,13 @@ impl Cipher for Caesar {
 
     fn output_alphabet(&mut self) -> &mut String {
         &mut self.alphabet
+    }
+
+    fn validate_settings(&self) -> Result<(),CipherErrors> {
+        if self.shift > self.alphabet_len() {
+            return Err(CipherErrors::new(vec![CipherError::Key(String::from("key value is incorrect"))]))
+        }
+        Ok(())
     }
 }
 

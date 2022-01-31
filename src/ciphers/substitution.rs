@@ -78,4 +78,8 @@ impl Cipher for GeneralSubstitution {
     fn output_alphabet(&mut self) -> &mut String {
         &mut self.alphabet2
     }
+
+    fn validate_settings(&self) -> Result<(),crate::errors::CipherErrors> {
+        todo!()
+    }
 }
