@@ -14,7 +14,7 @@ impl View for ProgressiveKey {
         ui.label("Key Word");
         ui.add(TextEdit::singleline(&mut self.key_word).text_style(TextStyle::Monospace));
 
-        let alpha_len = self.alpahbet_len();
+        let alpha_len = self.alphabet_len();
         ui.label("Shift");
         ui.add(DragValue::new(&mut self.shift).clamp_range(0usize..=alpha_len).speed(0.1));
 

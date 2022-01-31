@@ -17,7 +17,11 @@ impl ProgressiveKey {
         self.key_word.chars().map(|x| self.alphabet.chars().position(|c| c == x).unwrap()).cycle()
     }
 
-    pub fn alpahbet_len(&self) -> usize {
+    fn key_len(&self) -> usize {
+        self.key_word.chars().count()
+    }
+
+    pub fn alphabet_len(&self) -> usize {
         self.alphabet.chars().count()
     }
 
@@ -26,7 +30,7 @@ impl ProgressiveKey {
             return Err(CipherError::Key(String::from("No key word provided")))
         }
         for c in self.key_word.chars() {
-            if !self.alphabet.contains(c) { return Err(CipherError::invalid_alphabet_char(c)) }
+            if !self.alphabet.contains(c) { return Err(CipherError::invalid_key_char(c)) }
         }
         Ok(())
     }
@@ -63,13 +67,13 @@ impl ProgressiveKey {
         self.validate_key()?;
         self.validate_input(text)?;
 
-        let alpha_len = self.alpahbet_len();
+        let alpha_len = self.alphabet_len();
         let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
         let mut out = String::with_capacity(text_nums.len());
         
         let mut cur_shift = 0 as usize;
         let mut ctr = 0;
-        let key_len = self.key_vals().count();
+        let key_len = self.key_len();
 
         for (n, k) in text_nums.iter().zip(self.key_vals()) {
             out.push(self.encrypt_char_vig(*n, k+cur_shift, alpha_len) );
@@ -85,13 +89,13 @@ impl ProgressiveKey {
         self.validate_key()?;
         self.validate_input(text)?;
         
-        let alpha_len = self.alpahbet_len();
+        let alpha_len = self.alphabet_len();
         let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
         let mut out = String::with_capacity(text_nums.len());
         
         let mut cur_shift = 0;
         let mut ctr = 0;
-        let key_len = self.key_vals().count();
+        let key_len = self.key_len();
 
         for (n, k) in text_nums.iter().zip(self.key_vals()) {
             out.push(self.decrypt_char_vig(*n, k+cur_shift, alpha_len) );
@@ -108,13 +112,13 @@ impl ProgressiveKey {
         self.validate_key()?;
         self.validate_input(text)?;
         
-        let alpha_len = self.alpahbet_len();
+        let alpha_len = self.alphabet_len();
         let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
         let mut out = String::with_capacity(text_nums.len());
         
         let mut cur_shift = 0;
         let mut ctr = 0;
-        let key_len = self.key_vals().count();
+        let key_len = self.key_len();
 
         for (n, k) in text_nums.iter().zip(self.key_vals()) {
             out.push(self.encrypt_char_beau(*n, k+cur_shift, alpha_len) );
