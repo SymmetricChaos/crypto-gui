@@ -46,66 +46,87 @@ impl Autokey {
     // Unwraps for the character methods are justified by validating the input
 
     // The Beaufort cipher is reciprocal so no decrypt methods are needed
-    fn encrypt_char_beau(&self, t: usize, k: usize, l: usize) -> char {
-        self.alphabet.chars().nth( (l+k-t) % l ).unwrap()
+    fn encrypt_char_beau(&self, text: usize, key: usize, l: usize) -> (char, usize) {
+        let pos = (l+key-text) % l;
+        (self.alphabet.chars().nth( pos ).unwrap(), pos)
     }
 
-    fn encrypt_char_vig(&self, t: usize, k: usize, l: usize) -> char {
-        self.alphabet.chars().nth( (t+k) % l ).unwrap()
+    fn encrypt_char_vig(&self, text: usize, key: usize, l: usize) -> char {
+        self.alphabet.chars().nth( (text+key) % l ).unwrap()
     }
 
-    fn decrypt_char_vig(&self, t: usize, k: usize, l: usize) -> char {
-        self.alphabet.chars().nth( (l+t-k) % l ).unwrap()
+    fn decrypt_char_vig(&self, text: usize, key: usize, l: usize) -> (char,usize) {
+        let pos = (l+text-key) % l;
+        (self.alphabet.chars().nth( pos ).unwrap(), pos)
     }
 
-
-
-    fn encrypt_vigenere(&self, text: &str) -> Result<String,CipherError> {
+    pub fn prep(&self, text: &str) -> Result<(usize, Vec<usize>, VecDeque<usize>,String),CipherError> {
         self.validate_key()?;
         self.validate_input(text)?;
-
         let alpha_len = self.alpahbet_len();
         let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
-        let mut akey: VecDeque<usize> = self.key_vals().collect();
-        let mut out = String::with_capacity(text_nums.len());
+        let akey: VecDeque<usize> = self.key_vals().collect();
+        let out = String::with_capacity(text_nums.len());
+
+        Ok((alpha_len, text_nums, akey, out))
+    }
+
+    fn encrypt_vigenere(&self, text: &str) -> Result<String,CipherError> {
+
+        let (alpha_len, 
+            text_nums, 
+            mut akey, 
+            mut out) = self.prep(text)?;
         
         for n in text_nums {
             akey.push_back(n);
             let k = akey.pop_front().unwrap();
-            out.push(self.encrypt_char_vig(n,k,alpha_len) )
+            out.push(self.encrypt_char_vig(n, k,alpha_len) )
         }
 
         Ok(out)
     }
 
     fn decrypt_vigenere(&self, text: &str) -> Result<String,CipherError> {
-        self.validate_key()?;
-        self.validate_input(text)?;
-
-        let alpha_len = self.alpahbet_len();
-        let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
-        let mut akey: VecDeque<usize> = self.key_vals().collect();
-        let mut out = String::with_capacity(text_nums.len());
+        let (alpha_len, 
+            text_nums, 
+            mut akey, 
+            mut out) = self.prep(text)?;
 
         for n in text_nums {
-            akey.push_back(n);
             let k = akey.pop_front().unwrap();
-            out.push(self.decrypt_char_vig(n,k,alpha_len) )
+            let ptxt_char = self.decrypt_char_vig(n, k,alpha_len);
+            out.push( ptxt_char.0 );
+            akey.push_back(ptxt_char.1);
         }
         Ok(out)
     }
 
-    // There is no decrypt for Beaufort because it is reciprocal
     fn encrypt_beaufort(&self, text: &str) -> Result<String,CipherError> {
-        self.validate_key()?;
-        let alpha_len = self.alpahbet_len();
-        let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
-        let mut akey: VecDeque<usize> = self.key_vals().collect();
-        let mut out = String::with_capacity(text_nums.len());
+        let (alpha_len, 
+            text_nums, 
+            mut akey, 
+            mut out) = self.prep(text)?;
+
         for n in text_nums {
             akey.push_back(n);
             let k = akey.pop_front().unwrap();
-            out.push(self.encrypt_char_beau(n, k, alpha_len) )
+            out.push(self.encrypt_char_beau(n, k, alpha_len).0 )
+        }
+        Ok(out)
+    }
+
+    fn decrypt_beaufort(&self, text: &str) -> Result<String,CipherError> {
+        let (alpha_len, 
+            text_nums, 
+            mut akey, 
+            mut out) = self.prep(text)?;
+
+        for n in text_nums {
+            let k = akey.pop_front().unwrap();
+            let ptxt_char = self.encrypt_char_beau(n, k,alpha_len);
+            out.push( ptxt_char.0 );
+            akey.push_back(ptxt_char.1);
         }
         Ok(out)
     }
@@ -129,7 +150,7 @@ impl Cipher for Autokey {
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
         match self.mode {
             PolyMode::Vigenere => self.decrypt_vigenere(text),
-            PolyMode::Beaufort => self.encrypt_beaufort(text),
+            PolyMode::Beaufort => self.decrypt_beaufort(text),
         }
     }
 
@@ -148,5 +169,44 @@ impl Cipher for Autokey {
 
     fn validate_settings(&self) -> Result<(),crate::errors::CipherErrors> {
         todo!()
+    }
+}
+
+#[cfg(test)]
+mod autokey_tests {
+    use super::*;
+
+    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CIPHERTEXT_VIG: &'static str = "TIGTYBJORLWYXGFLFHRDPXPQGLVZPRSFHZG";
+    const CIPHERTEXT_BEA: &'static str = "HUYNKLFUPDUGXWDRNTTZFVZIYZHRTRUJBXU";
+
+    #[test]
+    fn encrypt_test_vigenere() {
+        let mut cipher = Autokey::default();
+        cipher.key_word = String::from("ABCDE");
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_VIG);
+    }
+
+    #[test]
+    fn decrypt_test_vigenere() {
+        let mut cipher = Autokey::default();
+        cipher.key_word = String::from("ABCDE");
+        assert_eq!(cipher.decrypt(CIPHERTEXT_VIG).unwrap(), PLAINTEXT);
+    }
+
+    #[test]
+    fn encrypt_test_beaufort() {
+        let mut cipher = Autokey::default();
+        cipher.key_word = String::from("ABCDE");
+        cipher.mode = PolyMode::Beaufort;
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_BEA);
+    }
+
+    #[test]
+    fn decrypt_test_beaufort() {
+        let mut cipher = Autokey::default();
+        cipher.key_word = String::from("ABCDE");
+        cipher.mode = PolyMode::Beaufort;
+        assert_eq!(cipher.decrypt(CIPHERTEXT_BEA).unwrap(), PLAINTEXT);
     }
 }

@@ -4,15 +4,21 @@ use crate::text_functions::{LATIN_UPPER, random_sample_replace};
 use crate::errors::CipherError;
 
 
-pub struct CyclicKey {
-    pub key_word: String,
+pub struct Vigenere {
+    key_word: String,
     alphabet: String,
     prog_shift: usize,
     tableaux: Vec<&[char]>,
-    pub mode: PolyMode,
+    mode: PolyMode,
+    dirty_settings: bool, // flag if settings need to be checked
 }
 
-impl CyclicKey {
+impl Vigenere {
+
+    pub fn set_key_word(&mut self, word: String) {
+        self.dirty_setting = true;
+        self.key_word = word;
+    }
 
     fn key_vals(&self) -> impl Iterator<Item = usize> + '_ {
         self.key_word.chars().map(|x| self.alphabet.chars().position(|c| c == x).unwrap()).cycle()
@@ -44,12 +50,6 @@ impl CyclicKey {
 
 
     // Unwraps for the character methods are justified by validating the input
-
-    // The Beaufort cipher is reciprocal so no decrypt methods are needed
-    fn encrypt_char_beau(&self, t: usize, k: usize, l: usize) -> char {
-        self.alphabet.chars().nth( (l+k-t) % l ).unwrap()
-    }
-
     fn encrypt_char_vig(&self, t: usize, k: usize, l: usize) -> char {
         self.alphabet.chars().nth( (t+k) % l ).unwrap()
     }
@@ -99,13 +99,13 @@ impl CyclicKey {
     }
 }
 
-impl Default for CyclicKey {
+impl Default for Vigenere {
     fn default() -> Self {
         Self { key_word: String::new(), alphabet: String::from(LATIN_UPPER), mode: PolyMode::Vigenere }
     }
 }
 
-impl Cipher for CyclicKey {
+impl Cipher for Vigenere {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
         match self.mode {
             PolyMode::Vigenere => self.encrypt_vigenere(text),
