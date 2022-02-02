@@ -52,6 +52,15 @@ impl epi::App for ClassicCrypto {
             ui.add_space(16.0);
             ui.label("OUTPUT TEXT");
             ui.add(TextEdit::multiline(&mut self.output).text_style(TextStyle::Monospace));
+
+            if ui.button("clear").clicked() {
+                self.input = String::new();
+                self.output = String::new();
+            }
+
+            if ui.button("swap input/output").clicked() {
+                std::mem::swap(&mut self.input, &mut self.output)
+            }
         });
 
         CentralPanel::default().show(ctx, |ui| {

@@ -40,7 +40,5 @@ impl View for M209 {
         encrypt_decrypt(ui, self, input, output);
         ui.add_space(16.0);
         randomize_button(ui, self);
-        ui.add_space(16.0);
-        clear_button(ui, input, output);
     }
 }
