@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use eframe::egui;
 
 use crate::ciphers::*;
@@ -17,7 +19,7 @@ pub trait View {
     fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String);
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Debug, Clone, Copy)]
 pub enum CipherID {
     Caesar,
     Affine,
@@ -52,6 +54,33 @@ impl CipherID {
     }
 }
 
+impl Display for  CipherID {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let name = match self {
+            CipherID::Caesar => "Caesar",
+            CipherID::Affine => "Affine",
+            CipherID::Decoder => "Decoder Ring",
+            CipherID::Substitution => "General Substittution",
+            CipherID::M209 => "M209",
+            CipherID::Playfair => "Playfair",
+            CipherID::CyclicKey => "Cyclic Key",
+            CipherID::Autokey => "Autokey",
+            CipherID::ProgressiveKey => "Progressive Key",
+        };
+        write!(f,"{}",name)
+    }
+}
+
+fn combox_box(ciphers: &[CipherID], identifier: &'static str, active_cipher: &mut CipherID, ui: &mut egui::Ui) {
+    egui::ComboBox::from_id_source(identifier)
+        .selected_text(identifier)
+        .show_ui(ui, |ui| {
+            for id in ciphers {
+                ui.selectable_value(active_cipher, *id, format!("{}",id));
+            }
+        });
+    ui.add_space(10.0);
+}
 
 pub struct ControlPanel {
     caesar: Caesar,
@@ -84,28 +113,37 @@ impl Default for ControlPanel {
 impl ControlPanel {
     pub fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String, active_cipher: &mut CipherID) {
         
-        ui.label("Simple Substitution");
         ui.horizontal(|ui| {
-            ui.selectable_value(active_cipher, CipherID::Caesar, "Caesar");
-            ui.selectable_value(active_cipher, CipherID::Decoder, "Decoder Ring");
-            ui.selectable_value(active_cipher, CipherID::Affine, "Affine");
-            ui.selectable_value(active_cipher, CipherID::Substitution, "General Substitution");
+            combox_box(
+                &[CipherID::Caesar, CipherID::Decoder, CipherID::Affine, CipherID::Substitution],
+                "Simple Substitution",
+                active_cipher,
+                ui
+            );
+    
+            combox_box(
+                &[CipherID::CyclicKey, CipherID::Autokey, CipherID::ProgressiveKey],
+                "Polyalphabetic",
+                active_cipher,
+                ui
+            );
+    
+            combox_box(
+                &[CipherID::M209],
+                "Rotor Machine",
+                active_cipher,
+                ui
+            );
+    
+            combox_box(
+                &[CipherID::Playfair],
+                "Other",
+                active_cipher,
+                ui
+            );
         });
-        ui.add_space(10.0);
 
-        ui.label("Polyalphabetic Substitution");
-        ui.horizontal(|ui| {
-            ui.selectable_value(active_cipher, CipherID::CyclicKey, "Cyclic Key");
-            ui.selectable_value(active_cipher, CipherID::Autokey, "Autokey");
-            ui.selectable_value(active_cipher, CipherID::ProgressiveKey, "Progressive");
-        });
-        ui.add_space(10.0);
 
-        ui.label("Other");
-        ui.horizontal(|ui| {
-            ui.selectable_value(active_cipher, CipherID::M209, "M209");
-            ui.selectable_value(active_cipher, CipherID::Playfair, "Playfair");
-        });
 
         ui.add_space(16.0);
         ui.separator();
