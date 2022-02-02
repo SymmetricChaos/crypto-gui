@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use rand::prelude::{ThreadRng, SliceRandom, IteratorRandom};
 
-use crate::errors::CipherError;
+use crate::{errors::CipherError, ciphers::Cipher};
 
 pub const LATIN_UPPER: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 pub const LATIN_LOWER: &str = "abcdefghijklmnopqrstuvwxyz";
@@ -87,3 +87,28 @@ fn are_anagrams(a: &str, words: &Vec<&str>) -> bool {
     }
     true
 }
+
+
+pub fn keyed_alphabet(keyword: &str, alphabet: &str) -> Result<String,CipherError> {
+    let mut keyed_alpha = String::with_capacity(alphabet.len());
+    for c in keyword.chars() {
+        if !alphabet.contains(c) {
+            return Err(CipherError::invalid_key_char(c))
+        }
+        if keyed_alpha.contains(c) {
+            continue
+        } else {
+            keyed_alpha.push(c)
+        }
+    }
+ 
+    for a in alphabet.chars() {
+        if keyed_alpha.contains(a) {
+            continue
+        } else {
+            keyed_alpha.push(a)
+        }
+    }
+    Ok(keyed_alpha)
+}
+ 

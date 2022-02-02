@@ -25,6 +25,11 @@ pub use autokey::Autokey;
 pub mod progressive_key;
 pub use progressive_key::ProgressiveKey;
 
+pub mod alberti_disk;
+pub use alberti_disk::Alberti;
+
+pub mod composite;
+
 use rand::prelude::ThreadRng;
 use crate::errors::{CipherError, CipherErrors};
 

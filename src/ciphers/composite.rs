@@ -2,17 +2,16 @@ use std::collections::VecDeque;
 
 use rand::prelude::ThreadRng;
 use super::Cipher;
-use crate::text_functions::{LATIN_UPPER, string_pairs};
 use crate::errors::CipherError;
 
 
-pub struct Composite {
-    ciphers: Vec<dyn Cipher>,
+pub struct Composite<'a> {
+    ciphers: Vec<&'a dyn Cipher>,
 }
 
-impl Composite {
+impl<'a> Composite<'a> {
 
-    fn validate_key(&self) -> Result<(),CipherError> {
+    fn validate_keys(&self) -> Result<(),CipherError> {
         todo!()
     }
 
@@ -23,13 +22,13 @@ impl Composite {
 
 }
 
-impl Default for Composite {
+impl Default for Composite<'_> {
     fn default() -> Self {
         todo!()
     }
 }
 
-impl Cipher for Composite {
+impl Cipher for Composite<'_> {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
         todo!()
     }
@@ -43,10 +42,14 @@ impl Cipher for Composite {
     }
 
     fn input_alphabet(&mut self) -> &mut String {
-        &mut self.alphabet
+        todo!()
     }
 
     fn output_alphabet(&mut self) -> &mut String {
-        &mut self.alphabet
+        todo!()
+    }
+
+    fn validate_settings(&self) -> Result<(),crate::errors::CipherErrors> {
+        todo!()
     }
 }
