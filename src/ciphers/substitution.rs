@@ -71,11 +71,19 @@ impl Cipher for GeneralSubstitution {
         }
     }
 
-    fn input_alphabet(&mut self) -> &mut String {
+    fn get_input_alphabet(&mut self) -> &String {
         &mut self.alphabet1
     }
 
-    fn output_alphabet(&mut self) -> &mut String {
+    fn get_output_alphabet(&mut self) -> &String {
+        &mut self.alphabet2
+    }
+
+    fn get_mut_input_alphabet(&mut self) -> &mut String {
+        &mut self.alphabet1
+    }
+
+    fn get_mut_output_alphabet(&mut self) -> &mut String {
         &mut self.alphabet2
     }
 

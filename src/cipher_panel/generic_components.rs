@@ -26,14 +26,7 @@ pub fn randomize_button(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
     }
 }
 
-pub fn clear_button(ui: &mut egui::Ui, plaintext: &mut String, ciphertext: &mut String) {
-    if ui.button("Clear").clicked() {
-        *plaintext = String::new();
-        *ciphertext = String::new();
-    }
-}
-
 pub fn input_alphabet(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
     ui.label("Alphabet");
-    ui.add(egui::TextEdit::singleline(cipher.input_alphabet()).text_style(TextStyle::Monospace));
+    ui.add(egui::TextEdit::singleline(cipher.get_mut_input_alphabet()).text_style(TextStyle::Monospace));
 }

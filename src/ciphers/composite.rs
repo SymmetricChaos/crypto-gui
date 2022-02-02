@@ -41,11 +41,19 @@ impl Cipher for Composite<'_> {
         todo!()
     }
 
-    fn input_alphabet(&mut self) -> &mut String {
+    fn get_input_alphabet(&mut self) -> &String {
         todo!()
     }
 
-    fn output_alphabet(&mut self) -> &mut String {
+    fn get_output_alphabet(&mut self) -> &String {
+        todo!()
+    }
+
+    fn get_mut_input_alphabet(&mut self) -> &mut String {
+        todo!()
+    }
+
+    fn get_mut_output_alphabet(&mut self) -> &mut String {
         todo!()
     }
 

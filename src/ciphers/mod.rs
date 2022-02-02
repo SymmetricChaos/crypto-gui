@@ -37,8 +37,10 @@ pub trait Cipher {
     fn encrypt(&self, text: &str) -> Result<String,CipherError>;
     fn decrypt(&self, text: &str) -> Result<String,CipherError>;
     fn randomize(&mut self, rng: &mut ThreadRng);
-    fn input_alphabet(&mut self) -> &mut String;
-    fn output_alphabet(&mut self) -> &mut String;
+    fn get_mut_input_alphabet(&mut self) -> &mut String;
+    fn get_mut_output_alphabet(&mut self) -> &mut String;
+    fn get_input_alphabet(&mut self) -> &String;
+    fn get_output_alphabet(&mut self) -> &String;
     fn validate_settings(&self) -> Result<(),CipherErrors>;
 }
 

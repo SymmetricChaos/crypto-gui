@@ -77,12 +77,20 @@ impl Cipher for DecoderRing {
         self.index = rng.gen_range(0..self.alphabet.len());
     }
 
-    fn input_alphabet(&mut self) -> &mut String {
+    fn get_input_alphabet(&mut self) -> &String {
         &mut self.alphabet
     }
 
-    fn output_alphabet(&mut self) -> &mut String {
+    fn get_output_alphabet(&mut self) -> &String {
+        todo!("output alphabet should be digits and spaces")
+    }
+
+    fn get_mut_input_alphabet(&mut self) -> &mut String {
         &mut self.alphabet
+    }
+
+    fn get_mut_output_alphabet(&mut self) -> &mut String {
+        todo!("output alphabet should be digits and spaces")
     }
 
     fn validate_settings(&self) -> Result<(),crate::errors::CipherErrors> {

@@ -16,7 +16,7 @@ impl View for Playfair {
             if ui.button("Alphanumeric").clicked() { self.set_mode(PlayfairMode::AlphaNum) };
         });
         ui.add_space(10.0);
-        ui.label(RichText::new(self.input_alphabet().clone()).monospace().background_color(Color32::BLACK));
+        ui.label(RichText::new(self.get_mut_input_alphabet().clone()).monospace().background_color(Color32::BLACK));
         ui.add_space(16.0);
 
         ui.label(RichText::new(format!("Grid\n{}",self)).monospace());

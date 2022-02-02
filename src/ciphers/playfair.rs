@@ -145,11 +145,19 @@ impl Cipher for Playfair {
         self.alphabet = shuffled_str(&self.alphabet, rng)
     }
 
-    fn input_alphabet(&mut self) -> &mut String {
+    fn get_input_alphabet(&mut self) -> &String {
         &mut self.alphabet
     }
 
-    fn output_alphabet(&mut self) -> &mut String {
+    fn get_output_alphabet(&mut self) -> &String {
+        &mut self.alphabet
+    }
+
+    fn get_mut_input_alphabet(&mut self) -> &mut String {
+        &mut self.alphabet
+    }
+
+    fn get_mut_output_alphabet(&mut self) -> &mut String {
         &mut self.alphabet
     }
 

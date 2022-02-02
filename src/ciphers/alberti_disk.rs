@@ -68,12 +68,20 @@ impl Cipher for Alberti {
         todo!()
     }
 
-    fn input_alphabet(&mut self) -> &mut String {
-        todo!()
+    fn get_input_alphabet(&mut self) -> &String {
+        todo!("may change with mode")
     }
 
-    fn output_alphabet(&mut self) -> &mut String {
-        todo!()
+    fn get_output_alphabet(&mut self) -> &String {
+        todo!("may change with mode")
+    }
+
+    fn get_mut_input_alphabet(&mut self) -> &mut String {
+        todo!("may change with mode")
+    }
+
+    fn get_mut_output_alphabet(&mut self) -> &mut String {
+        todo!("may change with mode")
     }
 
     fn validate_settings(&self) -> Result<(),crate::errors::CipherErrors> {
