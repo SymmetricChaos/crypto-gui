@@ -1,19 +1,5 @@
-use std::{fmt::Display};
+use std::fmt::Display;
 
-// use std::collections::HashMap;
-// use lazy_static::lazy_static;
-// use json::parse;
-// use std::fs;
-// // Not sure if this will work when compiled for web
-// lazy_static! {
-//     static ref CIPHER_DESCRIPTIONS: HashMap<String,String> = {
-//         let file_cts = fs::read_to_string("src\\cipher_descriptions.json")
-//             .expect("Something went wrong reading cipher_descriptions.json");
-//         let json = parse(&file_cts)
-//             .expect("error parsing cipher_descriptions.json");
-//         json.entries().map(|(name,desc)| (name.to_string(),desc.to_string())).collect::<HashMap<_,_>>()
-//     };
-// }
 
 #[derive(PartialEq, Debug, Clone, Copy)]
 pub enum CipherID {
