@@ -1,10 +1,11 @@
-use eframe::{egui::{CtxRef, SidePanel, CentralPanel, TextStyle, TextEdit, ScrollArea}, epi};
+use eframe::{egui::{CtxRef, SidePanel, CentralPanel, ScrollArea}, epi};
 
-use crate::cipher_panel::{ControlPanel, CipherID};
+use crate::cipher_panel::{ControlPanel, CipherID, DisplayPanel};
 
 
 pub struct ClassicCrypto {
     control: ControlPanel,
+    display: DisplayPanel,
     input: String,
     output: String,
     active_cipher: CipherID,
@@ -15,6 +16,7 @@ impl Default for ClassicCrypto {
     fn default() -> Self {
         Self { 
             control: ControlPanel::default(),
+            display: DisplayPanel::default(),
             input: String::new(),
             output: String::new(),
             active_cipher: CipherID::default(),
@@ -41,26 +43,7 @@ impl epi::App for ClassicCrypto {
         ctx.set_pixels_per_point(1.2);
 
         SidePanel::right("display_panel").max_width(300.0).show(ctx, |ui| {
-            ui.label(format!{"Description:\n{}",self.active_cipher.description()});
-
-            ui.add_space(16.0);
-            ui.separator();
-            ui.add_space(16.0);
-    
-            ui.label("INPUT TEXT");
-            ui.add(TextEdit::multiline(&mut self.input).text_style(TextStyle::Monospace));
-            ui.add_space(16.0);
-            ui.label("OUTPUT TEXT");
-            ui.add(TextEdit::multiline(&mut self.output).text_style(TextStyle::Monospace));
-
-            if ui.button("clear").clicked() {
-                self.input = String::new();
-                self.output = String::new();
-            }
-
-            if ui.button("swap input/output").clicked() {
-                std::mem::swap(&mut self.input, &mut self.output)
-            }
+            self.display.ui(ui, &mut self.input, &mut self.output)
         });
 
         CentralPanel::default().show(ctx, |ui| {

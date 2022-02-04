@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use eframe::egui;
+use eframe::egui::{self, TextEdit, TextStyle};
 
 use crate::ciphers::*;
 
@@ -117,33 +117,33 @@ impl ControlPanel {
             combox_box(
                 &[CipherID::Caesar, CipherID::Decoder, CipherID::Affine, CipherID::Substitution],
                 "Simple Substitution",
-                active_cipher,
-                ui
+                active_cipher, ui
             );
     
             combox_box(
                 &[CipherID::CyclicKey, CipherID::Autokey, CipherID::ProgressiveKey],
                 "Polyalphabetic",
-                active_cipher,
-                ui
+                active_cipher, ui
             );
     
             combox_box(
                 &[CipherID::M209],
                 "Rotor Machine",
-                active_cipher,
-                ui
+                active_cipher, ui
             );
     
             combox_box(
                 &[CipherID::Playfair],
                 "Other",
-                active_cipher,
-                ui
+                active_cipher, ui
             );
         });
 
+        ui.add_space(16.0);
+        ui.separator();
+        ui.add_space(16.0);
 
+        ui.label(format!{"Description:\n{}",active_cipher.description()});
 
         ui.add_space(16.0);
         ui.separator();
@@ -159,6 +159,37 @@ impl ControlPanel {
             CipherID::Autokey => self.autokey.ui(ui, input, output),
             CipherID::ProgressiveKey => self.progressive_key.ui(ui, input, output),
             CipherID::Playfair => self.playfair.ui(ui, input, output),
+        }
+    }
+}
+
+
+
+pub struct DisplayPanel { }
+
+impl Default for DisplayPanel {
+    fn default() -> Self {
+        Self{ }
+    }
+}
+
+impl DisplayPanel {
+    pub fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String) {
+        
+        ui.add_space(32.0);
+        ui.label("INPUT TEXT");
+        ui.add(TextEdit::multiline(input).text_style(TextStyle::Monospace));
+        ui.add_space(16.0);
+        ui.label("OUTPUT TEXT");
+        ui.add(TextEdit::multiline(output).text_style(TextStyle::Monospace));
+
+        if ui.button("clear").clicked() {
+            input.clear();
+            output.clear();
+        }
+
+        if ui.button("swap input/output").clicked() {
+            std::mem::swap(input, output)
         }
     }
 }

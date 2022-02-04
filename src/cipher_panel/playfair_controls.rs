@@ -1,4 +1,4 @@
-use eframe::egui::{TextEdit,RichText,TextStyle,Color32};
+use eframe::egui::{RichText,Color32};
 
 use super::View;
 use super::generic_components::*;

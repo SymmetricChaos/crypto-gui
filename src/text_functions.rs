@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use rand::prelude::{ThreadRng, SliceRandom, IteratorRandom};
 
-use crate::{errors::CipherError, ciphers::Cipher};
+use crate::{errors::CipherError};
 
 pub const LATIN_UPPER: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 pub const LATIN_LOWER: &str = "abcdefghijklmnopqrstuvwxyz";
@@ -69,24 +69,24 @@ pub fn string_pairs(text: &str) -> Vec<&str> {
 }
 
 
-use itertools::{sorted,equal};
+// use itertools::{sorted,equal};
 
 // We generally need to check anagrams for alphabets which are short (less than 100 characters) and should have all unique symbols
 // so more complex anagram checking is pointless
-fn is_anagram(a: &str, word: &str) -> bool {
-    equal(sorted(a.chars()),sorted(word.chars()))
-}
+// fn is_anagram(a: &str, word: &str) -> bool {
+//     equal(sorted(a.chars()),sorted(word.chars()))
+// }
 
-// Test multiple possible words. Need this for Tableaux
-fn are_anagrams(a: &str, words: &Vec<&str>) -> bool {
-    let standard = sorted(a.chars());
-    for word in words {
-        if !equal(standard.clone(),sorted(word.chars())) {
-            return false
-        }
-    }
-    true
-}
+// // Test multiple possible words. Need this for Tableaux
+// fn are_anagrams(a: &str, words: &Vec<&str>) -> bool {
+//     let standard = sorted(a.chars());
+//     for word in words {
+//         if !equal(standard.clone(),sorted(word.chars())) {
+//             return false
+//         }
+//     }
+//     true
+// }
 
 
 pub fn keyed_alphabet(keyword: &str, alphabet: &str) -> Result<String,CipherError> {
