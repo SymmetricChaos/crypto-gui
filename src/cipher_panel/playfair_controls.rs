@@ -8,7 +8,7 @@ use crate::ciphers::playfair::PlayfairMode;
 
 
 impl View for Playfair {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, output: &mut String) {
+    fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, output: &mut String, errors: &mut String) {
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
             if ui.button("No Q").clicked() { self.set_mode(PlayfairMode::NoQ) };
@@ -28,7 +28,7 @@ impl View for Playfair {
         //ui.label("Spacer Character\nInserted between double letters if needed");
         //ui.add(TextEdit::singleline(&mut self.spacer.to_string()).text_style(TextStyle::Monospace).desired_width(15.0));
 
-        encrypt_decrypt(ui, self, input, output);
+        encrypt_decrypt(ui, self, input, output, errors);
         ui.add_space(16.0);
         randomize_button(ui, self);
     }

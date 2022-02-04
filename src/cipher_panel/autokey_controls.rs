@@ -7,7 +7,7 @@ use crate::ciphers::{Autokey,PolyMode};
 
 
 impl View for Autokey {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, output: &mut String) {
+    fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, output: &mut String, errors: &mut String) {
         ui.add_space(16.0);
         input_alphabet(ui, self);
         ui.add_space(16.0);
@@ -21,7 +21,7 @@ impl View for Autokey {
             ui.selectable_value(&mut self.mode, PolyMode::Beaufort, "Beaufort");
         });
 
-        encrypt_decrypt(ui, self, input, output);
+        encrypt_decrypt(ui, self, input, output, errors);
         ui.add_space(16.0);
         randomize_button(ui, self);
     }

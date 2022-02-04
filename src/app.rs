@@ -8,6 +8,7 @@ pub struct ClassicCrypto {
     display: DisplayPanel,
     input: String,
     output: String,
+    errors: String,
     active_cipher: CipherID,
 
 }
@@ -19,6 +20,7 @@ impl Default for ClassicCrypto {
             display: DisplayPanel::default(),
             input: String::new(),
             output: String::new(),
+            errors: String::new(),
             active_cipher: CipherID::default(),
         }
     }
@@ -43,12 +45,12 @@ impl epi::App for ClassicCrypto {
         ctx.set_pixels_per_point(1.2);
 
         SidePanel::right("display_panel").max_width(300.0).show(ctx, |ui| {
-            self.display.ui(ui, &mut self.input, &mut self.output)
+            self.display.ui(ui, &mut self.input, &mut self.output, &mut self.errors)
         });
 
         CentralPanel::default().show(ctx, |ui| {
             ScrollArea::vertical().show(ui, |ui| {
-                self.control.ui(ui, &mut self.input, &mut self.output, &mut self.active_cipher)
+                self.control.ui(ui, &mut self.input, &mut self.output, &mut self.errors, &mut self.active_cipher)
             });
         });
     }

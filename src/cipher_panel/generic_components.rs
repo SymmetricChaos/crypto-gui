@@ -2,18 +2,18 @@ use eframe::egui::{self, RichText, Color32, TextStyle};
 use rand::prelude::ThreadRng;
 use crate::ciphers::Cipher;
 
-pub fn encrypt_decrypt(ui: &mut egui::Ui, cipher: &dyn Cipher, input: &mut String, output: &mut String) {
+pub fn encrypt_decrypt(ui: &mut egui::Ui, cipher: &dyn Cipher, input: &mut String, output: &mut String, errors: &mut String) {
     ui.horizontal(|ui| {
         if ui.button(RichText::from("ENCRYPT").color(Color32::GOLD)).clicked() {
             match cipher.encrypt(input) {
                 Ok(text) => *output = text,
-                Err(e) => *output = e.to_string(),
+                Err(e) => *errors = e.to_string(),
             }
         };
         if ui.button(RichText::from("DECRYPT").color(Color32::GOLD)).clicked() {
             match cipher.decrypt(input) {
                 Ok(text) => *output = text,
-                Err(e) => *output = e.to_string(),
+                Err(e) => *errors = e.to_string(),
             }
         }
     });
