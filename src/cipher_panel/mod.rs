@@ -131,21 +131,21 @@ impl DisplayPanel {
         ui.label("OUTPUT TEXT");
         ui.add(TextEdit::multiline(output).text_style(TextStyle::Monospace));
        
-        // ui.horizontal(|ui| {
-        //     if ui.button("UPPERCASE").clicked() {
-        //         input = &mut input.to_uppercase();
-        //         output = &mut output.to_uppercase();
-        //     }
-        //     if ui.button("lowercase").clicked() {
-        //         input = &mut input.to_lowercase();
-        //         output = &mut output.to_lowercase();
-        //     }
-        // });
+        ui.horizontal(|ui| {
+            if ui.button("UPPERCASE").clicked() {
+                *input = input.to_uppercase();
+                *output = output.to_uppercase();
+            }
+            if ui.button("lowercase").clicked() {
+                *input = input.to_lowercase();
+                *output = output.to_lowercase();
+            }
+        });
        
-        // if ui.button("strip whitespace").clicked() {
-        //     input = &mut input.split_whitespace().collect();
-        //     output = &mut output.split_whitespace().collect();
-        // }
+        if ui.button("strip whitespace").clicked() {
+            *input = input.split_whitespace().collect();
+            *output = output.split_whitespace().collect();
+        }
 
         if ui.button("clear").clicked() {
             input.clear();
