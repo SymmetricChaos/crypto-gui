@@ -1,5 +1,4 @@
-use std::fmt::Display;
-
+use crate::cipher_id::CipherID;
 use eframe::egui::{self, TextEdit, TextStyle, RichText, Color32};
 
 use crate::ciphers::*;
@@ -17,58 +16,6 @@ pub mod progressive_key_controls;
 
 pub trait View {
     fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String, errors: &mut String);
-}
-
-#[derive(PartialEq, Debug, Clone, Copy)]
-pub enum CipherID {
-    Caesar,
-    Affine,
-    Decoder,
-    Substitution,
-    M209,
-    Playfair,
-    CyclicKey,
-    Autokey,
-    ProgressiveKey,
-}
-
-impl Default for CipherID {
-    fn default() -> Self {
-        Self::Caesar
-    }
-}
-
-impl CipherID {
-    pub fn description(&self) -> &'static str {
-        match self {
-            CipherID::Caesar => "The Caesar Cipher is perhaps the oldest and simplest of ciphers. A value is chosen that shifts each letter of the alphabet that many positions. For example a shift of 2 turna A in C and Y into A.",
-            CipherID::Affine => "The Affine Cipher is a simple extension of the Caesar Cipher that applies an affine transform to the alphabet. Each letter's position has a value added to it and then is multiplied by a certain value. The need for a unique inverse to the multiplication adds some complexity to this cipher.",
-            CipherID::Decoder => "A Decoder Ring (as popularized by Little Orphan Annie and Captain Midnight) is a variable on the Caesar cipher. Rather than shift the letters each letter replaced with its numerical value which is then shifted.",
-            CipherID::Substitution => "The General Substituion Cipher maps a set of symbols one-to-one onto another arbitary set. This implementation allows only maping the symbols of an alphabet but all simple substitution ciphers are included in principle.",
-            CipherID::M209 => "The M209 was an entirely mechanical cipher machine used by the US Military with very complex key settings. The positions of the pins and lugs were set once a day. The exteral positions of the rotors were changed with each message.",
-            CipherID::Playfair => "The Playfair cipher swaps letters on a grid to encrypt letters pair by pair.",
-            CipherID::CyclicKey => "Cyclic key ciphers repeat their keyword over and over",
-            CipherID::Autokey => "Autokey ciphers draw their key from the text itself.",
-            CipherID::ProgressiveKey => "Progressive key ciphers repeat their key like a cyclic key cipher but apply a shift at each repetition to stretch it out",
-        }
-    }
-}
-
-impl Display for  CipherID {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let name = match self {
-            CipherID::Caesar => "Caesar",
-            CipherID::Affine => "Affine",
-            CipherID::Decoder => "Decoder Ring",
-            CipherID::Substitution => "General Substittution",
-            CipherID::M209 => "M209",
-            CipherID::Playfair => "Playfair",
-            CipherID::CyclicKey => "Cyclic Key",
-            CipherID::Autokey => "Autokey",
-            CipherID::ProgressiveKey => "Progressive Key",
-        };
-        write!(f,"{}",name)
-    }
 }
 
 fn combox_box(ciphers: &[CipherID], identifier: &'static str, active_cipher: &mut CipherID, ui: &mut egui::Ui) {

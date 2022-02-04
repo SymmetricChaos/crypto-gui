@@ -1,6 +1,7 @@
+use crate::cipher_id::CipherID;
 use eframe::{egui::{CtxRef, SidePanel, CentralPanel, ScrollArea}, epi};
 
-use crate::cipher_panel::{ControlPanel, CipherID, DisplayPanel};
+use crate::cipher_panel::{ControlPanel, DisplayPanel};
 
 
 pub struct ClassicCrypto {
