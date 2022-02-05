@@ -1,7 +1,6 @@
 use std::fmt::Display;
-
+use rand::{prelude::ThreadRng, Rng};
 use crate::errors::CipherError;
-
 use super::Cipher;
 
 pub struct Alberti {
@@ -64,8 +63,9 @@ impl Cipher for Alberti {
         Ok(out)
     }
 
-    fn randomize(&mut self, rng: &mut rand::prelude::ThreadRng) {
-        todo!("{:?}",rng)
+    fn randomize(&mut self, rng: &mut ThreadRng) {
+        let length = self.moving_alphabet.len();
+        self.start_index = rng.gen_range(0..length);
     }
 
     fn get_input_alphabet(&mut self) -> &String {

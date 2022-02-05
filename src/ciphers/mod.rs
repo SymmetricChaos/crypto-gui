@@ -28,6 +28,9 @@ pub use progressive_key::ProgressiveKey;
 pub mod alberti_disk;
 pub use alberti_disk::Alberti;
 
+pub mod polybius;
+pub use polybius::Polybius;
+
 pub mod composite;
 
 use rand::prelude::ThreadRng;
