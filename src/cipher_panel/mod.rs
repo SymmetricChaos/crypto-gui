@@ -13,6 +13,7 @@ pub mod playfair_controls;
 pub mod cyclic_key_controls;
 pub mod autokey_controls;
 pub mod progressive_key_controls;
+pub mod alberti_controls;
 
 pub trait View {
     fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String, errors: &mut String);
@@ -29,33 +30,23 @@ fn combox_box(ciphers: &[CipherID], identifier: &'static str, active_cipher: &mu
     ui.add_space(10.0);
 }
 
+#[derive(Default)]
 pub struct ControlPanel {
     caesar: Caesar,
     affine: Affine,
     decoder_ring: DecoderRing,
     gen_sub: GeneralSubstitution,
+
     m209: M209,
+
     cyclic_key: CyclicKey,
     autokey: Autokey,
     progressive_key: ProgressiveKey,
+    alberti: Alberti,
+
     playfair: Playfair,
 }
 
-impl Default for ControlPanel {
-    fn default() -> Self {
-        Self{ 
-            caesar: Caesar::default(),
-            affine: Affine::default(),
-            decoder_ring: DecoderRing::default(),
-            gen_sub: GeneralSubstitution::default(),
-            m209: M209::default(),
-            cyclic_key: CyclicKey::default(),
-            autokey: Autokey::default(),
-            playfair: Playfair::default(),
-            progressive_key: ProgressiveKey::default(),
-        }
-    }
-}
 
 impl ControlPanel {
     pub fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String, errors: &mut String, active_cipher: &mut CipherID) {
@@ -68,7 +59,7 @@ impl ControlPanel {
             );
     
             combox_box(
-                &[CipherID::CyclicKey, CipherID::Autokey, CipherID::ProgressiveKey],
+                &[CipherID::CyclicKey, CipherID::Autokey, CipherID::ProgressiveKey, CipherID::Alberti],
                 "Polyalphabetic",
                 active_cipher, ui
             );
@@ -106,6 +97,7 @@ impl ControlPanel {
             CipherID::Autokey => self.autokey.ui(ui, input, output, errors),
             CipherID::ProgressiveKey => self.progressive_key.ui(ui, input, output, errors),
             CipherID::Playfair => self.playfair.ui(ui, input, output, errors),
+            CipherID::Alberti => self.alberti.ui(ui, input, output, errors),
         }
     }
 }

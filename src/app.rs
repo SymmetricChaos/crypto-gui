@@ -36,11 +36,10 @@ impl epi::App for ClassicCrypto {
 
     fn setup(
         &mut self,
-        ctx: &CtxRef,
+        _ctx: &CtxRef,
         _frame: &epi::Frame,
         _storage: Option<&dyn epi::Storage>,
     ) {
-        let x = ctx.fonts().pixels_per_point();
     }
 
     fn update(&mut self, ctx: &CtxRef, frame: &epi::Frame) {

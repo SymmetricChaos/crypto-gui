@@ -5,25 +5,25 @@ use crate::errors::CipherError;
 use super::Cipher;
 
 pub struct Alberti {
-    fixed_alphabet: String,
-    moving_alphabet: String,
-    start_index: usize,
+    pub fixed_alphabet: String,
+    pub moving_alphabet: String,
+    pub start_index: usize,
 }
  
 impl Alberti {
  
     fn encrypt_char(&self, symbol: char, index: usize) -> char {
         let position = self.fixed_alphabet.chars().position(|x| x == symbol).unwrap();
-        self.moving_alphabet.chars().nth(position + index % self.length()).unwrap()
+        self.moving_alphabet.chars().nth((position + index) % self.alphabet_len()).unwrap()
     }
  
-    // fn decrypt_char(&self, symbol: char, index: usize) -> char {
-    //     let position = self.moving_alphabet.chars().position(|x| x == symbol).unwrap();
-    //     self.fixed_alphabet.chars().nth(position + index % self.length()).unwrap()
-    // }
+    fn decrypt_char(&self, symbol: char, index: usize) -> char {
+        let position = self.moving_alphabet.chars().position(|x| x == symbol).unwrap();
+        self.fixed_alphabet.chars().nth((self.alphabet_len() + position - index) % self.alphabet_len()).unwrap()
+    }
  
  
-    fn length(&self) -> usize {
+    pub fn alphabet_len(&self) -> usize {
         self.fixed_alphabet.chars().count()
     }
  
@@ -41,7 +41,7 @@ impl Cipher for Alberti {
                 index = self.moving_alphabet.chars().position(|x| x == s).unwrap();
                 out.push(self.fixed_alphabet.chars().nth(index).unwrap());
             } else {
-                todo!("CipherError::Input")
+                return Err(CipherError::invalid_input_char(s))
             }
         }
         Ok(out)
@@ -49,7 +49,19 @@ impl Cipher for Alberti {
 
 
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
-        todo!("{}",text)
+        let mut index = self.start_index.clone();
+        let mut out = String::with_capacity(text.len());
+        for s in text.chars() {
+            if self.moving_alphabet.contains(s) {
+                out.push(self.decrypt_char(s,index));
+            } else if self.fixed_alphabet.contains(s) {
+                index = self.fixed_alphabet.chars().position(|x| x == s).unwrap();
+                out.push(self.moving_alphabet.chars().nth(index).unwrap());
+            } else {
+                return Err(CipherError::invalid_input_char(s))
+            }
+        }
+        Ok(out)
     }
 
     fn randomize(&mut self, rng: &mut rand::prelude::ThreadRng) {
@@ -57,19 +69,19 @@ impl Cipher for Alberti {
     }
 
     fn get_input_alphabet(&mut self) -> &String {
-        todo!("may change with mode")
+        &self.fixed_alphabet
     }
 
     fn get_output_alphabet(&mut self) -> &String {
-        todo!("may change with mode")
+        &self.moving_alphabet
     }
 
     fn get_mut_input_alphabet(&mut self) -> &mut String {
-        todo!("may change with mode")
+        &mut self.fixed_alphabet
     }
 
     fn get_mut_output_alphabet(&mut self) -> &mut String {
-        todo!("may change with mode")
+        &mut self.moving_alphabet
     }
 
     fn validate_settings(&self) -> Result<(),crate::errors::CipherErrors> {
@@ -89,8 +101,29 @@ impl Default for Alberti {
 impl Display for Alberti {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut out = self.fixed_alphabet.clone();
-        out.push_str(&self.fixed_alphabet[self.start_index..]);
-        out.push_str(&self.fixed_alphabet[0..self.start_index]);
+        out.push('\n');
+        out.push_str(&self.moving_alphabet[self.start_index..]);
+        out.push_str(&self.moving_alphabet[0..self.start_index]);
         write!(f, "{}", out)
+    }
+}
+
+#[cfg(test)]
+mod alberti_tests {
+    use super::*;
+
+    const PLAINTEXT:  &'static str = "THEQUItCKBReOWNFOsXJUMPStOVERTiHELAZYDnOG";
+    const CIPHERTEXT: &'static str = "thequiTvdukEsarjsSpbmehkThoxkmIpmtihglNbt";
+
+    #[test]
+    fn encrypt_test() {
+        let cipher = Alberti::default();
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+    }
+
+    #[test]
+    fn decrypt_test() {
+        let cipher = Alberti::default();
+        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

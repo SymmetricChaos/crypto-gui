@@ -7,8 +7,12 @@ pub enum CipherID {
     Affine,
     Decoder,
     Substitution,
+
     M209,
+
     Playfair,
+
+    Alberti,
     CyclicKey,
     Autokey,
     ProgressiveKey,
@@ -27,11 +31,15 @@ impl CipherID {
             CipherID::Affine => "The Affine Cipher is a simple extension of the Caesar Cipher that applies an affine transform to the alphabet rather than simply shifting the position. This means each letter is assigned a value based on its position then the first key value is added to it and it is multiplied by the second key value. This often gives a position not in the alphabet so the value is reduced by the modulo operation. The multiplication steps adds some extra complexity as multiplicative key must have an inverse modulo the length of the alphabet.",
             CipherID::Decoder => "A Decoder Ring (as popularized by Little Orphan Annie and Captain Midnight, presets exist for each) is a minor variation on the Caesar Cipher. Rather than simply shift the letter's position instead a number is assigned a number and the key is added to that number then reduced by the modulo operation. The original decoder rings were keyed in a slightly more complex way by telling listeners to match a specific letter to a specific number but this is equivalent to simply adding a value.",
             CipherID::Substitution => "The General Substituion Cipher maps a set of symbols one-to-one onto another arbitary set. This implementation allows only maping the symbols of an alphabet but all simple substitution ciphers are included in principle.",
+            
             CipherID::M209 => "The M209 was an entirely mechanical cipher machine used by the US Military with very complex key settings. The positions of the pins and lugs were set once a day. The exteral positions of the rotors were changed with each message.",
+            
             CipherID::Playfair => "The Playfair Cipher swaps letters on a grid to encrypt letters pair by pair.",
+            
             CipherID::CyclicKey => "Cyclic Ley Ciphers repeat their keyword over and over.",
             CipherID::Autokey => "Autokey Ciphers draw their key from the text itself.",
             CipherID::ProgressiveKey => "Progressive key ciphers repeat their key like a cyclic key cipher but apply a shift at each repetition to stretch it out.",
+            CipherID::Alberti => "The Alberti Cipher: Alex remember to add a description",
         }
     }
 }
@@ -48,6 +56,7 @@ impl Display for  CipherID {
             CipherID::CyclicKey => "Cyclic Key",
             CipherID::Autokey => "Autokey",
             CipherID::ProgressiveKey => "Progressive Key",
+            CipherID::Alberti => "Alberti Cipher Disk",
         };
         write!(f,"{}",name)
     }
