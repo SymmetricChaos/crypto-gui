@@ -5,28 +5,18 @@ use rand::prelude::ThreadRng;
 use super::Cipher;
 use crate::errors::CipherErrors;
 use crate::{errors::CipherError, text_functions::shuffled_str};
-use crate::text_functions::{LATIN_UPPER_NO_J, LATIN_UPPER_NO_Q, LATIN_UPPER_DIGITS, validate_alphabet, keyed_alphabet};
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum PolybiusMode {
-    NoQ,
-    NoJ,
-    AlphaNum,
-}
+use crate::text_functions::{validate_alphabet, keyed_alphabet,PresetAlphabet};
 
 pub struct Polybius {
     alphabet: String,
+    labels: String,
     key_word: String,
 }
 
 impl Polybius {
 
-    pub fn set_mode(&mut self, mode: PolybiusMode) {
-        match mode {
-            PolybiusMode::NoQ => self.alphabet = String::from(LATIN_UPPER_NO_Q),
-            PolybiusMode::NoJ => self.alphabet = String::from(LATIN_UPPER_NO_J),
-            PolybiusMode::AlphaNum => self.alphabet = String::from(LATIN_UPPER_DIGITS),
-        };
+    pub fn set_mode(&mut self, mode: PresetAlphabet) {
+        self.alphabet = mode.string()
     }
 
     fn pairs(&self, text: &str) -> Result<Vec<(char,char)>,CipherError> {
@@ -41,7 +31,7 @@ impl Polybius {
         self.alphabet.chars().count()
     }
 
-    pub fn grid_size(&self) -> usize {
+    pub fn grid_side_len(&self) -> usize {
         self.alphabet_len().sqrt()
     }
 
@@ -58,21 +48,20 @@ impl Polybius {
         let num = position.0*self.alphabet_len() + position.1;
         self.alphabet.chars().nth(num).unwrap()
     }
-
-
 }
 
 impl Default for Polybius {
     fn default() -> Self {
-        Self{ alphabet: String::from("ABCDEFGHIJKLMNOPRSTUVWXYZ"), key_word: String::new() }
+        Self{ alphabet: String::from(PresetAlphabet::LatinNoQ), 
+              labels: String::from(PresetAlphabet::Digits),
+              key_word: String::new(), }
     }
 }
 
 impl Cipher for Polybius {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
-        self.validate_settings()?;
-        let pairs = self.pairs(text)?;
-        let mut out = String::with_capacity(text.chars().count());
+        //self.validate_settings()?;
+        let mut out = String::with_capacity(text.chars().count()*2);
         let size = self.size();
         let s = size+1;
         for (l,r) in pairs {
@@ -86,9 +75,9 @@ impl Cipher for Polybius {
     }
     
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
-        self.validate_settings()?;
+        //self.validate_settings()?;
         let pairs = self.pairs(text)?;
-        let mut out = String::with_capacity(text.chars().count());
+        let mut out = String::with_capacity(text.chars().count()/2);
         let size = self.size();
         let s = size-1;
         for (l,r) in pairs {

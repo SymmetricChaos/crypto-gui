@@ -3,12 +3,50 @@ use rand::prelude::{ThreadRng, SliceRandom, IteratorRandom};
 
 use crate::{errors::CipherError};
 
-pub const LATIN_UPPER: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-pub const LATIN_LOWER: &str = "abcdefghijklmnopqrstuvwxyz";
+pub const LATIN_UPPER: &'static str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+pub const LATIN_LOWER: &'static str = "abcdefghijklmnopqrstuvwxyz";
 pub const LATIN_UPPER_NO_J: &'static str = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
 pub const LATIN_UPPER_NO_Q: &'static str = "ABCDEFGHIJKLMNOPRSTUVWXYZ";
 pub const LATIN_UPPER_DIGITS: &'static str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; 
 pub const DIGITS: &'static str = "0123456789";
+pub const ASCII95: &'static str = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+pub const ASCII94: &'static str = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"; 
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PresetAlphabet {
+    Latin,
+    LatinNoJ,
+    LatinNoQ,
+    LatinWithDigits,
+    Digits,
+    Ascii94,
+    Ascii95,
+}
+
+impl PresetAlphabet {
+
+    pub fn slice(&self) -> &'static str {
+        match self {
+            PresetAlphabet::Latin => LATIN_UPPER,
+            PresetAlphabet::LatinNoJ => LATIN_UPPER_NO_J,
+            PresetAlphabet::LatinNoQ => LATIN_UPPER_NO_Q,
+            PresetAlphabet::LatinWithDigits => LATIN_UPPER_DIGITS,
+            PresetAlphabet::Digits => DIGITS,
+            PresetAlphabet::Ascii94 => ASCII94,
+            PresetAlphabet::Ascii95 => ASCII95,
+        }
+    }
+
+    pub fn string(&self) -> String {
+        self.slice().to_string()
+    }
+}
+
+impl From<PresetAlphabet> for String {
+    fn from(alphabet: PresetAlphabet) -> Self {
+        alphabet.string()
+    }
+}
 
 pub fn shuffled_str(s: &str, rng: &mut ThreadRng) -> String {
     let mut characters = s.chars().collect::<Vec<char>>();
