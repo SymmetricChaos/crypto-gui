@@ -43,7 +43,6 @@ impl Polybius {
         Ok((num / self.alphabet_len(), num % self.alphabet_len()))
     }
     
-    // The inputs to this come only from internal functions that will never give invalid positions
     fn position_to_char(&self,position: (usize,usize)) -> char {
         let num = position.0*self.alphabet_len() + position.1;
         self.alphabet.chars().nth(num).unwrap()
@@ -62,14 +61,10 @@ impl Cipher for Polybius {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
         //self.validate_settings()?;
         let mut out = String::with_capacity(text.chars().count()*2);
-        let size = self.size();
-        let s = size+1;
-        for (l,r) in pairs {
-            let lpos = self.char_to_position(l)?;
-            let rpos = self.char_to_position(r)?;
-            
-            // The Polybius_pairs() function ensures l and r never match
-            self.Polybius_shift(lpos, rpos, size, s, &mut out);
+
+        for c in text.chars() {
+            let pos = self.char_to_position(c)?;
+
         }
         Ok(out)
     }
@@ -78,14 +73,10 @@ impl Cipher for Polybius {
         //self.validate_settings()?;
         let pairs = self.pairs(text)?;
         let mut out = String::with_capacity(text.chars().count()/2);
-        let size = self.size();
-        let s = size-1;
-        for (l,r) in pairs {
+        for (l, r) in pairs {
             let lpos = self.char_to_position(l)?;
             let rpos = self.char_to_position(r)?;
             
-            // The Polybius_pairs() function ensures l and r never match
-            self.Polybius_shift(lpos, rpos, size, s, &mut out);
         }
         Ok(out)
     }
@@ -129,7 +120,7 @@ impl fmt::Display for Polybius {
         let kalpha = keyed_alphabet(&self.key_word, &self.alphabet).unwrap();
         let mut square = String::new();
         for (n, c) in kalpha.chars().enumerate() {
-            if n % self.grid_size() == 0 {
+            if n % self.grid_side_len() == 0 {
                 square.push_str("\n")
             }
             square.push_str(&format!("{} ",c))
