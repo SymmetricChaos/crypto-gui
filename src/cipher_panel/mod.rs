@@ -53,7 +53,7 @@ impl ControlPanel {
         
         ui.horizontal(|ui| {
             combox_box(
-                &[CipherID::Caesar, CipherID::Decoder, CipherID::Affine, CipherID::Substitution],
+                &[CipherID::Caesar, CipherID::Decoder, CipherID::Affine, CipherID::Substitution, CipherID::Polybius],
                 "Simple Substitution",
                 active_cipher, ui
             );
@@ -65,7 +65,7 @@ impl ControlPanel {
             );
     
             combox_box(
-                &[CipherID::M209],
+                &[CipherID::M209, CipherID::Enigma, CipherID::SIGABA],
                 "Rotor Machine",
                 active_cipher, ui
             );
@@ -98,6 +98,7 @@ impl ControlPanel {
             CipherID::ProgressiveKey => self.progressive_key.ui(ui, input, output, errors),
             CipherID::Playfair => self.playfair.ui(ui, input, output, errors),
             CipherID::Alberti => self.alberti.ui(ui, input, output, errors),
+            _ => {ui.label("COMING SOON");},
         }
     }
 }
