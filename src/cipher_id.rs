@@ -54,7 +54,7 @@ impl CipherID {
             CipherID::ProgressiveKey => "Progressive key ciphers repeat their key like a cyclic key cipher but apply a shift at each repetition to stretch it out.",
             CipherID::Alberti => "The Alberti Cipher",
             CipherID::Bazieres => "The Baziers Cipher",
-            CipherID::M94 => "The M94 Cipher",
+            CipherID::M94 => "The M94 Cipher was a low security tactical cipher US Army that consisted of 25 wheels each with a scrambled alphabet, placed sequentially on a rod. The order of the wheels was changed daily. To send a message the wheels were turned to display it and then an arbitrary other line was used. Decryption relied on the reciever searching for the only sensible line on their own set of wheels but this implementation specifies an offset for each message. Messages had to be sent with exactly 25 letters at a time, padded if the message was too short and broken into pices if it was too long.",
 
             CipherID::Columnar => "The Columnar Transposition Cipher",
 

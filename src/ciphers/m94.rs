@@ -1,4 +1,4 @@
-use rand::prelude::ThreadRng;
+use rand::{prelude::{ThreadRng, SliceRandom}, Rng};
 use super::Cipher;
 use crate::text_functions::PresetAlphabet;
 use std::fmt;
@@ -34,8 +34,8 @@ const M94_WHEELS: [&'static str; 25] = [
     ];
  
 pub struct M94 {
-    offset: usize,
-    wheels: Vec<&'static str>, //wheels can be reordered
+    pub offset: usize,
+    pub wheels: Vec<&'static str>, //wheels can be reordered
     alphabet: String,
 }
  
@@ -74,7 +74,8 @@ impl Cipher for M94 {
     }
 
     fn randomize(&mut self, rng: &mut ThreadRng) {
-        todo!()
+        self.wheels.shuffle(rng);
+        self.offset = rng.gen_range(1..25);
     }
 
     fn get_mut_input_alphabet(&mut self) -> &mut String {

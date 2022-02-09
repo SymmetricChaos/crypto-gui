@@ -14,6 +14,7 @@ pub mod cyclic_key_controls;
 pub mod autokey_controls;
 pub mod progressive_key_controls;
 pub mod alberti_controls;
+pub mod m94_controls;
 
 pub trait View {
     fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String, errors: &mut String);
@@ -43,6 +44,7 @@ pub struct ControlPanel {
     autokey: Autokey,
     progressive_key: ProgressiveKey,
     alberti: Alberti,
+    m94: M94,
 
     playfair: Playfair,
 }
@@ -59,7 +61,7 @@ impl ControlPanel {
             );
     
             combox_box(
-                &[CipherID::CyclicKey, CipherID::Autokey, CipherID::ProgressiveKey, CipherID::Alberti],
+                &[CipherID::CyclicKey, CipherID::Autokey, CipherID::ProgressiveKey, CipherID::M94, CipherID::Alberti],
                 "Polyalphabetic",
                 active_cipher, ui
             );
@@ -98,6 +100,7 @@ impl ControlPanel {
             CipherID::ProgressiveKey => self.progressive_key.ui(ui, input, output, errors),
             CipherID::Playfair => self.playfair.ui(ui, input, output, errors),
             CipherID::Alberti => self.alberti.ui(ui, input, output, errors),
+            CipherID::M94 => self.m94.ui(ui, input, output, errors),
             _ => {ui.label("COMING SOON");},
         }
     }

@@ -11,10 +11,11 @@ pub enum PresetAlphabet {
     EnglishNoQ,
     EnglishWithDigits,
     Digits,
-    Ascii94,
-    Ascii95,
+    Ascii94, // The printing ASCII symbols without the space
+    Ascii95, // The printing ASCII symbols with the space
     Greek,
     Latin, //Classical Latin
+    Base64, // 64 safe to use ASCII symbols, low chance of being interpreted if the string is parsed
 }
 
 impl PresetAlphabet {
@@ -29,8 +30,10 @@ impl PresetAlphabet {
             PresetAlphabet::Digits => "0123456789",
             PresetAlphabet::Ascii94 => "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
             PresetAlphabet::Ascii95 => " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
-            PresetAlphabet::Greek => "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ", //All of these are Unicode Greek even the ones identical to ASCII
+            PresetAlphabet::Greek => "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ", //All of these are Unicode Greek even the ones draw identically to ASCII
             PresetAlphabet::Latin => "ABCDEFGHIKLMNOPQRSTVXY",
+            PresetAlphabet::Base64 => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
+            
         }
     }
 
@@ -41,6 +44,7 @@ impl PresetAlphabet {
 
     // Length in Unicode characters
     pub fn len(&self) -> usize {
+        // This could be a match statement but this is easier
         self.slice().chars().count()
     }
 
