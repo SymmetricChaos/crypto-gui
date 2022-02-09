@@ -51,7 +51,7 @@ impl Polybius {
 
 impl Default for Polybius {
     fn default() -> Self {
-        Self{ alphabet: String::from(PresetAlphabet::LatinNoQ), 
+        Self{ alphabet: String::from(PresetAlphabet::EnglishNoQ), 
               labels: String::from(PresetAlphabet::Digits),
               key_word: String::new(), }
     }

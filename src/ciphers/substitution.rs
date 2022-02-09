@@ -1,5 +1,5 @@
 use rand::prelude::ThreadRng;
-use crate::text_functions::{shuffled_str, LATIN_UPPER};
+use crate::text_functions::{shuffled_str, PresetAlphabet};
 use super::Cipher;
 use std::collections::HashMap;
 use crate::errors::CipherError;
@@ -26,8 +26,8 @@ impl GeneralSubstitution {
 
 impl Default for GeneralSubstitution {
     fn default() -> Self {
-        let alphabet1 = String::from(LATIN_UPPER);
-        let alphabet2 = String::from(LATIN_UPPER);
+        let alphabet1 = String::from(PresetAlphabet::English);
+        let alphabet2 = String::from(PresetAlphabet::English);;
         let mut map = HashMap::new();
         let mut map_inv = HashMap::new();
         for (a, b) in alphabet1.chars().zip(alphabet2.chars()) {

@@ -1,6 +1,6 @@
 use rand::prelude::ThreadRng;
 use super::{Cipher, PolyMode};
-use crate::text_functions::{LATIN_UPPER, random_sample_replace};
+use crate::text_functions::{random_sample_replace, PresetAlphabet};
 use crate::errors::CipherError;
 
 
@@ -133,7 +133,7 @@ impl ProgressiveKey {
 
 impl Default for ProgressiveKey {
     fn default() -> Self {
-        Self { key_word: String::new(), alphabet: String::from(LATIN_UPPER), shift: 0, mode: PolyMode::Vigenere }
+        Self { key_word: String::new(), alphabet: String::from(PresetAlphabet::English), shift: 0, mode: PolyMode::Vigenere }
     }
 }
 

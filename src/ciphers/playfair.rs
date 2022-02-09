@@ -1,18 +1,9 @@
 use std::fmt;
-
 use num::integer::Roots;
 use rand::prelude::ThreadRng;
 use super::Cipher;
 use crate::{errors::CipherError, text_functions::shuffled_str};
-
-use crate::text_functions::{LATIN_UPPER_NO_J, LATIN_UPPER_NO_Q, LATIN_UPPER_DIGITS, validate_alphabet};
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum PlayfairMode {
-    NoQ,
-    NoJ,
-    AlphaNum,
-}
+use crate::text_functions::{validate_alphabet, PresetAlphabet};
 
 pub struct Playfair {
     alphabet: String,
@@ -21,12 +12,8 @@ pub struct Playfair {
 
 impl Playfair {
 
-    pub fn set_mode(&mut self, mode: PlayfairMode) {
-        match mode {
-            PlayfairMode::NoQ => self.alphabet = String::from(LATIN_UPPER_NO_Q),
-            PlayfairMode::NoJ => self.alphabet = String::from(LATIN_UPPER_NO_J),
-            PlayfairMode::AlphaNum => self.alphabet = String::from(LATIN_UPPER_DIGITS),
-        };
+    pub fn set_mode(&mut self, mode: PresetAlphabet) {
+        self.alphabet = String::from(mode);
     }
 
     fn validate_settings(&self) -> Result<(),CipherError> {

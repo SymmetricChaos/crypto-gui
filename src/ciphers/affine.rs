@@ -1,7 +1,6 @@
 use super::Cipher;
-use crate::errors::CipherError;
+use crate::{errors::CipherError, text_functions::PresetAlphabet};
 use crate::math_functions::mul_inv;
-use crate::text_functions::LATIN_UPPER;
 use rand::{prelude::ThreadRng, Rng};
 
 pub struct Affine {
@@ -11,14 +10,6 @@ pub struct Affine {
 }
 
 impl Affine {
-    pub fn new(add_key: usize, mul_key: usize, alphabet: &str) -> Self {
-        Self {
-            add_key,
-            mul_key,
-            alphabet: alphabet.to_string(),
-        }
-    }
-
     fn char_to_val(&self, c: char) -> Option<usize> {
         self.alphabet.chars().position(|x| x == c)
     }
@@ -41,7 +32,7 @@ impl Default for Affine {
         Self {
             add_key: 0,
             mul_key: 1,
-            alphabet: String::from(LATIN_UPPER),
+            alphabet: String::from(PresetAlphabet::English),
         }
     }
 }
@@ -127,13 +118,17 @@ mod affine_tests {
 
     #[test]
     fn encrypt_test() {
-        let cipher = Affine::new(3, 5, LATIN_UPPER);
+        let mut cipher = Affine::default();
+        cipher.add_key = 3;
+        cipher.mul_key = 5;
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
-        let cipher = Affine::new(3, 5, LATIN_UPPER);
+        let mut cipher = Affine::default();
+        cipher.add_key = 3;
+        cipher.mul_key = 5;
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

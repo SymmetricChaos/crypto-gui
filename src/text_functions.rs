@@ -1,44 +1,52 @@
 use itertools::Itertools;
 use rand::prelude::{ThreadRng, SliceRandom, IteratorRandom};
 
-use crate::{errors::CipherError};
+use crate::errors::CipherError;
 
-pub const LATIN_UPPER: &'static str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-pub const LATIN_LOWER: &'static str = "abcdefghijklmnopqrstuvwxyz";
-pub const LATIN_UPPER_NO_J: &'static str = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
-pub const LATIN_UPPER_NO_Q: &'static str = "ABCDEFGHIJKLMNOPRSTUVWXYZ";
-pub const LATIN_UPPER_DIGITS: &'static str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; 
-pub const DIGITS: &'static str = "0123456789";
-pub const ASCII95: &'static str = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
-pub const ASCII94: &'static str = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"; 
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PresetAlphabet {
-    Latin,
-    LatinNoJ,
-    LatinNoQ,
-    LatinWithDigits,
+    English,
+    EnglishNoJ,
+    EnglishNoQ,
+    EnglishWithDigits,
     Digits,
     Ascii94,
     Ascii95,
+    Greek,
+    Latin, //Classical Latin
 }
 
 impl PresetAlphabet {
 
+    // Pointer to a static string slice
     pub fn slice(&self) -> &'static str {
         match self {
-            PresetAlphabet::Latin => LATIN_UPPER,
-            PresetAlphabet::LatinNoJ => LATIN_UPPER_NO_J,
-            PresetAlphabet::LatinNoQ => LATIN_UPPER_NO_Q,
-            PresetAlphabet::LatinWithDigits => LATIN_UPPER_DIGITS,
-            PresetAlphabet::Digits => DIGITS,
-            PresetAlphabet::Ascii94 => ASCII94,
-            PresetAlphabet::Ascii95 => ASCII95,
+            PresetAlphabet::English => "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            PresetAlphabet::EnglishNoJ => "ABCDEFGHIKLMNOPQRSTUVWXYZ",
+            PresetAlphabet::EnglishNoQ => "ABCDEFGHIJKLMNOPRSTUVWXYZ",
+            PresetAlphabet::EnglishWithDigits => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+            PresetAlphabet::Digits => "0123456789",
+            PresetAlphabet::Ascii94 => "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
+            PresetAlphabet::Ascii95 => " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
+            PresetAlphabet::Greek => "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ", //All of these are Unicode Greek even the ones identical to ASCII
+            PresetAlphabet::Latin => "ABCDEFGHIKLMNOPQRSTVXY",
         }
     }
 
+    // Owned string
     pub fn string(&self) -> String {
         self.slice().to_string()
+    }
+
+    // Length in Unicode characters
+    pub fn len(&self) -> usize {
+        self.slice().chars().count()
+    }
+
+    // Iterate over characters
+    pub fn chars(&self) -> std::str::Chars {
+        self.slice().chars()
     }
 }
 

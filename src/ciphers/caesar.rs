@@ -1,6 +1,5 @@
 use rand::{Rng, prelude::ThreadRng};
-use crate::text_functions::LATIN_UPPER;
-use crate::errors::{CipherError, CipherErrors};
+use crate::{errors::{CipherError, CipherErrors}, text_functions::PresetAlphabet};
 use super::Cipher;
 
 pub struct Caesar {
@@ -28,7 +27,7 @@ impl Caesar {
 
 impl Default for Caesar {
     fn default() -> Self {
-        Self { shift: 0, alphabet: String::from(LATIN_UPPER) }
+        Self { shift: 0, alphabet: String::from(PresetAlphabet::English) }
     }
 }
 
@@ -111,13 +110,15 @@ mod caesar_tests {
 
     #[test]
     fn encrypt_test() {
-        let cipher = Caesar::new(3,LATIN_UPPER);
+        let mut cipher = Caesar::default();
+        cipher.shift = 3;
         assert_eq!(cipher.encrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 
     #[test]
     fn decrypt_test() {
-        let cipher = Caesar::new(3,LATIN_UPPER);
+        let mut cipher = Caesar::default();
+        cipher.shift = 3;
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }
