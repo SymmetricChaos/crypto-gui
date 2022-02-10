@@ -4,6 +4,7 @@ pub mod text_functions;
 pub mod cipher_panel;
 pub mod errors;
 pub mod cipher_id;
+pub mod grid;
 mod app;
 
 #[cfg(not(target_arch = "wasm32"))]

@@ -27,7 +27,7 @@ impl GeneralSubstitution {
 impl Default for GeneralSubstitution {
     fn default() -> Self {
         let alphabet1 = String::from(PresetAlphabet::English);
-        let alphabet2 = String::from(PresetAlphabet::English);;
+        let alphabet2 = String::from(PresetAlphabet::English);
         let mut map = HashMap::new();
         let mut map_inv = HashMap::new();
         for (a, b) in alphabet1.chars().zip(alphabet2.chars()) {

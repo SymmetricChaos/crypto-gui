@@ -118,6 +118,32 @@ pub fn string_pairs(text: &str) -> Vec<&str> {
     }
 }
 
+/*
+Rank the characters of a string by their order in the alphabet, making every entry unique and using the smallest possible numbers
+The text APPLE with the English alphabet would give: [0, 3, 4, 2, 1, 5]
+*/
+pub fn rank_str(text: &str, alphabet: &str) -> Vec<usize> {
+    let mut values = text.chars().map(|x| alphabet.chars().position(|c| x == c).unwrap()).collect::<Vec<usize>>();
+
+    let len = values.len();
+    let biggest = alphabet.chars().count();
+
+    let mut out = vec![0usize;len];
+
+    for i in 0..len {
+        let m = values.iter().min().unwrap();
+        for (pos,v) in values.iter().enumerate() {
+            if v == m {
+                out[pos] = i;
+                values[pos] = biggest;
+                break
+            }
+        }
+    }
+
+    out
+}
+
 
 // use itertools::{sorted,equal};
 
@@ -161,4 +187,18 @@ pub fn keyed_alphabet(keyword: &str, alphabet: &str) -> Result<String,CipherErro
     }
     Ok(keyed_alpha)
 }
- 
+
+
+
+#[cfg(test)]
+mod affine_tests {
+    use super::*;
+
+    #[test]
+    fn string_ranking() {
+        let text = "APPLES";
+        let alphabet = PresetAlphabet::English.slice();
+        assert_eq!(vec![0, 3, 4, 2, 1, 5],rank_str(text, alphabet));
+    }
+
+}

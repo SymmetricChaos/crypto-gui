@@ -31,9 +31,11 @@ pub use alberti_disk::Alberti;
 pub mod polybius;
 pub use polybius::Polybius;
 
-
 pub mod m94;
 pub use m94::M94;
+
+pub mod columnar;
+pub use columnar::Columnar;
 
 pub mod composite;
 
