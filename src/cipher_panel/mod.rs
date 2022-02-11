@@ -15,6 +15,7 @@ pub mod autokey_controls;
 pub mod progressive_key_controls;
 pub mod alberti_controls;
 pub mod m94_controls;
+pub mod polybius_controls;
 
 pub trait View {
     fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String, errors: &mut String);
@@ -37,6 +38,7 @@ pub struct ControlPanel {
     affine: Affine,
     decoder_ring: DecoderRing,
     gen_sub: GeneralSubstitution,
+    polybius: Polybius,
 
     m209: M209,
 
@@ -94,13 +96,16 @@ impl ControlPanel {
             CipherID::Affine => self.affine.ui(ui, input, output, errors),
             CipherID::Decoder => self.decoder_ring.ui(ui, input, output, errors),
             CipherID::Substitution => self.gen_sub.ui(ui, input, output, errors),
+            CipherID::Polybius => self.polybius.ui(ui, input, output, errors),
+
             CipherID::M209 => self.m209.ui(ui, input, output, errors),
             CipherID::CyclicKey => self.cyclic_key.ui(ui, input, output, errors),
             CipherID::Autokey => self.autokey.ui(ui, input, output, errors),
             CipherID::ProgressiveKey => self.progressive_key.ui(ui, input, output, errors),
-            CipherID::Playfair => self.playfair.ui(ui, input, output, errors),
-            CipherID::Alberti => self.alberti.ui(ui, input, output, errors),
             CipherID::M94 => self.m94.ui(ui, input, output, errors),
+            CipherID::Alberti => self.alberti.ui(ui, input, output, errors),
+
+            CipherID::Playfair => self.playfair.ui(ui, input, output, errors),
             _ => {ui.label("COMING SOON");},
         }
     }

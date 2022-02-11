@@ -1,3 +1,4 @@
+use std::fmt;
 use std::ops::{Index, IndexMut};
  
 pub fn str_to_grid_symbols(text: &str, empty_char: char, blocked_char: char) -> Vec<Symbol> {
@@ -21,6 +22,31 @@ pub enum Symbol {
     Blocked
 }
  
+impl Symbol {
+    pub fn is_empty(&self) -> bool {
+        match self {
+            Symbol::Empty => true,
+            _ => false
+        }
+    }
+ 
+    pub fn is_blocked(&self) -> bool {
+        match self {
+            Symbol::Blocked => true,
+            _ => false
+        }
+    }
+ 
+    pub fn is_character(&self) -> bool {
+        match self {
+            Symbol::Character(_) => true,
+            _ => false
+        }
+    }
+}
+ 
+ 
+ 
 #[derive(Clone, Debug)]
 pub struct Grid {
     grid: Vec<Symbol>,
@@ -34,7 +60,7 @@ impl Grid {
         Self { grid, num_rows, num_cols }
     }
  
-    pub fn new_row_major(text: &str, num_rows: usize, num_cols: usize, empty_char: char, blocked_char: char) -> Self {
+    pub fn from_rows(text: &str, num_rows: usize, num_cols: usize, empty_char: char, blocked_char: char) -> Self {
         let mut symbols = str_to_grid_symbols(text, empty_char, blocked_char);
         // Drop excess symbols or pad with Empty as needed
         symbols.truncate(num_rows * num_cols);
@@ -43,7 +69,7 @@ impl Grid {
         Self { grid: symbols, num_rows, num_cols }
     }
  
-    pub fn new_col_major(text: &str, num_rows: usize, num_cols: usize, empty_char: char, blocked_char: char) -> Self {
+    pub fn from_cols(text: &str, num_rows: usize, num_cols: usize, empty_char: char, blocked_char: char) -> Self {
         let mut symbols = str_to_grid_symbols(text, empty_char, blocked_char);
         let grid_size = num_rows * num_cols;
         // Drop excess symbols or pad with Empty as needed
@@ -106,16 +132,27 @@ impl Grid {
         self.grid.get_mut(idx)
     }
  
-    pub fn row(&self, row_index: usize) -> impl Iterator<Item = &Symbol> {
+    pub fn get_row(&self, row_index: usize) -> impl Iterator<Item = &Symbol> {
         let start = self.index_from_coord((row_index, 0))
             .expect("Row index was out of bounds");
         let end = start + self.row_len();
         self.grid[start..end].iter()
     }
  
-    pub fn col(&self, col_index: usize) -> impl Iterator<Item = &Symbol> {
+    pub fn get_col(&self, col_index: usize) -> impl Iterator<Item = &Symbol> {
         (0..self.col_len()).map(move |row_index| &self[(row_index, col_index)])
     }
+
+    pub fn get_row_mut(&mut self, row_index: usize) -> impl Iterator<Item = &mut Symbol> {
+        let start = self.index_from_coord((row_index, 0))
+            .expect("Row index was out of bounds");
+        let end = start + self.row_len();
+        self.grid[start..end].iter_mut()
+    }
+ 
+    // pub fn get_col_mut(&mut self, col_index: usize) -> impl Iterator<Item = &mut Symbol> {
+    //     (0..self.col_len()).map(move |row_index| self[(row_index, col_index)])
+    // }
  
     pub fn read_rows(&self) -> impl Iterator<Item = &Symbol> {
         self.grid.iter()
@@ -125,7 +162,7 @@ impl Grid {
     pub fn read_cols(&self) -> impl Iterator<Item = &Symbol> {
         let mut symbols: Vec<&Symbol> = Vec::new();
         for n in 0..self.num_cols() {
-            for symbol in self.col(n) {
+            for symbol in self.get_col(n) {
                 symbols.push(symbol)
             };
         }
@@ -156,7 +193,7 @@ impl Grid {
     // Replace only if the position is Symbol::Empty
     pub fn replace_if_empty(&mut self, coord: (usize, usize), new_sym: Symbol) -> Option<Symbol> {
         let contents = *self.get(coord)?;
-        if contents == Symbol::Empty {
+        if contents.is_empty() {
             self[coord] = new_sym;
             return Some(contents)
         }
@@ -166,13 +203,41 @@ impl Grid {
     // Replace if the position is anything other than Symbol::Blocked
     pub fn replace_if_not_blocked(&mut self, coord: (usize, usize), new_sym: Symbol) -> Option<Symbol> {
         let contents = *self.get(coord)?;
-        if contents != Symbol::Blocked {
+        if !contents.is_blocked() {
             self[coord] = new_sym;
             return Some(contents)
         }
         None
     }
  
+    pub fn remap<F>(&mut self, mut func: F)
+        where F: FnMut(Symbol) -> Symbol 
+    {
+        for sym in self.grid.iter_mut() {
+            *sym = func(*sym);
+        }
+    }
+ 
+ 
+    // pub fn overwrite_empty<I>(&mut self, symbols: I) 
+    // where
+    //     I: IntoIterator<Item = Symbol> {
+    //     let i = symbols.into_iter();
+    //     for cell in self.grid.iter() {
+    //         if *cell == Symbol::Empty {
+    //             cell = match i.next() {
+    //                 Some(sym) => *cell = sym,
+    //                 None => break,
+    //             }
+    //         }
+    //     }
+    // }
+ 
+    // pub fn overwrite_unblocked<I>(&mut self, symbols: I) 
+    // where
+    //     I: IntoIterator<Item = Symbol> {
+ 
+    // }
  
     // pub fn rotate(&mut self) {
     //     let mut new_grid = Vec::<Symbol>::with_capacity(self.grid.len());
@@ -191,22 +256,25 @@ impl Grid {
     //     self.grid = new_grid;
     // }
  
-    // pub fn display(&self) -> String {
-    //     let mut out = String::with_capacity(self.num_rows * self.num_cols);
- 
-    //     for n in 0..self.num_rows {
-    //         for s in self.grid.row(n) {
-    //             match s {
-    //                 Symbol::Symbol(c) => out.push(*c),
-    //                 Symbol::Empty => out.push(' '),
-    //                 Symbol::Blocked => out.push('🔒'),
-    //           }
-    //         }
-    //         out.push('\n')
-    //     }
-    //     out
-    // }
 }
+ 
+impl fmt::Display for Grid {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut out = String::with_capacity(self.grid_size());
+        for x in 0..self.num_rows {
+            for sym in self.get_row(x) {
+                match sym {
+                    Symbol::Character(c) => out.push(*c),
+                    Symbol::Empty => out.push('░'),
+                    Symbol::Blocked => out.push('▓'),
+                }
+            }
+            out.push('\n')
+        }
+        write!(f, "{}", out)
+    }
+}
+ 
  
 impl Index<(usize, usize)> for Grid {
     type Output = Symbol;

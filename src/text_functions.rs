@@ -10,7 +10,8 @@ pub enum PresetAlphabet {
     EnglishNoJ,
     EnglishNoQ,
     EnglishWithDigits,
-    Digits,
+    Digits0,
+    Digits1,
     Ascii94, // The printing ASCII symbols without the space
     Ascii95, // The printing ASCII symbols with the space
     Greek,
@@ -27,7 +28,8 @@ impl PresetAlphabet {
             PresetAlphabet::EnglishNoJ => "ABCDEFGHIKLMNOPQRSTUVWXYZ",
             PresetAlphabet::EnglishNoQ => "ABCDEFGHIJKLMNOPRSTUVWXYZ",
             PresetAlphabet::EnglishWithDigits => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-            PresetAlphabet::Digits => "0123456789",
+            PresetAlphabet::Digits0 => "0123456789",
+            PresetAlphabet::Digits1 => "1234567890",
             PresetAlphabet::Ascii94 => "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
             PresetAlphabet::Ascii95 => " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
             PresetAlphabet::Greek => "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ", //All of these are Unicode Greek even the ones draw identically to ASCII

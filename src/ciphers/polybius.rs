@@ -1,3 +1,4 @@
+use core::panic;
 use std::fmt;
 use itertools::Itertools;
 use num::integer::Roots;
@@ -10,13 +11,18 @@ use crate::text_functions::{validate_alphabet, keyed_alphabet,PresetAlphabet};
 pub struct Polybius {
     alphabet: String,
     labels: String,
+    grid_side_len: usize,
     key_word: String,
 }
 
 impl Polybius {
 
     pub fn set_mode(&mut self, mode: PresetAlphabet) {
-        self.alphabet = mode.string()
+        self.alphabet = mode.string();
+        self.grid_side_len = mode.len().sqrt();
+        if mode.len().sqrt().pow(2) != mode.len() {
+            panic!("Cannot assign an alphabet with a non-square length to a square grid")
+        }
     }
 
     fn pairs(&self, text: &str) -> Result<Vec<(char,char)>,CipherError> {
@@ -40,19 +46,20 @@ impl Polybius {
             Some(n) => n,
             None => return Err(CipherError::invalid_input_char(symbol)),
         };
-        Ok((num / self.alphabet_len(), num % self.alphabet_len()))
+        Ok((num / self.grid_side_len, num % self.grid_side_len))
     }
     
-    fn position_to_char(&self,position: (usize,usize)) -> char {
-        let num = position.0*self.alphabet_len() + position.1;
-        self.alphabet.chars().nth(num).unwrap()
-    }
+    // fn position_to_char(&self,position: (usize,usize)) -> char {
+    //     let num = position.0*self.alphabet_len() + position.1;
+    //     self.alphabet.chars().nth(num).unwrap()
+    // }
 }
 
 impl Default for Polybius {
     fn default() -> Self {
-        Self{ alphabet: String::from(PresetAlphabet::EnglishNoQ), 
-              labels: String::from(PresetAlphabet::Digits),
+        Self{ alphabet: String::from(PresetAlphabet::EnglishNoQ),
+              grid_side_len: 5,
+              labels: String::from(PresetAlphabet::Digits1),
               key_word: String::new(), }
     }
 }
@@ -64,6 +71,8 @@ impl Cipher for Polybius {
 
         for c in text.chars() {
             let pos = self.char_to_position(c)?;
+            out.push(self.labels.chars().nth(pos.0).unwrap());
+            out.push(self.labels.chars().nth(pos.1).unwrap());
 
         }
         Ok(out)
