@@ -1,3 +1,4 @@
+use eframe::egui::TextEdit;
 use eframe::egui::{Label, RichText, Color32, Grid, Vec2};
 
 use super::View;
@@ -9,6 +10,7 @@ use crate::text_functions::PresetAlphabet;
 
 impl View for Polybius {
     fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, output: &mut String, errors: &mut String) {
+
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
             if ui.button("No Q").clicked() { self.set_mode(PresetAlphabet::EnglishNoQ) };
@@ -16,18 +18,16 @@ impl View for Polybius {
             if ui.button("Alphanumeric").clicked() { self.set_mode(PresetAlphabet::EnglishWithDigits) };
             if ui.button("Base64").clicked() { self.set_mode(PresetAlphabet::Base64) };
         });
+
         ui.add_space(10.0);
         ui.label(RichText::new(self.get_mut_input_alphabet().clone()).monospace().background_color(Color32::BLACK));
         ui.add_space(16.0);
 
+        ui.label("Key Word");
+        ui.add(TextEdit::singleline(self.set_key()));
+
         ui.label(RichText::new(format!("Grid\n{}",self)).monospace());
         ui.add_space(16.0);
-
-        // ui.label("Key Word");
-        // ui.add(TextEdit::singleline(&mut self.key_word).text_style(TextStyle::Monospace));
-
-        //ui.label("Spacer Character\nInserted between double letters if needed");
-        //ui.add(TextEdit::singleline(&mut self.spacer.to_string()).text_style(TextStyle::Monospace).desired_width(15.0));
 
         encrypt_decrypt(ui, self, input, output, errors);
         ui.add_space(16.0);

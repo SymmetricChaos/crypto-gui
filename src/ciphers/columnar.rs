@@ -1,27 +1,37 @@
+use num::Integer;
+
 use crate::errors::CipherError;
 use crate::grid::Grid;
 use crate::text_functions::rank_str;
 use super::Cipher;
 
 pub struct Columnar {
+    alphabet: String,
     key: Vec<usize>,
     key_name: String,
 }
 
+impl Columnar {
+    pub fn set_key(&mut self) -> &mut String {
+        self.key = rank_str(&self.key_name, &self.alphabet);
+        &mut self.key_name
+    }
+}
 
 impl Cipher for Columnar {
 
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        // let tlen = text.chars().count();
-        // let n_rows = tlen.div_ceil(&self.key.len());
-        // let g = Grid::new(text, n_rows, self.key.len());
+        let tlen = text.chars().count();
+        let n_cols = self.key.len();
+        let n_rows = tlen.div_ceil(&self.key.len());
+        let g = Grid::from_rows(text, n_rows, n_cols, '\0', '\0');
 
         let mut out = String::with_capacity(text.len());
-        // for k in self.key.iter() {
-        //     let mut s: String = g.read_col_n(*k).iter().collect();
-        //     s = s.replace('\0', "");
-        //     out.push_str(&s);
-        // }
+        for k in self.key.iter() {
+            let mut s: String = g.get_col(*k).map(|sym| sym.to_char()).collect();
+            s = s.replace(crate::grid::EMPTY, "");
+            out.push_str(&s);
+        }
         Ok(out)
     }
 

@@ -166,12 +166,12 @@ pub fn rank_str(text: &str, alphabet: &str) -> Vec<usize> {
 //     true
 // }
 
-
-pub fn keyed_alphabet(keyword: &str, alphabet: &str) -> Result<String,CipherError> {
+// Silently ignores invalid characters
+pub fn keyed_alphabet(keyword: &str, alphabet: &str) -> String {
     let mut keyed_alpha = String::with_capacity(alphabet.len());
     for c in keyword.chars() {
         if !alphabet.contains(c) {
-            return Err(CipherError::invalid_key_char(c))
+            continue
         }
         if keyed_alpha.contains(c) {
             continue
@@ -187,7 +187,7 @@ pub fn keyed_alphabet(keyword: &str, alphabet: &str) -> Result<String,CipherErro
             keyed_alpha.push(a)
         }
     }
-    Ok(keyed_alpha)
+    keyed_alpha
 }
 
 

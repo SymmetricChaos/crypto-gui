@@ -1,6 +1,9 @@
 use std::fmt;
 use std::ops::{Index, IndexMut};
- 
+
+pub const EMPTY: char = '░';
+pub const BLOCK: char = '▓';
+
 pub fn str_to_grid_symbols(text: &str, empty_char: char, blocked_char: char) -> Vec<Symbol> {
     let mut v = Vec::with_capacity(text.chars().count());
     for c in text.chars() {
@@ -43,8 +46,15 @@ impl Symbol {
             _ => false
         }
     }
+
+    pub fn to_char(&self) -> char {
+        match self {
+            Symbol::Character(c) => *c,
+            Symbol::Empty => EMPTY,
+            Symbol::Blocked => BLOCK,
+        }
+    }
 }
- 
  
  
 #[derive(Clone, Debug)]
@@ -79,7 +89,7 @@ impl Grid {
         let mut grid = Vec::with_capacity(grid_size);
  
         for col in 0..num_cols {
-            for row in 0..num_rows {
+            for _ in 0..num_rows {
                 grid[col+(grid_size)] = symbols.remove(0);
             }
         }

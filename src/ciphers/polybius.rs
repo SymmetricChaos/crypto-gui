@@ -6,16 +6,23 @@ use rand::prelude::ThreadRng;
 use super::Cipher;
 use crate::errors::CipherErrors;
 use crate::{errors::CipherError, text_functions::shuffled_str};
-use crate::text_functions::{validate_alphabet, keyed_alphabet,PresetAlphabet};
+use crate::text_functions::{validate_alphabet, keyed_alphabet, PresetAlphabet};
 
 pub struct Polybius {
     alphabet: String,
+    inner_alphabet: String,
     labels: String,
     grid_side_len: usize,
     key_word: String,
 }
 
 impl Polybius {
+
+    // Silently ignores invalid characters
+    pub fn set_key(&mut self) -> &mut String {
+        self.inner_alphabet = keyed_alphabet(&self.key_word, &self.alphabet);
+        &mut self.key_word
+    }
 
     pub fn set_mode(&mut self, mode: PresetAlphabet) {
         self.alphabet = mode.string();
@@ -58,6 +65,7 @@ impl Polybius {
 impl Default for Polybius {
     fn default() -> Self {
         Self{ alphabet: String::from(PresetAlphabet::EnglishNoQ),
+              inner_alphabet: String::from(PresetAlphabet::EnglishNoQ),
               grid_side_len: 5,
               labels: String::from(PresetAlphabet::Digits1),
               key_word: String::new(), }
@@ -91,7 +99,7 @@ impl Cipher for Polybius {
     }
 
     fn randomize(&mut self, rng: &mut ThreadRng) {
-        self.alphabet = shuffled_str(&self.alphabet, rng)
+        self.key_word = shuffled_str(&self.inner_alphabet, rng)
     }
 
     fn get_input_alphabet(&mut self) -> &String {
@@ -126,14 +134,17 @@ impl Cipher for Polybius {
 
 impl fmt::Display for Polybius {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let kalpha = keyed_alphabet(&self.key_word, &self.alphabet).unwrap();
-        let mut square = String::new();
-        for (n, c) in kalpha.chars().enumerate() {
+        let mut square = String::from("  ");
+        for xlab in self.labels.chars().take(self.grid_side_len) {
+            square.push_str(&format!("{xlab} "))
+        }
+        for (n, c) in self.inner_alphabet.chars().enumerate() {
             if n % self.grid_side_len() == 0 {
-                square.push_str("\n")
+                let ylab = self.labels.chars().nth(n/self.grid_side_len).unwrap();
+                square.push_str(&format!("\n{ylab} "));
             }
-            square.push_str(&format!("{} ",c))
+            square.push_str(&format!("{c} "))
         };
-        write!(f, "{}", square)
+        write!(f, "{square}")
     }
 }
