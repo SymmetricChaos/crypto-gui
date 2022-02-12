@@ -1,10 +1,9 @@
 use rand::{prelude::{ThreadRng, SliceRandom}, Rng};
 use super::Cipher;
 use crate::text_functions::PresetAlphabet;
-use std::fmt;
 use crate::errors::CipherError;
 
-use itertools::Itertools;
+
 const M94_WHEELS: [&'static str; 25] = [
         "ABCEIGDJFVUYMHTQKZOLRXSPWN",
         "ACDEHFIJKTLMOUVYGZNPQXRWSB",

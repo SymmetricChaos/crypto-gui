@@ -73,6 +73,12 @@ impl ControlPanel {
                 "Rotor Machine",
                 active_cipher, ui
             );
+
+            combox_box(
+                &[CipherID::Columnar],
+                "Transposition",
+                active_cipher, ui
+            );
     
             combox_box(
                 &[CipherID::Playfair],
