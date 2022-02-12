@@ -35,13 +35,13 @@ impl fmt::Display for Cage {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut s = "Cage\n".to_string();
         for b in self.lugs.chunks(9).collect_vec() {
-            for lug in b {
-                let entry = format!("{}-{}  ",lug.0,lug.1);
+            for (lug0, lug1) in b {
+                let entry = format!("{lug0}-{lug1}  ");
                 s.push_str(&entry)
             }
             s.push('\n')
         }
-        write!(f, "{}", s)
+        write!(f, "{s}")
     }
 }
 
@@ -113,7 +113,7 @@ impl fmt::Display for Rotor {
         for (pos,letter) in self.alphabet.iter().enumerate() {
             if pos == self.active {
                 // bracket the active position
-                s.push_str(&format!("[{}]",letter));
+                s.push_str(&format!("[{letter}]"));
             } else {
                 s.push(*letter)
             }

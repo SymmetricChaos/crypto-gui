@@ -52,7 +52,7 @@ impl Cipher for M94 {
 
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         // should require a 25 character message
-        let mut out = String::with_capacity(text.chars().count());
+        let mut out = String::with_capacity(text.len());
         let ckey = self.wheels.iter().cycle();
         for (k, c) in ckey.zip(text.chars()) {
             let n = (k.chars().position(|x| x == c).unwrap() + self.offset) % 26;
@@ -63,7 +63,7 @@ impl Cipher for M94 {
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         // should require a 25 character message
-        let mut out = String::with_capacity(text.chars().count());
+        let mut out = String::with_capacity(text.len());
         let rev_offset = 26 - self.offset;
         let ckey = self.wheels.iter().cycle();
         for (k, c) in ckey.zip(text.chars()) {
@@ -98,11 +98,4 @@ impl Cipher for M94 {
         todo!()
     }
 
-}
-
-impl fmt::Display for M94 {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let alphas = self.wheels.iter().join("\n");
-        write!(f, "M94 Cipher\noffset: {}\nwheels: {}",self.offset,alphas)
-    }
 }

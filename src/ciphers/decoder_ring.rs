@@ -27,7 +27,11 @@ impl DecoderRing {
 
     fn valid_code_group(&self, s: &str) -> Result<usize, CipherError> {
         match s.parse::<usize>() {
-            Ok(n) => if n < self.length() { Ok(n) } else { Err(CipherError::input("invalid code group")) },
+            Ok(n) => if n < self.length() { 
+                    Ok(n) 
+                } else { 
+                    Err(CipherError::input("invalid code group")) 
+                },
             Err(_) => return Err(CipherError::input("invalid code group")),
         }
     }

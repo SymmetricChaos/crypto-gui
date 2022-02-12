@@ -91,7 +91,7 @@ impl Cipher for Caesar {
 
     fn validate_settings(&self) -> Result<(),CipherErrors> {
         if self.shift > self.alphabet_len() {
-            return Err(CipherErrors::new(vec![CipherError::Key(String::from("key value is incorrect"))]))
+            return Err(CipherErrors::new(vec![CipherError::Key(String::from("shift value must be less than the alphabet length"))]))
         }
         Ok(())
     }

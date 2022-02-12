@@ -40,7 +40,7 @@ impl Default for GeneralSubstitution {
 
 impl Cipher for GeneralSubstitution {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
-        let mut out = "".to_string();
+        let mut out = String::new();
         for c in text.chars() {
             match self.map.get(&c) {
                 Some(o) => out.push(*o),
@@ -51,7 +51,7 @@ impl Cipher for GeneralSubstitution {
     }
 
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
-        let mut out = "".to_string();
+        let mut out = String::new();
         for c in text.chars() {
             match self.map_inv.get(&c) {
                 Some(o) => out.push(*o),

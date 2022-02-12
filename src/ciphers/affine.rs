@@ -43,7 +43,7 @@ impl Cipher for Affine {
         let mut out = String::with_capacity(text.len());
         match self.find_inverse() {
             Some(n) => n,
-            None => return Err(CipherError::key("The multiplicative key of an Affine Cipher must have an inverse modulo the length of the alphabet"))
+            None => return Err(CipherError::key("The multiplicative key of an Affine Cipher cannot share any factors with the length of the alphabet"))
         };
         for s in symbols {
             let val = self.char_to_val(s);
@@ -62,7 +62,7 @@ impl Cipher for Affine {
         let mut out = String::with_capacity(text.len());
         let mki = match self.find_inverse() {
             Some(n) => n,
-            None => return Err(CipherError::key("The multiplicative key of an Affine Cipher must have an inverse modulo the length of the alphabet"))
+            None => return Err(CipherError::key("The multiplicative key of an Affine Cipher cannot share any factors with the length of the alphabet"))
         };
         for s in symbols {
             let val = self.char_to_val(s);
