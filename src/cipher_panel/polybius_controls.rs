@@ -1,5 +1,5 @@
 use eframe::egui::TextEdit;
-use eframe::egui::{Label, RichText, Color32, Grid, Vec2};
+use eframe::egui::{RichText, Color32};
 
 use super::View;
 use super::generic_components::*;

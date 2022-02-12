@@ -44,10 +44,6 @@ impl Polybius {
         self.alphabet.chars().count()
     }
 
-    pub fn grid_side_len(&self) -> usize {
-        self.alphabet_len().sqrt()
-    }
-
     fn char_to_position(&self,symbol: char) -> Result<(usize,usize),CipherError> {
         let num = match self.alphabet.chars().position(|x| x == symbol) {
             Some(n) => n,
@@ -56,10 +52,13 @@ impl Polybius {
         Ok((num / self.grid_side_len, num % self.grid_side_len))
     }
     
-    // fn position_to_char(&self,position: (usize,usize)) -> char {
-    //     let num = position.0*self.alphabet_len() + position.1;
-    //     self.alphabet.chars().nth(num).unwrap()
-    // }
+    fn position_to_char(&self,position: (char,char)) -> char {
+        let y = self.labels.chars().position(|c| c == position.0).unwrap();
+        let x = self.labels.chars().position(|c| c == position.1).unwrap();
+
+        let num = y*self.grid_side_len + x;
+        self.alphabet.chars().nth(num).unwrap()
+    }
 }
 
 impl Default for Polybius {
@@ -74,26 +73,22 @@ impl Default for Polybius {
 
 impl Cipher for Polybius {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
-        //self.validate_settings()?;
         let mut out = String::with_capacity(text.chars().count()*2);
 
         for c in text.chars() {
             let pos = self.char_to_position(c)?;
             out.push(self.labels.chars().nth(pos.0).unwrap());
             out.push(self.labels.chars().nth(pos.1).unwrap());
-
         }
         Ok(out)
     }
     
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
-        //self.validate_settings()?;
         let pairs = self.pairs(text)?;
         let mut out = String::with_capacity(text.chars().count()/2);
-        for (l, r) in pairs {
-            let lpos = self.char_to_position(l)?;
-            let rpos = self.char_to_position(r)?;
-            
+
+        for p in pairs {
+            out.push(self.position_to_char(p));
         }
         Ok(out)
     }
@@ -139,7 +134,7 @@ impl fmt::Display for Polybius {
             square.push_str(&format!("{xlab} "))
         }
         for (n, c) in self.inner_alphabet.chars().enumerate() {
-            if n % self.grid_side_len() == 0 {
+            if n % self.grid_side_len == 0 {
                 let ylab = self.labels.chars().nth(n/self.grid_side_len).unwrap();
                 square.push_str(&format!("\n{ylab} "));
             }
