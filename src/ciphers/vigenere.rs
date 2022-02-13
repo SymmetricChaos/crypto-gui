@@ -15,19 +15,19 @@ pub struct Vigenere {
 
 impl Vigenere {
 
-    fn cyclic_key(&self) -> impl Iterator<Item = usize> + '_ {
+    pub fn cyclic_key(&self) -> impl Iterator<Item = usize> + '_ {
         self.key_word.chars().map(|x| self.alphabet.chars().position(|c| c == x).unwrap()).cycle()
     }
 
-    fn key(&self) -> impl Iterator<Item = usize> + '_ {
+    pub fn key(&self) -> impl Iterator<Item = usize> + '_ {
         self.key_word.chars().map(|x| self.alphabet.chars().position(|c| c == x).unwrap())
     }
 
-    fn alphabet_len(&self) -> usize {
+    pub fn alphabet_len(&self) -> usize {
         self.alphabet.chars().count()
     }
 
-    fn key_len(&self) -> usize {
+    pub fn key_len(&self) -> usize {
         self.key().count()
     }
 
@@ -52,7 +52,7 @@ impl Vigenere {
     }
 
 
-    pub fn prep(&self, text: &str) -> Result<(usize, Vec<usize>, VecDeque<usize>,String),CipherError> {
+    fn autokey_prep(&self, text: &str) -> Result<(usize, Vec<usize>, VecDeque<usize>,String),CipherError> {
         self.validate_key()?;
         self.validate_input(text)?;
         let alpha_len = self.alphabet_len();
@@ -76,8 +76,6 @@ impl Vigenere {
 
 
     fn encrypt_cyclic(&self, text: &str) -> Result<String,CipherError> {
-        self.validate_key()?;
-        self.validate_input(text)?;
         let alpha_len = self.alphabet_len();
         let nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
         let mut out = String::with_capacity(nums.len());
@@ -88,8 +86,6 @@ impl Vigenere {
     }
 
     fn decrypt_cyclic(&self, text: &str) -> Result<String,CipherError> {
-        self.validate_key()?;
-        self.validate_input(text)?;
         let alpha_len = self.alphabet_len();
         let length = self.alphabet_len();
         let nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() + length ).collect();
@@ -105,7 +101,7 @@ impl Vigenere {
         let (alpha_len, 
              text_nums, 
              mut akey, 
-             mut out) = self.prep(text)?;
+             mut out) = self.autokey_prep(text)?;
         
         for n in text_nums {
             akey.push_back(n);
@@ -120,7 +116,7 @@ impl Vigenere {
         let (alpha_len, 
              text_nums, 
              mut akey, 
-             mut out) = self.prep(text)?;
+             mut out) = self.autokey_prep(text)?;
 
         for n in text_nums {
             let k = akey.pop_front().unwrap();
@@ -133,9 +129,6 @@ impl Vigenere {
     }
 
     fn encrypt_prog(&self, text: &str) -> Result<String,CipherError> {
-        self.validate_key()?;
-        self.validate_input(text)?;
-
         let alpha_len = self.alphabet_len();
         let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
         let mut out = String::with_capacity(text_nums.len());
@@ -154,10 +147,7 @@ impl Vigenere {
         Ok(out)
     }
 
-    fn decrypt_prog(&self, text: &str) -> Result<String,CipherError> {
-        self.validate_key()?;
-        self.validate_input(text)?;
-        
+    fn decrypt_prog(&self, text: &str) -> Result<String,CipherError> {       
         let alpha_len = self.alphabet_len();
         let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
         let mut out = String::with_capacity(text_nums.len());
@@ -186,6 +176,8 @@ impl Default for Vigenere {
 
 impl Cipher for Vigenere {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
+        self.validate_key()?;
+        self.validate_input(text)?;
         match self.mode {
             PolyMode::CylicKey => self.encrypt_cyclic(text),
             PolyMode::Autokey => self.encrypt_auto(text),
@@ -194,6 +186,8 @@ impl Cipher for Vigenere {
     }
 
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
+        self.validate_key()?;
+        self.validate_input(text)?;
         match self.mode {
             PolyMode::CylicKey => self.decrypt_cyclic(text),
             PolyMode::Autokey => self.decrypt_auto(text),

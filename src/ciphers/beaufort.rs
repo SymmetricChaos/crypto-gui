@@ -15,19 +15,19 @@ pub struct Beaufort {
 
 impl Beaufort {
 
-    fn cyclic_key(&self) -> impl Iterator<Item = usize> + '_ {
+    pub fn cyclic_key(&self) -> impl Iterator<Item = usize> + '_ {
         self.key_word.chars().map(|x| self.alphabet.chars().position(|c| c == x).unwrap()).cycle()
     }
 
-    fn key(&self) -> impl Iterator<Item = usize> + '_ {
+    pub fn key(&self) -> impl Iterator<Item = usize> + '_ {
         self.key_word.chars().map(|x| self.alphabet.chars().position(|c| c == x).unwrap())
     }
 
-    fn alphabet_len(&self) -> usize {
+    pub fn alphabet_len(&self) -> usize {
         self.alphabet.chars().count()
     }
 
-    fn key_len(&self) -> usize {
+    pub fn key_len(&self) -> usize {
         self.key().count()
     }
 
@@ -53,8 +53,6 @@ impl Beaufort {
 
 
     pub fn prep(&self, text: &str) -> Result<(usize, Vec<usize>, VecDeque<usize>,String),CipherError> {
-        self.validate_key()?;
-        self.validate_input(text)?;
         let alpha_len = self.alphabet_len();
         let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
         let akey: VecDeque<usize> = self.key().collect();
@@ -70,8 +68,6 @@ impl Beaufort {
     }
 
     fn encrypt_cyclic(&self, text: &str) -> Result<String,CipherError> {
-        self.validate_key()?;
-        self.validate_input(text)?;
         let alpha_len = self.alphabet_len();
         let nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
         let mut out = String::with_capacity(nums.len());
@@ -117,9 +113,6 @@ impl Beaufort {
     }
 
     fn encrypt_prog(&self, text: &str) -> Result<String,CipherError> {
-        self.validate_key()?;
-        self.validate_input(text)?;
-
         let alpha_len = self.alphabet_len();
         let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
         let mut out = String::with_capacity(text_nums.len());
@@ -152,6 +145,8 @@ impl Default for Beaufort {
 
 impl Cipher for Beaufort {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
+        self.validate_key()?;
+        self.validate_input(text)?;
         match self.mode {
             PolyMode::CylicKey => self.encrypt_cyclic(text),
             PolyMode::Autokey => self.encrypt_auto(text),
@@ -160,6 +155,8 @@ impl Cipher for Beaufort {
     }
 
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
+        self.validate_key()?;
+        self.validate_input(text)?;
         match self.mode {
             PolyMode::CylicKey => self.decrypt_cyclic(text),
             PolyMode::Autokey => self.decrypt_auto(text),

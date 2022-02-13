@@ -1,4 +1,4 @@
-use eframe::egui::{TextEdit, TextStyle};
+use eframe::egui::{TextEdit, TextStyle, Slider};
 use crate::ciphers::{Beaufort, PolyMode};
 use super::{View, generic_components::*};
 
@@ -18,6 +18,14 @@ impl View for Beaufort {
             ui.selectable_value(&mut self.mode, PolyMode::Autokey, "Autokey");
             ui.selectable_value(&mut self.mode, PolyMode::ProgKey, "Progressive Key");
         });
+
+        if self.mode == PolyMode::ProgKey {
+            ui.add_space(16.0);
+            ui.label("Step size");
+            let alpha_range = 0..=((self.alphabet_len()-1));
+            ui.add(Slider::new(&mut self.prog_shift, alpha_range));
+            ui.add_space(16.0);
+        }
 
         encrypt_decrypt(ui, self, input, output, errors);
         ui.add_space(16.0);
