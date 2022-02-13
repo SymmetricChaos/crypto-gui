@@ -16,10 +16,9 @@ pub enum CipherID {
     Playfair,
     Slidefair,
 
+    Vigenere,
+    Beaufort,
     Alberti,
-    CyclicKey,
-    Autokey,
-    ProgressiveKey,
     Bazieres,
     M94,
 
@@ -49,9 +48,8 @@ impl CipherID {
             CipherID::Playfair => "The Playfair Cipher swaps letters on a grid to encrypt letters pair by pair.",
             CipherID::Slidefair => "The Slidefair Cipher",
             
-            CipherID::CyclicKey => "Cyclic Ley Ciphers repeat their keyword over and over.",
-            CipherID::Autokey => "Autokey Ciphers draw their key from the text itself.",
-            CipherID::ProgressiveKey => "Progressive key ciphers repeat their key like a cyclic key cipher but apply a shift at each repetition to stretch it out.",
+            CipherID::Vigenere => "Vigenere",
+            CipherID::Beaufort => "Beaufort",
             CipherID::Alberti => "The Alberti Cipher",
             CipherID::Bazieres => "The Baziers Cipher",
             CipherID::M94 => "The M94 Cipher was a low security tactical cipher US Army that consisted of 25 wheels each with a scrambled alphabet, placed sequentially on a rod. The order of the wheels was changed daily. To send a message the wheels were turned to display it and then an arbitrary other line was used. Decryption relied on the reciever searching for the only sensible line on their own set of wheels but this implementation specifies an offset for each message. Messages had to be sent with exactly 25 letters at a time, padded if the message was too short and broken into pices if it was too long.",
@@ -71,9 +69,6 @@ impl Display for  CipherID {
             CipherID::Substitution => "General Substittution",
             CipherID::M209 => "M209",
             CipherID::Playfair => "Playfair",
-            CipherID::CyclicKey => "Cyclic Key",
-            CipherID::Autokey => "Autokey",
-            CipherID::ProgressiveKey => "Progressive Key",
             CipherID::Alberti => "Alberti Cipher Disk",
             CipherID::Polybius => "Polybius Square",
             CipherID::Enigma => "Enigma",
@@ -82,7 +77,15 @@ impl Display for  CipherID {
             CipherID::Columnar => "Columnar Transposition",
             CipherID::Bazieres => "Bazieres",
             CipherID::M94 => "M94",
+            CipherID::Vigenere => "Vigenere",
+            CipherID::Beaufort => "Beaufort",
         };
         write!(f,"{}",name)
+    }
+}
+
+impl From<CipherID> for String {
+    fn from(id: CipherID) -> Self {
+        id.to_string()
     }
 }

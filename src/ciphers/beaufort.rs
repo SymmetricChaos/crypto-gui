@@ -6,14 +6,14 @@ use crate::text_functions::{random_sample_replace, PresetAlphabet};
 use crate::errors::CipherError;
 
 
-pub struct Vigenere {
+pub struct Beaufort {
     pub key_word: String,
     alphabet: String,
     pub prog_shift: usize,
     pub mode: PolyMode,
 }
 
-impl Vigenere {
+impl Beaufort {
 
     fn cyclic_key(&self) -> impl Iterator<Item = usize> + '_ {
         self.key_word.chars().map(|x| self.alphabet.chars().position(|c| c == x).unwrap()).cycle()
@@ -64,16 +64,10 @@ impl Vigenere {
     }
 
 
-    // Unwraps for the character methods are justified by validating the input
+    // The Beaufort cipher is reciprocal so no decrypt methods are needed
     fn encrypt_char(&self, t: usize, k: usize, l: usize) -> char {
-        self.alphabet.chars().nth( (t+k) % l ).unwrap()
+        self.alphabet.chars().nth( (l+k-t) % l ).unwrap()
     }
-
-    fn decrypt_char(&self, t: usize, k: usize, l: usize) -> char {
-        self.alphabet.chars().nth( (l+t-k) % l ).unwrap()
-    }
-
-
 
     fn encrypt_cyclic(&self, text: &str) -> Result<String,CipherError> {
         self.validate_key()?;
@@ -88,20 +82,10 @@ impl Vigenere {
     }
 
     fn decrypt_cyclic(&self, text: &str) -> Result<String,CipherError> {
-        self.validate_key()?;
-        self.validate_input(text)?;
-        let alpha_len = self.alphabet_len();
-        let length = self.alphabet_len();
-        let nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() + length ).collect();
-        let mut out = String::with_capacity(nums.len());
-        for (n,k) in nums.iter().zip(self.cyclic_key()) {
-            out.push(self.decrypt_char(*n,k,alpha_len) )
-        }
-        Ok(out)
+        self.encrypt_cyclic(text)
     }
 
     fn encrypt_auto(&self, text: &str) -> Result<String,CipherError> {
-
         let (alpha_len, 
              text_nums, 
              mut akey, 
@@ -124,7 +108,7 @@ impl Vigenere {
 
         for n in text_nums {
             let k = akey.pop_front().unwrap();
-            let ptxt_char = self.decrypt_char(n, k,alpha_len);
+            let ptxt_char = self.encrypt_char(n, k,alpha_len);
             out.push( ptxt_char );
             // TODO: I know this doesn't work and I never remember why
             akey.push_back( k );
@@ -155,36 +139,18 @@ impl Vigenere {
     }
 
     fn decrypt_prog(&self, text: &str) -> Result<String,CipherError> {
-        self.validate_key()?;
-        self.validate_input(text)?;
-        
-        let alpha_len = self.alphabet_len();
-        let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
-        let mut out = String::with_capacity(text_nums.len());
-        
-        let mut cur_shift = 0;
-        let mut ctr = 0;
-        let key_len = self.key_len();
-
-        for (n, k) in text_nums.iter().zip(self.cyclic_key()) {
-            out.push(self.decrypt_char(*n, k+cur_shift, alpha_len) );
-            ctr = (ctr+1) % key_len;
-            if ctr == 0 {
-                cur_shift += self.prog_shift;
-            }
-        }
-        Ok(out)
+        self.encrypt_prog(text)
     }
 
 }
 
-impl Default for Vigenere {
+impl Default for Beaufort {
     fn default() -> Self {
         Self { key_word: String::new(), alphabet: String::from(PresetAlphabet::English), mode: PolyMode::CylicKey, prog_shift: 0 }
     }
 }
 
-impl Cipher for Vigenere {
+impl Cipher for Beaufort {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
         match self.mode {
             PolyMode::CylicKey => self.encrypt_cyclic(text),

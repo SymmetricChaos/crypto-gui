@@ -30,5 +30,5 @@ pub fn randomize_button(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
 
 pub fn input_alphabet(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
     ui.label("Alphabet");
-    ui.add(egui::TextEdit::singleline(cipher.get_mut_input_alphabet()).text_style(TextStyle::Monospace));
+    ui.add(egui::TextEdit::singleline(cipher.get_mut_input_alphabet()).text_style(TextStyle::Monospace)).on_hover_text("You can change this alphabet to whatever you like.");
 }

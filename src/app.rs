@@ -12,6 +12,7 @@ pub struct ClassicCrypto {
     errors: String,
     active_cipher: CipherID,
     show_settings: bool,
+    about: bool,
 }
 
 impl Default for ClassicCrypto {
@@ -24,6 +25,7 @@ impl Default for ClassicCrypto {
             errors: String::new(),
             active_cipher: CipherID::default(),
             show_settings: false,
+            about: true,
         }
     }
 }
@@ -50,6 +52,9 @@ impl epi::App for ClassicCrypto {
             if ui.add(Button::new("Settings").small() ).clicked() {
                 self.show_settings = !self.show_settings;
             }
+            if ui.add(Button::new("About").small() ).clicked() {
+                self.about = !self.about;
+            }
         });
 
         Window::new("🔧 Settings")
@@ -57,6 +62,13 @@ impl epi::App for ClassicCrypto {
             .vscroll(true)
             .show(ctx, |ui| {
                 ctx.settings_ui(ui);
+        });
+
+        Window::new("About")
+            .open(&mut self.about)
+            .vscroll(true)
+            .show(ctx, |ui| {
+                ui.label("Welcome to Classic Crypto an online cipher machine made using egui, Rust, and WASM!\n\nThis project starts 'classical cryptography' as early as writing itself and ends it in 1949 with the publication of 'Communication Theory of Secrecy Systems' by Claude Shannon at Bell Labs which introduct the modern theory of cryptography. Most of the ciphers here can be broken by hand in less than a day and all of them can be broken by computer in a few moments.");
         });
 
         SidePanel::right("display_panel").max_width(300.0).show(ctx, |ui| {

@@ -16,15 +16,6 @@ pub use m209::M209;
 pub mod playfair;
 pub use playfair::Playfair;
 
-pub mod cyclic_key;
-pub use cyclic_key::CyclicKey;
-
-pub mod autokey;
-pub use autokey::Autokey;
-
-pub mod progressive_key;
-pub use progressive_key::ProgressiveKey;
-
 pub mod alberti_disk;
 pub use alberti_disk::Alberti;
 
@@ -33,6 +24,12 @@ pub use polybius::Polybius;
 
 pub mod m94;
 pub use m94::M94;
+
+pub mod vigenere;
+pub use vigenere::Vigenere;
+
+pub mod beaufort;
+pub use beaufort::Beaufort;
 
 // pub mod columnar;
 // pub use columnar::Columnar;
@@ -55,8 +52,15 @@ pub trait Cipher {
 }
 
 
+// #[derive(Debug,Copy,Clone,PartialEq, Eq)]
+// pub enum PolyMode {
+//     Vigenere,
+//     Beaufort,
+// }
+
 #[derive(Debug,Copy,Clone,PartialEq, Eq)]
 pub enum PolyMode {
-    Vigenere,
-    Beaufort,
+    CylicKey,
+    Autokey,
+    ProgKey
 }

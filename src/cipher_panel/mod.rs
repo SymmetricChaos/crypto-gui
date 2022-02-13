@@ -10,9 +10,8 @@ pub mod decoder_ring_controls;
 pub mod m209_controls;
 pub mod general_sub_controls;
 pub mod playfair_controls;
-pub mod cyclic_key_controls;
-pub mod autokey_controls;
-pub mod progressive_key_controls;
+pub mod vigenere_controls;
+pub mod beaufort_controls;
 pub mod alberti_controls;
 pub mod m94_controls;
 pub mod polybius_controls;
@@ -42,9 +41,8 @@ pub struct ControlPanel {
 
     m209: M209,
 
-    cyclic_key: CyclicKey,
-    autokey: Autokey,
-    progressive_key: ProgressiveKey,
+    vigenere: Vigenere,
+    beaufort: Beaufort,
     alberti: Alberti,
     m94: M94,
 
@@ -63,7 +61,7 @@ impl ControlPanel {
             );
     
             combox_box(
-                &[CipherID::CyclicKey, CipherID::Autokey, CipherID::ProgressiveKey, CipherID::M94, CipherID::Alberti],
+                &[CipherID::Vigenere, CipherID::Beaufort, CipherID::M94, CipherID::Alberti],
                 "Polyalphabetic",
                 active_cipher, ui
             );
@@ -91,6 +89,10 @@ impl ControlPanel {
         ui.separator();
         ui.add_space(16.0);
 
+        let name = RichText::new(String::from(*active_cipher))
+            .strong()
+            .heading();
+        ui.add(egui::Label::new(name));
         ui.label(format!{"Description:\n{}",active_cipher.description()});
 
         ui.add_space(16.0);
@@ -104,10 +106,9 @@ impl ControlPanel {
             CipherID::Substitution => self.gen_sub.ui(ui, input, output, errors),
             CipherID::Polybius => self.polybius.ui(ui, input, output, errors),
 
+            CipherID::Vigenere => self.vigenere.ui(ui, input, output, errors),
+            CipherID::Beaufort => self.beaufort.ui(ui, input, output, errors),
             CipherID::M209 => self.m209.ui(ui, input, output, errors),
-            CipherID::CyclicKey => self.cyclic_key.ui(ui, input, output, errors),
-            CipherID::Autokey => self.autokey.ui(ui, input, output, errors),
-            CipherID::ProgressiveKey => self.progressive_key.ui(ui, input, output, errors),
             CipherID::M94 => self.m94.ui(ui, input, output, errors),
             CipherID::Alberti => self.alberti.ui(ui, input, output, errors),
 
