@@ -1,7 +1,7 @@
 use num::Integer;
 
 use crate::errors::CipherError;
-use crate::grid::Grid;
+use crate::grid::{Grid, Symbol};
 use crate::text_functions::rank_str;
 use super::Cipher;
 
@@ -35,40 +35,31 @@ impl Cipher for Columnar {
         Ok(out)
     }
 
-    // Decoding is very different
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        // let tlen = text.chars().count();
-        // let filled = match tlen % self.key.len() {
-        //     0 => self.key.len(),
-        //     a => a
-        // };
-        // let n_rows = tlen.div_ceil(&self.key.len());
-
-        // let mut g = Grid::new_empty(n_rows, self.key.len());
-        // let mut symbols = text.chars();
-
-        // for k in self.key.iter() {
-        //     let mut s = String::new();
-        //     if *k < filled {
-        //         for _ in 0..self.key.len() {
-        //             s.push(symbols.next().unwrap())
-        //         }
-        //     } else {
-        //         for _ in 0..self.key.len()-1 {
-        //             s.push(symbols.next().unwrap())
-        //         }
-        //     }
-            
-        //     g.write_col_n(*k,&s);
-        // }
-
-        let mut out = String::with_capacity(text.len());
-        // for i in 0..n_rows {
-        //     let s: String = g.read_row_n(i).iter().collect();
-        //     out.push_str(&s)
-        // }
-        // out = out.replace('\0', "");
-        Ok(out)
+        let tlen = text.chars().count();
+        let n_cols = self.key.len();
+        let n_rows = tlen.div_ceil(&n_cols);
+     
+        let mut g = Grid::new_empty(n_rows, n_cols);
+        let mut symbols = text.chars();
+     
+        for n in tlen..(n_rows*n_cols) {
+            let coord = g.coord_from_index(n).unwrap();
+            g.block_cell(coord);
+        }
+     
+        for n in self.key.iter() {
+            let column = g.get_col_mut(*n);
+            for cell in column {
+                if !cell.is_blocked() {
+                    *cell = Symbol::Character(symbols.next().unwrap())
+                }
+            }
+        }
+     
+        let out: String = g.read_rows().map(|s| s.to_char()).collect();
+     
+        Ok(out)   
     }
 
     fn randomize(&mut self, rng: &mut rand::prelude::ThreadRng) {

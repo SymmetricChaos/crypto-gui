@@ -1,9 +1,9 @@
 use std::fmt;
 use std::ops::{Index, IndexMut};
-
+ 
 pub const EMPTY: char = '░';
 pub const BLOCK: char = '▓';
-
+ 
 pub fn str_to_grid_symbols(text: &str, empty_char: char, blocked_char: char) -> Vec<Symbol> {
     let mut v = Vec::with_capacity(text.chars().count());
     for c in text.chars() {
@@ -46,7 +46,7 @@ impl Symbol {
             _ => false
         }
     }
-
+ 
     pub fn to_char(&self) -> char {
         match self {
             Symbol::Character(c) => *c,
@@ -152,7 +152,7 @@ impl Grid {
     pub fn get_col(&self, col_index: usize) -> impl Iterator<Item = &Symbol> {
         (0..self.col_len()).map(move |row_index| &self[(row_index, col_index)])
     }
-
+ 
     pub fn get_row_mut(&mut self, row_index: usize) -> impl Iterator<Item = &mut Symbol> {
         let start = self.index_from_coord((row_index, 0))
             .expect("Row index was out of bounds");
@@ -160,9 +160,13 @@ impl Grid {
         self.grid[start..end].iter_mut()
     }
  
-    // pub fn get_col_mut(&mut self, col_index: usize) -> impl Iterator<Item = &mut Symbol> {
-    //     (0..self.col_len()).map(move |row_index| self[(row_index, col_index)])
-    // }
+    pub fn get_col_mut(&mut self, col_index: usize) -> impl Iterator<Item = &mut Symbol> {
+        let col_len = self.num_rows;
+        self.grid.iter_mut()
+            .enumerate()
+            .filter(move |(i, _)| i % col_len == col_index )
+            .map(|(_, e)| e)
+    }
  
     pub fn read_rows(&self) -> impl Iterator<Item = &Symbol> {
         self.grid.iter()
