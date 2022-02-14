@@ -97,7 +97,6 @@ impl Vigenere {
     }
 
     fn encrypt_auto(&self, text: &str) -> Result<String,CipherError> {
-
         let (alpha_len, 
              text_nums, 
              mut akey, 
@@ -122,8 +121,8 @@ impl Vigenere {
             let k = akey.pop_front().unwrap();
             let ptxt_char = self.decrypt_char(n, k,alpha_len);
             out.push( ptxt_char );
-            // TODO: I know this doesn't work and I never remember why
-            akey.push_back( k );
+            let new_key_val = self.alphabet.chars().position(|x| x == ptxt_char).unwrap();
+            akey.push_back( new_key_val );
         }
         Ok(out)
     }
@@ -157,10 +156,10 @@ impl Vigenere {
         let key_len = self.key_len();
 
         for (n, k) in text_nums.iter().zip(self.cyclic_key()) {
-            out.push(self.decrypt_char(*n, k+cur_shift, alpha_len) );
+            out.push(self.decrypt_char(*n, (k+cur_shift) % alpha_len, alpha_len) );
             ctr = (ctr+1) % key_len;
             if ctr == 0 {
-                cur_shift += self.prog_shift;
+                cur_shift = (cur_shift + self.prog_shift) % alpha_len;
             }
         }
         Ok(out)
@@ -218,5 +217,66 @@ impl Cipher for Vigenere {
 
     fn get_output_alphabet(&mut self) -> &String {
         &self.alphabet
+    }
+}
+
+
+#[cfg(test)]
+mod vigenere_tests {
+    use super::*;
+
+    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CIPHERTEXT_CYCLIC: &'static str = "XUGOJBKYOVBYLUHFXHQCUMKXZHUIYCXNWWU";
+    const CIPHERTEXT_AUTO: &'static str = "XUGOJBKYOKVADZWZTVDDOBASOCBQASNTHFZ";
+    const CIPHERTEXT_PROG: &'static str = "XUGOJBKYOYEBOXKIAKWIASQDFNARHLGWFFD";
+
+    #[test]
+    fn encrypt_test_cyclic() {
+        let mut cipher = Vigenere::default();
+        cipher.key_word = String::from("ENCYPTION");
+        cipher.mode = PolyMode::CylicKey;
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_CYCLIC);
+    }
+
+    #[test]
+    fn decrypt_test_cyclic() {
+        let mut cipher = Vigenere::default();
+        cipher.key_word = String::from("ENCYPTION");
+        cipher.mode = PolyMode::CylicKey;
+        assert_eq!(cipher.decrypt(CIPHERTEXT_CYCLIC).unwrap(), PLAINTEXT);
+    }
+
+    #[test]
+    fn encrypt_test_auto() {
+        let mut cipher = Vigenere::default();
+        cipher.key_word = String::from("ENCYPTION");
+        cipher.mode = PolyMode::Autokey;
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_AUTO);
+    }
+
+    #[test]
+    fn decrypt_test_auto() {
+        let mut cipher = Vigenere::default();
+        cipher.key_word = String::from("ENCYPTION");
+        cipher.mode = PolyMode::Autokey;
+        assert_eq!(cipher.decrypt(CIPHERTEXT_AUTO).unwrap(), PLAINTEXT);
+    }
+
+    #[test]
+    fn encrypt_test_prog() {
+        let mut cipher = Vigenere::default();
+        cipher.key_word = String::from("ENCYPTION");
+        cipher.prog_shift = 3;
+        cipher.mode = PolyMode::ProgKey;
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_PROG);
+    }
+
+    #[test]
+    fn decrypt_test_prog() {
+        let mut cipher = Vigenere::default();
+        cipher.key_word = String::from("ENCYPTION");
+        cipher.prog_shift = 3;
+        cipher.mode = PolyMode::ProgKey;
+        assert_eq!(cipher.decrypt(CIPHERTEXT_PROG).unwrap(), PLAINTEXT);
     }
 }
