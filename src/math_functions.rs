@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, BTreeMap};
 
 use num::{Integer, ToPrimitive, One, FromPrimitive, Unsigned};
 
@@ -43,6 +43,25 @@ pub fn prime_factorization<N: Integer + Copy + Unsigned>(n: N) -> Vec<N> {
         }
     }
     out.sort();
+    out
+}
+
+pub fn prime_factorization_map<N: Integer + Copy + Unsigned>(n: N) -> BTreeMap<N,usize> {
+    if n.is_zero() { return BTreeMap::new() }
+    let mut out = BTreeMap::new();
+    let mut n = n;
+    let mut f = N::one();
+    while !n.is_one() {
+        f = f + N::one();
+        let mut ctr = 0;
+        while n.is_multiple_of(&f) {
+            ctr += 1;
+            n = n/f;
+        }
+        if ctr != 0 {
+            out.insert(n,ctr);
+        }
+    }
     out
 }
 

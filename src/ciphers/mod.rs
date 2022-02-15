@@ -27,6 +27,8 @@ pub use m94::M94;
 
 pub mod vigenere;
 pub use vigenere::Vigenere;
+pub mod vigenere_multikey;
+pub use vigenere_multikey::VigenereMultiKey;
 
 pub mod beaufort;
 pub use beaufort::Beaufort;
