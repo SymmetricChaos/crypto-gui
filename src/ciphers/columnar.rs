@@ -1,20 +1,27 @@
 use num::Integer;
+use rand::prelude::ThreadRng;
 
 use crate::errors::CipherError;
 use crate::grid::{Grid, Symbol};
-use crate::text_functions::rank_str;
+use crate::text_functions::{rank_str, random_sample_replace, PresetAlphabet};
 use super::Cipher;
 
 pub struct Columnar {
     alphabet: String,
     key: Vec<usize>,
-    key_name: String,
+    key_word: String,
 }
 
 impl Columnar {
     pub fn set_key(&mut self) -> &mut String {
-        self.key = rank_str(&self.key_name, &self.alphabet);
-        &mut self.key_name
+        self.key = rank_str(&self.key_word, &self.alphabet);
+        &mut self.key_word
+    }
+}
+
+impl Default for Columnar {
+    fn default() -> Self {
+        Self { alphabet: String::from(PresetAlphabet::English), key: Vec::new(), key_word: String::new() }
     }
 }
 
@@ -62,29 +69,29 @@ impl Cipher for Columnar {
         Ok(out)   
     }
 
-    fn randomize(&mut self, rng: &mut rand::prelude::ThreadRng) {
-        todo!()
+
+    fn randomize(&mut self, rng: &mut ThreadRng) {
+        self.key_word =  random_sample_replace(&self.alphabet, 11, rng);
+        self.key = rank_str(&self.key_word, &self.alphabet);
     }
 
     fn get_mut_input_alphabet(&mut self) -> &mut String {
-        todo!()
+        &mut self.alphabet
     }
 
     fn get_mut_output_alphabet(&mut self) -> &mut String {
-        todo!()
+        todo!("transposition may output any alphabet")
     }
 
     fn get_input_alphabet(&mut self) -> &String {
-        todo!()
+        &self.alphabet
     }
 
     fn get_output_alphabet(&mut self) -> &String {
-        todo!()
+        todo!("transposition may output any alphabet")
     }
 
     fn validate_settings(&self) -> Result<(),crate::errors::CipherErrors> {
         todo!()
     }
-
-
 }

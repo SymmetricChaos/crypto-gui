@@ -15,6 +15,7 @@ pub mod beaufort_controls;
 pub mod alberti_controls;
 pub mod m94_controls;
 pub mod polybius_controls;
+pub mod columnar_controls;
 
 pub trait View {
     fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String, errors: &mut String);
@@ -47,6 +48,8 @@ pub struct ControlPanel {
     m94: M94,
 
     playfair: Playfair,
+
+    columnar: Columnar,
 }
 
 
@@ -113,6 +116,7 @@ impl ControlPanel {
             CipherID::Alberti => self.alberti.ui(ui, input, output, errors),
 
             CipherID::Playfair => self.playfair.ui(ui, input, output, errors),
+            CipherID::Columnar => self.columnar.ui(ui, input, output, errors),
             _ => {ui.label("COMING SOON");},
         }
     }

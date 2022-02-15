@@ -1,5 +1,4 @@
 pub mod caesar;
-pub mod columnar;
 pub use caesar::Caesar;
 
 pub mod affine;
@@ -32,8 +31,8 @@ pub use vigenere::Vigenere;
 pub mod beaufort;
 pub use beaufort::Beaufort;
 
-// pub mod columnar;
-// pub use columnar::Columnar;
+pub mod columnar;
+pub use columnar::Columnar;
 
 pub mod composite;
 
