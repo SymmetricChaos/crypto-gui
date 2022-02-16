@@ -84,7 +84,7 @@ impl Cipher for Alberti {
         &mut self.moving_alphabet
     }
 
-    fn validate_settings(&self) -> Result<(),crate::errors::CipherErrors> {
+    fn validate_settings(&self) -> Result<(), CipherError> {
         todo!()
     }
 

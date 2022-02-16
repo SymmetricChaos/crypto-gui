@@ -219,7 +219,7 @@ impl Cipher for VigenereMultiKey {
         self.key_words[4] = String::new();
     }
 
-    fn validate_settings(&self) -> Result<(),crate::errors::CipherErrors> {
+    fn validate_settings(&self) -> Result<(), CipherError> {
         todo!()
     }
 

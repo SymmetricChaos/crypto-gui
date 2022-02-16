@@ -1,5 +1,5 @@
 use rand::{Rng, prelude::ThreadRng};
-use crate::{errors::{CipherError, CipherErrors}, text_functions::PresetAlphabet};
+use crate::{errors::{CipherError}, text_functions::PresetAlphabet};
 use super::Cipher;
 
 pub struct Caesar {
@@ -89,9 +89,9 @@ impl Cipher for Caesar {
         &mut self.alphabet
     }
 
-    fn validate_settings(&self) -> Result<(),CipherErrors> {
+    fn validate_settings(&self) -> Result<(), CipherError> {
         if self.shift > self.alphabet_len() {
-            return Err(CipherErrors::new(vec![CipherError::Key(String::from("shift value must be less than the alphabet length"))]))
+            return Err(CipherError::Key(String::from("shift value must be less than the alphabet length")))
         }
         Ok(())
     }

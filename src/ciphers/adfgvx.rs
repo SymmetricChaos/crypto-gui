@@ -66,7 +66,7 @@ impl Cipher for ADFGVX {
         unimplemented!("ADFGX and ADFGVX ciphers use historically accurate alphabets")
     }
  
-    fn validate_settings(&self) -> Result<(), crate::errors::CipherErrors> {
+    fn validate_settings(&self) -> Result<(), CipherError> {
         todo!()
     }
 }

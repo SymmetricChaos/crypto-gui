@@ -199,7 +199,7 @@ impl Cipher for Vigenere {
     
     }
 
-    fn validate_settings(&self) -> Result<(),crate::errors::CipherErrors> {
+    fn validate_settings(&self) -> Result<(), CipherError> {
         todo!()
     }
 

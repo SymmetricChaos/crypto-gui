@@ -40,6 +40,7 @@ impl Default for GeneralSubstitution {
 
 impl Cipher for GeneralSubstitution {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
+        self.validate_settings()?;
         let mut out = String::new();
         for c in text.chars() {
             match self.map.get(&c) {
@@ -51,6 +52,7 @@ impl Cipher for GeneralSubstitution {
     }
 
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
+        self.validate_settings()?;
         let mut out = String::new();
         for c in text.chars() {
             match self.map_inv.get(&c) {
@@ -87,7 +89,10 @@ impl Cipher for GeneralSubstitution {
         &mut self.alphabet2
     }
 
-    fn validate_settings(&self) -> Result<(),crate::errors::CipherErrors> {
-        todo!()
+    fn validate_settings(&self) -> Result<(), CipherError> {
+        if self.alphabet1.chars().count() != self.alphabet2.chars().count() {
+            return Err(CipherError::key("the input and output alphabets must have the same length"))
+        }
+        Ok(())
     }
 }

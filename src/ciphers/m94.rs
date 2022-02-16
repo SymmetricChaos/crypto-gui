@@ -50,7 +50,9 @@ impl Default for M94 {
 impl Cipher for M94 {
 
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        // should require a 25 character message
+        if text.len() != 25 {
+            return Err(CipherError::Input("M94 messages must have exactly 25 characters".to_string()))
+        }
         let mut out = String::with_capacity(text.len());
         let ckey = self.wheels.iter().cycle();
         for (k, c) in ckey.zip(text.chars()) {
@@ -61,7 +63,9 @@ impl Cipher for M94 {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        // should require a 25 character message
+        if text.len() != 25 {
+            return Err(CipherError::Input("M94 messages must have exactly 25 characters".to_string()))
+        }
         let mut out = String::with_capacity(text.len());
         let rev_offset = 26 - self.offset;
         let ckey = self.wheels.iter().cycle();
@@ -93,8 +97,8 @@ impl Cipher for M94 {
         &self.alphabet
     }
 
-    fn validate_settings(&self) -> Result<(),crate::errors::CipherErrors> {
-        todo!()
+    fn validate_settings(&self) -> Result<(), CipherError> {
+        unimplemented!("It shouldn't be possible to get the M94 into an invalid state")
     }
 
 }

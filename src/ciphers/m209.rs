@@ -311,7 +311,7 @@ impl Cipher for M209 {
         &mut self.alphabet
     }
 
-    fn validate_settings(&self) -> Result<(),crate::errors::CipherErrors> {
+    fn validate_settings(&self) -> Result<(), CipherError> {
         todo!()
     }
 }

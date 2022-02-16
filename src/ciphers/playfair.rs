@@ -148,7 +148,7 @@ impl Cipher for Playfair {
         &mut self.alphabet
     }
 
-    fn validate_settings(&self) -> Result<(),crate::errors::CipherErrors> {
+    fn validate_settings(&self) -> Result<(), CipherError> {
         todo!()
     }
 }

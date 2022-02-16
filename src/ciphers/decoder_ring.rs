@@ -97,7 +97,7 @@ impl Cipher for DecoderRing {
         todo!("output alphabet should be digits and spaces")
     }
 
-    fn validate_settings(&self) -> Result<(),crate::errors::CipherErrors> {
+    fn validate_settings(&self) -> Result<(), CipherError> {
         todo!()
     }
 }

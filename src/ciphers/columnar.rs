@@ -91,7 +91,7 @@ impl Cipher for Columnar {
         todo!("transposition may output any alphabet")
     }
 
-    fn validate_settings(&self) -> Result<(),crate::errors::CipherErrors> {
+    fn validate_settings(&self) -> Result<(), CipherError> {
         todo!()
     }
 }

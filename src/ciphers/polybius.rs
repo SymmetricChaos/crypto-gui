@@ -121,16 +121,9 @@ impl Cipher for Polybius {
         &mut self.alphabet
     }
 
-    fn validate_settings(&self) -> Result<(),CipherErrors> {
-        let mut errors = Vec::new();
-        match validate_alphabet(&self.alphabet) {
-            Ok(_) => (),
-            Err(e) => errors.push(e),
-        }
-        if errors.is_empty() {
-            return Ok(())
-        }
-        Err(CipherErrors::new(errors))
+    fn validate_settings(&self) -> Result<(), CipherError> {
+        validate_alphabet(&self.alphabet)?;
+        Ok(())
     }
 }
 
