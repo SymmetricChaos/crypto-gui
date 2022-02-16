@@ -4,7 +4,6 @@ use itertools::Itertools;
 use num::integer::Roots;
 use rand::prelude::ThreadRng;
 use super::Cipher;
-use crate::errors::CipherErrors;
 use crate::{errors::CipherError, text_functions::shuffled_str};
 use crate::text_functions::{validate_alphabet, keyed_alphabet, PresetAlphabet};
 

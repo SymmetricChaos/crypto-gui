@@ -1,5 +1,4 @@
 use rand::prelude::ThreadRng;
-
 use crate::{ciphers::{Polybius,Columnar}, text_functions::PresetAlphabet, errors::CipherError};
 use super::Cipher;
  
@@ -39,11 +38,15 @@ impl Default for ADFGVX {
  
 impl Cipher for ADFGVX {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        todo!("Set up Polybius Square and Columnar Transposition then execute in order")
+        let poly_text = self.polybius.encrypt(text)?;
+        let colm_text = self.columnar.encrypt(&poly_text)?;
+        Ok(colm_text)
     }
  
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        todo!("Set up Columnar Transposition and Polybius Square then execute in order")
+        let colm_text = self.columnar.decrypt(text)?;
+        let poly_text = self.polybius.decrypt(&colm_text)?;
+        Ok(poly_text)
     }
  
     fn randomize(&mut self, rng: &mut ThreadRng) {
@@ -59,11 +62,11 @@ impl Cipher for ADFGVX {
     }
  
     fn get_mut_input_alphabet(&mut self) -> &mut String {
-        unimplemented!("ADFGX and ADFGVX ciphers use historically accurate alphabets")
+        unimplemented!("ADFGX and ADFGVX ciphers use historically accurate alphabets that should not be changed")
     }
  
     fn get_mut_output_alphabet(&mut self) -> &mut String {
-        unimplemented!("ADFGX and ADFGVX ciphers use historically accurate alphabets")
+        unimplemented!("ADFGX and ADFGVX ciphers use historically accurate alphabets that should not be changed")
     }
  
     fn validate_settings(&self) -> Result<(), CipherError> {
