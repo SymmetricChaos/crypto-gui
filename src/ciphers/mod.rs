@@ -36,6 +36,9 @@ pub use beaufort::Beaufort;
 pub mod columnar;
 pub use columnar::Columnar;
 
+pub mod adfgvx;
+pub use adfgvx::ADFGVX;
+
 pub mod composite;
 
 use rand::prelude::ThreadRng;
