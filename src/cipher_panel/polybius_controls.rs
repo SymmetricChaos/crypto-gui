@@ -13,10 +13,10 @@ impl View for Polybius {
 
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
-            if ui.button("No Q").clicked() { self.set_mode(PresetAlphabet::EnglishNoQ) };
-            if ui.button("No J").clicked() { self.set_mode(PresetAlphabet::EnglishNoJ) };
-            if ui.button("Alphanumeric").clicked() { self.set_mode(PresetAlphabet::EnglishWithDigits) };
-            if ui.button("Base64").clicked() { self.set_mode(PresetAlphabet::Base64) };
+            if ui.button("No Q").clicked() { self.set_alphabet(PresetAlphabet::EnglishNoQ) };
+            if ui.button("No J").clicked() { self.set_alphabet(PresetAlphabet::EnglishNoJ) };
+            if ui.button("Alphanumeric").clicked() { self.set_alphabet(PresetAlphabet::EnglishWithDigits) };
+            if ui.button("Base64").clicked() { self.set_alphabet(PresetAlphabet::Base64) };
         });
 
         ui.add_space(10.0);

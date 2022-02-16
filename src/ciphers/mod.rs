@@ -50,8 +50,8 @@ pub trait Cipher {
     fn randomize(&mut self, rng: &mut ThreadRng);
     fn get_mut_input_alphabet(&mut self) -> &mut String;
     fn get_mut_output_alphabet(&mut self) -> &mut String;
-    fn get_input_alphabet(&mut self) -> &String;
-    fn get_output_alphabet(&mut self) -> &String;
+    fn get_input_alphabet(&self) -> &String;
+    fn get_output_alphabet(&self) -> &String;
     fn validate_settings(&self) -> Result<(),CipherErrors>;
     //fn get_key_state(&self) -> some complex thing? idk or this could be optional
 }

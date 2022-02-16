@@ -68,11 +68,11 @@ impl Cipher for Alberti {
         self.start_index = rng.gen_range(0..length);
     }
 
-    fn get_input_alphabet(&mut self) -> &String {
+    fn get_input_alphabet(&self) -> &String {
         &self.fixed_alphabet
     }
 
-    fn get_output_alphabet(&mut self) -> &String {
+    fn get_output_alphabet(&self) -> &String {
         &self.moving_alphabet
     }
 

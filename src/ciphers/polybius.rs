@@ -24,12 +24,20 @@ impl Polybius {
         &mut self.key_word
     }
 
-    pub fn set_mode(&mut self, mode: PresetAlphabet) {
+    pub fn set_alphabet(&mut self, mode: PresetAlphabet) {
         self.alphabet = mode.string();
         self.grid_side_len = mode.len().sqrt();
         if mode.len().sqrt().pow(2) != mode.len() {
             panic!("Cannot assign an alphabet with a non-square length to a square grid")
         }
+    }
+
+    pub fn set_labels(&mut self, labels: String) {
+        self.labels = labels
+    }
+
+    pub fn get_labels(&self) -> &String {
+        &self.labels
     }
 
     fn pairs(&self, text: &str) -> Result<Vec<(char,char)>,CipherError> {
@@ -97,12 +105,12 @@ impl Cipher for Polybius {
         self.key_word = shuffled_str(&self.inner_alphabet, rng)
     }
 
-    fn get_input_alphabet(&mut self) -> &String {
-        &mut self.alphabet
+    fn get_input_alphabet(&self) -> &String {
+        &self.alphabet
     }
 
-    fn get_output_alphabet(&mut self) -> &String {
-        &mut self.alphabet
+    fn get_output_alphabet(&self) -> &String {
+        &self.alphabet
     }
 
     fn get_mut_input_alphabet(&mut self) -> &mut String {

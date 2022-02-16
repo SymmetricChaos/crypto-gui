@@ -211,11 +211,11 @@ impl Cipher for Vigenere {
         &mut self.alphabet
     }
 
-    fn get_input_alphabet(&mut self) -> &String {
+    fn get_input_alphabet(&self) -> &String {
         &self.alphabet
     }
 
-    fn get_output_alphabet(&mut self) -> &String {
+    fn get_output_alphabet(&self) -> &String {
         &self.alphabet
     }
 }

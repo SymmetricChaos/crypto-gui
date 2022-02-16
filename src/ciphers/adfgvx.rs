@@ -4,22 +4,20 @@ use crate::{ciphers::{Polybius,Columnar}, text_functions::PresetAlphabet, errors
 use super::Cipher;
  
 pub struct ADFGVX {
-    alphabet: String,
-    labels: String,
-    polybius_key: String,
-    columnar_key: String
+    polybius: Polybius,
+    columnar: Columnar
 }
  
 impl ADFGVX {
-    pub fn set_alphabet(&mut self, alpha: PresetAlphabet) {
-        match alpha {
+    pub fn set_alphabet(&mut self, mode: PresetAlphabet) {
+        match mode {
             PresetAlphabet::EnglishNoJ => {
-                self.alphabet = String::from(alpha);
-                self.labels = String::from("ADFGX");
+                self.polybius.set_alphabet(mode);
+                self.polybius.set_labels(String::from("ADFGX"));
             }
             PresetAlphabet::EnglishWithDigits => {
-                self.alphabet = String::from(alpha);
-                self.labels = String::from("ADFGVX");
+                self.polybius.set_alphabet(mode);
+                self.polybius.set_labels(String::from("ADFGVX"));
             }
             _ => ()
         }
@@ -28,10 +26,13 @@ impl ADFGVX {
  
 impl Default for ADFGVX {
     fn default() -> Self {
-        Self{ alphabet: String::from(PresetAlphabet::EnglishNoJ), 
-              labels: String::from("ADFGVX"),
-              polybius_key: String::new(),
-              columnar_key: String::new()
+        let mut polybius = Polybius::default();
+        polybius.set_alphabet(PresetAlphabet::EnglishNoJ);
+        polybius.set_labels(String::from("ADFGVX"));
+
+        Self{
+              polybius,
+              columnar: Columnar::default()
         }
     }
 }
@@ -49,12 +50,12 @@ impl Cipher for ADFGVX {
         todo!()
     }
  
-    fn get_input_alphabet(&mut self) -> &String {
-        &self.alphabet
+    fn get_input_alphabet(&self) -> &String {
+        &self.polybius.get_input_alphabet()
     }
  
-    fn get_output_alphabet(&mut self) -> &String {
-        &self.labels
+    fn get_output_alphabet(&self) -> &String {
+        &self.polybius.get_labels()
     }
  
     fn get_mut_input_alphabet(&mut self) -> &mut String {

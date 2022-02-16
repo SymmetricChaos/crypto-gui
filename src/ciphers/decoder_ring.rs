@@ -81,11 +81,11 @@ impl Cipher for DecoderRing {
         self.index = rng.gen_range(0..self.alphabet.len());
     }
 
-    fn get_input_alphabet(&mut self) -> &String {
-        &mut self.alphabet
+    fn get_input_alphabet(&self) -> &String {
+        &self.alphabet
     }
 
-    fn get_output_alphabet(&mut self) -> &String {
+    fn get_output_alphabet(&self) -> &String {
         todo!("output alphabet should be digits and spaces")
     }
 
