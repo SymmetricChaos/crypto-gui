@@ -13,9 +13,9 @@ impl View for Polybius {
 
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
-            if ui.button("No Q").clicked() { self.set_alphabet(PresetAlphabet::EnglishNoQ) };
-            if ui.button("No J").clicked() { self.set_alphabet(PresetAlphabet::EnglishNoJ) };
-            if ui.button("Alphanumeric").clicked() { self.set_alphabet(PresetAlphabet::EnglishWithDigits) };
+            if ui.button("No Q").clicked() { self.set_alphabet(PresetAlphabet::BasicLatinNoQ) };
+            if ui.button("No J").clicked() { self.set_alphabet(PresetAlphabet::BasicLatinNoJ) };
+            if ui.button("Alphanumeric").clicked() { self.set_alphabet(PresetAlphabet::BasicLatinWithDigits) };
             if ui.button("Base64").clicked() { self.set_alphabet(PresetAlphabet::Base64) };
         });
 

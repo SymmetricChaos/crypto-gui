@@ -91,7 +91,7 @@ impl Playfair {
 
 impl Default for Playfair {
     fn default() -> Self {
-        Self{ alphabet: String::from(PresetAlphabet::EnglishNoQ), spacer: 'X' }
+        Self{ alphabet: String::from(PresetAlphabet::BasicLatinNoQ), spacer: 'X' }
     }
 }
 

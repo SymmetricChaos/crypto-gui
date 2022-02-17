@@ -139,7 +139,7 @@ impl Beaufort {
 
 impl Default for Beaufort {
     fn default() -> Self {
-        Self { key_word: String::new(), alphabet: String::from(PresetAlphabet::English), mode: PolyMode::CylicKey, prog_shift: 0 }
+        Self { key_word: String::new(), alphabet: String::from(PresetAlphabet::BasicLatin), mode: PolyMode::CylicKey, prog_shift: 0 }
     }
 }
 

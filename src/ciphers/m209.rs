@@ -170,7 +170,7 @@ impl Default for M209 {
                     (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0),
                     (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0)
             ], 
-            alphabet: String::from(PresetAlphabet::English) 
+            alphabet: String::from(PresetAlphabet::BasicLatin) 
         }
     }
 }

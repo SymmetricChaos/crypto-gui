@@ -10,11 +10,11 @@ pub struct ADFGVX {
 impl ADFGVX {
     pub fn set_alphabet(&mut self, mode: PresetAlphabet) {
         match mode {
-            PresetAlphabet::EnglishNoJ => {
+            PresetAlphabet::BasicLatinNoJ => {
                 self.polybius.set_alphabet(mode);
                 self.polybius.set_labels(String::from("ADFGX"));
             }
-            PresetAlphabet::EnglishWithDigits => {
+            PresetAlphabet::BasicLatinWithDigits => {
                 self.polybius.set_alphabet(mode);
                 self.polybius.set_labels(String::from("ADFGVX"));
             }
@@ -26,7 +26,7 @@ impl ADFGVX {
 impl Default for ADFGVX {
     fn default() -> Self {
         let mut polybius = Polybius::default();
-        polybius.set_alphabet(PresetAlphabet::EnglishNoJ);
+        polybius.set_alphabet(PresetAlphabet::BasicLatinNoJ);
         polybius.set_labels(String::from("ADFGVX"));
 
         Self{

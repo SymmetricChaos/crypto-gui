@@ -70,8 +70,8 @@ impl Polybius {
 
 impl Default for Polybius {
     fn default() -> Self {
-        Self{ alphabet: String::from(PresetAlphabet::EnglishNoQ),
-              inner_alphabet: String::from(PresetAlphabet::EnglishNoQ),
+        Self{ alphabet: String::from(PresetAlphabet::BasicLatinNoQ),
+              inner_alphabet: String::from(PresetAlphabet::BasicLatinNoQ),
               grid_side_len: 5,
               labels: String::from(PresetAlphabet::Digits1),
               key_word: String::new(), }

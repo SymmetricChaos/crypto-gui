@@ -27,7 +27,7 @@ impl Caesar {
 
 impl Default for Caesar {
     fn default() -> Self {
-        Self { shift: 0, alphabet: String::from(PresetAlphabet::English) }
+        Self { shift: 0, alphabet: String::from(PresetAlphabet::BasicLatin) }
     }
 }
 

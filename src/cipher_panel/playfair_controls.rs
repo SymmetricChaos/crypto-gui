@@ -10,9 +10,9 @@ impl View for Playfair {
     fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, output: &mut String, errors: &mut String) {
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
-            if ui.button("No Q").clicked() { self.set_mode(PresetAlphabet::EnglishNoQ) };
-            if ui.button("No J").clicked() { self.set_mode(PresetAlphabet::EnglishNoJ) };
-            if ui.button("Alphanumeric").clicked() { self.set_mode(PresetAlphabet::EnglishWithDigits) };
+            if ui.button("No Q").clicked() { self.set_mode(PresetAlphabet::BasicLatinNoQ) };
+            if ui.button("No J").clicked() { self.set_mode(PresetAlphabet::BasicLatinNoJ) };
+            if ui.button("Alphanumeric").clicked() { self.set_mode(PresetAlphabet::BasicLatinWithDigits) };
         });
         ui.add_space(10.0);
         ui.label(RichText::new(self.get_mut_input_alphabet().clone()).monospace().background_color(Color32::BLACK));

@@ -92,8 +92,8 @@ impl Cipher for Alberti {
  
 impl Default for Alberti {
     fn default() -> Self {
-        Self{ fixed_alphabet:  String::from(PresetAlphabet::English), 
-              moving_alphabet: String::from(PresetAlphabet::English.string().to_ascii_lowercase()),
+        Self{ fixed_alphabet:  String::from(PresetAlphabet::BasicLatin), 
+              moving_alphabet: String::from(PresetAlphabet::BasicLatin.string().to_ascii_lowercase()),
               start_index: 0} 
     }
 }

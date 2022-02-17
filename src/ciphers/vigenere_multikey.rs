@@ -184,7 +184,7 @@ impl VigenereMultiKey {
 impl Default for VigenereMultiKey {
     fn default() -> Self {
         Self { key_words: [String::new(), String::new(), String::new(), String::new(), String::new()], 
-               alphabet: String::from(PresetAlphabet::English), 
+               alphabet: String::from(PresetAlphabet::BasicLatin), 
                mode: PolyMode::CylicKey, 
                prog_shift: 0 }
     }

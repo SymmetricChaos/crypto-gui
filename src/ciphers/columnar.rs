@@ -21,7 +21,7 @@ impl Columnar {
 
 impl Default for Columnar {
     fn default() -> Self {
-        Self { alphabet: String::from(PresetAlphabet::English), key: Vec::new(), key_word: String::new() }
+        Self { alphabet: String::from(PresetAlphabet::BasicLatin), key: Vec::new(), key_word: String::new() }
     }
 }
 

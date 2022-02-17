@@ -169,7 +169,7 @@ impl Vigenere {
 
 impl Default for Vigenere {
     fn default() -> Self {
-        Self { key_word: String::new(), alphabet: String::from(PresetAlphabet::English), mode: PolyMode::CylicKey, prog_shift: 0 }
+        Self { key_word: String::new(), alphabet: String::from(PresetAlphabet::BasicLatin), mode: PolyMode::CylicKey, prog_shift: 0 }
     }
 }
 

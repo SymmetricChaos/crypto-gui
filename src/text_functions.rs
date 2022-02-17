@@ -6,10 +6,10 @@ use crate::errors::CipherError;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PresetAlphabet {
-    English,
-    EnglishNoJ,
-    EnglishNoQ,
-    EnglishWithDigits,
+    BasicLatin,
+    BasicLatinNoJ,
+    BasicLatinNoQ,
+    BasicLatinWithDigits,
     Digits0,
     Digits1,
     Ascii94, // The printing ASCII symbols without the space
@@ -24,10 +24,10 @@ impl PresetAlphabet {
     // Pointer to a static string slice
     pub fn slice(&self) -> &'static str {
         match self {
-            PresetAlphabet::English => "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-            PresetAlphabet::EnglishNoJ => "ABCDEFGHIKLMNOPQRSTUVWXYZ",
-            PresetAlphabet::EnglishNoQ => "ABCDEFGHIJKLMNOPRSTUVWXYZ",
-            PresetAlphabet::EnglishWithDigits => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+            PresetAlphabet::BasicLatin => "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            PresetAlphabet::BasicLatinNoJ => "ABCDEFGHIKLMNOPQRSTUVWXYZ",
+            PresetAlphabet::BasicLatinNoQ => "ABCDEFGHIJKLMNOPRSTUVWXYZ",
+            PresetAlphabet::BasicLatinWithDigits => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
             PresetAlphabet::Digits0 => "0123456789",
             PresetAlphabet::Digits1 => "1234567890",
             PresetAlphabet::Ascii94 => "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
@@ -122,7 +122,7 @@ pub fn string_pairs(text: &str) -> Vec<&str> {
 
 /*
 Rank the characters of a string by their order in the alphabet, making every entry unique and using the smallest possible numbers
-The text APPLE with the English alphabet would give: [0, 3, 4, 2, 1, 5]
+The text APPLE with the BasicLatin alphabet would give: [0, 3, 4, 2, 1, 5]
 */
 pub fn rank_str(text: &str, alphabet: &str) -> Vec<usize> {
     let mut values = text.chars().map(|x| alphabet.chars().position(|c| x == c).unwrap()).collect::<Vec<usize>>();
@@ -199,7 +199,7 @@ mod affine_tests {
     #[test]
     fn string_ranking() {
         let text = "APPLES";
-        let alphabet = PresetAlphabet::English.slice();
+        let alphabet = PresetAlphabet::BasicLatin.slice();
         assert_eq!(vec![0, 3, 4, 2, 1, 5],rank_str(text, alphabet));
     }
 

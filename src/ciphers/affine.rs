@@ -32,7 +32,7 @@ impl Default for Affine {
         Self {
             add_key: 0,
             mul_key: 1,
-            alphabet: String::from(PresetAlphabet::English),
+            alphabet: String::from(PresetAlphabet::BasicLatin),
         }
     }
 }

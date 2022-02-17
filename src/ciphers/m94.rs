@@ -41,7 +41,7 @@ pub struct M94 {
 impl Default for M94 {
     fn default() -> M94 {
         let wheels = Vec::from(M94_WHEELS);
-        let alphabet = String::from(PresetAlphabet::English);
+        let alphabet = String::from(PresetAlphabet::BasicLatin);
         M94{ offset: 0, wheels, alphabet }
     }
  
