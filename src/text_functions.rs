@@ -17,6 +17,8 @@ pub enum PresetAlphabet {
     Greek,
     Latin, //Classical Latin
     Base64, // 64 safe to use ASCII symbols, low chance of being interpreted if the string is parsed
+    Spanish,
+    German,
 }
 
 impl PresetAlphabet {
@@ -35,7 +37,8 @@ impl PresetAlphabet {
             PresetAlphabet::Greek => "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ", //All of these are Unicode Greek even the ones draw identically to ASCII
             PresetAlphabet::Latin => "ABCDEFGHIKLMNOPQRSTVXY",
             PresetAlphabet::Base64 => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
-            
+            PresetAlphabet::Spanish => "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ",
+            PresetAlphabet::German => "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜß",
         }
     }
 

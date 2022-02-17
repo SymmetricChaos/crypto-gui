@@ -6,6 +6,7 @@ use rand::prelude::ThreadRng;
 use super::Cipher;
 use crate::{errors::CipherError, text_functions::shuffled_str};
 use crate::text_functions::{validate_alphabet, keyed_alphabet, PresetAlphabet};
+use crate::text_functions::PresetAlphabet::*;
 
 pub struct Polybius {
     alphabet: String,
@@ -24,10 +25,12 @@ impl Polybius {
     }
 
     pub fn set_alphabet(&mut self, mode: PresetAlphabet) {
-        self.alphabet = mode.string();
-        self.grid_side_len = mode.len().sqrt();
-        if mode.len().sqrt().pow(2) != mode.len() {
-            panic!("Cannot assign an alphabet with a non-square length to a square grid")
+        match mode {
+            BasicLatinNoJ | BasicLatinNoQ | BasicLatinWithDigits | Base64 => {
+                self.alphabet = mode.string();
+                self.grid_side_len = mode.len().sqrt();
+            }
+            _ => ()
         }
     }
 
