@@ -39,10 +39,13 @@ pub use columnar::Columnar;
 pub mod adfgvx;
 pub use adfgvx::ADFGVX;
 
+pub mod sixtyfour;
+pub use sixtyfour::SixtyFour;
+
 pub mod composite;
 
 use rand::prelude::ThreadRng;
-use crate::errors::{CipherError};
+use crate::errors::CipherError;
 
 pub trait Cipher {
     fn encrypt(&self, text: &str) -> Result<String,CipherError>;

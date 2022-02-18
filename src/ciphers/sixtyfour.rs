@@ -37,8 +37,8 @@ impl Cipher for SixtyFour {
     }
  
     fn randomize(&mut self, rng: &mut ThreadRng) {
-        self.polybius.randomize();
-        self.columnar.randomize();
+        self.polybius.randomize(rng);
+        self.columnar.randomize(rng);
     }
  
     fn get_input_alphabet(&self) -> &String {

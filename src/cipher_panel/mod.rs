@@ -16,6 +16,7 @@ pub mod alberti_controls;
 pub mod m94_controls;
 pub mod polybius_controls;
 pub mod columnar_controls;
+pub mod adfgvx_controls;
 
 pub trait View {
     fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String, errors: &mut String);
@@ -50,6 +51,8 @@ pub struct ControlPanel {
     playfair: Playfair,
 
     columnar: Columnar,
+
+    adfgvx: ADFGVX,
 }
 
 
@@ -82,10 +85,17 @@ impl ControlPanel {
             );
     
             combox_box(
-                &[CipherID::Playfair],
-                "Other",
+                &[CipherID::Playfair, CipherID::Slidefair],
+                "Playfair",
                 active_cipher, ui
             );
+
+            combox_box(
+                &[CipherID::ADFGVX],
+                "Composite",
+                active_cipher, ui
+            );
+
         });
 
         ui.add_space(16.0);
@@ -108,16 +118,15 @@ impl ControlPanel {
             CipherID::Decoder => self.decoder_ring.ui(ui, input, output, errors),
             CipherID::Substitution => self.gen_sub.ui(ui, input, output, errors),
             CipherID::Polybius => self.polybius.ui(ui, input, output, errors),
-
             CipherID::Vigenere => self.vigenere.ui(ui, input, output, errors),
             CipherID::Beaufort => self.beaufort.ui(ui, input, output, errors),
             CipherID::M209 => self.m209.ui(ui, input, output, errors),
             CipherID::M94 => self.m94.ui(ui, input, output, errors),
             CipherID::Alberti => self.alberti.ui(ui, input, output, errors),
-
             CipherID::Playfair => self.playfair.ui(ui, input, output, errors),
             CipherID::Columnar => self.columnar.ui(ui, input, output, errors),
-            _ => {ui.label("COMING SOON");},
+            CipherID::ADFGVX => self.adfgvx.ui(ui, input, output, errors),
+            _ => {ui.label(format!("IN PROGRESS\n{}",active_cipher.description()));},
         }
     }
 }

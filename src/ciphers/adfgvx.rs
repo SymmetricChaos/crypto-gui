@@ -3,8 +3,8 @@ use crate::{ciphers::{Polybius,Columnar}, text_functions::PresetAlphabet, errors
 use super::Cipher;
  
 pub struct ADFGVX {
-    polybius: Polybius,
-    columnar: Columnar
+    pub polybius: Polybius,
+    pub columnar: Columnar
 }
  
 impl ADFGVX {
@@ -50,7 +50,8 @@ impl Cipher for ADFGVX {
     }
  
     fn randomize(&mut self, rng: &mut ThreadRng) {
-        todo!()
+        self.polybius.randomize(rng);
+        self.columnar.randomize(rng);
     }
  
     fn get_input_alphabet(&self) -> &String {
