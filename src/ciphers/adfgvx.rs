@@ -27,7 +27,7 @@ impl Default for ADFGVX {
     fn default() -> Self {
         let mut polybius = Polybius::default();
         polybius.set_alphabet(PresetAlphabet::BasicLatinNoJ);
-        polybius.set_labels(String::from("ADFGVX"));
+        polybius.set_labels(String::from("ADFGX"));
 
         Self{
               polybius,

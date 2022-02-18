@@ -1,9 +1,7 @@
-use eframe::egui::TextEdit;
-use eframe::egui::{RichText, Color32};
+use eframe::egui::{RichText, TextEdit};
 
 use super::View;
 use super::generic_components::*;
-use crate::ciphers::Cipher;
 use crate::ciphers::ADFGVX;
 use crate::text_functions::PresetAlphabet;
 
@@ -16,10 +14,6 @@ impl View for ADFGVX {
             if ui.button("ADFGX").clicked() { self.set_alphabet(PresetAlphabet::BasicLatinNoJ) };
             if ui.button("ADFGVX").clicked() { self.set_alphabet(PresetAlphabet::BasicLatinWithDigits) };
         });
-
-        ui.add_space(10.0);
-        ui.label(RichText::new(self.get_input_alphabet().clone()).monospace().background_color(Color32::BLACK));
-        ui.add_space(16.0);
 
         ui.label("Polybius Key Word");
         ui.add(TextEdit::singleline(self.polybius.set_key()));

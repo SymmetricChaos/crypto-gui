@@ -83,7 +83,9 @@ impl ControlPanel {
                 "Transposition",
                 active_cipher, ui
             );
-    
+        });
+        
+        ui.horizontal(|ui| {
             combox_box(
                 &[CipherID::Playfair, CipherID::Slidefair],
                 "Playfair",

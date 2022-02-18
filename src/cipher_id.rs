@@ -84,7 +84,7 @@ impl Display for  CipherID {
             CipherID::M94 => "M94",
             CipherID::Vigenere => "Vigenere",
             CipherID::Beaufort => "Beaufort",
-            CipherID::ADFGVX => "ASFGVX",
+            CipherID::ADFGVX => "ADFGX",
             CipherID::Bifid => "Bifid",
         };
         write!(f,"{}",name)
