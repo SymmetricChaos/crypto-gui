@@ -1,4 +1,3 @@
-use core::panic;
 use std::fmt;
 use itertools::Itertools;
 use num::integer::Roots;

@@ -1,7 +1,6 @@
 use eframe::egui::{TextEdit};
 use super::View;
 use super::generic_components::*;
-use crate::ciphers::Cipher;
 use crate::ciphers::Columnar;
 
 
