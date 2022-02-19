@@ -74,3 +74,29 @@ impl Cipher for ADFGVX {
         todo!()
     }
 }
+
+
+
+#[cfg(test)]
+mod adfgvx_tests {
+    use super::*;
+
+    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXIUMPSOVERTHELAZYDOG";
+    const CIPHERTEXT: &'static str = "GDXXFAAXFGDAXGGAGDDGDGFGAFGXDFGFDAGAXDFXXXGAAFFFXDXDXFGGDAFXDGGAFDGGFA";
+
+    #[test]
+    fn encrypt_test_adfgx() {
+        let mut cipher = ADFGVX::default();
+        cipher.polybius.set_key_word("KEYWORKFORUSEINTEST");
+        cipher.columnar.set_key_word("SOMEWORD");
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+    }
+
+    #[test]
+    fn decrypt_test_adfgx() {
+        let mut cipher = ADFGVX::default();
+        cipher.polybius.set_key_word("KEYWORKFORUSEINTEST");
+        cipher.columnar.set_key_word("SOMEWORD");
+        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+    }
+}

@@ -161,15 +161,19 @@ impl Grid {
     }
  
     pub fn get_col_mut(&mut self, col_index: usize) -> impl Iterator<Item = &mut Symbol> {
-        let col_len = self.num_rows;
+        let cols = self.num_cols;
         self.grid.iter_mut()
             .enumerate()
-            .filter(move |(i, _)| i % col_len == col_index )
+            .filter(move |(i, _)| (i % cols) == col_index )
             .map(|(_, e)| e)
     }
  
     pub fn read_rows(&self) -> impl Iterator<Item = &Symbol> {
         self.grid.iter()
+    }
+
+    pub fn read_filled_rows(&self) -> impl Iterator<Item = char> + '_ {
+        self.read_rows().filter(|x| x.is_character()).map(|x| x.to_char())
     }
  
     // Horrible hack that works fine
@@ -181,6 +185,10 @@ impl Grid {
             };
         }
         symbols.into_iter()
+    }
+
+    pub fn read_filled_cols(&self) -> impl Iterator<Item = char> + '_ {
+        self.read_cols().filter(|x| x.is_character()).map(|x| x.to_char())
     }
  
     // Replace the cell with the Symbol::Empty and return what was overwritten, panics if out of bounds
@@ -224,35 +232,14 @@ impl Grid {
         None
     }
  
-    pub fn remap<F>(&mut self, mut func: F)
+    pub fn apply<F>(&mut self, mut func: F)
         where F: FnMut(Symbol) -> Symbol 
     {
         for sym in self.grid.iter_mut() {
             *sym = func(*sym);
         }
     }
- 
- 
-    // pub fn overwrite_empty<I>(&mut self, symbols: I) 
-    // where
-    //     I: IntoIterator<Item = Symbol> {
-    //     let i = symbols.into_iter();
-    //     for cell in self.grid.iter() {
-    //         if *cell == Symbol::Empty {
-    //             cell = match i.next() {
-    //                 Some(sym) => *cell = sym,
-    //                 None => break,
-    //             }
-    //         }
-    //     }
-    // }
- 
-    // pub fn overwrite_unblocked<I>(&mut self, symbols: I) 
-    // where
-    //     I: IntoIterator<Item = Symbol> {
- 
-    // }
- 
+  
     // pub fn rotate(&mut self) {
     //     let mut new_grid = Vec::<Symbol>::with_capacity(self.grid.len());
  
@@ -303,3 +290,29 @@ impl IndexMut<(usize, usize)> for Grid {
         self.get_mut(indices).unwrap()
     }
 }
+
+
+// #[cfg(test)]
+// mod grid_tests {
+//     use super::*;
+
+
+//     #[test]
+//     fn row_mut_test() {
+//         let mut grid = Grid::new_empty(5, 6);
+//         for cell in grid.get_row_mut(0) {
+//             *cell = Symbol::Character('A')
+//         }
+//         println!("{}",grid);
+//     }
+
+//     #[test]
+//     fn col_mut_test() {
+//         let mut grid = Grid::new_empty(5, 6);
+//         for cell in grid.get_col_mut(0) {
+//             *cell = Symbol::Character('A')
+//         }
+//         println!("{}",grid);
+//     }
+
+// }

@@ -1,8 +1,9 @@
 use num::Integer;
+use rand::distributions::DistString;
 use rand::prelude::ThreadRng;
 
 use crate::errors::CipherError;
-use crate::grid::{Grid, Symbol, self};
+use crate::grid::{Grid, Symbol};
 use crate::text_functions::{rank_str, random_sample_replace, PresetAlphabet};
 use super::Cipher;
 
@@ -17,6 +18,11 @@ impl Columnar {
         self.key = rank_str(&self.key_word, &self.alphabet);
         &mut self.key_word
     }
+
+    pub fn set_key_word(&mut self, key_word: &str) {
+        self.key_word = key_word.to_string();
+        self.key = rank_str(&self.key_word, &self.alphabet);
+    }
 }
 
 impl Default for Columnar {
@@ -30,6 +36,9 @@ impl Cipher for Columnar {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let tlen = text.chars().count();
         let n_cols = self.key.len();
+        if n_cols < 2 {
+            return Err(CipherError::key("The key for a columnar cipher must have at least two characters"))
+        }
         let n_rows = tlen.div_ceil(&self.key.len());
         let g = Grid::from_rows(text, n_rows, n_cols, '\0', '\0');
 
@@ -37,16 +46,19 @@ impl Cipher for Columnar {
         for k in self.key.iter() {
             let mut s: String = g.get_col(*k).map(|sym| sym.to_char()).collect();
             s = s.replace(crate::grid::EMPTY, "");
+            s = s.replace(crate::grid::BLOCK, "");
             out.push_str(&s);
         }
-        out = out.replace(grid::EMPTY, "");
-        out = out.replace(grid::BLOCK, "");
+
         Ok(out)
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         let tlen = text.chars().count();
         let n_cols = self.key.len();
+        if n_cols < 2 {
+            return Err(CipherError::key("The key for a columnar cipher must have at least two characters"))
+        }
         let n_rows = tlen.div_ceil(&n_cols);
      
         let mut g = Grid::new_empty(n_rows, n_cols);
@@ -56,7 +68,7 @@ impl Cipher for Columnar {
             let coord = g.coord_from_index(n).unwrap();
             g.block_cell(coord);
         }
-     
+    
         for n in self.key.iter() {
             let column = g.get_col_mut(*n);
             for cell in column {
@@ -65,16 +77,13 @@ impl Cipher for Columnar {
                 }
             }
         }
-     
-        let mut out: String = g.read_rows().map(|s| s.to_char()).collect();
-        out = out.replace(grid::EMPTY, "");
-        out = out.replace(grid::BLOCK, "");
-        Ok(out)   
+    
+        Ok(g.read_filled_rows().collect())   
     }
 
 
     fn randomize(&mut self, rng: &mut ThreadRng) {
-        self.key_word =  random_sample_replace(&self.alphabet, 11, rng);
+        self.key_word = random_sample_replace(&self.alphabet, 11, rng);
         self.key = rank_str(&self.key_word, &self.alphabet);
     }
 
@@ -96,5 +105,28 @@ impl Cipher for Columnar {
 
     fn validate_settings(&self) -> Result<(), CipherError> {
         todo!()
+    }
+}
+
+
+#[cfg(test)]
+mod columnar_tests {
+    use super::*;
+
+    const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CIPHERTEXT: &'static str = "ECOOMVHZGTUBNJSRLDHIRFUOTAOQKWXPEEY";
+
+    #[test]
+    fn encrypt_test() {
+        let mut cipher = Columnar::default();
+        cipher.set_key_word("TEST");
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+    }
+
+    #[test]
+    fn decrypt_test() {
+        let mut cipher = Columnar::default();
+        cipher.set_key_word("TEST");
+        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

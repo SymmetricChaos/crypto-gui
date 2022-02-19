@@ -23,6 +23,11 @@ impl Polybius {
         &mut self.key_word
     }
 
+    pub fn set_key_word(&mut self, key_word: &str) {
+        self.key_word = key_word.to_string();
+        self.inner_alphabet = keyed_alphabet(key_word, &self.alphabet);
+    }
+
     pub fn set_alphabet(&mut self, mode: PresetAlphabet) {
         match mode {
             BasicLatinNoJ | BasicLatinNoQ | BasicLatinWithDigits | Base64 => {
