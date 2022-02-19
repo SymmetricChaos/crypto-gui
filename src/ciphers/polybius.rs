@@ -43,7 +43,9 @@ impl Polybius {
     }
 
     fn pairs(&self, text: &str) -> Result<Vec<(char,char)>,CipherError> {
-        if text.chars().count() % 2 == 1 {
+        if text.chars().count() % 2 != 0 {
+            dbg!(text);
+            dbg!(text.chars().count());
             return Err(CipherError::input("Input text does not have an even number of characters."))
         }
         let out = text.chars().chunks(2).into_iter().map(|x| x.collect_tuple().unwrap()).collect();

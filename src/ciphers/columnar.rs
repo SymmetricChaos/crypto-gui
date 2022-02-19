@@ -2,7 +2,7 @@ use num::Integer;
 use rand::prelude::ThreadRng;
 
 use crate::errors::CipherError;
-use crate::grid::{Grid, Symbol};
+use crate::grid::{Grid, Symbol, self};
 use crate::text_functions::{rank_str, random_sample_replace, PresetAlphabet};
 use super::Cipher;
 
@@ -39,6 +39,8 @@ impl Cipher for Columnar {
             s = s.replace(crate::grid::EMPTY, "");
             out.push_str(&s);
         }
+        out = out.replace(grid::EMPTY, "");
+        out = out.replace(grid::BLOCK, "");
         Ok(out)
     }
 
@@ -64,8 +66,9 @@ impl Cipher for Columnar {
             }
         }
      
-        let out: String = g.read_rows().map(|s| s.to_char()).collect();
-     
+        let mut out: String = g.read_rows().map(|s| s.to_char()).collect();
+        out = out.replace(grid::EMPTY, "");
+        out = out.replace(grid::BLOCK, "");
         Ok(out)   
     }
 

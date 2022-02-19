@@ -2,43 +2,46 @@ use rand::prelude::ThreadRng;
 use crate::{ciphers::{Polybius,Columnar}, text_functions::PresetAlphabet, errors::CipherError};
 use super::Cipher;
  
-pub struct SixtyFour {
-    polybius: Polybius,
-    columnar: Columnar
+pub struct B64 {
+    pub polybius: Polybius,
+    pub columnar1: Columnar,
+    pub columnar2: Columnar,
 }
  
-impl Default for SixtyFour {
+impl Default for B64 {
     fn default() -> Self {
         let mut polybius = Polybius::default();
         polybius.set_alphabet(PresetAlphabet::Base64);
  
         Self{
               polybius,
-              columnar: Columnar::default()
+              columnar1: Columnar::default(),
+              columnar2: Columnar::default(),
         }
     }
 }
  
-impl Cipher for SixtyFour {
+impl Cipher for B64 {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let t1 = self.polybius.encrypt(text)?;
-        let t2 = self.columnar.encrypt(&t1)?;
-        let t3 = self.columnar.encrypt(&t2)?;
+        let t2 = self.columnar1.encrypt(&t1)?;
+        let t3 = self.columnar2.encrypt(&t2)?;
         let t4 = self.polybius.decrypt(&t3)?;
         Ok(t4)
     }
  
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         let t1 = self.polybius.encrypt(text)?;
-        let t2 = self.columnar.decrypt(&t1)?;
-        let t3 = self.columnar.decrypt(&t2)?;
+        let t2 = self.columnar2.decrypt(&t1)?;
+        let t3 = self.columnar1.decrypt(&t2)?;
         let t4 = self.polybius.decrypt(&t3)?;
         Ok(t4)
     }
  
     fn randomize(&mut self, rng: &mut ThreadRng) {
         self.polybius.randomize(rng);
-        self.columnar.randomize(rng);
+        self.columnar1.randomize(rng);
+        self.columnar2.randomize(rng);
     }
  
     fn get_input_alphabet(&self) -> &String {
@@ -50,11 +53,11 @@ impl Cipher for SixtyFour {
     }
  
     fn get_mut_input_alphabet(&mut self) -> &mut String {
-        unimplemented!("The Sixty Four cipher uses a fixed alphabet")
+        unimplemented!("The B64 cipher uses a fixed alphabet")
     }
  
     fn get_mut_output_alphabet(&mut self) -> &mut String {
-        unimplemented!("The Sixty Four cipher uses a fixed alphabet")
+        unimplemented!("The B64 cipher uses a fixed alphabet")
     }
  
     fn validate_settings(&self) -> Result<(), CipherError> {

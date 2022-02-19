@@ -1,0 +1,38 @@
+use eframe::egui::{TextEdit, TextStyle, Slider};
+use crate::ciphers::{VigenereMultiKey, PolyMode};
+use super::{View, generic_components::*};
+
+
+impl View for VigenereMultiKey {
+    fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, output: &mut String, errors: &mut String) {
+        ui.add_space(16.0);
+        input_alphabet(ui, self);
+        ui.add_space(16.0);
+
+        ui.label("Key Words");
+        ui.add(TextEdit::singleline(&mut self.key_words[0]).text_style(TextStyle::Monospace));
+        ui.add(TextEdit::singleline(&mut self.key_words[1]).text_style(TextStyle::Monospace));
+        ui.add(TextEdit::singleline(&mut self.key_words[2]).text_style(TextStyle::Monospace));
+        ui.add(TextEdit::singleline(&mut self.key_words[3]).text_style(TextStyle::Monospace));
+        ui.add(TextEdit::singleline(&mut self.key_words[4]).text_style(TextStyle::Monospace));
+
+        ui.label("Mode");
+        ui.horizontal(|ui| {
+            ui.selectable_value(&mut self.mode, PolyMode::CylicKey, "Cyclic");
+            ui.selectable_value(&mut self.mode, PolyMode::Autokey, "Autokey");
+            ui.selectable_value(&mut self.mode, PolyMode::ProgKey, "Progressive Key");
+        });
+
+        if self.mode == PolyMode::ProgKey {
+            ui.add_space(16.0);
+            ui.label("Step size");
+            let alpha_range = 0..=((self.alphabet_len()-1));
+            ui.add(Slider::new(&mut self.prog_shift, alpha_range));
+            ui.add_space(16.0);
+        }
+
+        encrypt_decrypt(ui, self, input, output, errors);
+        ui.add_space(16.0);
+        randomize_button(ui, self);
+    }
+}

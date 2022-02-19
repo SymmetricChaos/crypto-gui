@@ -17,6 +17,8 @@ pub mod m94_controls;
 pub mod polybius_controls;
 pub mod columnar_controls;
 pub mod adfgvx_controls;
+pub mod vigenere_multikey_controls;
+pub mod b64_controls;
 
 pub trait View {
     fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String, errors: &mut String);
@@ -53,13 +55,14 @@ pub struct ControlPanel {
     columnar: Columnar,
 
     adfgvx: ADFGVX,
+    b64: B64,
 }
 
 
 impl ControlPanel {
     pub fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String, errors: &mut String, active_cipher: &mut CipherID) {
         
-        ui.horizontal(|ui| {
+        egui::Grid::new("comboboxes").show(ui, |ui| {
             combox_box(
                 &[CipherID::Caesar, CipherID::Decoder, CipherID::Affine, CipherID::Substitution, CipherID::Polybius],
                 "Simple Substitution",
@@ -83,9 +86,9 @@ impl ControlPanel {
                 "Transposition",
                 active_cipher, ui
             );
-        });
-        
-        ui.horizontal(|ui| {
+
+            ui.end_row();
+
             combox_box(
                 &[CipherID::Playfair, CipherID::Slidefair],
                 "Playfair",
@@ -93,11 +96,10 @@ impl ControlPanel {
             );
 
             combox_box(
-                &[CipherID::ADFGVX],
+                &[CipherID::ADFGVX, CipherID::B64],
                 "Composite",
                 active_cipher, ui
             );
-
         });
 
         ui.add_space(16.0);
@@ -108,7 +110,7 @@ impl ControlPanel {
             .strong()
             .heading();
         ui.add(egui::Label::new(name));
-        ui.label(format!{"Description:\n{}",active_cipher.description()});
+        ui.label(active_cipher.description());
 
         ui.add_space(16.0);
         ui.separator();
@@ -128,7 +130,8 @@ impl ControlPanel {
             CipherID::Playfair => self.playfair.ui(ui, input, output, errors),
             CipherID::Columnar => self.columnar.ui(ui, input, output, errors),
             CipherID::ADFGVX => self.adfgvx.ui(ui, input, output, errors),
-            _ => {ui.label(format!("IN PROGRESS\n{}",active_cipher.description()));},
+            CipherID::B64 => self.b64.ui(ui, input, output, errors),
+            _ => { ui.label("IN PROGRESS"); },
         }
     }
 }

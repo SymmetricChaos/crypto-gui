@@ -39,8 +39,8 @@ pub use columnar::Columnar;
 pub mod adfgvx;
 pub use adfgvx::ADFGVX;
 
-pub mod sixtyfour;
-pub use sixtyfour::SixtyFour;
+pub mod b64;
+pub use b64::B64;
 
 pub mod composite;
 
