@@ -17,7 +17,6 @@ pub mod m94_controls;
 pub mod polybius_controls;
 pub mod columnar_controls;
 pub mod adfgvx_controls;
-pub mod vigenere_multikey_controls;
 pub mod b64_controls;
 
 pub trait View {
@@ -46,7 +45,6 @@ pub struct ControlPanel {
     m209: M209,
 
     vigenere: Vigenere,
-    vigenere_multikey: VigenereMultiKey,
     beaufort: Beaufort,
     alberti: Alberti,
     m94: M94,
@@ -71,7 +69,7 @@ impl ControlPanel {
             );
     
             combox_box(
-                &[CipherID::Vigenere, CipherID::VigenereMultikey, CipherID::Beaufort, CipherID::M94, CipherID::Alberti],
+                &[CipherID::Vigenere, CipherID::Beaufort, CipherID::M94, CipherID::Alberti],
                 "Polyalphabetic",
                 active_cipher, ui
             );
@@ -124,7 +122,6 @@ impl ControlPanel {
             CipherID::Substitution => self.gen_sub.ui(ui, input, output, errors),
             CipherID::Polybius => self.polybius.ui(ui, input, output, errors),
             CipherID::Vigenere => self.vigenere.ui(ui, input, output, errors),
-            CipherID::VigenereMultikey => self.vigenere_multikey.ui(ui, input, output, errors),
             CipherID::Beaufort => self.beaufort.ui(ui, input, output, errors),
             CipherID::M209 => self.m209.ui(ui, input, output, errors),
             CipherID::M94 => self.m94.ui(ui, input, output, errors),

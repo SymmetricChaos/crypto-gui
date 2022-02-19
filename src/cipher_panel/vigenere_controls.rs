@@ -9,8 +9,7 @@ impl View for Vigenere {
         input_alphabet(ui, self);
         ui.add_space(16.0);
 
-        ui.label("Key Word");
-        ui.add(TextEdit::singleline(&mut self.key_word).text_style(TextStyle::Monospace));
+        ui.checkbox(&mut self.multikey, "Multikey");
 
         ui.label("Mode");
         ui.horizontal(|ui| {
@@ -25,6 +24,21 @@ impl View for Vigenere {
             let alpha_range = 0..=((self.alphabet_len()-1));
             ui.add(Slider::new(&mut self.prog_shift, alpha_range));
             ui.add_space(16.0);
+        }
+
+        match self.multikey {
+            true => {
+                ui.label("Key Words");
+                ui.add(TextEdit::singleline(&mut self.key_words[0]).text_style(TextStyle::Monospace));
+                ui.add(TextEdit::singleline(&mut self.key_words[1]).text_style(TextStyle::Monospace));
+                ui.add(TextEdit::singleline(&mut self.key_words[2]).text_style(TextStyle::Monospace));
+                ui.add(TextEdit::singleline(&mut self.key_words[3]).text_style(TextStyle::Monospace));
+                ui.add(TextEdit::singleline(&mut self.key_words[4]).text_style(TextStyle::Monospace));
+            },
+            false => {
+                ui.label("Key Word");
+                ui.add(TextEdit::singleline(&mut self.key_words[0]).text_style(TextStyle::Monospace));
+            },
         }
 
         encrypt_decrypt(ui, self, input, output, errors);

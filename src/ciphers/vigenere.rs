@@ -2,41 +2,71 @@ use std::collections::VecDeque;
 
 use rand::prelude::ThreadRng;
 use super::{Cipher, PolyMode};
-use crate::text_functions::{random_sample_replace, PresetAlphabet};
+use crate::text_functions::{PresetAlphabet, random_sample_replace};
 use crate::errors::CipherError;
 
 
 pub struct Vigenere {
-    pub key_word: String,
+    pub key_words: [String; 5],
     alphabet: String,
     pub prog_shift: usize,
     pub mode: PolyMode,
+    pub multikey: bool,
 }
 
 impl Vigenere {
 
-    pub fn cyclic_key(&self) -> impl Iterator<Item = usize> + '_ {
-        self.key_word.chars().map(|x| self.alphabet.chars().position(|c| c == x).unwrap()).cycle()
+    // Some weirdness needed to make types match
+    pub fn key(&self) -> impl Iterator<Item = usize> + '_ {
+        if self.multikey {
+            let mut effective_key = vec![0usize; self.key_len()];
+            for key in self.key_words.iter().filter(|s| !s.is_empty()) {
+                for (pos, sym) in key.chars().cycle().take(self.key_len()).enumerate() {
+                    let p = self.alphabet.chars().position(|c| c == sym).unwrap();
+                    effective_key[pos] += p
+                }
+            }
+            effective_key = effective_key.into_iter().map(|v| v % self.alphabet_len()).collect();
+            effective_key.into_iter()
+        } else {
+            let key: Vec<usize> = self.key_words[0].chars().map(|x| self.alphabet.chars().position(|c| c == x).unwrap()).collect();
+            key.into_iter()
+        }
+
     }
 
-    pub fn key(&self) -> impl Iterator<Item = usize> + '_ {
-        self.key_word.chars().map(|x| self.alphabet.chars().position(|c| c == x).unwrap())
+    pub fn cyclic_key(&self) -> impl Iterator<Item = usize> + '_ {
+        let v = self.key().collect::<Vec<usize>>();
+        v.into_iter().cycle()
+    }
+ 
+    //Should multiply together ignoring common factors. [9,6] should give 18
+    pub fn key_len(&self) -> usize {
+        if self.multikey {
+            self.key_words.iter().filter(|s| !s.is_empty()).map(|s| s.chars().count() ).fold(1, num::integer::lcm)
+        } else {
+            self.key_words[0].chars().count()
+        }
+    }
+ 
+    // Unwrap justified by bounds on key
+    pub fn key_word(&self) -> String {
+        if self.multikey {
+            self.key().map(|v| self.alphabet.chars().nth(v).unwrap()).collect()
+        } else {
+            self.key_words[0].clone()
+        }
     }
 
     pub fn alphabet_len(&self) -> usize {
         self.alphabet.chars().count()
     }
 
-    pub fn key_len(&self) -> usize {
-        self.key().count()
-    }
-
     fn validate_key(&self) -> Result<(),CipherError> {
-        if self.key_word.len() == 0 {
-            return Err(CipherError::Key(String::from("No key word provided")))
-        }
-        for c in self.key_word.chars() {
-            if !self.alphabet.contains(c) { return Err(CipherError::invalid_alphabet_char(c)) }
+        for key in self.key_words.iter() {
+            for c in key.chars() {
+                if !self.alphabet.contains(c) { return Err(CipherError::invalid_alphabet_char(c)) }
+            }
         }
         Ok(())
     }
@@ -50,7 +80,6 @@ impl Vigenere {
         }
         Ok(())
     }
-
 
     fn autokey_prep(&self, text: &str) -> Result<(usize, Vec<usize>, VecDeque<usize>,String),CipherError> {
         self.validate_key()?;
@@ -169,7 +198,12 @@ impl Vigenere {
 
 impl Default for Vigenere {
     fn default() -> Self {
-        Self { key_word: String::new(), alphabet: String::from(PresetAlphabet::BasicLatin), mode: PolyMode::CylicKey, prog_shift: 0 }
+        Self { key_words: [String::new(), String::new(), String::new(), String::new(), String::new()], 
+               alphabet: String::from(PresetAlphabet::BasicLatin), 
+               mode: PolyMode::CylicKey, 
+               prog_shift: 0,
+               multikey: false,        
+        }
     }
 }
 
@@ -195,8 +229,11 @@ impl Cipher for Vigenere {
     }
 
     fn randomize(&mut self, rng: &mut ThreadRng) {
-        self.key_word =  random_sample_replace(&self.alphabet, 11, rng);
-    
+        self.key_words[0] = random_sample_replace(&self.alphabet, 3, rng);
+        self.key_words[1] = random_sample_replace(&self.alphabet, 5, rng);
+        self.key_words[2] = random_sample_replace(&self.alphabet, 7, rng);
+        self.key_words[3] = String::new();
+        self.key_words[4] = String::new();
     }
 
     fn validate_settings(&self) -> Result<(), CipherError> {
@@ -222,18 +259,20 @@ impl Cipher for Vigenere {
 
 
 #[cfg(test)]
-mod vigenere_tests {
+mod vigenere_multikey_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT_CYCLIC: &'static str = "XUGOJBKYOVBYLUHFXHQCUMKXZHUIYCXNWWU";
-    const CIPHERTEXT_AUTO: &'static str = "XUGOJBKYOKVADZWZTVDDOBASOCBQASNTHFZ";
-    const CIPHERTEXT_PROG: &'static str = "XUGOJBKYOYEBOXKIAKWIASQDFNARHLGWFFD";
+    const PLAINTEXT: &'static str =         "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOGANDTHENSOMEMORETOMAKEALONGERPLAINTEXTFORTHISCIPHERTOUSE";
+    const CIPHERTEXT_CYCLIC: &'static str = "DIURPPYBUJPBRIVIDVEFAAYAFVILEQLQCKIQXEJIZUOFFWNTVHAZGBCUIXRJUGSWEQUFSAZJPPHUCPOTBHIJVWVFMF";
+    const CIPHERTEXT_AUTO: &'static str =   "DIURPPYBUJPBRIVIDVEFAAYAFVILEQLQCKIQGKXXYVUYNVAKEJHLVUWTSZJRXXYTWAHLWSDTSRKALVKQUTTSIXHIEE";
+    const CIPHERTEXT_PROG: &'static str =   "DIURPPYBUJPBRIVIDVEFAAYAFVILEQLQCKIQAHMLCXRIIZQWYKDCJEFXLAUMXJVZHTXIVDCMVVNAIVUZHNOPBCBLSL";
 
     #[test]
     fn encrypt_test_cyclic() {
         let mut cipher = Vigenere::default();
-        cipher.key_word = String::from("ENCYPTION");
+        cipher.key_words[1] = String::from("GOOD");
+        cipher.key_words[0] = String::from("ENCYPTION");
+
         cipher.mode = PolyMode::CylicKey;
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_CYCLIC);
     }
@@ -241,7 +280,8 @@ mod vigenere_tests {
     #[test]
     fn decrypt_test_cyclic() {
         let mut cipher = Vigenere::default();
-        cipher.key_word = String::from("ENCYPTION");
+        cipher.key_words[1] = String::from("GOOD");
+        cipher.key_words[0] = String::from("ENCYPTION");
         cipher.mode = PolyMode::CylicKey;
         assert_eq!(cipher.decrypt(CIPHERTEXT_CYCLIC).unwrap(), PLAINTEXT);
     }
@@ -249,7 +289,8 @@ mod vigenere_tests {
     #[test]
     fn encrypt_test_auto() {
         let mut cipher = Vigenere::default();
-        cipher.key_word = String::from("ENCYPTION");
+        cipher.key_words[1] = String::from("GOOD");
+        cipher.key_words[0] = String::from("ENCYPTION");
         cipher.mode = PolyMode::Autokey;
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_AUTO);
     }
@@ -257,7 +298,8 @@ mod vigenere_tests {
     #[test]
     fn decrypt_test_auto() {
         let mut cipher = Vigenere::default();
-        cipher.key_word = String::from("ENCYPTION");
+        cipher.key_words[1] = String::from("GOOD");
+        cipher.key_words[0] = String::from("ENCYPTION");
         cipher.mode = PolyMode::Autokey;
         assert_eq!(cipher.decrypt(CIPHERTEXT_AUTO).unwrap(), PLAINTEXT);
     }
@@ -265,7 +307,8 @@ mod vigenere_tests {
     #[test]
     fn encrypt_test_prog() {
         let mut cipher = Vigenere::default();
-        cipher.key_word = String::from("ENCYPTION");
+        cipher.key_words[1] = String::from("GOOD");
+        cipher.key_words[0] = String::from("ENCYPTION");
         cipher.prog_shift = 3;
         cipher.mode = PolyMode::ProgKey;
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_PROG);
@@ -274,7 +317,8 @@ mod vigenere_tests {
     #[test]
     fn decrypt_test_prog() {
         let mut cipher = Vigenere::default();
-        cipher.key_word = String::from("ENCYPTION");
+        cipher.key_words[1] = String::from("GOOD");
+        cipher.key_words[0] = String::from("ENCYPTION");
         cipher.prog_shift = 3;
         cipher.mode = PolyMode::ProgKey;
         assert_eq!(cipher.decrypt(CIPHERTEXT_PROG).unwrap(), PLAINTEXT);

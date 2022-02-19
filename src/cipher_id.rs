@@ -17,7 +17,6 @@ pub enum CipherID {
     Slidefair,
 
     Vigenere,
-    VigenereMultikey,
     Beaufort,
     Alberti,
     Bazieres,
@@ -53,8 +52,7 @@ impl CipherID {
             CipherID::Playfair => "The Playfair Cipher swaps letters on a grid to encrypt letters pair by pair.",
             CipherID::Slidefair => "The Slidefair Cipher",
             
-            CipherID::Vigenere => "The Vigenère Cipher, introduced at least as early as 1553, was once known as 'le chifre indéchiffrable' (the unsolvable cipher) as it was among the first ciphers to provide more security than any simple subtitution cipher. The keyword is used as if it were a series of Caesar ciphers.  Although Babbage and Kasiski independetly developed methods to break the cipher in the mid 1800s its popular reputation as unbreakable persisted into the early 1900s.",
-            CipherID::VigenereMultikey => "By encrypting a message several times the security of a Vigenere cipher can be increased dramatically. The effective key length is the least common multiple of all the keys used, assuming none of the keys repeat themselves. Thus the pair of key words 'VIGENERE' and 'CIPHER' would have a key with a length of 24. Further it is hard to seperate out the overlapping keys meaning that even if attacker has a large amount of text and knows the period of the key they cannot easily guess it.",
+            CipherID::Vigenere => "The Vigenère Cipher, introduced at least as early as 1553, was once known as 'le chifre indéchiffrable' (the unsolvable cipher) as it was among the first ciphers to provide more security than any simple subtitution cipher. The keyword is used as if it were a series of Caesar ciphers.  Although Babbage and Kasiski independetly developed methods to break the cipher in the mid 1800s its popular reputation as unbreakable persisted into the early 1900s. By encrypting a message several times the security of a Vigenere cipher can be increased dramatically. The effective key length is the least common multiple of all the keys used, assuming none of the keys repeat themselves. Thus the pair of key words 'VIGENERE' and 'CIPHER' would have a key with a length of 24. Further it is hard to seperate out the overlapping keys meaning that even if attacker has a large amount of text and knows the period of the key they cannot easily guess it.",
             CipherID::Beaufort => "The Beaufort Cipher is clever variation of the Vigenère",
             CipherID::Alberti => "The Alberti Cipher",
             CipherID::Bazieres => "The Baziers Cipher",
@@ -95,7 +93,6 @@ impl Display for  CipherID {
             CipherID::Beaufort => "Beaufort",
             CipherID::ADFGVX => "ADFGX",
             CipherID::Bifid => "Bifid",
-            CipherID::VigenereMultikey => "Vigenere Multikey",
             CipherID::B64 => "B64",
         };
         write!(f,"{}",name)
