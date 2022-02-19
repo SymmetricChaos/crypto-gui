@@ -27,6 +27,7 @@ impl Polybius {
         match mode {
             BasicLatinNoJ | BasicLatinNoQ | BasicLatinWithDigits | Base64 => {
                 self.alphabet = mode.string();
+                self.inner_alphabet = mode.string();
                 self.grid_side_len = mode.len().sqrt();
             }
             _ => ()
