@@ -1,5 +1,4 @@
 use num::Integer;
-use rand::distributions::DistString;
 use rand::prelude::ThreadRng;
 
 use crate::errors::CipherError;

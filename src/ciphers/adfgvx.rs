@@ -82,14 +82,15 @@ mod adfgvx_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "THEQUICKBROWNFOXIUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "GDXXFAAXFGDAXGGAGDDGDGFGAFGXDFGFDAGAXDFXXXGAAFFFXDXDXFGGDAFXDGGAFDGGFA";
+    const CIPHERTEXT1: &'static str = "GDXXFAAXFGDAXGGAGDDGDGFGAFGXDFGFDAGAXDFXXXGAAFFFXDXDXFGGDAFXDGGAFDGGFA";
+    const CIPHERTEXT2: &'static str = "FDGGFAAVDFXXFFDAFDDFAGFGAFDFDDFAXXGVVVXGVVAAAFFFGDVDVFFFAGDDAGGAFDGFDA";
 
     #[test]
     fn encrypt_test_adfgx() {
         let mut cipher = ADFGVX::default();
         cipher.polybius.set_key_word("KEYWORKFORUSEINTEST");
         cipher.columnar.set_key_word("SOMEWORD");
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT1);
     }
 
     #[test]
@@ -97,6 +98,24 @@ mod adfgvx_tests {
         let mut cipher = ADFGVX::default();
         cipher.polybius.set_key_word("KEYWORKFORUSEINTEST");
         cipher.columnar.set_key_word("SOMEWORD");
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CIPHERTEXT1).unwrap(), PLAINTEXT);
+    }
+
+    #[test]
+    fn encrypt_test_adfgvx() {
+        let mut cipher = ADFGVX::default();
+        cipher.set_alphabet(PresetAlphabet::BasicLatinWithDigits);
+        cipher.polybius.set_key_word("57This9Should0Mix2Words");
+        cipher.columnar.set_key_word("SOMEWORD");
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT2);
+    }
+
+    #[test]
+    fn decrypt_test_adfgvx() {
+        let mut cipher = ADFGVX::default();
+        cipher.set_alphabet(PresetAlphabet::BasicLatinWithDigits);
+        cipher.polybius.set_key_word("57This9Should0Mix2Words");
+        cipher.columnar.set_key_word("SOMEWORD");
+        assert_eq!(cipher.decrypt(CIPHERTEXT2).unwrap(), PLAINTEXT);
     }
 }

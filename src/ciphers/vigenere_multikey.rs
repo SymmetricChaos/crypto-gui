@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 
 use rand::prelude::ThreadRng;
 use super::{Cipher, PolyMode};
-use crate::text_functions::PresetAlphabet;
+use crate::text_functions::{PresetAlphabet, random_sample_replace};
 use crate::errors::CipherError;
 
 
@@ -211,11 +211,11 @@ impl Cipher for VigenereMultiKey {
     }
 
     fn randomize(&mut self, rng: &mut ThreadRng) {
-        // self.key_words[0] = random_sample_replace(&self.alphabet, 3, rng);
-        // self.key_words[1] = random_sample_replace(&self.alphabet, 5, rng);
-        // self.key_words[2] = random_sample_replace(&self.alphabet, 7, rng);
-        // self.key_words[3] = String::new();
-        // self.key_words[4] = String::new();
+        self.key_words[0] = random_sample_replace(&self.alphabet, 3, rng);
+        self.key_words[1] = random_sample_replace(&self.alphabet, 5, rng);
+        self.key_words[2] = random_sample_replace(&self.alphabet, 7, rng);
+        self.key_words[3] = String::new();
+        self.key_words[4] = String::new();
     }
 
     fn validate_settings(&self) -> Result<(), CipherError> {
