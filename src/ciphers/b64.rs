@@ -61,6 +61,33 @@ impl Cipher for B64 {
     }
  
     fn validate_settings(&self) -> Result<(), CipherError> {
-        todo!()
+        unreachable!("B64 actually has no settings. why did you call this method?")
     }
+}
+
+#[cfg(test)]
+mod b64_tests {
+    use super::*;
+
+    const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CIPHERTEXT: &'static str = "hMzRT3BBKyRgKfOgJBQ6DoRwaRCI1UD4MQF";
+
+    #[test]
+    fn encrypt_test() {
+        let mut cipher = B64::default();
+        cipher.polybius.set_key("ENCRYPTION");
+        cipher.columnar1.set_key("NOVELTY");
+        cipher.columnar2.set_key("SHUFFLE");
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+    }
+
+    #[test]
+    fn decrypt_test() {
+        let mut cipher = B64::default();
+        cipher.polybius.set_key("ENCRYPTION");
+        cipher.columnar1.set_key("NOVELTY");
+        cipher.columnar2.set_key("SHUFFLE");
+        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+    }
+
 }
