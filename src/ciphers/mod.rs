@@ -16,6 +16,9 @@ pub use m209::M209;
 pub mod playfair;
 pub use playfair::Playfair;
 
+// pub mod slidefair;
+// pub use slidefair::Slidefair;
+
 pub mod alberti_disk;
 pub use alberti_disk::Alberti;
 
@@ -40,8 +43,6 @@ pub use adfgvx::ADFGVX;
 pub mod b64;
 pub use b64::B64;
 
-pub mod composite;
-
 use rand::prelude::ThreadRng;
 use crate::errors::CipherError;
 
@@ -54,15 +55,9 @@ pub trait Cipher {
     fn get_input_alphabet(&self) -> &String;
     fn get_output_alphabet(&self) -> &String;
     fn validate_settings(&self) -> Result<(),CipherError>;
-    //fn get_key_state(&self) -> some complex thing? idk or this could be optional
 }
 
 
-// #[derive(Debug,Copy,Clone,PartialEq, Eq)]
-// pub enum PolyMode {
-//     Vigenere,
-//     Beaufort,
-// }
 
 #[derive(Debug,Copy,Clone,PartialEq, Eq)]
 pub enum PolyMode {
