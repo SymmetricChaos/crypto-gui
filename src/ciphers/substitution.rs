@@ -1,5 +1,5 @@
 use rand::prelude::ThreadRng;
-use crate::text_functions::{shuffled_str, PresetAlphabet};
+use crate::text_functions::{shuffled_str, dedup_alphabet, PresetAlphabet};
 use super::Cipher;
 use std::collections::HashMap;
 use crate::errors::CipherError;
@@ -12,6 +12,22 @@ pub struct GeneralSubstitution {
 }
 
 impl GeneralSubstitution {
+
+    pub fn set_alphabets(&mut self, mode: PresetAlphabet) {
+        self.alphabet1 = String::from(mode);
+        self.alphabet2 = String::from(mode);
+    }
+
+    pub fn control_alphabet1(&mut self) -> &mut String {
+        self.alphabet1 = dedup_alphabet(&self.alphabet1);
+        &mut self.alphabet1
+    }
+
+    pub fn control_alphabet2(&mut self) -> &mut String {
+        self.alphabet2 = dedup_alphabet(&self.alphabet2);
+        &mut self.alphabet2
+    }
+
     // The alphabets must be the same length but we need to handle that in the panel itself
     pub fn new(alphabet1: &str, alphabet2: &str) -> Self {
         let mut map = HashMap::new();

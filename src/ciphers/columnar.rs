@@ -13,12 +13,12 @@ pub struct Columnar {
 }
 
 impl Columnar {
-    pub fn set_key(&mut self) -> &mut String {
+    pub fn control_key(&mut self) -> &mut String {
         self.key = rank_str(&self.key_word, &self.alphabet);
         &mut self.key_word
     }
 
-    pub fn set_key_word(&mut self, key_word: &str) {
+    pub fn set_key(&mut self, key_word: &str) {
         self.key_word = key_word.to_string();
         self.key = rank_str(&self.key_word, &self.alphabet);
     }
@@ -118,14 +118,14 @@ mod columnar_tests {
     #[test]
     fn encrypt_test() {
         let mut cipher = Columnar::default();
-        cipher.set_key_word("TEST");
+        cipher.set_key("TEST");
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = Columnar::default();
-        cipher.set_key_word("TEST");
+        cipher.set_key("TEST");
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

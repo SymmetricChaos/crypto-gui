@@ -9,7 +9,7 @@ impl View for Vigenere {
         input_alphabet(ui, self);
         ui.add_space(16.0);
 
-        ui.checkbox(&mut self.multikey, "Multikey");
+        
 
         ui.label("Mode");
         ui.horizontal(|ui| {
@@ -28,7 +28,10 @@ impl View for Vigenere {
 
         match self.multikey {
             true => {
-                ui.label("Key Words");
+                ui.horizontal(|ui| {
+                    ui.label("Key Words");
+                    ui.checkbox(&mut self.multikey, "Multikey");
+                });
                 ui.add(TextEdit::singleline(&mut self.key_words[0]).text_style(TextStyle::Monospace));
                 ui.add(TextEdit::singleline(&mut self.key_words[1]).text_style(TextStyle::Monospace));
                 ui.add(TextEdit::singleline(&mut self.key_words[2]).text_style(TextStyle::Monospace));
@@ -36,7 +39,10 @@ impl View for Vigenere {
                 ui.add(TextEdit::singleline(&mut self.key_words[4]).text_style(TextStyle::Monospace));
             },
             false => {
-                ui.label("Key Word");
+                ui.horizontal(|ui| {
+                    ui.label("Key Word ");
+                    ui.checkbox(&mut self.multikey, "Multikey");
+                });
                 ui.add(TextEdit::singleline(&mut self.key_words[0]).text_style(TextStyle::Monospace));
             },
         }

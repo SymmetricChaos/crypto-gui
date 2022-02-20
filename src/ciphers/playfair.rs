@@ -17,17 +17,17 @@ pub struct Playfair {
 impl Playfair {
 
     // Silently ignores invalid characters
-    pub fn set_key(&mut self) -> &mut String {
+    pub fn control_key(&mut self) -> &mut String {
         self.square = keyed_alphabet(&self.key_word, &self.alphabet);
         &mut self.key_word
     }
 
-    pub fn set_key_word(&mut self, key_word: &str) {
+    pub fn set_key(&mut self, key_word: &str) {
         self.key_word = key_word.to_string();
         self.square = keyed_alphabet(key_word, &self.alphabet);
     }
 
-    pub fn set_spacer(&mut self) -> &mut char {
+    pub fn control_spacer(&mut self) -> &mut char {
         &mut self.spacer
     }
 

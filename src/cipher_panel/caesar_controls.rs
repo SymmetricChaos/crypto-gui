@@ -5,6 +5,11 @@ use crate::ciphers::Caesar;
 
 impl View for Caesar {
     fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, output: &mut String, errors: &mut String) {
+        encrypt_decrypt(ui, self, input, output, errors);
+        ui.add_space(16.0);
+        randomize_button(ui, self);
+        ui.add_space(16.0);
+
         ui.add_space(16.0);
         input_alphabet(ui, self);
         ui.add_space(16.0);

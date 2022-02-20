@@ -16,13 +16,13 @@ impl View for ADFGVX {
         });
 
         ui.label("Polybius Key Word");
-        ui.add(TextEdit::singleline(self.polybius.set_key()));
+        ui.add(TextEdit::singleline(self.polybius.control_key()));
 
         ui.label(RichText::new(format!("Grid\n{}",self.polybius)).monospace());
         ui.add_space(16.0);
 
         ui.label("Columnar Key Word");
-        ui.add(TextEdit::singleline(self.columnar.set_key()));
+        ui.add(TextEdit::singleline(self.columnar.control_key()));
 
         encrypt_decrypt(ui, self, input, output, errors);
         ui.add_space(16.0);

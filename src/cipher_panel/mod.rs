@@ -156,31 +156,34 @@ impl DisplayPanel {
         ui.label("OUTPUT TEXT");
         ui.add(TextEdit::multiline(output).text_style(TextStyle::Monospace));
        
-        ui.horizontal(|ui| {
-            if ui.button("UPPERCASE").clicked() {
-                *input = input.to_uppercase();
-                *output = output.to_uppercase();
-            }
-            if ui.button("lowercase").clicked() {
-                *input = input.to_lowercase();
-                *output = output.to_lowercase();
-            }
-        });
+        // ui.horizontal(|ui| {
+        //     if ui.button("UPPERCASE").clicked() {
+        //         *input = input.to_uppercase();
+        //         *output = output.to_uppercase();
+        //     }
+        //     if ui.button("lowercase").clicked() {
+        //         *input = input.to_lowercase();
+        //         *output = output.to_lowercase();
+        //     }
+        // });
        
-        if ui.button("strip whitespace").clicked() {
-            *input = input.split_whitespace().collect();
-            *output = output.split_whitespace().collect();
-        }
+        // if ui.button("strip whitespace").clicked() {
+        //     *input = input.split_whitespace().collect();
+        //     *output = output.split_whitespace().collect();
+        // }
 
+        ui.add_space(10.0);
         if ui.button("clear").clicked() {
             input.clear();
             output.clear();
             errors.clear();
         }
 
+        ui.add_space(10.0);
         if ui.button("swap input/output").clicked() {
             std::mem::swap(input, output)
         }
+
        
         if !errors.is_empty() {
             ui.add_space(24.0);

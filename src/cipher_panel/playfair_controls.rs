@@ -9,6 +9,7 @@ use crate::text_functions::PresetAlphabet;
 
 impl View for Playfair {
     fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, output: &mut String, errors: &mut String) {
+        
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
             if ui.button("No Q").clicked() { self.set_alphabet(PresetAlphabet::BasicLatinNoQ) };
@@ -20,14 +21,14 @@ impl View for Playfair {
         ui.label(RichText::new(self.get_input_alphabet().clone()).monospace().background_color(Color32::BLACK));
         ui.add_space(16.0);
 
-        ui.label(RichText::new(format!("Grid\n{}",self)).monospace());
-        ui.add_space(16.0);
-
         ui.label("Key Word");
-        ui.add(TextEdit::singleline(self.set_key()).text_style(TextStyle::Monospace));
+        control_text_edit(ui, self.control_key());
 
         ui.label("Spacer Character\nInserted as padding where needed");
-        ui.add(TextEdit::singleline(&mut self.set_spacer().to_string()).text_style(TextStyle::Monospace).desired_width(15.0));
+        ui.add(TextEdit::singleline(&mut self.control_spacer().to_string()).text_style(TextStyle::Monospace).desired_width(15.0));
+
+        ui.label(RichText::new(format!("Grid\n{}",self)).monospace());
+        ui.add_space(16.0);
 
         encrypt_decrypt(ui, self, input, output, errors);
         ui.add_space(16.0);

@@ -11,6 +11,11 @@ use crate::text_functions::PresetAlphabet;
 impl View for Polybius {
     fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, output: &mut String, errors: &mut String) {
 
+        encrypt_decrypt(ui, self, input, output, errors);
+        ui.add_space(16.0);
+        randomize_button(ui, self);
+        ui.add_space(16.0);
+
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
             if ui.button("No Q").clicked() { self.set_alphabet(PresetAlphabet::BasicLatinNoQ) };
@@ -24,13 +29,9 @@ impl View for Polybius {
         ui.add_space(16.0);
 
         ui.label("Key Word");
-        ui.add(TextEdit::singleline(self.set_key()));
+        ui.add(TextEdit::singleline(self.control_key()));
 
         ui.label(RichText::new(format!("Grid\n{}",self)).monospace());
         ui.add_space(16.0);
-
-        encrypt_decrypt(ui, self, input, output, errors);
-        ui.add_space(16.0);
-        randomize_button(ui, self);
     }
 }

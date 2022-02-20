@@ -194,6 +194,21 @@ pub fn keyed_alphabet(keyword: &str, alphabet: &str) -> String {
 }
 
 
+pub fn dedup_alphabet(s: &str) -> String {
+    let mut seen: Vec<char> = Vec::with_capacity(s.len());
+    let mut out = String::with_capacity(s.len());
+    for c in s.chars() {
+        if seen.contains(&c) {
+            continue
+        } else {
+            out.push(c);
+            seen.push(c)
+        }
+    }
+    out
+}
+
+
 
 #[cfg(test)]
 mod affine_tests {
