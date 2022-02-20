@@ -5,17 +5,9 @@ use super::{View, generic_components::*};
 
 impl View for Beaufort {
     fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, output: &mut String, errors: &mut String) {
-        encrypt_decrypt(ui, self, input, output, errors);
-        ui.add_space(16.0);
-        randomize_button(ui, self);
-        ui.add_space(16.0);
-
         ui.add_space(16.0);
         input_alphabet(ui, self);
         ui.add_space(16.0);
-
-        ui.label("Key Word");
-        ui.add(TextEdit::singleline(&mut self.key_word).text_style(TextStyle::Monospace));
 
         ui.label("Mode");
         ui.horizontal(|ui| {
@@ -31,5 +23,30 @@ impl View for Beaufort {
             ui.add(Slider::new(&mut self.prog_shift, alpha_range));
             ui.add_space(16.0);
         }
+
+        match self.multikey {
+            true => {
+                ui.horizontal(|ui| {
+                    ui.label("Key Words");
+                    ui.checkbox(&mut self.multikey, "Multikey");
+                });
+                ui.add(TextEdit::singleline(&mut self.key_words[0]).text_style(TextStyle::Monospace));
+                ui.add(TextEdit::singleline(&mut self.key_words[1]).text_style(TextStyle::Monospace));
+                ui.add(TextEdit::singleline(&mut self.key_words[2]).text_style(TextStyle::Monospace));
+                ui.add(TextEdit::singleline(&mut self.key_words[3]).text_style(TextStyle::Monospace));
+                ui.add(TextEdit::singleline(&mut self.key_words[4]).text_style(TextStyle::Monospace));
+            },
+            false => {
+                ui.horizontal(|ui| {
+                    ui.label("Key Word ");
+                    ui.checkbox(&mut self.multikey, "Multikey");
+                });
+                ui.add(TextEdit::singleline(&mut self.key_words[0]).text_style(TextStyle::Monospace));
+            },
+        }
+
+        encrypt_decrypt(ui, self, input, output, errors);
+        ui.add_space(16.0);
+        randomize_button(ui, self);
     }
 }
