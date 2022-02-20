@@ -9,13 +9,11 @@ impl View for Vigenere {
         input_alphabet(ui, self);
         ui.add_space(16.0);
 
-        
-
         ui.label("Mode");
         ui.horizontal(|ui| {
             ui.selectable_value(&mut self.mode, PolyMode::CylicKey, "Cyclic");
             ui.selectable_value(&mut self.mode, PolyMode::Autokey, "Autokey");
-            ui.selectable_value(&mut self.mode, PolyMode::ProgKey, "Progressive Key");
+            ui.selectable_value(&mut self.mode, PolyMode::ProgKey, "Progressive");
         });
 
         if self.mode == PolyMode::ProgKey {

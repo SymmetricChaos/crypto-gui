@@ -13,7 +13,7 @@ impl View for Beaufort {
         ui.horizontal(|ui| {
             ui.selectable_value(&mut self.mode, PolyMode::CylicKey, "Cyclic");
             ui.selectable_value(&mut self.mode, PolyMode::Autokey, "Autokey");
-            ui.selectable_value(&mut self.mode, PolyMode::ProgKey, "Progressive Key");
+            ui.selectable_value(&mut self.mode, PolyMode::ProgKey, "Progressive");
         });
 
         if self.mode == PolyMode::ProgKey {
