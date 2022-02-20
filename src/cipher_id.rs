@@ -91,7 +91,7 @@ impl Display for  CipherID {
             CipherID::M94 => "M94",
             CipherID::Vigenere => "Vigenère",
             CipherID::Beaufort => "Beaufort",
-            CipherID::ADFGVX => "ADFGX",
+            CipherID::ADFGVX => "ADFGVX",
             CipherID::Bifid => "Bifid",
             CipherID::B64 => "B64",
         };
