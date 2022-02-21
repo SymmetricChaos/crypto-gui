@@ -153,3 +153,28 @@ impl fmt::Display for Polybius {
         write!(f, "{square}")
     }
 }
+
+
+
+#[cfg(test)]
+mod polybius_tests {
+    use super::*;
+
+    // Note Q replaced by K
+    const PLAINTEXT: &'static str =  "THEKUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CIPHERTEXT: &'static str = "4423153145241331124235523421355325453341433551154244231532115554143522";
+
+    #[test]
+    fn encrypt_test() {
+        let mut cipher = Polybius::default();
+        cipher.set_key("INVENTORY");
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+    }
+
+    #[test]
+    fn decrypt_test() {
+        let mut cipher = Polybius::default();
+        cipher.set_key("INVENTORY");
+        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+    }
+}
