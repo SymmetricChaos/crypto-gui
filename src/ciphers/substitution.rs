@@ -88,7 +88,7 @@ impl Cipher for GeneralSubstitution {
 
 
 #[cfg(test)]
-mod gen_sub_multikey_tests {
+mod gen_sub_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";

@@ -100,5 +100,4 @@ impl Cipher for M94 {
     fn validate_settings(&self) -> Result<(), CipherError> {
         unimplemented!("It shouldn't be possible to get the M94 into an invalid state")
     }
-
 }
