@@ -65,6 +65,39 @@ impl From<PresetAlphabet> for String {
     }
 }
 
+
+#[derive(Clone, Debug)]
+pub struct Alphabet {
+    alpha: String,
+}
+
+impl Alphabet {
+
+    pub fn len(&self) -> usize {
+        self.alpha.chars().count()
+    }
+
+    pub fn nth(&self, n: usize, offset: usize) -> char {
+        let n = (n + offset) % self.len();
+        self.alpha.chars().nth(n).unwrap()
+    }
+
+    pub fn pos(&self, c: char, offset: usize) -> usize {
+        (self.alpha.chars().position(|x| x == c).unwrap() + offset)  % self.len()
+    }
+
+    pub fn show(&self, offset: usize) -> String {
+        let mut out = String::with_capacity(self.alpha.len());
+        out.push_str(&self.alpha[offset..]);
+        out.push_str(&self.alpha[0..offset]);
+        out
+    }
+
+}
+
+
+
+
 pub fn shuffled_str(s: &str, rng: &mut ThreadRng) -> String {
     let mut characters = s.chars().collect::<Vec<char>>();
     let slice = characters.as_mut_slice();
@@ -211,7 +244,7 @@ pub fn dedup_alphabet(s: &str) -> String {
 
 
 #[cfg(test)]
-mod affine_tests {
+mod string_ranking_tests {
     use super::*;
 
     #[test]

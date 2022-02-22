@@ -16,8 +16,8 @@ pub use m209::M209;
 pub mod playfair;
 pub use playfair::Playfair;
 
-// pub mod slidefair;
-// pub use slidefair::Slidefair;
+pub mod slidefair;
+pub use slidefair::Slidefair;
 
 pub mod alberti_disk;
 pub use alberti_disk::Alberti;
