@@ -1,10 +1,6 @@
 use itertools::Itertools;
 use rand::prelude::{ThreadRng, SliceRandom, IteratorRandom};
-
 use crate::errors::CipherError;
-
-
-
 
 
 pub fn shuffled_str(s: &str, rng: &mut ThreadRng) -> String {
@@ -159,7 +155,7 @@ mod string_ranking_tests {
     #[test]
     fn string_ranking() {
         let text = "APPLES";
-        let alphabet = PresetAlphabet::BasicLatin.slice();
+        let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         assert_eq!(vec![0, 3, 4, 2, 1, 5],rank_str(text, alphabet));
     }
 

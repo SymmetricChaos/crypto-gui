@@ -1,3 +1,5 @@
+use itertools::Itertools;
+
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PresetAlphabet {
@@ -70,58 +72,62 @@ impl From<PresetAlphabet> for &'static str {
 
 #[derive(Clone, Debug)]
 pub struct Alphabet {
-    alpha: String,
+    pub inner: String,
 }
 
 impl Alphabet {
 
     pub fn len(&self) -> usize {
-        self.alpha.chars().count()
+        self.inner.chars().count()
     }
 
     pub fn nth(&self, n: usize, offset: usize) -> Option<char> {
         let n = (n + offset) % self.len();
-        self.alpha.chars().nth(n)
+        self.inner.chars().nth(n)
     }
 
     pub fn pos(&self, c: char, offset: usize) -> Option<usize> {
-        Some((self.alpha.chars().position(|x| x == c)? + self.len() - offset)  % self.len())
+        Some((self.inner.chars().position(|x| x == c)? + self.len() - offset)  % self.len())
     }
 
     pub fn show(&self, offset: usize) -> String {
-        let mut out = String::with_capacity(self.alpha.len());
-        out.push_str(&self.alpha[offset..]);
-        out.push_str(&self.alpha[0..offset]);
+        let mut out = String::with_capacity(self.inner.len());
+        out.push_str(&self.inner[offset..]);
+        out.push_str(&self.inner[0..offset]);
         out
     }
 
     pub fn slice(&self) -> &str {
-        &self.alpha
+        &self.inner
+    }
+
+    pub fn contains(&self, c: char) -> bool {
+        self.inner.contains(c)
     }
 
 }
 
 impl From<PresetAlphabet> for Alphabet {
     fn from(alphabet: PresetAlphabet) -> Self {
-        Self{ alpha: String::from(alphabet) }
+        Self{ inner: String::from(alphabet) }
     }
 }
 
 impl From<String> for Alphabet {
     fn from(string: String) -> Self {
-        Self{ alpha: string }
+        Self{ inner: string }
     }
 }
 
 impl From<&str> for Alphabet {
     fn from(string: &str) -> Self {
-        Self{ alpha: string.to_string() }
+        Self{ inner: string.to_string() }
     }
 }
 
 impl From<Alphabet> for String {
     fn from(alphabet: Alphabet) -> Self {
-        alphabet.alpha
+        alphabet.inner
     }
 }
 
