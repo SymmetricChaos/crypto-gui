@@ -3,7 +3,7 @@ use eframe::egui::{RichText, TextEdit};
 use super::View;
 use super::generic_components::*;
 use crate::ciphers::ADFGVX;
-use crate::text_functions::PresetAlphabet;
+use crate::text_types::{PresetAlphabet::*};
 
 
 impl View for ADFGVX {
@@ -11,8 +11,8 @@ impl View for ADFGVX {
 
         ui.label("Select Mode");
         ui.horizontal(|ui| {
-            if ui.button("ADFGX").clicked() { self.set_alphabet(PresetAlphabet::BasicLatinNoJ) };
-            if ui.button("ADFGVX").clicked() { self.set_alphabet(PresetAlphabet::BasicLatinWithDigits) };
+            if ui.button("ADFGX").clicked() { self.set_alphabet(BasicLatinNoJ) };
+            if ui.button("ADFGVX").clicked() { self.set_alphabet(BasicLatinWithDigits) };
         });
 
         ui.label("Polybius Key Word");

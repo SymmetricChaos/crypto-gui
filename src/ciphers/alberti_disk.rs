@@ -1,6 +1,7 @@
 use std::fmt::Display;
 use rand::{prelude::ThreadRng, Rng};
-use crate::{errors::CipherError, text_functions::PresetAlphabet};
+use crate::errors::CipherError;
+use crate::text_types::{PresetAlphabet::*};
 use super::Cipher;
 
 pub struct Alberti {
@@ -92,8 +93,8 @@ impl Cipher for Alberti {
  
 impl Default for Alberti {
     fn default() -> Self {
-        Self{ fixed_alphabet:  String::from(PresetAlphabet::BasicLatin), 
-              moving_alphabet: String::from(PresetAlphabet::BasicLatin.string().to_ascii_lowercase()),
+        Self{ fixed_alphabet:  String::from(BasicLatin), 
+              moving_alphabet: String::from(BasicLatin.string().to_ascii_lowercase()),
               start_index: 0} 
     }
 }

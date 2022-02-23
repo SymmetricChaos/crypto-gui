@@ -2,7 +2,8 @@ use std::collections::VecDeque;
 
 use rand::prelude::ThreadRng;
 use super::{Cipher, PolyMode};
-use crate::text_functions::{PresetAlphabet, random_sample_replace};
+use crate::text_functions::random_sample_replace;
+use crate::text_types::PresetAlphabet;
 use crate::errors::CipherError;
 
 

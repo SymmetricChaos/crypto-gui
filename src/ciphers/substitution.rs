@@ -1,7 +1,8 @@
 use rand::prelude::ThreadRng;
-use crate::text_functions::{shuffled_str, dedup_alphabet, PresetAlphabet};
+use crate::text_functions::{shuffled_str, dedup_alphabet};
 use super::Cipher;
 use crate::errors::CipherError;
+use crate::text_types::PresetAlphabet;
 
 pub struct GeneralSubstitution {
     alphabet1: String,

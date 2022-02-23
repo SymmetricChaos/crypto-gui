@@ -3,8 +3,8 @@ use num::integer::Roots;
 use rand::prelude::ThreadRng;
 use super::Cipher;
 use crate::{errors::CipherError, text_functions::shuffled_str};
-use crate::text_functions::{PresetAlphabet, keyed_alphabet};
-use crate::text_functions::PresetAlphabet::*;
+use crate::text_functions::{keyed_alphabet};
+use crate::text_types::{PresetAlphabet::*, PresetAlphabet};
 
 pub struct Playfair {
     alphabet: String,

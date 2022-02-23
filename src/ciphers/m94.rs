@@ -1,6 +1,6 @@
 use rand::{prelude::{ThreadRng, SliceRandom}, Rng};
 use super::Cipher;
-use crate::text_functions::PresetAlphabet;
+use crate::text_types::{PresetAlphabet::*};
 use crate::errors::CipherError;
 
 
@@ -41,7 +41,7 @@ pub struct M94 {
 impl Default for M94 {
     fn default() -> M94 {
         let wheels = Vec::from(M94_WHEELS);
-        let alphabet = String::from(PresetAlphabet::BasicLatin);
+        let alphabet = String::from(BasicLatin);
         M94{ offset: 0, wheels, alphabet }
     }
  

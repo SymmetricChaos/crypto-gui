@@ -3,8 +3,9 @@ use rand::prelude::ThreadRng;
 
 use crate::errors::CipherError;
 use crate::grid::{Grid, Symbol};
-use crate::text_functions::{rank_str, random_sample_replace, PresetAlphabet};
+use crate::text_functions::{rank_str, random_sample_replace};
 use super::Cipher;
+use crate::text_types::{PresetAlphabet::*};
 
 pub struct Columnar {
     alphabet: String,
@@ -26,7 +27,7 @@ impl Columnar {
 
 impl Default for Columnar {
     fn default() -> Self {
-        Self { alphabet: String::from(PresetAlphabet::BasicLatin), key: Vec::new(), key_word: String::new() }
+        Self { alphabet: String::from(BasicLatin), key: Vec::new(), key_word: String::new() }
     }
 }
 

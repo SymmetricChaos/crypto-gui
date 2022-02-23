@@ -1,6 +1,7 @@
 use rand::{Rng, prelude::ThreadRng};
-use crate::{errors::{CipherError}, text_functions::PresetAlphabet};
+use crate::{errors::{CipherError}};
 use super::Cipher;
+use crate::text_types::{PresetAlphabet::*};
 
 pub struct Caesar {
     pub shift: usize,
@@ -27,7 +28,7 @@ impl Caesar {
 
 impl Default for Caesar {
     fn default() -> Self {
-        Self { shift: 0, alphabet: String::from(PresetAlphabet::BasicLatin) }
+        Self { shift: 0, alphabet: String::from(BasicLatin) }
     }
 }
 

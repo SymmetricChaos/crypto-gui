@@ -5,17 +5,17 @@ use super::View;
 use super::generic_components::*;
 use crate::ciphers::Cipher;
 use crate::ciphers::Playfair;
-use crate::text_functions::PresetAlphabet;
+use crate::text_types::{PresetAlphabet::*};
 
 impl View for Playfair {
     fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, output: &mut String, errors: &mut String) {
         
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
-            if ui.button("No Q").clicked() { self.set_alphabet(PresetAlphabet::BasicLatinNoQ) };
-            if ui.button("No J").clicked() { self.set_alphabet(PresetAlphabet::BasicLatinNoJ) };
-            if ui.button("Alphanumeric").clicked() { self.set_alphabet(PresetAlphabet::BasicLatinWithDigits) };
-            if ui.button("Base64").clicked() { self.set_alphabet(PresetAlphabet::Base64) };
+            if ui.button("No Q").clicked() { self.set_alphabet(BasicLatinNoQ) };
+            if ui.button("No J").clicked() { self.set_alphabet(BasicLatinNoJ) };
+            if ui.button("Alphanumeric").clicked() { self.set_alphabet(BasicLatinWithDigits) };
+            if ui.button("Base64").clicked() { self.set_alphabet(Base64) };
         });
         ui.add_space(10.0);
         ui.label(RichText::new(self.get_input_alphabet().clone()).monospace().background_color(Color32::BLACK));

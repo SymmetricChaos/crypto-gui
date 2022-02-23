@@ -5,7 +5,7 @@ use super::View;
 use super::generic_components::*;
 use crate::ciphers::Cipher;
 use crate::ciphers::Polybius;
-use crate::text_functions::PresetAlphabet;
+use crate::text_types::{PresetAlphabet::*};
 
 
 impl View for Polybius {
@@ -18,10 +18,10 @@ impl View for Polybius {
 
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
-            if ui.button("No Q").clicked() { self.set_alphabet(PresetAlphabet::BasicLatinNoQ) };
-            if ui.button("No J").clicked() { self.set_alphabet(PresetAlphabet::BasicLatinNoJ) };
-            if ui.button("Alphanumeric").clicked() { self.set_alphabet(PresetAlphabet::BasicLatinWithDigits) };
-            if ui.button("Base64").clicked() { self.set_alphabet(PresetAlphabet::Base64) };
+            if ui.button("No Q").clicked() { self.set_alphabet(BasicLatinNoQ) };
+            if ui.button("No J").clicked() { self.set_alphabet(BasicLatinNoJ) };
+            if ui.button("Alphanumeric").clicked() { self.set_alphabet(BasicLatinWithDigits) };
+            if ui.button("Base64").clicked() { self.set_alphabet(Base64) };
         });
 
         ui.add_space(10.0);

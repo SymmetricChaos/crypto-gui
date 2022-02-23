@@ -1,5 +1,6 @@
 use rand::prelude::ThreadRng;
-use crate::{ciphers::{Polybius,Columnar}, text_functions::PresetAlphabet, errors::CipherError};
+use crate::{ciphers::{Polybius,Columnar}, errors::CipherError};
+use crate::text_types::{PresetAlphabet::*};
 use super::Cipher;
  
 pub struct B64 {
@@ -11,7 +12,7 @@ pub struct B64 {
 impl Default for B64 {
     fn default() -> Self {
         let mut polybius = Polybius::default();
-        polybius.set_alphabet(PresetAlphabet::Base64);
+        polybius.set_alphabet(Base64);
  
         Self{
               polybius,

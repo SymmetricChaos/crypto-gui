@@ -1,7 +1,8 @@
 use rand::prelude::ThreadRng;
 use rand::Fill;
 use super::Cipher;
-use crate::text_functions::{random_char_vec, PresetAlphabet};
+use crate::text_functions::{random_char_vec};
+use crate::text_types::{PresetAlphabet::*};
 use lazy_static::lazy_static;
 use std::{collections::VecDeque, fmt};
 use crate::errors::CipherError;
@@ -170,7 +171,7 @@ impl Default for M209 {
                     (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0),
                     (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0)
             ], 
-            alphabet: String::from(PresetAlphabet::BasicLatin) 
+            alphabet: String::from(BasicLatin) 
         }
     }
 }

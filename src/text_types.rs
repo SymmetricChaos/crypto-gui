@@ -95,6 +95,10 @@ impl Alphabet {
         out
     }
 
+    pub fn slice(&self) -> &str {
+        &self.alpha
+    }
+
 }
 
 impl From<PresetAlphabet> for Alphabet {
@@ -112,6 +116,12 @@ impl From<String> for Alphabet {
 impl From<&str> for Alphabet {
     fn from(string: &str) -> Self {
         Self{ alpha: string.to_string() }
+    }
+}
+
+impl From<Alphabet> for String {
+    fn from(alphabet: Alphabet) -> Self {
+        alphabet.alpha
     }
 }
 

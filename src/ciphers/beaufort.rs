@@ -2,9 +2,9 @@ use std::collections::VecDeque;
 
 use rand::prelude::ThreadRng;
 use super::{Cipher, PolyMode};
-use crate::text_functions::{PresetAlphabet, random_sample_replace};
+use crate::text_functions::random_sample_replace;
 use crate::errors::CipherError;
-
+use crate::text_types::{PresetAlphabet::*};
 
 pub struct Beaufort {
     pub key_words: [String; 5],
@@ -185,7 +185,7 @@ impl Beaufort {
 impl Default for Beaufort {
     fn default() -> Self {
         Self { key_words: [String::new(), String::new(), String::new(), String::new(), String::new()], 
-               alphabet: String::from(PresetAlphabet::BasicLatin), 
+               alphabet: String::from(BasicLatin), 
                mode: PolyMode::CylicKey, 
                prog_shift: 0,
                multikey: false,        

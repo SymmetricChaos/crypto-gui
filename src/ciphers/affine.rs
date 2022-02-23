@@ -1,5 +1,6 @@
 use super::Cipher;
-use crate::{errors::CipherError, text_functions::PresetAlphabet};
+use crate::{errors::CipherError};
+use crate::text_types::{PresetAlphabet::*};
 use crate::math_functions::mul_inv;
 use rand::{prelude::ThreadRng, Rng};
 
@@ -32,7 +33,7 @@ impl Default for Affine {
         Self {
             add_key: 0,
             mul_key: 1,
-            alphabet: String::from(PresetAlphabet::BasicLatin),
+            alphabet: String::from(BasicLatin),
         }
     }
 }
