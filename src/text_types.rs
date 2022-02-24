@@ -74,42 +74,46 @@ impl From<PresetAlphabet> for &'static str {
 pub struct Alphabet {
     pub inner: String,
 }
-
+ 
 impl Alphabet {
-
+ 
+    // Length in characters is what we need
     pub fn len(&self) -> usize {
         self.inner.chars().count()
     }
-
-    pub fn nth(&self, n: usize, offset: usize) -> Option<char> {
-        let n = (n + offset) % self.len();
-        self.inner.chars().nth(n)
+ 
+    pub fn nth(&self, n: usize, offset: i32) -> Option<char> {
+        let len = self.len();
+        let idx = ((n + len) as i32 + offset) as usize % len;
+        self.inner.chars().nth(idx)
     }
-
-    pub fn pos(&self, c: char, offset: usize) -> Option<usize> {
-        Some((self.inner.chars().position(|x| x == c)? + self.len() - offset)  % self.len())
+ 
+    pub fn pos(&self, c: char, offset: i32) -> Option<usize> {
+        let shift = (self.len() as i32 - offset) as usize % self.len();
+        Some((self.inner.chars().position(|x| x == c)? + shift) % self.len())
     }
-
-    pub fn show(&self, offset: usize) -> String {
+ 
+    pub fn show(&self, offset: i32) -> String {
+        let shift = (self.len() as i32 + offset) as usize % self.len();
         let mut out = String::with_capacity(self.inner.len());
-        out.push_str(&self.inner[offset..]);
-        out.push_str(&self.inner[0..offset]);
+        out.push_str(&self.inner[shift..]);
+        out.push_str(&self.inner[0..shift]);
         out
     }
-
+ 
     pub fn slice(&self) -> &str {
         &self.inner
     }
-
+ 
     pub fn contains(&self, c: char) -> bool {
         self.inner.contains(c)
     }
-
+ 
 }
 
 impl From<PresetAlphabet> for Alphabet {
-    fn from(alphabet: PresetAlphabet) -> Self {
-        Self{ inner: String::from(alphabet) }
+    fn from(alpha: PresetAlphabet) -> Self {
+        Self{ inner: alpha.to_string() }
     }
 }
 
@@ -118,41 +122,59 @@ impl From<String> for Alphabet {
         Self{ inner: string }
     }
 }
-
+ 
 impl From<&str> for Alphabet {
     fn from(string: &str) -> Self {
         Self{ inner: string.to_string() }
     }
 }
-
+ 
 impl From<Alphabet> for String {
     fn from(alphabet: Alphabet) -> Self {
         alphabet.inner
     }
 }
-
-
-
+ 
 #[cfg(test)]
 mod alphabet_tests {
     use super::*;
 
+ 
     #[test]
     fn show_offset() {
         let alphabet = Alphabet::from("ABCD");
         assert_eq!(alphabet.show(1),"BCDA");
     }
-
+ 
     #[test]
     fn nth_offset()  {
         let alphabet = Alphabet::from("ABCD");
         assert_eq!(alphabet.nth(1,1).unwrap(),'C');
     }
-
+ 
     #[test]
     fn pos_offset() {
         let alphabet = Alphabet::from("ABCD");
         assert_eq!(alphabet.pos('C',1).unwrap(),1);
     }
-
+ 
+	// Offset should behave as expected even if its magnitude is greater than the Alphabet's length and even if it is negative
+    #[test]
+    fn show_offset_neg() {
+        let alphabet = Alphabet::from("ABCD");
+            assert_eq!(alphabet.show(-9),"DABC");
+    }
+ 
+    #[test]
+    fn nth_offset_neg()  {
+        let alphabet = Alphabet::from("ABCD");
+        assert_eq!(alphabet.nth(3,-9).unwrap(),'C');
+    }
+ 
+    #[test]
+    fn pos_offset_neg() {
+        let alphabet = Alphabet::from("ABCD");
+        assert_eq!(alphabet.pos('C',-9).unwrap(),3);
+    }
+ 
 }
