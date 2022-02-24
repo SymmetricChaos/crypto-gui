@@ -78,7 +78,7 @@ impl Cipher for Columnar {
             }
         }
     
-        Ok(g.read_filled_rows().collect())   
+        Ok(g.read_rows_characters().collect())   
     }
 
 

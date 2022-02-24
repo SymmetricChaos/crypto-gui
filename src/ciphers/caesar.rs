@@ -12,15 +12,19 @@ impl Caesar {
     pub fn new(shift: usize, alphabet: &str) -> Caesar {
         Caesar{ shift, alphabet: alphabet.to_string() }
     }
-
-    fn char_to_val(&self, c: char) -> Option<usize> {
-        self.alphabet.chars().position(|x| x == c)
+ 
+    fn encrypt_char(&self, c: char) -> char {
+        let alen = self.alphabet_len();
+        let pos = (self.alphabet.chars().position(|x| x == c).unwrap() + self.shift) % alen;
+        self.alphabet.chars().nth(pos).unwrap()
     }
-
-    fn val_to_char(&self, v: usize) -> Option<char> {
-        self.alphabet.chars().nth(v)
+ 
+    fn decrypt_char(&self, c: char) -> char {
+        let alen = self.alphabet_len();
+        let pos = (self.alphabet.chars().position(|x| x == c).unwrap() + alen - self.shift) % alen;
+        self.alphabet.chars().nth(pos).unwrap()
     }
-
+ 
     pub fn alphabet_len(&self) -> usize {
         self.alphabet.chars().count()
     }
@@ -34,38 +38,22 @@ impl Default for Caesar {
 
 impl Cipher for Caesar {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
-        let symbols = text.chars();
-        let mut out = "".to_string();
-        for s in symbols {
-            let val = self.char_to_val(s);
-            let n = match val {
-                Some(v) => (v + self.shift) % self.alphabet_len(),
-                None => return Err(CipherError::invalid_input_char(s))
-            };
-            let char = match self.val_to_char(n) {
-                Some(c) => c,
-                None => return Err(CipherError::invalid_input_char(s))
-            };
-            out.push(char)
+        for c in text.chars() {
+            if !self.alphabet.contains(c) {
+                return Err(CipherError::invalid_input_char(c))
+            }
         }
+        let out: String = text.chars().map(|c| self.encrypt_char(c)).collect();
         Ok(out)
     }
-
+ 
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
-        let symbols = text.chars();
-        let mut out = "".to_string();
-        for s in symbols {
-            let val = self.char_to_val(s);
-            let n = match val {
-                Some(v) => (v + self.alphabet_len() - self.shift) % self.alphabet_len(),
-                None => return Err(CipherError::invalid_input_char(s))
-            };
-            let char = match self.val_to_char(n) {
-                Some(c) => c,
-                None => return Err(CipherError::invalid_input_char(s))
-            };
-            out.push(char)
+        for c in text.chars() {
+            if !self.alphabet.contains(c) {
+                return Err(CipherError::invalid_input_char(c))
+            }
         }
+        let out: String = text.chars().map(|c| self.decrypt_char(c)).collect();
         Ok(out)
     }
 
@@ -113,7 +101,7 @@ mod caesar_tests {
     fn encrypt_test() {
         let mut cipher = Caesar::default();
         cipher.shift = 3;
-        assert_eq!(cipher.encrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
