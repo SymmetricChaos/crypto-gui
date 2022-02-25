@@ -105,6 +105,11 @@ impl Alphabet {
     pub fn contains(&self, c: char) -> bool {
         self.inner.contains(c)
     }
+
+    pub fn offset_char(&self, c: char, offset: i32) -> Option<char> {
+        let pos = self.pos(c, 0)?;
+        self.nth(pos, offset)
+    }
  
 }
 
@@ -135,7 +140,6 @@ impl From<Alphabet> for String {
 #[cfg(test)]
 mod alphabet_tests {
     use super::*;
-
  
     #[test]
     fn show_offset() {
@@ -154,24 +158,36 @@ mod alphabet_tests {
         let alphabet = Alphabet::from("ABCD");
         assert_eq!(alphabet.pos('C',1).unwrap(),1);
     }
+
+    #[test]
+    fn offset_char() {
+        let alphabet = Alphabet::from("ABCD");
+        assert_eq!(alphabet.offset_char('C',1).unwrap(),'D');
+    }
  
-	// Offset should behave as expected even if its magnitude is greater than the Alphabet's length and even if it is negative
+	// Offset should behave as expected even if it is negative
     #[test]
     fn show_offset_neg() {
         let alphabet = Alphabet::from("ABCD");
-            assert_eq!(alphabet.show(-9),"DABC");
+            assert_eq!(alphabet.show(-1),"DABC");
     }
  
     #[test]
     fn nth_offset_neg()  {
         let alphabet = Alphabet::from("ABCD");
-        assert_eq!(alphabet.nth(3,-9).unwrap(),'C');
+        assert_eq!(alphabet.nth(3,-1).unwrap(),'C');
     }
  
     #[test]
     fn pos_offset_neg() {
         let alphabet = Alphabet::from("ABCD");
-        assert_eq!(alphabet.pos('C',-9).unwrap(),3);
+        assert_eq!(alphabet.pos('C',-1).unwrap(),3);
+    }
+
+    #[test]
+    fn offset_char_neg() {
+        let alphabet = Alphabet::from("ABCD");
+        assert_eq!(alphabet.offset_char('C',-1).unwrap(),'B');
     }
  
 }

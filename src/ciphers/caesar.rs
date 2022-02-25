@@ -10,13 +10,11 @@ pub struct Caesar {
 
 impl Caesar {
     fn encrypt_char(&self, c: char) -> char {
-        let pos = self.alphabet.pos(c, 0).unwrap();
-        self.alphabet.nth(pos, self.shift).unwrap()
+        self.alphabet.offset_char(c, self.shift).unwrap()
     }
  
     fn decrypt_char(&self, c: char) -> char {
-        let pos = self.alphabet.pos(c, 0).unwrap();
-        self.alphabet.nth(pos, -self.shift).unwrap()
+        self.alphabet.offset_char(c, -self.shift).unwrap()
     }
 
     pub fn check_input(&self, text: &str) -> Result<(), CipherError> {
