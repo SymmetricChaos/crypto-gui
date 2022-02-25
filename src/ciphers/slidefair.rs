@@ -9,7 +9,7 @@ use crate::text_functions::keyed_alphabet;
 pub struct Slidefair {
     alphabet: Alphabet,
     key_word: String,
-    spacer: char,
+    spacer: String,
 }
 
 impl Slidefair {
@@ -24,6 +24,14 @@ impl Slidefair {
         key.into_iter()
     }
 
+    pub fn control_alphabet(&mut self) -> &mut String {
+        &mut self.alphabet.inner
+    }
+
+    pub fn set_alphabet(&mut self, alphabet: &str) {
+        self.alphabet.inner = alphabet.to_string();
+    }
+
     // Silently ignores invalid characters
     pub fn control_key(&mut self) -> &mut String {
         self.alphabet = Alphabet::from(keyed_alphabet(&self.key_word, self.alphabet.slice()));
@@ -35,7 +43,8 @@ impl Slidefair {
         self.alphabet = Alphabet::from(keyed_alphabet(key_word, self.alphabet.slice()));
     }
 
-    pub fn control_spacer(&mut self) -> &mut char {
+    pub fn control_spacer(&mut self) -> &mut String {
+        self.spacer = self.spacer.chars().next().unwrap_or('X').to_string();
         &mut self.spacer
     }
 
@@ -49,7 +58,7 @@ impl Slidefair {
             out.push((l,r))
         }
         if symbols.len() != 0 {
-            out.push( (symbols.pop().unwrap(), self.spacer) )
+            out.push( (symbols.pop().unwrap(), self.spacer.chars().next().unwrap()) )
         }
         out
     }
@@ -77,7 +86,7 @@ impl Slidefair {
 impl Default for Slidefair {
     fn default() -> Self {
         Self{ alphabet: Alphabet::from(BasicLatin), 
-              spacer: 'X',
+              spacer: String::from("X"),
               key_word: String::new() }
     }
 }
@@ -124,7 +133,7 @@ impl Cipher for Slidefair {
     }
 
     fn validate_settings(&self) -> Result<(), CipherError> {
-        if !&self.alphabet.contains(self.spacer) {
+        if !&self.alphabet.contains(self.spacer.chars().next().unwrap()) {
             return Err(CipherError::Key(format!("spacer character {} is not in the alphabet",self.spacer)))
         }
         Ok(())

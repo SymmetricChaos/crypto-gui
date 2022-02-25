@@ -18,6 +18,7 @@ pub mod polybius_controls;
 pub mod columnar_controls;
 pub mod adfgvx_controls;
 pub mod b64_controls;
+pub mod slidefair_controls;
 
 pub trait View {
     fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String, errors: &mut String);
@@ -50,6 +51,7 @@ pub struct ControlPanel {
     m94: M94,
 
     playfair: Playfair,
+    slidefair: Slidefair,
 
     columnar: Columnar,
 
@@ -130,6 +132,7 @@ impl ControlPanel {
             CipherID::Columnar => self.columnar.ui(ui, input, output, errors),
             CipherID::ADFGVX => self.adfgvx.ui(ui, input, output, errors),
             CipherID::B64 => self.b64.ui(ui, input, output, errors),
+            CipherID::Slidefair => self.slidefair.ui(ui, input, output, errors),
             _ => { ui.label("IN PROGRESS"); },
         }
     }
