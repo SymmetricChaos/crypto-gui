@@ -30,18 +30,18 @@ impl View for Beaufort {
                     ui.label("Key Words");
                     ui.checkbox(&mut self.multikey, "Multikey");
                 });
-                ui.add(TextEdit::singleline(&mut self.key_words[0]).text_style(TextStyle::Monospace));
-                ui.add(TextEdit::singleline(&mut self.key_words[1]).text_style(TextStyle::Monospace));
-                ui.add(TextEdit::singleline(&mut self.key_words[2]).text_style(TextStyle::Monospace));
-                ui.add(TextEdit::singleline(&mut self.key_words[3]).text_style(TextStyle::Monospace));
-                ui.add(TextEdit::singleline(&mut self.key_words[4]).text_style(TextStyle::Monospace));
+                ui.add(TextEdit::singleline(&mut self.key_words[0]).font(TextStyle::Monospace));
+                ui.add(TextEdit::singleline(&mut self.key_words[1]).font(TextStyle::Monospace));
+                ui.add(TextEdit::singleline(&mut self.key_words[2]).font(TextStyle::Monospace));
+                ui.add(TextEdit::singleline(&mut self.key_words[3]).font(TextStyle::Monospace));
+                ui.add(TextEdit::singleline(&mut self.key_words[4]).font(TextStyle::Monospace));
             },
             false => {
                 ui.horizontal(|ui| {
                     ui.label("Key Word ");
                     ui.checkbox(&mut self.multikey, "Multikey");
                 });
-                ui.add(TextEdit::singleline(&mut self.key_words[0]).text_style(TextStyle::Monospace));
+                ui.add(TextEdit::singleline(&mut self.key_words[0]).font(TextStyle::Monospace));
             },
         }
 

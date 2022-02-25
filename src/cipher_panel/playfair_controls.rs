@@ -25,7 +25,7 @@ impl View for Playfair {
         control_text_edit(ui, self.control_key());
 
         ui.label("Spacer Character\nInserted as padding where needed");
-        ui.add(TextEdit::singleline(&mut self.control_spacer().to_string()).text_style(TextStyle::Monospace).desired_width(15.0));
+        ui.add(TextEdit::singleline(&mut self.control_spacer().to_string()).font(TextStyle::Monospace).desired_width(15.0));
 
         ui.label(RichText::new(format!("Grid\n{}",self)).monospace());
         ui.add_space(16.0);

@@ -8,11 +8,11 @@ impl View for Alberti {
     fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, output: &mut String, errors: &mut String) {
         ui.add_space(16.0);
         ui.label("Fixed Alphabet");
-        ui.add(TextEdit::singleline(self.get_mut_input_alphabet()).text_style(TextStyle::Monospace));
+        ui.add(TextEdit::singleline(self.get_mut_input_alphabet()).font(TextStyle::Monospace));
         ui.add_space(16.0);
 
         ui.label("Moving Alphabet");
-        ui.add(TextEdit::singleline(self.get_mut_output_alphabet()).text_style(TextStyle::Monospace));
+        ui.add(TextEdit::singleline(self.get_mut_output_alphabet()).font(TextStyle::Monospace));
         ui.add_space(16.0);
 
         ui.label(RichText::new(self.to_string()).monospace());

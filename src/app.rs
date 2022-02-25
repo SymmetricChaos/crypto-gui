@@ -1,6 +1,5 @@
 use crate::cipher_id::CipherID;
-use eframe::{egui::{CtxRef, SidePanel, CentralPanel, ScrollArea, TopBottomPanel, Window, Button}, epi};
-
+use eframe::{egui::{SidePanel, CentralPanel, ScrollArea, TopBottomPanel, Window, Button, Context}, epi};
 use crate::cipher_panel::{ControlPanel, DisplayPanel};
 
 
@@ -38,23 +37,25 @@ impl epi::App for ClassicCrypto {
 
     fn setup(
         &mut self,
-        _ctx: &CtxRef,
+        _ctx: &Context,
         _frame: &epi::Frame,
         _storage: Option<&dyn epi::Storage>,
     ) {
     }
 
-    fn update(&mut self, ctx: &CtxRef, frame: &epi::Frame) {
+    fn update(&mut self, ctx: &Context, frame: &epi::Frame) {
         frame.set_window_size((1000.0,550.0).into());
         ctx.set_pixels_per_point(1.2);
         
         TopBottomPanel::top("top_panel").show(ctx, |ui| {
-            if ui.add(Button::new("Settings").small() ).clicked() {
-                self.show_settings = !self.show_settings;
-            }
-            if ui.add(Button::new("About").small() ).clicked() {
-                self.about = !self.about;
-            }
+            ui.horizontal_top(|ui| {
+                if ui.add(Button::new("Settings").small() ).clicked() {
+                    self.show_settings = !self.show_settings;
+                }
+                if ui.add(Button::new("About").small() ).clicked() {
+                    self.about = !self.about;
+                }
+            });
         });
 
         Window::new("🔧 Settings")

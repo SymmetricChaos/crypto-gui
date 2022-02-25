@@ -1,85 +1,74 @@
 use rand::{Rng, prelude::ThreadRng};
-use crate::{errors::{CipherError}};
+use crate::{errors::{CipherError}, text_types::Alphabet};
 use super::Cipher;
 use crate::text_types::{PresetAlphabet::*};
 
 pub struct Caesar {
-    pub shift: usize,
-    pub alphabet: String,
+    pub shift: i32,
+    pub alphabet: Alphabet,
 }
 
 impl Caesar {
-    pub fn new(shift: usize, alphabet: &str) -> Caesar {
-        Caesar{ shift, alphabet: alphabet.to_string() }
-    }
- 
     fn encrypt_char(&self, c: char) -> char {
-        let alen = self.alphabet_len();
-        let pos = (self.alphabet.chars().position(|x| x == c).unwrap() + self.shift) % alen;
-        self.alphabet.chars().nth(pos).unwrap()
+        let pos = self.alphabet.pos(c, 0).unwrap();
+        self.alphabet.nth(pos, self.shift).unwrap()
     }
  
     fn decrypt_char(&self, c: char) -> char {
-        let alen = self.alphabet_len();
-        let pos = (self.alphabet.chars().position(|x| x == c).unwrap() + alen - self.shift) % alen;
-        self.alphabet.chars().nth(pos).unwrap()
+        let pos = self.alphabet.pos(c, 0).unwrap();
+        self.alphabet.nth(pos, -self.shift).unwrap()
     }
- 
-    pub fn alphabet_len(&self) -> usize {
-        self.alphabet.chars().count()
+
+    pub fn check_input(&self, text: &str) -> Result<(), CipherError> {
+        for c in text.chars() {
+            if !self.alphabet.contains(c) {
+                return Err(CipherError::invalid_input_char(c))
+            }
+        }
+        Ok(())
     }
 }
 
 impl Default for Caesar {
     fn default() -> Self {
-        Self { shift: 0, alphabet: String::from(BasicLatin) }
+        Self { shift: 0, alphabet: Alphabet::from(BasicLatin) }
     }
 }
 
 impl Cipher for Caesar {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
-        for c in text.chars() {
-            if !self.alphabet.contains(c) {
-                return Err(CipherError::invalid_input_char(c))
-            }
-        }
-        let out: String = text.chars().map(|c| self.encrypt_char(c)).collect();
-        Ok(out)
+        self.check_input(text)?;
+        Ok( text.chars().map(|c| self.encrypt_char(c)).collect() )
     }
  
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
-        for c in text.chars() {
-            if !self.alphabet.contains(c) {
-                return Err(CipherError::invalid_input_char(c))
-            }
-        }
-        let out: String = text.chars().map(|c| self.decrypt_char(c)).collect();
-        Ok(out)
+        self.check_input(text)?;
+        Ok( text.chars().map(|c| self.decrypt_char(c)).collect() )
+
     }
 
     fn randomize(&mut self, rng: &mut ThreadRng) {
-        let length = self.alphabet.len();
-        self.shift = rng.gen_range(0..length);
+        self.shift = rng.gen_range(0..self.alphabet.len()) as i32;
     }
 
     fn get_input_alphabet(&self) -> &String {
-        &self.alphabet
+        &self.alphabet.inner
     }
 
     fn get_output_alphabet(&self) -> &String {
-        &self.alphabet
+        &self.alphabet.inner
     }
 
     fn get_mut_input_alphabet(&mut self) -> &mut String {
-        &mut self.alphabet
+        &mut self.alphabet.inner
     }
 
     fn get_mut_output_alphabet(&mut self) -> &mut String {
-        &mut self.alphabet
+        &mut self.alphabet.inner
     }
 
     fn validate_settings(&self) -> Result<(), CipherError> {
-        if self.shift > self.alphabet_len() {
+        if (self.shift as usize) > self.alphabet.len() {
             return Err(CipherError::Key(String::from("shift value must be less than the alphabet length")))
         }
         Ok(())

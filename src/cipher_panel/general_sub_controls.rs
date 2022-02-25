@@ -9,11 +9,11 @@ impl View for GeneralSubstitution {
     fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, output: &mut String, errors: &mut String) {
         ui.add_space(16.0);
         ui.label("Plaintext Alphabet");
-        ui.add(TextEdit::singleline(self.control_alphabet1()).text_style(TextStyle::Monospace));
+        ui.add(TextEdit::singleline(self.control_alphabet1()).font(TextStyle::Monospace));
         ui.add_space(16.0);
 
         ui.label("Ciphertext Alphabet");
-        ui.add(TextEdit::singleline(self.control_alphabet2()).text_style(TextStyle::Monospace));
+        ui.add(TextEdit::singleline(self.control_alphabet2()).font(TextStyle::Monospace));
         ui.add_space(16.0);
 
 

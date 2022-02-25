@@ -151,10 +151,10 @@ impl DisplayPanel {
        
         ui.add_space(32.0);
         ui.label("INPUT TEXT");
-        ui.add(TextEdit::multiline(input).text_style(TextStyle::Monospace));
+        ui.add(TextEdit::multiline(input).font(TextStyle::Monospace));
         ui.add_space(16.0);
         ui.label("OUTPUT TEXT");
-        ui.add(TextEdit::multiline(output).text_style(TextStyle::Monospace));
+        ui.add(TextEdit::multiline(output).font(TextStyle::Monospace));
        
         // ui.horizontal(|ui| {
         //     if ui.button("UPPERCASE").clicked() {
