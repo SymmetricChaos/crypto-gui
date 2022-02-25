@@ -113,7 +113,7 @@ impl Alphabet {
 
 impl From<PresetAlphabet> for Alphabet {
     fn from(alpha: PresetAlphabet) -> Self {
-        Self{ inner: alpha.to_string() }
+        Self{ inner: String::from(alpha) }
     }
 }
 
