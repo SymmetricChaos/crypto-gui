@@ -37,6 +37,12 @@ pub struct M94 {
     pub wheels: Vec<&'static str>, //wheels can be reordered
     alphabet: String,
 }
+
+impl M94 {
+    pub fn randomize_wheels(&mut self, rng: &mut ThreadRng) {
+        self.wheels.shuffle(rng);
+    }
+}
  
 impl Default for M94 {
     fn default() -> M94 {
@@ -85,19 +91,15 @@ impl Cipher for M94 {
         unimplemented!("the M94 alphabet cannot be changed")
     }
 
-    fn get_mut_output_alphabet(&mut self) -> &mut String {
-        unimplemented!("the M94 alphabet cannot be changed")
-    }
-
     fn get_input_alphabet(&self) -> &String {
-        &self.alphabet
-    }
-
-    fn get_output_alphabet(&self) -> &String {
         &self.alphabet
     }
 
     fn validate_settings(&self) -> Result<(), CipherError> {
         unimplemented!("It shouldn't be possible to get the M94 into an invalid state")
+    }
+
+    fn reset(&mut self) {
+        *self = Self::default();
     }
 }

@@ -66,16 +66,8 @@ impl Cipher for GeneralSubstitution {
         &self.alphabet1
     }
 
-    fn get_output_alphabet(&self) -> &String {
-        &self.alphabet2
-    }
-
     fn get_mut_input_alphabet(&mut self) -> &mut String {
         &mut self.alphabet1
-    }
-
-    fn get_mut_output_alphabet(&mut self) -> &mut String {
-        &mut self.alphabet2
     }
 
     fn validate_settings(&self) -> Result<(), CipherError> {
@@ -83,6 +75,10 @@ impl Cipher for GeneralSubstitution {
             return Err(CipherError::key("the input and output alphabets must have the same length"))
         }
         Ok(())
+    }
+    
+    fn reset(&mut self) {
+        *self = Self::default();
     }
 }
 

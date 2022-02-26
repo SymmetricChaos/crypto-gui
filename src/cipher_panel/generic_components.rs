@@ -28,22 +28,17 @@ pub fn randomize_button(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
     }
 }
 
+pub fn reset_button(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
+    if ui.button("Reset").clicked() {
+        cipher.reset()
+    }
+}
+
 pub fn input_alphabet(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
     ui.label("Alphabet");
     ui.add(egui::TextEdit::singleline(cipher.get_mut_input_alphabet()).font(TextStyle::Monospace)).on_hover_text("You can change this alphabet to whatever you like.");
 }
 
-
 pub fn control_text_edit(ui: &mut egui::Ui, text: &mut String) {
     ui.add(egui::TextEdit::singleline(text).font(TextStyle::Monospace));
 }
-
-// pub fn select_square_alphabet(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
-//     ui.label("Select Alphabet");
-//     ui.horizontal(|ui| {
-//         if ui.button("No Q").clicked() { cipher.set_alphabet(PresetAlphabet::BasicLatinNoQ) };
-//         if ui.button("No J").clicked() { cipher.set_alphabet(PresetAlphabet::BasicLatinNoJ) };
-//         if ui.button("Alphanumeric").clicked() { cipher.set_alphabet(PresetAlphabet::BasicLatinWithDigits) };
-//         if ui.button("Base64").clicked() { cipher.set_alphabet(PresetAlphabet::Base64) };
-//     });
-// }

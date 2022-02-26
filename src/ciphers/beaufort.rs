@@ -222,24 +222,20 @@ impl Cipher for Beaufort {
         self.key_words[4] = String::new();
     }
 
-    fn validate_settings(&self) -> Result<(), CipherError> {
-        todo!()
+    fn get_input_alphabet(&self) -> &String {
+        &self.alphabet
     }
 
     fn get_mut_input_alphabet(&mut self) -> &mut String {
         &mut self.alphabet
     }
 
-    fn get_mut_output_alphabet(&mut self) -> &mut String {
-        &mut self.alphabet
+    fn validate_settings(&self) -> Result<(), CipherError> {
+        todo!()
     }
 
-    fn get_input_alphabet(&self) -> &String {
-        &self.alphabet
-    }
-
-    fn get_output_alphabet(&self) -> &String {
-        &self.alphabet
+    fn reset(&mut self) {
+        *self = Self::default();
     }
 }
 

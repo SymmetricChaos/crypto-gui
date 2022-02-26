@@ -141,15 +141,7 @@ impl Cipher for Playfair {
         &self.square
     }
 
-    fn get_output_alphabet(&self) -> &String {
-        &self.square
-    }
-
     fn get_mut_input_alphabet(&mut self) -> &mut String {
-        &mut self.square
-    }
-
-    fn get_mut_output_alphabet(&mut self) -> &mut String {
         &mut self.square
     }
 
@@ -158,6 +150,10 @@ impl Cipher for Playfair {
             return Err(CipherError::Key(format!("spacer character {} is not in the alphabet",self.spacer)))
         }
         Ok(())
+    }
+
+    fn reset(&mut self) {
+        *self = Self::default();
     }
 }
 

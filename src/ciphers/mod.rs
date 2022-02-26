@@ -50,10 +50,9 @@ pub trait Cipher {
     fn encrypt(&self, text: &str) -> Result<String,CipherError>;
     fn decrypt(&self, text: &str) -> Result<String,CipherError>;
     fn randomize(&mut self, rng: &mut ThreadRng);
-    fn get_mut_input_alphabet(&mut self) -> &mut String;
-    fn get_mut_output_alphabet(&mut self) -> &mut String;
+    fn reset(&mut self);
     fn get_input_alphabet(&self) -> &String;
-    fn get_output_alphabet(&self) -> &String;
+    fn get_mut_input_alphabet(&mut self) -> &mut String;
     fn validate_settings(&self) -> Result<(),CipherError>;
 }
 

@@ -11,10 +11,8 @@ fn lug_pair(ui: &mut egui::Ui, pair: &mut (usize,usize)) {
 
 
 impl View for M209 {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, output: &mut String, errors: &mut String) {
+    fn ui(&mut self, ui: &mut eframe::egui::Ui) {
 
-        encrypt_decrypt(ui, self, input, output, errors);
-        ui.add_space(16.0);
         randomize_button(ui, self);
 
         ui.label("Alphabet");

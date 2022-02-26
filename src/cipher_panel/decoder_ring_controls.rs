@@ -4,7 +4,7 @@ use super::generic_components::*;
 use crate::ciphers::DecoderRing;
 
 impl View for DecoderRing {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, output: &mut String, errors: &mut String) {
+    fn ui(&mut self, ui: &mut eframe::egui::Ui) {
         ui.add_space(16.0);
         input_alphabet(ui, self);
         ui.add_space(16.0);
@@ -23,8 +23,6 @@ impl View for DecoderRing {
             }
         });
 
-        encrypt_decrypt(ui, self, input, output, errors);
-        ui.add_space(16.0);
         randomize_button(ui, self);
     }
 }

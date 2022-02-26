@@ -3,6 +3,8 @@ use eframe::egui::{self, TextEdit, TextStyle, RichText, Color32};
 
 use crate::ciphers::*;
 
+use self::generic_components::encrypt_decrypt;
+
 pub mod caesar_controls;
 pub mod generic_components;
 pub mod affine_controls;
@@ -21,7 +23,7 @@ pub mod b64_controls;
 pub mod slidefair_controls;
 
 pub trait View {
-    fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String, errors: &mut String);
+    fn ui(&mut self, ui: &mut egui::Ui);
 }
 
 fn combox_box(ciphers: &[CipherID], identifier: &'static str, active_cipher: &mut CipherID, ui: &mut egui::Ui) {
@@ -61,7 +63,7 @@ pub struct ControlPanel {
 
 
 impl ControlPanel {
-    pub fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String, errors: &mut String, active_cipher: &mut CipherID) {
+    pub fn ui(&mut self, ui: &mut egui::Ui, active_cipher: &mut CipherID) {
         
         egui::Grid::new("comboboxes").show(ui, |ui| {
             combox_box(
@@ -77,7 +79,7 @@ impl ControlPanel {
             );
     
             combox_box(
-                &[CipherID::M209, CipherID::Enigma, CipherID::SIGABA],
+                &[CipherID::M209], //CipherID::Enigma, CipherID::SIGABA],
                 "Rotor Machine",
                 active_cipher, ui
             );
@@ -118,21 +120,21 @@ impl ControlPanel {
         ui.add_space(16.0);
 
         match active_cipher {
-            CipherID::Caesar => self.caesar.ui(ui, input, output, errors),
-            CipherID::Affine => self.affine.ui(ui, input, output, errors),
-            CipherID::Decoder => self.decoder_ring.ui(ui, input, output, errors),
-            CipherID::Substitution => self.gen_sub.ui(ui, input, output, errors),
-            CipherID::Polybius => self.polybius.ui(ui, input, output, errors),
-            CipherID::Vigenere => self.vigenere.ui(ui, input, output, errors),
-            CipherID::Beaufort => self.beaufort.ui(ui, input, output, errors),
-            CipherID::M209 => self.m209.ui(ui, input, output, errors),
-            CipherID::M94 => self.m94.ui(ui, input, output, errors),
-            CipherID::Alberti => self.alberti.ui(ui, input, output, errors),
-            CipherID::Playfair => self.playfair.ui(ui, input, output, errors),
-            CipherID::Columnar => self.columnar.ui(ui, input, output, errors),
-            CipherID::ADFGVX => self.adfgvx.ui(ui, input, output, errors),
-            CipherID::B64 => self.b64.ui(ui, input, output, errors),
-            CipherID::Slidefair => self.slidefair.ui(ui, input, output, errors),
+            CipherID::Caesar => self.caesar.ui(ui),
+            CipherID::Affine => self.affine.ui(ui),
+            CipherID::Decoder => self.decoder_ring.ui(ui),
+            CipherID::Substitution => self.gen_sub.ui(ui),
+            CipherID::Polybius => self.polybius.ui(ui),
+            CipherID::Vigenere => self.vigenere.ui(ui),
+            CipherID::Beaufort => self.beaufort.ui(ui),
+            CipherID::M209 => self.m209.ui(ui),
+            CipherID::M94 => self.m94.ui(ui),
+            CipherID::Alberti => self.alberti.ui(ui),
+            CipherID::Playfair => self.playfair.ui(ui),
+            CipherID::Columnar => self.columnar.ui(ui),
+            CipherID::ADFGVX => self.adfgvx.ui(ui),
+            CipherID::B64 => self.b64.ui(ui),
+            CipherID::Slidefair => self.slidefair.ui(ui),
             _ => { ui.label("IN PROGRESS"); },
         }
     }
@@ -150,7 +152,7 @@ impl Default for DisplayPanel {
 }
 
 impl DisplayPanel {
-    pub fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String, errors: &mut String) {
+    pub fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String, errors: &mut String, active_cipher: &mut CipherID, control_panel: &ControlPanel,) {
        
         ui.add_space(32.0);
         ui.label("INPUT TEXT");
@@ -158,22 +160,25 @@ impl DisplayPanel {
         ui.add_space(16.0);
         ui.label("OUTPUT TEXT");
         ui.add(TextEdit::multiline(output).font(TextStyle::Monospace));
-       
-        // ui.horizontal(|ui| {
-        //     if ui.button("UPPERCASE").clicked() {
-        //         *input = input.to_uppercase();
-        //         *output = output.to_uppercase();
-        //     }
-        //     if ui.button("lowercase").clicked() {
-        //         *input = input.to_lowercase();
-        //         *output = output.to_lowercase();
-        //     }
-        // });
-       
-        // if ui.button("strip whitespace").clicked() {
-        //     *input = input.split_whitespace().collect();
-        //     *output = output.split_whitespace().collect();
-        // }
+
+        match active_cipher {
+            CipherID::Caesar => encrypt_decrypt(ui, &control_panel.caesar, input, output, errors),
+            CipherID::Affine => encrypt_decrypt(ui, &control_panel.affine, input, output, errors),
+            CipherID::Decoder => encrypt_decrypt(ui, &control_panel.decoder_ring, input, output, errors),
+            CipherID::Substitution => encrypt_decrypt(ui, &control_panel.gen_sub, input, output, errors),
+            CipherID::Polybius => encrypt_decrypt(ui, &control_panel.polybius, input, output, errors),
+            CipherID::Vigenere => encrypt_decrypt(ui, &control_panel.vigenere, input, output, errors),
+            CipherID::Beaufort => encrypt_decrypt(ui, &control_panel.beaufort, input, output, errors),
+            CipherID::M209 => encrypt_decrypt(ui, &control_panel.m209, input, output, errors),
+            CipherID::M94 => encrypt_decrypt(ui, &control_panel.m94, input, output, errors),
+            CipherID::Alberti => encrypt_decrypt(ui, &control_panel.alberti, input, output, errors),
+            CipherID::Playfair => encrypt_decrypt(ui, &control_panel.playfair, input, output, errors),
+            CipherID::Columnar => encrypt_decrypt(ui, &control_panel.columnar, input, output, errors),
+            CipherID::ADFGVX => encrypt_decrypt(ui, &control_panel.adfgvx, input, output, errors),
+            CipherID::B64 => encrypt_decrypt(ui, &control_panel.b64, input, output, errors),
+            CipherID::Slidefair => encrypt_decrypt(ui, &control_panel.slidefair, input, output, errors),
+            _ => { *errors = String::from("button not linked properly") }
+        }
 
         ui.add_space(10.0);
         if ui.button("clear").clicked() {
@@ -187,7 +192,6 @@ impl DisplayPanel {
             std::mem::swap(input, output)
         }
 
-       
         if !errors.is_empty() {
             ui.add_space(24.0);
             ui.label(RichText::new(errors.clone())
@@ -196,6 +200,5 @@ impl DisplayPanel {
                 .monospace()
             );
         }
-
     }
 }

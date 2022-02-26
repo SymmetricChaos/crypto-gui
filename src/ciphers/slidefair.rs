@@ -120,16 +120,8 @@ impl Cipher for Slidefair {
         &self.alphabet.inner
     }
 
-    fn get_output_alphabet(&self) -> &String {
-        todo!()
-    }
-
     fn get_mut_input_alphabet(&mut self) -> &mut String {
         &mut self.alphabet.inner
-    }
-
-    fn get_mut_output_alphabet(&mut self) -> &mut String {
-        todo!()
     }
 
     fn validate_settings(&self) -> Result<(), CipherError> {
@@ -137,6 +129,10 @@ impl Cipher for Slidefair {
             return Err(CipherError::Key(format!("spacer character {} is not in the alphabet",self.spacer)))
         }
         Ok(())
+    }
+
+    fn reset(&mut self) {
+        *self = Self::default();
     }
 }
 

@@ -214,16 +214,12 @@ impl Cipher for Vigenere {
         &mut self.alphabet.inner
     }
 
-    fn get_mut_output_alphabet(&mut self) -> &mut String {
-        &mut self.alphabet.inner
-    }
-
     fn get_input_alphabet(&self) -> &String {
         &self.alphabet.inner
     }
-
-    fn get_output_alphabet(&self) -> &String {
-        &self.alphabet.inner
+    
+    fn reset(&mut self) {
+        *self = Self::default();
     }
 }
 

@@ -4,9 +4,7 @@ use super::generic_components::*;
 use crate::ciphers::Caesar;
 
 impl View for Caesar {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, output: &mut String, errors: &mut String) {
-        encrypt_decrypt(ui, self, input, output, errors);
-        ui.add_space(16.0);
+    fn ui(&mut self, ui: &mut eframe::egui::Ui) {
 
         randomize_button(ui, self);
         ui.add_space(16.0);

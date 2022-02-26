@@ -91,20 +91,16 @@ impl Cipher for Columnar {
         &mut self.alphabet
     }
 
-    fn get_mut_output_alphabet(&mut self) -> &mut String {
-        todo!("transposition may output any alphabet")
-    }
-
     fn get_input_alphabet(&self) -> &String {
         &self.alphabet
     }
 
-    fn get_output_alphabet(&self) -> &String {
-        todo!("transposition may output any alphabet")
-    }
-
     fn validate_settings(&self) -> Result<(), CipherError> {
         todo!()
+    }
+
+    fn reset(&mut self) {
+        *self = Self::default();
     }
 }
 

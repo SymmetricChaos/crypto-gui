@@ -9,10 +9,8 @@ use crate::text_types::{PresetAlphabet::*};
 
 
 impl View for Polybius {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, output: &mut String, errors: &mut String) {
+    fn ui(&mut self, ui: &mut eframe::egui::Ui) {
 
-        encrypt_decrypt(ui, self, input, output, errors);
-        ui.add_space(16.0);
         randomize_button(ui, self);
         ui.add_space(16.0);
 

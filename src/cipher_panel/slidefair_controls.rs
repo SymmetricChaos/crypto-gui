@@ -5,7 +5,7 @@ use super::generic_components::*;
 use crate::ciphers::Slidefair;
 
 impl View for Slidefair {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, output: &mut String, errors: &mut String) {
+    fn ui(&mut self, ui: &mut eframe::egui::Ui) {
         
         ui.label("Select Alphabet");
         ui.add(TextEdit::singleline(self.control_alphabet()).font(TextStyle::Monospace));
@@ -17,8 +17,6 @@ impl View for Slidefair {
         ui.label(RichText::new(format!("Grid\n{}",self)).monospace());
         ui.add_space(16.0);
 
-        encrypt_decrypt(ui, self, input, output, errors);
-        ui.add_space(16.0);
         randomize_button(ui, self);
     }
 }

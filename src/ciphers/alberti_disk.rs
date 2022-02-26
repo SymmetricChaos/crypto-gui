@@ -12,6 +12,14 @@ pub struct Alberti {
  
 impl Alberti {
  
+    pub fn control_fixed_alphabet(&mut self) -> &mut String {
+        &mut self.fixed_alphabet
+    }
+
+    pub fn control_moving_alphabet(&mut self) -> &mut String {
+        &mut self.fixed_alphabet
+    }
+
     fn encrypt_char(&self, symbol: char, index: usize) -> char {
         let position = self.fixed_alphabet.chars().position(|x| x == symbol).unwrap();
         self.moving_alphabet.chars().nth((position + index) % self.alphabet_len()).unwrap()
@@ -73,20 +81,16 @@ impl Cipher for Alberti {
         &self.fixed_alphabet
     }
 
-    fn get_output_alphabet(&self) -> &String {
-        &self.moving_alphabet
-    }
-
     fn get_mut_input_alphabet(&mut self) -> &mut String {
         &mut self.fixed_alphabet
     }
 
-    fn get_mut_output_alphabet(&mut self) -> &mut String {
-        &mut self.moving_alphabet
-    }
-
     fn validate_settings(&self) -> Result<(), CipherError> {
         todo!()
+    }
+
+    fn reset(&mut self) {
+        *self = Self::default();
     }
 
 }

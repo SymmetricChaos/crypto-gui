@@ -53,15 +53,7 @@ impl Cipher for Caesar {
         &self.alphabet.inner
     }
 
-    fn get_output_alphabet(&self) -> &String {
-        &self.alphabet.inner
-    }
-
     fn get_mut_input_alphabet(&mut self) -> &mut String {
-        &mut self.alphabet.inner
-    }
-
-    fn get_mut_output_alphabet(&mut self) -> &mut String {
         &mut self.alphabet.inner
     }
 
@@ -70,6 +62,10 @@ impl Cipher for Caesar {
             return Err(CipherError::Key(String::from("shift value must be less than the alphabet length")))
         }
         Ok(())
+    }
+
+    fn reset(&mut self) {
+        *self = Self::default();
     }
 }
 

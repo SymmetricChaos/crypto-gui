@@ -256,7 +256,6 @@ impl Cipher for M209 {
                 }
             }
 
-            // This encryption step should be a modified atbash
             let c = usize_to_char(atbash_encrypt(n,sh,26));
             out.push(c);
             
@@ -293,14 +292,9 @@ impl Cipher for M209 {
         for (rotor, new_pins) in self.get_wheels().zip([pins1, pins2, pins3, pins4, pins5, pins6].iter()) {
             rotor.pins = new_pins.clone()
         }
-
     }
 
     fn get_input_alphabet(&self) -> &String {
-        &self.alphabet
-    }
-
-    fn get_output_alphabet(&self) -> &String {
         &self.alphabet
     }
 
@@ -308,12 +302,12 @@ impl Cipher for M209 {
         &mut self.alphabet
     }
 
-    fn get_mut_output_alphabet(&mut self) -> &mut String {
-        &mut self.alphabet
-    }
-
     fn validate_settings(&self) -> Result<(), CipherError> {
         todo!()
+    }
+
+    fn reset(&mut self) {
+        *self = Self::default();
     }
 }
 

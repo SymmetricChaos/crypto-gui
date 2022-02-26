@@ -7,7 +7,7 @@ use crate::text_types::{PresetAlphabet::*};
 
 
 impl View for ADFGVX {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, output: &mut String, errors: &mut String) {
+    fn ui(&mut self, ui: &mut eframe::egui::Ui) {
 
         ui.label("Select Mode");
         ui.horizontal(|ui| {
@@ -24,8 +24,6 @@ impl View for ADFGVX {
         ui.label("Columnar Key Word");
         ui.add(TextEdit::singleline(self.columnar.control_key()));
 
-        encrypt_decrypt(ui, self, input, output, errors);
-        ui.add_space(16.0);
         randomize_button(ui, self);
     }
 }

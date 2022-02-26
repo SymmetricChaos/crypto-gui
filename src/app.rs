@@ -44,8 +44,6 @@ impl epi::App for ClassicCrypto {
     }
 
     fn update(&mut self, ctx: &Context, _: &epi::Frame) {
-        //frame.set_window_size((1000.0,550.0).into());
-        //ctx.set_pixels_per_point(1.2);
         
         TopBottomPanel::top("top_panel").show(ctx, |ui| {
             ui.horizontal_top(|ui| {
@@ -69,17 +67,24 @@ impl epi::App for ClassicCrypto {
             .open(&mut self.show_about)
             .vscroll(true)
             .show(ctx, |ui| {
-                ui.label("Welcome to Classic Crypto an online cipher machine made using egui, Rust, and WASM!\n\nThis project starts 'classical cryptography' as early as writing itself and ends it in 1949 with the publication of 'Communication Theory of Secrecy Systems' by Claude Shannon at Bell Labs which introduct the modern theory of cryptography. Most of the ciphers here can be broken by hand in less than a day and all of them can be broken by computer in a few moments.");
+                ui.horizontal_wrapped(|ui| {
+                    ui.label("Welcome to Classic Crypto an online cipher machine made using");
+                    ui.hyperlink_to("egui", "https://github.com/emilk/egui");
+                    ui.label("!");
+                });
+                ui.label("\n\nThis project starts 'classical cryptography' as early as writing itself and ends it in 1949 with the publication of 'Communication Theory of Secrecy Systems' by Claude Shannon at Bell Labs which introduced the modern theory of cryptography. The ciphers presented here are for historical interest not for use in security. Most can be broken by hand in less than a day and all of them can quickly be broken by computer.\n\n");
+                ui.hyperlink_to("Check out the source code", "https://github.com/SymmetricChaos/crypto-gui");
+                
         });
 
         SidePanel::right("display_panel").max_width(300.0).show(ctx, |ui| {
-            self.display.ui(ui, &mut self.input, &mut self.output, &mut self.errors);
+            self.display.ui(ui, &mut self.input, &mut self.output, &mut self.errors, &mut self.active_cipher, &mut self.control);
             
         });
 
         CentralPanel::default().show(ctx, |ui| {
             ScrollArea::vertical().show(ui, |ui| {
-                self.control.ui(ui, &mut self.input, &mut self.output, &mut self.errors, &mut self.active_cipher)
+                self.control.ui(ui, &mut self.active_cipher)
             });
         });
     }

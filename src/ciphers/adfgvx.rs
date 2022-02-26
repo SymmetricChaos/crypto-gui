@@ -59,20 +59,16 @@ impl Cipher for ADFGVX {
         &self.polybius.get_input_alphabet()
     }
  
-    fn get_output_alphabet(&self) -> &String {
-        &self.polybius.get_labels()
-    }
- 
     fn get_mut_input_alphabet(&mut self) -> &mut String {
         unimplemented!("ADFGX and ADFGVX ciphers use historically accurate alphabets that should not be changed")
     }
- 
-    fn get_mut_output_alphabet(&mut self) -> &mut String {
-        unimplemented!("ADFGX and ADFGVX ciphers use historically accurate alphabets that should not be changed")
-    }
- 
+
     fn validate_settings(&self) -> Result<(), CipherError> {
         todo!()
+    }
+
+    fn reset(&mut self) {
+        *self = Self::default();
     }
 }
 

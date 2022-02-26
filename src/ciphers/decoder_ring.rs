@@ -85,20 +85,16 @@ impl Cipher for DecoderRing {
         &self.alphabet
     }
 
-    fn get_output_alphabet(&self) -> &String {
-        todo!("output alphabet should be digits and spaces")
-    }
-
     fn get_mut_input_alphabet(&mut self) -> &mut String {
         &mut self.alphabet
     }
 
-    fn get_mut_output_alphabet(&mut self) -> &mut String {
-        todo!("output alphabet should be digits and spaces")
-    }
-
     fn validate_settings(&self) -> Result<(), CipherError> {
         todo!()
+    }
+
+    fn reset(&mut self) {
+        *self = Self::default();
     }
 }
 

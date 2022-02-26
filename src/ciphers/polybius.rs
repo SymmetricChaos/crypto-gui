@@ -118,21 +118,17 @@ impl Cipher for Polybius {
         &self.alphabet
     }
 
-    fn get_output_alphabet(&self) -> &String {
-        &self.alphabet
-    }
-
     fn get_mut_input_alphabet(&mut self) -> &mut String {
         &mut self.alphabet
     }
-
-    fn get_mut_output_alphabet(&mut self) -> &mut String {
-        &mut self.alphabet
-    }
-
+    
     fn validate_settings(&self) -> Result<(), CipherError> {
         validate_alphabet(&self.alphabet)?;
         Ok(())
+    }
+
+    fn reset(&mut self) {
+        *self = Self::default();
     }
 }
 
