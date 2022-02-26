@@ -5,7 +5,10 @@ use super::{View, generic_components::*};
 
 impl View for Vigenere {
     fn ui(&mut self, ui: &mut eframe::egui::Ui) {
+
+        randomize_reset(ui, self);
         ui.add_space(16.0);
+
         input_alphabet(ui, self);
         ui.add_space(16.0);
 
@@ -44,7 +47,5 @@ impl View for Vigenere {
                 ui.add(TextEdit::singleline(&mut self.key_words[0]).font(TextStyle::Monospace));
             },
         }
-
-        randomize_button(ui, self);
     }
 }

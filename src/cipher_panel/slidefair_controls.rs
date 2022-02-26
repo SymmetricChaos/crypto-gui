@@ -6,6 +6,9 @@ use crate::ciphers::Slidefair;
 
 impl View for Slidefair {
     fn ui(&mut self, ui: &mut eframe::egui::Ui) {
+
+        randomize_reset(ui, self);
+        ui.add_space(16.0);
         
         ui.label("Select Alphabet");
         ui.add(TextEdit::singleline(self.control_alphabet()).font(TextStyle::Monospace));
@@ -17,6 +20,5 @@ impl View for Slidefair {
         ui.label(RichText::new(format!("Grid\n{}",self)).monospace());
         ui.add_space(16.0);
 
-        randomize_button(ui, self);
     }
 }

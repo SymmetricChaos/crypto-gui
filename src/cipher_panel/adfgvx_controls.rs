@@ -9,6 +9,9 @@ use crate::text_types::{PresetAlphabet::*};
 impl View for ADFGVX {
     fn ui(&mut self, ui: &mut eframe::egui::Ui) {
 
+        randomize_reset(ui, self);
+        ui.add_space(16.0);
+
         ui.label("Select Mode");
         ui.horizontal(|ui| {
             if ui.button("ADFGX").clicked() { self.set_alphabet(BasicLatinNoJ) };
@@ -23,7 +26,5 @@ impl View for ADFGVX {
 
         ui.label("Columnar Key Word");
         ui.add(TextEdit::singleline(self.columnar.control_key()));
-
-        randomize_button(ui, self);
     }
 }

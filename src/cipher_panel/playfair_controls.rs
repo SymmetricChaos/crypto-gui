@@ -9,6 +9,9 @@ use crate::text_types::{PresetAlphabet::*};
 
 impl View for Playfair {
     fn ui(&mut self, ui: &mut eframe::egui::Ui) {
+
+        randomize_reset(ui, self);
+        ui.add_space(16.0);
         
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
@@ -29,7 +32,5 @@ impl View for Playfair {
 
         ui.label(RichText::new(format!("Grid\n{}",self)).monospace());
         ui.add_space(16.0);
-
-        randomize_button(ui, self);
     }
 }

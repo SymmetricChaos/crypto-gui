@@ -5,7 +5,10 @@ use crate::ciphers::DecoderRing;
 
 impl View for DecoderRing {
     fn ui(&mut self, ui: &mut eframe::egui::Ui) {
+
+        randomize_reset(ui, self);
         ui.add_space(16.0);
+
         input_alphabet(ui, self);
         ui.add_space(16.0);
 
@@ -22,7 +25,5 @@ impl View for DecoderRing {
                 self.midnight();
             }
         });
-
-        randomize_button(ui, self);
     }
 }

@@ -7,6 +7,10 @@ use crate::ciphers::GeneralSubstitution;
 
 impl View for GeneralSubstitution {
     fn ui(&mut self, ui: &mut eframe::egui::Ui) {
+
+        randomize_reset(ui, self);
+        ui.add_space(16.0);
+
         ui.add_space(16.0);
         ui.label("Plaintext Alphabet");
         ui.add(TextEdit::singleline(self.control_alphabet1()).font(TextStyle::Monospace));
@@ -15,7 +19,5 @@ impl View for GeneralSubstitution {
         ui.label("Ciphertext Alphabet");
         ui.add(TextEdit::singleline(self.control_alphabet2()).font(TextStyle::Monospace));
         ui.add_space(16.0);
-
-        randomize_button(ui, self);
     }
 }

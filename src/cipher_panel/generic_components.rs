@@ -21,6 +21,17 @@ pub fn encrypt_decrypt(ui: &mut egui::Ui, cipher: &dyn Cipher, input: &mut Strin
     });
 }
 
+
+pub fn randomize_reset(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
+    let mut rng = ThreadRng::default();
+    if ui.button("Randomize").clicked() {
+        cipher.randomize(&mut rng)
+    }
+    if ui.button("Reset").clicked() {
+        cipher.reset()
+    }
+}
+
 pub fn randomize_button(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
     let mut rng = ThreadRng::default();
     if ui.button("Randomize\nSettings").clicked() {

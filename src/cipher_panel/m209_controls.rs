@@ -13,7 +13,8 @@ fn lug_pair(ui: &mut egui::Ui, pair: &mut (usize,usize)) {
 impl View for M209 {
     fn ui(&mut self, ui: &mut eframe::egui::Ui) {
 
-        randomize_button(ui, self);
+        randomize_reset(ui, self);
+        ui.add_space(16.0);
 
         ui.label("Alphabet");
         ui.label("ABDCEFGHIJKLMNOPQRSTUVWXYZ");

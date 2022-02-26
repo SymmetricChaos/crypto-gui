@@ -7,7 +7,9 @@ use crate::ciphers::Affine;
 
 impl View for Affine {
     fn ui(&mut self, ui: &mut eframe::egui::Ui) {
+        randomize_reset(ui, self);
         ui.add_space(16.0);
+
         input_alphabet(ui, self);
         ui.add_space(16.0);
 
@@ -21,7 +23,5 @@ impl View for Affine {
         let alpha_range = 1..=((self.length()-1));
         ui.add(Slider::new(&mut self.mul_key, alpha_range));
         ui.add_space(16.0);
-
-        randomize_button(ui, self);
     }
 }

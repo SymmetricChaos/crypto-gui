@@ -9,6 +9,10 @@ use crate::ciphers::M94;
 
 impl View for M94 {
     fn ui(&mut self, ui: &mut eframe::egui::Ui) {
+
+        randomize_reset(ui, self);
+        ui.add_space(16.0);
+
         ui.label("Alphabet");
         ui.label("ABDCEFGHIJKLMNOPQRSTUVWXYZ");
         ui.add_space(16.0);
@@ -27,7 +31,5 @@ impl View for M94 {
         for wheel in &self.wheels {
             ui.add(egui::Label::new(egui::RichText::from(*wheel).monospace()));
         }
-
-        randomize_button(ui, self);
     }
 }

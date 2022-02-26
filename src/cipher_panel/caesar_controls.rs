@@ -6,7 +6,7 @@ use crate::ciphers::Caesar;
 impl View for Caesar {
     fn ui(&mut self, ui: &mut eframe::egui::Ui) {
 
-        randomize_button(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         input_alphabet(ui, self);
