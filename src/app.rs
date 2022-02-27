@@ -1,7 +1,7 @@
 use crate::cipher_id::CipherID;
 use eframe::{egui::{SidePanel, CentralPanel, ScrollArea, TopBottomPanel, Window, Button, Context}, epi};
 use crate::cipher_panel::{ControlPanel, DisplayPanel};
-
+use crate::text_types::PresetAlphabet::*;
 
 pub struct ClassicCrypto {
     control: ControlPanel,
@@ -12,6 +12,7 @@ pub struct ClassicCrypto {
     active_cipher: CipherID,
     show_settings: bool,
     show_about: bool,
+    show_alphabet_selector: bool,
 }
 
 impl Default for ClassicCrypto {
@@ -25,6 +26,7 @@ impl Default for ClassicCrypto {
             active_cipher: CipherID::default(),
             show_settings: false,
             show_about: false,
+            show_alphabet_selector: false,
         }
     }
 }
@@ -53,6 +55,9 @@ impl epi::App for ClassicCrypto {
                 if ui.add(Button::new("About").small() ).clicked() {
                     self.show_about = !self.show_about;
                 }
+                if ui.add(Button::new("Alphabets").small() ).clicked() {
+                    self.show_alphabet_selector = !self.show_alphabet_selector;
+                }
             });
         });
 
@@ -75,6 +80,20 @@ impl epi::App for ClassicCrypto {
                 ui.label("\n\nThis project starts 'classical cryptography' as early as writing itself and ends it in 1949 with the publication of 'Communication Theory of Secrecy Systems' by Claude Shannon at Bell Labs which introduced the modern theory of cryptography. The ciphers presented here are for historical interest not for use in security. Most can be broken by hand in less than a day and all of them can quickly be broken by computer.\n\n");
                 ui.hyperlink_to("Check out the source code", "https://github.com/SymmetricChaos/crypto-gui");
                 
+        });
+
+        Window::new("Alphabet Selector")
+            .open(&mut self.show_alphabet_selector)
+            .vscroll(true)
+            .show(ctx, |ui| {
+                ui.label("Click to Copy");
+                ui.add_space(16.0);
+                for alphabet in [BasicLatin, BasicLatinNoJ, BasicLatinNoQ, BasicLatinWithDigits] {
+                    if ui.button(String::from(alphabet)).clicked() {
+                        ui.output().copied_text = String::from(alphabet);
+                    };
+                }
+
         });
 
         SidePanel::right("display_panel").max_width(300.0).show(ctx, |ui| {

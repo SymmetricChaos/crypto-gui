@@ -1,8 +1,6 @@
 use crate::cipher_id::CipherID;
 use eframe::egui::{self, TextEdit, TextStyle, RichText, Color32};
-
 use crate::ciphers::*;
-
 use self::generic_components::encrypt_decrypt;
 
 pub mod caesar_controls;
@@ -152,7 +150,7 @@ impl Default for DisplayPanel {
 }
 
 impl DisplayPanel {
-    pub fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String, errors: &mut String, active_cipher: &mut CipherID, control_panel: &ControlPanel,) {
+    pub fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String, errors: &mut String, active_cipher: &mut CipherID, control_panel: &ControlPanel) {
        
         ui.add_space(32.0);
         ui.label("INPUT TEXT");

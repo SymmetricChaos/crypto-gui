@@ -1,5 +1,5 @@
 use eframe::egui::{TextEdit, TextStyle, Slider};
-use crate::ciphers::{Vigenere, PolyMode};
+use crate::ciphers::{Vigenere, PolyMode::*};
 use super::{View, generic_components::*};
 
 
@@ -14,12 +14,12 @@ impl View for Vigenere {
 
         ui.label("Mode");
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.mode, PolyMode::CylicKey, "Cyclic");
-            ui.selectable_value(&mut self.mode, PolyMode::Autokey, "Autokey");
-            ui.selectable_value(&mut self.mode, PolyMode::ProgKey, "Progressive");
+            ui.selectable_value(&mut self.mode, CylicKey, "Cyclic");
+            ui.selectable_value(&mut self.mode, Autokey, "Autokey");
+            ui.selectable_value(&mut self.mode, ProgKey, "Progressive");
         });
 
-        if self.mode == PolyMode::ProgKey {
+        if self.mode == ProgKey {
             ui.add_space(16.0);
             ui.label("Step size");
             let alpha_range = 0..=((self.alphabet_len()-1));

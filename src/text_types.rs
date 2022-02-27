@@ -9,7 +9,7 @@ pub enum PresetAlphabet {
     Ascii94, // The printing ASCII symbols without the space
     Ascii95, // The printing ASCII symbols with the space
     Greek,
-    Latin, //Classical Latin
+    ClassicalLatin, //Classical Latin
     Base64, // 64 safe to use ASCII symbols, low chance of being interpreted if the string is parsed
     Spanish,
     German,
@@ -29,7 +29,7 @@ impl PresetAlphabet {
             PresetAlphabet::Ascii94 => "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
             PresetAlphabet::Ascii95 => " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
             PresetAlphabet::Greek => "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ", //All of these are Unicode Greek even the ones draw identically to ASCII
-            PresetAlphabet::Latin => "ABCDEFGHIKLMNOPQRSTVXY",
+            PresetAlphabet::ClassicalLatin => "ABCDEFGHIKLMNOPQRSTVXYZ",
             PresetAlphabet::Base64 => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
             PresetAlphabet::Spanish => "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ",
             PresetAlphabet::German => "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜß",
