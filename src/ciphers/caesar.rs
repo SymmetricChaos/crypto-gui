@@ -2,6 +2,7 @@ use rand::{Rng, prelude::ThreadRng};
 use crate::{errors::{CipherError}, text_types::Alphabet};
 use super::Cipher;
 use crate::text_types::{PresetAlphabet::*};
+use crate::text_functions::prep_text;
 
 pub struct Caesar {
     pub shift: i32,
@@ -9,6 +10,7 @@ pub struct Caesar {
 }
 
 impl Caesar {
+
     fn encrypt_char(&self, c: char) -> char {
         self.alphabet.offset_char(c, self.shift).unwrap()
     }
@@ -35,12 +37,12 @@ impl Default for Caesar {
 
 impl Cipher for Caesar {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
-        self.check_input(text)?;
+        let text = prep_text(text, self.alphabet.slice())?;
         Ok( text.chars().map(|c| self.encrypt_char(c)).collect() )
     }
  
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
-        self.check_input(text)?;
+        let text = prep_text(text, self.alphabet.slice())?;
         Ok( text.chars().map(|c| self.decrypt_char(c)).collect() )
 
     }

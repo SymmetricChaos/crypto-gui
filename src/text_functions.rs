@@ -146,6 +146,30 @@ pub fn dedup_alphabet(s: &str) -> String {
     out
 }
 
+pub fn prep_text(text: &str, alphabet: &str) -> Result<String,CipherError> {
+    let mut out = String::with_capacity(text.len());
+    for t in text.chars() {
+        if alphabet.contains(t) {
+            out.push(t)
+        } else if t.is_whitespace() || t.is_ascii_punctuation() {
+            // ignore any Unicode whitespace and 
+            // any ASCII punctuation
+        } else if alphabet.contains(t.to_ascii_lowercase()) {
+            // try converting the character to lowercase
+            // this only works with ASCII at the moment
+            // because unicode can change the number of
+            // characters between upper and lower case
+            out.push(t.to_ascii_lowercase())
+        } else if alphabet.contains(t.to_ascii_uppercase()) {
+            // As above
+            out.push(t.to_ascii_uppercase())
+        } else {
+            return Err(CipherError::invalid_input_char(t))
+        }
+    }
+    Ok(out)
+}
+
 
 
 #[cfg(test)]
