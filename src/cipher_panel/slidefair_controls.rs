@@ -17,7 +17,11 @@ impl View for Slidefair {
         ui.label("Spacer Character\nInserted at end as padding if needed");
         ui.add(TextEdit::singleline(self.control_spacer()).font(TextStyle::Monospace).desired_width(15.0));
 
-        ui.label(RichText::new(format!("Grid\n{}",self)).monospace());
+        ui.label("Grid");
+        for row in self.rows() {
+            ui.label(RichText::new(row).monospace());
+        }
+        
         ui.add_space(16.0);
 
     }

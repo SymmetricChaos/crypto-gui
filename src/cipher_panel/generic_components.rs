@@ -1,6 +1,6 @@
-use eframe::egui::{self, RichText, Color32, TextStyle};
+use eframe::egui::{self, RichText, Color32, TextStyle, Label};
 use rand::prelude::ThreadRng;
-use crate::ciphers::Cipher;
+use crate::{ciphers::Cipher, grid::Grid};
 
 pub fn encrypt_decrypt(ui: &mut egui::Ui, cipher: &dyn Cipher, input: &mut String, output: &mut String, errors: &mut String) {
     ui.horizontal(|ui| {
@@ -52,4 +52,20 @@ pub fn input_alphabet(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
 
 pub fn control_text_edit(ui: &mut egui::Ui, text: &mut String) {
     ui.add(egui::TextEdit::singleline(text).font(TextStyle::Monospace));
+}
+
+pub fn letter_grid(ui: &mut egui::Ui, n_rows: usize, n_cols: usize, text: &String) {
+    let grid = Grid::from_rows(text, n_rows, n_cols, '\0', '\0');
+    egui::Grid::new("letter_grid").show(ui, |ui| {
+        for n in 0..grid.num_rows() {
+            ui.spacing_mut().item_spacing.x = 0.0;
+            let row = grid.get_row(n);
+            for c in row {
+                let character = RichText::from(String::from(*c)).monospace();
+                ui.add_sized([0.0, 0.0], Label::new(character));
+            }
+            ui.end_row()
+        }
+        
+    });
 }

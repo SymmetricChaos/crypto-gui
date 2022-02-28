@@ -1,4 +1,5 @@
 use std::fmt;
+use itertools::Itertools;
 use num::integer::Roots;
 use rand::prelude::ThreadRng;
 use super::Cipher;
@@ -110,32 +111,26 @@ impl Default for SeriatedPlayfair {
 
 impl Cipher for SeriatedPlayfair {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
-        self.validate_settings()?;
+        // self.validate_settings()?;
 
-        let chunks = text.chars().chunks(self.period);
-        let groups = chunks.into_iter().map(|x| x.collect_vec()).collect_vec();
+        // let chunks = text.chars().chunks(self.period);
+        // let groups = chunks.into_iter().map(|x| x.collect_vec()).collect_vec();
 
-        let shift = self.grid_side_len+1;
-        let mut out = String::with_capacity(tlen);
+        // let shift = self.grid_side_len+1;
+        // let mut out = String::with_capacity(text.len());
 
-        for pair in 0..groups.len()/2 {
-            //println!("{:?}\n{:?}\n",groups[2*pair],groups[2*pair+1]);
-            let mut row_a = String::with_capacity(self.period);
-            let mut row_b = String::with_capacity(self.period);
-            for pos in 0..self.period {
-                let a = groups[2*pair][pos];
-                let b = groups[2*pair+1][pos];
-                row_a.push(out_a);
-                row_b.push(out_b);
-            }
-            
-            let (out_a, out_b) = self.playfair_shift(a, b, shift, &out);
-            out.push_str(&row_a);
-            out.push_str(&row_b);
-        }
-
-        Ok(out)
-
+        // for pair in 0..groups.len()/2 {
+        //     //println!("{:?}\n{:?}\n",groups[2*pair],groups[2*pair+1]);
+        //     let mut row_a = String::with_capacity(self.period);
+        //     let mut row_b = String::with_capacity(self.period);
+        //     for pos in 0..self.period {
+        //         let a = groups[2*pair][pos];
+        //         let b = groups[2*pair+1][pos];
+        //         self.playfair_shift(a, b, shift, &mut out);
+        //     }
+        // }
+        // Ok(out)
+        todo!()
     }
     
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
@@ -158,10 +153,10 @@ impl Cipher for SeriatedPlayfair {
         if self.period % 2 != 0 {
             return Err(CipherError::Key(String::from("period must be an even number")))
         }
-        let tlen = text.chars().count();
-        if tlen % (self.period) != 0 {
-            return Err(CipherError::Key(format!("number of characters in the text must be a multiple of the period: {}",self.period)))
-        }
+        // let tlen = text.chars().count();
+        // if tlen % (self.period) != 0 {
+        //     return Err(CipherError::Key(format!("number of characters in the text must be a multiple of the period: {}",self.period)))
+        // }
         if !&self.alphabet.contains(self.spacer) {
             return Err(CipherError::Key(format!("spacer character {} is not in the alphabet",self.spacer)))
         }

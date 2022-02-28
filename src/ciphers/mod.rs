@@ -1,4 +1,5 @@
 pub mod caesar;
+pub mod seriated_playfair;
 pub use caesar::Caesar;
 
 pub mod affine;

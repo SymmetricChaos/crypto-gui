@@ -69,7 +69,6 @@ impl Slidefair {
 
         output.push(self.alphabet.nth(right_index, 0).unwrap());
         output.push(self.alphabet.nth(left_index, slide as i32).unwrap());
-
     }
 
     fn decrypt_pair(&self, left: char, right: char, slide: usize, output: &mut String) {
@@ -78,9 +77,17 @@ impl Slidefair {
 
         output.push(self.alphabet.nth(right_index, 0).unwrap());
         output.push(self.alphabet.nth(left_index, slide as i32).unwrap());
-
     }
 
+    pub fn rows(&self) -> Vec<String> {
+        let mut rows = Vec::with_capacity(self.alphabet.len());
+        for n in 0..self.alphabet.len() {
+            let mut row = String::from(&self.alphabet.inner[n..]);
+            row.push_str(&self.alphabet.inner[0..n]);
+            rows.push(row);
+        };
+        rows
+    }
 }
 
 impl Default for Slidefair {

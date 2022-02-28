@@ -42,6 +42,10 @@ impl Playfair {
         }
     }
 
+    pub fn grid_side_len(&self) -> usize {
+        self.grid_side_len
+    }
+
     fn pairs(&self, text: &str) -> Vec<(char,char)> {
         let mut symbols: Vec<char> = text.chars().rev().collect();
         let mut out = Vec::with_capacity(text.len()/2);

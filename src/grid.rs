@@ -55,6 +55,26 @@ impl Symbol {
         }
     }
 }
+
+impl From<Symbol> for char {
+    fn from(symbol: Symbol) -> Self {
+        match symbol {
+            Symbol::Character(c) => c,
+            Symbol::Empty => EMPTY,
+            Symbol::Blocked => BLOCK,
+        }
+    }
+}
+
+impl From<Symbol> for String {
+    fn from(symbol: Symbol) -> Self {
+        match symbol {
+            Symbol::Character(c) => String::from(c),
+            Symbol::Empty => String::from(EMPTY),
+            Symbol::Blocked => String::from(BLOCK),
+        }
+    }
+}
  
  
 #[derive(Clone, Debug)]

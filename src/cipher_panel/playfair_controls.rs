@@ -32,5 +32,7 @@ impl View for Playfair {
 
         ui.label(RichText::new(format!("Grid\n{}",self)).monospace());
         ui.add_space(16.0);
+
+        //(ui, self.grid_side_len(), self.grid_side_len(), self.get_input_alphabet())
     }
 }
