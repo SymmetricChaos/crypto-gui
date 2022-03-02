@@ -208,6 +208,7 @@ mod text_function_tests {
 
     #[test]
     fn enigma_text_prep() {
+        //Twelve boxers chase Viktor across the large Sylter dike
         let pangram = "Zwölf Boxkämpfer jagen Viktor quer über den großen Sylter Deich";
         assert_eq!(prep_enigma_text(pangram).unwrap(),"ZWOELFBOXKAEMPFERJAGENVIKTORQUERUEBERDENGROSSENSYLTERDEICH");
     }
