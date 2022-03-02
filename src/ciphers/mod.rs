@@ -1,5 +1,4 @@
 pub mod caesar;
-pub mod seriated_playfair;
 pub use caesar::Caesar;
 
 pub mod affine;
@@ -19,6 +18,8 @@ pub use playfair::Playfair;
 
 pub mod slidefair;
 pub use slidefair::Slidefair;
+
+pub mod seriated_playfair;
 
 pub mod alberti_disk;
 pub use alberti_disk::Alberti;
@@ -43,6 +44,10 @@ pub use adfgvx::ADFGVX;
 
 pub mod b64;
 pub use b64::B64;
+
+
+pub mod enigma;
+pub use enigma::EnigmaM3;
 
 use rand::prelude::ThreadRng;
 use crate::errors::CipherError;
