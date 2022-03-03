@@ -3,7 +3,7 @@ use crate::{errors::CipherError, text_types::PresetAlphabet};
 
 use lazy_static::lazy_static;
 use rand::prelude::ThreadRng;
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt};
  
 #[derive(Clone,Debug,Copy)]
 pub struct Rotor {
@@ -45,6 +45,16 @@ impl Rotor {
         (inner+26-self.position+self.ring) % 26
     }
 }
+
+impl fmt::Display for Rotor {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut out = String::with_capacity(26);
+        let p = self.position;
+        out.push_str(&self.wiring_str[p..]);
+        out.push_str(&self.wiring_str[0..p]);
+        write!(f, "{}", out)
+    }
+}
  
 #[derive(Clone,Debug,Copy)]
 pub struct Reflector {
@@ -66,6 +76,12 @@ impl Reflector {
     // No decrypt is needed as reflectors are reciprocal
     pub fn encrypt(&self, entry: usize) -> usize {
         self.wiring[entry]
+    }
+}
+
+impl fmt::Display for Reflector {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.wiring_str)
     }
 }
  
@@ -114,7 +130,7 @@ fn usize_to_char(n: usize) -> char {
  
  
  
-fn parse_plugboard(pairs: &str) -> HashMap<char,char> {
+fn parse_plugboard(pairs: &str) -> Result<HashMap<char,char>,CipherError> {
     let mut wiring = HashMap::new();
     let digraphs = pairs.split(" ");
     for d in digraphs {
@@ -127,7 +143,7 @@ fn parse_plugboard(pairs: &str) -> HashMap<char,char> {
         wiring.insert(a,b);
         wiring.insert(b,a);
     }
-    wiring
+    Ok(wiring)
 }
  
 #[derive(Clone,Debug)]
@@ -136,13 +152,6 @@ pub struct Plugboard {
 }
  
 impl Plugboard {
-    pub fn new(pairs: &str) -> Plugboard {
-        let wiring = match pairs.len() == 0 {
-            true =>  HashMap::<char,char>::new(),
-            false => parse_plugboard(pairs),
-        };
-        Plugboard{ wiring }
-    }
  
     pub fn swap(&self, character: char) -> char {
         if self.wiring.contains_key(&character) {
@@ -224,9 +233,8 @@ impl Default for EnigmaState {
 #[derive(Clone,Debug)]
 pub struct EnigmaM3 {
     alphabet: String,
-    state: EnigmaState,
+    pub state: EnigmaState,
 }
- 
  
 impl Cipher for EnigmaM3 {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {

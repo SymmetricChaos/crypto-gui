@@ -19,6 +19,7 @@ pub mod columnar_controls;
 pub mod adfgvx_controls;
 pub mod b64_controls;
 pub mod slidefair_controls;
+pub mod enigma_controls;
 
 pub trait View {
     fn ui(&mut self, ui: &mut egui::Ui);
@@ -44,6 +45,7 @@ pub struct ControlPanel {
     polybius: Polybius,
 
     m209: M209,
+    enigma: EnigmaM3,
 
     vigenere: Vigenere,
     beaufort: Beaufort,
@@ -77,7 +79,7 @@ impl ControlPanel {
             );
     
             combox_box(
-                &[CipherID::M209], //CipherID::Enigma, CipherID::SIGABA],
+                &[CipherID::M209, CipherID::Enigma],
                 "Rotor Machine",
                 active_cipher, ui
             );
@@ -133,6 +135,7 @@ impl ControlPanel {
             CipherID::ADFGVX => self.adfgvx.ui(ui),
             CipherID::B64 => self.b64.ui(ui),
             CipherID::Slidefair => self.slidefair.ui(ui),
+            CipherID::Enigma => self.enigma.ui(ui),
             _ => { ui.label("IN PROGRESS"); },
         }
     }
@@ -175,6 +178,7 @@ impl DisplayPanel {
             CipherID::ADFGVX => encrypt_decrypt(ui, &control_panel.adfgvx, input, output, errors),
             CipherID::B64 => encrypt_decrypt(ui, &control_panel.b64, input, output, errors),
             CipherID::Slidefair => encrypt_decrypt(ui, &control_panel.slidefair, input, output, errors),
+            CipherID::Enigma => encrypt_decrypt(ui, &control_panel.enigma, input, output, errors),
             _ => { *errors = String::from("button not linked properly") }
         }
 

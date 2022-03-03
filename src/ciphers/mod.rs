@@ -45,7 +45,6 @@ pub use adfgvx::ADFGVX;
 pub mod b64;
 pub use b64::B64;
 
-
 pub mod enigma;
 pub use enigma::EnigmaM3;
 
