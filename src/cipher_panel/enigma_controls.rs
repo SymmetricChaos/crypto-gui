@@ -15,40 +15,56 @@ use crate::ciphers::{EnigmaM3, enigma::Rotor};
 
 impl View for EnigmaM3 {
     fn ui(&mut self, ui: &mut eframe::egui::Ui) {
-
+ 
+        ui.label("Rotor Positions\nTo Be Changed Every Message");
+        for rotor in &mut self.state.rotors {
+            ui.add(Slider::new(&mut rotor.position, 0..=26)
+                .clamp_to_range(true)
+            );
+        };
+ 
+        ui.label("Ring Settings").on_hover_text("Ringstellung");
+        for rotor in &mut self.state.rotors {
+            ui.add(Slider::new(&mut rotor.ring, 0..=26)
+                .clamp_to_range(true)
+            );
+        };
+ 
+        // ui.label("Set Reflector Position")
+        // ui.add(Slider::new(&mut self.state.reflector.position, 0..=26)
+        //     .show_value(false)
+        //     .clamp_to_range(true)
+        // );
+ 
         ui.label("Select Rotors");
-
-
-        ui.add_space(10.0);
-        ui.label("Select Reflector");
-
-        ui.add_space(10.0);
-        ui.label("Rotors");
+        ui.label("THREE COMBO BOXES HERE");
+ 
+        ui.label("Rotors").on_hover_text("Walzen");;
         for rotor in &mut self.state.rotors {
             ui.horizontal(|ui| {
                 let name = RichText::new(rotor.name).monospace();
                 ui.add_sized([20.0,20.0],Label::new(name));
                 let characters = RichText::new(&rotor.to_string()).monospace();
                 ui.label(characters);
-                ui.add(Slider::new(&mut rotor.position, 0..=26)
-                    .clamp_to_range(true)
-                );
+ 
             });
         }
-
+ 
+        ui.label("Select Reflector");
+        ui.label("COMBO BOX HERE");
+ 
         ui.add_space(10.0);
-        ui.label("Reflector");
+        ui.label("Reflector").on_hover_text("Umkehrwalze");
         ui.horizontal(|ui| {
-            // ui.add(Slider::new(&mut self.state.reflector.position, 0..=26)
-            //     .show_value(false)
-            //     .clamp_to_range(true)
-            // );
+            let name = RichText::new(self.state.reflector.name).monospace();
+            ui.add_sized([20.0,20.0],Label::new(name));
             let text = RichText::new(&self.state.reflector.to_string()).monospace();
             ui.label(text);
         });
-        
+ 
         ui.add_space(10.0);
-        ui.label("Plugboard");
-
+        ui.label("Plugboard").on_hover_text("Steckerbrett");
+        ui.label("SOME INTERFACE HERE");
+ 
     }
 }

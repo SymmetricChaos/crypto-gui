@@ -125,4 +125,54 @@ lazy_static! {
     };
 }
 
+#[derive(Copy,Clone,Debug)]
+pub enum EnigmaRotor {
+    I,
+    II,
+    III,
+    IV,
+    V,
+    VI,
+    VII,
+    VIII,
+}
  
+impl EnigmaRotor {
+    pub fn generate_rotor(&self) -> Rotor {
+        match self {
+            EnigmaRotor::I => ROTORS["I"].clone(),
+            EnigmaRotor::II => ROTORS["II"].clone(),
+            EnigmaRotor::III => ROTORS["III"].clone(),
+            EnigmaRotor::IV => ROTORS["IV"].clone(),
+            EnigmaRotor::V => ROTORS["V"].clone(),
+            EnigmaRotor::VI => ROTORS["VI"].clone(),
+            EnigmaRotor::VII => ROTORS["VII"].clone(),
+            EnigmaRotor::VIII => ROTORS["VIII"].clone(),
+        }
+    }
+}
+ 
+#[derive(Copy,Clone,Debug)]
+pub enum EnigmaReflector {
+    Alpha,
+    Beta,
+    A,
+    B,
+    C,
+    Bthin,
+    Cthin,
+}
+ 
+impl EnigmaReflector {
+    pub fn generate_reflector(&self) -> Reflector {
+        match self {
+            EnigmaReflector::Alpha => REFLECTORS["Alpha"].clone(),
+            EnigmaReflector::Beta => REFLECTORS["Beta"].clone(),
+            EnigmaReflector::A => REFLECTORS["A"].clone(),
+            EnigmaReflector::B => REFLECTORS["B"].clone(),
+            EnigmaReflector::C => REFLECTORS["C"].clone(),
+            EnigmaReflector::Bthin => REFLECTORS["B-thin"].clone(),
+            EnigmaReflector::Cthin => REFLECTORS["C-thin"].clone(),
+        }
+    }
+}
