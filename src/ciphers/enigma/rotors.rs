@@ -99,16 +99,24 @@ impl fmt::Display for Reflector {
 }
  
 lazy_static! {
-    pub static ref ROTORS: HashMap<&'static str, Rotor> = {
+    pub static ref ROTOR_VEC: Vec<Rotor> = {
+        let mut v = Vec::new();
+        v.push(Rotor::new("I",    "EKMFLGDQVZNTOWYHXUSPAIBRCJ", (16,16) ));
+        v.push(Rotor::new("II",   "AJDKSIRUXBLHWTMCQGZNPYFVOE", (4,4) ));
+        v.push(Rotor::new("III",  "BDFHJLCPRTXVZNYEIWGAKMUSQO", (21,21) ));
+        v.push(Rotor::new("IV",   "ESOVPZJAYQUIRHXLNFTGKDCMWB", (9,9) ));
+        v.push(Rotor::new("V",    "VZBRGITYUPSDNHLXAWMJQOFECK", (25,25) ));
+        v.push(Rotor::new("VI",   "JPGVOUMFYQBENHZRDKASXLICTW", (12,25) ));
+        v.push(Rotor::new("VII",  "NZJHGRCXMYSWBOUFAIVLPEKQDT", (12,25) ));
+        v.push(Rotor::new("VIII", "FKQHTLXOCBJSPDZRAMEWNIUYGV", (12,25) ));
+        v
+    };
+
+    pub static ref ROTOR_MAP: HashMap<&'static str, Rotor> = {
         let mut m = HashMap::new();
-        m.insert("I",    Rotor::new("I",    "EKMFLGDQVZNTOWYHXUSPAIBRCJ", (16,16) ));
-        m.insert("II",   Rotor::new("II",   "AJDKSIRUXBLHWTMCQGZNPYFVOE", (4,4) ));
-        m.insert("III",  Rotor::new("III",  "BDFHJLCPRTXVZNYEIWGAKMUSQO", (21,21) ));
-        m.insert("IV",   Rotor::new("IV",   "ESOVPZJAYQUIRHXLNFTGKDCMWB", (9,9) ));
-        m.insert("V",    Rotor::new("V",    "VZBRGITYUPSDNHLXAWMJQOFECK", (25,25) ));
-        m.insert("VI",   Rotor::new("VI",   "JPGVOUMFYQBENHZRDKASXLICTW", (12,25) ));
-        m.insert("VII",  Rotor::new("VII",  "NZJHGRCXMYSWBOUFAIVLPEKQDT", (12,25) ));
-        m.insert("VIII", Rotor::new("VIII", "FKQHTLXOCBJSPDZRAMEWNIUYGV", (12,25) ));
+        for rtr in ROTOR_VEC.iter() {
+            m.insert(rtr.name, rtr.clone());
+        }
         m
     };
  
@@ -123,56 +131,4 @@ lazy_static! {
         m.insert("C-thin", Reflector::new("C-thin", "RDOBJNTKVEHMLFCWZAXGYIPSUQ"));
         m
     };
-}
-
-#[derive(Copy,Clone,Debug)]
-pub enum EnigmaRotor {
-    I,
-    II,
-    III,
-    IV,
-    V,
-    VI,
-    VII,
-    VIII,
-}
- 
-impl EnigmaRotor {
-    pub fn generate_rotor(&self) -> Rotor {
-        match self {
-            EnigmaRotor::I => ROTORS["I"].clone(),
-            EnigmaRotor::II => ROTORS["II"].clone(),
-            EnigmaRotor::III => ROTORS["III"].clone(),
-            EnigmaRotor::IV => ROTORS["IV"].clone(),
-            EnigmaRotor::V => ROTORS["V"].clone(),
-            EnigmaRotor::VI => ROTORS["VI"].clone(),
-            EnigmaRotor::VII => ROTORS["VII"].clone(),
-            EnigmaRotor::VIII => ROTORS["VIII"].clone(),
-        }
-    }
-}
- 
-#[derive(Copy,Clone,Debug)]
-pub enum EnigmaReflector {
-    Alpha,
-    Beta,
-    A,
-    B,
-    C,
-    Bthin,
-    Cthin,
-}
- 
-impl EnigmaReflector {
-    pub fn generate_reflector(&self) -> Reflector {
-        match self {
-            EnigmaReflector::Alpha => REFLECTORS["Alpha"].clone(),
-            EnigmaReflector::Beta => REFLECTORS["Beta"].clone(),
-            EnigmaReflector::A => REFLECTORS["A"].clone(),
-            EnigmaReflector::B => REFLECTORS["B"].clone(),
-            EnigmaReflector::C => REFLECTORS["C"].clone(),
-            EnigmaReflector::Bthin => REFLECTORS["B-thin"].clone(),
-            EnigmaReflector::Cthin => REFLECTORS["C-thin"].clone(),
-        }
-    }
 }

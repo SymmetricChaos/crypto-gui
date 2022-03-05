@@ -2,7 +2,7 @@ pub mod enigma;
 pub use enigma::EnigmaM3;
 
 pub mod rotors;
-pub use rotors::{Rotor,Reflector,ROTORS,REFLECTORS};
+pub use rotors::{Rotor,Reflector,ROTOR_MAP, ROTOR_VEC, REFLECTORS};
 
 pub mod plugboard;
 pub use plugboard::Plugboard;

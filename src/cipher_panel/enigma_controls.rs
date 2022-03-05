@@ -1,6 +1,6 @@
-use eframe::egui::{RichText, TextEdit, Slider, ComboBox, Ui, Label};
+use eframe::egui::{RichText, Slider, ComboBox, Label};
 use super::View;
-use crate::ciphers::{EnigmaM3, enigma::Rotor};
+use crate::ciphers::{EnigmaM3, enigma::{ROTOR_VEC,REFLECTORS}};
 
 // fn rotor_selector(ciphers: &[Rotor], identifier: &'static str, ui: &mut Ui) {
 //     ComboBox::from_id_source(identifier)
@@ -23,6 +23,7 @@ impl View for EnigmaM3 {
             );
         };
  
+        ui.add_space(10.0);
         ui.label("Ring Settings").on_hover_text("Ringstellung");
         for rotor in &mut self.state.rotors {
             ui.add(Slider::new(&mut rotor.ring, 0..=26)
@@ -36,9 +37,20 @@ impl View for EnigmaM3 {
         //     .clamp_to_range(true)
         // );
  
+        ui.add_space(10.0);
         ui.label("Select Rotors");
-        ui.label("THREE COMBO BOXES HERE");
- 
+
+        for i in 0..3 {
+            ComboBox::from_id_source(format!("Rotor {}",i+1))
+                .selected_text(format!("Rotor {}",i+1))
+                .show_ui(ui, |ui| {
+                for rtr in ROTOR_VEC.iter() {
+                    ui.selectable_value(&mut self.state.rotors[i], *rtr, rtr.name.to_string());
+                }
+            });
+        }
+        
+        ui.add_space(10.0);
         ui.label("Rotors").on_hover_text("Walzen");;
         for rotor in &mut self.state.rotors {
             ui.horizontal(|ui| {
@@ -50,8 +62,14 @@ impl View for EnigmaM3 {
             });
         }
  
-        ui.label("Select Reflector");
-        ui.label("COMBO BOX HERE");
+        ui.add_space(10.0);
+        ComboBox::from_id_source("Reflector")
+            .selected_text("Select Reflector")
+            .show_ui(ui, |ui| {
+            for rfl in REFLECTORS.values() {
+                ui.selectable_value(&mut self.state.reflector, *rfl, format!("{}",rfl.name));
+            }
+        });
  
         ui.add_space(10.0);
         ui.label("Reflector").on_hover_text("Umkehrwalze");

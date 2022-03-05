@@ -1,5 +1,5 @@
 use crate::{errors::CipherError, text_types::PresetAlphabet, ciphers::Cipher};
-use super::{ROTORS,REFLECTORS,Rotor,Reflector,Plugboard,char_to_usize,usize_to_char};
+use super::{ROTOR_MAP,REFLECTORS,Rotor,Reflector,Plugboard,char_to_usize,usize_to_char};
 use rand::prelude::ThreadRng;
 use std::{collections::HashMap, fmt};
  
@@ -62,7 +62,7 @@ impl EnigmaState {
 
 impl Default for EnigmaState {
     fn default() -> Self {
-        Self { plugboard: Default::default(), rotors: [ROTORS["I"], ROTORS["II"], ROTORS["III"]], reflector: REFLECTORS["A"] }
+        Self { plugboard: Default::default(), rotors: [ROTOR_MAP["I"], ROTOR_MAP["II"], ROTOR_MAP["III"]], reflector: REFLECTORS["A"] }
     }
 }
  
