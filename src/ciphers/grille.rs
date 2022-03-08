@@ -16,22 +16,48 @@ impl Default for Grille {
         }
     }
 }
- 
- 
+
 impl Cipher for Grille {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
-        let mut grid = self.grid.clone();
+        if self.grid.num_empty() < text.chars().count() {
+            return Err(CipherError::Input("The text is too long to fit into the open spaces of the Grille".to_string()))
+        }
 
-        // clone self.grid
-        // write text into Empty cells
-        // write random from self.null_alphabet into Blocked cells
-        // read off grid
-        todo!()
+        let mut rng = ThreadRng::default();
+        let range = 0..self.null_alphabet.chars().count();
+
+        let mut grid = self.grid.clone();
+        let mut chars = text.chars();
+        
+        // Must be a better way to select random characters
+        for cell in grid.get_rows_mut() {
+            match cell {
+                Symbol::Character(_) => unreachable!("there should be no characters in the Grille"),
+                Symbol::Empty => { 
+                    match chars.next() {
+                        Some(_) => *cell = Symbol::Character(chars.next().unwrap()),
+                        None => *cell = Symbol::Character( self.null_alphabet.chars().nth(rng.gen_range(range.clone())).unwrap() ),
+                    }
+                },
+                Symbol::Blocked => { *cell = Symbol::Character( self.null_alphabet.chars().nth(rng.gen_range(range.clone())).unwrap() ) },
+            }
+        }
+
+        Ok(grid.get_cols().map(|x| x.to_char()).collect())
     }
  
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
-        // zip text with self.grid and filter out Blocked
-        todo!()
+        if self.grid.grid_size() != text.chars().count() {
+            return Err(CipherError::Input("Text is not the same size as the Grille".to_string()))
+        }
+
+        let mut out = String::with_capacity(self.grid.num_empty());
+        for (c,s) in text.chars().zip(self.grid.get_rows()) {
+            if s.is_empty() {
+                out.push(c)
+            }
+        }
+        Ok(out)
     }
  
     fn get_input_alphabet(&self) -> &String {
