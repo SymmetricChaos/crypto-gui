@@ -48,6 +48,9 @@ pub use b64::B64;
 pub mod enigma;
 pub use enigma::EnigmaM3;
 
+pub mod grille;
+pub use grille::Grille;
+
 use rand::prelude::ThreadRng;
 use crate::errors::CipherError;
 
