@@ -159,6 +159,22 @@ impl Grid {
     }
  
  
+    pub fn num_empty(&self) -> usize {
+        self.get_rows().filter(|s| s.is_empty()).count()
+    }
+ 
+    pub fn num_blocked(&self) -> usize {
+        self.get_rows().filter(|s| s.is_blocked()).count()
+    }
+ 
+    pub fn num_character(&self) -> usize {
+        self.get_rows().filter(|s| s.is_character()).count()
+    }
+ 
+    pub fn num_noncharacter(&self) -> usize {
+        self.get_rows().filter(|s| !s.is_character()).count()
+    }
+ 
     // Shared getter methods 
     pub fn get(&self, coord: (usize, usize)) -> Option<&Symbol> {
         let coord = self.index_from_coord(coord)?;
@@ -176,12 +192,28 @@ impl Grid {
         (0..self.col_len()).map(move |row_index| &self[(row_index, col_index)])
     }
  
-        pub fn get_mut(&mut self, coord: (usize, usize)) -> Option<&mut Symbol> {
+    pub fn get_rows(&self) -> impl Iterator<Item = &Symbol> {
+        self.grid.iter()
+    }
+ 
+    pub fn get_cols(&self) -> impl Iterator<Item = &Symbol> {
+        // Yes this is an absurd hack
+        let mut symbols: Vec<&Symbol> = Vec::new();
+        for n in 0..self.num_cols() {
+            for symbol in self.get_col(n) {
+                symbols.push(symbol)
+            };
+        }
+        symbols.into_iter()
+    }
+ 
+ 
+    // Mutable getter methods
+    pub fn get_mut(&mut self, coord: (usize, usize)) -> Option<&mut Symbol> {
         let idx = self.index_from_coord(coord)?;
         self.grid.get_mut(idx)
     }
  
-    // Mutable getter methods
     pub fn get_row_mut(&mut self, row_index: usize) -> impl Iterator<Item = &mut Symbol> {
         let start = self.index_from_coord((row_index, 0))
             .expect("Row index was out of bounds");
@@ -197,30 +229,28 @@ impl Grid {
             .map(|(_, e)| e)
     }
  
- 
-    // Methods to read off the entire grid
-    pub fn read_rows(&self) -> impl Iterator<Item = &Symbol> {
-        self.grid.iter()
+    pub fn get_rows_mut(&mut self) -> impl Iterator<Item = &mut Symbol> {
+        self.grid.iter_mut()
     }
  
-    pub fn read_cols(&self) -> impl Iterator<Item = &Symbol> {
-        // Yes this is an absurd hack
-        let mut symbols: Vec<&Symbol> = Vec::new();
-        for n in 0..self.num_cols() {
-            for symbol in self.get_col(n) {
-                symbols.push(symbol)
-            };
-        }
-        symbols.into_iter()
-    }
+    // pub fn get_cols_mut(&mut self) -> impl Iterator<Item = &mut Symbol> {
+    //     // Yes this is an absurd hack again
+    //     let mut symbols: Vec<&mut Symbol> = Vec::new();
+    //     for n in 0..self.num_cols() {
+    //         for symbol in self.get_col_mut(n) {
+    //             symbols.push(symbol)
+    //         };
+    //     }
+    //     symbols.into_iter()
+    // }
  
     // These two just read the positions with characters
     pub fn read_rows_characters(&self) -> impl Iterator<Item = char> + '_ {
-        self.read_rows().filter(|x| x.is_character()).map(|x| x.to_char())
+        self.get_rows().filter(|x| x.is_character()).map(|x| x.to_char())
     }
  
     pub fn read_cols_characters(&self) -> impl Iterator<Item = char> + '_ {
-        self.read_cols().filter(|x| x.is_character()).map(|x| x.to_char())
+        self.get_cols().filter(|x| x.is_character()).map(|x| x.to_char())
     }
  
  

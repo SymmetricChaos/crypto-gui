@@ -1,6 +1,6 @@
 use rand::{Rng, prelude::ThreadRng};
 use super::Cipher;
-use crate::{errors::CipherError, grid::Grid, text_types::PresetAlphabet};
+use crate::{errors::CipherError, grid::{Grid, Symbol}, text_types::PresetAlphabet};
 
 pub struct Grille {
     pub null_alphabet: String,
@@ -21,8 +21,7 @@ impl Default for Grille {
 impl Cipher for Grille {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
         let mut grid = self.grid.clone();
- 
- 
+
         // clone self.grid
         // write text into Empty cells
         // write random from self.null_alphabet into Blocked cells
@@ -48,7 +47,13 @@ impl Cipher for Grille {
     }
  
     fn randomize(&mut self, rng: &mut ThreadRng) {
-        todo!("randomize positions")
+        for cell in self.grid.get_rows_mut() {
+            if rng.gen_bool(0.5) {
+                *cell = Symbol::Empty;
+            } else {
+                *cell = Symbol::Blocked;
+            }
+        }
     }
  
     fn validate_settings(&self) -> Result<(), CipherError> {
