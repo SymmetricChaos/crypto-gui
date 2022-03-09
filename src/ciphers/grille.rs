@@ -1,10 +1,11 @@
-use rand::{Rng, prelude::ThreadRng};
+use rand::{Rng, prelude::{ThreadRng, StdRng}, SeedableRng};
 use super::Cipher;
 use crate::{errors::CipherError, grid::{Grid, Symbol}, text_types::PresetAlphabet};
 
 pub struct Grille {
     pub null_alphabet: String,
-    pub grid: Grid
+    pub grid: Grid,
+    pub seed: Option<u64>,
 }
  
  
@@ -12,7 +13,8 @@ impl Default for Grille {
     fn default() -> Self {
         Grille { 
             null_alphabet: String::from(PresetAlphabet::BasicLatin),
-            grid: Grid::new_empty(4, 4),
+            grid: Grid::new_empty(6, 6),
+            seed: None,
         }
     }
 }
@@ -23,7 +25,11 @@ impl Cipher for Grille {
             return Err(CipherError::Input("The text is too long to fit into the open spaces of the Grille".to_string()))
         }
 
-        let mut rng = ThreadRng::default();
+        let mut rng: StdRng = match self.seed {
+            Some(n) => SeedableRng::seed_from_u64(n),
+            None => SeedableRng::from_entropy(),
+        };
+
         let range = 0..self.null_alphabet.chars().count();
 
         let mut grid = self.grid.clone();
@@ -84,5 +90,29 @@ impl Cipher for Grille {
  
     fn validate_settings(&self) -> Result<(), CipherError> {
         todo!()
+    }
+}
+
+
+
+#[cfg(test)]
+mod grille_tests {
+
+    use super::*;
+
+    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CIPHERTEXT: &'static str = "";
+
+    #[test]
+    fn encrypt_test() {
+        let mut cipher = Grille::default();
+        cipher.seed = Some(1587782446298476296);
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+    }
+
+    #[test]
+    fn decrypt_test() {
+        let cipher = Grille::default();
+        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }
