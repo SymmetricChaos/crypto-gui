@@ -303,11 +303,51 @@ impl Grid {
         }
     }
  
-    // Resizing does not keep relative positions of elements on the 2D grid
-    pub fn resize(&mut self, num_rows: usize, num_cols: usize, symbol: Symbol) {
+    /*
+    Resize the grid adding Symbol::Empty if size increases and deleting from
+    the end if size decreases.
+    Relative position of elements in the 2D grid is not maintained
+    */
+    pub fn resize(&mut self, num_rows: usize, num_cols: usize,) {
         self.num_rows = num_rows;
         self.num_cols = num_cols;
-        self.grid.resize(num_rows*num_cols, symbol);
+        self.grid.resize(num_rows*num_cols, Symbol::Empty);
+    }
+ 
+    pub fn set_num_rows(&mut self, num_rows: usize) {
+        self.num_rows = num_rows;
+        self.grid.resize(self.num_rows*self.num_cols, Symbol::Empty);
+    }
+ 
+    pub fn set_num_cols(&mut self, num_cols: usize) {
+        self.num_cols = num_cols;
+        self.grid.resize(self.num_rows*self.num_cols, Symbol::Empty);
+    }
+ 
+    pub fn add_row(&mut self) {
+        self.num_rows += 1;
+        self.grid.resize(self.num_rows*self.num_cols, Symbol::Empty);
+    }
+ 
+    pub fn del_row(&mut self) {
+        if self.num_rows == 1 {
+            return ()
+        }
+        self.num_rows -= 1;
+        self.grid.resize(self.num_rows*self.num_cols, Symbol::Empty);
+    }
+ 
+    pub fn add_col(&mut self) {
+        self.num_cols += 1;
+        self.grid.resize(self.num_rows*self.num_cols, Symbol::Empty);
+    }
+ 
+    pub fn del_col(&mut self) {
+        if self.num_cols == 1 {
+            return ()
+        }
+        self.num_cols -= 1;
+        self.grid.resize(self.num_rows*self.num_cols, Symbol::Empty);
     }
  
     // pub fn rotate(&mut self) {
