@@ -20,6 +20,7 @@ pub mod adfgvx_controls;
 pub mod b64_controls;
 pub mod slidefair_controls;
 pub mod enigma_controls;
+pub mod grille_controls;
 
 pub trait View {
     fn ui(&mut self, ui: &mut egui::Ui);
@@ -56,6 +57,7 @@ pub struct ControlPanel {
     slidefair: Slidefair,
 
     columnar: Columnar,
+    grille: Grille,
 
     adfgvx: ADFGVX,
     b64: B64,
@@ -85,7 +87,7 @@ impl ControlPanel {
             );
 
             combox_box(
-                &[CipherID::Columnar],
+                &[CipherID::Columnar, CipherID::Grille],
                 "Transposition",
                 active_cipher, ui
             );
@@ -136,6 +138,7 @@ impl ControlPanel {
             CipherID::B64 => self.b64.ui(ui),
             CipherID::Slidefair => self.slidefair.ui(ui),
             CipherID::Enigma => self.enigma.ui(ui),
+            CipherID::Grille => self.grille.ui(ui),
             _ => { ui.label("IN PROGRESS"); },
         }
     }
@@ -179,7 +182,8 @@ impl DisplayPanel {
             CipherID::B64 => encrypt_decrypt(ui, &control_panel.b64, input, output, errors),
             CipherID::Slidefair => encrypt_decrypt(ui, &control_panel.slidefair, input, output, errors),
             CipherID::Enigma => encrypt_decrypt(ui, &control_panel.enigma, input, output, errors),
-            _ => { *errors = String::from("button not linked properly") }
+            CipherID::Grille => encrypt_decrypt(ui, &control_panel.grille, input, output, errors),
+            _ => { *errors = String::from("button must be added to DisplayPanel struct") }
         }
 
         ui.add_space(10.0);

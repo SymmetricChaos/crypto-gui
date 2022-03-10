@@ -1,5 +1,4 @@
-use eframe::egui;
-use eframe::egui::Slider;
+use eframe::egui::{TextStyle, TextEdit};
 use super::View;
 use super::generic_components::*;
 use crate::ciphers::Grille;
@@ -7,11 +6,11 @@ use crate::ciphers::Grille;
  
 fn cell_button(grille: &mut Grille, x: usize, y: usize, ui: &mut eframe::egui::Ui) {
     let cell = grille.grid[(x,y)];
-    if ui.button(RichText::from(cell.to_char())).clicked() {
+    if ui.button(cell.to_char().to_string()).clicked() {
         if cell.is_blocked() {
-            self.empty_cell((x,y));
+            grille.grid.empty_cell((x,y));
         } else if cell.is_empty() {
-            self.block_cell((x,y));
+            grille.grid.block_cell((x,y));
         }
     };
 }
@@ -22,37 +21,40 @@ impl View for Grille {
         randomize_reset(ui, self);
         ui.add_space(16.0);
  
+        ui.add_space(16.0);
         ui.label("Null Alphabet");
-        //TextEdit
+        ui.add(TextEdit::singleline(&mut self.null_alphabet).font(TextStyle::Monospace));
         ui.add_space(16.0);
  
         ui.label("Rows");
         ui.horizontal(|ui| {
             if ui.button("-").clicked() {
-                self.remove_row();
+                self.grid.del_row();
             };
-            ui.label(String::from(self.grid.num_rows()));
+            ui.label(format!("{}",self.grid.num_rows()));
             if ui.button("+").clicked() {
-                self.add_row();
+                self.grid.add_row();
             };
         });
         ui.add_space(16.0);
  
         ui.label("Columns");
         ui.horizontal(|ui| {
-            if ui.button("-").clicked().clicked() {
-                self.remove_col();
+            if ui.button("-").clicked() {
+                self.grid.del_col();
             };
-            ui.label(String::from(self.grid.num_rows()));
-            if ui.button("+").clicked().clicked() {
-                self.add_col();
+            ui.label(format!("{}",self.grid.num_cols()));
+            if ui.button("+").clicked() {
+                self.grid.add_col();
             };
         });
         ui.add_space(16.0);
  
-        for x in 0..self.num_rows() {
+        ui.spacing_mut().item_spacing = (2.0,2.0).into();
+        ui.style_mut().override_text_style = Some(TextStyle::Monospace);
+        for x in 0..self.grid.num_rows() {
             ui.horizontal(|ui| {
-                for y in 0..self.num_cols() {
+                for y in 0..self.grid.num_cols() {
                     cell_button(self, x,y,ui);
                 }
             });

@@ -7,13 +7,29 @@ pub struct Grille {
     pub grid: Grid,
     pub seed: Option<u64>,
 }
+
+impl Grille {
+    fn _randomize_seeded(&mut self) {
+        let mut rng: StdRng = match self.seed {
+            Some(n) => SeedableRng::seed_from_u64(n),
+            None => SeedableRng::from_entropy(),
+        };
+        for cell in self.grid.get_rows_mut() {
+            if rng.gen_bool(0.5) {
+                *cell = Symbol::Empty;
+            } else {
+                *cell = Symbol::Blocked;
+            }
+        }
+    }
+}
  
  
 impl Default for Grille {
     fn default() -> Self {
         Grille { 
             null_alphabet: String::from(PresetAlphabet::BasicLatin),
-            grid: Grid::new_empty(6, 6),
+            grid: Grid::new_empty(8, 8),
             seed: None,
         }
     }
@@ -41,7 +57,7 @@ impl Cipher for Grille {
                 Symbol::Character(_) => unreachable!("there should be no characters in the Grille"),
                 Symbol::Empty => { 
                     match chars.next() {
-                        Some(_) => *cell = Symbol::Character(chars.next().unwrap()),
+                        Some(c) => *cell = Symbol::Character(c),
                         None => *cell = Symbol::Character( self.null_alphabet.chars().nth(rng.gen_range(range.clone())).unwrap() ),
                     }
                 },
@@ -57,12 +73,15 @@ impl Cipher for Grille {
             return Err(CipherError::Input("Text is not the same size as the Grille".to_string()))
         }
 
+        let filled_grid = Grid::from_cols(text, self.grid.num_rows(), self.grid.num_cols(), '\n', '\n');
+
         let mut out = String::with_capacity(self.grid.num_empty());
-        for (c,s) in text.chars().zip(self.grid.get_rows()) {
+        for (c,s) in filled_grid.get_rows().zip(self.grid.get_rows()) {
             if s.is_empty() {
-                out.push(c)
+                out.push(c.to_char())
             }
         }
+
         Ok(out)
     }
  
@@ -100,19 +119,24 @@ mod grille_tests {
 
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "";
+    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYD";
+    const CIPHERTEXT: &'static str = "TECLESRKCQPWTKTAQPRFUOEZTXKNOVUMZDBFMQIYHEROBBHONUUXGWEDHIOJPELC";
+    const SEED: Option<u64> = Some(1587782446298476294);
 
     #[test]
     fn encrypt_test() {
         let mut cipher = Grille::default();
-        cipher.seed = Some(1587782446298476296);
+        cipher.seed = SEED;
+        cipher._randomize_seeded();
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
-        let cipher = Grille::default();
+        let mut cipher = Grille::default();
+        cipher.seed = SEED;
+        cipher._randomize_seeded();
+        println!("encrypting\n{}",cipher.grid);
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }
