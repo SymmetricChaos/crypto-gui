@@ -1,5 +1,4 @@
-use crate::cipher_id::CipherID;
-use crate::code_id::CodeID;
+use crate::{cipher_id::CipherID, code_id::CodeID};
 use eframe::{egui::{SidePanel, CentralPanel, ScrollArea, TopBottomPanel, Window, Button, Context, widgets}, epi};
 use crate::cipher_panel::{ControlPanel, DisplayPanel};
 use crate::text_types::PresetAlphabet::*;
@@ -13,8 +12,6 @@ pub struct ClassicCrypto {
     errors: String,
     active_cipher: CipherID,
     active_code: CodeID,
-    show_settings: bool,
-    show_about: bool,
     show_alphabet_selector: bool,
     active_page: Page,
 }
@@ -35,11 +32,31 @@ impl Default for ClassicCrypto {
             errors: String::new(),
             active_cipher: CipherID::default(),
             active_code: CodeID::default(),
-            show_settings: false,
-            show_about: false,
             show_alphabet_selector: false,
             active_page: Page::About,
         }
+    }
+}
+
+impl ClassicCrypto {
+    fn cipher_page(&mut self, ctx: &Context) {
+        SidePanel::right("display_panel").max_width(300.0).show(ctx, |ui| {
+            self.display.ui(ui, &mut self.input, &mut self.output, &mut self.errors, &mut self.active_cipher, &mut self.control);
+        
+        });
+        CentralPanel::default().show(ctx, |ui| {
+            ScrollArea::vertical().show(ui, |ui| {
+                self.control.ui(ui, &mut self.active_cipher)
+            });
+        });
+    }
+
+    fn code_page(&mut self, ctx: &Context) {
+        todo!()
+    }
+
+    fn about_page(&mut self, ctx: &Context) {
+        todo!()
     }
 }
 
@@ -62,12 +79,6 @@ impl epi::App for ClassicCrypto {
         TopBottomPanel::top("top_panel").show(ctx, |ui| {
             ui.horizontal_top(|ui| {
                 widgets::global_dark_light_mode_switch(ui);
-                // if ui.add(Button::new("Settings").small() ).clicked() {
-                //     self.show_settings = !self.show_settings;
-                // }
-                if ui.add(Button::new("About").small() ).clicked() {
-                    self.show_about = !self.show_about;
-                }
                 if ui.add(Button::new("Alphabets").small() ).clicked() {
                     self.show_alphabet_selector = !self.show_alphabet_selector;
                 }
@@ -86,26 +97,12 @@ impl epi::App for ClassicCrypto {
         //     }
         // }
 
-        Window::new("🔧 Settings")
-            .open(&mut self.show_settings)
-            .vscroll(true)
-            .show(ctx, |ui| {
-                ctx.settings_ui(ui);
-        });
-
-        Window::new("About")
-            .open(&mut self.show_about)
-            .vscroll(true)
-            .show(ctx, |ui| {
-                ui.horizontal_wrapped(|ui| {
-                    ui.label("Welcome to Classic Crypto an online cipher machine made using");
-                    ui.hyperlink_to("egui", "https://github.com/emilk/egui");
-                    ui.label("!");
-                });
-                ui.label("\n\nThis project starts 'classical cryptography' as early as writing itself and ends it in 1949 with the publication of 'Communication Theory of Secrecy Systems' by Claude Shannon at Bell Labs which introduced the modern theory of cryptography. The ciphers presented here are for historical interest not for use in security. Most can be broken by hand in less than a day and all of them can quickly be broken by computer.\n\n");
-                ui.hyperlink_to("Check out the source code", "https://github.com/SymmetricChaos/crypto-gui");
-                
-        });
+        // Window::new("Settings")
+        //     .open(&mut self.show_settings)
+        //     .vscroll(true)
+        //     .show(ctx, |ui| {
+        //         ctx.settings_ui(ui);
+        // });
 
         Window::new("Alphabet Selector")
             .open(&mut self.show_alphabet_selector)
@@ -121,15 +118,6 @@ impl epi::App for ClassicCrypto {
 
         });
 
-        SidePanel::right("display_panel").max_width(300.0).show(ctx, |ui| {
-            self.display.ui(ui, &mut self.input, &mut self.output, &mut self.errors, &mut self.active_cipher, &mut self.control);
-            
-        });
-
-        CentralPanel::default().show(ctx, |ui| {
-            ScrollArea::vertical().show(ui, |ui| {
-                self.control.ui(ui, &mut self.active_cipher)
-            });
-        });
+        self.cipher_page(ctx)
     }
 }

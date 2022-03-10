@@ -64,8 +64,6 @@ pub trait Cipher {
     fn validate_settings(&self) -> Result<(),CipherError>;
 }
 
-
-
 #[derive(Debug,Copy,Clone,PartialEq, Eq)]
 pub enum PolyMode {
     CylicKey,

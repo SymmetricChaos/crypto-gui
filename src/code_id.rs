@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 
-#[derive(PartialEq, Debug, Clone, Copy)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub enum CodeID {
     Ascii,
     Morse,
