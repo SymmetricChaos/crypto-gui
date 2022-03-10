@@ -12,6 +12,7 @@ pub mod grid;
 pub mod errors;
 pub mod cipher_id;
 pub mod text_types;
+pub mod codes;
 
 
 // ----------------------------------------------------------------------------

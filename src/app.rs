@@ -1,8 +1,10 @@
 use crate::cipher_id::CipherID;
-use eframe::{egui::{SidePanel, CentralPanel, ScrollArea, TopBottomPanel, Window, Button, Context}, epi};
+use crate::code_id::CodeID;
+use eframe::{egui::{SidePanel, CentralPanel, ScrollArea, TopBottomPanel, Window, Button, Context, widgets}, epi};
 use crate::cipher_panel::{ControlPanel, DisplayPanel};
 use crate::text_types::PresetAlphabet::*;
 
+// TODO: three way selector for About Page, Cipher Page, and Code Page
 pub struct ClassicCrypto {
     control: ControlPanel,
     display: DisplayPanel,
@@ -10,9 +12,17 @@ pub struct ClassicCrypto {
     output: String,
     errors: String,
     active_cipher: CipherID,
+    active_code: CodeID,
     show_settings: bool,
     show_about: bool,
     show_alphabet_selector: bool,
+    active_page: Page,
+}
+
+enum Page {
+    About,
+    Ciphers,
+    Codes,
 }
 
 impl Default for ClassicCrypto {
@@ -24,9 +34,11 @@ impl Default for ClassicCrypto {
             output: String::new(),
             errors: String::new(),
             active_cipher: CipherID::default(),
+            active_code: CodeID::default(),
             show_settings: false,
             show_about: false,
             show_alphabet_selector: false,
+            active_page: Page::About,
         }
     }
 }
@@ -49,9 +61,10 @@ impl epi::App for ClassicCrypto {
         
         TopBottomPanel::top("top_panel").show(ctx, |ui| {
             ui.horizontal_top(|ui| {
-                if ui.add(Button::new("Settings").small() ).clicked() {
-                    self.show_settings = !self.show_settings;
-                }
+                widgets::global_dark_light_mode_switch(ui);
+                // if ui.add(Button::new("Settings").small() ).clicked() {
+                //     self.show_settings = !self.show_settings;
+                // }
                 if ui.add(Button::new("About").small() ).clicked() {
                     self.show_about = !self.show_about;
                 }
@@ -60,6 +73,18 @@ impl epi::App for ClassicCrypto {
                 }
             });
         });
+
+        // for (anchor, app) in self.apps.iter_mut() {
+        //     if ui
+        //         .selectable_label(self.selected_anchor == anchor, app.name())
+        //         .clicked()
+        //     {
+        //         self.selected_anchor = anchor.to_owned();
+        //         if frame.is_web() {
+        //             ui.output().open_url(format!("#{}", anchor));
+        //         }
+        //     }
+        // }
 
         Window::new("🔧 Settings")
             .open(&mut self.show_settings)
