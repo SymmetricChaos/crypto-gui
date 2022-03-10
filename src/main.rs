@@ -1,4 +1,5 @@
 pub mod ciphers;
+pub mod codes;
 pub mod math_functions;
 pub mod text_functions;
 pub mod text_types;
