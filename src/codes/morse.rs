@@ -6,12 +6,12 @@ use super::Code;
 
 lazy_static! {
     pub static ref LETTERS: &'static str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-    pub static ref ITU_CODES: [&'static str; 36] = ["·-", "-···", "-·-·", "-··", "·", "··-", "--·", "····", "··", "·---", 
+    pub static ref ITU_CODES: [&'static str; 36] = ["·-", "-···", "-·-·", "-··", "·", "··-·", "--·", "····", "··", "·---", 
                                                 "-·-", "·-··", "--", "-·", "---", "·--·", "--·-", "·-·", "···", "-", 
                                                 "··-", "···-", "·--", "-··-", "-·--", "--··", "·----", "··---", 
                                                 "···--", "····-", "·····", "-····", "--···", "---··", "----·", 
                                                 "-----"];
-    pub static ref ITU_CODES_BINARY: [&'static str; 37] = ["0", "10111", "111010101", "11101011101", "1110101", "1", "101011101", "111011101", "1010101", "101", "1011101110111", 
+    pub static ref ITU_CODES_BINARY: [&'static str; 36] = ["10111", "111010101", "11101011101", "1110101", "1", "101011101", "111011101", "1010101", "101", "1011101110111", 
                                             "111010111", "101110101", "1110111", "11101", "11101110111", "10111011101", "1110111010111", "1011101", "10101", "111", 
                                             "1010111", "101010111", "101110111", "11101010111", "1110101110111", "11101110101", "10111011101110111", "101011101110111", 
                                             "1010101110111", "10101010111", "101010101", "11101010101", "1110111010101", "111011101110101", "11101110111011101", 
@@ -39,6 +39,7 @@ lazy_static! {
         for (l,c) in LETTERS.chars().zip(ITU_CODES_BINARY.iter()) {
             m.insert(l, *c);
         }
+        m.insert(' ',"0");
         m
     };
  
@@ -47,6 +48,7 @@ lazy_static! {
         for (l,c) in LETTERS.chars().zip(ITU_CODES_BINARY.iter()) {
             m.insert(*c, l);
         }
+        m.insert("0",' ');
         m
     };
 }
@@ -58,6 +60,20 @@ pub enum MorseMode {
  
 pub struct MorseITU {
     mode: MorseMode
+}
+
+impl MorseITU {
+    fn _print_mapping(&self) {
+        for c in LETTERS.chars() {
+            println!("{} {}",c,ITU_MAP.get(&c).unwrap())
+        }
+    }
+}
+
+impl Default for MorseITU {
+    fn default() -> Self {
+        Self { mode: MorseMode::DitDah }
+    }
 }
  
 impl MorseITU {
@@ -119,5 +135,42 @@ impl Code for MorseITU {
             MorseMode::DitDah => self.decode_ditdah(text),
             MorseMode::Binary => self.decode_binary(text),
         }
+    }
+}
+
+
+#[cfg(test)]
+mod morse_tests {
+    use super::*;
+
+    const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CIPHERTEXT_DITDAH: &'static str = "- ···· · --·- ··- ·· -·-· -·- -··· ·-· --- ·-- -· ··-· --- -··- ·--- ··- -- ·--· ··· --- ···- · ·-· - ···· · ·-·· ·- --·· -·-- -·· --- --·";
+    const CIPHERTEXT_BINARY: &'static str = "11100101010100100111011101011100101011100101001110101110100111010111001110101010010111010011101110111001011101110011101001010111010011101110111001110101011100101110111011100101011100111011100101110111010010101001110111011100101010111001001011101001110010101010010010111010100101110011101110101001110101110111001110101001110111011100111011101";
+
+    #[test]
+    fn encrypt_test() {
+        let code = MorseITU::default();
+        //code._print_mapping();
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT_DITDAH);
+    }
+
+    #[test]
+    fn decrypt_test() {
+        let code = MorseITU::default();
+        assert_eq!(code.decode(CIPHERTEXT_DITDAH).unwrap(), PLAINTEXT);
+    }
+
+    #[test]
+    fn encrypt_test_binary() {
+        let mut code = MorseITU::default();
+        code.mode = MorseMode::Binary;
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT_BINARY);
+    }
+
+    #[test]
+    fn decrypt_test_binary() {
+        let mut code = MorseITU::default();
+        code.mode = MorseMode::Binary;
+        assert_eq!(code.decode(CIPHERTEXT_BINARY).unwrap(), PLAINTEXT);
     }
 }
