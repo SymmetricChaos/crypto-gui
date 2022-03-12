@@ -38,7 +38,7 @@ fn combox_box(ciphers: &[CipherID], identifier: &'static str, active_cipher: &mu
 }
 
 #[derive(Default)]
-pub struct ControlPanel {
+pub struct CipherControlPanel {
     caesar: Caesar,
     affine: Affine,
     decoder_ring: DecoderRing,
@@ -64,7 +64,7 @@ pub struct ControlPanel {
 }
 
 
-impl ControlPanel {
+impl CipherControlPanel {
     pub fn ui(&mut self, ui: &mut egui::Ui, active_cipher: &mut CipherID) {
         
         egui::Grid::new("comboboxes").show(ui, |ui| {
@@ -146,17 +146,17 @@ impl ControlPanel {
 
 
 
-pub struct DisplayPanel {
+pub struct CipherDisplayPanel {
 }
 
-impl Default for DisplayPanel {
+impl Default for CipherDisplayPanel {
     fn default() -> Self {
         Self{ }
     }
 }
 
-impl DisplayPanel {
-    pub fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String, errors: &mut String, active_cipher: &mut CipherID, control_panel: &ControlPanel) {
+impl CipherDisplayPanel {
+    pub fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, output: &mut String, errors: &mut String, active_cipher: &mut CipherID, control_panel: &CipherControlPanel) {
        
         ui.add_space(32.0);
         ui.label("INPUT TEXT");

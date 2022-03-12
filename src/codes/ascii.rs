@@ -79,8 +79,13 @@ impl ASCII {
     }
  
 }
- 
- 
+
+impl Default for ASCII {
+    fn default() -> Self {
+        ASCII{ map: ASCII_MAP8.clone(), map_inv: ASCII_MAP_INV8.clone(), width: 8, alphabet: Ascii128.slice() }
+    }
+}
+
 impl Code for ASCII {
  
     fn encode(&self, text: &str) -> Result<String,CodeError> {
