@@ -17,7 +17,7 @@ lazy_static! {
                                             "1010101110111", "10101010111", "101010101", "11101010101", "1110111010101", "111011101110101", "11101110111011101", 
                                             "1110111011101110111"];
  
- 
+
     pub static ref ITU_MAP: HashMap<char, &'static str> = {
         let mut m = HashMap::new();
         for (l,c) in LETTERS.chars().zip(ITU_CODES.iter()) {
@@ -25,7 +25,7 @@ lazy_static! {
         }
         m
     };
- 
+
     pub static ref ITU_MAP_INV: HashMap<&'static str, char> = {
         let mut m = HashMap::new();
         for (l,c) in LETTERS.chars().zip(ITU_CODES.iter()) {
@@ -33,22 +33,20 @@ lazy_static! {
         }
         m
     };
- 
+
     pub static ref ITU_MAP_BINARY: HashMap<char, &'static str> = {
         let mut m = HashMap::new();
         for (l,c) in LETTERS.chars().zip(ITU_CODES_BINARY.iter()) {
             m.insert(l, *c);
         }
-        m.insert(' ',"0");
         m
     };
- 
+
     pub static ref ITU_MAP_BINARY_INV: HashMap<&'static str, char> = {
         let mut m = HashMap::new();
         for (l,c) in LETTERS.chars().zip(ITU_CODES_BINARY.iter()) {
             m.insert(*c, l);
         }
-        m.insert("0",' ');
         m
     };
 }
@@ -57,7 +55,7 @@ pub enum MorseMode {
     DitDah,
     Binary
 }
- 
+
 pub struct MorseITU {
     mode: MorseMode
 }
@@ -75,7 +73,7 @@ impl Default for MorseITU {
         Self { mode: MorseMode::DitDah }
     }
 }
- 
+
 impl MorseITU {
     fn encode_ditdah(&self, text: &str) -> Result<String,CodeError> {
         let mut out = Vec::with_capacity(text.chars().count());
@@ -87,7 +85,7 @@ impl MorseITU {
         }
         Ok(out.join(" "))
     }
- 
+
     fn encode_binary(&self, text: &str) -> Result<String,CodeError> {
         let mut out = Vec::with_capacity(text.chars().count());
         for s in text.chars() {
@@ -98,7 +96,7 @@ impl MorseITU {
         }
         Ok(out.join("00"))
     }
- 
+
     fn decode_ditdah(&self, text: &str) -> Result<String,CodeError> {
         let mut out = String::new();
         for s in text.split(" ") {
@@ -109,7 +107,7 @@ impl MorseITU {
         }
         Ok(out)
     }
- 
+
     fn decode_binary(&self, text: &str) -> Result<String,CodeError> {
         let mut out = String::new();
         for s in text.split("00") {
@@ -121,7 +119,7 @@ impl MorseITU {
         Ok(out)
     }
 }
- 
+
 impl Code for MorseITU {
     fn encode(&self, text: &str) -> Result<String,CodeError> {
         match self.mode {
@@ -129,7 +127,7 @@ impl Code for MorseITU {
             MorseMode::Binary => self.encode_binary(text),
         }
     }
- 
+
     fn decode(&self, text: &str) -> Result<String,CodeError> {
         match self.mode {
             MorseMode::DitDah => self.decode_ditdah(text),

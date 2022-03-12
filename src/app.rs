@@ -5,8 +5,8 @@ use crate::text_types::PresetAlphabet::*;
 
 // TODO: three way selector for About Page, Cipher Page, and Code Page
 pub struct ClassicCrypto {
-    control: ControlPanel,
-    display: DisplayPanel,
+    control_panel: ControlPanel,
+    display_panel: DisplayPanel,
     input: String,
     output: String,
     errors: String,
@@ -25,38 +25,54 @@ enum Page {
 impl Default for ClassicCrypto {
     fn default() -> Self {
         Self { 
-            control: ControlPanel::default(),
-            display: DisplayPanel::default(),
+            control_panel: ControlPanel::default(),
+            display_panel: DisplayPanel::default(),
             input: String::new(),
             output: String::new(),
             errors: String::new(),
             active_cipher: CipherID::default(),
             active_code: CodeID::default(),
             show_alphabet_selector: false,
-            active_page: Page::About,
+            active_page: Page::Ciphers,
         }
     }
 }
 
 impl ClassicCrypto {
     fn cipher_page(&mut self, ctx: &Context) {
-        SidePanel::right("display_panel").max_width(300.0).show(ctx, |ui| {
-            self.display.ui(ui, &mut self.input, &mut self.output, &mut self.errors, &mut self.active_cipher, &mut self.control);
+        SidePanel::right("cipher_display_panel").max_width(300.0).show(ctx, |ui| {
+            self.display_panel.ui(ui, &mut self.input, &mut self.output, &mut self.errors, &mut self.active_cipher, &mut self.control_panel);
         
         });
         CentralPanel::default().show(ctx, |ui| {
             ScrollArea::vertical().show(ui, |ui| {
-                self.control.ui(ui, &mut self.active_cipher)
+                self.control_panel.ui(ui, &mut self.active_cipher)
             });
         });
     }
 
     fn code_page(&mut self, ctx: &Context) {
-        todo!()
+        SidePanel::right("code_display_panel").max_width(300.0).show(ctx, |ui| {
+            
+        
+        });
+        CentralPanel::default().show(ctx, |ui| {
+            ScrollArea::vertical().show(ui, |ui| {
+                
+            });
+        });
     }
 
     fn about_page(&mut self, ctx: &Context) {
-        todo!()
+        SidePanel::right("about_display_panel").max_width(300.0).show(ctx, |ui| {
+            
+        
+        });
+        CentralPanel::default().show(ctx, |ui| {
+            ScrollArea::vertical().show(ui, |ui| {
+                
+            });
+        });
     }
 }
 
@@ -118,6 +134,11 @@ impl epi::App for ClassicCrypto {
 
         });
 
-        self.cipher_page(ctx)
+        match self.active_page {
+            Page::About => self.about_page(ctx),
+            Page::Ciphers => self.cipher_page(ctx),
+            Page::Codes => self.code_page(ctx),
+        }
+        
     }
 }
