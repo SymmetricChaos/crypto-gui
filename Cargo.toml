@@ -22,3 +22,4 @@ itertools = "0.10.0"
 rand = "0.8.3"
 getrandom = { version = "0.2", features = ["js"] }
 json = "0.12.4"
+primal = "0.3.0"

@@ -4,8 +4,9 @@ use std::fmt::Display;
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub enum CodeID {
     Ascii,
-    Morse,
     Bacon,
+    Morse,
+    Godel,
 }
 
 impl Default for CodeID {
@@ -31,6 +32,7 @@ impl Display for  CodeID {
             CodeID::Ascii => "ASCII",
             CodeID::Morse => "Morse",
             CodeID::Bacon => "Bacon",
+            CodeID::Godel => "Godel",
         };
         write!(f,"{}",name)
     }

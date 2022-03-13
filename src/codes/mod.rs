@@ -4,6 +4,9 @@ pub use ascii::ASCII;
 pub mod morse;
 pub use morse::MorseITU;
 
+pub mod godel;
+pub use godel::Godel;
+
 use crate::errors::CodeError;
 
 pub trait Code {
