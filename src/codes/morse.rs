@@ -66,6 +66,14 @@ impl MorseITU {
             println!("{} {}",c,ITU_MAP.get(&c).unwrap())
         }
     }
+
+    pub fn chars_codes(&self) -> impl Iterator<Item=(char, &str)> {
+        match self.mode {
+            MorseMode::DitDah => LETTERS.chars().zip(ITU_CODES.iter()).map(|(c,s)| (c,*s)),
+            //MorseMode::Binary => LETTERS.chars().zip(ITU_CODES_BINARY.iter()).map(|(c,s)| (c,*s)),
+            _ => unreachable!("")
+        }
+    }
 }
 
 impl Default for MorseITU {

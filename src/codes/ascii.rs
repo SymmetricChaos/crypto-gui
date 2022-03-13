@@ -79,9 +79,9 @@ impl ASCII {
         self.alphabet
     }
 
-    pub fn chars_codes(&self) -> impl Iterator<Item=(char, &String)> {
-        let v = self.alphabet.chars().map(|x| (x, *self.map.get(&x).unwrap())).collect_vec();
-        v.into_iter()
+    pub fn chars_codes(&self) -> impl Iterator<Item=(char, &String)> + '_ {
+        self.alphabet.chars()
+            .map(|x| (x, *self.map.get(&x).unwrap()))
     }
  
 }

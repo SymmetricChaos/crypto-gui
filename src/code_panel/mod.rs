@@ -6,6 +6,7 @@ use self::generic_components::encode_decode;
 
 pub mod ascii_controls;
 pub mod morse_controls;
+pub mod godel_controls;
 
 pub trait View {
     fn ui(&mut self, ui: &mut egui::Ui);
@@ -26,6 +27,7 @@ fn combox_box(code: &[CodeID], identifier: &'static str, active_code: &mut CodeI
 pub struct CodeControlPanel {
     ascii: ASCII,
     morse: MorseITU,
+    godel: Godel,
 }
 
 impl CodeControlPanel {

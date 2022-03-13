@@ -72,15 +72,21 @@ impl ClassicCrypto {
     fn about_page(&mut self, ctx: &Context) {
         SidePanel::left("about_display_panel").max_width(500.0).show(ctx, |ui| {
             warn_if_debug_build(ui);
-            let hello = RichText::new("Welcome to Classic Crypto!\nCheck out the Ciphers and Codes available.").heading();
+            let hello = RichText::new("Welcome to Classic Crypto!\nCheck out the Ciphers and Codes available.").strong();
             ui.label(hello);
-            ui.hyperlink_to("Check out the source code on GitHub", "https://github.com/SymmetricChaos/crypto-gui");
-            ui.hyperlink_to("Powered by egui", "https://github.com/emilk/egui");
+            ui.add_space(20.0);
+            ui.hyperlink_to("source code", "https://github.com/SymmetricChaos/crypto-gui");
+            ui.add_space(10.0);
+            ui.hyperlink_to("powered by egui", "https://github.com/emilk/egui");
         });
         CentralPanel::default().show(ctx, |ui| {
             let title = RichText::new("Classical Cryptography").heading();
             ui.label(title);
-            ui.label("The era of classical cryptography dates back to at least the invention of written language. In societies with low literacy writing itself was often a secure form of encryption as it was incomprehensible to most people. The era ends in the middle of the 20th century with Claude Shannon's publication of the paper 'Communication Theory of Secrecy Systems' at Bell Labs which established the modern theory of cryptography and contained and early mathematics proof of the security of an encryption system, the one-time pad.")
+            ui.label("The era of classical cryptography dates back to at least the invention of written language. In societies with low literacy writing itself was often a secure form of encryption as it was incomprehensible to most people. The era ends in the middle of the 20th century with Claude Shannon's publication of the paper 'Communication Theory of Secrecy Systems' at Bell Labs which established the modern theory of cryptography and contained and early mathematics proof of the security of an encryption system, the one-time pad. The pre-modern ciphers presented here were mostly based on an intuitive sense of what would be difficult for the enemy to decipher and limitations of what the person encrypting the message could accomplish by hand or with a simple tool. This changed slightly in the early 20th century when improvements in engineering caused the rise of electromechanical devices, such as the famous Enigma Mahchine, that could rapidly perform encryption not feasible to do by hand.");
+            ui.add_space(16.0);
+            let cipher_code_subhead = RichText::new("A Note on the Terms Cipher and Code").strong();
+            ui.label(cipher_code_subhead);
+            ui.label("No strong distinction is made in literature between a 'cipher' and a 'code' in this era. However this project adopts the modern convention that a cipher has a changeable key and a code does not. This is to understand a cipher one must know both the method as some secret additional information while a code can be read by anyone who knows the method of encoding.");
         });
     }
 }

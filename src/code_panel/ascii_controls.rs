@@ -1,7 +1,5 @@
 use eframe::egui::Grid;
-
 use super::View;
-use super::generic_components::*;
 use crate::codes::ASCII;
 
 impl View for ASCII {
