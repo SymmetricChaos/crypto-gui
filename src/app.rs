@@ -1,5 +1,5 @@
 use crate::{cipher_id::CipherID, code_id::CodeID, code_panel};
-use eframe::{egui::{SidePanel, CentralPanel, ScrollArea, TopBottomPanel, Window, Button, Context, widgets, SelectableLabel}, epi};
+use eframe::{egui::{SidePanel, CentralPanel, ScrollArea, TopBottomPanel, Window, Button, Context, widgets, SelectableLabel, warn_if_debug_build, RichText}, epi};
 use crate::text_types::PresetAlphabet::*;
 use crate::code_panel::{CodeDisplayPanel,CodeControlPanel};
 use crate::cipher_panel::{CipherDisplayPanel,CipherControlPanel};
@@ -70,14 +70,17 @@ impl ClassicCrypto {
     }
 
     fn about_page(&mut self, ctx: &Context) {
-        SidePanel::right("about_display_panel").max_width(300.0).show(ctx, |ui| {
-            
-        
+        SidePanel::left("about_display_panel").max_width(500.0).show(ctx, |ui| {
+            warn_if_debug_build(ui);
+            let hello = RichText::new("Welcome to Classic Crypto!\nCheck out the Ciphers and Codes available.").heading();
+            ui.label(hello);
+            ui.hyperlink_to("Check out the source code on GitHub", "https://github.com/SymmetricChaos/crypto-gui");
+            ui.hyperlink_to("Powered by egui", "https://github.com/emilk/egui");
         });
         CentralPanel::default().show(ctx, |ui| {
-            ScrollArea::vertical().show(ui, |ui| {
-                
-            });
+            let title = RichText::new("Classical Cryptography").heading();
+            ui.label(title);
+            ui.label("The era of classical cryptography dates back to at least the invention of written language. In societies with low literacy writing itself was often a secure form of encryption as it was incomprehensible to most people. The era ends in the middle of the 20th century with Claude Shannon's publication of the paper 'Communication Theory of Secrecy Systems' at Bell Labs which established the modern theory of cryptography and contained and early mathematics proof of the security of an encryption system, the one-time pad.")
         });
     }
 }
@@ -103,10 +106,10 @@ impl epi::App for ClassicCrypto {
                 // ui.selectable_label(&mut self.active_page, Page::Ciphers, "Ciphers");
                 // ui.selectable_label(&mut self.active_page, Page::Codes, "Codes");
                 // ui.selectable_label(&mut self.active_page, Page::About, "About");
-                ui.separator();
-                if ui.add(Button::new("Alphabets").small() ).clicked() {
-                    self.show_alphabet_selector = !self.show_alphabet_selector;
-                }
+                // ui.separator();
+                // if ui.add(Button::new("Alphabets").small() ).clicked() {
+                //     self.show_alphabet_selector = !self.show_alphabet_selector;
+                // }
             });
         });
 

@@ -1,5 +1,6 @@
+use itertools::Itertools;
 use lazy_static::lazy_static;
-use std::collections::HashMap;
+use std::{collections::HashMap, iter::Map};
 use crate::{text_types::PresetAlphabet::Ascii128, errors::CodeError};
 
 use super::Code;
@@ -58,7 +59,7 @@ lazy_static! {
  
  
 pub struct ASCII {
-    map: HashMap<char, &'static String,>,
+    map: HashMap<char, &'static String>,
     map_inv: HashMap<&'static String, char>,
     width: usize,
     alphabet: &'static str,
@@ -76,6 +77,11 @@ impl ASCII {
 
     pub fn input_set(&self) -> &'static str {
         self.alphabet
+    }
+
+    pub fn chars_codes(&self) -> impl Iterator<Item=(char, &String)> {
+        let v = self.alphabet.chars().map(|x| (x, *self.map.get(&x).unwrap())).collect_vec();
+        v.into_iter()
     }
  
 }
