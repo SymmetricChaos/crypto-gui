@@ -51,7 +51,7 @@ impl View for EnigmaM3 {
         }
         
         ui.add_space(10.0);
-        ui.label("Rotors").on_hover_text("Walzen");;
+        ui.label("Rotors").on_hover_text("Walzen");
         for rotor in &mut self.state.rotors {
             ui.horizontal(|ui| {
                 let name = RichText::new(rotor.name).monospace();

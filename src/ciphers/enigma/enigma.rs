@@ -1,7 +1,6 @@
 use crate::{errors::CipherError, text_types::PresetAlphabet, ciphers::Cipher};
 use super::{ROTOR_MAP,REFLECTORS,Rotor,Reflector,Plugboard,char_to_usize,usize_to_char};
 use rand::prelude::ThreadRng;
-use std::{collections::HashMap, fmt};
  
  
  
@@ -85,7 +84,7 @@ impl Cipher for EnigmaM3 {
     }
 
     fn randomize(&mut self, rng: &mut ThreadRng) {
-        todo!()
+        todo!("{:?}",rng)
     }
 
     fn reset(&mut self) {

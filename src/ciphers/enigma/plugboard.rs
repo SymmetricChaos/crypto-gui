@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use crate::errors::CipherError;
 
 
-fn parse_plugboard(pairs: &str) -> Result<HashMap<char,char>,CipherError> {
+fn _parse_plugboard(pairs: &str) -> Result<HashMap<char,char>,CipherError> {
     let mut wiring = HashMap::new();
     let digraphs = pairs.split(" ");
     for d in digraphs {

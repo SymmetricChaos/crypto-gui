@@ -1,6 +1,5 @@
-use itertools::Itertools;
 use lazy_static::lazy_static;
-use std::{collections::HashMap, iter::Map};
+use std::collections::HashMap;
 use crate::{text_types::PresetAlphabet::Ascii128, errors::CodeError};
 
 use super::Code;

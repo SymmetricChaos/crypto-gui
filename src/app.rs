@@ -1,5 +1,5 @@
-use crate::{cipher_id::CipherID, code_id::CodeID, code_panel};
-use eframe::{egui::{SidePanel, CentralPanel, ScrollArea, TopBottomPanel, Window, Button, Context, widgets, SelectableLabel, warn_if_debug_build, RichText}, epi};
+use crate::{cipher_id::CipherID, code_id::CodeID};
+use eframe::{egui::{SidePanel, CentralPanel, ScrollArea, TopBottomPanel, Window, Context, widgets, SelectableLabel, warn_if_debug_build, RichText}, epi};
 use crate::text_types::PresetAlphabet::*;
 use crate::code_panel::{CodeDisplayPanel,CodeControlPanel};
 use crate::cipher_panel::{CipherDisplayPanel,CipherControlPanel};
@@ -48,7 +48,6 @@ impl ClassicCrypto {
     fn cipher_page(&mut self, ctx: &Context) {
         SidePanel::right("cipher_display_panel").max_width(300.0).show(ctx, |ui| {
             self.cipher_display_panel.ui(ui, &mut self.input, &mut self.output, &mut self.errors, &mut self.active_cipher, &mut self.cipher_control_panel);
-        
         });
         CentralPanel::default().show(ctx, |ui| {
             ScrollArea::vertical().show(ui, |ui| {
@@ -60,7 +59,6 @@ impl ClassicCrypto {
     fn code_page(&mut self, ctx: &Context) {
         SidePanel::right("code_display_panel").max_width(300.0).show(ctx, |ui| {
             self.code_display_panel.ui(ui, &mut self.input, &mut self.output, &mut self.errors, &mut self.active_code, &mut self.code_control_panel);
-        
         });
         CentralPanel::default().show(ctx, |ui| {
             ScrollArea::vertical().show(ui, |ui| {
