@@ -1,5 +1,7 @@
+use std::borrow::Cow;
+
 use crate::{cipher_id::CipherID, code_id::CodeID};
-use eframe::{egui::{SidePanel, CentralPanel, ScrollArea, TopBottomPanel, Window, Context, widgets, SelectableLabel, warn_if_debug_build, RichText}, epi};
+use eframe::{egui::{SidePanel, CentralPanel, ScrollArea, TopBottomPanel, Window, Context, widgets, SelectableLabel, warn_if_debug_build, RichText, FontDefinitions, FontData}, epi, epaint::FontFamily};
 use crate::text_types::PresetAlphabet::*;
 use crate::code_panel::{CodeDisplayPanel,CodeControlPanel};
 use crate::cipher_panel::{CipherDisplayPanel,CipherControlPanel};
@@ -87,6 +89,21 @@ impl ClassicCrypto {
             ui.label("No strong distinction is made in literature between a 'cipher' and a 'code' in this era. However this project adopts the modern convention that a cipher has a changeable key and a code does not. This is to understand a cipher one must know both the method as some secret additional information while a code can be read by anyone who knows the method of encoding.");
         });
     }
+
+    fn configure_font(&self, ctx: &Context) {
+        let mut font_def = FontDefinitions::default();
+        font_def.font_data.insert(
+            "FreeMono".into(), 
+            FontData::from_static(include_bytes!("FreeMono.otf"))
+        );
+        font_def
+            .families
+            .get_mut(&FontFamily::Monospace)
+            .unwrap()
+            .insert(0, "FreeMono".into());
+
+        ctx.set_fonts(font_def);
+    }
 }
 
 
@@ -148,10 +165,11 @@ impl epi::App for ClassicCrypto {
 
     fn setup(
         &mut self,
-        _ctx: &Context,
+        ctx: &Context,
         _frame: &epi::Frame,
         _storage: Option<&dyn epi::Storage>,
     ) {
+        self.configure_font(ctx);
     }
 
     fn name(&self) -> &str {

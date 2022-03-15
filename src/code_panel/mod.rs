@@ -35,7 +35,7 @@ impl CodeControlPanel {
         
         egui::Grid::new("comboboxes").show(ui, |ui| {
             combox_box(
-                &[CodeID::Ascii, CodeID::Bacon],
+                &[CodeID::Ascii],
                 "Binary Codes",
                 active_code, ui
             );
@@ -48,7 +48,7 @@ impl CodeControlPanel {
 
             combox_box(
                 &[CodeID::Godel],
-                "Godel Code",
+                "Other Codes",
                 active_code, ui
             );
         });
@@ -71,7 +71,7 @@ impl CodeControlPanel {
             CodeID::Ascii => self.ascii.ui(ui),
             CodeID::Morse => self.morse.ui(ui),
             CodeID::Godel => self.godel.ui(ui),
-            _ => { ui.label("IN PROGRESS"); },
+            //_ => { ui.label("IN PROGRESS"); },
         }
     }
 }
@@ -101,7 +101,7 @@ impl CodeDisplayPanel {
             CodeID::Ascii => encode_decode(ui, &control_panel.ascii, input, output, errors),
             CodeID::Morse => encode_decode(ui, &control_panel.morse, input, output, errors),
             CodeID::Godel => encode_decode(ui, &control_panel.godel, input, output, errors),
-            _ => { *errors = String::from("button must be added to DisplayPanel struct") }
+            //_ => { *errors = String::from("button must be added to DisplayPanel struct") }
         }
 
         ui.add_space(10.0);
