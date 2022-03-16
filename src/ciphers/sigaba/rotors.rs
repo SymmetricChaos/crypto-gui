@@ -9,6 +9,7 @@ pub struct Rotor {
     wiring_ltr: Vec<usize>,
     position: usize,
     size: usize,
+    reversed: bool,
     pub wiring_str: &'static str,
     pub name: &'static str,
 }
@@ -22,7 +23,7 @@ impl Rotor {
             wiring_rtl[w.0] = w.1;
             wiring_ltr[w.1] = w.0;
         }
-        Rotor{ name, wiring_rtl, wiring_ltr, position: 0, size, wiring_str }
+        Rotor{ wiring_rtl, wiring_ltr, position: 0, size, reversed: false, wiring_str, name }
     }
  
     pub fn step(&mut self) {
@@ -31,15 +32,22 @@ impl Rotor {
  
     // Signal starts on the right and goes through the rotor then back
     // We will use and return usize instead of char to avoid constantly converting types
-    pub fn encrypt_rtl(&self, entry: usize) -> usize {
+    // Need to logically confirm that a reversed rotor works
+    pub fn rtl(&self, entry: usize) -> usize {
         let inner_position = (self.size + entry + self.position) % self.size;
-        let inner = self.wiring_rtl[inner_position];
+        let inner = match self.reversed {
+            true => self.wiring_ltr[inner_position],
+            false => self.wiring_rtl[inner_position],
+        };
         (inner + self.size - self.position) % self.size
     }
  
     pub fn ltr(&self, entry: usize) -> usize {
         let inner_position = (self.size + entry + self.position) % self.size;
-        let inner = self.wiring_ltr[inner_position];
+        let inner = match self.reversed {
+            true => self.wiring_rtl[inner_position],
+            false => self.wiring_ltr[inner_position],
+        };
         (inner + self.size - self.position) % self.size
     }
 }
@@ -63,11 +71,11 @@ impl fmt::Display for Rotor {
 lazy_static! {
     pub static ref CIPHER_ROTOR_VEC: Vec<Rotor> = {
         let mut v = Vec::new();
-        v.push(Rotor::new("Cph0", "YCHLQSUGBDIXNZKERPVJTAWFOM"));
-        v.push(Rotor::new("Cph1", "INPXBWETGUYSAOCHVLDMQKZJFR"));
-        v.push(Rotor::new("Cph2", "WNDRIOZPTAXHFJYQBMSVEKUCGL"));
-        v.push(Rotor::new("Cph3", "TZGHOBKRVUXLQDMPNFWCJYEIAS"));
-        v.push(Rotor::new("Cph4", "YWTAHRQJVLCEXUNGBIPZMSDFOK"));
+        v.push(Rotor::new("Cphr0", "YCHLQSUGBDIXNZKERPVJTAWFOM"));
+        v.push(Rotor::new("Cphr1", "INPXBWETGUYSAOCHVLDMQKZJFR"));
+        v.push(Rotor::new("Cphr2", "WNDRIOZPTAXHFJYQBMSVEKUCGL"));
+        v.push(Rotor::new("Cphr3", "TZGHOBKRVUXLQDMPNFWCJYEIAS"));
+        v.push(Rotor::new("Cphr4", "YWTAHRQJVLCEXUNGBIPZMSDFOK"));
         v
     };
 
@@ -97,16 +105,15 @@ lazy_static! {
         m
     };
 
-    // TODO
-    // These will not build correctlty
-    // need to modify
+    // Ideally these should use digits 0..9 but the converting function
+    // makes this easier
     pub static ref INDEX_ROTOR_VEC: Vec<Rotor> = {
         let mut v = Vec::new();
-        v.push(Rotor::new("Idx0", "7591482630"));
-        v.push(Rotor::new("Idx1", "3810592764"));
-        v.push(Rotor::new("Idx2", "4086153297"));
-        v.push(Rotor::new("Idx3", "3980526174"));
-        v.push(Rotor::new("Idx4", "6497135280"));
+        v.push(Rotor::new("Idx0", "HFJBEICGDA"));
+        v.push(Rotor::new("Idx1", "DIBAFJCHGE"));
+        v.push(Rotor::new("Idx2", "EAIGBFDCJH"));
+        v.push(Rotor::new("Idx3", "DJIAFCGBHE"));
+        v.push(Rotor::new("Idx4", "GEJHBDFCIA"));
         v
     };
 
