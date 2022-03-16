@@ -51,6 +51,9 @@ pub use enigma::EnigmaM3;
 pub mod grille;
 pub use grille::Grille;
 
+pub mod sigaba;
+pub use sigaba::Sigaba;
+
 use rand::prelude::ThreadRng;
 use crate::errors::CipherError;
 

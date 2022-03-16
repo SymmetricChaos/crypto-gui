@@ -2,7 +2,8 @@ use super::char_to_usize;
 use lazy_static::lazy_static;
 use std::{collections::HashMap, fmt};
  
-#[derive(Clone,Debug,Copy)]
+// Specifically the Enigma rotor
+#[derive(Copy,Clone,Debug)]
 pub struct Rotor {
     wiring_rtl: [usize; 26],
     wiring_ltr: [usize; 26],
