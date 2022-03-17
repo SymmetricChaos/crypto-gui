@@ -1,3 +1,7 @@
+use std::collections::HashSet;
+
+use itertools::Itertools;
+
 use crate::ciphers::Cipher;
 use super::{Rotor, CONTROL_ROTOR_VEC, INDEX_ROTOR_VEC, CIPHER_ROTOR_VEC, char_to_usize, usize_to_char};
 
@@ -31,9 +35,37 @@ impl ControlRotors {
         }
         self.counter += 1;
     }
+
+    fn encrypt(&self, n: usize) -> usize {
+        let mut out = n;
+        for rotor in self.rotors.iter() {
+            out = rotor.ltr(out)
+        }
+        out
+    }
  
-    fn produce_signal(&self) -> [bool; 10] {
-        todo!("put in the four live inputs and return live outputs")
+    fn produce_signal(&self) -> Vec<usize> {
+        let signal_in = [self.encrypt(0),
+                         self.encrypt(1),
+                         self.encrypt(2),
+                         self.encrypt(3),
+                        ];
+        let mut signal_out: HashSet<usize> = HashSet::new();
+        for sig in signal_in {
+            match sig {
+                0 => {signal_out.insert(8);},
+                1 => {signal_out.insert(7);},
+                2 => {signal_out.insert(6);},
+                3..=4 => {signal_out.insert(5);},
+                5..=7 => {signal_out.insert(4);},
+                8..=10 => {signal_out.insert(3);},
+                11..=14 => {signal_out.insert(2);},
+                15..=19 => {signal_out.insert(1);},
+                20..=25 => {signal_out.insert(0);},
+                _ => unreachable!("SIGABA control rotors should not produce values greater than 25"),
+            }
+        }
+        signal_out.into_iter().collect_vec()
     }
 }
 
