@@ -1,4 +1,5 @@
 pub mod ascii;
+pub mod fibonnaci;
 pub use ascii::ASCII;
 
 pub mod morse;
