@@ -88,8 +88,28 @@ pub struct IndexRotors {
 }
  
 impl IndexRotors {
-    fn pass_signal(&self, signal: [bool; 10]) -> [bool; 5] {
-        todo!("take live inputs and return live outputs")
+    pub fn encrypt(&self, n: usize) -> usize {
+        let mut out = n;
+        for rotor in self.rotors.iter() {
+            out = rotor.ltr(out)
+        }
+        out
+    }
+ 
+    fn pass_signal(&self, signal_in: Vec<usize>) -> Vec<usize> {
+ 
+        let mut signal_out: HashSet<usize> = HashSet::new();
+        for sig in signal_in.iter().map(|s| self.encrypt(*s)) {
+            match sig {
+                0|1 => {signal_out.insert(0);},
+                2|3 => {signal_out.insert(1);},
+                4|5 => {signal_out.insert(2);},
+                6|7 => {signal_out.insert(3);},
+                8|9 => {signal_out.insert(4);},
+                _ => unreachable!("SIGABA index rotors should not produce values greater than 9"),
+            }
+        }
+        signal_out.into_iter().collect_vec()
     }
 }
 
@@ -114,15 +134,25 @@ pub struct CipherRotors {
  
 impl CipherRotors {
     pub fn encrypt(&self, n: usize) -> usize {
-        todo!("steal from Enigma")
+        let mut out = n;
+        for rotor in self.rotors.iter() {
+            out = rotor.ltr(out)
+        }
+        out
     }
  
-    pub fn decrypt_char(&self, n: usize) -> usize {
-        todo!("good luck")
+    pub fn decrypt(&self, n: usize) -> usize {
+        let mut out = n;
+        for rotor in self.rotors.iter() {
+            out = rotor.rtl(out)
+        }
+        out
     }
  
-    pub fn step(&mut self, signal: [bool; 5]) {
-        todo!("take live inputs and move the rotors accordingly")
+    pub fn step(&mut self, signal: Vec<usize>) {
+        for sig in signal {
+            self.rotors[sig].step()
+        }
     }
 }
 
@@ -156,21 +186,35 @@ impl Default for SigabaState {
 impl SigabaState {
 
     fn step(&mut self) {
-        todo!("control rotors send signal to index rotors which send signal to cipher rotors")
+        let sig = self.control_rotors.produce_signal();
+        let sig = self.index_rotors.pass_signal(sig);
+        self. cipher_rotors.step(sig);
     }
  
-    fn encrypt(&self, text: &str) -> Result<String,crate::errors::CipherError> {
-        let nums = text.chars().map(|c| char_to_usize(c));
-        let mut out = String::with_capacity(text.chars().count());
-        for n in nums {
-            let val = self.cipher_rotors.encrypt(n);
-            out.push(usize_to_char(val));
+    fn encrypt_single(&self, n: usize) -> usize {
+        self.cipher_rotors.encrypt(n)
+    }
+ 
+    fn decrypt_single(&self, n: usize) -> usize {
+        self.cipher_rotors.decrypt(n)
+    }
+ 
+    fn encrypt(&mut self, text: &str) -> String {
+        let mut nums: Vec<usize> = text.chars().map(|c| char_to_usize(c)).collect();
+        for n in nums.iter_mut() {
+            *n = self.encrypt_single(*n);
+            self.step()
         }
-        Ok(out)
+        nums.iter().map(|n| usize_to_char(*n)).collect()
     }
 
-    fn decrypt(&self, text: &str) -> Result<String,crate::errors::CipherError> {
-        todo!()
+    fn decrypt(&mut self, text: &str) -> String {
+        let mut nums: Vec<usize> = text.chars().map(|c| char_to_usize(c)).collect();
+        for n in nums.iter_mut() {
+            *n = self.decrypt_single(*n);
+            self.step()
+        }
+        nums.iter().map(|n| usize_to_char(*n)).collect()
     }
 }
  
