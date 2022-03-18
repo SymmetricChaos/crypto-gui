@@ -30,7 +30,8 @@ impl Iterator for FibStr {
  
         // Go through the bits backward adding a 1 or 0 depending on if its part
         // of the partition
-        let mut bits = String::with_capacity(self.vector.len());
+        let mut bits = String::with_capacity(self.vector.len()+1);
+        bits.push('1');
         let mut val = self.n;
         for f in self.vector.iter().rev() {
             if *f <= val {
@@ -42,8 +43,7 @@ impl Iterator for FibStr {
         }
  
         // Reverse the bits, collect them into a String, and append a 1
-        let mut output = bits.chars().rev().collect::<String>();
-        output.push('1');
+        let output = bits.chars().rev().collect::<String>();
  
         // Increment the counter and append the next fibonacci number if it has
         // been reached
@@ -66,6 +66,17 @@ pub struct FibonacciCode {
 }
  
 impl FibonacciCode {
+
+    pub fn control_alphabet(&mut self) -> &mut String {
+        let codes = FibStr::new();
+        let mut map = HashMap::new();
+        let mut map_inv = HashMap::new();
+        for (l,c) in self.alphabet.chars().zip(codes) {
+            map.insert(l,c.clone() );
+            map_inv.insert(c, l);
+        }
+        &mut self.alphabet
+    }
  
     pub fn new(alphabet: &str) -> Self {
         let codes = FibStr::new();
@@ -77,7 +88,18 @@ impl FibonacciCode {
         }
         FibonacciCode{ map, map_inv, alphabet: alphabet.to_string() }
     }
- 
+
+    pub fn chars_codes(&self) -> impl Iterator<Item=(char, &String)> + '_ {
+        self.alphabet.chars()
+            .map(|x| (x, self.map.get(&x).unwrap()) )
+    }
+
+}
+
+impl Default for FibonacciCode {
+    fn default() -> Self {
+        Self::new("ETAOINSHRDLCUMWFGYPBVKJXQZ")
+    }
 }
  
 impl Code for FibonacciCode {

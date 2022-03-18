@@ -6,6 +6,7 @@ pub enum CodeID {
     Ascii,
     Morse,
     Godel,
+    Fibonacci,
 }
 
 impl Default for CodeID {
@@ -32,6 +33,7 @@ impl Display for  CodeID {
             CodeID::Ascii => "ASCII",
             CodeID::Morse => "Morse",
             CodeID::Godel => "Gödel",
+            CodeID::Fibonacci => "Fibonacci",
         };
         write!(f,"{}",name)
     }

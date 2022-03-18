@@ -1,5 +1,4 @@
 pub mod ascii;
-pub mod fibonnaci;
 pub use ascii::ASCII;
 
 pub mod morse;
@@ -7,6 +6,9 @@ pub use morse::MorseITU;
 
 pub mod godel;
 pub use godel::Godel;
+
+pub mod fibonnaci;
+pub use fibonnaci::FibonacciCode;
 
 use crate::errors::CodeError;
 

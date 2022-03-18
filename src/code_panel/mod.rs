@@ -7,6 +7,7 @@ use self::generic_components::encode_decode;
 pub mod ascii_controls;
 pub mod morse_controls;
 pub mod godel_controls;
+pub mod fibonacci_controls;
 
 pub trait View {
     fn ui(&mut self, ui: &mut egui::Ui);
@@ -28,6 +29,7 @@ pub struct CodeControlPanel {
     ascii: ASCII,
     morse: MorseITU,
     godel: Godel,
+    fibonacci: FibonacciCode,
 }
 
 impl CodeControlPanel {
@@ -35,7 +37,7 @@ impl CodeControlPanel {
         
         egui::Grid::new("comboboxes").show(ui, |ui| {
             combox_box(
-                &[CodeID::Ascii],
+                &[CodeID::Ascii, CodeID::Fibonacci],
                 "Binary Codes",
                 active_code, ui
             );
@@ -71,6 +73,7 @@ impl CodeControlPanel {
             CodeID::Ascii => self.ascii.ui(ui),
             CodeID::Morse => self.morse.ui(ui),
             CodeID::Godel => self.godel.ui(ui),
+            CodeID::Fibonacci => self.fibonacci.ui(ui),
             //_ => { ui.label("IN PROGRESS"); },
         }
     }
@@ -101,6 +104,7 @@ impl CodeDisplayPanel {
             CodeID::Ascii => encode_decode(ui, &control_panel.ascii, input, output, errors),
             CodeID::Morse => encode_decode(ui, &control_panel.morse, input, output, errors),
             CodeID::Godel => encode_decode(ui, &control_panel.godel, input, output, errors),
+            CodeID::Fibonacci => encode_decode(ui, &control_panel.fibonacci, input, output, errors),
             //_ => { *errors = String::from("button must be added to DisplayPanel struct") }
         }
 
