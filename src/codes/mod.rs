@@ -1,4 +1,5 @@
 pub mod ascii;
+pub mod romaji;
 pub use ascii::ASCII;
 
 pub mod morse;
