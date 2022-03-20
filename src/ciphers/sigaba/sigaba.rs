@@ -1,4 +1,4 @@
-use std::{collections::HashSet, cell::{Cell, RefCell}};
+use std::{collections::HashSet, cell::RefCell};
 
 use itertools::Itertools;
 
@@ -9,7 +9,7 @@ use super::{Rotor, CONTROL_ROTOR_VEC, INDEX_ROTOR_VEC, CIPHER_ROTOR_VEC, char_to
 #[derive(Clone,Debug)]
 pub struct ControlRotors {
     pub rotors: [Rotor; 5],
-    counter: Cell<usize>,
+    counter: usize,
 }
  
 impl ControlRotors {
@@ -19,13 +19,13 @@ impl ControlRotors {
     // The other two rotors do not move
     fn step(&mut self) {
         self.rotors[2].step();
-        if self.counter.get() % 26 == 0 {
+        if self.counter % 26 == 0 {
             self.rotors[3].step()
         }
-        if self.counter.get() % 676 == 0 {
+        if self.counter % 676 == 0 {
             self.rotors[1].step()
         }
-        *self.counter.get_mut() += 1;
+        self.counter += 1;
     }
 
     fn encrypt(&self, n: usize) -> usize {
@@ -69,7 +69,7 @@ impl Default for ControlRotors {
                                 CONTROL_ROTOR_VEC[3].clone(),
                                 CONTROL_ROTOR_VEC[4].clone()
                             ];
-        Self { rotors, counter: Cell::new(0) }
+        Self { rotors, counter: 0 }
     }
 }
  
@@ -169,12 +169,27 @@ pub struct Sigaba {
     pub index_rotors: RefCell<IndexRotors>,
     pub control_rotors: RefCell<ControlRotors>,
     pub cipher_rotors: RefCell<CipherRotors>,
+    pub prev_state: ([usize;5], [usize;5]),
 }
 
 impl Sigaba {
-    // Restore to previous rotor positions
+    // Restore to previous manually set rotor positions
+    pub fn previous_state(&mut self) {
+        for (val, rtr) in self.prev_state.0.clone().iter().zip(self.cipher_rotors()){
+            rtr.position = *val;
+        }
+        for (val, rtr) in self.prev_state.1.clone().iter().zip(self.control_rotors()){
+            rtr.position = *val;
+        }
+    }
+
     pub fn reset(&mut self) {
-        todo!()
+        for rtr in self.cipher_rotors() {
+            rtr.position = 0
+        }
+        for rtr in self.control_rotors() {
+            rtr.position = 0
+        }
     }
 
     fn step(&self) {
@@ -208,12 +223,16 @@ impl Sigaba {
 
 impl Default for Sigaba {
     fn default() -> Self {
-        Self { index_rotors: Default::default(), control_rotors: Default::default(), cipher_rotors: Default::default() }
+        Self { 
+            index_rotors: Default::default(), 
+            control_rotors: Default::default(), 
+            cipher_rotors: Default::default(),
+            prev_state: ([0,0,0,0,0], [0,0,0,0,0])
+        }
     }
 }
  
 impl Cipher for Sigaba {
-
 
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
         let mut text = text.to_string();
@@ -224,6 +243,7 @@ impl Cipher for Sigaba {
             *n = self.encrypt_single(*n);
             self.step()
         }
+        self.control_rotors.borrow_mut().counter = 0;
         Ok(nums.iter().map(|n| usize_to_char(*n)).collect())
     }
 
