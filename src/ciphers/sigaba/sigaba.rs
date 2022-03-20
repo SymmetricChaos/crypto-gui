@@ -228,8 +228,11 @@ impl Default for Sigaba {
  
 impl Cipher for Sigaba {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
+        let mut text = text.to_string();
+        text = text.replace("Z", "X");
+        text = text.replace(" ", "Z");
         let mut state = self.state.clone();
-        Ok(state.encrypt(text))
+        Ok(state.encrypt(&text))
     }
 
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
@@ -260,13 +263,13 @@ impl Cipher for Sigaba {
 
 
 // TODO: These tests only confirm that encrypting and decrypting properly reverse
-// need to validated correctness, check wiring diagram
+// To validate correctness check wiring diagram, examine internal stepping
 #[cfg(test)]
 mod sigaba_tests {
     use super::*;
 
     const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXIUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "GITZBZNOBEGZSWPITJDYZNJSUFQRBRSVFBR";
+    const CIPHERTEXT: &'static str = "GITZBZNOBEGZSWPITJDYZNJSUFQRBRTVFBR";
     //SIGABA is not perfectly reversible
     const DECRYPT_TEXT: &'static str = "THEQUICKBROWNFOXIUMPSOVERTHELAXYDOG";
 
@@ -279,6 +282,6 @@ mod sigaba_tests {
     #[test]
     fn decrypt() {
         let cipher = Sigaba::default();
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), DECRYPT_TEXT);
     }
 }
