@@ -21,6 +21,7 @@ pub mod b64_controls;
 pub mod slidefair_controls;
 pub mod enigma_controls;
 pub mod grille_controls;
+pub mod sigaba_controls;
 
 pub trait View {
     fn ui(&mut self, ui: &mut egui::Ui);
@@ -47,6 +48,7 @@ pub struct CipherControlPanel {
 
     m209: M209,
     enigma: EnigmaM3,
+    sigaba: Sigaba,
 
     vigenere: Vigenere,
     beaufort: Beaufort,
@@ -81,7 +83,7 @@ impl CipherControlPanel {
             );
     
             combox_box(
-                &[CipherID::M209, CipherID::Enigma],
+                &[CipherID::M209, CipherID::Enigma, CipherID::SIGABA],
                 "Rotor Machine",
                 active_cipher, ui
             );
@@ -139,6 +141,7 @@ impl CipherControlPanel {
             CipherID::Slidefair => self.slidefair.ui(ui),
             CipherID::Enigma => self.enigma.ui(ui),
             CipherID::Grille => self.grille.ui(ui),
+            CipherID::SIGABA => self.sigaba.ui(ui),
             _ => { ui.label("IN PROGRESS"); },
         }
     }
@@ -183,6 +186,7 @@ impl CipherDisplayPanel {
             CipherID::Slidefair => encrypt_decrypt(ui, &control_panel.slidefair, input, output, errors),
             CipherID::Enigma => encrypt_decrypt(ui, &control_panel.enigma, input, output, errors),
             CipherID::Grille => encrypt_decrypt(ui, &control_panel.grille, input, output, errors),
+            CipherID::SIGABA => encrypt_decrypt(ui, &control_panel.sigaba, input, output, errors),
             _ => { *errors = String::from("button must be added to DisplayPanel struct") }
         }
 

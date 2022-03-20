@@ -141,9 +141,9 @@ impl NihonShiki {
         out
     }
     
-    pub fn romaji_to_hirigana(&self, text: &str) -> String {
-        todo!()
-    }
+    // pub fn romaji_to_hirigana(&self, text: &str) -> String {
+    //     todo!()
+    // }
     
     pub fn katakana_to_romaji(&self, text: &str) -> String {
         let mut symbols = text.chars().peekable();
@@ -204,9 +204,9 @@ impl NihonShiki {
         out
     }
 
-    pub fn romaji_to_katakana(&self, text: &str) -> String {
-        todo!()
-    }
+    // pub fn romaji_to_katakana(&self, text: &str) -> String {
+    //     todo!()
+    // }
 }
 
 

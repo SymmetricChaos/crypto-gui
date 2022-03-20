@@ -8,7 +8,7 @@ use super::{Rotor, CONTROL_ROTOR_VEC, INDEX_ROTOR_VEC, CIPHER_ROTOR_VEC, char_to
  
 #[derive(Clone,Debug)]
 pub struct ControlRotors {
-    rotors: [Rotor; 5],
+    pub rotors: [Rotor; 5],
     counter: usize,
 }
  
@@ -77,7 +77,7 @@ impl Default for ControlRotors {
 // These rotors do not move they only pass signals through them
 #[derive(Clone,Debug)]
 pub struct IndexRotors {
-    rotors: [Rotor; 5]
+    pub rotors: [Rotor; 5]
 }
  
 impl IndexRotors {
@@ -123,7 +123,7 @@ impl Default for IndexRotors {
 // Rotors through which the text input passes
 #[derive(Clone,Debug)]
 pub struct CipherRotors {
-    rotors: [Rotor; 5]
+    pub rotors: [Rotor; 5]
 }
  
 impl CipherRotors {
@@ -167,9 +167,9 @@ impl Default for CipherRotors {
 // Internal machine state that must mutate during encryption
 #[derive(Clone,Debug)]
 pub struct SigabaState {
-    index_rotors: IndexRotors,
-    control_rotors: ControlRotors,
-    cipher_rotors: CipherRotors,
+    pub index_rotors: IndexRotors,
+    pub control_rotors: ControlRotors,
+    pub cipher_rotors: CipherRotors,
 }
 
 impl Default for SigabaState {
@@ -217,7 +217,7 @@ impl SigabaState {
  
 // Interface for the cipher
 pub struct Sigaba {
-    state: SigabaState,
+    pub state: SigabaState,
 }
  
 impl Default for Sigaba {
@@ -241,7 +241,7 @@ impl Cipher for Sigaba {
     }
 
     fn randomize(&mut self, rng: &mut rand::prelude::ThreadRng) {
-        todo!()
+        todo!("{:?}",rng)
     }
 
     fn reset(&mut self) {

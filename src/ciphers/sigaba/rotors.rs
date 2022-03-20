@@ -7,7 +7,7 @@ use std::{collections::HashMap, fmt};
 pub struct Rotor {
     wiring_rtl: Vec<usize>,
     wiring_ltr: Vec<usize>,
-    position: usize,
+    pub position: usize,
     size: usize,
     pub reversed: bool,
     pub wiring_str: &'static str,
@@ -24,6 +24,10 @@ impl Rotor {
             wiring_ltr[w.1] = w.0;
         }
         Rotor{ wiring_rtl, wiring_ltr, position: 0, size, reversed: false, wiring_str, name }
+    }
+
+    pub fn size(&self) -> usize {
+        self.size
     }
  
     pub fn step(&mut self) {
@@ -71,11 +75,11 @@ impl fmt::Display for Rotor {
 lazy_static! {
     pub static ref CIPHER_ROTOR_VEC: Vec<Rotor> = {
         let mut v = Vec::new();
-        v.push(Rotor::new("Cphr0", "YCHLQSUGBDIXNZKERPVJTAWFOM"));
-        v.push(Rotor::new("Cphr1", "INPXBWETGUYSAOCHVLDMQKZJFR"));
-        v.push(Rotor::new("Cphr2", "WNDRIOZPTAXHFJYQBMSVEKUCGL"));
-        v.push(Rotor::new("Cphr3", "TZGHOBKRVUXLQDMPNFWCJYEIAS"));
-        v.push(Rotor::new("Cphr4", "YWTAHRQJVLCEXUNGBIPZMSDFOK"));
+        v.push(Rotor::new("R-A", "YCHLQSUGBDIXNZKERPVJTAWFOM"));
+        v.push(Rotor::new("R-B", "INPXBWETGUYSAOCHVLDMQKZJFR"));
+        v.push(Rotor::new("R-C", "WNDRIOZPTAXHFJYQBMSVEKUCGL"));
+        v.push(Rotor::new("R-D", "TZGHOBKRVUXLQDMPNFWCJYEIAS"));
+        v.push(Rotor::new("R-E", "YWTAHRQJVLCEXUNGBIPZMSDFOK"));
         v
     };
 
@@ -89,11 +93,11 @@ lazy_static! {
 
     pub static ref CONTROL_ROTOR_VEC: Vec<Rotor> = {
         let mut v = Vec::new();
-        v.push(Rotor::new("Ctrl0", "QSLRBTEKOGAICFWYVMHJNXZUDP"));
-        v.push(Rotor::new("Ctrl1", "CHJDQIGNBSAKVTUOXFWLEPRMZY"));
-        v.push(Rotor::new("Ctrl2", "CDFAJXTIMNBEQHSUGRYLWZKVPO"));
-        v.push(Rotor::new("Ctrl3", "XHFESZDNRBCGKQIJLTVMUOYAPW"));
-        v.push(Rotor::new("Ctrl4", "EZJQXMOGYTCSFRIUPVNADLHWBK"));
+        v.push(Rotor::new("C-A", "QSLRBTEKOGAICFWYVMHJNXZUDP"));
+        v.push(Rotor::new("C-B", "CHJDQIGNBSAKVTUOXFWLEPRMZY"));
+        v.push(Rotor::new("C-C", "CDFAJXTIMNBEQHSUGRYLWZKVPO"));
+        v.push(Rotor::new("C-D", "XHFESZDNRBCGKQIJLTVMUOYAPW"));
+        v.push(Rotor::new("C-E", "EZJQXMOGYTCSFRIUPVNADLHWBK"));
         v
     };
 

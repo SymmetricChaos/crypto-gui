@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 use crate::{cipher_id::CipherID, code_id::CodeID};
 use eframe::{egui::{SidePanel, CentralPanel, ScrollArea, TopBottomPanel, Window, Context, widgets, SelectableLabel, warn_if_debug_build, RichText, FontDefinitions, FontData}, epi, epaint::FontFamily};
 use crate::text_types::PresetAlphabet::*;
