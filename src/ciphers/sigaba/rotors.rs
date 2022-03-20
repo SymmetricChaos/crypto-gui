@@ -72,6 +72,9 @@ impl fmt::Display for Rotor {
         write!(f, "{}", out)
     }
 }
+
+
+
 lazy_static! {
     pub static ref CIPHER_ROTOR_VEC: Vec<Rotor> = {
         let mut v = Vec::new();

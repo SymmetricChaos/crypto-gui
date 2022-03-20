@@ -29,17 +29,17 @@ impl View for Sigaba {
         ui.label("Select Cipher Rotors");
         for i in 0..5 {
             ComboBox::from_id_source(format!("Cipher Rotor {}",i+1))
-                .selected_text(self.state.cipher_rotors.rotors[i].name)
+                .selected_text(self.cipher_rotors()[i].name)
                 .show_ui(ui, |ui| {
                 for rtr in CIPHER_ROTOR_VEC.iter() {
-                    ui.selectable_value(&mut self.state.cipher_rotors.rotors[i], rtr.clone(), rtr.name.to_string());
+                    ui.selectable_value(&mut self.cipher_rotors()[i], rtr.clone(), rtr.name.to_string());
                 }
             });
         }
 
         ui.add_space(10.0);
         ui.label("Cipher Rotors");
-        rotor_display(ui, &mut self.state.cipher_rotors.rotors);
+        rotor_display(ui, self.cipher_rotors());
 
         ////////////////////////
         //// CONTROL ROTORS ////
@@ -48,17 +48,17 @@ impl View for Sigaba {
         ui.label("Select Control Rotors");
         for i in 0..5 {
             ComboBox::from_id_source(format!("Control Rotor {}",i+1))
-                .selected_text(self.state.control_rotors.rotors[i].name)
+                .selected_text(self.control_rotors()[i].name)
                 .show_ui(ui, |ui| {
                 for rtr in CONTROL_ROTOR_VEC.iter() {
-                    ui.selectable_value(&mut self.state.control_rotors.rotors[i], rtr.clone(), rtr.name.to_string());
+                    ui.selectable_value(&mut self.control_rotors()[i], rtr.clone(), rtr.name.to_string());
                 }
             });
         }
 
         ui.add_space(10.0);
         ui.label("Control Rotors");
-        rotor_display(ui, &mut self.state.control_rotors.rotors);
+        rotor_display(ui, self.control_rotors());
 
 
         //////////////////////
@@ -66,7 +66,7 @@ impl View for Sigaba {
         //////////////////////
         ui.add_space(10.0);
         ui.label("Index Rotors");
-        rotor_display(ui, &mut self.state.index_rotors.rotors);
+        rotor_display(ui, self.index_rotors());
 
     }
 }
