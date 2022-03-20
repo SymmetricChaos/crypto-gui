@@ -17,8 +17,8 @@ pub struct Rotor {
 impl Rotor {
     pub fn new(name: &'static str, wiring_str:  &'static str) -> Rotor {
         let size = wiring_str.chars().count();
-        let mut wiring_rtl = Vec::new();
-        let mut wiring_ltr = Vec::new();
+        let mut wiring_rtl = vec![0; size];
+        let mut wiring_ltr = vec![0; size];
         for w in wiring_str.chars().map(|x| char_to_usize(x) ).enumerate() {
             wiring_rtl[w.0] = w.1;
             wiring_ltr[w.1] = w.0;

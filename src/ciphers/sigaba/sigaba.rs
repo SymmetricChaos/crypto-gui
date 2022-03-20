@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use itertools::Itertools;
 
-use crate::ciphers::Cipher;
+use crate::{ciphers::Cipher, errors::CipherError};
 use super::{Rotor, CONTROL_ROTOR_VEC, INDEX_ROTOR_VEC, CIPHER_ROTOR_VEC, char_to_usize, usize_to_char};
 
 pub enum SigabaMode {
@@ -14,7 +14,7 @@ pub enum SigabaMode {
 }
  
  
- 
+#[derive(Clone,Debug)]
 pub struct ControlRotors {
     rotors: [Rotor; 5],
     counter: usize,
@@ -83,6 +83,7 @@ impl Default for ControlRotors {
  
  
 // These rotors do not move they only pass signals through them
+#[derive(Clone,Debug)]
 pub struct IndexRotors {
     rotors: [Rotor; 5]
 }
@@ -128,6 +129,7 @@ impl Default for IndexRotors {
 
  
 // Rotors through which the text input passes
+#[derive(Clone,Debug)]
 pub struct CipherRotors {
     rotors: [Rotor; 5]
 }
@@ -143,7 +145,7 @@ impl CipherRotors {
  
     pub fn decrypt(&self, n: usize) -> usize {
         let mut out = n;
-        for rotor in self.rotors.iter() {
+        for rotor in self.rotors.iter().rev() {
             out = rotor.rtl(out)
         }
         out
@@ -169,8 +171,9 @@ impl Default for CipherRotors {
 }
  
  
- 
+
 // Internal machine state that must mutate during encryption
+#[derive(Clone,Debug)]
 pub struct SigabaState {
     index_rotors: IndexRotors,
     control_rotors: ControlRotors,
@@ -222,26 +225,23 @@ impl SigabaState {
 // Interface for the cipher
 pub struct Sigaba {
     state: SigabaState,
-    pub mode: SigabaMode,
-}
- 
-impl Sigaba {
- 
 }
  
 impl Default for Sigaba {
     fn default() -> Self {
-        Self { state: Default::default(), mode: SigabaMode::Encipher }
+        Self { state: Default::default() }
     }
 }
  
 impl Cipher for Sigaba {
-    fn encrypt(&self, text: &str) -> Result<String,crate::errors::CipherError> {
-        todo!()
+    fn encrypt(&self, text: &str) -> Result<String,CipherError> {
+        let mut state = self.state.clone();
+        Ok(state.encrypt(text))
     }
 
-    fn decrypt(&self, text: &str) -> Result<String,crate::errors::CipherError> {
-        todo!()
+    fn decrypt(&self, text: &str) -> Result<String,CipherError> {
+        let mut state = self.state.clone();
+        Ok(state.decrypt(text))
     }
 
     fn randomize(&mut self, rng: &mut rand::prelude::ThreadRng) {
@@ -262,5 +262,30 @@ impl Cipher for Sigaba {
 
     fn validate_settings(&self) -> Result<(),crate::errors::CipherError> {
         todo!()
+    }
+}
+
+
+// TODO: These tests only confirm that encrypting and decrypting properly reverse
+// need to validated correctness, check wiring diagram
+#[cfg(test)]
+mod sigaba_tests {
+    use super::*;
+
+    const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXIUMPSOVERTHELAZYDOG";
+    const CIPHERTEXT: &'static str = "GIUPTZNKCMFPUNZUBPICOCXOCYFCFQPJBTY";
+    //SIGABA is not perfectly reversible
+    const DECRYPT_TEXT: &'static str = "THEQUICKBROWNFOXIUMPSOVERTHELAXYDOG";
+
+    #[test]
+    fn encrypt() {
+        let cipher = Sigaba::default();
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+    }
+
+    #[test]
+    fn decrypt() {
+        let cipher = Sigaba::default();
+        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }
