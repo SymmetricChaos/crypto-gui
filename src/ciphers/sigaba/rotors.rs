@@ -9,7 +9,7 @@ pub struct Rotor {
     wiring_ltr: Vec<usize>,
     position: usize,
     size: usize,
-    reversed: bool,
+    pub reversed: bool,
     pub wiring_str: &'static str,
     pub name: &'static str,
 }

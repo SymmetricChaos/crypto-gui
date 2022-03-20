@@ -5,14 +5,6 @@ use itertools::Itertools;
 use crate::{ciphers::Cipher, errors::CipherError};
 use super::{Rotor, CONTROL_ROTOR_VEC, INDEX_ROTOR_VEC, CIPHER_ROTOR_VEC, char_to_usize, usize_to_char};
 
-pub enum SigabaMode {
-    Off,
-    Plaintext,
-    Reset,
-    Encipher,
-    Decipher,
-}
- 
  
 #[derive(Clone,Debug)]
 pub struct ControlRotors {
@@ -191,7 +183,8 @@ impl SigabaState {
     fn step(&mut self) {
         let sig = self.control_rotors.produce_signal();
         let sig = self.index_rotors.pass_signal(sig);
-        self. cipher_rotors.step(sig);
+        self.cipher_rotors.step(sig);
+        self.control_rotors.step();
     }
  
     fn encrypt_single(&self, n: usize) -> usize {
@@ -273,7 +266,7 @@ mod sigaba_tests {
     use super::*;
 
     const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXIUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "GIUPTZNKCMFPUNZUBPICOCXOCYFCFQPJBTY";
+    const CIPHERTEXT: &'static str = "GITZBZNOBEGZSWPITJDYZNJSUFQRBRSVFBR";
     //SIGABA is not perfectly reversible
     const DECRYPT_TEXT: &'static str = "THEQUICKBROWNFOXIUMPSOVERTHELAXYDOG";
 
