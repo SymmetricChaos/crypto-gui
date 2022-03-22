@@ -67,16 +67,16 @@ pub struct FibonacciCode {
  
 impl FibonacciCode {
 
-    pub fn control_alphabet(&mut self) -> &mut String {
-        let codes = FibStr::new();
-        let mut map = HashMap::new();
-        let mut map_inv = HashMap::new();
-        for (l,c) in self.alphabet.chars().zip(codes) {
-            map.insert(l,c.clone() );
-            map_inv.insert(c, l);
-        }
-        &mut self.alphabet
-    }
+    // pub fn control_alphabet(&mut self) -> &mut String {
+    //     let codes = FibStr::new();
+    //     let mut map = HashMap::new();
+    //     let mut map_inv = HashMap::new();
+    //     for (l,c) in self.alphabet.chars().zip(codes) {
+    //         map.insert(l,c.clone() );
+    //         map_inv.insert(c, l);
+    //     }
+    //     &mut self.alphabet
+    // }
  
     pub fn new(alphabet: &str) -> Self {
         let codes = FibStr::new();
