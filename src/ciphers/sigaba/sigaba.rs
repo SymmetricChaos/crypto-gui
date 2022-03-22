@@ -90,7 +90,6 @@ impl IndexRotors {
     }
  
     fn pass_signal(&self, signal_in: Vec<usize>) -> Vec<usize> {
- 
         let mut signal_out: HashSet<usize> = HashSet::new();
         for sig in signal_in.iter().map(|s| self.encrypt(*s)) {
             match sig {
