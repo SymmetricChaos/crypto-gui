@@ -4,6 +4,35 @@ use crate::{text_types::PresetAlphabet::Ascii128, errors::CodeError};
 
 use super::Code;
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum AsciiMode {
+    SevenBit,
+    EightBit,
+}
+
+impl AsciiMode {
+    pub fn width(&self) -> usize {
+        match self {
+            AsciiMode::SevenBit => 7,
+            AsciiMode::EightBit => 8,
+        }
+    }
+
+    pub fn map(&self) -> HashMap<char, &'static String> {
+        match self {
+            AsciiMode::SevenBit => ASCII_MAP7.clone(),
+            AsciiMode::EightBit => ASCII_MAP8.clone(),
+        }
+    }
+
+    pub fn map_inv(&self) -> HashMap<&'static String, char> {
+        match self {
+            AsciiMode::SevenBit => ASCII_MAP_INV7.clone(),
+            AsciiMode::EightBit => ASCII_MAP_INV8.clone(),
+        }
+    }
+}
+
 lazy_static! {
 
     pub static ref SEVEN_BIT_ASCII_CODES: Vec<String> = {
@@ -22,7 +51,7 @@ lazy_static! {
         v
     };
 
-    pub static ref ASCII_MAP8: HashMap<char, &'static String,> = {
+    pub static ref ASCII_MAP8: HashMap<char, &'static String> = {
         let mut m = HashMap::new();
         for (letter, code) in Ascii128.chars().zip(EIGHT_BIT_ASCII_CODES.iter()) {
             m.insert(letter, code);
@@ -38,7 +67,7 @@ lazy_static! {
         m
     };
 
-    pub static ref ASCII_MAP7: HashMap<char, &'static String,> = {
+    pub static ref ASCII_MAP7: HashMap<char, &'static String> = {
         let mut m = HashMap::new();
         for (letter, code) in Ascii128.chars().zip(SEVEN_BIT_ASCII_CODES.iter()) {
             m.insert(letter, code);
@@ -55,48 +84,42 @@ lazy_static! {
     };
 
 }
+
  
- 
-pub struct ASCII {
-    map: HashMap<char, &'static String>,
-    map_inv: HashMap<&'static String, char>,
-    width: usize,
+pub struct Ascii {
+    pub mode: AsciiMode,
     alphabet: &'static str,
 }
  
-impl ASCII {
- 
-    pub fn default8() -> ASCII {
-        ASCII{ map: ASCII_MAP8.clone(), map_inv: ASCII_MAP_INV8.clone(), width: 8, alphabet: Ascii128.slice() }
-    }
- 
-    pub fn default7() -> ASCII {
-        ASCII{ map: ASCII_MAP7.clone(), map_inv: ASCII_MAP_INV7.clone(), width: 7, alphabet: Ascii128.slice() }
-    }
-
+impl Ascii {
     pub fn input_set(&self) -> &'static str {
         self.alphabet
     }
 
-    pub fn chars_codes(&self) -> impl Iterator<Item=(char, &String)> + '_ {
-        self.alphabet.chars()
-            .map(|x| (x, *self.map.get(&x).unwrap()))
+    pub fn chars_codes(&self) -> Box<dyn Iterator<Item=(char, &String)> + '_> {
+        match self.mode {
+            AsciiMode::SevenBit => Box::new(self.alphabet.chars().map(|x| (x, *ASCII_MAP7.get(&x).unwrap()))),
+            AsciiMode::EightBit => Box::new(self.alphabet.chars().map(|x| (x, *ASCII_MAP8.get(&x).unwrap()))),
+        }
+
     }
  
 }
 
-impl Default for ASCII {
+impl Default for Ascii {
     fn default() -> Self {
-        ASCII{ map: ASCII_MAP8.clone(), map_inv: ASCII_MAP_INV8.clone(), width: 8, alphabet: Ascii128.slice() }
+        Ascii{ mode: AsciiMode::EightBit, alphabet: Ascii128.slice() }
     }
 }
 
-impl Code for ASCII {
+impl Code for Ascii {
  
     fn encode(&self, text: &str) -> Result<String,CodeError> {
-        let mut out = String::with_capacity(text.chars().count()*self.width);
+        let w = self.mode.width();
+        let map = self.mode.map();
+        let mut out = String::with_capacity(text.chars().count()*w);
         for s in text.chars() {
-            match self.map.get(&s) {
+            match map.get(&s) {
                 Some(code_group) => out.push_str(code_group),
                 None => return Err(CodeError::Input(format!("The symbol `{}` is not in the ASCII alphabet",s)))
             }
@@ -105,11 +128,12 @@ impl Code for ASCII {
     }
  
     fn decode(&self, text: &str) -> Result<String,CodeError> {
-        let mut out = String::with_capacity(text.chars().count()/self.width);
-        let w = self.width;
+        let w = self.mode.width();
+        let map_inv = self.mode.map_inv();
+        let mut out = String::with_capacity(text.chars().count()/w);
         for p in 0..(text.len()/w) {
             let group = &text[(p*w)..(p*w)+w];
-            match self.map_inv.get(&group.to_string()) {
+            match map_inv.get(&group.to_string()) {
                 Some(code_group) => out.push(*code_group),
                 None => return Err(CodeError::Input(format!("The code group `{}` is not valid",group)))
             }
@@ -127,17 +151,17 @@ mod polybius_tests {
     use super::*;
 
     const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "10101001001000100010110100011010101100100110000111001011100001010100101001111101011110011101000110100111110110001001010101010110011011010000101001110011111010110100010110100101010100100100010001011001100100000110110101011001100010010011111000111";
+    const CIPHERTEXT: &'static str = "0101010001001000010001010101000101010101010010010100001101001011010000100101001001001111010101110100111001000110010011110101100001001010010101010100110101010000010100110100111101010110010001010101001001010100010010000100010101001100010000010101101001011001010001000100111101000111";
 
     #[test]
     fn encrypt_test() {
-        let code = ASCII::default7();
+        let code = Ascii::default();
         assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
-        let code = ASCII::default7();
+        let code = Ascii::default();
         assert_eq!(code.decode(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

@@ -26,7 +26,7 @@ fn combox_box(code: &[CodeID], identifier: &'static str, active_code: &mut CodeI
 
 #[derive(Default)]
 pub struct CodeControlPanel {
-    ascii: ASCII,
+    ascii: Ascii,
     morse: MorseITU,
     godel: Godel,
     fibonacci: FibonacciCode,

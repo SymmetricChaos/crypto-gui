@@ -1,6 +1,6 @@
 pub mod ascii;
 pub mod romaji;
-pub use ascii::ASCII;
+pub use ascii::Ascii;
 
 pub mod morse;
 pub use morse::MorseITU;
