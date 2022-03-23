@@ -85,6 +85,7 @@ impl ClassicCrypto {
             let cipher_code_subhead = RichText::new("A Note on the Terms Cipher and Code").strong();
             ui.label(cipher_code_subhead);
             ui.label("No strong distinction is made in literature between a 'cipher' and a 'code' in this era. However this project adopts the modern convention that a cipher has a changeable key and a code does not. That is: to understand a cipher one must know both the method as some secret additional information while a code can be read by anyone who knows the method of encoding.");
+            ui.label(format!("{:?}",ctx.fonts().families()));
         });
     }
 
@@ -92,13 +93,18 @@ impl ClassicCrypto {
         let mut font_def = FontDefinitions::default();
         font_def.font_data.insert(
             "FreeMono".into(), 
-            FontData::from_static(include_bytes!("..\\FreeMono.otf"))
+            FontData::from_static(include_bytes!("..\\FreeMono.ttf"))
         );
         font_def
             .families
             .get_mut(&FontFamily::Monospace)
             .unwrap()
             .insert(0, "FreeMono".into());
+        font_def
+            .families
+            .get_mut(&FontFamily::Monospace)
+            .unwrap()
+            .push("FreeMono".into());
         ctx.set_fonts(font_def);
     }
 }
@@ -157,7 +163,6 @@ impl epi::App for ClassicCrypto {
             Page::Ciphers => self.cipher_page(ctx),
             Page::Codes => self.code_page(ctx),
         }
-        
     }
 
     fn setup(

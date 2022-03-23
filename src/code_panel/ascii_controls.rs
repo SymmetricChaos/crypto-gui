@@ -1,4 +1,4 @@
-use eframe::egui::{Grid, RichText};
+use eframe::{egui::{Grid, RichText}};
 use super::View;
 use crate::codes::{Ascii, ascii::AsciiMode::{EightBit, SevenBit}};
 
@@ -13,8 +13,11 @@ impl View for Ascii {
         Grid::new("ascii_code_grid").num_columns(NUM_ROWS).show(ui, |ui| {
             let mut ctr = 0;
             for (c, code) in self.chars_codes() {
-                let pair = format!("{}  {}     ", c, code);
-                ui.label(RichText::new(pair).monospace());
+                let pair = match self.mode {
+                    SevenBit => format!("{}   {}     ", c, code),
+                    EightBit => format!("{}  {}     ", c, code),
+                };
+                ui.label(RichText::new(pair).monospace().strong());
                 ctr += 1;
                 if ctr % NUM_ROWS == 0 {
                     ui.end_row()
