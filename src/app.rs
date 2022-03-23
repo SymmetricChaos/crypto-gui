@@ -108,7 +108,7 @@ impl ClassicCrypto {
         font_def
             .families
             .get_mut(&FontFamily::Monospace).unwrap()
-            .push("FreeMono".into());
+            .push("FreeMonoOTF".into());
         ctx.set_fonts(font_def);
     }
 }
