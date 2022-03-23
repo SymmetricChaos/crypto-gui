@@ -1,6 +1,6 @@
 use crate::{cipher_id::CipherID, code_id::CodeID};
-use eframe::{egui::{SidePanel, CentralPanel, ScrollArea, TopBottomPanel, Window, Context, widgets, SelectableLabel, warn_if_debug_build, RichText, FontDefinitions, FontData}, epi, epaint::FontFamily};
-use crate::text_types::PresetAlphabet::*;
+use eframe::{egui::{SidePanel, CentralPanel, ScrollArea, TopBottomPanel, Context, widgets, SelectableLabel, warn_if_debug_build, RichText, FontDefinitions, FontData}, epi, epaint::FontFamily};
+//use crate::text_types::PresetAlphabet::*;
 use crate::code_panel::{CodeDisplayPanel,CodeControlPanel};
 use crate::cipher_panel::{CipherDisplayPanel,CipherControlPanel};
 
@@ -21,7 +21,7 @@ pub struct ClassicCrypto {
     errors: String,
     active_cipher: CipherID,
     active_code: CodeID,
-    show_alphabet_selector: bool,
+    //show_alphabet_selector: bool,
     active_page: Page,
 }
 
@@ -38,7 +38,7 @@ impl Default for ClassicCrypto {
             errors: String::new(),
             active_cipher: CipherID::default(),
             active_code: CodeID::default(),
-            show_alphabet_selector: false,
+            //show_alphabet_selector: false,
             active_page: Page::About,
         }
     }
@@ -92,14 +92,13 @@ impl ClassicCrypto {
         let mut font_def = FontDefinitions::default();
         font_def.font_data.insert(
             "FreeMono".into(), 
-            FontData::from_static(include_bytes!("FreeMono.otf"))
+            FontData::from_static(include_bytes!("..\\FreeMono.otf"))
         );
         font_def
             .families
             .get_mut(&FontFamily::Monospace)
             .unwrap()
             .insert(0, "FreeMono".into());
-
         ctx.set_fonts(font_def);
     }
 }
@@ -125,6 +124,7 @@ impl epi::App for ClassicCrypto {
                 // ui.selectable_label(&mut self.active_page, Page::Ciphers, "Ciphers");
                 // ui.selectable_label(&mut self.active_page, Page::Codes, "Codes");
                 // ui.selectable_label(&mut self.active_page, Page::About, "About");
+
                 // ui.separator();
                 // if ui.add(Button::new("Alphabets").small() ).clicked() {
                 //     self.show_alphabet_selector = !self.show_alphabet_selector;
@@ -139,19 +139,18 @@ impl epi::App for ClassicCrypto {
         //         ctx.settings_ui(ui);
         // });
 
-        Window::new("Alphabet Selector")
-            .open(&mut self.show_alphabet_selector)
-            .vscroll(true)
-            .show(ctx, |ui| {
-                ui.label("Click to Copy");
-                ui.add_space(16.0);
-                for alphabet in [BasicLatin, BasicLatinNoJ, BasicLatinNoQ, BasicLatinWithDigits] {
-                    if ui.button(String::from(alphabet)).clicked() {
-                        ui.output().copied_text = String::from(alphabet);
-                    };
-                }
-
-        });
+        // Window::new("Alphabet Selector")
+        //     .open(&mut self.show_alphabet_selector)
+        //     .vscroll(true)
+        //     .show(ctx, |ui| {
+        //         ui.label("Click to Copy");
+        //         ui.add_space(16.0);
+        //         for alphabet in [BasicLatin, BasicLatinNoJ, BasicLatinNoQ, BasicLatinWithDigits] {
+        //             if ui.button(String::from(alphabet)).clicked() {
+        //                 ui.output().copied_text = String::from(alphabet);
+        //             };
+        //         }
+        // });
 
         match self.active_page {
             Page::About => self.about_page(ctx),
