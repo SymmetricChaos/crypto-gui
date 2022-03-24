@@ -50,14 +50,15 @@ lazy_static! {
         m
     };
 }
- 
+
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum MorseMode {
     DitDah,
     Binary
 }
 
 pub struct MorseITU {
-    mode: MorseMode
+    pub mode: MorseMode
 }
 
 impl MorseITU {
@@ -67,11 +68,10 @@ impl MorseITU {
         }
     }
 
-    pub fn chars_codes(&self) -> impl Iterator<Item=(char, &str)> {
+    pub fn chars_codes(&self) -> Box<dyn Iterator<Item=(char, &'static str)> + '_> {
         match self.mode {
-            MorseMode::DitDah => LETTERS.chars().zip(ITU_CODES.iter()).map(|(c,s)| (c,*s)),
-            //MorseMode::Binary => LETTERS.chars().zip(ITU_CODES_BINARY.iter()).map(|(c,s)| (c,*s)),
-            _ => unreachable!("")
+            MorseMode::DitDah => Box::new(LETTERS.chars().map(|x| (x, *ITU_MAP.get(&x).unwrap()))),
+            MorseMode::Binary => Box::new(LETTERS.chars().map(|x| (x, *ITU_MAP_BINARY.get(&x).unwrap()))),
         }
     }
 }

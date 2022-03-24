@@ -101,7 +101,6 @@ impl Ascii {
             AsciiMode::SevenBit => Box::new(self.alphabet.chars().map(|x| (x, *ASCII_MAP7.get(&x).unwrap()))),
             AsciiMode::EightBit => Box::new(self.alphabet.chars().map(|x| (x, *ASCII_MAP8.get(&x).unwrap()))),
         }
-
     }
  
 }

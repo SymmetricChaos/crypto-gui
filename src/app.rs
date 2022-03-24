@@ -91,24 +91,28 @@ impl ClassicCrypto {
 
     fn configure_font(&self, ctx: &Context) {
         let mut font_def = FontDefinitions::default();
+        // Load FreeMono.ttf and use it at the main monospace font
         font_def.font_data.insert(
             "FreeMonoTTF".into(), 
             FontData::from_static(include_bytes!("..\\FreeMono.ttf"))
         );
+        font_def
+            .families
+            .get_mut(&FontFamily::Monospace).unwrap()
+            .insert(0, "FreeMonoTTF".into()
+        );
+
+        // Fallback on FreeMono.otf
         font_def.font_data.insert(
             "FreeMonoOTF".into(), 
             FontData::from_static(include_bytes!("..\\FreeMono.otf"))
         );
-        // Try TTF first
         font_def
             .families
             .get_mut(&FontFamily::Monospace).unwrap()
-            .insert(0, "FreeMonoTTF".into());
-        // Fallback on OTF
-        font_def
-            .families
-            .get_mut(&FontFamily::Monospace).unwrap()
-            .push("FreeMonoOTF".into());
+            .push("FreeMonoOTF".into()
+        );
+        
         ctx.set_fonts(font_def);
     }
 }
