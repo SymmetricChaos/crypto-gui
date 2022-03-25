@@ -1,6 +1,7 @@
-use eframe::{egui::{Grid, RichText}};
+use eframe::{egui::{Grid}};
 use super::View;
 use crate::codes::{Ascii, ascii::AsciiMode::{EightBit, SevenBit}};
+use crate::egui_aux::mono_strong;
 
 const NUM_ROWS: usize = 4;
 
@@ -17,7 +18,7 @@ impl View for Ascii {
                     SevenBit => format!("{}   {}     ", c, code),
                     EightBit => format!("{}  {}     ", c, code),
                 };
-                ui.label(RichText::new(pair).monospace().strong());
+                mono_strong(ui,&pair, None);
                 ctr += 1;
                 if ctr % NUM_ROWS == 0 {
                     ui.end_row()

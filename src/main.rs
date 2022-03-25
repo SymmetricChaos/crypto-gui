@@ -15,6 +15,8 @@ pub mod errors;
 
 pub mod grid;
 
+pub mod egui_aux;
+
 mod app;
 
 #[cfg(not(target_arch = "wasm32"))]

@@ -16,6 +16,8 @@ pub mod text_types;
 pub mod codes;
 pub mod code_panel;
 
+pub mod egui_aux;
+
 
 // ----------------------------------------------------------------------------
 // When compiling for web:

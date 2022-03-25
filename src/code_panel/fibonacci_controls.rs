@@ -1,6 +1,6 @@
-use eframe::egui::{Grid, RichText};
+use eframe::egui::{Grid};
 use super::View;
-use crate::codes::FibonacciCode;
+use crate::{codes::FibonacciCode, egui_aux::mono_strong};
 
 const NUM_ROWS: usize = 3;
 
@@ -12,7 +12,7 @@ impl View for FibonacciCode {
             let mut ctr = 0;
             for (c, code) in self.chars_codes() {
                 let pair = format!("{}  {}     ", c, code);
-                ui.label(RichText::new(pair).monospace().strong());
+                mono_strong(ui,&pair, None);
                 ctr += 1;
                 if ctr % NUM_ROWS == 0 {
                     ui.end_row()
