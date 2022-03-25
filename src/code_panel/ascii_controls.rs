@@ -15,10 +15,10 @@ impl View for Ascii {
             let mut ctr = 0;
             for (c, code) in self.chars_codes() {
                 let pair = match self.mode {
-                    SevenBit => format!("{}   {}     ", c, code),
-                    EightBit => format!("{}  {}     ", c, code),
+                    SevenBit => format!("{}   {}   ", c, code),
+                    EightBit => format!("{}  {}   ", c, code),
                 };
-                mono_strong(ui,&pair, None);
+                mono_strong(ui,&pair, Some(18.0));
                 ctr += 1;
                 if ctr % NUM_ROWS == 0 {
                     ui.end_row()

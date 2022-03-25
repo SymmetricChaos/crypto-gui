@@ -1,7 +1,7 @@
-use eframe::egui::{Grid, RichText};
+use eframe::egui::Grid;
 
 use super::View;
-use crate::codes::{MorseITU, morse_itu::MorseMode::{Binary, DitDah}};
+use crate::{codes::{MorseITU, morse_itu::MorseMode::{Binary, DitDah}}, egui_aux::mono_strong};
 
 const NUM_ROWS: usize = 3;
 
@@ -15,7 +15,7 @@ impl View for MorseITU {
             let mut ctr = 0;
             for (c, code) in self.chars_codes() {
                 let pair = format!("{}  {}", c, code);
-                ui.label(RichText::new(pair).monospace().strong());
+                mono_strong(ui,&pair, Some(16.0));
                 ctr += 1;
                 if ctr % NUM_ROWS == 0 {
                     ui.end_row()
