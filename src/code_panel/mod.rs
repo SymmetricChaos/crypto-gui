@@ -43,7 +43,7 @@ impl CodeControlPanel {
             );
 
             combox_box(
-                &[CodeID::Morse],
+                &[CodeID::MorseITU],
                 "Morse Code",
                 active_code, ui
             );
@@ -71,7 +71,7 @@ impl CodeControlPanel {
 
         match active_code {
             CodeID::Ascii => self.ascii.ui(ui),
-            CodeID::Morse => self.morse.ui(ui),
+            CodeID::MorseITU => self.morse.ui(ui),
             CodeID::Godel => self.godel.ui(ui),
             CodeID::Fibonacci => self.fibonacci.ui(ui),
             //_ => { ui.label("IN PROGRESS"); },
@@ -102,7 +102,7 @@ impl CodeDisplayPanel {
 
         match active_code {
             CodeID::Ascii => encode_decode(ui, &control_panel.ascii, input, output, errors),
-            CodeID::Morse => encode_decode(ui, &control_panel.morse, input, output, errors),
+            CodeID::MorseITU => encode_decode(ui, &control_panel.morse, input, output, errors),
             CodeID::Godel => encode_decode(ui, &control_panel.godel, input, output, errors),
             CodeID::Fibonacci => encode_decode(ui, &control_panel.fibonacci, input, output, errors),
             //_ => { *errors = String::from("button must be added to DisplayPanel struct") }

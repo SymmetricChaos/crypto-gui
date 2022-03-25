@@ -1,7 +1,7 @@
 use eframe::egui::{Grid, RichText};
 
 use super::View;
-use crate::codes::{MorseITU, morse::MorseMode::{Binary, DitDah}};
+use crate::codes::{MorseITU, morse_itu::MorseMode::{Binary, DitDah}};
 
 const NUM_ROWS: usize = 3;
 

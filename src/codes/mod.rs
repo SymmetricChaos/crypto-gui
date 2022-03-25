@@ -1,8 +1,8 @@
 pub mod ascii;
 pub use ascii::Ascii;
 
-pub mod morse;
-pub use morse::MorseITU;
+pub mod morse_itu;
+pub use morse_itu::MorseITU;
 
 pub mod morse_american;
 pub use morse_american::MorseAmerican;
