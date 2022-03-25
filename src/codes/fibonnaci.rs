@@ -11,10 +11,10 @@ pub struct FibStr {
     cur_fib: usize,
     next_fib: usize,
 }
- 
+
 impl FibStr {
     pub fn new() -> FibStr  {
-        let mut vector = Vec::with_capacity(30); //Should allocate enough space most of the time
+        let mut vector = Vec::with_capacity(10); //Should allocate enough space most of the time
         vector.push(1);
         let n = 1;
         let cur_fib = 1;
@@ -25,9 +25,9 @@ impl FibStr {
  
 impl Iterator for FibStr {
     type Item = String;
- 
+
     fn next(&mut self) -> Option<String> {
- 
+
         // Go through the bits backward adding a 1 or 0 depending on if its part
         // of the partition
         let mut bits = String::with_capacity(self.vector.len()+1);
@@ -41,10 +41,10 @@ impl Iterator for FibStr {
                 bits.push('0')
             }
         }
- 
-        // Reverse the bits, collect them into a String, and append a 1
+
+        // Reverse the bits, collect them into a String
         let output = bits.chars().rev().collect::<String>();
- 
+
         // Increment the counter and append the next fibonacci number if it has
         // been reached
         self.n += 1;
@@ -54,30 +54,44 @@ impl Iterator for FibStr {
             self.next_fib += self.cur_fib;
             self.cur_fib = t;
         }
- 
+
         Some(output)
     }
 }
- 
+
 pub struct FibonacciCode {
     map: HashMap<char, String>,
     map_inv: HashMap<String, char>,
     alphabet: String,
+    old_alphabet: String,
 }
- 
+
 impl FibonacciCode {
 
-    // pub fn control_alphabet(&mut self) -> &mut String {
-    //     let codes = FibStr::new();
-    //     let mut map = HashMap::new();
-    //     let mut map_inv = HashMap::new();
-    //     for (l,c) in self.alphabet.chars().zip(codes) {
-    //         map.insert(l,c.clone() );
-    //         map_inv.insert(c, l);
-    //     }
-    //     &mut self.alphabet
-    // }
- 
+    pub fn control_alphabet(&mut self) -> &mut String {
+        &mut self.alphabet
+    }
+
+    // This needs to be called before encoding or decoding to be
+    // sure that the maps are up to date. In the egui interface
+    // this is taken care of by embedding it in the chars_codes()
+    // method.
+    // It would make more sense to put it in the control_alphabet()
+    // method but that causes a panic due to interaction with
+    // the chars_codes() method.
+    pub fn set_maps(&mut self) {
+        if self.alphabet != self.old_alphabet {
+            let codes = FibStr::new();
+            self.map.clear();
+            self.map_inv.clear();
+            for (l,c) in self.alphabet.chars().zip(codes) {
+                self.map.insert(l,c.clone() );
+                self.map_inv.insert(c.clone(), l);
+            }
+            self.old_alphabet = self.alphabet.clone()
+        }
+    }
+
     pub fn new(alphabet: &str) -> Self {
         let codes = FibStr::new();
         let mut map = HashMap::new();
@@ -86,14 +100,14 @@ impl FibonacciCode {
             map.insert(l,c.clone() );
             map_inv.insert(c, l);
         }
-        FibonacciCode{ map, map_inv, alphabet: alphabet.to_string() }
+        FibonacciCode{ map, map_inv, alphabet: alphabet.to_string(), old_alphabet: alphabet.to_string() }
     }
 
-    pub fn chars_codes(&self) -> impl Iterator<Item=(char, &String)> + '_ {
+    pub fn chars_codes(&mut self) -> impl Iterator<Item=(char, &String)> + '_ {
+        self.set_maps();
         self.alphabet.chars()
             .map(|x| (x, self.map.get(&x).unwrap()) )
     }
-
 }
 
 impl Default for FibonacciCode {
@@ -101,9 +115,9 @@ impl Default for FibonacciCode {
         Self::new("ETAOINSHRDLCUMWFGYPBVKJXQZ")
     }
 }
- 
+
 impl Code for FibonacciCode {
- 
+
     fn encode(&self, text: &str) -> Result<String,CodeError> {
         let mut output = String::new();
         for s in text.chars() {
@@ -111,7 +125,7 @@ impl Code for FibonacciCode {
         }
         Ok(output)
     }
- 
+
     fn decode(&self, text: &str) -> Result<String,CodeError> {
         let mut output = String::new();
         let mut buffer = String::new();
@@ -124,6 +138,5 @@ impl Code for FibonacciCode {
         }
         Ok(output)
     }
- 
 }
  
