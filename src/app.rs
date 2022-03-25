@@ -94,7 +94,7 @@ impl ClassicCrypto {
         // Load FreeMono.ttf and use it at the main monospace font
         font_def.font_data.insert(
             "FreeMonoTTF".into(), 
-            FontData::from_static(include_bytes!("..\\FreeMono.ttf"))
+            FontData::from_static(include_bytes!("../FreeMono.ttf"))
         );
         font_def
             .families
@@ -105,7 +105,7 @@ impl ClassicCrypto {
         // Fallback on FreeMono.otf
         font_def.font_data.insert(
             "FreeMonoOTF".into(), 
-            FontData::from_static(include_bytes!("..\\FreeMono.otf"))
+            FontData::from_static(include_bytes!("../FreeMono.otf"))
         );
         font_def
             .families

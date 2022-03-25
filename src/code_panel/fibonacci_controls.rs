@@ -12,7 +12,7 @@ impl View for FibonacciCode {
             let mut ctr = 0;
             for (c, code) in self.chars_codes() {
                 let pair = format!("{}  {}     ", c, code);
-                ui.label(RichText::new(pair).monospace());
+                ui.label(RichText::new(pair).monospace().strong());
                 ctr += 1;
                 if ctr % NUM_ROWS == 0 {
                     ui.end_row()

@@ -1,15 +1,19 @@
 pub mod ascii;
-pub mod romaji;
 pub use ascii::Ascii;
 
 pub mod morse;
 pub use morse::MorseITU;
+
+pub mod morse_american;
+pub use morse_american::MorseAmerican;
 
 pub mod godel;
 pub use godel::Godel;
 
 pub mod fibonnaci;
 pub use fibonnaci::FibonacciCode;
+
+pub mod romaji;
 
 use crate::errors::CodeError;
 
