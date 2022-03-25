@@ -90,9 +90,9 @@ impl MorseAmerican {
                 None => return Err(CodeError::Input("Unknown character".into()))
             }
         }
-        Ok(out.join(" "))
+        Ok(out.join("  "))
     }
-
+ 
     fn encode_binary(&self, text: &str) -> Result<String,CodeError> {
         let mut out = Vec::with_capacity(text.chars().count());
         for s in text.chars() {
@@ -101,12 +101,12 @@ impl MorseAmerican {
                 None => return Err(CodeError::Input("Unknown character".into()))
             }
         }
-        Ok(out.join("00"))
+        Ok(out.join("000"))
     }
-
+ 
     fn decode_ditdah(&self, text: &str) -> Result<String,CodeError> {
         let mut out = String::new();
-        for s in text.split(" ") {
+        for s in text.split("  ") {
             match AMERICAN_MAP_INV.get(&s) {
                 Some(code_group) => out.push(*code_group),
                 None => return Err(CodeError::Input("Unknown code group".into()))
@@ -114,10 +114,10 @@ impl MorseAmerican {
         }
         Ok(out)
     }
-
+ 
     fn decode_binary(&self, text: &str) -> Result<String,CodeError> {
         let mut out = String::new();
-        for s in text.split("00") {
+        for s in text.split("000") {
             match AMERICAN_MAP_BINARY_INV.get(&s) {
                 Some(code_group) => out.push(*code_group),
                 None => return Err(CodeError::Input("Unknown code group".into()))
