@@ -1,5 +1,5 @@
 use crate::{cipher_id::CipherID, code_id::CodeID};
-use eframe::{egui::{SidePanel, CentralPanel, ScrollArea, TopBottomPanel, Context, widgets, SelectableLabel, warn_if_debug_build, RichText, FontDefinitions, FontData}, epi, epaint::FontFamily};
+use eframe::{egui::{SidePanel, CentralPanel, ScrollArea, TopBottomPanel, Context, widgets, SelectableLabel, warn_if_debug_build, RichText, FontDefinitions, FontData, Visuals}, epi, epaint::FontFamily};
 //use crate::text_types::PresetAlphabet::*;
 use crate::code_panel::{CodeDisplayPanel,CodeControlPanel};
 use crate::cipher_panel::{CipherDisplayPanel,CipherControlPanel};
@@ -85,7 +85,6 @@ impl ClassicCrypto {
             let cipher_code_subhead = RichText::new("A Note on the Terms Cipher and Code").strong();
             ui.label(cipher_code_subhead);
             ui.label("No strong distinction is made in literature between a 'cipher' and a 'code' in this era. However this project adopts the modern convention that a cipher has a changeable key and a code does not. That is: to understand a cipher one must know both the method as some secret additional information while a code can be read by anyone who knows the method of encoding.");
-            ui.label(format!("{:?}",ctx.fonts().families()));
         });
     }
 
@@ -180,6 +179,7 @@ impl epi::App for ClassicCrypto {
         _storage: Option<&dyn epi::Storage>,
     ) {
         self.configure_font(ctx);
+        Visuals::dark();
     }
 
     fn name(&self) -> &str {
