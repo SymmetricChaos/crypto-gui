@@ -90,7 +90,7 @@ impl MorseITU {
         for s in text.chars() {
             match ITU_MAP.get(&s) {
                 Some(code_group) => out.push(*code_group),
-                None => return Err(CodeError::Input("Unknown character".into()))
+                None => return Err(CodeError::invalid_char(s))
             }
         }
         Ok(out.join(" "))
@@ -101,7 +101,7 @@ impl MorseITU {
         for s in text.chars() {
             match ITU_MAP_BINARY.get(&s) {
                 Some(code_group) => out.push(*code_group),
-                None => return Err(CodeError::Input("Unknown character".into()))
+                None => return Err(CodeError::invalid_char(s))
             }
         }
         Ok(out.join("00"))
@@ -113,7 +113,7 @@ impl MorseITU {
         for s in text.split(" ") {
             match ITU_MAP_INV.get(&s) {
                 Some(code_group) => out.push(*code_group),
-                None => return Err(CodeError::Input("Unknown code group".into()))
+                None => return Err(CodeError::invalid_code_group(s))
             }
         }
         Ok(out)
@@ -124,7 +124,7 @@ impl MorseITU {
         for s in text.split("00") {
             match ITU_MAP_BINARY_INV.get(&s) {
                 Some(code_group) => out.push(*code_group),
-                None => return Err(CodeError::Input("Unknown code group".into()))
+                None => return Err(CodeError::invalid_code_group(s))
             }
         }
         Ok(out)
@@ -149,7 +149,7 @@ impl Code for MorseITU {
 
 
 #[cfg(test)]
-mod morse_tests {
+mod morseitu_tests {
     use super::*;
 
     const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";

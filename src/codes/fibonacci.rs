@@ -131,25 +131,43 @@ impl Code for FibonacciCode {
     fn decode(&self, text: &str) -> Result<String,CodeError> {
         let mut output = String::new();
         let mut buffer = String::with_capacity(self.max_code_len);
-        let mut ctr = 0;
+        let mut prev = '0';
         for b in text.chars() {
             buffer.push(b);
-            ctr += 1;
-            
-            println!("{}",&buffer);
-            if let Some(s) = self.map_inv.get(&buffer) {
-                output.push(*s);
-                buffer.clear();
-                ctr = 0;
+            if prev == '1' && b == '1' {
+                match self.map_inv.get(&buffer) {
+                    Some(s) => {
+                        output.push(*s);
+                        buffer.clear();
+                        prev = '0';
+                        continue
+                    }
+                    None => ()
+                }
             }
-            // If we have an impossible code ignore it and start again, it will eventually
-            // resychronize
-            if ctr == self.max_code_len {
-                buffer.clear();
-                ctr = 0;
-            }
+            prev = b;
         }
         Ok(output)
     }
 }
- 
+
+
+#[cfg(test)]
+mod fibonacci_tests {
+    use super::*;
+
+    const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const ENCODEDTEXT: &'static str = "01100001111101000110000011000111010111000001101010111000111011010001110011001001110110010001101000011000001110000111001011010111011000000111110001101100001111001011001100010011000101101001110111010011";
+
+    #[test]
+    fn encrypt_test() {
+        let code = FibonacciCode::default();
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
+    }
+
+    #[test]
+    fn decrypt_test() {
+        let code = FibonacciCode::default();
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
+    }
+}

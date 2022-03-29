@@ -10,8 +10,8 @@ pub use morse_american::MorseAmerican;
 pub mod godel;
 pub use godel::Godel;
 
-pub mod fibonnaci;
-pub use fibonnaci::FibonacciCode;
+pub mod fibonacci;
+pub use fibonacci::FibonacciCode;
 
 pub mod romaji;
 

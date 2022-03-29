@@ -62,8 +62,7 @@ impl Display for CipherError {
 pub enum CodeError {
     General(String),
     Input(String),
-    Key(String),
-    Alphabet(String),
+    Setting(String),
 }
 
 impl CodeError {
@@ -72,30 +71,21 @@ impl CodeError {
     }
 
 
-    pub fn invalid_input_char(c: char) -> Self {
+    pub fn invalid_char(c: char) -> Self {
         CodeError::Input(format!("invalid character `{c}`, alphabets are case sensitive"))
+    }
+
+    pub fn invalid_code_group(s: &str) -> Self {
+        CodeError::Input(format!("invalid code group `{s}`"))
     }
 
     pub fn input(error: &str) -> Self {
         CodeError::Input(format!("{error}"))
     }
 
-
-    pub fn invalid_key_char(c: char) -> Self {
-        CodeError::Key(format!("invalid character `{c}`, alphabets are case sensitive"))
-    }
-
-    pub fn key(error: &str) -> Self {
-        CodeError::Key(format!("{error}"))
-    }
-
-
-    pub fn invalid_alphabet_char(c: char) -> Self {
-        CodeError::Alphabet(format!("invalid character `{c}`, alphabets are case sensitive"))
-    }
-
-    pub fn alphabet(error: &str) -> Self {
-        CodeError::Alphabet(format!("{error}"))
+    
+    pub fn setting(error: &str) -> Self {
+        CodeError::Setting(format!("{error}"))
     }
 }
 
@@ -104,8 +94,7 @@ impl Display for CodeError {
         let error = match self {
             CodeError::General(e) => format!("Code Error: {e}"),
             CodeError::Input(e) => format!("Input Error: {e}"),
-            CodeError::Key(e) => format!("Key Error: {e}"),
-            CodeError::Alphabet(e) => format!("Alphabet Error: {e}"),
+            CodeError::Setting(e) => format!("Setting Error: {e}"),
         };
         write!(f, "{error}")
     }

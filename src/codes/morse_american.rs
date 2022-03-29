@@ -10,14 +10,21 @@ lazy_static! {
     pub static ref AMERICAN_CODES: [&'static str; 41] = ["·-", "-···", "·· ·", "-··", "·", 
                                                          "·-·", "--·", "····", "··", 
                                                          "-·-·", "-·-", "⸺", "--", "-·", 
-                                                         "· ·", "·····", "··-·", "··-·", "· ··", 
+                                                         "· ·", "·····", "··-·", "· ··", "···", 
                                                          "-", "··-", "···-", "·--", "·-··", 
                                                          "·· ··", "··· ·", "· ···", "·--·", "··-··", 
                                                          "···-·", "····-","---", "······", "--··", 
                                                          "-····", "-··-", "⸻", "·-·-", "··--··", 
                                                          "-··-·", "---·"];
-    pub static ref AMERICAN_CODES_BINARY: [&'static str; 41] = ["101110", "1110101010", "1010010", "11101010", "10", "10111010", "1110111010", "10101010", "1010", "111010111010", "111010111", "11111", "11101110", "111010", "10010", "1010101010", "1010111010", "1010111010", "1001010", "1110", "10101110", "1010101110", "1011101110", "1011101010", "101001010", "101010010", "100101010", "101110111010", "101011101010", "101010111010", "101010101110","111011101110", "101010101010", "111011101010", "111010101010", "111010101110", "1111111", "101110101110", "1010111011101010", "11101010111010", "11101110111010"];
-
+    pub static ref AMERICAN_CODES_BINARY: [&'static str; 41] = ["10111", "111010101", "101001", "1110101", "1", 
+                                                                "1011101", "111011101", "1010101", "101", 
+                                                                "11101011101", "111010111", "11111", "1110111", "11101", 
+                                                                "1001", "101010101", "101011101", "10011", "10101", 
+                                                                "111", "1010111", "101010111", "101110111", "101110101", 
+                                                                "1010011", "10101001", "1001101", "10111011101", "10101110101", 
+                                                                "10101011101", "10101010111","11101110111", "10101010101", "11101110101", 
+                                                                "11101010101", "11101010111", "1111111", "10111010111", "101011101110101", 
+                                                                "1110101011101", "1110111011101"];
     pub static ref AMERICAN_MAP: HashMap<char, &'static str> = {
         let mut m = HashMap::new();
         for (l,c) in LETTERS.chars().zip(AMERICAN_CODES.iter()) {
@@ -51,13 +58,14 @@ lazy_static! {
     };
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum MorseMode {
     DitDah,
     Binary
 }
 
 pub struct MorseAmerican {
-    mode: MorseMode
+    pub mode: MorseMode
 }
 
 impl MorseAmerican {
@@ -87,7 +95,7 @@ impl MorseAmerican {
         for s in text.chars() {
             match AMERICAN_MAP.get(&s) {
                 Some(code_group) => out.push(*code_group),
-                None => return Err(CodeError::Input("Unknown character".into()))
+                None => return Err(CodeError::invalid_char(s))
             }
         }
         Ok(out.join("  "))
@@ -98,7 +106,7 @@ impl MorseAmerican {
         for s in text.chars() {
             match AMERICAN_MAP_BINARY.get(&s) {
                 Some(code_group) => out.push(*code_group),
-                None => return Err(CodeError::Input("Unknown character".into()))
+                None => return Err(CodeError::invalid_char(s))
             }
         }
         Ok(out.join("000"))
@@ -109,7 +117,7 @@ impl MorseAmerican {
         for s in text.split("  ") {
             match AMERICAN_MAP_INV.get(&s) {
                 Some(code_group) => out.push(*code_group),
-                None => return Err(CodeError::Input("Unknown code group".into()))
+                None => return Err(CodeError::invalid_code_group(s))
             }
         }
         Ok(out)
@@ -120,7 +128,7 @@ impl MorseAmerican {
         for s in text.split("000") {
             match AMERICAN_MAP_BINARY_INV.get(&s) {
                 Some(code_group) => out.push(*code_group),
-                None => return Err(CodeError::Input("Unknown code group".into()))
+                None => return Err(CodeError::invalid_code_group(s))
             }
         }
         Ok(out)
@@ -140,5 +148,40 @@ impl Code for MorseAmerican {
             MorseMode::DitDah => self.decode_ditdah(text),
             MorseMode::Binary => self.decode_binary(text),
         }
+    }
+}
+
+#[cfg(test)]
+mod morseamerican_tests {
+    use super::*;
+
+    const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CIPHERTEXT_DITDAH: &'static str = "-  ····  ·  ··-·  ··-  ··  ·· ·  -·-  -···  · ··  · ·  ·--  -·  ·-·  · ·  ·-··  -·-·  ··-  --  ·····  ···  · ·  ···-  ·  · ··  -  ····  ·  ⸺  ·-  ··· ·  ·· ··  -··  · ·  --·";
+    const CIPHERTEXT_BINARY: &'static str = "1110001010101000100010101110100010101110001010001010010001110101110001110101010001001100010010001011101110001110100010111010001001000101110101000111010111010001010111000111011100010101010100010101000100100010101011100010001001100011100010101010001000111110001011100010101001000101001100011101010001001000111011101";
+
+    #[test]
+    fn encrypt_test() {
+        let code = MorseAmerican::default();
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT_DITDAH);
+    }
+
+    #[test]
+    fn decrypt_test() {
+        let code = MorseAmerican::default();
+        assert_eq!(code.decode(CIPHERTEXT_DITDAH).unwrap(), PLAINTEXT);
+    }
+
+    #[test]
+    fn encrypt_test_binary() {
+        let mut code = MorseAmerican::default();
+        code.mode = MorseMode::Binary;
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT_BINARY);
+    }
+
+    #[test]
+    fn decrypt_test_binary() {
+        let mut code = MorseAmerican::default();
+        code.mode = MorseMode::Binary;
+        assert_eq!(code.decode(CIPHERTEXT_BINARY).unwrap(), PLAINTEXT);
     }
 }
