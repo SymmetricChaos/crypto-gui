@@ -77,7 +77,7 @@ impl CodeControlPanel {
             CodeID::Godel => self.godel.ui(ui),
             CodeID::Fibonacci => self.fibonacci.ui(ui),
             CodeID::MorseAmerican => self.morse_american.ui(ui),
-            //_ => { ui.label("IN PROGRESS"); },
+            _ => { ui.label("IN PROGRESS"); },
         }
     }
 }
@@ -109,7 +109,7 @@ impl CodeDisplayPanel {
             CodeID::MorseAmerican => encode_decode(ui, &control_panel.morse_american, input, output, errors),
             CodeID::Godel => encode_decode(ui, &control_panel.godel, input, output, errors),
             CodeID::Fibonacci => encode_decode(ui, &control_panel.fibonacci, input, output, errors),
-            //_ => { *errors = String::from("button must be added to DisplayPanel struct") }
+            _ => { *errors = String::from("button must be added to DisplayPanel struct") }
         }
 
         ui.add_space(10.0);
