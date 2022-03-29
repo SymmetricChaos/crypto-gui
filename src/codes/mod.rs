@@ -15,6 +15,9 @@ pub use fibonnaci::FibonacciCode;
 
 pub mod romaji;
 
+
+pub mod elias;
+
 use crate::errors::CodeError;
 
 pub trait Code {

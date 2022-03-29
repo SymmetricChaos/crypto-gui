@@ -5,6 +5,9 @@ use crate::errors::CodeError;
 use super::Code;
 
 // https://en.wikipedia.org/wiki/Levenshtein_coding
+
+
+
 pub struct LevenshteinCode {
     map: HashMap<char, String>,
     map_inv: HashMap<String, char>,
