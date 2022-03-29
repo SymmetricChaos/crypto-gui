@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 
-#[derive(Debug,Clone)]
+#[derive(Debug,Clone,PartialEq)]
 pub enum CipherError {
     General(String),
     Input(String),
@@ -58,7 +58,7 @@ impl Display for CipherError {
 
 
 
-#[derive(Debug,Clone)]
+#[derive(Debug,Clone,PartialEq)]
 pub enum CodeError {
     General(String),
     Input(String),
