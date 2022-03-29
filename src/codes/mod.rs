@@ -15,6 +15,7 @@ pub use fibonacci::FibonacciCode;
 
 pub mod romaji;
 
+pub mod unary;
 
 pub mod elias;
 
