@@ -1,6 +1,6 @@
 use crate::{cipher_id::CipherID, code_id::CodeID};
 use eframe::{egui::{SidePanel, CentralPanel, ScrollArea, TopBottomPanel, Context, widgets, SelectableLabel, warn_if_debug_build, RichText, FontDefinitions, FontData, Visuals}, epi, epaint::FontFamily};
-//use crate::text_types::PresetAlphabet::*;
+use rand::{prelude::StdRng, SeedableRng};
 use crate::code_panel::{CodeDisplayPanel,CodeControlPanel};
 use crate::cipher_panel::{CipherDisplayPanel,CipherControlPanel};
 
@@ -21,8 +21,8 @@ pub struct ClassicCrypto {
     errors: String,
     active_cipher: CipherID,
     active_code: CodeID,
-    //show_alphabet_selector: bool,
     active_page: Page,
+    rng: StdRng,
 }
 
 
@@ -38,8 +38,8 @@ impl Default for ClassicCrypto {
             errors: String::new(),
             active_cipher: CipherID::default(),
             active_code: CodeID::default(),
-            //show_alphabet_selector: false,
             active_page: Page::About,
+            rng: StdRng::from_entropy(),
         }
     }
 }
@@ -51,7 +51,7 @@ impl ClassicCrypto {
         });
         CentralPanel::default().show(ctx, |ui| {
             ScrollArea::vertical().show(ui, |ui| {
-                self.cipher_control_panel.ui(ui, &mut self.active_cipher)
+                self.cipher_control_panel.ui(ui, &mut self.active_cipher, &mut self.rng)
             });
         });
     }

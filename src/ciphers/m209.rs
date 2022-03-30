@@ -1,4 +1,4 @@
-use rand::prelude::ThreadRng;
+use rand::prelude::StdRng;
 use rand::Fill;
 use super::Cipher;
 use crate::text_functions::{random_char_vec};
@@ -275,7 +275,7 @@ impl Cipher for M209 {
         self.encrypt(text)
     }
 
-    fn randomize(&mut self, rng: &mut ThreadRng) {
+    fn randomize(&mut self, rng: &mut StdRng) {
         // Fill up an array with random bytes. Then map that to pairs of usize.
         // Unwrap here is justified by the fixed sizes of everything involved.
         let mut data = [0u8; 54];

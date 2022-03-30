@@ -1,4 +1,4 @@
-use rand::{Rng, prelude::{ThreadRng, StdRng}, SeedableRng};
+use rand::{Rng, prelude::StdRng, SeedableRng};
 use super::Cipher;
 use crate::{errors::CipherError, grid::{Grid, Symbol}, text_types::PresetAlphabet};
 
@@ -97,7 +97,7 @@ impl Cipher for Grille {
         *self = Self::default();
     }
  
-    fn randomize(&mut self, rng: &mut ThreadRng) {
+    fn randomize(&mut self, rng: &mut StdRng) {
         for cell in self.grid.get_rows_mut() {
             if rng.gen_bool(0.5) {
                 *cell = Symbol::Empty;

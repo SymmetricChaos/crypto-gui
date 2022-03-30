@@ -2,7 +2,8 @@ use eframe::egui::{TextStyle, TextEdit};
 use super::View;
 use super::generic_components::*;
 use crate::ciphers::Grille;
- 
+use eframe::egui::Ui;
+use rand::prelude::StdRng;
  
 fn cell_button(grille: &mut Grille, x: usize, y: usize, ui: &mut eframe::egui::Ui) {
     let cell = grille.grid[(x,y)];
@@ -16,9 +17,9 @@ fn cell_button(grille: &mut Grille, x: usize, y: usize, ui: &mut eframe::egui::U
 }
  
 impl View for Grille {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui) {
+    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng) {
  
-        randomize_reset(ui, self);
+        randomize_reset(ui, self, rng);
         ui.add_space(16.0);
  
         ui.add_space(16.0);

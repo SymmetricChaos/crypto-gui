@@ -3,12 +3,13 @@ use eframe::egui::TextStyle;
 use super::View;
 use super::generic_components::*;
 use crate::ciphers::GeneralSubstitution;
-
+use eframe::egui::Ui;
+use rand::prelude::StdRng;
 
 impl View for GeneralSubstitution {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui) {
+    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng) {
 
-        randomize_reset(ui, self);
+        randomize_reset(ui, self, rng);
         ui.add_space(16.0);
 
         ui.add_space(16.0);

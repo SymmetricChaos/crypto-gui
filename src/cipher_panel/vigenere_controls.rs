@@ -1,12 +1,12 @@
-use eframe::egui::{TextEdit, TextStyle, Slider};
-use crate::ciphers::{Vigenere, PolyMode::*};
-use super::{View, generic_components::*};
-
+use eframe::egui::Ui;
+use rand::prelude::StdRng;
+use super::{generic_components::*, View};
+use crate::ciphers::{PolyMode::*, Vigenere};
+use eframe::egui::{Slider, TextEdit, TextStyle};
 
 impl View for Vigenere {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui) {
-
-        randomize_reset(ui, self);
+    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng) {
+        randomize_reset(ui, self, rng);
         ui.add_space(16.0);
 
         input_alphabet(ui, self);
@@ -22,7 +22,7 @@ impl View for Vigenere {
         if self.mode == ProgKey {
             ui.add_space(16.0);
             ui.label("Step size");
-            let alpha_range = 0..=((self.alphabet_len()-1));
+            let alpha_range = 0..=(self.alphabet_len() - 1);
             ui.add(Slider::new(&mut self.prog_shift, alpha_range));
             ui.add_space(16.0);
         }
@@ -38,14 +38,14 @@ impl View for Vigenere {
                 ui.add(TextEdit::singleline(&mut self.key_words[2]).font(TextStyle::Monospace));
                 ui.add(TextEdit::singleline(&mut self.key_words[3]).font(TextStyle::Monospace));
                 ui.add(TextEdit::singleline(&mut self.key_words[4]).font(TextStyle::Monospace));
-            },
+            }
             false => {
                 ui.horizontal(|ui| {
                     ui.label("Key Word ");
                     ui.checkbox(&mut self.multikey, "Multikey");
                 });
                 ui.add(TextEdit::singleline(&mut self.key_words[0]).font(TextStyle::Monospace));
-            },
+            }
         }
     }
 }

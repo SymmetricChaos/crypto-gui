@@ -1,4 +1,4 @@
-use rand::{prelude::{ThreadRng, SliceRandom}, Rng};
+use rand::{prelude::{StdRng, SliceRandom}, Rng};
 use super::Cipher;
 use crate::text_types::{PresetAlphabet::*};
 use crate::errors::CipherError;
@@ -39,7 +39,7 @@ pub struct M94 {
 }
 
 impl M94 {
-    pub fn randomize_wheels(&mut self, rng: &mut ThreadRng) {
+    pub fn randomize_wheels(&mut self, rng: &mut StdRng) {
         self.wheels.shuffle(rng);
     }
 }
@@ -82,7 +82,7 @@ impl Cipher for M94 {
         Ok(out)
     }
 
-    fn randomize(&mut self, rng: &mut ThreadRng) {
+    fn randomize(&mut self, rng: &mut StdRng) {
         self.wheels.shuffle(rng);
         self.offset = rng.gen_range(1..25);
     }

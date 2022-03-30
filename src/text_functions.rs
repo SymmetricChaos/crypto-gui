@@ -1,16 +1,16 @@
 use itertools::Itertools;
-use rand::prelude::{ThreadRng, SliceRandom, IteratorRandom};
+use rand::prelude::{StdRng, SliceRandom, IteratorRandom};
 use crate::{errors::CipherError, text_types::PresetAlphabet};
 
 
-pub fn shuffled_str(s: &str, rng: &mut ThreadRng) -> String {
+pub fn shuffled_str(s: &str, rng: &mut StdRng) -> String {
     let mut characters = s.chars().collect::<Vec<char>>();
     let slice = characters.as_mut_slice();
     slice.shuffle(rng);
     slice.iter().map(|x| *x).collect::<String>()
 }
 
-pub fn random_sample_replace(s: &str, n: usize, rng: &mut ThreadRng) -> String {
+pub fn random_sample_replace(s: &str, n: usize, rng: &mut StdRng) -> String {
     let mut out = String::with_capacity(n);
     for _ in 0..n {
         out.push(s.chars().choose(rng).unwrap())
@@ -18,7 +18,7 @@ pub fn random_sample_replace(s: &str, n: usize, rng: &mut ThreadRng) -> String {
     out
 }
 
-pub fn random_char_vec(s: &str, n: usize, rng: &mut ThreadRng) -> Vec<char> {
+pub fn random_char_vec(s: &str, n: usize, rng: &mut StdRng) -> Vec<char> {
     s.chars().choose_multiple(rng, n)
 }
 

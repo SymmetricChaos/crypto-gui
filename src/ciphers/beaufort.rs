@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use rand::prelude::ThreadRng;
+use rand::prelude::{StdRng};
 use super::{Cipher, PolyMode};
 use crate::text_functions::random_sample_replace;
 use crate::errors::CipherError;
@@ -214,7 +214,7 @@ impl Cipher for Beaufort {
         }
     }
 
-    fn randomize(&mut self, rng: &mut ThreadRng) {
+    fn randomize(&mut self, rng: &mut StdRng) {
         self.key_words[0] = random_sample_replace(&self.alphabet, 3, rng);
         self.key_words[1] = random_sample_replace(&self.alphabet, 5, rng);
         self.key_words[2] = random_sample_replace(&self.alphabet, 7, rng);

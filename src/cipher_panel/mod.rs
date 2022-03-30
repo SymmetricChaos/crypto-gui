@@ -1,5 +1,6 @@
 use crate::cipher_id::CipherID;
 use eframe::egui::{self, TextEdit, TextStyle, RichText, Color32};
+use rand::prelude::StdRng;
 use crate::ciphers::*;
 use self::generic_components::encrypt_decrypt;
 
@@ -24,7 +25,7 @@ pub mod grille_controls;
 pub mod sigaba_controls;
 
 pub trait View {
-    fn ui(&mut self, ui: &mut egui::Ui);
+    fn ui(&mut self, ui: &mut egui::Ui, rng: &mut StdRng);
 }
 
 fn combox_box(ciphers: &[CipherID], identifier: &'static str, active_cipher: &mut CipherID, ui: &mut egui::Ui) {
@@ -67,7 +68,7 @@ pub struct CipherControlPanel {
 
 
 impl CipherControlPanel {
-    pub fn ui(&mut self, ui: &mut egui::Ui, active_cipher: &mut CipherID) {
+    pub fn ui(&mut self, ui: &mut egui::Ui, active_cipher: &mut CipherID, rng: &mut StdRng) {
         
         egui::Grid::new("comboboxes").show(ui, |ui| {
             combox_box(
@@ -124,24 +125,24 @@ impl CipherControlPanel {
         ui.add_space(16.0);
 
         match active_cipher {
-            CipherID::Caesar => self.caesar.ui(ui),
-            CipherID::Affine => self.affine.ui(ui),
-            CipherID::Decoder => self.decoder_ring.ui(ui),
-            CipherID::Substitution => self.gen_sub.ui(ui),
-            CipherID::Polybius => self.polybius.ui(ui),
-            CipherID::Vigenere => self.vigenere.ui(ui),
-            CipherID::Beaufort => self.beaufort.ui(ui),
-            CipherID::M209 => self.m209.ui(ui),
-            CipherID::M94 => self.m94.ui(ui),
-            CipherID::Alberti => self.alberti.ui(ui),
-            CipherID::Playfair => self.playfair.ui(ui),
-            CipherID::Columnar => self.columnar.ui(ui),
-            CipherID::ADFGVX => self.adfgvx.ui(ui),
-            CipherID::B64 => self.b64.ui(ui),
-            CipherID::Slidefair => self.slidefair.ui(ui),
-            CipherID::Enigma => self.enigma.ui(ui),
-            CipherID::Grille => self.grille.ui(ui),
-            CipherID::SIGABA => self.sigaba.ui(ui),
+            CipherID::Caesar => self.caesar.ui(ui, rng),
+            CipherID::Affine => self.affine.ui(ui, rng),
+            CipherID::Decoder => self.decoder_ring.ui(ui, rng),
+            CipherID::Substitution => self.gen_sub.ui(ui, rng),
+            CipherID::Polybius => self.polybius.ui(ui, rng),
+            CipherID::Vigenere => self.vigenere.ui(ui, rng),
+            CipherID::Beaufort => self.beaufort.ui(ui, rng),
+            CipherID::M209 => self.m209.ui(ui, rng),
+            CipherID::M94 => self.m94.ui(ui, rng),
+            CipherID::Alberti => self.alberti.ui(ui, rng),
+            CipherID::Playfair => self.playfair.ui(ui, rng),
+            CipherID::Columnar => self.columnar.ui(ui, rng),
+            CipherID::ADFGVX => self.adfgvx.ui(ui, rng),
+            CipherID::B64 => self.b64.ui(ui, rng),
+            CipherID::Slidefair => self.slidefair.ui(ui, rng),
+            CipherID::Enigma => self.enigma.ui(ui, rng),
+            CipherID::Grille => self.grille.ui(ui, rng),
+            CipherID::SIGABA => self.sigaba.ui(ui, rng),
             _ => { ui.label("IN PROGRESS"); },
         }
     }

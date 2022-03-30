@@ -1,4 +1,4 @@
-use rand::prelude::ThreadRng;
+use rand::prelude::StdRng;
 use crate::{ciphers::{Polybius,Columnar}, errors::CipherError};
 use crate::text_types::{PresetAlphabet::*, PresetAlphabet};
 use super::Cipher;
@@ -50,7 +50,7 @@ impl Cipher for ADFGVX {
         Ok(poly_text)
     }
  
-    fn randomize(&mut self, rng: &mut ThreadRng) {
+    fn randomize(&mut self, rng: &mut StdRng) {
         self.polybius.randomize(rng);
         self.columnar.randomize(rng);
     }

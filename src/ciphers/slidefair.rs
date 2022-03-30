@@ -1,6 +1,6 @@
 use std::fmt;
 
-use rand::prelude::ThreadRng;
+use rand::prelude::StdRng;
 use super::Cipher;
 use crate::text_types::{PresetAlphabet::*, Alphabet};
 use crate::{errors::CipherError, text_functions::shuffled_str};
@@ -119,7 +119,7 @@ impl Cipher for Slidefair {
         Ok(out)
     }
 
-    fn randomize(&mut self, rng: &mut ThreadRng) {
+    fn randomize(&mut self, rng: &mut StdRng) {
         self.alphabet = Alphabet::from(shuffled_str(&self.alphabet.slice(), rng))
     }
 

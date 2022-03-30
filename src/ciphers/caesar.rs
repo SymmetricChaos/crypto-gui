@@ -1,4 +1,4 @@
-use rand::{Rng, prelude::ThreadRng};
+use rand::{Rng, prelude::StdRng};
 use crate::{errors::{CipherError}, text_types::Alphabet};
 use super::Cipher;
 use crate::text_types::{PresetAlphabet::*};
@@ -47,7 +47,7 @@ impl Cipher for Caesar {
 
     }
 
-    fn randomize(&mut self, rng: &mut ThreadRng) {
+    fn randomize(&mut self, rng: &mut StdRng) {
         self.shift = rng.gen_range(0..self.alphabet.len()) as i32;
     }
 

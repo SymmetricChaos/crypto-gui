@@ -1,4 +1,5 @@
-use eframe::egui::{RichText, TextEdit};
+use eframe::egui::{RichText, TextEdit, Ui};
+use rand::prelude::StdRng;
 
 use super::View;
 use super::generic_components::*;
@@ -6,9 +7,9 @@ use crate::ciphers::B64;
 
 
 impl View for B64 {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui) {
+    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng) {
 
-        randomize_reset(ui, self);
+        randomize_reset(ui, self, rng);
         ui.add_space(16.0);
 
         ui.label("Polybius Key Word");

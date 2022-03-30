@@ -1,6 +1,6 @@
 use crate::{errors::CipherError, text_types::PresetAlphabet, ciphers::Cipher};
 use super::{ROTOR_MAP,REFLECTORS,Rotor,Reflector,Plugboard,char_to_usize,usize_to_char};
-use rand::prelude::ThreadRng;
+use rand::prelude::StdRng;
  
  
  
@@ -83,7 +83,7 @@ impl Cipher for EnigmaM3 {
         self.encrypt(text)
     }
 
-    fn randomize(&mut self, rng: &mut ThreadRng) {
+    fn randomize(&mut self, rng: &mut StdRng) {
         todo!("{:?}",rng)
     }
 

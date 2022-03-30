@@ -1,4 +1,5 @@
-use eframe::egui::{RichText, Slider, ComboBox};
+use eframe::egui::{RichText, Slider, ComboBox, Ui};
+use rand::prelude::StdRng;
 use super::View;
 use crate::ciphers::{Sigaba, sigaba::{CIPHER_ROTOR_VEC, CONTROL_ROTOR_VEC, Rotor}};
 
@@ -19,7 +20,7 @@ fn rotor_display(ui: &mut eframe::egui::Ui, rotors: &mut [Rotor]) {
 }
 
 impl View for Sigaba {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui) {
+    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng) {
 
         if ui.button("Reset").clicked() {
             self.reset()

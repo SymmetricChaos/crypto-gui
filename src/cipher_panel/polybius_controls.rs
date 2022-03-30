@@ -1,5 +1,6 @@
-use eframe::egui::TextEdit;
+use eframe::egui::{TextEdit, Ui};
 use eframe::egui::{RichText, Color32};
+use rand::prelude::StdRng;
 
 use super::View;
 use super::generic_components::*;
@@ -9,9 +10,9 @@ use crate::text_types::{PresetAlphabet::*};
 
 
 impl View for Polybius {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui) {
+    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng) {
 
-        randomize_reset(ui, self);
+        randomize_reset(ui, self, rng);
         ui.add_space(16.0);
 
         ui.label("Select Alphabet");

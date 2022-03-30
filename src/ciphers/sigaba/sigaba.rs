@@ -255,7 +255,7 @@ impl Cipher for Sigaba {
         Ok(nums.iter().map(|n| usize_to_char(*n)).collect())
     }
 
-    fn randomize(&mut self, rng: &mut rand::prelude::ThreadRng) {
+    fn randomize(&mut self, rng: &mut rand::prelude::StdRng) {
         todo!("{:?}",rng)
     }
 

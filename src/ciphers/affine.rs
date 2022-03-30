@@ -1,8 +1,8 @@
 use super::Cipher;
-use crate::{errors::CipherError};
-use crate::text_types::{PresetAlphabet::*};
+use crate::errors::CipherError;
+use crate::text_types::PresetAlphabet::*;
 use crate::math_functions::mul_inv;
-use rand::{prelude::ThreadRng, Rng};
+use rand::{prelude::StdRng, Rng};
 
 pub struct Affine {
     pub add_key: usize,
@@ -78,7 +78,7 @@ impl Cipher for Affine {
         Ok(out)
     }
 
-    fn randomize(&mut self, rng: &mut ThreadRng) {
+    fn randomize(&mut self, rng: &mut StdRng) {
         let length = self.alphabet.len();
         self.add_key = rng.gen_range(0..length);
         loop {

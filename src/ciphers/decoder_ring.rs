@@ -1,4 +1,4 @@
-use rand::{Rng, prelude::ThreadRng};
+use rand::{Rng, prelude::StdRng};
 use super::Cipher;
 use crate::errors::CipherError;
 
@@ -77,7 +77,7 @@ impl Cipher for DecoderRing {
         Ok(out)
     }
 
-    fn randomize(&mut self, rng: &mut ThreadRng) {
+    fn randomize(&mut self, rng: &mut StdRng) {
         self.index = rng.gen_range(0..self.alphabet.len());
     }
 

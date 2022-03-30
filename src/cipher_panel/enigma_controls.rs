@@ -1,6 +1,8 @@
 use eframe::egui::{RichText, Slider, ComboBox, Label};
 use super::View;
 use crate::ciphers::{EnigmaM3, enigma::{ROTOR_VEC,REFLECTORS}};
+use eframe::egui::Ui;
+use rand::prelude::StdRng;
 
 // fn rotor_selector(ciphers: &[Rotor], identifier: &'static str, ui: &mut Ui) {
 //     ComboBox::from_id_source(identifier)
@@ -14,7 +16,7 @@ use crate::ciphers::{EnigmaM3, enigma::{ROTOR_VEC,REFLECTORS}};
 // }
 
 impl View for EnigmaM3 {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui) {
+    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng) {
  
         ui.label("Rotor Positions\nTo Be Changed Every Message");
         for rotor in &mut self.state.rotors {

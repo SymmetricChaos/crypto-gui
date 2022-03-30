@@ -1,4 +1,6 @@
+use eframe::egui::Ui;
 use eframe::egui::{RichText, TextEdit};
+use rand::prelude::StdRng;
 
 use super::View;
 use super::generic_components::*;
@@ -7,9 +9,9 @@ use crate::text_types::{PresetAlphabet::*};
 
 
 impl View for ADFGVX {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui) {
+    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng) {
 
-        randomize_reset(ui, self);
+        randomize_reset(ui, self, rng);
         ui.add_space(16.0);
 
         ui.label("Select Mode");

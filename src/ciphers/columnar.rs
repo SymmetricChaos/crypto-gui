@@ -1,5 +1,5 @@
 use num::Integer;
-use rand::prelude::ThreadRng;
+use rand::prelude::StdRng;
 
 use crate::errors::CipherError;
 use crate::grid::{Grid, Symbol};
@@ -82,7 +82,7 @@ impl Cipher for Columnar {
     }
 
 
-    fn randomize(&mut self, rng: &mut ThreadRng) {
+    fn randomize(&mut self, rng: &mut StdRng) {
         self.key_word = random_sample_replace(&self.alphabet, 11, rng);
         self.key = rank_str(&self.key_word, &self.alphabet);
     }

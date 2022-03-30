@@ -1,6 +1,6 @@
 use std::fmt;
 use num::integer::Roots;
-use rand::prelude::ThreadRng;
+use rand::prelude::StdRng;
 use super::Cipher;
 use crate::{errors::CipherError, text_functions::shuffled_str};
 use crate::text_functions::{keyed_alphabet};
@@ -137,7 +137,7 @@ impl Cipher for Playfair {
         Ok(out)
     }
 
-    fn randomize(&mut self, rng: &mut ThreadRng) {
+    fn randomize(&mut self, rng: &mut StdRng) {
         self.alphabet = shuffled_str(&self.alphabet, rng)
     }
 

@@ -1,16 +1,16 @@
 use eframe::egui;
 use eframe::egui::Slider;
-use rand::prelude::ThreadRng;
+use rand::prelude::StdRng;
 use super::View;
 use super::generic_components::*;
 use crate::ciphers::M94;
-
+use eframe::egui::Ui;
 
 
 impl View for M94 {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui) {
+    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng) {
 
-        randomize_reset(ui, self);
+        randomize_reset(ui, self, rng);
         ui.add_space(16.0);
 
         ui.label("Alphabet");
@@ -23,8 +23,7 @@ impl View for M94 {
         ui.add_space(16.0);
 
         if ui.button("Randomize Wheels").clicked() {
-            let mut rng = ThreadRng::default();
-            self.randomize_wheels(&mut rng);
+            self.randomize_wheels(rng);
         }
 
         ui.label("Wheels");

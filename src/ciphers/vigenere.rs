@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use rand::prelude::ThreadRng;
+use rand::prelude::StdRng;
 use super::{Cipher, PolyMode};
 use crate::text_functions::random_sample_replace;
 use crate::text_types::{PresetAlphabet, Alphabet};
@@ -198,7 +198,7 @@ impl Cipher for Vigenere {
         }
     }
 
-    fn randomize(&mut self, rng: &mut ThreadRng) {
+    fn randomize(&mut self, rng: &mut StdRng) {
         self.key_words[0] = random_sample_replace(&self.alphabet.inner, 3, rng);
         self.key_words[1] = random_sample_replace(&self.alphabet.inner, 4, rng);
         self.key_words[2] = random_sample_replace(&self.alphabet.inner, 5, rng);

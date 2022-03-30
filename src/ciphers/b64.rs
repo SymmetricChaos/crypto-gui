@@ -1,6 +1,6 @@
-use rand::prelude::ThreadRng;
+use rand::prelude::{StdRng};
 use crate::{ciphers::{Polybius,Columnar}, errors::CipherError};
-use crate::text_types::{PresetAlphabet::*};
+use crate::text_types::PresetAlphabet::*;
 use super::Cipher;
  
 pub struct B64 {
@@ -39,7 +39,7 @@ impl Cipher for B64 {
         Ok(t4)
     }
  
-    fn randomize(&mut self, rng: &mut ThreadRng) {
+    fn randomize(&mut self, rng: &mut StdRng) {
         self.polybius.randomize(rng);
         self.columnar1.randomize(rng);
         self.columnar2.randomize(rng);

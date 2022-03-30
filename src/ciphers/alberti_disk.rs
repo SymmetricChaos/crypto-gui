@@ -1,5 +1,5 @@
 use std::fmt::Display;
-use rand::{prelude::ThreadRng, Rng};
+use rand::{prelude::StdRng, Rng};
 use crate::errors::CipherError;
 use crate::text_types::{PresetAlphabet::*};
 use super::Cipher;
@@ -72,7 +72,7 @@ impl Cipher for Alberti {
         Ok(out)
     }
 
-    fn randomize(&mut self, rng: &mut ThreadRng) {
+    fn randomize(&mut self, rng: &mut StdRng) {
         let length = self.moving_alphabet.len();
         self.start_index = rng.gen_range(0..length);
     }

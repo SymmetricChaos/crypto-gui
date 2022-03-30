@@ -1,12 +1,14 @@
 use eframe::egui::Slider;
+use eframe::egui::Ui;
+use rand::prelude::StdRng;
 use super::View;
 use super::generic_components::*;
 use crate::ciphers::DecoderRing;
 
 impl View for DecoderRing {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui) {
+    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng) {
 
-        randomize_reset(ui, self);
+        randomize_reset(ui, self, rng);
         ui.add_space(16.0);
 
         input_alphabet(ui, self);

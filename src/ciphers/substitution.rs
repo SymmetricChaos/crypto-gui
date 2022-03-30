@@ -1,4 +1,4 @@
-use rand::prelude::ThreadRng;
+use rand::prelude::StdRng;
 use crate::text_functions::{shuffled_str, dedup_alphabet};
 use super::Cipher;
 use crate::errors::CipherError;
@@ -58,7 +58,7 @@ impl Cipher for GeneralSubstitution {
         Ok(out)
     }
 
-    fn randomize(&mut self, rng: &mut ThreadRng) {
+    fn randomize(&mut self, rng: &mut StdRng) {
         self.alphabet2 = shuffled_str(&self.alphabet1, rng);
     }
 

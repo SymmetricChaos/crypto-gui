@@ -1,16 +1,17 @@
-use eframe::egui::{TextEdit, TextStyle};
+use eframe::egui::{TextEdit, TextStyle, Ui};
 use eframe::egui::{RichText,Color32};
+use rand::prelude::StdRng;
 
 use super::View;
 use super::generic_components::*;
 use crate::ciphers::Cipher;
 use crate::ciphers::Playfair;
-use crate::text_types::{PresetAlphabet::*};
+use crate::text_types::PresetAlphabet::*;
 
 impl View for Playfair {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui) {
+    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng) {
 
-        randomize_reset(ui, self);
+        randomize_reset(ui, self, rng);
         ui.add_space(16.0);
         
         ui.label("Select Alphabet");
