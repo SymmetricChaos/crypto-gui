@@ -6,6 +6,7 @@ pub struct Grille {
     pub null_alphabet: String,
     pub grid: Grid,
     pub seed: Option<u64>,
+    pub use_nulls: bool,
 }
 
 impl Grille {
@@ -31,6 +32,7 @@ impl Default for Grille {
             null_alphabet: String::from(PresetAlphabet::BasicLatin),
             grid: Grid::new_empty(8, 8),
             seed: None,
+            use_nulls: true
         }
     }
 }
