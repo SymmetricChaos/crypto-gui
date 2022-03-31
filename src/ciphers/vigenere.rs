@@ -9,7 +9,7 @@ use crate::errors::CipherError;
 
 pub struct Vigenere {
     pub key_words: [String; 5],
-    alphabet: Alphabet,
+    pub alphabet: Alphabet,
     pub prog_shift: usize,
     pub mode: PolyMode,
     pub multikey: bool,
@@ -206,18 +206,6 @@ impl Cipher for Vigenere {
         self.key_words[4] = String::new();
     }
 
-    fn validate_settings(&self) -> Result<(), CipherError> {
-        todo!()
-    }
-
-    fn get_mut_input_alphabet(&mut self) -> &mut String {
-        &mut self.alphabet.inner
-    }
-
-    fn get_input_alphabet(&self) -> &String {
-        &self.alphabet.inner
-    }
-    
     fn reset(&mut self) {
         *self = Self::default();
     }

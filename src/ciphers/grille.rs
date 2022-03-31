@@ -87,14 +87,6 @@ impl Cipher for Grille {
         Ok(out)
     }
  
-    fn get_input_alphabet(&self) -> &String {
-        unimplemented!("all characters are accepted, only the null alphabet can be changed")
-    }
- 
-    fn get_mut_input_alphabet(&mut self) -> &mut String {
-        unimplemented!("all characters are accepted, only the null alphabet can be changed")
-    }
- 
     fn reset(&mut self) {
         *self = Self::default();
     }
@@ -107,10 +99,6 @@ impl Cipher for Grille {
                 *cell = Symbol::Blocked;
             }
         }
-    }
- 
-    fn validate_settings(&self) -> Result<(), CipherError> {
-        todo!()
     }
 }
 

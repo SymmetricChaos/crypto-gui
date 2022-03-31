@@ -81,18 +81,6 @@ impl Cipher for DecoderRing {
         self.index = rng.gen_range(0..self.alphabet.len());
     }
 
-    fn get_input_alphabet(&self) -> &String {
-        &self.alphabet
-    }
-
-    fn get_mut_input_alphabet(&mut self) -> &mut String {
-        &mut self.alphabet
-    }
-
-    fn validate_settings(&self) -> Result<(), CipherError> {
-        todo!()
-    }
-
     fn reset(&mut self) {
         *self = Self::default();
     }

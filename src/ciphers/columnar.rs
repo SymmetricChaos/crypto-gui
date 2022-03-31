@@ -8,7 +8,7 @@ use super::Cipher;
 use crate::text_types::{PresetAlphabet::*};
 
 pub struct Columnar {
-    alphabet: String,
+    pub alphabet: String,
     key: Vec<usize>,
     key_word: String,
 }
@@ -85,18 +85,6 @@ impl Cipher for Columnar {
     fn randomize(&mut self, rng: &mut StdRng) {
         self.key_word = random_sample_replace(&self.alphabet, 11, rng);
         self.key = rank_str(&self.key_word, &self.alphabet);
-    }
-
-    fn get_mut_input_alphabet(&mut self) -> &mut String {
-        &mut self.alphabet
-    }
-
-    fn get_input_alphabet(&self) -> &String {
-        &self.alphabet
-    }
-
-    fn validate_settings(&self) -> Result<(), CipherError> {
-        todo!()
     }
 
     fn reset(&mut self) {

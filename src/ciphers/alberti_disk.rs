@@ -77,18 +77,6 @@ impl Cipher for Alberti {
         self.start_index = rng.gen_range(0..length);
     }
 
-    fn get_input_alphabet(&self) -> &String {
-        &self.fixed_alphabet
-    }
-
-    fn get_mut_input_alphabet(&mut self) -> &mut String {
-        &mut self.fixed_alphabet
-    }
-
-    fn validate_settings(&self) -> Result<(), CipherError> {
-        todo!()
-    }
-
     fn reset(&mut self) {
         *self = Self::default();
     }

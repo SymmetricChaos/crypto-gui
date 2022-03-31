@@ -8,7 +8,7 @@ use crate::text_functions::{validate_alphabet, keyed_alphabet};
 use crate::text_types::{PresetAlphabet::*, PresetAlphabet};
 
 pub struct Polybius {
-    alphabet: String,
+    pub alphabet: String,
     inner_alphabet: String,
     labels: String,
     grid_side_len: usize,
@@ -76,6 +76,11 @@ impl Polybius {
         let num = y*self.grid_side_len + x;
         self.alphabet.chars().nth(num).unwrap()
     }
+
+    fn _validate_settings(&self) -> Result<(), CipherError> {
+        validate_alphabet(&self.alphabet)?;
+        Ok(())
+    }
 }
 
 impl Default for Polybius {
@@ -113,20 +118,7 @@ impl Cipher for Polybius {
     fn randomize(&mut self, rng: &mut StdRng) {
         self.key_word = shuffled_str(&self.inner_alphabet, rng)
     }
-
-    fn get_input_alphabet(&self) -> &String {
-        &self.alphabet
-    }
-
-    fn get_mut_input_alphabet(&mut self) -> &mut String {
-        &mut self.alphabet
-    }
     
-    fn validate_settings(&self) -> Result<(), CipherError> {
-        validate_alphabet(&self.alphabet)?;
-        Ok(())
-    }
-
     fn reset(&mut self) {
         *self = Self::default();
     }

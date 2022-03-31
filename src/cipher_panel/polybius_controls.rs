@@ -4,7 +4,6 @@ use rand::prelude::StdRng;
 
 use super::View;
 use super::generic_components::*;
-use crate::ciphers::Cipher;
 use crate::ciphers::Polybius;
 use crate::text_types::{PresetAlphabet::*};
 
@@ -24,7 +23,7 @@ impl View for Polybius {
         });
 
         ui.add_space(10.0);
-        ui.label(RichText::new(self.get_mut_input_alphabet().clone()).monospace().background_color(Color32::BLACK));
+        ui.label(RichText::new(&self.alphabet).monospace().background_color(Color32::BLACK));
         ui.add_space(16.0);
 
         ui.label("Key Word");

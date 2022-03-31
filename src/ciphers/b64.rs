@@ -44,18 +44,6 @@ impl Cipher for B64 {
         self.columnar1.randomize(rng);
         self.columnar2.randomize(rng);
     }
- 
-    fn get_input_alphabet(&self) -> &String {
-        &self.polybius.get_input_alphabet()
-    }
- 
-    fn get_mut_input_alphabet(&mut self) -> &mut String {
-        unimplemented!("The B64 cipher uses a fixed alphabet")
-    }
- 
-    fn validate_settings(&self) -> Result<(), CipherError> {
-        unreachable!("B64 actually has no settings. why did you call this method?")
-    }
 
     fn reset(&mut self) {
         *self = Self::default();

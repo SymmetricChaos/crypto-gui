@@ -69,7 +69,7 @@ impl Default for EnigmaState {
  
 #[derive(Clone,Debug)]
 pub struct EnigmaM3 {
-    alphabet: String,
+    _alphabet: String,
     pub state: EnigmaState,
 }
  
@@ -90,23 +90,11 @@ impl Cipher for EnigmaM3 {
     fn reset(&mut self) {
         *self = Self::default();
     }
-
-    fn get_input_alphabet(&self) -> &String {
-        &self.alphabet
-    }
-
-    fn get_mut_input_alphabet(&mut self) -> &mut String {
-        unimplemented!("Enigma uses a historically accurate alphabet that should not be changed")
-    }
-
-    fn validate_settings(&self) -> Result<(),CipherError> {
-        todo!()
-    }
 }
  
  
 impl Default for EnigmaM3 {
     fn default() -> Self {
-        Self { alphabet: String::from(PresetAlphabet::BasicLatin), state: Default::default() }
+        Self { _alphabet: String::from(PresetAlphabet::BasicLatin), state: Default::default() }
     }
 }

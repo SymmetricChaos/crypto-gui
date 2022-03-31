@@ -9,7 +9,7 @@ impl View for Vigenere {
         randomize_reset(ui, self, rng);
         ui.add_space(16.0);
 
-        input_alphabet(ui, self);
+        input_alphabet(ui, &mut self.alphabet.inner);
         ui.add_space(16.0);
 
         ui.label("Mode");

@@ -54,6 +54,9 @@ pub use grille::Grille;
 pub mod sigaba;
 pub use sigaba::Sigaba;
 
+pub mod bazeries;
+pub use bazeries::Bazeries;
+
 use rand::prelude::StdRng;
 use crate::errors::CipherError;
 
@@ -62,9 +65,6 @@ pub trait Cipher {
     fn decrypt(&self, text: &str) -> Result<String,CipherError>;
     fn randomize(&mut self, rng: &mut StdRng);
     fn reset(&mut self);
-    fn get_input_alphabet(&self) -> &String;
-    fn get_mut_input_alphabet(&mut self) -> &mut String;
-    fn validate_settings(&self) -> Result<(),CipherError>;
 }
 
 #[derive(Debug,Copy,Clone,PartialEq, Eq)]

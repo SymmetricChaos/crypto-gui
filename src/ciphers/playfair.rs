@@ -7,7 +7,7 @@ use crate::text_functions::{keyed_alphabet};
 use crate::text_types::{PresetAlphabet::*, PresetAlphabet};
 
 pub struct Playfair {
-    alphabet: String,
+    pub alphabet: String,
     square: String,
     key_word: String,
     spacer: char,
@@ -98,6 +98,13 @@ impl Playfair {
         }
     }
 
+    fn validate_settings(&self) -> Result<(), CipherError> {
+        if !&self.alphabet.contains(self.spacer) {
+            return Err(CipherError::Key(format!("spacer character {} is not in the alphabet",self.spacer)))
+        }
+        Ok(())
+    }
+
 }
 
 impl Default for Playfair {
@@ -139,21 +146,6 @@ impl Cipher for Playfair {
 
     fn randomize(&mut self, rng: &mut StdRng) {
         self.alphabet = shuffled_str(&self.alphabet, rng)
-    }
-
-    fn get_input_alphabet(&self) -> &String {
-        &self.square
-    }
-
-    fn get_mut_input_alphabet(&mut self) -> &mut String {
-        &mut self.square
-    }
-
-    fn validate_settings(&self) -> Result<(), CipherError> {
-        if !&self.alphabet.contains(self.spacer) {
-            return Err(CipherError::Key(format!("spacer character {} is not in the alphabet",self.spacer)))
-        }
-        Ok(())
     }
 
     fn reset(&mut self) {

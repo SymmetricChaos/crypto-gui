@@ -35,7 +35,7 @@ const M94_WHEELS: [&'static str; 25] = [
 pub struct M94 {
     pub offset: usize,
     pub wheels: Vec<&'static str>, //wheels can be reordered
-    alphabet: String,
+    _alphabet: String,
 }
 
 impl M94 {
@@ -48,7 +48,7 @@ impl Default for M94 {
     fn default() -> M94 {
         let wheels = Vec::from(M94_WHEELS);
         let alphabet = String::from(BasicLatin);
-        M94{ offset: 0, wheels, alphabet }
+        M94{ offset: 0, wheels, _alphabet: alphabet }
     }
  
 }
@@ -85,18 +85,6 @@ impl Cipher for M94 {
     fn randomize(&mut self, rng: &mut StdRng) {
         self.wheels.shuffle(rng);
         self.offset = rng.gen_range(1..25);
-    }
-
-    fn get_mut_input_alphabet(&mut self) -> &mut String {
-        unimplemented!("the M94 alphabet cannot be changed")
-    }
-
-    fn get_input_alphabet(&self) -> &String {
-        &self.alphabet
-    }
-
-    fn validate_settings(&self) -> Result<(), CipherError> {
-        unimplemented!("It shouldn't be possible to get the M94 into an invalid state")
     }
 
     fn reset(&mut self) {

@@ -27,6 +27,14 @@ impl Caesar {
         }
         Ok(())
     }
+
+    fn _validate_settings(&self) -> Result<(), CipherError> {
+        if (self.shift as usize) > self.alphabet.len() {
+            return Err(CipherError::Key(String::from("shift value must be less than the alphabet length")))
+        }
+        Ok(())
+    }
+
 }
 
 impl Default for Caesar {
@@ -49,21 +57,6 @@ impl Cipher for Caesar {
 
     fn randomize(&mut self, rng: &mut StdRng) {
         self.shift = rng.gen_range(0..self.alphabet.len()) as i32;
-    }
-
-    fn get_input_alphabet(&self) -> &String {
-        &self.alphabet.inner
-    }
-
-    fn get_mut_input_alphabet(&mut self) -> &mut String {
-        &mut self.alphabet.inner
-    }
-
-    fn validate_settings(&self) -> Result<(), CipherError> {
-        if (self.shift as usize) > self.alphabet.len() {
-            return Err(CipherError::Key(String::from("shift value must be less than the alphabet length")))
-        }
-        Ok(())
     }
 
     fn reset(&mut self) {

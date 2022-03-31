@@ -7,7 +7,7 @@ use rand::{prelude::StdRng, Rng};
 pub struct Affine {
     pub add_key: usize,
     pub mul_key: usize,
-    alphabet: String,
+    pub alphabet: String,
 }
 
 impl Affine {
@@ -88,18 +88,6 @@ impl Cipher for Affine {
                 break;
             };
         }
-    }
-
-    fn get_input_alphabet(&self) -> &String {
-        &self.alphabet
-    }
-
-    fn get_mut_input_alphabet(&mut self) -> &mut String {
-        &mut self.alphabet
-    }
-    
-    fn validate_settings(&self) -> Result<(), CipherError> {
-        todo!()
     }
 
     fn reset(&mut self) {

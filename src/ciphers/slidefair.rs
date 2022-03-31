@@ -88,6 +88,13 @@ impl Slidefair {
         };
         rows
     }
+
+    fn validate_settings(&self) -> Result<(), CipherError> {
+        if !&self.alphabet.contains(self.spacer.chars().next().unwrap()) {
+            return Err(CipherError::Key(format!("spacer character {} is not in the alphabet",self.spacer)))
+        }
+        Ok(())
+    }
 }
 
 impl Default for Slidefair {
@@ -123,20 +130,7 @@ impl Cipher for Slidefair {
         self.alphabet = Alphabet::from(shuffled_str(&self.alphabet.slice(), rng))
     }
 
-    fn get_input_alphabet(&self) -> &String {
-        &self.alphabet.inner
-    }
 
-    fn get_mut_input_alphabet(&mut self) -> &mut String {
-        &mut self.alphabet.inner
-    }
-
-    fn validate_settings(&self) -> Result<(), CipherError> {
-        if !&self.alphabet.contains(self.spacer.chars().next().unwrap()) {
-            return Err(CipherError::Key(format!("spacer character {} is not in the alphabet",self.spacer)))
-        }
-        Ok(())
-    }
 
     fn reset(&mut self) {
         *self = Self::default();

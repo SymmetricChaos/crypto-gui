@@ -35,6 +35,13 @@ impl GeneralSubstitution {
         let pos = self.alphabet2.chars().position(|x| x == c).unwrap();
         self.alphabet1.chars().nth(pos).unwrap()
     }
+
+    fn validate_settings(&self) -> Result<(), CipherError> {
+        if self.alphabet1.chars().count() != self.alphabet2.chars().count() {
+            return Err(CipherError::key("the input and output alphabets must have the same length"))
+        }
+        Ok(())
+    }
 }
 
 impl Default for GeneralSubstitution {
@@ -62,21 +69,6 @@ impl Cipher for GeneralSubstitution {
         self.alphabet2 = shuffled_str(&self.alphabet1, rng);
     }
 
-    fn get_input_alphabet(&self) -> &String {
-        &self.alphabet1
-    }
-
-    fn get_mut_input_alphabet(&mut self) -> &mut String {
-        &mut self.alphabet1
-    }
-
-    fn validate_settings(&self) -> Result<(), CipherError> {
-        if self.alphabet1.chars().count() != self.alphabet2.chars().count() {
-            return Err(CipherError::key("the input and output alphabets must have the same length"))
-        }
-        Ok(())
-    }
-    
     fn reset(&mut self) {
         *self = Self::default();
     }

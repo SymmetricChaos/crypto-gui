@@ -8,7 +8,7 @@ use crate::text_types::{PresetAlphabet::*};
 
 pub struct Beaufort {
     pub key_words: [String; 5],
-    alphabet: String,
+    pub alphabet: String,
     pub prog_shift: usize,
     pub mode: PolyMode,
     pub multikey: bool,
@@ -220,18 +220,6 @@ impl Cipher for Beaufort {
         self.key_words[2] = random_sample_replace(&self.alphabet, 7, rng);
         self.key_words[3] = String::new();
         self.key_words[4] = String::new();
-    }
-
-    fn get_input_alphabet(&self) -> &String {
-        &self.alphabet
-    }
-
-    fn get_mut_input_alphabet(&mut self) -> &mut String {
-        &mut self.alphabet
-    }
-
-    fn validate_settings(&self) -> Result<(), CipherError> {
-        todo!()
     }
 
     fn reset(&mut self) {

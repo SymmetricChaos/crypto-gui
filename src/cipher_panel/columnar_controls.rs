@@ -12,7 +12,7 @@ impl View for Columnar {
         ui.add_space(16.0);
 
         ui.add_space(16.0);
-        input_alphabet(ui, self);
+        input_alphabet(ui, &mut self.alphabet);
         ui.add_space(16.0);
 
         ui.label("Key Word");

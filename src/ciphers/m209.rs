@@ -160,7 +160,7 @@ fn atbash_encrypt(n: usize, k: usize, l: usize) -> usize {
 pub struct M209 {
     wheels: [Rotor; 6],
     pub lugs: [(usize,usize); 27],
-    alphabet: String,
+    _alphabet: String,
 }
 
 impl Default for M209 {
@@ -171,7 +171,7 @@ impl Default for M209 {
                     (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0),
                     (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0), (0,0)
             ], 
-            alphabet: String::from(BasicLatin) 
+            _alphabet: String::from(BasicLatin) 
         }
     }
 }
@@ -292,18 +292,6 @@ impl Cipher for M209 {
         for (rotor, new_pins) in self.get_wheels().zip([pins1, pins2, pins3, pins4, pins5, pins6].iter()) {
             rotor.pins = new_pins.clone()
         }
-    }
-
-    fn get_input_alphabet(&self) -> &String {
-        &self.alphabet
-    }
-
-    fn get_mut_input_alphabet(&mut self) -> &mut String {
-        &mut self.alphabet
-    }
-
-    fn validate_settings(&self) -> Result<(), CipherError> {
-        todo!()
     }
 
     fn reset(&mut self) {

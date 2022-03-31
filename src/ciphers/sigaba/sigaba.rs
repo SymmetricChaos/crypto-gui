@@ -260,19 +260,7 @@ impl Cipher for Sigaba {
     }
 
     fn reset(&mut self) {
-        todo!()
-    }
-
-    fn get_input_alphabet(&self) -> &String {
-        todo!()
-    }
-
-    fn get_mut_input_alphabet(&mut self) -> &mut String {
-        todo!()
-    }
-
-    fn validate_settings(&self) -> Result<(),crate::errors::CipherError> {
-        todo!()
+        *self = Self::default();
     }
 }
 
