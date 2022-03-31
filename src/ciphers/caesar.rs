@@ -1,22 +1,22 @@
 use rand::{Rng, prelude::StdRng};
-use crate::{errors::{CipherError}, text_types::Alphabet};
+use crate::{errors::{CipherError}, text_types::VecString};
 use super::Cipher;
 use crate::text_types::{PresetAlphabet::*};
 use crate::text_functions::prep_text;
 
 pub struct Caesar {
     pub shift: i32,
-    pub alphabet: Alphabet,
+    pub alphabet: VecString,
 }
 
 impl Caesar {
 
     fn encrypt_char(&self, c: char) -> char {
-        self.alphabet.offset_char(c, self.shift).unwrap()
+        *self.alphabet.char_offset(c, self.shift).unwrap()
     }
  
     fn decrypt_char(&self, c: char) -> char {
-        self.alphabet.offset_char(c, -self.shift).unwrap()
+        *self.alphabet.char_offset(c, -self.shift).unwrap()
     }
 
     pub fn check_input(&self, text: &str) -> Result<(), CipherError> {
@@ -39,18 +39,18 @@ impl Caesar {
 
 impl Default for Caesar {
     fn default() -> Self {
-        Self { shift: 0, alphabet: Alphabet::from(BasicLatin) }
+        Self { shift: 0, alphabet: VecString::from(BasicLatin) }
     }
 }
 
 impl Cipher for Caesar {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
-        let text = prep_text(text, self.alphabet.slice())?;
+        let text = prep_text(text, &self.alphabet.to_string())?;
         Ok( text.chars().map(|c| self.encrypt_char(c)).collect() )
     }
  
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
-        let text = prep_text(text, self.alphabet.slice())?;
+        let text = prep_text(text, &self.alphabet.to_string())?;
         Ok( text.chars().map(|c| self.decrypt_char(c)).collect() )
 
     }
