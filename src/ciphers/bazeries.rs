@@ -1,8 +1,8 @@
 use rand::prelude::StdRng;
 use super::Cipher;
-use crate::text_types::{PresetAlphabet};
+use crate::text_types::PresetAlphabet;
 use crate::errors::CipherError;
-use crate::text_functions::{shuffled_str, validate_alphabet};
+use crate::text_functions::shuffled_str;
 
 pub struct Bazeries {
     alphabet: String,
@@ -85,6 +85,8 @@ impl Cipher for Bazeries {
     }
     
     fn randomize(&mut self, rng: &mut StdRng) {
-        todo!("keep the current number of wheels and fill with permutations of alphabet")
+        for wheel in self.wheels.iter_mut() {
+            *wheel = shuffled_str(&self.alphabet, rng);
+        }
     }
 }
