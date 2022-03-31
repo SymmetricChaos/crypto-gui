@@ -19,7 +19,7 @@ pub enum CipherID {
     Vigenere,
     Beaufort,
     Alberti,
-    Bazieres,
+    Bazeries,
     M94,
     Chaocipher,
 
@@ -93,7 +93,7 @@ impl Display for  CipherID {
             CipherID::SIGABA => "SIGABA",
             CipherID::Slidefair => "Slidefair",
             CipherID::Columnar => "Columnar Transposition",
-            CipherID::Bazieres => "Bazieres",
+            CipherID::Bazeries => "Bazeries",
             CipherID::M94 => "M94",
             CipherID::Vigenere => "Vigenère",
             CipherID::Beaufort => "Beaufort",

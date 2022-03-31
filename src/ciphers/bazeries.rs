@@ -5,14 +5,22 @@ use crate::errors::CipherError;
 use crate::text_functions::shuffled_str;
 
 pub struct Bazeries {
-    alphabet: String,
-    wheels: Vec<String>,
-    offset: usize,
+    pub alphabet: String,
+    pub wheels: Vec<String>,
+    pub offset: usize,
 }
 
 impl Bazeries {
     pub fn control_wheels() {
         todo!("must be possible to enforce alphabet length, maybe just have function to 'set_wheels' that checks correctness")
+    }
+
+    pub fn add_wheel(&mut self, rng: &mut StdRng) {
+        self.wheels.push(shuffled_str(&self.alphabet, rng)) 
+    }
+
+    pub fn del_wheel(&mut self) {
+        self.wheels.pop(); 
     }
 }
 

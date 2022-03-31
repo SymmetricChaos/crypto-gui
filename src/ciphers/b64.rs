@@ -2,18 +2,18 @@ use rand::prelude::{StdRng};
 use crate::{ciphers::{Polybius,Columnar}, errors::CipherError};
 use crate::text_types::PresetAlphabet::*;
 use super::Cipher;
- 
+
 pub struct B64 {
     pub polybius: Polybius,
     pub columnar1: Columnar,
     pub columnar2: Columnar,
 }
- 
+
 impl Default for B64 {
     fn default() -> Self {
         let mut polybius = Polybius::default();
         polybius.set_alphabet(Base64);
- 
+
         Self{
               polybius,
               columnar1: Columnar::default(),
@@ -21,7 +21,7 @@ impl Default for B64 {
         }
     }
 }
- 
+
 impl Cipher for B64 {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let t1 = self.polybius.encrypt(text)?;
@@ -30,7 +30,7 @@ impl Cipher for B64 {
         let t4 = self.polybius.decrypt(&t3)?;
         Ok(t4)
     }
- 
+
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         let t1 = self.polybius.encrypt(text)?;
         let t2 = self.columnar2.decrypt(&t1)?;
@@ -38,7 +38,7 @@ impl Cipher for B64 {
         let t4 = self.polybius.decrypt(&t3)?;
         Ok(t4)
     }
- 
+
     fn randomize(&mut self, rng: &mut StdRng) {
         self.polybius.randomize(rng);
         self.columnar1.randomize(rng);

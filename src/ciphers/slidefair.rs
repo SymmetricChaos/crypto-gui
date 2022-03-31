@@ -130,8 +130,6 @@ impl Cipher for Slidefair {
         self.alphabet = Alphabet::from(shuffled_str(&self.alphabet.slice(), rng))
     }
 
-
-
     fn reset(&mut self) {
         *self = Self::default();
     }

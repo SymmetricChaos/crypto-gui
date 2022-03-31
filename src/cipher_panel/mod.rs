@@ -23,6 +23,7 @@ pub mod slidefair_controls;
 pub mod enigma_controls;
 pub mod grille_controls;
 pub mod sigaba_controls;
+pub mod bazeries_controls;
 
 pub trait View {
     fn ui(&mut self, ui: &mut egui::Ui, rng: &mut StdRng);
@@ -55,6 +56,7 @@ pub struct CipherControlPanel {
     beaufort: Beaufort,
     alberti: Alberti,
     m94: M94,
+    bazeries: Bazeries,
 
     playfair: Playfair,
     slidefair: Slidefair,
@@ -78,7 +80,7 @@ impl CipherControlPanel {
             );
     
             combox_box(
-                &[CipherID::Vigenere, CipherID::Beaufort, CipherID::M94, CipherID::Alberti],
+                &[CipherID::Vigenere, CipherID::Beaufort, CipherID::M94, CipherID::Alberti, CipherID::Bazeries,],
                 "Polyalphabetic",
                 active_cipher, ui
             );
@@ -143,6 +145,7 @@ impl CipherControlPanel {
             CipherID::Enigma => self.enigma.ui(ui, rng),
             CipherID::Grille => self.grille.ui(ui, rng),
             CipherID::SIGABA => self.sigaba.ui(ui, rng),
+            CipherID::Bazeries => self.bazeries.ui(ui, rng),
             _ => { ui.label("IN PROGRESS"); },
         }
     }
@@ -188,6 +191,7 @@ impl CipherDisplayPanel {
             CipherID::Enigma => encrypt_decrypt(ui, &control_panel.enigma, input, output, errors),
             CipherID::Grille => encrypt_decrypt(ui, &control_panel.grille, input, output, errors),
             CipherID::SIGABA => encrypt_decrypt(ui, &control_panel.sigaba, input, output, errors),
+            CipherID::Bazeries => encrypt_decrypt(ui, &control_panel.bazeries, input, output, errors),
             _ => { *errors = String::from("button must be added to DisplayPanel struct") }
         }
 
