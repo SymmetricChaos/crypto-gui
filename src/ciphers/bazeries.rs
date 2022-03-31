@@ -60,10 +60,12 @@ impl Cipher for Bazeries {
         let mut out = String::with_capacity(text.chars().count());
         let key = self.wheels.iter();
         for (k, c) in key.zip(text.chars()) {
-            let n = (k.chars().position(|x| x == c).unwrap() + self.offset) % alen;
+            let n = match k.chars().position(|x| x == c) {
+                Some(n) => (n + self.offset) % alen,
+                None => return Err(CipherError::invalid_alphabet_char(c)),
+            };
             out.push(k.chars().nth(n).unwrap())
         }
-        todo!("this needs to gracefully throw an error instead of panic");
         Ok(out)
     }
 
@@ -73,10 +75,12 @@ impl Cipher for Bazeries {
         let rev_offset = alen - self.offset;
         let key = self.wheels.iter();
         for (k, c) in key.zip(text.chars()) {
-            let n = (k.chars().position(|x| x == c).unwrap() + rev_offset) % alen;
+            let n = match k.chars().position(|x| x == c) {
+                Some(n) => (n + rev_offset) % alen,
+                None => return Err(CipherError::invalid_alphabet_char(c)),
+            };
             out.push(k.chars().nth(n).unwrap())
         }
-        todo!("this needs to gracefully throw an error instead of panic");
         Ok(out)
     }
     
