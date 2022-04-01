@@ -1,3 +1,5 @@
+use std::ops::Range;
+
 use rand::{Rng, prelude::StdRng, SeedableRng};
 use super::Cipher;
 use crate::{errors::CipherError, grid::{Grid, Symbol}, text_types::PresetAlphabet};
@@ -22,6 +24,10 @@ impl Grille {
                 *cell = Symbol::Blocked;
             }
         }
+    }
+
+    fn random_null(&self, rng: &mut StdRng, range: &Range<usize>) -> char {
+        self.null_alphabet.chars().nth(rng.gen_range(range.clone())).unwrap()
     }
 }
  
@@ -60,10 +66,10 @@ impl Cipher for Grille {
                 Symbol::Empty => { 
                     match chars.next() {
                         Some(c) => *cell = Symbol::Character(c),
-                        None => *cell = Symbol::Character( self.null_alphabet.chars().nth(rng.gen_range(range.clone())).unwrap() ),
+                        None => *cell = Symbol::Character( self.random_null(&mut rng, &range) ),
                     }
                 },
-                Symbol::Blocked => { *cell = Symbol::Character( self.null_alphabet.chars().nth(rng.gen_range(range.clone())).unwrap() ) },
+                Symbol::Blocked => { *cell = Symbol::Character( self.random_null(&mut rng, &range) ) },
             }
         }
 
