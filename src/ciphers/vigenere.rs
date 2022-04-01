@@ -10,6 +10,7 @@ use crate::errors::CipherError;
 pub struct Vigenere {
     pub key_words: [String; 5],
     pub alphabet: VecString,
+    _alphabet: String,
     pub prog_shift: usize,
     pub mode: PolyMode,
     pub multikey: bool,
@@ -80,6 +81,11 @@ impl Vigenere {
             if !self.alphabet.contains(c) { return Err(CipherError::invalid_input_char(c)) }
         }
         Ok(())
+    }
+
+    pub fn control_alphabet(&mut self) -> &mut String {
+        self.alphabet = VecString::from(&self._alphabet);
+        &mut self._alphabet
     }
 
 
@@ -169,7 +175,8 @@ impl Vigenere {
 impl Default for Vigenere {
     fn default() -> Self {
         Self { key_words: [String::new(), String::new(), String::new(), String::new(), String::new()], 
-               alphabet: VecString::from(PresetAlphabet::BasicLatin), 
+               alphabet: VecString::from(PresetAlphabet::BasicLatin),
+               _alphabet: String::from(PresetAlphabet::BasicLatin),
                mode: PolyMode::CylicKey, 
                prog_shift: 0,
                multikey: false,        
@@ -199,7 +206,7 @@ impl Cipher for Vigenere {
     }
 
     fn randomize(&mut self, rng: &mut StdRng) {
-        let alpha = String::from(self.alphabet);
+        let alpha = String::from(&self._alphabet);
         self.key_words[0] = random_sample_replace(&alpha, 3, rng);
         self.key_words[1] = random_sample_replace(&alpha, 4, rng);
         self.key_words[2] = random_sample_replace(&alpha, 5, rng);

@@ -3,8 +3,7 @@ pub use sigaba::Sigaba;
 
 pub mod rotors;
 pub use rotors::{Rotor, 
-    CIPHER_ROTOR_MAP, CIPHER_ROTOR_VEC,
-    CONTROL_ROTOR_MAP, CONTROL_ROTOR_VEC,
+    BIG_ROTOR_MAP, BIG_ROTOR_VEC,
     INDEX_ROTOR_MAP, INDEX_ROTOR_VEC
 };
 

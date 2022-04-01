@@ -1,7 +1,7 @@
 use eframe::egui::{RichText, Slider, ComboBox, Ui};
 use rand::prelude::StdRng;
 use super::View;
-use crate::ciphers::{Sigaba, sigaba::{CIPHER_ROTOR_VEC, CONTROL_ROTOR_VEC, Rotor}};
+use crate::ciphers::{Sigaba, sigaba::{BIG_ROTOR_VEC, Rotor}};
 
 fn rotor_display(ui: &mut eframe::egui::Ui, rotors: &mut [Rotor]) {
     for (_, rotor) in &mut rotors.iter_mut().enumerate() {
@@ -38,7 +38,7 @@ impl View for Sigaba {
                 ComboBox::from_id_source(format!("Cipher Rotor {}",i+1))
                     .selected_text(self.cipher_rotors()[i].name)
                     .show_ui(ui, |ui| {
-                    for rtr in CIPHER_ROTOR_VEC.iter() {
+                    for rtr in BIG_ROTOR_VEC.iter() {
                         ui.selectable_value(&mut self.cipher_rotors()[i], rtr.clone(), rtr.name.to_string());
                     }
                 });
@@ -62,7 +62,7 @@ impl View for Sigaba {
                 ComboBox::from_id_source(format!("Control Rotor {}",i+1))
                     .selected_text(self.control_rotors()[i].name)
                     .show_ui(ui, |ui| {
-                    for rtr in CONTROL_ROTOR_VEC.iter() {
+                    for rtr in BIG_ROTOR_VEC.iter() {
                         ui.selectable_value(&mut self.control_rotors()[i], rtr.clone(), rtr.name.to_string());
                     }
                 });

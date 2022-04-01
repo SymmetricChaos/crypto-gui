@@ -8,6 +8,7 @@ use crate::text_functions::keyed_alphabet;
 
 pub struct Slidefair {
     alphabet: VecString,
+    _alphabet: String,
     key_word: String,
     spacer: String,
 }
@@ -24,13 +25,15 @@ impl Slidefair {
         key.into_iter()
     }
 
-    // pub fn control_alphabet(&mut self) -> &mut String {
-    //     &mut self.alphabet.0
-    // }
+    pub fn control_alphabet(&mut self) -> &mut String {
+        self.alphabet = VecString::from(&self._alphabet);
+        &mut self._alphabet
+    }
 
-    // pub fn set_alphabet(&mut self, alphabet: &str) {
-    //     self.alphabet.0 = alphabet.to_string();
-    // }
+    pub fn set_alphabet(&mut self, alphabet: &str) {
+        self.alphabet = VecString::from(alphabet);
+        self._alphabet = alphabet.to_string();
+    }
 
     // Silently ignores invalid characters
     pub fn control_key(&mut self) -> &mut String {
@@ -82,7 +85,7 @@ impl Slidefair {
     pub fn rows(&self) -> Vec<String> {
         let mut rows = Vec::with_capacity(self.alphabet.len());
         for n in 0..self.alphabet.len() {
-            let alpha = String::from(self.alphabet);
+            let alpha = String::from(&self._alphabet);
             let mut row = String::from(&alpha[n..]);
             row.push_str(&alpha[0..n]);
             rows.push(row);
@@ -100,7 +103,8 @@ impl Slidefair {
 
 impl Default for Slidefair {
     fn default() -> Self {
-        Self{ alphabet: VecString::from(BasicLatin), 
+        Self{ alphabet: VecString::from(BasicLatin),
+              _alphabet: String::from(BasicLatin),
               spacer: String::from("X"),
               key_word: String::new() }
     }
@@ -140,7 +144,7 @@ impl Cipher for Slidefair {
 impl fmt::Display for Slidefair {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut out = String::new();
-        let alpha = String::from(self.alphabet);
+        let alpha = String::from(&self._alphabet);
         for (n, _) in self.alphabet.iter().enumerate() {
             out.push_str(&alpha[n..]);
             out.push_str(&alpha[0..n]);

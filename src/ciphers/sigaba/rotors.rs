@@ -76,37 +76,24 @@ impl fmt::Display for Rotor {
 
 
 lazy_static! {
-    pub static ref CIPHER_ROTOR_VEC: Vec<Rotor> = {
+    pub static ref BIG_ROTOR_VEC: Vec<Rotor> = {
         let mut v = Vec::new();
         v.push(Rotor::new("R-A", "YCHLQSUGBDIXNZKERPVJTAWFOM"));
         v.push(Rotor::new("R-B", "INPXBWETGUYSAOCHVLDMQKZJFR"));
         v.push(Rotor::new("R-C", "WNDRIOZPTAXHFJYQBMSVEKUCGL"));
         v.push(Rotor::new("R-D", "TZGHOBKRVUXLQDMPNFWCJYEIAS"));
         v.push(Rotor::new("R-E", "YWTAHRQJVLCEXUNGBIPZMSDFOK"));
+        v.push(Rotor::new("R-F", "QSLRBTEKOGAICFWYVMHJNXZUDP"));
+        v.push(Rotor::new("R-G", "CHJDQIGNBSAKVTUOXFWLEPRMZY"));
+        v.push(Rotor::new("R-H", "CDFAJXTIMNBEQHSUGRYLWZKVPO"));
+        v.push(Rotor::new("R-I", "XHFESZDNRBCGKQIJLTVMUOYAPW"));
+        v.push(Rotor::new("R-J", "EZJQXMOGYTCSFRIUPVNADLHWBK"));
         v
     };
 
-    pub static ref CIPHER_ROTOR_MAP: HashMap<&'static str, Rotor> = {
+    pub static ref BIG_ROTOR_MAP: HashMap<&'static str, Rotor> = {
         let mut m = HashMap::new();
-        for rtr in CIPHER_ROTOR_VEC.iter() {
-            m.insert(rtr.name, rtr.clone());
-        }
-        m
-    };
-
-    pub static ref CONTROL_ROTOR_VEC: Vec<Rotor> = {
-        let mut v = Vec::new();
-        v.push(Rotor::new("C-A", "QSLRBTEKOGAICFWYVMHJNXZUDP"));
-        v.push(Rotor::new("C-B", "CHJDQIGNBSAKVTUOXFWLEPRMZY"));
-        v.push(Rotor::new("C-C", "CDFAJXTIMNBEQHSUGRYLWZKVPO"));
-        v.push(Rotor::new("C-D", "XHFESZDNRBCGKQIJLTVMUOYAPW"));
-        v.push(Rotor::new("C-E", "EZJQXMOGYTCSFRIUPVNADLHWBK"));
-        v
-    };
-
-    pub static ref CONTROL_ROTOR_MAP: HashMap<&'static str, Rotor> = {
-        let mut m = HashMap::new();
-        for rtr in CONTROL_ROTOR_VEC.iter() {
+        for rtr in BIG_ROTOR_VEC.iter() {
             m.insert(rtr.name, rtr.clone());
         }
         m

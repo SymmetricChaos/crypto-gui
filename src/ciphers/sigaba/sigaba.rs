@@ -3,7 +3,7 @@ use std::{collections::HashSet, cell::RefCell};
 use itertools::Itertools;
 
 use crate::{ciphers::Cipher, errors::CipherError};
-use super::{Rotor, CONTROL_ROTOR_VEC, INDEX_ROTOR_VEC, CIPHER_ROTOR_VEC, char_to_usize, usize_to_char};
+use super::{Rotor, INDEX_ROTOR_VEC, BIG_ROTOR_VEC, char_to_usize, usize_to_char};
 
  
 #[derive(Clone,Debug)]
@@ -63,11 +63,11 @@ impl ControlRotors {
 
 impl Default for ControlRotors {
     fn default() -> Self {
-        let rotors = [CONTROL_ROTOR_VEC[0].clone(),
-                                CONTROL_ROTOR_VEC[1].clone(),
-                                CONTROL_ROTOR_VEC[2].clone(),
-                                CONTROL_ROTOR_VEC[3].clone(),
-                                CONTROL_ROTOR_VEC[4].clone()
+        let rotors = [BIG_ROTOR_VEC[0].clone(),
+                                BIG_ROTOR_VEC[1].clone(),
+                                BIG_ROTOR_VEC[2].clone(),
+                                BIG_ROTOR_VEC[3].clone(),
+                                BIG_ROTOR_VEC[4].clone()
                             ];
         Self { rotors, counter: 0 }
     }
@@ -151,11 +151,11 @@ impl CipherRotors {
 
 impl Default for CipherRotors {
     fn default() -> Self {
-        let rotors = [CIPHER_ROTOR_VEC[0].clone(),
-                                CIPHER_ROTOR_VEC[1].clone(),
-                                CIPHER_ROTOR_VEC[2].clone(),
-                                CIPHER_ROTOR_VEC[3].clone(),
-                                CIPHER_ROTOR_VEC[4].clone(),
+        let rotors = [BIG_ROTOR_VEC[5].clone(),
+                                BIG_ROTOR_VEC[6].clone(),
+                                BIG_ROTOR_VEC[7].clone(),
+                                BIG_ROTOR_VEC[8].clone(),
+                                BIG_ROTOR_VEC[9].clone(),
                             ];
         Self { rotors }
     }

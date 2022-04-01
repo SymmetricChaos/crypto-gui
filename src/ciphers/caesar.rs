@@ -7,6 +7,7 @@ use crate::text_functions::prep_text;
 pub struct Caesar {
     pub shift: i32,
     pub alphabet: VecString,
+    _alphabet: String,
 }
 
 impl Caesar {
@@ -28,6 +29,11 @@ impl Caesar {
         Ok(())
     }
 
+    pub fn control_alphabet(&mut self) -> &mut String {
+        self.alphabet = VecString::from(&self._alphabet);
+        &mut self._alphabet
+    }
+
     fn _validate_settings(&self) -> Result<(), CipherError> {
         if (self.shift as usize) > self.alphabet.len() {
             return Err(CipherError::Key(String::from("shift value must be less than the alphabet length")))
@@ -39,7 +45,7 @@ impl Caesar {
 
 impl Default for Caesar {
     fn default() -> Self {
-        Self { shift: 0, alphabet: VecString::from(BasicLatin) }
+        Self { shift: 0, alphabet: VecString::from(BasicLatin), _alphabet: String::from(BasicLatin) }
     }
 }
 

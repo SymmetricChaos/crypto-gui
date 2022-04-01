@@ -11,7 +11,7 @@ impl View for Caesar {
         randomize_reset(ui, self, rng);
         ui.add_space(16.0);
 
-        input_alphabet(ui, &mut self.alphabet.inner);
+        input_alphabet(ui, self.control_alphabet());
         ui.add_space(16.0);
 
         ui.label("Key");

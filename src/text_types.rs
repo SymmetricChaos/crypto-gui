@@ -208,6 +208,12 @@ impl From<String> for VecString {
         VecString(str.chars().collect::<VecDeque<char>>())
     }
 }
+
+impl From<&String> for VecString {
+    fn from(str: &String) -> Self {
+        VecString(str.chars().collect::<VecDeque<char>>())
+    }
+}
  
 impl From<&str> for VecString {
     fn from(str: &str) -> Self {
