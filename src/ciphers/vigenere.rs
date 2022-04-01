@@ -3,13 +3,13 @@ use std::collections::VecDeque;
 use rand::prelude::StdRng;
 use super::{Cipher, PolyMode};
 use crate::text_functions::random_sample_replace;
-use crate::text_types::{PresetAlphabet, Alphabet};
+use crate::text_types::{PresetAlphabet, VecString};
 use crate::errors::CipherError;
 
 
 pub struct Vigenere {
     pub key_words: [String; 5],
-    pub alphabet: Alphabet,
+    pub alphabet: VecString,
     pub prog_shift: usize,
     pub mode: PolyMode,
     pub multikey: bool,
@@ -23,14 +23,14 @@ impl Vigenere {
             let mut effective_key = vec![0usize; self.key_len()];
             for key in self.key_words.iter().filter(|s| !s.is_empty()) {
                 for (pos, sym) in key.chars().cycle().take(self.key_len()).enumerate() {
-                    let p = self.alphabet.pos(sym, 0).unwrap();
+                    let p = self.alphabet.pos_offset(sym, 0).unwrap();
                     effective_key[pos] += p
                 }
             }
             effective_key = effective_key.into_iter().map(|v| v % self.alphabet_len()).collect();
             effective_key.into_iter()
         } else {
-            let key: Vec<usize> = self.key_words[0].chars().map(|x| self.alphabet.pos(x, 0).unwrap()).collect();
+            let key: Vec<usize> = self.key_words[0].chars().map(|x| self.alphabet.pos_offset(x, 0).unwrap()).collect();
             key.into_iter()
         }
 
@@ -53,7 +53,7 @@ impl Vigenere {
     // Unwrap justified by bounds on key
     pub fn key_word(&self) -> String {
         if self.multikey {
-            self.key().map(|v| self.alphabet.nth(v, 0).unwrap()).collect()
+            self.key().map(|v| self.alphabet.get_offset(v, 0).unwrap()).collect()
         } else {
             self.key_words[0].clone()
         }
@@ -85,11 +85,11 @@ impl Vigenere {
 
     // Unwraps for the character methods are justified by validating the input
     fn encrypt_char(&self, c: char, k: usize) -> char {
-        self.alphabet.offset_char(c, k as i32).unwrap()
+        *self.alphabet.char_offset(c, k as i32).unwrap()
     }
 
     fn decrypt_char(&self, c: char, k: usize) -> char {
-        self.alphabet.offset_char(c, -(k as i32)).unwrap()
+        *self.alphabet.char_offset(c, -(k as i32)).unwrap()
     }
 
 
@@ -108,7 +108,7 @@ impl Vigenere {
         let mut out = String::with_capacity(text.len());
         
         for c in text.chars() {
-            akey.push_back(self.alphabet.pos(c,0).unwrap());
+            akey.push_back(self.alphabet.pos_offset(c,0).unwrap());
             let n = akey.pop_front().unwrap();
             out.push(self.encrypt_char(c, n) )
         }
@@ -124,7 +124,7 @@ impl Vigenere {
             let n = akey.pop_front().unwrap();
             let ptxt_char = self.decrypt_char(c, n);
             out.push( ptxt_char );
-            let new_key_val = self.alphabet.pos(ptxt_char, 0).unwrap();
+            let new_key_val = self.alphabet.pos_offset(ptxt_char, 0).unwrap();
             akey.push_back( new_key_val );
         }
         Ok(out)
@@ -169,7 +169,7 @@ impl Vigenere {
 impl Default for Vigenere {
     fn default() -> Self {
         Self { key_words: [String::new(), String::new(), String::new(), String::new(), String::new()], 
-               alphabet: Alphabet::from(PresetAlphabet::BasicLatin), 
+               alphabet: VecString::from(PresetAlphabet::BasicLatin), 
                mode: PolyMode::CylicKey, 
                prog_shift: 0,
                multikey: false,        
@@ -199,10 +199,11 @@ impl Cipher for Vigenere {
     }
 
     fn randomize(&mut self, rng: &mut StdRng) {
-        self.key_words[0] = random_sample_replace(&self.alphabet.inner, 3, rng);
-        self.key_words[1] = random_sample_replace(&self.alphabet.inner, 4, rng);
-        self.key_words[2] = random_sample_replace(&self.alphabet.inner, 5, rng);
-        self.key_words[3] = random_sample_replace(&self.alphabet.inner, 7, rng);
+        let alpha = String::from(self.alphabet);
+        self.key_words[0] = random_sample_replace(&alpha, 3, rng);
+        self.key_words[1] = random_sample_replace(&alpha, 4, rng);
+        self.key_words[2] = random_sample_replace(&alpha, 5, rng);
+        self.key_words[3] = String::new();
         self.key_words[4] = String::new();
     }
 
