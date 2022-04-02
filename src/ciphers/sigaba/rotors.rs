@@ -75,6 +75,55 @@ impl fmt::Display for Rotor {
 
 
 
+
+
+// Specifically for SIGABA rotor
+#[derive(Clone,Debug)]
+pub struct SigabaIndexRotor {
+    wiring_rtl: Vec<usize>,
+    wiring_ltr: Vec<usize>,
+    pub position: usize,
+    pub wiring_str: &'static str,
+}
+
+impl SigabaIndexRotor {
+    pub fn new(wiring_str:  &'static str) -> Self {
+        let size = wiring_str.chars().count();
+        let mut wiring_rtl = vec![0; size];
+        let mut wiring_ltr = vec![0; size];
+        for w in wiring_str.chars().map(|x| (x as u8 as usize) - 48 ).enumerate() {
+            wiring_rtl[w.0] = w.1;
+            wiring_ltr[w.1] = w.0;
+        }
+        SigabaIndexRotor{ wiring_rtl, wiring_ltr, position: 0, wiring_str }
+    }
+
+    pub fn step(&mut self) {
+        self.position = (self.position + 1) % 10
+    }
+ 
+    // Signal starts on the right and goes through the rotor then back
+    // We will use and return usize instead of char to avoid constantly converting types
+    // Need to logically confirm that a reversed rotor works
+    pub fn rtl(&self, entry: usize) -> usize {
+        let inner_position = (10 + entry + self.position) % 10;
+        let inner =  self.wiring_rtl[inner_position];
+        (inner + 10 - self.position) % 10
+    }
+ 
+    pub fn ltr(&self, entry: usize) -> usize {
+        let inner_position = (10 + entry + self.position) % 10;
+        let inner = self.wiring_ltr[inner_position];
+        (inner + 10 - self.position) % 10
+    }
+}
+
+impl fmt::Display for SigabaIndexRotor {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.position)
+    }
+}
+
 lazy_static! {
     pub static ref BIG_ROTOR_VEC: Vec<Rotor> = {
         let mut v = Vec::new();
@@ -101,21 +150,15 @@ lazy_static! {
 
     // Ideally these should use digits 0..9 but the converting function
     // makes this easier
-    pub static ref INDEX_ROTOR_VEC: Vec<Rotor> = {
+    pub static ref INDEX_ROTOR_VEC: Vec<SigabaIndexRotor> = {
         let mut v = Vec::new();
-        v.push(Rotor::new("Idx0", "HFJBEICGDA"));
-        v.push(Rotor::new("Idx1", "DIBAFJCHGE"));
-        v.push(Rotor::new("Idx2", "EAIGBFDCJH"));
-        v.push(Rotor::new("Idx3", "DJIAFCGBHE"));
-        v.push(Rotor::new("Idx4", "GEJHBDFCIA"));
+        v.push(SigabaIndexRotor::new("7591482630"));
+        v.push(SigabaIndexRotor::new("3810592764"));
+        v.push(SigabaIndexRotor::new("4086153297"));
+        v.push(SigabaIndexRotor::new("3980526174"));
+        v.push(SigabaIndexRotor::new("6497135280"));
         v
     };
-
-    pub static ref INDEX_ROTOR_MAP: HashMap<&'static str, Rotor> = {
-        let mut m = HashMap::new();
-        for rtr in INDEX_ROTOR_VEC.iter() {
-            m.insert(rtr.name, rtr.clone());
-        }
-        m
-    };
 }
+
+

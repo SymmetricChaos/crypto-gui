@@ -81,6 +81,20 @@ impl View for Sigaba {
         ui.label( 
             RichText::new("Index Rotors").heading()
         ).on_hover_text("These rotors stay in position during encryption. The signal from the Control Rotors is sent through them to the Cipher Rotors to decide which move.");
-        rotor_display(ui, self.index_rotors());
+        ui.horizontal(|ui| {
+            for (n, rotor) in &mut self.index_rotors().iter_mut().enumerate() {
+                //let characters = RichText::new(format!("{}{}",n+1,&rotor.to_string())).monospace();
+                //ui.label(characters);
+                let val = format!("{}{}",n+1,&rotor.to_string());
+                let range = 0..=9;
+                ui.add(Slider::new(&mut rotor.position, range)
+                    .clamp_to_range(true)
+                    .show_value(false)
+                    .vertical()
+                    .text(val)
+                );
+            }
+        });
+
     }
 }

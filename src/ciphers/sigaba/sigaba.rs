@@ -3,7 +3,7 @@ use std::{collections::HashSet, cell::RefCell};
 use itertools::Itertools;
 
 use crate::{ciphers::Cipher, errors::CipherError};
-use super::{Rotor, INDEX_ROTOR_VEC, BIG_ROTOR_VEC, char_to_usize, usize_to_char};
+use super::{Rotor, INDEX_ROTOR_VEC, BIG_ROTOR_VEC, char_to_usize, usize_to_char, rotors::SigabaIndexRotor};
 
  
 #[derive(Clone,Debug)]
@@ -64,10 +64,10 @@ impl ControlRotors {
 impl Default for ControlRotors {
     fn default() -> Self {
         let rotors = [BIG_ROTOR_VEC[0].clone(),
-                                BIG_ROTOR_VEC[1].clone(),
-                                BIG_ROTOR_VEC[2].clone(),
-                                BIG_ROTOR_VEC[3].clone(),
-                                BIG_ROTOR_VEC[4].clone()
+                                 BIG_ROTOR_VEC[1].clone(),
+                                 BIG_ROTOR_VEC[2].clone(),
+                                 BIG_ROTOR_VEC[3].clone(),
+                                 BIG_ROTOR_VEC[4].clone()
                             ];
         Self { rotors, counter: 0 }
     }
@@ -77,7 +77,7 @@ impl Default for ControlRotors {
 // These rotors do not move they only pass signals through them
 #[derive(Clone,Debug)]
 pub struct IndexRotors {
-    pub rotors: [Rotor; 5]
+    pub rotors: [SigabaIndexRotor; 5]
 }
  
 impl IndexRotors {
@@ -108,10 +108,10 @@ impl IndexRotors {
 impl Default for IndexRotors {
     fn default() -> Self {
         let rotors = [INDEX_ROTOR_VEC[0].clone(),
-                                INDEX_ROTOR_VEC[1].clone(),
-                                INDEX_ROTOR_VEC[2].clone(),
-                                INDEX_ROTOR_VEC[3].clone(),
-                                INDEX_ROTOR_VEC[4].clone(),
+                                 INDEX_ROTOR_VEC[1].clone(),
+                                 INDEX_ROTOR_VEC[2].clone(),
+                                 INDEX_ROTOR_VEC[3].clone(),
+                                 INDEX_ROTOR_VEC[4].clone(),
                             ];
         Self { rotors }
     }
@@ -152,10 +152,10 @@ impl CipherRotors {
 impl Default for CipherRotors {
     fn default() -> Self {
         let rotors = [BIG_ROTOR_VEC[5].clone(),
-                                BIG_ROTOR_VEC[6].clone(),
-                                BIG_ROTOR_VEC[7].clone(),
-                                BIG_ROTOR_VEC[8].clone(),
-                                BIG_ROTOR_VEC[9].clone(),
+                                 BIG_ROTOR_VEC[6].clone(),
+                                 BIG_ROTOR_VEC[7].clone(),
+                                 BIG_ROTOR_VEC[8].clone(),
+                                 BIG_ROTOR_VEC[9].clone(),
                             ];
         Self { rotors }
     }
@@ -206,7 +206,7 @@ impl Sigaba {
         self.cipher_rotors.borrow().decrypt(n)
     }
 
-    pub fn index_rotors(&mut self) -> &mut [Rotor; 5] {
+    pub fn index_rotors(&mut self) -> &mut [SigabaIndexRotor; 5] {
         &mut self.index_rotors.get_mut().rotors
     }
 
@@ -272,7 +272,7 @@ mod sigaba_tests {
     use super::*;
 
     const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXIUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "GITZBZNOBEGZSWPITJDYZNJSUFQRBRTVFBR";
+    const CIPHERTEXT: &'static str = "OGGNMQNOWAPPHFGEZJTIVRPZVPUDCLJZIOY";
     //SIGABA is not perfectly reversible
     const DECRYPT_TEXT: &'static str = "THEQUICKBROWNFOXIUMPSOVERTHELAXYDOG";
 

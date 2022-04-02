@@ -4,7 +4,7 @@ pub use sigaba::Sigaba;
 pub mod rotors;
 pub use rotors::{Rotor, 
     BIG_ROTOR_MAP, BIG_ROTOR_VEC,
-    INDEX_ROTOR_MAP, INDEX_ROTOR_VEC
+    INDEX_ROTOR_VEC
 };
 
 
