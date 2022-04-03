@@ -22,8 +22,8 @@ fn rotor_display(ui: &mut eframe::egui::Ui, rotors: &mut [Rotor]) {
 impl View for Sigaba {
     fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng) {
 
-        if ui.button("Reset").clicked() {
-            self.reset()
+        if ui.button("Restore State").clicked() {
+            self.previous_state()
         }
  
         ///////////////////////
@@ -32,7 +32,7 @@ impl View for Sigaba {
         ui.add_space(10.0);
         ui.label( 
             RichText::new("Cipher Rotors").heading()
-        ).on_hover_text("Message passes through these rotors during operation. Their movement is pseudorandom.");
+        ).on_hover_text("Message passes through these rotors during operation. Their pseudorandom movement is decided by the Control Rotors and Index Rotors.");
         for i in 0..5 {
             ui.horizontal(|ui| {
                 ComboBox::from_id_source(format!("Cipher Rotor {}",i+1))

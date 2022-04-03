@@ -57,6 +57,9 @@ pub use sigaba::Sigaba;
 pub mod bazeries;
 pub use bazeries::Bazeries;
 
+pub mod chaocipher;
+pub use chaocipher::Chaocipher;
+
 use rand::prelude::StdRng;
 use crate::errors::CipherError;
 

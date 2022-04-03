@@ -182,14 +182,14 @@ impl Sigaba {
         }
     }
 
-    pub fn reset(&mut self) {
-        for rtr in self.cipher_rotors() {
-            rtr.position = 0
-        }
-        for rtr in self.control_rotors() {
-            rtr.position = 0
-        }
-    }
+    // pub fn reset(&mut self) {
+    //     for rtr in self.cipher_rotors() {
+    //         rtr.position = 0
+    //     }
+    //     for rtr in self.control_rotors() {
+    //         rtr.position = 0
+    //     }
+    // }
 
     fn step(&self) {
         let sig = self.control_rotors.borrow().produce_signal();

@@ -28,7 +28,7 @@ impl CodeID {
             CodeID::MorseITU => "The best known version of Morse Code is the ITU Standard. It uses two kind of signals the 'dit' and 'dah' with the dah defined as three times the length of the dit. Morse code also requires periods with no signal, called spaces, in order to differentiate characters. The subset of ITU Morse below covers all the printing characters. Additional control signals and prosigns are not yet supported. The space between dits and dahs is the same length as a dit, between characters is a space of three dits, between words is a space of seven dits.\n\nDits may be entered as a period `.` instead of the cdot `·` shown for display.", 
             CodeID::MorseAmerican => "An early, now obsolete, version of Morse Code",
             CodeID::Fibonacci => "The Fibonacci code is named because it uses the Fibonacci sequence to generate a variable width encoding of some arbitrary alphabet. More common characters are assigned shorter codes. This allows very large alphabets to be encoded efficiently so long as characters vary in frequency following a geometric distribution.",
-            CodeID::Unary => "The Unary Encoding is the simplest useful variable length code. It is a prefix code as no code word appears as a prefix of any other code word.",
+            CodeID::Unary => "The Unary Encoding is the simplest prefix code and thus the simplest useful variable length code. No code word appears as a prefix of any other code word.",
             _ => "Missing description. Please complain to the author.",
         }
     }
