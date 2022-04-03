@@ -16,6 +16,7 @@ pub use fibonacci::FibonacciCode;
 pub mod romaji;
 
 pub mod unary;
+pub use unary::UnaryCode;
 
 pub mod elias;
 

@@ -62,16 +62,12 @@ impl Iterator for FibStr {
 pub struct FibonacciCode {
     map: HashMap<char, String>,
     map_inv: HashMap<String, char>,
-    alphabet: String,
+    pub alphabet: String,
     old_alphabet: String,
     max_code_len: usize,
 }
 
 impl FibonacciCode {
-
-    pub fn control_alphabet(&mut self) -> &mut String {
-        &mut self.alphabet
-    }
 
     // This needs to be called before encoding or decoding to be
     // sure that the maps are up to date. In the egui interface

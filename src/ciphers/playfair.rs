@@ -11,7 +11,7 @@ pub struct Playfair {
     square: String,
     key_word: String,
     spacer: char,
-    grid_side_len: usize,
+    pub grid_side_len: usize,
 }
 
 impl Playfair {
@@ -104,7 +104,6 @@ impl Playfair {
         }
         Ok(())
     }
-
 }
 
 impl Default for Playfair {
@@ -113,7 +112,8 @@ impl Default for Playfair {
               square: String::from(PresetAlphabet::BasicLatinNoQ), 
               spacer: 'X', 
               grid_side_len: 5, 
-              key_word: String::new() }
+              key_word: String::new() 
+        }
     }
 }
 

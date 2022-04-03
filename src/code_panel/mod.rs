@@ -2,13 +2,14 @@ use crate::code_id::CodeID;
 use eframe::egui::{self, TextEdit, TextStyle, RichText, Color32};
 use crate::codes::*;
 pub mod generic_components;
-pub mod morse_american_controls;
 use self::generic_components::encode_decode;
 
 pub mod ascii_controls;
 pub mod morse_controls;
 pub mod godel_controls;
 pub mod fibonacci_controls;
+pub mod morse_american_controls;
+pub mod unary_controls;
 
 pub trait View {
     fn ui(&mut self, ui: &mut egui::Ui);
@@ -32,6 +33,7 @@ pub struct CodeControlPanel {
     morse_american: MorseAmerican,
     godel: Godel,
     fibonacci: FibonacciCode,
+    unary: UnaryCode,
 }
 
 impl CodeControlPanel {
@@ -39,7 +41,7 @@ impl CodeControlPanel {
         
         egui::Grid::new("comboboxes").show(ui, |ui| {
             combox_box(
-                &[CodeID::Ascii, CodeID::Fibonacci],
+                &[CodeID::Ascii, CodeID::Fibonacci, CodeID::Unary],
                 "Binary Codes",
                 active_code, ui
             );
@@ -77,6 +79,7 @@ impl CodeControlPanel {
             CodeID::Godel => self.godel.ui(ui),
             CodeID::Fibonacci => self.fibonacci.ui(ui),
             CodeID::MorseAmerican => self.morse_american.ui(ui),
+            CodeID::Unary => self.unary.ui(ui),
             _ => { ui.label("IN PROGRESS"); },
         }
     }
@@ -109,6 +112,7 @@ impl CodeDisplayPanel {
             CodeID::MorseAmerican => encode_decode(ui, &control_panel.morse_american, input, output, errors),
             CodeID::Godel => encode_decode(ui, &control_panel.godel, input, output, errors),
             CodeID::Fibonacci => encode_decode(ui, &control_panel.fibonacci, input, output, errors),
+            CodeID::Unary => encode_decode(ui, &control_panel.unary, input, output, errors),
             _ => { *errors = String::from("button must be added to DisplayPanel struct") }
         }
 

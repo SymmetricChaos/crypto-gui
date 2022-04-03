@@ -6,7 +6,7 @@ use super::Code;
 pub struct UnaryCode {
     map: HashMap<char,String>,
     map_inv: HashMap<String,char>,
-    alphabet: String,
+    pub alphabet: String,
     old_alphabet: String
 }
 
