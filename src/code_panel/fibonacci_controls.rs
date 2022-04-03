@@ -1,22 +1,11 @@
-use eframe::egui::{Grid, TextEdit};
-use super::View;
-use crate::{codes::FibonacciCode, egui_aux::mono_strong};
+use eframe::egui::TextEdit;
+use super::{View, generic_components::fill_code_columns};
+use crate::codes::FibonacciCode;
 
-const NUM_ROWS: usize = 3;
 
 impl View for FibonacciCode {
     fn ui(&mut self, ui: &mut eframe::egui::Ui) {
         ui.add(TextEdit::singleline(&mut self.alphabet));
-        Grid::new("fib_code_grid").num_columns(NUM_ROWS).show(ui, |ui| {
-            let mut ctr = 0;
-            for (c, code) in self.chars_codes() {
-                let pair = format!("{}  {}     ", c, code);
-                mono_strong(ui,&pair, None);
-                ctr += 1;
-                if ctr % NUM_ROWS == 0 {
-                    ui.end_row()
-                }
-            }
-        });
+        fill_code_columns(32, 4, ui, Box::new(self.chars_codes()));
     }
 }

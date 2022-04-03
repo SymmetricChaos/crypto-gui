@@ -24,16 +24,15 @@ impl Godel {
 
     pub fn control_alphabet(&mut self) -> &mut String {
         for (n, c) in self.alphabet.chars().enumerate() {
-            self.map.insert(c, n);
-            self.map_inv.insert(n, c);
+            self.map.insert(c, n+1);
+            self.map_inv.insert(n+1, c);
         }
         &mut self.alphabet
     }
 
-    pub fn chars_codes(&self) -> impl Iterator<Item=(String, char)> + '_ {
+    pub fn chars_codes(&self) -> impl Iterator<Item=(&usize, char)> + '_ {
         self.alphabet.chars()
-            .enumerate()
-            .map(|(n, c)| ( format!("{}",n), c) )
+            .map(|x| (self.map.get(&x).unwrap(), x) )
     }
 }
 
