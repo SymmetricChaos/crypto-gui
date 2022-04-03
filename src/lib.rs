@@ -17,6 +17,7 @@ pub mod codes;
 pub mod code_panel;
 
 pub mod egui_aux;
+pub mod rotors;
 
 
 // ----------------------------------------------------------------------------
