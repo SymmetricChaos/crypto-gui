@@ -1,4 +1,4 @@
-use std::{collections::HashSet, cell::RefCell};
+use std::collections::HashSet;
 
 use itertools::Itertools;
 
@@ -165,57 +165,50 @@ impl Default for CipherRotors {
  
 // Interface for the cipher
 pub struct Sigaba {
-    pub index_rotors: RefCell<IndexRotors>,
-    pub control_rotors: RefCell<ControlRotors>,
-    pub cipher_rotors: RefCell<CipherRotors>,
-    pub prev_state: ([usize;5], [usize;5]),
+    pub index_rotors: IndexRotors,
+    pub control_rotors: ControlRotors,
+    pub cipher_rotors: CipherRotors,
+    //pub prev_state: RefCell<([usize;5], [usize;5])>,
 }
 
 impl Sigaba {
     // Restore to previous manually set rotor positions
-    pub fn previous_state(&mut self) {
-        for (val, rtr) in self.prev_state.0.clone().iter().zip(self.cipher_rotors()){
-            rtr.position = *val;
-        }
-        for (val, rtr) in self.prev_state.1.clone().iter().zip(self.control_rotors()){
-            rtr.position = *val;
-        }
-    }
-
-    // pub fn reset(&mut self) {
-    //     for rtr in self.cipher_rotors() {
-    //         rtr.position = 0
+    // pub fn previous_state(&mut self) {
+    //     for (val, rtr) in self.prev_state.borrow().0.clone().iter().zip(self.cipher_rotors()) {
+    //         rtr.position = *val;
     //     }
-    //     for rtr in self.control_rotors() {
-    //         rtr.position = 0
+    //     for (val, rtr) in self.prev_state.borrow().1.clone().iter().zip(self.control_rotors()) {
+    //         rtr.position = *val;
     //     }
     // }
 
-    fn step(&self) {
-        let sig = self.control_rotors.borrow().produce_signal();
-        let sig = self.index_rotors.borrow().pass_signal(sig);
-        self.cipher_rotors.borrow_mut().step(sig);
-        self.control_rotors.borrow_mut().step();
+    // pub fn save_state(&self) {
+
+    // }
+
+    fn signal(&self) -> Vec<usize> {
+        let sig = self.control_rotors.produce_signal();
+        self.index_rotors.pass_signal(sig)
     }
  
     fn encrypt_single(&self, n: usize) -> usize {
-        self.cipher_rotors.borrow().encrypt(n)
+        self.cipher_rotors.encrypt(n)
     }
  
     fn decrypt_single(&self, n: usize) -> usize {
-        self.cipher_rotors.borrow().decrypt(n)
+        self.cipher_rotors.decrypt(n)
     }
 
     pub fn index_rotors(&mut self) -> &mut [SigabaIndexRotor; 5] {
-        &mut self.index_rotors.get_mut().rotors
+        &mut self.index_rotors.rotors
     }
 
     pub fn cipher_rotors(&mut self) -> &mut [Rotor; 5] {
-        &mut self.cipher_rotors.get_mut().rotors
+        &mut self.cipher_rotors.rotors
     }
 
     pub fn control_rotors(&mut self) -> &mut [Rotor; 5] {
-        &mut self.control_rotors.get_mut().rotors
+        &mut self.control_rotors.rotors
     }
 }
 
@@ -226,7 +219,7 @@ impl Default for Sigaba {
             index_rotors: Default::default(), 
             control_rotors: Default::default(), 
             cipher_rotors: Default::default(),
-            prev_state: ([0,0,0,0,0], [0,0,0,0,0])
+            //prev_state: ([0,0,0,0,0], [0,0,0,0,0])
         }
     }
 }
@@ -234,23 +227,33 @@ impl Default for Sigaba {
 impl Cipher for Sigaba {
 
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
+
+        let mut ctrl = self.control_rotors.clone();
+        let mut cphr = self.cipher_rotors.clone();
+
         let mut text = text.to_string();
         text = text.replace("Z", "X");
         text = text.replace(" ", "Z");
         let mut nums: Vec<usize> = text.chars().map(|c| char_to_usize(c)).collect();
         for n in nums.iter_mut() {
             *n = self.encrypt_single(*n);
-            self.step()
+            cphr.step(self.signal());
+            ctrl.step();
         }
-        self.control_rotors.borrow_mut().counter = 0;
+
         Ok(nums.iter().map(|n| usize_to_char(*n)).collect())
     }
 
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
+
+        let mut ctrl = self.control_rotors.clone();
+        let mut cphr = self.cipher_rotors.clone();
+
         let mut nums: Vec<usize> = text.chars().map(|c| char_to_usize(c)).collect();
         for n in nums.iter_mut() {
             *n = self.decrypt_single(*n);
-            self.step()
+            cphr.step(self.signal());
+            ctrl.step();
         }
         Ok(nums.iter().map(|n| usize_to_char(*n)).collect())
     }
@@ -272,7 +275,7 @@ mod sigaba_tests {
     use super::*;
 
     const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXIUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "OGGNMQNOWAPPHFGEZJTIVRPZVPUDCLJZIOY";
+    const CIPHERTEXT: &'static str = "OUSBJVKFICZXMWZGVJPAYZDSCOUSHNGTLZE";
     //SIGABA is not perfectly reversible
     const DECRYPT_TEXT: &'static str = "THEQUICKBROWNFOXIUMPSOVERTHELAXYDOG";
 

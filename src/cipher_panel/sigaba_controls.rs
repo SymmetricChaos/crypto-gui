@@ -22,9 +22,9 @@ fn rotor_display(ui: &mut eframe::egui::Ui, rotors: &mut [Rotor]) {
 impl View for Sigaba {
     fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng) {
 
-        if ui.button("Restore State").clicked() {
-            self.previous_state()
-        }
+        // if ui.button("Restore State").clicked() {
+        //     self.previous_state()
+        // }
  
         ///////////////////////
         //// CIPHER ROTORS ////
