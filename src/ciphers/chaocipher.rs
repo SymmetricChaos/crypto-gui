@@ -83,8 +83,9 @@ impl Cipher for Chaocipher {
  
     }
 
-    fn randomize(&mut self, _rng: &mut rand::prelude::StdRng) {
-        todo!()
+    fn randomize(&mut self, rng: &mut rand::prelude::StdRng) {
+        self.left.shuffle(rng);
+        self.right.shuffle(rng);
     }
 
     fn reset(&mut self) {

@@ -1,4 +1,4 @@
-use eframe::egui::{TextEdit, Ui};
+use eframe::egui::Ui;
 use rand::prelude::StdRng;
 use super::View;
 use super::generic_components::*;

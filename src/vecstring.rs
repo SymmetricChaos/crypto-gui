@@ -1,3 +1,5 @@
+use rand::prelude::{StdRng, SliceRandom};
+
 use crate::preset_alphabet::PresetAlphabet;
 use std::collections::VecDeque;
 use std::collections::vec_deque::{Iter,IterMut};
@@ -111,7 +113,9 @@ impl VecString {
         self.0.make_contiguous().sort()
     }
  
- 
+    pub fn shuffle(&mut self, rng: &mut StdRng) {
+        self.0.make_contiguous().shuffle(rng)
+    }
 }
  
 impl Index<usize> for VecString {
