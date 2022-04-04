@@ -8,14 +8,14 @@ pub trait Rotor {
     fn size(&self) -> usize;
     fn position(&mut self) -> &mut usize;
 
-    fn step_left(&mut self) {
-        *self.position() += 1;
+    fn step_left(&mut self, n: usize) {
+        *self.position() += n;
         *self.position() %= self.size()
     }
 
-    fn step_right(&mut self) {
+    fn step_right(&mut self, n: usize) {
         *self.position() += self.size();
-        *self.position() -= 1;
+        *self.position() -= n;
         *self.position() %= self.size()
     }
 }

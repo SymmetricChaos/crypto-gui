@@ -21,6 +21,10 @@ pub fn encrypt_decrypt(ui: &mut egui::Ui, cipher: &dyn Cipher, input: &mut Strin
     });
 }
 
+// pub fn encrypt_decrypt_step(ui: &mut egui::Ui, cipher: &dyn SteppingCipher, input: &mut String, output: &mut String, errors: &mut String) {
+
+// }
+
 
 pub fn randomize_reset(ui: &mut egui::Ui, cipher: &mut dyn Cipher, rng: &mut StdRng) {
     if ui.button("Randomize").clicked() {

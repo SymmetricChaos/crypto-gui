@@ -2,7 +2,7 @@ use rand::prelude::StdRng;
 use crate::text_functions::{shuffled_str, dedup_alphabet};
 use super::Cipher;
 use crate::errors::CipherError;
-use crate::text_types::PresetAlphabet;
+use crate::preset_alphabet::PresetAlphabet;
 
 pub struct GeneralSubstitution {
     alphabet1: String,

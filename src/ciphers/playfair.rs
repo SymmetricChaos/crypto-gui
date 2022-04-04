@@ -4,7 +4,7 @@ use rand::prelude::StdRng;
 use super::Cipher;
 use crate::{errors::CipherError, text_functions::shuffled_str};
 use crate::text_functions::{keyed_alphabet};
-use crate::text_types::{PresetAlphabet::*, PresetAlphabet};
+use crate::preset_alphabet::{PresetAlphabet::*, PresetAlphabet};
 
 pub struct Playfair {
     pub alphabet: String,

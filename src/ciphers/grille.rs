@@ -2,7 +2,7 @@ use std::ops::Range;
 
 use rand::{Rng, prelude::StdRng, SeedableRng};
 use super::Cipher;
-use crate::{errors::CipherError, grid::{Grid, Symbol}, text_types::PresetAlphabet};
+use crate::{errors::CipherError, grid::{Grid, Symbol}, preset_alphabet::PresetAlphabet};
 
 pub struct Grille {
     pub null_alphabet: String,

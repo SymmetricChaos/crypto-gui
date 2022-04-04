@@ -5,7 +5,7 @@ use rand::prelude::StdRng;
 use super::View;
 use super::generic_components::*;
 use crate::ciphers::Playfair;
-use crate::text_types::PresetAlphabet::*;
+use crate::preset_alphabet::PresetAlphabet::*;
 
 impl View for Playfair {
     fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng) {

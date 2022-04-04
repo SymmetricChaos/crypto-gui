@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use rand::prelude::{StdRng, SliceRandom, IteratorRandom};
-use crate::{errors::CipherError, text_types::PresetAlphabet};
+use crate::{errors::CipherError, preset_alphabet::PresetAlphabet};
 
 
 pub fn shuffled_str(s: &str, rng: &mut StdRng) -> String {

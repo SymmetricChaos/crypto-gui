@@ -5,7 +5,7 @@ use crate::errors::CipherError;
 use crate::grid::{Grid, Symbol};
 use crate::text_functions::{rank_str, random_sample_replace};
 use super::Cipher;
-use crate::text_types::{PresetAlphabet::*};
+use crate::preset_alphabet::PresetAlphabet::*;
 
 pub struct Columnar {
     pub alphabet: String,

@@ -1,6 +1,6 @@
 use rand::prelude::{StdRng};
 use crate::{ciphers::{Polybius,Columnar}, errors::CipherError};
-use crate::text_types::PresetAlphabet::*;
+use crate::preset_alphabet::PresetAlphabet::*;
 use super::Cipher;
 
 pub struct B64 {

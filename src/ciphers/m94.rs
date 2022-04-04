@@ -1,6 +1,6 @@
 use rand::{prelude::{StdRng, SliceRandom}, Rng};
 use super::Cipher;
-use crate::text_types::{PresetAlphabet::*};
+use crate::preset_alphabet::PresetAlphabet::*;
 use crate::errors::CipherError;
 
 

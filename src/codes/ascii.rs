@@ -1,6 +1,6 @@
 use lazy_static::lazy_static;
 use std::collections::HashMap;
-use crate::{text_types::PresetAlphabet::Ascii128, errors::CodeError};
+use crate::{preset_alphabet::PresetAlphabet::Ascii128, errors::CodeError};
 
 use super::Code;
 

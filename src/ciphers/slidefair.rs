@@ -2,7 +2,8 @@ use std::fmt;
 
 use rand::prelude::StdRng;
 use super::Cipher;
-use crate::text_types::{PresetAlphabet::*, VecString};
+use crate::vecstring::{VecString};
+use crate::preset_alphabet::PresetAlphabet::*;
 use crate::{errors::CipherError, text_functions::shuffled_str};
 use crate::text_functions::keyed_alphabet;
 

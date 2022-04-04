@@ -24,6 +24,7 @@ pub mod enigma_controls;
 pub mod grille_controls;
 pub mod sigaba_controls;
 pub mod bazeries_controls;
+pub mod chaocipher_controls;
 
 pub trait View {
     fn ui(&mut self, ui: &mut egui::Ui, rng: &mut StdRng);
@@ -66,6 +67,8 @@ pub struct CipherControlPanel {
 
     adfgvx: ADFGVX,
     b64: B64,
+
+    chaocipher: Chaocipher,
 }
 
 
@@ -110,6 +113,12 @@ impl CipherControlPanel {
                 "Composite",
                 active_cipher, ui
             );
+
+            combox_box(
+                &[CipherID::Chaocipher],
+                "Other",
+                active_cipher, ui
+            );
         });
 
         ui.add_space(16.0);
@@ -146,6 +155,7 @@ impl CipherControlPanel {
             CipherID::Grille => self.grille.ui(ui, rng),
             CipherID::SIGABA => self.sigaba.ui(ui, rng),
             CipherID::Bazeries => self.bazeries.ui(ui, rng),
+            CipherID::Chaocipher => self.chaocipher.ui(ui, rng),
             _ => { ui.label("IN PROGRESS"); },
         }
     }
@@ -192,6 +202,7 @@ impl CipherDisplayPanel {
             CipherID::Grille => encrypt_decrypt(ui, &control_panel.grille, input, output, errors),
             CipherID::SIGABA => encrypt_decrypt(ui, &control_panel.sigaba, input, output, errors),
             CipherID::Bazeries => encrypt_decrypt(ui, &control_panel.bazeries, input, output, errors),
+            CipherID::Chaocipher => encrypt_decrypt(ui, &control_panel.chaocipher, input, output, errors),
             _ => { *errors = String::from("button must be added to DisplayPanel struct") }
         }
 

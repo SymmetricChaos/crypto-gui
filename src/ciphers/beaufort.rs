@@ -4,7 +4,7 @@ use rand::prelude::{StdRng};
 use super::{Cipher, PolyMode};
 use crate::text_functions::random_sample_replace;
 use crate::errors::CipherError;
-use crate::text_types::{PresetAlphabet::*};
+use crate::preset_alphabet::{PresetAlphabet::*};
 
 pub struct Beaufort {
     pub key_words: [String; 5],

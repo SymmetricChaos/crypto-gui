@@ -12,12 +12,13 @@ pub mod grid;
 pub mod errors;
 pub mod cipher_id;
 pub mod code_id;
-pub mod text_types;
+pub mod vecstring;
 pub mod codes;
 pub mod code_panel;
 
 pub mod egui_aux;
 pub mod rotors;
+pub mod preset_alphabet;
 
 
 // ----------------------------------------------------------------------------

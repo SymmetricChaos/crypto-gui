@@ -1,4 +1,4 @@
-use crate::{errors::CipherError, text_types::PresetAlphabet, ciphers::Cipher};
+use crate::{errors::CipherError, preset_alphabet::PresetAlphabet, ciphers::Cipher};
 use super::{ROTOR_MAP,REFLECTORS,Rotor,Reflector,Plugboard,char_to_usize,usize_to_char};
 use rand::prelude::StdRng;
  

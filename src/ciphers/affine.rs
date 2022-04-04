@@ -1,6 +1,6 @@
 use super::Cipher;
 use crate::errors::CipherError;
-use crate::text_types::PresetAlphabet::*;
+use crate::preset_alphabet::PresetAlphabet::*;
 use crate::math_functions::mul_inv;
 use rand::{prelude::StdRng, Rng};
 

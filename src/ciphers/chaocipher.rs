@@ -1,12 +1,11 @@
 use crate::errors::CipherError;
-use crate::text_types::{VecString, PresetAlphabet};
+use crate::vecstring::VecString;
 
 use super::Cipher;
  
 pub struct Chaocipher {
-    left: VecString,
-    right: VecString,
-    //prev_state: (VecString,VecString),
+    pub left: VecString,
+    pub right: VecString,
 }
 
 impl Chaocipher {
@@ -20,6 +19,11 @@ impl Chaocipher {
         right.rotate_left(n+1);
         let t = right.remove(2).unwrap();
         right.insert(13, t);
+    }
+
+    pub fn step(&mut self, n: usize) {
+        Chaocipher::left_permute(&mut self.left, n);
+        Chaocipher::right_permute(&mut self.right, n);
     }
 
     pub fn set_left(&mut self, s: &str) {
@@ -39,8 +43,8 @@ impl Chaocipher {
 impl Default for Chaocipher {
     fn default() -> Self {
         Chaocipher { 
-            left: VecString::from(PresetAlphabet::BasicLatin), 
-            right: VecString::from("AZDNBUHYFWJLVGRCQMPSOEXTKI"),
+            left:  VecString::from("HXUCZVAMDSLKPEFJRIGTWOBNYQ"), 
+            right: VecString::from("PTLNBQDEOYSFAVZKGJRIHWXUMC"),
             //prev_state: (VecString::from(PresetAlphabet::BasicLatin), VecString::from("AZDNBUHYFWJLVGRCQMPSOEXTKI"))
         }
     }
@@ -91,10 +95,11 @@ impl Cipher for Chaocipher {
 
 #[cfg(test)]
 mod chaocipher_tests {
+    // http://www.chaocipher.com/ActualChaocipher/Chaocipher-Revealed-Algorithm.pdf
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "";
+    const PLAINTEXT:  &'static str = "WELLDONEISBETTERTHANWELLSAID";
+    const CIPHERTEXT: &'static str = "OAHQHCNYNXTSZJRRHJBYHQKSOUJY";
 
     #[test]
     fn encrypt_test() {

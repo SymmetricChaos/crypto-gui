@@ -3,7 +3,8 @@ use std::collections::VecDeque;
 use rand::prelude::StdRng;
 use super::{Cipher, PolyMode};
 use crate::text_functions::random_sample_replace;
-use crate::text_types::{PresetAlphabet, VecString};
+use crate::vecstring::{VecString};
+use crate::preset_alphabet::PresetAlphabet;
 use crate::errors::CipherError;
 
 
