@@ -62,5 +62,6 @@ impl View for Grille {
                 }
             });
         }
+        ui.label(format!("{} empty cells", self.grid.num_empty()));
     }
 }
