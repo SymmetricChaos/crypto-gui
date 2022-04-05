@@ -15,18 +15,20 @@ fn cell_button(grille: &mut Grille, x: usize, y: usize, ui: &mut eframe::egui::U
         }
     };
 }
- 
+
 impl View for Grille {
     fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng) {
  
         randomize_reset(ui, self, rng);
         ui.add_space(16.0);
- 
+
+        ui.checkbox(&mut self.use_nulls, "Use Nulls?");
+        if self.use_nulls {
+            ui.label("Null Alphabet");
+            ui.add(TextEdit::singleline(&mut self.null_alphabet).font(TextStyle::Monospace));
+        }
         ui.add_space(16.0);
-        ui.label("Null Alphabet");
-        ui.add(TextEdit::singleline(&mut self.null_alphabet).font(TextStyle::Monospace));
-        ui.add_space(16.0);
- 
+
         ui.label("Rows");
         ui.horizontal(|ui| {
             if ui.button("-").clicked() {
@@ -37,8 +39,8 @@ impl View for Grille {
                 self.grid.add_row();
             };
         });
-        ui.add_space(16.0);
- 
+        ui.add_space(10.0);
+
         ui.label("Columns");
         ui.horizontal(|ui| {
             if ui.button("-").clicked() {
@@ -50,7 +52,7 @@ impl View for Grille {
             };
         });
         ui.add_space(16.0);
- 
+
         ui.spacing_mut().item_spacing = (2.0,2.0).into();
         ui.style_mut().override_text_style = Some(TextStyle::Monospace);
         for x in 0..self.grid.num_rows() {

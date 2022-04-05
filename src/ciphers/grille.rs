@@ -97,18 +97,18 @@ impl Cipher for Grille {
             Ok(out)
             
         } else {
-            if self.grid.num_empty() != text.chars().count() {
-                return Err(CipherError::Input("Text does not fill the empty spaces of the Grille".to_string()))
-            }
+            // if self.grid.num_empty() != text.chars().count() {
+            //     return Err(CipherError::Input("Text does not fill the empty spaces of the Grille".to_string()))
+            // }
             
             let mut grid = self.grid.clone();
             let mut chars = text.chars();
 
-            let col_coords = (0..grid.num_cols())
-                    .cartesian_product(0..grid.num_rows());
+            let coords = (0..grid.num_rows())
+                    .cartesian_product(0..grid.num_cols());
             
-            for coord in col_coords {
-                let cell = grid.get_mut(coord).unwrap();
+            for (r,c) in coords {
+                let cell = grid.get_mut((c,r)).unwrap();
                 if cell.is_empty() {
                     match chars.next() {
                         Some(c) => *cell = Symbol::Character(c),
