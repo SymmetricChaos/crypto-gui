@@ -1,5 +1,6 @@
 use std::ops::Range;
 
+use itertools::Itertools;
 use rand::{Rng, prelude::StdRng, SeedableRng};
 use super::Cipher;
 use crate::{errors::CipherError, grid::{Grid, Symbol}, preset_alphabet::PresetAlphabet};
@@ -26,8 +27,11 @@ impl Grille {
         }
     }
 
-    fn random_null(&self, rng: &mut StdRng, range: &Range<usize>) -> char {
-        self.null_alphabet.chars().nth(rng.gen_range(range.clone())).unwrap()
+    fn random_null(&self, rng: &mut StdRng, range: &Range<usize>) -> Symbol {
+        if !self.use_nulls {
+            return Symbol::Empty
+        }
+        Symbol::Character(self.null_alphabet.chars().nth(rng.gen_range(range.clone())).unwrap())
     }
 }
  
@@ -59,38 +63,64 @@ impl Cipher for Grille {
         let mut grid = self.grid.clone();
         let mut chars = text.chars();
         
-        // Must be a better way to select random characters
         for cell in grid.get_rows_mut() {
             match cell {
-                Symbol::Character(_) => unreachable!("there should be no characters in the Grille"),
+                Symbol::Character(_) => unreachable!("encryption should encounter no Symbol::Character cells"),
                 Symbol::Empty => { 
                     match chars.next() {
                         Some(c) => *cell = Symbol::Character(c),
-                        None => *cell = Symbol::Character( self.random_null(&mut rng, &range) ),
+                        None => *cell = self.random_null(&mut rng, &range),
                     }
                 },
-                Symbol::Blocked => { *cell = Symbol::Character( self.random_null(&mut rng, &range) ) },
+                Symbol::Blocked => { *cell = self.random_null(&mut rng, &range) },
             }
         }
 
-        Ok(grid.get_cols().map(|x| x.to_char()).collect())
+        Ok(grid.get_cols().filter(|x| x.is_character()).map(|x| x.to_char()).collect())
     }
  
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
-        if self.grid.grid_size() != text.chars().count() {
-            return Err(CipherError::Input("Text is not the same size as the Grille".to_string()))
-        }
-
-        let filled_grid = Grid::from_cols(text, self.grid.num_rows(), self.grid.num_cols(), '\n', '\n');
-
-        let mut out = String::with_capacity(self.grid.num_empty());
-        for (c,s) in filled_grid.get_rows().zip(self.grid.get_rows()) {
-            if s.is_empty() {
-                out.push(c.to_char())
+        if self.use_nulls {
+            if self.grid.grid_size() != text.chars().count() {
+                return Err(CipherError::Input("Text is not the same size as the Grille".to_string()))
             }
+            
+            let filled_grid = Grid::from_cols(text, self.grid.num_rows(), self.grid.num_cols(), '\n', '\n');
+
+            let mut out = String::with_capacity(self.grid.num_empty());
+            for (c,s) in filled_grid.get_rows().zip(self.grid.get_rows()) {
+                if s.is_empty() {
+                    out.push(c.to_char())
+                }
+            }
+    
+            Ok(out)
+            
+        } else {
+            if self.grid.num_empty() != text.chars().count() {
+                return Err(CipherError::Input("Text does not fill the empty spaces of the Grille".to_string()))
+            }
+            
+            let mut grid = self.grid.clone();
+            let mut chars = text.chars();
+
+            let col_coords = (0..grid.num_cols())
+                    .cartesian_product(0..grid.num_rows());
+            
+            for coord in col_coords {
+                let cell = grid.get_mut(coord).unwrap();
+                if cell.is_empty() {
+                    match chars.next() {
+                        Some(c) => *cell = Symbol::Character(c),
+                        None => (),
+                    }
+                }
+            }
+    
+            Ok(grid.get_rows().filter(|x| x.is_character()).map(|x| x.to_char()).collect())
         }
 
-        Ok(out)
+
     }
  
     fn reset(&mut self) {
@@ -132,7 +162,7 @@ mod grille_tests {
         let mut cipher = Grille::default();
         cipher.seed = SEED;
         cipher._randomize_seeded();
-        println!("encrypting\n{}",cipher.grid);
+        //println!("encrypting\n{}",cipher.grid);
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

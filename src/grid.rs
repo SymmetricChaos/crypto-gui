@@ -232,18 +232,15 @@ impl Grid {
     pub fn get_rows_mut(&mut self) -> impl Iterator<Item = &mut Symbol> {
         self.symbols.iter_mut()
     }
- 
+
     // pub fn get_cols_mut(&mut self) -> impl Iterator<Item = &mut Symbol> {
     //     // Yes this is an absurd hack again
-    //     let mut symbols: Vec<&mut Symbol> = Vec::new();
-    //     for n in 0..self.num_cols() {
-    //         for symbol in self.get_col_mut(n) {
-    //             symbols.push(symbol)
-    //         };
-    //     }
-    //     symbols.into_iter()
+    //     (0..self.num_cols)
+    //         .cartesian_product(0..self.num_rows())
+    //         .map(|coord| self.index_from_coord(coord).unwrap())
+    //         .map(|idx| self.symbols[idx])
     // }
- 
+
     // These two just read the positions with characters
     pub fn read_rows_characters(&self) -> impl Iterator<Item = char> + '_ {
         self.get_rows().filter(|x| x.is_character()).map(|x| x.to_char())
