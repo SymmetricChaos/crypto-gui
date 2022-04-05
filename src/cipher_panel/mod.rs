@@ -25,6 +25,7 @@ pub mod grille_controls;
 pub mod sigaba_controls;
 pub mod bazeries_controls;
 pub mod chaocipher_controls;
+pub mod bifid_controls;
 
 pub trait View {
     fn ui(&mut self, ui: &mut egui::Ui, rng: &mut StdRng);
@@ -67,6 +68,7 @@ pub struct CipherControlPanel {
 
     adfgvx: ADFGVX,
     b64: B64,
+    bifid: Bifid,
 
     chaocipher: Chaocipher,
 }
@@ -109,7 +111,7 @@ impl CipherControlPanel {
             );
 
             combox_box(
-                &[CipherID::ADFGVX, CipherID::B64],
+                &[CipherID::ADFGVX, CipherID::B64, CipherID::Bifid],
                 "Composite",
                 active_cipher, ui
             );
@@ -156,6 +158,7 @@ impl CipherControlPanel {
             CipherID::SIGABA => self.sigaba.ui(ui, rng),
             CipherID::Bazeries => self.bazeries.ui(ui, rng),
             CipherID::Chaocipher => self.chaocipher.ui(ui, rng),
+            CipherID::Bifid => self.bifid.ui(ui, rng),
             _ => { ui.label("IN PROGRESS"); },
         }
     }
@@ -203,6 +206,7 @@ impl CipherDisplayPanel {
             CipherID::SIGABA => encrypt_decrypt(ui, &control_panel.sigaba, input, output, errors),
             CipherID::Bazeries => encrypt_decrypt(ui, &control_panel.bazeries, input, output, errors),
             CipherID::Chaocipher => encrypt_decrypt(ui, &control_panel.chaocipher, input, output, errors),
+            CipherID::Bifid => encrypt_decrypt(ui, &control_panel.bifid, input, output, errors),
             _ => { *errors = String::from("button must be added to DisplayPanel struct") }
         }
 

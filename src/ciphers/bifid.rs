@@ -1,28 +1,29 @@
+use rand::Rng;
+
 use crate::{ciphers::polybius::Polybius, errors::CipherError};
 use super::Cipher;
 
 /// The Bifid Cipher combines a Polybius Square with a simple transposition
 pub struct Bifid {
-    polybius: Polybius,
-    block_size: usize,
-}
-
-
-impl Bifid {
-
+    pub polybius: Polybius,
+    pub block_size: usize,
 }
 
 impl Default for Bifid {
     fn default() -> Self {
-        Self { polybius: Default::default(), block_size: Default::default() }
+        Self { polybius: Default::default(), block_size: 7 }
     }
 }
 
 impl Cipher for Bifid {
 
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let len = text.chars().count();
+
         let vector: Vec<char> = text.chars().collect();
+        let len = vector.len();
+        if len % self.block_size != 0 {
+            return Err(CipherError::input("Input length must be a multiple of the block size"))
+        };
         let mut out = String::with_capacity(len*2);
 
         for block in vector.chunks(self.block_size).map(|x| x.to_vec()) {
@@ -44,34 +45,68 @@ impl Cipher for Bifid {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        let len = text.chars().count();
 
+        // turn text into a vector and prepare a string to fill with the output
         let vector: Vec<char> = text.chars().collect();
-        let mut out = String::with_capacity(len);
+        if vector.len() % self.block_size != 0 {
+            return Err(CipherError::input("Input length must be a multiple of the block size"))
+        };
+        let mut out = String::with_capacity(vector.len());
 
+        // Divide the vector into chunks of the block size
         for block in vector.chunks(self.block_size).map(|x| x.to_vec()) {
+
+            // Turn the block into a String then encrypt it with the Polybius cipher
             let clip: String = block.iter().collect();
             let poly: String = self.polybius.encrypt(&clip)?;
 
+            dbg!(&clip);
+
+            // Divide the encrypted string in half
+            // TODO: This will likely panic with non-ASCII inputs
             let left = &poly[0..self.block_size];
             let right = &poly[self.block_size..self.block_size*2];
 
-            let mut sorted = String::with_capacity(self.block_size);
+            // Take characters from left and right as pairs and write them into a new string
+            let mut sorted = String::with_capacity(self.block_size*2);
             for (l, r) in left.chars().zip(right.chars()) {
                 sorted.push(l);
                 sorted.push(r);
             }
 
+            // Decrypt the result and push it onto the output string
             out.push_str(&self.polybius.decrypt(&sorted)?)
         }
         Ok(out)
     }
 
     fn randomize(&mut self, rng: &mut rand::prelude::StdRng) {
+        self.block_size = rng.gen_range(3..=30);
         self.polybius.randomize(rng)
     }
 
     fn reset(&mut self) {
         *self = Self::default();
+    }
+}
+
+
+#[cfg(test)]
+mod caesar_tests {
+    use super::*;
+
+    const PLAINTEXT: &'static str =  "THEKUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CIPHERTEXT: &'static str = "RCRDOESKSXFGWPOINUOXCODREEIOKZCGETW";
+
+    #[test]
+    fn encrypt_test() {
+        let cipher = Bifid::default();
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+    }
+
+    #[test]
+    fn decrypt_test() {
+        let cipher = Bifid::default();
+        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }
