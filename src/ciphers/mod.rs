@@ -60,6 +60,9 @@ pub use bazeries::Bazeries;
 pub mod chaocipher;
 pub use chaocipher::Chaocipher;
 
+pub mod bifid;
+pub use bifid::Bifid;
+
 use rand::prelude::StdRng;
 use crate::errors::CipherError;
 
