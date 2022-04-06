@@ -10,6 +10,7 @@ pub mod godel_controls;
 pub mod fibonacci_controls;
 pub mod morse_american_controls;
 pub mod unary_controls;
+pub mod spelling_alphabet_controls;
 
 pub trait View {
     fn ui(&mut self, ui: &mut egui::Ui);
@@ -34,6 +35,7 @@ pub struct CodeControlPanel {
     godel: Godel,
     fibonacci: FibonacciCode,
     unary: UnaryCode,
+    spelling_alphabet: SpellingAlphabet,
 }
 
 impl CodeControlPanel {
@@ -53,7 +55,7 @@ impl CodeControlPanel {
             );
 
             combox_box(
-                &[CodeID::Godel],
+                &[CodeID::Godel, CodeID::SpellingAlphabet],
                 "Other Codes",
                 active_code, ui
             );
@@ -80,6 +82,7 @@ impl CodeControlPanel {
             CodeID::Fibonacci => self.fibonacci.ui(ui),
             CodeID::MorseAmerican => self.morse_american.ui(ui),
             CodeID::Unary => self.unary.ui(ui),
+            CodeID::SpellingAlphabet => self.spelling_alphabet.ui(ui),
             _ => { ui.label("IN PROGRESS"); },
         }
     }
@@ -113,6 +116,7 @@ impl CodeDisplayPanel {
             CodeID::Godel => encode_decode(ui, &control_panel.godel, input, output, errors),
             CodeID::Fibonacci => encode_decode(ui, &control_panel.fibonacci, input, output, errors),
             CodeID::Unary => encode_decode(ui, &control_panel.unary, input, output, errors),
+            CodeID::SpellingAlphabet => encode_decode(ui, &control_panel.spelling_alphabet, input, output, errors),
             _ => { *errors = String::from("button must be added to DisplayPanel struct") }
         }
 

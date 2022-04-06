@@ -1,5 +1,4 @@
 pub mod ascii;
-
 pub use ascii::Ascii;
 
 pub mod morse_itu;
@@ -18,6 +17,9 @@ pub mod romaji;
 
 pub mod unary;
 pub use unary::UnaryCode;
+
+pub mod spelling_alphabet;
+pub use spelling_alphabet::SpellingAlphabet;
 
 pub mod elias;
 

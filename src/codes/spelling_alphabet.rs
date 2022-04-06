@@ -1,5 +1,9 @@
+use itertools::Itertools;
 use lazy_static::lazy_static;
-use std::{collections::HashMap, fmt};
+use std::collections::HashMap;
+
+use crate::errors::CodeError;
+use super::Code;
 
 fn make_maps(alphabet: &'static str, codes: &[&'static str]) -> (HashMap<char,&'static str>, HashMap<&'static str, char>) {
         let mut map = HashMap::new();
@@ -40,17 +44,25 @@ pub enum SpellingAlphabetMode {
 }
 
 impl SpellingAlphabetMode {
-    pub fn encode(c: char) -> Option<&str> {
+
+    pub fn alphabet(&self) -> &str {
         match self {
-            Nato => NATO.0.get(&c),
-            Ccb => CCB.0.get(&c),
+            SpellingAlphabetMode::Nato => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+            SpellingAlphabetMode::Ccb => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+        }
+    }
+
+    pub fn encode(&self, c: char) -> Option<&&str> {
+        match self {
+            SpellingAlphabetMode::Nato => NATO.0.get(&c),
+            SpellingAlphabetMode::Ccb => CCB.0.get(&c),
         }
     }
     
-    pub fn decode(s: &str) -> Option<char> {
+    pub fn decode(&self, s: &str) -> Option<&char> {
         match self {
-            Nato => NATO.1.get(s),
-            Ccb => CCB.1.get(s),
+            SpellingAlphabetMode::Nato => NATO.1.get(s),
+            SpellingAlphabetMode::Ccb => CCB.1.get(s),
         }
     }
 }
@@ -59,20 +71,27 @@ pub struct SpellingAlphabet {
     mode: SpellingAlphabetMode
 }
 
+impl SpellingAlphabet {
+    pub fn chars_codes(&mut self) -> impl Iterator<Item=(char, &&str)> + '_ {
+        self.mode.alphabet().chars()
+            .map(|c| (c, self.mode.encode(c).unwrap()) )
+    }
+}
+
 impl Default for SpellingAlphabet {
     fn default() -> Self {
-        Self { mode: Default::default() }
+        Self { mode: SpellingAlphabetMode::Nato }
     }
 }
 
 
-
+// These will panic change them to return CodeError on failure
 impl Code for SpellingAlphabet {
-    fn encode(&self, text: &str) -> Result<CodeError,String> {
-        Ok( text.chars().map(|c| self.mode.encode(c).ok_or(CodeError::input("invalid character"))? ).join(' ').collect() )
+    fn encode(&self, text: &str) -> Result<String, CodeError> {
+        Ok( text.chars().map(|c| self.mode.encode(c).unwrap() ).join(" ") )
     }
 
-    fn decode(&self, text: &str) -> Result<CodeError,String> {
-        Ok(text.split(" ").map(|s| self.mode.decode(s).ok_or(CodeError::input("invalid character"))? ).collect() )
+    fn decode(&self, text: &str) ->  Result<String, CodeError> {
+        Ok( text.split(" ").map(|s| self.mode.decode(s).unwrap() ).collect() )
     }
 }

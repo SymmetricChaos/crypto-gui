@@ -10,7 +10,9 @@ pub enum CodeID {
     Fibonacci,
     Baudot,
     Base64,
+    Pgp,
     Unary,
+    SpellingAlphabet,
 }
 
 impl Default for CodeID {
@@ -29,6 +31,7 @@ impl CodeID {
             CodeID::MorseAmerican => "An early, now obsolete, version of Morse Code",
             CodeID::Fibonacci => "The Fibonacci code is named because it uses the Fibonacci sequence to generate a variable width encoding of some arbitrary alphabet. More common characters are assigned shorter codes. This allows very large alphabets to be encoded efficiently so long as characters vary in frequency following a geometric distribution.",
             CodeID::Unary => "The Unary Encoding is the simplest prefix code and thus the simplest useful variable length code. No code word appears as a prefix of any other code word.",
+            CodeID::SpellingAlphabet => "Spelling Alphabets or Phonetic Alphabets.",
             _ => "Missing description. Please complain to the author.",
         }
     }
@@ -47,6 +50,8 @@ impl Display for  CodeID {
             CodeID::Baudot => "Baudot",
             CodeID::Base64 => "Base64",
             CodeID::Unary => "Unary",
+            CodeID::SpellingAlphabet => "Spelling Alphabet",
+            CodeID::Pgp => "PGP Word List",
         };
         write!(f,"{}",name)
     }
