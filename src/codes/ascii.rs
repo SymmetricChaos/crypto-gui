@@ -146,7 +146,7 @@ impl Code for Ascii {
 
 
 #[cfg(test)]
-mod polybius_tests {
+mod ascii_tests {
     use super::*;
 
     const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";

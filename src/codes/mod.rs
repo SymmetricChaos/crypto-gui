@@ -13,7 +13,6 @@ pub use godel::Godel;
 pub mod fibonacci;
 pub use fibonacci::FibonacciCode;
 
-pub mod romaji;
 
 pub mod unary;
 pub use unary::UnaryCode;
@@ -21,7 +20,12 @@ pub use unary::UnaryCode;
 pub mod spelling_alphabet;
 pub use spelling_alphabet::SpellingAlphabet;
 
+pub mod base64;
+pub use base64::Base64;
+
 pub mod elias;
+
+pub mod romaji;
 
 use crate::errors::CodeError;
 

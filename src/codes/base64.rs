@@ -1,5 +1,9 @@
 use lazy_static::lazy_static; // 1.4.0
 use std::collections::HashMap;
+
+use crate::errors::CodeError;
+
+use super::Code;
  
 const B64: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
  
@@ -21,50 +25,95 @@ lazy_static! {
         m
     };
 }
- 
-pub fn encode_b64(input: &[u8]) -> String {
-    let mut out = String::new();
-    // take three bytes at a time
-    for chunk in input.chunks(3) {
- 
-        // turn the three bytes into four sextets
-        // shr chunk[0] twice to keep only the top six bits
-        let s1 = chunk[0] >> 2; 
-        // shl chunk[0] 4 times to put the bottom top 2 bits on top, mask the top two bits, then shr[1] 4 times to put the top four bits on the bottom, XOR together
-        let s2 = ((chunk[0] << 4) & 0x3F) ^ (chunk[1] >> 4);
-        // shl chunk[1] 2 times to leave two bits open at the bottom, mask the top two bits, shr chunk[2] 6 times to put the bottom two bits on the bottom XOR together 
-        let s3 = ((chunk[1] << 2) & 0x3F) ^ (chunk[2] >> 6);
-        // mask the top two bits of chunk[2]
-        let s4 = chunk[2] & 0x3F;
- 
-        out.push(B64_MAP[&s1] as char);
-        out.push(B64_MAP[&s2] as char);
-        out.push(B64_MAP[&s3] as char);
-        out.push(B64_MAP[&s4] as char);
+
+fn encode_b64_remainder(chunk: &[u8]) -> String {
+    
+}
+
+pub struct Base64 {}
+
+impl Default for Base64 {
+    fn default() -> Self {
+        Self {  }
     }
-    out
 }
  
-pub fn decode_b64(input: &[u8]) -> String {
+impl Base64 {
+    pub fn encode_raw(input: &[u8]) -> Vec<u8> {
+        let mut out = Vec::with_capacity( (input.len()/3)*4 );
+        let chunks = input.chunks_exact(3);
+        let rem = chunks.remainder();
  
-    let mut out = String::with_capacity( (input.len()/4)*3 );
-    for chunk in input.chunks(4) {
+        for chunk in chunks {
+            // turn the three bytes into four sextets
+            // shr chunk[0] twice to keep only the top six bits
+            let s1 = chunk[0] >> 2; 
+            // shl chunk[0] 4 times to put the bottom top 2 bits on top, mask the top two bits, then shr[1] 4 times to put the top four bits on the bottom, XOR together
+            let s2 = ((chunk[0] << 4) & 0x3F) ^ (chunk[1] >> 4);
+            // shl chunk[1] 2 times to leave two bits open at the bottom, mask the top two bits, shr chunk[2] 6 times to put the bottom two bits on the bottom XOR together 
+            let s3 = ((chunk[1] << 2) & 0x3F) ^ (chunk[2] >> 6);
+            // mask the top two bits of chunk[2]
+            let s4 = chunk[2] & 0x3F;
  
-        let s1 = B64_MAP_INV[&chunk[0]];
-        let s2 = B64_MAP_INV[&chunk[1]];
-        let s3 = B64_MAP_INV[&chunk[2]];
-        let s4 = B64_MAP_INV[&chunk[3]];
- 
-        // shift s1 left twice to leave two bits at the bottom, shift s2 right twice to put the top two bits on the bottom, XOR together
-        let o1 = (s1 << 2) ^ (s2 >> 4);
-        // shift s2 left four to leave four at the bottom, shift s3 right two times to put the top four bits on the bottom, XOR together
-        let o2 = (s2 << 4) ^ (s3 >> 2);
-        // shift s3 left six to leave four at the bottom, shift s3 right two times to put the top four bits on the bottom, XOR together
-        let o3 = (s3 << 6) ^ s4;
- 
-        out.push(o1 as char);
-        out.push(o2 as char);
-        out.push(o3 as char);
+            out.push(B64_MAP[&s1]);
+            out.push(B64_MAP[&s2]);
+            out.push(B64_MAP[&s3]);
+            out.push(B64_MAP[&s4]);
+        }
+        todo!("handle remainder");
+        out
     }
-    out
+ 
+    pub fn decode_raw(input: &[u8]) -> Vec<u8> {
+ 
+        let mut out = Vec::with_capacity( (input.len()/4)*3 );
+        let chunks = input.chunks_exact(4);
+        let rem = chunks.remainder();
+ 
+        for chunk in chunks {
+ 
+            let s1 = B64_MAP_INV[&chunk[0]];
+            let s2 = B64_MAP_INV[&chunk[1]];
+            let s3 = B64_MAP_INV[&chunk[2]];
+            let s4 = B64_MAP_INV[&chunk[3]];
+ 
+            // shift s1 left twice to leave two bits at the bottom, shift s2 right twice to put the top two bits on the bottom, XOR together
+            let o1 = (s1 << 2) ^ (s2 >> 4);
+            // shift s2 left four to leave four at the bottom, shift s3 right two times to put the top four bits on the bottom, XOR together
+            let o2 = (s2 << 4) ^ (s3 >> 2);
+            // shift s3 left six to leave four at the bottom, shift s3 right two times to put the top four bits on the bottom, XOR together
+            let o3 = (s3 << 6) ^ s4;
+ 
+            out.push(o1);
+            out.push(o2);
+            out.push(o3);
+        }
+        todo!("handle remainder");
+        out
+    }
+ 
+
+}
+impl Code for Base64 {
+    fn encode(&self, text: &str) -> Result<String, CodeError> {
+        let b = Base64::encode_raw(text.as_bytes());
+        Ok(String::from_utf8(b).unwrap())
+    }
+ 
+    fn decode(&self, text: &str) -> Result<String, CodeError> {
+        let b = Base64::decode_raw(text.as_bytes());
+        Ok(String::from_utf8(b).unwrap())
+    }
+}
+ 
+#[test]
+fn base64_tests() {
+    let code = Base64::default();
+    let plain = "Many hands make light work.";
+    let encoded = code.encode(plain).unwrap();
+    let decoded = code.decode(&encoded).unwrap();
+ 
+    assert_eq!(encoded,"TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcmsu".to_string());
+    assert_eq!(decoded, plain.to_string())
+ 
 }
