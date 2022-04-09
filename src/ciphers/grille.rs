@@ -108,6 +108,7 @@ impl Cipher for Grille {
             let mut grid = self.grid.clone();
             let mut chars = text.chars();
 
+            // Iterates slowly over columns indexes and quickly over rows indexes
             let coords = (0..grid.num_cols())
                     .cartesian_product(0..grid.num_rows());
             

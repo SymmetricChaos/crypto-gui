@@ -1,5 +1,5 @@
 use lazy_static::lazy_static;
-use std::collections::HashMap;
+use std::{collections::HashMap, path::PathBuf, fs::read};
 
 use crate::errors::CodeError;
 use super::Code;
@@ -48,15 +48,28 @@ fn encode_b64_remainder(chunk: &[u8], out: &mut Vec<u8>) {
     }
 }
 
-pub struct Base64 {}
+// Make it possible to encode an aribtrary file
+pub struct Base64 {
+    pub file: Option<PathBuf>
+}
 
 impl Default for Base64 {
     fn default() -> Self {
-        Self {  }
+        Self { file: None }
     }
 }
  
 impl Base64 {
+    pub fn encode_file(&self) -> Result<String, CodeError> {
+        if self.file.is_none() {
+            return Err(CodeError::input("no file stored"))
+        }
+        let bytes = &read(self.file.as_ref().unwrap()).unwrap()[..];
+
+        let encoded = Base64::encode_raw(bytes);
+        Ok(String::from_utf8(encoded).unwrap())
+    }
+
     pub fn encode_raw(input: &[u8]) -> Vec<u8> {
         let mut out = Vec::with_capacity( (input.len()/3)*4 );
         let chunks = input.chunks_exact(3);

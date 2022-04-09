@@ -10,6 +10,7 @@ pub mod godel_controls;
 pub mod fibonacci_controls;
 pub mod morse_american_controls;
 pub mod unary_controls;
+pub mod base64_controls;
 pub mod spelling_alphabet_controls;
 
 pub trait View {
@@ -30,6 +31,7 @@ fn combox_box(code: &[CodeID], identifier: &'static str, active_code: &mut CodeI
 #[derive(Default)]
 pub struct CodeControlPanel {
     ascii: Ascii,
+    base64: Base64,
     morse_itu: MorseITU,
     morse_american: MorseAmerican,
     godel: Godel,
@@ -43,7 +45,7 @@ impl CodeControlPanel {
         
         egui::Grid::new("comboboxes").show(ui, |ui| {
             combox_box(
-                &[CodeID::Ascii, CodeID::Fibonacci, CodeID::Unary],
+                &[CodeID::Ascii, CodeID::Fibonacci, CodeID::Unary, CodeID::Base64],
                 "Binary Codes",
                 active_code, ui
             );
@@ -77,6 +79,7 @@ impl CodeControlPanel {
 
         match active_code {
             CodeID::Ascii => self.ascii.ui(ui),
+            CodeID::Base64 => self.base64.ui(ui),
             CodeID::MorseITU => self.morse_itu.ui(ui),
             CodeID::Godel => self.godel.ui(ui),
             CodeID::Fibonacci => self.fibonacci.ui(ui),
@@ -111,6 +114,7 @@ impl CodeDisplayPanel {
 
         match active_code {
             CodeID::Ascii => encode_decode(ui, &control_panel.ascii, input, output, errors),
+            CodeID::Base64 => encode_decode(ui, &control_panel.base64, input, output, errors),
             CodeID::MorseITU => encode_decode(ui, &control_panel.morse_itu, input, output, errors),
             CodeID::MorseAmerican => encode_decode(ui, &control_panel.morse_american, input, output, errors),
             CodeID::Godel => encode_decode(ui, &control_panel.godel, input, output, errors),
