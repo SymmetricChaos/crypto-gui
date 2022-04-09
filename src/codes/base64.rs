@@ -86,7 +86,11 @@ impl Base64 {
  
         let mut out = Vec::with_capacity( (input.len()/4)*3 );
         let chunks = input.chunks_exact(4);
-
+        let padding_len = {
+            let l0 = input.iter().nth_back(0).unwrap() == &0x3D;
+            let l1 = input.iter().nth_back(1).unwrap() == &0x3D;
+            l0 as usize + l1 as usize
+        };
         for chunk in chunks {
  
             let s1 = B64_MAP_INV[&chunk[0]];
@@ -105,7 +109,7 @@ impl Base64 {
             out.push(o2);
             out.push(o3);
         }
-        while out.last().unwrap() == &0 {
+        for _ in 0..padding_len {
             out.pop();
         }
         out
@@ -132,10 +136,10 @@ mod base64_tests {
 
     const PLAINTEXT0: &'static str =  "Many hands make light work.";
     const PLAINTEXT1: &'static str =  "Many hands make light work";
-    const PLAINTEXT2: &'static str =  "Many hands make light wor";
+    const PLAINTEXT2: &'static str =  "Many hands make light woA";
     const CIPHERTEXT0: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcmsu";
     const CIPHERTEXT1: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcms=";
-    const CIPHERTEXT2: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcg==";
+    const CIPHERTEXT2: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvQQ==";
 
 
     #[test]
