@@ -1,8 +1,7 @@
-use lazy_static::lazy_static; // 1.4.0
+use lazy_static::lazy_static;
 use std::collections::HashMap;
 
 use crate::errors::CodeError;
-
 use super::Code;
  
 const B64: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -11,23 +10,42 @@ lazy_static! {
  
     static ref B64_MAP: HashMap<u8,u8> = {
         let mut m = HashMap::with_capacity(64);
-        for (pos, val) in B64.chars().enumerate() {
-            m.insert(pos as u8,val as u8);
+        for (pos, chr) in B64.chars().enumerate() {
+            m.insert(pos as u8, chr as u8);
         }
         m
     };
  
     static ref B64_MAP_INV: HashMap<u8,u8> = {
         let mut m = HashMap::with_capacity(64);
-        for (pos, val) in B64.chars().enumerate() {
-            m.insert(val as u8, pos as u8);
+        for (pos, chr) in B64.chars().enumerate() {
+            m.insert(chr as u8, pos as u8);
         }
+        m.insert('=' as u8, 0);
         m
     };
 }
 
-fn encode_b64_remainder(chunk: &[u8]) -> String {
-    
+fn encode_b64_remainder(chunk: &[u8], out: &mut Vec<u8>) {
+    if chunk.len() == 2 {
+        let s1 = chunk[0] >> 2; 
+        let s2 = ((chunk[0] << 4) & 0x3F) ^ (chunk[1] >> 4);
+        let s3 = (chunk[1] << 2) & 0x3F;
+        out.push(B64_MAP[&s1]);
+        out.push(B64_MAP[&s2]);
+        out.push(B64_MAP[&s3]);
+        out.push(0x3D);
+
+    } else if chunk.len() == 1 {
+        let s1 = chunk[0] >> 2; 
+        let s2 = (chunk[0] << 4) & 0x3F;
+        out.push(B64_MAP[&s1]);
+        out.push(B64_MAP[&s2]);
+        out.push(0x3D);
+        out.push(0x3D);
+    } else {
+        return ()
+    }
 }
 
 pub struct Base64 {}
@@ -60,7 +78,7 @@ impl Base64 {
             out.push(B64_MAP[&s3]);
             out.push(B64_MAP[&s4]);
         }
-        todo!("handle remainder");
+        encode_b64_remainder(rem, &mut out);
         out
     }
  
@@ -68,8 +86,7 @@ impl Base64 {
  
         let mut out = Vec::with_capacity( (input.len()/4)*3 );
         let chunks = input.chunks_exact(4);
-        let rem = chunks.remainder();
- 
+
         for chunk in chunks {
  
             let s1 = B64_MAP_INV[&chunk[0]];
@@ -88,7 +105,9 @@ impl Base64 {
             out.push(o2);
             out.push(o3);
         }
-        todo!("handle remainder");
+        while out.last().unwrap() == &0 {
+            out.pop();
+        }
         out
     }
  
@@ -106,14 +125,32 @@ impl Code for Base64 {
     }
 }
  
-#[test]
-fn base64_tests() {
-    let code = Base64::default();
-    let plain = "Many hands make light work.";
-    let encoded = code.encode(plain).unwrap();
-    let decoded = code.decode(&encoded).unwrap();
- 
-    assert_eq!(encoded,"TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcmsu".to_string());
-    assert_eq!(decoded, plain.to_string())
- 
+
+#[cfg(test)]
+mod base64_tests {
+    use super::*;
+
+    const PLAINTEXT0: &'static str =  "Many hands make light work.";
+    const PLAINTEXT1: &'static str =  "Many hands make light work";
+    const PLAINTEXT2: &'static str =  "Many hands make light wor";
+    const CIPHERTEXT0: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcmsu";
+    const CIPHERTEXT1: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcms=";
+    const CIPHERTEXT2: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcg==";
+
+
+    #[test]
+    fn encode_test() {
+        let code = Base64::default();
+        assert_eq!(code.encode(PLAINTEXT0).unwrap(),CIPHERTEXT0);
+        assert_eq!(code.encode(PLAINTEXT1).unwrap(),CIPHERTEXT1);
+        assert_eq!(code.encode(PLAINTEXT2).unwrap(),CIPHERTEXT2);
+    }
+
+    #[test]
+    fn deode_test() {
+        let code = Base64::default();
+        assert_eq!(code.decode(CIPHERTEXT0).unwrap(),PLAINTEXT0);
+        assert_eq!(code.decode(CIPHERTEXT1).unwrap(),PLAINTEXT1);
+        assert_eq!(code.decode(CIPHERTEXT2).unwrap(),PLAINTEXT2);
+    }
 }
