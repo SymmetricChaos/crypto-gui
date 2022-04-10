@@ -1,4 +1,4 @@
-use crate::{errors::CipherError, preset_alphabet::PresetAlphabet, ciphers::Cipher};
+use crate::{errors::CipherError, ciphers::Cipher};
 use super::{ROTOR_MAP,REFLECTORS,Rotor,Reflector,Plugboard,char_to_usize,usize_to_char};
 use rand::prelude::StdRng;
  
@@ -11,6 +11,7 @@ use rand::prelude::StdRng;
 // small and so should be cheap to Clone.
 #[derive(Clone,Debug)]
 pub struct EnigmaState {
+    pub plugboard_pairs: String,
     pub plugboard: Plugboard,
     pub rotors: [Rotor; 3],
     pub reflector: Reflector,
@@ -41,12 +42,15 @@ impl EnigmaState {
         self.rotors[1].ring = rotor_ring_positions.1;
         self.rotors[2].ring = rotor_ring_positions.2;
     }
+
+    pub fn set_plugboard(&mut self) -> Result<(),CipherError> {
+        self.plugboard.set_plugboard(&self.plugboard_pairs)
+    }
  
     // Notice that the signal goes through the rotors starting on the right with the 3rd rotor, 
     // then through the reflector, and back through from left to right starting with the 1st rotor
     fn encrypt_char(&mut self, c: char) -> char {
         self.advance_rotors();
-        //self.get_rotor_positions();
         let mut x = char_to_usize(self.plugboard.swap(c));
         x = self.rotors[2].encrypt_rtl(x);
         x = self.rotors[1].encrypt_rtl(x);
@@ -61,7 +65,7 @@ impl EnigmaState {
 
 impl Default for EnigmaState {
     fn default() -> Self {
-        Self { plugboard: Default::default(), rotors: [ROTOR_MAP["I"], ROTOR_MAP["II"], ROTOR_MAP["III"]], reflector: REFLECTORS["A"] }
+        Self { plugboard_pairs: String::new(), plugboard: Default::default(), rotors: [ROTOR_MAP["I"], ROTOR_MAP["II"], ROTOR_MAP["III"]], reflector: REFLECTORS["A"] }
     }
 }
  
@@ -69,13 +73,13 @@ impl Default for EnigmaState {
  
 #[derive(Clone,Debug)]
 pub struct EnigmaM3 {
-    _alphabet: String,
     pub state: EnigmaState,
 }
  
 impl Cipher for EnigmaM3 {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
         let mut inner_state = self.state.clone();
+        inner_state.set_plugboard()?;
         Ok(text.chars().map(|c| inner_state.encrypt_char(c)).collect())
     }
  
@@ -95,6 +99,6 @@ impl Cipher for EnigmaM3 {
  
 impl Default for EnigmaM3 {
     fn default() -> Self {
-        Self { _alphabet: String::from(PresetAlphabet::BasicLatin), state: Default::default() }
+        Self { state: Default::default() }
     }
 }
