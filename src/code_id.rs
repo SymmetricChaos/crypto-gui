@@ -32,6 +32,7 @@ impl CodeID {
             CodeID::Fibonacci => "The Fibonacci code is named because it uses the Fibonacci sequence to generate a variable width encoding of some arbitrary alphabet. More common characters are assigned shorter codes. This allows very large alphabets to be encoded efficiently so long as characters vary in frequency following a geometric distribution.",
             CodeID::Unary => "The Unary Encoding is the simplest prefix code and thus the simplest useful variable length code. No code word appears as a prefix of any other code word.",
             CodeID::SpellingAlphabet => "Spelling Alphabets or Phonetic Alphabets.",
+            CodeID::Base64 => "The Base64 is a binary code that is meant to re-encode arbitrary binary data as ASCII symbols that can then be transmitted safely through text channels and decoded on the other side.",
             _ => "Missing description. Please complain to the author.",
         }
     }

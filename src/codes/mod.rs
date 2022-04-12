@@ -13,7 +13,6 @@ pub use godel::Godel;
 pub mod fibonacci;
 pub use fibonacci::FibonacciCode;
 
-
 pub mod unary;
 pub use unary::UnaryCode;
 
@@ -22,6 +21,9 @@ pub use spelling_alphabet::SpellingAlphabet;
 
 pub mod base64;
 pub use base64::Base64;
+
+pub mod unicode;
+pub use unicode::Unicode;
 
 pub mod elias;
 

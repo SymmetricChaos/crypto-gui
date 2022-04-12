@@ -28,7 +28,7 @@ pub fn fill_code_columns<T: Display, S: Display>(nrows: usize, ncols: usize, ui:
         let mut ctr = 0;
         let mut col = 0;
         for (c, code) in iter {
-            let pair = format!("{}   {}", c, code);
+            let pair = format!("{}  {} ", c, code);
             mono_strong(&mut columns[col],&pair, Some(18.0));
             ctr += 1;
             if ctr % nrows == 0 {

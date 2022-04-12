@@ -1,4 +1,4 @@
-use super::View;
+use super::{View, generic_components::fill_code_columns};
 use crate::codes::Base64;
 use rfd::FileDialog;
 
@@ -8,6 +8,8 @@ impl View for Base64 {
         if ui.button("Select a File").clicked() {
             self.file = FileDialog::new().pick_file();
         }
+
+        fill_code_columns(16, 4, ui, Box::new(self.chars_codes()));
 
         if self.file.is_some() {
             let file_name = self.file.as_ref().unwrap().file_name().unwrap().to_str();

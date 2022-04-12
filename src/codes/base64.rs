@@ -127,9 +127,14 @@ impl Base64 {
         }
         out
     }
- 
 
+    pub fn chars_codes(&mut self) -> impl Iterator<Item=(String, char)> + '_ {
+        (0..64u8)
+            .map(|x| (format!("{:06b}",x), B64_MAP[&x] as char) )
+    }
 }
+
+
 impl Code for Base64 {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let b = Base64::encode_raw(text.as_bytes());
