@@ -35,7 +35,7 @@ impl Code for Unicode {
         }
     }
  
-    fn decode(&self, text: &str) -> Result<String,CodeError> {
+    fn decode(&self, _text: &str) -> Result<String,CodeError> {
         match self.mode {
             UnicodeMode::Utf8 => todo!(),
             UnicodeMode::Utf16 => todo!(),

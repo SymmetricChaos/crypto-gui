@@ -25,9 +25,10 @@ pub use base64::Base64;
 pub mod unicode;
 pub use unicode::Unicode;
 
-pub mod elias;
-
 pub mod romaji;
+pub use romaji::NihonShiki;
+
+pub mod elias;
 
 use crate::errors::CodeError;
 
