@@ -63,6 +63,12 @@ pub use chaocipher::Chaocipher;
 pub mod bifid;
 pub use bifid::Bifid;
 
+pub mod syctale;
+pub use syctale::Scytale;
+
+// pub mod route;
+// pub use route::Route;
+
 use rand::prelude::StdRng;
 use crate::errors::CipherError;
 
