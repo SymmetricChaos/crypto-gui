@@ -66,6 +66,9 @@ pub use bifid::Bifid;
 pub mod syctale;
 pub use syctale::Scytale;
 
+pub mod rail_fence;
+pub use rail_fence::RailFence;
+
 // pub mod route;
 // pub use route::Route;
 
