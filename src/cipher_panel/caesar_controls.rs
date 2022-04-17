@@ -6,7 +6,7 @@ use super::generic_components::*;
 use crate::ciphers::Caesar;
 
 impl View for Caesar {
-    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng) {
+    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {
 
         randomize_reset(ui, self, rng);
         ui.add_space(16.0);

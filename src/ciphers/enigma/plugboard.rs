@@ -2,30 +2,37 @@ use std::collections::HashMap;
 use crate::errors::CipherError;
 
 
- 
 #[derive(Clone,Debug)]
-pub struct Plugboard {
+pub struct EnigmaPlugboard {
     old_alphabet: String,
     wiring: HashMap<char,char>,
 }
  
-impl Plugboard {
-
+impl EnigmaPlugboard {
+ 
     pub fn set_plugboard(&mut self, pairs: &str) -> Result<(),CipherError> {
+        // Don't rebuild unless we need to
         if &self.old_alphabet == pairs {
             return Ok(())
         }
-        self.wiring.clear();
+ 
+        // Check that no more than 13 pairs are included
         let digraphs = pairs.split(" ");
+        if digraphs.clone().count() > 13 {
+            return Err(CipherError::key("Engima Plugboard cannot include more than 13 pairs of letters"));
+        }
+ 
+        // Clear the wiring and rebuild it, returning an Error if anything goes wrong
+        self.wiring.clear();
         for d in digraphs {
             if d.len() != 2 {
-                return Err(CipherError::input("Engima Plugboard settings must be given as pairs of letters"));
+                return Err(CipherError::key("Engima Plugboard settings must be given as pairs of letters"));
             }
             let mut cs = d.chars();
             let a = cs.next().unwrap();
             let b = cs.next().unwrap();
-            if a == b || self.wiring.contains_key(&a) {
-                return Err(CipherError::input("Enigma Plugboard settings cannot include cycles"));
+            if a == b || self.wiring.contains_key(&a) || self.wiring.contains_key(&b) {
+                return Err(CipherError::key("Enigma Plugboard settings cannot include cycles or chains"));
             }
             self.wiring.insert(a,b);
             self.wiring.insert(b,a);
@@ -34,16 +41,13 @@ impl Plugboard {
         Ok(())
     }
  
+    // Swap the character or return the original depending on if it is in the board
     pub fn swap(&self, character: char) -> char {
-        if self.wiring.contains_key(&character) {
-            self.wiring[&character]
-        } else {
-            character
-        }
+        *self.wiring.get(&character).unwrap_or_else(|| &character)
     }
 }
 
-impl Default for Plugboard {
+impl Default for EnigmaPlugboard {
     fn default() -> Self {
         Self { old_alphabet: String::new(), wiring: HashMap::with_capacity(13) }
     }

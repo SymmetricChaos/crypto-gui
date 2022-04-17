@@ -5,7 +5,7 @@ use crate::errors::CipherError;
 use super::Cipher;
  
 pub struct Scytale {
-    key: usize,
+    pub key: usize,
     padding: char
 }
  

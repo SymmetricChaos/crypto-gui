@@ -11,7 +11,7 @@ pub enum CipherID {
 
     M209,
     Enigma,
-    SIGABA,
+    Sigaba,
 
     Playfair,
     Slidefair,
@@ -26,14 +26,16 @@ pub enum CipherID {
     Columnar,
     Grille,
     TurningGrille,
+    RailFence,
+    Scytale,
 
-    ADFGVX,
+    Adfgvx,
     Bifid,
     B64,
-    VIC,
+    Vic,
 
-    BATCO,
-    DRYAD,
+    Batco,
+    Dryad,
 }
 
 impl Default for CipherID {
@@ -54,7 +56,7 @@ impl CipherID {
             
             CipherID::M209 => "The M209 was an entirely mechanical cipher machine used by the US Military with very complex key settings. The positions of the pins and lugs were set once a day. The exteral positions of the rotors were changed with each message.",
             CipherID::Enigma => "The Enigma machine is probably the most famous rotor machine from the brief era in which they dominated encryption. It was remarkable for its simplicity and compact size. Although it contained critical flaws ultimately the failure of Engima was caused by operational mistakes in the Nazi military that leaked information to the Allies.",
-            CipherID::SIGABA => "SIGABA was the most complex rotor machine of its era and is not known to have been successfully attacked during its use. Despite its complexity the United States was extremely paranoid about the device and did not allow allies direct access to it.",
+            CipherID::Sigaba => "SIGABA was the most complex rotor machine of its era and is not known to have been successfully attacked during its use. Despite its complexity the United States was extremely paranoid about the device and did not allow allies direct access to it.",
 
             CipherID::Playfair => "The Playfair Cipher swaps letters on a grid to encrypt letters pair by pair. Developed by Charles Wheatstone and promoted by Lord Playfair it was advertised as strong enough for tactical use and simple enough to teach to schoolchildren.",
             CipherID::Slidefair => "The Slidefair Cipher is a stronger but more complex variation on the Playfair Cipher developed by Helen Gaines. The square is formed by ",
@@ -66,7 +68,7 @@ impl CipherID {
             CipherID::Columnar => "The Columnar Transposition Cipher encrypts information by writing the text into a grid row by row and then reading it off column by column in the order decided by a keyword. To decrypt the text is simply written back into the grid column by column in the required order. The cipher is somewhat easier to use if the text fills all of the rows but this creates a serious weakness in that the key size can be guessed by factoring the length of the message. Though insecure on its own columnar transposition is a strong cipher if applied twice or combined with another layer of encryption.",
             CipherID::Grille => "Grille Cipher",
 
-            CipherID::ADFGVX => "The ADFGX and ADFGVX Ciphers are among the most effective classical ciphers that can be executed entirely by hand. The first step of encryption is to use a Polybius square to convert each letter into a pair of symbols (after which the ciphers are named). Then those symbols are rearranged using a columnar transposition cipher. The symbols were chosen to be distinctive in Morse Code so as to reduce transmission errors.",
+            CipherID::Adfgvx => "The ADFGX and ADFGVX Ciphers are among the most effective classical ciphers that can be executed entirely by hand. The first step of encryption is to use a Polybius square to convert each letter into a pair of symbols (after which the ciphers are named). Then those symbols are rearranged using a columnar transposition cipher. The symbols were chosen to be distinctive in Morse Code so as to reduce transmission errors.",
             CipherID::Bifid => "The Bifid Cipher combines a Polybius square with a very simple transposition in order to obscure as much information as possible about the plaintext. First the Polybius square is used to convert each letter into a pair of symbol, Then first symbol in each pair is written down after that the second symbol in each pair is written down. Finally this converted back to the original alphabet using the Polybius square once more.",
             CipherID::B64 => "The B64 Cipher is not a historical cipher. It is an (to the author's knowlege) novel cipher based on the ADFGVX and Bifid ciphers. Only symbols from the MIME Base64 alphabet are used, ensuring the message can be sent without risk of corruption over most digital systems. First a Polybius square is used to change the text into pairs of digits, then these pairs are shuffled by applying two columnar transpositions, and finally they Polybius square is applied in reverse to convert the results back to the Base64 alphabet to reduce the message size.",
 
@@ -92,22 +94,24 @@ impl Display for  CipherID {
             CipherID::Alberti => "Alberti Cipher Disk",
             CipherID::Polybius => "Polybius Square",
             CipherID::Enigma => "Enigma",
-            CipherID::SIGABA => "SIGABA",
+            CipherID::Sigaba => "SIGABA",
             CipherID::Slidefair => "Slidefair",
             CipherID::Columnar => "Columnar Transposition",
             CipherID::Bazeries => "Bazeries",
             CipherID::M94 => "M94",
             CipherID::Vigenere => "Vigenère",
             CipherID::Beaufort => "Beaufort",
-            CipherID::ADFGVX => "ADFGVX",
+            CipherID::Adfgvx => "ADFGVX",
             CipherID::Bifid => "Bifid",
             CipherID::B64 => "B64",
             CipherID::Grille => "Grille",
             CipherID::Chaocipher => "Chaocipher",
             CipherID::TurningGrille => "Turning Grille",
-            CipherID::VIC => "VIC",
-            CipherID::BATCO => "BATCO",
-            CipherID::DRYAD => "DRYAD",
+            CipherID::Vic => "VIC",
+            CipherID::Batco => "BATCO",
+            CipherID::Dryad => "DRYAD",
+            CipherID::RailFence => "Rail Fence",
+            CipherID::Scytale => "Scytale",
         };
         write!(f,"{}",name)
     }

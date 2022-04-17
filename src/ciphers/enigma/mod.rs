@@ -5,7 +5,7 @@ pub mod rotors;
 pub use rotors::{Rotor,Reflector,ROTOR_MAP, ROTOR_VEC, REFLECTORS};
 
 pub mod plugboard;
-pub use plugboard::Plugboard;
+pub use plugboard::EnigmaPlugboard;
 
 // References
 // This is the M3 Enigma

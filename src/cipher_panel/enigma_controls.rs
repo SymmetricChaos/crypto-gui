@@ -1,22 +1,11 @@
-use eframe::egui::{RichText, Slider, ComboBox, Label};
+use eframe::egui::{RichText, Slider, ComboBox, Label, TextStyle, TextEdit};
 use super::View;
 use crate::ciphers::{EnigmaM3, enigma::{ROTOR_VEC,REFLECTORS}};
 use eframe::egui::Ui;
 use rand::prelude::StdRng;
 
-// fn rotor_selector(ciphers: &[Rotor], identifier: &'static str, ui: &mut Ui) {
-//     ComboBox::from_id_source(identifier)
-//         .selected_text(identifier)
-//         .show_ui(ui, |ui| {
-//             for id in ciphers {
-//                 ui.selectable_value(active_cipher, *id, format!("{}",id));
-//             }
-//         });
-//     ui.add_space(10.0);
-// }
-
 impl View for EnigmaM3 {
-    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng) {
+    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng, _errors: &mut String) {
  
         ui.label("Rotor Positions\nTo Be Changed Every Message");
         for rotor in &mut self.state.rotors {
@@ -33,7 +22,8 @@ impl View for EnigmaM3 {
             );
         };
  
-        // ui.label("Set Reflector Position")
+        ui.label("Set Reflector Position");
+        ui.label("INTERFACE GOES HERE");
         // ui.add(Slider::new(&mut self.state.reflector.position, 0..=26)
         //     .show_value(false)
         //     .clamp_to_range(true)
@@ -84,7 +74,7 @@ impl View for EnigmaM3 {
  
         ui.add_space(10.0);
         ui.label("Plugboard").on_hover_text("Steckerbrett");
-        ui.label("SOME INTERFACE HERE");
+        ui.add(TextEdit::singleline(&mut self.state.plugboard_pairs).font(TextStyle::Monospace));
  
     }
 }

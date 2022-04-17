@@ -1,5 +1,5 @@
 use crate::{errors::CipherError, ciphers::Cipher};
-use super::{ROTOR_MAP,REFLECTORS,Rotor,Reflector,Plugboard,char_to_usize,usize_to_char};
+use super::{ROTOR_MAP,REFLECTORS,Rotor,Reflector,EnigmaPlugboard,char_to_usize,usize_to_char};
 use rand::prelude::StdRng;
  
  
@@ -12,7 +12,7 @@ use rand::prelude::StdRng;
 #[derive(Clone,Debug)]
 pub struct EnigmaState {
     pub plugboard_pairs: String,
-    pub plugboard: Plugboard,
+    pub plugboard: EnigmaPlugboard,
     pub rotors: [Rotor; 3],
     pub reflector: Reflector,
 }
@@ -65,7 +65,7 @@ impl EnigmaState {
 
 impl Default for EnigmaState {
     fn default() -> Self {
-        Self { plugboard_pairs: String::new(), plugboard: Default::default(), rotors: [ROTOR_MAP["I"], ROTOR_MAP["II"], ROTOR_MAP["III"]], reflector: REFLECTORS["A"] }
+        Self { plugboard_pairs: String::new(), plugboard: EnigmaPlugboard::default(), rotors: [ROTOR_MAP["I"], ROTOR_MAP["II"], ROTOR_MAP["III"]], reflector: REFLECTORS["A"] }
     }
 }
  

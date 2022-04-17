@@ -8,7 +8,7 @@ use crate::ciphers::Bifid;
 use crate::preset_alphabet::PresetAlphabet::*;
 
 impl View for Bifid {
-    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng) {
+    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {
 
         randomize_reset(ui, self, rng);
         ui.add_space(16.0);

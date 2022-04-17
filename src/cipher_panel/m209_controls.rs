@@ -14,7 +14,7 @@ fn lug_pair(ui: &mut egui::Ui, pair: &mut (usize,usize)) {
 
 
 impl View for M209 {
-    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng) {
+    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {
 
         randomize_reset(ui, self, rng);
         ui.add_space(16.0);

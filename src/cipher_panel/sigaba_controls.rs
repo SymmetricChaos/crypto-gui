@@ -20,7 +20,7 @@ fn rotor_display(ui: &mut eframe::egui::Ui, rotors: &mut [Rotor]) {
 }
 
 impl View for Sigaba {
-    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng) {
+    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng, _errors: &mut String) {
 
         // if ui.button("Restore State").clicked() {
         //     self.previous_state()

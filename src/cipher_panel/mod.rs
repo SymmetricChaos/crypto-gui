@@ -26,9 +26,33 @@ pub mod sigaba_controls;
 pub mod bazeries_controls;
 pub mod chaocipher_controls;
 pub mod bifid_controls;
+pub mod cipher_id;
+pub mod rail_fence_controls;
+pub mod scytale_controls;
 
-pub trait View {
-    fn ui(&mut self, ui: &mut egui::Ui, rng: &mut StdRng);
+pub trait View: Cipher {
+    fn ui(&mut self, ui: &mut egui::Ui, rng: &mut StdRng, errors: &mut String);
+
+    // Provides the interface to encrypt and decrypt, should be the same for all ciphers
+    // Needs to access the UI, accepts inputs, provide outputs, and report errors
+    fn encrypt_decrypt(&self, ui: &mut egui::Ui, input: &mut String, output: &mut String, errors: &mut String) {
+        ui.horizontal(|ui| {
+            if ui.button(RichText::from("ENCRYPT").color(Color32::GOLD)).clicked() {
+                errors.clear();
+                match self.encrypt(input) {
+                    Ok(text) => *output = text,
+                    Err(e) => *errors = e.to_string(),
+                }
+            };
+            if ui.button(RichText::from("DECRYPT").color(Color32::GOLD)).clicked() {
+                errors.clear();
+                match self.decrypt(input) {
+                    Ok(text) => *output = text,
+                    Err(e) => *errors = e.to_string(),
+                }
+            }
+        });
+    }
 }
 
 fn combox_box(ciphers: &[CipherID], identifier: &'static str, active_cipher: &mut CipherID, ui: &mut egui::Ui) {
@@ -65,6 +89,8 @@ pub struct CipherControlPanel {
 
     columnar: Columnar,
     grille: Grille,
+    rail_fence: RailFence,
+    scytale: Scytale,
 
     adfgvx: ADFGVX,
     b64: B64,
@@ -75,7 +101,7 @@ pub struct CipherControlPanel {
 
 
 impl CipherControlPanel {
-    pub fn ui(&mut self, ui: &mut egui::Ui, active_cipher: &mut CipherID, rng: &mut StdRng) {
+    pub fn ui(&mut self, ui: &mut egui::Ui, active_cipher: &mut CipherID, rng: &mut StdRng, errors: &mut String) {
         
         egui::Grid::new("comboboxes").show(ui, |ui| {
             combox_box(
@@ -91,13 +117,13 @@ impl CipherControlPanel {
             );
     
             combox_box(
-                &[CipherID::M209, CipherID::Enigma, CipherID::SIGABA],
+                &[CipherID::M209, CipherID::Enigma, CipherID::Sigaba],
                 "Rotor Machine",
                 active_cipher, ui
             );
 
             combox_box(
-                &[CipherID::Columnar, CipherID::Grille],
+                &[CipherID::Columnar, CipherID::Grille, CipherID::RailFence, CipherID::Scytale],
                 "Transposition",
                 active_cipher, ui
             );
@@ -111,7 +137,7 @@ impl CipherControlPanel {
             );
 
             combox_box(
-                &[CipherID::ADFGVX, CipherID::B64, CipherID::Bifid],
+                &[CipherID::Adfgvx, CipherID::B64, CipherID::Bifid],
                 "Composite",
                 active_cipher, ui
             );
@@ -138,27 +164,29 @@ impl CipherControlPanel {
         ui.add_space(16.0);
 
         match active_cipher {
-            CipherID::Caesar => self.caesar.ui(ui, rng),
-            CipherID::Affine => self.affine.ui(ui, rng),
-            CipherID::Decoder => self.decoder_ring.ui(ui, rng),
-            CipherID::Substitution => self.gen_sub.ui(ui, rng),
-            CipherID::Polybius => self.polybius.ui(ui, rng),
-            CipherID::Vigenere => self.vigenere.ui(ui, rng),
-            CipherID::Beaufort => self.beaufort.ui(ui, rng),
-            CipherID::M209 => self.m209.ui(ui, rng),
-            CipherID::M94 => self.m94.ui(ui, rng),
-            CipherID::Alberti => self.alberti.ui(ui, rng),
-            CipherID::Playfair => self.playfair.ui(ui, rng),
-            CipherID::Columnar => self.columnar.ui(ui, rng),
-            CipherID::ADFGVX => self.adfgvx.ui(ui, rng),
-            CipherID::B64 => self.b64.ui(ui, rng),
-            CipherID::Slidefair => self.slidefair.ui(ui, rng),
-            CipherID::Enigma => self.enigma.ui(ui, rng),
-            CipherID::Grille => self.grille.ui(ui, rng),
-            CipherID::SIGABA => self.sigaba.ui(ui, rng),
-            CipherID::Bazeries => self.bazeries.ui(ui, rng),
-            CipherID::Chaocipher => self.chaocipher.ui(ui, rng),
-            CipherID::Bifid => self.bifid.ui(ui, rng),
+            CipherID::Caesar => self.caesar.ui(ui, rng, errors),
+            CipherID::Affine => self.affine.ui(ui, rng, errors),
+            CipherID::Decoder => self.decoder_ring.ui(ui, rng, errors),
+            CipherID::Substitution => self.gen_sub.ui(ui, rng, errors),
+            CipherID::Polybius => self.polybius.ui(ui, rng, errors),
+            CipherID::Vigenere => self.vigenere.ui(ui, rng, errors),
+            CipherID::Beaufort => self.beaufort.ui(ui, rng, errors),
+            CipherID::M209 => self.m209.ui(ui, rng, errors),
+            CipherID::M94 => self.m94.ui(ui, rng, errors),
+            CipherID::Alberti => self.alberti.ui(ui, rng, errors),
+            CipherID::Playfair => self.playfair.ui(ui, rng, errors),
+            CipherID::Columnar => self.columnar.ui(ui, rng, errors),
+            CipherID::Adfgvx => self.adfgvx.ui(ui, rng, errors),
+            CipherID::B64 => self.b64.ui(ui, rng, errors),
+            CipherID::Slidefair => self.slidefair.ui(ui, rng, errors),
+            CipherID::Enigma => self.enigma.ui(ui, rng, errors),
+            CipherID::Grille => self.grille.ui(ui, rng, errors),
+            CipherID::Sigaba => self.sigaba.ui(ui, rng, errors),
+            CipherID::Bazeries => self.bazeries.ui(ui, rng, errors),
+            CipherID::Chaocipher => self.chaocipher.ui(ui, rng, errors),
+            CipherID::Bifid => self.bifid.ui(ui, rng, errors),
+            CipherID::RailFence => self.rail_fence.ui(ui, rng, errors),
+            CipherID::Scytale => self.scytale.ui(ui, rng, errors),
             _ => { ui.label("IN PROGRESS"); },
         }
     }
@@ -198,15 +226,17 @@ impl CipherDisplayPanel {
             CipherID::Alberti => encrypt_decrypt(ui, &control_panel.alberti, input, output, errors),
             CipherID::Playfair => encrypt_decrypt(ui, &control_panel.playfair, input, output, errors),
             CipherID::Columnar => encrypt_decrypt(ui, &control_panel.columnar, input, output, errors),
-            CipherID::ADFGVX => encrypt_decrypt(ui, &control_panel.adfgvx, input, output, errors),
+            CipherID::Adfgvx => encrypt_decrypt(ui, &control_panel.adfgvx, input, output, errors),
             CipherID::B64 => encrypt_decrypt(ui, &control_panel.b64, input, output, errors),
             CipherID::Slidefair => encrypt_decrypt(ui, &control_panel.slidefair, input, output, errors),
             CipherID::Enigma => encrypt_decrypt(ui, &control_panel.enigma, input, output, errors),
             CipherID::Grille => encrypt_decrypt(ui, &control_panel.grille, input, output, errors),
-            CipherID::SIGABA => encrypt_decrypt(ui, &control_panel.sigaba, input, output, errors),
+            CipherID::Sigaba => encrypt_decrypt(ui, &control_panel.sigaba, input, output, errors),
             CipherID::Bazeries => encrypt_decrypt(ui, &control_panel.bazeries, input, output, errors),
             CipherID::Chaocipher => encrypt_decrypt(ui, &control_panel.chaocipher, input, output, errors),
             CipherID::Bifid => encrypt_decrypt(ui, &control_panel.bifid, input, output, errors),
+            CipherID::RailFence => encrypt_decrypt(ui, &control_panel.rail_fence, input, output, errors),
+            CipherID::Scytale => encrypt_decrypt(ui, &control_panel.scytale, input, output, errors),
             _ => { *errors = String::from("button must be added to DisplayPanel struct") }
         }
 

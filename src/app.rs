@@ -51,7 +51,7 @@ impl ClassicCrypto {
         });
         CentralPanel::default().show(ctx, |ui| {
             ScrollArea::vertical().show(ui, |ui| {
-                self.cipher_control_panel.ui(ui, &mut self.active_cipher, &mut self.rng)
+                self.cipher_control_panel.ui(ui, &mut self.active_cipher, &mut self.rng, &mut self.errors)
             });
         });
     }

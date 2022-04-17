@@ -21,10 +21,6 @@ pub fn encrypt_decrypt(ui: &mut egui::Ui, cipher: &dyn Cipher, input: &mut Strin
     });
 }
 
-// pub fn encrypt_decrypt_step(ui: &mut egui::Ui, cipher: &dyn SteppingCipher, input: &mut String, output: &mut String, errors: &mut String) {
-
-// }
-
 
 pub fn randomize_reset(ui: &mut egui::Ui, cipher: &mut dyn Cipher, rng: &mut StdRng) {
     if ui.button("Randomize").clicked() {
@@ -52,7 +48,7 @@ pub fn input_alphabet(ui: &mut egui::Ui, alphabet: &mut String) {
     ui.add(egui::TextEdit::singleline(alphabet).font(TextStyle::Monospace)).on_hover_text("You can change this alphabet to whatever you like.");
 }
 
-pub fn control_text_edit(ui: &mut egui::Ui, text: &mut String) {
+pub fn text_edit(ui: &mut egui::Ui, text: &mut String) {
     ui.add(egui::TextEdit::singleline(text).font(TextStyle::Monospace));
 }
 
