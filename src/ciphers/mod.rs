@@ -72,6 +72,9 @@ pub use rail_fence::RailFence;
 // pub mod route;
 // pub use route::Route;
 
+pub mod hebern;
+pub use hebern::HebernRotor;
+
 use rand::prelude::StdRng;
 use crate::errors::CipherError;
 
