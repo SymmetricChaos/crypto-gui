@@ -19,6 +19,7 @@ pub mod code_panel;
 pub mod egui_aux;
 pub mod rotors;
 pub mod preset_alphabet;
+pub mod alphabet;
 
 
 // ----------------------------------------------------------------------------
