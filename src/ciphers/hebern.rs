@@ -1,13 +1,37 @@
 use std::{fmt, collections::HashMap};
+
 use crate::errors::CipherError;
 
-pub fn position_map(text: &str) -> HashMap<char,usize> {
-    let mut map = HashMap::with_capacity(text.chars().count());
-    for (pos,c) in text.chars().enumerate() {
-        map.insert(c, pos);
-    }
-    map
+pub struct Alphabet {
+    characters: Vec<char>,
+    positions: HashMap<char,usize>
 }
+
+impl Alphabet {
+    pub fn new(alphabet: &str) -> Self {
+        let characters = alphabet.chars().collect();
+        let mut positions = HashMap::with_capacity(alphabet.chars().count());
+        for (pos,c) in alphabet.chars().enumerate() {
+            positions.insert(c, pos);
+        }
+        Self{ characters, positions }
+    }
+
+    pub fn get_char(&self, n: usize) -> Option<char> {
+        self.characters.get(n).map(|n| *n)
+    }
+    
+    pub fn get_pos(&self, c: char) -> Option<usize> {
+        self.positions.get(&c).map(|n| *n)
+    }
+}
+
+impl fmt::Display for Alphabet {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.characters.iter().collect::<String>())
+    }
+}
+
  
 // Specifically the Enigma rotor
 #[derive(Clone,Debug)]
@@ -20,14 +44,17 @@ pub struct HebernRotor {
 }
 
 impl HebernRotor {
-	// TODO: this needs to 
-    pub fn new(wiring_str:  &str, positions: HashMap<char,usize>) -> Result<HebernRotor,CipherError> {
+
+    pub fn new(wiring_str: &str, alphabet: &Alphabet) -> Result<HebernRotor,CipherError> {
         let size = wiring_str.chars().count();
         let mut wiring_rtl = vec![0; size];
         let mut wiring_ltr = vec![0; size];
-        for w in wiring_str.chars().map(|x| *positions.get(&x).unwrap() ).enumerate() {
-            wiring_rtl[w.0] = w.1;
-            wiring_ltr[w.1] = w.0;
+
+        for (pos, c) in wiring_str
+                .chars().enumerate() {
+            let n = alphabet.get_pos(c).ok_or(CipherError::invalid_input_char(c))?;
+            wiring_rtl[pos] = n;
+            wiring_ltr[n]   = pos;
         }
         Ok(HebernRotor{ wiring_rtl, wiring_ltr, position: 0, wiring_str: wiring_str.to_string(), size })
     }
@@ -60,4 +87,10 @@ impl fmt::Display for HebernRotor {
         out.push_str(&self.wiring_str[0..p]);
         write!(f, "{}", out)
     }
+}
+
+pub struct Hebern {
+    pub rotors: Vec<HebernRotor>,
+    pub alphabet_string: String,
+    alphabet: Alphabet,
 }
