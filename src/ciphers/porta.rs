@@ -1,5 +1,14 @@
+use crate::errors::CipherError;
+use crate::ciphers::Cipher;
+use crate::alphabet::Alphabet;
+use crate::preset_alphabet::PresetAlphabet;
+use itertools::Itertools;
+use lazy_static::lazy_static;
+
+
+// Porta Cipher uses a sequence of 13 alphabets to encrypt characters. The visible pattern ensures the cipher is reciprocal.
 lazy_static! {
-    pub static ref PORTA_TABLEAUX: [&'static str; 13] = vec![
+    pub static ref PORTA_TABLEAUX: [&'static str; 13] = [
         "NOPQRSTUVWXYZABCDEFGHIJKLM",
         "OPQRSTUVWXYZNMABCDEFGHIJKL",
         "PQRSTUVWXYZNOLMABCDEFGHIJK",
@@ -17,45 +26,43 @@ lazy_static! {
 }
  
  
-/// Porta Cipher uses a sequence of 13 alphabets to encrypt characters. The visible pattern ensures the cipher is reciprocal.
 pub struct Porta {
-    tableaux: [&'static str; 13],
     pub key: String,
     key_vals: Vec<usize>,
-    alpahbet: Alphabet,
+    alphabet: Alphabet,
 }
  
 impl Default for Porta {
     fn default() -> Self {
         Self{ 
-            tableaux: PORTA_TABLEAUX.clone(), 
             key: String::new(), 
             key_vals: Vec::new(), 
-            alphabet: Alphabet::from(PresetAlphabet::BasicLatin) 
+            alphabet: Alphabet::from(PresetAlphabet::BasicLatin.slice()),
         }
     }
 }
  
 impl Porta {
     pub fn control_key(&mut self) -> &mut String {
-        self.key_vals = 
+        self.key_vals = self.key.chars().map(|c| self.alphabet.get_pos(c).unwrap()).collect_vec();
         &mut self.key
     }
  
     pub fn display_tableaux(&self) -> String {
- 
+        todo!()
     }
 }
  
 impl Cipher for Porta {
- 
+
+    // Need to incorporate graceful failure or guarantee of correctness
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
         let mut out = String::with_capacity(text.len());
         let ckey = self.key_vals.iter().cycle();
         for (c, k) in text.chars().zip(ckey) {
-            let row = self.tableaux.get(k);
+            let row = PORTA_TABLEAUX.get(*k).unwrap();
             let pos = row.chars().position(|x| x == c).unwrap();
-            out.push(self.alphabet.chars().nth(p).unwrap())
+            out.push(self.alphabet.get_char(pos).unwrap())
         }
         Ok(out)
     }
@@ -67,6 +74,10 @@ impl Cipher for Porta {
  
     fn reset(&mut self) {
         *self = Self::default()
+    }
+
+    fn randomize(&mut self, rng: &mut rand::prelude::StdRng) {
+        todo!()
     }
  
 }

@@ -69,6 +69,9 @@ pub use syctale::Scytale;
 pub mod rail_fence;
 pub use rail_fence::RailFence;
 
+pub mod porta;
+pub use porta::Porta;
+
 // pub mod route;
 // pub use route::Route;
 
