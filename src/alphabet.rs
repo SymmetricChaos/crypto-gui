@@ -1,29 +1,28 @@
-use std::{collections::HashMap, fmt};
+use std::{collections::BTreeMap, fmt};
 use itertools::Itertools;
 
 #[derive(Clone,Debug)]
 pub struct Alphabet {
-    characters: Vec<char>,
-    positions: HashMap<char,usize>
+    positions: BTreeMap<char,usize>
 }
 
 impl Alphabet {
 
     pub fn empty() -> Self {
-        Self{ characters: Vec::new(), positions: HashMap::new() }
+        Self{ positions: BTreeMap::new() }
     }
 
     pub fn from(alphabet: &str) -> Self {
-        let characters = alphabet.chars().unique().collect_vec();
-        let mut positions = HashMap::with_capacity(characters.len());
-        for (pos,c) in characters.iter().enumerate() {
-            positions.insert(*c, pos);
+        let characters = alphabet.chars().unique();
+        let mut positions = BTreeMap::new();
+        for (pos,c) in characters.enumerate() {
+            positions.insert(c, pos);
         }
-        Self{ characters, positions }
+        Self{ positions }
     }
 
     pub fn get_char(&self, n: usize) -> Option<char> {
-        self.characters.get(n).map(|n| *n)
+        self.positions.keys().nth(n).map(|c| *c)
     }
 
     pub fn get_pos(&self, c: char) -> Option<usize> {
@@ -37,6 +36,6 @@ impl Alphabet {
 
 impl fmt::Display for Alphabet {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.characters.iter().collect::<String>())
+        write!(f, "{}", self.positions.keys().collect::<String>())
     }
 }
