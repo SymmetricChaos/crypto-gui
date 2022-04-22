@@ -1,7 +1,8 @@
 use std::collections::BTreeMap;
 use std::fmt;
-use std::ops::Index;
 use itertools::Itertools;
+
+use crate::preset_alphabet::PresetAlphabet;
 
 // An Alphabet is a small ordered collection of unique chars
 // We want to be able to quickly know the index of any char and the char at
@@ -90,6 +91,12 @@ impl From<&str> for Alphabet {
             set.insert(c, pos as u8);
         }
         Self{ set }
+    }
+}
+
+impl From<PresetAlphabet> for Alphabet {
+    fn from(str: PresetAlphabet) -> Self {
+        Alphabet::from(str.slice())
     }
 }
 

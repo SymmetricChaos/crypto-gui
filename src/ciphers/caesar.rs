@@ -1,23 +1,23 @@
 use rand::{Rng, prelude::StdRng};
-use crate::{errors::{CipherError}, vecstring::VecString};
+use crate::{errors::CipherError, alphabet::Alphabet};
 use super::Cipher;
 use crate::preset_alphabet::PresetAlphabet::*;
 use crate::text_functions::prep_text;
 
 pub struct Caesar {
     pub shift: i32,
-    pub alphabet: VecString,
-    _alphabet: String,
+    pub alphabet: Alphabet,
+    alphabet_string: String,
 }
 
 impl Caesar {
 
     fn encrypt_char(&self, c: char) -> char {
-        *self.alphabet.char_offset(c, self.shift).unwrap()
+        self.alphabet.get_shifted_char(c, self.shift).unwrap()
     }
  
     fn decrypt_char(&self, c: char) -> char {
-        *self.alphabet.char_offset(c, -self.shift).unwrap()
+        self.alphabet.get_shifted_char(c, -self.shift).unwrap()
     }
 
     pub fn check_input(&self, text: &str) -> Result<(), CipherError> {
@@ -30,8 +30,8 @@ impl Caesar {
     }
 
     pub fn control_alphabet(&mut self) -> &mut String {
-        self.alphabet = VecString::from(&self._alphabet);
-        &mut self._alphabet
+        self.alphabet = Alphabet::from(&self.alphabet_string);
+        &mut self.alphabet_string
     }
 
     fn _validate_settings(&self) -> Result<(), CipherError> {
@@ -45,7 +45,7 @@ impl Caesar {
 
 impl Default for Caesar {
     fn default() -> Self {
-        Self { shift: 0, alphabet: VecString::from(BasicLatin), _alphabet: String::from(BasicLatin) }
+        Self { shift: 0, alphabet: Alphabet::from(BasicLatin), alphabet_string: String::from(BasicLatin) }
     }
 }
 
