@@ -38,6 +38,12 @@ impl Alphabet {
         self.set.get(&c).map(|n| (*n as usize + shift) % self.len() )
     }
 
+    // Get the character that is some (positive or negative) offset different from a provided char
+    pub fn get_shifted_char(&self, c: char, offset: i32) -> Option<char> {
+        let p = self.get_pos(c)?;
+        self.get_char_offset(p, offset)
+    }
+
     pub fn contains(&self, c: char) -> bool {
         self.set.contains_key(&c)
     }
