@@ -1,16 +1,18 @@
 use rand::{Rng, prelude::StdRng};
 use super::Cipher;
-use crate::errors::CipherError;
+use crate::{errors::CipherError, alphabet::Alphabet};
 
 pub struct DecoderRing {
     pub index: usize,
-    pub alphabet: String,
+    alphabet: Alphabet,
+    pub alphabet_string: String,
 }
 
 impl DecoderRing {
 
-    pub fn new(index: usize, alphabet: &str) -> Self {
-        DecoderRing{ index, alphabet: alphabet.to_string() }
+    pub fn control_alphabet(&mut self) -> &mut String {
+        self.alphabet = Alphabet::from(&self.alphabet_string);
+        &mut self.alphabet_string
     }
 
     pub fn length(&self) -> usize {
@@ -18,11 +20,13 @@ impl DecoderRing {
     }
 
     pub fn annie(&mut self) {
-        self.alphabet = String::from("_ASLWIMVHFKXDPOEJBTNQZGUYRC");
+        self.alphabet_string = String::from("_ASLWIMVHFKXDPOEJBTNQZGUYRC");
+        self.alphabet = Alphabet::from(&self.alphabet_string);
     }
 
     pub fn midnight(&mut self) {
-        self.alphabet = String::from("_AEXDTZKNYCJWSGUMBOQHRIVFPL");
+        self.alphabet_string = String::from("_AEXDTZKNYCJWSGUMBOQHRIVFPL");
+        self.alphabet = Alphabet::from(&self.alphabet_string);
     }
 
     fn valid_code_group(&self, s: &str) -> Result<usize, CipherError> {
@@ -39,7 +43,7 @@ impl DecoderRing {
 
 impl Default for DecoderRing {
     fn default() -> Self {
-        Self { index: 0, alphabet: String::from("_ABCDEFGHIJKLMNOPWRSTUVWXYZ") }
+        Self { index: 0, alphabet_string: String::from("_ABCDEFGHIJKLMNOPWRSTUVWXYZ"), alphabet: Alphabet::from("_ABCDEFGHIJKLMNOPWRSTUVWXYZ") }
     }
 }
 
@@ -95,17 +99,21 @@ mod decoder_ring_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "21 11 18 23 26 8 2 13 20 1 17 7 22 12 17 14 19 26 9 16 5 17 10 18 1 21 11 18 6 4 24 0 15 17 25";
+    const CIPHERTEXT: &'static str = "22 10 7 19 23 11 5 13 4 20 17 25 16 8 17 26 12 23 15 18 21 17 24 7 20 22 10 7 14 3 1 0 6 17 9";
 
     #[test]
     fn encrypt_test() {
-        let cipher = DecoderRing::new(3,"_ASLWIMVHFKXDPOEJBTNQZGUYRC");
+        let mut cipher = DecoderRing::default();
+        cipher.annie();
+        cipher.index = 3;
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
-        let cipher = DecoderRing::new(3,"_ASLWIMVHFKXDPOEJBTNQZGUYRC");
+        let mut cipher = DecoderRing::default();
+        cipher.annie();
+        cipher.index = 3;
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }
