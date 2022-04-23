@@ -1,5 +1,5 @@
 use super::Cipher;
-use crate::errors::CipherError;
+use crate::{errors::CipherError, alphabet::Alphabet};
 use crate::preset_alphabet::PresetAlphabet::*;
 use crate::math_functions::mul_inv;
 use rand::{prelude::StdRng, Rng};
@@ -7,12 +7,13 @@ use rand::{prelude::StdRng, Rng};
 pub struct Affine {
     pub add_key: usize,
     pub mul_key: usize,
-    pub alphabet: String,
+    pub alphabet_string: String,
+    alphabet: Alphabet,
 }
 
 impl Affine {
     fn encrypt_char(&self, c: char) -> char {
-        let mut pos = self.alphabet.chars().position(|x| x == c).unwrap();
+        let mut pos = self.alphabet.get_pos(c).unwrap();
         pos *= self.mul_key;
         pos += self.add_key;
         pos %= self.alphabet_len();
@@ -20,11 +21,16 @@ impl Affine {
     }
  
     fn decrypt_char(&self, c: char, mul_key_inv: usize) -> char {
-        let mut pos = self.alphabet.chars().position(|x| x == c).unwrap();
+        let mut pos = self.alphabet.get_pos(c).unwrap();
         pos += self.alphabet_len() - self.add_key;
         pos *= mul_key_inv;
         pos %= self.alphabet_len();
         self.alphabet.chars().nth(pos).unwrap()
+    }
+
+    pub fn control_alphabet(&mut self) -> &mut String {
+        self.alphabet = Alphabet::from(&self.alphabet_string);
+        &mut self.alphabet_string
     }
  
     pub fn alphabet_len(&self) -> usize {
@@ -57,7 +63,8 @@ impl Default for Affine {
         Self {
             add_key: 0,
             mul_key: 1,
-            alphabet: String::from(BasicLatin),
+            alphabet_string: String::from(BasicLatin),
+            alphabet: Alphabet::from(BasicLatin),
         }
     }
 }

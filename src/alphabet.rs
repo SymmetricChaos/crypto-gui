@@ -103,7 +103,7 @@ impl From<PresetAlphabet> for Alphabet {
 #[cfg(test)]
 mod alphabet_tests {
     use super::*;
- 
+
     #[test]
     fn nth_offset()  {
         let alphabet = Alphabet::from("ABCD");
@@ -114,6 +114,12 @@ mod alphabet_tests {
     fn pos_offset() {
         let alphabet = Alphabet::from("ABCD");
         assert_eq!(alphabet.get_pos_offset('C',1).unwrap(),1);
+    }
+
+    #[test]
+    fn shifted_char() {
+        let alphabet = Alphabet::from("ABCD");
+        assert_eq!(alphabet.get_shifted_char('A',2).unwrap(),'C');
     }
  
     #[test]
@@ -126,5 +132,11 @@ mod alphabet_tests {
     fn pos_offset_neg() {
         let alphabet = Alphabet::from("ABCD");
         assert_eq!(alphabet.get_pos_offset('C',-1).unwrap(),3);
+    }
+
+    #[test]
+    fn shifted_char_neg() {
+        let alphabet = Alphabet::from("ABCD");
+        assert_eq!(alphabet.get_shifted_char('A',-1).unwrap(),'D');
     }
 }
