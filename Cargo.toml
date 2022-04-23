@@ -24,3 +24,4 @@ getrandom = { version = "0.2", features = ["js"] }
 json = "0.12.4"
 primal = "0.3.0"
 rfd = "0.8.1"
+indexmap = "1.8.1"

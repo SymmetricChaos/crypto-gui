@@ -4,7 +4,6 @@
 
 pub mod ciphers;
 pub mod math_functions;
-pub mod text_functions;
 pub mod cipher_panel;
 mod app;
 pub mod grid;
@@ -12,14 +11,13 @@ pub mod grid;
 pub mod errors;
 pub mod cipher_id;
 pub mod code_id;
-pub mod vecstring;
 pub mod codes;
 pub mod code_panel;
 
 pub mod egui_aux;
 pub mod rotors;
-pub mod preset_alphabet;
-pub mod alphabet;
+
+pub mod text_aux;
 
 
 // ----------------------------------------------------------------------------

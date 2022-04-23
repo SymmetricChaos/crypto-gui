@@ -1,18 +1,15 @@
-use std::collections::BTreeMap;
 use std::fmt;
 use itertools::Itertools;
+use indexmap::IndexMap;
 
-use crate::preset_alphabet::PresetAlphabet;
+use super::preset_alphabet::PresetAlphabet;
 
-// An Alphabet is a small ordered collection of unique chars
-// We want to be able to quickly know the index of any char and the char at
-// any index. A BTreeMap should work for this, with u8 keys to save space.
-// This is probably a needless optimization but it will save writing lots of
-// iters and lambdas.
-// No way to modify an Alphabet once created is provided.
+// An Alphabet is a small collection of unique chars with an arbitrary
+// ordering (ie the order of their insertion).
+// IndexMap will provided the necessary functionality.
 #[derive(Clone,Debug)]
 pub struct Alphabet {
-    set: BTreeMap<char,u8>
+    set: IndexMap<char,u8>
 }
 
 impl Alphabet {
@@ -66,7 +63,7 @@ impl fmt::Display for Alphabet {
 
 impl From<String> for Alphabet {
     fn from(str: String) -> Self {
-        let mut set = BTreeMap::new();
+        let mut set = IndexMap::new();
         for (pos,c) in str.chars().unique().enumerate() {
             set.insert(c, pos as u8);
         }
@@ -76,7 +73,7 @@ impl From<String> for Alphabet {
 
 impl From<&String> for Alphabet {
     fn from(str: &String) -> Self {
-        let mut set = BTreeMap::new();
+        let mut set = IndexMap::new();
         for (pos,c) in str.chars().unique().enumerate() {
             set.insert(c, pos as u8);
         }
@@ -86,7 +83,7 @@ impl From<&String> for Alphabet {
 
 impl From<&str> for Alphabet {
     fn from(str: &str) -> Self {
-        let mut set = BTreeMap::new();
+        let mut set = IndexMap::new();
         for (pos,c) in str.chars().unique().enumerate() {
             set.insert(c, pos as u8);
         }
@@ -103,6 +100,13 @@ impl From<PresetAlphabet> for Alphabet {
 #[cfg(test)]
 mod alphabet_tests {
     use super::*;
+
+    #[test]
+    fn build_alphabet() {
+        let alpha = Alphabet::from("ZAGX");
+        assert_eq!(format!("{:?}",alpha),"Alphabet { set: {'Z': 0, 'A': 1, 'G': 2, 'X': 3} }");
+
+    }
 
     #[test]
     fn nth_offset()  {

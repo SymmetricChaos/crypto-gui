@@ -1,6 +1,6 @@
 use rand::prelude::{StdRng, SliceRandom};
 
-use crate::preset_alphabet::PresetAlphabet;
+use super::preset_alphabet::PresetAlphabet;
 use std::collections::VecDeque;
 use std::collections::vec_deque::{Iter,IterMut};
 use std::fmt::Display;

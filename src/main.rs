@@ -8,10 +8,7 @@ pub mod code_panel;
 
 pub mod math_functions;
 
-pub mod text_functions;
-pub mod vecstring;
-pub mod preset_alphabet;
-pub mod alphabet;
+pub mod text_aux;
 
 pub mod errors;
 
