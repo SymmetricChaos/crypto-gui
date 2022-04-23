@@ -27,7 +27,7 @@ impl Alphabet {
     // Get the character at some position with a (positive or negative) offset
     pub fn get_char_offset(&self, n: usize, offset: i32) -> Option<char> {
         let idx = ((n + self.len()) as i32 + offset) as usize % self.len();
-        self.set.keys().nth(idx).map(|c| *c)
+        self.get_char(idx)
     }
     
     // Get the position of some character with a (positive or negative) offset
@@ -64,7 +64,7 @@ impl fmt::Display for Alphabet {
 impl From<String> for Alphabet {
     fn from(str: String) -> Self {
         let mut set = IndexMap::new();
-        for (pos,c) in str.chars().unique().enumerate() {
+        for (pos, c) in str.chars().unique().enumerate() {
             set.insert(c, pos as u8);
         }
         Self{ set }
@@ -74,7 +74,7 @@ impl From<String> for Alphabet {
 impl From<&String> for Alphabet {
     fn from(str: &String) -> Self {
         let mut set = IndexMap::new();
-        for (pos,c) in str.chars().unique().enumerate() {
+        for (pos, c) in str.chars().unique().enumerate() {
             set.insert(c, pos as u8);
         }
         Self{ set }
@@ -84,7 +84,7 @@ impl From<&String> for Alphabet {
 impl From<&str> for Alphabet {
     fn from(str: &str) -> Self {
         let mut set = IndexMap::new();
-        for (pos,c) in str.chars().unique().enumerate() {
+        for (pos, c) in str.chars().unique().enumerate() {
             set.insert(c, pos as u8);
         }
         Self{ set }
@@ -109,7 +109,19 @@ mod alphabet_tests {
     }
 
     #[test]
-    fn nth_offset()  {
+    fn char()  {
+        let alphabet = Alphabet::from("ABCD");
+        assert_eq!(alphabet.get_char(1).unwrap(),'B');
+    }
+ 
+    #[test]
+    fn pos() {
+        let alphabet = Alphabet::from("ABCD");
+        assert_eq!(alphabet.get_pos('C').unwrap(),2);
+    }
+
+    #[test]
+    fn char_offset()  {
         let alphabet = Alphabet::from("ABCD");
         assert_eq!(alphabet.get_char_offset(1,1).unwrap(),'C');
     }
@@ -127,7 +139,7 @@ mod alphabet_tests {
     }
  
     #[test]
-    fn nth_offset_neg()  {
+    fn char_offset_neg()  {
         let alphabet = Alphabet::from("ABCD");
         assert_eq!(alphabet.get_char_offset(3,-1).unwrap(),'C');
     }
