@@ -62,7 +62,7 @@ impl fmt::Display for HebernRotor {
 #[derive(Clone,Debug)]
 pub struct HebernRotorCage {
     pub rotors: Vec<HebernRotor>,
-    alphabet_string: String,
+    pub alphabet_string: String,
     alphabet: Alphabet,
     counters: Vec<u8>,
     rotor_size: u8,
@@ -70,13 +70,14 @@ pub struct HebernRotorCage {
 
 impl HebernRotorCage {
 
-    pub fn set_alphabet(&mut self) {
-        self.alphabet = Alphabet::from(&self.alphabet_string)
+    pub fn control_alphabet(&mut self) -> &mut String {
+        self.alphabet = Alphabet::from(&self.alphabet_string);
+        &mut self.alphabet_string
     }
 
     pub fn step(&mut self) {
         // the first rotor always steps
-        // the stepping only continues if a rotor completes a full turn
+        // the stepping only continues if a rotor completes a full turn by returning to zero
         for (n, ctr) in self.counters.iter_mut().enumerate() {
             self.rotors[n].step();
             *ctr = (*ctr + 1) % self.rotor_size;
@@ -105,17 +106,20 @@ impl HebernRotorCage {
 
 impl Default for HebernRotorCage {
     fn default() -> Self {
+
         let alphabet_string = String::from(PresetAlphabet::BasicLatin);
         let alphabet = Alphabet::from(&alphabet_string);
+
         let counters = vec![0; 5];
+
         let mut rotors = Vec::with_capacity(5);
-        rotors.push(HebernRotor::new("WQHUFATCNKXZLEJIMRGOBPYVSD", &alphabet));
-        rotors.push(HebernRotor::new("PTYAUOJWCIRKDXVBGMSZENLHQF", &alphabet));
-        rotors.push(HebernRotor::new("DZFNREAUCYVSKJPXOHLBITWGQM", &alphabet));
-        rotors.push(HebernRotor::new("CXIZEGVAYWORLQKJPDFNSTBUHM", &alphabet));
-        rotors.push(HebernRotor::new("BWQZTNLAFPVJGSYIOMEXHUCDRK", &alphabet));
+        rotors.push(HebernRotor::new("WQHUFATCNKXZLEJIMRGOBPYVSD", &alphabet).unwrap());
+        rotors.push(HebernRotor::new("PTYAUOJWCIRKDXVBGMSZENLHQF", &alphabet).unwrap());
+        rotors.push(HebernRotor::new("DZFNREAUCYVSKJPXOHLBITWGQM", &alphabet).unwrap());
+        rotors.push(HebernRotor::new("CXIZEGVAYWORLQKJPDFNSTBUHM", &alphabet).unwrap());
+        rotors.push(HebernRotor::new("BWQZTNLAFPVJGSYIOMEXHUCDRK", &alphabet).unwrap());
         
-        Self { rotors: Default::default(), alphabet_string, alphabet, counters, rotor_size: 26 }
+        Self { rotors, alphabet_string, alphabet, counters, rotor_size: 26 }
     }
 }
 
@@ -138,7 +142,7 @@ impl Hebern {
 
 impl Default for Hebern {
     fn default() -> Self {
-        Self { rotors: Default::default() }
+        Self { rotors: HebernRotorCage::default() }
     }
 }
 
@@ -170,7 +174,7 @@ impl Cipher for Hebern {
     }
 
     fn randomize(&mut self, rng: &mut rand::prelude::StdRng) {
-        todo!()
+        todo!("{:?}",rng)
     }
 
     fn reset(&mut self) {
@@ -184,17 +188,17 @@ mod hebern_tests {
     use super::*;
 
     const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "";
+    const CIPHERTEXT: &'static str = "PHJXRXAVPGSDMLKZFFFGGKFYYMVMLXAYHEP";
 
     #[test]
     fn encrypt_test() {
-        let mut cipher = Hebern::default();
+        let cipher = Hebern::default();
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
-        let mut cipher = Hebern::default();
+        let cipher = Hebern::default();
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }
