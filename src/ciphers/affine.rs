@@ -1,7 +1,8 @@
 use super::Cipher;
-use crate::{errors::CipherError, alphabet::Alphabet};
-use crate::preset_alphabet::PresetAlphabet::*;
-use crate::math_functions::mul_inv;
+use crate::{
+    errors::CipherError, 
+    math_functions::mul_inv, 
+    text_aux::{Alphabet, PresetAlphabet::*}};
 use rand::{prelude::StdRng, Rng};
 
 pub struct Affine {

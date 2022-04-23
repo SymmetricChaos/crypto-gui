@@ -1,5 +1,5 @@
 use crate::errors::CipherError;
-use crate::vecstring::VecString;
+use crate::text_aux::vecstring::VecString;
 
 use super::Cipher;
  

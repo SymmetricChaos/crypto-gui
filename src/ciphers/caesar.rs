@@ -1,8 +1,7 @@
 use rand::{Rng, prelude::StdRng};
-use crate::{errors::CipherError, alphabet::Alphabet};
+use crate::errors::CipherError;
+use crate::text_aux::{prep_text, Alphabet, PresetAlphabet::*};
 use super::Cipher;
-use crate::preset_alphabet::PresetAlphabet::*;
-use crate::text_functions::prep_text;
 
 pub struct Caesar {
     pub shift: i32,

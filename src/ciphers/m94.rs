@@ -1,6 +1,6 @@
 use rand::{prelude::{StdRng, SliceRandom}, Rng};
 use super::Cipher;
-use crate::preset_alphabet::PresetAlphabet::*;
+use crate::text_aux::PresetAlphabet::*;
 use crate::errors::CipherError;
 
 
@@ -34,7 +34,7 @@ const M94_WHEELS: [&'static str; 25] = [
  
 pub struct M94 {
     pub offset: usize,
-    pub wheels: Vec<&'static str>, //wheels can be reordered
+    pub wheels: Vec<&'static str>, //wheels can be reordered but not changed
     _alphabet: String,
 }
 

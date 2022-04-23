@@ -1,7 +1,7 @@
 use std::fmt::Display;
 use rand::{prelude::StdRng, Rng};
 use crate::errors::CipherError;
-use crate::preset_alphabet::{PresetAlphabet::*};
+use crate::text_aux::PresetAlphabet::*;
 use super::Cipher;
 
 pub struct Alberti {

@@ -1,6 +1,7 @@
 use rand::{Rng, prelude::StdRng};
 use super::Cipher;
-use crate::{errors::CipherError, alphabet::Alphabet};
+use crate::errors::CipherError;
+use crate::text_aux::Alphabet;
 
 pub struct DecoderRing {
     pub index: usize,

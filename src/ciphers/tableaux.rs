@@ -1,7 +1,9 @@
 use rand::prelude::ThreadRng;
 use super::{Cipher, PolyMode};
-use crate::text_functions::{LATIN_UPPER, random_sample_replace};
-use crate::errors::CipherError;
+use crate::{
+    text_functions::{LATIN_UPPER, random_sample_replace}, 
+    errors::CipherError
+};
 
 
 pub struct CyclicKey {

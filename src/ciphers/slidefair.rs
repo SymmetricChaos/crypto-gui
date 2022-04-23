@@ -2,10 +2,10 @@ use std::fmt;
 
 use rand::prelude::StdRng;
 use super::Cipher;
-use crate::vecstring::{VecString};
-use crate::preset_alphabet::PresetAlphabet::*;
-use crate::{errors::CipherError, text_functions::shuffled_str};
-use crate::text_functions::keyed_alphabet;
+use crate::text_aux::vecstring::VecString;
+use crate::text_aux::PresetAlphabet::*;
+use crate::{errors::CipherError, text_aux::shuffled_str};
+use crate::text_aux::keyed_alphabet;
 
 pub struct Slidefair {
     alphabet: VecString,

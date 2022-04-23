@@ -2,9 +2,7 @@ use std::fmt;
 use num::integer::Roots;
 use rand::prelude::StdRng;
 use super::Cipher;
-use crate::{errors::CipherError, text_functions::shuffled_str};
-use crate::text_functions::{keyed_alphabet};
-use crate::preset_alphabet::{PresetAlphabet::*, PresetAlphabet};
+use crate::{text_aux::{keyed_alphabet, PresetAlphabet::{*, self}, shuffled_str}, errors::CipherError};
 
 pub struct Playfair {
     pub alphabet: String,

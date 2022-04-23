@@ -1,7 +1,7 @@
 use crate::errors::CipherError;
 use crate::ciphers::Cipher;
-use crate::alphabet::Alphabet;
-use crate::preset_alphabet::PresetAlphabet;
+use crate::text_aux::Alphabet;
+use crate::text_aux::PresetAlphabet;
 use itertools::Itertools;
 use lazy_static::lazy_static;
 
@@ -77,7 +77,7 @@ impl Cipher for Porta {
     }
 
     fn randomize(&mut self, rng: &mut rand::prelude::StdRng) {
-        todo!()
+        todo!("{:?}",rng)
     }
  
 }

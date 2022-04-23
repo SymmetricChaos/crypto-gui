@@ -5,7 +5,7 @@ use rand::prelude::StdRng;
 use super::View;
 use super::generic_components::*;
 use crate::ciphers::ADFGVX;
-use crate::preset_alphabet::{PresetAlphabet::*};
+use crate::text_aux::{PresetAlphabet::*};
 
 
 impl View for ADFGVX {

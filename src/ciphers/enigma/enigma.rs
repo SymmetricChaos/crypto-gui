@@ -1,9 +1,38 @@
-use crate::{errors::CipherError, ciphers::Cipher};
+use crate::{errors::CipherError, ciphers::Cipher, text_aux::PresetAlphabet};
 use super::{ROTOR_MAP,REFLECTORS,Rotor,Reflector,EnigmaPlugboard,char_to_usize,usize_to_char};
 use rand::prelude::StdRng;
  
  
  
+pub fn prep_enigma_text(text: &str) -> Result<String,CipherError> {
+    let mut out = String::with_capacity(text.len());
+    for t in text.chars() {
+        if PresetAlphabet::BasicLatin.slice().contains(t) {
+            out.push(t)
+        } else if t.is_whitespace() || t.is_ascii_punctuation() {
+            // ignore any Unicode whitespace and 
+            // any ASCII punctuation
+        } else if PresetAlphabet::BasicLatin.slice().contains(t.to_ascii_uppercase()) {
+            out.push(t.to_ascii_uppercase())
+        } else {
+            match t {
+                'Ä'|'ä' => out.push_str("AE"),
+                'Ö'|'ö' => out.push_str("OE"),
+                'Ü'|'ü' => out.push_str("UE"),
+                'ẞ'|'ß' => out.push_str("SS"),
+                _ => return Err(CipherError::invalid_input_char(t))
+            }
+        }
+    }
+    Ok(out)
+}
+
+#[test]
+fn enigma_text_prep() {
+    //Twelve boxers chase Viktor across the large Sylter dike
+    let pangram = "Zwölf Boxkämpfer jagen Viktor quer über den großen Sylter Deich";
+    assert_eq!(prep_enigma_text(pangram).unwrap(),"ZWOELFBOXKAEMPFERJAGENVIKTORQUERUEBERDENGROSSENSYLTERDEICH");
+}
  
 // This will be the mutating inner state of the Enigma machine. Each time we 
 // encrypt with Enigma this state is cloned and run.

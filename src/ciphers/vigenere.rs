@@ -2,10 +2,10 @@ use std::collections::VecDeque;
 
 use rand::prelude::StdRng;
 use super::{Cipher, PolyMode};
-use crate::text_functions::random_sample_replace;
-use crate::vecstring::{VecString};
-use crate::preset_alphabet::PresetAlphabet;
-use crate::errors::CipherError;
+use crate::{
+    text_aux::{vecstring::VecString, PresetAlphabet, random_sample_replace}, 
+    errors::CipherError
+};
 
 
 pub struct Vigenere {

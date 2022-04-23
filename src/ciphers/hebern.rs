@@ -1,8 +1,8 @@
 use std::fmt;
 
-use crate::{errors::CipherError, alphabet::Alphabet, preset_alphabet::PresetAlphabet};
+use crate::{errors::CipherError, text_aux::PresetAlphabet};
 use super::Cipher;
-
+use crate::text_aux::Alphabet;
 
 #[derive(Clone,Debug)]
 pub struct HebernRotor {
@@ -73,6 +73,16 @@ impl HebernRotorCage {
     pub fn control_alphabet(&mut self) -> &mut String {
         self.alphabet = Alphabet::from(&self.alphabet_string);
         &mut self.alphabet_string
+    }
+
+    pub fn add_rotor(&mut self) {
+        self.rotors.push(HebernRotor::new(&self.alphabet.to_string(), &self.alphabet).unwrap());
+        self.counters.push(0);
+    }
+
+    pub fn del_rotor(&mut self) {
+        self.rotors.pop();
+        self.counters.pop();
     }
 
     pub fn step(&mut self) {

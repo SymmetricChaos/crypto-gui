@@ -3,7 +3,7 @@ use std::ops::Range;
 use itertools::Itertools;
 use rand::{Rng, prelude::StdRng, SeedableRng};
 use super::Cipher;
-use crate::{errors::CipherError, grid::{Grid, Symbol}, preset_alphabet::PresetAlphabet};
+use crate::{errors::CipherError, grid::{Grid, Symbol}, text_aux::PresetAlphabet};
 
 pub struct Grille {
     pub null_alphabet: String,

@@ -1,8 +1,7 @@
 use rand::prelude::StdRng;
 use super::Cipher;
-use crate::preset_alphabet::PresetAlphabet;
+use crate::text_aux::{PresetAlphabet, shuffled_str};
 use crate::errors::CipherError;
-use crate::text_functions::shuffled_str;
 
 pub struct Bazeries {
     pub alphabet: String,

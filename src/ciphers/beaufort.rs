@@ -1,10 +1,9 @@
 use std::collections::VecDeque;
 
-use rand::prelude::{StdRng};
+use rand::prelude::StdRng;
 use super::{Cipher, PolyMode};
-use crate::text_functions::random_sample_replace;
+use crate::text_aux::{random_sample_replace, PresetAlphabet::*};
 use crate::errors::CipherError;
-use crate::preset_alphabet::{PresetAlphabet::*};
 
 pub struct Beaufort {
     pub key_words: [String; 5],

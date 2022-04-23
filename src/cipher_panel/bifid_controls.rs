@@ -5,7 +5,7 @@ use rand::prelude::StdRng;
 use super::View;
 use super::generic_components::*;
 use crate::ciphers::Bifid;
-use crate::preset_alphabet::PresetAlphabet::*;
+use crate::text_aux::PresetAlphabet::*;
 
 impl View for Bifid {
     fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {

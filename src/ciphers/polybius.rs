@@ -3,9 +3,7 @@ use itertools::Itertools;
 use num::integer::Roots;
 use rand::prelude::StdRng;
 use super::Cipher;
-use crate::{errors::CipherError, text_functions::shuffled_str};
-use crate::text_functions::{validate_alphabet, keyed_alphabet};
-use crate::preset_alphabet::{PresetAlphabet::*, PresetAlphabet};
+use crate::{text_aux::{PresetAlphabet::*, PresetAlphabet, validate_alphabet, keyed_alphabet, shuffled_str}, errors::CipherError};
 
 pub struct Polybius {
     pub alphabet: String,

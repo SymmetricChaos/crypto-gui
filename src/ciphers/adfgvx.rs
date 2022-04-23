@@ -1,6 +1,8 @@
 use rand::prelude::StdRng;
-use crate::{ciphers::{Polybius,Columnar}, errors::CipherError};
-use crate::preset_alphabet::{PresetAlphabet::*, PresetAlphabet};
+use crate::{
+    text_aux::{PresetAlphabet::*, PresetAlphabet}, 
+    ciphers::{Polybius,Columnar}, 
+    errors::CipherError};
 use super::Cipher;
  
 pub struct ADFGVX {

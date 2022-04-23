@@ -3,9 +3,8 @@ use rand::prelude::StdRng;
 
 use crate::errors::CipherError;
 use crate::grid::{Grid, Symbol};
-use crate::text_functions::{rank_str, random_sample_replace};
+use crate::text_aux::{PresetAlphabet::*, rank_str, random_sample_replace};
 use super::Cipher;
-use crate::preset_alphabet::PresetAlphabet::*;
 
 pub struct Columnar {
     pub alphabet: String,
