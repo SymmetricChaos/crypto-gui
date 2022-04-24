@@ -78,6 +78,9 @@ pub use porta::Porta;
 pub mod hebern;
 pub use hebern::HebernRotor;
 
+pub mod batco;
+pub use batco::Batco;
+
 use rand::prelude::StdRng;
 use crate::errors::CipherError;
 

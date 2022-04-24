@@ -175,6 +175,7 @@ pub fn prep_text(text: &str, alphabet: &str) -> Result<String,CipherError> {
 
 #[cfg(test)]
 mod text_function_tests {
+
     use super::*;
 
     #[test]
@@ -182,5 +183,15 @@ mod text_function_tests {
         let text = "APPLES";
         let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         assert_eq!(vec![0, 3, 4, 2, 1, 5],rank_str(text, alphabet));
+    }
+
+    use rand::SeedableRng;
+    #[test]
+    fn shuffled_alphabet() {
+        let mut rng = StdRng::from_entropy();
+        let alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        for _ in 0..26 {
+            println!("{}",shuffled_str(alpha, &mut rng))
+        }
     }
 }
