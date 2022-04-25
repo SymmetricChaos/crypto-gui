@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use rand::{prelude::StdRng, thread_rng, Rng, SeedableRng};
+use rand::{prelude::StdRng, Rng, SeedableRng};
 
 use crate::{errors::CipherError, text_aux::PresetAlphabet};
 use crate::text_aux::shuffled_str;
@@ -65,8 +65,9 @@ const BATCO_COLS_DEFAULT: [&'static str; 6] = [
 pub struct Batco {
     cipher_rows: Vec<String>,
     key_cols: Vec<String>,
-    message_key: (char,char),
-    seed: Option<u64>
+    pub message_key: (char,char),
+    pub seed: Option<u64>,
+    encrypt_with_seed: bool,
 }
 
 
@@ -77,6 +78,7 @@ impl Default for Batco {
             key_cols: BATCO_COLS_DEFAULT.iter().map(|x| x.to_string()).collect(),
             message_key: ('2','A'),
             seed: None,
+            encrypt_with_seed: false,
         }
     }
 }
@@ -135,11 +137,36 @@ impl Batco {
     }
 
     // The key is usize but its defined by a digit from 2 to 7 (to select a column) and a letter (to select a row in that column)
-    // fn key_to_row(&self) -> usize {
-    //     let x = c.0.to_digit(10).unwrap() as usize;
-    //     let alpha = &self.key_cols[x-2];
-    //     alpha.chars().position(|x| x == c.1).unwrap()
-    // }
+    fn key_to_row(&self) -> Result<usize,CipherError>  {
+        if self.message_key.1.is_ascii_uppercase() {
+            return Err(CipherError::key("the key letter must be an uppercase basic Latin letter"))
+        }
+        let column = self.message_key.0.to_digit(10).unwrap() as usize;
+        if column < 2 || column > 7 {
+            return Err(CipherError::key("the number must be between 2 and 7"))
+        }
+        let alpha = &self.key_cols[column-2];
+        Ok(alpha.chars().position(|x| x == self.message_key.1).unwrap())
+    }
+
+    fn symbol_to_number(&self, c: char) -> Result<usize,CipherError> {
+        let v = match c {
+            '0' => 0,
+            '1' => 1,
+            '2' => 2,
+            '3' => 3,
+            '4' => 4,
+            '5' => 5,
+            '6' => 6,
+            '7' => 7,
+            '8' => 8,
+            '9' => 9,
+            'C' => 10,
+            '.' => 11,
+            _ => return Err(CipherError::input("the only valid symbols are digits, CH, and the period"))
+        };
+        Ok(v)
+    }
 }
 
 
@@ -147,66 +174,58 @@ impl Batco {
 impl Cipher for Batco {
 
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
-        // if text.chars().count() > 22 {
-        //     return Err(CipherError::input("BATCO messages are limited to 22 characters per key for security reasons"))
-        // }
-        // let mut rng = thread_rng();
-        // let alphabet = &self.cipher_rows[self.message_key.get()];
-        // let mut symbols = text.chars();
-        // let breaks = [0,4,6,8,10,12,14,16,18,20,22,24,26];
+        if text.chars().count() > 22 {
+            return Err(CipherError::input("BATCO messages are limited to 22 characters per key for security reasons"))
+        }
 
-        // let mut out = String::with_capacity(text.len());
-        // // loop while c is Some(char)
-        // while let Some(c) = symbols.next() {
-        //     // H is ignored since it always follows C
-        //     if c == 'H' { continue }
-        //     // Convert the symbol to a number
-        //     let v = match c {
-        //         '0' => 0,
-        //         '1' => 1,
-        //         '2' => 2,
-        //         '3' => 3,
-        //         '4' => 4,
-        //         '5' => 5,
-        //         '6' => 6,
-        //         '7' => 7,
-        //         '8' => 8,
-        //         '9' => 9,
-        //         'C' => 10,
-        //         '.' => 11,
-        //         _ => return Err(CipherError::input("the only valid symbols are digits, CH, and the period"))
-        //     };
+        let mut rng = if self.encrypt_with_seed {
+            StdRng::seed_from_u64(self.seed.unwrap())
+        } else {
+            StdRng::from_entropy()
+        };
 
-        //     // Select a random symbol from the allowed range for that number
-        //     let pos: usize = rng.gen_range(breaks[v]..breaks[v+1]);
-        //     out.push( alphabet.chars().nth(pos).unwrap() );
-        // }
-        // Ok(out)
-        todo!("encrypt")
+        let alphabet = &self.cipher_rows[self.key_to_row()?];
+        let mut symbols = text.chars();
+        
+        let breaks = [0,4,6,8,10,12,14,16,18,20,22,24,26];
+
+        let mut out = String::with_capacity(text.len());
+
+        // loop while c is Some(char)
+        while let Some(c) = symbols.next() {
+            // H is ignored since it always follows C
+            if c == 'H' { continue }
+            let v = self.symbol_to_number(c)?;
+            // Select a random symbol from the allowed range for that number
+            let pos: usize = rng.gen_range(breaks[v]..breaks[v+1]);
+            out.push( alphabet.chars().nth(pos).unwrap() );
+        }
+        Ok(out)
     }
 
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
-        // let alphabet = &self.cipher_rows[self.message_key.get()];
-        // let symbols = text.chars();
+        let alphabet = &self.cipher_rows[self.key_to_row()?];
+        let symbols = text.chars();
 
-        // let mut out = String::with_capacity(text.len());
-        // for c in symbols {
-        //     let pos = alphabet.chars().position(|x| x == c).unwrap()/2;
-        //     out.push_str(BATCO_DIGITS[pos])
-        // }
-        // Ok(out)
-        todo!("decrypt")
+        let mut out = String::with_capacity(text.len());
+        for c in symbols {
+            let pos = alphabet.chars().position(|x| x == c).unwrap()/2;
+            out.push_str(BATCO_DIGITS[pos])
+        }
+        Ok(out)
     }
     
     fn randomize(&mut self, rng: &mut StdRng) {
-    
-        let alpha = PresetAlphabet::BasicLatin.slice();
-        for idx in 0..26 {
-            self.cipher_rows[idx] = shuffled_str(alpha, rng)
-        }
-
-        for idx in 0..7 {
-            self.key_cols[idx] = shuffled_str(alpha, rng)
+        if self.seed.is_some() {
+            self.randomize_seeded()
+        } else {
+            let alpha = PresetAlphabet::BasicLatin.slice();
+            for idx in 0..26 {
+                self.cipher_rows[idx] = shuffled_str(alpha, rng)
+            }
+            for idx in 0..7 {
+                self.key_cols[idx] = shuffled_str(alpha, rng)
+            }
         }
     }
     
@@ -227,5 +246,11 @@ mod batco_tests {
     // fn key_rows() {
     //     let cipher = Batco::default();
     //     println!("{}",cipher.show_key_rows());
+    // }
+
+    // #[test]
+    // fn key_rows() {
+    //     let cipher = Batco::default();
+    //     println!("{}",cipher.show_code_page());
     // }
 }

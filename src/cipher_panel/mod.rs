@@ -29,6 +29,7 @@ pub mod bifid_controls;
 pub mod cipher_id;
 pub mod rail_fence_controls;
 pub mod scytale_controls;
+pub mod batco_controls;
 
 pub trait View: Cipher {
     fn ui(&mut self, ui: &mut egui::Ui, rng: &mut StdRng, errors: &mut String);
@@ -97,6 +98,8 @@ pub struct CipherControlPanel {
     bifid: Bifid,
 
     chaocipher: Chaocipher,
+
+    batco: Batco,
 }
 
 
@@ -147,6 +150,13 @@ impl CipherControlPanel {
                 "Other",
                 active_cipher, ui
             );
+
+            
+            combox_box(
+                &[CipherID::Batco],
+                "Tactical",
+                active_cipher, ui
+            );
         });
 
         ui.add_space(16.0);
@@ -187,6 +197,7 @@ impl CipherControlPanel {
             CipherID::Bifid => self.bifid.ui(ui, rng, errors),
             CipherID::RailFence => self.rail_fence.ui(ui, rng, errors),
             CipherID::Scytale => self.scytale.ui(ui, rng, errors),
+            CipherID::Batco => self.batco.ui(ui, rng, errors),
             _ => { ui.label("IN PROGRESS"); },
         }
     }
@@ -237,6 +248,7 @@ impl CipherDisplayPanel {
             CipherID::Bifid => encrypt_decrypt(ui, &control_panel.bifid, input, output, errors),
             CipherID::RailFence => encrypt_decrypt(ui, &control_panel.rail_fence, input, output, errors),
             CipherID::Scytale => encrypt_decrypt(ui, &control_panel.scytale, input, output, errors),
+            CipherID::Batco => encrypt_decrypt(ui, &control_panel.batco, input, output, errors),
             _ => { *errors = String::from("button must be added to DisplayPanel struct") }
         }
 
