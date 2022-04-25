@@ -96,12 +96,11 @@ impl Batco {
         };
     
         let alpha = PresetAlphabet::BasicLatin.slice();
-        for idx in 0..26 {
-            self.cipher_rows[idx] = shuffled_str(alpha, &mut rng)
+        for row in self.cipher_rows.iter_mut() {
+            *row = shuffled_str(alpha, &mut rng)
         }
-
-        for idx in 0..7 {
-            self.key_cols[idx] = shuffled_str(alpha, &mut rng)
+        for col in self.key_cols.iter_mut() {
+            *col = shuffled_str(alpha, &mut rng)
         }
     }
 
@@ -138,12 +137,12 @@ impl Batco {
 
     // The key is usize but its defined by a digit from 2 to 7 (to select a column) and a letter (to select a row in that column)
     fn key_to_row(&self) -> Result<usize,CipherError>  {
-        if self.message_key.1.is_ascii_uppercase() {
+        if !self.message_key.1.is_ascii_uppercase() {
             return Err(CipherError::key("the key letter must be an uppercase basic Latin letter"))
         }
         let column = self.message_key.0.to_digit(10).unwrap() as usize;
         if column < 2 || column > 7 {
-            return Err(CipherError::key("the number must be between 2 and 7"))
+            return Err(CipherError::key("the key number must be between 2 and 7"))
         }
         let alpha = &self.key_cols[column-2];
         Ok(alpha.chars().position(|x| x == self.message_key.1).unwrap())
@@ -220,11 +219,11 @@ impl Cipher for Batco {
             self.randomize_seeded()
         } else {
             let alpha = PresetAlphabet::BasicLatin.slice();
-            for idx in 0..26 {
-                self.cipher_rows[idx] = shuffled_str(alpha, rng)
+            for row in self.cipher_rows.iter_mut() {
+                *row = shuffled_str(alpha, rng)
             }
-            for idx in 0..7 {
-                self.key_cols[idx] = shuffled_str(alpha, rng)
+            for col in self.key_cols.iter_mut() {
+                *col = shuffled_str(alpha, rng)
             }
         }
     }

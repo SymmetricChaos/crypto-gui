@@ -1,9 +1,8 @@
-use eframe::egui::Ui;
-use eframe::egui::Slider;
+use eframe::egui::{Ui, Slider};
 use rand::prelude::StdRng;
 use super::View;
 use super::generic_components::*;
-use crate::ciphers::Batco;
+use crate::{ciphers::Batco, egui_aux::mono};
 
 impl View for Batco {
     fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {
@@ -23,6 +22,6 @@ impl View for Batco {
             ui.add(Slider::new(&mut self.seed.unwrap(), 0..=u64::MAX));
         }
 
-        ui.label(self.show_code_page());
+        mono(ui, &self.show_code_page(), None);
     }
 }
