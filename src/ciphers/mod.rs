@@ -81,6 +81,9 @@ pub use hebern::HebernRotor;
 pub mod batco;
 pub use batco::Batco;
 
+pub mod checkerboard;
+pub use checkerboard::StraddlingCheckerboard;
+
 use rand::prelude::StdRng;
 use crate::errors::CipherError;
 
