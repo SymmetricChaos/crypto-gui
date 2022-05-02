@@ -1,7 +1,6 @@
 use std::char;
 
 use crate::errors::CipherError;
-
 use super::Cipher;
 
 // Use this to fill partial inputs for the interface
@@ -38,14 +37,13 @@ impl StraddlingCheckerboard {
         } else {
             Err(CipherError::invalid_input_char(c))
         }
-
     }
 
     fn encrypt_char(&self, num: usize, output: &mut String) -> Result<(),CipherError> {
         let qt = num / 10;
         let rem = num % 10;
         match qt {
-            0 => output.push_str(&format!("{}",qt)),
+            0 => output.push_str(&format!("{}",rem)),
             1 => output.push_str(&format!("{}{}",self.gaps.0,rem)),
             2 => output.push_str(&format!("{}{}",self.gaps.1,rem)),
             _ => return Err(CipherError::input("invalid character"))
@@ -54,26 +52,31 @@ impl StraddlingCheckerboard {
     }
     
     pub fn cipher_page(&self) -> String {
-        let mut s = "Straddling Checkerboard Cipher\n  0 1 2 3 4 5 6 7 8 9\n ".to_string();
+        let mut page = String::with_capacity(87);
+        page.push_str("  0 1 2 3 4 5 6 7 8 9\n ");
         let mut symbols = self.rows.iter();
 
-        for _ in 0..10 {
-            s.push(' ');
-            s.push(*symbols.next().unwrap())
+        for idx in 0..10 {
+            page.push(' ');
+            if self.gaps.0 == idx || self.gaps.1 == idx {
+                page.push(' ');
+            } else {
+                page.push(*symbols.next().unwrap())
+            }
         }
 
-        s.push_str(&format!("\n{}",self.gaps.0));
+        page.push_str(&format!("\n{}",self.gaps.0));
         for _ in 0..10 {
-            s.push(' ');
-            s.push(*symbols.next().unwrap())
+            page.push(' ');
+            page.push(*symbols.next().unwrap())
         }
 
-        s.push_str(&format!("\n{}",self.gaps.1));
+        page.push_str(&format!("\n{}",self.gaps.1));
         for _ in 0..10 {
-            s.push(' ');
-            s.push(*symbols.next().unwrap())
+            page.push(' ');
+            page.push(*symbols.next().unwrap())
         }
-        s
+        page
     }
 
 }
@@ -83,8 +86,8 @@ impl Cipher for StraddlingCheckerboard {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
         let mut out = String::with_capacity(text.len());
         let mut digit_mode = false;
+
         for c in text.chars() {
-        
             // If in digit mode push the character directly onto the output
             // then turn off digit_mode
             if digit_mode {
@@ -118,16 +121,23 @@ impl Cipher for StraddlingCheckerboard {
 
             if n == self.gaps.0 {
                 let x = numbers.next().unwrap();
-                out.push(*self.rows.iter().nth(x + 10).unwrap())
+                out.push(*self.rows.iter().nth(x + 8).unwrap())
             
             } else if n == self.gaps.1 {
                 let x = numbers.next().unwrap();
-                out.push(*self.rows.iter().nth(x + 20).unwrap())
+                out.push(*self.rows.iter().nth(x + 18).unwrap())
             
             } else {
-                out.push(*self.rows.iter().nth(n).unwrap())
+                if n >= self.gaps.0 {
+                    out.push(*self.rows.iter().nth(n-1).unwrap())
+                } else if n >= self.gaps.1 {
+                    out.push(*self.rows.iter().nth(n-2).unwrap())
+                } else {
+                    out.push(*self.rows.iter().nth(n).unwrap())
+                }
             }
         }
+
         Ok(out)
     }
 
@@ -139,4 +149,28 @@ impl Cipher for StraddlingCheckerboard {
         todo!()
     }
 
+}
+
+
+
+
+#[cfg(test)]
+mod checkerboard_tests {
+    // http://www.chaocipher.com/ActualChaocipher/Chaocipher-Revealed-Algorithm.pdf
+    use super::*;
+
+    const PLAINTEXT:  &'static str = "ATTACKTHECASTLEAT/0/5/3/1";
+    const CIPHERTEXT: &'static str = "3113212712502139128031620625623621";
+
+    #[test]
+    fn encrypt_test() {
+        let cipher = StraddlingCheckerboard::default();
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+    }
+
+    #[test]
+    fn decrypt_test() {
+        let cipher = StraddlingCheckerboard::default();
+        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+    }
 }
