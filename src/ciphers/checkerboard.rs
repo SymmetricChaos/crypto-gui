@@ -1,5 +1,7 @@
 use std::char;
 
+use rand::prelude::SliceRandom;
+
 use crate::errors::CipherError;
 use super::Cipher;
 
@@ -116,37 +118,42 @@ impl Cipher for StraddlingCheckerboard {
         let mut out = String::with_capacity(text.len());
         let mut numbers = text.chars().map(|c| c.to_digit(10).unwrap() as usize);
 
-        // This needs to correct for gaps
+        // This needs to handle gaps correctly
         while let Some(n) = numbers.next() {
-
-            if n == self.gaps.0 {
+            
+            let c = if n == self.gaps.0 {
                 let x = numbers.next().unwrap();
-                out.push(*self.rows.iter().nth(x + 8).unwrap())
+                *self.rows.iter().nth(x + 8).unwrap()
             
             } else if n == self.gaps.1 {
                 let x = numbers.next().unwrap();
-                out.push(*self.rows.iter().nth(x + 18).unwrap())
+                *self.rows.iter().nth(x + 18).unwrap()
             
             } else {
-                if n >= self.gaps.0 {
-                    out.push(*self.rows.iter().nth(n-1).unwrap())
-                } else if n >= self.gaps.1 {
-                    out.push(*self.rows.iter().nth(n-2).unwrap())
+                if n >= self.gaps.1 {
+                    *self.rows.iter().nth(n-2).unwrap()
+                } else if n >= self.gaps.0 {
+                    *self.rows.iter().nth(n-1).unwrap()
                 } else {
-                    out.push(*self.rows.iter().nth(n).unwrap())
+                    *self.rows.iter().nth(n).unwrap()
                 }
+            };
+            out.push(c);
+            if c == '/' {
+                let n = (numbers.next().unwrap() + 48) as u8 as char;
+                out.push(n)
             }
-        }
+        };
 
         Ok(out)
     }
 
     fn randomize(&mut self, rng: &mut rand::prelude::StdRng) {
-        todo!()
+        self.rows.shuffle(rng);
     }
 
     fn reset(&mut self) {
-        todo!()
+        *self = Self::default();
     }
 
 }
@@ -158,9 +165,8 @@ impl Cipher for StraddlingCheckerboard {
 mod checkerboard_tests {
     // http://www.chaocipher.com/ActualChaocipher/Chaocipher-Revealed-Algorithm.pdf
     use super::*;
-
-    const PLAINTEXT:  &'static str = "ATTACKTHECASTLEAT/0/5/3/1";
-    const CIPHERTEXT: &'static str = "3113212712502139128031620625623621";
+    const PLAINTEXT:  &'static str = "ATTACKTHEQUICKBROWNFOXAT/0/5/3/1";
+    const CIPHERTEXT: &'static str = "31132127125061638212720746552346631620625623621";
 
     #[test]
     fn encrypt_test() {
