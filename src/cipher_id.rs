@@ -36,6 +36,8 @@ pub enum CipherID {
 
     Batco,
     Dryad,
+
+    Checkerboard,
 }
 
 impl Default for CipherID {
@@ -72,7 +74,8 @@ impl CipherID {
             CipherID::Bifid => "The Bifid Cipher combines a Polybius square with a very simple transposition in order to obscure as much information as possible about the plaintext. First the Polybius square is used to convert each letter into a pair of symbol, Then first symbol in each pair is written down after that the second symbol in each pair is written down. Finally this converted back to the original alphabet using the Polybius square once more.",
             CipherID::B64 => "The B64 Cipher is not a historical cipher. It is an (to the author's knowlege) novel cipher based on the ADFGVX and Bifid ciphers. Only symbols from the MIME Base64 alphabet are used, ensuring the message can be sent without risk of corruption over most digital systems. First a Polybius square is used to change the text into pairs of digits, then these pairs are shuffled by applying two columnar transpositions, and finally they Polybius square is applied in reverse to convert the results back to the Base64 alphabet to reduce the message size.",
 
-            CipherID::Chaocipher => "The Chaocipher was developed by Irish journalist Jogn Francis Byrne who belived it to be unbreakable.",
+            CipherID::Chaocipher => "The Chaocipher was developed by Irish journalist John Francis Byrne who belived it to be unbreakable.",
+            CipherID::Checkerboard => "The Straddling Checkerboard is a modernized version of the Polybius Square that assigns single digits to certain letters, usually the most common. It is weak on its own but its irregularity makes it useful when combined with other ciphers.",
             _ => "Missing description. Please complain to the author.",
         }
     }
@@ -112,6 +115,7 @@ impl Display for  CipherID {
             CipherID::Dryad => "DRYAD",
             CipherID::RailFence => "Rail Fence",
             CipherID::Scytale => "Scytale",
+            CipherID::Checkerboard => "Straddling Checkerboard",
         };
         write!(f,"{}",name)
     }
