@@ -26,7 +26,6 @@ pub mod sigaba_controls;
 pub mod bazeries_controls;
 pub mod chaocipher_controls;
 pub mod bifid_controls;
-pub mod cipher_id;
 pub mod rail_fence_controls;
 pub mod scytale_controls;
 pub mod batco_controls;
@@ -99,10 +98,10 @@ pub struct CipherControlPanel {
     bifid: Bifid,
 
     chaocipher: Chaocipher,
+    checkerboard: StraddlingCheckerboard,
 
     batco: Batco,
 
-    checkerboard: StraddlingCheckerboard,
 }
 
 
@@ -149,17 +148,17 @@ impl CipherControlPanel {
             );
 
             combox_box(
-                &[CipherID::Chaocipher],
-                "Other",
-                active_cipher, ui
-            );
-
-            
-            combox_box(
                 &[CipherID::Batco],
                 "Tactical",
                 active_cipher, ui
             );
+
+            combox_box(
+                &[CipherID::Chaocipher, CipherID::Checkerboard],
+                "Other",
+                active_cipher, ui
+            );
+
         });
 
         ui.add_space(16.0);

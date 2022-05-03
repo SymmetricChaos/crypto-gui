@@ -2,15 +2,16 @@ use std::char;
 
 use rand::prelude::SliceRandom;
 
-use crate::errors::CipherError;
+use crate::{errors::CipherError, text_aux::keyed_alphabet};
 use super::Cipher;
 
 // Use this to fill partial inputs for the interface
-// const CHECKERBOARD_ALPHABET: &'static str = "ABCDEFGHIJKLM/NOPQRSTUVWXYZ.";
+const CHECKERBOARD_ALPHABET: &'static str = "ABCDEFGHIJKLM/NOPQRSTUVWXYZ.";
 
 pub struct StraddlingCheckerboard {
     rows: Vec<char>,
-    gaps: (usize,usize),
+    pub gaps: (usize,usize),
+    pub alphabet: String,
 }
 
 impl Default for StraddlingCheckerboard {
@@ -19,13 +20,18 @@ impl Default for StraddlingCheckerboard {
         let gaps = (2,6);
         StraddlingCheckerboard{
             rows, 
-            gaps, 
+            gaps,
+            alphabet: "ETAONRISBCDFGHJKLMPQ/UVWXYZ.".to_string(),
         }
     }
 }
 
 // need to handle the digit encoding scheme
 impl StraddlingCheckerboard {
+
+    pub fn set_alphabet(&mut self) {
+        self.rows = keyed_alphabet(&self.alphabet, CHECKERBOARD_ALPHABET).chars().collect();
+    }
 
     fn char_to_num(&self, c: char) -> Result<usize,CipherError> {
         if let Some(mut n) = self.rows.iter().position(|x| *x == c) {
