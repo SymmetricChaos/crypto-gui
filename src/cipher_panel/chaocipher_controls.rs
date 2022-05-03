@@ -3,6 +3,7 @@ use rand::prelude::StdRng;
 use super::View;
 use super::generic_components::*;
 use crate::ciphers::Chaocipher;
+use crate::egui_aux::mono;
 
 
 impl View for Chaocipher {
@@ -11,7 +12,7 @@ impl View for Chaocipher {
         randomize_reset(ui, self, rng);
         ui.add_space(16.0);
 
-        ui.label(self.left.to_string());
-        ui.label(self.right.to_string());
+        mono(ui, &self.left.to_string(), None);
+        mono(ui, &self.right.to_string(), None);
     }
 }
