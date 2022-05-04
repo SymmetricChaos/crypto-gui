@@ -1,5 +1,3 @@
-use eframe::egui::TextEdit;
-use eframe::egui::TextStyle;
 use super::View;
 use super::generic_components::*;
 use crate::ciphers::GeneralSubstitution;
@@ -12,13 +10,16 @@ impl View for GeneralSubstitution {
         randomize_reset(ui, self, rng);
         ui.add_space(16.0);
 
-        ui.add_space(16.0);
         ui.label("Plaintext Alphabet");
-        ui.add(TextEdit::singleline(self.control_alphabet1()).font(TextStyle::Monospace));
+        if control_string(ui, &mut self.pt_alphabet_string).changed() {
+            self.set_pt_alphabet();
+        }
         ui.add_space(16.0);
 
         ui.label("Ciphertext Alphabet");
-        ui.add(TextEdit::singleline(self.control_alphabet2()).font(TextStyle::Monospace));
+        if control_string(ui, &mut self.ct_alphabet_string).changed() {
+            self.set_pt_alphabet();
+        }
         ui.add_space(16.0);
     }
 }

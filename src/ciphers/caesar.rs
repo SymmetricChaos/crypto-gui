@@ -6,7 +6,7 @@ use super::Cipher;
 pub struct Caesar {
     pub shift: i32,
     pub alphabet: Alphabet,
-    alphabet_string: String,
+    pub alphabet_string: String,
 }
 
 impl Caesar {
@@ -26,6 +26,10 @@ impl Caesar {
             }
         }
         Ok(())
+    }
+
+    pub fn set_alphabet(&mut self) {
+        self.alphabet = Alphabet::from(&self.alphabet_string);
     }
 
     pub fn control_alphabet(&mut self) -> &mut String {

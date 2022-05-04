@@ -7,46 +7,45 @@ use super::Cipher;
 
 #[derive(Debug)]
 pub struct GeneralSubstitution {
-    alphabet_string1: String,
-    alphabet1: Alphabet,
-    alphabet_string2: String,
-    alphabet2: Alphabet,
+    pub pt_alphabet_string: String,
+    pt_alphabet: Alphabet,
+    pub ct_alphabet_string: String,
+    ct_alphabet: Alphabet,
 }
 
 impl GeneralSubstitution {
 
-    pub fn _set_alphabet1(&mut self, symbols: &str) {
-        self.alphabet1 = Alphabet::from(symbols);
-        self.alphabet_string1 = self.alphabet1.to_string();
+    pub fn set_pt_alphabet(&mut self) {
+        self.pt_alphabet = Alphabet::from(&self.pt_alphabet_string);
     }
 
-    pub fn _set_alphabet2(&mut self, symbols: &str) {
-        self.alphabet2 = Alphabet::from(symbols);
-        self.alphabet_string2 = self.alphabet2.to_string();
+    pub fn set_ct_alphabet(&mut self) {
+        self.ct_alphabet = Alphabet::from(&self.ct_alphabet_string);
     }
 
-    pub fn control_alphabet1(&mut self) -> &mut String {
-        self.alphabet1 = Alphabet::from(&self.alphabet_string1);
-        &mut self.alphabet_string1
+    // easier fpr debugging
+    pub fn _assign_pt_alphabet(&mut self, alphabet: &str) {
+        self.pt_alphabet_string = alphabet.to_string();
+        self.set_pt_alphabet();
     }
 
-    pub fn control_alphabet2(&mut self) -> &mut String {
-        self.alphabet2 = Alphabet::from(&self.alphabet_string2);
-        &mut self.alphabet_string2
+    pub fn _assign_ct_alphabet(&mut self, alphabet: &str) {
+        self.ct_alphabet_string = alphabet.to_string();
+        self.set_ct_alphabet();
     }
 
     pub fn encrypt_char(&self, c: char) -> char {
-        let pos = self.alphabet1.get_pos(c).unwrap();
-        self.alphabet2.get_char(pos).unwrap()
+        let pos = self.pt_alphabet.get_pos(c).unwrap();
+        self.ct_alphabet.get_char(pos).unwrap()
     }
 
     pub fn decrypt_char(&self, c: char) -> char {
-        let pos = self.alphabet2.get_pos(c).unwrap();
-        self.alphabet1.get_char(pos).unwrap()
+        let pos = self.ct_alphabet.get_pos(c).unwrap();
+        self.pt_alphabet.get_char(pos).unwrap()
     }
 
     fn validate_settings(&self) -> Result<(), CipherError> {
-        if self.alphabet1.chars().count() != self.alphabet2.chars().count() {
+        if self.pt_alphabet.chars().count() != self.ct_alphabet.chars().count() {
             return Err(CipherError::key("the input and output alphabets must have the same length"))
         }
         Ok(())
@@ -54,7 +53,7 @@ impl GeneralSubstitution {
 
     fn validate_text_encrypt(&self, text: &str) -> Result<(), CipherError> {
         for c in text.chars() {
-            if !self.alphabet1.contains(c) {
+            if !self.pt_alphabet.contains(c) {
                 return Err(CipherError::invalid_input_char(c))
             }
         }
@@ -63,7 +62,7 @@ impl GeneralSubstitution {
 
     fn validate_text_decrypt(&self, text: &str) -> Result<(), CipherError> {
         for c in text.chars() {
-            if !self.alphabet2.contains(c) {
+            if !self.ct_alphabet.contains(c) {
                 return Err(CipherError::invalid_input_char(c))
             }
         }
@@ -73,11 +72,11 @@ impl GeneralSubstitution {
 
 impl Default for GeneralSubstitution {
     fn default() -> Self {
-        let alphabet_string1 = String::from(PresetAlphabet::BasicLatin);
-        let alphabet1 = Alphabet::from(&alphabet_string1);
-        let alphabet_string2 = String::from("ZYXWVUTSRQPONMLKJIHGFEDCBA");
-        let alphabet2 = Alphabet::from(&alphabet_string2);
-        Self { alphabet1, alphabet_string1, alphabet2, alphabet_string2 }
+        let pt_alphabet_string = String::from(PresetAlphabet::BasicLatin);
+        let pt_alphabet = Alphabet::from(&pt_alphabet_string);
+        let ct_alphabet_string = String::from("ZYXWVUTSRQPONMLKJIHGFEDCBA");
+        let ct_alphabet = Alphabet::from(&ct_alphabet_string);
+        Self { pt_alphabet_string, pt_alphabet, ct_alphabet_string, ct_alphabet  }
     }
 }
 
@@ -97,8 +96,9 @@ impl Cipher for GeneralSubstitution {
     }
 
     fn randomize(&mut self, rng: &mut StdRng) {
-        self.alphabet_string2 = shuffled_str(&self.alphabet_string1, rng);
-        self.alphabet2 = Alphabet::from(&self.alphabet_string2);
+        // keep the plaintext alphabet unchanged and make the ciphertext alphabet a shuffled version of it
+        self.ct_alphabet_string = shuffled_str(&self.pt_alphabet_string, rng);
+        self.ct_alphabet = Alphabet::from(&self.ct_alphabet_string);
     }
 
     fn reset(&mut self) {
@@ -119,28 +119,28 @@ mod gen_sub_tests {
     #[test]
     fn encrypt_test1() {
         let mut cipher = GeneralSubstitution::default();
-        cipher._set_alphabet2("ODUSGPKLMECFJWRHVTYABZXNQI");
+        cipher._assign_ct_alphabet("ODUSGPKLMECFJWRHVTYABZXNQI");
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT1);
     }
 
     #[test]
     fn decrypt_test1() {
         let mut cipher = GeneralSubstitution::default();
-        cipher._set_alphabet2("ODUSGPKLMECFJWRHVTYABZXNQI");
+        cipher._assign_ct_alphabet("ODUSGPKLMECFJWRHVTYABZXNQI");
         assert_eq!(cipher.decrypt(CIPHERTEXT1).unwrap(), PLAINTEXT);
     }
 
     #[test]
     fn encrypt_test2() {
         let mut cipher = GeneralSubstitution::default();
-        cipher._set_alphabet2("⏯🍥🆚💲📢🍒💮🚚💡🎴🚅😽⏳🌃🕳👈🔝☪📡🐏😩🕘🚆🚢😪🚪");
+        cipher._assign_ct_alphabet("⏯🍥🆚💲📢🍒💮🚚💡🎴🚅😽⏳🌃🕳👈🔝☪📡🐏😩🕘🚆🚢😪🚪");
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT2);
     }
 
     #[test]
     fn decrypt_test2() {
         let mut cipher = GeneralSubstitution::default();
-        cipher._set_alphabet2("⏯🍥🆚💲📢🍒💮🚚💡🎴🚅😽⏳🌃🕳👈🔝☪📡🐏😩🕘🚆🚢😪🚪");
+        cipher._assign_ct_alphabet("⏯🍥🆚💲📢🍒💮🚚💡🎴🚅😽⏳🌃🕳👈🔝☪📡🐏😩🕘🚆🚢😪🚪");
         assert_eq!(cipher.decrypt(CIPHERTEXT2).unwrap(), PLAINTEXT);
     }
 }

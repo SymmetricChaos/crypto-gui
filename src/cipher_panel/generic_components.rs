@@ -43,6 +43,10 @@ pub fn reset_button(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
     }
 }
 
+pub fn control_string(ui: &mut egui::Ui, string: &mut String) -> egui::Response {
+    ui.add(egui::TextEdit::singleline(string).font(TextStyle::Monospace)).on_hover_text("Change this to whatever you like.")
+}
+
 pub fn input_alphabet(ui: &mut egui::Ui, alphabet: &mut String) {
     ui.label("Alphabet");
     ui.add(egui::TextEdit::singleline(alphabet).font(TextStyle::Monospace)).on_hover_text("You can change this alphabet to whatever you like.");
