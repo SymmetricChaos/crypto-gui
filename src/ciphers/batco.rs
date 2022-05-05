@@ -1,3 +1,5 @@
+use std::num::ParseIntError;
+
 use itertools::Itertools;
 use rand::{prelude::StdRng, Rng, SeedableRng};
 
@@ -65,9 +67,10 @@ const BATCO_COLS_DEFAULT: [&'static str; 6] = [
 pub struct Batco {
     cipher_rows: Vec<String>,
     key_cols: Vec<String>,
-    pub message_key: (char,char),
+    pub message_number: u8, // easy conversion with char
+    pub message_letter: u8, // easy conversion with char
+    pub seed_string: String,
     pub seed: Option<u64>,
-    encrypt_with_seed: bool,
 }
 
 
@@ -76,15 +79,30 @@ impl Default for Batco {
         Batco { 
             cipher_rows: BATCO_ROWS_DEFAULT.iter().map(|x| x.to_string()).collect(),
             key_cols: BATCO_COLS_DEFAULT.iter().map(|x| x.to_string()).collect(),
-            message_key: ('2','A'),
+            message_number: 0,
+            message_letter: 0,
+            seed_string: String::from("0"),
             seed: None,
-            encrypt_with_seed: false,
         }
     }
 }
 
 
 impl Batco {
+
+    pub fn seed_string_to_seed(&mut self) -> Result<(),ParseIntError> {
+        let n = self.seed_string.parse::<u64>()?;
+        self.seed = Some(n);
+        Ok(())
+    }
+
+    pub fn message_letter_to_char(&self) -> char {
+        (self.message_letter + 65) as char
+    }
+
+    pub fn message_number_to_char(&self) -> char {
+        (self.message_number + 50) as char
+    }
 
     fn randomize_seeded(&mut self) {
 
@@ -135,17 +153,18 @@ impl Batco {
         page
     }
 
-    // The key is usize but its defined by a digit from 2 to 7 (to select a column) and a letter (to select a row in that column)
+    // The keys is u8 but are defined as being a digit from 2 to 7 (to select a column) and an uppercase Latin letter (to select a row in that column)
     fn key_to_row(&self) -> Result<usize,CipherError>  {
-        if !self.message_key.1.is_ascii_uppercase() {
-            return Err(CipherError::key("the key letter must be an uppercase basic Latin letter"))
-        }
-        let column = self.message_key.0.to_digit(10).unwrap() as usize;
-        if column < 2 || column > 7 {
+
+        if self.message_number > 6 {
             return Err(CipherError::key("the key number must be between 2 and 7"))
         }
+        if self.message_letter > 26 {
+            return Err(CipherError::key("the key letter must be an uppercase basic Latin letter"))
+        }
+        let column = self.message_number as usize;
         let alpha = &self.key_cols[column-2];
-        Ok(alpha.chars().position(|x| x == self.message_key.1).unwrap())
+        Ok(alpha.chars().position(|x| x == self.message_letter_to_char()).unwrap())
     }
 
     fn symbol_to_number(&self, c: char) -> Result<usize,CipherError> {
@@ -177,11 +196,7 @@ impl Cipher for Batco {
             return Err(CipherError::input("BATCO messages are limited to 22 characters per key for security reasons"))
         }
 
-        let mut rng = if self.encrypt_with_seed {
-            StdRng::seed_from_u64(self.seed.unwrap())
-        } else {
-            StdRng::from_entropy()
-        };
+        let mut rng = StdRng::from_entropy();
 
         let alphabet = &self.cipher_rows[self.key_to_row()?];
         let mut symbols = text.chars();
@@ -241,15 +256,11 @@ impl Cipher for Batco {
 mod batco_tests {
     use super::*;
 
-    // #[test]
-    // fn key_rows() {
-    //     let cipher = Batco::default();
-    //     println!("{}",cipher.show_key_rows());
-    // }
-
-    // #[test]
-    // fn key_rows() {
-    //     let cipher = Batco::default();
-    //     println!("{}",cipher.show_code_page());
-    // }
+    #[test]
+    fn encrypt_decrypt_test() {
+        let cipher = Batco::default();
+        let ptext = "THEQUICKBROWNFOX";
+        let ctext = cipher.encrypt(ptext).unwrap();
+        assert_eq!(ptext,cipher.decrypt(&ctext).unwrap());
+    }
 }
