@@ -22,7 +22,7 @@ impl HebernRotor {
 
         for (pos, c) in wiring_str
                 .chars().enumerate() {
-            let n = alphabet.get_pos(c).ok_or(CipherError::invalid_input_char(c))?;
+            let n = alphabet.get_pos_of(c).ok_or(CipherError::invalid_input_char(c))?;
             wiring_rtl[pos] = n;
             wiring_ltr[n]   = pos;
         }
@@ -98,19 +98,19 @@ impl HebernRotorCage {
     }
 
     pub fn encrypt_char(&self, c: char) -> char {
-        let mut n = self.alphabet.get_pos(c).unwrap();
+        let mut n = self.alphabet.get_pos_of(c).unwrap();
         for rtr in self.rotors.iter() {
             n = rtr.ltr(n)
         }
-        self.alphabet.get_char(n).unwrap()
+        self.alphabet.get_char_at(n).unwrap()
     }
 
     pub fn decrypt_char(&self, c: char) -> char {
-        let mut n = self.alphabet.get_pos(c).unwrap();
+        let mut n = self.alphabet.get_pos_of(c).unwrap();
         for rtr in self.rotors.iter().rev() {
             n = rtr.rtl(n)
         }
-        self.alphabet.get_char(n).unwrap()
+        self.alphabet.get_char_at(n).unwrap()
     }
 }
 

@@ -35,13 +35,13 @@ impl GeneralSubstitution {
     }
 
     pub fn encrypt_char(&self, c: char) -> char {
-        let pos = self.pt_alphabet.get_pos(c).unwrap();
-        self.ct_alphabet.get_char(pos).unwrap()
+        let pos = self.pt_alphabet.get_pos_of(c).unwrap();
+        self.ct_alphabet.get_char_at(pos).unwrap()
     }
 
     pub fn decrypt_char(&self, c: char) -> char {
-        let pos = self.ct_alphabet.get_pos(c).unwrap();
-        self.pt_alphabet.get_char(pos).unwrap()
+        let pos = self.ct_alphabet.get_pos_of(c).unwrap();
+        self.pt_alphabet.get_char_at(pos).unwrap()
     }
 
     fn validate_settings(&self) -> Result<(), CipherError> {

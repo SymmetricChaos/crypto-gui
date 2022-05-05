@@ -9,16 +9,21 @@ use super::Cipher;
 pub struct Columnar {
     pub alphabet: String,
     key: Vec<usize>,
-    key_word: String,
+    pub key_word: String,
 }
 
 impl Columnar {
+
     pub fn control_key(&mut self) -> &mut String {
         self.key = rank_str(&self.key_word, &self.alphabet);
         &mut self.key_word
     }
 
-    pub fn set_key(&mut self, key_word: &str) {
+    pub fn set_key(&mut self) {
+        self.key = rank_str(&self.key_word, &self.alphabet);
+    }
+
+    pub fn assign_key(&mut self, key_word: &str) {
         self.key_word = key_word.to_string();
         self.key = rank_str(&self.key_word, &self.alphabet);
     }
@@ -102,14 +107,14 @@ mod columnar_tests {
     #[test]
     fn encrypt_test() {
         let mut cipher = Columnar::default();
-        cipher.set_key("TEST");
+        cipher.assign_key("TEST");
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = Columnar::default();
-        cipher.set_key("TEST");
+        cipher.assign_key("TEST");
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

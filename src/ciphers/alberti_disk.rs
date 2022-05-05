@@ -24,13 +24,13 @@ impl Alberti {
 
 
     fn encrypt_char(&self, symbol: char, index: usize) -> char {
-        let position = self.fixed_alphabet.get_pos(symbol).unwrap();
-        self.moving_alphabet.get_char_offset(position, index as i32).unwrap()
+        let position = self.fixed_alphabet.get_pos_of(symbol).unwrap();
+        self.moving_alphabet.get_char_at_offset(position, index as i32).unwrap()
     }
 
     fn decrypt_char(&self, symbol: char, index: usize) -> char {
-        let position = self.moving_alphabet.get_pos(symbol).unwrap();
-        self.fixed_alphabet.get_char_offset(position, -(index as i32)).unwrap()
+        let position = self.moving_alphabet.get_pos_of(symbol).unwrap();
+        self.fixed_alphabet.get_char_at_offset(position, -(index as i32)).unwrap()
     }
 
 
@@ -47,8 +47,8 @@ impl Cipher for Alberti {
             if self.fixed_alphabet.contains(s) {
                 out.push(self.encrypt_char(s,index));
             } else if self.moving_alphabet.contains(s) {
-                index = self.moving_alphabet.get_pos(s).unwrap();
-                out.push(self.fixed_alphabet.get_char(index).unwrap());
+                index = self.moving_alphabet.get_pos_of(s).unwrap();
+                out.push(self.fixed_alphabet.get_char_at(index).unwrap());
             } else {
                 return Err(CipherError::invalid_input_char(s))
             }
@@ -64,8 +64,8 @@ impl Cipher for Alberti {
             if self.moving_alphabet.contains(s) {
                 out.push(self.decrypt_char(s,index));
             } else if self.fixed_alphabet.contains(s) {
-                index = self.fixed_alphabet.get_pos(s).unwrap();
-                out.push(self.moving_alphabet.get_char(index).unwrap());
+                index = self.fixed_alphabet.get_pos_of(s).unwrap();
+                out.push(self.moving_alphabet.get_char_at(index).unwrap());
             } else {
                 return Err(CipherError::invalid_input_char(s))
             }

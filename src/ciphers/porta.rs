@@ -44,7 +44,7 @@ impl Default for Porta {
  
 impl Porta {
     pub fn control_key(&mut self) -> &mut String {
-        self.key_vals = self.key.chars().map(|c| self.alphabet.get_pos(c).unwrap()).collect_vec();
+        self.key_vals = self.key.chars().map(|c| self.alphabet.get_pos_of(c).unwrap()).collect_vec();
         &mut self.key
     }
  
@@ -62,7 +62,7 @@ impl Cipher for Porta {
         for (c, k) in text.chars().zip(ckey) {
             let row = PORTA_TABLEAUX.get(*k).unwrap();
             let pos = row.chars().position(|x| x == c).unwrap();
-            out.push(self.alphabet.get_char(pos).unwrap())
+            out.push(self.alphabet.get_char_at(pos).unwrap())
         }
         Ok(out)
     }

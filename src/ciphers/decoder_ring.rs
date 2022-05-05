@@ -11,13 +11,17 @@ pub struct DecoderRing {
 
 impl DecoderRing {
 
+    pub fn set_alphabet(&mut self) {
+        self.alphabet = Alphabet::from(&self.alphabet_string)
+    }
+
     pub fn control_alphabet(&mut self) -> &mut String {
         self.alphabet = Alphabet::from(&self.alphabet_string);
         &mut self.alphabet_string
     }
 
     pub fn length(&self) -> usize {
-        self.alphabet.chars().count()
+        self.alphabet.len()
     }
 
     pub fn annie(&mut self) {
@@ -44,7 +48,10 @@ impl DecoderRing {
 
 impl Default for DecoderRing {
     fn default() -> Self {
-        Self { index: 0, alphabet_string: String::from("_ABCDEFGHIJKLMNOPWRSTUVWXYZ"), alphabet: Alphabet::from("_ABCDEFGHIJKLMNOPWRSTUVWXYZ") }
+        Self { 
+            index: 0, 
+            alphabet_string: String::from("_ABCDEFGHIJKLMNOPWRSTUVWXYZ"), 
+            alphabet: Alphabet::from("_ABCDEFGHIJKLMNOPWRSTUVWXYZ") }
     }
 }
 
@@ -54,7 +61,7 @@ impl Cipher for DecoderRing {
         let symbols = text.chars();
         let mut out = Vec::new();
         for s in symbols {
-            let pos = self.alphabet.chars().position(|x| x == s);
+            let pos = self.alphabet.get_pos_of(s);
             let n = match pos {
                 Some(v) => (v + self.index) % self.length(),
                 None => return Err(CipherError::invalid_input_char(s))
@@ -77,7 +84,7 @@ impl Cipher for DecoderRing {
         let mut out = String::with_capacity(nums.len());
         for n in nums {
             // Unwrap is justified by the valid_code_groups method which catches both possibles sorts of errors
-            out.push(self.alphabet.chars().nth(n).unwrap());
+            out.push(self.alphabet.get_char_at(n).unwrap());
         }
         Ok(out)
     }

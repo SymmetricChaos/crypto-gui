@@ -15,31 +15,39 @@ pub struct Alphabet {
 impl Alphabet {
 
     // Get the character at some position
-    pub fn get_char(&self, n: usize) -> Option<char> {
+    pub fn get_char_at(&self, n: usize) -> Option<char> {
         self.set.keys().nth(n).map(|c| *c)
+    }
+
+    pub fn get_char_unchecked(&self, n: usize) -> char {
+        *self.set.keys().nth(n).unwrap()
     }
     
     // Get the position of some character
-    pub fn get_pos(&self, c: char) -> Option<usize> {
+    pub fn get_pos_of(&self, c: char) -> Option<usize> {
         self.set.get(&c).map(|n| *n as usize)
+    }
+
+    pub fn get_pos_unchecked(&self, c: char) -> usize {
+        self.set[&c] as usize
     }
     
     // Get the character at some position with a (positive or negative) offset
-    pub fn get_char_offset(&self, n: usize, offset: i32) -> Option<char> {
+    pub fn get_char_at_offset(&self, n: usize, offset: i32) -> Option<char> {
         let idx = ((n + self.len()) as i32 + offset) as usize % self.len();
-        self.get_char(idx)
+        self.get_char_at(idx)
     }
     
     // Get the position of some character with a (positive or negative) offset
-    pub fn get_pos_offset(&self, c: char, offset: i32) -> Option<usize> {
+    pub fn get_pos_of_offset(&self, c: char, offset: i32) -> Option<usize> {
         let shift = (self.len() as i32 - offset) as usize % self.len();
         self.set.get(&c).map(|n| (*n as usize + shift) % self.len() )
     }
 
     // Get the character that is some (positive or negative) offset different from a provided char
     pub fn get_shifted_char(&self, c: char, offset: i32) -> Option<char> {
-        let p = self.get_pos(c)?;
-        self.get_char_offset(p, offset)
+        let p = self.get_pos_of(c)?;
+        self.get_char_at_offset(p, offset)
     }
 
     pub fn contains(&self, c: char) -> bool {
@@ -111,25 +119,25 @@ mod alphabet_tests {
     #[test]
     fn char()  {
         let alphabet = Alphabet::from("ABCD");
-        assert_eq!(alphabet.get_char(1).unwrap(),'B');
+        assert_eq!(alphabet.get_char_at(1).unwrap(),'B');
     }
  
     #[test]
     fn pos() {
         let alphabet = Alphabet::from("ABCD");
-        assert_eq!(alphabet.get_pos('C').unwrap(),2);
+        assert_eq!(alphabet.get_pos_of('C').unwrap(),2);
     }
 
     #[test]
     fn char_offset()  {
         let alphabet = Alphabet::from("ABCD");
-        assert_eq!(alphabet.get_char_offset(1,1).unwrap(),'C');
+        assert_eq!(alphabet.get_char_at_offset(1,1).unwrap(),'C');
     }
  
     #[test]
     fn pos_offset() {
         let alphabet = Alphabet::from("ABCD");
-        assert_eq!(alphabet.get_pos_offset('C',1).unwrap(),1);
+        assert_eq!(alphabet.get_pos_of_offset('C',1).unwrap(),1);
     }
 
     #[test]
@@ -141,13 +149,13 @@ mod alphabet_tests {
     #[test]
     fn char_offset_neg()  {
         let alphabet = Alphabet::from("ABCD");
-        assert_eq!(alphabet.get_char_offset(3,-1).unwrap(),'C');
+        assert_eq!(alphabet.get_char_at_offset(3,-1).unwrap(),'C');
     }
  
     #[test]
     fn pos_offset_neg() {
         let alphabet = Alphabet::from("ABCD");
-        assert_eq!(alphabet.get_pos_offset('C',-1).unwrap(),3);
+        assert_eq!(alphabet.get_pos_of_offset('C',-1).unwrap(),3);
     }
 
     #[test]
