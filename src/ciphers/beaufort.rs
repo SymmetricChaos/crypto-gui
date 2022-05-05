@@ -101,7 +101,7 @@ impl Beaufort {
     }
 
     fn encrypt_cyclic(&self, text: &str) -> Result<String,CipherError> {
-        let nums: Vec<usize> = text.chars().map( |x| self.alphabet.get_pos_unchecked(x) ).collect();
+        let nums: Vec<usize> = text.chars().map( |x| self.alphabet.get_pos_of(x).unwrap() ).collect();
         let mut out = String::with_capacity(nums.len());
         for (n,k) in nums.iter().zip(self.cyclic_key()) {
             out.push(self.encrypt_char(*n,k) )

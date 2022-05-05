@@ -18,19 +18,15 @@ impl Alphabet {
     pub fn get_char_at(&self, n: usize) -> Option<char> {
         self.set.keys().nth(n).map(|c| *c)
     }
-
-    pub fn get_char_unchecked(&self, n: usize) -> char {
-        *self.set.keys().nth(n).unwrap()
-    }
     
     // Get the position of some character
     pub fn get_pos_of(&self, c: char) -> Option<usize> {
         self.set.get(&c).map(|n| *n as usize)
     }
 
-    pub fn get_pos_unchecked(&self, c: char) -> usize {
-        self.set[&c] as usize
-    }
+    // pub fn get_pos_of_unchecked(&self, c: char) -> usize {
+    //     self.set[&c] as usize
+    // }
     
     // Get the character at some position with a (positive or negative) offset
     pub fn get_char_at_offset(&self, n: usize, offset: i32) -> Option<char> {
