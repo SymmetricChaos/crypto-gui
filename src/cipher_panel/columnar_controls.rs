@@ -1,4 +1,4 @@
-use eframe::egui::{TextEdit, Ui};
+use eframe::egui::Ui;
 use rand::prelude::StdRng;
 use super::View;
 use super::generic_components::*;
@@ -11,11 +11,13 @@ impl View for Columnar {
         randomize_reset(ui, self, rng);
         ui.add_space(16.0);
 
-        ui.add_space(16.0);
-        input_alphabet(ui, &mut self.alphabet);
-        ui.add_space(16.0);
+        ui.label("Alphabet");
+        control_string(ui, &mut self.alphabet);
 
+        
         ui.label("Key Word");
-        ui.add(TextEdit::singleline(self.control_key()));
+        if control_string(ui, &mut self.key_word).changed() {
+            self.set_key()
+        };
     }
 }

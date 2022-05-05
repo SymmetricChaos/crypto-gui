@@ -1,4 +1,4 @@
-use eframe::egui::{DragValue, TextEdit, TextStyle, Ui};
+use eframe::egui::{DragValue, Ui};
 use rand::prelude::StdRng;
 use super::View;
 use super::generic_components::*;
@@ -11,19 +11,20 @@ impl View for StraddlingCheckerboard {
 
         randomize_reset(ui, self, rng);
 
-        ui.add_space(16.0);
-        ui.add(TextEdit::singleline(&mut self.alphabet).font(TextStyle::Monospace));
-        if ui.button("set alphabet").clicked() {
+        ui.label("Alphabet");
+        if control_string(ui, &mut self.alphabet).changed() {
             self.set_alphabet()
-        };
+        }
         
         ui.add_space(16.0);
         let gap0 = 0..=(self.gaps.1-1);
         let gap1 = (self.gaps.0+1)..=9;
+
         ui.horizontal(|ui| {
             mono(ui, "First Gap ", None);
             ui.add(DragValue::new(&mut self.gaps.0).clamp_range(gap0));
         });
+
         ui.horizontal(|ui| {
             mono(ui, "Second Gap", None);
             ui.add(DragValue::new(&mut self.gaps.1).clamp_range(gap1));
