@@ -1,5 +1,4 @@
-use eframe::egui::Ui;
-use eframe::egui::{RichText, Slider, TextEdit, TextStyle};
+use eframe::egui::{Ui, RichText, Slider};
 use rand::prelude::StdRng;
 use super::View;
 use super::generic_components::*;
@@ -12,14 +11,15 @@ impl View for Alberti {
         randomize_reset(ui, self, rng);
         ui.add_space(16.0);
 
-        ui.add_space(16.0);
         ui.label("Fixed Alphabet");
-        ui.add(TextEdit::singleline(self.control_fixed_alphabet()).font(TextStyle::Monospace));
-        ui.add_space(16.0);
+        if control_string(ui, &mut self.fixed_alphabet_string).changed() {
+            self.set_fixed_alphabet()
+        }
 
-        ui.label("Moving Alphabet");
-        ui.add(TextEdit::singleline(self.control_moving_alphabet()).font(TextStyle::Monospace));
-        ui.add_space(16.0);
+        ui.label("Fixed Alphabet");
+        if control_string(ui, &mut self.moving_alphabet_string).changed() {
+            self.set_moving_alphabet()
+        }
 
         ui.label(RichText::new(self.to_string()).monospace());
 

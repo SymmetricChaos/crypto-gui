@@ -1,41 +1,42 @@
 use std::fmt::Display;
 use rand::{prelude::StdRng, Rng};
 use crate::errors::CipherError;
-use crate::text_aux::PresetAlphabet::*;
+use crate::text_aux::{PresetAlphabet::*, Alphabet};
 use super::Cipher;
 
 pub struct Alberti {
-    pub fixed_alphabet: String,
-    pub moving_alphabet: String,
+    pub fixed_alphabet_string: String,
+    fixed_alphabet: Alphabet,
+    pub moving_alphabet_string: String,
+    moving_alphabet: Alphabet,
     pub start_index: usize,
 }
  
 impl Alberti {
  
-    pub fn control_fixed_alphabet(&mut self) -> &mut String {
-        &mut self.fixed_alphabet
+    pub fn set_fixed_alphabet(&mut self) {
+        self.fixed_alphabet = Alphabet::from(&self.fixed_alphabet_string);
     }
 
-    pub fn control_moving_alphabet(&mut self) -> &mut String {
-        &mut self.fixed_alphabet
+    pub fn set_moving_alphabet(&mut self) {
+        self.moving_alphabet = Alphabet::from(&self.moving_alphabet_string);
     }
+
 
     fn encrypt_char(&self, symbol: char, index: usize) -> char {
-        let position = self.fixed_alphabet.chars().position(|x| x == symbol).unwrap();
-        self.moving_alphabet.chars().nth((position + index) % self.alphabet_len()).unwrap()
+        let position = self.fixed_alphabet.get_pos(symbol).unwrap();
+        self.moving_alphabet.get_char_offset(position, index as i32).unwrap()
     }
- 
+
     fn decrypt_char(&self, symbol: char, index: usize) -> char {
-        let position = self.moving_alphabet.chars().position(|x| x == symbol).unwrap();
-        self.fixed_alphabet.chars().nth((self.alphabet_len() + position - index) % self.alphabet_len()).unwrap()
+        let position = self.moving_alphabet.get_pos(symbol).unwrap();
+        self.fixed_alphabet.get_char_offset(position, -(index as i32)).unwrap()
     }
- 
- 
+
+
     pub fn alphabet_len(&self) -> usize {
         self.fixed_alphabet.chars().count()
     }
- 
-
 }
 
 impl Cipher for Alberti {
@@ -46,8 +47,8 @@ impl Cipher for Alberti {
             if self.fixed_alphabet.contains(s) {
                 out.push(self.encrypt_char(s,index));
             } else if self.moving_alphabet.contains(s) {
-                index = self.moving_alphabet.chars().position(|x| x == s).unwrap();
-                out.push(self.fixed_alphabet.chars().nth(index).unwrap());
+                index = self.moving_alphabet.get_pos(s).unwrap();
+                out.push(self.fixed_alphabet.get_char(index).unwrap());
             } else {
                 return Err(CipherError::invalid_input_char(s))
             }
@@ -63,8 +64,8 @@ impl Cipher for Alberti {
             if self.moving_alphabet.contains(s) {
                 out.push(self.decrypt_char(s,index));
             } else if self.fixed_alphabet.contains(s) {
-                index = self.fixed_alphabet.chars().position(|x| x == s).unwrap();
-                out.push(self.moving_alphabet.chars().nth(index).unwrap());
+                index = self.fixed_alphabet.get_pos(s).unwrap();
+                out.push(self.moving_alphabet.get_char(index).unwrap());
             } else {
                 return Err(CipherError::invalid_input_char(s))
             }
@@ -85,18 +86,21 @@ impl Cipher for Alberti {
  
 impl Default for Alberti {
     fn default() -> Self {
-        Self{ fixed_alphabet:  String::from(BasicLatin), 
-              moving_alphabet: String::from(BasicLatin.string().to_ascii_lowercase()),
-              start_index: 0} 
+        Self{ fixed_alphabet_string: String::from(BasicLatin),
+              fixed_alphabet:  Alphabet::from(BasicLatin),
+              moving_alphabet_string: String::from(BasicLatin.string().to_ascii_lowercase()),
+              moving_alphabet: Alphabet::from(BasicLatin.string().to_ascii_lowercase()),
+              start_index: 0
+        } 
     }
 }
 
 impl Display for Alberti {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut out = self.fixed_alphabet.clone();
+        let mut out = self.fixed_alphabet_string.clone();
         out.push('\n');
-        out.push_str(&self.moving_alphabet[self.start_index..]);
-        out.push_str(&self.moving_alphabet[0..self.start_index]);
+        out.push_str(&self.moving_alphabet_string[self.start_index..]);
+        out.push_str(&self.moving_alphabet_string[0..self.start_index]);
         write!(f, "{}", out)
     }
 }

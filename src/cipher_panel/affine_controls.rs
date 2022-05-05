@@ -12,7 +12,11 @@ impl View for Affine {
         randomize_reset(ui, self, rng);
         ui.add_space(16.0);
 
-        input_alphabet(ui, &mut self.control_alphabet());
+
+        ui.label("Alphabet");
+        if control_string(ui, &mut self.alphabet_string).changed() {
+            self.set_alphabet()
+        }
         ui.add_space(16.0);
 
         ui.label("Additive Key");

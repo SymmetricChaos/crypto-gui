@@ -29,6 +29,10 @@ impl Affine {
         self.alphabet.chars().nth(pos).unwrap()
     }
 
+    pub fn set_alphabet(&mut self) {
+        self.alphabet = Alphabet::from(&self.alphabet_string);
+    }
+
     pub fn control_alphabet(&mut self) -> &mut String {
         self.alphabet = Alphabet::from(&self.alphabet_string);
         &mut self.alphabet_string
