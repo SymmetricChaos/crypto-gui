@@ -1,10 +1,11 @@
 use rand::prelude::StdRng;
 use super::Cipher;
-use crate::text_aux::{PresetAlphabet, shuffled_str};
+use crate::text_aux::{PresetAlphabet, shuffled_str, Alphabet};
 use crate::errors::CipherError;
 
 pub struct Bazeries {
-    pub alphabet: String,
+    pub alphabet_string: String,
+    alphabet: Alphabet,
     pub wheels: Vec<String>,
     pub offset: usize,
 }
@@ -14,12 +15,20 @@ impl Bazeries {
         todo!("must be possible to enforce alphabet length, maybe just have function to 'set_wheels' that checks correctness")
     }
 
+    pub fn set_alphabet(&mut self) {
+        self.alphabet = Alphabet::from(&self.alphabet_string);
+    }
+
     pub fn add_wheel(&mut self, rng: &mut StdRng) {
-        self.wheels.push(shuffled_str(&self.alphabet, rng)) 
+        self.wheels.push(shuffled_str(&self.alphabet_string, rng)) 
     }
 
     pub fn del_wheel(&mut self) {
         self.wheels.pop(); 
+    }
+
+    pub fn alphabet_len(&self) -> usize {
+        self.alphabet.len()
     }
 }
 
@@ -27,8 +36,10 @@ impl Default for Bazeries {
     fn default() -> Self {
         // 26 Random wheels
         // Maybe rotate these to be pseudo alphabetical
-        let alphabet = String::from(PresetAlphabet::BasicLatin);
-        let wheels = ["FDWCBAGJOEPKRSITUQLHMZNXYV",
+        let alphabet = Alphabet::from(PresetAlphabet::BasicLatin);
+        let alphabet_string = String::from(PresetAlphabet::BasicLatin);
+        let wheels = [
+                            "FDWCBAGJOEPKRSITUQLHMZNXYV",
                             "YGALXKDFEPCTSOHVWMIRZNJBUQ",
                             "JVORFDLAZTIHBWXMYPQNECGKSU",
                             "CYHNKSBRTOPXMEIDGLVZWAFJUQ",
@@ -54,16 +65,17 @@ impl Default for Bazeries {
                             "JGAXRKSTLPQBUOICVDNYFZMWHE",
                             "OUGTAHPWXQZYSJVDMNRCIEBFKL",
                             "LHYZSUMCKDIVRQAPWXBOETFJNG",
-                            "FXCEKVRMHLJNGUYPWBAODZSTQI"].iter().map(|x| x.to_string()).collect();
+                            "FXCEKVRMHLJNGUYPWBAODZSTQI"
+                        ].iter().map(|x| x.to_string()).collect();
         let offset = 0;
-        Self{ alphabet, wheels, offset }
+        Self{ alphabet, wheels, offset, alphabet_string }
     }
 }
 
 impl Cipher for Bazeries {
 
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let alen = self.alphabet.chars().count();
+        let alen = self.alphabet.len();
         let mut out = String::with_capacity(text.chars().count());
         let key = self.wheels.iter();
         for (k, c) in key.zip(text.chars()) {
@@ -77,7 +89,7 @@ impl Cipher for Bazeries {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        let alen = self.alphabet.chars().count();
+        let alen = self.alphabet.len();
         let mut out = String::with_capacity(text.chars().count());
         let rev_offset = alen - self.offset;
         let key = self.wheels.iter();
@@ -97,7 +109,7 @@ impl Cipher for Bazeries {
     
     fn randomize(&mut self, rng: &mut StdRng) {
         for wheel in self.wheels.iter_mut() {
-            *wheel = shuffled_str(&self.alphabet, rng);
+            *wheel = shuffled_str(&self.alphabet_string, rng);
         }
     }
 }

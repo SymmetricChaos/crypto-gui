@@ -12,11 +12,13 @@ impl View for Bazeries {
         ui.add_space(16.0);
 
         ui.label("Alphabet");
-        input_alphabet(ui, &mut self.alphabet);
+        if control_string(ui, &mut self.alphabet_string).changed() {
+            self.set_alphabet()
+        }
         ui.add_space(16.0);
 
         ui.label("Offset");
-        let alpha_range = 0..=(self.alphabet.chars().count());
+        let alpha_range = 0..=(self.alphabet_len());
         ui.add(Slider::new(&mut self.offset, alpha_range.clone()));
         ui.add_space(16.0);
 
