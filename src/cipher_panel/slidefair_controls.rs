@@ -12,8 +12,16 @@ impl View for Slidefair {
         randomize_reset(ui, self, rng);
         ui.add_space(16.0);
 
-        ui.label("Select Alphabet");
-        ui.add(TextEdit::singleline(self.control_alphabet()).font(TextStyle::Monospace));
+        ui.label("Alphabet");
+        if control_string(ui, &mut self.alphabet_string).changed() {
+            self.set_alphabet()
+        }
+        ui.add_space(16.0);
+
+        ui.label("Key Word");
+        if control_string(ui, &mut self.key_word).changed() {
+            self.set_key()
+        }
         ui.add_space(16.0);
 
         ui.label("Spacer Character\nInserted at end as padding if needed");

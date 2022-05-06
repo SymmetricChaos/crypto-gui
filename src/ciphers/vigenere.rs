@@ -3,18 +3,30 @@ use std::collections::VecDeque;
 use rand::prelude::StdRng;
 use super::{Cipher, PolyMode};
 use crate::{
-    text_aux::{vecstring::VecString, PresetAlphabet, random_sample_replace}, 
+    text_aux::{PresetAlphabet, random_sample_replace, Alphabet}, 
     errors::CipherError
 };
 
 
 pub struct Vigenere {
     pub key_words: [String; 5],
-    pub alphabet: VecString,
+    pub alphabet: Alphabet,
     _alphabet: String,
     pub prog_shift: usize,
     pub mode: PolyMode,
     pub multikey: bool,
+}
+
+impl Default for Vigenere {
+    fn default() -> Self {
+        Self { key_words: [String::new(), String::new(), String::new(), String::new(), String::new()], 
+               alphabet: Alphabet::from(PresetAlphabet::BasicLatin),
+               _alphabet: String::from(PresetAlphabet::BasicLatin),
+               mode: PolyMode::CylicKey, 
+               prog_shift: 0,
+               multikey: false,        
+        }
+    }
 }
 
 impl Vigenere {
@@ -25,17 +37,16 @@ impl Vigenere {
             let mut effective_key = vec![0usize; self.key_len()];
             for key in self.key_words.iter().filter(|s| !s.is_empty()) {
                 for (pos, sym) in key.chars().cycle().take(self.key_len()).enumerate() {
-                    let p = self.alphabet.pos_offset(sym, 0).unwrap();
+                    let p = self.alphabet.get_pos_of(sym).unwrap();
                     effective_key[pos] += p
                 }
             }
             effective_key = effective_key.into_iter().map(|v| v % self.alphabet_len()).collect();
             effective_key.into_iter()
         } else {
-            let key: Vec<usize> = self.key_words[0].chars().map(|x| self.alphabet.pos_offset(x, 0).unwrap()).collect();
+            let key: Vec<usize> = self.key_words[0].chars().map(|x| self.alphabet.get_pos_of(x).unwrap()).collect();
             key.into_iter()
         }
-
     }
 
     pub fn cyclic_key(&self) -> impl Iterator<Item = usize> + '_ {
@@ -55,7 +66,7 @@ impl Vigenere {
     // Unwrap justified by bounds on key
     pub fn key_word(&self) -> String {
         if self.multikey {
-            self.key().map(|v| self.alphabet.get_offset(v, 0).unwrap()).collect()
+            self.key().map(|v| self.alphabet.get_char_at(v).unwrap()).collect()
         } else {
             self.key_words[0].clone()
         }
@@ -85,18 +96,18 @@ impl Vigenere {
     }
 
     pub fn control_alphabet(&mut self) -> &mut String {
-        self.alphabet = VecString::from(&self._alphabet);
+        self.alphabet = Alphabet::from(&self._alphabet);
         &mut self._alphabet
     }
 
 
     // Unwraps for the character methods are justified by validating the input
     fn encrypt_char(&self, c: char, k: usize) -> char {
-        *self.alphabet.char_offset(c, k as i32).unwrap()
+        self.alphabet.get_shifted_char(c, k as i32).unwrap()
     }
 
     fn decrypt_char(&self, c: char, k: usize) -> char {
-        *self.alphabet.char_offset(c, -(k as i32)).unwrap()
+        self.alphabet.get_shifted_char(c, -(k as i32)).unwrap()
     }
 
 
@@ -115,7 +126,7 @@ impl Vigenere {
         let mut out = String::with_capacity(text.len());
         
         for c in text.chars() {
-            akey.push_back(self.alphabet.pos_offset(c,0).unwrap());
+            akey.push_back(self.alphabet.get_pos_of(c).unwrap());
             let n = akey.pop_front().unwrap();
             out.push(self.encrypt_char(c, n) )
         }
@@ -131,7 +142,7 @@ impl Vigenere {
             let n = akey.pop_front().unwrap();
             let ptxt_char = self.decrypt_char(c, n);
             out.push( ptxt_char );
-            let new_key_val = self.alphabet.pos_offset(ptxt_char, 0).unwrap();
+            let new_key_val = self.alphabet.get_pos_of(ptxt_char).unwrap();
             akey.push_back( new_key_val );
         }
         Ok(out)
@@ -171,18 +182,6 @@ impl Vigenere {
         Ok(out)
     }
 
-}
-
-impl Default for Vigenere {
-    fn default() -> Self {
-        Self { key_words: [String::new(), String::new(), String::new(), String::new(), String::new()], 
-               alphabet: VecString::from(PresetAlphabet::BasicLatin),
-               _alphabet: String::from(PresetAlphabet::BasicLatin),
-               mode: PolyMode::CylicKey, 
-               prog_shift: 0,
-               multikey: false,        
-        }
-    }
 }
 
 impl Cipher for Vigenere {
@@ -235,7 +234,6 @@ mod vigenere_tests {
         let mut cipher = Vigenere::default();
         cipher.key_words[1] = String::from("GOOD");
         cipher.key_words[0] = String::from("ENCRYPTION");
-
         cipher.mode = PolyMode::CylicKey;
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_CYCLIC);
     }
