@@ -75,7 +75,7 @@ mod adfgvx_tests {
     #[test]
     fn encrypt_test_adfgx() {
         let mut cipher = ADFGVX::default();
-        cipher.polybius.set_key("KEYWORKFORUSEINTEST");
+        cipher.polybius.assign_key("KEYWORKFORUSEINTEST");
         cipher.columnar.assign_key("SOMEWORD");
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT1);
     }
@@ -83,7 +83,7 @@ mod adfgvx_tests {
     #[test]
     fn decrypt_test_adfgx() {
         let mut cipher = ADFGVX::default();
-        cipher.polybius.set_key("KEYWORKFORUSEINTEST");
+        cipher.polybius.assign_key("KEYWORKFORUSEINTEST");
         cipher.columnar.assign_key("SOMEWORD");
         assert_eq!(cipher.decrypt(CIPHERTEXT1).unwrap(), PLAINTEXT);
     }
@@ -92,7 +92,7 @@ mod adfgvx_tests {
     fn encrypt_test_adfgvx() {
         let mut cipher = ADFGVX::default();
         cipher.set_alphabet(PresetAlphabet::BasicLatinWithDigits);
-        cipher.polybius.set_key("57This9Should0Mix2Words");
+        cipher.polybius.assign_key("57This9Should0Mix2Words");
         cipher.columnar.assign_key("SOMEWORD");
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT2);
     }
@@ -101,7 +101,7 @@ mod adfgvx_tests {
     fn decrypt_test_adfgvx() {
         let mut cipher = ADFGVX::default();
         cipher.set_alphabet(PresetAlphabet::BasicLatinWithDigits);
-        cipher.polybius.set_key("57This9Should0Mix2Words");
+        cipher.polybius.assign_key("57This9Should0Mix2Words");
         cipher.columnar.assign_key("SOMEWORD");
         assert_eq!(cipher.decrypt(CIPHERTEXT2).unwrap(), PLAINTEXT);
     }

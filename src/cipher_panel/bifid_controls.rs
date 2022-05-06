@@ -1,11 +1,8 @@
-use eframe::egui::Ui;
-use eframe::egui::{RichText, Slider, TextEdit};
-use eframe::epaint::Color32;
+use eframe::{egui::{Ui, RichText, Slider}, epaint::Color32};
 use rand::prelude::StdRng;
 use super::View;
 use super::generic_components::*;
-use crate::ciphers::Bifid;
-use crate::text_aux::PresetAlphabet::*;
+use crate::{ciphers::Bifid, text_aux::PresetAlphabet::*};
 
 impl View for Bifid {
     fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {
@@ -26,11 +23,14 @@ impl View for Bifid {
         });
 
         ui.add_space(10.0);
-        ui.label(RichText::new(&self.polybius.alphabet).monospace().background_color(Color32::BLACK));
+        ui.label(RichText::new(self.polybius.alphabet()).monospace().background_color(Color32::BLACK));
         ui.add_space(16.0);
 
         ui.label("Key Word");
-        ui.add(TextEdit::singleline(self.polybius.control_key()));
+        if control_string(ui, &mut self.polybius.key_word).changed() {
+            self.polybius.set_key()
+        }
+        ui.add_space(16.0);
 
         ui.label(RichText::new(format!("Grid\n{}",self.polybius)).monospace());
         ui.add_space(16.0);

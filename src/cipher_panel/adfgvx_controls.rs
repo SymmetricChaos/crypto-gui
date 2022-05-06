@@ -21,7 +21,10 @@ impl View for ADFGVX {
         });
 
         ui.label("Polybius Key Word");
-        ui.add(TextEdit::singleline(self.polybius.control_key()));
+        if control_string(ui, &mut self.polybius.key_word).changed() {
+            self.polybius.set_key()
+        }
+        ui.add_space(16.0);
 
         ui.label(RichText::new(format!("Grid\n{}",self.polybius)).monospace());
         ui.add_space(16.0);

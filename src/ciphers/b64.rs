@@ -59,7 +59,7 @@ mod b64_tests {
     #[test]
     fn encrypt_test() {
         let mut cipher = B64::default();
-        cipher.polybius.set_key("ENCRYPTION");
+        cipher.polybius.assign_key("ENCRYPTION");
         cipher.columnar1.assign_key("NOVELTY");
         cipher.columnar2.assign_key("SHUFFLE");
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
@@ -68,7 +68,7 @@ mod b64_tests {
     #[test]
     fn decrypt_test() {
         let mut cipher = B64::default();
-        cipher.polybius.set_key("ENCRYPTION");
+        cipher.polybius.assign_key("ENCRYPTION");
         cipher.columnar1.assign_key("NOVELTY");
         cipher.columnar2.assign_key("SHUFFLE");
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);

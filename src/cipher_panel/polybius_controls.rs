@@ -1,5 +1,4 @@
-use eframe::egui::{TextEdit, Ui};
-use eframe::egui::{RichText, Color32};
+use eframe::egui::{Ui, RichText, Color32};
 use rand::prelude::StdRng;
 
 use super::View;
@@ -23,11 +22,15 @@ impl View for Polybius {
         });
 
         ui.add_space(10.0);
-        ui.label(RichText::new(&self.alphabet).monospace().background_color(Color32::BLACK));
+        ui.label(RichText::new(self.alphabet()).monospace().background_color(Color32::BLACK));
         ui.add_space(16.0);
 
+
         ui.label("Key Word");
-        ui.add(TextEdit::singleline(self.control_key()));
+        if control_string(ui, &mut self.key_word).changed() {
+            self.set_key()
+        }
+        ui.add_space(16.0);
 
         ui.label(RichText::new(format!("Grid\n{}",self)).monospace());
         ui.add_space(16.0);
