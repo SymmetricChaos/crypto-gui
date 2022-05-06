@@ -256,6 +256,7 @@ impl CipherDisplayPanel {
             CipherID::Scytale => encrypt_decrypt(ui, &control_panel.scytale, input, output, errors),
             CipherID::Batco => encrypt_decrypt(ui, &control_panel.batco, input, output, errors),
             CipherID::Checkerboard => encrypt_decrypt(ui, &control_panel.checkerboard, input, output, errors),
+            CipherID::Porta => encrypt_decrypt(ui, &control_panel.porta, input, output, errors),
             _ => { *errors = String::from("button must be added to DisplayPanel struct") }
         }
 

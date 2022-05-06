@@ -53,8 +53,8 @@ impl Porta {
         self.key_vals = self.key.chars().map(|c| self.alphabet.get_pos_of(c).unwrap()).collect_vec();
     }
  
-    pub fn display_tableaux(&self) -> String {
-        todo!()
+    pub fn tableaux(&self) -> std::slice::Iter<&str>  {
+        PORTA_TABLEAUX.iter()
     }
 }
  

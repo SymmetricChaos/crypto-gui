@@ -8,15 +8,18 @@ impl View for Porta {
         randomize_reset(ui, self, rng);
         ui.add_space(16.0);
 
-        ui.label("Alphabet Table");
-        mono(ui, &self.display_tableaux(), None);
-        ui.add_space(16.0);
-
         ui.label("Keyword");
         if control_string(ui, &mut self.key).changed() {
             self.set_key()
         }
         ui.add_space(16.0);
+        
+        ui.label("Tableaux");
+        for row in self.tableaux() {
+            mono(ui, row, None);
+        }
+        ui.add_space(16.0);
+
 
         // This is possible but not yet implemented
         // ui.label("Mode");
