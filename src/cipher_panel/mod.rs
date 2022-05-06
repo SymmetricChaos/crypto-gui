@@ -30,6 +30,7 @@ pub mod rail_fence_controls;
 pub mod scytale_controls;
 pub mod batco_controls;
 pub mod checkerboard_controls;
+pub mod porta_controls;
 
 pub trait View: Cipher {
     fn ui(&mut self, ui: &mut egui::Ui, rng: &mut StdRng, errors: &mut String);
@@ -84,6 +85,7 @@ pub struct CipherControlPanel {
     alberti: Alberti,
     m94: M94,
     bazeries: Bazeries,
+    porta: Porta,
 
     playfair: Playfair,
     slidefair: Slidefair,
@@ -116,7 +118,7 @@ impl CipherControlPanel {
             );
     
             combox_box(
-                &[CipherID::Vigenere, CipherID::Beaufort, CipherID::M94, CipherID::Alberti, CipherID::Bazeries,],
+                &[CipherID::Vigenere, CipherID::Beaufort, CipherID::M94, CipherID::Alberti, CipherID::Bazeries, CipherID::Porta],
                 "Polyalphabetic",
                 active_cipher, ui
             );
@@ -201,6 +203,7 @@ impl CipherControlPanel {
             CipherID::Scytale => self.scytale.ui(ui, rng, errors),
             CipherID::Batco => self.batco.ui(ui, rng, errors),
             CipherID::Checkerboard => self.checkerboard.ui(ui, rng, errors),
+            CipherID::Porta => self.porta.ui(ui, rng, errors),
             _ => { ui.label("IN PROGRESS"); },
         }
     }

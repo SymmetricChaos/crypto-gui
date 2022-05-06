@@ -43,9 +43,14 @@ impl Default for Porta {
 }
  
 impl Porta {
-    pub fn control_key(&mut self) -> &mut String {
+
+    pub fn set_key(&mut self) {
         self.key_vals = self.key.chars().map(|c| self.alphabet.get_pos_of(c).unwrap()).collect_vec();
-        &mut self.key
+    }
+
+    pub fn assign_key(&mut self, key: &str) {
+        self.key = key.to_string();
+        self.key_vals = self.key.chars().map(|c| self.alphabet.get_pos_of(c).unwrap()).collect_vec();
     }
  
     pub fn display_tableaux(&self) -> String {
