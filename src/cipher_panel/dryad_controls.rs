@@ -1,36 +1,25 @@
 use super::{generic_components::*, View};
 use crate::{
-    ciphers::{Batco, Cipher},
+    ciphers::{Cipher, Dryad},
     egui_aux::mono,
 };
 use eframe::egui::{Slider, Ui};
 use rand::prelude::StdRng;
 
-impl View for Batco {
+impl View for Dryad {
     fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, errors: &mut String) {
         randomize_reset(ui, self, rng);
         ui.add_space(16.0);
 
         ui.label("Message Key");
-
         ui.horizontal(|ui| {
-            mono(ui, &format!("{}", self.message_number_to_char()), None);
+            mono(ui, &format!("{}", self.message_key_to_char()), None);
             ui.add(
-                Slider::new(&mut self.message_number, 0..=5)
+                Slider::new(&mut self.message_key, 0..=24)
                     .clamp_to_range(true)
                     .show_value(false),
             );
         });
-
-        ui.horizontal(|ui| {
-            mono(ui, &format!("{}", self.message_letter_to_char()), None);
-            ui.add(
-                Slider::new(&mut self.message_letter, 0..=25)
-                    .clamp_to_range(true)
-                    .show_value(false),
-            );
-        });
-
         ui.add_space(16.0);
 
         if ui.button("Use Seed").clicked() {

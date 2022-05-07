@@ -1,9 +1,11 @@
 use std::collections::VecDeque;
 
-use rand::prelude::StdRng;
 use super::{Cipher, PolyMode};
-use crate::text_aux::{random_sample_replace, PresetAlphabet::*, Alphabet};
-use crate::errors::CipherError;
+use crate::{
+    errors::CipherError,
+    text_aux::{random_sample_replace, Alphabet, PresetAlphabet::*},
+};
+use rand::prelude::StdRng;
 
 pub struct Beaufort {
     pub key_words: [String; 5],
@@ -15,7 +17,6 @@ pub struct Beaufort {
 }
 
 impl Beaufort {
-
     pub fn set_alphabet(&mut self) {
         self.alphabet = Alphabet::from(&self.alphabet_string);
     }
@@ -30,13 +31,18 @@ impl Beaufort {
                     effective_key[pos] += p
                 }
             }
-            effective_key = effective_key.into_iter().map(|v| v % self.alphabet_len()).collect();
+            effective_key = effective_key
+                .into_iter()
+                .map(|v| v % self.alphabet_len())
+                .collect();
             effective_key.into_iter()
         } else {
-            let key: Vec<usize> = self.key_words[0].chars().map(|x| self.alphabet.chars().position(|c| c == x).unwrap()).collect();
+            let key: Vec<usize> = self.key_words[0]
+                .chars()
+                .map(|x| self.alphabet.chars().position(|c| c == x).unwrap())
+                .collect();
             key.into_iter()
         }
-
     }
 
     pub fn cyclic_key(&self) -> impl Iterator<Item = usize> + '_ {
@@ -47,16 +53,22 @@ impl Beaufort {
     pub fn key_len(&self) -> usize {
         if self.multikey {
             // Should multiply together ignoring common factors. [9,6] should give 18
-            self.key_words.iter().filter(|s| !s.is_empty()).map(|s| s.chars().count() ).fold(1, num::integer::lcm)
+            self.key_words
+                .iter()
+                .filter(|s| !s.is_empty())
+                .map(|s| s.chars().count())
+                .fold(1, num::integer::lcm)
         } else {
             self.key_words[0].chars().count()
         }
     }
- 
+
     // Unwrap justified by bounds on key
     pub fn key_word(&self) -> String {
         if self.multikey {
-            self.key().map(|v| self.alphabet.get_char_at(v).unwrap()).collect()
+            self.key()
+                .map(|v| self.alphabet.get_char_at(v).unwrap())
+                .collect()
         } else {
             self.key_words[0].clone()
         }
@@ -66,29 +78,39 @@ impl Beaufort {
         self.alphabet.len()
     }
 
-    fn validate_key(&self) -> Result<(),CipherError> {
+    fn validate_key(&self) -> Result<(), CipherError> {
         for key in self.key_words.iter() {
             for c in key.chars() {
-                if !self.alphabet.contains(c) { return Err(CipherError::invalid_alphabet_char(c)) }
+                if !self.alphabet.contains(c) {
+                    return Err(CipherError::invalid_alphabet_char(c));
+                }
             }
         }
         Ok(())
     }
 
-    fn validate_input(&self, text: &str) -> Result<(),CipherError> {
+    fn validate_input(&self, text: &str) -> Result<(), CipherError> {
         if text.len() == 0 {
-            return Err(CipherError::Input(String::from("No input text provided")))
+            return Err(CipherError::Input(String::from("No input text provided")));
         }
         for c in text.chars() {
-            if !self.alphabet.contains(c) { return Err(CipherError::invalid_input_char(c)) }
+            if !self.alphabet.contains(c) {
+                return Err(CipherError::invalid_input_char(c));
+            }
         }
         Ok(())
     }
 
-    fn autokey_prep(&self, text: &str) -> Result<(Vec<usize>, VecDeque<usize>,String),CipherError> {
+    fn autokey_prep(
+        &self,
+        text: &str,
+    ) -> Result<(Vec<usize>, VecDeque<usize>, String), CipherError> {
         self.validate_key()?;
         self.validate_input(text)?;
-        let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.get_pos_of(x).unwrap() ).collect();
+        let text_nums: Vec<usize> = text
+            .chars()
+            .map(|x| self.alphabet.get_pos_of(x).unwrap())
+            .collect();
         let akey: VecDeque<usize> = self.key().collect();
         let out = String::with_capacity(text_nums.len());
 
@@ -100,59 +122,61 @@ impl Beaufort {
         self.alphabet.get_char_at_offset(k, -(t as i32)).unwrap()
     }
 
-    fn encrypt_cyclic(&self, text: &str) -> Result<String,CipherError> {
-        let nums: Vec<usize> = text.chars().map( |x| self.alphabet.get_pos_of(x).unwrap() ).collect();
+    fn encrypt_cyclic(&self, text: &str) -> Result<String, CipherError> {
+        let nums: Vec<usize> = text
+            .chars()
+            .map(|x| self.alphabet.get_pos_of(x).unwrap())
+            .collect();
         let mut out = String::with_capacity(nums.len());
-        for (n,k) in nums.iter().zip(self.cyclic_key()) {
-            out.push(self.encrypt_char(*n,k) )
+        for (n, k) in nums.iter().zip(self.cyclic_key()) {
+            out.push(self.encrypt_char(*n, k))
         }
         Ok(out)
     }
 
-    fn decrypt_cyclic(&self, text: &str) -> Result<String,CipherError> {
+    fn decrypt_cyclic(&self, text: &str) -> Result<String, CipherError> {
         self.encrypt_cyclic(text)
     }
 
-    fn encrypt_auto(&self, text: &str) -> Result<String,CipherError> {
-        let (text_nums, 
-             mut akey, 
-             mut out) = self.autokey_prep(text)?;
-        
+    fn encrypt_auto(&self, text: &str) -> Result<String, CipherError> {
+        let (text_nums, mut akey, mut out) = self.autokey_prep(text)?;
+
         for n in text_nums {
             akey.push_back(n);
             let k = akey.pop_front().unwrap();
-            out.push(self.encrypt_char(n, k) )
+            out.push(self.encrypt_char(n, k))
         }
 
         Ok(out)
     }
 
-    fn decrypt_auto(&self, text: &str) -> Result<String,CipherError> {
-        let (text_nums, 
-             mut akey, 
-             mut out) = self.autokey_prep(text)?;
+    fn decrypt_auto(&self, text: &str) -> Result<String, CipherError> {
+        let (text_nums, mut akey, mut out) = self.autokey_prep(text)?;
 
         for n in text_nums {
             let k = akey.pop_front().unwrap();
             let ptxt_char = self.encrypt_char(n, k);
-            out.push( ptxt_char );
+            out.push(ptxt_char);
             let new_key_val = self.alphabet.chars().position(|x| x == ptxt_char).unwrap();
-            akey.push_back( new_key_val );
+            akey.push_back(new_key_val);
         }
         Ok(out)
     }
 
-    fn encrypt_prog(&self, text: &str) -> Result<String,CipherError> {
-        let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
+    fn encrypt_prog(&self, text: &str) -> Result<String, CipherError> {
+        let text_nums: Vec<usize> = text
+            .chars()
+            .map(|x| self.alphabet.chars().position(|c| c == x).unwrap())
+            .collect();
         let mut out = String::with_capacity(text_nums.len());
-        
+
         let mut cur_shift = 0 as usize;
         let mut ctr = 0;
         let key_len = self.key_len();
 
         for (n, k) in text_nums.iter().zip(self.cyclic_key()) {
-            out.push(self.encrypt_char(*n, k+cur_shift) );
-            ctr = (ctr+1) % key_len;
+            out.push(self.encrypt_char(*n, k + cur_shift));
+            ctr = (ctr + 1) % key_len;
             if ctr == 0 {
                 cur_shift += self.prog_shift;
             }
@@ -160,41 +184,50 @@ impl Beaufort {
         Ok(out)
     }
 
-    fn decrypt_prog(&self, text: &str) -> Result<String,CipherError> {       
+    fn decrypt_prog(&self, text: &str) -> Result<String, CipherError> {
         let alpha_len = self.alphabet_len();
-        let text_nums: Vec<usize> = text.chars().map( |x| self.alphabet.chars().position(|c| c == x).unwrap() ).collect();
+        let text_nums: Vec<usize> = text
+            .chars()
+            .map(|x| self.alphabet.chars().position(|c| c == x).unwrap())
+            .collect();
         let mut out = String::with_capacity(text_nums.len());
-        
+
         let mut cur_shift = 0;
         let mut ctr = 0;
         let key_len = self.key_len();
 
         for (n, k) in text_nums.iter().zip(self.cyclic_key()) {
-            out.push(self.encrypt_char(*n, (k+cur_shift) % alpha_len) );
-            ctr = (ctr+1) % key_len;
+            out.push(self.encrypt_char(*n, (k + cur_shift) % alpha_len));
+            ctr = (ctr + 1) % key_len;
             if ctr == 0 {
                 cur_shift = (cur_shift + self.prog_shift) % alpha_len;
             }
         }
         Ok(out)
     }
-
 }
 
 impl Default for Beaufort {
     fn default() -> Self {
-        Self { key_words: [String::new(), String::new(), String::new(), String::new(), String::new()], 
-               alphabet_string: String::from(BasicLatin), 
-               alphabet: Alphabet::from(BasicLatin),
-               mode: PolyMode::CylicKey, 
-               prog_shift: 0,
-               multikey: false,        
+        Self {
+            key_words: [
+                String::new(),
+                String::new(),
+                String::new(),
+                String::new(),
+                String::new(),
+            ],
+            alphabet_string: String::from(BasicLatin),
+            alphabet: Alphabet::from(BasicLatin),
+            mode: PolyMode::CylicKey,
+            prog_shift: 0,
+            multikey: false,
         }
     }
 }
 
 impl Cipher for Beaufort {
-    fn encrypt(&self, text: &str) -> Result<String,CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         self.validate_key()?;
         self.validate_input(text)?;
         match self.mode {
@@ -204,7 +237,7 @@ impl Cipher for Beaufort {
         }
     }
 
-    fn decrypt(&self, text: &str) -> Result<String,CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         self.validate_key()?;
         self.validate_input(text)?;
         match self.mode {
@@ -226,7 +259,6 @@ impl Cipher for Beaufort {
         *self = Self::default();
     }
 }
-
 
 #[cfg(test)]
 mod beaufort_tests {

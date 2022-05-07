@@ -1,7 +1,7 @@
-pub mod ciphers;
-pub mod codes;
 pub mod cipher_id;
+pub mod ciphers;
 pub mod code_id;
+pub mod codes;
 
 pub mod cipher_panel;
 pub mod code_panel;

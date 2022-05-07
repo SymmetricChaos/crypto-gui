@@ -1,7 +1,7 @@
-use eframe::egui::Ui;
-use rand::prelude::StdRng;
 use super::{generic_components::*, View};
 use crate::{ciphers::Porta, egui_aux::mono};
+use eframe::egui::Ui;
+use rand::prelude::StdRng;
 
 impl View for Porta {
     fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {
@@ -13,13 +13,12 @@ impl View for Porta {
             self.set_key()
         }
         ui.add_space(16.0);
-        
+
         ui.label("Tableaux");
         for row in self.tableaux() {
             mono(ui, row, None);
         }
         ui.add_space(16.0);
-
 
         // This is possible but not yet implemented
         // ui.label("Mode");

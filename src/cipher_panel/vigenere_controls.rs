@@ -1,8 +1,7 @@
-use eframe::egui::Ui;
-use rand::prelude::StdRng;
 use super::{generic_components::*, View};
 use crate::ciphers::{PolyMode::*, Vigenere};
-use eframe::egui::{Slider, TextEdit, TextStyle};
+use eframe::egui::{Slider, TextEdit, TextStyle, Ui};
+use rand::prelude::StdRng;
 
 impl View for Vigenere {
     fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {

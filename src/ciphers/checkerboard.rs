@@ -2,24 +2,24 @@ use std::char;
 
 use rand::prelude::SliceRandom;
 
-use crate::{errors::CipherError, text_aux::keyed_alphabet};
 use super::Cipher;
+use crate::{errors::CipherError, text_aux::keyed_alphabet};
 
 // Use this to fill partial inputs for the interface
 const CHECKERBOARD_ALPHABET: &'static str = "ABCDEFGHIJKLM/NOPQRSTUVWXYZ.";
 
 pub struct StraddlingCheckerboard {
     rows: Vec<char>,
-    pub gaps: (usize,usize),
+    pub gaps: (usize, usize),
     pub alphabet: String,
 }
 
 impl Default for StraddlingCheckerboard {
     fn default() -> Self {
         let rows = "ETAONRISBCDFGHJKLMPQ/UVWXYZ.".chars().collect();
-        let gaps = (2,6);
-        StraddlingCheckerboard{
-            rows, 
+        let gaps = (2, 6);
+        StraddlingCheckerboard {
+            rows,
             gaps,
             alphabet: "ETAONRISBCDFGHJKLMPQ/UVWXYZ.".to_string(),
         }
@@ -28,12 +28,13 @@ impl Default for StraddlingCheckerboard {
 
 // need to handle the digit encoding scheme
 impl StraddlingCheckerboard {
-
     pub fn set_alphabet(&mut self) {
-        self.rows = keyed_alphabet(&self.alphabet, CHECKERBOARD_ALPHABET).chars().collect();
+        self.rows = keyed_alphabet(&self.alphabet, CHECKERBOARD_ALPHABET)
+            .chars()
+            .collect();
     }
 
-    fn char_to_num(&self, c: char) -> Result<usize,CipherError> {
+    fn char_to_num(&self, c: char) -> Result<usize, CipherError> {
         if let Some(mut n) = self.rows.iter().position(|x| *x == c) {
             if n >= self.gaps.0 {
                 n += 1
@@ -47,18 +48,18 @@ impl StraddlingCheckerboard {
         }
     }
 
-    fn encrypt_char(&self, num: usize, output: &mut String) -> Result<(),CipherError> {
+    fn encrypt_char(&self, num: usize, output: &mut String) -> Result<(), CipherError> {
         let qt = num / 10;
         let rem = num % 10;
         match qt {
-            0 => output.push_str(&format!("{}",rem)),
-            1 => output.push_str(&format!("{}{}",self.gaps.0,rem)),
-            2 => output.push_str(&format!("{}{}",self.gaps.1,rem)),
-            _ => return Err(CipherError::input("invalid character"))
+            0 => output.push_str(&format!("{}", rem)),
+            1 => output.push_str(&format!("{}{}", self.gaps.0, rem)),
+            2 => output.push_str(&format!("{}{}", self.gaps.1, rem)),
+            _ => return Err(CipherError::input("invalid character")),
         }
         Ok(())
     }
-    
+
     pub fn cipher_page(&self) -> String {
         let mut page = String::with_capacity(87);
         page.push_str("  0 1 2 3 4 5 6 7 8 9\n ");
@@ -73,25 +74,23 @@ impl StraddlingCheckerboard {
             }
         }
 
-        page.push_str(&format!("\n{}",self.gaps.0));
+        page.push_str(&format!("\n{}", self.gaps.0));
         for _ in 0..10 {
             page.push(' ');
             page.push(*symbols.next().unwrap())
         }
 
-        page.push_str(&format!("\n{}",self.gaps.1));
+        page.push_str(&format!("\n{}", self.gaps.1));
         for _ in 0..10 {
             page.push(' ');
             page.push(*symbols.next().unwrap())
         }
         page
     }
-
 }
 
 impl Cipher for StraddlingCheckerboard {
-    
-    fn encrypt(&self, text: &str) -> Result<String,CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let mut out = String::with_capacity(text.len());
         let mut digit_mode = false;
 
@@ -101,7 +100,9 @@ impl Cipher for StraddlingCheckerboard {
             if digit_mode {
                 // check that c is a character and return Error if not
                 if !c.is_ascii_digit() {
-                    return Err(CipherError::input("only digits 0 to 9 can be coded as digits"))
+                    return Err(CipherError::input(
+                        "only digits 0 to 9 can be coded as digits",
+                    ));
                 }
                 out.push(c);
                 digit_mode = false;
@@ -110,36 +111,32 @@ impl Cipher for StraddlingCheckerboard {
                 let n = self.char_to_num(c)?;
                 self.encrypt_char(n, &mut out)?;
             }
-            
+
             // If c is the escape symbol turn on digit mode
             if c == '/' {
                 digit_mode = true
             }
-
         }
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String,CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         let mut out = String::with_capacity(text.len());
         let mut numbers = text.chars().map(|c| c.to_digit(10).unwrap() as usize);
 
         // This needs to handle gaps correctly
         while let Some(n) = numbers.next() {
-            
             let c = if n == self.gaps.0 {
                 let x = numbers.next().unwrap();
                 *self.rows.iter().nth(x + 8).unwrap()
-            
             } else if n == self.gaps.1 {
                 let x = numbers.next().unwrap();
                 *self.rows.iter().nth(x + 18).unwrap()
-            
             } else {
                 if n >= self.gaps.1 {
-                    *self.rows.iter().nth(n-2).unwrap()
+                    *self.rows.iter().nth(n - 2).unwrap()
                 } else if n >= self.gaps.0 {
-                    *self.rows.iter().nth(n-1).unwrap()
+                    *self.rows.iter().nth(n - 1).unwrap()
                 } else {
                     *self.rows.iter().nth(n).unwrap()
                 }
@@ -149,7 +146,7 @@ impl Cipher for StraddlingCheckerboard {
                 let n = (numbers.next().unwrap() + 48) as u8 as char;
                 out.push(n)
             }
-        };
+        }
 
         Ok(out)
     }
@@ -161,17 +158,13 @@ impl Cipher for StraddlingCheckerboard {
     fn reset(&mut self) {
         *self = Self::default();
     }
-
 }
-
-
-
 
 #[cfg(test)]
 mod checkerboard_tests {
     // http://www.chaocipher.com/ActualChaocipher/Chaocipher-Revealed-Algorithm.pdf
     use super::*;
-    const PLAINTEXT:  &'static str = "ATTACKTHEQUICKBROWNFOXAT/0/5/3/1";
+    const PLAINTEXT: &'static str = "ATTACKTHEQUICKBROWNFOXAT/0/5/3/1";
     const CIPHERTEXT: &'static str = "31132127125061638212720746552346631620625623621";
 
     #[test]

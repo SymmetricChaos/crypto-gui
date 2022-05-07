@@ -1,30 +1,37 @@
-use eframe::egui::{Ui, RichText, Color32};
+use eframe::egui::{Color32, RichText, Ui};
 use rand::prelude::StdRng;
 
-use super::View;
-use super::generic_components::*;
-use crate::ciphers::Polybius;
-use crate::text_aux::{PresetAlphabet::*};
-
+use super::{generic_components::*, View};
+use crate::{ciphers::Polybius, text_aux::PresetAlphabet::*};
 
 impl View for Polybius {
     fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {
-
         randomize_reset(ui, self, rng);
         ui.add_space(16.0);
 
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
-            if ui.button("No Q").clicked() { self.set_alphabet(BasicLatinNoQ) };
-            if ui.button("No J").clicked() { self.set_alphabet(BasicLatinNoJ) };
-            if ui.button("Alphanumeric").clicked() { self.set_alphabet(BasicLatinWithDigits) };
-            if ui.button("Base64").clicked() { self.set_alphabet(Base64) };
+            if ui.button("No Q").clicked() {
+                self.set_alphabet(BasicLatinNoQ)
+            };
+            if ui.button("No J").clicked() {
+                self.set_alphabet(BasicLatinNoJ)
+            };
+            if ui.button("Alphanumeric").clicked() {
+                self.set_alphabet(BasicLatinWithDigits)
+            };
+            if ui.button("Base64").clicked() {
+                self.set_alphabet(Base64)
+            };
         });
 
         ui.add_space(10.0);
-        ui.label(RichText::new(self.alphabet()).monospace().background_color(Color32::BLACK));
+        ui.label(
+            RichText::new(self.alphabet())
+                .monospace()
+                .background_color(Color32::BLACK),
+        );
         ui.add_space(16.0);
-
 
         ui.label("Key Word");
         if control_string(ui, &mut self.key_word).changed() {
@@ -32,7 +39,7 @@ impl View for Polybius {
         }
         ui.add_space(16.0);
 
-        ui.label(RichText::new(format!("Grid\n{}",self)).monospace());
+        ui.label(RichText::new(format!("Grid\n{}", self)).monospace());
         ui.add_space(16.0);
     }
 }

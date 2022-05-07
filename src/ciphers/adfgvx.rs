@@ -1,15 +1,16 @@
-use rand::prelude::StdRng;
-use crate::{
-    text_aux::{PresetAlphabet::*, PresetAlphabet}, 
-    ciphers::{Polybius,Columnar}, 
-    errors::CipherError};
 use super::Cipher;
- 
+use crate::{
+    ciphers::{Columnar, Polybius},
+    errors::CipherError,
+    text_aux::{PresetAlphabet, PresetAlphabet::*},
+};
+use rand::prelude::StdRng;
+
 pub struct ADFGVX {
     pub polybius: Polybius,
-    pub columnar: Columnar
+    pub columnar: Columnar,
 }
- 
+
 impl ADFGVX {
     pub fn set_alphabet(&mut self, mode: PresetAlphabet) {
         match mode {
@@ -21,56 +22,56 @@ impl ADFGVX {
                 self.polybius.set_alphabet(mode);
                 self.polybius.set_labels(String::from("ADFGVX"));
             }
-            _ => ()
+            _ => (),
         }
     }
 }
- 
+
 impl Default for ADFGVX {
     fn default() -> Self {
         let mut polybius = Polybius::default();
         polybius.set_alphabet(BasicLatinNoJ);
         polybius.set_labels(String::from("ADFGX"));
 
-        Self{
-              polybius,
-              columnar: Columnar::default()
+        Self {
+            polybius,
+            columnar: Columnar::default(),
         }
     }
 }
- 
+
 impl Cipher for ADFGVX {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let poly_text = self.polybius.encrypt(text)?;
         let colm_text = self.columnar.encrypt(&poly_text)?;
         Ok(colm_text)
     }
- 
+
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         let colm_text = self.columnar.decrypt(text)?;
         let poly_text = self.polybius.decrypt(&colm_text)?;
         Ok(poly_text)
     }
- 
+
     fn randomize(&mut self, rng: &mut StdRng) {
         self.polybius.randomize(rng);
         self.columnar.randomize(rng);
     }
- 
+
     fn reset(&mut self) {
         *self = Self::default();
     }
 }
 
-
-
 #[cfg(test)]
 mod adfgvx_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str =   "THEQUICKBROWNFOXIUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT1: &'static str = "GDXXFAAXFGDAXGGAGDDGDGFGAFGXDFGFDAGAXDFXXXGAAFFFXDXDXFGGDAFXDGGAFDGGFA";
-    const CIPHERTEXT2: &'static str = "FDGGFAAVDFXXFFDAFDDFAGFGAFDFDDFAXXGVVVXGVVAAAFFFGDVDVFFFAGDDAGGAFDGFDA";
+    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXIUMPSOVERTHELAZYDOG";
+    const CIPHERTEXT1: &'static str =
+        "GDXXFAAXFGDAXGGAGDDGDGFGAFGXDFGFDAGAXDFXXXGAAFFFXDXDXFGGDAFXDGGAFDGGFA";
+    const CIPHERTEXT2: &'static str =
+        "FDGGFAAVDFXXFFDAFDDFAGFGAFDFDDFAXXGVVVXGVVAAAFFFGDVDVFFFAGDDAGGAFDGFDA";
 
     #[test]
     fn encrypt_test_adfgx() {

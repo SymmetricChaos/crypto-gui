@@ -1,8 +1,15 @@
+use crate::cipher_panel::{CipherControlPanel, CipherDisplayPanel};
+use crate::code_panel::{CodeControlPanel, CodeDisplayPanel};
 use crate::{cipher_id::CipherID, code_id::CodeID};
-use eframe::{egui::{SidePanel, CentralPanel, ScrollArea, TopBottomPanel, Context, widgets, SelectableLabel, warn_if_debug_build, RichText, FontDefinitions, FontData, Visuals}, epi, epaint::FontFamily};
+use eframe::{
+    egui::{
+        warn_if_debug_build, widgets, CentralPanel, Context, FontData, FontDefinitions, RichText,
+        ScrollArea, SelectableLabel, SidePanel, TopBottomPanel, Visuals,
+    },
+    epaint::FontFamily,
+    epi,
+};
 use rand::{prelude::StdRng, SeedableRng};
-use crate::code_panel::{CodeDisplayPanel,CodeControlPanel};
-use crate::cipher_panel::{CipherDisplayPanel,CipherControlPanel};
 
 #[derive(Debug, PartialEq, Eq)]
 enum Page {
@@ -25,10 +32,9 @@ pub struct ClassicCrypto {
     rng: StdRng,
 }
 
-
 impl Default for ClassicCrypto {
     fn default() -> Self {
-        Self { 
+        Self {
             cipher_control_panel: CipherControlPanel::default(),
             code_control_panel: CodeControlPanel::default(),
             cipher_display_panel: CipherDisplayPanel::default(),
@@ -46,20 +52,43 @@ impl Default for ClassicCrypto {
 
 impl ClassicCrypto {
     fn cipher_page(&mut self, ctx: &Context) {
-        SidePanel::right("cipher_display_panel").max_width(300.0).show(ctx, |ui| {
-            self.cipher_display_panel.ui(ui, &mut self.input, &mut self.output, &mut self.errors, &mut self.active_cipher, &mut self.cipher_control_panel);
-        });
+        SidePanel::right("cipher_display_panel")
+            .max_width(300.0)
+            .show(ctx, |ui| {
+                self.cipher_display_panel.ui(
+                    ui,
+                    &mut self.input,
+                    &mut self.output,
+                    &mut self.errors,
+                    &mut self.active_cipher,
+                    &mut self.cipher_control_panel,
+                );
+            });
         CentralPanel::default().show(ctx, |ui| {
             ScrollArea::vertical().show(ui, |ui| {
-                self.cipher_control_panel.ui(ui, &mut self.active_cipher, &mut self.rng, &mut self.errors)
+                self.cipher_control_panel.ui(
+                    ui,
+                    &mut self.active_cipher,
+                    &mut self.rng,
+                    &mut self.errors,
+                )
             });
         });
     }
 
     fn code_page(&mut self, ctx: &Context) {
-        SidePanel::right("code_display_panel").max_width(300.0).show(ctx, |ui| {
-            self.code_display_panel.ui(ui, &mut self.input, &mut self.output, &mut self.errors, &mut self.active_code, &mut self.code_control_panel);
-        });
+        SidePanel::right("code_display_panel")
+            .max_width(300.0)
+            .show(ctx, |ui| {
+                self.code_display_panel.ui(
+                    ui,
+                    &mut self.input,
+                    &mut self.output,
+                    &mut self.errors,
+                    &mut self.active_code,
+                    &mut self.code_control_panel,
+                );
+            });
         CentralPanel::default().show(ctx, |ui| {
             ScrollArea::vertical().show(ui, |ui| {
                 self.code_control_panel.ui(ui, &mut self.active_code)
@@ -68,15 +97,23 @@ impl ClassicCrypto {
     }
 
     fn about_page(&mut self, ctx: &Context) {
-        SidePanel::left("about_display_panel").max_width(500.0).show(ctx, |ui| {
-            warn_if_debug_build(ui);
-            let hello = RichText::new("Welcome to Classic Crypto!\nCheck out the Ciphers and Codes available.").strong();
-            ui.label(hello);
-            ui.add_space(20.0);
-            ui.hyperlink_to("source code", "https://github.com/SymmetricChaos/crypto-gui");
-            ui.add_space(10.0);
-            ui.hyperlink_to("powered by egui", "https://github.com/emilk/egui");
-        });
+        SidePanel::left("about_display_panel")
+            .max_width(500.0)
+            .show(ctx, |ui| {
+                warn_if_debug_build(ui);
+                let hello = RichText::new(
+                    "Welcome to Classic Crypto!\nCheck out the Ciphers and Codes available.",
+                )
+                .strong();
+                ui.label(hello);
+                ui.add_space(20.0);
+                ui.hyperlink_to(
+                    "source code",
+                    "https://github.com/SymmetricChaos/crypto-gui",
+                );
+                ui.add_space(10.0);
+                ui.hyperlink_to("powered by egui", "https://github.com/emilk/egui");
+            });
         CentralPanel::default().show(ctx, |ui| {
             let title = RichText::new("Classical Cryptography").heading();
             ui.label(title);
@@ -92,45 +129,61 @@ impl ClassicCrypto {
         let mut font_def = FontDefinitions::default();
         // Load FreeMono.ttf and use it at the main monospace font
         font_def.font_data.insert(
-            "FreeMonoTTF".into(), 
-            FontData::from_static(include_bytes!("../FreeMono.ttf"))
+            "FreeMonoTTF".into(),
+            FontData::from_static(include_bytes!("../FreeMono.ttf")),
         );
         font_def
             .families
-            .get_mut(&FontFamily::Monospace).unwrap()
-            .insert(0, "FreeMonoTTF".into()
-        );
+            .get_mut(&FontFamily::Monospace)
+            .unwrap()
+            .insert(0, "FreeMonoTTF".into());
 
         // Fallback on FreeMono.otf
         font_def.font_data.insert(
-            "FreeMonoOTF".into(), 
-            FontData::from_static(include_bytes!("../FreeMono.otf"))
+            "FreeMonoOTF".into(),
+            FontData::from_static(include_bytes!("../FreeMono.otf")),
         );
         font_def
             .families
-            .get_mut(&FontFamily::Monospace).unwrap()
-            .push("FreeMonoOTF".into()
-        );
-        
+            .get_mut(&FontFamily::Monospace)
+            .unwrap()
+            .push("FreeMonoOTF".into());
+
         ctx.set_fonts(font_def);
     }
 }
 
-
 impl epi::App for ClassicCrypto {
     fn update(&mut self, ctx: &Context, _: &epi::Frame) {
-        
         TopBottomPanel::top("top_panel").show(ctx, |ui| {
             ui.horizontal_top(|ui| {
                 widgets::global_dark_light_mode_switch(ui);
                 ui.separator();
-                if ui.add(SelectableLabel::new(self.active_page == Page::Ciphers, "Ciphers")).clicked() {
+                if ui
+                    .add(SelectableLabel::new(
+                        self.active_page == Page::Ciphers,
+                        "Ciphers",
+                    ))
+                    .clicked()
+                {
                     self.active_page = Page::Ciphers
                 }
-                if ui.add(SelectableLabel::new(self.active_page == Page::Codes, "Codes")).clicked() {
+                if ui
+                    .add(SelectableLabel::new(
+                        self.active_page == Page::Codes,
+                        "Codes",
+                    ))
+                    .clicked()
+                {
                     self.active_page = Page::Codes
                 }
-                if ui.add(SelectableLabel::new(self.active_page == Page::About, "About")).clicked() {
+                if ui
+                    .add(SelectableLabel::new(
+                        self.active_page == Page::About,
+                        "About",
+                    ))
+                    .clicked()
+                {
                     self.active_page = Page::About
                 }
                 // No idea why this is giving me an error
@@ -172,12 +225,7 @@ impl epi::App for ClassicCrypto {
         }
     }
 
-    fn setup(
-        &mut self,
-        ctx: &Context,
-        _frame: &epi::Frame,
-        _storage: Option<&dyn epi::Storage>,
-    ) {
+    fn setup(&mut self, ctx: &Context, _frame: &epi::Frame, _storage: Option<&dyn epi::Storage>) {
         self.configure_font(ctx);
         Visuals::dark();
     }

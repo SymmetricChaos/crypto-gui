@@ -1,7 +1,7 @@
-use rand::{Rng, prelude::StdRng};
 use super::Cipher;
 use crate::errors::CipherError;
 use crate::text_aux::Alphabet;
+use rand::{prelude::StdRng, Rng};
 
 pub struct DecoderRing {
     pub index: usize,
@@ -10,7 +10,6 @@ pub struct DecoderRing {
 }
 
 impl DecoderRing {
-
     pub fn set_alphabet(&mut self) {
         self.alphabet = Alphabet::from(&self.alphabet_string)
     }
@@ -36,11 +35,13 @@ impl DecoderRing {
 
     fn valid_code_group(&self, s: &str) -> Result<usize, CipherError> {
         match s.parse::<usize>() {
-            Ok(n) => if n < self.length() { 
-                    Ok(n) 
-                } else { 
-                    Err(CipherError::input("invalid code group")) 
-                },
+            Ok(n) => {
+                if n < self.length() {
+                    Ok(n)
+                } else {
+                    Err(CipherError::input("invalid code group"))
+                }
+            }
             Err(_) => return Err(CipherError::input("invalid code group")),
         }
     }
@@ -48,36 +49,36 @@ impl DecoderRing {
 
 impl Default for DecoderRing {
     fn default() -> Self {
-        Self { 
-            index: 0, 
-            alphabet_string: String::from("_ABCDEFGHIJKLMNOPWRSTUVWXYZ"), 
-            alphabet: Alphabet::from("_ABCDEFGHIJKLMNOPWRSTUVWXYZ") }
+        Self {
+            index: 0,
+            alphabet_string: String::from("_ABCDEFGHIJKLMNOPWRSTUVWXYZ"),
+            alphabet: Alphabet::from("_ABCDEFGHIJKLMNOPWRSTUVWXYZ"),
+        }
     }
 }
 
 impl Cipher for DecoderRing {
-
-    fn encrypt(&self, text: &str) -> Result<String,CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let symbols = text.chars();
         let mut out = Vec::new();
         for s in symbols {
             let pos = self.alphabet.get_pos_of(s);
             let n = match pos {
                 Some(v) => (v + self.index) % self.length(),
-                None => return Err(CipherError::invalid_input_char(s))
+                None => return Err(CipherError::invalid_input_char(s)),
             };
-            out.push( format!("{}",n) )
+            out.push(format!("{}", n))
         }
         Ok(out.join(" "))
     }
 
-    fn decrypt(&self, text: &str) -> Result<String,CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         let code_groups = text.split(' ');
-        let nums =  {
+        let nums = {
             let mut v = Vec::with_capacity(code_groups.clone().count());
             for s in code_groups {
                 let n = self.valid_code_group(s)?;
-                v.push( (n + self.length() - self.index) % self.length());
+                v.push((n + self.length() - self.index) % self.length());
             }
             v
         };
@@ -97,9 +98,6 @@ impl Cipher for DecoderRing {
         *self = Self::default();
     }
 }
-
-
-
 
 #[cfg(test)]
 mod decoder_ring_tests {

@@ -1,7 +1,6 @@
-use itertools::Itertools;
-use rand::prelude::{StdRng, SliceRandom, IteratorRandom};
 use crate::errors::CipherError;
-
+use itertools::Itertools;
+use rand::prelude::{IteratorRandom, SliceRandom, StdRng};
 
 pub fn shuffled_str(s: &str, rng: &mut StdRng) -> String {
     let mut characters = s.chars().collect::<Vec<char>>();
@@ -22,19 +21,22 @@ pub fn random_char_vec(s: &str, n: usize, rng: &mut StdRng) -> Vec<char> {
     s.chars().choose_multiple(rng, n)
 }
 
-pub fn validate_alphabet(alphabet: &str) -> Result<(),CipherError> {
-
+pub fn validate_alphabet(alphabet: &str) -> Result<(), CipherError> {
     // Most basic check, symbols in an alphabet must be unique
     if alphabet.chars().count() != alphabet.chars().unique().count() {
-        return Err(CipherError::Alphabet(String::from("characters must all be unique")))
+        return Err(CipherError::Alphabet(String::from(
+            "characters must all be unique",
+        )));
     }
 
     // Eliminate potentiually confusing characters
     for symbol in alphabet.chars() {
         if symbol.is_control() || symbol.is_whitespace() {
-            return Err(CipherError::Alphabet(String::from("whitespace and control characters are not allowed")))
+            return Err(CipherError::Alphabet(String::from(
+                "whitespace and control characters are not allowed",
+            )));
         }
-    };
+    }
 
     Ok(())
 }
@@ -42,7 +44,7 @@ pub fn validate_alphabet(alphabet: &str) -> Result<(),CipherError> {
 // Standard provisos about unicode character apply
 pub fn string_pairs(text: &str) -> Vec<&str> {
     let mut idxs = text.char_indices();
-    let mut out = Vec::with_capacity(text.len()/2);
+    let mut out = Vec::with_capacity(text.len() / 2);
     let mut start = 0;
     let last = text.len();
     idxs.next();
@@ -52,12 +54,11 @@ pub fn string_pairs(text: &str) -> Vec<&str> {
             Some(n) => n.0,
             None => {
                 out.push(&text[start..last]);
-                return out
+                return out;
             }
-    };
-    out.push(&text[start..end]);
-    start = end;
-   
+        };
+        out.push(&text[start..end]);
+        start = end;
     }
 }
 
@@ -66,27 +67,29 @@ Rank the characters of a string by their order in the alphabet, making every ent
 The text APPLE with the BasicLatin alphabet would give: [0, 3, 4, 2, 1, 5]
 */
 pub fn rank_str(text: &str, alphabet: &str) -> Vec<usize> {
-    let mut values = text.chars().map(|x| alphabet.chars().position(|c| x == c).unwrap()).collect::<Vec<usize>>();
+    let mut values = text
+        .chars()
+        .map(|x| alphabet.chars().position(|c| x == c).unwrap())
+        .collect::<Vec<usize>>();
 
     let len = values.len();
     let biggest = alphabet.chars().count();
 
-    let mut out = vec![0usize;len];
+    let mut out = vec![0usize; len];
 
     for i in 0..len {
         let m = values.iter().min().unwrap();
-        for (pos,v) in values.iter().enumerate() {
+        for (pos, v) in values.iter().enumerate() {
             if v == m {
                 out[pos] = i;
                 values[pos] = biggest;
-                break
+                break;
             }
         }
     }
 
     out
 }
-
 
 // use itertools::{sorted,equal};
 
@@ -112,18 +115,18 @@ pub fn keyed_alphabet(keyword: &str, alphabet: &str) -> String {
     let mut keyed_alpha = String::with_capacity(alphabet.len());
     for c in keyword.chars() {
         if !alphabet.contains(c) {
-            continue
+            continue;
         }
         if keyed_alpha.contains(c) {
-            continue
+            continue;
         } else {
             keyed_alpha.push(c)
         }
     }
- 
+
     for a in alphabet.chars() {
         if keyed_alpha.contains(a) {
-            continue
+            continue;
         } else {
             keyed_alpha.push(a)
         }
@@ -131,13 +134,12 @@ pub fn keyed_alphabet(keyword: &str, alphabet: &str) -> String {
     keyed_alpha
 }
 
-
 pub fn dedup_alphabet(s: &str) -> String {
     let mut seen: Vec<char> = Vec::with_capacity(s.len());
     let mut out = String::with_capacity(s.len());
     for c in s.chars() {
         if seen.contains(&c) {
-            continue
+            continue;
         } else {
             out.push(c);
             seen.push(c)
@@ -146,13 +148,13 @@ pub fn dedup_alphabet(s: &str) -> String {
     out
 }
 
-pub fn prep_text(text: &str, alphabet: &str) -> Result<String,CipherError> {
+pub fn prep_text(text: &str, alphabet: &str) -> Result<String, CipherError> {
     let mut out = String::with_capacity(text.len());
     for t in text.chars() {
         if alphabet.contains(t) {
             out.push(t)
         } else if t.is_whitespace() || t.is_ascii_punctuation() {
-            // ignore any Unicode whitespace and 
+            // ignore any Unicode whitespace and
             // any ASCII punctuation
         } else if alphabet.contains(t.to_ascii_lowercase()) {
             // try converting the character to lowercase
@@ -164,14 +166,11 @@ pub fn prep_text(text: &str, alphabet: &str) -> Result<String,CipherError> {
             // As above
             out.push(t.to_ascii_uppercase())
         } else {
-            return Err(CipherError::invalid_input_char(t))
+            return Err(CipherError::invalid_input_char(t));
         }
     }
     Ok(out)
 }
-
-
-
 
 #[cfg(test)]
 mod text_function_tests {
@@ -182,7 +181,7 @@ mod text_function_tests {
     fn string_ranking() {
         let text = "APPLES";
         let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        assert_eq!(vec![0, 3, 4, 2, 1, 5],rank_str(text, alphabet));
+        assert_eq!(vec![0, 3, 4, 2, 1, 5], rank_str(text, alphabet));
     }
 
     use rand::SeedableRng;
@@ -191,7 +190,7 @@ mod text_function_tests {
         let mut rng = StdRng::from_entropy();
         let alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         for _ in 0..26 {
-            println!("{}",shuffled_str(alpha, &mut rng))
+            println!("{}", shuffled_str(alpha, &mut rng))
         }
     }
 }

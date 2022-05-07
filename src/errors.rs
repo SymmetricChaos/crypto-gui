@@ -1,7 +1,6 @@
 use std::fmt::Display;
 
-
-#[derive(Debug,Clone,PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum CipherError {
     General(String),
     Input(String),
@@ -14,27 +13,30 @@ impl CipherError {
         CipherError::General(format!("{error}"))
     }
 
-
     pub fn invalid_input_char(c: char) -> Self {
-        CipherError::Input(format!("invalid character `{c}`, alphabets are case sensitive"))
+        CipherError::Input(format!(
+            "invalid character `{c}`, alphabets are case sensitive"
+        ))
     }
 
     pub fn input(error: &str) -> Self {
         CipherError::Input(format!("{error}"))
     }
 
-
     pub fn invalid_key_char(c: char) -> Self {
-        CipherError::Key(format!("invalid character `{c}`, alphabets are case sensitive"))
+        CipherError::Key(format!(
+            "invalid character `{c}`, alphabets are case sensitive"
+        ))
     }
 
     pub fn key(error: &str) -> Self {
         CipherError::Key(format!("{error}"))
     }
 
-
     pub fn invalid_alphabet_char(c: char) -> Self {
-        CipherError::Alphabet(format!("invalid character `{c}`, alphabets are case sensitive"))
+        CipherError::Alphabet(format!(
+            "invalid character `{c}`, alphabets are case sensitive"
+        ))
     }
 
     pub fn alphabet(error: &str) -> Self {
@@ -54,11 +56,7 @@ impl Display for CipherError {
     }
 }
 
-
-
-
-
-#[derive(Debug,Clone,PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum CodeError {
     General(String),
     Input(String),
@@ -70,9 +68,10 @@ impl CodeError {
         CodeError::General(format!("{error}"))
     }
 
-
     pub fn invalid_char(c: char) -> Self {
-        CodeError::Input(format!("invalid character `{c}`, alphabets are case sensitive"))
+        CodeError::Input(format!(
+            "invalid character `{c}`, alphabets are case sensitive"
+        ))
     }
 
     pub fn invalid_code_group(s: &str) -> Self {
@@ -83,7 +82,6 @@ impl CodeError {
         CodeError::Input(format!("{error}"))
     }
 
-    
     pub fn setting(error: &str) -> Self {
         CodeError::Setting(format!("{error}"))
     }

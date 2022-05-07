@@ -1,6 +1,8 @@
-use super::{View, generic_components::fill_code_columns};
-use crate::{codes::{MorseAmerican, morse_american::MorseMode::{Binary, DitDah}}};
-
+use super::{generic_components::fill_code_columns, View};
+use crate::codes::{
+    morse_american::MorseMode::{Binary, DitDah},
+    MorseAmerican,
+};
 
 impl View for MorseAmerican {
     fn ui(&mut self, ui: &mut eframe::egui::Ui) {

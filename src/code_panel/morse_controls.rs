@@ -1,6 +1,8 @@
-use super::{View, generic_components::fill_code_columns};
-use crate::codes::{MorseITU, morse_itu::MorseMode::{Binary, DitDah}};
-
+use super::{generic_components::fill_code_columns, View};
+use crate::codes::{
+    morse_itu::MorseMode::{Binary, DitDah},
+    MorseITU,
+};
 
 impl View for MorseITU {
     fn ui(&mut self, ui: &mut eframe::egui::Ui) {

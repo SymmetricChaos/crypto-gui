@@ -1,10 +1,10 @@
 use num::Integer;
 use rand::prelude::StdRng;
 
+use super::Cipher;
 use crate::errors::CipherError;
 use crate::grid::{Grid, Symbol};
-use crate::text_aux::{PresetAlphabet::*, rank_str, random_sample_replace};
-use super::Cipher;
+use crate::text_aux::{random_sample_replace, rank_str, PresetAlphabet::*};
 
 pub struct Columnar {
     pub alphabet: String,
@@ -13,7 +13,6 @@ pub struct Columnar {
 }
 
 impl Columnar {
-
     pub fn control_key(&mut self) -> &mut String {
         self.key = rank_str(&self.key_word, &self.alphabet);
         &mut self.key_word
@@ -31,17 +30,22 @@ impl Columnar {
 
 impl Default for Columnar {
     fn default() -> Self {
-        Self { alphabet: String::from(BasicLatin), key: Vec::new(), key_word: String::new() }
+        Self {
+            alphabet: String::from(BasicLatin),
+            key: Vec::new(),
+            key_word: String::new(),
+        }
     }
 }
 
 impl Cipher for Columnar {
-
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let tlen = text.chars().count();
         let n_cols = self.key.len();
         if n_cols < 2 {
-            return Err(CipherError::key("The key for a columnar cipher must have at least two characters"))
+            return Err(CipherError::key(
+                "The key for a columnar cipher must have at least two characters",
+            ));
         }
         let n_rows = tlen.div_ceil(&self.key.len());
         let g = Grid::from_rows(text, n_rows, n_cols, '\0', '\0');
@@ -61,18 +65,20 @@ impl Cipher for Columnar {
         let tlen = text.chars().count();
         let n_cols = self.key.len();
         if n_cols < 2 {
-            return Err(CipherError::key("The key for a columnar cipher must have at least two characters"))
+            return Err(CipherError::key(
+                "The key for a columnar cipher must have at least two characters",
+            ));
         }
         let n_rows = tlen.div_ceil(&n_cols);
-     
+
         let mut g = Grid::new_empty(n_rows, n_cols);
         let mut symbols = text.chars();
-     
-        for n in tlen..(n_rows*n_cols) {
+
+        for n in tlen..(n_rows * n_cols) {
             let coord = g.coord_from_index(n).unwrap();
             g.block_cell(coord);
         }
-    
+
         for n in self.key.iter() {
             let column = g.get_col_mut(*n);
             for cell in column {
@@ -81,10 +87,9 @@ impl Cipher for Columnar {
                 }
             }
         }
-    
-        Ok(g.read_rows_characters().collect())   
-    }
 
+        Ok(g.read_rows_characters().collect())
+    }
 
     fn randomize(&mut self, rng: &mut StdRng) {
         self.key_word = random_sample_replace(&self.alphabet, 11, rng);
@@ -96,12 +101,11 @@ impl Cipher for Columnar {
     }
 }
 
-
 #[cfg(test)]
 mod columnar_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
     const CIPHERTEXT: &'static str = "ECOOMVHZGTUBNJSRLDHIRFUOTAOQKWXPEEY";
 
     #[test]

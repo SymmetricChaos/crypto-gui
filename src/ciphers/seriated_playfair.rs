@@ -71,7 +71,7 @@
 //         };
 //         Ok((num / self.grid_side_len, num % self.grid_side_len))
 //     }
-    
+
 //     // The inputs to this come only from internal functions that will never give invalid positions
 //     fn position_to_char(&self, position: (usize,usize)) -> char {
 //         let num = position.0*self.grid_side_len + position.1;
@@ -99,10 +99,10 @@
 
 // impl Default for SeriatedPlayfair {
 //     fn default() -> Self {
-//         Self{ alphabet: String::from(PresetAlphabet::BasicLatinNoQ), 
-//               square: String::from(PresetAlphabet::BasicLatinNoQ), 
-//               spacer: 'X', 
-//               grid_side_len: 5, 
+//         Self{ alphabet: String::from(PresetAlphabet::BasicLatinNoQ),
+//               square: String::from(PresetAlphabet::BasicLatinNoQ),
+//               spacer: 'X',
+//               grid_side_len: 5,
 //               key_word: String::new() ,
 //               period: 10,
 //         }
@@ -132,7 +132,7 @@
 //         // Ok(out)
 //         todo!()
 //     }
-    
+
 //     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
 //         todo!()
 //     }
@@ -168,7 +168,6 @@
 //     }
 // }
 
-
 // impl fmt::Display for SeriatedPlayfair {
 //     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 //         let mut out = String::new();
@@ -181,7 +180,6 @@
 //         write!(f, "{}", out)
 //     }
 // }
-
 
 // #[cfg(test)]
 // mod seriated_playfair_tests {

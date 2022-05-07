@@ -1,6 +1,5 @@
 use std::fmt::Display;
 
-
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub enum CipherID {
     Caesar,
@@ -56,14 +55,14 @@ impl CipherID {
             CipherID::Decoder => "A Decoder Ring (as popularized by Little Orphan Annie and Captain Midnight, presets exist for each) is a minor variation on the Caesar Cipher. Rather than simply shift the letter's position instead a number is assigned a number and the key is added to that number then reduced by the modulo operation. The original decoder rings were keyed in a slightly more complex way by telling listeners to match a specific letter to a specific number but this is equivalent to simply adding a value.",
             CipherID::Substitution => "The General Substituion Cipher maps a set of symbols one-to-one onto another arbitary set. This implementation allows only maping the symbols of an alphabet but all simple substitution ciphers are included in principle.",
             CipherID::Polybius => "The Polybius Square is an ancient substitutuion cipher that converts each character of the plaintext into a pair that describes its coordinates in a grid. Though it provides no special security on its own it is a key component of very strong composite ciphers.",
-            
+
             CipherID::M209 => "The M209 was an entirely mechanical cipher machine used by the US Military with very complex key settings. The positions of the pins and lugs were set once a day. The exteral positions of the rotors were changed with each message.",
             CipherID::Enigma => "The Enigma machine is probably the most famous rotor machine from the brief era in which they dominated encryption. It was remarkable for its simplicity and compact size. Although it contained critical flaws ultimately the failure of Engima was caused by operational mistakes in the Nazi military that leaked information to the Allies.",
             CipherID::Sigaba => "SIGABA was the most complex rotor machine of its era and is not known to have been successfully attacked during its use. Despite its complexity the United States was extremely paranoid about the device and did not allow allies direct access to it.",
 
             CipherID::Playfair => "The Playfair Cipher swaps letters on a grid to encrypt letters pair by pair. Developed by Charles Wheatstone and promoted by Lord Playfair it was advertised as strong enough for tactical use and simple enough to teach to schoolchildren.",
             CipherID::Slidefair => "The Slidefair Cipher is a stronger but more complex variation on the Playfair Cipher developed by Helen Gaines. The square is formed by ",
-            
+
             CipherID::Vigenere => "The Vigenère Cipher, introduced at least as early as 1553, was once known as 'le chifre indéchiffrable' (the unsolvable cipher) as it was among the first ciphers to provide more security than any simple subtitution cipher. The keyword is used as if it were a series of Caesar ciphers.  Although Babbage and Kasiski independetly developed methods to break the cipher in the mid 1800s its popular reputation as unbreakable persisted into the early 1900s. By encrypting a message several times the security of a Vigenere cipher can be increased dramatically. The effective key length is the least common multiple of all the keys used, assuming none of the keys repeat themselves. Thus the pair of key words 'VIGENERE' and 'CIPHER' would have a key with a length of 24. Further it is hard to seperate out the overlapping keys meaning that even if attacker has a large amount of text and knows the period of the key they cannot easily guess it.",
             CipherID::Beaufort => "The Beaufort Cipher is clever variation of the Vigenère that uses subtraction to produce a reciprocal cipher in which the action of encryption and decryption is identical.",
             CipherID::Porta => "The Porta Cipher is meant to be a simpler and more compact version of ciphers like the Vigenere. Like the Beaufort it is reciprocal.",
@@ -82,13 +81,9 @@ impl CipherID {
             _ => "Missing description. Please complain to the author.",
         }
     }
-
-
 }
 
-
-
-impl Display for  CipherID {
+impl Display for CipherID {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let name = match self {
             CipherID::Caesar => "Caesar",
@@ -121,7 +116,7 @@ impl Display for  CipherID {
             CipherID::Checkerboard => "Straddling Checkerboard",
             CipherID::Porta => "Porta",
         };
-        write!(f,"{}",name)
+        write!(f, "{}", name)
     }
 }
 

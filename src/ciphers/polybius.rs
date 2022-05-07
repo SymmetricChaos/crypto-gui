@@ -1,9 +1,15 @@
-use std::fmt;
+use super::Cipher;
+use crate::{
+    errors::CipherError,
+    text_aux::{
+        keyed_alphabet, shuffled_str, validate_alphabet, Alphabet, PresetAlphabet,
+        PresetAlphabet::*,
+    },
+};
 use itertools::Itertools;
 use num::integer::Roots;
 use rand::prelude::StdRng;
-use super::Cipher;
-use crate::{text_aux::{PresetAlphabet::*, PresetAlphabet, validate_alphabet, keyed_alphabet, shuffled_str, Alphabet}, errors::CipherError};
+use std::fmt;
 
 pub struct Polybius {
     alphabet_string: &'static str, // custom alphabet strings aren't allowed
@@ -14,7 +20,6 @@ pub struct Polybius {
 }
 
 impl Polybius {
-
     pub fn alphabet(&self) -> &str {
         self.alphabet_string
     }
@@ -35,7 +40,7 @@ impl Polybius {
                 self.inner_alphabet = Alphabet::from(mode);
                 self.grid_side_len = mode.len().sqrt();
             }
-            _ => ()
+            _ => (),
         }
     }
 
@@ -47,13 +52,20 @@ impl Polybius {
         &self.labels
     }
 
-    fn pairs(&self, text: &str) -> Result<Vec<(char,char)>,CipherError> {
+    fn pairs(&self, text: &str) -> Result<Vec<(char, char)>, CipherError> {
         if text.chars().count() % 2 != 0 {
             dbg!(text);
             dbg!(text.chars().count());
-            return Err(CipherError::input("Input text does not have an even number of characters."))
+            return Err(CipherError::input(
+                "Input text does not have an even number of characters.",
+            ));
         }
-        let out = text.chars().chunks(2).into_iter().map(|x| x.collect_tuple().unwrap()).collect();
+        let out = text
+            .chars()
+            .chunks(2)
+            .into_iter()
+            .map(|x| x.collect_tuple().unwrap())
+            .collect();
         Ok(out)
     }
 
@@ -61,19 +73,19 @@ impl Polybius {
         self.inner_alphabet.len()
     }
 
-    fn char_to_position(&self,symbol: char) -> Result<(usize,usize),CipherError> {
+    fn char_to_position(&self, symbol: char) -> Result<(usize, usize), CipherError> {
         let num = match self.alphabet_string.chars().position(|x| x == symbol) {
             Some(n) => n,
             None => return Err(CipherError::invalid_input_char(symbol)),
         };
         Ok((num / self.grid_side_len, num % self.grid_side_len))
     }
-    
-    fn position_to_char(&self,position: (char,char)) -> char {
+
+    fn position_to_char(&self, position: (char, char)) -> char {
         let y = self.labels.chars().position(|c| c == position.0).unwrap();
         let x = self.labels.chars().position(|c| c == position.1).unwrap();
 
-        let num = y*self.grid_side_len + x;
+        let num = y * self.grid_side_len + x;
         self.alphabet_string.chars().nth(num).unwrap()
     }
 
@@ -85,17 +97,19 @@ impl Polybius {
 
 impl Default for Polybius {
     fn default() -> Self {
-        Self{ alphabet_string: PresetAlphabet::BasicLatinNoQ.slice(),
-              inner_alphabet: Alphabet::from(PresetAlphabet::BasicLatinNoQ),
-              grid_side_len: 5,
-              labels: String::from(PresetAlphabet::Digits1),
-              key_word: String::new(), }
+        Self {
+            alphabet_string: PresetAlphabet::BasicLatinNoQ.slice(),
+            inner_alphabet: Alphabet::from(PresetAlphabet::BasicLatinNoQ),
+            grid_side_len: 5,
+            labels: String::from(PresetAlphabet::Digits1),
+            key_word: String::new(),
+        }
     }
 }
 
 impl Cipher for Polybius {
-    fn encrypt(&self, text: &str) -> Result<String,CipherError> {
-        let mut out = String::with_capacity(text.chars().count()*2);
+    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+        let mut out = String::with_capacity(text.chars().count() * 2);
 
         for c in text.chars() {
             let pos = self.char_to_position(c)?;
@@ -104,10 +118,10 @@ impl Cipher for Polybius {
         }
         Ok(out)
     }
-    
-    fn decrypt(&self, text: &str) -> Result<String,CipherError> {
+
+    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         let pairs = self.pairs(text)?;
-        let mut out = String::with_capacity(text.chars().count()/2);
+        let mut out = String::with_capacity(text.chars().count() / 2);
 
         for p in pairs {
             out.push(self.position_to_char(p));
@@ -118,12 +132,11 @@ impl Cipher for Polybius {
     fn randomize(&mut self, rng: &mut StdRng) {
         self.key_word = shuffled_str(&self.alphabet_string, rng)
     }
-    
+
     fn reset(&mut self) {
         *self = Self::default();
     }
 }
-
 
 impl fmt::Display for Polybius {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -133,24 +146,23 @@ impl fmt::Display for Polybius {
         }
         for (n, c) in self.inner_alphabet.chars().enumerate() {
             if n % self.grid_side_len == 0 {
-                let ylab = self.labels.chars().nth(n/self.grid_side_len).unwrap();
+                let ylab = self.labels.chars().nth(n / self.grid_side_len).unwrap();
                 square.push_str(&format!("\n{ylab} "));
             }
             square.push_str(&format!("{c} "))
-        };
+        }
         write!(f, "{square}")
     }
 }
-
-
 
 #[cfg(test)]
 mod polybius_tests {
     use super::*;
 
     // Note Q replaced by K
-    const PLAINTEXT: &'static str =  "THEKUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "4423153145241331124235523421355325453341433551154244231532115554143522";
+    const PLAINTEXT: &'static str = "THEKUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CIPHERTEXT: &'static str =
+        "4423153145241331124235523421355325453341433551154244231532115554143522";
 
     #[test]
     fn encrypt_test() {

@@ -1,24 +1,20 @@
+use super::{generic_components::*, View};
+use crate::{ciphers::StraddlingCheckerboard, egui_aux::mono};
 use eframe::egui::{DragValue, Ui};
 use rand::prelude::StdRng;
-use super::View;
-use super::generic_components::*;
-use crate::ciphers::StraddlingCheckerboard;
-use crate::egui_aux::mono;
-
 
 impl View for StraddlingCheckerboard {
     fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {
-
         randomize_reset(ui, self, rng);
 
         ui.label("Alphabet");
         if control_string(ui, &mut self.alphabet).changed() {
             self.set_alphabet()
         }
-        
+
         ui.add_space(16.0);
-        let gap0 = 0..=(self.gaps.1-1);
-        let gap1 = (self.gaps.0+1)..=9;
+        let gap0 = 0..=(self.gaps.1 - 1);
+        let gap1 = (self.gaps.0 + 1)..=9;
 
         ui.horizontal(|ui| {
             mono(ui, "First Gap ", None);

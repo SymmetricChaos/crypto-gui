@@ -1,8 +1,7 @@
 use std::fmt;
 
-use crate::{errors::CipherError, text_aux::PresetAlphabet};
+use crate::{text_aux::{PresetAlphabet, Alphabet}, errors::CipherError};
 use super::Cipher;
-use crate::text_aux::Alphabet;
 
 #[derive(Clone,Debug)]
 pub struct HebernRotor {

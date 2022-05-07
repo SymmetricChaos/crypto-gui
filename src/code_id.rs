@@ -1,6 +1,5 @@
 use std::fmt::Display;
 
-
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub enum CodeID {
     Ascii,
@@ -38,9 +37,7 @@ impl CodeID {
     }
 }
 
-
-
-impl Display for  CodeID {
+impl Display for CodeID {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let name = match self {
             CodeID::Ascii => "ASCII",
@@ -54,7 +51,7 @@ impl Display for  CodeID {
             CodeID::SpellingAlphabet => "Spelling Alphabet",
             CodeID::Pgp => "PGP Word List",
         };
-        write!(f,"{}",name)
+        write!(f, "{}", name)
     }
 }
 

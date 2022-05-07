@@ -4,10 +4,10 @@ use crate::errors::CodeError;
 
 use super::Code;
 pub struct UnaryCode {
-    map: HashMap<char,String>,
-    map_inv: HashMap<String,char>,
+    map: HashMap<char, String>,
+    map_inv: HashMap<String, char>,
     pub alphabet: String,
-    old_alphabet: String
+    old_alphabet: String,
 }
 
 impl UnaryCode {
@@ -17,18 +17,19 @@ impl UnaryCode {
             self.map.clear();
             self.map_inv.clear();
             for c in self.alphabet.chars() {
-                self.map.insert(c,code.clone() );
+                self.map.insert(c, code.clone());
                 self.map_inv.insert(code.clone(), c);
                 code = format!("1{code}");
             }
             self.old_alphabet = self.alphabet.clone();
         }
     }
-    
-    pub fn chars_codes(&mut self) -> impl Iterator<Item=(char, &String)> + '_ {
+
+    pub fn chars_codes(&mut self) -> impl Iterator<Item = (char, &String)> + '_ {
         self.set_maps();
-        self.alphabet.chars()
-            .map(|x| (x, self.map.get(&x).unwrap()) )
+        self.alphabet
+            .chars()
+            .map(|x| (x, self.map.get(&x).unwrap()))
     }
 }
 
@@ -39,16 +40,21 @@ impl Default for UnaryCode {
         let mut map = HashMap::new();
         let mut map_inv = HashMap::new();
         for c in alphabet.chars() {
-            map.insert(c,code.clone() );
+            map.insert(c, code.clone());
             map_inv.insert(code.clone(), c);
             code = format!("1{code}");
         }
-        UnaryCode{ map, map_inv, alphabet: alphabet.to_string(), old_alphabet: alphabet.to_string() }
+        UnaryCode {
+            map,
+            map_inv,
+            alphabet: alphabet.to_string(),
+            old_alphabet: alphabet.to_string(),
+        }
     }
 }
 
 impl Code for UnaryCode {
-    fn encode(&self, text: &str) -> Result<String,CodeError> {
+    fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut output = String::new();
         for s in text.chars() {
             output.push_str(&self.map[&s])
@@ -56,8 +62,7 @@ impl Code for UnaryCode {
         Ok(output)
     }
 
-
-    fn decode(&self, text: &str) -> Result<String,CodeError> {
+    fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut output = String::new();
         let mut buffer = String::with_capacity(self.map.len());
         for b in text.chars() {
@@ -67,9 +72,9 @@ impl Code for UnaryCode {
                     Some(s) => {
                         output.push(*s);
                         buffer.clear();
-                        continue
+                        continue;
                     }
-                    None => ()
+                    None => (),
                 }
             }
         }
@@ -81,7 +86,7 @@ impl Code for UnaryCode {
 mod unary_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
     const ENCODEDTEXT: &'static str = "1011111110011111111111111111111111101111111111110111101111111111101111111111111111111110111111111111111111101111111101110111111111111110111110111111111111111011101111111111111111111111101111111111111111111111011111111111101111111111111011111111111111111101111110111011111111111111111111001111111101011111110011111111110110111111111111111111111111101111111111111111101111111110111011111111111111110";
 
     #[test]

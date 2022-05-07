@@ -6,8 +6,8 @@ pub enum PresetAlphabet {
     BasicLatinWithDigits,
     Digits0,
     Digits1,
-    Ascii94, // The printing ASCII symbols without the space
-    Ascii95, // The printing ASCII symbols with the space
+    Ascii94,  // The printing ASCII symbols without the space
+    Ascii95,  // The printing ASCII symbols with the space
     Ascii128, // The ASCII symbols with control pictures
     Greek,
     ClassicalLatin, //Classical Latin
@@ -17,7 +17,6 @@ pub enum PresetAlphabet {
 }
 
 impl PresetAlphabet {
-
     // Pointer to a static string slice
     pub fn slice(&self) -> &'static str {
         match self {

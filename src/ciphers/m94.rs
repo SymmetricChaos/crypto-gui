@@ -1,37 +1,39 @@
-use rand::{prelude::{StdRng, SliceRandom}, Rng};
 use super::Cipher;
-use crate::text_aux::PresetAlphabet::*;
 use crate::errors::CipherError;
-
+use crate::text_aux::PresetAlphabet::*;
+use rand::{
+    prelude::{SliceRandom, StdRng},
+    Rng,
+};
 
 const M94_WHEELS: [&'static str; 25] = [
-        "ABCEIGDJFVUYMHTQKZOLRXSPWN",
-        "ACDEHFIJKTLMOUVYGZNPQXRWSB",
-        "ADKOMJUBGEPHSCZINXFYQRTVWL",
-        "AEDCBIFGJHLKMRUOQVPTNWYXZS",
-        "AFNQUKDOPITJBRHCYSLWEMZVXG",
-        "AGPOCIXLURNDYZHWBJSQFKVMET",
-        "AHXJEZBNIKPVROGSYDULCFMQTW",
-        "AIHPJOBWKCVFZLQERYNSUMGTDX",
-        "AJDSKQOIVTZEFHGYUNLPMBXWCR",
-        "AKELBDFJGHONMTPRQSVZUXYWIC",
-        "ALTMSXVQPNOHUWDIZYCGKRFBEJ",
-        "AMNFLHQGCUJTBYPZKXISRDVEWO",
-        "ANCJILDHBMKGXUZTSWQYVORPFE",
-        "AODWPKJVIUQHZCTXBLEGNYRSMF",
-        "APBVHIYKSGUENTCXOWFQDRLJZM",
-        "AQJNUBTGIMWZRVLXCSHDEOKFPY",
-        "ARMYOFTHEUSZJXDPCWGQIBKLNV",
-        "ASDMCNEQBOZPLGVJRKYTFUIWXH",
-        "ATOJYLFXNGWHVCMIRBSEKUPDZQ",
-        "AUTRZXQLYIOVBPESNHJWMDGFCK",
-        "AVNKHRGOXEYBFSJMUDQCLZWTIP",
-        "AWVSFDLIEBHKNRJQZGMXPUCOTY",
-        "AXKWREVDTUFOYHMLSIQNJCPGBZ",
-        "AYJPXMVKBQWUGLOSTECHNZFRID",
-        "AZDNBUHYFWJLVGRCQMPSOEXTKI",
-    ];
- 
+    "ABCEIGDJFVUYMHTQKZOLRXSPWN",
+    "ACDEHFIJKTLMOUVYGZNPQXRWSB",
+    "ADKOMJUBGEPHSCZINXFYQRTVWL",
+    "AEDCBIFGJHLKMRUOQVPTNWYXZS",
+    "AFNQUKDOPITJBRHCYSLWEMZVXG",
+    "AGPOCIXLURNDYZHWBJSQFKVMET",
+    "AHXJEZBNIKPVROGSYDULCFMQTW",
+    "AIHPJOBWKCVFZLQERYNSUMGTDX",
+    "AJDSKQOIVTZEFHGYUNLPMBXWCR",
+    "AKELBDFJGHONMTPRQSVZUXYWIC",
+    "ALTMSXVQPNOHUWDIZYCGKRFBEJ",
+    "AMNFLHQGCUJTBYPZKXISRDVEWO",
+    "ANCJILDHBMKGXUZTSWQYVORPFE",
+    "AODWPKJVIUQHZCTXBLEGNYRSMF",
+    "APBVHIYKSGUENTCXOWFQDRLJZM",
+    "AQJNUBTGIMWZRVLXCSHDEOKFPY",
+    "ARMYOFTHEUSZJXDPCWGQIBKLNV",
+    "ASDMCNEQBOZPLGVJRKYTFUIWXH",
+    "ATOJYLFXNGWHVCMIRBSEKUPDZQ",
+    "AUTRZXQLYIOVBPESNHJWMDGFCK",
+    "AVNKHRGOXEYBFSJMUDQCLZWTIP",
+    "AWVSFDLIEBHKNRJQZGMXPUCOTY",
+    "AXKWREVDTUFOYHMLSIQNJCPGBZ",
+    "AYJPXMVKBQWUGLOSTECHNZFRID",
+    "AZDNBUHYFWJLVGRCQMPSOEXTKI",
+];
+
 pub struct M94 {
     pub offset: usize,
     pub wheels: Vec<&'static str>, //wheels can be reordered but not changed
@@ -43,21 +45,25 @@ impl M94 {
         self.wheels.shuffle(rng);
     }
 }
- 
+
 impl Default for M94 {
     fn default() -> M94 {
         let wheels = Vec::from(M94_WHEELS);
         let alphabet = String::from(BasicLatin);
-        M94{ offset: 0, wheels, _alphabet: alphabet }
+        M94 {
+            offset: 0,
+            wheels,
+            _alphabet: alphabet,
+        }
     }
- 
 }
 
 impl Cipher for M94 {
-
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         if text.len() != 25 {
-            return Err(CipherError::Input("M94 messages must have exactly 25 characters".to_string()))
+            return Err(CipherError::Input(
+                "M94 messages must have exactly 25 characters".to_string(),
+            ));
         }
         let mut out = String::with_capacity(text.len());
         let ckey = self.wheels.iter().cycle();
@@ -70,7 +76,9 @@ impl Cipher for M94 {
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         if text.len() != 25 {
-            return Err(CipherError::Input("M94 messages must have exactly 25 characters".to_string()))
+            return Err(CipherError::Input(
+                "M94 messages must have exactly 25 characters".to_string(),
+            ));
         }
         let mut out = String::with_capacity(text.len());
         let rev_offset = 26 - self.offset;

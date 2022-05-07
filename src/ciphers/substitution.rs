@@ -1,9 +1,9 @@
-use rand::prelude::StdRng;
-use crate::{
-    text_aux::{shuffled_str, PresetAlphabet, Alphabet}, 
-    errors::CipherError
-};
 use super::Cipher;
+use crate::{
+    errors::CipherError,
+    text_aux::{shuffled_str, Alphabet, PresetAlphabet},
+};
+use rand::prelude::StdRng;
 
 #[derive(Debug)]
 pub struct GeneralSubstitution {
@@ -14,7 +14,6 @@ pub struct GeneralSubstitution {
 }
 
 impl GeneralSubstitution {
-
     pub fn set_pt_alphabet(&mut self) {
         self.pt_alphabet = Alphabet::from(&self.pt_alphabet_string);
     }
@@ -46,7 +45,9 @@ impl GeneralSubstitution {
 
     fn validate_settings(&self) -> Result<(), CipherError> {
         if self.pt_alphabet.chars().count() != self.ct_alphabet.chars().count() {
-            return Err(CipherError::key("the input and output alphabets must have the same length"))
+            return Err(CipherError::key(
+                "the input and output alphabets must have the same length",
+            ));
         }
         Ok(())
     }
@@ -54,7 +55,7 @@ impl GeneralSubstitution {
     fn validate_text_encrypt(&self, text: &str) -> Result<(), CipherError> {
         for c in text.chars() {
             if !self.pt_alphabet.contains(c) {
-                return Err(CipherError::invalid_input_char(c))
+                return Err(CipherError::invalid_input_char(c));
             }
         }
         Ok(())
@@ -63,7 +64,7 @@ impl GeneralSubstitution {
     fn validate_text_decrypt(&self, text: &str) -> Result<(), CipherError> {
         for c in text.chars() {
             if !self.ct_alphabet.contains(c) {
-                return Err(CipherError::invalid_input_char(c))
+                return Err(CipherError::invalid_input_char(c));
             }
         }
         Ok(())
@@ -76,19 +77,24 @@ impl Default for GeneralSubstitution {
         let pt_alphabet = Alphabet::from(&pt_alphabet_string);
         let ct_alphabet_string = String::from("ZYXWVUTSRQPONMLKJIHGFEDCBA");
         let ct_alphabet = Alphabet::from(&ct_alphabet_string);
-        Self { pt_alphabet_string, pt_alphabet, ct_alphabet_string, ct_alphabet  }
+        Self {
+            pt_alphabet_string,
+            pt_alphabet,
+            ct_alphabet_string,
+            ct_alphabet,
+        }
     }
 }
 
 impl Cipher for GeneralSubstitution {
-    fn encrypt(&self, text: &str) -> Result<String,CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         self.validate_settings()?;
         self.validate_text_encrypt(text)?;
         let out = text.chars().map(|c| self.encrypt_char(c)).collect();
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String,CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         self.validate_settings()?;
         self.validate_text_decrypt(text)?;
         let out = text.chars().map(|c| self.decrypt_char(c)).collect();
@@ -106,15 +112,14 @@ impl Cipher for GeneralSubstitution {
     }
 }
 
-
-
 #[cfg(test)]
 mod gen_sub_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
     const CIPHERTEXT1: &'static str = "ALGVBMUCDTRXWPRNEBJHYRZGTALGFOIQSRK";
-    const CIPHERTEXT2: &'static str = "🐏🚚📢🔝😩💡🆚🚅🍥☪🕳🚆🌃🍒🕳🚢🎴😩⏳👈📡🕳🕘📢☪🐏🚚📢😽⏯🚪😪💲🕳💮";
+    const CIPHERTEXT2: &'static str =
+        "🐏🚚📢🔝😩💡🆚🚅🍥☪🕳🚆🌃🍒🕳🚢🎴😩⏳👈📡🕳🕘📢☪🐏🚚📢😽⏯🚪😪💲🕳💮";
 
     #[test]
     fn encrypt_test1() {

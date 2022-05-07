@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
-use crate::{errors::CodeError};
 use super::Code;
+use crate::errors::CodeError;
 use itertools::Itertools;
+use num::{BigUint, Integer, Num, One};
 use primal::Primes;
-use num::{BigUint, One, Num, Integer};
 
 const MESSAGE_LIMIT: usize = 50;
 
@@ -18,21 +18,22 @@ pub struct Godel {
 impl Godel {
     fn _print_mapping(&self) {
         for c in self.alphabet.chars() {
-            println!("{} {}",c,self.map.get(&c).unwrap())
+            println!("{} {}", c, self.map.get(&c).unwrap())
         }
     }
 
     pub fn control_alphabet(&mut self) -> &mut String {
         for (n, c) in self.alphabet.chars().enumerate() {
-            self.map.insert(c, n+1);
-            self.map_inv.insert(n+1, c);
+            self.map.insert(c, n + 1);
+            self.map_inv.insert(n + 1, c);
         }
         &mut self.alphabet
     }
 
-    pub fn chars_codes(&self) -> impl Iterator<Item=(&usize, char)> + '_ {
-        self.alphabet.chars()
-            .map(|x| (self.map.get(&x).unwrap(), x) )
+    pub fn chars_codes(&self) -> impl Iterator<Item = (&usize, char)> + '_ {
+        self.alphabet
+            .chars()
+            .map(|x| (self.map.get(&x).unwrap(), x))
     }
 }
 
@@ -43,10 +44,15 @@ impl Default for Godel {
         let mut map = HashMap::new();
         let mut map_inv = HashMap::new();
         for (n, c) in alphabet.chars().enumerate() {
-            map.insert(c, n+1);
-            map_inv.insert(n+1, c);
+            map.insert(c, n + 1);
+            map_inv.insert(n + 1, c);
         }
-        Self { alphabet, primes, map, map_inv }
+        Self {
+            alphabet,
+            primes,
+            map,
+            map_inv,
+        }
     }
 }
 
@@ -57,21 +63,29 @@ impl Godel {
 }
 
 impl Code for Godel {
-    fn encode(&self, text: &str) -> Result<String,CodeError> {
+    fn encode(&self, text: &str) -> Result<String, CodeError> {
         if text.chars().count() > MESSAGE_LIMIT {
-            return Err(CodeError::Input(format!("The Godel encoding is currently limited to {} characters",MESSAGE_LIMIT)))
+            return Err(CodeError::Input(format!(
+                "The Godel encoding is currently limited to {} characters",
+                MESSAGE_LIMIT
+            )));
         }
         let mut out = BigUint::one();
         for (c, prime) in text.chars().zip(self.primes.iter()) {
             match self.map.get(&c) {
                 Some(v) => out *= BigUint::from(*prime).pow(*v as u32),
-                None => return Err(CodeError::Input(format!("The symbol `{}` is not in the alphabet provided",c)))
+                None => {
+                    return Err(CodeError::Input(format!(
+                        "The symbol `{}` is not in the alphabet provided",
+                        c
+                    )))
+                }
             }
         }
         Ok(out.to_str_radix(10))
     }
 
-    fn decode(&self, text: &str) -> Result<String,CodeError> {
+    fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut num = match BigUint::from_str_radix(text, 10) {
             Ok(n) => n,
             Err(_) => return Err(CodeError::Input("unable to parse input as a number".into())),
@@ -87,7 +101,11 @@ impl Code for Godel {
             if ctr != 0 {
                 let c = match self.map_inv.get(&ctr) {
                     Some(c) => c,
-                    None => return Err(CodeError::Input("exponent does not map to a symnol in the alpabet".into())),
+                    None => {
+                        return Err(CodeError::Input(
+                            "exponent does not map to a symnol in the alpabet".into(),
+                        ))
+                    }
                 };
                 characters.push(*c);
             }
@@ -96,12 +114,11 @@ impl Code for Godel {
     }
 }
 
-
 #[cfg(test)]
 mod godel_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str =  "THE";
+    const PLAINTEXT: &'static str = "THE";
     const ENCODEDTEXT: &'static str = "131220";
 
     #[test]

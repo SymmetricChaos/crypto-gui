@@ -1,10 +1,7 @@
-use eframe::egui::Slider;
-use eframe::egui::Ui;
-use rand::prelude::StdRng;
-use super::View;
-use super::generic_components::*;
+use super::{generic_components::*, View};
 use crate::ciphers::RailFence;
-
+use eframe::egui::{Slider, Ui};
+use rand::prelude::StdRng;
 
 impl View for RailFence {
     fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {
@@ -15,6 +12,5 @@ impl View for RailFence {
         let alpha_range = 2..=12;
         ui.add(Slider::new(&mut self.rails, alpha_range.clone()));
         ui.add_space(16.0);
-
     }
 }

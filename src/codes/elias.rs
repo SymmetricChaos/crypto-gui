@@ -12,27 +12,29 @@ pub struct GammaGen {
 }
 
 impl GammaGen {
-    pub fn new() -> Self  {
-        GammaGen{ n: 1, prefix: String::new() }
+    pub fn new() -> Self {
+        GammaGen {
+            n: 1,
+            prefix: String::new(),
+        }
     }
 }
- 
+
 impl Iterator for GammaGen {
     type Item = String;
 
     fn next(&mut self) -> Option<String> {
         if self.n == 1 {
             self.n += 1;
-            return Some("1".to_string())
+            return Some("1".to_string());
         } else {
             if self.n.is_power_of_two() {
                 self.prefix.push('0');
             }
-            let out = format!("{}{:b}",self.prefix,self.n);
+            let out = format!("{}{:b}", self.prefix, self.n);
             self.n += 1;
             Some(out)
         }
-
     }
 }
 
@@ -42,34 +44,36 @@ pub struct DeltaGen {
 }
 
 impl DeltaGen {
-    pub fn new() -> Self  {
-        DeltaGen{ n: 1, prefix: String::new() }
+    pub fn new() -> Self {
+        DeltaGen {
+            n: 1,
+            prefix: String::new(),
+        }
     }
 }
- 
+
 impl Iterator for DeltaGen {
     type Item = String;
 
     fn next(&mut self) -> Option<String> {
         if self.n == 1 {
             self.n += 1;
-            return Some("1".to_string())
+            return Some("1".to_string());
         } else {
             if self.n.is_power_of_two() {
                 self.prefix.push('0');
             }
-            let out = format!("{}{:b}",self.prefix,self.n);
+            let out = format!("{}{:b}", self.prefix, self.n);
             self.n += 1;
             Some(out)
         }
-
     }
 }
 
 pub enum EliasMode {
     Delta,
     Gamma,
-    Omega
+    Omega,
 }
 
 impl EliasMode {
@@ -88,11 +92,10 @@ pub struct EliasCode {
     alphabet: String,
     old_alphabet: String,
     max_code_len: usize,
-    mode: EliasMode
+    mode: EliasMode,
 }
 
 impl EliasCode {
-
     pub fn control_alphabet(&mut self) -> &mut String {
         &mut self.alphabet
     }
@@ -109,19 +112,22 @@ impl EliasCode {
             let codes = self.mode.codes();
             self.map.clear();
             self.map_inv.clear();
-            for (l,c) in self.alphabet.chars().zip(codes) {
-                self.map.insert(l,c.clone() );
+            for (l, c) in self.alphabet.chars().zip(codes) {
+                self.map.insert(l, c.clone());
                 self.map_inv.insert(c.clone(), l);
             }
-            self.max_code_len = self.map[&self.alphabet.chars().last().unwrap()].chars().count();
+            self.max_code_len = self.map[&self.alphabet.chars().last().unwrap()]
+                .chars()
+                .count();
             self.old_alphabet = self.alphabet.clone();
         }
     }
 
-    pub fn chars_codes(&mut self) -> impl Iterator<Item=(char, &String)> + '_ {
+    pub fn chars_codes(&mut self) -> impl Iterator<Item = (char, &String)> + '_ {
         self.set_maps();
-        self.alphabet.chars()
-            .map(|x| (x, self.map.get(&x).unwrap()) )
+        self.alphabet
+            .chars()
+            .map(|x| (x, self.map.get(&x).unwrap()))
     }
 }
 
@@ -131,18 +137,24 @@ impl Default for EliasCode {
         let codes = GammaGen::new();
         let mut map = HashMap::new();
         let mut map_inv = HashMap::new();
-        for (l,c) in alphabet.chars().zip(codes) {
-            map.insert(l,c.clone() );
+        for (l, c) in alphabet.chars().zip(codes) {
+            map.insert(l, c.clone());
             map_inv.insert(c, l);
         }
         let max_code_len = map[&alphabet.chars().last().unwrap()].chars().count();
-        EliasCode{ map, map_inv, alphabet: alphabet.clone(), old_alphabet: alphabet, max_code_len, mode: EliasMode::Gamma }
+        EliasCode {
+            map,
+            map_inv,
+            alphabet: alphabet.clone(),
+            old_alphabet: alphabet,
+            max_code_len,
+            mode: EliasMode::Gamma,
+        }
     }
 }
 
 impl Code for EliasCode {
-
-    fn encode(&self, text: &str) -> Result<String,CodeError> {
+    fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut output = String::new();
         for s in text.chars() {
             output.push_str(&self.map[&s])
@@ -150,7 +162,7 @@ impl Code for EliasCode {
         Ok(output)
     }
 
-    fn decode(&self, text: &str) -> Result<String,CodeError> {
+    fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut output = String::new();
         let mut buffer = String::with_capacity(self.max_code_len);
         let mut ctr = 0;
@@ -173,12 +185,11 @@ impl Code for EliasCode {
     }
 }
 
-
 #[cfg(test)]
 mod elias_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
     const ENCODEDTEXT: &'static str = "0100001000100001100100011010010100011000000101100000101000001001001000001111001100000100000010000001100000001011100011010001110000010011001110010000001010110001001010000100010001011011000011010000010010000101000100000010001";
 
     #[test]

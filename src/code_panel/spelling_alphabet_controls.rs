@@ -1,6 +1,5 @@
-use super::{View, generic_components::fill_code_columns};
+use super::{generic_components::fill_code_columns, View};
 use crate::codes::SpellingAlphabet;
-
 
 impl View for SpellingAlphabet {
     fn ui(&mut self, ui: &mut eframe::egui::Ui) {

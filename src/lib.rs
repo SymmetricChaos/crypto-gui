@@ -1,24 +1,22 @@
 #![forbid(unsafe_code)]
 #![cfg_attr(not(debug_assertions), deny(warnings))] // Forbid warnings in release builds
 
-
-pub mod ciphers;
-pub mod math_functions;
-pub mod cipher_panel;
 mod app;
+pub mod cipher_panel;
+pub mod ciphers;
 pub mod grid;
+pub mod math_functions;
 
-pub mod errors;
 pub mod cipher_id;
 pub mod code_id;
-pub mod codes;
 pub mod code_panel;
+pub mod codes;
+pub mod errors;
 
 pub mod egui_aux;
 pub mod rotors;
 
 pub mod text_aux;
-
 
 // ----------------------------------------------------------------------------
 // When compiling for web:

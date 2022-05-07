@@ -1,7 +1,9 @@
-use super::View;
-use crate::codes::{Ascii, ascii::AsciiMode::{EightBit, SevenBit}};
 use super::generic_components::fill_code_columns;
-
+use super::View;
+use crate::codes::{
+    ascii::AsciiMode::{EightBit, SevenBit},
+    Ascii,
+};
 
 impl View for Ascii {
     fn ui(&mut self, ui: &mut eframe::egui::Ui) {

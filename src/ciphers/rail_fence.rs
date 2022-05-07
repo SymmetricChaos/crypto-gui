@@ -1,24 +1,23 @@
-use std::iter::Iterator;
 use rand::{prelude::StdRng, Rng};
+use std::iter::Iterator;
 
-use crate::errors::CipherError;
 use super::Cipher;
+use crate::errors::CipherError;
 
 pub struct RailFence {
-    pub rails: usize // the slider to control this should be limited
+    pub rails: usize, // the slider to control this should be limited
 }
 
 impl Default for RailFence {
     fn default() -> RailFence {
-        RailFence{ rails: 5 }
+        RailFence { rails: 5 }
     }
 }
 
 impl Cipher for RailFence {
-
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         if self.rails < 2 {
-            return Err(CipherError::key("Rail Fence key must be greater than 1"))
+            return Err(CipherError::key("Rail Fence key must be greater than 1"));
         }
 
         let mut rows = Vec::new();
@@ -28,7 +27,7 @@ impl Cipher for RailFence {
 
         let mut positions: Vec<usize> = (0..self.rails).collect();
         for p in 2..self.rails {
-            positions.push(self.rails-p)
+            positions.push(self.rails - p)
         }
 
         for (c, n) in text.chars().zip(positions.iter().cycle()) {
@@ -48,9 +47,9 @@ impl Cipher for RailFence {
     // There's probably an easier way to do this.
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         if self.rails < 2 {
-            return Err(CipherError::key("Rail Fence key must be greater than 1"))
+            return Err(CipherError::key("Rail Fence key must be greater than 1"));
         }
-        
+
         // Count how many letters must be on each rail
         let mut chunks = vec![0usize; self.rails];
         let mut rail = 0;
@@ -62,16 +61,16 @@ impl Cipher for RailFence {
                 true => rail += 1,
                 false => rail -= 1,
             }
-            if rail == 0 || rail == self.rails-1 {
+            if rail == 0 || rail == self.rails - 1 {
                 down = !down
             }
         }
 
         // Rebuild the rails
-        let mut fence= Vec::new();
+        let mut fence = Vec::new();
         let mut ctr = 0;
         for num in chunks {
-            fence.push(text[ctr..ctr+num].chars());
+            fence.push(text[ctr..ctr + num].chars());
             ctr += num
         }
 
@@ -84,13 +83,13 @@ impl Cipher for RailFence {
             let c = fence[rail].next();
             match c {
                 Some(symbol) => out.push(symbol),
-                None => break
+                None => break,
             }
             match down {
                 true => rail += 1,
                 false => rail -= 1,
             }
-            if rail == 0 || rail == self.rails-1 {
+            if rail == 0 || rail == self.rails - 1 {
                 down = !down
             }
         }

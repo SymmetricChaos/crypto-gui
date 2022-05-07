@@ -1,7 +1,7 @@
 use rand::Rng;
 
-use crate::{ciphers::polybius::Polybius, errors::CipherError};
 use super::Cipher;
+use crate::{ciphers::polybius::Polybius, errors::CipherError};
 
 /// The Bifid Cipher combines a Polybius Square with a simple transposition
 pub struct Bifid {
@@ -11,20 +11,23 @@ pub struct Bifid {
 
 impl Default for Bifid {
     fn default() -> Self {
-        Self { polybius: Default::default(), block_size: 7 }
+        Self {
+            polybius: Default::default(),
+            block_size: 7,
+        }
     }
 }
 
 impl Cipher for Bifid {
-
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-
         let vector: Vec<char> = text.chars().collect();
         let len = vector.len();
         if len % self.block_size != 0 {
-            return Err(CipherError::input("Input length must be a multiple of the block size"))
+            return Err(CipherError::input(
+                "Input length must be a multiple of the block size",
+            ));
         };
-        let mut out = String::with_capacity(len*2);
+        let mut out = String::with_capacity(len * 2);
 
         for block in vector.chunks(self.block_size).map(|x| x.to_vec()) {
             let clip: String = block.iter().collect();
@@ -45,17 +48,17 @@ impl Cipher for Bifid {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-
         // turn text into a vector and prepare a string to fill with the output
         let vector: Vec<char> = text.chars().collect();
         if vector.len() % self.block_size != 0 {
-            return Err(CipherError::input("Input length must be a multiple of the block size"))
+            return Err(CipherError::input(
+                "Input length must be a multiple of the block size",
+            ));
         };
         let mut out = String::with_capacity(vector.len());
 
         // Divide the vector into chunks of the block size
         for block in vector.chunks(self.block_size).map(|x| x.to_vec()) {
-
             // Turn the block into a String then encrypt it with the Polybius cipher
             let clip: String = block.iter().collect();
             let poly: String = self.polybius.encrypt(&clip)?;
@@ -65,10 +68,10 @@ impl Cipher for Bifid {
             // Divide the encrypted string in half
             // TODO: This will likely panic with non-ASCII inputs
             let left = &poly[0..self.block_size];
-            let right = &poly[self.block_size..self.block_size*2];
+            let right = &poly[self.block_size..self.block_size * 2];
 
             // Take characters from left and right as pairs and write them into a new string
-            let mut sorted = String::with_capacity(self.block_size*2);
+            let mut sorted = String::with_capacity(self.block_size * 2);
             for (l, r) in left.chars().zip(right.chars()) {
                 sorted.push(l);
                 sorted.push(r);
@@ -90,12 +93,11 @@ impl Cipher for Bifid {
     }
 }
 
-
 #[cfg(test)]
 mod caesar_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str =  "THEKUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const PLAINTEXT: &'static str = "THEKUICKBROWNFOXJUMPSOVERTHELAZYDOG";
     const CIPHERTEXT: &'static str = "RCRDOESKSXFGWPOINUOXCODREEIOKZCGETW";
 
     #[test]

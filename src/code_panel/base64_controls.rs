@@ -1,4 +1,4 @@
-use super::{View, generic_components::fill_code_columns};
+use super::{generic_components::fill_code_columns, View};
 use crate::codes::Base64;
 use rfd::FileDialog;
 

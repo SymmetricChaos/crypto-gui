@@ -1,17 +1,29 @@
-use eframe::egui::{self, RichText, Color32, TextStyle, Label};
-use rand::prelude::StdRng;
 use crate::{ciphers::Cipher, grid::Grid};
+use eframe::egui::{self, Color32, Label, RichText, TextStyle};
+use rand::prelude::StdRng;
 
-pub fn encrypt_decrypt(ui: &mut egui::Ui, cipher: &dyn Cipher, input: &mut String, output: &mut String, errors: &mut String) {
+pub fn encrypt_decrypt(
+    ui: &mut egui::Ui,
+    cipher: &dyn Cipher,
+    input: &mut String,
+    output: &mut String,
+    errors: &mut String,
+) {
     ui.horizontal(|ui| {
-        if ui.button(RichText::from("ENCRYPT").color(Color32::GOLD)).clicked() {
+        if ui
+            .button(RichText::from("ENCRYPT").color(Color32::GOLD))
+            .clicked()
+        {
             errors.clear();
             match cipher.encrypt(input) {
                 Ok(text) => *output = text,
                 Err(e) => *errors = e.to_string(),
             }
         };
-        if ui.button(RichText::from("DECRYPT").color(Color32::GOLD)).clicked() {
+        if ui
+            .button(RichText::from("DECRYPT").color(Color32::GOLD))
+            .clicked()
+        {
             errors.clear();
             match cipher.decrypt(input) {
                 Ok(text) => *output = text,
@@ -20,7 +32,6 @@ pub fn encrypt_decrypt(ui: &mut egui::Ui, cipher: &dyn Cipher, input: &mut Strin
         }
     });
 }
-
 
 pub fn randomize_reset(ui: &mut egui::Ui, cipher: &mut dyn Cipher, rng: &mut StdRng) {
     if ui.button("Randomize").clicked() {
@@ -44,12 +55,14 @@ pub fn reset_button(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
 }
 
 pub fn control_string(ui: &mut egui::Ui, string: &mut String) -> egui::Response {
-    ui.add(egui::TextEdit::singleline(string).font(TextStyle::Monospace)).on_hover_text("Change this to whatever you like.")
+    ui.add(egui::TextEdit::singleline(string).font(TextStyle::Monospace))
+        .on_hover_text("Change this to whatever you like.")
 }
 
 pub fn input_alphabet(ui: &mut egui::Ui, alphabet: &mut String) {
     ui.label("Alphabet");
-    ui.add(egui::TextEdit::singleline(alphabet).font(TextStyle::Monospace)).on_hover_text("You can change this alphabet to whatever you like.");
+    ui.add(egui::TextEdit::singleline(alphabet).font(TextStyle::Monospace))
+        .on_hover_text("You can change this alphabet to whatever you like.");
 }
 
 pub fn text_edit(ui: &mut egui::Ui, text: &mut String) {
@@ -68,6 +81,5 @@ pub fn letter_grid(ui: &mut egui::Ui, n_rows: usize, n_cols: usize, text: &Strin
             }
             ui.end_row()
         }
-        
     });
 }

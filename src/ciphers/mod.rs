@@ -87,19 +87,19 @@ pub use checkerboard::StraddlingCheckerboard;
 pub mod dryad;
 pub use dryad::Dryad;
 
-use rand::prelude::StdRng;
 use crate::errors::CipherError;
+use rand::prelude::StdRng;
 
 pub trait Cipher {
-    fn encrypt(&self, text: &str) -> Result<String,CipherError>;
-    fn decrypt(&self, text: &str) -> Result<String,CipherError>;
+    fn encrypt(&self, text: &str) -> Result<String, CipherError>;
+    fn decrypt(&self, text: &str) -> Result<String, CipherError>;
     fn randomize(&mut self, rng: &mut StdRng);
     fn reset(&mut self);
 }
 
-#[derive(Debug,Copy,Clone,PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum PolyMode {
     CylicKey,
     Autokey,
-    ProgKey
+    ProgKey,
 }

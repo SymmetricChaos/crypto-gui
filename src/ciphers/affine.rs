@@ -1,8 +1,9 @@
 use super::Cipher;
 use crate::{
-    errors::CipherError, 
-    math_functions::mul_inv, 
-    text_aux::{Alphabet, PresetAlphabet::*}};
+    errors::CipherError,
+    math_functions::mul_inv,
+    text_aux::{Alphabet, PresetAlphabet::*},
+};
 use rand::{prelude::StdRng, Rng};
 
 pub struct Affine {
@@ -20,7 +21,7 @@ impl Affine {
         pos %= self.alphabet_len();
         self.alphabet.chars().nth(pos).unwrap()
     }
- 
+
     fn decrypt_char(&self, c: char, mul_key_inv: usize) -> char {
         let mut pos = self.alphabet.get_pos_of(c).unwrap();
         pos += self.alphabet_len() - self.add_key;
@@ -37,7 +38,7 @@ impl Affine {
         self.alphabet = Alphabet::from(&self.alphabet_string);
         &mut self.alphabet_string
     }
- 
+
     pub fn alphabet_len(&self) -> usize {
         self.alphabet.chars().count()
     }
@@ -56,7 +57,7 @@ impl Affine {
     pub fn check_input(&self, text: &str) -> Result<(), CipherError> {
         for c in text.chars() {
             if !self.alphabet.contains(c) {
-                return Err(CipherError::invalid_input_char(c))
+                return Err(CipherError::invalid_input_char(c));
             }
         }
         Ok(())
@@ -82,11 +83,14 @@ impl Cipher for Affine {
         let out = text.chars().map(|s| self.encrypt_char(s)).collect();
         Ok(out)
     }
- 
+
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         self.check_input(text)?;
         let mul_inv = self.find_mul_inverse()?;
-        let out = text.chars().map(|s| self.decrypt_char(s, mul_inv)).collect();
+        let out = text
+            .chars()
+            .map(|s| self.decrypt_char(s, mul_inv))
+            .collect();
         Ok(out)
     }
 

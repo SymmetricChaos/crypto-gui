@@ -1,10 +1,7 @@
-use eframe::egui::Ui;
+use eframe::egui::{RichText, TextEdit, TextStyle, Ui};
 use rand::prelude::StdRng;
-use eframe::egui::{RichText, TextEdit, TextStyle};
 
-
-use super::generic_components::*;
-use super::View;
+use super::{generic_components::*, View};
 use crate::ciphers::Slidefair;
 
 impl View for Slidefair {

@@ -1,6 +1,10 @@
-use rand::prelude::{StdRng};
-use crate::{text_aux::PresetAlphabet::*, ciphers::{Polybius,Columnar}, errors::CipherError};
 use super::Cipher;
+use crate::{
+    ciphers::{Columnar, Polybius},
+    errors::CipherError,
+    text_aux::PresetAlphabet::*,
+};
+use rand::prelude::StdRng;
 
 pub struct B64 {
     pub polybius: Polybius,
@@ -13,10 +17,10 @@ impl Default for B64 {
         let mut polybius = Polybius::default();
         polybius.set_alphabet(Base64);
 
-        Self{
-              polybius,
-              columnar1: Columnar::default(),
-              columnar2: Columnar::default(),
+        Self {
+            polybius,
+            columnar1: Columnar::default(),
+            columnar2: Columnar::default(),
         }
     }
 }
@@ -53,7 +57,7 @@ impl Cipher for B64 {
 mod b64_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
     const CIPHERTEXT: &'static str = "hMzRT3BBKyRgKfOgJBQ6DoRwaRCI1UD4MQF";
 
     #[test]
@@ -73,5 +77,4 @@ mod b64_tests {
         cipher.columnar2.assign_key("SHUFFLE");
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
-
 }

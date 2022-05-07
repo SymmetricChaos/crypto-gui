@@ -1,8 +1,8 @@
-use std::fmt::Display;
-use rand::{prelude::StdRng, Rng};
-use crate::errors::CipherError;
-use crate::text_aux::{PresetAlphabet::*, Alphabet};
 use super::Cipher;
+use crate::errors::CipherError;
+use crate::text_aux::{Alphabet, PresetAlphabet::*};
+use rand::{prelude::StdRng, Rng};
+use std::fmt::Display;
 
 pub struct Alberti {
     pub fixed_alphabet_string: String,
@@ -11,9 +11,8 @@ pub struct Alberti {
     moving_alphabet: Alphabet,
     pub start_index: usize,
 }
- 
+
 impl Alberti {
- 
     pub fn set_fixed_alphabet(&mut self) {
         self.fixed_alphabet = Alphabet::from(&self.fixed_alphabet_string);
     }
@@ -22,17 +21,19 @@ impl Alberti {
         self.moving_alphabet = Alphabet::from(&self.moving_alphabet_string);
     }
 
-
     fn encrypt_char(&self, symbol: char, index: usize) -> char {
         let position = self.fixed_alphabet.get_pos_of(symbol).unwrap();
-        self.moving_alphabet.get_char_at_offset(position, index as i32).unwrap()
+        self.moving_alphabet
+            .get_char_at_offset(position, index as i32)
+            .unwrap()
     }
 
     fn decrypt_char(&self, symbol: char, index: usize) -> char {
         let position = self.moving_alphabet.get_pos_of(symbol).unwrap();
-        self.fixed_alphabet.get_char_at_offset(position, -(index as i32)).unwrap()
+        self.fixed_alphabet
+            .get_char_at_offset(position, -(index as i32))
+            .unwrap()
     }
-
 
     pub fn alphabet_len(&self) -> usize {
         self.fixed_alphabet.chars().count()
@@ -40,34 +41,33 @@ impl Alberti {
 }
 
 impl Cipher for Alberti {
-    fn encrypt(&self, text: &str) -> Result<String,CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let mut index = self.start_index.clone();
         let mut out = String::with_capacity(text.len());
         for s in text.chars() {
             if self.fixed_alphabet.contains(s) {
-                out.push(self.encrypt_char(s,index));
+                out.push(self.encrypt_char(s, index));
             } else if self.moving_alphabet.contains(s) {
                 index = self.moving_alphabet.get_pos_of(s).unwrap();
                 out.push(self.fixed_alphabet.get_char_at(index).unwrap());
             } else {
-                return Err(CipherError::invalid_input_char(s))
+                return Err(CipherError::invalid_input_char(s));
             }
         }
         Ok(out)
     }
 
-
-    fn decrypt(&self, text: &str) -> Result<String,CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         let mut index = self.start_index.clone();
         let mut out = String::with_capacity(text.len());
         for s in text.chars() {
             if self.moving_alphabet.contains(s) {
-                out.push(self.decrypt_char(s,index));
+                out.push(self.decrypt_char(s, index));
             } else if self.fixed_alphabet.contains(s) {
                 index = self.fixed_alphabet.get_pos_of(s).unwrap();
                 out.push(self.moving_alphabet.get_char_at(index).unwrap());
             } else {
-                return Err(CipherError::invalid_input_char(s))
+                return Err(CipherError::invalid_input_char(s));
             }
         }
         Ok(out)
@@ -81,17 +81,17 @@ impl Cipher for Alberti {
     fn reset(&mut self) {
         *self = Self::default();
     }
-
 }
- 
+
 impl Default for Alberti {
     fn default() -> Self {
-        Self{ fixed_alphabet_string: String::from(BasicLatin),
-              fixed_alphabet:  Alphabet::from(BasicLatin),
-              moving_alphabet_string: String::from(BasicLatin.string().to_ascii_lowercase()),
-              moving_alphabet: Alphabet::from(BasicLatin.string().to_ascii_lowercase()),
-              start_index: 0
-        } 
+        Self {
+            fixed_alphabet_string: String::from(BasicLatin),
+            fixed_alphabet: Alphabet::from(BasicLatin),
+            moving_alphabet_string: String::from(BasicLatin.string().to_ascii_lowercase()),
+            moving_alphabet: Alphabet::from(BasicLatin.string().to_ascii_lowercase()),
+            start_index: 0,
+        }
     }
 }
 
@@ -109,7 +109,7 @@ impl Display for Alberti {
 mod alberti_tests {
     use super::*;
 
-    const PLAINTEXT:  &'static str = "THEQUItCKBReOWNFOsXJUMPStOVERTiHELAZYDnOG";
+    const PLAINTEXT: &'static str = "THEQUItCKBReOWNFOsXJUMPStOVERTiHELAZYDnOG";
     const CIPHERTEXT: &'static str = "thequiTvdukEsarjsSpbmehkThoxkmIpmtihglNbt";
 
     #[test]

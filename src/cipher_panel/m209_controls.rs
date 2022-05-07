@@ -1,21 +1,24 @@
-use eframe::egui;
-use eframe::egui::Slider;
-use eframe::egui::Ui;
+use eframe::egui::{self, Slider, Ui};
 
-use rand::prelude::StdRng;
-use super::View;
-use super::generic_components::*;
+use super::{generic_components::*, View};
 use crate::ciphers::M209;
+use rand::prelude::StdRng;
 
-fn lug_pair(ui: &mut egui::Ui, pair: &mut (usize,usize)) {
-    ui.add(egui::DragValue::new(&mut pair.0).clamp_range(0usize..=6).speed(0.1));
-    ui.add(egui::DragValue::new(&mut pair.1).clamp_range(0usize..=6).speed(0.1));
+fn lug_pair(ui: &mut egui::Ui, pair: &mut (usize, usize)) {
+    ui.add(
+        egui::DragValue::new(&mut pair.0)
+            .clamp_range(0usize..=6)
+            .speed(0.1),
+    );
+    ui.add(
+        egui::DragValue::new(&mut pair.1)
+            .clamp_range(0usize..=6)
+            .speed(0.1),
+    );
 }
-
 
 impl View for M209 {
     fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {
-
         randomize_reset(ui, self, rng);
         ui.add_space(16.0);
 
@@ -25,11 +28,11 @@ impl View for M209 {
 
         ui.label("Rotor Settings");
         for rotor in self.get_wheels() {
-            let len = rotor.rotor_length()-1;
-            ui.add( Slider::new(&mut rotor.active, 0..=len).show_value(false));
-            ui.label(format!("{}",rotor));
+            let len = rotor.rotor_length() - 1;
+            ui.add(Slider::new(&mut rotor.active, 0..=len).show_value(false));
+            ui.label(format!("{}", rotor));
         }
-        
+
         ui.add_space(16.0);
 
         let lugs = &mut self.lugs;

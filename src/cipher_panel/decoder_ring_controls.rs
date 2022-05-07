@@ -1,13 +1,10 @@
-use eframe::egui::Slider;
-use eframe::egui::Ui;
-use rand::prelude::StdRng;
-use super::View;
-use super::generic_components::*;
+use super::{generic_components::*, View};
 use crate::ciphers::DecoderRing;
+use eframe::egui::{Slider, Ui};
+use rand::prelude::StdRng;
 
 impl View for DecoderRing {
     fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {
-
         randomize_reset(ui, self, rng);
         ui.add_space(16.0);
 
@@ -15,7 +12,7 @@ impl View for DecoderRing {
         ui.add_space(16.0);
 
         ui.label("Key");
-        let alpha_range = 0..=((self.length()-1));
+        let alpha_range = 0..=(self.length() - 1);
         ui.add(Slider::new(&mut self.index, alpha_range));
         ui.add_space(16.0);
 

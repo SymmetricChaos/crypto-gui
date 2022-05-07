@@ -1,7 +1,7 @@
-use rand::prelude::StdRng;
 use super::Cipher;
-use crate::text_aux::{PresetAlphabet, shuffled_str, Alphabet};
 use crate::errors::CipherError;
+use crate::text_aux::{shuffled_str, Alphabet, PresetAlphabet};
+use rand::prelude::StdRng;
 
 pub struct Bazeries {
     pub alphabet_string: String,
@@ -20,11 +20,11 @@ impl Bazeries {
     }
 
     pub fn add_wheel(&mut self, rng: &mut StdRng) {
-        self.wheels.push(shuffled_str(&self.alphabet_string, rng)) 
+        self.wheels.push(shuffled_str(&self.alphabet_string, rng))
     }
 
     pub fn del_wheel(&mut self) {
-        self.wheels.pop(); 
+        self.wheels.pop();
     }
 
     pub fn alphabet_len(&self) -> usize {
@@ -39,41 +39,48 @@ impl Default for Bazeries {
         let alphabet = Alphabet::from(PresetAlphabet::BasicLatin);
         let alphabet_string = String::from(PresetAlphabet::BasicLatin);
         let wheels = [
-                            "FDWCBAGJOEPKRSITUQLHMZNXYV",
-                            "YGALXKDFEPCTSOHVWMIRZNJBUQ",
-                            "JVORFDLAZTIHBWXMYPQNECGKSU",
-                            "CYHNKSBRTOPXMEIDGLVZWAFJUQ",
-                            "USGCLXBRDHIAJTZOFQEYVPWMNK",
-                            "EDHPQRTFWIMOVNJBCGUYXLZAKS",
-                            "JQRAWFLYMCHGBSOZXDKUVINEPT",
-                            "VWSPHDXGOBUTIEZANKFMJQRCYL",
-                            "SXWIEPOZFQBJMVTAKRUGCYHDLN",
-                            "YKFUJONPTWCVGDLBIAREMHSXQZ",
-                            "VHKJAUZGYDPONLSTWMIBCQRFXE",
-                            "OJNBKZRYLQMWPHASCVEIUFGXTD",
-                            "KLTYVFQBMUOGNWRCEDZJSAXIHP",
-                            "IJHCMOFXPSEAZKWGRDUTLVNYBQ",
-                            "MYZHDCOJGBSEWFRPLTUXKNAVIQ",
-                            "EPDXSQZAYBVUOJRCGTIMKNHWFL",
-                            "LTKFQAMGCOVDZYRPUBISJEHWNX",
-                            "SITKUREOMNBZXFVHLGYJCPDQAW",
-                            "IKCSGFUNBMHZEYXVRALDJTQWOP",
-                            "GPQLWSMCBRYZKNDVJFIXEOUHAT",
-                            "ERWLOSYJDGCBKXAMTHZUPVFNQI",
-                            "KRFWOVZHNPXTDEUYQICBMAJGSL",
-                            "PWGRTACFDHBXJVOSKELMUIYNZQ",
-                            "JGAXRKSTLPQBUOICVDNYFZMWHE",
-                            "OUGTAHPWXQZYSJVDMNRCIEBFKL",
-                            "LHYZSUMCKDIVRQAPWXBOETFJNG",
-                            "FXCEKVRMHLJNGUYPWBAODZSTQI"
-                        ].iter().map(|x| x.to_string()).collect();
+            "FDWCBAGJOEPKRSITUQLHMZNXYV",
+            "YGALXKDFEPCTSOHVWMIRZNJBUQ",
+            "JVORFDLAZTIHBWXMYPQNECGKSU",
+            "CYHNKSBRTOPXMEIDGLVZWAFJUQ",
+            "USGCLXBRDHIAJTZOFQEYVPWMNK",
+            "EDHPQRTFWIMOVNJBCGUYXLZAKS",
+            "JQRAWFLYMCHGBSOZXDKUVINEPT",
+            "VWSPHDXGOBUTIEZANKFMJQRCYL",
+            "SXWIEPOZFQBJMVTAKRUGCYHDLN",
+            "YKFUJONPTWCVGDLBIAREMHSXQZ",
+            "VHKJAUZGYDPONLSTWMIBCQRFXE",
+            "OJNBKZRYLQMWPHASCVEIUFGXTD",
+            "KLTYVFQBMUOGNWRCEDZJSAXIHP",
+            "IJHCMOFXPSEAZKWGRDUTLVNYBQ",
+            "MYZHDCOJGBSEWFRPLTUXKNAVIQ",
+            "EPDXSQZAYBVUOJRCGTIMKNHWFL",
+            "LTKFQAMGCOVDZYRPUBISJEHWNX",
+            "SITKUREOMNBZXFVHLGYJCPDQAW",
+            "IKCSGFUNBMHZEYXVRALDJTQWOP",
+            "GPQLWSMCBRYZKNDVJFIXEOUHAT",
+            "ERWLOSYJDGCBKXAMTHZUPVFNQI",
+            "KRFWOVZHNPXTDEUYQICBMAJGSL",
+            "PWGRTACFDHBXJVOSKELMUIYNZQ",
+            "JGAXRKSTLPQBUOICVDNYFZMWHE",
+            "OUGTAHPWXQZYSJVDMNRCIEBFKL",
+            "LHYZSUMCKDIVRQAPWXBOETFJNG",
+            "FXCEKVRMHLJNGUYPWBAODZSTQI",
+        ]
+        .iter()
+        .map(|x| x.to_string())
+        .collect();
         let offset = 0;
-        Self{ alphabet, wheels, offset, alphabet_string }
+        Self {
+            alphabet,
+            wheels,
+            offset,
+            alphabet_string,
+        }
     }
 }
 
 impl Cipher for Bazeries {
-
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let alen = self.alphabet.len();
         let mut out = String::with_capacity(text.chars().count());
@@ -102,11 +109,11 @@ impl Cipher for Bazeries {
         }
         Ok(out)
     }
-    
+
     fn reset(&mut self) {
         *self = Self::default();
     }
-    
+
     fn randomize(&mut self, rng: &mut StdRng) {
         for wheel in self.wheels.iter_mut() {
             *wheel = shuffled_str(&self.alphabet_string, rng);

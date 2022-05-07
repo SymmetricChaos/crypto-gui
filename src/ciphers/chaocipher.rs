@@ -2,7 +2,7 @@ use crate::errors::CipherError;
 use crate::text_aux::vecstring::VecString;
 
 use super::Cipher;
- 
+
 pub struct Chaocipher {
     pub left: VecString,
     pub right: VecString,
@@ -16,7 +16,7 @@ impl Chaocipher {
     }
 
     fn right_permute(right: &mut VecString, n: usize) {
-        right.rotate_left(n+1);
+        right.rotate_left(n + 1);
         let t = right.remove(2).unwrap();
         right.insert(13, t);
     }
@@ -42,8 +42,8 @@ impl Chaocipher {
 
 impl Default for Chaocipher {
     fn default() -> Self {
-        Chaocipher { 
-            left:  VecString::from("HXUCZVAMDSLKPEFJRIGTWOBNYQ"), 
+        Chaocipher {
+            left: VecString::from("HXUCZVAMDSLKPEFJRIGTWOBNYQ"),
             right: VecString::from("PTLNBQDEOYSFAVZKGJRIHWXUMC"),
             //prev_state: (VecString::from(PresetAlphabet::BasicLatin), VecString::from("AZDNBUHYFWJLVGRCQMPSOEXTKI"))
         }
@@ -51,7 +51,6 @@ impl Default for Chaocipher {
 }
 
 impl Cipher for Chaocipher {
-
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let mut left = self.left.clone();
         let mut right = self.right.clone();
@@ -61,8 +60,8 @@ impl Cipher for Chaocipher {
         for c in symbols {
             let n = right.pos(c).unwrap();
             out.push(left[n]);
-            Chaocipher::left_permute(&mut left,n);
-            Chaocipher::right_permute(&mut right,n);
+            Chaocipher::left_permute(&mut left, n);
+            Chaocipher::right_permute(&mut right, n);
         }
         Ok(out)
     }
@@ -76,11 +75,10 @@ impl Cipher for Chaocipher {
         for c in symbols {
             let n = left.pos(c).unwrap();
             out.push(right[n]);
-            Chaocipher::left_permute(&mut left,n);
-            Chaocipher::right_permute(&mut right,n);
+            Chaocipher::left_permute(&mut left, n);
+            Chaocipher::right_permute(&mut right, n);
         }
         Ok(out)
- 
     }
 
     fn randomize(&mut self, rng: &mut rand::prelude::StdRng) {
@@ -93,13 +91,12 @@ impl Cipher for Chaocipher {
     }
 }
 
-
 #[cfg(test)]
 mod chaocipher_tests {
     // http://www.chaocipher.com/ActualChaocipher/Chaocipher-Revealed-Algorithm.pdf
     use super::*;
 
-    const PLAINTEXT:  &'static str = "WELLDONEISBETTERTHANWELLSAID";
+    const PLAINTEXT: &'static str = "WELLDONEISBETTERTHANWELLSAID";
     const CIPHERTEXT: &'static str = "OAHQHCNYNXTSZJRRHJBYHQKSOUJY";
 
     #[test]
