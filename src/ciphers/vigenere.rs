@@ -11,7 +11,7 @@ use crate::{
 pub struct Vigenere {
     pub key_words: [String; 5],
     pub alphabet: Alphabet,
-    _alphabet: String,
+    alphabet_string: String,
     pub prog_shift: usize,
     pub mode: PolyMode,
     pub multikey: bool,
@@ -21,7 +21,7 @@ impl Default for Vigenere {
     fn default() -> Self {
         Self { key_words: [String::new(), String::new(), String::new(), String::new(), String::new()], 
                alphabet: Alphabet::from(PresetAlphabet::BasicLatin),
-               _alphabet: String::from(PresetAlphabet::BasicLatin),
+               alphabet_string: String::from(PresetAlphabet::BasicLatin),
                mode: PolyMode::CylicKey, 
                prog_shift: 0,
                multikey: false,        
@@ -96,8 +96,8 @@ impl Vigenere {
     }
 
     pub fn control_alphabet(&mut self) -> &mut String {
-        self.alphabet = Alphabet::from(&self._alphabet);
-        &mut self._alphabet
+        self.alphabet = Alphabet::from(&self.alphabet_string);
+        &mut self.alphabet_string
     }
 
 
@@ -206,7 +206,7 @@ impl Cipher for Vigenere {
     }
 
     fn randomize(&mut self, rng: &mut StdRng) {
-        let alpha = String::from(&self._alphabet);
+        let alpha = String::from(&self.alphabet_string);
         self.key_words[0] = random_sample_replace(&alpha, 3, rng);
         self.key_words[1] = random_sample_replace(&alpha, 4, rng);
         self.key_words[2] = random_sample_replace(&alpha, 5, rng);
