@@ -72,9 +72,6 @@ pub use rail_fence::RailFence;
 pub mod porta;
 pub use porta::Porta;
 
-// pub mod route;
-// pub use route::Route;
-
 pub mod hebern;
 pub use hebern::HebernRotor;
 
@@ -86,6 +83,10 @@ pub use checkerboard::StraddlingCheckerboard;
 
 pub mod dryad;
 pub use dryad::Dryad;
+
+
+// pub mod route;
+// pub use route::Route;
 
 use crate::errors::CipherError;
 use rand::prelude::StdRng;

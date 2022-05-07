@@ -81,6 +81,7 @@ impl CipherID {
             _ => "Missing description. Please complain to the author.",
         }
     }
+
 }
 
 impl Display for CipherID {
@@ -89,7 +90,7 @@ impl Display for CipherID {
             CipherID::Caesar => "Caesar",
             CipherID::Affine => "Affine",
             CipherID::Decoder => "Decoder Ring",
-            CipherID::Substitution => "General Substittution",
+            CipherID::Substitution => "Substitution",
             CipherID::M209 => "M209",
             CipherID::Playfair => "Playfair",
             CipherID::Alberti => "Alberti Cipher Disk",
