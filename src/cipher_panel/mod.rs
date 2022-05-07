@@ -1,6 +1,5 @@
 use self::generic_components::encrypt_decrypt;
-use crate::cipher_id::CipherID;
-use crate::ciphers::*;
+use crate::{cipher_id::CipherID, ciphers::*};
 use eframe::egui::{self, Color32, RichText, TextEdit, TextStyle};
 use rand::prelude::StdRng;
 
@@ -47,7 +46,7 @@ pub trait View: Cipher {
     ) {
         ui.horizontal(|ui| {
             if ui
-                .button(RichText::from("ENCRYPT").color(Color32::GOLD))
+                .button(RichText::from("ENCRYPT").color(Color32::GOLD).background_color(Color32::DARK_GRAY))
                 .clicked()
             {
                 errors.clear();
@@ -57,7 +56,7 @@ pub trait View: Cipher {
                 }
             };
             if ui
-                .button(RichText::from("DECRYPT").color(Color32::GOLD))
+                .button(RichText::from("DECRYPT").color(Color32::GOLD).background_color(Color32::DARK_GRAY))
                 .clicked()
             {
                 errors.clear();
