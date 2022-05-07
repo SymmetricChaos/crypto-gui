@@ -84,6 +84,9 @@ pub use batco::Batco;
 pub mod checkerboard;
 pub use checkerboard::StraddlingCheckerboard;
 
+pub mod dryad;
+pub use dryad::Dryad;
+
 use rand::prelude::StdRng;
 use crate::errors::CipherError;
 
