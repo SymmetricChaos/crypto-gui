@@ -84,6 +84,8 @@ pub use checkerboard::StraddlingCheckerboard;
 pub mod dryad;
 pub use dryad::Dryad;
 
+pub mod two_square;
+pub use two_square::TwoSquare;
 
 // pub mod route;
 // pub use route::Route;

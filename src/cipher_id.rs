@@ -14,13 +14,14 @@ pub enum CipherID {
 
     Playfair,
     Slidefair,
+    TwoSquare,
+    FourSquare,
 
     Vigenere,
     Beaufort,
     Alberti,
     Bazeries,
     M94,
-    Chaocipher,
     Porta,
 
     Columnar,
@@ -38,6 +39,7 @@ pub enum CipherID {
     Dryad,
 
     Checkerboard,
+    Chaocipher,
 }
 
 impl Default for CipherID {
@@ -116,6 +118,9 @@ impl Display for CipherID {
             CipherID::Scytale => "Scytale",
             CipherID::Checkerboard => "Straddling Checkerboard",
             CipherID::Porta => "Porta",
+            CipherID::TwoSquare => "Two Square",
+            CipherID::FourSquare => "Four Square",
+            //_ => "Missing name. Please complain to the author.",
         };
         write!(f, "{}", name)
     }
