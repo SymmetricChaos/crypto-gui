@@ -87,6 +87,9 @@ pub use dryad::Dryad;
 pub mod two_square;
 pub use two_square::TwoSquare;
 
+pub mod four_square;
+pub use four_square::FourSquare;
+
 // pub mod route;
 // pub use route::Route;
 

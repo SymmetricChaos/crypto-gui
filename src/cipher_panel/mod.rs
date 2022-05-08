@@ -31,6 +31,7 @@ pub mod scytale_controls;
 pub mod sigaba_controls;
 pub mod slidefair_controls;
 pub mod vigenere_controls;
+pub mod four_square_controls;
 
 pub trait View: Cipher {
     fn ui(&mut self, ui: &mut egui::Ui, rng: &mut StdRng, errors: &mut String);
@@ -106,6 +107,7 @@ pub struct CipherControlPanel {
 
     playfair: Playfair,
     slidefair: Slidefair,
+    four_square: FourSquare,
 
     columnar: Columnar,
     grille: Grille,

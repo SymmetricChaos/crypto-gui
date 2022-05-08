@@ -10,7 +10,7 @@ use itertools::Itertools;
 use num::integer::Roots;
 use rand::prelude::StdRng;
 
-pub struct TwoSquare {
+pub struct FourSquare {
     pub alphabet: Alphabet,
     square1: Alphabet,
     square2: Alphabet,
@@ -19,7 +19,7 @@ pub struct TwoSquare {
     grid_side_len: usize,
 }
 
-impl Default for TwoSquare {
+impl Default for FourSquare {
     fn default() -> Self {
         Self {
             alphabet: Alphabet::from(PresetAlphabet::BasicLatinNoQ),
@@ -32,13 +32,9 @@ impl Default for TwoSquare {
     }
 }
 
-impl TwoSquare {
+impl FourSquare {
     pub fn assign_key1(&mut self, key_word: &str) {
         self.key_word1 = key_word.to_string();
-        self.square1 = Alphabet::from(keyed_alphabet(&self.key_word1, &self.alphabet.to_string()));
-    }
-
-    pub fn set_key1(&mut self) {
         self.square1 = Alphabet::from(keyed_alphabet(&self.key_word1, &self.alphabet.to_string()));
     }
 
@@ -47,12 +43,16 @@ impl TwoSquare {
         self.square2 = Alphabet::from(keyed_alphabet(&self.key_word2, &self.alphabet.to_string()));
     }
 
+    pub fn set_key1(&mut self) {
+        self.square1 = Alphabet::from(keyed_alphabet(&self.key_word1, &self.alphabet.to_string()));
+    }
+
     pub fn set_key2(&mut self) {
         self.square2 = Alphabet::from(keyed_alphabet(&self.key_word2, &self.alphabet.to_string()));
     }
 
 
-    pub fn set_alphabet(&mut self, mode: PresetAlphabet) {
+    pub fn assign_alphabet(&mut self, mode: PresetAlphabet) {
         match mode {
             BasicLatinNoJ | BasicLatinNoQ | BasicLatinWithDigits | Base64 => {
                 self.alphabet = Alphabet::from(mode);
@@ -89,28 +89,6 @@ impl TwoSquare {
         alphabet.get_char_at(num).unwrap()
     }
 
-
-    // Shift characters according to playfairs method
-    fn encrypt_pair(
-        &self,
-        lpos: (usize, usize),
-        rpos: (usize, usize),
-        shift: usize,
-        output: &mut String,
-    ) {
-
-    }
-
-    fn decrypt_pair(
-        &self,
-        lpos: (usize, usize),
-        rpos: (usize, usize),
-        shift: usize,
-        output: &mut String,
-    ) {
-
-    }
-    
     pub fn show_square1(&self) -> String {
         let mut out = String::new();
         for (n, c) in self.square1.chars().enumerate() {
@@ -134,15 +112,16 @@ impl TwoSquare {
     }
 }
 
-impl Cipher for TwoSquare {
+impl Cipher for FourSquare {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let pairs = self.pairs(text);
         let mut out = String::with_capacity(text.len());
-        let shift = self.grid_side_len + 1;
         for (l, r) in pairs {
-            let lpos = self.char_to_position(l, &self.square1)?;
-            let rpos = self.char_to_position(r, &self.square2)?;
-            self.encrypt_pair(lpos, rpos, shift, &mut out);
+            let lpos = self.char_to_position(l, &self.alphabet)?;
+            let rpos = self.char_to_position(r, &self.alphabet)?;
+            // Unlike Playfair and Two Square the Four Square cipher has no special cases to handle
+            out.push(self.position_to_char((lpos.0,rpos.1), &self.square1));
+            out.push(self.position_to_char((rpos.0,lpos.1), &self.square2));
         }
         Ok(out)
     }
@@ -150,11 +129,12 @@ impl Cipher for TwoSquare {
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         let pairs = self.pairs(text);
         let mut out = String::with_capacity(text.len());
-        let shift = self.grid_side_len - 1;
         for (l, r) in pairs {
-            let lpos = self.char_to_position(l, &self.square1)?;
-            let rpos = self.char_to_position(r, &self.square2)?;
-            self.decrypt_pair(lpos, rpos, shift, &mut out);
+            let lpos = self.char_to_position(l,&self.square1)?;
+            let rpos = self.char_to_position(r,&self.square2)?;
+            // Unlike Playfair and Two Square the Four Square cipher has no special cases to handle
+            out.push(self.position_to_char((lpos.0,rpos.1), &self.alphabet));
+            out.push(self.position_to_char((rpos.0,lpos.1), &self.alphabet));
         }
         Ok(out)
     }
@@ -172,16 +152,16 @@ impl Cipher for TwoSquare {
 }
 
 #[cfg(test)]
-mod two_square_tests {
+mod four_square_tests {
     use super::*;
 
     // Note the X used as padding
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOGX";
-    const CIPHERTEXT: &'static str = "";
+    const PLAINTEXT: &'static str =  "HELPMEOBIWANKENOBI";
+    const CIPHERTEXT: &'static str = "FYGMKYHOBXMFKKKIMD";
 
     #[test]
     fn encrypt_test() {
-        let mut cipher = TwoSquare::default();
+        let mut cipher = FourSquare::default();
         cipher.assign_key1("EXAMPLE");
         cipher.assign_key2("KEYWORD");
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
@@ -189,7 +169,7 @@ mod two_square_tests {
 
     #[test]
     fn decrypt_test() {
-        let mut cipher = TwoSquare::default();
+        let mut cipher = FourSquare::default();
         cipher.assign_key1("EXAMPLE");
         cipher.assign_key2("KEYWORD");
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
