@@ -2,9 +2,9 @@ use eframe::egui::{RichText, TextEdit, Ui};
 use rand::prelude::StdRng;
 
 use super::{generic_components::*, View};
-use crate::{ciphers::ADFGVX, text_aux::PresetAlphabet::*};
+use crate::{ciphers::Adfgvx, text_aux::PresetAlphabet::*};
 
-impl View for ADFGVX {
+impl View for Adfgvx {
     fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {
         randomize_reset(ui, self, rng);
         ui.add_space(16.0);

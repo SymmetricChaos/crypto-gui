@@ -40,7 +40,7 @@ pub mod columnar;
 pub use columnar::Columnar;
 
 pub mod adfgvx;
-pub use adfgvx::ADFGVX;
+pub use adfgvx::Adfgvx;
 
 pub mod b64;
 pub use b64::B64;
