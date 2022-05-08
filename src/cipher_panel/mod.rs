@@ -183,7 +183,7 @@ impl CipherControlPanel {
             ui.end_row();
 
             combox_box(
-                &[CipherID::Playfair, CipherID::Slidefair],
+                &[CipherID::Playfair, CipherID::Slidefair, CipherID::FourSquare],
                 "Playfair",
                 active_cipher,
                 ui,
@@ -253,6 +253,7 @@ impl CipherControlPanel {
             CipherID::Checkerboard => self.checkerboard.ui(ui, rng, errors),
             CipherID::Porta => self.porta.ui(ui, rng, errors),
             CipherID::Dryad => self.dryad.ui(ui, rng, errors),
+            CipherID::FourSquare => self.four_square.ui(ui, rng, errors),
             _ => {
                 ui.label("IN PROGRESS");
             }
@@ -337,6 +338,7 @@ impl CipherDisplayPanel {
             }
             CipherID::Porta => encrypt_decrypt(ui, &control_panel.porta, input, output, errors),
             CipherID::Dryad => encrypt_decrypt(ui, &control_panel.dryad, input, output, errors),
+            CipherID::FourSquare => encrypt_decrypt(ui, &control_panel.four_square, input, output, errors),
             _ => *errors = String::from("button must be added to DisplayPanel struct"),
         }
 
