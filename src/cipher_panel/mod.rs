@@ -112,15 +112,15 @@ pub struct CipherControlPanel {
     rail_fence: RailFence,
     scytale: Scytale,
 
-    adfgvx: Adfgvx,
+    adfgvx: ADFGVX,
     b64: B64,
     bifid: Bifid,
 
-    batco: Batco,
-    dryad: Dryad,
-
     chaocipher: Chaocipher,
     checkerboard: StraddlingCheckerboard,
+
+    batco: Batco,
+    dryad: Dryad,
 }
 
 impl CipherControlPanel {

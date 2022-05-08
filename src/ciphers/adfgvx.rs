@@ -6,12 +6,12 @@ use crate::{
 };
 use rand::prelude::StdRng;
 
-pub struct Adfgvx {
+pub struct ADFGVX {
     pub polybius: Polybius,
     pub columnar: Columnar,
 }
 
-impl Adfgvx {
+impl ADFGVX {
     pub fn set_alphabet(&mut self, mode: PresetAlphabet) {
         match mode {
             BasicLatinNoJ => {
@@ -27,7 +27,7 @@ impl Adfgvx {
     }
 }
 
-impl Default for Adfgvx {
+impl Default for ADFGVX {
     fn default() -> Self {
         let mut polybius = Polybius::default();
         polybius.set_alphabet(BasicLatinNoJ);
@@ -40,7 +40,7 @@ impl Default for Adfgvx {
     }
 }
 
-impl Cipher for Adfgvx {
+impl Cipher for ADFGVX {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let poly_text = self.polybius.encrypt(text)?;
         let colm_text = self.columnar.encrypt(&poly_text)?;
@@ -75,7 +75,7 @@ mod adfgvx_tests {
 
     #[test]
     fn encrypt_test_adfgx() {
-        let mut cipher = Adfgvx::default();
+        let mut cipher = ADFGVX::default();
         cipher.polybius.assign_key("KEYWORKFORUSEINTEST");
         cipher.columnar.assign_key("SOMEWORD");
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT1);
@@ -83,7 +83,7 @@ mod adfgvx_tests {
 
     #[test]
     fn decrypt_test_adfgx() {
-        let mut cipher = Adfgvx::default();
+        let mut cipher = ADFGVX::default();
         cipher.polybius.assign_key("KEYWORKFORUSEINTEST");
         cipher.columnar.assign_key("SOMEWORD");
         assert_eq!(cipher.decrypt(CIPHERTEXT1).unwrap(), PLAINTEXT);
@@ -91,7 +91,7 @@ mod adfgvx_tests {
 
     #[test]
     fn encrypt_test_adfgvx() {
-        let mut cipher = Adfgvx::default();
+        let mut cipher = ADFGVX::default();
         cipher.set_alphabet(PresetAlphabet::BasicLatinWithDigits);
         cipher.polybius.assign_key("57This9Should0Mix2Words");
         cipher.columnar.assign_key("SOMEWORD");
@@ -100,7 +100,7 @@ mod adfgvx_tests {
 
     #[test]
     fn decrypt_test_adfgvx() {
-        let mut cipher = Adfgvx::default();
+        let mut cipher = ADFGVX::default();
         cipher.set_alphabet(PresetAlphabet::BasicLatinWithDigits);
         cipher.polybius.assign_key("57This9Should0Mix2Words");
         cipher.columnar.assign_key("SOMEWORD");
