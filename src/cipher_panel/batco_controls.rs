@@ -12,9 +12,9 @@ impl View for Batco {
         ui.add_space(16.0);
 
         ui.label("Message Key");
-
+        
         ui.horizontal(|ui| {
-            mono(ui, &format!("{}", self.message_number_to_char()), None);
+            ui.monospace(format!("{}", self.message_number_to_char()));
             ui.add(
                 Slider::new(&mut self.message_number, 0..=5)
                     .clamp_to_range(true)
