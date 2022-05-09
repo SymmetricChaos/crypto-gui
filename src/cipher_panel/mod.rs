@@ -32,6 +32,7 @@ pub mod sigaba_controls;
 pub mod slidefair_controls;
 pub mod vigenere_controls;
 pub mod four_square_controls;
+pub mod two_square_controls;
 
 pub trait View: Cipher {
     fn ui(&mut self, ui: &mut egui::Ui, rng: &mut StdRng, errors: &mut String);
@@ -107,6 +108,7 @@ pub struct CipherControlPanel {
 
     playfair: Playfair,
     slidefair: Slidefair,
+    two_square: TwoSquare,
     four_square: FourSquare,
 
     columnar: Columnar,
@@ -183,7 +185,7 @@ impl CipherControlPanel {
             ui.end_row();
 
             combox_box(
-                &[CipherID::Playfair, CipherID::Slidefair, CipherID::FourSquare],
+                &[CipherID::Playfair, CipherID::Slidefair, CipherID::TwoSquare, CipherID::FourSquare],
                 "Playfair",
                 active_cipher,
                 ui,
@@ -254,6 +256,7 @@ impl CipherControlPanel {
             CipherID::Porta => self.porta.ui(ui, rng, errors),
             CipherID::Dryad => self.dryad.ui(ui, rng, errors),
             CipherID::FourSquare => self.four_square.ui(ui, rng, errors),
+            CipherID::TwoSquare => self.two_square.ui(ui, rng, errors),
             _ => {
                 ui.label("IN PROGRESS");
             }
@@ -339,6 +342,7 @@ impl CipherDisplayPanel {
             CipherID::Porta => encrypt_decrypt(ui, &control_panel.porta, input, output, errors),
             CipherID::Dryad => encrypt_decrypt(ui, &control_panel.dryad, input, output, errors),
             CipherID::FourSquare => encrypt_decrypt(ui, &control_panel.four_square, input, output, errors),
+            CipherID::TwoSquare => encrypt_decrypt(ui, &control_panel.two_square, input, output, errors),
             _ => *errors = String::from("button must be added to DisplayPanel struct"),
         }
 
