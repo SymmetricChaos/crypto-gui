@@ -27,6 +27,9 @@ pub use alberti_disk::Alberti;
 pub mod polybius;
 pub use polybius::Polybius;
 
+pub mod polybius_cube;
+pub use polybius_cube::PolybiusCube;
+
 pub mod m94;
 pub use m94::M94;
 
@@ -62,6 +65,9 @@ pub use chaocipher::Chaocipher;
 
 pub mod bifid;
 pub use bifid::Bifid;
+
+pub mod trifid;
+pub use trifid::Trifid;
 
 pub mod syctale;
 pub use syctale::Scytale;

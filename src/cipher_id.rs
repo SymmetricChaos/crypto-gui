@@ -32,6 +32,7 @@ pub enum CipherID {
 
     Adfgvx,
     Bifid,
+    Trifid,
     B64,
     Vic,
 
@@ -110,6 +111,7 @@ impl Display for CipherID {
             CipherID::Beaufort => "Beaufort",
             CipherID::Adfgvx => "ADFGVX",
             CipherID::Bifid => "Bifid",
+            CipherID::Trifid => "Trifid",
             CipherID::B64 => "B64",
             CipherID::Grille => "Grille",
             CipherID::Chaocipher => "Chaocipher",
