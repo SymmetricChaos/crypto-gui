@@ -1,13 +1,13 @@
 use super::Cipher;
 use crate::{
-    ciphers::{Columnar, Polybius},
+    ciphers::{Columnar, PolybiusSquare},
     errors::CipherError,
     text_aux::{PresetAlphabet, PresetAlphabet::*},
 };
 use rand::prelude::StdRng;
 
 pub struct ADFGVX {
-    pub polybius: Polybius,
+    pub polybius: PolybiusSquare,
     pub columnar: Columnar,
 }
 
@@ -15,12 +15,12 @@ impl ADFGVX {
     pub fn set_alphabet(&mut self, mode: PresetAlphabet) {
         match mode {
             BasicLatinNoJ => {
-                self.polybius.set_alphabet(mode);
-                self.polybius.set_labels(String::from("ADFGX"));
+                self.polybius.assign_alphabet(mode);
+                self.polybius.assign_labels("ADFGX");
             }
             BasicLatinWithDigits => {
-                self.polybius.set_alphabet(mode);
-                self.polybius.set_labels(String::from("ADFGVX"));
+                self.polybius.assign_alphabet(mode);
+                self.polybius.assign_labels("ADFGVX");
             }
             _ => (),
         }
@@ -29,9 +29,9 @@ impl ADFGVX {
 
 impl Default for ADFGVX {
     fn default() -> Self {
-        let mut polybius = Polybius::default();
-        polybius.set_alphabet(BasicLatinNoJ);
-        polybius.set_labels(String::from("ADFGX"));
+        let mut polybius = PolybiusSquare::default();
+        polybius.assign_alphabet(BasicLatinNoJ);
+        polybius.assign_labels("ADFGX");
 
         Self {
             polybius,

@@ -2,9 +2,9 @@ use eframe::egui::{Color32, RichText, Ui};
 use rand::prelude::StdRng;
 
 use super::{generic_components::*, View};
-use crate::{ciphers::Polybius, text_aux::PresetAlphabet::*};
+use crate::{ciphers::PolybiusSquare, text_aux::PresetAlphabet::*};
 
-impl View for Polybius {
+impl View for PolybiusSquare {
     fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {
         randomize_reset(ui, self, rng);
         ui.add_space(16.0);
@@ -12,16 +12,16 @@ impl View for Polybius {
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
             if ui.button("No Q").clicked() {
-                self.set_alphabet(BasicLatinNoQ)
+                self.assign_alphabet(BasicLatinNoQ)
             };
             if ui.button("No J").clicked() {
-                self.set_alphabet(BasicLatinNoJ)
+                self.assign_alphabet(BasicLatinNoJ)
             };
             if ui.button("Alphanumeric").clicked() {
-                self.set_alphabet(BasicLatinWithDigits)
+                self.assign_alphabet(BasicLatinWithDigits)
             };
             if ui.button("Base64").clicked() {
-                self.set_alphabet(Base64)
+                self.assign_alphabet(Base64)
             };
         });
 

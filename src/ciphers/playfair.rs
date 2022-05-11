@@ -34,7 +34,7 @@ impl Playfair {
         &mut self.spacer
     }
 
-    pub fn set_alphabet(&mut self, mode: PresetAlphabet) {
+    pub fn assign_alphabet(&mut self, mode: PresetAlphabet) {
         match mode {
             BasicLatinNoJ | BasicLatinNoQ | BasicLatinWithDigits | Base64 => {
                 self.alphabet = mode.string();

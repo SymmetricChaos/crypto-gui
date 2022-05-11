@@ -25,7 +25,7 @@ pub mod alberti_disk;
 pub use alberti_disk::Alberti;
 
 pub mod polybius_square;
-pub use polybius_square::Polybius;
+pub use polybius_square::PolybiusSquare;
 
 pub mod polybius_cube;
 pub use polybius_cube::PolybiusCube;

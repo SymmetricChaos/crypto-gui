@@ -58,7 +58,7 @@ impl PolybiusCube {
         self.alphabet = Alphabet::from(keyed_alphabet(&self.key_word, &self.alphabet_string));
     }
 
-    pub fn assing_labels(&mut self, labels: &str) {
+    pub fn assign_labels(&mut self, labels: &str) {
         self.labels_string = labels.to_string();
         self.labels = Alphabet::from(&self.labels_string);
     }

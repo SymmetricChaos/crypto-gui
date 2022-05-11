@@ -12,16 +12,16 @@ impl View for Playfair {
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
             if ui.button("No Q").clicked() {
-                self.set_alphabet(BasicLatinNoQ)
+                self.assign_alphabet(BasicLatinNoQ)
             };
             if ui.button("No J").clicked() {
-                self.set_alphabet(BasicLatinNoJ)
+                self.assign_alphabet(BasicLatinNoJ)
             };
             if ui.button("Alphanumeric").clicked() {
-                self.set_alphabet(BasicLatinWithDigits)
+                self.assign_alphabet(BasicLatinWithDigits)
             };
             if ui.button("Base64").clicked() {
-                self.set_alphabet(Base64)
+                self.assign_alphabet(Base64)
             };
         });
         ui.add_space(10.0);

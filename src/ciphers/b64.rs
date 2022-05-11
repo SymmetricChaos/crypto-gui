@@ -1,21 +1,21 @@
 use super::Cipher;
 use crate::{
-    ciphers::{Columnar, Polybius},
+    ciphers::{Columnar, PolybiusSquare},
     errors::CipherError,
     text_aux::PresetAlphabet::*,
 };
 use rand::prelude::StdRng;
 
 pub struct B64 {
-    pub polybius: Polybius,
+    pub polybius: PolybiusSquare,
     pub columnar1: Columnar,
     pub columnar2: Columnar,
 }
 
 impl Default for B64 {
     fn default() -> Self {
-        let mut polybius = Polybius::default();
-        polybius.set_alphabet(Base64);
+        let mut polybius = PolybiusSquare::default();
+        polybius.assign_alphabet(Base64);
 
         Self {
             polybius,

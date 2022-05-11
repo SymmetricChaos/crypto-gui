@@ -11,45 +11,66 @@ use num::integer::Roots;
 use rand::prelude::StdRng;
 use std::fmt;
 
-pub struct Polybius {
+pub struct PolybiusSquare {
     alphabet_string: &'static str, // custom alphabet strings aren't allowed
-    alphabet: Alphabet,
-    labels: String,
+    grid: Alphabet,
+    pub labels_string: String,
+    labels: Alphabet,
     grid_side_len: usize,
     pub key_word: String,
 }
 
-impl Polybius {
+
+impl Default for PolybiusSquare {
+    fn default() -> Self {
+        Self {
+            alphabet_string: PresetAlphabet::BasicLatinNoQ.slice(),
+            grid: Alphabet::from(PresetAlphabet::BasicLatinNoQ),
+            grid_side_len: 5,
+            labels: Alphabet::from(PresetAlphabet::Digits1),
+            labels_string: PresetAlphabet::Digits1.string(),
+            key_word: String::new(),
+        }
+    }
+}
+
+
+impl PolybiusSquare {
     pub fn alphabet(&self) -> &str {
         self.alphabet_string
     }
 
     pub fn assign_key(&mut self, key_word: &str) {
         self.key_word = key_word.to_string();
-        self.alphabet = Alphabet::from(keyed_alphabet(&self.key_word, &self.alphabet_string));
+        self.grid = Alphabet::from(keyed_alphabet(&self.key_word, &self.alphabet_string));
     }
 
     pub fn set_key(&mut self) {
-        self.alphabet = Alphabet::from(keyed_alphabet(&self.key_word, &self.alphabet_string));
+        self.grid = Alphabet::from(keyed_alphabet(&self.key_word, &self.alphabet_string));
     }
 
-    pub fn set_alphabet(&mut self, mode: PresetAlphabet) {
+    pub fn assign_alphabet(&mut self, mode: PresetAlphabet) {
         match mode {
             BasicLatinNoJ | BasicLatinNoQ | BasicLatinWithDigits | Base64 => {
                 self.alphabet_string = mode.slice();
-                self.alphabet = Alphabet::from(mode);
+                self.grid = Alphabet::from(mode);
                 self.grid_side_len = mode.len().sqrt();
             }
             _ => (),
         }
     }
 
-    pub fn set_labels(&mut self, labels: String) {
-        self.labels = labels
+    pub fn set_alphabet(&mut self) {
+        todo!("should ensure a valid alphabet")
     }
 
-    pub fn get_labels(&self) -> &String {
-        &self.labels
+    pub fn assign_labels(&mut self, labels: &str) {
+        self.labels_string = labels.to_string();
+        self.labels = Alphabet::from(&self.labels_string);
+    }
+
+    pub fn set_labels(&mut self) {
+        self.labels = Alphabet::from(&self.labels_string);
     }
 
     fn pairs(&self, text: &str) -> Result<Vec<(char, char)>, CipherError> {
@@ -70,7 +91,7 @@ impl Polybius {
     }
 
     pub fn alphabet_len(&self) -> usize {
-        self.alphabet.len()
+        self.grid.len()
     }
 
     fn char_to_position(&self, symbol: char) -> Result<(usize, usize), CipherError> {
@@ -95,19 +116,7 @@ impl Polybius {
     }
 }
 
-impl Default for Polybius {
-    fn default() -> Self {
-        Self {
-            alphabet_string: PresetAlphabet::BasicLatinNoQ.slice(),
-            alphabet: Alphabet::from(PresetAlphabet::BasicLatinNoQ),
-            grid_side_len: 5,
-            labels: String::from(PresetAlphabet::Digits1),
-            key_word: String::new(),
-        }
-    }
-}
-
-impl Cipher for Polybius {
+impl Cipher for PolybiusSquare {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let mut out = String::with_capacity(text.chars().count() * 2);
 
@@ -130,7 +139,8 @@ impl Cipher for Polybius {
     }
 
     fn randomize(&mut self, rng: &mut StdRng) {
-        self.key_word = shuffled_str(&self.alphabet_string, rng)
+        self.key_word = shuffled_str(&self.alphabet_string, rng);
+        self.set_key();
     }
 
     fn reset(&mut self) {
@@ -138,13 +148,13 @@ impl Cipher for Polybius {
     }
 }
 
-impl fmt::Display for Polybius {
+impl fmt::Display for PolybiusSquare {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut square = String::from("  ");
         for xlab in self.labels.chars().take(self.grid_side_len) {
             square.push_str(&format!("{xlab} "))
         }
-        for (n, c) in self.alphabet.chars().enumerate() {
+        for (n, c) in self.grid.chars().enumerate() {
             if n % self.grid_side_len == 0 {
                 let ylab = self.labels.chars().nth(n / self.grid_side_len).unwrap();
                 square.push_str(&format!("\n{ylab} "));
@@ -166,14 +176,14 @@ mod polybius_tests {
 
     #[test]
     fn encrypt_test() {
-        let mut cipher = Polybius::default();
+        let mut cipher = PolybiusSquare::default();
         cipher.assign_key("INVENTORY");
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
-        let mut cipher = Polybius::default();
+        let mut cipher = PolybiusSquare::default();
         cipher.assign_key("INVENTORY");
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }

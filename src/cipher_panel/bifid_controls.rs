@@ -18,16 +18,16 @@ impl View for Bifid {
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
             if ui.button("No Q").clicked() {
-                self.polybius.set_alphabet(BasicLatinNoQ)
+                self.polybius.assign_alphabet(BasicLatinNoQ)
             };
             if ui.button("No J").clicked() {
-                self.polybius.set_alphabet(BasicLatinNoJ)
+                self.polybius.assign_alphabet(BasicLatinNoJ)
             };
             if ui.button("Alphanumeric").clicked() {
-                self.polybius.set_alphabet(BasicLatinWithDigits)
+                self.polybius.assign_alphabet(BasicLatinWithDigits)
             };
             if ui.button("Base64").clicked() {
-                self.polybius.set_alphabet(Base64)
+                self.polybius.assign_alphabet(Base64)
             };
         });
 

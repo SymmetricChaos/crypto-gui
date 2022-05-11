@@ -24,7 +24,7 @@ pub mod grille_controls;
 pub mod m209_controls;
 pub mod m94_controls;
 pub mod playfair_controls;
-pub mod polybius_controls;
+pub mod polybius_square_controls;
 pub mod porta_controls;
 pub mod rail_fence_controls;
 pub mod scytale_controls;
@@ -93,7 +93,7 @@ pub struct CipherControlPanel {
     affine: Affine,
     decoder_ring: DecoderRing,
     gen_sub: GeneralSubstitution,
-    polybius: Polybius,
+    polybius: PolybiusSquare,
 
     m209: M209,
     enigma: EnigmaM3,
