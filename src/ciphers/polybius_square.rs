@@ -13,7 +13,7 @@ use std::fmt;
 
 pub struct Polybius {
     alphabet_string: &'static str, // custom alphabet strings aren't allowed
-    inner_alphabet: Alphabet,
+    alphabet: Alphabet,
     labels: String,
     grid_side_len: usize,
     pub key_word: String,
@@ -26,18 +26,18 @@ impl Polybius {
 
     pub fn assign_key(&mut self, key_word: &str) {
         self.key_word = key_word.to_string();
-        self.inner_alphabet = Alphabet::from(keyed_alphabet(&self.key_word, &self.alphabet_string));
+        self.alphabet = Alphabet::from(keyed_alphabet(&self.key_word, &self.alphabet_string));
     }
 
     pub fn set_key(&mut self) {
-        self.inner_alphabet = Alphabet::from(keyed_alphabet(&self.key_word, &self.alphabet_string));
+        self.alphabet = Alphabet::from(keyed_alphabet(&self.key_word, &self.alphabet_string));
     }
 
     pub fn set_alphabet(&mut self, mode: PresetAlphabet) {
         match mode {
             BasicLatinNoJ | BasicLatinNoQ | BasicLatinWithDigits | Base64 => {
                 self.alphabet_string = mode.slice();
-                self.inner_alphabet = Alphabet::from(mode);
+                self.alphabet = Alphabet::from(mode);
                 self.grid_side_len = mode.len().sqrt();
             }
             _ => (),
@@ -70,7 +70,7 @@ impl Polybius {
     }
 
     pub fn alphabet_len(&self) -> usize {
-        self.inner_alphabet.len()
+        self.alphabet.len()
     }
 
     fn char_to_position(&self, symbol: char) -> Result<(usize, usize), CipherError> {
@@ -99,7 +99,7 @@ impl Default for Polybius {
     fn default() -> Self {
         Self {
             alphabet_string: PresetAlphabet::BasicLatinNoQ.slice(),
-            inner_alphabet: Alphabet::from(PresetAlphabet::BasicLatinNoQ),
+            alphabet: Alphabet::from(PresetAlphabet::BasicLatinNoQ),
             grid_side_len: 5,
             labels: String::from(PresetAlphabet::Digits1),
             key_word: String::new(),
@@ -144,7 +144,7 @@ impl fmt::Display for Polybius {
         for xlab in self.labels.chars().take(self.grid_side_len) {
             square.push_str(&format!("{xlab} "))
         }
-        for (n, c) in self.inner_alphabet.chars().enumerate() {
+        for (n, c) in self.alphabet.chars().enumerate() {
             if n % self.grid_side_len == 0 {
                 let ylab = self.labels.chars().nth(n / self.grid_side_len).unwrap();
                 square.push_str(&format!("\n{ylab} "));

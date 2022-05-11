@@ -1,7 +1,7 @@
 use rand::Rng;
 
 use super::Cipher;
-use crate::{ciphers::polybius::Polybius, errors::CipherError};
+use crate::{ciphers::polybius_square::Polybius, errors::CipherError};
 
 /// The Bifid Cipher combines a Polybius Square with a simple transposition
 pub struct Bifid {

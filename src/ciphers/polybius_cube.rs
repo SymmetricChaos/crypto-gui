@@ -24,7 +24,8 @@ fn is_power_of_three(a: usize) -> bool {
 pub struct PolybiusCube {
     pub alphabet_string: String,
     alphabet: Alphabet,
-    labels: String,
+    pub labels_string: String,
+    labels: Alphabet,
     side_len: usize,
     pub key_word: String,
 }
@@ -32,10 +33,12 @@ pub struct PolybiusCube {
 impl Default for PolybiusCube {
     fn default() -> Self {
         let alphabet = Alphabet::from("ABCDEFGHIJKLMNOPQRSTUVWXYZ+");
+        let labels = Alphabet::from("123456789");
         Self { 
             alphabet_string: "ABCDEFGHIJKLMNOPQRSTUVWXYZ+".to_string(), 
             alphabet, 
-            labels: "123456789".to_string(), 
+            labels_string: "123456789".to_string(),
+            labels,
             side_len: 3, 
             key_word: String::new() }
     }
@@ -55,6 +58,15 @@ impl PolybiusCube {
         self.alphabet = Alphabet::from(keyed_alphabet(&self.key_word, &self.alphabet_string));
     }
 
+    pub fn assing_labels(&mut self, labels: &str) {
+        self.labels_string = labels.to_string();
+        self.labels = Alphabet::from(&self.labels_string);
+    }
+
+    pub fn set_labels(&mut self) {
+        self.labels = Alphabet::from(&self.labels_string);
+    }
+
     pub fn set_alphabet(&mut self) -> Result<(),CipherError> {
 
         let new_alpha_len = self.alphabet_string.chars().count();
@@ -64,21 +76,13 @@ impl PolybiusCube {
         }
 
         if !is_power_of_three(self.alphabet_string.chars().count()) {
-            return Err(CipherError::alphabet("alphabet length must be a power of three"))
+            return Err(CipherError::alphabet("alphabet length must be a power of three to fill the grid"))
         }
 
         self.alphabet = Alphabet::from(&self.alphabet_string);
-        self.side_len = self.alphabet_string.chars().count().cbrt();
+        self.side_len = self.alphabet.len().cbrt();
 
         Ok(())
-    }
-
-    pub fn set_labels(&mut self, labels: String) {
-        self.labels = labels
-    }
-
-    pub fn get_labels(&self) -> &String {
-        &self.labels
     }
 
     fn triplets(&self, text: &str) -> Result<Vec<(char,char,char)>, CipherError> {
@@ -123,12 +127,20 @@ impl PolybiusCube {
         let num = x*(l*l) + y * l + z;
         self.alphabet.get_char_at(num).unwrap()
     }
+
+    fn check_settings(&self) -> Result<(),CipherError> {
+        if self.labels.len() < self.side_len {
+            return Err(CipherError::key("not enough labels for grid size"))
+        }
+        Ok(())
+    }
 }
 
 
 impl Cipher for PolybiusCube {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut out = String::with_capacity(text.chars().count() * 2);
+        self.check_settings()?;
+        let mut out = String::with_capacity(text.chars().count() * 3);
 
         for c in text.chars() {
             let pos = self.char_to_position(c)?;
@@ -140,6 +152,7 @@ impl Cipher for PolybiusCube {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+        self.check_settings()?;
         let pairs = self.triplets(text)?;
         let mut out = String::with_capacity(text.chars().count() / 3);
 

@@ -24,8 +24,8 @@ pub mod seriated_playfair;
 pub mod alberti_disk;
 pub use alberti_disk::Alberti;
 
-pub mod polybius;
-pub use polybius::Polybius;
+pub mod polybius_square;
+pub use polybius_square::Polybius;
 
 pub mod polybius_cube;
 pub use polybius_cube::PolybiusCube;
