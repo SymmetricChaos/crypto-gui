@@ -16,7 +16,7 @@ pub struct PolybiusSquare {
     grid: Alphabet,
     pub labels_string: String,
     labels: Alphabet,
-    grid_side_len: usize,
+    side_len: usize,
     pub key_word: String,
 }
 
@@ -26,7 +26,7 @@ impl Default for PolybiusSquare {
         Self {
             alphabet_string: PresetAlphabet::BasicLatinNoQ.slice(),
             grid: Alphabet::from(PresetAlphabet::BasicLatinNoQ),
-            grid_side_len: 5,
+            side_len: 5,
             labels: Alphabet::from(PresetAlphabet::Digits1),
             labels_string: PresetAlphabet::Digits1.string(),
             key_word: String::new(),
@@ -54,14 +54,28 @@ impl PolybiusSquare {
             BasicLatinNoJ | BasicLatinNoQ | BasicLatinWithDigits | Base64 => {
                 self.alphabet_string = mode.slice();
                 self.grid = Alphabet::from(mode);
-                self.grid_side_len = mode.len().sqrt();
+                self.side_len = mode.len().sqrt();
             }
             _ => (),
         }
     }
 
-    pub fn set_alphabet(&mut self) {
-        todo!("should ensure a valid alphabet")
+    pub fn set_alphabet(&mut self) -> Result<(),CipherError> {
+
+        let new_alpha_len = self.alphabet_string.chars().count();
+
+        if new_alpha_len > 100 {
+            return Err(CipherError::alphabet("alphabet length currently limited to 100 characters"))
+        }
+
+        if !new_alpha_len.is_power_of_two() {
+            return Err(CipherError::alphabet("alphabet length must be a power of two to fill the grid"))
+        }
+
+        self.grid = Alphabet::from(self.alphabet_string);
+        self.side_len = self.grid.len().cbrt();
+
+        Ok(())
     }
 
     pub fn assign_labels(&mut self, labels: &str) {
@@ -99,14 +113,14 @@ impl PolybiusSquare {
             Some(n) => n,
             None => return Err(CipherError::invalid_input_char(symbol)),
         };
-        Ok((num / self.grid_side_len, num % self.grid_side_len))
+        Ok((num / self.side_len, num % self.side_len))
     }
 
     fn position_to_char(&self, position: (char, char)) -> char {
         let y = self.labels.chars().position(|c| c == position.0).unwrap();
         let x = self.labels.chars().position(|c| c == position.1).unwrap();
 
-        let num = y * self.grid_side_len + x;
+        let num = y * self.side_len + x;
         self.alphabet_string.chars().nth(num).unwrap()
     }
 
@@ -151,12 +165,12 @@ impl Cipher for PolybiusSquare {
 impl fmt::Display for PolybiusSquare {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut square = String::from("  ");
-        for xlab in self.labels.chars().take(self.grid_side_len) {
+        for xlab in self.labels.chars().take(self.side_len) {
             square.push_str(&format!("{xlab} "))
         }
         for (n, c) in self.grid.chars().enumerate() {
-            if n % self.grid_side_len == 0 {
-                let ylab = self.labels.chars().nth(n / self.grid_side_len).unwrap();
+            if n % self.side_len == 0 {
+                let ylab = self.labels.chars().nth(n / self.side_len).unwrap();
                 square.push_str(&format!("\n{ylab} "));
             }
             square.push_str(&format!("{c} "))
