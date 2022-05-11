@@ -1,25 +1,25 @@
 use rand::Rng;
 
-use crate::errors::CipherError;
+use crate::{errors::CipherError, ciphers::Cipher};
 
-use super::{Cipher, PolybiusCube};
+use super::PolybiusSquare;
 
-// The Trifid Cipher combines a Polybius Cube with a simple transposition
-pub struct Trifid {
-    pub cube: PolybiusCube,
+/// The Bifid Cipher combines a Polybius Square with a simple transposition
+pub struct Bifid {
+    pub polybius: PolybiusSquare,
     pub block_size: usize,
 }
 
-impl Default for Trifid {
+impl Default for Bifid {
     fn default() -> Self {
         Self {
-            cube: PolybiusCube::default(),
+            polybius: Default::default(),
             block_size: 7,
         }
     }
 }
 
-impl Cipher for Trifid {
+impl Cipher for Bifid {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let vector: Vec<char> = text.chars().collect();
         let len = vector.len();
@@ -28,25 +28,22 @@ impl Cipher for Trifid {
                 "Input length must be a multiple of the block size",
             ));
         };
-        let mut out = String::with_capacity(len * 3);
+        let mut out = String::with_capacity(len * 2);
 
         for block in vector.chunks(self.block_size).map(|x| x.to_vec()) {
             let clip: String = block.iter().collect();
-            let poly = self.cube.encrypt(&clip)?;
-            let mut first = String::with_capacity(len);
-            let mut second = String::with_capacity(len);
-            let mut third = String::with_capacity(len);
+            let poly = self.polybius.encrypt(&clip)?;
+            let mut left = String::with_capacity(len);
+            let mut right = String::with_capacity(len);
             for (pos, s) in poly.chars().enumerate() {
-                match pos % 3 {
-                    0 => first.push(s),
-                    1 => second.push(s),
-                    2 => third.push(s),
-                    _ => unreachable!("n % 3 can only be 0, 1, or 2")
+                if (pos % 2) == 0 {
+                    left.push(s)
+                } else {
+                    right.push(s)
                 }
             }
-            first.push_str(&second);
-            first.push_str(&third);
-            out.push_str(&self.cube.decrypt(&first)?)
+            left.push_str(&right);
+            out.push_str(&self.polybius.decrypt(&left)?)
         }
         Ok(out)
     }
@@ -65,31 +62,31 @@ impl Cipher for Trifid {
         for block in vector.chunks(self.block_size).map(|x| x.to_vec()) {
             // Turn the block into a String then encrypt it with the Polybius cipher
             let clip: String = block.iter().collect();
-            let poly: String = self.cube.encrypt(&clip)?;
+            let poly: String = self.polybius.encrypt(&clip)?;
 
             dbg!(&clip);
 
             // Divide the encrypted string in half
             // TODO: This will likely panic with non-ASCII inputs
             let left = &poly[0..self.block_size];
-            let right = &poly[self.block_size..self.block_size * 3];
+            let right = &poly[self.block_size..self.block_size * 2];
 
             // Take characters from left and right as pairs and write them into a new string
-            let mut sorted = String::with_capacity(self.block_size * 3);
+            let mut sorted = String::with_capacity(self.block_size * 2);
             for (l, r) in left.chars().zip(right.chars()) {
                 sorted.push(l);
                 sorted.push(r);
             }
 
             // Decrypt the result and push it onto the output string
-            out.push_str(&self.cube.decrypt(&sorted)?)
+            out.push_str(&self.polybius.decrypt(&sorted)?)
         }
         Ok(out)
     }
 
     fn randomize(&mut self, rng: &mut rand::prelude::StdRng) {
         self.block_size = rng.gen_range(3..=30);
-        self.cube.randomize(rng)
+        self.polybius.randomize(rng)
     }
 
     fn reset(&mut self) {
@@ -98,21 +95,21 @@ impl Cipher for Trifid {
 }
 
 #[cfg(test)]
-mod trifid_tests {
+mod bifid_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "";
+    const PLAINTEXT: &'static str = "THEKUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CIPHERTEXT: &'static str = "RCRDOESKSXFGWPOINUOXCODREEIOKZCGETW";
 
     #[test]
     fn encrypt_test() {
-        let cipher = Trifid::default();
+        let cipher = Bifid::default();
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
-        let cipher = Trifid::default();
+        let cipher = Bifid::default();
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

@@ -1,5 +1,5 @@
 use self::generic_components::encrypt_decrypt;
-use crate::{cipher_id::CipherID, ciphers::*};
+use crate::{cipher_id::CipherID, ciphers::{*, polybius::{Adfgvx, PolybiusSquare, B64, Bifid}}};
 use eframe::egui::{self, Color32, RichText, TextEdit, TextStyle};
 use rand::prelude::StdRng;
 
@@ -116,7 +116,7 @@ pub struct CipherControlPanel {
     rail_fence: RailFence,
     scytale: Scytale,
 
-    adfgvx: ADFGVX,
+    adfgvx: Adfgvx,
     b64: B64,
     bifid: Bifid,
 

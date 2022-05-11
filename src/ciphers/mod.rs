@@ -24,11 +24,9 @@ pub mod seriated_playfair;
 pub mod alberti_disk;
 pub use alberti_disk::Alberti;
 
-pub mod polybius_square;
-pub use polybius_square::PolybiusSquare;
+pub mod polybius;
 
-pub mod polybius_cube;
-pub use polybius_cube::PolybiusCube;
+
 
 pub mod m94;
 pub use m94::M94;
@@ -42,11 +40,7 @@ pub use beaufort::Beaufort;
 pub mod columnar;
 pub use columnar::Columnar;
 
-pub mod adfgvx;
-pub use adfgvx::ADFGVX;
 
-pub mod b64;
-pub use b64::B64;
 
 pub mod enigma;
 pub use enigma::EnigmaM3;
@@ -63,11 +57,7 @@ pub use bazeries::Bazeries;
 pub mod chaocipher;
 pub use chaocipher::Chaocipher;
 
-pub mod bifid;
-pub use bifid::Bifid;
 
-pub mod trifid;
-pub use trifid::Trifid;
 
 pub mod syctale;
 pub use syctale::Scytale;

@@ -1,10 +1,11 @@
-use super::Cipher;
+
 use crate::{
-    ciphers::{Columnar, PolybiusSquare},
     errors::CipherError,
-    text_aux::PresetAlphabet::*,
+    text_aux::PresetAlphabet::*, ciphers::{Columnar, Cipher},
 };
 use rand::prelude::StdRng;
+
+use super::PolybiusSquare;
 
 pub struct B64 {
     pub polybius: PolybiusSquare,

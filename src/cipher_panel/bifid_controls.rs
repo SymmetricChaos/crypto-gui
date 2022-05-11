@@ -1,5 +1,5 @@
 use super::{generic_components::*, View};
-use crate::{ciphers::Bifid, text_aux::PresetAlphabet::*};
+use crate::{text_aux::PresetAlphabet::*, ciphers::polybius::Bifid};
 use eframe::{
     egui::{RichText, Slider, Ui},
     epaint::Color32,

@@ -1,8 +1,9 @@
 use eframe::egui::{RichText, TextEdit, Ui};
 use rand::prelude::StdRng;
 
+use crate::ciphers::polybius::B64;
+
 use super::{generic_components::*, View};
-use crate::ciphers::B64;
 
 impl View for B64 {
     fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {

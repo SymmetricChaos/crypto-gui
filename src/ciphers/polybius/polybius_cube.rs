@@ -1,9 +1,8 @@
-use super::Cipher;
 use crate::{
     errors::CipherError,
     text_aux::{
         keyed_alphabet, shuffled_str, Alphabet,
-    },
+    }, ciphers::Cipher,
 };
 use itertools::Itertools;
 use num::integer::Roots;
