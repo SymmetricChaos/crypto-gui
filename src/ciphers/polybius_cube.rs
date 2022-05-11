@@ -2,7 +2,7 @@ use super::Cipher;
 use crate::{
     errors::CipherError,
     text_aux::{
-        keyed_alphabet, shuffled_str, validate_alphabet, Alphabet,
+        keyed_alphabet, shuffled_str, Alphabet,
     },
 };
 use itertools::Itertools;
@@ -35,7 +35,7 @@ impl Default for PolybiusCube {
         Self { 
             alphabet_string: "ABCDEFGHIJKLMNOPQRSTUVWXYZ+".to_string(), 
             alphabet, 
-            labels: "123".to_string(), 
+            labels: "123456789".to_string(), 
             side_len: 3, 
             key_word: String::new() }
     }
@@ -103,30 +103,25 @@ impl PolybiusCube {
     }
 
     fn char_to_position(&self, symbol: char) -> Result<(usize,usize,usize), CipherError> {
-        let num = match self.alphabet_string.chars().position(|x| x == symbol) {
+        let num = match self.alphabet.get_pos_of(symbol) {
             Some(n) => n,
             None => return Err(CipherError::invalid_input_char(symbol)),
         };
         let l = self.side_len;
-        let x = num % l;
-        let y = (num % (l*l)) / l;
-        let z = num / (l*l);
+        let x = num / (l*l);
+        let y = (num / l) % l;
+        let z = num % l;
         Ok((x,y,z))
     }
 
     fn position_to_char(&self, position: (char, char, char)) -> char {
-        let z = self.labels.chars().position(|c| c == position.0).unwrap();
+        let x = self.labels.chars().position(|c| c == position.0).unwrap();
         let y = self.labels.chars().position(|c| c == position.1).unwrap();
-        let x = self.labels.chars().position(|c| c == position.2).unwrap();
+        let z = self.labels.chars().position(|c| c == position.2).unwrap();
 
         let l = self.side_len;
-        let num = z * (l*l) + y * l + x;
+        let num = x*(l*l) + y * l + z;
         self.alphabet.get_char_at(num).unwrap()
-    }
-
-    fn _validate_settings(&self) -> Result<(), CipherError> {
-        validate_alphabet(&self.alphabet_string)?;
-        Ok(())
     }
 }
 
@@ -155,7 +150,8 @@ impl Cipher for PolybiusCube {
     }
 
     fn randomize(&mut self, rng: &mut StdRng) {
-        self.key_word = shuffled_str(&self.alphabet_string, rng)
+        self.key_word = shuffled_str(&self.alphabet_string, rng);
+        self.set_alphabet().unwrap();
     }
 
     fn reset(&mut self) {
@@ -184,13 +180,13 @@ impl Cipher for PolybiusCube {
 mod polybius_cube_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "ABCD";
-    const CIPHERTEXT: &'static str ="";
+    const PLAINTEXT: &'static str =  "THEQUICK";
+    const CIPHERTEXT: &'static str = "122223121313322111212232";
 
     #[test]
     fn encrypt_test() {
         let mut cipher = PolybiusCube::default();
-        //cipher.assign_key("INVENTORY");
+        cipher.assign_key("INVENTORY");
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
