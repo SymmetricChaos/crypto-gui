@@ -2,7 +2,7 @@ use eframe::egui::{Color32, RichText, Ui};
 use rand::prelude::StdRng;
 
 use super::{generic_components::*, View};
-use crate::{text_aux::PresetAlphabet::*, ciphers::polybius::PolybiusSquare};
+use crate::{text_aux::PresetAlphabet::*, ciphers::polybius::PolybiusSquare, egui_aux::mono};
 
 impl View for PolybiusSquare {
     fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {
@@ -44,7 +44,9 @@ impl View for PolybiusSquare {
             self.set_labels();
         }
 
-        ui.label(RichText::new(format!("Grid\n{}", self)).monospace());
+        ui.label("Grid");
+        mono(ui,&self.show_grid(),None);
+        
         ui.add_space(16.0);
     }
 }

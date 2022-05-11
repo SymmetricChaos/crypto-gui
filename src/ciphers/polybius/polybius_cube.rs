@@ -133,6 +133,23 @@ impl PolybiusCube {
         }
         Ok(())
     }
+
+    // Should return a iterator over the three pages
+    // pub fn show_grid(&self) -> String {
+    //     let mut square = String::from("  ");
+    //     for xlab in self.labels.chars().take(self.side_len) {
+    //         square.push_str(&format!("{xlab} "))
+    //     }
+    //     for (n, c) in self.grid.chars().enumerate() {
+    //         if n % self.side_len == 0 {
+    //             let ylab = self.labels.get_char_at(n / self.side_len).unwrap_or(' ');
+    //             square.push_str(&format!("\n{ylab} "));
+    //         }
+    //         square.push(c);
+    //         square.push(' ');
+    //     }
+    //     square
+    // }
 }
 
 
@@ -171,22 +188,6 @@ impl Cipher for PolybiusCube {
     }
 }
 
-// impl fmt::Display for PolybiusCube {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         let mut square = String::from("  ");
-//         for xlab in self.labels.chars().take(self.grid_side_len) {
-//             square.push_str(&format!("{xlab} "))
-//         }
-//         for (n, c) in self.inner_alphabet.chars().enumerate() {
-//             if n % self.grid_side_len == 0 {
-//                 let ylab = self.labels.chars().nth(n / self.grid_side_len).unwrap();
-//                 square.push_str(&format!("\n{ylab} "));
-//             }
-//             square.push_str(&format!("{c} "))
-//         }
-//         write!(f, "{square}")
-//     }
-// }
 
 #[cfg(test)]
 mod polybius_cube_tests {

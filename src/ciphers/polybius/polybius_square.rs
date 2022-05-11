@@ -1,7 +1,7 @@
 use crate::{
     errors::CipherError,
     text_aux::{
-        keyed_alphabet, shuffled_str, validate_alphabet, Alphabet, PresetAlphabet,
+        keyed_alphabet, shuffled_str, Alphabet, PresetAlphabet,
         PresetAlphabet::*,
     }, ciphers::Cipher,
 };
@@ -123,14 +123,33 @@ impl PolybiusSquare {
         self.alphabet_string.chars().nth(num).unwrap()
     }
 
-    fn _validate_settings(&self) -> Result<(), CipherError> {
-        validate_alphabet(&self.alphabet_string)?;
+    fn check_settings(&self) -> Result<(),CipherError> {
+        if self.labels.len() < self.side_len {
+            return Err(CipherError::key("not enough labels for grid size"))
+        }
         Ok(())
+    }
+
+    pub fn show_grid(&self) -> String {
+        let mut square = String::from("  ");
+        for xlab in self.labels.chars().take(self.side_len) {
+            square.push_str(&format!("{xlab} "))
+        }
+        for (n, c) in self.grid.chars().enumerate() {
+            if n % self.side_len == 0 {
+                let ylab = self.labels.get_char_at(n / self.side_len).unwrap_or(' ');
+                square.push_str(&format!("\n{ylab} "));
+            }
+            square.push(c);
+            square.push(' ');
+        }
+        square
     }
 }
 
 impl Cipher for PolybiusSquare {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+        self.check_settings()?;
         let mut out = String::with_capacity(text.chars().count() * 2);
 
         for c in text.chars() {
@@ -142,6 +161,7 @@ impl Cipher for PolybiusSquare {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+        self.check_settings()?;
         let pairs = self.pairs(text)?;
         let mut out = String::with_capacity(text.chars().count() / 2);
 
