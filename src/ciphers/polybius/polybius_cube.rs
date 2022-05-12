@@ -134,22 +134,43 @@ impl PolybiusCube {
         Ok(())
     }
 
-    // Should return a iterator over the three pages
-    // pub fn show_grid(&self) -> String {
-    //     let mut square = String::from("  ");
-    //     for xlab in self.labels.chars().take(self.side_len) {
-    //         square.push_str(&format!("{xlab} "))
-    //     }
-    //     for (n, c) in self.grid.chars().enumerate() {
-    //         if n % self.side_len == 0 {
-    //             let ylab = self.labels.get_char_at(n / self.side_len).unwrap_or(' ');
-    //             square.push_str(&format!("\n{ylab} "));
-    //         }
-    //         square.push(c);
-    //         square.push(' ');
-    //     }
-    //     square
-    // }
+    pub fn show_grids(&self) -> [String; 3] {
+		let size = (self.side_len+2) * (self.side_len+1);
+        let mut grids = [
+            String::with_capacity(size),
+            String::with_capacity(size),
+            String::with_capacity(size),
+        ];
+ 
+        let grid_idxs = self.alphabet.chars()
+            .enumerate()
+            .collect::<Vec<(usize,char)>>();
+        let grid_chars = grid_idxs.chunks(self.side_len*self.side_len).collect_vec();
+
+        for (idx,square) in grids.iter_mut().enumerate() {
+
+            // Append x-axis labels
+            square.push_str("  ");
+            for xlab in self.labels.chars().take(self.side_len) {
+                square.push(xlab);
+                square.push(' ');
+            }
+
+            // Append y-axis labels followed by rows
+            for (n, c) in grid_chars[idx] {
+                if n % self.side_len == 0 {
+                    let ylab = self.labels.get_char_at((n / self.side_len) % self.side_len).unwrap_or(' ');
+                    square.push('\n');
+                    square.push(ylab);
+                    square.push(' ')
+                }
+                square.push(*c);
+                square.push(' ');
+            }
+        }
+ 
+        grids
+    }
 }
 
 

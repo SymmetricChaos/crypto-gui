@@ -7,6 +7,7 @@ pub enum CipherID {
     Decoder,
     Substitution,
     Polybius,
+    PolybiusCube,
 
     M209,
     Enigma,
@@ -101,6 +102,7 @@ impl Display for CipherID {
             CipherID::Playfair => "Playfair",
             CipherID::Alberti => "Alberti Cipher Disk",
             CipherID::Polybius => "Polybius Square",
+            CipherID::PolybiusCube => "Polybius Cube",
             CipherID::Enigma => "Enigma",
             CipherID::Sigaba => "SIGABA",
             CipherID::Slidefair => "Slidefair",

@@ -1,5 +1,5 @@
 use self::generic_components::encrypt_decrypt;
-use crate::{cipher_id::CipherID, ciphers::{*, polybius::{Adfgvx, PolybiusSquare, B64, Bifid}}};
+use crate::{cipher_id::CipherID, ciphers::{*, polybius::{Adfgvx, PolybiusSquare, B64, Bifid, PolybiusCube}}};
 use eframe::egui::{self, Color32, RichText, TextEdit, TextStyle};
 use rand::prelude::StdRng;
 
@@ -33,6 +33,7 @@ pub mod slidefair_controls;
 pub mod vigenere_controls;
 pub mod four_square_controls;
 pub mod two_square_controls;
+pub mod polybius_cube_controls;
 
 pub trait View: Cipher {
     fn ui(&mut self, ui: &mut egui::Ui, rng: &mut StdRng, errors: &mut String);
@@ -94,6 +95,7 @@ pub struct CipherControlPanel {
     decoder_ring: DecoderRing,
     gen_sub: GeneralSubstitution,
     polybius: PolybiusSquare,
+    polybius_cube: PolybiusCube,
 
     m209: M209,
     enigma: EnigmaM3,
@@ -143,6 +145,7 @@ impl CipherControlPanel {
                     CipherID::Affine,
                     CipherID::Substitution,
                     CipherID::Polybius,
+                    CipherID::PolybiusCube,
                 ],
                 "Simple Substitution",
                 active_cipher,
@@ -233,6 +236,7 @@ impl CipherControlPanel {
             CipherID::Decoder => self.decoder_ring.ui(ui, rng, errors),
             CipherID::Substitution => self.gen_sub.ui(ui, rng, errors),
             CipherID::Polybius => self.polybius.ui(ui, rng, errors),
+            CipherID::PolybiusCube => self.polybius_cube.ui(ui, rng, errors),
             CipherID::Vigenere => self.vigenere.ui(ui, rng, errors),
             CipherID::Beaufort => self.beaufort.ui(ui, rng, errors),
             CipherID::M209 => self.m209.ui(ui, rng, errors),
@@ -300,6 +304,9 @@ impl CipherDisplayPanel {
             }
             CipherID::Polybius => {
                 encrypt_decrypt(ui, &control_panel.polybius, input, output, errors)
+            }
+            CipherID::PolybiusCube => {
+                encrypt_decrypt(ui, &control_panel.polybius_cube, input, output, errors)
             }
             CipherID::Vigenere => {
                 encrypt_decrypt(ui, &control_panel.vigenere, input, output, errors)
