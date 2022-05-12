@@ -58,7 +58,7 @@ impl Cipher for Chaocipher {
         let symbols = text.chars();
         let mut out = String::new();
         for c in symbols {
-            let n = right.pos(c).unwrap();
+            let n = right.get_pos_of(c).unwrap();
             out.push(left[n]);
             Chaocipher::left_permute(&mut left, n);
             Chaocipher::right_permute(&mut right, n);
@@ -73,7 +73,7 @@ impl Cipher for Chaocipher {
         let symbols = text.chars();
         let mut out = String::new();
         for c in symbols {
-            let n = left.pos(c).unwrap();
+            let n = left.get_pos_of(c).unwrap();
             out.push(right[n]);
             Chaocipher::left_permute(&mut left, n);
             Chaocipher::right_permute(&mut right, n);

@@ -144,8 +144,6 @@ impl CipherControlPanel {
                     CipherID::Decoder,
                     CipherID::Affine,
                     CipherID::Substitution,
-                    CipherID::Polybius,
-                    CipherID::PolybiusCube,
                 ],
                 "Simple Substitution",
                 active_cipher,
@@ -195,22 +193,30 @@ impl CipherControlPanel {
             );
 
             combox_box(
-                &[CipherID::Adfgvx, CipherID::B64, CipherID::Bifid],
-                "Composite",
-                active_cipher,
-                ui,
-            );
-
-            combox_box(
                 &[CipherID::Batco, CipherID::Dryad],
                 "Tactical",
                 active_cipher,
                 ui,
             );
 
+            combox_box(&[
+                CipherID::Polybius,
+                CipherID::PolybiusCube,
+                CipherID::Adfgvx, 
+                CipherID::B64, 
+                CipherID::Bifid,
+                CipherID::Checkerboard
+                ], 
+                "Polybius", 
+                active_cipher, 
+                ui
+            );
+            
+            ui.end_row();
+
             combox_box(
-                &[CipherID::Chaocipher, CipherID::Checkerboard],
-                "Other",
+                &[CipherID::Chaocipher, CipherID::Hutton, CipherID::Quagmire],
+                "Mutating Alphabet",
                 active_cipher,
                 ui,
             );

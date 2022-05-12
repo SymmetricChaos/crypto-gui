@@ -42,6 +42,9 @@ pub enum CipherID {
 
     Checkerboard,
     Chaocipher,
+
+    Hutton,
+    Quagmire,
 }
 
 impl Default for CipherID {
@@ -127,6 +130,8 @@ impl Display for CipherID {
             CipherID::Porta => "Porta",
             CipherID::TwoSquare => "Two Square",
             CipherID::FourSquare => "Four Square",
+            CipherID::Hutton => "Hutton",
+            CipherID::Quagmire => "Quagmire",
             //_ => "Missing name. Please complain to the author.",
         };
         write!(f, "{}", name)

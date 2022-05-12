@@ -9,9 +9,6 @@ use std::ops::{Index, IndexMut};
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct VecString(VecDeque<char>);
 
-// A Python-like string type for when we need need to constantly manipulate it
-// The *_offset methods allow the equivalent of shifting without actually
-// changing anything
 impl VecString {
     // number of characters
     pub fn len(&self) -> usize {
@@ -21,13 +18,16 @@ impl VecString {
     ////////////////////
     // getter methods //
     ////////////////////
-    pub fn get(&self, index: usize) -> Option<&char> {
-        self.0.get(index)
+    // Get the character at some position
+    pub fn get_char_at(&self, n: usize) -> Option<char> {
+        self.0.iter().nth(n).map(|c| *c)
     }
 
-    pub fn get_mut(&mut self, index: usize) -> Option<&mut char> {
-        self.0.get_mut(index)
+    // Get the position of some character
+    pub fn get_pos_of(&self, c: char) -> Option<usize> {
+        self.0.iter().position(|x| x == &c)
     }
+
 
     pub fn get_offset(&self, index: usize, offset: i32) -> Option<&char> {
         let len = self.len();
@@ -48,17 +48,13 @@ impl VecString {
         self.0.contains(&c)
     }
 
-    pub fn pos(&self, c: char) -> Option<usize> {
-        Some(self.0.iter().position(|x| *x == c)?)
-    }
-
     pub fn pos_offset(&self, c: char, offset: i32) -> Option<usize> {
         let shift = (self.len() as i32 - offset) as usize % self.len();
         Some((self.0.iter().position(|x| *x == c)? + shift) % self.len())
     }
 
     pub fn char_offset(&self, c: char, offset: i32) -> Option<&char> {
-        let p = self.pos(c)?;
+        let p = self.get_pos_of(c)?;
         self.get_offset(p, offset)
     }
 
@@ -114,6 +110,10 @@ impl VecString {
 
     pub fn shuffle(&mut self, rng: &mut StdRng) {
         self.0.make_contiguous().shuffle(rng)
+    }
+
+    pub fn swap_indicies(&mut self, i: usize, j: usize) {
+        self.0.swap(i, j)
     }
 }
 
