@@ -14,57 +14,63 @@ impl VecString {
     pub fn len(&self) -> usize {
         self.0.len()
     }
-
+ 
     ////////////////////
     // getter methods //
     ////////////////////
     // Get the character at some position
-    pub fn get_char_at(&self, n: usize) -> Option<char> {
+    pub fn get_char(&self, n: usize) -> Option<char> {
         self.0.iter().nth(n).map(|c| *c)
     }
-
+ 
     // Get the position of some character
-    pub fn get_pos_of(&self, c: char) -> Option<usize> {
+    pub fn get_pos(&self, c: char) -> Option<usize> {
         self.0.iter().position(|x| x == &c)
     }
-
-
-    pub fn get_offset(&self, index: usize, offset: i32) -> Option<&char> {
+ 
+    // Get a mutable reference to the character as some position
+    pub fn get_char_mut(&mut self, n: usize) -> Option<&mut char> {
+        self.0.iter_mut().nth(n)
+    }
+ 
+    // Get a char at a position with some offset
+    pub fn get_char_offset(&self, index: usize, offset: i32) -> Option<char> {
         let len = self.len();
         let idx = ((index + len) as i32 + offset) as usize % len;
-        self.0.get(idx)
+        self.0.get(idx).map(|c| *c)
     }
-
-    pub fn get_mut_offset(&mut self, index: usize, offset: i32) -> Option<&mut char> {
+ 
+    // Get a mutable reference to the char at a position with some offset
+    pub fn get_char_offset_mut(&mut self, index: usize, offset: i32) -> Option<&mut char> {
         let len = self.len();
         let idx = ((index + len) as i32 + offset) as usize % len;
         self.0.get_mut(idx)
     }
-
+ 
     ////////////////////////////////////
     // methods for finding characters //
     ////////////////////////////////////
     pub fn contains(&self, c: char) -> bool {
         self.0.contains(&c)
     }
-
-    pub fn pos_offset(&self, c: char, offset: i32) -> Option<usize> {
+ 
+    pub fn get_pos_offset(&self, c: char, offset: i32) -> Option<usize> {
         let shift = (self.len() as i32 - offset) as usize % self.len();
         Some((self.0.iter().position(|x| *x == c)? + shift) % self.len())
     }
-
-    pub fn char_offset(&self, c: char, offset: i32) -> Option<&char> {
-        let p = self.get_pos_of(c)?;
-        self.get_offset(p, offset)
+ 
+    pub fn offset_from_char(&self, c: char, offset: i32) -> Option<char> {
+        let p = self.get_pos(c)?;
+        self.get_char_offset(p, offset)
     }
-
-    //////////////////
-    // iter methods //
-    //////////////////
+ 
+    ////////////////////////
+    // conversion methods //
+    ////////////////////////
     pub fn to_string(&self) -> String {
         self.0.iter().collect()
     }
-
+ 
     pub fn to_string_offset(&self, offset: i32) -> String {
         let shift = (self.len() as i32 + offset) as usize % self.len();
         let mut out = String::with_capacity(self.0.len());
@@ -73,47 +79,70 @@ impl VecString {
         out.push_str(&s[0..shift]);
         out
     }
-
+ 
     //////////////////
     // iter methods //
     //////////////////
     pub fn iter(&self) -> Iter<'_, char> {
         self.0.iter()
     }
-
+ 
     pub fn iter_mut(&mut self) -> IterMut<'_, char> {
         self.0.iter_mut()
     }
-
+ 
+    pub fn chars(&self) -> Iter<'_, char> {
+        self.0.iter()
+    }
+ 
     ////////////////////////
     // reordering methods //
     ////////////////////////
+    // mid is reduced modulo self.len() and does not panic
     pub fn rotate_left(&mut self, mid: usize) {
-        self.0.rotate_left(mid)
+        self.0.rotate_left(mid % self.len())
     }
-
+ 
+    // mid is reduced modulo self.len() and does not panic
     pub fn rotate_right(&mut self, mid: usize) {
-        self.0.rotate_right(mid)
+        self.0.rotate_right(mid % self.len())
     }
-
+ 
+    // does nothing if c does not exist
+    pub fn rotate_to(&mut self, c: char) {
+        if let Some(start) = self.get_pos(c) {
+            self.0.rotate_right(start)
+        }
+    }
+ 
     pub fn insert(&mut self, index: usize, val: char) {
         self.0.insert(index, val)
     }
-
+ 
     pub fn remove(&mut self, index: usize) -> Option<char> {
         self.0.remove(index)
     }
-
+ 
     pub fn sort(&mut self) {
         self.0.make_contiguous().sort()
     }
-
+ 
     pub fn shuffle(&mut self, rng: &mut StdRng) {
         self.0.make_contiguous().shuffle(rng)
     }
-
+ 
+    // Does nothing if either index out of bounds
     pub fn swap_indicies(&mut self, i: usize, j: usize) {
-        self.0.swap(i, j)
+        if i < self.len() && j < self.len() {
+            self.0.swap(i, j)
+        }
+    }
+ 
+    // Does nothing is either character doesn't exist
+    pub fn swap_chars(&mut self, a: char, b: char) {
+        if let (Some(i), Some(j)) = (self.get_pos(a),self.get_pos(b)) {
+            self.0.swap(i, j)
+        }
     }
 }
 
@@ -180,19 +209,19 @@ mod vecstring_tests {
     #[test]
     fn nth_offset() {
         let alphabet = VecString::from("ABCD");
-        assert_eq!(*alphabet.get_offset(1, 1).unwrap(), 'C');
+        assert_eq!(alphabet.get_char_offset(1, 1).unwrap(), 'C');
     }
 
     #[test]
-    fn pos_offset() {
+    fn get_pos_offset() {
         let alphabet = VecString::from("ABCD");
-        assert_eq!(alphabet.pos_offset('C', 1).unwrap(), 1);
+        assert_eq!(alphabet.get_pos_offset('C', 1).unwrap(), 1);
     }
 
     #[test]
     fn offset_char() {
         let alphabet = VecString::from("ABCD");
-        assert_eq!(*alphabet.char_offset('C', 1).unwrap(), 'D');
+        assert_eq!(alphabet.offset_from_char('C', 1).unwrap(), 'D');
     }
 
     // Offset should behave as expected even if it is negative
@@ -205,18 +234,18 @@ mod vecstring_tests {
     #[test]
     fn nth_offset_neg() {
         let alphabet = VecString::from("ABCD");
-        assert_eq!(*alphabet.get_offset(3, -1).unwrap(), 'C');
+        assert_eq!(alphabet.get_char_offset(3, -1).unwrap(), 'C');
     }
 
     #[test]
-    fn pos_offset_neg() {
+    fn get_pos_offset_neg() {
         let alphabet = VecString::from("ABCD");
-        assert_eq!(alphabet.pos_offset('C', -1).unwrap(), 3);
+        assert_eq!(alphabet.get_pos_offset('C', -1).unwrap(), 3);
     }
 
     #[test]
     fn offset_char_neg() {
         let alphabet = VecString::from("ABCD");
-        assert_eq!(*alphabet.char_offset('C', -1).unwrap(), 'B');
+        assert_eq!(alphabet.offset_from_char('C', -1).unwrap(), 'B');
     }
 }
