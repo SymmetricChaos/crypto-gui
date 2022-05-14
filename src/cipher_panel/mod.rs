@@ -1,5 +1,5 @@
 use self::generic_components::encrypt_decrypt;
-use crate::{cipher_id::CipherID, ciphers::{*, polybius::{Adfgvx, PolybiusSquare, B64, Bifid, PolybiusCube}}};
+use crate::{cipher_id::CipherID, ciphers::{*, polybius::*}};
 use eframe::egui::{self, Color32, RichText, TextEdit, TextStyle};
 use rand::prelude::StdRng;
 
@@ -34,6 +34,7 @@ pub mod vigenere_controls;
 pub mod four_square_controls;
 pub mod two_square_controls;
 pub mod polybius_cube_controls;
+pub mod trifid_controls;
 
 pub trait View: Cipher {
     fn ui(&mut self, ui: &mut egui::Ui, rng: &mut StdRng, errors: &mut String);
@@ -94,8 +95,6 @@ pub struct CipherControlPanel {
     affine: Affine,
     decoder_ring: DecoderRing,
     gen_sub: GeneralSubstitution,
-    polybius: PolybiusSquare,
-    polybius_cube: PolybiusCube,
 
     m209: M209,
     enigma: EnigmaM3,
@@ -118,9 +117,12 @@ pub struct CipherControlPanel {
     rail_fence: RailFence,
     scytale: Scytale,
 
+    polybius: PolybiusSquare,
+    polybius_cube: PolybiusCube,
     adfgvx: Adfgvx,
     b64: B64,
     bifid: Bifid,
+    trifid: Trifid,
 
     chaocipher: Chaocipher,
     checkerboard: StraddlingCheckerboard,
@@ -205,6 +207,7 @@ impl CipherControlPanel {
                 CipherID::Adfgvx, 
                 CipherID::B64, 
                 CipherID::Bifid,
+                CipherID::Trifid,
                 CipherID::Checkerboard
                 ], 
                 "Polybius", 
@@ -259,6 +262,7 @@ impl CipherControlPanel {
             CipherID::Bazeries => self.bazeries.ui(ui, rng, errors),
             CipherID::Chaocipher => self.chaocipher.ui(ui, rng, errors),
             CipherID::Bifid => self.bifid.ui(ui, rng, errors),
+            CipherID::Trifid => self.trifid.ui(ui, rng, errors),
             CipherID::RailFence => self.rail_fence.ui(ui, rng, errors),
             CipherID::Scytale => self.scytale.ui(ui, rng, errors),
             CipherID::Batco => self.batco.ui(ui, rng, errors),
@@ -344,6 +348,7 @@ impl CipherDisplayPanel {
                 encrypt_decrypt(ui, &control_panel.chaocipher, input, output, errors)
             }
             CipherID::Bifid => encrypt_decrypt(ui, &control_panel.bifid, input, output, errors),
+            CipherID::Trifid => encrypt_decrypt(ui, &control_panel.trifid, input, output, errors),
             CipherID::RailFence => {
                 encrypt_decrypt(ui, &control_panel.rail_fence, input, output, errors)
             }

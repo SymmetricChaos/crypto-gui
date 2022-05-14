@@ -6,12 +6,11 @@ pub enum CipherID {
     Affine,
     Decoder,
     Substitution,
-    Polybius,
-    PolybiusCube,
 
     M209,
     Enigma,
     Sigaba,
+    Fialka,
 
     Playfair,
     Slidefair,
@@ -31,20 +30,23 @@ pub enum CipherID {
     RailFence,
     Scytale,
 
+    Polybius,
+    PolybiusCube,
     Adfgvx,
     Bifid,
     Trifid,
     B64,
-    Vic,
+    Checkerboard,
 
     Batco,
     Dryad,
 
-    Checkerboard,
     Chaocipher,
 
     Hutton,
     Quagmire,
+
+    Vic,
 }
 
 impl Default for CipherID {
@@ -61,11 +63,18 @@ impl CipherID {
             CipherID::Affine => "The Affine Cipher is a slight improvement to the Caesar Cipher. Rather than a simple shift an affine transformation is applied to the letters. This means each letter is assigned a value based on its position then the first key value is added to it, then that number is multiplied by the second key value, and finally the value is divided by the length of the alphabet and the remainder is taken. That number corresponds to some letter in the alphabet. However this method was not used generally by the ancients the multiplicative key sometimes cannot be reversed. The Atbash Code, which effectively reverses the alphabet can be produced as an affine cipher.",
             CipherID::Decoder => "A Decoder Ring (as popularized by Little Orphan Annie and Captain Midnight, presets exist for each) is a minor variation on the Caesar Cipher. Rather than simply shift the letter's position instead a number is assigned a number and the key is added to that number then reduced by the modulo operation. The original decoder rings were keyed in a slightly more complex way by telling listeners to match a specific letter to a specific number but this is equivalent to simply adding a value.",
             CipherID::Substitution => "The General Substituion Cipher maps a set of symbols one-to-one onto another arbitary set. This implementation allows only maping the symbols of an alphabet but all simple substitution ciphers are included in principle.",
+            
             CipherID::Polybius => "The Polybius Square is an ancient substitutuion cipher that converts each character of the plaintext into a pair that describes its coordinates in a grid. Though it provides no special security on its own it is a key component of very strong composite ciphers.",
+            CipherID::PolybiusCube => "The Polybius Cube is an extension of the Polybius Square to an additional dimension.",
+            CipherID::Checkerboard => "The Straddling Checkerboard is a modernized version of the Polybius Square that assigns single digits to certain letters, usually the most common. It is weak on its own but its irregularity makes it useful when combined with other ciphers.",
+            CipherID::Adfgvx => "The ADFGX and ADFGVX Ciphers are among the most effective classical ciphers that can be executed entirely by hand. The first step of encryption is to use a Polybius square to convert each letter into a pair of symbols (after which the ciphers are named). Then those symbols are rearranged using a columnar transposition cipher. The symbols were chosen to be distinctive in Morse Code so as to reduce transmission errors.",
+            CipherID::Bifid => "The Bifid Cipher combines a Polybius square with a very simple transposition in order to obscure as much information as possible about the plaintext. First the Polybius square is used to convert each letter into a pair of symbol, Then first symbol in each pair is written down after that the second symbol in each pair is written down. Finally this converted back to the original alphabet using the Polybius square once more.",
+            CipherID::B64 => "The B64 Cipher is not a historical cipher. It is an (to the author's knowlege) novel cipher based on the ADFGVX and Bifid ciphers. Only symbols from the MIME Base64 alphabet are used, ensuring the message can be sent without risk of corruption over most digital systems. First a Polybius square is used to change the text into pairs of digits, then these pairs are shuffled by applying two columnar transpositions, and finally they Polybius square is applied in reverse to convert the results back to the Base64 alphabet to reduce the message size.",
 
             CipherID::M209 => "The M209 was an entirely mechanical cipher machine used by the US Military with very complex key settings. The positions of the pins and lugs were set once a day. The exteral positions of the rotors were changed with each message.",
             CipherID::Enigma => "The Enigma machine is probably the most famous rotor machine from the brief era in which they dominated encryption. It was remarkable for its simplicity and compact size. Although it contained critical flaws ultimately the failure of Engima was caused by operational mistakes in the Nazi military that leaked information to the Allies.",
             CipherID::Sigaba => "SIGABA was the most complex rotor machine of its era and is not known to have been successfully attacked during its use. Despite its complexity the United States was extremely paranoid about the device and did not allow allies direct access to it.",
+            CipherID::Fialka => "Fialka was a Soviet cipher machine.",
 
             CipherID::Playfair => "The Playfair Cipher swaps letters on a grid to encrypt letters pair by pair. Developed by Charles Wheatstone and promoted by Lord Playfair it was advertised as strong enough for tactical use and simple enough to teach to schoolchildren.",
             CipherID::Slidefair => "The Slidefair Cipher is a stronger but more complex variation on the Playfair Cipher developed by Helen Gaines. The square is formed by ",
@@ -78,12 +87,8 @@ impl CipherID {
             CipherID::Columnar => "The Columnar Transposition Cipher encrypts information by writing the text into a grid row by row and then reading it off column by column in the order decided by a keyword. To decrypt the text is simply written back into the grid column by column in the required order. The cipher is somewhat easier to use if the text fills all of the rows but this creates a serious weakness in that the key size can be guessed by factoring the length of the message. Though insecure on its own columnar transposition is a strong cipher if applied twice or combined with another layer of encryption.",
             CipherID::Grille => "Grille Cipher",
 
-            CipherID::Adfgvx => "The ADFGX and ADFGVX Ciphers are among the most effective classical ciphers that can be executed entirely by hand. The first step of encryption is to use a Polybius square to convert each letter into a pair of symbols (after which the ciphers are named). Then those symbols are rearranged using a columnar transposition cipher. The symbols were chosen to be distinctive in Morse Code so as to reduce transmission errors.",
-            CipherID::Bifid => "The Bifid Cipher combines a Polybius square with a very simple transposition in order to obscure as much information as possible about the plaintext. First the Polybius square is used to convert each letter into a pair of symbol, Then first symbol in each pair is written down after that the second symbol in each pair is written down. Finally this converted back to the original alphabet using the Polybius square once more.",
-            CipherID::B64 => "The B64 Cipher is not a historical cipher. It is an (to the author's knowlege) novel cipher based on the ADFGVX and Bifid ciphers. Only symbols from the MIME Base64 alphabet are used, ensuring the message can be sent without risk of corruption over most digital systems. First a Polybius square is used to change the text into pairs of digits, then these pairs are shuffled by applying two columnar transpositions, and finally they Polybius square is applied in reverse to convert the results back to the Base64 alphabet to reduce the message size.",
-
             CipherID::Chaocipher => "The Chaocipher was developed by Irish journalist John Francis Byrne who belived it to be unbreakable.",
-            CipherID::Checkerboard => "The Straddling Checkerboard is a modernized version of the Polybius Square that assigns single digits to certain letters, usually the most common. It is weak on its own but its irregularity makes it useful when combined with other ciphers.",
+            CipherID::Hutton => "Hutton is a mutating key cipher",
 
             CipherID::Batco => "BATCO is a British tactical code to be used quickly to send simple messages. The user chooses a message key consisting of a number from 2 to 6 (keeping 7 for emergencies) that identifies a column on the left and then letter to identify a row in that column. The message, which consists only of digits, is then encrypted using the right portion of the row. For instance the number '1' can be encoded as either of the numbers in its column that are on the selected row. Because '0' is expected to be common it has four options. The digits are not numbers but form code-groups from a set of vocabulary cards [COMING SOON]. A switch to numeric digits can be indicates by a code-group. The 'CH' symbol indicates the end of a numeric section.\nAs a tactical cipher BATCO relies mainly on frequent key changes to stay secure. A different message key should be used every time and the code pages should be changed regularly. Messages are also limited to 22 characters, giving very little text for an attacker to analyze. Furthermore so long as the vocabulary cards remain secret they make decryption nearly impossible even if an attacker is able to decrypt a message. The greatest security feature of BATCO, like any tactical cipher, is that messages should be useful for only a few hours which is often insufficient to bring them to the attention of cryptanalysis.",
             CipherID::Dryad => "DRYAD is an American tactical code to be used quickly to send simple messages.",
@@ -132,6 +137,7 @@ impl Display for CipherID {
             CipherID::FourSquare => "Four Square",
             CipherID::Hutton => "Hutton",
             CipherID::Quagmire => "Quagmire",
+            CipherID::Fialka => "Fialka",
             //_ => "Missing name. Please complain to the author.",
         };
         write!(f, "{}", name)

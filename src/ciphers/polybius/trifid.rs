@@ -6,14 +6,14 @@ use super::PolybiusCube;
 
 // The Trifid Cipher combines a Polybius Cube with a simple transposition
 pub struct Trifid {
-    pub cube: PolybiusCube,
+    pub polybius: PolybiusCube,
     pub block_size: usize,
 }
 
 impl Default for Trifid {
     fn default() -> Self {
         Self {
-            cube: PolybiusCube::default(),
+            polybius: PolybiusCube::default(),
             block_size: 7,
         }
     }
@@ -32,7 +32,7 @@ impl Cipher for Trifid {
 
         for block in vector.chunks(self.block_size).map(|x| x.to_vec()) {
             let clip: String = block.iter().collect();
-            let poly = self.cube.encrypt(&clip)?;
+            let poly = self.polybius.encrypt(&clip)?;
             let mut first = String::with_capacity(len);
             let mut second = String::with_capacity(len);
             let mut third = String::with_capacity(len);
@@ -46,7 +46,7 @@ impl Cipher for Trifid {
             }
             first.push_str(&second);
             first.push_str(&third);
-            out.push_str(&self.cube.decrypt(&first)?)
+            out.push_str(&self.polybius.decrypt(&first)?)
         }
         Ok(out)
     }
@@ -65,7 +65,7 @@ impl Cipher for Trifid {
         for block in vector.chunks(self.block_size).map(|x| x.to_vec()) {
             // Turn the block into a String then encrypt it with the Polybius cipher
             let clip: String = block.iter().collect();
-            let poly: String = self.cube.encrypt(&clip)?;
+            let poly: String = self.polybius.encrypt(&clip)?;
 
             dbg!(&clip);
 
@@ -82,14 +82,14 @@ impl Cipher for Trifid {
             }
 
             // Decrypt the result and push it onto the output string
-            out.push_str(&self.cube.decrypt(&sorted)?)
+            out.push_str(&self.polybius.decrypt(&sorted)?)
         }
         Ok(out)
     }
 
     fn randomize(&mut self, rng: &mut rand::prelude::StdRng) {
         self.block_size = rng.gen_range(3..=30);
-        self.cube.randomize(rng)
+        self.polybius.randomize(rng)
     }
 
     fn reset(&mut self) {
