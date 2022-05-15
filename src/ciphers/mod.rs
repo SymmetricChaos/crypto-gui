@@ -80,8 +80,8 @@ pub use two_square::TwoSquare;
 pub mod four_square;
 pub use four_square::FourSquare;
 
-// pub mod hutton;
-// pub use hutton::Hutton;
+pub mod hutton;
+pub use hutton::Hutton;
 
 // pub mod route;
 // pub use route::Route;

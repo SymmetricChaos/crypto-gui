@@ -73,13 +73,13 @@ impl Slidefair {
         let left_index = self.alphabet.get_pos_of(left).unwrap();
         let right_index = self
             .alphabet
-            .get_pos_of_offset(right, slide as i32)
+            .get_pos_offset(right, slide as i32)
             .unwrap();
 
         output.push(self.alphabet.get_char_at(right_index).unwrap());
         output.push(
             self.alphabet
-                .get_char_at_offset(left_index, slide as i32)
+                .get_char_offset(left_index, slide as i32)
                 .unwrap(),
         );
     }
@@ -88,13 +88,13 @@ impl Slidefair {
         let left_index = self.alphabet.get_pos_of(left).unwrap();
         let right_index = self
             .alphabet
-            .get_pos_of_offset(right, slide as i32)
+            .get_pos_offset(right, slide as i32)
             .unwrap();
 
         output.push(self.alphabet.get_char_at(right_index).unwrap());
         output.push(
             self.alphabet
-                .get_char_at_offset(left_index, slide as i32)
+                .get_char_offset(left_index, slide as i32)
                 .unwrap(),
         );
     }

@@ -15,6 +15,15 @@ impl VecString {
         self.0.len()
     }
 
+    // Constructor methods
+    pub fn new() -> Self {
+        VecString(VecDeque::new())
+    }
+
+    pub fn with_capacity(n: usize) -> Self {
+        VecString(VecDeque::with_capacity(n))
+    }
+
     ////////////////////
     // getter methods //
     ////////////////////
@@ -115,6 +124,32 @@ impl VecString {
         }
     }
 
+    // push and pop
+    pub fn push(&mut self, val: char) {
+        self.0.push_back(val)
+    }
+
+    pub fn push_front(&mut self, val: char) {
+        self.0.push_front(val)
+    }
+
+    pub fn push_back(&mut self, val: char) {
+        self.0.push_back(val)
+    }
+
+    pub fn pop(&mut self) -> Option<char> {
+        self.0.pop_back()
+    }
+
+    pub fn pop_front(&mut self) ->  Option<char> {
+        self.0.pop_front()
+    }
+
+    pub fn pop_back(&mut self) -> Option<char> {
+        self.0.pop_back()
+    }
+
+    // insert and delete
     pub fn insert(&mut self, index: usize, val: char) {
         self.0.insert(index, val)
     }
@@ -146,6 +181,8 @@ impl VecString {
     }
 }
 
+
+// Indexing Traits
 impl Index<usize> for VecString {
     type Output = char;
 
@@ -160,15 +197,31 @@ impl IndexMut<usize> for VecString {
     }
 }
 
+
+
+// Display
 impl Display for VecString {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.to_string())
     }
 }
 
+
+
+// Lots of From<_> Traits
 impl From<VecString> for String {
     fn from(vstr: VecString) -> Self {
         vstr.to_string()
+    }
+}
+
+impl FromIterator<char> for VecString {
+    fn from_iter<I: IntoIterator<Item=char>>(iter: I) -> Self {
+        let mut vdq = VecDeque::new();
+        for c in iter {
+            vdq.push_back(c)
+        }
+        VecString(vdq)
     }
 }
 

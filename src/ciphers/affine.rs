@@ -19,7 +19,7 @@ impl Affine {
         pos *= self.mul_key;
         pos += self.add_key;
         pos %= self.alphabet_len();
-        self.alphabet.chars().nth(pos).unwrap()
+        self.alphabet.get_char_at(pos).unwrap()
     }
 
     fn decrypt_char(&self, c: char, mul_key_inv: usize) -> char {
@@ -27,7 +27,7 @@ impl Affine {
         pos += self.alphabet_len() - self.add_key;
         pos *= mul_key_inv;
         pos %= self.alphabet_len();
-        self.alphabet.chars().nth(pos).unwrap()
+        self.alphabet.get_char_at(pos).unwrap()
     }
 
     pub fn set_alphabet(&mut self) {

@@ -1,9 +1,6 @@
 use super::{generic_components::*, View};
 use crate::{ciphers::polybius::Trifid, egui_aux::mono};
-use eframe::{
-    egui::{RichText, Slider, Ui},
-    epaint::Color32,
-};
+use eframe::egui::{Slider, Ui};
 use rand::prelude::StdRng;
 
 impl View for Trifid {
@@ -22,14 +19,6 @@ impl View for Trifid {
                 Err(e) => *errors = e.to_string(),
             }
         }
-
-        ui.add_space(10.0);
-        ui.label(
-            RichText::new(self.polybius.alphabet())
-                .monospace()
-                .background_color(Color32::BLACK),
-        );
-        ui.add_space(16.0);
 
         ui.label("Key Word");
         if control_string(ui, &mut self.polybius.key_word).changed() {

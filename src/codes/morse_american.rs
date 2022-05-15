@@ -160,7 +160,7 @@ impl MorseAmerican {
 impl Default for MorseAmerican {
     fn default() -> Self {
         Self {
-            mode: MorseMode::DitDah,
+            mode: MorseMode::Binary,
         }
     }
 }

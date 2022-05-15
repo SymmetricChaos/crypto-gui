@@ -39,7 +39,7 @@ impl Beaufort {
         } else {
             let key: Vec<usize> = self.key_words[0]
                 .chars()
-                .map(|x| self.alphabet.chars().position(|c| c == x).unwrap())
+                .map(|x| self.alphabet.get_pos_of(x).unwrap())
                 .collect();
             key.into_iter()
         }
@@ -119,7 +119,7 @@ impl Beaufort {
 
     // The Beaufort cipher is reciprocal so no decrypt methods are needed
     fn encrypt_char(&self, t: usize, k: usize) -> char {
-        self.alphabet.get_char_at_offset(k, -(t as i32)).unwrap()
+        self.alphabet.get_char_offset(k, -(t as i32)).unwrap()
     }
 
     fn encrypt_cyclic(&self, text: &str) -> Result<String, CipherError> {
@@ -157,7 +157,7 @@ impl Beaufort {
             let k = akey.pop_front().unwrap();
             let ptxt_char = self.encrypt_char(n, k);
             out.push(ptxt_char);
-            let new_key_val = self.alphabet.chars().position(|x| x == ptxt_char).unwrap();
+            let new_key_val = self.alphabet.get_pos_of(ptxt_char).unwrap();
             akey.push_back(new_key_val);
         }
         Ok(out)
@@ -166,7 +166,7 @@ impl Beaufort {
     fn encrypt_prog(&self, text: &str) -> Result<String, CipherError> {
         let text_nums: Vec<usize> = text
             .chars()
-            .map(|x| self.alphabet.chars().position(|c| c == x).unwrap())
+            .map(|x| self.alphabet.get_pos_of(x).unwrap())
             .collect();
         let mut out = String::with_capacity(text_nums.len());
 
@@ -188,7 +188,7 @@ impl Beaufort {
         let alpha_len = self.alphabet_len();
         let text_nums: Vec<usize> = text
             .chars()
-            .map(|x| self.alphabet.chars().position(|c| c == x).unwrap())
+            .map(|x| self.alphabet.get_pos_of(x).unwrap())
             .collect();
         let mut out = String::with_capacity(text_nums.len());
 

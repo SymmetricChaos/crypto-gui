@@ -172,7 +172,7 @@ impl MorseITU {
 impl Default for MorseITU {
     fn default() -> Self {
         Self {
-            mode: MorseMode::DitDah,
+            mode: MorseMode::Binary,
         }
     }
 }

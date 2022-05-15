@@ -106,9 +106,9 @@ impl PolybiusCube {
     }
 
     fn position_to_char(&self, position: (char, char, char)) -> char {
-        let x = self.labels.chars().position(|c| c == position.0).unwrap();
-        let y = self.labels.chars().position(|c| c == position.1).unwrap();
-        let z = self.labels.chars().position(|c| c == position.2).unwrap();
+        let x = self.labels.get_pos_of(position.0).unwrap();
+        let y = self.labels.get_pos_of(position.1).unwrap();
+        let z = self.labels.get_pos_of(position.2).unwrap();
 
         let l = self.side_len;
         let num = x * (l * l) + y * l + z;
@@ -180,9 +180,9 @@ impl Cipher for PolybiusCube {
 
         for c in text.chars() {
             let pos = self.char_to_position(c)?;
-            out.push(self.labels.chars().nth(pos.0).unwrap());
-            out.push(self.labels.chars().nth(pos.1).unwrap());
-            out.push(self.labels.chars().nth(pos.2).unwrap());
+            out.push(self.labels.get_char_at(pos.0).unwrap());
+            out.push(self.labels.get_char_at(pos.1).unwrap());
+            out.push(self.labels.get_char_at(pos.2).unwrap());
         }
         Ok(out)
     }

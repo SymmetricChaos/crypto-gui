@@ -1,7 +1,5 @@
 use rand::Rng;
-
 use crate::{ciphers::Cipher, errors::CipherError};
-
 use super::PolybiusCube;
 
 fn is_power_of_three(a: usize) -> bool {

@@ -24,14 +24,14 @@ impl Alberti {
     fn encrypt_char(&self, symbol: char, index: usize) -> char {
         let position = self.fixed_alphabet.get_pos_of(symbol).unwrap();
         self.moving_alphabet
-            .get_char_at_offset(position, index as i32)
+            .get_char_offset(position, index as i32)
             .unwrap()
     }
 
     fn decrypt_char(&self, symbol: char, index: usize) -> char {
         let position = self.moving_alphabet.get_pos_of(symbol).unwrap();
         self.fixed_alphabet
-            .get_char_at_offset(position, -(index as i32))
+            .get_char_offset(position, -(index as i32))
             .unwrap()
     }
 
