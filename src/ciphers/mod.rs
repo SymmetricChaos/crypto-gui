@@ -26,8 +26,6 @@ pub use alberti_disk::Alberti;
 
 pub mod polybius;
 
-
-
 pub mod m94;
 pub use m94::M94;
 
@@ -39,8 +37,6 @@ pub use beaufort::Beaufort;
 
 pub mod columnar;
 pub use columnar::Columnar;
-
-
 
 pub mod enigma;
 pub use enigma::EnigmaM3;
@@ -56,8 +52,6 @@ pub use bazeries::Bazeries;
 
 pub mod chaocipher;
 pub use chaocipher::Chaocipher;
-
-
 
 pub mod syctale;
 pub use syctale::Scytale;

@@ -1,7 +1,7 @@
-
 use crate::{
+    ciphers::{Cipher, Columnar},
     errors::CipherError,
-    text_aux::PresetAlphabet::*, ciphers::{Columnar, Cipher},
+    text_aux::PresetAlphabet::*,
 };
 use rand::prelude::StdRng;
 

@@ -1,13 +1,10 @@
 use crate::{
+    ciphers::Cipher,
     errors::CipherError,
-    text_aux::{
-        keyed_alphabet, shuffled_str, Alphabet,
-    }, ciphers::Cipher,
+    text_aux::{keyed_alphabet, shuffled_str, Alphabet},
 };
 use itertools::Itertools;
-use num::integer::Roots;
 use rand::prelude::StdRng;
-
 
 pub struct PolybiusCube {
     pub alphabet_string: String,
@@ -22,13 +19,14 @@ impl Default for PolybiusCube {
     fn default() -> Self {
         let alphabet = Alphabet::from("ABCDEFGHIJKLMNOPQRSTUVWXYZ+");
         let labels = Alphabet::from("123456789");
-        Self { 
-            alphabet_string: "ABCDEFGHIJKLMNOPQRSTUVWXYZ+".to_string(), 
-            alphabet, 
+        Self {
+            alphabet_string: "ABCDEFGHIJKLMNOPQRSTUVWXYZ+".to_string(),
+            alphabet,
             labels_string: "123456789".to_string(),
             labels,
-            side_len: 3, 
-            key_word: String::new() }
+            side_len: 3,
+            key_word: String::new(),
+        }
     }
 }
 
@@ -39,7 +37,7 @@ impl PolybiusCube {
 
     pub fn assign_key(&mut self, key_word: &str) {
         self.key_word = key_word.to_string();
-        self.alphabet = Alphabet::from(keyed_alphabet(&self.key_word, &self.alphabet_string));
+        self.set_key();
     }
 
     pub fn set_key(&mut self) {
@@ -48,32 +46,33 @@ impl PolybiusCube {
 
     pub fn assign_labels(&mut self, labels: &str) {
         self.labels_string = labels.to_string();
-        self.labels = Alphabet::from(&self.labels_string);
+        self.set_labels();
     }
 
     pub fn set_labels(&mut self) {
         self.labels = Alphabet::from(&self.labels_string);
     }
 
-    pub fn set_alphabet(&mut self) -> Result<(),CipherError> {
-
+    pub fn set_alphabet(&mut self) -> Result<(), CipherError> {
         let new_alpha_len = self.alphabet_string.chars().count();
 
-        if new_alpha_len > 125 {
-            return Err(CipherError::alphabet("alphabet length currently limited to 125 characters"))
+        if new_alpha_len < 8 {
+            return Err(CipherError::alphabet("alphabet length must be at least 8"));
         }
 
-        // if !is_power_of_three(self.alphabet_string.chars().count()) {
-        //     return Err(CipherError::alphabet("alphabet length must be a power of three to fill the grid"))
-        // }
+        if new_alpha_len > 125 {
+            return Err(CipherError::alphabet(
+                "alphabet length currently limited to 125 characters",
+            ));
+        }
 
         self.alphabet = Alphabet::from(&self.alphabet_string);
-        self.side_len = self.alphabet.len().cbrt();
+        self.side_len = (new_alpha_len as f64).cbrt().ceil() as usize;
 
         Ok(())
     }
 
-    fn triplets(&self, text: &str) -> Result<Vec<(char,char,char)>, CipherError> {
+    fn triplets(&self, text: &str) -> Result<Vec<(char, char, char)>, CipherError> {
         if text.chars().count() % 3 != 0 {
             dbg!(text);
             dbg!(text.chars().count());
@@ -94,16 +93,16 @@ impl PolybiusCube {
         self.alphabet.len()
     }
 
-    fn char_to_position(&self, symbol: char) -> Result<(usize,usize,usize), CipherError> {
+    fn char_to_position(&self, symbol: char) -> Result<(usize, usize, usize), CipherError> {
         let num = match self.alphabet.get_pos_of(symbol) {
             Some(n) => n,
             None => return Err(CipherError::invalid_input_char(symbol)),
         };
         let l = self.side_len;
-        let x = num / (l*l);
+        let x = num / (l * l);
         let y = (num / l) % l;
         let z = num % l;
-        Ok((x,y,z))
+        Ok((x, y, z))
     }
 
     fn position_to_char(&self, position: (char, char, char)) -> char {
@@ -112,56 +111,67 @@ impl PolybiusCube {
         let z = self.labels.chars().position(|c| c == position.2).unwrap();
 
         let l = self.side_len;
-        let num = x*(l*l) + y * l + z;
+        let num = x * (l * l) + y * l + z;
         self.alphabet.get_char_at(num).unwrap()
     }
 
-    fn check_settings(&self) -> Result<(),CipherError> {
+    fn check_settings(&self) -> Result<(), CipherError> {
         if self.labels.len() < self.side_len {
-            return Err(CipherError::key("not enough labels for grid size"))
+            return Err(CipherError::key("not enough labels for grid size"));
         }
         Ok(())
     }
 
     pub fn show_grids(&self) -> [String; 3] {
-		let size = (self.side_len+2) * (self.side_len+1);
+        let size = (self.side_len + 2) * (self.side_len + 1);
         let mut grids = [
             String::with_capacity(size),
             String::with_capacity(size),
             String::with_capacity(size),
         ];
- 
-        let grid_idxs = self.alphabet.chars()
+
+        // We produce a vector of positions and characters.
+        // The infinite cycle of blanks fills out empty spaces.
+        // Without the cycle we'll can be missing contents for the last chunk and panic later on
+        let blanks = " ".chars().cycle();
+        let grid_idxs = self
+            .alphabet
+            .chars()
+            .chain(blanks)
+            .take(self.side_len.pow(3))
             .enumerate()
-            .collect::<Vec<(usize,char)>>();
-        let grid_chars = grid_idxs.chunks(self.side_len*self.side_len).collect_vec();
+            .collect::<Vec<(usize, char)>>();
+        let grid_chunks = grid_idxs
+            .chunks(self.side_len * self.side_len)
+            .collect_vec();
 
-        for (idx,square) in grids.iter_mut().enumerate() {
-
+        for idx in 0..3 {
             // Append x-axis labels
-            square.push_str("  ");
+            grids[idx].push_str("  ");
             for xlab in self.labels.chars().take(self.side_len) {
-                square.push(xlab);
-                square.push(' ');
+                grids[idx].push(xlab);
+                grids[idx].push(' ');
             }
 
             // Append y-axis labels followed by rows
-            for (n, c) in grid_chars[idx] {
+            for (n, c) in grid_chunks[idx] {
                 if n % self.side_len == 0 {
-                    let ylab = self.labels.get_char_at((n / self.side_len) % self.side_len).unwrap_or(' ');
-                    square.push('\n');
-                    square.push(ylab);
-                    square.push(' ')
+                    let ylab = self
+                        .labels
+                        .get_char_at((n / self.side_len) % self.side_len)
+                        .unwrap_or(' ');
+                    grids[idx].push('\n');
+                    grids[idx].push(ylab);
+                    grids[idx].push(' ')
                 }
-                square.push(*c);
-                square.push(' ');
+                grids[idx].push(*c);
+                grids[idx].push(' ');
             }
         }
- 
+
         grids
     }
 }
-
 
 impl Cipher for PolybiusCube {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
@@ -198,12 +208,11 @@ impl Cipher for PolybiusCube {
     }
 }
 
-
 #[cfg(test)]
 mod polybius_cube_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str =  "THEQUICK";
+    const PLAINTEXT: &'static str = "THEQUICK";
     const CIPHERTEXT: &'static str = "122223121313322111212232";
 
     #[test]

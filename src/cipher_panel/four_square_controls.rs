@@ -43,7 +43,6 @@ impl View for FourSquare {
             self.set_key2()
         }
 
-
         // ui.label(RichText::new(format!("Grid\n{}", self)).monospace());
         // ui.add_space(16.0);
 

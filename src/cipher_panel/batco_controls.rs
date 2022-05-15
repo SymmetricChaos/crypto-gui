@@ -12,7 +12,7 @@ impl View for Batco {
         ui.add_space(16.0);
 
         ui.label("Message Key");
-        
+
         ui.horizontal(|ui| {
             ui.monospace(format!("{}", self.message_number_to_char()));
             ui.add(

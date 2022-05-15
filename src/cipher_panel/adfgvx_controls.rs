@@ -2,7 +2,7 @@ use eframe::egui::{RichText, TextEdit, Ui};
 use rand::prelude::StdRng;
 
 use super::{generic_components::*, View};
-use crate::{text_aux::PresetAlphabet::*, ciphers::polybius::Adfgvx};
+use crate::{ciphers::polybius::Adfgvx, text_aux::PresetAlphabet::*};
 
 impl View for Adfgvx {
     fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {

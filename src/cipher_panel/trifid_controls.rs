@@ -19,7 +19,7 @@ impl View for Trifid {
         if control_string(ui, &mut self.polybius.alphabet_string).changed() {
             match self.polybius.set_alphabet() {
                 Ok(_) => (),
-                Err(e) => {*errors = e.to_string()},
+                Err(e) => *errors = e.to_string(),
             }
         }
 
@@ -39,11 +39,10 @@ impl View for Trifid {
 
         ui.label("Grid");
         let grids = self.polybius.show_grids();
-        ui.horizontal( |ui| {
+        ui.horizontal(|ui| {
             mono(ui, &grids[0], None);
             mono(ui, &grids[1], None);
             mono(ui, &grids[2], None);
         });
-        
     }
 }

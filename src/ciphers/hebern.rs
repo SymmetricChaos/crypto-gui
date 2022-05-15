@@ -1,31 +1,40 @@
 use std::fmt;
 
-use crate::{text_aux::{PresetAlphabet, Alphabet}, errors::CipherError};
 use super::Cipher;
+use crate::{
+    errors::CipherError,
+    text_aux::{Alphabet, PresetAlphabet},
+};
 
-#[derive(Clone,Debug)]
+#[derive(Clone, Debug)]
 pub struct HebernRotor {
     wiring_rtl: Vec<usize>,
-    wiring_ltr:  Vec<usize>,
+    wiring_ltr: Vec<usize>,
     pub position: usize,
     pub wiring_str: String,
     size: usize,
 }
 
 impl HebernRotor {
-
-    pub fn new(wiring_str: &str, alphabet: &Alphabet) -> Result<HebernRotor,CipherError> {
+    pub fn new(wiring_str: &str, alphabet: &Alphabet) -> Result<HebernRotor, CipherError> {
         let size = wiring_str.chars().count();
         let mut wiring_rtl = vec![0; size];
         let mut wiring_ltr = vec![0; size];
 
-        for (pos, c) in wiring_str
-                .chars().enumerate() {
-            let n = alphabet.get_pos_of(c).ok_or(CipherError::invalid_input_char(c))?;
+        for (pos, c) in wiring_str.chars().enumerate() {
+            let n = alphabet
+                .get_pos_of(c)
+                .ok_or(CipherError::invalid_input_char(c))?;
             wiring_rtl[pos] = n;
-            wiring_ltr[n]   = pos;
+            wiring_ltr[n] = pos;
         }
-        Ok(HebernRotor{ wiring_rtl, wiring_ltr, position: 0, wiring_str: wiring_str.to_string(), size })
+        Ok(HebernRotor {
+            wiring_rtl,
+            wiring_ltr,
+            position: 0,
+            wiring_str: wiring_str.to_string(),
+            size,
+        })
     }
 
     pub fn step(&mut self) {
@@ -35,7 +44,7 @@ impl HebernRotor {
     // We will use and return usize instead of char to avoid constantly converting types
     pub fn rtl(&self, entry: usize) -> usize {
         let inner_position = (self.size + entry + self.position) % self.size;
-        let inner =  self.wiring_rtl[inner_position];
+        let inner = self.wiring_rtl[inner_position];
         (inner + self.size - self.position) % self.size
     }
 
@@ -56,9 +65,7 @@ impl fmt::Display for HebernRotor {
     }
 }
 
-
-
-#[derive(Clone,Debug)]
+#[derive(Clone, Debug)]
 pub struct HebernRotorCage {
     pub rotors: Vec<HebernRotor>,
     pub alphabet_string: String,
@@ -68,14 +75,14 @@ pub struct HebernRotorCage {
 }
 
 impl HebernRotorCage {
-
     pub fn control_alphabet(&mut self) -> &mut String {
         self.alphabet = Alphabet::from(&self.alphabet_string);
         &mut self.alphabet_string
     }
 
     pub fn add_rotor(&mut self) {
-        self.rotors.push(HebernRotor::new(&self.alphabet.to_string(), &self.alphabet).unwrap());
+        self.rotors
+            .push(HebernRotor::new(&self.alphabet.to_string(), &self.alphabet).unwrap());
         self.counters.push(0);
     }
 
@@ -91,7 +98,7 @@ impl HebernRotorCage {
             self.rotors[n].step();
             *ctr = (*ctr + 1) % self.rotor_size;
             if *ctr != 0 {
-                break
+                break;
             }
         }
     }
@@ -115,7 +122,6 @@ impl HebernRotorCage {
 
 impl Default for HebernRotorCage {
     fn default() -> Self {
-
         let alphabet_string = String::from(PresetAlphabet::BasicLatin);
         let alphabet = Alphabet::from(&alphabet_string);
 
@@ -127,12 +133,16 @@ impl Default for HebernRotorCage {
         rotors.push(HebernRotor::new("DZFNREAUCYVSKJPXOHLBITWGQM", &alphabet).unwrap());
         rotors.push(HebernRotor::new("CXIZEGVAYWORLQKJPDFNSTBUHM", &alphabet).unwrap());
         rotors.push(HebernRotor::new("BWQZTNLAFPVJGSYIOMEXHUCDRK", &alphabet).unwrap());
-        
-        Self { rotors, alphabet_string, alphabet, counters, rotor_size: 26 }
+
+        Self {
+            rotors,
+            alphabet_string,
+            alphabet,
+            counters,
+            rotor_size: 26,
+        }
     }
 }
-
-
 
 pub struct Hebern {
     pub rotors: HebernRotorCage,
@@ -142,7 +152,7 @@ impl Hebern {
     fn validate_text(&self, text: &str) -> Option<char> {
         for c in text.chars() {
             if !self.rotors.alphabet.contains(c) {
-                return Some(c)
+                return Some(c);
             }
         }
         None
@@ -151,14 +161,16 @@ impl Hebern {
 
 impl Default for Hebern {
     fn default() -> Self {
-        Self { rotors: HebernRotorCage::default() }
+        Self {
+            rotors: HebernRotorCage::default(),
+        }
     }
 }
 
 impl Cipher for Hebern {
-    fn encrypt(&self, text: &str) -> Result<String,CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         if let Some(c) = self.validate_text(text) {
-            return Err(CipherError::invalid_input_char(c))
+            return Err(CipherError::invalid_input_char(c));
         }
         let mut rotors = self.rotors.clone();
         let mut out = String::with_capacity(text.len());
@@ -169,9 +181,9 @@ impl Cipher for Hebern {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String,CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         if let Some(c) = self.validate_text(text) {
-            return Err(CipherError::invalid_input_char(c))
+            return Err(CipherError::invalid_input_char(c));
         }
         let mut rotors = self.rotors.clone();
         let mut out = String::with_capacity(text.len());
@@ -183,7 +195,7 @@ impl Cipher for Hebern {
     }
 
     fn randomize(&mut self, rng: &mut rand::prelude::StdRng) {
-        todo!("{:?}",rng)
+        todo!("{:?}", rng)
     }
 
     fn reset(&mut self) {
@@ -191,12 +203,11 @@ impl Cipher for Hebern {
     }
 }
 
-
 #[cfg(test)]
 mod hebern_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
     const CIPHERTEXT: &'static str = "PHJXRXAVPGSDMLKZFFFGGKFYYMVMLXAYHEP";
 
     #[test]

@@ -2,7 +2,7 @@ use eframe::egui::{Color32, RichText, Ui};
 use rand::prelude::StdRng;
 
 use super::{generic_components::*, View};
-use crate::{ciphers::TwoSquare, text_aux::PresetAlphabet::*, egui_aux::mono};
+use crate::{ciphers::TwoSquare, egui_aux::mono, text_aux::PresetAlphabet::*};
 
 impl View for TwoSquare {
     fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {
@@ -46,7 +46,6 @@ impl View for TwoSquare {
         mono(ui, &self.show_square1(), None);
         ui.add_space(8.0);
         mono(ui, &self.show_square2(), None);
-
 
         // ui.label(RichText::new(format!("Grid\n{}", self)).monospace());
         // ui.add_space(16.0);

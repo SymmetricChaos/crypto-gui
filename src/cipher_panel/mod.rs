@@ -1,5 +1,8 @@
 use self::generic_components::encrypt_decrypt;
-use crate::{cipher_id::CipherID, ciphers::{*, polybius::*}};
+use crate::{
+    cipher_id::CipherID,
+    ciphers::{polybius::*, *},
+};
 use eframe::egui::{self, Color32, RichText, TextEdit, TextStyle};
 use rand::prelude::StdRng;
 
@@ -18,23 +21,23 @@ pub mod columnar_controls;
 pub mod decoder_ring_controls;
 pub mod dryad_controls;
 pub mod enigma_controls;
+pub mod four_square_controls;
 pub mod general_sub_controls;
 pub mod generic_components;
 pub mod grille_controls;
 pub mod m209_controls;
 pub mod m94_controls;
 pub mod playfair_controls;
+pub mod polybius_cube_controls;
 pub mod polybius_square_controls;
 pub mod porta_controls;
 pub mod rail_fence_controls;
 pub mod scytale_controls;
 pub mod sigaba_controls;
 pub mod slidefair_controls;
-pub mod vigenere_controls;
-pub mod four_square_controls;
-pub mod two_square_controls;
-pub mod polybius_cube_controls;
 pub mod trifid_controls;
+pub mod two_square_controls;
+pub mod vigenere_controls;
 
 pub trait View: Cipher {
     fn ui(&mut self, ui: &mut egui::Ui, rng: &mut StdRng, errors: &mut String);
@@ -50,7 +53,11 @@ pub trait View: Cipher {
     ) {
         ui.horizontal(|ui| {
             if ui
-                .button(RichText::from("ENCRYPT").color(Color32::GOLD).background_color(Color32::DARK_GRAY))
+                .button(
+                    RichText::from("ENCRYPT")
+                        .color(Color32::GOLD)
+                        .background_color(Color32::DARK_GRAY),
+                )
                 .clicked()
             {
                 errors.clear();
@@ -60,7 +67,11 @@ pub trait View: Cipher {
                 }
             };
             if ui
-                .button(RichText::from("DECRYPT").color(Color32::GOLD).background_color(Color32::DARK_GRAY))
+                .button(
+                    RichText::from("DECRYPT")
+                        .color(Color32::GOLD)
+                        .background_color(Color32::DARK_GRAY),
+                )
                 .clicked()
             {
                 errors.clear();
@@ -188,7 +199,12 @@ impl CipherControlPanel {
             ui.end_row();
 
             combox_box(
-                &[CipherID::Playfair, CipherID::Slidefair, CipherID::TwoSquare, CipherID::FourSquare],
+                &[
+                    CipherID::Playfair,
+                    CipherID::Slidefair,
+                    CipherID::TwoSquare,
+                    CipherID::FourSquare,
+                ],
                 "Playfair",
                 active_cipher,
                 ui,
@@ -201,25 +217,24 @@ impl CipherControlPanel {
                 ui,
             );
 
-            combox_box(&[
-                CipherID::Polybius,
-                CipherID::PolybiusCube,
-                CipherID::Adfgvx, 
-                CipherID::B64, 
-                CipherID::Bifid,
-                CipherID::Trifid,
-                CipherID::Checkerboard
-                ], 
-                "Polybius", 
-                active_cipher, 
-                ui
+            combox_box(
+                &[
+                    CipherID::Polybius,
+                    CipherID::PolybiusCube,
+                    CipherID::Adfgvx,
+                    CipherID::B64,
+                    CipherID::Bifid,
+                    CipherID::Trifid,
+                    CipherID::Checkerboard,
+                ],
+                "Polybius",
+                active_cipher,
+                ui,
             );
-            
-            ui.end_row();
 
             combox_box(
-                &[CipherID::Chaocipher, CipherID::Hutton, CipherID::Quagmire],
-                "Mutating Alphabet",
+                &[CipherID::Chaocipher, CipherID::Hutton],
+                "Mutating",
                 active_cipher,
                 ui,
             );
@@ -359,8 +374,12 @@ impl CipherDisplayPanel {
             }
             CipherID::Porta => encrypt_decrypt(ui, &control_panel.porta, input, output, errors),
             CipherID::Dryad => encrypt_decrypt(ui, &control_panel.dryad, input, output, errors),
-            CipherID::FourSquare => encrypt_decrypt(ui, &control_panel.four_square, input, output, errors),
-            CipherID::TwoSquare => encrypt_decrypt(ui, &control_panel.two_square, input, output, errors),
+            CipherID::FourSquare => {
+                encrypt_decrypt(ui, &control_panel.four_square, input, output, errors)
+            }
+            CipherID::TwoSquare => {
+                encrypt_decrypt(ui, &control_panel.two_square, input, output, errors)
+            }
             _ => *errors = String::from("button must be added to DisplayPanel struct"),
         }
 

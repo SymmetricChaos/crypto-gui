@@ -2,8 +2,8 @@ use super::Cipher;
 use crate::{
     errors::CipherError,
     text_aux::{
-        keyed_alphabet, shuffled_str,
-        PresetAlphabet::{self, *}, Alphabet,
+        keyed_alphabet, shuffled_str, Alphabet,
+        PresetAlphabet::{self, *},
     },
 };
 use itertools::Itertools;
@@ -51,7 +51,6 @@ impl FourSquare {
         self.square2 = Alphabet::from(keyed_alphabet(&self.key_word2, &self.alphabet.to_string()));
     }
 
-
     pub fn assign_alphabet(&mut self, mode: PresetAlphabet) {
         match mode {
             BasicLatinNoJ | BasicLatinNoQ | BasicLatinWithDigits | Base64 => {
@@ -76,7 +75,11 @@ impl FourSquare {
             .collect_vec()
     }
 
-    fn char_to_position(&self, symbol: char, alphabet: &Alphabet) -> Result<(usize, usize), CipherError> {
+    fn char_to_position(
+        &self,
+        symbol: char,
+        alphabet: &Alphabet,
+    ) -> Result<(usize, usize), CipherError> {
         let num = match alphabet.get_pos_of(symbol) {
             Some(n) => n,
             None => return Err(CipherError::invalid_input_char(symbol)),
@@ -120,8 +123,8 @@ impl Cipher for FourSquare {
             let lpos = self.char_to_position(l, &self.alphabet)?;
             let rpos = self.char_to_position(r, &self.alphabet)?;
             // Unlike Playfair and Two Square the Four Square cipher has no special cases to handle
-            out.push(self.position_to_char((lpos.0,rpos.1), &self.square1));
-            out.push(self.position_to_char((rpos.0,lpos.1), &self.square2));
+            out.push(self.position_to_char((lpos.0, rpos.1), &self.square1));
+            out.push(self.position_to_char((rpos.0, lpos.1), &self.square2));
         }
         Ok(out)
     }
@@ -130,11 +133,11 @@ impl Cipher for FourSquare {
         let pairs = self.pairs(text);
         let mut out = String::with_capacity(text.len());
         for (l, r) in pairs {
-            let lpos = self.char_to_position(l,&self.square1)?;
-            let rpos = self.char_to_position(r,&self.square2)?;
+            let lpos = self.char_to_position(l, &self.square1)?;
+            let rpos = self.char_to_position(r, &self.square2)?;
             // Unlike Playfair and Two Square the Four Square cipher has no special cases to handle
-            out.push(self.position_to_char((lpos.0,rpos.1), &self.alphabet));
-            out.push(self.position_to_char((rpos.0,lpos.1), &self.alphabet));
+            out.push(self.position_to_char((lpos.0, rpos.1), &self.alphabet));
+            out.push(self.position_to_char((rpos.0, lpos.1), &self.alphabet));
         }
         Ok(out)
     }
@@ -156,7 +159,7 @@ mod four_square_tests {
     use super::*;
 
     // Note the X used as padding
-    const PLAINTEXT: &'static str =  "HELPMEOBIWANKENOBI";
+    const PLAINTEXT: &'static str = "HELPMEOBIWANKENOBI";
     const CIPHERTEXT: &'static str = "FYGMKYHOBXMFKKKIMD";
 
     #[test]

@@ -1,6 +1,6 @@
 use rand::Rng;
 
-use crate::{errors::CipherError, ciphers::Cipher};
+use crate::{ciphers::Cipher, errors::CipherError};
 
 use super::PolybiusCube;
 
@@ -8,7 +8,7 @@ fn is_power_of_three(a: usize) -> bool {
     let mut p = 1;
     while p < a {
         if a == p {
-            return true
+            return true;
         } else {
             p *= 3
         }
@@ -32,17 +32,17 @@ impl Default for Trifid {
 }
 
 impl Trifid {
-    pub fn set_alphabet(&mut self) -> Result<(),CipherError> {
-
+    pub fn set_alphabet(&mut self) -> Result<(), CipherError> {
         let new_alpha_len = self.polybius.alphabet_string.chars().count();
 
         if !is_power_of_three(new_alpha_len) {
-            return Err(CipherError::alphabet("alphabet length must be a power of three to fill the grid"))
+            return Err(CipherError::alphabet(
+                "alphabet length must be a power of three to fill the grid",
+            ));
         }
         self.polybius.set_alphabet()
     }
 }
-
 
 impl Cipher for Trifid {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
@@ -66,7 +66,7 @@ impl Cipher for Trifid {
                     0 => first.push(s),
                     1 => second.push(s),
                     2 => third.push(s),
-                    _ => unreachable!("n % 3 can only be 0, 1, or 2")
+                    _ => unreachable!("n % 3 can only be 0, 1, or 2"),
                 }
             }
             first.push_str(&second);
@@ -126,7 +126,7 @@ impl Cipher for Trifid {
 mod trifid_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
     const CIPHERTEXT: &'static str = "";
 
     #[test]

@@ -93,7 +93,7 @@ impl Cipher for Dryad {
         let mut rng = StdRng::from_entropy();
         for c in text.chars() {
             if !c.is_ascii_digit() {
-                return Err(CipherError::input("DRYAD only encrypts digits"))
+                return Err(CipherError::input("DRYAD only encrypts digits"));
             }
             let n = c.to_digit(10).unwrap() as usize;
             let pos = rng.gen_range(breaks[n]..breaks[n + 1]);

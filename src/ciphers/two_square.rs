@@ -2,8 +2,8 @@ use super::Cipher;
 use crate::{
     errors::CipherError,
     text_aux::{
-        keyed_alphabet, shuffled_str,
-        PresetAlphabet::{self, *}, Alphabet,
+        keyed_alphabet, shuffled_str, Alphabet,
+        PresetAlphabet::{self, *},
     },
 };
 use itertools::Itertools;
@@ -51,7 +51,6 @@ impl TwoSquare {
         self.square2 = Alphabet::from(keyed_alphabet(&self.key_word2, &self.alphabet.to_string()));
     }
 
-
     pub fn assign_alphabet(&mut self, mode: PresetAlphabet) {
         match mode {
             BasicLatinNoJ | BasicLatinNoQ | BasicLatinWithDigits | Base64 => {
@@ -76,7 +75,11 @@ impl TwoSquare {
             .collect_vec()
     }
 
-    fn char_to_position(&self, symbol: char, alphabet: &Alphabet) -> Result<(usize, usize), CipherError> {
+    fn char_to_position(
+        &self,
+        symbol: char,
+        alphabet: &Alphabet,
+    ) -> Result<(usize, usize), CipherError> {
         let num = match alphabet.get_pos_of(symbol) {
             Some(n) => n,
             None => return Err(CipherError::invalid_input_char(symbol)),
@@ -89,14 +92,8 @@ impl TwoSquare {
         alphabet.get_char_at(num).unwrap()
     }
 
-
     // Shift characters according to playfairs method
-    fn encrypt_pair(
-        &self,
-        lpos: (usize, usize),
-        rpos: (usize, usize),
-        output: &mut String,
-    ) {
+    fn encrypt_pair(&self, lpos: (usize, usize), rpos: (usize, usize), output: &mut String) {
         let size = self.grid_side_len;
         let shift = self.grid_side_len + 1;
         // The pairs() function ensures l and r never match so that case is not handled
@@ -110,12 +107,7 @@ impl TwoSquare {
         }
     }
 
-    fn decrypt_pair(
-        &self,
-        lpos: (usize, usize),
-        rpos: (usize, usize),
-        output: &mut String,
-    ) {
+    fn decrypt_pair(&self, lpos: (usize, usize), rpos: (usize, usize), output: &mut String) {
         let size = self.grid_side_len;
         let shift = self.grid_side_len - 1;
         // The pairs() function ensures l and r never match so that case is not handled
@@ -128,7 +120,7 @@ impl TwoSquare {
             output.push(self.position_to_char((rpos.0, lpos.1), &self.square2));
         }
     }
-    
+
     pub fn show_square1(&self) -> String {
         let mut out = String::new();
         for (n, c) in self.square1.chars().enumerate() {
@@ -194,7 +186,7 @@ mod two_square_tests {
     use super::*;
 
     // Note the Q replaced by K and the X used as padding
-    const PLAINTEXT: &'static str =  "THEKUICKBROWNFOXJUMPSOVERTHELAZYDOGX";
+    const PLAINTEXT: &'static str = "THEKUICKBROWNFOXJUMPSOVERTHELAZYDOGX";
     const CIPHERTEXT: &'static str = "RJXEYFLYCDSENFSUHXMPTWVENVHEBBWOFWJT";
 
     #[test]

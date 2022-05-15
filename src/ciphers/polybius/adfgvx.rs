@@ -1,4 +1,8 @@
-use crate::{ciphers::{Columnar, Cipher}, text_aux::PresetAlphabet, errors::CipherError};
+use crate::{
+    ciphers::{Cipher, Columnar},
+    errors::CipherError,
+    text_aux::PresetAlphabet,
+};
 
 use rand::prelude::StdRng;
 

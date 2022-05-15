@@ -1,12 +1,10 @@
 use crate::{
+    ciphers::Cipher,
     errors::CipherError,
-    text_aux::{
-        keyed_alphabet, shuffled_str, Alphabet, PresetAlphabet,
-        PresetAlphabet::*,
-    }, ciphers::Cipher,
+    text_aux::{keyed_alphabet, shuffled_str, Alphabet, PresetAlphabet, PresetAlphabet::*},
 };
 use itertools::Itertools;
-use num::integer::Roots;
+//use num::integer::Roots;
 use rand::prelude::StdRng;
 use std::fmt;
 
@@ -18,7 +16,6 @@ pub struct PolybiusSquare {
     side_len: usize,
     pub key_word: String,
 }
-
 
 impl Default for PolybiusSquare {
     fn default() -> Self {
@@ -33,9 +30,7 @@ impl Default for PolybiusSquare {
     }
 }
 
-
 impl PolybiusSquare {
-
     pub fn assign_key(&mut self, key_word: &str) {
         self.key_word = key_word.to_string();
         self.grid = Alphabet::from(keyed_alphabet(&self.key_word, &self.alphabet_string));
@@ -50,22 +45,23 @@ impl PolybiusSquare {
             BasicLatinNoJ | BasicLatinNoQ | BasicLatinWithDigits | Base64 => {
                 self.alphabet_string = String::from(mode);
                 self.grid = Alphabet::from(mode);
-                self.side_len = mode.len().sqrt();
+                self.side_len = (mode.len() as f64).sqrt().ceil() as usize;
             }
             _ => (),
         }
     }
 
-    pub fn set_alphabet(&mut self) -> Result<(),CipherError> {
-
+    pub fn set_alphabet(&mut self) -> Result<(), CipherError> {
         let new_alpha_len = self.alphabet_string.chars().count();
 
         if new_alpha_len > 100 {
-            return Err(CipherError::alphabet("alphabet length currently limited to 100 characters"))
+            return Err(CipherError::alphabet(
+                "alphabet length currently limited to 100 characters",
+            ));
         }
 
         self.grid = Alphabet::from(&self.alphabet_string);
-        self.side_len = new_alpha_len.sqrt();
+        self.side_len = (new_alpha_len as f64).sqrt().ceil() as usize;
 
         Ok(())
     }
@@ -116,18 +112,23 @@ impl PolybiusSquare {
         self.alphabet_string.chars().nth(num).unwrap()
     }
 
-    fn check_settings(&self) -> Result<(),CipherError> {
+    fn check_settings(&self) -> Result<(), CipherError> {
         if self.labels.len() < self.side_len {
-            return Err(CipherError::key("not enough labels for grid size"))
+            return Err(CipherError::key("not enough labels for grid size"));
         }
         Ok(())
     }
 
     pub fn show_grid(&self) -> String {
-        let mut square = String::from("  ");
+        let size = (self.side_len + 2) * (self.side_len + 1);
+        let mut square = String::with_capacity(size);
+        square.push_str("  ");
+
         for xlab in self.labels.chars().take(self.side_len) {
-            square.push_str(&format!("{xlab} "))
+            square.push(xlab);
+            square.push(' ');
         }
+
         for (n, c) in self.grid.chars().enumerate() {
             if n % self.side_len == 0 {
                 let ylab = self.labels.get_char_at(n / self.side_len).unwrap_or(' ');

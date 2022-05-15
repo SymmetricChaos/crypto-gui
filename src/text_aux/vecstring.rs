@@ -14,7 +14,7 @@ impl VecString {
     pub fn len(&self) -> usize {
         self.0.len()
     }
- 
+
     ////////////////////
     // getter methods //
     ////////////////////
@@ -22,55 +22,55 @@ impl VecString {
     pub fn get_char(&self, n: usize) -> Option<char> {
         self.0.iter().nth(n).map(|c| *c)
     }
- 
+
     // Get the position of some character
     pub fn get_pos(&self, c: char) -> Option<usize> {
         self.0.iter().position(|x| x == &c)
     }
- 
+
     // Get a mutable reference to the character as some position
     pub fn get_char_mut(&mut self, n: usize) -> Option<&mut char> {
         self.0.iter_mut().nth(n)
     }
- 
+
     // Get a char at a position with some offset
     pub fn get_char_offset(&self, index: usize, offset: i32) -> Option<char> {
         let len = self.len();
         let idx = ((index + len) as i32 + offset) as usize % len;
         self.0.get(idx).map(|c| *c)
     }
- 
+
     // Get a mutable reference to the char at a position with some offset
     pub fn get_char_offset_mut(&mut self, index: usize, offset: i32) -> Option<&mut char> {
         let len = self.len();
         let idx = ((index + len) as i32 + offset) as usize % len;
         self.0.get_mut(idx)
     }
- 
+
     ////////////////////////////////////
     // methods for finding characters //
     ////////////////////////////////////
     pub fn contains(&self, c: char) -> bool {
         self.0.contains(&c)
     }
- 
+
     pub fn get_pos_offset(&self, c: char, offset: i32) -> Option<usize> {
         let shift = (self.len() as i32 - offset) as usize % self.len();
         Some((self.0.iter().position(|x| *x == c)? + shift) % self.len())
     }
- 
+
     pub fn offset_from_char(&self, c: char, offset: i32) -> Option<char> {
         let p = self.get_pos(c)?;
         self.get_char_offset(p, offset)
     }
- 
+
     ////////////////////////
     // conversion methods //
     ////////////////////////
     pub fn to_string(&self) -> String {
         self.0.iter().collect()
     }
- 
+
     pub fn to_string_offset(&self, offset: i32) -> String {
         let shift = (self.len() as i32 + offset) as usize % self.len();
         let mut out = String::with_capacity(self.0.len());
@@ -79,22 +79,22 @@ impl VecString {
         out.push_str(&s[0..shift]);
         out
     }
- 
+
     //////////////////
     // iter methods //
     //////////////////
     pub fn iter(&self) -> Iter<'_, char> {
         self.0.iter()
     }
- 
+
     pub fn iter_mut(&mut self) -> IterMut<'_, char> {
         self.0.iter_mut()
     }
- 
+
     pub fn chars(&self) -> Iter<'_, char> {
         self.0.iter()
     }
- 
+
     ////////////////////////
     // reordering methods //
     ////////////////////////
@@ -102,45 +102,45 @@ impl VecString {
     pub fn rotate_left(&mut self, mid: usize) {
         self.0.rotate_left(mid % self.len())
     }
- 
+
     // mid is reduced modulo self.len() and does not panic
     pub fn rotate_right(&mut self, mid: usize) {
         self.0.rotate_right(mid % self.len())
     }
- 
+
     // does nothing if c does not exist
     pub fn rotate_to(&mut self, c: char) {
         if let Some(start) = self.get_pos(c) {
             self.0.rotate_right(start)
         }
     }
- 
+
     pub fn insert(&mut self, index: usize, val: char) {
         self.0.insert(index, val)
     }
- 
+
     pub fn remove(&mut self, index: usize) -> Option<char> {
         self.0.remove(index)
     }
- 
+
     pub fn sort(&mut self) {
         self.0.make_contiguous().sort()
     }
- 
+
     pub fn shuffle(&mut self, rng: &mut StdRng) {
         self.0.make_contiguous().shuffle(rng)
     }
- 
+
     // Does nothing if either index out of bounds
     pub fn swap_indicies(&mut self, i: usize, j: usize) {
         if i < self.len() && j < self.len() {
             self.0.swap(i, j)
         }
     }
- 
+
     // Does nothing is either character doesn't exist
     pub fn swap_chars(&mut self, a: char, b: char) {
-        if let (Some(i), Some(j)) = (self.get_pos(a),self.get_pos(b)) {
+        if let (Some(i), Some(j)) = (self.get_pos(a), self.get_pos(b)) {
             self.0.swap(i, j)
         }
     }
