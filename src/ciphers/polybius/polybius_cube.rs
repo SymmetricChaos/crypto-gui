@@ -8,17 +8,6 @@ use itertools::Itertools;
 use num::integer::Roots;
 use rand::prelude::StdRng;
 
-fn is_power_of_three(a: usize) -> bool {
-    let mut p = 1;
-    while p < a {
-        if a == p {
-            return true
-        } else {
-            p *= 3
-        }
-    }
-    false
-}
 
 pub struct PolybiusCube {
     pub alphabet_string: String,
@@ -74,9 +63,9 @@ impl PolybiusCube {
             return Err(CipherError::alphabet("alphabet length currently limited to 125 characters"))
         }
 
-        if !is_power_of_three(self.alphabet_string.chars().count()) {
-            return Err(CipherError::alphabet("alphabet length must be a power of three to fill the grid"))
-        }
+        // if !is_power_of_three(self.alphabet_string.chars().count()) {
+        //     return Err(CipherError::alphabet("alphabet length must be a power of three to fill the grid"))
+        // }
 
         self.alphabet = Alphabet::from(&self.alphabet_string);
         self.side_len = self.alphabet.len().cbrt();

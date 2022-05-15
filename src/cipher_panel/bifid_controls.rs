@@ -33,7 +33,7 @@ impl View for Bifid {
 
         ui.add_space(10.0);
         ui.label(
-            RichText::new(self.polybius.alphabet())
+            RichText::new(&self.polybius.alphabet_string)
                 .monospace()
                 .background_color(Color32::BLACK),
         );

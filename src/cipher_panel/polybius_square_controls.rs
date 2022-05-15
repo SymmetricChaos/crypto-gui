@@ -5,11 +5,11 @@ use super::{generic_components::*, View};
 use crate::{text_aux::PresetAlphabet::*, ciphers::polybius::PolybiusSquare, egui_aux::mono};
 
 impl View for PolybiusSquare {
-    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, errors: &mut String) {
         randomize_reset(ui, self, rng);
         ui.add_space(16.0);
 
-        ui.label("Select Alphabet");
+        ui.label("Common Latin Alphabets");
         ui.horizontal(|ui| {
             if ui.button("No Q").clicked() {
                 self.assign_alphabet(BasicLatinNoQ)
@@ -25,9 +25,17 @@ impl View for PolybiusSquare {
             };
         });
 
+        ui.label("Alphabet");
+        if control_string(ui, &mut self.alphabet_string).changed() {
+            match self.set_alphabet() {
+                Ok(_) => (),
+                Err(e) => {*errors = e.to_string()},
+            }
+        }
+
         ui.add_space(10.0);
         ui.label(
-            RichText::new(self.alphabet())
+            RichText::new(&self.alphabet_string)
                 .monospace()
                 .background_color(Color32::BLACK),
         );

@@ -4,6 +4,18 @@ use crate::{errors::CipherError, ciphers::Cipher};
 
 use super::PolybiusCube;
 
+fn is_power_of_three(a: usize) -> bool {
+    let mut p = 1;
+    while p < a {
+        if a == p {
+            return true
+        } else {
+            p *= 3
+        }
+    }
+    false
+}
+
 // The Trifid Cipher combines a Polybius Cube with a simple transposition
 pub struct Trifid {
     pub polybius: PolybiusCube,
@@ -18,6 +30,19 @@ impl Default for Trifid {
         }
     }
 }
+
+impl Trifid {
+    pub fn set_alphabet(&mut self) -> Result<(),CipherError> {
+
+        let new_alpha_len = self.polybius.alphabet_string.chars().count();
+
+        if !is_power_of_three(new_alpha_len) {
+            return Err(CipherError::alphabet("alphabet length must be a power of three to fill the grid"))
+        }
+        self.polybius.set_alphabet()
+    }
+}
+
 
 impl Cipher for Trifid {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
