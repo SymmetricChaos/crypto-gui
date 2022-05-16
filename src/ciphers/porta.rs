@@ -89,3 +89,8 @@ impl Cipher for Porta {
         todo!("{:?}", rng)
     }
 }
+
+// #[cfg(test)]
+// mod porta_tests {
+//     use super::*;
+// }

@@ -8,12 +8,12 @@ pub enum HuttonVer {
 }
 
 pub struct Hutton {
-    version: HuttonVer,
-    alphabet_string: String,
+    pub version: HuttonVer,
+    pub alphabet_string: String,
     alphabet: Alphabet,
-    key_string: String,
+    pub key_string: String,
     keyed_alpha: VecString,
-    password_string: String,
+    pub password_string: String,
     password: Vec<usize>
 }
 
@@ -31,7 +31,8 @@ impl Default for Hutton {
 }
 
 impl Hutton {
-    fn password_values(&self) -> std::iter::Cycle<std::slice::Iter<usize>> {
+    
+    fn password_values_cycle(&self) -> std::iter::Cycle<std::slice::Iter<usize>> {
         self.password.iter().cycle()
     }
     
@@ -58,39 +59,44 @@ impl Cipher for Hutton {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
         let mut out = String::with_capacity(text.len());
         // mutable alphabet for use while function runs
-        let mut keyed_alpha = self.keyed_alpha.clone();
+        let mut inner_alpha = self.keyed_alpha.clone();
+
+        let len = self.alphabet.len();
         
-        for (c, p) in text.chars().zip(self.password_values()) {
+        for (c, p) in text.chars().zip(self.password_values_cycle()) {
             // add the password number to the position of the character in the keyed alphabet
-            let mut value = keyed_alpha.get_pos(c).unwrap() + p;
+            let mut value = inner_alpha.get_pos(c).unwrap() + p;
             // in Version 2 add the plain alphabet position of the first symbol in the keyed alphabet
             if self.version == HuttonVer::V2 {
-                value += self.alphabet.get_pos_of(keyed_alpha.get_char(0).unwrap()).unwrap();
+                value += self.alphabet.get_pos_of(inner_alpha.get_char(0).unwrap()).unwrap();
+                value += 1;
             }
             // reduce modulo alphabet length and push the character at that position in the keyed alphabet to the ciphertext
-            value %= self.alphabet.len();
-            out.push(keyed_alpha.get_char(value).unwrap());
+            value %= len;
+            out.push(inner_alpha.get_char(value).unwrap());
             
-            keyed_alpha.swap_indicies(keyed_alpha.get_pos(c).unwrap(), value);
+            inner_alpha.swap_indicies(inner_alpha.get_pos(c).unwrap(), value);
         }
         Ok(out)
     }
     
     fn decrypt(&self, text: &str) -> Result<String,CipherError> {
         let mut out = String::with_capacity(text.len());
-        let mut keyed_alpha = self.keyed_alpha.clone();
+        let mut inner_alphabet = self.keyed_alpha.clone();
+        let len = self.alphabet.len();
+
         // this offset allows us to avoid dealing with negative numbers
-        // since no more than two subtractions occur we know it will not underflow
         let offset = self.alphabet.len()*2;
-        for (c, p) in text.chars().zip(self.password_values()) {
-            let mut value = offset + self.keyed_alpha.get_pos(c).unwrap() - p;
+        for (c, p) in text.chars().zip(self.password_values_cycle()) {
+            let mut value = offset + inner_alphabet.get_pos(c).unwrap() - p;
             if self.version == HuttonVer::V2 {
-                value -= self.alphabet.get_pos_of(self.keyed_alpha.get_char(0).unwrap()).unwrap();
+                value -= self.alphabet.get_pos_of(inner_alphabet.get_char(0).unwrap()).unwrap();
+                value -= 1;
             }
-            value %= self.alphabet.len();
-            out.push(self.keyed_alpha.get_char(value).unwrap());
+            value %= len;
+            out.push(inner_alphabet.get_char(value).unwrap());
             
-            keyed_alpha.swap_indicies(keyed_alpha.get_pos(c).unwrap(), value);
+            inner_alphabet.swap_indicies(inner_alphabet.get_pos(c).unwrap(), value);
         }
         Ok(out)
     }
@@ -110,22 +116,43 @@ impl Cipher for Hutton {
 mod hutton_tests {
     use super::*;
 
-    // Note Q replaced by K and the X used as padding
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "OLCJUPRMUEZJLFZFFBGEYZVIKBOQNTHYEWR";
+    const PLAINTEXT: &'static str =     "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const CIPHERTEXT_V1: &'static str = "ZLZJUPIMUKVJLFVFFBGZYVVDBVVANEPYEZB";
+    const CIPHERTEXT_V2: &'static str = "KVQPFLIRUTGZEUZEHUNBIYMPBMHLTREMUQU";
 
     #[test]
-    fn encrypt_test() {
+    fn encrypt_test_v1() {
         let mut cipher = Hutton::default();
-        cipher.assign_key("VUVUZELAS");
-        cipher.assign_password("OBSCTACLE");
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        cipher.assign_password("VUVUZELAS");
+        cipher.assign_key("OBSTACLE");
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_V1);
     }
 
-    // #[test]
-    // fn decrypt_test() {
-    //     let mut cipher = Hutton::default();
-    //     cipher.set_key("VUVUZELAS");
-    //     assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
-    // }
+    #[test]
+    fn decrypt_test_v1() {
+        let mut cipher = Hutton::default();
+        cipher.assign_password("VUVUZELAS");
+        cipher.assign_key("OBSTACLE");
+        assert_eq!(cipher.decrypt(CIPHERTEXT_V1).unwrap(), PLAINTEXT);
+    }
+
+
+
+    #[test]
+    fn encrypt_test_v2() {
+        let mut cipher = Hutton::default();
+        cipher.version = HuttonVer::V2;
+        cipher.assign_password("VUVUZELAS");
+        cipher.assign_key("OBSTACLE");
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_V2);
+    }
+
+    #[test]
+    fn decrypt_test_v2() {
+        let mut cipher = Hutton::default();
+        cipher.version = HuttonVer::V2;
+        cipher.assign_password("VUVUZELAS");
+        cipher.assign_key("OBSTACLE");
+        assert_eq!(cipher.decrypt(CIPHERTEXT_V2).unwrap(), PLAINTEXT);
+    }
 }
