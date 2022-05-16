@@ -1,5 +1,5 @@
 use super::{generic_components::*, View};
-use crate::{ciphers::Chaocipher, egui_aux::mono};
+use crate::ciphers::Chaocipher;
 use eframe::egui::Ui;
 use rand::prelude::StdRng;
 
@@ -8,7 +8,13 @@ impl View for Chaocipher {
         randomize_reset(ui, self, rng);
         ui.add_space(16.0);
 
-        mono(ui, &self.left.to_string(), None);
-        mono(ui, &self.right.to_string(), None);
+
+        if control_string(ui, &mut self.left_string).changed() {
+            self.set_left()
+        }
+
+        if control_string(ui, &mut self.right_string).changed() {
+            self.set_right()
+        }
     }
 }

@@ -32,26 +32,39 @@ impl Default for Hutton {
 
 impl Hutton {
     
-    fn password_values_cycle(&self) -> std::iter::Cycle<std::slice::Iter<usize>> {
+    pub fn password_values_cycle(&self) -> std::iter::Cycle<std::slice::Iter<usize>> {
         self.password.iter().cycle()
     }
+
+    pub fn set_alphabet(&mut self) {
+        self.alphabet = Alphabet::from(&self.alphabet_string);
+    }
+
+    pub fn assign_alphabet(&mut self, alphabet: &str) {
+        self.alphabet_string = alphabet.to_string();
+        self.set_alphabet();
+    }
     
-    fn set_password(&mut self) {
+    pub fn set_password(&mut self) {
         self.password = self.password_string.chars().map(|c| self.alphabet.get_pos_of(c).unwrap() + 1).collect();
     }
     
-    fn assign_password(&mut self, password: &str) {
+    pub fn assign_password(&mut self, password: &str) {
         self.password_string = password.to_string();
         self.set_password();
     }
     
-    fn set_key(&mut self) {
+    pub fn set_key(&mut self) {
         self.keyed_alpha = VecString::from(keyed_alphabet(&self.key_string, &self.alphabet_string));
     }
     
-    fn assign_key(&mut self, key: &str) {
+    pub fn assign_key(&mut self, key: &str) {
         self.key_string = key.to_string();
         self.set_key();
+    }
+
+    pub fn keyed_alphabet(&self) -> String {
+        self.keyed_alpha.to_string()
     }
 }
 

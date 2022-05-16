@@ -4,8 +4,10 @@ use crate::text_aux::vecstring::VecString;
 use super::Cipher;
 
 pub struct Chaocipher {
-    pub left: VecString,
-    pub right: VecString,
+    pub left_string: String,
+    left: VecString,
+    pub right_string: String,
+    right: VecString,
 }
 
 impl Chaocipher {
@@ -26,26 +28,34 @@ impl Chaocipher {
         Chaocipher::right_permute(&mut self.right, n);
     }
 
-    pub fn set_left(&mut self, s: &str) {
-        self.left = VecString::from(s)
+    pub fn set_left(&mut self) {
+        self.left = VecString::from(&self.left_string)
     }
 
-    pub fn set_right(&mut self, s: &str) {
-        self.right = VecString::from(s)
+    pub fn set_right(&mut self) {
+        self.right = VecString::from(&self.right_string)
     }
 
-    // pub fn previous_state(&mut self) {
-    //     self.left.replace(self.prev_state.0.clone());
-    //     self.right.replace(self.prev_state.1.clone());
-    // }
+    pub fn assign_left(&mut self, s: &str) {
+        self.left_string = String::from(s);
+        self.set_left();
+    }
+
+    pub fn assign_right(&mut self, s: &str) {
+        self.right_string = String::from(s);
+        self.set_right();
+    }
+
 }
 
 impl Default for Chaocipher {
     fn default() -> Self {
         Chaocipher {
+            
             left: VecString::from("HXUCZVAMDSLKPEFJRIGTWOBNYQ"),
             right: VecString::from("PTLNBQDEOYSFAVZKGJRIHWXUMC"),
-            //prev_state: (VecString::from(PresetAlphabet::BasicLatin), VecString::from("AZDNBUHYFWJLVGRCQMPSOEXTKI"))
+            left_string: String::from("HXUCZVAMDSLKPEFJRIGTWOBNYQ"),
+            right_string: String::from("PTLNBQDEOYSFAVZKGJRIHWXUMC"),
         }
     }
 }
@@ -96,7 +106,7 @@ mod chaocipher_tests {
     // http://www.chaocipher.com/ActualChaocipher/Chaocipher-Revealed-Algorithm.pdf
     use super::*;
 
-    const PLAINTEXT: &'static str = "WELLDONEISBETTERTHANWELLSAID";
+    const PLAINTEXT: &'static str =  "WELLDONEISBETTERTHANWELLSAID";
     const CIPHERTEXT: &'static str = "OAHQHCNYNXTSZJRRHJBYHQKSOUJY";
 
     #[test]

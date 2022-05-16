@@ -13,7 +13,7 @@ impl View for Alberti {
             self.set_fixed_alphabet()
         }
 
-        ui.label("Fixed Alphabet");
+        ui.label("Moving Alphabet");
         if control_string(ui, &mut self.moving_alphabet_string).changed() {
             self.set_moving_alphabet()
         }

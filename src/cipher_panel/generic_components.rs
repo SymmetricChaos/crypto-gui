@@ -61,8 +61,7 @@ pub fn control_string(ui: &mut egui::Ui, string: &mut String) -> egui::Response 
 
 pub fn input_alphabet(ui: &mut egui::Ui, alphabet: &mut String) {
     ui.label("Alphabet");
-    ui.add(egui::TextEdit::singleline(alphabet).font(TextStyle::Monospace))
-        .on_hover_text("You can change this alphabet to whatever you like.");
+    ui.add(egui::TextEdit::singleline(alphabet).font(TextStyle::Monospace));
 }
 
 pub fn text_edit(ui: &mut egui::Ui, text: &mut String) {

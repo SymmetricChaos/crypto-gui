@@ -38,6 +38,7 @@ pub mod slidefair_controls;
 pub mod trifid_controls;
 pub mod two_square_controls;
 pub mod vigenere_controls;
+pub mod hutton_controls;
 
 pub trait View: Cipher {
     fn ui(&mut self, ui: &mut egui::Ui, rng: &mut StdRng, errors: &mut String);
@@ -134,9 +135,10 @@ pub struct CipherControlPanel {
     b64: B64,
     bifid: Bifid,
     trifid: Trifid,
+    checkerboard: StraddlingCheckerboard,
 
     chaocipher: Chaocipher,
-    checkerboard: StraddlingCheckerboard,
+    hutton: Hutton,
 
     batco: Batco,
     dryad: Dryad,
@@ -171,6 +173,7 @@ impl CipherControlPanel {
                     CipherID::Alberti,
                     CipherID::Bazeries,
                     CipherID::Porta,
+                    CipherID::Quagmire,
                 ],
                 "Polyalphabetic",
                 active_cipher,
@@ -286,6 +289,7 @@ impl CipherControlPanel {
             CipherID::Dryad => self.dryad.ui(ui, rng, errors),
             CipherID::FourSquare => self.four_square.ui(ui, rng, errors),
             CipherID::TwoSquare => self.two_square.ui(ui, rng, errors),
+            CipherID::Hutton => self.hutton.ui(ui, rng, errors),
             _ => {
                 ui.label("IN PROGRESS");
             }
@@ -379,6 +383,9 @@ impl CipherDisplayPanel {
             }
             CipherID::TwoSquare => {
                 encrypt_decrypt(ui, &control_panel.two_square, input, output, errors)
+            }
+            CipherID::Hutton => {
+                encrypt_decrypt(ui, &control_panel.hutton, input, output, errors)
             }
             _ => *errors = String::from("button must be added to DisplayPanel struct"),
         }
