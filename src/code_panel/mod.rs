@@ -14,7 +14,7 @@ pub mod spelling_alphabet_controls;
 pub mod unary_controls;
 
 pub trait View {
-    fn ui(&mut self, ui: &mut egui::Ui);
+    fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, _output: &mut String, _errors: &mut String);
 }
 
 fn combox_box(
@@ -46,7 +46,12 @@ pub struct CodeControlPanel {
 }
 
 impl CodeControlPanel {
-    pub fn ui(&mut self, ui: &mut egui::Ui, active_code: &mut CodeID) {
+    pub fn ui(&mut self, 
+        ui: &mut egui::Ui, 
+        active_code: &mut CodeID, 
+        input: &mut String,
+        output: &mut String,
+        errors: &mut String,) {
         egui::Grid::new("comboboxes").show(ui, |ui| {
             combox_box(
                 &[
@@ -88,14 +93,14 @@ impl CodeControlPanel {
         ui.add_space(16.0);
 
         match active_code {
-            CodeID::Ascii => self.ascii.ui(ui),
-            CodeID::Base64 => self.base64.ui(ui),
-            CodeID::MorseITU => self.morse_itu.ui(ui),
-            CodeID::Godel => self.godel.ui(ui),
-            CodeID::Fibonacci => self.fibonacci.ui(ui),
-            CodeID::MorseAmerican => self.morse_american.ui(ui),
-            CodeID::Unary => self.unary.ui(ui),
-            CodeID::SpellingAlphabet => self.spelling_alphabet.ui(ui),
+            CodeID::Ascii => self.ascii.ui(ui, input, output, errors),
+            CodeID::Base64 => self.base64.ui(ui, input, output, errors),
+            CodeID::MorseITU => self.morse_itu.ui(ui, input, output, errors),
+            CodeID::Godel => self.godel.ui(ui, input, output, errors),
+            CodeID::Fibonacci => self.fibonacci.ui(ui, input, output, errors),
+            CodeID::MorseAmerican => self.morse_american.ui(ui, input, output, errors),
+            CodeID::Unary => self.unary.ui(ui, input, output, errors),
+            CodeID::SpellingAlphabet => self.spelling_alphabet.ui(ui, input, output, errors),
             _ => {
                 ui.label("IN PROGRESS");
             }

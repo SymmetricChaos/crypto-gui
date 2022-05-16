@@ -91,7 +91,7 @@ impl ClassicCrypto {
             });
         CentralPanel::default().show(ctx, |ui| {
             ScrollArea::vertical().show(ui, |ui| {
-                self.code_control_panel.ui(ui, &mut self.active_code)
+                self.code_control_panel.ui(ui, &mut self.active_code, &mut self.input, &mut self.output, &mut self. errors)
             });
         });
     }

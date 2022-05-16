@@ -6,7 +6,7 @@ use crate::codes::{
 };
 
 impl View for Ascii {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui) {
+    fn ui(&mut self, ui: &mut eframe::egui::Ui, _input: &mut String, _output: &mut String, _errors: &mut String) {
         ui.horizontal(|ui| {
             ui.selectable_value(&mut self.mode, EightBit, "8-Bit");
             ui.selectable_value(&mut self.mode, SevenBit, "7-Bit");
