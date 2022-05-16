@@ -56,17 +56,16 @@ impl Dryad {
         (self.message_key + 65) as char
     }
 
-    pub fn seed_string_to_seed(&mut self) -> Result<(), ParseIntError> {
-        let n = self.seed_string.parse::<u64>()?;
-        self.seed = n;
-        Ok(())
-    }
-
-    pub fn randomize_seeded(&mut self) {
+    pub fn randomize_seeded(&mut self) -> Result<(), ParseIntError> {
+        self.seed = self.seed_string.parse::<u64>()?;
+        
+        let rng = &mut StdRng::seed_from_u64(self.seed);
         let alpha = PresetAlphabet::BasicLatin.slice();
         for row in self.cipher_rows.iter_mut() {
-            *row = shuffled_str(alpha, &mut StdRng::seed_from_u64(self.seed))
+            *row = shuffled_str(alpha, rng)
         }
+
+        Ok(())
     }
 
     pub fn show_code_page(&self) -> String {

@@ -32,13 +32,16 @@ impl View for Batco {
         });
 
         ui.add_space(16.0);
-        if ui.button("Randomize from Seed").clicked() {
-            match self.randomize_seeded() {
-                Ok(_) => (),
-                Err(e) => *errors = e.to_string(),
+        ui.horizontal(|ui| {
+            if ui.button("Randomize from Seed").clicked() {
+                match self.randomize_seeded() {
+                    Ok(_) => (),
+                    Err(e) => *errors = e.to_string(),
+                }
             }
-        }
-        ui.text_edit_singleline(&mut self.seed_string);
+            ui.text_edit_singleline(&mut self.seed_string);
+        });
+
 
         mono(ui, &self.show_code_page(), None);
     }
