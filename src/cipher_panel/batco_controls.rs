@@ -1,6 +1,6 @@
 use super::{generic_components::*, View};
 use crate::{
-    ciphers::{Batco, Cipher},
+    ciphers::tactical::Batco,
     egui_aux::mono,
 };
 use eframe::egui::{Slider, Ui};
@@ -32,26 +32,13 @@ impl View for Batco {
         });
 
         ui.add_space(16.0);
-
-        if ui.button("Use Seed").clicked() {
-            if self.seed.is_none() {
-                self.seed = Some(0)
-            } else {
-                self.seed = None
+        if ui.button("Randomize from Seed").clicked() {
+            match self.randomize_seeded() {
+                Ok(_) => (),
+                Err(e) => *errors = e.to_string(),
             }
         }
-
-        if self.seed.is_some() {
-            if ui.text_edit_singleline(&mut self.seed_string).changed() {
-                let r = self.seed_string_to_seed();
-                if r.is_err() {
-                    errors.push_str(&r.unwrap_err().to_string())
-                } else {
-                    self.randomize(rng);
-                    errors.clear()
-                }
-            };
-        }
+        ui.text_edit_singleline(&mut self.seed_string);
 
         mono(ui, &self.show_code_page(), None);
     }

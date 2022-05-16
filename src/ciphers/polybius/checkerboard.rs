@@ -2,8 +2,7 @@ use std::char;
 
 use rand::prelude::SliceRandom;
 
-use super::Cipher;
-use crate::{errors::CipherError, text_aux::keyed_alphabet};
+use crate::{errors::CipherError, text_aux::keyed_alphabet, ciphers::Cipher};
 
 // Use this to fill partial inputs for the interface
 const CHECKERBOARD_ALPHABET: &'static str = "ABCDEFGHIJKLM/NOPQRSTUVWXYZ.";

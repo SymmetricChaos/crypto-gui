@@ -1,7 +1,7 @@
 use self::generic_components::encrypt_decrypt;
 use crate::{
     cipher_id::CipherID,
-    ciphers::{polybius::*, *},
+    ciphers::{polybius::*, *, tactical::*},
 };
 use eframe::egui::{self, Color32, RichText, TextEdit, TextStyle};
 use rand::prelude::StdRng;

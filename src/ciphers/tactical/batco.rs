@@ -3,10 +3,9 @@ use std::num::ParseIntError;
 use itertools::Itertools;
 use rand::{prelude::StdRng, Rng, SeedableRng};
 
-use super::Cipher;
 use crate::{
     errors::CipherError,
-    text_aux::{shuffled_str, PresetAlphabet},
+    text_aux::{shuffled_str, PresetAlphabet}, ciphers::Cipher,
 };
 
 /*
@@ -73,7 +72,7 @@ pub struct Batco {
     pub message_number: u8, // easy conversion with char
     pub message_letter: u8, // easy conversion with char
     pub seed_string: String,
-    pub seed: Option<u64>,
+    pub seed: u64,
 }
 
 impl Default for Batco {
@@ -84,17 +83,12 @@ impl Default for Batco {
             message_number: 0,
             message_letter: 0,
             seed_string: String::from("0"),
-            seed: None,
+            seed: 0,
         }
     }
 }
 
 impl Batco {
-    pub fn seed_string_to_seed(&mut self) -> Result<(), ParseIntError> {
-        let n = self.seed_string.parse::<u64>()?;
-        self.seed = Some(n);
-        Ok(())
-    }
 
     pub fn message_letter_to_char(&self) -> char {
         (self.message_letter + 65) as char
@@ -104,13 +98,10 @@ impl Batco {
         (self.message_number + 50) as char
     }
 
-    fn randomize_seeded(&mut self) {
-        // Setup an RNG, otherwise immediately stop
-        let mut rng = if self.seed.is_some() {
-            StdRng::seed_from_u64(self.seed.unwrap())
-        } else {
-            return ();
-        };
+    pub fn randomize_seeded(&mut self) -> Result<(), ParseIntError> {
+        self.seed = self.seed_string.parse::<u64>()?;
+
+        let mut rng = StdRng::seed_from_u64(self.seed);
 
         let alpha = PresetAlphabet::BasicLatin.slice();
         for row in self.cipher_rows.iter_mut() {
@@ -119,6 +110,7 @@ impl Batco {
         for col in self.key_cols.iter_mut() {
             *col = shuffled_str(alpha, &mut rng)
         }
+        Ok(())
     }
 
     pub fn show_code_page(&self) -> String {
@@ -246,16 +238,12 @@ impl Cipher for Batco {
     }
 
     fn randomize(&mut self, rng: &mut StdRng) {
-        if self.seed.is_some() {
-            self.randomize_seeded()
-        } else {
-            let alpha = PresetAlphabet::BasicLatin.slice();
-            for row in self.cipher_rows.iter_mut() {
-                *row = shuffled_str(alpha, rng)
-            }
-            for col in self.key_cols.iter_mut() {
-                *col = shuffled_str(alpha, rng)
-            }
+        let alpha = PresetAlphabet::BasicLatin.slice();
+        for row in self.cipher_rows.iter_mut() {
+            *row = shuffled_str(alpha, rng)
+        }
+        for col in self.key_cols.iter_mut() {
+            *col = shuffled_str(alpha, rng)
         }
     }
 

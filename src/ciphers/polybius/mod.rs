@@ -15,3 +15,6 @@ pub use bifid::Bifid;
 
 pub mod trifid;
 pub use trifid::Trifid;
+
+pub mod checkerboard;
+pub use checkerboard::StraddlingCheckerboard;

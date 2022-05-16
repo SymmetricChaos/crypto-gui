@@ -1,5 +1,5 @@
 use super::{generic_components::*, View};
-use crate::{ciphers::StraddlingCheckerboard, egui_aux::mono};
+use crate::{egui_aux::mono, ciphers::polybius::StraddlingCheckerboard};
 use eframe::egui::{DragValue, Ui};
 use rand::prelude::StdRng;
 

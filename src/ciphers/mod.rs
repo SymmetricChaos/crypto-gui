@@ -1,3 +1,8 @@
+pub mod polybius;
+pub mod tactical;
+
+
+
 pub mod caesar;
 pub use caesar::Caesar;
 
@@ -24,7 +29,7 @@ pub mod seriated_playfair;
 pub mod alberti_disk;
 pub use alberti_disk::Alberti;
 
-pub mod polybius;
+
 
 pub mod m94;
 pub use m94::M94;
@@ -65,14 +70,7 @@ pub use porta::Porta;
 pub mod hebern;
 pub use hebern::HebernRotor;
 
-pub mod batco;
-pub use batco::Batco;
 
-pub mod checkerboard;
-pub use checkerboard::StraddlingCheckerboard;
-
-pub mod dryad;
-pub use dryad::Dryad;
 
 pub mod two_square;
 pub use two_square::TwoSquare;

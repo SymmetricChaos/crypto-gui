@@ -4,16 +4,14 @@ use rand::{prelude::StdRng, Rng, SeedableRng};
 
 use crate::{
     errors::CipherError,
-    text_aux::{shuffled_str, PresetAlphabet},
+    text_aux::{shuffled_str, PresetAlphabet}, ciphers::Cipher,
 };
-
-use super::Cipher;
 
 pub struct Dryad {
     pub cipher_rows: [String; 25],
     pub message_key: u8, // easy conversion with char
     pub seed_string: String,
-    pub seed: Option<u64>,
+    pub seed: u64,
 }
 
 impl Default for Dryad {
@@ -48,7 +46,7 @@ impl Default for Dryad {
             ],
             message_key: 0,
             seed_string: "0".to_string(),
-            seed: None,
+            seed: 0,
         }
     }
 }
@@ -60,8 +58,15 @@ impl Dryad {
 
     pub fn seed_string_to_seed(&mut self) -> Result<(), ParseIntError> {
         let n = self.seed_string.parse::<u64>()?;
-        self.seed = Some(n);
+        self.seed = n;
         Ok(())
+    }
+
+    pub fn randomize_seeded(&mut self) {
+        let alpha = PresetAlphabet::BasicLatin.slice();
+        for row in self.cipher_rows.iter_mut() {
+            *row = shuffled_str(alpha, &mut StdRng::seed_from_u64(self.seed))
+        }
     }
 
     pub fn show_code_page(&self) -> String {
@@ -131,15 +136,8 @@ impl Cipher for Dryad {
 
     fn randomize(&mut self, rng: &mut StdRng) {
         let alpha = PresetAlphabet::BasicLatin.slice();
-        if self.seed.is_some() {
-            let mut inner_rng = StdRng::seed_from_u64(self.seed.unwrap());
-            for row in self.cipher_rows.iter_mut() {
-                *row = shuffled_str(alpha, &mut inner_rng)
-            }
-        } else {
-            for row in self.cipher_rows.iter_mut() {
-                *row = shuffled_str(alpha, rng)
-            }
+        for row in self.cipher_rows.iter_mut() {
+            *row = shuffled_str(alpha, rng)
         }
     }
 
