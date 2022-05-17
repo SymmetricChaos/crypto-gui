@@ -1,7 +1,7 @@
+use super::Code;
 use crate::errors::CodeError;
 use lazy_static::lazy_static;
 use std::collections::HashMap;
-use super::Code;
 
 const LETTERS: &'static str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ&1234567890,.?!";
 const AMERICAN_MORSE_CODES: [&'static str; 41] = [
@@ -45,11 +45,10 @@ const AMERICAN_MORSE_CODES: [&'static str; 41] = [
     "10111010111",
     "101011101110101",
     "1110101011101",
-    "1110111011101"
+    "1110111011101",
 ];
-    
-lazy_static! {
 
+lazy_static! {
     pub static ref AMERICAN_MORSE_MAP: HashMap<char, &'static str> = {
         let mut m = HashMap::new();
         for (l, c) in LETTERS.chars().zip(AMERICAN_MORSE_CODES.iter()) {
@@ -81,11 +80,10 @@ impl Default for MorseAmerican {
 }
 
 impl MorseAmerican {
-
     pub fn set_line_on(&mut self) {
         todo!("change the line_on symbol")
     }
-    
+
     pub fn set_line_off(&mut self) {
         todo!("change the line_off symbol")
     }
@@ -103,7 +101,6 @@ impl MorseAmerican {
             .map(|(c, s)| (c, *s))
     }
 }
-
 
 impl Code for MorseAmerican {
     fn encode(&self, text: &str) -> Result<String, CodeError> {

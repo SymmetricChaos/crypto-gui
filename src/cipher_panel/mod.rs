@@ -1,7 +1,7 @@
 use self::generic_components::encrypt_decrypt;
 use crate::{
     cipher_id::CipherID,
-    ciphers::{polybius::*, *, tactical::*},
+    ciphers::{polybius::*, tactical::*, *},
 };
 use eframe::egui::{self, Color32, RichText, TextEdit, TextStyle};
 use rand::prelude::StdRng;
@@ -25,6 +25,7 @@ pub mod four_square_controls;
 pub mod general_sub_controls;
 pub mod generic_components;
 pub mod grille_controls;
+pub mod hutton_controls;
 pub mod m209_controls;
 pub mod m94_controls;
 pub mod playfair_controls;
@@ -38,7 +39,6 @@ pub mod slidefair_controls;
 pub mod trifid_controls;
 pub mod two_square_controls;
 pub mod vigenere_controls;
-pub mod hutton_controls;
 
 pub trait View: Cipher {
     fn ui(&mut self, ui: &mut egui::Ui, rng: &mut StdRng, errors: &mut String);
@@ -384,9 +384,7 @@ impl CipherDisplayPanel {
             CipherID::TwoSquare => {
                 encrypt_decrypt(ui, &control_panel.two_square, input, output, errors)
             }
-            CipherID::Hutton => {
-                encrypt_decrypt(ui, &control_panel.hutton, input, output, errors)
-            }
+            CipherID::Hutton => encrypt_decrypt(ui, &control_panel.hutton, input, output, errors),
             _ => *errors = String::from("button must be added to DisplayPanel struct"),
         }
 

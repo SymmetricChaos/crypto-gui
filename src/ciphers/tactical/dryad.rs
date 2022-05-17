@@ -3,8 +3,9 @@ use std::num::ParseIntError;
 use rand::{prelude::StdRng, Rng, SeedableRng};
 
 use crate::{
+    ciphers::Cipher,
     errors::CipherError,
-    text_aux::{shuffled_str, PresetAlphabet}, ciphers::Cipher,
+    text_aux::{shuffled_str, PresetAlphabet},
 };
 
 pub struct Dryad {
@@ -58,7 +59,7 @@ impl Dryad {
 
     pub fn randomize_seeded(&mut self) -> Result<(), ParseIntError> {
         self.seed = self.seed_string.parse::<u64>()?;
-        
+
         let rng = &mut StdRng::seed_from_u64(self.seed);
         let alpha = PresetAlphabet::BasicLatin.slice();
         for row in self.cipher_rows.iter_mut() {

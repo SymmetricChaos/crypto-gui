@@ -1,11 +1,20 @@
 use super::View;
-use crate::{codes::{
-    ascii::AsciiMode::{EightBit, SevenBit},
-    Ascii,
-}, egui_aux::mono_button};
+use crate::{
+    codes::{
+        ascii::AsciiMode::{EightBit, SevenBit},
+        Ascii,
+    },
+    egui_aux::mono_button,
+};
 
 impl View for Ascii {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, _output: &mut String, _errors: &mut String) {
+    fn ui(
+        &mut self,
+        ui: &mut eframe::egui::Ui,
+        input: &mut String,
+        _output: &mut String,
+        _errors: &mut String,
+    ) {
         ui.horizontal(|ui| {
             ui.selectable_value(&mut self.mode, EightBit, "8-Bit");
             ui.selectable_value(&mut self.mode, SevenBit, "7-Bit");
@@ -13,7 +22,6 @@ impl View for Ascii {
         let nrows = 32;
         let ncols = 4;
         ui.columns(ncols, |columns| {
-
             let mut ctr = 0;
             let mut col = 0;
             for (c, code) in self.chars_codes() {

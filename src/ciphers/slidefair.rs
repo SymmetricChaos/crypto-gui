@@ -71,10 +71,7 @@ impl Slidefair {
 
     fn encrypt_pair(&self, left: char, right: char, slide: usize, output: &mut String) {
         let left_index = self.alphabet.get_pos_of(left).unwrap();
-        let right_index = self
-            .alphabet
-            .get_pos_offset(right, slide as i32)
-            .unwrap();
+        let right_index = self.alphabet.get_pos_offset(right, slide as i32).unwrap();
 
         output.push(self.alphabet.get_char_at(right_index).unwrap());
         output.push(
@@ -86,10 +83,7 @@ impl Slidefair {
 
     fn decrypt_pair(&self, left: char, right: char, slide: usize, output: &mut String) {
         let left_index = self.alphabet.get_pos_of(left).unwrap();
-        let right_index = self
-            .alphabet
-            .get_pos_offset(right, slide as i32)
-            .unwrap();
+        let right_index = self.alphabet.get_pos_offset(right, slide as i32).unwrap();
 
         output.push(self.alphabet.get_char_at(right_index).unwrap());
         output.push(

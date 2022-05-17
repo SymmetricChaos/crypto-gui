@@ -1,8 +1,5 @@
 use super::{generic_components::*, View};
-use crate::{
-    ciphers::tactical::Batco,
-    egui_aux::mono,
-};
+use crate::{ciphers::tactical::Batco, egui_aux::mono};
 use eframe::egui::{Slider, Ui};
 use rand::prelude::StdRng;
 
@@ -41,7 +38,6 @@ impl View for Batco {
             }
             ui.text_edit_singleline(&mut self.seed_string);
         });
-
 
         mono(ui, &self.show_code_page(), None);
     }

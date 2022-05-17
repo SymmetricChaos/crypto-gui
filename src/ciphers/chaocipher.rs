@@ -45,13 +45,11 @@ impl Chaocipher {
         self.right_string = String::from(s);
         self.set_right();
     }
-
 }
 
 impl Default for Chaocipher {
     fn default() -> Self {
         Chaocipher {
-            
             left: VecString::from("HXUCZVAMDSLKPEFJRIGTWOBNYQ"),
             right: VecString::from("PTLNBQDEOYSFAVZKGJRIHWXUMC"),
             left_string: String::from("HXUCZVAMDSLKPEFJRIGTWOBNYQ"),
@@ -106,7 +104,7 @@ mod chaocipher_tests {
     // http://www.chaocipher.com/ActualChaocipher/Chaocipher-Revealed-Algorithm.pdf
     use super::*;
 
-    const PLAINTEXT: &'static str =  "WELLDONEISBETTERTHANWELLSAID";
+    const PLAINTEXT: &'static str = "WELLDONEISBETTERTHANWELLSAID";
     const CIPHERTEXT: &'static str = "OAHQHCNYNXTSZJRRHJBYHQKSOUJY";
 
     #[test]

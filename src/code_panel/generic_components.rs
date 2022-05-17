@@ -55,7 +55,6 @@ pub fn fill_code_columns<T: Display, S: Display>(
     });
 }
 
-
 pub fn code_button_columns(
     nrows: usize,
     ncols: usize,
@@ -65,7 +64,6 @@ pub fn code_button_columns(
     iter: Box<dyn Iterator<Item = (char, &str)> + '_>,
 ) {
     ui.columns(ncols, |columns| {
-
         let mut ctr = 0;
         let mut col = 0;
         for (c, code) in iter {

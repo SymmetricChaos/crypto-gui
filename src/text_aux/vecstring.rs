@@ -141,7 +141,7 @@ impl VecString {
         self.0.pop_back()
     }
 
-    pub fn pop_front(&mut self) ->  Option<char> {
+    pub fn pop_front(&mut self) -> Option<char> {
         self.0.pop_front()
     }
 
@@ -181,7 +181,6 @@ impl VecString {
     }
 }
 
-
 // Indexing Traits
 impl Index<usize> for VecString {
     type Output = char;
@@ -197,16 +196,12 @@ impl IndexMut<usize> for VecString {
     }
 }
 
-
-
 // Display
 impl Display for VecString {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.to_string())
     }
 }
-
-
 
 // Lots of From<_> Traits
 impl From<VecString> for String {
@@ -216,7 +211,7 @@ impl From<VecString> for String {
 }
 
 impl FromIterator<char> for VecString {
-    fn from_iter<I: IntoIterator<Item=char>>(iter: I) -> Self {
+    fn from_iter<I: IntoIterator<Item = char>>(iter: I) -> Self {
         let mut vdq = VecDeque::new();
         for c in iter {
             vdq.push_back(c)

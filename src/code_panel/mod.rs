@@ -14,7 +14,13 @@ pub mod spelling_alphabet_controls;
 pub mod unary_controls;
 
 pub trait View {
-    fn ui(&mut self, ui: &mut egui::Ui, input: &mut String, _output: &mut String, _errors: &mut String);
+    fn ui(
+        &mut self,
+        ui: &mut egui::Ui,
+        input: &mut String,
+        _output: &mut String,
+        _errors: &mut String,
+    );
 }
 
 fn combox_box(
@@ -46,12 +52,14 @@ pub struct CodeControlPanel {
 }
 
 impl CodeControlPanel {
-    pub fn ui(&mut self, 
-        ui: &mut egui::Ui, 
-        active_code: &mut CodeID, 
+    pub fn ui(
+        &mut self,
+        ui: &mut egui::Ui,
+        active_code: &mut CodeID,
         input: &mut String,
         output: &mut String,
-        errors: &mut String,) {
+        errors: &mut String,
+    ) {
         egui::Grid::new("comboboxes").show(ui, |ui| {
             combox_box(
                 &[

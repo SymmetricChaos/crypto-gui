@@ -1,8 +1,6 @@
 pub mod polybius;
 pub mod tactical;
 
-
-
 pub mod caesar;
 pub use caesar::Caesar;
 
@@ -28,8 +26,6 @@ pub mod seriated_playfair;
 
 pub mod alberti_disk;
 pub use alberti_disk::Alberti;
-
-
 
 pub mod m94;
 pub use m94::M94;
@@ -69,8 +65,6 @@ pub use porta::Porta;
 
 pub mod hebern;
 pub use hebern::HebernRotor;
-
-
 
 pub mod two_square;
 pub use two_square::TwoSquare;

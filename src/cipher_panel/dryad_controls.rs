@@ -1,8 +1,5 @@
 use super::{generic_components::*, View};
-use crate::{
-    ciphers::tactical::Dryad,
-    egui_aux::mono,
-};
+use crate::{ciphers::tactical::Dryad, egui_aux::mono};
 use eframe::egui::{Slider, Ui};
 use rand::prelude::StdRng;
 
@@ -20,7 +17,6 @@ impl View for Dryad {
                     .show_value(false),
             );
         });
-
 
         ui.add_space(16.0);
         ui.horizontal(|ui| {

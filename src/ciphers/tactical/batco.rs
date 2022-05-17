@@ -4,8 +4,9 @@ use itertools::Itertools;
 use rand::{prelude::StdRng, Rng, SeedableRng};
 
 use crate::{
+    ciphers::Cipher,
     errors::CipherError,
-    text_aux::{shuffled_str, PresetAlphabet}, ciphers::Cipher,
+    text_aux::{shuffled_str, PresetAlphabet},
 };
 
 /*
@@ -89,7 +90,6 @@ impl Default for Batco {
 }
 
 impl Batco {
-
     pub fn message_letter_to_char(&self) -> char {
         (self.message_letter + 65) as char
     }

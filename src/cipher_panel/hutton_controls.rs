@@ -1,5 +1,8 @@
 use super::{generic_components::*, View};
-use crate::{ciphers::{Hutton, hutton::HuttonVer}, egui_aux::mono};
+use crate::{
+    ciphers::{hutton::HuttonVer, Hutton},
+    egui_aux::mono,
+};
 use eframe::egui::Ui;
 use rand::prelude::StdRng;
 

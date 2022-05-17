@@ -8,7 +8,6 @@ impl View for Chaocipher {
         randomize_reset(ui, self, rng);
         ui.add_space(16.0);
 
-
         if control_string(ui, &mut self.left_string).changed() {
             self.set_left()
         }

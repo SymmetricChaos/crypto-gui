@@ -1,6 +1,6 @@
-use rand::Rng;
-use crate::{ciphers::Cipher, errors::CipherError};
 use super::PolybiusCube;
+use crate::{ciphers::Cipher, errors::CipherError};
+use rand::Rng;
 
 fn is_power_of_three(a: usize) -> bool {
     let mut p = 1;
