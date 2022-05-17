@@ -1,13 +1,19 @@
-use crate::{errors::CodeError, text_aux::PresetAlphabet::Ascii128};
+use crate::errors::CodeError;
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 
 use super::Code;
 
-const BAUDOT_LETTERS: &'static str = "\0␍␊ QWERTYUIOPASDFGHJKLZXCVBNM␎\0";
-const BAUDOT_FIGURES: &'static str = "\0␍␊ 1234567890-'␅!&£␇()+/:=?,.\0␏";
+const BAUDOT_LETTERS: &'static str = "␀␍␊ QWERTYUIOPASDFGHJKLZXCVBNM␎\0";
+const BAUDOT_FIGURES: &'static str = "␀␍␊ 1234567890-'␅!&£␇()+/:=?,.\0␏";
+
+pub enum BaudotMode {
+    Letters,
+    Figures
+}
 
 lazy_static! {
+
     pub static ref BAUDOT_CODES: Vec<String> = {
         let mut v = Vec::with_capacity(32);
         for n in 0..32 {
@@ -16,79 +22,93 @@ lazy_static! {
         v
     };
 
-    pub static ref BAUDOT_LETTER_MAP: HashMap<char, &'static String> = {
+
+    pub static ref BAUDOT_LETTER_MAP: HashMap<char, String> = {
         let mut m = HashMap::new();
-        for (letter, code) in Ascii128.chars().zip(EIGHT_BIT_ASCII_CODES.iter()) {
-            m.insert(letter, code);
+        for (letter, code) in BAUDOT_LETTERS.chars().zip(BAUDOT_CODES.iter()) {
+            m.insert(letter, code.clone());
         }
         m
     };
-    pub static ref BAUDOT_LETTER_MAP_INV: HashMap<&'static String, char> = {
+    pub static ref BAUDOT_FIGURE_MAP: HashMap<char, String> = {
         let mut m = HashMap::new();
-        for (letter, code) in Ascii128.chars().zip(EIGHT_BIT_ASCII_CODES.iter()) {
-            m.insert(code, letter);
+        for (letter, code) in BAUDOT_FIGURES.chars().zip(BAUDOT_CODES.iter()) {
+            m.insert(letter, code.clone());
+        }
+        m
+    };
+
+
+    pub static ref BAUDOT_LETTER_MAP_INV: HashMap<String, char> = {
+        let mut m = HashMap::new();
+        for (letter, code) in BAUDOT_LETTERS.chars().zip(BAUDOT_CODES.iter()) {
+            m.insert(code.clone(), letter);
         }
         m
 
     };
-    pub static ref BAUDOT_FIGURE_MAP: HashMap<char, &'static String> = {
+    pub static ref BAUDOT_FIGURE_MAP_INV: HashMap<String, char> = {
         let mut m = HashMap::new();
-        for (letter, code) in Ascii128.chars().zip(EIGHT_BIT_ASCII_CODES.iter()) {
-            m.insert(letter, code);
-        }
-        m
-    };
-    pub static ref BAUDOT_FIGURE_MAP_INV: HashMap<&'static String, char> = {
-        let mut m = HashMap::new();
-        for (letter, code) in Ascii128.chars().zip(EIGHT_BIT_ASCII_CODES.iter()) {
-            m.insert(code, letter);
+        for (letter, code) in BAUDOT_FIGURES.chars().zip(BAUDOT_CODES.iter()) {
+            m.insert(code.clone(), letter);
         }
         m
     };
 }
 
-pub struct Ascii {
-    pub mode: AsciiMode,
-    alphabet: &'static str,
+pub struct Baudot {
+    pub mode: BaudotMode,
 }
 
-impl Ascii {
-    pub fn input_set(&self) -> &'static str {
-        self.alphabet
+impl Baudot {
+    // Baudot codes are always five bits
+    const WIDTH: usize = 5;
+
+    pub fn letters_codes(&self) -> Box<dyn Iterator<Item = (char, &String)> + '_> {
+        Box::new(
+                BAUDOT_LETTERS
+                    .chars()
+                    .map(|x| (x, BAUDOT_LETTER_MAP.get(&x).unwrap())),
+        )
     }
 
-    pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (char, &String)> + '_> {
+    pub fn figures_codes(&self) -> Box<dyn Iterator<Item = (char, &String)> + '_> {
+        Box::new(
+                BAUDOT_FIGURES
+                    .chars()
+                    .map(|x| (x, BAUDOT_FIGURE_MAP.get(&x).unwrap())),
+        )
+    }
+
+    pub fn map(&self, k: &char) -> Option<&String> {
         match self.mode {
-            AsciiMode::SevenBit => Box::new(
-                self.alphabet
-                    .chars()
-                    .map(|x| (x, *ASCII_MAP7.get(&x).unwrap())),
-            ),
-            AsciiMode::EightBit => Box::new(
-                self.alphabet
-                    .chars()
-                    .map(|x| (x, *ASCII_MAP8.get(&x).unwrap())),
-            ),
+            BaudotMode::Letters => BAUDOT_LETTER_MAP.get(k),
+            BaudotMode::Figures => BAUDOT_FIGURE_MAP.get(k),
+        }
+    }
+
+    pub fn map_inv(&self, k: &str) -> Option<&char> {
+        match self.mode {
+            BaudotMode::Letters => BAUDOT_LETTER_MAP_INV.get(k),
+            BaudotMode::Figures => BAUDOT_FIGURE_MAP_INV.get(k),
         }
     }
 }
 
-impl Default for Ascii {
+impl Default for Baudot {
     fn default() -> Self {
-        Ascii {
-            mode: AsciiMode::EightBit,
-            alphabet: Ascii128.slice(),
+        Baudot {
+            mode: BaudotMode::Letters,
         }
     }
 }
 
-impl Code for Ascii {
+impl Code for Baudot {
+
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        let w = self.mode.width();
-        let map = self.mode.map();
-        let mut out = String::with_capacity(text.chars().count() * w);
+        let mut out = String::with_capacity(text.len() * Self::WIDTH);
         for s in text.chars() {
-            match map.get(&s) {
+            match self.map(&s) {
                 Some(code_group) => out.push_str(code_group),
                 None => {
                     return Err(CodeError::Input(format!(
@@ -102,12 +122,11 @@ impl Code for Ascii {
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        let w = self.mode.width();
-        let map_inv = self.mode.map_inv();
-        let mut out = String::with_capacity(text.chars().count() / w);
-        for p in 0..(text.len() / w) {
-            let group = &text[(p * w)..(p * w) + w];
-            match map_inv.get(&group.to_string()) {
+
+        let mut out = String::with_capacity(text.len() / Self::WIDTH);
+        for p in 0..(text.len() / Self::WIDTH) {
+            let group = &text[(p * Self::WIDTH)..(p * Self::WIDTH) + Self::WIDTH];
+            match self.map_inv(&group.to_string()) {
                 Some(code_group) => out.push(*code_group),
                 None => {
                     return Err(CodeError::Input(format!(
@@ -122,21 +141,21 @@ impl Code for Ascii {
 }
 
 #[cfg(test)]
-mod ascii_tests {
+mod baudot_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "0101010001001000010001010101000101010101010010010100001101001011010000100101001001001111010101110100111001000110010011110101100001001010010101010100110101010000010100110100111101010110010001010101001001010100010010000100010101001100010000010101101001011001010001000100111101000111";
+    const CIPHERTEXT: &'static str = "";
 
     #[test]
     fn encrypt_test() {
-        let code = Ascii::default();
+        let code = Baudot::default();
         assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
-        let code = Ascii::default();
+        let code = Baudot::default();
         assert_eq!(code.decode(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

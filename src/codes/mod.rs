@@ -28,6 +28,9 @@ pub use unicode::Unicode;
 pub mod romaji;
 pub use romaji::NihonShiki;
 
+pub mod baudot;
+pub use baudot::Baudot;
+
 pub mod elias;
 
 use crate::errors::CodeError;
