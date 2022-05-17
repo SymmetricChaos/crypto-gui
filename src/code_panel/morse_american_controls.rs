@@ -13,10 +13,7 @@ impl View for MorseAmerican {
             for (c, code) in self.chars_codes() {
                 let pair = format!("{}  {} ", c, code);
                 if mono_button(&mut columns[col], &pair).clicked() {
-                    if !input.is_empty() {
-                        input.push_str("000");
-                    }
-                    input.push_str(code)
+                    input.push(c)
                 }
                 ctr += 1;
                 if ctr % nrows == 0 {
