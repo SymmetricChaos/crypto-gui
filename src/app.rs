@@ -186,37 +186,8 @@ impl epi::App for ClassicCrypto {
                 {
                     self.active_page = Page::About
                 }
-                // No idea why this is giving me an error
-                // ui.selectable_label(&mut self.active_page, Page::Ciphers, "Ciphers");
-                // ui.selectable_label(&mut self.active_page, Page::Codes, "Codes");
-                // ui.selectable_label(&mut self.active_page, Page::About, "About");
-
-                // ui.separator();
-                // if ui.add(Button::new("Alphabets").small() ).clicked() {
-                //     self.show_alphabet_selector = !self.show_alphabet_selector;
-                // }
             });
         });
-
-        // Window::new("Settings")
-        //     .open(&mut self.show_settings)
-        //     .vscroll(true)
-        //     .show(ctx, |ui| {
-        //         ctx.settings_ui(ui);
-        // });
-
-        // Window::new("Alphabet Selector")
-        //     .open(&mut self.show_alphabet_selector)
-        //     .vscroll(true)
-        //     .show(ctx, |ui| {
-        //         ui.label("Click to Copy");
-        //         ui.add_space(16.0);
-        //         for alphabet in [BasicLatin, BasicLatinNoJ, BasicLatinNoQ, BasicLatinWithDigits] {
-        //             if ui.button(String::from(alphabet)).clicked() {
-        //                 ui.output().copied_text = String::from(alphabet);
-        //             };
-        //         }
-        // });
 
         match self.active_page {
             Page::About => self.about_page(ctx),

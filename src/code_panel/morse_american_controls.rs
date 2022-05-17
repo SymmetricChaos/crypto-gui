@@ -1,5 +1,5 @@
 use super::View;
-use crate::codes::MorseAmerican;
+use crate::{codes::MorseAmerican, egui_aux::mono_button};
 
 impl View for MorseAmerican {
     fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, _output: &mut String, _errors: &mut String) {
@@ -12,7 +12,7 @@ impl View for MorseAmerican {
             let mut col = 0;
             for (c, code) in self.chars_codes() {
                 let pair = format!("{}  {} ", c, code);
-                if columns[col].button(&pair).clicked() {
+                if mono_button(&mut columns[col], &pair).clicked() {
                     if !input.is_empty() {
                         input.push_str("000");
                     }

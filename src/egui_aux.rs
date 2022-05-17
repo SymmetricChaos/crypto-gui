@@ -13,3 +13,7 @@ pub fn mono_strong(ui: &mut Ui, text: &str, size: Option<f32>) -> Response {
         None => ui.label(RichText::new(text).monospace().strong()),
     }
 }
+
+pub fn mono_button(ui: &mut Ui, text: &str) -> Response {
+    ui.button(RichText::new(text).monospace())
+}

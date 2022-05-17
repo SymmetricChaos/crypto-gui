@@ -1,12 +1,28 @@
-use super::{generic_components::fill_code_columns, View};
-use crate::codes::MorseITU;
+use super::View;
+use crate::{codes::MorseITU, egui_aux::mono_button};
 
 impl View for MorseITU {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui, _input: &mut String, _output: &mut String, _errors: &mut String) {
-        // ui.horizontal(|ui| {
-        //     ui.selectable_value(&mut self.mode, DitDah, "DitDah");
-        //     ui.selectable_value(&mut self.mode, Binary, "Binary");
-        // });
-        fill_code_columns(20, 3, ui, self.chars_codes());
+    fn ui(&mut self, ui: &mut eframe::egui::Ui, input: &mut String, _output: &mut String, _errors: &mut String) {
+
+        let nrows = 20;
+        let ncols = 3;
+        ui.columns(ncols, |columns| {
+
+            let mut ctr = 0;
+            let mut col = 0;
+            for (c, code) in self.chars_codes() {
+                let pair = format!("{}  {} ", c, code);
+                if mono_button(&mut columns[col], &pair).clicked() {
+                    if !input.is_empty() {
+                        input.push_str("00");
+                    }
+                    input.push_str(code)
+                }
+                ctr += 1;
+                if ctr % nrows == 0 {
+                    col += 1
+                }
+            }
+        });
     }
 }

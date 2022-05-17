@@ -54,3 +54,32 @@ pub fn fill_code_columns<T: Display, S: Display>(
         }
     });
 }
+
+
+pub fn code_button_columns(
+    nrows: usize,
+    ncols: usize,
+    ui: &mut egui::Ui,
+    target: &mut String,
+    space: &str,
+    iter: Box<dyn Iterator<Item = (char, &str)> + '_>,
+) {
+    ui.columns(ncols, |columns| {
+
+        let mut ctr = 0;
+        let mut col = 0;
+        for (c, code) in iter {
+            let pair = format!("{}  {} ", c, code);
+            if columns[col].button(&pair).clicked() {
+                if !target.is_empty() {
+                    target.push_str(space);
+                }
+                target.push_str(code)
+            }
+            ctr += 1;
+            if ctr % nrows == 0 {
+                col += 1
+            }
+        }
+    });
+}
