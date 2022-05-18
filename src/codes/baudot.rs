@@ -4,9 +4,9 @@ use std::{cell::Cell, collections::HashMap};
 
 use super::Code;
 
-const BAUDOT_LETTERS: &'static str = "␀␍␊ QWERTYUIOPASDFGHJKLZXCVBNM␎\0";
-const BAUDOT_FIGURES: &'static str = "␀␍␊ 1234567890-'␅!&£␇()+/:=?,.\0␏";
-const BAUDOT_CODES: [&'static str; 32] = [
+pub const BAUDOT_LETTERS: &'static str = "␀␍␊ QWERTYUIOPASDFGHJKLZXCVBNM␎\0";
+pub const BAUDOT_FIGURES: &'static str = "␀␍␊ 1234567890-'␅!&£␇()+/:=?,.\0␏";
+pub const BAUDOT_CODES: [&'static str; 32] = [
     "00000", "00010", "01000", "00100", "11101", "11001", "10000", "01010", "00001", "10101",
     "11100", "01100", "00011", "01101", "11000", "10100", "10010", "10110", "01011", "00101",
     "11010", "11110", "01001", "10001", "10111", "01110", "01111", "10011", "00110", "00111",
@@ -51,12 +51,19 @@ lazy_static! {
 }
 
 pub struct Baudot {
-    pub mode: Cell<BaudotMode>,
+    mode: Cell<BaudotMode>, // interior mutability to make encoding and decoding easier
 }
 
 impl Baudot {
     // Baudot codes are always five bits
     const WIDTH: usize = 5;
+
+    pub fn switch_mode(&self) {
+        match self.mode.get() {
+            BaudotMode::Letters => todo!(),
+            BaudotMode::Figures => todo!(),
+        }
+    }
 
     pub fn letters_codes(&self) -> Box<dyn Iterator<Item = (char, &&str)> + '_> {
         Box::new(

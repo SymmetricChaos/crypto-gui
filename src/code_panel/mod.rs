@@ -12,6 +12,7 @@ pub mod morse_american_controls;
 pub mod morse_controls;
 pub mod spelling_alphabet_controls;
 pub mod unary_controls;
+pub mod baudot_controls;
 
 pub trait View {
     fn ui(
