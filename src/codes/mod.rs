@@ -31,6 +31,9 @@ pub use romaji::NihonShiki;
 pub mod baudot;
 pub use baudot::Baudot;
 
+pub mod bacon;
+pub use bacon::Bacon;
+
 pub mod elias;
 
 use crate::errors::CodeError;
