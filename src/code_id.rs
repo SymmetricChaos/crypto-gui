@@ -12,6 +12,7 @@ pub enum CodeID {
     Pgp,
     Unary,
     SpellingAlphabet,
+    Bacon,
 }
 
 impl Default for CodeID {
@@ -50,6 +51,7 @@ impl Display for CodeID {
             CodeID::Unary => "Unary",
             CodeID::SpellingAlphabet => "Spelling Alphabet",
             CodeID::Pgp => "PGP Word List",
+            CodeID::Bacon => "Bacon",
         };
         write!(f, "{}", name)
     }

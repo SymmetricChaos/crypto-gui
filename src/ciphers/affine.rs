@@ -34,17 +34,13 @@ impl Affine {
         self.alphabet = Alphabet::from(&self.alphabet_string);
     }
 
-    pub fn control_alphabet(&mut self) -> &mut String {
-        self.alphabet = Alphabet::from(&self.alphabet_string);
-        &mut self.alphabet_string
+    pub fn assign_alphabet(&mut self, alphabet: &str) {
+        self.alphabet_string = String::from(alphabet);
+        self.set_alphabet();
     }
 
     pub fn alphabet_len(&self) -> usize {
-        self.alphabet.chars().count()
-    }
-
-    pub fn length(&self) -> usize {
-        self.alphabet.chars().count()
+        self.alphabet.len()
     }
 
     pub fn find_mul_inverse(&self) -> Result<usize, CipherError> {
@@ -99,7 +95,7 @@ impl Cipher for Affine {
         self.add_key = rng.gen_range(0..length);
         loop {
             let mul = rng.gen_range(1..length);
-            if mul_inv(mul, self.length()).is_some() {
+            if mul_inv(mul, self.alphabet_len()).is_some() {
                 self.mul_key = mul;
                 break;
             };

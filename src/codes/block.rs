@@ -5,6 +5,14 @@ use std::collections::HashMap;
 use super::Code;
 
 lazy_static! {
+    pub static ref FOUR_BIT_CODES: Vec<String> = {
+        let mut v = Vec::with_capacity(16);
+        for n in 0..16 {
+            v.push(format!("{:04b}", n))
+        }
+        v
+    };
+
     pub static ref FIVE_BIT_CODES: Vec<String> = {
         let mut v = Vec::with_capacity(32);
         for n in 0..32 {
@@ -12,52 +20,67 @@ lazy_static! {
         }
         v
     };
+
+    pub static ref SIX_BIT_CODES: Vec<String> = {
+        let mut v = Vec::with_capacity(64);
+        for n in 0..64 {
+            v.push(format!("{:06b}", n))
+        }
+        v
+    };
+
+    pub static ref SEVEN_BIT_CODES: Vec<String> = {
+        let mut v = Vec::with_capacity(128);
+        for n in 0..64 {
+            v.push(format!("{:07b}", n))
+        }
+        v
+    };
+
+    pub static ref EIGHT_BIT_CODES: Vec<String> = {
+        let mut v = Vec::with_capacity(256);
+        for n in 0..64 {
+            v.push(format!("{:08b}", n))
+        }
+        v
+    };
     
-    pub static ref BACON_MAP: HashMap<char, &'static String> = {
-        let mut m = HashMap::new();
-        for (letter, code) in BasicLatin.chars().zip(FIVE_BIT_CODES.iter()) {
-            m.insert(letter, code);
-        }
-        m
-    };
-    pub static ref BACON_MAP_INV: HashMap<&'static String, char> = {
-        let mut m = HashMap::new();
-        for (letter, code) in BasicLatin.chars().zip(FIVE_BIT_CODES.iter()) {
-            m.insert(code, letter);
-        }
-        m
-    };
 }
 
-pub struct Bacon {
-    pub false_text: String,
+pub struct BlockCode {
+    width: u8, // 
+    symbols: String, // enforce comma seperated values
 }
 
-impl Bacon {
+impl Default for BlockCode {
+    fn default() -> Self {
+        BlockCode {
+            width: 5,
+            symbols: String::new(),
+        }
+    }
+}
 
-    const WIDTH: usize = 5;
+impl BlockCode {
+    pub fn assign_width(&mut self, width: u8) {
+        if width > 3 && width <= 8 {
+            self.width = width
+        }
+    }
 
     pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (char, &String)> + '_> {
         Box::new(BasicLatin
             .chars()
-            .map(|x| (x, *BACON_MAP.get(&x).unwrap())))
+            .map(|x| (x, *BLOCK_CODE_MAP.get(&x).unwrap())))
     }
 }
 
-impl Default for Bacon {
-    fn default() -> Self {
-        Bacon {
-            false_text: String::new(),
-        }
-    }
-}
-
-impl Code for Bacon {
+impl Code for BlockCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
 
         let mut out = String::with_capacity(text.len() * Self::WIDTH);
         for s in text.chars() {
-            match BACON_MAP.get(&s) {
+            match BlockCode_MAP.get(&s) {
                 Some(code_group) => out.push_str(code_group),
                 None => {
                     return Err(CodeError::Input(format!(
@@ -75,7 +98,7 @@ impl Code for Bacon {
         let mut out = String::with_capacity(text.len() / Self::WIDTH);
         for p in 0..(text.len() / Self::WIDTH) {
             let group = &text[(p * Self::WIDTH)..(p * Self::WIDTH) + Self::WIDTH];
-            match BACON_MAP_INV.get(&group.to_string()) {
+            match BlockCode_MAP_INV.get(&group.to_string()) {
                 Some(code_group) => out.push(*code_group),
                 None => {
                     return Err(CodeError::Input(format!(
@@ -90,21 +113,21 @@ impl Code for Bacon {
 }
 
 #[cfg(test)]
-mod bacon_tests {
+mod block_code_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "1001100111001001000010100010000001001010000011000101110101100110100101011101011101001101000110001111100100111010101001001000110011001110010001011000001100111000000110111000110";
+    const CIPHERTEXT: &'static str = "";
 
     #[test]
     fn encrypt_test() {
-        let code = Bacon::default();
+        let code = BlockCode::default();
         assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
-        let code = Bacon::default();
+        let code = BlockCode::default();
         assert_eq!(code.decode(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

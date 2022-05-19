@@ -2,6 +2,7 @@ use crate::code_id::CodeID;
 use crate::codes::*;
 use eframe::egui::{self, Color32, RichText, TextEdit, TextStyle};
 pub mod generic_components;
+pub mod bacon_contols;
 use self::generic_components::encode_decode;
 
 pub mod ascii_controls;
@@ -50,6 +51,7 @@ pub struct CodeControlPanel {
     fibonacci: FibonacciCode,
     unary: UnaryCode,
     spelling_alphabet: SpellingAlphabet,
+    bacon: Bacon,
 }
 
 impl CodeControlPanel {
@@ -68,6 +70,7 @@ impl CodeControlPanel {
                     CodeID::Fibonacci,
                     CodeID::Unary,
                     CodeID::Base64,
+                    CodeID::Bacon,
                 ],
                 "Binary Codes",
                 active_code,
@@ -110,6 +113,7 @@ impl CodeControlPanel {
             CodeID::MorseAmerican => self.morse_american.ui(ui, input, output, errors),
             CodeID::Unary => self.unary.ui(ui, input, output, errors),
             CodeID::SpellingAlphabet => self.spelling_alphabet.ui(ui, input, output, errors),
+            CodeID::Bacon => self.bacon.ui(ui, input, output, errors),
             _ => {
                 ui.label("IN PROGRESS");
             }
@@ -154,6 +158,9 @@ impl CodeDisplayPanel {
             CodeID::Unary => encode_decode(ui, &control_panel.unary, input, output, errors),
             CodeID::SpellingAlphabet => {
                 encode_decode(ui, &control_panel.spelling_alphabet, input, output, errors)
+            }
+            CodeID::Bacon => {
+                encode_decode(ui, &control_panel.bacon, input, output, errors)
             }
             _ => *errors = String::from("button must be added to DisplayPanel struct"),
         }
