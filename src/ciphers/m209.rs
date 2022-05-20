@@ -1,10 +1,10 @@
 use super::Cipher;
 use crate::errors::CipherError;
-use crate::text_aux::{random_char_vec, PresetAlphabet::*};
+use crate::text_aux::{random_char_vec, VecString};
 use lazy_static::lazy_static;
 use rand::prelude::StdRng;
 use rand::Fill;
-use std::{collections::VecDeque, fmt};
+use std::fmt;
 
 use itertools::Itertools;
 
@@ -16,35 +16,7 @@ pub struct Cage {
 impl Default for Cage {
     fn default() -> Self {
         Self {
-            lugs: [
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-            ],
+            lugs: [ (0, 0); 27 ],
         }
     }
 }
@@ -71,14 +43,14 @@ impl fmt::Display for Cage {
 
 #[derive(Clone, Debug)]
 pub struct Rotor {
-    alphabet: VecDeque<char>,
+    alphabet: VecString,
     pub pins: Vec<char>,
     pub active: usize,
 }
 
 impl Rotor {
     pub fn new(alphabet: &str, active: usize) -> Rotor {
-        let alphabet: VecDeque<char> = alphabet.chars().collect();
+        let alphabet = VecString::from(alphabet);
         Rotor {
             alphabet,
             pins: Vec::new(),
@@ -92,7 +64,7 @@ impl Rotor {
 
     pub fn set_pins(&mut self, pins: &str) -> Result<(), CipherError> {
         for p in pins.chars() {
-            if !self.alphabet.contains(&p) {
+            if !self.alphabet.contains(p) {
                 return Err(CipherError::key(
                     "effective pins must be in the Rotor's alphabet",
                 ));
@@ -177,43 +149,13 @@ fn atbash_encrypt(n: usize, k: usize, l: usize) -> usize {
 pub struct M209 {
     wheels: [Rotor; 6],
     pub lugs: [(usize, usize); 27],
-    _alphabet: String,
 }
 
 impl Default for M209 {
     fn default() -> Self {
         Self {
             wheels: M209_ROTORS.clone(),
-            lugs: [
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-                (0, 0),
-            ],
-            _alphabet: String::from(BasicLatin),
+            lugs: [ (0, 0); 27 ],
         }
     }
 }

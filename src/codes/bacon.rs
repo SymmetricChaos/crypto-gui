@@ -33,6 +33,14 @@ pub struct Bacon {
     pub false_text: String,
 }
 
+impl Default for Bacon {
+    fn default() -> Self {
+        Bacon {
+            false_text: String::new(),
+        }
+    }
+}
+
 impl Bacon {
 
     const WIDTH: usize = 5;
@@ -41,14 +49,6 @@ impl Bacon {
         Box::new(BasicLatin
             .chars()
             .map(|x| (x, *BACON_MAP.get(&x).unwrap())))
-    }
-}
-
-impl Default for Bacon {
-    fn default() -> Self {
-        Bacon {
-            false_text: String::new(),
-        }
     }
 }
 

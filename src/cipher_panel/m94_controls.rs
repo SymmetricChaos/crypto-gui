@@ -1,5 +1,5 @@
 use super::{generic_components::*, View};
-use crate::ciphers::M94;
+use crate::ciphers::{M94, Cipher};
 use eframe::egui::{self, Slider, Ui};
 use rand::prelude::StdRng;
 
@@ -18,7 +18,7 @@ impl View for M94 {
         ui.add_space(16.0);
 
         if ui.button("Randomize Wheels").clicked() {
-            self.randomize_wheels(rng);
+            self.randomize(rng);
         }
 
         ui.label("Wheels");
