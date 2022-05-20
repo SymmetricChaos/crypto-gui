@@ -1,6 +1,7 @@
 use super::Cipher;
 use crate::errors::CipherError;
 use crate::text_aux::{shuffled_str, Alphabet, PresetAlphabet};
+use itertools::Itertools;
 use rand::prelude::StdRng;
 
 pub struct Bazeries {
@@ -29,6 +30,21 @@ impl Bazeries {
 
     pub fn alphabet_len(&self) -> usize {
         self.alphabet.len()
+    }
+
+    pub fn validate(&self, text: &str) -> Result<(),CipherError> {
+        if text.chars().count() > self.alphabet.len() {
+            return Err(CipherError::input("the text cannot be longer the the number of wheels, for longer messages send each part with a different key"))
+        }
+        
+        let sorted = self.alphabet_string.chars().sorted().collect_vec();
+        for wheel in self.wheels.iter() {
+            if wheel.chars().sorted().collect_vec() != sorted {
+                return Err(CipherError::input("the wheels must have exactly the same letters as the alphabet"))
+            }
+        }
+
+        Ok(())
     }
 }
 
@@ -82,12 +98,16 @@ impl Default for Bazeries {
 
 impl Cipher for Bazeries {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let alen = self.alphabet.len();
-        let mut out = String::with_capacity(text.chars().count());
+
+        self.validate(text)?;
+
+
+        let mut out = String::with_capacity(text.len());
+
         let key = self.wheels.iter();
         for (k, c) in key.zip(text.chars()) {
             let n = match k.chars().position(|x| x == c) {
-                Some(n) => (n + self.offset) % alen,
+                Some(n) => (n + self.offset) % self.alphabet.len(),
                 None => return Err(CipherError::invalid_alphabet_char(c)),
             };
             out.push(k.chars().nth(n).unwrap())
@@ -96,10 +116,14 @@ impl Cipher for Bazeries {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+
+        self.validate(text)?;
+
         let alen = self.alphabet.len();
-        let mut out = String::with_capacity(text.chars().count());
+        let mut out = String::with_capacity(text.len());
         let rev_offset = alen - self.offset;
         let key = self.wheels.iter();
+
         for (k, c) in key.zip(text.chars()) {
             let n = match k.chars().position(|x| x == c) {
                 Some(n) => (n + rev_offset) % alen,
@@ -118,5 +142,28 @@ impl Cipher for Bazeries {
         for wheel in self.wheels.iter_mut() {
             *wheel = shuffled_str(&self.alphabet_string, rng);
         }
+    }
+}
+
+
+#[cfg(test)]
+mod bazeries_tests {
+    use super::*;
+
+    const PLAINTEXT: &'static str  = "THEQUICKBROWNFOXJUMPSOVERTH";
+    const CIPHERTEXT: &'static str = "LMKHCVBJVHSACSBZWOEWDHKAENN";
+
+    #[test]
+    fn encrypt_test() {
+        let mut cipher = Bazeries::default();
+        cipher.offset = 3;
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+    }
+
+    #[test]
+    fn decrypt_test() {
+        let mut cipher = Bazeries::default();
+        cipher.offset = 3;
+        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }
