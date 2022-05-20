@@ -290,23 +290,51 @@ impl Cipher for M209 {
     }
 }
 
-// #[cfg(test)]
-// mod m209_tests {
+#[cfg(test)]
+mod m209_tests {
 
-//     use super::*;
+    use super::*;
 
-//     const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-//     const CIPHERTEXT: &'static str = "";
+    const PLAINTEXT: &'static str =  "AAAAAAAAAAAAAAAAAAAAAAAAAA";
+    const CIPHERTEXT: &'static str = "TNJUWAUQTKCZKNUTOTBCWARMIO";
 
-//     #[test]
-//     fn encrypt_test() {
-//         let cipher = M209
-//         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
-//     }
+    #[test]
+    fn encrypt_test() {
+        let mut cipher = M209::default();
+        cipher.set_pins([
+            "ABDHIKMNSTVW",
+            "ADEGJKLORSUX",
+            "ABGHJLMNRSTUX",
+            "CEFHIMNPSTU",
+            "BDEFHIMNPS",
+            "ABDHKNOQ",]
+        ).expect("invalid pins");
+        cipher.set_lugs([
+            (3,6),(0,6),(1,6),(1,5),(4,5),(0,4),(0,4),(0,4),(0,4),
+            (2,0),(2,0),(2,0),(2,0),(2,0),(2,0),(2,0),(2,0),(2,0),
+            (2,0),(2,5),(2,5),(0,5),(0,5),(0,5),(0,5),(0,5),(0,5),
 
-//     #[test]
-//     fn decrypt_test() {
-//         let cipher = M209
-//         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
-//     }
-// }
+        ]);
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+    }
+
+    #[test]
+    fn decrypt_test() {
+        let mut cipher = M209::default();
+        cipher.set_pins([
+            "ABDHIKMNSTVW",
+            "ADEGJKLORSUX",
+            "ABGHJLMNRSTUX",
+            "CEFHIMNPSTU",
+            "BDEFHIMNPS",
+            "ABDHKNOQ",]
+        ).expect("invalid pins");
+        cipher.set_lugs([
+            (3,6),(0,6),(1,6),(1,5),(4,5),(0,4),(0,4),(0,4),(0,4),
+            (2,0),(2,0),(2,0),(2,0),(2,0),(2,0),(2,0),(2,0),(2,0),
+            (2,0),(2,5),(2,5),(0,5),(0,5),(0,5),(0,5),(0,5),(0,5),
+
+        ]);
+        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+    }
+}
