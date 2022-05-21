@@ -88,7 +88,7 @@ impl Cipher for Scytale {
 mod scytale_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
     const CIPHERTEXT: &'static str = "TKOOLHBXVAERJEZQOURYUWMTDINPHOCFSEG";
 
     #[test]

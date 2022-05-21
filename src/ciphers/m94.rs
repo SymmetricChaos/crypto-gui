@@ -41,10 +41,7 @@ pub struct M94 {
 impl Default for M94 {
     fn default() -> M94 {
         let wheels = M94_WHEELS.clone();
-        M94 {
-            offset: 0,
-            wheels,
-        }
+        M94 { offset: 0, wheels }
     }
 }
 
@@ -90,12 +87,11 @@ impl Cipher for M94 {
     }
 }
 
-
 #[cfg(test)]
 mod m94_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXJUMPSOVER";
+    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVER";
     const CIPHERTEXT: &'static str = "WVYAHWENQCKCGUAYKNZFTISYK";
 
     #[test]

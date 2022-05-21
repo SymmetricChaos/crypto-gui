@@ -1,10 +1,5 @@
 use super::View;
-use crate::{
-    codes::{
-        Baudot,
-    },
-    egui_aux::mono_button,
-};
+use crate::{codes::Baudot, egui_aux::mono_button};
 
 impl View for Baudot {
     fn ui(
@@ -14,7 +9,6 @@ impl View for Baudot {
         _output: &mut String,
         _errors: &mut String,
     ) {
-
         let nrows = 16;
         let ncols = 2;
         ui.columns(ncols, |columns| {

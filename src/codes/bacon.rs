@@ -12,7 +12,6 @@ lazy_static! {
         }
         v
     };
-    
     pub static ref BACON_MAP: HashMap<char, &'static String> = {
         let mut m = HashMap::new();
         for (letter, code) in BasicLatin.chars().zip(FIVE_BIT_CODES.iter()) {
@@ -42,36 +41,26 @@ impl Default for Bacon {
 }
 
 impl Bacon {
-
     const WIDTH: usize = 5;
 
     pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (char, &String)> + '_> {
-        Box::new(BasicLatin
-            .chars()
-            .map(|x| (x, *BACON_MAP.get(&x).unwrap())))
+        Box::new(BasicLatin.chars().map(|x| (x, *BACON_MAP.get(&x).unwrap())))
     }
 }
 
 impl Code for Bacon {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-
         let mut out = String::with_capacity(text.len() * Self::WIDTH);
         for s in text.chars() {
             match BACON_MAP.get(&s) {
                 Some(code_group) => out.push_str(code_group),
-                None => {
-                    return Err(CodeError::Input(format!(
-                        "The symbol `{}` is not valid",
-                        s
-                    )))
-                }
+                None => return Err(CodeError::Input(format!("The symbol `{}` is not valid", s))),
             }
         }
         Ok(out)
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-
         let mut out = String::with_capacity(text.len() / Self::WIDTH);
         for p in 0..(text.len() / Self::WIDTH) {
             let group = &text[(p * Self::WIDTH)..(p * Self::WIDTH) + Self::WIDTH];

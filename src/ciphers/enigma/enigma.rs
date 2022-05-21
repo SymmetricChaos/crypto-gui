@@ -106,7 +106,7 @@ impl Default for EnigmaState {
             plugboard_pairs: String::new(),
             plugboard: EnigmaPlugboard::default(),
             rotors: [ROTOR_MAP["I"], ROTOR_MAP["II"], ROTOR_MAP["III"]],
-            reflector: REFLECTORS["A"],
+            reflector: REFLECTORS["B"],
         }
     }
 }
@@ -141,5 +141,26 @@ impl Default for EnigmaM3 {
         Self {
             state: Default::default(),
         }
+    }
+}
+
+
+#[cfg(test)]
+mod enigma_tests {
+    use super::*;
+
+    const PLAINTEXT: &'static str =  "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    const CIPHERTEXT: &'static str = "BDZGOWCXLTKSBTMCDLPBMUQOFXYHCXTGYJFLINHNXSHIUNTHEO";
+
+    #[test]
+    fn encrypt_test() {
+        let cipher = EnigmaM3::default();
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+    }
+
+    #[test]
+    fn decrypt_test() {
+        let cipher = EnigmaM3::default();
+        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

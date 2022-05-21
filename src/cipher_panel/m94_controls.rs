@@ -1,5 +1,5 @@
 use super::{generic_components::*, View};
-use crate::ciphers::{M94, Cipher};
+use crate::ciphers::{Cipher, M94};
 use eframe::egui::{self, Slider, Ui};
 use rand::prelude::StdRng;
 

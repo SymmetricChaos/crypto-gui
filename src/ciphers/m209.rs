@@ -15,9 +15,7 @@ pub struct Cage {
 
 impl Default for Cage {
     fn default() -> Self {
-        Self {
-            lugs: [ (0, 0); 27 ],
-        }
+        Self { lugs: [(0, 0); 27] }
     }
 }
 
@@ -155,7 +153,7 @@ impl Default for M209 {
     fn default() -> Self {
         Self {
             wheels: M209_ROTORS.clone(),
-            lugs: [ (0, 0); 27 ],
+            lugs: [(0, 0); 27],
         }
     }
 }
@@ -295,25 +293,50 @@ mod m209_tests {
 
     use super::*;
 
-    const PLAINTEXT: &'static str =  "AAAAAAAAAAAAAAAAAAAAAAAAAA";
+    const PLAINTEXT: &'static str = "AAAAAAAAAAAAAAAAAAAAAAAAAA";
     const CIPHERTEXT: &'static str = "TNJUWAUQTKCZKNUTOTBCWARMIO";
 
     #[test]
     fn encrypt_test() {
         let mut cipher = M209::default();
-        cipher.set_pins([
-            "ABDHIKMNSTVW",
-            "ADEGJKLORSUX",
-            "ABGHJLMNRSTUX",
-            "CEFHIMNPSTU",
-            "BDEFHIMNPS",
-            "ABDHKNOQ",]
-        ).expect("invalid pins");
+        cipher
+            .set_pins([
+                "ABDHIKMNSTVW",
+                "ADEGJKLORSUX",
+                "ABGHJLMNRSTUX",
+                "CEFHIMNPSTU",
+                "BDEFHIMNPS",
+                "ABDHKNOQ",
+            ])
+            .expect("invalid pins");
         cipher.set_lugs([
-            (3,6),(0,6),(1,6),(1,5),(4,5),(0,4),(0,4),(0,4),(0,4),
-            (2,0),(2,0),(2,0),(2,0),(2,0),(2,0),(2,0),(2,0),(2,0),
-            (2,0),(2,5),(2,5),(0,5),(0,5),(0,5),(0,5),(0,5),(0,5),
-
+            (3, 6),
+            (0, 6),
+            (1, 6),
+            (1, 5),
+            (4, 5),
+            (0, 4),
+            (0, 4),
+            (0, 4),
+            (0, 4),
+            (2, 0),
+            (2, 0),
+            (2, 0),
+            (2, 0),
+            (2, 0),
+            (2, 0),
+            (2, 0),
+            (2, 0),
+            (2, 0),
+            (2, 0),
+            (2, 5),
+            (2, 5),
+            (0, 5),
+            (0, 5),
+            (0, 5),
+            (0, 5),
+            (0, 5),
+            (0, 5),
         ]);
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
@@ -321,19 +344,44 @@ mod m209_tests {
     #[test]
     fn decrypt_test() {
         let mut cipher = M209::default();
-        cipher.set_pins([
-            "ABDHIKMNSTVW",
-            "ADEGJKLORSUX",
-            "ABGHJLMNRSTUX",
-            "CEFHIMNPSTU",
-            "BDEFHIMNPS",
-            "ABDHKNOQ",]
-        ).expect("invalid pins");
+        cipher
+            .set_pins([
+                "ABDHIKMNSTVW",
+                "ADEGJKLORSUX",
+                "ABGHJLMNRSTUX",
+                "CEFHIMNPSTU",
+                "BDEFHIMNPS",
+                "ABDHKNOQ",
+            ])
+            .expect("invalid pins");
         cipher.set_lugs([
-            (3,6),(0,6),(1,6),(1,5),(4,5),(0,4),(0,4),(0,4),(0,4),
-            (2,0),(2,0),(2,0),(2,0),(2,0),(2,0),(2,0),(2,0),(2,0),
-            (2,0),(2,5),(2,5),(0,5),(0,5),(0,5),(0,5),(0,5),(0,5),
-
+            (3, 6),
+            (0, 6),
+            (1, 6),
+            (1, 5),
+            (4, 5),
+            (0, 4),
+            (0, 4),
+            (0, 4),
+            (0, 4),
+            (2, 0),
+            (2, 0),
+            (2, 0),
+            (2, 0),
+            (2, 0),
+            (2, 0),
+            (2, 0),
+            (2, 0),
+            (2, 0),
+            (2, 0),
+            (2, 5),
+            (2, 5),
+            (0, 5),
+            (0, 5),
+            (0, 5),
+            (0, 5),
+            (0, 5),
+            (0, 5),
         ]);
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }

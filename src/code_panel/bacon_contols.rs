@@ -1,8 +1,5 @@
 use super::View;
-use crate::{
-    codes::Bacon,
-    egui_aux::mono_button,
-};
+use crate::{codes::Bacon, egui_aux::mono_button};
 
 impl View for Bacon {
     fn ui(

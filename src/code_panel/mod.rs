@@ -1,19 +1,19 @@
 use crate::code_id::CodeID;
 use crate::codes::*;
 use eframe::egui::{self, Color32, RichText, TextEdit, TextStyle};
-pub mod generic_components;
 pub mod bacon_contols;
+pub mod generic_components;
 use self::generic_components::encode_decode;
 
 pub mod ascii_controls;
 pub mod base64_controls;
+pub mod baudot_controls;
 pub mod fibonacci_controls;
 pub mod godel_controls;
 pub mod morse_american_controls;
 pub mod morse_controls;
 pub mod spelling_alphabet_controls;
 pub mod unary_controls;
-pub mod baudot_controls;
 
 pub trait View {
     fn ui(
@@ -159,9 +159,7 @@ impl CodeDisplayPanel {
             CodeID::SpellingAlphabet => {
                 encode_decode(ui, &control_panel.spelling_alphabet, input, output, errors)
             }
-            CodeID::Bacon => {
-                encode_decode(ui, &control_panel.bacon, input, output, errors)
-            }
+            CodeID::Bacon => encode_decode(ui, &control_panel.bacon, input, output, errors),
             _ => *errors = String::from("button must be added to DisplayPanel struct"),
         }
 
