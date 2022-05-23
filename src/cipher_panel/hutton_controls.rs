@@ -19,12 +19,8 @@ impl View for Hutton {
         ui.add_space(16.0);
         ui.label("Select Version");
         ui.horizontal(|ui| {
-            if ui.button("V1").clicked() {
-                self.version = HuttonVer::V1
-            };
-            if ui.button("V2").clicked() {
-                self.version = HuttonVer::V2
-            };
+            ui.selectable_value(&mut self.version, HuttonVer::V1, "V1");
+            ui.selectable_value(&mut self.version, HuttonVer::V2, "V2");
         });
 
         ui.add_space(16.0);
