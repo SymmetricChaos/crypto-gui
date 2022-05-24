@@ -2,6 +2,7 @@ use crate::category_pages::CipherCategory;
 use crate::cipher_panel::{CipherControlPanel, CipherDisplayPanel};
 use crate::code_panel::{CodeControlPanel, CodeDisplayPanel};
 use crate::{cipher_id::CipherID, code_id::CodeID};
+use eframe::egui::Grid;
 use eframe::{
     egui::{
         warn_if_debug_build, widgets, CentralPanel, Context, FontData, FontDefinitions, RichText,
@@ -60,11 +61,26 @@ impl ClassicCrypto {
         SidePanel::left("cipher_selector_panel")
             .max_width(300.0)
             .show(ctx, |ui| {
+                ui.label("Examples");
                 for id in self.cipher_category.ciphers() {
-                    ui.selectable_value(&mut self.active_cipher, *id, id.to_string() );
+                    if ui.selectable_value(&mut self.active_cipher, *id, id.to_string() ).clicked() {
+                        self.active_page = Page::Cipher;
+                    };
                 }
             });
         CentralPanel::default().show(ctx, |ui| {
+            Grid::new("cipher_categories").show(ui, |ui| {
+                ui.selectable_value(&mut self.cipher_category, CipherCategory::Substituion, "Substitution");
+                ui.selectable_value(&mut self.cipher_category, CipherCategory::Polyalphabetic, "Polyalphabetic");
+                ui.selectable_value(&mut self.cipher_category, CipherCategory::RotorMachine, "Rotor Machine");
+                ui.selectable_value(&mut self.cipher_category, CipherCategory::Transposition, "Transposition");
+                ui.end_row();
+                ui.selectable_value(&mut self.cipher_category, CipherCategory::Playfair, "Playfair");
+                ui.selectable_value(&mut self.cipher_category, CipherCategory::Tactical, "Tactical");
+                ui.selectable_value(&mut self.cipher_category, CipherCategory::Polybius, "Polybius");
+                ui.selectable_value(&mut self.cipher_category, CipherCategory::Mutating, "Mutating");
+
+            });
             ScrollArea::vertical().show(ui, |ui| {
                 ui.label(self.cipher_category.description())
             });
