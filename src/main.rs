@@ -16,6 +16,8 @@ pub mod grid;
 
 pub mod egui_aux;
 
+pub mod category_pages;
+
 mod app;
 
 #[cfg(not(target_arch = "wasm32"))]

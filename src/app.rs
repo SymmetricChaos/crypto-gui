@@ -1,3 +1,4 @@
+use crate::category_pages::CipherCategory;
 use crate::cipher_panel::{CipherControlPanel, CipherDisplayPanel};
 use crate::code_panel::{CodeControlPanel, CodeDisplayPanel};
 use crate::{cipher_id::CipherID, code_id::CodeID};
@@ -14,14 +15,16 @@ use rand::{prelude::StdRng, SeedableRng};
 #[derive(Debug, PartialEq, Eq)]
 enum Page {
     About,
-    Ciphers,
-    Codes,
+    Cipher,
+    Code,
+    CipherCategory,
 }
 
 pub struct ClassicCrypto {
+    cipher_category: CipherCategory,
     cipher_control_panel: CipherControlPanel,
-    code_control_panel: CodeControlPanel,
     cipher_display_panel: CipherDisplayPanel,
+    code_control_panel: CodeControlPanel,
     code_display_panel: CodeDisplayPanel,
     input: String,
     output: String,
@@ -36,8 +39,8 @@ impl Default for ClassicCrypto {
     fn default() -> Self {
         Self {
             cipher_control_panel: CipherControlPanel::default(),
-            code_control_panel: CodeControlPanel::default(),
             cipher_display_panel: CipherDisplayPanel::default(),
+            code_control_panel: CodeControlPanel::default(),
             code_display_panel: CodeDisplayPanel::default(),
             input: String::new(),
             output: String::new(),
@@ -46,11 +49,28 @@ impl Default for ClassicCrypto {
             active_code: CodeID::default(),
             active_page: Page::About,
             rng: StdRng::from_entropy(),
+            cipher_category: CipherCategory::Substituion,
         }
     }
 }
 
 impl ClassicCrypto {
+
+    fn cipher_category_page(&mut self, ctx: &Context) {
+        SidePanel::left("cipher_selector_panel")
+            .max_width(300.0)
+            .show(ctx, |ui| {
+                for id in self.cipher_category.ciphers() {
+                    ui.selectable_value(&mut self.active_cipher, *id, id.to_string() );
+                }
+            });
+        CentralPanel::default().show(ctx, |ui| {
+            ScrollArea::vertical().show(ui, |ui| {
+                ui.label(self.cipher_category.description())
+            });
+        });
+    }
+
     fn cipher_page(&mut self, ctx: &Context) {
         SidePanel::right("cipher_display_panel")
             .max_width(300.0)
@@ -167,21 +187,21 @@ impl epi::App for ClassicCrypto {
                 ui.separator();
                 if ui
                     .add(SelectableLabel::new(
-                        self.active_page == Page::Ciphers,
+                        self.active_page == Page::CipherCategory,
                         "Ciphers",
                     ))
                     .clicked()
                 {
-                    self.active_page = Page::Ciphers
+                    self.active_page = Page::CipherCategory
                 }
                 if ui
                     .add(SelectableLabel::new(
-                        self.active_page == Page::Codes,
+                        self.active_page == Page::Code,
                         "Codes",
                     ))
                     .clicked()
                 {
-                    self.active_page = Page::Codes
+                    self.active_page = Page::Code
                 }
                 if ui
                     .add(SelectableLabel::new(
@@ -197,8 +217,9 @@ impl epi::App for ClassicCrypto {
 
         match self.active_page {
             Page::About => self.about_page(ctx),
-            Page::Ciphers => self.cipher_page(ctx),
-            Page::Codes => self.code_page(ctx),
+            Page::Cipher => self.cipher_page(ctx),
+            Page::Code => self.code_page(ctx),
+            Page::CipherCategory => self.cipher_category_page(ctx),
         }
     }
 
