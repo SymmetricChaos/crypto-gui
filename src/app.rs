@@ -78,7 +78,6 @@ impl ClassicCrypto {
                 ui.selectable_value(&mut self.cipher_category, CipherCategory::Playfair, "Playfair");
                 ui.selectable_value(&mut self.cipher_category, CipherCategory::Tactical, "Tactical");
                 ui.selectable_value(&mut self.cipher_category, CipherCategory::Polybius, "Polybius");
-                ui.selectable_value(&mut self.cipher_category, CipherCategory::Mutating, "Mutating");
 
             });
             ScrollArea::vertical().show(ui, |ui| {

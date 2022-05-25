@@ -160,7 +160,7 @@ impl CipherControlPanel {
                     CipherID::Affine,
                     CipherID::Substitution,
                 ],
-                "Simple Substitution",
+                "Substitution",
                 active_cipher,
                 ui,
             );
@@ -174,6 +174,8 @@ impl CipherControlPanel {
                     CipherID::Bazeries,
                     CipherID::Porta,
                     CipherID::Quagmire,
+                    CipherID::Chaocipher, 
+                    CipherID::Hutton
                 ],
                 "Polyalphabetic",
                 active_cipher,
@@ -235,12 +237,6 @@ impl CipherControlPanel {
                 ui,
             );
 
-            combox_box(
-                &[CipherID::Chaocipher, CipherID::Hutton],
-                "Mutating",
-                active_cipher,
-                ui,
-            );
         });
 
         ui.add_space(16.0);
