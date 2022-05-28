@@ -78,6 +78,9 @@ pub use hutton::Hutton;
 // pub mod route;
 // pub use route::Route;
 
+pub mod quagmire;
+pub use quagmire::Quagmire;
+
 use crate::errors::CipherError;
 use rand::prelude::StdRng;
 

@@ -32,7 +32,6 @@ impl Default for Slidefair {
 
 impl Slidefair {
 
-
     // Set or assign alphabet
     pub fn set_alphabet(&mut self) {
         self.alphabet = Alphabet::from(&self.alphabet_string)

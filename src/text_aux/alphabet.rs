@@ -51,6 +51,10 @@ impl Alphabet {
     pub fn len(&self) -> usize {
         self.0.len()
     }
+
+    pub fn new() -> Self {
+        Alphabet(VecString::new())
+    }
 }
 
 impl fmt::Display for Alphabet {
