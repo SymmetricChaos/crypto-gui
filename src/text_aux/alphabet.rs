@@ -1,10 +1,9 @@
 use itertools::Itertools;
 use std::fmt;
 
-use super::{preset_alphabet::PresetAlphabet, VecString};
+use super::{preset_alphabet::PresetAlphabet, VecString, keyed_alphabet};
 
 // An Alphabet is a small collection of unique chars with an arbitrary ordering
-// To maintain the uniqueness invariant no mutating methods are defined on Alphabet
 #[derive(Clone, Debug)]
 pub struct Alphabet(VecString);
 
@@ -55,6 +54,26 @@ impl Alphabet {
     pub fn new() -> Self {
         Alphabet(VecString::new())
     }
+
+    pub fn from_key(key: &str, alphabet: &str) -> Self {
+        Self(keyed_alphabet(key, alphabet).chars().collect())
+    }
+
+    pub fn rotate_left(&mut self, mid: usize) {
+        self.0.rotate_left(mid % self.len())
+    }
+
+    // mid is reduced modulo self.len() and does not panic
+    pub fn rotate_right(&mut self, mid: usize) {
+        self.0.rotate_right(mid % self.len())
+    }
+
+    // does nothing if c does not exist
+    pub fn rotate_to(&mut self, c: char) {
+        if let Some(start) = self.get_pos_of(c) {
+            self.0.rotate_right(start)
+        }
+    }
 }
 
 impl fmt::Display for Alphabet {
@@ -90,15 +109,6 @@ impl From<PresetAlphabet> for Alphabet {
 #[cfg(test)]
 mod alphabet_tests {
     use super::*;
-
-    #[test]
-    fn build_alphabet() {
-        let alpha = Alphabet::from("ZAGX");
-        assert_eq!(
-            format!("{:?}", alpha),
-            "Alphabet { set: {'Z': 0, 'A': 1, 'G': 2, 'X': 3} }"
-        );
-    }
 
     #[test]
     fn char() {
