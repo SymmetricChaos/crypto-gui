@@ -5,6 +5,7 @@ use rand::{prelude::StdRng};
 use crate::{text_aux::{Alphabet, PresetAlphabet, random_sample_replace}, errors::CipherError};
 use super::Cipher;
 
+#[derive(Debug, PartialEq, Eq)]
 pub enum QuagmireVersion {
     V1,
     V2,
@@ -43,28 +44,58 @@ impl Default for Quagmire {
 }
 
 impl Quagmire {
+
+    pub fn assign_alphabet(&mut self, alphabet: &str) {
+        self.alphabet_string = alphabet.to_string();
+        self.set_alphabet();
+    }
+
+    pub fn set_alphabet(&mut self) {
+        self.alphabet = Alphabet::from(&self.alphabet_string);
+    }
+
+    pub fn show_alphabet(&self) -> String {
+        self.alphabet.to_string()
+    }
+
+
     pub fn assign_pt_key(&mut self, key: &str) {
         self.pt_key_string = key.to_string();
         self.set_pt_key();
     }
+
+    pub fn set_pt_key(&mut self) {
+        self.pt_key = Alphabet::from_key(&self.pt_key_string, &self.alphabet_string);
+    }
+
+    pub fn show_pt_key(&self) -> String {
+        self.pt_key.to_string()
+    }
+    
+
     
     pub fn assign_ct_key(&mut self, key: &str) {
         self.ct_key_string = key.to_string();
         self.set_ct_key();
     }
+
+    pub fn set_ct_key(&mut self) {
+        self.ct_key = Alphabet::from_key(&self.ct_key_string, &self.alphabet_string);
+    }
+
+    pub fn show_ct_key(&self) -> String {
+        self.ct_key.to_string()
+    }
+    
     
     pub fn assign_ind_key(&mut self, key: &str) {
         self.ind_key_string = key.to_string();
         self.set_ind_key();
     }
+
+
+
     
-    pub fn set_pt_key(&mut self) {
-        self.pt_key = Alphabet::from_key(&self.pt_key_string, &self.alphabet_string);
-    }
-    
-    pub fn set_ct_key(&mut self) {
-        self.ct_key = Alphabet::from_key(&self.ct_key_string, &self.alphabet_string);
-    }
     
     // Converts the ind_key_string into a vector of usize that represent how
     // many spaces the ct_alphabet is rotated relative to its starting position
