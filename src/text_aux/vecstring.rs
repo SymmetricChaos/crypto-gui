@@ -1,3 +1,4 @@
+use rand::Rng;
 use rand::prelude::{SliceRandom, StdRng};
 
 use super::preset_alphabet::PresetAlphabet;
@@ -15,7 +16,9 @@ impl VecString {
         self.0.len()
     }
 
-    // Constructor methods
+    /////////////////////////
+    // constructor methods //
+    /////////////////////////
     pub fn new() -> Self {
         VecString(VecDeque::new())
     }
@@ -54,6 +57,20 @@ impl VecString {
         let len = self.len();
         let idx = ((index + len) as i32 + offset) as usize % len;
         self.0.get_mut(idx)
+    }
+
+    // Get one random character
+    pub fn get_rand_char(&self, rng: &mut StdRng) -> char {
+        self.get_char(rng.gen_range(0..self.len())).unwrap()
+    }
+
+    // Get multiple random characters, replacing each time
+    pub fn get_rand_chars_replace(&self, n: usize, rng: &mut StdRng) -> Vec<char> {
+        let mut out = Vec::with_capacity(n);
+        for i in out.iter_mut() {
+            *i = self.get_rand_char(rng);
+        }
+        out
     }
 
     ////////////////////////////////////
@@ -158,12 +175,28 @@ impl VecString {
         self.0.remove(index)
     }
 
+    // Sort the VecString
     pub fn sort(&mut self) {
         self.0.make_contiguous().sort()
     }
 
+    // Return a sorted clone of the VecString
+    pub fn sorted(&mut self) -> Self {
+        let mut vs = self.clone();
+        vs.sort();
+        vs
+    }
+
+    // Shuffle the VecString
     pub fn shuffle(&mut self, rng: &mut StdRng) {
         self.0.make_contiguous().shuffle(rng)
+    }
+
+    // Return a shuffled clone of the VecString
+    pub fn shuffled(&mut self, rng: &mut StdRng) -> Self {
+        let mut vs = self.clone();
+        vs.shuffle(rng);
+        vs
     }
 
     // Does nothing if either index out of bounds

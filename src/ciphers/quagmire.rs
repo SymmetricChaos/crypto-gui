@@ -1,8 +1,8 @@
 use std::{iter::Cycle, slice::Iter};
 
-use rand::prelude::StdRng;
+use rand::{prelude::StdRng};
 
-use crate::{text_aux::{Alphabet, PresetAlphabet}, errors::CipherError};
+use crate::{text_aux::{Alphabet, PresetAlphabet, random_sample_replace}, errors::CipherError};
 use super::Cipher;
 
 pub enum QuagmireVersion {
@@ -134,11 +134,14 @@ impl Cipher for Quagmire {
     }
 
     fn randomize(&mut self, rng: &mut StdRng) {
-        todo!()
+        self.assign_ct_key(&random_sample_replace(&self.alphabet_string, 9, rng));
+        self.assign_pt_key(&random_sample_replace(&self.alphabet_string, 9, rng));
+        self.assign_ind_key(&random_sample_replace(&self.alphabet_string, 9, rng));
+        self.indicator = self.alphabet.get_rand_char(rng);
     }
 
     fn reset(&mut self) {
-        todo!()
+        *self = Self::default()
     }
 }
 

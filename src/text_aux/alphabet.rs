@@ -1,9 +1,11 @@
 use itertools::Itertools;
+use rand::prelude::StdRng;
 use std::fmt;
 
 use super::{preset_alphabet::PresetAlphabet, VecString, keyed_alphabet};
 
 // An Alphabet is a small collection of unique chars with an arbitrary ordering
+// All methods matain the uniqueness invariant
 #[derive(Clone, Debug)]
 pub struct Alphabet(VecString);
 
@@ -39,6 +41,46 @@ impl Alphabet {
         self.get_char_offset(p, offset)
     }
 
+    pub fn get_rand_char(&self, rng: &mut StdRng) -> char {
+        self.0.get_rand_char(rng)
+    }
+
+    pub fn get_rand_chars_replace(&self, n: usize, rng: &mut StdRng) -> Vec<char> {
+        self.0.get_rand_chars_replace(n, rng)
+    }
+
+
+
+    // Builder Methods
+    pub fn new() -> Self {
+        Alphabet(VecString::new())
+    }
+
+    pub fn from_key(key: &str, alphabet: &str) -> Self {
+        Self(keyed_alphabet(key, alphabet).chars().collect())
+    }
+
+
+
+    // Mutating methods
+    // All of these reduce the input or do nothing on an invalid input
+    pub fn rotate_left(&mut self, mid: usize) {
+        self.0.rotate_left(mid % self.len())
+    }
+
+    pub fn rotate_right(&mut self, mid: usize) {
+        self.0.rotate_right(mid % self.len())
+    }
+
+    pub fn rotate_to(&mut self, c: char) {
+        if let Some(start) = self.get_pos_of(c) {
+            self.0.rotate_right(start)
+        }
+    }
+
+
+    
+    // Other methods
     pub fn contains(&self, c: char) -> bool {
         self.0.contains(c)
     }
@@ -49,30 +91,6 @@ impl Alphabet {
 
     pub fn len(&self) -> usize {
         self.0.len()
-    }
-
-    pub fn new() -> Self {
-        Alphabet(VecString::new())
-    }
-
-    pub fn from_key(key: &str, alphabet: &str) -> Self {
-        Self(keyed_alphabet(key, alphabet).chars().collect())
-    }
-
-    pub fn rotate_left(&mut self, mid: usize) {
-        self.0.rotate_left(mid % self.len())
-    }
-
-    // mid is reduced modulo self.len() and does not panic
-    pub fn rotate_right(&mut self, mid: usize) {
-        self.0.rotate_right(mid % self.len())
-    }
-
-    // does nothing if c does not exist
-    pub fn rotate_to(&mut self, c: char) {
-        if let Some(start) = self.get_pos_of(c) {
-            self.0.rotate_right(start)
-        }
     }
 }
 
