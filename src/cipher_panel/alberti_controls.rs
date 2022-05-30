@@ -1,5 +1,6 @@
+use crate::ciphers::polyalphabetic::Alberti;
+
 use super::{generic_components::*, View};
-use crate::ciphers::Alberti;
 use eframe::egui::{RichText, Slider, Ui};
 use rand::prelude::StdRng;
 

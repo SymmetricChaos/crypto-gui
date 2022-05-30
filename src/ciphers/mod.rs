@@ -1,5 +1,6 @@
 pub mod polybius;
 pub mod tactical;
+pub mod polyalphabetic;
 
 pub mod caesar;
 pub use caesar::Caesar;
@@ -24,17 +25,8 @@ pub use slidefair::Slidefair;
 
 pub mod seriated_playfair;
 
-pub mod alberti_disk;
-pub use alberti_disk::Alberti;
-
 pub mod m94;
 pub use m94::M94;
-
-pub mod vigenere;
-pub use vigenere::Vigenere;
-
-pub mod beaufort;
-pub use beaufort::Beaufort;
 
 pub mod columnar;
 pub use columnar::Columnar;
@@ -48,20 +40,11 @@ pub use grille::Grille;
 pub mod sigaba;
 pub use sigaba::Sigaba;
 
-pub mod bazeries;
-pub use bazeries::Bazeries;
-
-pub mod chaocipher;
-pub use chaocipher::Chaocipher;
-
 pub mod syctale;
 pub use syctale::Scytale;
 
 pub mod rail_fence;
 pub use rail_fence::RailFence;
-
-pub mod porta;
-pub use porta::Porta;
 
 pub mod hebern;
 pub use hebern::HebernRotor;
@@ -72,14 +55,8 @@ pub use two_square::TwoSquare;
 pub mod four_square;
 pub use four_square::FourSquare;
 
-pub mod hutton;
-pub use hutton::Hutton;
-
 // pub mod route;
 // pub use route::Route;
-
-pub mod quagmire;
-pub use quagmire::Quagmire;
 
 use crate::errors::CipherError;
 use rand::prelude::StdRng;
@@ -89,11 +66,4 @@ pub trait Cipher {
     fn decrypt(&self, text: &str) -> Result<String, CipherError>;
     fn randomize(&mut self, rng: &mut StdRng);
     fn reset(&mut self);
-}
-
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum PolyMode {
-    CylicKey,
-    Autokey,
-    ProgKey,
 }

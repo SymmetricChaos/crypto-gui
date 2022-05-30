@@ -1,4 +1,4 @@
-use super::Cipher;
+use crate::ciphers::Cipher;
 use crate::errors::CipherError;
 use crate::text_aux::{shuffled_str, Alphabet, PresetAlphabet};
 use itertools::Itertools;

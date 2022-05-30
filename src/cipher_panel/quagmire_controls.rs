@@ -1,7 +1,6 @@
 use super::{generic_components::*, View};
 use crate::{
-    ciphers::{Quagmire, quagmire::QuagmireVersion},
-    egui_aux::mono,
+    egui_aux::mono, ciphers::polyalphabetic::{Quagmire, QuagmireVersion},
 };
 use eframe::egui::Ui;
 use rand::prelude::StdRng;

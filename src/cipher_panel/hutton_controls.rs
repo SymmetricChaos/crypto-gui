@@ -1,7 +1,6 @@
 use super::{generic_components::*, View};
 use crate::{
-    ciphers::{hutton::HuttonVer, Hutton},
-    egui_aux::mono,
+    egui_aux::mono, ciphers::polyalphabetic::{Hutton, HuttonVersion},
 };
 use eframe::egui::Ui;
 use rand::prelude::StdRng;
@@ -19,8 +18,8 @@ impl View for Hutton {
         ui.add_space(16.0);
         ui.label("Select Version");
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.version, HuttonVer::V1, "V1");
-            ui.selectable_value(&mut self.version, HuttonVer::V2, "V2");
+            ui.selectable_value(&mut self.version, HuttonVersion::V1, "V1");
+            ui.selectable_value(&mut self.version, HuttonVersion::V2, "V2");
         });
 
         ui.add_space(16.0);

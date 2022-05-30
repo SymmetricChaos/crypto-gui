@@ -1,7 +1,7 @@
+use crate::ciphers::Cipher;
 use crate::errors::CipherError;
 use crate::text_aux::vecstring::VecString;
 
-use super::Cipher;
 
 pub struct Chaocipher {
     pub left_string: String,

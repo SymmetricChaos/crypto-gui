@@ -1,5 +1,6 @@
+use crate::ciphers::polyalphabetic::Bazeries;
+
 use super::{generic_components::*, View};
-use crate::ciphers::Bazeries;
 use eframe::egui::{self, Slider, Ui};
 use rand::prelude::StdRng;
 

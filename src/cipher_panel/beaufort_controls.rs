@@ -1,5 +1,6 @@
+use crate::ciphers::polyalphabetic::{Beaufort, PolyMode};
+
 use super::{generic_components::*, View};
-use crate::ciphers::{Beaufort, PolyMode};
 use eframe::egui::{Slider, TextEdit, TextStyle, Ui};
 use rand::prelude::StdRng;
 

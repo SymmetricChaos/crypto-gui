@@ -1,18 +1,16 @@
 use crate::{
     errors::CipherError,
-    text_aux::{keyed_alphabet, shuffled_str, Alphabet, PresetAlphabet, VecString},
+    text_aux::{keyed_alphabet, shuffled_str, Alphabet, PresetAlphabet, VecString}, ciphers::Cipher,
 };
 
-use super::Cipher;
-
 #[derive(PartialEq, Eq)]
-pub enum HuttonVer {
+pub enum HuttonVersion {
     V1,
     V2,
 }
 
 pub struct Hutton {
-    pub version: HuttonVer,
+    pub version: HuttonVersion,
     pub alphabet_string: String,
     alphabet: Alphabet,
     pub key_string: String,
@@ -24,7 +22,7 @@ pub struct Hutton {
 impl Default for Hutton {
     fn default() -> Self {
         Self {
-            version: HuttonVer::V1,
+            version: HuttonVersion::V1,
             alphabet_string: String::from(PresetAlphabet::BasicLatin),
             alphabet: Alphabet::from(PresetAlphabet::BasicLatin),
             key_string: Default::default(),
@@ -88,7 +86,7 @@ impl Cipher for Hutton {
             // add the password number to the position of the character in the keyed alphabet
             let mut value = inner_alpha.get_pos(c).unwrap() + p;
             // in Version 2 add the plain alphabet position of the first symbol in the keyed alphabet
-            if self.version == HuttonVer::V2 {
+            if self.version == HuttonVersion::V2 {
                 value += self
                     .alphabet
                     .get_pos_of(inner_alpha.get_char(0).unwrap())
@@ -113,7 +111,7 @@ impl Cipher for Hutton {
         let offset = self.alphabet.len() * 2;
         for (c, p) in text.chars().zip(self.password_values_cycle()) {
             let mut value = offset + inner_alphabet.get_pos(c).unwrap() - p;
-            if self.version == HuttonVer::V2 {
+            if self.version == HuttonVersion::V2 {
                 value -= self
                     .alphabet
                     .get_pos_of(inner_alphabet.get_char(0).unwrap())
@@ -165,7 +163,7 @@ mod hutton_tests {
     #[test]
     fn encrypt_test_v2() {
         let mut cipher = Hutton::default();
-        cipher.version = HuttonVer::V2;
+        cipher.version = HuttonVersion::V2;
         cipher.assign_password("VUVUZELAS");
         cipher.assign_key("OBSTACLE");
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_V2);
@@ -174,7 +172,7 @@ mod hutton_tests {
     #[test]
     fn decrypt_test_v2() {
         let mut cipher = Hutton::default();
-        cipher.version = HuttonVer::V2;
+        cipher.version = HuttonVersion::V2;
         cipher.assign_password("VUVUZELAS");
         cipher.assign_key("OBSTACLE");
         assert_eq!(cipher.decrypt(CIPHERTEXT_V2).unwrap(), PLAINTEXT);

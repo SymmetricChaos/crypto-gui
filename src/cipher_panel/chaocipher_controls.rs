@@ -1,5 +1,5 @@
 use super::{generic_components::*, View};
-use crate::ciphers::Chaocipher;
+use crate::ciphers::polyalphabetic::Chaocipher;
 use eframe::egui::Ui;
 use rand::prelude::StdRng;
 

@@ -2,8 +2,7 @@ use std::{iter::Cycle, slice::Iter};
 
 use rand::{prelude::StdRng};
 
-use crate::{text_aux::{Alphabet, PresetAlphabet, random_sample_replace}, errors::CipherError};
-use super::Cipher;
+use crate::{text_aux::{Alphabet, PresetAlphabet, random_sample_replace}, errors::CipherError, ciphers::Cipher};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum QuagmireVersion {

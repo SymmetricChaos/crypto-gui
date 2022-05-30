@@ -1,7 +1,7 @@
 use self::generic_components::encrypt_decrypt;
 use crate::{
     cipher_id::CipherID,
-    ciphers::{polybius::*, tactical::*, *},
+    ciphers::{polybius::*, tactical::*, *, polyalphabetic::{Vigenere, Beaufort, Bazeries, Porta, Quagmire, Chaocipher, Hutton, Alberti}},
 };
 use eframe::egui::{self, Color32, RichText, TextEdit, TextStyle};
 use rand::prelude::StdRng;
@@ -119,7 +119,9 @@ pub struct CipherControlPanel {
     m94: M94,
     bazeries: Bazeries,
     porta: Porta,
-    quagmire: Quagmire,
+    quagmire: Quagmire,    
+    chaocipher: Chaocipher,
+    hutton: Hutton,
 
     playfair: Playfair,
     slidefair: Slidefair,
@@ -138,9 +140,6 @@ pub struct CipherControlPanel {
     bifid: Bifid,
     trifid: Trifid,
     checkerboard: StraddlingCheckerboard,
-
-    chaocipher: Chaocipher,
-    hutton: Hutton,
 
     batco: Batco,
     dryad: Dryad,
