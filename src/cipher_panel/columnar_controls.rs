@@ -1,5 +1,6 @@
+use crate::ciphers::transposition::Columnar;
+
 use super::{generic_components::*, View};
-use crate::ciphers::Columnar;
 use eframe::egui::Ui;
 use rand::prelude::StdRng;
 

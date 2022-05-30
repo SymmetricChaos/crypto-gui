@@ -1,5 +1,7 @@
+use crate::ciphers::transposition::RailFence;
+
 use super::{generic_components::*, View};
-use crate::ciphers::RailFence;
+
 use eframe::egui::{Slider, Ui};
 use rand::prelude::StdRng;
 

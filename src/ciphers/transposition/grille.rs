@@ -1,11 +1,6 @@
 use std::ops::Range;
 
-use super::Cipher;
-use crate::{
-    errors::CipherError,
-    grid::{Grid, Symbol},
-    text_aux::PresetAlphabet,
-};
+use crate::{ciphers::Cipher, errors::CipherError, grid::{Grid, Symbol}, text_aux::PresetAlphabet};
 use itertools::Itertools;
 use rand::{prelude::StdRng, Rng, SeedableRng};
 

@@ -2,7 +2,7 @@ use eframe::egui::{Color32, RichText, Ui};
 use rand::prelude::StdRng;
 
 use super::{generic_components::*, View};
-use crate::{ciphers::FourSquare, text_aux::PresetAlphabet::*};
+use crate::{text_aux::PresetAlphabet::*, ciphers::playfair::FourSquare};
 
 impl View for FourSquare {
     fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {

@@ -1,5 +1,5 @@
 use super::{generic_components::*, View};
-use crate::{ciphers::Affine, math_functions::prime_factors};
+use crate::{math_functions::prime_factors, ciphers::substitution::Affine};
 use eframe::egui::{Slider, Ui};
 use rand::prelude::StdRng;
 

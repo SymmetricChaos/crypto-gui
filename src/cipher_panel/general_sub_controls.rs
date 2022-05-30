@@ -1,5 +1,5 @@
+use crate::ciphers::substitution::GeneralSubstitution;
 use super::{generic_components::*, View};
-use crate::ciphers::GeneralSubstitution;
 use eframe::egui::Ui;
 use rand::prelude::StdRng;
 

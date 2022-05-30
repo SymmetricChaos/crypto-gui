@@ -1,8 +1,7 @@
-use super::Cipher;
 use crate::{
     errors::CipherError,
     math_functions::mul_inv,
-    text_aux::{VecString, PresetAlphabet::*},
+    text_aux::{VecString, PresetAlphabet::*}, ciphers::Cipher,
 };
 use rand::{prelude::StdRng, Rng};
 

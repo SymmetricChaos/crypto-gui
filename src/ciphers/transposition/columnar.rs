@@ -1,8 +1,7 @@
 use num::Integer;
 use rand::prelude::StdRng;
 
-use super::Cipher;
-use crate::errors::CipherError;
+use crate::{errors::CipherError, ciphers::Cipher};
 use crate::grid::{Grid, Symbol};
 use crate::text_aux::{random_sample_replace, rank_str, PresetAlphabet::*};
 

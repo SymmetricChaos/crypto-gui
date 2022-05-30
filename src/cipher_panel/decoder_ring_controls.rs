@@ -1,5 +1,6 @@
+use crate::ciphers::substitution::DecoderRing;
+
 use super::{generic_components::*, View};
-use crate::ciphers::DecoderRing;
 use eframe::egui::{Slider, Ui};
 use rand::prelude::StdRng;
 

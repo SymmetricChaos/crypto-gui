@@ -2,7 +2,7 @@ use eframe::egui::{Color32, RichText, TextEdit, TextStyle, Ui};
 use rand::prelude::StdRng;
 
 use super::{generic_components::*, View};
-use crate::{ciphers::Playfair, text_aux::PresetAlphabet::*};
+use crate::{ciphers::playfair::Playfair, text_aux::PresetAlphabet::*};
 
 impl View for Playfair {
     fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {

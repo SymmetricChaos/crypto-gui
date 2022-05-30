@@ -1,7 +1,6 @@
-use super::Cipher;
 use crate::{
     errors::CipherError,
-    text_aux::{shuffled_str, VecString, PresetAlphabet},
+    text_aux::{shuffled_str, VecString, PresetAlphabet}, ciphers::Cipher,
 };
 use rand::prelude::StdRng;
 

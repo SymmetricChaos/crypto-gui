@@ -1,5 +1,6 @@
+use crate::ciphers::substitution::Caesar;
+
 use super::{generic_components::*, View};
-use crate::ciphers::Caesar;
 use eframe::egui::{Slider, Ui};
 use rand::prelude::StdRng;
 

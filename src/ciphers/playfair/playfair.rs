@@ -1,10 +1,9 @@
-use super::Cipher;
 use crate::{
     errors::CipherError,
     text_aux::{
         keyed_alphabet, shuffled_str,
         PresetAlphabet::{self, *},
-    },
+    }, ciphers::Cipher,
 };
 use num::integer::Roots;
 use rand::prelude::StdRng;

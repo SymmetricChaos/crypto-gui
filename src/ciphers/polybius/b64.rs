@@ -1,5 +1,5 @@
 use crate::{
-    ciphers::{Cipher, Columnar},
+    ciphers::{Cipher, transposition::Columnar},
     errors::CipherError,
     text_aux::PresetAlphabet::*,
 };

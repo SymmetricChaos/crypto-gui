@@ -1,5 +1,7 @@
+use crate::ciphers::transposition::Scytale;
+
 use super::{generic_components::*, View};
-use crate::ciphers::Scytale;
+
 use eframe::egui::{Slider, Ui};
 use rand::prelude::StdRng;
 

@@ -1,4 +1,4 @@
-use super::Cipher;
+use crate::ciphers::Cipher;
 use crate::errors::CipherError;
 use crate::text_aux::{prep_text, VecString, PresetAlphabet::*};
 use rand::{prelude::StdRng, Rng};

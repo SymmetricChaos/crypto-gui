@@ -1,8 +1,9 @@
 use eframe::egui::{RichText, TextEdit, TextStyle, Ui};
 use rand::prelude::StdRng;
 
+use crate::ciphers::playfair::Slidefair;
+
 use super::{generic_components::*, View};
-use crate::ciphers::Slidefair;
 
 impl View for Slidefair {
     fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {

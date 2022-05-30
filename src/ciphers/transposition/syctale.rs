@@ -1,8 +1,6 @@
 use num::Integer;
 use rand::{prelude::StdRng, Rng};
-
-use super::Cipher;
-use crate::errors::CipherError;
+use crate::{errors::CipherError, ciphers::Cipher};
 
 pub struct Scytale {
     pub key: usize,

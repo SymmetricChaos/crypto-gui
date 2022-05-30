@@ -1,5 +1,6 @@
+use crate::ciphers::transposition::Grille;
+
 use super::{generic_components::*, View};
-use crate::ciphers::Grille;
 use eframe::egui::{TextEdit, TextStyle, Ui};
 use rand::prelude::StdRng;
 
