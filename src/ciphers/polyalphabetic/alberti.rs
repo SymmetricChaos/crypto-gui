@@ -1,26 +1,38 @@
 use crate::ciphers::Cipher;
 use crate::errors::CipherError;
-use crate::text_aux::{Alphabet, PresetAlphabet::*};
+use crate::text_aux::text_functions::validate_text;
+use crate::text_aux::{VecString, PresetAlphabet::*};
 use rand::{prelude::StdRng, Rng};
 use std::fmt::Display;
 
 pub struct Alberti {
     pub fixed_alphabet_string: String,
-    fixed_alphabet: Alphabet,
+    fixed_alphabet: VecString,
     pub moving_alphabet_string: String,
-    moving_alphabet: Alphabet,
+    moving_alphabet: VecString,
     pub start_index: usize,
 }
 
 impl Alberti {
     pub fn set_fixed_alphabet(&mut self) {
-        self.fixed_alphabet = Alphabet::from(&self.fixed_alphabet_string);
+        self.fixed_alphabet = VecString::unique_from(&self.fixed_alphabet_string);
+    }    
+    
+    pub fn assign_fixed_alphabet(&mut self, alphabet: &str) {
+        self.fixed_alphabet_string = alphabet.to_string();
+        self.set_fixed_alphabet()
     }
 
     pub fn set_moving_alphabet(&mut self) {
-        self.moving_alphabet = Alphabet::from(&self.moving_alphabet_string);
+        self.moving_alphabet = VecString::unique_from(&self.moving_alphabet_string);
     }
 
+    pub fn assign_moving_alphabet(&mut self, alphabet: &str) {
+        self.moving_alphabet_string = alphabet.to_string();
+        self.set_moving_alphabet()
+    }
+
+    // Unwrap justified by checks made in encrypt()
     fn encrypt_char(&self, symbol: char, index: usize) -> char {
         let position = self.fixed_alphabet.get_pos_of(symbol).unwrap();
         self.moving_alphabet
@@ -28,6 +40,7 @@ impl Alberti {
             .unwrap()
     }
 
+    // Unwrap justified by checks made in decrypt()
     fn decrypt_char(&self, symbol: char, index: usize) -> char {
         let position = self.moving_alphabet.get_pos_of(symbol).unwrap();
         self.fixed_alphabet
@@ -42,6 +55,7 @@ impl Alberti {
 
 impl Cipher for Alberti {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+        validate_text(text, &self.fixed_alphabet)?;
         let mut index = self.start_index.clone();
         let mut out = String::with_capacity(text.len());
         for s in text.chars() {
@@ -58,6 +72,7 @@ impl Cipher for Alberti {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+        validate_text(text, &self.moving_alphabet)?;
         let mut index = self.start_index.clone();
         let mut out = String::with_capacity(text.len());
         for s in text.chars() {
@@ -87,9 +102,9 @@ impl Default for Alberti {
     fn default() -> Self {
         Self {
             fixed_alphabet_string: String::from(BasicLatin),
-            fixed_alphabet: Alphabet::from(BasicLatin),
+            fixed_alphabet: VecString::from(BasicLatin),
             moving_alphabet_string: String::from(BasicLatin.string().to_ascii_lowercase()),
-            moving_alphabet: Alphabet::from(BasicLatin.string().to_ascii_lowercase()),
+            moving_alphabet: VecString::from(BasicLatin.string().to_ascii_lowercase()),
             start_index: 0,
         }
     }

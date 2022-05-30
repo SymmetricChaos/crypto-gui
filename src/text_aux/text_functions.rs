@@ -2,6 +2,8 @@ use crate::errors::CipherError;
 use itertools::Itertools;
 use rand::prelude::{IteratorRandom, SliceRandom, StdRng};
 
+use super::VecString;
+
 pub fn shuffled_str(s: &str, rng: &mut StdRng) -> String {
     let mut characters = s.chars().collect::<Vec<char>>();
     let slice = characters.as_mut_slice();
@@ -170,6 +172,18 @@ pub fn prep_text(text: &str, alphabet: &str) -> Result<String, CipherError> {
         }
     }
     Ok(out)
+}
+
+pub fn validate_text(text: &str, alphabet: &VecString) -> Result<(),CipherError> {
+    if text.len() == 0 {
+        return Err(CipherError::Input(String::from("No input text provided")));
+    }
+    for c in text.chars() {
+        if !alphabet.contains(c) {
+            return Err(CipherError::invalid_input_char(c));
+        }
+    }
+    Ok(())
 }
 
 #[cfg(test)]

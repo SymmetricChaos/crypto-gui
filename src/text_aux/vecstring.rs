@@ -1,6 +1,8 @@
+use itertools::Itertools;
 use rand::Rng;
 use rand::prelude::{SliceRandom, StdRng};
 
+use super::keyed_alphabet;
 use super::preset_alphabet::PresetAlphabet;
 use std::collections::vec_deque::{Iter, IterMut};
 use std::collections::VecDeque;
@@ -27,6 +29,14 @@ impl VecString {
         VecString(VecDeque::with_capacity(n))
     }
 
+    pub fn keyed_alphabet(key: &str, alphabet: &str) -> Self {
+        Self(keyed_alphabet(key, alphabet).chars().collect())
+    }
+
+    pub fn unique_from(text: &str) -> Self {
+        Self(text.chars().unique().collect())
+    }
+
     ////////////////////
     // getter methods //
     ////////////////////
@@ -35,8 +45,16 @@ impl VecString {
         self.0.iter().nth(n).map(|c| *c)
     }
 
+    pub fn get_char_at(&self, n: usize) -> Option<char> {
+        self.0.iter().nth(n).map(|c| *c)
+    }
+
     // Get the position of some character
     pub fn get_pos(&self, c: char) -> Option<usize> {
+        self.0.iter().position(|x| x == &c)
+    }
+
+    pub fn get_pos_of(&self, c: char) -> Option<usize> {
         self.0.iter().position(|x| x == &c)
     }
 
@@ -59,12 +77,19 @@ impl VecString {
         self.0.get_mut(idx)
     }
 
+    // Get the character that is some (positive or negative) offset different from a provided char
+    pub fn get_shifted_char(&self, c: char, offset: i32) -> Option<char> {
+        let p = self.get_pos_of(c)?;
+        self.get_char_offset(p, offset)
+    }
+
     // Get one random character
     pub fn get_rand_char(&self, rng: &mut StdRng) -> char {
         self.get_char(rng.gen_range(0..self.len())).unwrap()
     }
 
     // Get multiple random characters, replacing each time
+    // For sampling without replacement shuffle and iterate
     pub fn get_rand_chars_replace(&self, n: usize, rng: &mut StdRng) -> Vec<char> {
         let mut out = Vec::with_capacity(n);
         for i in out.iter_mut() {
@@ -117,8 +142,8 @@ impl VecString {
         self.0.iter_mut()
     }
 
-    pub fn chars(&self) -> Iter<'_, char> {
-        self.0.iter()
+    pub fn chars(&self) -> impl Iterator<Item = char> + '_ {
+        self.0.iter().map(|c| *c)
     }
 
     ////////////////////////
@@ -199,14 +224,14 @@ impl VecString {
         vs
     }
 
-    // Does nothing if either index out of bounds
+    // Swap i and j, does nothing if either index out of bounds
     pub fn swap_indicies(&mut self, i: usize, j: usize) {
         if i < self.len() && j < self.len() {
             self.0.swap(i, j)
         }
     }
 
-    // Does nothing is either character doesn't exist
+    // Swap the first instance of a with the first instance of b, does nothing if either does not exist
     pub fn swap_chars(&mut self, a: char, b: char) {
         if let (Some(i), Some(j)) = (self.get_pos(a), self.get_pos(b)) {
             self.0.swap(i, j)

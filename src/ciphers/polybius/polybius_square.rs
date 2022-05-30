@@ -1,7 +1,7 @@
 use crate::{
     ciphers::Cipher,
     errors::CipherError,
-    text_aux::{keyed_alphabet, shuffled_str, Alphabet, PresetAlphabet, PresetAlphabet::*},
+    text_aux::{shuffled_str, VecString, PresetAlphabet, PresetAlphabet::*},
 };
 use itertools::Itertools;
 //use num::integer::Roots;
@@ -10,9 +10,9 @@ use std::fmt;
 
 pub struct PolybiusSquare {
     pub alphabet_string: String,
-    grid: Alphabet,
+    grid: VecString,
     pub labels_string: String,
-    labels: Alphabet,
+    labels: VecString,
     side_len: usize,
     pub key_word: String,
 }
@@ -21,9 +21,9 @@ impl Default for PolybiusSquare {
     fn default() -> Self {
         Self {
             alphabet_string: String::from(PresetAlphabet::BasicLatinNoQ),
-            grid: Alphabet::from(PresetAlphabet::BasicLatinNoQ),
+            grid: VecString::from(PresetAlphabet::BasicLatinNoQ),
             side_len: 5,
-            labels: Alphabet::from(PresetAlphabet::Digits1),
+            labels: VecString::from(PresetAlphabet::Digits1),
             labels_string: PresetAlphabet::Digits1.string(),
             key_word: String::new(),
         }
@@ -33,18 +33,18 @@ impl Default for PolybiusSquare {
 impl PolybiusSquare {
     pub fn assign_key(&mut self, key_word: &str) {
         self.key_word = key_word.to_string();
-        self.grid = Alphabet::from(keyed_alphabet(&self.key_word, &self.alphabet_string));
+        self.grid = VecString::keyed_alphabet(&self.key_word, &self.alphabet_string);
     }
 
     pub fn set_key(&mut self) {
-        self.grid = Alphabet::from(keyed_alphabet(&self.key_word, &self.alphabet_string));
+        self.grid = VecString::keyed_alphabet(&self.key_word, &self.alphabet_string);
     }
 
     pub fn assign_alphabet(&mut self, mode: PresetAlphabet) {
         match mode {
             BasicLatinNoJ | BasicLatinNoQ | BasicLatinWithDigits | Base64 => {
                 self.alphabet_string = String::from(mode);
-                self.grid = Alphabet::from(mode);
+                self.grid = VecString::from(mode);
                 self.side_len = (mode.len() as f64).sqrt().ceil() as usize;
             }
             _ => (),
@@ -60,7 +60,7 @@ impl PolybiusSquare {
             ));
         }
 
-        self.grid = Alphabet::from(&self.alphabet_string);
+        self.grid = VecString::unique_from(&self.alphabet_string);
         self.side_len = (new_alpha_len as f64).sqrt().ceil() as usize;
 
         Ok(())
@@ -68,11 +68,11 @@ impl PolybiusSquare {
 
     pub fn assign_labels(&mut self, labels: &str) {
         self.labels_string = labels.to_string();
-        self.labels = Alphabet::from(&self.labels_string);
+        self.labels = VecString::unique_from(&self.labels_string);
     }
 
     pub fn set_labels(&mut self) {
-        self.labels = Alphabet::from(&self.labels_string);
+        self.labels = VecString::unique_from(&self.labels_string);
     }
 
     fn pairs(&self, text: &str) -> Result<Vec<(char, char)>, CipherError> {

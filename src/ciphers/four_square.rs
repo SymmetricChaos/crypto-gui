@@ -2,7 +2,7 @@ use super::Cipher;
 use crate::{
     errors::CipherError,
     text_aux::{
-        keyed_alphabet, shuffled_str, Alphabet,
+        shuffled_str, VecString,
         PresetAlphabet::{self, *},
     },
 };
@@ -11,9 +11,9 @@ use num::integer::Roots;
 use rand::prelude::StdRng;
 
 pub struct FourSquare {
-    pub alphabet: Alphabet,
-    square1: Alphabet,
-    square2: Alphabet,
+    pub alphabet: VecString,
+    square1: VecString,
+    square2: VecString,
     pub key_word1: String,
     pub key_word2: String,
     grid_side_len: usize,
@@ -22,9 +22,9 @@ pub struct FourSquare {
 impl Default for FourSquare {
     fn default() -> Self {
         Self {
-            alphabet: Alphabet::from(PresetAlphabet::BasicLatinNoQ),
-            square1: Alphabet::from(PresetAlphabet::BasicLatinNoQ),
-            square2: Alphabet::from(PresetAlphabet::BasicLatinNoQ),
+            alphabet: VecString::from(PresetAlphabet::BasicLatinNoQ),
+            square1: VecString::from(PresetAlphabet::BasicLatinNoQ),
+            square2: VecString::from(PresetAlphabet::BasicLatinNoQ),
             key_word1: String::new(),
             key_word2: String::new(),
             grid_side_len: 5,
@@ -35,26 +35,26 @@ impl Default for FourSquare {
 impl FourSquare {
     pub fn assign_key1(&mut self, key_word: &str) {
         self.key_word1 = key_word.to_string();
-        self.square1 = Alphabet::from(keyed_alphabet(&self.key_word1, &self.alphabet.to_string()));
+        self.set_key1();
     }
 
     pub fn assign_key2(&mut self, key_word: &str) {
         self.key_word2 = key_word.to_string();
-        self.square2 = Alphabet::from(keyed_alphabet(&self.key_word2, &self.alphabet.to_string()));
+        self.set_key2();
     }
 
     pub fn set_key1(&mut self) {
-        self.square1 = Alphabet::from(keyed_alphabet(&self.key_word1, &self.alphabet.to_string()));
+        self.square1 = VecString::keyed_alphabet(&self.key_word1, &self.alphabet.to_string());
     }
 
     pub fn set_key2(&mut self) {
-        self.square2 = Alphabet::from(keyed_alphabet(&self.key_word2, &self.alphabet.to_string()));
+        self.square2 = VecString::keyed_alphabet(&self.key_word2, &self.alphabet.to_string());
     }
 
     pub fn assign_alphabet(&mut self, mode: PresetAlphabet) {
         match mode {
             BasicLatinNoJ | BasicLatinNoQ | BasicLatinWithDigits | Base64 => {
-                self.alphabet = Alphabet::from(mode);
+                self.alphabet = VecString::from(mode);
                 self.set_key1();
                 self.set_key2();
                 self.grid_side_len = mode.len().sqrt();
@@ -78,7 +78,7 @@ impl FourSquare {
     fn char_to_position(
         &self,
         symbol: char,
-        alphabet: &Alphabet,
+        alphabet: &VecString,
     ) -> Result<(usize, usize), CipherError> {
         let num = match alphabet.get_pos_of(symbol) {
             Some(n) => n,
@@ -87,7 +87,7 @@ impl FourSquare {
         Ok((num / self.grid_side_len, num % self.grid_side_len))
     }
 
-    fn position_to_char(&self, position: (usize, usize), alphabet: &Alphabet) -> char {
+    fn position_to_char(&self, position: (usize, usize), alphabet: &VecString) -> char {
         let num = position.0 * self.grid_side_len + position.1;
         alphabet.get_char_at(num).unwrap()
     }

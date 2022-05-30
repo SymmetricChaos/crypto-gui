@@ -1,6 +1,7 @@
 use crate::ciphers::Cipher;
 use crate::errors::CipherError;
-use crate::text_aux::vecstring::VecString;
+use crate::text_aux::VecString;
+use crate::text_aux::text_functions::validate_text;
 
 
 pub struct Chaocipher {
@@ -29,11 +30,11 @@ impl Chaocipher {
     }
 
     pub fn set_left(&mut self) {
-        self.left = VecString::from(&self.left_string)
+        self.left = VecString::unique_from(&self.left_string)
     }
 
     pub fn set_right(&mut self) {
-        self.right = VecString::from(&self.right_string)
+        self.right = VecString::unique_from(&self.right_string)
     }
 
     pub fn assign_left(&mut self, s: &str) {
@@ -45,6 +46,7 @@ impl Chaocipher {
         self.right_string = String::from(s);
         self.set_right();
     }
+
 }
 
 impl Default for Chaocipher {
@@ -60,6 +62,9 @@ impl Default for Chaocipher {
 
 impl Cipher for Chaocipher {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+
+        validate_text(text, &self.left)?;
+
         let mut left = self.left.clone();
         let mut right = self.right.clone();
 

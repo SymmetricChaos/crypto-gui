@@ -2,7 +2,7 @@ use std::{iter::Cycle, slice::Iter};
 
 use rand::{prelude::StdRng};
 
-use crate::{text_aux::{Alphabet, PresetAlphabet, random_sample_replace}, errors::CipherError, ciphers::Cipher};
+use crate::{text_aux::{VecString, PresetAlphabet, random_sample_replace}, errors::CipherError, ciphers::Cipher};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum QuagmireVersion {
@@ -15,11 +15,11 @@ pub enum QuagmireVersion {
 pub struct Quagmire {
     pub version: QuagmireVersion,
     pub alphabet_string: String,
-    alphabet: Alphabet,
+    alphabet: VecString,
     pub pt_key_string: String,
-    pt_key: Alphabet,
+    pt_key: VecString,
     pub ct_key_string: String,
-    ct_key: Alphabet,
+    ct_key: VecString,
     pub ind_key_string: String,
     ind_key: Vec<i32>,
     pub indicator: char,
@@ -30,11 +30,11 @@ impl Default for Quagmire {
         Self{
             version: QuagmireVersion::V1,
             alphabet_string: String::from(PresetAlphabet::BasicLatin),
-            alphabet: Alphabet::from(PresetAlphabet::BasicLatin),
+            alphabet: VecString::from(PresetAlphabet::BasicLatin),
             pt_key_string: String::from(PresetAlphabet::BasicLatin),
-            pt_key: Alphabet::from(PresetAlphabet::BasicLatin),
+            pt_key: VecString::from(PresetAlphabet::BasicLatin),
             ct_key_string: String::from(PresetAlphabet::BasicLatin),
-            ct_key: Alphabet::from(PresetAlphabet::BasicLatin),
+            ct_key: VecString::from(PresetAlphabet::BasicLatin),
             ind_key_string: String::new(),
             ind_key: Vec::new(),
             indicator: 'A',
@@ -50,7 +50,7 @@ impl Quagmire {
     }
 
     pub fn set_alphabet(&mut self) {
-        self.alphabet = Alphabet::from(&self.alphabet_string);
+        self.alphabet = VecString::unique_from(&self.alphabet_string);
     }
 
     pub fn show_alphabet(&self) -> String {
@@ -64,7 +64,7 @@ impl Quagmire {
     }
 
     pub fn set_pt_key(&mut self) {
-        self.pt_key = Alphabet::from_key(&self.pt_key_string, &self.alphabet_string);
+        self.pt_key = VecString::keyed_alphabet(&self.pt_key_string, &self.alphabet_string);
     }
 
     pub fn show_pt_key(&self) -> String {
@@ -79,7 +79,7 @@ impl Quagmire {
     }
 
     pub fn set_ct_key(&mut self) {
-        self.ct_key = Alphabet::from_key(&self.ct_key_string, &self.alphabet_string);
+        self.ct_key = VecString::keyed_alphabet(&self.ct_key_string, &self.alphabet_string);
     }
 
     pub fn show_ct_key(&self) -> String {

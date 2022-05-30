@@ -1,6 +1,6 @@
 use crate::{
     errors::CipherError,
-    text_aux::{keyed_alphabet, shuffled_str, Alphabet, PresetAlphabet, VecString}, ciphers::Cipher,
+    text_aux::{keyed_alphabet, shuffled_str, VecString, PresetAlphabet}, ciphers::Cipher,
 };
 
 #[derive(PartialEq, Eq)]
@@ -12,7 +12,7 @@ pub enum HuttonVersion {
 pub struct Hutton {
     pub version: HuttonVersion,
     pub alphabet_string: String,
-    alphabet: Alphabet,
+    alphabet: VecString,
     pub key_string: String,
     keyed_alpha: VecString,
     pub password_string: String,
@@ -24,9 +24,9 @@ impl Default for Hutton {
         Self {
             version: HuttonVersion::V1,
             alphabet_string: String::from(PresetAlphabet::BasicLatin),
-            alphabet: Alphabet::from(PresetAlphabet::BasicLatin),
+            alphabet: VecString::from(PresetAlphabet::BasicLatin),
             key_string: Default::default(),
-            keyed_alpha: VecString::from(""),
+            keyed_alpha: VecString::with_capacity(26),
             password_string: Default::default(),
             password: Default::default(),
         }
@@ -39,7 +39,7 @@ impl Hutton {
     }
 
     pub fn set_alphabet(&mut self) {
-        self.alphabet = Alphabet::from(&self.alphabet_string);
+        self.alphabet = VecString::unique_from(&self.alphabet_string);
     }
 
     pub fn assign_alphabet(&mut self, alphabet: &str) {

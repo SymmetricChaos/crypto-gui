@@ -1,12 +1,12 @@
 use crate::ciphers::Cipher;
 use crate::errors::CipherError;
-use crate::text_aux::{shuffled_str, Alphabet, PresetAlphabet};
+use crate::text_aux::{shuffled_str, VecString, PresetAlphabet};
 use itertools::Itertools;
 use rand::prelude::StdRng;
 
 pub struct Bazeries {
     pub alphabet_string: String,
-    alphabet: Alphabet,
+    alphabet: VecString,
     pub wheels: Vec<String>,
     pub offset: usize,
 }
@@ -17,7 +17,7 @@ impl Bazeries {
     }
 
     pub fn set_alphabet(&mut self) {
-        self.alphabet = Alphabet::from(&self.alphabet_string);
+        self.alphabet = VecString::unique_from(&self.alphabet_string);
     }
 
     pub fn add_wheel(&mut self, rng: &mut StdRng) {
@@ -54,7 +54,7 @@ impl Default for Bazeries {
     fn default() -> Self {
         // 26 Random wheels
         // Maybe rotate these to be pseudo alphabetical
-        let alphabet = Alphabet::from(PresetAlphabet::BasicLatin);
+        let alphabet = VecString::from(PresetAlphabet::BasicLatin);
         let alphabet_string = String::from(PresetAlphabet::BasicLatin);
         let wheels = [
             "FDWCBAGJOEPKRSITUQLHMZNXYV",

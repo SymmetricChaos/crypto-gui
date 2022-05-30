@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 
 use crate::{
     errors::CipherError,
-    text_aux::{random_sample_replace, Alphabet, PresetAlphabet}, ciphers::Cipher,
+    text_aux::{random_sample_replace, VecString, PresetAlphabet}, ciphers::Cipher,
 };
 use rand::prelude::StdRng;
 
@@ -10,7 +10,7 @@ use super::PolyMode;
 
 pub struct Vigenere {
     pub key_words: [String; 5],
-    pub alphabet: Alphabet,
+    pub alphabet: VecString,
     alphabet_string: String,
     pub prog_shift: usize,
     pub mode: PolyMode,
@@ -27,7 +27,7 @@ impl Default for Vigenere {
                 String::new(),
                 String::new(),
             ],
-            alphabet: Alphabet::from(PresetAlphabet::BasicLatin),
+            alphabet: VecString::from(PresetAlphabet::BasicLatin),
             alphabet_string: String::from(PresetAlphabet::BasicLatin),
             mode: PolyMode::CylicKey,
             prog_shift: 0,
@@ -118,7 +118,7 @@ impl Vigenere {
     }
 
     pub fn control_alphabet(&mut self) -> &mut String {
-        self.alphabet = Alphabet::from(&self.alphabet_string);
+        self.alphabet = VecString::unique_from(&self.alphabet_string);
         &mut self.alphabet_string
     }
 

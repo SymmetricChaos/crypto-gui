@@ -1,11 +1,11 @@
 use super::Cipher;
 use crate::errors::CipherError;
-use crate::text_aux::{prep_text, Alphabet, PresetAlphabet::*};
+use crate::text_aux::{prep_text, VecString, PresetAlphabet::*};
 use rand::{prelude::StdRng, Rng};
 
 pub struct Caesar {
     pub shift: i32,
-    pub alphabet: Alphabet,
+    pub alphabet: VecString,
     pub alphabet_string: String,
 }
 
@@ -28,11 +28,11 @@ impl Caesar {
     }
 
     pub fn set_alphabet(&mut self) {
-        self.alphabet = Alphabet::from(&self.alphabet_string);
+        self.alphabet = VecString::unique_from(&self.alphabet_string);
     }
 
     pub fn control_alphabet(&mut self) -> &mut String {
-        self.alphabet = Alphabet::from(&self.alphabet_string);
+        self.alphabet = VecString::unique_from(&self.alphabet_string);
         &mut self.alphabet_string
     }
 
@@ -50,7 +50,7 @@ impl Default for Caesar {
     fn default() -> Self {
         Self {
             shift: 0,
-            alphabet: Alphabet::from(BasicLatin),
+            alphabet: VecString::from(BasicLatin),
             alphabet_string: String::from(BasicLatin),
         }
     }

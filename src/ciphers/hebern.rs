@@ -3,7 +3,7 @@ use std::fmt;
 use super::Cipher;
 use crate::{
     errors::CipherError,
-    text_aux::{Alphabet, PresetAlphabet},
+    text_aux::{VecString, PresetAlphabet},
 };
 
 #[derive(Clone, Debug)]
@@ -16,7 +16,7 @@ pub struct HebernRotor {
 }
 
 impl HebernRotor {
-    pub fn new(wiring_str: &str, alphabet: &Alphabet) -> Result<HebernRotor, CipherError> {
+    pub fn new(wiring_str: &str, alphabet: &VecString) -> Result<HebernRotor, CipherError> {
         let size = wiring_str.chars().count();
         let mut wiring_rtl = vec![0; size];
         let mut wiring_ltr = vec![0; size];
@@ -69,14 +69,14 @@ impl fmt::Display for HebernRotor {
 pub struct HebernRotorCage {
     pub rotors: Vec<HebernRotor>,
     pub alphabet_string: String,
-    alphabet: Alphabet,
+    alphabet: VecString,
     counters: Vec<u8>,
     rotor_size: u8,
 }
 
 impl HebernRotorCage {
     pub fn control_alphabet(&mut self) -> &mut String {
-        self.alphabet = Alphabet::from(&self.alphabet_string);
+        self.alphabet = VecString::unique_from(&self.alphabet_string);
         &mut self.alphabet_string
     }
 
@@ -123,7 +123,7 @@ impl HebernRotorCage {
 impl Default for HebernRotorCage {
     fn default() -> Self {
         let alphabet_string = String::from(PresetAlphabet::BasicLatin);
-        let alphabet = Alphabet::from(&alphabet_string);
+        let alphabet = VecString::from(&alphabet_string);
 
         let counters = vec![0; 5];
 

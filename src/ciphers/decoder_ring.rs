@@ -1,21 +1,21 @@
 use super::Cipher;
 use crate::errors::CipherError;
-use crate::text_aux::Alphabet;
+use crate::text_aux::VecString;
 use rand::{prelude::StdRng, Rng};
 
 pub struct DecoderRing {
     pub index: usize,
-    alphabet: Alphabet,
+    alphabet: VecString,
     pub alphabet_string: String,
 }
 
 impl DecoderRing {
     pub fn set_alphabet(&mut self) {
-        self.alphabet = Alphabet::from(&self.alphabet_string)
+        self.alphabet = VecString::unique_from(&self.alphabet_string)
     }
 
     pub fn control_alphabet(&mut self) -> &mut String {
-        self.alphabet = Alphabet::from(&self.alphabet_string);
+        self.alphabet = VecString::unique_from(&self.alphabet_string);
         &mut self.alphabet_string
     }
 
@@ -25,12 +25,12 @@ impl DecoderRing {
 
     pub fn annie(&mut self) {
         self.alphabet_string = String::from("_ASLWIMVHFKXDPOEJBTNQZGUYRC");
-        self.alphabet = Alphabet::from(&self.alphabet_string);
+        self.alphabet = VecString::from(&self.alphabet_string);
     }
 
     pub fn midnight(&mut self) {
         self.alphabet_string = String::from("_AEXDTZKNYCJWSGUMBOQHRIVFPL");
-        self.alphabet = Alphabet::from(&self.alphabet_string);
+        self.alphabet = VecString::from(&self.alphabet_string);
     }
 
     fn valid_code_group(&self, s: &str) -> Result<usize, CipherError> {
@@ -52,7 +52,7 @@ impl Default for DecoderRing {
         Self {
             index: 0,
             alphabet_string: String::from("_ABCDEFGHIJKLMNOPWRSTUVWXYZ"),
-            alphabet: Alphabet::from("_ABCDEFGHIJKLMNOPWRSTUVWXYZ"),
+            alphabet: VecString::from("_ABCDEFGHIJKLMNOPWRSTUVWXYZ"),
         }
     }
 }

@@ -1,24 +1,24 @@
 use crate::{
     ciphers::Cipher,
     errors::CipherError,
-    text_aux::{keyed_alphabet, shuffled_str, Alphabet},
+    text_aux::{shuffled_str, VecString},
 };
 use itertools::Itertools;
 use rand::prelude::StdRng;
 
 pub struct PolybiusCube {
     pub alphabet_string: String,
-    alphabet: Alphabet,
+    alphabet: VecString,
     pub labels_string: String,
-    labels: Alphabet,
+    labels: VecString,
     side_len: usize,
     pub key_word: String,
 }
 
 impl Default for PolybiusCube {
     fn default() -> Self {
-        let alphabet = Alphabet::from("ABCDEFGHIJKLMNOPQRSTUVWXYZ+");
-        let labels = Alphabet::from("123456789");
+        let alphabet = VecString::from("ABCDEFGHIJKLMNOPQRSTUVWXYZ+");
+        let labels = VecString::from("123456789");
         Self {
             alphabet_string: "ABCDEFGHIJKLMNOPQRSTUVWXYZ+".to_string(),
             alphabet,
@@ -41,7 +41,7 @@ impl PolybiusCube {
     }
 
     pub fn set_key(&mut self) {
-        self.alphabet = Alphabet::from(keyed_alphabet(&self.key_word, &self.alphabet_string));
+        self.alphabet = VecString::keyed_alphabet(&self.key_word, &self.alphabet_string);
     }
 
     pub fn assign_labels(&mut self, labels: &str) {
@@ -50,7 +50,7 @@ impl PolybiusCube {
     }
 
     pub fn set_labels(&mut self) {
-        self.labels = Alphabet::from(&self.labels_string);
+        self.labels = VecString::unique_from(&self.labels_string);
     }
 
     pub fn set_alphabet(&mut self) -> Result<(), CipherError> {
@@ -66,7 +66,7 @@ impl PolybiusCube {
             ));
         }
 
-        self.alphabet = Alphabet::from(&self.alphabet_string);
+        self.alphabet = VecString::from(&self.alphabet_string);
         self.side_len = (new_alpha_len as f64).cbrt().ceil() as usize;
 
         Ok(())

@@ -48,7 +48,7 @@ pub struct Rotor {
 
 impl Rotor {
     pub fn new(alphabet: &str, active: usize) -> Rotor {
-        let alphabet = VecString::from(alphabet);
+        let alphabet = VecString::unique_from(alphabet);
         Rotor {
             alphabet,
             pins: Vec::new(),

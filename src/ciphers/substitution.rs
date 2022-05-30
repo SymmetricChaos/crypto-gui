@@ -1,25 +1,25 @@
 use super::Cipher;
 use crate::{
     errors::CipherError,
-    text_aux::{shuffled_str, Alphabet, PresetAlphabet},
+    text_aux::{shuffled_str, VecString, PresetAlphabet},
 };
 use rand::prelude::StdRng;
 
 #[derive(Debug)]
 pub struct GeneralSubstitution {
     pub pt_alphabet_string: String,
-    pt_alphabet: Alphabet,
+    pt_alphabet: VecString,
     pub ct_alphabet_string: String,
-    ct_alphabet: Alphabet,
+    ct_alphabet: VecString,
 }
 
 impl GeneralSubstitution {
     pub fn set_pt_alphabet(&mut self) {
-        self.pt_alphabet = Alphabet::from(&self.pt_alphabet_string);
+        self.pt_alphabet = VecString::unique_from(&self.pt_alphabet_string);
     }
 
     pub fn set_ct_alphabet(&mut self) {
-        self.ct_alphabet = Alphabet::from(&self.ct_alphabet_string);
+        self.ct_alphabet = VecString::unique_from(&self.ct_alphabet_string);
     }
 
     // easier fpr debugging
@@ -74,9 +74,9 @@ impl GeneralSubstitution {
 impl Default for GeneralSubstitution {
     fn default() -> Self {
         let pt_alphabet_string = String::from(PresetAlphabet::BasicLatin);
-        let pt_alphabet = Alphabet::from(&pt_alphabet_string);
+        let pt_alphabet = VecString::from(&pt_alphabet_string);
         let ct_alphabet_string = String::from("ZYXWVUTSRQPONMLKJIHGFEDCBA");
-        let ct_alphabet = Alphabet::from(&ct_alphabet_string);
+        let ct_alphabet = VecString::from(&ct_alphabet_string);
         Self {
             pt_alphabet_string,
             pt_alphabet,
@@ -104,7 +104,7 @@ impl Cipher for GeneralSubstitution {
     fn randomize(&mut self, rng: &mut StdRng) {
         // keep the plaintext alphabet unchanged and make the ciphertext alphabet a shuffled version of it
         self.ct_alphabet_string = shuffled_str(&self.pt_alphabet_string, rng);
-        self.ct_alphabet = Alphabet::from(&self.ct_alphabet_string);
+        self.ct_alphabet = VecString::unique_from(&self.ct_alphabet_string);
     }
 
     fn reset(&mut self) {

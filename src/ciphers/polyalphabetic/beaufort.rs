@@ -3,14 +3,14 @@ use std::collections::VecDeque;
 use super::PolyMode;
 use crate::{
     errors::CipherError,
-    text_aux::{random_sample_replace, Alphabet, PresetAlphabet::*}, ciphers::Cipher,
+    text_aux::{random_sample_replace, VecString, PresetAlphabet::*}, ciphers::Cipher,
 };
 use rand::prelude::StdRng;
 
 pub struct Beaufort {
     pub key_words: [String; 5],
     pub alphabet_string: String,
-    alphabet: Alphabet,
+    alphabet: VecString,
     pub prog_shift: usize,
     pub mode: PolyMode,
     pub multikey: bool,
@@ -18,7 +18,7 @@ pub struct Beaufort {
 
 impl Beaufort {
     pub fn set_alphabet(&mut self) {
-        self.alphabet = Alphabet::from(&self.alphabet_string);
+        self.alphabet = VecString::unique_from(&self.alphabet_string);
     }
 
     // Some weirdness needed to make types match
@@ -117,7 +117,7 @@ impl Beaufort {
         Ok((text_nums, akey, out))
     }
 
-    // The Beaufort cipher is reciprocal so no decrypt methods are needed
+    // The Beaufort cipher is reciprocal so no decrypt method is needed on a character per character basis
     fn encrypt_char(&self, t: usize, k: usize) -> char {
         self.alphabet.get_char_offset(k, -(t as i32)).unwrap()
     }
@@ -218,7 +218,7 @@ impl Default for Beaufort {
                 String::new(),
             ],
             alphabet_string: String::from(BasicLatin),
-            alphabet: Alphabet::from(BasicLatin),
+            alphabet: VecString::from(BasicLatin),
             mode: PolyMode::CylicKey,
             prog_shift: 0,
             multikey: false,

@@ -3,13 +3,13 @@ use std::fmt;
 use super::Cipher;
 use crate::{
     errors::CipherError,
-    text_aux::{shuffled_str, Alphabet, PresetAlphabet::*},
+    text_aux::{shuffled_str, VecString, PresetAlphabet::*},
 };
 use itertools::Itertools;
 use rand::prelude::StdRng;
 
 pub struct Slidefair {
-    alphabet: Alphabet,
+    alphabet: VecString,
     pub alphabet_string: String,
     pub key_word: String,
     key: Vec<usize>,
@@ -21,7 +21,7 @@ impl Default for Slidefair {
     fn default() -> Self {
         Self {
             alphabet_string: String::from(BasicLatin),
-            alphabet: Alphabet::from(BasicLatin),
+            alphabet: VecString::from(BasicLatin),
             spacer_string: String::from("X"),
             spacer: 'X',
             key_word: String::new(),
@@ -34,11 +34,11 @@ impl Slidefair {
 
     // Set or assign alphabet
     pub fn set_alphabet(&mut self) {
-        self.alphabet = Alphabet::from(&self.alphabet_string)
+        self.alphabet = VecString::unique_from(&self.alphabet_string)
     }
 
     pub fn assign_alphabet(&mut self, alphabet: &str) {
-        self.alphabet = Alphabet::from(alphabet);
+        self.alphabet_string = String::from(alphabet);
         self.set_alphabet();
     }
 
@@ -153,7 +153,7 @@ impl Cipher for Slidefair {
     }
 
     fn randomize(&mut self, rng: &mut StdRng) {
-        self.alphabet = Alphabet::from(shuffled_str(&self.alphabet.to_string(), rng))
+        self.alphabet = VecString::from(shuffled_str(&self.alphabet.to_string(), rng))
     }
 
     fn reset(&mut self) {

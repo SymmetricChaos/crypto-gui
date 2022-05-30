@@ -2,7 +2,7 @@ use super::Cipher;
 use crate::{
     errors::CipherError,
     math_functions::mul_inv,
-    text_aux::{Alphabet, PresetAlphabet::*},
+    text_aux::{VecString, PresetAlphabet::*},
 };
 use rand::{prelude::StdRng, Rng};
 
@@ -10,7 +10,7 @@ pub struct Affine {
     pub add_key: usize,
     pub mul_key: usize,
     pub alphabet_string: String,
-    alphabet: Alphabet,
+    alphabet: VecString,
 }
 
 impl Affine {
@@ -31,7 +31,7 @@ impl Affine {
     }
 
     pub fn set_alphabet(&mut self) {
-        self.alphabet = Alphabet::from(&self.alphabet_string);
+        self.alphabet = VecString::unique_from(&self.alphabet_string);
     }
 
     pub fn assign_alphabet(&mut self, alphabet: &str) {
@@ -66,7 +66,7 @@ impl Default for Affine {
             add_key: 0,
             mul_key: 1,
             alphabet_string: String::from(BasicLatin),
-            alphabet: Alphabet::from(BasicLatin),
+            alphabet: VecString::from(BasicLatin),
         }
     }
 }

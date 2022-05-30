@@ -1,6 +1,6 @@
 use crate::ciphers::Cipher;
 use crate::errors::CipherError;
-use crate::text_aux::Alphabet;
+use crate::text_aux::VecString;
 use crate::text_aux::PresetAlphabet;
 use itertools::Itertools;
 use lazy_static::lazy_static;
@@ -27,7 +27,7 @@ lazy_static! {
 pub struct Porta {
     pub key: String,
     key_vals: Vec<usize>,
-    alphabet: Alphabet,
+    alphabet: VecString,
 }
 
 impl Default for Porta {
@@ -35,7 +35,7 @@ impl Default for Porta {
         Self {
             key: String::new(),
             key_vals: Vec::new(),
-            alphabet: Alphabet::from(PresetAlphabet::BasicLatin.slice()),
+            alphabet: VecString::from(PresetAlphabet::BasicLatin),
         }
     }
 }
