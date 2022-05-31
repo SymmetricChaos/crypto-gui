@@ -163,6 +163,10 @@ impl ClassicCrypto {
             let cipher_code_subhead = RichText::new("A Note on the Terms Cipher and Code").strong();
             ui.label(cipher_code_subhead);
             ui.label("No strong distinction is made in literature between a 'cipher' and a 'code' in this era. However this project adopts the modern convention that a cipher has a changeable key and a code does not. That is: to understand a cipher one must know both the method as some secret additional information while a code can be read by anyone who knows the method of encoding.");
+            ui.add_space(16.0);
+            let grapheme_subhead = RichText::new("Supported Text Characters").strong();
+            ui.label(grapheme_subhead);
+            ui.label("While essentially all of Unicode can be displayed ciphers and codes operate on individual codepoints, unexpected behavior will occur when combining characters are used. Optional support for Unicode graphemes may be added later.");
         });
     }
 
