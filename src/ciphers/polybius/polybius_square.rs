@@ -1,7 +1,7 @@
 use crate::{
     ciphers::Cipher,
     errors::CipherError,
-    text_aux::{shuffled_str, VecString, PresetAlphabet, PresetAlphabet::*},
+    text_aux::{shuffled_str, VecString, PresetAlphabet, PresetAlphabet::*, text_functions::validate_text},
 };
 use itertools::Itertools;
 use rand::prelude::StdRng;
@@ -74,35 +74,28 @@ impl PolybiusSquare {
         self.labels = VecString::unique_from(&self.labels_string);
     }
 
-    fn pairs(&self, text: &str) -> Result<Vec<(char, char)>, CipherError> {
-        if text.chars().count() % 2 != 0 {
-            dbg!(text);
-            dbg!(text.chars().count());
-            return Err(CipherError::input(
-                "Input text does not have an even number of characters.",
-            ));
-        }
+    // Cannot fail due to checks in encrypt/decrypt
+    fn pairs(&self, text: &str) -> Vec<(char, char)> {
         let out = text
             .chars()
             .chunks(2)
             .into_iter()
             .map(|x| x.collect_tuple().unwrap())
             .collect();
-        Ok(out)
+        out
     }
 
     pub fn alphabet_len(&self) -> usize {
         self.grid.len()
     }
 
-    fn char_to_position(&self, symbol: char) -> Result<(usize, usize), CipherError> {
-        let num = match self.alphabet_string.chars().position(|x| x == symbol) {
-            Some(n) => n,
-            None => return Err(CipherError::invalid_input_char(symbol)),
-        };
-        Ok((num / self.side_len, num % self.side_len))
+    // Cannot fail due to checks in encrypt/decrypt
+    fn char_to_position(&self, symbol: char) -> (usize, usize) {
+        let num = self.grid.get_pos_of(symbol).unwrap();
+        (num / self.side_len, num % self.side_len)
     }
 
+    // Cannot fail due to checks in encrypt/decrypt
     fn position_to_char(&self, position: (char, char)) -> char {
         let y = self.labels.get_pos_of(position.0).unwrap();
         let x = self.labels.get_pos_of(position.1).unwrap();
@@ -111,13 +104,13 @@ impl PolybiusSquare {
         self.alphabet_string.chars().nth(num).unwrap()
     }
 
-    fn check_settings(&self) -> Result<(), CipherError> {
+    fn check_labels(&self) -> Result<(), CipherError> {
         if self.labels.len() < self.side_len {
             return Err(CipherError::key("not enough labels for grid size"));
         }
         Ok(())
     }
-
+    
     pub fn show_grid(&self) -> String {
         let size = (self.side_len + 2) * (self.side_len + 1);
         let mut square = String::with_capacity(size);
@@ -142,11 +135,13 @@ impl PolybiusSquare {
 
 impl Cipher for PolybiusSquare {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        self.check_settings()?;
+        self.check_labels()?;
+        validate_text(text, &self.grid)?;
+        
         let mut out = String::with_capacity(text.chars().count() * 2);
 
         for c in text.chars() {
-            let pos = self.char_to_position(c)?;
+            let pos = self.char_to_position(c);
             out.push(self.labels.get_char_at(pos.0).unwrap());
             out.push(self.labels.get_char_at(pos.1).unwrap());
         }
@@ -154,8 +149,15 @@ impl Cipher for PolybiusSquare {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        self.check_settings()?;
-        let pairs = self.pairs(text)?;
+        self.check_labels()?;
+        validate_text(text, &self.labels)?;
+        if text.chars().count() % 2 != 0 {
+            return Err(CipherError::input(
+                "Input text does not have an even number of characters.",
+            ));
+        }
+        
+        let pairs = self.pairs(text);
         let mut out = String::with_capacity(text.chars().count() / 2);
 
         for p in pairs {

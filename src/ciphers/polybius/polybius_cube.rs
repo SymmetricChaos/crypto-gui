@@ -1,14 +1,14 @@
 use crate::{
     ciphers::Cipher,
     errors::CipherError,
-    text_aux::{shuffled_str, VecString},
+    text_aux::{shuffled_str, VecString, text_functions::validate_text},
 };
 use itertools::Itertools;
 use rand::prelude::StdRng;
 
 pub struct PolybiusCube {
     pub alphabet_string: String,
-    alphabet: VecString,
+    grid: VecString,
     pub labels_string: String,
     labels: VecString,
     side_len: usize,
@@ -21,7 +21,7 @@ impl Default for PolybiusCube {
         let labels = VecString::from("123456789");
         Self {
             alphabet_string: "ABCDEFGHIJKLMNOPQRSTUVWXYZ+".to_string(),
-            alphabet,
+            grid: alphabet,
             labels_string: "123456789".to_string(),
             labels,
             side_len: 3,
@@ -41,7 +41,7 @@ impl PolybiusCube {
     }
 
     pub fn set_key(&mut self) {
-        self.alphabet = VecString::keyed_alphabet(&self.key_word, &self.alphabet_string);
+        self.grid = VecString::keyed_alphabet(&self.key_word, &self.alphabet_string);
     }
 
     pub fn assign_labels(&mut self, labels: &str) {
@@ -66,7 +66,7 @@ impl PolybiusCube {
             ));
         }
 
-        self.alphabet = VecString::from(&self.alphabet_string);
+        self.grid = VecString::from(&self.alphabet_string);
         self.side_len = (new_alpha_len as f64).cbrt().ceil() as usize;
 
         Ok(())
@@ -90,19 +90,16 @@ impl PolybiusCube {
     }
 
     pub fn alphabet_len(&self) -> usize {
-        self.alphabet.len()
+        self.grid.len()
     }
 
-    fn char_to_position(&self, symbol: char) -> Result<(usize, usize, usize), CipherError> {
-        let num = match self.alphabet.get_pos_of(symbol) {
-            Some(n) => n,
-            None => return Err(CipherError::invalid_input_char(symbol)),
-        };
+    fn char_to_position(&self, symbol: char) -> (usize, usize, usize) {
+        let num = self.grid.get_pos_of(symbol).unwrap();
         let l = self.side_len;
         let x = num / (l * l);
         let y = (num / l) % l;
         let z = num % l;
-        Ok((x, y, z))
+        (x, y, z)
     }
 
     fn position_to_char(&self, position: (char, char, char)) -> char {
@@ -112,10 +109,10 @@ impl PolybiusCube {
 
         let l = self.side_len;
         let num = x * (l * l) + y * l + z;
-        self.alphabet.get_char_at(num).unwrap()
+        self.grid.get_char_at(num).unwrap()
     }
 
-    fn check_settings(&self) -> Result<(), CipherError> {
+    fn check_labels(&self) -> Result<(), CipherError> {
         if self.labels.len() < self.side_len {
             return Err(CipherError::key("not enough labels for grid size"));
         }
@@ -135,7 +132,7 @@ impl PolybiusCube {
         // Without the cycle we'll can be missing contents for the last chunk and panic later on
         let blanks = " ".chars().cycle();
         let grid_idxs = self
-            .alphabet
+            .grid
             .chars()
             .chain(blanks)
             .take(self.side_len.pow(3))
@@ -175,11 +172,13 @@ impl PolybiusCube {
 
 impl Cipher for PolybiusCube {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        self.check_settings()?;
+        self.check_labels()?;
+        validate_text(text, &self.grid)?;
+
         let mut out = String::with_capacity(text.chars().count() * 3);
 
         for c in text.chars() {
-            let pos = self.char_to_position(c)?;
+            let pos = self.char_to_position(c);
             out.push(self.labels.get_char_at(pos.0).unwrap());
             out.push(self.labels.get_char_at(pos.1).unwrap());
             out.push(self.labels.get_char_at(pos.2).unwrap());
@@ -188,11 +187,18 @@ impl Cipher for PolybiusCube {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        self.check_settings()?;
-        let pairs = self.triplets(text)?;
+        self.check_labels()?;
+        validate_text(text, &self.labels)?;
+        if text.chars().count() % 3 != 0 {
+            return Err(CipherError::input(
+                "Input text must have a length that is a multiple of three.",
+            ));
+        }
+
+        let triplets = self.triplets(text)?;
         let mut out = String::with_capacity(text.chars().count() / 3);
 
-        for p in pairs {
+        for p in triplets {
             out.push(self.position_to_char(p));
         }
         Ok(out)
