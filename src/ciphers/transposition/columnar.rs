@@ -3,34 +3,46 @@ use rand::prelude::StdRng;
 
 use crate::{errors::CipherError, ciphers::Cipher};
 use crate::grid::{Grid, Symbol};
-use crate::text_aux::{random_sample_replace, rank_str, PresetAlphabet::*};
+use crate::text_aux::{rank_str, PresetAlphabet::*, VecString};
 
 pub struct Columnar {
-    pub alphabet: String,
+    pub alphabet_string: String,
+    alphabet: VecString,
     key: Vec<usize>,
     pub key_word: String,
 }
 
 impl Columnar {
+
+    pub fn set_alphabet(&mut self) {
+        self.alphabet = VecString::unique_from(&self.alphabet_string);
+    }
+
+    pub fn assign_alphabet(&mut self, alphabet: &str) {
+        self.alphabet_string = String::from(alphabet);
+        self.set_alphabet();
+    }
+
     pub fn control_key(&mut self) -> &mut String {
-        self.key = rank_str(&self.key_word, &self.alphabet);
+        self.key = rank_str(&self.key_word, &self.alphabet_string);
         &mut self.key_word
     }
 
     pub fn set_key(&mut self) {
-        self.key = rank_str(&self.key_word, &self.alphabet);
+        self.key = rank_str(&self.key_word, &self.alphabet_string);
     }
 
     pub fn assign_key(&mut self, key_word: &str) {
         self.key_word = key_word.to_string();
-        self.key = rank_str(&self.key_word, &self.alphabet);
+        self.key = rank_str(&self.key_word, &self.alphabet_string);
     }
 }
 
 impl Default for Columnar {
     fn default() -> Self {
         Self {
-            alphabet: String::from(BasicLatin),
+            alphabet_string: String::from(BasicLatin),
+            alphabet: VecString::from(BasicLatin),
             key: Vec::new(),
             key_word: String::new(),
         }
@@ -91,8 +103,8 @@ impl Cipher for Columnar {
     }
 
     fn randomize(&mut self, rng: &mut StdRng) {
-        self.key_word = random_sample_replace(&self.alphabet, 11, rng);
-        self.key = rank_str(&self.key_word, &self.alphabet);
+        let key: String = self.alphabet.get_rand_chars_replace(11, rng).iter().collect();
+        self.assign_key(&key);
     }
 
     fn reset(&mut self) {

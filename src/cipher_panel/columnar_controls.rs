@@ -10,7 +10,9 @@ impl View for Columnar {
         ui.add_space(16.0);
 
         ui.label("Alphabet");
-        control_string(ui, &mut self.alphabet);
+        if control_string(ui, &mut self.alphabet_string).changed() {
+            self.set_alphabet()
+        }
 
         ui.label("Key Word");
         if control_string(ui, &mut self.key_word).changed() {
