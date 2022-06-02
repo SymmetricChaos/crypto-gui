@@ -4,6 +4,7 @@ use crate::{
     text_aux::{shuffled_str, VecString, PresetAlphabet, PresetAlphabet::*, text_functions::validate_text},
 };
 use itertools::Itertools;
+use num::Integer;
 use rand::prelude::StdRng;
 use std::fmt;
 
@@ -151,9 +152,9 @@ impl Cipher for PolybiusSquare {
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         self.check_labels()?;
         validate_text(text, &self.labels)?;
-        if text.chars().count() % 2 != 0 {
+        if !text.chars().count().is_multiple_of(&2) {
             return Err(CipherError::input(
-                "Input text does not have an even number of characters.",
+                "Input text must have a length that is a multiple of three.",
             ));
         }
         

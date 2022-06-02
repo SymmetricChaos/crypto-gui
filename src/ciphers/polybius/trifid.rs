@@ -1,5 +1,6 @@
 use super::PolybiusCube;
 use crate::{ciphers::Cipher, errors::CipherError};
+use num::Integer;
 use rand::Rng;
 
 fn is_power_of_three(a: usize) -> bool {
@@ -44,18 +45,19 @@ impl Trifid {
 
 impl Cipher for Trifid {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+        
         let vector: Vec<char> = text.chars().collect();
         let len = vector.len();
-        if len % self.block_size != 0 {
+        if !len.is_multiple_of(&self.block_size) {
             return Err(CipherError::input(
                 "Input length must be a multiple of the block size",
             ));
         };
         let mut out = String::with_capacity(len * 3);
 
-        for block in vector.chunks(self.block_size).map(|x| x.to_vec()) {
-            let clip: String = block.iter().collect();
-            let poly = self.polybius.encrypt(&clip)?;
+        for block in vector.chunks(self.block_size).map(|x| x.to_vec().iter().collect::<String>()) {
+
+            let poly = self.polybius.encrypt(&block)?;
             let mut first = String::with_capacity(len);
             let mut second = String::with_capacity(len);
             let mut third = String::with_capacity(len);
@@ -77,7 +79,7 @@ impl Cipher for Trifid {
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         // turn text into a vector and prepare a string to fill with the output
         let vector: Vec<char> = text.chars().collect();
-        if vector.len() % self.block_size != 0 {
+        if !vector.len().is_multiple_of(&self.block_size) {
             return Err(CipherError::input(
                 "Input length must be a multiple of the block size",
             ));
@@ -85,12 +87,9 @@ impl Cipher for Trifid {
         let mut out = String::with_capacity(vector.len());
 
         // Divide the vector into chunks of the block size
-        for block in vector.chunks(self.block_size).map(|x| x.to_vec()) {
+        for block in vector.chunks(self.block_size).map(|x| x.to_vec().iter().collect::<String>()) {
             // Turn the block into a String then encrypt it with the Polybius cipher
-            let clip: String = block.iter().collect();
-            let poly: String = self.polybius.encrypt(&clip)?;
-
-            dbg!(&clip);
+            let poly: String = self.polybius.encrypt(&block)?;
 
             // Divide the encrypted string in half
             // TODO: This will likely panic with non-ASCII inputs

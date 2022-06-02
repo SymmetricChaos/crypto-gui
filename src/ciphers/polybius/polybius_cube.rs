@@ -4,6 +4,7 @@ use crate::{
     text_aux::{shuffled_str, VecString, text_functions::validate_text},
 };
 use itertools::Itertools;
+use num::Integer;
 use rand::prelude::StdRng;
 
 pub struct PolybiusCube {
@@ -189,7 +190,7 @@ impl Cipher for PolybiusCube {
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         self.check_labels()?;
         validate_text(text, &self.labels)?;
-        if text.chars().count() % 3 != 0 {
+        if !text.chars().count().is_multiple_of(&3) {
             return Err(CipherError::input(
                 "Input text must have a length that is a multiple of three.",
             ));
