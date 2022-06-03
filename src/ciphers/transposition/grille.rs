@@ -1,12 +1,12 @@
 use std::ops::Range;
 
-use crate::{ciphers::Cipher, errors::CipherError, grid::{Grid, Symbol}, text_aux::PresetAlphabet};
+use crate::{ciphers::Cipher, errors::CipherError, grid::{Grid, Symbol, str_to_char_grid}, text_aux::PresetAlphabet};
 use itertools::Itertools;
 use rand::{prelude::StdRng, Rng, SeedableRng};
 
 pub struct Grille {
     pub null_alphabet: String,
-    pub grid: Grid,
+    pub grid: Grid<char>,
     pub seed: Option<u64>,
     pub use_nulls: bool,
 }
@@ -26,7 +26,7 @@ impl Grille {
         }
     }
 
-    fn random_null(&self, rng: &mut StdRng, range: &Range<usize>) -> Symbol {
+    fn random_null(&self, rng: &mut StdRng, range: &Range<usize>) -> Symbol<char> {
         if !self.use_nulls {
             return Symbol::Empty;
         }
@@ -90,7 +90,7 @@ impl Cipher for Grille {
         Ok(grid
             .get_cols()
             .filter(|x| x.is_character())
-            .map(|x| x.to_char())
+            .map(|x| x.contents().unwrap())
             .collect())
     }
 
@@ -102,13 +102,13 @@ impl Cipher for Grille {
                 ));
             }
 
-            let filled_grid =
-                Grid::from_cols(text, self.grid.num_rows(), self.grid.num_cols(), '\n', '\n');
+            let symbols = str_to_char_grid(text, '\n', '\n');
+            let filled_grid = Grid::from_cols(symbols, self.grid.num_rows(), self.grid.num_cols());
 
             let mut out = String::with_capacity(self.grid.num_empty());
             for (c, s) in filled_grid.get_rows().zip(self.grid.get_rows()) {
                 if s.is_empty() {
-                    out.push(c.to_char())
+                    out.push(*c.contents().unwrap())
                 }
             }
 
@@ -141,7 +141,7 @@ impl Cipher for Grille {
             Ok(grid
                 .get_rows()
                 .filter(|x| x.is_character())
-                .map(|x| x.to_char())
+                .map(|x| *x.contents().unwrap())
                 .collect())
         }
     }

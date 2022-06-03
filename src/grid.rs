@@ -1,31 +1,17 @@
-use std::fmt;
 use std::ops::{Index, IndexMut};
+use std::fmt;
 
 pub const EMPTY: char = '⬜';
 pub const BLOCK: char = '⬛';
 
-pub fn str_to_grid_symbols(text: &str, empty_char: char, blocked_char: char) -> Vec<Symbol> {
-    let mut v = Vec::with_capacity(text.chars().count());
-    for c in text.chars() {
-        if c == empty_char {
-            v.push(Symbol::Empty)
-        } else if c == blocked_char {
-            v.push(Symbol::Blocked)
-        } else {
-            v.push(Symbol::Character(c))
-        }
-    }
-    v
-}
-
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
-pub enum Symbol {
-    Character(char),
+pub enum Symbol<T> {
+    Character(T),
     Empty,
     Blocked,
 }
 
-impl Symbol {
+impl<T> Symbol<T> {
     pub fn is_empty(&self) -> bool {
         match self {
             Symbol::Empty => true,
@@ -46,44 +32,51 @@ impl Symbol {
             _ => false,
         }
     }
-
-    pub fn to_char(&self) -> char {
+    
+    pub fn contents(&self) -> Option<&T> {
         match self {
-            Symbol::Character(c) => *c,
-            Symbol::Empty => EMPTY,
-            Symbol::Blocked => BLOCK,
+            Symbol::Character(x) => Some(x),
+            _ => None,
         }
     }
+
 }
 
-impl From<Symbol> for char {
-    fn from(symbol: Symbol) -> Self {
-        match symbol {
-            Symbol::Character(c) => c,
-            Symbol::Empty => EMPTY,
-            Symbol::Blocked => BLOCK,
+pub fn str_to_char_grid(text: &str, empty_char: char, blocked_char: char) -> Vec<Symbol<char>> {
+    let mut v = Vec::with_capacity(text.chars().count());
+    for c in text.chars() {
+        if c == empty_char {
+            v.push(Symbol::Empty)
+        } else if c == blocked_char {
+            v.push(Symbol::Blocked)
+        } else {
+            v.push(Symbol::Character(c))
         }
     }
+    v
 }
 
-impl From<Symbol> for String {
-    fn from(symbol: Symbol) -> Self {
-        match symbol {
-            Symbol::Character(c) => String::from(c),
-            Symbol::Empty => String::from(EMPTY),
-            Symbol::Blocked => String::from(BLOCK),
-        }
-    }
+pub fn read_rows_characters(grid: &Grid<char>) -> impl Iterator<Item = char> + '_ {
+    grid.get_rows()
+        .filter(|x| x.is_character())
+        .map(|x| *x.contents().unwrap())
 }
 
-#[derive(Clone, Debug)]
-pub struct Grid {
-    symbols: Vec<Symbol>,
+pub fn read_cols_characters(grid: &Grid<char>) -> impl Iterator<Item = char> + '_ {
+    grid.get_cols()
+        .filter(|x| x.is_character())
+        .map(|x| *x.contents().unwrap())
+}
+
+
+#[derive(Clone)]
+pub struct Grid<T: Copy + Clone> {
+    symbols: Vec<Symbol<T>>,
     num_rows: usize,
     num_cols: usize,
 }
 
-impl Grid {
+impl<T: Copy + Clone> Grid<T> {
     // Creation methods
     pub fn new_empty(num_rows: usize, num_cols: usize) -> Self {
         let grid = vec![Symbol::Empty; num_cols * num_rows];
@@ -95,16 +88,16 @@ impl Grid {
     }
 
     pub fn from_rows(
-        text: &str,
+        symbols: Vec<Symbol<T>>,
         num_rows: usize,
         num_cols: usize,
-        empty_char: char,
-        blocked_char: char,
     ) -> Self {
-        let mut symbols = str_to_grid_symbols(text, empty_char, blocked_char);
+
+        let mut symbols = symbols;
+        let grid_size = num_rows * num_cols;
         // Drop excess symbols or pad with Empty as needed
-        symbols.truncate(num_rows * num_cols);
-        symbols.resize(num_rows * num_cols, Symbol::Empty);
+        symbols.truncate(grid_size);
+        symbols.resize(grid_size, Symbol::Empty);
 
         Self {
             symbols,
@@ -114,15 +107,14 @@ impl Grid {
     }
 
     pub fn from_cols(
-        text: &str,
+        symbols: Vec<Symbol<T>>,
         num_rows: usize,
         num_cols: usize,
-        empty_char: char,
-        blocked_char: char,
     ) -> Self {
-        let mut symbols = str_to_grid_symbols(text, empty_char, blocked_char);
+
+        let mut symbols = symbols;
         let grid_size = num_rows * num_cols;
-        // Drop excess symbols or pad with Empty as needed
+        
         symbols.truncate(grid_size);
         symbols.resize(grid_size, Symbol::Empty);
 
@@ -195,12 +187,12 @@ impl Grid {
     }
 
     // Shared getter methods
-    pub fn get(&self, coord: (usize, usize)) -> Option<&Symbol> {
+    pub fn get(&self, coord: (usize, usize)) -> Option<&Symbol<T>> {
         let coord = self.index_from_coord(coord)?;
         self.symbols.get(coord)
     }
 
-    pub fn get_row(&self, row_index: usize) -> impl Iterator<Item = &Symbol> {
+    pub fn get_row(&self, row_index: usize) -> impl Iterator<Item = &Symbol<T>> {
         let start = self
             .index_from_coord((row_index, 0))
             .expect("Row index was out of bounds");
@@ -208,17 +200,17 @@ impl Grid {
         self.symbols[start..end].iter()
     }
 
-    pub fn get_col(&self, col_index: usize) -> impl Iterator<Item = &Symbol> {
+    pub fn get_col(&self, col_index: usize) -> impl Iterator<Item = &Symbol<T>> {
         (0..self.col_len()).map(move |row_index| &self[(row_index, col_index)])
     }
 
-    pub fn get_rows(&self) -> impl Iterator<Item = &Symbol> {
+    pub fn get_rows(&self) -> impl Iterator<Item = &Symbol<T>> {
         self.symbols.iter()
     }
 
-    pub fn get_cols(&self) -> impl Iterator<Item = &Symbol> {
+    pub fn get_cols(&self) -> impl Iterator<Item = &Symbol<T>> {
         // Yes this is an absurd hack
-        let mut symbols: Vec<&Symbol> = Vec::new();
+        let mut symbols: Vec<&Symbol<T>> = Vec::new();
         for n in 0..self.num_cols() {
             for symbol in self.get_col(n) {
                 symbols.push(symbol)
@@ -228,12 +220,12 @@ impl Grid {
     }
 
     // Mutable getter methods
-    pub fn get_mut(&mut self, coord: (usize, usize)) -> Option<&mut Symbol> {
+    pub fn get_mut(&mut self, coord: (usize, usize)) -> Option<&mut Symbol<T>> {
         let idx = self.index_from_coord(coord)?;
         self.symbols.get_mut(idx)
     }
 
-    pub fn get_row_mut(&mut self, row_index: usize) -> impl Iterator<Item = &mut Symbol> {
+    pub fn get_row_mut(&mut self, row_index: usize) -> impl Iterator<Item = &mut Symbol<T>> {
         let start = self
             .index_from_coord((row_index, 0))
             .expect("Row index was out of bounds");
@@ -241,7 +233,7 @@ impl Grid {
         self.symbols[start..end].iter_mut()
     }
 
-    pub fn get_col_mut(&mut self, col_index: usize) -> impl Iterator<Item = &mut Symbol> {
+    pub fn get_col_mut(&mut self, col_index: usize) -> impl Iterator<Item = &mut Symbol<T>> {
         let cols = self.num_cols;
         self.symbols
             .iter_mut()
@@ -250,53 +242,38 @@ impl Grid {
             .map(|(_, e)| e)
     }
 
-    pub fn get_rows_mut(&mut self) -> impl Iterator<Item = &mut Symbol> {
+    pub fn get_rows_mut(&mut self) -> impl Iterator<Item = &mut Symbol<T>> {
         self.symbols.iter_mut()
     }
 
     // pub fn get_cols_mut(&mut self) -> impl Iterator<Item = &mut Symbol> {
-    //     // Yes this is an absurd hack again
-    //     (0..self.num_cols)
-    //         .cartesian_product(0..self.num_rows())
-    //         .map(|coord| self.index_from_coord(coord).unwrap())
-    //         .map(|idx| self.symbols[idx])
+    //  for some reason this is
     // }
 
-    // These two just read the positions with characters
-    pub fn read_rows_characters(&self) -> impl Iterator<Item = char> + '_ {
-        self.get_rows()
-            .filter(|x| x.is_character())
-            .map(|x| x.to_char())
-    }
 
-    pub fn read_cols_characters(&self) -> impl Iterator<Item = char> + '_ {
-        self.get_cols()
-            .filter(|x| x.is_character())
-            .map(|x| x.to_char())
-    }
 
     // Setter methods overwrite a specific coordinate with some Symbol variant
     // and return what was overwritten. If out of bounds all return None and
     // do nothing.
-    pub fn empty_cell(&mut self, coord: (usize, usize)) -> Option<Symbol> {
+    pub fn empty_cell(&mut self, coord: (usize, usize)) -> Option<Symbol<T>> {
         let contents = *self.get(coord)?;
         self[coord] = Symbol::Empty;
         Some(contents)
     }
 
-    pub fn block_cell(&mut self, coord: (usize, usize)) -> Option<Symbol> {
+    pub fn block_cell(&mut self, coord: (usize, usize)) -> Option<Symbol<T>> {
         let contents = *self.get(coord)?;
         self[coord] = Symbol::Blocked;
         Some(contents)
     }
 
-    pub fn replace(&mut self, coord: (usize, usize), new_sym: Symbol) -> Option<Symbol> {
+    pub fn replace(&mut self, coord: (usize, usize), new_sym: Symbol<T>) -> Option<Symbol<T>> {
         let contents = *self.get(coord)?;
         self[coord] = new_sym;
         Some(contents)
     }
 
-    pub fn replace_if_empty(&mut self, coord: (usize, usize), new_sym: Symbol) -> Option<Symbol> {
+    pub fn replace_if_empty(&mut self, coord: (usize, usize), new_sym: Symbol<T>) -> Option<Symbol<T>> {
         let contents = *self.get(coord)?;
         if contents.is_empty() {
             self[coord] = new_sym;
@@ -308,8 +285,8 @@ impl Grid {
     pub fn replace_if_not_blocked(
         &mut self,
         coord: (usize, usize),
-        new_sym: Symbol,
-    ) -> Option<Symbol> {
+        new_sym: Symbol<T>,
+    ) -> Option<Symbol<T>> {
         let contents = *self.get(coord)?;
         if !contents.is_blocked() {
             self[coord] = new_sym;
@@ -321,7 +298,7 @@ impl Grid {
     // Apply some closure to each element of the grid, mutating it in place
     pub fn apply<F>(&mut self, mut func: F)
     where
-        F: FnMut(Symbol) -> Symbol,
+        F: FnMut(Symbol<T>) -> Symbol<T>,
     {
         for sym in self.symbols.iter_mut() {
             *sym = func(*sym);
@@ -381,25 +358,25 @@ impl Grid {
             .resize(self.num_rows * self.num_cols, Symbol::Empty);
     }
 
-    // pub fn rotate(&mut self) {
-    //     let mut new_grid = Vec::<Symbol>::with_capacity(self.grid.len());
+    // rotate the grid 90 degree
+    pub fn rotate(&mut self) {
+        let mut new_symbols = Vec::<Symbol<T>>::with_capacity(self.grid_size());
 
-    //     for n in 0..self.num_cols {
-    //         let mut cells = self.col_iter(n);
-    //         cells.reverse();
-    //         for c in cells {
-    //           new_grid.push(*c)
-    //         }
-    //     }
+        for n in 0..self.num_cols {
+            let cells: Vec<&Symbol<T>> = self.get_col(n).collect();
+            for c in cells.iter().rev() {
+              new_symbols.push(**c)
+            }
+        }
 
-    //     let r = self.num_rows;
-    //     self.num_rows = self.num_cols;
-    //     self.num_cols = r;
-    //     self.grid = new_grid;
-    // }
+        let r = self.num_rows;
+        self.num_rows = self.num_cols;
+        self.num_cols = r;
+        self.symbols = new_symbols;
+    }
 }
 
-impl fmt::Display for Grid {
+impl fmt::Display for Grid<char> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut out = String::with_capacity(self.grid_size());
         for x in 0..self.num_rows {
@@ -417,54 +394,30 @@ impl fmt::Display for Grid {
 }
 
 // Two index methods. One for coords and one for index.
-impl Index<(usize, usize)> for Grid {
-    type Output = Symbol;
+impl<T: Copy + Clone> Index<(usize, usize)> for Grid<T> {
+    type Output = Symbol<T>;
 
     fn index(&self, coord: (usize, usize)) -> &Self::Output {
         self.get(coord).unwrap()
     }
 }
 
-impl IndexMut<(usize, usize)> for Grid {
+impl<T: Copy + Clone> IndexMut<(usize, usize)> for Grid<T> {
     fn index_mut(&mut self, coord: (usize, usize)) -> &mut Self::Output {
         self.get_mut(coord).unwrap()
     }
 }
 
-impl Index<usize> for Grid {
-    type Output = Symbol;
+impl<T: Copy + Clone> Index<usize> for Grid<T> {
+    type Output = Symbol<T>;
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.symbols[index]
     }
 }
 
-impl IndexMut<usize> for Grid {
+impl<T: Copy + Clone> IndexMut<usize> for Grid<T> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         &mut self.symbols[index]
     }
 }
-
-// #[cfg(test)]
-// mod grid_tests {
-//     use super::*;
-
-//     #[test]
-//     fn row_mut_test() {
-//         let mut grid = Grid::new_empty(5, 6);
-//         for cell in grid.get_row_mut(0) {
-//             *cell = Symbol::Character('A')
-//         }
-//         println!("{}",grid);
-//     }
-
-//     #[test]
-//     fn col_mut_test() {
-//         let mut grid = Grid::new_empty(5, 6);
-//         for cell in grid.get_col_mut(0) {
-//             *cell = Symbol::Character('A')
-//         }
-//         println!("{}",grid);
-//     }
-
-// }

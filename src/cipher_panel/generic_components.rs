@@ -1,4 +1,4 @@
-use crate::{ciphers::Cipher, grid::Grid};
+use crate::{ciphers::Cipher, grid::{Grid, str_to_char_grid}};
 use eframe::egui::{self, Color32, Label, RichText, TextStyle};
 use rand::prelude::StdRng;
 
@@ -69,13 +69,16 @@ pub fn text_edit(ui: &mut egui::Ui, text: &mut String) {
 }
 
 pub fn letter_grid(ui: &mut egui::Ui, n_rows: usize, n_cols: usize, text: &String) {
-    let grid = Grid::from_rows(text, n_rows, n_cols, '\0', '\0');
+
+    let symbols = str_to_char_grid(text, '\0', '\0');
+    let grid = Grid::from_cols(symbols, n_rows, n_cols);
+
     egui::Grid::new("letter_grid").show(ui, |ui| {
         for n in 0..grid.num_rows() {
             ui.spacing_mut().item_spacing.x = 0.0;
             let row = grid.get_row(n);
             for c in row {
-                let character = RichText::from(String::from(*c)).monospace();
+                let character = RichText::from(String::from(*c.contents().unwrap())).monospace();
                 ui.add_sized([0.0, 0.0], Label::new(character));
             }
             ui.end_row()

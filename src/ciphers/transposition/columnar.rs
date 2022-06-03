@@ -2,7 +2,7 @@ use num::Integer;
 use rand::prelude::StdRng;
 
 use crate::{errors::CipherError, ciphers::Cipher};
-use crate::grid::{Grid, Symbol};
+use crate::grid::{Grid, Symbol, str_to_char_grid, read_rows_characters};
 use crate::text_aux::{rank_str, PresetAlphabet::*, VecString};
 
 pub struct Columnar {
@@ -58,12 +58,16 @@ impl Cipher for Columnar {
                 "The key for a columnar cipher must have at least two characters",
             ));
         }
+
         let n_rows = tlen.div_ceil(&self.key.len());
-        let g = Grid::from_rows(text, n_rows, n_cols, '\0', '\0');
+        
+        let symbols = str_to_char_grid(text, '\n', '\n');
+        let g = Grid::from_cols(symbols, n_rows, n_cols);
+
 
         let mut out = String::with_capacity(text.len());
         for k in self.key.iter() {
-            let mut s: String = g.get_col(*k).map(|sym| sym.to_char()).collect();
+            let mut s: String = g.get_col(*k).map(|sym| sym.contents().unwrap()).collect();
             s = s.replace(crate::grid::EMPTY, "");
             s = s.replace(crate::grid::BLOCK, "");
             out.push_str(&s);
@@ -99,7 +103,7 @@ impl Cipher for Columnar {
             }
         }
 
-        Ok(g.read_rows_characters().collect())
+        Ok(read_rows_characters(&g).collect())
     }
 
     fn randomize(&mut self, rng: &mut StdRng) {

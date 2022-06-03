@@ -6,7 +6,7 @@ use rand::prelude::StdRng;
 
 fn cell_button(grille: &mut Grille, x: usize, y: usize, ui: &mut eframe::egui::Ui) {
     let cell = grille.grid[(x, y)];
-    if ui.button(cell.to_char().to_string()).clicked() {
+    if ui.button(cell.contents().unwrap().to_string()).clicked() {
         if cell.is_blocked() {
             grille.grid.empty_cell((x, y));
         } else if cell.is_empty() {
