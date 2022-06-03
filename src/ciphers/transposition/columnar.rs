@@ -61,13 +61,13 @@ impl Cipher for Columnar {
 
         let n_rows = tlen.div_ceil(&self.key.len());
         
-        let symbols = str_to_char_grid(text, '\n', '\n');
+        let symbols = str_to_char_grid(text, '\0', '\0');
         let g = Grid::from_cols(symbols, n_rows, n_cols);
 
 
         let mut out = String::with_capacity(text.len());
         for k in self.key.iter() {
-            let mut s: String = g.get_col(*k).map(|sym| sym.contents().unwrap()).collect();
+            let mut s: String = g.get_col(*k).map(|sym| sym.to_char()).collect();
             s = s.replace(crate::grid::EMPTY, "");
             s = s.replace(crate::grid::BLOCK, "");
             out.push_str(&s);

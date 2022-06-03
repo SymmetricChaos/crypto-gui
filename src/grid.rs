@@ -42,6 +42,28 @@ impl<T> Symbol<T> {
 
 }
 
+impl Symbol<char> {
+    pub fn to_char(&self) -> char {
+        match self {
+            Symbol::Character(c) => *c,
+            Symbol::Empty => EMPTY,
+            Symbol::Blocked => BLOCK,
+        }
+    }
+}
+
+impl ToString for Symbol<char> {
+    fn to_string(&self) -> String {
+        match self {
+            Symbol::Character(c) => String::from(*c),
+            Symbol::Empty => String::from(EMPTY),
+            Symbol::Blocked => String::from(BLOCK),
+        }
+    }
+}
+
+
+
 pub fn str_to_char_grid(text: &str, empty_char: char, blocked_char: char) -> Vec<Symbol<char>> {
     let mut v = Vec::with_capacity(text.chars().count());
     for c in text.chars() {
@@ -59,13 +81,13 @@ pub fn str_to_char_grid(text: &str, empty_char: char, blocked_char: char) -> Vec
 pub fn read_rows_characters(grid: &Grid<char>) -> impl Iterator<Item = char> + '_ {
     grid.get_rows()
         .filter(|x| x.is_character())
-        .map(|x| *x.contents().unwrap())
+        .map(|x| x.to_char())
 }
 
 pub fn read_cols_characters(grid: &Grid<char>) -> impl Iterator<Item = char> + '_ {
     grid.get_cols()
         .filter(|x| x.is_character())
-        .map(|x| *x.contents().unwrap())
+        .map(|x| x.to_char())
 }
 
 

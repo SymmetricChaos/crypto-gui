@@ -108,7 +108,7 @@ impl Cipher for Grille {
             let mut out = String::with_capacity(self.grid.num_empty());
             for (c, s) in filled_grid.get_rows().zip(self.grid.get_rows()) {
                 if s.is_empty() {
-                    out.push(*c.contents().unwrap())
+                    out.push(c.to_char())
                 }
             }
 
@@ -141,7 +141,7 @@ impl Cipher for Grille {
             Ok(grid
                 .get_rows()
                 .filter(|x| x.is_character())
-                .map(|x| *x.contents().unwrap())
+                .map(|x| x.to_char())
                 .collect())
         }
     }
