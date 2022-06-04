@@ -109,6 +109,15 @@ impl<T: Copy + Clone> Grid<T> {
         }
     }
 
+    pub fn new_blocked(num_rows: usize, num_cols: usize) -> Self {
+        let grid = vec![Symbol::Blocked; num_cols * num_rows];
+        Self {
+            symbols: grid,
+            num_rows,
+            num_cols,
+        }
+    }
+
     pub fn from_rows(
         symbols: Vec<Symbol<T>>,
         num_rows: usize,

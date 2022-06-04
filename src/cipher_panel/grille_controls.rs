@@ -23,7 +23,7 @@ impl View for Grille {
         ui.checkbox(&mut self.use_nulls, "Use Nulls?");
         if self.use_nulls {
             ui.label("Null Alphabet");
-            ui.add(TextEdit::singleline(&mut self.null_alphabet).font(TextStyle::Monospace));
+            ui.add(TextEdit::singleline(&mut self.null_alphabet_string).font(TextStyle::Monospace));
         }
         ui.add_space(16.0);
 

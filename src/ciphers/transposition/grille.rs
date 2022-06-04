@@ -22,9 +22,9 @@ impl Grille {
         }
     }
 
-    fn random_null(&self) -> Symbol<char> {
-        let rng = self.get_rng();
-        Symbol::Character(self.null_alphabet.get_rand_char(&mut rng))
+    fn random_nulls(&self, n: usize) -> Vec<Symbol<char>> {
+        let mut rng = self.get_rng();
+        self.null_alphabet.get_rand_chars_replace(n, &mut rng).iter().map(|c| Symbol::Character(*c)).collect_vec()
     }
 
     fn get_rng(&self) -> StdRng {
@@ -61,15 +61,9 @@ impl Cipher for Grille {
             ));
         }
 
-        let mut rng: StdRng = match self.seed {
-            Some(n) => SeedableRng::seed_from_u64(n),
-            None => SeedableRng::from_entropy(),
-        };
-
-        let range = 0..self.null_alphabet.chars().count();
-
         let mut grid = self.grid.clone();
         let mut chars = text.chars();
+        let mut nulls = self.random_nulls(self.grid.grid_size());
 
         for cell in grid.get_rows_mut() {
             match cell {
@@ -78,9 +72,9 @@ impl Cipher for Grille {
                 }
                 Symbol::Empty => match chars.next() {
                     Some(c) => *cell = Symbol::Character(c),
-                    None => *cell = self.random_null(),
+                    None => *cell = nulls.pop().unwrap(),
                 },
-                Symbol::Blocked => *cell = self.random_null(),
+                Symbol::Blocked => *cell = nulls.pop().unwrap(),
             }
         }
 
@@ -148,7 +142,7 @@ impl Cipher for Grille {
     }
 
     fn randomize(&mut self, _rng: &mut StdRng) {
-        let rng = self.get_rng();
+        let mut rng = self.get_rng();
         for cell in self.grid.get_rows_mut() {
             if rng.gen_bool(0.5) {
                 *cell = Symbol::Empty;
