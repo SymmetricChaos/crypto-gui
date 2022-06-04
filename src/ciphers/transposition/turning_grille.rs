@@ -2,7 +2,7 @@ use crate::{ciphers::Cipher, errors::CipherError, grid::{Grid, Symbol, str_to_ch
 use itertools::Itertools;
 use rand::{prelude::StdRng, Rng, SeedableRng};
 
-pub struct Grille {
+pub struct TurningGrille {
     pub null_alphabet_string: String,
     null_alphabet: VecString,
     pub grid: Grid<char>,
@@ -10,7 +10,7 @@ pub struct Grille {
     pub use_nulls: bool,
 }
 
-impl Grille {
+impl TurningGrille {
     fn _randomize_seeded(&mut self) {
         let mut rng = self.get_rng();
         for cell in self.grid.get_rows_mut() {
@@ -33,11 +33,12 @@ impl Grille {
             None => SeedableRng::from_entropy(),
         }
     }
+
 }
 
-impl Default for Grille {
+impl Default for TurningGrille {
     fn default() -> Self {
-        Grille {
+        TurningGrille {
             null_alphabet_string: String::from(PresetAlphabet::BasicLatin),
             null_alphabet: VecString::from(PresetAlphabet::BasicLatin),
             grid: Grid::new_empty(4, 4),
@@ -47,7 +48,7 @@ impl Default for Grille {
     }
 }
 
-impl Cipher for Grille {
+impl Cipher for TurningGrille {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         if self.grid.num_empty() < text.chars().count() {
             return Err(CipherError::Input(
@@ -60,11 +61,6 @@ impl Cipher for Grille {
                 "The text must exactly fill the empty spaces in the Grille".to_string(),
             ));
         }
-
-        let mut rng: StdRng = match self.seed {
-            Some(n) => SeedableRng::seed_from_u64(n),
-            None => SeedableRng::from_entropy(),
-        };
 
         let range = 0..self.null_alphabet.chars().count();
 
@@ -172,7 +168,7 @@ mod grille_tests {
 
     #[test]
     fn encrypt_test_full_grid() {
-        let mut cipher = Grille::default();
+        let mut cipher = TurningGrille::default();
         cipher.seed = SEED;
         cipher._randomize_seeded();
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
@@ -180,7 +176,7 @@ mod grille_tests {
 
     #[test]
     fn decrypt_test_full_grid() {
-        let mut cipher = Grille::default();
+        let mut cipher = TurningGrille::default();
         cipher.seed = SEED;
         cipher._randomize_seeded();
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
@@ -188,7 +184,7 @@ mod grille_tests {
 
     #[test]
     fn encrypt_test_full_grid_no_nulls() {
-        let mut cipher = Grille::default();
+        let mut cipher = TurningGrille::default();
         cipher.use_nulls = false;
         cipher.seed = SEED;
         cipher._randomize_seeded();
@@ -197,7 +193,7 @@ mod grille_tests {
 
     #[test]
     fn decrypt_test_full_grid_no_nulls() {
-        let mut cipher = Grille::default();
+        let mut cipher = TurningGrille::default();
         cipher.use_nulls = false;
         cipher.seed = SEED;
         cipher._randomize_seeded();

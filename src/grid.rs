@@ -1,5 +1,5 @@
 use std::ops::{Index, IndexMut};
-use std::fmt;
+use std::fmt::{Display, Formatter, Result};
 
 pub const EMPTY: char = '⬜';
 pub const BLOCK: char = '⬛';
@@ -391,15 +391,14 @@ impl<T: Copy + Clone> Grid<T> {
             }
         }
 
-        let r = self.num_rows;
-        self.num_rows = self.num_cols;
-        self.num_cols = r;
+        std::mem::swap(&mut self.num_rows, &mut self.num_cols);
         self.symbols = new_symbols;
     }
+
 }
 
-impl fmt::Display for Grid<char> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl Display for Grid<char> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let mut out = String::with_capacity(self.grid_size());
         for x in 0..self.num_rows {
             for sym in self.get_row(x) {
