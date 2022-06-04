@@ -5,7 +5,7 @@ use rand::{prelude::StdRng, Rng, SeedableRng};
 pub struct Grille {
     pub null_alphabet_string: String,
     null_alphabet: VecString,
-    pub grid: Grid<char>,
+    pub grid: Grid<Symbol<char>>,
     pub seed: Option<u64>,
     pub use_nulls: bool,
 }

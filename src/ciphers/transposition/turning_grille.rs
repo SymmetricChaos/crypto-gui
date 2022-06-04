@@ -1,11 +1,13 @@
-use crate::{ciphers::Cipher, errors::CipherError, grid::{Grid, Symbol, str_to_char_grid}, text_aux::{PresetAlphabet, VecString}};
+use crate::{ciphers::Cipher, errors::CipherError, grid::{Grid, Symbol}, text_aux::{PresetAlphabet, VecString}};
 use itertools::Itertools;
 use rand::{prelude::StdRng, Rng, SeedableRng};
+
+
 
 pub struct TurningGrille {
     pub null_alphabet_string: String,
     null_alphabet: VecString,
-    pub grid: Grid<char>,
+    pub grid: Grid<Symbol<char>>,
     pub seed: Option<u64>,
     pub use_nulls: bool,
 }
@@ -22,10 +24,11 @@ impl TurningGrille {
         }
     }
 
-    fn random_null(&self) -> Symbol<char> {
+    fn random_nulls(&self, n: usize) -> Vec<char> {
         let mut rng = self.get_rng();
-        Symbol::Character(self.null_alphabet.get_rand_char(&mut rng))
+        self.null_alphabet.get_rand_chars_replace(n, &mut rng).iter().map(|c| *c).collect_vec()
     }
+
 
     fn get_rng(&self) -> StdRng {
         match self.seed {
@@ -35,7 +38,7 @@ impl TurningGrille {
     }
 
     pub fn increase_size(&mut self) {
-        if self.grid.num_cols() >= 16 {
+        if self.grid.num_cols() >= 20 {
             return ()
         }
         self.grid.add_col();
@@ -54,6 +57,10 @@ impl TurningGrille {
         self.grid.del_row();
     }
 
+    pub fn rotate_coord(&self) {
+        
+    }
+
 }
 
 impl Default for TurningGrille {
@@ -70,7 +77,23 @@ impl Default for TurningGrille {
 
 impl Cipher for TurningGrille {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        todo!()
+
+        let mut stencil = self.grid.clone();
+        let mut output_grid = Grid::<char>::new_default(self.grid.num_rows(), self.grid.num_cols());
+        let mut chars = text.chars();
+        let mut nulls = self.random_nulls(self.grid.grid_size());
+
+        for _ in 0..4 {
+            for (pos, cell) in stencil.get_rows().enumerate() {
+                if cell.is_empty() {
+                    let c = chars.next().unwrap_or(nulls.pop().unwrap());
+                    output_grid[pos] = c;
+                }
+            }
+            stencil.rotate();
+        }
+
+        Ok(output_grid.get_cols().collect())
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
