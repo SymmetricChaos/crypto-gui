@@ -1,0 +1,49 @@
+use crate::ciphers::transposition::TurningGrille;
+
+use super::{generic_components::*, View};
+use eframe::egui::{TextStyle, Ui};
+use rand::prelude::StdRng;
+
+
+impl View for TurningGrille {
+    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, errors: &mut String) {
+        randomize_reset(ui, self, rng);
+        ui.add_space(16.0);
+
+        ui.label("Adjust Size");
+        ui.horizontal(|ui| {
+            if ui.button("-").clicked() {
+                self.decrease_size()
+            };
+            ui.label(format!("{}", self.grid.num_rows()));
+            if ui.button("+").clicked() {
+                self.increase_size()
+            };
+        });
+        ui.add_space(16.0);
+
+        ui.label("Key String");
+        ui.text_edit_multiline(&mut self.key_string);
+
+        if ui.button("Build Grid").clicked() {
+            match self.build_key() {
+                Ok(_) => (),
+                Err(e) => *errors = e.to_string(),
+            }
+            match self.build_grid() {
+                Ok(_) => (),
+                Err(e) => errors.push_str(&e.to_string()),
+            }
+        };
+
+        ui.spacing_mut().item_spacing = (2.0, 2.0).into();
+        ui.style_mut().override_text_style = Some(TextStyle::Monospace);
+        for x in 0..self.grid.num_rows() {
+            ui.horizontal(|ui| {
+                for y in 0..self.grid.num_cols() {
+                    ui.label(self.grid[(x,y)].to_char().to_string());
+                }
+            });
+        }
+    }
+}

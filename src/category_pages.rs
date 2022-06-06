@@ -49,6 +49,7 @@ impl CipherCategory {
             CipherCategory::Transposition =>  &[
                                     CipherID::Columnar,
                                     CipherID::Grille,
+                                    CipherID::TurningGrille,
                                     CipherID::RailFence,
                                     CipherID::Scytale,],
             CipherCategory::Playfair => &[

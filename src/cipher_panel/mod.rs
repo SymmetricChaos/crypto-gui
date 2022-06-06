@@ -40,6 +40,7 @@ pub mod trifid_controls;
 pub mod two_square_controls;
 pub mod vigenere_controls;
 pub mod quagmire_controls;
+pub mod turning_grille_controls;
 
 pub trait View: Cipher {
     fn ui(&mut self, ui: &mut egui::Ui, rng: &mut StdRng, errors: &mut String);
@@ -132,6 +133,7 @@ pub struct CipherControlPanel {
     grille: Grille,
     rail_fence: RailFence,
     scytale: Scytale,
+    turning_grille: TurningGrille,
 
     polybius: PolybiusSquare,
     polybius_cube: PolybiusCube,
@@ -196,6 +198,7 @@ impl CipherControlPanel {
                     CipherID::Grille,
                     CipherID::RailFence,
                     CipherID::Scytale,
+                    CipherID::TurningGrille,
                 ],
                 "Transposition",
                 active_cipher,
@@ -288,6 +291,7 @@ impl CipherControlPanel {
             CipherID::TwoSquare => self.two_square.ui(ui, rng, errors),
             CipherID::Hutton => self.hutton.ui(ui, rng, errors),
             CipherID::Quagmire => self.quagmire.ui(ui, rng, errors),
+            CipherID::TurningGrille => self.turning_grille.ui(ui, rng, errors),
             _ => {
                 ui.label("IN PROGRESS");
             }
@@ -384,6 +388,7 @@ impl CipherDisplayPanel {
             }
             CipherID::Hutton => encrypt_decrypt(ui, &control_panel.hutton, input, output, errors),
             CipherID::Quagmire => encrypt_decrypt(ui, &control_panel.quagmire, input, output, errors),
+            CipherID::TurningGrille => encrypt_decrypt(ui, &control_panel.turning_grille, input, output, errors),
             _ => *errors = String::from("button must be added to DisplayPanel struct"),
         }
 

@@ -38,10 +38,9 @@ impl TurningGrille {
     pub fn build_grid(&mut self) -> Result<(), CipherError> {
 
         self.grid.apply(|_| Symbol::Blocked);
-
         let w = self.subgrille_width();
 
-        if self.key.len() != w*w {
+        if self.key.len() != self.subgrille_size() {
             return Err(CipherError::key("not enough key values provided"))
         }
 
@@ -59,10 +58,11 @@ impl TurningGrille {
 
     pub fn build_key(&mut self) -> Result<(),ParseIntError> {
         let strings = self.key_string.split(',');
-        let mut new_key = Vec::with_capacity(self.key.len());
+        let mut new_key = Vec::with_capacity(self.subgrille_width());
         for s in strings.unique() {
             new_key.push( s.trim().parse::<usize>()? );
         }
+        self.key = new_key;
         Ok(())
     }
 
@@ -76,12 +76,6 @@ impl TurningGrille {
             }
         }
     }
-
-    fn random_nulls(&self, n: usize) -> Vec<char> {
-        let mut rng = self.get_rng();
-        self.null_alphabet.get_rand_chars_replace(n, &mut rng).iter().map(|c| *c).collect_vec()
-    }
-
 
     fn get_rng(&self) -> StdRng {
         match self.seed {
@@ -98,6 +92,7 @@ impl TurningGrille {
         self.grid.add_col();
         self.grid.add_row();
         self.grid.add_row();
+        self.grid.apply(|_| Symbol::Blocked);
     }
 
     pub fn decrease_size(&mut self) {
@@ -108,10 +103,15 @@ impl TurningGrille {
         self.grid.del_col();
         self.grid.del_row();
         self.grid.del_row();
+        self.grid.apply(|_| Symbol::Blocked);
     }
 
     pub fn subgrille_width(&self) -> usize {
         self.grid.num_cols()/2
+    }
+
+    pub fn subgrille_size(&self) -> usize {
+        self.subgrille_width().pow(2)
     }
 
 }
@@ -125,6 +125,7 @@ impl Cipher for TurningGrille {
 
         let w = self.grid.num_cols();
         let section = crypto_grid.grid_size()/4;
+        let mut rng = self.get_rng();
 
         for i in 0..4 {
             let lo = i*section;
@@ -133,7 +134,7 @@ impl Cipher for TurningGrille {
             for row in 0..w {
                 for col in 0..w {
                     if crypto_grid[(row,col)].is_empty() {
-                        output_grid[(row,col)] = snip.next().unwrap()
+                        output_grid[(row,col)] = snip.next().unwrap_or(self.null_alphabet.get_rand_char(&mut rng))
                     }
                 }
             }
