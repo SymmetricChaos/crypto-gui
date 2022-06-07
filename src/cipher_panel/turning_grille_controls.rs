@@ -22,8 +22,12 @@ impl View for TurningGrille {
         });
         ui.add_space(16.0);
 
-        ui.label("Key String");
-        ui.text_edit_multiline(&mut self.key_string);
+        ui.label("Keys");
+        ui.label(format!("The numbers from 0 to {} should all be used exactly once among the keys",self.subgrille_size()));
+        ui.text_edit_singleline(&mut self.key_strings[0]);
+        ui.text_edit_singleline(&mut self.key_strings[1]);
+        ui.text_edit_singleline(&mut self.key_strings[1]);
+        ui.text_edit_singleline(&mut self.key_strings[3]);
 
         if ui.button("Build Grid").clicked() {
             match self.build_key() {
@@ -35,6 +39,10 @@ impl View for TurningGrille {
                 Err(e) => errors.push_str(&e.to_string()),
             }
         };
+
+        if ui.button("rotate").clicked() {
+            self.grid.rotate()
+        }
 
         ui.spacing_mut().item_spacing = (2.0, 2.0).into();
         ui.style_mut().override_text_style = Some(TextStyle::Monospace);

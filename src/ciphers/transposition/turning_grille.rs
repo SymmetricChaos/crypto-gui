@@ -45,9 +45,9 @@ impl TurningGrille {
         }
 
         let mut set = HashSet::with_capacity(self.subgrille_size());
-        for key in self.keys {
+        for key in &self.keys {
             for n in key {
-                if n >= self.subgrille_size() {
+                if n >= &self.subgrille_size() {
                     return Err(CipherError::Key(format!("invalid key value found: {}", n)));
                 }
                 if !set.insert(n) {
@@ -60,7 +60,7 @@ impl TurningGrille {
         self.grid.apply(|_| Symbol::Blocked);
  
         // "Stamp" each chunk onto the grid, rotating after each stamp
-        for key in self.keys {
+        for key in &self.keys {
             for n in key {
                 let row = n / self.subgrille_width();
                 let col = n % self.subgrille_width();
