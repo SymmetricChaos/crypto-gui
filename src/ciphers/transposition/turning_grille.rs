@@ -1,4 +1,4 @@
-use std::num::ParseIntError;
+use std::{num::ParseIntError, collections::HashSet};
 
 use crate::{ciphers::Cipher, errors::CipherError, grid::{Grid, Symbol}, text_aux::{PresetAlphabet, VecString}};
 use itertools::Itertools;
@@ -11,8 +11,8 @@ pub struct TurningGrille {
     null_alphabet: VecString,
     pub grid: Grid<Symbol<char>>,
     pub seed: Option<u64>,
-    pub key_string: String,
-    key: Vec<usize>,
+    pub key_strings: [String; 4],
+    keys: [Vec<usize>; 4],
 }
 
 impl Default for TurningGrille {
@@ -22,8 +22,8 @@ impl Default for TurningGrille {
             null_alphabet: VecString::from(PresetAlphabet::BasicLatin),
             grid: Grid::new_blocked(8, 8),
             seed: None,
-            key_string: String::new(),
-            key: Vec::new(),
+            key_strings: [String::new(), String::new(), String::new(), String::new()],
+            keys: [Vec::new(), Vec::new(), Vec::new(), Vec::new()],
         }
     }
 }
@@ -36,34 +36,55 @@ impl TurningGrille {
     //     the first quarter of the numbers are used to punch out spaces
     //     then the grid is rotated and the next quarters, and so on
     pub fn build_grid(&mut self) -> Result<(), CipherError> {
-
-        self.grid.apply(|_| Symbol::Blocked);
-        let w = self.subgrille_width();
-
-        if self.key.len() != self.subgrille_size() {
-            return Err(CipherError::key("not enough key values provided"))
+ 
+        // These next two blocks find likely errors
+        if self.key_length() != self.subgrille_size() {
+            return Err(CipherError::Key(format!("there should be {} key values provided but {} were found", 
+                self.subgrille_size(), 
+                self.key_length())));
         }
 
-        for (pos, n) in self.key.iter().enumerate() {
-            if pos % w == 0 {
-                self.grid.rotate()
+        let mut set = HashSet::with_capacity(self.subgrille_size());
+        for key in self.keys {
+            for n in key {
+                if n >= self.subgrille_size() {
+                    return Err(CipherError::Key(format!("invalid key value found: {}", n)));
+                }
+                if !set.insert(n) {
+                    return Err(CipherError::Key(format!("duplicate key value found: {}", n)));
+                }
             }
-            let col = n % w;
-            let row = n / w;
-            self.grid[(row, col)] = Symbol::Empty;
         }
-        self.grid.rotate();
+
+        // Block off the whole grid
+        self.grid.apply(|_| Symbol::Blocked);
+ 
+        // "Stamp" each chunk onto the grid, rotating after each stamp
+        for key in self.keys {
+            for n in key {
+                let row = n / self.subgrille_width();
+                let col = n % self.subgrille_width();
+                self.grid[(row, col)] = Symbol::Empty;
+            }
+            self.grid.rotate();
+        }
         Ok(())
     }
 
     pub fn build_key(&mut self) -> Result<(),ParseIntError> {
-        let strings = self.key_string.split(',');
-        let mut new_key = Vec::with_capacity(self.subgrille_width());
-        for s in strings.unique() {
-            new_key.push( s.trim().parse::<usize>()? );
+        for (n, string) in self.key_strings.iter().enumerate() {
+            self.keys[n].clear();
+            let nums = string.split(',');
+            for s in nums {
+                self.keys[n].push( s.trim().parse::<usize>()? );
+            }
         }
-        self.key = new_key;
         Ok(())
+    }
+
+    // I love .fold()
+    fn key_length(&self) -> usize {
+        self.keys.iter().fold(0, |acc, vec| acc + vec.len())
     }
 
     fn _randomize_seeded(&mut self) {
