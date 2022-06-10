@@ -4,8 +4,8 @@ use eframe::egui::{DragValue, Ui};
 use rand::prelude::StdRng;
 
 impl View for StraddlingCheckerboard {
-    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {
-        randomize_reset(ui, self, rng);
+    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng, _errors: &mut String) {
+        randomize_reset(ui, self);
 
         ui.label("Alphabet");
         if control_string(ui, &mut self.alphabet).changed() {

@@ -2,9 +2,8 @@ use std::collections::VecDeque;
 
 use crate::{
     errors::CipherError,
-    text_aux::{random_sample_replace, VecString, PresetAlphabet}, ciphers::Cipher,
+    text_aux::{random_sample_replace, VecString, PresetAlphabet}, ciphers::Cipher, global_rng::get_gobal_rng,
 };
-use rand::prelude::StdRng;
 
 use super::PolyMode;
 
@@ -232,7 +231,8 @@ impl Cipher for Vigenere {
         }
     }
 
-    fn randomize(&mut self, rng: &mut StdRng) {
+    fn randomize(&mut self) {
+        let rng = &mut get_gobal_rng();
         let alpha = String::from(&self.alphabet_string);
         self.key_words[0] = random_sample_replace(&alpha, 3, rng);
         self.key_words[1] = random_sample_replace(&alpha, 4, rng);

@@ -1,6 +1,6 @@
 use num::Integer;
-use rand::{prelude::StdRng, Rng};
-use crate::{errors::CipherError, ciphers::Cipher};
+use rand::Rng;
+use crate::{errors::CipherError, ciphers::Cipher, global_rng::GLOBAL_RNG};
 
 pub struct Scytale {
     pub key: usize,
@@ -73,8 +73,8 @@ impl Cipher for Scytale {
         Ok(out)
     }
 
-    fn randomize(&mut self, rng: &mut StdRng) {
-        self.key = rng.gen_range(2..10);
+    fn randomize(&mut self) {
+        self.key = GLOBAL_RNG.lock().unwrap().gen_range(2..10);
     }
 
     fn reset(&mut self) {

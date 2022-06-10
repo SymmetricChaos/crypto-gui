@@ -3,7 +3,7 @@ use std::fmt;
 use super::Cipher;
 use crate::{
     errors::CipherError,
-    text_aux::{VecString, PresetAlphabet},
+    text_aux::{VecString, PresetAlphabet}, global_rng::get_gobal_rng,
 };
 
 #[derive(Clone, Debug)]
@@ -194,8 +194,8 @@ impl Cipher for Hebern {
         Ok(out)
     }
 
-    fn randomize(&mut self, rng: &mut rand::prelude::StdRng) {
-        todo!("{:?}", rng)
+    fn randomize(&mut self) {
+        todo!("{:?}", &mut get_gobal_rng())
     }
 
     fn reset(&mut self) {

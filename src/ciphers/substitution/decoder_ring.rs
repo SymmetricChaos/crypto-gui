@@ -1,6 +1,8 @@
+use rand::Rng;
+
+use crate::global_rng::get_gobal_rng;
 use crate::{errors::CipherError, ciphers::Cipher};
 use crate::text_aux::VecString;
-use rand::{prelude::StdRng, Rng};
 
 pub struct DecoderRing {
     pub index: usize,
@@ -89,8 +91,8 @@ impl Cipher for DecoderRing {
         Ok(out)
     }
 
-    fn randomize(&mut self, rng: &mut StdRng) {
-        self.index = rng.gen_range(0..self.alphabet.len());
+    fn randomize(&mut self) {
+        self.index = get_gobal_rng().gen_range(0..self.alphabet.len());
     }
 
     fn reset(&mut self) {

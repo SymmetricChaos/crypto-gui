@@ -3,10 +3,9 @@ use crate::{
     text_aux::{
         keyed_alphabet, shuffled_str,
         PresetAlphabet::{self, *},
-    }, ciphers::Cipher,
+    }, ciphers::Cipher, global_rng::get_gobal_rng,
 };
 use num::integer::Roots;
-use rand::prelude::StdRng;
 use std::fmt;
 
 pub struct Playfair {
@@ -156,8 +155,8 @@ impl Cipher for Playfair {
         Ok(out)
     }
 
-    fn randomize(&mut self, rng: &mut StdRng) {
-        self.alphabet = shuffled_str(&self.alphabet, rng)
+    fn randomize(&mut self) {
+        self.alphabet = shuffled_str(&self.alphabet, &mut get_gobal_rng())
     }
 
     fn reset(&mut self) {

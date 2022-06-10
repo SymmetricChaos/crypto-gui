@@ -4,7 +4,6 @@ use crate::{
     text_aux::PresetAlphabet,
 };
 
-use rand::prelude::StdRng;
 
 use super::PolybiusSquare;
 
@@ -55,9 +54,9 @@ impl Cipher for Adfgvx {
         Ok(poly_text)
     }
 
-    fn randomize(&mut self, rng: &mut StdRng) {
-        self.polybius.randomize(rng);
-        self.columnar.randomize(rng);
+    fn randomize(&mut self) {
+        self.polybius.randomize();
+        self.columnar.randomize();
     }
 
     fn reset(&mut self) {

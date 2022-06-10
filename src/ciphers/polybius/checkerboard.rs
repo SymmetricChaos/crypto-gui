@@ -2,7 +2,7 @@ use std::char;
 
 use rand::prelude::SliceRandom;
 
-use crate::{ciphers::Cipher, errors::CipherError, text_aux::keyed_alphabet};
+use crate::{ciphers::Cipher, errors::CipherError, text_aux::keyed_alphabet, global_rng::get_gobal_rng};
 
 // Use this to fill partial inputs for the interface
 const CHECKERBOARD_ALPHABET: &'static str = "ABCDEFGHIJKLM/NOPQRSTUVWXYZ.";
@@ -150,8 +150,9 @@ impl Cipher for StraddlingCheckerboard {
         Ok(out)
     }
 
-    fn randomize(&mut self, rng: &mut rand::prelude::StdRng) {
-        self.rows.shuffle(rng);
+    fn randomize(&mut self) {
+        let mut rng = get_gobal_rng();
+        self.rows.shuffle(&mut *rng);
     }
 
     fn reset(&mut self) {

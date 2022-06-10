@@ -1,7 +1,8 @@
 use crate::ciphers::Cipher;
 use crate::errors::CipherError;
+use crate::global_rng::get_gobal_rng;
 use crate::text_aux::{prep_text, VecString, PresetAlphabet::*};
-use rand::{prelude::StdRng, Rng};
+use rand::Rng;
 
 pub struct Caesar {
     pub shift: i32,
@@ -67,8 +68,8 @@ impl Cipher for Caesar {
         Ok(text.chars().map(|c| self.decrypt_char(c)).collect())
     }
 
-    fn randomize(&mut self, rng: &mut StdRng) {
-        self.shift = rng.gen_range(0..self.alphabet.len()) as i32;
+    fn randomize(&mut self) {
+        self.shift = get_gobal_rng().gen_range(0..self.alphabet.len()) as i32;
     }
 
     fn reset(&mut self) {

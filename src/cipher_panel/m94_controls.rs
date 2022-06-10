@@ -4,8 +4,8 @@ use eframe::egui::{self, Slider, Ui};
 use rand::prelude::StdRng;
 
 impl View for M94 {
-    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {
-        randomize_reset(ui, self, rng);
+    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng, _errors: &mut String) {
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Alphabet");
@@ -18,7 +18,7 @@ impl View for M94 {
         ui.add_space(16.0);
 
         if ui.button("Randomize Wheels").clicked() {
-            self.randomize(rng);
+            self.randomize();
         }
 
         ui.label("Wheels");

@@ -1,8 +1,10 @@
+use rand::Rng;
+
 use crate::ciphers::Cipher;
 use crate::errors::CipherError;
+use crate::global_rng::GLOBAL_RNG;
 use crate::text_aux::text_functions::validate_text;
 use crate::text_aux::{VecString, PresetAlphabet::*};
-use rand::{prelude::StdRng, Rng};
 use std::fmt::Display;
 
 pub struct Alberti {
@@ -88,9 +90,9 @@ impl Cipher for Alberti {
         Ok(out)
     }
 
-    fn randomize(&mut self, rng: &mut StdRng) {
+    fn randomize(&mut self) {
         let length = self.moving_alphabet.len();
-        self.start_index = rng.gen_range(0..length);
+        self.start_index = GLOBAL_RNG.lock().unwrap().gen_range(0..length);
     }
 
     fn reset(&mut self) {

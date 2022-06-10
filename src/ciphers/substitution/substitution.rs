@@ -1,8 +1,7 @@
 use crate::{
     errors::CipherError,
-    text_aux::{shuffled_str, VecString, PresetAlphabet}, ciphers::Cipher,
+    text_aux::{shuffled_str, VecString, PresetAlphabet}, ciphers::Cipher, global_rng::get_gobal_rng,
 };
-use rand::prelude::StdRng;
 
 #[derive(Debug)]
 pub struct GeneralSubstitution {
@@ -100,9 +99,9 @@ impl Cipher for GeneralSubstitution {
         Ok(out)
     }
 
-    fn randomize(&mut self, rng: &mut StdRng) {
+    fn randomize(&mut self) {
         // keep the plaintext alphabet unchanged and make the ciphertext alphabet a shuffled version of it
-        self.ct_alphabet_string = shuffled_str(&self.pt_alphabet_string, rng);
+        self.ct_alphabet_string = shuffled_str(&self.pt_alphabet_string, &mut get_gobal_rng());
         self.ct_alphabet = VecString::unique_from(&self.ct_alphabet_string);
     }
 

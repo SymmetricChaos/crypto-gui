@@ -1,8 +1,8 @@
 use std::{num::ParseIntError, collections::HashSet};
 
-use crate::{ciphers::Cipher, errors::CipherError, grid::{Grid, Symbol}, text_aux::{PresetAlphabet, VecString}};
+use crate::{ciphers::Cipher, errors::CipherError, grid::{Grid, Symbol}, text_aux::{PresetAlphabet, VecString}, global_rng::get_gobal_rng};
 use itertools::Itertools;
-use rand::{prelude::StdRng, Rng, SeedableRng};
+use rand::Rng;
 
 
 
@@ -87,24 +87,6 @@ impl TurningGrille {
         self.keys.iter().fold(0, |acc, vec| acc + vec.len())
     }
 
-    fn _randomize_seeded(&mut self) {
-        let mut rng = self.get_rng();
-        for cell in self.grid.get_rows_mut() {
-            if rng.gen_bool(0.5) {
-                *cell = Symbol::Empty;
-            } else {
-                *cell = Symbol::Blocked;
-            }
-        }
-    }
-
-    fn get_rng(&self) -> StdRng {
-        match self.seed {
-            Some(n) => SeedableRng::seed_from_u64(n),
-            None => SeedableRng::from_entropy(),
-        }
-    }
-
     pub fn increase_size(&mut self) {
         if self.grid.num_cols() >= 20 {
             return ()
@@ -146,7 +128,7 @@ impl Cipher for TurningGrille {
 
         let w = self.grid.num_cols();
         let section = crypto_grid.grid_size()/4;
-        let mut rng = self.get_rng();
+        let mut rng = get_gobal_rng();
 
         for i in 0..4 {
             let lo = i*section;
@@ -190,8 +172,8 @@ impl Cipher for TurningGrille {
         *self = Self::default();
     }
 
-    fn randomize(&mut self, _rng: &mut StdRng) {
-        let mut rng = self.get_rng();
+    fn randomize(&mut self) {
+        let rng = &mut get_gobal_rng();
         for cell in self.grid.get_rows_mut() {
             if rng.gen_bool(0.5) {
                 *cell = Symbol::Empty;
@@ -205,26 +187,27 @@ impl Cipher for TurningGrille {
 #[cfg(test)]
 mod turning_grille_tests {
 
+    use crate::global_rng::seed_global_rng;
+
     use super::*;
 
     const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYD";
     const CIPHERTEXT: &'static str =
         "TECLESRKCQPWTKTAQPRFUOEZTXKNOVUMZDBFMQIYHEROBBHONUUXGWEDHIOJPELC";
-    const SEED: Option<u64> = Some(1587782446298476294);
 
     #[test]
     fn encrypt_test_full_grid() {
+        seed_global_rng(1587782446298476294);
         let mut cipher = TurningGrille::default();
-        cipher.seed = SEED;
-        cipher._randomize_seeded();
+        cipher.randomize();
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test_full_grid() {
+        seed_global_rng(1587782446298476294);
         let mut cipher = TurningGrille::default();
-        cipher.seed = SEED;
-        cipher._randomize_seeded();
+        cipher.randomize();
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 

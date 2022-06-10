@@ -1,8 +1,8 @@
 use super::Cipher;
 use crate::errors::CipherError;
+use crate::global_rng::get_gobal_rng;
 use crate::text_aux::{random_char_vec, VecString};
 use lazy_static::lazy_static;
-use rand::prelude::StdRng;
 use rand::Fill;
 use std::fmt;
 
@@ -256,11 +256,12 @@ impl Cipher for M209 {
         self.encrypt(text)
     }
 
-    fn randomize(&mut self, rng: &mut StdRng) {
+    fn randomize(&mut self) {
         // Fill up an array with random bytes. Then map that to pairs of usize.
         // Unwrap here is justified by the fixed sizes of everything involved.
+        let mut rng = get_gobal_rng();
         let mut data = [0u8; 54];
-        data.try_fill(rng).unwrap();
+        data.try_fill(&mut *rng).unwrap();
         self.lugs = data
             .chunks_exact(2)
             .map(|x| ((x[0] % 7) as usize, (x[1] % 7) as usize))
@@ -268,12 +269,12 @@ impl Cipher for M209 {
             .try_into()
             .unwrap();
 
-        let pins1 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 13, rng);
-        let pins2 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVXYZ", 12, rng);
-        let pins3 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVX", 12, rng);
-        let pins4 = random_char_vec("ABCDEFGHIJKLMNOPQRSTU", 12, rng);
-        let pins5 = random_char_vec("ABCDEFGHIJKLMNOPQRS", 12, rng);
-        let pins6 = random_char_vec("ABCDEFGHIJKLMNOPQ", 12, rng);
+        let pins1 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 13, &mut rng);
+        let pins2 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVXYZ", 12, &mut rng);
+        let pins3 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVX", 12, &mut rng);
+        let pins4 = random_char_vec("ABCDEFGHIJKLMNOPQRSTU", 12, &mut rng);
+        let pins5 = random_char_vec("ABCDEFGHIJKLMNOPQRS", 12, &mut rng);
+        let pins6 = random_char_vec("ABCDEFGHIJKLMNOPQ", 12, &mut rng);
 
         for (rotor, new_pins) in self
             .get_wheels()

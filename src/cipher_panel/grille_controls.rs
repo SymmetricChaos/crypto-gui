@@ -16,8 +16,8 @@ fn cell_button(grille: &mut Grille, x: usize, y: usize, ui: &mut eframe::egui::U
 }
 
 impl View for Grille {
-    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {
-        randomize_reset(ui, self, rng);
+    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng, _errors: &mut String) {
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.checkbox(&mut self.use_nulls, "Use Nulls?");

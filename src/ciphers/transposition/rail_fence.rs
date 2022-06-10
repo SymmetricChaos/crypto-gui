@@ -1,7 +1,7 @@
-use rand::{prelude::StdRng, Rng};
+use rand::Rng;
 use std::iter::Iterator;
 
-use crate::{errors::CipherError, ciphers::Cipher};
+use crate::{errors::CipherError, ciphers::Cipher, global_rng::GLOBAL_RNG};
 
 pub struct RailFence {
     pub rails: usize, // the slider to control this should be limited
@@ -95,8 +95,8 @@ impl Cipher for RailFence {
         Ok(out)
     }
 
-    fn randomize(&mut self, rng: &mut StdRng) {
-        self.rails = rng.gen_range(2..10);
+    fn randomize(&mut self) {
+        self.rails = GLOBAL_RNG.lock().unwrap().gen_range(2..10);
     }
 
     fn reset(&mut self) {

@@ -189,6 +189,8 @@ pub fn validate_text(text: &str, alphabet: &VecString) -> Result<(),CipherError>
 #[cfg(test)]
 mod text_function_tests {
 
+    use crate::global_rng::{seed_global_rng, get_gobal_rng};
+
     use super::*;
 
     #[test]
@@ -198,13 +200,12 @@ mod text_function_tests {
         assert_eq!(vec![0, 3, 4, 2, 1, 5], rank_str(text, alphabet));
     }
 
-    use rand::SeedableRng;
     #[test]
     fn shuffled_alphabet() {
-        let mut rng = StdRng::from_entropy();
+        seed_global_rng(3141592654);
         let alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         for _ in 0..26 {
-            println!("{}", shuffled_str(alpha, &mut rng))
+            println!("{}", shuffled_str(alpha, &mut get_gobal_rng()))
         }
     }
 }

@@ -1,14 +1,14 @@
 use rand::{prelude::{StdRng, SliceRandom}, SeedableRng, Rng};
 
-use crate::{grid::{Symbol, Grid}, errors::CipherError, ciphers::Cipher};
+use crate::{grid::{Symbol, Grid}, errors::CipherError, ciphers::Cipher, global_rng::get_gobal_rng};
 
 pub struct RS44 {
     stencil: Grid<Symbol<char>>,
-    xlabels: [&'static str; Self::WIDTH],
-    ylabels: [&'static str; Self::HEIGHT],
+    xlabels: [&'static str; 25],
+    ylabels: [&'static str; 24],
     message_key: (usize,usize),
     message_key_maxtrix: Grid<char>,
-    time: String,
+    _time: String,
     seed: Option<u64>,
 }
 
@@ -69,7 +69,7 @@ impl RS44 {
     }
     
     pub fn randomize_stencil(&mut self) {
-        self.stencil.apply(|x| Symbol::Blocked);
+        self.stencil.apply(|_| Symbol::Blocked);
         let mut rng = self.get_rng();
         let mut positions: Vec<usize> = (0..Self::WIDTH).collect();
         
@@ -83,11 +83,13 @@ impl RS44 {
     
     // Start at the given position and give positions going down columns, wrapping around
     // This is only called after the message key is checked the start position is always valid
-    fn vec_positions(start: (usize,usize)) -> Vec<(usize,usize)> {
-        let mut positions = Vec::with_capacity(Self::GRID_SIZE);
+    fn open_positions(&self, start: (usize,usize)) -> Vec<(usize,usize)> {
+        let mut positions = Vec::with_capacity(Self::MESSAGE_LENGTH);
         let mut current = start;
-        for i in 0..Self::GRID_SIZE {
-            positions.push(current);
+        for _ in 0..Self::GRID_SIZE {
+            if self.stencil[current].is_empty() {
+                positions.push(current);
+            }
             current.1 = (current.1 + 1) % 24;
             if current.1 == 0 {
                 current.0 = (current.0 + 1) % 25
@@ -105,20 +107,18 @@ impl Cipher for RS44 {
         let mut out = String::with_capacity(Self::MESSAGE_LENGTH+5);
         out.push_str(&self.encrypt_message_key()?);
         out.push(' ');
-        let positions = Self::vec_positions(self.message_key);
+        let positions = self.open_positions(self.message_key);
         let mut temp_stencil = self.stencil.clone();
         let mut chars = text.chars();
         for pos in positions.iter() {
-            if temp_stencil[*pos].is_empty() {
-                temp_stencil[*pos] = Symbol::Character(chars.next().expect("need to all nulls here"));
-            }
+            temp_stencil[*pos] = Symbol::Character(chars.next().expect("need to all nulls here"));
         }
-        todo!("read the text out and append to the ")
+        todo!("read the text out and append to the output")
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        let out = String::new();
-        let positions = Self::vec_positions(self.message_key);
+    fn decrypt(&self, _text: &str) -> Result<String, CipherError> {
+        let _out = String::new();
+        let _positions = self.open_positions(self.message_key);
         
         todo!("decrypt it lol")
     }
@@ -127,9 +127,8 @@ impl Cipher for RS44 {
         *self = Self::default();
     }
 
-    fn randomize(&mut self, _rng: &mut StdRng) {
-        let mut rng = self.get_rng();
-        todo!("randomize stencil");
-        todo!("randomize maxtrix");
+    fn randomize(&mut self) {
+        let mut _rng = &mut get_gobal_rng();
+        todo!("randomize stencil and matrix");
     }
 }

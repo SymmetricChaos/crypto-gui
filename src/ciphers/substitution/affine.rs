@@ -1,9 +1,9 @@
 use crate::{
     errors::CipherError,
     math_functions::mul_inv,
-    text_aux::{VecString, PresetAlphabet::*}, ciphers::Cipher,
+    text_aux::{VecString, PresetAlphabet::*}, ciphers::Cipher, global_rng::get_gobal_rng,
 };
-use rand::{prelude::StdRng, Rng};
+use rand::Rng;
 
 pub struct Affine {
     pub add_key: usize,
@@ -89,7 +89,8 @@ impl Cipher for Affine {
         Ok(out)
     }
 
-    fn randomize(&mut self, rng: &mut StdRng) {
+    fn randomize(&mut self) {
+        let mut rng = get_gobal_rng();
         let length = self.alphabet.len();
         self.add_key = rng.gen_range(0..length);
         loop {

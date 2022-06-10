@@ -5,7 +5,7 @@ use itertools::Itertools;
 use super::{
     char_to_usize, rotors::SigabaIndexRotor, usize_to_char, Rotor, BIG_ROTOR_VEC, INDEX_ROTOR_VEC,
 };
-use crate::{ciphers::Cipher, errors::CipherError};
+use crate::{ciphers::Cipher, errors::CipherError, global_rng::get_gobal_rng};
 
 #[derive(Clone, Debug)]
 pub struct ControlRotors {
@@ -284,7 +284,8 @@ impl Cipher for Sigaba {
         Ok(nums.iter().map(|n| usize_to_char(*n)).collect())
     }
 
-    fn randomize(&mut self, rng: &mut rand::prelude::StdRng) {
+    fn randomize(&mut self) {
+        let rng = get_gobal_rng();
         todo!("{:?}", rng)
     }
 

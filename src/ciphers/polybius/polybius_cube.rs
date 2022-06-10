@@ -1,11 +1,10 @@
 use crate::{
     ciphers::Cipher,
     errors::CipherError,
-    text_aux::{shuffled_str, VecString, text_functions::validate_text},
+    text_aux::{shuffled_str, VecString, text_functions::validate_text}, global_rng::get_gobal_rng,
 };
 use itertools::Itertools;
 use num::Integer;
-use rand::prelude::StdRng;
 
 pub struct PolybiusCube {
     pub alphabet_string: String,
@@ -205,9 +204,9 @@ impl Cipher for PolybiusCube {
         Ok(out)
     }
 
-    fn randomize(&mut self, rng: &mut StdRng) {
-        self.key_word = shuffled_str(&self.alphabet_string, rng);
-        self.set_alphabet().unwrap();
+    fn randomize(&mut self) {
+        self.key_word = shuffled_str(&self.alphabet_string, &mut get_gobal_rng());
+        self.set_key();
     }
 
     fn reset(&mut self) {

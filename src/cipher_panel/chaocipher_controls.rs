@@ -4,8 +4,8 @@ use eframe::egui::Ui;
 use rand::prelude::StdRng;
 
 impl View for Chaocipher {
-    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {
-        randomize_reset(ui, self, rng);
+    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng, _errors: &mut String) {
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         if control_string(ui, &mut self.left_string).changed() {

@@ -1,7 +1,7 @@
 use super::Cipher;
-use crate::errors::CipherError;
+use crate::{errors::CipherError, global_rng::get_gobal_rng};
 use rand::{
-    prelude::{SliceRandom, StdRng},
+    prelude::SliceRandom,
     Rng,
 };
 
@@ -77,8 +77,9 @@ impl Cipher for M94 {
         Ok(out)
     }
 
-    fn randomize(&mut self, rng: &mut StdRng) {
-        self.wheels.shuffle(rng);
+    fn randomize(&mut self) {
+        let mut rng = get_gobal_rng();
+        self.wheels.shuffle(&mut *rng);
         self.offset = rng.gen_range(1..self.wheels.len());
     }
 

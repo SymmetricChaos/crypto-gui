@@ -4,8 +4,8 @@ use eframe::egui::{Slider, Ui};
 use rand::prelude::StdRng;
 
 impl View for Trifid {
-    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, errors: &mut String) {
-        randomize_reset(ui, self, rng);
+    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng, errors: &mut String) {
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         let block_size_range = 3..=30;

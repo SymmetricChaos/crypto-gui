@@ -1,11 +1,9 @@
-use std::num::ParseIntError;
-
 use rand::{prelude::StdRng, Rng, SeedableRng};
 
 use crate::{
     ciphers::Cipher,
     errors::CipherError,
-    text_aux::{shuffled_str, PresetAlphabet},
+    text_aux::{shuffled_str, PresetAlphabet}, global_rng::get_gobal_rng,
 };
 
 pub struct Dryad {
@@ -55,18 +53,6 @@ impl Default for Dryad {
 impl Dryad {
     pub fn message_key_to_char(&self) -> char {
         (self.message_key + 65) as char
-    }
-
-    pub fn randomize_seeded(&mut self) -> Result<(), ParseIntError> {
-        self.seed = self.seed_string.parse::<u64>()?;
-
-        let rng = &mut StdRng::seed_from_u64(self.seed);
-        let alpha = PresetAlphabet::BasicLatin.slice();
-        for row in self.cipher_rows.iter_mut() {
-            *row = shuffled_str(alpha, rng)
-        }
-
-        Ok(())
     }
 
     pub fn show_code_page(&self) -> String {
@@ -134,10 +120,10 @@ impl Cipher for Dryad {
         Ok(out)
     }
 
-    fn randomize(&mut self, rng: &mut StdRng) {
+    fn randomize(&mut self) {
         let alpha = PresetAlphabet::BasicLatin.slice();
         for row in self.cipher_rows.iter_mut() {
-            *row = shuffled_str(alpha, rng)
+            *row = shuffled_str(alpha, &mut get_gobal_rng())
         }
     }
 

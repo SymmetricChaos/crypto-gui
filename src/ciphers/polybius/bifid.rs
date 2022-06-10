@@ -1,6 +1,6 @@
 use rand::Rng;
 
-use crate::{ciphers::Cipher, errors::CipherError};
+use crate::{ciphers::Cipher, errors::CipherError, global_rng::GLOBAL_RNG};
 
 use super::PolybiusSquare;
 
@@ -97,9 +97,9 @@ impl Cipher for Bifid {
         Ok(out)
     }
 
-    fn randomize(&mut self, rng: &mut rand::prelude::StdRng) {
-        self.block_size = rng.gen_range(3..=30);
-        self.polybius.randomize(rng)
+    fn randomize(&mut self) {
+        self.block_size = GLOBAL_RNG.lock().unwrap().gen_range(3..=30);
+        self.polybius.randomize();
     }
 
     fn reset(&mut self) {

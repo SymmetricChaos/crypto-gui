@@ -24,11 +24,10 @@ pub use hebern::HebernRotor;
 // pub use route::Route;
 
 use crate::errors::CipherError;
-use rand::prelude::StdRng;
 
 pub trait Cipher {
     fn encrypt(&self, text: &str) -> Result<String, CipherError>;
     fn decrypt(&self, text: &str) -> Result<String, CipherError>;
-    fn randomize(&mut self, rng: &mut StdRng);
+    fn randomize(&mut self);
     fn reset(&mut self);
 }

@@ -5,8 +5,8 @@ use eframe::egui::{self, Slider, Ui};
 use rand::prelude::StdRng;
 
 impl View for Bazeries {
-    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, _errors: &mut String) {
-        randomize_reset(ui, self, rng);
+    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng, _errors: &mut String) {
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Alphabet");
@@ -27,7 +27,7 @@ impl View for Bazeries {
 
         ui.horizontal(|ui| {
             if ui.button("+").clicked() {
-                self.add_wheel(rng)
+                self.add_wheel()
             }
             if ui.button("-").clicked() {
                 self.del_wheel()

@@ -1,4 +1,4 @@
-use crate::{ciphers::Cipher, errors::CipherError, grid::{Grid, Symbol, str_to_char_grid}, text_aux::{PresetAlphabet, VecString}};
+use crate::{ciphers::Cipher, errors::CipherError, grid::{Grid, Symbol, str_to_char_grid}, text_aux::{PresetAlphabet, VecString}, global_rng::get_gobal_rng};
 use itertools::Itertools;
 use rand::{prelude::StdRng, Rng, SeedableRng};
 
@@ -23,8 +23,7 @@ impl Grille {
     }
 
     fn random_nulls(&self, n: usize) -> Vec<Symbol<char>> {
-        let mut rng = self.get_rng();
-        self.null_alphabet.get_rand_chars_replace(n, &mut rng).iter().map(|c| Symbol::Character(*c)).collect_vec()
+        self.null_alphabet.get_rand_chars_replace(n, &mut get_gobal_rng()).iter().map(|c| Symbol::Character(*c)).collect_vec()
     }
 
     fn get_rng(&self) -> StdRng {
@@ -141,7 +140,7 @@ impl Cipher for Grille {
         *self = Self::default();
     }
 
-    fn randomize(&mut self, _rng: &mut StdRng) {
+    fn randomize(&mut self) {
         let mut rng = self.get_rng();
         for cell in self.grid.get_rows_mut() {
             if rng.gen_bool(0.5) {

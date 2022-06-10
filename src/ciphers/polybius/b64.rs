@@ -3,7 +3,6 @@ use crate::{
     errors::CipherError,
     text_aux::PresetAlphabet::*,
 };
-use rand::prelude::StdRng;
 
 use super::PolybiusSquare;
 
@@ -43,10 +42,10 @@ impl Cipher for B64 {
         Ok(t4)
     }
 
-    fn randomize(&mut self, rng: &mut StdRng) {
-        self.polybius.randomize(rng);
-        self.columnar1.randomize(rng);
-        self.columnar2.randomize(rng);
+    fn randomize(&mut self) {
+        self.polybius.randomize();
+        self.columnar1.randomize();
+        self.columnar2.randomize();
     }
 
     fn reset(&mut self) {

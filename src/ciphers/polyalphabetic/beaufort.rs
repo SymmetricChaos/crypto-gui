@@ -3,9 +3,8 @@ use std::collections::VecDeque;
 use super::PolyMode;
 use crate::{
     errors::CipherError,
-    text_aux::{random_sample_replace, VecString, PresetAlphabet::*}, ciphers::Cipher,
+    text_aux::{random_sample_replace, VecString, PresetAlphabet::*}, ciphers::Cipher, global_rng::get_gobal_rng,
 };
-use rand::prelude::StdRng;
 
 pub struct Beaufort {
     pub key_words: [String; 5],
@@ -247,10 +246,11 @@ impl Cipher for Beaufort {
         }
     }
 
-    fn randomize(&mut self, rng: &mut StdRng) {
-        self.key_words[0] = random_sample_replace(&self.alphabet_string, 3, rng);
-        self.key_words[1] = random_sample_replace(&self.alphabet_string, 5, rng);
-        self.key_words[2] = random_sample_replace(&self.alphabet_string, 7, rng);
+    fn randomize(&mut self) {
+        let mut rng = get_gobal_rng();
+        self.key_words[0] = random_sample_replace(&self.alphabet_string, 3, &mut rng);
+        self.key_words[1] = random_sample_replace(&self.alphabet_string, 5, &mut rng);
+        self.key_words[2] = random_sample_replace(&self.alphabet_string, 7, &mut rng);
         self.key_words[3] = String::new();
         self.key_words[4] = String::new();
     }

@@ -1,8 +1,8 @@
 use crate::ciphers::Cipher;
 use crate::errors::CipherError;
+use crate::global_rng::get_gobal_rng;
 use crate::text_aux::{shuffled_str, VecString, PresetAlphabet};
 use itertools::Itertools;
-use rand::prelude::StdRng;
 
 pub struct Bazeries {
     pub alphabet_string: String,
@@ -20,8 +20,8 @@ impl Bazeries {
         self.alphabet = VecString::unique_from(&self.alphabet_string);
     }
 
-    pub fn add_wheel(&mut self, rng: &mut StdRng) {
-        self.wheels.push(shuffled_str(&self.alphabet_string, rng))
+    pub fn add_wheel(&mut self) {
+        self.wheels.push(shuffled_str(&self.alphabet_string, &mut get_gobal_rng()))
     }
 
     pub fn del_wheel(&mut self) {
@@ -137,9 +137,9 @@ impl Cipher for Bazeries {
         *self = Self::default();
     }
 
-    fn randomize(&mut self, rng: &mut StdRng) {
+    fn randomize(&mut self) {
         for wheel in self.wheels.iter_mut() {
-            *wheel = shuffled_str(&self.alphabet_string, rng);
+            *wheel = shuffled_str(&self.alphabet_string, &mut get_gobal_rng());
         }
     }
 }

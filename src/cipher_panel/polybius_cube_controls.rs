@@ -5,8 +5,8 @@ use super::{generic_components::*, View};
 use crate::{ciphers::polybius::PolybiusCube, egui_aux::mono};
 
 impl View for PolybiusCube {
-    fn ui(&mut self, ui: &mut Ui, rng: &mut StdRng, errors: &mut String) {
-        randomize_reset(ui, self, rng);
+    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng, errors: &mut String) {
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.add_space(16.0);

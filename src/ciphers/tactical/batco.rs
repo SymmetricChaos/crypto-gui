@@ -6,7 +6,7 @@ use rand::{prelude::StdRng, Rng, SeedableRng};
 use crate::{
     ciphers::Cipher,
     errors::CipherError,
-    text_aux::{shuffled_str, PresetAlphabet},
+    text_aux::{shuffled_str, PresetAlphabet}, global_rng::{seed_global_rng, get_gobal_rng},
 };
 
 /*
@@ -101,14 +101,14 @@ impl Batco {
     pub fn randomize_seeded(&mut self) -> Result<(), ParseIntError> {
         self.seed = self.seed_string.parse::<u64>()?;
 
-        let mut rng = StdRng::seed_from_u64(self.seed);
+        seed_global_rng(self.seed);
 
         let alpha = PresetAlphabet::BasicLatin.slice();
         for row in self.cipher_rows.iter_mut() {
-            *row = shuffled_str(alpha, &mut rng)
+            *row = shuffled_str(alpha, &mut get_gobal_rng())
         }
         for col in self.key_cols.iter_mut() {
-            *col = shuffled_str(alpha, &mut rng)
+            *col = shuffled_str(alpha, &mut get_gobal_rng())
         }
         Ok(())
     }
@@ -237,13 +237,13 @@ impl Cipher for Batco {
         Ok(out)
     }
 
-    fn randomize(&mut self, rng: &mut StdRng) {
+    fn randomize(&mut self) {
         let alpha = PresetAlphabet::BasicLatin.slice();
         for row in self.cipher_rows.iter_mut() {
-            *row = shuffled_str(alpha, rng)
+            *row = shuffled_str(alpha, &mut get_gobal_rng())
         }
         for col in self.key_cols.iter_mut() {
-            *col = shuffled_str(alpha, rng)
+            *col = shuffled_str(alpha, &mut get_gobal_rng())
         }
     }
 

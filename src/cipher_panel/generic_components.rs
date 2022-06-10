@@ -1,6 +1,5 @@
 use crate::{ciphers::Cipher, grid::{Grid, str_to_char_grid}};
 use eframe::egui::{self, Color32, Label, RichText, TextStyle};
-use rand::prelude::StdRng;
 
 pub fn encrypt_decrypt(
     ui: &mut egui::Ui,
@@ -33,18 +32,18 @@ pub fn encrypt_decrypt(
     });
 }
 
-pub fn randomize_reset(ui: &mut egui::Ui, cipher: &mut dyn Cipher, rng: &mut StdRng) {
+pub fn randomize_reset(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
     if ui.button("Randomize").clicked() {
-        cipher.randomize(rng)
+        cipher.randomize()
     }
     if ui.button("Reset").clicked() {
         cipher.reset()
     }
 }
 
-pub fn randomize_button(ui: &mut egui::Ui, cipher: &mut dyn Cipher, rng: &mut StdRng) {
+pub fn randomize_button(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
     if ui.button("Randomize\nSettings").clicked() {
-        cipher.randomize(rng)
+        cipher.randomize()
     }
 }
 

@@ -18,7 +18,11 @@ pub mod egui_aux;
 
 pub mod category_pages;
 
+pub mod global_rng;
+
 mod app;
+
+
 
 #[cfg(not(target_arch = "wasm32"))]
 fn main() {
