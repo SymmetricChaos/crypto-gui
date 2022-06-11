@@ -1,6 +1,8 @@
 use crate::{ciphers::Cipher, grid::{Grid, str_to_char_grid}};
 use eframe::egui::{self, Color32, Label, RichText, TextStyle};
 
+
+
 pub fn encrypt_decrypt(
     ui: &mut egui::Ui,
     cipher: &dyn Cipher,
@@ -55,7 +57,6 @@ pub fn reset_button(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
 
 pub fn control_string(ui: &mut egui::Ui, string: &mut String) -> egui::Response {
     ui.add(egui::TextEdit::singleline(string).font(TextStyle::Monospace))
-        .on_hover_text("Change this to whatever you like.")
 }
 
 pub fn input_alphabet(ui: &mut egui::Ui, alphabet: &mut String) {
