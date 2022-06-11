@@ -1,16 +1,13 @@
 use std::{num::ParseIntError, collections::HashSet};
+use itertools::Itertools;
+use rand::prelude::SliceRandom;
 
 use crate::{ciphers::Cipher, errors::CipherError, grid::{Grid, Symbol}, text_aux::{PresetAlphabet, VecString}, global_rng::get_gobal_rng};
-use itertools::Itertools;
-use rand::Rng;
-
-
 
 pub struct TurningGrille {
     pub null_alphabet_string: String,
     null_alphabet: VecString,
     pub grid: Grid<Symbol<char>>,
-    pub seed: Option<u64>,
     pub key_strings: [String; 4],
     keys: [Vec<usize>; 4],
 }
@@ -21,7 +18,6 @@ impl Default for TurningGrille {
             null_alphabet_string: String::from(PresetAlphabet::BasicLatin),
             null_alphabet: VecString::from(PresetAlphabet::BasicLatin),
             grid: Grid::new_blocked(8, 8),
-            seed: None,
             key_strings: [String::new(), String::new(), String::new(), String::new()],
             keys: [Vec::new(), Vec::new(), Vec::new(), Vec::new()],
         }
@@ -173,14 +169,26 @@ impl Cipher for TurningGrille {
     }
 
     fn randomize(&mut self) {
-        let rng = &mut get_gobal_rng();
-        for cell in self.grid.get_rows_mut() {
-            if rng.gen_bool(0.5) {
-                *cell = Symbol::Empty;
-            } else {
-                *cell = Symbol::Blocked;
-            }
+        let mut rng = get_gobal_rng();
+        let mut nums = (0..self.subgrille_size()).collect_vec();
+        nums.shuffle(&mut *rng);
+        let mut ctr = 0;
+
+        for n in 0..4 {
+            self.key_strings[n].clear();
+            self.keys[n].clear();
         }
+
+        for n in nums {
+            self.keys[ctr].push(n);
+            if !self.key_strings[ctr].is_empty() {
+                self.key_strings[ctr].push_str(", ")
+            }
+            self.key_strings[ctr].push_str(&n.to_string());
+            ctr = (ctr + 1) % 4
+        }
+
+        self.build_grid().unwrap();
     }
 }
 

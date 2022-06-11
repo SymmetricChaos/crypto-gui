@@ -4,6 +4,12 @@ use super::{generic_components::*, View};
 use eframe::egui::{TextStyle, Ui};
 use rand::prelude::StdRng;
 
+fn cell_button(grille: &mut TurningGrille, x: usize, y: usize, ui: &mut eframe::egui::Ui) {
+    let cell = grille.grid[(x, y)];
+    if ui.button(cell.to_char().to_string()).clicked() {
+        ()
+    };
+}
 
 impl View for TurningGrille {
     fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng, errors: &mut String) {
@@ -49,7 +55,7 @@ impl View for TurningGrille {
         for x in 0..self.grid.num_rows() {
             ui.horizontal(|ui| {
                 for y in 0..self.grid.num_cols() {
-                    ui.label(self.grid[(x,y)].to_char().to_string());
+                    cell_button(self, x, y, ui);
                 }
             });
         }
