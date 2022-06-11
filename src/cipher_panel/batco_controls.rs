@@ -1,5 +1,5 @@
 use super::{generic_components::*, View};
-use crate::{ciphers::tactical::Batco, egui_aux::mono, global_rng::global_rng_controls};
+use crate::{ciphers::tactical::Batco, egui_aux::mono};
 use eframe::egui::{Slider, Ui};
 use rand::prelude::StdRng;
 
@@ -29,19 +29,6 @@ impl View for Batco {
         });
 
         ui.add_space(16.0);
-        global_rng_controls(ui);
-        ui.add_space(16.0);
-
-        // ui.add_space(16.0);
-        // ui.horizontal(|ui| {
-        //     if ui.button("Randomize from Seed").clicked() {
-        //         match self.randomize_seeded() {
-        //             Ok(_) => (),
-        //             Err(e) => *errors = e.to_string(),
-        //         }
-        //     }
-        //     ui.text_edit_singleline(&mut self.seed_string);
-        // });
 
         mono(ui, &self.show_code_page(), None);
     }

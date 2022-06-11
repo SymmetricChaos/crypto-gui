@@ -1,7 +1,7 @@
 use self::generic_components::encrypt_decrypt;
 use crate::{
     cipher_id::CipherID,
-    ciphers::{polybius::*, tactical::*, *, polyalphabetic::*, substitution::*, playfair::*, transposition::*},
+    ciphers::{polybius::*, tactical::*, *, polyalphabetic::*, substitution::*, playfair::*, transposition::*}, global_rng::global_rng_controls,
 };
 use eframe::egui::{self, Color32, RichText, TextEdit, TextStyle};
 use rand::prelude::StdRng;
@@ -403,6 +403,9 @@ impl CipherDisplayPanel {
         if ui.button("swap input/output").clicked() {
             std::mem::swap(input, output)
         }
+
+        ui.add_space(16.0);
+        global_rng_controls(ui);
 
         if !errors.is_empty() {
             ui.add_space(24.0);
