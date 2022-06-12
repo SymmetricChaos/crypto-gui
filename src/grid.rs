@@ -1,6 +1,8 @@
 use std::ops::{Index, IndexMut};
 use std::fmt::{Display, Formatter, Result};
 
+use rand::prelude::{StdRng, SliceRandom};
+
 pub const EMPTY: char = '⬜';
 pub const BLOCK: char = '⬛';
 
@@ -400,6 +402,10 @@ impl<T: Copy + Clone + Default> Grid<T> {
 
         std::mem::swap(&mut self.num_rows, &mut self.num_cols);
         self.symbols = new_symbols;
+    }
+    
+    pub fn shuffle(&mut self, rng: &mut StdRng) {
+        self.symbols.shuffle(rng)
     }
 
 }
