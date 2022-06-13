@@ -10,7 +10,8 @@ pub struct RS44 {
     ylabels: [&'static str; 24],
     message_key: (usize,usize),
     message_key_maxtrix: Grid<char>,
-    time: String,
+    hours: u8,
+    minutes: u8,
 }
 
 impl Default for RS44 {
@@ -51,7 +52,7 @@ impl Default for RS44 {
             g
         };
 
-        Self { stencil, column_nums, xlabels, ylabels, message_key: (0,0), message_key_maxtrix, time: String::new() }
+        Self { stencil, column_nums, xlabels, ylabels, message_key: (0,0), message_key_maxtrix, hours: 0, minutes: 0 }
         
     }
 }
@@ -132,21 +133,30 @@ impl RS44 {
 
 impl Cipher for RS44 {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut output = self.encrypt_message_key()?;
-        output.push_str(&self.time);
-        output.push_str(&format!("{}",text.chars().count()));
+        let mut output = String::new();
+        output.push_str(&self.encrypt_message_key()?);
+        output.push_str(&format!("-{:02}{:02}",self.hours, self.minutes));
+        output.push_str(&format!("-{} ",text.chars().count()));
 
-        
+        let mut symbols = text.chars();
+        let mut stencil = self.stencil.clone();
+        let start = stencil.index_from_coord(self.message_key).unwrap();
 
-        todo!("
-        steps for encyrption:
-            encrypt the message key, also validating at the same time
-            prepend the encrypted key, the time, and the length
-            clone the stencil
-            iterate through the stencil by rows, filling in the empty spaces
-            give an error if we run out of space
-            read the stencil off by columns in the order given by column_nums
-        ")
+        for idx in start..600 {
+            if stencil[idx].is_empty() {
+                match symbols.next() {
+                    Some(c) => { stencil[idx] = Symbol::Character(c) },
+                    None => { return Err(CipherError::input("ran out of spaces")) },
+                }
+            }
+        }
+
+        for k in self.column_nums.iter() {
+            let s: String = stencil.get_col(*k as usize).filter(|sym| sym.is_character()).map(|sym| sym.to_char()).collect();
+            output.push_str(&s);
+        }
+
+        Ok(output)
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {

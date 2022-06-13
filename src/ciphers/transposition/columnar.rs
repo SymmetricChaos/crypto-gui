@@ -2,7 +2,7 @@ use num::Integer;
 
 use crate::global_rng::get_gobal_rng;
 use crate::{errors::CipherError, ciphers::Cipher};
-use crate::grid::{Grid, Symbol, str_to_char_grid, read_rows_characters};
+use crate::grid::{Grid, Symbol, str_to_char_grid};
 use crate::text_aux::{rank_str, PresetAlphabet::*, VecString};
 
 pub struct Columnar {
@@ -103,7 +103,7 @@ impl Cipher for Columnar {
             }
         }
 
-        Ok(read_rows_characters(&g).collect())
+        Ok(g.read_cols_characters().collect())
     }
 
     fn randomize(&mut self) {

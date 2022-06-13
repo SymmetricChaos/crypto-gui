@@ -74,17 +74,7 @@ pub fn str_to_char_grid(text: &str, empty_char: char, blocked_char: char) -> Vec
     v
 }
 
-pub fn read_rows_characters(grid: &Grid<Symbol<char>>) -> impl Iterator<Item = char> + '_ {
-    grid.get_rows()
-        .filter(|x| x.is_character())
-        .map(|x| x.to_char())
-}
 
-pub fn read_cols_characters(grid: &Grid<Symbol<char>>) -> impl Iterator<Item = char> + '_ {
-    grid.get_cols()
-        .filter(|x| x.is_character())
-        .map(|x| x.to_char())
-}
 
 #[derive(Clone)]
 pub struct Grid<T: Copy + Clone + Default> {
@@ -93,76 +83,9 @@ pub struct Grid<T: Copy + Clone + Default> {
     num_cols: usize,
 }
 
-impl<T: Clone + Copy> Grid<Symbol<T>> {
-    pub fn new_empty(num_rows: usize, num_cols: usize) -> Self {
-        let grid = vec![Symbol::Empty; num_cols * num_rows];
-        Self {
-            symbols: grid,
-            num_rows,
-            num_cols,
-        }
-    }
 
-    pub fn new_blocked(num_rows: usize, num_cols: usize) -> Self {
-        let grid = vec![Symbol::Blocked; num_cols * num_rows];
-        Self {
-            symbols: grid,
-            num_rows,
-            num_cols,
-        }
-    }
 
-    pub fn num_empty(&self) -> usize {
-        self.get_rows().filter(|s| s.is_empty()).count()
-    }
-
-    pub fn num_blocked(&self) -> usize {
-        self.get_rows().filter(|s| s.is_blocked()).count()
-    }
-
-    pub fn num_character(&self) -> usize {
-        self.get_rows().filter(|s| s.is_character()).count()
-    }
-
-    pub fn num_noncharacter(&self) -> usize {
-        self.get_rows().filter(|s| !s.is_character()).count()
-    }
-
-    pub fn empty_cell(&mut self, coord: (usize, usize)) -> Option<Symbol<T>> {
-        let contents = *self.get(coord)?;
-        self[coord] = Symbol::Empty;
-        Some(contents)
-    }
-
-    pub fn block_cell(&mut self, coord: (usize, usize)) -> Option<Symbol<T>> {
-        let contents = *self.get(coord)?;
-        self[coord] = Symbol::Blocked;
-        Some(contents)
-    }
-
-    pub fn replace_if_empty(&mut self, coord: (usize, usize), new_sym: Symbol<T>) -> Option<Symbol<T>> {
-        let contents = *self.get(coord)?;
-        if contents.is_empty() {
-            self[coord] = new_sym;
-            return Some(contents);
-        }
-        None
-    }
-
-    pub fn replace_if_not_blocked(
-        &mut self,
-        coord: (usize, usize),
-        new_sym: Symbol<T>,
-    ) -> Option<Symbol<T>> {
-        let contents = *self.get(coord)?;
-        if !contents.is_blocked() {
-            self[coord] = new_sym;
-            return Some(contents);
-        }
-        None
-    }
-}
-
+// Most Generic Methods
 impl<T: Copy + Clone + Default> Grid<T> {
     // Creation methods
     pub fn new_default(num_rows: usize, num_cols: usize) -> Self {
@@ -409,6 +332,98 @@ impl<T: Copy + Clone + Default> Grid<T> {
     }
 
 }
+
+
+
+
+
+impl<T: Clone + Copy> Grid<Symbol<T>> {
+    pub fn new_empty(num_rows: usize, num_cols: usize) -> Self {
+        let grid = vec![Symbol::Empty; num_cols * num_rows];
+        Self {
+            symbols: grid,
+            num_rows,
+            num_cols,
+        }
+    }
+
+    pub fn new_blocked(num_rows: usize, num_cols: usize) -> Self {
+        let grid = vec![Symbol::Blocked; num_cols * num_rows];
+        Self {
+            symbols: grid,
+            num_rows,
+            num_cols,
+        }
+    }
+
+    pub fn num_empty(&self) -> usize {
+        self.get_rows().filter(|s| s.is_empty()).count()
+    }
+
+    pub fn num_blocked(&self) -> usize {
+        self.get_rows().filter(|s| s.is_blocked()).count()
+    }
+
+    pub fn num_character(&self) -> usize {
+        self.get_rows().filter(|s| s.is_character()).count()
+    }
+
+    pub fn num_noncharacter(&self) -> usize {
+        self.get_rows().filter(|s| !s.is_character()).count()
+    }
+
+    pub fn empty_cell(&mut self, coord: (usize, usize)) -> Option<Symbol<T>> {
+        let contents = *self.get(coord)?;
+        self[coord] = Symbol::Empty;
+        Some(contents)
+    }
+
+    pub fn block_cell(&mut self, coord: (usize, usize)) -> Option<Symbol<T>> {
+        let contents = *self.get(coord)?;
+        self[coord] = Symbol::Blocked;
+        Some(contents)
+    }
+
+    pub fn replace_if_empty(&mut self, coord: (usize, usize), new_sym: Symbol<T>) -> Option<Symbol<T>> {
+        let contents = *self.get(coord)?;
+        if contents.is_empty() {
+            self[coord] = new_sym;
+            return Some(contents);
+        }
+        None
+    }
+
+    pub fn replace_if_not_blocked(
+        &mut self,
+        coord: (usize, usize),
+        new_sym: Symbol<T>,
+    ) -> Option<Symbol<T>> {
+        let contents = *self.get(coord)?;
+        if !contents.is_blocked() {
+            self[coord] = new_sym;
+            return Some(contents);
+        }
+        None
+    }
+}
+
+
+impl Grid<Symbol<char>> {
+    pub fn read_rows_characters(&self) -> impl Iterator<Item = char> + '_ {
+        self.get_rows()
+            .filter(|x| x.is_character())
+            .map(|x| x.to_char())
+    }
+    
+    pub fn read_cols_characters(&self) -> impl Iterator<Item = char> + '_ {
+        self.get_cols()
+            .filter(|x| x.is_character())
+            .map(|x| x.to_char())
+    }
+}
+
+
+
 
 impl Display for Grid<Symbol<char>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
