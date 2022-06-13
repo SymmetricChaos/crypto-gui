@@ -132,6 +132,12 @@ impl RS44 {
 
 impl Cipher for RS44 {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+        let mut output = self.encrypt_message_key()?;
+        output.push_str(&self.time);
+        output.push_str(&format!("{}",text.chars().count()));
+
+        
+
         todo!("
         steps for encyrption:
             encrypt the message key, also validating at the same time
