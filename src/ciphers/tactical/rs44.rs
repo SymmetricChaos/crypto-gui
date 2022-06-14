@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use rand::{prelude::{StdRng, SliceRandom}, SeedableRng, Rng};
 
-use crate::{grid::{Symbol, Grid}, errors::CipherError, ciphers::Cipher, global_rng::get_gobal_rng, text_aux::PresetAlphabet};
+use crate::{grid::{Symbol, Grid}, errors::CipherError, ciphers::Cipher, global_rng::get_global_rng, text_aux::PresetAlphabet};
 
 pub struct RS44 {
     stencil: Grid<Symbol<char>>,
@@ -40,9 +40,9 @@ impl Default for RS44 {
             arr
         };
         let ylabels: [&str; Self::HEIGHT] = {
-            let mut arr: [&str; Self::HEIGHT] = Self::LABELS.clone().iter().map(|x| *x).take(Self::HEIGHT).collect_vec().try_into().unwrap();
-            arr.shuffle(&mut rng);
-            arr
+            let mut v = Self::LABELS.clone();
+            v.shuffle(&mut rng);
+            v.iter().take(Self::HEIGHT).map(|x| *x).collect_vec().try_into().unwrap()
         };
         let message_key_maxtrix = {
             let mut g: Grid<char> = Grid::from_rows(
@@ -86,7 +86,7 @@ impl RS44 {
             None => return Err(CipherError::key("message key out of bounds"))
         }
         let mut message_key_string = String::with_capacity(4);
-        let mut rng = get_gobal_rng();
+        let mut rng = get_global_rng();
         for c in self.xlabels[self.message_key.0].chars().chain(self.ylabels[self.message_key.1].chars()) {
             let row: usize = rng.gen_range(0..5);
             let col = self.label_letter_to_matrix_column(c);
@@ -96,13 +96,16 @@ impl RS44 {
         Ok(message_key_string)
     }
     
-    pub fn decrypt_message_key(&self) -> Result<(usize,usize),CipherError> {
-        todo!("decrypt the message key")
+    pub fn full_message_key(&self) -> Result<String, CipherError> {
+        let mut output = String::with_capacity(13);
+        output.push_str(&self.encrypt_message_key()?);
+        output.push_str(&format!("-{:02}{:02}",self.hours, self.minutes));
+        Ok(output)
     }
     
     pub fn randomize_stencil(&mut self) {
-        self.stencil.apply(|x| Symbol::Blocked);
-        let mut rng = get_gobal_rng();
+        self.stencil.apply(|_| Symbol::Blocked);
+        let mut rng = get_global_rng();
         let mut positions: Vec<usize> = (0..Self::WIDTH).collect();
         
         for i in 0..Self::HEIGHT {
@@ -113,40 +116,44 @@ impl RS44 {
         }
     }
     
-    // Start at the given position and give positions going down columns, wrapping around
-    // This is only called after the message key is checked the start position is always valid
-    fn vec_positions(start: (usize,usize)) -> Vec<(usize,usize)> {
-        let mut positions = Vec::with_capacity(Self::GRID_SIZE);
-        let mut current = start;
-        for i in 0..Self::GRID_SIZE {
-            positions.push(current);
-            current.1 = (current.1 + 1) % 24;
-            if current.1 == 0 {
-                current.0 = (current.0 + 1) % 25
-            }
-        }
-        positions
+    pub fn randomize_matrix(&mut self) {
+        self.message_key_maxtrix.shuffle(&mut *get_global_rng())
     }
+    
+    pub fn randomize_labels(&mut self) {
+        let mut rng = get_global_rng();
+        self.column_nums.shuffle(&mut *rng);
+        self.xlabels.shuffle(&mut *rng);
+        self.ylabels = {
+            let mut v = Self::LABELS.clone();
+            v.shuffle(&mut *rng);
+            v.iter().take(Self::HEIGHT).map(|x| *x).collect_vec().try_into().unwrap()
+        };
+    }
+
 }
 
 
 
 impl Cipher for RS44 {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut output = String::new();
-        output.push_str(&self.encrypt_message_key()?);
-        output.push_str(&format!("-{:02}{:02}",self.hours, self.minutes));
-        output.push_str(&format!("-{} ",text.chars().count()));
-
+    
+        match self.stencil.get(self.message_key) {
+            Some(s) => if !s.is_empty() { return Err(CipherError::key("message key must select an empty position")) } else { () }
+            None => return Err(CipherError::key("message key out of bounds"))
+        }
+    
+        let mut output = String::with_capacity(text.len());
+        
         let mut symbols = text.chars();
         let mut stencil = self.stencil.clone();
         let start = stencil.index_from_coord(self.message_key).unwrap();
 
-        for idx in start..600 {
+        for idx in start..Self::GRID_SIZE {
             if stencil[idx].is_empty() {
                 match symbols.next() {
                     Some(c) => { stencil[idx] = Symbol::Character(c) },
-                    None => { return Err(CipherError::input("ran out of spaces")) },
+                    None => { return Err(CipherError::input("ran out of spaces before finishing message")) },
                 }
             }
         }
@@ -160,15 +167,28 @@ impl Cipher for RS44 {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        todo!("
-        steps for decyrption:
-            decrypt the message key, also validating at the same time
-            check that the length is correct
-            clone the stencil
-            write into the stencil by column in the order given by column_nums using the message key as a guide
-            give an error if we run out of space
-            read the stencil off by rows
-        ")
+        let mut symbols = text.chars();
+        let mut stencil = self.stencil.clone();
+        
+        for pos in 0..Self::WIDTH {
+            // unwrap justified by static size
+            let x = self.column_nums.iter().position(|n| *n == pos as u8).unwrap();
+            // The starting y-value is one less than the message key y-value until we reach it
+            let y_min = match pos < self.message_key.1 {
+                true => self.message_key.0 - 1,
+                false => self.message_key.0 
+            };
+            for y in y_min..Self::HEIGHT {
+                if stencil[(x,y)].is_empty() {
+                    match symbols.next() {
+                        Some(c) => { stencil[(x,y)] = Symbol::Character(c) },
+                        None => { return Err(CipherError::input("ran out of spaces before finishing message")) },
+                    }
+                }
+            }
+        }
+        
+        Ok(stencil.read_rows_characters().collect())
     }
 
     fn reset(&mut self) {
