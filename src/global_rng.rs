@@ -36,7 +36,7 @@ pub fn randomize_global_rng() {
     *GLOBAL_RNG.lock().unwrap() = StdRng::from_entropy();
 }
  
-pub fn get_gobal_rng() -> std::sync::MutexGuard<'static, StdRng> {
+pub fn get_global_rng() -> std::sync::MutexGuard<'static, StdRng> {
     GLOBAL_RNG.lock().unwrap()
 }
 

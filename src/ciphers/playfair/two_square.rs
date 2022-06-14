@@ -3,7 +3,7 @@ use crate::{
     text_aux::{
         shuffled_str, VecString,
         PresetAlphabet::{self, *},
-    }, ciphers::Cipher, global_rng::get_gobal_rng,
+    }, ciphers::Cipher, global_rng::get_global_rng,
 };
 use itertools::Itertools;
 use num::integer::Roots;
@@ -168,8 +168,8 @@ impl Cipher for TwoSquare {
     }
 
     fn randomize(&mut self) {
-        self.key_word1 = shuffled_str(&self.alphabet.to_string(), &mut get_gobal_rng());
-        self.key_word2 = shuffled_str(&self.alphabet.to_string(), &mut get_gobal_rng());
+        self.key_word1 = shuffled_str(&self.alphabet.to_string(), &mut get_global_rng());
+        self.key_word2 = shuffled_str(&self.alphabet.to_string(), &mut get_global_rng());
         self.set_key1();
         self.set_key2();
     }

@@ -1,6 +1,6 @@
 use std::{iter::Cycle, slice::Iter};
 
-use crate::{text_aux::{VecString, PresetAlphabet, random_sample_replace}, errors::CipherError, ciphers::Cipher, global_rng::get_gobal_rng};
+use crate::{text_aux::{VecString, PresetAlphabet, random_sample_replace}, errors::CipherError, ciphers::Cipher, global_rng::get_global_rng};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum QuagmireVersion {
@@ -162,7 +162,7 @@ impl Cipher for Quagmire {
     }
 
     fn randomize(&mut self) {
-        let rng = &mut get_gobal_rng();
+        let rng = &mut get_global_rng();
         self.assign_ct_key(&random_sample_replace(&self.alphabet_string, 9, rng));
         self.assign_pt_key(&random_sample_replace(&self.alphabet_string, 9, rng));
         self.assign_ind_key(&random_sample_replace(&self.alphabet_string, 9, rng));

@@ -1,7 +1,7 @@
 use super::{
     char_to_usize, usize_to_char, EnigmaPlugboard, Reflector, Rotor, REFLECTORS, ROTOR_MAP,
 };
-use crate::{ciphers::Cipher, errors::CipherError, text_aux::PresetAlphabet, global_rng::get_gobal_rng};
+use crate::{ciphers::Cipher, errors::CipherError, text_aux::PresetAlphabet, global_rng::get_global_rng};
 
 
 pub fn prep_enigma_text(text: &str) -> Result<String, CipherError> {
@@ -128,7 +128,7 @@ impl Cipher for EnigmaM3 {
     }
 
     fn randomize(&mut self) {
-        let rng = get_gobal_rng();
+        let rng = get_global_rng();
         todo!("{:?}", rng)
     }
 

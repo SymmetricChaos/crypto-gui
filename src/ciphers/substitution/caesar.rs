@@ -1,6 +1,6 @@
 use crate::ciphers::Cipher;
 use crate::errors::CipherError;
-use crate::global_rng::get_gobal_rng;
+use crate::global_rng::get_global_rng;
 use crate::text_aux::{prep_text, VecString, PresetAlphabet::*};
 use rand::Rng;
 
@@ -69,7 +69,7 @@ impl Cipher for Caesar {
     }
 
     fn randomize(&mut self) {
-        self.shift = get_gobal_rng().gen_range(0..self.alphabet.len()) as i32;
+        self.shift = get_global_rng().gen_range(0..self.alphabet.len()) as i32;
     }
 
     fn reset(&mut self) {

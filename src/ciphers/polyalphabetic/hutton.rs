@@ -1,6 +1,6 @@
 use crate::{
     errors::CipherError,
-    text_aux::{keyed_alphabet, shuffled_str, VecString, PresetAlphabet}, ciphers::Cipher, global_rng::get_gobal_rng,
+    text_aux::{keyed_alphabet, shuffled_str, VecString, PresetAlphabet}, ciphers::Cipher, global_rng::get_global_rng,
 };
 
 #[derive(PartialEq, Eq)]
@@ -127,8 +127,8 @@ impl Cipher for Hutton {
     }
 
     fn randomize(&mut self) {
-        self.assign_key(&shuffled_str(&self.alphabet_string, &mut get_gobal_rng()));
-        self.assign_password(&shuffled_str(&self.alphabet_string, &mut get_gobal_rng()));
+        self.assign_key(&shuffled_str(&self.alphabet_string, &mut get_global_rng()));
+        self.assign_password(&shuffled_str(&self.alphabet_string, &mut get_global_rng()));
     }
 
     fn reset(&mut self) {

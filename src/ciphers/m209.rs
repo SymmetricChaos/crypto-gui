@@ -1,6 +1,6 @@
 use super::Cipher;
 use crate::errors::CipherError;
-use crate::global_rng::get_gobal_rng;
+use crate::global_rng::get_global_rng;
 use crate::text_aux::{random_char_vec, VecString};
 use lazy_static::lazy_static;
 use rand::Fill;
@@ -259,7 +259,7 @@ impl Cipher for M209 {
     fn randomize(&mut self) {
         // Fill up an array with random bytes. Then map that to pairs of usize.
         // Unwrap here is justified by the fixed sizes of everything involved.
-        let mut rng = get_gobal_rng();
+        let mut rng = get_global_rng();
         let mut data = [0u8; 54];
         data.try_fill(&mut *rng).unwrap();
         self.lugs = data

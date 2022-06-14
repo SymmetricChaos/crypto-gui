@@ -2,7 +2,7 @@ use std::{num::ParseIntError, collections::HashSet};
 use itertools::Itertools;
 use rand::prelude::SliceRandom;
 
-use crate::{ciphers::Cipher, errors::CipherError, grid::{Grid, Symbol}, text_aux::{PresetAlphabet, VecString}, global_rng::get_gobal_rng};
+use crate::{ciphers::Cipher, errors::CipherError, grid::{Grid, Symbol}, text_aux::{PresetAlphabet, VecString}, global_rng::get_global_rng};
 
 pub struct TurningGrille {
     pub null_alphabet_string: String,
@@ -124,7 +124,7 @@ impl Cipher for TurningGrille {
 
         let w = self.grid.num_cols();
         let section = crypto_grid.grid_size()/4;
-        let mut rng = get_gobal_rng();
+        let mut rng = get_global_rng();
 
         for i in 0..4 {
             let lo = i*section;
@@ -169,7 +169,7 @@ impl Cipher for TurningGrille {
     }
 
     fn randomize(&mut self) {
-        let mut rng = get_gobal_rng();
+        let mut rng = get_global_rng();
         let mut nums = (0..self.subgrille_size()).collect_vec();
         nums.shuffle(&mut *rng);
         let mut ctr = 0;

@@ -3,7 +3,7 @@ use crate::{
     text_aux::{
         keyed_alphabet, shuffled_str,
         PresetAlphabet::{self, *},
-    }, ciphers::Cipher, global_rng::get_gobal_rng,
+    }, ciphers::Cipher, global_rng::get_global_rng,
 };
 use num::integer::Roots;
 use std::fmt;
@@ -156,7 +156,7 @@ impl Cipher for Playfair {
     }
 
     fn randomize(&mut self) {
-        self.alphabet = shuffled_str(&self.alphabet, &mut get_gobal_rng())
+        self.alphabet = shuffled_str(&self.alphabet, &mut get_global_rng())
     }
 
     fn reset(&mut self) {

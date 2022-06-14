@@ -2,7 +2,7 @@ use std::fmt;
 
 use crate::{
     errors::CipherError,
-    text_aux::{shuffled_str, VecString, PresetAlphabet::*}, ciphers::Cipher, global_rng::get_gobal_rng,
+    text_aux::{shuffled_str, VecString, PresetAlphabet::*}, ciphers::Cipher, global_rng::get_global_rng,
 };
 use itertools::Itertools;
 
@@ -151,7 +151,7 @@ impl Cipher for Slidefair {
     }
 
     fn randomize(&mut self) {
-        self.alphabet = VecString::from(shuffled_str(&self.alphabet.to_string(), &mut get_gobal_rng()))
+        self.alphabet = VecString::from(shuffled_str(&self.alphabet.to_string(), &mut get_global_rng()))
     }
 
     fn reset(&mut self) {

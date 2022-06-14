@@ -1,6 +1,6 @@
 use crate::ciphers::Cipher;
 use crate::errors::CipherError;
-use crate::global_rng::get_gobal_rng;
+use crate::global_rng::get_global_rng;
 use crate::text_aux::VecString;
 use crate::text_aux::text_functions::validate_text;
 
@@ -96,7 +96,7 @@ impl Cipher for Chaocipher {
     }
 
     fn randomize(&mut self) {
-        let rng = &mut get_gobal_rng();
+        let rng = &mut get_global_rng();
         self.left.shuffle(rng);
         self.right.shuffle(rng);
     }

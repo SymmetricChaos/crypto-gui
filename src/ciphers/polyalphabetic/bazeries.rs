@@ -1,6 +1,6 @@
 use crate::ciphers::Cipher;
 use crate::errors::CipherError;
-use crate::global_rng::get_gobal_rng;
+use crate::global_rng::get_global_rng;
 use crate::text_aux::{shuffled_str, VecString, PresetAlphabet};
 use itertools::Itertools;
 
@@ -21,7 +21,7 @@ impl Bazeries {
     }
 
     pub fn add_wheel(&mut self) {
-        self.wheels.push(shuffled_str(&self.alphabet_string, &mut get_gobal_rng()))
+        self.wheels.push(shuffled_str(&self.alphabet_string, &mut get_global_rng()))
     }
 
     pub fn del_wheel(&mut self) {
@@ -139,7 +139,7 @@ impl Cipher for Bazeries {
 
     fn randomize(&mut self) {
         for wheel in self.wheels.iter_mut() {
-            *wheel = shuffled_str(&self.alphabet_string, &mut get_gobal_rng());
+            *wheel = shuffled_str(&self.alphabet_string, &mut get_global_rng());
         }
     }
 }

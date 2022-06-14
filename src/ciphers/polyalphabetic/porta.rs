@@ -1,6 +1,6 @@
 use crate::ciphers::Cipher;
 use crate::errors::CipherError;
-use crate::global_rng::get_gobal_rng;
+use crate::global_rng::get_global_rng;
 use crate::text_aux::VecString;
 use crate::text_aux::PresetAlphabet;
 use itertools::Itertools;
@@ -87,7 +87,7 @@ impl Cipher for Porta {
     }
 
     fn randomize(&mut self) {
-        let rng = get_gobal_rng();
+        let rng = get_global_rng();
         todo!("{:?}", rng)
     }
 }

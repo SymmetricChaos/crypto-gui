@@ -3,7 +3,7 @@ use rand::{prelude::StdRng, Rng, SeedableRng};
 use crate::{
     ciphers::Cipher,
     errors::CipherError,
-    text_aux::{shuffled_str, PresetAlphabet}, global_rng::get_gobal_rng,
+    text_aux::{shuffled_str, PresetAlphabet}, global_rng::get_global_rng,
 };
 
 pub struct Dryad {
@@ -123,7 +123,7 @@ impl Cipher for Dryad {
     fn randomize(&mut self) {
         let alpha = PresetAlphabet::BasicLatin.slice();
         for row in self.cipher_rows.iter_mut() {
-            *row = shuffled_str(alpha, &mut get_gobal_rng())
+            *row = shuffled_str(alpha, &mut get_global_rng())
         }
     }
 

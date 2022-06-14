@@ -1,6 +1,6 @@
 use rand::Rng;
 
-use crate::global_rng::get_gobal_rng;
+use crate::global_rng::get_global_rng;
 use crate::{errors::CipherError, ciphers::Cipher};
 use crate::text_aux::VecString;
 
@@ -92,7 +92,7 @@ impl Cipher for DecoderRing {
     }
 
     fn randomize(&mut self) {
-        self.index = get_gobal_rng().gen_range(0..self.alphabet.len());
+        self.index = get_global_rng().gen_range(0..self.alphabet.len());
     }
 
     fn reset(&mut self) {

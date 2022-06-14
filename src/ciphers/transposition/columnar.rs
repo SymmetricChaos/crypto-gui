@@ -1,6 +1,6 @@
 use num::Integer;
 
-use crate::global_rng::get_gobal_rng;
+use crate::global_rng::get_global_rng;
 use crate::{errors::CipherError, ciphers::Cipher};
 use crate::grid::{Grid, Symbol, str_to_char_grid};
 use crate::text_aux::{rank_str, PresetAlphabet::*, VecString};
@@ -107,7 +107,7 @@ impl Cipher for Columnar {
     }
 
     fn randomize(&mut self) {
-        let key: String = self.alphabet.get_rand_chars_replace(11, &mut get_gobal_rng()).iter().collect();
+        let key: String = self.alphabet.get_rand_chars_replace(11, &mut get_global_rng()).iter().collect();
         self.assign_key(&key);
     }
 

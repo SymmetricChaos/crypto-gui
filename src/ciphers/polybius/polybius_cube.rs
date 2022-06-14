@@ -1,7 +1,7 @@
 use crate::{
     ciphers::Cipher,
     errors::CipherError,
-    text_aux::{shuffled_str, VecString, text_functions::validate_text}, global_rng::get_gobal_rng,
+    text_aux::{shuffled_str, VecString, text_functions::validate_text}, global_rng::get_global_rng,
 };
 use itertools::Itertools;
 use num::Integer;
@@ -205,7 +205,7 @@ impl Cipher for PolybiusCube {
     }
 
     fn randomize(&mut self) {
-        self.key_word = shuffled_str(&self.alphabet_string, &mut get_gobal_rng());
+        self.key_word = shuffled_str(&self.alphabet_string, &mut get_global_rng());
         self.set_key();
     }
 

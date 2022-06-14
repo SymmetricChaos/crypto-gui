@@ -1,7 +1,7 @@
 use crate::{
     errors::CipherError,
     math_functions::mul_inv,
-    text_aux::{VecString, PresetAlphabet::*}, ciphers::Cipher, global_rng::get_gobal_rng,
+    text_aux::{VecString, PresetAlphabet::*}, ciphers::Cipher, global_rng::get_global_rng,
 };
 use rand::Rng;
 
@@ -90,7 +90,7 @@ impl Cipher for Affine {
     }
 
     fn randomize(&mut self) {
-        let mut rng = get_gobal_rng();
+        let mut rng = get_global_rng();
         let length = self.alphabet.len();
         self.add_key = rng.gen_range(0..length);
         loop {
