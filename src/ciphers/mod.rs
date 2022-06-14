@@ -3,9 +3,9 @@ pub mod tactical;
 pub mod polyalphabetic;
 pub mod substitution;
 pub mod playfair;
+pub mod transposition;
 
 pub mod m209;
-pub mod transposition;
 pub use m209::M209;
 
 pub mod m94;
@@ -19,6 +19,8 @@ pub use sigaba::Sigaba;
 
 pub mod hebern;
 pub use hebern::HebernRotor;
+
+pub mod purple;
 
 // pub mod route;
 // pub use route::Route;
