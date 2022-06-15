@@ -19,13 +19,6 @@ impl View for EnigmaM3 {
             ui.add(Slider::new(&mut rotor.ring, 0..=26).clamp_to_range(true));
         }
 
-        ui.label("Set Reflector Position");
-        ui.label("INTERFACE GOES HERE");
-        // ui.add(Slider::new(&mut self.state.reflector.position, 0..=26)
-        //     .show_value(false)
-        //     .clamp_to_range(true)
-        // );
-
         ui.add_space(10.0);
         ui.label("Select Rotors");
 
