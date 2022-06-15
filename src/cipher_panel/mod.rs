@@ -1,7 +1,7 @@
 use self::generic_components::encrypt_decrypt;
 use crate::{
     cipher_id::CipherID,
-    ciphers::{polybius::*, tactical::*, *, polyalphabetic::*, substitution::*, playfair::*, transposition::*}, global_rng::global_rng_controls,
+    ciphers::{*, polybius::*, tactical::*, polyalphabetic::*, substitution::*, playfair::*, transposition::*}, global_rng::global_rng_controls,
 };
 use eframe::egui::{self, Color32, RichText, TextEdit, TextStyle};
 use rand::prelude::StdRng;
@@ -41,6 +41,7 @@ pub mod two_square_controls;
 pub mod vigenere_controls;
 pub mod quagmire_controls;
 pub mod turning_grille_controls;
+pub mod plugboard_controls;
 
 pub trait View: Cipher {
     fn ui(&mut self, ui: &mut egui::Ui, rng: &mut StdRng, errors: &mut String);

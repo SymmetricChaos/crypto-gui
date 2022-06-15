@@ -9,3 +9,6 @@ pub use decoder_ring::DecoderRing;
 
 pub mod substitution;
 pub use substitution::GeneralSubstitution;
+
+pub mod plugboard;
+pub use plugboard::Plugboard;
