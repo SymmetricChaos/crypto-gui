@@ -79,6 +79,7 @@ impl Plugboard {
 		for pair in self.wiring.iter() {
 			out.push(format!("{} ⇒ {}",pair.0, pair.1))
 		}
+        out.sort();
 		out
 	}
 }
