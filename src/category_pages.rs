@@ -31,7 +31,8 @@ impl CipherCategory {
                                     CipherID::Caesar,
                                     CipherID::Decoder,
                                     CipherID::Affine,
-                                    CipherID::Substitution,],
+                                    CipherID::Substitution,
+                                    CipherID::Plugboard],
             CipherCategory::Polyalphabetic => &[
                                     CipherID::Vigenere,
                                     CipherID::Beaufort,

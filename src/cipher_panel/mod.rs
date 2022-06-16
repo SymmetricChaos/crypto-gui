@@ -110,6 +110,7 @@ pub struct CipherControlPanel {
     affine: Affine,
     decoder_ring: DecoderRing,
     gen_sub: GeneralSubstitution,
+    plugboard: Plugboard,
 
     m209: M209,
     enigma: EnigmaM3,
@@ -163,6 +164,7 @@ impl CipherControlPanel {
                     CipherID::Decoder,
                     CipherID::Affine,
                     CipherID::Substitution,
+                    CipherID::Plugboard,
                 ],
                 "Substitution",
                 active_cipher,
@@ -293,6 +295,7 @@ impl CipherControlPanel {
             CipherID::Hutton => self.hutton.ui(ui, rng, errors),
             CipherID::Quagmire => self.quagmire.ui(ui, rng, errors),
             CipherID::TurningGrille => self.turning_grille.ui(ui, rng, errors),
+            CipherID::Plugboard => self.plugboard.ui(ui, rng, errors),
             _ => {
                 ui.label("IN PROGRESS");
             }
@@ -390,6 +393,7 @@ impl CipherDisplayPanel {
             CipherID::Hutton => encrypt_decrypt(ui, &control_panel.hutton, input, output, errors),
             CipherID::Quagmire => encrypt_decrypt(ui, &control_panel.quagmire, input, output, errors),
             CipherID::TurningGrille => encrypt_decrypt(ui, &control_panel.turning_grille, input, output, errors),
+            CipherID::Plugboard => encrypt_decrypt(ui, &control_panel.plugboard, input, output, errors),
             _ => *errors = String::from("button must be added to DisplayPanel struct"),
         }
 

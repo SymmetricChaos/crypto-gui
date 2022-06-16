@@ -6,6 +6,7 @@ pub enum CipherID {
     Affine,
     Decoder,
     Substitution,
+    Plugboard,
 
     M209,
     Enigma,
@@ -63,6 +64,7 @@ impl CipherID {
             CipherID::Affine => "The Affine Cipher is a slight improvement to the Caesar Cipher. Rather than a simple shift an affine transformation is applied to the letters. This means each letter is assigned a value based on its position then the first key value is added to it, then that number is multiplied by the second key value, and finally the value is divided by the length of the alphabet and the remainder is taken. That number corresponds to some letter in the alphabet. However this method was not used generally by the ancients the multiplicative key sometimes cannot be reversed. The Atbash Code, which effectively reverses the alphabet can be produced as an affine cipher.",
             CipherID::Decoder => "A Decoder Ring (as popularized by Little Orphan Annie and Captain Midnight, presets exist for each) is a minor variation on the Caesar Cipher. Rather than simply shift the letter's position instead a number is assigned a number and the key is added to that number then reduced by the modulo operation. The original decoder rings were keyed in a slightly more complex way by telling listeners to match a specific letter to a specific number but this is equivalent to simply adding a value.",
             CipherID::Substitution => "The General Substituion Cipher maps a set of symbols one-to-one onto another arbitary set. This implementation allows only maping the symbols of an alphabet but all simple substitution ciphers are included in principle.",
+            CipherID::Plugboard => "A plugboard is a very simple substitution cipher used in electrical cipher machines that simply swaps certain pairs of letters by plugging a wire in to connect those positions. The plugboard itself is an extremely weak cipher, its purpose in cipher machines is to obscure information about the more complex inner state.",
 
             CipherID::Polybius => "The Polybius Square is an ancient substitutuion cipher that converts each character of the plaintext into a pair that describes its coordinates in a grid. Though it provides no special security on its own it is a key component of very strong composite ciphers.",
             CipherID::PolybiusCube => "The Polybius Cube is an extension of the Polybius Square to an additional dimension.",
@@ -137,6 +139,7 @@ impl Display for CipherID {
             CipherID::Hutton => "Hutton",
             CipherID::Quagmire => "Quagmire",
             CipherID::Fialka => "Fialka",
+            CipherID::Plugboard => "Plugboard",
             //_ => "Missing name. Please complain to the author.",
         };
         write!(f, "{}", name)
