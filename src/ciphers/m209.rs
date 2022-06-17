@@ -144,6 +144,7 @@ fn atbash_encrypt(n: usize, k: usize, l: usize) -> usize {
     ((l - 1) * (n + 1) + k) % l
 }
 
+
 pub struct M209 {
     wheels: [Rotor; 6],
     pub lugs: [(usize, usize); 27],

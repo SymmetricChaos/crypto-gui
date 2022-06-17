@@ -1,10 +1,11 @@
-use super::{generic_components::*, View};
+use super::{generic_components::*, View, ViewableCipher};
 use crate::{ciphers::polybius::Trifid, egui_aux::mono};
 use eframe::egui::{Slider, Ui};
-use rand::prelude::StdRng;
+
+impl ViewableCipher for Trifid {}
 
 impl View for Trifid {
-    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng, errors: &mut String) {
+    fn ui(&mut self, ui: &mut Ui, errors: &mut String) {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 

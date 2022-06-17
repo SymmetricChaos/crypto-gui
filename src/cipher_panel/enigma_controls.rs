@@ -1,13 +1,14 @@
-use super::View;
+use super::{View, ViewableCipher};
 use crate::ciphers::{
     enigma::{REFLECTORS, ROTOR_VEC},
     EnigmaM3,
 };
 use eframe::egui::{ComboBox, Label, RichText, Slider, TextEdit, TextStyle, Ui};
-use rand::prelude::StdRng;
+
+impl ViewableCipher for EnigmaM3 {}
 
 impl View for EnigmaM3 {
-    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.label("Rotor Positions\nTo Be Changed Every Message");
         for rotor in &mut self.state.rotors {
             ui.add(Slider::new(&mut rotor.position, 0..=26).clamp_to_range(true));

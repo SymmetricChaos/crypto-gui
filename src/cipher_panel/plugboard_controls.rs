@@ -1,11 +1,12 @@
 use crate::{ciphers::substitution::Plugboard, egui_aux::mono_strong};
 
-use super::{View, generic_components::control_string};
+use super::{View, generic_components::control_string, ViewableCipher};
 use eframe::egui::Ui;
-use rand::prelude::StdRng;
+
+impl ViewableCipher for Plugboard {}
 
 impl View for Plugboard {
-    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
   
         ui.add_space(16.0);
         ui.label("Plugboard Pairs");

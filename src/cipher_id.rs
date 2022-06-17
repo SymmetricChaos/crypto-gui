@@ -127,7 +127,7 @@ impl Display for CipherID {
             CipherID::Grille => "Grille",
             CipherID::Chaocipher => "Chaocipher",
             CipherID::TurningGrille => "Turning Grille",
-            CipherID::Vic => "VIC",
+            // CipherID::Vic => "VIC",
             CipherID::Batco => "BATCO",
             CipherID::Dryad => "DRYAD",
             CipherID::RailFence => "Rail Fence",
@@ -138,9 +138,9 @@ impl Display for CipherID {
             CipherID::FourSquare => "Four Square",
             CipherID::Hutton => "Hutton",
             CipherID::Quagmire => "Quagmire",
-            CipherID::Fialka => "Fialka",
+            // CipherID::Fialka => "Fialka",
             CipherID::Plugboard => "Plugboard",
-            //_ => "Missing name. Please complain to the author.",
+            _ => "Missing name. Please complain to the author.",
         };
         write!(f, "{}", name)
     }

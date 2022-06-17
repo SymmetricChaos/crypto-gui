@@ -1,11 +1,12 @@
 use eframe::egui::{RichText, TextEdit, Ui};
-use rand::prelude::StdRng;
 
-use super::{generic_components::*, View};
+use super::{generic_components::*, View, ViewableCipher};
 use crate::{ciphers::polybius::Adfgvx, text_aux::PresetAlphabet::*};
 
+impl ViewableCipher for Adfgvx {}
+
 impl View for Adfgvx {
-    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 

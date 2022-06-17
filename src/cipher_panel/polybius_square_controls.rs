@@ -1,11 +1,12 @@
 use eframe::egui::{Color32, RichText, Ui};
-use rand::prelude::StdRng;
 
-use super::{generic_components::*, View};
+use super::{generic_components::*, View, ViewableCipher};
 use crate::{ciphers::polybius::PolybiusSquare, egui_aux::mono, text_aux::PresetAlphabet::*};
 
+impl ViewableCipher for PolybiusSquare {}
+
 impl View for PolybiusSquare {
-    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng, errors: &mut String) {
+    fn ui(&mut self, ui: &mut Ui, errors: &mut String) {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 

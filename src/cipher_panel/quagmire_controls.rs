@@ -1,12 +1,13 @@
-use super::{generic_components::*, View};
+use super::{generic_components::*, View, ViewableCipher};
 use crate::{
     egui_aux::mono, ciphers::polyalphabetic::{Quagmire, QuagmireVersion},
 };
 use eframe::egui::Ui;
-use rand::prelude::StdRng;
+
+impl ViewableCipher for Quagmire {}
 
 impl View for Quagmire {
-    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 

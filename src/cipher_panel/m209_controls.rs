@@ -1,8 +1,9 @@
 use eframe::egui::{self, Slider, Ui};
 
-use super::{generic_components::*, View};
+use super::{generic_components::*, View, ViewableCipher};
 use crate::ciphers::M209;
-use rand::prelude::StdRng;
+
+impl ViewableCipher for M209 {}
 
 fn lug_pair(ui: &mut egui::Ui, pair: &mut (usize, usize)) {
     ui.add(
@@ -18,7 +19,7 @@ fn lug_pair(ui: &mut egui::Ui, pair: &mut (usize, usize)) {
 }
 
 impl View for M209 {
-    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 

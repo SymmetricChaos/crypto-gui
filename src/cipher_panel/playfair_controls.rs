@@ -1,11 +1,12 @@
 use eframe::egui::{Color32, RichText, TextEdit, TextStyle, Ui};
-use rand::prelude::StdRng;
 
-use super::{generic_components::*, View};
+use super::{generic_components::*, View, ViewableCipher};
 use crate::{ciphers::playfair::Playfair, text_aux::PresetAlphabet::*};
 
+impl ViewableCipher for Playfair {}
+
 impl View for Playfair {
-    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 

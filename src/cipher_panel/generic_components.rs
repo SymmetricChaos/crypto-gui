@@ -1,11 +1,13 @@
 use crate::{ciphers::Cipher, grid::{Grid, str_to_char_grid}};
 use eframe::egui::{self, Color32, Label, RichText, TextStyle};
 
+use super::ViewableCipher;
+
 
 
 pub fn encrypt_decrypt(
     ui: &mut egui::Ui,
-    cipher: &dyn Cipher,
+    cipher: &dyn ViewableCipher,
     input: &mut String,
     output: &mut String,
     errors: &mut String,

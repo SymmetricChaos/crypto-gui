@@ -11,7 +11,6 @@ use eframe::{
     epaint::FontFamily,
     epi,
 };
-use rand::{prelude::StdRng, SeedableRng};
 
 #[derive(Debug, PartialEq, Eq)]
 enum Page {
@@ -33,7 +32,6 @@ pub struct ClassicCrypto {
     active_cipher: CipherID,
     active_code: CodeID,
     active_page: Page,
-    rng: StdRng,
 }
 
 impl Default for ClassicCrypto {
@@ -49,7 +47,6 @@ impl Default for ClassicCrypto {
             active_cipher: CipherID::default(),
             active_code: CodeID::default(),
             active_page: Page::About,
-            rng: StdRng::from_entropy(),
             cipher_category: CipherCategory::Substituion,
         }
     }
@@ -104,7 +101,6 @@ impl ClassicCrypto {
                 self.cipher_control_panel.ui(
                     ui,
                     &mut self.active_cipher,
-                    &mut self.rng,
                     &mut self.errors,
                 )
             });

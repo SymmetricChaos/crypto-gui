@@ -1,7 +1,7 @@
 // use std::fmt;
 // use itertools::Itertools;
 // use num::integer::Roots;
-// use rand::prelude::StdRng;
+// 
 // use super::Cipher;
 // use crate::{errors::CipherError, text_functions::shuffled_str};
 // use crate::text_functions::{keyed_alphabet};

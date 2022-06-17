@@ -1,13 +1,14 @@
-use super::{generic_components::*, View};
+use super::{generic_components::*, View, ViewableCipher};
 use crate::{ciphers::polybius::Bifid, text_aux::PresetAlphabet::*};
 use eframe::{
     egui::{RichText, Slider, Ui},
     epaint::Color32,
 };
-use rand::prelude::StdRng;
+
+impl ViewableCipher for Bifid {}
 
 impl View for Bifid {
-    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 

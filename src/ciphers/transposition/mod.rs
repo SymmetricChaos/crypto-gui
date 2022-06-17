@@ -10,7 +10,6 @@ pub use rail_fence::RailFence;
 pub mod grille;
 pub use grille::Grille;
 
-
 pub mod turning_grille;
 pub use turning_grille::TurningGrille;
 

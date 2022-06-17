@@ -1,8 +1,9 @@
 use crate::ciphers::transposition::TurningGrille;
 
-use super::{generic_components::*, View};
+use super::{generic_components::*, View, ViewableCipher};
 use eframe::egui::{TextStyle, Ui};
-use rand::prelude::StdRng;
+
+impl ViewableCipher for TurningGrille {}
 
 fn cell_button(grille: &mut TurningGrille, x: usize, y: usize, ui: &mut eframe::egui::Ui) {
     let cell = grille.grid[(x, y)];
@@ -12,7 +13,7 @@ fn cell_button(grille: &mut TurningGrille, x: usize, y: usize, ui: &mut eframe::
 }
 
 impl View for TurningGrille {
-    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng, errors: &mut String) {
+    fn ui(&mut self, ui: &mut Ui, errors: &mut String) {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 

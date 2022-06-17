@@ -1,11 +1,12 @@
 use crate::ciphers::polyalphabetic::{Beaufort, PolyMode};
 
-use super::{generic_components::*, View};
+use super::{generic_components::*, View, ViewableCipher};
 use eframe::egui::{Slider, TextEdit, TextStyle, Ui};
-use rand::prelude::StdRng;
+
+impl ViewableCipher for Beaufort {}
 
 impl View for Beaufort {
-    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 

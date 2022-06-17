@@ -1,10 +1,11 @@
-use super::{generic_components::*, View};
+use super::{generic_components::*, View, ViewableCipher};
 use crate::{ciphers::polybius::StraddlingCheckerboard, egui_aux::mono};
 use eframe::egui::{DragValue, Ui};
-use rand::prelude::StdRng;
+
+impl ViewableCipher for StraddlingCheckerboard {}
 
 impl View for StraddlingCheckerboard {
-    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         randomize_reset(ui, self);
 
         ui.label("Alphabet");

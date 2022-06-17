@@ -1,9 +1,10 @@
 use super::View;
 use eframe::egui::{ComboBox, Label, RichText, Slider, TextEdit, TextStyle, Ui};
-use rand::prelude::StdRng;
 
-impl View for Heberm {
-    fn ui(&mut self, ui: &mut Ui, _rng: &mut StdRng, _errors: &mut String) {
+impl ViewableCipher for Hebern {}
+
+impl View for Hebern {
+    fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.label("Rotor Positions\nTo Be Changed Every Message");
         for rotor in &mut self.state.rotors {
             ui.add(Slider::new(&mut rotor.position, 0..=26).clamp_to_range(true));
