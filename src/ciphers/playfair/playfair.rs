@@ -1,9 +1,11 @@
 use crate::{
+    ciphers::Cipher,
     errors::CipherError,
+    global_rng::get_global_rng,
     text_aux::{
         keyed_alphabet, shuffled_str,
         PresetAlphabet::{self, *},
-    }, ciphers::Cipher, global_rng::get_global_rng,
+    },
 };
 use num::integer::Roots;
 use std::fmt;

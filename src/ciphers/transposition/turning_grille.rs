@@ -1,8 +1,14 @@
-use std::{num::ParseIntError, collections::HashSet};
 use itertools::Itertools;
 use rand::prelude::SliceRandom;
+use std::{collections::HashSet, num::ParseIntError};
 
-use crate::{ciphers::Cipher, errors::CipherError, grid::{Grid, Symbol}, text_aux::{PresetAlphabet, VecString}, global_rng::get_global_rng};
+use crate::{
+    ciphers::Cipher,
+    errors::CipherError,
+    global_rng::get_global_rng,
+    grid::{Grid, Symbol},
+    text_aux::{PresetAlphabet, VecString},
+};
 
 pub struct TurningGrille {
     pub null_alphabet_string: String,
@@ -25,19 +31,19 @@ impl Default for TurningGrille {
 }
 
 impl TurningGrille {
-
     // Concept is simple:
     //     user provides a list of numbers from 0 to the size of the subgrille
     //     a new blocked grid is created
     //     the first quarter of the numbers are used to punch out spaces
     //     then the grid is rotated and the next quarters, and so on
     pub fn build_grid(&mut self) -> Result<(), CipherError> {
- 
         // These next two blocks find likely errors
         if self.key_length() != self.subgrille_size() {
-            return Err(CipherError::Key(format!("there should be {} key values provided but {} were found", 
-                self.subgrille_size(), 
-                self.key_length())));
+            return Err(CipherError::Key(format!(
+                "there should be {} key values provided but {} were found",
+                self.subgrille_size(),
+                self.key_length()
+            )));
         }
 
         let mut set = HashSet::with_capacity(self.subgrille_size());
@@ -47,14 +53,17 @@ impl TurningGrille {
                     return Err(CipherError::Key(format!("invalid key value found: {}", n)));
                 }
                 if !set.insert(n) {
-                    return Err(CipherError::Key(format!("duplicate key value found: {}", n)));
+                    return Err(CipherError::Key(format!(
+                        "duplicate key value found: {}",
+                        n
+                    )));
                 }
             }
         }
 
         // Block off the whole grid
         self.grid.apply(|_| Symbol::Blocked);
- 
+
         // "Stamp" each chunk onto the grid, rotating after each stamp
         for key in &self.keys {
             for n in key {
@@ -67,12 +76,12 @@ impl TurningGrille {
         Ok(())
     }
 
-    pub fn build_key(&mut self) -> Result<(),ParseIntError> {
+    pub fn build_key(&mut self) -> Result<(), ParseIntError> {
         for (n, string) in self.key_strings.iter().enumerate() {
             self.keys[n].clear();
             let nums = string.split(',');
             for s in nums {
-                self.keys[n].push( s.trim().parse::<usize>()? );
+                self.keys[n].push(s.trim().parse::<usize>()?);
             }
         }
         Ok(())
@@ -85,7 +94,7 @@ impl TurningGrille {
 
     pub fn increase_size(&mut self) {
         if self.grid.num_cols() >= 20 {
-            return ()
+            return ();
         }
         self.grid.add_col();
         self.grid.add_col();
@@ -96,7 +105,7 @@ impl TurningGrille {
 
     pub fn decrease_size(&mut self) {
         if self.grid.num_cols() <= 4 {
-            return ()
+            return ();
         }
         self.grid.del_col();
         self.grid.del_col();
@@ -106,46 +115,49 @@ impl TurningGrille {
     }
 
     pub fn subgrille_width(&self) -> usize {
-        self.grid.num_cols()/2
+        self.grid.num_cols() / 2
     }
 
     pub fn subgrille_size(&self) -> usize {
         self.subgrille_width().pow(2)
     }
-
 }
 
-
 impl Cipher for TurningGrille {
-    fn encrypt(&self, text: &str) -> Result<String,CipherError> {
-
+    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let mut crypto_grid = self.grid.clone();
-        let mut output_grid: Grid<char> = Grid::new_default(self.grid.num_rows(), self.grid.num_cols());
+        let mut output_grid: Grid<char> =
+            Grid::new_default(self.grid.num_rows(), self.grid.num_cols());
 
         let w = self.grid.num_cols();
-        let section = crypto_grid.grid_size()/4;
+        let section = crypto_grid.grid_size() / 4;
         let mut rng = get_global_rng();
 
         for i in 0..4 {
-            let lo = i*section;
-            let hi = lo+section;
+            let lo = i * section;
+            let hi = lo + section;
             let mut snip = text[lo..hi].chars();
             for row in 0..w {
                 for col in 0..w {
-                    if crypto_grid[(row,col)].is_empty() {
-                        output_grid[(row,col)] = snip.next().unwrap_or(self.null_alphabet.get_rand_char(&mut rng))
+                    if crypto_grid[(row, col)].is_empty() {
+                        output_grid[(row, col)] = snip
+                            .next()
+                            .unwrap_or(self.null_alphabet.get_rand_char(&mut rng))
                     }
                 }
             }
             crypto_grid.rotate();
         }
-        
+
         Ok(output_grid.get_cols().collect::<String>())
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-
-        let input_grid: Grid<char> = Grid::from_cols(text.chars().collect_vec(), self.grid.num_rows(), self.grid.num_cols());
+        let input_grid: Grid<char> = Grid::from_cols(
+            text.chars().collect_vec(),
+            self.grid.num_rows(),
+            self.grid.num_cols(),
+        );
         let mut crypto_grid = self.grid.clone();
 
         let w = self.grid.num_cols();
@@ -154,8 +166,8 @@ impl Cipher for TurningGrille {
         for _ in 0..4 {
             for row in 0..w {
                 for col in 0..w {
-                    if crypto_grid[(row,col)].is_empty() {
-                        out.push(input_grid[(row,col)])
+                    if crypto_grid[(row, col)].is_empty() {
+                        out.push(input_grid[(row, col)])
                     }
                 }
             }
@@ -218,5 +230,4 @@ mod turning_grille_tests {
         cipher.randomize();
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
-
 }

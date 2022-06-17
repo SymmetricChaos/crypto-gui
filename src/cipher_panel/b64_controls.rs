@@ -1,6 +1,5 @@
 use eframe::egui::{RichText, TextEdit, Ui};
 
-
 use crate::ciphers::polybius::B64;
 
 use super::{generic_components::*, View, ViewableCipher};

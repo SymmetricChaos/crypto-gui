@@ -4,7 +4,7 @@ use crate::ciphers::Cipher;
 use crate::errors::CipherError;
 use crate::global_rng::GLOBAL_RNG;
 use crate::text_aux::text_functions::validate_text;
-use crate::text_aux::{VecString, PresetAlphabet::*};
+use crate::text_aux::{PresetAlphabet::*, VecString};
 use std::fmt::Display;
 
 pub struct Alberti {
@@ -18,8 +18,8 @@ pub struct Alberti {
 impl Alberti {
     pub fn set_fixed_alphabet(&mut self) {
         self.fixed_alphabet = VecString::unique_from(&self.fixed_alphabet_string);
-    }    
-    
+    }
+
     pub fn assign_fixed_alphabet(&mut self, alphabet: &str) {
         self.fixed_alphabet_string = alphabet.to_string();
         self.set_fixed_alphabet()

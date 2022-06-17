@@ -1,9 +1,8 @@
 use crate::{
-    ciphers::{Cipher, transposition::Columnar},
+    ciphers::{transposition::Columnar, Cipher},
     errors::CipherError,
     text_aux::PresetAlphabet,
 };
-
 
 use super::PolybiusSquare;
 

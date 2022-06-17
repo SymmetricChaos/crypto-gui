@@ -1,5 +1,8 @@
 use itertools::Itertools;
-use rand::{Rng, prelude::{SliceRandom, StdRng}};
+use rand::{
+    prelude::{SliceRandom, StdRng},
+    Rng,
+};
 
 use super::keyed_alphabet;
 use super::preset_alphabet::PresetAlphabet;

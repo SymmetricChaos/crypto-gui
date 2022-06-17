@@ -2,8 +2,10 @@ use std::collections::VecDeque;
 
 use super::PolyMode;
 use crate::{
+    ciphers::Cipher,
     errors::CipherError,
-    text_aux::{random_sample_replace, VecString, PresetAlphabet::*}, ciphers::Cipher, global_rng::get_global_rng,
+    global_rng::get_global_rng,
+    text_aux::{random_sample_replace, PresetAlphabet::*, VecString},
 };
 
 pub struct Beaufort {

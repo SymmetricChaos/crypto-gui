@@ -1,6 +1,7 @@
 use super::{generic_components::*, View, ViewableCipher};
 use crate::{
-    egui_aux::mono, ciphers::polyalphabetic::{Quagmire, QuagmireVersion},
+    ciphers::polyalphabetic::{Quagmire, QuagmireVersion},
+    egui_aux::mono,
 };
 use eframe::egui::Ui;
 

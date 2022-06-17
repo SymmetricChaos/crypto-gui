@@ -1,6 +1,11 @@
 use std::{iter::Cycle, slice::Iter};
 
-use crate::{text_aux::{VecString, PresetAlphabet, random_sample_replace}, errors::CipherError, ciphers::Cipher, global_rng::get_global_rng};
+use crate::{
+    ciphers::Cipher,
+    errors::CipherError,
+    global_rng::get_global_rng,
+    text_aux::{random_sample_replace, PresetAlphabet, VecString},
+};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum QuagmireVersion {
@@ -25,7 +30,7 @@ pub struct Quagmire {
 
 impl Default for Quagmire {
     fn default() -> Quagmire {
-        Self{
+        Self {
             version: QuagmireVersion::V1,
             alphabet_string: String::from(PresetAlphabet::BasicLatin),
             alphabet: VecString::from(PresetAlphabet::BasicLatin),
@@ -41,7 +46,6 @@ impl Default for Quagmire {
 }
 
 impl Quagmire {
-
     pub fn assign_alphabet(&mut self, alphabet: &str) {
         self.alphabet_string = alphabet.to_string();
         self.set_alphabet();
@@ -55,7 +59,6 @@ impl Quagmire {
         self.alphabet.to_string()
     }
 
-
     pub fn assign_pt_key(&mut self, key: &str) {
         self.pt_key_string = key.to_string();
         self.set_pt_key();
@@ -68,9 +71,7 @@ impl Quagmire {
     pub fn show_pt_key(&self) -> String {
         self.pt_key.to_string()
     }
-    
 
-    
     pub fn assign_ct_key(&mut self, key: &str) {
         self.ct_key_string = key.to_string();
         self.set_ct_key();
@@ -83,17 +84,12 @@ impl Quagmire {
     pub fn show_ct_key(&self) -> String {
         self.ct_key.to_string()
     }
-    
-    
+
     pub fn assign_ind_key(&mut self, key: &str) {
         self.ind_key_string = key.to_string();
         self.set_ind_key();
     }
 
-
-
-    
-    
     // Converts the ind_key_string into a vector of usize that represent how
     // many spaces the ct_alphabet is rotated relative to its starting position
     pub fn set_ind_key(&mut self) {
@@ -101,29 +97,37 @@ impl Quagmire {
         let ind_pos = self.indicator_position() as i32;
         let len = self.alphabet.len() as i32;
         let ct = match self.version {
-            QuagmireVersion::V1 =>  &self.alphabet,
-            QuagmireVersion::V2 =>  &self.pt_key,
-            QuagmireVersion::V3 =>  &self.pt_key,
-            QuagmireVersion::V4 =>  &self.ct_key,
+            QuagmireVersion::V1 => &self.alphabet,
+            QuagmireVersion::V2 => &self.pt_key,
+            QuagmireVersion::V3 => &self.pt_key,
+            QuagmireVersion::V4 => &self.ct_key,
         };
         for c in self.ind_key_string.chars() {
-            let sh = len +ind_pos - (ct.get_pos_of(c).expect(&format!("unknown character `{}` in indicator key",c)) as i32);
+            let sh = len + ind_pos
+                - (ct
+                    .get_pos_of(c)
+                    .expect(&format!("unknown character `{}` in indicator key", c))
+                    as i32);
             self.ind_key.push(sh % len)
         }
     }
-    
+
     pub fn indicator_position(&self) -> usize {
         match self.version {
-            QuagmireVersion::V2 => self.alphabet.get_pos_of(self.indicator).expect(&format!("invalid indicator character `{}`",self.indicator)),
-            _ => self.pt_key.get_pos_of(self.indicator).expect(&format!("invalid indicator character `{}`",self.indicator)),
+            QuagmireVersion::V2 => self
+                .alphabet
+                .get_pos_of(self.indicator)
+                .expect(&format!("invalid indicator character `{}`", self.indicator)),
+            _ => self
+                .pt_key
+                .get_pos_of(self.indicator)
+                .expect(&format!("invalid indicator character `{}`", self.indicator)),
         }
     }
-    
+
     pub fn indicator_cyclic_key(&self) -> Cycle<Iter<i32>> {
         self.ind_key.iter().cycle()
     }
-    
-
 }
 
 impl Cipher for Quagmire {
@@ -174,13 +178,11 @@ impl Cipher for Quagmire {
     }
 }
 
-
-
 #[cfg(test)]
 mod quagmire_tests {
     use super::*;
 
-    const PLAINTEXT:     &'static str = "DONTLETANYONE";
+    const PLAINTEXT: &'static str = "DONTLETANYONE";
     const CIPHERTEXT_V1: &'static str = "HIFUFCIRFKUYK";
     const CIPHERTEXT_V2: &'static str = "RMGXKEVLGUQQN";
     const CIPHERTEXT_V3: &'static str = "FXDIEOGNDBZII";

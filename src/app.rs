@@ -53,33 +53,60 @@ impl Default for ClassicCrypto {
 }
 
 impl ClassicCrypto {
-
     fn cipher_category_page(&mut self, ctx: &Context) {
         SidePanel::left("cipher_selector_panel")
             .max_width(300.0)
             .show(ctx, |ui| {
                 ui.label("Examples");
                 for id in self.cipher_category.ciphers() {
-                    if ui.selectable_value(&mut self.active_cipher, *id, id.to_string() ).clicked() {
+                    if ui
+                        .selectable_value(&mut self.active_cipher, *id, id.to_string())
+                        .clicked()
+                    {
                         self.active_page = Page::Cipher;
                     };
                 }
             });
         CentralPanel::default().show(ctx, |ui| {
             Grid::new("cipher_categories").show(ui, |ui| {
-                ui.selectable_value(&mut self.cipher_category, CipherCategory::Substituion, "Substitution");
-                ui.selectable_value(&mut self.cipher_category, CipherCategory::Polyalphabetic, "Polyalphabetic");
-                ui.selectable_value(&mut self.cipher_category, CipherCategory::RotorMachine, "Rotor Machine");
-                ui.selectable_value(&mut self.cipher_category, CipherCategory::Transposition, "Transposition");
+                ui.selectable_value(
+                    &mut self.cipher_category,
+                    CipherCategory::Substituion,
+                    "Substitution",
+                );
+                ui.selectable_value(
+                    &mut self.cipher_category,
+                    CipherCategory::Polyalphabetic,
+                    "Polyalphabetic",
+                );
+                ui.selectable_value(
+                    &mut self.cipher_category,
+                    CipherCategory::RotorMachine,
+                    "Rotor Machine",
+                );
+                ui.selectable_value(
+                    &mut self.cipher_category,
+                    CipherCategory::Transposition,
+                    "Transposition",
+                );
                 ui.end_row();
-                ui.selectable_value(&mut self.cipher_category, CipherCategory::Playfair, "Playfair");
-                ui.selectable_value(&mut self.cipher_category, CipherCategory::Tactical, "Tactical");
-                ui.selectable_value(&mut self.cipher_category, CipherCategory::Polybius, "Polybius");
-
+                ui.selectable_value(
+                    &mut self.cipher_category,
+                    CipherCategory::Playfair,
+                    "Playfair",
+                );
+                ui.selectable_value(
+                    &mut self.cipher_category,
+                    CipherCategory::Tactical,
+                    "Tactical",
+                );
+                ui.selectable_value(
+                    &mut self.cipher_category,
+                    CipherCategory::Polybius,
+                    "Polybius",
+                );
             });
-            ScrollArea::vertical().show(ui, |ui| {
-                ui.label(self.cipher_category.description())
-            });
+            ScrollArea::vertical().show(ui, |ui| ui.label(self.cipher_category.description()));
         });
     }
 
@@ -98,11 +125,8 @@ impl ClassicCrypto {
             });
         CentralPanel::default().show(ctx, |ui| {
             ScrollArea::vertical().show(ui, |ui| {
-                self.cipher_control_panel.ui(
-                    ui,
-                    &mut self.active_cipher,
-                    &mut self.errors,
-                )
+                self.cipher_control_panel
+                    .ui(ui, &mut self.active_cipher, &mut self.errors)
             });
         });
     }

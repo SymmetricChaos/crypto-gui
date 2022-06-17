@@ -1,8 +1,8 @@
 use crate::ciphers::Cipher;
 use crate::errors::CipherError;
 use crate::global_rng::get_global_rng;
-use crate::text_aux::VecString;
 use crate::text_aux::PresetAlphabet;
+use crate::text_aux::VecString;
 use itertools::Itertools;
 use lazy_static::lazy_static;
 

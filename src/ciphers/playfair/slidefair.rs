@@ -1,8 +1,10 @@
 use std::fmt;
 
 use crate::{
+    ciphers::Cipher,
     errors::CipherError,
-    text_aux::{shuffled_str, VecString, PresetAlphabet::*}, ciphers::Cipher, global_rng::get_global_rng,
+    global_rng::get_global_rng,
+    text_aux::{shuffled_str, PresetAlphabet::*, VecString},
 };
 use itertools::Itertools;
 
@@ -29,7 +31,6 @@ impl Default for Slidefair {
 }
 
 impl Slidefair {
-
     // Set or assign alphabet
     pub fn set_alphabet(&mut self) {
         self.alphabet = VecString::unique_from(&self.alphabet_string)
@@ -42,17 +43,18 @@ impl Slidefair {
 
     // Set or assign key
     pub fn set_key(&mut self) {
-        self.key = self.key_word
+        self.key = self
+            .key_word
             .chars()
             .map(|x| self.alphabet.get_pos_of(x).unwrap())
             .collect();
     }
-    
+
     pub fn assign_key(&mut self, key_word: &str) {
         self.key_word = key_word.to_string();
         self.set_key();
     }
-    
+
     // Create cyclic key
     pub fn cyclic_key(&self) -> impl Iterator<Item = &usize> + '_ {
         self.key.iter().cycle()
@@ -120,7 +122,6 @@ impl Slidefair {
     }
 }
 
-
 impl Cipher for Slidefair {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         self.validate_settings()?;
@@ -151,7 +152,10 @@ impl Cipher for Slidefair {
     }
 
     fn randomize(&mut self) {
-        self.alphabet = VecString::from(shuffled_str(&self.alphabet.to_string(), &mut get_global_rng()))
+        self.alphabet = VecString::from(shuffled_str(
+            &self.alphabet.to_string(),
+            &mut get_global_rng(),
+        ))
     }
 
     fn reset(&mut self) {
@@ -172,13 +176,12 @@ impl fmt::Display for Slidefair {
     }
 }
 
-
 #[cfg(test)]
 mod slidefair_tests {
     use super::*;
 
     // Note X used as padding
-    const PLAINTEXT: &'static str  = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOGX";
+    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOGX";
     const CIPHERTEXT: &'static str = "HTPFGWHFRBVPDPURUJONMUBYTRDIYNVCODWH";
 
     #[test]

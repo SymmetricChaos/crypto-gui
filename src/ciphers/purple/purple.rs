@@ -16,7 +16,6 @@ impl Switches {
     }
 }
 
-
 // pub struct Purple {
 //     switches: Switches, // this will be cloned during execution and then mutated
 //     input_plugboard: Plugboard,
@@ -26,8 +25,7 @@ impl Switches {
 // impl Purple {
 //     const SIXES: &'static str = "AEIOUY";
 //     const TWENTIES: &'static str = "BCDFGHJKLMNPQRSTVWXZ";
-    
-    
+
 // }
 
 // impl Cipher for Purple {

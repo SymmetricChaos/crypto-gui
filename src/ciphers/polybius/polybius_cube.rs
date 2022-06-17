@@ -1,7 +1,8 @@
 use crate::{
     ciphers::Cipher,
     errors::CipherError,
-    text_aux::{shuffled_str, VecString, text_functions::validate_text}, global_rng::get_global_rng,
+    global_rng::get_global_rng,
+    text_aux::{shuffled_str, text_functions::validate_text, VecString},
 };
 use itertools::Itertools;
 use num::Integer;

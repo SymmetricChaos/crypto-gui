@@ -1,8 +1,9 @@
 use super::{
     char_to_usize, usize_to_char, EnigmaPlugboard, Reflector, Rotor, REFLECTORS, ROTOR_MAP,
 };
-use crate::{ciphers::Cipher, errors::CipherError, text_aux::PresetAlphabet, global_rng::get_global_rng};
-
+use crate::{
+    ciphers::Cipher, errors::CipherError, global_rng::get_global_rng, text_aux::PresetAlphabet,
+};
 
 pub fn prep_enigma_text(text: &str) -> Result<String, CipherError> {
     let mut out = String::with_capacity(text.len());
@@ -145,12 +146,11 @@ impl Default for EnigmaM3 {
     }
 }
 
-
 #[cfg(test)]
 mod enigma_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str =  "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    const PLAINTEXT: &'static str = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     const CIPHERTEXT: &'static str = "BDZGOWCXLTKSBTMCDLPBMUQOFXYHCXTGYJFLINHNXSHIUNTHEO";
 
     #[test]

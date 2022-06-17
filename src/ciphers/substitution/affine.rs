@@ -1,7 +1,9 @@
 use crate::{
+    ciphers::Cipher,
     errors::CipherError,
+    global_rng::get_global_rng,
     math_functions::mul_inv,
-    text_aux::{VecString, PresetAlphabet::*}, ciphers::Cipher, global_rng::get_global_rng,
+    text_aux::{PresetAlphabet::*, VecString},
 };
 use rand::Rng;
 

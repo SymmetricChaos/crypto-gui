@@ -1,6 +1,6 @@
+use crate::{ciphers::Cipher, errors::CipherError, global_rng::GLOBAL_RNG};
 use num::Integer;
 use rand::Rng;
-use crate::{errors::CipherError, ciphers::Cipher, global_rng::GLOBAL_RNG};
 
 pub struct Scytale {
     pub key: usize,

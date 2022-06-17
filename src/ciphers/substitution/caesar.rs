@@ -1,7 +1,7 @@
 use crate::ciphers::Cipher;
 use crate::errors::CipherError;
 use crate::global_rng::get_global_rng;
-use crate::text_aux::{prep_text, VecString, PresetAlphabet::*};
+use crate::text_aux::{prep_text, PresetAlphabet::*, VecString};
 use rand::Rng;
 
 pub struct Caesar {

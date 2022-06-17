@@ -1,7 +1,10 @@
 use crate::{
     ciphers::Cipher,
     errors::CipherError,
-    text_aux::{shuffled_str, VecString, PresetAlphabet, PresetAlphabet::*, text_functions::validate_text}, global_rng::get_global_rng,
+    global_rng::get_global_rng,
+    text_aux::{
+        shuffled_str, text_functions::validate_text, PresetAlphabet, PresetAlphabet::*, VecString,
+    },
 };
 use itertools::Itertools;
 use num::Integer;
@@ -110,7 +113,7 @@ impl PolybiusSquare {
         }
         Ok(())
     }
-    
+
     pub fn show_grid(&self) -> String {
         let size = (self.side_len + 2) * (self.side_len + 1);
         let mut square = String::with_capacity(size);
@@ -137,7 +140,7 @@ impl Cipher for PolybiusSquare {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         self.check_labels()?;
         validate_text(text, &self.grid)?;
-        
+
         let mut out = String::with_capacity(text.chars().count() * 2);
 
         for c in text.chars() {
@@ -156,7 +159,7 @@ impl Cipher for PolybiusSquare {
                 "Input text must have a length that is a multiple of three.",
             ));
         }
-        
+
         let pairs = self.pairs(text);
         let mut out = String::with_capacity(text.chars().count() / 2);
 

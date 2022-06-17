@@ -1,7 +1,7 @@
 use eframe::egui::{Color32, RichText, Ui};
 
 use super::{generic_components::*, View, ViewableCipher};
-use crate::{text_aux::PresetAlphabet::*, ciphers::playfair::FourSquare};
+use crate::{ciphers::playfair::FourSquare, text_aux::PresetAlphabet::*};
 
 impl ViewableCipher for FourSquare {}
 

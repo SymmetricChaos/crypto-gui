@@ -1,7 +1,7 @@
 use rand::Rng;
 use std::iter::Iterator;
 
-use crate::{errors::CipherError, ciphers::Cipher, global_rng::GLOBAL_RNG};
+use crate::{ciphers::Cipher, errors::CipherError, global_rng::GLOBAL_RNG};
 
 pub struct RailFence {
     pub rails: usize, // the slider to control this should be limited

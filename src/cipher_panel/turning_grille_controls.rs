@@ -30,7 +30,10 @@ impl View for TurningGrille {
         ui.add_space(16.0);
 
         ui.label("Keys");
-        ui.label(format!("The numbers from 0 to {} should all be used exactly once among the keys",self.subgrille_size()-1));
+        ui.label(format!(
+            "The numbers from 0 to {} should all be used exactly once among the keys",
+            self.subgrille_size() - 1
+        ));
         ui.text_edit_singleline(&mut self.key_strings[0]);
         ui.text_edit_singleline(&mut self.key_strings[1]);
         ui.text_edit_singleline(&mut self.key_strings[2]);

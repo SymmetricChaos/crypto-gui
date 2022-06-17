@@ -16,18 +16,16 @@ pub mod errors;
 pub mod egui_aux;
 pub mod rotors;
 
-pub mod text_aux;
 pub mod category_pages;
+pub mod text_aux;
 
 pub mod global_rng;
 
 // ----------------------------------------------------------------------------
 // When compiling for web:
 
-
 #[cfg(target_arch = "wasm32")]
 use eframe::wasm_bindgen::{self, prelude::*};
-
 
 /// This is the entry-point for all the web-assembly.
 /// This is called once from the HTML.

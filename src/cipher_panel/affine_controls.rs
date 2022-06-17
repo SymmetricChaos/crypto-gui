@@ -1,5 +1,5 @@
 use super::{generic_components::*, View, ViewableCipher};
-use crate::{math_functions::prime_factors, ciphers::substitution::Affine};
+use crate::{ciphers::substitution::Affine, math_functions::prime_factors};
 use eframe::egui::{Slider, Ui};
 
 impl ViewableCipher for Affine {}

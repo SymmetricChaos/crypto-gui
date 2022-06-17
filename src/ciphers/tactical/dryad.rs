@@ -3,7 +3,8 @@ use rand::{prelude::StdRng, Rng, SeedableRng};
 use crate::{
     ciphers::Cipher,
     errors::CipherError,
-    text_aux::{shuffled_str, PresetAlphabet}, global_rng::get_global_rng,
+    global_rng::get_global_rng,
+    text_aux::{shuffled_str, PresetAlphabet},
 };
 
 pub struct Dryad {

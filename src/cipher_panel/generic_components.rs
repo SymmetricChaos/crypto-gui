@@ -1,9 +1,10 @@
-use crate::{ciphers::Cipher, grid::{Grid, str_to_char_grid}};
+use crate::{
+    ciphers::Cipher,
+    grid::{str_to_char_grid, Grid},
+};
 use eframe::egui::{self, Color32, Label, RichText, TextStyle};
 
 use super::ViewableCipher;
-
-
 
 pub fn encrypt_decrypt(
     ui: &mut egui::Ui,
@@ -71,7 +72,6 @@ pub fn text_edit(ui: &mut egui::Ui, text: &mut String) {
 }
 
 pub fn letter_grid(ui: &mut egui::Ui, n_rows: usize, n_cols: usize, text: &String) {
-
     let symbols = str_to_char_grid(text, '\0', '\0');
     let grid = Grid::from_cols(symbols, n_rows, n_cols);
 

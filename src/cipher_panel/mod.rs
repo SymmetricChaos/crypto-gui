@@ -1,7 +1,11 @@
 use self::generic_components::encrypt_decrypt;
 use crate::{
     cipher_id::CipherID,
-    ciphers::{*, polybius::*, tactical::*, polyalphabetic::*, substitution::*, playfair::*, transposition::*}, global_rng::global_rng_controls,
+    ciphers::{
+        playfair::*, polyalphabetic::*, polybius::*, substitution::*, tactical::*,
+        transposition::*, *,
+    },
+    global_rng::global_rng_controls,
 };
 use eframe::egui::{self, Color32, RichText, TextEdit, TextStyle, Ui};
 
@@ -28,19 +32,19 @@ pub mod hutton_controls;
 pub mod m209_controls;
 pub mod m94_controls;
 pub mod playfair_controls;
+pub mod plugboard_controls;
 pub mod polybius_cube_controls;
 pub mod polybius_square_controls;
 pub mod porta_controls;
+pub mod quagmire_controls;
 pub mod rail_fence_controls;
 pub mod scytale_controls;
 pub mod sigaba_controls;
 pub mod slidefair_controls;
 pub mod trifid_controls;
+pub mod turning_grille_controls;
 pub mod two_square_controls;
 pub mod vigenere_controls;
-pub mod quagmire_controls;
-pub mod turning_grille_controls;
-pub mod plugboard_controls;
 
 pub trait ViewableCipher: View + Cipher {}
 
@@ -83,7 +87,7 @@ pub struct CipherControlPanel {
     m94: M94,
     bazeries: Bazeries,
     porta: Porta,
-    quagmire: Quagmire,    
+    quagmire: Quagmire,
     chaocipher: Chaocipher,
     hutton: Hutton,
 
@@ -111,12 +115,7 @@ pub struct CipherControlPanel {
 }
 
 impl CipherControlPanel {
-    pub fn ui(
-        &mut self,
-        ui: &mut egui::Ui,
-        active_cipher: &mut CipherID,
-        errors: &mut String,
-    ) {
+    pub fn ui(&mut self, ui: &mut egui::Ui, active_cipher: &mut CipherID, errors: &mut String) {
         egui::Grid::new("comboboxes").show(ui, |ui| {
             combox_box(
                 &[
@@ -140,8 +139,8 @@ impl CipherControlPanel {
                     CipherID::Bazeries,
                     CipherID::Porta,
                     CipherID::Quagmire,
-                    CipherID::Chaocipher, 
-                    CipherID::Hutton
+                    CipherID::Chaocipher,
+                    CipherID::Hutton,
                 ],
                 "Polyalphabetic",
                 active_cipher,
@@ -203,7 +202,6 @@ impl CipherControlPanel {
                 active_cipher,
                 ui,
             );
-
         });
 
         ui.add_space(16.0);
@@ -223,8 +221,7 @@ impl CipherControlPanel {
         let c = self.get_active_cipher(active_cipher);
         c.ui(ui, errors);
     }
-    
-    
+
     pub fn get_active_cipher(&mut self, active_cipher: &mut CipherID) -> &mut dyn ViewableCipher {
         match active_cipher {
             CipherID::Caesar => &mut self.caesar,
@@ -270,7 +267,6 @@ impl CipherControlPanel {
 #[derive(Default)]
 pub struct CipherDisplayPanel {}
 
-
 impl CipherDisplayPanel {
     pub fn ui(
         &mut self,
@@ -288,7 +284,13 @@ impl CipherDisplayPanel {
         ui.label("OUTPUT TEXT");
         ui.add(TextEdit::multiline(output).font(TextStyle::Monospace));
 
-        encrypt_decrypt(ui, control_panel.get_active_cipher(active_cipher), input, output, errors);
+        encrypt_decrypt(
+            ui,
+            control_panel.get_active_cipher(active_cipher),
+            input,
+            output,
+            errors,
+        );
 
         ui.add_space(10.0);
         if ui.button("clear").clicked() {

@@ -1,5 +1,5 @@
 use super::{generic_components::*, View, ViewableCipher};
-use crate::{egui_aux::mono, ciphers::polyalphabetic::Porta};
+use crate::{ciphers::polyalphabetic::Porta, egui_aux::mono};
 use eframe::egui::Ui;
 
 impl ViewableCipher for Porta {}

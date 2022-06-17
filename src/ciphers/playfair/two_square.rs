@@ -1,9 +1,12 @@
 use crate::{
+    ciphers::Cipher,
     errors::CipherError,
+    global_rng::get_global_rng,
     text_aux::{
-        shuffled_str, VecString,
+        shuffled_str,
         PresetAlphabet::{self, *},
-    }, ciphers::Cipher, global_rng::get_global_rng,
+        VecString,
+    },
 };
 use itertools::Itertools;
 use num::integer::Roots;

@@ -1,6 +1,8 @@
 use crate::{
+    ciphers::Cipher,
     errors::CipherError,
-    text_aux::{shuffled_str, VecString, PresetAlphabet}, ciphers::Cipher, global_rng::get_global_rng,
+    global_rng::get_global_rng,
+    text_aux::{shuffled_str, PresetAlphabet, VecString},
 };
 
 #[derive(Debug)]

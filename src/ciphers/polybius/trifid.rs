@@ -45,7 +45,6 @@ impl Trifid {
 
 impl Cipher for Trifid {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        
         let vector: Vec<char> = text.chars().collect();
         let len = vector.len();
         if !len.is_multiple_of(&self.block_size) {
@@ -55,8 +54,10 @@ impl Cipher for Trifid {
         };
         let mut out = String::with_capacity(len * 3);
 
-        for block in vector.chunks(self.block_size).map(|x| x.to_vec().iter().collect::<String>()) {
-
+        for block in vector
+            .chunks(self.block_size)
+            .map(|x| x.to_vec().iter().collect::<String>())
+        {
             let poly = self.polybius.encrypt(&block)?;
             let mut first = String::with_capacity(len);
             let mut second = String::with_capacity(len);
@@ -87,7 +88,10 @@ impl Cipher for Trifid {
         let mut out = String::with_capacity(vector.len());
 
         // Divide the vector into chunks of the block size
-        for block in vector.chunks(self.block_size).map(|x| x.to_vec().iter().collect::<String>()) {
+        for block in vector
+            .chunks(self.block_size)
+            .map(|x| x.to_vec().iter().collect::<String>())
+        {
             // Turn the block into a String then encrypt it with the Polybius cipher
             let poly: String = self.polybius.encrypt(&block)?;
 

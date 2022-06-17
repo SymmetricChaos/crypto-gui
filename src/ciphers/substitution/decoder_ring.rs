@@ -1,8 +1,8 @@
 use rand::Rng;
 
 use crate::global_rng::get_global_rng;
-use crate::{errors::CipherError, ciphers::Cipher};
 use crate::text_aux::VecString;
+use crate::{ciphers::Cipher, errors::CipherError};
 
 pub struct DecoderRing {
     pub index: usize,

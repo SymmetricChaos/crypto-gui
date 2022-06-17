@@ -1,7 +1,7 @@
-use std::ops::{Index, IndexMut};
 use std::fmt::{Display, Formatter, Result};
+use std::ops::{Index, IndexMut};
 
-use rand::prelude::{StdRng, SliceRandom};
+use rand::prelude::{SliceRandom, StdRng};
 
 pub const EMPTY: char = '⬜';
 pub const BLOCK: char = '⬛';
@@ -40,14 +40,13 @@ impl<T> Symbol<T> {
             _ => false,
         }
     }
-    
+
     pub fn contents(&self) -> Option<&T> {
         match self {
             Symbol::Character(x) => Some(x),
             _ => None,
         }
     }
-
 }
 
 impl Symbol<char> {
@@ -74,16 +73,12 @@ pub fn str_to_char_grid(text: &str, empty_char: char, blocked_char: char) -> Vec
     v
 }
 
-
-
 #[derive(Clone)]
 pub struct Grid<T: Copy + Clone + Default> {
     symbols: Vec<T>,
     num_rows: usize,
     num_cols: usize,
 }
-
-
 
 // Most Generic Methods
 impl<T: Copy + Clone + Default> Grid<T> {
@@ -97,12 +92,7 @@ impl<T: Copy + Clone + Default> Grid<T> {
         }
     }
 
-    pub fn from_rows(
-        symbols: Vec<T>,
-        num_rows: usize,
-        num_cols: usize,
-    ) -> Self {
-
+    pub fn from_rows(symbols: Vec<T>, num_rows: usize, num_cols: usize) -> Self {
         let mut symbols = symbols;
         let grid_size = num_rows * num_cols;
         // Drop excess symbols or pad with Empty as needed
@@ -116,15 +106,10 @@ impl<T: Copy + Clone + Default> Grid<T> {
         }
     }
 
-    pub fn from_cols(
-        symbols: Vec<T>,
-        num_rows: usize,
-        num_cols: usize,
-    ) -> Self {
-
+    pub fn from_cols(symbols: Vec<T>, num_rows: usize, num_cols: usize) -> Self {
         let mut symbols = symbols;
         let grid_size = num_rows * num_cols;
-        
+
         symbols.truncate(grid_size);
         symbols.resize(grid_size, T::default());
 
@@ -319,23 +304,18 @@ impl<T: Copy + Clone + Default> Grid<T> {
         for n in 0..self.num_cols {
             let cells: Vec<&T> = self.get_col(n).collect();
             for c in cells.iter().rev() {
-              new_symbols.push(**c)
+                new_symbols.push(**c)
             }
         }
 
         std::mem::swap(&mut self.num_rows, &mut self.num_cols);
         self.symbols = new_symbols;
     }
-    
+
     pub fn shuffle(&mut self, rng: &mut StdRng) {
         self.symbols.shuffle(rng)
     }
-
 }
-
-
-
-
 
 impl<T: Clone + Copy> Grid<Symbol<T>> {
     pub fn new_empty(num_rows: usize, num_cols: usize) -> Self {
@@ -384,7 +364,11 @@ impl<T: Clone + Copy> Grid<Symbol<T>> {
         Some(contents)
     }
 
-    pub fn replace_if_empty(&mut self, coord: (usize, usize), new_sym: Symbol<T>) -> Option<Symbol<T>> {
+    pub fn replace_if_empty(
+        &mut self,
+        coord: (usize, usize),
+        new_sym: Symbol<T>,
+    ) -> Option<Symbol<T>> {
         let contents = *self.get(coord)?;
         if contents.is_empty() {
             self[coord] = new_sym;
@@ -407,23 +391,19 @@ impl<T: Clone + Copy> Grid<Symbol<T>> {
     }
 }
 
-
 impl Grid<Symbol<char>> {
     pub fn read_rows_characters(&self) -> impl Iterator<Item = char> + '_ {
         self.get_rows()
             .filter(|x| x.is_character())
             .map(|x| x.to_char())
     }
-    
+
     pub fn read_cols_characters(&self) -> impl Iterator<Item = char> + '_ {
         self.get_cols()
             .filter(|x| x.is_character())
             .map(|x| x.to_char())
     }
 }
-
-
-
 
 impl Display for Grid<Symbol<char>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
@@ -441,8 +421,6 @@ impl Display for Grid<Symbol<char>> {
         write!(f, "{out}")
     }
 }
-
-
 
 // Two index methods. One for coords and one for index.
 impl<T: Copy + Clone + Default> Index<(usize, usize)> for Grid<T> {

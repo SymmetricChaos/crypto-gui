@@ -1,7 +1,7 @@
 use crate::ciphers::Cipher;
 use crate::errors::CipherError;
 use crate::global_rng::get_global_rng;
-use crate::text_aux::{shuffled_str, VecString, PresetAlphabet};
+use crate::text_aux::{shuffled_str, PresetAlphabet, VecString};
 use itertools::Itertools;
 
 pub struct Bazeries {
@@ -21,7 +21,8 @@ impl Bazeries {
     }
 
     pub fn add_wheel(&mut self) {
-        self.wheels.push(shuffled_str(&self.alphabet_string, &mut get_global_rng()))
+        self.wheels
+            .push(shuffled_str(&self.alphabet_string, &mut get_global_rng()))
     }
 
     pub fn del_wheel(&mut self) {

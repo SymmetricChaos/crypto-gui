@@ -1,4 +1,4 @@
-use crate::ciphers::polyalphabetic::{Vigenere, PolyMode::*};
+use crate::ciphers::polyalphabetic::{PolyMode::*, Vigenere};
 
 use super::{generic_components::*, View, ViewableCipher};
 use eframe::egui::{Slider, TextEdit, TextStyle, Ui};

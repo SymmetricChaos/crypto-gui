@@ -2,7 +2,6 @@ use super::{generic_components::*, View, ViewableCipher};
 use crate::ciphers::polyalphabetic::Chaocipher;
 use eframe::egui::Ui;
 
-
 impl ViewableCipher for Chaocipher {}
 
 impl View for Chaocipher {

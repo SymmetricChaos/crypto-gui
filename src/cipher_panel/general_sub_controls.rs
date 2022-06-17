@@ -1,5 +1,5 @@
-use crate::ciphers::substitution::GeneralSubstitution;
 use super::{generic_components::*, View, ViewableCipher};
+use crate::ciphers::substitution::GeneralSubstitution;
 use eframe::egui::Ui;
 
 impl ViewableCipher for GeneralSubstitution {}

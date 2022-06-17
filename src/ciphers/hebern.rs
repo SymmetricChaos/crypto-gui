@@ -3,7 +3,8 @@ use std::fmt;
 use super::Cipher;
 use crate::{
     errors::CipherError,
-    text_aux::{VecString, PresetAlphabet}, global_rng::get_global_rng,
+    global_rng::get_global_rng,
+    text_aux::{PresetAlphabet, VecString},
 };
 
 #[derive(Clone, Debug)]
@@ -207,7 +208,7 @@ impl Cipher for Hebern {
 mod hebern_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str =  "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
     const CIPHERTEXT: &'static str = "PHJXRXAVPGSDMLKZFFFGGKFYYMVMLXAYHEP";
 
     #[test]

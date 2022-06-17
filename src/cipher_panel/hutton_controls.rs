@@ -1,6 +1,7 @@
 use super::{generic_components::*, View, ViewableCipher};
 use crate::{
-    egui_aux::mono, ciphers::polyalphabetic::{Hutton, HuttonVersion},
+    ciphers::polyalphabetic::{Hutton, HuttonVersion},
+    egui_aux::mono,
 };
 use eframe::egui::Ui;
 

@@ -174,7 +174,7 @@ pub fn prep_text(text: &str, alphabet: &str) -> Result<String, CipherError> {
     Ok(out)
 }
 
-pub fn validate_text(text: &str, alphabet: &VecString) -> Result<(),CipherError> {
+pub fn validate_text(text: &str, alphabet: &VecString) -> Result<(), CipherError> {
     if text.len() == 0 {
         return Err(CipherError::Input(String::from("No input text provided")));
     }
@@ -189,7 +189,7 @@ pub fn validate_text(text: &str, alphabet: &VecString) -> Result<(),CipherError>
 #[cfg(test)]
 mod text_function_tests {
 
-    use crate::global_rng::{seed_global_rng, get_global_rng};
+    use crate::global_rng::{get_global_rng, seed_global_rng};
 
     use super::*;
 

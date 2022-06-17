@@ -1,9 +1,8 @@
 use crate::ciphers::Cipher;
 use crate::errors::CipherError;
 use crate::global_rng::get_global_rng;
-use crate::text_aux::VecString;
 use crate::text_aux::text_functions::validate_text;
-
+use crate::text_aux::VecString;
 
 pub struct Chaocipher {
     pub left_string: String,
@@ -47,7 +46,6 @@ impl Chaocipher {
         self.right_string = String::from(s);
         self.set_right();
     }
-
 }
 
 impl Default for Chaocipher {
@@ -63,7 +61,6 @@ impl Default for Chaocipher {
 
 impl Cipher for Chaocipher {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-
         validate_text(text, &self.left)?;
 
         let mut left = self.left.clone();

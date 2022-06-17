@@ -9,7 +9,6 @@ pub enum CipherCategory {
     Playfair,
     Tactical,
     Polybius,
-
 }
 
 impl CipherCategory {
@@ -28,47 +27,47 @@ impl CipherCategory {
     pub fn ciphers(&self) -> &[CipherID] {
         match self {
             CipherCategory::Substituion => &[
-                                    CipherID::Caesar,
-                                    CipherID::Decoder,
-                                    CipherID::Affine,
-                                    CipherID::Substitution,
-                                    CipherID::Plugboard],
+                CipherID::Caesar,
+                CipherID::Decoder,
+                CipherID::Affine,
+                CipherID::Substitution,
+                CipherID::Plugboard,
+            ],
             CipherCategory::Polyalphabetic => &[
-                                    CipherID::Vigenere,
-                                    CipherID::Beaufort,
-                                    CipherID::M94,
-                                    CipherID::Alberti,
-                                    CipherID::Bazeries,
-                                    CipherID::Porta,
-                                    CipherID::Quagmire,
-                                    CipherID::Chaocipher, 
-                                    CipherID::Hutton],
-            CipherCategory::RotorMachine =>  &[
-                                    CipherID::M209, 
-                                    CipherID::Enigma, 
-                                    CipherID::Sigaba,],
-            CipherCategory::Transposition =>  &[
-                                    CipherID::Columnar,
-                                    CipherID::Grille,
-                                    CipherID::TurningGrille,
-                                    CipherID::RailFence,
-                                    CipherID::Scytale,],
+                CipherID::Vigenere,
+                CipherID::Beaufort,
+                CipherID::M94,
+                CipherID::Alberti,
+                CipherID::Bazeries,
+                CipherID::Porta,
+                CipherID::Quagmire,
+                CipherID::Chaocipher,
+                CipherID::Hutton,
+            ],
+            CipherCategory::RotorMachine => &[CipherID::M209, CipherID::Enigma, CipherID::Sigaba],
+            CipherCategory::Transposition => &[
+                CipherID::Columnar,
+                CipherID::Grille,
+                CipherID::TurningGrille,
+                CipherID::RailFence,
+                CipherID::Scytale,
+            ],
             CipherCategory::Playfair => &[
-                                    CipherID::Playfair,
-                                    CipherID::Slidefair,
-                                    CipherID::TwoSquare,
-                                    CipherID::FourSquare,],
-            CipherCategory::Tactical => &[
-                                    CipherID::Batco, 
-                                    CipherID::Dryad],
+                CipherID::Playfair,
+                CipherID::Slidefair,
+                CipherID::TwoSquare,
+                CipherID::FourSquare,
+            ],
+            CipherCategory::Tactical => &[CipherID::Batco, CipherID::Dryad],
             CipherCategory::Polybius => &[
-                                    CipherID::Polybius,
-                                    CipherID::PolybiusCube,
-                                    CipherID::Adfgvx,
-                                    CipherID::B64,
-                                    CipherID::Bifid,
-                                    CipherID::Trifid,
-                                    CipherID::Checkerboard,],
+                CipherID::Polybius,
+                CipherID::PolybiusCube,
+                CipherID::Adfgvx,
+                CipherID::B64,
+                CipherID::Bifid,
+                CipherID::Trifid,
+                CipherID::Checkerboard,
+            ],
         }
     }
 }

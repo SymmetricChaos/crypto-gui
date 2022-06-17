@@ -1,8 +1,8 @@
-pub mod polybius;
-pub mod tactical;
-pub mod polyalphabetic;
-pub mod substitution;
 pub mod playfair;
+pub mod polyalphabetic;
+pub mod polybius;
+pub mod substitution;
+pub mod tactical;
 pub mod transposition;
 
 pub mod m209;

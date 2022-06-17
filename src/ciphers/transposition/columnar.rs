@@ -1,9 +1,9 @@
 use num::Integer;
 
 use crate::global_rng::get_global_rng;
-use crate::{errors::CipherError, ciphers::Cipher};
-use crate::grid::{Grid, Symbol, str_to_char_grid};
+use crate::grid::{str_to_char_grid, Grid, Symbol};
 use crate::text_aux::{rank_str, PresetAlphabet::*, VecString};
+use crate::{ciphers::Cipher, errors::CipherError};
 
 pub struct Columnar {
     pub alphabet_string: String,
@@ -13,7 +13,6 @@ pub struct Columnar {
 }
 
 impl Columnar {
-
     pub fn set_alphabet(&mut self) {
         self.alphabet = VecString::unique_from(&self.alphabet_string);
     }
@@ -60,10 +59,9 @@ impl Cipher for Columnar {
         }
 
         let n_rows = tlen.div_ceil(&self.key.len());
-        
+
         let symbols = str_to_char_grid(text, '\0', '\0');
         let g = Grid::from_cols(symbols, n_rows, n_cols);
-
 
         let mut out = String::with_capacity(text.len());
         for k in self.key.iter() {
@@ -107,7 +105,11 @@ impl Cipher for Columnar {
     }
 
     fn randomize(&mut self) {
-        let key: String = self.alphabet.get_rand_chars_replace(11, &mut get_global_rng()).iter().collect();
+        let key: String = self
+            .alphabet
+            .get_rand_chars_replace(11, &mut get_global_rng())
+            .iter()
+            .collect();
         self.assign_key(&key);
     }
 

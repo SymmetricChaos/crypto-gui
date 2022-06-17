@@ -1,7 +1,7 @@
 use eframe::egui::{Color32, RichText, Ui};
 
 use super::{generic_components::*, View, ViewableCipher};
-use crate::{egui_aux::mono, text_aux::PresetAlphabet::*, ciphers::playfair::TwoSquare};
+use crate::{ciphers::playfair::TwoSquare, egui_aux::mono, text_aux::PresetAlphabet::*};
 
 impl ViewableCipher for TwoSquare {}
 

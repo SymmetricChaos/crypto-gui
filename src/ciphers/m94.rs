@@ -1,9 +1,6 @@
 use super::Cipher;
 use crate::{errors::CipherError, global_rng::get_global_rng};
-use rand::{
-    prelude::SliceRandom,
-    Rng,
-};
+use rand::{prelude::SliceRandom, Rng};
 
 const M94_WHEELS: [&'static str; 25] = [
     "ABCEIGDJFVUYMHTQKZOLRXSPWN",
