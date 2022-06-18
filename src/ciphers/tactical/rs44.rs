@@ -13,14 +13,14 @@ use crate::{
 };
 
 pub struct RS44 {
-    stencil: Grid<Symbol<char>>,
-    column_nums: [u8; 25],
-    xlabels: [&'static str; 25],
-    ylabels: [&'static str; 24],
-    message_key: (usize, usize),
+    pub stencil: Grid<Symbol<char>>,
+    pub column_nums: [u8; 25],
+    pub xlabels: [&'static str; 25],
+    pub ylabels: [&'static str; 24],
+    pub message_key: (usize, usize),
     message_key_maxtrix: Grid<char>,
-    hours: u8,
-    minutes: u8,
+    pub hours: u8,
+    pub minutes: u8,
 }
 
 impl Default for RS44 {
@@ -254,6 +254,8 @@ impl Cipher for RS44 {
     }
 
     fn randomize(&mut self) {
-        todo!("randomize stencil and maxtrix");
+        self.randomize_stencil();
+        self.randomize_matrix();
+        self.randomize_labels();
     }
 }

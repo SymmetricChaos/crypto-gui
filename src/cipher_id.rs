@@ -41,6 +41,7 @@ pub enum CipherID {
 
     Batco,
     Dryad,
+    Rs44,
 
     Chaocipher,
 
@@ -94,6 +95,7 @@ impl CipherID {
 
             CipherID::Batco => "BATCO is a British tactical code to be used quickly to send simple messages. The user chooses a message key consisting of a number from 2 to 6 (keeping 7 for emergencies) that identifies a column on the left and then letter to identify a row in that column. The message, which consists only of digits, is then encrypted using the right portion of the row. For instance the number '1' can be encoded as either of the numbers in its column that are on the selected row. Because '0' is expected to be common it has four options. The digits are not numbers but form code-groups from a set of vocabulary cards [COMING SOON]. A switch to numeric digits can be indicates by a code-group. The 'CH' symbol indicates the end of a numeric section.\nAs a tactical cipher BATCO relies mainly on frequent key changes to stay secure. A different message key should be used every time and the code pages should be changed regularly. Messages are also limited to 22 characters, giving very little text for an attacker to analyze. Furthermore so long as the vocabulary cards remain secret they make decryption nearly impossible even if an attacker is able to decrypt a message. The greatest security feature of BATCO, like any tactical cipher, is that messages should be useful for only a few hours which is often insufficient to bring them to the attention of cryptanalysis.",
             CipherID::Dryad => "DRYAD is an American tactical code to be used quickly to send simple messages.",
+            CipherID::Rs44 => "The RS44 Cipher is a tactical transposition cipher.",
 
             _ => "Missing description. Please complain to the author.",
         }
@@ -140,6 +142,7 @@ impl Display for CipherID {
             CipherID::Quagmire => "Quagmire",
             // CipherID::Fialka => "Fialka",
             CipherID::Plugboard => "Plugboard",
+            CipherID::Rs44 => "RS44",
             _ => "Missing name. Please complain to the author.",
         };
         write!(f, "{}", name)

@@ -58,7 +58,7 @@ impl CipherCategory {
                 CipherID::TwoSquare,
                 CipherID::FourSquare,
             ],
-            CipherCategory::Tactical => &[CipherID::Batco, CipherID::Dryad],
+            CipherCategory::Tactical => &[CipherID::Batco, CipherID::Dryad, CipherID::Rs44],
             CipherCategory::Polybius => &[
                 CipherID::Polybius,
                 CipherID::PolybiusCube,

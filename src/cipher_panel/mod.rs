@@ -45,6 +45,7 @@ pub mod trifid_controls;
 pub mod turning_grille_controls;
 pub mod two_square_controls;
 pub mod vigenere_controls;
+pub mod rs44_controls;
 
 pub trait ViewableCipher: View + Cipher {}
 
@@ -112,6 +113,7 @@ pub struct CipherControlPanel {
 
     batco: Batco,
     dryad: Dryad,
+    rs44: RS44,
 }
 
 impl CipherControlPanel {
@@ -182,7 +184,7 @@ impl CipherControlPanel {
             );
 
             combox_box(
-                &[CipherID::Batco, CipherID::Dryad],
+                &[CipherID::Batco, CipherID::Dryad, CipherID::Rs44],
                 "Tactical",
                 active_cipher,
                 ui,
@@ -259,6 +261,7 @@ impl CipherControlPanel {
             CipherID::Quagmire => &mut self.quagmire,
             CipherID::TurningGrille => &mut self.turning_grille,
             CipherID::Plugboard => &mut self.plugboard,
+            CipherID::Rs44 => &mut self.rs44,
             _ => todo!(),
         }
     }
