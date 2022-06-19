@@ -18,7 +18,7 @@ pub struct RS44 {
     pub xlabels: [&'static str; 25],
     pub ylabels: [&'static str; 24],
     pub message_key: (usize, usize),
-    message_key_maxtrix: Grid<char>,
+    pub message_key_maxtrix: Grid<char>,
     pub hours: u8,
     pub minutes: u8,
 }
@@ -102,19 +102,7 @@ impl RS44 {
         }
     }
 
-    pub fn encrypt_message_key(&self) -> Result<String, CipherError> {
-        match self.stencil.get(self.message_key) {
-            Some(s) => {
-                if !s.is_empty() {
-                    return Err(CipherError::key(
-                        "message key must select an empty position",
-                    ));
-                } else {
-                    ()
-                }
-            }
-            None => return Err(CipherError::key("message key out of bounds")),
-        }
+    pub fn encrypt_message_key(&self) -> String {
         let mut message_key_string = String::with_capacity(4);
         let mut rng = get_global_rng();
         for c in self.xlabels[self.message_key.0]
@@ -126,14 +114,14 @@ impl RS44 {
             message_key_string.push(self.message_key_maxtrix[(row, col)]);
         }
 
-        Ok(message_key_string)
+        message_key_string
     }
 
-    pub fn full_message_key(&self) -> Result<String, CipherError> {
+    pub fn full_message_key(&self) -> String {
         let mut output = String::with_capacity(13);
-        output.push_str(&self.encrypt_message_key()?);
+        output.push_str(&self.encrypt_message_key());
         output.push_str(&format!("-{:02}{:02}", self.hours, self.minutes));
-        Ok(output)
+        output
     }
 
     pub fn randomize_stencil(&mut self) {
