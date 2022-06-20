@@ -21,6 +21,7 @@ pub struct RS44 {
     pub message_key_maxtrix: Grid<char>,
     pub hours: u8,
     pub minutes: u8,
+    pub encrypted_message_key: String,
 }
 
 impl Default for RS44 {
@@ -77,6 +78,7 @@ impl Default for RS44 {
             message_key_maxtrix,
             hours: 0,
             minutes: 0,
+            encrypted_message_key: String::new(),
         }
     }
 }
@@ -117,11 +119,10 @@ impl RS44 {
         message_key_string
     }
 
-    pub fn full_message_key(&self) -> String {
-        let mut output = String::with_capacity(13);
-        output.push_str(&self.encrypt_message_key());
-        output.push_str(&format!("-{:02}{:02}", self.hours, self.minutes));
-        output
+    pub fn set_full_message_key(&mut self) {
+        self.encrypted_message_key.clear();
+        self.encrypted_message_key.push_str(&self.encrypt_message_key());
+        self.encrypted_message_key.push_str(&format!("-{:02}{:02}", self.hours, self.minutes));
     }
 
     pub fn randomize_stencil(&mut self) {
@@ -245,5 +246,6 @@ impl Cipher for RS44 {
         self.randomize_stencil();
         self.randomize_matrix();
         self.randomize_labels();
+        self.set_full_message_key();
     }
 }

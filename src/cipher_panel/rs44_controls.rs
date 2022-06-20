@@ -22,12 +22,16 @@ impl View for RS44 {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 
-        ui.add(
+        if ui.add(
             DragValue::new(&mut self.message_key.0).prefix("x: ").clamp_range(0..=24)
-        );
-        ui.add(
+        ).changed() {
+            self.set_full_message_key();
+        };
+        if ui.add(
             DragValue::new(&mut self.message_key.1).prefix("y: ").clamp_range(0..=23)
-        );
+        ).changed() {
+            self.set_full_message_key();
+        };
         if self.stencil[self.message_key].is_blocked() {
             ui.label(
                 RichText::new("Invalid Start Position")
@@ -45,13 +49,17 @@ impl View for RS44 {
 
             ui.label("Time of Transmission");
             ui.horizontal(|ui| {
-                ui.add(
+                if ui.add(
                     DragValue::new(&mut self.hours).clamp_range(0..=23)
-                );
+                ).changed() {
+                    self.set_full_message_key();
+                };
                 ui.label(":");
-                ui.add(
+                if ui.add(
                     DragValue::new(&mut self.minutes).clamp_range(0..=59)
-                );
+                ).changed() {
+                    self.set_full_message_key();
+                };
             });
 
             ui.spacing_mut().item_spacing = (2.0, 2.0).into();
@@ -65,7 +73,7 @@ impl View for RS44 {
             }
 
             ui.add_space(8.0);
-            ui.label(RichText::new(format!("Message Key: {}",self.full_message_key())).strong().monospace());
+            ui.label(RichText::new(format!("Message Key: {}",self.encrypted_message_key)).strong().monospace());
         });
 
         ui.add_space(16.0);
@@ -76,7 +84,7 @@ impl View for RS44 {
             ui.label(" ");
             for col in 0..25 {
                 if col == self.message_key.0 {
-                    ui.label("🡳");
+                    ui.label("+");
                 }
                 else {
                     ui.label(" ");
@@ -97,7 +105,7 @@ impl View for RS44 {
             ui.end_row();
             for row in 0..24 {
                 if row == self.message_key.1 {
-                    ui.label("🡲");
+                    ui.label("+");
                 } else {
                     ui.label(" ");
                 }
