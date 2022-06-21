@@ -8,7 +8,7 @@ use crate::{
     ciphers::Cipher,
     errors::CipherError,
     global_rng::get_global_rng,
-    grid::{Grid, Symbol},
+    grid::{Grid, Symbol, str_to_char_grid, EMPTY, BLOCK},
     text_aux::PresetAlphabet,
 };
 
@@ -26,10 +26,10 @@ pub struct RS44 {
 
 impl Default for RS44 {
     fn default() -> Self {
-        let mut rng = StdRng::seed_from_u64(3141592654);
+        let mut rng = StdRng::seed_from_u64(5920348976);
 
         // Build the stencile
-        let mut stencil: Grid<Symbol<char>> = Grid::new_empty(Self::WIDTH, Self::HEIGHT);
+        let mut stencil: Grid<Symbol<char>> = Grid::new_blocked(Self::WIDTH, Self::HEIGHT);
         let mut positions: Vec<usize> = (0..Self::WIDTH).collect();
         for i in 0..Self::HEIGHT {
             positions.shuffle(&mut rng);
@@ -156,6 +156,25 @@ impl RS44 {
                 .try_into()
                 .unwrap()
         };
+    }
+
+    pub fn stencil_to_text(&self) -> String {
+        self.stencil.read_rows_characters().collect()
+    }
+
+    pub fn text_to_stencil(&mut self, text: &str) -> Result<(),CipherError> {
+        let mut vec = Vec::with_capacity(Self::GRID_SIZE);
+        for c in text.chars() {
+            if c == EMPTY {
+                vec.push(Symbol::Empty)
+            } else if c == BLOCK {
+                vec.push(Symbol::Empty)
+            } else {
+                return Err(CipherError::Key(format!("Key can only be built from the symbols {} and {}", EMPTY, BLOCK)))
+            }
+        }
+        self.stencil = Grid::from_rows(vec, 24, 25);
+        Ok(())
     }
 }
 

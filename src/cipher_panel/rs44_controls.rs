@@ -45,40 +45,7 @@ impl View for RS44 {
 
         ui.add_space(16.0);
 
-        ui.collapsing("Message Key", |ui| {
-
-            ui.label("Time of Transmission");
-            ui.horizontal(|ui| {
-                if ui.add(
-                    DragValue::new(&mut self.hours).clamp_range(0..=23)
-                ).changed() {
-                    self.set_full_message_key();
-                };
-                ui.label(":");
-                if ui.add(
-                    DragValue::new(&mut self.minutes).clamp_range(0..=59)
-                ).changed() {
-                    self.set_full_message_key();
-                };
-            });
-
-            ui.spacing_mut().item_spacing = (2.0, 2.0).into();
-            ui.style_mut().override_text_style = Some(TextStyle::Monospace);
-            for x in 0..self.message_key_maxtrix.num_rows() {
-                ui.horizontal(|ui| {
-                    for y in 0..self.message_key_maxtrix.num_cols() {
-                        cell_button_char(&self.message_key_maxtrix, x, y, ui);
-                    }
-                });
-            }
-
-            ui.add_space(8.0);
-            ui.label(RichText::new(format!("Message Key: {}",self.encrypted_message_key)).strong().monospace());
-        });
-
-        ui.add_space(16.0);
-
-        // arrows: 🡲🡳
+        
         Grid::new("control_rs44_grid").show(ui, |ui| {
             ui.label(" ");
             ui.label(" ");
@@ -115,6 +82,54 @@ impl View for RS44 {
                 } 
                 ui.end_row();
             }
+        });
+        if ui.button("Copy Stencil to Clipboard").clicked() {
+            ui.output().copied_text = self.stencil_to_text();
+        }
+        
+
+        ui.add_space(10.0);
+        // The Message Key area. Not needed for encryption.
+        ui.collapsing("Message Key", |ui| {
+
+            ui.label("Time of Transmission");
+            ui.horizontal(|ui| {
+                if ui.add(
+                    DragValue::new(&mut self.hours).clamp_range(0..=23)
+                ).changed() {
+                    self.set_full_message_key();
+                };
+                ui.label(":");
+                if ui.add(
+                    DragValue::new(&mut self.minutes).clamp_range(0..=59)
+                ).changed() {
+                    self.set_full_message_key();
+                };
+            });
+
+            ui.spacing_mut().item_spacing = (2.0, 2.0).into();
+            ui.style_mut().override_text_style = Some(TextStyle::Monospace);
+           
+            ui.horizontal(|ui| {
+                for letter in ["a", "b", "c", "d", "e"] {
+                    ui.add_enabled(false, Button::new(letter).frame(false));
+                }
+            });
+            ui.horizontal(|ui| {
+                for _ in 0..5 {
+                    ui.add_enabled(false, Button::new("-").frame(false));
+                }
+            });
+            for x in 0..self.message_key_maxtrix.num_rows() {
+                ui.horizontal(|ui| {
+                    for y in 0..self.message_key_maxtrix.num_cols() {
+                        cell_button_char(&self.message_key_maxtrix, x, y, ui);
+                    }
+                });
+            }
+
+            ui.add_space(8.0);
+            ui.label(RichText::new(format!("Message Key: {}",self.encrypted_message_key)).strong().monospace());
         });
 
     }
