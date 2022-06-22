@@ -164,14 +164,22 @@ impl RS44 {
 
     pub fn text_to_stencil(&mut self, text: &str) -> Result<(),CipherError> {
         let mut vec = Vec::with_capacity(Self::GRID_SIZE);
-        for c in text.chars() {
+        let mut ctr = 0;
+        for (n,c) in text.chars().enumerate() {
             if c == EMPTY {
-                vec.push(Symbol::Empty)
+                vec.push(Symbol::Empty);
+                ctr += 1;
             } else if c == BLOCK {
                 vec.push(Symbol::Empty)
             } else {
-                return Err(CipherError::Key(format!("Key can only be built from the symbols {} and {}", EMPTY, BLOCK)))
+                return Err(CipherError::Key(format!("The RS44 key can only be built from the symbols {} and {}", EMPTY, BLOCK)))
             }
+            if (n+1) % 25 == 0 && ctr % 10 != 0{
+                return Err(CipherError::key("The RS44 stencil must have exactly 10 empty spaces in each row"))
+            }
+        }
+        if vec.len() != Self::GRID_SIZE {
+            return Err(CipherError::key("The RS44 key must have exactly 600 positions defined"))
         }
         self.stencil = Grid::from_rows(vec, 24, 25);
         Ok(())
