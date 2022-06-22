@@ -18,7 +18,7 @@ fn cell_button_char(grille: &crate::grid::Grid<char>, x: usize, y: usize, ui: &m
 }
 
 impl View for RS44 {
-    fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut Ui, errors: &mut String) {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 
@@ -86,6 +86,15 @@ impl View for RS44 {
         if ui.button("Copy Stencil to Clipboard").clicked() {
             ui.output().copied_text = self.stencil_to_text();
         }
+
+        ui.text_edit_singleline(&mut self.imported_stencil);
+        if ui.button("Import Stencil").clicked() {
+            match self.text_to_stencil() {
+                Ok(_) => (),
+                Err(e) => *errors = e.to_string(),
+            }
+        }
+        
         
 
         ui.add_space(10.0);

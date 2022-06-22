@@ -8,7 +8,7 @@ use crate::{
     ciphers::Cipher,
     errors::CipherError,
     global_rng::get_global_rng,
-    grid::{Grid, Symbol, str_to_char_grid, EMPTY, BLOCK},
+    grid::{Grid, Symbol, EMPTY, BLOCK},
     text_aux::PresetAlphabet,
 };
 
@@ -22,6 +22,7 @@ pub struct RS44 {
     pub hours: u8,
     pub minutes: u8,
     pub encrypted_message_key: String,
+    pub imported_stencil: String,
 }
 
 impl Default for RS44 {
@@ -79,6 +80,7 @@ impl Default for RS44 {
             hours: 0,
             minutes: 0,
             encrypted_message_key: String::new(),
+            imported_stencil: String::new(),
         }
     }
 }
@@ -162,10 +164,10 @@ impl RS44 {
         self.stencil.read_rows_characters().collect()
     }
 
-    pub fn text_to_stencil(&mut self, text: &str) -> Result<(),CipherError> {
+    pub fn text_to_stencil(&mut self) -> Result<(),CipherError> {
         let mut vec = Vec::with_capacity(Self::GRID_SIZE);
         let mut ctr = 0;
-        for (n,c) in text.chars().enumerate() {
+        for (n,c) in self.imported_stencil.chars().enumerate() {
             if c == EMPTY {
                 vec.push(Symbol::Empty);
                 ctr += 1;
@@ -182,6 +184,7 @@ impl RS44 {
             return Err(CipherError::key("The RS44 key must have exactly 600 positions defined"))
         }
         self.stencil = Grid::from_rows(vec, 24, 25);
+        self.imported_stencil.clear();
         Ok(())
     }
 }
