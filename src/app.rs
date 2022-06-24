@@ -235,6 +235,16 @@ impl epi::App for ClassicCrypto {
                 ui.separator();
                 if ui
                     .add(SelectableLabel::new(
+                        self.active_page == Page::About,
+                        "About",
+                    ))
+                    .clicked()
+                {
+                    self.active_page = Page::About
+                }
+
+                if ui
+                    .add(SelectableLabel::new(
                         self.active_page == Page::CipherCategory,
                         "Ciphers",
                     ))
@@ -242,6 +252,7 @@ impl epi::App for ClassicCrypto {
                 {
                     self.active_page = Page::CipherCategory
                 }
+                
                 if ui
                     .add(SelectableLabel::new(
                         self.active_page == Page::Code,
@@ -251,15 +262,7 @@ impl epi::App for ClassicCrypto {
                 {
                     self.active_page = Page::Code
                 }
-                if ui
-                    .add(SelectableLabel::new(
-                        self.active_page == Page::About,
-                        "About",
-                    ))
-                    .clicked()
-                {
-                    self.active_page = Page::About
-                }
+
                 if ui
                     .add(SelectableLabel::new(
                         self.active_page == Page::TextPrep,
