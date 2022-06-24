@@ -143,3 +143,29 @@ impl View for RS44 {
 
     }
 }
+
+
+
+#[cfg(test)]
+mod rs44_tests {
+    use crate::ciphers::Cipher;
+
+    use super::*;
+ 
+    // check configuration for default
+    // https://derekbruff.org/blogs/fywscrypto/historical-crypto/rasterschlussel-44-the-stencil-on-steroids/
+    const PLAINTEXT: &'static str = "RAINBOWUNICORNHORNSAREIMMENSELYMOREVALUABLETHANTHOSEOFEVENTHELARGESTNARWHALS";
+    const CIPHERTEXT: &'static str = "HNANOESONMEGNANAALHRNTRAUHVSCWSTNAOAWVIBHMEFLREMLRNRLTIOEAEEBRSUIYEHREOTOLSEN";
+ 
+    #[test]
+    fn encrypt_test() {
+        let cipher = RS44::default();
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+    }
+ 
+    #[test]
+    fn decrypt_test() {
+        let cipher = RS44::default();
+        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+    }
+}

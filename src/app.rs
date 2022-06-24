@@ -1,6 +1,7 @@
 use crate::category_pages::CipherCategory;
 use crate::cipher_panel::{CipherControlPanel, CipherDisplayPanel};
 use crate::code_panel::{CodeControlPanel, CodeDisplayPanel};
+use crate::text_prep_page::TextPrepPage;
 use crate::{cipher_id::CipherID, code_id::CodeID};
 use eframe::egui::Grid;
 use eframe::{
@@ -18,6 +19,7 @@ enum Page {
     Cipher,
     Code,
     CipherCategory,
+    TextPrep,
 }
 
 pub struct ClassicCrypto {
@@ -32,6 +34,7 @@ pub struct ClassicCrypto {
     active_cipher: CipherID,
     active_code: CodeID,
     active_page: Page,
+    text_prep_page: TextPrepPage,
 }
 
 impl Default for ClassicCrypto {
@@ -48,11 +51,17 @@ impl Default for ClassicCrypto {
             active_code: CodeID::default(),
             active_page: Page::About,
             cipher_category: CipherCategory::Substituion,
+            text_prep_page: TextPrepPage::default(),
         }
     }
 }
 
 impl ClassicCrypto {
+
+    fn text_prep_page(&mut self, ctx: &Context) {
+        self.text_prep_page.view(&ctx)
+    }
+
     fn cipher_category_page(&mut self, ctx: &Context) {
         SidePanel::left("cipher_selector_panel")
             .max_width(300.0)
@@ -251,6 +260,15 @@ impl epi::App for ClassicCrypto {
                 {
                     self.active_page = Page::About
                 }
+                if ui
+                    .add(SelectableLabel::new(
+                        self.active_page == Page::TextPrep,
+                        "Text",
+                    ))
+                    .clicked()
+                {
+                    self.active_page = Page::TextPrep
+                }
             });
         });
 
@@ -259,6 +277,7 @@ impl epi::App for ClassicCrypto {
             Page::Cipher => self.cipher_page(ctx),
             Page::Code => self.code_page(ctx),
             Page::CipherCategory => self.cipher_category_page(ctx),
+            Page::TextPrep => self.text_prep_page(ctx)
         }
     }
 

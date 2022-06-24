@@ -20,6 +20,8 @@ pub mod category_pages;
 
 pub mod global_rng;
 
+pub mod text_prep_page;
+
 mod app;
 
 #[cfg(not(target_arch = "wasm32"))]
