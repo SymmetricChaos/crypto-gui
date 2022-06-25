@@ -11,7 +11,7 @@ use crate::{
     errors::CipherError,
     global_rng::get_global_rng,
     grid::{Grid, Symbol, EMPTY, BLOCK},
-    text_aux::PresetAlphabet,
+    text_aux::{PresetAlphabet, text_functions::rank_vec},
 };
 
 pub struct RS44 {
@@ -39,7 +39,7 @@ impl Default for RS44 {
             }
         }
         let column_nums = [
-            14, 2, 21, 11, 19, 15, 1, 8, 18, 10, 24, 3, 7, 12, 17, 20, 5, 13, 23, 16, 6, 4, 22, 25, 9,
+            13, 1, 20, 10, 18, 14, 0, 7, 17, 9, 23, 2, 6, 11, 16, 19, 4, 12, 22, 15, 5, 3, 21, 24, 8,
         ];
         let xlabels: [&str; Self::WIDTH] = {
             let mut arr = Self::LABELS.clone();
@@ -213,17 +213,19 @@ impl Cipher for RS44 {
             if stencil[idx].is_empty() {
                 match symbols.next() {
                     Some(c) => stencil[idx] = Symbol::Character(c),
-                    None => { continue }
+                    None => { break }
                 }
             }
         }
 
-        for k in self.column_nums.iter() {
+
+        for k in rank_vec(&Vec::from(self.column_nums)) {
             let s: String = stencil
-                .get_col(*k as usize)
+                .get_col(k)
                 .filter(|sym| sym.is_character())
                 .map(|sym| sym.to_char())
                 .collect();
+            dbg!(&s);
             output.push_str(&s);
         }
 
@@ -250,7 +252,7 @@ impl Cipher for RS44 {
                 if stencil[(x, y)].is_empty() {
                     match symbols.next() {
                         Some(c) => stencil[(x, y)] = Symbol::Character(c),
-                        None => { continue }
+                        None => { break }
                     }
                 }
             }
@@ -303,13 +305,15 @@ mod rs44_tests {
 
     #[test]
     fn encrypt_test() {
-        let cipher = RS44::default();
+        let mut cipher = RS44::default();
+        cipher.message_key = (12,16);
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
-        let cipher = RS44::default();
+        let mut cipher = RS44::default();
+        cipher.message_key = (12,16);
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

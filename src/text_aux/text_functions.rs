@@ -93,6 +93,19 @@ pub fn rank_str(text: &str, alphabet: &str) -> Vec<usize> {
     out
 }
 
+// This ignores repeated numbers
+pub fn rank_vec<O: Ord>(vec: &Vec<O>) -> Vec<usize> {
+
+    let mut out = Vec::with_capacity(vec.len());
+    let ranks = vec.clone().iter().sorted().dedup().collect_vec();
+
+    for o in ranks.iter() {
+        out.push( vec.iter().position(|x| &x == o).unwrap() )
+    }
+
+    out
+}
+
 // use itertools::{sorted,equal};
 
 // We generally need to check anagrams for alphabets which are short (less than 100 characters) and should have all unique symbols
@@ -199,6 +212,13 @@ mod text_function_tests {
         let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         assert_eq!(vec![0, 3, 4, 2, 1, 5], rank_str(text, alphabet));
     }
+
+    #[test]
+    fn num_ranking() {
+        let text = vec![5,0,1,3,2,4];
+        assert_eq!(vec![1, 2, 4, 3, 5, 0], rank_vec(&text));
+    }
+    
 
     #[test]
     fn shuffled_alphabet() {
