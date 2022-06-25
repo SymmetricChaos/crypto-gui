@@ -1,7 +1,7 @@
 use crate::{ciphers::tactical::RS44};
 
 use super::{generic_components::*, View, ViewableCipher};
-use eframe::{egui::{TextStyle, Ui, Button, DragValue, RichText, Grid}, epaint::Color32};
+use eframe::{egui::{TextStyle, Ui, Button, DragValue, RichText, Grid}, epaint::{Color32, Vec2}};
 
 impl ViewableCipher for RS44 {}
 
@@ -46,7 +46,9 @@ impl View for RS44 {
         ui.add_space(16.0);
 
         
-        Grid::new("control_rs44_grid").show(ui, |ui| {
+        Grid::new("control_rs44_grid").spacing(Vec2{ x: 0.0, y: 0.0}).show(ui, |ui| {
+
+            // Position cursors on top
             ui.label(" ");
             ui.label(" ");
             for col in 0..25 {
@@ -57,12 +59,15 @@ impl View for RS44 {
                     ui.label(" ");
                 }
             }
+
+            // labels
             ui.end_row();
             ui.label(" ");
             ui.label(" ");
             for l in self.xlabels.iter() {
                 ui.label(l.to_string());
             }
+            // numbers
             ui.end_row();
             ui.label(" ");
             ui.label(" ");
@@ -70,6 +75,8 @@ impl View for RS44 {
                 ui.label(n.to_string());
             }
             ui.end_row();
+
+
             for row in 0..24 {
                 if row == self.message_key.1 {
                     ui.label("+");
@@ -77,7 +84,7 @@ impl View for RS44 {
                     ui.label(" ");
                 }
                 ui.label(self.ylabels[row]);
-                for s in self.stencil.get_col(row) {
+                for s in self.stencil.get_row(row) {
                     ui.label(s.to_char().to_string());
                 } 
                 ui.end_row();
