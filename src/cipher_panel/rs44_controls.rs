@@ -20,18 +20,21 @@ fn cell_button_char(grille: &crate::grid::Grid<char>, x: usize, y: usize, ui: &m
 impl View for RS44 {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String) {
         randomize_reset(ui, self);
-        ui.add_space(16.0);
 
+        ui.add_space(16.0);
+        // The user changes the second field of the index with the x coordinate and the first field with the y coordinate
         if ui.add(
-            DragValue::new(&mut self.message_key.0).prefix("x: ").clamp_range(0..=24)
+            DragValue::new(&mut self.message_key.1).prefix("x: ").clamp_range(0..=24)
         ).changed() {
             self.set_full_message_key();
         };
         if ui.add(
-            DragValue::new(&mut self.message_key.1).prefix("y: ").clamp_range(0..=23)
+            DragValue::new(&mut self.message_key.0).prefix("y: ").clamp_range(0..=23)
         ).changed() {
             self.set_full_message_key();
         };
+
+
         if self.stencil[self.message_key].is_blocked() {
             ui.label(
                 RichText::new("Invalid Start Position")
@@ -46,14 +49,14 @@ impl View for RS44 {
         ui.add_space(16.0);
 
         
-        Grid::new("control_rs44_grid").spacing(Vec2{ x: 0.0, y: 0.0}).show(ui, |ui| {
+        Grid::new("control_rs44_grid").spacing(Vec2{ x: 0.0, y: 0.0}).num_columns(27).show(ui, |ui| {
 
             // Position cursors on top
             ui.label(" ");
             ui.label(" ");
             for col in 0..25 {
-                if col == self.message_key.0 {
-                    ui.label("+");
+                if col == self.message_key.1 {
+                    ui.label(RichText::new("+").strong().size(16.0));
                 }
                 else {
                     ui.label(" ");
@@ -78,14 +81,14 @@ impl View for RS44 {
 
 
             for row in 0..24 {
-                if row == self.message_key.1 {
-                    ui.label("+");
+                if row == self.message_key.0 {
+                    ui.label(RichText::new("+").strong().size(16.0));
                 } else {
                     ui.label(" ");
                 }
                 ui.label(self.ylabels[row]);
                 for s in self.stencil.get_row(row) {
-                    ui.label(s.to_char().to_string());
+                    ui.label(RichText::new(s.to_char()).size(16.0));
                 } 
                 ui.end_row();
             }

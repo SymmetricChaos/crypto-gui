@@ -20,6 +20,7 @@ pub struct RS44 {
     pub xlabels: [&'static str; 25],
     pub ylabels: [&'static str; 24],
     pub message_key: (usize, usize),
+    pub start_column: usize,
     pub message_key_maxtrix: Grid<char>,
     pub hours: u8,
     pub minutes: u8,
@@ -75,6 +76,7 @@ impl Default for RS44 {
             xlabels,
             ylabels,
             message_key: (0, 0),
+            start_column: 0,
             message_key_maxtrix,
             hours: 0,
             minutes: 0,
@@ -296,7 +298,7 @@ mod rs44_tests {
             if cipher.stencil[idx].is_empty() {
                 match symbols.next() {
                     Some(c) => cipher.stencil[idx] = Symbol::Character(c),
-                    None => { continue }
+                    None => { break }
                 }
             }
         }
