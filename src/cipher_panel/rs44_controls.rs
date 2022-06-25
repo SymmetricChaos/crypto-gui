@@ -49,7 +49,7 @@ impl View for RS44 {
         ui.add_space(16.0);
 
         
-        Grid::new("control_rs44_grid").spacing(Vec2{ x: 0.0, y: 0.0}).num_columns(27).show(ui, |ui| {
+        Grid::new("control_rs44_grid").spacing(Vec2{ x: -14.0, y: 2.0}).num_columns(27).show(ui, |ui| {
 
             // Position cursors on top
             ui.label(" ");

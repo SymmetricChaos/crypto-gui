@@ -110,9 +110,9 @@ impl RS44 {
     pub fn encrypt_message_key(&self) -> String {
         let mut message_key_string = String::with_capacity(4);
         let mut rng = get_global_rng();
-        for c in self.xlabels[self.message_key.0]
+        for c in self.xlabels[self.message_key.1]
             .chars()
-            .chain(self.ylabels[self.message_key.1].chars())
+            .chain(self.ylabels[self.message_key.0].chars())
         {
             let row: usize = rng.gen_range(0..5);
             let col = self.label_letter_to_matrix_column(c);
