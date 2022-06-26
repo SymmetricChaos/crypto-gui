@@ -107,25 +107,19 @@ impl RS44 {
         }
     }
 
-    pub fn encrypt_message_key(&self) -> String {
-        let mut message_key_string = String::with_capacity(4);
-        let mut rng = get_global_rng();
-        for c in self.xlabels[self.message_key.1]
-            .chars()
-            .chain(self.ylabels[self.message_key.0].chars())
-        {
-            let row: usize = rng.gen_range(0..5);
-            let col = self.label_letter_to_matrix_column(c);
-            message_key_string.push(self.message_key_maxtrix[(row, col)]);
-        }
-
-        message_key_string
+    pub fn encrypt_label_char(&self, c: char, rng: &mut StdRng) -> char {
+        let row: usize = rng.gen_range(0..5);
+        let col = self.label_letter_to_matrix_column(c);
+        self.message_key_maxtrix[(row, col)]
     }
 
     pub fn set_full_message_key(&mut self) {
         self.encrypted_message_key.clear();
-        self.encrypted_message_key.push_str(&self.encrypt_message_key());
-        self.encrypted_message_key.push_str(&format!("-{:02}{:02}", self.hours, self.minutes));
+        let mut rng = get_global_rng();
+        self.xlabels[self.message_key.1].chars().for_each(|c| self.encrypted_message_key.push(self.encrypt_label_char(c, &mut rng)));
+        self.ylabels[self.message_key.0].chars().for_each(|c| self.encrypted_message_key.push(self.encrypt_label_char(c, &mut rng)));
+        self.encrypted_message_key.push('-');
+        self.xlabels[self.start_column].chars().for_each(|c| self.encrypted_message_key.push(self.encrypt_label_char(c, &mut rng)));
     }
 
     pub fn randomize_stencil(&mut self) {
