@@ -11,15 +11,15 @@ use crate::{
     errors::CipherError,
     global_rng::get_global_rng,
     grid::{Grid, Symbol, EMPTY, BLOCK},
-    text_aux::{PresetAlphabet, text_functions::rank_vec},
+    text_aux::{PresetAlphabet},
 };
 
 pub struct RS44 {
     pub stencil: Grid<Symbol<char>>,
-    pub column_nums: [u8; 25],
+    pub column_nums: [usize; 25],
     pub xlabels: [&'static str; 25],
     pub ylabels: [&'static str; 24],
-    pub message_key: (usize, usize),
+    pub start_cell: (usize, usize),
     pub start_column: usize,
     pub message_key_maxtrix: Grid<char>,
     pub hours: u8,
@@ -75,7 +75,7 @@ impl Default for RS44 {
             column_nums,
             xlabels,
             ylabels,
-            message_key: (0, 0),
+            start_cell: (0, 0),
             start_column: 0,
             message_key_maxtrix,
             hours: 0,
@@ -116,8 +116,8 @@ impl RS44 {
     pub fn set_full_message_key(&mut self) {
         self.encrypted_message_key.clear();
         let mut rng = get_global_rng();
-        self.xlabels[self.message_key.1].chars().for_each(|c| self.encrypted_message_key.push(self.encrypt_label_char(c, &mut rng)));
-        self.ylabels[self.message_key.0].chars().for_each(|c| self.encrypted_message_key.push(self.encrypt_label_char(c, &mut rng)));
+        self.xlabels[self.start_cell.1].chars().for_each(|c| self.encrypted_message_key.push(self.encrypt_label_char(c, &mut rng)));
+        self.ylabels[self.start_cell.0].chars().for_each(|c| self.encrypted_message_key.push(self.encrypt_label_char(c, &mut rng)));
         self.encrypted_message_key.push('-');
         self.xlabels[self.start_column].chars().for_each(|c| self.encrypted_message_key.push(self.encrypt_label_char(c, &mut rng)));
     }
@@ -156,7 +156,7 @@ impl RS44 {
     }
 
     pub fn stencil_to_text(&self) -> String {
-        self.stencil.read_rows_characters().collect()
+        self.stencil.get_rows().map(|c| c.to_char()).collect()
     }
 
     pub fn text_to_stencil(&mut self) -> Result<(),CipherError> {
@@ -186,24 +186,27 @@ impl RS44 {
 
 impl Cipher for RS44 {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        match self.stencil.get(self.message_key) {
+        match self.stencil.get(self.start_cell) {
             Some(s) => {
                 if !s.is_empty() {
                     return Err(CipherError::key(
-                        "message key must select an empty position",
+                        "starting cell must be an empty position",
                     ));
                 } else {
                     ()
                 }
             }
-            None => return Err(CipherError::key("message key out of bounds")),
+            None => return Err(CipherError::key("starting cell out of bounds")),
+        }
+        if self.start_column > 24 {
+            return Err(CipherError::key("starting column out of bounds"))
         }
 
         let mut output = String::with_capacity(text.len());
 
         let mut symbols = text.chars();
         let mut stencil = self.stencil.clone();
-        let start = stencil.index_from_coord(self.message_key).unwrap();
+        let start = stencil.index_from_coord(self.start_cell).unwrap();
 
         for idx in start..Self::GRID_SIZE {
             if stencil[idx].is_empty() {
@@ -214,14 +217,16 @@ impl Cipher for RS44 {
             }
         }
 
+        let start_idx = self.column_nums[self.start_column];
+        let positions = (start_idx..25).chain(0..start_idx).map(|n| self.column_nums.iter().position(|x| &n == x).unwrap());
 
-        for k in rank_vec(&Vec::from(self.column_nums)) {
+        for col in positions {
             let s: String = stencil
-                .get_col(k)
+                .get_col(col)
                 .filter(|sym| sym.is_character())
                 .map(|sym| sym.to_char())
                 .collect();
-            dbg!(&s);
+            //dbg!(&s);
             output.push_str(&s);
         }
 
@@ -237,12 +242,12 @@ impl Cipher for RS44 {
             let x = self
                 .column_nums
                 .iter()
-                .position(|n| *n == pos as u8)
+                .position(|n| *n == pos)
                 .unwrap();
             // The starting y-value is one less than the message key y-value until we reach it
-            let y_min = match pos < self.message_key.1 {
-                true => self.message_key.0 - 1,
-                false => self.message_key.0,
+            let y_min = match pos < self.start_cell.1 {
+                true => self.start_cell.0 - 1,
+                false => self.start_cell.0,
             };
             for y in y_min..Self::HEIGHT {
                 if stencil[(x, y)].is_empty() {
@@ -302,14 +307,15 @@ mod rs44_tests {
     #[test]
     fn encrypt_test() {
         let mut cipher = RS44::default();
-        cipher.message_key = (12,16);
+        cipher.start_cell = (12,16);
+        cipher.start_column = 7;
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = RS44::default();
-        cipher.message_key = (12,16);
+        cipher.start_cell = (12,16);
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

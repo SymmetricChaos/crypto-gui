@@ -26,18 +26,18 @@ impl View for RS44 {
             ui.add_space(16.0);
             // The user changes the second field of the index with the x coordinate and the first field with the y coordinate
             if ui.add(
-                DragValue::new(&mut self.message_key.1).prefix("x: ").clamp_range(0..=24)
+                DragValue::new(&mut self.start_cell.1).prefix("x: ").clamp_range(0..=24)
             ).changed() {
                 self.set_full_message_key();
             };
             if ui.add(
-                DragValue::new(&mut self.message_key.0).prefix("y: ").clamp_range(0..=23)
+                DragValue::new(&mut self.start_cell.0).prefix("y: ").clamp_range(0..=23)
             ).changed() {
                 self.set_full_message_key();
             };
         });
 
-        if self.stencil[self.message_key].is_blocked() {
+        if self.stencil[self.start_cell].is_blocked() {
             ui.label(
                 RichText::new("Invalid Start Position")
                     .color(Color32::RED)
@@ -98,7 +98,7 @@ impl View for RS44 {
             ui.label(" ");
             ui.label(" ");
             for col in 0..25 {
-                if col == self.message_key.1 {
+                if col == self.start_cell.1 {
                     ui.label(RichText::new("+").strong().size(16.0));
                 }
                 else {
@@ -124,7 +124,7 @@ impl View for RS44 {
 
 
             for row in 0..24 {
-                if row == self.message_key.0 {
+                if row == self.start_cell.0 {
                     ui.label(RichText::new("+").strong().size(16.0));
                 } else {
                     ui.label(" ");
