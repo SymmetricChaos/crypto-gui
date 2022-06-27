@@ -1,4 +1,4 @@
-use std::os::windows::fs::symlink_dir;
+use std::{iter::Chain, ops::Range};
 
 use itertools::Itertools;
 use rand::{
@@ -161,7 +161,7 @@ impl RS44 {
         self.column_nums.iter().position(|x| &n == x).expect("invalid column number supplied")
     }
 
-    fn offset_col_nums(&self) -> std::iter::Chain<std::ops::Range<usize>, std::ops::Range<usize>> {
+    fn offset_col_nums(&self) -> Chain<Range<usize>, Range<usize>> {
         let start_idx = self.column_nums[self.start_column];
         (start_idx..25).chain(0..start_idx)
     }
@@ -212,6 +212,10 @@ impl RS44 {
         }
         Ok(())
     }
+
+    fn wrapping_iter(&self, n: usize) -> Chain<Range<usize>, Range<usize>> {
+        (n..Self::GRID_SIZE).chain(0..n)
+    }
 }
 
 impl Cipher for RS44 {
@@ -224,7 +228,7 @@ impl Cipher for RS44 {
         let mut stencil = self.stencil.clone();
         let start = stencil.index_from_coord(self.start_cell).unwrap();
 
-        for idx in start..Self::GRID_SIZE {
+        for idx in self.wrapping_iter(start) {
             if stencil[idx].is_empty() {
                 match symbols.next() {
                     Some(c) => stencil[idx] = Symbol::Character(c),
@@ -253,11 +257,12 @@ impl Cipher for RS44 {
 
         let mut symbols = text.chars();
         let mut stencil = self.stencil.clone();
-        // We must tag the cells that will be used for the message
 
+        // We must tag the cells that will be used for the message in order to
+        // write into the columns correctly
         let start = stencil.index_from_coord(self.start_cell).unwrap();
         let mut temp_symbols = symbols.clone();
-        for idx in start..Self::GRID_SIZE {
+        for idx in self.wrapping_iter(start) {
             if stencil[idx].is_empty() {
                 match temp_symbols.next() {
                     Some(_) => stencil[idx] = Symbol::Character('\0'),
@@ -266,14 +271,12 @@ impl Cipher for RS44 {
             }
         }
 
- 
         let positions = self.offset_col_nums()
             .map(|n| self.col_num_to_col_idx(n));
  
         // Go through the column numbers and their positions
         // col is the actual index in the column in the 2D array
         'outer: for col in positions {
-
             for row in 0..Self::HEIGHT {
                 if stencil[(row, col)] == Symbol::Character('\0') {
                     match symbols.next() {
@@ -283,8 +286,16 @@ impl Cipher for RS44 {
                 }
             }
         }
+
+        // Read off the characters starting from the correct point
+        let mut output = String::new();
+        for idx in self.wrapping_iter(start) {
+            if stencil[idx].is_character() {
+                output.push(stencil[idx].to_char())
+            }
+        }
  
-        Ok(stencil.read_rows_characters().collect())
+        Ok(output)
     }
 
     fn reset(&mut self) {
@@ -343,5 +354,14 @@ mod rs44_tests {
         cipher.start_cell = (12,16);
         cipher.start_column = 7;
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+    }
+
+    #[test]
+    fn wrap_test() {
+        let mut cipher = RS44::default();
+        cipher.start_cell = (20,20);
+        cipher.start_column = 7;
+        let ciphertext = cipher.encrypt(PLAINTEXT).unwrap();
+        assert_eq!(cipher.decrypt(&ciphertext).unwrap(), PLAINTEXT);
     }
 }
