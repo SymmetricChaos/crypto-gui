@@ -1,3 +1,5 @@
+use std::os::windows::fs::symlink_dir;
+
 use itertools::Itertools;
 use rand::{
     prelude::{SliceRandom, StdRng},
@@ -155,6 +157,15 @@ impl RS44 {
         };
     }
 
+    fn col_num_to_col_idx(&self, n: usize) -> usize {
+        self.column_nums.iter().position(|x| &n == x).expect("invalid column number supplied")
+    }
+
+    fn offset_col_nums(&self) -> std::iter::Chain<std::ops::Range<usize>, std::ops::Range<usize>> {
+        let start_idx = self.column_nums[self.start_column];
+        (start_idx..25).chain(0..start_idx)
+    }
+
     pub fn stencil_to_text(&self) -> String {
         self.stencil.get_rows().map(|c| c.to_char()).collect()
     }
@@ -182,10 +193,8 @@ impl RS44 {
         self.imported_stencil.clear();
         Ok(())
     }
-}
 
-impl Cipher for RS44 {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn bounds_check(&self) -> Result<(),CipherError> {
         match self.stencil.get(self.start_cell) {
             Some(s) => {
                 if !s.is_empty() {
@@ -198,9 +207,16 @@ impl Cipher for RS44 {
             }
             None => return Err(CipherError::key("starting cell out of bounds")),
         }
-        if self.start_column > 24 {
+        if self.start_column >= Self::WIDTH {
             return Err(CipherError::key("starting column out of bounds"))
         }
+        Ok(())
+    }
+}
+
+impl Cipher for RS44 {
+    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+        self.bounds_check()?;
 
         let mut output = String::with_capacity(text.len());
 
@@ -217,8 +233,7 @@ impl Cipher for RS44 {
             }
         }
 
-        let start_idx = self.column_nums[self.start_column];
-        let positions = (start_idx..25).chain(0..start_idx).map(|n| self.column_nums.iter().position(|x| &n == x).unwrap());
+        let positions = self.offset_col_nums().map(|n| self.col_num_to_col_idx(n));
 
         for col in positions {
             let s: String = stencil
@@ -226,39 +241,49 @@ impl Cipher for RS44 {
                 .filter(|sym| sym.is_character())
                 .map(|sym| sym.to_char())
                 .collect();
-            //dbg!(&s);
             output.push_str(&s);
         }
 
         Ok(output)
     }
 
+ 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+        self.bounds_check()?;
+
         let mut symbols = text.chars();
         let mut stencil = self.stencil.clone();
+        // We must tag the cells that will be used for the message
 
-        for pos in 0..Self::WIDTH {
-            // unwrap justified by static size
-            let x = self
-                .column_nums
-                .iter()
-                .position(|n| *n == pos)
-                .unwrap();
-            // The starting y-value is one less than the message key y-value until we reach it
-            let y_min = match pos < self.start_cell.1 {
-                true => self.start_cell.0 - 1,
-                false => self.start_cell.0,
-            };
-            for y in y_min..Self::HEIGHT {
-                if stencil[(x, y)].is_empty() {
-                    match symbols.next() {
-                        Some(c) => stencil[(x, y)] = Symbol::Character(c),
-                        None => { break }
-                    }
+        let start = stencil.index_from_coord(self.start_cell).unwrap();
+        let mut temp_symbols = symbols.clone();
+        for idx in start..Self::GRID_SIZE {
+            if stencil[idx].is_empty() {
+                match temp_symbols.next() {
+                    Some(_) => stencil[idx] = Symbol::Character('\0'),
+                    None => { break }
                 }
             }
         }
 
+ 
+        let positions = self.offset_col_nums()
+            .map(|n| self.col_num_to_col_idx(n));
+ 
+        // Go through the column numbers and their positions
+        // col is the actual index in the column in the 2D array
+        'outer: for col in positions {
+
+            for row in 0..Self::HEIGHT {
+                if stencil[(row, col)] == Symbol::Character('\0') {
+                    match symbols.next() {
+                        Some(c) => stencil[(row, col)] = Symbol::Character(c),
+                        None => { break 'outer }
+                    }
+                }
+            }
+        }
+ 
         Ok(stencil.read_rows_characters().collect())
     }
 
@@ -316,6 +341,7 @@ mod rs44_tests {
     fn decrypt_test() {
         let mut cipher = RS44::default();
         cipher.start_cell = (12,16);
+        cipher.start_column = 7;
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }
