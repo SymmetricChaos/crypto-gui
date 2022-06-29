@@ -1,4 +1,8 @@
+use eframe::egui::{Context, SidePanel, Grid, CentralPanel, ScrollArea};
+
 use crate::cipher_id::CipherID;
+
+use super::Page;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum CipherCategory {
@@ -9,6 +13,12 @@ pub enum CipherCategory {
     Playfair,
     Tactical,
     Polybius,
+}
+
+impl Default for CipherCategory {
+    fn default() -> Self {
+        Self::Substituion
+    }
 }
 
 impl CipherCategory {
@@ -80,13 +90,13 @@ impl CipherCategory {
     }
 }
 
-
+#[derive(Default)]
 pub struct CipherCategoryPage {
     cipher_category: CipherCategory,
 }
 
 impl CipherCategoryPage {
-    fn view(&mut self, ctx: &Context) {
+    pub fn view(&mut self, ctx: &Context) {
         SidePanel::left("cipher_selector_panel")
             .max_width(300.0)
             .show(ctx, |ui| {
