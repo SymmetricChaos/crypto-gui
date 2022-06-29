@@ -1,4 +1,4 @@
-use eframe::egui::{Context, SidePanel, Grid, CentralPanel, ScrollArea};
+use eframe::egui::{Context, SidePanel, Grid, CentralPanel, ScrollArea, Ui, SelectableLabel};
 
 use crate::cipher_id::CipherID;
 
@@ -75,6 +75,17 @@ impl CipherCategory {
     }
 }
 
+fn page_selector(ui: &Ui, name: &str, page: Page, active_page: &mut Page) {
+    if ui.add(SelectableLabel::new(
+            active_page == &page,
+            name,
+        ))
+        .clicked()
+    {
+        *active_page = page
+    }
+}
+
 
 
 #[derive(Default)]
@@ -83,55 +94,55 @@ pub struct CipherCategoryPage {
 }
 
 impl CipherCategoryPage {
-    pub fn view(&mut self, ctx: &Context, cipher_category: &mut CipherCategory, active_cipher: &mut CipherID, active_page: &mut Page) {
+    pub fn view(&mut self, ctx: &Context, active_page: &mut Page) {
         SidePanel::left("cipher_selector_panel")
             .max_width(300.0)
             .show(ctx, |ui| {
                 ui.label("Examples");
-                for id in cipher_category.ciphers() {
+                for id in self.cipher_category.ciphers() {
                     if ui
-                        .selectable_value(active_cipher, *id, id.to_string())
+                        .selectable_value(&mut self.active_cipher, *id, id.to_string())
                         .clicked()
                     {
-                        *active_page = Page::Cipher;
+                        self.active_page = Page::Cipher;
                     };
                 }
             });
         CentralPanel::default().show(ctx, |ui| {
             Grid::new("cipher_categories").show(ui, |ui| {
                 ui.selectable_value(
-                    cipher_category,
+                    &mut self.cipher_category,
                     CipherCategory::Substituion,
                     "Substitution",
                 );
                 ui.selectable_value(
-                    cipher_category,
+                    &mut self.cipher_category,
                     CipherCategory::Polyalphabetic,
                     "Polyalphabetic",
                 );
                 ui.selectable_value(
-                    cipher_category,
+                    &mut self.cipher_category,
                     CipherCategory::RotorMachine,
                     "Rotor Machine",
                 );
                 ui.selectable_value(
-                    cipher_category,
+                    &mut self.cipher_category,
                     CipherCategory::Transposition,
                     "Transposition",
                 );
                 ui.end_row();
                 ui.selectable_value(
-                    cipher_category,
+                    &mut self.cipher_category,
                     CipherCategory::Playfair,
                     "Playfair",
                 );
                 ui.selectable_value(
-                    cipher_category,
+                    &mut self.cipher_category,
                     CipherCategory::Tactical,
                     "Tactical",
                 );
                 ui.selectable_value(
-                    cipher_category,
+                    &mut self.cipher_category,
                     CipherCategory::Polybius,
                     "Polybius",
                 );

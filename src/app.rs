@@ -3,6 +3,7 @@ use crate::code_panel::{CodeControlPanel, CodeDisplayPanel};
 use crate::pages::category_page::CipherCategoryPage;
 use crate::pages::{TextPrepPage, CipherCategory, Page};
 use crate::{cipher_id::CipherID, code_id::CodeID};
+use eframe::egui::Ui;
 use eframe::{
     egui::{
         warn_if_debug_build, widgets, CentralPanel, Context, FontData, FontDefinitions, RichText,
@@ -12,7 +13,16 @@ use eframe::{
     epi,
 };
 
-
+fn page_selector(ui: &mut Ui, name: &str, page: Page, active_page: &mut Page) {
+    if ui.add(SelectableLabel::new(
+            active_page == &page,
+            name,
+        ))
+        .clicked()
+    {
+        *active_page = page
+    }
+}
 
 pub struct ClassicCrypto {
     cipher_category: CipherCategory,
@@ -57,7 +67,7 @@ impl ClassicCrypto {
     }
 
     fn cipher_category_page(&mut self, ctx: &Context) {
-        self.cipher_category_page.view(&ctx)
+        self.cipher_category_page.view(&ctx, &mut self.cipher_category, &mut self.active_cipher, &mut self.active_page)
     }
 
     fn cipher_page(&mut self, ctx: &Context) {
@@ -174,45 +184,12 @@ impl epi::App for ClassicCrypto {
             ui.horizontal_top(|ui| {
                 widgets::global_dark_light_mode_switch(ui);
                 ui.separator();
-                if ui
-                    .add(SelectableLabel::new(
-                        self.active_page == Page::About,
-                        "About",
-                    ))
-                    .clicked()
-                {
-                    self.active_page = Page::About
-                }
-
-                if ui
-                    .add(SelectableLabel::new(
-                        self.active_page == Page::CipherCategory,
-                        "Ciphers",
-                    ))
-                    .clicked()
-                {
-                    self.active_page = Page::CipherCategory
-                }
-                
-                if ui
-                    .add(SelectableLabel::new(
-                        self.active_page == Page::Code,
-                        "Codes",
-                    ))
-                    .clicked()
-                {
-                    self.active_page = Page::Code
-                }
-
-                if ui
-                    .add(SelectableLabel::new(
-                        self.active_page == Page::TextPrep,
-                        "Text",
-                    ))
-                    .clicked()
-                {
-                    self.active_page = Page::TextPrep
-                }
+ 
+                page_selector(ui, "About", Page::About, &mut self.active_page);
+                page_selector(ui, "Ciphers", Page::CipherCategory, &mut self.active_page);
+                page_selector(ui, "Codes", Page::Code, &mut self.active_page);
+                page_selector(ui, "Text", Page::TextPrep, &mut self.active_page);
+ 
             });
         });
 
