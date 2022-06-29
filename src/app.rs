@@ -1,7 +1,6 @@
-use crate::category_pages::CipherCategory;
 use crate::cipher_panel::{CipherControlPanel, CipherDisplayPanel};
 use crate::code_panel::{CodeControlPanel, CodeDisplayPanel};
-use crate::text_prep_page::TextPrepPage;
+use crate::pages::{TextPrepPage, CipherCategory};
 use crate::{cipher_id::CipherID, code_id::CodeID};
 use eframe::egui::Grid;
 use eframe::{

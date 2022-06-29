@@ -6,6 +6,8 @@ pub mod codes;
 pub mod cipher_panel;
 pub mod code_panel;
 
+pub mod pages;
+
 pub mod math_functions;
 
 pub mod text_aux;
@@ -16,11 +18,7 @@ pub mod grid;
 
 pub mod egui_aux;
 
-pub mod category_pages;
-
 pub mod global_rng;
-
-pub mod text_prep_page;
 
 mod app;
 

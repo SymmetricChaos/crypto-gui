@@ -12,18 +12,17 @@ pub mod code_id;
 pub mod code_panel;
 pub mod codes;
 pub mod errors;
+pub mod pages;
 
 pub mod egui_aux;
 
 pub mod rotors;
 
-pub mod category_pages;
-
 pub mod text_aux;
 
 pub mod global_rng;
 
-pub mod text_prep_page;
+
 
 // ----------------------------------------------------------------------------
 // When compiling for web:
