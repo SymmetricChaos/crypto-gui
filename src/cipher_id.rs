@@ -12,6 +12,7 @@ pub enum CipherID {
     Enigma,
     Sigaba,
     Fialka,
+    Hebern,
 
     Playfair,
     Slidefair,
@@ -143,6 +144,7 @@ impl Display for CipherID {
             // CipherID::Fialka => "Fialka",
             CipherID::Plugboard => "Plugboard",
             CipherID::Rs44 => "RS44",
+            CipherID::Hebern => "Hebern",
             _ => "Missing name. Please complain to the author.",
         };
         write!(f, "{}", name)

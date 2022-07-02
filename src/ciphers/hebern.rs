@@ -14,6 +14,7 @@ pub struct HebernRotor {
     pub position: usize,
     pub wiring_str: String,
     size: usize,
+    pub editable: bool,
 }
 
 impl HebernRotor {
@@ -35,6 +36,7 @@ impl HebernRotor {
             position: 0,
             wiring_str: wiring_str.to_string(),
             size,
+            editable: false,
         })
     }
 
@@ -54,6 +56,24 @@ impl HebernRotor {
         let inner = self.wiring_ltr[inner_position];
         (inner + self.size - self.position) % self.size
     }
+
+    pub fn set(&mut self, alphabet: &VecString) -> Result<(),CipherError> {
+        if !self.editable {
+            return Ok(())
+        }
+        let mut new_wiring_rtl = vec![0; self.size];
+        let mut new_wiring_ltr = vec![0; self.size];
+        for (pos, c) in self.wiring_str.chars().enumerate() {
+            let n = alphabet
+                .get_pos_of(c)
+                .ok_or(CipherError::invalid_input_char(c))?;
+            new_wiring_rtl[pos] = n;
+            new_wiring_ltr[n] = pos;
+        }
+        self.wiring_rtl = new_wiring_rtl;
+        self.wiring_ltr = new_wiring_ltr;
+        Ok(())
+    }
 }
 
 impl fmt::Display for HebernRotor {
@@ -69,8 +89,9 @@ impl fmt::Display for HebernRotor {
 #[derive(Clone, Debug)]
 pub struct HebernRotorCage {
     pub rotors: Vec<HebernRotor>,
+    pub locks: Vec<bool>,
     pub alphabet_string: String,
-    alphabet: VecString,
+    pub alphabet: VecString,
     counters: Vec<u8>,
     rotor_size: u8,
 }
@@ -85,11 +106,13 @@ impl HebernRotorCage {
         self.rotors
             .push(HebernRotor::new(&self.alphabet.to_string(), &self.alphabet).unwrap());
         self.counters.push(0);
+        self.locks.push(false);
     }
 
     pub fn del_rotor(&mut self) {
         self.rotors.pop();
         self.counters.pop();
+        self.locks.pop();
     }
 
     pub fn step(&mut self) {
@@ -128,6 +151,8 @@ impl Default for HebernRotorCage {
 
         let counters = vec![0; 5];
 
+        let locks = vec![false; 5];
+
         let mut rotors = Vec::with_capacity(5);
         rotors.push(HebernRotor::new("WQHUFATCNKXZLEJIMRGOBPYVSD", &alphabet).unwrap());
         rotors.push(HebernRotor::new("PTYAUOJWCIRKDXVBGMSZENLHQF", &alphabet).unwrap());
@@ -137,6 +162,7 @@ impl Default for HebernRotorCage {
 
         Self {
             rotors,
+            locks,
             alphabet_string,
             alphabet,
             counters,

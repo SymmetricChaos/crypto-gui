@@ -3,7 +3,7 @@ use crate::{
     cipher_id::CipherID,
     ciphers::{
         playfair::*, polyalphabetic::*, polybius::*, substitution::*, tactical::*,
-        transposition::*, *,
+        transposition::*, *, hebern::Hebern,
     },
     global_rng::global_rng_controls,
 };
@@ -46,6 +46,7 @@ pub mod turning_grille_controls;
 pub mod two_square_controls;
 pub mod vigenere_controls;
 pub mod rs44_controls;
+pub mod hebern_controls;
 
 pub trait ViewableCipher: View + Cipher {}
 
@@ -81,6 +82,7 @@ pub struct CipherControlPanel {
     m209: M209,
     enigma: EnigmaM3,
     sigaba: Sigaba,
+    hebern: Hebern,
 
     vigenere: Vigenere,
     beaufort: Beaufort,
@@ -150,7 +152,7 @@ impl CipherControlPanel {
             );
 
             combox_box(
-                &[CipherID::M209, CipherID::Enigma, CipherID::Sigaba],
+                &[CipherID::M209, CipherID::Enigma, CipherID::Sigaba, CipherID::Hebern],
                 "Rotor Machine",
                 active_cipher,
                 ui,
@@ -262,6 +264,7 @@ impl CipherControlPanel {
             CipherID::TurningGrille => &mut self.turning_grille,
             CipherID::Plugboard => &mut self.plugboard,
             CipherID::Rs44 => &mut self.rs44,
+            CipherID::Hebern => &mut self.hebern,
             _ => todo!(),
         }
     }

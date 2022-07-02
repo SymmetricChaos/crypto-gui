@@ -42,7 +42,8 @@ impl CipherCategory {
             CipherCategory::RotorMachine => &[
                 CipherID::M209, 
                 CipherID::Enigma, 
-                CipherID::Sigaba
+                CipherID::Sigaba,
+                CipherID::Hebern,
             ],
             CipherCategory::Transposition => &[
                 CipherID::Columnar,
