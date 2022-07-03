@@ -1,4 +1,5 @@
-use crate::ciphers::hebern::Hebern;
+
+use crate::ciphers::rotor_machine::Hebern;
 
 use super::{View, ViewableCipher};
 use eframe::egui::{Slider, TextEdit, Ui};
@@ -6,7 +7,7 @@ use eframe::egui::{Slider, TextEdit, Ui};
 impl ViewableCipher for Hebern {}
 
 impl View for Hebern {
-    fn ui(&mut self, ui: &mut Ui, errors: &mut String) {
+    fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.label("Rotor Positions\nTo Be Changed Every Message");
         for rotor in &mut self.rotors.rotors {
             ui.add(Slider::new(&mut rotor.position, 0..=26).clamp_to_range(true));
@@ -18,8 +19,8 @@ impl View for Hebern {
                 if rotor.editable {
                     if ui.button("save").clicked() {
                         match rotor.set(&self.rotors.alphabet) {
-                            Ok(_) => { rotor.editable = false },
-                            Err(_) => *errors = "unable to build rotor".to_string(),
+                            Ok(_) => { rotor.editable = false; rotor.error.clear(); },
+                            Err(e) => rotor.error = e.to_string(),
                         }
                     }
                 } else {
@@ -27,6 +28,7 @@ impl View for Hebern {
                         rotor.editable = true;
                     }
                 }
+                ui.label(&rotor.error);
             });
         };
 

@@ -4,6 +4,7 @@ pub mod polybius;
 pub mod substitution;
 pub mod tactical;
 pub mod transposition;
+pub mod rotor_machine;
 
 pub mod m209;
 pub use m209::M209;
@@ -16,9 +17,6 @@ pub use enigma::EnigmaM3;
 
 pub mod sigaba;
 pub use sigaba::Sigaba;
-
-pub mod hebern;
-pub use hebern::HebernRotor;
 
 pub mod purple;
 

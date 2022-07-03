@@ -1,10 +1,11 @@
 use std::fmt;
 
-use super::Cipher;
+use itertools::Itertools;
+
 use crate::{
     errors::CipherError,
     global_rng::get_global_rng,
-    text_aux::{PresetAlphabet, VecString},
+    text_aux::{PresetAlphabet, VecString}, ciphers::Cipher,
 };
 
 #[derive(Clone, Debug)]
@@ -15,6 +16,7 @@ pub struct HebernRotor {
     pub wiring_str: String,
     size: usize,
     pub editable: bool,
+    pub error: String,
 }
 
 impl HebernRotor {
@@ -37,6 +39,7 @@ impl HebernRotor {
             wiring_str: wiring_str.to_string(),
             size,
             editable: false,
+            error: String::new(),
         })
     }
 
@@ -61,12 +64,23 @@ impl HebernRotor {
         if !self.editable {
             return Ok(())
         }
+
+        let total_size = self.wiring_str.chars().count();
+        if total_size != self.size {
+            return Err(CipherError::General(format!("must provide exactly {} characters", self.size)))
+        }
+        let unique_size = self.wiring_str.chars().unique().count();
+        if unique_size != total_size {
+            return Err(CipherError::General(String::from("duplicate characters are not allowed")))
+        }
+
         let mut new_wiring_rtl = vec![0; self.size];
         let mut new_wiring_ltr = vec![0; self.size];
         for (pos, c) in self.wiring_str.chars().enumerate() {
             let n = alphabet
                 .get_pos_of(c)
                 .ok_or(CipherError::invalid_input_char(c))?;
+
             new_wiring_rtl[pos] = n;
             new_wiring_ltr[n] = pos;
         }
