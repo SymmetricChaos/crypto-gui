@@ -1,5 +1,4 @@
 use crate::{ciphers::Cipher, errors::CipherError, global_rng::GLOBAL_RNG};
-use num::Integer;
 use rand::Rng;
 
 pub struct Scytale {
@@ -22,7 +21,7 @@ impl Cipher for Scytale {
             return Err(CipherError::key("Scytale key must be 2 or greater"));
         }
 
-        let n_cols = text.len().div_ceil(&self.key);
+        let n_cols = num::Integer::div_ceil(&text.len(), &self.key);
         let mut symbols = text.chars();
         let mut rows = Vec::with_capacity(self.key);
 
@@ -50,7 +49,7 @@ impl Cipher for Scytale {
             return Err(CipherError::key("Scytale key must be 2 or greater"));
         }
 
-        let n_cols = text.len().div_ceil(&self.key);
+        let n_cols = num::Integer::div_ceil(&text.len(), &self.key);
         let mut symbols = text.chars();
         let mut rows = Vec::with_capacity(n_cols);
 

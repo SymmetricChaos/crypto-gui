@@ -1,5 +1,3 @@
-use num::Integer;
-
 use crate::global_rng::get_global_rng;
 use crate::grid::{str_to_char_grid, Grid, Symbol};
 use crate::text_aux::{rank_str, PresetAlphabet::*, VecString};
@@ -58,7 +56,8 @@ impl Cipher for Columnar {
             ));
         }
 
-        let n_rows = tlen.div_ceil(&self.key.len());
+        // TODO: Once this is in std or core use that instead
+        let n_rows = num::Integer::div_ceil(&tlen, &self.key.len());
 
         let symbols = str_to_char_grid(text, '\0', '\0');
         let g = Grid::from_cols(symbols, n_rows, n_cols);
@@ -82,7 +81,9 @@ impl Cipher for Columnar {
                 "The key for a columnar cipher must have at least two characters",
             ));
         }
-        let n_rows = tlen.div_ceil(&n_cols);
+        
+        // TODO: Once this is in std or core use that instead
+        let n_rows = num::Integer::div_ceil(&tlen, &n_cols);
 
         let mut g = Grid::new_empty(n_rows, n_cols);
         let mut symbols = text.chars();
