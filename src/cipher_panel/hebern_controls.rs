@@ -20,7 +20,7 @@ impl View for Hebern {
                     if ui.button("save").clicked() {
                         match rotor.set(&self.rotors.alphabet) {
                             Ok(_) => { rotor.editable = false; rotor.error.clear(); },
-                            Err(e) => rotor.error = e.to_string(),
+                            Err(e) => rotor.error = e.inner(),
                         }
                     }
                 } else {

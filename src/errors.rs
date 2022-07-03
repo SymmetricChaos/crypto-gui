@@ -9,7 +9,7 @@ pub enum CipherError {
 }
 
 impl CipherError {
-    pub fn new_static(error: &str) -> Self {
+    pub fn new(error: &str) -> Self {
         CipherError::General(format!("{error}"))
     }
 
@@ -42,6 +42,15 @@ impl CipherError {
     pub fn alphabet(error: &str) -> Self {
         CipherError::Alphabet(format!("{error}"))
     }
+
+    pub fn inner(self) -> String {
+        match self {
+            CipherError::General(e) => e,
+            CipherError::Input(e) => e,
+            CipherError::Key(e) => e,
+            CipherError::Alphabet(e) => e,
+        }
+    }
 }
 
 impl Display for CipherError {
@@ -64,7 +73,7 @@ pub enum CodeError {
 }
 
 impl CodeError {
-    pub fn new_static(error: &str) -> Self {
+    pub fn new(error: &str) -> Self {
         CodeError::General(format!("{error}"))
     }
 
