@@ -220,7 +220,7 @@ impl VecString {
     }
 
     // Return a shuffled clone of the VecString
-    pub fn shuffled(&mut self, rng: &mut StdRng) -> Self {
+    pub fn shuffled(&self, rng: &mut StdRng) -> Self {
         let mut vs = self.clone();
         vs.shuffle(rng);
         vs

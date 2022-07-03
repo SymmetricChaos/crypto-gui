@@ -3,7 +3,7 @@ use crate::{
     cipher_id::CipherID,
     ciphers::{
         playfair::*, polyalphabetic::*, polybius::*, substitution::*, tactical::*,
-        transposition::*, *, rotor_machine::Hebern,
+        transposition::*, *, hebern::Hebern,
     },
     global_rng::global_rng_controls,
 };

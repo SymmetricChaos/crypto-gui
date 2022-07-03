@@ -4,7 +4,7 @@ pub mod polybius;
 pub mod substitution;
 pub mod tactical;
 pub mod transposition;
-pub mod rotor_machine;
+pub mod hebern;
 
 pub mod m209;
 pub use m209::M209;
