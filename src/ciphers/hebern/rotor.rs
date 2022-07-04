@@ -1,4 +1,4 @@
-use std::fmt;
+use std::fmt::{self, Display, Formatter};
 
 use itertools::Itertools;
 
@@ -60,10 +60,6 @@ impl HebernRotor {
     }
 
     pub fn set(&mut self, alphabet: &VecString) -> Result<(),CipherError> {
-        if !self.editable {
-            return Ok(())
-        }
-
         let total_size = self.wiring_str.chars().count();
         if total_size != self.size {
             return Err(CipherError::General(format!("must provide exactly {} characters", self.size)))
@@ -99,13 +95,14 @@ impl HebernRotor {
         self.set(alphabet)
     }
 
-    pub fn randomize(&mut self, alphabet: &VecString) {
-        self.wiring_str = alphabet.shuffled(&mut get_global_rng()).to_string()
+    pub fn randomize(&mut self, alphabet: &VecString) -> Result<(),CipherError> {
+        self.wiring_str = alphabet.shuffled(&mut get_global_rng()).to_string();
+        self.set(alphabet)
     }
 }
 
-impl fmt::Display for HebernRotor {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+impl Display for HebernRotor {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         let mut out = String::with_capacity(self.size);
         let p = self.position;
         out.push_str(&self.wiring_str[p..]);

@@ -21,19 +21,28 @@ impl View for Hebern {
             ui.horizontal(|ui| {
                 ui.add_enabled(rotor.editable, TextEdit::singleline(&mut rotor.wiring_str));
                 if rotor.editable {
-                    if ui.button("save").clicked() {
+                    if ui.small_button("save").clicked() {
                         match rotor.set(&self.rotors.alphabet) {
                             Ok(_) => { rotor.editable = false; rotor.error.clear(); },
                             Err(e) => rotor.error = e.inner(),
                         }
                     }
                 } else {
-                    if ui.button("edit").clicked() {
+                    if ui.small_button("edit").clicked() {
                         rotor.editable = true;
                     }
                 }
-                if ui.button("random").clicked() {
-                    rotor.randomize(&self.rotors.alphabet)
+                if ui.small_button("random").clicked() {
+                    match rotor.randomize(&self.rotors.alphabet) {
+                        Ok(_) =>  rotor.error.clear(),
+                        Err(e) => rotor.error = e.inner(),
+                    }
+                }
+                if ui.small_button("fill").clicked() {
+                    match rotor.fill(&self.rotors.alphabet) {
+                        Ok(_) =>  rotor.error.clear(),
+                        Err(e) => rotor.error = e.inner(),
+                    }
                 }
                 ui.label(&rotor.error);
             });

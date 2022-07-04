@@ -39,8 +39,8 @@ impl HebernRotorCage {
     pub fn step(&mut self) {
         // the first rotor always steps
         // the stepping only continues if a rotor completes a full turn by returning to zero
-        for (n, ctr) in self.counters.iter_mut().enumerate() {
-            self.rotors[n].step();
+        for (rotor, ctr) in self.rotors.iter_mut().zip(self.counters.iter_mut()) {
+            rotor.step();
             *ctr = (*ctr + 1) % self.rotor_size;
             if *ctr != 0 {
                 break;
