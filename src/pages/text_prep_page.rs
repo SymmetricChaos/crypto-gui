@@ -1,4 +1,4 @@
-use eframe::egui::{CentralPanel, Context, SidePanel};
+use eframe::egui::{CentralPanel, Context, SidePanel, TextEdit};
 use unicode_normalization::UnicodeNormalization;
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -15,7 +15,7 @@ pub struct TextPrepPage {
 
 impl Default for TextPrepPage {
     fn default() -> Self {
-        Self { text: String::from("←↑→↓⋀⋁òóô"), num_bytes: Default::default(), num_chars: Default::default(), num_graphemes: Default::default(), replace_from: Default::default(), replace_to: Default::default(), remove: Default::default(), keep: Default::default() }
+        Self { text: String::from("ô"), num_bytes: Default::default(), num_chars: Default::default(), num_graphemes: Default::default(), replace_from: Default::default(), replace_to: Default::default(), remove: Default::default(), keep: Default::default() }
     }
 }
 
@@ -137,8 +137,10 @@ impl TextPrepPage {
                     ui.text_edit_singleline(&mut self.keep);
                 });
             });
+        
         CentralPanel::default().show(ctx, |ui| {
-            if ui.text_edit_multiline(&mut self.text).changed() {
+            let main_text = TextEdit::singleline(&mut self.text).code_editor();
+            if ui.add(main_text).changed() {
                 self.count_bytes();
                 self.count_chars();
                 self.count_graphemes();
