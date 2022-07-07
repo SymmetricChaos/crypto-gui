@@ -11,8 +11,8 @@ impl View for Hebern {
 
         ui.add_space(10.0);
         ui.label("Alphabet");
-        if control_string(ui, &mut self.rotors.alphabet_string).changed() {
-            self.rotors.set_alphabet()
+        if control_string(ui, &mut self.alphabet_string).changed() {
+            self.set_alphabet()
         }
 
         ui.add_space(10.0);
@@ -22,7 +22,7 @@ impl View for Hebern {
                 ui.add_enabled(rotor.editable, TextEdit::singleline(&mut rotor.wiring_str));
                 if rotor.editable {
                     if ui.small_button("save").clicked() {
-                        match rotor.set(&self.rotors.alphabet) {
+                        match rotor.set(&self.alphabet) {
                             Ok(_) => { rotor.editable = false; rotor.error.clear(); },
                             Err(e) => rotor.error = e.inner(),
                         }
@@ -33,13 +33,13 @@ impl View for Hebern {
                     }
                 }
                 if ui.small_button("random").clicked() {
-                    match rotor.randomize(&self.rotors.alphabet) {
+                    match rotor.randomize(&self.alphabet) {
                         Ok(_) =>  rotor.error.clear(),
                         Err(e) => rotor.error = e.inner(),
                     }
                 }
                 if ui.small_button("fill").clicked() {
-                    match rotor.fill(&self.rotors.alphabet) {
+                    match rotor.fill(&self.alphabet) {
                         Ok(_) =>  rotor.error.clear(),
                         Err(e) => rotor.error = e.inner(),
                     }

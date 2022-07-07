@@ -10,30 +10,21 @@ use super::rotor::HebernRotor;
 #[derive(Clone, Debug)]
 pub struct HebernRotorCage {
     pub rotors: Vec<HebernRotor>,
-    pub locks: Vec<bool>,
-    pub alphabet_string: String,
-    pub alphabet: VecString,
     counters: Vec<u8>,
     rotor_size: u8,
 }
 
 impl HebernRotorCage {
 
-    pub fn set_alphabet(&mut self) {
-        self.alphabet = VecString::unique_from(&self.alphabet_string);
-    }
-
-    pub fn add_rotor(&mut self) {
+    pub fn add_rotor(&mut self, alphabet: &VecString) {
         self.rotors
-            .push(HebernRotor::new(&self.alphabet.to_string(), &self.alphabet).unwrap());
+            .push(HebernRotor::new(&alphabet.to_string(), alphabet).unwrap());
         self.counters.push(0);
-        self.locks.push(false);
     }
 
     pub fn del_rotor(&mut self) {
         self.rotors.pop();
         self.counters.pop();
-        self.locks.pop();
     }
 
     pub fn step(&mut self) {
@@ -48,31 +39,28 @@ impl HebernRotorCage {
         }
     }
 
-    pub fn encrypt_char(&self, c: char) -> char {
-        let mut n = self.alphabet.get_pos_of(c).unwrap();
+    pub fn encrypt_char(&self, c: char, alphabet: &VecString) -> char {
+        let mut n = alphabet.get_pos_of(c).unwrap();
         for rtr in self.rotors.iter() {
             n = rtr.ltr(n)
         }
-        self.alphabet.get_char_at(n).unwrap()
+        alphabet.get_char_at(n).unwrap()
     }
 
-    pub fn decrypt_char(&self, c: char) -> char {
-        let mut n = self.alphabet.get_pos_of(c).unwrap();
+    pub fn decrypt_char(&self, c: char, alphabet: &VecString) -> char {
+        let mut n = alphabet.get_pos_of(c).unwrap();
         for rtr in self.rotors.iter().rev() {
             n = rtr.rtl(n)
         }
-        self.alphabet.get_char_at(n).unwrap()
+        alphabet.get_char_at(n).unwrap()
     }
 }
 
 impl Default for HebernRotorCage {
     fn default() -> Self {
-        let alphabet_string = String::from(PresetAlphabet::BasicLatin);
-        let alphabet = VecString::from(&alphabet_string);
 
         let counters = vec![0; 5];
-
-        let locks = vec![false; 5];
+        let alphabet = VecString::from(PresetAlphabet::BasicLatin);
 
         let mut rotors = Vec::with_capacity(5);
         rotors.push(HebernRotor::new("WQHUFATCNKXZLEJIMRGOBPYVSD", &alphabet).unwrap());
@@ -83,9 +71,6 @@ impl Default for HebernRotorCage {
 
         Self {
             rotors,
-            locks,
-            alphabet_string,
-            alphabet,
             counters,
             rotor_size: 26,
         }
@@ -94,12 +79,19 @@ impl Default for HebernRotorCage {
 
 pub struct Hebern {
     pub rotors: HebernRotorCage,
+    pub alphabet_string: String,
+    pub alphabet: VecString,
 }
 
 impl Hebern {
+
+    pub fn set_alphabet(&mut self) {
+        self.alphabet = VecString::unique_from(&self.alphabet_string);
+    }
+
     fn validate_text(&self, text: &str) -> Option<char> {
         for c in text.chars() {
-            if !self.rotors.alphabet.contains(c) {
+            if !self.alphabet.contains(c) {
                 return Some(c);
             }
         }
@@ -111,6 +103,8 @@ impl Default for Hebern {
     fn default() -> Self {
         Self {
             rotors: HebernRotorCage::default(),
+            alphabet_string: String::from(PresetAlphabet::BasicLatin),
+            alphabet: VecString::from(PresetAlphabet::BasicLatin),
         }
     }
 }
@@ -123,7 +117,7 @@ impl Cipher for Hebern {
         let mut rotors = self.rotors.clone();
         let mut out = String::with_capacity(text.len());
         for c in text.chars() {
-            out.push(rotors.encrypt_char(c));
+            out.push(rotors.encrypt_char(c, &self.alphabet));
             rotors.step();
         }
         Ok(out)
@@ -136,7 +130,7 @@ impl Cipher for Hebern {
         let mut rotors = self.rotors.clone();
         let mut out = String::with_capacity(text.len());
         for c in text.chars() {
-            out.push(rotors.decrypt_char(c));
+            out.push(rotors.decrypt_char(c, &self.alphabet));
             rotors.step();
         }
         Ok(out)
