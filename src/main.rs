@@ -20,11 +20,14 @@ pub mod egui_aux;
 
 pub mod global_rng;
 
-mod app;
+pub mod app;
 
 #[cfg(not(target_arch = "wasm32"))]
 fn main() {
-    let app = app::ClassicCrypto::default();
     let native_options = eframe::NativeOptions::default();
-    eframe::run_native(Box::new(app), native_options);
+    eframe::run_native(
+        "Classic Cryptography",
+        native_options,
+        Box::new(|cc| Box::new(app::ClassicCrypto::build_with_context(cc))),
+    );
 }

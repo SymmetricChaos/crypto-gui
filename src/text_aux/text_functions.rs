@@ -95,12 +95,11 @@ pub fn rank_str(text: &str, alphabet: &str) -> Vec<usize> {
 
 // This ignores repeated numbers
 pub fn rank_vec<O: Ord>(vec: &Vec<O>) -> Vec<usize> {
-
     let mut out = Vec::with_capacity(vec.len());
     let ranks = vec.clone().iter().sorted().dedup().collect_vec();
 
     for o in ranks.iter() {
-        out.push( vec.iter().position(|x| &x == o).unwrap() )
+        out.push(vec.iter().position(|x| &x == o).unwrap())
     }
 
     out
@@ -215,10 +214,9 @@ mod text_function_tests {
 
     #[test]
     fn num_ranking() {
-        let text = vec![5,0,1,3,2,4];
+        let text = vec![5, 0, 1, 3, 2, 4];
         assert_eq!(vec![1, 2, 4, 3, 5, 0], rank_vec(&text));
     }
-    
 
     #[test]
     fn shuffled_alphabet() {

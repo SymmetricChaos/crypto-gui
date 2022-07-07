@@ -1,10 +1,8 @@
-use eframe::egui::{Context, SidePanel, Grid, CentralPanel, ScrollArea};
+use eframe::egui::{CentralPanel, Context, Grid, ScrollArea, SidePanel};
 
 use crate::cipher_id::CipherID;
 
-use super::{Page, CipherCategory};
-
-
+use super::{CipherCategory, Page};
 
 impl CipherCategory {
     pub fn description(&self) -> &'static str {
@@ -40,8 +38,8 @@ impl CipherCategory {
                 CipherID::Hutton,
             ],
             CipherCategory::RotorMachine => &[
-                CipherID::M209, 
-                CipherID::Enigma, 
+                CipherID::M209,
+                CipherID::Enigma,
                 CipherID::Sigaba,
                 CipherID::Hebern,
             ],
@@ -58,11 +56,7 @@ impl CipherCategory {
                 CipherID::TwoSquare,
                 CipherID::FourSquare,
             ],
-            CipherCategory::Tactical => &[
-                CipherID::Batco, 
-                CipherID::Dryad, 
-                CipherID::Rs44
-            ],
+            CipherCategory::Tactical => &[CipherID::Batco, CipherID::Dryad, CipherID::Rs44],
             CipherCategory::Polybius => &[
                 CipherID::Polybius,
                 CipherID::PolybiusCube,
@@ -76,15 +70,19 @@ impl CipherCategory {
     }
 }
 
-
-
 #[derive(Default)]
 pub struct CipherCategoryPage {
     cipher_category: CipherCategory,
 }
 
 impl CipherCategoryPage {
-    pub fn view(&mut self, ctx: &Context, cipher_category: &mut CipherCategory, active_cipher: &mut CipherID, active_page: &mut Page) {
+    pub fn view(
+        &mut self,
+        ctx: &Context,
+        cipher_category: &mut CipherCategory,
+        active_cipher: &mut CipherID,
+        active_page: &mut Page,
+    ) {
         SidePanel::left("cipher_selector_panel")
             .max_width(300.0)
             .show(ctx, |ui| {
@@ -100,11 +98,7 @@ impl CipherCategoryPage {
             });
         CentralPanel::default().show(ctx, |ui| {
             Grid::new("cipher_categories").show(ui, |ui| {
-                ui.selectable_value(
-                    cipher_category,
-                    CipherCategory::Substituion,
-                    "Substitution",
-                );
+                ui.selectable_value(cipher_category, CipherCategory::Substituion, "Substitution");
                 ui.selectable_value(
                     cipher_category,
                     CipherCategory::Polyalphabetic,
@@ -121,25 +115,11 @@ impl CipherCategoryPage {
                     "Transposition",
                 );
                 ui.end_row();
-                ui.selectable_value(
-                    cipher_category,
-                    CipherCategory::Playfair,
-                    "Playfair",
-                );
-                ui.selectable_value(
-                    cipher_category,
-                    CipherCategory::Tactical,
-                    "Tactical",
-                );
-                ui.selectable_value(
-                    cipher_category,
-                    CipherCategory::Polybius,
-                    "Polybius",
-                );
+                ui.selectable_value(cipher_category, CipherCategory::Playfair, "Playfair");
+                ui.selectable_value(cipher_category, CipherCategory::Tactical, "Tactical");
+                ui.selectable_value(cipher_category, CipherCategory::Polybius, "Polybius");
             });
             ScrollArea::vertical().show(ui, |ui| ui.label(self.cipher_category.description()));
         });
     }
 }
-
-

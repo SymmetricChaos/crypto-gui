@@ -1,11 +1,11 @@
 use crate::{
+    ciphers::Cipher,
     errors::CipherError,
     global_rng::get_global_rng,
-    text_aux::{PresetAlphabet, VecString}, ciphers::Cipher,
+    text_aux::{PresetAlphabet, VecString},
 };
 
 use super::rotor::HebernRotor;
-
 
 #[derive(Clone, Debug)]
 pub struct HebernRotorCage {
@@ -15,7 +15,6 @@ pub struct HebernRotorCage {
 }
 
 impl HebernRotorCage {
-
     pub fn add_rotor(&mut self, alphabet: &VecString) {
         self.rotors
             .push(HebernRotor::new(&alphabet.to_string(), alphabet).unwrap());
@@ -58,7 +57,6 @@ impl HebernRotorCage {
 
 impl Default for HebernRotorCage {
     fn default() -> Self {
-
         let counters = vec![0; 5];
         let alphabet = VecString::from(PresetAlphabet::BasicLatin);
 
@@ -84,7 +82,6 @@ pub struct Hebern {
 }
 
 impl Hebern {
-
     pub fn set_alphabet(&mut self) {
         self.alphabet = VecString::unique_from(&self.alphabet_string);
     }

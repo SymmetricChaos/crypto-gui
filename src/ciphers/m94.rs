@@ -42,6 +42,24 @@ impl Default for M94 {
     }
 }
 
+impl M94 {
+    pub fn shift_left(&mut self, n: usize) {
+        if n == 0 {
+            return ();
+        } else {
+            self.wheels.swap(n, n - 1);
+        }
+    }
+
+    pub fn shift_right(&mut self, n: usize) {
+        if n == 24 {
+            return ();
+        } else {
+            self.wheels.swap(n, n + 1);
+        }
+    }
+}
+
 impl Cipher for M94 {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         if text.len() != self.wheels.len() {

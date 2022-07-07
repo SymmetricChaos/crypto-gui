@@ -81,7 +81,7 @@ impl Cipher for Columnar {
                 "The key for a columnar cipher must have at least two characters",
             ));
         }
-        
+
         // TODO: Once this is in std or core use that instead
         let n_rows = num::Integer::div_ceil(&tlen, &n_cols);
 

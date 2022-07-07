@@ -1,23 +1,21 @@
 use crate::cipher_panel::{CipherControlPanel, CipherDisplayPanel};
 use crate::code_panel::{CodeControlPanel, CodeDisplayPanel};
 use crate::pages::category_page::CipherCategoryPage;
-use crate::pages::{TextPrepPage, CipherCategory, Page};
+use crate::pages::{CipherCategory, Page, TextPrepPage};
 use crate::{cipher_id::CipherID, code_id::CodeID};
-use eframe::egui::Ui;
+use eframe::egui;
 use eframe::{
     egui::{
         warn_if_debug_build, widgets, CentralPanel, Context, FontData, FontDefinitions, RichText,
-        ScrollArea, SelectableLabel, SidePanel, TopBottomPanel, Visuals,
+        ScrollArea, SelectableLabel, SidePanel, TopBottomPanel, Ui,
     },
     epaint::FontFamily,
-    epi,
+    App,
 };
 
 fn page_selector(ui: &mut Ui, name: &str, page: Page, active_page: &mut Page) {
-    if ui.add(SelectableLabel::new(
-            active_page == &page,
-            name,
-        ))
+    if ui
+        .add(SelectableLabel::new(active_page == &page, name))
         .clicked()
     {
         *active_page = page
@@ -62,12 +60,49 @@ impl Default for ClassicCrypto {
 
 impl ClassicCrypto {
 
+    // Configure the CreationContext and also build the app
+    pub fn build_with_context(cc: &eframe::CreationContext<'_>) -> Self {
+        let mut font_def = FontDefinitions::default();
+        // Load FreeMono.ttf and use it at the main monospace font
+        font_def.font_data.insert(
+            "FreeMonoTTF".into(),
+            FontData::from_static(include_bytes!("../FreeMono.ttf")),
+        );
+        font_def
+            .families
+            .get_mut(&FontFamily::Monospace)
+            .unwrap()
+            .insert(0, "FreeMonoTTF".into());
+
+        // Fallback on FreeMono.otf
+        font_def.font_data.insert(
+            "FreeMonoOTF".into(),
+            FontData::from_static(include_bytes!("../FreeMono.otf")),
+        );
+        font_def
+            .families
+            .get_mut(&FontFamily::Monospace)
+            .unwrap()
+            .push("FreeMonoOTF".into());
+
+        cc.egui_ctx.set_fonts(font_def);
+
+        cc.egui_ctx.set_visuals(egui::Visuals::dark());
+
+        Self::default()
+    }
+
     fn text_prep_page(&mut self, ctx: &Context) {
         self.text_prep_page.view(&ctx)
     }
 
     fn cipher_category_page(&mut self, ctx: &Context) {
-        self.cipher_category_page.view(&ctx, &mut self.cipher_category, &mut self.active_cipher, &mut self.active_page)
+        self.cipher_category_page.view(
+            &ctx,
+            &mut self.cipher_category,
+            &mut self.active_cipher,
+            &mut self.active_page,
+        )
     }
 
     fn cipher_page(&mut self, ctx: &Context) {
@@ -149,47 +184,19 @@ impl ClassicCrypto {
             ui.label("While essentially all of Unicode can be displayed ciphers and codes operate on individual codepoints, unexpected behavior will occur when combining characters are used. Optional support for Unicode graphemes may be added later.");
         });
     }
-
-    fn configure_font(&self, ctx: &Context) {
-        let mut font_def = FontDefinitions::default();
-        // Load FreeMono.ttf and use it at the main monospace font
-        font_def.font_data.insert(
-            "FreeMonoTTF".into(),
-            FontData::from_static(include_bytes!("../FreeMono.ttf")),
-        );
-        font_def
-            .families
-            .get_mut(&FontFamily::Monospace)
-            .unwrap()
-            .insert(0, "FreeMonoTTF".into());
-
-        // Fallback on FreeMono.otf
-        font_def.font_data.insert(
-            "FreeMonoOTF".into(),
-            FontData::from_static(include_bytes!("../FreeMono.otf")),
-        );
-        font_def
-            .families
-            .get_mut(&FontFamily::Monospace)
-            .unwrap()
-            .push("FreeMonoOTF".into());
-
-        ctx.set_fonts(font_def);
-    }
 }
 
-impl epi::App for ClassicCrypto {
-    fn update(&mut self, ctx: &Context, _: &epi::Frame) {
+impl App for ClassicCrypto {
+    fn update(&mut self, ctx: &Context, _: &mut eframe::Frame) {
         TopBottomPanel::top("top_panel").show(ctx, |ui| {
             ui.horizontal_top(|ui| {
                 widgets::global_dark_light_mode_switch(ui);
                 ui.separator();
- 
+
                 page_selector(ui, "About", Page::About, &mut self.active_page);
                 page_selector(ui, "Ciphers", Page::CipherCategory, &mut self.active_page);
                 page_selector(ui, "Codes", Page::Code, &mut self.active_page);
                 page_selector(ui, "Text", Page::TextPrep, &mut self.active_page);
- 
             });
         });
 
@@ -198,16 +205,7 @@ impl epi::App for ClassicCrypto {
             Page::Cipher => self.cipher_page(ctx),
             Page::Code => self.code_page(ctx),
             Page::CipherCategory => self.cipher_category_page(ctx),
-            Page::TextPrep => self.text_prep_page(ctx)
+            Page::TextPrep => self.text_prep_page(ctx),
         }
-    }
-
-    fn setup(&mut self, ctx: &Context, _frame: &epi::Frame, _storage: Option<&dyn epi::Storage>) {
-        self.configure_font(ctx);
-        Visuals::dark();
-    }
-
-    fn name(&self) -> &str {
-        "Classical Cryptography"
     }
 }

@@ -1,7 +1,7 @@
 #![forbid(unsafe_code)]
 #![cfg_attr(not(debug_assertions), deny(warnings))] // Forbid warnings in release builds
 
-mod app;
+pub mod app;
 pub mod cipher_panel;
 pub mod ciphers;
 pub mod grid;
@@ -22,8 +22,6 @@ pub mod text_aux;
 
 pub mod global_rng;
 
-
-
 // ----------------------------------------------------------------------------
 // When compiling for web:
 
@@ -38,5 +36,5 @@ use eframe::wasm_bindgen::{self, prelude::*};
 #[wasm_bindgen]
 pub fn start(canvas_id: &str) -> Result<(), eframe::wasm_bindgen::JsValue> {
     let app = app::ClassicCrypto::default();
-    eframe::start_web(canvas_id, Box::new(app))
+    eframe::start_web(canvas_id, Box::new(|cc| Box::new(app::ClassicCrypto::build_with_context(cc))))
 }

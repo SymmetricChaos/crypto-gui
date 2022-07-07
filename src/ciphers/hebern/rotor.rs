@@ -2,10 +2,7 @@ use std::fmt::{self, Display, Formatter};
 
 use itertools::Itertools;
 
-use crate::{
-    errors::CipherError,
-    text_aux::VecString, global_rng::get_global_rng,
-};
+use crate::{errors::CipherError, global_rng::get_global_rng, text_aux::VecString};
 
 #[derive(Clone, Debug)]
 pub struct HebernRotor {
@@ -59,14 +56,19 @@ impl HebernRotor {
         (inner + self.size - self.position) % self.size
     }
 
-    pub fn set(&mut self, alphabet: &VecString) -> Result<(),CipherError> {
+    pub fn set(&mut self, alphabet: &VecString) -> Result<(), CipherError> {
         let total_size = self.wiring_str.chars().count();
         if total_size != self.size {
-            return Err(CipherError::General(format!("must provide exactly {} characters", self.size)))
+            return Err(CipherError::General(format!(
+                "must provide exactly {} characters",
+                self.size
+            )));
         }
         let unique_size = self.wiring_str.chars().unique().count();
         if unique_size != total_size {
-            return Err(CipherError::General(String::from("duplicate characters are not allowed")))
+            return Err(CipherError::General(String::from(
+                "duplicate characters are not allowed",
+            )));
         }
 
         let mut new_wiring_rtl = vec![0; self.size];
@@ -84,18 +86,18 @@ impl HebernRotor {
         Ok(())
     }
 
-    pub fn fill(&mut self, alphabet: &VecString) -> Result<(),CipherError> {
+    pub fn fill(&mut self, alphabet: &VecString) -> Result<(), CipherError> {
         for a in alphabet.chars() {
             if self.wiring_str.contains(a) {
                 continue;
             } else {
                 self.wiring_str.push(a)
             }
-        };
+        }
         self.set(alphabet)
     }
 
-    pub fn randomize(&mut self, alphabet: &VecString) -> Result<(),CipherError> {
+    pub fn randomize(&mut self, alphabet: &VecString) -> Result<(), CipherError> {
         self.wiring_str = alphabet.shuffled(&mut get_global_rng()).to_string();
         self.set(alphabet)
     }

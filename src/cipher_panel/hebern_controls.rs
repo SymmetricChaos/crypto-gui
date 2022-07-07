@@ -1,14 +1,12 @@
-
 use crate::ciphers::hebern::Hebern;
 
-use super::{View, ViewableCipher, generic_components::control_string};
+use super::{generic_components::control_string, View, ViewableCipher};
 use eframe::egui::{Slider, TextEdit, Ui};
 
 impl ViewableCipher for Hebern {}
 
 impl View for Hebern {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-
         ui.add_space(10.0);
         ui.label("Alphabet");
         if control_string(ui, &mut self.alphabet_string).changed() {
@@ -23,7 +21,10 @@ impl View for Hebern {
                 if rotor.editable {
                     if ui.small_button("save").clicked() {
                         match rotor.set(&self.alphabet) {
-                            Ok(_) => { rotor.editable = false; rotor.error.clear(); },
+                            Ok(_) => {
+                                rotor.editable = false;
+                                rotor.error.clear();
+                            }
                             Err(e) => rotor.error = e.inner(),
                         }
                     }
@@ -34,26 +35,24 @@ impl View for Hebern {
                 }
                 if ui.small_button("random").clicked() {
                     match rotor.randomize(&self.alphabet) {
-                        Ok(_) =>  rotor.error.clear(),
+                        Ok(_) => rotor.error.clear(),
                         Err(e) => rotor.error = e.inner(),
                     }
                 }
                 if ui.small_button("fill").clicked() {
                     match rotor.fill(&self.alphabet) {
-                        Ok(_) =>  rotor.error.clear(),
+                        Ok(_) => rotor.error.clear(),
                         Err(e) => rotor.error = e.inner(),
                     }
                 }
                 ui.label(&rotor.error);
             });
-        };
+        }
 
         ui.add_space(10.0);
         ui.label("Rotor Positions\nTo Be Changed Every Message");
         for rotor in &mut self.rotors.rotors {
             ui.add(Slider::new(&mut rotor.position, 0..=26).clamp_to_range(true));
         }
-
-
     }
 }

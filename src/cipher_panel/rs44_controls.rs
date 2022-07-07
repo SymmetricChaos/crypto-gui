@@ -1,7 +1,10 @@
-use crate::{ciphers::tactical::RS44};
+use crate::ciphers::tactical::RS44;
 
 use super::{generic_components::*, View, ViewableCipher};
-use eframe::{egui::{TextStyle, Ui, Button, DragValue, RichText, Grid}, epaint::{Color32, Vec2}};
+use eframe::{
+    egui::{Button, DragValue, Grid, RichText, TextStyle, Ui},
+    epaint::{Color32, Vec2},
+};
 
 impl ViewableCipher for RS44 {}
 
@@ -11,7 +14,12 @@ impl ViewableCipher for RS44 {}
 //     ui.add_enabled(false, Button::new(symbol).frame(false));
 // }
 
-fn cell_button_char(grille: &crate::grid::Grid<char>, x: usize, y: usize, ui: &mut eframe::egui::Ui) {
+fn cell_button_char(
+    grille: &crate::grid::Grid<char>,
+    x: usize,
+    y: usize,
+    ui: &mut eframe::egui::Ui,
+) {
     let cell = grille[(x, y)];
     let symbol = cell.to_string();
     ui.add_enabled(false, Button::new(symbol).frame(false));
@@ -25,14 +33,24 @@ impl View for RS44 {
         ui.horizontal(|ui| {
             ui.add_space(16.0);
             // The user changes the second field of the index with the x coordinate and the first field with the y coordinate
-            if ui.add(
-                DragValue::new(&mut self.start_cell.1).prefix("x: ").clamp_range(0..=24)
-            ).changed() {
+            if ui
+                .add(
+                    DragValue::new(&mut self.start_cell.1)
+                        .prefix("x: ")
+                        .clamp_range(0..=24),
+                )
+                .changed()
+            {
                 self.set_full_message_key();
             };
-            if ui.add(
-                DragValue::new(&mut self.start_cell.0).prefix("y: ").clamp_range(0..=23)
-            ).changed() {
+            if ui
+                .add(
+                    DragValue::new(&mut self.start_cell.0)
+                        .prefix("y: ")
+                        .clamp_range(0..=23),
+                )
+                .changed()
+            {
                 self.set_full_message_key();
             };
         });
@@ -49,9 +67,10 @@ impl View for RS44 {
         }
 
         ui.label("Start Column");
-        if ui.add(
-            DragValue::new(&mut self.start_column).clamp_range(0..=24)
-        ).changed() {
+        if ui
+            .add(DragValue::new(&mut self.start_column).clamp_range(0..=24))
+            .changed()
+        {
             self.set_full_message_key();
         };
 
@@ -59,10 +78,9 @@ impl View for RS44 {
 
         // The Message Key area. Not needed for encryption.
         ui.collapsing("Message Key", |ui| {
-
             ui.spacing_mut().item_spacing = (2.0, 2.0).into();
             ui.style_mut().override_text_style = Some(TextStyle::Monospace);
-            
+
             ui.horizontal(|ui| {
                 for letter in ["a", "b", "c", "d", "e"] {
                     ui.add_enabled(false, Button::new(letter).frame(false));
@@ -82,60 +100,63 @@ impl View for RS44 {
             }
 
             ui.add_space(8.0);
-            ui.label(RichText::new(format!("Message Key: {}",self.encrypted_message_key)).strong().monospace());
-            
+            ui.label(
+                RichText::new(format!("Message Key: {}", self.encrypted_message_key))
+                    .strong()
+                    .monospace(),
+            );
+
             if ui.button("New Key").clicked() {
                 self.set_full_message_key()
             }
         });
 
-        
         ui.add_space(10.0);
 
-        Grid::new("control_rs44_grid").spacing(Vec2{ x: -14.0, y: 2.0}).num_columns(27).show(ui, |ui| {
-
-            // Position cursors on top
-            ui.label(" ");
-            ui.label(" ");
-            for col in 0..25 {
-                if col == self.start_cell.1 {
-                    ui.label(RichText::new("+").strong().size(16.0));
+        Grid::new("control_rs44_grid")
+            .spacing(Vec2 { x: -14.0, y: 2.0 })
+            .num_columns(27)
+            .show(ui, |ui| {
+                // Position cursors on top
+                ui.label(" ");
+                ui.label(" ");
+                for col in 0..25 {
+                    if col == self.start_cell.1 {
+                        ui.label(RichText::new("+").strong().size(16.0));
+                    } else {
+                        ui.label(" ");
+                    }
                 }
-                else {
-                    ui.label(" ");
-                }
-            }
 
-            // labels
-            ui.end_row();
-            ui.label(" ");
-            ui.label(" ");
-            for l in self.xlabels.iter() {
-                ui.label(l.to_string());
-            }
-            // numbers
-            ui.end_row();
-            ui.label(" ");
-            ui.label(" ");
-            for n in self.column_nums.iter() {
-                ui.label(n.to_string());
-            }
-            ui.end_row();
-
-
-            for row in 0..24 {
-                if row == self.start_cell.0 {
-                    ui.label(RichText::new("+").strong().size(16.0));
-                } else {
-                    ui.label(" ");
-                }
-                ui.label(self.ylabels[row]);
-                for s in self.stencil.get_row(row) {
-                    ui.label(RichText::new(s.to_char()).size(16.0));
-                } 
+                // labels
                 ui.end_row();
-            }
-        });
+                ui.label(" ");
+                ui.label(" ");
+                for l in self.xlabels.iter() {
+                    ui.label(l.to_string());
+                }
+                // numbers
+                ui.end_row();
+                ui.label(" ");
+                ui.label(" ");
+                for n in self.column_nums.iter() {
+                    ui.label(n.to_string());
+                }
+                ui.end_row();
+
+                for row in 0..24 {
+                    if row == self.start_cell.0 {
+                        ui.label(RichText::new("+").strong().size(16.0));
+                    } else {
+                        ui.label(" ");
+                    }
+                    ui.label(self.ylabels[row]);
+                    for s in self.stencil.get_row(row) {
+                        ui.label(RichText::new(s.to_char()).size(16.0));
+                    }
+                    ui.end_row();
+                }
+            });
         if ui.button("Copy Stencil to Clipboard").clicked() {
             ui.output().copied_text = self.stencil_to_text();
         }
@@ -147,8 +168,5 @@ impl View for RS44 {
                 Err(e) => *errors = e.to_string(),
             }
         }
-        
     }
 }
-
-

@@ -2,8 +2,8 @@ use self::generic_components::encrypt_decrypt;
 use crate::{
     cipher_id::CipherID,
     ciphers::{
-        playfair::*, polyalphabetic::*, polybius::*, substitution::*, tactical::*,
-        transposition::*, *, hebern::Hebern,
+        hebern::Hebern, playfair::*, polyalphabetic::*, polybius::*, substitution::*, tactical::*,
+        transposition::*, *,
     },
     global_rng::global_rng_controls,
 };
@@ -28,6 +28,7 @@ pub mod four_square_controls;
 pub mod general_sub_controls;
 pub mod generic_components;
 pub mod grille_controls;
+pub mod hebern_controls;
 pub mod hutton_controls;
 pub mod m209_controls;
 pub mod m94_controls;
@@ -38,6 +39,7 @@ pub mod polybius_square_controls;
 pub mod porta_controls;
 pub mod quagmire_controls;
 pub mod rail_fence_controls;
+pub mod rs44_controls;
 pub mod scytale_controls;
 pub mod sigaba_controls;
 pub mod slidefair_controls;
@@ -45,8 +47,6 @@ pub mod trifid_controls;
 pub mod turning_grille_controls;
 pub mod two_square_controls;
 pub mod vigenere_controls;
-pub mod rs44_controls;
-pub mod hebern_controls;
 
 pub trait ViewableCipher: View + Cipher {}
 
@@ -152,7 +152,12 @@ impl CipherControlPanel {
             );
 
             combox_box(
-                &[CipherID::M209, CipherID::Enigma, CipherID::Sigaba, CipherID::Hebern],
+                &[
+                    CipherID::M209,
+                    CipherID::Enigma,
+                    CipherID::Sigaba,
+                    CipherID::Hebern,
+                ],
                 "Rotor Machine",
                 active_cipher,
                 ui,
