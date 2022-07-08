@@ -1,4 +1,4 @@
-use eframe::egui::{RichText, TextEdit, Ui};
+use eframe::egui::{TextEdit, Ui};
 
 use crate::ciphers::polybius::B64;
 
@@ -17,7 +17,7 @@ impl View for B64 {
         }
         ui.add_space(16.0);
 
-        ui.label(RichText::new(format!("Grid\n{}", self.polybius)).monospace());
+        ui.label(free_mono(format!("Grid\n{}", self.polybius)));
         ui.add_space(16.0);
 
         ui.label("First Columnar Key Word");

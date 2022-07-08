@@ -22,6 +22,9 @@ pub use porta::Porta;
 pub mod alberti;
 pub use alberti::Alberti;
 
+pub mod m94;
+pub use m94::M94;
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum PolyMode {
     CylicKey,

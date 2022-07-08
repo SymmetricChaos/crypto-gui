@@ -63,7 +63,7 @@ impl ClassicCrypto {
     // Configure the CreationContext and also build the app
     pub fn build_with_context(cc: &eframe::CreationContext<'_>) -> Self {
         let mut font_def = FontDefinitions::default();
-        // Load FreeMono.ttf and use it at the main monospace font
+        // Load FreeMono.ttf and FreeMono.otf
         font_def.font_data.insert(
             "FreeMonoTTF".into(),
             FontData::from_static(include_bytes!("../FreeMono.ttf")),
@@ -74,7 +74,6 @@ impl ClassicCrypto {
             .unwrap()
             .insert(0, "FreeMonoTTF".into());
 
-        // Fallback on FreeMono.otf
         font_def.font_data.insert(
             "FreeMonoOTF".into(),
             FontData::from_static(include_bytes!("../FreeMono.otf")),
@@ -84,6 +83,27 @@ impl ClassicCrypto {
             .get_mut(&FontFamily::Monospace)
             .unwrap()
             .push("FreeMonoOTF".into());
+        
+        // Load FreeSans.ttf and FreeSans.otf
+        font_def.font_data.insert(
+            "FreeSansTTF".into(),
+            FontData::from_static(include_bytes!("../FreeSans.ttf")),
+        );
+        font_def
+            .families
+            .get_mut(&FontFamily::Proportional)
+            .unwrap()
+            .insert(0, "FreeSansTTF".into());
+
+        font_def.font_data.insert(
+            "FreeSansOTF".into(),
+            FontData::from_static(include_bytes!("../FreeSans.otf")),
+        );
+        font_def
+            .families
+            .get_mut(&FontFamily::Proportional)
+            .unwrap()
+            .push("FreeSansOTF".into());
 
         cc.egui_ctx.set_fonts(font_def);
 

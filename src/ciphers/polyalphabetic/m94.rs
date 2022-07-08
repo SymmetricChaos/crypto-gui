@@ -1,5 +1,4 @@
-use super::Cipher;
-use crate::{errors::CipherError, global_rng::get_global_rng};
+use crate::{errors::CipherError, global_rng::get_global_rng, ciphers::Cipher};
 use rand::{prelude::SliceRandom, Rng};
 
 const M94_WHEELS: [&'static str; 25] = [
@@ -57,6 +56,11 @@ impl M94 {
         } else {
             self.wheels.swap(n, n + 1);
         }
+    }
+
+    pub fn randomize_wheels(&mut self) {
+        let mut rng = get_global_rng();
+        self.wheels.shuffle(&mut *rng);
     }
 }
 

@@ -1,10 +1,7 @@
 use crate::ciphers::tactical::RS44;
 
 use super::{generic_components::*, View, ViewableCipher};
-use eframe::{
-    egui::{Button, DragValue, Grid, RichText, TextStyle, Ui},
-    epaint::{Color32, Vec2},
-};
+use eframe::{epaint::{Vec2, Color32}, egui::{Button, DragValue, Grid, RichText, TextStyle, Ui}};
 
 impl ViewableCipher for RS44 {}
 
@@ -122,7 +119,7 @@ impl View for RS44 {
                 ui.label(" ");
                 for col in 0..25 {
                     if col == self.start_cell.1 {
-                        ui.label(RichText::new("+").strong().size(16.0));
+                        ui.label(free_mono("↓").strong().size(16.0));
                     } else {
                         ui.label(" ");
                     }
@@ -146,13 +143,13 @@ impl View for RS44 {
 
                 for row in 0..24 {
                     if row == self.start_cell.0 {
-                        ui.label(RichText::new("+").strong().size(16.0));
+                        ui.label(free_mono("→").strong().size(16.0));
                     } else {
                         ui.label(" ");
                     }
                     ui.label(self.ylabels[row]);
                     for s in self.stencil.get_row(row) {
-                        ui.label(RichText::new(s.to_char()).size(16.0));
+                        ui.label(free_mono(s.to_char()).size(16.0));
                     }
                     ui.end_row();
                 }

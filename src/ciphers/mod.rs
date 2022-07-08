@@ -9,9 +9,6 @@ pub mod transposition;
 pub mod m209;
 pub use m209::M209;
 
-pub mod m94;
-pub use m94::M94;
-
 pub mod enigma;
 pub use enigma::EnigmaM3;
 

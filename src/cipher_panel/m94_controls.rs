@@ -1,6 +1,6 @@
 use super::{generic_components::*, View, ViewableCipher};
-use crate::ciphers::{Cipher, M94};
-use eframe::egui::{self, Slider, Ui, RichText};
+use crate::ciphers::polyalphabetic::M94;
+use eframe::{egui::{self, Slider, Ui, RichText}, epaint::FontFamily};
 
 impl ViewableCipher for M94 {}
 
@@ -19,7 +19,7 @@ impl View for M94 {
         ui.add_space(16.0);
 
         if ui.button("Randomize Wheels").clicked() {
-            self.randomize();
+            self.randomize_wheels();
         }
 
         ui.label("Wheels");
@@ -28,10 +28,10 @@ impl View for M94 {
                 ui.add(egui::Label::new(
                     RichText::from(self.wheels[n]).monospace(),
                 ));
-                if ui.small_button(RichText::from("↑").monospace()).clicked() {
+                if ui.small_button(RichText::from("⋀").family(FontFamily::Monospace)).clicked() {
                     self.shift_left(n)
                 }
-                if ui.small_button(RichText::from("↓").monospace()).clicked() {
+                if ui.small_button(RichText::from("⋁").family(FontFamily::Monospace)).clicked() {
                     self.shift_right(n)
                 }
             });
