@@ -2,7 +2,10 @@ use crate::{
     ciphers::Cipher,
     grid::{str_to_char_grid, Grid},
 };
-use eframe::{egui::{self, Color32, Label, RichText, TextStyle}, epaint::FontFamily};
+use eframe::{
+    egui::{self, Color32, Label, RichText, TextStyle},
+    epaint::FontFamily,
+};
 
 use super::ViewableCipher;
 
@@ -80,7 +83,7 @@ pub fn letter_grid(ui: &mut egui::Ui, n_rows: usize, n_cols: usize, text: &Strin
             ui.spacing_mut().item_spacing.x = 0.0;
             let row = grid.get_row(n);
             for c in row {
-                let character = free_mono(*c.contents().unwrap());// RichText::from(String::from(*c.contents().unwrap())).monospace();
+                let character = mono(*c.contents().unwrap()); // RichText::from(String::from(*c.contents().unwrap())).monospace();
                 ui.add_sized([0.0, 0.0], Label::new(character));
             }
             ui.end_row()
@@ -89,6 +92,7 @@ pub fn letter_grid(ui: &mut egui::Ui, n_rows: usize, n_cols: usize, text: &Strin
 }
 // Usable arrows
 // ← ↑ → ↓
-pub fn free_mono<T: ToString>(text: T) -> RichText {
+pub fn mono<T: ToString>(text: T) -> RichText {
     RichText::from(text.to_string()).family(FontFamily::Monospace)
 }
+

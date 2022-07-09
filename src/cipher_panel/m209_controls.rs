@@ -1,6 +1,6 @@
 use eframe::egui::{self, Slider, Ui};
 
-use super::{generic_components::*, View, ViewableCipher};
+use super::{_generic_components::*, View, ViewableCipher};
 use crate::ciphers::M209;
 
 impl ViewableCipher for M209 {}

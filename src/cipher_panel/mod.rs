@@ -1,4 +1,4 @@
-use self::generic_components::encrypt_decrypt;
+use self::_generic_components::encrypt_decrypt;
 use crate::{
     cipher_id::CipherID,
     ciphers::{
@@ -26,7 +26,7 @@ pub mod dryad_controls;
 pub mod enigma_controls;
 pub mod four_square_controls;
 pub mod general_sub_controls;
-pub mod generic_components;
+pub mod _generic_components;
 pub mod grille_controls;
 pub mod hebern_controls;
 pub mod hutton_controls;

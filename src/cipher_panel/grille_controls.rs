@@ -1,6 +1,6 @@
 use crate::ciphers::transposition::Grille;
 
-use super::{generic_components::*, View, ViewableCipher};
+use super::{_generic_components::*, View, ViewableCipher};
 use eframe::egui::{TextEdit, TextStyle, Ui};
 
 impl ViewableCipher for Grille {}

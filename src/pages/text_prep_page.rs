@@ -15,47 +15,56 @@ pub struct TextPrepPage {
 
 impl Default for TextPrepPage {
     fn default() -> Self {
-        Self { text: String::from("ô"), num_bytes: Default::default(), num_chars: Default::default(), num_graphemes: Default::default(), replace_from: Default::default(), replace_to: Default::default(), remove: Default::default(), keep: Default::default() }
+        Self {
+            text: String::from("ô"),
+            num_bytes: 3,
+            num_chars: 2,
+            num_graphemes: 1,
+            replace_from: Default::default(),
+            replace_to: Default::default(),
+            remove: Default::default(),
+            keep: Default::default(),
+        }
     }
 }
 
 impl TextPrepPage {
     // Information counters
-    fn count_bytes(&mut self) {
+    fn counts(&mut self) {
         self.num_bytes = self.text.len();
-    }
-
-    fn count_chars(&mut self) {
         self.num_chars = self.text.chars().count();
-    }
-
-    fn count_graphemes(&mut self) {
         self.num_graphemes = self.text.graphemes(true).count();
     }
 
     // Buttons
     fn clear(&mut self) {
         self.text.clear();
+        self.counts();
     }
 
     fn remove_whitespace(&mut self) {
-        self.text = self.text.split_whitespace().collect()
+        self.text = self.text.split_whitespace().collect();
+        self.counts();
     }
 
     fn uppercase(&mut self) {
-        self.text = self.text.to_uppercase()
+        self.text = self.text.to_uppercase();
+        self.counts();
     }
 
     fn lowercase(&mut self) {
-        self.text = self.text.to_lowercase()
+        self.text = self.text.to_lowercase();
+        self.counts();
     }
 
     fn replace(&mut self) {
-        self.text = self.text.replace(&self.replace_from, &self.replace_to)
+        self.text = self.text.replace(&self.replace_from, &self.replace_to);
+        self.counts();
     }
 
     fn normalize(&mut self) {
-        self.text = self.text.nfc().collect()
+        self.text = self.text.nfc().collect();
+        self.counts();
     }
 
     fn remove_characters(&mut self) {
@@ -63,7 +72,8 @@ impl TextPrepPage {
             .text
             .chars()
             .filter(|c| !self.remove.contains(*c))
-            .collect()
+            .collect();
+        self.counts();
     }
 
     fn keep_characters(&mut self) {
@@ -71,7 +81,8 @@ impl TextPrepPage {
             .text
             .chars()
             .filter(|c| self.remove.contains(*c))
-            .collect()
+            .collect();
+        self.counts();
     }
 
     pub fn view(&mut self, ctx: &Context) {
@@ -137,13 +148,11 @@ impl TextPrepPage {
                     ui.text_edit_singleline(&mut self.keep);
                 });
             });
-        
+
         CentralPanel::default().show(ctx, |ui| {
             let main_text = TextEdit::singleline(&mut self.text).code_editor();
             if ui.add(main_text).changed() {
-                self.count_bytes();
-                self.count_chars();
-                self.count_graphemes();
+                self.counts();
             };
             ui.label(format!("Bytes:      {}", self.num_bytes))
                 .on_hover_text_at_pointer(

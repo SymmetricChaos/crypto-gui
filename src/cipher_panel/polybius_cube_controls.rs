@@ -2,7 +2,7 @@ use eframe::egui::Ui;
 
 impl ViewableCipher for PolybiusCube {}
 
-use super::{generic_components::*, View, ViewableCipher};
+use super::{_generic_components::*, View, ViewableCipher};
 use crate::{ciphers::polybius::PolybiusCube, egui_aux::mono};
 
 impl View for PolybiusCube {

@@ -2,7 +2,7 @@ use eframe::egui::{TextEdit, Ui};
 
 use crate::ciphers::polybius::B64;
 
-use super::{generic_components::*, View, ViewableCipher};
+use super::{_generic_components::*, View, ViewableCipher};
 
 impl ViewableCipher for B64 {}
 
@@ -17,7 +17,7 @@ impl View for B64 {
         }
         ui.add_space(16.0);
 
-        ui.label(free_mono(format!("Grid\n{}", self.polybius)));
+        ui.label(mono(format!("Grid\n{}", self.polybius)));
         ui.add_space(16.0);
 
         ui.label("First Columnar Key Word");

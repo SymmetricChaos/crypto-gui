@@ -1,4 +1,4 @@
-use super::{generic_components::*, View, ViewableCipher};
+use super::{_generic_components::*, View, ViewableCipher};
 use crate::{ciphers::polybius::Bifid, text_aux::PresetAlphabet::*};
 use eframe::{
     egui::{RichText, Slider, Ui},

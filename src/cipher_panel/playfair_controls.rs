@@ -1,6 +1,6 @@
 use eframe::egui::{Color32, RichText, TextEdit, TextStyle, Ui};
 
-use super::{generic_components::*, View, ViewableCipher};
+use super::{_generic_components::*, View, ViewableCipher};
 use crate::{ciphers::playfair::Playfair, text_aux::PresetAlphabet::*};
 
 impl ViewableCipher for Playfair {}

@@ -1,6 +1,6 @@
 use eframe::egui::{TextEdit, Ui};
 
-use super::{generic_components::*, View, ViewableCipher};
+use super::{_generic_components::*, View, ViewableCipher};
 use crate::{ciphers::polybius::Adfgvx, text_aux::PresetAlphabet::*};
 
 impl ViewableCipher for Adfgvx {}
@@ -26,7 +26,7 @@ impl View for Adfgvx {
         }
         ui.add_space(16.0);
 
-        ui.label(free_mono(format!("Grid\n{}", self.polybius)));
+        ui.label(mono(format!("Grid\n{}", self.polybius)));
         ui.add_space(16.0);
 
         ui.label("Columnar Key Word");

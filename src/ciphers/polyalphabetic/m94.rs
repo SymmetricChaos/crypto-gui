@@ -1,4 +1,4 @@
-use crate::{errors::CipherError, global_rng::get_global_rng, ciphers::Cipher};
+use crate::{ciphers::Cipher, errors::CipherError, global_rng::get_global_rng};
 use rand::{prelude::SliceRandom, Rng};
 
 const M94_WHEELS: [&'static str; 25] = [

@@ -1,6 +1,6 @@
 use crate::ciphers::polyalphabetic::{Beaufort, PolyMode};
 
-use super::{generic_components::*, View, ViewableCipher};
+use super::{_generic_components::*, View, ViewableCipher};
 use eframe::egui::{Slider, TextEdit, TextStyle, Ui};
 
 impl ViewableCipher for Beaufort {}

@@ -2,7 +2,7 @@ use eframe::egui::{RichText, TextEdit, TextStyle, Ui};
 
 use crate::ciphers::playfair::Slidefair;
 
-use super::{generic_components::*, View, ViewableCipher};
+use super::{_generic_components::*, View, ViewableCipher};
 
 impl ViewableCipher for Slidefair {}
 

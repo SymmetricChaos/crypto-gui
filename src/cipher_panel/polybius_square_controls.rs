@@ -1,6 +1,6 @@
 use eframe::egui::{Color32, RichText, Ui};
 
-use super::{generic_components::*, View, ViewableCipher};
+use super::{_generic_components::*, View, ViewableCipher};
 use crate::{ciphers::polybius::PolybiusSquare, egui_aux::mono, text_aux::PresetAlphabet::*};
 
 impl ViewableCipher for PolybiusSquare {}

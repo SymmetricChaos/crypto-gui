@@ -1,4 +1,4 @@
-use super::{generic_components::*, View, ViewableCipher};
+use super::{_generic_components::*, View, ViewableCipher};
 use crate::{ciphers::tactical::Batco, egui_aux::mono};
 use eframe::egui::{Slider, Ui};
 

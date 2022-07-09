@@ -1,6 +1,6 @@
 use crate::{ciphers::substitution::Plugboard, egui_aux::mono_strong};
 
-use super::{generic_components::control_string, View, ViewableCipher};
+use super::{_generic_components::control_string, View, ViewableCipher};
 use eframe::egui::Ui;
 
 impl ViewableCipher for Plugboard {}

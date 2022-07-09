@@ -1,6 +1,6 @@
 use crate::ciphers::polyalphabetic::Alberti;
 
-use super::{generic_components::*, View, ViewableCipher};
+use super::{_generic_components::*, View, ViewableCipher};
 use eframe::egui::{Slider, Ui};
 
 impl ViewableCipher for Alberti {}
@@ -20,7 +20,7 @@ impl View for Alberti {
             self.set_moving_alphabet()
         }
 
-        ui.label(free_mono(&self));
+        ui.label(mono(&self));
 
         ui.label("Index");
         let alpha_range = 0..=(self.alphabet_len() - 1);

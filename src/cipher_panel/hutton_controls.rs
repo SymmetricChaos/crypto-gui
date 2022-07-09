@@ -1,4 +1,4 @@
-use super::{generic_components::*, View, ViewableCipher};
+use super::{_generic_components::*, View, ViewableCipher};
 use crate::{
     ciphers::polyalphabetic::{Hutton, HuttonVersion},
     egui_aux::mono,

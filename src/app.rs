@@ -59,7 +59,6 @@ impl Default for ClassicCrypto {
 }
 
 impl ClassicCrypto {
-
     // Configure the CreationContext and also build the app
     pub fn build_with_context(cc: &eframe::CreationContext<'_>) -> Self {
         let mut font_def = FontDefinitions::default();
@@ -83,7 +82,7 @@ impl ClassicCrypto {
             .get_mut(&FontFamily::Monospace)
             .unwrap()
             .push("FreeMonoOTF".into());
-        
+
         // Load FreeSans.ttf and FreeSans.otf
         font_def.font_data.insert(
             "FreeSansTTF".into(),
@@ -104,6 +103,16 @@ impl ClassicCrypto {
             .get_mut(&FontFamily::Proportional)
             .unwrap()
             .push("FreeSansOTF".into());
+
+        font_def.font_data.insert(
+                "NotoSymbols".into(),
+                FontData::from_static(include_bytes!("../NotoSansSymbols2-Regular.ttf")),
+            );
+        font_def
+            .families
+            .get_mut(&FontFamily::Proportional)
+            .unwrap()
+            .push("NotoSymbols".into());
 
         cc.egui_ctx.set_fonts(font_def);
 

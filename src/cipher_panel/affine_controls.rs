@@ -1,4 +1,4 @@
-use super::{generic_components::*, View, ViewableCipher};
+use super::{_generic_components::*, View, ViewableCipher};
 use crate::{ciphers::substitution::Affine, math_functions::prime_factors};
 use eframe::egui::{Slider, Ui};
 
