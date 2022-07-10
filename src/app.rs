@@ -22,6 +22,18 @@ fn page_selector(ui: &mut Ui, name: &str, page: Page, active_page: &mut Page) {
     }
 }
 
+fn load_font(name: &str, family: &FontFamily, font_data: FontData, font_def: &mut FontDefinitions) {
+    font_def.font_data.insert(
+        name.into(),
+        font_data
+    );
+    font_def
+        .families
+        .get_mut(family)
+        .unwrap()
+        .push(name.into());
+}
+
 pub struct ClassicCrypto {
     cipher_category: CipherCategory,
     cipher_control_panel: CipherControlPanel,
@@ -62,57 +74,17 @@ impl ClassicCrypto {
     // Configure the CreationContext and also build the app
     pub fn build_with_context(cc: &eframe::CreationContext<'_>) -> Self {
         let mut font_def = FontDefinitions::default();
-        // Load FreeMono.ttf and FreeMono.otf
-        font_def.font_data.insert(
-            "FreeMonoTTF".into(),
-            FontData::from_static(include_bytes!("../FreeMono.ttf")),
-        );
-        font_def
-            .families
-            .get_mut(&FontFamily::Monospace)
-            .unwrap()
-            .insert(0, "FreeMonoTTF".into());
 
-        font_def.font_data.insert(
-            "FreeMonoOTF".into(),
-            FontData::from_static(include_bytes!("../FreeMono.otf")),
-        );
-        font_def
-            .families
-            .get_mut(&FontFamily::Monospace)
-            .unwrap()
-            .push("FreeMonoOTF".into());
+        // Noto fonts to get wide coverage, more can be added if needed
+        load_font("NotoMono", &FontFamily::Monospace, FontData::from_static(include_bytes!("../NotoSansMono-Regular.ttf")), &mut font_def);
+        load_font("NotoSans", &FontFamily::Proportional, FontData::from_static(include_bytes!("../NotoSans-Regular.ttf")), &mut font_def);
+        load_font("NotoSymbols", &FontFamily::Proportional, FontData::from_static(include_bytes!("../NotoSansSymbols-Regular.ttf")), &mut font_def);
+        load_font("NotoSymbols2", &FontFamily::Proportional, FontData::from_static(include_bytes!("../NotoSansSymbols2-Regular.ttf")), &mut font_def);
+        load_font("NotoMath", &FontFamily::Proportional, FontData::from_static(include_bytes!("../NotoSansMath-Regular.ttf")), &mut font_def);
 
-        // Load FreeSans.ttf and FreeSans.otf
-        font_def.font_data.insert(
-            "FreeSansTTF".into(),
-            FontData::from_static(include_bytes!("../FreeSans.ttf")),
-        );
-        font_def
-            .families
-            .get_mut(&FontFamily::Proportional)
-            .unwrap()
-            .insert(0, "FreeSansTTF".into());
-
-        font_def.font_data.insert(
-            "FreeSansOTF".into(),
-            FontData::from_static(include_bytes!("../FreeSans.otf")),
-        );
-        font_def
-            .families
-            .get_mut(&FontFamily::Proportional)
-            .unwrap()
-            .push("FreeSansOTF".into());
-
-        font_def.font_data.insert(
-                "NotoSymbols".into(),
-                FontData::from_static(include_bytes!("../NotoSansSymbols2-Regular.ttf")),
-            );
-        font_def
-            .families
-            .get_mut(&FontFamily::Proportional)
-            .unwrap()
-            .push("NotoSymbols".into());
+        // Fallback FreeMono and FreeSans in OTF for compatibility
+        load_font("FreeMonoOTF", &FontFamily::Monospace, FontData::from_static(include_bytes!("../FreeMono.otf")), &mut font_def);
+        load_font("FreeSansOTF", &FontFamily::Proportional, FontData::from_static(include_bytes!("../FreeSans.otf")), &mut font_def);
 
         cc.egui_ctx.set_fonts(font_def);
 

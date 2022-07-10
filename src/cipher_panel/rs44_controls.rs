@@ -28,11 +28,22 @@ fn cell_button_char(
 impl View for RS44 {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String) {
         randomize_reset(ui, self);
+        ui.add_space(16.0);
 
-        ui.label("Starting Cell");
+        ui.label("Start Column").on_hover_text_at_pointer("the index of the column that is read first when encrypting");
+        if ui
+            .add(DragValue::new(&mut self.start_column).clamp_range(0..=24))
+            .changed()
+        {
+            self.set_full_message_key();
+        };
+
+        ui.add_space(16.0);
+
+        ui.label("Starting Cell").on_hover_text_at_pointer("the coordinates of the cell where the text is written into the grid when encrypting");
         ui.horizontal(|ui| {
-            ui.add_space(16.0);
             // The user changes the second field of the index with the x coordinate and the first field with the y coordinate
+            // Grid index notation is flipped from the more familiar xy notation
             if ui
                 .add(
                     DragValue::new(&mut self.start_cell.1)
@@ -52,27 +63,18 @@ impl View for RS44 {
                 .changed()
             {
                 self.set_full_message_key();
-            };
+            };        
+            if self.stencil[self.start_cell].is_blocked() {
+                ui.label(
+                    RichText::new("Invalid Start Position")
+                        .color(Color32::RED)
+                        .background_color(Color32::BLACK)
+                        .monospace(),
+                );
+            } else {
+                ui.label(" ");
+            }
         });
-
-        if self.stencil[self.start_cell].is_blocked() {
-            ui.label(
-                RichText::new("Invalid Start Position")
-                    .color(Color32::RED)
-                    .background_color(Color32::BLACK)
-                    .monospace(),
-            );
-        } else {
-            ui.label(" ");
-        }
-
-        ui.label("Start Column");
-        if ui
-            .add(DragValue::new(&mut self.start_column).clamp_range(0..=24))
-            .changed()
-        {
-            self.set_full_message_key();
-        };
 
         ui.add_space(16.0);
 
@@ -81,6 +83,7 @@ impl View for RS44 {
             ui.spacing_mut().item_spacing = (2.0, 2.0).into();
             ui.style_mut().override_text_style = Some(TextStyle::Monospace);
 
+            ui.label("Letter Encyption Square").on_hover_text_at_pointer("each letter along the top can be written as any of the letters in the column below it");
             ui.horizontal(|ui| {
                 for letter in ["a", "b", "c", "d", "e"] {
                     ui.add_enabled(false, Button::new(letter).frame(false));
@@ -104,7 +107,7 @@ impl View for RS44 {
                 RichText::new(format!("Message Key: {}", self.encrypted_message_key))
                     .strong()
                     .monospace(),
-            );
+            ).on_hover_text_at_pointer("to be transmitted with the message so that the reciever can configure their own cipher");
 
             if ui.button("New Key").clicked() {
                 self.set_full_message_key()
@@ -112,12 +115,22 @@ impl View for RS44 {
         });
 
         ui.add_space(10.0);
-
         Grid::new("control_rs44_grid")
             .spacing(Vec2 { x: -14.0, y: 2.0 })
             .num_columns(27)
             .show(ui, |ui| {
                 // Position cursors on top
+                ui.label(" ");
+                ui.label(" ");
+                for col in 0..25 {
+                    if col == self.start_column {
+                        ui.label(RichText::from("🡫").strong().size(24.0));
+                    } else {
+                        ui.label(" ");
+                    }
+                }
+                ui.end_row();
+
                 ui.label(" ");
                 ui.label(" ");
                 for col in 0..25 {
@@ -140,7 +153,7 @@ impl View for RS44 {
                 ui.label(" ");
                 ui.label(" ");
                 for n in self.column_nums.iter() {
-                    ui.label(n.to_string());
+                    ui.label((n+1).to_string());
                 }
                 ui.end_row();
 
