@@ -3,10 +3,17 @@ use crate::{ciphers::{substitution::Plugboard, Cipher}, errors::CipherError};
 use super::switch::{Switch, SwitchSpeed};
 
 
- 
+
+#[derive(Clone)]
 pub struct Switches {
     sixes: Switch,
     twenties: [Switch; 3],
+}
+
+impl Default for Switches {
+    fn default() -> Self {
+        Self { sixes: Default::default(), twenties: Default::default() }
+    }
 }
  
 impl Switches {
@@ -37,12 +44,12 @@ impl Switches {
     }
  
     fn get_switch(&mut self, speed: SwitchSpeed) -> &mut Switch {
-        for switch in self.twenties {
+        for switch in self.twenties.iter_mut() {
             if switch.speed == speed {
-                return &mut switch
+                return switch
             }
         }
-        &mut self.twenties[0]
+        unreachable!("every switch speed must be represented")
     }
 }
  
@@ -50,6 +57,12 @@ pub struct Purple {
     switches: Switches, // this will be cloned during execution and then mutated
     input_plugboard: Plugboard,
     output_plugboard: Plugboard,
+}
+
+impl Default for Purple {
+    fn default() -> Self {
+        Self { switches: Default::default(), input_plugboard: Default::default(), output_plugboard: Default::default() }
+    }
 }
  
 impl Purple {
@@ -59,16 +72,30 @@ impl Purple {
  
 impl Cipher for Purple {
     fn encrypt(&self, text: &str) -> Result<String,CipherError> {
-        let mut out = String::with_capacity(text.len());
+
         let mut switches = self.switches.clone();
-        for c in text.chars() {
-            let x = self.input_plugboard.get(c);
-            let x = switches.encrypt(x);
-            let f = self.output_plugboard.get(x);
-            out.push(f);
+
+        let from_pb = self.input_plugboard.encrypt(text)?;
+
+        let mut out = String::with_capacity(text.len());
+
+        for c in from_pb.chars() {
+            out.push(switches.encrypt(c));
             switches.step();
         }
  
-        out
+        self.output_plugboard.encrypt(&out)
+    }
+
+    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+        todo!()
+    }
+
+    fn randomize(&mut self) {
+        todo!()
+    }
+
+    fn reset(&mut self) {
+        todo!()
     }
 }
