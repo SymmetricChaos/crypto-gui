@@ -6,13 +6,13 @@ use super::switch::{Switch, SwitchSpeed};
 
 #[derive(Clone)]
 pub struct Switches {
-    sixes: Switch,
-    twenties: [Switch; 3],
+    sixes: Switch<6_usize>,
+    twenties: [Switch<20_usize>; 3],
 }
 
 impl Default for Switches {
     fn default() -> Self {
-        Self { sixes: Default::default(), twenties: Default::default() }
+        Self { sixes: Switch::<6_usize>::sixes(), twenties: Switch::<20_usize>::twenties() }
     }
 }
  
@@ -43,7 +43,7 @@ impl Switches {
         todo!("")
     }
  
-    fn get_switch(&mut self, speed: SwitchSpeed) -> &mut Switch {
+    fn get_switch(&mut self, speed: SwitchSpeed) -> &mut Switch<20> {
         for switch in self.twenties.iter_mut() {
             if switch.speed == speed {
                 return switch
