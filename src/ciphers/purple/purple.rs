@@ -34,12 +34,38 @@ impl Switches {
         }
  
     }
- 
-    pub fn encrypt(&mut self, c: char) -> char {
-        todo!("")
+
+    pub fn encrypt_char(&self, n: usize) -> usize {
+        if n < 6 {
+            self.sixes.encrypt(n)
+        } else {
+            let n = self.twenties[0].encrypt(n);
+            let n = self.twenties[1].encrypt(n);
+            self.twenties[2].encrypt(n)
+        }
+    }
+
+    pub fn decrypt_char(&self, n: usize) -> usize {
+        if n < 6 {
+            self.sixes.decrypt(n)
+        } else {
+            let n = self.twenties[2].decrypt(n);
+            let n = self.twenties[1].decrypt(n);
+            self.twenties[0].decrypt(n)
+        }
     }
  
-    pub fn decrypt(&mut self, c: char) -> char {
+    pub fn encrypt(&mut self, text: &str) -> String {
+        let out = String::with_capacity(text.len());
+        for c in text.chars() {
+            todo!("convert c to a number then encrypt");
+            
+            self.step();
+        }
+        out
+    }
+ 
+    pub fn decrypt(&mut self, text: &str) -> String {
         todo!("")
     }
  
@@ -61,13 +87,18 @@ pub struct Purple {
 
 impl Default for Purple {
     fn default() -> Self {
-        Self { switches: Default::default(), input_plugboard: Default::default(), output_plugboard: Default::default() }
+        Self { 
+            switches: Default::default(), 
+            input_plugboard: Default::default(), 
+            output_plugboard: Default::default() 
+        }
     }
 }
  
 impl Purple {
     const SIXES: &'static str = "AEIOUY";
     const TWENTIES: &'static str = "BCDFGHJKLMNPQRSTVWXZ";
+    const ALPHABET: &'static str = "AEIOUYBCDFGHJKLMNPQRSTVWXZ";
 }
  
 impl Cipher for Purple {
@@ -77,14 +108,9 @@ impl Cipher for Purple {
 
         let from_pb = self.input_plugboard.encrypt(text)?;
 
-        let mut out = String::with_capacity(text.len());
+        let from_sw = switches.encrypt(&from_pb);
 
-        for c in from_pb.chars() {
-            out.push(switches.encrypt(c));
-            switches.step();
-        }
- 
-        self.output_plugboard.encrypt(&out)
+        self.output_plugboard.encrypt(&from_sw)
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
