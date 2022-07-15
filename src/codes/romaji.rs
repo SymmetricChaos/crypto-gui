@@ -1,5 +1,7 @@
 use lazy_static::lazy_static;
 use std::collections::HashMap;
+use regex::Regex; 
+use itertools::zip;
 
 use crate::errors::CodeError;
 
@@ -17,16 +19,65 @@ to its English pronunciation. For instance こんにちは is written and
 pronounced "kon'nichiwa" in the Hepburn system but is written "kon'nitiha" in
 the Nihon-shiki system, with the same pronunciation.
 */
-const HIRAGANA: &'static str = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽゃゅょ";
+// the organization of the array should be preserved for legibility
+#[rustfmt::skip] 
+const LATIN: [&str; 109] = [
+     "a",  "i",  "u",  "e",  "o", 
+    "ka", "ki", "ku", "ke", "ko",   "kya", "kyu", "kyo",
+    "sa", "si", "su", "se", "so",   "sya", "syu", "syo",
+    "ta", "ti", "tu", "te", "to",   "tya", "tyu", "tyo",
+    "na", "ni", "nu", "ne", "no",   "nya", "nyu", "nyo",
+    "ha", "hi", "hu", "he", "ho",   "hya", "hyu", "hyo",
+    "ma", "mi", "mu", "me", "mo",   "mya", "myu", "myo",
+    "ya",       "yu",       "yo", 
+    "ra", "ri", "ru", "re", "ro",   "rya", "ryu", "ryo",
+    "wa", "wi",       "we", "wo",
+    "n", 
+    "ga", "gi", "gu", "ge", "go",   "gya", "gyu", "gyo",
+    "za", "zi", "zu", "ze", "zo",   "zya", "zyu", "zyo",
+    "da", "di", "du", "de", "do",   "dya", "dyu", "dyo",
+    "ba", "bi", "bu", "be", "bo",   "bya", "byu", "byo",
+    "pa", "pi", "pu", "pe", "po",   "pya", "pyu", "pyo",
+];
 
-const KATAKANA: &'static str = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポャュョ";
+#[rustfmt::skip] 
+const HIRAGANA: [&str; 109] = [
+    "あ", "い", "う", "え", "お", 
+    "か", "き", "く", "け", "こ",   "きゃ", "きゅ", "きょ",
+    "さ", "し", "す", "せ", "そ",   "しゃ", "しゅ", "しょ",
+    "た", "ち", "つ", "て", "と",   "ちゃ", "ちゅ", "ちょ",
+    "な", "に", "ぬ", "ね", "の",   "にゃ", "にゅ", "にょ",
+    "は", "ひ", "ふ", "へ", "ほ",   "ひゃ", "ひゅ", "ひょ",
+    "ま", "み", "む", "め", "も",   "みゃ", "みゅ", "みょ",
+    "や",       "ゆ",       "よ", 
+    "ら", "り", "る", "れ", "ろ",   "りゃ", "りゅ", "りょ",
+    "わ", "ゐ",       "ゑ", "を",
+    "ん", 
+    "が", "ぎ", "ぐ", "げ", "ご",   "ぎゃ", "ぎゅ", "ぎょ",
+    "ざ", "じ", "ず", "ぜ", "ぞ",   "じゃ", "じゅ", "じょ",
+    "だ", "ぢ", "づ", "で", "ど",   "ぢゃ", "ぢゅ", "ぢょ",
+    "ば", "び", "ぶ", "べ", "ぼ",   "びゃ", "びゅ", "びょ",
+    "ぱ", "ぴ", "ぷ", "ぺ", "ぽ",   "ぴゃ", "ぴゅ", "ぴょ",
+];
 
-const ROMAN: [&'static str; 74] = [
-    "a", "i", "u", "e", "o", "ka", "ki", "ku", "ke", "ko", "sa", "si", "su", "se", "so", "ta",
-    "ti", "tu", "te", "to", "na", "ni", "nu", "ne", "no", "ha", "hi", "hu", "he", "ho", "ma", "mi",
-    "mu", "me", "mo", "ya", "yu", "yo", "ra", "ri", "ru", "re", "ro", "wa", "wo", "n", "ga", "gi",
-    "gu", "ge", "go", "za", "zi", "zu", "ze", "zo", "da", "di", "du", "de", "do", "ba", "bi", "bu",
-    "be", "bo", "pa", "pi", "pu", "pe", "po", "ya", "yu", "yo",
+#[rustfmt::skip] 
+const KATAKANA: [&str; 109] = [
+    "ア", "イ", "ウ", "エ", "オ", 
+    "カ", "キ", "ク", "ケ", "コ",   "キャ", "キュ", "キョ",
+    "サ", "シ", "ス", "セ", "ソ",   "シャ", "シュ", "ショ",
+    "タ", "チ", "ツ", "テ", "ト",   "チャ", "チュ", "チョ",
+    "ナ", "ニ", "ヌ", "ネ", "ノ",   "ニャ", "ニュ", "ニョ",
+    "ハ", "ヒ", "フ", "ヘ", "ホ",   "ヒャ", "ヒュ", "ヒョ",
+    "マ", "ミ", "ム", "メ", "モ",   "ミャ", "ミュ", "ミョ",
+    "ヤ",       "ユ",       "ヨ", 
+    "ラ", "リ", "ル", "レ", "ロ",   "リャ", "リュ", "リョ",
+    "ワ", "ヰ",       "ヱ", "ヲ",
+    "ン", 
+    "ガ", "ギ", "グ", "ゲ", "ゴ",   "ギャ", "ギュ", "ギョ",
+    "ザ", "ジ", "ズ", "ゼ", "ゾ",   "ジャ", "ジュ", "ジョ",
+    "ダ", "ヂ", "ヅ", "デ", "ド",   "ヂャ", "ヂュ", "ヂョ",
+    "バ", "ビ", "ブ", "ベ", "ボ",   "ビャ", "ビュ", "ビョ",
+    "パ", "ピ", "プ", "ペ", "ポ",   "ピャ", "ピュ", "ピョ",
 ];
 
 lazy_static! {
@@ -58,9 +109,29 @@ lazy_static! {
         }
         m
     };
+
+    pub static ref L_TO_H: HashMap<&'static str, &'static str> = {
+        let mut hiragana_map = HashMap::<&str,&str>::new();
+        for (l,h) in zip(LATIN.iter(), HIRAGANA.iter()) {
+            hiragana_map.insert(*l,*h);
+        }
+        hiragana_map.insert("n'","ん");
+        hiragana_map
+    };
+
+    pub static ref L_TO_K: HashMap<&'static str, &'static str> = {
+        let mut katakana_map = HashMap::<&str,&str>::new();
+        for (l,h) in zip(LATIN.iter(), KATAKANA.iter()) {
+            katakana_map.insert(*l,*h);
+        }
+        katakana_map.insert("n'","ン");
+        katakana_map
+    };
 }
 
-pub struct NihonShiki {}
+pub struct NihonShiki {
+
+}
 
 impl Default for NihonShiki {
     fn default() -> Self {
@@ -69,6 +140,37 @@ impl Default for NihonShiki {
 }
 
 impl NihonShiki {
+
+    // regex is ordered
+    // first we match the 'kya' type chunks (note w and y excluded)
+    // then the 'ka' types (note w and y excluded)
+    // then the 'wa' types
+    // then the 'ya', 'yu', and 'yo'
+    // the the 'a' types
+    // then the two n types, always checking for the n with apostophe first, otherwise it would never be matched
+    // finally we capture everything else in order to catch malformed strings when converting
+ 
+    fn latin_to_kana(text: &str, map: HashMap<&str,&str>) -> String {
+        let re = Regex::new(r"(([kstnhmrgzdbp]y[auo])|([kstnhmrgzdbp][aiueo])|(w[aueo])|(y[auo])|([aiueo])|(n'|n)|.+)").unwrap();
+ 
+        let mut out = Vec::new();
+        let words = text.split_whitespace();
+        for word in words {
+            let mut temp_word = String::with_capacity(12);
+            for m in re.find_iter(word) {
+                let group = m.as_str();
+                if let Some(s) = map.get(group) {
+                    temp_word.push_str(s)
+                } else {
+                    temp_word = format!("INVALID({})",word);
+                    break
+                }
+            }
+            out.push(temp_word)
+        }
+        out.join(" ")
+    }
+
     pub fn hirigana_to_romaji(&self, text: &str) -> Result<String,CodeError> {
         let mut symbols = text.chars().peekable();
         let mut out = String::with_capacity(text.chars().count() * 2);
