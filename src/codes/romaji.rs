@@ -1,9 +1,11 @@
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 
+use crate::errors::CodeError;
+
 /*
 There are numerous romanization of the Japanese syllabary, the kana. The two
-most common are the Hebrun romanization, often seen in the west, and the
+most common are the Hebern romanization, often seen in the west, and the
 official Kunrei-shiki romanization (訓令式ローマ字). However neither of
 these are reversible without significant context because some kana are
 written in exactly the same way due to being pronounced in the same way,
@@ -67,11 +69,13 @@ impl Default for NihonShiki {
 }
 
 impl NihonShiki {
-    pub fn hirigana_to_romaji(&self, text: &str) -> String {
+    pub fn hirigana_to_romaji(&self, text: &str) -> Result<String,CodeError> {
         let mut symbols = text.chars().peekable();
         let mut out = String::with_capacity(text.chars().count() * 2);
+
         // Japanese doesn't have vowels but these characters begin with a vowel when romanized
         let vowels = ['あ', 'い', 'う', 'え', 'お', 'や', 'ゆ', 'よ'];
+
         // kana start start with n when romanized
         let n_kana = ['な', 'に', 'ぬ', 'ね', 'の'];
 
@@ -110,21 +114,52 @@ impl NihonShiki {
                 if prev_char == 'i' {
                     out.push_str(&H_TO_R[&s])
                 } else {
-                    panic!("small y kana must be preceeded by a i-column kana")
+                    return Err(CodeError::Input("small y kana must be preceeded by a i-column kana".to_string()))
                 }
             // everything else
             } else {
                 out.push_str(&H_TO_R[&s])
             }
         }
-        out
+        Ok(out)
     }
 
-    // pub fn romaji_to_hirigana(&self, text: &str) -> String {
-    //     todo!()
-    // }
+    pub fn romaji_to_hirigana(&self, text: &str) -> Result<String,CodeError> {
+        let mut symbols = text.chars().peekable();
+        let mut out = String::with_capacity(text.chars().count() / 2);
 
-    pub fn katakana_to_romaji(&self, text: &str) -> String {
+        let mut buffer = String::with_capacity(12);
+
+        // For each roman letter:
+        //  push to the buffer
+        //  if the buffer contains only a vowel then push that kana to out and clear the buffer
+        //  if the buffer contains a consonant and a non-'y' vowel push that kana to out and clear the buffer
+        //  if the buffer contains a non-'n' consonant then restart the loop
+        //  if the buffer contains 'n' check the next symbol
+        //      if it is an apostrophe then push 'ん' to out and clear the buffer
+        //      if that is a vowel then restart the loop
+        //      otherwise return an error
+        //  if the buffer contains a consonant and 'y' continue then restart the loop
+        //  if the buffer contains a constant, a 'y', and a non-'y' vowel push that kana to out and clear the buffer
+        //  in all other cases return an error
+        loop {
+            match symbols.next() {
+                Some(s) => buffer.push(s),
+                None => break,
+            }
+            if buffer == "n" {
+                if let Some(c) = symbols.peek() {
+
+                }
+            }
+
+        }
+
+
+        Ok(out)
+    }
+
+    pub fn katakana_to_romaji(&self, text: &str) -> Result<String,CodeError> {
         let mut symbols = text.chars().peekable();
         let mut out = String::new();
 
@@ -172,17 +207,17 @@ impl NihonShiki {
                 if prev_char == 'i' {
                     out.push_str(&K_TO_R[&s])
                 } else {
-                    panic!("small y kana must be preceeded by a i-column kana")
+                    return Err(CodeError::Input("small y kana must be preceeded by a i-column kana".to_string()))
                 }
             // everything else
             } else {
                 out.push_str(&K_TO_R[&s])
             }
         }
-        out
+        Ok(out)
     }
 
-    // pub fn romaji_to_katakana(&self, text: &str) -> String {
+    // pub fn romaji_to_katakana(&self, text: &str) -> Result<String,CodeError> {
     //     todo!()
     // }
 }

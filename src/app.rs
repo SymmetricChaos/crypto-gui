@@ -81,10 +81,7 @@ impl ClassicCrypto {
         load_font("NotoSymbols", &FontFamily::Proportional, FontData::from_static(include_bytes!("../NotoSansSymbols-Regular.ttf")), &mut font_def);
         load_font("NotoSymbols2", &FontFamily::Proportional, FontData::from_static(include_bytes!("../NotoSansSymbols2-Regular.ttf")), &mut font_def);
         load_font("NotoMath", &FontFamily::Proportional, FontData::from_static(include_bytes!("../NotoSansMath-Regular.ttf")), &mut font_def);
-
-        // Fallback FreeMono and FreeSans in OTF for compatibility
-        load_font("FreeMonoOTF", &FontFamily::Monospace, FontData::from_static(include_bytes!("../FreeMono.otf")), &mut font_def);
-        load_font("FreeSansOTF", &FontFamily::Proportional, FontData::from_static(include_bytes!("../FreeSans.otf")), &mut font_def);
+        load_font("NotoJP", &FontFamily::Proportional, FontData::from_static(include_bytes!("../NotoSansJP-Regular.otf")), &mut font_def);
 
         cc.egui_ctx.set_fonts(font_def);
 

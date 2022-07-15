@@ -150,7 +150,7 @@ impl TextPrepPage {
             });
 
         CentralPanel::default().show(ctx, |ui| {
-            let main_text = TextEdit::singleline(&mut self.text).code_editor();
+            let main_text = TextEdit::multiline(&mut self.text);
             if ui.add(main_text).changed() {
                 self.counts();
             };
