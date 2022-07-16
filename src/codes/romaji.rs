@@ -81,51 +81,47 @@ const KATAKANA: [&str; 109] = [
 ];
 
 lazy_static! {
-    pub static ref H_TO_R: HashMap<char, &'static str> = {
-        let mut m = HashMap::new();
-        for (kana, syll) in HIRAGANA.chars().zip(ROMAN.iter()) {
-            m.insert(kana, *syll);
-        }
-        m
-    };
-    pub static ref R_TO_H: HashMap<&'static str, char> = {
-        let mut m = HashMap::new();
-        for (kana, syll) in HIRAGANA.chars().zip(ROMAN.iter()) {
-            m.insert(*syll, kana);
-        }
-        m
-    };
-    pub static ref K_TO_R: HashMap<char, &'static str> = {
-        let mut m = HashMap::new();
-        for (kana, syll) in KATAKANA.chars().zip(ROMAN.iter()) {
-            m.insert(kana, *syll);
-        }
-        m
-    };
-    pub static ref R_TO_K: HashMap<&'static str, char> = {
-        let mut m = HashMap::new();
-        for (kana, syll) in KATAKANA.chars().zip(ROMAN.iter()) {
-            m.insert(*syll, kana);
-        }
-        m
-    };
 
+    pub static ref LATIN_REGEX: Regex = Regex::new(r"(([kstnhmrgzdbp]y[auo])|([kstnhmrgzdbp][aiueo])|(w[aueo])|(y[auo])|([aiueo])|(n'|n)|.+)").unwrap();
+    pub static ref HIRAGANA_REGEX: Regex = Regex::new(r"((\p{hira}[ゃゅょ])|(\p{hira})|.+)").unwrap();
+    pub static ref KATAKANA_REGEX: Regex = Regex::new(r"((\p{kata}[ャュョ])|(\p{kata})|.+)").unwrap();
+
+    // LATIN to HIRAGANA
     pub static ref L_TO_H: HashMap<&'static str, &'static str> = {
-        let mut hiragana_map = HashMap::<&str,&str>::new();
+        let mut map = HashMap::<&str,&str>::new();
         for (l,h) in zip(LATIN.iter(), HIRAGANA.iter()) {
-            hiragana_map.insert(*l,*h);
+            map.insert(*l,*h);
         }
-        hiragana_map.insert("n'","ん");
-        hiragana_map
+        map.insert("n'","ん");
+        map
     };
 
+    // LATIN to KATAKANA
     pub static ref L_TO_K: HashMap<&'static str, &'static str> = {
-        let mut katakana_map = HashMap::<&str,&str>::new();
+        let mut map = HashMap::<&str,&str>::new();
         for (l,h) in zip(LATIN.iter(), KATAKANA.iter()) {
-            katakana_map.insert(*l,*h);
+            map.insert(*l,*h);
         }
-        katakana_map.insert("n'","ン");
-        katakana_map
+        map.insert("n'","ン");
+        map
+    };
+
+    // HIRAGANA to LATIN
+    pub static ref H_TO_L: HashMap<&'static str, &'static str> = {
+        let mut map = HashMap::<&str,&str>::new();
+        for (l,h) in zip(LATIN.iter(), HIRAGANA.iter()) {
+            map.insert(*h,*l);
+        }
+        map
+    };
+
+    // KATAKANA to LATIN
+    pub static ref K_TO_L: HashMap<&'static str, &'static str> = {
+        let mut map = HashMap::<&str,&str>::new();
+        for (l,k) in zip(LATIN.iter(), KATAKANA.iter()) {
+            map.insert(*k,*l);
+        }
+        map
     };
 }
 
@@ -150,184 +146,72 @@ impl NihonShiki {
     // then the two n types, always checking for the n with apostophe first, otherwise it would never be matched
     // finally we capture everything else in order to catch malformed strings when converting
  
-    fn latin_to_kana(text: &str, map: HashMap<&str,&str>) -> String {
-        let re = Regex::new(r"(([kstnhmrgzdbp]y[auo])|([kstnhmrgzdbp][aiueo])|(w[aueo])|(y[auo])|([aiueo])|(n'|n)|.+)").unwrap();
+    fn latin_to_kana(text: &str, map: &HashMap<&str,&str>) -> Result<String,CodeError> {
  
         let mut out = Vec::new();
         let words = text.split_whitespace();
         for word in words {
             let mut temp_word = String::with_capacity(12);
-            for m in re.find_iter(word) {
+            for m in LATIN_REGEX.find_iter(word) {
                 let group = m.as_str();
                 if let Some(s) = map.get(group) {
                     temp_word.push_str(s)
                 } else {
-                    temp_word = format!("INVALID({})",word);
-                    break
+                    return Err(CodeError::Input(format!("invalid romaji found: {}", group)));
                 }
             }
             out.push(temp_word)
         }
-        out.join(" ")
+        Ok(out.join(" "))
     }
 
-    pub fn hirigana_to_romaji(&self, text: &str) -> Result<String,CodeError> {
-        let mut symbols = text.chars().peekable();
-        let mut out = String::with_capacity(text.chars().count() * 2);
-
-        // Japanese doesn't have vowels but these characters begin with a vowel when romanized
-        let vowels = ['あ', 'い', 'う', 'え', 'お', 'や', 'ゆ', 'よ'];
-
-        // kana start start with n when romanized
-        let n_kana = ['な', 'に', 'ぬ', 'ね', 'の'];
-
-        // The small y-kana
-        let small_y = ['ゃ', 'ゅ', 'ょ'];
-
-        loop {
-            let s = match symbols.next() {
-                Some(symbol) => symbol,
-                None => break,
-            };
-            // Don't modify whitespace
-            if s.is_whitespace() {
-                out.push(s);
-            // handle apostophe after ん
-            } else if s == 'ん' {
-                let next_kana = symbols.peek();
-                if next_kana.is_none() {
-                    out.push('n')
+    fn kana_to_latin(text: &str, map: &HashMap<&str,&str>) -> Result<String,CodeError> {
+ 
+        let mut out = Vec::new();
+        let words = text.split_whitespace();
+        for word in words {
+            let mut temp_word = String::with_capacity(12);
+            for m in HIRAGANA_REGEX.find_iter(word) {
+                let group = m.as_str();
+                if let Some(s) = map.get(group) {
+                    temp_word.push_str(s)
                 } else {
-                    let k = next_kana.unwrap();
-                    if vowels.contains(k) || n_kana.contains(k) {
-                        out.push_str("n'");
-                    } else {
-                        out.push('n');
-                    }
+                    return Err(CodeError::Input(format!("invalid kana found: {}", group)));
                 }
-            // handle sokuon
-            } else if s == 'っ' {
-                let next_kana = symbols.peek().unwrap();
-                let romaji = H_TO_R[next_kana].chars().nth(0).unwrap();
-                out.push(romaji);
-            // handle yoon
-            } else if small_y.contains(&s) {
-                let prev_char = out.pop().unwrap();
-                if prev_char == 'i' {
-                    out.push_str(&H_TO_R[&s])
-                } else {
-                    return Err(CodeError::Input("small y kana must be preceeded by a i-column kana".to_string()))
-                }
-            // everything else
-            } else {
-                out.push_str(&H_TO_R[&s])
             }
+            out.push(temp_word)
         }
-        Ok(out)
+        Ok(out.join(" "))
     }
 
-    pub fn romaji_to_hirigana(&self, text: &str) -> Result<String,CodeError> {
-        let mut symbols = text.chars().peekable();
-        let mut out = String::with_capacity(text.chars().count() / 2);
-
-        let mut buffer = String::with_capacity(12);
-
-        // For each roman letter:
-        //  push to the buffer
-        //  if the buffer contains only a vowel then push that kana to out and clear the buffer
-        //  if the buffer contains a consonant and a non-'y' vowel push that kana to out and clear the buffer
-        //  if the buffer contains a non-'n' consonant then restart the loop
-        //  if the buffer contains 'n' check the next symbol
-        //      if it is an apostrophe then push 'ん' to out and clear the buffer
-        //      if that is a vowel then restart the loop
-        //      otherwise return an error
-        //  if the buffer contains a consonant and 'y' continue then restart the loop
-        //  if the buffer contains a constant, a 'y', and a non-'y' vowel push that kana to out and clear the buffer
-        //  in all other cases return an error
-        loop {
-            match symbols.next() {
-                Some(s) => buffer.push(s),
-                None => break,
-            }
-            if buffer == "n" {
-                if let Some(c) = symbols.peek() {
-
-                }
-            }
-
-        }
-
-
-        Ok(out)
+    pub fn hiragana_to_romaji(&self, text: &str) -> Result<String,CodeError> {
+        Self::kana_to_latin(text, &H_TO_L)
     }
 
     pub fn katakana_to_romaji(&self, text: &str) -> Result<String,CodeError> {
-        let mut symbols = text.chars().peekable();
-        let mut out = String::new();
-
-        // Japanese doesn't have vowels but these characters begin with a vowel when romanized
-        let vowels = ['ア', 'イ', 'ウ', 'エ', 'オ', 'ユ', 'ヨ', 'ラ'];
-        // kana start start with n when romanized
-        let n_kana = ['ナ', 'ニ', 'ヌ', 'ネ', 'ノ'];
-        // The small y-kana
-        let small_y = ['ャ', 'ュ', 'ョ'];
-
-        loop {
-            let s = match symbols.next() {
-                Some(kana) => kana,
-                None => break,
-            };
-            if s.is_whitespace() {
-                out.push(s);
-            // handle apostophe after ン
-            } else if s == 'ン' {
-                let next_kana = symbols.peek();
-                if next_kana.is_none() {
-                    out.push('n')
-                } else {
-                    let k = next_kana.unwrap();
-                    if vowels.contains(k) || n_kana.contains(k) {
-                        out.push_str("n'");
-                    } else {
-                        out.push('n');
-                    }
-                }
-            // handle chōonpu
-            } else if s == 'ー' {
-                let vowel = out.pop().unwrap();
-                out.push(vowel);
-                out.push(vowel);
-
-            // handle sokuon
-            } else if s == 'ッ' {
-                let next_kana = symbols.peek().unwrap();
-                let romaji = K_TO_R[next_kana].chars().nth(0).unwrap();
-                out.push(romaji);
-            // handle yoon
-            } else if small_y.contains(&s) {
-                let prev_char = out.pop().unwrap();
-                if prev_char == 'i' {
-                    out.push_str(&K_TO_R[&s])
-                } else {
-                    return Err(CodeError::Input("small y kana must be preceeded by a i-column kana".to_string()))
-                }
-            // everything else
-            } else {
-                out.push_str(&K_TO_R[&s])
-            }
-        }
-        Ok(out)
+        Self::kana_to_latin(text, &K_TO_L)
     }
 
-    // pub fn romaji_to_katakana(&self, text: &str) -> Result<String,CodeError> {
-    //     todo!()
-    // }
+    pub fn romaji_to_hiragana(&self, text: &str) -> Result<String,CodeError> {
+        Self::latin_to_kana(text, &L_TO_H)
+    }
+
+    pub fn romaji_to_katakana(&self, text: &str) -> Result<String,CodeError> {
+        Self::latin_to_kana(text, &L_TO_K)
+    }
 }
 
 #[test]
 fn nihon_shiki_hiragana() {
     let ns = NihonShiki::default();
-    let plaintext = "ひらがな かたかな しんよう きっぷ きよう きょう にほん　こんにちは";
-    let coded = ns.hirigana_to_romaji(plaintext);
-    println!("{}", coded);
+    let latin = "konnitiwa hiragana kyouto oosaka toukyo yokohama ren'ai"; // kippu";
+    let hiragana = "こんにちわ ひらがな きょうと おおさか とうきょ よこはま れんあい"; // きっぷ";
+    let katakana = "コンニチワ ヒラガナ キョウト オオサカ トウキョ ヨコハマ レンアイ"; // きっぷ";
+
+    assert_eq!(ns.romaji_to_hiragana(latin).unwrap(), hiragana);
+    assert_eq!(ns.romaji_to_katakana(latin).unwrap(), katakana);
+
+    println!("{:?}",ns.hiragana_to_romaji(hiragana));
+    println!("{:?}",ns.katakana_to_romaji(katakana));
+
 }
