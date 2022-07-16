@@ -26,7 +26,6 @@ pub mod unicode;
 pub use unicode::Unicode;
 
 pub mod romaji;
-pub use romaji::NihonShiki;
 
 pub mod baudot;
 pub use baudot::Baudot;
