@@ -82,9 +82,19 @@ const KATAKANA: [&str; 109] = [
 
 lazy_static! {
 
+    // regex is ordered
+    // first we match the 'kya' type chunks (note w and y excluded)
+    // then the 'ka' types (note w and y excluded)
+    // then the 'wa' types
+    // then the 'ya', 'yu', and 'yo'
+    // the the 'a' types
+    // then the two n types, always checking for the n with apostophe first, otherwise it would never be matched
+    // finally we capture everything else in order to catch malformed strings when converting
     pub static ref LATIN_REGEX: Regex = Regex::new(r"(([kstnhmrgzdbp]y[auo])|([kstnhmrgzdbp][aiueo])|(w[aueo])|(y[auo])|([aiueo])|(n'|n)|.+)").unwrap();
+    
+    // here match the kya type chunks, then all single kana, then everything else
     pub static ref HIRAGANA_REGEX: Regex = Regex::new(r"((\p{hira}[ゃゅょ])|(\p{hira})|.+)").unwrap();
-    pub static ref KATAKANA_REGEX: Regex = Regex::new(r"((\p{kata}[ャュョ])|(\p{kata})|.+)").unwrap();
+    pub static ref KATAKANA_REGEX: Regex = Regex::new(r"((\p{katakana}[ャュョ])|(\p{katakana})|.+)").unwrap();
 
 
     // LATIN to HIRAGANA
@@ -135,14 +145,7 @@ impl Default for NihonShiki {
 }
 
 impl NihonShiki {
-    // regex is ordered
-    // first we match the 'kya' type chunks (note w and y excluded)
-    // then the 'ka' types (note w and y excluded)
-    // then the 'wa' types
-    // then the 'ya', 'yu', and 'yo'
-    // the the 'a' types
-    // then the two n types, always checking for the n with apostophe first, otherwise it would never be matched
-    // finally we capture everything else in order to catch malformed strings when converting
+
 
     fn latin_to_kana(text: &str, map: &HashMap<&str, &str>) -> Result<String, CodeError> {
         let mut out = Vec::new();
@@ -162,7 +165,7 @@ impl NihonShiki {
         Ok(out.join(" "))
     }
 
-    fn kana_to_latin(text: &str, map: &HashMap<&str, &str>) -> Result<String, CodeError> {
+    fn hiragana_to_latin(text: &str, map: &HashMap<&str, &str>) -> Result<String, CodeError> {
         let mut out = Vec::new();
         let words = text.split_whitespace();
         for word in words {
@@ -180,12 +183,30 @@ impl NihonShiki {
         Ok(out.join(" "))
     }
 
+    fn katakana_to_latin(text: &str, map: &HashMap<&str, &str>) -> Result<String, CodeError> {
+        let mut out = Vec::new();
+        let words = text.split_whitespace();
+        for word in words {
+            let mut temp_word = String::with_capacity(12);
+            for m in KATAKANA_REGEX.find_iter(word) {
+                let group = m.as_str();
+                if let Some(s) = map.get(group) {
+                    temp_word.push_str(s)
+                } else {
+                    return Err(CodeError::Input(format!("invalid kana found: {}", group)));
+                }
+            }
+            out.push(temp_word)
+        }
+        Ok(out.join(" "))
+    }
+
     pub fn hiragana_to_romaji(&self, text: &str) -> Result<String, CodeError> {
-        Self::kana_to_latin(text, &H_TO_L)
+        Self::hiragana_to_latin(text, &H_TO_L)
     }
 
     pub fn katakana_to_romaji(&self, text: &str) -> Result<String, CodeError> {
-        Self::kana_to_latin(text, &K_TO_L)
+        Self::katakana_to_latin(text, &K_TO_L)
     }
 
     pub fn romaji_to_hiragana(&self, text: &str) -> Result<String, CodeError> {
