@@ -1,6 +1,6 @@
 use eframe::egui::{TextEdit, Ui};
 
-use super::{_generic_components::*, View, ViewableCipher};
+use super::{View, ViewableCipher, _generic_components::*};
 use crate::{ciphers::polybius::Adfgvx, text_aux::PresetAlphabet::*};
 
 impl ViewableCipher for Adfgvx {}

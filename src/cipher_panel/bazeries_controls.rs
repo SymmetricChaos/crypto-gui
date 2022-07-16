@@ -1,6 +1,6 @@
 use crate::ciphers::polyalphabetic::Bazeries;
 
-use super::{_generic_components::*, View, ViewableCipher};
+use super::{View, ViewableCipher, _generic_components::*};
 use eframe::egui::{self, Slider, Ui};
 
 impl ViewableCipher for Bazeries {}

@@ -1,4 +1,4 @@
-use super::{_generic_components::*, View, ViewableCipher};
+use super::{View, ViewableCipher, _generic_components::*};
 use crate::{ciphers::polybius::Trifid, egui_aux::mono};
 use eframe::egui::{Slider, Ui};
 

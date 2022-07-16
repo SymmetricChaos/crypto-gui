@@ -1,6 +1,6 @@
 use crate::ciphers::polyalphabetic::{PolyMode::*, Vigenere};
 
-use super::{_generic_components::*, View, ViewableCipher};
+use super::{View, ViewableCipher, _generic_components::*};
 use eframe::egui::{Slider, TextEdit, TextStyle, Ui};
 
 impl ViewableCipher for Vigenere {}

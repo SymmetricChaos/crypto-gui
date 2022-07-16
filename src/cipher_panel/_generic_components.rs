@@ -95,4 +95,3 @@ pub fn letter_grid(ui: &mut egui::Ui, n_rows: usize, n_cols: usize, text: &Strin
 pub fn mono<T: ToString>(text: T) -> RichText {
     RichText::from(text.to_string()).family(FontFamily::Monospace)
 }
-

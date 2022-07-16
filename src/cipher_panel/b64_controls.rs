@@ -2,7 +2,7 @@ use eframe::egui::{TextEdit, Ui};
 
 use crate::ciphers::polybius::B64;
 
-use super::{_generic_components::*, View, ViewableCipher};
+use super::{View, ViewableCipher, _generic_components::*};
 
 impl ViewableCipher for B64 {}
 

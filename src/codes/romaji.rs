@@ -1,7 +1,7 @@
-use lazy_static::lazy_static;
-use std::collections::HashMap;
-use regex::Regex; 
 use itertools::zip;
+use lazy_static::lazy_static;
+use regex::Regex;
+use std::collections::HashMap;
 
 use crate::errors::CodeError;
 
@@ -86,6 +86,7 @@ lazy_static! {
     pub static ref HIRAGANA_REGEX: Regex = Regex::new(r"((\p{hira}[ゃゅょ])|(\p{hira})|.+)").unwrap();
     pub static ref KATAKANA_REGEX: Regex = Regex::new(r"((\p{kata}[ャュョ])|(\p{kata})|.+)").unwrap();
 
+
     // LATIN to HIRAGANA
     pub static ref L_TO_H: HashMap<&'static str, &'static str> = {
         let mut map = HashMap::<&str,&str>::new();
@@ -125,9 +126,7 @@ lazy_static! {
     };
 }
 
-pub struct NihonShiki {
-
-}
+pub struct NihonShiki {}
 
 impl Default for NihonShiki {
     fn default() -> Self {
@@ -136,7 +135,6 @@ impl Default for NihonShiki {
 }
 
 impl NihonShiki {
-
     // regex is ordered
     // first we match the 'kya' type chunks (note w and y excluded)
     // then the 'ka' types (note w and y excluded)
@@ -145,9 +143,8 @@ impl NihonShiki {
     // the the 'a' types
     // then the two n types, always checking for the n with apostophe first, otherwise it would never be matched
     // finally we capture everything else in order to catch malformed strings when converting
- 
-    fn latin_to_kana(text: &str, map: &HashMap<&str,&str>) -> Result<String,CodeError> {
- 
+
+    fn latin_to_kana(text: &str, map: &HashMap<&str, &str>) -> Result<String, CodeError> {
         let mut out = Vec::new();
         let words = text.split_whitespace();
         for word in words {
@@ -165,8 +162,7 @@ impl NihonShiki {
         Ok(out.join(" "))
     }
 
-    fn kana_to_latin(text: &str, map: &HashMap<&str,&str>) -> Result<String,CodeError> {
- 
+    fn kana_to_latin(text: &str, map: &HashMap<&str, &str>) -> Result<String, CodeError> {
         let mut out = Vec::new();
         let words = text.split_whitespace();
         for word in words {
@@ -184,19 +180,19 @@ impl NihonShiki {
         Ok(out.join(" "))
     }
 
-    pub fn hiragana_to_romaji(&self, text: &str) -> Result<String,CodeError> {
+    pub fn hiragana_to_romaji(&self, text: &str) -> Result<String, CodeError> {
         Self::kana_to_latin(text, &H_TO_L)
     }
 
-    pub fn katakana_to_romaji(&self, text: &str) -> Result<String,CodeError> {
+    pub fn katakana_to_romaji(&self, text: &str) -> Result<String, CodeError> {
         Self::kana_to_latin(text, &K_TO_L)
     }
 
-    pub fn romaji_to_hiragana(&self, text: &str) -> Result<String,CodeError> {
+    pub fn romaji_to_hiragana(&self, text: &str) -> Result<String, CodeError> {
         Self::latin_to_kana(text, &L_TO_H)
     }
 
-    pub fn romaji_to_katakana(&self, text: &str) -> Result<String,CodeError> {
+    pub fn romaji_to_katakana(&self, text: &str) -> Result<String, CodeError> {
         Self::latin_to_kana(text, &L_TO_K)
     }
 }
@@ -211,7 +207,6 @@ fn nihon_shiki_hiragana() {
     assert_eq!(ns.romaji_to_hiragana(latin).unwrap(), hiragana);
     assert_eq!(ns.romaji_to_katakana(latin).unwrap(), katakana);
 
-    println!("{:?}",ns.hiragana_to_romaji(hiragana));
-    println!("{:?}",ns.katakana_to_romaji(katakana));
-
+    println!("{:?}", ns.hiragana_to_romaji(hiragana));
+    println!("{:?}", ns.katakana_to_romaji(katakana));
 }

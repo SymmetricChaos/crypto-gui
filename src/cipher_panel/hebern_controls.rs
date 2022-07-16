@@ -1,6 +1,6 @@
 use crate::ciphers::hebern::Hebern;
 
-use super::{_generic_components::control_string, View, ViewableCipher};
+use super::{View, ViewableCipher, _generic_components::control_string};
 use eframe::egui::{Slider, TextEdit, Ui};
 
 impl ViewableCipher for Hebern {}

@@ -23,15 +23,8 @@ fn page_selector(ui: &mut Ui, name: &str, page: Page, active_page: &mut Page) {
 }
 
 fn load_font(name: &str, family: &FontFamily, font_data: FontData, font_def: &mut FontDefinitions) {
-    font_def.font_data.insert(
-        name.into(),
-        font_data
-    );
-    font_def
-        .families
-        .get_mut(family)
-        .unwrap()
-        .push(name.into());
+    font_def.font_data.insert(name.into(), font_data);
+    font_def.families.get_mut(family).unwrap().push(name.into());
 }
 
 pub struct ClassicCrypto {
@@ -76,12 +69,42 @@ impl ClassicCrypto {
         let mut font_def = FontDefinitions::default();
 
         // Noto fonts to get wide coverage, more can be added if needed
-        load_font("NotoMono", &FontFamily::Monospace, FontData::from_static(include_bytes!("../NotoSansMono-Regular.ttf")), &mut font_def);
-        load_font("NotoSans", &FontFamily::Proportional, FontData::from_static(include_bytes!("../NotoSans-Regular.ttf")), &mut font_def);
-        load_font("NotoSymbols", &FontFamily::Proportional, FontData::from_static(include_bytes!("../NotoSansSymbols-Regular.ttf")), &mut font_def);
-        load_font("NotoSymbols2", &FontFamily::Proportional, FontData::from_static(include_bytes!("../NotoSansSymbols2-Regular.ttf")), &mut font_def);
-        load_font("NotoMath", &FontFamily::Proportional, FontData::from_static(include_bytes!("../NotoSansMath-Regular.ttf")), &mut font_def);
-        load_font("NotoJP", &FontFamily::Proportional, FontData::from_static(include_bytes!("../NotoSansJP-Regular.otf")), &mut font_def);
+        load_font(
+            "NotoMono",
+            &FontFamily::Monospace,
+            FontData::from_static(include_bytes!("../NotoSansMono-Regular.ttf")),
+            &mut font_def,
+        );
+        load_font(
+            "NotoSans",
+            &FontFamily::Proportional,
+            FontData::from_static(include_bytes!("../NotoSans-Regular.ttf")),
+            &mut font_def,
+        );
+        load_font(
+            "NotoSymbols",
+            &FontFamily::Proportional,
+            FontData::from_static(include_bytes!("../NotoSansSymbols-Regular.ttf")),
+            &mut font_def,
+        );
+        load_font(
+            "NotoSymbols2",
+            &FontFamily::Proportional,
+            FontData::from_static(include_bytes!("../NotoSansSymbols2-Regular.ttf")),
+            &mut font_def,
+        );
+        load_font(
+            "NotoMath",
+            &FontFamily::Proportional,
+            FontData::from_static(include_bytes!("../NotoSansMath-Regular.ttf")),
+            &mut font_def,
+        );
+        load_font(
+            "NotoJP",
+            &FontFamily::Proportional,
+            FontData::from_static(include_bytes!("../NotoSansJP-Regular.otf")),
+            &mut font_def,
+        );
 
         cc.egui_ctx.set_fonts(font_def);
 

@@ -1,4 +1,4 @@
-use super::{_generic_components::*, View, ViewableCipher};
+use super::{View, ViewableCipher, _generic_components::*};
 use crate::ciphers::polyalphabetic::M94;
 use eframe::{
     egui::{self, RichText, Slider, Ui},

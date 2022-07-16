@@ -1,6 +1,6 @@
 use crate::ciphers::tactical::RS44;
 
-use super::{_generic_components::*, View, ViewableCipher};
+use super::{View, ViewableCipher, _generic_components::*};
 use eframe::{
     egui::{Button, DragValue, Grid, RichText, TextStyle, Ui},
     epaint::{Color32, Vec2},
@@ -30,7 +30,8 @@ impl View for RS44 {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 
-        ui.label("Start Column").on_hover_text_at_pointer("the index of the column that is read first when encrypting");
+        ui.label("Start Column")
+            .on_hover_text_at_pointer("the index of the column that is read first when encrypting");
         if ui
             .add(DragValue::new(&mut self.start_column).clamp_range(0..=24))
             .changed()
@@ -40,7 +41,9 @@ impl View for RS44 {
 
         ui.add_space(16.0);
 
-        ui.label("Starting Cell").on_hover_text_at_pointer("the coordinates of the cell where the text is written into the grid when encrypting");
+        ui.label("Starting Cell").on_hover_text_at_pointer(
+            "the coordinates of the cell where the text is written into the grid when encrypting",
+        );
         ui.horizontal(|ui| {
             // The user changes the second field of the index with the x coordinate and the first field with the y coordinate
             // Grid index notation is flipped from the more familiar xy notation
@@ -63,7 +66,7 @@ impl View for RS44 {
                 .changed()
             {
                 self.set_full_message_key();
-            };        
+            };
             if self.stencil[self.start_cell].is_blocked() {
                 ui.label(
                     RichText::new("Invalid Start Position")
@@ -153,7 +156,7 @@ impl View for RS44 {
                 ui.label(" ");
                 ui.label(" ");
                 for n in self.column_nums.iter() {
-                    ui.label((n+1).to_string());
+                    ui.label((n + 1).to_string());
                 }
                 ui.end_row();
 

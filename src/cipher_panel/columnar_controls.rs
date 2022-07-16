@@ -1,6 +1,6 @@
 use crate::ciphers::transposition::Columnar;
 
-use super::{_generic_components::*, View, ViewableCipher};
+use super::{View, ViewableCipher, _generic_components::*};
 use eframe::egui::Ui;
 
 impl ViewableCipher for Columnar {}

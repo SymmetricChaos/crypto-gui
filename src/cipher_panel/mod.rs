@@ -9,6 +9,7 @@ use crate::{
 };
 use eframe::egui::{self, Color32, RichText, TextEdit, TextStyle, Ui};
 
+pub mod _generic_components;
 pub mod adfgvx_controls;
 pub mod affine_controls;
 pub mod alberti_controls;
@@ -26,7 +27,6 @@ pub mod dryad_controls;
 pub mod enigma_controls;
 pub mod four_square_controls;
 pub mod general_sub_controls;
-pub mod _generic_components;
 pub mod grille_controls;
 pub mod hebern_controls;
 pub mod hutton_controls;

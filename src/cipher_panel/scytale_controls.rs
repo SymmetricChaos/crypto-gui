@@ -1,6 +1,6 @@
 use crate::ciphers::transposition::Scytale;
 
-use super::{_generic_components::*, View, ViewableCipher};
+use super::{View, ViewableCipher, _generic_components::*};
 
 use eframe::egui::{Slider, Ui};
 
