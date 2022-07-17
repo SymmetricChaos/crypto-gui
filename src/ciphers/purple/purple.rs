@@ -1,6 +1,7 @@
+use lazy_static::lazy_static;
 use crate::{
     ciphers::{substitution::Plugboard, Cipher},
-    errors::CipherError,
+    errors::CipherError, codes::romaji::to_romaji_ks, text_aux::VecString,
 };
 
 use super::switch::{Switch, SwitchSpeed};
@@ -21,6 +22,7 @@ impl Default for Switches {
 }
 
 impl Switches {
+
     pub fn step(&mut self) {
         let spos = self.sixes.position;
         let mpos = self.get_switch(SwitchSpeed::Middle).position;
@@ -38,38 +40,24 @@ impl Switches {
         }
     }
 
-    pub fn encrypt_char(&self, n: usize) -> usize {
+    pub fn encrypt_num(&self, n: usize) -> usize {
         if n < 6 {
             self.sixes.encrypt(n)
         } else {
-            let n = self.twenties[0].encrypt(n);
+            let n = self.twenties[0].encrypt(n-6);
             let n = self.twenties[1].encrypt(n);
             self.twenties[2].encrypt(n)
         }
     }
 
-    pub fn decrypt_char(&self, n: usize) -> usize {
+    pub fn decrypt_num(&self, n: usize) -> usize {
         if n < 6 {
             self.sixes.decrypt(n)
         } else {
-            let n = self.twenties[2].decrypt(n);
+            let n = self.twenties[2].decrypt(n-6);
             let n = self.twenties[1].decrypt(n);
             self.twenties[0].decrypt(n)
         }
-    }
-
-    pub fn encrypt(&mut self, text: &str) -> String {
-        let out = String::with_capacity(text.len());
-        for c in text.chars() {
-            todo!("convert c to a number then encrypt");
-
-            self.step();
-        }
-        out
-    }
-
-    pub fn decrypt(&mut self, text: &str) -> String {
-        todo!("")
     }
 
     fn get_switch(&mut self, speed: SwitchSpeed) -> &mut Switch<20> {
@@ -84,39 +72,75 @@ impl Switches {
 
 pub struct Purple {
     switches: Switches, // this will be cloned during execution and then mutated
-    input_plugboard: Plugboard,
-    output_plugboard: Plugboard,
+    plugboard: Plugboard,
 }
 
 impl Default for Purple {
     fn default() -> Self {
         Self {
             switches: Default::default(),
-            input_plugboard: Default::default(),
-            output_plugboard: Default::default(),
+            plugboard: Default::default(),
         }
     }
 }
 
+lazy_static! {
+    pub static ref PURPLE_ALPHABET: VecString = VecString::from("AEIOUYBCDFGHJKLMNPQRSTVWXZ");
+}
+
 impl Purple {
-    const SIXES: &'static str = "AEIOUY";
-    const TWENTIES: &'static str = "BCDFGHJKLMNPQRSTVWXZ";
-    const ALPHABET: &'static str = "AEIOUYBCDFGHJKLMNPQRSTVWXZ";
+
+    fn text_to_nums(text: &str) -> Result<Vec<usize>,CipherError> {
+        let mut out = Vec::with_capacity(text.len());
+        for c in text.chars() {
+            let n = PURPLE_ALPHABET.get_pos(c).ok_or(CipherError::input("invalid character"))?;
+            out.push(n);
+        }
+        Ok(out)
+    }
+
+    fn nums_to_text(nums: Vec<usize>) -> Result<String,CipherError> {
+        let mut out = String::with_capacity(nums.len());
+        for n in nums {
+            let n = PURPLE_ALPHABET.get_char(n).ok_or(CipherError::input("invalid character"))?;
+            out.push(n);
+        }
+        Ok(out)
+    }
 }
 
 impl Cipher for Purple {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+
+        let text = to_romaji_ks(text);
+
+        let from_pb = self.plugboard.encrypt(&text)?;
+
+        let mut nums = Self::text_to_nums(&from_pb)?;
+
         let mut switches = self.switches.clone();
+        for n in nums.iter_mut() {
+            *n = switches.encrypt_num(*n);
+            switches.step();
+        }
 
-        let from_pb = self.input_plugboard.encrypt(text)?;
-
-        let from_sw = switches.encrypt(&from_pb);
-
-        self.output_plugboard.encrypt(&from_sw)
+        Self::nums_to_text(nums)
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        todo!()
+        let text = to_romaji_ks(text);
+
+        let from_pb = self.plugboard.decrypt(&text)?;
+
+        let mut nums = Self::text_to_nums(&from_pb)?;
+
+        let mut switches = self.switches.clone();
+        for n in nums.iter_mut() {
+            *n = switches.decrypt_num(*n);
+            switches.step();
+        }
+
+        Self::nums_to_text(nums)
     }
 
     fn randomize(&mut self) {
@@ -125,5 +149,27 @@ impl Cipher for Purple {
 
     fn reset(&mut self) {
         todo!()
+    }
+}
+
+
+
+#[cfg(test)]
+mod purple_tests {
+    use super::*;
+
+    const PLAINTEXT: &'static str =  "ZTXODNWKCCMAVNZXYWEETUQTCIMNVEUVIWBLUAXRRTLVA";
+    const CIPHERTEXT: &'static str = "FOVTATAKIDASINIMUIMINOMOXIWOIRUBESIFYXXFCKZZR";
+
+    #[test]
+    fn encrypt() {
+        let cipher = Purple::default();
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+    }
+
+    #[test]
+    fn decrypt() {
+        let cipher = Purple::default();
+        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }
