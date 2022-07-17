@@ -1,8 +1,10 @@
-use lazy_static::lazy_static;
 use crate::{
     ciphers::{substitution::Plugboard, Cipher},
-    errors::CipherError, codes::romaji::to_romaji_ks, text_aux::VecString,
+    codes::romaji::to_romaji_ks,
+    errors::CipherError,
+    text_aux::VecString,
 };
+use lazy_static::lazy_static;
 
 use super::switch::{Switch, SwitchSpeed};
 
@@ -22,7 +24,6 @@ impl Default for Switches {
 }
 
 impl Switches {
-
     pub fn step(&mut self) {
         let spos = self.sixes.position;
         let mpos = self.get_switch(SwitchSpeed::Middle).position;
@@ -34,9 +35,9 @@ impl Switches {
         if spos == 23 && mpos == 24 {
             self.get_switch(SwitchSpeed::Slow).step();
         } else if spos == 24 {
-            self.get_switch(SwitchSpeed::Middle).step();
-        } else {
             self.get_switch(SwitchSpeed::Fast).step();
+        } else {
+            self.get_switch(SwitchSpeed::Middle).step();
         }
     }
 
@@ -44,7 +45,7 @@ impl Switches {
         if n < 6 {
             self.sixes.encrypt(n)
         } else {
-            let n = self.twenties[0].encrypt(n-6);
+            let n = self.twenties[0].encrypt(n - 6);
             let n = self.twenties[1].encrypt(n);
             self.twenties[2].encrypt(n)
         }
@@ -54,7 +55,7 @@ impl Switches {
         if n < 6 {
             self.sixes.decrypt(n)
         } else {
-            let n = self.twenties[2].decrypt(n-6);
+            let n = self.twenties[2].decrypt(n - 6);
             let n = self.twenties[1].decrypt(n);
             self.twenties[0].decrypt(n)
         }
@@ -77,9 +78,10 @@ pub struct Purple {
 
 impl Default for Purple {
     fn default() -> Self {
+        let plugboard = Plugboard::build("NOKTYUXEQLHBRMPDICJASVWGZF");
         Self {
             switches: Default::default(),
-            plugboard: Default::default(),
+            plugboard,
         }
     }
 }
@@ -89,20 +91,23 @@ lazy_static! {
 }
 
 impl Purple {
-
-    fn text_to_nums(text: &str) -> Result<Vec<usize>,CipherError> {
+    fn text_to_nums(text: &str) -> Result<Vec<usize>, CipherError> {
         let mut out = Vec::with_capacity(text.len());
         for c in text.chars() {
-            let n = PURPLE_ALPHABET.get_pos(c).ok_or(CipherError::input("invalid character"))?;
+            let n = PURPLE_ALPHABET
+                .get_pos(c)
+                .ok_or(CipherError::input("invalid character"))?;
             out.push(n);
         }
         Ok(out)
     }
 
-    fn nums_to_text(nums: Vec<usize>) -> Result<String,CipherError> {
+    fn nums_to_text(nums: Vec<usize>) -> Result<String, CipherError> {
         let mut out = String::with_capacity(nums.len());
         for n in nums {
-            let n = PURPLE_ALPHABET.get_char(n).ok_or(CipherError::input("invalid character"))?;
+            let n = PURPLE_ALPHABET
+                .get_char(n)
+                .ok_or(CipherError::input("invalid character"))?;
             out.push(n);
         }
         Ok(out)
@@ -111,7 +116,6 @@ impl Purple {
 
 impl Cipher for Purple {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-
         let text = to_romaji_ks(text);
 
         let from_pb = self.plugboard.encrypt(&text)?;
@@ -152,13 +156,11 @@ impl Cipher for Purple {
     }
 }
 
-
-
 #[cfg(test)]
 mod purple_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str =  "ZTXODNWKCCMAVNZXYWEETUQTCIMNVEUVIWBLUAXRRTLVA";
+    const PLAINTEXT: &'static str = "ZTXODNWKCCMAVNZXYWEETUQTCIMNVEUVIWBLUAXRRTLVA";
     const CIPHERTEXT: &'static str = "FOVTATAKIDASINIMUIMINOMOXIWOIRUBESIFYXXFCKZZR";
 
     #[test]

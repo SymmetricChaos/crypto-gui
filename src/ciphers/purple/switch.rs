@@ -17,12 +17,13 @@ pub struct Switch<const N: usize> {
 
 impl<const N: usize> Switch<N> {
     pub fn new(
+        position: usize,
         speed: SwitchSpeed,
         wiring_enc: &'static [[usize; N]; 25],
         wiring_dec: &'static [[usize; N]; 25],
     ) -> Switch<N> {
         Self {
-            position: 0,
+            position,
             speed,
             wiring_enc,
             wiring_dec,
@@ -30,13 +31,13 @@ impl<const N: usize> Switch<N> {
     }
 
     pub fn sixes() -> Switch<6_usize> {
-        Switch::new(SwitchSpeed::Fast, &SIXES_ENC, &SIXES_DEC)
+        Switch::new(9, SwitchSpeed::Fast, &SIXES_ENC, &SIXES_DEC)
     }
 
     pub fn twenties() -> [Switch<20_usize>; 3] {
-        let t1 = Switch::new(SwitchSpeed::Slow, &TWENTIES_1_ENC, &TWENTIES_1_DEC);
-        let t2 = Switch::new(SwitchSpeed::Middle, &TWENTIES_2_ENC, &TWENTIES_2_DEC);
-        let t3 = Switch::new(SwitchSpeed::Fast, &TWENTIES_3_ENC, &TWENTIES_3_DEC);
+        let t1 = Switch::new(1, SwitchSpeed::Slow, &TWENTIES_1_ENC, &TWENTIES_1_DEC);
+        let t2 = Switch::new(24, SwitchSpeed::Middle, &TWENTIES_2_ENC, &TWENTIES_2_DEC);
+        let t3 = Switch::new(6, SwitchSpeed::Fast, &TWENTIES_3_ENC, &TWENTIES_3_DEC);
 
         [t1, t2, t3]
     }
