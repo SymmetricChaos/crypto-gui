@@ -1,5 +1,7 @@
+use std::collections::HashMap;
+
 use crate::{
-    ciphers::{substitution::Plugboard, Cipher},
+    ciphers::Cipher,
     codes::romaji::to_romaji_ks,
     errors::CipherError,
     text_aux::VecString,
@@ -73,12 +75,12 @@ impl Switches {
 
 pub struct Purple {
     switches: Switches, // this will be cloned during execution and then mutated
-    plugboard: Plugboard,
+    plugboard: HashMap<char,usize>,
 }
 
 impl Default for Purple {
     fn default() -> Self {
-        let plugboard = Plugboard::build_purple("NOKTYUXEQLHBRMPDICJASVWGZF");
+        let plugboard = HashMap::from([('N', 0), ('O', 1), ('K', 2), ('T', 3), ('Y', 4), ('U', 5), ('X', 6), ('E', 7), ('Q', 8), ('L', 9), ('H', 10), ('B', 11), ('R', 12), ('M', 13), ('P', 14), ('D', 15), ('I', 16), ('C', 17), ('J', 18), ('A', 19), ('S', 20), ('V', 21), ('W', 22), ('G', 23), ('Z', 24), ('F', 25)]);
         Self {
             switches: Default::default(),
             plugboard,
@@ -90,66 +92,63 @@ lazy_static! {
     pub static ref PURPLE_ALPHABET: VecString = VecString::from("AEIOUYBCDFGHJKLMNPQRSTVWXZ");
 }
 
-impl Purple {
-    fn text_to_nums(text: &str) -> Result<Vec<usize>, CipherError> {
-        let mut out = Vec::with_capacity(text.len());
-        for c in text.chars() {
-            let n = PURPLE_ALPHABET
-                .get_pos(c)
-                .ok_or(CipherError::input("invalid character"))?;
-            out.push(n);
-        }
-        Ok(out)
-    }
+// impl Purple {
+//     fn text_to_nums(text: &str) -> Result<Vec<usize>, CipherError> {
+//         let mut out = Vec::with_capacity(text.len());
+//         for c in text.chars() {
+//             let n = PURPLE_ALPHABET
+//                 .get_pos(c)
+//                 .ok_or(CipherError::input("invalid character"))?;
+//             out.push(n);
+//         }
+//         Ok(out)
+//     }
 
-    fn nums_to_text(nums: Vec<usize>) -> Result<String, CipherError> {
-        let mut out = String::with_capacity(nums.len());
-        for n in nums {
-            let c = PURPLE_ALPHABET
-                .get_char(n)
-                .ok_or(CipherError::input("invalid character"))?;
-            out.push(c);
-        }
-        Ok(out)
-    }
-}
+//     fn nums_to_text(nums: Vec<usize>) -> Result<String, CipherError> {
+//         let mut out = String::with_capacity(nums.len());
+//         for n in nums {
+//             let c = PURPLE_ALPHABET
+//                 .get_char(n)
+//                 .ok_or(CipherError::input("invalid character"))?;
+//             out.push(c);
+//         }
+//         Ok(out)
+//     }
+// }
 
 impl Cipher for Purple {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         // convert kana to romaji if needed
         let text = to_romaji_ks(text);
 
-        // pass all the letters through the plugboard
-        // this can be done all at once because the plugboard doesn't change
-        let from_pb = self.plugboard.encrypt(&text)?;
-
-        // Convert the plugboard values into numbers
-        let mut nums = Self::text_to_nums(&from_pb)?;
-
         // Clone switches then encrypt letters one by one, stepping each time
         let mut switches = self.switches.clone();
-        for n in nums.iter_mut() {
-            *n = switches.encrypt_num(*n);
+        let mut out = String::with_capacity(text.len());
+        for c in text.chars() {
+            let n = self.plugboard.get(&c).ok_or(CipherError::input("invalid character"))?;
+            let encrypted = switches.encrypt_num(*n);
+            out.push(PURPLE_ALPHABET.get_char_at(encrypted).ok_or(CipherError::input("invalid character"))?);
             switches.step();
         }
 
-        self.plugboard.encrypt(&Self::nums_to_text(nums)?)
+        Ok(out)
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+        // convert kana to romaji if needed
         let text = to_romaji_ks(text);
 
-        let from_pb = self.plugboard.decrypt(&text)?;
-
-        let mut nums = Self::text_to_nums(&from_pb)?;
-
+        // Clone switches then decrypt letters one by one, stepping each time
         let mut switches = self.switches.clone();
-        for n in nums.iter_mut() {
-            *n = switches.decrypt_num(*n);
+        let mut out = String::with_capacity(text.len());
+        for c in text.chars() {
+            let n = self.plugboard.get(&c).ok_or(CipherError::input("invalid character"))?;
+            let decrypted = switches.decrypt_num(*n);
+            out.push(PURPLE_ALPHABET.get_char_at(decrypted).ok_or(CipherError::input("invalid character"))?);
             switches.step();
         }
 
-        Self::nums_to_text(nums)
+        Ok(out)
     }
 
     fn randomize(&mut self) {
@@ -163,10 +162,14 @@ impl Cipher for Purple {
 
 #[cfg(test)]
 mod purple_tests {
+
     use super::*;
 
-    const PLAINTEXT: &'static str = "ZTXODNWKCCMAVNZXYWEETUQTCIMNVEUVIWBLUAXRRTLVA";
-    const CIPHERTEXT: &'static str = "FOVTATAKIDASINIMUIMINOMOXIWOIRUBESIFYXXFCKZZR";
+    // const PLAINTEXT: &'static str = "ZTXODNWKCCMAVNZXYWEETUQTCIMNVEUVIWBLUAXRRTLVA";
+    // const CIPHERTEXT: &'static str = "FOVTATAKIDASINIMUIMINOMOXIWOIRUBESIFYXXFCKZZR";
+
+    const PLAINTEXT: &'static str = "N";
+    const CIPHERTEXT: &'static str = "Y";
 
     #[test]
     fn encrypt() {

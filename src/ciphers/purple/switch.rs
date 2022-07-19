@@ -15,6 +15,22 @@ pub struct Switch<const N: usize> {
     wiring_dec: &'static [[usize; N]; 25],
 }
 
+impl Switch<6> {
+    pub fn sixes() -> Switch<6> {
+        Switch::new(8, SwitchSpeed::Fast, &SIXES_ENC, &SIXES_DEC)
+    }
+}
+
+impl Switch<20> {
+    pub fn twenties() -> [Switch<20>; 3] {
+        let t1 = Switch::new(0,  SwitchSpeed::Slow,   &TWENTIES_1_ENC, &TWENTIES_1_DEC);
+        let t2 = Switch::new(23, SwitchSpeed::Fast, &TWENTIES_2_ENC, &TWENTIES_2_DEC);
+        let t3 = Switch::new(5,  SwitchSpeed::Middle,   &TWENTIES_3_ENC, &TWENTIES_3_DEC);
+
+        [t1, t2, t3]
+    }
+}
+
 impl<const N: usize> Switch<N> {
     pub fn new(
         position: usize,
@@ -28,18 +44,6 @@ impl<const N: usize> Switch<N> {
             wiring_enc,
             wiring_dec,
         }
-    }
-
-    pub fn sixes() -> Switch<6_usize> {
-        Switch::new(9, SwitchSpeed::Fast, &SIXES_ENC, &SIXES_DEC)
-    }
-
-    pub fn twenties() -> [Switch<20_usize>; 3] {
-        let t1 = Switch::new(1,  SwitchSpeed::Slow,   &TWENTIES_1_ENC, &TWENTIES_1_DEC);
-        let t2 = Switch::new(24, SwitchSpeed::Middle, &TWENTIES_2_ENC, &TWENTIES_2_DEC);
-        let t3 = Switch::new(6,  SwitchSpeed::Fast,   &TWENTIES_3_ENC, &TWENTIES_3_DEC);
-
-        [t1, t2, t3]
     }
 
     pub fn step(&mut self) {
@@ -62,7 +66,7 @@ mod purple_switch_tests {
 
     #[test]
     fn sixes_encrypt() {
-        let mut sixes: Switch<6_usize> = Switch::<6_usize>::sixes();
+        let mut sixes = Switch::sixes();
         sixes.position = 0;
         assert_eq!(sixes.encrypt(0), 1);
         assert_eq!(sixes.encrypt(1), 0);
@@ -90,7 +94,7 @@ mod purple_switch_tests {
 
     #[test]
     fn sixes_decrypt() {
-        let mut sixes: Switch<6_usize> = Switch::<6_usize>::sixes();
+        let mut sixes = Switch::sixes();
         sixes.position = 0;
         assert_eq!(sixes.decrypt(0), 1);
         assert_eq!(sixes.decrypt(1), 0);
