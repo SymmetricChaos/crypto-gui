@@ -25,18 +25,6 @@ impl Default for Plugboard {
 
 impl Plugboard {
 
-    // This builds a complete plugboard for the Purple cipher from  a string
-    pub fn build_purple(wiring: &str) -> Plugboard {
-        let mut plugboard = Plugboard::default();
-        for (n,c) in wiring.chars().enumerate() {
-            // Guaranteed not to panic because n is always leq the length of wiring
-            let d = wiring.chars().nth(n).unwrap();
-            plugboard.wiring.insert(c, d);
-            plugboard.wiring.insert(d, c);
-        }
-        plugboard
-    }
-
     pub fn set_plugboard(&mut self) -> Result<(), CipherError> {
         let digraphs = self.pairs.split(" ");
 
