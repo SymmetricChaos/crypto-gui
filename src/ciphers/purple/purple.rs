@@ -45,9 +45,9 @@ impl Switches {
         if n < 6 {
             self.sixes.encrypt(n)
         } else {
-            let n = self.twenties[0].encrypt(n - 6);
+            let n = self.twenties[2].encrypt(n - 6);
             let n = self.twenties[1].encrypt(n);
-            self.twenties[2].encrypt(n)
+            self.twenties[0].encrypt(n)+6
         }
     }
 
@@ -55,9 +55,9 @@ impl Switches {
         if n < 6 {
             self.sixes.decrypt(n)
         } else {
-            let n = self.twenties[2].decrypt(n - 6);
+            let n = self.twenties[0].decrypt(n - 6);
             let n = self.twenties[1].decrypt(n);
-            self.twenties[0].decrypt(n)
+            self.twenties[2].decrypt(n)+6
         }
     }
 
@@ -78,7 +78,7 @@ pub struct Purple {
 
 impl Default for Purple {
     fn default() -> Self {
-        let plugboard = Plugboard::build("NOKTYUXEQLHBRMPDICJASVWGZF");
+        let plugboard = Plugboard::build_purple("NOKTYUXEQLHBRMPDICJASVWGZF");
         Self {
             switches: Default::default(),
             plugboard,
@@ -105,10 +105,10 @@ impl Purple {
     fn nums_to_text(nums: Vec<usize>) -> Result<String, CipherError> {
         let mut out = String::with_capacity(nums.len());
         for n in nums {
-            let n = PURPLE_ALPHABET
+            let c = PURPLE_ALPHABET
                 .get_char(n)
                 .ok_or(CipherError::input("invalid character"))?;
-            out.push(n);
+            out.push(c);
         }
         Ok(out)
     }
@@ -116,19 +116,24 @@ impl Purple {
 
 impl Cipher for Purple {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+        // convert kana to romaji if needed
         let text = to_romaji_ks(text);
 
+        // pass all the letters through the plugboard
+        // this can be done all at once because the plugboard doesn't change
         let from_pb = self.plugboard.encrypt(&text)?;
 
+        // Convert the plugboard values into numbers
         let mut nums = Self::text_to_nums(&from_pb)?;
 
+        // Clone switches then encrypt letters one by one, stepping each time
         let mut switches = self.switches.clone();
         for n in nums.iter_mut() {
             *n = switches.encrypt_num(*n);
             switches.step();
         }
 
-        Self::nums_to_text(nums)
+        self.plugboard.encrypt(&Self::nums_to_text(nums)?)
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
