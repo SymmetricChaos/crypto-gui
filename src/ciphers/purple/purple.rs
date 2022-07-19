@@ -12,15 +12,15 @@ use super::switch::{Switch, SwitchSpeed};
 
 #[derive(Clone)]
 pub struct Switches {
-    sixes: Switch<6_usize>,
-    twenties: [Switch<20_usize>; 3],
+    sixes: Switch<6>,
+    twenties: [Switch<20>; 3],
 }
 
 impl Default for Switches {
     fn default() -> Self {
         Self {
-            sixes: Switch::<6_usize>::sixes(),
-            twenties: Switch::<20_usize>::twenties(),
+            sixes: Switch::sixes(),
+            twenties: Switch::twenties(),
         }
     }
 }
@@ -76,14 +76,17 @@ impl Switches {
 pub struct Purple {
     switches: Switches, // this will be cloned during execution and then mutated
     plugboard: HashMap<char,usize>,
+    plugboard_inv: HashMap<usize,char>,
 }
 
 impl Default for Purple {
     fn default() -> Self {
         let plugboard = HashMap::from([('N', 0), ('O', 1), ('K', 2), ('T', 3), ('Y', 4), ('U', 5), ('X', 6), ('E', 7), ('Q', 8), ('L', 9), ('H', 10), ('B', 11), ('R', 12), ('M', 13), ('P', 14), ('D', 15), ('I', 16), ('C', 17), ('J', 18), ('A', 19), ('S', 20), ('V', 21), ('W', 22), ('G', 23), ('Z', 24), ('F', 25)]);
+        let plugboard_inv = HashMap::from([('N', 0), ('O', 1), ('K', 2), ('T', 3), ('Y', 4), ('U', 5), ('X', 6), ('E', 7), ('Q', 8), ('L', 9), ('H', 10), ('B', 11), ('R', 12), ('M', 13), ('P', 14), ('D', 15), ('I', 16), ('C', 17), ('J', 18), ('A', 19), ('S', 20), ('V', 21), ('W', 22), ('G', 23), ('Z', 24), ('F', 25)].map(|(a,b)| (b,a)));
         Self {
             switches: Default::default(),
             plugboard,
+            plugboard_inv,
         }
     }
 }
@@ -142,9 +145,9 @@ impl Cipher for Purple {
         let mut switches = self.switches.clone();
         let mut out = String::with_capacity(text.len());
         for c in text.chars() {
-            let n = self.plugboard.get(&c).ok_or(CipherError::input("invalid character"))?;
-            let decrypted = switches.decrypt_num(*n);
-            out.push(PURPLE_ALPHABET.get_char_at(decrypted).ok_or(CipherError::input("invalid character"))?);
+            let n = PURPLE_ALPHABET.get_pos(c).ok_or(CipherError::input("invalid character"))?;
+            let decrypted = switches.decrypt_num(n);
+            out.push(*self.plugboard_inv.get(&decrypted).ok_or(CipherError::input("invalid character"))?);
             switches.step();
         }
 
@@ -168,18 +171,38 @@ mod purple_tests {
     // const PLAINTEXT: &'static str = "ZTXODNWKCCMAVNZXYWEETUQTCIMNVEUVIWBLUAXRRTLVA";
     // const CIPHERTEXT: &'static str = "FOVTATAKIDASINIMUIMINOMOXIWOIRUBESIFYXXFCKZZR";
 
-    const PLAINTEXT: &'static str = "N";
-    const CIPHERTEXT: &'static str = "Y";
+    // Checked by hand for Purple::default()
+    // N will go through the Sixes
+    const PLAINTEXT_V: &'static str = "N";
+    const CIPHERTEXT_V: &'static str = "Y";
+
+    // Checked by hand for Purple::default(), but this contradicts the tests for the reference, decryption also fails
+    // X will go through the Twenties
+    const PLAINTEXT_C: &'static str = "X";
+    const CIPHERTEXT_C: &'static str = "F";
 
     #[test]
-    fn encrypt() {
+    fn encrypt_vowel() {
         let cipher = Purple::default();
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encrypt(PLAINTEXT_V).unwrap(), CIPHERTEXT_V);
     }
 
     #[test]
-    fn decrypt() {
+    fn decrypt_vowel() {
         let cipher = Purple::default();
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CIPHERTEXT_V).unwrap(), PLAINTEXT_V);
     }
+
+    #[test]
+    fn encrypt_consonant() {
+        let cipher = Purple::default();
+        assert_eq!(cipher.encrypt(PLAINTEXT_C).unwrap(), CIPHERTEXT_C);
+    }
+
+    #[test]
+    fn derypt_consonant() {
+        let cipher = Purple::default();
+        assert_eq!(cipher.decrypt(CIPHERTEXT_C).unwrap(), PLAINTEXT_C);
+    }
+
 }
