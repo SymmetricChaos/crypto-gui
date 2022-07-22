@@ -47,6 +47,7 @@ pub mod trifid_controls;
 pub mod turning_grille_controls;
 pub mod two_square_controls;
 pub mod vigenere_controls;
+pub mod purple_controls;
 
 pub trait ViewableCipher: View + Cipher {}
 

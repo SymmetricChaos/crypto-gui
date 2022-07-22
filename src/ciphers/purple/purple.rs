@@ -12,8 +12,8 @@ use super::switch::{Switch, SwitchSpeed};
 
 #[derive(Clone)]
 pub struct Switches {
-    sixes: Switch<6>,
-    twenties: [Switch<20>; 3],
+    pub sixes: Switch<6>,
+    pub twenties: [Switch<20>; 3],
 }
 
 impl Default for Switches {
@@ -74,7 +74,8 @@ impl Switches {
 }
 
 pub struct Purple {
-    switches: Switches, // this will be cloned during execution and then mutated
+    pub switches: Switches, // this will be cloned during execution and then mutated
+    pub plugboard_string: String,
     plugboard: HashMap<char,usize>,
     plugboard_inv: HashMap<usize,char>,
 }
@@ -85,6 +86,7 @@ impl Default for Purple {
         let plugboard_inv = HashMap::from([('N', 0), ('O', 1), ('K', 2), ('T', 3), ('Y', 4), ('U', 5), ('X', 6), ('E', 7), ('Q', 8), ('L', 9), ('H', 10), ('B', 11), ('R', 12), ('M', 13), ('P', 14), ('D', 15), ('I', 16), ('C', 17), ('J', 18), ('A', 19), ('S', 20), ('V', 21), ('W', 22), ('G', 23), ('Z', 24), ('F', 25)].map(|(a,b)| (b,a)));
         Self {
             switches: Default::default(),
+            plugboard_string: Default::default(),
             plugboard,
             plugboard_inv,
         }
@@ -160,6 +162,5 @@ mod purple_tests {
         let cipher = Purple::default();
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
-
 
 }
