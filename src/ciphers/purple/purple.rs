@@ -73,6 +73,11 @@ impl Switches {
     }
 }
 
+
+lazy_static! {
+    pub static ref PURPLE_ALPHABET: VecString = VecString::from("AEIOUYBCDFGHJKLMNPQRSTVWXZ");
+}
+
 pub struct Purple {
     pub switches: Switches, // this will be cloned during execution and then mutated
     pub plugboard_string: String,
@@ -93,9 +98,21 @@ impl Default for Purple {
     }
 }
 
-lazy_static! {
-    pub static ref PURPLE_ALPHABET: VecString = VecString::from("AEIOUYBCDFGHJKLMNPQRSTVWXZ");
+impl Purple {
+    pub fn set_plugboard(&mut self) -> Result<(),CipherError> {
+        if self.plugboard_string.chars().count() != 26 {
+            return Err(CipherError::key("plugboard must have exactly 26 characters"))
+        }
+        self.plugboard.clear();
+        self.plugboard_inv.clear();
+        for (n, c) in self.plugboard_string.chars().enumerate() {
+            self.plugboard.insert(c, n);
+            self.plugboard_inv.insert(n, c);
+        }
+        Ok(())
+    }
 }
+
 
 impl Cipher for Purple {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {

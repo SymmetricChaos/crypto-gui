@@ -12,3 +12,6 @@ pub use substitution::GeneralSubstitution;
 
 pub mod plugboard;
 pub use plugboard::Plugboard;
+
+pub mod plugboard_generic;
+pub use plugboard_generic::PlugboardGen;

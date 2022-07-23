@@ -22,7 +22,7 @@ impl View for Purple {
         ui.add_space(10.0);
         ui.label("Plugboard");
         if ui.add(TextEdit::singleline(&mut self.plugboard_string).font(TextStyle::Monospace)).changed() {
-            // onvert plugs description to hashmaps
+            // convert plugs description to hashmaps
         };
     }
 }
