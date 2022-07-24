@@ -29,7 +29,7 @@ impl Plugboard {
         let digraphs = self.pairs.split(" ");
 
         // Clear the wiring and rebuild it, returning an Error if anything goes wrong
-        self.wiring.clear();
+        let mut wiring = HashMap::with_capacity(self.wiring.capacity());
         for d in digraphs {
             if d.len() != 2 {
                 return Err(CipherError::key(
@@ -39,22 +39,24 @@ impl Plugboard {
             let mut cs = d.chars();
             let a = cs.next().unwrap();
             let b = cs.next().unwrap();
-            if a == b || self.wiring.contains_key(&a) || self.wiring.contains_key(&b) {
+            if a == b || wiring.contains_key(&a) || wiring.contains_key(&b) {
                 return Err(CipherError::key(
                     "Plugboard settings cannot include cycles or chains",
                 ));
             }
-            self.wiring.insert(a, b);
-            self.wiring.insert(b, a);
+            wiring.insert(a, b);
+            wiring.insert(b, a);
         }
+        self.wiring = wiring;
         Ok(())
     }
+
 
     // Infallible setter that just skips any incorrect inputs
     pub fn set_plugboard_silent(&mut self) {
         let digraphs = self.pairs.split(" ");
 
-        self.wiring.clear();
+        let mut wiring = HashMap::with_capacity(self.wiring.capacity());
         for d in digraphs {
             if d.len() != 2 {
                 continue;
@@ -62,12 +64,13 @@ impl Plugboard {
             let mut cs = d.chars();
             let a = cs.next().unwrap();
             let b = cs.next().unwrap();
-            if a == b || self.wiring.contains_key(&a) || self.wiring.contains_key(&b) {
+            if a == b || wiring.contains_key(&a) || wiring.contains_key(&b) {
                 continue;
             }
-            self.wiring.insert(a, b);
-            self.wiring.insert(b, a);
+            wiring.insert(a, b);
+            wiring.insert(b, a);
         }
+        self.wiring = wiring;
     }
 
     // Swap the character or return the original depending on if it is in the board
@@ -98,15 +101,7 @@ impl Cipher for Plugboard {
     }
 
     fn randomize(&mut self) {
-        // get half the length of the alphabet or one greater if the half isn't even
-        let half = {
-            let simple_half = self.alphabet.len() / 2;
-            if simple_half % 2 == 0 {
-                self.alphabet.len() / 2
-            } else {
-                self.alphabet.len() / 2 + 1
-            }
-        };
+        let half = self.alphabet.len() / 2 + 1;
 
         let alpha = self.alphabet.shuffled(&mut get_global_rng());
         let mut chars = alpha.chars();

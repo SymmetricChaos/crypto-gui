@@ -5,7 +5,7 @@ use eframe::egui::{Slider, TextEdit, TextStyle, Ui};
 impl ViewableCipher for Purple {}
 
 impl View for Purple {
-    fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut Ui, errors: &mut String) {
         ui.label("Sixes Position\nTo Be Changed Every Message");
         ui.add(Slider::new(&mut self.switches.sixes.position, 0..=24).clamp_to_range(true));
 
@@ -22,7 +22,10 @@ impl View for Purple {
         ui.add_space(10.0);
         ui.label("Plugboard");
         if ui.add(TextEdit::singleline(&mut self.plugboard_string).font(TextStyle::Monospace)).changed() {
-            // convert plugs description to hashmaps
+            match self.set_plugboard() {
+                Ok(_) => (),
+                Err(e) => *errors = e.to_string(),
+            }
         };
     }
 }
