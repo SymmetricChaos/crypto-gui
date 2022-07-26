@@ -3,13 +3,13 @@ use std::collections::HashSet;
 use itertools::Itertools;
 
 use super::{
-    char_to_usize, rotors::SigabaIndexRotor, usize_to_char, Rotor, BIG_ROTOR_VEC, INDEX_ROTOR_VEC,
+    char_to_usize, usize_to_char, Rotor, BIG_ROTOR_VEC, INDEX_ROTOR_VEC, CipherRotor, IndexRotor,
 };
 use crate::{ciphers::Cipher, errors::CipherError, global_rng::get_global_rng};
 
 #[derive(Clone, Debug)]
 pub struct ControlRotors {
-    pub rotors: [Rotor; 5],
+    pub rotors: [Rotor<26>; 5],
     counter: usize,
 }
 
@@ -99,7 +99,7 @@ impl Default for ControlRotors {
 // These rotors do not move they only pass signals through them
 #[derive(Clone, Debug)]
 pub struct IndexRotors {
-    pub rotors: [SigabaIndexRotor; 5],
+    pub rotors: [IndexRotor; 5],
 }
 
 impl IndexRotors {
@@ -153,7 +153,7 @@ impl Default for IndexRotors {
 // Rotors through which the text input passes
 #[derive(Clone, Debug)]
 pub struct CipherRotors {
-    pub rotors: [Rotor; 5],
+    pub rotors: [CipherRotor; 5],
 }
 
 impl CipherRotors {
@@ -229,15 +229,15 @@ impl Sigaba {
         self.cipher_rotors.decrypt(n)
     }
 
-    pub fn index_rotors(&mut self) -> &mut [SigabaIndexRotor; 5] {
+    pub fn index_rotors(&mut self) -> &mut [IndexRotor; 5] {
         &mut self.index_rotors.rotors
     }
 
-    pub fn cipher_rotors(&mut self) -> &mut [Rotor; 5] {
+    pub fn cipher_rotors(&mut self) -> &mut [CipherRotor; 5] {
         &mut self.cipher_rotors.rotors
     }
 
-    pub fn control_rotors(&mut self) -> &mut [Rotor; 5] {
+    pub fn control_rotors(&mut self) -> &mut [CipherRotor; 5] {
         &mut self.control_rotors.rotors
     }
 }

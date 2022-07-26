@@ -7,14 +7,12 @@ use eframe::egui::{ComboBox, RichText, Slider, Ui};
 
 impl ViewableCipher for Sigaba {}
 
-fn rotor_display(ui: &mut eframe::egui::Ui, rotors: &mut [Rotor]) {
+fn rotor_display<const N: usize>(ui: &mut eframe::egui::Ui, rotors: &mut [Rotor<N>]) {
     for (_, rotor) in &mut rotors.iter_mut().enumerate() {
         ui.horizontal(|ui| {
-            // let name = RichText::new(format!("Rotor{}",n+1)).monospace();
-            // ui.add_sized([20.0,20.0],Label::new(name));
             let characters = RichText::new(&rotor.to_string()).monospace();
             ui.label(characters);
-            let range = 0..=rotor.size();
+            let range = 0..=N;
             ui.add(
                 Slider::new(&mut rotor.position, range)
                     .clamp_to_range(true)

@@ -2,7 +2,7 @@ pub mod sigaba;
 pub use sigaba::Sigaba;
 
 pub mod rotors;
-pub use rotors::{Rotor, BIG_ROTOR_MAP, BIG_ROTOR_VEC, INDEX_ROTOR_VEC};
+pub use rotors::{Rotor, BIG_ROTOR_MAP, BIG_ROTOR_VEC, INDEX_ROTOR_VEC, CipherRotor, IndexRotor};
 
 // References
 // https://www.nsa.gov/portals/75/documents/about/cryptologic-heritage/historical-figures-publications/publications/technology/The_SIGABA_ECM_Cipher_Machine_A_Beautiful_Idea3.pdf
