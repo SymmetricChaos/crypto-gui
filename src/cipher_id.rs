@@ -50,6 +50,7 @@ pub enum CipherID {
     Quagmire,
 
     Vic,
+    Purple,
 }
 
 impl Default for CipherID {
@@ -79,6 +80,7 @@ impl CipherID {
             CipherID::Enigma => "The Enigma machine is probably the most famous rotor machine from the brief era in which they dominated encryption. It was remarkable for its simplicity and compact size. Although it contained critical flaws ultimately the failure of Engima was caused by operational mistakes in the Nazi military that leaked information to the Allies.",
             CipherID::Sigaba => "SIGABA was the most complex rotor machine of its era and is not known to have been successfully attacked during its use. Despite its complexity the United States was extremely paranoid about the device and did not allow allies direct access to it.",
             CipherID::Fialka => "Fialka was a Soviet cipher machine.",
+            CipherID::Purple => "The Japanese Type-97 cipher machine.",
 
             CipherID::Playfair => "The Playfair Cipher swaps letters on a grid to encrypt letters pair by pair. Developed by Charles Wheatstone and promoted by Lord Playfair it was advertised as strong enough for tactical use and simple enough to teach to schoolchildren.",
             CipherID::Slidefair => "The Slidefair Cipher is a stronger but more complex variation on the Playfair Cipher developed by Helen Gaines. The square is formed by ",
@@ -145,6 +147,7 @@ impl Display for CipherID {
             CipherID::Plugboard => "Plugboard",
             CipherID::Rs44 => "RS44",
             CipherID::Hebern => "Hebern",
+            CipherID::Purple => "Purple",
             _ => "Missing name. Please complain to the author.",
         };
         write!(f, "{}", name)

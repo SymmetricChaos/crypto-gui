@@ -26,6 +26,19 @@ impl Default for Switches {
 }
 
 impl Switches {
+
+    pub fn set_switch_speed_1() {
+
+    }
+
+    pub fn set_switch_speed_2() {
+        
+    }
+
+    pub fn set_switch_speed_3() {
+        
+    }
+
     pub fn step(&mut self) {
         let spos = self.sixes.position;
         let mpos = self.get_switch(SwitchSpeed::Middle).position;
@@ -91,7 +104,7 @@ impl Default for Purple {
         let plugboard_inv = HashMap::from([('N', 0), ('O', 1), ('K', 2), ('T', 3), ('Y', 4), ('U', 5), ('X', 6), ('E', 7), ('Q', 8), ('L', 9), ('H', 10), ('B', 11), ('R', 12), ('M', 13), ('P', 14), ('D', 15), ('I', 16), ('C', 17), ('J', 18), ('A', 19), ('S', 20), ('V', 21), ('W', 22), ('G', 23), ('Z', 24), ('F', 25)].map(|(a,b)| (b,a)));
         Self {
             switches: Default::default(),
-            plugboard_string: Default::default(),
+            plugboard_string: "NOKTYUXEQLHBRMPDICJASVWGZF".into(),
             plugboard,
             plugboard_inv,
         }

@@ -84,6 +84,7 @@ pub struct CipherControlPanel {
     enigma: EnigmaM3,
     sigaba: Sigaba,
     hebern: Hebern,
+    purple: Purple,
 
     vigenere: Vigenere,
     beaufort: Beaufort,
@@ -158,8 +159,9 @@ impl CipherControlPanel {
                     CipherID::Enigma,
                     CipherID::Sigaba,
                     CipherID::Hebern,
+                    CipherID::Purple,
                 ],
-                "Rotor Machine",
+                "Cipher Machine",
                 active_cipher,
                 ui,
             );
@@ -271,6 +273,7 @@ impl CipherControlPanel {
             CipherID::Plugboard => &mut self.plugboard,
             CipherID::Rs44 => &mut self.rs44,
             CipherID::Hebern => &mut self.hebern,
+            CipherID::Purple => &mut self.purple,
             _ => todo!(),
         }
     }

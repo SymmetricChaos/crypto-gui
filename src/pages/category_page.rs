@@ -42,6 +42,7 @@ impl CipherCategory {
                 CipherID::Enigma,
                 CipherID::Sigaba,
                 CipherID::Hebern,
+                CipherID::Purple,
             ],
             CipherCategory::Transposition => &[
                 CipherID::Columnar,
