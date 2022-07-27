@@ -73,7 +73,7 @@ fn combox_box(
 }
 
 #[derive(Default)]
-pub struct CipherControlPanel {
+pub struct CipherControlPanel<'a> {
     caesar: Caesar,
     affine: Affine,
     decoder_ring: DecoderRing,
@@ -82,7 +82,7 @@ pub struct CipherControlPanel {
 
     m209: M209,
     enigma: EnigmaM3,
-    sigaba: Sigaba,
+    sigaba: Sigaba<'a>,
     hebern: Hebern,
     purple: Purple,
 
@@ -120,7 +120,7 @@ pub struct CipherControlPanel {
     rs44: RS44,
 }
 
-impl CipherControlPanel {
+impl<'a> CipherControlPanel<'a> {
     pub fn ui(&mut self, ui: &mut egui::Ui, active_cipher: &mut CipherID, errors: &mut String) {
         egui::Grid::new("comboboxes").show(ui, |ui| {
             combox_box(

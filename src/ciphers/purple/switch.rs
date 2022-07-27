@@ -23,9 +23,9 @@ impl Switch<6> {
 
 impl Switch<20> {
     pub fn twenties() -> [Switch<20>; 3] {
-        let t1 = Switch::new(0,  SwitchSpeed::Slow,   &TWENTIES_1_ENC, &TWENTIES_1_DEC);
+        let t1 = Switch::new(0, SwitchSpeed::Slow, &TWENTIES_1_ENC, &TWENTIES_1_DEC);
         let t2 = Switch::new(23, SwitchSpeed::Fast, &TWENTIES_2_ENC, &TWENTIES_2_DEC);
-        let t3 = Switch::new(5,  SwitchSpeed::Middle,   &TWENTIES_3_ENC, &TWENTIES_3_DEC);
+        let t3 = Switch::new(5, SwitchSpeed::Middle, &TWENTIES_3_ENC, &TWENTIES_3_DEC);
 
         [t1, t2, t3]
     }
@@ -58,7 +58,6 @@ impl<const N: usize> Switch<N> {
         self.wiring_dec[self.position][n]
     }
 }
-
 
 #[cfg(test)]
 mod purple_switch_tests {

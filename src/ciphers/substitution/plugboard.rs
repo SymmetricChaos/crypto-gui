@@ -24,7 +24,6 @@ impl Default for Plugboard {
 }
 
 impl Plugboard {
-
     pub fn set_plugboard(&mut self) -> Result<(), CipherError> {
         let digraphs = self.pairs.split(" ");
 
@@ -50,7 +49,6 @@ impl Plugboard {
         self.wiring = wiring;
         Ok(())
     }
-
 
     // Infallible setter that just skips any incorrect inputs
     pub fn set_plugboard_silent(&mut self) {

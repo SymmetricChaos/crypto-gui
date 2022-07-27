@@ -1,10 +1,7 @@
 use std::collections::HashMap;
 
 use crate::{
-    ciphers::Cipher,
-    codes::romaji::to_romaji_ks,
-    errors::CipherError,
-    text_aux::VecString,
+    ciphers::Cipher, codes::romaji::to_romaji_ks, errors::CipherError, text_aux::VecString,
 };
 use lazy_static::lazy_static;
 
@@ -26,18 +23,11 @@ impl Default for Switches {
 }
 
 impl Switches {
+    pub fn set_switch_speed_1() {}
 
-    pub fn set_switch_speed_1() {
+    pub fn set_switch_speed_2() {}
 
-    }
-
-    pub fn set_switch_speed_2() {
-        
-    }
-
-    pub fn set_switch_speed_3() {
-        
-    }
+    pub fn set_switch_speed_3() {}
 
     pub fn step(&mut self) {
         let spos = self.sixes.position;
@@ -62,7 +52,7 @@ impl Switches {
         } else {
             let n = self.twenties[0].encrypt(n - 6);
             let n = self.twenties[1].encrypt(n);
-            self.twenties[2].encrypt(n)+6
+            self.twenties[2].encrypt(n) + 6
         }
     }
 
@@ -72,7 +62,7 @@ impl Switches {
         } else {
             let n = self.twenties[2].decrypt(n - 6);
             let n = self.twenties[1].decrypt(n);
-            self.twenties[0].decrypt(n)+6
+            self.twenties[0].decrypt(n) + 6
         }
     }
 
@@ -86,7 +76,6 @@ impl Switches {
     }
 }
 
-
 lazy_static! {
     pub static ref PURPLE_ALPHABET: VecString = VecString::from("AEIOUYBCDFGHJKLMNPQRSTVWXZ");
 }
@@ -94,14 +83,71 @@ lazy_static! {
 pub struct Purple {
     pub switches: Switches, // this will be cloned during execution and then mutated
     pub plugboard_string: String,
-    plugboard: HashMap<char,usize>,
-    plugboard_inv: HashMap<usize,char>,
+    plugboard: HashMap<char, usize>,
+    plugboard_inv: HashMap<usize, char>,
 }
 
 impl Default for Purple {
     fn default() -> Self {
-        let plugboard = HashMap::from([('N', 0), ('O', 1), ('K', 2), ('T', 3), ('Y', 4), ('U', 5), ('X', 6), ('E', 7), ('Q', 8), ('L', 9), ('H', 10), ('B', 11), ('R', 12), ('M', 13), ('P', 14), ('D', 15), ('I', 16), ('C', 17), ('J', 18), ('A', 19), ('S', 20), ('V', 21), ('W', 22), ('G', 23), ('Z', 24), ('F', 25)]);
-        let plugboard_inv = HashMap::from([('N', 0), ('O', 1), ('K', 2), ('T', 3), ('Y', 4), ('U', 5), ('X', 6), ('E', 7), ('Q', 8), ('L', 9), ('H', 10), ('B', 11), ('R', 12), ('M', 13), ('P', 14), ('D', 15), ('I', 16), ('C', 17), ('J', 18), ('A', 19), ('S', 20), ('V', 21), ('W', 22), ('G', 23), ('Z', 24), ('F', 25)].map(|(a,b)| (b,a)));
+        let plugboard = HashMap::from([
+            ('N', 0),
+            ('O', 1),
+            ('K', 2),
+            ('T', 3),
+            ('Y', 4),
+            ('U', 5),
+            ('X', 6),
+            ('E', 7),
+            ('Q', 8),
+            ('L', 9),
+            ('H', 10),
+            ('B', 11),
+            ('R', 12),
+            ('M', 13),
+            ('P', 14),
+            ('D', 15),
+            ('I', 16),
+            ('C', 17),
+            ('J', 18),
+            ('A', 19),
+            ('S', 20),
+            ('V', 21),
+            ('W', 22),
+            ('G', 23),
+            ('Z', 24),
+            ('F', 25),
+        ]);
+        let plugboard_inv = HashMap::from(
+            [
+                ('N', 0),
+                ('O', 1),
+                ('K', 2),
+                ('T', 3),
+                ('Y', 4),
+                ('U', 5),
+                ('X', 6),
+                ('E', 7),
+                ('Q', 8),
+                ('L', 9),
+                ('H', 10),
+                ('B', 11),
+                ('R', 12),
+                ('M', 13),
+                ('P', 14),
+                ('D', 15),
+                ('I', 16),
+                ('C', 17),
+                ('J', 18),
+                ('A', 19),
+                ('S', 20),
+                ('V', 21),
+                ('W', 22),
+                ('G', 23),
+                ('Z', 24),
+                ('F', 25),
+            ]
+            .map(|(a, b)| (b, a)),
+        );
         Self {
             switches: Default::default(),
             plugboard_string: "NOKTYUXEQLHBRMPDICJASVWGZF".into(),
@@ -112,9 +158,11 @@ impl Default for Purple {
 }
 
 impl Purple {
-    pub fn set_plugboard(&mut self) -> Result<(),CipherError> {
+    pub fn set_plugboard(&mut self) -> Result<(), CipherError> {
         if self.plugboard_string.chars().count() != 26 {
-            return Err(CipherError::key("plugboard must have exactly 26 characters"))
+            return Err(CipherError::key(
+                "plugboard must have exactly 26 characters",
+            ));
         }
         self.plugboard.clear();
         self.plugboard_inv.clear();
@@ -126,21 +174,26 @@ impl Purple {
     }
 }
 
-
 impl Cipher for Purple {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         // convert kana to romaji if needed
         //let text = to_romaji_ks(text);
 
-
-
         // Clone switches then encrypt letters one by one, stepping each time
         let mut switches = self.switches.clone();
         let mut out = String::with_capacity(text.len());
         for c in text.chars() {
-            let n = self.plugboard.get(&c).ok_or(CipherError::input("invalid character"))?;
+            let n = self
+                .plugboard
+                .get(&c)
+                .ok_or(CipherError::input("invalid character"))?;
             let encrypted = switches.encrypt_num(*n);
-            out.push(*self.plugboard_inv.get(&encrypted).ok_or(CipherError::input("invalid character"))?);
+            out.push(
+                *self
+                    .plugboard_inv
+                    .get(&encrypted)
+                    .ok_or(CipherError::input("invalid character"))?,
+            );
             switches.step();
         }
 
@@ -155,9 +208,17 @@ impl Cipher for Purple {
         let mut switches = self.switches.clone();
         let mut out = String::with_capacity(text.len());
         for c in text.chars() {
-            let n = self.plugboard.get(&c).ok_or(CipherError::input("invalid character"))?;
+            let n = self
+                .plugboard
+                .get(&c)
+                .ok_or(CipherError::input("invalid character"))?;
             let encrypted = switches.decrypt_num(*n);
-            out.push(*self.plugboard_inv.get(&encrypted).ok_or(CipherError::input("invalid character"))?);
+            out.push(
+                *self
+                    .plugboard_inv
+                    .get(&encrypted)
+                    .ok_or(CipherError::input("invalid character"))?,
+            );
             switches.step();
         }
 
@@ -192,5 +253,4 @@ mod purple_tests {
         let cipher = Purple::default();
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
-
 }

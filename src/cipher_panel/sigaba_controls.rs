@@ -1,11 +1,11 @@
 use super::{View, ViewableCipher};
-use crate::ciphers::{
-    sigaba::{Rotor, BIG_ROTOR_VEC},
-    Sigaba,
+use crate::{
+    ciphers::{sigaba::BIG_ROTOR_VEC, Sigaba},
+    rotors::Rotor,
 };
 use eframe::egui::{ComboBox, RichText, Slider, Ui};
 
-impl ViewableCipher for Sigaba {}
+impl<'a> ViewableCipher for Sigaba<'a> {}
 
 fn rotor_display<const N: usize>(ui: &mut eframe::egui::Ui, rotors: &mut [Rotor<N>]) {
     for (_, rotor) in &mut rotors.iter_mut().enumerate() {
@@ -22,7 +22,7 @@ fn rotor_display<const N: usize>(ui: &mut eframe::egui::Ui, rotors: &mut [Rotor<
     }
 }
 
-impl View for Sigaba {
+impl<'a> View for Sigaba<'a> {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         // if ui.button("Restore State").clicked() {
         //     self.previous_state()

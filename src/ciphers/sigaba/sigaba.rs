@@ -3,17 +3,17 @@ use std::collections::HashSet;
 use itertools::Itertools;
 
 use super::{
-    char_to_usize, usize_to_char, Rotor, BIG_ROTOR_VEC, INDEX_ROTOR_VEC, CipherRotor, IndexRotor,
+    char_to_usize, usize_to_char, CipherRotor, IndexRotor, BIG_ROTOR_VEC, INDEX_ROTOR_VEC,
 };
 use crate::{ciphers::Cipher, errors::CipherError, global_rng::get_global_rng};
 
 #[derive(Clone, Debug)]
-pub struct ControlRotors {
-    pub rotors: [Rotor<26>; 5],
+pub struct ControlRotors<'a> {
+    pub rotors: [CipherRotor<'a>; 5],
     counter: usize,
 }
 
-impl ControlRotors {
+impl<'a> ControlRotors<'a> {
     // rotor[2] (the middle rotor) steps every time.
     // rotor[3] steps every 26 characters
     // rotor[1] steps every 676 characters
@@ -83,7 +83,7 @@ impl ControlRotors {
     }
 }
 
-impl Default for ControlRotors {
+impl<'a> Default for ControlRotors<'a> {
     fn default() -> Self {
         let rotors = [
             BIG_ROTOR_VEC[0].clone(),
@@ -98,11 +98,11 @@ impl Default for ControlRotors {
 
 // These rotors do not move they only pass signals through them
 #[derive(Clone, Debug)]
-pub struct IndexRotors {
-    pub rotors: [IndexRotor; 5],
+pub struct IndexRotors<'a> {
+    pub rotors: [IndexRotor<'a>; 5],
 }
 
-impl IndexRotors {
+impl<'a> IndexRotors<'a> {
     pub fn encrypt(&self, n: usize) -> usize {
         let mut out = n;
         for rotor in self.rotors.iter() {
@@ -137,7 +137,7 @@ impl IndexRotors {
     }
 }
 
-impl Default for IndexRotors {
+impl<'a> Default for IndexRotors<'a> {
     fn default() -> Self {
         let rotors = [
             INDEX_ROTOR_VEC[0].clone(),
@@ -152,11 +152,11 @@ impl Default for IndexRotors {
 
 // Rotors through which the text input passes
 #[derive(Clone, Debug)]
-pub struct CipherRotors {
-    pub rotors: [CipherRotor; 5],
+pub struct CipherRotors<'a> {
+    pub rotors: [CipherRotor<'a>; 5],
 }
 
-impl CipherRotors {
+impl<'a> CipherRotors<'a> {
     pub fn encrypt(&self, n: usize) -> usize {
         let mut out = n;
         for rotor in self.rotors.iter() {
@@ -180,7 +180,7 @@ impl CipherRotors {
     }
 }
 
-impl Default for CipherRotors {
+impl<'a> Default for CipherRotors<'a> {
     fn default() -> Self {
         let rotors = [
             BIG_ROTOR_VEC[5].clone(),
@@ -194,14 +194,14 @@ impl Default for CipherRotors {
 }
 
 // Interface for the cipher
-pub struct Sigaba {
-    pub index_rotors: IndexRotors,
-    pub control_rotors: ControlRotors,
-    pub cipher_rotors: CipherRotors,
+pub struct Sigaba<'a> {
+    pub index_rotors: IndexRotors<'a>,
+    pub control_rotors: ControlRotors<'a>,
+    pub cipher_rotors: CipherRotors<'a>,
     //pub prev_state: RefCell<([usize;5], [usize;5])>,
 }
 
-impl Sigaba {
+impl<'a> Sigaba<'a> {
     // Restore to previous manually set rotor positions
     // pub fn previous_state(&mut self) {
     //     for (val, rtr) in self.prev_state.borrow().0.clone().iter().zip(self.cipher_rotors()) {
@@ -242,7 +242,7 @@ impl Sigaba {
     }
 }
 
-impl Default for Sigaba {
+impl<'a> Default for Sigaba<'a> {
     fn default() -> Self {
         Self {
             index_rotors: Default::default(),
@@ -253,7 +253,7 @@ impl Default for Sigaba {
     }
 }
 
-impl Cipher for Sigaba {
+impl<'a> Cipher for Sigaba<'a> {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let mut ctrl = self.control_rotors.clone();
         let mut cphr = self.cipher_rotors.clone();
