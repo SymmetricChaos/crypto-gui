@@ -15,6 +15,7 @@ pub mod text_aux;
 pub mod errors;
 
 pub mod grid;
+pub mod rotors;
 
 pub mod egui_aux;
 

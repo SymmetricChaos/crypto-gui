@@ -8,12 +8,12 @@ use super::{
 use crate::{ciphers::Cipher, errors::CipherError, global_rng::get_global_rng};
 
 #[derive(Clone, Debug)]
-pub struct ControlRotors<'a> {
-    pub rotors: [CipherRotor<'a>; 5],
+pub struct ControlRotors {
+    pub rotors: [CipherRotor; 5],
     counter: usize,
 }
 
-impl<'a> ControlRotors<'a> {
+impl ControlRotors {
     // rotor[2] (the middle rotor) steps every time.
     // rotor[3] steps every 26 characters
     // rotor[1] steps every 676 characters
@@ -32,7 +32,7 @@ impl<'a> ControlRotors<'a> {
     fn encrypt(&self, n: usize) -> usize {
         let mut out = n;
         for rotor in self.rotors.iter() {
-            out = rotor.ltr(out)
+            out = rotor.signal_ltr(out)
         }
         out
     }
@@ -83,7 +83,7 @@ impl<'a> ControlRotors<'a> {
     }
 }
 
-impl<'a> Default for ControlRotors<'a> {
+impl Default for ControlRotors {
     fn default() -> Self {
         let rotors = [
             BIG_ROTOR_VEC[0].clone(),
@@ -98,15 +98,15 @@ impl<'a> Default for ControlRotors<'a> {
 
 // These rotors do not move they only pass signals through them
 #[derive(Clone, Debug)]
-pub struct IndexRotors<'a> {
-    pub rotors: [IndexRotor<'a>; 5],
+pub struct IndexRotors {
+    pub rotors: [IndexRotor; 5],
 }
 
-impl<'a> IndexRotors<'a> {
+impl IndexRotors {
     pub fn encrypt(&self, n: usize) -> usize {
         let mut out = n;
         for rotor in self.rotors.iter() {
-            out = rotor.ltr(out)
+            out = rotor.signal_ltr(out)
         }
         out
     }
@@ -137,7 +137,7 @@ impl<'a> IndexRotors<'a> {
     }
 }
 
-impl<'a> Default for IndexRotors<'a> {
+impl Default for IndexRotors {
     fn default() -> Self {
         let rotors = [
             INDEX_ROTOR_VEC[0].clone(),
@@ -152,15 +152,15 @@ impl<'a> Default for IndexRotors<'a> {
 
 // Rotors through which the text input passes
 #[derive(Clone, Debug)]
-pub struct CipherRotors<'a> {
-    pub rotors: [CipherRotor<'a>; 5],
+pub struct CipherRotors {
+    pub rotors: [CipherRotor; 5],
 }
 
-impl<'a> CipherRotors<'a> {
+impl CipherRotors {
     pub fn encrypt(&self, n: usize) -> usize {
         let mut out = n;
         for rotor in self.rotors.iter() {
-            out = rotor.ltr(out)
+            out = rotor.signal_ltr(out)
         }
         out
     }
@@ -168,7 +168,7 @@ impl<'a> CipherRotors<'a> {
     pub fn decrypt(&self, n: usize) -> usize {
         let mut out = n;
         for rotor in self.rotors.iter().rev() {
-            out = rotor.rtl(out)
+            out = rotor.signal_rtl(out)
         }
         out
     }
@@ -180,7 +180,7 @@ impl<'a> CipherRotors<'a> {
     }
 }
 
-impl<'a> Default for CipherRotors<'a> {
+impl Default for CipherRotors {
     fn default() -> Self {
         let rotors = [
             BIG_ROTOR_VEC[5].clone(),
@@ -194,28 +194,14 @@ impl<'a> Default for CipherRotors<'a> {
 }
 
 // Interface for the cipher
-pub struct Sigaba<'a> {
-    pub index_rotors: IndexRotors<'a>,
-    pub control_rotors: ControlRotors<'a>,
-    pub cipher_rotors: CipherRotors<'a>,
+pub struct Sigaba {
+    pub index_rotors: IndexRotors,
+    pub control_rotors: ControlRotors,
+    pub cipher_rotors: CipherRotors,
     //pub prev_state: RefCell<([usize;5], [usize;5])>,
 }
 
-impl<'a> Sigaba<'a> {
-    // Restore to previous manually set rotor positions
-    // pub fn previous_state(&mut self) {
-    //     for (val, rtr) in self.prev_state.borrow().0.clone().iter().zip(self.cipher_rotors()) {
-    //         rtr.position = *val;
-    //     }
-    //     for (val, rtr) in self.prev_state.borrow().1.clone().iter().zip(self.control_rotors()) {
-    //         rtr.position = *val;
-    //     }
-    // }
-
-    // pub fn save_state(&self) {
-
-    // }
-
+impl Sigaba {
     fn signal(&self) -> Vec<usize> {
         let sig = self.control_rotors.produce_signal();
         self.index_rotors.pass_signal(sig)
@@ -242,7 +228,7 @@ impl<'a> Sigaba<'a> {
     }
 }
 
-impl<'a> Default for Sigaba<'a> {
+impl Default for Sigaba {
     fn default() -> Self {
         Self {
             index_rotors: Default::default(),
@@ -253,7 +239,7 @@ impl<'a> Default for Sigaba<'a> {
     }
 }
 
-impl<'a> Cipher for Sigaba<'a> {
+impl Cipher for Sigaba {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let mut ctrl = self.control_rotors.clone();
         let mut cphr = self.cipher_rotors.clone();

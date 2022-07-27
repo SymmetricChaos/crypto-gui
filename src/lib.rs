@@ -5,6 +5,7 @@ pub mod app;
 pub mod cipher_panel;
 pub mod ciphers;
 pub mod grid;
+pub mod rotors;
 pub mod math_functions;
 
 pub mod cipher_id;
@@ -16,7 +17,6 @@ pub mod pages;
 
 pub mod egui_aux;
 
-pub mod rotors;
 
 pub mod text_aux;
 

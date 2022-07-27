@@ -5,7 +5,7 @@ use crate::{
 };
 use eframe::egui::{ComboBox, RichText, Slider, Ui};
 
-impl<'a> ViewableCipher for Sigaba<'a> {}
+impl ViewableCipher for Sigaba {}
 
 fn rotor_display<const N: usize>(ui: &mut eframe::egui::Ui, rotors: &mut [Rotor<N>]) {
     for (_, rotor) in &mut rotors.iter_mut().enumerate() {
@@ -22,7 +22,7 @@ fn rotor_display<const N: usize>(ui: &mut eframe::egui::Ui, rotors: &mut [Rotor<
     }
 }
 
-impl<'a> View for Sigaba<'a> {
+impl View for Sigaba {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         // if ui.button("Restore State").clicked() {
         //     self.previous_state()
@@ -31,6 +31,7 @@ impl<'a> View for Sigaba<'a> {
         ///////////////////////
         //// CIPHER ROTORS ////
         ///////////////////////
+        let cipher_rotors = self.cipher_rotors();
         ui.add_space(10.0);
         ui.label(
             RichText::new("Cipher Rotors").heading()
@@ -38,25 +39,26 @@ impl<'a> View for Sigaba<'a> {
         for i in 0..5 {
             ui.horizontal(|ui| {
                 ComboBox::from_id_source(format!("Cipher Rotor {}", i + 1))
-                    .selected_text(self.cipher_rotors()[i].name)
+                    .selected_text(cipher_rotors[i].name)
                     .show_ui(ui, |ui| {
                         for rtr in BIG_ROTOR_VEC.iter() {
                             ui.selectable_value(
-                                &mut self.cipher_rotors()[i],
+                                &mut cipher_rotors[i],
                                 rtr.clone(),
                                 rtr.name.to_string(),
                             );
                         }
                     });
-                ui.checkbox(&mut self.cipher_rotors()[i].reversed, "reversed");
+                ui.checkbox(&mut cipher_rotors[i].reversed, "reversed");
             });
         }
         ui.add_space(10.0);
-        rotor_display(ui, self.cipher_rotors());
+        rotor_display(ui, cipher_rotors);
 
         ////////////////////////
         //// CONTROL ROTORS ////
         ////////////////////////
+        let control_rotors = self.control_rotors();
         ui.add_space(20.0);
         ui.label(
             RichText::new("Control Rotors").heading()
@@ -64,21 +66,21 @@ impl<'a> View for Sigaba<'a> {
         for i in 0..5 {
             ui.horizontal(|ui| {
                 ComboBox::from_id_source(format!("Control Rotor {}", i + 1))
-                    .selected_text(self.control_rotors()[i].name)
+                    .selected_text(control_rotors[i].name)
                     .show_ui(ui, |ui| {
                         for rtr in BIG_ROTOR_VEC.iter() {
                             ui.selectable_value(
-                                &mut self.control_rotors()[i],
+                                &mut control_rotors[i],
                                 rtr.clone(),
                                 rtr.name.to_string(),
                             );
                         }
                     });
-                ui.checkbox(&mut self.control_rotors()[i].reversed, "reversed");
+                ui.checkbox(&mut control_rotors[i].reversed, "reversed");
             });
         }
         ui.add_space(10.0);
-        rotor_display(ui, self.control_rotors());
+        rotor_display(ui, control_rotors);
 
         //////////////////////
         //// INDEX ROTORS ////

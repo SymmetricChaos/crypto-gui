@@ -2,21 +2,21 @@ use itertools::Itertools;
 
 // An array backed Rotor with a fixed size known at compile time
 #[derive(Copy, Clone, Debug)]
-pub struct Rotor<'a, const N: usize> {
+pub struct Rotor<const N: usize> {
     wiring_rtl: [usize; N],
     wiring_ltr: [usize; N],
     pub position: usize,
     pub reversed: bool,
-    pub wiring_str: &'a str,
-    pub name: &'a str,
+    pub wiring_str: &'static str,
+    pub name: &'static str,
 }
 
-impl<const N: usize> Rotor<'_, N> {
-    pub fn new<'a>(
-        name: &'a str,
-        wiring_str: &'a str,
+impl<const N: usize> Rotor<N> {
+    pub fn new(
+        name: &'static str,
+        wiring_str: &'static str,
         char_to_usize: &dyn Fn(char) -> usize,
-    ) -> Result<Rotor<'a, N>, String> {
+    ) -> Result<Rotor<N>, String> {
         let count = wiring_str.chars().count();
         if count != N {
             return Err(format!(

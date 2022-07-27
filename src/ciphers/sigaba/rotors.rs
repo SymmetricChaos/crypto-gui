@@ -1,18 +1,19 @@
 use super::char_to_usize;
 use crate::rotors::Rotor;
+use itertools::zip;
 use lazy_static::lazy_static;
 use std::{collections::HashMap, fmt};
 
-pub type IndexRotor<'a> = Rotor<'a, 10>;
-pub type CipherRotor<'a> = Rotor<'a, 26>;
+pub type IndexRotor = Rotor<10>;
+pub type CipherRotor = Rotor<26>;
 
-impl<const N: usize> PartialEq for Rotor<'_, N> {
+impl<const N: usize> PartialEq for Rotor<N> {
     fn eq(&self, other: &Self) -> bool {
         self.wiring_str == other.wiring_str
     }
 }
 
-impl<const N: usize> fmt::Display for Rotor<'_, N> {
+impl<const N: usize> fmt::Display for Rotor<N> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut out = String::with_capacity(N);
         let p = self.position;
@@ -23,74 +24,48 @@ impl<const N: usize> fmt::Display for Rotor<'_, N> {
 }
 
 lazy_static! {
-    pub static ref BIG_ROTOR_VEC: Vec<CipherRotor<'static>> = {
-        let mut v = Vec::with_capacity(10);
-        v.push(CipherRotor::new(
-            "R-A",
+    pub static ref BIG_ROTOR_VEC: Vec<CipherRotor> = {
+        let names = [
+            "R-A", "R-B", "R-C", "R-D", "R-E", "R-F", "R-G", "R-H", "R-I", "R-H",
+        ];
+        let wirings = [
             "YCHLQSUGBDIXNZKERPVJTAWFOM",
-            &char_to_usize,
-        ));
-        v.push(CipherRotor::new(
-            "R-B",
             "INPXBWETGUYSAOCHVLDMQKZJFR",
-            &char_to_usize,
-        ));
-        v.push(CipherRotor::new(
-            "R-C",
             "WNDRIOZPTAXHFJYQBMSVEKUCGL",
-            &char_to_usize,
-        ));
-        v.push(CipherRotor::new(
-            "R-D",
             "TZGHOBKRVUXLQDMPNFWCJYEIAS",
-            &char_to_usize,
-        ));
-        v.push(CipherRotor::new(
-            "R-E",
             "YWTAHRQJVLCEXUNGBIPZMSDFOK",
-            &char_to_usize,
-        ));
-        v.push(CipherRotor::new(
-            "R-F",
             "QSLRBTEKOGAICFWYVMHJNXZUDP",
-            &char_to_usize,
-        ));
-        v.push(CipherRotor::new(
-            "R-G",
             "CHJDQIGNBSAKVTUOXFWLEPRMZY",
-            &char_to_usize,
-        ));
-        v.push(CipherRotor::new(
-            "R-H",
             "CDFAJXTIMNBEQHSUGRYLWZKVPO",
-            &char_to_usize,
-        ));
-        v.push(CipherRotor::new(
-            "R-I",
             "XHFESZDNRBCGKQIJLTVMUOYAPW",
-            &char_to_usize,
-        ));
-        v.push(CipherRotor::new(
-            "R-J",
             "EZJQXMOGYTCSFRIUPVNADLHWBK",
-            &char_to_usize,
-        ));
+        ];
+        let mut v = Vec::with_capacity(10);
+        for (name, wiring) in zip(names, wirings) {
+            v.push(CipherRotor::new(name, wiring, &char_to_usize).unwrap())
+        }
         v
     };
-    pub static ref BIG_ROTOR_MAP: HashMap<&'static str, CipherRotor<'static>> = {
+    pub static ref BIG_ROTOR_MAP: HashMap<&'static str, CipherRotor> = {
         let mut m = HashMap::new();
         for rtr in BIG_ROTOR_VEC.iter() {
             m.insert(rtr.name, rtr.clone());
         }
         m
     };
-    pub static ref INDEX_ROTOR_VEC: Vec<IndexRotor<'static>> = {
+    pub static ref INDEX_ROTOR_VEC: Vec<IndexRotor> = {
+        let names = ["0", "1", "2", "3", "4"];
+        let wirings = [
+            "7591482630",
+            "3810592764",
+            "4086153297",
+            "3980526174",
+            "6497135280",
+        ];
         let mut v = Vec::with_capacity(5);
-        v.push(IndexRotor::new("0", "7591482630", &char_to_usize));
-        v.push(IndexRotor::new("1", "3810592764", &char_to_usize));
-        v.push(IndexRotor::new("2", "4086153297", &char_to_usize));
-        v.push(IndexRotor::new("3", "3980526174", &char_to_usize));
-        v.push(IndexRotor::new("4", "6497135280", &char_to_usize));
+        for (name, wiring) in zip(names, wirings) {
+            v.push(IndexRotor::new(name, wiring, &char_to_usize).unwrap())
+        }
         v
     };
 }

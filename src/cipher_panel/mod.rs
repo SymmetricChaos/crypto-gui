@@ -37,6 +37,7 @@ pub mod plugboard_controls;
 pub mod polybius_cube_controls;
 pub mod polybius_square_controls;
 pub mod porta_controls;
+pub mod purple_controls;
 pub mod quagmire_controls;
 pub mod rail_fence_controls;
 pub mod rs44_controls;
@@ -47,7 +48,6 @@ pub mod trifid_controls;
 pub mod turning_grille_controls;
 pub mod two_square_controls;
 pub mod vigenere_controls;
-pub mod purple_controls;
 
 pub trait ViewableCipher: View + Cipher {}
 
@@ -73,7 +73,7 @@ fn combox_box(
 }
 
 #[derive(Default)]
-pub struct CipherControlPanel<'a> {
+pub struct CipherControlPanel {
     caesar: Caesar,
     affine: Affine,
     decoder_ring: DecoderRing,
@@ -82,7 +82,7 @@ pub struct CipherControlPanel<'a> {
 
     m209: M209,
     enigma: EnigmaM3,
-    sigaba: Sigaba<'a>,
+    sigaba: Sigaba,
     hebern: Hebern,
     purple: Purple,
 
@@ -120,7 +120,7 @@ pub struct CipherControlPanel<'a> {
     rs44: RS44,
 }
 
-impl<'a> CipherControlPanel<'a> {
+impl CipherControlPanel {
     pub fn ui(&mut self, ui: &mut egui::Ui, active_cipher: &mut CipherID, errors: &mut String) {
         egui::Grid::new("comboboxes").show(ui, |ui| {
             combox_box(
