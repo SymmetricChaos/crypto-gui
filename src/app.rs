@@ -1,8 +1,9 @@
-use crate::cipher_panel::{CipherControlPanel, CipherDisplayPanel};
+use crate::cipher_panel::{CipherInterfaces, CipherIO};
 use crate::code_panel::{CodeControlPanel, CodeDisplayPanel};
 use crate::pages::category_page::CipherCategoryPage;
 use crate::pages::rng_pages::RngInfoPage;
 use crate::pages::{CipherCategory, Page, TextPrepPage};
+use crate::rng_id::RngID;
 use crate::{cipher_id::CipherID, code_id::CodeID};
 use eframe::egui;
 use eframe::{
@@ -30,8 +31,8 @@ fn load_font(name: &str, family: &FontFamily, font_data: FontData, font_def: &mu
 
 pub struct ClassicCrypto {
     cipher_category: CipherCategory,
-    cipher_control_panel: CipherControlPanel,
-    cipher_display_panel: CipherDisplayPanel,
+    cipher_control_panel: CipherInterfaces,
+    cipher_display_panel: CipherIO,
     code_control_panel: CodeControlPanel,
     code_display_panel: CodeDisplayPanel,
     rng_display_panel: RngInfoPage,
@@ -40,6 +41,7 @@ pub struct ClassicCrypto {
     errors: String,
     active_cipher: CipherID,
     active_code: CodeID,
+    active_rng: RngID,
     active_page: Page,
     text_prep_page: TextPrepPage,
     cipher_category_page: CipherCategoryPage,
@@ -48,17 +50,25 @@ pub struct ClassicCrypto {
 impl Default for ClassicCrypto {
     fn default() -> Self {
         Self {
-            cipher_control_panel: CipherControlPanel::default(),
-            cipher_display_panel: CipherDisplayPanel::default(),
+            cipher_control_panel: CipherInterfaces::default(),
+            cipher_display_panel: CipherIO::default(),
             code_control_panel: CodeControlPanel::default(),
             code_display_panel: CodeDisplayPanel::default(),
             rng_display_panel: RngInfoPage::default(),
+
+            // Input, output, and error shared by everything
             input: String::new(),
             output: String::new(),
             errors: String::new(),
+
+            // Which of each kind of tool is active
             active_cipher: CipherID::default(),
             active_code: CodeID::default(),
+            active_rng: RngID::default(),
+
+            // Which page we are on
             active_page: Page::About,
+
             cipher_category: CipherCategory::Substituion,
             text_prep_page: TextPrepPage::default(),
             cipher_category_page: CipherCategoryPage::default(),
@@ -230,7 +240,7 @@ impl App for ClassicCrypto {
             Page::Code => self.code_page(ctx),
             Page::CipherCategory => self.cipher_category_page(ctx),
             Page::TextPrep => self.text_prep_page(ctx),
-            Page::Rng => todo!("make a method for the RNG page")
+            Page::Rng => todo!("make a method for the RNG page"),
         }
     }
 }

@@ -20,13 +20,17 @@ struct FibLsfrFrame {
 
 impl Default for FibLsfrFrame {
     fn default() -> Self {
-        Self { eight: Default::default(), sixteen: Default::default(), thirty_two: Default::default(), selector: todo!() }
+        Self {
+            eight: Default::default(),
+            sixteen: Default::default(),
+            thirty_two: Default::default(),
+            selector: Default::default(),
+        }
     }
 }
 
 impl View for FibLsfrFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-
         match self.selector {
             Selector::Eight => {
                 ui.horizontal(|ui| {
@@ -34,7 +38,7 @@ impl View for FibLsfrFrame {
                         ui.label(bit.to_string());
                     }
                 });
-        
+
                 if ui.button("Step").clicked() {
                     self.eight.step();
                 }
@@ -45,7 +49,7 @@ impl View for FibLsfrFrame {
                         ui.label(bit.to_string());
                     }
                 });
-        
+
                 if ui.button("Step").clicked() {
                     self.sixteen.step();
                 }
@@ -56,13 +60,11 @@ impl View for FibLsfrFrame {
                         ui.label(bit.to_string());
                     }
                 });
-        
+
                 if ui.button("Step").clicked() {
                     self.thirty_two.step();
                 }
             }
         }
-
-
     }
 }

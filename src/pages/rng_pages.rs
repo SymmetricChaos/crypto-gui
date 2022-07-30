@@ -1,23 +1,14 @@
 use eframe::egui::{CentralPanel, Context, ScrollArea, SidePanel};
 
-
 use crate::rng_id::RngID;
 
 use super::Page;
 
-
 #[derive(Default)]
-pub struct RngInfoPage {
-
-}
+pub struct RngInfoPage {}
 
 impl RngInfoPage {
-    pub fn view(
-        &mut self,
-        ctx: &Context,
-        active_rng: &mut RngID,
-        active_page: &mut Page,
-    ) {
+    pub fn view(&mut self, ctx: &Context, active_rng: &mut RngID, active_page: &mut Page) {
         SidePanel::left("rng_selector_panel")
             .max_width(300.0)
             .show(ctx, |ui| {

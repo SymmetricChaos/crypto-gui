@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub enum RngID {
-    Lfsr
+    Lfsr,
 }
 
 impl Default for RngID {

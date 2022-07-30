@@ -5,6 +5,11 @@ use eframe::egui::{Slider, Ui};
 
 impl ViewableCipher for Caesar {}
 
+// pub struct CaesarFrame {
+//     cipher: Caesar,
+//     alphabet_string: String,
+// }
+
 impl View for Caesar {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         randomize_reset(ui, self);

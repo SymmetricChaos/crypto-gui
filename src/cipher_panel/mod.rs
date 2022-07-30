@@ -66,14 +66,14 @@ fn combox_box(
         .selected_text(identifier)
         .show_ui(ui, |ui| {
             for id in ciphers {
-                ui.selectable_value(active_cipher, *id, format!("{}", id));
+                ui.selectable_value(active_cipher, *id, id.to_string());
             }
         });
     ui.add_space(10.0);
 }
 
 #[derive(Default)]
-pub struct CipherControlPanel {
+pub struct CipherInterfaces {
     caesar: Caesar,
     affine: Affine,
     decoder_ring: DecoderRing,
@@ -120,7 +120,7 @@ pub struct CipherControlPanel {
     rs44: RS44,
 }
 
-impl CipherControlPanel {
+impl CipherInterfaces {
     pub fn ui(&mut self, ui: &mut egui::Ui, active_cipher: &mut CipherID, errors: &mut String) {
         egui::Grid::new("comboboxes").show(ui, |ui| {
             combox_box(
@@ -280,9 +280,9 @@ impl CipherControlPanel {
 }
 
 #[derive(Default)]
-pub struct CipherDisplayPanel {}
+pub struct CipherIO {}
 
-impl CipherDisplayPanel {
+impl CipherIO {
     pub fn ui(
         &mut self,
         ui: &mut egui::Ui,
@@ -290,7 +290,7 @@ impl CipherDisplayPanel {
         output: &mut String,
         errors: &mut String,
         active_cipher: &mut CipherID,
-        control_panel: &mut CipherControlPanel,
+        control_panel: &mut CipherInterfaces,
     ) {
         ui.add_space(32.0);
         ui.label("INPUT TEXT");
