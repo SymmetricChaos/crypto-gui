@@ -2,21 +2,24 @@
 #![cfg_attr(not(debug_assertions), deny(warnings))] // Forbid warnings in release builds
 
 pub mod app;
-pub mod cipher_panel;
-pub mod ciphers;
 pub mod grid;
-pub mod rotors;
 pub mod math_functions;
+pub mod rotors;
 
 pub mod cipher_id;
+pub mod cipher_panel;
+pub mod ciphers;
+
 pub mod code_id;
 pub mod code_panel;
 pub mod codes;
+
+pub mod rng_id;
+
 pub mod errors;
 pub mod pages;
 
 pub mod egui_aux;
-
 
 pub mod text_aux;
 

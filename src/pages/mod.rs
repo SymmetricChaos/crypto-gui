@@ -4,6 +4,9 @@ pub use text_prep_page::TextPrepPage;
 pub mod category_page;
 pub use category_page::CipherCategoryPage;
 
+pub mod rng_pages;
+pub use rng_pages::RngInfoPage;
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum Page {
     About,
@@ -11,6 +14,7 @@ pub enum Page {
     Code,
     CipherCategory,
     TextPrep,
+    Rng,
 }
 
 #[derive(Debug, PartialEq, Eq)]

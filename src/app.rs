@@ -1,6 +1,7 @@
 use crate::cipher_panel::{CipherControlPanel, CipherDisplayPanel};
 use crate::code_panel::{CodeControlPanel, CodeDisplayPanel};
 use crate::pages::category_page::CipherCategoryPage;
+use crate::pages::rng_pages::RngInfoPage;
 use crate::pages::{CipherCategory, Page, TextPrepPage};
 use crate::{cipher_id::CipherID, code_id::CodeID};
 use eframe::egui;
@@ -33,6 +34,7 @@ pub struct ClassicCrypto {
     cipher_display_panel: CipherDisplayPanel,
     code_control_panel: CodeControlPanel,
     code_display_panel: CodeDisplayPanel,
+    rng_display_panel: RngInfoPage,
     input: String,
     output: String,
     errors: String,
@@ -50,6 +52,7 @@ impl Default for ClassicCrypto {
             cipher_display_panel: CipherDisplayPanel::default(),
             code_control_panel: CodeControlPanel::default(),
             code_display_panel: CodeDisplayPanel::default(),
+            rng_display_panel: RngInfoPage::default(),
             input: String::new(),
             output: String::new(),
             errors: String::new(),
@@ -227,6 +230,7 @@ impl App for ClassicCrypto {
             Page::Code => self.code_page(ctx),
             Page::CipherCategory => self.cipher_category_page(ctx),
             Page::TextPrep => self.text_prep_page(ctx),
+            Page::Rng => todo!("make a method for the RNG page")
         }
     }
 }
