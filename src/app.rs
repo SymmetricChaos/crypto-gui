@@ -70,8 +70,12 @@ impl Default for ClassicCrypto {
 }
 
 impl ClassicCrypto {
+    
     // Configure the CreationContext and also build the app
     pub fn build_with_context(cc: &eframe::CreationContext<'_>) -> Self {
+
+        cc.egui_ctx.set_visuals(egui::Visuals::dark());
+
         let mut font_def = FontDefinitions::default();
 
         // Noto fonts to get wide coverage, more can be added if needed
@@ -133,6 +137,8 @@ impl ClassicCrypto {
     // Combox boxes for selecting ciphers
     fn cipher_selector_panel(&mut self, ctx: &Context) {
         SidePanel::left("cipher_selector_panel")
+            .default_width(200.0)
+            .min_width(200.0)
             .max_width(300.0)
             .show(ctx, |ui| {
                 self.cipher_interface
@@ -146,6 +152,8 @@ impl ClassicCrypto {
             self.cipher_selector_panel(ctx);
 
             SidePanel::right("cipher_display_panel")
+                .default_width(200.0)
+                .min_width(200.0)
                 .max_width(300.0)
                 .show(ctx, |ui| {
                     self.io_panel.ui(
@@ -212,6 +220,7 @@ impl ClassicCrypto {
 
     fn about_page(&mut self, ctx: &Context) {
         SidePanel::left("about_display_panel")
+            .default_width(500.0)
             .max_width(500.0)
             .show(ctx, |ui| {
                 warn_if_debug_build(ui);
@@ -245,7 +254,10 @@ impl ClassicCrypto {
 }
 
 impl App for ClassicCrypto {
-    fn update(&mut self, ctx: &Context, _: &mut eframe::Frame) {
+    fn update(&mut self, ctx: &Context, frame: &mut eframe::Frame) {
+
+        frame.set_window_size((900.0, 700.0).into());
+
         TopBottomPanel::top("top_panel").show(ctx, |ui| {
             ui.horizontal_top(|ui| {
                 widgets::global_dark_light_mode_switch(ui);
