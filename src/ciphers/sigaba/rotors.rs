@@ -1,4 +1,3 @@
-use super::char_to_usize;
 use crate::rotors::Rotor;
 use itertools::zip;
 use lazy_static::lazy_static;
@@ -42,7 +41,7 @@ lazy_static! {
         ];
         let mut v = Vec::with_capacity(10);
         for (name, wiring) in zip(names, wirings) {
-            v.push(CipherRotor::new(name, wiring, &char_to_usize).unwrap())
+            v.push(CipherRotor::new(name, wiring, &|c: char| (c as u8 as usize) - 65).unwrap())
         }
         v
     };
@@ -64,7 +63,7 @@ lazy_static! {
         ];
         let mut v = Vec::with_capacity(5);
         for (name, wiring) in zip(names, wirings) {
-            v.push(IndexRotor::new(name, wiring, &char_to_usize).unwrap())
+            v.push(IndexRotor::new(name, wiring, &|c: char| (c as u8 as usize) - 48).unwrap())
         }
         v
     };
