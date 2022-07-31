@@ -1,6 +1,6 @@
 use eframe::egui::{CentralPanel, Context, ScrollArea, SidePanel};
 
-use crate::rng_id::RngID;
+use crate::ids::RngID;
 
 use super::Page;
 
@@ -18,7 +18,7 @@ impl RngInfoPage {
                         .selectable_value(active_rng, id, id.to_string())
                         .clicked()
                     {
-                        *active_page = Page::Rng;
+                        *active_page = Page::Rng(None);
                     };
                 }
             });
