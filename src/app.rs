@@ -1,10 +1,7 @@
-use crate::cipher_panel::{CipherInterfaces, CipherIO};
-use crate::code_panel::{CodeControlPanel, CodeDisplayPanel};
-use crate::pages::category_page::CipherCategoryPage;
-use crate::pages::rng_pages::RngInfoPage;
-use crate::pages::{CipherCategory, Page, TextPrepPage};
-use crate::rng_id::RngID;
-use crate::{cipher_id::CipherID, code_id::CodeID};
+use crate::cipher_panel::CipherInterface;
+use crate::ids::CipherID;
+use crate::pages::io_panel::IOPanel;
+use crate::pages::{Page, TextPrepPage};
 use eframe::egui;
 use eframe::{
     egui::{
@@ -15,12 +12,12 @@ use eframe::{
     App,
 };
 
-fn page_selector(ui: &mut Ui, name: &str, page: Page, active_page: &mut Page) {
+fn page_selector(ui: &mut Ui, name: &str, selected_page: Page, active_page: &mut Page) {
     if ui
-        .add(SelectableLabel::new(active_page == &page, name))
+        .add(SelectableLabel::new(active_page == &selected_page, name))
         .clicked()
     {
-        *active_page = page
+        *active_page = selected_page
     }
 }
 
@@ -30,48 +27,44 @@ fn load_font(name: &str, family: &FontFamily, font_data: FontData, font_def: &mu
 }
 
 pub struct ClassicCrypto {
-    cipher_category: CipherCategory,
-    cipher_control_panel: CipherInterfaces,
-    cipher_display_panel: CipherIO,
-    code_control_panel: CodeControlPanel,
-    code_display_panel: CodeDisplayPanel,
-    rng_display_panel: RngInfoPage,
+    cipher_interface: CipherInterface,
+    // cipher_display_panel: CipherIO,
+    // code_control_panel: CodeControlPanel,
+    // code_display_panel: CodeDisplayPanel,
+    // rng_display_panel: RngInfoPage,
+    io_panel: IOPanel,
     input: String,
     output: String,
     errors: String,
     active_cipher: CipherID,
-    active_code: CodeID,
-    active_rng: RngID,
+    // active_code: CodeID,
+    // active_rng: RngID,
     active_page: Page,
     text_prep_page: TextPrepPage,
-    cipher_category_page: CipherCategoryPage,
 }
 
 impl Default for ClassicCrypto {
     fn default() -> Self {
         Self {
-            cipher_control_panel: CipherInterfaces::default(),
-            cipher_display_panel: CipherIO::default(),
-            code_control_panel: CodeControlPanel::default(),
-            code_display_panel: CodeDisplayPanel::default(),
-            rng_display_panel: RngInfoPage::default(),
-
-            // Input, output, and error shared by everything
+            
+            // Input, output, and error shared by Ciphers and Codes
             input: String::new(),
             output: String::new(),
             errors: String::new(),
 
-            // Which of each kind of tool is active
+            // IO Panel shared by Ciphers and Codes
+            io_panel: IOPanel::default(),
+
+            // Which cipher is active
             active_cipher: CipherID::default(),
-            active_code: CodeID::default(),
-            active_rng: RngID::default(),
 
             // Which page we are on
             active_page: Page::About,
 
-            cipher_category: CipherCategory::Substituion,
             text_prep_page: TextPrepPage::default(),
-            cipher_category_page: CipherCategoryPage::default(),
+
+            // Interface that hold a copy of each cipher and organizes them
+            cipher_interface: CipherInterface::default(),
         }
     }
 }
@@ -130,61 +123,92 @@ impl ClassicCrypto {
         self.text_prep_page.view(&ctx)
     }
 
-    fn cipher_category_page(&mut self, ctx: &Context) {
-        self.cipher_category_page.view(
-            &ctx,
-            &mut self.cipher_category,
-            &mut self.active_cipher,
-            &mut self.active_page,
-        )
+    // Direct invalid selections here
+    fn blank_page(&mut self, ctx: &Context) {
+        CentralPanel::default().show(ctx, |ui| {
+            ScrollArea::vertical().show(ui, |ui| ui.label("you have reached this page in error"));
+        });
+    }
+
+    // Combox boxes for selecting ciphers
+    fn cipher_selector_panel(&mut self, ctx: &Context) {
+        SidePanel::left("cipher_selector_panel")
+            .max_width(300.0)
+            .show(ctx, |ui| {
+                self.cipher_interface
+                    .combo_boxes(ui, &mut self.active_cipher)
+            });
     }
 
     fn cipher_page(&mut self, ctx: &Context) {
-        SidePanel::right("cipher_display_panel")
-            .max_width(300.0)
-            .show(ctx, |ui| {
-                self.cipher_display_panel.ui(
-                    ui,
-                    &mut self.input,
-                    &mut self.output,
-                    &mut self.errors,
-                    &mut self.active_cipher,
-                    &mut self.cipher_control_panel,
-                );
+        if self.active_page == Page::Cipher {
+
+            self.cipher_selector_panel(ctx);
+
+            SidePanel::right("cipher_display_panel")
+                .max_width(300.0)
+                .show(ctx, |ui| {
+                    self.io_panel.ui(
+                        ui,
+                        &mut self.input,
+                        &mut self.output,
+                        &mut self.errors,
+                        &mut self.active_page,
+                        &mut self.active_cipher,
+                        &mut self.cipher_interface,
+                    );
+                });
+
+            CentralPanel::default().show(ctx, |ui| {
+                ScrollArea::vertical().show(ui, |ui| {
+                    let name = RichText::new(String::from(self.active_cipher))
+                        .strong()
+                        .heading();
+                    ui.add(egui::Label::new(name));
+                    ui.label(self.active_cipher.description());
+
+                    ui.add_space(16.0);
+                    ui.separator();
+                    ui.add_space(16.0);
+                    self.cipher_interface
+                        .get_active_cipher(&self.active_cipher)
+                        .ui(ui, &mut self.errors)
+                });
             });
-        CentralPanel::default().show(ctx, |ui| {
-            ScrollArea::vertical().show(ui, |ui| {
-                self.cipher_control_panel
-                    .ui(ui, &mut self.active_cipher, &mut self.errors)
-            });
-        });
+
+        // If somehow we are here without Page::Cipher selected
+        } else {
+            self.blank_page(ctx)
+        }
     }
 
-    fn code_page(&mut self, ctx: &Context) {
-        SidePanel::right("code_display_panel")
-            .max_width(300.0)
-            .show(ctx, |ui| {
-                self.code_display_panel.ui(
-                    ui,
-                    &mut self.input,
-                    &mut self.output,
-                    &mut self.errors,
-                    &mut self.active_code,
-                    &mut self.code_control_panel,
-                );
-            });
-        CentralPanel::default().show(ctx, |ui| {
-            ScrollArea::vertical().show(ui, |ui| {
-                self.code_control_panel.ui(
-                    ui,
-                    &mut self.active_code,
-                    &mut self.input,
-                    &mut self.output,
-                    &mut self.errors,
-                )
-            });
-        });
-    }
+    // fn code_page(&mut self, ctx: &Context) {
+    //     SidePanel::right("cipher_display_panel")
+    //         .max_width(300.0)
+    //         .show(ctx, |ui| {
+    //             self.io_panel.ui(
+    //                 ui,
+    //                 &mut self.input,
+    //                 &mut self.output,
+    //                 &mut self.errors,
+    //                 &mut self.active_page,
+    //                 &mut self.code_interface,
+    //             );
+    //         });
+    //     CentralPanel::default().show(ctx, |ui| {
+    //         ScrollArea::vertical().show(ui, |ui| {
+    //             if let Page::Code(None) = self.active_page {
+    //                 ui.label("Generic description panel for Codes should go here");
+    //             } else if let Page::Code(Some(code)) = self.active_page {
+    //                 self.code_interface
+    //                     .ui(ui, &mut code, &mut self.errors)
+    //             } else {
+    //                 ui.label("this page should not be visisble");
+    //             }
+
+    //         });
+    //     });
+    // }
 
     fn about_page(&mut self, ctx: &Context) {
         SidePanel::left("about_display_panel")
@@ -228,8 +252,14 @@ impl App for ClassicCrypto {
                 ui.separator();
 
                 page_selector(ui, "About", Page::About, &mut self.active_page);
-                page_selector(ui, "Ciphers", Page::CipherCategory, &mut self.active_page);
-                page_selector(ui, "Codes", Page::Code, &mut self.active_page);
+                page_selector(
+                    ui,
+                    "Ciphers",
+                    Page::Cipher,
+                    &mut self.active_page,
+                );
+                // page_selector(ui, "Codes", Page::Code(None), &mut self.active_page);
+                // page_selector(ui, "RNGs", Page::Rng(None), &mut self.active_page);
                 page_selector(ui, "Text", Page::TextPrep, &mut self.active_page);
             });
         });
@@ -237,10 +267,11 @@ impl App for ClassicCrypto {
         match self.active_page {
             Page::About => self.about_page(ctx),
             Page::Cipher => self.cipher_page(ctx),
-            Page::Code => self.code_page(ctx),
-            Page::CipherCategory => self.cipher_category_page(ctx),
+            // Page::Code(_) => self.code_page(ctx),
+            // Page::Rng(_) => todo!("make a method for the RNG page"),
+            // Page::CipherCategory => self.cipher_category_page(ctx),
             Page::TextPrep => self.text_prep_page(ctx),
-            Page::Rng => todo!("make a method for the RNG page"),
+            _ => self.blank_page(ctx),
         }
     }
 }

@@ -1,13 +1,12 @@
-use self::_generic_components::encrypt_decrypt;
+
 use crate::{
-    cipher_id::CipherID,
     ciphers::{
         hebern::Hebern, playfair::*, polyalphabetic::*, polybius::*, substitution::*, tactical::*,
         transposition::*, *,
     },
-    global_rng::global_rng_controls,
+    ids::CipherID,
 };
-use eframe::egui::{self, Color32, RichText, TextEdit, TextStyle, Ui};
+use eframe::egui::{self, Ui};
 
 pub mod _generic_components;
 pub mod adfgvx_controls;
@@ -60,7 +59,7 @@ fn combox_box(
     ciphers: &[CipherID],
     identifier: &'static str,
     active_cipher: &mut CipherID,
-    ui: &mut egui::Ui,
+    ui: &mut Ui,
 ) {
     egui::ComboBox::from_id_source(identifier)
         .selected_text(identifier)
@@ -73,7 +72,7 @@ fn combox_box(
 }
 
 #[derive(Default)]
-pub struct CipherInterfaces {
+pub struct CipherInterface {
     caesar: Caesar,
     affine: Affine,
     decoder_ring: DecoderRing,
@@ -120,121 +119,101 @@ pub struct CipherInterfaces {
     rs44: RS44,
 }
 
-impl CipherInterfaces {
-    pub fn ui(&mut self, ui: &mut egui::Ui, active_cipher: &mut CipherID, errors: &mut String) {
-        egui::Grid::new("comboboxes").show(ui, |ui| {
-            combox_box(
-                &[
-                    CipherID::Caesar,
-                    CipherID::Decoder,
-                    CipherID::Affine,
-                    CipherID::Substitution,
-                    CipherID::Plugboard,
-                ],
-                "Substitution",
-                active_cipher,
-                ui,
-            );
+impl CipherInterface {
+    pub fn combo_boxes(&mut self, ui: &mut Ui, active_cipher: &mut CipherID) {
+        combox_box(
+            &[
+                CipherID::Caesar,
+                CipherID::Decoder,
+                CipherID::Affine,
+                CipherID::Substitution,
+                CipherID::Plugboard,
+            ],
+            "Substitution",
+            active_cipher,
+            ui,
+        );
 
-            combox_box(
-                &[
-                    CipherID::Vigenere,
-                    CipherID::Beaufort,
-                    CipherID::M94,
-                    CipherID::Alberti,
-                    CipherID::Bazeries,
-                    CipherID::Porta,
-                    CipherID::Quagmire,
-                    CipherID::Chaocipher,
-                    CipherID::Hutton,
-                ],
-                "Polyalphabetic",
-                active_cipher,
-                ui,
-            );
+        combox_box(
+            &[
+                CipherID::Vigenere,
+                CipherID::Beaufort,
+                CipherID::M94,
+                CipherID::Alberti,
+                CipherID::Bazeries,
+                CipherID::Porta,
+                CipherID::Quagmire,
+                CipherID::Chaocipher,
+                CipherID::Hutton,
+            ],
+            "Polyalphabetic",
+            active_cipher,
+            ui,
+        );
 
-            combox_box(
-                &[
-                    CipherID::M209,
-                    CipherID::Enigma,
-                    CipherID::Sigaba,
-                    CipherID::Hebern,
-                    CipherID::Purple,
-                ],
-                "Cipher Machine",
-                active_cipher,
-                ui,
-            );
+        combox_box(
+            &[
+                CipherID::M209,
+                CipherID::Enigma,
+                CipherID::Sigaba,
+                CipherID::Hebern,
+                CipherID::Purple,
+            ],
+            "Cipher Machine",
+            active_cipher,
+            ui,
+        );
 
-            combox_box(
-                &[
-                    CipherID::Columnar,
-                    CipherID::Grille,
-                    CipherID::RailFence,
-                    CipherID::Scytale,
-                    CipherID::TurningGrille,
-                ],
-                "Transposition",
-                active_cipher,
-                ui,
-            );
+        combox_box(
+            &[
+                CipherID::Columnar,
+                CipherID::Grille,
+                CipherID::RailFence,
+                CipherID::Scytale,
+                CipherID::TurningGrille,
+            ],
+            "Transposition",
+            active_cipher,
+            ui,
+        );
 
-            ui.end_row();
+        combox_box(
+            &[
+                CipherID::Playfair,
+                CipherID::Slidefair,
+                CipherID::TwoSquare,
+                CipherID::FourSquare,
+            ],
+            "Playfair",
+            active_cipher,
+            ui,
+        );
 
-            combox_box(
-                &[
-                    CipherID::Playfair,
-                    CipherID::Slidefair,
-                    CipherID::TwoSquare,
-                    CipherID::FourSquare,
-                ],
-                "Playfair",
-                active_cipher,
-                ui,
-            );
+        combox_box(
+            &[CipherID::Batco, CipherID::Dryad, CipherID::Rs44],
+            "Tactical",
+            active_cipher,
+            ui,
+        );
 
-            combox_box(
-                &[CipherID::Batco, CipherID::Dryad, CipherID::Rs44],
-                "Tactical",
-                active_cipher,
-                ui,
-            );
+        combox_box(
+            &[
+                CipherID::Polybius,
+                CipherID::PolybiusCube,
+                CipherID::Adfgvx,
+                CipherID::B64,
+                CipherID::Bifid,
+                CipherID::Trifid,
+                CipherID::Checkerboard,
+            ],
+            "Polybius",
+            active_cipher,
+            ui,
+        );
 
-            combox_box(
-                &[
-                    CipherID::Polybius,
-                    CipherID::PolybiusCube,
-                    CipherID::Adfgvx,
-                    CipherID::B64,
-                    CipherID::Bifid,
-                    CipherID::Trifid,
-                    CipherID::Checkerboard,
-                ],
-                "Polybius",
-                active_cipher,
-                ui,
-            );
-        });
-
-        ui.add_space(16.0);
-        ui.separator();
-        ui.add_space(16.0);
-
-        let name = RichText::new(String::from(*active_cipher))
-            .strong()
-            .heading();
-        ui.add(egui::Label::new(name));
-        ui.label(active_cipher.description());
-
-        ui.add_space(16.0);
-        ui.separator();
-        ui.add_space(16.0);
-
-        let c = self.get_active_cipher(active_cipher);
-        c.ui(ui, errors);
     }
 
-    pub fn get_active_cipher(&mut self, active_cipher: &mut CipherID) -> &mut dyn ViewableCipher {
+    pub fn get_active_cipher(&mut self, active_cipher: &CipherID) -> &mut dyn ViewableCipher {
         match active_cipher {
             CipherID::Caesar => &mut self.caesar,
             CipherID::Affine => &mut self.affine,
@@ -279,57 +258,57 @@ impl CipherInterfaces {
     }
 }
 
-#[derive(Default)]
-pub struct CipherIO {}
+// #[derive(Default)]
+// pub struct CipherIO {}
 
-impl CipherIO {
-    pub fn ui(
-        &mut self,
-        ui: &mut egui::Ui,
-        input: &mut String,
-        output: &mut String,
-        errors: &mut String,
-        active_cipher: &mut CipherID,
-        control_panel: &mut CipherInterfaces,
-    ) {
-        ui.add_space(32.0);
-        ui.label("INPUT TEXT");
-        ui.add(TextEdit::multiline(input).font(TextStyle::Monospace));
-        ui.add_space(16.0);
-        ui.label("OUTPUT TEXT");
-        ui.add(TextEdit::multiline(output).font(TextStyle::Monospace));
+// impl CipherIO {
+//     pub fn ui(
+//         &mut self,
+//         ui: &mut egui::Ui,
+//         input: &mut String,
+//         output: &mut String,
+//         errors: &mut String,
+//         active_cipher: &mut CipherID,
+//         control_panel: &mut CipherInterface,
+//     ) {
+//         ui.add_space(32.0);
+//         ui.label("INPUT TEXT");
+//         ui.add(TextEdit::multiline(input).font(TextStyle::Monospace));
+//         ui.add_space(16.0);
+//         ui.label("OUTPUT TEXT");
+//         ui.add(TextEdit::multiline(output).font(TextStyle::Monospace));
 
-        encrypt_decrypt(
-            ui,
-            control_panel.get_active_cipher(active_cipher),
-            input,
-            output,
-            errors,
-        );
+//         encrypt_decrypt(
+//             ui,
+//             control_panel.get_active_cipher(active_cipher),
+//             input,
+//             output,
+//             errors,
+//         );
 
-        ui.add_space(10.0);
-        if ui.button("clear").clicked() {
-            input.clear();
-            output.clear();
-            errors.clear();
-        }
+//         ui.add_space(10.0);
+//         if ui.button("clear").clicked() {
+//             input.clear();
+//             output.clear();
+//             errors.clear();
+//         }
 
-        ui.add_space(10.0);
-        if ui.button("swap input/output").clicked() {
-            std::mem::swap(input, output)
-        }
+//         ui.add_space(10.0);
+//         if ui.button("swap input/output").clicked() {
+//             std::mem::swap(input, output)
+//         }
 
-        ui.add_space(16.0);
-        global_rng_controls(ui);
+//         ui.add_space(16.0);
+//         global_rng_controls(ui);
 
-        if !errors.is_empty() {
-            ui.add_space(24.0);
-            ui.label(
-                RichText::new(errors.clone())
-                    .color(Color32::RED)
-                    .background_color(Color32::BLACK)
-                    .monospace(),
-            );
-        }
-    }
-}
+//         if !errors.is_empty() {
+//             ui.add_space(24.0);
+//             ui.label(
+//                 RichText::new(errors.clone())
+//                     .color(Color32::RED)
+//                     .background_color(Color32::BLACK)
+//                     .monospace(),
+//             );
+//         }
+//     }
+// }

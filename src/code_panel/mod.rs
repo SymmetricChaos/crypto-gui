@@ -1,5 +1,4 @@
-use crate::code_id::CodeID;
-use crate::codes::*;
+use crate::{codes::*, ids::CodeID};
 use eframe::egui::{self, Color32, RichText, TextEdit, TextStyle};
 pub mod bacon_contols;
 pub mod generic_components;
