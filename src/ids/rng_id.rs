@@ -12,7 +12,6 @@ impl Default for RngID {
 }
 
 impl RngID {
-    // Describe the history of the cipher
     pub fn description(&self) -> &'static str {
         match self {
             RngID::Lfsr => "The Linear Feedback Shift Register.",
