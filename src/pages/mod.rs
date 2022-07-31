@@ -1,35 +1,21 @@
 pub mod text_prep_page;
 pub use text_prep_page::TextPrepPage;
 
-pub mod category_page;
-pub use category_page::CipherCategoryPage;
+pub mod io_panel;
 
-pub mod rng_pages;
-pub use rng_pages::RngInfoPage;
+pub mod cipher_page;
+
+pub mod category_page;
+
+// pub mod rng_page;
+// pub use rng_page::RngInfoPage;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Page {
     About,
     Cipher,
     Code,
+    Rng,
     CipherCategory,
     TextPrep,
-    Rng,
-}
-
-#[derive(Debug, PartialEq, Eq)]
-pub enum CipherCategory {
-    Substituion,
-    Polyalphabetic,
-    RotorMachine,
-    Transposition,
-    Playfair,
-    Tactical,
-    Polybius,
-}
-
-impl Default for CipherCategory {
-    fn default() -> Self {
-        Self::Substituion
-    }
 }
