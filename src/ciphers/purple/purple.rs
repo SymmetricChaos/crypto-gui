@@ -23,11 +23,10 @@ impl Default for Switches {
 }
 
 impl Switches {
-    pub fn set_switch_speed_1() {}
-
-    pub fn set_switch_speed_2() {}
-
-    pub fn set_switch_speed_3() {}
+    pub fn validate_switches() -> Result<(),Error> {
+        
+        Ok(())
+    }
 
     pub fn step(&mut self) {
         let spos = self.sixes.position;
