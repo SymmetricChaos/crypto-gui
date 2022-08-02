@@ -1,6 +1,6 @@
 use crate::{
     ciphers::Cipher,
-    errors::CipherError,
+    errors::Error,
     global_rng::get_global_rng,
     text_aux::{PresetAlphabet, VecString},
 };
@@ -24,14 +24,14 @@ impl Default for Plugboard {
 }
 
 impl Plugboard {
-    pub fn set_plugboard(&mut self) -> Result<(), CipherError> {
+    pub fn set_plugboard(&mut self) -> Result<(), Error> {
         let digraphs = self.pairs.split(" ");
 
         // Clear the wiring and rebuild it, returning an Error if anything goes wrong
         let mut wiring = HashMap::with_capacity(self.wiring.capacity());
         for d in digraphs {
             if d.len() != 2 {
-                return Err(CipherError::key(
+                return Err(Error::key(
                     "Plugboard settings must be given as pairs of letters",
                 ));
             }
@@ -39,7 +39,7 @@ impl Plugboard {
             let a = cs.next().unwrap();
             let b = cs.next().unwrap();
             if a == b || wiring.contains_key(&a) || wiring.contains_key(&b) {
-                return Err(CipherError::key(
+                return Err(Error::key(
                     "Plugboard settings cannot include cycles or chains",
                 ));
             }
@@ -88,13 +88,13 @@ impl Plugboard {
 }
 
 impl Cipher for Plugboard {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         let out = text.chars().map(|c| self.swap(c)).collect();
         Ok(out)
     }
 
     // Plugboards are naturally reciprocal
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         self.encrypt(text)
     }
 

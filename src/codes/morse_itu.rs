@@ -1,4 +1,4 @@
-use crate::errors::CodeError;
+use crate::errors::Error;
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 
@@ -178,46 +178,46 @@ impl Default for MorseITU {
 }
 
 impl MorseITU {
-    fn encode_ditdah(&self, text: &str) -> Result<String, CodeError> {
+    fn encode_ditdah(&self, text: &str) -> Result<String, Error> {
         let mut out = Vec::with_capacity(text.chars().count());
         for s in text.chars() {
             match ITU_MAP.get(&s) {
                 Some(code_group) => out.push(*code_group),
-                None => return Err(CodeError::invalid_char(s)),
+                None => return Err(Error::invalid_input_char(s)),
             }
         }
         Ok(out.join(" "))
     }
 
-    fn encode_binary(&self, text: &str) -> Result<String, CodeError> {
+    fn encode_binary(&self, text: &str) -> Result<String, Error> {
         let mut out = Vec::with_capacity(text.chars().count());
         for s in text.chars() {
             match ITU_MAP_BINARY.get(&s) {
                 Some(code_group) => out.push(*code_group),
-                None => return Err(CodeError::invalid_char(s)),
+                None => return Err(Error::invalid_input_char(s)),
             }
         }
         Ok(out.join("00"))
     }
 
-    fn decode_ditdah(&self, text: &str) -> Result<String, CodeError> {
+    fn decode_ditdah(&self, text: &str) -> Result<String, Error> {
         let text = text.replace(".", "·");
         let mut out = String::new();
         for s in text.split(" ") {
             match ITU_MAP_INV.get(&s) {
                 Some(code_group) => out.push(*code_group),
-                None => return Err(CodeError::invalid_code_group(s)),
+                None => return Err(Error::invalid_input_group(s)),
             }
         }
         Ok(out)
     }
 
-    fn decode_binary(&self, text: &str) -> Result<String, CodeError> {
+    fn decode_binary(&self, text: &str) -> Result<String, Error> {
         let mut out = String::new();
         for s in text.split("00") {
             match ITU_MAP_BINARY_INV.get(&s) {
                 Some(code_group) => out.push(*code_group),
-                None => return Err(CodeError::invalid_code_group(s)),
+                None => return Err(Error::invalid_input_group(s)),
             }
         }
         Ok(out)
@@ -225,14 +225,14 @@ impl MorseITU {
 }
 
 impl Code for MorseITU {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, Error> {
         match self.mode {
             MorseMode::DitDah => self.encode_ditdah(text),
             MorseMode::Binary => self.encode_binary(text),
         }
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, Error> {
         match self.mode {
             MorseMode::DitDah => self.decode_ditdah(text),
             MorseMode::Binary => self.decode_binary(text),

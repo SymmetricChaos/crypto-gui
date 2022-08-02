@@ -1,5 +1,5 @@
 use crate::ciphers::Cipher;
-use crate::errors::CipherError;
+use crate::errors::Error;
 use crate::global_rng::get_global_rng;
 use crate::text_aux::PresetAlphabet;
 use crate::text_aux::VecString;
@@ -66,7 +66,7 @@ impl Porta {
 
 impl Cipher for Porta {
     // Need to incorporate graceful failure or guarantee of correctness
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         let mut out = String::with_capacity(text.len());
         let ckey = self.key_vals.iter().cycle();
         for (c, k) in text.chars().zip(ckey) {
@@ -78,7 +78,7 @@ impl Cipher for Porta {
     }
 
     // The Porta cipher is reciprocal
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         self.encrypt(text)
     }
 

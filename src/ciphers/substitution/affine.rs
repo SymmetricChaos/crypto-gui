@@ -1,6 +1,6 @@
 use crate::{
     ciphers::Cipher,
-    errors::CipherError,
+    errors::Error,
     global_rng::get_global_rng,
     math_functions::mul_inv,
     text_aux::{PresetAlphabet::*, VecString},
@@ -44,17 +44,17 @@ impl Affine {
         self.alphabet.len()
     }
 
-    pub fn find_mul_inverse(&self) -> Result<usize, CipherError> {
+    pub fn find_mul_inverse(&self) -> Result<usize, Error> {
         match mul_inv(self.mul_key, self.alphabet.chars().count()) {
             Some(n) => Ok(n),
-            None => Err(CipherError::key("The multiplicative key of an Affine Cipher cannot share any factors with the length of the alphabet"))
+            None => Err(Error::key("The multiplicative key of an Affine Cipher cannot share any factors with the length of the alphabet"))
         }
     }
 
-    pub fn check_input(&self, text: &str) -> Result<(), CipherError> {
+    pub fn check_input(&self, text: &str) -> Result<(), Error> {
         for c in text.chars() {
             if !self.alphabet.contains(c) {
-                return Err(CipherError::invalid_input_char(c));
+                return Err(Error::invalid_input_char(c));
             }
         }
         Ok(())
@@ -73,7 +73,7 @@ impl Default for Affine {
 }
 
 impl Cipher for Affine {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         self.check_input(text)?;
         // The inverse is not used but it must exist
         self.find_mul_inverse()?;
@@ -81,7 +81,7 @@ impl Cipher for Affine {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         self.check_input(text)?;
         let mul_inv = self.find_mul_inverse()?;
         let out = text

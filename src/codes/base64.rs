@@ -2,7 +2,7 @@ use lazy_static::lazy_static;
 use std::{collections::HashMap, fs::read, path::PathBuf};
 
 use super::Code;
-use crate::errors::CodeError;
+use crate::errors::Error;
 
 const B64: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
@@ -57,9 +57,9 @@ impl Default for Base64 {
 }
 
 impl Base64 {
-    pub fn encode_file(&self) -> Result<String, CodeError> {
+    pub fn encode_file(&self) -> Result<String, Error> {
         if self.file.is_none() {
-            return Err(CodeError::input("no file stored"));
+            return Err(Error::input("no file stored"));
         }
         let bytes = &read(self.file.as_ref().unwrap()).unwrap()[..];
 
@@ -129,12 +129,12 @@ impl Base64 {
 }
 
 impl Code for Base64 {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, Error> {
         let b = Base64::encode_raw(text.as_bytes());
         Ok(String::from_utf8(b).unwrap())
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, Error> {
         let b = Base64::decode_raw(text.as_bytes());
         Ok(String::from_utf8(b).unwrap())
     }

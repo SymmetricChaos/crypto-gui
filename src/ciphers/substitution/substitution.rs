@@ -1,6 +1,6 @@
 use crate::{
     ciphers::Cipher,
-    errors::CipherError,
+    errors::Error,
     global_rng::get_global_rng,
     text_aux::{shuffled_str, PresetAlphabet, VecString},
 };
@@ -43,28 +43,28 @@ impl GeneralSubstitution {
         self.pt_alphabet.get_char_at(pos).unwrap()
     }
 
-    fn validate_settings(&self) -> Result<(), CipherError> {
+    fn validate_settings(&self) -> Result<(), Error> {
         if self.pt_alphabet.chars().count() != self.ct_alphabet.chars().count() {
-            return Err(CipherError::key(
+            return Err(Error::key(
                 "the input and output alphabets must have the same length",
             ));
         }
         Ok(())
     }
 
-    fn validate_text_encrypt(&self, text: &str) -> Result<(), CipherError> {
+    fn validate_text_encrypt(&self, text: &str) -> Result<(), Error> {
         for c in text.chars() {
             if !self.pt_alphabet.contains(c) {
-                return Err(CipherError::invalid_input_char(c));
+                return Err(Error::invalid_input_char(c));
             }
         }
         Ok(())
     }
 
-    fn validate_text_decrypt(&self, text: &str) -> Result<(), CipherError> {
+    fn validate_text_decrypt(&self, text: &str) -> Result<(), Error> {
         for c in text.chars() {
             if !self.ct_alphabet.contains(c) {
-                return Err(CipherError::invalid_input_char(c));
+                return Err(Error::invalid_input_char(c));
             }
         }
         Ok(())
@@ -87,14 +87,14 @@ impl Default for GeneralSubstitution {
 }
 
 impl Cipher for GeneralSubstitution {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         self.validate_settings()?;
         self.validate_text_encrypt(text)?;
         let out = text.chars().map(|c| self.encrypt_char(c)).collect();
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         self.validate_settings()?;
         self.validate_text_decrypt(text)?;
         let out = text.chars().map(|c| self.decrypt_char(c)).collect();

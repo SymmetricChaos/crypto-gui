@@ -1,6 +1,6 @@
 use crate::{
     ciphers::Cipher,
-    errors::CipherError,
+    errors::Error,
     global_rng::get_global_rng,
     text_aux::{
         shuffled_str,
@@ -80,10 +80,10 @@ impl FourSquare {
         &self,
         symbol: char,
         alphabet: &VecString,
-    ) -> Result<(usize, usize), CipherError> {
+    ) -> Result<(usize, usize), Error> {
         let num = match alphabet.get_pos_of(symbol) {
             Some(n) => n,
-            None => return Err(CipherError::invalid_input_char(symbol)),
+            None => return Err(Error::invalid_input_char(symbol)),
         };
         Ok((num / self.grid_side_len, num % self.grid_side_len))
     }
@@ -117,7 +117,7 @@ impl FourSquare {
 }
 
 impl Cipher for FourSquare {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         let pairs = self.pairs(text);
         let mut out = String::with_capacity(text.len());
         for (l, r) in pairs {
@@ -130,7 +130,7 @@ impl Cipher for FourSquare {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         let pairs = self.pairs(text);
         let mut out = String::with_capacity(text.len());
         for (l, r) in pairs {

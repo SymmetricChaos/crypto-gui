@@ -21,11 +21,11 @@ pub use purple::Purple;
 // pub mod route;
 // pub use route::Route;
 
-use crate::errors::CipherError;
+use crate::errors::Error;
 
 pub trait Cipher {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError>;
-    fn decrypt(&self, text: &str) -> Result<String, CipherError>;
+    fn encrypt(&self, text: &str) -> Result<String, Error>;
+    fn decrypt(&self, text: &str) -> Result<String, Error>;
     fn randomize(&mut self);
     fn reset(&mut self);
 }

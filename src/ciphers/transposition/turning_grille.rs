@@ -4,7 +4,7 @@ use std::{collections::HashSet, num::ParseIntError};
 
 use crate::{
     ciphers::Cipher,
-    errors::CipherError,
+    errors::Error,
     global_rng::get_global_rng,
     grid::{Grid, Symbol},
     text_aux::{PresetAlphabet, VecString},
@@ -36,10 +36,10 @@ impl TurningGrille {
     //     a new blocked grid is created
     //     the first quarter of the numbers are used to punch out spaces
     //     then the grid is rotated and the next quarters, and so on
-    pub fn build_grid(&mut self) -> Result<(), CipherError> {
+    pub fn build_grid(&mut self) -> Result<(), Error> {
         // These next two blocks find likely errors
         if self.key_length() != self.subgrille_size() {
-            return Err(CipherError::Key(format!(
+            return Err(Error::Key(format!(
                 "there should be {} key values provided but {} were found",
                 self.subgrille_size(),
                 self.key_length()
@@ -50,10 +50,10 @@ impl TurningGrille {
         for key in &self.keys {
             for n in key {
                 if n >= &self.subgrille_size() {
-                    return Err(CipherError::Key(format!("invalid key value found: {}", n)));
+                    return Err(Error::Key(format!("invalid key value found: {}", n)));
                 }
                 if !set.insert(n) {
-                    return Err(CipherError::Key(format!(
+                    return Err(Error::Key(format!(
                         "duplicate key value found: {}",
                         n
                     )));
@@ -124,7 +124,7 @@ impl TurningGrille {
 }
 
 impl Cipher for TurningGrille {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         let mut crypto_grid = self.grid.clone();
         let mut output_grid: Grid<char> =
             Grid::new_default(self.grid.num_rows(), self.grid.num_cols());
@@ -152,7 +152,7 @@ impl Cipher for TurningGrille {
         Ok(output_grid.get_cols().collect::<String>())
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         let input_grid: Grid<char> = Grid::from_cols(
             text.chars().collect_vec(),
             self.grid.num_rows(),

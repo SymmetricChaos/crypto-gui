@@ -1,6 +1,6 @@
 use crate::{
     ciphers::Cipher,
-    errors::CipherError,
+    errors::Error,
     global_rng::get_global_rng,
     text_aux::{keyed_alphabet, shuffled_str, PresetAlphabet, VecString},
 };
@@ -77,7 +77,7 @@ impl Hutton {
 }
 
 impl Cipher for Hutton {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         let mut out = String::with_capacity(text.len());
         // mutable alphabet for use while function runs
         let mut inner_alpha = self.keyed_alpha.clone();
@@ -104,7 +104,7 @@ impl Cipher for Hutton {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         let mut out = String::with_capacity(text.len());
         let mut inner_alphabet = self.keyed_alpha.clone();
         let len = self.alphabet.len();

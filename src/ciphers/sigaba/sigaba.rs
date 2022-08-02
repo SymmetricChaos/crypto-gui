@@ -5,7 +5,7 @@ use itertools::Itertools;
 use super::{
     char_to_usize, usize_to_char, CipherRotor, IndexRotor, BIG_ROTOR_VEC, INDEX_ROTOR_VEC,
 };
-use crate::{ciphers::Cipher, errors::CipherError, global_rng::get_global_rng};
+use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
 
 #[derive(Clone, Debug)]
 pub struct ControlRotors {
@@ -240,7 +240,7 @@ impl Default for Sigaba {
 }
 
 impl Cipher for Sigaba {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         let mut ctrl = self.control_rotors.clone();
         let mut cphr = self.cipher_rotors.clone();
 
@@ -257,7 +257,7 @@ impl Cipher for Sigaba {
         Ok(nums.iter().map(|n| usize_to_char(*n)).collect())
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         let mut ctrl = self.control_rotors.clone();
         let mut cphr = self.cipher_rotors.clone();
 

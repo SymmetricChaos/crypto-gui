@@ -2,7 +2,7 @@ use itertools::zip;
 use std::collections::HashMap;
 use std::hash::Hash;
 
-use crate::errors::CipherError;
+use crate::errors::Error;
 
 pub struct PlugboardGen<A> {
     wiring: HashMap<A, A>,
@@ -17,16 +17,16 @@ impl<A: Hash + Eq + Clone> Default for PlugboardGen<A> {
 }
 
 impl<A: Hash + Eq + Clone> PlugboardGen<A> {
-    pub fn build(left: &[A], right: &[A]) -> Result<PlugboardGen<A>, CipherError> {
+    pub fn build(left: &[A], right: &[A]) -> Result<PlugboardGen<A>, Error> {
         if left.len() != right.len() {
-            return Err(CipherError::General(
+            return Err(Error::General(
                 "the lists of left and right plugs positions must be the same length".into(),
             ));
         }
         let mut wiring = HashMap::with_capacity(left.len());
         for (l, r) in zip(left, right) {
             if l == r || wiring.contains_key(l) || wiring.contains_key(r) {
-                return Err(CipherError::General(
+                return Err(Error::General(
                     "plugboard inputs cannot form chains or cycles".into(),
                 ));
             }
@@ -49,16 +49,16 @@ impl<A: Hash + Eq + Clone> PlugboardGen<A> {
         PlugboardGen { wiring }
     }
 
-    pub fn rebuild(&mut self, left: &[A], right: &[A]) -> Result<(), CipherError> {
+    pub fn rebuild(&mut self, left: &[A], right: &[A]) -> Result<(), Error> {
         if left.len() != right.len() {
-            return Err(CipherError::General(
+            return Err(Error::General(
                 "the lists of left and right plugs positions must be the same length".into(),
             ));
         }
         let mut wiring = HashMap::with_capacity(left.len());
         for (l, r) in zip(left, right) {
             if l == r || wiring.contains_key(l) || wiring.contains_key(r) {
-                return Err(CipherError::General(
+                return Err(Error::General(
                     "plugboard inputs cannot form chains or cycles".into(),
                 ));
             }

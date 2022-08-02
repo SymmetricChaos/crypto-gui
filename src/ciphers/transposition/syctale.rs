@@ -1,4 +1,4 @@
-use crate::{ciphers::Cipher, errors::CipherError, global_rng::GLOBAL_RNG};
+use crate::{ciphers::Cipher, errors::Error, global_rng::GLOBAL_RNG};
 use rand::Rng;
 
 pub struct Scytale {
@@ -16,9 +16,9 @@ impl Default for Scytale {
 }
 
 impl Cipher for Scytale {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         if self.key <= 1 {
-            return Err(CipherError::key("Scytale key must be 2 or greater"));
+            return Err(Error::key("Scytale key must be 2 or greater"));
         }
 
         let n_cols = num::Integer::div_ceil(&text.len(), &self.key);
@@ -44,9 +44,9 @@ impl Cipher for Scytale {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         if self.key <= 1 {
-            return Err(CipherError::key("Scytale key must be 2 or greater"));
+            return Err(Error::key("Scytale key must be 2 or greater"));
         }
 
         let n_cols = num::Integer::div_ceil(&text.len(), &self.key);

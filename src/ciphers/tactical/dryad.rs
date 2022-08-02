@@ -2,7 +2,7 @@ use rand::{prelude::StdRng, Rng, SeedableRng};
 
 use crate::{
     ciphers::Cipher,
-    errors::CipherError,
+    errors::Error,
     global_rng::get_global_rng,
     text_aux::{shuffled_str, PresetAlphabet},
 };
@@ -76,7 +76,7 @@ impl Dryad {
 }
 
 impl Cipher for Dryad {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         let breaks = [0, 4, 7, 10, 12, 14, 17, 19, 21, 23, 25];
         let alphabet = &self.cipher_rows[self.message_key as usize];
 
@@ -85,7 +85,7 @@ impl Cipher for Dryad {
         let mut rng = StdRng::from_entropy();
         for c in text.chars() {
             if !c.is_ascii_digit() {
-                return Err(CipherError::input("DRYAD only encrypts digits"));
+                return Err(Error::input("DRYAD only encrypts digits"));
             }
             let n = c.to_digit(10).unwrap() as usize;
             let pos = rng.gen_range(breaks[n]..breaks[n + 1]);
@@ -95,7 +95,7 @@ impl Cipher for Dryad {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         let digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
         let alphabet = &self.cipher_rows[self.message_key as usize];
 

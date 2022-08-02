@@ -1,4 +1,4 @@
-use crate::{errors::CodeError, text_aux::PresetAlphabet::BasicLatin};
+use crate::{errors::Error, text_aux::PresetAlphabet::BasicLatin};
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 
@@ -49,25 +49,25 @@ impl Bacon {
 }
 
 impl Code for Bacon {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, Error> {
         let mut out = String::with_capacity(text.len() * Self::WIDTH);
         for s in text.chars() {
             match BACON_MAP.get(&s) {
                 Some(code_group) => out.push_str(code_group),
-                None => return Err(CodeError::Input(format!("The symbol `{}` is not valid", s))),
+                None => return Err(Error::Input(format!("The symbol `{}` is not valid", s))),
             }
         }
         Ok(out)
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, Error> {
         let mut out = String::with_capacity(text.len() / Self::WIDTH);
         for p in 0..(text.len() / Self::WIDTH) {
             let group = &text[(p * Self::WIDTH)..(p * Self::WIDTH) + Self::WIDTH];
             match BACON_MAP_INV.get(&group.to_string()) {
                 Some(code_group) => out.push(*code_group),
                 None => {
-                    return Err(CodeError::Input(format!(
+                    return Err(Error::Input(format!(
                         "The code group `{}` is not valid",
                         group
                     )))

@@ -3,7 +3,7 @@ use std::collections::VecDeque;
 use super::PolyMode;
 use crate::{
     ciphers::Cipher,
-    errors::CipherError,
+    errors::Error,
     global_rng::get_global_rng,
     text_aux::{random_sample_replace, PresetAlphabet::*, VecString},
 };
@@ -79,24 +79,24 @@ impl Beaufort {
         self.alphabet.len()
     }
 
-    fn validate_key(&self) -> Result<(), CipherError> {
+    fn validate_key(&self) -> Result<(), Error> {
         for key in self.key_words.iter() {
             for c in key.chars() {
                 if !self.alphabet.contains(c) {
-                    return Err(CipherError::invalid_alphabet_char(c));
+                    return Err(Error::invalid_alphabet_char(c));
                 }
             }
         }
         Ok(())
     }
 
-    fn validate_input(&self, text: &str) -> Result<(), CipherError> {
+    fn validate_input(&self, text: &str) -> Result<(), Error> {
         if text.len() == 0 {
-            return Err(CipherError::Input(String::from("No input text provided")));
+            return Err(Error::Input(String::from("No input text provided")));
         }
         for c in text.chars() {
             if !self.alphabet.contains(c) {
-                return Err(CipherError::invalid_input_char(c));
+                return Err(Error::invalid_input_char(c));
             }
         }
         Ok(())
@@ -105,7 +105,7 @@ impl Beaufort {
     fn autokey_prep(
         &self,
         text: &str,
-    ) -> Result<(Vec<usize>, VecDeque<usize>, String), CipherError> {
+    ) -> Result<(Vec<usize>, VecDeque<usize>, String), Error> {
         self.validate_key()?;
         self.validate_input(text)?;
         let text_nums: Vec<usize> = text
@@ -123,7 +123,7 @@ impl Beaufort {
         self.alphabet.get_char_offset(k, -(t as i32)).unwrap()
     }
 
-    fn encrypt_cyclic(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt_cyclic(&self, text: &str) -> Result<String, Error> {
         let nums: Vec<usize> = text
             .chars()
             .map(|x| self.alphabet.get_pos_of(x).unwrap())
@@ -135,11 +135,11 @@ impl Beaufort {
         Ok(out)
     }
 
-    fn decrypt_cyclic(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt_cyclic(&self, text: &str) -> Result<String, Error> {
         self.encrypt_cyclic(text)
     }
 
-    fn encrypt_auto(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt_auto(&self, text: &str) -> Result<String, Error> {
         let (text_nums, mut akey, mut out) = self.autokey_prep(text)?;
 
         for n in text_nums {
@@ -151,7 +151,7 @@ impl Beaufort {
         Ok(out)
     }
 
-    fn decrypt_auto(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt_auto(&self, text: &str) -> Result<String, Error> {
         let (text_nums, mut akey, mut out) = self.autokey_prep(text)?;
 
         for n in text_nums {
@@ -164,7 +164,7 @@ impl Beaufort {
         Ok(out)
     }
 
-    fn encrypt_prog(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt_prog(&self, text: &str) -> Result<String, Error> {
         let text_nums: Vec<usize> = text
             .chars()
             .map(|x| self.alphabet.get_pos_of(x).unwrap())
@@ -185,7 +185,7 @@ impl Beaufort {
         Ok(out)
     }
 
-    fn decrypt_prog(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt_prog(&self, text: &str) -> Result<String, Error> {
         let alpha_len = self.alphabet_len();
         let text_nums: Vec<usize> = text
             .chars()
@@ -228,7 +228,7 @@ impl Default for Beaufort {
 }
 
 impl Cipher for Beaufort {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         self.validate_key()?;
         self.validate_input(text)?;
         match self.mode {
@@ -238,7 +238,7 @@ impl Cipher for Beaufort {
         }
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         self.validate_key()?;
         self.validate_input(text)?;
         match self.mode {

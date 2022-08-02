@@ -1,6 +1,6 @@
 use crate::{
     ciphers::Cipher,
-    errors::CipherError,
+    errors::Error,
     global_rng::get_global_rng,
     grid::{str_to_char_grid, Grid, Symbol},
     text_aux::{PresetAlphabet, VecString},
@@ -57,15 +57,15 @@ impl Default for Grille {
 }
 
 impl Cipher for Grille {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         if self.grid.num_empty() < text.chars().count() {
-            return Err(CipherError::Input(
+            return Err(Error::Input(
                 "The text is too long to fit into the open spaces of the Grille".to_string(),
             ));
         }
 
         if !self.use_nulls && self.grid.num_empty() != text.chars().count() {
-            return Err(CipherError::Input(
+            return Err(Error::Input(
                 "The text must exactly fill the empty spaces in the Grille".to_string(),
             ));
         }
@@ -94,10 +94,10 @@ impl Cipher for Grille {
             .collect())
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         if self.use_nulls {
             if self.grid.grid_size() != text.chars().count() {
-                return Err(CipherError::Input(
+                return Err(Error::Input(
                     "Text is not the same size as the Grille".to_string(),
                 ));
             }
@@ -115,7 +115,7 @@ impl Cipher for Grille {
             Ok(out)
         } else {
             if self.grid.num_empty() != text.chars().count() {
-                return Err(CipherError::Input(
+                return Err(Error::Input(
                     "The text must exactly fill the empty spaces in the Grille".to_string(),
                 ));
             }

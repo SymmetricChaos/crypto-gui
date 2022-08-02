@@ -1,5 +1,5 @@
 use crate::ciphers::Cipher;
-use crate::errors::CipherError;
+use crate::errors::Error;
 use crate::global_rng::get_global_rng;
 use crate::text_aux::text_functions::validate_text;
 use crate::text_aux::VecString;
@@ -60,7 +60,7 @@ impl Default for Chaocipher {
 }
 
 impl Cipher for Chaocipher {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         validate_text(text, &self.left)?;
 
         let mut left = self.left.clone();
@@ -77,7 +77,7 @@ impl Cipher for Chaocipher {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         let mut left = self.left.clone();
         let mut right = self.right.clone();
 

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use super::Code;
-use crate::errors::CodeError;
+use crate::errors::Error;
 use itertools::Itertools;
 use num::{BigUint, Integer, Num, One};
 use primal::Primes;
@@ -63,9 +63,9 @@ impl Godel {
 }
 
 impl Code for Godel {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, Error> {
         if text.chars().count() > MESSAGE_LIMIT {
-            return Err(CodeError::Input(format!(
+            return Err(Error::Input(format!(
                 "The Godel encoding is currently limited to {} characters",
                 MESSAGE_LIMIT
             )));
@@ -75,7 +75,7 @@ impl Code for Godel {
             match self.map.get(&c) {
                 Some(v) => out *= BigUint::from(*prime).pow(*v as u32),
                 None => {
-                    return Err(CodeError::Input(format!(
+                    return Err(Error::Input(format!(
                         "The symbol `{}` is not in the alphabet provided",
                         c
                     )))
@@ -85,10 +85,10 @@ impl Code for Godel {
         Ok(out.to_str_radix(10))
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, Error> {
         let mut num = match BigUint::from_str_radix(text, 10) {
             Ok(n) => n,
-            Err(_) => return Err(CodeError::Input("unable to parse input as a number".into())),
+            Err(_) => return Err(Error::Input("unable to parse input as a number".into())),
         };
         let mut characters = Vec::with_capacity(MESSAGE_LIMIT);
         for p in self.primes.iter() {
@@ -102,7 +102,7 @@ impl Code for Godel {
                 let c = match self.map_inv.get(&ctr) {
                     Some(c) => c,
                     None => {
-                        return Err(CodeError::Input(
+                        return Err(Error::Input(
                             "exponent does not map to a symnol in the alpabet".into(),
                         ))
                     }

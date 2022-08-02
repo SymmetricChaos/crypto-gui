@@ -5,7 +5,7 @@ use rand::{prelude::StdRng, Rng, SeedableRng};
 
 use crate::{
     ciphers::Cipher,
-    errors::CipherError,
+    errors::Error,
     global_rng::{get_global_rng, seed_global_rng},
     text_aux::{shuffled_str, PresetAlphabet},
 };
@@ -154,12 +154,12 @@ impl Batco {
     }
 
     // The keys is u8 but are defined as being a digit from 2 to 7 (to select a column) and an uppercase Latin letter (to select a row in that column)
-    fn key_to_row(&self) -> Result<usize, CipherError> {
+    fn key_to_row(&self) -> Result<usize, Error> {
         if self.message_number > 6 {
-            return Err(CipherError::key("the key number must be between 2 and 7"));
+            return Err(Error::key("the key number must be between 2 and 7"));
         }
         if self.message_letter > 26 {
-            return Err(CipherError::key(
+            return Err(Error::key(
                 "the key letter must be an uppercase basic Latin letter",
             ));
         }
@@ -171,7 +171,7 @@ impl Batco {
             .unwrap())
     }
 
-    fn symbol_to_number(&self, c: char) -> Result<usize, CipherError> {
+    fn symbol_to_number(&self, c: char) -> Result<usize, Error> {
         let v = match c {
             '0' => 0,
             '1' => 1,
@@ -186,7 +186,7 @@ impl Batco {
             'C' => 10,
             '.' => 11,
             _ => {
-                return Err(CipherError::input(
+                return Err(Error::input(
                     "the only valid symbols are digits, CH, and the period",
                 ))
             }
@@ -196,9 +196,9 @@ impl Batco {
 }
 
 impl Cipher for Batco {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         if text.chars().count() > 22 {
-            return Err(CipherError::input(
+            return Err(Error::input(
                 "BATCO messages are limited to 22 characters per key for security reasons",
             ));
         }
@@ -226,7 +226,7 @@ impl Cipher for Batco {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         let alphabet = &self.cipher_rows[self.key_to_row()?];
         let symbols = text.chars();
 

@@ -1,5 +1,5 @@
 use super::Code;
-use crate::errors::CodeError;
+use crate::errors::Error;
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 
@@ -103,23 +103,23 @@ impl MorseAmerican {
 }
 
 impl Code for MorseAmerican {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, Error> {
         let mut out = Vec::with_capacity(text.chars().count());
         for s in text.chars() {
             match AMERICAN_MORSE_MAP.get(&s) {
                 Some(code_group) => out.push(*code_group),
-                None => return Err(CodeError::invalid_char(s)),
+                None => return Err(Error::invalid_input_char(s)),
             }
         }
         Ok(out.join("000"))
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, Error> {
         let mut out = String::new();
         for s in text.split("000") {
             match AMERICAN_MORSE_MAP_INV.get(&s) {
                 Some(code_group) => out.push(*code_group),
-                None => return Err(CodeError::invalid_code_group(s)),
+                None => return Err(Error::invalid_input_group(s)),
             }
         }
         Ok(out)

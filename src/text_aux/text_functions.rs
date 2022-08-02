@@ -1,4 +1,4 @@
-use crate::errors::CipherError;
+use crate::errors::Error;
 use itertools::Itertools;
 use rand::prelude::{IteratorRandom, SliceRandom, StdRng};
 
@@ -23,10 +23,10 @@ pub fn random_char_vec(s: &str, n: usize, rng: &mut StdRng) -> Vec<char> {
     s.chars().choose_multiple(rng, n)
 }
 
-pub fn validate_alphabet(alphabet: &str) -> Result<(), CipherError> {
+pub fn validate_alphabet(alphabet: &str) -> Result<(), Error> {
     // Most basic check, symbols in an alphabet must be unique
     if alphabet.chars().count() != alphabet.chars().unique().count() {
-        return Err(CipherError::Alphabet(String::from(
+        return Err(Error::Alphabet(String::from(
             "characters must all be unique",
         )));
     }
@@ -34,7 +34,7 @@ pub fn validate_alphabet(alphabet: &str) -> Result<(), CipherError> {
     // Eliminate potentiually confusing characters
     for symbol in alphabet.chars() {
         if symbol.is_control() || symbol.is_whitespace() {
-            return Err(CipherError::Alphabet(String::from(
+            return Err(Error::Alphabet(String::from(
                 "whitespace and control characters are not allowed",
             )));
         }
@@ -162,7 +162,7 @@ pub fn dedup_alphabet(s: &str) -> String {
     out
 }
 
-pub fn prep_text(text: &str, alphabet: &str) -> Result<String, CipherError> {
+pub fn prep_text(text: &str, alphabet: &str) -> Result<String, Error> {
     let mut out = String::with_capacity(text.len());
     for t in text.chars() {
         if alphabet.contains(t) {
@@ -180,19 +180,19 @@ pub fn prep_text(text: &str, alphabet: &str) -> Result<String, CipherError> {
             // As above
             out.push(t.to_ascii_uppercase())
         } else {
-            return Err(CipherError::invalid_input_char(t));
+            return Err(Error::invalid_input_char(t));
         }
     }
     Ok(out)
 }
 
-pub fn validate_text(text: &str, alphabet: &VecString) -> Result<(), CipherError> {
+pub fn validate_text(text: &str, alphabet: &VecString) -> Result<(), Error> {
     if text.len() == 0 {
-        return Err(CipherError::Input(String::from("No input text provided")));
+        return Err(Error::Input(String::from("No input text provided")));
     }
     for c in text.chars() {
         if !alphabet.contains(c) {
-            return Err(CipherError::invalid_input_char(c));
+            return Err(Error::invalid_input_char(c));
         }
     }
     Ok(())

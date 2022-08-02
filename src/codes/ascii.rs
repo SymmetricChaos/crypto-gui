@@ -1,4 +1,4 @@
-use crate::{errors::CodeError, text_aux::PresetAlphabet::Ascii128};
+use crate::{errors::Error, text_aux::PresetAlphabet::Ascii128};
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 
@@ -114,7 +114,7 @@ impl Default for Ascii {
 }
 
 impl Code for Ascii {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, Error> {
         let w = self.mode.width();
         let map = self.mode.map();
         let mut out = String::with_capacity(text.chars().count() * w);
@@ -122,7 +122,7 @@ impl Code for Ascii {
             match map.get(&s) {
                 Some(code_group) => out.push_str(code_group),
                 None => {
-                    return Err(CodeError::Input(format!(
+                    return Err(Error::Input(format!(
                         "The symbol `{}` is not in the ASCII alphabet",
                         s
                     )))
@@ -132,7 +132,7 @@ impl Code for Ascii {
         Ok(out)
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, Error> {
         let w = self.mode.width();
         let map_inv = self.mode.map_inv();
         let mut out = String::with_capacity(text.chars().count() / w);
@@ -141,7 +141,7 @@ impl Code for Ascii {
             match map_inv.get(&group.to_string()) {
                 Some(code_group) => out.push(*code_group),
                 None => {
-                    return Err(CodeError::Input(format!(
+                    return Err(Error::Input(format!(
                         "The code group `{}` is not valid",
                         group
                     )))

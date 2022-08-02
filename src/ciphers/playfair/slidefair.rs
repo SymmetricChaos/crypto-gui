@@ -2,7 +2,7 @@ use std::fmt;
 
 use crate::{
     ciphers::Cipher,
-    errors::CipherError,
+    errors::Error,
     global_rng::get_global_rng,
     text_aux::{shuffled_str, PresetAlphabet::*, VecString},
 };
@@ -111,9 +111,9 @@ impl Slidefair {
         rows
     }
 
-    fn validate_settings(&self) -> Result<(), CipherError> {
+    fn validate_settings(&self) -> Result<(), Error> {
         if !&self.alphabet.contains(self.spacer) {
-            return Err(CipherError::Key(format!(
+            return Err(Error::Key(format!(
                 "spacer character `{}` is not in the alphabet",
                 self.spacer
             )));
@@ -123,7 +123,7 @@ impl Slidefair {
 }
 
 impl Cipher for Slidefair {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         self.validate_settings()?;
         let mut symbols = text.chars().collect_vec();
         if symbols.len() % 2 != 0 {
@@ -137,7 +137,7 @@ impl Cipher for Slidefair {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         self.validate_settings()?;
         let mut symbols = text.chars().collect_vec();
         if symbols.len() % 2 != 0 {

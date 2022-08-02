@@ -1,107 +1,85 @@
 use std::fmt::Display;
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum CipherError {
+pub enum Error {
     General(String),
     Input(String),
     Key(String),
     Alphabet(String),
+    State(String),
 }
 
-impl CipherError {
-    pub fn new(error: &str) -> Self {
-        CipherError::General(format!("{error}"))
-    }
-
-    pub fn invalid_input_char(c: char) -> Self {
-        CipherError::Input(format!(
-            "invalid character `{c}`, alphabets are case sensitive"
-        ))
+impl Error {
+    pub fn general(error: &str) -> Self {
+        Error::General(format!("{error}"))
     }
 
     pub fn input(error: &str) -> Self {
-        CipherError::Input(format!("{error}"))
-    }
-
-    pub fn invalid_key_char(c: char) -> Self {
-        CipherError::Key(format!(
-            "invalid character `{c}`, alphabets are case sensitive"
-        ))
+        Error::Input(format!("{error}"))
     }
 
     pub fn key(error: &str) -> Self {
-        CipherError::Key(format!("{error}"))
+        Error::Key(format!("{error}"))
     }
 
-    pub fn invalid_alphabet_char(c: char) -> Self {
-        CipherError::Alphabet(format!(
+    pub fn alphabet(error: &str) -> Self {
+        Error::Alphabet(format!("{error}"))
+    }
+
+    pub fn state(error: &str) -> Self {
+        Error::State(format!("{error}"))
+    }
+
+
+    pub fn invalid_input_char(c: char) -> Self {
+        Error::Input(format!(
             "invalid character `{c}`, alphabets are case sensitive"
         ))
     }
 
-    pub fn alphabet(error: &str) -> Self {
-        CipherError::Alphabet(format!("{error}"))
+    pub fn invalid_input_group(s: &str) -> Self {
+        Error::Input(format!(
+            "invalid group `{s}`, alphabets are case sensitive"
+        ))
+    }
+
+    pub fn invalid_key_char(c: char) -> Self {
+        Error::Key(format!(
+            "invalid character `{c}`, alphabets are case sensitive"
+        ))
+    }
+
+    pub fn invalid_key_group(c: char) -> Self {
+        Error::Key(format!(
+            "invalid group `{c}`, alphabets are case sensitive"
+        ))
+    }
+
+    pub fn invalid_alphabet_char(c: char) -> Self {
+        Error::Alphabet(format!(
+            "invalid character `{c}`, alphabets are case sensitive"
+        ))
     }
 
     pub fn inner(self) -> String {
         match self {
-            CipherError::General(e) => e,
-            CipherError::Input(e) => e,
-            CipherError::Key(e) => e,
-            CipherError::Alphabet(e) => e,
+            Error::General(e) => e,
+            Error::Input(e) => e,
+            Error::Key(e) => e,
+            Error::Alphabet(e) => e,
+            Error::State(e) => e,
         }
     }
 }
 
-impl Display for CipherError {
+impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let error = match self {
-            CipherError::General(e) => format!("Cipher Error: {e}"),
-            CipherError::Input(e) => format!("Input Error: {e}"),
-            CipherError::Key(e) => format!("Key Error: {e}"),
-            CipherError::Alphabet(e) => format!("Alphabet Error: {e}"),
-        };
-        write!(f, "{error}")
-    }
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum CodeError {
-    General(String),
-    Input(String),
-    Setting(String),
-}
-
-impl CodeError {
-    pub fn new(error: &str) -> Self {
-        CodeError::General(format!("{error}"))
-    }
-
-    pub fn invalid_char(c: char) -> Self {
-        CodeError::Input(format!(
-            "invalid character `{c}`, alphabets are case sensitive"
-        ))
-    }
-
-    pub fn invalid_code_group(s: &str) -> Self {
-        CodeError::Input(format!("invalid code group `{s}`"))
-    }
-
-    pub fn input(error: &str) -> Self {
-        CodeError::Input(format!("{error}"))
-    }
-
-    pub fn setting(error: &str) -> Self {
-        CodeError::Setting(format!("{error}"))
-    }
-}
-
-impl Display for CodeError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let error = match self {
-            CodeError::General(e) => format!("Code Error: {e}"),
-            CodeError::Input(e) => format!("Input Error: {e}"),
-            CodeError::Setting(e) => format!("Setting Error: {e}"),
+            Error::General(e) => format!("General Error: {e}"),
+            Error::Input(e) => format!("Input Error: {e}"),
+            Error::Key(e) => format!("Key Error: {e}"),
+            Error::Alphabet(e) => format!("Alphabet Error: {e}"),
+            Error::State(e) => format!("State Error: {e}"),
         };
         write!(f, "{error}")
     }

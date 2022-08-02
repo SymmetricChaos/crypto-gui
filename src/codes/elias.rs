@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::errors::CodeError;
+use crate::errors::Error;
 
 use super::Code;
 
@@ -154,7 +154,7 @@ impl Default for EliasCode {
 }
 
 impl Code for EliasCode {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, Error> {
         let mut output = String::new();
         for s in text.chars() {
             output.push_str(&self.map[&s])
@@ -162,7 +162,7 @@ impl Code for EliasCode {
         Ok(output)
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, Error> {
         let mut output = String::new();
         let mut buffer = String::with_capacity(self.max_code_len);
         let mut ctr = 0;

@@ -1,7 +1,7 @@
 use rand::Rng;
 use std::iter::Iterator;
 
-use crate::{ciphers::Cipher, errors::CipherError, global_rng::GLOBAL_RNG};
+use crate::{ciphers::Cipher, errors::Error, global_rng::GLOBAL_RNG};
 
 pub struct RailFence {
     pub rails: usize, // the slider to control this should be limited
@@ -14,9 +14,9 @@ impl Default for RailFence {
 }
 
 impl Cipher for RailFence {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         if self.rails < 2 {
-            return Err(CipherError::key("Rail Fence key must be greater than 1"));
+            return Err(Error::key("Rail Fence key must be greater than 1"));
         }
 
         let mut rows = Vec::new();
@@ -44,9 +44,9 @@ impl Cipher for RailFence {
     }
 
     // There's probably an easier way to do this.
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         if self.rails < 2 {
-            return Err(CipherError::key("Rail Fence key must be greater than 1"));
+            return Err(Error::key("Rail Fence key must be greater than 1"));
         }
 
         // Count how many letters must be on each rail

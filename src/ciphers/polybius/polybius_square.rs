@@ -1,6 +1,6 @@
 use crate::{
     ciphers::Cipher,
-    errors::CipherError,
+    errors::Error,
     global_rng::get_global_rng,
     text_aux::{
         shuffled_str, text_functions::validate_text, PresetAlphabet, PresetAlphabet::*, VecString,
@@ -53,11 +53,11 @@ impl PolybiusSquare {
         }
     }
 
-    pub fn set_alphabet(&mut self) -> Result<(), CipherError> {
+    pub fn set_alphabet(&mut self) -> Result<(), Error> {
         let new_alpha_len = self.alphabet_string.chars().count();
 
         if new_alpha_len > 100 {
-            return Err(CipherError::alphabet(
+            return Err(Error::alphabet(
                 "alphabet length currently limited to 100 characters",
             ));
         }
@@ -107,9 +107,9 @@ impl PolybiusSquare {
         self.alphabet_string.chars().nth(num).unwrap()
     }
 
-    fn check_labels(&self) -> Result<(), CipherError> {
+    fn check_labels(&self) -> Result<(), Error> {
         if self.labels.len() < self.side_len {
-            return Err(CipherError::key("not enough labels for grid size"));
+            return Err(Error::key("not enough labels for grid size"));
         }
         Ok(())
     }
@@ -137,7 +137,7 @@ impl PolybiusSquare {
 }
 
 impl Cipher for PolybiusSquare {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         self.check_labels()?;
         validate_text(text, &self.grid)?;
 
@@ -151,11 +151,11 @@ impl Cipher for PolybiusSquare {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         self.check_labels()?;
         validate_text(text, &self.labels)?;
         if !text.chars().count().is_multiple_of(&2) {
-            return Err(CipherError::input(
+            return Err(Error::input(
                 "Input text must have a length that is a multiple of three.",
             ));
         }

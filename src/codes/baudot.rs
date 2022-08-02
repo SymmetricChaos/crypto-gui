@@ -1,4 +1,4 @@
-use crate::errors::CodeError;
+use crate::errors::Error;
 use lazy_static::lazy_static;
 use std::{cell::Cell, collections::HashMap};
 
@@ -105,13 +105,13 @@ impl Default for Baudot {
 }
 
 impl Code for Baudot {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, Error> {
         let mut out = String::with_capacity(text.len() * Self::WIDTH);
         for s in text.chars() {
             match self.map(&s) {
                 Some(code_group) => out.push_str(code_group),
                 None => {
-                    return Err(CodeError::Input(format!(
+                    return Err(Error::Input(format!(
                         "The symbol `{}` is not in the Baudot alphabet",
                         s
                     )))
@@ -131,14 +131,14 @@ impl Code for Baudot {
         Ok(out)
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, Error> {
         let mut out = String::with_capacity(text.len() / Self::WIDTH);
         for p in 0..(text.len() / Self::WIDTH) {
             let group = &text[(p * Self::WIDTH)..(p * Self::WIDTH) + Self::WIDTH];
             match self.map_inv(&group.to_string()) {
                 Some(code_group) => out.push(*code_group),
                 None => {
-                    return Err(CodeError::Input(format!(
+                    return Err(Error::Input(format!(
                         "The code group `{}` is not valid",
                         group
                     )))

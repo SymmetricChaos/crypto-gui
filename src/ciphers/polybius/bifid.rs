@@ -1,6 +1,6 @@
 use rand::Rng;
 
-use crate::{ciphers::Cipher, errors::CipherError, global_rng::GLOBAL_RNG};
+use crate::{ciphers::Cipher, errors::Error, global_rng::GLOBAL_RNG};
 
 use super::PolybiusSquare;
 
@@ -20,10 +20,10 @@ impl Default for Bifid {
 }
 
 impl Bifid {
-    pub fn set_alphabet(&mut self) -> Result<(), CipherError> {
+    pub fn set_alphabet(&mut self) -> Result<(), Error> {
         let new_alpha_len = self.polybius.alphabet_string.chars().count();
         if !new_alpha_len.is_power_of_two() {
-            return Err(CipherError::alphabet(
+            return Err(Error::alphabet(
                 "alphabet length must be a power of two to fill the grid",
             ));
         }
@@ -33,11 +33,11 @@ impl Bifid {
 }
 
 impl Cipher for Bifid {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         let vector: Vec<char> = text.chars().collect();
         let len = vector.len();
         if len % self.block_size != 0 {
-            return Err(CipherError::input(
+            return Err(Error::input(
                 "Input length must be a multiple of the block size",
             ));
         };
@@ -61,11 +61,11 @@ impl Cipher for Bifid {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         // turn text into a vector and prepare a string to fill with the output
         let vector: Vec<char> = text.chars().collect();
         if vector.len() % self.block_size != 0 {
-            return Err(CipherError::input(
+            return Err(Error::input(
                 "Input length must be a multiple of the block size",
             ));
         };

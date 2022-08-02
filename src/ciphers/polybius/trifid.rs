@@ -1,5 +1,5 @@
 use super::PolybiusCube;
-use crate::{ciphers::Cipher, errors::CipherError, global_rng::GLOBAL_RNG};
+use crate::{ciphers::Cipher, errors::Error, global_rng::GLOBAL_RNG};
 use num::Integer;
 use rand::Rng;
 
@@ -31,11 +31,11 @@ impl Default for Trifid {
 }
 
 impl Trifid {
-    pub fn set_alphabet(&mut self) -> Result<(), CipherError> {
+    pub fn set_alphabet(&mut self) -> Result<(), Error> {
         let new_alpha_len = self.polybius.alphabet_string.chars().count();
 
         if !is_power_of_three(new_alpha_len) {
-            return Err(CipherError::alphabet(
+            return Err(Error::alphabet(
                 "alphabet length must be a power of three to fill the grid",
             ));
         }
@@ -44,11 +44,11 @@ impl Trifid {
 }
 
 impl Cipher for Trifid {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         let vector: Vec<char> = text.chars().collect();
         let len = vector.len();
         if !len.is_multiple_of(&self.block_size) {
-            return Err(CipherError::input(
+            return Err(Error::input(
                 "Input length must be a multiple of the block size",
             ));
         };
@@ -77,11 +77,11 @@ impl Cipher for Trifid {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         // turn text into a vector and prepare a string to fill with the output
         let vector: Vec<char> = text.chars().collect();
         if !vector.len().is_multiple_of(&self.block_size) {
-            return Err(CipherError::input(
+            return Err(Error::input(
                 "Input length must be a multiple of the block size",
             ));
         };

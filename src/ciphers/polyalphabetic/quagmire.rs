@@ -2,7 +2,7 @@ use std::{iter::Cycle, slice::Iter};
 
 use crate::{
     ciphers::Cipher,
-    errors::CipherError,
+    errors::Error,
     global_rng::get_global_rng,
     text_aux::{random_sample_replace, PresetAlphabet, VecString},
 };
@@ -131,7 +131,7 @@ impl Quagmire {
 }
 
 impl Cipher for Quagmire {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         let (pt, ct) = match self.version {
             QuagmireVersion::V1 => (&self.pt_key, &self.alphabet),
             QuagmireVersion::V2 => (&self.alphabet, &self.pt_key),
@@ -148,7 +148,7 @@ impl Cipher for Quagmire {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, crate::errors::CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, crate::errors::Error> {
         let (ct, pt) = match self.version {
             QuagmireVersion::V1 => (&self.pt_key, &self.alphabet),
             QuagmireVersion::V2 => (&self.alphabet, &self.pt_key),

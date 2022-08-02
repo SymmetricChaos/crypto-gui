@@ -1,6 +1,6 @@
 use crate::{
     ciphers::Cipher,
-    errors::CipherError,
+    errors::Error,
     global_rng::get_global_rng,
     text_aux::{
         keyed_alphabet, shuffled_str,
@@ -69,10 +69,10 @@ impl Playfair {
         out
     }
 
-    fn char_to_position(&self, symbol: char) -> Result<(usize, usize), CipherError> {
+    fn char_to_position(&self, symbol: char) -> Result<(usize, usize), Error> {
         let num = match self.square.chars().position(|x| x == symbol) {
             Some(n) => n,
-            None => return Err(CipherError::invalid_input_char(symbol)),
+            None => return Err(Error::invalid_input_char(symbol)),
         };
         Ok((num / self.grid_side_len, num % self.grid_side_len))
     }
@@ -107,9 +107,9 @@ impl Playfair {
         }
     }
 
-    fn validate_settings(&self) -> Result<(), CipherError> {
+    fn validate_settings(&self) -> Result<(), Error> {
         if !&self.alphabet.contains(self.spacer) {
-            return Err(CipherError::Key(format!(
+            return Err(Error::Key(format!(
                 "spacer character {} is not in the alphabet",
                 self.spacer
             )));
@@ -131,7 +131,7 @@ impl Default for Playfair {
 }
 
 impl Cipher for Playfair {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         self.validate_settings()?;
         let pairs = self.pairs(text);
         let mut out = String::with_capacity(text.chars().count());
@@ -144,7 +144,7 @@ impl Cipher for Playfair {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         self.validate_settings()?;
         let pairs = self.pairs(text);
         let mut out = String::with_capacity(text.chars().count());

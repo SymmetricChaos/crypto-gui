@@ -3,7 +3,7 @@ use lazy_static::lazy_static;
 use std::collections::HashMap;
 
 use super::Code;
-use crate::errors::CodeError;
+use crate::errors::Error;
 
 fn make_maps(
     alphabet: &'static str,
@@ -91,11 +91,11 @@ impl Default for SpellingAlphabet {
 
 // These will panic change them to return CodeError on failure
 impl Code for SpellingAlphabet {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, Error> {
         Ok(text.chars().map(|c| self.mode.encode(c).unwrap()).join(" "))
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, Error> {
         Ok(text
             .split(" ")
             .map(|s| self.mode.decode(s).unwrap())

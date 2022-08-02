@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::errors::CodeError;
+use crate::errors::Error;
 
 use super::Code;
 pub struct UnaryCode {
@@ -54,7 +54,7 @@ impl Default for UnaryCode {
 }
 
 impl Code for UnaryCode {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, Error> {
         let mut output = String::new();
         for s in text.chars() {
             output.push_str(&self.map[&s])
@@ -62,7 +62,7 @@ impl Code for UnaryCode {
         Ok(output)
     }
 
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
+    fn decode(&self, text: &str) -> Result<String, Error> {
         let mut output = String::new();
         let mut buffer = String::with_capacity(self.map.len());
         for b in text.chars() {

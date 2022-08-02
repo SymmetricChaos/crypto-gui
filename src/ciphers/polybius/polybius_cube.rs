@@ -1,6 +1,6 @@
 use crate::{
     ciphers::Cipher,
-    errors::CipherError,
+    errors::Error,
     global_rng::get_global_rng,
     text_aux::{shuffled_str, text_functions::validate_text, VecString},
 };
@@ -54,15 +54,15 @@ impl PolybiusCube {
         self.labels = VecString::unique_from(&self.labels_string);
     }
 
-    pub fn set_alphabet(&mut self) -> Result<(), CipherError> {
+    pub fn set_alphabet(&mut self) -> Result<(), Error> {
         let new_alpha_len = self.alphabet_string.chars().count();
 
         if new_alpha_len < 8 {
-            return Err(CipherError::alphabet("alphabet length must be at least 8"));
+            return Err(Error::alphabet("alphabet length must be at least 8"));
         }
 
         if new_alpha_len > 125 {
-            return Err(CipherError::alphabet(
+            return Err(Error::alphabet(
                 "alphabet length currently limited to 125 characters",
             ));
         }
@@ -73,11 +73,11 @@ impl PolybiusCube {
         Ok(())
     }
 
-    fn triplets(&self, text: &str) -> Result<Vec<(char, char, char)>, CipherError> {
+    fn triplets(&self, text: &str) -> Result<Vec<(char, char, char)>, Error> {
         if text.chars().count() % 3 != 0 {
             dbg!(text);
             dbg!(text.chars().count());
-            return Err(CipherError::input(
+            return Err(Error::input(
                 "ciphertext length must be a multiple of three.",
             ));
         }
@@ -113,9 +113,9 @@ impl PolybiusCube {
         self.grid.get_char_at(num).unwrap()
     }
 
-    fn check_labels(&self) -> Result<(), CipherError> {
+    fn check_labels(&self) -> Result<(), Error> {
         if self.labels.len() < self.side_len {
-            return Err(CipherError::key("not enough labels for grid size"));
+            return Err(Error::key("not enough labels for grid size"));
         }
         Ok(())
     }
@@ -172,7 +172,7 @@ impl PolybiusCube {
 }
 
 impl Cipher for PolybiusCube {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         self.check_labels()?;
         validate_text(text, &self.grid)?;
 
@@ -187,11 +187,11 @@ impl Cipher for PolybiusCube {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         self.check_labels()?;
         validate_text(text, &self.labels)?;
         if !text.chars().count().is_multiple_of(&3) {
-            return Err(CipherError::input(
+            return Err(Error::input(
                 "Input text must have a length that is a multiple of three.",
             ));
         }

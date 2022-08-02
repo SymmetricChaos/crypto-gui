@@ -1,5 +1,5 @@
 use crate::ciphers::Cipher;
-use crate::errors::CipherError;
+use crate::errors::Error;
 use crate::global_rng::get_global_rng;
 use crate::text_aux::{shuffled_str, PresetAlphabet, VecString};
 use itertools::Itertools;
@@ -33,15 +33,15 @@ impl Bazeries {
         self.alphabet.len()
     }
 
-    pub fn validate(&self, text: &str) -> Result<(), CipherError> {
+    pub fn validate(&self, text: &str) -> Result<(), Error> {
         if text.chars().count() > self.alphabet.len() {
-            return Err(CipherError::input("the text cannot be longer the the number of wheels, for longer messages send each part with a different key"));
+            return Err(Error::input("the text cannot be longer the the number of wheels, for longer messages send each part with a different key"));
         }
 
         let sorted = self.alphabet_string.chars().sorted().collect_vec();
         for wheel in self.wheels.iter() {
             if wheel.chars().sorted().collect_vec() != sorted {
-                return Err(CipherError::input(
+                return Err(Error::input(
                     "the wheels must have exactly the same letters as the alphabet",
                 ));
             }
@@ -100,7 +100,7 @@ impl Default for Bazeries {
 }
 
 impl Cipher for Bazeries {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         self.validate(text)?;
 
         let mut out = String::with_capacity(text.len());
@@ -109,14 +109,14 @@ impl Cipher for Bazeries {
         for (k, c) in key.zip(text.chars()) {
             let n = match k.chars().position(|x| x == c) {
                 Some(n) => (n + self.offset) % self.alphabet.len(),
-                None => return Err(CipherError::invalid_alphabet_char(c)),
+                None => return Err(Error::invalid_alphabet_char(c)),
             };
             out.push(k.chars().nth(n).unwrap())
         }
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         self.validate(text)?;
 
         let alen = self.alphabet.len();
@@ -127,7 +127,7 @@ impl Cipher for Bazeries {
         for (k, c) in key.zip(text.chars()) {
             let n = match k.chars().position(|x| x == c) {
                 Some(n) => (n + rev_offset) % alen,
-                None => return Err(CipherError::invalid_alphabet_char(c)),
+                None => return Err(Error::invalid_alphabet_char(c)),
             };
             out.push(k.chars().nth(n).unwrap())
         }

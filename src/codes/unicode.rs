@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use crate::errors::CodeError;
+use crate::errors::Error;
 
 use super::Code;
 
@@ -26,7 +26,7 @@ impl Default for Unicode {
 }
 
 impl Code for Unicode {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
+    fn encode(&self, text: &str) -> Result<String, Error> {
         match self.mode {
             UnicodeMode::Utf8 => Ok(text.bytes().map(|b| (format!("{:08b}", b))).join("")),
             UnicodeMode::Utf16 => todo!(),
@@ -34,7 +34,7 @@ impl Code for Unicode {
         }
     }
 
-    fn decode(&self, _text: &str) -> Result<String, CodeError> {
+    fn decode(&self, _text: &str) -> Result<String, Error> {
         match self.mode {
             UnicodeMode::Utf8 => todo!(),
             UnicodeMode::Utf16 => todo!(),

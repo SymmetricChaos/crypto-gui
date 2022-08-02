@@ -1,4 +1,4 @@
-use crate::{ciphers::Cipher, errors::CipherError, global_rng::get_global_rng};
+use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
 use rand::{prelude::SliceRandom, Rng};
 
 const M94_WHEELS: [&'static str; 25] = [
@@ -65,9 +65,9 @@ impl M94 {
 }
 
 impl Cipher for M94 {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         if text.len() != self.wheels.len() {
-            return Err(CipherError::Input(
+            return Err(Error::Input(
                 "M94 messages must have exactly 25 characters".to_string(),
             ));
         }
@@ -80,9 +80,9 @@ impl Cipher for M94 {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         if text.len() != self.wheels.len() {
-            return Err(CipherError::Input(
+            return Err(Error::Input(
                 "M94 messages must have exactly 25 characters".to_string(),
             ));
         }

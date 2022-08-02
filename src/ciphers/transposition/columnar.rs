@@ -1,7 +1,7 @@
 use crate::global_rng::get_global_rng;
 use crate::grid::{str_to_char_grid, Grid, Symbol};
 use crate::text_aux::{rank_str, PresetAlphabet::*, VecString};
-use crate::{ciphers::Cipher, errors::CipherError};
+use crate::{ciphers::Cipher, errors::Error};
 
 pub struct Columnar {
     pub alphabet_string: String,
@@ -47,11 +47,11 @@ impl Default for Columnar {
 }
 
 impl Cipher for Columnar {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         let tlen = text.chars().count();
         let n_cols = self.key.len();
         if n_cols < 2 {
-            return Err(CipherError::key(
+            return Err(Error::key(
                 "The key for a columnar cipher must have at least two characters",
             ));
         }
@@ -73,11 +73,11 @@ impl Cipher for Columnar {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         let tlen = text.chars().count();
         let n_cols = self.key.len();
         if n_cols < 2 {
-            return Err(CipherError::key(
+            return Err(Error::key(
                 "The key for a columnar cipher must have at least two characters",
             ));
         }

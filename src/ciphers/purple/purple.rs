@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::{
-    ciphers::Cipher, codes::romaji::to_romaji_ks, errors::CipherError, text_aux::VecString,
+    ciphers::Cipher, codes::romaji::to_romaji_ks, errors::Error, text_aux::VecString,
 };
 use lazy_static::lazy_static;
 
@@ -158,9 +158,9 @@ impl Default for Purple {
 }
 
 impl Purple {
-    pub fn set_plugboard(&mut self) -> Result<(), CipherError> {
+    pub fn set_plugboard(&mut self) -> Result<(), Error> {
         if self.plugboard_string.chars().count() != 26 {
-            return Err(CipherError::key(
+            return Err(Error::key(
                 "plugboard must have exactly 26 characters",
             ));
         }
@@ -175,7 +175,7 @@ impl Purple {
 }
 
 impl Cipher for Purple {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         // convert kana to romaji if needed
         //let text = to_romaji_ks(text);
 
@@ -186,13 +186,13 @@ impl Cipher for Purple {
             let n = self
                 .plugboard
                 .get(&c)
-                .ok_or(CipherError::input("invalid character"))?;
+                .ok_or(Error::input("invalid character"))?;
             let encrypted = switches.encrypt_num(*n);
             out.push(
                 *self
                     .plugboard_inv
                     .get(&encrypted)
-                    .ok_or(CipherError::input("invalid character"))?,
+                    .ok_or(Error::input("invalid character"))?,
             );
             switches.step();
         }
@@ -200,7 +200,7 @@ impl Cipher for Purple {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         // convert kana to romaji if needed
         let text = to_romaji_ks(text);
 
@@ -211,13 +211,13 @@ impl Cipher for Purple {
             let n = self
                 .plugboard
                 .get(&c)
-                .ok_or(CipherError::input("invalid character"))?;
+                .ok_or(Error::input("invalid character"))?;
             let encrypted = switches.decrypt_num(*n);
             out.push(
                 *self
                     .plugboard_inv
                     .get(&encrypted)
-                    .ok_or(CipherError::input("invalid character"))?,
+                    .ok_or(Error::input("invalid character"))?,
             );
             switches.step();
         }

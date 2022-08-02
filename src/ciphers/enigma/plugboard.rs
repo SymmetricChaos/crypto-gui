@@ -1,4 +1,4 @@
-use crate::errors::CipherError;
+use crate::errors::Error;
 use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
@@ -8,7 +8,7 @@ pub struct EnigmaPlugboard {
 }
 
 impl EnigmaPlugboard {
-    pub fn set_plugboard(&mut self, pairs: &str) -> Result<(), CipherError> {
+    pub fn set_plugboard(&mut self, pairs: &str) -> Result<(), Error> {
         // Don't rebuild unless we need to
         if &self.old_alphabet == pairs {
             return Ok(());
@@ -17,7 +17,7 @@ impl EnigmaPlugboard {
         // Check that no more than 13 pairs are included
         let digraphs = pairs.split(" ");
         if digraphs.clone().count() > 13 {
-            return Err(CipherError::key(
+            return Err(Error::key(
                 "Engima Plugboard cannot include more than 13 pairs of letters",
             ));
         }
@@ -26,7 +26,7 @@ impl EnigmaPlugboard {
         self.wiring.clear();
         for d in digraphs {
             if d.len() != 2 {
-                return Err(CipherError::key(
+                return Err(Error::key(
                     "Engima Plugboard settings must be given as pairs of letters",
                 ));
             }
@@ -34,7 +34,7 @@ impl EnigmaPlugboard {
             let a = cs.next().unwrap();
             let b = cs.next().unwrap();
             if a == b || self.wiring.contains_key(&a) || self.wiring.contains_key(&b) {
-                return Err(CipherError::key(
+                return Err(Error::key(
                     "Enigma Plugboard settings cannot include cycles or chains",
                 ));
             }

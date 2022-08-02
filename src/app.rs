@@ -248,7 +248,7 @@ impl ClassicCrypto {
             ui.add_space(16.0);
             let grapheme_subhead = RichText::new("Supported Text Characters").strong();
             ui.label(grapheme_subhead);
-            ui.label("Monospaced font supports most Latin alphabets.\n\nIt is important to note that all ciphers operated on the 'char' type which represent a single Unicode codepoint. Not all Unicode graphemes are single code points.");
+            ui.label("Most Latin alphabets and will appear as monospaced fonts.\n\nIt is important to note that all ciphers operated on the 'char' type which represent a single Unicode codepoint. Not all Unicode graphemes are single code points.");
         });
     }
 }

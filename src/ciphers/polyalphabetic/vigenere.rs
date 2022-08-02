@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 
 use crate::{
     ciphers::Cipher,
-    errors::CipherError,
+    errors::Error,
     global_rng::get_global_rng,
     text_aux::{random_sample_replace, PresetAlphabet, VecString},
 };
@@ -95,24 +95,24 @@ impl Vigenere {
         self.alphabet.len()
     }
 
-    fn validate_key(&self) -> Result<(), CipherError> {
+    fn validate_key(&self) -> Result<(), Error> {
         for key in self.key_words.iter() {
             for c in key.chars() {
                 if !self.alphabet.contains(c) {
-                    return Err(CipherError::invalid_alphabet_char(c));
+                    return Err(Error::invalid_alphabet_char(c));
                 }
             }
         }
         Ok(())
     }
 
-    fn validate_input(&self, text: &str) -> Result<(), CipherError> {
+    fn validate_input(&self, text: &str) -> Result<(), Error> {
         if text.len() == 0 {
-            return Err(CipherError::Input(String::from("No input text provided")));
+            return Err(Error::Input(String::from("No input text provided")));
         }
         for c in text.chars() {
             if !self.alphabet.contains(c) {
-                return Err(CipherError::invalid_input_char(c));
+                return Err(Error::invalid_input_char(c));
             }
         }
         Ok(())
@@ -132,7 +132,7 @@ impl Vigenere {
         self.alphabet.get_shifted_char(c, -(k as i32)).unwrap()
     }
 
-    fn encrypt_cyclic(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt_cyclic(&self, text: &str) -> Result<String, Error> {
         let out = text
             .chars()
             .zip(self.cyclic_key())
@@ -141,7 +141,7 @@ impl Vigenere {
         Ok(out)
     }
 
-    fn decrypt_cyclic(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt_cyclic(&self, text: &str) -> Result<String, Error> {
         let out = text
             .chars()
             .zip(self.cyclic_key())
@@ -150,7 +150,7 @@ impl Vigenere {
         Ok(out)
     }
 
-    fn encrypt_auto(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt_auto(&self, text: &str) -> Result<String, Error> {
         let mut akey: VecDeque<usize> = self.key().collect();
         let mut out = String::with_capacity(text.len());
 
@@ -163,7 +163,7 @@ impl Vigenere {
         Ok(out)
     }
 
-    fn decrypt_auto(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt_auto(&self, text: &str) -> Result<String, Error> {
         let mut akey: VecDeque<usize> = self.key().collect();
         let mut out = String::with_capacity(text.len());
 
@@ -177,7 +177,7 @@ impl Vigenere {
         Ok(out)
     }
 
-    fn encrypt_prog(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt_prog(&self, text: &str) -> Result<String, Error> {
         let mut out = String::with_capacity(text.len());
 
         let mut cur_shift = 0 as usize;
@@ -194,7 +194,7 @@ impl Vigenere {
         Ok(out)
     }
 
-    fn decrypt_prog(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt_prog(&self, text: &str) -> Result<String, Error> {
         let mut out = String::with_capacity(text.len());
 
         let mut cur_shift = 0;
@@ -213,7 +213,7 @@ impl Vigenere {
 }
 
 impl Cipher for Vigenere {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, Error> {
         self.validate_key()?;
         self.validate_input(text)?;
         match self.mode {
@@ -223,7 +223,7 @@ impl Cipher for Vigenere {
         }
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, Error> {
         self.validate_key()?;
         self.validate_input(text)?;
         match self.mode {
