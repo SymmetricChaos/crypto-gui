@@ -248,7 +248,7 @@ impl ClassicCrypto {
             ui.add_space(16.0);
             let grapheme_subhead = RichText::new("Supported Text Characters").strong();
             ui.label(grapheme_subhead);
-            ui.label("While essentially all of Unicode can be displayed ciphers and codes operate on individual codepoints, unexpected behavior will occur when combining characters are used. Optional support for Unicode graphemes may be added later.");
+            ui.label("Monospaced font supports most Latin alphabets.\n\nIt is important to note that all ciphers operated on the 'char' type which represent a single Unicode codepoint. Not all Unicode graphemes are single code points.");
         });
     }
 }
