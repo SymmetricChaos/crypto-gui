@@ -1,47 +1,57 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, cell::RefCell, rc::Rc};
 
 use crate::{
     ciphers::Cipher, codes::romaji::to_romaji_ks, errors::Error, text_aux::VecString,
 };
 use lazy_static::lazy_static;
 
-use super::switch::{Switch, SwitchSpeed};
+use super::switch::Switch;
 
 #[derive(Clone)]
 pub struct Switches {
     pub sixes: Switch<6>,
-    pub twenties: [Switch<20>; 3],
+    pub twenties: [Rc<RefCell<Switch<20>>>; 3],
+    slow: Rc<RefCell<Switch<20>>>,
+    middle: Rc<RefCell<Switch<20>>>,
+    fast: Rc<RefCell<Switch<20>>>,
 }
 
 impl Default for Switches {
     fn default() -> Self {
+        let twenties = Switch::twenties();
+        let slow = twenties[0].clone();
+        let middle = twenties[2].clone();
+        let fast = twenties[1].clone();
         Self {
             sixes: Switch::sixes(),
-            twenties: Switch::twenties(),
+            twenties,
+            slow,
+            middle,
+            fast,
         }
     }
 }
 
 impl Switches {
     pub fn validate_switches() -> Result<(),Error> {
-        
+
         Ok(())
     }
 
     pub fn step(&mut self) {
         let spos = self.sixes.position;
-        let mpos = self.get_switch(SwitchSpeed::Middle).position;
+        let mpos = self.middle.borrow().position;
 
         // Sixes always steps
         self.sixes.step();
 
         // Exactly one of the Twenties steps at a time
         if spos == 23 && mpos == 24 {
-            self.get_switch(SwitchSpeed::Slow).step();
+            self.slow.borrow_mut().step();
         } else if spos == 24 {
-            self.get_switch(SwitchSpeed::Middle).step();
+            self.middle.borrow_mut().step();
         } else {
-            self.get_switch(SwitchSpeed::Fast).step();
+            self.fast.borrow_mut().step();
         }
     }
 
@@ -49,9 +59,9 @@ impl Switches {
         if n < 6 {
             self.sixes.encrypt(n)
         } else {
-            let n = self.twenties[0].encrypt(n - 6);
-            let n = self.twenties[1].encrypt(n);
-            self.twenties[2].encrypt(n) + 6
+            let n = self.twenties[0].borrow().encrypt(n - 6);
+            let n = self.twenties[1].borrow().encrypt(n);
+            self.twenties[2].borrow().encrypt(n) + 6
         }
     }
 
@@ -59,20 +69,12 @@ impl Switches {
         if n < 6 {
             self.sixes.decrypt(n)
         } else {
-            let n = self.twenties[2].decrypt(n - 6);
-            let n = self.twenties[1].decrypt(n);
-            self.twenties[0].decrypt(n) + 6
+            let n = self.twenties[2].borrow().decrypt(n - 6);
+            let n = self.twenties[1].borrow().decrypt(n);
+            self.twenties[0].borrow().decrypt(n) + 6
         }
     }
 
-    fn get_switch(&mut self, speed: SwitchSpeed) -> &mut Switch<20> {
-        for switch in self.twenties.iter_mut() {
-            if switch.speed == speed {
-                return switch;
-            }
-        }
-        unreachable!("every switch speed must be represented")
-    }
 }
 
 lazy_static! {
