@@ -14,15 +14,33 @@ impl View for Purple {
             ui.add(Slider::new(&mut switch.borrow_mut().position, 0..=24).clamp_to_range(true));
         }
 
-        // TODO: Selections must be exclusive
-        // ui.label("Select Twenties Speeds");
-        // for switch in self.switches.twenties.iter_mut() {
-        //     ui.horizontal(|ui| {
-        //         ui.selectable_value(&mut switch.speed, SwitchSpeed::Fast, "Fast");
-        //         ui.selectable_value(&mut switch.speed, SwitchSpeed::Middle, "Middle");
-        //         ui.selectable_value(&mut switch.speed, SwitchSpeed::Slow, "Slow");
-        //     });
-        // }
+    // Rather than automatically create a valid setting (which seems hard)
+    // we just detect invalid state when switches are changed and report it
+    // to the errors
+    ui.label("Select Twenties Speeds");
+    for n in 0..3 {
+        ui.horizontal( |ui| {
+            ui.label(format!("\nSwitch {}",n+1));
+            if ui.selectable_value(&mut self.switches.twenties[n].borrow_mut().speed, SwitchSpeed::Slow, "Slow").clicked() {
+                self.switches.set_slow(self.switches.twenties[n].clone());
+                if let Err(e) = self.switches.validate_switches() {
+                    *errors = e.to_string()
+                };
+            };
+            if ui.selectable_value(&mut self.switches.twenties[n].borrow_mut().speed, SwitchSpeed::Middle, "Middle").clicked() {
+                self.switches.set_middle(self.switches.twenties[n].clone());
+                if let Err(e) = self.switches.validate_switches() {
+                    *errors = e.to_string()
+                };
+            };
+            if ui.selectable_value(&mut self.switches.twenties[n].borrow_mut().speed, SwitchSpeed::Fast, "Fast").clicked() {
+                self.switches.set_fast(self.switches.twenties[n].clone());
+                if let Err(e) = self.switches.validate_switches() {
+                    *errors = e.to_string()
+                };
+            };
+        });
+    }
 
         ui.add_space(10.0);
         ui.label("Plugboard");

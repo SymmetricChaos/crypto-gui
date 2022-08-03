@@ -33,10 +33,27 @@ impl Default for Switches {
 }
 
 impl Switches {
-    pub fn validate_switches() -> Result<(),Error> {
-
+    pub fn validate_switches(&self) -> Result<(),Error> {
+        for switch in self.twenties.iter() {
+            if Rc::strong_count(&switch) != 2 {
+                return Err(Error::key("each Twenties switch must has a different speed"))
+            }
+        }
         Ok(())
     }
+ 
+    pub fn set_slow(&mut self, switch: Rc<RefCell<Switch<20>>>) {
+        self.slow = switch
+    }
+ 
+    pub fn set_middle(&mut self, switch: Rc<RefCell<Switch<20>>>) {
+        self.middle = switch
+    }
+ 
+    pub fn set_fast(&mut self, switch: Rc<RefCell<Switch<20>>>) {
+        self.fast = switch
+    }
+
 
     pub fn step(&mut self) {
         let spos = self.sixes.position;

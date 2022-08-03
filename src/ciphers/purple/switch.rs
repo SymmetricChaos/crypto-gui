@@ -12,21 +12,22 @@ pub enum SwitchSpeed {
 #[derive(Clone, Copy)]
 pub struct Switch<const N: usize> {
     pub position: usize,
+    pub speed: SwitchSpeed,
     wiring_enc: &'static [[usize; N]; 25],
     wiring_dec: &'static [[usize; N]; 25],
 }
 
 impl Switch<6> {
     pub fn sixes() -> Switch<6> {
-        Switch::new(8, &SIXES_ENC, &SIXES_DEC)
+        Switch::new(8, SwitchSpeed::Fast, &SIXES_ENC, &SIXES_DEC)
     }
 }
 
 impl Switch<20> {
     pub fn twenties() -> [Rc<RefCell<Switch<20>>>; 3] {
-        let t1 = Rc::new(RefCell::new(Switch::new(0, &TWENTIES_1_ENC, &TWENTIES_1_DEC)));
-        let t2 = Rc::new(RefCell::new(Switch::new(23, &TWENTIES_2_ENC, &TWENTIES_2_DEC)));
-        let t3 = Rc::new(RefCell::new(Switch::new(5, &TWENTIES_3_ENC, &TWENTIES_3_DEC)));
+        let t1 = Rc::new(RefCell::new(Switch::new(0, SwitchSpeed::Slow, &TWENTIES_1_ENC, &TWENTIES_1_DEC)));
+        let t2 = Rc::new(RefCell::new(Switch::new(23, SwitchSpeed::Fast, &TWENTIES_2_ENC, &TWENTIES_2_DEC)));
+        let t3 = Rc::new(RefCell::new(Switch::new(5, SwitchSpeed::Middle, &TWENTIES_3_ENC, &TWENTIES_3_DEC)));
 
         [t1, t2, t3]
     }
@@ -35,11 +36,13 @@ impl Switch<20> {
 impl<const N: usize> Switch<N> {
     pub fn new(
         position: usize,
+        speed: SwitchSpeed,
         wiring_enc: &'static [[usize; N]; 25],
         wiring_dec: &'static [[usize; N]; 25],
     ) -> Switch<N> {
         Self {
             position,
+            speed,
             wiring_enc,
             wiring_dec,
         }
