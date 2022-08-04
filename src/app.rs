@@ -137,9 +137,9 @@ impl ClassicCrypto {
     // Combox boxes for selecting ciphers
     fn cipher_selector_panel(&mut self, ctx: &Context) {
         SidePanel::left("cipher_selector_panel")
-            .default_width(200.0)
-            .min_width(200.0)
-            .max_width(300.0)
+            .default_width(150.0)
+            .min_width(100.0)
+            .max_width(200.0)
             .show(ctx, |ui| {
                 self.cipher_interface
                     .combo_boxes(ui, &mut self.active_cipher)
@@ -151,10 +151,10 @@ impl ClassicCrypto {
 
             self.cipher_selector_panel(ctx);
 
-            SidePanel::right("cipher_display_panel")
-                .default_width(200.0)
-                .min_width(200.0)
-                .max_width(300.0)
+            SidePanel::right("cipher_io_panel")
+                .default_width(150.0)
+                .min_width(100.0)
+                .max_width(200.0)
                 .show(ctx, |ui| {
                     self.io_panel.ui(
                         ui,
@@ -225,7 +225,7 @@ impl ClassicCrypto {
             .show(ctx, |ui| {
                 warn_if_debug_build(ui);
                 let hello = RichText::new(
-                    "Welcome to Classic Crypto!\nCheck out the Ciphers and Codes available.",
+                    "Welcome to Classic Crypto!\nCheck out the Ciphers available.",
                 )
                 .strong();
                 ui.label(hello);
@@ -248,7 +248,7 @@ impl ClassicCrypto {
             ui.add_space(16.0);
             let grapheme_subhead = RichText::new("Supported Text Characters").strong();
             ui.label(grapheme_subhead);
-            ui.label("Most Latin alphabets and will appear as monospaced fonts.\n\nIt is important to note that all ciphers operated on the 'char' type which represent a single Unicode codepoint. Not all Unicode graphemes are single code points.");
+            ui.label("Most Latin alphabets are supported by the site.\n\nIt is important to note that all ciphers operated on Rust's character type which represents a single Unicode codepoint. Not all graphemes are formed from single code points. Text can be normalized on the Text Prep page.");
         });
     }
 }
