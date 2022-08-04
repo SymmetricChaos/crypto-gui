@@ -36,7 +36,7 @@ impl Switches {
     pub fn validate_switches(&self) -> Result<(),Error> {
         for switch in self.twenties.iter() {
             if Rc::strong_count(&switch) != 2 {
-                return Err(Error::key("each Twenties switch must has a different speed"))
+                return Err(Error::key("each Twenties switch must have a different speed"))
             }
         }
         Ok(())

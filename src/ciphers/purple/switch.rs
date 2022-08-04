@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, rc::Rc, fmt::Display};
 
 use super::wiring::*;
 
@@ -58,6 +58,12 @@ impl<const N: usize> Switch<N> {
 
     pub fn decrypt(&self, n: usize) -> usize {
         self.wiring_dec[self.position][n]
+    }
+}
+
+impl<const N: usize> Display for Switch<N> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self.wiring_enc[self.position])
     }
 }
 
