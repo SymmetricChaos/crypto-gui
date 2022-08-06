@@ -102,10 +102,7 @@ impl Beaufort {
         Ok(())
     }
 
-    fn autokey_prep(
-        &self,
-        text: &str,
-    ) -> Result<(Vec<usize>, VecDeque<usize>, String), Error> {
+    fn autokey_prep(&self, text: &str) -> Result<(Vec<usize>, VecDeque<usize>, String), Error> {
         self.validate_key()?;
         self.validate_input(text)?;
         let text_nums: Vec<usize> = text

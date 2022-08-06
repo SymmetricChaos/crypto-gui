@@ -1,6 +1,5 @@
 use crate::ids::CipherID;
 
-
 #[derive(Debug, PartialEq, Eq)]
 pub enum CipherCategory {
     Substituion,
@@ -17,7 +16,6 @@ impl Default for CipherCategory {
         Self::Substituion
     }
 }
-
 
 impl CipherCategory {
     pub fn description_of_category(&self) -> &'static str {

@@ -53,10 +53,7 @@ impl TurningGrille {
                     return Err(Error::Key(format!("invalid key value found: {}", n)));
                 }
                 if !set.insert(n) {
-                    return Err(Error::Key(format!(
-                        "duplicate key value found: {}",
-                        n
-                    )));
+                    return Err(Error::Key(format!("duplicate key value found: {}", n)));
                 }
             }
         }

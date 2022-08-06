@@ -63,9 +63,7 @@ impl Rotor {
     pub fn set_pins(&mut self, pins: &str) -> Result<(), Error> {
         for p in pins.chars() {
             if !self.alphabet.contains(p) {
-                return Err(Error::key(
-                    "effective pins must be in the Rotor's alphabet",
-                ));
+                return Err(Error::key("effective pins must be in the Rotor's alphabet"));
             }
         }
         self.pins = pins.chars().collect();

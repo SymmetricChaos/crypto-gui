@@ -22,9 +22,7 @@ impl HebernRotor {
         let mut wiring_ltr = vec![0; size];
 
         for (pos, c) in wiring_str.chars().enumerate() {
-            let n = alphabet
-                .get_pos_of(c)
-                .ok_or(Error::invalid_input_char(c))?;
+            let n = alphabet.get_pos_of(c).ok_or(Error::invalid_input_char(c))?;
             wiring_rtl[pos] = n;
             wiring_ltr[n] = pos;
         }
@@ -74,9 +72,7 @@ impl HebernRotor {
         let mut new_wiring_rtl = vec![0; self.size];
         let mut new_wiring_ltr = vec![0; self.size];
         for (pos, c) in self.wiring_str.chars().enumerate() {
-            let n = alphabet
-                .get_pos_of(c)
-                .ok_or(Error::invalid_input_char(c))?;
+            let n = alphabet.get_pos_of(c).ok_or(Error::invalid_input_char(c))?;
 
             new_wiring_rtl[pos] = n;
             new_wiring_ltr[n] = pos;

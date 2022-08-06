@@ -2,9 +2,7 @@ use std::char;
 
 use rand::prelude::SliceRandom;
 
-use crate::{
-    ciphers::Cipher, errors::Error, global_rng::get_global_rng, text_aux::keyed_alphabet,
-};
+use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng, text_aux::keyed_alphabet};
 
 // Use this to fill partial inputs for the interface
 const CHECKERBOARD_ALPHABET: &'static str = "ABCDEFGHIJKLM/NOPQRSTUVWXYZ.";
@@ -101,9 +99,7 @@ impl Cipher for StraddlingCheckerboard {
             if digit_mode {
                 // check that c is a character and return Error if not
                 if !c.is_ascii_digit() {
-                    return Err(Error::input(
-                        "only digits 0 to 9 can be coded as digits",
-                    ));
+                    return Err(Error::input("only digits 0 to 9 can be coded as digits"));
                 }
                 out.push(c);
                 digit_mode = false;

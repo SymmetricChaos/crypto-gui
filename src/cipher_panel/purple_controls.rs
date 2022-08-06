@@ -21,7 +21,6 @@ impl View for Purple {
                 ui.add(Slider::new(&mut switch.borrow_mut().position, 0..=24).clamp_to_range(true));
                 ui.label(switch.borrow().to_string());
             });
-
         }
 
         // Rather than automatically create a valid setting (which seems hard)
@@ -29,15 +28,36 @@ impl View for Purple {
         // to the errors
         ui.label("Select Twenties Speeds");
         for n in 0..3 {
-            ui.horizontal( |ui| {
-                ui.label(format!("\nSwitch {}",n+1));
-                if ui.selectable_value(&mut self.switches.twenties[n].borrow_mut().speed, SwitchSpeed::Slow, "Slow").clicked() {
+            ui.horizontal(|ui| {
+                ui.label(format!("\nSwitch {}", n + 1));
+                if ui
+                    .selectable_value(
+                        &mut self.switches.twenties[n].borrow_mut().speed,
+                        SwitchSpeed::Slow,
+                        "Slow",
+                    )
+                    .clicked()
+                {
                     self.switches.set_slow(self.switches.twenties[n].clone());
                 };
-                if ui.selectable_value(&mut self.switches.twenties[n].borrow_mut().speed, SwitchSpeed::Middle, "Middle").clicked() {
+                if ui
+                    .selectable_value(
+                        &mut self.switches.twenties[n].borrow_mut().speed,
+                        SwitchSpeed::Middle,
+                        "Middle",
+                    )
+                    .clicked()
+                {
                     self.switches.set_middle(self.switches.twenties[n].clone());
                 };
-                if ui.selectable_value(&mut self.switches.twenties[n].borrow_mut().speed, SwitchSpeed::Fast, "Fast").clicked() {
+                if ui
+                    .selectable_value(
+                        &mut self.switches.twenties[n].borrow_mut().speed,
+                        SwitchSpeed::Fast,
+                        "Fast",
+                    )
+                    .clicked()
+                {
                     self.switches.set_fast(self.switches.twenties[n].clone());
                 };
             });

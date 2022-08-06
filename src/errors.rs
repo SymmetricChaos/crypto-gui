@@ -30,7 +30,6 @@ impl Error {
         Error::State(format!("{error}"))
     }
 
-
     pub fn invalid_input_char(c: char) -> Self {
         Error::Input(format!(
             "invalid character `{c}`, alphabets are case sensitive"
@@ -38,9 +37,7 @@ impl Error {
     }
 
     pub fn invalid_input_group(s: &str) -> Self {
-        Error::Input(format!(
-            "invalid group `{s}`, alphabets are case sensitive"
-        ))
+        Error::Input(format!("invalid group `{s}`, alphabets are case sensitive"))
     }
 
     pub fn invalid_key_char(c: char) -> Self {
@@ -50,9 +47,7 @@ impl Error {
     }
 
     pub fn invalid_key_group(c: char) -> Self {
-        Error::Key(format!(
-            "invalid group `{c}`, alphabets are case sensitive"
-        ))
+        Error::Key(format!("invalid group `{c}`, alphabets are case sensitive"))
     }
 
     pub fn invalid_alphabet_char(c: char) -> Self {

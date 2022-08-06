@@ -1,9 +1,7 @@
 use super::{
     char_to_usize, usize_to_char, EnigmaPlugboard, Reflector, Rotor, REFLECTORS, ROTOR_MAP,
 };
-use crate::{
-    ciphers::Cipher, errors::Error, global_rng::get_global_rng, text_aux::PresetAlphabet,
-};
+use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng, text_aux::PresetAlphabet};
 
 pub fn prep_enigma_text(text: &str) -> Result<String, Error> {
     let mut out = String::with_capacity(text.len());

@@ -1,4 +1,3 @@
-
 use crate::{
     ciphers::{
         hebern::Hebern, playfair::*, polyalphabetic::*, polybius::*, substitution::*, tactical::*,
@@ -210,7 +209,6 @@ impl CipherInterface {
             active_cipher,
             ui,
         );
-
     }
 
     pub fn get_active_cipher(&mut self, active_cipher: &CipherID) -> &mut dyn ViewableCipher {

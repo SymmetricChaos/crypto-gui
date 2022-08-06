@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc, fmt::Display};
+use std::{cell::RefCell, fmt::Display, rc::Rc};
 
 use super::wiring::*;
 
@@ -25,9 +25,24 @@ impl Switch<6> {
 
 impl Switch<20> {
     pub fn twenties() -> [Rc<RefCell<Switch<20>>>; 3] {
-        let t1 = Rc::new(RefCell::new(Switch::new(0, SwitchSpeed::Slow, &TWENTIES_1_ENC, &TWENTIES_1_DEC)));
-        let t2 = Rc::new(RefCell::new(Switch::new(23, SwitchSpeed::Fast, &TWENTIES_2_ENC, &TWENTIES_2_DEC)));
-        let t3 = Rc::new(RefCell::new(Switch::new(5, SwitchSpeed::Middle, &TWENTIES_3_ENC, &TWENTIES_3_DEC)));
+        let t1 = Rc::new(RefCell::new(Switch::new(
+            0,
+            SwitchSpeed::Slow,
+            &TWENTIES_1_ENC,
+            &TWENTIES_1_DEC,
+        )));
+        let t2 = Rc::new(RefCell::new(Switch::new(
+            23,
+            SwitchSpeed::Fast,
+            &TWENTIES_2_ENC,
+            &TWENTIES_2_DEC,
+        )));
+        let t3 = Rc::new(RefCell::new(Switch::new(
+            5,
+            SwitchSpeed::Middle,
+            &TWENTIES_3_ENC,
+            &TWENTIES_3_DEC,
+        )));
 
         [t1, t2, t3]
     }

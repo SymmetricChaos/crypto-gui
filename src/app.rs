@@ -46,7 +46,6 @@ pub struct ClassicCrypto {
 impl Default for ClassicCrypto {
     fn default() -> Self {
         Self {
-            
             // Input, output, and error shared by Ciphers and Codes
             input: String::new(),
             output: String::new(),
@@ -70,10 +69,8 @@ impl Default for ClassicCrypto {
 }
 
 impl ClassicCrypto {
-    
     // Configure the CreationContext and also build the app
     pub fn build_with_context(cc: &eframe::CreationContext<'_>) -> Self {
-
         cc.egui_ctx.set_visuals(egui::Visuals::dark());
 
         let mut font_def = FontDefinitions::default();
@@ -148,7 +145,6 @@ impl ClassicCrypto {
 
     fn cipher_page(&mut self, ctx: &Context) {
         if self.active_page == Page::Cipher {
-
             self.cipher_selector_panel(ctx);
 
             SidePanel::right("cipher_io_panel")
@@ -224,10 +220,9 @@ impl ClassicCrypto {
             .max_width(500.0)
             .show(ctx, |ui| {
                 warn_if_debug_build(ui);
-                let hello = RichText::new(
-                    "Welcome to Classic Crypto!\nCheck out the Ciphers available.",
-                )
-                .strong();
+                let hello =
+                    RichText::new("Welcome to Classic Crypto!\nCheck out the Ciphers available.")
+                        .strong();
                 ui.label(hello);
                 ui.add_space(20.0);
                 ui.hyperlink_to(
@@ -255,7 +250,6 @@ impl ClassicCrypto {
 
 impl App for ClassicCrypto {
     fn update(&mut self, ctx: &Context, frame: &mut eframe::Frame) {
-
         frame.set_window_size((900.0, 700.0).into());
 
         TopBottomPanel::top("top_panel").show(ctx, |ui| {
@@ -264,12 +258,7 @@ impl App for ClassicCrypto {
                 ui.separator();
 
                 page_selector(ui, "About", Page::About, &mut self.active_page);
-                page_selector(
-                    ui,
-                    "Ciphers",
-                    Page::Cipher,
-                    &mut self.active_page,
-                );
+                page_selector(ui, "Ciphers", Page::Cipher, &mut self.active_page);
                 // page_selector(ui, "Codes", Page::Code(None), &mut self.active_page);
                 // page_selector(ui, "RNGs", Page::Rng(None), &mut self.active_page);
                 page_selector(ui, "Text", Page::TextPrep, &mut self.active_page);

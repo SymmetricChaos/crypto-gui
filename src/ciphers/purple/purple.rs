@@ -1,8 +1,6 @@
-use std::{collections::HashMap, cell::RefCell, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
-use crate::{
-    ciphers::Cipher, codes::romaji::to_romaji_ks, errors::Error, text_aux::VecString,
-};
+use crate::{ciphers::Cipher, codes::romaji::to_romaji_ks, errors::Error, text_aux::VecString};
 use lazy_static::lazy_static;
 
 use super::switch::Switch;
@@ -33,27 +31,28 @@ impl Default for Switches {
 }
 
 impl Switches {
-    pub fn validate_switches(&self) -> Result<(),Error> {
+    pub fn validate_switches(&self) -> Result<(), Error> {
         for switch in self.twenties.iter() {
             if Rc::strong_count(&switch) != 2 {
-                return Err(Error::key("each Twenties switch must have a different speed"))
+                return Err(Error::key(
+                    "each Twenties switch must have a different speed",
+                ));
             }
         }
         Ok(())
     }
- 
+
     pub fn set_slow(&mut self, switch: Rc<RefCell<Switch<20>>>) {
         self.slow = switch
     }
- 
+
     pub fn set_middle(&mut self, switch: Rc<RefCell<Switch<20>>>) {
         self.middle = switch
     }
- 
+
     pub fn set_fast(&mut self, switch: Rc<RefCell<Switch<20>>>) {
         self.fast = switch
     }
-
 
     pub fn step(&mut self) {
         let spos = self.sixes.position;
@@ -91,7 +90,6 @@ impl Switches {
             self.twenties[0].borrow().decrypt(n) + 6
         }
     }
-
 }
 
 lazy_static! {
@@ -178,9 +176,7 @@ impl Default for Purple {
 impl Purple {
     pub fn set_plugboard(&mut self) -> Result<(), Error> {
         if self.plugboard_string.chars().count() != 26 {
-            return Err(Error::key(
-                "plugboard must have exactly 26 characters",
-            ));
+            return Err(Error::key("plugboard must have exactly 26 characters"));
         }
         self.plugboard.clear();
         self.plugboard_inv.clear();

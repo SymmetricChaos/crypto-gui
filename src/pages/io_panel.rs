@@ -2,7 +2,8 @@ use egui::{Color32, RichText, TextEdit, TextStyle, Ui};
 
 use crate::{
     cipher_panel::{CipherInterface, ViewableCipher},
-    global_rng::global_rng_controls, ids::CipherID,
+    global_rng::global_rng_controls,
+    ids::CipherID,
 };
 
 use super::Page;
@@ -91,7 +92,7 @@ impl IOPanel {
         ui.label("OUTPUT TEXT");
         ui.add(TextEdit::multiline(output).font(TextStyle::Monospace));
 
-        if active_page == &mut Page::Cipher  {
+        if active_page == &mut Page::Cipher {
             encrypt_decrypt(
                 ui,
                 cipher_interface.get_active_cipher(active_cipher),
