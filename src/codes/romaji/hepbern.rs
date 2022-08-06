@@ -3,7 +3,7 @@ use lazy_static::lazy_static;
 use crate::tokenizer::Node;
 
 lazy_static! {
-    pub static ref KUNREI_SHIKI: Node = {
+    pub static ref HEPBERN_SHIKI: Node = {
         let transitions = Some(vec![
             (
                 '\u{3000}',
@@ -149,11 +149,41 @@ lazy_static! {
                 'き',
                 Node {
                     transitions: Some(vec![
-                        Node::leaf('ぃ',"kyi"),
-                        Node::leaf('ぇ',"kye"),
-                        Node::leaf('ゃ',"kya"),
-                        Node::leaf('ゅ',"kyu"),
-                        Node::leaf('ょ',"kyo"),
+                        (
+                            'ぃ',
+                            Node {
+                                transitions: None,
+                                output: "kyi",
+                            },
+                        ),
+                        (
+                            'ぇ',
+                            Node {
+                                transitions: None,
+                                output: "kye",
+                            },
+                        ),
+                        (
+                            'ゃ',
+                            Node {
+                                transitions: None,
+                                output: "kya",
+                            },
+                        ),
+                        (
+                            'ゅ',
+                            Node {
+                                transitions: None,
+                                output: "kyu",
+                            },
+                        ),
+                        (
+                            'ょ',
+                            Node {
+                                transitions: None,
+                                output: "kyo",
+                            },
+                        ),
                     ]),
                     output: "ki",
                 },
@@ -162,11 +192,41 @@ lazy_static! {
                 'ぎ',
                 Node {
                     transitions: Some(vec![
-                        Node::leaf('ぃ',"gyi"),
-                        Node::leaf('ぇ',"gye"),
-                        Node::leaf('ゃ',"gya"),
-                        Node::leaf('ゅ',"gyu"),
-                        Node::leaf('ょ',"gyo"),
+                        (
+                            'ぃ',
+                            Node {
+                                transitions: None,
+                                output: "gyi",
+                            },
+                        ),
+                        (
+                            'ぇ',
+                            Node {
+                                transitions: None,
+                                output: "gye",
+                            },
+                        ),
+                        (
+                            'ゃ',
+                            Node {
+                                transitions: None,
+                                output: "gya",
+                            },
+                        ),
+                        (
+                            'ゅ',
+                            Node {
+                                transitions: None,
+                                output: "gyu",
+                            },
+                        ),
+                        (
+                            'ょ',
+                            Node {
+                                transitions: None,
+                                output: "gyo",
+                            },
+                        ),
                     ]),
                     output: "gi",
                 },
@@ -175,11 +235,41 @@ lazy_static! {
                 'く',
                 Node {
                     transitions: Some(vec![
-                        Node::leaf('ぃ',"kyi"),
-                        Node::leaf('ぇ',"kye"),
-                        Node::leaf('ゃ',"kya"),
-                        Node::leaf('ゅ',"kyu"),
-                        Node::leaf('ょ',"kyo"),
+                        (
+                            'ぃ',
+                            Node {
+                                transitions: None,
+                                output: "kyi",
+                            },
+                        ),
+                        (
+                            'ぇ',
+                            Node {
+                                transitions: None,
+                                output: "kye",
+                            },
+                        ),
+                        (
+                            'ゃ',
+                            Node {
+                                transitions: None,
+                                output: "kya",
+                            },
+                        ),
+                        (
+                            'ゅ',
+                            Node {
+                                transitions: None,
+                                output: "kyu",
+                            },
+                        ),
+                        (
+                            'ょ',
+                            Node {
+                                transitions: None,
+                                output: "kyo",
+                            },
+                        ),
                     ]),
                     output: "ku",
                 },
@@ -237,26 +327,86 @@ lazy_static! {
                 'し',
                 Node {
                     transitions: Some(vec![
-                        Node::leaf('ぃ',"syi"),
-                        Node::leaf('ぇ',"sye"),
-                        Node::leaf('ゃ',"sya"),
-                        Node::leaf('ゅ',"syu"),
-                        Node::leaf('ょ',"syo"),
+                        (
+                            'ぃ',
+                            Node {
+                                transitions: None,
+                                output: "shyi",
+                            },
+                        ),
+                        (
+                            'ぇ',
+                            Node {
+                                transitions: None,
+                                output: "she",
+                            },
+                        ),
+                        (
+                            'ゃ',
+                            Node {
+                                transitions: None,
+                                output: "sha",
+                            },
+                        ),
+                        (
+                            'ゅ',
+                            Node {
+                                transitions: None,
+                                output: "shu",
+                            },
+                        ),
+                        (
+                            'ょ',
+                            Node {
+                                transitions: None,
+                                output: "sho",
+                            },
+                        ),
                     ]),
-                    output: "si",
+                    output: "shi",
                 },
             ),
             (
                 'じ',
                 Node {
                     transitions: Some(vec![
-                        Node::leaf('ぃ',"zyi"),
-                        Node::leaf('ぇ',"zye"),
-                        Node::leaf('ゃ',"zya"),
-                        Node::leaf('ゅ',"zyu"),
-                        Node::leaf('ょ',"zyo"),
+                        (
+                            'ぃ',
+                            Node {
+                                transitions: None,
+                                output: "jyi",
+                            },
+                        ),
+                        (
+                            'ぇ',
+                            Node {
+                                transitions: None,
+                                output: "je",
+                            },
+                        ),
+                        (
+                            'ゃ',
+                            Node {
+                                transitions: None,
+                                output: "ja",
+                            },
+                        ),
+                        (
+                            'ゅ',
+                            Node {
+                                transitions: None,
+                                output: "ju",
+                            },
+                        ),
+                        (
+                            'ょ',
+                            Node {
+                                transitions: None,
+                                output: "jo",
+                            },
+                        ),
                     ]),
-                    output: "zi",
+                    output: "ji",
                 },
             ),
             (
@@ -319,26 +469,86 @@ lazy_static! {
                 'ち',
                 Node {
                     transitions: Some(vec![
-                        Node::leaf('ぃ',"tyi"),
-                        Node::leaf('ぇ',"tye"),
-                        Node::leaf('ゃ',"tya"),
-                        Node::leaf('ゅ',"tyu"),
-                        Node::leaf('ょ',"tyo"),
+                        (
+                            'ぃ',
+                            Node {
+                                transitions: None,
+                                output: "chyi",
+                            },
+                        ),
+                        (
+                            'ぇ',
+                            Node {
+                                transitions: None,
+                                output: "che",
+                            },
+                        ),
+                        (
+                            'ゃ',
+                            Node {
+                                transitions: None,
+                                output: "cha",
+                            },
+                        ),
+                        (
+                            'ゅ',
+                            Node {
+                                transitions: None,
+                                output: "chu",
+                            },
+                        ),
+                        (
+                            'ょ',
+                            Node {
+                                transitions: None,
+                                output: "cho",
+                            },
+                        ),
                     ]),
-                    output: "ti",
+                    output: "chi",
                 },
             ),
             (
                 'ぢ',
                 Node {
                     transitions: Some(vec![
-                        Node::leaf('ぃ',"zyi"),
-                        Node::leaf('ぇ',"zye"),
-                        Node::leaf('ゃ',"zya"),
-                        Node::leaf('ゅ',"zyu"),
-                        Node::leaf('ょ',"zyo"),
+                        (
+                            'ぃ',
+                            Node {
+                                transitions: None,
+                                output: "jyi",
+                            },
+                        ),
+                        (
+                            'ぇ',
+                            Node {
+                                transitions: None,
+                                output: "je",
+                            },
+                        ),
+                        (
+                            'ゃ',
+                            Node {
+                                transitions: None,
+                                output: "ja",
+                            },
+                        ),
+                        (
+                            'ゅ',
+                            Node {
+                                transitions: None,
+                                output: "ju",
+                            },
+                        ),
+                        (
+                            'ょ',
+                            Node {
+                                transitions: None,
+                                output: "jo",
+                            },
+                        ),
                     ]),
-                    output: "zi",
+                    output: "ji",
                 },
             ),
             (
@@ -489,11 +699,41 @@ lazy_static! {
                             'き',
                             Node {
                                 transitions: Some(vec![
-                                    Node::leaf('ぃ',"kkyi"),
-                                    Node::leaf('ぇ',"kkye"),
-                                    Node::leaf('ゃ',"kkya"),
-                                    Node::leaf('ゅ',"kkyu"),
-                                    Node::leaf('ょ',"kkyo"),
+                                    (
+                                        'ぃ',
+                                        Node {
+                                            transitions: None,
+                                            output: "kkyi",
+                                        },
+                                    ),
+                                    (
+                                        'ぇ',
+                                        Node {
+                                            transitions: None,
+                                            output: "kkye",
+                                        },
+                                    ),
+                                    (
+                                        'ゃ',
+                                        Node {
+                                            transitions: None,
+                                            output: "kkya",
+                                        },
+                                    ),
+                                    (
+                                        'ゅ',
+                                        Node {
+                                            transitions: None,
+                                            output: "kkyu",
+                                        },
+                                    ),
+                                    (
+                                        'ょ',
+                                        Node {
+                                            transitions: None,
+                                            output: "kkyo",
+                                        },
+                                    ),
                                 ]),
                                 output: "kki",
                             },
@@ -502,11 +742,41 @@ lazy_static! {
                             'ぎ',
                             Node {
                                 transitions: Some(vec![
-                                    Node::leaf('ぃ',"ggyi"),
-                                    Node::leaf('ぇ',"ggye"),
-                                    Node::leaf('ゃ',"ggya"),
-                                    Node::leaf('ゅ',"ggyu"),
-                                    Node::leaf('ょ',"ggyo"),
+                                    (
+                                        'ぃ',
+                                        Node {
+                                            transitions: None,
+                                            output: "ggyi",
+                                        },
+                                    ),
+                                    (
+                                        'ぇ',
+                                        Node {
+                                            transitions: None,
+                                            output: "ggye",
+                                        },
+                                    ),
+                                    (
+                                        'ゃ',
+                                        Node {
+                                            transitions: None,
+                                            output: "ggya",
+                                        },
+                                    ),
+                                    (
+                                        'ゅ',
+                                        Node {
+                                            transitions: None,
+                                            output: "ggyu",
+                                        },
+                                    ),
+                                    (
+                                        'ょ',
+                                        Node {
+                                            transitions: None,
+                                            output: "ggyo",
+                                        },
+                                    ),
                                 ]),
                                 output: "ggi",
                             },
@@ -515,11 +785,41 @@ lazy_static! {
                             'く',
                             Node {
                                 transitions: Some(vec![
-                                    Node::leaf('ぃ',"kkyi"),
-                                    Node::leaf('ぇ',"kkye"),
-                                    Node::leaf('ゃ',"kkya"),
-                                    Node::leaf('ゅ',"kkyu"),
-                                    Node::leaf('ょ',"kkyo"),
+                                    (
+                                        'ぃ',
+                                        Node {
+                                            transitions: None,
+                                            output: "kkyi",
+                                        },
+                                    ),
+                                    (
+                                        'ぇ',
+                                        Node {
+                                            transitions: None,
+                                            output: "kkye",
+                                        },
+                                    ),
+                                    (
+                                        'ゃ',
+                                        Node {
+                                            transitions: None,
+                                            output: "kkya",
+                                        },
+                                    ),
+                                    (
+                                        'ゅ',
+                                        Node {
+                                            transitions: None,
+                                            output: "kkyu",
+                                        },
+                                    ),
+                                    (
+                                        'ょ',
+                                        Node {
+                                            transitions: None,
+                                            output: "kkyo",
+                                        },
+                                    ),
                                 ]),
                                 output: "kku",
                             },
@@ -577,26 +877,86 @@ lazy_static! {
                             'し',
                             Node {
                                 transitions: Some(vec![
-                                    Node::leaf('ぃ',"ssyi"),
-                                    Node::leaf('ぇ',"ssye"),
-                                    Node::leaf('ゃ',"ssya"),
-                                    Node::leaf('ゅ',"ssyu"),
-                                    Node::leaf('ょ',"ssyo"),
+                                    (
+                                        'ぃ',
+                                        Node {
+                                            transitions: None,
+                                            output: "sshyi",
+                                        },
+                                    ),
+                                    (
+                                        'ぇ',
+                                        Node {
+                                            transitions: None,
+                                            output: "sshe",
+                                        },
+                                    ),
+                                    (
+                                        'ゃ',
+                                        Node {
+                                            transitions: None,
+                                            output: "ssha",
+                                        },
+                                    ),
+                                    (
+                                        'ゅ',
+                                        Node {
+                                            transitions: None,
+                                            output: "sshu",
+                                        },
+                                    ),
+                                    (
+                                        'ょ',
+                                        Node {
+                                            transitions: None,
+                                            output: "ssho",
+                                        },
+                                    ),
                                 ]),
-                                output: "ssi",
+                                output: "sshi",
                             },
                         ),
                         (
                             'じ',
                             Node {
                                 transitions: Some(vec![
-                                    Node::leaf('ぃ',"zzyi"),
-                                    Node::leaf('ぇ',"zzye"),
-                                    Node::leaf('ゃ',"zzya"),
-                                    Node::leaf('ゅ',"zzyu"),
-                                    Node::leaf('ょ',"zzyo"),
+                                    (
+                                        'ぃ',
+                                        Node {
+                                            transitions: None,
+                                            output: "jjyi",
+                                        },
+                                    ),
+                                    (
+                                        'ぇ',
+                                        Node {
+                                            transitions: None,
+                                            output: "jje",
+                                        },
+                                    ),
+                                    (
+                                        'ゃ',
+                                        Node {
+                                            transitions: None,
+                                            output: "jja",
+                                        },
+                                    ),
+                                    (
+                                        'ゅ',
+                                        Node {
+                                            transitions: None,
+                                            output: "jju",
+                                        },
+                                    ),
+                                    (
+                                        'ょ',
+                                        Node {
+                                            transitions: None,
+                                            output: "jjo",
+                                        },
+                                    ),
                                 ]),
-                                output: "zzi",
+                                output: "jji",
                             },
                         ),
                         (
@@ -659,33 +1019,93 @@ lazy_static! {
                             'ち',
                             Node {
                                 transitions: Some(vec![
-                                    Node::leaf('ぃ',"ttyi"),
-                                    Node::leaf('ぇ',"ttye"),
-                                    Node::leaf('ゃ',"ttya"),
-                                    Node::leaf('ゅ',"ttyu"),
-                                    Node::leaf('ょ',"ttyo"),
+                                    (
+                                        'ぃ',
+                                        Node {
+                                            transitions: None,
+                                            output: "tchyi",
+                                        },
+                                    ),
+                                    (
+                                        'ぇ',
+                                        Node {
+                                            transitions: None,
+                                            output: "tche",
+                                        },
+                                    ),
+                                    (
+                                        'ゃ',
+                                        Node {
+                                            transitions: None,
+                                            output: "tcha",
+                                        },
+                                    ),
+                                    (
+                                        'ゅ',
+                                        Node {
+                                            transitions: None,
+                                            output: "tchu",
+                                        },
+                                    ),
+                                    (
+                                        'ょ',
+                                        Node {
+                                            transitions: None,
+                                            output: "tcho",
+                                        },
+                                    ),
                                 ]),
-                                output: "tti",
+                                output: "tchi",
                             },
                         ),
                         (
                             'ぢ',
                             Node {
                                 transitions: Some(vec![
-                                    Node::leaf('ぃ',"zzyi"),
-                                    Node::leaf('ぇ',"zzye"),
-                                    Node::leaf('ゃ',"zzya"),
-                                    Node::leaf('ゅ',"zzyu"),
-                                    Node::leaf('ょ',"zzyo"),
+                                    (
+                                        'ぃ',
+                                        Node {
+                                            transitions: None,
+                                            output: "jjyi",
+                                        },
+                                    ),
+                                    (
+                                        'ぇ',
+                                        Node {
+                                            transitions: None,
+                                            output: "jje",
+                                        },
+                                    ),
+                                    (
+                                        'ゃ',
+                                        Node {
+                                            transitions: None,
+                                            output: "jja",
+                                        },
+                                    ),
+                                    (
+                                        'ゅ',
+                                        Node {
+                                            transitions: None,
+                                            output: "jju",
+                                        },
+                                    ),
+                                    (
+                                        'ょ',
+                                        Node {
+                                            transitions: None,
+                                            output: "jjo",
+                                        },
+                                    ),
                                 ]),
-                                output: "zzi",
+                                output: "jji",
                             },
                         ),
                         (
                             'つ',
                             Node {
                                 transitions: None,
-                                output: "ttu",
+                                output: "ttsu",
                             },
                         ),
                         (
@@ -734,11 +1154,41 @@ lazy_static! {
                             'に',
                             Node {
                                 transitions: Some(vec![
-                                    Node::leaf('ぃ',"nyi"),
-                                    Node::leaf('ぇ',"nye"),
-                                    Node::leaf('ゃ',"nya"),
-                                    Node::leaf('ゅ',"nyu"),
-                                    Node::leaf('ょ',"nyo"),
+                                    (
+                                        'ぃ',
+                                        Node {
+                                            transitions: None,
+                                            output: "nyi",
+                                        },
+                                    ),
+                                    (
+                                        'ぇ',
+                                        Node {
+                                            transitions: None,
+                                            output: "nye",
+                                        },
+                                    ),
+                                    (
+                                        'ゃ',
+                                        Node {
+                                            transitions: None,
+                                            output: "nya",
+                                        },
+                                    ),
+                                    (
+                                        'ゅ',
+                                        Node {
+                                            transitions: None,
+                                            output: "nyu",
+                                        },
+                                    ),
+                                    (
+                                        'ょ',
+                                        Node {
+                                            transitions: None,
+                                            output: "nyo",
+                                        },
+                                    ),
                                 ]),
                                 output: "ni",
                             },
@@ -922,39 +1372,39 @@ lazy_static! {
                                         'ぃ',
                                         Node {
                                             transitions: None,
-                                            output: "hhyi",
+                                            output: "ffyi",
                                         },
                                     ),
                                     (
                                         'ぇ',
                                         Node {
                                             transitions: None,
-                                            output: "hhye",
+                                            output: "ffye",
                                         },
                                     ),
                                     (
                                         'ゃ',
                                         Node {
                                             transitions: None,
-                                            output: "hhya",
+                                            output: "ffya",
                                         },
                                     ),
                                     (
                                         'ゅ',
                                         Node {
                                             transitions: None,
-                                            output: "hhyu",
+                                            output: "ffyu",
                                         },
                                     ),
                                     (
                                         'ょ',
                                         Node {
                                             transitions: None,
-                                            output: "hhyo",
+                                            output: "ffyo",
                                         },
                                     ),
                                 ]),
-                                output: "hhu",
+                                output: "ffu",
                             },
                         ),
                         (
@@ -1388,7 +1838,7 @@ lazy_static! {
                 'つ',
                 Node {
                     transitions: None,
-                    output: "tu",
+                    output: "tsu",
                 },
             ),
             (
@@ -1655,39 +2105,39 @@ lazy_static! {
                             'ぃ',
                             Node {
                                 transitions: None,
-                                output: "hyi",
+                                output: "fyi",
                             },
                         ),
                         (
                             'ぇ',
                             Node {
                                 transitions: None,
-                                output: "hye",
+                                output: "fye",
                             },
                         ),
                         (
                             'ゃ',
                             Node {
                                 transitions: None,
-                                output: "hya",
+                                output: "fya",
                             },
                         ),
                         (
                             'ゅ',
                             Node {
                                 transitions: None,
-                                output: "hyu",
+                                output: "fyu",
                             },
                         ),
                         (
                             'ょ',
                             Node {
                                 transitions: None,
-                                output: "hyo",
+                                output: "fyo",
                             },
                         ),
                     ]),
-                    output: "hu",
+                    output: "fu",
                 },
             ),
             (

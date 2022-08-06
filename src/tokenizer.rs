@@ -64,7 +64,7 @@ impl Node {
         }
     }
  
-    fn sort(&mut self) {
+    pub fn sort(&mut self) {
         if let Some(transitions) = &mut self.transitions {
             transitions.sort_by_key(|el| el.0);
             for el in transitions {
@@ -73,7 +73,7 @@ impl Node {
         }
     }
  
-    fn count(&self) -> usize {
+    pub fn count(&self) -> usize {
         match &self.transitions {
             Some(v) => {
                 let mut sum = 1;
@@ -86,7 +86,7 @@ impl Node {
         }
     }
 
-    fn extract_tokens(&self, text: &str) -> Vec<String> {
+    pub fn extract_tokens(&self, text: &str) -> Vec<String> {
  
         let chars = text.chars().collect::<Vec<_>>();
         let mut ouput = Vec::new();

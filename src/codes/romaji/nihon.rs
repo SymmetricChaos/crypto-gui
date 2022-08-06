@@ -3,7 +3,7 @@ use lazy_static::lazy_static;
 use crate::tokenizer::Node;
 
 lazy_static! {
-    pub static ref KUNREI_SHIKI: Node = {
+    pub static ref NIHON_SHIKI: Node = {
         let transitions = Some(vec![
             (
                 '\u{3000}',
@@ -332,13 +332,13 @@ lazy_static! {
                 'ぢ',
                 Node {
                     transitions: Some(vec![
-                        Node::leaf('ぃ',"zyi"),
-                        Node::leaf('ぇ',"zye"),
-                        Node::leaf('ゃ',"zya"),
-                        Node::leaf('ゅ',"zyu"),
-                        Node::leaf('ょ',"zyo"),
+                        Node::leaf('ぃ',"dyi"),
+                        Node::leaf('ぇ',"dye"),
+                        Node::leaf('ゃ',"dya"),
+                        Node::leaf('ゅ',"dyu"),
+                        Node::leaf('ょ',"dyo"),
                     ]),
-                    output: "zi",
+                    output: "di",
                 },
             ),
             (
@@ -672,13 +672,13 @@ lazy_static! {
                             'ぢ',
                             Node {
                                 transitions: Some(vec![
-                                    Node::leaf('ぃ',"zzyi"),
-                                    Node::leaf('ぇ',"zzye"),
-                                    Node::leaf('ゃ',"zzya"),
-                                    Node::leaf('ゅ',"zzyu"),
-                                    Node::leaf('ょ',"zzyo"),
+                                    Node::leaf('ぃ',"ddyi"),
+                                    Node::leaf('ぇ',"ddye"),
+                                    Node::leaf('ゃ',"ddya"),
+                                    Node::leaf('ゅ',"ddyu"),
+                                    Node::leaf('ょ',"ddyo"),
                                 ]),
-                                output: "zzi",
+                                output: "ddi",
                             },
                         ),
                         (
@@ -836,39 +836,39 @@ lazy_static! {
                                         'ぃ',
                                         Node {
                                             transitions: None,
-                                            output: "bbyi",
+                                            output: "ppyi",
                                         },
                                     ),
                                     (
                                         'ぇ',
                                         Node {
                                             transitions: None,
-                                            output: "bbye",
+                                            output: "ppye",
                                         },
                                     ),
                                     (
                                         'ゃ',
                                         Node {
                                             transitions: None,
-                                            output: "bbya",
+                                            output: "ppya",
                                         },
                                     ),
                                     (
                                         'ゅ',
                                         Node {
                                             transitions: None,
-                                            output: "bbyu",
+                                            output: "ppyu",
                                         },
                                     ),
                                     (
                                         'ょ',
                                         Node {
                                             transitions: None,
-                                            output: "bbyo",
+                                            output: "ppyo",
                                         },
                                     ),
                                 ]),
-                                output: "bbi",
+                                output: "ppi",
                             },
                         ),
                         (

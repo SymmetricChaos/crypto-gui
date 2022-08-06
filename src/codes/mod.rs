@@ -1,4 +1,5 @@
 pub mod ascii;
+pub mod romaji;
 pub use ascii::Ascii;
 
 pub mod morse_itu;
@@ -24,8 +25,6 @@ pub use base64::Base64;
 
 pub mod unicode;
 pub use unicode::Unicode;
-
-pub mod romaji;
 
 pub mod baudot;
 pub use baudot::Baudot;
