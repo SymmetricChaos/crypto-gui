@@ -24,6 +24,8 @@ pub mod text_aux;
 
 pub mod global_rng;
 
+pub mod tokenizer;
+
 // ----------------------------------------------------------------------------
 // When compiling for web:
 

@@ -21,6 +21,8 @@ pub mod text_aux;
 
 pub mod global_rng;
 
+pub mod tokenizer;
+
 #[cfg(not(target_arch = "wasm32"))]
 fn main() {
     let native_options = eframe::NativeOptions::default();
