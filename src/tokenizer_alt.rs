@@ -17,13 +17,17 @@ impl fmt::Display for Node {
         match &self.transitions {
             Some(v) => {
                 if let Some(output) = self.output {
-                    let mut s = format!("{}", output);
+                    let mut s = output.to_string();
                     for (_,n) in v {
                         s.push_str(&format!("({})",n))
                     };
                     write!(f, "{}", s)
                 } else {
-                    write!(f, "")
+                    let mut s = String::new();
+                    for (_,n) in v {
+                        s.push_str(&format!("({})",n))
+                    };
+                    write!(f, "{}", s)
                 }
             },
             None => {
@@ -77,20 +81,6 @@ impl Node {
             (None, 0)
         }
     }
-
-    // pub fn get<'a>(&self, chars: &'a [char]) -> (&'static str, usize) {
-    //     let mut i = 0;
-    //     let mut curr_node = self;
-    //     for char in chars.iter() {
-    //         if let Some(trans_node) = curr_node.find_transition_node(*char) {
-    //             curr_node = trans_node;
-    //         } else {
-    //             break;
-    //         }
-    //         i += 1;
-    //     }
-    //     (curr_node.output, i)
-    // }
  
     pub fn find_transition_node(&self, char: char) -> Option<&Node> {
         if let Some(t) = &self.transitions {
@@ -181,6 +171,17 @@ fn test_tokenizer() {
                 Node::branch('n', Some("en"), 
                     vec![
                         Node::leaf('t',"ent"),
+                    ]
+                )
+            ]
+        ),
+        Node::branch('f', None,
+            vec![
+                Node::leaf('a',"fr"),
+                Node::leaf('a',"fs"),
+                Node::branch('n', Some("fn"), 
+                    vec![
+                        Node::leaf('t',"fnt"),
                     ]
                 )
             ]
