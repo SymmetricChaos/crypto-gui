@@ -1,3 +1,6 @@
+// The methods used here are all copied: https://github.com/PSeitz/wana_kana_rust
+// Just wanted to be able to cover additional romanizations
+
 pub mod kunrei;
 pub use kunrei::KUNREI_SHIKI;
 
