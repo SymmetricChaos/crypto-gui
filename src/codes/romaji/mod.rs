@@ -10,4 +10,7 @@ pub use hepbern::HEPBERN_SHIKI;
 pub mod nihon;
 pub use nihon::NIHON_SHIKI;
 
+pub mod romaji_to_kana;
+pub use romaji_to_kana::ROMAJI_TO_KANA;
+
 pub mod romaji;
