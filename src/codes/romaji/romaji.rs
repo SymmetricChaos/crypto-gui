@@ -23,12 +23,36 @@ pub fn to_romaji(orig: &str, tree: Node) -> String {
     ouput
 }
 
-#[test]
-fn nihon_shiki_hiragana() {
+#[cfg(test)]
+mod romaji_test {
+    use super::*;
     
-    use super::KUNREI_SHIKI;
-    let hiragana = "こんにちは ひらがな きょうと おおさか とうきょ よこはま れんあい けん ふゆき みっつ ぼっち";
-    let latin_ks =
-        "KONNITIHA HIRAGANA KYOUTO OOSAKA TOUKYO YOKOHAMA REN'AI KEN HUYUKI MITTU BOTTI";
-    assert_eq!(to_romaji(hiragana,KUNREI_SHIKI.clone()), latin_ks);
+    use crate::codes::romaji::{NIHON_SHIKI,KUNREI_SHIKI,HEPBERN_SHIKI};
+    // we check the differences between the methods
+    const HIRAGANA: &'static str = "ち し つ ぢ じ づ ぢゃ じゃ こんに こんお";
+
+    
+    #[test]
+    fn hepbern_text() {
+        let latin_hs =
+            "CHI SHI TSU JI JI ZU JA JA KONNI KON'O";
+        assert_eq!(to_romaji(HIRAGANA,HEPBERN_SHIKI.clone()), latin_hs);
+    }
+
+    #[test]
+    fn nihon_text() {
+        let latin_ns =
+            "TI SI TU DI ZI DU DYA ZYA KONNI KON'O";
+        assert_eq!(to_romaji(HIRAGANA,NIHON_SHIKI.clone()), latin_ns);
+    }
+    
+    #[test]
+    fn kunrei_text() {
+        let latin_ks =
+            "TI SI TU ZI ZI ZU ZYA ZYA KONNI KON'O";
+        assert_eq!(to_romaji(HIRAGANA,KUNREI_SHIKI.clone()), latin_ks);
+    
+    }
+
+    
 }

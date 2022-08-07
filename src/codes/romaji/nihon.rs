@@ -692,7 +692,7 @@ lazy_static! {
                             'づ',
                             Node {
                                 transitions: None,
-                                output: "zzu",
+                                output: "ddu",
                             },
                         ),
                         (
@@ -1395,7 +1395,7 @@ lazy_static! {
                 'づ',
                 Node {
                     transitions: None,
-                    output: "zu",
+                    output: "du",
                 },
             ),
             (
