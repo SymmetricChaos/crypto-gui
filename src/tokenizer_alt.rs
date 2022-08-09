@@ -1,17 +1,25 @@
 use std::fmt;
-
-
-#[derive(Debug, Clone)]
+ 
+#[derive(Clone,Copy,Debug)]
 pub enum TokenError {
-    InvalidTermination
+    InvalidSymbol(usize)
 }
-
+ 
+impl fmt::Display for TokenError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            TokenError::InvalidSymbol(n) => write!(f, "Invalid transition at index {}", n)
+        }
+    }
+}
+ 
 #[derive(Debug, Clone)]
 pub struct Node {
     pub transitions: Option<Vec<(char, Node)>>,
     pub output: Option<&'static str>,
 }
-
+ 
+ 
 impl fmt::Display for Node {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self.transitions {
@@ -40,7 +48,7 @@ impl fmt::Display for Node {
         }
     }
 }
-
+ 
 impl Node {
     // It is invalid for a leaf to have no output
     pub fn leaf(c: char, output: &'static str) -> (char, Node) {
@@ -52,7 +60,7 @@ impl Node {
             }
         )
     }
-
+ 
     pub fn branch(c: char, output: Option<&'static str>, transitions: Vec<(char, Node)>) -> (char, Node) {
         (
             c,
@@ -62,11 +70,21 @@ impl Node {
             }
         )
     }
-
+ 
+    pub fn tree(transitions: Vec<(char, Node)>) -> Node {
+        Node{
+            transitions: Some(transitions), 
+            output: None
+        }
+ 
+    }
+ 
     pub fn get<'a>(&self, chars: &'a [char]) -> (Option<&'static str>, usize) {
         let mut i = 0;
         let mut curr_node = self;
         for char in chars.iter() {
+            // find the transition to the next node or stop at a leaf node
+            // count the number of characters taken
             if let Some(trans_node) = curr_node.find_transition_node(char.to_ascii_lowercase()) {
                 curr_node = trans_node;
             } else {
@@ -74,7 +92,8 @@ impl Node {
             }
             i += 1;
         }
-
+ 
+        // if an output exists then provide it and the index reached
         if let Some(_output) = curr_node.output {
             (curr_node.output, i)
         } else {
@@ -83,11 +102,39 @@ impl Node {
     }
  
     pub fn find_transition_node(&self, char: char) -> Option<&Node> {
+        // If transitions exist find one that acts on 'char' and return it, if
+        // there is no such node return none. At a leaf return none.
         if let Some(t) = &self.transitions {
             t.binary_search_by_key(&char, |t| t.0).ok().map(|index| &t[index].1)
         } else {
             None
         }
+    }
+ 
+ 
+ 
+    pub fn extract_tokens(&self, text: &str) -> Result<Vec<String>,TokenError> {
+ 
+        let chars = text.chars().collect::<Vec<_>>();
+        let mut ouput = Vec::new();
+        let len = chars.len();
+        let mut curr_pos = 0;
+ 
+        while curr_pos != len {
+            let result = self.get(&chars[curr_pos..]);
+            // no valid match return the error
+            if result.1 == 0 {
+                return Err(TokenError::InvalidSymbol(curr_pos))
+            } else {
+                if let Some(text) = result.0 {
+                    ouput.push(text.to_string());
+                    curr_pos += result.1;
+                } else {
+                    return Err(TokenError::InvalidSymbol(curr_pos))
+                }
+            }
+        }
+        Ok(ouput)
     }
  
     pub fn sort(&mut self) {
@@ -102,7 +149,10 @@ impl Node {
     pub fn count(&self) -> usize {
         match &self.transitions {
             Some(v) => {
-                let mut sum = 1;
+                let mut sum = match self.output {
+                    Some(_) => 1,
+                    None => 0,
+                };
                 for (_,n) in v {
                     sum += n.count()
                 }
@@ -111,41 +161,17 @@ impl Node {
             None => 1
         }
     }
-
-    pub fn extract_tokens(&self, text: &str) -> Result<Vec<String>,TokenError> {
  
-        let chars = text.chars().collect::<Vec<_>>();
-        let mut ouput = Vec::new();
-        let len = chars.len();
-        // Position in the string that is being evaluated
-        let mut curr_pos = 0;
-     
-        while curr_pos != len {
-            let result = self.get(&chars[curr_pos..]);
-            //nothing found, pass through
-            if result.1 == 0 {
-                ouput.push(chars[curr_pos].to_string());
-                curr_pos += 1;
-            } else {
-                if let Some(text) = result.0 {
-                    ouput.push(text.to_string());
-                    curr_pos += result.1;
-                } else {
-                    return Err(TokenError::InvalidTermination)
-                }
-            }
-        }
-        Ok(ouput)
-    }
+ 
 }
  
-
-
-
-#[test]
-fn test_tokenizer() {
-    
-    let transitions = Some(vec![
+ 
+ 
+ 
+ 
+fn main() {
+ 
+    let transitions = vec![
         Node::branch(
             'a', Some("a"),
             vec![
@@ -183,15 +209,22 @@ fn test_tokenizer() {
                     vec![
                         Node::leaf('t',"fnt"),
                     ]
+                ),
+                Node::branch('x', None, 
+                    vec![
+                        Node::leaf('t',"fnx"),
+                    ]
                 )
             ]
         ),
-    ]);
-
-    let mut tree = Node { transitions, output: Some("") };
+    ];
+ 
+    let mut tree = Node::tree(transitions);
     tree.sort();
     println!("{}",&tree);
     println!("{}",&tree.count());
     let sentence = "andaanerent";
+    println!("{:?}",tree.extract_tokens(sentence));
+    let sentence = "anfnxdaanerent";
     println!("{:?}",tree.extract_tokens(sentence));
 }
