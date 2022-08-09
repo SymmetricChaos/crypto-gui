@@ -9,140 +9,140 @@ lazy_static! {
                 '\u{3000}',
                 Node {
                     transitions: None,
-                    output: " ",
+                    output: Some(" "),
                 },
             ),
             (
                 '、',
                 Node {
                     transitions: None,
-                    output: ",",
+                    output: Some(","),
                 },
             ),
             (
                 '。',
                 Node {
                     transitions: None,
-                    output: ".",
+                    output: Some("."),
                 },
             ),
             (
                 '「',
                 Node {
                     transitions: None,
-                    output: "‘",
+                    output: Some("‘"),
                 },
             ),
             (
                 '」',
                 Node {
                     transitions: None,
-                    output: "’",
+                    output: Some("’"),
                 },
             ),
             (
                 '『',
                 Node {
                     transitions: None,
-                    output: "“",
+                    output: Some("“"),
                 },
             ),
             (
                 '』',
                 Node {
                     transitions: None,
-                    output: "”",
+                    output: Some("”"),
                 },
             ),
             (
                 '〜',
                 Node {
                     transitions: None,
-                    output: "~",
+                    output: Some("~"),
                 },
             ),
             (
                 'ぁ',
                 Node {
                     transitions: None,
-                    output: "a",
+                    output: Some("a"),
                 },
             ),
             (
                 'あ',
                 Node {
                     transitions: None,
-                    output: "a",
+                    output: Some("a"),
                 },
             ),
             (
                 'ぃ',
                 Node {
                     transitions: None,
-                    output: "i",
+                    output: Some("i"),
                 },
             ),
             (
                 'い',
                 Node {
                     transitions: None,
-                    output: "i",
+                    output: Some("i"),
                 },
             ),
             (
                 'ぅ',
                 Node {
                     transitions: None,
-                    output: "u",
+                    output: Some("u"),
                 },
             ),
             (
                 'う',
                 Node {
                     transitions: None,
-                    output: "u",
+                    output: Some("u"),
                 },
             ),
             (
                 'ぇ',
                 Node {
                     transitions: None,
-                    output: "e",
+                    output: Some("e"),
                 },
             ),
             (
                 'え',
                 Node {
                     transitions: None,
-                    output: "e",
+                    output: Some("e"),
                 },
             ),
             (
                 'ぉ',
                 Node {
                     transitions: None,
-                    output: "o",
+                    output: Some("o"),
                 },
             ),
             (
                 'お',
                 Node {
                     transitions: None,
-                    output: "o",
+                    output: Some("o"),
                 },
             ),
             (
                 'か',
                 Node {
                     transitions: None,
-                    output: "ka",
+                    output: Some("ka"),
                 },
             ),
             (
                 'が',
                 Node {
                     transitions: None,
-                    output: "ga",
+                    output: Some("ga"),
                 },
             ),
             (
@@ -153,39 +153,39 @@ lazy_static! {
                             'ぃ',
                             Node {
                                 transitions: None,
-                                output: "kyi",
+                                output: Some("kyi"),
                             },
                         ),
                         (
                             'ぇ',
                             Node {
                                 transitions: None,
-                                output: "kye",
+                                output: Some("kye"),
                             },
                         ),
                         (
                             'ゃ',
                             Node {
                                 transitions: None,
-                                output: "kya",
+                                output: Some("kya"),
                             },
                         ),
                         (
                             'ゅ',
                             Node {
                                 transitions: None,
-                                output: "kyu",
+                                output: Some("kyu"),
                             },
                         ),
                         (
                             'ょ',
                             Node {
                                 transitions: None,
-                                output: "kyo",
+                                output: Some("kyo"),
                             },
                         ),
                     ]),
-                    output: "ki",
+                    output: Some("ki"),
                 },
             ),
             (
@@ -196,39 +196,39 @@ lazy_static! {
                             'ぃ',
                             Node {
                                 transitions: None,
-                                output: "gyi",
+                                output: Some("gyi"),
                             },
                         ),
                         (
                             'ぇ',
                             Node {
                                 transitions: None,
-                                output: "gye",
+                                output: Some("gye"),
                             },
                         ),
                         (
                             'ゃ',
                             Node {
                                 transitions: None,
-                                output: "gya",
+                                output: Some("gya"),
                             },
                         ),
                         (
                             'ゅ',
                             Node {
                                 transitions: None,
-                                output: "gyu",
+                                output: Some("gyu"),
                             },
                         ),
                         (
                             'ょ',
                             Node {
                                 transitions: None,
-                                output: "gyo",
+                                output: Some("gyo"),
                             },
                         ),
                     ]),
-                    output: "gi",
+                    output: Some("gi"),
                 },
             ),
             (
@@ -239,88 +239,88 @@ lazy_static! {
                             'ぃ',
                             Node {
                                 transitions: None,
-                                output: "kyi",
+                                output: Some("kyi"),
                             },
                         ),
                         (
                             'ぇ',
                             Node {
                                 transitions: None,
-                                output: "kye",
+                                output: Some("kye"),
                             },
                         ),
                         (
                             'ゃ',
                             Node {
                                 transitions: None,
-                                output: "kya",
+                                output: Some("kya"),
                             },
                         ),
                         (
                             'ゅ',
                             Node {
                                 transitions: None,
-                                output: "kyu",
+                                output: Some("kyu"),
                             },
                         ),
                         (
                             'ょ',
                             Node {
                                 transitions: None,
-                                output: "kyo",
+                                output: Some("kyo"),
                             },
                         ),
                     ]),
-                    output: "ku",
+                    output: Some("ku"),
                 },
             ),
             (
                 'ぐ',
                 Node {
                     transitions: None,
-                    output: "gu",
+                    output: Some("gu"),
                 },
             ),
             (
                 'け',
                 Node {
                     transitions: None,
-                    output: "ke",
+                    output: Some("ke"),
                 },
             ),
             (
                 'げ',
                 Node {
                     transitions: None,
-                    output: "ge",
+                    output: Some("ge"),
                 },
             ),
             (
                 'こ',
                 Node {
                     transitions: None,
-                    output: "ko",
+                    output: Some("ko"),
                 },
             ),
             (
                 'ご',
                 Node {
                     transitions: None,
-                    output: "go",
+                    output: Some("go"),
                 },
             ),
             (
                 'さ',
                 Node {
                     transitions: None,
-                    output: "sa",
+                    output: Some("sa"),
                 },
             ),
             (
                 'ざ',
                 Node {
                     transitions: None,
-                    output: "za",
+                    output: Some("za"),
                 },
             ),
             (
@@ -331,39 +331,39 @@ lazy_static! {
                             'ぃ',
                             Node {
                                 transitions: None,
-                                output: "shyi",
+                                output: Some("shyi"),
                             },
                         ),
                         (
                             'ぇ',
                             Node {
                                 transitions: None,
-                                output: "she",
+                                output: Some("she"),
                             },
                         ),
                         (
                             'ゃ',
                             Node {
                                 transitions: None,
-                                output: "sha",
+                                output: Some("sha"),
                             },
                         ),
                         (
                             'ゅ',
                             Node {
                                 transitions: None,
-                                output: "shu",
+                                output: Some("shu"),
                             },
                         ),
                         (
                             'ょ',
                             Node {
                                 transitions: None,
-                                output: "sho",
+                                output: Some("sho"),
                             },
                         ),
                     ]),
-                    output: "shi",
+                    output: Some("shi"),
                 },
             ),
             (
@@ -374,95 +374,95 @@ lazy_static! {
                             'ぃ',
                             Node {
                                 transitions: None,
-                                output: "jyi",
+                                output: Some("jyi"),
                             },
                         ),
                         (
                             'ぇ',
                             Node {
                                 transitions: None,
-                                output: "je",
+                                output: Some("je"),
                             },
                         ),
                         (
                             'ゃ',
                             Node {
                                 transitions: None,
-                                output: "ja",
+                                output: Some("ja"),
                             },
                         ),
                         (
                             'ゅ',
                             Node {
                                 transitions: None,
-                                output: "ju",
+                                output: Some("ju"),
                             },
                         ),
                         (
                             'ょ',
                             Node {
                                 transitions: None,
-                                output: "jo",
+                                output: Some("jo"),
                             },
                         ),
                     ]),
-                    output: "ji",
+                    output: Some("ji"),
                 },
             ),
             (
                 'す',
                 Node {
                     transitions: None,
-                    output: "su",
+                    output: Some("su"),
                 },
             ),
             (
                 'ず',
                 Node {
                     transitions: None,
-                    output: "zu",
+                    output: Some("zu"),
                 },
             ),
             (
                 'せ',
                 Node {
                     transitions: None,
-                    output: "se",
+                    output: Some("se"),
                 },
             ),
             (
                 'ぜ',
                 Node {
                     transitions: None,
-                    output: "ze",
+                    output: Some("ze"),
                 },
             ),
             (
                 'そ',
                 Node {
                     transitions: None,
-                    output: "so",
+                    output: Some("so"),
                 },
             ),
             (
                 'ぞ',
                 Node {
                     transitions: None,
-                    output: "zo",
+                    output: Some("zo"),
                 },
             ),
             (
                 'た',
                 Node {
                     transitions: None,
-                    output: "ta",
+                    output: Some("ta"),
                 },
             ),
             (
                 'だ',
                 Node {
                     transitions: None,
-                    output: "da",
+                    output: Some("da"),
                 },
             ),
             (
@@ -473,39 +473,39 @@ lazy_static! {
                             'ぃ',
                             Node {
                                 transitions: None,
-                                output: "chyi",
+                                output: Some("chyi"),
                             },
                         ),
                         (
                             'ぇ',
                             Node {
                                 transitions: None,
-                                output: "che",
+                                output: Some("che"),
                             },
                         ),
                         (
                             'ゃ',
                             Node {
                                 transitions: None,
-                                output: "cha",
+                                output: Some("cha"),
                             },
                         ),
                         (
                             'ゅ',
                             Node {
                                 transitions: None,
-                                output: "chu",
+                                output: Some("chu"),
                             },
                         ),
                         (
                             'ょ',
                             Node {
                                 transitions: None,
-                                output: "cho",
+                                output: Some("cho"),
                             },
                         ),
                     ]),
-                    output: "chi",
+                    output: Some("chi"),
                 },
             ),
             (
@@ -516,39 +516,39 @@ lazy_static! {
                             'ぃ',
                             Node {
                                 transitions: None,
-                                output: "jyi",
+                                output: Some("jyi"),
                             },
                         ),
                         (
                             'ぇ',
                             Node {
                                 transitions: None,
-                                output: "je",
+                                output: Some("je"),
                             },
                         ),
                         (
                             'ゃ',
                             Node {
                                 transitions: None,
-                                output: "ja",
+                                output: Some("ja"),
                             },
                         ),
                         (
                             'ゅ',
                             Node {
                                 transitions: None,
-                                output: "ju",
+                                output: Some("ju"),
                             },
                         ),
                         (
                             'ょ',
                             Node {
                                 transitions: None,
-                                output: "jo",
+                                output: Some("jo"),
                             },
                         ),
                     ]),
-                    output: "ji",
+                    output: Some("ji"),
                 },
             ),
             (
@@ -559,140 +559,140 @@ lazy_static! {
                             '\u{3000}',
                             Node {
                                 transitions: None,
-                                output: " ",
+                                output: Some(" "),
                             },
                         ),
                         (
                             '、',
                             Node {
                                 transitions: None,
-                                output: ",",
+                                output: Some(","),
                             },
                         ),
                         (
                             '。',
                             Node {
                                 transitions: None,
-                                output: ".",
+                                output: Some("."),
                             },
                         ),
                         (
                             '「',
                             Node {
                                 transitions: None,
-                                output: "‘",
+                                output: Some("‘"),
                             },
                         ),
                         (
                             '」',
                             Node {
                                 transitions: None,
-                                output: "’",
+                                output: Some("’"),
                             },
                         ),
                         (
                             '『',
                             Node {
                                 transitions: None,
-                                output: "“",
+                                output: Some("“"),
                             },
                         ),
                         (
                             '』',
                             Node {
                                 transitions: None,
-                                output: "”",
+                                output: Some("”"),
                             },
                         ),
                         (
                             '〜',
                             Node {
                                 transitions: None,
-                                output: "~",
+                                output: Some("~"),
                             },
                         ),
                         (
                             'ぁ',
                             Node {
                                 transitions: None,
-                                output: "a",
+                                output: Some("a"),
                             },
                         ),
                         (
                             'あ',
                             Node {
                                 transitions: None,
-                                output: "a",
+                                output: Some("a"),
                             },
                         ),
                         (
                             'ぃ',
                             Node {
                                 transitions: None,
-                                output: "i",
+                                output: Some("i"),
                             },
                         ),
                         (
                             'い',
                             Node {
                                 transitions: None,
-                                output: "i",
+                                output: Some("i"),
                             },
                         ),
                         (
                             'ぅ',
                             Node {
                                 transitions: None,
-                                output: "u",
+                                output: Some("u"),
                             },
                         ),
                         (
                             'う',
                             Node {
                                 transitions: None,
-                                output: "u",
+                                output: Some("u"),
                             },
                         ),
                         (
                             'ぇ',
                             Node {
                                 transitions: None,
-                                output: "e",
+                                output: Some("e"),
                             },
                         ),
                         (
                             'え',
                             Node {
                                 transitions: None,
-                                output: "e",
+                                output: Some("e"),
                             },
                         ),
                         (
                             'ぉ',
                             Node {
                                 transitions: None,
-                                output: "o",
+                                output: Some("o"),
                             },
                         ),
                         (
                             'お',
                             Node {
                                 transitions: None,
-                                output: "o",
+                                output: Some("o"),
                             },
                         ),
                         (
                             'か',
                             Node {
                                 transitions: None,
-                                output: "kka",
+                                output: Some("kka"),
                             },
                         ),
                         (
                             'が',
                             Node {
                                 transitions: None,
-                                output: "gga",
+                                output: Some("gga"),
                             },
                         ),
                         (
@@ -703,39 +703,39 @@ lazy_static! {
                                         'ぃ',
                                         Node {
                                             transitions: None,
-                                            output: "kkyi",
+                                            output: Some("kkyi"),
                                         },
                                     ),
                                     (
                                         'ぇ',
                                         Node {
                                             transitions: None,
-                                            output: "kkye",
+                                            output: Some("kkye"),
                                         },
                                     ),
                                     (
                                         'ゃ',
                                         Node {
                                             transitions: None,
-                                            output: "kkya",
+                                            output: Some("kkya"),
                                         },
                                     ),
                                     (
                                         'ゅ',
                                         Node {
                                             transitions: None,
-                                            output: "kkyu",
+                                            output: Some("kkyu"),
                                         },
                                     ),
                                     (
                                         'ょ',
                                         Node {
                                             transitions: None,
-                                            output: "kkyo",
+                                            output: Some("kkyo"),
                                         },
                                     ),
                                 ]),
-                                output: "kki",
+                                output: Some("kki"),
                             },
                         ),
                         (
@@ -746,39 +746,39 @@ lazy_static! {
                                         'ぃ',
                                         Node {
                                             transitions: None,
-                                            output: "ggyi",
+                                            output: Some("ggyi"),
                                         },
                                     ),
                                     (
                                         'ぇ',
                                         Node {
                                             transitions: None,
-                                            output: "ggye",
+                                            output: Some("ggye"),
                                         },
                                     ),
                                     (
                                         'ゃ',
                                         Node {
                                             transitions: None,
-                                            output: "ggya",
+                                            output: Some("ggya"),
                                         },
                                     ),
                                     (
                                         'ゅ',
                                         Node {
                                             transitions: None,
-                                            output: "ggyu",
+                                            output: Some("ggyu"),
                                         },
                                     ),
                                     (
                                         'ょ',
                                         Node {
                                             transitions: None,
-                                            output: "ggyo",
+                                            output: Some("ggyo"),
                                         },
                                     ),
                                 ]),
-                                output: "ggi",
+                                output: Some("ggi"),
                             },
                         ),
                         (
@@ -789,88 +789,88 @@ lazy_static! {
                                         'ぃ',
                                         Node {
                                             transitions: None,
-                                            output: "kkyi",
+                                            output: Some("kkyi"),
                                         },
                                     ),
                                     (
                                         'ぇ',
                                         Node {
                                             transitions: None,
-                                            output: "kkye",
+                                            output: Some("kkye"),
                                         },
                                     ),
                                     (
                                         'ゃ',
                                         Node {
                                             transitions: None,
-                                            output: "kkya",
+                                            output: Some("kkya"),
                                         },
                                     ),
                                     (
                                         'ゅ',
                                         Node {
                                             transitions: None,
-                                            output: "kkyu",
+                                            output: Some("kkyu"),
                                         },
                                     ),
                                     (
                                         'ょ',
                                         Node {
                                             transitions: None,
-                                            output: "kkyo",
+                                            output: Some("kkyo"),
                                         },
                                     ),
                                 ]),
-                                output: "kku",
+                                output: Some("kku"),
                             },
                         ),
                         (
                             'ぐ',
                             Node {
                                 transitions: None,
-                                output: "ggu",
+                                output: Some("ggu"),
                             },
                         ),
                         (
                             'け',
                             Node {
                                 transitions: None,
-                                output: "kke",
+                                output: Some("kke"),
                             },
                         ),
                         (
                             'げ',
                             Node {
                                 transitions: None,
-                                output: "gge",
+                                output: Some("gge"),
                             },
                         ),
                         (
                             'こ',
                             Node {
                                 transitions: None,
-                                output: "kko",
+                                output: Some("kko"),
                             },
                         ),
                         (
                             'ご',
                             Node {
                                 transitions: None,
-                                output: "ggo",
+                                output: Some("ggo"),
                             },
                         ),
                         (
                             'さ',
                             Node {
                                 transitions: None,
-                                output: "ssa",
+                                output: Some("ssa"),
                             },
                         ),
                         (
                             'ざ',
                             Node {
                                 transitions: None,
-                                output: "zza",
+                                output: Some("zza"),
                             },
                         ),
                         (
@@ -881,39 +881,39 @@ lazy_static! {
                                         'ぃ',
                                         Node {
                                             transitions: None,
-                                            output: "sshyi",
+                                            output: Some("sshyi"),
                                         },
                                     ),
                                     (
                                         'ぇ',
                                         Node {
                                             transitions: None,
-                                            output: "sshe",
+                                            output: Some("sshe"),
                                         },
                                     ),
                                     (
                                         'ゃ',
                                         Node {
                                             transitions: None,
-                                            output: "ssha",
+                                            output: Some("ssha"),
                                         },
                                     ),
                                     (
                                         'ゅ',
                                         Node {
                                             transitions: None,
-                                            output: "sshu",
+                                            output: Some("sshu"),
                                         },
                                     ),
                                     (
                                         'ょ',
                                         Node {
                                             transitions: None,
-                                            output: "ssho",
+                                            output: Some("ssho"),
                                         },
                                     ),
                                 ]),
-                                output: "sshi",
+                                output: Some("sshi"),
                             },
                         ),
                         (
@@ -924,95 +924,95 @@ lazy_static! {
                                         'ぃ',
                                         Node {
                                             transitions: None,
-                                            output: "jjyi",
+                                            output: Some("jjyi"),
                                         },
                                     ),
                                     (
                                         'ぇ',
                                         Node {
                                             transitions: None,
-                                            output: "jje",
+                                            output: Some("jje"),
                                         },
                                     ),
                                     (
                                         'ゃ',
                                         Node {
                                             transitions: None,
-                                            output: "jja",
+                                            output: Some("jja"),
                                         },
                                     ),
                                     (
                                         'ゅ',
                                         Node {
                                             transitions: None,
-                                            output: "jju",
+                                            output: Some("jju"),
                                         },
                                     ),
                                     (
                                         'ょ',
                                         Node {
                                             transitions: None,
-                                            output: "jjo",
+                                            output: Some("jjo"),
                                         },
                                     ),
                                 ]),
-                                output: "jji",
+                                output: Some("jji"),
                             },
                         ),
                         (
                             'す',
                             Node {
                                 transitions: None,
-                                output: "ssu",
+                                output: Some("ssu"),
                             },
                         ),
                         (
                             'ず',
                             Node {
                                 transitions: None,
-                                output: "zzu",
+                                output: Some("zzu"),
                             },
                         ),
                         (
                             'せ',
                             Node {
                                 transitions: None,
-                                output: "sse",
+                                output: Some("sse"),
                             },
                         ),
                         (
                             'ぜ',
                             Node {
                                 transitions: None,
-                                output: "zze",
+                                output: Some("zze"),
                             },
                         ),
                         (
                             'そ',
                             Node {
                                 transitions: None,
-                                output: "sso",
+                                output: Some("sso"),
                             },
                         ),
                         (
                             'ぞ',
                             Node {
                                 transitions: None,
-                                output: "zzo",
+                                output: Some("zzo"),
                             },
                         ),
                         (
                             'た',
                             Node {
                                 transitions: None,
-                                output: "tta",
+                                output: Some("tta"),
                             },
                         ),
                         (
                             'だ',
                             Node {
                                 transitions: None,
-                                output: "dda",
+                                output: Some("dda"),
                             },
                         ),
                         (
@@ -1023,39 +1023,39 @@ lazy_static! {
                                         'ぃ',
                                         Node {
                                             transitions: None,
-                                            output: "tchyi",
+                                            output: Some("tchyi"),
                                         },
                                     ),
                                     (
                                         'ぇ',
                                         Node {
                                             transitions: None,
-                                            output: "tche",
+                                            output: Some("tche"),
                                         },
                                     ),
                                     (
                                         'ゃ',
                                         Node {
                                             transitions: None,
-                                            output: "tcha",
+                                            output: Some("tcha"),
                                         },
                                     ),
                                     (
                                         'ゅ',
                                         Node {
                                             transitions: None,
-                                            output: "tchu",
+                                            output: Some("tchu"),
                                         },
                                     ),
                                     (
                                         'ょ',
                                         Node {
                                             transitions: None,
-                                            output: "tcho",
+                                            output: Some("tcho"),
                                         },
                                     ),
                                 ]),
-                                output: "tchi",
+                                output: Some("tchi"),
                             },
                         ),
                         (
@@ -1066,88 +1066,88 @@ lazy_static! {
                                         'ぃ',
                                         Node {
                                             transitions: None,
-                                            output: "jjyi",
+                                            output: Some("jjyi"),
                                         },
                                     ),
                                     (
                                         'ぇ',
                                         Node {
                                             transitions: None,
-                                            output: "jje",
+                                            output: Some("jje"),
                                         },
                                     ),
                                     (
                                         'ゃ',
                                         Node {
                                             transitions: None,
-                                            output: "jja",
+                                            output: Some("jja"),
                                         },
                                     ),
                                     (
                                         'ゅ',
                                         Node {
                                             transitions: None,
-                                            output: "jju",
+                                            output: Some("jju"),
                                         },
                                     ),
                                     (
                                         'ょ',
                                         Node {
                                             transitions: None,
-                                            output: "jjo",
+                                            output: Some("jjo"),
                                         },
                                     ),
                                 ]),
-                                output: "jji",
+                                output: Some("jji"),
                             },
                         ),
                         (
                             'つ',
                             Node {
                                 transitions: None,
-                                output: "ttsu",
+                                output: Some("ttsu"),
                             },
                         ),
                         (
                             'づ',
                             Node {
                                 transitions: None,
-                                output: "zzu",
+                                output: Some("zzu"),
                             },
                         ),
                         (
                             'て',
                             Node {
                                 transitions: None,
-                                output: "tte",
+                                output: Some("tte"),
                             },
                         ),
                         (
                             'で',
                             Node {
                                 transitions: None,
-                                output: "dde",
+                                output: Some("dde"),
                             },
                         ),
                         (
                             'と',
                             Node {
                                 transitions: None,
-                                output: "tto",
+                                output: Some("tto"),
                             },
                         ),
                         (
                             'ど',
                             Node {
                                 transitions: None,
-                                output: "ddo",
+                                output: Some("ddo"),
                             },
                         ),
                         (
                             'な',
                             Node {
                                 transitions: None,
-                                output: "na",
+                                output: Some("na"),
                             },
                         ),
                         (
@@ -1158,81 +1158,81 @@ lazy_static! {
                                         'ぃ',
                                         Node {
                                             transitions: None,
-                                            output: "nyi",
+                                            output: Some("nyi"),
                                         },
                                     ),
                                     (
                                         'ぇ',
                                         Node {
                                             transitions: None,
-                                            output: "nye",
+                                            output: Some("nye"),
                                         },
                                     ),
                                     (
                                         'ゃ',
                                         Node {
                                             transitions: None,
-                                            output: "nya",
+                                            output: Some("nya"),
                                         },
                                     ),
                                     (
                                         'ゅ',
                                         Node {
                                             transitions: None,
-                                            output: "nyu",
+                                            output: Some("nyu"),
                                         },
                                     ),
                                     (
                                         'ょ',
                                         Node {
                                             transitions: None,
-                                            output: "nyo",
+                                            output: Some("nyo"),
                                         },
                                     ),
                                 ]),
-                                output: "ni",
+                                output: Some("ni"),
                             },
                         ),
                         (
                             'ぬ',
                             Node {
                                 transitions: None,
-                                output: "nu",
+                                output: Some("nu"),
                             },
                         ),
                         (
                             'ね',
                             Node {
                                 transitions: None,
-                                output: "ne",
+                                output: Some("ne"),
                             },
                         ),
                         (
                             'の',
                             Node {
                                 transitions: None,
-                                output: "no",
+                                output: Some("no"),
                             },
                         ),
                         (
                             'は',
                             Node {
                                 transitions: None,
-                                output: "hha",
+                                output: Some("hha"),
                             },
                         ),
                         (
                             'ば',
                             Node {
                                 transitions: None,
-                                output: "bba",
+                                output: Some("bba"),
                             },
                         ),
                         (
                             'ぱ',
                             Node {
                                 transitions: None,
-                                output: "ppa",
+                                output: Some("ppa"),
                             },
                         ),
                         (
@@ -1243,39 +1243,39 @@ lazy_static! {
                                         'ぃ',
                                         Node {
                                             transitions: None,
-                                            output: "hhyi",
+                                            output: Some("hhyi"),
                                         },
                                     ),
                                     (
                                         'ぇ',
                                         Node {
                                             transitions: None,
-                                            output: "hhye",
+                                            output: Some("hhye"),
                                         },
                                     ),
                                     (
                                         'ゃ',
                                         Node {
                                             transitions: None,
-                                            output: "hhya",
+                                            output: Some("hhya"),
                                         },
                                     ),
                                     (
                                         'ゅ',
                                         Node {
                                             transitions: None,
-                                            output: "hhyu",
+                                            output: Some("hhyu"),
                                         },
                                     ),
                                     (
                                         'ょ',
                                         Node {
                                             transitions: None,
-                                            output: "hhyo",
+                                            output: Some("hhyo"),
                                         },
                                     ),
                                 ]),
-                                output: "hhi",
+                                output: Some("hhi"),
                             },
                         ),
                         (
@@ -1286,39 +1286,39 @@ lazy_static! {
                                         'ぃ',
                                         Node {
                                             transitions: None,
-                                            output: "bbyi",
+                                            output: Some("bbyi"),
                                         },
                                     ),
                                     (
                                         'ぇ',
                                         Node {
                                             transitions: None,
-                                            output: "bbye",
+                                            output: Some("bbye"),
                                         },
                                     ),
                                     (
                                         'ゃ',
                                         Node {
                                             transitions: None,
-                                            output: "bbya",
+                                            output: Some("bbya"),
                                         },
                                     ),
                                     (
                                         'ゅ',
                                         Node {
                                             transitions: None,
-                                            output: "bbyu",
+                                            output: Some("bbyu"),
                                         },
                                     ),
                                     (
                                         'ょ',
                                         Node {
                                             transitions: None,
-                                            output: "bbyo",
+                                            output: Some("bbyo"),
                                         },
                                     ),
                                 ]),
-                                output: "bbi",
+                                output: Some("bbi"),
                             },
                         ),
                         (
@@ -1329,39 +1329,39 @@ lazy_static! {
                                         'ぃ',
                                         Node {
                                             transitions: None,
-                                            output: "ppyi",
+                                            output: Some("ppyi"),
                                         },
                                     ),
                                     (
                                         'ぇ',
                                         Node {
                                             transitions: None,
-                                            output: "ppye",
+                                            output: Some("ppye"),
                                         },
                                     ),
                                     (
                                         'ゃ',
                                         Node {
                                             transitions: None,
-                                            output: "ppya",
+                                            output: Some("ppya"),
                                         },
                                     ),
                                     (
                                         'ゅ',
                                         Node {
                                             transitions: None,
-                                            output: "ppyu",
+                                            output: Some("ppyu"),
                                         },
                                     ),
                                     (
                                         'ょ',
                                         Node {
                                             transitions: None,
-                                            output: "ppyo",
+                                            output: Some("ppyo"),
                                         },
                                     ),
                                 ]),
-                                output: "ppi",
+                                output: Some("ppi"),
                             },
                         ),
                         (
@@ -1372,102 +1372,102 @@ lazy_static! {
                                         'ぃ',
                                         Node {
                                             transitions: None,
-                                            output: "ffyi",
+                                            output: Some("ffyi"),
                                         },
                                     ),
                                     (
                                         'ぇ',
                                         Node {
                                             transitions: None,
-                                            output: "ffye",
+                                            output: Some("ffye"),
                                         },
                                     ),
                                     (
                                         'ゃ',
                                         Node {
                                             transitions: None,
-                                            output: "ffya",
+                                            output: Some("ffya"),
                                         },
                                     ),
                                     (
                                         'ゅ',
                                         Node {
                                             transitions: None,
-                                            output: "ffyu",
+                                            output: Some("ffyu"),
                                         },
                                     ),
                                     (
                                         'ょ',
                                         Node {
                                             transitions: None,
-                                            output: "ffyo",
+                                            output: Some("ffyo"),
                                         },
                                     ),
                                 ]),
-                                output: "ffu",
+                                output: Some("ffu"),
                             },
                         ),
                         (
                             'ぶ',
                             Node {
                                 transitions: None,
-                                output: "bbu",
+                                output: Some("bbu"),
                             },
                         ),
                         (
                             'ぷ',
                             Node {
                                 transitions: None,
-                                output: "ppu",
+                                output: Some("ppu"),
                             },
                         ),
                         (
                             'へ',
                             Node {
                                 transitions: None,
-                                output: "hhe",
+                                output: Some("hhe"),
                             },
                         ),
                         (
                             'べ',
                             Node {
                                 transitions: None,
-                                output: "bbe",
+                                output: Some("bbe"),
                             },
                         ),
                         (
                             'ぺ',
                             Node {
                                 transitions: None,
-                                output: "ppe",
+                                output: Some("ppe"),
                             },
                         ),
                         (
                             'ほ',
                             Node {
                                 transitions: None,
-                                output: "hho",
+                                output: Some("hho"),
                             },
                         ),
                         (
                             'ぼ',
                             Node {
                                 transitions: None,
-                                output: "bbo",
+                                output: Some("bbo"),
                             },
                         ),
                         (
                             'ぽ',
                             Node {
                                 transitions: None,
-                                output: "ppo",
+                                output: Some("ppo"),
                             },
                         ),
                         (
                             'ま',
                             Node {
                                 transitions: None,
-                                output: "mma",
+                                output: Some("mma"),
                             },
                         ),
                         (
@@ -1478,109 +1478,109 @@ lazy_static! {
                                         'ぃ',
                                         Node {
                                             transitions: None,
-                                            output: "mmyi",
+                                            output: Some("mmyi"),
                                         },
                                     ),
                                     (
                                         'ぇ',
                                         Node {
                                             transitions: None,
-                                            output: "mmye",
+                                            output: Some("mmye"),
                                         },
                                     ),
                                     (
                                         'ゃ',
                                         Node {
                                             transitions: None,
-                                            output: "mmya",
+                                            output: Some("mmya"),
                                         },
                                     ),
                                     (
                                         'ゅ',
                                         Node {
                                             transitions: None,
-                                            output: "mmyu",
+                                            output: Some("mmyu"),
                                         },
                                     ),
                                     (
                                         'ょ',
                                         Node {
                                             transitions: None,
-                                            output: "mmyo",
+                                            output: Some("mmyo"),
                                         },
                                     ),
                                 ]),
-                                output: "mmi",
+                                output: Some("mmi"),
                             },
                         ),
                         (
                             'む',
                             Node {
                                 transitions: None,
-                                output: "mmu",
+                                output: Some("mmu"),
                             },
                         ),
                         (
                             'め',
                             Node {
                                 transitions: None,
-                                output: "mme",
+                                output: Some("mme"),
                             },
                         ),
                         (
                             'も',
                             Node {
                                 transitions: None,
-                                output: "mmo",
+                                output: Some("mmo"),
                             },
                         ),
                         (
                             'ゃ',
                             Node {
                                 transitions: None,
-                                output: "ya",
+                                output: Some("ya"),
                             },
                         ),
                         (
                             'や',
                             Node {
                                 transitions: None,
-                                output: "ya",
+                                output: Some("ya"),
                             },
                         ),
                         (
                             'ゅ',
                             Node {
                                 transitions: None,
-                                output: "yu",
+                                output: Some("yu"),
                             },
                         ),
                         (
                             'ゆ',
                             Node {
                                 transitions: None,
-                                output: "yu",
+                                output: Some("yu"),
                             },
                         ),
                         (
                             'ょ',
                             Node {
                                 transitions: None,
-                                output: "yo",
+                                output: Some("yo"),
                             },
                         ),
                         (
                             'よ',
                             Node {
                                 transitions: None,
-                                output: "yo",
+                                output: Some("yo"),
                             },
                         ),
                         (
                             'ら',
                             Node {
                                 transitions: None,
-                                output: "rra",
+                                output: Some("rra"),
                             },
                         ),
                         (
@@ -1591,95 +1591,95 @@ lazy_static! {
                                         'ぃ',
                                         Node {
                                             transitions: None,
-                                            output: "rryi",
+                                            output: Some("rryi"),
                                         },
                                     ),
                                     (
                                         'ぇ',
                                         Node {
                                             transitions: None,
-                                            output: "rrye",
+                                            output: Some("rrye"),
                                         },
                                     ),
                                     (
                                         'ゃ',
                                         Node {
                                             transitions: None,
-                                            output: "rrya",
+                                            output: Some("rrya"),
                                         },
                                     ),
                                     (
                                         'ゅ',
                                         Node {
                                             transitions: None,
-                                            output: "rryu",
+                                            output: Some("rryu"),
                                         },
                                     ),
                                     (
                                         'ょ',
                                         Node {
                                             transitions: None,
-                                            output: "rryo",
+                                            output: Some("rryo"),
                                         },
                                     ),
                                 ]),
-                                output: "rri",
+                                output: Some("rri"),
                             },
                         ),
                         (
                             'る',
                             Node {
                                 transitions: None,
-                                output: "rru",
+                                output: Some("rru"),
                             },
                         ),
                         (
                             'れ',
                             Node {
                                 transitions: None,
-                                output: "rre",
+                                output: Some("rre"),
                             },
                         ),
                         (
                             'ろ',
                             Node {
                                 transitions: None,
-                                output: "rro",
+                                output: Some("rro"),
                             },
                         ),
                         (
                             'わ',
                             Node {
                                 transitions: None,
-                                output: "wwa",
+                                output: Some("wwa"),
                             },
                         ),
                         (
                             'ゐ',
                             Node {
                                 transitions: None,
-                                output: "wwi",
+                                output: Some("wwi"),
                             },
                         ),
                         (
                             'ゑ',
                             Node {
                                 transitions: None,
-                                output: "wwe",
+                                output: Some("wwe"),
                             },
                         ),
                         (
                             'を',
                             Node {
                                 transitions: None,
-                                output: "wwo",
+                                output: Some("wwo"),
                             },
                         ),
                         (
                             'ん',
                             Node {
                                 transitions: None,
-                                output: "n",
+                                output: Some("n"),
                             },
                         ),
                         (
@@ -1690,197 +1690,197 @@ lazy_static! {
                                         'ぃ',
                                         Node {
                                             transitions: None,
-                                            output: "vvyi",
+                                            output: Some("vvyi"),
                                         },
                                     ),
                                     (
                                         'ぇ',
                                         Node {
                                             transitions: None,
-                                            output: "vvye",
+                                            output: Some("vvye"),
                                         },
                                     ),
                                     (
                                         'ゃ',
                                         Node {
                                             transitions: None,
-                                            output: "vvya",
+                                            output: Some("vvya"),
                                         },
                                     ),
                                     (
                                         'ゅ',
                                         Node {
                                             transitions: None,
-                                            output: "vvyu",
+                                            output: Some("vvyu"),
                                         },
                                     ),
                                     (
                                         'ょ',
                                         Node {
                                             transitions: None,
-                                            output: "vvyo",
+                                            output: Some("vvyo"),
                                         },
                                     ),
                                 ]),
-                                output: "vvu",
+                                output: Some("vvu"),
                             },
                         ),
                         (
                             'ゔ',
                             Node {
                                 transitions: None,
-                                output: "vva",
+                                output: Some("vva"),
                             },
                         ),
                         (
                             'ゔ',
                             Node {
                                 transitions: None,
-                                output: "vvi",
+                                output: Some("vvi"),
                             },
                         ),
                         (
                             'ゔ',
                             Node {
                                 transitions: None,
-                                output: "vve",
+                                output: Some("vve"),
                             },
                         ),
                         (
                             'ゔ',
                             Node {
                                 transitions: None,
-                                output: "vvo",
+                                output: Some("vvo"),
                             },
                         ),
                         (
                             '・',
                             Node {
                                 transitions: None,
-                                output: "/",
+                                output: Some("/"),
                             },
                         ),
                         (
                             'ー',
                             Node {
                                 transitions: None,
-                                output: "-",
+                                output: Some("-"),
                             },
                         ),
                         (
                             '！',
                             Node {
                                 transitions: None,
-                                output: "!",
+                                output: Some("!"),
                             },
                         ),
                         (
                             '（',
                             Node {
                                 transitions: None,
-                                output: "(",
+                                output: Some("("),
                             },
                         ),
                         (
                             '）',
                             Node {
                                 transitions: None,
-                                output: ")",
+                                output: Some(")"),
                             },
                         ),
                         (
                             '：',
                             Node {
                                 transitions: None,
-                                output: ":",
+                                output: Some(":"),
                             },
                         ),
                         (
                             '？',
                             Node {
                                 transitions: None,
-                                output: "?",
+                                output: Some("?"),
                             },
                         ),
                         (
                             '［',
                             Node {
                                 transitions: None,
-                                output: "[",
+                                output: Some("["),
                             },
                         ),
                         (
                             '］',
                             Node {
                                 transitions: None,
-                                output: "]",
+                                output: Some("]"),
                             },
                         ),
                         (
                             '｛',
                             Node {
                                 transitions: None,
-                                output: "{",
+                                output: Some("{"),
                             },
                         ),
                         (
                             '｝',
                             Node {
                                 transitions: None,
-                                output: "}",
+                                output: Some("}"),
                             },
                         ),
                     ]),
-                    output: "",
+                    output: Some(""),
                 },
             ),
             (
                 'つ',
                 Node {
                     transitions: None,
-                    output: "tsu",
+                    output: Some("tsu"),
                 },
             ),
             (
                 'づ',
                 Node {
                     transitions: None,
-                    output: "zu",
+                    output: Some("zu"),
                 },
             ),
             (
                 'て',
                 Node {
                     transitions: None,
-                    output: "te",
+                    output: Some("te"),
                 },
             ),
             (
                 'で',
                 Node {
                     transitions: None,
-                    output: "de",
+                    output: Some("de"),
                 },
             ),
             (
                 'と',
                 Node {
                     transitions: None,
-                    output: "to",
+                    output: Some("to"),
                 },
             ),
             (
                 'ど',
                 Node {
                     transitions: None,
-                    output: "do",
+                    output: Some("do"),
                 },
             ),
             (
                 'な',
                 Node {
                     transitions: None,
-                    output: "na",
+                    output: Some("na"),
                 },
             ),
             (
@@ -1891,81 +1891,81 @@ lazy_static! {
                             'ぃ',
                             Node {
                                 transitions: None,
-                                output: "nyi",
+                                output: Some("nyi"),
                             },
                         ),
                         (
                             'ぇ',
                             Node {
                                 transitions: None,
-                                output: "nye",
+                                output: Some("nye"),
                             },
                         ),
                         (
                             'ゃ',
                             Node {
                                 transitions: None,
-                                output: "nya",
+                                output: Some("nya"),
                             },
                         ),
                         (
                             'ゅ',
                             Node {
                                 transitions: None,
-                                output: "nyu",
+                                output: Some("nyu"),
                             },
                         ),
                         (
                             'ょ',
                             Node {
                                 transitions: None,
-                                output: "nyo",
+                                output: Some("nyo"),
                             },
                         ),
                     ]),
-                    output: "ni",
+                    output: Some("ni"),
                 },
             ),
             (
                 'ぬ',
                 Node {
                     transitions: None,
-                    output: "nu",
+                    output: Some("nu"),
                 },
             ),
             (
                 'ね',
                 Node {
                     transitions: None,
-                    output: "ne",
+                    output: Some("ne"),
                 },
             ),
             (
                 'の',
                 Node {
                     transitions: None,
-                    output: "no",
+                    output: Some("no"),
                 },
             ),
             (
                 'は',
                 Node {
                     transitions: None,
-                    output: "ha",
+                    output: Some("ha"),
                 },
             ),
             (
                 'ば',
                 Node {
                     transitions: None,
-                    output: "ba",
+                    output: Some("ba"),
                 },
             ),
             (
                 'ぱ',
                 Node {
                     transitions: None,
-                    output: "pa",
+                    output: Some("pa"),
                 },
             ),
             (
@@ -1976,39 +1976,39 @@ lazy_static! {
                             'ぃ',
                             Node {
                                 transitions: None,
-                                output: "hyi",
+                                output: Some("hyi"),
                             },
                         ),
                         (
                             'ぇ',
                             Node {
                                 transitions: None,
-                                output: "hye",
+                                output: Some("hye"),
                             },
                         ),
                         (
                             'ゃ',
                             Node {
                                 transitions: None,
-                                output: "hya",
+                                output: Some("hya"),
                             },
                         ),
                         (
                             'ゅ',
                             Node {
                                 transitions: None,
-                                output: "hyu",
+                                output: Some("hyu"),
                             },
                         ),
                         (
                             'ょ',
                             Node {
                                 transitions: None,
-                                output: "hyo",
+                                output: Some("hyo"),
                             },
                         ),
                     ]),
-                    output: "hi",
+                    output: Some("hi"),
                 },
             ),
             (
@@ -2019,39 +2019,39 @@ lazy_static! {
                             'ぃ',
                             Node {
                                 transitions: None,
-                                output: "byi",
+                                output: Some("byi"),
                             },
                         ),
                         (
                             'ぇ',
                             Node {
                                 transitions: None,
-                                output: "bye",
+                                output: Some("bye"),
                             },
                         ),
                         (
                             'ゃ',
                             Node {
                                 transitions: None,
-                                output: "bya",
+                                output: Some("bya"),
                             },
                         ),
                         (
                             'ゅ',
                             Node {
                                 transitions: None,
-                                output: "byu",
+                                output: Some("byu"),
                             },
                         ),
                         (
                             'ょ',
                             Node {
                                 transitions: None,
-                                output: "byo",
+                                output: Some("byo"),
                             },
                         ),
                     ]),
-                    output: "bi",
+                    output: Some("bi"),
                 },
             ),
             (
@@ -2062,39 +2062,39 @@ lazy_static! {
                             'ぃ',
                             Node {
                                 transitions: None,
-                                output: "pyi",
+                                output: Some("pyi"),
                             },
                         ),
                         (
                             'ぇ',
                             Node {
                                 transitions: None,
-                                output: "pye",
+                                output: Some("pye"),
                             },
                         ),
                         (
                             'ゃ',
                             Node {
                                 transitions: None,
-                                output: "pya",
+                                output: Some("pya"),
                             },
                         ),
                         (
                             'ゅ',
                             Node {
                                 transitions: None,
-                                output: "pyu",
+                                output: Some("pyu"),
                             },
                         ),
                         (
                             'ょ',
                             Node {
                                 transitions: None,
-                                output: "pyo",
+                                output: Some("pyo"),
                             },
                         ),
                     ]),
-                    output: "pi",
+                    output: Some("pi"),
                 },
             ),
             (
@@ -2105,102 +2105,102 @@ lazy_static! {
                             'ぃ',
                             Node {
                                 transitions: None,
-                                output: "fyi",
+                                output: Some("fyi"),
                             },
                         ),
                         (
                             'ぇ',
                             Node {
                                 transitions: None,
-                                output: "fye",
+                                output: Some("fye"),
                             },
                         ),
                         (
                             'ゃ',
                             Node {
                                 transitions: None,
-                                output: "fya",
+                                output: Some("fya"),
                             },
                         ),
                         (
                             'ゅ',
                             Node {
                                 transitions: None,
-                                output: "fyu",
+                                output: Some("fyu"),
                             },
                         ),
                         (
                             'ょ',
                             Node {
                                 transitions: None,
-                                output: "fyo",
+                                output: Some("fyo"),
                             },
                         ),
                     ]),
-                    output: "fu",
+                    output: Some("fu"),
                 },
             ),
             (
                 'ぶ',
                 Node {
                     transitions: None,
-                    output: "bu",
+                    output: Some("bu"),
                 },
             ),
             (
                 'ぷ',
                 Node {
                     transitions: None,
-                    output: "pu",
+                    output: Some("pu"),
                 },
             ),
             (
                 'へ',
                 Node {
                     transitions: None,
-                    output: "he",
+                    output: Some("he"),
                 },
             ),
             (
                 'べ',
                 Node {
                     transitions: None,
-                    output: "be",
+                    output: Some("be"),
                 },
             ),
             (
                 'ぺ',
                 Node {
                     transitions: None,
-                    output: "pe",
+                    output: Some("pe"),
                 },
             ),
             (
                 'ほ',
                 Node {
                     transitions: None,
-                    output: "ho",
+                    output: Some("ho"),
                 },
             ),
             (
                 'ぼ',
                 Node {
                     transitions: None,
-                    output: "bo",
+                    output: Some("bo"),
                 },
             ),
             (
                 'ぽ',
                 Node {
                     transitions: None,
-                    output: "po",
+                    output: Some("po"),
                 },
             ),
             (
                 'ま',
                 Node {
                     transitions: None,
-                    output: "ma",
+                    output: Some("ma"),
                 },
             ),
             (
@@ -2211,109 +2211,109 @@ lazy_static! {
                             'ぃ',
                             Node {
                                 transitions: None,
-                                output: "myi",
+                                output: Some("myi"),
                             },
                         ),
                         (
                             'ぇ',
                             Node {
                                 transitions: None,
-                                output: "mye",
+                                output: Some("mye"),
                             },
                         ),
                         (
                             'ゃ',
                             Node {
                                 transitions: None,
-                                output: "mya",
+                                output: Some("mya"),
                             },
                         ),
                         (
                             'ゅ',
                             Node {
                                 transitions: None,
-                                output: "myu",
+                                output: Some("myu"),
                             },
                         ),
                         (
                             'ょ',
                             Node {
                                 transitions: None,
-                                output: "myo",
+                                output: Some("myo"),
                             },
                         ),
                     ]),
-                    output: "mi",
+                    output: Some("mi"),
                 },
             ),
             (
                 'む',
                 Node {
                     transitions: None,
-                    output: "mu",
+                    output: Some("mu"),
                 },
             ),
             (
                 'め',
                 Node {
                     transitions: None,
-                    output: "me",
+                    output: Some("me"),
                 },
             ),
             (
                 'も',
                 Node {
                     transitions: None,
-                    output: "mo",
+                    output: Some("mo"),
                 },
             ),
             (
                 'ゃ',
                 Node {
                     transitions: None,
-                    output: "ya",
+                    output: Some("ya"),
                 },
             ),
             (
                 'や',
                 Node {
                     transitions: None,
-                    output: "ya",
+                    output: Some("ya"),
                 },
             ),
             (
                 'ゅ',
                 Node {
                     transitions: None,
-                    output: "yu",
+                    output: Some("yu"),
                 },
             ),
             (
                 'ゆ',
                 Node {
                     transitions: None,
-                    output: "yu",
+                    output: Some("yu"),
                 },
             ),
             (
                 'ょ',
                 Node {
                     transitions: None,
-                    output: "yo",
+                    output: Some("yo"),
                 },
             ),
             (
                 'よ',
                 Node {
                     transitions: None,
-                    output: "yo",
+                    output: Some("yo"),
                 },
             ),
             (
                 'ら',
                 Node {
                     transitions: None,
-                    output: "ra",
+                    output: Some("ra"),
                 },
             ),
             (
@@ -2324,88 +2324,88 @@ lazy_static! {
                             'ぃ',
                             Node {
                                 transitions: None,
-                                output: "ryi",
+                                output: Some("ryi"),
                             },
                         ),
                         (
                             'ぇ',
                             Node {
                                 transitions: None,
-                                output: "rye",
+                                output: Some("rye"),
                             },
                         ),
                         (
                             'ゃ',
                             Node {
                                 transitions: None,
-                                output: "rya",
+                                output: Some("rya"),
                             },
                         ),
                         (
                             'ゅ',
                             Node {
                                 transitions: None,
-                                output: "ryu",
+                                output: Some("ryu"),
                             },
                         ),
                         (
                             'ょ',
                             Node {
                                 transitions: None,
-                                output: "ryo",
+                                output: Some("ryo"),
                             },
                         ),
                     ]),
-                    output: "ri",
+                    output: Some("ri"),
                 },
             ),
             (
                 'る',
                 Node {
                     transitions: None,
-                    output: "ru",
+                    output: Some("ru"),
                 },
             ),
             (
                 'れ',
                 Node {
                     transitions: None,
-                    output: "re",
+                    output: Some("re"),
                 },
             ),
             (
                 'ろ',
                 Node {
                     transitions: None,
-                    output: "ro",
+                    output: Some("ro"),
                 },
             ),
             (
                 'わ',
                 Node {
                     transitions: None,
-                    output: "wa",
+                    output: Some("wa"),
                 },
             ),
             (
                 'ゐ',
                 Node {
                     transitions: None,
-                    output: "wi",
+                    output: Some("wi"),
                 },
             ),
             (
                 'ゑ',
                 Node {
                     transitions: None,
-                    output: "we",
+                    output: Some("we"),
                 },
             ),
             (
                 'を',
                 Node {
                     transitions: None,
-                    output: "wo",
+                    output: Some("wo"),
                 },
             ),
             (
@@ -2416,60 +2416,60 @@ lazy_static! {
                             'あ',
                             Node {
                                 transitions: None,
-                                output: "n\'a",
+                                output: Some("n\'a"),
                             },
                         ),
                         (
                             'い',
                             Node {
                                 transitions: None,
-                                output: "n\'i",
+                                output: Some("n\'i"),
                             },
                         ),
                         (
                             'う',
                             Node {
                                 transitions: None,
-                                output: "n\'u",
+                                output: Some("n\'u"),
                             },
                         ),
                         (
                             'え',
                             Node {
                                 transitions: None,
-                                output: "n\'e",
+                                output: Some("n\'e"),
                             },
                         ),
                         (
                             'お',
                             Node {
                                 transitions: None,
-                                output: "n\'o",
+                                output: Some("n\'o"),
                             },
                         ),
                         (
                             'や',
                             Node {
                                 transitions: None,
-                                output: "n\'ya",
+                                output: Some("n\'ya"),
                             },
                         ),
                         (
                             'ゆ',
                             Node {
                                 transitions: None,
-                                output: "n\'yu",
+                                output: Some("n\'yu"),
                             },
                         ),
                         (
                             'よ',
                             Node {
                                 transitions: None,
-                                output: "n\'yo",
+                                output: Some("n\'yo"),
                             },
                         ),
                     ]),
-                    output: "n",
+                    output: Some("n"),
                 },
             ),
             (
@@ -2480,149 +2480,152 @@ lazy_static! {
                             'ぃ',
                             Node {
                                 transitions: None,
-                                output: "vyi",
+                                output: Some("vyi"),
                             },
                         ),
                         (
                             'ぇ',
                             Node {
                                 transitions: None,
-                                output: "vye",
+                                output: Some("vye"),
                             },
                         ),
                         (
                             'ゃ',
                             Node {
                                 transitions: None,
-                                output: "vya",
+                                output: Some("vya"),
                             },
                         ),
                         (
                             'ゅ',
                             Node {
                                 transitions: None,
-                                output: "vyu",
+                                output: Some("vyu"),
                             },
                         ),
                         (
                             'ょ',
                             Node {
                                 transitions: None,
-                                output: "vyo",
+                                output: Some("vyo"),
                             },
                         ),
                     ]),
-                    output: "vu",
+                    output: Some("vu"),
                 },
             ),
             (
                 'ゔ',
                 Node {
                     transitions: None,
-                    output: "va",
+                    output: Some("va"),
                 },
             ),
             (
                 'ゔ',
                 Node {
                     transitions: None,
-                    output: "vi",
+                    output: Some("vi"),
                 },
             ),
             (
                 'ゔ',
                 Node {
                     transitions: None,
-                    output: "ve",
+                    output: Some("ve"),
                 },
             ),
             (
                 'ゔ',
                 Node {
                     transitions: None,
-                    output: "vo",
+                    output: Some("vo"),
                 },
             ),
             (
                 '・',
                 Node {
                     transitions: None,
-                    output: "/",
+                    output: Some("/"),
                 },
             ),
             (
                 'ー',
                 Node {
                     transitions: None,
-                    output: "-",
+                    output: Some("-"),
                 },
             ),
             (
                 '！',
                 Node {
                     transitions: None,
-                    output: "!",
+                    output: Some("!"),
                 },
             ),
             (
                 '（',
                 Node {
                     transitions: None,
-                    output: "(",
+                    output: Some("("),
                 },
             ),
             (
                 '）',
                 Node {
                     transitions: None,
-                    output: ")",
+                    output: Some(")"),
                 },
             ),
             (
                 '：',
                 Node {
                     transitions: None,
-                    output: ":",
+                    output: Some(":"),
                 },
             ),
             (
                 '？',
                 Node {
                     transitions: None,
-                    output: "?",
+                    output: Some("?"),
                 },
             ),
             (
                 '［',
                 Node {
                     transitions: None,
-                    output: "[",
+                    output: Some("["),
                 },
             ),
             (
                 '］',
                 Node {
                     transitions: None,
-                    output: "]",
+                    output: Some("]"),
                 },
             ),
             (
                 '｛',
                 Node {
                     transitions: None,
-                    output: "{",
+                    output: Some("{"),
                 },
             ),
             (
                 '｝',
                 Node {
                     transitions: None,
-                    output: "}",
+                    output: Some("}"),
                 },
             ),
         ]);
 
-        let mut node = Node { transitions, output: "" };
+        let mut node = Node {
+            transitions,
+            output: Some(""),
+        };
         node.sort();
         node
     };

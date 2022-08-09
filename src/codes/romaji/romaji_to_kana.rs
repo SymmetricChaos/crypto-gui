@@ -21,16 +21,16 @@ lazy_static! {
             Node::leaf('i',""),
             Node::leaf('o',""),
             Node::leaf('u',""),
-            
+
             Node::branch(
-                'b', "^NONE^",
+                'b', None,
                 vec![
                     Node::leaf('a', "ば"),
                     Node::leaf('e', "べ"),
                     Node::leaf('i', "び"),
                     Node::leaf('o', "ぼ"),
                     Node::leaf('u', "ぶ"),
-                    Node::branch('b', "^NONE^",
+                    Node::branch('b', None,
                         vec![
                             Node::leaf('a',"っば"),
                             Node::leaf('e',"っべ"),
@@ -38,7 +38,7 @@ lazy_static! {
                             Node::leaf('o',"っぼ"),
                             Node::leaf('u',"っぶ"),
 
-                            Node::branch('y', "^NONE^", 
+                            Node::branch('y', None,
                                 vec![
                                     Node::leaf('a',"っびゃ"),
                                     Node::leaf('e',"っびぇ"),
@@ -48,7 +48,7 @@ lazy_static! {
                                 ])
                         ]
                     ),
-                    Node::branch('y', "^NONE^",
+                    Node::branch('y', None,
                         vec![
                             Node::leaf('a',"びゃ"),
                             Node::leaf('e',"びぇ"),
@@ -60,14 +60,14 @@ lazy_static! {
                 ]
             ),
             Node::branch(
-                'c', "^NONE^",
+                'c', None,
                 vec![
                     Node::leaf('a', "か"),
                     Node::leaf('e', "け"),
                     Node::leaf('i', "き"),
                     Node::leaf('o', "こ"),
                     Node::leaf('u', "く"),
-                    Node::branch('c', "^NONE^",
+                    Node::branch('c', None,
                         vec![
                             Node::leaf('a', "っか"),
                             Node::leaf('e', "っけ"),
@@ -75,7 +75,7 @@ lazy_static! {
                             Node::leaf('o', "っこ"),
                             Node::leaf('u', "っく"),
 
-                            Node::branch('y', "^NONE^", 
+                            Node::branch('y', None,
                                 vec![
                                     Node::leaf('a', "っきゃ"),
                                     Node::leaf('e', "っきぇ"),
@@ -85,7 +85,7 @@ lazy_static! {
                                 ])
                         ]
                     ),
-                    Node::branch('y', "^NONE^",
+                    Node::branch('y', None,
                         vec![
                             Node::leaf('a',"きゃ"),
                             Node::leaf('e',"きぇ"),
@@ -95,7 +95,7 @@ lazy_static! {
                         ]
                     ),
                     // chi branch
-                    Node::branch('h', "^NONE^", 
+                    Node::branch('h', None,
                         vec![
                             Node::leaf('i', "ち")
                         ]
@@ -103,44 +103,44 @@ lazy_static! {
                 ]
             ),
             Node::branch(
-                'd', "^NONE^",
+                'd', None,
                 vec![
 
                 ]
             ),
             Node::branch(
-                'f', "^NONE^",
+                'f', None,
                 vec![
 
                 ]
             ),
             Node::branch(
-                'g', "^NONE^",
+                'g', None,
                 vec![
 
                 ]
             ),
             Node::branch(
-                'h', "^NONE^",
+                'h', None,
                 vec![
 
                 ]
             ),
             Node::branch(
-                'j', "^NONE^",
+                'j', None,
                 vec![
 
                 ]
             ),
             Node::branch(
-                'k', "^NONE^",
+                'k', None,
                 vec![
                     Node::leaf('a', "か"),
                     Node::leaf('e', "け"),
                     Node::leaf('i', "き"),
                     Node::leaf('o', "こ"),
                     Node::leaf('u', "く"),
-                    Node::branch('k', "^NONE^",
+                    Node::branch('k', None,
                         vec![
                             Node::leaf('a', "っか"),
                             Node::leaf('e', "っけ"),
@@ -148,7 +148,7 @@ lazy_static! {
                             Node::leaf('o', "っこ"),
                             Node::leaf('u', "っく"),
 
-                            Node::branch('y', "^NONE^", 
+                            Node::branch('y', None,
                                 vec![
                                     Node::leaf('a', "っきゃ"),
                                     Node::leaf('e', "っきぇ"),
@@ -158,7 +158,7 @@ lazy_static! {
                                 ])
                         ]
                     ),
-                    Node::branch('y', "^NONE^",
+                    Node::branch('y', None,
                         vec![
                             Node::leaf('a',"きゃ"),
                             Node::leaf('e',"きぇ"),
@@ -170,7 +170,7 @@ lazy_static! {
                 ]
             ),
             Node::branch(
-                'l', "^NONE^",
+                'l', None,
                 vec![
                     Node::leaf('a', "ら"),
                     Node::leaf('e', "れ"),
@@ -178,7 +178,7 @@ lazy_static! {
                     Node::leaf('o', "ろ"),
                     Node::leaf('u', "る"),
 
-                    Node::branch('l', "^NONE^",
+                    Node::branch('l', None,
                         vec![
                             Node::leaf('a', "っら"),
                             Node::leaf('e', "っれ"),
@@ -186,7 +186,7 @@ lazy_static! {
                             Node::leaf('o', "っろ"),
                             Node::leaf('u', "っる"),
 
-                            Node::branch('y', "^NONE^", 
+                            Node::branch('y', None,
                                 vec![
                                     Node::leaf('a', "っりゃ"),
                                     Node::leaf('e', "っりぇ"),
@@ -196,7 +196,7 @@ lazy_static! {
                                 ])
                         ]
                     ),
-                    Node::branch('y', "^NONE^",
+                    Node::branch('y', None,
                         vec![
                             Node::leaf('a',"りゃ"),
                             Node::leaf('e',"りぇ"),
@@ -208,25 +208,25 @@ lazy_static! {
                 ]
             ),
             Node::branch(
-                'm', "^NONE^",
+                'm', None,
                 vec![
 
                 ]
             ),
             Node::branch(
-                'n', "^NONE^",
+                'n', None,
                 vec![
 
                 ]
             ),
             Node::branch(
-                'p', "^NONE^",
+                'p', None,
                 vec![
 
                 ]
             ),
             Node::branch(
-                'r', "^NONE^",
+                'r', None,
                 vec![
                     Node::leaf('a', "ら"),
                     Node::leaf('e', "れ"),
@@ -234,7 +234,7 @@ lazy_static! {
                     Node::leaf('o', "ろ"),
                     Node::leaf('u', "る"),
 
-                    Node::branch('r', "^NONE^",
+                    Node::branch('r', None,
                         vec![
                             Node::leaf('a', "っら"),
                             Node::leaf('e', "っれ"),
@@ -242,7 +242,7 @@ lazy_static! {
                             Node::leaf('o', "っろ"),
                             Node::leaf('u', "っる"),
 
-                            Node::branch('y', "^NONE^", 
+                            Node::branch('y', None,
                                 vec![
                                     Node::leaf('a', "っりゃ"),
                                     Node::leaf('e', "っりぇ"),
@@ -252,7 +252,7 @@ lazy_static! {
                                 ])
                         ]
                     ),
-                    Node::branch('y', "^NONE^",
+                    Node::branch('y', None,
                         vec![
                             Node::leaf('a',"りゃ"),
                             Node::leaf('e',"りぇ"),
@@ -264,45 +264,42 @@ lazy_static! {
                 ]
             ),
             Node::branch(
-                's', "^NONE^",
+                's', None,
                 vec![
 
                 ]
             ),
             Node::branch(
-                't', "^NONE^",
+                't', None,
                 vec![
 
                 ]
             ),
             Node::branch(
-                'w', "^NONE^",
+                'w', None,
                 vec![
 
                 ]
             ),
             Node::branch(
-                'y', "^NONE^",
+                'y', None,
                 vec![
 
                 ]
             ),
             Node::branch(
-                'z', "^NONE^",
+                'z', None,
                 vec![
 
                 ]
             ),
         ];
 
-        let mut node = Node { transitions: Some(transitions), output: "" };
+        let mut node = Node { transitions: Some(transitions), output: None };
         node.sort();
         node
     };
 }
-
-
-            
 
 //             (
 //                 'c',
