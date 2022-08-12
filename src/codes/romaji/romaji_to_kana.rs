@@ -20,12 +20,13 @@ fn test() {
     check_kana("ba bi bu be bo bya byi byu bye byo bba bbi bbu bbe bbo");
     check_kana("na ni nu ne no nya nyi nyu nye nyo nna nni nnu nne nno");
     check_kana("ma mi mu me mo mya myi myu mye myo mma mmi mmu mme mmo");
-    //check_kana("cha chi chu che cho");
+    check_kana("chi cha chu che cho chya chiya chyu chye chyo cchi ccha cchya");
 }
 
 lazy_static! {
     pub static ref ROMAJI_TO_KANA: Node = {
         let transitions = vec![
+            // Symbols
             Node::leaf('!',"！"),
             Node::leaf('(',"（"),
             Node::leaf(')',"）"),
@@ -37,12 +38,21 @@ lazy_static! {
             Node::leaf('?',"？"),
             Node::leaf('[',"［"),
             Node::leaf(']',"］"),
+            Node::leaf(' ',"\u{3000}"),
+            Node::leaf('{',"｛"),
+            Node::leaf('}',"｝"),
+            Node::leaf('~',"〜"),
+            Node::leaf('‘',"「"),
+            Node::leaf('’',"」"),
+            Node::leaf('“',"『"),
+            Node::leaf('”',"』"),
+
             Node::leaf('a',"あ"),
             Node::leaf('e',"え"),
             Node::leaf('i',"い"),
             Node::leaf('o',"お"),
             Node::leaf('u',"う"),
-            Node::leaf(' ',"\u{3000}"),
+
             Node::branch(
                 'b', None,
                 vec![
@@ -89,7 +99,8 @@ lazy_static! {
                             Node::leaf('a', "ちゃ"),
                             Node::leaf('e', "ちぇ"),
                             Node::leaf('o', "ちょ"),
-                            Node::leaf('a', "ちゅ"),
+                            Node::leaf('u', "ちゅ"),
+
                             Node::branch('y', None, 
                                 vec![
                                     Node::leaf('a',"ちゃ"),
@@ -109,7 +120,8 @@ lazy_static! {
                                     Node::leaf('a', "っちゃ"),
                                     Node::leaf('e', "っちぇ"),
                                     Node::leaf('o', "っちょ"),
-                                    Node::leaf('a', "っちゅ"),
+                                    Node::leaf('u', "っちゅ"),
+
                                     Node::branch('y', None, 
                                         vec![
                                             Node::leaf('a',"っちゃ"),
