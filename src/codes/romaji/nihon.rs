@@ -1784,7 +1784,7 @@ lazy_static! {
 
         let mut node = Node {
             transitions,
-            output: Some(""),
+            output: None,
         };
         node.sort();
         node
