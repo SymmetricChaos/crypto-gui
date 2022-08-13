@@ -1,6 +1,6 @@
-use crate::tokenizer::{Node, TokenError};
+use crate::tokenizer::{Node, TransitionError};
 
-pub fn to_romaji(orig: &str, tree: &Node) -> Result<String, TokenError> {
+pub fn to_romaji(orig: &str, tree: &Node) -> Result<String, TransitionError> {
     let tokens = tree.extract_tokens(orig)?;
 
     Ok(tokens.iter().cloned().collect())

@@ -1,43 +1,36 @@
-use std::fmt;
 
-#[derive(Clone, Debug)]
-pub enum TokenError {
-    NoTransition(String),
+use std::{fmt, collections::HashMap};
+
+use itertools::Itertools;
+
+#[derive(Clone)]
+pub struct TransitionError(String, Option<char>);
+
+impl fmt::Display for TransitionError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.1 {
+            Some(c) => {
+                if self.0 == "" {
+                    write!(f, "invalid symbol `{}`", c)
+                } else {
+                    write!(f, "no transition `{}` -> `{}`", self.0, c)
+                }
+            },
+            None => write!(f, "`{}` must transition", self.0),
+        }
+    }
+}
+
+impl fmt::Debug for TransitionError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(&self, f)
+    }
 }
 
 #[derive(Debug, Clone)]
 pub struct Node {
     pub transitions: Option<Vec<(char, Node)>>,
     pub output: Option<&'static str>,
-}
-
-impl fmt::Display for Node {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match &self.transitions {
-            Some(v) => {
-                if let Some(output) = self.output {
-                    let mut s = output.to_string();
-                    for (_, n) in v {
-                        s.push_str(&format!("({})", n))
-                    }
-                    write!(f, "{}", s)
-                } else {
-                    let mut s = String::new();
-                    for (_, n) in v {
-                        s.push_str(&format!("({})", n))
-                    }
-                    write!(f, "{}", s)
-                }
-            }
-            None => {
-                if let Some(output) = self.output {
-                    write!(f, "{}", output)
-                } else {
-                    write!(f, "")
-                }
-            }
-        }
-    }
 }
 
 impl Node {
@@ -73,17 +66,19 @@ impl Node {
         }
     }
 
-    pub fn get<'a>(&self, chars: &'a [char]) -> Result<(&'static str, usize), TokenError> {
+    pub fn get<'a>(&self, chars: &'a [char]) -> Result<(&'static str, usize), TransitionError> {
         let mut i = 0;
         let mut curr_node = self;
-        for char in chars.iter() {
+        let mut maybe_char = None;
+        for ch in chars.iter() {
             // find the transition to the next node or break if there is no
             // transition
             // a lack of transition could be a leaf node or a could mean that
             // the character has no transition from this node
-            if let Some(trans_node) = curr_node.find_transition_node(*char) {
+            if let Some(trans_node) = curr_node.find_transition_node(*ch) {
                 curr_node = trans_node;
             } else {
+                maybe_char = Some(*ch);
                 break;
             }
             i += 1;
@@ -94,11 +89,7 @@ impl Node {
         if let Some(output) = curr_node.output {
             Ok((output, i))
         } else {
-            let chunk: String = match i {
-                0 => chars[0].to_string(),
-                _ => chars[0..i].iter().collect(),
-            };
-            Err(TokenError::NoTransition(chunk))
+            Err(TransitionError(chars[0..i].iter().collect(), maybe_char))
         }
     }
 
@@ -114,7 +105,7 @@ impl Node {
         }
     }
 
-    pub fn extract_tokens(&self, text: &str) -> Result<Vec<String>, TokenError> {
+    pub fn extract_tokens(&self, text: &str) -> Result<Vec<String>, TransitionError> {
         let chars = text.chars().collect::<Vec<_>>();
         let mut ouput = Vec::new();
         let len = chars.len();
@@ -152,50 +143,100 @@ impl Node {
             None => 1,
         }
     }
+
+    pub fn input_paths(&self) -> Vec<(String,&'static str)> {
+        let mut paths: Vec<(String, &str)> = Vec::new();
+        self.input_paths_inner(vec![], &mut paths);
+        paths
+    }
+
+    fn input_paths_inner(&self, chars: Vec<char>, paths: &mut Vec<(String,&'static str)>) {
+        if let Some(s) = self.output {
+            paths.push((chars.iter().collect::<String>(),s))
+        }
+        if let Some(transitions) = &self.transitions {
+            for (c, n) in transitions.iter() {
+                let mut new_chars = chars.clone();
+                new_chars.push(*c);
+                n.input_paths_inner(new_chars,paths)
+            }
+        }
+    }
+
+    pub fn output_paths(&self) -> Vec<(&'static str, Vec<String>)> {
+        let mut map = HashMap::new();
+        self.output_paths_inner(vec![], &mut map);
+        let mut paths = map.iter().map(|(k,v)| (*k,v.clone())).collect_vec();
+        paths.sort_by_key(|a| a.0);
+        paths
+    }
+
+    fn output_paths_inner(&self, chars: Vec<char>, paths: &mut HashMap<&'static str, Vec<String>>) {
+
+        if let Some(s) = self.output {
+            let input = chars.iter().collect::<String>();
+            match paths.contains_key(s) {
+                true => { paths.entry(s).and_modify(|e| e.push(input)); },
+                false => { paths.insert(s, vec![input]); }
+            };
+        }
+        if let Some(transitions) = &self.transitions {
+            for (c, n) in transitions.iter() {
+                let mut new_chars = chars.clone();
+                new_chars.push(*c);
+                n.output_paths_inner(new_chars,paths)
+            }
+        }
+    }
+
 }
 
 #[test]
 fn test() {
-    let transitions = vec![
-        Node::branch(
-            'a',
-            Some("a"),
-            vec![
-                Node::branch('n', Some("an"), vec![Node::leaf('d', "and")]),
-                Node::leaf('r', "ar"),
-                Node::leaf('t', "at"),
-            ],
-        ),
-        Node::leaf('b', "b"),
-        Node::branch('c', Some("c"), vec![Node::leaf('c', "ch")]),
-        Node::leaf('d', "d"),
-        Node::branch(
-            'e',
-            Some("e"),
-            vec![
-                Node::leaf('r', "er"),
-                Node::leaf('s', "es"),
-                Node::branch('n', Some("en"), vec![Node::leaf('t', "ent")]),
-            ],
-        ),
-        Node::branch(
-            'f',
-            None,
-            vec![
-                Node::leaf('a', "fr"),
-                Node::leaf('a', "fs"),
-                Node::branch('n', Some("fn"), vec![Node::leaf('t', "fnt")]),
-                Node::branch('x', None, vec![Node::leaf('t', "fnx")]),
-            ],
-        ),
-    ];
 
-    let mut tree = Node::tree(transitions);
+    let mut tree = Node::tree(
+        vec![
+            Node::branch(
+                't', Some("letter"),
+                vec![
+                    Node::branch(
+                        'h', None, 
+                        vec![
+                            Node::branch(
+                                'e', Some("word"),
+                                vec![
+                                    Node::leaf('e', "word")
+                                ]
+                            )
+                        ]
+                    )
+                ]
+            ),
+            Node::branch(
+                'h', Some("letter"), 
+                vec![
+                    Node::leaf('e', "word")
+                ]
+            ),
+            Node::leaf('e', "letter")
+        ]
+    );
     tree.sort();
-    println!("{}", &tree);
-    println!("{}", &tree.num_output_paths());
-    let sentence = "andaanerent";
-    println!("{:?}", tree.extract_tokens(sentence));
-    let sentence = "anfnxdaanerent";
-    println!("{:?}", tree.extract_tokens(sentence));
+
+    println!("\n\nInput Paths:");
+    for (k,v) in &tree.input_paths() {
+        println!("{k} => {v}")
+    }
+
+    println!("\n\nOutput Paths:");
+    for (k,v) in &tree.output_paths() {
+        println!("{k} <= {v:?}")
+    }
+
+    print!("\n\n");
+    for sentence in ["t","the","thee","teh","ethehe","art","thj","th",] {
+        println!("{}", sentence);
+        println!("{:?}\n", tree.extract_tokens(sentence));
+    }
+
 }

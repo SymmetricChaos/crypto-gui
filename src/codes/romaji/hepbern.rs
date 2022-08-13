@@ -2,6 +2,15 @@ use lazy_static::lazy_static;
 
 use crate::tokenizer::Node;
 
+#[test]
+fn test() {
+    let paths = HEPBERN_SHIKI.output_paths();
+    
+    for (k,v) in &paths {
+        print!("{k} <= {v:?}\n")
+    }
+}
+
 lazy_static! {
     pub static ref HEPBERN_SHIKI: Node = {
         let transitions = Some(vec![
