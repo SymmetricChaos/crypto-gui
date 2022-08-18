@@ -4,147 +4,27 @@ use crate::tokenizer::Node;
 
 lazy_static! {
     pub static ref NIHON_SHIKI: Node = {
-        let transitions = Some(vec![
-            (
-                '\u{3000}',
-                Node {
-                    transitions: None,
-                    output: Some(" "),
-                },
-            ),
-            (
-                '、',
-                Node {
-                    transitions: None,
-                    output: Some(","),
-                },
-            ),
-            (
-                '。',
-                Node {
-                    transitions: None,
-                    output: Some("."),
-                },
-            ),
-            (
-                '「',
-                Node {
-                    transitions: None,
-                    output: Some("‘"),
-                },
-            ),
-            (
-                '」',
-                Node {
-                    transitions: None,
-                    output: Some("’"),
-                },
-            ),
-            (
-                '『',
-                Node {
-                    transitions: None,
-                    output: Some("“"),
-                },
-            ),
-            (
-                '』',
-                Node {
-                    transitions: None,
-                    output: Some("”"),
-                },
-            ),
-            (
-                '〜',
-                Node {
-                    transitions: None,
-                    output: Some("~"),
-                },
-            ),
-            (
-                'ぁ',
-                Node {
-                    transitions: None,
-                    output: Some("a"),
-                },
-            ),
-            (
-                'あ',
-                Node {
-                    transitions: None,
-                    output: Some("a"),
-                },
-            ),
-            (
-                'ぃ',
-                Node {
-                    transitions: None,
-                    output: Some("i"),
-                },
-            ),
-            (
-                'い',
-                Node {
-                    transitions: None,
-                    output: Some("i"),
-                },
-            ),
-            (
-                'ぅ',
-                Node {
-                    transitions: None,
-                    output: Some("u"),
-                },
-            ),
-            (
-                'う',
-                Node {
-                    transitions: None,
-                    output: Some("u"),
-                },
-            ),
-            (
-                'ぇ',
-                Node {
-                    transitions: None,
-                    output: Some("e"),
-                },
-            ),
-            (
-                'え',
-                Node {
-                    transitions: None,
-                    output: Some("e"),
-                },
-            ),
-            (
-                'ぉ',
-                Node {
-                    transitions: None,
-                    output: Some("o"),
-                },
-            ),
-            (
-                'お',
-                Node {
-                    transitions: None,
-                    output: Some("o"),
-                },
-            ),
-            (
-                'か',
-                Node {
-                    transitions: None,
-                    output: Some("ka"),
-                },
-            ),
-            (
-                'が',
-                Node {
-                    transitions: None,
-                    output: Some("ga"),
-                },
-            ),
+        let transitions = vec![
+			Node::leaf('\u{3000}', " "),
+            Node::leaf('、', ","),
+            Node::leaf('。', "."),
+            Node::leaf('「', "‘"),
+            Node::leaf('」', "’"),
+            Node::leaf('『', "“"),
+            Node::leaf('』', "”"),
+            Node::leaf('〜', "~"),
+            Node::leaf('ぁ', "a"),
+            Node::leaf('あ', "a"),
+            Node::leaf('ぃ', "i"),
+            Node::leaf('い', "i"),
+            Node::leaf('ぅ', "u"),
+            Node::leaf('う', "u"),
+            Node::leaf('ぇ', "e"),
+            Node::leaf('え', "e"),
+            Node::leaf('ぉ', "o"),
+            Node::leaf('お', "o"),
+            Node::leaf('か', "ka"),
+            Node::leaf('が', "ga"),
             (
                 'き',
                 Node {
@@ -184,55 +64,13 @@ lazy_static! {
                     output: Some("ku"),
                 },
             ),
-            (
-                'ぐ',
-                Node {
-                    transitions: None,
-                    output: Some("gu"),
-                },
-            ),
-            (
-                'け',
-                Node {
-                    transitions: None,
-                    output: Some("ke"),
-                },
-            ),
-            (
-                'げ',
-                Node {
-                    transitions: None,
-                    output: Some("ge"),
-                },
-            ),
-            (
-                'こ',
-                Node {
-                    transitions: None,
-                    output: Some("ko"),
-                },
-            ),
-            (
-                'ご',
-                Node {
-                    transitions: None,
-                    output: Some("go"),
-                },
-            ),
-            (
-                'さ',
-                Node {
-                    transitions: None,
-                    output: Some("sa"),
-                },
-            ),
-            (
-                'ざ',
-                Node {
-                    transitions: None,
-                    output: Some("za"),
-                },
-            ),
+            Node::leaf('ぐ', "gu"),
+            Node::leaf('け', "ke"),
+            Node::leaf('げ', "ge"),
+            Node::leaf('こ', "ko"),
+            Node::leaf('ご', "go"),
+            Node::leaf('さ', "sa"),
+            Node::leaf('ざ', "za"),
             (
                 'し',
                 Node {
@@ -259,62 +97,14 @@ lazy_static! {
                     output: Some("zi"),
                 },
             ),
-            (
-                'す',
-                Node {
-                    transitions: None,
-                    output: Some("su"),
-                },
-            ),
-            (
-                'ず',
-                Node {
-                    transitions: None,
-                    output: Some("zu"),
-                },
-            ),
-            (
-                'せ',
-                Node {
-                    transitions: None,
-                    output: Some("se"),
-                },
-            ),
-            (
-                'ぜ',
-                Node {
-                    transitions: None,
-                    output: Some("ze"),
-                },
-            ),
-            (
-                'そ',
-                Node {
-                    transitions: None,
-                    output: Some("so"),
-                },
-            ),
-            (
-                'ぞ',
-                Node {
-                    transitions: None,
-                    output: Some("zo"),
-                },
-            ),
-            (
-                'た',
-                Node {
-                    transitions: None,
-                    output: Some("ta"),
-                },
-            ),
-            (
-                'だ',
-                Node {
-                    transitions: None,
-                    output: Some("da"),
-                },
-            ),
+            Node::leaf('す', "su"),
+            Node::leaf('ず', "zu"),
+            Node::leaf('せ', "se"),
+            Node::leaf('ぜ', "ze"),
+            Node::leaf('そ', "so"),
+            Node::leaf('ぞ', "zo"),
+            Node::leaf('た', "ta"),
+            Node::leaf('だ', "da"),
             (
                 'ち',
                 Node {
@@ -345,146 +135,26 @@ lazy_static! {
                 'っ',
                 Node {
                     transitions: Some(vec![
-                        (
-                            '\u{3000}',
-                            Node {
-                                transitions: None,
-                                output: Some(" "),
-                            },
-                        ),
-                        (
-                            '、',
-                            Node {
-                                transitions: None,
-                                output: Some(","),
-                            },
-                        ),
-                        (
-                            '。',
-                            Node {
-                                transitions: None,
-                                output: Some("."),
-                            },
-                        ),
-                        (
-                            '「',
-                            Node {
-                                transitions: None,
-                                output: Some("‘"),
-                            },
-                        ),
-                        (
-                            '」',
-                            Node {
-                                transitions: None,
-                                output: Some("’"),
-                            },
-                        ),
-                        (
-                            '『',
-                            Node {
-                                transitions: None,
-                                output: Some("“"),
-                            },
-                        ),
-                        (
-                            '』',
-                            Node {
-                                transitions: None,
-                                output: Some("”"),
-                            },
-                        ),
-                        (
-                            '〜',
-                            Node {
-                                transitions: None,
-                                output: Some("~"),
-                            },
-                        ),
-                        (
-                            'ぁ',
-                            Node {
-                                transitions: None,
-                                output: Some("a"),
-                            },
-                        ),
-                        (
-                            'あ',
-                            Node {
-                                transitions: None,
-                                output: Some("a"),
-                            },
-                        ),
-                        (
-                            'ぃ',
-                            Node {
-                                transitions: None,
-                                output: Some("i"),
-                            },
-                        ),
-                        (
-                            'い',
-                            Node {
-                                transitions: None,
-                                output: Some("i"),
-                            },
-                        ),
-                        (
-                            'ぅ',
-                            Node {
-                                transitions: None,
-                                output: Some("u"),
-                            },
-                        ),
-                        (
-                            'う',
-                            Node {
-                                transitions: None,
-                                output: Some("u"),
-                            },
-                        ),
-                        (
-                            'ぇ',
-                            Node {
-                                transitions: None,
-                                output: Some("e"),
-                            },
-                        ),
-                        (
-                            'え',
-                            Node {
-                                transitions: None,
-                                output: Some("e"),
-                            },
-                        ),
-                        (
-                            'ぉ',
-                            Node {
-                                transitions: None,
-                                output: Some("o"),
-                            },
-                        ),
-                        (
-                            'お',
-                            Node {
-                                transitions: None,
-                                output: Some("o"),
-                            },
-                        ),
-                        (
-                            'か',
-                            Node {
-                                transitions: None,
-                                output: Some("kka"),
-                            },
-                        ),
-                        (
-                            'が',
-                            Node {
-                                transitions: None,
-                                output: Some("gga"),
-                            },
-                        ),
+						Node::leaf('\u{3000}', " "),
+                        Node::leaf('、', ","),
+                        Node::leaf('。', "."),
+                        Node::leaf('「', "‘"),
+                        Node::leaf('」', "’"),
+                        Node::leaf('『', "“"),
+                        Node::leaf('』', "”"),
+                        Node::leaf('〜', "~"),
+                        Node::leaf('ぁ', "a"),
+                        Node::leaf('あ', "a"),
+                        Node::leaf('ぃ', "i"),
+                        Node::leaf('い', "i"),
+                        Node::leaf('ぅ', "u"),
+                        Node::leaf('う', "u"),
+                        Node::leaf('ぇ', "e"),
+                        Node::leaf('え', "e"),
+                        Node::leaf('ぉ', "o"),
+                        Node::leaf('お', "o"),
+                        Node::leaf('か', "kka"),
+                        Node::leaf('が', "gga"),
                         (
                             'き',
                             Node {
@@ -524,55 +194,13 @@ lazy_static! {
                                 output: Some("kku"),
                             },
                         ),
-                        (
-                            'ぐ',
-                            Node {
-                                transitions: None,
-                                output: Some("ggu"),
-                            },
-                        ),
-                        (
-                            'け',
-                            Node {
-                                transitions: None,
-                                output: Some("kke"),
-                            },
-                        ),
-                        (
-                            'げ',
-                            Node {
-                                transitions: None,
-                                output: Some("gge"),
-                            },
-                        ),
-                        (
-                            'こ',
-                            Node {
-                                transitions: None,
-                                output: Some("kko"),
-                            },
-                        ),
-                        (
-                            'ご',
-                            Node {
-                                transitions: None,
-                                output: Some("ggo"),
-                            },
-                        ),
-                        (
-                            'さ',
-                            Node {
-                                transitions: None,
-                                output: Some("ssa"),
-                            },
-                        ),
-                        (
-                            'ざ',
-                            Node {
-                                transitions: None,
-                                output: Some("zza"),
-                            },
-                        ),
+                        Node::leaf('ぐ', "ggu"),
+                        Node::leaf('け', "kke"),
+                        Node::leaf('げ', "gge"),
+                        Node::leaf('こ', "kko"),
+                        Node::leaf('ご', "ggo"),
+                        Node::leaf('さ', "ssa"),
+                        Node::leaf('ざ', "zza"),
                         (
                             'し',
                             Node {
@@ -599,62 +227,14 @@ lazy_static! {
                                 output: Some("zzi"),
                             },
                         ),
-                        (
-                            'す',
-                            Node {
-                                transitions: None,
-                                output: Some("ssu"),
-                            },
-                        ),
-                        (
-                            'ず',
-                            Node {
-                                transitions: None,
-                                output: Some("zzu"),
-                            },
-                        ),
-                        (
-                            'せ',
-                            Node {
-                                transitions: None,
-                                output: Some("sse"),
-                            },
-                        ),
-                        (
-                            'ぜ',
-                            Node {
-                                transitions: None,
-                                output: Some("zze"),
-                            },
-                        ),
-                        (
-                            'そ',
-                            Node {
-                                transitions: None,
-                                output: Some("sso"),
-                            },
-                        ),
-                        (
-                            'ぞ',
-                            Node {
-                                transitions: None,
-                                output: Some("zzo"),
-                            },
-                        ),
-                        (
-                            'た',
-                            Node {
-                                transitions: None,
-                                output: Some("tta"),
-                            },
-                        ),
-                        (
-                            'だ',
-                            Node {
-                                transitions: None,
-                                output: Some("dda"),
-                            },
-                        ),
+                        Node::leaf('す', "ssu"),
+                        Node::leaf('ず', "zzu"),
+                        Node::leaf('せ', "sse"),
+                        Node::leaf('ぜ', "zze"),
+                        Node::leaf('そ', "sso"),
+                        Node::leaf('ぞ', "zzo"),
+                        Node::leaf('た', "tta"),
+                        Node::leaf('だ', "dda"),
                         (
                             'ち',
                             Node {
@@ -681,55 +261,13 @@ lazy_static! {
                                 output: Some("ddi"),
                             },
                         ),
-                        (
-                            'つ',
-                            Node {
-                                transitions: None,
-                                output: Some("ttu"),
-                            },
-                        ),
-                        (
-                            'づ',
-                            Node {
-                                transitions: None,
-                                output: Some("ddu"),
-                            },
-                        ),
-                        (
-                            'て',
-                            Node {
-                                transitions: None,
-                                output: Some("tte"),
-                            },
-                        ),
-                        (
-                            'で',
-                            Node {
-                                transitions: None,
-                                output: Some("dde"),
-                            },
-                        ),
-                        (
-                            'と',
-                            Node {
-                                transitions: None,
-                                output: Some("tto"),
-                            },
-                        ),
-                        (
-                            'ど',
-                            Node {
-                                transitions: None,
-                                output: Some("ddo"),
-                            },
-                        ),
-                        (
-                            'な',
-                            Node {
-                                transitions: None,
-                                output: Some("na"),
-                            },
-                        ),
+                        Node::leaf('つ', "ttu"),
+                        Node::leaf('づ', "ddu"),
+                        Node::leaf('て', "tte"),
+                        Node::leaf('で', "dde"),
+                        Node::leaf('と', "tto"),
+                        Node::leaf('ど', "ddo"),
+                        Node::leaf('な', "na"),
                         (
                             'に',
                             Node {
@@ -743,48 +281,12 @@ lazy_static! {
                                 output: Some("ni"),
                             },
                         ),
-                        (
-                            'ぬ',
-                            Node {
-                                transitions: None,
-                                output: Some("nu"),
-                            },
-                        ),
-                        (
-                            'ね',
-                            Node {
-                                transitions: None,
-                                output: Some("ne"),
-                            },
-                        ),
-                        (
-                            'の',
-                            Node {
-                                transitions: None,
-                                output: Some("no"),
-                            },
-                        ),
-                        (
-                            'は',
-                            Node {
-                                transitions: None,
-                                output: Some("hha"),
-                            },
-                        ),
-                        (
-                            'ば',
-                            Node {
-                                transitions: None,
-                                output: Some("bba"),
-                            },
-                        ),
-                        (
-                            'ぱ',
-                            Node {
-                                transitions: None,
-                                output: Some("ppa"),
-                            },
-                        ),
+                        Node::leaf('ぬ', "nu"),
+                        Node::leaf('ね', "ne"),
+                        Node::leaf('の', "no"),
+                        Node::leaf('は', "hha"),
+                        Node::leaf('ば', "bba"),
+                        Node::leaf('ぱ', "ppa"),
                         (
                             'ひ',
                             Node {
@@ -802,41 +304,11 @@ lazy_static! {
                             'び',
                             Node {
                                 transitions: Some(vec![
-                                    (
-                                        'ぃ',
-                                        Node {
-                                            transitions: None,
-                                            output: Some("ppyi"),
-                                        },
-                                    ),
-                                    (
-                                        'ぇ',
-                                        Node {
-                                            transitions: None,
-                                            output: Some("ppye"),
-                                        },
-                                    ),
-                                    (
-                                        'ゃ',
-                                        Node {
-                                            transitions: None,
-                                            output: Some("ppya"),
-                                        },
-                                    ),
-                                    (
-                                        'ゅ',
-                                        Node {
-                                            transitions: None,
-                                            output: Some("ppyu"),
-                                        },
-                                    ),
-                                    (
-                                        'ょ',
-                                        Node {
-                                            transitions: None,
-                                            output: Some("ppyo"),
-                                        },
-                                    ),
+                                    Node::leaf('ぃ', "ppyi"),
+                                    Node::leaf('ぇ', "ppye"),
+                                    Node::leaf('ゃ', "ppya"),
+                                    Node::leaf('ゅ', "ppyu"),
+                                    Node::leaf('ょ', "ppyo"),
                                 ]),
                                 output: Some("ppi"),
                             },
@@ -858,108 +330,24 @@ lazy_static! {
                             'ふ',
                             Node {
                                 transitions: Some(vec![
-                                    (
-                                        'ぃ',
-                                        Node {
-                                            transitions: None,
-                                            output: Some("hhyi"),
-                                        },
-                                    ),
-                                    (
-                                        'ぇ',
-                                        Node {
-                                            transitions: None,
-                                            output: Some("hhye"),
-                                        },
-                                    ),
-                                    (
-                                        'ゃ',
-                                        Node {
-                                            transitions: None,
-                                            output: Some("hhya"),
-                                        },
-                                    ),
-                                    (
-                                        'ゅ',
-                                        Node {
-                                            transitions: None,
-                                            output: Some("hhyu"),
-                                        },
-                                    ),
-                                    (
-                                        'ょ',
-                                        Node {
-                                            transitions: None,
-                                            output: Some("hhyo"),
-                                        },
-                                    ),
+                                    Node::leaf('ぃ', "hhyi"),
+                                    Node::leaf('ぇ', "hhye"),
+                                    Node::leaf('ゃ', "hhya"),
+                                    Node::leaf('ゅ', "hhyu"),
+                                    Node::leaf('ょ', "hhyo"),
                                 ]),
                                 output: Some("hhu"),
                             },
                         ),
-                        (
-                            'ぶ',
-                            Node {
-                                transitions: None,
-                                output: Some("bbu"),
-                            },
-                        ),
-                        (
-                            'ぷ',
-                            Node {
-                                transitions: None,
-                                output: Some("ppu"),
-                            },
-                        ),
-                        (
-                            'へ',
-                            Node {
-                                transitions: None,
-                                output: Some("hhe"),
-                            },
-                        ),
-                        (
-                            'べ',
-                            Node {
-                                transitions: None,
-                                output: Some("bbe"),
-                            },
-                        ),
-                        (
-                            'ぺ',
-                            Node {
-                                transitions: None,
-                                output: Some("ppe"),
-                            },
-                        ),
-                        (
-                            'ほ',
-                            Node {
-                                transitions: None,
-                                output: Some("hho"),
-                            },
-                        ),
-                        (
-                            'ぼ',
-                            Node {
-                                transitions: None,
-                                output: Some("bbo"),
-                            },
-                        ),
-                        (
-                            'ぽ',
-                            Node {
-                                transitions: None,
-                                output: Some("ppo"),
-                            },
-                        ),
-                        (
-                            'ま',
-                            Node {
-                                transitions: None,
-                                output: Some("mma"),
-                            },
-                        ),
+                        Node::leaf('ぶ', "bbu"),
+                        Node::leaf('ぷ', "ppu"),
+                        Node::leaf('へ', "hhe"),
+                        Node::leaf('べ', "bbe"),
+                        Node::leaf('ぺ', "ppe"),
+                        Node::leaf('ほ', "hho"),
+                        Node::leaf('ぼ', "bbo"),
+                        Node::leaf('ぽ', "ppo"),
+                        Node::leaf('ま', "mma"),
                         (
                             'み',
                             Node {
@@ -973,76 +361,16 @@ lazy_static! {
                                 output: Some("mmi"),
                             },
                         ),
-                        (
-                            'む',
-                            Node {
-                                transitions: None,
-                                output: Some("mmu"),
-                            },
-                        ),
-                        (
-                            'め',
-                            Node {
-                                transitions: None,
-                                output: Some("mme"),
-                            },
-                        ),
-                        (
-                            'も',
-                            Node {
-                                transitions: None,
-                                output: Some("mmo"),
-                            },
-                        ),
-                        (
-                            'ゃ',
-                            Node {
-                                transitions: None,
-                                output: Some("ya"),
-                            },
-                        ),
-                        (
-                            'や',
-                            Node {
-                                transitions: None,
-                                output: Some("ya"),
-                            },
-                        ),
-                        (
-                            'ゅ',
-                            Node {
-                                transitions: None,
-                                output: Some("yu"),
-                            },
-                        ),
-                        (
-                            'ゆ',
-                            Node {
-                                transitions: None,
-                                output: Some("yu"),
-                            },
-                        ),
-                        (
-                            'ょ',
-                            Node {
-                                transitions: None,
-                                output: Some("yo"),
-                            },
-                        ),
-                        (
-                            'よ',
-                            Node {
-                                transitions: None,
-                                output: Some("yo"),
-                            },
-                        ),
-                        (
-                            'ら',
-                            Node {
-                                transitions: None,
-                                output: Some("rra"),
-                            },
-                        ),
+                        Node::leaf('む', "mmu"),
+                        Node::leaf('め', "mme"),
+                        Node::leaf('も', "mmo"),
+                        Node::leaf('ゃ', "ya"),
+                        Node::leaf('や', "ya"),
+                        Node::leaf('ゅ', "yu"),
+                        Node::leaf('ゆ', "yu"),
+                        Node::leaf('ょ', "yo"),
+                        Node::leaf('よ', "yo"),
+                        Node::leaf('ら', "rra"),
                         (
                             'り',
                             Node {
@@ -1056,62 +384,14 @@ lazy_static! {
                                 output: Some("rri"),
                             },
                         ),
-                        (
-                            'る',
-                            Node {
-                                transitions: None,
-                                output: Some("rru"),
-                            },
-                        ),
-                        (
-                            'れ',
-                            Node {
-                                transitions: None,
-                                output: Some("rre"),
-                            },
-                        ),
-                        (
-                            'ろ',
-                            Node {
-                                transitions: None,
-                                output: Some("rro"),
-                            },
-                        ),
-                        (
-                            'わ',
-                            Node {
-                                transitions: None,
-                                output: Some("wwa"),
-                            },
-                        ),
-                        (
-                            'ゐ',
-                            Node {
-                                transitions: None,
-                                output: Some("wwi"),
-                            },
-                        ),
-                        (
-                            'ゑ',
-                            Node {
-                                transitions: None,
-                                output: Some("wwe"),
-                            },
-                        ),
-                        (
-                            'を',
-                            Node {
-                                transitions: None,
-                                output: Some("wwo"),
-                            },
-                        ),
-                        (
-                            'ん',
-                            Node {
-                                transitions: None,
-                                output: Some("n"),
-                            },
-                        ),
+                        Node::leaf('る', "rru"),
+                        Node::leaf('れ', "rre"),
+                        Node::leaf('ろ', "rro"),
+                        Node::leaf('わ', "wwa"),
+                        Node::leaf('ゐ', "wwi"),
+                        Node::leaf('ゑ', "wwe"),
+                        Node::leaf('を', "wwo"),
+                        Node::leaf('ん', "n"),
                         (
                             'ゔ',
                             Node {
@@ -1125,164 +405,32 @@ lazy_static! {
                                 output: Some("vvu"),
                             },
                         ),
-                        (
-                            'ゔ',
-                            Node {
-                                transitions: None,
-                                output: Some("vva"),
-                            },
-                        ),
-                        (
-                            'ゔ',
-                            Node {
-                                transitions: None,
-                                output: Some("vvi"),
-                            },
-                        ),
-                        (
-                            'ゔ',
-                            Node {
-                                transitions: None,
-                                output: Some("vve"),
-                            },
-                        ),
-                        (
-                            'ゔ',
-                            Node {
-                                transitions: None,
-                                output: Some("vvo"),
-                            },
-                        ),
-                        (
-                            '・',
-                            Node {
-                                transitions: None,
-                                output: Some("/"),
-                            },
-                        ),
-                        (
-                            'ー',
-                            Node {
-                                transitions: None,
-                                output: Some("-"),
-                            },
-                        ),
-                        (
-                            '！',
-                            Node {
-                                transitions: None,
-                                output: Some("!"),
-                            },
-                        ),
-                        (
-                            '（',
-                            Node {
-                                transitions: None,
-                                output: Some("("),
-                            },
-                        ),
-                        (
-                            '）',
-                            Node {
-                                transitions: None,
-                                output: Some(")"),
-                            },
-                        ),
-                        (
-                            '：',
-                            Node {
-                                transitions: None,
-                                output: Some(":"),
-                            },
-                        ),
-                        (
-                            '？',
-                            Node {
-                                transitions: None,
-                                output: Some("?"),
-                            },
-                        ),
-                        (
-                            '［',
-                            Node {
-                                transitions: None,
-                                output: Some("["),
-                            },
-                        ),
-                        (
-                            '］',
-                            Node {
-                                transitions: None,
-                                output: Some("]"),
-                            },
-                        ),
-                        (
-                            '｛',
-                            Node {
-                                transitions: None,
-                                output: Some("{"),
-                            },
-                        ),
-                        (
-                            '｝',
-                            Node {
-                                transitions: None,
-                                output: Some("}"),
-                            },
-                        ),
+                        Node::leaf('ゔ', "vva"),
+                        Node::leaf('ゔ', "vvi"),
+                        Node::leaf('ゔ', "vve"),
+                        Node::leaf('ゔ', "vvo"),
+                        Node::leaf('・', "/"),
+                        Node::leaf('ー', "-"),
+                        Node::leaf('！', "!"),
+                        Node::leaf('（', "("),
+                        Node::leaf('）', ")"),
+                        Node::leaf('：', ":"),
+                        Node::leaf('？', "?"),
+                        Node::leaf('［', "["),
+                        Node::leaf('］', "]"),
+                        Node::leaf('｛', "{"),
+                        Node::leaf('｝', "}"),
                     ]),
                     output: Some(""),
                 },
             ),
-            (
-                'つ',
-                Node {
-                    transitions: None,
-                    output: Some("tu"),
-                },
-            ),
-            (
-                'づ',
-                Node {
-                    transitions: None,
-                    output: Some("du"),
-                },
-            ),
-            (
-                'て',
-                Node {
-                    transitions: None,
-                    output: Some("te"),
-                },
-            ),
-            (
-                'で',
-                Node {
-                    transitions: None,
-                    output: Some("de"),
-                },
-            ),
-            (
-                'と',
-                Node {
-                    transitions: None,
-                    output: Some("to"),
-                },
-            ),
-            (
-                'ど',
-                Node {
-                    transitions: None,
-                    output: Some("do"),
-                },
-            ),
-            (
-                'な',
-                Node {
-                    transitions: None,
-                    output: Some("na"),
-                },
-            ),
+            Node::leaf('つ', "tu"),
+            Node::leaf('づ', "du"),
+            Node::leaf('て', "te"),
+            Node::leaf('で', "de"),
+            Node::leaf('と', "to"),
+            Node::leaf('ど', "do"),
+            Node::leaf('な', "na"),
             (
                 'に',
                 Node {
@@ -1296,48 +444,12 @@ lazy_static! {
                     output: Some("ni"),
                 },
             ),
-            (
-                'ぬ',
-                Node {
-                    transitions: None,
-                    output: Some("nu"),
-                },
-            ),
-            (
-                'ね',
-                Node {
-                    transitions: None,
-                    output: Some("ne"),
-                },
-            ),
-            (
-                'の',
-                Node {
-                    transitions: None,
-                    output: Some("no"),
-                },
-            ),
-            (
-                'は',
-                Node {
-                    transitions: None,
-                    output: Some("ha"),
-                },
-            ),
-            (
-                'ば',
-                Node {
-                    transitions: None,
-                    output: Some("ba"),
-                },
-            ),
-            (
-                'ぱ',
-                Node {
-                    transitions: None,
-                    output: Some("pa"),
-                },
-            ),
+            Node::leaf('ぬ', "nu"),
+            Node::leaf('ね', "ne"),
+            Node::leaf('の', "no"),
+            Node::leaf('は', "ha"),
+            Node::leaf('ば', "ba"),
+            Node::leaf('ぱ', "pa"),
             (
                 'ひ',
                 Node {
@@ -1390,69 +502,15 @@ lazy_static! {
                     output: Some("hu"),
                 },
             ),
-            (
-                'ぶ',
-                Node {
-                    transitions: None,
-                    output: Some("bu"),
-                },
-            ),
-            (
-                'ぷ',
-                Node {
-                    transitions: None,
-                    output: Some("pu"),
-                },
-            ),
-            (
-                'へ',
-                Node {
-                    transitions: None,
-                    output: Some("he"),
-                },
-            ),
-            (
-                'べ',
-                Node {
-                    transitions: None,
-                    output: Some("be"),
-                },
-            ),
-            (
-                'ぺ',
-                Node {
-                    transitions: None,
-                    output: Some("pe"),
-                },
-            ),
-            (
-                'ほ',
-                Node {
-                    transitions: None,
-                    output: Some("ho"),
-                },
-            ),
-            (
-                'ぼ',
-                Node {
-                    transitions: None,
-                    output: Some("bo"),
-                },
-            ),
-            (
-                'ぽ',
-                Node {
-                    transitions: None,
-                    output: Some("po"),
-                },
-            ),
-            (
-                'ま',
-                Node {
-                    transitions: None,
-                    output: Some("ma"),
-                },
-            ),
+            Node::leaf('ぶ', "bu"),
+            Node::leaf('ぷ', "pu"),
+            Node::leaf('へ', "he"),
+            Node::leaf('べ', "be"),
+            Node::leaf('ぺ', "pe"),
+            Node::leaf('ほ', "ho"),
+            Node::leaf('ぼ', "bo"),
+            Node::leaf('ぽ', "po"),
+            Node::leaf('ま', "ma"),
             (
                 'み',
                 Node {
@@ -1466,76 +524,16 @@ lazy_static! {
                     output: Some("mi"),
                 },
             ),
-            (
-                'む',
-                Node {
-                    transitions: None,
-                    output: Some("mu"),
-                },
-            ),
-            (
-                'め',
-                Node {
-                    transitions: None,
-                    output: Some("me"),
-                },
-            ),
-            (
-                'も',
-                Node {
-                    transitions: None,
-                    output: Some("mo"),
-                },
-            ),
-            (
-                'ゃ',
-                Node {
-                    transitions: None,
-                    output: Some("ya"),
-                },
-            ),
-            (
-                'や',
-                Node {
-                    transitions: None,
-                    output: Some("ya"),
-                },
-            ),
-            (
-                'ゅ',
-                Node {
-                    transitions: None,
-                    output: Some("yu"),
-                },
-            ),
-            (
-                'ゆ',
-                Node {
-                    transitions: None,
-                    output: Some("yu"),
-                },
-            ),
-            (
-                'ょ',
-                Node {
-                    transitions: None,
-                    output: Some("yo"),
-                },
-            ),
-            (
-                'よ',
-                Node {
-                    transitions: None,
-                    output: Some("yo"),
-                },
-            ),
-            (
-                'ら',
-                Node {
-                    transitions: None,
-                    output: Some("ra"),
-                },
-            ),
+            Node::leaf('む', "mu"),
+            Node::leaf('め', "me"),
+            Node::leaf('も', "mo"),
+            Node::leaf('ゃ', "ya"),
+            Node::leaf('や', "ya"),
+            Node::leaf('ゅ', "yu"),
+            Node::leaf('ゆ', "yu"),
+            Node::leaf('ょ', "yo"),
+            Node::leaf('よ', "yo"),
+            Node::leaf('ら', "ra"),
             (
                 'り',
                 Node {
@@ -1549,115 +547,25 @@ lazy_static! {
                     output: Some("ri"),
                 },
             ),
-            (
-                'る',
-                Node {
-                    transitions: None,
-                    output: Some("ru"),
-                },
-            ),
-            (
-                'れ',
-                Node {
-                    transitions: None,
-                    output: Some("re"),
-                },
-            ),
-            (
-                'ろ',
-                Node {
-                    transitions: None,
-                    output: Some("ro"),
-                },
-            ),
-            (
-                'わ',
-                Node {
-                    transitions: None,
-                    output: Some("wa"),
-                },
-            ),
-            (
-                'ゐ',
-                Node {
-                    transitions: None,
-                    output: Some("wi"),
-                },
-            ),
-            (
-                'ゑ',
-                Node {
-                    transitions: None,
-                    output: Some("we"),
-                },
-            ),
-            (
-                'を',
-                Node {
-                    transitions: None,
-                    output: Some("wo"),
-                },
-            ),
+            Node::leaf('る', "ru"),
+            Node::leaf('れ', "re"),
+            Node::leaf('ろ', "ro"),
+            Node::leaf('わ', "wa"),
+            Node::leaf('ゐ', "wi"),
+            Node::leaf('ゑ', "we"),
+            Node::leaf('を', "wo"),
             (
                 'ん',
                 Node {
                     transitions: Some(vec![
-                        (
-                            'あ',
-                            Node {
-                                transitions: None,
-                                output: Some("n\'a"),
-                            },
-                        ),
-                        (
-                            'い',
-                            Node {
-                                transitions: None,
-                                output: Some("n\'i"),
-                            },
-                        ),
-                        (
-                            'う',
-                            Node {
-                                transitions: None,
-                                output: Some("n\'u"),
-                            },
-                        ),
-                        (
-                            'え',
-                            Node {
-                                transitions: None,
-                                output: Some("n\'e"),
-                            },
-                        ),
-                        (
-                            'お',
-                            Node {
-                                transitions: None,
-                                output: Some("n\'o"),
-                            },
-                        ),
-                        (
-                            'や',
-                            Node {
-                                transitions: None,
-                                output: Some("n\'ya"),
-                            },
-                        ),
-                        (
-                            'ゆ',
-                            Node {
-                                transitions: None,
-                                output: Some("n\'yu"),
-                            },
-                        ),
-                        (
-                            'よ',
-                            Node {
-                                transitions: None,
-                                output: Some("n\'yo"),
-                            },
-                        ),
+                        Node::leaf('あ', "n\'a"),
+                        Node::leaf('い', "n\'i"),
+                        Node::leaf('う', "n\'u"),
+                        Node::leaf('え', "n\'e"),
+                        Node::leaf('お', "n\'o"),
+                        Node::leaf('や', "n\'ya"),
+                        Node::leaf('ゆ', "n\'yu"),
+                        Node::leaf('よ', "n\'yo"),
                     ]),
                     output: Some("n"),
                 },
@@ -1675,118 +583,23 @@ lazy_static! {
                     output: Some("vu"),
                 },
             ),
-            (
-                'ゔ',
-                Node {
-                    transitions: None,
-                    output: Some("va"),
-                },
-            ),
-            (
-                'ゔ',
-                Node {
-                    transitions: None,
-                    output: Some("vi"),
-                },
-            ),
-            (
-                'ゔ',
-                Node {
-                    transitions: None,
-                    output: Some("ve"),
-                },
-            ),
-            (
-                'ゔ',
-                Node {
-                    transitions: None,
-                    output: Some("vo"),
-                },
-            ),
-            (
-                '・',
-                Node {
-                    transitions: None,
-                    output: Some("/"),
-                },
-            ),
-            (
-                'ー',
-                Node {
-                    transitions: None,
-                    output: Some("-"),
-                },
-            ),
-            (
-                '！',
-                Node {
-                    transitions: None,
-                    output: Some("!"),
-                },
-            ),
-            (
-                '（',
-                Node {
-                    transitions: None,
-                    output: Some("("),
-                },
-            ),
-            (
-                '）',
-                Node {
-                    transitions: None,
-                    output: Some(")"),
-                },
-            ),
-            (
-                '：',
-                Node {
-                    transitions: None,
-                    output: Some(":"),
-                },
-            ),
-            (
-                '？',
-                Node {
-                    transitions: None,
-                    output: Some("?"),
-                },
-            ),
-            (
-                '［',
-                Node {
-                    transitions: None,
-                    output: Some("["),
-                },
-            ),
-            (
-                '］',
-                Node {
-                    transitions: None,
-                    output: Some("]"),
-                },
-            ),
-            (
-                '｛',
-                Node {
-                    transitions: None,
-                    output: Some("{"),
-                },
-            ),
-            (
-                '｝',
-                Node {
-                    transitions: None,
-                    output: Some("}"),
-                },
-            ),
-        ]);
+            Node::leaf('ゔ', "va"),
+            Node::leaf('ゔ', "vi"),
+            Node::leaf('ゔ', "ve"),
+            Node::leaf('ゔ', "vo"),
+            Node::leaf('・', "/"),
+            Node::leaf('ー', "-"),
+            Node::leaf('！', "!"),
+            Node::leaf('（', "("),
+            Node::leaf('）', ")"),
+            Node::leaf('：', ":"),
+            Node::leaf('？', "?"),
+            Node::leaf('［', "["),
+            Node::leaf('］', "]"),
+            Node::leaf('｛', "{"),
+            Node::leaf('｝', "}"),
+        ];
 
-        let mut node = Node {
-            transitions,
-            output: None,
-        };
-        node.sort();
-        node
+        Node::tree(transitions)
     };
 }
