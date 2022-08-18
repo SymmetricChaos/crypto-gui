@@ -26,6 +26,7 @@ json = "0.12.4"
 primal = "0.3.0"
 unicode-normalization = "0.1.19"
 unicode-segmentation = "1.9.0"
+wana_kana = "2.1.0"
 
 # native:
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]

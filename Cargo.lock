@@ -312,7 +312,7 @@ dependencies = [
  "eframe",
  "egui",
  "getrandom",
- "itertools",
+ "itertools 0.10.3",
  "json",
  "lazy_static",
  "num",
@@ -322,6 +322,7 @@ dependencies = [
  "tracing-wasm",
  "unicode-normalization",
  "unicode-segmentation",
+ "wana_kana",
 ]
 
 [[package]]
@@ -670,6 +671,15 @@ dependencies = [
  "js-sys",
  "wasm-bindgen",
  "web-sys",
+]
+
+[[package]]
+name = "itertools"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f56a2d0bc861f9165be4eb3442afd3c236d8a98afd426f65d92324ae1091a484"
+dependencies = [
+ "either",
 ]
 
 [[package]]
@@ -1560,6 +1570,17 @@ dependencies = [
  "same-file",
  "winapi",
  "winapi-util",
+]
+
+[[package]]
+name = "wana_kana"
+version = "2.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5422b401e00b7e3d45c55756298aeda568afe57b0380406d3530d64c243d8c00"
+dependencies = [
+ "fnv",
+ "itertools 0.8.2",
+ "lazy_static",
 ]
 
 [[package]]
