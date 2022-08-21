@@ -1,9 +1,11 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
-use crate::{ciphers::Cipher, errors::Error, text_aux::VecString};
+use crate::{ciphers::Cipher, errors::Error, text_aux::VecString, codes::romaji::romaji::to_romaji};
 use lazy_static::lazy_static;
 
 use super::switch::Switch;
+
+use crate::codes::romaji::NIHON_SHIKI;
 
 #[derive(Clone)]
 pub struct Switches {
@@ -191,7 +193,11 @@ impl Purple {
 impl Cipher for Purple {
     fn encrypt(&self, text: &str) -> Result<String, Error> {
         // convert kana to romaji if needed
-        //let text = to_romaji_ks(text);
+        // let text = to_romaji(text, &NIHON_SHIKI);
+        // if let Err(e) = text {
+        //     return Err(Error::General(e.to_string()))
+        // }
+        // let text = text.unwrap();
 
         // Clone switches then encrypt letters one by one, stepping each time
         let mut switches = self.switches.clone();
@@ -216,7 +222,11 @@ impl Cipher for Purple {
 
     fn decrypt(&self, text: &str) -> Result<String, Error> {
         // convert kana to romaji if needed
-        //let text = to_romaji_ks(text);
+        // let text = to_romaji(text, &NIHON_SHIKI);
+        // if let Err(e) = text {
+        //     return Err(Error::General(e.to_string()))
+        // }
+        // let text = text.unwrap();
 
         // Clone switches then decrypt letters one by one, stepping each time
         let mut switches = self.switches.clone();
