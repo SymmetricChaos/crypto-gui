@@ -103,6 +103,7 @@ pub struct Purple {
     pub plugboard_string: String,
     plugboard: HashMap<char, usize>,
     plugboard_inv: HashMap<usize, char>,
+    pub use_kana: bool,
 }
 
 impl Default for Purple {
@@ -171,6 +172,7 @@ impl Default for Purple {
             plugboard_string: "NOKTYUXEQLHBRMPDICJASVWGZF".into(),
             plugboard,
             plugboard_inv,
+            use_kana: false,
         }
     }
 }
@@ -193,11 +195,15 @@ impl Purple {
 impl Cipher for Purple {
     fn encrypt(&self, text: &str) -> Result<String, Error> {
         // convert kana to romaji if needed
-        // let text = to_romaji(text, &NIHON_SHIKI);
-        // if let Err(e) = text {
-        //     return Err(Error::General(e.to_string()))
-        // }
-        // let text = text.unwrap();
+        let text = if self.use_kana {
+            let text = to_romaji(text, &NIHON_SHIKI);
+            if let Err(e) = text {
+                return Err(Error::General(e.to_string()))
+            }
+            text.unwrap()
+        } else {
+            text.to_string()
+        };
 
         // Clone switches then encrypt letters one by one, stepping each time
         let mut switches = self.switches.clone();
@@ -222,11 +228,15 @@ impl Cipher for Purple {
 
     fn decrypt(&self, text: &str) -> Result<String, Error> {
         // convert kana to romaji if needed
-        // let text = to_romaji(text, &NIHON_SHIKI);
-        // if let Err(e) = text {
-        //     return Err(Error::General(e.to_string()))
-        // }
-        // let text = text.unwrap();
+        let text = if self.use_kana {
+            let text = to_romaji(text, &NIHON_SHIKI);
+            if let Err(e) = text {
+                return Err(Error::General(e.to_string()))
+            }
+            text.unwrap()
+        } else {
+            text.to_string()
+        };
 
         // Clone switches then decrypt letters one by one, stepping each time
         let mut switches = self.switches.clone();

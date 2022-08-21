@@ -4,7 +4,7 @@ use crate::tokenizer::Node;
 
 lazy_static! {
     pub static ref KUNREI_SHIKI: Node = {
-        let transitions = Some(vec![
+        let transitions = vec![
 			Node::leaf('\u{3000}', " "),
             Node::leaf('、', ","),
             Node::leaf('。', "."),
@@ -598,13 +598,8 @@ lazy_static! {
             Node::leaf('］', "]"),
             Node::leaf('｛', "{"),
             Node::leaf('｝', "}"),
-        ]);
+        ];
 
-        let mut node = Node {
-            transitions,
-            output: None,
-        };
-        node.sort();
-        node
+        Node::tree(transitions)
     };
 }
