@@ -2,7 +2,7 @@ use std::{cell::RefCell, fmt::Display, rc::Rc};
 
 use super::wiring::*;
 
-#[derive(PartialEq, Clone, Copy)]
+#[derive(PartialEq, Clone, Copy, Debug)]
 pub enum SwitchSpeed {
     Slow,
     Middle,

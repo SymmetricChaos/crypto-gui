@@ -1,6 +1,8 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
-use crate::{ciphers::Cipher, errors::Error, text_aux::VecString, codes::romaji::romaji::to_romaji};
+use crate::{
+    ciphers::Cipher, codes::romaji::romaji::to_romaji, errors::Error, text_aux::VecString,
+};
 use lazy_static::lazy_static;
 
 use super::switch::Switch;
@@ -11,9 +13,9 @@ use crate::codes::romaji::NIHON_SHIKI;
 pub struct Switches {
     pub sixes: Switch<6>,
     pub twenties: [Rc<RefCell<Switch<20>>>; 3],
-    slow: Rc<RefCell<Switch<20>>>,
-    middle: Rc<RefCell<Switch<20>>>,
-    fast: Rc<RefCell<Switch<20>>>,
+    pub slow: Rc<RefCell<Switch<20>>>,
+    pub middle: Rc<RefCell<Switch<20>>>,
+    pub fast: Rc<RefCell<Switch<20>>>,
 }
 
 impl Default for Switches {
@@ -198,7 +200,7 @@ impl Cipher for Purple {
         let text = if self.use_kana {
             let text = to_romaji(text, &NIHON_SHIKI);
             if let Err(e) = text {
-                return Err(Error::General(e.to_string()))
+                return Err(Error::General(e.to_string()));
             }
             text.unwrap()
         } else {
@@ -231,7 +233,7 @@ impl Cipher for Purple {
         let text = if self.use_kana {
             let text = to_romaji(text, &NIHON_SHIKI);
             if let Err(e) = text {
-                return Err(Error::General(e.to_string()))
+                return Err(Error::General(e.to_string()));
             }
             text.unwrap()
         } else {
