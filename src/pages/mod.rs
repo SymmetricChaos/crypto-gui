@@ -1,3 +1,4 @@
+pub mod code_category_page;
 pub mod text_prep_page;
 pub use text_prep_page::TextPrepPage;
 

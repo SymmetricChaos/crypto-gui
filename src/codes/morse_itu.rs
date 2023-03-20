@@ -238,6 +238,10 @@ impl Code for MorseITU {
             MorseMode::Binary => self.decode_binary(text),
         }
     }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

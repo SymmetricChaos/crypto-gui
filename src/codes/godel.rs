@@ -112,6 +112,10 @@ impl Code for Godel {
         }
         Ok(characters.iter().collect())
     }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

@@ -124,6 +124,10 @@ impl Code for MorseAmerican {
         }
         Ok(out)
     }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

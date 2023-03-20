@@ -1,5 +1,6 @@
 use crate::cipher_panel::CipherInterface;
-use crate::ids::CipherID;
+use crate::code_panel::CodeInterface;
+use crate::ids::{CipherID, CodeID};
 use crate::pages::io_panel::IOPanel;
 use crate::pages::{Page, TextPrepPage};
 use eframe::egui;
@@ -28,6 +29,7 @@ fn load_font(name: &str, family: &FontFamily, font_data: FontData, font_def: &mu
 
 pub struct ClassicCrypto {
     cipher_interface: CipherInterface,
+    code_interface: CodeInterface,
     // cipher_display_panel: CipherIO,
     // code_control_panel: CodeControlPanel,
     // code_display_panel: CodeDisplayPanel,
@@ -36,8 +38,9 @@ pub struct ClassicCrypto {
     input: String,
     output: String,
     errors: String,
+
     active_cipher: CipherID,
-    // active_code: CodeID,
+    active_code: CodeID,
     // active_rng: RngID,
     active_page: Page,
     text_prep_page: TextPrepPage,
@@ -56,6 +59,7 @@ impl Default for ClassicCrypto {
 
             // Which cipher is active
             active_cipher: CipherID::default(),
+            active_code: CodeID::default(),
 
             // Which page we are on
             active_page: Page::About,
@@ -64,6 +68,7 @@ impl Default for ClassicCrypto {
 
             // Interface that hold a copy of each cipher and organizes them
             cipher_interface: CipherInterface::default(),
+            code_interface: CodeInterface::default(),
         }
     }
 }
@@ -131,6 +136,62 @@ impl ClassicCrypto {
         });
     }
 
+    // Combox boxes for selecting codes
+    fn code_selector_panel(&mut self, ctx: &Context) {
+        SidePanel::left("code_selector_panel")
+            .default_width(150.0)
+            .min_width(100.0)
+            .max_width(200.0)
+            .show(ctx, |ui| {
+                self.code_interface.combo_boxes(ui, &mut self.active_code)
+            });
+    }
+
+    fn code_page(&mut self, ctx: &Context) {
+        if self.active_page == Page::Code {
+            self.code_selector_panel(ctx);
+
+            SidePanel::right("code_io_panel")
+                .default_width(150.0)
+                .min_width(100.0)
+                .max_width(200.0)
+                .show(ctx, |ui| {
+                    self.io_panel.ui(
+                        ui,
+                        &mut self.input,
+                        &mut self.output,
+                        &mut self.errors,
+                        &mut self.active_page,
+                        &mut self.active_cipher,
+                        &mut self.active_code,
+                        &mut self.cipher_interface,
+                        &mut self.code_interface,
+                    );
+                });
+
+            CentralPanel::default().show(ctx, |ui| {
+                ScrollArea::vertical().show(ui, |ui| {
+                    let name = RichText::new(String::from(self.active_code))
+                        .strong()
+                        .heading();
+                    ui.add(egui::Label::new(name));
+                    ui.label(self.active_code.description());
+
+                    ui.add_space(16.0);
+                    ui.separator();
+                    ui.add_space(16.0);
+                    self.code_interface
+                        .get_active_code(&self.active_code)
+                        .ui(ui, &mut self.errors)
+                });
+            });
+
+        // If somehow we are here without Page::Code selected
+        } else {
+            self.blank_page(ctx)
+        }
+    }
+
     // Combox boxes for selecting ciphers
     fn cipher_selector_panel(&mut self, ctx: &Context) {
         SidePanel::left("cipher_selector_panel")
@@ -159,7 +220,9 @@ impl ClassicCrypto {
                         &mut self.errors,
                         &mut self.active_page,
                         &mut self.active_cipher,
+                        &mut self.active_code,
                         &mut self.cipher_interface,
+                        &mut self.code_interface,
                     );
                 });
 
@@ -185,34 +248,6 @@ impl ClassicCrypto {
             self.blank_page(ctx)
         }
     }
-
-    // fn code_page(&mut self, ctx: &Context) {
-    //     SidePanel::right("cipher_display_panel")
-    //         .max_width(300.0)
-    //         .show(ctx, |ui| {
-    //             self.io_panel.ui(
-    //                 ui,
-    //                 &mut self.input,
-    //                 &mut self.output,
-    //                 &mut self.errors,
-    //                 &mut self.active_page,
-    //                 &mut self.code_interface,
-    //             );
-    //         });
-    //     CentralPanel::default().show(ctx, |ui| {
-    //         ScrollArea::vertical().show(ui, |ui| {
-    //             if let Page::Code(None) = self.active_page {
-    //                 ui.label("Generic description panel for Codes should go here");
-    //             } else if let Page::Code(Some(code)) = self.active_page {
-    //                 self.code_interface
-    //                     .ui(ui, &mut code, &mut self.errors)
-    //             } else {
-    //                 ui.label("this page should not be visisble");
-    //             }
-
-    //         });
-    //     });
-    // }
 
     fn about_page(&mut self, ctx: &Context) {
         SidePanel::left("about_display_panel")
@@ -259,7 +294,7 @@ impl App for ClassicCrypto {
 
                 page_selector(ui, "About", Page::About, &mut self.active_page);
                 page_selector(ui, "Ciphers", Page::Cipher, &mut self.active_page);
-                // page_selector(ui, "Codes", Page::Code(None), &mut self.active_page);
+                page_selector(ui, "Codes", Page::Code, &mut self.active_page);
                 // page_selector(ui, "RNGs", Page::Rng(None), &mut self.active_page);
                 page_selector(ui, "Text", Page::TextPrep, &mut self.active_page);
             });
@@ -268,7 +303,7 @@ impl App for ClassicCrypto {
         match self.active_page {
             Page::About => self.about_page(ctx),
             Page::Cipher => self.cipher_page(ctx),
-            // Page::Code(_) => self.code_page(ctx),
+            Page::Code => self.code_page(ctx),
             // Page::Rng(_) => todo!("make a method for the RNG page"),
             // Page::CipherCategory => self.cipher_category_page(ctx),
             Page::TextPrep => self.text_prep_page(ctx),

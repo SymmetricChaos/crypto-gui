@@ -1,4 +1,4 @@
-use super::View;
+use super::{View, ViewableCode};
 use crate::{
     codes::{
         ascii::AsciiMode::{EightBit, SevenBit},
@@ -7,14 +7,10 @@ use crate::{
     egui_aux::mono_button,
 };
 
+impl ViewableCode for Ascii {}
+
 impl View for Ascii {
-    fn ui(
-        &mut self,
-        ui: &mut eframe::egui::Ui,
-        input: &mut String,
-        _output: &mut String,
-        _errors: &mut String,
-    ) {
+    fn ui(&mut self, ui: &mut eframe::egui::Ui, _errors: &mut String) {
         ui.horizontal(|ui| {
             ui.selectable_value(&mut self.mode, EightBit, "8-Bit");
             ui.selectable_value(&mut self.mode, SevenBit, "7-Bit");
@@ -26,9 +22,9 @@ impl View for Ascii {
             let mut col = 0;
             for (c, code) in self.chars_codes() {
                 let pair = format!("{}  {} ", c, code);
-                if mono_button(&mut columns[col], &pair).clicked() {
-                    input.push(c)
-                }
+                // if mono_button(&mut columns[col], &pair).clicked() {
+                //     input.push(c)
+                // }
                 ctr += 1;
                 if ctr % nrows == 0 {
                     col += 1

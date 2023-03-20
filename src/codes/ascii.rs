@@ -1,4 +1,4 @@
-use crate::{errors::Error, text_aux::PresetAlphabet::Ascii128};
+use crate::{code_panel::ViewableCode, errors::Error, text_aux::PresetAlphabet::Ascii128};
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 
@@ -150,6 +150,10 @@ impl Code for Ascii {
         }
         Ok(out)
     }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

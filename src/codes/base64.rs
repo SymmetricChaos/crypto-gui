@@ -138,6 +138,10 @@ impl Code for Base64 {
         let b = Base64::decode_raw(text.as_bytes());
         Ok(String::from_utf8(b).unwrap())
     }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

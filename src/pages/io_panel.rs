@@ -2,8 +2,9 @@ use egui::{Color32, RichText, TextEdit, TextStyle, Ui};
 
 use crate::{
     cipher_panel::{CipherInterface, ViewableCipher},
+    code_panel::{CodeInterface, ViewableCode},
     global_rng::global_rng_controls,
-    ids::CipherID,
+    ids::{CipherID, CodeID},
 };
 
 use super::Page;
@@ -39,36 +40,36 @@ pub fn encrypt_decrypt(
     });
 }
 
-// pub fn encode_decode(
-//     ui: &mut Ui,
-//     code: &dyn ViewableCode,
-//     input: &mut String,
-//     output: &mut String,
-//     errors: &mut String,
-// ) {
-//     ui.horizontal(|ui| {
-//         if ui
-//             .button(RichText::from("ENCODE").color(Color32::GOLD))
-//             .clicked()
-//         {
-//             errors.clear();
-//             match code.encode(input) {
-//                 Ok(text) => *output = text,
-//                 Err(e) => *errors = e.to_string(),
-//             }
-//         };
-//         if ui
-//             .button(RichText::from("DECODE").color(Color32::GOLD))
-//             .clicked()
-//         {
-//             errors.clear();
-//             match code.decode(input) {
-//                 Ok(text) => *output = text,
-//                 Err(e) => *errors = e.to_string(),
-//             }
-//         }
-//     });
-// }
+pub fn encode_decode(
+    ui: &mut Ui,
+    code: &dyn ViewableCode,
+    input: &mut String,
+    output: &mut String,
+    errors: &mut String,
+) {
+    ui.horizontal(|ui| {
+        if ui
+            .button(RichText::from("ENCODE").color(Color32::GOLD))
+            .clicked()
+        {
+            errors.clear();
+            match code.encode(input) {
+                Ok(text) => *output = text,
+                Err(e) => *errors = e.to_string(),
+            }
+        };
+        if ui
+            .button(RichText::from("DECODE").color(Color32::GOLD))
+            .clicked()
+        {
+            errors.clear();
+            match code.decode(input) {
+                Ok(text) => *output = text,
+                Err(e) => *errors = e.to_string(),
+            }
+        }
+    });
+}
 
 #[derive(Default)]
 pub struct IOPanel {}
@@ -82,8 +83,9 @@ impl IOPanel {
         errors: &mut String,
         active_page: &mut Page,
         active_cipher: &mut CipherID,
+        active_code: &mut CodeID,
         cipher_interface: &mut CipherInterface,
-        //code_interface: &mut CodeInterface,
+        code_interface: &mut CodeInterface,
     ) {
         ui.add_space(32.0);
         ui.label("INPUT TEXT");
@@ -102,15 +104,15 @@ impl IOPanel {
             );
         }
 
-        // if let Page::Code(Some(c)) = active_page {
-        //     encrypt_decrypt(
-        //         ui,
-        //         code_interface.get_active_code(c),
-        //         input,
-        //         output,
-        //         errors,
-        //     );
-        // }
+        if active_page == &mut Page::Code {
+            encode_decode(
+                ui,
+                code_interface.get_active_code(active_code),
+                input,
+                output,
+                errors,
+            );
+        }
 
         ui.add_space(10.0);
         if ui.button("clear").clicked() {

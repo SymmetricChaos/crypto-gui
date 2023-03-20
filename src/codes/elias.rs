@@ -183,6 +183,10 @@ impl Code for EliasCode {
         }
         Ok(output)
     }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

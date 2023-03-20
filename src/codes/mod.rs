@@ -1,4 +1,5 @@
 pub mod ascii;
+pub mod punycode;
 pub mod romaji;
 pub use ascii::Ascii;
 
@@ -39,4 +40,6 @@ use crate::errors::Error;
 pub trait Code {
     fn encode(&self, text: &str) -> Result<String, Error>;
     fn decode(&self, text: &str) -> Result<String, Error>;
+    fn randomize(&mut self);
+    fn reset(&mut self);
 }

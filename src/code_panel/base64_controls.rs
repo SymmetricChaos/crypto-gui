@@ -1,15 +1,11 @@
-use super::{generic_components::fill_code_columns, View};
+use super::{generic_components::fill_code_columns, View, ViewableCode};
 use crate::codes::Base64;
 //use rfd::FileDialog;
 
+impl ViewableCode for Base64 {}
+
 impl View for Base64 {
-    fn ui(
-        &mut self,
-        ui: &mut eframe::egui::Ui,
-        _input: &mut String,
-        _output: &mut String,
-        _errors: &mut String,
-    ) {
+    fn ui(&mut self, ui: &mut eframe::egui::Ui, _errors: &mut String) {
         // ui.label("You can upload a file and encode its binary data in Base64. This website does not allow decoding of arbitrary inputs because it is impossible to know their contents before decoding, which is potentially dangerous.");
         // if ui.button("Select a File").clicked() {
         //     self.file = FileDialog::new().pick_file();

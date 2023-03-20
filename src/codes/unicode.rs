@@ -41,6 +41,10 @@ impl Code for Unicode {
             UnicodeMode::Utf32 => todo!(),
         }
     }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

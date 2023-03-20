@@ -101,4 +101,8 @@ impl Code for SpellingAlphabet {
             .map(|s| self.mode.decode(s).unwrap())
             .collect())
     }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {}
 }
