@@ -117,6 +117,12 @@ impl ClassicCrypto {
             FontData::from_static(include_bytes!("../NotoSansJP-Regular.otf")),
             &mut font_def,
         );
+        load_font(
+            "Segoe",
+            &FontFamily::Monospace,
+            FontData::from_static(include_bytes!("../seguisym.ttf")),
+            &mut font_def,
+        );
 
         cc.egui_ctx.set_fonts(font_def);
 

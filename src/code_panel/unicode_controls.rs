@@ -1,9 +1,8 @@
-use super::{generic_components::fill_code_columns, View, ViewableCode};
+use super::{View, ViewableCode};
 use crate::codes::{
     unicode::{DisplayMode, UnicodeEncoding},
     Unicode,
 };
-use eframe::egui::TextEdit;
 
 impl ViewableCode for Unicode {}
 
@@ -20,7 +19,5 @@ impl View for Unicode {
             ui.selectable_value(&mut self.mode, DisplayMode::Decimal, "Decimal");
             ui.selectable_value(&mut self.mode, DisplayMode::Hex, "Hexadecimal");
         });
-
-        fill_code_columns(32, 4, ui, Box::new(self.chars_codes()));
     }
 }

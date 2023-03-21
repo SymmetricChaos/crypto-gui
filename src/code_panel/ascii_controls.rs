@@ -13,6 +13,6 @@ impl View for Ascii {
             ui.selectable_value(&mut self.mode, SevenBit, "7-Bit");
         });
 
-        fill_code_columns(32, 4, ui, Box::new(self.chars_codes()));
+        fill_code_columns(32, 4, ui, self.chars_codes_display());
     }
 }

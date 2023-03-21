@@ -13,6 +13,7 @@ pub enum CodeID {
     Unary,
     SpellingAlphabet,
     Bacon,
+    Unicode,
 }
 
 impl Default for CodeID {
@@ -33,6 +34,7 @@ impl CodeID {
             CodeID::Unary => "The Unary Encoding is the simplest prefix code and thus the simplest useful variable length code. No code word appears as a prefix of any other code word.",
             CodeID::SpellingAlphabet => "Spelling Alphabets or Phonetic Alphabets.",
             CodeID::Base64 => "The Base64 is a binary code that is meant to re-encode arbitrary binary data as ASCII symbols that can then be transmitted safely through text channels and decoded on the other side.",
+            CodeID::Unicode => "<<<DESCRIPTION NEEDED>>>",
             _ => "Missing description. Please complain to the author.",
         }
     }
@@ -52,6 +54,7 @@ impl Display for CodeID {
             CodeID::SpellingAlphabet => "Spelling Alphabet",
             CodeID::Pgp => "PGP Word List",
             CodeID::Bacon => "Bacon",
+            CodeID::Unicode => "Unicode",
         };
         write!(f, "{}", name)
     }

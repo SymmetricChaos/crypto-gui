@@ -1,5 +1,5 @@
 use super::{View, ViewableCode};
-use crate::{codes::Baudot, egui_aux::mono_button};
+use crate::codes::Baudot;
 
 impl ViewableCode for Baudot {}
 

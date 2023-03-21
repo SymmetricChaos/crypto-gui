@@ -1,4 +1,7 @@
-use crate::{code_panel::ViewableCode, errors::Error, text_aux::PresetAlphabet::Ascii128};
+use crate::{
+    errors::Error,
+    text_aux::PresetAlphabet::{self, Ascii128},
+};
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 
@@ -99,6 +102,21 @@ impl Ascii {
                 self.alphabet
                     .chars()
                     .map(|x| (x, *ASCII_MAP8.get(&x).unwrap())),
+            ),
+        }
+    }
+
+    pub fn chars_codes_display(&self) -> Box<dyn Iterator<Item = (char, &String)> + '_> {
+        match self.mode {
+            AsciiMode::SevenBit => Box::new(
+                PresetAlphabet::Ascii128
+                    .chars()
+                    .zip(SEVEN_BIT_ASCII_CODES.iter()),
+            ),
+            AsciiMode::EightBit => Box::new(
+                PresetAlphabet::Ascii128
+                    .chars()
+                    .zip(EIGHT_BIT_ASCII_CODES.iter()),
             ),
         }
     }
