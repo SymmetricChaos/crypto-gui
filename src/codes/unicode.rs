@@ -141,8 +141,8 @@ impl Code for Unicode {
 
     fn decode(&self, text: &str) -> Result<String, Error> {
         match self.encoding {
-            UnicodeEncoding::Utf8 => todo!(),
-            UnicodeEncoding::Utf16 => todo!(),
+            UnicodeEncoding::Utf8 => Err(Error::general("decoding not yet supported")),
+            UnicodeEncoding::Utf16 => Err(Error::general("decoding not yet supported")),
             UnicodeEncoding::Utf32 => self.utf32_decode(text),
         }
     }
