@@ -4,17 +4,28 @@ use crate::errors::Error;
 
 use super::Code;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UnicodeEncoding {
     Utf8,
     Utf16,
     Utf32,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DisplayMode {
     Bits,
     Decimal,
     Hex,
+}
+
+impl DisplayMode {
+    pub fn radix(&self) -> u32 {
+        match self {
+            DisplayMode::Bits => 2,
+            DisplayMode::Decimal => 10,
+            DisplayMode::Hex => 16,
+        }
+    }
 }
 
 pub struct Unicode {
@@ -52,6 +63,62 @@ impl Unicode {
         };
         Ok(s)
     }
+
+    fn utf8_decode(&self, text: &str) -> Result<String, Error> {
+        let chunks = text.split(" ");
+
+        let out = String::with_capacity(chunks.clone().count());
+
+        if self.mode == DisplayMode::Bits {
+            for chunk in chunks {
+                match u32::from_str_radix(chunk, 2) {
+                    Ok(_) => {
+                        todo!("decoding algorithm for UTF-8 needed");
+                    }
+                    Err(_) => {
+                        return Err(Error::Input(format!(
+                            "UTF-8 decoding error, unable to parse bitstring: {}",
+                            chunk
+                        )))
+                    }
+                }
+            }
+        }
+
+        Ok(out)
+    }
+
+    fn utf32_decode(&self, text: &str) -> Result<String, Error> {
+        let chunks = text.split(" ");
+
+        let mut out = String::with_capacity(chunks.clone().count());
+
+        let radix = self.mode.radix();
+
+        for chunk in chunks {
+            match u32::from_str_radix(chunk, radix) {
+                Ok(n) => {
+                    match char::from_u32(n) {
+                        Some(c) => out.push(c),
+                        None => {
+                            return Err(Error::Input(format!(
+                                "UTF-32 decoding error, invalid input string: {}",
+                                chunk
+                            )))
+                        }
+                    };
+                }
+                Err(_) => {
+                    return Err(Error::Input(format!(
+                        "UTF-32 decoding error, unable to parse string: {}",
+                        chunk
+                    )))
+                }
+            }
+        }
+
+        Ok(out)
+    }
 }
 
 impl Default for Unicode {
@@ -72,11 +139,11 @@ impl Code for Unicode {
         }
     }
 
-    fn decode(&self, _text: &str) -> Result<String, Error> {
+    fn decode(&self, text: &str) -> Result<String, Error> {
         match self.encoding {
             UnicodeEncoding::Utf8 => todo!(),
             UnicodeEncoding::Utf16 => todo!(),
-            UnicodeEncoding::Utf32 => todo!(),
+            UnicodeEncoding::Utf32 => self.utf32_decode(text),
         }
     }
 
@@ -86,7 +153,7 @@ impl Code for Unicode {
 }
 
 #[cfg(test)]
-mod ascii_tests {
+mod unicode_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "The 素早い καφέ 🦊 ｊｕｍｐｓ over the lazy 🐶.";
@@ -110,6 +177,35 @@ mod ascii_tests {
         let mut code = Unicode::default();
         code.mode = DisplayMode::Hex;
         println!("{}", code.encode(PLAINTEXT).unwrap());
+    }
+
+    #[test]
+    fn encrypt_decrypt_utf32() {
+        let mut code = Unicode::default();
+        code.encoding = UnicodeEncoding::Utf32;
+
+        code.mode = DisplayMode::Bits;
+        let encoded = code.encode(PLAINTEXT).expect("encoding UTF32 bits error");
+        let decoded = code.decode(&encoded).expect("decoding UTF32 bits error");
+        if decoded != PLAINTEXT {
+            panic!("decoded UTF32 bits not equivalent to plaintext")
+        }
+
+        code.mode = DisplayMode::Decimal;
+        let encoded = code
+            .encode(PLAINTEXT)
+            .expect("encoding UTF32 decimal error");
+        let decoded = code.decode(&encoded).expect("decoding UTF32 decimal error");
+        if decoded != PLAINTEXT {
+            panic!("decoded UTF32 decimal not equivalent to plaintext")
+        }
+
+        code.mode = DisplayMode::Hex;
+        let encoded = code.encode(PLAINTEXT).expect("encoding UTF32 hex error");
+        let decoded = code.decode(&encoded).expect("decoding UTF32 hex error");
+        if decoded != PLAINTEXT {
+            panic!("decoded UTF32 hex not equivalent to plaintext")
+        }
     }
 
     // #[test]
