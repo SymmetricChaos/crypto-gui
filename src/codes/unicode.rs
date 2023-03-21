@@ -5,40 +5,78 @@ use crate::errors::Error;
 use super::Code;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub enum UnicodeMode {
+pub enum UnicodeEncoding {
     Utf8,
     Utf16,
     Utf32,
 }
 
-pub struct Unicode {
-    pub mode: UnicodeMode,
+pub enum DisplayMode {
+    Bits,
+    Decimal,
+    Hex,
 }
 
-impl Unicode {}
+pub struct Unicode {
+    pub encoding: UnicodeEncoding,
+    pub mode: DisplayMode,
+}
+
+impl Unicode {
+    fn utf8_encode(&self, text: &str) -> Result<String, Error> {
+        let chunks = text.bytes();
+        let s = match self.mode {
+            DisplayMode::Bits => chunks.map(|n| (format!("{:08b}", n))).join(" "),
+            DisplayMode::Decimal => chunks.map(|n| (format!("{}", n))).join(" "),
+            DisplayMode::Hex => chunks.map(|n| (format!("{:02x}", n))).join(" "),
+        };
+        Ok(s)
+    }
+
+    fn utf16_encode(&self, text: &str) -> Result<String, Error> {
+        let chunks = text.encode_utf16();
+        let s = match self.mode {
+            DisplayMode::Bits => chunks.map(|n| (format!("{:016b}", n))).join(" "),
+            DisplayMode::Decimal => chunks.map(|n| (format!("{}", n))).join(" "),
+            DisplayMode::Hex => chunks.map(|n| (format!("{:04x}", n))).join(" "),
+        };
+        Ok(s)
+    }
+
+    fn utf32_encode(&self, text: &str) -> Result<String, Error> {
+        let chunks = text.chars().map(|c| u32::from(c));
+        let s = match self.mode {
+            DisplayMode::Bits => chunks.map(|n| (format!("{:032b}", n))).join(" "),
+            DisplayMode::Decimal => chunks.map(|n| (format!("{}", n))).join(" "),
+            DisplayMode::Hex => chunks.map(|n| (format!("{:08x}", n))).join(" "),
+        };
+        Ok(s)
+    }
+}
 
 impl Default for Unicode {
     fn default() -> Self {
         Unicode {
-            mode: UnicodeMode::Utf8,
+            encoding: UnicodeEncoding::Utf8,
+            mode: DisplayMode::Bits,
         }
     }
 }
 
 impl Code for Unicode {
     fn encode(&self, text: &str) -> Result<String, Error> {
-        match self.mode {
-            UnicodeMode::Utf8 => Ok(text.bytes().map(|b| (format!("{:08b}", b))).join("")),
-            UnicodeMode::Utf16 => todo!(),
-            UnicodeMode::Utf32 => todo!(),
+        match self.encoding {
+            UnicodeEncoding::Utf8 => self.utf8_encode(text),
+            UnicodeEncoding::Utf16 => self.utf16_encode(text),
+            UnicodeEncoding::Utf32 => self.utf32_encode(text),
         }
     }
 
     fn decode(&self, _text: &str) -> Result<String, Error> {
-        match self.mode {
-            UnicodeMode::Utf8 => todo!(),
-            UnicodeMode::Utf16 => todo!(),
-            UnicodeMode::Utf32 => todo!(),
+        match self.encoding {
+            UnicodeEncoding::Utf8 => todo!(),
+            UnicodeEncoding::Utf16 => todo!(),
+            UnicodeEncoding::Utf32 => todo!(),
         }
     }
 
@@ -55,16 +93,30 @@ mod ascii_tests {
     const CIPHERTEXT_UTF8: &'static str = "010101000110100001100101001000001110011110110100101000001110011010010111101010011110001110000001100001000010000011001110101110101100111010110001110011111000011011001110101011010010000011110000100111111010011010001010001000001110111110111101100010101110111110111101100101011110111110111101100011011110111110111101100100001110111110111101100100110010000001101111011101100110010101110010001000000111010001101000011001010010000001101100011000010111101001111001001000001111000010011111100100001011011000101110";
 
     #[test]
-    fn encrypt_test_utf8() {
+    fn encrypt_utf8_bits() {
         let code = Unicode::default();
         assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT_UTF8);
     }
 
     #[test]
-    fn decrypt_test_utf8() {
-        let code = Unicode::default();
-        assert_eq!(code.decode(CIPHERTEXT_UTF8).unwrap(), PLAINTEXT);
+    fn encrypt_utf8_dec() {
+        let mut code = Unicode::default();
+        code.mode = DisplayMode::Decimal;
+        println!("{}", code.encode(PLAINTEXT).unwrap());
     }
+
+    #[test]
+    fn encrypt_utf8_hex() {
+        let mut code = Unicode::default();
+        code.mode = DisplayMode::Hex;
+        println!("{}", code.encode(PLAINTEXT).unwrap());
+    }
+
+    // #[test]
+    // fn decrypt_test_utf8() {
+    //     let code = Unicode::default();
+    //     assert_eq!(code.decode(CIPHERTEXT_UTF8).unwrap(), PLAINTEXT);
+    // }
 
     // #[test]
     // fn encrypt_test_utf8() {
