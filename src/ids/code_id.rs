@@ -14,6 +14,7 @@ pub enum CodeID {
     SpellingAlphabet,
     Bacon,
     Unicode,
+    Punycode,
 }
 
 impl Default for CodeID {
@@ -33,8 +34,9 @@ impl CodeID {
             CodeID::Fibonacci => "The Fibonacci code is named because it uses the Fibonacci sequence to generate a variable width encoding of some arbitrary alphabet. More common characters are assigned shorter codes. This allows very large alphabets to be encoded efficiently so long as characters vary in frequency following a geometric distribution.",
             CodeID::Unary => "The Unary Encoding is the simplest prefix code and thus the simplest useful variable length code. No code word appears as a prefix of any other code word.",
             CodeID::SpellingAlphabet => "Spelling Alphabets or Phonetic Alphabets.",
-            CodeID::Base64 => "The Base64 is a binary code that is meant to re-encode arbitrary binary data as ASCII symbols that can then be transmitted safely through text channels and decoded on the other side.",
-            CodeID::Unicode => "<<<DESCRIPTION NEEDED>>>",
+            CodeID::Base64 => "Base64 is a binary code that is meant to re-encode arbitrary binary data as ASCII symbols that can then be transmitted safely through text channels and decoded on the other side.",
+            CodeID::Unicode => "Unicode is an international standard for encoding of text using in most of the world writing systems with over 100,000 code points defined. There are three major encodings used called UTF-8, UTF-16, and UTF-32.",
+            CodeID::Punycode => "Punycode is a method for re-encoding short Unicode strings using only ASCII characters, originally created for use with Internationalized Domain Names. The characters which are not ASCII are stripped out of the string, a delimeter character is placed after the remaining characters, then the non-ASCII characters are encoded onto the end using a method that records their position and Unicode codepoint. For example the sentence \"TạisaohọkhôngthểchỉnóitiếngViệt\" is encoded as \"TisaohkhngthchnitingVit-kjcr8268qyxafd2f1b9g\".",
             _ => "Missing description. Please complain to the author.",
         }
     }
@@ -55,6 +57,7 @@ impl Display for CodeID {
             CodeID::Pgp => "PGP Word List",
             CodeID::Bacon => "Bacon",
             CodeID::Unicode => "Unicode",
+            CodeID::Punycode => "Punycode",
         };
         write!(f, "{}", name)
     }
