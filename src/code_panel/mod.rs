@@ -10,6 +10,7 @@ pub mod generic_components;
 pub mod godel_controls;
 pub mod morse_american_controls;
 pub mod morse_controls;
+pub mod punycode_controls;
 pub mod spelling_alphabet_controls;
 pub mod unary_controls;
 pub mod unicode_controls;
@@ -37,6 +38,7 @@ pub struct CodeInterface {
     ascii: Ascii,
     bacon: Bacon,
     unicode: Unicode,
+    punycode: Punycode,
 
     morse_itu: MorseITU,
     morse_american: MorseAmerican,
@@ -84,6 +86,7 @@ impl CodeInterface {
             CodeID::SpellingAlphabet => &mut self.phonetic,
             CodeID::Bacon => &mut self.bacon,
             CodeID::Unicode => &mut self.unicode,
+            CodeID::Punycode => &mut self.punycode,
             //_ => todo!("unable to get active code"),
         }
     }

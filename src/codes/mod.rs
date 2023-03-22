@@ -1,6 +1,4 @@
 pub mod ascii;
-pub mod punycode;
-pub mod romaji;
 pub use ascii::Ascii;
 
 pub mod morse_itu;
@@ -33,7 +31,12 @@ pub use baudot::Baudot;
 pub mod bacon;
 pub use bacon::Bacon;
 
+pub mod romaji;
+
 pub mod elias;
+
+pub mod punycode;
+pub use punycode::Punycode;
 
 use crate::errors::Error;
 

@@ -2,207 +2,214 @@
 
 use itertools::Itertools;
 
-const TMIN: u32 = 1;
-const TMAX: u32 = 26;
-const DAMP: u32 = 700;
-const SKEW: u32 = 38;
-const INIT_BIAS: u32 = 72;
-const INIT_N: u32 = 128;
-const BASE: u32 = 36;
-const DELIM: char = '-';
+use crate::errors::Error;
 
-pub fn adaptation(delta: u32, num_points: u32, first_time: bool) -> u32 {
-    let mut delta = if first_time { delta / DAMP } else { delta / 2 };
-    delta += delta / num_points;
-    let mut k = 0;
-    while delta > ((BASE - TMIN) * TMAX) / 2 {
-        delta /= BASE - TMIN;
-        k += BASE;
-    }
-    k + (((BASE - TMIN + 1) * delta) / (delta + SKEW))
+use super::Code;
+
+pub struct Punycode {
+    pub tmin: u32,
+    pub tmax: u32,
+    pub damp: u32,
+    pub skew: u32,
+    pub init_bias: u32,
+    pub init_n: u32,
+    pub base: u32,
+    pub delim: char,
 }
 
-fn decode_digit(c: char) -> u32 {
-    match c {
-        'a'..='z' => u32::from(c) - 97,
-        'A'..='Z' => u32::from(c) - 65,
-        '0'..='9' => u32::from(c) - 22,
-        _ => panic!("invald punycode digit when decoding"),
+impl Punycode {
+    pub fn adaptation(&self, delta: u32, num_points: u32, first_time: bool) -> u32 {
+        let mut delta = if first_time {
+            delta / self.damp
+        } else {
+            delta / 2
+        };
+        delta += delta / num_points;
+        let mut k = 0;
+        while delta > ((self.base - self.tmin) * self.tmax) / 2 {
+            delta /= self.base - self.tmin;
+            k += self.base;
+        }
+        k + (((self.base - self.tmin + 1) * delta) / (delta + self.skew))
+    }
+
+    pub fn decode_digit(c: char) -> Result<u32, Error> {
+        Ok(match c {
+            'a'..='z' => u32::from(c) - 97,
+            'A'..='Z' => u32::from(c) - 65,
+            '0'..='9' => u32::from(c) - 22,
+            _ => return Err(Error::state("invalid punycode digit")),
+        })
+    }
+
+    pub fn encode_digit(n: u32) -> Result<char, Error> {
+        Ok(match n {
+            0..=25 => char::from_u32(n + 97).unwrap(),
+            26..=35 => char::from_u32(n + 22).unwrap(),
+            _ => return Err(Error::state("invalid punycode digit")),
+        })
+    }
+
+    pub fn threshold(&self, k: u32, bias: u32) -> u32 {
+        if k <= bias + self.tmin {
+            self.tmin
+        } else if k >= bias + self.tmax {
+            self.tmax
+        } else {
+            k - bias
+        }
     }
 }
 
-fn encode_digit(n: u32) -> char {
-    match n {
-        0..=25 => char::from_u32(n + 97).unwrap(),
-        26..=35 => char::from_u32(n + 22).unwrap(),
-        _ => panic!("invald punycode digit when encoding"),
+impl Default for Punycode {
+    fn default() -> Self {
+        Self {
+            tmin: 1,
+            tmax: 26,
+            damp: 700,
+            skew: 38,
+            init_bias: 72,
+            init_n: 128,
+            base: 36,
+            delim: '-',
+        }
     }
 }
 
-fn threshold(k: u32, bias: u32) -> u32 {
-    if k <= bias + TMIN {
-        TMIN
-    } else if k >= bias + TMAX {
-        TMAX
-    } else {
-        k - bias
-    }
-}
+impl Code for Punycode {
+    fn encode(&self, text: &str) -> Result<String, Error> {
+        let mut n = self.init_n;
+        let mut delta = 0;
+        let mut bias = self.init_bias;
 
-pub fn decode_punycode(input: &str) -> Result<String, &'static str> {
-    let mut n = INIT_N;
-    let mut i = 0;
-    let mut bias = INIT_BIAS;
+        let mut output = text.chars().filter(|c| c.is_ascii()).collect_vec();
 
-    if !input.is_ascii() {
-        return Err("found non-ASCII characters");
-    }
+        let mut h = output.len() as u32;
+        let b = h;
 
-    // This gives a byte index but because we only have ASCII characters this is also the character index
-    let delim_pos = input.rfind(DELIM);
-
-    let mut output = match delim_pos {
-        Some(i) => input.chars().take(i).collect_vec(),
-        None => Vec::new(),
-    };
-
-    // Rather than decoding whole punycode string we'll just decode the part after the delimeter
-    let mut chars = match delim_pos {
-        Some(i) => input.chars().skip(i + 1),
-        None => input.chars().skip(0),
-    };
-
-    'outer: loop {
-        let old_i = i;
-        let mut w = 1;
-        for k in 1.. {
-            let digit = match chars.next() {
-                Some(c) => decode_digit(c),
-                None => break 'outer,
-            };
-
-            i = digit
-                .checked_mul(w)
-                .expect("overflow multipliying digit by w")
-                .checked_add(i)
-                .expect("overflow while incrementing i");
-
-            let t = threshold(k * BASE, bias);
-
-            if digit < t {
-                break;
-            }
-
-            w = BASE
-                .checked_sub(t)
-                .expect("overflow subtracting t from BASE")
-                .checked_mul(w)
-                .expect("overflow while increasing w");
+        if b > 0 {
+            output.push(self.delim);
         }
 
-        let len_plus_one = (output.len() + 1) as u32;
+        while h < text.chars().count() as u32 {
+            // Find the first character that is greater than or equal to n
+            let m = text
+                .chars()
+                .map(|c| u32::from(c))
+                .filter(|c| c >= &n)
+                .fold(u32::MAX, |acc, f| u32::from(f).min(acc));
 
-        bias = adaptation(i - old_i, len_plus_one, old_i == 0);
-
-        n = n
-            .checked_add(i / len_plus_one)
-            .expect("overflow while incrementing n");
-
-        i = i % len_plus_one;
-
-        let c = char::from_u32(n).expect("invalid unicode codepoint");
-
-        output.insert(i as usize, c);
-
-        i += 1;
-    }
-    Ok(output.iter().collect())
-}
-
-pub fn encode_punycode(input: &str) -> String {
-    let mut n = INIT_N;
-    let mut delta = 0;
-    let mut bias = INIT_BIAS;
-
-    let mut output = input.chars().filter(|c| c.is_ascii()).collect_vec();
-
-    let mut h = output.len() as u32;
-    let b = h;
-
-    if b > 0 {
-        output.push(DELIM);
-    }
-
-    while h < input.chars().count() as u32 {
-        // Find the first character that is greater than or equal to n
-        let m = input
-            .chars()
-            .map(|c| u32::from(c))
-            .filter(|c| c >= &n)
-            .fold(u32::MAX, |acc, f| u32::from(f).min(acc));
-
-        delta += (m - n)
-            .checked_mul(h + 1)
-            .expect("overflow multiplying m-n with h+1");
-        n = m;
-        for c in input.chars() {
-            if u32::from(c) < n {
-                delta += 1;
-            }
-            if u32::from(c) == n {
-                let mut q = delta;
-                for k in 1.. {
-                    let t = threshold(k * BASE, bias);
-
-                    if q < t {
-                        break;
-                    }
-
-                    output.push(encode_digit(t + (q - t) % (BASE - t)));
-
-                    q = (q - t) / (BASE - t)
+            delta += m
+                .checked_sub(n)
+                .ok_or(Error::state("overflow subtracting m from n"))?
+                .checked_mul(h + 1)
+                .ok_or(Error::state("overflow multiplying (m-n) by (h+1)"))?;
+            n = m;
+            for c in text.chars() {
+                if u32::from(c) < n {
+                    delta += 1;
                 }
-                output.push(encode_digit(q));
-                bias = adaptation(delta, h + 1, h == b);
-                delta = 0;
-                h += 1
+                if u32::from(c) == n {
+                    let mut q = delta;
+                    for k in 1.. {
+                        let t = self.threshold(k * self.base, bias);
+
+                        if q < t {
+                            break;
+                        }
+
+                        output.push(Self::encode_digit(t + (q - t) % (self.base - t))?);
+
+                        q = (q - t) / (self.base - t)
+                    }
+                    output.push(Self::encode_digit(q)?);
+                    bias = self.adaptation(delta, h + 1, h == b);
+                    delta = 0;
+                    h += 1
+                }
             }
+
+            delta += 1;
+            n += 1;
         }
 
-        delta += 1;
-        n += 1;
+        Ok(output.iter().collect())
     }
 
-    output.iter().collect()
-}
+    fn decode(&self, text: &str) -> Result<String, Error> {
+        let mut n = self.init_n;
+        let mut i = 0;
+        let mut bias = self.init_bias;
 
-#[test]
-fn check_digit_value() {
-    for (c, n) in ('a'..='z').chain('0'..='9').zip(0..=35) {
-        assert!(
-            decode_digit(c) == n,
-            "the digit value of {c} should be {n}, but found {}",
-            decode_digit(c)
-        )
-    }
-    for (c, n) in ('A'..='Z').zip(0..=25) {
-        assert!(
-            decode_digit(c) == n,
-            "the digit value of {c} should be {n}, but found {}",
-            decode_digit(c)
-        )
-    }
-}
+        if !text.is_ascii() {
+            return Err(Error::input("Punycode can only decode ASCII characters"));
+        }
 
-#[test]
-fn check_value_digit() {
-    for (c, n) in ('a'..='z').chain('0'..='9').zip(0..=35) {
-        assert!(
-            encode_digit(n) == c,
-            "the digit value of {c} should be {n}, but found {}",
-            encode_digit(n)
-        )
+        // This gives a byte index but because we only have ASCII characters this is also the character index
+        let delim_pos = text.rfind(self.delim);
+
+        let mut output = match delim_pos {
+            Some(i) => text.chars().take(i).collect_vec(),
+            None => Vec::new(),
+        };
+
+        // Rather than decoding whole punycode string we'll just decode the part after the delimeter
+        let mut chars = match delim_pos {
+            Some(i) => text.chars().skip(i + 1),
+            None => text.chars().skip(0),
+        };
+
+        'outer: loop {
+            let old_i = i;
+            let mut w = 1;
+            for k in 1.. {
+                let digit = match chars.next() {
+                    Some(c) => Self::decode_digit(c)?,
+                    None => break 'outer,
+                };
+
+                i = digit
+                    .checked_mul(w)
+                    .ok_or(Error::state("overflow multipliying digit by w"))?
+                    .checked_add(i)
+                    .ok_or(Error::state("overflow incrementing i"))?;
+
+                let t = self.threshold(k * self.base, bias);
+
+                if digit < t {
+                    break;
+                }
+
+                w = self
+                    .base
+                    .checked_sub(t)
+                    .ok_or(Error::state("overflow subtracting t from self.base"))?
+                    .checked_mul(w)
+                    .ok_or(Error::state("overflow multiplying (self.base - t) by w"))?;
+            }
+
+            let len_plus_one = (output.len() + 1) as u32;
+
+            bias = self.adaptation(i - old_i, len_plus_one, old_i == 0);
+
+            n = n
+                .checked_add(i / len_plus_one)
+                .expect("overflow while incrementing n");
+
+            i = i % len_plus_one;
+
+            let c = char::from_u32(n).expect("invalid unicode codepoint");
+
+            output.insert(i as usize, c);
+
+            i += 1;
+        }
+        Ok(output.iter().collect())
     }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {}
 }
 
 #[cfg(test)]
@@ -217,16 +224,18 @@ static TEST_STRINGS: [(&'static str,&'static str); 3] = [
 
 #[test]
 fn punycode_decode() {
+    let code = Punycode::default();
     for (raw, punycode) in TEST_STRINGS {
-        let decoded = decode_punycode(punycode).unwrap();
+        let decoded = code.decode(punycode).unwrap();
         assert!(raw == decoded, "expected {raw} but found {decoded}");
     }
 }
 
 #[test]
 fn punycode_encode() {
+    let code = Punycode::default();
     for (raw, punycode) in TEST_STRINGS {
-        let encoded = encode_punycode(raw);
+        let encoded = code.encode(raw).unwrap();
         assert!(
             punycode == encoded,
             "expected {punycode} but found {encoded}"
