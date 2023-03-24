@@ -1,123 +1,84 @@
-use crate::{
-    errors::Error,
-    text_aux::PresetAlphabet::{self, Ascii128},
-};
+use crate::{errors::Error, text_aux::PresetAlphabet::Ascii128};
+use itertools::Itertools;
 use lazy_static::lazy_static;
-use std::collections::HashMap;
 
 use super::Code;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum AsciiMode {
-    SevenBit,
-    EightBit,
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DisplayMode {
+    EightBitBinary,
+    SevenBitBinary,
+    Octal,
+    Decimal,
+    Hex,
 }
 
-impl AsciiMode {
+impl DisplayMode {
+    pub fn radix(&self) -> u32 {
+        match self {
+            DisplayMode::EightBitBinary => 2,
+            DisplayMode::SevenBitBinary => 2,
+            DisplayMode::Octal => 8,
+            DisplayMode::Decimal => 10,
+            DisplayMode::Hex => 16,
+        }
+    }
+
+    pub fn name(&self) -> &str {
+        match self {
+            DisplayMode::EightBitBinary => "binary",
+            DisplayMode::SevenBitBinary => "binary",
+            DisplayMode::Octal => "octal",
+            DisplayMode::Decimal => "decimal",
+            DisplayMode::Hex => "hexadecimal",
+        }
+    }
+
     pub fn width(&self) -> usize {
         match self {
-            AsciiMode::SevenBit => 7,
-            AsciiMode::EightBit => 8,
-        }
-    }
-
-    pub fn map(&self) -> HashMap<char, &'static String> {
-        match self {
-            AsciiMode::SevenBit => ASCII_MAP7.clone(),
-            AsciiMode::EightBit => ASCII_MAP8.clone(),
-        }
-    }
-
-    pub fn map_inv(&self) -> HashMap<&'static String, char> {
-        match self {
-            AsciiMode::SevenBit => ASCII_MAP_INV7.clone(),
-            AsciiMode::EightBit => ASCII_MAP_INV8.clone(),
+            DisplayMode::EightBitBinary => 8,
+            DisplayMode::SevenBitBinary => 7,
+            DisplayMode::Octal => 3,
+            DisplayMode::Decimal => 3,
+            DisplayMode::Hex => 2,
         }
     }
 }
 
 lazy_static! {
-    pub static ref SEVEN_BIT_ASCII_CODES: Vec<String> = {
-        let mut v = Vec::with_capacity(128);
-        for n in 0..128 {
-            v.push(format!("{:07b}", n))
-        }
-        v
-    };
-    pub static ref EIGHT_BIT_ASCII_CODES: Vec<String> = {
-        let mut v = Vec::with_capacity(128);
-        for n in 0..128 {
-            v.push(format!("{:08b}", n))
-        }
-        v
-    };
-    pub static ref ASCII_MAP8: HashMap<char, &'static String> = {
-        let mut m = HashMap::new();
-        for (letter, code) in Ascii128.chars().zip(EIGHT_BIT_ASCII_CODES.iter()) {
-            m.insert(letter, code);
-        }
-        m
-    };
-    pub static ref ASCII_MAP_INV8: HashMap<&'static String, char> = {
-        let mut m = HashMap::new();
-        for (letter, code) in Ascii128.chars().zip(EIGHT_BIT_ASCII_CODES.iter()) {
-            m.insert(code, letter);
-        }
-        m
-    };
-    pub static ref ASCII_MAP7: HashMap<char, &'static String> = {
-        let mut m = HashMap::new();
-        for (letter, code) in Ascii128.chars().zip(SEVEN_BIT_ASCII_CODES.iter()) {
-            m.insert(letter, code);
-        }
-        m
-    };
-    pub static ref ASCII_MAP_INV7: HashMap<&'static String, char> = {
-        let mut m = HashMap::new();
-        for (letter, code) in Ascii128.chars().zip(SEVEN_BIT_ASCII_CODES.iter()) {
-            m.insert(code, letter);
-        }
-        m
-    };
+    pub static ref SEVEN_BIT: Vec<String> = (0..128).map(|n| format!("{:07b}", n)).collect_vec();
+    pub static ref SEVEN_BIT_DISPLAY: Vec<String> =
+        (0..128).map(|n| format!(" {:07b}", n)).collect_vec();
+    pub static ref EIGHT_BIT: Vec<String> = (0..128).map(|n| format!("{:08b}", n)).collect_vec();
+    pub static ref OCTAL: Vec<String> = (0..128).map(|n| format!("{:03o}", n)).collect_vec();
+    pub static ref DECIMAL: Vec<String> = (0..128).map(|n| format!("{:3}", n)).collect_vec();
+    pub static ref HEX: Vec<String> = (0..128).map(|n| format!("{:02x}", n)).collect_vec();
 }
 
 pub struct Ascii {
-    pub mode: AsciiMode,
-    alphabet: &'static str,
+    pub mode: DisplayMode,
 }
 
 impl Ascii {
-    pub fn input_set(&self) -> &'static str {
-        self.alphabet
-    }
-
     pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (char, &String)> + '_> {
+        let cs = Ascii128.chars();
         match self.mode {
-            AsciiMode::SevenBit => Box::new(
-                self.alphabet
-                    .chars()
-                    .map(|x| (x, *ASCII_MAP7.get(&x).unwrap())),
-            ),
-            AsciiMode::EightBit => Box::new(
-                self.alphabet
-                    .chars()
-                    .map(|x| (x, *ASCII_MAP8.get(&x).unwrap())),
-            ),
+            DisplayMode::EightBitBinary => Box::new(cs.zip(EIGHT_BIT.iter())),
+            DisplayMode::SevenBitBinary => Box::new(cs.zip(SEVEN_BIT.iter())),
+            DisplayMode::Octal => Box::new(cs.zip(OCTAL.iter())),
+            DisplayMode::Decimal => Box::new(cs.zip(DECIMAL.iter())),
+            DisplayMode::Hex => Box::new(cs.zip(HEX.iter())),
         }
     }
 
     pub fn chars_codes_display(&self) -> Box<dyn Iterator<Item = (char, &String)> + '_> {
+        let cs = Ascii128.chars();
         match self.mode {
-            AsciiMode::SevenBit => Box::new(
-                PresetAlphabet::Ascii128
-                    .chars()
-                    .zip(SEVEN_BIT_ASCII_CODES.iter()),
-            ),
-            AsciiMode::EightBit => Box::new(
-                PresetAlphabet::Ascii128
-                    .chars()
-                    .zip(EIGHT_BIT_ASCII_CODES.iter()),
-            ),
+            DisplayMode::EightBitBinary => Box::new(cs.zip(EIGHT_BIT.iter())),
+            DisplayMode::SevenBitBinary => Box::new(cs.zip(SEVEN_BIT_DISPLAY.iter())),
+            DisplayMode::Octal => Box::new(cs.zip(OCTAL.iter())),
+            DisplayMode::Decimal => Box::new(cs.zip(DECIMAL.iter())),
+            DisplayMode::Hex => Box::new(cs.zip(HEX.iter())),
         }
     }
 }
@@ -125,48 +86,46 @@ impl Ascii {
 impl Default for Ascii {
     fn default() -> Self {
         Ascii {
-            mode: AsciiMode::EightBit,
-            alphabet: Ascii128.slice(),
+            mode: DisplayMode::EightBitBinary,
         }
     }
 }
 
 impl Code for Ascii {
     fn encode(&self, text: &str) -> Result<String, Error> {
-        let w = self.mode.width();
-        let map = self.mode.map();
-        let mut out = String::with_capacity(text.chars().count() * w);
-        for s in text.chars() {
-            match map.get(&s) {
-                Some(code_group) => out.push_str(code_group),
-                None => {
-                    return Err(Error::Input(format!(
-                        "The symbol `{}` is not in the ASCII alphabet",
-                        s
-                    )))
-                }
-            }
+        if !text.is_ascii() {
+            return Err(Error::Input("text includes non-ASCII characters".into()));
         }
-        Ok(out)
+        let chunks = text.bytes();
+        let s: String = match self.mode {
+            DisplayMode::EightBitBinary => chunks.map(|n| (format!("{:08b}", n))).join(" "),
+            DisplayMode::SevenBitBinary => chunks.map(|n| (format!("{:07b}", n))).join(" "),
+            DisplayMode::Octal => chunks.map(|n| (format!("{:04o}", n))).join(" "),
+            DisplayMode::Decimal => chunks.map(|n| (format!("{}", n))).join(" "),
+            DisplayMode::Hex => chunks.map(|n| (format!("{:02x}", n))).join(" "),
+        };
+        Ok(s)
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
-        let w = self.mode.width();
-        let map_inv = self.mode.map_inv();
-        let mut out = String::with_capacity(text.chars().count() / w);
-        for p in 0..(text.len() / w) {
-            let group = &text[(p * w)..(p * w) + w];
-            match map_inv.get(&group.to_string()) {
-                Some(code_group) => out.push(*code_group),
-                None => {
+        let chunks = text.split(" ");
+        let radix = self.mode.radix();
+        let mut vec = Vec::with_capacity(chunks.clone().count());
+
+        for chunk in chunks {
+            match u8::from_str_radix(chunk, radix) {
+                Ok(n) => vec.push(n),
+                Err(_) => {
                     return Err(Error::Input(format!(
-                        "The code group `{}` is not valid",
-                        group
+                        "error decoding ASCII ({} representation), unable to parse string: {}",
+                        self.mode.name(),
+                        chunk
                     )))
                 }
             }
         }
-        Ok(out)
+
+        String::from_utf8(vec).map_err(|e| Error::Input(e.to_string()))
     }
 
     fn randomize(&mut self) {}
@@ -179,7 +138,7 @@ mod ascii_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "0101010001001000010001010101000101010101010010010100001101001011010000100101001001001111010101110100111001000110010011110101100001001010010101010100110101010000010100110100111101010110010001010101001001010100010010000100010101001100010000010101101001011001010001000100111101000111";
+    const CIPHERTEXT: &'static str = "01010100 01001000 01000101 01010001 01010101 01001001 01000011 01001011 01000010 01010010 01001111 01010111 01001110 01000110 01001111 01011000 01001010 01010101 01001101 01010000 01010011 01001111 01010110 01000101 01010010 01010100 01001000 01000101 01001100 01000001 01011010 01011001 01000100 01001111 01000111";
 
     #[test]
     fn encrypt_test() {
