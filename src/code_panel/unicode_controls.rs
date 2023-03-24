@@ -15,7 +15,7 @@ impl View for Unicode {
         });
 
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.mode, DisplayMode::Bits, "Binary");
+            ui.selectable_value(&mut self.mode, DisplayMode::Binary, "Binary");
             ui.selectable_value(&mut self.mode, DisplayMode::Decimal, "Decimal");
             ui.selectable_value(&mut self.mode, DisplayMode::Hex, "Hexadecimal");
         });

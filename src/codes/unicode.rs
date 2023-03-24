@@ -13,7 +13,8 @@ pub enum UnicodeEncoding {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DisplayMode {
-    Bits,
+    Binary,
+    Octal,
     Decimal,
     Hex,
 }
@@ -21,9 +22,19 @@ pub enum DisplayMode {
 impl DisplayMode {
     pub fn radix(&self) -> u32 {
         match self {
-            DisplayMode::Bits => 2,
+            DisplayMode::Binary => 2,
+            DisplayMode::Octal => 8,
             DisplayMode::Decimal => 10,
             DisplayMode::Hex => 16,
+        }
+    }
+
+    pub fn name(&self) -> &str {
+        match self {
+            DisplayMode::Binary => "binary",
+            DisplayMode::Octal => "octal",
+            DisplayMode::Decimal => "decimal",
+            DisplayMode::Hex => "hexadecimal",
         }
     }
 }
@@ -37,7 +48,8 @@ impl Unicode {
     fn utf8_encode(&self, text: &str) -> Result<String, Error> {
         let chunks = text.bytes();
         let s = match self.mode {
-            DisplayMode::Bits => chunks.map(|n| (format!("{:08b}", n))).join(" "),
+            DisplayMode::Binary => chunks.map(|n| (format!("{:08b}", n))).join(" "),
+            DisplayMode::Octal => chunks.map(|n| (format!("{:04o}", n))).join(" "),
             DisplayMode::Decimal => chunks.map(|n| (format!("{}", n))).join(" "),
             DisplayMode::Hex => chunks.map(|n| (format!("{:02x}", n))).join(" "),
         };
@@ -47,7 +59,8 @@ impl Unicode {
     fn utf16_encode(&self, text: &str) -> Result<String, Error> {
         let chunks = text.encode_utf16();
         let s = match self.mode {
-            DisplayMode::Bits => chunks.map(|n| (format!("{:016b}", n))).join(" "),
+            DisplayMode::Binary => chunks.map(|n| (format!("{:016b}", n))).join(" "),
+            DisplayMode::Octal => chunks.map(|n| (format!("{:08o}", n))).join(" "),
             DisplayMode::Decimal => chunks.map(|n| (format!("{}", n))).join(" "),
             DisplayMode::Hex => chunks.map(|n| (format!("{:04x}", n))).join(" "),
         };
@@ -57,7 +70,8 @@ impl Unicode {
     fn utf32_encode(&self, text: &str) -> Result<String, Error> {
         let chunks = text.chars().map(|c| u32::from(c));
         let s = match self.mode {
-            DisplayMode::Bits => chunks.map(|n| (format!("{:032b}", n))).join(" "),
+            DisplayMode::Binary => chunks.map(|n| (format!("{:032b}", n))).join(" "),
+            DisplayMode::Octal => chunks.map(|n| (format!("{:016o}", n))).join(" "),
             DisplayMode::Decimal => chunks.map(|n| (format!("{}", n))).join(" "),
             DisplayMode::Hex => chunks.map(|n| (format!("{:08x}", n))).join(" "),
         };
@@ -66,26 +80,44 @@ impl Unicode {
 
     fn utf8_decode(&self, text: &str) -> Result<String, Error> {
         let chunks = text.split(" ");
+        let radix = self.mode.radix();
+        let mut vec = Vec::with_capacity(chunks.clone().count());
 
-        let out = String::with_capacity(chunks.clone().count());
-
-        if self.mode == DisplayMode::Bits {
-            for chunk in chunks {
-                match u32::from_str_radix(chunk, 2) {
-                    Ok(_) => {
-                        todo!("decoding algorithm for UTF-8 needed");
-                    }
-                    Err(_) => {
-                        return Err(Error::Input(format!(
-                            "UTF-8 decoding error, unable to parse bitstring: {}",
-                            chunk
-                        )))
-                    }
+        for chunk in chunks {
+            match u8::from_str_radix(chunk, radix) {
+                Ok(n) => vec.push(n),
+                Err(_) => {
+                    return Err(Error::Input(format!(
+                        "error decoding UTF-8 ({} representation), unable to parse string: {}",
+                        self.mode.name(),
+                        chunk
+                    )))
                 }
             }
         }
 
-        Ok(out)
+        String::from_utf8(vec).map_err(|e| Error::Input(e.to_string()))
+    }
+
+    fn utf16_decode(&self, text: &str) -> Result<String, Error> {
+        let chunks = text.split(" ");
+        let radix = self.mode.radix();
+        let mut vec = Vec::with_capacity(chunks.clone().count());
+
+        for chunk in chunks {
+            match u16::from_str_radix(chunk, radix) {
+                Ok(n) => vec.push(n),
+                Err(_) => {
+                    return Err(Error::Input(format!(
+                        "error decoding UTF-16 ({} representation), unable to parse string: {}",
+                        self.mode.name(),
+                        chunk
+                    )))
+                }
+            }
+        }
+
+        String::from_utf16(&vec).map_err(|e| Error::Input(e.to_string()))
     }
 
     fn utf32_decode(&self, text: &str) -> Result<String, Error> {
@@ -110,7 +142,8 @@ impl Unicode {
                 }
                 Err(_) => {
                     return Err(Error::Input(format!(
-                        "UTF-32 decoding error, unable to parse string: {}",
+                        "error decoding UTF-32 ({} representation), unable to parse string: {}",
+                        self.mode.name(),
                         chunk
                     )))
                 }
@@ -125,7 +158,7 @@ impl Default for Unicode {
     fn default() -> Self {
         Unicode {
             encoding: UnicodeEncoding::Utf8,
-            mode: DisplayMode::Bits,
+            mode: DisplayMode::Binary,
         }
     }
 }
@@ -141,8 +174,8 @@ impl Code for Unicode {
 
     fn decode(&self, text: &str) -> Result<String, Error> {
         match self.encoding {
-            UnicodeEncoding::Utf8 => Err(Error::general("decoding not yet supported")),
-            UnicodeEncoding::Utf16 => Err(Error::general("decoding not yet supported")),
+            UnicodeEncoding::Utf8 => self.utf8_decode(text),
+            UnicodeEncoding::Utf16 => self.utf16_decode(text),
             UnicodeEncoding::Utf32 => self.utf32_decode(text),
         }
     }
@@ -180,49 +213,36 @@ mod unicode_tests {
     }
 
     #[test]
-    fn encrypt_decrypt_utf32() {
+    fn encrypt_decrypt() {
         let mut code = Unicode::default();
-        code.encoding = UnicodeEncoding::Utf32;
 
-        code.mode = DisplayMode::Bits;
-        let encoded = code.encode(PLAINTEXT).expect("encoding UTF32 bits error");
-        let decoded = code.decode(&encoded).expect("decoding UTF32 bits error");
-        if decoded != PLAINTEXT {
-            panic!("decoded UTF32 bits not equivalent to plaintext")
-        }
+        for encoding in [
+            UnicodeEncoding::Utf8,
+            UnicodeEncoding::Utf16,
+            UnicodeEncoding::Utf32,
+        ] {
+            code.encoding = encoding;
 
-        code.mode = DisplayMode::Decimal;
-        let encoded = code
-            .encode(PLAINTEXT)
-            .expect("encoding UTF32 decimal error");
-        let decoded = code.decode(&encoded).expect("decoding UTF32 decimal error");
-        if decoded != PLAINTEXT {
-            panic!("decoded UTF32 decimal not equivalent to plaintext")
-        }
-
-        code.mode = DisplayMode::Hex;
-        let encoded = code.encode(PLAINTEXT).expect("encoding UTF32 hex error");
-        let decoded = code.decode(&encoded).expect("decoding UTF32 hex error");
-        if decoded != PLAINTEXT {
-            panic!("decoded UTF32 hex not equivalent to plaintext")
+            for mode in [
+                DisplayMode::Binary,
+                DisplayMode::Octal,
+                DisplayMode::Decimal,
+                DisplayMode::Hex,
+            ] {
+                code.mode = mode;
+                let encoded = code
+                    .encode(PLAINTEXT)
+                    .expect(&format!("encoding {:?} {:?} error", encoding, mode));
+                let decoded = code
+                    .decode(&encoded)
+                    .expect(&format!("decoding{:?} {:?} error", encoding, mode));
+                if decoded != PLAINTEXT {
+                    panic!(
+                        "decoded {:?} {:?} not equivalent to plaintext",
+                        encoding, mode
+                    )
+                }
+            }
         }
     }
-
-    // #[test]
-    // fn decrypt_test_utf8() {
-    //     let code = Unicode::default();
-    //     assert_eq!(code.decode(CIPHERTEXT_UTF8).unwrap(), PLAINTEXT);
-    // }
-
-    // #[test]
-    // fn encrypt_test_utf8() {
-    //     let code = Unicode::default();
-    //     assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT);
-    // }
-
-    // #[test]
-    // fn decrypt_test_utf8() {
-    //     let code = Unicode::default();
-    //     assert_eq!(code.decode(CIPHERTEXT).unwrap(), PLAINTEXT);
-    // }
 }

@@ -194,11 +194,11 @@ impl Code for Punycode {
 
             n = n
                 .checked_add(i / len_plus_one)
-                .expect("overflow while incrementing n");
+                .ok_or(Error::state("overflow while incrementing n"))?;
 
             i = i % len_plus_one;
 
-            let c = char::from_u32(n).expect("invalid unicode codepoint");
+            let c = char::from_u32(n).ok_or(Error::state("invalid unicode codepoint"))?;
 
             output.insert(i as usize, c);
 
