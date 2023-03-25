@@ -1,6 +1,9 @@
 use super::char_to_usize;
 use lazy_static::lazy_static;
-use std::{collections::HashMap, fmt};
+use std::{
+    collections::HashMap,
+    fmt::{self, Formatter},
+};
 
 // Specifically the Enigma rotor
 #[derive(Copy, Clone, Debug)]
@@ -61,7 +64,7 @@ impl PartialEq for Rotor {
 }
 
 impl fmt::Display for Rotor {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let mut out = String::with_capacity(26);
         let p = self.position;
         out.push_str(&self.wiring_str[p..]);
@@ -106,7 +109,7 @@ impl PartialEq for Reflector {
 }
 
 impl fmt::Display for Reflector {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.wiring_str)
     }
 }

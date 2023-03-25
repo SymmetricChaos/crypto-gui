@@ -173,8 +173,9 @@ impl View for RS44 {
                     ui.end_row();
                 }
             });
+
         if ui.button("Copy Stencil to Clipboard").clicked() {
-            ui.output().copied_text = self.stencil_to_text();
+            ui.output_mut(|o| o.copied_text = self.stencil_to_text());
         }
 
         ui.text_edit_singleline(&mut self.imported_stencil);

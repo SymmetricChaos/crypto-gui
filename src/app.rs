@@ -291,7 +291,7 @@ impl ClassicCrypto {
 
 impl App for ClassicCrypto {
     fn update(&mut self, ctx: &Context, frame: &mut eframe::Frame) {
-        frame.set_window_size((900.0, 700.0).into());
+        //frame.set_window_size((900.0, 700.0).into());
 
         TopBottomPanel::top("top_panel").show(ctx, |ui| {
             ui.horizontal_top(|ui| {

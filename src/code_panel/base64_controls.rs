@@ -19,7 +19,7 @@ impl View for Base64 {
             ui.label(format!("File: {}", file_name.unwrap()));
             ui.label("\nBase 64 Encoding\n");
             if ui.button("Copy to Clipboard").clicked() {
-                ui.output().copied_text = self.encode_file().unwrap();
+                ui.output_mut(|o| o.copied_text = self.encode_file().unwrap());
             }
         }
     }
