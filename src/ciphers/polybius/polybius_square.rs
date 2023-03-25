@@ -8,7 +8,7 @@ use crate::{
 };
 use itertools::Itertools;
 use num::Integer;
-use std::fmt;
+use std::fmt::{self, Formatter};
 
 pub struct PolybiusSquare {
     pub alphabet_string: String,
@@ -180,7 +180,7 @@ impl Cipher for PolybiusSquare {
 }
 
 impl fmt::Display for PolybiusSquare {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let mut square = String::from("  ");
         for xlab in self.labels.chars().take(self.side_len) {
             square.push_str(&format!("{xlab} "))

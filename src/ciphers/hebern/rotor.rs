@@ -100,7 +100,7 @@ impl HebernRotor {
 }
 
 impl Display for HebernRotor {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let mut out = String::with_capacity(self.size);
         let p = self.position;
         out.push_str(&self.wiring_str[p..]);

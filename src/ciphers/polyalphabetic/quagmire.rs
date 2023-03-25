@@ -125,7 +125,7 @@ impl Quagmire {
         }
     }
 
-    pub fn indicator_cyclic_key(&self) -> Cycle<Iter<i32>> {
+    pub fn indicator_cyclic_key(&self) -> Cycle<Iter<'_, i32>> {
         self.ind_key.iter().cycle()
     }
 }

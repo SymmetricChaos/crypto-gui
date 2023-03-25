@@ -59,7 +59,7 @@ impl Porta {
             .collect_vec();
     }
 
-    pub fn tableaux(&self) -> std::slice::Iter<&str> {
+    pub fn tableaux(&self) -> std::slice::Iter<'_, &str> {
         PORTA_TABLEAUX.iter()
     }
 }

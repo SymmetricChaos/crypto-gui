@@ -1,3 +1,5 @@
+use std::str::Chars;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PresetAlphabet {
     BasicLatin,
@@ -51,7 +53,7 @@ impl PresetAlphabet {
     }
 
     // Iterate over characters
-    pub fn chars(&self) -> std::str::Chars {
+    pub fn chars(&self) -> Chars<'_> {
         self.slice().chars()
     }
 }

@@ -1,4 +1,4 @@
-use std::fmt;
+use std::fmt::{self, Formatter};
 
 use crate::{
     ciphers::Cipher,
@@ -164,7 +164,7 @@ impl Cipher for Slidefair {
 }
 
 impl fmt::Display for Slidefair {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let mut out = String::new();
         let alpha = String::from(&self.alphabet_string);
         for (n, _) in self.alphabet.chars().enumerate() {

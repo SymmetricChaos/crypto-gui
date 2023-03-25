@@ -167,7 +167,7 @@ impl Cipher for Playfair {
 }
 
 impl fmt::Display for Playfair {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut out = String::new();
         for (n, c) in self.square.chars().enumerate() {
             if n % self.grid_side_len == 0 {

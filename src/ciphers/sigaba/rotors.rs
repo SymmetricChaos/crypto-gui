@@ -1,7 +1,10 @@
 use crate::rotors::Rotor;
 use itertools::zip;
 use lazy_static::lazy_static;
-use std::{collections::HashMap, fmt};
+use std::{
+    collections::HashMap,
+    fmt::{self, Formatter},
+};
 
 pub type IndexRotor = Rotor<10>;
 pub type CipherRotor = Rotor<26>;
@@ -13,7 +16,7 @@ impl<const N: usize> PartialEq for Rotor<N> {
 }
 
 impl<const N: usize> fmt::Display for Rotor<N> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let mut out = String::with_capacity(N);
         let p = self.position;
         out.push_str(&self.wiring_str[p..]);

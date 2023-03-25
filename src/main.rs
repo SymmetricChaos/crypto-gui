@@ -30,7 +30,8 @@ fn main() {
         "Classic Cryptography",
         native_options,
         Box::new(|cc| Box::new(app::ClassicCrypto::build_with_context(cc))),
-    );
+    )
+    .expect("failed to start eframe");
 }
 
 // when compiling to web using trunk.

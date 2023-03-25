@@ -290,7 +290,7 @@ impl ClassicCrypto {
 }
 
 impl App for ClassicCrypto {
-    fn update(&mut self, ctx: &Context, frame: &mut eframe::Frame) {
+    fn update(&mut self, ctx: &Context, _frame: &mut eframe::Frame) {
         //frame.set_window_size((900.0, 700.0).into());
 
         TopBottomPanel::top("top_panel").show(ctx, |ui| {

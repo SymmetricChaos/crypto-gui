@@ -4,7 +4,7 @@ use crate::global_rng::get_global_rng;
 use crate::text_aux::{random_char_vec, VecString};
 use lazy_static::lazy_static;
 use rand::Fill;
-use std::fmt;
+use std::fmt::{self, Formatter};
 
 use itertools::Itertools;
 
@@ -26,7 +26,7 @@ impl Cage {
 }
 
 impl fmt::Display for Cage {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let mut s = "Cage\n".to_string();
         for b in self.lugs.chunks(9).collect_vec() {
             for (lug0, lug1) in b {
@@ -101,7 +101,7 @@ impl Rotor {
 
 // This could be simplified since all the real rotors used ASCII characters but this library tries to work with Unicode as much as possible
 impl fmt::Display for Rotor {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let mut s = String::new();
         for (pos, letter) in self.alphabet.iter().enumerate() {
             if pos == self.active {

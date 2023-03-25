@@ -36,7 +36,7 @@ impl Default for Hutton {
 }
 
 impl Hutton {
-    pub fn password_values_cycle(&self) -> std::iter::Cycle<std::slice::Iter<usize>> {
+    pub fn password_values_cycle(&self) -> std::iter::Cycle<std::slice::Iter<'_, usize>> {
         self.password.iter().cycle()
     }
 
