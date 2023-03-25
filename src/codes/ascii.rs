@@ -152,3 +152,28 @@ mod ascii_tests {
         assert_eq!(code.decode(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }
+
+#[test]
+fn encrypt_decrypt() {
+    let mut code = Ascii::default();
+    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+
+    for mode in [
+        DisplayMode::EightBitBinary,
+        DisplayMode::SevenBitBinary,
+        DisplayMode::Octal,
+        DisplayMode::Decimal,
+        DisplayMode::Hex,
+    ] {
+        code.mode = mode;
+        let encoded = code
+            .encode(PLAINTEXT)
+            .expect(&format!("encoding ASCII {:?} error", mode));
+        let decoded = code
+            .decode(&encoded)
+            .expect(&format!("decoding ASCII {:?} error", mode));
+        if decoded != PLAINTEXT {
+            panic!("decoded ASCII {:?} not equivalent to plaintext", mode)
+        }
+    }
+}
