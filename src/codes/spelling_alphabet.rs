@@ -40,6 +40,7 @@ lazy_static! {
                                               "FIVE", "SIX", "SEVEN", "EIGHT", "NINE"]);
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SpellingAlphabetMode {
     Nato,
     Ccb,
@@ -69,7 +70,7 @@ impl SpellingAlphabetMode {
 }
 
 pub struct SpellingAlphabet {
-    mode: SpellingAlphabetMode,
+    pub mode: SpellingAlphabetMode,
 }
 
 impl SpellingAlphabet {
