@@ -1,6 +1,9 @@
 use itertools::Itertools;
 
-use crate::errors::Error;
+use crate::{
+    errors::Error,
+    text_aux::bytes_as_text::{byte_to_string, ByteRep},
+};
 
 use super::Code;
 
@@ -11,58 +14,24 @@ pub enum UnicodeEncoding {
     Utf32,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum DisplayMode {
-    Binary,
-    Octal,
-    Decimal,
-    Hex,
-}
-
-impl DisplayMode {
-    pub fn radix(&self) -> u32 {
-        match self {
-            DisplayMode::Binary => 2,
-            DisplayMode::Octal => 8,
-            DisplayMode::Decimal => 10,
-            DisplayMode::Hex => 16,
-        }
-    }
-
-    pub fn name(&self) -> &str {
-        match self {
-            DisplayMode::Binary => "binary",
-            DisplayMode::Octal => "octal",
-            DisplayMode::Decimal => "decimal",
-            DisplayMode::Hex => "hexadecimal",
-        }
-    }
-}
-
 pub struct Unicode {
     pub encoding: UnicodeEncoding,
-    pub mode: DisplayMode,
+    pub mode: ByteRep,
 }
 
 impl Unicode {
     fn utf8_encode(&self, text: &str) -> Result<String, Error> {
-        let chunks = text.bytes();
-        let s = match self.mode {
-            DisplayMode::Binary => chunks.map(|n| (format!("{:08b}", n))).join(" "),
-            DisplayMode::Octal => chunks.map(|n| (format!("{:04o}", n))).join(" "),
-            DisplayMode::Decimal => chunks.map(|n| (format!("{}", n))).join(" "),
-            DisplayMode::Hex => chunks.map(|n| (format!("{:02x}", n))).join(" "),
-        };
-        Ok(s)
+        Ok(text.bytes().map(|n| byte_to_string(n, self.mode)).join(" "))
     }
 
     fn utf16_encode(&self, text: &str) -> Result<String, Error> {
         let chunks = text.encode_utf16();
         let s = match self.mode {
-            DisplayMode::Binary => chunks.map(|n| (format!("{:016b}", n))).join(" "),
-            DisplayMode::Octal => chunks.map(|n| (format!("{:08o}", n))).join(" "),
-            DisplayMode::Decimal => chunks.map(|n| (format!("{}", n))).join(" "),
-            DisplayMode::Hex => chunks.map(|n| (format!("{:04x}", n))).join(" "),
+            ByteRep::Binary => chunks.map(|n| (format!("{:016b}", n))).join(" "),
+            ByteRep::Octal => chunks.map(|n| (format!("{:08o}", n))).join(" "),
+            ByteRep::Decimal => chunks.map(|n| (format!("{}", n))).join(" "),
+            ByteRep::Hex => chunks.map(|n| (format!("{:04x}", n))).join(" "),
+            ByteRep::HexCap => chunks.map(|n| (format!("{:04X}", n))).join(" "),
         };
         Ok(s)
     }
@@ -70,10 +39,11 @@ impl Unicode {
     fn utf32_encode(&self, text: &str) -> Result<String, Error> {
         let chunks = text.chars().map(|c| u32::from(c));
         let s = match self.mode {
-            DisplayMode::Binary => chunks.map(|n| (format!("{:032b}", n))).join(" "),
-            DisplayMode::Octal => chunks.map(|n| (format!("{:016o}", n))).join(" "),
-            DisplayMode::Decimal => chunks.map(|n| (format!("{}", n))).join(" "),
-            DisplayMode::Hex => chunks.map(|n| (format!("{:08x}", n))).join(" "),
+            ByteRep::Binary => chunks.map(|n| (format!("{:032b}", n))).join(" "),
+            ByteRep::Octal => chunks.map(|n| (format!("{:016o}", n))).join(" "),
+            ByteRep::Decimal => chunks.map(|n| (format!("{}", n))).join(" "),
+            ByteRep::Hex => chunks.map(|n| (format!("{:08x}", n))).join(" "),
+            ByteRep::HexCap => chunks.map(|n| (format!("{:08X}", n))).join(" "),
         };
         Ok(s)
     }
@@ -88,8 +58,7 @@ impl Unicode {
                 Ok(n) => vec.push(n),
                 Err(_) => {
                     return Err(Error::Input(format!(
-                        "error decoding UTF-8 ({} representation), unable to parse string: {}",
-                        self.mode.name(),
+                        "error decoding UTF-8, unable to parse string: {}",
                         chunk
                     )))
                 }
@@ -109,8 +78,7 @@ impl Unicode {
                 Ok(n) => vec.push(n),
                 Err(_) => {
                     return Err(Error::Input(format!(
-                        "error decoding UTF-16 ({} representation), unable to parse string: {}",
-                        self.mode.name(),
+                        "error decoding UTF-16, unable to parse string: {}",
                         chunk
                     )))
                 }
@@ -142,8 +110,7 @@ impl Unicode {
                 }
                 Err(_) => {
                     return Err(Error::Input(format!(
-                        "error decoding UTF-32 ({} representation), unable to parse string: {}",
-                        self.mode.name(),
+                        "error decoding UTF-32 unable to parse string: {}",
                         chunk
                     )))
                 }
@@ -158,7 +125,7 @@ impl Default for Unicode {
     fn default() -> Self {
         Unicode {
             encoding: UnicodeEncoding::Utf8,
-            mode: DisplayMode::Binary,
+            mode: ByteRep::Binary,
         }
     }
 }
@@ -201,14 +168,14 @@ mod unicode_tests {
     #[test]
     fn encrypt_utf8_dec() {
         let mut code = Unicode::default();
-        code.mode = DisplayMode::Decimal;
+        code.mode = ByteRep::Decimal;
         println!("{}", code.encode(PLAINTEXT).unwrap());
     }
 
     #[test]
     fn encrypt_utf8_hex() {
         let mut code = Unicode::default();
-        code.mode = DisplayMode::Hex;
+        code.mode = ByteRep::Hex;
         println!("{}", code.encode(PLAINTEXT).unwrap());
     }
 
@@ -224,10 +191,10 @@ mod unicode_tests {
             code.encoding = encoding;
 
             for mode in [
-                DisplayMode::Binary,
-                DisplayMode::Octal,
-                DisplayMode::Decimal,
-                DisplayMode::Hex,
+                ByteRep::Binary,
+                ByteRep::Octal,
+                ByteRep::Decimal,
+                ByteRep::Hex,
             ] {
                 code.mode = mode;
                 let encoded = code
