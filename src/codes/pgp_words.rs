@@ -1,4 +1,8 @@
-use itertools::Itertools; // 0.10.3
+use itertools::Itertools;
+
+use crate::errors::Error;
+
+use super::Code;
 
 const PGP_WORDS: [[&'static str; 2]; 256] = [
     ["aardvark", "adroitness"],
@@ -256,12 +260,77 @@ const PGP_WORDS: [[&'static str; 2]; 256] = [
     ["wayside", "Wilmington"],
     ["willow", "Wyoming"],
     ["woodlark", "yesteryear"],
-    ["Zulu", "Yucatán"]];
-    
-pub fn data_to_words(data: &[u8]) -> String {
-    data.iter()
-        .enumerate()
-        .map(|(idx, byte)| PGP_WORDS[*byte as usize][idx%2])
-        .intersperse(" ")
-        .collect::<String>()
+    ["Zulu", "Yucatan"],
+];
+
+// This can't be done with a binary search because the right side list is not sorted with "applicant" before "Apollo"
+pub fn left_word(word: &str) -> Result<usize, Error> {
+    PGP_WORDS
+        .iter()
+        .position(|p| p[0] == word)
+        .ok_or_else(|| Error::Input(format!("invalid left word `{}` found", word)))
+}
+
+pub fn right_word(word: &str) -> Result<usize, Error> {
+    PGP_WORDS
+        .iter()
+        .position(|p| p[1] == word)
+        .ok_or_else(|| Error::Input(format!("invalid left word `{}` found", word)))
+}
+
+pub struct PgpWords {}
+
+impl Default for PgpWords {
+    fn default() -> Self {
+        Self {}
+    }
+}
+
+impl PgpWords {
+    pub fn chars_codes(&mut self) -> impl Iterator<Item = (String, String)> + '_ {
+        (0..256).map(|n| {
+            (
+                format!("{n:02x}"),
+                format!("{}, {}", PGP_WORDS[n][0], PGP_WORDS[n][1]),
+            )
+        })
+    }
+}
+
+impl Code for PgpWords {
+    fn encode(&self, text: &str) -> Result<String, Error> {
+        let data = text.bytes();
+        Ok(data
+            .enumerate()
+            .map(|(idx, byte)| PGP_WORDS[byte as usize][idx % 2])
+            .join(" "))
+    }
+
+    fn decode(&self, text: &str) -> Result<String, Error> {
+        let words = text.split(" ");
+        let mut left = true;
+        let mut out = Vec::with_capacity(words.clone().count());
+        for word in words {
+            if left {
+                out.push(format!("{:02X}", left_word(word)?))
+            } else {
+                out.push(format!("{:02X}", right_word(word)?))
+            }
+            left = !left;
+        }
+        Ok(out.join(" "))
+    }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {}
+}
+
+#[test]
+pub fn encode_pgp_words() {
+    let words = "topmost Istanbul Pluto vagabond treadmill Pacific brackish dictator goldfish Medusa afflict bravado chatter revolver Dupont midsummer stopwatch whimsical cowbell bottomless";
+    let nums = "E5 82 94 F2 E9 A2 27 48 6E 8B 06 1B 31 CC 52 8F D7 FA 3F 19";
+    let code = PgpWords::default();
+    let decoded = code.decode(words).unwrap();
+    assert_eq!(nums, decoded)
 }

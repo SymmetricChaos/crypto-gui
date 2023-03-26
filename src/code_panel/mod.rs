@@ -14,6 +14,7 @@ pub mod punycode_controls;
 pub mod spelling_alphabet_controls;
 pub mod unary_controls;
 pub mod unicode_controls;
+pub mod pgp_controls;
 
 pub trait ViewableCode: View + Code {}
 

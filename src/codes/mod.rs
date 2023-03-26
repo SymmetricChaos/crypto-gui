@@ -38,6 +38,9 @@ pub mod elias;
 pub mod punycode;
 pub use punycode::Punycode;
 
+pub mod pgp_words;
+pub use pgp_words::PgpWords;
+
 use crate::errors::Error;
 
 pub trait Code {
