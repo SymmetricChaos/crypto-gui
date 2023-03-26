@@ -1,4 +1,5 @@
 pub mod vecstring;
+pub mod bytes_as_text;
 pub use vecstring::VecString;
 
 // pub mod vecstring_ex;
