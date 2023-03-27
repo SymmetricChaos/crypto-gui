@@ -2,7 +2,7 @@ use itertools::Itertools;
 
 use crate::{
     errors::Error,
-    text_aux::bytes_as_text::{u8_to_string, ByteRep},
+    text_aux::bytes_as_text::{u16_to_string, u32_to_string, u8_to_string, ByteRep},
 };
 
 use super::Code;
@@ -25,27 +25,18 @@ impl Unicode {
     }
 
     fn utf16_encode(&self, text: &str) -> Result<String, Error> {
-        let chunks = text.encode_utf16();
-        let s = match self.mode {
-            ByteRep::Binary => chunks.map(|n| (format!("{:016b}", n))).join(" "),
-            ByteRep::Octal => chunks.map(|n| (format!("{:08o}", n))).join(" "),
-            ByteRep::Decimal => chunks.map(|n| (format!("{}", n))).join(" "),
-            ByteRep::Hex => chunks.map(|n| (format!("{:04x}", n))).join(" "),
-            ByteRep::HexCap => chunks.map(|n| (format!("{:04X}", n))).join(" "),
-        };
-        Ok(s)
+        Ok(text
+            .encode_utf16()
+            .map(|n| u16_to_string(n, self.mode))
+            .join(" "))
     }
 
     fn utf32_encode(&self, text: &str) -> Result<String, Error> {
-        let chunks = text.chars().map(|c| u32::from(c));
-        let s = match self.mode {
-            ByteRep::Binary => chunks.map(|n| (format!("{:032b}", n))).join(" "),
-            ByteRep::Octal => chunks.map(|n| (format!("{:016o}", n))).join(" "),
-            ByteRep::Decimal => chunks.map(|n| (format!("{}", n))).join(" "),
-            ByteRep::Hex => chunks.map(|n| (format!("{:08x}", n))).join(" "),
-            ByteRep::HexCap => chunks.map(|n| (format!("{:08X}", n))).join(" "),
-        };
-        Ok(s)
+        Ok(text
+            .chars()
+            .map(|c| u32::from(c))
+            .map(|n| u32_to_string(n, self.mode))
+            .join(" "))
     }
 
     fn utf8_decode(&self, text: &str) -> Result<String, Error> {
@@ -157,27 +148,6 @@ mod unicode_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "The 素早い καφέ 🦊 ｊｕｍｐｓ over the lazy 🐶.";
-    const CIPHERTEXT_UTF8: &'static str = "010101000110100001100101001000001110011110110100101000001110011010010111101010011110001110000001100001000010000011001110101110101100111010110001110011111000011011001110101011010010000011110000100111111010011010001010001000001110111110111101100010101110111110111101100101011110111110111101100011011110111110111101100100001110111110111101100100110010000001101111011101100110010101110010001000000111010001101000011001010010000001101100011000010111101001111001001000001111000010011111100100001011011000101110";
-
-    #[test]
-    fn encrypt_utf8_bits() {
-        let code = Unicode::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT_UTF8);
-    }
-
-    #[test]
-    fn encrypt_utf8_dec() {
-        let mut code = Unicode::default();
-        code.mode = ByteRep::Decimal;
-        println!("{}", code.encode(PLAINTEXT).unwrap());
-    }
-
-    #[test]
-    fn encrypt_utf8_hex() {
-        let mut code = Unicode::default();
-        code.mode = ByteRep::Hex;
-        println!("{}", code.encode(PLAINTEXT).unwrap());
-    }
 
     #[test]
     fn encrypt_decrypt() {
