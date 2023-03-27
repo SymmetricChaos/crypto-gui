@@ -18,8 +18,12 @@ impl View for Unicode {
             ui.selectable_value(&mut self.mode, ByteRep::Binary, "Binary");
             ui.selectable_value(&mut self.mode, ByteRep::Octal, "Octal");
             ui.selectable_value(&mut self.mode, ByteRep::Decimal, "Decimal");
-            ui.selectable_value(&mut self.mode, ByteRep::Hex, "Hexadecimal");
-            ui.selectable_value(&mut self.mode, ByteRep::HexCap, "Hexadecimal (capitalized)");
+            ui.selectable_value(&mut self.mode, ByteRep::HexLower, "Hexadecimal");
+            ui.selectable_value(
+                &mut self.mode,
+                ByteRep::HexUpper,
+                "Hexadecimal (capitalized)",
+            );
         });
     }
 }

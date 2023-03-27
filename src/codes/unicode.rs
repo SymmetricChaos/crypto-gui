@@ -164,7 +164,7 @@ mod unicode_tests {
                 ByteRep::Binary,
                 ByteRep::Octal,
                 ByteRep::Decimal,
-                ByteRep::Hex,
+                ByteRep::HexLower,
             ] {
                 code.mode = mode;
                 let encoded = code
