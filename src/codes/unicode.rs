@@ -2,7 +2,7 @@ use itertools::Itertools;
 
 use crate::{
     errors::Error,
-    text_aux::bytes_as_text::{byte_to_string, ByteRep},
+    text_aux::bytes_as_text::{u8_to_string, ByteRep},
 };
 
 use super::Code;
@@ -21,7 +21,7 @@ pub struct Unicode {
 
 impl Unicode {
     fn utf8_encode(&self, text: &str) -> Result<String, Error> {
-        Ok(text.bytes().map(|n| byte_to_string(n, self.mode)).join(" "))
+        Ok(text.bytes().map(|n| u8_to_string(n, self.mode)).join(" "))
     }
 
     fn utf16_encode(&self, text: &str) -> Result<String, Error> {

@@ -19,13 +19,33 @@ impl ByteRep {
     }
 }
 
-pub fn byte_to_string(n: u8, rep: ByteRep) -> String {
+pub fn u8_to_string(n: u8, rep: ByteRep) -> String {
     match rep {
         ByteRep::Binary => format!("{n:08b}"),
         ByteRep::Octal => format!("{n:03o}"),
         ByteRep::Decimal => format!("{n}"),
         ByteRep::Hex => format!("{n:02x}"),
         ByteRep::HexCap => format!("{n:02X}"),
+    }
+}
+
+pub fn u16_to_string(n: u16, rep: ByteRep) -> String {
+    match rep {
+        ByteRep::Binary => format!("{n:016b}"),
+        ByteRep::Octal => format!("{n:011o}"),
+        ByteRep::Decimal => format!("{n}"),
+        ByteRep::Hex => format!("{n:04x}"),
+        ByteRep::HexCap => format!("{n:04X}"),
+    }
+}
+
+pub fn u32_to_string(n: u32, rep: ByteRep) -> String {
+    match rep {
+        ByteRep::Binary => format!("{n:032b}"),
+        ByteRep::Octal => format!("{n:022o}"),
+        ByteRep::Decimal => format!("{n}"),
+        ByteRep::Hex => format!("{n:08x}"),
+        ByteRep::HexCap => format!("{n:08X}"),
     }
 }
 
