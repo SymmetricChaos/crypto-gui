@@ -1,113 +1,83 @@
-use crate::{errors::CodeError, text_aux::PresetAlphabet::BasicLatin};
+use crate::{
+    errors::CodeError,
+    text_aux::{
+        bytes_as_text::{num_to_string_width, u32_from_string, ByteRep},
+        PresetAlphabet::{self, BasicLatin},
+        VecString,
+    },
+};
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 
 use super::Code;
 
-lazy_static! {
-    pub static ref FOUR_BIT_CODES: Vec<String> = {
-        let mut v = Vec::with_capacity(16);
-        for n in 0..16 {
-            v.push(format!("{:04b}", n))
-        }
-        v
-    };
-
-    pub static ref FIVE_BIT_CODES: Vec<String> = {
-        let mut v = Vec::with_capacity(32);
-        for n in 0..32 {
-            v.push(format!("{:05b}", n))
-        }
-        v
-    };
-
-    pub static ref SIX_BIT_CODES: Vec<String> = {
-        let mut v = Vec::with_capacity(64);
-        for n in 0..64 {
-            v.push(format!("{:06b}", n))
-        }
-        v
-    };
-
-    pub static ref SEVEN_BIT_CODES: Vec<String> = {
-        let mut v = Vec::with_capacity(128);
-        for n in 0..64 {
-            v.push(format!("{:07b}", n))
-        }
-        v
-    };
-
-    pub static ref EIGHT_BIT_CODES: Vec<String> = {
-        let mut v = Vec::with_capacity(256);
-        for n in 0..64 {
-            v.push(format!("{:08b}", n))
-        }
-        v
-    };
-    
-}
-
 pub struct BlockCode {
-    width: u8, // 
-    symbols: String, // enforce comma seperated values
+    width: u8,
+    rep: ByteRep,
+    symbols: VecString, // enforce comma seperated values
 }
 
 impl Default for BlockCode {
     fn default() -> Self {
         BlockCode {
             width: 5,
-            symbols: String::new(),
+            rep: ByteRep::Binary,
+            symbols: VecString::from(PresetAlphabet::BasicLatin),
         }
     }
 }
 
 impl BlockCode {
     pub fn assign_width(&mut self, width: u8) {
-        if width > 3 && width <= 8 {
+        if width >= 3 && width <= 8 {
             self.width = width
         }
     }
 
     pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (char, &String)> + '_> {
-        Box::new(BasicLatin
-            .chars()
-            .map(|x| (x, *BLOCK_CODE_MAP.get(&x).unwrap())))
+        Box::new(
+            self.symbols
+                .chars()
+                .map(|c| (c, num_to_string_width(&u32::from(c), self.rep, self.width))),
+        )
+    }
+
+    pub fn check_code_width(&self) {
+        let n_symbols = self.symbols.chars().count();
+        let min_width = (n_symbols as f32).log(self.rep.radix()).ceil();
     }
 }
 
 impl Code for BlockCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-
-        let mut out = String::with_capacity(text.len() * Self::WIDTH);
-        for s in text.chars() {
-            match BlockCode_MAP.get(&s) {
-                Some(code_group) => out.push_str(code_group),
-                None => {
-                    return Err(CodeError::Input(format!(
-                        "The symbol `{}` is not valid",
-                        s
-                    )))
-                }
-            }
+        let mut out = Vec::with_capacity(text.len());
+        for c in text.chars() {
+            let n = self.symbols.get_pos(c).ok_or_else(|| {
+                Err(CodeError::Input(format!(
+                    "The symbol `{c}` is not in the alphabet selected",
+                )))
+            })?;
+            out.push(num_to_string_width(&n, self.rep, self.width));
         }
-        Ok(out)
+        Ok(out.join(" "))
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
+        let mut out = String::new();
 
-        let mut out = String::with_capacity(text.len() / Self::WIDTH);
-        for p in 0..(text.len() / Self::WIDTH) {
-            let group = &text[(p * Self::WIDTH)..(p * Self::WIDTH) + Self::WIDTH];
-            match BlockCode_MAP_INV.get(&group.to_string()) {
-                Some(code_group) => out.push(*code_group),
-                None => {
-                    return Err(CodeError::Input(format!(
-                        "The code group `{}` is not valid",
-                        group
-                    )))
-                }
-            }
+        for group in text.split(" ") {
+            let n = u32_from_string(group, self.rep).map_err(|e| {
+                Err(CodeError::Input(format!(
+                    "The code group `{group}` is not valid"
+                )))
+            })? as usize;
+            out.push(
+                self.symbols
+                    .get_char_at(n)
+                    .expect("tried to access byte outside alphabet range"),
+            )
         }
+
         Ok(out)
     }
 }
