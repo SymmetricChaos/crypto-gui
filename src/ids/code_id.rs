@@ -37,7 +37,10 @@ impl CodeID {
             CodeID::Base64 => "Base64 is a binary code that is meant to re-encode arbitrary binary data as ASCII symbols that can then be transmitted safely through text channels and decoded on the other side.",
             CodeID::Unicode => "Unicode is an international standard for encoding of text using in most of the world writing systems with over 100,000 code points defined. There are three major encodings used called UTF-8, UTF-16, and UTF-32.",
             CodeID::Punycode => "Punycode is a method for re-encoding short Unicode strings using only ASCII characters, originally created for use with Internationalized Domain Names. The characters which are not ASCII are stripped out of the string, a delimeter character is placed after the remaining characters, then the non-ASCII characters are encoded onto the end using a method that records their position and Unicode codepoint. For example the sentence \"TạisaohọkhôngthểchỉnóitiếngViệt\" is encoded as \"TisaohkhngthchnitingVit-kjcr8268qyxafd2f1b9g\".",
-            _ => "Missing description. Please complain to the author.",
+            CodeID::Pgp => "The PGP Word List converts a sequence of bytes into a sequence of words. To prevent errors this is done using two list which alternate back and forth. The even list uses words with two syllables and the odd list uses words with three syllables.",
+            CodeID::Baudot => todo!(),
+            CodeID::Bacon => todo!(),
+            //_ => "Missing description. Please complain to the author.",
         }
     }
 }
