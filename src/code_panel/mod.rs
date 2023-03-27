@@ -10,11 +10,11 @@ pub mod generic_components;
 pub mod godel_controls;
 pub mod morse_american_controls;
 pub mod morse_controls;
+pub mod pgp_controls;
 pub mod punycode_controls;
 pub mod spelling_alphabet_controls;
 pub mod unary_controls;
 pub mod unicode_controls;
-pub mod pgp_controls;
 
 pub trait ViewableCode: View + Code {}
 
@@ -36,41 +36,47 @@ fn combox_box(code: &[CodeID], identifier: &'static str, active_code: &mut CodeI
 
 #[derive(Default)]
 pub struct CodeInterface {
+    // Text Standards
     ascii: Ascii,
     bacon: Bacon,
     unicode: Unicode,
     punycode: Punycode,
-
+    spelling: SpellingAlphabet,
     morse_itu: MorseITU,
     morse_american: MorseAmerican,
+    baudot: Baudot,
 
+    // Data Encodings
+    base64: Base64,
+    pgp: PgpWords,
+    fibonacci: FibonacciCode,
     unary: UnaryCode,
-    phonetic: SpellingAlphabet,
     godel: Godel,
 }
 
-// Morse,    // MorseAmerican, Morse ITU
-// Binary,   // Baudot, Ascii, Bacon, Fibonacci, Base64
-// Unary,    // Unary
-// Spelling, // Pgp, Phonetic
-// Godel,
-
 impl CodeInterface {
     pub fn combo_boxes(&mut self, ui: &mut Ui, active_code: &mut CodeID) {
-        combox_box(&[CodeID::Ascii, CodeID::Bacon], "Binary", active_code, ui);
-
         combox_box(
-            &[CodeID::MorseITU, CodeID::MorseAmerican],
-            "Morse",
+            &[
+                CodeID::Ascii,
+                CodeID::Bacon,
+                CodeID::Unicode,
+                CodeID::MorseITU,
+                CodeID::MorseAmerican,
+                CodeID::SpellingAlphabet,
+                CodeID::Baudot,
+            ],
+            "Text Standards",
             active_code,
             ui,
         );
 
-        combox_box(&[CodeID::Unary], "Unary", active_code, ui);
-
-        combox_box(&[CodeID::SpellingAlphabet], "Spelling", active_code, ui);
-
-        combox_box(&[CodeID::Godel], "Godel", active_code, ui);
+        combox_box(
+            &[CodeID::Godel, CodeID::Unary, CodeID::Base64],
+            "Other Codes",
+            active_code,
+            ui,
+        );
     }
 
     pub fn get_active_code(&mut self, active_code: &CodeID) -> &mut dyn ViewableCode {
@@ -79,12 +85,12 @@ impl CodeInterface {
             CodeID::MorseAmerican => &mut self.morse_american,
             CodeID::MorseITU => &mut self.morse_itu,
             CodeID::Godel => &mut self.godel,
-            CodeID::Fibonacci => todo!(),
-            CodeID::Baudot => todo!(),
-            CodeID::Base64 => todo!(),
-            CodeID::Pgp => todo!(),
+            CodeID::Fibonacci => &mut self.fibonacci,
+            CodeID::Baudot => &mut self.baudot,
+            CodeID::Base64 => &mut self.base64,
+            CodeID::Pgp => &mut self.pgp,
             CodeID::Unary => &mut self.unary,
-            CodeID::SpellingAlphabet => &mut self.phonetic,
+            CodeID::SpellingAlphabet => &mut self.spelling,
             CodeID::Bacon => &mut self.bacon,
             CodeID::Unicode => &mut self.unicode,
             CodeID::Punycode => &mut self.punycode,
