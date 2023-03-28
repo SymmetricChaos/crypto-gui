@@ -41,6 +41,9 @@ pub use punycode::Punycode;
 pub mod pgp_words;
 pub use pgp_words::PgpWords;
 
+pub mod block;
+pub use block::BlockCode;
+
 use crate::errors::Error;
 
 pub trait Code {
