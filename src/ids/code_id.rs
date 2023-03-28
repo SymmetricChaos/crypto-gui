@@ -15,6 +15,7 @@ pub enum CodeID {
     Bacon,
     Unicode,
     Punycode,
+    Block,
 }
 
 impl Default for CodeID {
@@ -39,7 +40,8 @@ impl CodeID {
             CodeID::Punycode => "Punycode is a method for re-encoding short Unicode strings using only ASCII characters, originally created for use with Internationalized Domain Names. The characters which are not ASCII are stripped out of the string, a delimeter character is placed after the remaining characters, then the non-ASCII characters are encoded onto the end using a method that records their position and Unicode codepoint. For example the sentence \"TạisaohọkhôngthểchỉnóitiếngViệt\" is encoded as \"TisaohkhngthchnitingVit-kjcr8268qyxafd2f1b9g\".",
             CodeID::Pgp => "The PGP Word List converts a sequence of bytes into a sequence of words. To prevent errors this is done using two list which alternate back and forth. The even list uses words with two syllables and the odd list uses words with three syllables.",
             CodeID::Baudot => todo!(),
-            CodeID::Bacon => todo!(),
+            CodeID::Bacon => "Fancis Bacon developed this fixed width code (though he called it a cipher) in 1605, assigning each letter of the classical Latin alphabet a five bit code. The intended use was to hide one text in another by writing letters of the larger text in two different ways to represent the bits of the hidden message.",
+            CodeID::Block => "In a block code (or fixed width code) every code group contains the same number of symbols. The ASCII, UTF-32, and Bacon codes are examples of block codes."
             //_ => "Missing description. Please complain to the author.",
         }
     }
@@ -61,6 +63,7 @@ impl Display for CodeID {
             CodeID::Bacon => "Bacon",
             CodeID::Unicode => "Unicode",
             CodeID::Punycode => "Punycode",
+            CodeID::Block => "Block",
         };
         write!(f, "{}", name)
     }

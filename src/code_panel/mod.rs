@@ -38,7 +38,6 @@ fn combox_box(code: &[CodeID], identifier: &'static str, active_code: &mut CodeI
 pub struct CodeInterface {
     // Text Standards
     ascii: Ascii,
-    bacon: Bacon,
     unicode: Unicode,
     punycode: Punycode,
     spelling: SpellingAlphabet,
@@ -46,12 +45,13 @@ pub struct CodeInterface {
     morse_american: MorseAmerican,
     baudot: Baudot,
 
-    // Data Encodings
+    // Other Codes
     base64: Base64,
     pgp: PgpWords,
     fibonacci: FibonacciCode,
     unary: UnaryCode,
     godel: Godel,
+    bacon: Bacon,
 }
 
 impl CodeInterface {
@@ -59,12 +59,11 @@ impl CodeInterface {
         combox_box(
             &[
                 CodeID::Ascii,
-                CodeID::Bacon,
-                CodeID::Unicode,
-                CodeID::MorseITU,
-                CodeID::MorseAmerican,
-                CodeID::SpellingAlphabet,
                 CodeID::Baudot,
+                CodeID::MorseAmerican,
+                CodeID::MorseITU,
+                CodeID::SpellingAlphabet,
+                CodeID::Unicode,
             ],
             "Text Standards",
             active_code,
@@ -72,7 +71,7 @@ impl CodeInterface {
         );
 
         combox_box(
-            &[CodeID::Godel, CodeID::Unary, CodeID::Base64],
+            &[CodeID::Godel, CodeID::Unary, CodeID::Base64, CodeID::Bacon],
             "Other Codes",
             active_code,
             ui,
@@ -94,6 +93,7 @@ impl CodeInterface {
             CodeID::Bacon => &mut self.bacon,
             CodeID::Unicode => &mut self.unicode,
             CodeID::Punycode => &mut self.punycode,
+            CodeID::Block => todo!(),
             //_ => todo!("unable to get active code"),
         }
     }
