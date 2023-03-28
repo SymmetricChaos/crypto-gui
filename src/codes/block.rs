@@ -1,7 +1,7 @@
 use crate::{
     errors::Error,
     text_aux::{
-        bytes_as_text::{num_to_string_width, u32_from_string, ByteRep},
+        bytes_as_text::{num_to_string_width, u32_from_string, NumRep},
         PresetAlphabet, VecString,
     },
 };
@@ -9,16 +9,16 @@ use crate::{
 use super::Code;
 
 pub struct BlockCode {
-    width: usize,
-    rep: ByteRep,
-    symbols: VecString, // enforce comma seperated values
+    pub width: usize,
+    pub rep: NumRep,
+    pub symbols: VecString, // enforce comma seperated values
 }
 
 impl Default for BlockCode {
     fn default() -> Self {
         BlockCode {
             width: 5,
-            rep: ByteRep::Binary,
+            rep: NumRep::Binary,
             symbols: VecString::from(PresetAlphabet::BasicLatin),
         }
     }

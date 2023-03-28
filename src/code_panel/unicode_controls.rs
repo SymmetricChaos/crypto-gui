@@ -1,7 +1,7 @@
 use super::{View, ViewableCode};
 use crate::{
     codes::{unicode::UnicodeEncoding, Unicode},
-    text_aux::bytes_as_text::ByteRep,
+    text_aux::bytes_as_text::NumRep,
 };
 
 impl ViewableCode for Unicode {}
@@ -15,13 +15,13 @@ impl View for Unicode {
         });
 
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.mode, ByteRep::Binary, "Binary");
-            ui.selectable_value(&mut self.mode, ByteRep::Octal, "Octal");
-            ui.selectable_value(&mut self.mode, ByteRep::Decimal, "Decimal");
-            ui.selectable_value(&mut self.mode, ByteRep::HexLower, "Hexadecimal");
+            ui.selectable_value(&mut self.mode, NumRep::Binary, "Binary");
+            ui.selectable_value(&mut self.mode, NumRep::Octal, "Octal");
+            ui.selectable_value(&mut self.mode, NumRep::Decimal, "Decimal");
+            ui.selectable_value(&mut self.mode, NumRep::HexLower, "Hexadecimal");
             ui.selectable_value(
                 &mut self.mode,
-                ByteRep::HexUpper,
+                NumRep::HexUpper,
                 "Hexadecimal (capitalized)",
             );
         });

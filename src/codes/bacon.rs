@@ -1,80 +1,66 @@
-use crate::{errors::Error, text_aux::PresetAlphabet::BasicLatin};
-use lazy_static::lazy_static;
-use std::collections::HashMap;
+use crate::{
+    errors::Error,
+    text_aux::{bytes_as_text::NumRep, PresetAlphabet::ClassicalLatin, VecString},
+};
 
-use super::Code;
-
-lazy_static! {
-    pub static ref FIVE_BIT_CODES: Vec<String> = {
-        let mut v = Vec::with_capacity(32);
-        for n in 0..32 {
-            v.push(format!("{:05b}", n))
-        }
-        v
-    };
-    pub static ref BACON_MAP: HashMap<char, &'static String> = {
-        let mut m = HashMap::new();
-        for (letter, code) in BasicLatin.chars().zip(FIVE_BIT_CODES.iter()) {
-            m.insert(letter, code);
-        }
-        m
-    };
-    pub static ref BACON_MAP_INV: HashMap<&'static String, char> = {
-        let mut m = HashMap::new();
-        for (letter, code) in BasicLatin.chars().zip(FIVE_BIT_CODES.iter()) {
-            m.insert(code, letter);
-        }
-        m
-    };
-}
+use super::{BlockCode, Code};
 
 pub struct Bacon {
+    pub block: BlockCode,
     pub false_text: String,
 }
 
 impl Default for Bacon {
     fn default() -> Self {
+        let mut block = BlockCode::default();
+        block.rep = NumRep::Binary;
+        block.width = 5;
+        block.symbols = VecString::from(ClassicalLatin);
         Bacon {
+            block,
             false_text: String::new(),
         }
     }
 }
 
 impl Bacon {
-    const WIDTH: usize = 5;
-
-    pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (char, &String)> + '_> {
-        Box::new(BasicLatin.chars().map(|x| (x, *BACON_MAP.get(&x).unwrap())))
+    pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (char, String)> + '_> {
+        self.block.chars_codes()
     }
 }
 
 impl Code for Bacon {
     fn encode(&self, text: &str) -> Result<String, Error> {
-        let mut out = String::with_capacity(text.len() * Self::WIDTH);
-        for s in text.chars() {
-            match BACON_MAP.get(&s) {
-                Some(code_group) => out.push_str(code_group),
-                None => return Err(Error::Input(format!("The symbol `{}` is not valid", s))),
+        let usable_chars = self
+            .false_text
+            .chars()
+            .filter(|c| c.is_ascii_alphabetic())
+            .count();
+        let chars_needed = text.chars().count() * self.block.width;
+        if usable_chars < chars_needed {
+            return Err(Error::Input(format!(
+                "At least {chars_needed} alphabetic characters are needed in the false text."
+            )));
+        }
+        let binding = self.block.encode(text)?;
+        let mut bits = binding.chars().map(|c| if c == '0' { false } else { true });
+        let mut out = String::new();
+        for c in self.false_text.chars() {
+            if c.is_ascii_alphabetic() {
+                if let Some(b) = bits.next() {
+                    if b {
+                        out.push(c.to_ascii_uppercase());
+                    } else {
+                        out.push(c.to_ascii_lowercase());
+                    }
+                }
             }
         }
         Ok(out)
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
-        let mut out = String::with_capacity(text.len() / Self::WIDTH);
-        for p in 0..(text.len() / Self::WIDTH) {
-            let group = &text[(p * Self::WIDTH)..(p * Self::WIDTH) + Self::WIDTH];
-            match BACON_MAP_INV.get(&group.to_string()) {
-                Some(code_group) => out.push(*code_group),
-                None => {
-                    return Err(Error::Input(format!(
-                        "The code group `{}` is not valid",
-                        group
-                    )))
-                }
-            }
-        }
-        Ok(out)
+        self.block.decode(text)
     }
 
     fn randomize(&mut self) {}
@@ -86,7 +72,7 @@ impl Code for Bacon {
 mod bacon_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
+    const PLAINTEXT: &'static str = "THEQVICKBROWNFOXIUMPSOVERTHELAZYDOG";
     const CIPHERTEXT: &'static str = "1001100111001001000010100010000001001010000011000101110101100110100101011101011101001101000110001111100100111010101001001000110011001110010001011000001100111000000110111000110";
 
     #[test]

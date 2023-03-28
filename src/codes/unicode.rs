@@ -2,7 +2,7 @@ use itertools::Itertools;
 
 use crate::{
     errors::Error,
-    text_aux::bytes_as_text::{u16_to_string, u32_to_string, u8_to_string, ByteRep},
+    text_aux::bytes_as_text::{u16_to_string, u32_to_string, u8_to_string, NumRep},
 };
 
 use super::Code;
@@ -16,7 +16,7 @@ pub enum UnicodeEncoding {
 
 pub struct Unicode {
     pub encoding: UnicodeEncoding,
-    pub mode: ByteRep,
+    pub mode: NumRep,
 }
 
 impl Unicode {
@@ -116,7 +116,7 @@ impl Default for Unicode {
     fn default() -> Self {
         Unicode {
             encoding: UnicodeEncoding::Utf8,
-            mode: ByteRep::Binary,
+            mode: NumRep::Binary,
         }
     }
 }
@@ -161,10 +161,10 @@ mod unicode_tests {
             code.encoding = encoding;
 
             for mode in [
-                ByteRep::Binary,
-                ByteRep::Octal,
-                ByteRep::Decimal,
-                ByteRep::HexLower,
+                NumRep::Binary,
+                NumRep::Octal,
+                NumRep::Decimal,
+                NumRep::HexLower,
             ] {
                 code.mode = mode;
                 let encoded = code
