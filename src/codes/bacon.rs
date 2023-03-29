@@ -1,3 +1,5 @@
+use itertools::Itertools;
+
 use crate::{
     errors::Error,
     text_aux::{bytes_as_text::NumRep, PresetAlphabet::ClassicalLatin, VecString},
@@ -15,7 +17,7 @@ impl Default for Bacon {
         let mut block = BlockCode::default();
         block.rep = NumRep::Binary;
         block.width = 5;
-        block.symbols = VecString::from(ClassicalLatin);
+        block.alphabet = VecString::from(ClassicalLatin);
         Bacon {
             block,
             false_text: String::new(),
@@ -27,10 +29,8 @@ impl Bacon {
     pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (char, String)> + '_> {
         self.block.chars_codes()
     }
-}
 
-impl Code for Bacon {
-    fn encode(&self, text: &str) -> Result<String, Error> {
+    fn enough_false_text(&self, text: &str) -> Result<(), Error> {
         let usable_chars = self
             .false_text
             .chars()
@@ -39,12 +39,40 @@ impl Code for Bacon {
         let chars_needed = text.chars().count() * self.block.width;
         if usable_chars < chars_needed {
             return Err(Error::Input(format!(
-                "At least {chars_needed} alphabetic characters are needed in the false text."
+                "At least {chars_needed} ASCII alphabetic characters are needed in the false text."
             )));
         }
+        Ok(())
+    }
+}
+
+fn capitalization_to_bits(c: char) -> char {
+    if c.is_ascii_uppercase() {
+        '1'
+    } else {
+        '0'
+    }
+}
+
+fn bits_to_capitalization(c: char) -> bool {
+    if c == '1' {
+        true
+    } else {
+        false
+    }
+}
+
+impl Code for Bacon {
+    fn encode(&self, text: &str) -> Result<String, Error> {
+        self.enough_false_text(text)?;
+
         let binding = self.block.encode(text)?;
-        let mut bits = binding.chars().map(|c| if c == '0' { false } else { true });
+        let mut bits = binding
+            .chars()
+            .filter(|c| !c.is_ascii_whitespace())
+            .map(|c| bits_to_capitalization(c));
         let mut out = String::new();
+
         for c in self.false_text.chars() {
             if c.is_ascii_alphabetic() {
                 if let Some(b) = bits.next() {
@@ -53,14 +81,30 @@ impl Code for Bacon {
                     } else {
                         out.push(c.to_ascii_lowercase());
                     }
+                } else {
+                    out.push(c.to_ascii_lowercase())
                 }
+            } else {
+                out.push(c)
             }
         }
         Ok(out)
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
-        self.block.decode(text)
+        let usable_letters = text.chars().filter(|c| c.is_ascii_alphabetic()).count();
+        let extra_letters = usable_letters % self.block.width;
+        let message_length = usable_letters - extra_letters;
+        let bits = text
+            .chars()
+            .filter(|c| c.is_ascii_alphabetic())
+            .take(message_length)
+            .map(|c| capitalization_to_bits(c))
+            .chunks(self.block.width)
+            .into_iter()
+            .map(|ch| ch.collect::<String>())
+            .join(" ");
+        self.block.decode(&bits)
     }
 
     fn randomize(&mut self) {}
@@ -70,14 +114,17 @@ impl Code for Bacon {
 
 #[cfg(test)]
 mod bacon_tests {
+
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQVICKBROWNFOXIUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "1001100111001001000010100010000001001010000011000101110101100110100101011101011101001101000110001111100100111010101001001000110011001110010001011000001100111000000110111000110";
+    const PLAINTEXT: &'static str = "ATTACKAAA";
+    const FALSETEXT: &'static str = "There is nothing at all suspicious about this message.";
+    const CIPHERTEXT: &'static str = "there Is nOtHinG at all suspIciOus About this message.";
 
     #[test]
     fn encrypt_test() {
-        let code = Bacon::default();
+        let mut code = Bacon::default();
+        code.false_text = FALSETEXT.into();
         assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
