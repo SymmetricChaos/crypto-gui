@@ -2,6 +2,8 @@ use eframe::egui::{CentralPanel, Context, SidePanel, TextEdit};
 use unicode_normalization::UnicodeNormalization;
 use unicode_segmentation::UnicodeSegmentation;
 
+use crate::text_aux::text_functions::chunk_and_join;
+
 pub struct TextPrepPage {
     pub text: String,
     pub num_bytes: usize,
@@ -11,6 +13,7 @@ pub struct TextPrepPage {
     pub replace_to: String,
     pub remove: String,
     pub keep: String,
+    pub chunk_width: usize,
 }
 
 impl Default for TextPrepPage {
@@ -24,6 +27,7 @@ impl Default for TextPrepPage {
             replace_to: Default::default(),
             remove: Default::default(),
             keep: Default::default(),
+            chunk_width: 5,
         }
     }
 }
@@ -60,6 +64,10 @@ impl TextPrepPage {
     fn replace(&mut self) {
         self.text = self.text.replace(&self.replace_from, &self.replace_to);
         self.counts();
+    }
+
+    fn chunks(&mut self) {
+        self.text = chunk_and_join(&self.text, self.chunk_width, ' ')
     }
 
     fn normalize(&mut self) {
@@ -113,10 +121,26 @@ impl TextPrepPage {
 
                 ui.add_space(10.0);
 
+                ui.horizontal(|ui| {
+                    if ui.button("Group").clicked() {
+                        self.chunks();
+                    }
+                    ui.add_space(5.0);
+                    if ui.small_button("-").clicked() {
+                        self.chunk_width = self.chunk_width.saturating_sub(1);
+                    }
+                    ui.label(format!("{}", self.chunk_width));
+                    if ui.small_button("+").clicked() {
+                        self.chunk_width += 1
+                    }
+                });
+
+                ui.add_space(10.0);
+
                 ui.collapsing("Advanced", |ui| {
                     let normalize = ui
                         .button("Normalize")
-                        .on_hover_text_at_pointer("Normalize Unicode Representation");
+                        .on_hover_text_at_pointer("Change to Normalized Unicode Representation");
                     if normalize.clicked() {
                         self.normalize();
                     }
@@ -150,7 +174,9 @@ impl TextPrepPage {
             });
 
         CentralPanel::default().show(ctx, |ui| {
-            let main_text = TextEdit::multiline(&mut self.text);
+            let main_text = TextEdit::multiline(&mut self.text)
+                .desired_width(800.0)
+                .desired_rows(10);
             if ui.add(main_text).changed() {
                 self.counts();
             };

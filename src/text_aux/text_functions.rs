@@ -105,6 +105,21 @@ pub fn rank_vec<O: Ord>(vec: &Vec<O>) -> Vec<usize> {
     out
 }
 
+pub fn chunk_and_join(text: &str, width: usize, sep: char) -> String {
+    text.chars()
+        .enumerate()
+        .flat_map(|(i, c)| {
+            if i != 0 && i % width == 0 {
+                Some(sep)
+            } else {
+                None
+            }
+            .into_iter()
+            .chain(std::iter::once(c))
+        })
+        .collect::<String>()
+}
+
 // use itertools::{sorted,equal};
 
 // We generally need to check anagrams for alphabets which are short (less than 100 characters) and should have all unique symbols
