@@ -5,8 +5,8 @@ use std::{cell::Cell, collections::HashMap};
 use super::Code;
 
 // ITA2
-pub const BAUDOT_LETTERS: &'static str = "␀␍␊ QWERTYUIOPASDFGHJKLZXCVBNM␎␏";
-pub const BAUDOT_FIGURES: &'static str = "␀␍␊ 1234567890-'␅!&£␇()+/:=?,.␎␏";
+pub const ITA2_LETTERS: &'static str = "␀␍␊ QWERTYUIOPASDFGHJKLZXCVBNM␎␏";
+pub const ITA2_FIGURES: &'static str = "␀␍␊ 1234567890-'␅!&£␇()+/:=?,.␎␏";
 pub const BAUDOT_CODES: [&'static str; 32] = [
     "00000", "00010", "01000", "00100", "11101", "11001", "10000", "01010", "00001", "10101",
     "11100", "01100", "00011", "01101", "11000", "10100", "10010", "10110", "01011", "00101",
@@ -22,13 +22,13 @@ pub enum BaudotMode {
 
 lazy_static! {
     pub static ref BAUDOT_LETTER_MAP: HashMap<char, &'static str> =
-        HashMap::from_iter(BAUDOT_LETTERS.chars().zip(BAUDOT_CODES.iter().copied()));
+        HashMap::from_iter(ITA2_LETTERS.chars().zip(BAUDOT_CODES.iter().copied()));
     pub static ref BAUDOT_FIGURE_MAP: HashMap<char, &'static str> =
-        HashMap::from_iter(BAUDOT_FIGURES.chars().zip(BAUDOT_CODES.iter().copied()));
+        HashMap::from_iter(ITA2_FIGURES.chars().zip(BAUDOT_CODES.iter().copied()));
     pub static ref BAUDOT_LETTER_MAP_INV: HashMap<&'static str, char> =
-        HashMap::from_iter(BAUDOT_CODES.iter().copied().zip(BAUDOT_LETTERS.chars()));
+        HashMap::from_iter(BAUDOT_CODES.iter().copied().zip(ITA2_LETTERS.chars()));
     pub static ref BAUDOT_FIGURE_MAP_INV: HashMap<&'static str, char> =
-        HashMap::from_iter(BAUDOT_CODES.iter().copied().zip(BAUDOT_FIGURES.chars()));
+        HashMap::from_iter(BAUDOT_CODES.iter().copied().zip(ITA2_FIGURES.chars()));
 }
 
 pub struct Baudot {
@@ -49,7 +49,7 @@ impl Baudot {
 
     pub fn letters_codes(&self) -> Box<dyn Iterator<Item = (char, &&str)> + '_> {
         Box::new(
-            BAUDOT_LETTERS
+            ITA2_LETTERS
                 .chars()
                 .map(|x| (x, BAUDOT_LETTER_MAP.get(&x).unwrap())),
         )
@@ -57,7 +57,7 @@ impl Baudot {
 
     pub fn figures_codes(&self) -> Box<dyn Iterator<Item = (char, &&str)> + '_> {
         Box::new(
-            BAUDOT_FIGURES
+            ITA2_FIGURES
                 .chars()
                 .map(|x| (x, BAUDOT_FIGURE_MAP.get(&x).unwrap())),
         )
