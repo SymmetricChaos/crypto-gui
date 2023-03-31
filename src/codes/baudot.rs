@@ -4,8 +4,9 @@ use std::{cell::Cell, collections::HashMap};
 
 use super::Code;
 
-pub const BAUDOT_LETTERS: &'static str = "␀␍␊ QWERTYUIOPASDFGHJKLZXCVBNM␎\0";
-pub const BAUDOT_FIGURES: &'static str = "␀␍␊ 1234567890-'␅!&£␇()+/:=?,.\0␏";
+// ITA2
+pub const BAUDOT_LETTERS: &'static str = "␀␍␊ QWERTYUIOPASDFGHJKLZXCVBNM␎␏";
+pub const BAUDOT_FIGURES: &'static str = "␀␍␊ 1234567890-'␅!&£␇()+/:=?,.␎␏";
 pub const BAUDOT_CODES: [&'static str; 32] = [
     "00000", "00010", "01000", "00100", "11101", "11001", "10000", "01010", "00001", "10101",
     "11100", "01100", "00011", "01101", "11000", "10100", "10010", "10110", "01011", "00101",
@@ -20,34 +21,14 @@ pub enum BaudotMode {
 }
 
 lazy_static! {
-    pub static ref BAUDOT_LETTER_MAP: HashMap<char, &'static str> = {
-        let mut m = HashMap::new();
-        for (letter, code) in BAUDOT_LETTERS.chars().zip(BAUDOT_CODES.iter()) {
-            m.insert(letter, *code);
-        }
-        m
-    };
-    pub static ref BAUDOT_FIGURE_MAP: HashMap<char, &'static str> = {
-        let mut m = HashMap::new();
-        for (letter, code) in BAUDOT_FIGURES.chars().zip(BAUDOT_CODES.iter()) {
-            m.insert(letter, *code);
-        }
-        m
-    };
-    pub static ref BAUDOT_LETTER_MAP_INV: HashMap<&'static str, char> = {
-        let mut m = HashMap::new();
-        for (letter, code) in BAUDOT_LETTERS.chars().zip(BAUDOT_CODES.iter()) {
-            m.insert(*code, letter);
-        }
-        m
-    };
-    pub static ref BAUDOT_FIGURE_MAP_INV: HashMap<&'static str, char> = {
-        let mut m = HashMap::new();
-        for (letter, code) in BAUDOT_FIGURES.chars().zip(BAUDOT_CODES.iter()) {
-            m.insert(*code, letter);
-        }
-        m
-    };
+    pub static ref BAUDOT_LETTER_MAP: HashMap<char, &'static str> =
+        HashMap::from_iter(BAUDOT_LETTERS.chars().zip(BAUDOT_CODES.iter().copied()));
+    pub static ref BAUDOT_FIGURE_MAP: HashMap<char, &'static str> =
+        HashMap::from_iter(BAUDOT_FIGURES.chars().zip(BAUDOT_CODES.iter().copied()));
+    pub static ref BAUDOT_LETTER_MAP_INV: HashMap<&'static str, char> =
+        HashMap::from_iter(BAUDOT_CODES.iter().copied().zip(BAUDOT_LETTERS.chars()));
+    pub static ref BAUDOT_FIGURE_MAP_INV: HashMap<&'static str, char> =
+        HashMap::from_iter(BAUDOT_CODES.iter().copied().zip(BAUDOT_FIGURES.chars()));
 }
 
 pub struct Baudot {
@@ -58,11 +39,12 @@ impl Baudot {
     // Baudot codes are always five bits
     const WIDTH: usize = 5;
 
-    pub fn switch_mode(&self) {
-        match self.mode.get() {
-            BaudotMode::Letters => todo!(),
-            BaudotMode::Figures => todo!(),
-        }
+    pub fn letter_shift(&self) {
+        self.mode.set(BaudotMode::Letters)
+    }
+
+    pub fn figure_shift(&self) {
+        self.mode.set(BaudotMode::Figures)
     }
 
     pub fn letters_codes(&self) -> Box<dyn Iterator<Item = (char, &&str)> + '_> {
@@ -79,6 +61,19 @@ impl Baudot {
                 .chars()
                 .map(|x| (x, BAUDOT_FIGURE_MAP.get(&x).unwrap())),
         )
+    }
+
+    pub fn codes_chars(&self) -> Box<dyn Iterator<Item = (&&str, String)> + '_> {
+        Box::new(BAUDOT_CODES.iter().map(|code| {
+            (
+                code,
+                format!(
+                    "{} {}",
+                    BAUDOT_LETTER_MAP_INV.get(code).unwrap(),
+                    BAUDOT_FIGURE_MAP_INV.get(code).unwrap()
+                ),
+            )
+        }))
     }
 
     pub fn map(&self, k: &char) -> Option<&&str> {
