@@ -1,4 +1,7 @@
-use crate::{codes::*, ids::CodeID};
+use crate::{
+    codes::{morse::Morse, *},
+    ids::CodeID,
+};
 use eframe::egui;
 use egui::Ui;
 pub mod ascii_controls;
@@ -8,7 +11,6 @@ pub mod baudot_controls;
 pub mod fibonacci_controls;
 pub mod generic_components;
 pub mod godel_controls;
-pub mod morse_american_controls;
 pub mod morse_controls;
 pub mod pgp_controls;
 pub mod punycode_controls;
@@ -41,8 +43,7 @@ pub struct CodeInterface {
     unicode: Unicode,
     punycode: Punycode,
     spelling: SpellingAlphabet,
-    morse_itu: MorseITU,
-    morse_american: MorseAmerican,
+    morse: Morse,
     baudot: Baudot,
 
     // Other Codes
@@ -60,8 +61,7 @@ impl CodeInterface {
             &[
                 CodeID::Ascii,
                 CodeID::Baudot,
-                CodeID::MorseAmerican,
-                CodeID::MorseITU,
+                CodeID::Morse,
                 CodeID::SpellingAlphabet,
                 CodeID::Unicode,
             ],
@@ -81,8 +81,7 @@ impl CodeInterface {
     pub fn get_active_code(&mut self, active_code: &CodeID) -> &mut dyn ViewableCode {
         match active_code {
             CodeID::Ascii => &mut self.ascii,
-            CodeID::MorseAmerican => &mut self.morse_american,
-            CodeID::MorseITU => &mut self.morse_itu,
+            CodeID::Morse => &mut self.morse,
             CodeID::Godel => &mut self.godel,
             CodeID::Fibonacci => &mut self.fibonacci,
             CodeID::Baudot => &mut self.baudot,

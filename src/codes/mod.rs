@@ -1,5 +1,6 @@
 pub mod ascii;
 pub mod morse;
+pub mod morse_encodings;
 pub use ascii::Ascii;
 
 pub mod morse_itu;

@@ -28,7 +28,7 @@ impl CodeCategory {
 
     pub fn all_cipher_in_category(&self) -> &[CodeID] {
         match self {
-            CodeCategory::Morse => &[CodeID::MorseAmerican, CodeID::MorseITU],
+            CodeCategory::Morse => &[CodeID::Morse],
             CodeCategory::Binary => &[
                 CodeID::Ascii,
                 CodeID::Bacon,
