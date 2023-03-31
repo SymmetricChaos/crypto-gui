@@ -7,16 +7,16 @@ use super::{morse_encodings::*, Code};
 pub enum MorseRep {
     Binary,
     HalfBlock,
-    // Ascii,
-    // CdotNDash,
+    Ascii,
+    CdotNDash,
 }
 
 impl MorseRep {
     pub fn dit(&self) -> &str {
         match self {
             MorseRep::Binary => "1",
-            // MorseRep::Ascii => "-",
-            // MorseRep::CdotNDash => "–",
+            MorseRep::Ascii => "-",
+            MorseRep::CdotNDash => "–",
             MorseRep::HalfBlock => "▄",
         }
     }
@@ -24,8 +24,8 @@ impl MorseRep {
     pub fn dah(&self) -> &str {
         match self {
             MorseRep::Binary => "111",
-            // MorseRep::Ascii => ".",
-            // MorseRep::CdotNDash => "·",
+            MorseRep::Ascii => ".",
+            MorseRep::CdotNDash => "·",
             MorseRep::HalfBlock => "▄▄▄",
         }
     }
@@ -33,8 +33,8 @@ impl MorseRep {
     pub fn intra_char_sep(&self) -> &str {
         match self {
             MorseRep::Binary => "0",
-            // MorseRep::Ascii => "",
-            // MorseRep::CdotNDash => "",
+            MorseRep::Ascii => "",
+            MorseRep::CdotNDash => "",
             MorseRep::HalfBlock => " ",
         }
     }
@@ -42,8 +42,8 @@ impl MorseRep {
     pub fn letter_sep(&self) -> &str {
         match self {
             MorseRep::Binary => "000",
-            // MorseRep::Ascii => " ",
-            // MorseRep::CdotNDash => " ",
+            MorseRep::Ascii => " ",
+            MorseRep::CdotNDash => " ",
             MorseRep::HalfBlock => "   ",
         }
     }
@@ -53,10 +53,17 @@ impl MorseRep {
             MorseStandard::Itu => match self {
                 MorseRep::Binary => &ITU_BINARY_MAP,
                 MorseRep::HalfBlock => &ITU_HALFBLOCK_MAP,
+                MorseRep::Ascii => &ITU_ASCII_MAP,
+                MorseRep::CdotNDash => &ITU_DOT_DASH_MAP,
             },
             MorseStandard::American => match self {
                 MorseRep::Binary => &AMERICAN_BINARY_MAP,
                 MorseRep::HalfBlock => &AMERICAN_HALFBLOCK_MAP,
+                MorseRep::Ascii | MorseRep::CdotNDash => {
+                    return Err(Error::State(
+                        "American Morse only suppots line code representation".into(),
+                    ))
+                }
             },
         })
     }
@@ -66,10 +73,17 @@ impl MorseRep {
             MorseStandard::Itu => match self {
                 MorseRep::Binary => &ITU_BINARY_MAP_INV,
                 MorseRep::HalfBlock => &ITU_HALFBLOCK_MAP_INV,
+                MorseRep::Ascii => &ITU_ASCII_MAP_INV,
+                MorseRep::CdotNDash => &ITU_DOT_DASH_MAP_INV,
             },
             MorseStandard::American => match self {
                 MorseRep::Binary => &AMERICAN_BINARY_MAP_INV,
                 MorseRep::HalfBlock => &AMERICAN_HALFBLOCK_MAP_INV,
+                MorseRep::Ascii | MorseRep::CdotNDash => {
+                    return Err(Error::State(
+                        "American Morse only suppots line code representation".into(),
+                    ))
+                }
             },
         })
     }
@@ -92,10 +106,16 @@ impl Morse {
             MorseStandard::Itu => match self.mode {
                 MorseRep::Binary => Box::new(ITU_LETTERS.chars().zip(ITU_BINARY)),
                 MorseRep::HalfBlock => Box::new(ITU_LETTERS.chars().zip(ITU_HALFBLOCK)),
+                MorseRep::Ascii => Box::new(ITU_LETTERS.chars().zip(ITU_ASCII)),
+                MorseRep::CdotNDash => Box::new(ITU_LETTERS.chars().zip(ITU_DOT_DASH)),
             },
             MorseStandard::American => match self.mode {
                 MorseRep::Binary => Box::new(AMERICAN_LETTERS.chars().zip(AMERICAN_BINARY)),
                 MorseRep::HalfBlock => Box::new(AMERICAN_LETTERS.chars().zip(AMERICAN_HALFBLOCK)),
+                MorseRep::Ascii | MorseRep::CdotNDash => Box::new(
+                    std::iter::once(' ')
+                        .zip(std::iter::once("Only Line codes work for American Morse")),
+                ),
             },
         }
     }
