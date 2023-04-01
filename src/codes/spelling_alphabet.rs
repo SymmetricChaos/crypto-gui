@@ -1,49 +1,60 @@
+use bimap::BiMap;
 use itertools::Itertools;
 use lazy_static::lazy_static;
-use std::collections::HashMap;
 
 use super::Code;
 use crate::errors::Error;
 
-fn make_maps(
-    alphabet: &'static str,
-    codes: &[&'static str],
-) -> (HashMap<char, &'static str>, HashMap<&'static str, char>) {
-    let mut map = HashMap::new();
-    let mut map_inv = HashMap::new();
-    for (l, w) in alphabet.chars().zip(codes.iter()) {
-        map.insert(l, *w);
-        map_inv.insert(*w, l);
-    }
-    (map, map_inv)
-}
-
 lazy_static! {
     // Yes, ALFA and JULIETT are meant to be spelled that way
     // Yes, the spelling of the numerals is correct even though the pronunciation is different
-    pub static ref NATO: (HashMap<char,&'static str>, HashMap<&'static str, char>) = make_maps(
-                                                "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-                                                &["ALFA", "BRAVO", "CHARLIE", "DELTA", "ECHO", "FOXTROT",
-                                                "GOLF", "HOTEL", "INDIA", "JULIETT", "KILO", "LIMA",
-                                                "MIKE", "NOVEMBER", "OSCAR", "PAPA", "QUEBEC", "ROMEO",
-                                                "SIERRA", "TANGO", "UNIFORM", "VICTOR", "WHISKEY",
-                                                "XRAY", "YANKEE", "ZULU", "ZERO", "ONE", "TWO", "THREE", "FOUR",
-                                                "FIVE", "SIX", "SEVEN", "EIGHT", "NINE"]);
+    pub static ref NATO: BiMap<char,&'static str> = {
+        let mut map = BiMap::new();
+        for (sym,code) in "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".chars().zip([
+            "ALFA", "BRAVO", "CHARLIE", "DELTA", "ECHO", "FOXTROT",
+            "GOLF", "HOTEL", "INDIA", "JULIETT", "KILO", "LIMA",
+            "MIKE", "NOVEMBER", "OSCAR", "PAPA", "QUEBEC", "ROMEO",
+            "SIERRA", "TANGO", "UNIFORM", "VICTOR", "WHISKEY",
+            "XRAY", "YANKEE", "ZULU", "ZERO", "ONE", "TWO", "THREE", "FOUR",
+            "FIVE", "SIX", "SEVEN", "EIGHT", "NINE"].into_iter()) {
+            map.insert(sym, code);
+        };
+        map
+    };
 
-    pub static ref CCB: (HashMap<char,&'static str>, HashMap<&'static str, char>) = make_maps(
-                                              "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-                                              &["ABLE", "BAKER", "CHARLIE", "DOG", "EASY", "FOX",
-                                              "GEORGE", "HOW", "ITEM", "JIG", "KING", "LOVE",
-                                              "MIKE", "NAN", "OBOE", "PETER", "QUEEN", "ROGER",
-                                              "SUGAR", "TARE", "UNCLE", "VICTOR", "WILLIAM",
-                                              "XRAY", "YOKE", "ZEBRA", "ZERO", "ONE", "TWO", "THREE", "FOUR",
-                                              "FIVE", "SIX", "SEVEN", "EIGHT", "NINE"]);
+    pub static ref CCB: BiMap<char,&'static str> = {
+        let mut map = BiMap::new();
+        for (sym,code) in "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".chars().zip([
+            "ABLE", "BAKER", "CHARLIE", "DOG", "EASY", "FOX",
+            "GEORGE", "HOW", "ITEM", "JIG", "KING", "LOVE",
+            "MIKE", "NAN", "OBOE", "PETER", "QUEEN", "ROGER",
+            "SUGAR", "TARE", "UNCLE", "VICTOR", "WILLIAM",
+            "XRAY", "YOKE", "ZEBRA", "ZERO", "ONE", "TWO", "THREE", "FOUR",
+            "FIVE", "SIX", "SEVEN", "EIGHT", "NINE"].into_iter()) {
+            map.insert(sym, code);
+        };
+        map
+    };
+
+    pub static ref WESTERN_UNION_1912: BiMap<char,&'static str> = {
+        let mut map = BiMap::new();
+        for (sym,code) in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".chars().zip([
+            "ADAMS", "BOSTON", "CHICAGO", "DENVER", "EASY", "FRANK",
+            "GEORGE", "HENRY", "IDA", "JOHN", "KING", "LINCOLN",
+            "MARY", "NEWYORK", "OCEAN", "PETER", "QUEEN", "ROGER",
+            "SUGAR", "THOMAS", "UNION", "VICTOR", "WILLIAM",
+            "XRAY", "YOUNG", "ZERO"].into_iter()) {
+            map.insert(sym, code);
+        };
+        map
+    };
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SpellingAlphabetMode {
     Nato,
     Ccb,
+    Wu1912,
 }
 
 impl SpellingAlphabetMode {
@@ -51,20 +62,23 @@ impl SpellingAlphabetMode {
         match self {
             SpellingAlphabetMode::Nato => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
             SpellingAlphabetMode::Ccb => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+            SpellingAlphabetMode::Wu1912 => "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
         }
     }
 
     pub fn encode(&self, c: char) -> Option<&&str> {
         match self {
-            SpellingAlphabetMode::Nato => NATO.0.get(&c),
-            SpellingAlphabetMode::Ccb => CCB.0.get(&c),
+            SpellingAlphabetMode::Nato => NATO.get_by_left(&c),
+            SpellingAlphabetMode::Ccb => CCB.get_by_left(&c),
+            SpellingAlphabetMode::Wu1912 => WESTERN_UNION_1912.get_by_left(&c),
         }
     }
 
     pub fn decode(&self, s: &str) -> Option<&char> {
         match self {
-            SpellingAlphabetMode::Nato => NATO.1.get(s),
-            SpellingAlphabetMode::Ccb => CCB.1.get(s),
+            SpellingAlphabetMode::Nato => NATO.get_by_right(s),
+            SpellingAlphabetMode::Ccb => CCB.get_by_right(s),
+            SpellingAlphabetMode::Wu1912 => WESTERN_UNION_1912.get_by_right(s),
         }
     }
 }

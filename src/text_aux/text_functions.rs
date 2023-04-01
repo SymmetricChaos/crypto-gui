@@ -1,6 +1,7 @@
 use crate::errors::Error;
 use itertools::Itertools;
 use rand::prelude::{IteratorRandom, SliceRandom, StdRng};
+use std::{collections::HashMap, fmt::Display, hash::Hash};
 
 use super::VecString;
 

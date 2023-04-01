@@ -8,6 +8,11 @@ impl View for SpellingAlphabet {
         ui.horizontal(|ui| {
             ui.selectable_value(&mut self.mode, SpellingAlphabetMode::Nato, "NATO");
             ui.selectable_value(&mut self.mode, SpellingAlphabetMode::Ccb, "CCB");
+            ui.selectable_value(
+                &mut self.mode,
+                SpellingAlphabetMode::Wu1912,
+                "Western Union (1912)",
+            );
         });
         fill_code_columns(9, 4, ui, Box::new(self.chars_codes()));
     }
