@@ -1,13 +1,5 @@
 pub mod ascii;
-pub mod morse;
-pub mod morse_encodings;
 pub use ascii::Ascii;
-
-pub mod morse_itu;
-pub use morse_itu::MorseITU;
-
-pub mod morse_american;
-pub use morse_american::MorseAmerican;
 
 pub mod godel;
 pub use godel::Godel;
@@ -45,6 +37,10 @@ pub use pgp_words::PgpWords;
 
 pub mod block;
 pub use block::BlockCode;
+
+pub mod morse;
+pub use morse::Morse;
+pub mod morse_encodings;
 
 use crate::errors::Error;
 

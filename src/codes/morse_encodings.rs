@@ -256,6 +256,8 @@ pub const AMERICAN_HALFBLOCK: [&'static str; 41] = [
     "▄▄▄ ▄▄▄ ▄▄▄ ▄",
 ];
 
+
+
 lazy_static! {
     pub static ref ITU_ASCII_MAP: HashMap<char, &'static str> =
         HashMap::from_iter(ITU_LETTERS.chars().zip(ITU_ASCII.iter().copied()));

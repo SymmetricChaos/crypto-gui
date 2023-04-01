@@ -101,7 +101,7 @@ pub struct Morse {
 }
 
 impl Morse {
-    pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (char, &'static str)> + '_> {
+    pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (char, &str)> + '_> {
         match self.standard {
             MorseStandard::Itu => match self.mode {
                 MorseRep::Binary => Box::new(ITU_LETTERS.chars().zip(ITU_BINARY)),
@@ -114,7 +114,7 @@ impl Morse {
                 MorseRep::HalfBlock => Box::new(AMERICAN_LETTERS.chars().zip(AMERICAN_HALFBLOCK)),
                 MorseRep::Ascii | MorseRep::CdotNDash => Box::new(
                     std::iter::once(' ')
-                        .zip(std::iter::once("Only Line codes work for American Morse")),
+                        .zip(std::iter::once("Only line codes work for American Morse")),
                 ),
             },
         }
