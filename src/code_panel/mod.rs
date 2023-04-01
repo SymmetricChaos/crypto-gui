@@ -47,12 +47,14 @@ pub struct CodeInterface {
     morse: Morse,
     baudot: Baudot,
 
+    // Mathematical
+    godel: Godel,
+    unary: UnaryCode,
+    fibonacci: FibonacciCode,
+
     // Other Codes
     base64: Base64,
     pgp: PgpWords,
-    fibonacci: FibonacciCode,
-    unary: UnaryCode,
-    godel: Godel,
     bacon: Bacon,
     tap: TapCode,
 }
@@ -72,13 +74,13 @@ impl CodeInterface {
             ui,
         );
         combox_box(
-            &[CodeID::Godel, CodeID::Unary],
+            &[CodeID::Godel, CodeID::Unary, CodeID::Fibonacci],
             "Mathematical",
             active_code,
             ui,
         );
         combox_box(
-            &[CodeID::Base64, CodeID::Bacon, CodeID::Tap],
+            &[CodeID::Base64, CodeID::Bacon, CodeID::Tap, CodeID::Pgp],
             "Other Codes",
             active_code,
             ui,

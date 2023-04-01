@@ -1,5 +1,7 @@
+use bimap::BiMap;
 use lazy_static::lazy_static;
-use std::collections::HashMap;
+
+use crate::text_aux::text_functions::bimap_from_iter;
 
 pub const ITU_LETTERS: &'static str = "ABCDEÉFGHIJKLMNOPQRSTUVWXYZ1234567890.,:?'-/()\"=+@";
 pub const ITU_ASCII: [&'static str; 50] = [
@@ -256,49 +258,66 @@ pub const AMERICAN_HALFBLOCK: [&'static str; 41] = [
     "▄▄▄ ▄▄▄ ▄▄▄ ▄",
 ];
 
+// the organization of the array should be preserved for legibility
+#[rustfmt::skip] 
+pub const HIRAGANA: [&str; 109] = [
+    "あ", "い", "う", "え", "お", 
+    "か", "き", "く", "け", "こ",   "きゃ", "きゅ", "きょ",
+    "さ", "し", "す", "せ", "そ",   "しゃ", "しゅ", "しょ",
+    "た", "ち", "つ", "て", "と",   "ちゃ", "ちゅ", "ちょ",
+    "な", "に", "ぬ", "ね", "の",   "にゃ", "にゅ", "にょ",
+    "は", "ひ", "ふ", "へ", "ほ",   "ひゃ", "ひゅ", "ひょ",
+    "ま", "み", "む", "め", "も",   "みゃ", "みゅ", "みょ",
+    "や",       "ゆ",       "よ", 
+    "ら", "り", "る", "れ", "ろ",   "りゃ", "りゅ", "りょ",
+    "わ", "ゐ",       "ゑ", "を",
+    "ん", 
+    "が", "ぎ", "ぐ", "げ", "ご",   "ぎゃ", "ぎゅ", "ぎょ",
+    "ざ", "じ", "ず", "ぜ", "ぞ",   "じゃ", "じゅ", "じょ",
+    "だ", "ぢ", "づ", "で", "ど",   "ぢゃ", "ぢゅ", "ぢょ",
+    "ば", "び", "ぶ", "べ", "ぼ",   "びゃ", "びゅ", "びょ",
+    "ぱ", "ぴ", "ぷ", "ぺ", "ぽ",   "ぴゃ", "ぴゅ", "ぴょ",
+];
+#[rustfmt::skip] 
+pub const LATIN: [&str; 109] = [
+     "a",  "i",  "u",  "e",  "o", 
+    "ka", "ki", "ku", "ke", "ko",   "kya", "kyu", "kyo",
+    "sa", "si", "su", "se", "so",   "sya", "syu", "syo",
+    "ta", "ti", "tu", "te", "to",   "tya", "tyu", "tyo",
+    "na", "ni", "nu", "ne", "no",   "nya", "nyu", "nyo",
+    "ha", "hi", "hu", "he", "ho",   "hya", "hyu", "hyo",
+    "ma", "mi", "mu", "me", "mo",   "mya", "myu", "myo",
+    "ya",       "yu",       "yo", 
+    "ra", "ri", "ru", "re", "ro",   "rya", "ryu", "ryo",
+    "wa", "wi",       "we", "wo",
+    "n'", 
+    "ga", "gi", "gu", "ge", "go",   "gya", "gyu", "gyo",
+    "za", "zi", "zu", "ze", "zo",   "zya", "zyu", "zyo",
+    "da", "di", "du", "de", "do",   "dya", "dyu", "dyo",
+    "ba", "bi", "bu", "be", "bo",   "bya", "byu", "byo",
+    "pa", "pi", "pu", "pe", "po",   "pya", "pyu", "pyo",
+];
 
+// pub const WABUN: [&str; ?] = [];
 
 lazy_static! {
-    pub static ref ITU_ASCII_MAP: HashMap<char, &'static str> =
-        HashMap::from_iter(ITU_LETTERS.chars().zip(ITU_ASCII.iter().copied()));
-    pub static ref ITU_BINARY_MAP: HashMap<char, &'static str> =
-        HashMap::from_iter(ITU_LETTERS.chars().zip(ITU_BINARY.iter().copied()));
-    pub static ref ITU_DOT_DASH_MAP: HashMap<char, &'static str> =
-        HashMap::from_iter(ITU_LETTERS.chars().zip(ITU_DOT_DASH.iter().copied()));
-    pub static ref ITU_HALFBLOCK_MAP: HashMap<char, &'static str> =
-        HashMap::from_iter(ITU_LETTERS.chars().zip(ITU_HALFBLOCK.iter().copied()));
-    pub static ref AMERICAN_BINARY_MAP: HashMap<char, &'static str> = HashMap::from_iter(
+    pub static ref ITU_ASCII_MAP: BiMap<char, &'static str> =
+        bimap_from_iter(ITU_LETTERS.chars().zip(ITU_ASCII.iter().copied()));
+    pub static ref ITU_BINARY_MAP: BiMap<char, &'static str> =
+        bimap_from_iter(ITU_LETTERS.chars().zip(ITU_BINARY.iter().copied()));
+    pub static ref ITU_DOT_DASH_MAP: BiMap<char, &'static str> =
+        bimap_from_iter(ITU_LETTERS.chars().zip(ITU_DOT_DASH.iter().copied()));
+    pub static ref ITU_HALFBLOCK_MAP: BiMap<char, &'static str> =
+        bimap_from_iter(ITU_LETTERS.chars().zip(ITU_HALFBLOCK.iter().copied()));
+    pub static ref AMERICAN_BINARY_MAP: BiMap<char, &'static str> = bimap_from_iter(
         AMERICAN_LETTERS
             .chars()
             .zip(AMERICAN_BINARY.iter().copied())
     );
-    pub static ref AMERICAN_HALFBLOCK_MAP: HashMap<char, &'static str> = HashMap::from_iter(
+    pub static ref AMERICAN_HALFBLOCK_MAP: BiMap<char, &'static str> = bimap_from_iter(
         AMERICAN_LETTERS
             .chars()
             .zip(AMERICAN_HALFBLOCK.iter().copied())
-    );
-}
-
-lazy_static! {
-    pub static ref ITU_ASCII_MAP_INV: HashMap<&'static str, char> =
-        HashMap::from_iter(ITU_ASCII.iter().copied().zip(ITU_LETTERS.chars()));
-    pub static ref ITU_BINARY_MAP_INV: HashMap<&'static str, char> =
-        HashMap::from_iter(ITU_BINARY.iter().copied().zip(ITU_LETTERS.chars()));
-    pub static ref ITU_DOT_DASH_MAP_INV: HashMap<&'static str, char> =
-        HashMap::from_iter(ITU_DOT_DASH.iter().copied().zip(ITU_LETTERS.chars()));
-    pub static ref ITU_HALFBLOCK_MAP_INV: HashMap<&'static str, char> =
-        HashMap::from_iter(ITU_HALFBLOCK.iter().copied().zip(ITU_LETTERS.chars()));
-    pub static ref AMERICAN_BINARY_MAP_INV: HashMap<&'static str, char> = HashMap::from_iter(
-        AMERICAN_BINARY
-            .iter()
-            .copied()
-            .zip(AMERICAN_LETTERS.chars())
-    );
-    pub static ref AMERICAN_HALFBLOCK_MAP_INV: HashMap<&'static str, char> = HashMap::from_iter(
-        AMERICAN_HALFBLOCK
-            .iter()
-            .copied()
-            .zip(AMERICAN_LETTERS.chars())
     );
 }
 
@@ -347,21 +366,12 @@ impl MorseRep {
         }
     }
 
-    pub fn map(&self) -> &HashMap<char, &str> {
+    pub fn map(&self) -> &BiMap<char, &str> {
         match self {
             MorseRep::Binary => &ITU_BINARY_MAP,
             MorseRep::Ascii => &ITU_ASCII_MAP,
             MorseRep::CdotNDash => &ITU_DOT_DASH_MAP,
             MorseRep::HalfBlock => &ITU_HALFBLOCK_MAP,
-        }
-    }
-
-    pub fn map_inv(&self) -> &HashMap<&str, char> {
-        match self {
-            MorseRep::Binary => &ITU_BINARY_MAP_INV,
-            MorseRep::Ascii => &ITU_ASCII_MAP_INV,
-            MorseRep::CdotNDash => &ITU_DOT_DASH_MAP_INV,
-            MorseRep::HalfBlock => &ITU_HALFBLOCK_MAP_INV,
         }
     }
 }

@@ -1,5 +1,6 @@
+use bimap::BiMap;
+
 use crate::errors::Error;
-use std::collections::HashMap;
 
 use super::{morse_encodings::*, Code};
 
@@ -48,7 +49,7 @@ impl MorseRep {
         }
     }
 
-    pub fn map(&self, standard: MorseStandard) -> Result<&HashMap<char, &str>, Error> {
+    pub fn map(&self, standard: MorseStandard) -> Result<&BiMap<char, &str>, Error> {
         Ok(match standard {
             MorseStandard::Itu => match self {
                 MorseRep::Binary => &ITU_BINARY_MAP,
@@ -59,26 +60,6 @@ impl MorseRep {
             MorseStandard::American => match self {
                 MorseRep::Binary => &AMERICAN_BINARY_MAP,
                 MorseRep::HalfBlock => &AMERICAN_HALFBLOCK_MAP,
-                MorseRep::Ascii | MorseRep::CdotNDash => {
-                    return Err(Error::State(
-                        "American Morse only suppots line code representation".into(),
-                    ))
-                }
-            },
-        })
-    }
-
-    pub fn map_inv(&self, standard: MorseStandard) -> Result<&HashMap<&str, char>, Error> {
-        Ok(match standard {
-            MorseStandard::Itu => match self {
-                MorseRep::Binary => &ITU_BINARY_MAP_INV,
-                MorseRep::HalfBlock => &ITU_HALFBLOCK_MAP_INV,
-                MorseRep::Ascii => &ITU_ASCII_MAP_INV,
-                MorseRep::CdotNDash => &ITU_DOT_DASH_MAP_INV,
-            },
-            MorseStandard::American => match self {
-                MorseRep::Binary => &AMERICAN_BINARY_MAP_INV,
-                MorseRep::HalfBlock => &AMERICAN_HALFBLOCK_MAP_INV,
                 MorseRep::Ascii | MorseRep::CdotNDash => {
                     return Err(Error::State(
                         "American Morse only suppots line code representation".into(),
@@ -135,7 +116,7 @@ impl Code for Morse {
         let map = self.mode.map(self.standard)?;
         let mut out = Vec::with_capacity(text.chars().count());
         for s in text.chars() {
-            match map.get(&s) {
+            match map.get_by_left(&s) {
                 Some(code_group) => out.push(*code_group),
                 None => return Err(Error::invalid_input_char(s)),
             }
@@ -145,9 +126,9 @@ impl Code for Morse {
 
     fn decode(&self, text: &str) -> Result<String, Error> {
         let mut out = String::new();
-        let map = self.mode.map_inv(self.standard)?;
+        let map = self.mode.map(self.standard)?;
         for s in text.split(self.mode.letter_sep()) {
-            match map.get(&s) {
+            match map.get_by_right(&s) {
                 Some(c) => out.push(*c),
                 None => return Err(Error::invalid_input_group(s)),
             }

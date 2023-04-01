@@ -1,9 +1,22 @@
+use super::VecString;
 use crate::errors::Error;
+use bimap::BiMap;
 use itertools::Itertools;
 use rand::prelude::{IteratorRandom, SliceRandom, StdRng};
-use std::{collections::HashMap, fmt::Display, hash::Hash};
+use std::hash::Hash;
 
-use super::VecString;
+pub fn bimap_from_iter<I, S, T>(iter: I) -> BiMap<S, T>
+where
+    I: Iterator<Item = (S, T)>,
+    S: Hash + Eq,
+    T: Hash + Eq,
+{
+    let mut map = BiMap::new();
+    for (l, r) in iter {
+        map.insert(l, r);
+    }
+    map
+}
 
 pub fn shuffled_str(s: &str, rng: &mut StdRng) -> String {
     let mut characters = s.chars().collect::<Vec<char>>();
