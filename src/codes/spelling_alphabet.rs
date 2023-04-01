@@ -40,9 +40,22 @@ lazy_static! {
         let mut map = BiMap::new();
         for (sym,code) in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".chars().zip([
             "ADAMS", "BOSTON", "CHICAGO", "DENVER", "EASY", "FRANK",
+            "GEORGE", "HENRY", "IDA", "JERSEY", "KING", "LINCOLN",
+            "MARY", "NEWARK", "OCEAN", "PETER", "QUEEN", "ROGER",
+            "SUGAR", "TEXAS", "UNION", "VIOLET", "WILLIAM",
+            "XRAY", "YALE", "ZERO"].into_iter()) {
+            map.insert(sym, code);
+        };
+        map
+    };
+
+    pub static ref WESTERN_UNION_1942: BiMap<char,&'static str> = {
+        let mut map = BiMap::new();
+        for (sym,code) in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".chars().zip([
+            "ADAMS", "BOSTON", "CHICAGO", "DENVER", "EASY", "FRANK",
             "GEORGE", "HENRY", "IDA", "JOHN", "KING", "LINCOLN",
             "MARY", "NEWYORK", "OCEAN", "PETER", "QUEEN", "ROGER",
-            "SUGAR", "THOMAS", "UNION", "VICTOR", "WILLIAM",
+            "SUGAR", "THOMAS", "UNION", "VICTORY", "WILLIAM",
             "XRAY", "YOUNG", "ZERO"].into_iter()) {
             map.insert(sym, code);
         };
@@ -55,6 +68,7 @@ pub enum SpellingAlphabetMode {
     Nato,
     Ccb,
     Wu1912,
+    Wu1942,
 }
 
 impl SpellingAlphabetMode {
@@ -63,6 +77,7 @@ impl SpellingAlphabetMode {
             SpellingAlphabetMode::Nato => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
             SpellingAlphabetMode::Ccb => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
             SpellingAlphabetMode::Wu1912 => "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            SpellingAlphabetMode::Wu1942 => "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
         }
     }
 
@@ -71,6 +86,7 @@ impl SpellingAlphabetMode {
             SpellingAlphabetMode::Nato => NATO.get_by_left(&c),
             SpellingAlphabetMode::Ccb => CCB.get_by_left(&c),
             SpellingAlphabetMode::Wu1912 => WESTERN_UNION_1912.get_by_left(&c),
+            SpellingAlphabetMode::Wu1942 => WESTERN_UNION_1942.get_by_left(&c),
         }
     }
 
@@ -79,6 +95,7 @@ impl SpellingAlphabetMode {
             SpellingAlphabetMode::Nato => NATO.get_by_right(s),
             SpellingAlphabetMode::Ccb => CCB.get_by_right(s),
             SpellingAlphabetMode::Wu1912 => WESTERN_UNION_1912.get_by_right(s),
+            SpellingAlphabetMode::Wu1942 => WESTERN_UNION_1942.get_by_right(s),
         }
     }
 }

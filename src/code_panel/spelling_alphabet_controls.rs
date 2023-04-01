@@ -13,6 +13,11 @@ impl View for SpellingAlphabet {
                 SpellingAlphabetMode::Wu1912,
                 "Western Union (1912)",
             );
+            ui.selectable_value(
+                &mut self.mode,
+                SpellingAlphabetMode::Wu1942,
+                "Western Union (1942)",
+            );
         });
         fill_code_columns(9, 4, ui, Box::new(self.chars_codes()));
     }
