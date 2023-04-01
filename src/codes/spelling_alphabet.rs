@@ -61,6 +61,46 @@ lazy_static! {
         };
         map
     };
+
+    pub static ref US_NAVY_1908: BiMap<char,&'static str> = {
+        let mut map = BiMap::new();
+        for (sym,code) in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".chars().zip([
+            "ACTOR", "BAKER", "CANTEEN", "DIVER", "EAGLE", "FISHER",
+            "GANGWAY", "HALLIARD", "INSECT", "JOKCEY", "KNAPSACK", "LUGGER",
+            "MUSKET", "NEPTUNE", "OYSTER", "PISTOL", "QUADRANT", "REEFER",
+            "SHIPMATE", "TOPSAIL", "UNLOAD", "VESSEL", "WINDAGE",
+            "XRAY", "YEOMAN", "ZEBRA"].into_iter()) {
+            map.insert(sym, code);
+        };
+        map
+    };
+
+
+    pub static ref US_NAVY_1908_ALT: BiMap<char,&'static str> = {
+        let mut map = BiMap::new();
+        for (sym,code) in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".chars().zip([
+            "ASH", "BACK", "CHAIN", "DOG", "EGG", "FOX",
+            "GIG", "HORSE", "ICE", "JAKE", "KING", "LASH",
+            "MULE", "NET", "OAK", "PAGE", "QUAIL", "RAFT",
+            "SCOUT", "TIDE", "USE", "VAST", "WINCH",
+            "XRAY", "YACHT", "ZOO"].into_iter()) {
+            map.insert(sym, code);
+        };
+        map
+    };
+
+    pub static ref US_MILITARY_1941: BiMap<char,&'static str> = {
+        let mut map = BiMap::new();
+        for (sym,code) in "ABCDEFGHIJKLMNOPQRSTUVWXYZ".chars().zip([
+            "ABLE", "BAKER", "CHARLIE", "DOG", "EASY", "FOX",
+            "GEORGE", "HOW", "ITEM", "JIG", "KING", "LOVE",
+            "MIKE", "NAN", "OBOE", "PETER", "QUEEN", "ROGER",
+            "SAIL", "TARE", "UNCLE", "VICTOR", "WILLIAM",
+            "XRAY", "YOKE", "ZEBRA"].into_iter()) {
+            map.insert(sym, code);
+        };
+        map
+    };
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -69,6 +109,9 @@ pub enum SpellingAlphabetMode {
     Ccb,
     Wu1912,
     Wu1942,
+    Usn1908,
+    Usn1908Alt,
+    Us1941,
 }
 
 impl SpellingAlphabetMode {
@@ -78,6 +121,9 @@ impl SpellingAlphabetMode {
             SpellingAlphabetMode::Ccb => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
             SpellingAlphabetMode::Wu1912 => "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
             SpellingAlphabetMode::Wu1942 => "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            SpellingAlphabetMode::Us1941 => "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            SpellingAlphabetMode::Usn1908 => "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            SpellingAlphabetMode::Usn1908Alt => "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
         }
     }
 
@@ -87,6 +133,9 @@ impl SpellingAlphabetMode {
             SpellingAlphabetMode::Ccb => CCB.get_by_left(&c),
             SpellingAlphabetMode::Wu1912 => WESTERN_UNION_1912.get_by_left(&c),
             SpellingAlphabetMode::Wu1942 => WESTERN_UNION_1942.get_by_left(&c),
+            SpellingAlphabetMode::Us1941 => US_MILITARY_1941.get_by_left(&c),
+            SpellingAlphabetMode::Usn1908 => US_NAVY_1908.get_by_left(&c),
+            SpellingAlphabetMode::Usn1908Alt => US_NAVY_1908_ALT.get_by_left(&c),
         }
     }
 
@@ -96,6 +145,9 @@ impl SpellingAlphabetMode {
             SpellingAlphabetMode::Ccb => CCB.get_by_right(s),
             SpellingAlphabetMode::Wu1912 => WESTERN_UNION_1912.get_by_right(s),
             SpellingAlphabetMode::Wu1942 => WESTERN_UNION_1942.get_by_right(s),
+            SpellingAlphabetMode::Us1941 => US_MILITARY_1941.get_by_right(s),
+            SpellingAlphabetMode::Usn1908 => US_NAVY_1908.get_by_right(s),
+            SpellingAlphabetMode::Usn1908Alt => US_NAVY_1908_ALT.get_by_right(s),
         }
     }
 }
