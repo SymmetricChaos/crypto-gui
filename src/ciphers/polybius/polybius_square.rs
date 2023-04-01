@@ -156,7 +156,7 @@ impl Cipher for PolybiusSquare {
         validate_text(text, &self.labels)?;
         if !text.chars().count().is_multiple_of(&2) {
             return Err(Error::input(
-                "Input text must have a length that is a multiple of three.",
+                "Input text must have a length that is a multiple of two.",
             ));
         }
 
