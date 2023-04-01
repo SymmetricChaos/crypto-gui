@@ -15,6 +15,7 @@ pub enum CodeID {
     Unicode,
     Punycode,
     Block,
+    Tap,
 }
 
 impl Default for CodeID {
@@ -39,7 +40,8 @@ impl CodeID {
             CodeID::Pgp => "The PGP Word List converts a sequence of bytes into a sequence of words. To prevent errors this is done using two list which alternate back and forth. The even list uses words with two syllables and the odd list uses words with three syllables.",
             CodeID::Baudot => "The Baudot Code is a five bit telegraphy code developed by Emile Baudot of France that extended its character set by being able to switch modes (essentially making a six bit code with the sixth bit stored on the recieving machine). A variation known as ITA2 created by Donald Murray of New Zealand would become the major international standard for telegraphy in the 20th century.",
             CodeID::Bacon => "Fancis Bacon developed this fixed width code (though he called it a cipher) in 1605, assigning each letter of the classical Latin alphabet a five bit code. The intended use was to hide one text in another by writing letters of the larger text in two different ways to represent the bits of the hidden message.",
-            CodeID::Block => "In a block code (or fixed width code) every code group contains the same number of symbols. The ASCII, UTF-32, and Bacon codes are examples of block codes."
+            CodeID::Block => "In a block code (or fixed width code) every code group contains the same number of symbols. The ASCII, UTF-32, and Bacon codes are examples of block codes.",
+            CodeID::Tap => "Tap codes work on the same principle as the Polybius Square cipher but simplified for ease of use. Characters are specified by pairs of tap sequences. The first sequence of taps selects a row and the second sequence of taps a column in that row. This very slow way of encoding text is said to be common among prisoners as it is easy to learn and requires no special tools.",
             //_ => "Missing description. Please complain to the author.",
         }
     }
@@ -61,6 +63,7 @@ impl Display for CodeID {
             CodeID::Unicode => "Unicode",
             CodeID::Punycode => "Punycode",
             CodeID::Block => "Block",
+            CodeID::Tap => "Tap",
         };
         write!(f, "{}", name)
     }

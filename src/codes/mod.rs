@@ -42,6 +42,9 @@ pub mod morse;
 pub use morse::Morse;
 pub mod morse_encodings;
 
+pub mod tap_code;
+pub use tap_code::TapCode;
+
 use crate::errors::Error;
 
 pub trait Code {

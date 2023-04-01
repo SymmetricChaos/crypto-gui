@@ -3,6 +3,7 @@ use std::str::Chars;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PresetAlphabet {
     BasicLatin,
+    BasicLatinNoC,
     BasicLatinNoJ,
     BasicLatinNoQ,
     BasicLatinWithDigits,
@@ -24,6 +25,7 @@ impl PresetAlphabet {
     pub fn slice(&self) -> &'static str {
         match self {
             PresetAlphabet::BasicLatin => "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            PresetAlphabet::BasicLatinNoC => "ABCDEFGHIJLMNOPQRSTUVWXYZ",
             PresetAlphabet::BasicLatinNoJ => "ABCDEFGHIKLMNOPQRSTUVWXYZ",
             PresetAlphabet::BasicLatinNoQ => "ABCDEFGHIJKLMNOPRSTUVWXYZ",
             PresetAlphabet::BasicLatinWithDigits => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",

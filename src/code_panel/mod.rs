@@ -15,6 +15,7 @@ pub mod morse_controls;
 pub mod pgp_controls;
 pub mod punycode_controls;
 pub mod spelling_alphabet_controls;
+pub mod tap_code_controls;
 pub mod unary_controls;
 pub mod unicode_controls;
 
@@ -53,6 +54,7 @@ pub struct CodeInterface {
     unary: UnaryCode,
     godel: Godel,
     bacon: Bacon,
+    tap: TapCode,
 }
 
 impl CodeInterface {
@@ -69,9 +71,14 @@ impl CodeInterface {
             active_code,
             ui,
         );
-
         combox_box(
-            &[CodeID::Godel, CodeID::Unary, CodeID::Base64, CodeID::Bacon],
+            &[CodeID::Godel, CodeID::Unary],
+            "Mathematical",
+            active_code,
+            ui,
+        );
+        combox_box(
+            &[CodeID::Base64, CodeID::Bacon, CodeID::Tap],
             "Other Codes",
             active_code,
             ui,
@@ -93,6 +100,7 @@ impl CodeInterface {
             CodeID::Unicode => &mut self.unicode,
             CodeID::Punycode => &mut self.punycode,
             CodeID::Block => todo!(),
+            CodeID::Tap => &mut self.tap,
             //_ => todo!("unable to get active code"),
         }
     }
