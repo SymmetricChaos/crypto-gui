@@ -30,7 +30,7 @@ impl Default for CodeID {
 impl CodeID {
     // Describe the history of the code
     pub fn description(&self) -> &'static str {
-        match CODE_IFORMATION[self.to_string()].as_str() {
+        match CODE_INFORMATION[self.to_string()].as_str() {
             Some(s) => s,
             None => "<<<MISSING DESCRIPTION>>>",
         }
@@ -68,9 +68,8 @@ impl From<CodeID> for String {
 const JSON_CODE_INFORMATION: &'static str = include_str!("code_descriptions.json");
 
 lazy_static! {
-    // Yes, ALFA and JULIETT are meant to be spelled that way
-    // Yes, the spelling of the numerals is correct even though the pronunciation is different
-    pub static ref CODE_IFORMATION: JsonValue = {
-        json::parse(&JSON_CODE_INFORMATION.replace('\u{feff}', "")).expect("unable to parse code_descriptions.json")
+    pub static ref CODE_INFORMATION: JsonValue = {
+        json::parse(&JSON_CODE_INFORMATION.replace('\u{feff}', ""))
+            .expect("unable to parse code_descriptions.json")
     };
 }
