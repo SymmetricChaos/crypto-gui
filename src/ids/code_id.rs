@@ -1,5 +1,8 @@
 use std::fmt::Display;
 
+use json::JsonValue;
+use lazy_static::lazy_static;
+
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub enum CodeID {
     Ascii,
@@ -27,22 +30,9 @@ impl Default for CodeID {
 impl CodeID {
     // Describe the history of the code
     pub fn description(&self) -> &'static str {
-        match self {
-            CodeID::Ascii => "The American Standard Code for Information Interchange (ASCII) was created in the 1960s and consists of 128 characters sufficient to write essentially all English text and to control the printing device. Originally a 7-bit code it is now most often seen as an 8-bit code with the leading bit always set to zero. The limitations of ASCII became more apparent as it emerged as a defacto standard for computer text even outside the United States. Today the UTF-8 of Unicode encoding fully subsumes ASCII.",
-            CodeID::Godel => "The Gödel encoding was created by Kurt Gödel as part of his proof of first Incompleteness Theorem in order to convert statements of mathematical logic into numbers that are then subject to mathematical logic. The version here can encode whatever kind of text you choose, however, because it produces huge numbers the maximum message is currently limited to 50 characters.\n\nThe encoding works as follows. Each symbol is assigned a positive natural number. Each symbol of the message is then assigned a prime number raised to the power of the number associated with the symbol and those values are all multiplied together. The original message can then be recovered by factoring. For example if A = 1, B = 2, and C = 3 the message BBC would be encoded as 2^2 * 3^2 * 5^3 = 4500.\n\nThe default encoding below puts the Basic Latin alphabet in order of frequncy as used in English in order to produce smaller numbers for most messages.",
-            CodeID::Morse => "The best known version of Morse Code is the ITU Standard. It uses two kind of signals the 'dit' and 'dah' with the dah defined as three times the length of the dit. Morse code also requires periods with no signal, called spaces, in order to differentiate characters. The subset of ITU Morse below covers all the printing characters. Additional control signals and prosigns are not yet supported. The space between dits and dahs is the same length as a dit, between characters is a space of three dits. The older American Morse standard is slightly different, still using dits and dahs of the same size but also including a double length space within come characters.", 
-            CodeID::Fibonacci => "The Fibonacci code is named because it uses the Fibonacci sequence to generate a variable width encoding of some arbitrary alphabet. More common characters are assigned shorter codes. This allows very large alphabets to be encoded efficiently so long as characters vary in frequency following a geometric distribution.",
-            CodeID::Unary => "The Unary Encoding is the simplest prefix code and thus the simplest useful variable length code. No code word appears as a prefix of any other code word.",
-            CodeID::SpellingAlphabet => "Spelling Alphabets are designed to spell short sequences of letter over voice channels where noise might caught ambiguity. Written specifications for these systems appeared in the early 20th century with several focusing only on the most easily confused letters. The most widely used international standard today is the one specified by the ICAO, though it is commonly called the NATO Phonetic Alphabet.",
-            CodeID::Base64 => "Base64 is a binary code that is meant to re-encode arbitrary binary data as ASCII symbols that can then be transmitted safely through text channels and decoded on the other side.",
-            CodeID::Unicode => "Unicode is the dominant international standard for encoding of text using in most of the world writing systems with over 100,000 code points defined. There are three major encodings used called UTF-8, UTF-16, and UTF-32.",
-            CodeID::Punycode => "Punycode is a method for re-encoding short Unicode strings using only ASCII characters, originally created for use with Internationalized Domain Names. The characters which are not ASCII are stripped out of the string, a delimeter character is placed after the remaining characters, then the non-ASCII characters are encoded onto the end using a method that records their position and Unicode codepoint. For example the sentence \"TạisaohọkhôngthểchỉnóitiếngViệt\" is encoded as \"TisaohkhngthchnitingVit-kjcr8268qyxafd2f1b9g\".",
-            CodeID::Pgp => "The PGP Word List converts a sequence of bytes into a sequence of words. To prevent errors this is done using two list which alternate back and forth. The even list uses words with two syllables and the odd list uses words with three syllables.",
-            CodeID::Baudot => "The Baudot Code is a five bit telegraphy code developed by Emile Baudot of France that extended its character set by being able to switch modes (essentially making a six bit code with the sixth bit stored on the recieving machine). A variation known as ITA2 created by Donald Murray of New Zealand would become the major international standard for telegraphy in the 20th century.",
-            CodeID::Bacon => "Fancis Bacon developed this fixed width code (though he called it a cipher) in 1605, assigning each letter of the classical Latin alphabet a five bit code. The intended use was to hide one text in another by writing letters of the larger text in two different ways to represent the bits of the hidden message.",
-            CodeID::Block => "In a block code (or fixed width code) every code group contains the same number of symbols. The ASCII, UTF-32, and Bacon codes are examples of block codes.",
-            CodeID::Tap => "Tap codes work on the same principle as the Polybius square cipher but simplified for ease of use. Characters are specified by pairs of tap sequences. The first sequence of taps selects a row and the second sequence of taps a column in that row. This very slow way of encoding text is said to be common among prisoners as it is easy to learn and requires no special tools.",
-            //_ => "Missing description. Please complain to the author.",
+        match CODE_IFORMATION[self.to_string()].as_str() {
+            Some(s) => s,
+            None => "<<<MISSING DESCRIPTION>>>",
         }
     }
 }
@@ -58,7 +48,7 @@ impl Display for CodeID {
             CodeID::Base64 => "Base64",
             CodeID::Unary => "Unary",
             CodeID::SpellingAlphabet => "Spelling Alphabet",
-            CodeID::Pgp => "PGP Word List",
+            CodeID::Pgp => "PGP Words",
             CodeID::Bacon => "Bacon",
             CodeID::Unicode => "Unicode",
             CodeID::Punycode => "Punycode",
@@ -73,4 +63,14 @@ impl From<CodeID> for String {
     fn from(id: CodeID) -> Self {
         id.to_string()
     }
+}
+
+const JSON_CODE_INFORMATION: &'static str = include_str!("code_descriptions.json");
+
+lazy_static! {
+    // Yes, ALFA and JULIETT are meant to be spelled that way
+    // Yes, the spelling of the numerals is correct even though the pronunciation is different
+    pub static ref CODE_IFORMATION: JsonValue = {
+        json::parse(&JSON_CODE_INFORMATION.replace('\u{feff}', "")).expect("unable to parse code_descriptions.json")
+    };
 }
