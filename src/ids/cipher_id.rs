@@ -114,7 +114,7 @@ impl Display for CipherID {
             CipherID::Rs44 => "RS44",
             CipherID::Hebern => "Hebern",
             CipherID::Purple => "Purple",
-            _ => "Missing name. Please complain to the author.",
+            _ => "<<<MISSING NAME>>>",
         };
         write!(f, "{}", name)
     }
