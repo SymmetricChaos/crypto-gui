@@ -1,8 +1,6 @@
-use std::collections::HashMap;
-
-use crate::errors::Error;
-
 use super::Code;
+use crate::errors::Error;
+use bimap::BiMap;
 
 // https://en.wikipedia.org/wiki/Fibonacci_coding
 pub struct FibStr {
@@ -64,8 +62,7 @@ impl Iterator for FibStr {
 }
 
 pub struct FibonacciCode {
-    map: HashMap<char, String>,
-    map_inv: HashMap<String, char>,
+    map: BiMap<char, String>,
     pub alphabet: String,
     old_alphabet: String,
     max_code_len: usize,
@@ -83,12 +80,13 @@ impl FibonacciCode {
         if self.alphabet != self.old_alphabet {
             let codes = FibStr::new();
             self.map.clear();
-            self.map_inv.clear();
             for (l, c) in self.alphabet.chars().zip(codes) {
                 self.map.insert(l, c.clone());
-                self.map_inv.insert(c.clone(), l);
             }
-            self.max_code_len = self.map[&self.alphabet.chars().last().unwrap()]
+            self.max_code_len = self
+                .map
+                .get_by_left(&self.alphabet.chars().last().unwrap())
+                .unwrap()
                 .chars()
                 .count();
             self.old_alphabet = self.alphabet.clone();
@@ -97,15 +95,12 @@ impl FibonacciCode {
 
     pub fn new(alphabet: &str) -> Self {
         let codes = FibStr::new();
-        let mut map = HashMap::new();
-        let mut map_inv = HashMap::new();
+        let mut map = BiMap::new();
         for (l, c) in alphabet.chars().zip(codes) {
             map.insert(l, c.clone());
-            map_inv.insert(c, l);
         }
         FibonacciCode {
             map,
-            map_inv,
             alphabet: alphabet.to_string(),
             old_alphabet: alphabet.to_string(),
             max_code_len: 8,
@@ -116,7 +111,7 @@ impl FibonacciCode {
         self.set_maps();
         self.alphabet
             .chars()
-            .map(|x| (x, self.map.get(&x).unwrap()))
+            .map(|x| (x, self.map.get_by_left(&x).unwrap()))
     }
 }
 
@@ -130,7 +125,11 @@ impl Code for FibonacciCode {
     fn encode(&self, text: &str) -> Result<String, Error> {
         let mut output = String::new();
         for s in text.chars() {
-            output.push_str(&self.map[&s])
+            let code = self
+                .map
+                .get_by_left(&s)
+                .ok_or_else(|| Error::Input(format!("Unknown character `{}`", s)))?;
+            output.push_str(&code)
         }
         Ok(output)
     }
@@ -142,7 +141,7 @@ impl Code for FibonacciCode {
         for b in text.chars() {
             buffer.push(b);
             if prev == '1' && b == '1' {
-                match self.map_inv.get(&buffer) {
+                match self.map.get_by_right(&buffer) {
                     Some(s) => {
                         output.push(*s);
                         buffer.clear();

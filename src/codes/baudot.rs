@@ -1,4 +1,7 @@
-use crate::{errors::Error, text_aux::text_functions::bimap_from_iter};
+use crate::{
+    errors::Error,
+    text_aux::text_functions::{bimap_from_iter, chunk_and_join},
+};
 use bimap::BiMap;
 use lazy_static::lazy_static;
 use std::cell::Cell;
@@ -98,6 +101,7 @@ impl Default for Baudot {
 
 impl Code for Baudot {
     fn encode(&self, text: &str) -> Result<String, Error> {
+        // Always start in letter mode
         self.letter_shift();
 
         let mut out = String::with_capacity(text.len() * Self::WIDTH);
@@ -126,12 +130,12 @@ impl Code for Baudot {
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
+        // Always start in letter mode
         self.letter_shift();
 
         let mut out = String::with_capacity(text.len() / Self::WIDTH);
-        for p in 0..(text.len() / Self::WIDTH) {
-            let group = &text[(p * Self::WIDTH)..(p * Self::WIDTH) + Self::WIDTH];
-            match self.map_inv(&group.to_string()) {
+        for group in chunk_and_join(text, Self::WIDTH, ' ').split(' ') {
+            match self.map_inv(&group) {
                 Some(code_group) => out.push(*code_group),
                 None => {
                     return Err(Error::Input(format!(

@@ -134,24 +134,13 @@ pub fn chunk_and_join(text: &str, width: usize, sep: char) -> String {
         .collect::<String>()
 }
 
-// use itertools::{sorted,equal};
-
-// We generally need to check anagrams for alphabets which are short (less than 100 characters) and should have all unique symbols
-// so more complex anagram checking is pointless
-// fn is_anagram(a: &str, word: &str) -> bool {
-//     equal(sorted(a.chars()),sorted(word.chars()))
-// }
-
-// // Test multiple possible words. Need this for Tableaux
-// fn are_anagrams(a: &str, words: &Vec<&str>) -> bool {
-//     let standard = sorted(a.chars());
-//     for word in words {
-//         if !equal(standard.clone(),sorted(word.chars())) {
-//             return false
-//         }
-//     }
-//     true
-// }
+pub fn string_chunks(text: &str, width: usize) -> Vec<String> {
+    text.chars()
+        .chunks(width)
+        .into_iter()
+        .map(|chunk| chunk.collect::<String>())
+        .collect_vec()
+}
 
 // Silently ignores invalid characters
 pub fn keyed_alphabet(keyword: &str, alphabet: &str) -> String {
@@ -254,5 +243,21 @@ mod text_function_tests {
         for _ in 0..26 {
             println!("{}", shuffled_str(alpha, &mut get_global_rng()))
         }
+    }
+
+    #[test]
+    fn joined_chunks() {
+        let s = "1234567890";
+        assert_eq!("123 456 789 0", chunk_and_join(s, 3, ' '))
+    }
+
+    #[test]
+    fn vec_chunks() {
+        let s = "1234567890";
+        let chunks = string_chunks(s, 3);
+        assert_eq!(
+            "[\"123\", \"456\", \"789\", \"0\"]",
+            format!("{:?}", chunks)
+        )
     }
 }
