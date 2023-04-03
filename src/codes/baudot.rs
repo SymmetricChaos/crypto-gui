@@ -108,12 +108,7 @@ impl Code for Baudot {
         for s in text.chars() {
             match self.map(&s) {
                 Some(code_group) => out.push_str(code_group),
-                None => {
-                    return Err(Error::Input(format!(
-                        "The symbol `{}` is not in the Baudot alphabet",
-                        s
-                    )))
-                }
+                None => return Err(Error::invalid_input_char(s)),
             }
             match s {
                 '␎' => {

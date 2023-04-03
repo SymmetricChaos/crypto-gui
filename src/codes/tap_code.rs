@@ -63,7 +63,7 @@ impl TapCode {
         let num = self
             .grid
             .get_pos_of(symbol)
-            .ok_or_else(|| Error::Input(format!("invalid character: `{}`", symbol)))?;
+            .ok_or_else(|| Error::invalid_input_char(symbol))?;
         Ok((num / self.side_len, num % self.side_len))
     }
 

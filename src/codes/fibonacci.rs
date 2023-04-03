@@ -128,7 +128,7 @@ impl Code for FibonacciCode {
             let code = self
                 .map
                 .get_by_left(&s)
-                .ok_or_else(|| Error::Input(format!("Unknown character `{}`", s)))?;
+                .ok_or_else(|| Error::invalid_input_char(s))?;
             output.push_str(&code)
         }
         Ok(output)

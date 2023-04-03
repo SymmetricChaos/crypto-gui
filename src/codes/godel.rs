@@ -74,12 +74,7 @@ impl Code for Godel {
         for (c, prime) in text.chars().zip(self.primes.iter()) {
             match self.map.get(&c) {
                 Some(v) => out *= BigUint::from(*prime).pow(*v as u32),
-                None => {
-                    return Err(Error::Input(format!(
-                        "The symbol `{}` is not in the alphabet provided",
-                        c
-                    )))
-                }
+                None => return Err(Error::invalid_input_char(c)),
             }
         }
         Ok(out.to_str_radix(10))

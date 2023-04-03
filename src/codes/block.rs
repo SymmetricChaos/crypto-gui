@@ -57,11 +57,10 @@ impl Code for BlockCode {
     fn encode(&self, text: &str) -> Result<String, Error> {
         let mut out = Vec::with_capacity(text.len());
         for c in text.chars() {
-            let n = self.alphabet.get_pos(c).ok_or_else(|| {
-                Error::Input(format!(
-                    "The character `{c}` is not in the selected alphabet"
-                ))
-            })?;
+            let n = self
+                .alphabet
+                .get_pos(c)
+                .ok_or_else(|| Error::invalid_input_char(c))?;
             out.push(self.num_to_string(&n));
         }
         Ok(out.join(" "))
