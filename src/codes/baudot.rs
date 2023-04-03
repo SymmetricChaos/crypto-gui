@@ -1,6 +1,7 @@
-use crate::errors::Error;
+use crate::{errors::Error, text_aux::text_functions::bimap_from_iter};
+use bimap::BiMap;
 use lazy_static::lazy_static;
-use std::{cell::Cell, collections::HashMap};
+use std::cell::Cell;
 
 use super::Code;
 
@@ -21,14 +22,10 @@ pub enum BaudotMode {
 }
 
 lazy_static! {
-    pub static ref BAUDOT_LETTER_MAP: HashMap<char, &'static str> =
-        HashMap::from_iter(ITA2_LETTERS.chars().zip(BAUDOT_CODES.iter().copied()));
-    pub static ref BAUDOT_FIGURE_MAP: HashMap<char, &'static str> =
-        HashMap::from_iter(ITA2_FIGURES.chars().zip(BAUDOT_CODES.iter().copied()));
-    pub static ref BAUDOT_LETTER_MAP_INV: HashMap<&'static str, char> =
-        HashMap::from_iter(BAUDOT_CODES.iter().copied().zip(ITA2_LETTERS.chars()));
-    pub static ref BAUDOT_FIGURE_MAP_INV: HashMap<&'static str, char> =
-        HashMap::from_iter(BAUDOT_CODES.iter().copied().zip(ITA2_FIGURES.chars()));
+    pub static ref BAUDOT_LETTER_BIMAP: BiMap<char, &'static str> =
+        bimap_from_iter(ITA2_LETTERS.chars().zip(BAUDOT_CODES.iter().copied()));
+    pub static ref BAUDOT_FIGURE_BIMAP: BiMap<char, &'static str> =
+        bimap_from_iter(ITA2_FIGURES.chars().zip(BAUDOT_CODES.iter().copied()));
 }
 
 pub struct Baudot {
@@ -51,7 +48,7 @@ impl Baudot {
         Box::new(
             ITA2_LETTERS
                 .chars()
-                .map(|x| (x, BAUDOT_LETTER_MAP.get(&x).unwrap())),
+                .map(|x| (x, BAUDOT_LETTER_BIMAP.get_by_left(&x).unwrap())),
         )
     }
 
@@ -59,7 +56,7 @@ impl Baudot {
         Box::new(
             ITA2_FIGURES
                 .chars()
-                .map(|x| (x, BAUDOT_FIGURE_MAP.get(&x).unwrap())),
+                .map(|x| (x, BAUDOT_FIGURE_BIMAP.get_by_left(&x).unwrap())),
         )
     }
 
@@ -69,8 +66,8 @@ impl Baudot {
                 code,
                 format!(
                     "{} {}",
-                    BAUDOT_LETTER_MAP_INV.get(code).unwrap(),
-                    BAUDOT_FIGURE_MAP_INV.get(code).unwrap()
+                    BAUDOT_LETTER_BIMAP.get_by_right(code).unwrap(),
+                    BAUDOT_FIGURE_BIMAP.get_by_right(code).unwrap()
                 ),
             )
         }))
@@ -78,15 +75,15 @@ impl Baudot {
 
     pub fn map(&self, k: &char) -> Option<&&str> {
         match self.mode.get() {
-            BaudotMode::Letters => BAUDOT_LETTER_MAP.get(k),
-            BaudotMode::Figures => BAUDOT_FIGURE_MAP.get(k),
+            BaudotMode::Letters => BAUDOT_LETTER_BIMAP.get_by_left(k),
+            BaudotMode::Figures => BAUDOT_FIGURE_BIMAP.get_by_left(k),
         }
     }
 
     pub fn map_inv(&self, k: &str) -> Option<&char> {
         match self.mode.get() {
-            BaudotMode::Letters => BAUDOT_LETTER_MAP_INV.get(k),
-            BaudotMode::Figures => BAUDOT_FIGURE_MAP_INV.get(k),
+            BaudotMode::Letters => BAUDOT_LETTER_BIMAP.get_by_right(k),
+            BaudotMode::Figures => BAUDOT_FIGURE_BIMAP.get_by_right(k),
         }
     }
 }
@@ -101,6 +98,8 @@ impl Default for Baudot {
 
 impl Code for Baudot {
     fn encode(&self, text: &str) -> Result<String, Error> {
+        self.letter_shift();
+
         let mut out = String::with_capacity(text.len() * Self::WIDTH);
         for s in text.chars() {
             match self.map(&s) {
@@ -114,10 +113,10 @@ impl Code for Baudot {
             }
             match s {
                 '␎' => {
-                    self.mode.replace(BaudotMode::Figures);
+                    self.figure_shift();
                 }
                 '␏' => {
-                    self.mode.replace(BaudotMode::Letters);
+                    self.letter_shift();
                 }
                 _ => (),
             };
@@ -127,6 +126,8 @@ impl Code for Baudot {
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
+        self.letter_shift();
+
         let mut out = String::with_capacity(text.len() / Self::WIDTH);
         for p in 0..(text.len() / Self::WIDTH) {
             let group = &text[(p * Self::WIDTH)..(p * Self::WIDTH) + Self::WIDTH];
@@ -141,10 +142,10 @@ impl Code for Baudot {
             }
             match group {
                 "11011" => {
-                    self.mode.replace(BaudotMode::Figures);
+                    self.figure_shift();
                 }
                 "11111" => {
-                    self.mode.replace(BaudotMode::Letters);
+                    self.letter_shift();
                 }
                 _ => (),
             };

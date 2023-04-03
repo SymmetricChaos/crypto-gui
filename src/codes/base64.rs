@@ -6,6 +6,7 @@ use crate::errors::Error;
 
 const B64: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
+// These maps due not form a bijection due to the padding symbol '=' so we can't use bimap
 lazy_static! {
     static ref B64_MAP: HashMap<u8, u8> = {
         let mut m = HashMap::with_capacity(64);
