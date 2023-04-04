@@ -6,19 +6,20 @@ use lazy_static::lazy_static;
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub enum CodeID {
     Ascii,
-    Morse,
-    Godel,
-    Fibonacci,
-    Baudot,
-    Base64,
-    Pgp,
-    Unary,
-    SpellingAlphabet,
     Bacon,
-    Unicode,
-    Punycode,
+    Base64,
+    Baudot,
     Block,
+    Fibonacci,
+    Godel,
+    Morse,
+    Needle,
+    Pgp,
+    Punycode,
+    SpellingAlphabet,
     Tap,
+    Unary,
+    Unicode,
 }
 
 impl Default for CodeID {
@@ -54,6 +55,7 @@ impl Display for CodeID {
             CodeID::Punycode => "Punycode",
             CodeID::Block => "Block",
             CodeID::Tap => "Tap",
+            CodeID::Needle => "Needle",
         };
         write!(f, "{}", name)
     }
@@ -70,6 +72,6 @@ const JSON_CODE_INFORMATION: &'static str = include_str!("code_descriptions.json
 lazy_static! {
     pub static ref CODE_INFORMATION: JsonValue = {
         json::parse(&JSON_CODE_INFORMATION.replace('\u{feff}', ""))
-            .expect("unable to parse code_descriptions.json")
+            .expect("unable to parse code_descriptions")
     };
 }
