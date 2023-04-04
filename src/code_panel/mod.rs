@@ -12,6 +12,7 @@ pub mod fibonacci_controls;
 pub mod generic_components;
 pub mod godel_controls;
 pub mod morse_controls;
+pub mod needle_controls;
 pub mod pgp_controls;
 pub mod punycode_controls;
 pub mod spelling_alphabet_controls;
@@ -46,6 +47,7 @@ pub struct CodeInterface {
     spelling: SpellingAlphabet,
     morse: Morse,
     baudot: Baudot,
+    needle: Needle,
 
     // Mathematical
     godel: Godel,
@@ -103,6 +105,7 @@ impl CodeInterface {
             CodeID::Punycode => &mut self.punycode,
             CodeID::Block => todo!(),
             CodeID::Tap => &mut self.tap,
+            CodeID::Needle => &mut self.needle,
             //_ => todo!("unable to get active code"),
         }
     }
