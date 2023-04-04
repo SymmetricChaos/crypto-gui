@@ -25,10 +25,6 @@ pub use baudot::Baudot;
 pub mod bacon;
 pub use bacon::Bacon;
 
-pub mod romaji;
-
-pub mod elias;
-
 pub mod punycode;
 pub use punycode::Punycode;
 
@@ -44,6 +40,16 @@ pub mod morse_encodings;
 
 pub mod tap_code;
 pub use tap_code::TapCode;
+
+pub mod elias;
+pub use elias::EliasCode;
+
+pub mod needle;
+pub use needle::Needle;
+
+//pub mod levenshtein;
+
+pub mod romaji;
 
 use crate::errors::Error;
 
