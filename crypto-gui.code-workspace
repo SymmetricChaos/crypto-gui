@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"name": "crypto-gui",
+			"path": ".."
+		}
+	],
+	"settings": {
+		"rust-analyzer.linkedProjects": [
+			"\\Cargo.toml",
+			"\\Cargo.toml"
+		]
+	}
+}
