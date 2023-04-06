@@ -1,3 +1,5 @@
+use egui::SelectableLabel;
+
 use super::{generic_components::fill_code_columns, View, ViewableCode};
 use crate::codes::morse::{Morse, MorseRep, MorseStandard};
 
@@ -17,6 +19,8 @@ impl View for Morse {
             ui.horizontal(|ui| {
                 ui.selectable_value(&mut self.mode, MorseRep::HalfBlock, "Halfblock Line Code");
                 ui.selectable_value(&mut self.mode, MorseRep::Binary, "Binary Line Code");
+                ui.add_enabled(false, SelectableLabel::new(false, "ASCII symbols"));
+                ui.add_enabled(false, SelectableLabel::new(false, "Cdot and En-dash"));
             });
         }
         ui.add_space(10.0);
