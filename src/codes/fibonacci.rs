@@ -76,7 +76,7 @@ impl FibonacciCode {
     // It would make more sense to put it in the control_alphabet()
     // method but that causes a panic due to interaction with
     // the chars_codes() method.
-    pub fn set_maps(&mut self) {
+    pub fn set_map(&mut self) {
         if self.alphabet != self.old_alphabet {
             let codes = FibStr::new();
             self.map.clear();
@@ -108,7 +108,7 @@ impl FibonacciCode {
     }
 
     pub fn chars_codes(&mut self) -> impl Iterator<Item = (char, &String)> + '_ {
-        self.set_maps();
+        self.set_map();
         self.alphabet
             .chars()
             .map(|x| (x, self.map.get_by_left(&x).unwrap()))

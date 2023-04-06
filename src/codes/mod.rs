@@ -6,6 +6,8 @@ pub use godel::Godel;
 
 pub mod fibonacci;
 pub use fibonacci::FibonacciCode;
+pub mod fibonacci_integers;
+pub use fibonacci_integers::FibonacciCodeIntegers;
 
 pub mod unary;
 pub use unary::UnaryCode;
