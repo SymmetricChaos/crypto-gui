@@ -1,71 +1,16 @@
-use super::Code;
+use super::{Code, FibonacciCodeIntegers};
 use crate::errors::Error;
 use bimap::BiMap;
 
 // https://en.wikipedia.org/wiki/Fibonacci_coding
-pub struct FibStr {
-    vector: Vec<usize>,
-    n: usize,
-    cur_fib: usize,
-    next_fib: usize,
-}
-
-impl FibStr {
-    pub fn new() -> FibStr {
-        let mut vector = Vec::with_capacity(10); //Should allocate enough space most of the time
-        vector.push(1);
-        let n = 1;
-        let cur_fib = 1;
-        let next_fib = 2;
-        FibStr {
-            vector,
-            n,
-            cur_fib,
-            next_fib,
-        }
-    }
-}
-
-impl Iterator for FibStr {
-    type Item = String;
-
-    fn next(&mut self) -> Option<String> {
-        // Go through the bits backward adding a 1 or 0 depending on if its part
-        // of the partition
-        let mut bits = String::with_capacity(self.vector.len() + 1);
-        bits.push('1');
-        let mut val = self.n;
-        for f in self.vector.iter().rev() {
-            if *f <= val {
-                bits.push('1');
-                val -= f;
-            } else {
-                bits.push('0')
-            }
-        }
-
-        // Reverse the bits, collect them into a String
-        let output = bits.chars().rev().collect::<String>();
-
-        // Increment the counter and append the next fibonacci number if it has
-        // been reached
-        self.n += 1;
-        if self.next_fib == self.n {
-            self.vector.push(self.next_fib);
-            let t = self.next_fib;
-            self.next_fib += self.cur_fib;
-            self.cur_fib = t;
-        }
-
-        Some(output)
-    }
-}
 
 pub struct FibonacciCode {
     map: BiMap<char, String>,
     pub alphabet: String,
     old_alphabet: String,
     max_code_len: usize,
+    pub integer_mode: bool,
+    pub integer_code: FibonacciCodeIntegers,
 }
 
 impl FibonacciCode {
@@ -78,10 +23,10 @@ impl FibonacciCode {
     // the chars_codes() method.
     pub fn set_map(&mut self) {
         if self.alphabet != self.old_alphabet {
-            let codes = FibStr::new();
             self.map.clear();
-            for (l, c) in self.alphabet.chars().zip(codes) {
-                self.map.insert(l, c.clone());
+            for (n, c) in self.alphabet.chars().enumerate() {
+                self.map
+                    .insert(c.clone(), self.integer_code.encode_u32((n + 1) as u32));
             }
             self.max_code_len = self
                 .map
@@ -90,20 +35,6 @@ impl FibonacciCode {
                 .chars()
                 .count();
             self.old_alphabet = self.alphabet.clone();
-        }
-    }
-
-    pub fn new(alphabet: &str) -> Self {
-        let codes = FibStr::new();
-        let mut map = BiMap::new();
-        for (l, c) in alphabet.chars().zip(codes) {
-            map.insert(l, c.clone());
-        }
-        FibonacciCode {
-            map,
-            alphabet: alphabet.to_string(),
-            old_alphabet: alphabet.to_string(),
-            max_code_len: 8,
         }
     }
 
@@ -117,43 +48,66 @@ impl FibonacciCode {
 
 impl Default for FibonacciCode {
     fn default() -> Self {
-        Self::new("ETAOINSHRDLCUMWFGYPBVKJXQZ")
+        let alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
+        let codes = FibonacciCodeIntegers::default();
+        let mut map = BiMap::new();
+        for (n, c) in alphabet.chars().enumerate() {
+            map.insert(c, codes.encode_u32((n + 1) as u32));
+        }
+        FibonacciCode {
+            map,
+            alphabet: alphabet.clone(),
+            old_alphabet: alphabet,
+            max_code_len: 8,
+            integer_mode: false,
+            integer_code: codes,
+        }
     }
 }
 
 impl Code for FibonacciCode {
     fn encode(&self, text: &str) -> Result<String, Error> {
-        let mut output = String::new();
-        for s in text.chars() {
-            let code = self
-                .map
-                .get_by_left(&s)
-                .ok_or_else(|| Error::invalid_input_char(s))?;
-            output.push_str(&code)
+        if self.integer_mode {
+            self.integer_code.encode(text)
+        } else {
+            let mut output = String::new();
+            for s in text.chars() {
+                let code = self
+                    .map
+                    .get_by_left(&s)
+                    .ok_or_else(|| Error::invalid_input_char(s))?;
+                output.push_str(&code)
+            }
+            Ok(output)
         }
-        Ok(output)
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
-        let mut output = String::new();
-        let mut buffer = String::with_capacity(self.max_code_len);
-        let mut prev = '0';
-        for b in text.chars() {
-            buffer.push(b);
-            if prev == '1' && b == '1' {
-                match self.map.get_by_right(&buffer) {
-                    Some(s) => {
-                        output.push(*s);
-                        buffer.clear();
-                        prev = '0';
-                        continue;
+        if self.integer_mode {
+            self.integer_code.decode(text)
+        } else {
+            let mut output = String::new();
+            let mut buffer = String::with_capacity(self.max_code_len);
+            let mut prev = '0';
+            for b in text.chars() {
+                buffer.push(b);
+                if prev == '1' && b == '1' {
+                    match self.map.get_by_right(&buffer) {
+                        Some(s) => {
+                            output.push(*s);
+                        }
+                        None => {
+                            output.push('�');
+                        }
                     }
-                    None => (),
+                    buffer.clear();
+                    prev = '0';
+                    continue;
                 }
+                prev = b;
             }
-            prev = b;
+            Ok(output)
         }
-        Ok(output)
     }
 
     fn randomize(&mut self) {}

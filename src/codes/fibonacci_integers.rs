@@ -35,7 +35,7 @@ pub struct FibonacciCodeIntegers {
 }
 
 impl FibonacciCodeIntegers {
-    fn encode_u32(&self, n: u32) -> String {
+    pub fn encode_u32(&self, n: u32) -> String {
         // Quickly check if the number has been encoded before
         if let Some(code) = self.cached_codes.borrow().get(&n) {
             return code.clone();
