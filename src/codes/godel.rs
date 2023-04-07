@@ -1,7 +1,6 @@
-use std::collections::HashMap;
-
 use super::Code;
 use crate::errors::Error;
+use bimap::BiMap;
 use itertools::Itertools;
 use num::{BigUint, Integer, Num, One};
 use primal::Primes;
@@ -9,49 +8,61 @@ use primal::Primes;
 const MESSAGE_LIMIT: usize = 50;
 
 pub struct Godel {
-    alphabet: String,
+    words: Vec<String>,
+    words_string: String,
+    sep: String,
     primes: Vec<usize>,
-    map: HashMap<char, usize>,
-    map_inv: HashMap<usize, char>,
+    map: BiMap<String, usize>,
 }
 
 impl Godel {
     fn _print_mapping(&self) {
-        for c in self.alphabet.chars() {
-            println!("{} {}", c, self.map.get(&c).unwrap())
+        for s in self.words.iter() {
+            println!("{} {}", s, self.map.get_by_left(s).unwrap())
         }
     }
 
     pub fn control_alphabet(&mut self) -> &mut String {
-        for (n, c) in self.alphabet.chars().enumerate() {
-            self.map.insert(c, n + 1);
-            self.map_inv.insert(n + 1, c);
+        self.words = self
+            .words_string
+            .split(&self.sep)
+            .map(|w| w.to_string())
+            .collect_vec();
+        for (n, c) in self.words.iter().enumerate() {
+            self.map.insert(c.clone(), n + 1);
         }
-        &mut self.alphabet
+        &mut self.words_string
     }
 
-    pub fn chars_codes(&self) -> impl Iterator<Item = (&usize, char)> + '_ {
-        self.alphabet
-            .chars()
-            .map(|x| (self.map.get(&x).unwrap(), x))
+    pub fn chars_codes(&self) -> impl Iterator<Item = (&usize, &String)> + '_ {
+        self.words
+            .iter()
+            .map(|x| (self.map.get_by_left(x).unwrap(), x))
     }
 }
 
 impl Default for Godel {
     fn default() -> Self {
-        let alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
+        let words_string =
+            String::from("0 s + × = ( ) implies not forall exists and or x1 x2 x3 x4 x5");
+
+        let sep = String::from(" ");
+        let words = words_string
+            .split(&sep)
+            .map(|w| w.to_string())
+            .collect_vec();
+
         let primes = Primes::all().take(MESSAGE_LIMIT).collect_vec();
-        let mut map = HashMap::new();
-        let mut map_inv = HashMap::new();
-        for (n, c) in alphabet.chars().enumerate() {
+        let mut map = BiMap::new();
+        for (n, c) in words.iter().cloned().enumerate() {
             map.insert(c, n + 1);
-            map_inv.insert(n + 1, c);
         }
         Self {
-            alphabet,
+            words,
+            words_string,
+            sep,
             primes,
             map,
-            map_inv,
         }
     }
 }
@@ -71,10 +82,10 @@ impl Code for Godel {
             )));
         }
         let mut out = BigUint::one();
-        for (c, prime) in text.chars().zip(self.primes.iter()) {
-            match self.map.get(&c) {
+        for (c, prime) in text.split(&self.sep).zip(self.primes.iter()) {
+            match self.map.get_by_left(c) {
                 Some(v) => out *= BigUint::from(*prime).pow(*v as u32),
-                None => return Err(Error::invalid_input_char(c)),
+                None => return Err(Error::invalid_input_group(c)),
             }
         }
         Ok(out.to_str_radix(10))
@@ -85,7 +96,7 @@ impl Code for Godel {
             Ok(n) => n,
             Err(_) => return Err(Error::Input("unable to parse input as a number".into())),
         };
-        let mut characters = Vec::with_capacity(MESSAGE_LIMIT);
+        let mut words = Vec::with_capacity(MESSAGE_LIMIT);
         for p in self.primes.iter() {
             let mut ctr = 0;
             let big_p = BigUint::from(*p);
@@ -94,7 +105,7 @@ impl Code for Godel {
                 num = num.div_floor(&big_p)
             }
             if ctr != 0 {
-                let c = match self.map_inv.get(&ctr) {
+                let c = match self.map.get_by_right(&ctr) {
                     Some(c) => c,
                     None => {
                         return Err(Error::Input(
@@ -102,10 +113,10 @@ impl Code for Godel {
                         ))
                     }
                 };
-                characters.push(*c);
+                words.push(c);
             }
         }
-        Ok(characters.iter().collect())
+        Ok(words.iter().join(&self.sep))
     }
 
     fn randomize(&mut self) {}
