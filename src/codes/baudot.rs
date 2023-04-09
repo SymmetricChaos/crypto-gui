@@ -3,15 +3,19 @@ use crate::{
     text_aux::text_functions::{bimap_from_iter, chunk_and_join},
 };
 use bimap::BiMap;
+use itertools::Itertools;
 use lazy_static::lazy_static;
 use std::cell::Cell;
 
 use super::Code;
 
-// ITA2
-pub const ITA2_LETTERS: &'static str = "␀␍␊ QWERTYUIOPASDFGHJKLZXCVBNM␎␏";
-pub const ITA2_FIGURES: &'static str = "␀␍␊ 1234567890-'␅!&£␇()+/:=?,.␎␏";
-pub const BAUDOT_CODES: [&'static str; 32] = [
+pub const ITA1_LETTERS: &'static str = "␀␍␊ QWERTYUIOPASDFGHJKLZXCVBNM␎␏";
+pub const ITA1_FIGURES: &'static str = "␀␍␊ 1234567890-'␅!&£␇()+/:=?,.␎␏";
+pub const ITA2_LETTERS: &'static str = "␀E␊A SIU␍DRJNFCKTZLWHYPQOBG␎MXV␏";
+pub const ITA2_FIGURES: &'static str = "␀3␊- '87␍␅4␇,!:(5+)2£6019?&␎./=␏";
+pub const US_TTY_FIGURES: &'static str = "␀3␊- ␇87␍$4',!:(5\")2#6019?&␎./;␏";
+
+pub const GRAY_CODES: [&'static str; 32] = [
     "00000", "00010", "01000", "00100", "11101", "11001", "10000", "01010", "00001", "10101",
     "11100", "01100", "00011", "01101", "11000", "10100", "10010", "10110", "01011", "00101",
     "11010", "11110", "01001", "10001", "10111", "01110", "01111", "10011", "00110", "00111",
@@ -24,15 +28,31 @@ pub enum BaudotMode {
     Figures,
 }
 
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum BaudotVersion {
+    Ita1,
+    Ita2,
+    UsTty,
+}
+
 lazy_static! {
-    pub static ref BAUDOT_LETTER_MAP: BiMap<char, &'static str> =
-        bimap_from_iter(ITA2_LETTERS.chars().zip(BAUDOT_CODES.iter().copied()));
-    pub static ref BAUDOT_FIGURE_MAP: BiMap<char, &'static str> =
-        bimap_from_iter(ITA2_FIGURES.chars().zip(BAUDOT_CODES.iter().copied()));
+    pub static ref FIVE_BIT_CODES: Vec<String> =
+        (0..32).map(|n| format!("{:05b}", n)).collect_vec();
+    pub static ref ITA1_LETTER_MAP: BiMap<char, String> =
+        bimap_from_iter(ITA1_LETTERS.chars().zip(FIVE_BIT_CODES.iter().cloned()));
+    pub static ref ITA1_FIGURE_MAP: BiMap<char, String> =
+        bimap_from_iter(ITA1_FIGURES.chars().zip(FIVE_BIT_CODES.iter().cloned()));
+    pub static ref ITA2_LETTER_MAP: BiMap<char, String> =
+        bimap_from_iter(ITA2_LETTERS.chars().zip(FIVE_BIT_CODES.iter().cloned()));
+    pub static ref ITA2_FIGURE_MAP: BiMap<char, String> =
+        bimap_from_iter(ITA2_FIGURES.chars().zip(FIVE_BIT_CODES.iter().cloned()));
+    pub static ref US_TTY_FIGURE_MAP: BiMap<char, String> =
+        bimap_from_iter(US_TTY_FIGURES.chars().zip(FIVE_BIT_CODES.iter().cloned()));
 }
 
 pub struct Baudot {
     mode: Cell<BaudotMode>, // interior mutability to make encoding and decoding easier
+    pub version: BaudotVersion,
 }
 
 impl Baudot {
@@ -47,46 +67,82 @@ impl Baudot {
         self.mode.set(BaudotMode::Figures)
     }
 
-    pub fn letters_codes(&self) -> Box<dyn Iterator<Item = (char, &&str)> + '_> {
-        Box::new(
-            ITA2_LETTERS
-                .chars()
-                .map(|x| (x, BAUDOT_LETTER_MAP.get_by_left(&x).unwrap())),
-        )
-    }
+    // pub fn letters_codes(&self) -> Box<dyn Iterator<Item = (char, &String)> + '_> {
+    //     Box::new(
+    //         ITA2_LETTERS
+    //             .chars()
+    //             .map(|x| (x, ITA2_LETTER_MAP.get_by_left(&x).unwrap())),
+    //     )
+    // }
 
-    pub fn figures_codes(&self) -> Box<dyn Iterator<Item = (char, &&str)> + '_> {
-        Box::new(
-            ITA2_FIGURES
-                .chars()
-                .map(|x| (x, BAUDOT_FIGURE_MAP.get_by_left(&x).unwrap())),
-        )
-    }
+    // pub fn figures_codes(&self) -> Box<dyn Iterator<Item = (char, &String)> + '_> {
+    //     Box::new(
+    //         ITA2_FIGURES
+    //             .chars()
+    //             .map(|x| (x, ITA2_FIGURE_MAP.get_by_left(&x).unwrap())),
+    //     )
+    // }
 
     pub fn codes_chars(&self) -> Box<dyn Iterator<Item = (&&str, String)> + '_> {
-        Box::new(BAUDOT_CODES.iter().map(|code| {
+        Box::new(GRAY_CODES.iter().map(|code| {
             (
                 code,
                 format!(
                     "{} {}",
-                    BAUDOT_LETTER_MAP.get_by_right(code).unwrap(),
-                    BAUDOT_FIGURE_MAP.get_by_right(code).unwrap()
+                    self.letter_map().get_by_right(&code.to_string()).unwrap(),
+                    self.figure_map().get_by_right(&code.to_string()).unwrap()
                 ),
             )
         }))
     }
 
-    pub fn map(&self, k: &char) -> Option<&&str> {
-        match self.mode.get() {
-            BaudotMode::Letters => BAUDOT_LETTER_MAP.get_by_left(k),
-            BaudotMode::Figures => BAUDOT_FIGURE_MAP.get_by_left(k),
+    pub fn figure_map(&self) -> &BiMap<char, String> {
+        match self.version {
+            BaudotVersion::Ita1 => &ITA1_FIGURE_MAP,
+            BaudotVersion::Ita2 => &ITA2_FIGURE_MAP,
+            BaudotVersion::UsTty => &US_TTY_FIGURE_MAP,
+        }
+    }
+
+    pub fn letter_map(&self) -> &BiMap<char, String> {
+        match self.version {
+            BaudotVersion::Ita1 => &ITA1_LETTER_MAP,
+            BaudotVersion::Ita2 => &ITA2_LETTER_MAP,
+            BaudotVersion::UsTty => &ITA2_LETTER_MAP,
+        }
+    }
+
+    pub fn map(&self, k: &char) -> Option<&String> {
+        match self.version {
+            BaudotVersion::Ita1 => match self.mode.get() {
+                BaudotMode::Letters => ITA1_LETTER_MAP.get_by_left(k),
+                BaudotMode::Figures => ITA1_FIGURE_MAP.get_by_left(k),
+            },
+            BaudotVersion::Ita2 => match self.mode.get() {
+                BaudotMode::Letters => ITA2_LETTER_MAP.get_by_left(k),
+                BaudotMode::Figures => ITA2_FIGURE_MAP.get_by_left(k),
+            },
+            BaudotVersion::UsTty => match self.mode.get() {
+                BaudotMode::Letters => ITA2_LETTER_MAP.get_by_left(k),
+                BaudotMode::Figures => US_TTY_FIGURE_MAP.get_by_left(k),
+            },
         }
     }
 
     pub fn map_inv(&self, k: &str) -> Option<&char> {
-        match self.mode.get() {
-            BaudotMode::Letters => BAUDOT_LETTER_MAP.get_by_right(k),
-            BaudotMode::Figures => BAUDOT_FIGURE_MAP.get_by_right(k),
+        match self.version {
+            BaudotVersion::Ita1 => match self.mode.get() {
+                BaudotMode::Letters => ITA1_LETTER_MAP.get_by_right(k),
+                BaudotMode::Figures => ITA1_FIGURE_MAP.get_by_right(k),
+            },
+            BaudotVersion::Ita2 => match self.mode.get() {
+                BaudotMode::Letters => ITA2_LETTER_MAP.get_by_right(k),
+                BaudotMode::Figures => ITA2_FIGURE_MAP.get_by_right(k),
+            },
+            BaudotVersion::UsTty => match self.mode.get() {
+                BaudotMode::Letters => ITA2_LETTER_MAP.get_by_right(k),
+                BaudotMode::Figures => US_TTY_FIGURE_MAP.get_by_right(k),
+            },
         }
     }
 }
@@ -95,6 +151,7 @@ impl Default for Baudot {
     fn default() -> Self {
         Baudot {
             mode: Cell::new(BaudotMode::Letters),
+            version: BaudotVersion::Ita2,
         }
     }
 }
@@ -162,16 +219,16 @@ mod baudot_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "THEQUICKBROWNFOXCOSTS␎£572␏WHILEONSALE";
-    const CIPHERTEXT: &'static str = "0000100101100001110111100011000111011110100110101000011110010011010110000111011101110000111010000001101001101100101000011110011001111111100100101011000100110000000110011010100110000100110000";
+    const CIPHERTEXT: &'static str = "1000010100000011011100111001100111001111110010101011000100110110001101110001110101110110000010110000001011101110100100000011110011111111001110100001101001000001110000110000101000111001000001";
 
     #[test]
-    fn encrypt_test() {
+    fn encode_test() {
         let code = Baudot::default();
         assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
-    fn decrypt_test() {
+    fn decode_test() {
         let code = Baudot::default();
         assert_eq!(code.decode(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
