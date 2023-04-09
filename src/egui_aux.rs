@@ -19,5 +19,5 @@ pub fn mono_button(ui: &mut Ui, text: &str) -> Response {
 }
 
 pub fn large_text_label(ui: &mut Ui, text: &str) -> Response {
-    ui.label(RichText::new(text).size(15.0))
+    ui.label(RichText::new(text).size(10.0))
 }

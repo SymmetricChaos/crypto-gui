@@ -5,6 +5,6 @@ impl ViewableCode for PgpWords {}
 
 impl View for PgpWords {
     fn ui(&mut self, ui: &mut eframe::egui::Ui, _errors: &mut String) {
-        fill_code_columns(64, 4, ui, Box::new(self.chars_codes()));
+        fill_code_columns(128, 2, ui, Box::new(self.chars_codes()));
     }
 }
