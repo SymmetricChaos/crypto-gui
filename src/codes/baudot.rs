@@ -25,9 +25,9 @@ pub enum BaudotMode {
 }
 
 lazy_static! {
-    pub static ref BAUDOT_LETTER_BIMAP: BiMap<char, &'static str> =
+    pub static ref BAUDOT_LETTER_MAP: BiMap<char, &'static str> =
         bimap_from_iter(ITA2_LETTERS.chars().zip(BAUDOT_CODES.iter().copied()));
-    pub static ref BAUDOT_FIGURE_BIMAP: BiMap<char, &'static str> =
+    pub static ref BAUDOT_FIGURE_MAP: BiMap<char, &'static str> =
         bimap_from_iter(ITA2_FIGURES.chars().zip(BAUDOT_CODES.iter().copied()));
 }
 
@@ -51,7 +51,7 @@ impl Baudot {
         Box::new(
             ITA2_LETTERS
                 .chars()
-                .map(|x| (x, BAUDOT_LETTER_BIMAP.get_by_left(&x).unwrap())),
+                .map(|x| (x, BAUDOT_LETTER_MAP.get_by_left(&x).unwrap())),
         )
     }
 
@@ -59,7 +59,7 @@ impl Baudot {
         Box::new(
             ITA2_FIGURES
                 .chars()
-                .map(|x| (x, BAUDOT_FIGURE_BIMAP.get_by_left(&x).unwrap())),
+                .map(|x| (x, BAUDOT_FIGURE_MAP.get_by_left(&x).unwrap())),
         )
     }
 
@@ -69,8 +69,8 @@ impl Baudot {
                 code,
                 format!(
                     "{} {}",
-                    BAUDOT_LETTER_BIMAP.get_by_right(code).unwrap(),
-                    BAUDOT_FIGURE_BIMAP.get_by_right(code).unwrap()
+                    BAUDOT_LETTER_MAP.get_by_right(code).unwrap(),
+                    BAUDOT_FIGURE_MAP.get_by_right(code).unwrap()
                 ),
             )
         }))
@@ -78,15 +78,15 @@ impl Baudot {
 
     pub fn map(&self, k: &char) -> Option<&&str> {
         match self.mode.get() {
-            BaudotMode::Letters => BAUDOT_LETTER_BIMAP.get_by_left(k),
-            BaudotMode::Figures => BAUDOT_FIGURE_BIMAP.get_by_left(k),
+            BaudotMode::Letters => BAUDOT_LETTER_MAP.get_by_left(k),
+            BaudotMode::Figures => BAUDOT_FIGURE_MAP.get_by_left(k),
         }
     }
 
     pub fn map_inv(&self, k: &str) -> Option<&char> {
         match self.mode.get() {
-            BaudotMode::Letters => BAUDOT_LETTER_BIMAP.get_by_right(k),
-            BaudotMode::Figures => BAUDOT_FIGURE_BIMAP.get_by_right(k),
+            BaudotMode::Letters => BAUDOT_LETTER_MAP.get_by_right(k),
+            BaudotMode::Figures => BAUDOT_FIGURE_MAP.get_by_right(k),
         }
     }
 }
