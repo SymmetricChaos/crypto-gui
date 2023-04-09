@@ -4,10 +4,15 @@ use bimap::BiMap;
 
 // https://en.wikipedia.org/wiki/Fibonacci_coding
 
+pub enum FibMode {
+    Letter,
+    Word,
+    Integer,
+}
+
 pub struct FibonacciCode {
     map: BiMap<char, String>,
     pub alphabet: String,
-    old_alphabet: String,
     max_code_len: usize,
     pub integer_mode: bool,
     pub integer_code: FibonacciCodeIntegers,
@@ -22,20 +27,17 @@ impl FibonacciCode {
     // method but that causes a panic due to interaction with
     // the chars_codes() method.
     pub fn set_map(&mut self) {
-        if self.alphabet != self.old_alphabet {
-            self.map.clear();
-            for (n, c) in self.alphabet.chars().enumerate() {
-                self.map
-                    .insert(c.clone(), self.integer_code.encode_u32((n + 1) as u32));
-            }
-            self.max_code_len = self
-                .map
-                .get_by_left(&self.alphabet.chars().last().unwrap())
-                .unwrap()
-                .chars()
-                .count();
-            self.old_alphabet = self.alphabet.clone();
+        self.map.clear();
+        for (n, c) in self.alphabet.chars().enumerate() {
+            self.map
+                .insert(c.clone(), self.integer_code.encode_u32((n + 1) as u32));
         }
+        self.max_code_len = self
+            .map
+            .get_by_left(&self.alphabet.chars().last().unwrap())
+            .unwrap()
+            .chars()
+            .count();
     }
 
     pub fn chars_codes(&mut self) -> impl Iterator<Item = (char, &String)> + '_ {
@@ -56,8 +58,7 @@ impl Default for FibonacciCode {
         }
         FibonacciCode {
             map,
-            alphabet: alphabet.clone(),
-            old_alphabet: alphabet,
+            alphabet,
             max_code_len: 8,
             integer_mode: false,
             integer_code: codes,

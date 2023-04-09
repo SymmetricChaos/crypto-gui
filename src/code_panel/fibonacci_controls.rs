@@ -17,7 +17,9 @@ impl View for FibonacciCode {
             fill_code_columns(16, 5, ui, Box::new(pairs));
         } else {
             ui.label("Alphabetical Mode: Provide an alphabet. Fibonacci codes will be assigned to each character of the alphabet in ascending order. The alphabet and the code for each letter is provided below.");
-            ui.add(TextEdit::singleline(&mut self.alphabet));
+            if ui.add(TextEdit::singleline(&mut self.alphabet)).changed() {
+                self.set_map();
+            };
             fill_code_columns(16, 5, ui, Box::new(self.chars_codes()));
         }
     }
