@@ -1,8 +1,20 @@
-use crate::{errors::Error, text_aux::PresetAlphabet::Ascii128};
+use crate::{
+    errors::Error,
+    text_aux::{text_functions::bimap_from_iter, PresetAlphabet::Ascii128},
+};
+use bimap::BiMap;
 use itertools::Itertools;
 use lazy_static::lazy_static;
 
 use super::Code;
+
+lazy_static! {
+    pub static ref CONTROL_PICTURE_MAP: BiMap<u8, char> = bimap_from_iter(
+        (0..33)
+            .chain(std::iter::once(127))
+            .zip("␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟␠␡".chars())
+    );
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DisplayMode {
@@ -51,7 +63,9 @@ lazy_static! {
         (0..128).map(|n| format!(" {:07b}", n)).collect_vec();
     pub static ref EIGHT_BIT: Vec<String> = (0..128).map(|n| format!("{:08b}", n)).collect_vec();
     pub static ref OCTAL: Vec<String> = (0..128).map(|n| format!("{:03o}", n)).collect_vec();
-    pub static ref DECIMAL: Vec<String> = (0..128).map(|n| format!("{:3}", n)).collect_vec();
+    pub static ref DECIMAL: Vec<String> = (0..128).map(|n| format!("{}", n)).collect_vec();
+    pub static ref DECIMAL_DISPLAY: Vec<String> =
+        (0..128).map(|n| format!(" {:3}", n)).collect_vec();
     pub static ref HEX: Vec<String> = (0..128).map(|n| format!("{:02x}", n)).collect_vec();
 }
 
@@ -60,6 +74,45 @@ pub struct Ascii {
 }
 
 impl Ascii {
+    pub fn map(&self, c: char) -> Result<&String, Error> {
+        if c.is_ascii() {
+            return match self.mode {
+                DisplayMode::EightBitBinary => EIGHT_BIT.get(c as u8 as usize),
+                DisplayMode::SevenBitBinary => SEVEN_BIT.get(c as u8 as usize),
+                DisplayMode::Octal => OCTAL.get(c as u8 as usize),
+                DisplayMode::Decimal => DECIMAL.get(c as u8 as usize),
+                DisplayMode::Hex => HEX.get(c as u8 as usize),
+            }
+            .ok_or(Error::invalid_input_char(c));
+        }
+        if let Some(control_val) = CONTROL_PICTURE_MAP.get_by_right(&c) {
+            match self.mode {
+                DisplayMode::EightBitBinary => EIGHT_BIT.get(*control_val as usize),
+                DisplayMode::SevenBitBinary => SEVEN_BIT.get(*control_val as usize),
+                DisplayMode::Octal => OCTAL.get(*control_val as usize),
+                DisplayMode::Decimal => DECIMAL.get(*control_val as usize),
+                DisplayMode::Hex => HEX.get(*control_val as usize),
+            }
+            .ok_or(Error::invalid_input_char(c))
+        } else {
+            Err(Error::invalid_input_char(c))
+        }
+    }
+
+    pub fn map_inv(&self, s: &str) -> Result<char, Error> {
+        let radix = self.mode.radix();
+        match usize::from_str_radix(s, radix) {
+            Ok(n) => Ascii128.chars().nth(n).ok_or(Error::invalid_input_group(s)),
+            Err(_) => {
+                return Err(Error::Input(format!(
+                    "error decoding ASCII ({} representation), unable to parse string: {}",
+                    self.mode.name(),
+                    s
+                )))
+            }
+        }
+    }
+
     pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (char, &String)> + '_> {
         let cs = Ascii128.chars();
         match self.mode {
@@ -72,7 +125,7 @@ impl Ascii {
     }
 
     pub fn chars_codes_display(&self) -> Box<dyn Iterator<Item = (char, &String)> + '_> {
-        let cs = Ascii128.chars();
+        let cs = "␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟␠!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~␡".chars();
         match self.mode {
             DisplayMode::EightBitBinary => Box::new(cs.zip(EIGHT_BIT.iter())),
             DisplayMode::SevenBitBinary => Box::new(cs.zip(SEVEN_BIT_DISPLAY.iter())),
@@ -93,39 +146,22 @@ impl Default for Ascii {
 
 impl Code for Ascii {
     fn encode(&self, text: &str) -> Result<String, Error> {
-        if !text.is_ascii() {
-            return Err(Error::Input("text includes non-ASCII characters".into()));
+        let mut out = Vec::new();
+        for c in text.chars() {
+            out.push(self.map(c)?)
         }
-        let chunks = text.bytes();
-        let s: String = match self.mode {
-            DisplayMode::EightBitBinary => chunks.map(|n| (format!("{:08b}", n))).join(" "),
-            DisplayMode::SevenBitBinary => chunks.map(|n| (format!("{:07b}", n))).join(" "),
-            DisplayMode::Octal => chunks.map(|n| (format!("{:04o}", n))).join(" "),
-            DisplayMode::Decimal => chunks.map(|n| (format!("{}", n))).join(" "),
-            DisplayMode::Hex => chunks.map(|n| (format!("{:02x}", n))).join(" "),
-        };
-        Ok(s)
+        Ok(out.into_iter().join(" "))
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
         let chunks = text.split(" ");
-        let radix = self.mode.radix();
-        let mut vec = Vec::with_capacity(chunks.clone().count());
+        let mut out = String::with_capacity(chunks.clone().count());
 
         for chunk in chunks {
-            match u8::from_str_radix(chunk, radix) {
-                Ok(n) => vec.push(n),
-                Err(_) => {
-                    return Err(Error::Input(format!(
-                        "error decoding ASCII ({} representation), unable to parse string: {}",
-                        self.mode.name(),
-                        chunk
-                    )))
-                }
-            }
+            out.push(self.map_inv(chunk)?)
         }
 
-        String::from_utf8(vec).map_err(|e| Error::Input(e.to_string()))
+        Ok(out)
     }
 
     fn randomize(&mut self) {}
@@ -137,8 +173,8 @@ impl Code for Ascii {
 mod ascii_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "01010100 01001000 01000101 01010001 01010101 01001001 01000011 01001011 01000010 01010010 01001111 01010111 01001110 01000110 01001111 01011000 01001010 01010101 01001101 01010000 01010011 01001111 01010110 01000101 01010010 01010100 01001000 01000101 01001100 01000001 01011010 01011001 01000100 01001111 01000111";
+    const PLAINTEXT: &'static str = "0\0␀A ␠";
+    const CIPHERTEXT: &'static str = "00110000 00000000 00000000 01000001 00100000 00100000";
 
     #[test]
     fn encrypt_test() {
@@ -147,33 +183,31 @@ mod ascii_tests {
     }
 
     #[test]
-    fn decrypt_test() {
-        let code = Ascii::default();
-        assert_eq!(code.decode(CIPHERTEXT).unwrap(), PLAINTEXT);
-    }
-}
+    fn encrypt_decrypt_test() {
+        let mut code = Ascii::default();
+        const GIVEN_TEXT: &'static str = "The quick␠brown fox!␀␀␀Jumps over the lazy(dog)";
+        const DECODED_TEXT: &'static str = "The quick brown fox!␀␀␀Jumps over the lazy(dog)";
 
-#[test]
-fn encrypt_decrypt() {
-    let mut code = Ascii::default();
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-
-    for mode in [
-        DisplayMode::EightBitBinary,
-        DisplayMode::SevenBitBinary,
-        DisplayMode::Octal,
-        DisplayMode::Decimal,
-        DisplayMode::Hex,
-    ] {
-        code.mode = mode;
-        let encoded = code
-            .encode(PLAINTEXT)
-            .expect(&format!("encoding ASCII {:?} error", mode));
-        let decoded = code
-            .decode(&encoded)
-            .expect(&format!("decoding ASCII {:?} error", mode));
-        if decoded != PLAINTEXT {
-            panic!("decoded ASCII {:?} not equivalent to plaintext", mode)
+        for mode in [
+            DisplayMode::EightBitBinary,
+            DisplayMode::SevenBitBinary,
+            DisplayMode::Octal,
+            DisplayMode::Decimal,
+            DisplayMode::Hex,
+        ] {
+            code.mode = mode;
+            let encoded = code
+                .encode(GIVEN_TEXT)
+                .expect(&format!("encoding ASCII {:?} error", mode));
+            let decoded = code
+                .decode(&encoded)
+                .expect(&format!("decoding ASCII {:?} error", mode));
+            if decoded != DECODED_TEXT {
+                panic!(
+                    "decoded ASCII {:?} not equivalent to plaintext\n{}",
+                    mode, decoded
+                )
+            }
         }
     }
 }
