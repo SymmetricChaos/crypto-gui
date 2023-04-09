@@ -1,5 +1,6 @@
 use crate::cipher_panel::CipherInterface;
 use crate::code_panel::CodeInterface;
+use crate::egui_aux::large_text_label;
 use crate::ids::{CipherID, CodeID};
 use crate::pages::io_panel::IOPanel;
 use crate::pages::{Page, TextPrepPage};
@@ -76,8 +77,6 @@ impl Default for ClassicCrypto {
 impl ClassicCrypto {
     // Configure the CreationContext and also build the app
     pub fn build_with_context(cc: &eframe::CreationContext<'_>) -> Self {
-        cc.egui_ctx.set_visuals(egui::Visuals::dark());
-
         let mut font_def = FontDefinitions::default();
 
         // Noto fonts to get wide coverage, more can be added if needed
@@ -127,6 +126,16 @@ impl ClassicCrypto {
         cc.egui_ctx.set_fonts(font_def);
 
         cc.egui_ctx.set_visuals(egui::Visuals::dark());
+
+        // let _x = cc.egui_ctx.style().text_styles;
+        // let text_styles = [
+        //     (Heading, FontId::new(30.0, Proportional)),
+        //     (Body, FontId::new(18.0, Proportional)),
+        //     (Monospace, FontId::new(14.0, Proportional)),
+        //     (Button, FontId::new(14.0, Proportional)),
+        //     (Small, FontId::new(10.0, Proportional)),
+        // ]
+        // .into();
 
         Self::default()
     }
@@ -181,7 +190,7 @@ impl ClassicCrypto {
                         .strong()
                         .heading();
                     ui.add(egui::Label::new(name));
-                    ui.label(self.active_code.description());
+                    large_text_label(ui, self.active_code.description());
 
                     ui.add_space(16.0);
                     ui.separator();
@@ -238,7 +247,7 @@ impl ClassicCrypto {
                         .strong()
                         .heading();
                     ui.add(egui::Label::new(name));
-                    ui.label(self.active_cipher.description());
+                    large_text_label(ui, self.active_cipher.description());
 
                     ui.add_space(16.0);
                     ui.separator();
