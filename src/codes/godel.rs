@@ -10,23 +10,17 @@ const MESSAGE_LIMIT: usize = 50;
 pub struct Godel {
     words: Vec<String>,
     words_string: String,
-    sep: String,
     primes: Vec<usize>,
     map: BiMap<String, usize>,
 }
 
 impl Godel {
-    // fn _print_mapping(&self) {
-    //     for s in self.words.iter() {
-    //         println!("{} {}", s, self.map.get_by_left(s).unwrap())
-    //     }
-    // }
-
     pub fn control_words(&mut self) -> &mut String {
+        self.map.clear();
         self.words = self
             .words_string
-            .split(&self.sep)
-            .map(|w| w.to_string())
+            .split(",")
+            .map(|w| w.trim().to_string())
             .collect_vec();
         for (n, c) in self.words.iter().enumerate() {
             self.map.insert(c.clone(), n + 1);
@@ -43,24 +37,24 @@ impl Godel {
 
 impl Default for Godel {
     fn default() -> Self {
-        let words_string =
-            String::from("0 s + × = ( ) implies not forall exists and or x1 x2 x3 x4 x5");
+        let words_string = String::from(
+            "0, s, +, ×, =, (, ), implies, not, forall, exists, and, or, x1, x2, x3, x4, x5",
+        );
 
-        let sep = String::from(" ");
+        let sep = String::from(",");
         let words = words_string
             .split(&sep)
-            .map(|w| w.to_string())
+            .map(|w| w.trim().to_string())
             .collect_vec();
 
         let primes = Primes::all().take(MESSAGE_LIMIT).collect_vec();
         let mut map = BiMap::new();
-        for (n, c) in words.iter().cloned().enumerate() {
-            map.insert(c, n + 1);
+        for (n, word) in words.iter().cloned().enumerate() {
+            map.insert(word, n + 1);
         }
         Self {
             words,
             words_string,
-            sep,
             primes,
             map,
         }
@@ -75,14 +69,14 @@ impl Godel {
 
 impl Code for Godel {
     fn encode(&self, text: &str) -> Result<String, Error> {
-        if text.chars().count() > MESSAGE_LIMIT {
+        if text.split(" ").count() > MESSAGE_LIMIT {
             return Err(Error::Input(format!(
-                "The Godel encoding is currently limited to {} characters",
+                "The Godel encoding is currently limited to {} code points",
                 MESSAGE_LIMIT
             )));
         }
         let mut out = BigUint::one();
-        for (c, prime) in text.split(&self.sep).zip(self.primes.iter()) {
+        for (c, prime) in text.split(" ").zip(self.primes.iter()) {
             match self.map.get_by_left(c) {
                 Some(v) => out *= BigUint::from(*prime).pow(*v as u32),
                 None => return Err(Error::invalid_input_group(c)),
@@ -108,15 +102,16 @@ impl Code for Godel {
                 let c = match self.map.get_by_right(&ctr) {
                     Some(c) => c,
                     None => {
-                        return Err(Error::Input(
-                            "exponent does not map to a symnol in the alpabet".into(),
-                        ))
+                        return Err(Error::Input("exponent does not map to a code word".into()))
                     }
                 };
                 words.push(c);
             }
+            if num.is_one() {
+                break;
+            }
         }
-        Ok(words.iter().join(&self.sep))
+        Ok(words.iter().join(" "))
     }
 
     fn randomize(&mut self) {}
@@ -128,8 +123,8 @@ impl Code for Godel {
 mod godel_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THE";
-    const ENCODEDTEXT: &'static str = "131220";
+    const PLAINTEXT: &'static str = "0 s +";
+    const ENCODEDTEXT: &'static str = "2250";
 
     #[test]
     fn encrypt_test() {
