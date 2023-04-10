@@ -6,7 +6,7 @@ impl ViewableCode for Godel {}
 
 impl View for Godel {
     fn ui(&mut self, ui: &mut eframe::egui::Ui, _errors: &mut String) {
-        ui.add(TextEdit::singleline(self.control_alphabet()));
+        ui.add(TextEdit::singleline(self.control_words()));
         fill_code_columns(20, 3, ui, Box::new(self.chars_codes()));
     }
 }

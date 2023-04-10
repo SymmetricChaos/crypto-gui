@@ -16,13 +16,13 @@ pub struct Godel {
 }
 
 impl Godel {
-    fn _print_mapping(&self) {
-        for s in self.words.iter() {
-            println!("{} {}", s, self.map.get_by_left(s).unwrap())
-        }
-    }
+    // fn _print_mapping(&self) {
+    //     for s in self.words.iter() {
+    //         println!("{} {}", s, self.map.get_by_left(s).unwrap())
+    //     }
+    // }
 
-    pub fn control_alphabet(&mut self) -> &mut String {
+    pub fn control_words(&mut self) -> &mut String {
         self.words = self
             .words_string
             .split(&self.sep)
