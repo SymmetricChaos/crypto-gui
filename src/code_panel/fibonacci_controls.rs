@@ -13,20 +13,19 @@ impl View for FibonacciCode {
 
         match self.mode {
             FibMode::Letter => {
-                ui.label("Alphabetical Mode: Provide an alphabet. Fibonacci codes will be assigned to each character of the alphabet in ascending order. The alphabet and the code for each letter is provided below.");
+                ui.label("Alphabetical Mode: Provide an alphabet. Fibonacci codes will be assigned to each character of the alphabet in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned. The encoding is provided below.");
                 if ui.add(TextEdit::singleline(&mut self.alphabet)).changed() {
-                    self.set_map();
+                    self.set_letter_map();
                 };
                 fill_code_columns(16, 5, ui, Box::new(self.chars_codes()));
             }
             FibMode::Word => {
-                ui.label("Alphabetical Mode: Provide an alphabet. Fibonacci codes will be assigned to each character of the alphabet in ascending order. The alphabet and the code for each letter is provided below.");
+                ui.label("Word Mode: Provide any number of words or phrases separated by commas. Fibonacci codes will be assigned to each word or phrase in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned. The encoding is provided below.");
                 if ui
-                    .add(TextEdit::singleline(&mut self.code_words.string))
+                    .add(TextEdit::singleline(&mut self.words_string))
                     .changed()
                 {
-                    self.code_words.update_code_words();
-                    self.set_map();
+                    self.set_word_map();
                 };
                 fill_code_columns(16, 5, ui, Box::new(self.chars_codes()));
             }

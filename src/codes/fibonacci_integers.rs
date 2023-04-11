@@ -69,6 +69,31 @@ impl FibonacciCodeIntegers {
         bits.chars().rev().collect::<String>()
     }
 
+    pub fn decode_to_u32(&self, text: &str) -> Result<Vec<u32>, Error> {
+        let mut output = Vec::new();
+        let mut prev = '0';
+        let mut ctr = 0;
+        let mut n = 0;
+        for bit in text.chars() {
+            if prev == '1' && bit == '1' {
+                output.push(n);
+                prev = '0';
+                ctr = 0;
+                n = 0;
+                continue;
+            }
+            match bit {
+                '0' => (),
+                '1' => n += self.get_nth_fib(ctr),
+                _ => return Err(Error::invalid_input_char(bit)),
+            }
+
+            ctr += 1;
+            prev = bit;
+        }
+        Ok(output)
+    }
+
     fn get_nth_fib(&self, index: usize) -> u32 {
         if let Some(n) = self.cached_fib_seq.borrow().get(index) {
             return *n;
