@@ -1,9 +1,10 @@
-use super::{Code, FibonacciCodeIntegers};
+use super::{Code, CodeWords, FibonacciCodeIntegers};
 use crate::errors::Error;
 use bimap::BiMap;
 
 // https://en.wikipedia.org/wiki/Fibonacci_coding
 
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum FibMode {
     Letter,
     Word,
@@ -13,8 +14,9 @@ pub enum FibMode {
 pub struct FibonacciCode {
     map: BiMap<char, String>,
     pub alphabet: String,
+    pub code_words: CodeWords,
     max_code_len: usize,
-    pub integer_mode: bool,
+    pub mode: FibMode,
     pub integer_code: FibonacciCodeIntegers,
 }
 
@@ -27,17 +29,19 @@ impl FibonacciCode {
     // method but that causes a panic due to interaction with
     // the chars_codes() method.
     pub fn set_map(&mut self) {
-        self.map.clear();
-        for (n, c) in self.alphabet.chars().enumerate() {
-            self.map
-                .insert(c.clone(), self.integer_code.encode_u32((n + 1) as u32));
+        if self.mode == FibMode::Letter {
+            self.map.clear();
+            for (n, c) in self.alphabet.chars().enumerate() {
+                self.map
+                    .insert(c.clone(), self.integer_code.encode_u32((n + 1) as u32));
+            }
+            self.max_code_len = self
+                .map
+                .get_by_left(&self.alphabet.chars().last().unwrap())
+                .unwrap()
+                .chars()
+                .count();
         }
-        self.max_code_len = self
-            .map
-            .get_by_left(&self.alphabet.chars().last().unwrap())
-            .unwrap()
-            .chars()
-            .count();
     }
 
     pub fn chars_codes(&mut self) -> impl Iterator<Item = (char, &String)> + '_ {
@@ -60,15 +64,16 @@ impl Default for FibonacciCode {
             map,
             alphabet,
             max_code_len: 8,
-            integer_mode: false,
+            mode: FibMode::Integer,
             integer_code: codes,
+            code_words: CodeWords::new(),
         }
     }
 }
 
 impl Code for FibonacciCode {
     fn encode(&self, text: &str) -> Result<String, Error> {
-        if self.integer_mode {
+        if self.mode == FibMode::Integer {
             self.integer_code.encode(text)
         } else {
             let mut output = String::new();
@@ -84,7 +89,7 @@ impl Code for FibonacciCode {
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
-        if self.integer_mode {
+        if self.mode == FibMode::Integer {
             self.integer_code.decode(text)
         } else {
             let mut output = String::new();

@@ -125,7 +125,7 @@ impl Code for FibonacciCodeIntegers {
             match bit {
                 '0' => (),
                 '1' => n += self.get_nth_fib(ctr),
-                _ => return Err(Error::Input(format!("ivalid input symbol: `{}`", bit))),
+                _ => return Err(Error::invalid_input_char(bit)),
             }
 
             ctr += 1;

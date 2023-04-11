@@ -1,3 +1,5 @@
+use itertools::Itertools;
+
 pub mod ascii;
 pub use ascii::Ascii;
 
@@ -60,4 +62,32 @@ pub trait Code {
     fn decode(&self, text: &str) -> Result<String, Error>;
     fn randomize(&mut self);
     fn reset(&mut self);
+}
+
+pub struct CodeWords {
+    pub words: Vec<String>,
+    pub string: String,
+    pub sep: String,
+}
+
+impl CodeWords {
+    pub fn new() -> Self {
+        Self {
+            words: Vec::new(),
+            string: String::new(),
+            sep: String::from(","),
+        }
+    }
+
+    pub fn update_code_words(&mut self) {
+        self.words = self
+            .string
+            .split(&self.sep)
+            .map(|w| w.trim().to_string())
+            .collect_vec();
+    }
+
+    pub fn code_words(&self) -> std::slice::Iter<'_, String> {
+        self.words.iter()
+    }
 }
