@@ -1,40 +1,57 @@
-use crate::{
-    errors::Error,
-    text_aux::{
-        bytes_as_text::{num_to_string_width, u32_from_string, NumRep},
-        PresetAlphabet, VecString,
-    },
-};
+use std::ops::{Add, Sub};
+
+use num::{Integer, Zero};
 
 use super::Code;
+use crate::{
+    errors::Error,
+    text_aux::{PresetAlphabet, VecString},
+};
+
+fn to_str_radix(n: usize, radix: usize, width: usize, symbols: &VecString) -> String {
+    if n.is_zero() {
+        return String::from(symbols[0]).repeat(width);
+    }
+
+    let mut values = Vec::with_capacity(width);
+
+    let mut n = n;
+    while n != 0 || values.len() < width {
+        let (n_temp, r) = n.div_mod_floor(&radix);
+        values.push(r);
+        n = n_temp;
+    }
+
+    values.into_iter().map(|x| symbols[x]).rev().collect()
+}
 
 pub struct BlockCode {
     pub width: usize,
-    pub rep: NumRep,
     pub alphabet: VecString,
-    //pub symbols: VecString,
+    pub symbols: VecString,
 }
 
 impl Default for BlockCode {
     fn default() -> Self {
         BlockCode {
             width: 5,
-            rep: NumRep::Binary,
             alphabet: VecString::from(PresetAlphabet::BasicLatin),
-            //symbols: VecString::from("01"),
+            symbols: VecString::from("01"),
         }
     }
 }
 
 impl BlockCode {
-    fn num_to_string(&self, n: &usize) -> String {
-        num_to_string_width(&n, self.rep, self.width)
+    fn num_to_string(&self, n: usize) -> String {
+        to_str_radix(n, self.symbols.len(), self.width, &self.symbols)
     }
 
-    pub fn assign_width(&mut self, width: usize) {
-        if width >= 3 && width <= 8 {
-            self.width = width
-        }
+    pub fn decrease_width(&mut self) {
+        self.width = self.width.sub(1).clamp(2, 8)
+    }
+
+    pub fn increase_width(&mut self) {
+        self.width = self.width.add(1).clamp(2, 8)
     }
 
     pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (char, String)> + '_> {
@@ -42,13 +59,13 @@ impl BlockCode {
             self.alphabet
                 .chars()
                 .enumerate()
-                .map(|(n, c)| (c, self.num_to_string(&n))),
+                .map(|(n, c)| (c, self.num_to_string(n))),
         )
     }
 
     pub fn valid_code_width(&self) -> bool {
         let n_symbols = self.alphabet.chars().count();
-        let min_width = (n_symbols as f32).log(self.rep.radix() as f32).ceil() as usize;
+        let min_width = (n_symbols as f32).log(self.symbols.len() as f32).ceil() as usize;
         min_width < self.width
     }
 }
@@ -61,23 +78,27 @@ impl Code for BlockCode {
                 .alphabet
                 .get_pos(c)
                 .ok_or_else(|| Error::invalid_input_char(c))?;
-            out.push(self.num_to_string(&n));
+            out.push(self.num_to_string(n));
         }
-        Ok(out.join(" "))
+        Ok(out.join(""))
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
         let mut out = String::new();
 
-        for group in text.split(" ") {
-            let n = u32_from_string(group, self.rep)
-                .map_err(|_| Error::Input(format!("The code group `{group}` is not valid")))?
-                as usize;
-            out.push(
-                self.alphabet
-                    .get_char_at(n)
-                    .expect("tried to access character outside alphabet range"),
-            )
+        let pows = (0..self.width).rev().cycle();
+        let mut val = 0;
+        for (c, p) in text.chars().zip(pows) {
+            let n = self
+                .symbols
+                .get_pos_of(c)
+                .ok_or(Error::invalid_input_char(c))?;
+            val += n * self.symbols.len().pow(p as u32);
+
+            if p == 0 {
+                out.push(self.alphabet[val]);
+                val = 0;
+            }
         }
 
         Ok(out)
@@ -96,18 +117,35 @@ impl Code for BlockCode {
 mod block_code_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "";
+    const PLAINTEXT: &'static str = "ABC";
+    const CIPHERTEXT_01: &'static str = "000000000100010";
+    const CIPHERTEXT_XYZ: &'static str = "XXXYXZ";
 
     #[test]
-    fn encrypt_test() {
+    fn encode_test_default() {
         let code = BlockCode::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT_01);
     }
 
     #[test]
-    fn decrypt_test() {
+    fn decode_test_default() {
         let code = BlockCode::default();
-        assert_eq!(code.decode(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(CIPHERTEXT_01).unwrap(), PLAINTEXT);
+    }
+
+    #[test]
+    fn encode_test() {
+        let mut code = BlockCode::default();
+        code.symbols = VecString::from("XYZ");
+        code.width = 2;
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT_XYZ);
+    }
+
+    #[test]
+    fn decode_test() {
+        let mut code = BlockCode::default();
+        code.symbols = VecString::from("XYZ");
+        code.width = 2;
+        assert_eq!(code.decode(CIPHERTEXT_XYZ).unwrap(), PLAINTEXT);
     }
 }

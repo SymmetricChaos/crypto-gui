@@ -2,7 +2,7 @@ use itertools::Itertools;
 
 use crate::{
     errors::Error,
-    text_aux::{bytes_as_text::NumRep, PresetAlphabet::ClassicalLatin, VecString},
+    text_aux::{PresetAlphabet::ClassicalLatin, VecString},
 };
 
 use super::{BlockCode, Code};
@@ -15,9 +15,9 @@ pub struct Bacon {
 impl Default for Bacon {
     fn default() -> Self {
         let mut block = BlockCode::default();
-        block.rep = NumRep::Binary;
         block.width = 5;
         block.alphabet = VecString::from(ClassicalLatin);
+        block.symbols = VecString::from("01");
         Bacon {
             block,
             false_text: String::new(),
@@ -103,7 +103,7 @@ impl Code for Bacon {
             .chunks(self.block.width)
             .into_iter()
             .map(|ch| ch.collect::<String>())
-            .join(" ");
+            .join("");
         self.block.decode(&bits)
     }
 
