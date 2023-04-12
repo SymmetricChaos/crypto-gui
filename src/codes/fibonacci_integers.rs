@@ -91,6 +91,9 @@ impl FibonacciCodeIntegers {
             ctr += 1;
             prev = bit;
         }
+        if n != 0 {
+            output.push(0);
+        }
         Ok(output)
     }
 
@@ -155,6 +158,9 @@ impl Code for FibonacciCodeIntegers {
 
             ctr += 1;
             prev = bit;
+        }
+        if n != 0 {
+            output.push(String::from("�"))
         }
         Ok(output.join(" "))
     }

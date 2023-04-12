@@ -116,30 +116,24 @@ impl Code for FibonacciCode {
             self.integer_code.decode(text)
         } else if self.mode == FibMode::Letter {
             let mut output = String::new();
-            let mut buffer = String::with_capacity(8);
-            let mut prev = '0';
-            for b in text.chars() {
-                buffer.push(b);
-                if prev == '1' && b == '1' {
-                    match self.letter_map.get_by_right(&buffer) {
-                        Some(s) => {
-                            output.push(*s);
-                        }
-                        None => {
-                            output.push('�');
-                        }
-                    }
-                    buffer.clear();
-                    prev = '0';
-                    continue;
+            for n in self.integer_code.decode_to_u32(text)?.into_iter() {
+                // n == 0 can only occur as the last number and only as a signal that the final code was incomplete
+                if n == 0 {
+                    output.push('�')
                 }
-                prev = b;
+                match self.alphabet.chars().nth((n - 1) as usize) {
+                    Some(w) => output.push(w),
+                    None => output.push('�'),
+                }
             }
             Ok(output)
         } else {
             let mut output = Vec::new();
             let e = String::from("�");
             for n in self.integer_code.decode_to_u32(text)?.into_iter() {
+                if n == 0 {
+                    output.push(&e);
+                }
                 match self.words.get((n - 1) as usize) {
                     Some(w) => output.push(w),
                     None => output.push(&e),
@@ -167,13 +161,15 @@ mod fibonacci_tests {
 
     #[test]
     fn encode_test() {
-        let code = FibonacciCode::default();
+        let mut code = FibonacciCode::default();
+        code.mode = FibMode::Letter;
         assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
     }
 
     #[test]
     fn decode_test() {
-        let code = FibonacciCode::default();
+        let mut code = FibonacciCode::default();
+        code.mode = FibMode::Letter;
         assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
     }
 
