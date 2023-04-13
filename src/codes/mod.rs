@@ -28,10 +28,8 @@ pub use baudot::Baudot;
 
 pub mod bacon;
 pub use bacon::Bacon;
-
 pub mod punycode;
 pub use punycode::Punycode;
-
 pub mod pgp_words;
 pub use pgp_words::PgpWords;
 

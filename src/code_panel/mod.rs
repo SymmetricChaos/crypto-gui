@@ -8,6 +8,7 @@ pub mod ascii_controls;
 pub mod bacon_contols;
 pub mod base64_controls;
 pub mod baudot_controls;
+pub mod block_controls;
 pub mod fibonacci_controls;
 pub mod generic_components;
 pub mod godel_controls;
@@ -59,6 +60,7 @@ pub struct CodeInterface {
     pgp: PgpWords,
     bacon: Bacon,
     tap: TapCode,
+    block: BlockCode,
 }
 
 impl CodeInterface {
@@ -68,6 +70,8 @@ impl CodeInterface {
                 CodeID::Ascii,
                 CodeID::Baudot,
                 CodeID::Morse,
+                CodeID::Needle,
+                CodeID::Punycode,
                 CodeID::SpellingAlphabet,
                 CodeID::Unicode,
             ],
@@ -76,13 +80,19 @@ impl CodeInterface {
             ui,
         );
         combox_box(
-            &[CodeID::Godel, CodeID::Unary, CodeID::Fibonacci],
+            &[CodeID::Godel, CodeID::Fibonacci, CodeID::Unary],
             "Mathematical",
             active_code,
             ui,
         );
         combox_box(
-            &[CodeID::Base64, CodeID::Bacon, CodeID::Tap, CodeID::Pgp],
+            &[
+                CodeID::Bacon,
+                CodeID::Base64,
+                CodeID::Block,
+                CodeID::Pgp,
+                CodeID::Tap,
+            ],
             "Other Codes",
             active_code,
             ui,
@@ -103,7 +113,7 @@ impl CodeInterface {
             CodeID::Bacon => &mut self.bacon,
             CodeID::Unicode => &mut self.unicode,
             CodeID::Punycode => &mut self.punycode,
-            CodeID::Block => todo!(),
+            CodeID::Block => &mut self.block,
             CodeID::Tap => &mut self.tap,
             CodeID::Needle => &mut self.needle,
             //_ => todo!("unable to get active code"),
