@@ -10,7 +10,7 @@ impl View for UnaryCode {
         ui.selectable_value(&mut self.mode, UnaryMode::Word, "Word");
         match self.mode {
             UnaryMode::Letter => {
-                ui.label("Alphabetical Mode: Provide an alphabet. Codes will be assigned to each character of the alphabet in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned. The encoding is provided below.");
+                ui.label("Alphabetical Mode: Provide an alphabet. Codes will be assigned to each character of the alphabet in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
                 if ui
                     .add(TextEdit::singleline(&mut self.code.alphabet))
                     .changed()
@@ -20,7 +20,7 @@ impl View for UnaryCode {
                 fill_code_columns(16, 5, ui, Box::new(self.code.chars_codes()));
             }
             UnaryMode::Word => {
-                ui.label("Word Mode: Provide any number of words or phrases separated by commas. Codes will be assigned to each word or phrase in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned. The encoding is provided below.");
+                ui.label("Word Mode: Provide any number of words or phrases separated by commas. Codes will be assigned to each word or phrase in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
                 if ui
                     .add(TextEdit::singleline(&mut self.code.words_string))
                     .changed()
