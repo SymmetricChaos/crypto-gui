@@ -85,7 +85,7 @@ impl<T: Default + Hash + Eq + PartialEq> Default for LetterAndWordCode<T> {
     }
 }
 
-impl<T: Hash + Eq + PartialEq> LetterAndWordCode<T> {
+impl<T: Hash + Eq + PartialEq + ToString> LetterAndWordCode<T> {
     pub fn set_letter_map<F: Fn((usize, char)) -> T>(&mut self, ltr_map: F) {
         self.letter_map.clear();
         for (n, c) in self.alphabet.chars().enumerate() {
@@ -123,9 +123,21 @@ impl<T: Hash + Eq + PartialEq> LetterAndWordCode<T> {
             .ok_or_else(|| Error::invalid_input_char(c))
     }
 
+    pub fn get_letter_by_code(&self, code: &T) -> Result<&char, Error> {
+        self.letter_map
+            .get_by_right(code)
+            .ok_or_else(|| Error::invalid_input_group(&code.to_string()))
+    }
+
     pub fn get_by_word(&self, s: &str) -> Result<&T, Error> {
         self.word_map
             .get_by_left(s)
             .ok_or_else(|| Error::invalid_input_group(s))
+    }
+
+    pub fn get_word_by_code(&self, code: &T) -> Result<&String, Error> {
+        self.word_map
+            .get_by_right(code)
+            .ok_or_else(|| Error::invalid_input_group(&code.to_string()))
     }
 }
