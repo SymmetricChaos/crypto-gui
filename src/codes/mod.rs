@@ -116,4 +116,16 @@ impl<T: Hash + Eq + PartialEq> LetterAndWordCode<T> {
             .iter()
             .map(|x| (x, self.word_map.get_by_left(x).unwrap()))
     }
+
+    pub fn get_by_letter(&self, c: char) -> Result<&T, Error> {
+        self.letter_map
+            .get_by_left(&c)
+            .ok_or_else(|| Error::invalid_input_char(c))
+    }
+
+    pub fn get_by_word(&self, s: &str) -> Result<&T, Error> {
+        self.word_map
+            .get_by_left(s)
+            .ok_or_else(|| Error::invalid_input_group(s))
+    }
 }

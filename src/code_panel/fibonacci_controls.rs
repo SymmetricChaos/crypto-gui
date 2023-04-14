@@ -14,20 +14,23 @@ impl View for FibonacciCode {
         match self.mode {
             FibMode::Letter => {
                 ui.label("Alphabetical Mode: Provide an alphabet. Fibonacci codes will be assigned to each character of the alphabet in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
-                if ui.add(TextEdit::singleline(&mut self.alphabet)).changed() {
+                if ui
+                    .add(TextEdit::singleline(&mut self.maps.alphabet))
+                    .changed()
+                {
                     self.set_letter_map();
                 };
-                fill_code_columns(16, 5, ui, Box::new(self.chars_codes()));
+                fill_code_columns(16, 5, ui, Box::new(self.maps.chars_codes()));
             }
             FibMode::Word => {
                 ui.label("Word Mode: Provide any number of words or phrases separated by commas. Fibonacci codes will be assigned to each word or phrase in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
                 if ui
-                    .add(TextEdit::singleline(&mut self.words_string))
+                    .add(TextEdit::singleline(&mut self.maps.words_string))
                     .changed()
                 {
                     self.set_word_map();
                 };
-                fill_code_columns(16, 5, ui, Box::new(self.words_codes()));
+                fill_code_columns(16, 5, ui, Box::new(self.maps.words_codes()));
             }
             FibMode::Integer => {
                 ui.label("Integer Mode: get the Fibonacci coding for any list of positive integers or decode any string of 0s and 1s into a list of positive integers. A sample list of encodings it provided below.");

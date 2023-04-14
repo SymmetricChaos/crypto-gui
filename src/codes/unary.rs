@@ -8,27 +8,27 @@ pub enum UnaryMode {
 }
 
 pub struct UnaryCode {
-    pub code: LetterAndWordCode<String>,
+    pub maps: LetterAndWordCode<String>,
     pub mode: UnaryMode,
 }
 
 impl UnaryCode {
     pub fn set_letter_map(&mut self) {
-        self.code.set_letter_map(|(n, _)| "1".repeat(n) + "0")
+        self.maps.set_letter_map(|(n, _)| "1".repeat(n) + "0")
     }
 
     pub fn set_word_map(&mut self) {
-        self.code.set_word_map(|(n, _)| "1".repeat(n) + "0")
+        self.maps.set_word_map(|(n, _)| "1".repeat(n) + "0")
     }
 }
 
 impl Default for UnaryCode {
     fn default() -> Self {
-        let mut code = LetterAndWordCode::<String>::default();
-        code.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
-        code.set_letter_map(|(n, _)| "1".repeat(n) + "0");
+        let mut maps = LetterAndWordCode::<String>::default();
+        maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
+        maps.set_letter_map(|(n, _)| "1".repeat(n) + "0");
         UnaryCode {
-            code,
+            maps,
             mode: UnaryMode::Letter,
         }
     }
@@ -38,23 +38,15 @@ impl Code for UnaryCode {
     fn encode(&self, text: &str) -> Result<String, Error> {
         if self.mode == UnaryMode::Letter {
             let mut output = String::new();
-            for s in text.chars() {
-                let code = self
-                    .code
-                    .letter_map
-                    .get_by_left(&s)
-                    .ok_or_else(|| Error::invalid_input_char(s))?;
+            for c in text.chars() {
+                let code = self.maps.get_by_letter(c)?;
                 output.push_str(&code)
             }
             Ok(output)
         } else {
             let mut output = String::new();
             for w in text.split(" ") {
-                let code = self
-                    .code
-                    .word_map
-                    .get_by_left(w)
-                    .ok_or_else(|| Error::invalid_input_group(w))?;
+                let code = self.maps.get_by_word(w)?;
                 output.push_str(code)
             }
             Ok(output)
@@ -63,12 +55,12 @@ impl Code for UnaryCode {
 
     fn decode(&self, text: &str) -> Result<String, Error> {
         let mut output = String::new();
-        let mut buffer = String::with_capacity(self.code.letter_map.len());
+        let mut buffer = String::with_capacity(self.maps.letter_map.len());
         if self.mode == UnaryMode::Letter {
             for b in text.chars() {
                 buffer.push(b);
                 if b == '0' {
-                    match self.code.letter_map.get_by_right(&buffer) {
+                    match self.maps.letter_map.get_by_right(&buffer) {
                         Some(s) => {
                             output.push(*s);
                             buffer.clear();
@@ -84,7 +76,7 @@ impl Code for UnaryCode {
             for b in text.chars() {
                 buffer.push(b);
                 if b == '0' {
-                    match self.code.word_map.get_by_right(&buffer) {
+                    match self.maps.word_map.get_by_right(&buffer) {
                         Some(s) => {
                             output.push_str(s);
                             buffer.clear();
