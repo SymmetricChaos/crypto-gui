@@ -1,35 +1,26 @@
-use std::collections::HashMap;
-
-use crate::errors::Error;
-
 use super::Code;
+use crate::errors::Error;
+use bimap::BiMap;
+
 pub struct UnaryCode {
-    map: HashMap<char, String>,
-    map_inv: HashMap<String, char>,
+    map: BiMap<char, String>,
     pub alphabet: String,
-    old_alphabet: String,
 }
 
 impl UnaryCode {
-    pub fn set_maps(&mut self) {
-        if self.alphabet != self.old_alphabet {
-            let mut code = String::from("0");
-            self.map.clear();
-            self.map_inv.clear();
-            for c in self.alphabet.chars() {
-                self.map.insert(c, code.clone());
-                self.map_inv.insert(code.clone(), c);
-                code = format!("1{code}");
-            }
-            self.old_alphabet = self.alphabet.clone();
+    pub fn set_map(&mut self) {
+        let mut code = String::from('0');
+        self.map.clear();
+        for c in self.alphabet.chars() {
+            self.map.insert(c, code.clone());
+            code = format!("1{code}");
         }
     }
 
     pub fn chars_codes(&mut self) -> impl Iterator<Item = (char, &String)> + '_ {
-        self.set_maps();
         self.alphabet
             .chars()
-            .map(|x| (x, self.map.get(&x).unwrap()))
+            .map(|x| (x, self.map.get_by_left(&x).unwrap()))
     }
 }
 
@@ -37,18 +28,14 @@ impl Default for UnaryCode {
     fn default() -> Self {
         let alphabet = "ETAOINSHRDLCUMWFGYPBVKJXQZ";
         let mut code = String::from("0");
-        let mut map = HashMap::new();
-        let mut map_inv = HashMap::new();
+        let mut map = BiMap::new();
         for c in alphabet.chars() {
             map.insert(c, code.clone());
-            map_inv.insert(code.clone(), c);
             code = format!("1{code}");
         }
         UnaryCode {
             map,
-            map_inv,
             alphabet: alphabet.to_string(),
-            old_alphabet: alphabet.to_string(),
         }
     }
 }
@@ -57,7 +44,12 @@ impl Code for UnaryCode {
     fn encode(&self, text: &str) -> Result<String, Error> {
         let mut output = String::new();
         for s in text.chars() {
-            output.push_str(&self.map[&s])
+            output.push_str(
+                &self
+                    .map
+                    .get_by_left(&s)
+                    .ok_or(Error::invalid_input_char(s))?,
+            )
         }
         Ok(output)
     }
@@ -68,13 +60,15 @@ impl Code for UnaryCode {
         for b in text.chars() {
             buffer.push(b);
             if b == '0' {
-                match self.map_inv.get(&buffer) {
+                match self.map.get_by_right(&buffer) {
                     Some(s) => {
                         output.push(*s);
                         buffer.clear();
-                        continue;
                     }
-                    None => (),
+                    None => {
+                        output.push('�');
+                        buffer.clear();
+                    }
                 }
             }
         }

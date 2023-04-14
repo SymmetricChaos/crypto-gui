@@ -6,7 +6,9 @@ impl ViewableCode for UnaryCode {}
 
 impl View for UnaryCode {
     fn ui(&mut self, ui: &mut eframe::egui::Ui, _errors: &mut String) {
-        ui.add(TextEdit::singleline(&mut self.alphabet));
+        if ui.add(TextEdit::singleline(&mut self.alphabet)).changed() {
+            self.set_map();
+        };
         fill_code_columns(20, 3, ui, Box::new(self.chars_codes()));
     }
 }
