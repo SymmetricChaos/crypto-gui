@@ -1,77 +1,103 @@
-use super::Code;
+use super::{Code, LetterAndWordCode};
 use crate::errors::Error;
-use bimap::BiMap;
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum UnaryMode {
+    Letter,
+    Word,
+}
 
 pub struct UnaryCode {
-    map: BiMap<char, String>,
-    pub alphabet: String,
+    pub code: LetterAndWordCode<String>,
+    pub mode: UnaryMode,
 }
 
 impl UnaryCode {
-    pub fn set_map(&mut self) {
-        let mut code = String::from('0');
-        self.map.clear();
-        for c in self.alphabet.chars() {
-            self.map.insert(c, code.clone());
-            code = format!("1{code}");
-        }
+    pub fn set_letter_map(&mut self) {
+        self.code.set_letter_map(|(n, _)| "1".repeat(n) + "0")
     }
 
-    pub fn chars_codes(&mut self) -> impl Iterator<Item = (char, &String)> + '_ {
-        self.alphabet
-            .chars()
-            .map(|x| (x, self.map.get_by_left(&x).unwrap()))
+    pub fn set_word_map(&mut self) {
+        self.code.set_word_map(|(n, _)| "1".repeat(n) + "0")
     }
 }
 
 impl Default for UnaryCode {
     fn default() -> Self {
-        let alphabet = "ETAOINSHRDLCUMWFGYPBVKJXQZ";
-        let mut code = String::from("0");
-        let mut map = BiMap::new();
-        for c in alphabet.chars() {
-            map.insert(c, code.clone());
-            code = format!("1{code}");
-        }
+        let mut code = LetterAndWordCode::<String>::default();
+        code.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
+        code.set_letter_map(|(n, _)| "1".repeat(n) + "0");
         UnaryCode {
-            map,
-            alphabet: alphabet.to_string(),
+            code,
+            mode: UnaryMode::Letter,
         }
     }
 }
 
 impl Code for UnaryCode {
     fn encode(&self, text: &str) -> Result<String, Error> {
-        let mut output = String::new();
-        for s in text.chars() {
-            output.push_str(
-                &self
-                    .map
+        if self.mode == UnaryMode::Letter {
+            let mut output = String::new();
+            for s in text.chars() {
+                let code = self
+                    .code
+                    .letter_map
                     .get_by_left(&s)
-                    .ok_or(Error::invalid_input_char(s))?,
-            )
+                    .ok_or_else(|| Error::invalid_input_char(s))?;
+                output.push_str(&code)
+            }
+            Ok(output)
+        } else {
+            let mut output = String::new();
+            for w in text.split(" ") {
+                let code = self
+                    .code
+                    .word_map
+                    .get_by_left(w)
+                    .ok_or_else(|| Error::invalid_input_group(w))?;
+                output.push_str(code)
+            }
+            Ok(output)
         }
-        Ok(output)
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
         let mut output = String::new();
-        let mut buffer = String::with_capacity(self.map.len());
-        for b in text.chars() {
-            buffer.push(b);
-            if b == '0' {
-                match self.map.get_by_right(&buffer) {
-                    Some(s) => {
-                        output.push(*s);
-                        buffer.clear();
+        let mut buffer = String::with_capacity(self.code.letter_map.len());
+        if self.mode == UnaryMode::Letter {
+            for b in text.chars() {
+                buffer.push(b);
+                if b == '0' {
+                    match self.code.letter_map.get_by_right(&buffer) {
+                        Some(s) => {
+                            output.push(*s);
+                            buffer.clear();
+                        }
+                        None => {
+                            output.push('�');
+                            buffer.clear();
+                        }
                     }
-                    None => {
-                        output.push('�');
-                        buffer.clear();
+                }
+            }
+        } else {
+            for b in text.chars() {
+                buffer.push(b);
+                if b == '0' {
+                    match self.code.word_map.get_by_right(&buffer) {
+                        Some(s) => {
+                            output.push_str(s);
+                            buffer.clear();
+                        }
+                        None => {
+                            output.push('�');
+                            buffer.clear();
+                        }
                     }
                 }
             }
         }
+
         Ok(output)
     }
 

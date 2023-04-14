@@ -1,4 +1,6 @@
+use bimap::BiMap;
 use itertools::Itertools;
+use std::hash::Hash;
 
 pub mod ascii;
 pub use ascii::Ascii;
@@ -62,30 +64,56 @@ pub trait Code {
     fn reset(&mut self);
 }
 
-pub struct CodeWords {
+#[derive(Debug)]
+pub struct LetterAndWordCode<T> {
+    pub letter_map: BiMap<char, T>,
+    pub word_map: BiMap<String, T>,
+    pub alphabet: String,
     pub words: Vec<String>,
-    pub string: String,
-    pub sep: String,
+    pub words_string: String,
 }
 
-impl CodeWords {
-    pub fn new() -> Self {
+impl<T: Default + Hash + Eq + PartialEq> Default for LetterAndWordCode<T> {
+    fn default() -> Self {
         Self {
-            words: Vec::new(),
-            string: String::new(),
-            sep: String::from(","),
+            letter_map: Default::default(),
+            word_map: Default::default(),
+            alphabet: Default::default(),
+            words: Default::default(),
+            words_string: Default::default(),
+        }
+    }
+}
+
+impl<T: Hash + Eq + PartialEq> LetterAndWordCode<T> {
+    pub fn set_letter_map<F: Fn((usize, char)) -> T>(&mut self, ltr_map: F) {
+        self.letter_map.clear();
+        for (n, c) in self.alphabet.chars().enumerate() {
+            self.letter_map.insert(c.clone(), ltr_map((n, c)));
         }
     }
 
-    pub fn update_code_words(&mut self) {
+    pub fn set_word_map<F: Fn((usize, &String)) -> T>(&mut self, ltr_map: F) {
         self.words = self
-            .string
-            .split(&self.sep)
+            .words_string
+            .split(",")
             .map(|w| w.trim().to_string())
             .collect_vec();
+        self.word_map.clear();
+        for (n, c) in self.words.iter().enumerate() {
+            self.word_map.insert(c.clone(), ltr_map((n, c)));
+        }
     }
 
-    pub fn code_words(&self) -> std::slice::Iter<'_, String> {
-        self.words.iter()
+    pub fn chars_codes(&mut self) -> impl Iterator<Item = (char, &T)> + '_ {
+        self.alphabet
+            .chars()
+            .map(|x| (x, self.letter_map.get_by_left(&x).unwrap()))
+    }
+
+    pub fn words_codes(&mut self) -> impl Iterator<Item = (&String, &T)> + '_ {
+        self.words
+            .iter()
+            .map(|x| (x, self.word_map.get_by_left(x).unwrap()))
     }
 }

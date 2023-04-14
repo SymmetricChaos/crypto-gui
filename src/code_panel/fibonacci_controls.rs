@@ -27,7 +27,7 @@ impl View for FibonacciCode {
                 {
                     self.set_word_map();
                 };
-                fill_code_columns(16, 5, ui, Box::new(self.chars_codes()));
+                fill_code_columns(16, 5, ui, Box::new(self.words_codes()));
             }
             FibMode::Integer => {
                 ui.label("Integer Mode: get the Fibonacci coding for any list of positive integers or decode any string of 0s and 1s into a list of positive integers. A sample list of encodings it provided below.");
