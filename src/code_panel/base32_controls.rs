@@ -1,5 +1,5 @@
 use super::{generic_components::fill_code_columns, View, ViewableCode};
-use crate::codes::Base32;
+use crate::codes::{base32::B32Variant, Base32};
 //use rfd::FileDialog;
 
 impl ViewableCode for Base32 {}
@@ -10,6 +10,14 @@ impl View for Base32 {
         // if ui.button("Select a File").clicked() {
         //     self.file = FileDialog::new().pick_file();
         // }
+
+        ui.selectable_value(&mut self.variant, B32Variant::Rfc4648, "RFC 4684");
+        ui.selectable_value(&mut self.variant, B32Variant::WordSafe, "Word Safe");
+
+        match self.variant {
+            B32Variant::Rfc4648 => ui.label("The most commonly used Bas32 variant is defined by RFC 4684. To avoid ambiguity the character 0, 1, and 8 are not included."),
+            B32Variant::WordSafe => ui.label("The Word Safe variant of Base32 is used for geocaching. It is an example of a variant used to avoid forming words, which it accomplishes by not including any vowels."),
+        };
 
         fill_code_columns(8, 4, ui, Box::new(self.chars_codes()));
 
