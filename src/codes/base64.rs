@@ -7,6 +7,9 @@ use bimap::BiMap;
 use lazy_static::lazy_static;
 use std::{fs::read, path::PathBuf};
 
+const MASK: u8 = 0b00111111;
+const PAD: u8 = '=' as u8;
+
 lazy_static! {
     pub static ref B64_MAP: BiMap<u8, u8> = bimap_from_iter(
         PresetAlphabet::Base64
@@ -17,7 +20,7 @@ lazy_static! {
 }
 
 fn decode_byte(n: &u8) -> Result<&u8, Error> {
-    if n == &0x3D {
+    if n == &PAD {
         Ok(&0)
     } else {
         B64_MAP
@@ -29,45 +32,32 @@ fn decode_byte(n: &u8) -> Result<&u8, Error> {
 fn encode_b64_remainder(chunk: &[u8], out: &mut Vec<u8>) {
     if chunk.len() == 2 {
         let s1 = chunk[0] >> 2;
-        let s2 = ((chunk[0] << 4) & 0x3F) ^ (chunk[1] >> 4);
-        let s3 = (chunk[1] << 2) & 0x3F;
+        let s2 = ((chunk[0] << 4) & MASK) ^ (chunk[1] >> 4);
+        let s3 = (chunk[1] << 2) & MASK;
         out.push(*B64_MAP.get_by_left(&s1).unwrap());
         out.push(*B64_MAP.get_by_left(&s2).unwrap());
         out.push(*B64_MAP.get_by_left(&s3).unwrap());
-        out.push(0x3D);
+        out.push(PAD);
     } else if chunk.len() == 1 {
         let s1 = chunk[0] >> 2;
-        let s2 = (chunk[0] << 4) & 0x3F;
+        let s2 = (chunk[0] << 4) & MASK;
         out.push(*B64_MAP.get_by_left(&s1).unwrap());
         out.push(*B64_MAP.get_by_left(&s2).unwrap());
-        out.push(0x3D);
-        out.push(0x3D);
+        out.push(PAD);
+        out.push(PAD);
     } else {
         return ();
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum DisplayMode {
-    Direct,
-    Binary,
-    Octal,
-    Decimal,
-    Hex,
-}
-
 // Make it possible to encode an aribtrary file
 pub struct Base64 {
     pub file: Option<PathBuf>,
-    pub mode: DisplayMode,
 }
 
 impl Default for Base64 {
     fn default() -> Self {
-        Self {
-            file: None,
-            mode: DisplayMode::Direct,
-        }
+        Self { file: None }
     }
 }
 
@@ -90,14 +80,10 @@ impl Base64 {
 
         for chunk in chunks {
             // turn the three bytes into four sextets
-            // shr chunk[0] twice to keep only the top six bits
             let s1 = chunk[0] >> 2;
-            // shl chunk[0] 4 times to put the bottom top 2 bits on top, mask the top two bits, then shr[1] 4 times to put the top four bits on the bottom, XOR together
-            let s2 = ((chunk[0] << 4) & 0x3F) ^ (chunk[1] >> 4);
-            // shl chunk[1] 2 times to leave two bits open at the bottom, mask the top two bits, shr chunk[2] 6 times to put the bottom two bits on the bottom XOR together
-            let s3 = ((chunk[1] << 2) & 0x3F) ^ (chunk[2] >> 6);
-            // mask the top two bits of chunk[2]
-            let s4 = chunk[2] & 0x3F;
+            let s2 = ((chunk[0] << 4) & MASK) ^ (chunk[1] >> 4);
+            let s3 = ((chunk[1] << 2) & MASK) ^ (chunk[2] >> 6);
+            let s4 = chunk[2] & MASK;
 
             // Encode the four sextets as four ASCII bytes
             out.push(*B64_MAP.get_by_left(&s1).unwrap());
@@ -114,8 +100,8 @@ impl Base64 {
         let mut out = Vec::with_capacity((input.len() / 4) * 3);
         let chunks = input.chunks_exact(4);
         let padding_len = {
-            let l0 = input.iter().nth_back(0).unwrap() == &0x3D;
-            let l1 = input.iter().nth_back(1).unwrap() == &0x3D;
+            let l0 = input.iter().nth_back(0).unwrap() == &PAD;
+            let l1 = input.iter().nth_back(1).unwrap() == &PAD;
             l0 as usize + l1 as usize
         };
         for chunk in chunks {
