@@ -19,6 +19,9 @@ pub use unary::UnaryCode;
 pub mod spelling_alphabet;
 pub use spelling_alphabet::SpellingAlphabet;
 
+pub mod base32;
+pub use base32::Base32;
+
 pub mod base64;
 pub use base64::Base64;
 
