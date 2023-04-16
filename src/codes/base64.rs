@@ -7,7 +7,6 @@ use bimap::BiMap;
 use lazy_static::lazy_static;
 use std::{fs::read, path::PathBuf};
 
-// These maps due not form a bijection due to the padding symbol '=' so we can't use bimap
 lazy_static! {
     pub static ref B64_MAP: BiMap<u8, u8> = bimap_from_iter(
         PresetAlphabet::Base64
