@@ -7,6 +7,7 @@ use lazy_static::lazy_static;
 pub enum CodeID {
     Ascii,
     Bacon,
+    Base32,
     Base64,
     Baudot,
     Block,
@@ -46,6 +47,7 @@ impl Display for CodeID {
             CodeID::Godel => "Gödel",
             CodeID::Fibonacci => "Fibonacci",
             CodeID::Baudot => "Baudot",
+            CodeID::Base32 => "Base32",
             CodeID::Base64 => "Base64",
             CodeID::Unary => "Unary",
             CodeID::SpellingAlphabet => "Spelling Alphabet",

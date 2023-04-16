@@ -6,6 +6,7 @@ use eframe::egui;
 use egui::Ui;
 pub mod ascii_controls;
 pub mod bacon_contols;
+pub mod base32_controls;
 pub mod base64_controls;
 pub mod baudot_controls;
 pub mod block_controls;
@@ -56,6 +57,7 @@ pub struct CodeInterface {
     fibonacci: FibonacciCode,
 
     // Other Codes
+    base32: Base32,
     base64: Base64,
     pgp: PgpWords,
     bacon: Bacon,
@@ -88,6 +90,7 @@ impl CodeInterface {
         combox_box(
             &[
                 CodeID::Bacon,
+                CodeID::Base32,
                 CodeID::Base64,
                 CodeID::Block,
                 CodeID::Pgp,
@@ -106,6 +109,7 @@ impl CodeInterface {
             CodeID::Godel => &mut self.godel,
             CodeID::Fibonacci => &mut self.fibonacci,
             CodeID::Baudot => &mut self.baudot,
+            CodeID::Base32 => &mut self.base32,
             CodeID::Base64 => &mut self.base64,
             CodeID::Pgp => &mut self.pgp,
             CodeID::Unary => &mut self.unary,
