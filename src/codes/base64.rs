@@ -8,7 +8,11 @@ use lazy_static::lazy_static;
 use std::{fs::read, path::PathBuf};
 
 const MASK: u8 = 0b00111111;
-const PAD: u8 = '=' as u8;
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum B64Variant {
+    Rfc4648,
+}
 
 lazy_static! {
     pub static ref B64_MAP: BiMap<u8, u8> = bimap_from_iter(
@@ -19,110 +23,123 @@ lazy_static! {
     );
 }
 
-fn decode_byte(n: &u8) -> Result<&u8, Error> {
-    if n == &PAD {
-        Ok(&0)
-    } else {
-        B64_MAP
-            .get_by_right(&n)
-            .ok_or_else(|| Error::invalid_input_char(*n as char))
-    }
-}
-
-fn encode_b64_remainder(chunk: &[u8], out: &mut Vec<u8>) {
-    if chunk.len() == 2 {
-        let s1 = chunk[0] >> 2;
-        let s2 = ((chunk[0] << 4) & MASK) ^ (chunk[1] >> 4);
-        let s3 = (chunk[1] << 2) & MASK;
-        out.push(*B64_MAP.get_by_left(&s1).unwrap());
-        out.push(*B64_MAP.get_by_left(&s2).unwrap());
-        out.push(*B64_MAP.get_by_left(&s3).unwrap());
-        out.push(PAD);
-    } else if chunk.len() == 1 {
-        let s1 = chunk[0] >> 2;
-        let s2 = (chunk[0] << 4) & MASK;
-        out.push(*B64_MAP.get_by_left(&s1).unwrap());
-        out.push(*B64_MAP.get_by_left(&s2).unwrap());
-        out.push(PAD);
-        out.push(PAD);
-    } else {
-        return ();
-    }
-}
-
 // Make it possible to encode an aribtrary file
 pub struct Base64 {
     pub file: Option<PathBuf>,
+    pub use_padding: bool,
+    pub pad: u8,
 }
 
 impl Default for Base64 {
     fn default() -> Self {
-        Self { file: None }
+        Self {
+            file: None,
+            use_padding: true,
+            pad: '=' as u8,
+        }
     }
 }
 
 impl Base64 {
+    pub fn map(&self) -> &BiMap<u8, u8> {
+        &B64_MAP
+    }
+
     pub fn encode_file(&self) -> Result<String, Error> {
         if self.file.is_none() {
             return Err(Error::input("no file stored"));
         }
         let bytes = &read(self.file.as_ref().unwrap()).unwrap()[..];
 
-        let encoded = Base64::encode_bytes(bytes);
+        let encoded = self.encode_byte_stream(bytes);
         Ok(String::from_utf8(encoded).unwrap())
     }
 
-    // All u8 values are covered so this is not fallible
-    pub fn encode_bytes(input: &[u8]) -> Vec<u8> {
-        let mut out = Vec::with_capacity((input.len() / 3) * 4);
-        let chunks = input.chunks_exact(3);
-        let rem = chunks.remainder();
+    fn encode_byte_stream(&self, input: &[u8]) -> Vec<u8> {
+        let mut out = Vec::with_capacity((input.len() / 3) * 4 + 1);
+        let map = self.map();
+        let mut buffer = 0_u32;
+        let mut bits_in_use = 0;
+        let mut bytes = input.iter();
 
-        for chunk in chunks {
-            // turn the three bytes into four sextets
-            let s1 = chunk[0] >> 2;
-            let s2 = ((chunk[0] << 4) & MASK) ^ (chunk[1] >> 4);
-            let s3 = ((chunk[1] << 2) & MASK) ^ (chunk[2] >> 6);
-            let s4 = chunk[2] & MASK;
-
-            // Encode the four sextets as four ASCII bytes
-            out.push(*B64_MAP.get_by_left(&s1).unwrap());
-            out.push(*B64_MAP.get_by_left(&s2).unwrap());
-            out.push(*B64_MAP.get_by_left(&s3).unwrap());
-            out.push(*B64_MAP.get_by_left(&s4).unwrap());
+        loop {
+            // If less than 6 bits are bring used get the next byte
+            if bits_in_use < 6 {
+                match bytes.next() {
+                    // If it exists put it into the buffer
+                    Some(n) => {
+                        buffer = buffer << 8;
+                        buffer = buffer ^ (*n as u32);
+                        bits_in_use += 8
+                    }
+                    // Otherwise normal encoding is done
+                    None => break,
+                };
+            }
+            // Get the five highest USED bites in the buffer and map them
+            let n = ((buffer >> (bits_in_use - 6)) as u8) & MASK;
+            out.push(*map.get_by_left(&n).unwrap());
+            bits_in_use -= 6;
         }
-        encode_b64_remainder(rem, &mut out);
+
+        if bits_in_use != 0 {
+            // If padding is used continue shifting in 0 bytes until we reach 0 bits in use (a multiple of 40)
+            // The only differene is that the 00000 word is now PAD instead of A
+            if self.use_padding {
+                while bits_in_use != 0 {
+                    if bits_in_use < 6 {
+                        buffer = buffer << 8;
+                        bits_in_use += 8;
+                    }
+                    let n = ((buffer >> (bits_in_use - 6)) as u8) & MASK;
+                    if n == 0 {
+                        out.push(self.pad)
+                    } else {
+                        out.push(*map.get_by_left(&n).unwrap());
+                    }
+                    bits_in_use -= 6;
+                }
+            } else {
+                if bits_in_use < 6 {
+                    buffer = buffer << 8;
+                    bits_in_use += 8;
+                }
+                let n = ((buffer >> (bits_in_use - 6)) as u8) & MASK;
+                if n == 0 {
+                    out.push(self.pad)
+                } else {
+                    out.push(*map.get_by_left(&n).unwrap());
+                }
+            }
+        }
+
         out
     }
 
-    // Only ASCII values for u8 are allowed so this is fallible
-    pub fn decode_bytes(input: &[u8]) -> Result<Vec<u8>, Error> {
-        let mut out = Vec::with_capacity((input.len() / 4) * 3);
-        let chunks = input.chunks_exact(4);
-        let padding_len = {
-            let l0 = input.iter().nth_back(0).unwrap() == &PAD;
-            let l1 = input.iter().nth_back(1).unwrap() == &PAD;
-            l0 as usize + l1 as usize
-        };
-        for chunk in chunks {
-            let s1 = *decode_byte(&chunk[0])?;
-            let s2 = *decode_byte(&chunk[1])?;
-            let s3 = *decode_byte(&chunk[2])?;
-            let s4 = *decode_byte(&chunk[3])?;
-
-            // shift s1 left twice to leave two bits at the bottom, shift s2 right four times to put the top two bits on the bottom, XOR together
-            let o1 = (s1 << 2) ^ (s2 >> 4);
-            // shift s2 left four to leave four at the bottom, shift s3 right two times to put the top four bits on the bottom, XOR together
-            let o2 = (s2 << 4) ^ (s3 >> 2);
-            // shift s3 left six to leave four at the bottom, XOR together with s4
-            let o3 = (s3 << 6) ^ s4;
-
-            out.push(o1);
-            out.push(o2);
-            out.push(o3);
-        }
-        for _ in 0..padding_len {
-            out.pop();
+    fn decode_byte_stream(&self, input: &[u8]) -> Result<Vec<u8>, Error> {
+        let mut out = Vec::with_capacity((input.len() / 4) * 3 + 1);
+        let mut buffer = 0_u32;
+        let mut bits_in_use = 0;
+        let map = self.map();
+        // Detect and remove padding then map each character to its bitstring
+        let mut bytes = input.iter().take_while(|n| n != &&self.pad).map(|n| {
+            map.get_by_right(n)
+                .ok_or_else(|| Error::invalid_input_char(*n as char))
+        });
+        loop {
+            if bits_in_use < 8 {
+                buffer = buffer << 6;
+                if let Some(n) = bytes.next() {
+                    buffer = buffer ^ (*n? & MASK) as u32;
+                    bits_in_use += 6
+                } else {
+                    break;
+                }
+            } else {
+                let n = (buffer >> (bits_in_use - 8)) as u8;
+                out.push(n);
+                bits_in_use -= 8;
+            }
         }
         Ok(out)
     }
@@ -139,12 +156,12 @@ impl Base64 {
 
 impl Code for Base64 {
     fn encode(&self, text: &str) -> Result<String, Error> {
-        let b = Base64::encode_bytes(text.as_bytes());
+        let b = self.encode_byte_stream(text.as_bytes());
         Ok(String::from_utf8(b).unwrap())
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
-        let b = Base64::decode_bytes(text.as_bytes())?;
+        let b = self.decode_byte_stream(text.as_bytes())?;
         Ok(String::from_utf8(b).unwrap())
     }
 
@@ -160,9 +177,14 @@ mod base64_tests {
     const PLAINTEXT0: &'static str = "Many hands make light work.";
     const PLAINTEXT1: &'static str = "Many hands make light work";
     const PLAINTEXT2: &'static str = "Many hands make light woA";
+
     const CIPHERTEXT0: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcmsu";
     const CIPHERTEXT1: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcms=";
     const CIPHERTEXT2: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvQQ==";
+
+    const CIPHERTEXT0_NOPAD: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcmsu";
+    const CIPHERTEXT1_NOPAD: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcms";
+    const CIPHERTEXT2_NOPAD: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvQQ";
 
     #[test]
     fn encode_test() {
@@ -173,10 +195,27 @@ mod base64_tests {
     }
 
     #[test]
-    fn deode_test() {
+    fn encode_test_nopad() {
+        let mut code = Base64::default();
+        code.use_padding = false;
+        assert_eq!(code.encode(PLAINTEXT0).unwrap(), CIPHERTEXT0_NOPAD);
+        assert_eq!(code.encode(PLAINTEXT1).unwrap(), CIPHERTEXT1_NOPAD);
+        assert_eq!(code.encode(PLAINTEXT2).unwrap(), CIPHERTEXT2_NOPAD);
+    }
+
+    #[test]
+    fn decode_test() {
         let code = Base64::default();
         assert_eq!(code.decode(CIPHERTEXT0).unwrap(), PLAINTEXT0);
         assert_eq!(code.decode(CIPHERTEXT1).unwrap(), PLAINTEXT1);
         assert_eq!(code.decode(CIPHERTEXT2).unwrap(), PLAINTEXT2);
+    }
+
+    #[test]
+    fn decode_test_nopad() {
+        let code = Base64::default();
+        assert_eq!(code.decode(CIPHERTEXT0_NOPAD).unwrap(), PLAINTEXT0);
+        assert_eq!(code.decode(CIPHERTEXT1_NOPAD).unwrap(), PLAINTEXT1);
+        assert_eq!(code.decode(CIPHERTEXT2_NOPAD).unwrap(), PLAINTEXT2);
     }
 }

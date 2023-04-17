@@ -11,6 +11,8 @@ impl View for Base64 {
         //     self.file = FileDialog::new().pick_file();
         // }
 
+        ui.checkbox(&mut self.use_padding, "Use Padding");
+
         fill_code_columns(16, 4, ui, Box::new(self.chars_codes()));
 
         if self.file.is_some() {
