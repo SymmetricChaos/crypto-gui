@@ -19,7 +19,7 @@ impl View for Base32 {
             B32Variant::WordSafe => ui.label("The Word Safe variant of Base32 is used for geocaching. It is an example of a variant used to avoid forming words, which it accomplishes by not including any vowels."),
         };
         ui.add_space(10.0);
-        ui.label("When padding is enabled the padding symbol `=` is added to the end until the length is a multiple of five.");
+        ui.label("When padding is enabled the padding symbol `=` is added to the end until the length is a multiple of eight. Padding is ignored when decoding.");
         ui.checkbox(&mut self.use_padding, "Use Padding");
         ui.add_space(10.0);
         fill_code_columns(8, 4, ui, Box::new(self.chars_codes()));
