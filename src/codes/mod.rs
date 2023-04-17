@@ -13,6 +13,11 @@ pub use fibonacci::FibonacciCode;
 pub mod fibonacci_integers;
 pub use fibonacci_integers::FibonacciCodeIntegers;
 
+pub mod levenshtein;
+pub use levenshtein::LevenshteinCode;
+pub mod levenshtein_integers;
+pub use levenshtein_integers::LevenshteinCodeIntegers;
+
 pub mod unary;
 pub use unary::UnaryCode;
 

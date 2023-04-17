@@ -78,14 +78,14 @@ impl Code for LevenshteinCodeIntegers {
 mod fibonacci_int_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "65 1 7";
-    const ENCODEDTEXT: &'static str = "";
+    const PLAINTEXT: &'static str = "16 0 2 10";
+    const ENCODEDTEXT: &'static str = "1111000000000110011101010";
 
-    // #[test]
-    // fn encode_test() {
-    //     let code = LevenshteinCodeIntegers::default();
-    //     assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
-    // }
+    #[test]
+    fn encode_test() {
+        let code = LevenshteinCodeIntegers::default();
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
+    }
 
     // #[test]
     // fn decode_test() {
