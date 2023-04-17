@@ -95,9 +95,9 @@ impl Base32 {
             bits_in_use -= 5;
         }
 
-        // If padding is used continue shifting in 0 bytes until we reach 0 bits in use (a multiple of 40)
-        // The only differene is that the 00000 word is now PAD instead of A
         if bits_in_use != 0 {
+            // If padding is used continue shifting in 0 bytes until we reach 0 bits in use (a multiple of 40)
+            // The only differene is that the 00000 word is now PAD instead of A
             if self.use_padding {
                 while bits_in_use != 0 {
                     if bits_in_use < 5 {
@@ -131,75 +131,28 @@ impl Base32 {
 
     fn decode_byte_stream(&self, input: &[u8]) -> Result<Vec<u8>, Error> {
         let mut out = Vec::with_capacity((input.len() / 8) * 5);
-        let needed_padding = 8 - (input.len() % 8);
         let mut buffer = 0_u32;
         let mut bits_in_use = 0;
-        let mut bytes = input.iter();
+        let map = self.map();
+        // Detect and remove padding then map each character to its bitstring
+        let mut bytes = input.iter().take_while(|n| n != &&PAD).map(|n| {
+            map.get_by_right(n)
+                .ok_or_else(|| Error::invalid_input_char(*n as char))
+        });
         loop {
-            if bits_in_use < 5 {
+            if bits_in_use < 8 {
                 buffer = buffer << 5;
-                match bytes.next() {
-                    Some(n) => {
-                        buffer = buffer ^ (*n & MASK) as u32;
-                        bits_in_use += 5
-                    }
-                    None => break,
-                };
-            }
-            let n = ((buffer >> (bits_in_use - 5)) as u8) & MASK;
-            dbg!(n as char);
-            out.push(*self.decode_byte(&n).unwrap());
-            bits_in_use -= 5;
-        }
-        Ok(out)
-    }
-
-    pub fn decode_bytes(&self, input: &[u8]) -> Result<Vec<u8>, Error> {
-        let mut out = Vec::with_capacity((input.len() / 8) * 5);
-        let extra_bytes = input.len() % 8;
-
-        let chunks = input.chunks_exact(8);
-        let padding_len = {
-            match input.iter().filter(|b| b == &&PAD).count() {
-                0 => 0,
-                1 => 1,
-                3 => 2,
-                4 => 3,
-                6 => 4,
-                n => {
-                    return Err(Error::Input(format!(
-                        "valid Base32 cannot have {} padding bytes",
-                        n
-                    )))
+                if let Some(n) = bytes.next() {
+                    buffer = buffer ^ (*n? & MASK) as u32;
+                    bits_in_use += 5
+                } else {
+                    break;
                 }
+            } else {
+                let n = (buffer >> (bits_in_use - 8)) as u8;
+                out.push(n);
+                bits_in_use -= 8;
             }
-        };
-        for chunk in chunks {
-            // Turn the eight bytes into five bytes
-            let s1 = *self.decode_byte(&chunk[0])?;
-            let s2 = *self.decode_byte(&chunk[1])?;
-            let s3 = *self.decode_byte(&chunk[2])?;
-            let s4 = *self.decode_byte(&chunk[3])?;
-            let s5 = *self.decode_byte(&chunk[4])?;
-            let s6 = *self.decode_byte(&chunk[5])?;
-            let s7 = *self.decode_byte(&chunk[6])?;
-            let s8 = *self.decode_byte(&chunk[7])?;
-
-            // BITSHIFT HECK (no masks needed as top 3 bits always zero)
-            let o1 = (s1 << 3) ^ (s2 >> 2);
-            let o2 = (s2 << 6) ^ (s3 << 1) ^ (s4 >> 4);
-            let o3 = (s4 << 4) ^ (s5 >> 1);
-            let o4 = (s5 << 7) ^ (s6 << 2) ^ (s7 >> 3);
-            let o5 = (s7 << 5) ^ s8;
-            out.push(o1);
-            out.push(o2);
-            out.push(o3);
-            out.push(o4);
-            out.push(o5);
-        }
-
-        for _ in 0..padding_len {
-            out.pop();
         }
         Ok(out)
     }
@@ -212,16 +165,6 @@ impl Base32 {
             )
         })
     }
-
-    fn decode_byte(&self, n: &u8) -> Result<&u8, Error> {
-        if n == &PAD {
-            Ok(&0)
-        } else {
-            self.map()
-                .get_by_right(&n)
-                .ok_or_else(|| Error::invalid_input_char(*n as char))
-        }
-    }
 }
 
 impl Code for Base32 {
@@ -231,7 +174,7 @@ impl Code for Base32 {
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
-        let b = self.decode_bytes(text.as_bytes())?;
+        let b = self.decode_byte_stream(text.as_bytes())?;
         Ok(String::from_utf8(b).unwrap())
     }
 
@@ -291,5 +234,16 @@ mod base64_tests {
         assert_eq!(code.decode(CIPHERTEXT2).unwrap(), PLAINTEXT2);
         assert_eq!(code.decode(CIPHERTEXT3).unwrap(), PLAINTEXT3);
         assert_eq!(code.decode(CIPHERTEXT4).unwrap(), PLAINTEXT4);
+    }
+
+    #[test]
+    fn decode_test_nopad() {
+        let mut code = Base32::default();
+        code.use_padding = false;
+        assert_eq!(code.decode(CIPHERTEXT0_NOPAD).unwrap(), PLAINTEXT0);
+        assert_eq!(code.decode(CIPHERTEXT1_NOPAD).unwrap(), PLAINTEXT1);
+        assert_eq!(code.decode(CIPHERTEXT2_NOPAD).unwrap(), PLAINTEXT2);
+        assert_eq!(code.decode(CIPHERTEXT3_NOPAD).unwrap(), PLAINTEXT3);
+        assert_eq!(code.decode(CIPHERTEXT4_NOPAD).unwrap(), PLAINTEXT4);
     }
 }
