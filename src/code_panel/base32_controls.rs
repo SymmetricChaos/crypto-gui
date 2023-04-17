@@ -13,14 +13,15 @@ impl View for Base32 {
 
         ui.selectable_value(&mut self.variant, B32Variant::Rfc4648, "RFC 4684");
         ui.selectable_value(&mut self.variant, B32Variant::WordSafe, "Word Safe");
-
+        ui.add_space(10.0);
         match self.variant {
             B32Variant::Rfc4648 => ui.label("The most commonly used Bas32 variant is defined by RFC 4684. To avoid ambiguity the character 0, 1, and 8 are not included."),
             B32Variant::WordSafe => ui.label("The Word Safe variant of Base32 is used for geocaching. It is an example of a variant used to avoid forming words, which it accomplishes by not including any vowels."),
         };
-
+        ui.add_space(10.0);
+        ui.label("When padding is enabled the padding symbol `=` is added to the end until the length is a multiple of five.");
         ui.checkbox(&mut self.use_padding, "Use Padding");
-
+        ui.add_space(10.0);
         fill_code_columns(8, 4, ui, Box::new(self.chars_codes()));
 
         if self.file.is_some() {

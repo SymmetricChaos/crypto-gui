@@ -11,10 +11,11 @@ impl View for Base64 {
         //     self.file = FileDialog::new().pick_file();
         // }
 
+        ui.label("When padding is enabled the padding symbol `=` is added to the end until the length is a multiple of three. Padding is ignored when decoding.");
         ui.checkbox(&mut self.use_padding, "Use Padding");
-
+        ui.add_space(10.0);
         fill_code_columns(16, 4, ui, Box::new(self.chars_codes()));
-
+        ui.add_space(10.0);
         if self.file.is_some() {
             let file_name = self.file.as_ref().unwrap().file_name().unwrap().to_str();
             ui.add_space(10.0);
