@@ -4,35 +4,34 @@ use lazy_static::lazy_static;
 
 use crate::tokenizer::Node;
 
+// #[test]
+// fn test() {
+//     fn check_kana(romaji: &str) {
+//         print!(
+//             "{}\n{}\n",
+//             romaji,
+//             ROMAJI_TO_KANA
+//                 .extract_tokens(romaji)
+//                 .unwrap()
+//                 .iter()
+//                 .cloned()
+//                 .collect::<String>()
+//         );
+//     }
 
-#[test]
-fn test() {
-    // fn check_kana(romaji: &str) {
-    //     print!(
-    //         "{}\n{}\n",
-    //         romaji,
-    //         ROMAJI_TO_KANA
-    //             .extract_tokens(romaji)
-    //             .unwrap()
-    //             .iter()
-    //             .cloned()
-    //             .collect::<String>()
-    //     );
-    // }
+//     let paths = ROMAJI_TO_KANA.input_paths();
 
-    //let paths = ROMAJI_TO_KANA.input_paths();
+//     let paths = ROMAJI_TO_KANA.output_paths();
 
-    let paths = ROMAJI_TO_KANA.output_paths();
-    
-    for (k,v) in &paths {
-        print!("{k} <= {v:?}\n")
-    }
+//     for (k,v) in &paths {
+//         print!("{k} <= {v:?}\n")
+//     }
 
-    // println!("{:?}", check_kana("“konokudehazenchishiwoshyouryakudenkiru!”"));
-    // println!("{:?}", ROMAJI_TO_KANA.extract_tokens("x"));
-    // println!("{:?}", ROMAJI_TO_KANA.extract_tokens("shm"));
-    // println!("{:?}", ROMAJI_TO_KANA.extract_tokens("sh"));
-}
+//     println!("{:?}", check_kana("“konokudehazenchishiwoshyouryakudenkiru!”"));
+//     println!("{:?}", ROMAJI_TO_KANA.extract_tokens("x"));
+//     println!("{:?}", ROMAJI_TO_KANA.extract_tokens("shm"));
+//     println!("{:?}", ROMAJI_TO_KANA.extract_tokens("sh"));
+// }
 
 lazy_static! {
     pub static ref ROMAJI_TO_KANA: Node = {

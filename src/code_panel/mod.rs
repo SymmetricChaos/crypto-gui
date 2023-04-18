@@ -1,5 +1,5 @@
 use crate::{
-    codes::{morse::Morse, *},
+    codes::{morse::Morse, romaji::romaji::Romaji, *},
     ids::CodeID,
 };
 use eframe::egui;
@@ -17,6 +17,7 @@ pub mod morse_controls;
 pub mod needle_controls;
 pub mod pgp_controls;
 pub mod punycode_controls;
+pub mod romaji_controls;
 pub mod spelling_alphabet_controls;
 pub mod tap_code_controls;
 pub mod unary_controls;
@@ -48,6 +49,7 @@ pub struct CodeInterface {
     punycode: Punycode,
     spelling: SpellingAlphabet,
     morse: Morse,
+    romaji: Romaji,
     baudot: Baudot,
     needle: Needle,
 
@@ -120,6 +122,7 @@ impl CodeInterface {
             CodeID::Block => &mut self.block,
             CodeID::Tap => &mut self.tap,
             CodeID::Needle => &mut self.needle,
+            CodeID::Romaji => &mut self.romaji,
             //_ => todo!("unable to get active code"),
         }
     }

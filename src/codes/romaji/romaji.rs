@@ -1,4 +1,10 @@
-use crate::tokenizer::{Node, TransitionError};
+use crate::{
+    codes::Code,
+    errors::Error,
+    tokenizer::{Node, TransitionError},
+};
+
+use super::{HEPBERN_SHIKI, KUNREI_SHIKI, NIHON_SHIKI, ROMAJI_TO_KANA};
 
 pub fn to_romaji(orig: &str, tree: &Node) -> Result<String, TransitionError> {
     let tokens = tree.extract_tokens(orig)?;
@@ -6,44 +12,138 @@ pub fn to_romaji(orig: &str, tree: &Node) -> Result<String, TransitionError> {
     Ok(tokens.iter().cloned().collect())
 }
 
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum RomajiVariant {
+    Nihon,
+    Hepbern,
+    Kunrei,
+}
+
+impl RomajiVariant {
+    pub fn root(&self) -> &Node {
+        match self {
+            RomajiVariant::Nihon => &NIHON_SHIKI,
+            RomajiVariant::Hepbern => &HEPBERN_SHIKI,
+            RomajiVariant::Kunrei => &KUNREI_SHIKI,
+        }
+    }
+}
+
+pub struct Romaji {
+    pub variant: RomajiVariant,
+}
+
+impl Default for Romaji {
+    fn default() -> Self {
+        Self {
+            variant: RomajiVariant::Kunrei,
+        }
+    }
+}
+
+impl Code for Romaji {
+    fn encode(&self, text: &str) -> Result<String, crate::errors::Error> {
+        let tokens = self
+            .variant
+            .root()
+            .extract_tokens(text)
+            .map_err(|e| Error::General(e.to_string()))?;
+
+        Ok(tokens.iter().cloned().collect())
+    }
+
+    fn decode(&self, text: &str) -> Result<String, crate::errors::Error> {
+        // if self.variant == RomajiVariant::Nihon {
+        //     let tokens = ROMAJI_TO_KANA
+        //         .extract_tokens(&text.to_lowercase())
+        //         .map_err(|e| Error::General(e.to_string()))?;
+
+        //     Ok(tokens.iter().cloned().collect())
+        // } else {
+        //     Err(Error::General(
+        //         "<<<DECODING ROMAJI INTO KANA NOT YET SUPPORTED>>>".into(),
+        //     ))
+        // }
+        let tokens = ROMAJI_TO_KANA
+            .extract_tokens(&text.to_lowercase())
+            .map_err(|e| Error::General(e.to_string()))?;
+
+        Ok(tokens.iter().cloned().collect())
+    }
+
+    fn randomize(&mut self) {
+        todo!()
+    }
+
+    fn reset(&mut self) {
+        todo!()
+    }
+}
+
 #[cfg(test)]
 mod romaji_test {
     use super::*;
 
-    use crate::codes::romaji::{HEPBERN_SHIKI, KUNREI_SHIKI, NIHON_SHIKI};
-    // we check the differences between the methods
     const HIRAGANA: &'static str = "ちしつぢじづぢゃじゃこんにこんお";
+    const LATIN_KUNREI: &'static str = "TISITUZIZIZUZYAZYAKONNIKON'O";
+    const LATIN_HEBERN: &'static str = "CHISHITSUJIJIZUJAJAKONNIKON'O";
+    const LATIN_NIHON: &'static str = "TISITUDIZIDUDYAZYAKONNIKON'O";
 
     #[test]
-    fn hepbern_text() {
-        let latin_hs = "CHISHITSUJIJIZUJAJAKONNIKON'O";
+    fn kunrei_kana_to_latin() {
+        let code = Romaji::default();
         assert_eq!(
-            to_romaji(HIRAGANA, &HEPBERN_SHIKI)
-                .unwrap()
-                .to_ascii_uppercase(),
-            latin_hs
+            code.encode(HIRAGANA).unwrap().to_ascii_uppercase(),
+            LATIN_KUNREI
         );
     }
 
     #[test]
-    fn nihon_text() {
-        let latin_ns = "TISITUDIZIDUDYAZYAKONNIKON'O";
+    fn kunrei_latin_to_kana() {
+        let code = Romaji::default();
         assert_eq!(
-            to_romaji(HIRAGANA, &NIHON_SHIKI)
-                .unwrap()
-                .to_ascii_uppercase(),
-            latin_ns
+            code.decode(LATIN_KUNREI).unwrap().to_ascii_uppercase(),
+            HIRAGANA
         );
     }
 
     #[test]
-    fn kunrei_text() {
-        let latin_ks = "TISITUZIZIZUZYAZYAKONNIKON'O";
+    fn nihon_kana_to_latin() {
+        let mut code = Romaji::default();
+        code.variant = RomajiVariant::Nihon;
         assert_eq!(
-            to_romaji(HIRAGANA, &KUNREI_SHIKI)
-                .unwrap()
-                .to_ascii_uppercase(),
-            latin_ks
+            code.encode(HIRAGANA).unwrap().to_ascii_uppercase(),
+            LATIN_NIHON
+        );
+    }
+
+    #[test]
+    fn nihon_latin_to_kana() {
+        let mut code = Romaji::default();
+        code.variant = RomajiVariant::Nihon;
+        assert_eq!(
+            code.decode(LATIN_NIHON).unwrap().to_ascii_uppercase(),
+            HIRAGANA
+        );
+    }
+
+    #[test]
+    fn hepbern_kana_to_latin() {
+        let mut code = Romaji::default();
+        code.variant = RomajiVariant::Hepbern;
+        assert_eq!(
+            code.encode(HIRAGANA).unwrap().to_ascii_uppercase(),
+            LATIN_HEBERN
+        );
+    }
+
+    #[test]
+    fn hepbern_latin_to_kana() {
+        let mut code = Romaji::default();
+        code.variant = RomajiVariant::Hepbern;
+        assert_eq!(
+            code.decode(LATIN_HEBERN).unwrap().to_ascii_uppercase(),
+            HIRAGANA
         );
     }
 }
