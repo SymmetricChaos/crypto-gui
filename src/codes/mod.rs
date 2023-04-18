@@ -18,6 +18,11 @@ pub use levenshtein::LevenshteinCode;
 pub mod levenshtein_integers;
 pub use levenshtein_integers::LevenshteinCodeIntegers;
 
+// pub mod elias;
+// pub use elias::EliasCode;
+// pub mod elias_integers;
+// pub use elias_integers::EliasCodeIntegers;
+
 pub mod unary;
 pub use unary::UnaryCode;
 
@@ -38,8 +43,10 @@ pub use baudot::Baudot;
 
 pub mod bacon;
 pub use bacon::Bacon;
+
 pub mod punycode;
 pub use punycode::Punycode;
+
 pub mod pgp_words;
 pub use pgp_words::PgpWords;
 
@@ -53,15 +60,11 @@ pub mod morse_encodings;
 pub mod tap_code;
 pub use tap_code::TapCode;
 
-pub mod elias;
-pub use elias::EliasCode;
-
 pub mod needle;
 pub use needle::Needle;
 
-//pub mod levenshtein;
-
 pub mod romaji;
+pub use romaji::romaji::Romaji;
 
 use crate::errors::Error;
 
@@ -70,6 +73,13 @@ pub trait Code {
     fn decode(&self, text: &str) -> Result<String, Error>;
     fn randomize(&mut self);
     fn reset(&mut self);
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum IOMode {
+    Letter,
+    Word,
+    Integer,
 }
 
 #[derive(Debug)]

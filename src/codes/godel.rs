@@ -1,4 +1,4 @@
-use super::{Code, LetterAndWordCode};
+use super::{Code, IOMode, LetterAndWordCode};
 use crate::errors::Error;
 use itertools::Itertools;
 use num::{BigUint, Integer, Num, One};
@@ -6,16 +6,10 @@ use primal::Primes;
 
 const MESSAGE_LIMIT: usize = 50;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum GodelMode {
-    Letter,
-    Word,
-}
-
 pub struct Godel {
     pub maps: LetterAndWordCode<usize>,
     primes: Vec<usize>,
-    pub mode: GodelMode,
+    pub mode: IOMode,
 }
 
 impl Godel {
@@ -43,7 +37,7 @@ impl Default for Godel {
         Self {
             primes,
             maps,
-            mode: GodelMode::Word,
+            mode: IOMode::Word,
         }
     }
 }
@@ -64,7 +58,7 @@ impl Code for Godel {
         }
         let mut out = BigUint::one();
 
-        if self.mode == GodelMode::Letter {
+        if self.mode == IOMode::Letter {
             for (s, prime) in text.chars().zip(self.primes.iter()) {
                 match self.maps.get_by_letter(s) {
                     Ok(v) => out *= BigUint::from(*prime).pow(*v as u32),
@@ -89,7 +83,7 @@ impl Code for Godel {
             Err(_) => return Err(Error::Input("unable to parse input as a number".into())),
         };
 
-        if self.mode == GodelMode::Word {
+        if self.mode == IOMode::Word {
             let mut words = Vec::with_capacity(MESSAGE_LIMIT);
             for p in self.primes.iter() {
                 let mut ctr = 0;

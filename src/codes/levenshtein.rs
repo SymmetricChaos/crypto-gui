@@ -1,18 +1,11 @@
-use super::{Code, LetterAndWordCode, LevenshteinCodeIntegers};
+use super::{Code, IOMode, LetterAndWordCode, LevenshteinCodeIntegers};
 use crate::errors::Error;
 
 // https://en.wikipedia.org/wiki/Levenshtein_coding
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum LevMode {
-    Letter,
-    Word,
-    Integer,
-}
-
 pub struct LevenshteinCode {
     pub maps: LetterAndWordCode<String>,
-    pub mode: LevMode,
+    pub mode: IOMode,
     pub integer_code: LevenshteinCodeIntegers,
 }
 
@@ -36,7 +29,7 @@ impl Default for LevenshteinCode {
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
         maps.set_letter_map(|(n, _)| codes.encode_u32((n + 1) as u32));
         LevenshteinCode {
-            mode: LevMode::Integer,
+            mode: IOMode::Integer,
             integer_code: codes,
             maps,
         }
@@ -45,9 +38,9 @@ impl Default for LevenshteinCode {
 
 impl Code for LevenshteinCode {
     fn encode(&self, text: &str) -> Result<String, Error> {
-        if self.mode == LevMode::Integer {
+        if self.mode == IOMode::Integer {
             self.integer_code.encode(text)
-        } else if self.mode == LevMode::Letter {
+        } else if self.mode == IOMode::Letter {
             let mut output = String::new();
             for c in text.chars() {
                 let code = self.maps.get_by_letter(c)?;
