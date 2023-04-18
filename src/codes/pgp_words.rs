@@ -326,11 +326,15 @@ impl Code for PgpWords {
     fn reset(&mut self) {}
 }
 
-#[test]
-pub fn encode_pgp_words() {
-    let words = "topmost Istanbul Pluto vagabond treadmill Pacific brackish dictator goldfish Medusa afflict bravado chatter revolver Dupont midsummer stopwatch whimsical cowbell bottomless";
-    let nums = "E5 82 94 F2 E9 A2 27 48 6E 8B 06 1B 31 CC 52 8F D7 FA 3F 19";
-    let code = PgpWords::default();
-    let decoded = code.decode(words).unwrap();
-    assert_eq!(nums, decoded)
+#[cfg(test)]
+mod punycode_tests {
+    use super::*;
+    #[test]
+    pub fn encode_pgp_words() {
+        let words = "topmost Istanbul Pluto vagabond treadmill Pacific brackish dictator goldfish Medusa afflict bravado chatter revolver Dupont midsummer stopwatch whimsical cowbell bottomless";
+        let nums = "E5 82 94 F2 E9 A2 27 48 6E 8B 06 1B 31 CC 52 8F D7 FA 3F 19";
+        let code = PgpWords::default();
+        let decoded = code.decode(words).unwrap();
+        assert_eq!(nums, decoded)
+    }
 }

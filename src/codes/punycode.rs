@@ -213,32 +213,35 @@ impl Code for Punycode {
 }
 
 #[cfg(test)]
-static TEST_STRINGS: [(&'static str,&'static str); 3] = [
+mod punycode_tests {
+    use super::*;
+    static TEST_STRINGS: [(&'static str,&'static str); 3] = [
     //ليهمابتكلموشعربي؟
     ("\u{0644}\u{064A}\u{0647}\u{0645}\u{0627}\u{0628}\u{062A}\u{0643}\u{0644}\u{0645}\u{0648}\u{0634}\u{0639}\u{0631}\u{0628}\u{064A}\u{061F}","egbpdaj6bu4bxfgehfvwxn"),
     // なぜみんな日本語を話してくれないのか
     ("\u{306A}\u{305C}\u{307F}\u{3093}\u{306A}\u{65E5}\u{672C}\u{8A9E}\u{3092}\u{8A71}\u{3057}\u{3066}\u{304F}\u{308C}\u{306A}\u{3044}\u{306E}\u{304B}","n8jok5ay5dzabd5bym9f0cm5685rrjetr6pdxa"),
     //TạisaohọkhôngthểchỉnóitiếngViệt
     ("\u{0054}\u{1EA1}\u{0069}\u{0073}\u{0061}\u{006F}\u{0068}\u{1ECD}\u{006B}\u{0068}\u{00F4}\u{006E}\u{0067}\u{0074}\u{0068}\u{1EC3}\u{0063}\u{0068}\u{1EC9}\u{006E}\u{00F3}\u{0069}\u{0074}\u{0069}\u{1EBF}\u{006E}\u{0067}\u{0056}\u{0069}\u{1EC7}\u{0074}","TisaohkhngthchnitingVit-kjcr8268qyxafd2f1b9g")
-];
+    ];
 
-#[test]
-fn punycode_decode() {
-    let code = Punycode::default();
-    for (raw, punycode) in TEST_STRINGS {
-        let decoded = code.decode(punycode).unwrap();
-        assert!(raw == decoded, "expected {raw} but found {decoded}");
+    #[test]
+    fn punycode_decode() {
+        let code = Punycode::default();
+        for (raw, punycode) in TEST_STRINGS {
+            let decoded = code.decode(punycode).unwrap();
+            assert!(raw == decoded, "expected {raw} but found {decoded}");
+        }
     }
-}
 
-#[test]
-fn punycode_encode() {
-    let code = Punycode::default();
-    for (raw, punycode) in TEST_STRINGS {
-        let encoded = code.encode(raw).unwrap();
-        assert!(
-            punycode == encoded,
-            "expected {punycode} but found {encoded}"
-        );
+    #[test]
+    fn punycode_encode() {
+        let code = Punycode::default();
+        for (raw, punycode) in TEST_STRINGS {
+            let encoded = code.encode(raw).unwrap();
+            assert!(
+                punycode == encoded,
+                "expected {punycode} but found {encoded}"
+            );
+        }
     }
 }
