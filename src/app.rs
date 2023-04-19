@@ -112,8 +112,14 @@ impl ClassicCrypto {
         );
         load_font(
             "NotoJP",
+            &FontFamily::Monospace,
+            FontData::from_static(include_bytes!("../NotoSansJP-Regular.ttf")),
+            &mut font_def,
+        );
+        load_font(
+            "NotoJP",
             &FontFamily::Proportional,
-            FontData::from_static(include_bytes!("../NotoSansJP-Regular.otf")),
+            FontData::from_static(include_bytes!("../NotoSansJP-Regular.ttf")),
             &mut font_def,
         );
         load_font(

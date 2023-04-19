@@ -6,7 +6,6 @@ use std::{fs::read, path::PathBuf};
 
 // Mask to set top three bits to zero
 const MASK: u8 = 0b00011111;
-
 const PAD: u8 = '=' as u8;
 
 const BASE32_ALPHA: &'static str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";

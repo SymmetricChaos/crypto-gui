@@ -76,6 +76,7 @@ impl CodeInterface {
                 CodeID::Morse,
                 CodeID::Needle,
                 CodeID::Punycode,
+                CodeID::Romaji,
                 CodeID::SpellingAlphabet,
                 CodeID::Unicode,
             ],
