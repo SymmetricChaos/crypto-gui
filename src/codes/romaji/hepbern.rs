@@ -5,8 +5,8 @@ use crate::tokenizer::Node;
 #[test]
 fn test() {
     let paths = HEPBERN_SHIKI.output_paths();
-    
-    for (k,v) in &paths {
+
+    for (k, v) in &paths {
         print!("{k} <= {v:?}\n")
     }
 }
@@ -14,7 +14,7 @@ fn test() {
 lazy_static! {
     pub static ref HEPBERN_SHIKI: Node = {
         let transitions = vec![
-			Node::leaf('\u{3000}', " "),
+            Node::leaf('\u{3000}', " "),
             Node::leaf('、', ","),
             Node::leaf('。', "."),
             Node::leaf('「', "‘"),
@@ -34,40 +34,39 @@ lazy_static! {
             Node::leaf('お', "o"),
             Node::leaf('か', "ka"),
             Node::leaf('が', "ga"),
-
             Node::branch(
-                'き', Some("ki"),
+                'き',
+                Some("ki"),
                 vec![
                     Node::leaf('ぃ', "kyi"),
                     Node::leaf('ぇ', "kye"),
                     Node::leaf('ゃ', "kya"),
                     Node::leaf('ゅ', "kyu"),
                     Node::leaf('ょ', "kyo"),
-                ]
+                ],
             ),
-
             Node::branch(
-                'ぎ', Some("gi"),
+                'ぎ',
+                Some("gi"),
                 vec![
                     Node::leaf('ぃ', "gyi"),
                     Node::leaf('ぇ', "gye"),
                     Node::leaf('ゃ', "gya"),
                     Node::leaf('ゅ', "gyu"),
                     Node::leaf('ょ', "gyo"),
-                ]
+                ],
             ),
-
             Node::branch(
-                'く', Some("ku"),
+                'く',
+                Some("ku"),
                 vec![
                     Node::leaf('ぃ', "kyi"),
                     Node::leaf('ぇ', "kye"),
                     Node::leaf('ゃ', "kya"),
                     Node::leaf('ゅ', "kyu"),
                     Node::leaf('ょ', "kyo"),
-                ]
+                ],
             ),
-
             Node::leaf('ぐ', "gu"),
             Node::leaf('け', "ke"),
             Node::leaf('げ', "ge"),
@@ -75,18 +74,17 @@ lazy_static! {
             Node::leaf('ご', "go"),
             Node::leaf('さ', "sa"),
             Node::leaf('ざ', "za"),
-
             Node::branch(
-                'し', Some("shi"),
+                'し',
+                Some("shi"),
                 vec![
                     Node::leaf('ぃ', "shyi"),
                     Node::leaf('ぇ', "she"),
                     Node::leaf('ゃ', "sha"),
                     Node::leaf('ゅ', "shu"),
                     Node::leaf('ょ', "sho"),
-                ]
+                ],
             ),
-
             (
                 'じ',
                 Node {
@@ -138,7 +136,7 @@ lazy_static! {
                 'っ',
                 Node {
                     transitions: Some(vec![
-						Node::leaf('\u{3000}', " "),
+                        Node::leaf('\u{3000}', " "),
                         Node::leaf('、', ","),
                         Node::leaf('。', "."),
                         Node::leaf('「', "‘"),

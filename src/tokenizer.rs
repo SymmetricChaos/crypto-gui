@@ -1,5 +1,4 @@
-
-use std::{fmt, collections::HashMap};
+use std::{collections::HashMap, fmt};
 
 use itertools::Itertools;
 
@@ -11,12 +10,12 @@ impl fmt::Display for TransitionError {
         match self.1 {
             Some(c) => {
                 if self.0 == "" {
-                    write!(f, "invalid symbol `{}`", c)
+                    write!(f, "invalid symbol {:?}", c)
                 } else {
-                    write!(f, "no transition `{}` -> `{}`", self.0, c)
+                    write!(f, "no transition {:?} -> {:?}", self.0, c)
                 }
-            },
-            None => write!(f, "`{}` must transition", self.0),
+            }
+            None => write!(f, "{:?} must transition", self.0),
         }
     }
 }
@@ -95,7 +94,7 @@ impl Node {
 
     pub fn find_transition_node(&self, char: char) -> Option<&Node> {
         // If transitions exist find one that acts on 'char' and return it, if
-        // there is no such node return none. At a leaf return none.
+        // there is no such node return None. At a leaf return None.
         if let Some(t) = &self.transitions {
             t.binary_search_by_key(&char, |t| t.0)
                 .ok()
@@ -144,21 +143,21 @@ impl Node {
         }
     }
 
-    pub fn input_paths(&self) -> Vec<(String,&'static str)> {
+    pub fn input_paths(&self) -> Vec<(String, &'static str)> {
         let mut paths: Vec<(String, &str)> = Vec::new();
         self.input_paths_inner(vec![], &mut paths);
         paths
     }
 
-    fn input_paths_inner(&self, chars: Vec<char>, paths: &mut Vec<(String,&'static str)>) {
+    fn input_paths_inner(&self, chars: Vec<char>, paths: &mut Vec<(String, &'static str)>) {
         if let Some(s) = self.output {
-            paths.push((chars.iter().collect::<String>(),s))
+            paths.push((chars.iter().collect::<String>(), s))
         }
         if let Some(transitions) = &self.transitions {
             for (c, n) in transitions.iter() {
                 let mut new_chars = chars.clone();
                 new_chars.push(*c);
-                n.input_paths_inner(new_chars,paths)
+                n.input_paths_inner(new_chars, paths)
             }
         }
     }
@@ -166,77 +165,67 @@ impl Node {
     pub fn output_paths(&self) -> Vec<(&'static str, Vec<String>)> {
         let mut map = HashMap::new();
         self.output_paths_inner(vec![], &mut map);
-        let mut paths = map.iter().map(|(k,v)| (*k,v.clone())).collect_vec();
+        let mut paths = map.iter().map(|(k, v)| (*k, v.clone())).collect_vec();
         paths.sort_by_key(|a| a.0);
         paths
     }
 
     fn output_paths_inner(&self, chars: Vec<char>, paths: &mut HashMap<&'static str, Vec<String>>) {
-
         if let Some(s) = self.output {
             let input = chars.iter().collect::<String>();
             match paths.contains_key(s) {
-                true => { paths.entry(s).and_modify(|e| e.push(input)); },
-                false => { paths.insert(s, vec![input]); }
+                true => {
+                    paths.entry(s).and_modify(|e| e.push(input));
+                }
+                false => {
+                    paths.insert(s, vec![input]);
+                }
             };
         }
         if let Some(transitions) = &self.transitions {
             for (c, n) in transitions.iter() {
                 let mut new_chars = chars.clone();
                 new_chars.push(*c);
-                n.output_paths_inner(new_chars,paths)
+                n.output_paths_inner(new_chars, paths)
             }
         }
     }
-
 }
 
 #[test]
 fn test() {
-
-    let mut tree = Node::tree(
-        vec![
-            Node::branch(
-                't', Some("letter"),
-                vec![
-                    Node::branch(
-                        'h', None, 
-                        vec![
-                            Node::branch(
-                                'e', Some("word"),
-                                vec![
-                                    Node::leaf('e', "word")
-                                ]
-                            )
-                        ]
-                    )
-                ]
-            ),
-            Node::branch(
-                'h', Some("letter"), 
-                vec![
-                    Node::leaf('e', "word")
-                ]
-            ),
-            Node::leaf('e', "letter")
-        ]
-    );
+    let mut tree = Node::tree(vec![
+        Node::branch(
+            't',
+            Some("letter"),
+            vec![Node::branch(
+                'h',
+                None,
+                vec![Node::branch(
+                    'e',
+                    Some("word"),
+                    vec![Node::leaf('e', "word")],
+                )],
+            )],
+        ),
+        Node::branch('h', Some("letter"), vec![Node::leaf('e', "word")]),
+        Node::leaf('e', "letter"),
+    ]);
     tree.sort();
 
     println!("\n\nInput Paths:");
-    for (k,v) in &tree.input_paths() {
+    for (k, v) in &tree.input_paths() {
         println!("{k} => {v}")
     }
 
     println!("\n\nOutput Paths:");
-    for (k,v) in &tree.output_paths() {
+    for (k, v) in &tree.output_paths() {
         println!("{k} <= {v:?}")
     }
 
     print!("\n\n");
-    for sentence in ["t","the","thee","teh","ethehe","art","thj","th",] {
+    for sentence in ["t", "the", "thee", "teh", "ethehe", "art", "thj", "th"] {
         println!("{}", sentence);
         println!("{:?}\n", tree.extract_tokens(sentence));
     }
-
 }

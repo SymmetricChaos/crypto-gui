@@ -4,7 +4,7 @@ use crate::{
     tokenizer::{Node, TransitionError},
 };
 
-use super::{HEPBERN_SHIKI, KUNREI_SHIKI, NIHON_SHIKI, ROMAJI_TO_KANA};
+use super::{HEPBERN_SHIKI, HIRAGANA, KUNREI_SHIKI, NIHON_SHIKI, ROMAJI_TO_KANA};
 
 pub fn to_romaji(orig: &str, tree: &Node) -> Result<String, TransitionError> {
     let tokens = tree.extract_tokens(orig)?;
@@ -33,6 +33,14 @@ pub struct Romaji {
     pub variant: RomajiVariant,
 }
 
+impl Romaji {
+    pub fn hiragana_codes(&self) -> impl Iterator<Item = (&&str, String)> + '_ {
+        HIRAGANA
+            .iter()
+            .map(|kana| (kana, self.encode(kana).unwrap()))
+    }
+}
+
 impl Default for Romaji {
     fn default() -> Self {
         Self {
@@ -53,17 +61,6 @@ impl Code for Romaji {
     }
 
     fn decode(&self, text: &str) -> Result<String, crate::errors::Error> {
-        // if self.variant == RomajiVariant::Nihon {
-        //     let tokens = ROMAJI_TO_KANA
-        //         .extract_tokens(&text.to_lowercase())
-        //         .map_err(|e| Error::General(e.to_string()))?;
-
-        //     Ok(tokens.iter().cloned().collect())
-        // } else {
-        //     Err(Error::General(
-        //         "<<<DECODING ROMAJI INTO KANA NOT YET SUPPORTED>>>".into(),
-        //     ))
-        // }
         let tokens = ROMAJI_TO_KANA
             .extract_tokens(&text.to_lowercase())
             .map_err(|e| Error::General(e.to_string()))?;
@@ -84,7 +81,7 @@ impl Code for Romaji {
 mod romaji_test {
     use super::*;
 
-    const HIRAGANA: &'static str = "ちしつぢじづぢゃじゃこんにこんお";
+    const HIRAGANA_TEST: &'static str = "ちしつぢじづぢゃじゃこんにこんお";
     const LATIN_KUNREI: &'static str = "TISITUZIZIZUZYAZYAKONNIKON'O";
     const LATIN_HEBERN: &'static str = "CHISHITSUJIJIZUJAJAKONNIKON'O";
     const LATIN_NIHON: &'static str = "TISITUDIZIDUDYAZYAKONNIKON'O";
@@ -93,7 +90,7 @@ mod romaji_test {
     fn kunrei_kana_to_latin() {
         let code = Romaji::default();
         assert_eq!(
-            code.encode(HIRAGANA).unwrap().to_ascii_uppercase(),
+            code.encode(HIRAGANA_TEST).unwrap().to_ascii_uppercase(),
             LATIN_KUNREI
         );
     }
@@ -103,7 +100,7 @@ mod romaji_test {
         let code = Romaji::default();
         assert_eq!(
             code.decode(LATIN_KUNREI).unwrap().to_ascii_uppercase(),
-            HIRAGANA
+            HIRAGANA_TEST
         );
     }
 
@@ -112,7 +109,7 @@ mod romaji_test {
         let mut code = Romaji::default();
         code.variant = RomajiVariant::Nihon;
         assert_eq!(
-            code.encode(HIRAGANA).unwrap().to_ascii_uppercase(),
+            code.encode(HIRAGANA_TEST).unwrap().to_ascii_uppercase(),
             LATIN_NIHON
         );
     }
@@ -123,7 +120,7 @@ mod romaji_test {
         code.variant = RomajiVariant::Nihon;
         assert_eq!(
             code.decode(LATIN_NIHON).unwrap().to_ascii_uppercase(),
-            HIRAGANA
+            HIRAGANA_TEST
         );
     }
 
@@ -132,7 +129,7 @@ mod romaji_test {
         let mut code = Romaji::default();
         code.variant = RomajiVariant::Hepbern;
         assert_eq!(
-            code.encode(HIRAGANA).unwrap().to_ascii_uppercase(),
+            code.encode(HIRAGANA_TEST).unwrap().to_ascii_uppercase(),
             LATIN_HEBERN
         );
     }
@@ -143,7 +140,7 @@ mod romaji_test {
         code.variant = RomajiVariant::Hepbern;
         assert_eq!(
             code.decode(LATIN_HEBERN).unwrap().to_ascii_uppercase(),
-            HIRAGANA
+            HIRAGANA_TEST
         );
     }
 }

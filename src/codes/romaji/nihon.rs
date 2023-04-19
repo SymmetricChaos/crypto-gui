@@ -5,7 +5,7 @@ use crate::tokenizer::Node;
 lazy_static! {
     pub static ref NIHON_SHIKI: Node = {
         let transitions = vec![
-			Node::leaf('\u{3000}', " "),
+            Node::leaf('\u{3000}', " "),
             Node::leaf('、', ","),
             Node::leaf('。', "."),
             Node::leaf('「', "‘"),
@@ -135,7 +135,7 @@ lazy_static! {
                 'っ',
                 Node {
                     transitions: Some(vec![
-						Node::leaf('\u{3000}', " "),
+                        Node::leaf('\u{3000}', " "),
                         Node::leaf('、', ","),
                         Node::leaf('。', "."),
                         Node::leaf('「', "‘"),
@@ -272,13 +272,13 @@ lazy_static! {
                             'に',
                             Node {
                                 transitions: Some(vec![
-                                    Node::leaf('ぃ', "nyi"),
-                                    Node::leaf('ぇ', "nye"),
-                                    Node::leaf('ゃ', "nya"),
-                                    Node::leaf('ゅ', "nyu"),
-                                    Node::leaf('ょ', "nyo"),
+                                    Node::leaf('ぃ', "nnyi"),
+                                    Node::leaf('ぇ', "nnye"),
+                                    Node::leaf('ゃ', "nnya"),
+                                    Node::leaf('ゅ', "nnyu"),
+                                    Node::leaf('ょ', "nnyo"),
                                 ]),
-                                output: Some("ni"),
+                                output: Some("nni"),
                             },
                         ),
                         Node::leaf('ぬ', "nu"),
@@ -435,11 +435,11 @@ lazy_static! {
                 'に',
                 Node {
                     transitions: Some(vec![
-                        Node::leaf('ぃ', "nnyi"),
-                        Node::leaf('ぇ', "nnye"),
-                        Node::leaf('ゃ', "nnya"),
-                        Node::leaf('ゅ', "nnyu"),
-                        Node::leaf('ょ', "nnyo"),
+                        Node::leaf('ぃ', "nyi"),
+                        Node::leaf('ぇ', "nye"),
+                        Node::leaf('ゃ', "nya"),
+                        Node::leaf('ゅ', "nyu"),
+                        Node::leaf('ょ', "nyo"),
                     ]),
                     output: Some("ni"),
                 },

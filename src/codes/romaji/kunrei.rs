@@ -5,7 +5,9 @@ use crate::tokenizer::Node;
 lazy_static! {
     pub static ref KUNREI_SHIKI: Node = {
         let transitions = vec![
-			Node::leaf('\u{3000}', " "),
+            Node::leaf('　', " "),
+            Node::leaf(' ', " "),
+            Node::leaf('\n', "\n"),
             Node::leaf('、', ","),
             Node::leaf('。', "."),
             Node::leaf('「', "‘"),
