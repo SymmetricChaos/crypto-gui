@@ -53,15 +53,17 @@ pub struct CodeInterface {
     baudot: Baudot,
     needle: Needle,
 
+    // Binary to Text
+    base32: Base32,
+    base64: Base64,
+    pgp: PgpWords,
+
     // Mathematical
     godel: Godel,
     unary: UnaryCode,
     fibonacci: FibonacciCode,
 
     // Other Codes
-    base32: Base32,
-    base64: Base64,
-    pgp: PgpWords,
     bacon: Bacon,
     tap: TapCode,
     block: BlockCode,
@@ -85,20 +87,19 @@ impl CodeInterface {
             ui,
         );
         combox_box(
+            &[CodeId::Base32, CodeId::Base64, CodeId::Pgp],
+            "Binary-to-Text",
+            active_code,
+            ui,
+        );
+        combox_box(
             &[CodeId::Godel, CodeId::Fibonacci, CodeId::Unary],
             "Mathematical",
             active_code,
             ui,
         );
         combox_box(
-            &[
-                CodeId::Bacon,
-                CodeId::Base32,
-                CodeId::Base64,
-                CodeId::Block,
-                CodeId::Pgp,
-                CodeId::Tap,
-            ],
+            &[CodeId::Bacon, CodeId::Block, CodeId::Tap],
             "Other Codes",
             active_code,
             ui,
