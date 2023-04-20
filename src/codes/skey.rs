@@ -174,17 +174,32 @@ const SKEY_WORDS: [&'static str; 2048] = [
     "YANG", "YANK", "YARD", "YARN", "YAWL", "YAWN", "YEAH", "YEAR", "YELL", "YOGA", "YOKE",
 ];
 
-// This can't be done with a binary search because the right side list is not sorted with "applicant" before "Apollo"
-pub fn skey_word(word: &str) -> Result<usize, Error> {
+fn skey_word(word: &str) -> Result<usize, Error> {
     SKEY_WORDS
         .iter()
         .position(|p| p == &word)
         .ok_or_else(|| Error::Input(format!("invalid left word `{}` found", word)))
 }
 
-// pub fn u64_to_skey(n: u64) -> [usize; 6] {
-//     let parity: u128 = (0..32).map(|i| (n >> (2 * i)) % 4).sum() % 4;
-// }
+fn skey_parity(n: u64) -> u64 {
+    let mut p = 0_u64;
+    for i in 0..32 {
+        p += n >> (2 * i) & 0b11;
+    }
+    p % 4
+}
+
+const MASK11: u128 = 0b11111111111;
+fn u64_to_words(n: u64) -> [&'static str; 6] {
+    let mut words = [""; 6];
+    let parity = skey_parity(n);
+    let big_n = (u128::from(n) << 2) + u128::from(parity);
+    for i in (0..6).rev() {
+        let idx = (big_n >> (11 * i) & MASK11) as usize;
+        words[5 - i] = SKEY_WORDS[idx];
+    }
+    words
+}
 
 pub struct SKeyWords {}
 
@@ -195,6 +210,23 @@ impl Default for SKeyWords {
 }
 
 impl SKeyWords {
+    pub fn encode_bytes(&self, bytes: &[u8]) -> Result<String, Error> {
+        if bytes.len() % 8 != 0 {
+            return Err(Error::Input(
+                "S/KEY operates on chunks of 8 bytes at a time".into(),
+            ));
+        } else {
+            let mut out = Vec::new();
+            let chunks = bytes.chunks_exact(8);
+            for chunk in chunks {
+                let n = u64::from_le_bytes(chunk.try_into().unwrap());
+                out.extend(u64_to_words(n).into_iter())
+            }
+
+            Ok(out.join(" "))
+        }
+    }
+
     pub fn chars_codes(&mut self) -> impl Iterator<Item = (String, String)> + '_ {
         (0..2048).map(|n| (format!("{n:03x}"), format!("{}", SKEY_WORDS[n])))
     }
@@ -212,4 +244,28 @@ impl Code for SKeyWords {
     fn randomize(&mut self) {}
 
     fn reset(&mut self) {}
+}
+
+#[cfg(test)]
+mod skey_tests {
+    use super::*;
+
+    #[test]
+    fn test_parity_calc() {
+        let ns = [0b0110, 0b1111, 0b0111, 0b0100];
+        let ps = [3, 2, 0, 1];
+
+        for (n, p) in ns.into_iter().zip(ps) {
+            let skp = skey_parity(n);
+            assert_eq!(skp, p, "given {n} expected {p} but found {skp}")
+        }
+    }
+
+    #[test]
+    fn test_words() {
+        assert_eq!(
+            u64_to_words(0x85c43ee03857765b),
+            ["FOWL", "KID", "MASH", "DEAD", "DUAL", "OAF"]
+        );
+    }
 }

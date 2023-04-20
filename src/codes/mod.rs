@@ -66,6 +66,8 @@ pub use needle::Needle;
 pub mod romaji;
 pub use romaji::romaji::Romaji;
 
+pub mod skey;
+
 use crate::errors::Error;
 
 pub trait Code {
