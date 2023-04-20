@@ -1,6 +1,6 @@
 use crate::{
     codes::{morse::Morse, romaji::romaji::Romaji, *},
-    ids::CodeID,
+    ids::CodeId,
 };
 use eframe::egui;
 use egui::Ui;
@@ -30,7 +30,7 @@ pub trait View {
 }
 
 // Quick simple combo box builder
-fn combox_box(code: &[CodeID], identifier: &'static str, active_code: &mut CodeID, ui: &mut Ui) {
+fn combox_box(code: &[CodeId], identifier: &'static str, active_code: &mut CodeId, ui: &mut Ui) {
     egui::ComboBox::from_id_source(identifier)
         .selected_text(identifier)
         .show_ui(ui, |ui| {
@@ -68,36 +68,36 @@ pub struct CodeInterface {
 }
 
 impl CodeInterface {
-    pub fn combo_boxes(&mut self, ui: &mut Ui, active_code: &mut CodeID) {
+    pub fn combo_boxes(&mut self, ui: &mut Ui, active_code: &mut CodeId) {
         combox_box(
             &[
-                CodeID::Ascii,
-                CodeID::Baudot,
-                CodeID::Morse,
-                CodeID::Needle,
-                CodeID::Punycode,
-                CodeID::Romaji,
-                CodeID::SpellingAlphabet,
-                CodeID::Unicode,
+                CodeId::Ascii,
+                CodeId::Baudot,
+                CodeId::Morse,
+                CodeId::Needle,
+                CodeId::Punycode,
+                CodeId::Romaji,
+                CodeId::SpellingAlphabet,
+                CodeId::Unicode,
             ],
             "Text Standards",
             active_code,
             ui,
         );
         combox_box(
-            &[CodeID::Godel, CodeID::Fibonacci, CodeID::Unary],
+            &[CodeId::Godel, CodeId::Fibonacci, CodeId::Unary],
             "Mathematical",
             active_code,
             ui,
         );
         combox_box(
             &[
-                CodeID::Bacon,
-                CodeID::Base32,
-                CodeID::Base64,
-                CodeID::Block,
-                CodeID::Pgp,
-                CodeID::Tap,
+                CodeId::Bacon,
+                CodeId::Base32,
+                CodeId::Base64,
+                CodeId::Block,
+                CodeId::Pgp,
+                CodeId::Tap,
             ],
             "Other Codes",
             active_code,
@@ -105,25 +105,25 @@ impl CodeInterface {
         );
     }
 
-    pub fn get_active_code(&mut self, active_code: &CodeID) -> &mut dyn ViewableCode {
+    pub fn get_active_code(&mut self, active_code: &CodeId) -> &mut dyn ViewableCode {
         match active_code {
-            CodeID::Ascii => &mut self.ascii,
-            CodeID::Morse => &mut self.morse,
-            CodeID::Godel => &mut self.godel,
-            CodeID::Fibonacci => &mut self.fibonacci,
-            CodeID::Baudot => &mut self.baudot,
-            CodeID::Base32 => &mut self.base32,
-            CodeID::Base64 => &mut self.base64,
-            CodeID::Pgp => &mut self.pgp,
-            CodeID::Unary => &mut self.unary,
-            CodeID::SpellingAlphabet => &mut self.spelling,
-            CodeID::Bacon => &mut self.bacon,
-            CodeID::Unicode => &mut self.unicode,
-            CodeID::Punycode => &mut self.punycode,
-            CodeID::Block => &mut self.block,
-            CodeID::Tap => &mut self.tap,
-            CodeID::Needle => &mut self.needle,
-            CodeID::Romaji => &mut self.romaji,
+            CodeId::Ascii => &mut self.ascii,
+            CodeId::Morse => &mut self.morse,
+            CodeId::Godel => &mut self.godel,
+            CodeId::Fibonacci => &mut self.fibonacci,
+            CodeId::Baudot => &mut self.baudot,
+            CodeId::Base32 => &mut self.base32,
+            CodeId::Base64 => &mut self.base64,
+            CodeId::Pgp => &mut self.pgp,
+            CodeId::Unary => &mut self.unary,
+            CodeId::SpellingAlphabet => &mut self.spelling,
+            CodeId::Bacon => &mut self.bacon,
+            CodeId::Unicode => &mut self.unicode,
+            CodeId::Punycode => &mut self.punycode,
+            CodeId::Block => &mut self.block,
+            CodeId::Tap => &mut self.tap,
+            CodeId::Needle => &mut self.needle,
+            CodeId::Romaji => &mut self.romaji,
             //_ => todo!("unable to get active code"),
         }
     }

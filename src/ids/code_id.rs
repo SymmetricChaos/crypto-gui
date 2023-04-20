@@ -4,7 +4,7 @@ use json::JsonValue;
 use lazy_static::lazy_static;
 
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
-pub enum CodeID {
+pub enum CodeId {
     Ascii,
     Bacon,
     Base32,
@@ -24,13 +24,13 @@ pub enum CodeID {
     Unicode,
 }
 
-impl Default for CodeID {
+impl Default for CodeId {
     fn default() -> Self {
         Self::Ascii
     }
 }
 
-impl CodeID {
+impl CodeId {
     // Describe the history of the code
     pub fn description(&self) -> &'static str {
         match CODE_INFORMATION[self.to_string()].as_str() {
@@ -40,33 +40,33 @@ impl CodeID {
     }
 }
 
-impl Display for CodeID {
+impl Display for CodeId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let name = match self {
-            CodeID::Ascii => "ASCII",
-            CodeID::Morse => "Morse",
-            CodeID::Godel => "Gödel",
-            CodeID::Fibonacci => "Fibonacci",
-            CodeID::Baudot => "Baudot",
-            CodeID::Base32 => "Base32",
-            CodeID::Base64 => "Base64",
-            CodeID::Unary => "Unary",
-            CodeID::SpellingAlphabet => "Spelling Alphabet",
-            CodeID::Pgp => "PGP Words",
-            CodeID::Bacon => "Bacon",
-            CodeID::Unicode => "Unicode",
-            CodeID::Punycode => "Punycode",
-            CodeID::Romaji => "Romaji",
-            CodeID::Block => "Block",
-            CodeID::Tap => "Tap",
-            CodeID::Needle => "Needle",
+            CodeId::Ascii => "ASCII",
+            CodeId::Morse => "Morse",
+            CodeId::Godel => "Gödel",
+            CodeId::Fibonacci => "Fibonacci",
+            CodeId::Baudot => "Baudot",
+            CodeId::Base32 => "Base32",
+            CodeId::Base64 => "Base64",
+            CodeId::Unary => "Unary",
+            CodeId::SpellingAlphabet => "Spelling Alphabet",
+            CodeId::Pgp => "PGP Words",
+            CodeId::Bacon => "Bacon",
+            CodeId::Unicode => "Unicode",
+            CodeId::Punycode => "Punycode",
+            CodeId::Romaji => "Romaji",
+            CodeId::Block => "Block",
+            CodeId::Tap => "Tap",
+            CodeId::Needle => "Needle",
         };
         write!(f, "{}", name)
     }
 }
 
-impl From<CodeID> for String {
-    fn from(id: CodeID) -> Self {
+impl From<CodeId> for String {
+    fn from(id: CodeId) -> Self {
         id.to_string()
     }
 }

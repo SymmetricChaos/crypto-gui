@@ -67,7 +67,8 @@ impl TextPrepPage {
     }
 
     fn chunks(&mut self) {
-        self.text = chunk_and_join(&self.text, self.chunk_width, ' ')
+        self.text = chunk_and_join(&self.text, self.chunk_width, ' ');
+        self.counts();
     }
 
     fn normalize(&mut self) {

@@ -3,7 +3,7 @@ use lazy_static::lazy_static;
 use std::fmt::Display;
 
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
-pub enum CipherID {
+pub enum CipherId {
     Adfgvx,
     Affine,
     Alberti,
@@ -46,13 +46,13 @@ pub enum CipherID {
     Vigenere,
 }
 
-impl Default for CipherID {
+impl Default for CipherId {
     fn default() -> Self {
         Self::Caesar
     }
 }
 
-impl CipherID {
+impl CipherId {
     // Describe the history of the cipher
     pub fn description(&self) -> &'static str {
         match CIPHER_INFORMATION[self.to_string()].as_str() {
@@ -62,57 +62,57 @@ impl CipherID {
     }
 }
 
-impl Display for CipherID {
+impl Display for CipherId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let name = match self {
-            CipherID::Adfgvx => "ADFGVX",
-            CipherID::Affine => "Affine",
-            CipherID::Alberti => "Alberti Cipher Disk",
-            CipherID::B64 => "B64",
-            CipherID::Batco => "BATCO",
-            CipherID::Bazeries => "Bazeries",
-            CipherID::Beaufort => "Beaufort",
-            CipherID::Bifid => "Bifid",
-            CipherID::Caesar => "Caesar",
-            CipherID::Chaocipher => "Chaocipher",
-            CipherID::Checkerboard => "Straddling Checkerboard",
-            CipherID::Columnar => "Columnar Transposition",
-            CipherID::Decoder => "Decoder Ring",
-            CipherID::Dryad => "DRYAD",
-            CipherID::Enigma => "Enigma",
+            CipherId::Adfgvx => "ADFGVX",
+            CipherId::Affine => "Affine",
+            CipherId::Alberti => "Alberti Cipher Disk",
+            CipherId::B64 => "B64",
+            CipherId::Batco => "BATCO",
+            CipherId::Bazeries => "Bazeries",
+            CipherId::Beaufort => "Beaufort",
+            CipherId::Bifid => "Bifid",
+            CipherId::Caesar => "Caesar",
+            CipherId::Chaocipher => "Chaocipher",
+            CipherId::Checkerboard => "Straddling Checkerboard",
+            CipherId::Columnar => "Columnar Transposition",
+            CipherId::Decoder => "Decoder Ring",
+            CipherId::Dryad => "DRYAD",
+            CipherId::Enigma => "Enigma",
             // CipherID::Fialka => "Fialka",
-            CipherID::FourSquare => "Four-Square",
-            CipherID::Grille => "Grille",
-            CipherID::Hebern => "Hebern",
-            CipherID::Hutton => "Hutton",
-            CipherID::M94 => "M94",
-            CipherID::M209 => "M209",
-            CipherID::Playfair => "Playfair",
-            CipherID::Plugboard => "Plugboard",
-            CipherID::Polybius => "Polybius Square",
-            CipherID::PolybiusCube => "Polybius Cube",
-            CipherID::Porta => "Porta",
-            CipherID::Purple => "Purple",
-            CipherID::Quagmire => "Quagmire",
-            CipherID::RailFence => "Rail Fence",
-            CipherID::Rs44 => "RS44",
-            CipherID::Scytale => "Scytale",
-            CipherID::Sigaba => "SIGABA",
-            CipherID::Slidefair => "Slidefair",
-            CipherID::Substitution => "Substitution",
-            CipherID::Trifid => "Trifid",
-            CipherID::TurningGrille => "Turning Grille",
-            CipherID::TwoSquare => "Two-Square",
+            CipherId::FourSquare => "Four-Square",
+            CipherId::Grille => "Grille",
+            CipherId::Hebern => "Hebern",
+            CipherId::Hutton => "Hutton",
+            CipherId::M94 => "M94",
+            CipherId::M209 => "M209",
+            CipherId::Playfair => "Playfair",
+            CipherId::Plugboard => "Plugboard",
+            CipherId::Polybius => "Polybius Square",
+            CipherId::PolybiusCube => "Polybius Cube",
+            CipherId::Porta => "Porta",
+            CipherId::Purple => "Purple",
+            CipherId::Quagmire => "Quagmire",
+            CipherId::RailFence => "Rail Fence",
+            CipherId::Rs44 => "RS44",
+            CipherId::Scytale => "Scytale",
+            CipherId::Sigaba => "SIGABA",
+            CipherId::Slidefair => "Slidefair",
+            CipherId::Substitution => "Substitution",
+            CipherId::Trifid => "Trifid",
+            CipherId::TurningGrille => "Turning Grille",
+            CipherId::TwoSquare => "Two-Square",
             // CipherID::Vic => "VIC",
-            CipherID::Vigenere => "Vigenère",
+            CipherId::Vigenere => "Vigenère",
             _ => "<<<MISSING NAME>>>",
         };
         write!(f, "{}", name)
     }
 }
 
-impl From<CipherID> for String {
-    fn from(id: CipherID) -> Self {
+impl From<CipherId> for String {
+    fn from(id: CipherId) -> Self {
         id.to_string()
     }
 }

@@ -4,7 +4,7 @@ use crate::{
     cipher_panel::{CipherInterface, ViewableCipher},
     code_panel::{CodeInterface, ViewableCode},
     global_rng::global_rng_controls,
-    ids::{CipherID, CodeID},
+    ids::{CipherId, CodeId},
 };
 
 use super::Page;
@@ -82,8 +82,8 @@ impl IOPanel {
         output: &mut String,
         errors: &mut String,
         active_page: &mut Page,
-        active_cipher: &mut CipherID,
-        active_code: &mut CodeID,
+        active_cipher: &mut CipherId,
+        active_code: &mut CodeId,
         cipher_interface: &mut CipherInterface,
         code_interface: &mut CodeInterface,
     ) {

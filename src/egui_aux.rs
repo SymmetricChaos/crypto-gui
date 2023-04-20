@@ -14,10 +14,16 @@ pub fn mono_strong(ui: &mut Ui, text: &str, size: Option<f32>) -> Response {
     }
 }
 
-pub fn mono_button(ui: &mut Ui, text: &str) -> Response {
-    ui.button(RichText::new(text).monospace())
+pub fn mono_text(text: &str, size: Option<f32>) -> RichText {
+    match size {
+        Some(n) => RichText::new(text).monospace().size(n),
+        None => RichText::new(text).monospace(),
+    }
 }
 
-pub fn large_text_label(ui: &mut Ui, text: &str) -> Response {
-    ui.label(RichText::new(text).size(10.0))
+pub fn mono_strong_text(text: &str, size: Option<f32>) -> RichText {
+    match size {
+        Some(n) => RichText::new(text).monospace().strong().size(n),
+        None => RichText::new(text).monospace().strong(),
+    }
 }

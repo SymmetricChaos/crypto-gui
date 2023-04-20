@@ -1,4 +1,4 @@
-use crate::ids::CipherID;
+use crate::ids::CipherId;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum CipherCategory {
@@ -30,55 +30,55 @@ impl CipherCategory {
         }
     }
 
-    pub fn all_cipher_in_category(&self) -> &[CipherID] {
+    pub fn all_cipher_in_category(&self) -> &[CipherId] {
         match self {
             CipherCategory::Substituion => &[
-                CipherID::Caesar,
-                CipherID::Decoder,
-                CipherID::Affine,
-                CipherID::Substitution,
-                CipherID::Plugboard,
+                CipherId::Caesar,
+                CipherId::Decoder,
+                CipherId::Affine,
+                CipherId::Substitution,
+                CipherId::Plugboard,
             ],
             CipherCategory::Polyalphabetic => &[
-                CipherID::Vigenere,
-                CipherID::Beaufort,
-                CipherID::M94,
-                CipherID::Alberti,
-                CipherID::Bazeries,
-                CipherID::Porta,
-                CipherID::Quagmire,
-                CipherID::Chaocipher,
-                CipherID::Hutton,
+                CipherId::Vigenere,
+                CipherId::Beaufort,
+                CipherId::M94,
+                CipherId::Alberti,
+                CipherId::Bazeries,
+                CipherId::Porta,
+                CipherId::Quagmire,
+                CipherId::Chaocipher,
+                CipherId::Hutton,
             ],
             CipherCategory::Machine => &[
-                CipherID::M209,
-                CipherID::Enigma,
-                CipherID::Sigaba,
-                CipherID::Hebern,
-                CipherID::Purple,
+                CipherId::M209,
+                CipherId::Enigma,
+                CipherId::Sigaba,
+                CipherId::Hebern,
+                CipherId::Purple,
             ],
             CipherCategory::Transposition => &[
-                CipherID::Columnar,
-                CipherID::Grille,
-                CipherID::TurningGrille,
-                CipherID::RailFence,
-                CipherID::Scytale,
+                CipherId::Columnar,
+                CipherId::Grille,
+                CipherId::TurningGrille,
+                CipherId::RailFence,
+                CipherId::Scytale,
             ],
             CipherCategory::Playfair => &[
-                CipherID::Playfair,
-                CipherID::Slidefair,
-                CipherID::TwoSquare,
-                CipherID::FourSquare,
+                CipherId::Playfair,
+                CipherId::Slidefair,
+                CipherId::TwoSquare,
+                CipherId::FourSquare,
             ],
-            CipherCategory::Tactical => &[CipherID::Batco, CipherID::Dryad, CipherID::Rs44],
+            CipherCategory::Tactical => &[CipherId::Batco, CipherId::Dryad, CipherId::Rs44],
             CipherCategory::Polybius => &[
-                CipherID::Polybius,
-                CipherID::PolybiusCube,
-                CipherID::Adfgvx,
-                CipherID::B64,
-                CipherID::Bifid,
-                CipherID::Trifid,
-                CipherID::Checkerboard,
+                CipherId::Polybius,
+                CipherId::PolybiusCube,
+                CipherId::Adfgvx,
+                CipherId::B64,
+                CipherId::Bifid,
+                CipherId::Trifid,
+                CipherId::Checkerboard,
             ],
         }
     }

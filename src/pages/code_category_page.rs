@@ -1,4 +1,4 @@
-use crate::ids::CodeID;
+use crate::ids::CodeId;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum CodeCategory {
@@ -26,19 +26,19 @@ impl CodeCategory {
         }
     }
 
-    pub fn all_cipher_in_category(&self) -> &[CodeID] {
+    pub fn all_cipher_in_category(&self) -> &[CodeId] {
         match self {
-            CodeCategory::Morse => &[CodeID::Morse],
+            CodeCategory::Morse => &[CodeId::Morse],
             CodeCategory::Binary => &[
-                CodeID::Ascii,
-                CodeID::Bacon,
-                CodeID::Baudot,
-                CodeID::Base64,
-                CodeID::Fibonacci,
+                CodeId::Ascii,
+                CodeId::Bacon,
+                CodeId::Baudot,
+                CodeId::Base64,
+                CodeId::Fibonacci,
             ],
-            CodeCategory::Unary => &[CodeID::Unary],
-            CodeCategory::Spelling => &[CodeID::Pgp, CodeID::SpellingAlphabet],
-            CodeCategory::Godel => &[CodeID::Godel],
+            CodeCategory::Unary => &[CodeId::Unary],
+            CodeCategory::Spelling => &[CodeId::Pgp, CodeId::SpellingAlphabet],
+            CodeCategory::Godel => &[CodeId::Godel],
         }
     }
 }

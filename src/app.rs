@@ -1,7 +1,6 @@
 use crate::cipher_panel::CipherInterface;
 use crate::code_panel::CodeInterface;
-use crate::egui_aux::large_text_label;
-use crate::ids::{CipherID, CodeID};
+use crate::ids::{CipherId, CodeId};
 use crate::pages::io_panel::IOPanel;
 use crate::pages::{Page, TextPrepPage};
 use eframe::egui;
@@ -31,18 +30,14 @@ fn load_font(name: &str, family: &FontFamily, font_data: FontData, font_def: &mu
 pub struct ClassicCrypto {
     cipher_interface: CipherInterface,
     code_interface: CodeInterface,
-    // cipher_display_panel: CipherIO,
-    // code_control_panel: CodeControlPanel,
-    // code_display_panel: CodeDisplayPanel,
-    // rng_display_panel: RngInfoPage,
+
     io_panel: IOPanel,
     input: String,
     output: String,
     errors: String,
 
-    active_cipher: CipherID,
-    active_code: CodeID,
-    // active_rng: RngID,
+    active_cipher: CipherId,
+    active_code: CodeId,
     active_page: Page,
     text_prep_page: TextPrepPage,
 }
@@ -50,24 +45,25 @@ pub struct ClassicCrypto {
 impl Default for ClassicCrypto {
     fn default() -> Self {
         Self {
-            // Input, output, and error shared by Ciphers and Codes
+            // Input, output, and error shared by all Ciphers and Codes
             input: String::new(),
             output: String::new(),
             errors: String::new(),
 
-            // IO Panel shared by Ciphers and Codes
+            // IO Panel shared by all Ciphers and Codes
             io_panel: IOPanel::default(),
 
-            // Which cipher is active
-            active_cipher: CipherID::default(),
-            active_code: CodeID::default(),
+            // ID of the active Cipher or Code
+            active_cipher: CipherId::default(),
+            active_code: CodeId::default(),
 
             // Which page we are on
             active_page: Page::About,
 
+            // Contents of the TextPrepPage
             text_prep_page: TextPrepPage::default(),
 
-            // Interface that hold a copy of each cipher and organizes them
+            // Contains each Cipher and Code along with with controls and a panel for selecting them
             cipher_interface: CipherInterface::default(),
             code_interface: CodeInterface::default(),
         }
@@ -196,7 +192,7 @@ impl ClassicCrypto {
                         .strong()
                         .heading();
                     ui.add(egui::Label::new(name));
-                    large_text_label(ui, self.active_code.description());
+                    ui.label(RichText::new(self.active_code.description()).size(12.0));
 
                     ui.add_space(16.0);
                     ui.separator();
@@ -253,7 +249,7 @@ impl ClassicCrypto {
                         .strong()
                         .heading();
                     ui.add(egui::Label::new(name));
-                    large_text_label(ui, self.active_cipher.description());
+                    ui.label(RichText::new(self.active_cipher.description()).size(12.0));
 
                     ui.add_space(16.0);
                     ui.separator();
@@ -276,9 +272,10 @@ impl ClassicCrypto {
             .max_width(500.0)
             .show(ctx, |ui| {
                 warn_if_debug_build(ui);
-                let hello =
-                    RichText::new("Welcome to Classic Crypto!\nCheck out the Ciphers available.")
-                        .strong();
+                let hello = RichText::new(
+                    "Welcome to Classic Crypto!\nCheck out the Ciphers and Codes available.",
+                )
+                .strong();
                 ui.label(hello);
                 ui.add_space(20.0);
                 ui.hyperlink_to(
