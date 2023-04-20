@@ -19,11 +19,6 @@ impl View for Unicode {
             ui.selectable_value(&mut self.mode, NumRep::Octal, "Octal");
             ui.selectable_value(&mut self.mode, NumRep::Decimal, "Decimal");
             ui.selectable_value(&mut self.mode, NumRep::HexLower, "Hexadecimal");
-            ui.selectable_value(
-                &mut self.mode,
-                NumRep::HexUpper,
-                "Hexadecimal (capitalized)",
-            );
         });
     }
 }

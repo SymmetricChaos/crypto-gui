@@ -107,6 +107,7 @@ pub fn randomize_global_rng() {
 pub fn get_global_rng() -> std::sync::MutexGuard<'static, StdRng> {
     let mut x = RNG_CONTROLS.lock().unwrap();
     x.seed_string.clear();
+    x.rng_err.clear();
 
     GLOBAL_RNG.lock().unwrap()
 }
