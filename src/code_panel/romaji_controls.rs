@@ -15,9 +15,9 @@ impl View for Romaji {
         });
 
         match self.variant {
-            RomajiVariant::Nihon => ui.label("Nihon-shiki is a now obsolete style of romanization. It keeps closely to morphology of Japanese with two letter per kana excepting ん (n) and the single vowel sounds. It does not reflect modern Japanese pronunciation of some kana."),
-            RomajiVariant::Kunrei => ui.label("Kunrei-shiki is the style of romanization prefered by the government of Japan. While similar to Nihon-shiki it does not distinguish some kana because they are usually pronounced identically. For instance ぢ and じ are both romanized as `zi` whereas Nihon-shiki renders them as `di` and ``zi`."),
-            RomajiVariant::Hepbern => ui.label("Hepbern-shiki is commonly seen outside of Japan as it attempts to give phonetic spellings for kana, making it easier to read. In particular instance ち is written `chi`, し is written `shi`, and つ is written `tsu`. Like Kunrein-shiki it does not distinguish some kana."),
+            RomajiVariant::Nihon => ui.label("Nihon-shiki is a now obsolete style of romanization. It keeps closely to morphology of Japanese with two letter per kana excepting ん (n) and the single vowel sounds and different consonants for every row of the . It does not reflect modern Japanese pronunciation of some kana."),
+            RomajiVariant::Kunrei => ui.label("Kunrei-shiki is the style of romanization prefered by the government of Japan. While similar to Nihon-shiki it does not distinguish some kana because they are usually pronounced identically. For instance ぢ and じ are both romanized as 'zi'."),
+            RomajiVariant::Hepbern => ui.label("Hepbern-shiki is commonly seen outside of Japan as it attempts to give phonetic spellings for kana, making it easier to read. In particular し is written 'shi', ち is written 'chi, and つ is written 'tsu'. Like Kunrein-shiki it does not distinguish some kana."),
         };
 
         ui.add_space(10.0);
