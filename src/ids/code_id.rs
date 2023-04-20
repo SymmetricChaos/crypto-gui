@@ -31,7 +31,6 @@ impl Default for CodeId {
 }
 
 impl CodeId {
-    // Describe the history of the code
     pub fn description(&self) -> &'static str {
         match CODE_INFORMATION[self.to_string()].as_str() {
             Some(s) => s,
