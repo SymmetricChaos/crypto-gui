@@ -555,7 +555,7 @@ lazy_static! {
             Node::leaf('わ', "wa"),
             Node::leaf('ゐ', "wi"),
             Node::leaf('ゑ', "we"),
-            Node::leaf('を', "wo"),
+            Node::leaf('を', "o"),
             (
                 'ん',
                 Node {
