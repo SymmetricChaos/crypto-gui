@@ -333,4 +333,51 @@ mod skey_tests {
             Error::Input("invalid word `KIP` found".into())
         );
     }
+
+    #[test]
+    fn test_encode() {
+        let code = SKeyWords::default();
+        let text = "abcdefghijklmnop";
+        assert_eq!(
+            code.encode(text).unwrap(),
+            "COAT SEC HOFF ONLY RAM OW DAWN EMIL HOVE SEEN MALL POW"
+        );
+    }
+
+    #[test]
+    fn test_encode_errs() {
+        let code = SKeyWords::default();
+        let text = "abcdefghijklmno";
+        assert_eq!(
+            code.encode(text).unwrap_err(),
+            Error::Input("S/KEY operates on chunks of 8 bytes at a time".into())
+        );
+    }
+
+    #[test]
+    fn test_decode() {
+        let code = SKeyWords::default();
+        let text = "COAT SEC HOFF ONLY RAM OW DAWN EMIL HOVE SEEN MALL POW";
+        assert_eq!(code.decode(text).unwrap(), "abcdefghijklmnop");
+    }
+
+    #[test]
+    fn test_decode_errs() {
+        let code = SKeyWords::default();
+        assert_eq!(
+            code.decode("COAT SEC HOFF ONLY RAM OW DAWN EMIL HOVE MALL POW")
+                .unwrap_err(),
+            Error::Input("S/KEY operates on chunks of 6 words at a time".into())
+        );
+        assert_eq!(
+            code.decode("COAST SEC HOFF ONLY RAM OW DAWN EMIL HOVE SEEN MALL POW")
+                .unwrap_err(),
+            Error::Input("invalid word `COAST` found".into())
+        );
+        assert_eq!(
+            code.decode("COAT SEC HOFF ONLY RAM OVA DAWN EMIL HOVE SEEN MALL POW")
+                .unwrap_err(),
+            Error::Input("invalid words, parity check failed".into())
+        );
+    }
 }
