@@ -217,7 +217,10 @@ fn words_to_u64(words: &[&str]) -> Result<u64, Error> {
     let parity = (big_n & 0b11) as u64;
     let expected_parity = skey_parity((big_n >> 2) as u64);
     if parity != expected_parity {
-        return Err(Error::Input("invalid words, parity check failed".into()));
+        return Err(Error::Input(format!(
+            "invalid words {:?}, parity check failed",
+            words
+        )));
     }
     big_n >>= 2;
     Ok(big_n as u64)
@@ -377,7 +380,7 @@ mod skey_tests {
         assert_eq!(
             code.decode("COAT SEC HOFF ONLY RAM OVA DAWN EMIL HOVE SEEN MALL POW")
                 .unwrap_err(),
-            Error::Input("invalid words, parity check failed".into())
+            Error::Input("invalid words [\"COAT\", \"SEC\", \"HOFF\", \"ONLY\", \"RAM\", \"OVA\"], parity check failed".into())
         );
     }
 }
