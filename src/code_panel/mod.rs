@@ -18,6 +18,7 @@ pub mod needle_controls;
 pub mod pgp_controls;
 pub mod punycode_controls;
 pub mod romaji_controls;
+pub mod skey_controls;
 pub mod spelling_alphabet_controls;
 pub mod tap_code_controls;
 pub mod unary_controls;
@@ -57,6 +58,7 @@ pub struct CodeInterface {
     base32: Base32,
     base64: Base64,
     pgp: PgpWords,
+    skey: SKeyWords,
 
     // Mathematical
     godel: Godel,
@@ -87,7 +89,7 @@ impl CodeInterface {
             ui,
         );
         combox_box(
-            &[CodeId::Base32, CodeId::Base64, CodeId::Pgp],
+            &[CodeId::Base32, CodeId::Base64, CodeId::Pgp, CodeId::Skey],
             "Binary-to-Text",
             active_code,
             ui,
@@ -117,7 +119,7 @@ impl CodeInterface {
             CodeId::Base64 => &mut self.base64,
             CodeId::Pgp => &mut self.pgp,
             CodeId::Unary => &mut self.unary,
-            CodeId::Skey => todo!(),
+            CodeId::Skey => &mut self.skey,
             CodeId::SpellingAlphabet => &mut self.spelling,
             CodeId::Bacon => &mut self.bacon,
             CodeId::Unicode => &mut self.unicode,

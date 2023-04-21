@@ -1,6 +1,10 @@
-use crate::errors::Error;
+use itertools::Itertools;
+
+use crate::{codes::binary_to_text::bytes_to_hex, errors::Error};
 
 use crate::codes::Code;
+
+use super::{BinaryToText, BinaryToTextMode};
 // rfc2289
 
 const SKEY_WORDS: [&'static str; 2048] = [
@@ -199,7 +203,12 @@ fn u64_to_words(n: u64) -> [&'static str; 6] {
     words
 }
 
-fn words_to_u64(words: [&'static str; 6]) -> Result<u64, Error> {
+fn words_to_u64(words: &[&str]) -> Result<u64, Error> {
+    if words.len() != 6 {
+        return Err(Error::Input(format!(
+            "cannot decode {words:?} because it does not have 6 words"
+        )));
+    }
     let mut big_n = 0_u128;
     for (idx, word) in words.into_iter().enumerate() {
         let n = skey_word(word)? as u128;
@@ -214,16 +223,26 @@ fn words_to_u64(words: [&'static str; 6]) -> Result<u64, Error> {
     Ok(big_n as u64)
 }
 
-pub struct SKeyWords {}
+pub struct SKeyWords {
+    pub mode: BinaryToTextMode,
+}
 
 impl Default for SKeyWords {
     fn default() -> Self {
-        Self {}
+        Self {
+            mode: BinaryToTextMode::Utf8,
+        }
     }
 }
 
 impl SKeyWords {
-    pub fn encode_bytes(&self, bytes: &[u8]) -> Result<String, Error> {
+    pub fn chars_codes(&mut self) -> impl Iterator<Item = (String, String)> + '_ {
+        (0..2048).map(|n| (format!("{n:03x}"), format!("{}", SKEY_WORDS[n])))
+    }
+}
+
+impl BinaryToText for SKeyWords {
+    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, Error> {
         if bytes.len() % 8 != 0 {
             return Err(Error::Input(
                 "S/KEY operates on chunks of 8 bytes at a time".into(),
@@ -239,30 +258,36 @@ impl SKeyWords {
             Ok(out.join(" "))
         }
     }
-    pub fn chars_codes(&mut self) -> impl Iterator<Item = (String, String)> + '_ {
-        (0..2048).map(|n| (format!("{n:03x}"), format!("{}", SKEY_WORDS[n])))
-    }
 }
 
 impl Code for SKeyWords {
     fn encode(&self, text: &str) -> Result<String, Error> {
-        self.encode_bytes(text.as_bytes())
+        match self.mode {
+            BinaryToTextMode::Hex => self.encode_hex(text),
+            BinaryToTextMode::Utf8 => self.encode_utf8(text),
+        }
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
-        // let words = text.split(' ');
-        // if words.clone().count() % 6 != 0 {
-        //     return Err(Error::Input(
-        //         "S/KEY operates on chunks of 6 words at a time".into(),
-        //     ));
-        // } else {
-        //     let chunks = words.chunks(6);
-        //     for chunk in chunks {
-
-        //     }
-        //     todo!()
-        // }
-        todo!()
+        let words = text.split(' ');
+        if words.clone().count() % 6 != 0 {
+            return Err(Error::Input(
+                "S/KEY operates on chunks of 6 words at a time".into(),
+            ));
+        } else {
+            let mut out = Vec::new();
+            let temp = words.collect_vec();
+            let chunks = temp.chunks(6);
+            for chunk in chunks {
+                out.extend_from_slice(&words_to_u64(chunk)?.to_le_bytes());
+            }
+            match self.mode {
+                BinaryToTextMode::Hex => bytes_to_hex(&out),
+                BinaryToTextMode::Utf8 => {
+                    String::from_utf8(out).map_err(|e| Error::Input(e.to_string()))
+                }
+            }
+        }
     }
 
     fn randomize(&mut self) {}
@@ -296,15 +321,15 @@ mod skey_tests {
     #[test]
     fn test_u64() {
         assert_eq!(
-            words_to_u64(["FOWL", "KID", "MASH", "DEAD", "DUAL", "OAF"]).unwrap(),
+            words_to_u64(&["FOWL", "KID", "MASH", "DEAD", "DUAL", "OAF"]).unwrap(),
             0x85c43ee03857765b_u64
         );
         assert_eq!(
-            words_to_u64(["FOWL", "KID", "MASH", "DEAD", "DUAL", "O"]).unwrap_err(),
+            words_to_u64(&["FOWL", "KID", "MASH", "DEAD", "DUAL", "O"]).unwrap_err(),
             Error::Input("invalid words, parity check failed".into())
         );
         assert_eq!(
-            words_to_u64(["FOWL", "KIP", "MASH", "DEAD", "DUAL", "OAF"]).unwrap_err(),
+            words_to_u64(&["FOWL", "KIP", "MASH", "DEAD", "DUAL", "OAF"]).unwrap_err(),
             Error::Input("invalid word `KIP` found".into())
         );
     }

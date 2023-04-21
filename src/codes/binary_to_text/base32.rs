@@ -2,7 +2,9 @@ use crate::codes::Code;
 use crate::{errors::Error, text_aux::text_functions::bimap_from_iter};
 use bimap::BiMap;
 use lazy_static::lazy_static;
-use std::{fs::read, path::PathBuf};
+use std::path::PathBuf;
+
+use super::{bytes_to_hex, BinaryToText, BinaryToTextMode};
 
 // Mask to set top three bits to zero
 const MASK: u8 = 0b00011111;
@@ -36,6 +38,7 @@ pub enum B32Variant {
 pub struct Base32 {
     pub file: Option<PathBuf>,
     pub variant: B32Variant,
+    pub mode: BinaryToTextMode,
     pub use_padding: bool,
 }
 
@@ -44,6 +47,7 @@ impl Default for Base32 {
         Self {
             file: None,
             variant: B32Variant::Rfc4648,
+            mode: BinaryToTextMode::Utf8,
             use_padding: true,
         }
     }
@@ -57,22 +61,23 @@ impl Base32 {
         }
     }
 
-    pub fn encode_file(&self) -> Result<String, Error> {
-        if self.file.is_none() {
-            return Err(Error::input("no file stored"));
-        }
-        let bytes = &read(self.file.as_ref().unwrap()).unwrap()[..];
-
-        let encoded = self.encode_byte_stream(bytes);
-        Ok(String::from_utf8(encoded).unwrap())
+    pub fn chars_codes(&mut self) -> impl Iterator<Item = (String, char)> + '_ {
+        (0..32u8).map(|x| {
+            (
+                format!("{:05b}", x),
+                *self.map().get_by_left(&x).unwrap() as char,
+            )
+        })
     }
+}
 
-    fn encode_byte_stream(&self, input: &[u8]) -> Vec<u8> {
-        let mut out = Vec::with_capacity((input.len() / 5) * 8);
+impl BinaryToText for Base32 {
+    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, Error> {
+        let mut out = Vec::with_capacity((bytes.len() / 5) * 8);
         let map = self.map();
         let mut buffer = 0_u32;
         let mut bits_in_use = 0;
-        let mut bytes = input.iter();
+        let mut bytes = bytes.iter();
 
         loop {
             // If less than 5 bits are bring used get the next byte
@@ -125,18 +130,27 @@ impl Base32 {
             }
         }
 
-        out
+        Ok(String::from_utf8(out).unwrap())
+    }
+}
+
+impl Code for Base32 {
+    fn encode(&self, text: &str) -> Result<String, Error> {
+        match self.mode {
+            BinaryToTextMode::Hex => self.encode_hex(text),
+            BinaryToTextMode::Utf8 => self.encode_utf8(text),
+        }
     }
 
-    fn decode_byte_stream(&self, input: &[u8]) -> Result<Vec<u8>, Error> {
-        let mut out = Vec::with_capacity((input.len() / 8) * 5);
+    fn decode(&self, text: &str) -> Result<String, Error> {
+        let mut out = Vec::with_capacity((text.len() / 8) * 5);
         let mut buffer = 0_u32;
         let mut bits_in_use = 0;
         let map = self.map();
         // Detect and remove padding then map each character to its bitstring
-        let mut bytes = input.iter().take_while(|n| n != &&PAD).map(|n| {
-            map.get_by_right(n)
-                .ok_or_else(|| Error::invalid_input_char(*n as char))
+        let mut bytes = text.bytes().take_while(|n| n != &PAD).map(|n| {
+            map.get_by_right(&n)
+                .ok_or_else(|| Error::invalid_input_char(n as char))
         });
         loop {
             if bits_in_use < 8 {
@@ -153,28 +167,12 @@ impl Base32 {
                 bits_in_use -= 8;
             }
         }
-        Ok(out)
-    }
-
-    pub fn chars_codes(&mut self) -> impl Iterator<Item = (String, char)> + '_ {
-        (0..32u8).map(|x| {
-            (
-                format!("{:05b}", x),
-                *self.map().get_by_left(&x).unwrap() as char,
-            )
-        })
-    }
-}
-
-impl Code for Base32 {
-    fn encode(&self, text: &str) -> Result<String, Error> {
-        let b = self.encode_byte_stream(text.as_bytes());
-        Ok(String::from_utf8(b).unwrap())
-    }
-
-    fn decode(&self, text: &str) -> Result<String, Error> {
-        let b = self.decode_byte_stream(text.as_bytes())?;
-        Ok(String::from_utf8(b).unwrap())
+        match self.mode {
+            BinaryToTextMode::Hex => bytes_to_hex(&out),
+            BinaryToTextMode::Utf8 => {
+                String::from_utf8(out).map_err(|e| Error::Input(e.to_string()))
+            }
+        }
     }
 
     fn randomize(&mut self) {}

@@ -3,6 +3,8 @@ use itertools::Itertools;
 use crate::codes::Code;
 use crate::errors::Error;
 
+use super::{BinaryToText, BinaryToTextMode};
+
 const PGP_WORDS: [[&'static str; 2]; 256] = [
     ["aardvark", "adroitness"],
     ["absurd", "adviser"],
@@ -277,11 +279,15 @@ pub fn right_word(word: &str) -> Result<usize, Error> {
         .ok_or_else(|| Error::Input(format!("invalid left word `{}` found", word)))
 }
 
-pub struct PgpWords {}
+pub struct PgpWords {
+    pub mode: BinaryToTextMode,
+}
 
 impl Default for PgpWords {
     fn default() -> Self {
-        Self {}
+        Self {
+            mode: BinaryToTextMode::Utf8,
+        }
     }
 }
 
@@ -296,13 +302,22 @@ impl PgpWords {
     }
 }
 
+impl BinaryToText for PgpWords {
+    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, Error> {
+        Ok(bytes
+            .into_iter()
+            .enumerate()
+            .map(|(idx, byte)| PGP_WORDS[*byte as usize][idx % 2])
+            .join(" "))
+    }
+}
+
 impl Code for PgpWords {
     fn encode(&self, text: &str) -> Result<String, Error> {
-        let data = text.bytes();
-        Ok(data
-            .enumerate()
-            .map(|(idx, byte)| PGP_WORDS[byte as usize][idx % 2])
-            .join(" "))
+        match self.mode {
+            BinaryToTextMode::Hex => self.encode_hex(text),
+            BinaryToTextMode::Utf8 => self.encode_utf8(text),
+        }
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
