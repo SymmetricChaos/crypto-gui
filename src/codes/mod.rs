@@ -2,6 +2,8 @@ use bimap::BiMap;
 use itertools::Itertools;
 use std::hash::Hash;
 
+pub mod binary_to_text;
+
 pub mod ascii;
 pub use ascii::Ascii;
 
