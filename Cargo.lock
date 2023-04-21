@@ -615,6 +615,7 @@ dependencies = [
  "num",
  "primal",
  "rand",
+ "regex",
  "tracing-subscriber",
  "tracing-wasm",
  "unicode-normalization",
