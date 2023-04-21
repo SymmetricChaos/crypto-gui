@@ -1,5 +1,3 @@
-use itertools::Itertools;
-
 use crate::errors::Error;
 
 use super::Code;
@@ -178,7 +176,7 @@ fn skey_word(word: &str) -> Result<usize, Error> {
     SKEY_WORDS
         .iter()
         .position(|p| p == &word)
-        .ok_or_else(|| Error::Input(format!("invalid left word `{}` found", word)))
+        .ok_or_else(|| Error::Input(format!("invalid word `{}` found", word)))
 }
 
 fn skey_parity(n: u64) -> u64 {
@@ -206,6 +204,11 @@ fn words_to_u64(words: [&'static str; 6]) -> Result<u64, Error> {
     for (idx, word) in words.into_iter().enumerate() {
         let n = skey_word(word)? as u128;
         big_n += n << 11 * (5 - idx);
+    }
+    let parity = (big_n & 0b11) as u64;
+    let expected_parity = skey_parity((big_n >> 2) as u64);
+    if parity != expected_parity {
+        return Err(Error::Input("invalid words, parity check failed".into()));
     }
     big_n >>= 2;
     Ok(big_n as u64)
@@ -236,7 +239,6 @@ impl SKeyWords {
             Ok(out.join(" "))
         }
     }
-
     pub fn chars_codes(&mut self) -> impl Iterator<Item = (String, String)> + '_ {
         (0..2048).map(|n| (format!("{n:03x}"), format!("{}", SKEY_WORDS[n])))
     }
@@ -244,10 +246,22 @@ impl SKeyWords {
 
 impl Code for SKeyWords {
     fn encode(&self, text: &str) -> Result<String, Error> {
-        todo!()
+        self.encode_bytes(text.as_bytes())
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
+        // let words = text.split(' ');
+        // if words.clone().count() % 6 != 0 {
+        //     return Err(Error::Input(
+        //         "S/KEY operates on chunks of 6 words at a time".into(),
+        //     ));
+        // } else {
+        //     let chunks = words.chunks(6);
+        //     for chunk in chunks {
+
+        //     }
+        //     todo!()
+        // }
         todo!()
     }
 
@@ -284,6 +298,14 @@ mod skey_tests {
         assert_eq!(
             words_to_u64(["FOWL", "KID", "MASH", "DEAD", "DUAL", "OAF"]).unwrap(),
             0x85c43ee03857765b_u64
+        );
+        assert_eq!(
+            words_to_u64(["FOWL", "KID", "MASH", "DEAD", "DUAL", "O"]).unwrap_err(),
+            Error::Input("invalid words, parity check failed".into())
+        );
+        assert_eq!(
+            words_to_u64(["FOWL", "KIP", "MASH", "DEAD", "DUAL", "OAF"]).unwrap_err(),
+            Error::Input("invalid word `KIP` found".into())
         );
     }
 }

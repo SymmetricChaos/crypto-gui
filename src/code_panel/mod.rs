@@ -117,6 +117,7 @@ impl CodeInterface {
             CodeId::Base64 => &mut self.base64,
             CodeId::Pgp => &mut self.pgp,
             CodeId::Unary => &mut self.unary,
+            CodeId::Skey => todo!(),
             CodeId::SpellingAlphabet => &mut self.spelling,
             CodeId::Bacon => &mut self.bacon,
             CodeId::Unicode => &mut self.unicode,
