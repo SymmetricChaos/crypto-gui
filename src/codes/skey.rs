@@ -201,6 +201,16 @@ fn u64_to_words(n: u64) -> [&'static str; 6] {
     words
 }
 
+fn words_to_u64(words: [&'static str; 6]) -> Result<u64, Error> {
+    let mut big_n = 0_u128;
+    for (idx, word) in words.into_iter().enumerate() {
+        let n = skey_word(word)? as u128;
+        big_n += n << 11 * (5 - idx);
+    }
+    big_n >>= 2;
+    Ok(big_n as u64)
+}
+
 pub struct SKeyWords {}
 
 impl Default for SKeyWords {
@@ -266,6 +276,14 @@ mod skey_tests {
         assert_eq!(
             u64_to_words(0x85c43ee03857765b),
             ["FOWL", "KID", "MASH", "DEAD", "DUAL", "OAF"]
+        );
+    }
+
+    #[test]
+    fn test_u64() {
+        assert_eq!(
+            words_to_u64(["FOWL", "KID", "MASH", "DEAD", "DUAL", "OAF"]).unwrap(),
+            0x85c43ee03857765b_u64
         );
     }
 }
