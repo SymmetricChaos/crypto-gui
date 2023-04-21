@@ -1,3 +1,8 @@
+pub mod base32;
+pub mod base64;
+pub mod pgp_words;
+pub mod skey;
+
 use crate::errors::Error;
 use eframe::epaint::ahash::HashMap;
 use lazy_static::lazy_static;

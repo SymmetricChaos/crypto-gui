@@ -1,6 +1,6 @@
 use crate::errors::Error;
 
-use super::Code;
+use crate::codes::Code;
 // rfc2289
 
 const SKEY_WORDS: [&'static str; 2048] = [

@@ -1,8 +1,7 @@
 use itertools::Itertools;
 
+use crate::codes::Code;
 use crate::errors::Error;
-
-use super::Code;
 
 const PGP_WORDS: [[&'static str; 2]; 256] = [
     ["aardvark", "adroitness"],

@@ -3,6 +3,10 @@ use itertools::Itertools;
 use std::hash::Hash;
 
 pub mod binary_to_text;
+pub use binary_to_text::base32::Base32;
+pub use binary_to_text::base64::Base64;
+pub use binary_to_text::pgp_words::PgpWords;
+pub use binary_to_text::skey::SKeyWords;
 
 pub mod ascii;
 pub use ascii::Ascii;
@@ -31,12 +35,6 @@ pub use unary::UnaryCode;
 pub mod spelling_alphabet;
 pub use spelling_alphabet::SpellingAlphabet;
 
-pub mod base32;
-pub use base32::Base32;
-
-pub mod base64;
-pub use base64::Base64;
-
 pub mod unicode;
 pub use unicode::Unicode;
 
@@ -48,9 +46,6 @@ pub use bacon::Bacon;
 
 pub mod punycode;
 pub use punycode::Punycode;
-
-pub mod pgp_words;
-pub use pgp_words::PgpWords;
 
 pub mod block;
 pub use block::BlockCode;
@@ -67,8 +62,6 @@ pub use needle::Needle;
 
 pub mod romaji;
 pub use romaji::romaji::Romaji;
-
-pub mod skey;
 
 use crate::errors::Error;
 
