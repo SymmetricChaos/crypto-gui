@@ -14,12 +14,19 @@ const PAD: u8 = '=' as u8;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum B64Variant {
-    Rfc4648,
+    Standard,
+    UrlSafe,
 }
 
 lazy_static! {
     pub static ref B64_MAP: BiMap<u8, u8> = bimap_from_iter(
         PresetAlphabet::Base64
+            .chars()
+            .enumerate()
+            .map(|(n, c)| (n as u8, c as u8))
+    );
+    pub static ref B64_URLSAFE_MAP: BiMap<u8, u8> = bimap_from_iter(
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
             .chars()
             .enumerate()
             .map(|(n, c)| (n as u8, c as u8))
@@ -31,6 +38,7 @@ pub struct Base64 {
     pub file: Option<PathBuf>,
     pub use_padding: bool,
     pub mode: BinaryToTextMode,
+    pub variant: B64Variant,
 }
 
 impl Default for Base64 {
@@ -39,13 +47,17 @@ impl Default for Base64 {
             file: None,
             use_padding: true,
             mode: BinaryToTextMode::Utf8,
+            variant: B64Variant::Standard,
         }
     }
 }
 
 impl Base64 {
     pub fn map(&self) -> &BiMap<u8, u8> {
-        &B64_MAP
+        match self.variant {
+            B64Variant::Standard => &B64_MAP,
+            B64Variant::UrlSafe => &B64_URLSAFE_MAP,
+        }
     }
 
     pub fn chars_codes(&mut self) -> impl Iterator<Item = (String, char)> + '_ {

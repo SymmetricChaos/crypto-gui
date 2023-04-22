@@ -14,11 +14,11 @@ impl View for Base32 {
         //     self.file = FileDialog::new().pick_file();
         // }
 
-        ui.selectable_value(&mut self.variant, B32Variant::Rfc4648, "RFC 4684");
+        ui.selectable_value(&mut self.variant, B32Variant::Rfc4648, "Standard");
         ui.selectable_value(&mut self.variant, B32Variant::WordSafe, "Word Safe");
         ui.add_space(10.0);
         match self.variant {
-            B32Variant::Rfc4648 => ui.label("The most commonly used Base32 variant is defined by RFC 4684. To avoid ambiguity the character 0, 1, and 8 are not included."),
+            B32Variant::Rfc4648 => ui.label("The most commonly used Base32 variant is defined by RFC 4684 section 6. To avoid ambiguity in reading the characters 0, 1, and 8 are not included."),
             B32Variant::WordSafe => ui.label("The Word Safe variant of Base32 is used for geocaching. It is an example of a variant used to avoid forming words, which it accomplishes by not including any vowels."),
         };
         ui.add_space(10.0);

@@ -7,14 +7,14 @@ pub enum PresetAlphabet {
     BasicLatinNoJ,
     BasicLatinNoQ,
     BasicLatinWithDigits,
-    Digits0,
-    Digits1,
+    Digits0,  // Digits starting at 0 and ending at 9
+    Digits1,  // Digits start at 1 and ending with 0
     Ascii94,  // The printing ASCII symbols without the space
     Ascii95,  // The printing ASCII symbols with the space
-    Ascii128, // The ASCII symbols with control pictures for non-printing characters including space
+    Ascii128, // The ASCII symbols with control pictures for non-printing characters except space
     AsciiLdh, // The LDH (letter, digit, hyphen) subset of ASCII used by IDNA, in ascending order per ASCII code
     Greek,
-    ClassicalLatin, //Classical Latin
+    ClassicalLatin, // Classical Latin lacks J, U, and W
     Base64, // 64 safe to use ASCII symbols, low chance of being interpreted if the string is parsed
     Spanish,
     German,

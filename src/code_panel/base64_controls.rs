@@ -1,5 +1,8 @@
 use super::{generic_components::fill_code_columns, View, ViewableCode};
-use crate::codes::{binary_to_text::BinaryToTextMode, Base64};
+use crate::codes::{
+    binary_to_text::{base64::B64Variant, BinaryToTextMode},
+    Base64,
+};
 //use rfd::FileDialog;
 
 impl ViewableCode for Base64 {}
@@ -10,6 +13,19 @@ impl View for Base64 {
         // if ui.button("Select a File").clicked() {
         //     self.file = FileDialog::new().pick_file();
         // }
+        ui.selectable_value(&mut self.variant, B64Variant::Standard, "Standard");
+        ui.selectable_value(
+            &mut self.variant,
+            B64Variant::UrlSafe,
+            "URL and Filename Safe",
+        );
+        ui.add_space(10.0);
+        match self.variant {
+            B64Variant::Standard => {
+                ui.label("The most commonly used Base64 variant is defined by RFC 4684 section 4.")
+            }
+            B64Variant::UrlSafe => ui.label("URL and Filename Safe variant is defioned in RFC 4684 section 5 to be used in situations where the + and / characters might have special use defined for them. They are replaced by - and _."),
+        };
         ui.add_space(10.0);
         ui.selectable_value(&mut self.mode, BinaryToTextMode::Hex, "Hex")
             .on_hover_text("interpret input as hexcode");
