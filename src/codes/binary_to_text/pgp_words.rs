@@ -276,7 +276,7 @@ pub fn right_word(word: &str) -> Result<usize, Error> {
     PGP_WORDS
         .iter()
         .position(|p| p[1] == word)
-        .ok_or_else(|| Error::Input(format!("invalid left word `{}` found", word)))
+        .ok_or_else(|| Error::Input(format!("invalid right word `{}` found", word)))
 }
 
 pub struct PgpWords {
@@ -341,14 +341,54 @@ impl Code for PgpWords {
 }
 
 #[cfg(test)]
-mod punycode_tests {
+mod pgp_tests {
     use super::*;
+
     #[test]
     pub fn encode_pgp_words() {
         let words = "topmost Istanbul Pluto vagabond treadmill Pacific brackish dictator goldfish Medusa afflict bravado chatter revolver Dupont midsummer stopwatch whimsical cowbell bottomless";
         let nums = "E5 82 94 F2 E9 A2 27 48 6E 8B 06 1B 31 CC 52 8F D7 FA 3F 19";
+        let code = PgpWords {
+            mode: BinaryToTextMode::Hex,
+        };
+        assert_eq!(words, code.encode(nums).unwrap())
+    }
+
+    #[test]
+    pub fn encode_pgp_words_errs() {
+        let nums = "E5 82 94 F2 E9 A2 27 48 6E 8B 06 1B 31 C 52 8F D7 FA 3F 19";
+        let code = PgpWords {
+            mode: BinaryToTextMode::Hex,
+        };
+        assert_eq!(
+            Error::Input("not valid hex bytes".into()),
+            code.encode(nums).unwrap_err()
+        )
+    }
+
+    #[test]
+    pub fn decode_pgp_words() {
+        let words = "topmost Istanbul Pluto vagabond treadmill Pacific brackish dictator goldfish Medusa afflict bravado chatter revolver Dupont midsummer stopwatch whimsical cowbell bottomless";
+        let nums = "E5 82 94 F2 E9 A2 27 48 6E 8B 06 1B 31 CC 52 8F D7 FA 3F 19";
+        let code = PgpWords {
+            mode: BinaryToTextMode::Hex,
+        };
+        assert_eq!(nums, code.decode(words).unwrap())
+    }
+
+    #[test]
+    pub fn decode_pgp_words_errs() {
+        let words1 = "topmst Istanbul Pluto vagabond treadmill Pacific";
+        let words2 = "topmost Istannbul Pluto vagabond treadmill Pacific";
+
         let code = PgpWords::default();
-        let decoded = code.decode(words).unwrap();
-        assert_eq!(nums, decoded)
+        assert_eq!(
+            Error::Input("invalid left word `topmst` found".into()),
+            code.decode(words1).unwrap_err()
+        );
+        assert_eq!(
+            Error::Input("invalid right word `Istannbul` found".into()),
+            code.decode(words2).unwrap_err()
+        );
     }
 }
