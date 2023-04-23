@@ -12,6 +12,7 @@ const PAD: u8 = '=' as u8;
 
 const BASE32_ALPHA: &'static str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 const WORD_SAFE_BASE32: &'static str = "23456789CFGHJMPQRVWXcfghjmpqrvwx";
+const BASE32_HEX: &'static str = "0123456789ABCDEFGHIJKLMNOPQRSTUV";
 
 lazy_static! {
     pub static ref B32_MAP: BiMap<u8, u8> = bimap_from_iter(
@@ -26,12 +27,19 @@ lazy_static! {
             .enumerate()
             .map(|(n, c)| (n as u8, c as u8))
     );
+    pub static ref B32_HEX: BiMap<u8, u8> = bimap_from_iter(
+        BASE32_HEX
+            .chars()
+            .enumerate()
+            .map(|(n, c)| (n as u8, c as u8))
+    );
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum B32Variant {
     Rfc4648,
     WordSafe,
+    ExtendedHex,
 }
 
 // Make it possible to encode an aribtrary file
@@ -58,6 +66,7 @@ impl Base32 {
         match self.variant {
             B32Variant::Rfc4648 => &B32_MAP,
             B32Variant::WordSafe => &B32_WORD_SAFE_MAP,
+            B32Variant::ExtendedHex => &B32_HEX,
         }
     }
 
