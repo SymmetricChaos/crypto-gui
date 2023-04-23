@@ -190,7 +190,7 @@ impl Code for Base32 {
 }
 
 #[cfg(test)]
-mod base64_tests {
+mod base32_tests {
     use super::*;
 
     const PLAINTEXT0: &'static str = "Manyh";
