@@ -122,13 +122,12 @@ impl Code for Ascii85 {
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
+        // If the next letter is 'z' then push 0x00000000 to the output and discard the 'z'
+        // If the next letter is 'y' then push 0x20202020 to the output and discard the 'y'
+        // Otherwise push five bytes into the buffer, pushing PAD ('u') if bytes run out, count the number of padding used
+        // Map the bytes to their values, multiply and add to get the 32 bit chunk
+        // Discard a number of lower order bytes equal to the number of padding used
         todo!();
-        // match self.mode {
-        //     BinaryToTextMode::Hex => bytes_to_hex(&out),
-        //     BinaryToTextMode::Utf8 => {
-        //         String::from_utf8(out).map_err(|e| Error::Input(e.to_string()))
-        //     }
-        // }
     }
 
     fn randomize(&mut self) {}
@@ -140,31 +139,27 @@ impl Code for Ascii85 {
 mod ascii85_tests {
     use super::*;
 
-    const PLAINTEXT0: &'static str = "Man ";
-    const PLAINTEXT1: &'static str = "Man";
-    const PLAINTEXT2: &'static str = "Ma";
-    const PLAINTEXT3: &'static str = "M";
-
-    const CIPHERTEXT0: &'static str = "9jqo^";
-    const CIPHERTEXT1: &'static str = "9jqo";
-    const CIPHERTEXT2: &'static str = "9jn";
-    const CIPHERTEXT3: &'static str = "9`";
+    const TEST_TEXT: [(&'static str, &'static str); 5] = [
+        ("Man ", "9jqo^"),
+        ("Man", "9jqo"),
+        ("Ma", "9jn"),
+        ("M", "9`"),
+        ("    ", "y"),
+    ];
 
     #[test]
     fn encode_test() {
         let code = Ascii85::default();
-        assert_eq!(code.encode(PLAINTEXT0).unwrap(), CIPHERTEXT0);
-        assert_eq!(code.encode(PLAINTEXT1).unwrap(), CIPHERTEXT1);
-        assert_eq!(code.encode(PLAINTEXT2).unwrap(), CIPHERTEXT2);
-        assert_eq!(code.encode(PLAINTEXT3).unwrap(), CIPHERTEXT3);
+        for (ptext, ctext) in TEST_TEXT {
+            assert_eq!(code.encode(ptext).unwrap(), ctext);
+        }
     }
 
     #[test]
     fn decode_test() {
         let code = Ascii85::default();
-        assert_eq!(code.decode(CIPHERTEXT0).unwrap(), PLAINTEXT0);
-        assert_eq!(code.decode(CIPHERTEXT1).unwrap(), PLAINTEXT1);
-        assert_eq!(code.decode(CIPHERTEXT2).unwrap(), PLAINTEXT2);
-        assert_eq!(code.decode(CIPHERTEXT3).unwrap(), PLAINTEXT3);
+        for (ptext, ctext) in TEST_TEXT {
+            assert_eq!(code.decode(ctext).unwrap(), ptext);
+        }
     }
 }
