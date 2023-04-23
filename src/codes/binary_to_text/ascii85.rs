@@ -26,7 +26,6 @@ lazy_static! {
 pub struct Ascii85 {
     pub file: Option<PathBuf>,
     pub mode: BinaryToTextMode,
-    pub use_padding: bool,
 }
 
 impl Default for Ascii85 {
@@ -34,7 +33,6 @@ impl Default for Ascii85 {
         Self {
             file: None,
             mode: BinaryToTextMode::Utf8,
-            use_padding: true,
         }
     }
 }
@@ -62,13 +60,6 @@ impl BinaryToText for Ascii85 {
         let mut bytes = bytes.iter().peekable();
 
         loop {
-            // Push four bytes into buffer
-            // Push PAD ('\0') into the buffer if bytes run out, count the number of PAD bytes
-            // If buffer == 0x0 and no padding was used, push 'z' to out
-            // If buffer == 0x20202020, push 'y' to
-            // Otherwise divide by 85 and take remainder four times, map those values to characters
-            // read those characters in reverse order, stopping after 4-(pad count)
-
             // Break if done
             if bytes.peek().is_none() {
                 break;
@@ -122,12 +113,59 @@ impl Code for Ascii85 {
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
-        // If the next letter is 'z' then push 0x00000000 to the output and discard the 'z'
-        // If the next letter is 'y' then push 0x20202020 to the output and discard the 'y'
-        // Otherwise push five bytes into the buffer, pushing PAD ('u') if bytes run out, count the number of padding used
-        // Map the bytes to their values, multiply and add to get the 32 bit chunk
-        // Discard a number of lower order bytes equal to the number of padding used
-        todo!();
+        let mut out: Vec<u8> = Vec::new();
+        let mut chars = text.chars().filter(|c| !c.is_whitespace()).peekable();
+        let map = self.map();
+
+        loop {
+            // Break if done
+            if chars.peek().is_none() {
+                break;
+            }
+
+            // Handle special 'z' and 'y' characters
+            if *chars.peek().unwrap() == 'z' {
+                out.extend_from_slice(&[0, 0, 0, 0]);
+                chars.next(); // remove the 'z'
+                continue;
+            }
+            if *chars.peek().unwrap() == 'y' {
+                out.extend_from_slice(&[0x20, 0x20, 0x20, 0x20]);
+                chars.next(); // remove the 'y'
+                continue;
+            }
+
+            // If those are handled we fill the buffer algebraically
+            let mut buffer = 0_u32;
+
+            let mut used_chars = 4;
+            for i in (0..5).rev() {
+                match chars.next() {
+                    Some(byte) => {
+                        buffer += *map
+                            .get_by_right(&(byte as u8))
+                            .ok_or_else(|| Error::invalid_input_char(byte as char))?
+                            as u32
+                            * 85_u32.pow(i)
+                    }
+                    None => {
+                        used_chars -= 1;
+                        buffer += 84 * 85_u32.pow(i);
+                    }
+                }
+            }
+
+            // Extract the used bytes from the buffer
+            for b in buffer.to_le_bytes().into_iter().rev().take(used_chars) {
+                out.push(b)
+            }
+        }
+        match self.mode {
+            BinaryToTextMode::Hex => bytes_to_hex(&out),
+            BinaryToTextMode::Utf8 => {
+                String::from_utf8(out).map_err(|e| Error::Input(e.to_string()))
+            }
+        }
     }
 
     fn randomize(&mut self) {}
@@ -139,12 +177,14 @@ impl Code for Ascii85 {
 mod ascii85_tests {
     use super::*;
 
-    const TEST_TEXT: [(&'static str, &'static str); 5] = [
+    const TEST_TEXT: [(&'static str, &'static str); 7] = [
+        ("Man is d", "9jqo^BlbD-"),
         ("Man ", "9jqo^"),
         ("Man", "9jqo"),
         ("Ma", "9jn"),
         ("M", "9`"),
         ("    ", "y"),
+        ("\0\0\0\0", "z"),
     ];
 
     #[test]
