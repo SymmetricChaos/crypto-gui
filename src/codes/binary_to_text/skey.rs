@@ -239,7 +239,7 @@ impl Default for SKeyWords {
 }
 
 impl SKeyWords {
-    pub fn chars_codes(&mut self) -> impl Iterator<Item = (String, String)> + '_ {
+    pub fn chars_codes(&self) -> impl Iterator<Item = (String, String)> + '_ {
         (0..2048).map(|n| (format!("{n:03x}"), format!("{}", SKEY_WORDS[n])))
     }
 }

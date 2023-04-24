@@ -6,6 +6,7 @@ use lazy_static::lazy_static;
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub enum CodeId {
     Ascii,
+    Ascii85,
     Bacon,
     Base32,
     Base64,
@@ -44,6 +45,7 @@ impl Display for CodeId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let name = match self {
             CodeId::Ascii => "ASCII",
+            CodeId::Ascii85 => "Ascii85",
             CodeId::Morse => "Morse",
             CodeId::Godel => "Gödel",
             CodeId::Fibonacci => "Fibonacci",

@@ -1,9 +1,10 @@
 use crate::{
-    codes::{morse::Morse, romaji::romaji::Romaji, *},
+    codes::{binary_to_text::ascii85::Ascii85, morse::Morse, romaji::romaji::Romaji, *},
     ids::CodeId,
 };
 use eframe::egui;
 use egui::Ui;
+pub mod ascii85_controls;
 pub mod ascii_controls;
 pub mod bacon_contols;
 pub mod base32_controls;
@@ -55,6 +56,7 @@ pub struct CodeInterface {
     needle: Needle,
 
     // Binary to Text
+    ascii85: Ascii85,
     base32: Base32,
     base64: Base64,
     pgp: PgpWords,
@@ -89,7 +91,13 @@ impl CodeInterface {
             ui,
         );
         combox_box(
-            &[CodeId::Base32, CodeId::Base64, CodeId::Pgp, CodeId::Skey],
+            &[
+                CodeId::Ascii85,
+                CodeId::Base32,
+                CodeId::Base64,
+                CodeId::Pgp,
+                CodeId::Skey,
+            ],
             "Binary-to-Text",
             active_code,
             ui,
@@ -111,6 +119,7 @@ impl CodeInterface {
     pub fn get_active_code(&mut self, active_code: &CodeId) -> &mut dyn ViewableCode {
         match active_code {
             CodeId::Ascii => &mut self.ascii,
+            CodeId::Ascii85 => &mut self.ascii85,
             CodeId::Morse => &mut self.morse,
             CodeId::Godel => &mut self.godel,
             CodeId::Fibonacci => &mut self.fibonacci,

@@ -292,7 +292,7 @@ impl Default for PgpWords {
 }
 
 impl PgpWords {
-    pub fn chars_codes(&mut self) -> impl Iterator<Item = (String, String)> + '_ {
+    pub fn chars_codes(&self) -> impl Iterator<Item = (String, String)> + '_ {
         (0..256).map(|n| {
             (
                 format!("{n:02x}"),

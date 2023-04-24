@@ -60,6 +60,14 @@ pub trait BinaryToText {
     fn encode_utf8(&self, text: &str) -> Result<String, Error> {
         self.encode_bytes(text.as_bytes())
     }
+
+    // fn encode_file(&self, path: Option<PathBuf>) -> Result<String, Error> {
+    //     if path.is_none() {
+    //         return Err(Error::input("no file stored"));
+    //     }
+    //     let bytes = &read(path.as_ref().unwrap()).unwrap()[..];
+    //     self.encode_bytes(bytes)
+    // }
 }
 
 #[cfg(test)]

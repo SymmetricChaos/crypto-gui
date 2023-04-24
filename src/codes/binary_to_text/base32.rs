@@ -2,6 +2,7 @@ use crate::codes::Code;
 use crate::{errors::Error, text_aux::text_functions::bimap_from_iter};
 use bimap::BiMap;
 use lazy_static::lazy_static;
+use std::fs::read;
 use std::path::PathBuf;
 
 use super::{bytes_to_hex, BinaryToText, BinaryToTextMode};
@@ -70,13 +71,21 @@ impl Base32 {
         }
     }
 
-    pub fn chars_codes(&mut self) -> impl Iterator<Item = (String, char)> + '_ {
+    pub fn chars_codes(&self) -> impl Iterator<Item = (String, char)> + '_ {
         (0..32u8).map(|x| {
             (
                 format!("{:05b}", x),
                 *self.map().get_by_left(&x).unwrap() as char,
             )
         })
+    }
+
+    pub fn encode_file(&self) -> Result<String, Error> {
+        if self.file.is_none() {
+            return Err(Error::input("no file stored"));
+        }
+        let bytes = &read(self.file.as_ref().unwrap()).unwrap()[..];
+        self.encode_bytes(bytes)
     }
 }
 
