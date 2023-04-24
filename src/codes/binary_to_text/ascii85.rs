@@ -40,6 +40,7 @@ lazy_static! {
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Ascii85Variant {
+    Adobe,
     Btoa,
     Ipv6,
     ZeroQm,
@@ -65,6 +66,7 @@ impl Default for Ascii85 {
 impl Ascii85 {
     pub fn map(&self) -> &BiMap<u8, u8> {
         match self.variant {
+            Ascii85Variant::Adobe => &ASCII85_BTOA_MAP, // uses the same map as BTOA.
             Ascii85Variant::Btoa => &ASCII85_BTOA_MAP,
             Ascii85Variant::Ipv6 => &ASCII85_IPV6_MAP,
             Ascii85Variant::ZeroQm => &ASCII85_ZEROQM_MAP,
@@ -114,7 +116,9 @@ impl BinaryToText for Ascii85 {
                     out.push('y' as u8);
                     continue;
                 }
+            }
 
+            if self.variant == Ascii85Variant::Btoa || self.variant == Ascii85Variant::Adobe {
                 if used_bytes == 5 && buffer == 0 {
                     out.push('z' as u8);
                     continue;
