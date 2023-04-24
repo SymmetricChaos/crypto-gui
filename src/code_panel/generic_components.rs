@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::codes::Code;
+use crate::codes::{binary_to_text::BinaryToTextMode, Code};
 use crate::egui_aux::mono_strong;
 use eframe::egui::{self, Color32, RichText};
 
@@ -80,4 +80,12 @@ pub fn code_button_columns(
             }
         }
     });
+}
+
+pub fn binary_to_text_input_mode(ui: &mut egui::Ui, current_value: &mut BinaryToTextMode) {
+    ui.label("Encoding Mode");
+    ui.selectable_value(current_value, BinaryToTextMode::Hex, "Hex")
+        .on_hover_text("interpret input as hexcode");
+    ui.selectable_value(current_value, BinaryToTextMode::Utf8, "Text")
+        .on_hover_text("convert text to raw bytes");
 }
