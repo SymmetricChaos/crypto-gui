@@ -3,6 +3,7 @@ pub mod base32;
 pub mod base64;
 pub mod pgp_words;
 pub mod skey;
+pub mod numeric;
 
 use crate::errors::Error;
 use bimap::BiMap;
