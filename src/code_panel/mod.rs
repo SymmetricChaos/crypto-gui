@@ -1,5 +1,10 @@
 use crate::{
-    codes::{binary_to_text::ascii85::Ascii85, morse::Morse, romaji::romaji::Romaji, *},
+    codes::{
+        binary_to_text::{ascii85::Ascii85, numeric::BytesAsNumbers},
+        morse::Morse,
+        romaji::romaji::Romaji,
+        *,
+    },
     ids::CodeId,
 };
 use eframe::egui;
@@ -16,6 +21,7 @@ pub mod generic_components;
 pub mod godel_controls;
 pub mod morse_controls;
 pub mod needle_controls;
+pub mod numeric_controls;
 pub mod pgp_controls;
 pub mod punycode_controls;
 pub mod romaji_controls;
@@ -59,6 +65,7 @@ pub struct CodeInterface {
     ascii85: Ascii85,
     base32: Base32,
     base64: Base64,
+    numeric: BytesAsNumbers,
     pgp: PgpWords,
     skey: SKeyWords,
 
@@ -95,6 +102,7 @@ impl CodeInterface {
                 CodeId::Ascii85,
                 CodeId::Base32,
                 CodeId::Base64,
+                CodeId::ByteAsNum,
                 CodeId::Pgp,
                 CodeId::Skey,
             ],
@@ -137,6 +145,7 @@ impl CodeInterface {
             CodeId::Tap => &mut self.tap,
             CodeId::Needle => &mut self.needle,
             CodeId::Romaji => &mut self.romaji,
+            CodeId::ByteAsNum => &mut self.numeric,
             //_ => todo!("unable to get active code"),
         }
     }
