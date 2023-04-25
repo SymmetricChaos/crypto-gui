@@ -1,5 +1,7 @@
 use std::{cell::RefCell, collections::HashMap};
 
+use itertools::Itertools;
+
 use super::Code;
 use crate::errors::Error;
 
@@ -42,7 +44,51 @@ impl LevenshteinCodeIntegers {
     }
 
     pub fn decode_to_u32(&self, text: &str) -> Result<Vec<u32>, Error> {
-        todo!()
+        // if !IS_BITSTRING.is_match(text) {
+        //     return Err(Error::Input("Not a string of bits".into()));
+        // }
+        let mut vec = Vec::new();
+        let mut bits = text.chars().peekable();
+        loop {
+            // Count the number of '1's until a '0' is encountered
+            let mut ctr = 0;
+            if bits.peek() == None {
+                break;
+            }
+            while bits.next() == Some('1') {
+                ctr += 1;
+            }
+            // If the COUNT is zero the value is 0
+            if ctr == 0 {
+                vec.push(0u32)
+            } else {
+                // Otherwise start with N = 1 and repeat the next step COUNT-1 times
+                let mut n = 1_u32;
+                for _ in 0..(ctr - 1) {
+                    // Read N bits, prepend '1' and assign the value to N
+                    let mut value = 1;
+                    for _ in 0..n {
+                        match bits.next() {
+                            Some(c) => {
+                                value <<= 1;
+                                if c == '1' {
+                                    value ^= 1;
+                                }
+                            }
+                            None => {
+                                return Err(Error::Input(
+                                    "malformed coding, not enough bits".into(),
+                                ))
+                            }
+                        }
+                    }
+                    n = value
+                }
+                vec.push(n)
+            }
+        }
+
+        Ok(vec)
     }
 }
 
@@ -66,7 +112,11 @@ impl Code for LevenshteinCodeIntegers {
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
-        todo!()
+        Ok(self
+            .decode_to_u32(text)?
+            .into_iter()
+            .map(|n| n.to_string())
+            .join(" "))
     }
 
     fn randomize(&mut self) {}
@@ -75,7 +125,7 @@ impl Code for LevenshteinCodeIntegers {
 }
 
 #[cfg(test)]
-mod fibonacci_int_tests {
+mod levenshtein_int_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "16 0 2 10";
@@ -87,11 +137,11 @@ mod fibonacci_int_tests {
         assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
     }
 
-    // #[test]
-    // fn decode_test() {
-    //     let code = LevenshteinCodeIntegers::default();
-    //     assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
-    // }
+    #[test]
+    fn decode_test() {
+        let code = LevenshteinCodeIntegers::default();
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
+    }
 
     #[test]
     fn remove_bit() {
@@ -99,5 +149,11 @@ mod fibonacci_int_tests {
         for i in 0..10 {
             println!("{}", code.encode_u32(i))
         }
+    }
+
+    #[test]
+    fn decode_to_nums() {
+        let code = LevenshteinCodeIntegers::default();
+        println!("{:?}", code.decode_to_u32(ENCODEDTEXT));
     }
 }

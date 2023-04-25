@@ -19,6 +19,7 @@ pub mod block_controls;
 pub mod fibonacci_controls;
 pub mod generic_components;
 pub mod godel_controls;
+pub mod levenshtein_controls;
 pub mod morse_controls;
 pub mod needle_controls;
 pub mod numeric_controls;
@@ -70,9 +71,10 @@ pub struct CodeInterface {
     skey: SKeyWords,
 
     // Mathematical
-    godel: Godel,
-    unary: UnaryCode,
     fibonacci: FibonacciCode,
+    godel: Godel,
+    levenshtein: LevenshteinCode,
+    unary: UnaryCode,
 
     // Other Codes
     bacon: Bacon,
@@ -111,7 +113,12 @@ impl CodeInterface {
             ui,
         );
         combox_box(
-            &[CodeId::Godel, CodeId::Fibonacci, CodeId::Unary],
+            &[
+                CodeId::Fibonacci,
+                CodeId::Godel,
+                CodeId::Levenshtein,
+                CodeId::Unary,
+            ],
             "Mathematical",
             active_code,
             ui,
@@ -146,6 +153,7 @@ impl CodeInterface {
             CodeId::Needle => &mut self.needle,
             CodeId::Romaji => &mut self.romaji,
             CodeId::ByteAsNum => &mut self.numeric,
+            CodeId::Levenshtein => &mut self.levenshtein,
             //_ => todo!("unable to get active code"),
         }
     }

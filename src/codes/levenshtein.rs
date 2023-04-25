@@ -1,3 +1,5 @@
+use itertools::Itertools;
+
 use super::{Code, IOMode, LetterAndWordCode, LevenshteinCodeIntegers};
 use crate::errors::Error;
 
@@ -58,7 +60,31 @@ impl Code for LevenshteinCode {
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
-        todo!()
+        if self.mode == IOMode::Integer {
+            self.integer_code.decode(text)
+        } else if self.mode == IOMode::Letter {
+            let mut output = String::new();
+            for n in self.integer_code.decode_to_u32(text)?.into_iter() {
+                match self.maps.alphabet.chars().nth((n - 1) as usize) {
+                    Some(w) => output.push(w),
+                    None => output.push('�'),
+                }
+            }
+            Ok(output)
+        } else {
+            let mut output = Vec::new();
+            let e = String::from("�");
+            for n in self.integer_code.decode_to_u32(text)?.into_iter() {
+                if n == 0 {
+                    output.push(&e);
+                }
+                match self.maps.words.get((n - 1) as usize) {
+                    Some(w) => output.push(w),
+                    None => output.push(&e),
+                }
+            }
+            Ok(output.into_iter().join(" "))
+        }
     }
 
     fn randomize(&mut self) {

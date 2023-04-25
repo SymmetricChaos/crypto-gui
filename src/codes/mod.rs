@@ -113,6 +113,7 @@ impl<T: Hash + Eq + PartialEq + ToString> LetterAndWordCode<T> {
             .words_string
             .split(",")
             .map(|w| w.trim().to_string())
+            .filter(|word| !word.is_empty())
             .collect_vec();
         self.word_map.clear();
         for (n, c) in self.words.iter().enumerate() {
