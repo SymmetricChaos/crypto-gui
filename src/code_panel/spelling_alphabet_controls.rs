@@ -9,6 +9,16 @@ impl View for SpellingAlphabet {
         ui.selectable_value(&mut self.mode, SpellingAlphabetMode::Ccb, "CCB");
         ui.selectable_value(
             &mut self.mode,
+            SpellingAlphabetMode::Usn1908,
+            "US Navy (1908) (long)",
+        );
+        ui.selectable_value(
+            &mut self.mode,
+            SpellingAlphabetMode::Usn1908Alt,
+            "US Navy (1908) (short)",
+        );
+        ui.selectable_value(
+            &mut self.mode,
             SpellingAlphabetMode::Wu1912,
             "Western Union (1912)",
         );
@@ -17,16 +27,7 @@ impl View for SpellingAlphabet {
             SpellingAlphabetMode::Wu1942,
             "Western Union (1942)",
         );
-        ui.selectable_value(
-            &mut self.mode,
-            SpellingAlphabetMode::Usn1908,
-            "US Navy (1908)",
-        );
-        ui.selectable_value(
-            &mut self.mode,
-            SpellingAlphabetMode::Usn1908Alt,
-            "US Navy (1908) (Alt)",
-        );
+
         ui.selectable_value(
             &mut self.mode,
             SpellingAlphabetMode::Us1941,
