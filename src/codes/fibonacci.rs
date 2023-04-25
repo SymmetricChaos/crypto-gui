@@ -121,6 +121,20 @@ mod fibonacci_tests {
     }
 
     #[test]
+    fn encode_test_integer() {
+        let mut code = FibonacciCode::default();
+        code.mode = IOMode::Integer;
+        assert_eq!(code.encode("1").unwrap(), "11");
+    }
+    
+    #[test]
+    fn decode_test_integer() {
+        let mut code = FibonacciCode::default();
+        code.mode = IOMode::Integer;
+        assert_eq!(code.decode("11").unwrap(), "1");
+    }
+
+    #[test]
     fn encode_test_words() {
         let mut code = FibonacciCode::default();
         code.mode = IOMode::Word;

@@ -33,8 +33,8 @@ impl View for FibonacciCode {
                 fill_code_columns(16, 5, ui, Box::new(self.maps.words_codes()));
             }
             IOMode::Integer => {
-                ui.label("Integer Mode: get the Fibonacci coding for any list of positive integers or decode any string of 0s and 1s into a list of positive integers. A sample list of encodings it provided below.");
-                let pairs = (0..64).map(|n| (n.to_string(), self.integer_code.encode_u32(n)));
+                ui.label("Integer Mode: Get the Fibonacci coding for any list of positive integers or decode any string of 0s and 1s into a list of positive integers. A sample list of encodings it provided below.");
+                let pairs = (1..=64).map(|n| (n.to_string(), self.integer_code.encode_u32(n)));
                 fill_code_columns(16, 5, ui, Box::new(pairs));
             }
         }

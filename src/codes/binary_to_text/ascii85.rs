@@ -74,7 +74,12 @@ impl Ascii85 {
     }
 
     pub fn chars_codes(&self) -> impl Iterator<Item = (String, char)> + '_ {
-        (0..85u8).map(|x| (format!("{x}"), *self.map().get_by_left(&x).unwrap() as char))
+        (0..85u8).map(|x| {
+            (
+                format!("{x: <2}"),
+                *self.map().get_by_left(&x).unwrap() as char,
+            )
+        })
     }
 
     pub fn encode_file(&self) -> Result<String, Error> {
