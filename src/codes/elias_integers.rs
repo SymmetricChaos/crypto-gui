@@ -11,7 +11,7 @@ lazy_static! {
     pub static ref DLETA: OmegaGen = OmegaGen::new();
 }
 
-pub enum EliasMode {
+pub enum EliasVariant {
     Delta,
     Gamma,
     Omega,
@@ -105,7 +105,7 @@ impl Iterator for DeltaGen {
 }
 
 pub struct EliasCodeIntegers {
-    pub variant: EliasMode,
+    pub variant: EliasVariant,
     cached_codes_delta: RefCell<HashMap<u32, String>>,
     cached_codes_gamma: RefCell<HashMap<u32, String>>,
     cached_codes_omega: RefCell<HashMap<u32, String>>,
@@ -114,9 +114,9 @@ pub struct EliasCodeIntegers {
 impl EliasCodeIntegers {
     pub fn encode_u32(&self, n: u32) -> String {
         match self.variant {
-            EliasMode::Delta => todo!(),
-            EliasMode::Gamma => todo!(),
-            EliasMode::Omega => todo!(),
+            EliasVariant::Delta => todo!(),
+            EliasVariant::Gamma => todo!(),
+            EliasVariant::Omega => todo!(),
         }
         // Quickly check if the number has been encoded before
         if let Some(code) = self.cached_codes.borrow().get(&n) {

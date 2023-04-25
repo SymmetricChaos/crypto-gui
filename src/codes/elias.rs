@@ -1,24 +1,35 @@
-use super::{elias_integers::EliasMode, Code, EliasCodeIntegers, LetterAndWordCode};
+use super::{elias_integers::EliasVariant, Code, EliasCodeIntegers, IOMode, LetterAndWordCode};
 use crate::errors::Error;
 
 pub struct EliasCode {
     pub maps: LetterAndWordCode<String>,
     pub integer_code: EliasCodeIntegers,
     pub mode: IOMode,
-    pub variant: EliasMode,
+    pub variant: EliasVariant,
 }
 
 impl EliasCode {}
 
 impl Default for EliasCode {
     fn default() -> Self {
-        todo!()
+        let codes = EliasCodeIntegers::default();
+
+        let mut maps = LetterAndWordCode::<String>::default();
+        maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
+        maps.set_letter_map(|(n, _)| codes.encode_u32((n + 1) as u32));
+
+        Self {
+            mode: IOMode::Integer,
+            integer_code: codes,
+            maps,
+            variant: EliasVariant::Delta,
+        }
     }
 }
 
 impl Code for EliasCode {
     fn encode(&self, text: &str) -> Result<String, Error> {
-        if self.mode == IOMode::Number {
+        if self.mode == IOMode::Integer {
             self.integer_code.encode(text)
         } else if self.mode == IOMode::Letter {
             let mut output = String::new();
