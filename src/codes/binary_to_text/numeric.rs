@@ -1,62 +1,55 @@
-use crate::codes::Code;
 use crate::errors::Error;
+use crate::text_aux::bytes_as_text::u8_to_string_with_radix_and_width;
+use crate::{codes::Code, text_aux::bytes_as_text::u8_to_string_with_radix};
 use itertools::Itertools;
-use num::Integer;
-use std::fs::read;
-use std::path::PathBuf;
 
 use super::{bytes_to_hex, BinaryToText, BinaryToTextMode};
 
 // Make it possible to encode an aribtrary file
-pub struct Numeric {
-    pub file: Option<PathBuf>,
+pub struct BytesAsNumbers {
     pub mode: BinaryToTextMode,
     pub fixed_width: bool,
     pub radix: u32,
+    pub width: usize,
 }
 
-impl Default for Numeric {
+impl Default for BytesAsNumbers {
     fn default() -> Self {
         Self {
-            file: None,
             mode: BinaryToTextMode::Utf8,
             fixed_width: false,
             radix: 10,
+            width: 3,
         }
     }
 }
 
-impl Numeric {
+impl BytesAsNumbers {
     pub fn chars_codes(&self) -> impl Iterator<Item = (String, String)> + '_ {
-        (0..255u8).map(|x| (format!("{x}"), self.byte_to_number(&x)))
+        (0..=255u8).map(|x| (format!("{x: <3}"), self.byte_to_number(&x)))
+    }
+
+    pub fn set_width(&mut self) {
+        self.width = 256.0_f32.log(self.radix as f32).ceil() as usize
     }
 
     pub fn byte_to_number(&self, byte: &u8) -> String {
-        // Built ins
-        match self.radix {
-            2 => return format!("{:b}", byte),
-            8 => return format!("{:o}", byte),
-            10 => return format!("{}", byte),
-            16 => return format!("{:X}", byte),
-            _ => (),
-        }
-        // Handle zero
-        if byte == &0 {
-            String::from("0")
-        } else {
-            let mut b = *byte;
-            let mut s = Vec::new();
-            let divisor = self.radix as u8;
-            while b != 0 {
-                let (q, r) = b.div_rem(&divisor);
-                if r < 10 {
-                    s.push(r + 48) // shift to start of ASCII numbers
-                } else {
-                    s.push(r + 55) // shift to start of ASCII uppercase letters
-                }
-                b = q;
+        if self.fixed_width {
+            match self.radix {
+                2 => return format!("{:08b}", byte),
+                8 => return format!("{:03o}", byte),
+                10 => return format!("{:03}", byte),
+                16 => return format!("{:02X}", byte),
+                r => u8_to_string_with_radix_and_width(byte, r as u8, self.width),
             }
-            String::from_utf8(s.into_iter().rev().collect_vec()).unwrap()
+        } else {
+            match self.radix {
+                2 => format!("{:b}", byte),
+                8 => format!("{:o}", byte),
+                10 => format!("{}", byte),
+                16 => format!("{:X}", byte),
+                r => u8_to_string_with_radix(byte, r as u8),
+            }
         }
     }
 
@@ -64,22 +57,22 @@ impl Numeric {
         u8::from_str_radix(number, self.radix).map_err(|e| Error::Input(e.to_string()))
     }
 
-    pub fn encode_file(&self) -> Result<String, Error> {
-        if self.file.is_none() {
-            return Err(Error::input("no file stored"));
-        }
-        let bytes = &read(self.file.as_ref().unwrap()).unwrap()[..];
-        self.encode_bytes(bytes)
-    }
+    // pub fn encode_file(&self) -> Result<String, Error> {
+    //     if self.file.is_none() {
+    //         return Err(Error::input("no file stored"));
+    //     }
+    //     let bytes = &read(self.file.as_ref().unwrap()).unwrap()[..];
+    //     self.encode_bytes(bytes)
+    // }
 }
 
-impl BinaryToText for Numeric {
+impl BinaryToText for BytesAsNumbers {
     fn encode_bytes(&self, bytes: &[u8]) -> Result<String, Error> {
         Ok(bytes.iter().map(|b| self.byte_to_number(b)).join(" "))
     }
 }
 
-impl Code for Numeric {
+impl Code for BytesAsNumbers {
     fn encode(&self, text: &str) -> Result<String, Error> {
         match self.mode {
             BinaryToTextMode::Hex => self.encode_hex(text),
@@ -120,7 +113,7 @@ mod numeric_tests {
 
     #[test]
     fn encode_test() {
-        let mut code = Numeric::default();
+        let mut code = BytesAsNumbers::default();
         for (ptext, ctext) in TESTS_10 {
             assert_eq!(code.encode(ptext).unwrap(), ctext);
         }
@@ -132,7 +125,7 @@ mod numeric_tests {
 
     #[test]
     fn decode_test() {
-        let mut code = Numeric::default();
+        let mut code = BytesAsNumbers::default();
         for (ptext, ctext) in TESTS_10 {
             assert_eq!(code.decode(ctext).unwrap(), ptext);
         }
