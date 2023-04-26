@@ -1,5 +1,9 @@
 use eframe::egui::{Response, RichText, Ui};
 
+pub fn subheading(text: &str) -> RichText {
+    RichText::new(text).size(16.0)
+}
+
 pub fn mono(ui: &mut Ui, text: &str, size: Option<f32>) -> Response {
     match size {
         Some(n) => ui.label(RichText::new(text).monospace().size(n)),

@@ -1,7 +1,9 @@
 use eframe::egui::Ui;
 
 use crate::{
-    cipher_panel::_generic_components::control_string, codes::TapCode, egui_aux::mono,
+    cipher_panel::_generic_components::control_string,
+    codes::TapCode,
+    egui_aux::{mono, subheading},
     text_aux::PresetAlphabet::*,
 };
 
@@ -11,7 +13,7 @@ impl ViewableCode for TapCode {}
 
 impl View for TapCode {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String) {
-        ui.label("Common Latin Alphabets");
+        ui.label(subheading("Common Latin Alphabets"));
         ui.horizontal(|ui| {
             if ui.button("No C").clicked() {
                 self.assign_alphabet(BasicLatinNoC)
