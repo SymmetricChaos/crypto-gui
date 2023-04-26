@@ -1,39 +1,8 @@
 use std::fmt::Display;
 
-use crate::codes::{binary_to_text::BinaryToTextMode, Code};
+use crate::codes::binary_to_text::BinaryToTextMode;
 use crate::egui_aux::mono_strong;
-use eframe::egui::{self, Color32, RichText};
-
-pub fn encode_decode(
-    ui: &mut egui::Ui,
-    code: &dyn Code,
-    input: &mut String,
-    output: &mut String,
-    errors: &mut String,
-) {
-    ui.horizontal(|ui| {
-        if ui
-            .button(RichText::from("ENCODE").color(Color32::GOLD))
-            .clicked()
-        {
-            errors.clear();
-            match code.encode(input) {
-                Ok(text) => *output = text,
-                Err(e) => *errors = e.to_string(),
-            }
-        };
-        if ui
-            .button(RichText::from("DECODE").color(Color32::GOLD))
-            .clicked()
-        {
-            errors.clear();
-            match code.decode(input) {
-                Ok(text) => *output = text,
-                Err(e) => *errors = e.to_string(),
-            }
-        }
-    });
-}
+use eframe::egui::{self};
 
 pub fn fill_code_columns<T: Display, S: Display>(
     nrows: usize,
@@ -89,3 +58,24 @@ pub fn binary_to_text_input_mode(ui: &mut egui::Ui, current_value: &mut BinaryTo
     ui.selectable_value(current_value, BinaryToTextMode::Utf8, "Text")
         .on_hover_text("convert text to raw bytes");
 }
+
+// pub fn upload_and_save_file(file: Option<PathBuf>) {
+//     use rfd::FileDialog;
+//     ui.label("You can upload a file and encode its binary data as text. Decoding files is not supported as it is impossible to know the contents.");
+//     if ui.button("Upload File").clicked() {
+//         file = FileDialog::new().pick_file();
+//     }
+//     if self.file.is_some() {
+//         let file_name = file.as_ref().unwrap().file_name().unwrap().to_str();
+//         ui.add_space(10.0);
+//         ui.label(format!("{}", file_name.unwrap()));
+//         if ui.button("Download Encoded File").clicked() {
+//             let target_file = FileDialog::new().add_filter("", &[".txt"]).save_file();
+//             if let Some(file) = target_file {
+//                 std::fs::write(file, self.encode_file().unwrap()).unwrap()
+//             }
+//         }
+//     }
+//     ui.add_space(32.0);
+//     fill_code_columns(17, 5, ui, Box::new(self.chars_codes()));
+// }
