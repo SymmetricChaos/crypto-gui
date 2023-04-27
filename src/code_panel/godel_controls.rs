@@ -17,7 +17,7 @@ impl View for Godel {
                 {
                     self.set_letter_map();
                 };
-                fill_code_columns(16, 5, ui, Box::new(self.maps.chars_codes()));
+                fill_code_columns(16, 5, ui, Box::new(self.maps.codes_chars()));
             }
             IOMode::Word => {
                 ui.label("Word Mode: Provide any number of words or phrases separated by commas. Codes will be assigned to each word or phrase in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
@@ -27,7 +27,7 @@ impl View for Godel {
                 {
                     self.set_word_map();
                 };
-                fill_code_columns(16, 5, ui, Box::new(self.maps.words_codes()));
+                fill_code_columns(16, 5, ui, Box::new(self.maps.codes_words()));
             }
             IOMode::Integer => {
                 ui.label("<<<ERROR INTEGER MODE IS NOT DEFINED FOR GODEL CODE>>>");

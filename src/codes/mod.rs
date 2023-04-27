@@ -133,6 +133,18 @@ impl<T: Hash + Eq + PartialEq + ToString> LetterAndWordCode<T> {
             .map(|x| (x, self.word_map.get_by_left(x).unwrap()))
     }
 
+    pub fn codes_chars(&mut self) -> impl Iterator<Item = (&T, char)> + '_ {
+        self.alphabet
+            .chars()
+            .map(|x| (self.letter_map.get_by_left(&x).unwrap(), x))
+    }
+
+    pub fn codes_words(&mut self) -> impl Iterator<Item = (&T, &String)> + '_ {
+        self.words
+            .iter()
+            .map(|x| (self.word_map.get_by_left(x).unwrap(), x))
+    }
+
     pub fn get_by_letter(&self, c: char) -> Result<&T, Error> {
         self.letter_map
             .get_by_left(&c)

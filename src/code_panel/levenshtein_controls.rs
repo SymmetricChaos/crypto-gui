@@ -34,7 +34,7 @@ impl View for LevenshteinCode {
             }
             IOMode::Integer => {
                 ui.label("Integer Mode: Get the Levenshtein coding for any list of non-negative integers or decode any string of 0s and 1s into a list of non-negative integers. A sample list of encodings it provided below.");
-                let pairs = (0..64).map(|n| (n.to_string(), self.integer_code.encode_u32(n)));
+                let pairs = (0..32).map(|n| (n.to_string(), self.integer_code.encode_u32(n)));
                 fill_code_columns(16, 5, ui, Box::new(pairs));
             }
         }
