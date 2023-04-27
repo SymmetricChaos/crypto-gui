@@ -1,9 +1,11 @@
 pub mod ascii85;
 pub mod base32;
 pub mod base64;
+pub mod numeric;
 pub mod pgp_words;
 pub mod skey;
-pub mod numeric;
+
+use std::{fs::read, path::PathBuf};
 
 use crate::errors::Error;
 use bimap::BiMap;
@@ -62,14 +64,16 @@ pub trait BinaryToText {
         self.encode_bytes(text.as_bytes())
     }
 
-    // fn encode_file(&self, path: Option<PathBuf>) -> Result<String, Error> {
-    //     if path.is_none() {
-    //         return Err(Error::input("no file stored"));
-    //     }
-    //     let bytes = &read(path.as_ref().unwrap()).unwrap()[..];
-    //     self.encode_bytes(bytes)
-    // }
+    fn encode_file(&self, path: Option<PathBuf>) -> Result<String, Error> {
+        if path.is_none() {
+            return Err(Error::input("no file stored"));
+        }
+        let bytes = &read(path.as_ref().unwrap()).unwrap()[..];
+        self.encode_bytes(bytes)
+    }
 }
+
+// #[cfg(target_arch = "wasm32")]
 
 #[cfg(test)]
 mod tests {

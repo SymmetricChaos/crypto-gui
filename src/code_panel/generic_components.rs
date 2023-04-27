@@ -1,8 +1,6 @@
-use std::fmt::Display;
-
-use crate::codes::binary_to_text::BinaryToTextMode;
-use crate::egui_aux::mono_strong;
+use crate::{codes::binary_to_text::BinaryToTextMode, egui_aux::mono_strong};
 use eframe::egui::{self};
+use std::fmt::Display;
 
 pub fn fill_code_columns<T: Display, S: Display>(
     nrows: usize,
@@ -58,24 +56,34 @@ pub fn binary_to_text_input_mode(ui: &mut egui::Ui, current_value: &mut BinaryTo
     ui.selectable_value(current_value, BinaryToTextMode::Utf8, "Text")
         .on_hover_text("convert text to raw bytes");
 }
+// use std::path::PathBuf;
 
-// pub fn upload_and_save_file(file: Option<PathBuf>) {
-//     use rfd::FileDialog;
-//     ui.label("You can upload a file and encode its binary data as text. Decoding files is not supported as it is impossible to know the contents.");
+// use rfd::FileDialog;
+// #[cfg(not(target_arch = "wasm32"))]
+// pub fn upload_file(ui: &mut egui::Ui, file: &mut Option<PathBuf>) {
 //     if ui.button("Upload File").clicked() {
-//         file = FileDialog::new().pick_file();
+//         *file = FileDialog::new().pick_file();
 //     }
-//     if self.file.is_some() {
-//         let file_name = file.as_ref().unwrap().file_name().unwrap().to_str();
-//         ui.add_space(10.0);
-//         ui.label(format!("{}", file_name.unwrap()));
-//         if ui.button("Download Encoded File").clicked() {
-//             let target_file = FileDialog::new().add_filter("", &[".txt"]).save_file();
-//             if let Some(file) = target_file {
-//                 std::fs::write(file, self.encode_file().unwrap()).unwrap()
-//             }
+//     let file_name = file.as_ref().unwrap().file_name().unwrap().to_str();
+//     ui.add_space(10.0);
+//     ui.label(format!("{}", file_name.unwrap()));
+// }
+// #[cfg(target_arch = "wasm32")]
+// pub fn upload_file(ui: &mut egui::Ui, file: &mut Option<PathBuf>) {}
+
+// #[cfg(not(target_arch = "wasm32"))]
+// pub fn encode_file_and_save(
+//     ui: &mut egui::Ui,
+//     code: &dyn BinaryToText,
+//     source_file: Option<PathBuf>,
+// ) {
+//     if ui.button("Download Encoded File").clicked() {
+//         let target_file = FileDialog::new().add_filter("", &[".txt"]).save_file();
+//         if let Some(file) = target_file {
+//             std::fs::write(file, code.encode_file(source_file).unwrap()).unwrap()
 //         }
 //     }
-//     ui.add_space(32.0);
-//     fill_code_columns(17, 5, ui, Box::new(self.chars_codes()));
 // }
+
+// #[cfg(target_arch = "wasm32")]
+// pub fn encode_file_and_save(file: Option<PathBuf>) {}

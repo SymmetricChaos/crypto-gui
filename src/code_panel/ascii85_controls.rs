@@ -30,25 +30,16 @@ impl View for Ascii85 {
         };
         ui.add_space(10.0);
         binary_to_text_input_mode(ui, &mut self.mode);
-        ui.add_space(10.0);
 
-        // use rfd::FileDialog;
         // ui.label("You can upload a file and encode its binary data as text. Decoding files is not supported as it is impossible to know the contents.");
-        // if ui.button("Upload File").clicked() {
-        //     self.file = FileDialog::new().pick_file();
-        // }
+        // upload_file(ui, &mut self.file);
         // if self.file.is_some() {
         //     let file_name = self.file.as_ref().unwrap().file_name().unwrap().to_str();
         //     ui.add_space(10.0);
         //     ui.label(format!("{}", file_name.unwrap()));
-        //     if ui.button("Download Encoded File").clicked() {
-        //         let target_file = FileDialog::new().add_filter("", &[".txt"]).save_file();
-        //         if let Some(file) = target_file {
-        //             std::fs::write(file, self.encode_file().unwrap()).unwrap()
-        //         }
-        //     }
+        //     encode_file_and_save(ui, self, self.file.clone());
         // }
-        // ui.add_space(32.0);
+        ui.add_space(32.0);
         fill_code_columns(17, 5, ui, Box::new(self.chars_codes()));
     }
 }

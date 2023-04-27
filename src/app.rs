@@ -130,16 +130,6 @@ impl ClassicCrypto {
 
         cc.egui_ctx.set_visuals(egui::Visuals::dark());
 
-        // let _x = cc.egui_ctx.style().text_styles;
-        // let text_styles = [
-        //     (Heading, FontId::new(30.0, Proportional)),
-        //     (Body, FontId::new(18.0, Proportional)),
-        //     (Monospace, FontId::new(14.0, Proportional)),
-        //     (Button, FontId::new(14.0, Proportional)),
-        //     (Small, FontId::new(10.0, Proportional)),
-        // ]
-        // .into();
-
         Self::default()
     }
 
@@ -170,9 +160,7 @@ impl ClassicCrypto {
             self.code_selector_panel(ctx);
 
             SidePanel::right("code_io_panel")
-                .default_width(150.0)
-                .min_width(100.0)
-                .max_width(200.0)
+                .default_width(200.0)
                 .show(ctx, |ui| {
                     self.io_panel.ui(
                         ui,
@@ -227,9 +215,7 @@ impl ClassicCrypto {
             self.cipher_selector_panel(ctx);
 
             SidePanel::right("cipher_io_panel")
-                .default_width(150.0)
-                .min_width(100.0)
-                .max_width(200.0)
+                .default_width(200.0)
                 .show(ctx, |ui| {
                     self.io_panel.ui(
                         ui,
