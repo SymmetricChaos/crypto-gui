@@ -9,6 +9,8 @@ pub mod ids;
 pub mod cipher_panel;
 pub mod ciphers;
 
+pub mod cipher_attacks;
+
 pub mod code_panel;
 pub mod codes;
 
