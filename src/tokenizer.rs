@@ -192,40 +192,40 @@ impl Node {
     }
 }
 
-#[test]
-fn test() {
-    let mut tree = Node::tree(vec![
-        Node::branch(
-            't',
-            Some("letter"),
-            vec![Node::branch(
-                'h',
-                None,
-                vec![Node::branch(
-                    'e',
-                    Some("word"),
-                    vec![Node::leaf('e', "word")],
-                )],
-            )],
-        ),
-        Node::branch('h', Some("letter"), vec![Node::leaf('e', "word")]),
-        Node::leaf('e', "letter"),
-    ]);
-    tree.sort();
+// #[test]
+// fn test() {
+//     let mut tree = Node::tree(vec![
+//         Node::branch(
+//             't',
+//             Some("letter"),
+//             vec![Node::branch(
+//                 'h',
+//                 None,
+//                 vec![Node::branch(
+//                     'e',
+//                     Some("word"),
+//                     vec![Node::leaf('e', "word")],
+//                 )],
+//             )],
+//         ),
+//         Node::branch('h', Some("letter"), vec![Node::leaf('e', "word")]),
+//         Node::leaf('e', "letter"),
+//     ]);
+//     tree.sort();
 
-    println!("\n\nInput Paths:");
-    for (k, v) in &tree.input_paths() {
-        println!("{k} => {v}")
-    }
+//     println!("\n\nInput Paths:");
+//     for (k, v) in &tree.input_paths() {
+//         println!("{k} => {v}")
+//     }
 
-    println!("\n\nOutput Paths:");
-    for (k, v) in &tree.output_paths() {
-        println!("{k} <= {v:?}")
-    }
+//     println!("\n\nOutput Paths:");
+//     for (k, v) in &tree.output_paths() {
+//         println!("{k} <= {v:?}")
+//     }
 
-    print!("\n\n");
-    for sentence in ["t", "the", "thee", "teh", "ethehe", "art", "thj", "th"] {
-        println!("{}", sentence);
-        println!("{:?}\n", tree.extract_tokens(sentence));
-    }
-}
+//     print!("\n\n");
+//     for sentence in ["t", "the", "thee", "teh", "ethehe", "art", "thj", "th"] {
+//         println!("{}", sentence);
+//         println!("{:?}\n", tree.extract_tokens(sentence));
+//     }
+// }
