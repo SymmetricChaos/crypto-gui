@@ -63,6 +63,9 @@ pub use needle::Needle;
 pub mod romaji;
 pub use romaji::romaji::Romaji;
 
+pub mod linotype;
+pub use linotype::Linotype;
+
 use crate::errors::Error;
 
 pub trait Code {

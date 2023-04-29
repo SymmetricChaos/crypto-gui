@@ -20,6 +20,7 @@ pub mod fibonacci_controls;
 pub mod generic_components;
 pub mod godel_controls;
 pub mod levenshtein_controls;
+pub mod linotype_controls;
 pub mod morse_controls;
 pub mod needle_controls;
 pub mod numeric_controls;
@@ -54,13 +55,14 @@ fn combox_box(code: &[CodeId], identifier: &'static str, active_code: &mut CodeI
 pub struct CodeInterface {
     // Text Standards
     ascii: Ascii,
-    unicode: Unicode,
-    punycode: Punycode,
-    spelling: SpellingAlphabet,
-    morse: Morse,
-    romaji: Romaji,
     baudot: Baudot,
+    linotype: Linotype,
+    morse: Morse,
     needle: Needle,
+    punycode: Punycode,
+    romaji: Romaji,
+    spelling: SpellingAlphabet,
+    unicode: Unicode,
 
     // Binary to Text
     ascii85: Ascii85,
@@ -88,6 +90,7 @@ impl CodeInterface {
             &[
                 CodeId::Ascii,
                 CodeId::Baudot,
+                CodeId::Linotype,
                 CodeId::Morse,
                 CodeId::Needle,
                 CodeId::Punycode,
@@ -154,6 +157,7 @@ impl CodeInterface {
             CodeId::Romaji => &mut self.romaji,
             CodeId::ByteAsNum => &mut self.numeric,
             CodeId::Levenshtein => &mut self.levenshtein,
+            CodeId::Linotype => &mut self.linotype,
             //_ => todo!("unable to get active code"),
         }
     }
