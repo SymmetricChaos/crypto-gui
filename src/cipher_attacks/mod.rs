@@ -47,20 +47,32 @@ fn char_windows(src: &str, win_size: usize) -> impl Iterator<Item = &str> {
     })
 }
 
-// Logprobability score for a text, higher (closer to zero) is better
-// Overflow happens a text size of several quadrillion characters of text
+// Log probability score for a text, higher (closer to zero) is better. The number has no real meaning on its own, it is only useful for comparison.
+// Overflow happens at a text size of several quadrillion characters
 pub fn score_bigrams(text: &str) -> i64 {
     char_windows(text, 2)
         .map(|s| BIGRAM_LOGPROB.get(s).unwrap())
         .sum()
 }
 
-// Logprobability score for a text, higher is (closer to zero) better
-// Overflow happens a text size of several quadrillion characters of text
 pub fn score_trigrams(text: &str) -> i64 {
     char_windows(text, 3)
         .map(|s| TRIGRAM_LOGPROB.get(s).unwrap_or(&-5000))
         .sum()
+}
+
+pub enum TextScore {
+    Bigram,
+    Trigram,
+}
+
+impl TextScore {
+    pub fn score(&self, text: &str) -> i64 {
+        match self {
+            TextScore::Bigram => score_bigrams(text),
+            TextScore::Trigram => score_trigrams(text),
+        }
+    }
 }
 #[cfg(test)]
 mod cipher_attack_tests {
