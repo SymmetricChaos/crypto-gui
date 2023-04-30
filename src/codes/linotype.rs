@@ -5,11 +5,6 @@ use itertools::Itertools;
 use lazy_static::lazy_static;
 use std::cell::Cell;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum MagazineVariant {
-    NinetyChannel,
-    SeventyTwoChannel,
-}
 //http://www.linotype.org/OnLineDocs/LinotypeMachinePrinciples-1940/LMP-chapter20.pdf
 const LINOTYPE_90_MAG: &'static str =
     "taoinshrdlucmfwypvbgkqjxz\u{FB01}\u{FB02}\u{FB00}\u{FB03}\u{FB04}\u{2003},.:;?\u{2007}(|\"!-\u{2009})\u{2024}'*1234567890$\u{2025}ETAOINSHRDLUCMFWYPVBGKQJXZ@\u{00E6}&\u{2014}";
@@ -23,7 +18,6 @@ lazy_static! {
 }
 
 pub struct Linotype {
-    pub variant: MagazineVariant,
     first_e_channel: Cell<bool>,
 }
 
@@ -49,7 +43,6 @@ impl Linotype {
 impl Default for Linotype {
     fn default() -> Self {
         Linotype {
-            variant: MagazineVariant::NinetyChannel,
             first_e_channel: Cell::new(true),
         }
     }
@@ -102,17 +95,17 @@ mod linotype_tests {
 
     // Multiple 'e' characters appear
     const PLAINTEXT: &'static str = "TheQuickBrownFoxJumpsOverTheLazyDog";
-    const CIPHERTEXT: &'static str = "10000000001010000001010101010001110000011100011110011000101001000010110000110001001000010001001101000011000110111010110000111000100000010100000100110000100010101000001100010111000000000101000000101001001000010100111000010011100100000001100010111";
+    const CIPHERTEXT_90: &'static str = "10000000001010000001010101010001110000011100011110011000101001000010110000110001001000010001001101000011000110111010110000111000100000010100000100110000100010101000001100010111000000000101000000101001001000010100111000010011100100000001100010111";
 
     #[test]
     fn encrypt_test() {
-        let code = Linotype::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT);
+        let mut code = Linotype::default();
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT_90);
     }
 
     #[test]
     fn decrypt_test() {
-        let code = Linotype::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT);
+        let mut code = Linotype::default();
+        assert_eq!(code.decode(CIPHERTEXT_90).unwrap(), PLAINTEXT);
     }
 }
