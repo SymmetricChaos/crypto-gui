@@ -47,6 +47,22 @@ fn char_windows(src: &str, win_size: usize) -> impl Iterator<Item = &str> {
     })
 }
 
+fn extract_char_counts(text: &str) -> HashMap<char, usize> {
+    let mut map = HashMap::new();
+    for c in text.chars() {
+        *map.entry(c).or_insert(0) += 1
+    }
+    map
+}
+
+fn extract_bigram_counts(text: &str) -> HashMap<String, usize> {
+    let mut map = HashMap::new();
+    for s in char_windows(text, 2) {
+        *map.entry(s.to_owned()).or_insert(0) += 1
+    }
+    map
+}
+
 // Log probability score for a text, higher (closer to zero) is better. The number has no real meaning on its own, it is only useful for comparison.
 // Overflow happens at a text size of several quadrillion characters
 pub fn score_bigrams(text: &str) -> i64 {
