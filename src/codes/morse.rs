@@ -22,6 +22,15 @@ impl MorseRep {
         }
     }
 
+    pub fn word_sep(&self) -> &str {
+        match self {
+            MorseRep::Binary => "0000000",
+            MorseRep::Ascii => "   ",
+            MorseRep::CdotNDash => "   ",
+            MorseRep::HalfBlock => "       ",
+        }
+    }
+
     pub fn map(&self, standard: MorseStandard) -> Result<&BiMap<char, &str>, Error> {
         Ok(match standard {
             MorseStandard::Itu => match self {
@@ -89,6 +98,15 @@ impl Code for Morse {
         let map = self.mode.map(self.standard)?;
         let mut out = Vec::with_capacity(text.chars().count());
         for s in text.chars() {
+            if s == ' ' {
+                match self.mode {
+                    MorseRep::Binary => out.push("0"),
+                    MorseRep::HalfBlock => out.push(" "),
+                    MorseRep::Ascii => out.push(" "),
+                    MorseRep::CdotNDash => out.push(" "),
+                }
+                continue;
+            }
             match map.get_by_left(&s) {
                 Some(code_group) => out.push(*code_group),
                 None => return Err(Error::invalid_input_char(s)),
@@ -98,15 +116,21 @@ impl Code for Morse {
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
-        let mut out = String::new();
+        let mut out = Vec::new();
+        let mut word_buffer = String::new();
         let map = self.mode.map(self.standard)?;
-        for s in text.split(self.mode.letter_sep()) {
-            match map.get_by_right(&s) {
-                Some(c) => out.push(*c),
-                None => return Err(Error::invalid_input_group(s)),
+        for word in text.split(self.mode.word_sep()) {
+            for ch in word.split(self.mode.letter_sep()) {
+                match map.get_by_right(&ch) {
+                    Some(c) => word_buffer.push(*c),
+                    None => return Err(Error::invalid_input_group(ch)),
+                }
             }
+            out.push(word_buffer.to_string());
+            word_buffer.clear()
         }
-        Ok(out)
+
+        Ok(out.join(" "))
     }
 
     fn randomize(&mut self) {}
@@ -118,15 +142,18 @@ impl Code for Morse {
 mod morseitu_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    //const CIPHERTEXT_ASCII: &'static str = "- .... . --.- ..- .. -.-. -.- -... .-. --- .-- -. ..-. --- -..- .--- ..- -- .--. ... --- ...- . .-. - .... . .-.. .- --.. -.-- -.. --- --.";
-    const CIPHERTEXT_BINARY: &'static str = "111000101010100010001110111010111000101011100010100011101011101000111010111000111010101000101110100011101110111000101110111000111010001010111010001110111011100011101010111000101110111011100010101110001110111000101110111010001010100011101110111000101010111000100010111010001110001010101000100010111010100010111000111011101010001110101110111000111010100011101110111000111011101";
+    const PLAINTEXT: &'static str = "THE QUICK BROWN FOX";
+    const CIPHERTEXT_ASCII: &'static str =
+        "- .... .   --.- ..- .. -.-. -.-   -... .-. --- .-- -.   ..-. --- -..-";
+    const CIPHERTEXT_BINARY: &'static str = "111000101010100010000000111011101011100010101110001010001110101110100011101011100000001110101010001011101000111011101110001011101110001110100000001010111010001110111011100011101010111";
 
     #[test]
     fn encode_test_binary() {
         let mut code = Morse::default();
         code.mode = MorseRep::Binary;
         assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT_BINARY);
+        code.mode = MorseRep::Ascii;
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT_ASCII);
     }
 
     #[test]
@@ -134,6 +161,8 @@ mod morseitu_tests {
         let mut code = Morse::default();
         code.mode = MorseRep::Binary;
         assert_eq!(code.decode(CIPHERTEXT_BINARY).unwrap(), PLAINTEXT);
+        code.mode = MorseRep::Ascii;
+        assert_eq!(code.decode(CIPHERTEXT_ASCII).unwrap(), PLAINTEXT);
     }
 
     // #[test]
