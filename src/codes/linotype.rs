@@ -21,6 +21,15 @@ pub struct Linotype {
     first_e_channel: Cell<bool>,
 }
 
+pub fn space_to_name(c: char) -> &'static str {
+    match c {
+        '\u{2003}' => "EM SPACE",
+        '\u{2007}' => "FIGURE SPACE",
+        '\u{2009}' => "THIN SPACE",
+        _ => "<<<NOT WHITESPACE>>>",
+    }
+}
+
 impl Linotype {
     pub fn map_inv(&self, s: &str) -> Result<&char, Error> {
         if s == "0000010" {
@@ -34,9 +43,15 @@ impl Linotype {
         }
     }
 
-    pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (char, String)> + '_> {
-        let chars = "eetaoinshrdlucmfwypvbgkqjxz\u{FB01}\u{FB02}\u{FB00}\u{FB03}\u{FB04}␠,.:;?␠(|\"!-␠)\u{2024}'*1234567890$\u{2025}ETAOINSHRDLUCMFWYPVBGKQJXZ@\u{00E6}&\u{2014}".chars();
-        Box::new((2..93).zip(chars).map(|(n, c)| (c, format!("{:07b}", n))))
+    pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (String, String)> + '_> {
+        //let chars = "eetaoinshrdlucmfwypvbgkqjxz\u{FB01}\u{FB02}\u{FB00}\u{FB03}\u{FB04}␠,.:;?␠(|\"!-␠)\u{2024}'*1234567890$\u{2025}ETAOINSHRDLUCMFWYPVBGKQJXZ@\u{00E6}&\u{2014}".chars();
+        Box::new((2..93).zip(LINOTYPE_90_MAG.chars()).map(|(n, c)| {
+            if c.is_whitespace() {
+                (format!("{:07b}", n), space_to_name(c).to_string())
+            } else {
+                (format!("{:07b}", n), format!("{c}"))
+            }
+        }))
     }
 }
 
@@ -99,13 +114,13 @@ mod linotype_tests {
 
     #[test]
     fn encrypt_test() {
-        let mut code = Linotype::default();
+        let code = Linotype::default();
         assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT_90);
     }
 
     #[test]
     fn decrypt_test() {
-        let mut code = Linotype::default();
+        let code = Linotype::default();
         assert_eq!(code.decode(CIPHERTEXT_90).unwrap(), PLAINTEXT);
     }
 }
