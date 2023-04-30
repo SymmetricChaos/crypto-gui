@@ -13,33 +13,6 @@ pub enum MorseRep {
 }
 
 impl MorseRep {
-    pub fn dit(&self) -> &str {
-        match self {
-            MorseRep::Binary => "1",
-            MorseRep::Ascii => "-",
-            MorseRep::CdotNDash => "–",
-            MorseRep::HalfBlock => "▄",
-        }
-    }
-
-    pub fn dah(&self) -> &str {
-        match self {
-            MorseRep::Binary => "111",
-            MorseRep::Ascii => ".",
-            MorseRep::CdotNDash => "·",
-            MorseRep::HalfBlock => "▄▄▄",
-        }
-    }
-
-    pub fn intra_char_sep(&self) -> &str {
-        match self {
-            MorseRep::Binary => "0",
-            MorseRep::Ascii => "",
-            MorseRep::CdotNDash => "",
-            MorseRep::HalfBlock => " ",
-        }
-    }
-
     pub fn letter_sep(&self) -> &str {
         match self {
             MorseRep::Binary => "000",
@@ -62,7 +35,7 @@ impl MorseRep {
                 MorseRep::HalfBlock => &AMERICAN_HALFBLOCK_MAP,
                 MorseRep::Ascii | MorseRep::CdotNDash => {
                     return Err(Error::State(
-                        "American Morse only suppots line code representation".into(),
+                        "Only line codes work for American Morse".into(),
                     ))
                 }
             },

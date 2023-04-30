@@ -46,6 +46,11 @@ impl View for Morse {
             });
         }
 
+        match self.standard {
+            MorseStandard::Itu => ui.label(""),
+            MorseStandard::American => ui.label("The original 1844 created by Morse and Vail was much more complex than the better known international standard. Signals came in four lengths and gaps came in two lengths."),
+        };
+
         ui.add_space(10.0);
         fill_code_columns(20, 3, ui, Box::new(self.chars_codes()))
     }
