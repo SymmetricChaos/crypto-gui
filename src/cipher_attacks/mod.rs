@@ -6,6 +6,8 @@ use itertools::Itertools;
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 
+use crate::errors::Error;
+
 //const ONE_GRAMS: &'static str = "ETAOINSHRDLCUMWFGYPBVKJXQZ";
 const TWO_GRAM_DATA: &'static str = include_str!("2_gram_scores.csv");
 const THREE_GRAM_DATA: &'static str = include_str!("3_gram_scores.csv");
@@ -51,6 +53,10 @@ lazy_static! {
         }
         map
     };
+}
+
+pub trait CipherAttack {
+    fn attack_cipher(&self, text: &str) -> Result<String, Error>;
 }
 
 // From StackOverflow
@@ -108,6 +114,7 @@ pub fn score_quadgrams(text: &str) -> i64 {
         .sum()
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum TextScore {
     Bigram,
     Trigram,

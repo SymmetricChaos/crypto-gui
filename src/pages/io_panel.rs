@@ -1,10 +1,11 @@
 use egui::{Color32, RichText, TextEdit, TextStyle, Ui};
 
 use crate::{
+    attack_panel::{AttackInterface, ViewableAttack},
     cipher_panel::{CipherInterface, ViewableCipher},
     code_panel::{CodeInterface, ViewableCode},
     global_rng::global_rng_controls,
-    ids::{CipherId, CodeId},
+    ids::{AttackId, CipherId, CodeId},
 };
 
 use super::Page;
@@ -71,6 +72,27 @@ pub fn encode_decode(
     });
 }
 
+pub fn attack(
+    ui: &mut Ui,
+    attack: &dyn ViewableAttack,
+    input: &mut String,
+    output: &mut String,
+    errors: &mut String,
+) {
+    ui.horizontal(|ui| {
+        if ui
+            .button(RichText::from("DECRYPT").color(Color32::GOLD))
+            .clicked()
+        {
+            errors.clear();
+            match attack.attack_cipher(input) {
+                Ok(text) => *output = text,
+                Err(e) => *errors = e.to_string(),
+            }
+        };
+    });
+}
+
 #[derive(Default)]
 pub struct IOPanel {}
 
@@ -84,8 +106,10 @@ impl IOPanel {
         active_page: &mut Page,
         active_cipher: &mut CipherId,
         active_code: &mut CodeId,
+        active_attack: &mut AttackId,
         cipher_interface: &mut CipherInterface,
         code_interface: &mut CodeInterface,
+        attack_interface: &mut AttackInterface,
     ) {
         ui.add_space(32.0);
         ui.label("INPUT TEXT");
@@ -114,6 +138,16 @@ impl IOPanel {
             );
         }
 
+        if active_page == &mut Page::Attack {
+            attack(
+                ui,
+                attack_interface.get_active_attack(active_attack),
+                input,
+                output,
+                errors,
+            );
+        }
+
         ui.add_space(10.0);
         if ui.button("clear").clicked() {
             input.clear();
@@ -126,17 +160,19 @@ impl IOPanel {
             std::mem::swap(input, output)
         }
 
-        ui.add_space(16.0);
-        global_rng_controls(ui);
+        if active_page == &Page::Cipher {
+            ui.add_space(16.0);
+            global_rng_controls(ui);
 
-        if !errors.is_empty() {
-            ui.add_space(24.0);
-            ui.label(
-                RichText::new(errors.clone())
-                    .color(Color32::RED)
-                    .background_color(Color32::BLACK)
-                    .monospace(),
-            );
+            if !errors.is_empty() {
+                ui.add_space(24.0);
+                ui.label(
+                    RichText::new(errors.clone())
+                        .color(Color32::RED)
+                        .background_color(Color32::BLACK)
+                        .monospace(),
+                );
+            }
         }
     }
 }

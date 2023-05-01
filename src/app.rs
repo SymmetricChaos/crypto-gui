@@ -1,7 +1,8 @@
+use crate::attack_panel::AttackInterface;
 use crate::cipher_panel::CipherInterface;
 use crate::code_panel::CodeInterface;
 use crate::egui_aux::subheading;
-use crate::ids::{CipherId, CodeId};
+use crate::ids::{AttackId, CipherId, CodeId};
 use crate::pages::io_panel::IOPanel;
 use crate::pages::{Page, TextPrepPage};
 use eframe::egui;
@@ -31,6 +32,7 @@ fn load_font(name: &str, family: &FontFamily, font_data: FontData, font_def: &mu
 pub struct ClassicCrypto {
     cipher_interface: CipherInterface,
     code_interface: CodeInterface,
+    attack_interface: AttackInterface,
 
     io_panel: IOPanel,
     input: String,
@@ -39,6 +41,8 @@ pub struct ClassicCrypto {
 
     active_cipher: CipherId,
     active_code: CodeId,
+    active_attack: AttackId,
+
     active_page: Page,
     text_prep_page: TextPrepPage,
 }
@@ -57,6 +61,7 @@ impl Default for ClassicCrypto {
             // ID of the active Cipher or Code
             active_cipher: CipherId::default(),
             active_code: CodeId::default(),
+            active_attack: AttackId::default(),
 
             // Which page we are on
             active_page: Page::About,
@@ -67,6 +72,7 @@ impl Default for ClassicCrypto {
             // Contains each Cipher and Code along with with controls and a panel for selecting them
             cipher_interface: CipherInterface::default(),
             code_interface: CodeInterface::default(),
+            attack_interface: AttackInterface::default(),
         }
     }
 }
@@ -170,8 +176,10 @@ impl ClassicCrypto {
                         &mut self.active_page,
                         &mut self.active_cipher,
                         &mut self.active_code,
+                        &mut self.active_attack,
                         &mut self.cipher_interface,
                         &mut self.code_interface,
+                        &mut self.attack_interface,
                     );
                 });
 
@@ -225,8 +233,10 @@ impl ClassicCrypto {
                         &mut self.active_page,
                         &mut self.active_cipher,
                         &mut self.active_code,
+                        &mut self.active_attack,
                         &mut self.cipher_interface,
                         &mut self.code_interface,
+                        &mut self.attack_interface,
                     );
                 });
 
@@ -248,6 +258,63 @@ impl ClassicCrypto {
             });
 
         // If somehow we are here without Page::Cipher selected
+        } else {
+            self.blank_page(ctx)
+        }
+    }
+
+    // Combox boxes for selecting ciphers
+    fn attack_selector_panel(&mut self, ctx: &Context) {
+        SidePanel::left("attack_selector_panel")
+            .default_width(150.0)
+            .min_width(100.0)
+            .max_width(200.0)
+            .show(ctx, |ui| {
+                self.attack_interface
+                    .combo_boxes(ui, &mut self.active_attack)
+            });
+    }
+
+    fn attack_page(&mut self, ctx: &Context) {
+        if self.active_page == Page::Attack {
+            self.attack_selector_panel(ctx);
+
+            SidePanel::right("attack_io_panel")
+                .default_width(200.0)
+                .show(ctx, |ui| {
+                    self.io_panel.ui(
+                        ui,
+                        &mut self.input,
+                        &mut self.output,
+                        &mut self.errors,
+                        &mut self.active_page,
+                        &mut self.active_cipher,
+                        &mut self.active_code,
+                        &mut self.active_attack,
+                        &mut self.cipher_interface,
+                        &mut self.code_interface,
+                        &mut self.attack_interface,
+                    );
+                });
+
+            CentralPanel::default().show(ctx, |ui| {
+                ScrollArea::vertical().show(ui, |ui| {
+                    let name = RichText::new(String::from(self.active_attack))
+                        .strong()
+                        .heading();
+                    ui.add(egui::Label::new(name));
+                    ui.label(RichText::new(self.active_attack.description()).size(12.0));
+
+                    ui.add_space(16.0);
+                    ui.separator();
+                    ui.add_space(16.0);
+                    self.attack_interface
+                        .get_active_attack(&self.active_attack)
+                        .ui(ui, &mut self.errors)
+                });
+            });
+
+        // If somehow we are here without Page::Attack selected
         } else {
             self.blank_page(ctx)
         }
@@ -296,6 +363,7 @@ impl App for ClassicCrypto {
 
                 page_selector(ui, "About", Page::About, &mut self.active_page);
                 page_selector(ui, "Ciphers", Page::Cipher, &mut self.active_page);
+                page_selector(ui, "Attacks", Page::Attack, &mut self.active_page);
                 page_selector(ui, "Codes", Page::Code, &mut self.active_page);
                 // page_selector(ui, "RNGs", Page::Rng(None), &mut self.active_page);
                 page_selector(ui, "Text", Page::TextPrep, &mut self.active_page);
@@ -306,6 +374,7 @@ impl App for ClassicCrypto {
             Page::About => self.about_page(ctx),
             Page::Cipher => self.cipher_page(ctx),
             Page::Code => self.code_page(ctx),
+            Page::Attack => self.attack_page(ctx),
             // Page::Rng(_) => todo!("make a method for the RNG page"),
             // Page::CipherCategory => self.cipher_category_page(ctx),
             Page::TextPrep => self.text_prep_page(ctx),

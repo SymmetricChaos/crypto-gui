@@ -26,6 +26,7 @@ pub mod text_aux;
 
 pub mod global_rng;
 
+pub mod attack_panel;
 pub mod tokenizer;
 
 // // ----------------------------------------------------------------------------

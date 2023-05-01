@@ -14,6 +14,7 @@ pub enum Page {
     About,
     Cipher,
     Code,
+    Attack,
     Rng,
     CipherCategory,
     TextPrep,
