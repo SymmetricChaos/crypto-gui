@@ -9,6 +9,7 @@ use std::collections::HashMap;
 //const ONE_GRAMS: &'static str = "ETAOINSHRDLCUMWFGYPBVKJXQZ";
 const TWO_GRAM_DATA: &'static str = include_str!("2_gram_scores.csv");
 const THREE_GRAM_DATA: &'static str = include_str!("3_gram_scores.csv");
+const FOUR_GRAM_DATA: &'static str = include_str!("4_gram_scores.csv");
 
 lazy_static! {
     pub static ref BIGRAM_LOGPROB: HashMap<String, i64> = {
@@ -29,6 +30,19 @@ lazy_static! {
         let mut map = HashMap::new();
         for record in reader.records() {
             let fields = record.expect("failure reading row of trigrama data");
+            map.insert(
+                fields[0].to_string(),
+                i64::from_str_radix(&fields[2], 10)
+                    .expect("failure to convert log probability to i64"),
+            );
+        }
+        map
+    };
+    pub static ref QUADGRAM_LOGPROB: HashMap<String, i64> = {
+        let mut reader = csv::ReaderBuilder::new().from_reader(FOUR_GRAM_DATA.as_bytes());
+        let mut map = HashMap::new();
+        for record in reader.records() {
+            let fields = record.expect("failure reading row of quadgrama data");
             map.insert(
                 fields[0].to_string(),
                 i64::from_str_radix(&fields[2], 10)
@@ -88,9 +102,16 @@ pub fn score_trigrams(text: &str) -> i64 {
         .sum()
 }
 
+pub fn score_quadgrams(text: &str) -> i64 {
+    char_windows(text, 4)
+        .map(|s| QUADGRAM_LOGPROB.get(s).unwrap_or(&-5000))
+        .sum()
+}
+
 pub enum TextScore {
     Bigram,
     Trigram,
+    Quadgram,
 }
 
 impl TextScore {
@@ -98,6 +119,7 @@ impl TextScore {
         match self {
             TextScore::Bigram => score_bigrams(text),
             TextScore::Trigram => score_trigrams(text),
+            TextScore::Quadgram => score_quadgrams(text),
         }
     }
 }
