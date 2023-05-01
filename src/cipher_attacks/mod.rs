@@ -1,9 +1,12 @@
 pub mod caesar_attack;
+pub mod substitution_attack;
 
 use csv;
+use itertools::Itertools;
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 
+//const ONE_GRAMS: &'static str = "ETAOINSHRDLCUMWFGYPBVKJXQZ";
 const TWO_GRAM_DATA: &'static str = include_str!("2_gram_scores.csv");
 const THREE_GRAM_DATA: &'static str = include_str!("3_gram_scores.csv");
 
@@ -55,13 +58,21 @@ fn extract_char_counts(text: &str) -> HashMap<char, usize> {
     map
 }
 
-fn extract_bigram_counts(text: &str) -> HashMap<String, usize> {
-    let mut map = HashMap::new();
-    for s in char_windows(text, 2) {
-        *map.entry(s.to_owned()).or_insert(0) += 1
-    }
-    map
+pub fn chars_by_frequency(text: &str) -> Vec<char> {
+    extract_char_counts(text)
+        .into_iter()
+        .sorted_by_key(|(_c, n)| *n)
+        .map(|(c, _n)| c)
+        .collect()
 }
+
+// fn extract_bigram_counts(text: &str) -> HashMap<String, usize> {
+//     let mut map = HashMap::new();
+//     for s in char_windows(text, 2) {
+//         *map.entry(s.to_owned()).or_insert(0) += 1
+//     }
+//     map
+// }
 
 // Log probability score for a text, higher (closer to zero) is better. The number has no real meaning on its own, it is only useful for comparison.
 // Overflow happens at a text size of several quadrillion characters
