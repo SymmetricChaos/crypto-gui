@@ -17,6 +17,17 @@ pub trait View {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
 }
 
+fn text_score_group(ui: &mut Ui, scorer: &mut TextScorer) {
+    ui.group(|ui| {
+        ui.label(subheading("Text Scoring"));
+        ui.horizontal(|ui| {
+            ui.selectable_value(scorer, TextScorer::Bigram, "2-Gram");
+            ui.selectable_value(scorer, TextScorer::Trigram, "3-Gram");
+            ui.selectable_value(scorer, TextScorer::Quadgram, "4-Gram");
+        });
+    });
+}
+
 // Quick simple combo box builder
 fn combox_box(
     code: &[AttackId],
@@ -32,17 +43,6 @@ fn combox_box(
             }
         });
     ui.add_space(10.0);
-}
-
-fn text_score_group(ui: &mut Ui, scorer: &mut TextScorer) {
-    ui.group(|ui| {
-        ui.label(subheading("Text Scoring"));
-        ui.horizontal(|ui| {
-            ui.selectable_value(scorer, TextScorer::Bigram, "2-Gram");
-            ui.selectable_value(scorer, TextScorer::Trigram, "3-Gram");
-            ui.selectable_value(scorer, TextScorer::Quadgram, "4-Gram");
-        });
-    });
 }
 
 #[derive(Default)]

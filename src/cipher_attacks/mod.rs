@@ -99,7 +99,7 @@ pub fn chars_by_frequency(text: &str) -> Vec<char> {
 // Overflow happens at a text size of several quadrillion characters
 pub fn score_bigrams(text: &str) -> i64 {
     char_windows(text, 2)
-        .map(|s| BIGRAM_LOGPROB.get(s).unwrap())
+        .map(|s| BIGRAM_LOGPROB.get(s).unwrap_or(&-5000))
         .sum()
 }
 

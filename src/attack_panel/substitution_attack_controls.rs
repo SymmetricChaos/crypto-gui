@@ -22,6 +22,7 @@ impl View for SubstitutionAttack {
         ui.add(Slider::new(&mut self.num_trials, 50_000..=500_000));
 
         ui.label(subheading("Stopping Condition"));
+        ui.label("After making this many attempts without improvement the attack will stop early. Higher values will search more for improvement while low values will run faster.");
         ui.add(Slider::new(&mut self.quit_number, 100..=10_000));
 
         text_score_group(ui, &mut self.text_scorer);
