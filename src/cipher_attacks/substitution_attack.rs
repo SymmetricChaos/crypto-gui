@@ -7,18 +7,18 @@ use itertools::Itertools;
 use rand::{rngs::StdRng, seq::SliceRandom, Rng};
 use std::collections::HashMap;
 
-use super::{CipherAttack, TextScore};
+use super::{CipherAttack, TextScorer};
 
-pub struct Substitution {
+pub struct SubstitutionAttack {
     pub alphabet: VecString,
     pub alphabet_string: String,
     pub num_trials: usize,
     pub num_cadidates: usize,
     pub quit_number: usize,
-    pub text_scorer: TextScore,
+    pub text_scorer: TextScorer,
 }
 
-impl Default for Substitution {
+impl Default for SubstitutionAttack {
     fn default() -> Self {
         Self {
             alphabet: VecString::from(PresetAlphabet::BasicLatin),
@@ -26,12 +26,18 @@ impl Default for Substitution {
             num_trials: 200_000,
             num_cadidates: 5,
             quit_number: 2000,
-            text_scorer: TextScore::Bigram,
+            text_scorer: TextScorer::Bigram,
         }
     }
 }
 
-impl CipherAttack for Substitution {
+impl SubstitutionAttack {
+    pub fn set_alphabet(&mut self) {
+        self.alphabet = VecString::unique_from(&self.alphabet_string);
+    }
+}
+
+impl CipherAttack for SubstitutionAttack {
     fn attack_cipher(&self, text: &str) -> Result<String, Error> {
         let mut unique_chars = text.chars().unique().collect_vec();
 
@@ -63,10 +69,11 @@ impl CipherAttack for Substitution {
             let candidate: String = text.chars().map(|c| *map.get(&c).unwrap_or(&'�')).collect();
             let score = self.text_scorer.score(&candidate);
 
-            // If the score is better than out best insert it at the head of the list and reset the counter
+            // If the score is better than our best make it our new best and reset the counter
             if top_score < score {
                 top_output = candidate;
                 top_score = score;
+                trials_without_improvement = 0;
             } else {
                 // Otherwise undo the swap and increase the counter
                 unique_chars.swap(a, b);
@@ -79,6 +86,10 @@ impl CipherAttack for Substitution {
 
         Ok(top_output)
     }
+
+    fn get_text_scorer(&mut self) -> &mut TextScorer {
+        &mut self.text_scorer
+    }
 }
 
 #[cfg(test)]
@@ -88,7 +99,7 @@ mod substitution_attack_tests {
     #[test]
     fn attack() {
         let encrypted = "SOWFBRKAWFCZFSBSCSBQITBKOWLBFXTBKOWLSOXSOXFZWWIBICFWUQLRXINOCIJLWJFQUNWXLFBSZXFBTXAANTQIFBFSFQUFCZFSBSCSBIMWHWLNKAXBISWGSTOXLXTSWLUQLXJBUUWLWISTBKOWLSWGSTOXLXTSWLBSJBUUWLFULQRTXWFXLTBKOWLBISOXSSOWTBKOWLXAKOXZWSBFIQSFBRKANSOWXAKOXZWSFOBUSWJBSBFTQRKAWSWANECRZAWJ";
-        let attacker = Substitution::default();
+        let attacker = SubstitutionAttack::default();
         println!("{}", attacker.attack_cipher(encrypted).unwrap())
     }
 }

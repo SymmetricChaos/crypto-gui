@@ -57,6 +57,7 @@ lazy_static! {
 
 pub trait CipherAttack {
     fn attack_cipher(&self, text: &str) -> Result<String, Error>;
+    fn get_text_scorer(&mut self) -> &mut TextScorer;
 }
 
 // From StackOverflow
@@ -115,18 +116,18 @@ pub fn score_quadgrams(text: &str) -> i64 {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub enum TextScore {
+pub enum TextScorer {
     Bigram,
     Trigram,
     Quadgram,
 }
 
-impl TextScore {
+impl TextScorer {
     pub fn score(&self, text: &str) -> i64 {
         match self {
-            TextScore::Bigram => score_bigrams(text),
-            TextScore::Trigram => score_trigrams(text),
-            TextScore::Quadgram => score_quadgrams(text),
+            TextScorer::Bigram => score_bigrams(text),
+            TextScorer::Trigram => score_trigrams(text),
+            TextScorer::Quadgram => score_quadgrams(text),
         }
     }
 }

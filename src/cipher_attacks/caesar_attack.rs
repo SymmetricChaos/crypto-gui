@@ -1,4 +1,4 @@
-use super::{CipherAttack, TextScore};
+use super::{CipherAttack, TextScorer};
 use crate::{
     errors::Error,
     text_aux::{text_functions::validate_text, PresetAlphabet, VecString},
@@ -8,7 +8,7 @@ pub struct CaesarAttack {
     pub alphabet: VecString,
     pub alphabet_string: String,
     pub depth: usize,
-    pub text_scorer: TextScore,
+    pub text_scorer: TextScorer,
 }
 
 impl Default for CaesarAttack {
@@ -17,7 +17,7 @@ impl Default for CaesarAttack {
             alphabet: VecString::from(PresetAlphabet::BasicLatin),
             alphabet_string: String::from(PresetAlphabet::BasicLatin),
             depth: 5,
-            text_scorer: TextScore::Bigram,
+            text_scorer: TextScorer::Bigram,
         }
     }
 }
@@ -49,6 +49,10 @@ impl CipherAttack for CaesarAttack {
             }
         }
         Ok(top_output)
+    }
+
+    fn get_text_scorer(&mut self) -> &mut TextScorer {
+        &mut self.text_scorer
     }
 }
 
