@@ -1,4 +1,4 @@
 ﻿{
-  "Caesar": "Caesar ciphers are trivial crack by brute force as there are only as many possible keys as alphabets and it is unlikely that an alphabet will contain more than a hundred characters.",
+  "Caesar": "For a Caesar cipher there are only as many possible keys as characters in the alphabet (26 in this case) so it is easiest to just check every possible key.",
   "Substitution": "General substitution ciphers have a very large keyspace but are vulnerable to straighforward attack by computer. The hill climbing method attempts to build the correct key by repeatedly making small changes to a guess and accepting only changes that produce a more plausible text. Here the change is simply swapping the position of two ramdom characters in the alphabet."
 }
