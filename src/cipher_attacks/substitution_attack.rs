@@ -10,10 +10,7 @@ use std::collections::HashMap;
 use super::{CipherAttack, TextScorer};
 
 pub struct SubstitutionAttack {
-    pub alphabet: VecString,
-    pub alphabet_string: String,
     pub num_trials: usize,
-    pub num_cadidates: usize,
     pub quit_number: usize,
     pub text_scorer: TextScorer,
 }
@@ -21,25 +18,18 @@ pub struct SubstitutionAttack {
 impl Default for SubstitutionAttack {
     fn default() -> Self {
         Self {
-            alphabet: VecString::from(PresetAlphabet::BasicLatin),
-            alphabet_string: String::from(PresetAlphabet::BasicLatin),
             num_trials: 200_000,
-            num_cadidates: 5,
             quit_number: 2000,
             text_scorer: TextScorer::Bigram,
         }
     }
 }
 
-impl SubstitutionAttack {
-    pub fn set_alphabet(&mut self) {
-        self.alphabet = VecString::unique_from(&self.alphabet_string);
-    }
-}
-
 impl CipherAttack for SubstitutionAttack {
     fn attack_cipher(&self, text: &str) -> Result<String, Error> {
         let mut unique_chars = text.chars().unique().collect_vec();
+
+        let alphabet = VecString::from(PresetAlphabet::BasicLatin);
 
         // Initialize output and score with raw input
         let mut top_output = text.to_string();
@@ -59,7 +49,7 @@ impl CipherAttack for SubstitutionAttack {
             // Build the mapping
             let map = {
                 let mut hash_map = HashMap::new();
-                for (a, b) in unique_chars.iter().zip(self.alphabet.chars()) {
+                for (a, b) in unique_chars.iter().zip(alphabet.chars()) {
                     hash_map.insert(*a, b);
                 }
                 hash_map
