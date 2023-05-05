@@ -91,25 +91,23 @@ pub enum SpellingAlphabetMode {
 impl SpellingAlphabetMode {
     pub fn alphabet(&self) -> &str {
         match self {
-            SpellingAlphabetMode::Nato => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-            SpellingAlphabetMode::Ccb => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-            SpellingAlphabetMode::Wu1912 => "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-            SpellingAlphabetMode::Wu1942 => "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-            SpellingAlphabetMode::Us1941 => "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-            SpellingAlphabetMode::Usn1908 => "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-            SpellingAlphabetMode::Usn1908Alt => "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            Self::Nato => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+            Self::Ccb => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+            Self::Wu1912 | Self::Wu1942 | Self::Us1941 | Self::Usn1908 | Self::Usn1908Alt => {
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            }
         }
     }
 
     pub fn encode(&self, c: char) -> Option<&&str> {
         match self {
-            SpellingAlphabetMode::Nato => NATO.get_by_left(&c),
-            SpellingAlphabetMode::Ccb => CCB.get_by_left(&c),
-            SpellingAlphabetMode::Wu1912 => WESTERN_UNION_1912.get_by_left(&c),
-            SpellingAlphabetMode::Wu1942 => WESTERN_UNION_1942.get_by_left(&c),
-            SpellingAlphabetMode::Us1941 => US_MILITARY_1941.get_by_left(&c),
-            SpellingAlphabetMode::Usn1908 => US_NAVY_1908.get_by_left(&c),
-            SpellingAlphabetMode::Usn1908Alt => US_NAVY_1908_ALT.get_by_left(&c),
+            Self::Nato => NATO.get_by_left(&c),
+            Self::Ccb => CCB.get_by_left(&c),
+            Self::Wu1912 => WESTERN_UNION_1912.get_by_left(&c),
+            Self::Wu1942 => WESTERN_UNION_1942.get_by_left(&c),
+            Self::Us1941 => US_MILITARY_1941.get_by_left(&c),
+            Self::Usn1908 => US_NAVY_1908.get_by_left(&c),
+            Self::Usn1908Alt => US_NAVY_1908_ALT.get_by_left(&c),
         }
     }
 
@@ -150,13 +148,17 @@ impl Default for SpellingAlphabet {
 // These will panic change them to return CodeError on failure
 impl Code for SpellingAlphabet {
     fn encode(&self, text: &str) -> Result<String, Error> {
-        Ok(text.chars().map(|c| self.mode.encode(c).unwrap()).join(" "))
+        Ok(text
+            .chars()
+            .map(|c| self.mode.encode(c).unwrap_or(&"�"))
+            .join(" "))
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
         Ok(text
             .split(" ")
-            .map(|s| self.mode.decode(s).unwrap())
+            .filter(|s| !s.is_empty())
+            .map(|s| self.mode.decode(s).unwrap_or(&'�'))
             .collect())
     }
 
