@@ -131,22 +131,22 @@ impl SpellingAlphabetMode {
 }
 
 pub struct SpellingAlphabet {
-    pub mode: SpellingAlphabetMode,
+    pub variant: SpellingAlphabetMode,
 }
 
 impl SpellingAlphabet {
     pub fn chars_codes(&mut self) -> impl Iterator<Item = (char, &&str)> + '_ {
-        self.mode
+        self.variant
             .alphabet()
             .chars()
-            .map(|c| (c, self.mode.encode(c).unwrap()))
+            .map(|c| (c, self.variant.encode(c).unwrap()))
     }
 }
 
 impl Default for SpellingAlphabet {
     fn default() -> Self {
         Self {
-            mode: SpellingAlphabetMode::Nato,
+            variant: SpellingAlphabetMode::Nato,
         }
     }
 }
@@ -154,18 +154,18 @@ impl Default for SpellingAlphabet {
 // These will panic change them to return CodeError on failure
 impl Code for SpellingAlphabet {
     fn encode(&self, text: &str) -> Result<String, Error> {
-        if self.mode == SpellingAlphabetMode::FirstLetter {
+        if self.variant == SpellingAlphabetMode::FirstLetter {
             Err(Error::state("Cannot encode while in First Letter mode"))
         } else {
             Ok(text
                 .chars()
-                .map(|c| self.mode.encode(c).unwrap_or(&"�"))
+                .map(|c| self.variant.encode(c).unwrap_or(&"�"))
                 .join(" "))
         }
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
-        if self.mode == SpellingAlphabetMode::FirstLetter {
+        if self.variant == SpellingAlphabetMode::FirstLetter {
             Ok(text
                 .split_whitespace()
                 .filter(|s| !s.is_empty())
@@ -175,7 +175,7 @@ impl Code for SpellingAlphabet {
             Ok(text
                 .split_whitespace()
                 .filter(|s| !s.is_empty())
-                .map(|s| self.mode.decode(s).unwrap_or(&'�'))
+                .map(|s| self.variant.decode(s).unwrap_or(&'�'))
                 .collect())
         }
     }

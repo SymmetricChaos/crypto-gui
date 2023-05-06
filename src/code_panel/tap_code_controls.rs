@@ -26,7 +26,7 @@ impl View for TapCode {
             };
         });
 
-        ui.label("Alphabet");
+        ui.label(subheading("Alphabet"));
         if control_string(ui, &mut self.alphabet_string).changed() {
             match self.set_alphabet() {
                 Ok(_) => (),
@@ -35,7 +35,6 @@ impl View for TapCode {
         }
         ui.add_space(16.0);
 
-        ui.add_space(16.0);
         ui.label("Grid");
         mono(ui, &self.show_grid(), None);
     }

@@ -1,11 +1,13 @@
 use super::{generic_components::fill_code_columns, View, ViewableCode};
-use crate::{cipher_panel::_generic_components::control_string, codes::Needle};
+use crate::{
+    cipher_panel::_generic_components::control_string, codes::Needle, egui_aux::subheading,
+};
 
 impl ViewableCode for Needle {}
 
 impl View for Needle {
     fn ui(&mut self, ui: &mut eframe::egui::Ui, _errors: &mut String) {
-        ui.label("Alphabet");
+        ui.label(subheading("Alphabet"));
         if control_string(ui, &mut self.alphabet).changed() {
             self.set_map()
         }

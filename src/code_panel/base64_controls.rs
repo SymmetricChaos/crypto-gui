@@ -23,21 +23,19 @@ impl View for Base64 {
             });
         });
 
-        ui.add_space(10.0);
+        ui.add_space(16.0);
         match self.variant {
             B64Variant::Standard => {
                 ui.label("The most commonly used Base64 variant is defined by RFC 4684 section 4.")
             }
             B64Variant::UrlSafe => ui.label("URL and Filename Safe variant is defioned in RFC 4684 section 5 to be used in situations where the + and / characters might have special use defined for them. They are replaced by - and _."),
         };
-        ui.add_space(10.0);
-        ui.add_space(10.0);
+        ui.add_space(16.0);
         binary_to_text_input_mode(ui, &mut self.mode);
-        ui.add_space(10.0);
-        ui.add_space(10.0);
+        ui.add_space(16.0);
         ui.label("When padding is enabled the padding symbol `=` is added to the end until the length is a multiple of three. Padding is ignored when decoding.");
         ui.checkbox(&mut self.use_padding, "Use Padding");
-        ui.add_space(10.0);
+        ui.add_space(16.0);
         // use rfd::FileDialog;
         // ui.label("You can upload a file and encode its binary data as text. Decoding files is not supported as it is impossible to know the contents.");
         // if ui.button("Upload File").clicked() {

@@ -46,12 +46,13 @@ impl View for Morse {
             });
         }
 
+        ui.add_space(16.0);
         match self.standard {
             MorseStandard::Itu => ui.label("The best known variant of Morse code is the standard adopted by the International Telegraphy Union. There are two kinds of marks, dits and dahs. A dit lasts for one unit of time and a dah for three times that. The space between marks is the length of a dit. Between letters a space the length of a dah is used. Sentences words a space the length of seven dits is used."),
             MorseStandard::American => ui.label("The original 1844 created by Morse and Vail was much more complex than the better known international standard. Rather than two kinds of marks there were four. The dor was of one unit, the dash of two units, the long dash of five (used for the letter 'L'), and the longer dash of six (used for the number '0'). Gaps between marks also varied in size. A gap within a character could be either one or two units in length."),
         };
 
-        ui.add_space(10.0);
+        ui.add_space(16.0);
         fill_code_columns(20, 3, ui, Box::new(self.chars_codes()))
     }
 }

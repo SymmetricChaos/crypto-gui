@@ -20,19 +20,18 @@ impl View for Base32 {
             });
         });
 
-        ui.add_space(10.0);
+        ui.add_space(16.0);
         match self.variant {
             B32Variant::Rfc4648 => ui.label("This variant defined as 'base32' by RFC 4684 is widely used and recognized. To avoid ambiguity in reading the characters 0, 1, and 8 are not included."),
             B32Variant::ExtendedHex => ui.label("This variant defined as 'base32hex' by RFC 4684 is less commonly used than the standard variant. It retains some ordering properties of the original data."),
             B32Variant::WordSafe => ui.label("The Word Safe variant of Base32 is used for geocaching. It is an example of a variant used to avoid forming words, which it accomplishes by not including any vowels."),
-
         };
-        ui.add_space(10.0);
+        ui.add_space(16.0);
         binary_to_text_input_mode(ui, &mut self.mode);
-        ui.add_space(10.0);
+        ui.add_space(16.0);
         ui.label("When padding is enabled the padding symbol `=` is added to the end until the length is a multiple of eight. Padding is ignored when decoding.");
         ui.checkbox(&mut self.use_padding, "Use Padding");
-        ui.add_space(10.0);
+        ui.add_space(16.0);
         // use rfd::FileDialog;
         // ui.label("You can upload a file and encode its binary data as text. Decoding files is not supported as it is impossible to know the contents.");
         // if ui.button("Upload File").clicked() {
