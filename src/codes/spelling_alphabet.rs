@@ -3,7 +3,10 @@ use itertools::Itertools;
 use lazy_static::lazy_static;
 
 use super::Code;
-use crate::{errors::Error, text_aux::text_functions::bimap_from_iter};
+use crate::{
+    errors::Error,
+    text_aux::{text_functions::bimap_from_iter, PresetAlphabet},
+};
 
 lazy_static! {
     // Yes, ALFA and JULIETT are meant to be spelled that way
@@ -86,16 +89,17 @@ pub enum SpellingAlphabetMode {
     Usn1908,
     Usn1908Alt,
     Us1941,
+    FirstLetter,
 }
 
 impl SpellingAlphabetMode {
     pub fn alphabet(&self) -> &str {
         match self {
-            Self::Nato => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-            Self::Ccb => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+            Self::Nato | Self::Ccb => PresetAlphabet::BasicLatinWithDigits.slice(),
             Self::Wu1912 | Self::Wu1942 | Self::Us1941 | Self::Usn1908 | Self::Usn1908Alt => {
-                "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                PresetAlphabet::BasicLatin.slice()
             }
+            Self::FirstLetter => "",
         }
     }
 
@@ -108,18 +112,20 @@ impl SpellingAlphabetMode {
             Self::Us1941 => US_MILITARY_1941.get_by_left(&c),
             Self::Usn1908 => US_NAVY_1908.get_by_left(&c),
             Self::Usn1908Alt => US_NAVY_1908_ALT.get_by_left(&c),
+            Self::FirstLetter => None,
         }
     }
 
     pub fn decode(&self, s: &str) -> Option<&char> {
         match self {
-            SpellingAlphabetMode::Nato => NATO.get_by_right(s),
-            SpellingAlphabetMode::Ccb => CCB.get_by_right(s),
-            SpellingAlphabetMode::Wu1912 => WESTERN_UNION_1912.get_by_right(s),
-            SpellingAlphabetMode::Wu1942 => WESTERN_UNION_1942.get_by_right(s),
-            SpellingAlphabetMode::Us1941 => US_MILITARY_1941.get_by_right(s),
-            SpellingAlphabetMode::Usn1908 => US_NAVY_1908.get_by_right(s),
-            SpellingAlphabetMode::Usn1908Alt => US_NAVY_1908_ALT.get_by_right(s),
+            Self::Nato => NATO.get_by_right(s),
+            Self::Ccb => CCB.get_by_right(s),
+            Self::Wu1912 => WESTERN_UNION_1912.get_by_right(s),
+            Self::Wu1942 => WESTERN_UNION_1942.get_by_right(s),
+            Self::Us1941 => US_MILITARY_1941.get_by_right(s),
+            Self::Usn1908 => US_NAVY_1908.get_by_right(s),
+            Self::Usn1908Alt => US_NAVY_1908_ALT.get_by_right(s),
+            Self::FirstLetter => None,
         }
     }
 }
@@ -148,18 +154,30 @@ impl Default for SpellingAlphabet {
 // These will panic change them to return CodeError on failure
 impl Code for SpellingAlphabet {
     fn encode(&self, text: &str) -> Result<String, Error> {
-        Ok(text
-            .chars()
-            .map(|c| self.mode.encode(c).unwrap_or(&"�"))
-            .join(" "))
+        if self.mode == SpellingAlphabetMode::FirstLetter {
+            Err(Error::state("Cannot encode while in First Letter mode"))
+        } else {
+            Ok(text
+                .chars()
+                .map(|c| self.mode.encode(c).unwrap_or(&"�"))
+                .join(" "))
+        }
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
-        Ok(text
-            .split(" ")
-            .filter(|s| !s.is_empty())
-            .map(|s| self.mode.decode(s).unwrap_or(&'�'))
-            .collect())
+        if self.mode == SpellingAlphabetMode::FirstLetter {
+            Ok(text
+                .split_whitespace()
+                .filter(|s| !s.is_empty())
+                .map(|s| s.chars().next().unwrap())
+                .collect())
+        } else {
+            Ok(text
+                .split_whitespace()
+                .filter(|s| !s.is_empty())
+                .map(|s| self.mode.decode(s).unwrap_or(&'�'))
+                .collect())
+        }
     }
 
     fn randomize(&mut self) {}

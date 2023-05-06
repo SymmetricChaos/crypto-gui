@@ -39,6 +39,12 @@ impl View for SpellingAlphabet {
                     SpellingAlphabetMode::Us1941,
                     "US Joint Army/Navy (1941)",
                 );
+
+                ui.selectable_value(
+                    &mut self.mode,
+                    SpellingAlphabetMode::FirstLetter,
+                    "First Character (decoding only)",
+                );
             });
         });
 
