@@ -51,14 +51,14 @@ impl View for SpellingAlphabet {
         ui.add_space(16.0);
 
         match self.variant {
-            SpellingAlphabetMode::Nato => ui.label(""),
-            SpellingAlphabetMode::Ccb => ui.label(""),
+            SpellingAlphabetMode::Nato => ui.label("The most widely used international standard today is the one specified by the ICAO, though it is commonly called the NATO Phonetic Alphabet."),
+            SpellingAlphabetMode::Ccb => ui.label("The Combined Communications Board was formed during World War II to make improve the interoperability of communications systems for UK and US forces. It was the immedoate predececessor to the NATO/ICAO standard."),
             SpellingAlphabetMode::Wu1912 => ui.label(""),
             SpellingAlphabetMode::Wu1942 => ui.label(""),
             SpellingAlphabetMode::Usn1908 => ui.label(""),
             SpellingAlphabetMode::Usn1908Alt => ui.label(""),
             SpellingAlphabetMode::Us1941 => ui.label(""),
-            SpellingAlphabetMode::FirstLetter => ui.label(""),
+            SpellingAlphabetMode::FirstLetter => ui.label("Arbitrary words can be used for a phonetic alphabet. Most commonly the first letter of each word is the letter being represented. This decodes any sequence of words into their first letters."),
         };
         ui.add_space(16.0);
         fill_code_columns(9, 4, ui, Box::new(self.chars_codes()));

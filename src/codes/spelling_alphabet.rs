@@ -1,5 +1,4 @@
 use bimap::BiMap;
-use itertools::Itertools;
 use lazy_static::lazy_static;
 
 use super::Code;
@@ -157,10 +156,11 @@ impl Code for SpellingAlphabet {
         if self.variant == SpellingAlphabetMode::FirstLetter {
             Err(Error::state("Cannot encode while in First Letter mode"))
         } else {
-            Ok(text
-                .chars()
-                .map(|c| self.variant.encode(c).unwrap_or(&"�"))
-                .join(" "))
+            let mut out = String::new();
+            for c in text.chars() {
+                out.push_str(self.variant.encode(c).ok_or(Error::invalid_input_char(c))?)
+            }
+            Ok(out)
         }
     }
 
@@ -169,14 +169,19 @@ impl Code for SpellingAlphabet {
             Ok(text
                 .split_whitespace()
                 .filter(|s| !s.is_empty())
-                .map(|s| s.chars().next().unwrap())
+                .map(|s| s.chars().next().unwrap()) // Unwrap is guaranteed valid because string is not empty
                 .collect())
         } else {
-            Ok(text
-                .split_whitespace()
-                .filter(|s| !s.is_empty())
-                .map(|s| self.variant.decode(s).unwrap_or(&'�'))
-                .collect())
+            let mut out = String::new();
+            for s in text.split_whitespace().filter(|s| !s.is_empty()) {
+                out.push(
+                    *self
+                        .variant
+                        .decode(s)
+                        .ok_or(Error::invalid_input_group(s))?,
+                )
+            }
+            Ok(out)
         }
     }
 
