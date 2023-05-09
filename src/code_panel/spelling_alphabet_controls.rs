@@ -59,7 +59,7 @@ impl View for SpellingAlphabet {
             SpellingAlphabetMode::Nato => ui.label("The most widely used international standard today is the one specified by the ICAO, though it is commonly called the NATO Phonetic Alphabet. Note the intentional mispellings for ALFA (for non-English speakers generally) and JULIET (for French speakers)."),
             SpellingAlphabetMode::Ccb => ui.label("The Combined Communications Board was formed during World War II to improve the interoperability of communications systems for UK and US forces. It was the immediate predececessor to the NATO/ICAO standard."),
             SpellingAlphabetMode::Wu1912 => ui.label("In 1912 Western Union introduced a spelling alphabet for its employees that mostly used place names to represent letters."),
-            SpellingAlphabetMode::Wu1942 => ui.label("The 1942 update to the Western Union Standard."),
+            SpellingAlphabetMode::Wu1942 => ui.label("The 1942 update to the Western Union standard."),
             SpellingAlphabetMode::Usn1908 => ui.label("The first of two recommendations by the US Navy in 1908, this version using two syllable words."),
             SpellingAlphabetMode::Usn1908Alt => ui.label("The first of two recommendations by the US Navy in 1908, this version using one syllable words."),
             SpellingAlphabetMode::Us1941 => ui.label("A US military standard created for joint use by the Army and Navy."),
