@@ -21,6 +21,7 @@ pub mod generic_components;
 pub mod godel_controls;
 pub mod levenshtein_controls;
 pub mod linotype_controls;
+pub mod m_of_n_controls;
 pub mod morse_controls;
 pub mod needle_controls;
 pub mod numeric_controls;
@@ -71,6 +72,9 @@ pub struct CodeInterface {
     numeric: BytesAsNumbers,
     pgp: PgpWords,
     skey: SKeyWords,
+
+    // Error Correcting and Detecting
+    m_of_n: MofNCode,
 
     // Mathematical
     fibonacci: FibonacciCode,
@@ -126,6 +130,7 @@ impl CodeInterface {
             active_code,
             ui,
         );
+        combox_box(&[CodeId::MofN], "Error Correcting Codes", active_code, ui);
         combox_box(
             &[CodeId::Bacon, CodeId::Block, CodeId::Tap],
             "Other Codes",
@@ -158,6 +163,7 @@ impl CodeInterface {
             CodeId::ByteAsNum => &mut self.numeric,
             CodeId::Levenshtein => &mut self.levenshtein,
             CodeId::Linotype => &mut self.linotype,
+            CodeId::MofN => &mut self.m_of_n,
             //_ => todo!("unable to get active code"),
         }
     }

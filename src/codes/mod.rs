@@ -66,8 +66,10 @@ pub use romaji::romaji::Romaji;
 pub mod linotype;
 pub use linotype::Linotype;
 
-pub mod hamming_code;
 pub mod m_of_n;
+pub use m_of_n::MofNCode;
+
+pub mod hamming_code;
 
 use crate::errors::Error;
 

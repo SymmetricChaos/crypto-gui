@@ -2,12 +2,12 @@ use super::{bits_from_bitstring, Code};
 use crate::errors::Error;
 
 pub struct MofNCode {
-    weight: usize,
-    length: usize,
+    pub weight: usize,
+    pub length: usize,
 }
 
 impl MofNCode {
-    fn n_data_bits(&self) -> usize {
+    pub fn n_data_bits(&self) -> usize {
         self.length - self.weight
     }
 }
