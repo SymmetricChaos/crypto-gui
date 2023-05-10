@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use super::Code;
+use super::{bits_from_bitstring, Code};
 use crate::errors::Error;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -17,15 +17,11 @@ pub struct HammingCode {
 impl HammingCode {
     fn encode_3_1(text: &str) -> Result<String, Error> {
         let mut out = String::new();
-        for bit in text.chars().filter(|b| !b.is_whitespace()) {
-            match bit {
-                '0' => out.push_str("000"),
-                '1' => out.push_str("111"),
-                _ => {
-                    return Err(Error::input(
-                        "only '0' and '1' are allowed to represent bits",
-                    ))
-                }
+        for bit in bits_from_bitstring(text) {
+            match bit? {
+                0 => out.push_str("000"),
+                1 => out.push_str("111"),
+                _ => unreachable!("bits_from_bitstring should filter out everything but 0s and 1s"),
             }
         }
         Ok(out)
@@ -33,21 +29,17 @@ impl HammingCode {
 
     fn decode_3_1(text: &str) -> Result<String, Error> {
         let mut out = String::new();
-        for (a, b, c) in text.chars().filter(|b| !b.is_whitespace()).tuples() {
-            match (a, b, c) {
-                ('0', '0', '0') => out.push('0'),
-                ('0', '0', '1') => out.push('0'),
-                ('0', '1', '0') => out.push('0'),
-                ('1', '0', '0') => out.push('0'),
-                ('1', '1', '1') => out.push('1'),
-                ('1', '1', '0') => out.push('1'),
-                ('1', '0', '1') => out.push('1'),
-                ('0', '1', '1') => out.push('1'),
-                _ => {
-                    return Err(Error::input(
-                        "only '0' and '1' are allowed to represent bits",
-                    ))
-                }
+        for (a, b, c) in bits_from_bitstring(text).tuples() {
+            match (a?, b?, c?) {
+                (0, 0, 1) => out.push('0'),
+                (0, 0, 0) => out.push('0'),
+                (0, 1, 0) => out.push('0'),
+                (1, 0, 0) => out.push('0'),
+                (1, 1, 1) => out.push('1'),
+                (1, 1, 0) => out.push('1'),
+                (1, 0, 1) => out.push('1'),
+                (0, 1, 1) => out.push('1'),
+                _ => unreachable!("bits_from_bitstring should filter out everything but 0s and 1s"),
             }
         }
         Ok(out)
