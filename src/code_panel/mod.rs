@@ -27,6 +27,7 @@ pub mod needle_controls;
 pub mod numeric_controls;
 pub mod pgp_controls;
 pub mod punycode_controls;
+pub mod repetition_controls;
 pub mod romaji_controls;
 pub mod skey_controls;
 pub mod spelling_alphabet_controls;
@@ -75,6 +76,7 @@ pub struct CodeInterface {
 
     // Error Correcting and Detecting
     m_of_n: MofNCode,
+    repetition: Repetition,
 
     // Mathematical
     fibonacci: FibonacciCode,
@@ -164,6 +166,7 @@ impl CodeInterface {
             CodeId::Levenshtein => &mut self.levenshtein,
             CodeId::Linotype => &mut self.linotype,
             CodeId::MofN => &mut self.m_of_n,
+            CodeId::Repetition => &mut self.repetition,
             //_ => todo!("unable to get active code"),
         }
     }
