@@ -8,6 +8,11 @@ pub use binary_to_text::base64::Base64;
 pub use binary_to_text::pgp_words::PgpWords;
 pub use binary_to_text::skey::SKeyWords;
 
+pub mod ecc;
+pub use ecc::hamming::HammingCode;
+pub use ecc::m_of_n::MofNCode;
+pub use ecc::repetition::Repetition;
+
 pub mod ascii;
 pub use ascii::Ascii;
 
@@ -65,11 +70,6 @@ pub use romaji::romaji::Romaji;
 
 pub mod linotype;
 pub use linotype::Linotype;
-
-pub mod m_of_n;
-pub use m_of_n::MofNCode;
-
-pub mod hamming_code;
 
 use crate::errors::Error;
 
@@ -184,18 +184,4 @@ impl<T: Hash + Eq + PartialEq + ToString> LetterAndWordCode<T> {
             .get_by_right(code)
             .ok_or_else(|| Error::invalid_input_group(&code.to_string()))
     }
-}
-
-pub fn char_to_bit(c: char) -> Result<usize, Error> {
-    match c {
-        '0' => Ok(0),
-        '1' => Ok(1),
-        _ => Err(Error::invalid_input_char(c)),
-    }
-}
-
-pub fn bits_from_bitstring(text: &str) -> impl Iterator<Item = Result<usize, Error>> + '_ {
-    text.chars()
-        .filter(|b| !b.is_whitespace())
-        .map(|b| char_to_bit(b))
 }

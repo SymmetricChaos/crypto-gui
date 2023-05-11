@@ -1,5 +1,5 @@
-use super::{bits_from_bitstring, Code};
-use crate::errors::Error;
+use super::bits_from_bitstring;
+use crate::{codes::Code, errors::Error};
 
 pub struct MofNCode {
     pub weight: usize,

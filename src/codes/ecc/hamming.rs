@@ -1,7 +1,7 @@
 use itertools::Itertools;
 
-use super::{bits_from_bitstring, Code};
-use crate::errors::Error;
+use super::bits_from_bitstring;
+use crate::{codes::Code, errors::Error};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HammingCodeVariant {
