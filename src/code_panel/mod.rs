@@ -25,6 +25,7 @@ pub mod m_of_n_controls;
 pub mod morse_controls;
 pub mod needle_controls;
 pub mod numeric_controls;
+pub mod parity_check_controls;
 pub mod pgp_controls;
 pub mod punycode_controls;
 pub mod repetition_controls;
@@ -76,6 +77,7 @@ pub struct CodeInterface {
 
     // Error Correcting and Detecting
     m_of_n: MofNCode,
+    parity_bit: ParityBit,
     repetition: Repetition,
 
     // Mathematical
@@ -132,7 +134,12 @@ impl CodeInterface {
             active_code,
             ui,
         );
-        combox_box(&[CodeId::MofN], "Error Correcting Codes", active_code, ui);
+        combox_box(
+            &[CodeId::MofN, CodeId::ParityBit, CodeId::Repetition],
+            "Error Correcting Codes",
+            active_code,
+            ui,
+        );
         combox_box(
             &[CodeId::Bacon, CodeId::Block, CodeId::Tap],
             "Other Codes",
@@ -167,6 +174,7 @@ impl CodeInterface {
             CodeId::Linotype => &mut self.linotype,
             CodeId::MofN => &mut self.m_of_n,
             CodeId::Repetition => &mut self.repetition,
+            CodeId::ParityBit => &mut self.parity_bit,
             //_ => todo!("unable to get active code"),
         }
     }

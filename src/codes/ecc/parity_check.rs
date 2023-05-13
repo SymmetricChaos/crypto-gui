@@ -1,14 +1,14 @@
 use super::{bits_from_bitstring, Bit};
 use crate::{codes::Code, errors::Error};
 
-pub struct PairtyBit {
+pub struct ParityBit {
     pub block_size: usize,
     pub inverted: bool,
 }
 
-impl PairtyBit {}
+impl ParityBit {}
 
-impl Default for PairtyBit {
+impl Default for ParityBit {
     fn default() -> Self {
         Self {
             block_size: 4,
@@ -17,7 +17,7 @@ impl Default for PairtyBit {
     }
 }
 
-impl Code for PairtyBit {
+impl Code for ParityBit {
     fn encode(&self, text: &str) -> Result<String, Error> {
         let mut parity = Bit::Zero;
         let mut ctr = 0;
@@ -43,7 +43,6 @@ impl Code for PairtyBit {
         let mut buffer = String::new();
         for bit in bits_from_bitstring(text) {
             ctr += 1;
-            parity ^= bit;
 
             if ctr == self.block_size + 1 {
                 if parity == bit {
@@ -55,6 +54,7 @@ impl Code for PairtyBit {
                 parity = Bit::Zero;
                 buffer.clear();
             } else {
+                parity ^= bit;
                 buffer.push(bit.as_char());
             }
         }
@@ -67,25 +67,25 @@ impl Code for PairtyBit {
 }
 
 #[cfg(test)]
-mod repetition_tests {
+mod parity_tests {
     use super::*;
 
     #[test]
     fn test_encode() {
-        let code = PairtyBit::default();
+        let code = ParityBit::default();
         assert_eq!(code.encode("111010010000").unwrap(), "111011001000000");
     }
 
     #[test]
     fn test_decode() {
-        let code = PairtyBit::default();
+        let code = ParityBit::default();
         assert_eq!(code.decode("111011001000000").unwrap(), "111010010000");
     }
 
     #[test]
     fn test_decode_with_err() {
-        let mut code = PairtyBit::default();
+        let mut code = ParityBit::default();
         code.block_size = 4;
-        assert_eq!(code.decode("").unwrap(), "");
+        assert_eq!(code.decode("111001001000000").unwrap(), "����10010000");
     }
 }
