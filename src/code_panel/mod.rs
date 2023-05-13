@@ -175,7 +175,7 @@ impl CodeInterface {
             CodeId::MofN => &mut self.m_of_n,
             CodeId::Repetition => &mut self.repetition,
             CodeId::ParityBit => &mut self.parity_bit,
-            //_ => todo!("unable to get active code"),
+            CodeId::Hamming => todo!("ADD HAMMING"),
         }
     }
 }

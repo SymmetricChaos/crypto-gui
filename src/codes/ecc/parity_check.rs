@@ -28,7 +28,12 @@ impl Code for ParityBit {
             parity ^= bit;
 
             if ctr == self.block_size {
-                out.push(parity.as_char());
+                if self.inverted {
+                    out.push(parity.flipped().as_char());
+                } else {
+                    out.push(parity.as_char());
+                }
+
                 ctr = 0;
                 parity = Bit::Zero;
             }
@@ -45,10 +50,18 @@ impl Code for ParityBit {
             ctr += 1;
 
             if ctr == self.block_size + 1 {
-                if parity == bit {
-                    out.push_str(&buffer);
+                if self.inverted {
+                    if parity != bit {
+                        out.push_str(&buffer);
+                    } else {
+                        out.push_str(&"�".repeat(self.block_size))
+                    }
                 } else {
-                    out.push_str(&"�".repeat(self.block_size))
+                    if parity == bit {
+                        out.push_str(&buffer);
+                    } else {
+                        out.push_str(&"�".repeat(self.block_size))
+                    }
                 }
                 ctr = 0;
                 parity = Bit::Zero;
@@ -77,9 +90,23 @@ mod parity_tests {
     }
 
     #[test]
+    fn test_encode_inv() {
+        let mut code = ParityBit::default();
+        code.inverted = true;
+        assert_eq!(code.encode("111010010000").unwrap(), "111001001100001");
+    }
+
+    #[test]
     fn test_decode() {
         let code = ParityBit::default();
         assert_eq!(code.decode("111011001000000").unwrap(), "111010010000");
+    }
+
+    #[test]
+    fn test_decode_inv() {
+        let mut code = ParityBit::default();
+        code.inverted = true;
+        assert_eq!(code.decode("111001001100001").unwrap(), "111010010000");
     }
 
     #[test]
