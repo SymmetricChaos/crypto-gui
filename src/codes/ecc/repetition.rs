@@ -1,4 +1,4 @@
-use super::bits_from_bitstring;
+use super::{bits_from_bitstring, check_bitstring, Bit};
 use crate::{codes::Code, errors::Error};
 
 pub struct Repetition {
@@ -15,29 +15,31 @@ impl Default for Repetition {
 
 impl Code for Repetition {
     fn encode(&self, text: &str) -> Result<String, Error> {
+        check_bitstring(text)?;
+
         let zeroes = "0".repeat(self.block_size);
         let ones = "1".repeat(self.block_size);
         let mut out = String::new();
         for bit in bits_from_bitstring(text) {
-            match bit? {
-                0 => out.push_str(&zeroes),
-                1 => out.push_str(&ones),
-                _ => unreachable!("bits_from_bitstring should filter out everything but 0s and 1s"),
+            match bit {
+                Bit::Zero => out.push_str(&zeroes),
+                Bit::One => out.push_str(&ones),
             }
         }
         Ok(out)
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
+        check_bitstring(text)?;
+
         let mut out = String::new();
         let mut zeroes = 0;
         let mut ones = 0;
         let mut ctr = 0;
         for bit in bits_from_bitstring(text) {
-            match bit? {
-                0 => zeroes += 1,
-                1 => ones += 1,
-                _ => unreachable!("bits_from_bitstring should filter out everything but 0s and 1s"),
+            match bit {
+                Bit::Zero => zeroes += 1,
+                Bit::One => ones += 1,
             }
             ctr += 1;
             if ctr == self.block_size {

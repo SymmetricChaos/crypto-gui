@@ -1,4 +1,4 @@
-use super::bits_from_bitstring;
+use super::{bits_from_bitstring, check_bitstring};
 use crate::{codes::Code, errors::Error};
 
 pub struct MofNCode {
@@ -23,8 +23,7 @@ impl Default for MofNCode {
 
 impl Code for MofNCode {
     fn encode(&self, text: &str) -> Result<String, Error> {
-        // read length - weight bits, adding up the weight, and writing each to output
-        // then write weight
+        check_bitstring(text)?;
 
         let n_data_bits = self.n_data_bits();
         if bits_from_bitstring(text).count() % n_data_bits != 0 {
@@ -41,14 +40,11 @@ impl Code for MofNCode {
         let mut counted_weight = 0;
         let mut buffer = String::new();
         for bit in bits {
-            let b = bit?;
+            let b = bit;
             ctr += 1;
             counted_weight += b;
-            match b {
-                0 => buffer.push('0'),
-                1 => buffer.push('1'),
-                _ => unreachable!(),
-            }
+            buffer.push(b.as_char());
+
             if ctr == n_data_bits {
                 buffer.push_str(&"1".repeat(self.weight - counted_weight));
                 while buffer.len() < self.length {
@@ -64,6 +60,8 @@ impl Code for MofNCode {
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
+        check_bitstring(text)?;
+
         let n_data_bits = self.n_data_bits();
         if bits_from_bitstring(text).count() % self.length != 0 {
             return Err(Error::Input(format!(
@@ -79,15 +77,10 @@ impl Code for MofNCode {
         let mut counted_weight = 0;
         let mut buffer = String::new();
         for bit in bits {
-            let b = bit?;
             ctr += 1;
-            counted_weight += b;
+            counted_weight += bit;
             if ctr <= n_data_bits {
-                match b {
-                    0 => buffer.push('0'),
-                    1 => buffer.push('1'),
-                    _ => unreachable!(),
-                }
+                buffer.push(bit.as_char());
             } else if ctr == self.length {
                 if counted_weight == self.weight {
                     out.push_str(&buffer)
