@@ -2,6 +2,7 @@ pub mod hamming;
 pub mod m_of_n;
 pub mod parity_check;
 pub mod repetition;
+pub mod luhn;
 use std::ops::{Add, AddAssign, BitXor, BitXorAssign};
 
 use lazy_static::lazy_static;
