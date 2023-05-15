@@ -36,7 +36,6 @@ impl Code for LuhnAlgorithm {
                 check += n;
             }
         }
-        println!("{check}");
         let digit = char::from_u32((10 - (check % 10)) + 48).unwrap();
 
         let mut out = String::with_capacity(text.len() + 1);
@@ -46,7 +45,34 @@ impl Code for LuhnAlgorithm {
     }
 
     fn decode(&self, text: &str) -> Result<String, Error> {
-        todo!()
+        if text.is_empty() {
+            return Err(Error::input("input cannot be empty"));
+        }
+
+        let stored_check_num = text
+            .chars()
+            .last()
+            .unwrap()
+            .to_digit(10)
+            .ok_or(Error::input("check digit is not a valid digit"))?;
+
+        let mut check = 0;
+        for (p, c) in text.chars().rev().skip(1).enumerate() {
+            let n = c.to_digit(10).ok_or(Error::input(
+                "only digits 0-9 are allowed for Luhn's algorithm",
+            ))?;
+            if p % 2 == 0 {
+                check += digital_sum(n * 2);
+            } else {
+                check += n;
+            }
+        }
+
+        if stored_check_num == (10 - (check % 10)) {
+            Ok(text[0..text.len() - 1].to_string())
+        } else {
+            Err(Error::input("check digit does not match"))
+        }
     }
 
     fn randomize(&mut self) {}
@@ -63,6 +89,7 @@ mod luhn_tests {
         let code = LuhnAlgorithm::default();
         assert_eq!(code.encode("7992739871").unwrap(), "79927398713");
     }
+
     #[test]
     fn test_decode() {
         let code = LuhnAlgorithm::default();
@@ -73,8 +100,8 @@ mod luhn_tests {
     fn test_decode_with_err() {
         let code = LuhnAlgorithm::default();
         assert_eq!(
-            code.decode("79297398713").unwrap(),
-            "<<SOME KIND OF ERROR>>"
+            code.decode("79297398713").unwrap_err(),
+            Error::input("check digit does not match")
         );
     }
 }
