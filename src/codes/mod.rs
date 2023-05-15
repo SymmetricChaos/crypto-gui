@@ -10,6 +10,7 @@ pub use binary_to_text::skey::SKeyWords;
 
 pub mod ecc;
 pub use ecc::hamming::HammingCode;
+pub use ecc::luhn::LuhnAlgorithm;
 pub use ecc::m_of_n::MofNCode;
 pub use ecc::parity_check::ParityBit;
 pub use ecc::repetition::Repetition;

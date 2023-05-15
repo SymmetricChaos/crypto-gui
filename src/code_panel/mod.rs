@@ -21,6 +21,7 @@ pub mod generic_components;
 pub mod godel_controls;
 pub mod levenshtein_controls;
 pub mod linotype_controls;
+pub mod luhn_controls;
 pub mod m_of_n_controls;
 pub mod morse_controls;
 pub mod needle_controls;
@@ -76,6 +77,7 @@ pub struct CodeInterface {
     skey: SKeyWords,
 
     // Error Correcting and Detecting
+    luhn: LuhnAlgorithm,
     m_of_n: MofNCode,
     parity_bit: ParityBit,
     repetition: Repetition,
