@@ -20,7 +20,7 @@ pub struct Isbn {
 }
 
 impl Isbn {
-    fn is_valid_isbn_10(&self, text: &str) -> Result<(), Error> {
+    fn is_valid_isbn_10<'a>(&self, text: &'a str) -> Result<(), Error> {
         if !ISBN_10.is_match(text) {
             return Err(Error::input("not a well formed ISBN-109 code"));
         }
@@ -43,7 +43,7 @@ impl Isbn {
         }
     }
 
-    fn is_valid_isbn_13(&self, text: &str) -> Result<(), Error> {
+    fn is_valid_isbn_13<'a>(&self, text: &'a str) -> Result<(), Error> {
         if !ISBN_13.is_match(text) {
             return Err(Error::input("not a well formed ISBN-109 code"));
         }
@@ -64,6 +64,27 @@ impl Isbn {
         } else {
             Err(Error::input("invalid check digit"))
         }
+    }
+
+    pub fn check_csv_isbn(&self, list: &str) -> String {
+        let mut out = String::new();
+        for line in list.split(",").into_iter() {
+            let result = match self.variant {
+                IsbnVariant::Ten => self.is_valid_isbn_10(line.trim()),
+                IsbnVariant::Thirteen => self.is_valid_isbn_13(line.trim()),
+            };
+            if result.is_ok() {
+                out.push_str(line.trim());
+                out.push_str(",\n");
+            } else {
+                out.push_str(line.trim());
+                out.push_str(" [");
+                out.push_str(&result.unwrap_err().to_string());
+                out.push(']');
+                out.push_str(",\n");
+            }
+        }
+        out
     }
 }
 
