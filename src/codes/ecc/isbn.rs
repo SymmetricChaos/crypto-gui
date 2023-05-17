@@ -20,9 +20,9 @@ pub struct Isbn {
 }
 
 impl Isbn {
-    fn is_valid_isbn_10(&self, text: &str) -> bool {
+    fn is_valid_isbn_10(&self, text: &str) -> Result<(), Error> {
         if !ISBN_10.is_match(text) {
-            return false;
+            return Err(Error::input("not a well formed ISBN-109 code"));
         }
 
         let mut check = 0;
@@ -36,12 +36,16 @@ impl Isbn {
                 None => check += idx * 10, // only case that can reach this is 'X'
             }
         }
-        check % 11 == 0
+        if check % 11 == 0 {
+            Ok(())
+        } else {
+            Err(Error::input("invalid check digit"))
+        }
     }
 
-    fn is_valid_isbn_13(&self, text: &str) -> bool {
+    fn is_valid_isbn_13(&self, text: &str) -> Result<(), Error> {
         if !ISBN_13.is_match(text) {
-            return false;
+            return Err(Error::input("not a well formed ISBN-109 code"));
         }
 
         let mut check = 0;
@@ -55,7 +59,11 @@ impl Isbn {
                 None => unreachable!("only valid digits can reach this point"),
             }
         }
-        check % 10 == 0
+        if check % 10 == 0 {
+            Ok(())
+        } else {
+            Err(Error::input("invalid check digit"))
+        }
     }
 }
 
@@ -80,7 +88,16 @@ impl Code for Isbn {
         if text.is_empty() {
             return Err(Error::input("input cannot be empty"));
         }
-        todo!()
+        match self.variant {
+            IsbnVariant::Ten => {
+                self.is_valid_isbn_10(text)?;
+                Ok(text[0..text.len() - 1].to_string())
+            }
+            IsbnVariant::Thirteen => {
+                self.is_valid_isbn_13(text)?;
+                Ok(text[0..text.len() - 1].to_string())
+            }
+        }
     }
 
     fn randomize(&mut self) {}
@@ -95,23 +112,23 @@ mod isbn_tests {
     #[test]
     fn test_isbn_10_valid() {
         let code = Isbn::default();
-        assert!(code.is_valid_isbn_10("0-306-40615-2"));
-        assert!(code.is_valid_isbn_10("0306406152"));
-        assert!(!code.is_valid_isbn_10("0-306-4615-2"));
-        assert!(!code.is_valid_isbn_10("0306-4615-2"));
-        assert!(!code.is_valid_isbn_10("0-306-40615-1"));
-        assert!(!code.is_valid_isbn_10("0-306-40165-2"));
+        assert!(code.is_valid_isbn_10("0-306-40615-2").is_ok());
+        assert!(code.is_valid_isbn_10("0306406152").is_ok());
+        assert!(code.is_valid_isbn_10("0-306-4615-2").is_err());
+        assert!(code.is_valid_isbn_10("0306-4615-2").is_err());
+        assert!(code.is_valid_isbn_10("0-306-40615-1").is_err());
+        assert!(code.is_valid_isbn_10("0-306-40165-2").is_err());
     }
 
     #[test]
     fn test_isbn_13_valid() {
         let code = Isbn::default();
-        assert!(code.is_valid_isbn_13("978-0-306-40615-7"));
-        assert!(code.is_valid_isbn_13("9780306406157"));
-        assert!(!code.is_valid_isbn_13("978-0-306-4015-7"));
-        assert!(!code.is_valid_isbn_13("978-0-306-406157"));
-        assert!(!code.is_valid_isbn_13("978-0-306-40615-3"));
-        assert!(!code.is_valid_isbn_13("978-0-360-40615-7"));
+        assert!(code.is_valid_isbn_13("978-0-306-40615-7").is_ok());
+        assert!(code.is_valid_isbn_13("9780306406157").is_ok());
+        assert!(code.is_valid_isbn_13("978-0-306-4015-7").is_err());
+        assert!(code.is_valid_isbn_13("978-0-306-406157").is_err());
+        assert!(code.is_valid_isbn_13("978-0-306-40615-3").is_err());
+        assert!(code.is_valid_isbn_13("978-0-360-40615-7").is_err());
     }
 
     #[test]
