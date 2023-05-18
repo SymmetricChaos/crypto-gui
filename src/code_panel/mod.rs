@@ -19,6 +19,7 @@ pub mod block_controls;
 pub mod fibonacci_controls;
 pub mod generic_components;
 pub mod godel_controls;
+pub mod isbn_contols;
 pub mod levenshtein_controls;
 pub mod linotype_controls;
 pub mod luhn_controls;
@@ -77,6 +78,7 @@ pub struct CodeInterface {
     skey: SKeyWords,
 
     // Error Correcting and Detecting
+    isbn: Isbn,
     luhn: LuhnAlgorithm,
     m_of_n: MofNCode,
     parity_bit: ParityBit,
@@ -169,7 +171,7 @@ impl CodeInterface {
             CodeId::Fibonacci => &mut self.fibonacci,
             CodeId::Godel => &mut self.godel,
             CodeId::Hamming => todo!("ADD HAMMING"),
-            CodeId::Isbn => todo!("ADD ISBN"),
+            CodeId::Isbn => &mut self.isbn,
             CodeId::Levenshtein => &mut self.levenshtein,
             CodeId::Linotype => &mut self.linotype,
             CodeId::Luhn => &mut self.luhn,

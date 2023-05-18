@@ -10,6 +10,7 @@ lazy_static! {
         Regex::new(r"^([0-9]{3}\-[0-9]\-[0-9]{3}\-[0-9]{5}\-[0-9])|([0-9]{13})$").unwrap();
 }
 
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum IsbnVariant {
     Ten,
     Thirteen,
@@ -75,7 +76,7 @@ impl Isbn {
             };
             if result.is_ok() {
                 out.push_str(line.trim());
-                out.push_str(",\n");
+                out.push_str(" [valid],\n");
             } else {
                 out.push_str(line.trim());
                 out.push_str(" [");
