@@ -22,7 +22,7 @@ pub const GRAY_CODES: [&'static str; 32] = [
     "11011", "11111",
 ];
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum BaudotMode {
     Letters,
     Figures,

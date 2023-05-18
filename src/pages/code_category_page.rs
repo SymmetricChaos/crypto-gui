@@ -2,6 +2,7 @@
 pub enum CodeCategory {
     Text,
     Binary,
+    ErrorCorrecting,
     Mathematical,
     Other,
 }
@@ -17,6 +18,7 @@ impl CodeCategory {
         match self {
             CodeCategory::Text => "<<<DESCRIPTION NEEDED>>",
             CodeCategory::Binary => "<<<DESCRIPTION NEEDED>>",
+            CodeCategory::ErrorCorrecting => "<<<DESCRIPTION NEEDED>>>",
             CodeCategory::Mathematical => "<<<DESCRIPTION NEEDED>>",
             CodeCategory::Other => "<<<DESCRIPTION NEEDED>>",
         }
