@@ -9,6 +9,8 @@ use crate::{
 };
 use eframe::egui;
 use egui::Ui;
+
+use self::isbn_contols::IsbnFrame;
 pub mod ascii85_controls;
 pub mod ascii_controls;
 pub mod bacon_contols;
@@ -78,7 +80,7 @@ pub struct CodeInterface {
     skey: SKeyWords,
 
     // Error Correcting and Detecting
-    isbn: Isbn,
+    isbn: IsbnFrame,
     luhn: LuhnAlgorithm,
     m_of_n: MofNCode,
     parity_bit: ParityBit,
