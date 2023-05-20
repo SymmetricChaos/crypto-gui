@@ -1,10 +1,11 @@
 use super::{bytes_to_hex, BinaryToText, BinaryToTextMode};
-use crate::{errors::CodeError, text_utils::functions::bimap_from_iter, traits::Code};
+use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use lazy_static::lazy_static;
 use num::Integer;
 use std::fs::read;
 use std::path::PathBuf;
+use utils::functions::bimap_from_iter;
 
 const ASCII85_BTOA: &'static str =
     "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstu";

@@ -4,6 +4,8 @@ use rand::{
     Rng,
 };
 
+use crate::functions::keyed_alphabet;
+
 use super::preset_alphabet::PresetAlphabet;
 use std::collections::vec_deque::{Iter, IterMut};
 use std::collections::VecDeque;
@@ -32,6 +34,10 @@ impl VecString {
 
     pub fn unique_from(text: &str) -> Self {
         Self(text.chars().unique().collect())
+    }
+
+    pub fn keyed_alphabet(key: &str, alphabet: &str) -> Self {
+        Self(keyed_alphabet(key, alphabet).chars().collect())
     }
 
     ////////////////////

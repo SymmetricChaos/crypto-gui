@@ -1,8 +1,9 @@
 use super::{generic_components::fill_code_columns, CodeFrame};
 use crate::egui_aux::subheading;
-use codes::{block::BlockCode, text_utils::PresetAlphabet};
+use codes::block::BlockCode;
 use egui::TextEdit;
 use itertools::Itertools;
+use utils::preset_alphabet::PresetAlphabet;
 
 pub struct BlockCodeFrame {
     code: BlockCode,

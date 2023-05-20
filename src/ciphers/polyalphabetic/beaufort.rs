@@ -1,12 +1,11 @@
 use std::collections::VecDeque;
 
-use super::PolyMode;
-use crate::{
-    ciphers::Cipher,
-    errors::Error,
-    global_rng::get_global_rng,
-    text_aux::{random_sample_replace, PresetAlphabet::*, VecString},
+use utils::{
+    functions::random_sample_replace, preset_alphabet::PresetAlphabet, vecstring::VecString,
 };
+
+use super::PolyMode;
+use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
 
 pub struct Beaufort {
     pub key_words: [String; 5],
@@ -215,8 +214,8 @@ impl Default for Beaufort {
                 String::new(),
                 String::new(),
             ],
-            alphabet_string: String::from(BasicLatin),
-            alphabet: VecString::from(BasicLatin),
+            alphabet_string: String::from(PresetAlphabet::BasicLatin),
+            alphabet: VecString::from(PresetAlphabet::BasicLatin),
             mode: PolyMode::CylicKey,
             prog_shift: 0,
             multikey: false,

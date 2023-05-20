@@ -1,11 +1,8 @@
 use bimap::BiMap;
 use lazy_static::lazy_static;
+use utils::{functions::bimap_from_iter, preset_alphabet::PresetAlphabet};
 
-use crate::{
-    errors::CodeError,
-    text_utils::{functions::bimap_from_iter, PresetAlphabet},
-    traits::Code,
-};
+use crate::{errors::CodeError, traits::Code};
 
 lazy_static! {
     // Yes, ALFA and JULIETT are meant to be spelled that way

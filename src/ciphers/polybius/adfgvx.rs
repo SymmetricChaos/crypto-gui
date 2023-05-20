@@ -1,7 +1,8 @@
+use utils::preset_alphabet::PresetAlphabet;
+
 use crate::{
     ciphers::{transposition::Columnar, Cipher},
     errors::Error,
-    text_aux::PresetAlphabet,
 };
 
 use super::PolybiusSquare;

@@ -1,15 +1,7 @@
-use crate::{
-    ciphers::Cipher,
-    errors::Error,
-    global_rng::get_global_rng,
-    text_aux::{
-        shuffled_str,
-        PresetAlphabet::{self, *},
-        VecString,
-    },
-};
+use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
 use itertools::Itertools;
 use num::integer::Roots;
+use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet, vecstring::VecString};
 
 pub struct FourSquare {
     pub alphabet: VecString,
@@ -54,7 +46,10 @@ impl FourSquare {
 
     pub fn assign_alphabet(&mut self, mode: PresetAlphabet) {
         match mode {
-            BasicLatinNoJ | BasicLatinNoQ | BasicLatinWithDigits | Base64 => {
+            PresetAlphabet::BasicLatinNoJ
+            | PresetAlphabet::BasicLatinNoQ
+            | PresetAlphabet::BasicLatinWithDigits
+            | PresetAlphabet::Base64 => {
                 self.alphabet = VecString::from(mode);
                 self.set_key1();
                 self.set_key2();

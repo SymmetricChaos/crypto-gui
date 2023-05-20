@@ -1,10 +1,10 @@
 use super::Cipher;
 use crate::errors::Error;
 use crate::global_rng::get_global_rng;
-use crate::text_aux::{random_char_vec, VecString};
 use lazy_static::lazy_static;
 use rand::Fill;
 use std::fmt::{self, Formatter};
+use utils::{functions::random_char_vec, vecstring::VecString};
 
 use itertools::Itertools;
 

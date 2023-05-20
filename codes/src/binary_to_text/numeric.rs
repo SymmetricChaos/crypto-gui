@@ -1,11 +1,8 @@
-use crate::{
-    errors::CodeError,
-    text_utils::functions::{u8_to_string_with_radix, u8_to_string_with_radix_and_width},
-    traits::Code,
-};
+use crate::{errors::CodeError, traits::Code};
 
 use super::{bytes_to_hex, BinaryToText, BinaryToTextMode};
 use itertools::Itertools;
+use utils::functions::{u8_to_string_with_radix, u8_to_string_with_radix_and_width};
 
 // Make it possible to encode an aribtrary file
 pub struct BytesAsNumbers {

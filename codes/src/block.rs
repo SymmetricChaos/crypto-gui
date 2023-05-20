@@ -2,8 +2,9 @@ use std::ops::{Add, Sub};
 
 use itertools::Itertools;
 use num::{Integer, Zero};
+use utils::preset_alphabet::PresetAlphabet;
 
-use crate::{errors::CodeError, text_utils::PresetAlphabet, traits::Code};
+use crate::{errors::CodeError, traits::Code};
 
 fn to_str_radix(n: usize, radix: usize, width: usize, symbols: &Vec<char>) -> String {
     if n.is_zero() {

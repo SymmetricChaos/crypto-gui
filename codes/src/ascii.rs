@@ -1,11 +1,8 @@
-use crate::{
-    errors::CodeError,
-    text_utils::{functions::bimap_from_iter, PresetAlphabet},
-    traits::Code,
-};
+use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use itertools::Itertools;
 use lazy_static::lazy_static;
+use utils::{functions::bimap_from_iter, preset_alphabet::PresetAlphabet};
 
 lazy_static! {
     pub static ref CONTROL_PICTURE_MAP: BiMap<u8, char> = bimap_from_iter(

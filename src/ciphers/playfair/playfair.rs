@@ -1,14 +1,10 @@
-use crate::{
-    ciphers::Cipher,
-    errors::Error,
-    global_rng::get_global_rng,
-    text_aux::{
-        keyed_alphabet, shuffled_str,
-        PresetAlphabet::{self, *},
-    },
-};
+use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
 use num::integer::Roots;
 use std::fmt;
+use utils::{
+    functions::{keyed_alphabet, shuffled_str},
+    preset_alphabet::PresetAlphabet,
+};
 
 pub struct Playfair {
     pub alphabet: String,
@@ -36,7 +32,10 @@ impl Playfair {
 
     pub fn assign_alphabet(&mut self, mode: PresetAlphabet) {
         match mode {
-            BasicLatinNoJ | BasicLatinNoQ | BasicLatinWithDigits | Base64 => {
+            PresetAlphabet::BasicLatinNoJ
+            | PresetAlphabet::BasicLatinNoQ
+            | PresetAlphabet::BasicLatinWithDigits
+            | PresetAlphabet::Base64 => {
                 self.alphabet = mode.string();
                 self.square = mode.string();
                 self.grid_side_len = mode.len().sqrt();

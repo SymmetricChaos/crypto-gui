@@ -1,7 +1,8 @@
 use eframe::egui::{Color32, RichText, Ui};
+use utils::preset_alphabet::PresetAlphabet;
 
 use super::{View, ViewableCipher, _generic_components::*};
-use crate::{ciphers::playfair::FourSquare, text_aux::PresetAlphabet::*};
+use crate::ciphers::playfair::FourSquare;
 
 impl ViewableCipher for FourSquare {}
 
@@ -13,16 +14,16 @@ impl View for FourSquare {
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
             if ui.button("No Q").clicked() {
-                self.assign_alphabet(BasicLatinNoQ)
+                self.assign_alphabet(PresetAlphabet::BasicLatinNoQ)
             };
             if ui.button("No J").clicked() {
-                self.assign_alphabet(BasicLatinNoJ)
+                self.assign_alphabet(PresetAlphabet::BasicLatinNoJ)
             };
             if ui.button("Alphanumeric").clicked() {
-                self.assign_alphabet(BasicLatinWithDigits)
+                self.assign_alphabet(PresetAlphabet::BasicLatinWithDigits)
             };
             if ui.button("Base64").clicked() {
-                self.assign_alphabet(Base64)
+                self.assign_alphabet(PresetAlphabet::Base64)
             };
         });
         ui.add_space(10.0);

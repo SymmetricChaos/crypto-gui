@@ -1,13 +1,13 @@
 use itertools::Itertools;
 use rand::prelude::SliceRandom;
 use std::{collections::HashSet, num::ParseIntError};
+use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
 
 use crate::{
     ciphers::Cipher,
     errors::Error,
     global_rng::get_global_rng,
     grid::{Grid, Symbol},
-    text_aux::{PresetAlphabet, VecString},
 };
 
 pub struct TurningGrille {

@@ -1,12 +1,8 @@
 use std::fmt::{self, Formatter};
 
-use crate::{
-    ciphers::Cipher,
-    errors::Error,
-    global_rng::get_global_rng,
-    text_aux::{shuffled_str, PresetAlphabet::*, VecString},
-};
+use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
 use itertools::Itertools;
+use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet, vecstring::VecString};
 
 pub struct Slidefair {
     alphabet: VecString,
@@ -20,8 +16,8 @@ pub struct Slidefair {
 impl Default for Slidefair {
     fn default() -> Self {
         Self {
-            alphabet_string: String::from(BasicLatin),
-            alphabet: VecString::from(BasicLatin),
+            alphabet_string: String::from(PresetAlphabet::BasicLatin),
+            alphabet: VecString::from(PresetAlphabet::BasicLatin),
             spacer_string: String::from("X"),
             spacer: 'X',
             key_word: String::new(),

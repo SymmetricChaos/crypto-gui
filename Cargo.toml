@@ -18,6 +18,7 @@ egui = "0.21.0"
 eframe = "0.21.0"
 
 codes = {path = "codes"}
+utils = {path = "utils"}
 
 lazy_static = "1.4.0"
 num = "0.4.0"

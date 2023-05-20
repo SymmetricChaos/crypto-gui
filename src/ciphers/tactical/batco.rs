@@ -2,12 +2,12 @@ use std::num::ParseIntError;
 
 use itertools::Itertools;
 use rand::{prelude::StdRng, Rng, SeedableRng};
+use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet};
 
 use crate::{
     ciphers::Cipher,
     errors::Error,
     global_rng::{get_global_rng, seed_global_rng},
-    text_aux::{shuffled_str, PresetAlphabet},
 };
 
 /*

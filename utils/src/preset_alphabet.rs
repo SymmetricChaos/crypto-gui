@@ -42,7 +42,7 @@ impl PresetAlphabet {
         self.slice().to_string()
     }
 
-    // Length in Unicode characters
+    // Length in Unicode code points
     pub fn len(&self) -> usize {
         // This could be a match statement but this is easier
         self.slice().chars().count()

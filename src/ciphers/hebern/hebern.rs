@@ -1,9 +1,6 @@
-use crate::{
-    ciphers::Cipher,
-    errors::Error,
-    global_rng::get_global_rng,
-    text_aux::{PresetAlphabet, VecString},
-};
+use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
+
+use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
 
 use super::rotor::HebernRotor;
 

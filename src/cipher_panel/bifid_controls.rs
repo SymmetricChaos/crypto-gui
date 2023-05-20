@@ -1,9 +1,10 @@
 use super::{View, ViewableCipher, _generic_components::*};
-use crate::{ciphers::polybius::Bifid, text_aux::PresetAlphabet::*};
+use crate::ciphers::polybius::Bifid;
 use eframe::{
     egui::{RichText, Slider, Ui},
     epaint::Color32,
 };
+use utils::preset_alphabet::PresetAlphabet;
 
 impl ViewableCipher for Bifid {}
 
@@ -19,16 +20,17 @@ impl View for Bifid {
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
             if ui.button("No Q").clicked() {
-                self.polybius.assign_alphabet(BasicLatinNoQ)
+                self.polybius.assign_alphabet(PresetAlphabet::BasicLatinNoQ)
             };
             if ui.button("No J").clicked() {
-                self.polybius.assign_alphabet(BasicLatinNoJ)
+                self.polybius.assign_alphabet(PresetAlphabet::BasicLatinNoJ)
             };
             if ui.button("Alphanumeric").clicked() {
-                self.polybius.assign_alphabet(BasicLatinWithDigits)
+                self.polybius
+                    .assign_alphabet(PresetAlphabet::BasicLatinWithDigits)
             };
             if ui.button("Base64").clicked() {
-                self.polybius.assign_alphabet(Base64)
+                self.polybius.assign_alphabet(PresetAlphabet::Base64)
             };
         });
 

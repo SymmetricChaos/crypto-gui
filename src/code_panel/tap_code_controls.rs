@@ -1,4 +1,5 @@
-use codes::{tap_code::TapCode, text_utils::PresetAlphabet};
+use codes::tap_code::TapCode;
+use utils::preset_alphabet::PresetAlphabet;
 
 use crate::{
     cipher_panel::_generic_components::control_string,

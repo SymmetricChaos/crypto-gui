@@ -1,8 +1,8 @@
+use utils::vecstring::VecString;
+
 use crate::ciphers::Cipher;
 use crate::errors::Error;
 use crate::global_rng::get_global_rng;
-use crate::text_aux::text_functions::validate_text;
-use crate::text_aux::VecString;
 
 pub struct Chaocipher {
     pub left_string: String,
@@ -61,15 +61,13 @@ impl Default for Chaocipher {
 
 impl Cipher for Chaocipher {
     fn encrypt(&self, text: &str) -> Result<String, Error> {
-        validate_text(text, &self.left)?;
-
         let mut left = self.left.clone();
         let mut right = self.right.clone();
 
         let symbols = text.chars();
         let mut out = String::new();
         for c in symbols {
-            let n = right.get_pos(c).unwrap();
+            let n = right.get_pos(c).ok_or(Error::invalid_input_char(c))?;
             out.push(left[n]);
             Chaocipher::left_permute(&mut left, n);
             Chaocipher::right_permute(&mut right, n);
@@ -84,7 +82,7 @@ impl Cipher for Chaocipher {
         let symbols = text.chars();
         let mut out = String::new();
         for c in symbols {
-            let n = left.get_pos(c).unwrap();
+            let n = left.get_pos(c).ok_or(Error::invalid_input_char(c))?;
             out.push(right[n]);
             Chaocipher::left_permute(&mut left, n);
             Chaocipher::right_permute(&mut right, n);

@@ -1,8 +1,7 @@
 use eframe::egui::{CentralPanel, Context, SidePanel, TextEdit};
 use unicode_normalization::UnicodeNormalization;
 use unicode_segmentation::UnicodeSegmentation;
-
-use crate::text_aux::text_functions::chunk_and_join;
+use utils::functions::chunk_and_join;
 
 pub struct TextPrepPage {
     pub text: String,

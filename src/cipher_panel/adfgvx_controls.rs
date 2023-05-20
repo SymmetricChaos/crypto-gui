@@ -1,7 +1,8 @@
 use eframe::egui::{TextEdit, Ui};
+use utils::preset_alphabet::PresetAlphabet;
 
 use super::{View, ViewableCipher, _generic_components::*};
-use crate::{ciphers::polybius::Adfgvx, text_aux::PresetAlphabet::*};
+use crate::ciphers::polybius::Adfgvx;
 
 impl ViewableCipher for Adfgvx {}
 
@@ -13,10 +14,10 @@ impl View for Adfgvx {
         ui.label("Select Mode");
         ui.horizontal(|ui| {
             if ui.button("ADFGX").clicked() {
-                self.set_alphabet(BasicLatinNoJ)
+                self.set_alphabet(PresetAlphabet::BasicLatinNoJ)
             };
             if ui.button("ADFGVX").clicked() {
-                self.set_alphabet(BasicLatinWithDigits)
+                self.set_alphabet(PresetAlphabet::BasicLatinWithDigits)
             };
         });
 

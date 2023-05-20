@@ -1,7 +1,6 @@
 pub mod errors;
 pub use errors::CodeError;
 
-pub mod text_utils;
 pub mod traits;
 
 pub mod binary_to_text;

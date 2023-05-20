@@ -1,11 +1,6 @@
-use crate::{
-    ciphers::Cipher,
-    errors::Error,
-    global_rng::get_global_rng,
-    math_functions::mul_inv,
-    text_aux::{PresetAlphabet::*, VecString},
-};
+use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng, math_functions::mul_inv};
 use rand::Rng;
+use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
 
 pub struct Affine {
     pub add_key: usize,
@@ -66,8 +61,8 @@ impl Default for Affine {
         Self {
             add_key: 0,
             mul_key: 1,
-            alphabet_string: String::from(BasicLatin),
-            alphabet: VecString::from(BasicLatin),
+            alphabet_string: String::from(PresetAlphabet::BasicLatin),
+            alphabet: VecString::from(PresetAlphabet::BasicLatin),
         }
     }
 }

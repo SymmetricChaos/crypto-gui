@@ -1,7 +1,5 @@
-use codes::{
-    text_utils::functions::NumRep,
-    unicode::{Unicode, UnicodeEncoding},
-};
+use codes::unicode::{Unicode, UnicodeEncoding};
+use utils::functions::NumRep;
 
 use crate::egui_aux::subheading;
 

@@ -1,6 +1,7 @@
 use itertools::Itertools;
+use utils::preset_alphabet::PresetAlphabet;
 
-use crate::{block::BlockCode, errors::CodeError, text_utils::PresetAlphabet, traits::Code};
+use crate::{block::BlockCode, errors::CodeError, traits::Code};
 
 pub struct Bacon {
     pub block: BlockCode,

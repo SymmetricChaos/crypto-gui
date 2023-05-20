@@ -1,9 +1,6 @@
-use crate::{
-    ciphers::Cipher,
-    errors::Error,
-    global_rng::get_global_rng,
-    text_aux::{shuffled_str, PresetAlphabet, VecString},
-};
+use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet, vecstring::VecString};
+
+use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
 
 #[derive(Debug)]
 pub struct GeneralSubstitution {

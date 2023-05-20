@@ -1,11 +1,12 @@
 use super::{bytes_to_hex, BinaryToText, BinaryToTextMode};
 use crate::errors::CodeError;
-use crate::text_utils::PresetAlphabet;
-use crate::{text_utils::functions::bimap_from_iter, traits::Code};
+use crate::traits::Code;
 use bimap::BiMap;
 use lazy_static::lazy_static;
 use std::fs::read;
 use std::path::PathBuf;
+use utils::functions::bimap_from_iter;
+use utils::preset_alphabet::PresetAlphabet;
 
 const MASK: u8 = 0b00111111;
 const PAD: u8 = '=' as u8;

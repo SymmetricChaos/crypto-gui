@@ -1,10 +1,10 @@
 use rand::Rng;
+use utils::preset_alphabet::PresetAlphabet;
+use utils::vecstring::VecString;
 
 use crate::ciphers::Cipher;
 use crate::errors::Error;
 use crate::global_rng::GLOBAL_RNG;
-use crate::text_aux::text_functions::validate_text;
-use crate::text_aux::{PresetAlphabet::*, VecString};
 use std::fmt::Display;
 
 pub struct Alberti {
@@ -57,14 +57,16 @@ impl Alberti {
 
 impl Cipher for Alberti {
     fn encrypt(&self, text: &str) -> Result<String, Error> {
-        validate_text(text, &self.fixed_alphabet)?;
         let mut index = self.start_index.clone();
         let mut out = String::with_capacity(text.len());
         for s in text.chars() {
             if self.fixed_alphabet.contains(s) {
                 out.push(self.encrypt_char(s, index));
             } else if self.moving_alphabet.contains(s) {
-                index = self.moving_alphabet.get_pos_of(s).unwrap();
+                index = self
+                    .moving_alphabet
+                    .get_pos_of(s)
+                    .ok_or(Error::invalid_input_char(s))?;
                 out.push(self.fixed_alphabet.get_char_at(index).unwrap());
             } else {
                 return Err(Error::invalid_input_char(s));
@@ -74,14 +76,16 @@ impl Cipher for Alberti {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, Error> {
-        validate_text(text, &self.moving_alphabet)?;
         let mut index = self.start_index.clone();
         let mut out = String::with_capacity(text.len());
         for s in text.chars() {
             if self.moving_alphabet.contains(s) {
                 out.push(self.decrypt_char(s, index));
             } else if self.fixed_alphabet.contains(s) {
-                index = self.fixed_alphabet.get_pos_of(s).unwrap();
+                index = self
+                    .fixed_alphabet
+                    .get_pos_of(s)
+                    .ok_or(Error::invalid_input_char(s))?;
                 out.push(self.moving_alphabet.get_char_at(index).unwrap());
             } else {
                 return Err(Error::invalid_input_char(s));
@@ -103,10 +107,14 @@ impl Cipher for Alberti {
 impl Default for Alberti {
     fn default() -> Self {
         Self {
-            fixed_alphabet_string: String::from(BasicLatin),
-            fixed_alphabet: VecString::from(BasicLatin),
-            moving_alphabet_string: String::from(BasicLatin.string().to_ascii_lowercase()),
-            moving_alphabet: VecString::from(BasicLatin.string().to_ascii_lowercase()),
+            fixed_alphabet_string: String::from(PresetAlphabet::BasicLatin),
+            fixed_alphabet: VecString::from(PresetAlphabet::BasicLatin),
+            moving_alphabet_string: String::from(
+                PresetAlphabet::BasicLatin.string().to_ascii_lowercase(),
+            ),
+            moving_alphabet: VecString::from(
+                PresetAlphabet::BasicLatin.string().to_ascii_lowercase(),
+            ),
             start_index: 0,
         }
     }

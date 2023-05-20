@@ -1,10 +1,10 @@
 use crate::ciphers::Cipher;
 use crate::errors::Error;
 use crate::global_rng::get_global_rng;
-use crate::text_aux::PresetAlphabet;
-use crate::text_aux::VecString;
 use itertools::Itertools;
 use lazy_static::lazy_static;
+use utils::preset_alphabet::PresetAlphabet;
+use utils::vecstring::VecString;
 
 // Porta Cipher uses a sequence of 13 alphabets to encrypt characters. The visible pattern ensures the cipher is reciprocal.
 lazy_static! {

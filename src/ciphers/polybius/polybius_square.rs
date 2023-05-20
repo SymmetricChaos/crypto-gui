@@ -1,14 +1,8 @@
-use crate::{
-    ciphers::Cipher,
-    errors::Error,
-    global_rng::get_global_rng,
-    text_aux::{
-        shuffled_str, text_functions::validate_text, PresetAlphabet, PresetAlphabet::*, VecString,
-    },
-};
+use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
 use itertools::Itertools;
 use num::Integer;
 use std::fmt::{self, Formatter};
+use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet, vecstring::VecString};
 
 pub struct PolybiusSquare {
     pub alphabet_string: String,
@@ -44,7 +38,10 @@ impl PolybiusSquare {
 
     pub fn assign_alphabet(&mut self, mode: PresetAlphabet) {
         match mode {
-            BasicLatinNoJ | BasicLatinNoQ | BasicLatinWithDigits | Base64 => {
+            PresetAlphabet::BasicLatinNoJ
+            | PresetAlphabet::BasicLatinNoQ
+            | PresetAlphabet::BasicLatinWithDigits
+            | PresetAlphabet::Base64 => {
                 self.alphabet_string = String::from(mode);
                 self.grid = VecString::from(mode);
                 self.side_len = (mode.len() as f64).sqrt().ceil() as usize;
@@ -99,12 +96,18 @@ impl PolybiusSquare {
     }
 
     // Cannot fail due to checks in encrypt/decrypt
-    fn position_to_char(&self, position: (char, char)) -> char {
-        let y = self.labels.get_pos_of(position.0).unwrap();
-        let x = self.labels.get_pos_of(position.1).unwrap();
+    fn position_to_char(&self, position: (char, char)) -> Result<char, Error> {
+        let y = self
+            .labels
+            .get_pos_of(position.0)
+            .ok_or(Error::invalid_input_char(position.0))?;
+        let x = self
+            .labels
+            .get_pos_of(position.1)
+            .ok_or(Error::invalid_input_char(position.1))?;
 
         let num = y * self.side_len + x;
-        self.alphabet_string.chars().nth(num).unwrap()
+        Ok(self.alphabet_string.chars().nth(num).unwrap())
     }
 
     fn check_labels(&self) -> Result<(), Error> {
@@ -139,21 +142,27 @@ impl PolybiusSquare {
 impl Cipher for PolybiusSquare {
     fn encrypt(&self, text: &str) -> Result<String, Error> {
         self.check_labels()?;
-        validate_text(text, &self.grid)?;
 
         let mut out = String::with_capacity(text.chars().count() * 2);
 
         for c in text.chars() {
             let pos = self.char_to_position(c);
-            out.push(self.labels.get_char_at(pos.0).unwrap());
-            out.push(self.labels.get_char_at(pos.1).unwrap());
+            out.push(
+                self.labels
+                    .get_char_at(pos.0)
+                    .ok_or(Error::invalid_input_char(c))?,
+            );
+            out.push(
+                self.labels
+                    .get_char_at(pos.1)
+                    .ok_or(Error::invalid_input_char(c))?,
+            );
         }
         Ok(out)
     }
 
     fn decrypt(&self, text: &str) -> Result<String, Error> {
         self.check_labels()?;
-        validate_text(text, &self.labels)?;
         if !text.chars().count().is_multiple_of(&2) {
             return Err(Error::input(
                 "Input text must have a length that is a multiple of two.",
@@ -164,7 +173,7 @@ impl Cipher for PolybiusSquare {
         let mut out = String::with_capacity(text.chars().count() / 2);
 
         for p in pairs {
-            out.push(self.position_to_char(p));
+            out.push(self.position_to_char(p)?);
         }
         Ok(out)
     }

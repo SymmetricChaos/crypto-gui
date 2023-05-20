@@ -3,10 +3,10 @@ use crate::{
     errors::Error,
     global_rng::get_global_rng,
     grid::{str_to_char_grid, Grid, Symbol},
-    text_aux::{PresetAlphabet, VecString},
 };
 use itertools::Itertools;
 use rand::{prelude::StdRng, Rng, SeedableRng};
+use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
 
 pub struct Grille {
     pub null_alphabet_string: String,

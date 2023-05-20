@@ -1,7 +1,7 @@
 use rand::Rng;
+use utils::vecstring::VecString;
 
 use crate::global_rng::get_global_rng;
-use crate::text_aux::VecString;
 use crate::{ciphers::Cipher, errors::Error};
 
 pub struct DecoderRing {

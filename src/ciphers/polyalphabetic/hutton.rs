@@ -1,9 +1,10 @@
-use crate::{
-    ciphers::Cipher,
-    errors::Error,
-    global_rng::get_global_rng,
-    text_aux::{keyed_alphabet, shuffled_str, PresetAlphabet, VecString},
+use utils::{
+    functions::{keyed_alphabet, shuffled_str},
+    preset_alphabet::PresetAlphabet,
+    vecstring::VecString,
 };
+
+use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
 
 #[derive(PartialEq, Eq)]
 pub enum HuttonVersion {

@@ -1,10 +1,7 @@
 use itertools::Itertools;
+use utils::functions::{u16_to_string, u32_to_string, u8_to_string, NumRep};
 
-use crate::{
-    errors::CodeError,
-    text_utils::functions::{u16_to_string, u32_to_string, u8_to_string, NumRep},
-    traits::Code,
-};
+use crate::{errors::CodeError, traits::Code};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UnicodeEncoding {

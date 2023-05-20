@@ -1,8 +1,9 @@
 use std::fmt::{self, Display, Formatter};
 
 use itertools::Itertools;
+use utils::vecstring::VecString;
 
-use crate::{errors::Error, global_rng::get_global_rng, text_aux::VecString};
+use crate::{errors::Error, global_rng::get_global_rng};
 
 #[derive(Clone, Debug)]
 pub struct HebernRotor {

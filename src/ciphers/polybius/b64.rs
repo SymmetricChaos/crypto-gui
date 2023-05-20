@@ -1,7 +1,8 @@
+use utils::preset_alphabet::PresetAlphabet;
+
 use crate::{
     ciphers::{transposition::Columnar, Cipher},
     errors::Error,
-    text_aux::PresetAlphabet::*,
 };
 
 use super::PolybiusSquare;
@@ -15,7 +16,7 @@ pub struct B64 {
 impl Default for B64 {
     fn default() -> Self {
         let mut polybius = PolybiusSquare::default();
-        polybius.assign_alphabet(Base64);
+        polybius.assign_alphabet(PresetAlphabet::Base64);
 
         Self {
             polybius,

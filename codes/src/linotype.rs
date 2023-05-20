@@ -2,8 +2,9 @@ use bimap::BiMap;
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use std::cell::Cell;
+use utils::functions::bimap_from_iter;
 
-use crate::{errors::CodeError, text_utils::functions::bimap_from_iter, traits::Code};
+use crate::{errors::CodeError, traits::Code};
 
 //http://www.linotype.org/OnLineDocs/LinotypeMachinePrinciples-1940/LMP-chapter20.pdf
 const LINOTYPE_90_MAG: &'static str =

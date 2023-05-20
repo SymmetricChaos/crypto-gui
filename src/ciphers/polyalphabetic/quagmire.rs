@@ -1,11 +1,10 @@
 use std::{iter::Cycle, slice::Iter};
 
-use crate::{
-    ciphers::Cipher,
-    errors::Error,
-    global_rng::get_global_rng,
-    text_aux::{random_sample_replace, PresetAlphabet, VecString},
+use utils::{
+    functions::random_sample_replace, preset_alphabet::PresetAlphabet, vecstring::VecString,
 };
+
+use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum QuagmireVersion {

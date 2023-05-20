@@ -1,6 +1,9 @@
+use utils::functions::rank_str;
+use utils::preset_alphabet::PresetAlphabet;
+use utils::vecstring::VecString;
+
 use crate::global_rng::get_global_rng;
 use crate::grid::{str_to_char_grid, Grid, Symbol};
-use crate::text_aux::{rank_str, PresetAlphabet::*, VecString};
 use crate::{ciphers::Cipher, errors::Error};
 
 pub struct Columnar {
@@ -38,8 +41,8 @@ impl Columnar {
 impl Default for Columnar {
     fn default() -> Self {
         Self {
-            alphabet_string: String::from(BasicLatin),
-            alphabet: VecString::from(BasicLatin),
+            alphabet_string: String::from(PresetAlphabet::BasicLatin),
+            alphabet: VecString::from(PresetAlphabet::BasicLatin),
             key: Vec::new(),
             key_word: String::new(),
         }

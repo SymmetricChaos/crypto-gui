@@ -1,11 +1,8 @@
-use crate::{
-    errors::Error,
-    global_rng::get_global_rng,
-    text_aux::{PresetAlphabet, VecString},
-};
+use crate::{errors::Error, global_rng::get_global_rng};
 use itertools::Itertools;
 use rand::{rngs::StdRng, seq::SliceRandom, Rng};
 use std::collections::HashMap;
+use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
 
 use super::{CipherAttack, TextScorer};
 

@@ -18,59 +18,59 @@ pub struct Isbn {
     pub variant: IsbnVariant,
 }
 
+pub fn is_valid_isbn_10(text: &str) -> Result<(), CodeError> {
+    if !ISBN_10.is_match(&text.chars().filter(|c| *c != '-').collect::<String>()) {
+        return Err(CodeError::input("not a well formed ISBN-10 code"));
+    }
+
+    let mut check = 0;
+    for (c, idx) in text
+        .chars()
+        .filter(|c| *c != '-')
+        .zip([10, 9, 8, 7, 6, 5, 4, 3, 2, 1].into_iter())
+    {
+        match c.to_digit(10) {
+            Some(n) => check += idx * n,
+            None => check += idx * 10, // only case that can reach this is 'X'
+        }
+    }
+    if check % 11 == 0 {
+        Ok(())
+    } else {
+        Err(CodeError::input("invalid check digit"))
+    }
+}
+
+pub fn is_valid_isbn_13(text: &str) -> Result<(), CodeError> {
+    if !ISBN_13.is_match(&text.chars().filter(|c| *c != '-').collect::<String>()) {
+        return Err(CodeError::input("not a well formed ISBN-13 code"));
+    }
+
+    let mut check = 0;
+    for (c, idx) in text
+        .chars()
+        .filter(|c| *c != '-')
+        .zip([1, 3].into_iter().cycle())
+    {
+        match c.to_digit(10) {
+            Some(n) => check += idx * n,
+            None => unreachable!("only valid digits can reach this point"),
+        }
+    }
+    if check % 10 == 0 {
+        Ok(())
+    } else {
+        Err(CodeError::input("invalid check digit"))
+    }
+}
+
 impl Isbn {
-    fn is_valid_isbn_10<'a>(&self, text: &'a str) -> Result<(), CodeError> {
-        if !ISBN_10.is_match(&text.chars().filter(|c| *c != '-').collect::<String>()) {
-            return Err(CodeError::input("not a well formed ISBN-10 code"));
-        }
-
-        let mut check = 0;
-        for (c, idx) in text
-            .chars()
-            .filter(|c| *c != '-')
-            .zip([10, 9, 8, 7, 6, 5, 4, 3, 2, 1].into_iter())
-        {
-            match c.to_digit(10) {
-                Some(n) => check += idx * n,
-                None => check += idx * 10, // only case that can reach this is 'X'
-            }
-        }
-        if check % 11 == 0 {
-            Ok(())
-        } else {
-            Err(CodeError::input("invalid check digit"))
-        }
-    }
-
-    fn is_valid_isbn_13<'a>(&self, text: &'a str) -> Result<(), CodeError> {
-        if !ISBN_13.is_match(&text.chars().filter(|c| *c != '-').collect::<String>()) {
-            return Err(CodeError::input("not a well formed ISBN-13 code"));
-        }
-
-        let mut check = 0;
-        for (c, idx) in text
-            .chars()
-            .filter(|c| *c != '-')
-            .zip([1, 3].into_iter().cycle())
-        {
-            match c.to_digit(10) {
-                Some(n) => check += idx * n,
-                None => unreachable!("only valid digits can reach this point"),
-            }
-        }
-        if check % 10 == 0 {
-            Ok(())
-        } else {
-            Err(CodeError::input("invalid check digit"))
-        }
-    }
-
     pub fn check_csv_isbn(&self, list: &str) -> String {
         let mut out = String::new();
         for line in list.split(",").into_iter() {
             let result = match self.variant {
-                IsbnVariant::Ten => self.is_valid_isbn_10(line.trim()),
-                IsbnVariant::Thirteen => self.is_valid_isbn_13(line.trim()),
+                IsbnVariant::Ten => is_valid_isbn_10(line.trim()),
+                IsbnVariant::Thirteen => is_valid_isbn_13(line.trim()),
             };
             if result.is_ok() {
                 out.push_str(line.trim());
@@ -110,11 +110,11 @@ impl Code for Isbn {
         }
         match self.variant {
             IsbnVariant::Ten => {
-                self.is_valid_isbn_10(text)?;
+                is_valid_isbn_10(text)?;
                 Ok(text[0..text.len() - 1].to_string())
             }
             IsbnVariant::Thirteen => {
-                self.is_valid_isbn_13(text)?;
+                is_valid_isbn_13(text)?;
                 Ok(text[0..text.len() - 1].to_string())
             }
         }

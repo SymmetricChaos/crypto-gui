@@ -1,11 +1,7 @@
 use rand::{prelude::StdRng, Rng, SeedableRng};
+use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet};
 
-use crate::{
-    ciphers::Cipher,
-    errors::Error,
-    global_rng::get_global_rng,
-    text_aux::{shuffled_str, PresetAlphabet},
-};
+use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
 
 pub struct Dryad {
     pub cipher_rows: [String; 25],

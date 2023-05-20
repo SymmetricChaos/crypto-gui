@@ -2,12 +2,9 @@ use bimap::BiMap;
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use std::cell::Cell;
+use utils::functions::{bimap_from_iter, chunk_and_join};
 
-use crate::{
-    errors::CodeError,
-    text_utils::functions::{bimap_from_iter, chunk_and_join},
-    traits::Code,
-};
+use crate::{errors::CodeError, traits::Code};
 
 pub const ITA1_LETTERS: &'static str = "␀␍␊ QWERTYUIOPASDFGHJKLZXCVBNM␎␏";
 pub const ITA1_FIGURES: &'static str = "␀␍␊ 1234567890-'␅!&£␇()+/:=?,.␎␏";

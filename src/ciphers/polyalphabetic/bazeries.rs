@@ -1,8 +1,10 @@
 use crate::ciphers::Cipher;
 use crate::errors::Error;
 use crate::global_rng::get_global_rng;
-use crate::text_aux::{shuffled_str, PresetAlphabet, VecString};
 use itertools::Itertools;
+use utils::functions::shuffled_str;
+use utils::preset_alphabet::PresetAlphabet;
+use utils::vecstring::VecString;
 
 pub struct Bazeries {
     pub alphabet_string: String,

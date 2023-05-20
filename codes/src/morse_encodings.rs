@@ -1,7 +1,6 @@
 use bimap::BiMap;
 use lazy_static::lazy_static;
-
-use crate::text_utils::functions::bimap_from_iter;
+use utils::functions::bimap_from_iter;
 
 pub const ITU_LETTERS: &'static str = "ABCDEÉFGHIJKLMNOPQRSTUVWXYZ1234567890.,:?'-/()\"=+@";
 pub const ITU_ASCII: [&'static str; 50] = [
