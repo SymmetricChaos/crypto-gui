@@ -16,7 +16,7 @@ impl Default for PunycodeFrame {
 }
 
 impl CodeFrame for PunycodeFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.collapsing("Variables", |ui| {
             let tmin_range = 1..=(self.code.tmax - 1);
             let tmax_range = 2..=2000;

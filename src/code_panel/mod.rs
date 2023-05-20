@@ -1,5 +1,4 @@
-use crate::ids::CodeId;
-use codes::{errors::CodeError, traits::Code};
+use codes::{errors::CodeError, ids::CodeId, traits::Code};
 use eframe::egui;
 use egui::Ui;
 

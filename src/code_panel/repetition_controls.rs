@@ -16,7 +16,7 @@ impl Default for RepetitionFrame {
 }
 
 impl CodeFrame for RepetitionFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.label("Block Size");
         ui.add(Slider::new(&mut self.code.block_size, 3..=9));
 

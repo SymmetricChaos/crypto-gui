@@ -20,7 +20,7 @@ impl Default for UnicodeFrame {
 }
 
 impl CodeFrame for UnicodeFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.group(|ui| {
             ui.label(subheading("Encoding"));
             ui.horizontal(|ui| {

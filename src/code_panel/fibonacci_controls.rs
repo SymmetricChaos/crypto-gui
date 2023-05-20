@@ -15,7 +15,7 @@ impl Default for FibonacciCodeFrame {
 }
 
 impl CodeFrame for FibonacciCodeFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.selectable_value(&mut self.code.mode, IOMode::Integer, "Integer");
         ui.selectable_value(&mut self.code.mode, IOMode::Letter, "Letter");
         ui.selectable_value(&mut self.code.mode, IOMode::Word, "Word");

@@ -2,9 +2,10 @@ use crate::attack_panel::AttackInterface;
 use crate::cipher_panel::CipherInterface;
 use crate::code_panel::CodeInterface;
 use crate::egui_aux::subheading;
-use crate::ids::{AttackId, CipherId, CodeId};
+use crate::ids::{AttackId, CipherId};
 use crate::pages::io_panel::IOPanel;
 use crate::pages::{Page, TextPrepPage};
+use codes::ids::CodeId;
 use eframe::egui;
 use eframe::{
     egui::{

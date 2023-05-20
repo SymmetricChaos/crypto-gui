@@ -16,7 +16,7 @@ impl Default for MofNCodeFrame {
 }
 
 impl CodeFrame for MofNCodeFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.group(|ui| {
             ui.label("Weight");
             ui.add(Slider::new(&mut self.code.weight, 1..=self.code.length));

@@ -1,3 +1,4 @@
+use codes::ids::CodeId;
 use egui::{Color32, RichText, TextEdit, TextStyle, Ui};
 
 use crate::{
@@ -6,7 +7,7 @@ use crate::{
     code_panel::{CodeFrame, CodeInterface},
     egui_aux::error_text,
     global_rng::global_rng_controls,
-    ids::{AttackId, CipherId, CodeId},
+    ids::{AttackId, CipherId},
 };
 
 use super::Page;

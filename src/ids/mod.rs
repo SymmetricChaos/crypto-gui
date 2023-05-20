@@ -1,9 +1,6 @@
 pub mod cipher_id;
 pub use cipher_id::CipherId;
 
-pub mod code_id;
-pub use code_id::CodeId;
-
 pub mod attack_id;
 pub use attack_id::AttackId;
 

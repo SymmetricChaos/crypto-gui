@@ -22,5 +22,6 @@ pub mod ecc;
 pub mod romaji;
 
 pub mod errors;
+pub mod ids;
 pub mod text_utils;
 pub mod traits;

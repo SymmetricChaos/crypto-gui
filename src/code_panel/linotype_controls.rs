@@ -15,7 +15,7 @@ impl Default for LinotypeFrame {
 }
 
 impl CodeFrame for LinotypeFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         fill_code_columns(32, 4, ui, self.code.chars_codes());
     }
 

@@ -16,7 +16,7 @@ impl Default for UnaryCodeFrame {
 }
 
 impl CodeFrame for UnaryCodeFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.selectable_value(&mut self.code.mode, UnaryMode::Letter, "Letter");
         ui.selectable_value(&mut self.code.mode, UnaryMode::Word, "Word");
         match self.code.mode {

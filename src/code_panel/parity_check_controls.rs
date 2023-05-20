@@ -16,7 +16,7 @@ impl Default for ParityBitFrame {
 }
 
 impl CodeFrame for ParityBitFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.label("Data Bits");
         ui.add(Slider::new(&mut self.code.block_size, 1..=10));
 
