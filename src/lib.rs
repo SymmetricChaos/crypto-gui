@@ -21,8 +21,6 @@ pub mod pages;
 
 pub mod egui_aux;
 
-pub mod text_aux;
-
 pub mod global_rng;
 
 pub mod attack_panel;
