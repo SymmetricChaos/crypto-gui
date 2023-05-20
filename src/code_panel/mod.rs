@@ -1,49 +1,24 @@
-use crate::{
-    codes::{
-        binary_to_text::{ascii85::Ascii85, numeric::BytesAsNumbers},
-        morse::Morse,
-        romaji::romaji::Romaji,
-        *,
-    },
-    ids::CodeId,
-};
+use crate::ids::CodeId;
+use codes::{errors::CodeError, traits::Code};
 use eframe::egui;
 use egui::Ui;
 
-use self::isbn_contols::IsbnFrame;
-pub mod ascii85_controls;
-pub mod ascii_controls;
-pub mod bacon_contols;
-pub mod base32_controls;
-pub mod base64_controls;
-pub mod baudot_controls;
-pub mod block_controls;
-pub mod fibonacci_controls;
+use self::{ascii85_controls::Ascii85Frame, ascii_controls::AsciiFrame, isbn_contols::IsbnFrame};
 pub mod generic_components;
-pub mod godel_controls;
-pub mod isbn_contols;
-pub mod levenshtein_controls;
-pub mod linotype_controls;
-pub mod luhn_controls;
-pub mod m_of_n_controls;
-pub mod morse_controls;
-pub mod needle_controls;
-pub mod numeric_controls;
-pub mod parity_check_controls;
-pub mod pgp_controls;
-pub mod punycode_controls;
-pub mod repetition_controls;
-pub mod romaji_controls;
-pub mod skey_controls;
-pub mod spelling_alphabet_controls;
-pub mod tap_code_controls;
-pub mod unary_controls;
-pub mod unicode_controls;
 
-pub trait ViewableCode: View + Code {}
+mod ascii85_controls;
+mod ascii_controls;
+mod isbn_contols;
 
-pub trait View {
+pub trait CodeFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
+    fn code(&self) -> &dyn Code;
+    fn encode(&self, text: &str) -> Result<String, CodeError> {
+        self.code().encode(text)
+    }
+    fn decode(&self, text: &str) -> Result<String, CodeError> {
+        self.code().decode(text)
+    }
 }
 
 // Quick simple combo box builder
@@ -61,7 +36,7 @@ fn combox_box(code: &[CodeId], identifier: &'static str, active_code: &mut CodeI
 #[derive(Default)]
 pub struct CodeInterface {
     // Text Standards
-    ascii: Ascii,
+    ascii: AsciiFrame,
     baudot: Baudot,
     linotype: Linotype,
     morse: Morse,
@@ -72,7 +47,7 @@ pub struct CodeInterface {
     unicode: Unicode,
 
     // Binary to Text
-    ascii85: Ascii85,
+    ascii85: Ascii85Frame,
     base32: Base32,
     base64: Base64,
     numeric: BytesAsNumbers,
@@ -160,7 +135,7 @@ impl CodeInterface {
         );
     }
 
-    pub fn get_active_code(&mut self, active_code: &CodeId) -> &mut dyn ViewableCode {
+    pub fn get_active_code(&mut self, active_code: &CodeId) -> &mut dyn CodeFrame {
         match active_code {
             CodeId::Ascii => &mut self.ascii,
             CodeId::Ascii85 => &mut self.ascii85,

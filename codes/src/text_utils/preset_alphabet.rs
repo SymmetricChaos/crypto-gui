@@ -1,4 +1,4 @@
-use std::{path::Display, str::Chars};
+use std::str::Chars;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PresetAlphabet {

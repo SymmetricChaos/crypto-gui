@@ -82,8 +82,7 @@ pub struct CipherInterface {
     enigma: EnigmaM3,
     sigaba: Sigaba,
     hebern: Hebern,
-    purple: Purple,
-
+    // purple: Purple,
     vigenere: Vigenere,
     beaufort: Beaufort,
     alberti: Alberti,
@@ -156,7 +155,7 @@ impl CipherInterface {
                 CipherId::Enigma,
                 CipherId::Sigaba,
                 CipherId::Hebern,
-                CipherId::Purple,
+                // CipherId::Purple,
             ],
             "Cipher Machine",
             active_cipher,
@@ -250,7 +249,7 @@ impl CipherInterface {
             CipherId::Plugboard => &mut self.plugboard,
             CipherId::Rs44 => &mut self.rs44,
             CipherId::Hebern => &mut self.hebern,
-            CipherId::Purple => &mut self.purple,
+            // CipherId::Purple => &mut self.purple,
             _ => todo!(),
         }
     }

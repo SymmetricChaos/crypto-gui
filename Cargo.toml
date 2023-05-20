@@ -17,6 +17,8 @@ opt-level = 2
 egui = "0.21.0"
 eframe = "0.21.0"
 
+codes = {path = "codes"}
+
 lazy_static = "1.4.0"
 num = "0.4.0"
 itertools = "0.10.0"

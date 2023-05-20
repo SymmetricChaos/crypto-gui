@@ -1,6 +1,8 @@
-use crate::{codes::binary_to_text::BinaryToTextMode, egui_aux::mono_strong};
-use eframe::egui::{self};
+use codes::binary_to_text::BinaryToTextMode;
+use eframe::egui;
 use std::fmt::Display;
+
+use crate::egui_aux::mono_strong;
 
 pub fn fill_code_columns<T: Display, S: Display>(
     nrows: usize,

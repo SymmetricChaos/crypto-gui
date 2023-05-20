@@ -3,7 +3,7 @@ use egui::{Color32, RichText, TextEdit, TextStyle, Ui};
 use crate::{
     attack_panel::{AttackInterface, ViewableAttack},
     cipher_panel::{CipherInterface, ViewableCipher},
-    code_panel::{CodeInterface, ViewableCode},
+    code_panel::{CodeFrame, CodeInterface},
     egui_aux::error_text,
     global_rng::global_rng_controls,
     ids::{AttackId, CipherId, CodeId},
@@ -44,7 +44,7 @@ pub fn encrypt_decrypt(
 
 pub fn encode_decode(
     ui: &mut Ui,
-    code: &dyn ViewableCode,
+    code: &dyn CodeFrame,
     input: &mut String,
     output: &mut String,
     errors: &mut String,
@@ -165,7 +165,7 @@ impl IOPanel {
             ui.add_space(16.0);
             global_rng_controls(ui);
         }
-        
+
         if !errors.is_empty() {
             ui.add_space(24.0);
             ui.label(error_text(errors));

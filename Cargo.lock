@@ -526,6 +526,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "codes"
+version = "0.1.0"
+dependencies = [
+ "bimap",
+ "csv",
+ "getrandom",
+ "itertools",
+ "json",
+ "lazy_static",
+ "num",
+ "primal",
+ "rand",
+ "regex",
+ "rfd",
+ "unicode-normalization",
+ "unicode-segmentation",
+]
+
+[[package]]
 name = "combine"
 version = "4.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -637,6 +656,7 @@ name = "crypto-gui"
 version = "0.1.0"
 dependencies = [
  "bimap",
+ "codes",
  "console_error_panic_hook",
  "csv",
  "eframe",

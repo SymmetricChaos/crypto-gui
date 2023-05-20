@@ -15,8 +15,8 @@ pub use enigma::EnigmaM3;
 pub mod sigaba;
 pub use sigaba::Sigaba;
 
-pub mod purple;
-pub use purple::Purple;
+// pub mod purple;
+// pub use purple::Purple;
 
 // pub mod route;
 // pub use route::Route;
