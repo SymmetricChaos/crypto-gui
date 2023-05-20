@@ -1,25 +1,39 @@
+use codes::ecc::repetition::Repetition;
 use egui::Slider;
 
-use super::{View, ViewableCode};
-use crate::codes::Repetition;
+use super::CodeFrame;
 
-impl ViewableCode for Repetition {}
+pub struct RepetitionFrame {
+    code: Repetition,
+}
 
-impl View for Repetition {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui, _errors: &mut String) {
+impl Default for RepetitionFrame {
+    fn default() -> Self {
+        Self {
+            code: Default::default(),
+        }
+    }
+}
+
+impl CodeFrame for RepetitionFrame {
+    fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
         ui.label("Block Size");
-        ui.add(Slider::new(&mut self.block_size, 3..=9));
+        ui.add(Slider::new(&mut self.code.block_size, 3..=9));
 
         ui.add_space(16.0);
 
-        if self.block_size % 2 == 0 {
+        if self.code.block_size % 2 == 0 {
             ui.label(format!(
                 "Correct {}-bit errors\nDetect {}-bit errors",
-                self.block_size / 2 - 1,
-                self.block_size / 2
+                self.code.block_size / 2 - 1,
+                self.code.block_size / 2
             ));
         } else {
-            ui.label(format!("Correct {}-bit errors", self.block_size / 2,));
+            ui.label(format!("Correct {}-bit errors", self.code.block_size / 2,));
         }
+    }
+
+    fn code(&self) -> &dyn codes::traits::Code {
+        &self.code
     }
 }

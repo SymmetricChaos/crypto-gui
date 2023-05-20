@@ -15,7 +15,7 @@ impl Default for AsciiFrame {
 }
 
 impl CodeFrame for AsciiFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.group(|ui| {
             ui.label(subheading("Representation"));
             ui.horizontal(|ui| {
@@ -27,7 +27,7 @@ impl CodeFrame for AsciiFrame {
             });
         });
 
-        fill_code_columns(32, 4, ui, self.chars_codes_display());
+        fill_code_columns(32, 4, ui, self.code.chars_codes_display());
     }
 
     fn code(&self) -> &dyn codes::traits::Code {

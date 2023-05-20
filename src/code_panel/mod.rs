@@ -3,12 +3,49 @@ use codes::{errors::CodeError, traits::Code};
 use eframe::egui;
 use egui::Ui;
 
-use self::{ascii85_controls::Ascii85Frame, ascii_controls::AsciiFrame, isbn_contols::IsbnFrame};
+use self::{
+    ascii85_controls::Ascii85Frame, ascii_controls::AsciiFrame, bacon_contols::BaconFrame,
+    base32_controls::Base32Frame, base64_controls::Base64Frame, baudot_controls::BaudotFrame,
+    block_controls::BlockCodeFrame, fibonacci_controls::FibonacciCodeFrame,
+    godel_controls::GodelFrame, isbn_contols::IsbnFrame,
+    levenshtein_controls::LevenshteinCodeFrame, linotype_controls::LinotypeFrame,
+    luhn_controls::LuhnAlgorithmFrame, m_of_n_controls::MofNCodeFrame, morse_controls::MorseFrame,
+    needle_controls::NeedleFrame, numeric_controls::BytesAsNumbersFrame,
+    parity_check_controls::ParityBitFrame, pgp_controls::PgpWordsFrame,
+    punycode_controls::PunycodeFrame, repetition_controls::RepetitionFrame,
+    romaji_controls::RomajiFrame, skey_controls::SKeyWordsFrame,
+    spelling_alphabet_controls::SpellingAlphabetFrame, tap_code_controls::TapCodeFrame,
+    unary_controls::UnaryCodeFrame, unicode_controls::UnicodeFrame,
+};
 pub mod generic_components;
 
 mod ascii85_controls;
 mod ascii_controls;
+mod bacon_contols;
+mod base32_controls;
+mod base64_controls;
+mod baudot_controls;
+mod block_controls;
+mod fibonacci_controls;
+mod godel_controls;
 mod isbn_contols;
+mod levenshtein_controls;
+mod linotype_controls;
+mod luhn_controls;
+mod m_of_n_controls;
+mod morse_controls;
+mod needle_controls;
+mod numeric_controls;
+mod parity_check_controls;
+mod pgp_controls;
+mod punycode_controls;
+mod repetition_controls;
+mod romaji_controls;
+mod skey_controls;
+mod spelling_alphabet_controls;
+mod tap_code_controls;
+mod unary_controls;
+mod unicode_controls;
 
 pub trait CodeFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
@@ -37,40 +74,40 @@ fn combox_box(code: &[CodeId], identifier: &'static str, active_code: &mut CodeI
 pub struct CodeInterface {
     // Text Standards
     ascii: AsciiFrame,
-    baudot: Baudot,
-    linotype: Linotype,
-    morse: Morse,
-    needle: Needle,
-    punycode: Punycode,
-    romaji: Romaji,
-    spelling: SpellingAlphabet,
-    unicode: Unicode,
+    baudot: BaudotFrame,
+    linotype: LinotypeFrame,
+    morse: MorseFrame,
+    needle: NeedleFrame,
+    punycode: PunycodeFrame,
+    romaji: RomajiFrame,
+    spelling: SpellingAlphabetFrame,
+    unicode: UnicodeFrame,
 
     // Binary to Text
     ascii85: Ascii85Frame,
-    base32: Base32,
-    base64: Base64,
-    numeric: BytesAsNumbers,
-    pgp: PgpWords,
-    skey: SKeyWords,
+    base32: Base32Frame,
+    base64: Base64Frame,
+    numeric: BytesAsNumbersFrame,
+    pgp: PgpWordsFrame,
+    skey: SKeyWordsFrame,
 
     // Error Correcting and Detecting
     isbn: IsbnFrame,
-    luhn: LuhnAlgorithm,
-    m_of_n: MofNCode,
-    parity_bit: ParityBit,
-    repetition: Repetition,
+    luhn: LuhnAlgorithmFrame,
+    m_of_n: MofNCodeFrame,
+    parity_bit: ParityBitFrame,
+    repetition: RepetitionFrame,
 
     // Mathematical
-    fibonacci: FibonacciCode,
-    godel: Godel,
-    levenshtein: LevenshteinCode,
-    unary: UnaryCode,
+    fibonacci: FibonacciCodeFrame,
+    godel: GodelFrame,
+    levenshtein: LevenshteinCodeFrame,
+    unary: UnaryCodeFrame,
 
     // Other Codes
-    bacon: Bacon,
-    tap: TapCode,
-    block: BlockCode,
+    bacon: BaconFrame,
+    block: BlockCodeFrame,
+    tap: TapCodeFrame,
 }
 
 impl CodeInterface {

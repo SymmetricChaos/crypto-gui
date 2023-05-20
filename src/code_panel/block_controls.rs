@@ -1,18 +1,33 @@
+use super::{generic_components::fill_code_columns, CodeFrame};
+use crate::egui_aux::subheading;
+use codes::{block::BlockCode, text_utils::PresetAlphabet};
 use egui::TextEdit;
+use itertools::Itertools;
 
-use super::{generic_components::fill_code_columns, View, ViewableCode};
-use crate::{codes::BlockCode, egui_aux::subheading};
+pub struct BlockCodeFrame {
+    code: BlockCode,
+    alphabet_string: String,
+    symbol_string: String,
+}
 
-impl ViewableCode for BlockCode {}
+impl Default for BlockCodeFrame {
+    fn default() -> Self {
+        Self {
+            code: Default::default(),
+            alphabet_string: String::from(PresetAlphabet::BasicLatin),
+            symbol_string: String::from("01"),
+        }
+    }
+}
 
-impl View for BlockCode {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui, errors: &mut String) {
+impl CodeFrame for BlockCodeFrame {
+    fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
         ui.label(subheading("Alphabet"));
         if ui
             .add(TextEdit::singleline(&mut self.alphabet_string))
             .changed()
         {
-            self.set_alphabet();
+            self.code.alphabet = self.alphabet_string.chars().collect_vec()
         };
         ui.add_space(16.0);
 
@@ -21,21 +36,21 @@ impl View for BlockCode {
             .add(TextEdit::singleline(&mut self.symbol_string))
             .changed()
         {
-            self.set_symbols();
+            self.code.symbols = self.symbol_string.chars().collect_vec()
         };
         ui.add_space(16.0);
 
         ui.horizontal(|ui| {
             if ui.small_button("-").clicked() {
-                if let Err(e) = self.decrease_width() {
+                if let Err(e) = self.code.decrease_width() {
                     *errors = e.to_string();
                 } else {
                     errors.clear()
                 }
             }
-            ui.label(self.width.to_string());
+            ui.label(self.code.width.to_string());
             if ui.small_button("+").clicked() {
-                if let Err(e) = self.increase_width() {
+                if let Err(e) = self.code.increase_width() {
                     *errors = e.to_string();
                 } else {
                     errors.clear()
@@ -43,6 +58,10 @@ impl View for BlockCode {
             }
         });
         ui.add_space(16.0);
-        fill_code_columns(24, 6, ui, self.chars_codes());
+        fill_code_columns(24, 6, ui, self.code.chars_codes());
+    }
+
+    fn code(&self) -> &dyn codes::traits::Code {
+        &self.code
     }
 }

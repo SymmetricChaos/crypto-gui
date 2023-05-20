@@ -24,9 +24,7 @@ fn to_str_radix(n: usize, radix: usize, width: usize, symbols: &Vec<char>) -> St
 
 pub struct BlockCode {
     pub width: usize,
-    pub alphabet_string: String,
     pub alphabet: Vec<char>,
-    pub symbol_string: String,
     pub symbols: Vec<char>,
 }
 
@@ -34,23 +32,13 @@ impl Default for BlockCode {
     fn default() -> Self {
         BlockCode {
             width: 5,
-            alphabet_string: String::from(PresetAlphabet::BasicLatin),
             alphabet: PresetAlphabet::BasicLatin.chars().collect_vec(),
-            symbol_string: String::from("01"),
             symbols: vec!['0', '1'],
         }
     }
 }
 
 impl BlockCode {
-    pub fn set_symbols(&mut self) {
-        self.symbols = self.symbol_string.chars().unique().collect()
-    }
-
-    pub fn set_alphabet(&mut self) {
-        self.alphabet = self.alphabet_string.chars().unique().collect()
-    }
-
     fn num_to_string(&self, n: usize) -> String {
         to_str_radix(n, self.symbols.len(), self.width, &self.symbols)
     }

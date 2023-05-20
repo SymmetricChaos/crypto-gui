@@ -1,4 +1,7 @@
-use super::{generic_components::fill_code_columns, CodeFrame};
+use super::{
+    generic_components::{binary_to_text_input_mode, fill_code_columns},
+    CodeFrame,
+};
 use crate::egui_aux::subheading;
 use codes::binary_to_text::ascii85::{Ascii85, Ascii85Variant};
 
@@ -15,7 +18,7 @@ impl Default for Ascii85Frame {
 }
 
 impl CodeFrame for Ascii85Frame {
-    fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.group(|ui| {
             ui.label(subheading("Variant"));
             ui.horizontal(|ui| {
@@ -37,8 +40,8 @@ impl CodeFrame for Ascii85Frame {
             Ascii85Variant::ZeroQm => ui.label("Z85 variant deliberately excludes the the ASCII quote characters to make the encoding safe to used in quoted strings and thus much easier to include in source code. While no special encoding is used for the all zero word (0x00000000) the placement of zero as the first digit means that runs of zero bytes appear as runs of zeroes in encoded text."),
             Ascii85Variant::Adobe => ui.label("The Adobe variant of is used in PDFs and differs from the original btoa only in that it does not have the 'y' special rule and that Adobe marks the start and end of the encoded string differently."),
         };
-        // ui.add_space(16.0);
-        // binary_to_text_input_mode(ui, &mut self.mode);
+        ui.add_space(16.0);
+        binary_to_text_input_mode(ui, &mut self.code.mode);
 
         // ui.label("You can upload a file and encode its binary data as text. Decoding files is not supported as it is impossible to know the contents.");
         // upload_file(ui, &mut self.file);

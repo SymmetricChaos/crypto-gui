@@ -1,34 +1,49 @@
-use super::{generic_components::fill_code_columns, View, ViewableCode};
-use crate::codes::{unary::UnaryMode, UnaryCode};
-use eframe::egui::TextEdit;
+use codes::unary::{UnaryCode, UnaryMode};
+use egui::TextEdit;
 
-impl ViewableCode for UnaryCode {}
+use super::{generic_components::fill_code_columns, CodeFrame};
 
-impl View for UnaryCode {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui, _errors: &mut String) {
-        ui.selectable_value(&mut self.mode, UnaryMode::Letter, "Letter");
-        ui.selectable_value(&mut self.mode, UnaryMode::Word, "Word");
-        match self.mode {
+pub struct UnaryCodeFrame {
+    code: UnaryCode,
+}
+
+impl Default for UnaryCodeFrame {
+    fn default() -> Self {
+        Self {
+            code: Default::default(),
+        }
+    }
+}
+
+impl CodeFrame for UnaryCodeFrame {
+    fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
+        ui.selectable_value(&mut self.code.mode, UnaryMode::Letter, "Letter");
+        ui.selectable_value(&mut self.code.mode, UnaryMode::Word, "Word");
+        match self.code.mode {
             UnaryMode::Letter => {
                 ui.label("Alphabetical Mode: Provide an alphabet. Codes will be assigned to each character of the alphabet in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
                 if ui
-                    .add(TextEdit::singleline(&mut self.maps.alphabet))
+                    .add(TextEdit::singleline(&mut self.code.maps.alphabet))
                     .changed()
                 {
-                    self.set_letter_map();
+                    self.code.set_letter_map();
                 };
-                fill_code_columns(16, 3, ui, Box::new(self.maps.chars_codes()));
+                fill_code_columns(16, 3, ui, Box::new(self.code.maps.chars_codes()));
             }
             UnaryMode::Word => {
                 ui.label("Word Mode: Provide any number of words or phrases separated by commas. Codes will be assigned to each word or phrase in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
                 if ui
-                    .add(TextEdit::singleline(&mut self.maps.words_string))
+                    .add(TextEdit::singleline(&mut self.code.maps.words_string))
                     .changed()
                 {
-                    self.set_word_map();
+                    self.code.set_word_map();
                 };
-                fill_code_columns(16, 3, ui, Box::new(self.maps.words_codes()));
+                fill_code_columns(16, 3, ui, Box::new(self.code.maps.words_codes()));
             }
         }
+    }
+
+    fn code(&self) -> &dyn codes::traits::Code {
+        &self.code
     }
 }

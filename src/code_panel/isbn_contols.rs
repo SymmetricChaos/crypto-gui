@@ -1,8 +1,6 @@
-use codes::ecc::isbn::{Isbn, IsbnVariant};
-
-use crate::egui_aux::subheading;
-
 use super::CodeFrame;
+use crate::egui_aux::subheading;
+use codes::ecc::isbn::{Isbn, IsbnVariant};
 
 pub struct IsbnFrame {
     pub code: Isbn,

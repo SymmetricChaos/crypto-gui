@@ -3,8 +3,7 @@ use itertools::Itertools;
 use crate::{errors::CodeError, text_utils::PresetAlphabet, traits::Code};
 
 pub struct TapCode {
-    pub alphabet_string: String,
-    grid: Vec<char>,
+    pub grid: Vec<char>,
     side_len: usize,
     pub symbol: char,
 }
@@ -12,7 +11,6 @@ pub struct TapCode {
 impl Default for TapCode {
     fn default() -> Self {
         Self {
-            alphabet_string: String::from(PresetAlphabet::BasicLatinNoC),
             grid: PresetAlphabet::BasicLatinNoC.chars().collect_vec(),
             side_len: 5,
             symbol: '.',
@@ -26,7 +24,6 @@ impl TapCode {
             PresetAlphabet::BasicLatinNoC
             | PresetAlphabet::BasicLatinNoJ
             | PresetAlphabet::BasicLatinNoQ => {
-                self.alphabet_string = String::from(mode);
                 self.grid = mode.chars().collect_vec();
                 self.side_len = (mode.len() as f64).sqrt().ceil() as usize;
             }
@@ -34,8 +31,8 @@ impl TapCode {
         }
     }
 
-    pub fn set_alphabet(&mut self) -> Result<(), CodeError> {
-        let new_alpha_len = self.alphabet_string.chars().count();
+    pub fn set_alphabet(&mut self, alphabet_string: &str) -> Result<(), CodeError> {
+        let new_alpha_len = alphabet_string.chars().count();
 
         if new_alpha_len > 100 {
             return Err(CodeError::alphabet(
@@ -43,7 +40,7 @@ impl TapCode {
             ));
         }
 
-        self.grid = self.alphabet_string.chars().unique().collect();
+        self.grid = alphabet_string.chars().unique().collect();
         self.side_len = (new_alpha_len as f64).sqrt().ceil() as usize;
 
         Ok(())
@@ -103,7 +100,7 @@ impl Code for TapCode {
                 if c >= self.side_len {
                     return Err(CodeError::Input(format!("Invalid code group {}", col)));
                 }
-                out.push(self.alphabet_string.chars().nth(nth).unwrap())
+                out.push(*self.grid.iter().nth(nth).unwrap())
             } else {
                 return Err(CodeError::Input(format!(
                     "Unable to correctly segment code groups. Found pair {}",

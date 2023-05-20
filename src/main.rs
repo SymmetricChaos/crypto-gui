@@ -13,7 +13,6 @@ pub mod attack_panel;
 pub mod cipher_attacks;
 
 pub mod code_panel;
-pub mod codes;
 
 pub mod errors;
 pub mod pages;
