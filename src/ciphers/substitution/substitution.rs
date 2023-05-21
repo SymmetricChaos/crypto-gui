@@ -1,6 +1,6 @@
-use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet, vecstring::VecString};
+use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
 
-use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
+use crate::{ciphers::Cipher, errors::CodeError};
 
 #[derive(Debug)]
 pub struct GeneralSubstitution {
@@ -40,28 +40,28 @@ impl GeneralSubstitution {
         self.pt_alphabet.get_char_at(pos).unwrap()
     }
 
-    fn validate_settings(&self) -> Result<(), Error> {
+    fn validate_settings(&self) -> Result<(), CodeError> {
         if self.pt_alphabet.chars().count() != self.ct_alphabet.chars().count() {
-            return Err(Error::key(
+            return Err(CodeError::key(
                 "the input and output alphabets must have the same length",
             ));
         }
         Ok(())
     }
 
-    fn validate_text_encrypt(&self, text: &str) -> Result<(), Error> {
+    fn validate_text_encrypt(&self, text: &str) -> Result<(), CodeError> {
         for c in text.chars() {
             if !self.pt_alphabet.contains(c) {
-                return Err(Error::invalid_input_char(c));
+                return Err(CodeError::invalid_input_char(c));
             }
         }
         Ok(())
     }
 
-    fn validate_text_decrypt(&self, text: &str) -> Result<(), Error> {
+    fn validate_text_decrypt(&self, text: &str) -> Result<(), CodeError> {
         for c in text.chars() {
             if !self.ct_alphabet.contains(c) {
-                return Err(Error::invalid_input_char(c));
+                return Err(CodeError::invalid_input_char(c));
             }
         }
         Ok(())
@@ -84,25 +84,25 @@ impl Default for GeneralSubstitution {
 }
 
 impl Cipher for GeneralSubstitution {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         self.validate_settings()?;
         self.validate_text_encrypt(text)?;
         let out = text.chars().map(|c| self.encrypt_char(c)).collect();
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, Error> {
+    fn decrypt(&self, text: &str) -> Result<String, CodeError> {
         self.validate_settings()?;
         self.validate_text_decrypt(text)?;
         let out = text.chars().map(|c| self.decrypt_char(c)).collect();
         Ok(out)
     }
 
-    fn randomize(&mut self) {
-        // keep the plaintext alphabet unchanged and make the ciphertext alphabet a shuffled version of it
-        self.ct_alphabet_string = shuffled_str(&self.pt_alphabet_string, &mut get_global_rng());
-        self.ct_alphabet = VecString::unique_from(&self.ct_alphabet_string);
-    }
+    // fn randomize(&mut self) {
+    //     // keep the plaintext alphabet unchanged and make the ciphertext alphabet a shuffled version of it
+    //     self.ct_alphabet_string = shuffled_str(&self.pt_alphabet_string, &mut get_global_rng());
+    //     self.ct_alphabet = VecString::unique_from(&self.ct_alphabet_string);
+    // }
 
     fn reset(&mut self) {
         *self = Self::default();

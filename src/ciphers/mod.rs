@@ -21,11 +21,10 @@ pub use sigaba::Sigaba;
 // pub mod route;
 // pub use route::Route;
 
-use crate::errors::Error;
+use crate::errors::CodeError;
 
 pub trait Cipher {
-    fn encrypt(&self, text: &str) -> Result<String, Error>;
-    fn decrypt(&self, text: &str) -> Result<String, Error>;
-    fn randomize(&mut self);
+    fn encrypt(&self, text: &str) -> Result<String, CodeError>;
+    fn decrypt(&self, text: &str) -> Result<String, CodeError>;
     fn reset(&mut self);
 }

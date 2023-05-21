@@ -1,10 +1,8 @@
-use rand::Rng;
 use utils::preset_alphabet::PresetAlphabet;
 use utils::vecstring::VecString;
 
 use crate::ciphers::Cipher;
-use crate::errors::Error;
-use crate::global_rng::GLOBAL_RNG;
+use crate::errors::CodeError;
 use std::fmt::Display;
 
 pub struct Alberti {
@@ -56,7 +54,7 @@ impl Alberti {
 }
 
 impl Cipher for Alberti {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         let mut index = self.start_index.clone();
         let mut out = String::with_capacity(text.len());
         for s in text.chars() {
@@ -66,16 +64,16 @@ impl Cipher for Alberti {
                 index = self
                     .moving_alphabet
                     .get_pos_of(s)
-                    .ok_or(Error::invalid_input_char(s))?;
+                    .ok_or(CodeError::invalid_input_char(s))?;
                 out.push(self.fixed_alphabet.get_char_at(index).unwrap());
             } else {
-                return Err(Error::invalid_input_char(s));
+                return Err(CodeError::invalid_input_char(s));
             }
         }
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, Error> {
+    fn decrypt(&self, text: &str) -> Result<String, CodeError> {
         let mut index = self.start_index.clone();
         let mut out = String::with_capacity(text.len());
         for s in text.chars() {
@@ -85,19 +83,19 @@ impl Cipher for Alberti {
                 index = self
                     .fixed_alphabet
                     .get_pos_of(s)
-                    .ok_or(Error::invalid_input_char(s))?;
+                    .ok_or(CodeError::invalid_input_char(s))?;
                 out.push(self.moving_alphabet.get_char_at(index).unwrap());
             } else {
-                return Err(Error::invalid_input_char(s));
+                return Err(CodeError::invalid_input_char(s));
             }
         }
         Ok(out)
     }
 
-    fn randomize(&mut self) {
-        let length = self.moving_alphabet.len();
-        self.start_index = GLOBAL_RNG.lock().unwrap().gen_range(0..length);
-    }
+    // fn randomize(&mut self) {
+    //     let length = self.moving_alphabet.len();
+    //     self.start_index = GLOBAL_RNG.lock().unwrap().gen_range(0..length);
+    // }
 
     fn reset(&mut self) {
         *self = Self::default();

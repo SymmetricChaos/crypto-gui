@@ -1,7 +1,7 @@
-use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
+use crate::{ciphers::Cipher, errors::CodeError};
 use itertools::Itertools;
 use num::integer::Roots;
-use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet, vecstring::VecString};
+use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
 
 pub struct FourSquare {
     pub alphabet: VecString,
@@ -75,10 +75,10 @@ impl FourSquare {
         &self,
         symbol: char,
         alphabet: &VecString,
-    ) -> Result<(usize, usize), Error> {
+    ) -> Result<(usize, usize), CodeError> {
         let num = match alphabet.get_pos_of(symbol) {
             Some(n) => n,
-            None => return Err(Error::invalid_input_char(symbol)),
+            None => return Err(CodeError::invalid_input_char(symbol)),
         };
         Ok((num / self.grid_side_len, num % self.grid_side_len))
     }
@@ -112,7 +112,7 @@ impl FourSquare {
 }
 
 impl Cipher for FourSquare {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         let pairs = self.pairs(text);
         let mut out = String::with_capacity(text.len());
         for (l, r) in pairs {
@@ -125,7 +125,7 @@ impl Cipher for FourSquare {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, Error> {
+    fn decrypt(&self, text: &str) -> Result<String, CodeError> {
         let pairs = self.pairs(text);
         let mut out = String::with_capacity(text.len());
         for (l, r) in pairs {
@@ -138,12 +138,12 @@ impl Cipher for FourSquare {
         Ok(out)
     }
 
-    fn randomize(&mut self) {
-        self.key_word1 = shuffled_str(&self.alphabet.to_string(), &mut get_global_rng());
-        self.key_word2 = shuffled_str(&self.alphabet.to_string(), &mut get_global_rng());
-        self.set_key1();
-        self.set_key2();
-    }
+    // fn randomize(&mut self) {
+    //     self.key_word1 = shuffled_str(&self.alphabet.to_string(), &mut get_global_rng());
+    //     self.key_word2 = shuffled_str(&self.alphabet.to_string(), &mut get_global_rng());
+    //     self.set_key1();
+    //     self.set_key2();
+    // }
 
     fn reset(&mut self) {
         *self = Self::default();

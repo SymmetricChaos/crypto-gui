@@ -1,6 +1,6 @@
 use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
 
-use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
+use crate::{ciphers::Cipher, errors::CodeError};
 
 use super::rotor::HebernRotor;
 
@@ -104,9 +104,9 @@ impl Default for Hebern {
 }
 
 impl Cipher for Hebern {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         if let Some(c) = self.validate_text(text) {
-            return Err(Error::invalid_input_char(c));
+            return Err(CodeError::invalid_input_char(c));
         }
         let mut rotors = self.rotors.clone();
         let mut out = String::with_capacity(text.len());
@@ -117,9 +117,9 @@ impl Cipher for Hebern {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, Error> {
+    fn decrypt(&self, text: &str) -> Result<String, CodeError> {
         if let Some(c) = self.validate_text(text) {
-            return Err(Error::invalid_input_char(c));
+            return Err(CodeError::invalid_input_char(c));
         }
         let mut rotors = self.rotors.clone();
         let mut out = String::with_capacity(text.len());
@@ -128,10 +128,6 @@ impl Cipher for Hebern {
             rotors.step();
         }
         Ok(out)
-    }
-
-    fn randomize(&mut self) {
-        todo!("{:?}", &mut get_global_rng())
     }
 
     fn reset(&mut self) {

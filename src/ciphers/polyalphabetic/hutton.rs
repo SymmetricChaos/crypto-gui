@@ -1,10 +1,6 @@
-use utils::{
-    functions::{keyed_alphabet, shuffled_str},
-    preset_alphabet::PresetAlphabet,
-    vecstring::VecString,
-};
+use utils::{functions::keyed_alphabet, preset_alphabet::PresetAlphabet, vecstring::VecString};
 
-use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
+use crate::{ciphers::Cipher, errors::CodeError};
 
 #[derive(PartialEq, Eq)]
 pub enum HuttonVersion {
@@ -78,7 +74,7 @@ impl Hutton {
 }
 
 impl Cipher for Hutton {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::with_capacity(text.len());
         // mutable alphabet for use while function runs
         let mut inner_alpha = self.keyed_alpha.clone();
@@ -105,7 +101,7 @@ impl Cipher for Hutton {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, Error> {
+    fn decrypt(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::with_capacity(text.len());
         let mut inner_alphabet = self.keyed_alpha.clone();
         let len = self.alphabet.len();
@@ -129,10 +125,10 @@ impl Cipher for Hutton {
         Ok(out)
     }
 
-    fn randomize(&mut self) {
-        self.assign_key(&shuffled_str(&self.alphabet_string, &mut get_global_rng()));
-        self.assign_password(&shuffled_str(&self.alphabet_string, &mut get_global_rng()));
-    }
+    // fn randomize(&mut self) {
+    //     self.assign_key(&shuffled_str(&self.alphabet_string, &mut get_global_rng()));
+    //     self.assign_password(&shuffled_str(&self.alphabet_string, &mut get_global_rng()));
+    // }
 
     fn reset(&mut self) {
         *self = Self::default();

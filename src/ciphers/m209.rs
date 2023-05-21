@@ -1,10 +1,8 @@
 use super::Cipher;
-use crate::errors::Error;
-use crate::global_rng::get_global_rng;
+use crate::errors::CodeError;
 use lazy_static::lazy_static;
-use rand::Fill;
 use std::fmt::{self, Formatter};
-use utils::{functions::random_char_vec, vecstring::VecString};
+use utils::vecstring::VecString;
 
 use itertools::Itertools;
 
@@ -60,10 +58,12 @@ impl Rotor {
         self.alphabet.rotate_left(1)
     }
 
-    pub fn set_pins(&mut self, pins: &str) -> Result<(), Error> {
+    pub fn set_pins(&mut self, pins: &str) -> Result<(), CodeError> {
         for p in pins.chars() {
             if !self.alphabet.contains(p) {
-                return Err(Error::key("effective pins must be in the Rotor's alphabet"));
+                return Err(CodeError::key(
+                    "effective pins must be in the Rotor's alphabet",
+                ));
             }
         }
         self.pins = pins.chars().collect();
@@ -157,7 +157,7 @@ impl Default for M209 {
 }
 
 impl M209 {
-    pub fn set_pins(&mut self, pins: [&str; 6]) -> Result<(), Error> {
+    pub fn set_pins(&mut self, pins: [&str; 6]) -> Result<(), CodeError> {
         for (r, p) in self.get_wheels().zip(pins) {
             r.set_pins(p)?
         }
@@ -207,7 +207,7 @@ impl M209 {
 }
 
 impl Cipher for M209 {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         let nums = text.chars().map(|x| char_to_usize(x)).collect_vec();
         let mut out = String::with_capacity(text.len());
 
@@ -250,37 +250,37 @@ impl Cipher for M209 {
     }
 
     // The M209 is reciprocal
-    fn decrypt(&self, text: &str) -> Result<String, Error> {
+    fn decrypt(&self, text: &str) -> Result<String, CodeError> {
         self.encrypt(text)
     }
 
-    fn randomize(&mut self) {
-        // Fill up an array with random bytes. Then map that to pairs of usize.
-        // Unwrap here is justified by the fixed sizes of everything involved.
-        let mut rng = get_global_rng();
-        let mut data = [0u8; 54];
-        data.try_fill(&mut *rng).unwrap();
-        self.lugs = data
-            .chunks_exact(2)
-            .map(|x| ((x[0] % 7) as usize, (x[1] % 7) as usize))
-            .collect::<Vec<(usize, usize)>>()
-            .try_into()
-            .unwrap();
+    // fn randomize(&mut self) {
+    //     // Fill up an array with random bytes. Then map that to pairs of usize.
+    //     // Unwrap here is justified by the fixed sizes of everything involved.
+    //     let mut rng = get_global_rng();
+    //     let mut data = [0u8; 54];
+    //     data.try_fill(&mut *rng).unwrap();
+    //     self.lugs = data
+    //         .chunks_exact(2)
+    //         .map(|x| ((x[0] % 7) as usize, (x[1] % 7) as usize))
+    //         .collect::<Vec<(usize, usize)>>()
+    //         .try_into()
+    //         .unwrap();
 
-        let pins1 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 13, &mut rng);
-        let pins2 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVXYZ", 12, &mut rng);
-        let pins3 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVX", 12, &mut rng);
-        let pins4 = random_char_vec("ABCDEFGHIJKLMNOPQRSTU", 12, &mut rng);
-        let pins5 = random_char_vec("ABCDEFGHIJKLMNOPQRS", 12, &mut rng);
-        let pins6 = random_char_vec("ABCDEFGHIJKLMNOPQ", 12, &mut rng);
+    //     let pins1 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 13, &mut rng);
+    //     let pins2 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVXYZ", 12, &mut rng);
+    //     let pins3 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVX", 12, &mut rng);
+    //     let pins4 = random_char_vec("ABCDEFGHIJKLMNOPQRSTU", 12, &mut rng);
+    //     let pins5 = random_char_vec("ABCDEFGHIJKLMNOPQRS", 12, &mut rng);
+    //     let pins6 = random_char_vec("ABCDEFGHIJKLMNOPQ", 12, &mut rng);
 
-        for (rotor, new_pins) in self
-            .get_wheels()
-            .zip([pins1, pins2, pins3, pins4, pins5, pins6].iter())
-        {
-            rotor.pins = new_pins.clone()
-        }
-    }
+    //     for (rotor, new_pins) in self
+    //         .get_wheels()
+    //         .zip([pins1, pins2, pins3, pins4, pins5, pins6].iter())
+    //     {
+    //         rotor.pins = new_pins.clone()
+    //     }
+    // }
 
     fn reset(&mut self) {
         *self = Self::default();

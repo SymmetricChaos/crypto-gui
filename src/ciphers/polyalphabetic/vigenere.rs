@@ -1,10 +1,8 @@
 use std::collections::VecDeque;
 
-use utils::{
-    functions::random_sample_replace, preset_alphabet::PresetAlphabet, vecstring::VecString,
-};
+use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
 
-use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
+use crate::{ciphers::Cipher, errors::CodeError};
 
 use super::PolyMode;
 
@@ -94,24 +92,24 @@ impl Vigenere {
         self.alphabet.len()
     }
 
-    fn validate_key(&self) -> Result<(), Error> {
+    fn validate_key(&self) -> Result<(), CodeError> {
         for key in self.key_words.iter() {
             for c in key.chars() {
                 if !self.alphabet.contains(c) {
-                    return Err(Error::invalid_alphabet_char(c));
+                    return Err(CodeError::invalid_alphabet_char(c));
                 }
             }
         }
         Ok(())
     }
 
-    fn validate_input(&self, text: &str) -> Result<(), Error> {
+    fn validate_input(&self, text: &str) -> Result<(), CodeError> {
         if text.len() == 0 {
-            return Err(Error::Input(String::from("No input text provided")));
+            return Err(CodeError::Input(String::from("No input text provided")));
         }
         for c in text.chars() {
             if !self.alphabet.contains(c) {
-                return Err(Error::invalid_input_char(c));
+                return Err(CodeError::invalid_input_char(c));
             }
         }
         Ok(())
@@ -131,7 +129,7 @@ impl Vigenere {
         self.alphabet.get_shifted_char(c, -(k as i32)).unwrap()
     }
 
-    fn encrypt_cyclic(&self, text: &str) -> Result<String, Error> {
+    fn encrypt_cyclic(&self, text: &str) -> Result<String, CodeError> {
         let out = text
             .chars()
             .zip(self.cyclic_key())
@@ -140,7 +138,7 @@ impl Vigenere {
         Ok(out)
     }
 
-    fn decrypt_cyclic(&self, text: &str) -> Result<String, Error> {
+    fn decrypt_cyclic(&self, text: &str) -> Result<String, CodeError> {
         let out = text
             .chars()
             .zip(self.cyclic_key())
@@ -149,7 +147,7 @@ impl Vigenere {
         Ok(out)
     }
 
-    fn encrypt_auto(&self, text: &str) -> Result<String, Error> {
+    fn encrypt_auto(&self, text: &str) -> Result<String, CodeError> {
         let mut akey: VecDeque<usize> = self.key().collect();
         let mut out = String::with_capacity(text.len());
 
@@ -162,7 +160,7 @@ impl Vigenere {
         Ok(out)
     }
 
-    fn decrypt_auto(&self, text: &str) -> Result<String, Error> {
+    fn decrypt_auto(&self, text: &str) -> Result<String, CodeError> {
         let mut akey: VecDeque<usize> = self.key().collect();
         let mut out = String::with_capacity(text.len());
 
@@ -176,7 +174,7 @@ impl Vigenere {
         Ok(out)
     }
 
-    fn encrypt_prog(&self, text: &str) -> Result<String, Error> {
+    fn encrypt_prog(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::with_capacity(text.len());
 
         let mut cur_shift = 0 as usize;
@@ -193,7 +191,7 @@ impl Vigenere {
         Ok(out)
     }
 
-    fn decrypt_prog(&self, text: &str) -> Result<String, Error> {
+    fn decrypt_prog(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::with_capacity(text.len());
 
         let mut cur_shift = 0;
@@ -212,7 +210,7 @@ impl Vigenere {
 }
 
 impl Cipher for Vigenere {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         self.validate_key()?;
         self.validate_input(text)?;
         match self.mode {
@@ -222,7 +220,7 @@ impl Cipher for Vigenere {
         }
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, Error> {
+    fn decrypt(&self, text: &str) -> Result<String, CodeError> {
         self.validate_key()?;
         self.validate_input(text)?;
         match self.mode {
@@ -232,15 +230,15 @@ impl Cipher for Vigenere {
         }
     }
 
-    fn randomize(&mut self) {
-        let rng = &mut get_global_rng();
-        let alpha = String::from(&self.alphabet_string);
-        self.key_words[0] = random_sample_replace(&alpha, 3, rng);
-        self.key_words[1] = random_sample_replace(&alpha, 4, rng);
-        self.key_words[2] = random_sample_replace(&alpha, 5, rng);
-        self.key_words[3] = String::new();
-        self.key_words[4] = String::new();
-    }
+    // fn randomize(&mut self) {
+    //     let rng = &mut get_global_rng();
+    //     let alpha = String::from(&self.alphabet_string);
+    //     self.key_words[0] = random_sample_replace(&alpha, 3, rng);
+    //     self.key_words[1] = random_sample_replace(&alpha, 4, rng);
+    //     self.key_words[2] = random_sample_replace(&alpha, 5, rng);
+    //     self.key_words[3] = String::new();
+    //     self.key_words[4] = String::new();
+    // }
 
     fn reset(&mut self) {
         *self = Self::default();

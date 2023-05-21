@@ -1,7 +1,5 @@
-use rand::Rng;
+use crate::{ciphers::Cipher, errors::CodeError};
 use std::iter::Iterator;
-
-use crate::{ciphers::Cipher, errors::Error, global_rng::GLOBAL_RNG};
 
 pub struct RailFence {
     pub rails: usize, // the slider to control this should be limited
@@ -14,9 +12,9 @@ impl Default for RailFence {
 }
 
 impl Cipher for RailFence {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         if self.rails < 2 {
-            return Err(Error::key("Rail Fence key must be greater than 1"));
+            return Err(CodeError::key("Rail Fence key must be greater than 1"));
         }
 
         let mut rows = Vec::new();
@@ -44,9 +42,9 @@ impl Cipher for RailFence {
     }
 
     // There's probably an easier way to do this.
-    fn decrypt(&self, text: &str) -> Result<String, Error> {
+    fn decrypt(&self, text: &str) -> Result<String, CodeError> {
         if self.rails < 2 {
-            return Err(Error::key("Rail Fence key must be greater than 1"));
+            return Err(CodeError::key("Rail Fence key must be greater than 1"));
         }
 
         // Count how many letters must be on each rail
@@ -95,9 +93,9 @@ impl Cipher for RailFence {
         Ok(out)
     }
 
-    fn randomize(&mut self) {
-        self.rails = GLOBAL_RNG.lock().unwrap().gen_range(2..10);
-    }
+    // fn randomize(&mut self) {
+    //     self.rails = GLOBAL_RNG.lock().unwrap().gen_range(2..10);
+    // }
 
     fn reset(&mut self) {
         *self = Self::default();

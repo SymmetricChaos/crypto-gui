@@ -11,7 +11,7 @@ const DEFAULT_STENCIL: &'static str = "⬛⬜⬛⬛⬛⬛⬛⬜⬜⬛⬛⬜⬛�
 
 use crate::{
     ciphers::Cipher,
-    errors::Error,
+    errors::CodeError,
     global_rng::get_global_rng,
     grid::{Grid, Symbol, BLOCK, EMPTY},
 };
@@ -183,7 +183,7 @@ impl RS44 {
         self.stencil.get_rows().map(|c| c.to_char()).collect()
     }
 
-    pub fn text_to_stencil(&mut self) -> Result<(), Error> {
+    pub fn text_to_stencil(&mut self) -> Result<(), CodeError> {
         let mut vec = Vec::with_capacity(Self::GRID_SIZE);
         let mut ctr = 0;
         for (n, c) in self.imported_stencil.chars().enumerate() {
@@ -193,19 +193,19 @@ impl RS44 {
             } else if c == BLOCK {
                 vec.push(Symbol::Empty)
             } else {
-                return Err(Error::Key(format!(
+                return Err(CodeError::Key(format!(
                     "The RS44 key can only be built from the symbols {} and {}",
                     EMPTY, BLOCK
                 )));
             }
             if (n + 1) % 25 == 0 && ctr % 10 != 0 {
-                return Err(Error::key(
+                return Err(CodeError::key(
                     "The RS44 stencil must have exactly 10 empty spaces in each row",
                 ));
             }
         }
         if vec.len() != Self::GRID_SIZE {
-            return Err(Error::key(
+            return Err(CodeError::key(
                 "The RS44 key must have exactly 600 positions defined",
             ));
         }
@@ -214,19 +214,19 @@ impl RS44 {
         Ok(())
     }
 
-    fn bounds_check(&self) -> Result<(), Error> {
+    fn bounds_check(&self) -> Result<(), CodeError> {
         match self.stencil.get(self.start_cell) {
             Some(s) => {
                 if !s.is_empty() {
-                    return Err(Error::key("starting cell must be an empty position"));
+                    return Err(CodeError::key("starting cell must be an empty position"));
                 } else {
                     ()
                 }
             }
-            None => return Err(Error::key("starting cell out of bounds")),
+            None => return Err(CodeError::key("starting cell out of bounds")),
         }
         if self.start_column >= Self::WIDTH {
-            return Err(Error::key("starting column out of bounds"));
+            return Err(CodeError::key("starting column out of bounds"));
         }
         Ok(())
     }
@@ -237,7 +237,7 @@ impl RS44 {
 }
 
 impl Cipher for RS44 {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         self.bounds_check()?;
 
         let mut output = String::with_capacity(text.len());
@@ -269,7 +269,7 @@ impl Cipher for RS44 {
         Ok(output)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, Error> {
+    fn decrypt(&self, text: &str) -> Result<String, CodeError> {
         self.bounds_check()?;
 
         let mut symbols = text.chars();
@@ -318,12 +318,12 @@ impl Cipher for RS44 {
         *self = Self::default();
     }
 
-    fn randomize(&mut self) {
-        self.randomize_stencil();
-        self.randomize_matrix();
-        self.randomize_labels();
-        self.set_full_message_key();
-    }
+    // fn randomize(&mut self) {
+    //     self.randomize_stencil();
+    //     self.randomize_matrix();
+    //     self.randomize_labels();
+    //     self.set_full_message_key();
+    // }
 }
 
 #[cfg(test)]

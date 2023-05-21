@@ -1,6 +1,6 @@
 use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
 
-use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
+use crate::{ciphers::Cipher, errors::CodeError};
 use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
@@ -21,14 +21,14 @@ impl Default for Plugboard {
 }
 
 impl Plugboard {
-    pub fn set_plugboard(&mut self) -> Result<(), Error> {
+    pub fn set_plugboard(&mut self) -> Result<(), CodeError> {
         let digraphs = self.pairs.split(" ");
 
         // Clear the wiring and rebuild it, returning an Error if anything goes wrong
         let mut wiring = HashMap::with_capacity(self.wiring.capacity());
         for d in digraphs {
             if d.len() != 2 {
-                return Err(Error::key(
+                return Err(CodeError::key(
                     "Plugboard settings must be given as pairs of letters",
                 ));
             }
@@ -36,7 +36,7 @@ impl Plugboard {
             let a = cs.next().unwrap();
             let b = cs.next().unwrap();
             if a == b || wiring.contains_key(&a) || wiring.contains_key(&b) {
-                return Err(Error::key(
+                return Err(CodeError::key(
                     "Plugboard settings cannot include cycles or chains",
                 ));
             }
@@ -85,31 +85,31 @@ impl Plugboard {
 }
 
 impl Cipher for Plugboard {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         let out = text.chars().map(|c| self.swap(c)).collect();
         Ok(out)
     }
 
     // Plugboards are naturally reciprocal
-    fn decrypt(&self, text: &str) -> Result<String, Error> {
+    fn decrypt(&self, text: &str) -> Result<String, CodeError> {
         self.encrypt(text)
     }
 
-    fn randomize(&mut self) {
-        let half = self.alphabet.len() / 2 + 1;
+    // fn randomize(&mut self) {
+    //     let half = self.alphabet.len() / 2 + 1;
 
-        let alpha = self.alphabet.shuffled(&mut get_global_rng());
-        let mut chars = alpha.chars();
-        let mut pairs = String::with_capacity(half * 3);
-        for _ in 0..half {
-            pairs.push(chars.next().unwrap());
-            pairs.push(chars.next().unwrap());
-            pairs.push(' ');
-        }
+    //     let alpha = self.alphabet.shuffled(&mut get_global_rng());
+    //     let mut chars = alpha.chars();
+    //     let mut pairs = String::with_capacity(half * 3);
+    //     for _ in 0..half {
+    //         pairs.push(chars.next().unwrap());
+    //         pairs.push(chars.next().unwrap());
+    //         pairs.push(' ');
+    //     }
 
-        self.pairs = pairs;
-        self.set_plugboard().unwrap();
-    }
+    //     self.pairs = pairs;
+    //     self.set_plugboard().unwrap();
+    // }
 
     fn reset(&mut self) {
         *self = Self::default();

@@ -1,8 +1,8 @@
 use std::fmt::{self, Formatter};
 
-use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
+use crate::{ciphers::Cipher, errors::CodeError};
 use itertools::Itertools;
-use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet, vecstring::VecString};
+use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
 
 pub struct Slidefair {
     alphabet: VecString,
@@ -107,9 +107,9 @@ impl Slidefair {
         rows
     }
 
-    fn validate_settings(&self) -> Result<(), Error> {
+    fn validate_settings(&self) -> Result<(), CodeError> {
         if !&self.alphabet.contains(self.spacer) {
-            return Err(Error::Key(format!(
+            return Err(CodeError::Key(format!(
                 "spacer character `{}` is not in the alphabet",
                 self.spacer
             )));
@@ -119,7 +119,7 @@ impl Slidefair {
 }
 
 impl Cipher for Slidefair {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         self.validate_settings()?;
         let mut symbols = text.chars().collect_vec();
         if symbols.len() % 2 != 0 {
@@ -133,7 +133,7 @@ impl Cipher for Slidefair {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, Error> {
+    fn decrypt(&self, text: &str) -> Result<String, CodeError> {
         self.validate_settings()?;
         let mut symbols = text.chars().collect_vec();
         if symbols.len() % 2 != 0 {
@@ -147,12 +147,12 @@ impl Cipher for Slidefair {
         Ok(out)
     }
 
-    fn randomize(&mut self) {
-        self.alphabet = VecString::from(shuffled_str(
-            &self.alphabet.to_string(),
-            &mut get_global_rng(),
-        ))
-    }
+    // fn randomize(&mut self) {
+    //     self.alphabet = VecString::from(shuffled_str(
+    //         &self.alphabet.to_string(),
+    //         &mut get_global_rng(),
+    //     ))
+    // }
 
     fn reset(&mut self) {
         *self = Self::default();

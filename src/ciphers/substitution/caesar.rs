@@ -1,7 +1,5 @@
 use crate::ciphers::Cipher;
-use crate::errors::Error;
-use crate::global_rng::get_global_rng;
-use rand::Rng;
+use crate::errors::CodeError;
 use utils::preset_alphabet::PresetAlphabet;
 use utils::vecstring::VecString;
 
@@ -12,16 +10,16 @@ pub struct Caesar {
 }
 
 impl Caesar {
-    fn encrypt_char(&self, c: char) -> Result<char, Error> {
+    fn encrypt_char(&self, c: char) -> Result<char, CodeError> {
         self.alphabet
             .get_shifted_char(c, self.shift)
-            .ok_or(Error::invalid_input_char(c))
+            .ok_or(CodeError::invalid_input_char(c))
     }
 
-    fn decrypt_char(&self, c: char) -> Result<char, Error> {
+    fn decrypt_char(&self, c: char) -> Result<char, CodeError> {
         self.alphabet
             .get_shifted_char(c, -self.shift)
-            .ok_or(Error::invalid_input_char(c))
+            .ok_or(CodeError::invalid_input_char(c))
     }
 
     pub fn set_alphabet(&mut self) {
@@ -45,7 +43,7 @@ impl Default for Caesar {
 }
 
 impl Cipher for Caesar {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         let mut vec = Vec::new();
         for c in text.chars() {
             vec.push(self.encrypt_char(c)?)
@@ -53,7 +51,7 @@ impl Cipher for Caesar {
         Ok(vec.into_iter().collect())
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, Error> {
+    fn decrypt(&self, text: &str) -> Result<String, CodeError> {
         let mut vec = Vec::new();
         for c in text.chars() {
             vec.push(self.decrypt_char(c)?)
@@ -61,9 +59,9 @@ impl Cipher for Caesar {
         Ok(vec.into_iter().collect())
     }
 
-    fn randomize(&mut self) {
-        self.shift = get_global_rng().gen_range(0..self.alphabet.len()) as i32;
-    }
+    // fn randomize(&mut self) {
+    //     self.shift = get_global_rng().gen_range(0..self.alphabet.len()) as i32;
+    // }
 
     fn reset(&mut self) {
         *self = Self::default();

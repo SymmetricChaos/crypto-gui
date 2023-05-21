@@ -1,8 +1,7 @@
 use utils::vecstring::VecString;
 
 use crate::ciphers::Cipher;
-use crate::errors::Error;
-use crate::global_rng::get_global_rng;
+use crate::errors::CodeError;
 
 pub struct Chaocipher {
     pub left_string: String,
@@ -60,14 +59,14 @@ impl Default for Chaocipher {
 }
 
 impl Cipher for Chaocipher {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         let mut left = self.left.clone();
         let mut right = self.right.clone();
 
         let symbols = text.chars();
         let mut out = String::new();
         for c in symbols {
-            let n = right.get_pos(c).ok_or(Error::invalid_input_char(c))?;
+            let n = right.get_pos(c).ok_or(CodeError::invalid_input_char(c))?;
             out.push(left[n]);
             Chaocipher::left_permute(&mut left, n);
             Chaocipher::right_permute(&mut right, n);
@@ -75,14 +74,14 @@ impl Cipher for Chaocipher {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, Error> {
+    fn decrypt(&self, text: &str) -> Result<String, CodeError> {
         let mut left = self.left.clone();
         let mut right = self.right.clone();
 
         let symbols = text.chars();
         let mut out = String::new();
         for c in symbols {
-            let n = left.get_pos(c).ok_or(Error::invalid_input_char(c))?;
+            let n = left.get_pos(c).ok_or(CodeError::invalid_input_char(c))?;
             out.push(right[n]);
             Chaocipher::left_permute(&mut left, n);
             Chaocipher::right_permute(&mut right, n);
@@ -90,11 +89,11 @@ impl Cipher for Chaocipher {
         Ok(out)
     }
 
-    fn randomize(&mut self) {
-        let rng = &mut get_global_rng();
-        self.left.shuffle(rng);
-        self.right.shuffle(rng);
-    }
+    // fn randomize(&mut self) {
+    //     let rng = &mut get_global_rng();
+    //     self.left.shuffle(rng);
+    //     self.right.shuffle(rng);
+    // }
 
     fn reset(&mut self) {
         *self = Self::default();

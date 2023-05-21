@@ -1,6 +1,6 @@
 use crate::{
     ciphers::Cipher,
-    errors::Error,
+    errors::CodeError,
     global_rng::get_global_rng,
     grid::{str_to_char_grid, Grid, Symbol},
 };
@@ -57,15 +57,15 @@ impl Default for Grille {
 }
 
 impl Cipher for Grille {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         if self.grid.num_empty() < text.chars().count() {
-            return Err(Error::Input(
+            return Err(CodeError::Input(
                 "The text is too long to fit into the open spaces of the Grille".to_string(),
             ));
         }
 
         if !self.use_nulls && self.grid.num_empty() != text.chars().count() {
-            return Err(Error::Input(
+            return Err(CodeError::Input(
                 "The text must exactly fill the empty spaces in the Grille".to_string(),
             ));
         }
@@ -94,10 +94,10 @@ impl Cipher for Grille {
             .collect())
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, Error> {
+    fn decrypt(&self, text: &str) -> Result<String, CodeError> {
         if self.use_nulls {
             if self.grid.grid_size() != text.chars().count() {
-                return Err(Error::Input(
+                return Err(CodeError::Input(
                     "Text is not the same size as the Grille".to_string(),
                 ));
             }
@@ -115,7 +115,7 @@ impl Cipher for Grille {
             Ok(out)
         } else {
             if self.grid.num_empty() != text.chars().count() {
-                return Err(Error::Input(
+                return Err(CodeError::Input(
                     "The text must exactly fill the empty spaces in the Grille".to_string(),
                 ));
             }
@@ -150,16 +150,16 @@ impl Cipher for Grille {
         *self = Self::default();
     }
 
-    fn randomize(&mut self) {
-        let mut rng = self.get_rng();
-        for cell in self.grid.get_rows_mut() {
-            if rng.gen_bool(0.5) {
-                *cell = Symbol::Empty;
-            } else {
-                *cell = Symbol::Blocked;
-            }
-        }
-    }
+    // fn randomize(&mut self) {
+    //     let mut rng = self.get_rng();
+    //     for cell in self.grid.get_rows_mut() {
+    //         if rng.gen_bool(0.5) {
+    //             *cell = Symbol::Empty;
+    //         } else {
+    //             *cell = Symbol::Blocked;
+    //         }
+    //     }
+    // }
 }
 
 #[cfg(test)]

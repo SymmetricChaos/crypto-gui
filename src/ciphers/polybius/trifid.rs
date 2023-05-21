@@ -1,7 +1,6 @@
 use super::PolybiusCube;
-use crate::{ciphers::Cipher, errors::Error, global_rng::GLOBAL_RNG};
+use crate::{ciphers::Cipher, errors::CodeError};
 use num::Integer;
-use rand::Rng;
 
 fn is_power_of_three(a: usize) -> bool {
     let mut p = 1;
@@ -31,11 +30,11 @@ impl Default for Trifid {
 }
 
 impl Trifid {
-    pub fn set_alphabet(&mut self) -> Result<(), Error> {
+    pub fn set_alphabet(&mut self) -> Result<(), CodeError> {
         let new_alpha_len = self.polybius.alphabet_string.chars().count();
 
         if !is_power_of_three(new_alpha_len) {
-            return Err(Error::alphabet(
+            return Err(CodeError::alphabet(
                 "alphabet length must be a power of three to fill the grid",
             ));
         }
@@ -44,11 +43,11 @@ impl Trifid {
 }
 
 impl Cipher for Trifid {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         let vector: Vec<char> = text.chars().collect();
         let len = vector.len();
         if !len.is_multiple_of(&self.block_size) {
-            return Err(Error::input(
+            return Err(CodeError::input(
                 "Input length must be a multiple of the block size",
             ));
         };
@@ -77,11 +76,11 @@ impl Cipher for Trifid {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, Error> {
+    fn decrypt(&self, text: &str) -> Result<String, CodeError> {
         // turn text into a vector and prepare a string to fill with the output
         let vector: Vec<char> = text.chars().collect();
         if !vector.len().is_multiple_of(&self.block_size) {
-            return Err(Error::input(
+            return Err(CodeError::input(
                 "Input length must be a multiple of the block size",
             ));
         };
@@ -113,10 +112,10 @@ impl Cipher for Trifid {
         Ok(out)
     }
 
-    fn randomize(&mut self) {
-        self.block_size = GLOBAL_RNG.lock().unwrap().gen_range(3..=30);
-        self.polybius.randomize();
-    }
+    // fn randomize(&mut self) {
+    //     self.block_size = GLOBAL_RNG.lock().unwrap().gen_range(3..=30);
+    //     self.polybius.randomize();
+    // }
 
     fn reset(&mut self) {
         *self = Self::default();

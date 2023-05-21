@@ -6,7 +6,7 @@ use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet};
 
 use crate::{
     ciphers::Cipher,
-    errors::Error,
+    errors::CodeError,
     global_rng::{get_global_rng, seed_global_rng},
 };
 
@@ -154,12 +154,12 @@ impl Batco {
     }
 
     // The keys is u8 but are defined as being a digit from 2 to 7 (to select a column) and an uppercase Latin letter (to select a row in that column)
-    fn key_to_row(&self) -> Result<usize, Error> {
+    fn key_to_row(&self) -> Result<usize, CodeError> {
         if self.message_number > 6 {
-            return Err(Error::key("the key number must be between 2 and 7"));
+            return Err(CodeError::key("the key number must be between 2 and 7"));
         }
         if self.message_letter > 26 {
-            return Err(Error::key(
+            return Err(CodeError::key(
                 "the key letter must be an uppercase basic Latin letter",
             ));
         }
@@ -171,7 +171,7 @@ impl Batco {
             .unwrap())
     }
 
-    fn symbol_to_number(&self, c: char) -> Result<usize, Error> {
+    fn symbol_to_number(&self, c: char) -> Result<usize, CodeError> {
         let v = match c {
             '0' => 0,
             '1' => 1,
@@ -186,7 +186,7 @@ impl Batco {
             'C' => 10,
             '.' => 11,
             _ => {
-                return Err(Error::input(
+                return Err(CodeError::input(
                     "the only valid symbols are digits, CH, and the period",
                 ))
             }
@@ -196,9 +196,9 @@ impl Batco {
 }
 
 impl Cipher for Batco {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         if text.chars().count() > 22 {
-            return Err(Error::input(
+            return Err(CodeError::input(
                 "BATCO messages are limited to 22 characters per key for security reasons",
             ));
         }
@@ -226,7 +226,7 @@ impl Cipher for Batco {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, Error> {
+    fn decrypt(&self, text: &str) -> Result<String, CodeError> {
         let alphabet = &self.cipher_rows[self.key_to_row()?];
         let symbols = text.chars();
 
@@ -238,15 +238,15 @@ impl Cipher for Batco {
         Ok(out)
     }
 
-    fn randomize(&mut self) {
-        let alpha = PresetAlphabet::BasicLatin.slice();
-        for row in self.cipher_rows.iter_mut() {
-            *row = shuffled_str(alpha, &mut get_global_rng())
-        }
-        for col in self.key_cols.iter_mut() {
-            *col = shuffled_str(alpha, &mut get_global_rng())
-        }
-    }
+    // fn randomize(&mut self) {
+    //     let alpha = PresetAlphabet::BasicLatin.slice();
+    //     for row in self.cipher_rows.iter_mut() {
+    //         *row = shuffled_str(alpha, &mut get_global_rng())
+    //     }
+    //     for col in self.key_cols.iter_mut() {
+    //         *col = shuffled_str(alpha, &mut get_global_rng())
+    //     }
+    // }
 
     fn reset(&mut self) {
         *self = Self::default();

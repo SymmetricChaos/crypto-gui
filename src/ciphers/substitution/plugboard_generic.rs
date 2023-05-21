@@ -2,7 +2,7 @@ use itertools::zip;
 use std::collections::HashMap;
 use std::hash::Hash;
 
-use crate::errors::Error;
+use crate::errors::CodeError;
 
 pub struct PlugboardGen<A> {
     wiring: HashMap<A, A>,
@@ -17,16 +17,16 @@ impl<A: Hash + Eq + Clone> Default for PlugboardGen<A> {
 }
 
 impl<A: Hash + Eq + Clone> PlugboardGen<A> {
-    pub fn build(left: &[A], right: &[A]) -> Result<PlugboardGen<A>, Error> {
+    pub fn build(left: &[A], right: &[A]) -> Result<PlugboardGen<A>, CodeError> {
         if left.len() != right.len() {
-            return Err(Error::General(
+            return Err(CodeError::General(
                 "the lists of left and right plugs positions must be the same length".into(),
             ));
         }
         let mut wiring = HashMap::with_capacity(left.len());
         for (l, r) in zip(left, right) {
             if l == r || wiring.contains_key(l) || wiring.contains_key(r) {
-                return Err(Error::General(
+                return Err(CodeError::General(
                     "plugboard inputs cannot form chains or cycles".into(),
                 ));
             }
@@ -49,16 +49,16 @@ impl<A: Hash + Eq + Clone> PlugboardGen<A> {
         PlugboardGen { wiring }
     }
 
-    pub fn rebuild(&mut self, left: &[A], right: &[A]) -> Result<(), Error> {
+    pub fn rebuild(&mut self, left: &[A], right: &[A]) -> Result<(), CodeError> {
         if left.len() != right.len() {
-            return Err(Error::General(
+            return Err(CodeError::General(
                 "the lists of left and right plugs positions must be the same length".into(),
             ));
         }
         let mut wiring = HashMap::with_capacity(left.len());
         for (l, r) in zip(left, right) {
             if l == r || wiring.contains_key(l) || wiring.contains_key(r) {
-                return Err(Error::General(
+                return Err(CodeError::General(
                     "plugboard inputs cannot form chains or cycles".into(),
                 ));
             }

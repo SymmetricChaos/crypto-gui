@@ -1,5 +1,5 @@
-use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
-use rand::{prelude::SliceRandom, Rng};
+use crate::{ciphers::Cipher, errors::CodeError, global_rng::get_global_rng};
+use rand::prelude::SliceRandom;
 
 const M94_WHEELS: [&'static str; 25] = [
     "ABCEIGDJFVUYMHTQKZOLRXSPWN",
@@ -65,9 +65,9 @@ impl M94 {
 }
 
 impl Cipher for M94 {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         if text.len() != self.wheels.len() {
-            return Err(Error::Input(
+            return Err(CodeError::Input(
                 "M94 messages must have exactly 25 characters".to_string(),
             ));
         }
@@ -80,9 +80,9 @@ impl Cipher for M94 {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, Error> {
+    fn decrypt(&self, text: &str) -> Result<String, CodeError> {
         if text.len() != self.wheels.len() {
-            return Err(Error::Input(
+            return Err(CodeError::Input(
                 "M94 messages must have exactly 25 characters".to_string(),
             ));
         }
@@ -96,11 +96,11 @@ impl Cipher for M94 {
         Ok(out)
     }
 
-    fn randomize(&mut self) {
-        let mut rng = get_global_rng();
-        self.wheels.shuffle(&mut *rng);
-        self.offset = rng.gen_range(1..self.wheels.len());
-    }
+    // fn randomize(&mut self) {
+    //     let mut rng = get_global_rng();
+    //     self.wheels.shuffle(&mut *rng);
+    //     self.offset = rng.gen_range(1..self.wheels.len());
+    // }
 
     fn reset(&mut self) {
         *self = Self::default();

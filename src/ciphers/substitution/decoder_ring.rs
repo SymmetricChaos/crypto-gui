@@ -1,8 +1,5 @@
-use rand::Rng;
+use crate::{ciphers::Cipher, errors::CodeError};
 use utils::vecstring::VecString;
-
-use crate::global_rng::get_global_rng;
-use crate::{ciphers::Cipher, errors::Error};
 
 pub struct DecoderRing {
     pub index: usize,
@@ -34,16 +31,16 @@ impl DecoderRing {
         self.alphabet = VecString::from(&self.alphabet_string);
     }
 
-    fn valid_code_group(&self, s: &str) -> Result<usize, Error> {
+    fn valid_code_group(&self, s: &str) -> Result<usize, CodeError> {
         match s.parse::<usize>() {
             Ok(n) => {
                 if n < self.length() {
                     Ok(n)
                 } else {
-                    Err(Error::input("invalid code group"))
+                    Err(CodeError::input("invalid code group"))
                 }
             }
-            Err(_) => return Err(Error::input("invalid code group")),
+            Err(_) => return Err(CodeError::input("invalid code group")),
         }
     }
 }
@@ -59,21 +56,21 @@ impl Default for DecoderRing {
 }
 
 impl Cipher for DecoderRing {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         let symbols = text.chars();
         let mut out = Vec::new();
         for s in symbols {
             let pos = self.alphabet.get_pos_of(s);
             let n = match pos {
                 Some(v) => (v + self.index) % self.length(),
-                None => return Err(Error::invalid_input_char(s)),
+                None => return Err(CodeError::invalid_input_char(s)),
             };
             out.push(format!("{}", n))
         }
         Ok(out.join(" "))
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, Error> {
+    fn decrypt(&self, text: &str) -> Result<String, CodeError> {
         let code_groups = text.split(' ');
         let nums = {
             let mut v = Vec::with_capacity(code_groups.clone().count());
@@ -91,9 +88,9 @@ impl Cipher for DecoderRing {
         Ok(out)
     }
 
-    fn randomize(&mut self) {
-        self.index = get_global_rng().gen_range(0..self.alphabet.len());
-    }
+    // fn randomize(&mut self) {
+    //     self.index = get_global_rng().gen_range(0..self.alphabet.len());
+    // }
 
     fn reset(&mut self) {
         *self = Self::default();

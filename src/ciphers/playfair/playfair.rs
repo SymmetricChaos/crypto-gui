@@ -1,10 +1,7 @@
-use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
+use crate::{ciphers::Cipher, errors::CodeError};
 use num::integer::Roots;
 use std::fmt;
-use utils::{
-    functions::{keyed_alphabet, shuffled_str},
-    preset_alphabet::PresetAlphabet,
-};
+use utils::{functions::keyed_alphabet, preset_alphabet::PresetAlphabet};
 
 pub struct Playfair {
     pub alphabet: String,
@@ -68,10 +65,10 @@ impl Playfair {
         out
     }
 
-    fn char_to_position(&self, symbol: char) -> Result<(usize, usize), Error> {
+    fn char_to_position(&self, symbol: char) -> Result<(usize, usize), CodeError> {
         let num = match self.square.chars().position(|x| x == symbol) {
             Some(n) => n,
-            None => return Err(Error::invalid_input_char(symbol)),
+            None => return Err(CodeError::invalid_input_char(symbol)),
         };
         Ok((num / self.grid_side_len, num % self.grid_side_len))
     }
@@ -106,9 +103,9 @@ impl Playfair {
         }
     }
 
-    fn validate_settings(&self) -> Result<(), Error> {
+    fn validate_settings(&self) -> Result<(), CodeError> {
         if !&self.alphabet.contains(self.spacer) {
-            return Err(Error::Key(format!(
+            return Err(CodeError::Key(format!(
                 "spacer character {} is not in the alphabet",
                 self.spacer
             )));
@@ -130,7 +127,7 @@ impl Default for Playfair {
 }
 
 impl Cipher for Playfair {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         self.validate_settings()?;
         let pairs = self.pairs(text);
         let mut out = String::with_capacity(text.chars().count());
@@ -143,7 +140,7 @@ impl Cipher for Playfair {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, Error> {
+    fn decrypt(&self, text: &str) -> Result<String, CodeError> {
         self.validate_settings()?;
         let pairs = self.pairs(text);
         let mut out = String::with_capacity(text.chars().count());
@@ -156,9 +153,9 @@ impl Cipher for Playfair {
         Ok(out)
     }
 
-    fn randomize(&mut self) {
-        self.alphabet = shuffled_str(&self.alphabet, &mut get_global_rng())
-    }
+    // fn randomize(&mut self) {
+    //     self.alphabet = shuffled_str(&self.alphabet, &mut get_global_rng())
+    // }
 
     fn reset(&mut self) {
         *self = Self::default();

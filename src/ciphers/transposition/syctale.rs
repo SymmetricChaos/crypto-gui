@@ -1,5 +1,4 @@
-use crate::{ciphers::Cipher, errors::Error, global_rng::GLOBAL_RNG};
-use rand::Rng;
+use crate::{ciphers::Cipher, errors::CodeError};
 
 pub struct Scytale {
     pub key: usize,
@@ -16,9 +15,9 @@ impl Default for Scytale {
 }
 
 impl Cipher for Scytale {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         if self.key <= 1 {
-            return Err(Error::key("Scytale key must be 2 or greater"));
+            return Err(CodeError::key("Scytale key must be 2 or greater"));
         }
 
         let n_cols = num::Integer::div_ceil(&text.len(), &self.key);
@@ -44,9 +43,9 @@ impl Cipher for Scytale {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, Error> {
+    fn decrypt(&self, text: &str) -> Result<String, CodeError> {
         if self.key <= 1 {
-            return Err(Error::key("Scytale key must be 2 or greater"));
+            return Err(CodeError::key("Scytale key must be 2 or greater"));
         }
 
         let n_cols = num::Integer::div_ceil(&text.len(), &self.key);
@@ -72,9 +71,9 @@ impl Cipher for Scytale {
         Ok(out)
     }
 
-    fn randomize(&mut self) {
-        self.key = GLOBAL_RNG.lock().unwrap().gen_range(2..10);
-    }
+    // fn randomize(&mut self) {
+    //     self.key = GLOBAL_RNG.lock().unwrap().gen_range(2..10);
+    // }
 
     fn reset(&mut self) {
         *self = Self::default();

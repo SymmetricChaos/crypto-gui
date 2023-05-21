@@ -1,10 +1,8 @@
 use std::{iter::Cycle, slice::Iter};
 
-use utils::{
-    functions::random_sample_replace, preset_alphabet::PresetAlphabet, vecstring::VecString,
-};
+use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
 
-use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
+use crate::{ciphers::Cipher, errors::CodeError};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum QuagmireVersion {
@@ -130,7 +128,7 @@ impl Quagmire {
 }
 
 impl Cipher for Quagmire {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         let (pt, ct) = match self.version {
             QuagmireVersion::V1 => (&self.pt_key, &self.alphabet),
             QuagmireVersion::V2 => (&self.alphabet, &self.pt_key),
@@ -147,7 +145,7 @@ impl Cipher for Quagmire {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, crate::errors::Error> {
+    fn decrypt(&self, text: &str) -> Result<String, crate::errors::CodeError> {
         let (ct, pt) = match self.version {
             QuagmireVersion::V1 => (&self.pt_key, &self.alphabet),
             QuagmireVersion::V2 => (&self.alphabet, &self.pt_key),
@@ -164,13 +162,13 @@ impl Cipher for Quagmire {
         Ok(out)
     }
 
-    fn randomize(&mut self) {
-        let rng = &mut get_global_rng();
-        self.assign_ct_key(&random_sample_replace(&self.alphabet_string, 9, rng));
-        self.assign_pt_key(&random_sample_replace(&self.alphabet_string, 9, rng));
-        self.assign_ind_key(&random_sample_replace(&self.alphabet_string, 9, rng));
-        self.indicator = self.alphabet.get_rand_char(rng);
-    }
+    // fn randomize(&mut self) {
+    //     let rng = &mut get_global_rng();
+    //     self.assign_ct_key(&random_sample_replace(&self.alphabet_string, 9, rng));
+    //     self.assign_pt_key(&random_sample_replace(&self.alphabet_string, 9, rng));
+    //     self.assign_ind_key(&random_sample_replace(&self.alphabet_string, 9, rng));
+    //     self.indicator = self.alphabet.get_rand_char(rng);
+    // }
 
     fn reset(&mut self) {
         *self = Self::default()

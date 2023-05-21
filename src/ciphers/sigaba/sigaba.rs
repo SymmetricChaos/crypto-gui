@@ -1,11 +1,9 @@
-use std::collections::HashSet;
-
-use itertools::Itertools;
-
 use super::{
     char_to_usize, usize_to_char, CipherRotor, IndexRotor, BIG_ROTOR_VEC, INDEX_ROTOR_VEC,
 };
-use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
+use crate::{ciphers::Cipher, errors::CodeError};
+use itertools::Itertools;
+use std::collections::HashSet;
 
 #[derive(Clone, Debug)]
 pub struct ControlRotors {
@@ -240,7 +238,7 @@ impl Default for Sigaba {
 }
 
 impl Cipher for Sigaba {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         let mut ctrl = self.control_rotors.clone();
         let mut cphr = self.cipher_rotors.clone();
 
@@ -257,7 +255,7 @@ impl Cipher for Sigaba {
         Ok(nums.iter().map(|n| usize_to_char(*n)).collect())
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, Error> {
+    fn decrypt(&self, text: &str) -> Result<String, CodeError> {
         let mut ctrl = self.control_rotors.clone();
         let mut cphr = self.cipher_rotors.clone();
 
@@ -268,11 +266,6 @@ impl Cipher for Sigaba {
             ctrl.step();
         }
         Ok(nums.iter().map(|n| usize_to_char(*n)).collect())
-    }
-
-    fn randomize(&mut self) {
-        let rng = get_global_rng();
-        todo!("{:?}", rng)
     }
 
     fn reset(&mut self) {

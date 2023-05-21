@@ -1,10 +1,8 @@
+use crate::grid::{str_to_char_grid, Grid, Symbol};
+use crate::{ciphers::Cipher, errors::CodeError};
 use utils::functions::rank_str;
 use utils::preset_alphabet::PresetAlphabet;
 use utils::vecstring::VecString;
-
-use crate::global_rng::get_global_rng;
-use crate::grid::{str_to_char_grid, Grid, Symbol};
-use crate::{ciphers::Cipher, errors::Error};
 
 pub struct Columnar {
     pub alphabet_string: String,
@@ -50,11 +48,11 @@ impl Default for Columnar {
 }
 
 impl Cipher for Columnar {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         let tlen = text.chars().count();
         let n_cols = self.key.len();
         if n_cols < 2 {
-            return Err(Error::key(
+            return Err(CodeError::key(
                 "The key for a columnar cipher must have at least two characters",
             ));
         }
@@ -76,11 +74,11 @@ impl Cipher for Columnar {
         Ok(out)
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, Error> {
+    fn decrypt(&self, text: &str) -> Result<String, CodeError> {
         let tlen = text.chars().count();
         let n_cols = self.key.len();
         if n_cols < 2 {
-            return Err(Error::key(
+            return Err(CodeError::key(
                 "The key for a columnar cipher must have at least two characters",
             ));
         }
@@ -108,14 +106,14 @@ impl Cipher for Columnar {
         Ok(g.read_cols_characters().collect())
     }
 
-    fn randomize(&mut self) {
-        let key: String = self
-            .alphabet
-            .get_rand_chars_replace(11, &mut get_global_rng())
-            .iter()
-            .collect();
-        self.assign_key(&key);
-    }
+    // fn randomize(&mut self) {
+    //     let key: String = self
+    //         .alphabet
+    //         .get_rand_chars_replace(11, &mut get_global_rng())
+    //         .iter()
+    //         .collect();
+    //     self.assign_key(&key);
+    // }
 
     fn reset(&mut self) {
         *self = Self::default();

@@ -1,11 +1,10 @@
-use utils::preset_alphabet::PresetAlphabet;
-
 use super::{
     char_to_usize, usize_to_char, EnigmaPlugboard, Reflector, Rotor, REFLECTORS, ROTOR_MAP,
 };
-use crate::{ciphers::Cipher, errors::Error, global_rng::get_global_rng};
+use crate::{ciphers::Cipher, errors::CodeError};
+use utils::preset_alphabet::PresetAlphabet;
 
-pub fn prep_enigma_text(text: &str) -> Result<String, Error> {
+pub fn prep_enigma_text(text: &str) -> Result<String, CodeError> {
     let mut out = String::with_capacity(text.len());
     for t in text.chars() {
         if PresetAlphabet::BasicLatin.slice().contains(t) {
@@ -24,7 +23,7 @@ pub fn prep_enigma_text(text: &str) -> Result<String, Error> {
                 'Ö' | 'ö' => out.push_str("OE"),
                 'Ü' | 'ü' => out.push_str("UE"),
                 'ẞ' | 'ß' => out.push_str("SS"),
-                _ => return Err(Error::invalid_input_char(t)),
+                _ => return Err(CodeError::invalid_input_char(t)),
             }
         }
     }
@@ -81,7 +80,7 @@ impl EnigmaState {
         self.rotors[2].ring = rotor_ring_positions.2;
     }
 
-    pub fn set_plugboard(&mut self) -> Result<(), Error> {
+    pub fn set_plugboard(&mut self) -> Result<(), CodeError> {
         self.plugboard.set_plugboard(&self.plugboard_pairs)
     }
 
@@ -118,19 +117,14 @@ pub struct EnigmaM3 {
 }
 
 impl Cipher for EnigmaM3 {
-    fn encrypt(&self, text: &str) -> Result<String, Error> {
+    fn encrypt(&self, text: &str) -> Result<String, CodeError> {
         let mut inner_state = self.state.clone();
         inner_state.set_plugboard()?;
         Ok(text.chars().map(|c| inner_state.encrypt_char(c)).collect())
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, Error> {
+    fn decrypt(&self, text: &str) -> Result<String, CodeError> {
         self.encrypt(text)
-    }
-
-    fn randomize(&mut self) {
-        let rng = get_global_rng();
-        todo!("{:?}", rng)
     }
 
     fn reset(&mut self) {

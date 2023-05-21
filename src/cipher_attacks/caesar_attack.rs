@@ -1,7 +1,7 @@
 use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
 
 use super::{CipherAttack, TextScorer};
-use crate::errors::Error;
+use crate::errors::CodeError;
 
 pub struct CaesarAttack {
     pub text_scorer: TextScorer,
@@ -16,7 +16,7 @@ impl Default for CaesarAttack {
 }
 
 impl CipherAttack for CaesarAttack {
-    fn attack_cipher(&self, text: &str) -> Result<String, Error> {
+    fn attack_cipher(&self, text: &str) -> Result<String, CodeError> {
         let alphabet = VecString::from(PresetAlphabet::BasicLatin);
 
         let n_trials = alphabet.len() as i32;
