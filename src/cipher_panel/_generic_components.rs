@@ -1,17 +1,14 @@
-use crate::{
-    ciphers::Cipher,
-    grid::{str_to_char_grid, Grid},
-};
+use crate::grid::{str_to_char_grid, Grid};
 use eframe::{
     egui::{self, Color32, Label, RichText, TextStyle},
     epaint::FontFamily,
 };
 
-use super::ViewableCipher;
+use super::CipherFrame;
 
 pub fn encrypt_decrypt(
     ui: &mut egui::Ui,
-    cipher: &dyn ViewableCipher,
+    cipher: &dyn CipherFrame,
     input: &mut String,
     output: &mut String,
     errors: &mut String,
@@ -40,7 +37,7 @@ pub fn encrypt_decrypt(
     });
 }
 
-pub fn randomize_reset(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
+pub fn randomize_reset(ui: &mut egui::Ui, cipher: &mut dyn CipherFrame) {
     if ui.button("Randomize").clicked() {
         cipher.randomize()
     }
@@ -49,13 +46,13 @@ pub fn randomize_reset(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
     }
 }
 
-pub fn randomize_button(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
-    if ui.button("Randomize\nSettings").clicked() {
+pub fn randomize_button(ui: &mut egui::Ui, cipher: &mut dyn CipherFrame) {
+    if ui.button("Randomize").clicked() {
         cipher.randomize()
     }
 }
 
-pub fn reset_button(ui: &mut egui::Ui, cipher: &mut dyn Cipher) {
+pub fn reset_button(ui: &mut egui::Ui, cipher: &mut dyn CipherFrame) {
     if ui.button("Reset").clicked() {
         cipher.reset()
     }

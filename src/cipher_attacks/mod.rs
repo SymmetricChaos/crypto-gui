@@ -6,7 +6,7 @@ use itertools::Itertools;
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 
-use crate::errors::CodeError;
+use crate::errors::CipherError;
 
 //const ONE_GRAMS: &'static str = "ETAOINSHRDLCUMWFGYPBVKJXQZ";
 const TWO_GRAM_DATA: &'static str = include_str!("2_gram_scores.csv");
@@ -56,7 +56,7 @@ lazy_static! {
 }
 
 pub trait CipherAttack {
-    fn attack_cipher(&self, text: &str) -> Result<String, CodeError>;
+    fn attack_cipher(&self, text: &str) -> Result<String, CipherError>;
     fn get_text_scorer(&mut self) -> &mut TextScorer;
 }
 

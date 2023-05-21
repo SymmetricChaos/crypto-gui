@@ -3,6 +3,7 @@ use crate::{
         hebern::Hebern, playfair::*, polyalphabetic::*, polybius::*, substitution::*, tactical::*,
         transposition::*, *,
     },
+    errors::CipherError,
     ids::CipherId,
 };
 use eframe::egui::{self, Ui};
@@ -48,6 +49,19 @@ pub mod two_square_controls;
 pub mod vigenere_controls;
 
 pub trait ViewableCipher: View + Cipher {}
+
+pub trait CipherFrame {
+    fn ui(&mut self, ui: &mut Ui, errors: &mut String);
+    fn code(&self) -> &dyn Cipher;
+    fn randomize(&mut self);
+    fn reset(&mut self);
+    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+        self.code().encrypt(text)
+    }
+    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+        self.code().decrypt(text)
+    }
+}
 
 pub trait View {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);

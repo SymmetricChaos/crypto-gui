@@ -1,4 +1,4 @@
-use crate::{errors::CodeError, global_rng::get_global_rng};
+use crate::{errors::CipherError, global_rng::get_global_rng};
 use itertools::Itertools;
 use rand::{rngs::StdRng, seq::SliceRandom, Rng};
 use std::collections::HashMap;
@@ -23,7 +23,7 @@ impl Default for SubstitutionAttack {
 }
 
 impl CipherAttack for SubstitutionAttack {
-    fn attack_cipher(&self, text: &str) -> Result<String, CodeError> {
+    fn attack_cipher(&self, text: &str) -> Result<String, CipherError> {
         let mut unique_chars = text.chars().unique().collect_vec();
 
         let alphabet = VecString::from(PresetAlphabet::BasicLatin);

@@ -515,6 +515,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "ciphers"
+version = "0.1.0"
+dependencies = [
+ "bimap",
+ "csv",
+ "getrandom",
+ "itertools",
+ "json",
+ "lazy_static",
+ "num",
+ "primal",
+ "rand",
+ "regex",
+ "rfd",
+ "unicode-normalization",
+ "unicode-segmentation",
+ "utils",
+]
+
+[[package]]
 name = "clipboard-win"
 version = "4.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -657,6 +677,7 @@ name = "crypto-gui"
 version = "0.1.0"
 dependencies = [
  "bimap",
+ "ciphers",
  "codes",
  "console_error_panic_hook",
  "csv",

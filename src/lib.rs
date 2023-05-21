@@ -10,11 +10,9 @@ pub mod rotors;
 pub mod ids;
 
 pub mod cipher_panel;
-pub mod ciphers;
+pub mod code_panel;
 
 pub mod cipher_attacks;
-
-pub mod code_panel;
 
 pub mod errors;
 pub mod pages;
