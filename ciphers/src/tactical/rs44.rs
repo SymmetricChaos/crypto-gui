@@ -1,20 +1,16 @@
-use std::{iter::Chain, ops::Range};
-
+use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
 use rand::{
     prelude::{SliceRandom, StdRng},
     Rng, SeedableRng,
 };
-use utils::preset_alphabet::PresetAlphabet;
+use std::{iter::Chain, ops::Range};
+use utils::{
+    grid::{Grid, Symbol, BLOCK, EMPTY},
+    preset_alphabet::PresetAlphabet,
+};
 
 const DEFAULT_STENCIL: &'static str = "⬛⬜⬛⬛⬛⬛⬛⬜⬜⬛⬛⬜⬛⬜⬛⬜⬛⬛⬜⬜⬛⬛⬜⬜⬛⬛⬛⬜⬛⬜⬛⬛⬜⬛⬜⬜⬛⬛⬜⬛⬛⬛⬜⬛⬛⬜⬛⬜⬛⬜⬜⬛⬛⬜⬜⬜⬛⬛⬛⬛⬜⬛⬛⬜⬛⬜⬛⬜⬛⬜⬛⬛⬛⬜⬛⬛⬜⬛⬜⬛⬜⬜⬜⬛⬜⬛⬛⬜⬛⬛⬜⬛⬛⬜⬛⬛⬜⬛⬛⬛⬜⬛⬛⬛⬛⬜⬛⬛⬜⬛⬛⬜⬛⬜⬜⬛⬜⬛⬛⬛⬛⬜⬜⬛⬜⬛⬛⬛⬜⬛⬛⬜⬛⬛⬜⬛⬜⬜⬜⬛⬛⬜⬜⬛⬛⬜⬛⬛⬜⬛⬜⬛⬛⬛⬜⬛⬛⬛⬛⬜⬛⬜⬛⬛⬜⬛⬛⬛⬜⬜⬜⬛⬛⬜⬜⬛⬛⬜⬛⬜⬛⬜⬛⬛⬜⬜⬛⬛⬛⬜⬜⬛⬛⬜⬛⬛⬜⬛⬜⬛⬛⬜⬛⬛⬛⬛⬛⬜⬛⬛⬛⬛⬜⬜⬛⬛⬜⬛⬜⬜⬛⬛⬜⬜⬜⬛⬜⬜⬛⬜⬛⬜⬛⬛⬜⬜⬛⬜⬛⬛⬛⬜⬜⬛⬛⬜⬛⬛⬛⬛⬛⬛⬜⬛⬛⬜⬛⬛⬜⬛⬛⬜⬜⬜⬛⬜⬛⬛⬜⬛⬛⬜⬜⬛⬛⬛⬜⬛⬜⬛⬜⬛⬜⬜⬛⬜⬛⬜⬛⬜⬛⬛⬛⬜⬛⬜⬛⬛⬜⬛⬜⬛⬛⬛⬜⬛⬛⬜⬛⬛⬜⬜⬛⬛⬜⬛⬜⬜⬛⬛⬛⬜⬛⬛⬜⬜⬜⬛⬜⬜⬜⬛⬛⬛⬛⬜⬛⬛⬛⬛⬜⬛⬛⬛⬜⬜⬛⬜⬛⬛⬛⬛⬛⬜⬛⬛⬛⬜⬜⬛⬜⬛⬛⬜⬜⬛⬛⬜⬜⬛⬛⬛⬜⬜⬛⬛⬛⬜⬜⬛⬛⬜⬜⬛⬛⬛⬜⬛⬛⬛⬛⬜⬛⬛⬛⬜⬜⬜⬜⬛⬛⬜⬜⬛⬜⬛⬛⬜⬛⬛⬜⬜⬛⬜⬛⬜⬛⬜⬛⬛⬛⬛⬛⬜⬛⬜⬛⬛⬛⬛⬜⬛⬛⬜⬛⬛⬛⬜⬛⬜⬜⬜⬛⬛⬛⬜⬜⬛⬛⬜⬛⬛⬜⬜⬛⬜⬛⬛⬛⬜⬛⬛⬛⬛⬜⬛⬜⬜⬛⬛⬜⬛⬜⬜⬛⬜⬛⬛⬜⬛⬛⬜⬛⬛⬜⬜⬛⬛⬜⬜⬛⬛⬜⬛⬜⬛⬜⬛⬛⬛⬜⬛⬜⬛⬛⬜⬛⬛⬜⬜⬛⬛⬛⬛⬜⬜⬛⬛⬜⬛⬜⬛⬜⬛⬛⬛⬛⬜⬛⬜⬛⬜⬛⬛⬛⬜⬜⬛⬛⬛⬛⬜⬛⬛⬜⬜⬛⬜⬛⬜⬛⬜⬛⬛⬛⬛⬜⬜⬛⬜⬛⬛⬜⬛⬜⬜⬛⬛⬜⬛⬛⬜⬛⬜⬛⬛⬛⬛⬜⬛⬛⬛⬛⬜⬜⬛⬛⬜⬜⬜⬛⬛⬜⬜⬜⬛⬛⬛⬜⬛";
-
-use crate::{
-    ciphers::Cipher,
-    errors::CipherError,
-    global_rng::get_global_rng,
-    grid::{Grid, Symbol, BLOCK, EMPTY},
-};
 
 pub struct RS44 {
     pub stencil: Grid<Symbol<char>>,
@@ -116,56 +112,56 @@ impl RS44 {
         self.message_key_maxtrix[(row, col)]
     }
 
-    pub fn set_full_message_key(&mut self) {
-        self.encrypted_message_key.clear();
-        let mut rng = get_global_rng();
-        self.xlabels[self.start_cell.1].chars().for_each(|c| {
-            self.encrypted_message_key
-                .push(self.encrypt_label_char(c, &mut rng))
-        });
-        self.ylabels[self.start_cell.0].chars().for_each(|c| {
-            self.encrypted_message_key
-                .push(self.encrypt_label_char(c, &mut rng))
-        });
-        self.encrypted_message_key.push('-');
-        self.xlabels[self.start_column].chars().for_each(|c| {
-            self.encrypted_message_key
-                .push(self.encrypt_label_char(c, &mut rng))
-        });
-    }
+    // pub fn set_full_message_key(&mut self) {
+    //     self.encrypted_message_key.clear();
+    //     let mut rng = get_global_rng();
+    //     self.xlabels[self.start_cell.1].chars().for_each(|c| {
+    //         self.encrypted_message_key
+    //             .push(self.encrypt_label_char(c, &mut rng))
+    //     });
+    //     self.ylabels[self.start_cell.0].chars().for_each(|c| {
+    //         self.encrypted_message_key
+    //             .push(self.encrypt_label_char(c, &mut rng))
+    //     });
+    //     self.encrypted_message_key.push('-');
+    //     self.xlabels[self.start_column].chars().for_each(|c| {
+    //         self.encrypted_message_key
+    //             .push(self.encrypt_label_char(c, &mut rng))
+    //     });
+    // }
 
-    pub fn randomize_stencil(&mut self) {
-        self.stencil.apply(|_| Symbol::Blocked);
-        let mut rng = get_global_rng();
-        let mut positions: Vec<usize> = (0..Self::WIDTH).collect();
+    // pub fn randomize_stencil(&mut self) {
+    //     self.stencil.apply(|_| Symbol::Blocked);
+    //     let mut rng = get_global_rng();
+    //     let mut positions: Vec<usize> = (0..Self::WIDTH).collect();
 
-        for i in 0..Self::HEIGHT {
-            positions.shuffle(&mut *rng);
-            for n in &positions[0..10] {
-                self.stencil[n + (i * Self::WIDTH)] = Symbol::Empty;
-            }
-        }
-    }
+    //     for i in 0..Self::HEIGHT {
+    //         positions.shuffle(&mut *rng);
+    //         for n in &positions[0..10] {
+    //             self.stencil[n + (i * Self::WIDTH)] = Symbol::Empty;
+    //         }
+    //     }
+    // }
 
-    pub fn randomize_matrix(&mut self) {
-        self.message_key_maxtrix.shuffle(&mut *get_global_rng())
-    }
+    // pub fn randomize_matrix(&mut self) {
+    //     self.message_key_maxtrix.shuffle(&mut *get_global_rng())
+    // }
 
-    pub fn randomize_labels(&mut self) {
-        let mut rng = get_global_rng();
-        self.column_nums.shuffle(&mut *rng);
-        self.xlabels.shuffle(&mut *rng);
-        self.ylabels = {
-            let mut v = Self::LABELS.clone();
-            v.shuffle(&mut *rng);
-            v.iter()
-                .take(Self::HEIGHT)
-                .map(|x| *x)
-                .collect_vec()
-                .try_into()
-                .unwrap()
-        };
-    }
+    // pub fn randomize_labels(&mut self) {
+    //     let mut rng = get_global_rng();
+    //     self.column_nums.shuffle(&mut *rng);
+    //     self.xlabels.shuffle(&mut *rng);
+    //     self.ylabels = {
+    //         let mut v = Self::LABELS.clone();
+    //         v.shuffle(&mut *rng);
+    //         v.iter()
+    //             .take(Self::HEIGHT)
+    //             .map(|x| *x)
+    //             .collect_vec()
+    //             .try_into()
+    //             .unwrap()
+    //     };
+    // }
 
     fn col_num_to_col_idx(&self, n: usize) -> usize {
         self.column_nums
@@ -312,10 +308,6 @@ impl Cipher for RS44 {
         }
 
         Ok(output)
-    }
-
-    fn reset(&mut self) {
-        *self = Self::default();
     }
 
     // fn randomize(&mut self) {

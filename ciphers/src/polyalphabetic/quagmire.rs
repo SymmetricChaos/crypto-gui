@@ -1,8 +1,6 @@
+use crate::{errors::CipherError, traits::Cipher};
 use std::{iter::Cycle, slice::Iter};
-
 use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
-
-use crate::{ciphers::Cipher, errors::CipherError};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum QuagmireVersion {
@@ -169,10 +167,6 @@ impl Cipher for Quagmire {
     //     self.assign_ind_key(&random_sample_replace(&self.alphabet_string, 9, rng));
     //     self.indicator = self.alphabet.get_rand_char(rng);
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
 }
 
 #[cfg(test)]

@@ -1,5 +1,3 @@
-use crate::ids::CipherId;
-
 #[derive(Debug, PartialEq, Eq)]
 pub enum CipherCategory {
     Substituion,

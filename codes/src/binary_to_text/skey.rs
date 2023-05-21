@@ -289,10 +289,6 @@ impl Code for SKeyWords {
             }
         }
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

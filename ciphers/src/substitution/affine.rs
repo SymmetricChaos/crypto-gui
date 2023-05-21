@@ -1,5 +1,5 @@
-use crate::{ciphers::Cipher, errors::CipherError, math_functions::mul_inv};
-use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
+use crate::{errors::CipherError, traits::Cipher};
+use utils::{math_functions::mul_inv, preset_alphabet::PresetAlphabet, vecstring::VecString};
 
 pub struct Affine {
     pub add_key: usize,
@@ -97,10 +97,6 @@ impl Cipher for Affine {
     //         };
     //     }
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 #[cfg(test)]

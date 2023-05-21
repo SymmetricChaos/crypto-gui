@@ -1,9 +1,7 @@
+use crate::{errors::CipherError, traits::Cipher};
+use std::fmt::Display;
 use utils::preset_alphabet::PresetAlphabet;
 use utils::vecstring::VecString;
-
-use crate::ciphers::Cipher;
-use crate::errors::CipherError;
-use std::fmt::Display;
 
 pub struct Alberti {
     pub fixed_alphabet_string: String,
@@ -96,10 +94,6 @@ impl Cipher for Alberti {
     //     let length = self.moving_alphabet.len();
     //     self.start_index = GLOBAL_RNG.lock().unwrap().gen_range(0..length);
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 impl Default for Alberti {

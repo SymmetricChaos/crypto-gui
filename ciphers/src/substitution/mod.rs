@@ -15,6 +15,3 @@ pub use plugboard::Plugboard;
 
 pub mod plugboard_generic;
 pub use plugboard_generic::PlugboardGen;
-
-pub mod syllabary;
-//pub use syllabary;

@@ -99,10 +99,6 @@ impl Code for VerhoeffAlgorithm {
             Ok(text[0..text.len() - 1].to_string())
         }
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

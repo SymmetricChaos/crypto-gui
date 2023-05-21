@@ -131,10 +131,6 @@ impl Code for Morse {
 
         Ok(out.join(" "))
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

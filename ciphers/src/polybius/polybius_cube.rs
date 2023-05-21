@@ -1,4 +1,4 @@
-use crate::{ciphers::Cipher, errors::CipherError};
+use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
 use num::Integer;
 use utils::vecstring::VecString;
@@ -223,10 +223,6 @@ impl Cipher for PolybiusCube {
     //     self.key_word = shuffled_str(&self.alphabet_string, &mut get_global_rng());
     //     self.set_key();
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 #[cfg(test)]

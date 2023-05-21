@@ -133,10 +133,6 @@ impl Code for Unicode {
             UnicodeEncoding::Utf32 => self.utf32_decode(text),
         }
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

@@ -331,10 +331,6 @@ impl Code for PgpWords {
         }
         Ok(out.join(" "))
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

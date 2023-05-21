@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 
 use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
 
-use crate::{ciphers::Cipher, errors::CipherError};
+use crate::{errors::CipherError, traits::Cipher};
 
 use super::PolyMode;
 
@@ -239,10 +239,6 @@ impl Cipher for Vigenere {
     //     self.key_words[3] = String::new();
     //     self.key_words[4] = String::new();
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 #[cfg(test)]

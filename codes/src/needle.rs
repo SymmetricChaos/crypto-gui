@@ -57,10 +57,6 @@ impl Code for Needle {
         }
         Ok(output)
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

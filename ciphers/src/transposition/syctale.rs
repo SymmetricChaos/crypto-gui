@@ -1,4 +1,4 @@
-use crate::{ciphers::Cipher, errors::CipherError};
+use crate::{errors::CipherError, traits::Cipher};
 
 pub struct Scytale {
     pub key: usize,
@@ -74,10 +74,6 @@ impl Cipher for Scytale {
     // fn randomize(&mut self) {
     //     self.key = GLOBAL_RNG.lock().unwrap().gen_range(2..10);
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 #[cfg(test)]

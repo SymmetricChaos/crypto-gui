@@ -1,4 +1,4 @@
-use crate::{ciphers::Cipher, errors::CipherError};
+use crate::{errors::CipherError, traits::Cipher};
 use std::iter::Iterator;
 
 pub struct RailFence {
@@ -96,10 +96,6 @@ impl Cipher for RailFence {
     // fn randomize(&mut self) {
     //     self.rails = GLOBAL_RNG.lock().unwrap().gen_range(2..10);
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 #[cfg(test)]

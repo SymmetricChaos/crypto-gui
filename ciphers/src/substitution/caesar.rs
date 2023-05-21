@@ -1,5 +1,4 @@
-use crate::ciphers::Cipher;
-use crate::errors::CipherError;
+use crate::{errors::CipherError, traits::Cipher};
 use utils::preset_alphabet::PresetAlphabet;
 use utils::vecstring::VecString;
 
@@ -62,10 +61,6 @@ impl Cipher for Caesar {
     // fn randomize(&mut self) {
     //     self.shift = get_global_rng().gen_range(0..self.alphabet.len()) as i32;
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 #[cfg(test)]

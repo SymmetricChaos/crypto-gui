@@ -162,10 +162,6 @@ impl Code for Ascii {
 
         Ok(out)
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

@@ -1,6 +1,5 @@
+use crate::{errors::CipherError, traits::Cipher};
 use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
-
-use crate::{ciphers::Cipher, errors::CipherError};
 
 use super::rotor::HebernRotor;
 
@@ -128,10 +127,6 @@ impl Cipher for Hebern {
             rotors.step();
         }
         Ok(out)
-    }
-
-    fn reset(&mut self) {
-        todo!()
     }
 }
 

@@ -1,4 +1,4 @@
-use crate::{ciphers::Cipher, errors::CipherError};
+use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
 use num::integer::Roots;
 use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
@@ -144,10 +144,6 @@ impl Cipher for FourSquare {
     //     self.set_key1();
     //     self.set_key2();
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 #[cfg(test)]

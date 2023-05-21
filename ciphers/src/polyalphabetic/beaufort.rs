@@ -3,7 +3,7 @@ use std::collections::VecDeque;
 use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
 
 use super::PolyMode;
-use crate::{ciphers::Cipher, errors::CipherError};
+use crate::{errors::CipherError, traits::Cipher};
 
 pub struct Beaufort {
     pub key_words: [String; 5],
@@ -253,10 +253,6 @@ impl Cipher for Beaufort {
     //     self.key_words[3] = String::new();
     //     self.key_words[4] = String::new();
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 #[cfg(test)]

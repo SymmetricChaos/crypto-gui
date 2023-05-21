@@ -3,7 +3,7 @@ use std::fmt::{self, Display, Formatter};
 use itertools::Itertools;
 use utils::vecstring::VecString;
 
-use crate::{errors::CipherError, global_rng::get_global_rng};
+use crate::errors::CipherError;
 
 #[derive(Clone, Debug)]
 pub struct HebernRotor {
@@ -98,10 +98,10 @@ impl HebernRotor {
         self.set(alphabet)
     }
 
-    pub fn randomize(&mut self, alphabet: &VecString) -> Result<(), CipherError> {
-        self.wiring_str = alphabet.shuffled(&mut get_global_rng()).to_string();
-        self.set(alphabet)
-    }
+    // pub fn randomize(&mut self, alphabet: &VecString) -> Result<(), CipherError> {
+    //     self.wiring_str = alphabet.shuffled(&mut get_global_rng()).to_string();
+    //     self.set(alphabet)
+    // }
 }
 
 impl Display for HebernRotor {

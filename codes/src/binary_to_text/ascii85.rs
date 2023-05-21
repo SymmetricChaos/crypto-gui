@@ -208,10 +208,6 @@ impl Code for Ascii85 {
             }
         }
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

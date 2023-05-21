@@ -1,7 +1,7 @@
 use super::{
     char_to_usize, usize_to_char, CipherRotor, IndexRotor, BIG_ROTOR_VEC, INDEX_ROTOR_VEC,
 };
-use crate::{ciphers::Cipher, errors::CipherError};
+use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
 use std::collections::HashSet;
 
@@ -266,10 +266,6 @@ impl Cipher for Sigaba {
             ctrl.step();
         }
         Ok(nums.iter().map(|n| usize_to_char(*n)).collect())
-    }
-
-    fn reset(&mut self) {
-        *self = Self::default();
     }
 }
 

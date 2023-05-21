@@ -96,10 +96,6 @@ impl Code for LuhnAlgorithm {
             Err(CodeError::input("check digit does not match"))
         }
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

@@ -136,10 +136,6 @@ impl Code for Godel {
             Ok(words.iter().collect())
         }
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

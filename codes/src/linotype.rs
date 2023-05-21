@@ -99,10 +99,6 @@ impl Code for Linotype {
         }
         Ok(out)
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

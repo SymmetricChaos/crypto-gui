@@ -1,6 +1,6 @@
 use utils::{functions::keyed_alphabet, preset_alphabet::PresetAlphabet, vecstring::VecString};
 
-use crate::{ciphers::Cipher, errors::CipherError};
+use crate::{errors::CipherError, traits::Cipher};
 
 #[derive(PartialEq, Eq)]
 pub enum HuttonVersion {
@@ -129,10 +129,6 @@ impl Cipher for Hutton {
     //     self.assign_key(&shuffled_str(&self.alphabet_string, &mut get_global_rng()));
     //     self.assign_password(&shuffled_str(&self.alphabet_string, &mut get_global_rng()));
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 #[cfg(test)]

@@ -1,13 +1,18 @@
-use eframe::egui::{TextEdit, Ui};
+use crate::egui_aux::mono;
+
+use super::CipherFrame;
+use ciphers::polybius::Adfgvx;
+use ciphers::traits::Cipher;
+use egui::TextEdit;
 use utils::preset_alphabet::PresetAlphabet;
 
-use super::{View, ViewableCipher, _generic_components::*};
-use crate::ciphers::polybius::Adfgvx;
+#[derive(Default)]
+pub struct AdfgvxFrame {
+    cipher: Adfgvx,
+}
 
-impl ViewableCipher for Adfgvx {}
-
-impl View for Adfgvx {
-    fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
+impl CipherFrame for AdfgvxFrame {
+    fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 
@@ -22,15 +27,28 @@ impl View for Adfgvx {
         });
 
         ui.label("Polybius Key Word");
-        if control_string(ui, &mut self.polybius.key_word).changed() {
-            self.polybius.set_key()
+        if control_string(ui, &mut self.cipher.polybius.key_word).changed() {
+            self.cipher.polybius.set_key()
         }
         ui.add_space(16.0);
 
-        ui.label(mono(format!("Grid\n{}", self.polybius)));
+        ui.label(mono(format!("Grid\n{}", self.cipher.polybius)));
         ui.add_space(16.0);
 
         ui.label("Columnar Key Word");
-        ui.add(TextEdit::singleline(self.columnar.control_key()));
+        ui.add(TextEdit::singleline(self.cipher.columnar.control_key()));
+    }
+
+    fn cipher(&self) -> &dyn Cipher {
+        &self.cipher
+    }
+
+    fn randomize(&mut self) {
+        self.polybius.randomize();
+        self.columnar.randomize();
+    }
+
+    fn reset(&mut self) {
+        *self = Self::default()
     }
 }

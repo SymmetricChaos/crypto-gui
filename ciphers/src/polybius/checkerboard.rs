@@ -1,4 +1,4 @@
-use crate::{ciphers::Cipher, errors::CipherError};
+use crate::{errors::CipherError, traits::Cipher};
 use std::char;
 use utils::functions::keyed_alphabet;
 
@@ -152,10 +152,6 @@ impl Cipher for StraddlingCheckerboard {
     //     let mut rng = get_global_rng();
     //     self.rows.shuffle(&mut *rng);
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 #[cfg(test)]

@@ -1,7 +1,7 @@
 use super::{
     char_to_usize, usize_to_char, EnigmaPlugboard, Reflector, Rotor, REFLECTORS, ROTOR_MAP,
 };
-use crate::{ciphers::Cipher, errors::CipherError};
+use crate::{errors::CipherError, traits::Cipher};
 use utils::preset_alphabet::PresetAlphabet;
 
 pub fn prep_enigma_text(text: &str) -> Result<String, CipherError> {
@@ -125,10 +125,6 @@ impl Cipher for EnigmaM3 {
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         self.encrypt(text)
-    }
-
-    fn reset(&mut self) {
-        *self = Self::default();
     }
 }
 

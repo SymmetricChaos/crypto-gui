@@ -1,10 +1,8 @@
-use super::Cipher;
-use crate::errors::CipherError;
+use crate::{errors::CipherError, traits::Cipher};
+use itertools::Itertools;
 use lazy_static::lazy_static;
 use std::fmt::{self, Formatter};
 use utils::vecstring::VecString;
-
-use itertools::Itertools;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Cage {
@@ -281,10 +279,6 @@ impl Cipher for M209 {
     //         rotor.pins = new_pins.clone()
     //     }
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 #[cfg(test)]

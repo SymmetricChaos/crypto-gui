@@ -1,10 +1,11 @@
-use crate::attack_panel::AttackInterface;
+// use crate::attack_panel::AttackInterface;
 use crate::cipher_panel::CipherInterface;
 use crate::code_panel::CodeInterface;
 use crate::egui_aux::subheading;
-use crate::ids::{AttackId, CipherId};
+use crate::ids::AttackId;
 use crate::pages::io_panel::IOPanel;
 use crate::pages::{Page, TextPrepPage};
+use ciphers::ids::CipherId;
 use codes::ids::CodeId;
 use eframe::egui;
 use eframe::{
@@ -33,8 +34,7 @@ fn load_font(name: &str, family: &FontFamily, font_data: FontData, font_def: &mu
 pub struct ClassicCrypto {
     cipher_interface: CipherInterface,
     code_interface: CodeInterface,
-    attack_interface: AttackInterface,
-
+    // attack_interface: AttackInterface,
     io_panel: IOPanel,
     input: String,
     output: String,
@@ -73,7 +73,7 @@ impl Default for ClassicCrypto {
             // Contains each Cipher and Code along with with controls and a panel for selecting them
             cipher_interface: CipherInterface::default(),
             code_interface: CodeInterface::default(),
-            attack_interface: AttackInterface::default(),
+            // attack_interface: AttackInterface::default(),
         }
     }
 }
@@ -180,7 +180,7 @@ impl ClassicCrypto {
                         &mut self.active_attack,
                         &mut self.cipher_interface,
                         &mut self.code_interface,
-                        &mut self.attack_interface,
+                        // &mut self.attack_interface,
                     );
                 });
 
@@ -237,7 +237,7 @@ impl ClassicCrypto {
                         &mut self.active_attack,
                         &mut self.cipher_interface,
                         &mut self.code_interface,
-                        &mut self.attack_interface,
+                        // &mut self.attack_interface,
                     );
                 });
 
@@ -294,7 +294,7 @@ impl ClassicCrypto {
                         &mut self.active_attack,
                         &mut self.cipher_interface,
                         &mut self.code_interface,
-                        &mut self.attack_interface,
+                        // &mut self.attack_interface,
                     );
                 });
 

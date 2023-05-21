@@ -1,5 +1,5 @@
 use super::PolybiusCube;
-use crate::{ciphers::Cipher, errors::CipherError};
+use crate::{errors::CipherError, traits::Cipher};
 use num::Integer;
 
 fn is_power_of_three(a: usize) -> bool {
@@ -116,10 +116,6 @@ impl Cipher for Trifid {
     //     self.block_size = GLOBAL_RNG.lock().unwrap().gen_range(3..=30);
     //     self.polybius.randomize();
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 #[cfg(test)]

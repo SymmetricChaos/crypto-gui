@@ -1,6 +1,6 @@
 use std::fmt::{self, Formatter};
 
-use crate::{ciphers::Cipher, errors::CipherError};
+use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
 use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
 
@@ -153,10 +153,6 @@ impl Cipher for Slidefair {
     //         &mut get_global_rng(),
     //     ))
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 impl fmt::Display for Slidefair {

@@ -134,14 +134,6 @@ impl Code for BlockCode {
 
         Ok(out)
     }
-
-    fn randomize(&mut self) {
-        todo!()
-    }
-
-    fn reset(&mut self) {
-        todo!()
-    }
 }
 
 #[cfg(test)]

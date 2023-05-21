@@ -66,14 +66,6 @@ impl Code for Romaji {
 
         Ok(tokens.iter().cloned().collect())
     }
-
-    fn randomize(&mut self) {
-        todo!()
-    }
-
-    fn reset(&mut self) {
-        todo!()
-    }
 }
 
 #[cfg(test)]

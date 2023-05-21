@@ -208,10 +208,6 @@ impl Code for Punycode {
         }
         Ok(output.iter().collect())
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

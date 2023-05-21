@@ -1,4 +1,4 @@
-use crate::{ciphers::Cipher, errors::CipherError};
+use crate::{errors::CipherError, traits::Cipher};
 use num::integer::Roots;
 use std::fmt;
 use utils::{functions::keyed_alphabet, preset_alphabet::PresetAlphabet};
@@ -156,10 +156,6 @@ impl Cipher for Playfair {
     // fn randomize(&mut self) {
     //     self.alphabet = shuffled_str(&self.alphabet, &mut get_global_rng())
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 impl fmt::Display for Playfair {

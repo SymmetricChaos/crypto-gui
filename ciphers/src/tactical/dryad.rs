@@ -1,4 +1,4 @@
-use crate::{ciphers::Cipher, errors::CipherError};
+use crate::{errors::CipherError, traits::Cipher};
 use rand::{prelude::StdRng, Rng, SeedableRng};
 
 pub struct Dryad {
@@ -121,8 +121,4 @@ impl Cipher for Dryad {
     //         *row = shuffled_str(alpha, &mut get_global_rng())
     //     }
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }

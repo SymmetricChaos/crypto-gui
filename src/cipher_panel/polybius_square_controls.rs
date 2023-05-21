@@ -1,12 +1,16 @@
+use super::{CipherFrame, _generic_components::control_string};
+use ciphers::{polybius::PolybiusSquare, Cipher};
 use eframe::egui::{Color32, RichText, Ui};
 use utils::preset_alphabet::PresetAlphabet;
 
-use super::{View, ViewableCipher, _generic_components::*};
-use crate::{ciphers::polybius::PolybiusSquare, egui_aux::mono};
+#[derive(Default)]
+pub struct PolybiusSquareFrame {
+    cipher: PolybiusSquare,
+    alphabet_string: String,
+    key_string: String,
+}
 
-impl ViewableCipher for PolybiusSquare {}
-
-impl View for PolybiusSquare {
+impl CipherFrame for PolybiusSquareFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String) {
         randomize_reset(ui, self);
         ui.add_space(16.0);
@@ -14,16 +18,17 @@ impl View for PolybiusSquare {
         ui.label("Common Latin Alphabets");
         ui.horizontal(|ui| {
             if ui.button("No Q").clicked() {
-                self.assign_alphabet(PresetAlphabet::BasicLatinNoQ)
+                self.cipher.assign_alphabet(PresetAlphabet::BasicLatinNoQ)
             };
             if ui.button("No J").clicked() {
-                self.assign_alphabet(PresetAlphabet::BasicLatinNoJ)
+                self.cipher.assign_alphabet(PresetAlphabet::BasicLatinNoJ)
             };
             if ui.button("Alphanumeric").clicked() {
-                self.assign_alphabet(PresetAlphabet::BasicLatinWithDigits)
+                self.cipher
+                    .assign_alphabet(PresetAlphabet::BasicLatinWithDigits)
             };
             if ui.button("Base64").clicked() {
-                self.assign_alphabet(PresetAlphabet::Base64)
+                self.cipher.assign_alphabet(PresetAlphabet::Base64)
             };
         });
 
@@ -57,5 +62,15 @@ impl View for PolybiusSquare {
         ui.add_space(16.0);
         ui.label("Grid");
         mono(ui, &self.show_grid(), None);
+    }
+
+    fn cipher(&self) -> &dyn Cipher {
+        &self.cipher
+    }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {
+        *self = Self::default()
     }
 }

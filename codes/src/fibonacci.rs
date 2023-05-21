@@ -93,10 +93,6 @@ impl Code for FibonacciCode {
             Ok(output.into_iter().join(" "))
         }
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

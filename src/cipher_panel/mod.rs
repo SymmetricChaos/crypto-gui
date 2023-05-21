@@ -1,58 +1,49 @@
-use crate::{
-    ciphers::{
-        hebern::Hebern, playfair::*, polyalphabetic::*, polybius::*, substitution::*, tactical::*,
-        transposition::*, *,
-    },
-    errors::CipherError,
-    ids::CipherId,
-};
-use eframe::egui::{self, Ui};
+use ciphers::{errors::CipherError, ids::CipherId, traits::Cipher};
+use egui::Ui;
 
 pub mod _generic_components;
 pub mod adfgvx_controls;
-pub mod affine_controls;
-pub mod alberti_controls;
-pub mod b64_controls;
-pub mod batco_controls;
-pub mod bazeries_controls;
-pub mod beaufort_controls;
-pub mod bifid_controls;
-pub mod caesar_controls;
-pub mod chaocipher_controls;
-pub mod checkerboard_controls;
+// pub mod affine_controls;
+// pub mod alberti_controls;
+// pub mod b64_controls;
+// pub mod batco_controls;
+// pub mod bazeries_controls;
+// pub mod beaufort_controls;
+// pub mod bifid_controls;
+// pub mod caesar_controls;
+// pub mod chaocipher_controls;
+// pub mod checkerboard_controls;
 pub mod columnar_controls;
-pub mod decoder_ring_controls;
-pub mod dryad_controls;
-pub mod enigma_controls;
-pub mod four_square_controls;
-pub mod general_sub_controls;
-pub mod grille_controls;
-pub mod hebern_controls;
-pub mod hutton_controls;
-pub mod m209_controls;
-pub mod m94_controls;
-pub mod playfair_controls;
-pub mod plugboard_controls;
-pub mod polybius_cube_controls;
+// pub mod decoder_ring_controls;
+// pub mod dryad_controls;
+// pub mod enigma_controls;
+// pub mod four_square_controls;
+// pub mod general_sub_controls;
+// pub mod grille_controls;
+// pub mod hebern_controls;
+// pub mod hutton_controls;
+// pub mod m209_controls;
+// pub mod m94_controls;
+// pub mod playfair_controls;
+// pub mod plugboard_controls;
+// pub mod polybius_cube_controls;
 pub mod polybius_square_controls;
-pub mod porta_controls;
-pub mod purple_controls;
-pub mod quagmire_controls;
-pub mod rail_fence_controls;
-pub mod rs44_controls;
-pub mod scytale_controls;
-pub mod sigaba_controls;
-pub mod slidefair_controls;
-pub mod trifid_controls;
-pub mod turning_grille_controls;
-pub mod two_square_controls;
-pub mod vigenere_controls;
-
-pub trait ViewableCipher: View + Cipher {}
+// pub mod porta_controls;
+// pub mod purple_controls;
+// pub mod quagmire_controls;
+// pub mod rail_fence_controls;
+// pub mod rs44_controls;
+// pub mod scytale_controls;
+// pub mod sigaba_controls;
+// pub mod slidefair_controls;
+// pub mod trifid_controls;
+// pub mod turning_grille_controls;
+// pub mod two_square_controls;
+// pub mod vigenere_controls;
 
 pub trait CipherFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
-    fn code(&self) -> &dyn Cipher;
+    fn cipher(&self) -> &dyn Cipher;
     fn randomize(&mut self);
     fn reset(&mut self);
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
@@ -61,10 +52,6 @@ pub trait CipherFrame {
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         self.code().decrypt(text)
     }
-}
-
-pub trait View {
-    fn ui(&mut self, ui: &mut Ui, errors: &mut String);
 }
 
 // Quick simple combo box builder
@@ -224,102 +211,47 @@ impl CipherInterface {
         );
     }
 
-    pub fn get_active_cipher(&mut self, active_cipher: &CipherId) -> &mut dyn ViewableCipher {
+    pub fn get_active_cipher(&mut self, active_cipher: &CipherId) -> &mut dyn CipherFrame {
         match active_cipher {
-            CipherId::Caesar => &mut self.caesar,
+            CipherId::Adfgvx => &mut self.adfgvx,
             CipherId::Affine => &mut self.affine,
-            CipherId::Decoder => &mut self.decoder_ring,
-            CipherId::Substitution => &mut self.gen_sub,
-            CipherId::Polybius => &mut self.polybius,
-            CipherId::PolybiusCube => &mut self.polybius_cube,
-            CipherId::Vigenere => &mut self.vigenere,
+            CipherId::Alberti => &mut self.alberti,
+            CipherId::B64 => &mut self.b64,
+            CipherId::Batco => &mut self.batco,
+            CipherId::Bazeries => &mut self.bazeries,
             CipherId::Beaufort => &mut self.beaufort,
+            CipherId::Bifid => &mut self.bifid,
+            CipherId::Caesar => &mut self.caesar,
+            CipherId::Chaocipher => &mut self.chaocipher,
+            CipherId::Checkerboard => &mut self.checkerboard,
+            CipherId::Columnar => &mut self.columnar,
+            CipherId::Decoder => &mut self.decoder_ring,
+            CipherId::Dryad => &mut self.dryad,
+            CipherId::Enigma => &mut self.enigma,
+            CipherId::FourSquare => &mut self.four_square,
+            CipherId::Grille => &mut self.grille,
+            CipherId::Hebern => &mut self.hebern,
+            CipherId::Hutton => &mut self.hutton,
             CipherId::M209 => &mut self.m209,
             CipherId::M94 => &mut self.m94,
-            CipherId::Alberti => &mut self.alberti,
             CipherId::Playfair => &mut self.playfair,
-            CipherId::Columnar => &mut self.columnar,
-            CipherId::Adfgvx => &mut self.adfgvx,
-            CipherId::B64 => &mut self.b64,
-            CipherId::Slidefair => &mut self.slidefair,
-            CipherId::Enigma => &mut self.enigma,
-            CipherId::Grille => &mut self.grille,
-            CipherId::Sigaba => &mut self.sigaba,
-            CipherId::Bazeries => &mut self.bazeries,
-            CipherId::Chaocipher => &mut self.chaocipher,
-            CipherId::Bifid => &mut self.bifid,
-            CipherId::Trifid => &mut self.trifid,
-            CipherId::RailFence => &mut self.rail_fence,
-            CipherId::Scytale => &mut self.scytale,
-            CipherId::Batco => &mut self.batco,
-            CipherId::Checkerboard => &mut self.checkerboard,
-            CipherId::Porta => &mut self.porta,
-            CipherId::Dryad => &mut self.dryad,
-            CipherId::FourSquare => &mut self.four_square,
-            CipherId::TwoSquare => &mut self.two_square,
-            CipherId::Hutton => &mut self.hutton,
-            CipherId::Quagmire => &mut self.quagmire,
-            CipherId::TurningGrille => &mut self.turning_grille,
             CipherId::Plugboard => &mut self.plugboard,
-            CipherId::Rs44 => &mut self.rs44,
-            CipherId::Hebern => &mut self.hebern,
+            CipherId::Polybius => &mut self.polybius,
+            CipherId::PolybiusCube => &mut self.polybius_cube,
+            CipherId::Porta => &mut self.porta,
             // CipherId::Purple => &mut self.purple,
+            CipherId::Quagmire => &mut self.quagmire,
+            CipherId::RailFence => &mut self.rail_fence,
+            CipherId::Rs44 => &mut self.rs44,
+            CipherId::Scytale => &mut self.scytale,
+            CipherId::Sigaba => &mut self.sigaba,
+            CipherId::Slidefair => &mut self.slidefair,
+            CipherId::Substitution => &mut self.gen_sub,
+            CipherId::Trifid => &mut self.trifid,
+            CipherId::TurningGrille => &mut self.turning_grille,
+            CipherId::TwoSquare => &mut self.two_square,
+            CipherId::Vigenere => &mut self.vigenere,
             _ => todo!(),
         }
     }
 }
-
-// #[derive(Default)]
-// pub struct CipherIO {}
-
-// impl CipherIO {
-//     pub fn ui(
-//         &mut self,
-//         ui: &mut egui::Ui,
-//         input: &mut String,
-//         output: &mut String,
-//         errors: &mut String,
-//         active_cipher: &mut CipherID,
-//         control_panel: &mut CipherInterface,
-//     ) {
-//         ui.add_space(32.0);
-//         ui.label("INPUT TEXT");
-//         ui.add(TextEdit::multiline(input).font(TextStyle::Monospace));
-//         ui.add_space(16.0);
-//         ui.label("OUTPUT TEXT");
-//         ui.add(TextEdit::multiline(output).font(TextStyle::Monospace));
-
-//         encrypt_decrypt(
-//             ui,
-//             control_panel.get_active_cipher(active_cipher),
-//             input,
-//             output,
-//             errors,
-//         );
-
-//         ui.add_space(10.0);
-//         if ui.button("clear").clicked() {
-//             input.clear();
-//             output.clear();
-//             errors.clear();
-//         }
-
-//         ui.add_space(10.0);
-//         if ui.button("swap input/output").clicked() {
-//             std::mem::swap(input, output)
-//         }
-
-//         ui.add_space(16.0);
-//         global_rng_controls(ui);
-
-//         if !errors.is_empty() {
-//             ui.add_space(24.0);
-//             ui.label(
-//                 RichText::new(errors.clone())
-//                     .color(Color32::RED)
-//                     .background_color(Color32::BLACK)
-//                     .monospace(),
-//             );
-//         }
-//     }
-// }

@@ -1,5 +1,4 @@
-use crate::ciphers::Cipher;
-use crate::errors::CipherError;
+use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use utils::preset_alphabet::PresetAlphabet;
@@ -79,10 +78,6 @@ impl Cipher for Porta {
     // The Porta cipher is reciprocal
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         self.encrypt(text)
-    }
-
-    fn reset(&mut self) {
-        *self = Self::default()
     }
 
     // fn randomize(&mut self) {

@@ -1,11 +1,7 @@
-use utils::preset_alphabet::PresetAlphabet;
-
-use crate::{
-    ciphers::{transposition::Columnar, Cipher},
-    errors::CipherError,
-};
-
 use super::PolybiusSquare;
+use crate::transposition::Columnar;
+use crate::{errors::CipherError, traits::Cipher};
+use utils::preset_alphabet::PresetAlphabet;
 
 pub struct Adfgvx {
     pub polybius: PolybiusSquare,
@@ -52,15 +48,6 @@ impl Cipher for Adfgvx {
         let colm_text = self.columnar.decrypt(text)?;
         let poly_text = self.polybius.decrypt(&colm_text)?;
         Ok(poly_text)
-    }
-
-    // fn randomize(&mut self) {
-    //     self.polybius.randomize();
-    //     self.columnar.randomize();
-    // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
     }
 }
 

@@ -151,10 +151,6 @@ impl Code for EliasCodeIntegers {
     fn decode(&self, text: &str) -> Result<String, Error> {
         todo!()
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

@@ -1,6 +1,6 @@
 use rand::{rngs::StdRng, SeedableRng};
 
-use crate::{ciphers::Cipher, errors::CipherError};
+use crate::{errors::CipherError, traits::Cipher};
 
 use super::PolybiusSquare;
 
@@ -103,10 +103,6 @@ impl Cipher for Bifid {
     //     self.block_size = self.rng.gen_range(3..=30);
     //     self.polybius.randomize();
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 #[cfg(test)]

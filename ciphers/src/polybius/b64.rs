@@ -1,11 +1,7 @@
-use utils::preset_alphabet::PresetAlphabet;
-
-use crate::{
-    ciphers::{transposition::Columnar, Cipher},
-    errors::CipherError,
-};
-
 use super::PolybiusSquare;
+use crate::transposition::Columnar;
+use crate::{errors::CipherError, traits::Cipher};
+use utils::preset_alphabet::PresetAlphabet;
 
 pub struct B64 {
     pub polybius: PolybiusSquare,
@@ -48,10 +44,6 @@ impl Cipher for B64 {
     //     self.columnar1.randomize();
     //     self.columnar2.randomize();
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 #[cfg(test)]

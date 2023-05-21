@@ -1,6 +1,6 @@
 use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
 
-use crate::{ciphers::Cipher, errors::CipherError};
+use crate::{errors::CipherError, traits::Cipher};
 use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
@@ -110,8 +110,4 @@ impl Cipher for Plugboard {
     //     self.pairs = pairs;
     //     self.set_plugboard().unwrap();
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }

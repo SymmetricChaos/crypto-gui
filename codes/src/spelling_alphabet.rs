@@ -191,8 +191,4 @@ impl Code for SpellingAlphabet {
             Ok(out)
         }
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }

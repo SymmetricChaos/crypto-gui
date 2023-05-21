@@ -1,6 +1,6 @@
 use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
 
-use crate::{ciphers::Cipher, errors::CipherError};
+use crate::{errors::CipherError, traits::Cipher};
 
 #[derive(Debug)]
 pub struct GeneralSubstitution {
@@ -103,10 +103,6 @@ impl Cipher for GeneralSubstitution {
     //     self.ct_alphabet_string = shuffled_str(&self.pt_alphabet_string, &mut get_global_rng());
     //     self.ct_alphabet = VecString::unique_from(&self.ct_alphabet_string);
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 #[cfg(test)]

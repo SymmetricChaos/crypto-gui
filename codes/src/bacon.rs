@@ -102,10 +102,6 @@ impl Code for Bacon {
             .join("");
         self.block.decode(&bits)
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

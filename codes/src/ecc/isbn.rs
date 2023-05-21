@@ -119,10 +119,6 @@ impl Code for Isbn {
             }
         }
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

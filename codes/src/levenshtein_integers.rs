@@ -117,10 +117,6 @@ impl Code for LevenshteinCodeIntegers {
             .map(|n| n.to_string())
             .join(" "))
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

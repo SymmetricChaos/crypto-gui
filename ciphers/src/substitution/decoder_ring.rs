@@ -1,4 +1,4 @@
-use crate::{ciphers::Cipher, errors::CipherError};
+use crate::{errors::CipherError, traits::Cipher};
 use utils::vecstring::VecString;
 
 pub struct DecoderRing {
@@ -91,10 +91,6 @@ impl Cipher for DecoderRing {
     // fn randomize(&mut self) {
     //     self.index = get_global_rng().gen_range(0..self.alphabet.len());
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 #[cfg(test)]

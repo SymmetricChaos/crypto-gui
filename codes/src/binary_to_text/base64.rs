@@ -184,10 +184,6 @@ impl Code for Base64 {
             }
         }
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

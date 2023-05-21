@@ -1,5 +1,4 @@
-use crate::{ciphers::Cipher, errors::CipherError, global_rng::get_global_rng};
-use rand::prelude::SliceRandom;
+use crate::{errors::CipherError, traits::Cipher};
 
 const M94_WHEELS: [&'static str; 25] = [
     "ABCEIGDJFVUYMHTQKZOLRXSPWN",
@@ -58,10 +57,10 @@ impl M94 {
         }
     }
 
-    pub fn randomize_wheels(&mut self) {
-        let mut rng = get_global_rng();
-        self.wheels.shuffle(&mut *rng);
-    }
+    // pub fn randomize_wheels(&mut self) {
+    //     let mut rng = get_global_rng();
+    //     self.wheels.shuffle(&mut *rng);
+    // }
 }
 
 impl Cipher for M94 {
@@ -101,10 +100,6 @@ impl Cipher for M94 {
     //     self.wheels.shuffle(&mut *rng);
     //     self.offset = rng.gen_range(1..self.wheels.len());
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 #[cfg(test)]

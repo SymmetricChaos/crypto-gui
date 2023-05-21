@@ -193,10 +193,6 @@ impl Code for Base32 {
             }
         }
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

@@ -1,12 +1,12 @@
-use crate::{
-    ciphers::Cipher,
-    errors::CipherError,
-    global_rng::get_global_rng,
-    grid::{str_to_char_grid, Grid, Symbol},
-};
+use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
-use rand::{prelude::StdRng, Rng, SeedableRng};
-use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
+use rand::{prelude::StdRng, SeedableRng};
+use std::cell::RefCell;
+use utils::{
+    grid::{str_to_char_grid, Grid, Symbol},
+    preset_alphabet::PresetAlphabet,
+    vecstring::VecString,
+};
 
 pub struct Grille {
     pub null_alphabet_string: String,
@@ -14,23 +14,24 @@ pub struct Grille {
     pub grid: Grid<Symbol<char>>,
     pub seed: Option<u64>,
     pub use_nulls: bool,
+    rng: RefCell<StdRng>,
 }
 
 impl Grille {
-    fn _randomize_seeded(&mut self) {
-        let mut rng = self.get_rng();
-        for cell in self.grid.get_rows_mut() {
-            if rng.gen_bool(0.5) {
-                *cell = Symbol::Empty;
-            } else {
-                *cell = Symbol::Blocked;
-            }
-        }
-    }
+    // fn _randomize_seeded(&mut self) {
+    //     let mut rng = self.get_rng();
+    //     for cell in self.grid.get_rows_mut() {
+    //         if rng.gen_bool(0.5) {
+    //             *cell = Symbol::Empty;
+    //         } else {
+    //             *cell = Symbol::Blocked;
+    //         }
+    //     }
+    // }
 
-    fn random_nulls(&self, n: usize) -> Vec<Symbol<char>> {
+    fn random_nulls(&self, n: usize, rng: &mut StdRng) -> Vec<Symbol<char>> {
         self.null_alphabet
-            .get_rand_chars_replace(n, &mut get_global_rng())
+            .get_rand_chars_replace(n, rng)
             .iter()
             .map(|c| Symbol::Character(*c))
             .collect_vec()
@@ -52,6 +53,7 @@ impl Default for Grille {
             grid: Grid::new_empty(4, 4),
             seed: None,
             use_nulls: true,
+            rng: RefCell::new(StdRng::seed_from_u64(7852172251351752522)),
         }
     }
 }
@@ -72,7 +74,7 @@ impl Cipher for Grille {
 
         let mut grid = self.grid.clone();
         let mut chars = text.chars();
-        let mut nulls = self.random_nulls(self.grid.grid_size());
+        let mut nulls = self.random_nulls(self.grid.grid_size(), &mut self.rng.borrow_mut());
 
         for cell in grid.get_rows_mut() {
             match cell {
@@ -144,10 +146,6 @@ impl Cipher for Grille {
                 .map(|x| x.to_char())
                 .collect())
         }
-    }
-
-    fn reset(&mut self) {
-        *self = Self::default();
     }
 
     // fn randomize(&mut self) {

@@ -3,26 +3,19 @@
 
 pub mod app;
 
-pub mod grid;
-pub mod math_functions;
-pub mod rotors;
-
 pub mod ids;
 
 pub mod cipher_panel;
 pub mod code_panel;
 
-pub mod cipher_attacks;
+// pub mod cipher_attacks;
+// pub mod attack_panel;
 
-pub mod errors;
 pub mod pages;
 
 pub mod egui_aux;
 
 pub mod global_rng;
-
-pub mod attack_panel;
-pub mod tokenizer;
 
 // // ----------------------------------------------------------------------------
 // // When compiling for web:

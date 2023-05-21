@@ -24,10 +24,6 @@ impl Code for HammingCode {
 
         todo!("match on self.parity bits")
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

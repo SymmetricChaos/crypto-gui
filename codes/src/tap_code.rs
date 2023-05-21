@@ -111,10 +111,6 @@ impl Code for TapCode {
         }
         Ok(out)
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }
 
 // impl fmt::Display for TapCode {

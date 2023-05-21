@@ -1,8 +1,8 @@
-use crate::grid::{str_to_char_grid, Grid};
 use eframe::{
     egui::{self, Color32, Label, RichText, TextStyle},
     epaint::FontFamily,
 };
+use utils::grid::{str_to_char_grid, Grid};
 
 use super::CipherFrame;
 

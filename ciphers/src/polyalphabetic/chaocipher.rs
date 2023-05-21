@@ -1,7 +1,5 @@
+use crate::{errors::CipherError, traits::Cipher};
 use utils::vecstring::VecString;
-
-use crate::ciphers::Cipher;
-use crate::errors::CipherError;
 
 pub struct Chaocipher {
     pub left_string: String,
@@ -94,10 +92,6 @@ impl Cipher for Chaocipher {
     //     self.left.shuffle(rng);
     //     self.right.shuffle(rng);
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 #[cfg(test)]

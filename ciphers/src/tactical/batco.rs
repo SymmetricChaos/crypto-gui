@@ -1,14 +1,6 @@
-use std::num::ParseIntError;
-
+use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
 use rand::{prelude::StdRng, Rng, SeedableRng};
-use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet};
-
-use crate::{
-    ciphers::Cipher,
-    errors::CipherError,
-    global_rng::{get_global_rng, seed_global_rng},
-};
 
 /*
 BATCO is an example of a tactical cipher, one meant to be used quickly to send
@@ -99,20 +91,20 @@ impl Batco {
         (self.message_number + 50) as char
     }
 
-    pub fn randomize_seeded(&mut self) -> Result<(), ParseIntError> {
-        self.seed = self.seed_string.parse::<u64>()?;
+    // pub fn randomize_seeded(&mut self) -> Result<(), ParseIntError> {
+    //     self.seed = self.seed_string.parse::<u64>()?;
 
-        seed_global_rng(self.seed);
+    //     seed_global_rng(self.seed);
 
-        let alpha = PresetAlphabet::BasicLatin.slice();
-        for row in self.cipher_rows.iter_mut() {
-            *row = shuffled_str(alpha, &mut get_global_rng())
-        }
-        for col in self.key_cols.iter_mut() {
-            *col = shuffled_str(alpha, &mut get_global_rng())
-        }
-        Ok(())
-    }
+    //     let alpha = PresetAlphabet::BasicLatin.slice();
+    //     for row in self.cipher_rows.iter_mut() {
+    //         *row = shuffled_str(alpha, &mut get_global_rng())
+    //     }
+    //     for col in self.key_cols.iter_mut() {
+    //         *col = shuffled_str(alpha, &mut get_global_rng())
+    //     }
+    //     Ok(())
+    // }
 
     pub fn show_code_page(&self) -> String {
         let mut s = "2 3 4 5 6 7   0  0  1  2  3  4  5  6  7  8  9 CH  .".to_string();
@@ -247,10 +239,6 @@ impl Cipher for Batco {
     //         *col = shuffled_str(alpha, &mut get_global_rng())
     //     }
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 #[cfg(test)]

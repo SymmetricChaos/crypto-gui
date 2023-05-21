@@ -1,48 +1,31 @@
-use crate::grid::{str_to_char_grid, Grid, Symbol};
-use crate::{ciphers::Cipher, errors::CipherError};
-use utils::functions::rank_str;
-use utils::preset_alphabet::PresetAlphabet;
-use utils::vecstring::VecString;
+use crate::{errors::CipherError, traits::Cipher};
+use utils::{
+    functions::rank_str,
+    grid::{str_to_char_grid, Grid, Symbol, BLOCK, EMPTY},
+    preset_alphabet::PresetAlphabet,
+    vecstring::VecString,
+};
 
 pub struct Columnar {
-    pub alphabet_string: String,
-    alphabet: VecString,
-    key: Vec<usize>,
-    pub key_word: String,
+    pub alphabet: VecString,
+    pub key: Vec<usize>,
 }
 
 impl Columnar {
-    pub fn set_alphabet(&mut self) {
-        self.alphabet = VecString::unique_from(&self.alphabet_string);
-    }
-
     pub fn assign_alphabet(&mut self, alphabet: &str) {
-        self.alphabet_string = String::from(alphabet);
-        self.set_alphabet();
-    }
-
-    pub fn control_key(&mut self) -> &mut String {
-        self.key = rank_str(&self.key_word, &self.alphabet_string);
-        &mut self.key_word
-    }
-
-    pub fn set_key(&mut self) {
-        self.key = rank_str(&self.key_word, &self.alphabet_string);
+        self.alphabet = VecString::unique_from(alphabet);
     }
 
     pub fn assign_key(&mut self, key_word: &str) {
-        self.key_word = key_word.to_string();
-        self.key = rank_str(&self.key_word, &self.alphabet_string);
+        self.key = rank_str(key_word, &self.alphabet.to_string());
     }
 }
 
 impl Default for Columnar {
     fn default() -> Self {
         Self {
-            alphabet_string: String::from(PresetAlphabet::BasicLatin),
             alphabet: VecString::from(PresetAlphabet::BasicLatin),
             key: Vec::new(),
-            key_word: String::new(),
         }
     }
 }
@@ -66,8 +49,8 @@ impl Cipher for Columnar {
         let mut out = String::with_capacity(text.len());
         for k in self.key.iter() {
             let mut s: String = g.get_col(*k).map(|sym| sym.to_char()).collect();
-            s = s.replace(crate::grid::EMPTY, "");
-            s = s.replace(crate::grid::BLOCK, "");
+            s = s.replace(EMPTY, "");
+            s = s.replace(BLOCK, "");
             out.push_str(&s);
         }
 
@@ -114,10 +97,6 @@ impl Cipher for Columnar {
     //         .collect();
     //     self.assign_key(&key);
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 #[cfg(test)]

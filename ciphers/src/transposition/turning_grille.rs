@@ -1,12 +1,12 @@
+use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
 use rand::{rngs::StdRng, SeedableRng};
+use std::cell::RefCell;
 use std::{collections::HashSet, num::ParseIntError};
-use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
-
-use crate::{
-    ciphers::Cipher,
-    errors::CipherError,
+use utils::{
     grid::{Grid, Symbol},
+    preset_alphabet::PresetAlphabet,
+    vecstring::VecString,
 };
 
 pub struct TurningGrille {
@@ -15,7 +15,7 @@ pub struct TurningGrille {
     pub grid: Grid<Symbol<char>>,
     pub key_strings: [String; 4],
     keys: [Vec<usize>; 4],
-    rng: StdRng,
+    rng: RefCell<StdRng>,
 }
 
 impl Default for TurningGrille {
@@ -26,7 +26,7 @@ impl Default for TurningGrille {
             grid: Grid::new_blocked(8, 8),
             key_strings: [String::new(), String::new(), String::new(), String::new()],
             keys: [Vec::new(), Vec::new(), Vec::new(), Vec::new()],
-            rng: StdRng::seed_from_u64(1587782446298476294),
+            rng: RefCell::new(StdRng::seed_from_u64(1587782446298476294)),
         }
     }
 }
@@ -142,7 +142,7 @@ impl Cipher for TurningGrille {
                     if crypto_grid[(row, col)].is_empty() {
                         output_grid[(row, col)] = snip
                             .next()
-                            .unwrap_or(self.null_alphabet.get_rand_char(&mut self.rng))
+                            .unwrap_or(self.null_alphabet.get_rand_char(&mut self.rng.borrow_mut()))
                     }
                 }
             }
@@ -174,10 +174,6 @@ impl Cipher for TurningGrille {
             crypto_grid.rotate();
         }
         Ok(out)
-    }
-
-    fn reset(&mut self) {
-        *self = Self::default();
     }
 
     // fn randomize(&mut self) {

@@ -6,8 +6,6 @@ use std::hash::Hash;
 pub trait Code {
     fn encode(&self, text: &str) -> Result<String, CodeError>;
     fn decode(&self, text: &str) -> Result<String, CodeError>;
-    fn randomize(&mut self);
-    fn reset(&mut self);
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]

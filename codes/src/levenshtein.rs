@@ -89,12 +89,4 @@ impl Code for LevenshteinCode {
             Ok(output.into_iter().join(" "))
         }
     }
-
-    fn randomize(&mut self) {
-        todo!()
-    }
-
-    fn reset(&mut self) {
-        todo!()
-    }
 }

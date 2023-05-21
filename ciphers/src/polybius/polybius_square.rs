@@ -1,4 +1,4 @@
-use crate::{ciphers::Cipher, errors::CipherError};
+use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
 use num::Integer;
 use std::fmt::{self, Formatter};
@@ -182,10 +182,6 @@ impl Cipher for PolybiusSquare {
     //     self.key_word = shuffled_str(&self.alphabet_string, &mut get_global_rng());
     //     self.set_key();
     // }
-
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
 }
 
 impl fmt::Display for PolybiusSquare {

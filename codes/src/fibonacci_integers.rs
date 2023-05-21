@@ -163,10 +163,6 @@ impl Code for FibonacciCodeIntegers {
         }
         Ok(output.join(" "))
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }
 
 #[cfg(test)]

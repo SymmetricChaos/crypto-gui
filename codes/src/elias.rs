@@ -70,10 +70,6 @@ impl Code for EliasCode {
         // Ok(output)
         todo!()
     }
-
-    fn randomize(&mut self) {}
-
-    fn reset(&mut self) {}
 }
 
 #[cfg(test)]
