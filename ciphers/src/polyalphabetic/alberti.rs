@@ -4,30 +4,18 @@ use utils::preset_alphabet::PresetAlphabet;
 use utils::vecstring::VecString;
 
 pub struct Alberti {
-    pub fixed_alphabet_string: String,
-    fixed_alphabet: VecString,
-    pub moving_alphabet_string: String,
-    moving_alphabet: VecString,
+    pub fixed_alphabet: VecString,
+    pub moving_alphabet: VecString,
     pub start_index: usize,
 }
 
 impl Alberti {
-    pub fn set_fixed_alphabet(&mut self) {
-        self.fixed_alphabet = VecString::unique_from(&self.fixed_alphabet_string);
-    }
-
     pub fn assign_fixed_alphabet(&mut self, alphabet: &str) {
-        self.fixed_alphabet_string = alphabet.to_string();
-        self.set_fixed_alphabet()
-    }
-
-    pub fn set_moving_alphabet(&mut self) {
-        self.moving_alphabet = VecString::unique_from(&self.moving_alphabet_string);
+        self.fixed_alphabet = VecString::unique_from(alphabet);
     }
 
     pub fn assign_moving_alphabet(&mut self, alphabet: &str) {
-        self.moving_alphabet_string = alphabet.to_string();
-        self.set_moving_alphabet()
+        self.moving_alphabet = VecString::unique_from(alphabet);
     }
 
     // Unwrap justified by checks made in encrypt()
@@ -99,11 +87,8 @@ impl Cipher for Alberti {
 impl Default for Alberti {
     fn default() -> Self {
         Self {
-            fixed_alphabet_string: String::from(PresetAlphabet::BasicLatin),
             fixed_alphabet: VecString::from(PresetAlphabet::BasicLatin),
-            moving_alphabet_string: String::from(
-                PresetAlphabet::BasicLatin.string().to_ascii_lowercase(),
-            ),
+
             moving_alphabet: VecString::from(
                 PresetAlphabet::BasicLatin.string().to_ascii_lowercase(),
             ),
@@ -114,10 +99,10 @@ impl Default for Alberti {
 
 impl Display for Alberti {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut out = self.fixed_alphabet_string.clone();
+        let mut out = self.fixed_alphabet.to_string();
         out.push('\n');
-        out.push_str(&self.moving_alphabet_string[self.start_index..]);
-        out.push_str(&self.moving_alphabet_string[0..self.start_index]);
+        out.push_str(&self.moving_alphabet.to_string()[self.start_index..]);
+        out.push_str(&self.moving_alphabet.to_string()[0..self.start_index]);
         write!(f, "{}", out)
     }
 }

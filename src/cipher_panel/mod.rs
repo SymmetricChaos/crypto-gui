@@ -1,14 +1,18 @@
 use ciphers::{errors::CipherError, ids::CipherId, traits::Cipher};
 use egui::Ui;
 
-use self::{columnar_controls::ColumnarFrame, polybius_square_controls::PolybiusSquareFrame};
+use self::{
+    adfgvx_controls::AdfgvxFrame, affine_controls::AffineFrame, alberti_controls::AlbertiFrame,
+    b64_controls::B64Frame, columnar_controls::ColumnarFrame,
+    polybius_square_controls::PolybiusSquareFrame,
+};
 
 pub mod _generic_components;
 pub mod adfgvx_controls;
 pub mod affine_controls;
-// pub mod alberti_controls;
-// pub mod b64_controls;
-// pub mod batco_controls;
+pub mod alberti_controls;
+pub mod b64_controls;
+pub mod batco_controls;
 // pub mod bazeries_controls;
 // pub mod beaufort_controls;
 // pub mod bifid_controls;
@@ -76,7 +80,7 @@ fn combox_box(
 #[derive(Default)]
 pub struct CipherInterface {
     caesar: Caesar,
-    affine: Affine,
+    affine: AffineFrame,
     decoder_ring: DecoderRing,
     gen_sub: GeneralSubstitution,
     plugboard: Plugboard,
@@ -88,7 +92,7 @@ pub struct CipherInterface {
     // purple: Purple,
     vigenere: Vigenere,
     beaufort: Beaufort,
-    alberti: Alberti,
+    alberti: AlbertiFrame,
     m94: M94,
     bazeries: Bazeries,
     porta: Porta,
@@ -110,7 +114,7 @@ pub struct CipherInterface {
     polybius: PolybiusSquareFrame,
     polybius_cube: PolybiusCube,
     adfgvx: AdfgvxFrame,
-    b64: B64,
+    b64: B64Frame,
     bifid: Bifid,
     trifid: Trifid,
     checkerboard: StraddlingCheckerboard,
