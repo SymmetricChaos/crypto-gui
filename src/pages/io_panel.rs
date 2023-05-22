@@ -107,7 +107,7 @@ impl IOPanel {
         output: &mut String,
         errors: &mut String,
         active_page: &mut Page,
-        active_cipher: &mut CipherId,
+        active_cipher: &mut Option<CipherId>,
         active_code: &mut CodeId,
         active_attack: &mut AttackId,
         cipher_interface: &mut CipherInterface,
@@ -122,13 +122,17 @@ impl IOPanel {
         ui.add(TextEdit::multiline(output).font(TextStyle::Monospace));
 
         if active_page == &mut Page::Cipher {
-            encrypt_decrypt(
-                ui,
-                cipher_interface.get_active_cipher(active_cipher),
-                input,
-                output,
-                errors,
-            );
+            if let Some(cipher) = active_cipher {
+                encrypt_decrypt(
+                    ui,
+                    cipher_interface.get_active_cipher(*cipher),
+                    input,
+                    output,
+                    errors,
+                );
+            } else {
+                ui.label("<<<CIPHER HOMEPAGE>>>");
+            }
         }
 
         if active_page == &mut Page::Code {

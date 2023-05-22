@@ -13,7 +13,7 @@ pub struct B64Frame {
 }
 
 impl CipherFrame for B64Frame {
-    fn ui(&mut self, ui: &mut Ui, errors: &mut String) {
+    fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         // randomize_reset(ui, self);
         ui.add_space(16.0);
 
@@ -36,10 +36,10 @@ impl CipherFrame for B64Frame {
         ui.add_space(8.0);
         ui.label("Second Columnar Key Word");
         ui.label("Polybius Key Word");
-        if control_string(ui, &mut self.columnar_key_string_1).changed() {
+        if control_string(ui, &mut self.columnar_key_string_2).changed() {
             self.cipher
                 .columnar2
-                .assign_key(&self.columnar_key_string_1)
+                .assign_key(&self.columnar_key_string_2)
         }
     }
 

@@ -1,38 +1,52 @@
-use crate::ciphers::polyalphabetic::Bazeries;
+use ciphers::{polyalphabetic::Bazeries, Cipher};
+use egui::{Slider, Ui};
 
-use super::{View, ViewableCipher, _generic_components::*};
-use eframe::egui::{self, Slider, Ui};
+use super::{CipherFrame, _generic_components::control_string};
 
-impl ViewableCipher for Bazeries {}
+#[derive(Default)]
+pub struct BazeriesFrame {
+    cipher: Bazeries,
+    alphabet_string: String,
+}
 
-impl View for Bazeries {
+impl CipherFrame for BazeriesFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        // randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Alphabet");
         if control_string(ui, &mut self.alphabet_string).changed() {
-            self.set_alphabet()
+            self.cipher.assign_alphabet(&self.alphabet_string)
         }
         ui.add_space(16.0);
 
         ui.label("Offset");
-        let alpha_range = 0..=(self.alphabet_len());
-        ui.add(Slider::new(&mut self.offset, alpha_range.clone()));
+        let alpha_range = 0..=(self.cipher.alphabet_len());
+        ui.add(Slider::new(&mut self.cipher.offset, alpha_range));
         ui.add_space(16.0);
 
         ui.label("Wheels");
-        for wheel in &self.wheels {
+        for wheel in &self.cipher.wheels {
             ui.add(egui::Label::new(egui::RichText::from(wheel).monospace()));
         }
 
         ui.horizontal(|ui| {
             if ui.button("+").clicked() {
-                self.add_wheel()
+                self.cipher.add_wheel()
             }
             if ui.button("-").clicked() {
-                self.del_wheel()
+                self.cipher.del_wheel()
             }
         });
+    }
+
+    fn cipher(&self) -> &dyn Cipher {
+        &self.cipher
+    }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {
+        *self = Self::default()
     }
 }

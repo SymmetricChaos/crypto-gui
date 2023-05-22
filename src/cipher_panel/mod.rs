@@ -3,8 +3,8 @@ use egui::Ui;
 
 use self::{
     adfgvx_controls::AdfgvxFrame, affine_controls::AffineFrame, alberti_controls::AlbertiFrame,
-    b64_controls::B64Frame, columnar_controls::ColumnarFrame,
-    polybius_square_controls::PolybiusSquareFrame,
+    b64_controls::B64Frame, batco_controls::BatcoFrame, bazeries_controls::BazeriesFrame,
+    columnar_controls::ColumnarFrame, polybius_square_controls::PolybiusSquareFrame,
 };
 
 pub mod _generic_components;
@@ -13,7 +13,7 @@ pub mod affine_controls;
 pub mod alberti_controls;
 pub mod b64_controls;
 pub mod batco_controls;
-// pub mod bazeries_controls;
+pub mod bazeries_controls;
 // pub mod beaufort_controls;
 // pub mod bifid_controls;
 // pub mod caesar_controls;
@@ -64,14 +64,14 @@ pub trait CipherFrame {
 fn combox_box(
     ciphers: &[CipherId],
     identifier: &'static str,
-    active_cipher: &mut CipherId,
+    active_cipher: &mut Option<CipherId>,
     ui: &mut Ui,
 ) {
     egui::ComboBox::from_id_source(identifier)
         .selected_text(identifier)
         .show_ui(ui, |ui| {
             for id in ciphers {
-                ui.selectable_value(active_cipher, *id, id.to_string());
+                ui.selectable_value(active_cipher, Some(*id), id.to_string());
             }
         });
     ui.add_space(10.0);
@@ -79,53 +79,50 @@ fn combox_box(
 
 #[derive(Default)]
 pub struct CipherInterface {
-    caesar: Caesar,
+    // caesar: Caesar,
     affine: AffineFrame,
-    decoder_ring: DecoderRing,
-    gen_sub: GeneralSubstitution,
-    plugboard: Plugboard,
+    // decoder_ring: DecoderRing,
+    // gen_sub: GeneralSubstitution,
+    // plugboard: Plugboard,
 
-    m209: M209,
-    enigma: EnigmaM3,
-    sigaba: Sigaba,
-    hebern: Hebern,
+    // m209: M209,
+    // enigma: EnigmaM3,
+    // sigaba: Sigaba,
+    // hebern: Hebern,
     // purple: Purple,
-    vigenere: Vigenere,
-    beaufort: Beaufort,
+    // vigenere: Vigenere,
+    // beaufort: Beaufort,
     alberti: AlbertiFrame,
-    m94: M94,
-    bazeries: Bazeries,
-    porta: Porta,
-    quagmire: Quagmire,
-    chaocipher: Chaocipher,
-    hutton: Hutton,
+    // m94: M94,
+    bazeries: BazeriesFrame,
+    // porta: Porta,
+    // quagmire: Quagmire,
+    // chaocipher: Chaocipher,
+    // hutton: Hutton,
 
-    playfair: Playfair,
-    slidefair: Slidefair,
-    two_square: TwoSquare,
-    four_square: FourSquare,
-
+    // playfair: Playfair,
+    // slidefair: Slidefair,
+    // two_square: TwoSquare,
+    // four_square: FourSquare,
     columnar: ColumnarFrame,
-    grille: Grille,
-    rail_fence: RailFence,
-    scytale: Scytale,
-    turning_grille: TurningGrille,
-
+    // grille: Grille,
+    // rail_fence: RailFence,
+    // scytale: Scytale,
+    // turning_grille: TurningGrille,
     polybius: PolybiusSquareFrame,
-    polybius_cube: PolybiusCube,
+    // polybius_cube: PolybiusCube,
     adfgvx: AdfgvxFrame,
     b64: B64Frame,
-    bifid: Bifid,
-    trifid: Trifid,
-    checkerboard: StraddlingCheckerboard,
-
-    batco: Batco,
-    dryad: Dryad,
-    rs44: RS44,
+    // bifid: Bifid,
+    // trifid: Trifid,
+    // checkerboard: StraddlingCheckerboard,
+    batco: BatcoFrame,
+    // dryad: Dryad,
+    // rs44: RS44,
 }
 
 impl CipherInterface {
-    pub fn combo_boxes(&mut self, ui: &mut Ui, active_cipher: &mut CipherId) {
+    pub fn combo_boxes(&mut self, ui: &mut Ui, active_cipher: &mut Option<CipherId>) {
         combox_box(
             &[
                 CipherId::Caesar,
@@ -217,47 +214,47 @@ impl CipherInterface {
         );
     }
 
-    pub fn get_active_cipher(&mut self, active_cipher: &CipherId) -> &mut dyn CipherFrame {
+    pub fn get_active_cipher(&mut self, active_cipher: CipherId) -> &mut dyn CipherFrame {
         match active_cipher {
-            CipherId::Adfgvx => &mut self.adfgvx,
-            CipherId::Affine => &mut self.affine,
-            CipherId::Alberti => &mut self.alberti,
-            CipherId::B64 => &mut self.b64,
-            CipherId::Batco => &mut self.batco,
-            CipherId::Bazeries => &mut self.bazeries,
-            CipherId::Beaufort => &mut self.beaufort,
-            CipherId::Bifid => &mut self.bifid,
-            CipherId::Caesar => &mut self.caesar,
-            CipherId::Chaocipher => &mut self.chaocipher,
-            CipherId::Checkerboard => &mut self.checkerboard,
-            CipherId::Columnar => &mut self.columnar,
-            CipherId::Decoder => &mut self.decoder_ring,
-            CipherId::Dryad => &mut self.dryad,
-            CipherId::Enigma => &mut self.enigma,
-            CipherId::FourSquare => &mut self.four_square,
-            CipherId::Grille => &mut self.grille,
-            CipherId::Hebern => &mut self.hebern,
-            CipherId::Hutton => &mut self.hutton,
-            CipherId::M209 => &mut self.m209,
-            CipherId::M94 => &mut self.m94,
-            CipherId::Playfair => &mut self.playfair,
-            CipherId::Plugboard => &mut self.plugboard,
-            CipherId::Polybius => &mut self.polybius,
-            CipherId::PolybiusCube => &mut self.polybius_cube,
-            CipherId::Porta => &mut self.porta,
-            // CipherId::Purple => &mut self.purple,
-            CipherId::Quagmire => &mut self.quagmire,
-            CipherId::RailFence => &mut self.rail_fence,
-            CipherId::Rs44 => &mut self.rs44,
-            CipherId::Scytale => &mut self.scytale,
-            CipherId::Sigaba => &mut self.sigaba,
-            CipherId::Slidefair => &mut self.slidefair,
-            CipherId::Substitution => &mut self.gen_sub,
-            CipherId::Trifid => &mut self.trifid,
-            CipherId::TurningGrille => &mut self.turning_grille,
-            CipherId::TwoSquare => &mut self.two_square,
-            CipherId::Vigenere => &mut self.vigenere,
-            _ => todo!(),
-        }
+            CipherId::Adfgvx => return &mut self.adfgvx,
+            CipherId::Affine => return &mut self.affine,
+            CipherId::Alberti => return &mut self.alberti,
+            CipherId::B64 => return &mut self.b64,
+            CipherId::Batco => return &mut self.batco,
+            CipherId::Bazeries => return &mut self.bazeries,
+            // CipherId::Beaufort => &mut self.beaufort,
+            // CipherId::Bifid => &mut self.bifid,
+            // CipherId::Caesar => &mut self.caesar,
+            // CipherId::Chaocipher => &mut self.chaocipher,
+            // CipherId::Checkerboard => &mut self.checkerboard,
+            CipherId::Columnar => return &mut self.columnar,
+            // CipherId::Decoder => &mut self.decoder_ring,
+            // CipherId::Dryad => &mut self.dryad,
+            // CipherId::Enigma => &mut self.enigma,
+            // CipherId::FourSquare => &mut self.four_square,
+            // CipherId::Grille => &mut self.grille,
+            // CipherId::Hebern => &mut self.hebern,
+            // CipherId::Hutton => &mut self.hutton,
+            // CipherId::M209 => &mut self.m209,
+            // CipherId::M94 => &mut self.m94,
+            // CipherId::Playfair => &mut self.playfair,
+            // CipherId::Plugboard => &mut self.plugboard,
+            CipherId::Polybius => return &mut self.polybius,
+            // CipherId::PolybiusCube => &mut self.polybius_cube,
+            // CipherId::Porta => &mut self.porta,
+            // // CipherId::Purple => &mut self.purple,
+            // CipherId::Quagmire => &mut self.quagmire,
+            // CipherId::RailFence => &mut self.rail_fence,
+            // CipherId::Rs44 => &mut self.rs44,
+            // CipherId::Scytale => &mut self.scytale,
+            // CipherId::Sigaba => &mut self.sigaba,
+            // CipherId::Slidefair => &mut self.slidefair,
+            // CipherId::Substitution => &mut self.gen_sub,
+            // CipherId::Trifid => &mut self.trifid,
+            // CipherId::TurningGrille => &mut self.turning_grille,
+            // CipherId::TwoSquare => &mut self.two_square,
+            // CipherId::Vigenere => &mut self.vigenere,
+            _ => todo!("<<<CIPHER NOT FOUND>>>"),
+        };
     }
 }

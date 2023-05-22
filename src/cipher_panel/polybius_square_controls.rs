@@ -14,7 +14,7 @@ pub struct PolybiusSquareFrame {
 }
 
 impl CipherFrame for PolybiusSquareFrame {
-    fn ui(&mut self, ui: &mut Ui, errors: &mut String) {
+    fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         // randomize_reset(ui, self);
         ui.add_space(16.0);
 

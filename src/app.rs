@@ -1,7 +1,7 @@
 // use crate::attack_panel::AttackInterface;
 use crate::cipher_panel::CipherInterface;
 use crate::code_panel::CodeInterface;
-use crate::egui_aux::subheading;
+use crate::egui_aux::{mono_strong, subheading};
 use crate::ids::AttackId;
 use crate::pages::io_panel::IOPanel;
 use crate::pages::{Page, TextPrepPage};
@@ -40,7 +40,7 @@ pub struct ClassicCrypto {
     output: String,
     errors: String,
 
-    active_cipher: CipherId,
+    active_cipher: Option<CipherId>,
     active_code: CodeId,
     active_attack: AttackId,
 
@@ -60,7 +60,7 @@ impl Default for ClassicCrypto {
             io_panel: IOPanel::default(),
 
             // ID of the active Cipher or Code
-            active_cipher: CipherId::default(),
+            active_cipher: None,
             active_code: CodeId::default(),
             active_attack: AttackId::default(),
 
@@ -243,18 +243,26 @@ impl ClassicCrypto {
 
             CentralPanel::default().show(ctx, |ui| {
                 ScrollArea::vertical().show(ui, |ui| {
-                    let name = RichText::new(String::from(self.active_cipher))
-                        .strong()
-                        .heading();
-                    ui.add(egui::Label::new(name));
-                    ui.label(RichText::new(self.active_cipher.description()).size(12.0));
-
-                    ui.add_space(16.0);
-                    ui.separator();
-                    ui.add_space(16.0);
-                    self.cipher_interface
-                        .get_active_cipher(&self.active_cipher)
-                        .ui(ui, &mut self.errors)
+                    match self.active_cipher {
+                        Some(cipher) => {
+                            ui.label(mono_strong(cipher).heading());
+                            ui.label(RichText::new(cipher.description()).size(12.0));
+                            ui.add_space(16.0);
+                            ui.separator();
+                            ui.add_space(16.0);
+                            self.cipher_interface
+                                .get_active_cipher(cipher)
+                                .ui(ui, &mut self.errors);
+                        }
+                        None => {
+                            ui.label(mono_strong("<<<TITLE>>>").heading());
+                            ui.label(RichText::new("<<<DESCRIPTION>>>").size(12.0));
+                            ui.add_space(16.0);
+                            ui.separator();
+                            ui.add_space(16.0);
+                            ui.label(mono_strong("<<<INTERFACE>>>"));
+                        }
+                    };
                 });
             });
 

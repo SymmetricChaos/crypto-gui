@@ -14,7 +14,7 @@ pub struct AdfgvxFrame {
 }
 
 impl CipherFrame for AdfgvxFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         // randomize_reset(ui, self);
         ui.add_space(16.0);
 

@@ -79,19 +79,6 @@ impl Cipher for Affine {
             .collect();
         Ok(out)
     }
-
-    // fn randomize(&mut self) {
-    //     let mut rng = get_global_rng();
-    //     let length = self.alphabet.len();
-    //     self.add_key = rng.gen_range(0..length);
-    //     loop {
-    //         let mul = rng.gen_range(1..length);
-    //         if mul_inv(mul, self.alphabet_len()).is_some() {
-    //             self.mul_key = mul;
-    //             break;
-    //         };
-    //     }
-    // }
 }
 
 #[cfg(test)]

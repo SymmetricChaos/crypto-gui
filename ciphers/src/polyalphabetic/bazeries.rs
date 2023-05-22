@@ -3,8 +3,7 @@ use itertools::Itertools;
 use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
 
 pub struct Bazeries {
-    pub alphabet_string: String,
-    alphabet: VecString,
+    pub alphabet: VecString,
     pub wheels: Vec<String>,
     pub offset: usize,
 }
@@ -14,8 +13,8 @@ impl Bazeries {
         todo!("must be possible to enforce alphabet length, maybe just have function to 'set_wheels' that checks correctness")
     }
 
-    pub fn set_alphabet(&mut self) {
-        self.alphabet = VecString::unique_from(&self.alphabet_string);
+    pub fn assign_alphabet(&mut self, alphabet: &str) {
+        self.alphabet = VecString::unique_from(alphabet);
     }
 
     pub fn add_wheel(&mut self) {
@@ -35,7 +34,7 @@ impl Bazeries {
             return Err(CipherError::input("the text cannot be longer the the number of wheels, for longer messages send each part with a different key"));
         }
 
-        let sorted = self.alphabet_string.chars().sorted().collect_vec();
+        let sorted = self.alphabet.chars().sorted().collect_vec();
         for wheel in self.wheels.iter() {
             if wheel.chars().sorted().collect_vec() != sorted {
                 return Err(CipherError::input(
@@ -53,7 +52,6 @@ impl Default for Bazeries {
         // 26 Random wheels
         // Maybe rotate these to be pseudo alphabetical
         let alphabet = VecString::from(PresetAlphabet::BasicLatin);
-        let alphabet_string = String::from(PresetAlphabet::BasicLatin);
         let wheels = [
             "FDWCBAGJOEPKRSITUQLHMZNXYV",
             "YGALXKDFEPCTSOHVWMIRZNJBUQ",
@@ -91,7 +89,6 @@ impl Default for Bazeries {
             alphabet,
             wheels,
             offset,
-            alphabet_string,
         }
     }
 }
