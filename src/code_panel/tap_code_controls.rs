@@ -47,7 +47,7 @@ impl CodeFrame for TapCodeFrame {
         ui.add_space(16.0);
 
         ui.label("Grid");
-        mono(ui, &self.code.show_grid(), None);
+        ui.label(mono(self.code.show_grid()));
     }
 
     fn code(&self) -> &dyn codes::traits::Code {

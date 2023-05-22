@@ -22,16 +22,16 @@ impl Default for Bifid {
 }
 
 impl Bifid {
-    pub fn set_alphabet(&mut self) -> Result<(), CipherError> {
-        let new_alpha_len = self.polybius.alphabet_string.chars().count();
-        if !new_alpha_len.is_power_of_two() {
-            return Err(CipherError::alphabet(
-                "alphabet length must be a power of two to fill the grid",
-            ));
-        }
+    // pub fn set_alphabet(&mut self) -> Result<(), CipherError> {
+    //     let new_alpha_len = self.polybius.alphabet_string.chars().count();
+    //     if !new_alpha_len.is_power_of_two() {
+    //         return Err(CipherError::alphabet(
+    //             "alphabet length must be a power of two to fill the grid",
+    //         ));
+    //     }
 
-        self.polybius.set_alphabet()
-    }
+    //     self.polybius.set_alphabet()
+    // }
 }
 
 impl Cipher for Bifid {

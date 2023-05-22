@@ -12,7 +12,7 @@ pub struct B64 {
 impl Default for B64 {
     fn default() -> Self {
         let mut polybius = PolybiusSquare::default();
-        polybius.assign_alphabet(PresetAlphabet::Base64);
+        polybius.pick_alphabet(PresetAlphabet::Base64);
 
         Self {
             polybius,

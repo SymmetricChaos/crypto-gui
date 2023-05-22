@@ -1,8 +1,7 @@
-use eframe::{
-    egui::{self, Color32, Label, RichText, TextStyle},
-    epaint::FontFamily,
-};
+use eframe::egui::{self, Color32, Label, RichText, TextStyle};
 use utils::grid::{str_to_char_grid, Grid};
+
+use crate::egui_aux::mono;
 
 use super::CipherFrame;
 
@@ -86,9 +85,4 @@ pub fn letter_grid(ui: &mut egui::Ui, n_rows: usize, n_cols: usize, text: &Strin
             ui.end_row()
         }
     });
-}
-// Usable arrows
-// ← ↑ → ↓
-pub fn mono<T: ToString>(text: T) -> RichText {
-    RichText::from(text.to_string()).family(FontFamily::Monospace)
 }

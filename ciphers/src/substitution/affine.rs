@@ -4,8 +4,7 @@ use utils::{math_functions::mul_inv, preset_alphabet::PresetAlphabet, vecstring:
 pub struct Affine {
     pub add_key: usize,
     pub mul_key: usize,
-    pub alphabet_string: String,
-    alphabet: VecString,
+    pub alphabet: VecString,
 }
 
 impl Affine {
@@ -25,13 +24,10 @@ impl Affine {
         self.alphabet.get_char_at(pos).unwrap()
     }
 
-    pub fn set_alphabet(&mut self) {
-        self.alphabet = VecString::unique_from(&self.alphabet_string);
-    }
+    pub fn set_alphabet(&mut self) {}
 
     pub fn assign_alphabet(&mut self, alphabet: &str) {
-        self.alphabet_string = String::from(alphabet);
-        self.set_alphabet();
+        self.alphabet = VecString::unique_from(alphabet);
     }
 
     pub fn alphabet_len(&self) -> usize {
@@ -60,7 +56,6 @@ impl Default for Affine {
         Self {
             add_key: 0,
             mul_key: 1,
-            alphabet_string: String::from(PresetAlphabet::BasicLatin),
             alphabet: VecString::from(PresetAlphabet::BasicLatin),
         }
     }

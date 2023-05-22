@@ -37,12 +37,12 @@ impl Grille {
             .collect_vec()
     }
 
-    fn get_rng(&self) -> StdRng {
-        match self.seed {
-            Some(n) => SeedableRng::seed_from_u64(n),
-            None => SeedableRng::from_entropy(),
-        }
-    }
+    // fn get_rng(&self) -> StdRng {
+    //     match self.seed {
+    //         Some(n) => SeedableRng::seed_from_u64(n),
+    //         None => SeedableRng::from_entropy(),
+    //     }
+    // }
 }
 
 impl Default for Grille {

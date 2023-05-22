@@ -1,9 +1,11 @@
 use ciphers::{errors::CipherError, ids::CipherId, traits::Cipher};
 use egui::Ui;
 
+use self::{columnar_controls::ColumnarFrame, polybius_square_controls::PolybiusSquareFrame};
+
 pub mod _generic_components;
 pub mod adfgvx_controls;
-// pub mod affine_controls;
+pub mod affine_controls;
 // pub mod alberti_controls;
 // pub mod b64_controls;
 // pub mod batco_controls;
@@ -47,10 +49,10 @@ pub trait CipherFrame {
     fn randomize(&mut self);
     fn reset(&mut self);
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        self.code().encrypt(text)
+        self.cipher().encrypt(text)
     }
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        self.code().decrypt(text)
+        self.cipher().decrypt(text)
     }
 }
 
@@ -99,15 +101,15 @@ pub struct CipherInterface {
     two_square: TwoSquare,
     four_square: FourSquare,
 
-    columnar: Columnar,
+    columnar: ColumnarFrame,
     grille: Grille,
     rail_fence: RailFence,
     scytale: Scytale,
     turning_grille: TurningGrille,
 
-    polybius: PolybiusSquare,
+    polybius: PolybiusSquareFrame,
     polybius_cube: PolybiusCube,
-    adfgvx: Adfgvx,
+    adfgvx: AdfgvxFrame,
     b64: B64,
     bifid: Bifid,
     trifid: Trifid,

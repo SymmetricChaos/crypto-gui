@@ -12,11 +12,11 @@ impl Adfgvx {
     pub fn set_alphabet(&mut self, mode: PresetAlphabet) {
         match mode {
             PresetAlphabet::BasicLatinNoJ => {
-                self.polybius.assign_alphabet(mode);
+                self.polybius.pick_alphabet(mode);
                 self.polybius.assign_labels("ADFGX");
             }
             PresetAlphabet::BasicLatinWithDigits => {
-                self.polybius.assign_alphabet(mode);
+                self.polybius.pick_alphabet(mode);
                 self.polybius.assign_labels("ADFGVX");
             }
             _ => (),
@@ -27,7 +27,7 @@ impl Adfgvx {
 impl Default for Adfgvx {
     fn default() -> Self {
         let mut polybius = PolybiusSquare::default();
-        polybius.assign_alphabet(PresetAlphabet::BasicLatinNoJ);
+        polybius.pick_alphabet(PresetAlphabet::BasicLatinNoJ);
         polybius.assign_labels("ADFGX");
 
         Self {

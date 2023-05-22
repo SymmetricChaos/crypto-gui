@@ -43,7 +43,7 @@ impl CodeFrame for RomajiFrame {
                 for _row in 0..16 {
                     for _col in 0..8 {
                         let (kana, romaji) = pairs.next().unwrap();
-                        mono_strong(ui, &format!("{} {}  ", kana, romaji), Some(16.0));
+                        ui.label(mono_strong(format!("{} {}  ", kana, romaji)).size(16.0));
                     }
                     ui.end_row()
                 }

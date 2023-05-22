@@ -1,22 +1,16 @@
-use eframe::egui::{Response, RichText, Ui};
+use eframe::egui::RichText;
 use egui::Color32;
 
 pub fn subheading(text: &str) -> RichText {
     RichText::new(text).size(16.0)
 }
 
-pub fn mono(ui: &mut Ui, text: &str, size: Option<f32>) -> Response {
-    match size {
-        Some(n) => ui.label(RichText::new(text).monospace().size(n)),
-        None => ui.label(RichText::new(text).monospace()),
-    }
+pub fn mono<T: ToString>(text: T) -> RichText {
+    RichText::from(text.to_string()).monospace()
 }
 
-pub fn mono_strong(ui: &mut Ui, text: &str, size: Option<f32>) -> Response {
-    match size {
-        Some(n) => ui.label(RichText::new(text).monospace().strong().size(n)),
-        None => ui.label(RichText::new(text).monospace().strong()),
-    }
+pub fn mono_strong<T: ToString>(text: T) -> RichText {
+    RichText::from(text.to_string()).monospace().strong()
 }
 
 pub fn mono_text(text: &str, size: Option<f32>) -> RichText {

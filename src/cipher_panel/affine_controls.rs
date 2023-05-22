@@ -1,32 +1,59 @@
-use super::{View, ViewableCipher, _generic_components::*};
-use crate::{ciphers::substitution::Affine, math_functions::prime_factors};
+use ciphers::substitution::Affine;
 use eframe::egui::{Slider, Ui};
+use utils::math_functions::prime_factors;
 
-impl ViewableCipher for Affine {}
+use super::{CipherFrame, _generic_components::control_string};
 
-impl View for Affine {
-    fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+#[derive(Default)]
+pub struct AffineFrame {
+    cipher: Affine,
+    alphabet_string: String,
+}
+
+impl CipherFrame for AffineFrame {
+    fn ui(&mut self, ui: &mut Ui, errors: &mut String) {
+        // randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Alphabet");
         if control_string(ui, &mut self.alphabet_string).changed() {
-            self.set_alphabet()
+            self.cipher.assign_alphabet(&self.alphabet_string)
         }
         ui.add_space(16.0);
 
         ui.label("Additive Key");
-        let alpha_range = 0..=(self.alphabet_len() - 1);
-        ui.add(Slider::new(&mut self.add_key, alpha_range.clone()));
+        let alpha_range = 0..=(self.cipher.alphabet_len() - 1);
+        ui.add(Slider::new(&mut self.cipher.add_key, alpha_range.clone()));
         ui.add_space(16.0);
 
         ui.label("Multiplicative Key");
         ui.label(format!(
             "Must not be divisible by the following numbers: {:?}",
-            prime_factors(self.alphabet_len())
+            prime_factors(self.cipher.alphabet_len())
         ));
-        let alpha_range = 1..=(self.alphabet_len() - 1);
-        ui.add(Slider::new(&mut self.mul_key, alpha_range));
+        let alpha_range = 1..=(self.cipher.alphabet_len() - 1);
+        ui.add(Slider::new(&mut self.cipher.mul_key, alpha_range));
         ui.add_space(16.0);
+    }
+
+    fn cipher(&self) -> &dyn ciphers::Cipher {
+        &self.cipher
+    }
+
+    fn randomize(&mut self) {
+        //     let mut rng = get_global_rng();
+        //     let length = self.alphabet.len();
+        //     self.add_key = rng.gen_range(0..length);
+        //     loop {
+        //         let mul = rng.gen_range(1..length);
+        //         if mul_inv(mul, self.alphabet_len()).is_some() {
+        //             self.mul_key = mul;
+        //             break;
+        //         };
+        //     }
+    }
+
+    fn reset(&mut self) {
+        *self = Self::default()
     }
 }

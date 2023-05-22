@@ -5,22 +5,18 @@ use std::fmt::{self, Formatter};
 use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
 
 pub struct PolybiusSquare {
-    pub alphabet_string: String,
-    grid: VecString,
-    pub labels_string: String,
-    labels: VecString,
-    side_len: usize,
+    pub alphabet: VecString,
+    pub labels: VecString,
     pub key_word: String,
+    side_len: usize,
 }
 
 impl Default for PolybiusSquare {
     fn default() -> Self {
         Self {
-            alphabet_string: String::from(PresetAlphabet::BasicLatinNoQ),
-            grid: VecString::from(PresetAlphabet::BasicLatinNoQ),
+            alphabet: VecString::from(PresetAlphabet::BasicLatinNoQ),
             side_len: 5,
             labels: VecString::from(PresetAlphabet::Digits1),
-            labels_string: PresetAlphabet::Digits1.string(),
             key_word: String::new(),
         }
     }
@@ -29,49 +25,24 @@ impl Default for PolybiusSquare {
 impl PolybiusSquare {
     pub fn assign_key(&mut self, key_word: &str) {
         self.key_word = key_word.to_string();
-        self.grid = VecString::keyed_alphabet(&self.key_word, &self.alphabet_string);
+        self.alphabet = VecString::keyed_alphabet(&self.key_word, &self.alphabet.to_string());
     }
 
-    pub fn set_key(&mut self) {
-        self.grid = VecString::keyed_alphabet(&self.key_word, &self.alphabet_string);
-    }
-
-    pub fn assign_alphabet(&mut self, mode: PresetAlphabet) {
+    pub fn pick_alphabet(&mut self, mode: PresetAlphabet) {
         match mode {
             PresetAlphabet::BasicLatinNoJ
             | PresetAlphabet::BasicLatinNoQ
             | PresetAlphabet::BasicLatinWithDigits
             | PresetAlphabet::Base64 => {
-                self.alphabet_string = String::from(mode);
-                self.grid = VecString::from(mode);
+                self.alphabet = VecString::from(mode);
                 self.side_len = (mode.len() as f64).sqrt().ceil() as usize;
             }
             _ => (),
         }
     }
 
-    pub fn set_alphabet(&mut self) -> Result<(), CipherError> {
-        let new_alpha_len = self.alphabet_string.chars().count();
-
-        if new_alpha_len > 100 {
-            return Err(CipherError::alphabet(
-                "alphabet length currently limited to 100 characters",
-            ));
-        }
-
-        self.grid = VecString::unique_from(&self.alphabet_string);
-        self.side_len = (new_alpha_len as f64).sqrt().ceil() as usize;
-
-        Ok(())
-    }
-
     pub fn assign_labels(&mut self, labels: &str) {
-        self.labels_string = labels.to_string();
-        self.labels = VecString::unique_from(&self.labels_string);
-    }
-
-    pub fn set_labels(&mut self) {
-        self.labels = VecString::unique_from(&self.labels_string);
+        self.labels = VecString::unique_from(labels);
     }
 
     // Cannot fail due to checks in encrypt/decrypt
@@ -86,12 +57,12 @@ impl PolybiusSquare {
     }
 
     pub fn alphabet_len(&self) -> usize {
-        self.grid.len()
+        self.alphabet.len()
     }
 
     // Cannot fail due to checks in encrypt/decrypt
     fn char_to_position(&self, symbol: char) -> (usize, usize) {
-        let num = self.grid.get_pos_of(symbol).unwrap();
+        let num = self.alphabet.get_pos_of(symbol).unwrap();
         (num / self.side_len, num % self.side_len)
     }
 
@@ -107,7 +78,7 @@ impl PolybiusSquare {
             .ok_or(CipherError::invalid_input_char(position.1))?;
 
         let num = y * self.side_len + x;
-        Ok(self.alphabet_string.chars().nth(num).unwrap())
+        Ok(self.alphabet.chars().nth(num).unwrap())
     }
 
     fn check_labels(&self) -> Result<(), CipherError> {
@@ -127,7 +98,7 @@ impl PolybiusSquare {
             square.push(' ');
         }
 
-        for (n, c) in self.grid.chars().enumerate() {
+        for (n, c) in self.alphabet.chars().enumerate() {
             if n % self.side_len == 0 {
                 let ylab = self.labels.get_char_at(n / self.side_len).unwrap_or(' ');
                 square.push_str(&format!("\n{ylab} "));
@@ -177,11 +148,6 @@ impl Cipher for PolybiusSquare {
         }
         Ok(out)
     }
-
-    // fn randomize(&mut self) {
-    //     self.key_word = shuffled_str(&self.alphabet_string, &mut get_global_rng());
-    //     self.set_key();
-    // }
 }
 
 impl fmt::Display for PolybiusSquare {
@@ -190,7 +156,7 @@ impl fmt::Display for PolybiusSquare {
         for xlab in self.labels.chars().take(self.side_len) {
             square.push_str(&format!("{xlab} "))
         }
-        for (n, c) in self.grid.chars().enumerate() {
+        for (n, c) in self.alphabet.chars().enumerate() {
             if n % self.side_len == 0 {
                 let ylab = self.labels.chars().nth(n / self.side_len).unwrap();
                 square.push_str(&format!("\n{ylab} "));
