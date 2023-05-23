@@ -9,7 +9,6 @@ use utils::{
 };
 
 pub struct Grille {
-    pub null_alphabet_string: String,
     null_alphabet: VecString,
     pub grid: Grid<Symbol<char>>,
     pub seed: Option<u64>,
@@ -37,6 +36,10 @@ impl Grille {
             .collect_vec()
     }
 
+    pub fn assign_null_alphabet(&mut self, alphabet: &str) {
+        self.null_alphabet = VecString::unique_from(alphabet)
+    }
+
     // fn get_rng(&self) -> StdRng {
     //     match self.seed {
     //         Some(n) => SeedableRng::seed_from_u64(n),
@@ -48,7 +51,6 @@ impl Grille {
 impl Default for Grille {
     fn default() -> Self {
         Grille {
-            null_alphabet_string: String::from(PresetAlphabet::BasicLatin),
             null_alphabet: VecString::from(PresetAlphabet::BasicLatin),
             grid: Grid::new_empty(4, 4),
             seed: None,

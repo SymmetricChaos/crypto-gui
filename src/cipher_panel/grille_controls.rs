@@ -1,9 +1,22 @@
-use crate::ciphers::transposition::Grille;
+use ciphers::{transposition::Grille, Cipher};
+use egui::{TextStyle, Ui};
+use utils::preset_alphabet::PresetAlphabet;
 
-use super::{View, ViewableCipher, _generic_components::*};
-use eframe::egui::{TextEdit, TextStyle, Ui};
+use super::{CipherFrame, _generic_components::control_string};
 
-impl ViewableCipher for Grille {}
+pub struct GrilleFrame {
+    cipher: Grille,
+    null_alphabet_string: String,
+}
+
+impl Default for GrilleFrame {
+    fn default() -> Self {
+        Self {
+            cipher: Default::default(),
+            null_alphabet_string: PresetAlphabet::BasicLatin.into(),
+        }
+    }
+}
 
 fn cell_button(grille: &mut Grille, x: usize, y: usize, ui: &mut eframe::egui::Ui) {
     let cell = grille.grid[(x, y)];
@@ -16,26 +29,27 @@ fn cell_button(grille: &mut Grille, x: usize, y: usize, ui: &mut eframe::egui::U
     };
 }
 
-impl View for Grille {
+impl CipherFrame for GrilleFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        // randomize_reset(ui, self);
         ui.add_space(16.0);
 
-        ui.checkbox(&mut self.use_nulls, "Use Nulls?");
-        if self.use_nulls {
-            ui.label("Null Alphabet");
-            ui.add(TextEdit::singleline(&mut self.null_alphabet_string).font(TextStyle::Monospace));
+        ui.checkbox(&mut self.cipher.use_nulls, "Use Nulls?");
+        if self.cipher.use_nulls {
+            if control_string(ui, &mut self.null_alphabet_string).changed() {
+                self.cipher.assign_null_alphabet(&self.null_alphabet_string)
+            }
         }
         ui.add_space(16.0);
 
         ui.label("Rows");
         ui.horizontal(|ui| {
             if ui.button("-").clicked() {
-                self.grid.del_row();
+                self.cipher.grid.del_row();
             };
-            ui.label(format!("{}", self.grid.num_rows()));
+            ui.label(format!("{}", self.cipher.grid.num_rows()));
             if ui.button("+").clicked() {
-                self.grid.add_row();
+                self.cipher.grid.add_row();
             };
         });
         ui.add_space(10.0);
@@ -43,24 +57,34 @@ impl View for Grille {
         ui.label("Columns");
         ui.horizontal(|ui| {
             if ui.button("-").clicked() {
-                self.grid.del_col();
+                self.cipher.grid.del_col();
             };
-            ui.label(format!("{}", self.grid.num_cols()));
+            ui.label(format!("{}", self.cipher.grid.num_cols()));
             if ui.button("+").clicked() {
-                self.grid.add_col();
+                self.cipher.grid.add_col();
             };
         });
         ui.add_space(16.0);
 
         ui.spacing_mut().item_spacing = (2.0, 2.0).into();
         ui.style_mut().override_text_style = Some(TextStyle::Monospace);
-        for x in 0..self.grid.num_rows() {
+        for x in 0..self.cipher.grid.num_rows() {
             ui.horizontal(|ui| {
-                for y in 0..self.grid.num_cols() {
-                    cell_button(self, x, y, ui);
+                for y in 0..self.cipher.grid.num_cols() {
+                    cell_button(&mut self.cipher, x, y, ui);
                 }
             });
         }
-        ui.label(format!("{} empty cells", self.grid.num_empty()));
+        ui.label(format!("{} empty cells", self.cipher.grid.num_empty()));
+    }
+
+    fn cipher(&self) -> &dyn Cipher {
+        &self.cipher
+    }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {
+        *self = Self::default()
     }
 }
