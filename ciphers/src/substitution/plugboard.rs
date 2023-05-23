@@ -1,28 +1,22 @@
-use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
-
 use crate::{errors::CipherError, traits::Cipher};
 use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
 pub struct Plugboard {
-    alphabet: VecString,
-    pub pairs: String,
     wiring: HashMap<char, char>,
 }
 
 impl Default for Plugboard {
     fn default() -> Self {
         Self {
-            alphabet: VecString::from(PresetAlphabet::BasicLatin),
-            pairs: String::new(),
             wiring: HashMap::with_capacity(15),
         }
     }
 }
 
 impl Plugboard {
-    pub fn set_plugboard(&mut self) -> Result<(), CipherError> {
-        let digraphs = self.pairs.split(" ");
+    pub fn set_plugboard(&mut self, pairs: &str) -> Result<(), CipherError> {
+        let digraphs = pairs.split(" ");
 
         // Clear the wiring and rebuild it, returning an Error if anything goes wrong
         let mut wiring = HashMap::with_capacity(self.wiring.capacity());
@@ -45,27 +39,6 @@ impl Plugboard {
         }
         self.wiring = wiring;
         Ok(())
-    }
-
-    // Infallible setter that just skips any incorrect inputs
-    pub fn set_plugboard_silent(&mut self) {
-        let digraphs = self.pairs.split(" ");
-
-        let mut wiring = HashMap::with_capacity(self.wiring.capacity());
-        for d in digraphs {
-            if d.len() != 2 {
-                continue;
-            }
-            let mut cs = d.chars();
-            let a = cs.next().unwrap();
-            let b = cs.next().unwrap();
-            if a == b || wiring.contains_key(&a) || wiring.contains_key(&b) {
-                continue;
-            }
-            wiring.insert(a, b);
-            wiring.insert(b, a);
-        }
-        self.wiring = wiring;
     }
 
     // Swap the character or return the original depending on if it is in the board

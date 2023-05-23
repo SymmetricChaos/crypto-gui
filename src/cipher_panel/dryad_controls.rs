@@ -1,19 +1,25 @@
-use super::{View, ViewableCipher, _generic_components::*};
-use crate::{ciphers::tactical::Dryad, egui_aux::mono};
-use eframe::egui::{Slider, Ui};
+use ciphers::{tactical::Dryad, Cipher};
+use egui::{Slider, Ui};
 
-impl ViewableCipher for Dryad {}
+use crate::egui_aux::mono;
 
-impl View for Dryad {
+use super::CipherFrame;
+
+#[derive(Default)]
+pub struct DryadFrame {
+    cipher: Dryad,
+}
+
+impl CipherFrame for DryadFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        // randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Message Key");
         ui.horizontal(|ui| {
-            mono(ui, &format!("{}", self.message_key_to_char()), None);
+            ui.label(mono(self.cipher.message_key_to_char()));
             ui.add(
-                Slider::new(&mut self.message_key, 0..=24)
+                Slider::new(&mut self.cipher.message_key, 0..=24)
                     .clamp_to_range(true)
                     .show_value(false),
             );
@@ -21,6 +27,16 @@ impl View for Dryad {
 
         ui.add_space(16.0);
 
-        mono(ui, &self.show_code_page(), None);
+        ui.label(mono(self.cipher.show_code_page()));
+    }
+
+    fn cipher(&self) -> &dyn Cipher {
+        &self.cipher
+    }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {
+        *self = Self::default()
     }
 }

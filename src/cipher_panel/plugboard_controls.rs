@@ -1,32 +1,51 @@
-use crate::{ciphers::substitution::Plugboard, egui_aux::mono_strong};
+use ciphers::{substitution::Plugboard, Cipher};
+use egui::Ui;
 
-use super::{View, ViewableCipher, _generic_components::control_string};
-use eframe::egui::Ui;
+use crate::egui_aux::{error_text, mono_strong};
 
-impl ViewableCipher for Plugboard {}
+use super::{CipherFrame, _generic_components::control_string};
 
-impl View for Plugboard {
+#[derive(Default)]
+pub struct PlugboardFrame {
+    cipher: Plugboard,
+    pairs: String,
+}
+
+impl CipherFrame for PlugboardFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.add_space(16.0);
         ui.label("Plugboard Pairs");
-        ui.horizontal(|ui| {
-            if control_string(ui, &mut self.pairs).changed() {
-                self.set_plugboard_silent();
+        if control_string(ui, &mut self.pairs).changed() {
+            match self.cipher.set_plugboard(&self.pairs) {
+                Ok(_) => (),
+                Err(e) => {
+                    ui.label(error_text(&e.inner()));
+                }
             }
-        });
+        };
 
         let nrows = 8;
         let ncols = 8;
         ui.columns(ncols, |columns| {
             let mut ctr = 0;
             let mut col = 0;
-            for pair in self.show_settings() {
-                mono_strong(&mut columns[col], &pair, None);
+            for pair in self.cipher.show_settings() {
+                columns[col].label(mono_strong(pair));
                 ctr += 1;
                 if ctr % nrows == 0 {
                     col += 1
                 }
             }
         });
+    }
+
+    fn cipher(&self) -> &dyn Cipher {
+        &self.cipher
+    }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {
+        *self = Self::default()
     }
 }

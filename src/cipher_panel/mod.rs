@@ -7,7 +7,8 @@ use self::{
     beaufort_controls::BeaufortFrame, bifid_controls::BifidFrame, caesar_controls::CaesarFrame,
     chaocipher_controls::ChaocipherFrame, checkerboard_controls::StraddlingCheckerboardFrame,
     columnar_controls::ColumnarFrame, decoder_ring_controls::DecoderRingFrame,
-    general_sub_controls::GeneralSubstitutionFrame, polybius_square_controls::PolybiusSquareFrame,
+    general_sub_controls::GeneralSubstitutionFrame, plugboard_controls::PlugboardFrame,
+    polybius_square_controls::PolybiusSquareFrame,
 };
 
 pub mod _generic_components;
@@ -24,7 +25,7 @@ pub mod chaocipher_controls;
 pub mod checkerboard_controls;
 pub mod columnar_controls;
 pub mod decoder_ring_controls;
-// pub mod dryad_controls;
+pub mod dryad_controls;
 // pub mod enigma_controls;
 // pub mod four_square_controls;
 pub mod general_sub_controls;
@@ -34,7 +35,7 @@ pub mod general_sub_controls;
 // pub mod m209_controls;
 // pub mod m94_controls;
 // pub mod playfair_controls;
-// pub mod plugboard_controls;
+pub mod plugboard_controls;
 // pub mod polybius_cube_controls;
 pub mod polybius_square_controls;
 // pub mod porta_controls;
@@ -86,7 +87,7 @@ pub struct CipherInterface {
     affine: AffineFrame,
     decoder_ring: DecoderRingFrame,
     gen_sub: GeneralSubstitutionFrame,
-    // plugboard: Plugboard,
+    plugboard: PlugboardFrame,
 
     // m209: M209,
     // enigma: EnigmaM3,
@@ -241,7 +242,7 @@ impl CipherInterface {
             // CipherId::M209 => &mut self.m209,
             // CipherId::M94 => &mut self.m94,
             // CipherId::Playfair => &mut self.playfair,
-            // CipherId::Plugboard => &mut self.plugboard,
+            CipherId::Plugboard => &mut self.plugboard,
             CipherId::Polybius => &mut self.polybius,
             // CipherId::PolybiusCube => &mut self.polybius_cube,
             // CipherId::Porta => &mut self.porta,
@@ -252,7 +253,7 @@ impl CipherInterface {
             // CipherId::Scytale => &mut self.scytale,
             // CipherId::Sigaba => &mut self.sigaba,
             // CipherId::Slidefair => &mut self.slidefair,
-            // CipherId::Substitution => &mut self.gen_sub,
+            CipherId::Substitution => &mut self.gen_sub,
             // CipherId::Trifid => &mut self.trifid,
             // CipherId::TurningGrille => &mut self.turning_grille,
             // CipherId::TwoSquare => &mut self.two_square,
