@@ -1,13 +1,21 @@
 use ciphers::substitution::Affine;
 use eframe::egui::{Slider, Ui};
-use utils::math_functions::prime_factors;
+use utils::{math_functions::prime_factors, preset_alphabet::PresetAlphabet};
 
 use super::{CipherFrame, _generic_components::control_string};
 
-#[derive(Default)]
 pub struct AffineFrame {
     cipher: Affine,
     alphabet_string: String,
+}
+
+impl Default for AffineFrame {
+    fn default() -> Self {
+        Self {
+            cipher: Default::default(),
+            alphabet_string: String::from(PresetAlphabet::BasicLatin),
+        }
+    }
 }
 
 impl CipherFrame for AffineFrame {

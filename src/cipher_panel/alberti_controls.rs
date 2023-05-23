@@ -3,12 +3,22 @@ use crate::egui_aux::mono;
 use super::{CipherFrame, _generic_components::control_string};
 use ciphers::{polyalphabetic::Alberti, Cipher};
 use eframe::egui::{Slider, Ui};
+use utils::preset_alphabet::PresetAlphabet;
 
-#[derive(Default)]
 pub struct AlbertiFrame {
     cipher: Alberti,
     fixed_alphabet_string: String,
     moving_alphabet_string: String,
+}
+
+impl Default for AlbertiFrame {
+    fn default() -> Self {
+        Self {
+            cipher: Default::default(),
+            fixed_alphabet_string: String::from(PresetAlphabet::BasicLatin),
+            moving_alphabet_string: String::from(PresetAlphabet::BasicLatin).to_ascii_lowercase(),
+        }
+    }
 }
 
 impl CipherFrame for AlbertiFrame {

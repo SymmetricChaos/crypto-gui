@@ -1,54 +1,81 @@
-use super::{View, ViewableCipher, _generic_components::*};
-use crate::ciphers::polybius::Bifid;
-use eframe::{
-    egui::{RichText, Slider, Ui},
-    epaint::Color32,
-};
+use ciphers::{polybius::Bifid, Cipher};
+use egui::{Color32, Slider, Ui};
 use utils::preset_alphabet::PresetAlphabet;
 
-impl ViewableCipher for Bifid {}
+use crate::egui_aux::mono;
 
-impl View for Bifid {
+use super::{CipherFrame, _generic_components::control_string};
+
+pub struct BifidFrame {
+    cipher: Bifid,
+    alphabet_string: String,
+    key_string: String,
+}
+
+impl Default for BifidFrame {
+    fn default() -> Self {
+        Self {
+            cipher: Default::default(),
+            alphabet_string: String::from(PresetAlphabet::BasicLatinNoQ),
+            key_string: Default::default(),
+        }
+    }
+}
+
+impl CipherFrame for BifidFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        // randomize_reset(ui, self);
         ui.add_space(16.0);
 
         let block_size_range = 3..=30;
         ui.label("Block Size");
-        ui.add(Slider::new(&mut self.block_size, block_size_range));
+        ui.add(Slider::new(&mut self.cipher.block_size, block_size_range));
 
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
             if ui.button("No Q").clicked() {
-                self.polybius.assign_alphabet(PresetAlphabet::BasicLatinNoQ)
+                self.cipher
+                    .polybius
+                    .pick_alphabet(PresetAlphabet::BasicLatinNoQ);
+                self.alphabet_string = PresetAlphabet::BasicLatinNoQ.string()
             };
             if ui.button("No J").clicked() {
-                self.polybius.assign_alphabet(PresetAlphabet::BasicLatinNoJ)
+                self.cipher
+                    .polybius
+                    .pick_alphabet(PresetAlphabet::BasicLatinNoJ);
+                self.alphabet_string = PresetAlphabet::BasicLatinNoJ.string()
             };
             if ui.button("Alphanumeric").clicked() {
-                self.polybius
-                    .assign_alphabet(PresetAlphabet::BasicLatinWithDigits)
+                self.cipher
+                    .polybius
+                    .pick_alphabet(PresetAlphabet::BasicLatinWithDigits);
+                self.alphabet_string = PresetAlphabet::BasicLatinWithDigits.string()
             };
             if ui.button("Base64").clicked() {
-                self.polybius.assign_alphabet(PresetAlphabet::Base64)
+                self.cipher.polybius.pick_alphabet(PresetAlphabet::Base64);
+                self.alphabet_string = PresetAlphabet::Base64.string()
             };
         });
 
-        ui.add_space(10.0);
-        ui.label(
-            RichText::new(&self.polybius.alphabet_string)
-                .monospace()
-                .background_color(Color32::BLACK),
-        );
+        // False alphabet display
+        ui.label(mono(&self.alphabet_string).background_color(Color32::BLACK));
         ui.add_space(16.0);
 
         ui.label("Key Word");
-        if control_string(ui, &mut self.polybius.key_word).changed() {
-            self.polybius.set_key()
+        if control_string(ui, &mut self.key_string).changed() {
+            self.cipher.polybius.assign_key(&self.key_string)
         }
         ui.add_space(16.0);
+        ui.label(mono(format!("Grid\n{}", self.cipher.polybius)));
+    }
 
-        ui.label(RichText::new(format!("Grid\n{}", self.polybius)).monospace());
-        ui.add_space(16.0);
+    fn cipher(&self) -> &dyn Cipher {
+        &self.cipher
+    }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {
+        *self = Self::default()
     }
 }

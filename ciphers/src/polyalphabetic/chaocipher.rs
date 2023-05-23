@@ -2,10 +2,8 @@ use crate::{errors::CipherError, traits::Cipher};
 use utils::vecstring::VecString;
 
 pub struct Chaocipher {
-    pub left_string: String,
-    left: VecString,
-    pub right_string: String,
-    right: VecString,
+    pub left: VecString,
+    pub right: VecString,
 }
 
 impl Chaocipher {
@@ -26,22 +24,12 @@ impl Chaocipher {
         Chaocipher::right_permute(&mut self.right, n);
     }
 
-    pub fn set_left(&mut self) {
-        self.left = VecString::unique_from(&self.left_string)
-    }
-
-    pub fn set_right(&mut self) {
-        self.right = VecString::unique_from(&self.right_string)
-    }
-
     pub fn assign_left(&mut self, s: &str) {
-        self.left_string = String::from(s);
-        self.set_left();
+        self.left = VecString::unique_from(s)
     }
 
     pub fn assign_right(&mut self, s: &str) {
-        self.right_string = String::from(s);
-        self.set_right();
+        self.right = VecString::unique_from(s)
     }
 }
 
@@ -50,8 +38,6 @@ impl Default for Chaocipher {
         Chaocipher {
             left: VecString::from("HXUCZVAMDSLKPEFJRIGTWOBNYQ"),
             right: VecString::from("PTLNBQDEOYSFAVZKGJRIHWXUMC"),
-            left_string: String::from("HXUCZVAMDSLKPEFJRIGTWOBNYQ"),
-            right_string: String::from("PTLNBQDEOYSFAVZKGJRIHWXUMC"),
         }
     }
 }

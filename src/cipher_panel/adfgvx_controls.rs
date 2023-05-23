@@ -4,6 +4,7 @@ use super::CipherFrame;
 use super::_generic_components::control_string;
 use ciphers::polybius::Adfgvx;
 use ciphers::traits::Cipher;
+use egui::Color32;
 use utils::preset_alphabet::PresetAlphabet;
 
 #[derive(Default)]
@@ -23,14 +24,20 @@ impl CipherFrame for AdfgvxFrame {
             if ui.button("ADFGX").clicked() {
                 self.cipher
                     .polybius
-                    .pick_alphabet(PresetAlphabet::BasicLatinNoJ)
+                    .pick_alphabet(PresetAlphabet::BasicLatinNoJ);
+                self.polybius_key_string = PresetAlphabet::BasicLatinNoJ.string();
             };
             if ui.button("ADFGVX").clicked() {
                 self.cipher
                     .polybius
-                    .pick_alphabet(PresetAlphabet::BasicLatinWithDigits)
+                    .pick_alphabet(PresetAlphabet::BasicLatinWithDigits);
+                self.polybius_key_string = PresetAlphabet::BasicLatinWithDigits.string();
             };
         });
+
+        // False alphabet display
+        ui.label(mono(&self.polybius_key_string).background_color(Color32::BLACK));
+        ui.add_space(16.0);
 
         ui.label("Polybius Key Word");
         if control_string(ui, &mut self.polybius_key_string).changed() {
@@ -52,9 +59,7 @@ impl CipherFrame for AdfgvxFrame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {
-        //TODO
-    }
+    fn randomize(&mut self) {}
 
     fn reset(&mut self) {
         *self = Self::default()

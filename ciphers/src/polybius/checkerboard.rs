@@ -8,25 +8,20 @@ const CHECKERBOARD_ALPHABET: &'static str = "ABCDEFGHIJKLM/NOPQRSTUVWXYZ.";
 pub struct StraddlingCheckerboard {
     rows: Vec<char>,
     pub gaps: (usize, usize),
-    pub alphabet: String,
 }
 
 impl Default for StraddlingCheckerboard {
     fn default() -> Self {
         let rows = "ETAONRISBCDFGHJKLMPQ/UVWXYZ.".chars().collect();
         let gaps = (2, 6);
-        StraddlingCheckerboard {
-            rows,
-            gaps,
-            alphabet: "ETAONRISBCDFGHJKLMPQ/UVWXYZ.".to_string(),
-        }
+        StraddlingCheckerboard { rows, gaps }
     }
 }
 
 // need to handle the digit encoding scheme
 impl StraddlingCheckerboard {
-    pub fn set_alphabet(&mut self) {
-        self.rows = keyed_alphabet(&self.alphabet, CHECKERBOARD_ALPHABET)
+    pub fn assign_alphabet(&mut self, alphabet: &str) {
+        self.rows = keyed_alphabet(alphabet, CHECKERBOARD_ALPHABET)
             .chars()
             .collect();
     }

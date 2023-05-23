@@ -1,12 +1,21 @@
 use ciphers::{polyalphabetic::Bazeries, Cipher};
 use egui::{Slider, Ui};
+use utils::preset_alphabet::PresetAlphabet;
 
 use super::{CipherFrame, _generic_components::control_string};
 
-#[derive(Default)]
 pub struct BazeriesFrame {
     cipher: Bazeries,
     alphabet_string: String,
+}
+
+impl Default for BazeriesFrame {
+    fn default() -> Self {
+        Self {
+            cipher: Default::default(),
+            alphabet_string: String::from(PresetAlphabet::BasicLatin),
+        }
+    }
 }
 
 impl CipherFrame for BazeriesFrame {

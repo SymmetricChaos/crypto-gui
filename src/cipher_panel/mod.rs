@@ -4,6 +4,8 @@ use egui::Ui;
 use self::{
     adfgvx_controls::AdfgvxFrame, affine_controls::AffineFrame, alberti_controls::AlbertiFrame,
     b64_controls::B64Frame, batco_controls::BatcoFrame, bazeries_controls::BazeriesFrame,
+    beaufort_controls::BeaufortFrame, bifid_controls::BifidFrame, caesar_controls::CaesarFrame,
+    chaocipher_controls::ChaocipherFrame, checkerboard_controls::StraddlingCheckerboardFrame,
     columnar_controls::ColumnarFrame, polybius_square_controls::PolybiusSquareFrame,
 };
 
@@ -14,11 +16,11 @@ pub mod alberti_controls;
 pub mod b64_controls;
 pub mod batco_controls;
 pub mod bazeries_controls;
-// pub mod beaufort_controls;
-// pub mod bifid_controls;
-// pub mod caesar_controls;
-// pub mod chaocipher_controls;
-// pub mod checkerboard_controls;
+pub mod beaufort_controls;
+pub mod bifid_controls;
+pub mod caesar_controls;
+pub mod chaocipher_controls;
+pub mod checkerboard_controls;
 pub mod columnar_controls;
 // pub mod decoder_ring_controls;
 // pub mod dryad_controls;
@@ -79,7 +81,7 @@ fn combox_box(
 
 #[derive(Default)]
 pub struct CipherInterface {
-    // caesar: Caesar,
+    caesar: CaesarFrame,
     affine: AffineFrame,
     // decoder_ring: DecoderRing,
     // gen_sub: GeneralSubstitution,
@@ -91,13 +93,13 @@ pub struct CipherInterface {
     // hebern: Hebern,
     // purple: Purple,
     // vigenere: Vigenere,
-    // beaufort: Beaufort,
+    beaufort: BeaufortFrame,
     alberti: AlbertiFrame,
     // m94: M94,
     bazeries: BazeriesFrame,
     // porta: Porta,
     // quagmire: Quagmire,
-    // chaocipher: Chaocipher,
+    chaocipher: ChaocipherFrame,
     // hutton: Hutton,
 
     // playfair: Playfair,
@@ -113,9 +115,9 @@ pub struct CipherInterface {
     // polybius_cube: PolybiusCube,
     adfgvx: AdfgvxFrame,
     b64: B64Frame,
-    // bifid: Bifid,
+    bifid: BifidFrame,
     // trifid: Trifid,
-    // checkerboard: StraddlingCheckerboard,
+    checkerboard: StraddlingCheckerboardFrame,
     batco: BatcoFrame,
     // dryad: Dryad,
     // rs44: RS44,
@@ -216,18 +218,18 @@ impl CipherInterface {
 
     pub fn get_active_cipher(&mut self, active_cipher: CipherId) -> &mut dyn CipherFrame {
         match active_cipher {
-            CipherId::Adfgvx => return &mut self.adfgvx,
-            CipherId::Affine => return &mut self.affine,
-            CipherId::Alberti => return &mut self.alberti,
-            CipherId::B64 => return &mut self.b64,
-            CipherId::Batco => return &mut self.batco,
-            CipherId::Bazeries => return &mut self.bazeries,
-            // CipherId::Beaufort => &mut self.beaufort,
-            // CipherId::Bifid => &mut self.bifid,
-            // CipherId::Caesar => &mut self.caesar,
-            // CipherId::Chaocipher => &mut self.chaocipher,
-            // CipherId::Checkerboard => &mut self.checkerboard,
-            CipherId::Columnar => return &mut self.columnar,
+            CipherId::Adfgvx => &mut self.adfgvx,
+            CipherId::Affine => &mut self.affine,
+            CipherId::Alberti => &mut self.alberti,
+            CipherId::B64 => &mut self.b64,
+            CipherId::Batco => &mut self.batco,
+            CipherId::Bazeries => &mut self.bazeries,
+            CipherId::Beaufort => &mut self.beaufort,
+            CipherId::Bifid => &mut self.bifid,
+            CipherId::Caesar => &mut self.caesar,
+            CipherId::Chaocipher => &mut self.chaocipher,
+            CipherId::Checkerboard => &mut self.checkerboard,
+            CipherId::Columnar => &mut self.columnar,
             // CipherId::Decoder => &mut self.decoder_ring,
             // CipherId::Dryad => &mut self.dryad,
             // CipherId::Enigma => &mut self.enigma,
@@ -239,7 +241,7 @@ impl CipherInterface {
             // CipherId::M94 => &mut self.m94,
             // CipherId::Playfair => &mut self.playfair,
             // CipherId::Plugboard => &mut self.plugboard,
-            CipherId::Polybius => return &mut self.polybius,
+            CipherId::Polybius => &mut self.polybius,
             // CipherId::PolybiusCube => &mut self.polybius_cube,
             // CipherId::Porta => &mut self.porta,
             // // CipherId::Purple => &mut self.purple,
@@ -255,6 +257,6 @@ impl CipherInterface {
             // CipherId::TwoSquare => &mut self.two_square,
             // CipherId::Vigenere => &mut self.vigenere,
             _ => todo!("<<<CIPHER NOT FOUND>>>"),
-        };
+        }
     }
 }

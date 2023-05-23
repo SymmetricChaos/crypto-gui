@@ -21,13 +21,8 @@ impl Caesar {
             .ok_or(CipherError::invalid_input_char(c))
     }
 
-    pub fn set_alphabet(&mut self) {
-        self.alphabet = VecString::unique_from(&self.alphabet_string);
-    }
-
-    pub fn control_alphabet(&mut self) -> &mut String {
-        self.alphabet = VecString::unique_from(&self.alphabet_string);
-        &mut self.alphabet_string
+    pub fn assign_alphabet(&mut self, alphabet: &str) {
+        self.alphabet = VecString::unique_from(alphabet);
     }
 }
 

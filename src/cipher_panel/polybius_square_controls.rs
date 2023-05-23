@@ -35,13 +35,9 @@ impl CipherFrame for PolybiusSquareFrame {
             };
         });
 
-        // ui.label("Alphabet");
-        // if control_string(ui, &mut self.alphabet_string).changed() {
-        //     match self.cipher.set_alphabet() {
-        //         Ok(_) => (),
-        //         Err(e) => *errors = e.to_string(),
-        //     }
-        // }
+        // False alphabet display
+        ui.label(mono(&self.alphabet_string).background_color(Color32::BLACK));
+        ui.add_space(16.0);
 
         ui.add_space(10.0);
         ui.label(

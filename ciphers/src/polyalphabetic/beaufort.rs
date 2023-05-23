@@ -7,7 +7,6 @@ use crate::{errors::CipherError, traits::Cipher};
 
 pub struct Beaufort {
     pub key_words: [String; 5],
-    pub alphabet_string: String,
     alphabet: VecString,
     pub prog_shift: usize,
     pub mode: PolyMode,
@@ -15,8 +14,8 @@ pub struct Beaufort {
 }
 
 impl Beaufort {
-    pub fn set_alphabet(&mut self) {
-        self.alphabet = VecString::unique_from(&self.alphabet_string);
+    pub fn assign_alphabet(&mut self, alphabet: &str) {
+        self.alphabet = VecString::unique_from(alphabet);
     }
 
     // Some weirdness needed to make types match
@@ -215,7 +214,6 @@ impl Default for Beaufort {
                 String::new(),
                 String::new(),
             ],
-            alphabet_string: String::from(PresetAlphabet::BasicLatin),
             alphabet: VecString::from(PresetAlphabet::BasicLatin),
             mode: PolyMode::CylicKey,
             prog_shift: 0,

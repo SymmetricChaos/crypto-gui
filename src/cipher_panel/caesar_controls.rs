@@ -1,24 +1,38 @@
-use crate::ciphers::substitution::Caesar;
+use ciphers::{substitution::Caesar, Cipher};
+use egui::{Slider, Ui};
 
-use super::{View, ViewableCipher, _generic_components::*};
-use eframe::egui::{Slider, Ui};
+use super::{CipherFrame, _generic_components::control_string};
 
-impl ViewableCipher for Caesar {}
+#[derive(Default)]
+pub struct CaesarFrame {
+    cipher: Caesar,
+    alphabet_string: String,
+}
 
-impl View for Caesar {
+impl CipherFrame for CaesarFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        // randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Alphabet");
         if control_string(ui, &mut self.alphabet_string).changed() {
-            self.set_alphabet()
+            self.cipher.assign_alphabet(&self.alphabet_string)
         }
         ui.add_space(16.0);
 
         ui.label("Key");
-        let alpha_range = 0..=(self.alphabet.len() as i32 - 1);
-        ui.add(Slider::new(&mut self.shift, alpha_range));
+        let alpha_range = 0..=(self.cipher.alphabet.len() as i32 - 1);
+        ui.add(Slider::new(&mut self.cipher.shift, alpha_range));
         ui.add_space(16.0);
+    }
+
+    fn cipher(&self) -> &dyn Cipher {
+        &self.cipher
+    }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {
+        *self = Self::default()
     }
 }
