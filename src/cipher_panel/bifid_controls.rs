@@ -16,7 +16,7 @@ impl Default for BifidFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
-            alphabet_string: String::from(PresetAlphabet::BasicLatinNoQ),
+            alphabet_string: PresetAlphabet::BasicLatinNoQ.into(),
             key_string: Default::default(),
         }
     }
@@ -37,23 +37,27 @@ impl CipherFrame for BifidFrame {
                 self.cipher
                     .polybius
                     .pick_alphabet(PresetAlphabet::BasicLatinNoQ);
-                self.alphabet_string = PresetAlphabet::BasicLatinNoQ.string()
+                self.alphabet_string = PresetAlphabet::BasicLatinNoQ.string();
+                self.cipher.polybius.assign_key(&self.key_string)
             };
             if ui.button("No J").clicked() {
                 self.cipher
                     .polybius
                     .pick_alphabet(PresetAlphabet::BasicLatinNoJ);
-                self.alphabet_string = PresetAlphabet::BasicLatinNoJ.string()
+                self.alphabet_string = PresetAlphabet::BasicLatinNoJ.string();
+                self.cipher.polybius.assign_key(&self.key_string)
             };
             if ui.button("Alphanumeric").clicked() {
                 self.cipher
                     .polybius
                     .pick_alphabet(PresetAlphabet::BasicLatinWithDigits);
-                self.alphabet_string = PresetAlphabet::BasicLatinWithDigits.string()
+                self.alphabet_string = PresetAlphabet::BasicLatinWithDigits.string();
+                self.cipher.polybius.assign_key(&self.key_string)
             };
             if ui.button("Base64").clicked() {
                 self.cipher.polybius.pick_alphabet(PresetAlphabet::Base64);
-                self.alphabet_string = PresetAlphabet::Base64.string()
+                self.alphabet_string = PresetAlphabet::Base64.string();
+                self.cipher.polybius.assign_key(&self.key_string)
             };
         });
 

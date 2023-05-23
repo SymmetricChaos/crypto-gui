@@ -1,7 +1,5 @@
-use super::{
-    char_to_usize, usize_to_char, EnigmaPlugboard, Reflector, Rotor, REFLECTORS, ROTOR_MAP,
-};
-use crate::{errors::CipherError, traits::Cipher};
+use super::{char_to_usize, usize_to_char, Reflector, Rotor, REFLECTORS, ROTOR_MAP};
+use crate::{errors::CipherError, substitution::Plugboard, traits::Cipher};
 use utils::preset_alphabet::PresetAlphabet;
 
 pub fn prep_enigma_text(text: &str) -> Result<String, CipherError> {
@@ -46,8 +44,7 @@ fn enigma_text_prep() {
 // small and so should be cheap to Clone.
 #[derive(Clone, Debug)]
 pub struct EnigmaState {
-    pub plugboard_pairs: String,
-    pub plugboard: EnigmaPlugboard,
+    pub plugboard: Plugboard,
     pub rotors: [Rotor; 3],
     pub reflector: Reflector,
 }
@@ -80,8 +77,14 @@ impl EnigmaState {
         self.rotors[2].ring = rotor_ring_positions.2;
     }
 
-    pub fn set_plugboard(&mut self) -> Result<(), CipherError> {
-        self.plugboard.set_plugboard(&self.plugboard_pairs)
+    pub fn set_plugboard(&mut self, pairs: &str) -> Result<(), CipherError> {
+        let digraphs = pairs.split(" ");
+        if digraphs.clone().count() > 13 {
+            return Err(CipherError::key(
+                "Engima Plugboard cannot include more than 13 pairs of letters",
+            ));
+        }
+        self.plugboard.set_plugboard(pairs)
     }
 
     // Notice that the signal goes through the rotors starting on the right with the 3rd rotor,
@@ -103,8 +106,7 @@ impl EnigmaState {
 impl Default for EnigmaState {
     fn default() -> Self {
         Self {
-            plugboard_pairs: String::new(),
-            plugboard: EnigmaPlugboard::default(),
+            plugboard: Plugboard::default(),
             rotors: [ROTOR_MAP["I"], ROTOR_MAP["II"], ROTOR_MAP["III"]],
             reflector: REFLECTORS["B"],
         }
@@ -119,7 +121,6 @@ pub struct EnigmaM3 {
 impl Cipher for EnigmaM3 {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let mut inner_state = self.state.clone();
-        inner_state.set_plugboard()?;
         Ok(text.chars().map(|c| inner_state.encrypt_char(c)).collect())
     }
 

@@ -1,22 +1,29 @@
-use super::{View, ViewableCipher};
-use crate::ciphers::{
+use ciphers::{
     enigma::{REFLECTORS, ROTOR_VEC},
-    EnigmaM3,
+    Cipher, EnigmaM3,
 };
-use eframe::egui::{ComboBox, Label, RichText, Slider, TextEdit, TextStyle, Ui};
+use egui::{ComboBox, Label, Slider, Ui};
 
-impl ViewableCipher for EnigmaM3 {}
+use crate::egui_aux::{error_text, mono};
 
-impl View for EnigmaM3 {
+use super::{CipherFrame, _generic_components::control_string};
+
+#[derive(Default)]
+pub struct EnigmaM3Frame {
+    cipher: EnigmaM3,
+    plugboard_string: String,
+}
+
+impl CipherFrame for EnigmaM3Frame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.label("Rotor Positions\nTo Be Changed Every Message");
-        for rotor in &mut self.state.rotors {
+        for rotor in &mut self.cipher.state.rotors {
             ui.add(Slider::new(&mut rotor.position, 0..=26).clamp_to_range(true));
         }
 
         ui.add_space(10.0);
         ui.label("Ring Settings").on_hover_text("Ringstellung");
-        for rotor in &mut self.state.rotors {
+        for rotor in &mut self.cipher.state.rotors {
             ui.add(Slider::new(&mut rotor.ring, 0..=26).clamp_to_range(true));
         }
 
@@ -28,19 +35,21 @@ impl View for EnigmaM3 {
                 .selected_text(format!("Rotor {}", i + 1))
                 .show_ui(ui, |ui| {
                     for rtr in ROTOR_VEC.iter() {
-                        ui.selectable_value(&mut self.state.rotors[i], *rtr, rtr.name.to_string());
+                        ui.selectable_value(
+                            &mut self.cipher.state.rotors[i],
+                            *rtr,
+                            rtr.name.to_string(),
+                        );
                     }
                 });
         }
 
         ui.add_space(10.0);
         ui.label("Rotors").on_hover_text("Walzen");
-        for rotor in &mut self.state.rotors {
+        for rotor in &mut self.cipher.state.rotors {
             ui.horizontal(|ui| {
-                let name = RichText::new(rotor.name).monospace();
-                ui.add_sized([20.0, 20.0], Label::new(name));
-                let characters = RichText::new(&rotor.to_string()).monospace();
-                ui.label(characters);
+                ui.add_sized([20.0, 20.0], Label::new(mono(rotor.name)));
+                ui.label(mono(rotor));
             });
         }
 
@@ -49,21 +58,43 @@ impl View for EnigmaM3 {
             .selected_text("Select Reflector")
             .show_ui(ui, |ui| {
                 for rfl in REFLECTORS.values() {
-                    ui.selectable_value(&mut self.state.reflector, *rfl, format!("{}", rfl.name));
+                    ui.selectable_value(
+                        &mut self.cipher.state.reflector,
+                        *rfl,
+                        format!("{}", rfl.name),
+                    );
                 }
             });
 
         ui.add_space(10.0);
         ui.label("Reflector").on_hover_text("Umkehrwalze");
         ui.horizontal(|ui| {
-            let name = RichText::new(self.state.reflector.name).monospace();
-            ui.add_sized([20.0, 20.0], Label::new(name));
-            let text = RichText::new(&self.state.reflector.to_string()).monospace();
-            ui.label(text);
+            ui.add_sized(
+                [20.0, 20.0],
+                Label::new(mono(self.cipher.state.reflector.name)),
+            );
+            ui.label(mono(self.cipher.state.reflector));
         });
 
         ui.add_space(10.0);
         ui.label("Plugboard").on_hover_text("Steckerbrett");
-        ui.add(TextEdit::singleline(&mut self.state.plugboard_pairs).font(TextStyle::Monospace));
+        if control_string(ui, &mut self.plugboard_string).changed() {
+            match self.cipher.state.set_plugboard(&self.plugboard_string) {
+                Ok(_) => (),
+                Err(e) => {
+                    ui.label(error_text(&e.inner()));
+                }
+            }
+        };
+    }
+
+    fn cipher(&self) -> &dyn Cipher {
+        &self.cipher
+    }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {
+        *self = Self::default()
     }
 }

@@ -2,7 +2,7 @@ use crate::egui_aux::mono;
 
 use super::{CipherFrame, _generic_components::control_string};
 use ciphers::{polybius::PolybiusSquare, Cipher};
-use eframe::egui::{Color32, RichText, Ui};
+use eframe::egui::{Color32, Ui};
 use utils::preset_alphabet::PresetAlphabet;
 
 #[derive(Default)]
@@ -37,14 +37,6 @@ impl CipherFrame for PolybiusSquareFrame {
 
         // False alphabet display
         ui.label(mono(&self.alphabet_string).background_color(Color32::BLACK));
-        ui.add_space(16.0);
-
-        ui.add_space(10.0);
-        ui.label(
-            RichText::new(&self.alphabet_string)
-                .monospace()
-                .background_color(Color32::BLACK),
-        );
         ui.add_space(16.0);
 
         ui.label("Key Word");

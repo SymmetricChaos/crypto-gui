@@ -7,8 +7,9 @@ use self::{
     beaufort_controls::BeaufortFrame, bifid_controls::BifidFrame, caesar_controls::CaesarFrame,
     chaocipher_controls::ChaocipherFrame, checkerboard_controls::StraddlingCheckerboardFrame,
     columnar_controls::ColumnarFrame, decoder_ring_controls::DecoderRingFrame,
-    general_sub_controls::GeneralSubstitutionFrame, plugboard_controls::PlugboardFrame,
-    polybius_square_controls::PolybiusSquareFrame,
+    dryad_controls::DryadFrame, enigma_controls::EnigmaM3Frame,
+    four_square_controls::FourSquareFrame, general_sub_controls::GeneralSubstitutionFrame,
+    plugboard_controls::PlugboardFrame, polybius_square_controls::PolybiusSquareFrame,
 };
 
 pub mod _generic_components;
@@ -26,8 +27,8 @@ pub mod checkerboard_controls;
 pub mod columnar_controls;
 pub mod decoder_ring_controls;
 pub mod dryad_controls;
-// pub mod enigma_controls;
-// pub mod four_square_controls;
+pub mod enigma_controls;
+pub mod four_square_controls;
 pub mod general_sub_controls;
 // pub mod grille_controls;
 // pub mod hebern_controls;
@@ -90,7 +91,7 @@ pub struct CipherInterface {
     plugboard: PlugboardFrame,
 
     // m209: M209,
-    // enigma: EnigmaM3,
+    enigma: EnigmaM3Frame,
     // sigaba: Sigaba,
     // hebern: Hebern,
     // purple: Purple,
@@ -107,7 +108,7 @@ pub struct CipherInterface {
     // playfair: Playfair,
     // slidefair: Slidefair,
     // two_square: TwoSquare,
-    // four_square: FourSquare,
+    four_square: FourSquareFrame,
     columnar: ColumnarFrame,
     // grille: Grille,
     // rail_fence: RailFence,
@@ -121,7 +122,7 @@ pub struct CipherInterface {
     // trifid: Trifid,
     checkerboard: StraddlingCheckerboardFrame,
     batco: BatcoFrame,
-    // dryad: Dryad,
+    dryad: DryadFrame,
     // rs44: RS44,
 }
 
@@ -233,9 +234,9 @@ impl CipherInterface {
             CipherId::Checkerboard => &mut self.checkerboard,
             CipherId::Columnar => &mut self.columnar,
             CipherId::Decoder => &mut self.decoder_ring,
-            // CipherId::Dryad => &mut self.dryad,
-            // CipherId::Enigma => &mut self.enigma,
-            // CipherId::FourSquare => &mut self.four_square,
+            CipherId::Dryad => &mut self.dryad,
+            CipherId::Enigma => &mut self.enigma,
+            CipherId::FourSquare => &mut self.four_square,
             // CipherId::Grille => &mut self.grille,
             // CipherId::Hebern => &mut self.hebern,
             // CipherId::Hutton => &mut self.hutton,

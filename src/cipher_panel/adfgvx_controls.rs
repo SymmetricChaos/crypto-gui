@@ -26,12 +26,14 @@ impl CipherFrame for AdfgvxFrame {
                     .polybius
                     .pick_alphabet(PresetAlphabet::BasicLatinNoJ);
                 self.polybius_key_string = PresetAlphabet::BasicLatinNoJ.string();
+                self.cipher.columnar.assign_key(&self.polybius_key_string);
             };
             if ui.button("ADFGVX").clicked() {
                 self.cipher
                     .polybius
                     .pick_alphabet(PresetAlphabet::BasicLatinWithDigits);
                 self.polybius_key_string = PresetAlphabet::BasicLatinWithDigits.string();
+                self.cipher.columnar.assign_key(&self.polybius_key_string);
             };
         });
 

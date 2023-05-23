@@ -16,7 +16,7 @@ impl Default for BeaufortFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
-            alphabet_string: String::from(PresetAlphabet::BasicLatin),
+            alphabet_string: PresetAlphabet::BasicLatin.into(),
         }
     }
 }
