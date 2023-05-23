@@ -4,31 +4,15 @@ use utils::vecstring::VecString;
 pub struct DecoderRing {
     pub index: usize,
     alphabet: VecString,
-    pub alphabet_string: String,
 }
 
 impl DecoderRing {
-    pub fn set_alphabet(&mut self) {
-        self.alphabet = VecString::unique_from(&self.alphabet_string)
-    }
-
-    pub fn control_alphabet(&mut self) -> &mut String {
-        self.alphabet = VecString::unique_from(&self.alphabet_string);
-        &mut self.alphabet_string
+    pub fn assign_alphabet(&mut self, alphabet: &str) {
+        self.alphabet = VecString::unique_from(alphabet)
     }
 
     pub fn length(&self) -> usize {
         self.alphabet.len()
-    }
-
-    pub fn annie(&mut self) {
-        self.alphabet_string = String::from("_ASLWIMVHFKXDPOEJBTNQZGUYRC");
-        self.alphabet = VecString::from(&self.alphabet_string);
-    }
-
-    pub fn midnight(&mut self) {
-        self.alphabet_string = String::from("_AEXDTZKNYCJWSGUMBOQHRIVFPL");
-        self.alphabet = VecString::from(&self.alphabet_string);
     }
 
     fn valid_code_group(&self, s: &str) -> Result<usize, CipherError> {
@@ -49,7 +33,6 @@ impl Default for DecoderRing {
     fn default() -> Self {
         Self {
             index: 0,
-            alphabet_string: String::from("_ABCDEFGHIJKLMNOPWRSTUVWXYZ"),
             alphabet: VecString::from("_ABCDEFGHIJKLMNOPWRSTUVWXYZ"),
         }
     }

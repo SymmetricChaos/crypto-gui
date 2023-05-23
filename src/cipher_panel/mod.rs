@@ -6,7 +6,8 @@ use self::{
     b64_controls::B64Frame, batco_controls::BatcoFrame, bazeries_controls::BazeriesFrame,
     beaufort_controls::BeaufortFrame, bifid_controls::BifidFrame, caesar_controls::CaesarFrame,
     chaocipher_controls::ChaocipherFrame, checkerboard_controls::StraddlingCheckerboardFrame,
-    columnar_controls::ColumnarFrame, polybius_square_controls::PolybiusSquareFrame,
+    columnar_controls::ColumnarFrame, decoder_ring_controls::DecoderRingFrame,
+    general_sub_controls::GeneralSubstitutionFrame, polybius_square_controls::PolybiusSquareFrame,
 };
 
 pub mod _generic_components;
@@ -22,11 +23,11 @@ pub mod caesar_controls;
 pub mod chaocipher_controls;
 pub mod checkerboard_controls;
 pub mod columnar_controls;
-// pub mod decoder_ring_controls;
+pub mod decoder_ring_controls;
 // pub mod dryad_controls;
 // pub mod enigma_controls;
 // pub mod four_square_controls;
-// pub mod general_sub_controls;
+pub mod general_sub_controls;
 // pub mod grille_controls;
 // pub mod hebern_controls;
 // pub mod hutton_controls;
@@ -83,8 +84,8 @@ fn combox_box(
 pub struct CipherInterface {
     caesar: CaesarFrame,
     affine: AffineFrame,
-    // decoder_ring: DecoderRing,
-    // gen_sub: GeneralSubstitution,
+    decoder_ring: DecoderRingFrame,
+    gen_sub: GeneralSubstitutionFrame,
     // plugboard: Plugboard,
 
     // m209: M209,
@@ -230,7 +231,7 @@ impl CipherInterface {
             CipherId::Chaocipher => &mut self.chaocipher,
             CipherId::Checkerboard => &mut self.checkerboard,
             CipherId::Columnar => &mut self.columnar,
-            // CipherId::Decoder => &mut self.decoder_ring,
+            CipherId::Decoder => &mut self.decoder_ring,
             // CipherId::Dryad => &mut self.dryad,
             // CipherId::Enigma => &mut self.enigma,
             // CipherId::FourSquare => &mut self.four_square,

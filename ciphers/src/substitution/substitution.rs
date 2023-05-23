@@ -4,30 +4,17 @@ use crate::{errors::CipherError, traits::Cipher};
 
 #[derive(Debug)]
 pub struct GeneralSubstitution {
-    pub pt_alphabet_string: String,
     pt_alphabet: VecString,
-    pub ct_alphabet_string: String,
     ct_alphabet: VecString,
 }
 
 impl GeneralSubstitution {
-    pub fn set_pt_alphabet(&mut self) {
-        self.pt_alphabet = VecString::unique_from(&self.pt_alphabet_string);
+    pub fn assign_pt_alphabet(&mut self, alphabet: &str) {
+        self.pt_alphabet = VecString::unique_from(alphabet)
     }
 
-    pub fn set_ct_alphabet(&mut self) {
-        self.ct_alphabet = VecString::unique_from(&self.ct_alphabet_string);
-    }
-
-    // easier fpr debugging
-    pub fn _assign_pt_alphabet(&mut self, alphabet: &str) {
-        self.pt_alphabet_string = alphabet.to_string();
-        self.set_pt_alphabet();
-    }
-
-    pub fn _assign_ct_alphabet(&mut self, alphabet: &str) {
-        self.ct_alphabet_string = alphabet.to_string();
-        self.set_ct_alphabet();
+    pub fn assign_ct_alphabet(&mut self, alphabet: &str) {
+        self.ct_alphabet = VecString::unique_from(alphabet)
     }
 
     pub fn encrypt_char(&self, c: char) -> char {
@@ -70,14 +57,10 @@ impl GeneralSubstitution {
 
 impl Default for GeneralSubstitution {
     fn default() -> Self {
-        let pt_alphabet_string = String::from(PresetAlphabet::BasicLatin);
-        let pt_alphabet = VecString::from(&pt_alphabet_string);
-        let ct_alphabet_string = String::from("ZYXWVUTSRQPONMLKJIHGFEDCBA");
-        let ct_alphabet = VecString::from(&ct_alphabet_string);
+        let pt_alphabet = VecString::from(PresetAlphabet::BasicLatin);
+        let ct_alphabet = VecString::from("ZYXWVUTSRQPONMLKJIHGFEDCBA");
         Self {
-            pt_alphabet_string,
             pt_alphabet,
-            ct_alphabet_string,
             ct_alphabet,
         }
     }

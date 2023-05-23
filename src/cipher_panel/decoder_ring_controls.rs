@@ -1,30 +1,57 @@
-use crate::ciphers::substitution::DecoderRing;
+use ciphers::{substitution::DecoderRing, Cipher};
+use egui::{Slider, Ui};
 
-use super::{View, ViewableCipher, _generic_components::*};
-use eframe::egui::{Slider, Ui};
+use super::{CipherFrame, _generic_components::control_string};
 
-impl ViewableCipher for DecoderRing {}
+pub struct DecoderRingFrame {
+    cipher: DecoderRing,
+    alphabet_string: String,
+}
 
-impl View for DecoderRing {
+impl Default for DecoderRingFrame {
+    fn default() -> Self {
+        Self {
+            cipher: Default::default(),
+            alphabet_string: String::from("_ABCDEFGHIJKLMNOPWRSTUVWXYZ"),
+        }
+    }
+}
+
+impl CipherFrame for DecoderRingFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        // randomize_reset(ui, self);
         ui.add_space(16.0);
 
-        input_alphabet(ui, &mut self.control_alphabet());
+        ui.label("Alphabet");
+        if control_string(ui, &mut self.alphabet_string).changed() {
+            self.cipher.assign_alphabet(&self.alphabet_string)
+        }
         ui.add_space(16.0);
 
         ui.label("Key");
-        let alpha_range = 0..=(self.length() - 1);
-        ui.add(Slider::new(&mut self.index, alpha_range));
+        let alpha_range = 0..=(self.cipher.length() - 1);
+        ui.add(Slider::new(&mut self.cipher.index, alpha_range));
         ui.add_space(16.0);
 
         ui.horizontal(|ui| {
-            if ui.button("Annie").clicked() {
-                self.annie();
+            if ui.button("Little Orphan Annie").clicked() {
+                self.alphabet_string = String::from("_ASLWIMVHFKXDPOEJBTNQZGUYRC");
+                self.cipher.assign_alphabet("_ASLWIMVHFKXDPOEJBTNQZGUYRC")
             }
-            if ui.button("Midnight").clicked() {
-                self.midnight();
+            if ui.button("Captain Midnight").clicked() {
+                self.alphabet_string = String::from("_AEXDTZKNYCJWSGUMBOQHRIVFPL");
+                self.cipher.assign_alphabet("_AEXDTZKNYCJWSGUMBOQHRIVFPL")
             }
         });
+    }
+
+    fn cipher(&self) -> &dyn Cipher {
+        &self.cipher
+    }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {
+        *self = Self::default()
     }
 }

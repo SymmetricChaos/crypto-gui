@@ -1,24 +1,50 @@
-use super::{View, ViewableCipher, _generic_components::*};
-use crate::ciphers::substitution::GeneralSubstitution;
-use eframe::egui::Ui;
+use ciphers::{substitution::GeneralSubstitution, Cipher};
+use egui::Ui;
+use utils::preset_alphabet::PresetAlphabet;
 
-impl ViewableCipher for GeneralSubstitution {}
+use super::{CipherFrame, _generic_components::control_string};
 
-impl View for GeneralSubstitution {
+pub struct GeneralSubstitutionFrame {
+    cipher: GeneralSubstitution,
+    pt_alphabet_string: String,
+    ct_alphabet_string: String,
+}
+
+impl Default for GeneralSubstitutionFrame {
+    fn default() -> Self {
+        Self {
+            cipher: Default::default(),
+            pt_alphabet_string: String::from(PresetAlphabet::BasicLatin),
+            ct_alphabet_string: String::from("ZYXWVUTSRQPONMLKJIHGFEDCBA"),
+        }
+    }
+}
+
+impl CipherFrame for GeneralSubstitutionFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        // randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Plaintext Alphabet");
         if control_string(ui, &mut self.pt_alphabet_string).changed() {
-            self.set_pt_alphabet();
+            self.cipher.assign_pt_alphabet(&self.pt_alphabet_string);
         }
         ui.add_space(16.0);
 
         ui.label("Ciphertext Alphabet");
         if control_string(ui, &mut self.ct_alphabet_string).changed() {
-            self.set_pt_alphabet();
+            self.cipher.assign_ct_alphabet(&self.ct_alphabet_string);
         }
         ui.add_space(16.0);
+    }
+
+    fn cipher(&self) -> &dyn Cipher {
+        &self.cipher
+    }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {
+        *self = Self::default()
     }
 }
