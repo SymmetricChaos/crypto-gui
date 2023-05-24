@@ -7,8 +7,7 @@ pub struct TwoSquare {
     pub alphabet: VecString,
     square1: VecString,
     square2: VecString,
-    pub key_word1: String,
-    pub key_word2: String,
+
     grid_side_len: usize,
 }
 
@@ -18,8 +17,6 @@ impl Default for TwoSquare {
             alphabet: VecString::from(PresetAlphabet::BasicLatinNoQ),
             square1: VecString::from(PresetAlphabet::BasicLatinNoQ),
             square2: VecString::from(PresetAlphabet::BasicLatinNoQ),
-            key_word1: String::new(),
-            key_word2: String::new(),
             grid_side_len: 5,
         }
     }
@@ -27,32 +24,20 @@ impl Default for TwoSquare {
 
 impl TwoSquare {
     pub fn assign_key1(&mut self, key_word: &str) {
-        self.key_word1 = key_word.to_string();
-        self.set_key1();
+        self.square1 = VecString::keyed_alphabet(key_word, &self.alphabet.to_string());
     }
 
     pub fn assign_key2(&mut self, key_word: &str) {
-        self.key_word2 = key_word.to_string();
-        self.set_key2();
+        self.square2 = VecString::keyed_alphabet(key_word, &self.alphabet.to_string());
     }
 
-    pub fn set_key1(&mut self) {
-        self.square1 = VecString::keyed_alphabet(&self.key_word1, &self.alphabet.to_string());
-    }
-
-    pub fn set_key2(&mut self) {
-        self.square2 = VecString::keyed_alphabet(&self.key_word2, &self.alphabet.to_string());
-    }
-
-    pub fn assign_alphabet(&mut self, mode: PresetAlphabet) {
+    pub fn pick_alphabet(&mut self, mode: PresetAlphabet) {
         match mode {
             PresetAlphabet::BasicLatinNoJ
             | PresetAlphabet::BasicLatinNoQ
             | PresetAlphabet::BasicLatinWithDigits
             | PresetAlphabet::Base64 => {
                 self.alphabet = VecString::from(mode);
-                self.set_key1();
-                self.set_key2();
                 self.grid_side_len = mode.len().sqrt();
             }
             _ => (),

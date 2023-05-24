@@ -9,7 +9,6 @@ use super::PolyMode;
 pub struct Vigenere {
     pub key_words: [String; 5],
     pub alphabet: VecString,
-    alphabet_string: String,
     pub prog_shift: usize,
     pub mode: PolyMode,
     pub multikey: bool,
@@ -26,7 +25,6 @@ impl Default for Vigenere {
                 String::new(),
             ],
             alphabet: VecString::from(PresetAlphabet::BasicLatin),
-            alphabet_string: String::from(PresetAlphabet::BasicLatin),
             mode: PolyMode::CylicKey,
             prog_shift: 0,
             multikey: false,
@@ -115,9 +113,8 @@ impl Vigenere {
         Ok(())
     }
 
-    pub fn control_alphabet(&mut self) -> &mut String {
-        self.alphabet = VecString::unique_from(&self.alphabet_string);
-        &mut self.alphabet_string
+    pub fn assign_alphabet(&mut self, alphabet: &str) {
+        self.alphabet = VecString::unique_from(&alphabet);
     }
 
     // Unwraps for the character methods are justified by validating the input
