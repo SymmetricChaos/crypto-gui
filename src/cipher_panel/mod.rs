@@ -9,7 +9,8 @@ use self::{
     columnar_controls::ColumnarFrame, decoder_ring_controls::DecoderRingFrame,
     dryad_controls::DryadFrame, enigma_controls::EnigmaM3Frame,
     four_square_controls::FourSquareFrame, general_sub_controls::GeneralSubstitutionFrame,
-    grille_controls::GrilleFrame, plugboard_controls::PlugboardFrame,
+    grille_controls::GrilleFrame, hebern_controls::HebernFrame, hutton_controls::HuttonFrame,
+    m209_controls::M209Frame, plugboard_controls::PlugboardFrame,
     polybius_square_controls::PolybiusSquareFrame,
 };
 
@@ -32,9 +33,9 @@ pub mod enigma_controls;
 pub mod four_square_controls;
 pub mod general_sub_controls;
 pub mod grille_controls;
-// pub mod hebern_controls;
-// pub mod hutton_controls;
-// pub mod m209_controls;
+pub mod hebern_controls;
+pub mod hutton_controls;
+pub mod m209_controls;
 // pub mod m94_controls;
 // pub mod playfair_controls;
 pub mod plugboard_controls;
@@ -91,10 +92,10 @@ pub struct CipherInterface {
     gen_sub: GeneralSubstitutionFrame,
     plugboard: PlugboardFrame,
 
-    // m209: M209,
+    m209: M209Frame,
     enigma: EnigmaM3Frame,
     // sigaba: Sigaba,
-    // hebern: Hebern,
+    hebern: HebernFrame,
     // purple: Purple,
     // vigenere: Vigenere,
     beaufort: BeaufortFrame,
@@ -104,7 +105,7 @@ pub struct CipherInterface {
     // porta: Porta,
     // quagmire: Quagmire,
     chaocipher: ChaocipherFrame,
-    // hutton: Hutton,
+    hutton: HuttonFrame,
 
     // playfair: Playfair,
     // slidefair: Slidefair,
@@ -239,9 +240,9 @@ impl CipherInterface {
             CipherId::Enigma => &mut self.enigma,
             CipherId::FourSquare => &mut self.four_square,
             CipherId::Grille => &mut self.grille,
-            // CipherId::Hebern => &mut self.hebern,
-            // CipherId::Hutton => &mut self.hutton,
-            // CipherId::M209 => &mut self.m209,
+            CipherId::Hebern => &mut self.hebern,
+            CipherId::Hutton => &mut self.hutton,
+            CipherId::M209 => &mut self.m209,
             // CipherId::M94 => &mut self.m94,
             // CipherId::Playfair => &mut self.playfair,
             CipherId::Plugboard => &mut self.plugboard,

@@ -73,13 +73,12 @@ impl Default for HebernRotorCage {
 
 pub struct Hebern {
     pub rotors: HebernRotorCage,
-    pub alphabet_string: String,
     pub alphabet: VecString,
 }
 
 impl Hebern {
-    pub fn set_alphabet(&mut self) {
-        self.alphabet = VecString::unique_from(&self.alphabet_string);
+    pub fn set_alphabet(&mut self, alphabet: &str) {
+        self.alphabet = VecString::unique_from(alphabet);
     }
 
     fn validate_text(&self, text: &str) -> Option<char> {
@@ -96,7 +95,6 @@ impl Default for Hebern {
     fn default() -> Self {
         Self {
             rotors: HebernRotorCage::default(),
-            alphabet_string: String::from(PresetAlphabet::BasicLatin),
             alphabet: VecString::from(PresetAlphabet::BasicLatin),
         }
     }

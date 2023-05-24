@@ -10,11 +10,8 @@ pub enum HuttonVersion {
 
 pub struct Hutton {
     pub version: HuttonVersion,
-    pub alphabet_string: String,
     alphabet: VecString,
-    pub key_string: String,
     keyed_alpha: VecString,
-    pub password_string: String,
     password: Vec<usize>,
 }
 
@@ -22,11 +19,11 @@ impl Default for Hutton {
     fn default() -> Self {
         Self {
             version: HuttonVersion::V1,
-            alphabet_string: String::from(PresetAlphabet::BasicLatin),
+
             alphabet: VecString::from(PresetAlphabet::BasicLatin),
-            key_string: Default::default(),
+
             keyed_alpha: VecString::with_capacity(26),
-            password_string: Default::default(),
+
             password: Default::default(),
         }
     }
@@ -37,35 +34,19 @@ impl Hutton {
         self.password.iter().cycle()
     }
 
-    pub fn set_alphabet(&mut self) {
-        self.alphabet = VecString::unique_from(&self.alphabet_string);
-    }
-
     pub fn assign_alphabet(&mut self, alphabet: &str) {
-        self.alphabet_string = alphabet.to_string();
-        self.set_alphabet();
+        self.alphabet = VecString::unique_from(alphabet);
     }
 
-    pub fn set_password(&mut self) {
-        self.password = self
-            .password_string
+    pub fn assign_password(&mut self, password: &str) {
+        self.password = password
             .chars()
             .map(|c| self.alphabet.get_pos_of(c).unwrap() + 1)
             .collect();
     }
 
-    pub fn assign_password(&mut self, password: &str) {
-        self.password_string = password.to_string();
-        self.set_password();
-    }
-
-    pub fn set_key(&mut self) {
-        self.keyed_alpha = VecString::from(keyed_alphabet(&self.key_string, &self.alphabet_string));
-    }
-
     pub fn assign_key(&mut self, key: &str) {
-        self.key_string = key.to_string();
-        self.set_key();
+        self.keyed_alpha = VecString::from(keyed_alphabet(key, &self.alphabet.to_string()));
     }
 
     pub fn keyed_alphabet(&self) -> String {

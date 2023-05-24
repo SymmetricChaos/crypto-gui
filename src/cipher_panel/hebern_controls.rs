@@ -1,26 +1,39 @@
-use crate::ciphers::hebern::Hebern;
+use ciphers::{hebern::Hebern, Cipher};
+use egui::{Slider, TextEdit, Ui};
+use utils::preset_alphabet::PresetAlphabet;
 
-use super::{View, ViewableCipher, _generic_components::control_string};
-use eframe::egui::{Slider, TextEdit, Ui};
+use super::{CipherFrame, _generic_components::control_string};
 
-impl ViewableCipher for Hebern {}
+pub struct HebernFrame {
+    cipher: Hebern,
+    alphabet_string: String,
+}
 
-impl View for Hebern {
+impl Default for HebernFrame {
+    fn default() -> Self {
+        Self {
+            cipher: Default::default(),
+            alphabet_string: PresetAlphabet::BasicLatin.into(),
+        }
+    }
+}
+
+impl CipherFrame for HebernFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.add_space(10.0);
         ui.label("Alphabet");
         if control_string(ui, &mut self.alphabet_string).changed() {
-            self.set_alphabet()
+            self.cipher.set_alphabet(&self.alphabet_string)
         }
 
         ui.add_space(10.0);
         ui.label("Rotor Wiring");
-        for rotor in self.rotors.rotors.iter_mut() {
+        for rotor in self.cipher.rotors.rotors.iter_mut() {
             ui.horizontal(|ui| {
                 ui.add_enabled(rotor.editable, TextEdit::singleline(&mut rotor.wiring_str));
                 if rotor.editable {
                     if ui.small_button("save").clicked() {
-                        match rotor.set(&self.alphabet) {
+                        match rotor.set(&self.cipher.alphabet) {
                             Ok(_) => {
                                 rotor.editable = false;
                                 rotor.error.clear();
@@ -33,14 +46,14 @@ impl View for Hebern {
                         rotor.editable = true;
                     }
                 }
-                if ui.small_button("random").clicked() {
-                    match rotor.randomize(&self.alphabet) {
-                        Ok(_) => rotor.error.clear(),
-                        Err(e) => rotor.error = e.inner(),
-                    }
-                }
+                // if ui.small_button("random").clicked() {
+                //     match rotor.randomize(&self.cipher.alphabet) {
+                //         Ok(_) => rotor.error.clear(),
+                //         Err(e) => rotor.error = e.inner(),
+                //     }
+                // }
                 if ui.small_button("fill").clicked() {
-                    match rotor.fill(&self.alphabet) {
+                    match rotor.fill(&self.cipher.alphabet) {
                         Ok(_) => rotor.error.clear(),
                         Err(e) => rotor.error = e.inner(),
                     }
@@ -51,8 +64,18 @@ impl View for Hebern {
 
         ui.add_space(10.0);
         ui.label("Rotor Positions\nTo Be Changed Every Message");
-        for rotor in &mut self.rotors.rotors {
+        for rotor in &mut self.cipher.rotors.rotors {
             ui.add(Slider::new(&mut rotor.position, 0..=26).clamp_to_range(true));
         }
+    }
+
+    fn cipher(&self) -> &dyn Cipher {
+        &self.cipher
+    }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {
+        *self = Self::default()
     }
 }
