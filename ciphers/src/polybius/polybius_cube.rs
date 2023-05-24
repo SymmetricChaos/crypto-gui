@@ -6,7 +6,6 @@ use utils::vecstring::VecString;
 pub struct PolybiusCube {
     pub alphabet_string: String,
     grid: VecString,
-    pub labels_string: String,
     labels: VecString,
     side_len: usize,
     pub key_word: String,
@@ -14,12 +13,12 @@ pub struct PolybiusCube {
 
 impl Default for PolybiusCube {
     fn default() -> Self {
-        let alphabet = VecString::from("ABCDEFGHIJKLMNOPQRSTUVWXYZ+");
+        let alphabet_string = String::from("ABCDEFGHIJKLMNOPQRSTUVWXYZ+");
+        let grid = VecString::from("ABCDEFGHIJKLMNOPQRSTUVWXYZ+");
         let labels = VecString::from("123456789");
         Self {
-            alphabet_string: "ABCDEFGHIJKLMNOPQRSTUVWXYZ+".to_string(),
-            grid: alphabet,
-            labels_string: "123456789".to_string(),
+            alphabet_string,
+            grid,
             labels,
             side_len: 3,
             key_word: String::new(),
@@ -28,45 +27,12 @@ impl Default for PolybiusCube {
 }
 
 impl PolybiusCube {
-    pub fn alphabet(&self) -> &str {
-        &self.alphabet_string
-    }
-
     pub fn assign_key(&mut self, key_word: &str) {
-        self.key_word = key_word.to_string();
-        self.set_key();
-    }
-
-    pub fn set_key(&mut self) {
         self.grid = VecString::keyed_alphabet(&self.key_word, &self.alphabet_string);
     }
 
     pub fn assign_labels(&mut self, labels: &str) {
-        self.labels_string = labels.to_string();
-        self.set_labels();
-    }
-
-    pub fn set_labels(&mut self) {
-        self.labels = VecString::unique_from(&self.labels_string);
-    }
-
-    pub fn set_alphabet(&mut self) -> Result<(), CipherError> {
-        let new_alpha_len = self.alphabet_string.chars().count();
-
-        if new_alpha_len < 8 {
-            return Err(CipherError::alphabet("alphabet length must be at least 8"));
-        }
-
-        if new_alpha_len > 125 {
-            return Err(CipherError::alphabet(
-                "alphabet length currently limited to 125 characters",
-            ));
-        }
-
-        self.grid = VecString::from(&self.alphabet_string);
-        self.side_len = (new_alpha_len as f64).cbrt().ceil() as usize;
-
-        Ok(())
+        self.labels = VecString::unique_from(labels);
     }
 
     fn triplets(&self, text: &str) -> Result<Vec<(char, char, char)>, CipherError> {

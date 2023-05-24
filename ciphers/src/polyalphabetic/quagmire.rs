@@ -12,13 +12,9 @@ pub enum QuagmireVersion {
 
 pub struct Quagmire {
     pub version: QuagmireVersion,
-    pub alphabet_string: String,
     alphabet: VecString,
-    pub pt_key_string: String,
     pt_key: VecString,
-    pub ct_key_string: String,
     ct_key: VecString,
-    pub ind_key_string: String,
     ind_key: Vec<i32>,
     pub indicator: char,
 }
@@ -27,13 +23,9 @@ impl Default for Quagmire {
     fn default() -> Quagmire {
         Self {
             version: QuagmireVersion::V1,
-            alphabet_string: String::from(PresetAlphabet::BasicLatin),
             alphabet: VecString::from(PresetAlphabet::BasicLatin),
-            pt_key_string: String::from(PresetAlphabet::BasicLatin),
             pt_key: VecString::from(PresetAlphabet::BasicLatin),
-            ct_key_string: String::from(PresetAlphabet::BasicLatin),
             ct_key: VecString::from(PresetAlphabet::BasicLatin),
-            ind_key_string: String::new(),
             ind_key: Vec::new(),
             indicator: 'A',
         }
@@ -42,12 +34,7 @@ impl Default for Quagmire {
 
 impl Quagmire {
     pub fn assign_alphabet(&mut self, alphabet: &str) {
-        self.alphabet_string = alphabet.to_string();
-        self.set_alphabet();
-    }
-
-    pub fn set_alphabet(&mut self) {
-        self.alphabet = VecString::unique_from(&self.alphabet_string);
+        self.alphabet = VecString::unique_from(&alphabet);
     }
 
     pub fn show_alphabet(&self) -> String {
@@ -55,39 +42,16 @@ impl Quagmire {
     }
 
     pub fn assign_pt_key(&mut self, key: &str) {
-        self.pt_key_string = key.to_string();
-        self.set_pt_key();
-    }
-
-    pub fn set_pt_key(&mut self) {
-        self.pt_key = VecString::keyed_alphabet(&self.pt_key_string, &self.alphabet_string);
-    }
-
-    pub fn show_pt_key(&self) -> String {
-        self.pt_key.to_string()
+        self.pt_key = VecString::keyed_alphabet(&key, &self.alphabet.to_string());
     }
 
     pub fn assign_ct_key(&mut self, key: &str) {
-        self.ct_key_string = key.to_string();
-        self.set_ct_key();
-    }
-
-    pub fn set_ct_key(&mut self) {
-        self.ct_key = VecString::keyed_alphabet(&self.ct_key_string, &self.alphabet_string);
-    }
-
-    pub fn show_ct_key(&self) -> String {
-        self.ct_key.to_string()
-    }
-
-    pub fn assign_ind_key(&mut self, key: &str) {
-        self.ind_key_string = key.to_string();
-        self.set_ind_key();
+        self.ct_key = VecString::keyed_alphabet(&key, &self.alphabet.to_string());
     }
 
     // Converts the ind_key_string into a vector of usize that represent how
     // many spaces the ct_alphabet is rotated relative to its starting position
-    pub fn set_ind_key(&mut self) {
+    pub fn assign_ind_key(&mut self, key: &str) -> Result<(), CipherError> {
         self.ind_key.clear();
         let ind_pos = self.indicator_position() as i32;
         let len = self.alphabet.len() as i32;
@@ -97,14 +61,12 @@ impl Quagmire {
             QuagmireVersion::V3 => &self.pt_key,
             QuagmireVersion::V4 => &self.ct_key,
         };
-        for c in self.ind_key_string.chars() {
-            let sh = len + ind_pos
-                - (ct
-                    .get_pos_of(c)
-                    .expect(&format!("unknown character `{}` in indicator key", c))
-                    as i32);
+        for c in key.chars() {
+            let sh =
+                len + ind_pos - (ct.get_pos_of(c).ok_or(CipherError::invalid_key_char(c))? as i32);
             self.ind_key.push(sh % len)
         }
+        Ok(())
     }
 
     pub fn indicator_position(&self) -> usize {

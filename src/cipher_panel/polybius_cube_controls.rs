@@ -1,9 +1,22 @@
-use eframe::egui::Ui;
+use ciphers::polybius::PolybiusCube;
 
-impl ViewableCipher for PolybiusCube {}
+pub struct PolybiusCubeFrame {
+    cipher: PolybiusCube,
+    alphabet_string: String,
+    key_string: String,
+    label_string: String,
+}
 
-use super::{View, ViewableCipher, _generic_components::*};
-use crate::{ciphers::polybius::PolybiusCube, egui_aux::mono};
+impl Default for PolybiusCubeFrame {
+    fn default() -> Self {
+        Self {
+            cipher: Default::default(),
+            alphabet_string: String::from("ABCDEFGHIJKLMNOPQRSTUVWXYZ+"),
+            key_string: Default::default(),
+            label_string: String::from("123456789"),
+        }
+    }
+}
 
 impl View for PolybiusCube {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String) {

@@ -1,23 +1,30 @@
-use super::{View, ViewableCipher, _generic_components::*};
-use crate::{ciphers::polyalphabetic::Porta, egui_aux::mono};
-use eframe::egui::Ui;
+use ciphers::{polyalphabetic::Porta, Cipher};
+use egui::Ui;
 
-impl ViewableCipher for Porta {}
+use crate::egui_aux::mono;
 
-impl View for Porta {
+use super::{CipherFrame, _generic_components::control_string};
+
+#[derive(Default)]
+pub struct PortaFrame {
+    cipher: Porta,
+    key_word_string: String,
+}
+
+impl CipherFrame for PortaFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        // randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Keyword");
-        if control_string(ui, &mut self.key).changed() {
-            self.set_key()
+        if control_string(ui, &mut self.key_word_string).changed() {
+            self.cipher.assign_key(&self.key_word_string)
         }
         ui.add_space(16.0);
 
         ui.label("Tableaux");
-        for row in self.tableaux() {
-            mono(ui, row, None);
+        for row in self.cipher.tableaux() {
+            ui.label(mono(row));
         }
         ui.add_space(16.0);
 
@@ -57,5 +64,15 @@ impl View for Porta {
         //         ui.add(TextEdit::singleline(&mut self.key_words[0]).font(TextStyle::Monospace));
         //     }
         // }
+    }
+
+    fn cipher(&self) -> &dyn Cipher {
+        &self.cipher
+    }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {
+        *self = Self::default()
     }
 }

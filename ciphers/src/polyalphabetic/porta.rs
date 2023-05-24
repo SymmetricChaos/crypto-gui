@@ -24,7 +24,6 @@ lazy_static! {
 }
 
 pub struct Porta {
-    pub key: String,
     key_vals: Vec<usize>,
     alphabet: VecString,
 }
@@ -32,7 +31,6 @@ pub struct Porta {
 impl Default for Porta {
     fn default() -> Self {
         Self {
-            key: String::new(),
             key_vals: Vec::new(),
             alphabet: VecString::from(PresetAlphabet::BasicLatin),
         }
@@ -40,18 +38,8 @@ impl Default for Porta {
 }
 
 impl Porta {
-    pub fn set_key(&mut self) {
-        self.key_vals = self
-            .key
-            .chars()
-            .map(|c| self.alphabet.get_pos_of(c).unwrap())
-            .collect_vec();
-    }
-
     pub fn assign_key(&mut self, key: &str) {
-        self.key = key.to_string();
-        self.key_vals = self
-            .key
+        self.key_vals = key
             .chars()
             .map(|c| self.alphabet.get_pos_of(c).unwrap())
             .collect_vec();
@@ -85,8 +73,3 @@ impl Cipher for Porta {
     //     todo!("{:?}", rng)
     // }
 }
-
-// #[cfg(test)]
-// mod porta_tests {
-//     use super::*;
-// }

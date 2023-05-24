@@ -10,8 +10,9 @@ use self::{
     dryad_controls::DryadFrame, enigma_controls::EnigmaM3Frame,
     four_square_controls::FourSquareFrame, general_sub_controls::GeneralSubstitutionFrame,
     grille_controls::GrilleFrame, hebern_controls::HebernFrame, hutton_controls::HuttonFrame,
-    m209_controls::M209Frame, plugboard_controls::PlugboardFrame,
-    polybius_square_controls::PolybiusSquareFrame,
+    m209_controls::M209Frame, m94_controls::M94Frame, playfair_controls::PlayfairFrame,
+    plugboard_controls::PlugboardFrame, polybius_square_controls::PolybiusSquareFrame,
+    porta_controls::PortaFrame, quagmire_controls::QuagmireFrame,
 };
 
 pub mod _generic_components;
@@ -36,14 +37,14 @@ pub mod grille_controls;
 pub mod hebern_controls;
 pub mod hutton_controls;
 pub mod m209_controls;
-// pub mod m94_controls;
-// pub mod playfair_controls;
+pub mod m94_controls;
+pub mod playfair_controls;
 pub mod plugboard_controls;
 // pub mod polybius_cube_controls;
 pub mod polybius_square_controls;
-// pub mod porta_controls;
+pub mod porta_controls;
 // pub mod purple_controls;
-// pub mod quagmire_controls;
+pub mod quagmire_controls;
 // pub mod rail_fence_controls;
 // pub mod rs44_controls;
 // pub mod scytale_controls;
@@ -86,42 +87,53 @@ fn combox_box(
 
 #[derive(Default)]
 pub struct CipherInterface {
+    // Simple Substitution
     caesar: CaesarFrame,
     affine: AffineFrame,
     decoder_ring: DecoderRingFrame,
     gen_sub: GeneralSubstitutionFrame,
     plugboard: PlugboardFrame,
 
+    // Electromechanical
     m209: M209Frame,
     enigma: EnigmaM3Frame,
     // sigaba: Sigaba,
     hebern: HebernFrame,
     // purple: Purple,
+
+    // Polyalphabetic
     // vigenere: Vigenere,
     beaufort: BeaufortFrame,
     alberti: AlbertiFrame,
-    // m94: M94,
+    m94: M94Frame,
     bazeries: BazeriesFrame,
-    // porta: Porta,
-    // quagmire: Quagmire,
+    porta: PortaFrame,
+    quagmire: QuagmireFrame,
     chaocipher: ChaocipherFrame,
     hutton: HuttonFrame,
 
-    // playfair: Playfair,
+    // Playfair Based
+    playfair: PlayfairFrame,
     // slidefair: Slidefair,
     // two_square: TwoSquare,
+
+    // Transposition
     four_square: FourSquareFrame,
     columnar: ColumnarFrame,
     grille: GrilleFrame,
     // rail_fence: RailFence,
     // scytale: Scytale,
     // turning_grille: TurningGrille,
+
+    // Polybius Based
     polybius: PolybiusSquareFrame,
     // polybius_cube: PolybiusCube,
     adfgvx: AdfgvxFrame,
     b64: B64Frame,
     bifid: BifidFrame,
     // trifid: Trifid,
+
+    // Tactical
     checkerboard: StraddlingCheckerboardFrame,
     batco: BatcoFrame,
     dryad: DryadFrame,
@@ -243,14 +255,14 @@ impl CipherInterface {
             CipherId::Hebern => &mut self.hebern,
             CipherId::Hutton => &mut self.hutton,
             CipherId::M209 => &mut self.m209,
-            // CipherId::M94 => &mut self.m94,
-            // CipherId::Playfair => &mut self.playfair,
+            CipherId::M94 => &mut self.m94,
+            CipherId::Playfair => &mut self.playfair,
             CipherId::Plugboard => &mut self.plugboard,
             CipherId::Polybius => &mut self.polybius,
             // CipherId::PolybiusCube => &mut self.polybius_cube,
-            // CipherId::Porta => &mut self.porta,
+            CipherId::Porta => &mut self.porta,
             // // CipherId::Purple => &mut self.purple,
-            // CipherId::Quagmire => &mut self.quagmire,
+            CipherId::Quagmire => &mut self.quagmire,
             // CipherId::RailFence => &mut self.rail_fence,
             // CipherId::Rs44 => &mut self.rs44,
             // CipherId::Scytale => &mut self.scytale,

@@ -6,20 +6,12 @@ use utils::{functions::keyed_alphabet, preset_alphabet::PresetAlphabet};
 pub struct Playfair {
     pub alphabet: String,
     square: String,
-    key_word: String,
     spacer: char,
-    pub grid_side_len: usize,
+    grid_side_len: usize,
 }
 
 impl Playfair {
-    // Silently ignores invalid characters
-    pub fn control_key(&mut self) -> &mut String {
-        self.square = keyed_alphabet(&self.key_word, &self.alphabet);
-        &mut self.key_word
-    }
-
-    pub fn set_key(&mut self, key_word: &str) {
-        self.key_word = key_word.to_string();
+    pub fn assign_key(&mut self, key_word: &str) {
         self.square = keyed_alphabet(key_word, &self.alphabet);
     }
 
@@ -27,7 +19,7 @@ impl Playfair {
         &mut self.spacer
     }
 
-    pub fn assign_alphabet(&mut self, mode: PresetAlphabet) {
+    pub fn pick_alphabet(&mut self, mode: PresetAlphabet) {
         match mode {
             PresetAlphabet::BasicLatinNoJ
             | PresetAlphabet::BasicLatinNoQ
@@ -121,7 +113,6 @@ impl Default for Playfair {
             square: String::from(PresetAlphabet::BasicLatinNoQ),
             spacer: 'X',
             grid_side_len: 5,
-            key_word: String::new(),
         }
     }
 }
