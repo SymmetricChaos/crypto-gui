@@ -1,19 +1,30 @@
-use crate::ciphers::transposition::Scytale;
+use ciphers::{transposition::Scytale, Cipher};
+use egui::{Slider, Ui};
 
-use super::{View, ViewableCipher, _generic_components::*};
+use super::CipherFrame;
 
-use eframe::egui::{Slider, Ui};
+#[derive(Default)]
+pub struct ScytaleFrame {
+    cipher: Scytale,
+}
 
-impl ViewableCipher for Scytale {}
-
-impl View for Scytale {
+impl CipherFrame for ScytaleFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        // randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Wraps");
-        let alpha_range = 2..=12;
-        ui.add(Slider::new(&mut self.key, alpha_range.clone()));
+        ui.add(Slider::new(&mut self.cipher.key, 2..=12));
         ui.add_space(16.0);
+    }
+
+    fn cipher(&self) -> &dyn Cipher {
+        &self.cipher
+    }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {
+        *self = Self::default()
     }
 }

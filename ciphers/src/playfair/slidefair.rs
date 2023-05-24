@@ -6,49 +6,31 @@ use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
 
 pub struct Slidefair {
     alphabet: VecString,
-    pub alphabet_string: String,
-    pub key_word: String,
     key: Vec<usize>,
-    spacer_string: String,
     spacer: char,
 }
 
 impl Default for Slidefair {
     fn default() -> Self {
         Self {
-            alphabet_string: String::from(PresetAlphabet::BasicLatin),
             alphabet: VecString::from(PresetAlphabet::BasicLatin),
-            spacer_string: String::from("X"),
+
             spacer: 'X',
-            key_word: String::new(),
             key: Vec::new(),
         }
     }
 }
 
 impl Slidefair {
-    // Set or assign alphabet
-    pub fn set_alphabet(&mut self) {
-        self.alphabet = VecString::unique_from(&self.alphabet_string)
-    }
-
     pub fn assign_alphabet(&mut self, alphabet: &str) {
-        self.alphabet_string = String::from(alphabet);
-        self.set_alphabet();
-    }
-
-    // Set or assign key
-    pub fn set_key(&mut self) {
-        self.key = self
-            .key_word
-            .chars()
-            .map(|x| self.alphabet.get_pos_of(x).unwrap())
-            .collect();
+        self.alphabet = VecString::unique_from(alphabet)
     }
 
     pub fn assign_key(&mut self, key_word: &str) {
-        self.key_word = key_word.to_string();
-        self.set_key();
+        self.key = key_word
+            .chars()
+            .map(|x| self.alphabet.get_pos_of(x).unwrap())
+            .collect();
     }
 
     // Create cyclic key
@@ -57,9 +39,8 @@ impl Slidefair {
     }
 
     // Set the spacer
-    pub fn control_spacer(&mut self) -> &mut String {
-        self.spacer = self.spacer_string.chars().next().unwrap_or('X');
-        &mut self.spacer_string
+    pub fn assign_spacer(&mut self, spacer_string: &str) {
+        self.spacer = spacer_string.chars().next().unwrap_or('X');
     }
 
     fn encrypt_pair(&self, pair: &[char], slide: usize, output: &mut String) {
@@ -99,7 +80,7 @@ impl Slidefair {
     pub fn rows(&self) -> Vec<String> {
         let mut rows = Vec::with_capacity(self.alphabet.len());
         for n in 0..self.alphabet.len() {
-            let alpha = String::from(&self.alphabet_string);
+            let alpha = String::from(&self.alphabet.to_string());
             let mut row = String::from(&alpha[n..]);
             row.push_str(&alpha[0..n]);
             rows.push(row);
@@ -158,7 +139,7 @@ impl Cipher for Slidefair {
 impl fmt::Display for Slidefair {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let mut out = String::new();
-        let alpha = String::from(&self.alphabet_string);
+        let alpha = String::from(&self.alphabet.to_string());
         for (n, _) in self.alphabet.chars().enumerate() {
             out.push_str(&alpha[n..]);
             out.push_str(&alpha[0..n]);

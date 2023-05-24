@@ -12,7 +12,7 @@ use utils::{
 
 const DEFAULT_STENCIL: &'static str = "⬛⬜⬛⬛⬛⬛⬛⬜⬜⬛⬛⬜⬛⬜⬛⬜⬛⬛⬜⬜⬛⬛⬜⬜⬛⬛⬛⬜⬛⬜⬛⬛⬜⬛⬜⬜⬛⬛⬜⬛⬛⬛⬜⬛⬛⬜⬛⬜⬛⬜⬜⬛⬛⬜⬜⬜⬛⬛⬛⬛⬜⬛⬛⬜⬛⬜⬛⬜⬛⬜⬛⬛⬛⬜⬛⬛⬜⬛⬜⬛⬜⬜⬜⬛⬜⬛⬛⬜⬛⬛⬜⬛⬛⬜⬛⬛⬜⬛⬛⬛⬜⬛⬛⬛⬛⬜⬛⬛⬜⬛⬛⬜⬛⬜⬜⬛⬜⬛⬛⬛⬛⬜⬜⬛⬜⬛⬛⬛⬜⬛⬛⬜⬛⬛⬜⬛⬜⬜⬜⬛⬛⬜⬜⬛⬛⬜⬛⬛⬜⬛⬜⬛⬛⬛⬜⬛⬛⬛⬛⬜⬛⬜⬛⬛⬜⬛⬛⬛⬜⬜⬜⬛⬛⬜⬜⬛⬛⬜⬛⬜⬛⬜⬛⬛⬜⬜⬛⬛⬛⬜⬜⬛⬛⬜⬛⬛⬜⬛⬜⬛⬛⬜⬛⬛⬛⬛⬛⬜⬛⬛⬛⬛⬜⬜⬛⬛⬜⬛⬜⬜⬛⬛⬜⬜⬜⬛⬜⬜⬛⬜⬛⬜⬛⬛⬜⬜⬛⬜⬛⬛⬛⬜⬜⬛⬛⬜⬛⬛⬛⬛⬛⬛⬜⬛⬛⬜⬛⬛⬜⬛⬛⬜⬜⬜⬛⬜⬛⬛⬜⬛⬛⬜⬜⬛⬛⬛⬜⬛⬜⬛⬜⬛⬜⬜⬛⬜⬛⬜⬛⬜⬛⬛⬛⬜⬛⬜⬛⬛⬜⬛⬜⬛⬛⬛⬜⬛⬛⬜⬛⬛⬜⬜⬛⬛⬜⬛⬜⬜⬛⬛⬛⬜⬛⬛⬜⬜⬜⬛⬜⬜⬜⬛⬛⬛⬛⬜⬛⬛⬛⬛⬜⬛⬛⬛⬜⬜⬛⬜⬛⬛⬛⬛⬛⬜⬛⬛⬛⬜⬜⬛⬜⬛⬛⬜⬜⬛⬛⬜⬜⬛⬛⬛⬜⬜⬛⬛⬛⬜⬜⬛⬛⬜⬜⬛⬛⬛⬜⬛⬛⬛⬛⬜⬛⬛⬛⬜⬜⬜⬜⬛⬛⬜⬜⬛⬜⬛⬛⬜⬛⬛⬜⬜⬛⬜⬛⬜⬛⬜⬛⬛⬛⬛⬛⬜⬛⬜⬛⬛⬛⬛⬜⬛⬛⬜⬛⬛⬛⬜⬛⬜⬜⬜⬛⬛⬛⬜⬜⬛⬛⬜⬛⬛⬜⬜⬛⬜⬛⬛⬛⬜⬛⬛⬛⬛⬜⬛⬜⬜⬛⬛⬜⬛⬜⬜⬛⬜⬛⬛⬜⬛⬛⬜⬛⬛⬜⬜⬛⬛⬜⬜⬛⬛⬜⬛⬜⬛⬜⬛⬛⬛⬜⬛⬜⬛⬛⬜⬛⬛⬜⬜⬛⬛⬛⬛⬜⬜⬛⬛⬜⬛⬜⬛⬜⬛⬛⬛⬛⬜⬛⬜⬛⬜⬛⬛⬛⬜⬜⬛⬛⬛⬛⬜⬛⬛⬜⬜⬛⬜⬛⬜⬛⬜⬛⬛⬛⬛⬜⬜⬛⬜⬛⬛⬜⬛⬜⬜⬛⬛⬜⬛⬛⬜⬛⬜⬛⬛⬛⬛⬜⬛⬛⬛⬛⬜⬜⬛⬛⬜⬜⬜⬛⬛⬜⬜⬜⬛⬛⬛⬜⬛";
 
-pub struct RS44 {
+pub struct Rs44 {
     pub stencil: Grid<Symbol<char>>,
     pub column_nums: [usize; 25],
     pub xlabels: [&'static str; 25],
@@ -26,7 +26,7 @@ pub struct RS44 {
     pub imported_stencil: String,
 }
 
-impl Default for RS44 {
+impl Default for Rs44 {
     fn default() -> Self {
         let mut rng = StdRng::seed_from_u64(5920348976);
 
@@ -85,7 +85,7 @@ impl Default for RS44 {
     }
 }
 
-impl RS44 {
+impl Rs44 {
     pub const WIDTH: usize = 25;
     pub const HEIGHT: usize = 24;
     pub const LABELS: [&'static str; 25] = [
@@ -112,56 +112,57 @@ impl RS44 {
         self.message_key_maxtrix[(row, col)]
     }
 
-    // pub fn set_full_message_key(&mut self) {
-    //     self.encrypted_message_key.clear();
-    //     let mut rng = get_global_rng();
-    //     self.xlabels[self.start_cell.1].chars().for_each(|c| {
-    //         self.encrypted_message_key
-    //             .push(self.encrypt_label_char(c, &mut rng))
-    //     });
-    //     self.ylabels[self.start_cell.0].chars().for_each(|c| {
-    //         self.encrypted_message_key
-    //             .push(self.encrypt_label_char(c, &mut rng))
-    //     });
-    //     self.encrypted_message_key.push('-');
-    //     self.xlabels[self.start_column].chars().for_each(|c| {
-    //         self.encrypted_message_key
-    //             .push(self.encrypt_label_char(c, &mut rng))
-    //     });
-    // }
+    pub fn set_full_message_key(&mut self) {
+        self.encrypted_message_key.clear();
+        let mut rng = StdRng::from_entropy();
+        self.xlabels[self.start_cell.1].chars().for_each(|c| {
+            self.encrypted_message_key
+                .push(self.encrypt_label_char(c, &mut rng))
+        });
+        self.ylabels[self.start_cell.0].chars().for_each(|c| {
+            self.encrypted_message_key
+                .push(self.encrypt_label_char(c, &mut rng))
+        });
+        self.encrypted_message_key.push('-');
+        self.xlabels[self.start_column].chars().for_each(|c| {
+            self.encrypted_message_key
+                .push(self.encrypt_label_char(c, &mut rng))
+        });
+    }
 
-    // pub fn randomize_stencil(&mut self) {
-    //     self.stencil.apply(|_| Symbol::Blocked);
-    //     let mut rng = get_global_rng();
-    //     let mut positions: Vec<usize> = (0..Self::WIDTH).collect();
+    pub fn randomize_stencil(&mut self) {
+        self.stencil.apply(|_| Symbol::Blocked);
+        let mut rng = StdRng::from_entropy();
+        let mut positions: Vec<usize> = (0..Self::WIDTH).collect();
 
-    //     for i in 0..Self::HEIGHT {
-    //         positions.shuffle(&mut *rng);
-    //         for n in &positions[0..10] {
-    //             self.stencil[n + (i * Self::WIDTH)] = Symbol::Empty;
-    //         }
-    //     }
-    // }
+        for i in 0..Self::HEIGHT {
+            positions.shuffle(&mut rng);
+            for n in &positions[0..10] {
+                self.stencil[n + (i * Self::WIDTH)] = Symbol::Empty;
+            }
+        }
+    }
 
-    // pub fn randomize_matrix(&mut self) {
-    //     self.message_key_maxtrix.shuffle(&mut *get_global_rng())
-    // }
+    pub fn randomize_matrix(&mut self) {
+        self.message_key_maxtrix
+            .shuffle(&mut StdRng::from_entropy())
+    }
 
-    // pub fn randomize_labels(&mut self) {
-    //     let mut rng = get_global_rng();
-    //     self.column_nums.shuffle(&mut *rng);
-    //     self.xlabels.shuffle(&mut *rng);
-    //     self.ylabels = {
-    //         let mut v = Self::LABELS.clone();
-    //         v.shuffle(&mut *rng);
-    //         v.iter()
-    //             .take(Self::HEIGHT)
-    //             .map(|x| *x)
-    //             .collect_vec()
-    //             .try_into()
-    //             .unwrap()
-    //     };
-    // }
+    pub fn randomize_labels(&mut self) {
+        let mut rng = StdRng::from_entropy();
+        self.column_nums.shuffle(&mut rng);
+        self.xlabels.shuffle(&mut rng);
+        self.ylabels = {
+            let mut v = Self::LABELS.clone();
+            v.shuffle(&mut rng);
+            v.iter()
+                .take(Self::HEIGHT)
+                .map(|x| *x)
+                .collect_vec()
+                .try_into()
+                .unwrap()
+        };
+    }
 
     fn col_num_to_col_idx(&self, n: usize) -> usize {
         self.column_nums
@@ -232,7 +233,7 @@ impl RS44 {
     }
 }
 
-impl Cipher for RS44 {
+impl Cipher for Rs44 {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         self.bounds_check()?;
 
@@ -334,7 +335,7 @@ mod rs44_tests {
     // We know the stencil is filled in correctly based on a reference image
     #[test]
     fn grid_test() {
-        let mut cipher = RS44::default();
+        let mut cipher = Rs44::default();
 
         let mut symbols = PLAINTEXT.chars();
         let start = cipher.stencil.index_from_coord((12, 16)).unwrap();
@@ -356,7 +357,7 @@ mod rs44_tests {
 
     #[test]
     fn encrypt_test() {
-        let mut cipher = RS44::default();
+        let mut cipher = Rs44::default();
         cipher.start_cell = (12, 16);
         cipher.start_column = 7;
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
@@ -364,7 +365,7 @@ mod rs44_tests {
 
     #[test]
     fn decrypt_test() {
-        let mut cipher = RS44::default();
+        let mut cipher = Rs44::default();
         cipher.start_cell = (12, 16);
         cipher.start_column = 7;
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
@@ -372,7 +373,7 @@ mod rs44_tests {
 
     #[test]
     fn wrap_test() {
-        let mut cipher = RS44::default();
+        let mut cipher = Rs44::default();
         cipher.start_cell = (20, 20);
         cipher.start_column = 7;
         let ciphertext = cipher.encrypt(PLAINTEXT).unwrap();

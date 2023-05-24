@@ -1,11 +1,12 @@
-use super::{View, ViewableCipher};
-use crate::{
-    ciphers::{sigaba::BIG_ROTOR_VEC, Sigaba},
-    rotors::Rotor,
-};
-use eframe::egui::{ComboBox, RichText, Slider, Ui};
+use ciphers::{rotors::Rotor, sigaba::BIG_ROTOR_VEC, Cipher, Sigaba};
+use egui::{ComboBox, RichText, Slider, Ui};
 
-impl ViewableCipher for Sigaba {}
+use super::CipherFrame;
+
+#[derive(Default)]
+pub struct SigabaFrame {
+    cipher: Sigaba,
+}
 
 fn rotor_display<const N: usize>(ui: &mut eframe::egui::Ui, rotors: &mut [Rotor<N>]) {
     for (_, rotor) in &mut rotors.iter_mut().enumerate() {
@@ -22,7 +23,7 @@ fn rotor_display<const N: usize>(ui: &mut eframe::egui::Ui, rotors: &mut [Rotor<
     }
 }
 
-impl View for Sigaba {
+impl CipherFrame for SigabaFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         // if ui.button("Restore State").clicked() {
         //     self.previous_state()
@@ -31,7 +32,7 @@ impl View for Sigaba {
         ///////////////////////
         //// CIPHER ROTORS ////
         ///////////////////////
-        let cipher_rotors = self.cipher_rotors();
+        let cipher_rotors = self.cipher.cipher_rotors();
         ui.add_space(10.0);
         ui.label(
             RichText::new("Cipher Rotors").heading()
@@ -58,7 +59,7 @@ impl View for Sigaba {
         ////////////////////////
         //// CONTROL ROTORS ////
         ////////////////////////
-        let control_rotors = self.control_rotors();
+        let control_rotors = self.cipher.control_rotors();
         ui.add_space(20.0);
         ui.label(
             RichText::new("Control Rotors").heading()
@@ -90,7 +91,7 @@ impl View for Sigaba {
             RichText::new("Index Rotors").heading()
         ).on_hover_text("These rotors stay in position during encryption. The signal from the Control Rotors is sent through them to the Cipher Rotors to decide which move.");
         ui.horizontal(|ui| {
-            for (n, rotor) in &mut self.index_rotors().iter_mut().enumerate() {
+            for (n, rotor) in &mut self.cipher.index_rotors().iter_mut().enumerate() {
                 //let characters = RichText::new(format!("{}{}",n+1,&rotor.to_string())).monospace();
                 //ui.label(characters);
                 let val = format!("{}{}", n + 1, &rotor.to_string());
@@ -104,5 +105,15 @@ impl View for Sigaba {
                 );
             }
         });
+    }
+
+    fn cipher(&self) -> &dyn Cipher {
+        &self.cipher
+    }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {
+        *self = Self::default()
     }
 }

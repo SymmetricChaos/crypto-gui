@@ -5,4 +5,4 @@ pub mod batco;
 pub use batco::Batco;
 
 pub mod rs44;
-pub use rs44::RS44;
+pub use rs44::Rs44;

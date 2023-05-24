@@ -1,19 +1,30 @@
-use crate::ciphers::transposition::RailFence;
+use ciphers::{transposition::RailFence, Cipher};
+use egui::{Slider, Ui};
 
-use super::{View, ViewableCipher, _generic_components::*};
+use super::CipherFrame;
 
-use eframe::egui::{Slider, Ui};
+#[derive(Default)]
+pub struct RailFenceFrame {
+    cipher: RailFence,
+}
 
-impl ViewableCipher for RailFence {}
-
-impl View for RailFence {
+impl CipherFrame for RailFenceFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        // randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Number of Rails");
-        let alpha_range = 2..=12;
-        ui.add(Slider::new(&mut self.rails, alpha_range.clone()));
+        ui.add(Slider::new(&mut self.cipher.rails, 2..=12));
         ui.add_space(16.0);
+    }
+
+    fn cipher(&self) -> &dyn Cipher {
+        &self.cipher
+    }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {
+        *self = Self::default()
     }
 }
