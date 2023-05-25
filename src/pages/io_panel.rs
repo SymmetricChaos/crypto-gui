@@ -8,7 +8,7 @@ use crate::{
     code_panel::{CodeFrame, CodeInterface},
     egui_aux::error_text,
     global_rng::global_rng_controls,
-    ids::AttackId,
+    // ids::AttackId,
 };
 
 use super::Page;
@@ -109,7 +109,7 @@ impl IOPanel {
         active_page: &mut Page,
         active_cipher: &mut Option<CipherId>,
         active_code: &mut CodeId,
-        active_attack: &mut AttackId,
+        // active_attack: &mut AttackId,
         cipher_interface: &mut CipherInterface,
         code_interface: &mut CodeInterface,
         // attack_interface: &mut AttackInterface,

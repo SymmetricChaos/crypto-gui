@@ -1,12 +1,21 @@
 use ciphers::{substitution::Caesar, Cipher};
 use egui::{Slider, Ui};
+use utils::preset_alphabet::PresetAlphabet;
 
 use super::{CipherFrame, _generic_components::control_string};
 
-#[derive(Default)]
 pub struct CaesarFrame {
     cipher: Caesar,
     alphabet_string: String,
+}
+
+impl Default for CaesarFrame {
+    fn default() -> Self {
+        Self {
+            cipher: Default::default(),
+            alphabet_string: PresetAlphabet::BasicLatin.into(),
+        }
+    }
 }
 
 impl CipherFrame for CaesarFrame {

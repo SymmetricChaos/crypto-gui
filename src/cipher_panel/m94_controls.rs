@@ -1,5 +1,8 @@
 use ciphers::{polyalphabetic::M94, Cipher};
-use egui::{FontFamily, RichText, Slider, Ui};
+use egui::{Color32, FontFamily, RichText, Slider, Ui};
+use utils::preset_alphabet::PresetAlphabet;
+
+use crate::egui_aux::mono;
 
 use super::CipherFrame;
 
@@ -14,12 +17,11 @@ impl CipherFrame for M94Frame {
         ui.add_space(16.0);
 
         ui.label("Alphabet");
-        ui.label("ABDCEFGHIJKLMNOPQRSTUVWXYZ");
+        ui.label(mono(PresetAlphabet::BasicLatin.slice()).background_color(Color32::BLACK));
         ui.add_space(16.0);
 
         ui.label("Offset");
-        let alpha_range = 0..=24;
-        ui.add(Slider::new(&mut self.cipher.offset, alpha_range.clone()));
+        ui.add(Slider::new(&mut self.cipher.offset, 0..=25));
         ui.add_space(16.0);
 
         // if ui.button("Randomize Wheels").clicked() {

@@ -1,10 +1,14 @@
 use ciphers::{playfair::Slidefair, Cipher};
 use egui::Ui;
-use utils::preset_alphabet::PresetAlphabet;
+use rand::{rngs::StdRng, SeedableRng};
+use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet};
 
 use crate::egui_aux::mono;
 
-use super::{CipherFrame, _generic_components::control_string};
+use super::{
+    CipherFrame,
+    _generic_components::{control_string, randomize_reset},
+};
 
 pub struct SlidefairFrame {
     cipher: Slidefair,
@@ -26,7 +30,7 @@ impl Default for SlidefairFrame {
 
 impl CipherFrame for SlidefairFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Alphabet");
@@ -64,7 +68,10 @@ impl CipherFrame for SlidefairFrame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        self.key_word_string = shuffled_str(&self.alphabet_string, &mut StdRng::from_entropy());
+        self.cipher.assign_key(&self.key_word_string)
+    }
 
     fn reset(&mut self) {
         *self = Self::default()

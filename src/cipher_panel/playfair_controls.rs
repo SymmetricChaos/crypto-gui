@@ -1,10 +1,14 @@
 use ciphers::{playfair::Playfair, Cipher};
 use egui::{Color32, RichText, TextEdit, TextStyle, Ui};
-use utils::preset_alphabet::PresetAlphabet;
+use rand::{rngs::StdRng, SeedableRng};
+use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet};
 
 use crate::egui_aux::mono;
 
-use super::{CipherFrame, _generic_components::control_string};
+use super::{
+    CipherFrame,
+    _generic_components::{control_string, randomize_reset},
+};
 
 #[derive(Default)]
 pub struct PlayfairFrame {
@@ -14,23 +18,27 @@ pub struct PlayfairFrame {
 
 impl CipherFrame for PlayfairFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
             if ui.button("No Q").clicked() {
-                self.cipher.pick_alphabet(PresetAlphabet::BasicLatinNoQ)
+                self.cipher.pick_alphabet(PresetAlphabet::BasicLatinNoQ);
+                self.cipher.assign_key(&self.key_string)
             };
             if ui.button("No J").clicked() {
-                self.cipher.pick_alphabet(PresetAlphabet::BasicLatinNoJ)
+                self.cipher.pick_alphabet(PresetAlphabet::BasicLatinNoJ);
+                self.cipher.assign_key(&self.key_string)
             };
             if ui.button("Alphanumeric").clicked() {
                 self.cipher
-                    .pick_alphabet(PresetAlphabet::BasicLatinWithDigits)
+                    .pick_alphabet(PresetAlphabet::BasicLatinWithDigits);
+                self.cipher.assign_key(&self.key_string)
             };
             if ui.button("Base64").clicked() {
-                self.cipher.pick_alphabet(PresetAlphabet::Base64)
+                self.cipher.pick_alphabet(PresetAlphabet::Base64);
+                self.cipher.assign_key(&self.key_string)
             };
         });
 
@@ -66,7 +74,10 @@ impl CipherFrame for PlayfairFrame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        self.key_string = shuffled_str(&self.cipher.alphabet, &mut StdRng::from_entropy());
+        self.cipher.assign_key(&self.key_string)
+    }
 
     fn reset(&mut self) {
         *self = Self::default()

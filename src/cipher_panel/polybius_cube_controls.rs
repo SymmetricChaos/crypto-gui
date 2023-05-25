@@ -1,4 +1,9 @@
-use ciphers::polybius::PolybiusCube;
+use ciphers::{polybius::PolybiusCube, Cipher};
+use egui::Ui;
+
+use crate::egui_aux::mono;
+
+use super::{CipherFrame, _generic_components::control_string};
 
 pub struct PolybiusCubeFrame {
     cipher: PolybiusCube,
@@ -18,39 +23,48 @@ impl Default for PolybiusCubeFrame {
     }
 }
 
-impl View for PolybiusCube {
-    fn ui(&mut self, ui: &mut Ui, errors: &mut String) {
-        randomize_reset(ui, self);
+impl CipherFrame for PolybiusCubeFrame {
+    fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
+        // randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.add_space(16.0);
         ui.label("Alphabet");
         if control_string(ui, &mut self.alphabet_string).changed() {
-            match self.set_alphabet() {
-                Ok(_) => (),
-                Err(e) => *errors = e.to_string(),
-            }
+            self.cipher
+                .define_grid(&self.alphabet_string, &self.key_string)
         }
 
         ui.add_space(16.0);
         ui.label("Key Word");
-        if control_string(ui, &mut self.key_word).changed() {
-            self.set_key()
+        if control_string(ui, &mut self.key_string).changed() {
+            self.cipher
+                .define_grid(&self.alphabet_string, &self.key_string)
         }
 
         ui.add_space(16.0);
         ui.label("Labels");
-        if control_string(ui, &mut self.labels_string).changed() {
-            self.set_labels();
+        if control_string(ui, &mut self.label_string).changed() {
+            self.cipher.assign_labels(&self.label_string);
         }
 
         ui.add_space(16.0);
         ui.label("Grid");
-        let grids = self.show_grids();
+        let grids = self.cipher.show_grids();
         ui.horizontal(|ui| {
-            mono(ui, &grids[0], None);
-            mono(ui, &grids[1], None);
-            mono(ui, &grids[2], None);
+            ui.label(mono(&grids[0]));
+            ui.label(mono(&grids[1]));
+            ui.label(mono(&grids[2]));
         });
+    }
+
+    fn cipher(&self) -> &dyn Cipher {
+        &self.cipher
+    }
+
+    fn randomize(&mut self) {}
+
+    fn reset(&mut self) {
+        *self = Self::default()
     }
 }

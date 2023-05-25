@@ -3,12 +3,22 @@ use super::_generic_components::control_string;
 use ciphers::traits::Cipher;
 use ciphers::transposition::Columnar;
 use eframe::egui::Ui;
+use utils::preset_alphabet::PresetAlphabet;
 
-#[derive(Default)]
 pub struct ColumnarFrame {
     cipher: Columnar,
     alphabet_string: String,
     key_string: String,
+}
+
+impl Default for ColumnarFrame {
+    fn default() -> Self {
+        Self {
+            cipher: Default::default(),
+            alphabet_string: PresetAlphabet::BasicLatin.into(),
+            key_string: Default::default(),
+        }
+    }
 }
 
 impl CipherFrame for ColumnarFrame {

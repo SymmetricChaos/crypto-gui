@@ -36,24 +36,24 @@ pub fn encrypt_decrypt(
     });
 }
 
-pub fn randomize_reset(ui: &mut egui::Ui, cipher: &mut dyn CipherFrame) {
+pub fn randomize_reset(ui: &mut egui::Ui, cipher_frame: &mut dyn CipherFrame) {
     if ui.button("Randomize").clicked() {
-        cipher.randomize()
+        cipher_frame.randomize()
     }
     if ui.button("Reset").clicked() {
-        cipher.reset()
+        cipher_frame.reset()
     }
 }
 
-pub fn randomize_button(ui: &mut egui::Ui, cipher: &mut dyn CipherFrame) {
+pub fn randomize_button(ui: &mut egui::Ui, cipher_frame: &mut dyn CipherFrame) {
     if ui.button("Randomize").clicked() {
-        cipher.randomize()
+        cipher_frame.randomize()
     }
 }
 
-pub fn reset_button(ui: &mut egui::Ui, cipher: &mut dyn CipherFrame) {
+pub fn reset_button(ui: &mut egui::Ui, cipher_frame: &mut dyn CipherFrame) {
     if ui.button("Reset").clicked() {
-        cipher.reset()
+        cipher_frame.reset()
     }
 }
 

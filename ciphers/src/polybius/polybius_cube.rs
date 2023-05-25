@@ -4,31 +4,26 @@ use num::Integer;
 use utils::vecstring::VecString;
 
 pub struct PolybiusCube {
-    pub alphabet_string: String,
     grid: VecString,
     labels: VecString,
     side_len: usize,
-    pub key_word: String,
 }
 
 impl Default for PolybiusCube {
     fn default() -> Self {
-        let alphabet_string = String::from("ABCDEFGHIJKLMNOPQRSTUVWXYZ+");
         let grid = VecString::from("ABCDEFGHIJKLMNOPQRSTUVWXYZ+");
         let labels = VecString::from("123456789");
         Self {
-            alphabet_string,
             grid,
             labels,
             side_len: 3,
-            key_word: String::new(),
         }
     }
 }
 
 impl PolybiusCube {
-    pub fn assign_key(&mut self, key_word: &str) {
-        self.grid = VecString::keyed_alphabet(&self.key_word, &self.alphabet_string);
+    pub fn define_grid(&mut self, alphabet: &str, key_word: &str) {
+        self.grid = VecString::keyed_alphabet(key_word, alphabet);
     }
 
     pub fn assign_labels(&mut self, labels: &str) {

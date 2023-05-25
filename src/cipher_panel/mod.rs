@@ -11,11 +11,13 @@ use self::{
     four_square_controls::FourSquareFrame, general_sub_controls::GeneralSubstitutionFrame,
     grille_controls::GrilleFrame, hebern_controls::HebernFrame, hutton_controls::HuttonFrame,
     m209_controls::M209Frame, m94_controls::M94Frame, playfair_controls::PlayfairFrame,
-    plugboard_controls::PlugboardFrame, polybius_square_controls::PolybiusSquareFrame,
-    porta_controls::PortaFrame, quagmire_controls::QuagmireFrame,
-    rail_fence_controls::RailFenceFrame, rs44_controls::Rs44Frame, scytale_controls::ScytaleFrame,
-    sigaba_controls::SigabaFrame, slidefair_controls::SlidefairFrame,
-    turning_grille_controls::TurningGrilleFrame, vigenere_controls::VigenereFrame,
+    plugboard_controls::PlugboardFrame, polybius_cube_controls::PolybiusCubeFrame,
+    polybius_square_controls::PolybiusSquareFrame, porta_controls::PortaFrame,
+    quagmire_controls::QuagmireFrame, rail_fence_controls::RailFenceFrame,
+    rs44_controls::Rs44Frame, scytale_controls::ScytaleFrame, sigaba_controls::SigabaFrame,
+    slidefair_controls::SlidefairFrame, trifid_controls::TrifidFrame,
+    turning_grille_controls::TurningGrilleFrame, two_square_controls::TwoSquareFrame,
+    vigenere_controls::VigenereFrame,
 };
 
 pub mod _generic_components;
@@ -43,7 +45,7 @@ pub mod m209_controls;
 pub mod m94_controls;
 pub mod playfair_controls;
 pub mod plugboard_controls;
-// pub mod polybius_cube_controls;
+pub mod polybius_cube_controls;
 pub mod polybius_square_controls;
 pub mod porta_controls;
 // pub mod purple_controls;
@@ -53,7 +55,7 @@ pub mod rs44_controls;
 pub mod scytale_controls;
 pub mod sigaba_controls;
 pub mod slidefair_controls;
-// pub mod trifid_controls;
+pub mod trifid_controls;
 pub mod turning_grille_controls;
 pub mod two_square_controls;
 pub mod vigenere_controls;
@@ -118,7 +120,7 @@ pub struct CipherInterface {
     // Playfair Based
     playfair: PlayfairFrame,
     slidefair: SlidefairFrame,
-    // two_square: TwoSquare,
+    two_square: TwoSquareFrame,
     four_square: FourSquareFrame,
 
     // Transposition
@@ -130,11 +132,11 @@ pub struct CipherInterface {
 
     // Polybius Based
     polybius: PolybiusSquareFrame,
-    // polybius_cube: PolybiusCube,
+    polybius_cube: PolybiusCubeFrame,
     adfgvx: AdfgvxFrame,
     b64: B64Frame,
     bifid: BifidFrame,
-    // trifid: Trifid,
+    trifid: TrifidFrame,
 
     // Tactical
     checkerboard: StraddlingCheckerboardFrame,
@@ -262,9 +264,9 @@ impl CipherInterface {
             CipherId::Playfair => &mut self.playfair,
             CipherId::Plugboard => &mut self.plugboard,
             CipherId::Polybius => &mut self.polybius,
-            // // CipherId::PolybiusCube => &mut self.polybius_cube,
+            CipherId::PolybiusCube => &mut self.polybius_cube,
             CipherId::Porta => &mut self.porta,
-            // // CipherId::Purple => &mut self.purple,
+            // CipherId::Purple => &mut self.purple,
             CipherId::Quagmire => &mut self.quagmire,
             CipherId::RailFence => &mut self.rail_fence,
             CipherId::Rs44 => &mut self.rs44,
@@ -272,9 +274,9 @@ impl CipherInterface {
             CipherId::Sigaba => &mut self.sigaba,
             CipherId::Slidefair => &mut self.slidefair,
             CipherId::Substitution => &mut self.gen_sub,
-            // // CipherId::Trifid => &mut self.trifid,
+            CipherId::Trifid => &mut self.trifid,
             CipherId::TurningGrille => &mut self.turning_grille,
-            // CipherId::TwoSquare => &mut self.two_square,
+            CipherId::TwoSquare => &mut self.two_square,
             CipherId::Vigenere => &mut self.vigenere,
             _ => todo!("<<<CIPHER NOT FOUND>>>"),
         }

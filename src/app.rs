@@ -2,7 +2,7 @@
 use crate::cipher_panel::CipherInterface;
 use crate::code_panel::CodeInterface;
 use crate::egui_aux::{mono_strong, subheading};
-use crate::ids::AttackId;
+// use crate::ids::AttackId;
 use crate::pages::io_panel::IOPanel;
 use crate::pages::{Page, TextPrepPage};
 use ciphers::ids::CipherId;
@@ -42,8 +42,7 @@ pub struct ClassicCrypto {
 
     active_cipher: Option<CipherId>,
     active_code: CodeId,
-    active_attack: AttackId,
-
+    // active_attack: AttackId,
     active_page: Page,
     text_prep_page: TextPrepPage,
 }
@@ -62,7 +61,7 @@ impl Default for ClassicCrypto {
             // ID of the active Cipher or Code
             active_cipher: None,
             active_code: CodeId::default(),
-            active_attack: AttackId::default(),
+            // active_attack: AttackId::default(),
 
             // Which page we are on
             active_page: Page::About,
@@ -177,7 +176,7 @@ impl ClassicCrypto {
                         &mut self.active_page,
                         &mut self.active_cipher,
                         &mut self.active_code,
-                        &mut self.active_attack,
+                        // &mut self.active_attack,
                         &mut self.cipher_interface,
                         &mut self.code_interface,
                         // &mut self.attack_interface,
@@ -234,7 +233,7 @@ impl ClassicCrypto {
                         &mut self.active_page,
                         &mut self.active_cipher,
                         &mut self.active_code,
-                        &mut self.active_attack,
+                        // &mut self.active_attack,
                         &mut self.cipher_interface,
                         &mut self.code_interface,
                         // &mut self.attack_interface,
