@@ -31,7 +31,7 @@ impl CipherFrame for PlayfairFrame {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 
-        ui.label("Select Alphabet");
+        ui.label("Common Alphabets");
         ui.horizontal(|ui| {
             if ui.button("No Q").clicked() {
                 self.alphabet_string = PresetAlphabet::BasicLatinNoQ.string();
@@ -54,6 +54,7 @@ impl CipherFrame for PlayfairFrame {
                     .assign_key(&self.key_string, &self.alphabet_string)
             };
         });
+        ui.add_space(8.0);
 
         ui.label("Alphabet");
         if control_string(ui, &mut self.alphabet_string).changed() {
@@ -76,8 +77,15 @@ impl CipherFrame for PlayfairFrame {
                 .desired_width(15.0),
         );
 
-        ui.label(mono(format!("Grid\n{}", self.cipher)));
         ui.add_space(16.0);
+
+        ui.horizontal(|ui| {
+            ui.label("Grid");
+            if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
+                ui.output_mut(|o| o.copied_text = self.cipher.to_string())
+            }
+        });
+        ui.label(mono(self.cipher.to_string()));
     }
 
     fn cipher(&self) -> &dyn Cipher {

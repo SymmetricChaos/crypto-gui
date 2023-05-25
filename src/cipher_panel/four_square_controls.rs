@@ -78,9 +78,13 @@ impl CipherFrame for FourSquareFrame {
                 .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
         }
 
-        for line in self.cipher.grid_lines() {
-            ui.label(mono(line));
-        }
+        ui.horizontal(|ui| {
+            ui.label("Grid");
+            if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
+                ui.output_mut(|o| o.copied_text = self.cipher.grid_lines())
+            }
+        });
+        ui.label(mono(self.cipher.grid_lines()));
     }
 
     fn cipher(&self) -> &dyn Cipher {

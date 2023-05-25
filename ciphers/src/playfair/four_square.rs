@@ -60,8 +60,8 @@ impl FourSquare {
         alphabet.get_char_at(num).unwrap()
     }
 
-    pub fn grid_lines(&self) -> Vec<String> {
-        let mut lines = Vec::with_capacity(self.grid_side_len * 2 + 1);
+    pub fn grid_lines(&self) -> String {
+        let mut lines = String::new();
 
         let mut left_side = String::new();
         let mut right_side = String::new();
@@ -72,13 +72,13 @@ impl FourSquare {
             right_side.push(r);
             right_side.push(' ');
             if (n + 1) % self.grid_side_len == 0 {
-                lines.push(format!("{left_side}   {right_side}"));
+                lines.push_str(&format!("{left_side}   {right_side}\n"));
                 left_side.clear();
                 right_side.clear();
             }
         }
 
-        lines.push(String::from("\n"));
+        lines.push('\n');
 
         for (n, (l, r)) in self.alphabet.chars().zip(self.square2.chars()).enumerate() {
             left_side.push(l);
@@ -86,7 +86,7 @@ impl FourSquare {
             right_side.push(r);
             right_side.push(' ');
             if (n + 1) % self.grid_side_len == 0 {
-                lines.push(format!("{left_side}   {right_side}"));
+                lines.push_str(&format!("{left_side}   {right_side}\n"));
                 left_side.clear();
                 right_side.clear();
             }
