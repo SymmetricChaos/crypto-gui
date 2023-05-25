@@ -1,5 +1,6 @@
 use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
+use num::integer::Roots;
 use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
 
 pub struct FourSquare {
@@ -21,25 +22,11 @@ impl Default for FourSquare {
 }
 
 impl FourSquare {
-    pub fn assign_key1(&mut self, key_word: &str) {
-        self.square1 = VecString::keyed_alphabet(key_word, &self.alphabet.to_string());
-    }
-
-    pub fn assign_key2(&mut self, key_word: &str) {
-        self.square2 = VecString::keyed_alphabet(key_word, &self.alphabet.to_string());
-    }
-
-    pub fn pick_alphabet(&mut self, mode: PresetAlphabet) {
-        match mode {
-            PresetAlphabet::BasicLatinNoJ
-            | PresetAlphabet::BasicLatinNoQ
-            | PresetAlphabet::BasicLatinWithDigits
-            | PresetAlphabet::Base64 => {
-                self.alphabet = VecString::from(mode);
-                self.grid_side_len = (mode.len() as f64).sqrt().ceil() as usize;
-            }
-            _ => (),
-        }
+    pub fn assign_keys(&mut self, key_word_1: &str, key_word_2: &str, alphabet: &str) {
+        self.square1 = VecString::keyed_alphabet(key_word_1, alphabet);
+        self.square2 = VecString::keyed_alphabet(key_word_2, alphabet);
+        self.alphabet = VecString::unique_from(alphabet);
+        self.grid_side_len = alphabet.chars().count().sqrt();
     }
 
     pub fn grid_side_len(&self) -> usize {
@@ -133,16 +120,14 @@ mod four_square_tests {
     #[test]
     fn encrypt_test() {
         let mut cipher = FourSquare::default();
-        cipher.assign_key1("EXAMPLE");
-        cipher.assign_key2("KEYWORD");
+        cipher.assign_keys("EXAMPLE", "KEYWORD", PresetAlphabet::BasicLatinNoQ);
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = FourSquare::default();
-        cipher.assign_key1("EXAMPLE");
-        cipher.assign_key2("KEYWORD");
+        cipher.assign_keys("EXAMPLE", "KEYWORD", PresetAlphabet::BasicLatinNoQ);
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

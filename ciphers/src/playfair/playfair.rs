@@ -3,6 +3,8 @@ use num::integer::Roots;
 use std::fmt;
 use utils::{functions::keyed_alphabet, preset_alphabet::PresetAlphabet};
 
+use super::is_square;
+
 pub struct Playfair {
     pub square: String,
     spacer: char,
@@ -82,7 +84,7 @@ impl Playfair {
     }
 
     fn validate_settings(&self) -> Result<(), CipherError> {
-        if self.square.chars().count().sqrt().pow(2) != self.square.chars().count() {
+        if !is_square(self.square.chars().count()) {
             return Err(CipherError::alphabet(
                 "alphabet must have a square number of characters",
             ));

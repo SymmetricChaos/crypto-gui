@@ -1,9 +1,7 @@
 use ciphers::{playfair::FourSquare, Cipher};
-use egui::{Color32, Ui};
+use egui::Ui;
 use rand::{rngs::StdRng, SeedableRng};
 use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet};
-
-use crate::egui_aux::mono;
 
 use super::{
     CipherFrame,
@@ -36,46 +34,46 @@ impl CipherFrame for FourSquareFrame {
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
             if ui.button("No Q").clicked() {
-                self.cipher.pick_alphabet(PresetAlphabet::BasicLatinNoQ);
                 self.alphabet_string = PresetAlphabet::BasicLatinNoQ.string();
-                self.cipher.assign_key1(&self.key_word_1);
-                self.cipher.assign_key1(&self.key_word_2);
+                self.cipher
+                    .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
             };
             if ui.button("No J").clicked() {
-                self.cipher.pick_alphabet(PresetAlphabet::BasicLatinNoJ);
                 self.alphabet_string = PresetAlphabet::BasicLatinNoJ.string();
-                self.cipher.assign_key1(&self.key_word_1);
-                self.cipher.assign_key1(&self.key_word_2);
+                self.cipher
+                    .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
             };
             if ui.button("Alphanumeric").clicked() {
-                self.cipher
-                    .pick_alphabet(PresetAlphabet::BasicLatinWithDigits);
                 self.alphabet_string = PresetAlphabet::BasicLatinWithDigits.string();
-                self.cipher.assign_key1(&self.key_word_1);
-                self.cipher.assign_key1(&self.key_word_2);
+                self.cipher
+                    .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
             };
             if ui.button("Base64").clicked() {
-                self.cipher.pick_alphabet(PresetAlphabet::Base64);
                 self.alphabet_string = PresetAlphabet::Base64.string();
-                self.cipher.assign_key1(&self.key_word_1);
-                self.cipher.assign_key1(&self.key_word_2);
+                self.cipher
+                    .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
             };
         });
         ui.add_space(10.0);
 
-        // False alphabet display
-        ui.label(mono(&self.alphabet_string).background_color(Color32::BLACK));
+        ui.label("Alphabet");
+        if control_string(ui, &mut self.alphabet_string).changed() {
+            self.cipher
+                .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
+        }
         ui.add_space(16.0);
 
         ui.label("Key Word 1");
         if control_string(ui, &mut self.key_word_1).changed() {
-            self.cipher.assign_key1(&self.key_word_1)
+            self.cipher
+                .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
         }
 
         ui.add_space(16.0);
         ui.label("Key Word 2");
         if control_string(ui, &mut self.key_word_2).changed() {
-            self.cipher.assign_key1(&self.key_word_2)
+            self.cipher
+                .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
         }
 
         // Need a better method for displaying the grids
@@ -88,8 +86,8 @@ impl CipherFrame for FourSquareFrame {
     fn randomize(&mut self) {
         self.key_word_1 = shuffled_str(&self.alphabet_string, &mut StdRng::from_entropy());
         self.key_word_2 = shuffled_str(&self.alphabet_string, &mut StdRng::from_entropy());
-        self.cipher.assign_key1(&self.key_word_1);
-        self.cipher.assign_key1(&self.key_word_2);
+        self.cipher
+            .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
     }
 
     fn reset(&mut self) {
