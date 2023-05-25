@@ -127,13 +127,6 @@ impl Cipher for Slidefair {
         }
         Ok(out)
     }
-
-    // fn randomize(&mut self) {
-    //     self.alphabet = VecString::from(shuffled_str(
-    //         &self.alphabet.to_string(),
-    //         &mut get_global_rng(),
-    //     ))
-    // }
 }
 
 impl fmt::Display for Slidefair {

@@ -4,33 +4,19 @@ use std::fmt;
 use utils::{functions::keyed_alphabet, preset_alphabet::PresetAlphabet};
 
 pub struct Playfair {
-    pub alphabet: String,
-    square: String,
+    pub square: String,
     spacer: char,
     grid_side_len: usize,
 }
 
 impl Playfair {
-    pub fn assign_key(&mut self, key_word: &str) {
-        self.square = keyed_alphabet(key_word, &self.alphabet);
+    pub fn assign_key(&mut self, key_word: &str, alphabet: &str) {
+        self.grid_side_len = alphabet.chars().count().sqrt();
+        self.square = keyed_alphabet(key_word, alphabet);
     }
 
     pub fn control_spacer(&mut self) -> &mut char {
         &mut self.spacer
-    }
-
-    pub fn pick_alphabet(&mut self, mode: PresetAlphabet) {
-        match mode {
-            PresetAlphabet::BasicLatinNoJ
-            | PresetAlphabet::BasicLatinNoQ
-            | PresetAlphabet::BasicLatinWithDigits
-            | PresetAlphabet::Base64 => {
-                self.alphabet = mode.string();
-                self.square = mode.string();
-                self.grid_side_len = mode.len().sqrt();
-            }
-            _ => (),
-        }
     }
 
     pub fn grid_side_len(&self) -> usize {
@@ -96,7 +82,12 @@ impl Playfair {
     }
 
     fn validate_settings(&self) -> Result<(), CipherError> {
-        if !&self.alphabet.contains(self.spacer) {
+        if self.square.chars().count().sqrt().pow(2) != self.square.chars().count() {
+            return Err(CipherError::alphabet(
+                "alphabet must have a square number of characters",
+            ));
+        }
+        if !&self.square.contains(self.spacer) {
             return Err(CipherError::Key(format!(
                 "spacer character {} is not in the alphabet",
                 self.spacer
@@ -109,7 +100,6 @@ impl Playfair {
 impl Default for Playfair {
     fn default() -> Self {
         Self {
-            alphabet: String::from(PresetAlphabet::BasicLatinNoQ),
             square: String::from(PresetAlphabet::BasicLatinNoQ),
             spacer: 'X',
             grid_side_len: 5,
@@ -143,10 +133,6 @@ impl Cipher for Playfair {
         }
         Ok(out)
     }
-
-    // fn randomize(&mut self) {
-    //     self.alphabet = shuffled_str(&self.alphabet, &mut get_global_rng())
-    // }
 }
 
 impl fmt::Display for Playfair {

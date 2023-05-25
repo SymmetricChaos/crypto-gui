@@ -1,5 +1,5 @@
 use ciphers::{playfair::Playfair, Cipher};
-use egui::{Color32, RichText, TextEdit, TextStyle, Ui};
+use egui::{TextEdit, TextStyle, Ui};
 use rand::{rngs::StdRng, SeedableRng};
 use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet};
 
@@ -10,10 +10,20 @@ use super::{
     _generic_components::{control_string, randomize_reset},
 };
 
-#[derive(Default)]
 pub struct PlayfairFrame {
     cipher: Playfair,
     key_string: String,
+    alphabet_string: String,
+}
+
+impl Default for PlayfairFrame {
+    fn default() -> Self {
+        Self {
+            cipher: Default::default(),
+            key_string: Default::default(),
+            alphabet_string: PresetAlphabet::BasicLatinNoQ.into(),
+        }
+    }
 }
 
 impl CipherFrame for PlayfairFrame {
@@ -24,36 +34,38 @@ impl CipherFrame for PlayfairFrame {
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
             if ui.button("No Q").clicked() {
-                self.cipher.pick_alphabet(PresetAlphabet::BasicLatinNoQ);
-                self.cipher.assign_key(&self.key_string)
+                self.alphabet_string = PresetAlphabet::BasicLatinNoQ.string();
+                self.cipher
+                    .assign_key(&self.key_string, &self.alphabet_string)
             };
             if ui.button("No J").clicked() {
-                self.cipher.pick_alphabet(PresetAlphabet::BasicLatinNoJ);
-                self.cipher.assign_key(&self.key_string)
+                self.alphabet_string = PresetAlphabet::BasicLatinNoJ.string();
+                self.cipher
+                    .assign_key(&self.key_string, &self.alphabet_string)
             };
             if ui.button("Alphanumeric").clicked() {
+                self.alphabet_string = PresetAlphabet::BasicLatinWithDigits.string();
                 self.cipher
-                    .pick_alphabet(PresetAlphabet::BasicLatinWithDigits);
-                self.cipher.assign_key(&self.key_string)
+                    .assign_key(&self.key_string, &self.alphabet_string)
             };
             if ui.button("Base64").clicked() {
-                self.cipher.pick_alphabet(PresetAlphabet::Base64);
-                self.cipher.assign_key(&self.key_string)
+                self.alphabet_string = PresetAlphabet::Base64.string();
+                self.cipher
+                    .assign_key(&self.key_string, &self.alphabet_string)
             };
         });
 
-        // False alphabet block
-        ui.add_space(10.0);
-        ui.label(
-            RichText::new(&self.cipher.alphabet)
-                .monospace()
-                .background_color(Color32::BLACK),
-        );
+        ui.label("Alphabet");
+        if control_string(ui, &mut self.alphabet_string).changed() {
+            self.cipher
+                .assign_key(&self.key_string, &self.alphabet_string);
+        }
         ui.add_space(16.0);
 
         ui.label("Key Word");
         if control_string(ui, &mut self.key_string).changed() {
-            self.cipher.assign_key(&self.key_string)
+            self.cipher
+                .assign_key(&self.key_string, &self.alphabet_string)
         }
         ui.add_space(16.0);
 
@@ -66,8 +78,6 @@ impl CipherFrame for PlayfairFrame {
 
         ui.label(mono(format!("Grid\n{}", self.cipher)));
         ui.add_space(16.0);
-
-        //(ui, self.grid_side_len(), self.grid_side_len(), self.get_input_alphabet())
     }
 
     fn cipher(&self) -> &dyn Cipher {
@@ -75,8 +85,9 @@ impl CipherFrame for PlayfairFrame {
     }
 
     fn randomize(&mut self) {
-        self.key_string = shuffled_str(&self.cipher.alphabet, &mut StdRng::from_entropy());
-        self.cipher.assign_key(&self.key_string)
+        self.key_string = shuffled_str(&self.cipher.square, &mut StdRng::from_entropy());
+        self.cipher
+            .assign_key(&self.key_string, &self.alphabet_string);
     }
 
     fn reset(&mut self) {

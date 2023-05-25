@@ -73,6 +73,13 @@ impl CipherFrame for SlidefairFrame {
         self.cipher.assign_key(&self.key_word_string)
     }
 
+    // fn randomize(&mut self) {
+    //     self.alphabet = VecString::from(shuffled_str(
+    //         &self.alphabet.to_string(),
+    //         &mut get_global_rng(),
+    //     ))
+    // }
+
     fn reset(&mut self) {
         *self = Self::default()
     }

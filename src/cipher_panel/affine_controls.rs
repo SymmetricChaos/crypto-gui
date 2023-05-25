@@ -1,8 +1,15 @@
 use ciphers::substitution::Affine;
 use eframe::egui::{Slider, Ui};
-use utils::{math_functions::prime_factors, preset_alphabet::PresetAlphabet};
+use rand::{rngs::StdRng, Rng, SeedableRng};
+use utils::{
+    math_functions::{mul_inv, prime_factors},
+    preset_alphabet::PresetAlphabet,
+};
 
-use super::{CipherFrame, _generic_components::control_string};
+use super::{
+    CipherFrame,
+    _generic_components::{control_string, randomize_reset},
+};
 
 pub struct AffineFrame {
     cipher: Affine,
@@ -20,7 +27,7 @@ impl Default for AffineFrame {
 
 impl CipherFrame for AffineFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Alphabet");
@@ -49,16 +56,16 @@ impl CipherFrame for AffineFrame {
     }
 
     fn randomize(&mut self) {
-        //     let mut rng = get_global_rng();
-        //     let length = self.alphabet.len();
-        //     self.add_key = rng.gen_range(0..length);
-        //     loop {
-        //         let mul = rng.gen_range(1..length);
-        //         if mul_inv(mul, self.alphabet_len()).is_some() {
-        //             self.mul_key = mul;
-        //             break;
-        //         };
-        //     }
+        let mut rng = StdRng::from_entropy();
+        let length = self.cipher.alphabet_len();
+        self.cipher.add_key = rng.gen_range(0..length);
+        loop {
+            let mul = rng.gen_range(1..length);
+            if mul_inv(mul, self.cipher.alphabet_len()).is_some() {
+                self.cipher.mul_key = mul;
+                break;
+            };
+        }
     }
 
     fn reset(&mut self) {
