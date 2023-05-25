@@ -60,26 +60,38 @@ impl FourSquare {
         alphabet.get_char_at(num).unwrap()
     }
 
-    pub fn show_square1(&self) -> String {
-        let mut out = String::new();
-        for (n, c) in self.square1.chars().enumerate() {
-            if n % self.grid_side_len == 0 {
-                out.push_str("\n")
-            }
-            out.push_str(&format!("{} ", c))
-        }
-        out
-    }
+    pub fn grid_lines(&self) -> Vec<String> {
+        let mut lines = Vec::with_capacity(self.grid_side_len * 2 + 1);
 
-    pub fn show_square2(&self) -> String {
-        let mut out = String::new();
-        for (n, c) in self.square2.chars().enumerate() {
-            if n % self.grid_side_len == 0 {
-                out.push_str("\n")
+        let mut left_side = String::new();
+        let mut right_side = String::new();
+
+        for (n, (l, r)) in self.square1.chars().zip(self.alphabet.chars()).enumerate() {
+            left_side.push(l);
+            left_side.push(' ');
+            right_side.push(r);
+            right_side.push(' ');
+            if (n + 1) % self.grid_side_len == 0 {
+                lines.push(format!("{left_side}   {right_side}"));
+                left_side.clear();
+                right_side.clear();
             }
-            out.push_str(&format!("{} ", c))
         }
-        out
+
+        lines.push(String::from("\n"));
+
+        for (n, (l, r)) in self.alphabet.chars().zip(self.square2.chars()).enumerate() {
+            left_side.push(l);
+            left_side.push(' ');
+            right_side.push(r);
+            right_side.push(' ');
+            if (n + 1) % self.grid_side_len == 0 {
+                lines.push(format!("{left_side}   {right_side}"));
+                left_side.clear();
+                right_side.clear();
+            }
+        }
+        lines
     }
 
     fn validate_settings(&self) -> Result<(), CipherError> {

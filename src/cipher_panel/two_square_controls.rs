@@ -10,12 +10,22 @@ use super::{
     _generic_components::{control_string, randomize_reset},
 };
 
-#[derive(Default)]
 pub struct TwoSquareFrame {
     cipher: TwoSquare,
     alphabet_string: String,
     key_word_1: String,
     key_word_2: String,
+}
+
+impl Default for TwoSquareFrame {
+    fn default() -> Self {
+        Self {
+            cipher: Default::default(),
+            alphabet_string: PresetAlphabet::BasicLatinNoQ.into(),
+            key_word_1: Default::default(),
+            key_word_2: Default::default(),
+        }
+    }
 }
 
 impl CipherFrame for TwoSquareFrame {
@@ -71,11 +81,6 @@ impl CipherFrame for TwoSquareFrame {
         ui.label(mono(self.cipher.show_square1()));
         ui.add_space(8.0);
         ui.label(mono(self.cipher.show_square2()));
-
-        // ui.label(RichText::new(format!("Grid\n{}", self)).monospace());
-        // ui.add_space(16.0);
-
-        //(ui, self.grid_side_len(), self.grid_side_len(), self.get_input_alphabet())
     }
 
     fn cipher(&self) -> &dyn Cipher {

@@ -14,7 +14,6 @@ impl Default for Slidefair {
     fn default() -> Self {
         Self {
             alphabet: VecString::from(PresetAlphabet::BasicLatin),
-
             spacer: 'X',
             key: Vec::new(),
         }

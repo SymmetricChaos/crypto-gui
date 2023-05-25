@@ -3,6 +3,8 @@ use egui::Ui;
 use rand::{rngs::StdRng, SeedableRng};
 use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet};
 
+use crate::egui_aux::mono;
+
 use super::{
     CipherFrame,
     _generic_components::{control_string, randomize_reset},
@@ -76,7 +78,9 @@ impl CipherFrame for FourSquareFrame {
                 .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
         }
 
-        // Need a better method for displaying the grids
+        for line in self.cipher.grid_lines() {
+            ui.label(mono(line));
+        }
     }
 
     fn cipher(&self) -> &dyn Cipher {

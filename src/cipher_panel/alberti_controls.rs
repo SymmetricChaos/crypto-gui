@@ -3,6 +3,7 @@ use crate::egui_aux::mono;
 use super::{CipherFrame, _generic_components::control_string};
 use ciphers::{polyalphabetic::Alberti, Cipher};
 use eframe::egui::{Slider, Ui};
+use rand::{rngs::StdRng, Rng, SeedableRng};
 use utils::preset_alphabet::PresetAlphabet;
 
 pub struct AlbertiFrame {
@@ -53,7 +54,10 @@ impl CipherFrame for AlbertiFrame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        let length = self.cipher.moving_alphabet.len();
+        self.cipher.start_index = StdRng::from_entropy().gen_range(0..length);
+    }
 
     fn reset(&mut self) {
         *self = Self::default()

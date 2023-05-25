@@ -128,11 +128,7 @@ impl Cipher for Bazeries {
         Ok(out)
     }
 
-    // fn randomize(&mut self) {
-    //     for wheel in self.wheels.iter_mut() {
-    //         *wheel = shuffled_str(&self.alphabet_string, &mut get_global_rng());
-    //     }
-    // }
+
 }
 
 #[cfg(test)]

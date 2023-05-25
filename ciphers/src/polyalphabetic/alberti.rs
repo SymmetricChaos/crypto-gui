@@ -37,10 +37,18 @@ impl Alberti {
     pub fn alphabet_len(&self) -> usize {
         self.fixed_alphabet.chars().count()
     }
+
+    fn validate_settings(&self) -> Result<(), CipherError> {
+        if self.fixed_alphabet.len() != self.moving_alphabet.len() {
+            return Err(CipherError::alphabet("alphabets must be of equal length"));
+        }
+        Ok(())
+    }
 }
 
 impl Cipher for Alberti {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+        self.validate_settings()?;
         let mut index = self.start_index.clone();
         let mut out = String::with_capacity(text.len());
         for s in text.chars() {
@@ -60,6 +68,7 @@ impl Cipher for Alberti {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+        self.validate_settings()?;
         let mut index = self.start_index.clone();
         let mut out = String::with_capacity(text.len());
         for s in text.chars() {
@@ -77,11 +86,6 @@ impl Cipher for Alberti {
         }
         Ok(out)
     }
-
-    // fn randomize(&mut self) {
-    //     let length = self.moving_alphabet.len();
-    //     self.start_index = GLOBAL_RNG.lock().unwrap().gen_range(0..length);
-    // }
 }
 
 impl Default for Alberti {

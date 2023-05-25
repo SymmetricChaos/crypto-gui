@@ -1,8 +1,12 @@
 use ciphers::{polyalphabetic::Bazeries, Cipher};
 use egui::{Slider, Ui};
-use utils::preset_alphabet::PresetAlphabet;
+use rand::{rngs::StdRng, SeedableRng};
+use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet};
 
-use super::{CipherFrame, _generic_components::control_string};
+use super::{
+    CipherFrame,
+    _generic_components::{control_string, randomize_reset},
+};
 
 pub struct BazeriesFrame {
     cipher: Bazeries,
@@ -20,7 +24,7 @@ impl Default for BazeriesFrame {
 
 impl CipherFrame for BazeriesFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Alphabet");
@@ -53,7 +57,12 @@ impl CipherFrame for BazeriesFrame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        let mut rng = StdRng::from_entropy();
+        for wheel in self.cipher.wheels.iter_mut() {
+            *wheel = shuffled_str(&self.alphabet_string, &mut rng);
+        }
+    }
 
     fn reset(&mut self) {
         *self = Self::default()
