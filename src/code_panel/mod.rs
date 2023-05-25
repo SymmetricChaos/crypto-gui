@@ -58,12 +58,17 @@ pub trait CodeFrame {
 }
 
 // Quick simple combo box builder
-fn combox_box(code: &[CodeId], identifier: &'static str, active_code: &mut CodeId, ui: &mut Ui) {
+fn combox_box(
+    code: &[CodeId],
+    identifier: &'static str,
+    active_code: &mut Option<CodeId>,
+    ui: &mut Ui,
+) {
     egui::ComboBox::from_id_source(identifier)
         .selected_text(identifier)
         .show_ui(ui, |ui| {
             for id in code {
-                ui.selectable_value(active_code, *id, id.to_string());
+                ui.selectable_value(active_code, Some(*id), id.to_string());
             }
         });
     ui.add_space(10.0);
@@ -110,7 +115,7 @@ pub struct CodeInterface {
 }
 
 impl CodeInterface {
-    pub fn combo_boxes(&mut self, ui: &mut Ui, active_code: &mut CodeId) {
+    pub fn combo_boxes(&mut self, ui: &mut Ui, active_code: &mut Option<CodeId>) {
         combox_box(
             &[
                 CodeId::Ascii,

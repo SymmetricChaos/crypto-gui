@@ -108,7 +108,7 @@ impl IOPanel {
         errors: &mut String,
         active_page: &mut Page,
         active_cipher: &mut Option<CipherId>,
-        active_code: &mut CodeId,
+        active_code: &mut Option<CodeId>,
         // active_attack: &mut AttackId,
         cipher_interface: &mut CipherInterface,
         code_interface: &mut CodeInterface,
@@ -125,7 +125,7 @@ impl IOPanel {
             if let Some(cipher) = active_cipher {
                 encrypt_decrypt(
                     ui,
-                    cipher_interface.get_active_cipher(*cipher),
+                    cipher_interface.get_active_cipher(cipher),
                     input,
                     output,
                     errors,
@@ -136,13 +136,17 @@ impl IOPanel {
         }
 
         if active_page == &mut Page::Code {
-            encode_decode(
-                ui,
-                code_interface.get_active_code(active_code),
-                input,
-                output,
-                errors,
-            );
+            if let Some(code) = active_code {
+                encode_decode(
+                    ui,
+                    code_interface.get_active_code(code),
+                    input,
+                    output,
+                    errors,
+                );
+            } else {
+                ui.label("<<<CODE HOMEPAGE>>>");
+            }
         }
 
         // if active_page == &mut Page::Attack {

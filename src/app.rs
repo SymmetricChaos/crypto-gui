@@ -32,7 +32,7 @@ pub struct ClassicCrypto {
     errors: String,
 
     active_cipher: Option<CipherId>,
-    active_code: CodeId,
+    active_code: Option<CodeId>,
     // active_attack: AttackId,
     active_page: Page,
     text_prep_page: TextPrepPage,
@@ -51,7 +51,7 @@ impl Default for ClassicCrypto {
 
             // ID of the active Cipher or Code
             active_cipher: None,
-            active_code: CodeId::default(),
+            active_code: None,
             // active_attack: AttackId::default(),
 
             // Which page we are on
@@ -155,7 +155,7 @@ impl ClassicCrypto {
     }
 
     fn code_page(&mut self, ctx: &Context) {
-        if self.active_page == Page::Code {
+        if self.active_page == Page::Code && self.active_code.is_some() {
             self.code_selector_panel(ctx);
 
             SidePanel::right("code_io_panel")
@@ -178,18 +178,26 @@ impl ClassicCrypto {
 
             CentralPanel::default().show(ctx, |ui| {
                 ScrollArea::vertical().show(ui, |ui| {
-                    let name = RichText::new(String::from(self.active_code))
-                        .strong()
-                        .heading();
-                    ui.add(egui::Label::new(name));
-                    ui.label(RichText::new(self.active_code.description()).size(12.0));
-
-                    ui.add_space(16.0);
-                    ui.separator();
-                    ui.add_space(16.0);
-                    self.code_interface
-                        .get_active_code(&self.active_code)
-                        .ui(ui, &mut self.errors)
+                    match self.active_code {
+                        Some(code) => {
+                            ui.label(mono_strong(code).heading());
+                            ui.label(RichText::new(code.description()).size(12.0));
+                            ui.add_space(16.0);
+                            ui.separator();
+                            ui.add_space(16.0);
+                            self.code_interface
+                                .get_active_code(&code)
+                                .ui(ui, &mut self.errors);
+                        }
+                        None => {
+                            ui.label(mono_strong("Codes").heading());
+                            ui.label(RichText::new("<<<DESCRIPTION>>>").size(12.0));
+                            ui.add_space(16.0);
+                            ui.separator();
+                            ui.add_space(16.0);
+                            ui.label(mono_strong("<<<INTERFACE>>>"));
+                        }
+                    };
                 });
             });
 
@@ -212,7 +220,7 @@ impl ClassicCrypto {
     }
 
     fn cipher_page(&mut self, ctx: &Context) {
-        if self.active_page == Page::Cipher {
+        if self.active_page == Page::Cipher && self.active_cipher.is_some() {
             self.cipher_selector_panel(ctx);
 
             SidePanel::right("cipher_io_panel")
@@ -243,7 +251,7 @@ impl ClassicCrypto {
                             ui.separator();
                             ui.add_space(16.0);
                             self.cipher_interface
-                                .get_active_cipher(cipher)
+                                .get_active_cipher(&cipher)
                                 .ui(ui, &mut self.errors);
                         }
                         None => {

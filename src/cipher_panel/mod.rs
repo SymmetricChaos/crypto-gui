@@ -238,7 +238,7 @@ impl CipherInterface {
         );
     }
 
-    pub fn get_active_cipher(&mut self, active_cipher: CipherId) -> &mut dyn CipherFrame {
+    pub fn get_active_cipher(&mut self, active_cipher: &CipherId) -> &mut dyn CipherFrame {
         match active_cipher {
             CipherId::Adfgvx => &mut self.adfgvx,
             CipherId::Affine => &mut self.affine,
