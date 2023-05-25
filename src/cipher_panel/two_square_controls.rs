@@ -1,5 +1,5 @@
 use ciphers::{playfair::TwoSquare, Cipher};
-use egui::{Color32, RichText, Ui};
+use egui::Ui;
 use rand::{rngs::StdRng, SeedableRng};
 use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet};
 
@@ -13,6 +13,7 @@ use super::{
 #[derive(Default)]
 pub struct TwoSquareFrame {
     cipher: TwoSquare,
+    alphabet_string: String,
     key_word_1: String,
     key_word_2: String,
 }
@@ -25,44 +26,46 @@ impl CipherFrame for TwoSquareFrame {
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
             if ui.button("No Q").clicked() {
-                self.cipher.pick_alphabet(PresetAlphabet::BasicLatinNoQ);
-                self.cipher.assign_key1(&self.key_word_1);
-                self.cipher.assign_key2(&self.key_word_2);
+                self.alphabet_string = PresetAlphabet::BasicLatinNoQ.string();
+                self.cipher
+                    .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
             };
             if ui.button("No J").clicked() {
-                self.cipher.pick_alphabet(PresetAlphabet::BasicLatinNoJ);
-                self.cipher.assign_key1(&self.key_word_1);
-                self.cipher.assign_key2(&self.key_word_2);
+                self.alphabet_string = PresetAlphabet::BasicLatinNoJ.string();
+                self.cipher
+                    .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
             };
             if ui.button("Alphanumeric").clicked() {
+                self.alphabet_string = PresetAlphabet::BasicLatinWithDigits.string();
                 self.cipher
-                    .pick_alphabet(PresetAlphabet::BasicLatinWithDigits);
-                self.cipher.assign_key1(&self.key_word_1);
-                self.cipher.assign_key2(&self.key_word_2);
+                    .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
             };
             if ui.button("Base64").clicked() {
-                self.cipher.pick_alphabet(PresetAlphabet::Base64);
-                self.cipher.assign_key1(&self.key_word_1);
-                self.cipher.assign_key2(&self.key_word_2);
+                self.alphabet_string = PresetAlphabet::Base64.string();
+                self.cipher
+                    .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
             };
         });
         ui.add_space(10.0);
 
-        ui.label(
-            RichText::new(&self.cipher.alphabet.to_string())
-                .monospace()
-                .background_color(Color32::BLACK),
-        );
+        ui.label("Alphabet");
+        if control_string(ui, &mut self.alphabet_string).changed() {
+            self.cipher
+                .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
+        }
         ui.add_space(16.0);
 
         ui.label("Key Word 1");
         if control_string(ui, &mut self.key_word_1).changed() {
-            self.cipher.assign_key1(&self.key_word_1)
+            self.cipher
+                .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
         }
 
+        ui.add_space(16.0);
         ui.label("Key Word 2");
         if control_string(ui, &mut self.key_word_2).changed() {
-            self.cipher.assign_key2(&self.key_word_2)
+            self.cipher
+                .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
         }
 
         ui.label(mono(self.cipher.show_square1()));
@@ -80,16 +83,10 @@ impl CipherFrame for TwoSquareFrame {
     }
 
     fn randomize(&mut self) {
-        self.key_word_1 = shuffled_str(
-            &self.cipher.alphabet.to_string(),
-            &mut StdRng::from_entropy(),
-        );
-        self.key_word_2 = shuffled_str(
-            &self.cipher.alphabet.to_string(),
-            &mut StdRng::from_entropy(),
-        );
-        self.cipher.assign_key1(&self.key_word_1);
-        self.cipher.assign_key1(&self.key_word_2);
+        self.key_word_1 = shuffled_str(&self.alphabet_string, &mut StdRng::from_entropy());
+        self.key_word_2 = shuffled_str(&self.alphabet_string, &mut StdRng::from_entropy());
+        self.cipher
+            .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
     }
 
     fn reset(&mut self) {

@@ -3,6 +3,8 @@ use itertools::Itertools;
 use num::integer::Roots;
 use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
 
+use super::is_square;
+
 pub struct FourSquare {
     pub alphabet: VecString,
     square1: VecString,
@@ -79,10 +81,20 @@ impl FourSquare {
         }
         out
     }
+
+    fn validate_settings(&self) -> Result<(), CipherError> {
+        if !is_square(self.alphabet.chars().count()) {
+            return Err(CipherError::alphabet(
+                "alphabet must have a square number of characters",
+            ));
+        }
+        Ok(())
+    }
 }
 
 impl Cipher for FourSquare {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+        self.validate_settings()?;
         let pairs = self.pairs(text);
         let mut out = String::with_capacity(text.len());
         for (l, r) in pairs {
@@ -96,6 +108,7 @@ impl Cipher for FourSquare {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+        self.validate_settings()?;
         let pairs = self.pairs(text);
         let mut out = String::with_capacity(text.len());
         for (l, r) in pairs {

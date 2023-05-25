@@ -3,6 +3,8 @@ use itertools::Itertools;
 use num::integer::Roots;
 use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
 
+use super::is_square;
+
 pub struct TwoSquare {
     pub alphabet: VecString,
     square1: VecString,
@@ -23,25 +25,11 @@ impl Default for TwoSquare {
 }
 
 impl TwoSquare {
-    pub fn assign_key1(&mut self, key_word: &str) {
-        self.square1 = VecString::keyed_alphabet(key_word, &self.alphabet.to_string());
-    }
-
-    pub fn assign_key2(&mut self, key_word: &str) {
-        self.square2 = VecString::keyed_alphabet(key_word, &self.alphabet.to_string());
-    }
-
-    pub fn pick_alphabet(&mut self, mode: PresetAlphabet) {
-        match mode {
-            PresetAlphabet::BasicLatinNoJ
-            | PresetAlphabet::BasicLatinNoQ
-            | PresetAlphabet::BasicLatinWithDigits
-            | PresetAlphabet::Base64 => {
-                self.alphabet = VecString::from(mode);
-                self.grid_side_len = mode.len().sqrt();
-            }
-            _ => (),
-        }
+    pub fn assign_keys(&mut self, key_word_1: &str, key_word_2: &str, alphabet: &str) {
+        self.square1 = VecString::keyed_alphabet(key_word_1, alphabet);
+        self.square2 = VecString::keyed_alphabet(key_word_2, alphabet);
+        self.alphabet = VecString::unique_from(alphabet);
+        self.grid_side_len = alphabet.chars().count().sqrt();
     }
 
     pub fn grid_side_len(&self) -> usize {
@@ -123,10 +111,20 @@ impl TwoSquare {
         }
         out
     }
+
+    fn validate_settings(&self) -> Result<(), CipherError> {
+        if !is_square(self.alphabet.chars().count()) {
+            return Err(CipherError::alphabet(
+                "alphabet must have a square number of characters",
+            ));
+        }
+        Ok(())
+    }
 }
 
 impl Cipher for TwoSquare {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+        self.validate_settings()?;
         let mut out = String::with_capacity(text.len());
 
         for (l, r) in self.pairs(text) {
@@ -139,6 +137,7 @@ impl Cipher for TwoSquare {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+        self.validate_settings()?;
         let mut out = String::with_capacity(text.len());
 
         for (l, r) in self.pairs(text) {
