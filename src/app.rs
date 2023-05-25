@@ -11,20 +11,11 @@ use eframe::egui;
 use eframe::{
     egui::{
         warn_if_debug_build, widgets, CentralPanel, Context, FontData, FontDefinitions, RichText,
-        ScrollArea, SelectableLabel, SidePanel, TopBottomPanel, Ui,
+        ScrollArea, SidePanel, TopBottomPanel,
     },
     epaint::FontFamily,
     App,
 };
-
-fn page_selector(ui: &mut Ui, name: &str, selected_page: Page, active_page: &mut Page) {
-    if ui
-        .add(SelectableLabel::new(active_page == &selected_page, name))
-        .clicked()
-    {
-        *active_page = selected_page
-    }
-}
 
 fn load_font(name: &str, family: &FontFamily, font_data: FontData, font_def: &mut FontDefinitions) {
     font_def.font_data.insert(name.into(), font_data);
@@ -146,7 +137,9 @@ impl ClassicCrypto {
     // Direct invalid selections here
     fn blank_page(&mut self, ctx: &Context) {
         CentralPanel::default().show(ctx, |ui| {
-            ScrollArea::vertical().show(ui, |ui| ui.label("you have reached this page in error"));
+            ScrollArea::vertical().show(ui, |ui| {
+                ui.label("<<<THIS PAGE INTENTIONALLY LEFT BLANK>>>")
+            });
         });
     }
 
@@ -254,7 +247,7 @@ impl ClassicCrypto {
                                 .ui(ui, &mut self.errors);
                         }
                         None => {
-                            ui.label(mono_strong("<<<TITLE>>>").heading());
+                            ui.label(mono_strong("Ciphers").heading());
                             ui.label(RichText::new("<<<DESCRIPTION>>>").size(12.0));
                             ui.add_space(16.0);
                             ui.separator();
@@ -360,6 +353,15 @@ impl ClassicCrypto {
     }
 }
 
+// fn old_page_selector(ui: &mut Ui, name: &str, selected_page: Page, active_page: &mut Page) {
+//     if ui
+//         .add(SelectableLabel::new(active_page == &selected_page, name))
+//         .clicked()
+//     {
+//         *active_page = selected_page
+//     }
+// }
+
 impl App for ClassicCrypto {
     fn update(&mut self, ctx: &Context, _frame: &mut eframe::Frame) {
         //frame.set_window_size((900.0, 700.0).into());
@@ -369,12 +371,20 @@ impl App for ClassicCrypto {
                 widgets::global_dark_light_mode_switch(ui);
                 ui.separator();
 
-                page_selector(ui, "About", Page::About, &mut self.active_page);
-                page_selector(ui, "Ciphers", Page::Cipher, &mut self.active_page);
-                page_selector(ui, "Attacks", Page::Attack, &mut self.active_page);
-                page_selector(ui, "Codes", Page::Code, &mut self.active_page);
-                // page_selector(ui, "RNGs", Page::Rng(None), &mut self.active_page);
-                page_selector(ui, "Text", Page::TextPrep, &mut self.active_page);
+                if ui.button("About").clicked() {
+                    self.active_page = Page::About;
+                }
+                if ui.button("Ciphers").clicked() {
+                    self.active_page = Page::Cipher;
+                    self.active_cipher = None;
+                }
+                if ui.button("Codes").clicked() {
+                    self.active_page = Page::Code;
+                    // self.active_code = None;
+                }
+                if ui.button("Text").clicked() {
+                    self.active_page = Page::TextPrep;
+                }
             });
         });
 
