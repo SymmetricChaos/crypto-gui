@@ -191,11 +191,11 @@ impl ClassicCrypto {
                         }
                         None => {
                             ui.label(mono_strong("Codes").heading());
-                            ui.label(RichText::new("<<<DESCRIPTION>>>").size(12.0));
+                            ui.label(RichText::new("A code is a method of transforming information in one form to another form.").size(12.0));
                             ui.add_space(16.0);
                             ui.separator();
                             ui.add_space(16.0);
-                            ui.label(mono_strong("<<<INTERFACE>>>"));
+                            ui.label(mono_strong("Codes exist for many reasons but the most common is ease of use. Often information in one form is difficult to use for a particular purpose and so needs to be changed. A spoken explanation vanishes in moments and travels only a short distance while the same explanation encoded as symbols can survive for years and be transported thousands of kilometers. Those same symbols become a problem for transmitting electronically so instead they may be enoded again as a sequence of signals, often just binary bits. The reciever of those bits then transforms then back to symbols and the reader interprets the symbols using their knowledge of how they relate to spoken language."));
                         }
                     };
                 });
@@ -256,11 +256,11 @@ impl ClassicCrypto {
                         }
                         None => {
                             ui.label(mono_strong("Ciphers").heading());
-                            ui.label(RichText::new("<<<DESCRIPTION>>>").size(12.0));
+                            ui.label(RichText::new("A cipher is a method of making information inaccessible to those without knowledge of a secret key.").size(12.0));
                             ui.add_space(16.0);
                             ui.separator();
-                            ui.add_space(16.0);
-                            ui.label(mono_strong("<<<INTERFACE>>>"));
+                            // ui.add_space(16.0);
+                            // ui.label(mono_strong("<<<INTERFACE>>>"));
                         }
                     };
                 });
