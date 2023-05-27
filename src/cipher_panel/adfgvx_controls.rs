@@ -6,12 +6,26 @@ use ciphers::polybius::adfgvx::AdfgvxMode;
 use ciphers::polybius::Adfgvx;
 use ciphers::traits::Cipher;
 use egui::Color32;
+use rand::{thread_rng, Rng};
+use utils::functions::shuffled_str;
+use utils::preset_alphabet::PresetAlphabet;
 
-#[derive(Default)]
 pub struct AdfgvxFrame {
     cipher: Adfgvx,
+    alphabet_string: String,
     columnar_key_string: String,
     polybius_key_string: String,
+}
+
+impl Default for AdfgvxFrame {
+    fn default() -> Self {
+        Self {
+            cipher: Default::default(),
+            alphabet_string: PresetAlphabet::BasicLatinNoJ.string(),
+            columnar_key_string: Default::default(),
+            polybius_key_string: Default::default(),
+        }
+    }
 }
 
 impl CipherFrame for AdfgvxFrame {
@@ -23,18 +37,20 @@ impl CipherFrame for AdfgvxFrame {
         ui.horizontal(|ui| {
             if ui.button("ADFGX").clicked() {
                 self.cipher.assign_mode(AdfgvxMode::Short);
+                self.alphabet_string = PresetAlphabet::BasicLatinNoJ.string();
                 self.cipher.assign_polybius_key(&self.polybius_key_string);
                 self.cipher.assign_columnar_key(&self.columnar_key_string);
             };
             if ui.button("ADFGVX").clicked() {
                 self.cipher.assign_mode(AdfgvxMode::Long);
+                self.alphabet_string = PresetAlphabet::BasicLatinWithDigits.string();
                 self.cipher.assign_polybius_key(&self.polybius_key_string);
                 self.cipher.assign_columnar_key(&self.columnar_key_string);
             };
         });
 
         // False alphabet display
-        ui.label(mono(&self.polybius_key_string).background_color(Color32::BLACK));
+        ui.label(mono(&self.alphabet_string).background_color(Color32::BLACK));
         ui.add_space(16.0);
 
         ui.label("Polybius Key Word");
@@ -57,7 +73,24 @@ impl CipherFrame for AdfgvxFrame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        self.polybius_key_string = shuffled_str(&self.alphabet_string, &mut thread_rng());
+        self.cipher.assign_polybius_key(&self.polybius_key_string);
+
+        let n_chars = thread_rng().gen_range(6..10);
+
+        self.columnar_key_string.clear();
+        for _ in 0..n_chars {
+            self.columnar_key_string.push(
+                PresetAlphabet::BasicLatin
+                    .chars()
+                    .nth(thread_rng().gen_range(0..26))
+                    .unwrap(),
+            )
+        }
+
+        self.cipher.assign_columnar_key(&self.columnar_key_string)
+    }
 
     fn reset(&mut self) {
         *self = Self::default()

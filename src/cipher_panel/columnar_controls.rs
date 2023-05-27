@@ -3,8 +3,7 @@ use super::_generic_components::{control_string, randomize_reset};
 use ciphers::traits::Cipher;
 use ciphers::transposition::Columnar;
 use eframe::egui::Ui;
-use rand::rngs::StdRng;
-use rand::{Rng, SeedableRng};
+use rand::{thread_rng, Rng};
 use utils::preset_alphabet::PresetAlphabet;
 
 pub struct ColumnarFrame {
@@ -46,7 +45,7 @@ impl CipherFrame for ColumnarFrame {
     }
 
     fn randomize(&mut self) {
-        let mut rng = StdRng::from_entropy();
+        let mut rng = thread_rng();
         let len = self.alphabet_string.chars().count();
         let n_chars = rng.gen_range(6..10);
 

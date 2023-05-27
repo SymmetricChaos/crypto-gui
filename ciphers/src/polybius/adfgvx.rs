@@ -31,7 +31,8 @@ impl Adfgvx {
     }
 
     pub fn assign_columnar_key(&mut self, key: &str) {
-        self.columnar.assign_key(key, self.alphabet())
+        self.columnar
+            .assign_key(key, PresetAlphabet::BasicLatin.into())
     }
 
     pub fn show_polybius_grid(&self) -> String {
