@@ -2,7 +2,7 @@ use crate::egui_aux::mono;
 
 use super::{CipherFrame, _generic_components::control_string};
 use ciphers::{polybius::PolybiusSquare, Cipher};
-use eframe::egui::{Color32, Ui};
+use eframe::egui::Ui;
 use utils::preset_alphabet::PresetAlphabet;
 
 #[derive(Default)]
@@ -18,30 +18,41 @@ impl CipherFrame for PolybiusSquareFrame {
         // randomize_reset(ui, self);
         ui.add_space(16.0);
 
-        ui.label("Common Latin Alphabets");
+        ui.label("Common Alphabets");
         ui.horizontal(|ui| {
             if ui.button("No Q").clicked() {
-                self.cipher.pick_alphabet(PresetAlphabet::BasicLatinNoQ)
+                self.alphabet_string = PresetAlphabet::BasicLatinNoQ.string();
+                self.cipher
+                    .assign_key(&self.key_string, &self.alphabet_string)
             };
             if ui.button("No J").clicked() {
-                self.cipher.pick_alphabet(PresetAlphabet::BasicLatinNoJ)
+                self.alphabet_string = PresetAlphabet::BasicLatinNoJ.string();
+                self.cipher
+                    .assign_key(&self.key_string, &self.alphabet_string)
             };
             if ui.button("Alphanumeric").clicked() {
+                self.alphabet_string = PresetAlphabet::BasicLatinWithDigits.string();
                 self.cipher
-                    .pick_alphabet(PresetAlphabet::BasicLatinWithDigits)
+                    .assign_key(&self.key_string, &self.alphabet_string)
             };
             if ui.button("Base64").clicked() {
-                self.cipher.pick_alphabet(PresetAlphabet::Base64)
+                self.alphabet_string = PresetAlphabet::Base64.string();
+                self.cipher
+                    .assign_key(&self.key_string, &self.alphabet_string)
             };
         });
 
-        // False alphabet display
-        ui.label(mono(&self.alphabet_string).background_color(Color32::BLACK));
+        ui.label("Alphabet");
+        if control_string(ui, &mut self.alphabet_string).changed() {
+            self.cipher
+                .assign_key(&self.key_string, &self.alphabet_string);
+        }
         ui.add_space(16.0);
 
         ui.label("Key Word");
         if control_string(ui, &mut self.key_string).changed() {
-            self.cipher.assign_key(&self.key_string)
+            self.cipher
+                .assign_key(&self.key_string, &self.alphabet_string)
         }
 
         ui.add_space(16.0);

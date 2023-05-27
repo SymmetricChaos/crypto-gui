@@ -1,6 +1,9 @@
 use crate::egui_aux::mono;
 
-use super::{CipherFrame, _generic_components::control_string};
+use super::{
+    CipherFrame,
+    _generic_components::{control_string, randomize_reset},
+};
 use ciphers::{polyalphabetic::Alberti, Cipher};
 use eframe::egui::{Slider, Ui};
 use rand::{rngs::StdRng, Rng, SeedableRng};
@@ -24,7 +27,7 @@ impl Default for AlbertiFrame {
 
 impl CipherFrame for AlbertiFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Fixed Alphabet");

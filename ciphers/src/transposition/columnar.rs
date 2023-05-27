@@ -2,31 +2,21 @@ use crate::{errors::CipherError, traits::Cipher};
 use utils::{
     functions::rank_str,
     grid::{str_to_char_grid, Grid, Symbol, BLOCK, EMPTY},
-    preset_alphabet::PresetAlphabet,
-    vecstring::VecString,
 };
 
 pub struct Columnar {
-    pub alphabet: VecString,
     pub key: Vec<usize>,
 }
 
 impl Columnar {
-    pub fn assign_alphabet(&mut self, alphabet: &str) {
-        self.alphabet = VecString::unique_from(alphabet);
-    }
-
-    pub fn assign_key(&mut self, key_word: &str) {
-        self.key = rank_str(key_word, &self.alphabet.to_string());
+    pub fn assign_key(&mut self, key_word: &str, alphabet: &str) {
+        self.key = rank_str(key_word, alphabet);
     }
 }
 
 impl Default for Columnar {
     fn default() -> Self {
-        Self {
-            alphabet: VecString::from(PresetAlphabet::BasicLatin),
-            key: Vec::new(),
-        }
+        Self { key: Vec::new() }
     }
 }
 
@@ -101,6 +91,8 @@ impl Cipher for Columnar {
 
 #[cfg(test)]
 mod columnar_tests {
+    use utils::preset_alphabet::PresetAlphabet;
+
     use super::*;
 
     const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
@@ -109,14 +101,14 @@ mod columnar_tests {
     #[test]
     fn encrypt_test() {
         let mut cipher = Columnar::default();
-        cipher.assign_key("TEST");
+        cipher.assign_key("TEST", PresetAlphabet::BasicLatin.slice());
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = Columnar::default();
-        cipher.assign_key("TEST");
+        cipher.assign_key("TEST", PresetAlphabet::BasicLatin.slice());
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

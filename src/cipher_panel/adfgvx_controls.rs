@@ -2,10 +2,10 @@ use crate::egui_aux::mono;
 
 use super::CipherFrame;
 use super::_generic_components::control_string;
+use ciphers::polybius::adfgvx::AdfgvxMode;
 use ciphers::polybius::Adfgvx;
 use ciphers::traits::Cipher;
 use egui::Color32;
-use utils::preset_alphabet::PresetAlphabet;
 
 #[derive(Default)]
 pub struct AdfgvxFrame {
@@ -22,18 +22,14 @@ impl CipherFrame for AdfgvxFrame {
         ui.label("Select Mode");
         ui.horizontal(|ui| {
             if ui.button("ADFGX").clicked() {
-                self.cipher
-                    .polybius
-                    .pick_alphabet(PresetAlphabet::BasicLatinNoJ);
-                self.polybius_key_string = PresetAlphabet::BasicLatinNoJ.string();
-                self.cipher.columnar.assign_key(&self.polybius_key_string);
+                self.cipher.assign_mode(AdfgvxMode::Short);
+                self.cipher.assign_polybius_key(&self.polybius_key_string);
+                self.cipher.assign_columnar_key(&self.columnar_key_string);
             };
             if ui.button("ADFGVX").clicked() {
-                self.cipher
-                    .polybius
-                    .pick_alphabet(PresetAlphabet::BasicLatinWithDigits);
-                self.polybius_key_string = PresetAlphabet::BasicLatinWithDigits.string();
-                self.cipher.columnar.assign_key(&self.polybius_key_string);
+                self.cipher.assign_mode(AdfgvxMode::Long);
+                self.cipher.assign_polybius_key(&self.polybius_key_string);
+                self.cipher.assign_columnar_key(&self.columnar_key_string);
             };
         });
 
@@ -43,17 +39,17 @@ impl CipherFrame for AdfgvxFrame {
 
         ui.label("Polybius Key Word");
         if control_string(ui, &mut self.polybius_key_string).changed() {
-            self.cipher.columnar.assign_key(&self.polybius_key_string)
+            self.cipher.assign_polybius_key(&self.polybius_key_string)
         }
         ui.add_space(16.0);
 
         ui.add_space(16.0);
         ui.label("Grid");
-        ui.label(mono(self.cipher.polybius.show_grid()));
+        ui.label(mono(self.cipher.show_polybius_grid()));
 
         ui.label("Columnar Key Word");
         if control_string(ui, &mut self.columnar_key_string).changed() {
-            self.cipher.columnar.assign_key(&self.columnar_key_string)
+            self.cipher.assign_columnar_key(&self.columnar_key_string)
         }
     }
 

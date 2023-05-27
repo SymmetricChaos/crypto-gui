@@ -1,44 +1,30 @@
 use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
-use num::Integer;
+use num::{integer::Roots, Integer};
 use std::fmt::{self, Formatter};
-use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
+use utils::{math_functions::is_square, preset_alphabet::PresetAlphabet, vecstring::VecString};
 
 pub struct PolybiusSquare {
-    pub alphabet: VecString,
+    pub square: VecString,
     pub labels: VecString,
-    pub key_word: String,
     side_len: usize,
 }
 
 impl Default for PolybiusSquare {
     fn default() -> Self {
         Self {
-            alphabet: VecString::from(PresetAlphabet::BasicLatinNoQ),
+            square: VecString::from(PresetAlphabet::BasicLatinNoQ),
             side_len: 5,
             labels: VecString::from(PresetAlphabet::Digits1),
-            key_word: String::new(),
         }
     }
 }
 
 impl PolybiusSquare {
-    pub fn assign_key(&mut self, key_word: &str) {
-        self.key_word = key_word.to_string();
-        self.alphabet = VecString::keyed_alphabet(&self.key_word, &self.alphabet.to_string());
-    }
-
-    pub fn pick_alphabet(&mut self, mode: PresetAlphabet) {
-        match mode {
-            PresetAlphabet::BasicLatinNoJ
-            | PresetAlphabet::BasicLatinNoQ
-            | PresetAlphabet::BasicLatinWithDigits
-            | PresetAlphabet::Base64 => {
-                self.alphabet = VecString::from(mode);
-                self.side_len = (mode.len() as f64).sqrt().ceil() as usize;
-            }
-            _ => (),
-        }
+    pub fn assign_key(&mut self, key_word: &str, alphabet: &str) {
+        self.square = VecString::keyed_alphabet(key_word, alphabet);
+        self.square = VecString::unique_from(alphabet);
+        self.side_len = alphabet.chars().count().sqrt();
     }
 
     pub fn assign_labels(&mut self, labels: &str) {
@@ -57,12 +43,12 @@ impl PolybiusSquare {
     }
 
     pub fn alphabet_len(&self) -> usize {
-        self.alphabet.len()
+        self.square.len()
     }
 
     // Cannot fail due to checks in encrypt/decrypt
     fn char_to_position(&self, symbol: char) -> (usize, usize) {
-        let num = self.alphabet.get_pos_of(symbol).unwrap();
+        let num = self.square.get_pos_of(symbol).unwrap();
         (num / self.side_len, num % self.side_len)
     }
 
@@ -78,12 +64,17 @@ impl PolybiusSquare {
             .ok_or(CipherError::invalid_input_char(position.1))?;
 
         let num = y * self.side_len + x;
-        Ok(self.alphabet.chars().nth(num).unwrap())
+        Ok(self.square.chars().nth(num).unwrap())
     }
 
-    fn check_labels(&self) -> Result<(), CipherError> {
+    fn check_settings(&self) -> Result<(), CipherError> {
         if self.labels.len() < self.side_len {
             return Err(CipherError::key("not enough labels for grid size"));
+        }
+        if !is_square(self.square.chars().count()) {
+            return Err(CipherError::alphabet(
+                "alphabet must have a square number of characters",
+            ));
         }
         Ok(())
     }
@@ -98,7 +89,7 @@ impl PolybiusSquare {
             square.push(' ');
         }
 
-        for (n, c) in self.alphabet.chars().enumerate() {
+        for (n, c) in self.square.chars().enumerate() {
             if n % self.side_len == 0 {
                 let ylab = self.labels.get_char_at(n / self.side_len).unwrap_or(' ');
                 square.push_str(&format!("\n{ylab} "));
@@ -112,7 +103,7 @@ impl PolybiusSquare {
 
 impl Cipher for PolybiusSquare {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        self.check_labels()?;
+        self.check_settings()?;
 
         let mut out = String::with_capacity(text.chars().count() * 2);
 
@@ -133,7 +124,7 @@ impl Cipher for PolybiusSquare {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        self.check_labels()?;
+        self.check_settings()?;
         if !text.chars().count().is_multiple_of(&2) {
             return Err(CipherError::input(
                 "Input text must have a length that is a multiple of two.",
@@ -156,7 +147,7 @@ impl fmt::Display for PolybiusSquare {
         for xlab in self.labels.chars().take(self.side_len) {
             square.push_str(&format!("{xlab} "))
         }
-        for (n, c) in self.alphabet.chars().enumerate() {
+        for (n, c) in self.square.chars().enumerate() {
             if n % self.side_len == 0 {
                 let ylab = self.labels.chars().nth(n / self.side_len).unwrap();
                 square.push_str(&format!("\n{ylab} "));
@@ -179,14 +170,14 @@ mod polybius_tests {
     #[test]
     fn encrypt_test() {
         let mut cipher = PolybiusSquare::default();
-        cipher.assign_key("INVENTORY");
+        cipher.assign_key("INVENTORY", PresetAlphabet::BasicLatinNoJ);
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = PolybiusSquare::default();
-        cipher.assign_key("INVENTORY");
+        cipher.assign_key("INVENTORY", PresetAlphabet::BasicLatinNoJ);
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

@@ -3,34 +3,48 @@ use crate::transposition::Columnar;
 use crate::{errors::CipherError, traits::Cipher};
 use utils::preset_alphabet::PresetAlphabet;
 
+pub enum AdfgvxMode {
+    Short,
+    Long,
+}
+
 pub struct Adfgvx {
-    pub polybius: PolybiusSquare,
-    pub columnar: Columnar,
+    pub mode: AdfgvxMode,
+    polybius: PolybiusSquare,
+    columnar: Columnar,
 }
 
 impl Adfgvx {
-    pub fn set_alphabet(&mut self, mode: PresetAlphabet) {
-        match mode {
-            PresetAlphabet::BasicLatinNoJ => {
-                self.polybius.pick_alphabet(mode);
-                self.polybius.assign_labels("ADFGX");
-            }
-            PresetAlphabet::BasicLatinWithDigits => {
-                self.polybius.pick_alphabet(mode);
-                self.polybius.assign_labels("ADFGVX");
-            }
-            _ => (),
+    pub fn alphabet(&self) -> &'static str {
+        match self.mode {
+            AdfgvxMode::Short => PresetAlphabet::BasicLatinNoJ.slice(),
+            AdfgvxMode::Long => PresetAlphabet::BasicLatinWithDigits.slice(),
         }
+    }
+
+    pub fn assign_mode(&mut self, mode: AdfgvxMode) {
+        self.mode = mode;
+    }
+
+    pub fn assign_polybius_key(&mut self, key: &str) {
+        self.polybius.assign_key(key, self.alphabet())
+    }
+
+    pub fn assign_columnar_key(&mut self, key: &str) {
+        self.columnar.assign_key(key, self.alphabet())
+    }
+
+    pub fn show_polybius_grid(&self) -> String {
+        self.polybius.show_grid()
     }
 }
 
 impl Default for Adfgvx {
     fn default() -> Self {
-        let mut polybius = PolybiusSquare::default();
-        polybius.pick_alphabet(PresetAlphabet::BasicLatinNoJ);
-        polybius.assign_labels("ADFGX");
+        let polybius = PolybiusSquare::default();
 
         Self {
+            mode: AdfgvxMode::Short,
             polybius,
             columnar: Columnar::default(),
         }
@@ -64,34 +78,34 @@ mod adfgvx_tests {
     #[test]
     fn encrypt_test_adfgx() {
         let mut cipher = Adfgvx::default();
-        cipher.polybius.assign_key("KEYWORKFORUSEINTEST");
-        cipher.columnar.assign_key("SOMEWORD");
+        cipher.assign_polybius_key("KEYWORKFORUSEINTEST");
+        cipher.assign_columnar_key("SOMEWORD");
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT1);
     }
 
     #[test]
     fn decrypt_test_adfgx() {
         let mut cipher = Adfgvx::default();
-        cipher.polybius.assign_key("KEYWORKFORUSEINTEST");
-        cipher.columnar.assign_key("SOMEWORD");
+        cipher.assign_polybius_key("KEYWORKFORUSEINTEST");
+        cipher.assign_columnar_key("SOMEWORD");
         assert_eq!(cipher.decrypt(CIPHERTEXT1).unwrap(), PLAINTEXT);
     }
 
     #[test]
     fn encrypt_test_adfgvx() {
         let mut cipher = Adfgvx::default();
-        cipher.set_alphabet(PresetAlphabet::BasicLatinWithDigits);
-        cipher.polybius.assign_key("57This9Should0Mix2Words");
-        cipher.columnar.assign_key("SOMEWORD");
+        cipher.mode = AdfgvxMode::Long;
+        cipher.assign_polybius_key("57This9Should0Mix2Words");
+        cipher.assign_columnar_keyy("SOMEWORD");
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT2);
     }
 
     #[test]
     fn decrypt_test_adfgvx() {
         let mut cipher = Adfgvx::default();
-        cipher.set_alphabet(PresetAlphabet::BasicLatinWithDigits);
-        cipher.polybius.assign_key("57This9Should0Mix2Words");
-        cipher.columnar.assign_key("SOMEWORD");
+        cipher.mode = AdfgvxMode::Long;
+        cipher.assign_polybius_key("57This9Should0Mix2Words");
+        cipher.assign_columnar_key("SOMEWORD");
         assert_eq!(cipher.decrypt(CIPHERTEXT2).unwrap(), PLAINTEXT);
     }
 }

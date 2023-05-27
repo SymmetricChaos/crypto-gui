@@ -9,13 +9,27 @@ pub struct B64 {
     pub columnar2: Columnar,
 }
 
+impl B64 {
+    pub fn assign_polybius_key(&mut self, key: &str) {
+        self.polybius
+            .assign_key(key, PresetAlphabet::Base64.slice());
+    }
+
+    pub fn assign_columnar_key_1(&mut self, key: &str) {
+        self.columnar1
+            .assign_key(key, PresetAlphabet::Base64.slice());
+    }
+
+    pub fn assign_columnar_key_2(&mut self, key: &str) {
+        self.columnar2
+            .assign_key(key, PresetAlphabet::Base64.slice());
+    }
+}
+
 impl Default for B64 {
     fn default() -> Self {
-        let mut polybius = PolybiusSquare::default();
-        polybius.pick_alphabet(PresetAlphabet::Base64);
-
         Self {
-            polybius,
+            polybius: PolybiusSquare::default(),
             columnar1: Columnar::default(),
             columnar2: Columnar::default(),
         }
@@ -38,12 +52,6 @@ impl Cipher for B64 {
         let t4 = self.polybius.decrypt(&t3)?;
         Ok(t4)
     }
-
-    // fn randomize(&mut self) {
-    //     self.polybius.randomize();
-    //     self.columnar1.randomize();
-    //     self.columnar2.randomize();
-    // }
 }
 
 #[cfg(test)]
@@ -56,18 +64,18 @@ mod b64_tests {
     #[test]
     fn encrypt_test() {
         let mut cipher = B64::default();
-        cipher.polybius.assign_key("ENCRYPTION");
-        cipher.columnar1.assign_key("NOVELTY");
-        cipher.columnar2.assign_key("SHUFFLE");
+        cipher.assign_polybius_key("ENCRYPTION");
+        cipher.assign_columnar_key_1("NOVELTY");
+        cipher.assign_columnar_key_2("SHUFFLE");
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = B64::default();
-        cipher.polybius.assign_key("ENCRYPTION");
-        cipher.columnar1.assign_key("NOVELTY");
-        cipher.columnar2.assign_key("SHUFFLE");
+        cipher.passign_polybius_key("ENCRYPTION");
+        cipher.assign_columnar_key_1("NOVELTY");
+        cipher.assign_columnar_key_2("SHUFFLE");
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }
