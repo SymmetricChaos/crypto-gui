@@ -1,5 +1,5 @@
 use codes::tap_code::TapCode;
-use utils::preset_alphabet::PresetAlphabet;
+use utils::preset_alphabet::Alphabet;
 
 use crate::{
     cipher_panel::_generic_components::control_string,
@@ -17,7 +17,7 @@ impl Default for TapCodeFrame {
     fn default() -> Self {
         Self {
             code: Default::default(),
-            alphabet_string: String::from(PresetAlphabet::BasicLatinNoC),
+            alphabet_string: String::from(Alphabet::BasicLatinNoC),
         }
     }
 }
@@ -27,13 +27,13 @@ impl CodeFrame for TapCodeFrame {
         ui.label(subheading("Common Latin Alphabets"));
         ui.horizontal(|ui| {
             if ui.button("No C").clicked() {
-                self.code.assign_alphabet(PresetAlphabet::BasicLatinNoC)
+                self.code.assign_alphabet(Alphabet::BasicLatinNoC)
             };
             if ui.button("No J").clicked() {
-                self.code.assign_alphabet(PresetAlphabet::BasicLatinNoJ)
+                self.code.assign_alphabet(Alphabet::BasicLatinNoJ)
             };
             if ui.button("No Q").clicked() {
-                self.code.assign_alphabet(PresetAlphabet::BasicLatinNoQ)
+                self.code.assign_alphabet(Alphabet::BasicLatinNoQ)
             };
         });
 

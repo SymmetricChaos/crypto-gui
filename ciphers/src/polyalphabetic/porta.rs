@@ -1,7 +1,7 @@
 use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
 use lazy_static::lazy_static;
-use utils::preset_alphabet::PresetAlphabet;
+use utils::preset_alphabet::Alphabet;
 use utils::vecstring::VecString;
 
 // Porta Cipher uses a sequence of 13 alphabets to encrypt characters. The visible pattern ensures the cipher is reciprocal.
@@ -32,7 +32,7 @@ impl Default for Porta {
     fn default() -> Self {
         Self {
             key_vals: Vec::new(),
-            alphabet: VecString::from(PresetAlphabet::BasicLatin),
+            alphabet: VecString::from(Alphabet::BasicLatin),
         }
     }
 }

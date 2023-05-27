@@ -1,6 +1,6 @@
 use crate::{errors::CipherError, traits::Cipher};
 use std::{iter::Cycle, slice::Iter};
-use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
+use utils::{preset_alphabet::Alphabet, vecstring::VecString};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum QuagmireVersion {
@@ -23,9 +23,9 @@ impl Default for Quagmire {
     fn default() -> Quagmire {
         Self {
             version: QuagmireVersion::V1,
-            alphabet: VecString::from(PresetAlphabet::BasicLatin),
-            pt_key: VecString::from(PresetAlphabet::BasicLatin),
-            ct_key: VecString::from(PresetAlphabet::BasicLatin),
+            alphabet: VecString::from(Alphabet::BasicLatin),
+            pt_key: VecString::from(Alphabet::BasicLatin),
+            ct_key: VecString::from(Alphabet::BasicLatin),
             ind_key: Vec::new(),
             indicator: 'A',
         }

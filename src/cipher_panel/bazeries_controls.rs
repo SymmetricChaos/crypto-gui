@@ -1,7 +1,7 @@
 use ciphers::{polyalphabetic::Bazeries, Cipher};
 use egui::{Slider, Ui};
 use rand::{rngs::StdRng, SeedableRng};
-use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet};
+use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
 
 use super::{
     CipherFrame,
@@ -17,7 +17,7 @@ impl Default for BazeriesFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
-            alphabet_string: PresetAlphabet::BasicLatin.into(),
+            alphabet_string: Alphabet::BasicLatin.into(),
         }
     }
 }

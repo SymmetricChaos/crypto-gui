@@ -82,7 +82,7 @@ impl Cipher for Columnar {
 
 #[cfg(test)]
 mod columnar_tests {
-    use utils::preset_alphabet::PresetAlphabet;
+    use utils::preset_alphabet::Alphabet;
 
     use super::*;
 
@@ -92,14 +92,14 @@ mod columnar_tests {
     #[test]
     fn encrypt_test() {
         let mut cipher = Columnar::default();
-        cipher.assign_key("TEST", PresetAlphabet::BasicLatin.slice());
+        cipher.assign_key("TEST", Alphabet::BasicLatin.slice());
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = Columnar::default();
-        cipher.assign_key("TEST", PresetAlphabet::BasicLatin.slice());
+        cipher.assign_key("TEST", Alphabet::BasicLatin.slice());
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

@@ -1,7 +1,7 @@
 use ciphers::{playfair::Slidefair, Cipher};
 use egui::Ui;
 use rand::{rngs::StdRng, SeedableRng};
-use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet};
+use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
 
 use crate::egui_aux::mono;
 
@@ -21,7 +21,7 @@ impl Default for SlidefairFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
-            alphabet_string: PresetAlphabet::BasicLatin.into(),
+            alphabet_string: Alphabet::BasicLatin.into(),
             key_word_string: Default::default(),
             spacer_string: String::from("X"),
         }

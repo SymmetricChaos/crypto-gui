@@ -1,5 +1,5 @@
 use crate::{errors::CipherError, traits::Cipher};
-use utils::preset_alphabet::PresetAlphabet;
+use utils::preset_alphabet::Alphabet;
 use utils::vecstring::VecString;
 
 pub struct Caesar {
@@ -30,8 +30,8 @@ impl Default for Caesar {
     fn default() -> Self {
         Self {
             shift: 0,
-            alphabet: VecString::from(PresetAlphabet::BasicLatin),
-            alphabet_string: String::from(PresetAlphabet::BasicLatin),
+            alphabet: VecString::from(Alphabet::BasicLatin),
+            alphabet_string: String::from(Alphabet::BasicLatin),
         }
     }
 }

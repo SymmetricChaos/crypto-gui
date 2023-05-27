@@ -3,7 +3,7 @@ use crate::egui_aux::subheading;
 use codes::block::BlockCode;
 use egui::TextEdit;
 use itertools::Itertools;
-use utils::preset_alphabet::PresetAlphabet;
+use utils::preset_alphabet::Alphabet;
 
 pub struct BlockCodeFrame {
     code: BlockCode,
@@ -15,7 +15,7 @@ impl Default for BlockCodeFrame {
     fn default() -> Self {
         Self {
             code: Default::default(),
-            alphabet_string: String::from(PresetAlphabet::BasicLatin),
+            alphabet_string: String::from(Alphabet::BasicLatin),
             symbol_string: String::from("01"),
         }
     }

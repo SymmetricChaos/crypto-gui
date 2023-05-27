@@ -1,5 +1,5 @@
 use crate::{errors::CipherError, traits::Cipher};
-use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
+use utils::{preset_alphabet::Alphabet, vecstring::VecString};
 
 use super::rotor::HebernRotor;
 
@@ -54,7 +54,7 @@ impl HebernRotorCage {
 impl Default for HebernRotorCage {
     fn default() -> Self {
         let counters = vec![0; 5];
-        let alphabet = VecString::from(PresetAlphabet::BasicLatin);
+        let alphabet = VecString::from(Alphabet::BasicLatin);
 
         let mut rotors = Vec::with_capacity(5);
         rotors.push(HebernRotor::new("WQHUFATCNKXZLEJIMRGOBPYVSD", &alphabet).unwrap());
@@ -95,7 +95,7 @@ impl Default for Hebern {
     fn default() -> Self {
         Self {
             rotors: HebernRotorCage::default(),
-            alphabet: VecString::from(PresetAlphabet::BasicLatin),
+            alphabet: VecString::from(Alphabet::BasicLatin),
         }
     }
 }

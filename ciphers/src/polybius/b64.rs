@@ -1,7 +1,7 @@
 use super::PolybiusSquare;
 use crate::transposition::Columnar;
 use crate::{errors::CipherError, traits::Cipher};
-use utils::preset_alphabet::PresetAlphabet;
+use utils::preset_alphabet::Alphabet;
 
 pub struct B64 {
     pub polybius: PolybiusSquare,
@@ -11,18 +11,15 @@ pub struct B64 {
 
 impl B64 {
     pub fn assign_polybius_key(&mut self, key: &str) {
-        self.polybius
-            .assign_key(key, PresetAlphabet::Base64.slice());
+        self.polybius.assign_key(key, Alphabet::Base64.slice());
     }
 
     pub fn assign_columnar_key_1(&mut self, key: &str) {
-        self.columnar1
-            .assign_key(key, PresetAlphabet::Base64.slice());
+        self.columnar1.assign_key(key, Alphabet::Base64.slice());
     }
 
     pub fn assign_columnar_key_2(&mut self, key: &str) {
-        self.columnar2
-            .assign_key(key, PresetAlphabet::Base64.slice());
+        self.columnar2.assign_key(key, Alphabet::Base64.slice());
     }
 }
 

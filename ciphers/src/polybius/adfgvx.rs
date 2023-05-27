@@ -1,7 +1,7 @@
 use super::PolybiusSquare;
 use crate::transposition::Columnar;
 use crate::{errors::CipherError, traits::Cipher};
-use utils::preset_alphabet::PresetAlphabet;
+use utils::preset_alphabet::Alphabet;
 
 pub enum AdfgvxMode {
     Short,
@@ -17,8 +17,8 @@ pub struct Adfgvx {
 impl Adfgvx {
     pub fn alphabet(&self) -> &'static str {
         match self.mode {
-            AdfgvxMode::Short => PresetAlphabet::BasicLatinNoJ.slice(),
-            AdfgvxMode::Long => PresetAlphabet::BasicLatinWithDigits.slice(),
+            AdfgvxMode::Short => Alphabet::BasicLatinNoJ.slice(),
+            AdfgvxMode::Long => Alphabet::BasicLatinWithDigits.slice(),
         }
     }
 
@@ -31,8 +31,7 @@ impl Adfgvx {
     }
 
     pub fn assign_columnar_key(&mut self, key: &str) {
-        self.columnar
-            .assign_key(key, PresetAlphabet::BasicLatin.into())
+        self.columnar.assign_key(key, Alphabet::BasicLatin.into())
     }
 
     pub fn show_polybius_grid(&self) -> String {

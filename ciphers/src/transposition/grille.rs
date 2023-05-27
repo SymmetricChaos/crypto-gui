@@ -4,7 +4,7 @@ use rand::{prelude::StdRng, SeedableRng};
 use std::cell::RefCell;
 use utils::{
     grid::{str_to_char_grid, Grid, Symbol},
-    preset_alphabet::PresetAlphabet,
+    preset_alphabet::Alphabet,
     vecstring::VecString,
 };
 
@@ -51,7 +51,7 @@ impl Grille {
 impl Default for Grille {
     fn default() -> Self {
         Grille {
-            null_alphabet: VecString::from(PresetAlphabet::BasicLatin),
+            null_alphabet: VecString::from(Alphabet::BasicLatin),
             grid: Grid::new_empty(4, 4),
             seed: None,
             use_nulls: true,

@@ -1,5 +1,5 @@
 use crate::{errors::CipherError, traits::Cipher};
-use utils::{math_functions::mul_inv, preset_alphabet::PresetAlphabet, vecstring::VecString};
+use utils::{math_functions::mul_inv, preset_alphabet::Alphabet, vecstring::VecString};
 
 pub struct Affine {
     pub add_key: usize,
@@ -56,7 +56,7 @@ impl Default for Affine {
         Self {
             add_key: 0,
             mul_key: 1,
-            alphabet: VecString::from(PresetAlphabet::BasicLatin),
+            alphabet: VecString::from(Alphabet::BasicLatin),
         }
     }
 }

@@ -2,7 +2,7 @@ use std::ops::{Add, Sub};
 
 use itertools::Itertools;
 use num::{Integer, Zero};
-use utils::preset_alphabet::PresetAlphabet;
+use utils::preset_alphabet::Alphabet;
 
 use crate::{errors::CodeError, traits::Code};
 
@@ -33,7 +33,7 @@ impl Default for BlockCode {
     fn default() -> Self {
         BlockCode {
             width: 5,
-            alphabet: PresetAlphabet::BasicLatin.chars().collect_vec(),
+            alphabet: Alphabet::BasicLatin.chars().collect_vec(),
             symbols: vec!['0', '1'],
         }
     }

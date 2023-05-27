@@ -7,7 +7,7 @@ use super::{
 use ciphers::{polyalphabetic::Alberti, Cipher};
 use eframe::egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
-use utils::preset_alphabet::PresetAlphabet;
+use utils::preset_alphabet::Alphabet;
 
 pub struct AlbertiFrame {
     cipher: Alberti,
@@ -19,8 +19,8 @@ impl Default for AlbertiFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
-            fixed_alphabet_string: String::from(PresetAlphabet::BasicLatin),
-            moving_alphabet_string: String::from(PresetAlphabet::BasicLatin).to_ascii_lowercase(),
+            fixed_alphabet_string: String::from(Alphabet::BasicLatin),
+            moving_alphabet_string: String::from(Alphabet::BasicLatin).to_ascii_lowercase(),
         }
     }
 }

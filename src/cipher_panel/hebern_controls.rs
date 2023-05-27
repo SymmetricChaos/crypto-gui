@@ -1,6 +1,6 @@
 use ciphers::{hebern::Hebern, Cipher};
 use egui::{Slider, TextEdit, Ui};
-use utils::preset_alphabet::PresetAlphabet;
+use utils::preset_alphabet::Alphabet;
 
 use super::{CipherFrame, _generic_components::control_string};
 
@@ -13,7 +13,7 @@ impl Default for HebernFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
-            alphabet_string: PresetAlphabet::BasicLatin.into(),
+            alphabet_string: Alphabet::BasicLatin.into(),
         }
     }
 }

@@ -3,7 +3,7 @@ use ciphers::{
     Cipher,
 };
 use egui::Ui;
-use utils::preset_alphabet::PresetAlphabet;
+use utils::preset_alphabet::Alphabet;
 
 use crate::egui_aux::error_text;
 
@@ -21,7 +21,7 @@ impl Default for QuagmireFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
-            alphabet_string: String::from(PresetAlphabet::BasicLatin),
+            alphabet_string: String::from(Alphabet::BasicLatin),
             ind_key_string: Default::default(),
             pt_key_string: Default::default(),
             ct_key_string: Default::default(),

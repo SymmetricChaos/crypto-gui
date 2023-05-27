@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use utils::preset_alphabet::PresetAlphabet;
+use utils::preset_alphabet::Alphabet;
 
 use crate::{errors::CodeError, traits::Code};
 
@@ -12,7 +12,7 @@ pub struct TapCode {
 impl Default for TapCode {
     fn default() -> Self {
         Self {
-            grid: PresetAlphabet::BasicLatinNoC.chars().collect_vec(),
+            grid: Alphabet::BasicLatinNoC.chars().collect_vec(),
             side_len: 5,
             symbol: '.',
         }
@@ -20,11 +20,9 @@ impl Default for TapCode {
 }
 
 impl TapCode {
-    pub fn assign_alphabet(&mut self, mode: PresetAlphabet) {
+    pub fn assign_alphabet(&mut self, mode: Alphabet) {
         match mode {
-            PresetAlphabet::BasicLatinNoC
-            | PresetAlphabet::BasicLatinNoJ
-            | PresetAlphabet::BasicLatinNoQ => {
+            Alphabet::BasicLatinNoC | Alphabet::BasicLatinNoJ | Alphabet::BasicLatinNoQ => {
                 self.grid = mode.chars().collect_vec();
                 self.side_len = (mode.len() as f64).sqrt().ceil() as usize;
             }

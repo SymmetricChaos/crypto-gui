@@ -1,4 +1,4 @@
-use utils::{functions::keyed_alphabet, preset_alphabet::PresetAlphabet, vecstring::VecString};
+use utils::{functions::keyed_alphabet, preset_alphabet::Alphabet, vecstring::VecString};
 
 use crate::{errors::CipherError, traits::Cipher};
 
@@ -20,7 +20,7 @@ impl Default for Hutton {
         Self {
             version: HuttonVersion::V1,
 
-            alphabet: VecString::from(PresetAlphabet::BasicLatin),
+            alphabet: VecString::from(Alphabet::BasicLatin),
 
             keyed_alpha: VecString::with_capacity(26),
 

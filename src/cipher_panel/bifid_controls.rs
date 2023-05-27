@@ -1,6 +1,6 @@
 use ciphers::{polybius::Bifid, Cipher};
 use egui::{Slider, Ui};
-use utils::preset_alphabet::PresetAlphabet;
+use utils::preset_alphabet::Alphabet;
 
 use crate::egui_aux::mono;
 
@@ -16,7 +16,7 @@ impl Default for BifidFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
-            alphabet_string: PresetAlphabet::BasicLatinNoQ.into(),
+            alphabet_string: Alphabet::BasicLatinNoQ.into(),
             key_string: Default::default(),
         }
     }
@@ -36,27 +36,26 @@ impl CipherFrame for BifidFrame {
             if ui.button("No Q").clicked() {
                 self.cipher
                     .polybius
-                    .assign_key(&self.key_string, PresetAlphabet::BasicLatinNoQ.into());
-                self.alphabet_string = PresetAlphabet::BasicLatinNoQ.string();
+                    .assign_key(&self.key_string, Alphabet::BasicLatinNoQ.into());
+                self.alphabet_string = Alphabet::BasicLatinNoQ.string();
             };
             if ui.button("No J").clicked() {
                 self.cipher
                     .polybius
-                    .assign_key(&self.key_string, PresetAlphabet::BasicLatinNoJ.into());
-                self.alphabet_string = PresetAlphabet::BasicLatinNoJ.string();
+                    .assign_key(&self.key_string, Alphabet::BasicLatinNoJ.into());
+                self.alphabet_string = Alphabet::BasicLatinNoJ.string();
             };
             if ui.button("Alphanumeric").clicked() {
-                self.cipher.polybius.assign_key(
-                    &self.key_string,
-                    PresetAlphabet::BasicLatinWithDigits.into(),
-                );
-                self.alphabet_string = PresetAlphabet::BasicLatinWithDigits.string();
+                self.cipher
+                    .polybius
+                    .assign_key(&self.key_string, Alphabet::BasicLatinWithDigits.into());
+                self.alphabet_string = Alphabet::BasicLatinWithDigits.string();
             };
             if ui.button("Base64").clicked() {
                 self.cipher
                     .polybius
-                    .assign_key(&self.key_string, PresetAlphabet::Base64.into());
-                self.alphabet_string = PresetAlphabet::Base64.string();
+                    .assign_key(&self.key_string, Alphabet::Base64.into());
+                self.alphabet_string = Alphabet::Base64.string();
             };
         });
 

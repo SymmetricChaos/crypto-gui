@@ -6,7 +6,7 @@ use lazy_static::lazy_static;
 use std::fs::read;
 use std::path::PathBuf;
 use utils::functions::bimap_from_iter;
-use utils::preset_alphabet::PresetAlphabet;
+use utils::preset_alphabet::Alphabet;
 
 const MASK: u8 = 0b00111111;
 const PAD: u8 = '=' as u8;
@@ -19,7 +19,7 @@ pub enum B64Variant {
 
 lazy_static! {
     pub static ref B64_MAP: BiMap<u8, u8> = bimap_from_iter(
-        PresetAlphabet::Base64
+        Alphabet::Base64
             .chars()
             .enumerate()
             .map(|(n, c)| (n as u8, c as u8))

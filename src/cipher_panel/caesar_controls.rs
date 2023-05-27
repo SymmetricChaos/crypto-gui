@@ -1,7 +1,7 @@
 use ciphers::{substitution::Caesar, Cipher};
 use egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
-use utils::preset_alphabet::PresetAlphabet;
+use utils::preset_alphabet::Alphabet;
 
 use super::{
     CipherFrame,
@@ -17,7 +17,7 @@ impl Default for CaesarFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
-            alphabet_string: PresetAlphabet::BasicLatin.into(),
+            alphabet_string: Alphabet::BasicLatin.into(),
         }
     }
 }

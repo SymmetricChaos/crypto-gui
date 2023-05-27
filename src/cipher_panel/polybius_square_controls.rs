@@ -4,7 +4,7 @@ use super::{CipherFrame, _generic_components::control_string};
 use ciphers::{polybius::PolybiusSquare, Cipher};
 use eframe::egui::Ui;
 use rand::thread_rng;
-use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet};
+use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
 
 #[derive(Default)]
 pub struct PolybiusSquareFrame {
@@ -22,22 +22,22 @@ impl CipherFrame for PolybiusSquareFrame {
         ui.label("Common Alphabets");
         ui.horizontal(|ui| {
             if ui.button("No Q").clicked() {
-                self.alphabet_string = PresetAlphabet::BasicLatinNoQ.string();
+                self.alphabet_string = Alphabet::BasicLatinNoQ.string();
                 self.cipher
                     .assign_key(&self.key_string, &self.alphabet_string)
             };
             if ui.button("No J").clicked() {
-                self.alphabet_string = PresetAlphabet::BasicLatinNoJ.string();
+                self.alphabet_string = Alphabet::BasicLatinNoJ.string();
                 self.cipher
                     .assign_key(&self.key_string, &self.alphabet_string)
             };
             if ui.button("Alphanumeric").clicked() {
-                self.alphabet_string = PresetAlphabet::BasicLatinWithDigits.string();
+                self.alphabet_string = Alphabet::BasicLatinWithDigits.string();
                 self.cipher
                     .assign_key(&self.key_string, &self.alphabet_string)
             };
             if ui.button("Base64").clicked() {
-                self.alphabet_string = PresetAlphabet::Base64.string();
+                self.alphabet_string = Alphabet::Base64.string();
                 self.cipher
                     .assign_key(&self.key_string, &self.alphabet_string)
             };

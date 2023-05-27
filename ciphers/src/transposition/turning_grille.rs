@@ -5,7 +5,7 @@ use std::cell::RefCell;
 use std::{collections::HashSet, num::ParseIntError};
 use utils::{
     grid::{Grid, Symbol},
-    preset_alphabet::PresetAlphabet,
+    preset_alphabet::Alphabet,
     vecstring::VecString,
 };
 
@@ -21,8 +21,8 @@ pub struct TurningGrille {
 impl Default for TurningGrille {
     fn default() -> Self {
         TurningGrille {
-            null_alphabet_string: String::from(PresetAlphabet::BasicLatin),
-            null_alphabet: VecString::from(PresetAlphabet::BasicLatin),
+            null_alphabet_string: String::from(Alphabet::BasicLatin),
+            null_alphabet: VecString::from(Alphabet::BasicLatin),
             grid: Grid::new_blocked(8, 8),
             key_strings: [String::new(), String::new(), String::new(), String::new()],
             keys: [Vec::new(), Vec::new(), Vec::new(), Vec::new()],

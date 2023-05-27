@@ -2,7 +2,7 @@ use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use itertools::Itertools;
 use lazy_static::lazy_static;
-use utils::{functions::bimap_from_iter, preset_alphabet::PresetAlphabet};
+use utils::{functions::bimap_from_iter, preset_alphabet::Alphabet};
 
 lazy_static! {
     pub static ref CONTROL_PICTURE_MAP: BiMap<u8, char> = bimap_from_iter(
@@ -98,7 +98,7 @@ impl Ascii {
     pub fn map_inv(&self, s: &str) -> Result<char, CodeError> {
         let radix = self.mode.radix();
         match usize::from_str_radix(s, radix) {
-            Ok(n) => PresetAlphabet::Ascii128
+            Ok(n) => Alphabet::Ascii128
                 .chars()
                 .nth(n)
                 .ok_or(CodeError::invalid_input_group(s)),
@@ -113,7 +113,7 @@ impl Ascii {
     }
 
     pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (char, &String)> + '_> {
-        let cs = PresetAlphabet::Ascii128.chars();
+        let cs = Alphabet::Ascii128.chars();
         match self.mode {
             DisplayMode::EightBitBinary => Box::new(cs.zip(EIGHT_BIT.iter())),
             DisplayMode::SevenBitBinary => Box::new(cs.zip(SEVEN_BIT.iter())),

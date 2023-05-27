@@ -1,6 +1,6 @@
 use ciphers::{polyalphabetic::M94, Cipher};
 use egui::{Color32, FontFamily, RichText, Slider, Ui};
-use utils::preset_alphabet::PresetAlphabet;
+use utils::preset_alphabet::Alphabet;
 
 use crate::egui_aux::mono;
 
@@ -17,7 +17,7 @@ impl CipherFrame for M94Frame {
         ui.add_space(16.0);
 
         ui.label("Alphabet");
-        ui.label(mono(PresetAlphabet::BasicLatin.slice()).background_color(Color32::BLACK));
+        ui.label(mono(Alphabet::BasicLatin.slice()).background_color(Color32::BLACK));
         ui.add_space(16.0);
 
         ui.label("Offset");

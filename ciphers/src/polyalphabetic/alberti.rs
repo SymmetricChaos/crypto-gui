@@ -1,6 +1,6 @@
 use crate::{errors::CipherError, traits::Cipher};
 use std::fmt::Display;
-use utils::preset_alphabet::PresetAlphabet;
+use utils::preset_alphabet::Alphabet;
 use utils::vecstring::VecString;
 
 pub struct Alberti {
@@ -91,11 +91,9 @@ impl Cipher for Alberti {
 impl Default for Alberti {
     fn default() -> Self {
         Self {
-            fixed_alphabet: VecString::from(PresetAlphabet::BasicLatin),
+            fixed_alphabet: VecString::from(Alphabet::BasicLatin),
 
-            moving_alphabet: VecString::from(
-                PresetAlphabet::BasicLatin.string().to_ascii_lowercase(),
-            ),
+            moving_alphabet: VecString::from(Alphabet::BasicLatin.string().to_ascii_lowercase()),
             start_index: 0,
         }
     }

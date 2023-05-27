@@ -1,7 +1,7 @@
 use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
 use num::integer::Roots;
-use utils::{math_functions::is_square, preset_alphabet::PresetAlphabet, vecstring::VecString};
+use utils::{math_functions::is_square, preset_alphabet::Alphabet, vecstring::VecString};
 
 pub struct FourSquare {
     pub alphabet: VecString,
@@ -13,9 +13,9 @@ pub struct FourSquare {
 impl Default for FourSquare {
     fn default() -> Self {
         Self {
-            alphabet: VecString::from(PresetAlphabet::BasicLatinNoQ),
-            square1: VecString::from(PresetAlphabet::BasicLatinNoQ),
-            square2: VecString::from(PresetAlphabet::BasicLatinNoQ),
+            alphabet: VecString::from(Alphabet::BasicLatinNoQ),
+            square1: VecString::from(Alphabet::BasicLatinNoQ),
+            square2: VecString::from(Alphabet::BasicLatinNoQ),
             grid_side_len: 5,
         }
     }
@@ -143,14 +143,14 @@ mod four_square_tests {
     #[test]
     fn encrypt_test() {
         let mut cipher = FourSquare::default();
-        cipher.assign_keys("EXAMPLE", "KEYWORD", PresetAlphabet::BasicLatinNoQ);
+        cipher.assign_keys("EXAMPLE", "KEYWORD", Alphabet::BasicLatinNoQ);
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = FourSquare::default();
-        cipher.assign_keys("EXAMPLE", "KEYWORD", PresetAlphabet::BasicLatinNoQ);
+        cipher.assign_keys("EXAMPLE", "KEYWORD", Alphabet::BasicLatinNoQ);
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

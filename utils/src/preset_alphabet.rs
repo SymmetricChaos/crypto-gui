@@ -1,7 +1,7 @@
 use std::str::Chars;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum PresetAlphabet {
+pub enum Alphabet {
     BasicLatin,
     BasicLatinNoC,
     BasicLatinNoJ,
@@ -17,23 +17,23 @@ pub enum PresetAlphabet {
     Base64, // 64 safe to use ASCII symbols, low chance of being interpreted if the string is parsed
 }
 
-impl PresetAlphabet {
+impl Alphabet {
     // Pointer to a static string slice
     pub fn slice(&self) -> &'static str {
         match self {
-            PresetAlphabet::BasicLatin => "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-            PresetAlphabet::BasicLatinNoC => "ABCDEFGHIJLMNOPQRSTUVWXYZ",
-            PresetAlphabet::BasicLatinNoJ => "ABCDEFGHIKLMNOPQRSTUVWXYZ",
-            PresetAlphabet::BasicLatinNoQ => "ABCDEFGHIJKLMNOPRSTUVWXYZ",
-            PresetAlphabet::BasicLatinWithDigits => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-            PresetAlphabet::Digits0 => "0123456789",
-            PresetAlphabet::Digits1 => "1234567890",
-            PresetAlphabet::Ascii94 => "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
-            PresetAlphabet::Ascii95 => " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
-            PresetAlphabet::Ascii128 => "␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~␡",
-            PresetAlphabet::AsciiLdh => "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
-            PresetAlphabet::ClassicalLatin => "ABCDEFGHIKLMNOPQRSTVXYZ",
-            PresetAlphabet::Base64 => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
+            Alphabet::BasicLatin => "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            Alphabet::BasicLatinNoC => "ABCDEFGHIJLMNOPQRSTUVWXYZ",
+            Alphabet::BasicLatinNoJ => "ABCDEFGHIKLMNOPQRSTUVWXYZ",
+            Alphabet::BasicLatinNoQ => "ABCDEFGHIJKLMNOPRSTUVWXYZ",
+            Alphabet::BasicLatinWithDigits => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+            Alphabet::Digits0 => "0123456789",
+            Alphabet::Digits1 => "1234567890",
+            Alphabet::Ascii94 => "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
+            Alphabet::Ascii95 => " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
+            Alphabet::Ascii128 => "␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~␡",
+            Alphabet::AsciiLdh => "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+            Alphabet::ClassicalLatin => "ABCDEFGHIKLMNOPQRSTVXYZ",
+            Alphabet::Base64 => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
         }
     }
 
@@ -54,14 +54,14 @@ impl PresetAlphabet {
     }
 }
 
-impl From<PresetAlphabet> for String {
-    fn from(alphabet: PresetAlphabet) -> Self {
+impl From<Alphabet> for String {
+    fn from(alphabet: Alphabet) -> Self {
         alphabet.string()
     }
 }
 
-impl From<PresetAlphabet> for &'static str {
-    fn from(alphabet: PresetAlphabet) -> Self {
+impl From<Alphabet> for &'static str {
+    fn from(alphabet: Alphabet) -> Self {
         alphabet.slice()
     }
 }

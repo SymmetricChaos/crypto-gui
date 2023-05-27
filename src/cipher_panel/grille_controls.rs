@@ -1,7 +1,7 @@
 use ciphers::{transposition::Grille, Cipher};
 use egui::{TextStyle, Ui};
 use rand::{rngs::StdRng, Rng, SeedableRng};
-use utils::{grid::Symbol, preset_alphabet::PresetAlphabet};
+use utils::{grid::Symbol, preset_alphabet::Alphabet};
 
 use super::{
     CipherFrame,
@@ -17,7 +17,7 @@ impl Default for GrilleFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
-            null_alphabet_string: PresetAlphabet::BasicLatin.into(),
+            null_alphabet_string: Alphabet::BasicLatin.into(),
         }
     }
 }

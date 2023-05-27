@@ -2,7 +2,7 @@ use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
 use num::{integer::Roots, Integer};
 use std::fmt::{self, Formatter};
-use utils::{math_functions::is_square, preset_alphabet::PresetAlphabet, vecstring::VecString};
+use utils::{math_functions::is_square, preset_alphabet::Alphabet, vecstring::VecString};
 
 pub struct PolybiusSquare {
     pub square: VecString,
@@ -13,9 +13,9 @@ pub struct PolybiusSquare {
 impl Default for PolybiusSquare {
     fn default() -> Self {
         Self {
-            square: VecString::from(PresetAlphabet::BasicLatinNoQ),
+            square: VecString::from(Alphabet::BasicLatinNoQ),
             side_len: 5,
-            labels: VecString::from(PresetAlphabet::Digits1),
+            labels: VecString::from(Alphabet::Digits1),
         }
     }
 }
@@ -170,14 +170,14 @@ mod polybius_tests {
     #[test]
     fn encrypt_test() {
         let mut cipher = PolybiusSquare::default();
-        cipher.assign_key("INVENTORY", PresetAlphabet::BasicLatinNoJ);
+        cipher.assign_key("INVENTORY", Alphabet::BasicLatinNoJ);
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = PolybiusSquare::default();
-        cipher.assign_key("INVENTORY", PresetAlphabet::BasicLatinNoJ);
+        cipher.assign_key("INVENTORY", Alphabet::BasicLatinNoJ);
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

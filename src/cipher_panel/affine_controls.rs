@@ -3,7 +3,7 @@ use eframe::egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
 use utils::{
     math_functions::{mul_inv, prime_factors},
-    preset_alphabet::PresetAlphabet,
+    preset_alphabet::Alphabet,
 };
 
 use super::{
@@ -20,7 +20,7 @@ impl Default for AffineFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
-            alphabet_string: String::from(PresetAlphabet::BasicLatin),
+            alphabet_string: String::from(Alphabet::BasicLatin),
         }
     }
 }

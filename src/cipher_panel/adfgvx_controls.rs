@@ -8,7 +8,7 @@ use ciphers::traits::Cipher;
 use egui::Color32;
 use rand::{thread_rng, Rng};
 use utils::functions::shuffled_str;
-use utils::preset_alphabet::PresetAlphabet;
+use utils::preset_alphabet::Alphabet;
 
 pub struct AdfgvxFrame {
     cipher: Adfgvx,
@@ -21,7 +21,7 @@ impl Default for AdfgvxFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
-            alphabet_string: PresetAlphabet::BasicLatinNoJ.string(),
+            alphabet_string: Alphabet::BasicLatinNoJ.string(),
             columnar_key_string: Default::default(),
             polybius_key_string: Default::default(),
         }
@@ -37,13 +37,13 @@ impl CipherFrame for AdfgvxFrame {
         ui.horizontal(|ui| {
             if ui.button("ADFGX").clicked() {
                 self.cipher.assign_mode(AdfgvxMode::Short);
-                self.alphabet_string = PresetAlphabet::BasicLatinNoJ.string();
+                self.alphabet_string = Alphabet::BasicLatinNoJ.string();
                 self.cipher.assign_polybius_key(&self.polybius_key_string);
                 self.cipher.assign_columnar_key(&self.columnar_key_string);
             };
             if ui.button("ADFGVX").clicked() {
                 self.cipher.assign_mode(AdfgvxMode::Long);
-                self.alphabet_string = PresetAlphabet::BasicLatinWithDigits.string();
+                self.alphabet_string = Alphabet::BasicLatinWithDigits.string();
                 self.cipher.assign_polybius_key(&self.polybius_key_string);
                 self.cipher.assign_columnar_key(&self.columnar_key_string);
             };
@@ -82,7 +82,7 @@ impl CipherFrame for AdfgvxFrame {
         self.columnar_key_string.clear();
         for _ in 0..n_chars {
             self.columnar_key_string.push(
-                PresetAlphabet::BasicLatin
+                Alphabet::BasicLatin
                     .chars()
                     .nth(thread_rng().gen_range(0..26))
                     .unwrap(),

@@ -1,16 +1,16 @@
 use super::{char_to_usize, usize_to_char, Reflector, Rotor, REFLECTORS, ROTOR_MAP};
 use crate::{errors::CipherError, substitution::Plugboard, traits::Cipher};
-use utils::preset_alphabet::PresetAlphabet;
+use utils::preset_alphabet::Alphabet;
 
 pub fn prep_enigma_text(text: &str) -> Result<String, CipherError> {
     let mut out = String::with_capacity(text.len());
     for t in text.chars() {
-        if PresetAlphabet::BasicLatin.slice().contains(t) {
+        if Alphabet::BasicLatin.slice().contains(t) {
             out.push(t)
         } else if t.is_whitespace() || t.is_ascii_punctuation() {
             // ignore any Unicode whitespace and
             // any ASCII punctuation
-        } else if PresetAlphabet::BasicLatin
+        } else if Alphabet::BasicLatin
             .slice()
             .contains(t.to_ascii_uppercase())
         {

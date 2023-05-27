@@ -1,6 +1,6 @@
 use bimap::BiMap;
 use lazy_static::lazy_static;
-use utils::{functions::bimap_from_iter, preset_alphabet::PresetAlphabet};
+use utils::{functions::bimap_from_iter, preset_alphabet::Alphabet};
 
 use crate::{errors::CodeError, traits::Code};
 
@@ -8,7 +8,7 @@ lazy_static! {
     // Yes, ALFA and JULIETT are meant to be spelled that way
     // Yes, the spelling of the numerals is correct even though the pronunciation is different
     pub static ref NATO: BiMap<char,&'static str> = bimap_from_iter(
-        PresetAlphabet::BasicLatin.chars().zip([
+        Alphabet::BasicLatin.chars().zip([
             "ALFA", "BRAVO", "CHARLIE", "DELTA", "ECHO", "FOXTROT",
             "GOLF", "HOTEL", "INDIA", "JULIETT", "KILO", "LIMA",
             "MIKE", "NOVEMBER", "OSCAR", "PAPA", "QUEBEC", "ROMEO",
@@ -18,7 +18,7 @@ lazy_static! {
 
 
     pub static ref CCB: BiMap<char,&'static str> = bimap_from_iter(
-        PresetAlphabet::BasicLatin.chars().zip([
+        Alphabet::BasicLatin.chars().zip([
             "ABLE", "BAKER", "CHARLIE", "DOG", "EASY", "FOX",
             "GEORGE", "HOW", "ITEM", "JIG", "KING", "LOVE",
             "MIKE", "NAN", "OBOE", "PETER", "QUEEN", "ROGER",
@@ -28,7 +28,7 @@ lazy_static! {
     );
 
     pub static ref WESTERN_UNION_1912: BiMap<char,&'static str> = bimap_from_iter(
-        PresetAlphabet::BasicLatin.chars().zip([
+        Alphabet::BasicLatin.chars().zip([
             "ADAMS", "BOSTON", "CHICAGO", "DENVER", "EASY", "FRANK",
             "GEORGE", "HENRY", "IDA", "JERSEY", "KING", "LINCOLN",
             "MARY", "NEWARK", "OCEAN", "PETER", "QUEEN", "ROGER",
@@ -37,7 +37,7 @@ lazy_static! {
     );
 
     pub static ref WESTERN_UNION_1942: BiMap<char,&'static str> = bimap_from_iter(
-        PresetAlphabet::BasicLatin.chars().zip([
+        Alphabet::BasicLatin.chars().zip([
             "ADAMS", "BOSTON", "CHICAGO", "DENVER", "EASY", "FRANK",
             "GEORGE", "HENRY", "IDA", "JOHN", "KING", "LINCOLN",
             "MARY", "NEWYORK", "OCEAN", "PETER", "QUEEN", "ROGER",
@@ -46,7 +46,7 @@ lazy_static! {
     );
 
     pub static ref US_NAVY_1908: BiMap<char,&'static str> = bimap_from_iter(
-        PresetAlphabet::BasicLatin.chars().zip([
+        Alphabet::BasicLatin.chars().zip([
             "ACTOR", "BAKER", "CANTEEN", "DIVER", "EAGLE", "FISHER",
             "GANGWAY", "HALLIARD", "INSECT", "JOKCEY", "KNAPSACK", "LUGGER",
             "MUSKET", "NEPTUNE", "OYSTER", "PISTOL", "QUADRANT", "REEFER",
@@ -56,7 +56,7 @@ lazy_static! {
 
 
     pub static ref US_NAVY_1908_SHORT: BiMap<char,&'static str> = bimap_from_iter(
-        PresetAlphabet::BasicLatin.chars().zip([
+        Alphabet::BasicLatin.chars().zip([
             "ASH", "BACK", "CHAIN", "DOG", "EGG", "FOX",
             "GIG", "HORSE", "ICE", "JAKE", "KING", "LASH",
             "MULE", "NET", "OAK", "PAGE", "QUAIL", "RAFT",
@@ -65,7 +65,7 @@ lazy_static! {
     );
 
     pub static ref US_MILITARY_1941: BiMap<char,&'static str> = bimap_from_iter(
-        PresetAlphabet::BasicLatin.chars().zip([
+        Alphabet::BasicLatin.chars().zip([
             "ABLE", "BAKER", "CHARLIE", "DOG", "EASY", "FOX",
             "GEORGE", "HOW", "ITEM", "JIG", "KING", "LOVE",
             "MIKE", "NAN", "OBOE", "PETER", "QUEEN", "ROGER",
@@ -74,7 +74,7 @@ lazy_static! {
     );
 
     pub static ref UK_ARMY_1904: BiMap<char,&'static str> = bimap_from_iter(
-        PresetAlphabet::BasicLatin.chars().zip([
+        Alphabet::BasicLatin.chars().zip([
             "ACK", "BEER", "CORK", "DON", "EDDY", "FREDDY",
             "GEORGE", "HARRY", "INK", "JUB", "KING", "LONDON",
             "EMMA", "NUTS", "ORANGE", "PIP", "QUAD", "ROBERT",
@@ -100,7 +100,7 @@ impl SpellingAlphabetMode {
     pub fn alphabet(&self) -> &str {
         match self {
             Self::FirstLetter => "",
-            _ => PresetAlphabet::BasicLatin.slice(),
+            _ => Alphabet::BasicLatin.slice(),
         }
     }
 

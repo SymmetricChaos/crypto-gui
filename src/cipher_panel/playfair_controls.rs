@@ -1,7 +1,7 @@
 use ciphers::{playfair::Playfair, Cipher};
 use egui::{TextEdit, TextStyle, Ui};
 use rand::{rngs::StdRng, SeedableRng};
-use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet};
+use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
 
 use crate::egui_aux::mono;
 
@@ -21,7 +21,7 @@ impl Default for PlayfairFrame {
         Self {
             cipher: Default::default(),
             key_string: Default::default(),
-            alphabet_string: PresetAlphabet::BasicLatinNoQ.into(),
+            alphabet_string: Alphabet::BasicLatinNoQ.into(),
         }
     }
 }
@@ -34,22 +34,22 @@ impl CipherFrame for PlayfairFrame {
         ui.label("Common Alphabets");
         ui.horizontal(|ui| {
             if ui.button("No Q").clicked() {
-                self.alphabet_string = PresetAlphabet::BasicLatinNoQ.string();
+                self.alphabet_string = Alphabet::BasicLatinNoQ.string();
                 self.cipher
                     .assign_key(&self.key_string, &self.alphabet_string)
             };
             if ui.button("No J").clicked() {
-                self.alphabet_string = PresetAlphabet::BasicLatinNoJ.string();
+                self.alphabet_string = Alphabet::BasicLatinNoJ.string();
                 self.cipher
                     .assign_key(&self.key_string, &self.alphabet_string)
             };
             if ui.button("Alphanumeric").clicked() {
-                self.alphabet_string = PresetAlphabet::BasicLatinWithDigits.string();
+                self.alphabet_string = Alphabet::BasicLatinWithDigits.string();
                 self.cipher
                     .assign_key(&self.key_string, &self.alphabet_string)
             };
             if ui.button("Base64").clicked() {
-                self.alphabet_string = PresetAlphabet::Base64.string();
+                self.alphabet_string = Alphabet::Base64.string();
                 self.cipher
                     .assign_key(&self.key_string, &self.alphabet_string)
             };

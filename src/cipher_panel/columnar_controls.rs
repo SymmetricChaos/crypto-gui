@@ -4,7 +4,7 @@ use ciphers::traits::Cipher;
 use ciphers::transposition::Columnar;
 use eframe::egui::Ui;
 use rand::{thread_rng, Rng};
-use utils::preset_alphabet::PresetAlphabet;
+use utils::preset_alphabet::Alphabet;
 
 pub struct ColumnarFrame {
     cipher: Columnar,
@@ -16,7 +16,7 @@ impl Default for ColumnarFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
-            alphabet_string: PresetAlphabet::BasicLatin.into(),
+            alphabet_string: Alphabet::BasicLatin.into(),
             key_string: Default::default(),
         }
     }

@@ -1,6 +1,6 @@
 use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
-use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
+use utils::{preset_alphabet::Alphabet, vecstring::VecString};
 
 pub struct Bazeries {
     pub alphabet: VecString,
@@ -51,7 +51,7 @@ impl Default for Bazeries {
     fn default() -> Self {
         // 26 Random wheels
         // Maybe rotate these to be pseudo alphabetical
-        let alphabet = VecString::from(PresetAlphabet::BasicLatin);
+        let alphabet = VecString::from(Alphabet::BasicLatin);
         let wheels = [
             "FDWCBAGJOEPKRSITUQLHMZNXYV",
             "YGALXKDFEPCTSOHVWMIRZNJBUQ",
@@ -127,8 +127,6 @@ impl Cipher for Bazeries {
         }
         Ok(out)
     }
-
-
 }
 
 #[cfg(test)]

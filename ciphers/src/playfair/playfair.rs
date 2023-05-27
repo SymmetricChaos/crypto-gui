@@ -1,9 +1,7 @@
 use crate::{errors::CipherError, traits::Cipher};
 use num::integer::Roots;
 use std::fmt;
-use utils::{
-    functions::keyed_alphabet, math_functions::is_square, preset_alphabet::PresetAlphabet,
-};
+use utils::{functions::keyed_alphabet, math_functions::is_square, preset_alphabet::Alphabet};
 
 pub struct Playfair {
     pub square: String,
@@ -102,7 +100,7 @@ impl Playfair {
 impl Default for Playfair {
     fn default() -> Self {
         Self {
-            square: String::from(PresetAlphabet::BasicLatinNoQ),
+            square: String::from(Alphabet::BasicLatinNoQ),
             spacer: 'X',
             grid_side_len: 5,
         }

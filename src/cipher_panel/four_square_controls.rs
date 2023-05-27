@@ -1,7 +1,7 @@
 use ciphers::{playfair::FourSquare, Cipher};
 use egui::Ui;
 use rand::{rngs::StdRng, SeedableRng};
-use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet};
+use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
 
 use crate::egui_aux::mono;
 
@@ -21,7 +21,7 @@ impl Default for FourSquareFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
-            alphabet_string: PresetAlphabet::BasicLatinNoQ.into(),
+            alphabet_string: Alphabet::BasicLatinNoQ.into(),
             key_word_1: Default::default(),
             key_word_2: Default::default(),
         }
@@ -36,22 +36,22 @@ impl CipherFrame for FourSquareFrame {
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
             if ui.button("No Q").clicked() {
-                self.alphabet_string = PresetAlphabet::BasicLatinNoQ.string();
+                self.alphabet_string = Alphabet::BasicLatinNoQ.string();
                 self.cipher
                     .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
             };
             if ui.button("No J").clicked() {
-                self.alphabet_string = PresetAlphabet::BasicLatinNoJ.string();
+                self.alphabet_string = Alphabet::BasicLatinNoJ.string();
                 self.cipher
                     .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
             };
             if ui.button("Alphanumeric").clicked() {
-                self.alphabet_string = PresetAlphabet::BasicLatinWithDigits.string();
+                self.alphabet_string = Alphabet::BasicLatinWithDigits.string();
                 self.cipher
                     .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
             };
             if ui.button("Base64").clicked() {
-                self.alphabet_string = PresetAlphabet::Base64.string();
+                self.alphabet_string = Alphabet::Base64.string();
                 self.cipher
                     .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
             };

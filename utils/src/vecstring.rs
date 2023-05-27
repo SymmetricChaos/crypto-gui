@@ -6,7 +6,7 @@ use rand::{
 
 use crate::functions::keyed_alphabet;
 
-use super::preset_alphabet::PresetAlphabet;
+use super::preset_alphabet::Alphabet;
 use std::collections::vec_deque::{Iter, IterMut};
 use std::collections::VecDeque;
 use std::fmt::Display;
@@ -299,8 +299,8 @@ impl From<&str> for VecString {
     }
 }
 
-impl From<PresetAlphabet> for VecString {
-    fn from(alpha: PresetAlphabet) -> Self {
+impl From<Alphabet> for VecString {
+    fn from(alpha: Alphabet) -> Self {
         VecString::from(alpha.slice())
     }
 }

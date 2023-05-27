@@ -2,7 +2,7 @@ use std::fmt::{self, Formatter};
 
 use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
-use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
+use utils::{preset_alphabet::Alphabet, vecstring::VecString};
 
 pub struct Slidefair {
     alphabet: VecString,
@@ -13,7 +13,7 @@ pub struct Slidefair {
 impl Default for Slidefair {
     fn default() -> Self {
         Self {
-            alphabet: VecString::from(PresetAlphabet::BasicLatin),
+            alphabet: VecString::from(Alphabet::BasicLatin),
             spacer: 'X',
             key: Vec::new(),
         }

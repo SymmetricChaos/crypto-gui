@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use utils::preset_alphabet::PresetAlphabet;
+use utils::preset_alphabet::Alphabet;
 
 use crate::{block::BlockCode, errors::CodeError, traits::Code};
 
@@ -12,7 +12,7 @@ impl Default for Bacon {
     fn default() -> Self {
         let mut block = BlockCode::default();
         block.width = 5;
-        block.alphabet = PresetAlphabet::ClassicalLatin.chars().collect_vec();
+        block.alphabet = Alphabet::ClassicalLatin.chars().collect_vec();
         block.symbols = vec!['0', '1'];
         Bacon {
             block,

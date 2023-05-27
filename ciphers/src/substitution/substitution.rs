@@ -1,4 +1,4 @@
-use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
+use utils::{preset_alphabet::Alphabet, vecstring::VecString};
 
 use crate::{errors::CipherError, traits::Cipher};
 
@@ -57,7 +57,7 @@ impl GeneralSubstitution {
 
 impl Default for GeneralSubstitution {
     fn default() -> Self {
-        let pt_alphabet = VecString::from(PresetAlphabet::BasicLatin);
+        let pt_alphabet = VecString::from(Alphabet::BasicLatin);
         let ct_alphabet = VecString::from("ZYXWVUTSRQPONMLKJIHGFEDCBA");
         Self {
             pt_alphabet,

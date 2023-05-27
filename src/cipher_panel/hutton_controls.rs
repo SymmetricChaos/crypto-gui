@@ -3,7 +3,7 @@ use ciphers::{
     Cipher,
 };
 use egui::Ui;
-use utils::preset_alphabet::PresetAlphabet;
+use utils::preset_alphabet::Alphabet;
 
 use crate::egui_aux::mono;
 
@@ -20,7 +20,7 @@ impl Default for HuttonFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
-            alphabet_string: PresetAlphabet::BasicLatin.into(),
+            alphabet_string: Alphabet::BasicLatin.into(),
             password_string: Default::default(),
             key_string: Default::default(),
         }

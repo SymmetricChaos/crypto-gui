@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
+use utils::{preset_alphabet::Alphabet, vecstring::VecString};
 
 use crate::{errors::CipherError, traits::Cipher};
 
@@ -24,7 +24,7 @@ impl Default for Vigenere {
                 String::new(),
                 String::new(),
             ],
-            alphabet: VecString::from(PresetAlphabet::BasicLatin),
+            alphabet: VecString::from(Alphabet::BasicLatin),
             mode: PolyMode::CylicKey,
             prog_shift: 0,
             multikey: false,
