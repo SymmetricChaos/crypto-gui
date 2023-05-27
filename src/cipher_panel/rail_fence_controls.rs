@@ -1,7 +1,8 @@
 use ciphers::{transposition::RailFence, Cipher};
 use egui::{Slider, Ui};
+use rand::{thread_rng, Rng};
 
-use super::CipherFrame;
+use super::{CipherFrame, _generic_components::randomize_reset};
 
 #[derive(Default)]
 pub struct RailFenceFrame {
@@ -10,7 +11,7 @@ pub struct RailFenceFrame {
 
 impl CipherFrame for RailFenceFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Number of Rails");
@@ -22,7 +23,9 @@ impl CipherFrame for RailFenceFrame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        self.cipher.rails = thread_rng().gen_range(2..12);
+    }
 
     fn reset(&mut self) {
         *self = Self::default()

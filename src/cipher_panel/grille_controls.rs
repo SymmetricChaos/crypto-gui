@@ -1,8 +1,12 @@
 use ciphers::{transposition::Grille, Cipher};
 use egui::{TextStyle, Ui};
-use utils::preset_alphabet::PresetAlphabet;
+use rand::{rngs::StdRng, Rng, SeedableRng};
+use utils::{grid::Symbol, preset_alphabet::PresetAlphabet};
 
-use super::{CipherFrame, _generic_components::control_string};
+use super::{
+    CipherFrame,
+    _generic_components::{control_string, randomize_reset},
+};
 
 pub struct GrilleFrame {
     cipher: Grille,
@@ -31,7 +35,7 @@ fn cell_button(grille: &mut Grille, x: usize, y: usize, ui: &mut eframe::egui::U
 
 impl CipherFrame for GrilleFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.checkbox(&mut self.cipher.use_nulls, "Use Nulls?");
@@ -82,7 +86,16 @@ impl CipherFrame for GrilleFrame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        let mut rng = StdRng::from_entropy();
+        for cell in self.cipher.grid.get_rows_mut() {
+            if rng.gen_bool(0.5) {
+                *cell = Symbol::Empty;
+            } else {
+                *cell = Symbol::Blocked;
+            }
+        }
+    }
 
     fn reset(&mut self) {
         *self = Self::default()

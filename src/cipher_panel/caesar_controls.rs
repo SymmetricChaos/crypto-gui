@@ -1,8 +1,12 @@
 use ciphers::{substitution::Caesar, Cipher};
 use egui::{Slider, Ui};
+use rand::{thread_rng, Rng};
 use utils::preset_alphabet::PresetAlphabet;
 
-use super::{CipherFrame, _generic_components::control_string};
+use super::{
+    CipherFrame,
+    _generic_components::{control_string, randomize_reset},
+};
 
 pub struct CaesarFrame {
     cipher: Caesar,
@@ -20,7 +24,7 @@ impl Default for CaesarFrame {
 
 impl CipherFrame for CaesarFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Alphabet");
@@ -39,7 +43,9 @@ impl CipherFrame for CaesarFrame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        self.cipher.shift = thread_rng().gen_range(0..self.cipher.alphabet.len()) as i32;
+    }
 
     fn reset(&mut self) {
         *self = Self::default()

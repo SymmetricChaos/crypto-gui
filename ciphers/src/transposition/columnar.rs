@@ -78,15 +78,6 @@ impl Cipher for Columnar {
 
         Ok(g.read_cols_characters().collect())
     }
-
-    // fn randomize(&mut self) {
-    //     let key: String = self
-    //         .alphabet
-    //         .get_rand_chars_replace(11, &mut get_global_rng())
-    //         .iter()
-    //         .collect();
-    //     self.assign_key(&key);
-    // }
 }
 
 #[cfg(test)]

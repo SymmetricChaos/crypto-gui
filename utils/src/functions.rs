@@ -1,7 +1,10 @@
 use bimap::BiMap;
 use itertools::Itertools;
 use num::Integer;
-use rand::prelude::{IteratorRandom, SliceRandom, StdRng};
+use rand::{
+    prelude::{IteratorRandom, SliceRandom},
+    Rng,
+};
 use std::hash::Hash;
 
 pub fn bimap_from_iter<I, S, T>(iter: I) -> BiMap<S, T>
@@ -130,14 +133,14 @@ pub fn u8_to_string_with_radix_and_width(byte: &u8, radix: u8, width: usize) -> 
     String::from_utf8(zeroes.chain(s.into_iter().rev()).collect()).unwrap()
 }
 
-pub fn shuffled_str(s: &str, rng: &mut StdRng) -> String {
+pub fn shuffled_str<R: Rng>(s: &str, rng: &mut R) -> String {
     let mut characters = s.chars().collect::<Vec<char>>();
     let slice = characters.as_mut_slice();
     slice.shuffle(rng);
     slice.iter().map(|x| *x).collect::<String>()
 }
 
-pub fn random_sample_replace(s: &str, n: usize, rng: &mut StdRng) -> String {
+pub fn random_sample_replace<R: Rng>(s: &str, n: usize, rng: &mut R) -> String {
     let mut out = String::with_capacity(n);
     for _ in 0..n {
         out.push(s.chars().choose(rng).unwrap())
@@ -145,7 +148,7 @@ pub fn random_sample_replace(s: &str, n: usize, rng: &mut StdRng) -> String {
     out
 }
 
-pub fn random_char_vec(s: &str, n: usize, rng: &mut StdRng) -> Vec<char> {
+pub fn random_char_vec<R: Rng>(s: &str, n: usize, rng: &mut R) -> Vec<char> {
     s.chars().choose_multiple(rng, n)
 }
 

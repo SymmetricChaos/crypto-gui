@@ -3,7 +3,8 @@ use crate::egui_aux::mono;
 use super::{CipherFrame, _generic_components::control_string};
 use ciphers::{polybius::PolybiusSquare, Cipher};
 use eframe::egui::Ui;
-use utils::preset_alphabet::PresetAlphabet;
+use rand::thread_rng;
+use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet};
 
 #[derive(Default)]
 pub struct PolybiusSquareFrame {
@@ -71,8 +72,9 @@ impl CipherFrame for PolybiusSquareFrame {
     }
 
     fn randomize(&mut self) {
-        // self.key_word = shuffled_str(&self.alphabet_string, &mut get_global_rng());
-        // self.set_key();
+        self.key_string = shuffled_str(&self.alphabet_string, &mut thread_rng());
+        self.cipher
+            .assign_key(&self.key_string, &self.alphabet_string);
     }
 
     fn reset(&mut self) {

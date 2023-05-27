@@ -6,7 +6,7 @@ use super::{
 };
 use ciphers::{polyalphabetic::Alberti, Cipher};
 use eframe::egui::{Slider, Ui};
-use rand::{rngs::StdRng, Rng, SeedableRng};
+use rand::{thread_rng, Rng};
 use utils::preset_alphabet::PresetAlphabet;
 
 pub struct AlbertiFrame {
@@ -59,7 +59,7 @@ impl CipherFrame for AlbertiFrame {
 
     fn randomize(&mut self) {
         let length = self.cipher.moving_alphabet.len();
-        self.cipher.start_index = StdRng::from_entropy().gen_range(0..length);
+        self.cipher.start_index = thread_rng().gen_range(0..length);
     }
 
     fn reset(&mut self) {

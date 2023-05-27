@@ -1,7 +1,9 @@
 use ciphers::{transposition::TurningGrille, Cipher};
 use egui::{TextStyle, Ui};
+use itertools::Itertools;
+use rand::{seq::SliceRandom, thread_rng};
 
-use super::CipherFrame;
+use super::{CipherFrame, _generic_components::randomize_reset};
 
 #[derive(Default)]
 pub struct TurningGrilleFrame {
@@ -17,7 +19,7 @@ fn cell_button(grille: &mut TurningGrille, x: usize, y: usize, ui: &mut eframe::
 
 impl CipherFrame for TurningGrilleFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Adjust Size");
@@ -72,7 +74,28 @@ impl CipherFrame for TurningGrilleFrame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        let mut rng = thread_rng();
+        let mut nums = (0..self.cipher.subgrille_size()).collect_vec();
+        nums.shuffle(&mut rng);
+        let mut ctr = 0;
+
+        for n in 0..4 {
+            self.cipher.key_strings[n].clear();
+            self.cipher.keys[n].clear();
+        }
+
+        for n in nums {
+            self.cipher.keys[ctr].push(n);
+            if !self.cipher.key_strings[ctr].is_empty() {
+                self.cipher.key_strings[ctr].push_str(", ")
+            }
+            self.cipher.key_strings[ctr].push_str(&n.to_string());
+            ctr = (ctr + 1) % 4
+        }
+
+        self.cipher.build_grid().unwrap();
+    }
 
     fn reset(&mut self) {
         *self = Self::default()

@@ -1,6 +1,6 @@
 use ciphers::substitution::Affine;
 use eframe::egui::{Slider, Ui};
-use rand::{rngs::StdRng, Rng, SeedableRng};
+use rand::{thread_rng, Rng};
 use utils::{
     math_functions::{mul_inv, prime_factors},
     preset_alphabet::PresetAlphabet,
@@ -56,7 +56,7 @@ impl CipherFrame for AffineFrame {
     }
 
     fn randomize(&mut self) {
-        let mut rng = StdRng::from_entropy();
+        let mut rng = thread_rng();
         let length = self.cipher.alphabet_len();
         self.cipher.add_key = rng.gen_range(0..length);
         loop {

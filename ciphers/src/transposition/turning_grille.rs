@@ -11,10 +11,10 @@ use utils::{
 
 pub struct TurningGrille {
     pub null_alphabet_string: String,
-    null_alphabet: VecString,
+    pub null_alphabet: VecString,
     pub grid: Grid<Symbol<char>>,
     pub key_strings: [String; 4],
-    keys: [Vec<usize>; 4],
+    pub keys: [Vec<usize>; 4],
     rng: RefCell<StdRng>,
 }
 
@@ -175,28 +175,6 @@ impl Cipher for TurningGrille {
         }
         Ok(out)
     }
-
-    // fn randomize(&mut self) {
-    //     let mut nums = (0..self.subgrille_size()).collect_vec();
-    //     nums.shuffle(&mut self.rng);
-    //     let mut ctr = 0;
-
-    //     for n in 0..4 {
-    //         self.key_strings[n].clear();
-    //         self.keys[n].clear();
-    //     }
-
-    //     for n in nums {
-    //         self.keys[ctr].push(n);
-    //         if !self.key_strings[ctr].is_empty() {
-    //             self.key_strings[ctr].push_str(", ")
-    //         }
-    //         self.key_strings[ctr].push_str(&n.to_string());
-    //         ctr = (ctr + 1) % 4
-    //     }
-
-    //     self.build_grid().unwrap();
-    // }
 }
 
 #[cfg(test)]

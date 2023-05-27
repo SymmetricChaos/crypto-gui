@@ -149,17 +149,6 @@ impl Cipher for Grille {
                 .collect())
         }
     }
-
-    // fn randomize(&mut self) {
-    //     let mut rng = self.get_rng();
-    //     for cell in self.grid.get_rows_mut() {
-    //         if rng.gen_bool(0.5) {
-    //             *cell = Symbol::Empty;
-    //         } else {
-    //             *cell = Symbol::Blocked;
-    //         }
-    //     }
-    // }
 }
 
 #[cfg(test)]

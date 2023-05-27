@@ -52,10 +52,6 @@ impl Cipher for Caesar {
         }
         Ok(vec.into_iter().collect())
     }
-
-    // fn randomize(&mut self) {
-    //     self.shift = get_global_rng().gen_range(0..self.alphabet.len()) as i32;
-    // }
 }
 
 #[cfg(test)]

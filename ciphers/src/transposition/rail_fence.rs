@@ -92,10 +92,6 @@ impl Cipher for RailFence {
         }
         Ok(out)
     }
-
-    // fn randomize(&mut self) {
-    //     self.rails = GLOBAL_RNG.lock().unwrap().gen_range(2..10);
-    // }
 }
 
 #[cfg(test)]

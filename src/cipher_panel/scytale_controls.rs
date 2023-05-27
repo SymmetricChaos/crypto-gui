@@ -1,7 +1,8 @@
 use ciphers::{transposition::Scytale, Cipher};
 use egui::{Slider, Ui};
+use rand::{thread_rng, Rng};
 
-use super::CipherFrame;
+use super::{CipherFrame, _generic_components::randomize_reset};
 
 #[derive(Default)]
 pub struct ScytaleFrame {
@@ -10,7 +11,7 @@ pub struct ScytaleFrame {
 
 impl CipherFrame for ScytaleFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Wraps");
@@ -22,7 +23,9 @@ impl CipherFrame for ScytaleFrame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        self.cipher.key = thread_rng().gen_range(2..12);
+    }
 
     fn reset(&mut self) {
         *self = Self::default()

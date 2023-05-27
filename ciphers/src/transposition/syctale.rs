@@ -70,10 +70,6 @@ impl Cipher for Scytale {
 
         Ok(out)
     }
-
-    // fn randomize(&mut self) {
-    //     self.key = GLOBAL_RNG.lock().unwrap().gen_range(2..10);
-    // }
 }
 
 #[cfg(test)]
