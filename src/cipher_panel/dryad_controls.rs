@@ -1,9 +1,11 @@
 use ciphers::{tactical::Dryad, Cipher};
 use egui::{Slider, Ui};
+use rand::{rngs::StdRng, SeedableRng};
+use utils::{functions::shuffled_str, preset_alphabet::PresetAlphabet};
 
 use crate::egui_aux::mono;
 
-use super::CipherFrame;
+use super::{CipherFrame, _generic_components::randomize_reset};
 
 #[derive(Default)]
 pub struct DryadFrame {
@@ -12,7 +14,7 @@ pub struct DryadFrame {
 
 impl CipherFrame for DryadFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Message Key");
@@ -34,7 +36,13 @@ impl CipherFrame for DryadFrame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        let mut rng = StdRng::from_entropy();
+        let alpha = PresetAlphabet::BasicLatin.slice();
+        for row in self.cipher.cipher_rows.iter_mut() {
+            *row = shuffled_str(alpha, &mut rng)
+        }
+    }
 
     fn reset(&mut self) {
         *self = Self::default()

@@ -61,8 +61,8 @@ const BATCO_COLS_DEFAULT: [&'static str; 6] = [
 
 #[derive(Clone, Debug)]
 pub struct Batco {
-    cipher_rows: Vec<String>,
-    key_cols: Vec<String>,
+    pub cipher_rows: Vec<String>,
+    pub key_cols: Vec<String>,
     pub message_number: u8, // easy conversion with char
     pub message_letter: u8, // easy conversion with char
     pub seed_string: String,
@@ -229,16 +229,6 @@ impl Cipher for Batco {
         }
         Ok(out)
     }
-
-    // fn randomize(&mut self) {
-    //     let alpha = PresetAlphabet::BasicLatin.slice();
-    //     for row in self.cipher_rows.iter_mut() {
-    //         *row = shuffled_str(alpha, &mut get_global_rng())
-    //     }
-    //     for col in self.key_cols.iter_mut() {
-    //         *col = shuffled_str(alpha, &mut get_global_rng())
-    //     }
-    // }
 }
 
 #[cfg(test)]

@@ -114,11 +114,4 @@ impl Cipher for Dryad {
 
         Ok(out)
     }
-
-    // fn randomize(&mut self) {
-    //     let alpha = PresetAlphabet::BasicLatin.slice();
-    //     for row in self.cipher_rows.iter_mut() {
-    //         *row = shuffled_str(alpha, &mut get_global_rng())
-    //     }
-    // }
 }
