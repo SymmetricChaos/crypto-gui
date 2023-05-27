@@ -1,9 +1,9 @@
 use crate::{errors::CipherError, traits::Cipher};
 use num::integer::Roots;
 use std::fmt;
-use utils::{functions::keyed_alphabet, preset_alphabet::PresetAlphabet};
-
-use super::is_square;
+use utils::{
+    functions::keyed_alphabet, math_functions::is_square, preset_alphabet::PresetAlphabet,
+};
 
 pub struct Playfair {
     pub square: String,

@@ -1,9 +1,7 @@
 use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
 use num::integer::Roots;
-use utils::{preset_alphabet::PresetAlphabet, vecstring::VecString};
-
-use super::is_square;
+use utils::{math_functions::is_square, preset_alphabet::PresetAlphabet, vecstring::VecString};
 
 pub struct TwoSquare {
     pub alphabet: VecString,

@@ -1,6 +1,10 @@
 use std::collections::{BTreeMap, HashMap};
 
-use num::{FromPrimitive, Integer, One, ToPrimitive, Unsigned};
+use num::{integer::Roots, FromPrimitive, Integer, One, ToPrimitive, Unsigned};
+
+pub fn is_square(n: usize) -> bool {
+    n.sqrt().pow(2) == n
+}
 
 pub fn mul_inv<N: Integer + Copy + ToPrimitive + FromPrimitive>(num: N, modulus: N) -> Option<N> {
     if num < N::one() {
