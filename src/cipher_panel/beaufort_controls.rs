@@ -3,9 +3,13 @@ use ciphers::{
     Cipher,
 };
 use egui::{Slider, TextEdit, TextStyle, Ui};
-use utils::preset_alphabet::Alphabet;
+use rand::thread_rng;
+use utils::{functions::random_sample_replace, preset_alphabet::Alphabet};
 
-use super::{CipherFrame, _generic_components::control_string};
+use super::{
+    CipherFrame,
+    _generic_components::{control_string, randomize_reset},
+};
 
 pub struct BeaufortFrame {
     cipher: Beaufort,
@@ -23,7 +27,7 @@ impl Default for BeaufortFrame {
 
 impl CipherFrame for BeaufortFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Alphabet");
@@ -85,7 +89,14 @@ impl CipherFrame for BeaufortFrame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        let mut rng = thread_rng();
+        self.cipher.key_words[0] = random_sample_replace(&self.alphabet_string, 3, &mut rng);
+        self.cipher.key_words[1] = random_sample_replace(&self.alphabet_string, 5, &mut rng);
+        self.cipher.key_words[2] = random_sample_replace(&self.alphabet_string, 7, &mut rng);
+        self.cipher.key_words[3] = String::new();
+        self.cipher.key_words[4] = String::new();
+    }
 
     fn reset(&mut self) {
         *self = Self::default()

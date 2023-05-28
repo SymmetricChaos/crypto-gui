@@ -242,15 +242,6 @@ impl Cipher for Beaufort {
             PolyMode::ProgKey => self.decrypt_prog(text),
         }
     }
-
-    // fn randomize(&mut self) {
-    //     let mut rng = get_global_rng();
-    //     self.key_words[0] = random_sample_replace(&self.alphabet_string, 3, &mut rng);
-    //     self.key_words[1] = random_sample_replace(&self.alphabet_string, 5, &mut rng);
-    //     self.key_words[2] = random_sample_replace(&self.alphabet_string, 7, &mut rng);
-    //     self.key_words[3] = String::new();
-    //     self.key_words[4] = String::new();
-    // }
 }
 
 #[cfg(test)]

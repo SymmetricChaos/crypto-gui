@@ -3,11 +3,15 @@ use ciphers::{
     Cipher,
 };
 use egui::Ui;
-use utils::preset_alphabet::Alphabet;
+use rand::thread_rng;
+use utils::{functions::random_sample_replace, preset_alphabet::Alphabet};
 
 use crate::egui_aux::error_text;
 
-use super::{CipherFrame, _generic_components::control_string};
+use super::{
+    CipherFrame,
+    _generic_components::{control_string, randomize_reset},
+};
 
 pub struct QuagmireFrame {
     cipher: Quagmire,
@@ -31,7 +35,7 @@ impl Default for QuagmireFrame {
 
 impl CipherFrame for QuagmireFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Alphabet");
@@ -58,14 +62,14 @@ impl CipherFrame for QuagmireFrame {
         };
 
         ui.add_space(16.0);
-        ui.label("Key 1");
+        ui.label("Key #1");
         if control_string(ui, &mut self.pt_key_string).changed() {
             self.cipher.assign_pt_key(&self.pt_key_string)
         }
 
         if self.cipher.version == QuagmireVersion::V4 {
             ui.add_space(16.0);
-            ui.label("Key 2");
+            ui.label("Key #2");
             if control_string(ui, &mut self.ct_key_string).changed() {
                 self.cipher.assign_ct_key(&self.ct_key_string)
             }
@@ -81,7 +85,17 @@ impl CipherFrame for QuagmireFrame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        let mut rng = thread_rng();
+        self.ct_key_string = random_sample_replace(&self.alphabet_string, 9, &mut rng);
+        self.pt_key_string = random_sample_replace(&self.alphabet_string, 9, &mut rng);
+        self.ind_key_string = random_sample_replace(&self.alphabet_string, 9, &mut rng);
+        self.cipher.assign_ct_key(&self.ct_key_string);
+        self.cipher.assign_pt_key(&self.pt_key_string);
+        self.cipher
+            .assign_ind_key(&self.ind_key_string)
+            .expect("error assigning indicator");
+    }
 
     fn reset(&mut self) {
         *self = Self::default()

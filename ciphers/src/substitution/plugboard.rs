@@ -67,20 +67,4 @@ impl Cipher for Plugboard {
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         self.encrypt(text)
     }
-
-    // fn randomize(&mut self) {
-    //     let half = self.alphabet.len() / 2 + 1;
-
-    //     let alpha = self.alphabet.shuffled(&mut get_global_rng());
-    //     let mut chars = alpha.chars();
-    //     let mut pairs = String::with_capacity(half * 3);
-    //     for _ in 0..half {
-    //         pairs.push(chars.next().unwrap());
-    //         pairs.push(chars.next().unwrap());
-    //         pairs.push(' ');
-    //     }
-
-    //     self.pairs = pairs;
-    //     self.set_plugboard().unwrap();
-    // }
 }

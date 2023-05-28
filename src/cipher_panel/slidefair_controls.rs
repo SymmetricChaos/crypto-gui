@@ -1,6 +1,6 @@
 use ciphers::{playfair::Slidefair, Cipher};
 use egui::Ui;
-use rand::{rngs::StdRng, SeedableRng};
+use rand::thread_rng;
 use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
 
 use crate::egui_aux::mono;
@@ -69,16 +69,9 @@ impl CipherFrame for SlidefairFrame {
     }
 
     fn randomize(&mut self) {
-        self.key_word_string = shuffled_str(&self.alphabet_string, &mut StdRng::from_entropy());
+        self.key_word_string = shuffled_str(&self.alphabet_string, &mut thread_rng());
         self.cipher.assign_key(&self.key_word_string)
     }
-
-    // fn randomize(&mut self) {
-    //     self.alphabet = VecString::from(shuffled_str(
-    //         &self.alphabet.to_string(),
-    //         &mut get_global_rng(),
-    //     ))
-    // }
 
     fn reset(&mut self) {
         *self = Self::default()

@@ -140,6 +140,10 @@ pub fn shuffled_str<R: Rng>(s: &str, rng: &mut R) -> String {
     slice.iter().map(|x| *x).collect::<String>()
 }
 
+pub fn random_sample<R: Rng>(s: &str, n: usize, rng: &mut R) -> String {
+    s.chars().choose_multiple(rng, n).iter().collect()
+}
+
 pub fn random_sample_replace<R: Rng>(s: &str, n: usize, rng: &mut R) -> String {
     let mut out = String::with_capacity(n);
     for _ in 0..n {

@@ -1,5 +1,7 @@
 use ciphers::{substitution::Plugboard, Cipher};
 use egui::Ui;
+use rand::thread_rng;
+use utils::{functions::random_sample, preset_alphabet::Alphabet};
 
 use crate::egui_aux::{error_text, mono_strong};
 
@@ -43,7 +45,20 @@ impl CipherFrame for PlugboardFrame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        let alpha = random_sample(Alphabet::BasicLatin.slice(), 14, &mut thread_rng());
+        let mut cs = alpha.chars();
+        self.pairs.clear();
+        for _ in 0..7 {
+            self.pairs.push(cs.next().unwrap());
+            self.pairs.push(cs.next().unwrap());
+            self.pairs.push(' ');
+        }
+
+        self.cipher
+            .set_plugboard(&self.pairs)
+            .expect("error randomly generating plugboard")
+    }
 
     fn reset(&mut self) {
         *self = Self::default()
