@@ -4,6 +4,7 @@ use ciphers::traits::Cipher;
 use ciphers::transposition::Columnar;
 use eframe::egui::Ui;
 use rand::{thread_rng, Rng};
+use utils::functions::random_sample_replace;
 use utils::preset_alphabet::Alphabet;
 
 pub struct ColumnarFrame {
@@ -46,18 +47,9 @@ impl CipherFrame for ColumnarFrame {
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        let len = self.alphabet_string.chars().count();
         let n_chars = rng.gen_range(6..10);
 
-        self.key_string.clear();
-        for _ in 0..n_chars {
-            self.key_string.push(
-                self.alphabet_string
-                    .chars()
-                    .nth(rng.gen_range(0..len))
-                    .unwrap(),
-            )
-        }
+        self.key_string = random_sample_replace(&self.alphabet_string, n_chars, &mut rng);
 
         self.cipher
             .assign_key(&self.key_string, &self.alphabet_string)

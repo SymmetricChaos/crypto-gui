@@ -1,7 +1,15 @@
 use ciphers::{polybius::B64, Cipher};
 use egui::Ui;
+use rand::{thread_rng, Rng};
+use utils::{
+    functions::{random_sample_replace, shuffled_str},
+    preset_alphabet::Alphabet,
+};
 
-use super::{CipherFrame, _generic_components::control_string};
+use super::{
+    CipherFrame,
+    _generic_components::{control_string, randomize_reset},
+};
 use crate::egui_aux::mono;
 
 #[derive(Default)]
@@ -14,7 +22,7 @@ pub struct B64Frame {
 
 impl CipherFrame for B64Frame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Polybius Key Word");
@@ -46,9 +54,27 @@ impl CipherFrame for B64Frame {
     }
 
     fn randomize(&mut self) {
-        // self.cipher.polybius.randomize();
-        // self.cipher.columnar1.randomize();
-        // self.cipher.columnar2.randomize();
+        let mut rng = thread_rng();
+
+        // Random polybius key
+        self.polybius_key_string = shuffled_str(Alphabet::Base64.slice(), &mut rng);
+        self.cipher
+            .polybius
+            .assign_key(&self.polybius_key_string, Alphabet::Base64.slice());
+
+        // First columnar
+        let n_chars = rng.gen_range(6..10);
+        self.columnar_key_string_1 =
+            random_sample_replace(Alphabet::BasicLatin.slice(), n_chars, &mut rng);
+        self.cipher
+            .assign_columnar_key_1(&self.columnar_key_string_1);
+
+        // Second columnar
+        let n_chars = rng.gen_range(6..10);
+        self.columnar_key_string_2 =
+            random_sample_replace(Alphabet::BasicLatin.slice(), n_chars, &mut rng);
+        self.cipher
+            .assign_columnar_key_1(&self.columnar_key_string_2);
     }
 
     fn reset(&mut self) {
