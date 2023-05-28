@@ -98,11 +98,6 @@ impl Cipher for Bifid {
         }
         Ok(out)
     }
-
-    // fn randomize(&mut self) {
-    //     self.block_size = self.rng.gen_range(3..=30);
-    //     self.polybius.randomize();
-    // }
 }
 
 #[cfg(test)]

@@ -1,7 +1,11 @@
 use ciphers::{substitution::DecoderRing, Cipher};
 use egui::{Slider, Ui};
+use rand::{thread_rng, Rng};
 
-use super::{CipherFrame, _generic_components::control_string};
+use super::{
+    CipherFrame,
+    _generic_components::{control_string, randomize_reset},
+};
 
 pub struct DecoderRingFrame {
     cipher: DecoderRing,
@@ -19,7 +23,7 @@ impl Default for DecoderRingFrame {
 
 impl CipherFrame for DecoderRingFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Alphabet");
@@ -49,7 +53,9 @@ impl CipherFrame for DecoderRingFrame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        self.cipher.index = thread_rng().gen_range(0..self.alphabet_string.chars().count());
+    }
 
     fn reset(&mut self) {
         *self = Self::default()

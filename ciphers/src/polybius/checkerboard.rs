@@ -142,11 +142,6 @@ impl Cipher for StraddlingCheckerboard {
 
         Ok(out)
     }
-
-    // fn randomize(&mut self) {
-    //     let mut rng = get_global_rng();
-    //     self.rows.shuffle(&mut *rng);
-    // }
 }
 
 #[cfg(test)]

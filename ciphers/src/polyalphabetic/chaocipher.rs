@@ -72,12 +72,6 @@ impl Cipher for Chaocipher {
         }
         Ok(out)
     }
-
-    // fn randomize(&mut self) {
-    //     let rng = &mut get_global_rng();
-    //     self.left.shuffle(rng);
-    //     self.right.shuffle(rng);
-    // }
 }
 
 #[cfg(test)]

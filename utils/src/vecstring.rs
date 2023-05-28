@@ -216,12 +216,12 @@ impl VecString {
     }
 
     // Shuffle the VecString
-    pub fn shuffle(&mut self, rng: &mut StdRng) {
+    pub fn shuffle<R: Rng>(&mut self, rng: &mut R) {
         self.0.make_contiguous().shuffle(rng)
     }
 
     // Return a shuffled clone of the VecString
-    pub fn shuffled(&self, rng: &mut StdRng) -> Self {
+    pub fn shuffled<R: Rng>(&self, rng: &mut R) -> Self {
         let mut vs = self.clone();
         vs.shuffle(rng);
         vs

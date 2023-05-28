@@ -1,7 +1,7 @@
 use crate::egui_aux::mono;
 
 use super::CipherFrame;
-use super::_generic_components::control_string;
+use super::_generic_components::{control_string, randomize_reset};
 use ciphers::polybius::adfgvx::AdfgvxMode;
 use ciphers::polybius::Adfgvx;
 use ciphers::traits::Cipher;
@@ -30,7 +30,7 @@ impl Default for AdfgvxFrame {
 
 impl CipherFrame for AdfgvxFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Select Mode");

@@ -1,8 +1,12 @@
 use ciphers::{substitution::GeneralSubstitution, Cipher};
 use egui::Ui;
-use utils::preset_alphabet::Alphabet;
+use rand::thread_rng;
+use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
 
-use super::{CipherFrame, _generic_components::control_string};
+use super::{
+    CipherFrame,
+    _generic_components::{control_string, randomize_reset},
+};
 
 pub struct GeneralSubstitutionFrame {
     cipher: GeneralSubstitution,
@@ -22,7 +26,7 @@ impl Default for GeneralSubstitutionFrame {
 
 impl CipherFrame for GeneralSubstitutionFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Plaintext Alphabet");
@@ -42,7 +46,10 @@ impl CipherFrame for GeneralSubstitutionFrame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        self.ct_alphabet_string = shuffled_str(&self.pt_alphabet_string, &mut thread_rng());
+        self.cipher.assign_ct_alphabet(&self.ct_alphabet_string);
+    }
 
     fn reset(&mut self) {
         *self = Self::default()

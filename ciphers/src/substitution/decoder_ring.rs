@@ -70,10 +70,6 @@ impl Cipher for DecoderRing {
         }
         Ok(out)
     }
-
-    // fn randomize(&mut self) {
-    //     self.index = get_global_rng().gen_range(0..self.alphabet.len());
-    // }
 }
 
 #[cfg(test)]

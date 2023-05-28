@@ -1,10 +1,14 @@
 use ciphers::{polybius::Bifid, Cipher};
 use egui::{Slider, Ui};
-use utils::preset_alphabet::Alphabet;
+use rand::{thread_rng, Rng};
+use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
 
 use crate::egui_aux::mono;
 
-use super::{CipherFrame, _generic_components::control_string};
+use super::{
+    CipherFrame,
+    _generic_components::{control_string, randomize_reset},
+};
 
 pub struct BifidFrame {
     cipher: Bifid,
@@ -24,7 +28,7 @@ impl Default for BifidFrame {
 
 impl CipherFrame for BifidFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         let block_size_range = 3..=30;
@@ -81,7 +85,14 @@ impl CipherFrame for BifidFrame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        let mut rng = thread_rng();
+        self.cipher.block_size = rng.gen_range(3..=30);
+        self.key_string = shuffled_str(&self.alphabet_string, &mut thread_rng());
+        self.cipher
+            .polybius
+            .assign_key(&self.key_string, &self.alphabet_string);
+    }
 
     fn reset(&mut self) {
         *self = Self::default()
