@@ -122,13 +122,7 @@ impl Cipher for Quagmire {
         Ok(out)
     }
 
-    // fn randomize(&mut self) {
-    //     let rng = &mut get_global_rng();
-    //     self.assign_ct_key(&random_sample_replace(&self.alphabet_string, 9, rng));
-    //     self.assign_pt_key(&random_sample_replace(&self.alphabet_string, 9, rng));
-    //     self.assign_ind_key(&random_sample_replace(&self.alphabet_string, 9, rng));
-    //     self.indicator = self.alphabet.get_rand_char(rng);
-    // }
+
 }
 
 #[cfg(test)]

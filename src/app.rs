@@ -155,9 +155,7 @@ impl ClassicCrypto {
     }
 
     fn code_page(&mut self, ctx: &Context) {
-        if self.active_page == Page::Code && self.active_code.is_some() {
-            self.code_selector_panel(ctx);
-
+        if self.active_page == Page::Code {
             SidePanel::right("code_io_panel")
                 .default_width(200.0)
                 .show(ctx, |ui| {
@@ -203,7 +201,7 @@ impl ClassicCrypto {
 
         // If somehow we are here without Page::Code selected
         } else {
-            self.blank_page(ctx)
+            self.code_selector_panel(ctx);
         }
     }
 
@@ -220,7 +218,7 @@ impl ClassicCrypto {
     }
 
     fn cipher_page(&mut self, ctx: &Context) {
-        if self.active_page == Page::Cipher && self.active_cipher.is_some() {
+        if self.active_page == Page::Cipher {
             self.cipher_selector_panel(ctx);
 
             SidePanel::right("cipher_io_panel")
@@ -268,7 +266,7 @@ impl ClassicCrypto {
 
         // If somehow we are here without Page::Cipher selected
         } else {
-            self.blank_page(ctx)
+            self.code_selector_panel(ctx);
         }
     }
 

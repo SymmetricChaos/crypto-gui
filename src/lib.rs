@@ -15,7 +15,7 @@ pub mod pages;
 
 pub mod egui_aux;
 
-pub mod global_rng;
+// pub mod global_rng;
 
 // // ----------------------------------------------------------------------------
 // // When compiling for web:

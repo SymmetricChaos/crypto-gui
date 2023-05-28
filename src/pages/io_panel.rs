@@ -6,8 +6,7 @@ use crate::{
     // attack_panel::{AttackInterface, ViewableAttack},
     cipher_panel::{CipherFrame, CipherInterface},
     code_panel::{CodeFrame, CodeInterface},
-    egui_aux::error_text,
-    global_rng::global_rng_controls,
+    egui_aux::{error_text, text_manip_menu},
     // ids::AttackId,
 };
 
@@ -115,10 +114,16 @@ impl IOPanel {
         // attack_interface: &mut AttackInterface,
     ) {
         ui.add_space(32.0);
-        ui.label("INPUT TEXT");
+        ui.horizontal(|ui| {
+            ui.label("INPUT TEXT");
+            text_manip_menu(ui, input);
+        });
         ui.add(TextEdit::multiline(input).font(TextStyle::Monospace));
         ui.add_space(16.0);
-        ui.label("OUTPUT TEXT");
+        ui.horizontal(|ui| {
+            ui.label("OUTPUT TEXT");
+            text_manip_menu(ui, output);
+        });
         ui.add(TextEdit::multiline(output).font(TextStyle::Monospace));
 
         if active_page == &mut Page::Cipher {
@@ -171,10 +176,10 @@ impl IOPanel {
             std::mem::swap(input, output)
         }
 
-        if active_page == &Page::Cipher {
-            ui.add_space(16.0);
-            global_rng_controls(ui);
-        }
+        // if active_page == &Page::Cipher {
+        //     ui.add_space(16.0);
+        //     global_rng_controls(ui);
+        // }
 
         if !errors.is_empty() {
             ui.add_space(24.0);
