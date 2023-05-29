@@ -3,9 +3,8 @@ use ciphers::{
     Cipher,
 };
 use egui::Ui;
-use utils::preset_alphabet::Alphabet;
-
-use crate::egui_aux::mono;
+use rand::thread_rng;
+use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
 
 use super::{CipherFrame, _generic_components::control_string};
 
@@ -47,24 +46,27 @@ impl CipherFrame for HuttonFrame {
         ui.add_space(16.0);
         ui.label("Password");
         if control_string(ui, &mut self.password_string).changed() {
-            self.cipher.assign_alphabet(&self.password_string)
+            self.cipher.assign_password(&self.password_string)
         }
 
         ui.add_space(16.0);
         ui.label("Key Word");
         if control_string(ui, &mut self.key_string).changed() {
-            self.cipher.assign_alphabet(&self.key_string)
+            self.cipher.assign_key(&self.key_string)
         }
-
-        ui.add_space(8.0);
-        ui.label(mono(self.cipher.keyed_alphabet()));
     }
 
     fn cipher(&self) -> &dyn Cipher {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        let mut rng = thread_rng();
+        self.password_string = shuffled_str(&self.alphabet_string, &mut rng);
+        self.cipher.assign_password(&self.password_string);
+        self.key_string = shuffled_str(&self.alphabet_string, &mut rng);
+        self.cipher.assign_key(&self.key_string);
+    }
 
     fn reset(&mut self) {
         *self = Self::default()

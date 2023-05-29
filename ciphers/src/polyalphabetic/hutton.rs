@@ -19,11 +19,8 @@ impl Default for Hutton {
     fn default() -> Self {
         Self {
             version: HuttonVersion::V1,
-
             alphabet: VecString::from(Alphabet::BasicLatin),
-
-            keyed_alpha: VecString::with_capacity(26),
-
+            keyed_alpha: VecString::new(),
             password: Default::default(),
         }
     }
@@ -47,10 +44,6 @@ impl Hutton {
 
     pub fn assign_key(&mut self, key: &str) {
         self.keyed_alpha = VecString::from(keyed_alphabet(key, &self.alphabet.to_string()));
-    }
-
-    pub fn keyed_alphabet(&self) -> String {
-        self.keyed_alpha.to_string()
     }
 }
 
@@ -105,11 +98,6 @@ impl Cipher for Hutton {
         }
         Ok(out)
     }
-
-    // fn randomize(&mut self) {
-    //     self.assign_key(&shuffled_str(&self.alphabet_string, &mut get_global_rng()));
-    //     self.assign_password(&shuffled_str(&self.alphabet_string, &mut get_global_rng()));
-    // }
 }
 
 #[cfg(test)]
