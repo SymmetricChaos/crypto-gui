@@ -1,10 +1,18 @@
-use ciphers::{tactical::Rs44, Cipher};
+use ciphers::{
+    tactical::{
+        rs44::{HEIGHT, LABELS, WIDTH},
+        Rs44,
+    },
+    Cipher,
+};
 use egui::{Button, Color32, DragValue, RichText, TextStyle, Ui, Vec2};
-use utils::grid::Grid;
+use itertools::Itertools;
+use rand::{seq::SliceRandom, thread_rng};
+use utils::grid::{Grid, Symbol};
 
 use crate::egui_aux::mono;
 
-use super::CipherFrame;
+use super::{CipherFrame, _generic_components::randomize_reset};
 
 #[derive(Default)]
 pub struct Rs44Frame {
@@ -19,7 +27,7 @@ fn cell_button_char(grille: &Grid<char>, x: usize, y: usize, ui: &mut eframe::eg
 
 impl CipherFrame for Rs44Frame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Start Column")
@@ -183,7 +191,39 @@ impl CipherFrame for Rs44Frame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        let mut rng = thread_rng();
+
+        // Randomize the matrix
+        self.cipher.message_key_maxtrix.shuffle(&mut rng);
+
+        // Randomize stencil
+        self.cipher.stencil.apply(|_| Symbol::Blocked);
+        let mut positions: Vec<usize> = (0..WIDTH).collect();
+        for i in 0..HEIGHT {
+            positions.shuffle(&mut rng);
+            for n in &positions[0..10] {
+                self.cipher.stencil[n + (i * WIDTH)] = Symbol::Empty;
+            }
+        }
+
+        // Randomize labels
+        self.cipher.column_nums.shuffle(&mut rng);
+        self.cipher.xlabels.shuffle(&mut rng);
+        self.cipher.ylabels = {
+            let mut v = LABELS.clone();
+            v.shuffle(&mut rng);
+            v.iter()
+                .take(HEIGHT)
+                .map(|x| *x)
+                .collect_vec()
+                .try_into()
+                .unwrap()
+        };
+
+        // Set the message key again
+        self.cipher.set_full_message_key();
+    }
 
     fn reset(&mut self) {
         *self = Self::default()

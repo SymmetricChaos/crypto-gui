@@ -5,7 +5,10 @@ use utils::{functions::random_sample_replace, preset_alphabet::Alphabet};
 
 use crate::egui_aux::{error_text, mono};
 
-use super::{CipherFrame, _generic_components::control_string};
+use super::{
+    CipherFrame,
+    _generic_components::{control_string, randomize_reset},
+};
 
 #[derive(Default)]
 pub struct PortaFrame {
@@ -15,7 +18,7 @@ pub struct PortaFrame {
 
 impl CipherFrame for PortaFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Keyword");

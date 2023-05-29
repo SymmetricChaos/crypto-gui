@@ -31,7 +31,7 @@ impl Default for Rs44 {
         let mut rng = StdRng::seed_from_u64(5920348976);
 
         // Build the stencile
-        let mut stencil: Grid<Symbol<char>> = Grid::new_blocked(Self::HEIGHT, Self::WIDTH);
+        let mut stencil: Grid<Symbol<char>> = Grid::new_blocked(HEIGHT, WIDTH);
         for (i, c) in DEFAULT_STENCIL.chars().enumerate() {
             if c == EMPTY {
                 stencil[i] = Symbol::Empty;
@@ -41,16 +41,16 @@ impl Default for Rs44 {
             13, 1, 20, 10, 18, 14, 0, 7, 17, 9, 23, 2, 6, 11, 16, 19, 4, 12, 22, 15, 5, 3, 21, 24,
             8,
         ];
-        let xlabels: [&str; Self::WIDTH] = {
-            let mut arr = Self::LABELS.clone();
+        let xlabels: [&str; WIDTH] = {
+            let mut arr = LABELS.clone();
             arr.shuffle(&mut rng);
             arr
         };
-        let ylabels: [&str; Self::HEIGHT] = {
-            let mut v = Self::LABELS.clone();
+        let ylabels: [&str; HEIGHT] = {
+            let mut v = LABELS.clone();
             v.shuffle(&mut rng);
             v.iter()
-                .take(Self::HEIGHT)
+                .take(HEIGHT)
                 .map(|x| *x)
                 .collect_vec()
                 .try_into()
@@ -85,16 +85,16 @@ impl Default for Rs44 {
     }
 }
 
-impl Rs44 {
-    pub const WIDTH: usize = 25;
-    pub const HEIGHT: usize = 24;
-    pub const LABELS: [&'static str; 25] = [
-        "aa", "ba", "ca", "da", "ea", "ab", "bb", "cb", "db", "eb", "ac", "bc", "cc", "dc", "ec",
-        "ad", "bd", "cd", "dd", "de", "ae", "be", "ce", "de", "ee",
-    ];
-    pub const MESSAGE_LENGTH: usize = 240;
-    pub const GRID_SIZE: usize = 600;
+pub const WIDTH: usize = 25;
+pub const HEIGHT: usize = 24;
+pub const LABELS: [&'static str; 25] = [
+    "aa", "ba", "ca", "da", "ea", "ab", "bb", "cb", "db", "eb", "ac", "bc", "cc", "dc", "ec", "ad",
+    "bd", "cd", "dd", "de", "ae", "be", "ce", "de", "ee",
+];
+pub const MESSAGE_LENGTH: usize = 240;
+pub const GRID_SIZE: usize = 600;
 
+impl Rs44 {
     fn label_letter_to_matrix_column(&self, c: char) -> usize {
         match c {
             'a' => 0,
@@ -130,33 +130,15 @@ impl Rs44 {
         });
     }
 
-    pub fn randomize_stencil(&mut self) {
-        self.stencil.apply(|_| Symbol::Blocked);
-        let mut rng = StdRng::from_entropy();
-        let mut positions: Vec<usize> = (0..Self::WIDTH).collect();
-
-        for i in 0..Self::HEIGHT {
-            positions.shuffle(&mut rng);
-            for n in &positions[0..10] {
-                self.stencil[n + (i * Self::WIDTH)] = Symbol::Empty;
-            }
-        }
-    }
-
-    pub fn randomize_matrix(&mut self) {
-        self.message_key_maxtrix
-            .shuffle(&mut StdRng::from_entropy())
-    }
-
     pub fn randomize_labels(&mut self) {
         let mut rng = StdRng::from_entropy();
         self.column_nums.shuffle(&mut rng);
         self.xlabels.shuffle(&mut rng);
         self.ylabels = {
-            let mut v = Self::LABELS.clone();
+            let mut v = LABELS.clone();
             v.shuffle(&mut rng);
             v.iter()
-                .take(Self::HEIGHT)
+                .take(HEIGHT)
                 .map(|x| *x)
                 .collect_vec()
                 .try_into()
@@ -181,7 +163,7 @@ impl Rs44 {
     }
 
     pub fn text_to_stencil(&mut self) -> Result<(), CipherError> {
-        let mut vec = Vec::with_capacity(Self::GRID_SIZE);
+        let mut vec = Vec::with_capacity(GRID_SIZE);
         let mut ctr = 0;
         for (n, c) in self.imported_stencil.chars().enumerate() {
             if c == EMPTY {
@@ -201,7 +183,7 @@ impl Rs44 {
                 ));
             }
         }
-        if vec.len() != Self::GRID_SIZE {
+        if vec.len() != GRID_SIZE {
             return Err(CipherError::key(
                 "The RS44 key must have exactly 600 positions defined",
             ));
@@ -222,14 +204,14 @@ impl Rs44 {
             }
             None => return Err(CipherError::key("starting cell out of bounds")),
         }
-        if self.start_column >= Self::WIDTH {
+        if self.start_column >= WIDTH {
             return Err(CipherError::key("starting column out of bounds"));
         }
         Ok(())
     }
 
     fn wrapping_iter(&self, n: usize) -> Chain<Range<usize>, Range<usize>> {
-        (n..Self::GRID_SIZE).chain(0..n)
+        (n..GRID_SIZE).chain(0..n)
     }
 }
 
@@ -290,7 +272,7 @@ impl Cipher for Rs44 {
         // Go through the column numbers and their positions
         // col is the actual index in the column in the 2D array
         'outer: for col in positions {
-            for row in 0..Self::HEIGHT {
+            for row in 0..HEIGHT {
                 if stencil[(row, col)] == Symbol::Character('\0') {
                     match symbols.next() {
                         Some(c) => stencil[(row, col)] = Symbol::Character(c),
@@ -310,13 +292,6 @@ impl Cipher for Rs44 {
 
         Ok(output)
     }
-
-    // fn randomize(&mut self) {
-    //     self.randomize_stencil();
-    //     self.randomize_matrix();
-    //     self.randomize_labels();
-    //     self.set_full_message_key();
-    // }
 }
 
 #[cfg(test)]

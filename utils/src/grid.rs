@@ -1,7 +1,8 @@
 use std::fmt::{Display, Formatter, Result};
 use std::ops::{Index, IndexMut};
 
-use rand::prelude::{SliceRandom, StdRng};
+use rand::prelude::SliceRandom;
+use rand::Rng;
 
 pub const EMPTY: char = '⬜';
 pub const BLOCK: char = '⬛';
@@ -312,7 +313,7 @@ impl<T: Copy + Clone + Default> Grid<T> {
         self.symbols = new_symbols;
     }
 
-    pub fn shuffle(&mut self, rng: &mut StdRng) {
+    pub fn shuffle<R: Rng>(&mut self, rng: &mut R) {
         self.symbols.shuffle(rng)
     }
 }
