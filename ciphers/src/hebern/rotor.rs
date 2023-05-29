@@ -24,7 +24,7 @@ impl HebernRotor {
 
         for (pos, c) in wiring_str.chars().enumerate() {
             let n = alphabet
-                .get_pos_of(c)
+                .get_pos(c)
                 .ok_or(CipherError::invalid_input_char(c))?;
             wiring_rtl[pos] = n;
             wiring_ltr[n] = pos;
@@ -76,7 +76,7 @@ impl HebernRotor {
         let mut new_wiring_ltr = vec![0; self.size];
         for (pos, c) in self.wiring_str.chars().enumerate() {
             let n = alphabet
-                .get_pos_of(c)
+                .get_pos(c)
                 .ok_or(CipherError::invalid_input_char(c))?;
 
             new_wiring_rtl[pos] = n;

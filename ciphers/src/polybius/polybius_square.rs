@@ -48,7 +48,7 @@ impl PolybiusSquare {
 
     // Cannot fail due to checks in encrypt/decrypt
     fn char_to_position(&self, symbol: char) -> (usize, usize) {
-        let num = self.square.get_pos_of(symbol).unwrap();
+        let num = self.square.get_pos(symbol).unwrap();
         (num / self.side_len, num % self.side_len)
     }
 
@@ -56,11 +56,11 @@ impl PolybiusSquare {
     fn position_to_char(&self, position: (char, char)) -> Result<char, CipherError> {
         let y = self
             .labels
-            .get_pos_of(position.0)
+            .get_pos(position.0)
             .ok_or(CipherError::invalid_input_char(position.0))?;
         let x = self
             .labels
-            .get_pos_of(position.1)
+            .get_pos(position.1)
             .ok_or(CipherError::invalid_input_char(position.1))?;
 
         let num = y * self.side_len + x;
@@ -91,7 +91,7 @@ impl PolybiusSquare {
 
         for (n, c) in self.square.chars().enumerate() {
             if n % self.side_len == 0 {
-                let ylab = self.labels.get_char_at(n / self.side_len).unwrap_or(' ');
+                let ylab = self.labels.get_char(n / self.side_len).unwrap_or(&' ');
                 square.push_str(&format!("\n{ylab} "));
             }
             square.push(c);
@@ -110,13 +110,15 @@ impl Cipher for PolybiusSquare {
         for c in text.chars() {
             let pos = self.char_to_position(c);
             out.push(
-                self.labels
-                    .get_char_at(pos.0)
+                *self
+                    .labels
+                    .get_char(pos.0)
                     .ok_or(CipherError::invalid_input_char(c))?,
             );
             out.push(
-                self.labels
-                    .get_char_at(pos.1)
+                *self
+                    .labels
+                    .get_char(pos.1)
                     .ok_or(CipherError::invalid_input_char(c))?,
             );
         }

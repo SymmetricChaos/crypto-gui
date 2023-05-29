@@ -50,7 +50,7 @@ impl PolybiusCube {
     }
 
     fn char_to_position(&self, symbol: char) -> (usize, usize, usize) {
-        let num = self.grid.get_pos_of(symbol).unwrap();
+        let num = self.grid.get_pos(symbol).unwrap();
         let l = self.side_len;
         let x = num / (l * l);
         let y = (num / l) % l;
@@ -61,20 +61,20 @@ impl PolybiusCube {
     fn position_to_char(&self, position: (char, char, char)) -> Result<char, CipherError> {
         let x = self
             .labels
-            .get_pos_of(position.0)
+            .get_pos(position.0)
             .ok_or(CipherError::invalid_input_char(position.0))?;
         let y = self
             .labels
-            .get_pos_of(position.1)
+            .get_pos(position.1)
             .ok_or(CipherError::invalid_input_char(position.1))?;
         let z = self
             .labels
-            .get_pos_of(position.2)
+            .get_pos(position.2)
             .ok_or(CipherError::invalid_input_char(position.2))?;
 
         let l = self.side_len;
         let num = x * (l * l) + y * l + z;
-        Ok(self.grid.get_char_at(num).unwrap())
+        Ok(*self.grid.get_char(num).unwrap())
     }
 
     fn check_labels(&self) -> Result<(), CipherError> {
@@ -120,10 +120,10 @@ impl PolybiusCube {
                 if n % self.side_len == 0 {
                     let ylab = self
                         .labels
-                        .get_char_at((n / self.side_len) % self.side_len)
-                        .unwrap_or(' ');
+                        .get_char((n / self.side_len) % self.side_len)
+                        .unwrap_or(&' ');
                     grids[idx].push('\n');
-                    grids[idx].push(ylab);
+                    grids[idx].push(*ylab);
                     grids[idx].push(' ')
                 }
                 grids[idx].push(*c);
@@ -144,18 +144,21 @@ impl Cipher for PolybiusCube {
         for c in text.chars() {
             let pos = self.char_to_position(c);
             out.push(
-                self.labels
-                    .get_char_at(pos.0)
+                *self
+                    .labels
+                    .get_char(pos.0)
                     .ok_or(CipherError::invalid_input_char(c))?,
             );
             out.push(
-                self.labels
-                    .get_char_at(pos.1)
+                *self
+                    .labels
+                    .get_char(pos.1)
                     .ok_or(CipherError::invalid_input_char(c))?,
             );
             out.push(
-                self.labels
-                    .get_char_at(pos.2)
+                *self
+                    .labels
+                    .get_char(pos.2)
                     .ok_or(CipherError::invalid_input_char(c))?,
             );
         }

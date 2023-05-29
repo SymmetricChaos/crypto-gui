@@ -43,7 +43,7 @@ impl Cipher for DecoderRing {
         let symbols = text.chars();
         let mut out = Vec::new();
         for s in symbols {
-            let pos = self.alphabet.get_pos_of(s);
+            let pos = self.alphabet.get_pos(s);
             let n = match pos {
                 Some(v) => (v + self.index) % self.length(),
                 None => return Err(CipherError::invalid_input_char(s)),
@@ -66,7 +66,7 @@ impl Cipher for DecoderRing {
         let mut out = String::with_capacity(nums.len());
         for n in nums {
             // Unwrap is justified by the valid_code_groups method which catches both possibles sorts of errors
-            out.push(self.alphabet.get_char_at(n).unwrap());
+            out.push(*self.alphabet.get_char(n).unwrap());
         }
         Ok(out)
     }

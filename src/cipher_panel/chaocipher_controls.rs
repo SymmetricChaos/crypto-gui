@@ -1,7 +1,7 @@
 use ciphers::{polyalphabetic::Chaocipher, Cipher};
 use egui::Ui;
 use rand::thread_rng;
-use utils::functions::shuffled_str;
+use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
 
 use super::{
     CipherFrame,
@@ -44,10 +44,10 @@ impl CipherFrame for ChaocipherFrame {
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        self.left_string = shuffled_str(&self.left_string, &mut rng);
+        self.left_string = shuffled_str(Alphabet::BasicLatin.into(), &mut rng);
         self.cipher.assign_left(&self.left_string);
 
-        self.right_string = shuffled_str(&self.right_string, &mut rng);
+        self.right_string = shuffled_str(Alphabet::BasicLatin.into(), &mut rng);
         self.cipher.assign_right(&self.right_string);
     }
 

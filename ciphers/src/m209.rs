@@ -73,23 +73,29 @@ impl Rotor {
     }
 
     pub fn set_active(&mut self, c: char) {
-        while self.alphabet[self.active] != c {
+        while self
+            .alphabet
+            .get_char(self.active)
+            .expect("active character did not exist")
+            != &c
+        {
             self.alphabet.rotate_left(1)
         }
     }
 
     pub fn set_display(&mut self, c: char) {
-        while self.alphabet[0] != c {
+        while *self.alphabet.front().unwrap() != c {
             self.alphabet.rotate_left(1)
         }
     }
 
     pub fn get_active(&self) -> char {
-        self.alphabet[self.active]
+        *self.alphabet.get_char(self.active).unwrap()
     }
 
     pub fn active_is_effective(&self) -> bool {
-        self.pins.contains(&self.alphabet[self.active])
+        self.pins
+            .contains(&self.alphabet.get_char(self.active).unwrap())
     }
 
     pub fn rotor_length(&self) -> usize {

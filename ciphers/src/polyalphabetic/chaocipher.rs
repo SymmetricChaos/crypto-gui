@@ -51,7 +51,7 @@ impl Cipher for Chaocipher {
         let mut out = String::new();
         for c in symbols {
             let n = right.get_pos(c).ok_or(CipherError::invalid_input_char(c))?;
-            out.push(left[n]);
+            out.push(*left.get_char(n).unwrap()); // Error will be caught by previous line
             Chaocipher::left_permute(&mut left, n);
             Chaocipher::right_permute(&mut right, n);
         }
@@ -66,7 +66,7 @@ impl Cipher for Chaocipher {
         let mut out = String::new();
         for c in symbols {
             let n = left.get_pos(c).ok_or(CipherError::invalid_input_char(c))?;
-            out.push(right[n]);
+            out.push(*right.get_char(n).unwrap()); // Error will be caught by previous line
             Chaocipher::left_permute(&mut left, n);
             Chaocipher::right_permute(&mut right, n);
         }

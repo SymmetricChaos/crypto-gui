@@ -35,19 +35,19 @@ impl HebernRotorCage {
     }
 
     pub fn encrypt_char(&self, c: char, alphabet: &VecString) -> char {
-        let mut n = alphabet.get_pos_of(c).unwrap();
+        let mut n = alphabet.get_pos(c).unwrap();
         for rtr in self.rotors.iter() {
             n = rtr.ltr(n)
         }
-        alphabet.get_char_at(n).unwrap()
+        *alphabet.get_char(n).unwrap()
     }
 
     pub fn decrypt_char(&self, c: char, alphabet: &VecString) -> char {
-        let mut n = alphabet.get_pos_of(c).unwrap();
+        let mut n = alphabet.get_pos(c).unwrap();
         for rtr in self.rotors.iter().rev() {
             n = rtr.rtl(n)
         }
-        alphabet.get_char_at(n).unwrap()
+        *alphabet.get_char(n).unwrap()
     }
 }
 

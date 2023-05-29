@@ -38,7 +38,7 @@ impl Hutton {
     pub fn assign_password(&mut self, password: &str) {
         self.password = password
             .chars()
-            .map(|c| self.alphabet.get_pos_of(c).unwrap() + 1)
+            .map(|c| self.alphabet.get_pos(c).unwrap() + 1)
             .collect();
     }
 
@@ -62,13 +62,13 @@ impl Cipher for Hutton {
             if self.version == HuttonVersion::V2 {
                 value += self
                     .alphabet
-                    .get_pos_of(inner_alpha.get_char(0).unwrap())
+                    .get_pos(*inner_alpha.get_char(0).unwrap())
                     .unwrap();
                 value += 1;
             }
             // reduce modulo alphabet length and push the character at that position in the keyed alphabet to the ciphertext
             value %= len;
-            out.push(inner_alpha.get_char(value).unwrap());
+            out.push(*inner_alpha.get_char(value).unwrap());
 
             inner_alpha.swap_indicies(inner_alpha.get_pos(c).unwrap(), value);
         }
@@ -87,12 +87,12 @@ impl Cipher for Hutton {
             if self.version == HuttonVersion::V2 {
                 value -= self
                     .alphabet
-                    .get_pos_of(inner_alphabet.get_char(0).unwrap())
+                    .get_pos(*inner_alphabet.get_char(0).unwrap())
                     .unwrap();
                 value -= 1;
             }
             value %= len;
-            out.push(inner_alphabet.get_char(value).unwrap());
+            out.push(*inner_alphabet.get_char(value).unwrap());
 
             inner_alphabet.swap_indicies(inner_alphabet.get_pos(c).unwrap(), value);
         }

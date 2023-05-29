@@ -1,14 +1,16 @@
 use ciphers::{polyalphabetic::Porta, Cipher};
 use egui::Ui;
+use rand::{thread_rng, Rng};
+use utils::{functions::random_sample_replace, preset_alphabet::Alphabet};
 
-use crate::egui_aux::mono;
+use crate::egui_aux::{error_text, mono};
 
 use super::{CipherFrame, _generic_components::control_string};
 
 #[derive(Default)]
 pub struct PortaFrame {
     cipher: Porta,
-    key_word_string: String,
+    key_string: String,
 }
 
 impl CipherFrame for PortaFrame {
@@ -17,8 +19,13 @@ impl CipherFrame for PortaFrame {
         ui.add_space(16.0);
 
         ui.label("Keyword");
-        if control_string(ui, &mut self.key_word_string).changed() {
-            self.cipher.assign_key(&self.key_word_string)
+        if control_string(ui, &mut self.key_string).changed() {
+            match self.cipher.assign_key(&self.key_string) {
+                Ok(_) => (),
+                Err(e) => {
+                    ui.label(error_text(e.inner()));
+                }
+            }
         }
         ui.add_space(16.0);
 
@@ -70,7 +77,14 @@ impl CipherFrame for PortaFrame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        let mut rng = thread_rng();
+        let n_chars = rng.gen_range(6..10);
+        self.key_string = random_sample_replace(Alphabet::BasicLatin.into(), n_chars, &mut rng);
+        self.cipher
+            .assign_key(&self.key_string)
+            .expect("randomizer picked invalid characters")
+    }
 
     fn reset(&mut self) {
         *self = Self::default()

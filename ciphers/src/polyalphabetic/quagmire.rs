@@ -63,7 +63,7 @@ impl Quagmire {
         };
         for c in key.chars() {
             let sh =
-                len + ind_pos - (ct.get_pos_of(c).ok_or(CipherError::invalid_key_char(c))? as i32);
+                len + ind_pos - (ct.get_pos(c).ok_or(CipherError::invalid_key_char(c))? as i32);
             self.ind_key.push(sh % len)
         }
         Ok(())
@@ -73,11 +73,11 @@ impl Quagmire {
         match self.version {
             QuagmireVersion::V2 => self
                 .alphabet
-                .get_pos_of(self.indicator)
+                .get_pos(self.indicator)
                 .expect(&format!("invalid indicator character `{}`", self.indicator)),
             _ => self
                 .pt_key
-                .get_pos_of(self.indicator)
+                .get_pos(self.indicator)
                 .expect(&format!("invalid indicator character `{}`", self.indicator)),
         }
     }
@@ -98,8 +98,8 @@ impl Cipher for Quagmire {
         let ind_key = self.indicator_cyclic_key();
         let mut out = String::with_capacity(text.len());
         for (c, k) in text.chars().zip(ind_key) {
-            let p = pt.get_pos_of(c).unwrap();
-            let new_c = ct.get_char_offset(p, -*k).unwrap();
+            let p = pt.get_pos(c).unwrap();
+            let new_c = *ct.get_char_offset(p, -*k).unwrap();
             out.push(new_c);
         }
         Ok(out)
@@ -115,14 +115,12 @@ impl Cipher for Quagmire {
         let ind_key = self.indicator_cyclic_key();
         let mut out = String::with_capacity(text.len());
         for (c, k) in text.chars().zip(ind_key) {
-            let p = pt.get_pos_of(c).unwrap();
-            let new_c = ct.get_char_offset(p, *k).unwrap();
+            let p = pt.get_pos(c).unwrap();
+            let new_c = *ct.get_char_offset(p, *k).unwrap();
             out.push(new_c);
         }
         Ok(out)
     }
-
-
 }
 
 #[cfg(test)]

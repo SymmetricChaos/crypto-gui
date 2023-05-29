@@ -9,19 +9,19 @@ pub struct Affine {
 
 impl Affine {
     fn encrypt_char(&self, c: char) -> char {
-        let mut pos = self.alphabet.get_pos_of(c).unwrap();
+        let mut pos = self.alphabet.get_pos(c).unwrap();
         pos *= self.mul_key;
         pos += self.add_key;
         pos %= self.alphabet_len();
-        self.alphabet.get_char_at(pos).unwrap()
+        *self.alphabet.get_char(pos).unwrap()
     }
 
     fn decrypt_char(&self, c: char, mul_key_inv: usize) -> char {
-        let mut pos = self.alphabet.get_pos_of(c).unwrap();
+        let mut pos = self.alphabet.get_pos(c).unwrap();
         pos += self.alphabet_len() - self.add_key;
         pos *= mul_key_inv;
         pos %= self.alphabet_len();
-        self.alphabet.get_char_at(pos).unwrap()
+        *self.alphabet.get_char(pos).unwrap()
     }
 
     pub fn set_alphabet(&mut self) {}

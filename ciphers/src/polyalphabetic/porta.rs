@@ -1,5 +1,4 @@
 use crate::{errors::CipherError, traits::Cipher};
-use itertools::Itertools;
 use lazy_static::lazy_static;
 use utils::preset_alphabet::Alphabet;
 use utils::vecstring::VecString;
@@ -38,11 +37,16 @@ impl Default for Porta {
 }
 
 impl Porta {
-    pub fn assign_key(&mut self, key: &str) {
-        self.key_vals = key
-            .chars()
-            .map(|c| self.alphabet.get_pos_of(c).unwrap())
-            .collect_vec();
+    pub fn assign_key(&mut self, key: &str) -> Result<(), CipherError> {
+        let mut values = Vec::new();
+        for c in key.chars() {
+            match self.alphabet.get_pos(c) {
+                Some(n) => values.push(n),
+                None => return Err(CipherError::invalid_key_char(c)),
+            }
+        }
+        self.key_vals = values;
+        Ok(())
     }
 
     pub fn tableaux(&self) -> std::slice::Iter<'_, &str> {
@@ -58,7 +62,7 @@ impl Cipher for Porta {
         for (c, k) in text.chars().zip(ckey) {
             let row = PORTA_TABLEAUX.get(*k).unwrap();
             let pos = row.chars().position(|x| x == c).unwrap();
-            out.push(self.alphabet.get_char_at(pos).unwrap())
+            out.push(*self.alphabet.get_char(pos).unwrap())
         }
         Ok(out)
     }

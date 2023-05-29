@@ -28,7 +28,7 @@ impl Slidefair {
     pub fn assign_key(&mut self, key_word: &str) {
         self.key = key_word
             .chars()
-            .map(|x| self.alphabet.get_pos_of(x).unwrap())
+            .map(|x| self.alphabet.get_pos(x).unwrap())
             .collect();
     }
 
@@ -43,36 +43,38 @@ impl Slidefair {
     }
 
     fn encrypt_pair(&self, pair: &[char], slide: usize, output: &mut String) {
-        let left_index = self.alphabet.get_pos_of(pair[0]).unwrap();
+        let left_index = self.alphabet.get_pos(pair[0]).unwrap();
         let right_index = self.alphabet.get_pos_offset(pair[1], slide as i32).unwrap();
 
         if left_index != right_index {
-            output.push(self.alphabet.get_char_at(right_index).unwrap());
+            output.push(*self.alphabet.get_char(right_index).unwrap());
             output.push(
-                self.alphabet
-                    .get_char_offset(left_index, slide as i32)
+                *self
+                    .alphabet
+                    .get_char_offset(right_index, slide as i32)
                     .unwrap(),
             );
         } else {
-            output.push(self.alphabet.get_char_offset(left_index, -1).unwrap());
-            output.push(self.alphabet.get_char_offset(right_index, -1).unwrap());
+            output.push(*self.alphabet.get_char_offset(left_index, -1).unwrap());
+            output.push(*self.alphabet.get_char_offset(right_index, -1).unwrap());
         }
     }
 
     fn decrypt_pair(&self, pair: &[char], slide: usize, output: &mut String) {
-        let left_index = self.alphabet.get_pos_of(pair[0]).unwrap();
+        let left_index = self.alphabet.get_pos(pair[0]).unwrap();
         let right_index = self.alphabet.get_pos_offset(pair[1], slide as i32).unwrap();
 
         if left_index != right_index {
-            output.push(self.alphabet.get_char_at(right_index).unwrap());
+            output.push(*self.alphabet.get_char(right_index).unwrap());
             output.push(
-                self.alphabet
+                *self
+                    .alphabet
                     .get_char_offset(left_index, slide as i32)
                     .unwrap(),
             );
         } else {
-            output.push(self.alphabet.get_char_offset(left_index, 1).unwrap());
-            output.push(self.alphabet.get_char_offset(right_index, 1).unwrap());
+            output.push(*self.alphabet.get_char_offset(left_index, 1).unwrap());
+            output.push(*self.alphabet.get_char_offset(right_index, 1).unwrap());
         }
     }
 

@@ -10,15 +10,19 @@ pub struct Caesar {
 
 impl Caesar {
     fn encrypt_char(&self, c: char) -> Result<char, CipherError> {
-        self.alphabet
-            .get_shifted_char(c, self.shift)
-            .ok_or(CipherError::invalid_input_char(c))
+        let p = self
+            .alphabet
+            .get_pos(c)
+            .ok_or(CipherError::invalid_input_char(c))?;
+        Ok(*self.alphabet.get_char_offset(p, self.shift).unwrap())
     }
 
     fn decrypt_char(&self, c: char) -> Result<char, CipherError> {
-        self.alphabet
-            .get_shifted_char(c, -self.shift)
-            .ok_or(CipherError::invalid_input_char(c))
+        let p = self
+            .alphabet
+            .get_pos(c)
+            .ok_or(CipherError::invalid_input_char(c))?;
+        Ok(*self.alphabet.get_char_offset(p, -self.shift).unwrap())
     }
 
     pub fn assign_alphabet(&mut self, alphabet: &str) {

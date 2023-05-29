@@ -47,7 +47,7 @@ impl TwoSquare {
         symbol: char,
         alphabet: &VecString,
     ) -> Result<(usize, usize), CipherError> {
-        let num = match alphabet.get_pos_of(symbol) {
+        let num = match alphabet.get_pos(symbol) {
             Some(n) => n,
             None => return Err(CipherError::invalid_input_char(symbol)),
         };
@@ -56,7 +56,7 @@ impl TwoSquare {
 
     fn position_to_char(&self, position: (usize, usize), alphabet: &VecString) -> char {
         let num = position.0 * self.grid_side_len + position.1;
-        alphabet.get_char_at(num).unwrap()
+        *alphabet.get_char(num).unwrap()
     }
 
     // Shift characters according to playfairs method

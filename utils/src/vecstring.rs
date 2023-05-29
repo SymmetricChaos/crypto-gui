@@ -10,7 +10,6 @@ use super::preset_alphabet::Alphabet;
 use std::collections::vec_deque::{Iter, IterMut};
 use std::collections::VecDeque;
 use std::fmt::Display;
-use std::ops::{Index, IndexMut};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct VecString(VecDeque<char>);
@@ -43,52 +42,41 @@ impl VecString {
     ////////////////////
     // getter methods //
     ////////////////////
+    // First character
+    pub fn front(&self) -> Option<&char> {
+        self.0.front()
+    }
+
+    pub fn front_mut(&mut self) -> Option<&mut char> {
+        self.0.front_mut()
+    }
+
+    // Last character
+    pub fn back(&self) -> Option<&char> {
+        self.0.back()
+    }
+
+    pub fn back_mut(&mut self) -> Option<&mut char> {
+        self.0.back_mut()
+    }
+
     // Get the character at some position
-    pub fn get_char(&self, n: usize) -> Option<char> {
-        self.0.iter().nth(n).map(|c| *c)
+    pub fn get_char(&self, n: usize) -> Option<&char> {
+        self.0.iter().nth(n)
     }
 
-    pub fn get_char_at(&self, n: usize) -> Option<char> {
-        self.0.iter().nth(n).map(|c| *c)
-    }
-
-    // Get the position of some character
-    pub fn get_pos(&self, c: char) -> Option<usize> {
-        self.0.iter().position(|x| x == &c)
-    }
-
-    pub fn get_pos_of(&self, c: char) -> Option<usize> {
-        self.0.iter().position(|x| x == &c)
-    }
-
-    // Get a mutable reference to the character as some position
     pub fn get_char_mut(&mut self, n: usize) -> Option<&mut char> {
         self.0.iter_mut().nth(n)
     }
 
-    // Get a char at a position with some offset
-    pub fn get_char_offset(&self, index: usize, offset: i32) -> Option<char> {
-        let len = self.len();
-        let idx = ((index + len) as i32 + offset) as usize % len;
-        self.0.get(idx).map(|c| *c)
-    }
-
-    // Get a mutable reference to the char at a position with some offset
-    pub fn get_char_offset_mut(&mut self, index: usize, offset: i32) -> Option<&mut char> {
-        let len = self.len();
-        let idx = ((index + len) as i32 + offset) as usize % len;
-        self.0.get_mut(idx)
-    }
-
-    // Get the character that is some (positive or negative) offset different from a provided char
-    pub fn get_shifted_char(&self, c: char, offset: i32) -> Option<char> {
-        let p = self.get_pos_of(c)?;
-        self.get_char_offset(p, offset)
+    // Find a position
+    pub fn get_pos(&self, c: char) -> Option<usize> {
+        self.0.iter().position(|x| x == &c)
     }
 
     // Get one random character
     pub fn get_rand_char(&self, rng: &mut StdRng) -> char {
-        self.get_char(rng.gen_range(0..self.len())).unwrap()
+        *self.get_char(rng.gen_range(0..self.len())).unwrap()
     }
 
     // Get multiple random characters, replacing each time
@@ -100,6 +88,29 @@ impl VecString {
         }
         out
     }
+
+    ////////////////////
+    // offset methods //
+    ///////////////////
+
+    // Get an index offset by a positive or negative value that wraps around and the ends
+    fn offset(&self, index: usize, offset: i32) -> usize {
+        ((index + self.len()) as i32 + offset) as usize % self.len()
+    }
+
+    pub fn get_char_offset(&self, n: usize, offset: i32) -> Option<&char> {
+        self.0.iter().nth(self.offset(n, offset))
+    }
+
+    pub fn get_char_offset_mut(&mut self, n: usize, offset: i32) -> Option<&mut char> {
+        let pos = self.offset(n, offset);
+        self.0.iter_mut().nth(pos)
+    }
+
+    // Get the character that is some (positive or negative) offset different from a provided char
+    // pub fn get_shifted_char(&self, c: char, offset: i32) -> Option<&char> {
+
+    // }
 
     ////////////////////////////////////
     // methods for finding characters //
@@ -113,10 +124,10 @@ impl VecString {
         Some((self.0.iter().position(|x| *x == c)? + shift) % self.len())
     }
 
-    pub fn offset_from_char(&self, c: char, offset: i32) -> Option<char> {
-        let p = self.get_pos(c)?;
-        self.get_char_offset(p, offset)
-    }
+    // pub fn offset_from_char(&self, c: char, offset: i32) -> Option<char> {
+    //     let p = self.get_pos_of(c)?;
+    //     self.get_char_offset(p, offset)
+    // }
 
     ////////////////////////
     // conversion methods //
@@ -243,19 +254,19 @@ impl VecString {
 }
 
 // Indexing Traits
-impl Index<usize> for VecString {
-    type Output = char;
+// impl Index<usize> for VecString {
+//     type Output = char;
 
-    fn index(&self, n: usize) -> &Self::Output {
-        &self.0[n]
-    }
-}
+//     fn index(&self, n: usize) -> &Self::Output {
+//         &self.0[n]
+//     }
+// }
 
-impl IndexMut<usize> for VecString {
-    fn index_mut(&mut self, n: usize) -> &mut Self::Output {
-        &mut self.0[n]
-    }
-}
+// impl IndexMut<usize> for VecString {
+//     fn index_mut(&mut self, n: usize) -> &mut Self::Output {
+//         &mut self.0[n]
+//     }
+// }
 
 // Display
 impl Display for VecString {

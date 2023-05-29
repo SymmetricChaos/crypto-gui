@@ -39,7 +39,7 @@ impl Vigenere {
             let mut effective_key = vec![0usize; self.key_len()];
             for key in self.key_words.iter().filter(|s| !s.is_empty()) {
                 for (pos, sym) in key.chars().cycle().take(self.key_len()).enumerate() {
-                    let p = self.alphabet.get_pos_of(sym).unwrap();
+                    let p = self.alphabet.get_pos(sym).unwrap();
                     effective_key[pos] += p
                 }
             }
@@ -51,7 +51,7 @@ impl Vigenere {
         } else {
             let key: Vec<usize> = self.key_words[0]
                 .chars()
-                .map(|x| self.alphabet.get_pos_of(x).unwrap())
+                .map(|x| self.alphabet.get_pos(x).unwrap())
                 .collect();
             key.into_iter()
         }
@@ -79,7 +79,7 @@ impl Vigenere {
     pub fn key_word(&self) -> String {
         if self.multikey {
             self.key()
-                .map(|v| self.alphabet.get_char_at(v).unwrap())
+                .map(|v| self.alphabet.get_char(v).unwrap())
                 .collect()
         } else {
             self.key_words[0].clone()
@@ -118,29 +118,35 @@ impl Vigenere {
     }
 
     // Unwraps for the character methods are justified by validating the input
-    fn encrypt_char(&self, c: char, k: usize) -> char {
-        self.alphabet.get_shifted_char(c, k as i32).unwrap()
+    fn encrypt_char(&self, c: char, k: usize) -> Result<char, CipherError> {
+        let p = self
+            .alphabet
+            .get_pos(c)
+            .ok_or(CipherError::invalid_input_char(c))?;
+        Ok(*self.alphabet.get_char_offset(p, k as i32).unwrap())
     }
 
-    fn decrypt_char(&self, c: char, k: usize) -> char {
-        self.alphabet.get_shifted_char(c, -(k as i32)).unwrap()
+    fn decrypt_char(&self, c: char, k: usize) -> Result<char, CipherError> {
+        let p = self
+            .alphabet
+            .get_pos(c)
+            .ok_or(CipherError::invalid_input_char(c))?;
+        Ok(*self.alphabet.get_char_offset(p, -(k as i32)).unwrap())
     }
 
     fn encrypt_cyclic(&self, text: &str) -> Result<String, CipherError> {
-        let out = text
-            .chars()
-            .zip(self.cyclic_key())
-            .map(|(c, n)| self.encrypt_char(c, n))
-            .collect();
+        let mut out = String::with_capacity(text.len());
+        for (c, n) in text.chars().zip(self.cyclic_key()) {
+            out.push(self.encrypt_char(c, n)?)
+        }
         Ok(out)
     }
 
     fn decrypt_cyclic(&self, text: &str) -> Result<String, CipherError> {
-        let out = text
-            .chars()
-            .zip(self.cyclic_key())
-            .map(|(c, n)| self.decrypt_char(c, n))
-            .collect();
+        let mut out = String::with_capacity(text.len());
+        for (c, n) in text.chars().zip(self.cyclic_key()) {
+            out.push(self.decrypt_char(c, n)?)
+        }
         Ok(out)
     }
 
@@ -149,9 +155,9 @@ impl Vigenere {
         let mut out = String::with_capacity(text.len());
 
         for c in text.chars() {
-            akey.push_back(self.alphabet.get_pos_of(c).unwrap());
+            akey.push_back(self.alphabet.get_pos(c).unwrap());
             let n = akey.pop_front().unwrap();
-            out.push(self.encrypt_char(c, n))
+            out.push(self.encrypt_char(c, n)?)
         }
 
         Ok(out)
@@ -163,9 +169,9 @@ impl Vigenere {
 
         for c in text.chars() {
             let n = akey.pop_front().unwrap();
-            let ptxt_char = self.decrypt_char(c, n);
+            let ptxt_char = self.decrypt_char(c, n)?;
             out.push(ptxt_char);
-            let new_key_val = self.alphabet.get_pos_of(ptxt_char).unwrap();
+            let new_key_val = self.alphabet.get_pos(ptxt_char).unwrap();
             akey.push_back(new_key_val);
         }
         Ok(out)
@@ -179,7 +185,7 @@ impl Vigenere {
         let key_len = self.key_len();
 
         for (c, n) in text.chars().zip(self.cyclic_key()) {
-            out.push(self.encrypt_char(c, (n + cur_shift) % self.alphabet_len()));
+            out.push(self.encrypt_char(c, (n + cur_shift) % self.alphabet_len())?);
             ctr = (ctr + 1) % key_len;
             if ctr == 0 {
                 cur_shift = (cur_shift + self.prog_shift) % self.alphabet_len();
@@ -196,7 +202,7 @@ impl Vigenere {
         let key_len = self.key_len();
 
         for (c, n) in text.chars().zip(self.cyclic_key()) {
-            out.push(self.decrypt_char(c, (n + cur_shift) % self.alphabet_len()));
+            out.push(self.decrypt_char(c, (n + cur_shift) % self.alphabet_len())?);
             ctr = (ctr + 1) % key_len;
             if ctr == 0 {
                 cur_shift = (cur_shift + self.prog_shift) % self.alphabet_len();
