@@ -1,10 +1,11 @@
 use ciphers::{polyalphabetic::M94, Cipher};
 use egui::{Color32, FontFamily, RichText, Slider, Ui};
+use rand::{seq::SliceRandom, thread_rng, Rng};
 use utils::preset_alphabet::Alphabet;
 
 use crate::egui_aux::mono;
 
-use super::CipherFrame;
+use super::{CipherFrame, _generic_components::randomize_reset};
 
 #[derive(Default)]
 pub struct M94Frame {
@@ -13,7 +14,7 @@ pub struct M94Frame {
 
 impl CipherFrame for M94Frame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Alphabet");
@@ -23,10 +24,6 @@ impl CipherFrame for M94Frame {
         ui.label("Offset");
         ui.add(Slider::new(&mut self.cipher.offset, 0..=25));
         ui.add_space(16.0);
-
-        // if ui.button("Randomize Wheels").clicked() {
-        //     self.cipher.randomize_wheels();
-        // }
 
         ui.label("Wheels");
         for n in 0..25 {
@@ -54,7 +51,11 @@ impl CipherFrame for M94Frame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        let mut rng = thread_rng();
+        self.cipher.wheels.shuffle(&mut rng);
+        self.cipher.offset = rng.gen_range(1..25);
+    }
 
     fn reset(&mut self) {
         *self = Self::default()

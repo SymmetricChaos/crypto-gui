@@ -67,9 +67,4 @@ impl Cipher for Porta {
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         self.encrypt(text)
     }
-
-    // fn randomize(&mut self) {
-    //     let rng = get_global_rng();
-    //     todo!("{:?}", rng)
-    // }
 }

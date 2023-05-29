@@ -251,34 +251,6 @@ impl Cipher for M209 {
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         self.encrypt(text)
     }
-
-    // fn randomize(&mut self) {
-    //     // Fill up an array with random bytes. Then map that to pairs of usize.
-    //     // Unwrap here is justified by the fixed sizes of everything involved.
-    //     let mut rng = get_global_rng();
-    //     let mut data = [0u8; 54];
-    //     data.try_fill(&mut *rng).unwrap();
-    //     self.lugs = data
-    //         .chunks_exact(2)
-    //         .map(|x| ((x[0] % 7) as usize, (x[1] % 7) as usize))
-    //         .collect::<Vec<(usize, usize)>>()
-    //         .try_into()
-    //         .unwrap();
-
-    //     let pins1 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 13, &mut rng);
-    //     let pins2 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVXYZ", 12, &mut rng);
-    //     let pins3 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVX", 12, &mut rng);
-    //     let pins4 = random_char_vec("ABCDEFGHIJKLMNOPQRSTU", 12, &mut rng);
-    //     let pins5 = random_char_vec("ABCDEFGHIJKLMNOPQRS", 12, &mut rng);
-    //     let pins6 = random_char_vec("ABCDEFGHIJKLMNOPQ", 12, &mut rng);
-
-    //     for (rotor, new_pins) in self
-    //         .get_wheels()
-    //         .zip([pins1, pins2, pins3, pins4, pins5, pins6].iter())
-    //     {
-    //         rotor.pins = new_pins.clone()
-    //     }
-    // }
 }
 
 #[cfg(test)]

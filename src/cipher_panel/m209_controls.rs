@@ -1,7 +1,9 @@
 use ciphers::{Cipher, M209};
 use egui::{Slider, Ui};
+use rand::{thread_rng, Fill};
+use utils::functions::random_char_vec;
 
-use super::CipherFrame;
+use super::{CipherFrame, _generic_components::randomize_reset};
 
 fn lug_pair(ui: &mut egui::Ui, pair: &mut (usize, usize)) {
     ui.add(
@@ -23,7 +25,7 @@ pub struct M209Frame {
 
 impl CipherFrame for M209Frame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Alphabet");
@@ -56,7 +58,34 @@ impl CipherFrame for M209Frame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        // Fill up an array with random bytes. Then map that to pairs of usize.
+        // Unwrap here is justified by the fixed sizes of everything involved.
+        let mut rng = thread_rng();
+        let mut data = [0u8; 54];
+        data.try_fill(&mut rng).unwrap();
+        self.cipher.lugs = data
+            .chunks_exact(2)
+            .map(|x| ((x[0] % 7) as usize, (x[1] % 7) as usize))
+            .collect::<Vec<(usize, usize)>>()
+            .try_into()
+            .unwrap();
+
+        let pins1 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 13, &mut rng);
+        let pins2 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVXYZ", 12, &mut rng);
+        let pins3 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVX", 12, &mut rng);
+        let pins4 = random_char_vec("ABCDEFGHIJKLMNOPQRSTU", 12, &mut rng);
+        let pins5 = random_char_vec("ABCDEFGHIJKLMNOPQRS", 12, &mut rng);
+        let pins6 = random_char_vec("ABCDEFGHIJKLMNOPQ", 12, &mut rng);
+
+        for (rotor, new_pins) in self
+            .cipher
+            .get_wheels()
+            .zip([pins1, pins2, pins3, pins4, pins5, pins6].iter())
+        {
+            rotor.pins = new_pins.clone()
+        }
+    }
 
     fn reset(&mut self) {
         *self = Self::default()

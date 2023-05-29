@@ -56,11 +56,6 @@ impl M94 {
             self.wheels.swap(n, n + 1);
         }
     }
-
-    // pub fn randomize_wheels(&mut self) {
-    //     let mut rng = get_global_rng();
-    //     self.wheels.shuffle(&mut *rng);
-    // }
 }
 
 impl Cipher for M94 {
@@ -94,12 +89,6 @@ impl Cipher for M94 {
         }
         Ok(out)
     }
-
-    // fn randomize(&mut self) {
-    //     let mut rng = get_global_rng();
-    //     self.wheels.shuffle(&mut *rng);
-    //     self.offset = rng.gen_range(1..self.wheels.len());
-    // }
 }
 
 #[cfg(test)]
