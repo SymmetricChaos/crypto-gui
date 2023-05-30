@@ -108,6 +108,6 @@ mod amsco_tests {
     #[test]
     fn grouping_test() {
         let mut cipher = Amsco::default();
-        println!("{}", cipher.groups(PLAINTEXT));
+        println!("{:?}", cipher.groups(PLAINTEXT));
     }
 }

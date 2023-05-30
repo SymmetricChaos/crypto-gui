@@ -172,14 +172,14 @@ mod polybius_tests {
     #[test]
     fn encrypt_test() {
         let mut cipher = PolybiusSquare::default();
-        cipher.assign_key("INVENTORY", Alphabet::BasicLatinNoJ);
+        cipher.assign_key("INVENTORY", Alphabet::BasicLatinNoQ.into());
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = PolybiusSquare::default();
-        cipher.assign_key("INVENTORY", Alphabet::BasicLatinNoJ);
+        cipher.assign_key("INVENTORY", Alphabet::BasicLatinNoQ.into());
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

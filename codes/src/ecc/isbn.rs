@@ -127,21 +127,19 @@ mod isbn_tests {
 
     #[test]
     fn test_isbn_10_valid() {
-        let code = Isbn::default();
-        assert!(code.is_valid_isbn_10("0-306-40615-2").is_ok());
-        assert!(code.is_valid_isbn_10("0306406152").is_ok());
-        assert!(code.is_valid_isbn_10("0-306-4615-2").is_err());
-        assert!(code.is_valid_isbn_10("0-306-40615-1").is_err());
-        assert!(code.is_valid_isbn_10("0-306-40165-2").is_err());
+        assert!(is_valid_isbn_10("0-306-40615-2").is_ok());
+        assert!(is_valid_isbn_10("0306406152").is_ok());
+        assert!(is_valid_isbn_10("0-306-4615-2").is_err());
+        assert!(is_valid_isbn_10("0-306-40615-1").is_err());
+        assert!(is_valid_isbn_10("0-306-40165-2").is_err());
     }
 
     #[test]
     fn test_isbn_13_valid() {
-        let code = Isbn::default();
-        assert!(code.is_valid_isbn_13("978-0-306-40615-7").is_ok());
-        assert!(code.is_valid_isbn_13("9780306406157").is_ok());
-        assert!(code.is_valid_isbn_13("978-0-306-4015-7").is_err());
-        assert!(code.is_valid_isbn_13("978-0-306-40615-3").is_err());
-        assert!(code.is_valid_isbn_13("978-0-360-40615-7").is_err());
+        assert!(is_valid_isbn_13("978-0-306-40615-7").is_ok());
+        assert!(is_valid_isbn_13("9780306406157").is_ok());
+        assert!(is_valid_isbn_13("978-0-306-4015-7").is_err());
+        assert!(is_valid_isbn_13("978-0-306-40615-3").is_err());
+        assert!(is_valid_isbn_13("978-0-360-40615-7").is_err());
     }
 }

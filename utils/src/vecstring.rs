@@ -1,8 +1,5 @@
 use itertools::Itertools;
-use rand::{
-    prelude::{SliceRandom, StdRng},
-    Rng,
-};
+use rand::{prelude::SliceRandom, Rng};
 
 use crate::functions::keyed_alphabet;
 
@@ -75,13 +72,13 @@ impl VecString {
     }
 
     // Get one random character
-    pub fn get_rand_char(&self, rng: &mut StdRng) -> char {
+    pub fn get_rand_char<R: Rng>(&self, rng: &mut R) -> char {
         *self.get_char(rng.gen_range(0..self.len())).unwrap()
     }
 
     // Get multiple random characters, replacing each time
     // For sampling without replacement shuffle and iterate
-    pub fn get_rand_chars_replace(&self, n: usize, rng: &mut StdRng) -> Vec<char> {
+    pub fn get_rand_chars_replace<R: Rng>(&self, n: usize, rng: &mut R) -> Vec<char> {
         let mut out = Vec::with_capacity(n);
         for i in out.iter_mut() {
             *i = self.get_rand_char(rng);

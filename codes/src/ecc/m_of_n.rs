@@ -115,7 +115,7 @@ mod m_of_n_tests {
     }
 
     #[test]
-    fn decode_with_CodeErrortest() {
+    fn decode_with_errors_test() {
         let code = MofNCode::default();
         assert_eq!(code.decode("011001100001011").unwrap(), "011110���");
     }

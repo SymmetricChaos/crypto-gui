@@ -96,7 +96,7 @@ mod adfgvx_tests {
         let mut cipher = Adfgvx::default();
         cipher.mode = AdfgvxMode::Long;
         cipher.assign_polybius_key("57This9Should0Mix2Words");
-        cipher.assign_columnar_keyy("SOMEWORD");
+        cipher.assign_columnar_key("SOMEWORD");
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT2);
     }
 

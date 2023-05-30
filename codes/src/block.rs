@@ -159,7 +159,7 @@ mod block_code_tests {
     #[test]
     fn encode_test() {
         let mut code = BlockCode::default();
-        code.symbols = VecString::from("XYZ");
+        code.symbols = "XYZ".chars().collect();
         code.width = 2;
         assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT_XYZ);
     }
@@ -167,7 +167,7 @@ mod block_code_tests {
     #[test]
     fn decode_test() {
         let mut code = BlockCode::default();
-        code.symbols = VecString::from("XYZ");
+        code.symbols = "XYZ".chars().collect();
         code.width = 2;
         assert_eq!(code.decode(CIPHERTEXT_XYZ).unwrap(), PLAINTEXT);
     }

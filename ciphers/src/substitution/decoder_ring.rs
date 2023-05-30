@@ -3,7 +3,7 @@ use utils::vecstring::VecString;
 
 pub struct DecoderRing {
     pub index: usize,
-    alphabet: VecString,
+    pub alphabet: VecString,
 }
 
 impl DecoderRing {
@@ -86,7 +86,7 @@ mod decoder_ring_tests {
     #[test]
     fn encrypt_test() {
         let mut cipher = DecoderRing::default();
-        cipher.annie();
+        cipher.assign_alphabet("_ASLWIMVHFKXDPOEJBTNQZGUYRC");
         cipher.index = 3;
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
@@ -94,7 +94,7 @@ mod decoder_ring_tests {
     #[test]
     fn decrypt_test() {
         let mut cipher = DecoderRing::default();
-        cipher.annie();
+        cipher.assign_alphabet("_ASLWIMVHFKXDPOEJBTNQZGUYRC");
         cipher.index = 3;
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }

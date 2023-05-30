@@ -1,7 +1,6 @@
 use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
-use rand::{rngs::StdRng, SeedableRng};
-use std::cell::RefCell;
+use rand::thread_rng;
 use std::{collections::HashSet, num::ParseIntError};
 use utils::{
     grid::{Grid, Symbol},
@@ -15,7 +14,7 @@ pub struct TurningGrille {
     pub grid: Grid<Symbol<char>>,
     pub key_strings: [String; 4],
     pub keys: [Vec<usize>; 4],
-    rng: RefCell<StdRng>,
+    // rng: RefCell<StdRng>,
 }
 
 impl Default for TurningGrille {
@@ -26,7 +25,7 @@ impl Default for TurningGrille {
             grid: Grid::new_blocked(8, 8),
             key_strings: [String::new(), String::new(), String::new(), String::new()],
             keys: [Vec::new(), Vec::new(), Vec::new(), Vec::new()],
-            rng: RefCell::new(StdRng::seed_from_u64(1587782446298476294)),
+            // rng: RefCell::new(StdRng::seed_from_u64(1587782446298476294)),
         }
     }
 }
@@ -142,7 +141,7 @@ impl Cipher for TurningGrille {
                     if crypto_grid[(row, col)].is_empty() {
                         output_grid[(row, col)] = snip
                             .next()
-                            .unwrap_or(self.null_alphabet.get_rand_char(&mut self.rng.borrow_mut()))
+                            .unwrap_or(self.null_alphabet.get_rand_char(&mut thread_rng()))
                     }
                 }
             }
@@ -187,13 +186,13 @@ mod turning_grille_tests {
 
     #[test]
     fn encrypt_test_full_grid() {
-        let mut cipher = TurningGrille::default();
+        let cipher = TurningGrille::default();
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test_full_grid() {
-        let mut cipher = TurningGrille::default();
+        let cipher = TurningGrille::default();
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

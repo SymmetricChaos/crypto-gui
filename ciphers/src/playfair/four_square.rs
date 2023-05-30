@@ -143,14 +143,14 @@ mod four_square_tests {
     #[test]
     fn encrypt_test() {
         let mut cipher = FourSquare::default();
-        cipher.assign_keys("EXAMPLE", "KEYWORD", Alphabet::BasicLatinNoQ);
+        cipher.assign_keys("EXAMPLE", "KEYWORD", Alphabet::BasicLatinNoQ.into());
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = FourSquare::default();
-        cipher.assign_keys("EXAMPLE", "KEYWORD", Alphabet::BasicLatinNoQ);
+        cipher.assign_keys("EXAMPLE", "KEYWORD", Alphabet::BasicLatinNoQ.into());
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

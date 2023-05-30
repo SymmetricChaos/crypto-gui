@@ -22,7 +22,7 @@ impl Default for PolybiusCube {
 }
 
 impl PolybiusCube {
-    pub fn assign_grid(&mut self, alphabet: &str, key_word: &str) {
+    pub fn assign_grid(&mut self, key_word: &str, alphabet: &str) {
         self.grid = VecString::keyed_alphabet(key_word, alphabet);
     }
 
@@ -194,14 +194,14 @@ mod polybius_cube_tests {
     #[test]
     fn encrypt_test() {
         let mut cipher = PolybiusCube::default();
-        cipher.assign_key("INVENTORY");
+        cipher.assign_grid("INVENTORY", "ABCDEFGHIJKLMNOPQRSTUVWXYZ+");
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = PolybiusCube::default();
-        cipher.assign_key("INVENTORY");
+        cipher.assign_grid("INVENTORY", "ABCDEFGHIJKLMNOPQRSTUVWXYZ+");
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

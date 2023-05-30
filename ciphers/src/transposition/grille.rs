@@ -1,7 +1,6 @@
 use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
-use rand::{prelude::StdRng, SeedableRng};
-use std::cell::RefCell;
+use rand::{rngs::StdRng, thread_rng, Rng, SeedableRng};
 use utils::{
     grid::{str_to_char_grid, Grid, Symbol},
     preset_alphabet::Alphabet,
@@ -13,22 +12,22 @@ pub struct Grille {
     pub grid: Grid<Symbol<char>>,
     pub seed: Option<u64>,
     pub use_nulls: bool,
-    rng: RefCell<StdRng>,
+    // rng: RefCell<StdRng>,
 }
 
 impl Grille {
-    // fn _randomize_seeded(&mut self) {
-    //     let mut rng = self.get_rng();
-    //     for cell in self.grid.get_rows_mut() {
-    //         if rng.gen_bool(0.5) {
-    //             *cell = Symbol::Empty;
-    //         } else {
-    //             *cell = Symbol::Blocked;
-    //         }
-    //     }
-    // }
+    fn _randomize_seeded(&mut self, seed: u64) {
+        let mut rng = StdRng::seed_from_u64(seed);
+        for cell in self.grid.get_rows_mut() {
+            if rng.gen_bool(0.5) {
+                *cell = Symbol::Empty;
+            } else {
+                *cell = Symbol::Blocked;
+            }
+        }
+    }
 
-    fn random_nulls(&self, n: usize, rng: &mut StdRng) -> Vec<Symbol<char>> {
+    fn random_nulls<R: Rng>(&self, n: usize, rng: &mut R) -> Vec<Symbol<char>> {
         self.null_alphabet
             .get_rand_chars_replace(n, rng)
             .iter()
@@ -39,13 +38,6 @@ impl Grille {
     pub fn assign_null_alphabet(&mut self, alphabet: &str) {
         self.null_alphabet = VecString::unique_from(alphabet)
     }
-
-    // fn get_rng(&self) -> StdRng {
-    //     match self.seed {
-    //         Some(n) => SeedableRng::seed_from_u64(n),
-    //         None => SeedableRng::from_entropy(),
-    //     }
-    // }
 }
 
 impl Default for Grille {
@@ -55,7 +47,7 @@ impl Default for Grille {
             grid: Grid::new_empty(4, 4),
             seed: None,
             use_nulls: true,
-            rng: RefCell::new(StdRng::seed_from_u64(7852172251351752522)),
+            // rng: RefCell::new(StdRng::seed_from_u64(7852172251351752522)),
         }
     }
 }
@@ -76,7 +68,7 @@ impl Cipher for Grille {
 
         let mut grid = self.grid.clone();
         let mut chars = text.chars();
-        let mut nulls = self.random_nulls(self.grid.grid_size(), &mut self.rng.borrow_mut());
+        let mut nulls = self.random_nulls(self.grid.grid_size(), &mut thread_rng());
 
         for cell in grid.get_rows_mut() {
             match cell {
@@ -160,21 +152,19 @@ mod grille_tests {
     const CIPHERTEXT: &'static str =
         "TECLESRKCQPWTKTAQPRFUOEZTXKNOVUMZDBFMQIYHEROBBHONUUXGWEDHIOJPELC";
     const CIPHERTEXT_NO_NULLS: &'static str = "TECSRQWTAUOZKNVBFMYHROHUXEDIOJPEL";
-    const SEED: Option<u64> = Some(1587782446298476294);
+    const SEED: u64 = 1587782446298476294;
 
     #[test]
     fn encrypt_test_full_grid() {
         let mut cipher = Grille::default();
-        cipher.seed = SEED;
-        cipher._randomize_seeded();
+        cipher._randomize_seeded(SEED);
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test_full_grid() {
         let mut cipher = Grille::default();
-        cipher.seed = SEED;
-        cipher._randomize_seeded();
+        cipher._randomize_seeded(SEED);
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 
@@ -182,8 +172,7 @@ mod grille_tests {
     fn encrypt_test_full_grid_no_nulls() {
         let mut cipher = Grille::default();
         cipher.use_nulls = false;
-        cipher.seed = SEED;
-        cipher._randomize_seeded();
+        cipher._randomize_seeded(SEED);
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_NO_NULLS);
     }
 
@@ -191,8 +180,7 @@ mod grille_tests {
     fn decrypt_test_full_grid_no_nulls() {
         let mut cipher = Grille::default();
         cipher.use_nulls = false;
-        cipher.seed = SEED;
-        cipher._randomize_seeded();
+        cipher._randomize_seeded(SEED);
         assert_eq!(cipher.decrypt(CIPHERTEXT_NO_NULLS).unwrap(), PLAINTEXT);
     }
 }

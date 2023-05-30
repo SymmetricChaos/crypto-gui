@@ -74,7 +74,7 @@ mod b64_tests {
     #[test]
     fn decrypt_test() {
         let mut cipher = B64::default();
-        cipher.passign_polybius_key("ENCRYPTION");
+        cipher.assign_polybius_key("ENCRYPTION");
         cipher.assign_columnar_key_1("NOVELTY");
         cipher.assign_columnar_key_2("SHUFFLE");
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);

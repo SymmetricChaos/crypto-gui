@@ -159,14 +159,14 @@ mod playfair_tests {
     #[test]
     fn encrypt_test() {
         let mut cipher = Playfair::default();
-        cipher.set_key("VUVUZELAS");
+        cipher.assign_key("VUVUZELAS", Alphabet::BasicLatinNoQ.into());
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = Playfair::default();
-        cipher.set_key("VUVUZELAS");
+        cipher.assign_key("VUVUZELAS", Alphabet::BasicLatinNoQ.into());
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }
