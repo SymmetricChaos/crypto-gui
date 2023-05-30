@@ -1,5 +1,3 @@
-use rand::{rngs::StdRng, SeedableRng};
-
 use crate::{errors::CipherError, traits::Cipher};
 
 use super::PolybiusSquare;
@@ -8,7 +6,6 @@ use super::PolybiusSquare;
 pub struct Bifid {
     pub polybius: PolybiusSquare,
     pub block_size: usize,
-    pub rng: StdRng,
 }
 
 impl Default for Bifid {
@@ -16,7 +13,6 @@ impl Default for Bifid {
         Self {
             polybius: Default::default(),
             block_size: 7,
-            rng: StdRng::seed_from_u64(1587782446298476294),
         }
     }
 }

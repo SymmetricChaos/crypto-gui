@@ -42,8 +42,8 @@ impl Plugboard {
     }
 
     // Swap the character or return the original depending on if it is in the board
-    pub fn swap(&self, character: char) -> char {
-        *self.wiring.get(&character).unwrap_or_else(|| &character)
+    pub fn swap(&self, c: char) -> char {
+        *self.wiring.get(&c).unwrap_or_else(|| &c)
     }
 
     // Vector of pairs to show state
@@ -59,7 +59,7 @@ impl Plugboard {
 
 impl Cipher for Plugboard {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let out = text.chars().map(|c| self.swap(c)).collect();
+        let out = text.chars().map(|c| self.swap(c)).collect(); // This is infalliable
         Ok(out)
     }
 

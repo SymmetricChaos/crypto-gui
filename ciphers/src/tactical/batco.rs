@@ -91,21 +91,6 @@ impl Batco {
         (self.message_number + 50) as char
     }
 
-    // pub fn randomize_seeded(&mut self) -> Result<(), ParseIntError> {
-    //     self.seed = self.seed_string.parse::<u64>()?;
-
-    //     seed_global_rng(self.seed);
-
-    //     let alpha = PresetAlphabet::BasicLatin.slice();
-    //     for row in self.cipher_rows.iter_mut() {
-    //         *row = shuffled_str(alpha, &mut get_global_rng())
-    //     }
-    //     for col in self.key_cols.iter_mut() {
-    //         *col = shuffled_str(alpha, &mut get_global_rng())
-    //     }
-    //     Ok(())
-    // }
-
     pub fn show_code_page(&self) -> String {
         let mut s = "2 3 4 5 6 7   0  0  1  2  3  4  5  6  7  8  9 CH  .".to_string();
         for i in 0..26 {

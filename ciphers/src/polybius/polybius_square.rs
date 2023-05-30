@@ -7,7 +7,7 @@ use utils::{math_functions::is_square, preset_alphabet::Alphabet, vecstring::Vec
 pub struct PolybiusSquare {
     pub square: VecString,
     pub labels: VecString,
-    side_len: usize,
+    pub side_len: usize,
 }
 
 impl Default for PolybiusSquare {

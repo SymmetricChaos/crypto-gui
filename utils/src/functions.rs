@@ -259,7 +259,7 @@ pub fn dedup_alphabet(s: &str) -> String {
 #[cfg(test)]
 mod text_function_tests {
 
-    use crate::global_rng::{get_global_rng, seed_global_rng};
+    use rand::{rngs::StdRng, SeedableRng};
 
     use super::*;
 
@@ -278,10 +278,10 @@ mod text_function_tests {
 
     #[test]
     fn shuffled_alphabet() {
-        seed_global_rng(3141592654);
+        let mut rng = StdRng::seed_from_u64(3141592654);
         let alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         for _ in 0..26 {
-            println!("{}", shuffled_str(alpha, &mut get_global_rng()))
+            println!("{}", shuffled_str(alpha, &mut rng))
         }
     }
 

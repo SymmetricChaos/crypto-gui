@@ -1,6 +1,6 @@
 use ciphers::{tactical::Dryad, Cipher};
 use egui::{Slider, Ui};
-use rand::{rngs::StdRng, SeedableRng};
+use rand::thread_rng;
 use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
 
 use crate::egui_aux::mono;
@@ -37,7 +37,7 @@ impl CipherFrame for DryadFrame {
     }
 
     fn randomize(&mut self) {
-        let mut rng = StdRng::from_entropy();
+        let mut rng = thread_rng();
         let alpha = Alphabet::BasicLatin.slice();
         for row in self.cipher.cipher_rows.iter_mut() {
             *row = shuffled_str(alpha, &mut rng)

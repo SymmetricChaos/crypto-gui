@@ -31,7 +31,7 @@ impl CipherFrame for B64Frame {
         }
         ui.add_space(16.0);
 
-        ui.label(mono(format!("Grid\n{}", self.cipher.polybius)));
+        ui.label(mono(format!("Grid\n{}", self.cipher.polybius_grid())));
         ui.add_space(16.0);
 
         ui.label("First Columnar Key Word");
@@ -58,9 +58,7 @@ impl CipherFrame for B64Frame {
 
         // Random polybius key
         self.polybius_key_string = shuffled_str(Alphabet::Base64.slice(), &mut rng);
-        self.cipher
-            .polybius
-            .assign_key(&self.polybius_key_string, Alphabet::Base64.slice());
+        self.cipher.assign_polybius_key(&self.polybius_key_string);
 
         // First columnar
         let n_chars = rng.gen_range(6..10);

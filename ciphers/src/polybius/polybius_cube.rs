@@ -4,9 +4,9 @@ use num::Integer;
 use utils::vecstring::VecString;
 
 pub struct PolybiusCube {
-    grid: VecString,
-    labels: VecString,
-    side_len: usize,
+    pub grid: VecString,
+    pub labels: VecString,
+    pub side_len: usize,
 }
 
 impl Default for PolybiusCube {
@@ -22,7 +22,7 @@ impl Default for PolybiusCube {
 }
 
 impl PolybiusCube {
-    pub fn define_grid(&mut self, alphabet: &str, key_word: &str) {
+    pub fn assign_grid(&mut self, alphabet: &str, key_word: &str) {
         self.grid = VecString::keyed_alphabet(key_word, alphabet);
     }
 

@@ -40,7 +40,7 @@ impl CipherFrame for TrifidFrame {
         if control_string(ui, &mut self.alphabet_string).changed() {
             self.cipher
                 .polybius
-                .define_grid(&self.alphabet_string, &self.key_string)
+                .assign_grid(&self.alphabet_string, &self.key_string)
         }
 
         ui.add_space(16.0);
@@ -48,7 +48,7 @@ impl CipherFrame for TrifidFrame {
         if control_string(ui, &mut self.key_string).changed() {
             self.cipher
                 .polybius
-                .define_grid(&self.alphabet_string, &self.key_string)
+                .assign_grid(&self.alphabet_string, &self.key_string)
         }
         ui.add_space(16.0);
 
@@ -70,7 +70,7 @@ impl CipherFrame for TrifidFrame {
         self.key_string = shuffled_str(&self.alphabet_string, &mut thread_rng());
         self.cipher
             .polybius
-            .define_grid(&self.alphabet_string, &self.key_string);
+            .assign_grid(&self.alphabet_string, &self.key_string);
     }
 
     fn reset(&mut self) {

@@ -130,22 +130,6 @@ impl Rs44 {
         });
     }
 
-    pub fn randomize_labels(&mut self) {
-        let mut rng = StdRng::from_entropy();
-        self.column_nums.shuffle(&mut rng);
-        self.xlabels.shuffle(&mut rng);
-        self.ylabels = {
-            let mut v = LABELS.clone();
-            v.shuffle(&mut rng);
-            v.iter()
-                .take(HEIGHT)
-                .map(|x| *x)
-                .collect_vec()
-                .try_into()
-                .unwrap()
-        };
-    }
-
     fn col_num_to_col_idx(&self, n: usize) -> usize {
         self.column_nums
             .iter()

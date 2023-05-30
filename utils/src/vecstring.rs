@@ -329,19 +329,13 @@ mod vecstring_tests {
     #[test]
     fn nth_offset() {
         let alphabet = VecString::from("ABCD");
-        assert_eq!(alphabet.get_char_offset(1, 1).unwrap(), 'C');
+        assert_eq!(*alphabet.get_char_offset(1, 1).unwrap(), 'C');
     }
 
     #[test]
     fn get_pos_offset() {
         let alphabet = VecString::from("ABCD");
         assert_eq!(alphabet.get_pos_offset('C', 1).unwrap(), 1);
-    }
-
-    #[test]
-    fn offset_char() {
-        let alphabet = VecString::from("ABCD");
-        assert_eq!(alphabet.offset_from_char('C', 1).unwrap(), 'D');
     }
 
     // Offset should behave as expected even if it is negative
@@ -354,18 +348,12 @@ mod vecstring_tests {
     #[test]
     fn nth_offset_neg() {
         let alphabet = VecString::from("ABCD");
-        assert_eq!(alphabet.get_char_offset(3, -1).unwrap(), 'C');
+        assert_eq!(*alphabet.get_char_offset(3, -1).unwrap(), 'C');
     }
 
     #[test]
     fn get_pos_offset_neg() {
         let alphabet = VecString::from("ABCD");
         assert_eq!(alphabet.get_pos_offset('C', -1).unwrap(), 3);
-    }
-
-    #[test]
-    fn offset_char_neg() {
-        let alphabet = VecString::from("ABCD");
-        assert_eq!(alphabet.offset_from_char('C', -1).unwrap(), 'B');
     }
 }

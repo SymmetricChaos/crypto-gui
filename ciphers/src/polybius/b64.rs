@@ -4,9 +4,9 @@ use crate::{errors::CipherError, traits::Cipher};
 use utils::preset_alphabet::Alphabet;
 
 pub struct B64 {
-    pub polybius: PolybiusSquare,
-    pub columnar1: Columnar,
-    pub columnar2: Columnar,
+    polybius: PolybiusSquare,
+    columnar1: Columnar,
+    columnar2: Columnar,
 }
 
 impl B64 {
@@ -20,6 +20,10 @@ impl B64 {
 
     pub fn assign_columnar_key_2(&mut self, key: &str) {
         self.columnar2.assign_key(key, Alphabet::Base64.slice());
+    }
+
+    pub fn polybius_grid(&self) -> String {
+        self.polybius.show_grid()
     }
 }
 

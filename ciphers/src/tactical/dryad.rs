@@ -1,11 +1,11 @@
 use crate::{errors::CipherError, traits::Cipher};
-use rand::{prelude::StdRng, Rng, SeedableRng};
+use rand::{thread_rng, Rng};
 
 pub struct Dryad {
     pub cipher_rows: [String; 25],
     pub message_key: u8, // easy conversion with char
-    pub seed_string: String,
-    pub seed: u64,
+                         // pub seed_string: String,
+                         // pub seed: u64,
 }
 
 impl Default for Dryad {
@@ -39,8 +39,8 @@ impl Default for Dryad {
                 "WIVGMCAHPSRXEQODFKLUYJTNZB".to_string(),
             ],
             message_key: 0,
-            seed_string: "0".to_string(),
-            seed: 0,
+            // seed_string: "0".to_string(),
+            // seed: 0,
         }
     }
 }
@@ -76,7 +76,7 @@ impl Cipher for Dryad {
 
         let mut out = String::with_capacity(text.len());
 
-        let mut rng = StdRng::from_entropy();
+        let mut rng = thread_rng();
         for c in text.chars() {
             if !c.is_ascii_digit() {
                 return Err(CipherError::input("DRYAD only encrypts digits"));

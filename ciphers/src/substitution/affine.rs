@@ -8,23 +8,27 @@ pub struct Affine {
 }
 
 impl Affine {
-    fn encrypt_char(&self, c: char) -> char {
-        let mut pos = self.alphabet.get_pos(c).unwrap();
+    fn encrypt_char(&self, c: char) -> Result<char, CipherError> {
+        let mut pos = self
+            .alphabet
+            .get_pos(c)
+            .ok_or_else(|| CipherError::invalid_input_char(c))?;
         pos *= self.mul_key;
         pos += self.add_key;
         pos %= self.alphabet_len();
-        *self.alphabet.get_char(pos).unwrap()
+        Ok(*self.alphabet.get_char(pos).unwrap())
     }
 
-    fn decrypt_char(&self, c: char, mul_key_inv: usize) -> char {
-        let mut pos = self.alphabet.get_pos(c).unwrap();
+    fn decrypt_char(&self, c: char, mul_key_inv: usize) -> Result<char, CipherError> {
+        let mut pos = self
+            .alphabet
+            .get_pos(c)
+            .ok_or_else(|| CipherError::invalid_input_char(c))?;
         pos += self.alphabet_len() - self.add_key;
         pos *= mul_key_inv;
         pos %= self.alphabet_len();
-        *self.alphabet.get_char(pos).unwrap()
+        Ok(*self.alphabet.get_char(pos).unwrap())
     }
-
-    pub fn set_alphabet(&mut self) {}
 
     pub fn assign_alphabet(&mut self, alphabet: &str) {
         self.alphabet = VecString::unique_from(alphabet);
@@ -37,17 +41,8 @@ impl Affine {
     pub fn find_mul_inverse(&self) -> Result<usize, CipherError> {
         match mul_inv(self.mul_key, self.alphabet.chars().count()) {
             Some(n) => Ok(n),
-            None => Err(CipherError::key("The multiplicative key of an Affine Cipher cannot share any factors with the length of the alphabet"))
+            None => Err(CipherError::key("the multiplicative key of an Affine Cipher cannot share any factors with the length of the alphabet"))
         }
-    }
-
-    pub fn check_input(&self, text: &str) -> Result<(), CipherError> {
-        for c in text.chars() {
-            if !self.alphabet.contains(c) {
-                return Err(CipherError::invalid_input_char(c));
-            }
-        }
-        Ok(())
     }
 }
 
@@ -63,20 +58,20 @@ impl Default for Affine {
 
 impl Cipher for Affine {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        self.check_input(text)?;
-        // The inverse is not used but it must exist
         self.find_mul_inverse()?;
-        let out = text.chars().map(|s| self.encrypt_char(s)).collect();
+        let mut out = String::with_capacity(text.len());
+        for c in text.chars() {
+            out.push(self.encrypt_char(c)?);
+        }
         Ok(out)
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        self.check_input(text)?;
         let mul_inv = self.find_mul_inverse()?;
-        let out = text
-            .chars()
-            .map(|s| self.decrypt_char(s, mul_inv))
-            .collect();
+        let mut out = String::with_capacity(text.len());
+        for c in text.chars() {
+            out.push(self.decrypt_char(c, mul_inv)?);
+        }
         Ok(out)
     }
 }
