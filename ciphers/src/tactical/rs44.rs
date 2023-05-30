@@ -212,7 +212,7 @@ impl Cipher for Rs44 {
         for idx in self.wrapping_iter(start) {
             if stencil[idx].is_empty() {
                 match symbols.next() {
-                    Some(c) => stencil[idx] = Symbol::Character(c),
+                    Some(c) => stencil[idx] = Symbol::Filled(c),
                     None => break,
                 }
             }
@@ -223,7 +223,7 @@ impl Cipher for Rs44 {
         for col in positions {
             let s: String = stencil
                 .get_col(col)
-                .filter(|sym| sym.is_character())
+                .filter(|sym| sym.is_filled())
                 .map(|sym| sym.to_char())
                 .collect();
             output.push_str(&s);
@@ -245,7 +245,7 @@ impl Cipher for Rs44 {
         for idx in self.wrapping_iter(start) {
             if stencil[idx].is_empty() {
                 match temp_symbols.next() {
-                    Some(_) => stencil[idx] = Symbol::Character('\0'),
+                    Some(_) => stencil[idx] = Symbol::Filled('\0'),
                     None => break,
                 }
             }
@@ -257,9 +257,9 @@ impl Cipher for Rs44 {
         // col is the actual index in the column in the 2D array
         'outer: for col in positions {
             for row in 0..HEIGHT {
-                if stencil[(row, col)] == Symbol::Character('\0') {
+                if stencil[(row, col)] == Symbol::Filled('\0') {
                     match symbols.next() {
-                        Some(c) => stencil[(row, col)] = Symbol::Character(c),
+                        Some(c) => stencil[(row, col)] = Symbol::Filled(c),
                         None => break 'outer,
                     }
                 }
@@ -269,7 +269,7 @@ impl Cipher for Rs44 {
         // Read off the characters starting from the correct point
         let mut output = String::new();
         for idx in self.wrapping_iter(start) {
-            if stencil[idx].is_character() {
+            if stencil[idx].is_filled() {
                 output.push(stencil[idx].to_char())
             }
         }
@@ -301,7 +301,7 @@ mod rs44_tests {
         for idx in start..600 {
             if cipher.stencil[idx].is_empty() {
                 match symbols.next() {
-                    Some(c) => cipher.stencil[idx] = Symbol::Character(c),
+                    Some(c) => cipher.stencil[idx] = Symbol::Filled(c),
                     None => break,
                 }
             }

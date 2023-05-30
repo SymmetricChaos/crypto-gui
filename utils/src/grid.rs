@@ -7,9 +7,9 @@ use rand::Rng;
 pub const EMPTY: char = '⬜';
 pub const BLOCK: char = '⬛';
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Symbol<T> {
-    Character(T),
+    Filled(T),
     Empty,
     Blocked,
 }
@@ -35,16 +35,16 @@ impl<T> Symbol<T> {
         }
     }
 
-    pub fn is_character(&self) -> bool {
+    pub fn is_filled(&self) -> bool {
         match self {
-            Symbol::Character(_) => true,
+            Symbol::Filled(_) => true,
             _ => false,
         }
     }
 
     pub fn contents(&self) -> Option<&T> {
         match self {
-            Symbol::Character(x) => Some(x),
+            Symbol::Filled(x) => Some(x),
             _ => None,
         }
     }
@@ -53,7 +53,7 @@ impl<T> Symbol<T> {
 impl Symbol<char> {
     pub fn to_char(&self) -> char {
         match self {
-            Symbol::Character(c) => *c,
+            Symbol::Filled(c) => *c,
             Symbol::Empty => EMPTY,
             Symbol::Blocked => BLOCK,
         }
@@ -68,67 +68,20 @@ pub fn str_to_char_grid(text: &str, empty_char: char, blocked_char: char) -> Vec
         } else if c == blocked_char {
             v.push(Symbol::Blocked)
         } else {
-            v.push(Symbol::Character(c))
+            v.push(Symbol::Filled(c))
         }
     }
     v
 }
 
 #[derive(Clone)]
-pub struct Grid<T: Copy + Clone + Default> {
+pub struct Grid<T> {
     symbols: Vec<T>,
     num_rows: usize,
     num_cols: usize,
 }
 
-// Most Generic Methods
-impl<T: Copy + Clone + Default> Grid<T> {
-    // Creation methods
-    pub fn new_default(num_rows: usize, num_cols: usize) -> Self {
-        let grid = vec![T::default(); num_cols * num_rows];
-        Self {
-            symbols: grid,
-            num_rows,
-            num_cols,
-        }
-    }
-
-    pub fn from_rows(symbols: Vec<T>, num_rows: usize, num_cols: usize) -> Self {
-        let mut symbols = symbols;
-        let grid_size = num_rows * num_cols;
-        // Drop excess symbols or pad with Empty as needed
-        symbols.truncate(grid_size);
-        symbols.resize(grid_size, T::default());
-
-        Self {
-            symbols,
-            num_rows,
-            num_cols,
-        }
-    }
-
-    pub fn from_cols(symbols: Vec<T>, num_rows: usize, num_cols: usize) -> Self {
-        let mut symbols = symbols;
-        let grid_size = num_rows * num_cols;
-
-        symbols.truncate(grid_size);
-        symbols.resize(grid_size, T::default());
-
-        let mut grid = Grid::new_default(num_rows, num_cols);
-
-        for col in 0..num_cols {
-            for row in 0..num_rows {
-                grid[(row, col)] = symbols.remove(0);
-            }
-        }
-
-        Self {
-            symbols: grid.symbols,
-            num_rows,
-            num_cols,
-        }
-    }
-
+impl<T> Grid<T> {
     // Sizing information
     pub fn row_len(&self) -> usize {
         self.num_cols
@@ -225,6 +178,56 @@ impl<T: Copy + Clone + Default> Grid<T> {
     pub fn get_rows_mut(&mut self) -> impl Iterator<Item = &mut T> {
         self.symbols.iter_mut()
     }
+}
+
+impl<T: Default + Clone> Grid<T> {
+    pub fn new_default(num_rows: usize, num_cols: usize) -> Self {
+        let grid = vec![T::default(); num_cols * num_rows];
+        Self {
+            symbols: grid,
+            num_rows,
+            num_cols,
+        }
+    }
+
+    pub fn from_rows(symbols: Vec<T>, num_rows: usize, num_cols: usize) -> Self {
+        let mut symbols = symbols;
+        let grid_size = num_rows * num_cols;
+        // Drop excess symbols or pad with Empty as needed
+        symbols.truncate(grid_size);
+        symbols.resize(grid_size, T::default());
+
+        Self {
+            symbols,
+            num_rows,
+            num_cols,
+        }
+    }
+}
+
+// Most Generic Methods
+impl<T: Copy + Clone + Default> Grid<T> {
+    pub fn from_cols(symbols: Vec<T>, num_rows: usize, num_cols: usize) -> Self {
+        let mut symbols = symbols;
+        let grid_size = num_rows * num_cols;
+
+        symbols.truncate(grid_size);
+        symbols.resize(grid_size, T::default());
+
+        let mut grid = Grid::new_default(num_rows, num_cols);
+
+        for col in 0..num_cols {
+            for row in 0..num_rows {
+                grid[(row, col)] = symbols.remove(0);
+            }
+        }
+
+        Self {
+            symbols: grid.symbols,
+            num_rows,
+            num_cols,
+        }
+    }
 
     // Setter methods overwrite a specific coordinate with some Symbol variant
     // and return what was overwritten. If out of bounds all return None and
@@ -318,6 +321,64 @@ impl<T: Copy + Clone + Default> Grid<T> {
     }
 }
 
+impl<T: Clone> Grid<Symbol<T>> {
+    pub fn empty_cell(&mut self, coord: (usize, usize)) -> Option<Symbol<T>> {
+        let contents = self.get(coord)?.clone();
+        self[coord] = Symbol::Empty;
+        Some(contents)
+    }
+
+    pub fn block_cell(&mut self, coord: (usize, usize)) -> Option<Symbol<T>> {
+        let contents = self.get(coord)?.clone();
+        self[coord] = Symbol::Blocked;
+        Some(contents)
+    }
+
+    pub fn replace_if_empty(
+        &mut self,
+        coord: (usize, usize),
+        new_sym: Symbol<T>,
+    ) -> Option<Symbol<T>> {
+        let contents = self.get(coord)?.clone();
+        if contents.is_empty() {
+            self[coord] = new_sym;
+            return Some(contents);
+        }
+        None
+    }
+
+    pub fn replace_if_not_blocked(
+        &mut self,
+        coord: (usize, usize),
+        new_sym: Symbol<T>,
+    ) -> Option<Symbol<T>> {
+        let contents = self.get(coord)?.clone();
+        if !contents.is_blocked() {
+            self[coord] = new_sym;
+            return Some(contents);
+        }
+        None
+    }
+}
+
+impl<T> Grid<Symbol<T>> {
+    pub fn num_empty(&self) -> usize {
+        self.get_rows().filter(|s| s.is_empty()).count()
+    }
+
+    pub fn num_blocked(&self) -> usize {
+        self.get_rows().filter(|s| s.is_blocked()).count()
+    }
+
+    pub fn num_character(&self) -> usize {
+        self.get_rows().filter(|s| s.is_filled()).count()
+    }
+
+    pub fn num_noncharacter(&self) -> usize {
+        self.get_rows().filter(|s| !s.is_filled()).count()
+    }
+}
+
 impl<T: Clone + Copy> Grid<Symbol<T>> {
     pub fn new_empty(num_rows: usize, num_cols: usize) -> Self {
         let grid = vec![Symbol::Empty; num_cols * num_rows];
@@ -336,72 +397,18 @@ impl<T: Clone + Copy> Grid<Symbol<T>> {
             num_cols,
         }
     }
-
-    pub fn num_empty(&self) -> usize {
-        self.get_rows().filter(|s| s.is_empty()).count()
-    }
-
-    pub fn num_blocked(&self) -> usize {
-        self.get_rows().filter(|s| s.is_blocked()).count()
-    }
-
-    pub fn num_character(&self) -> usize {
-        self.get_rows().filter(|s| s.is_character()).count()
-    }
-
-    pub fn num_noncharacter(&self) -> usize {
-        self.get_rows().filter(|s| !s.is_character()).count()
-    }
-
-    pub fn empty_cell(&mut self, coord: (usize, usize)) -> Option<Symbol<T>> {
-        let contents = *self.get(coord)?;
-        self[coord] = Symbol::Empty;
-        Some(contents)
-    }
-
-    pub fn block_cell(&mut self, coord: (usize, usize)) -> Option<Symbol<T>> {
-        let contents = *self.get(coord)?;
-        self[coord] = Symbol::Blocked;
-        Some(contents)
-    }
-
-    pub fn replace_if_empty(
-        &mut self,
-        coord: (usize, usize),
-        new_sym: Symbol<T>,
-    ) -> Option<Symbol<T>> {
-        let contents = *self.get(coord)?;
-        if contents.is_empty() {
-            self[coord] = new_sym;
-            return Some(contents);
-        }
-        None
-    }
-
-    pub fn replace_if_not_blocked(
-        &mut self,
-        coord: (usize, usize),
-        new_sym: Symbol<T>,
-    ) -> Option<Symbol<T>> {
-        let contents = *self.get(coord)?;
-        if !contents.is_blocked() {
-            self[coord] = new_sym;
-            return Some(contents);
-        }
-        None
-    }
 }
 
 impl Grid<Symbol<char>> {
     pub fn read_rows_characters(&self) -> impl Iterator<Item = char> + '_ {
         self.get_rows()
-            .filter(|x| x.is_character())
+            .filter(|x| x.is_filled())
             .map(|x| x.to_char())
     }
 
     pub fn read_cols_characters(&self) -> impl Iterator<Item = char> + '_ {
         self.get_cols()
-            .filter(|x| x.is_character())
+            .filter(|x| x.is_filled())
             .map(|x| x.to_char())
     }
 }
@@ -412,7 +419,7 @@ impl Display for Grid<Symbol<char>> {
         for x in 0..self.num_rows {
             for sym in self.get_row(x) {
                 match sym {
-                    Symbol::Character(c) => out.push(*c),
+                    Symbol::Filled(c) => out.push(*c),
                     Symbol::Empty => out.push(EMPTY),
                     Symbol::Blocked => out.push(BLOCK),
                 }
@@ -424,7 +431,7 @@ impl Display for Grid<Symbol<char>> {
 }
 
 // Two index methods. One for coords and one for index.
-impl<T: Copy + Clone + Default> Index<(usize, usize)> for Grid<T> {
+impl<T> Index<(usize, usize)> for Grid<T> {
     type Output = T;
 
     fn index(&self, coord: (usize, usize)) -> &Self::Output {
@@ -432,13 +439,13 @@ impl<T: Copy + Clone + Default> Index<(usize, usize)> for Grid<T> {
     }
 }
 
-impl<T: Copy + Clone + Default> IndexMut<(usize, usize)> for Grid<T> {
+impl<T> IndexMut<(usize, usize)> for Grid<T> {
     fn index_mut(&mut self, coord: (usize, usize)) -> &mut Self::Output {
         self.get_mut(coord).unwrap()
     }
 }
 
-impl<T: Copy + Clone + Default> Index<usize> for Grid<T> {
+impl<T> Index<usize> for Grid<T> {
     type Output = T;
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -446,7 +453,7 @@ impl<T: Copy + Clone + Default> Index<usize> for Grid<T> {
     }
 }
 
-impl<T: Copy + Clone + Default> IndexMut<usize> for Grid<T> {
+impl<T> IndexMut<usize> for Grid<T> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         &mut self.symbols[index]
     }

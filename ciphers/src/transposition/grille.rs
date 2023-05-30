@@ -31,7 +31,7 @@ impl Grille {
         self.null_alphabet
             .get_rand_chars_replace(n, rng)
             .iter()
-            .map(|c| Symbol::Character(*c))
+            .map(|c| Symbol::Filled(*c))
             .collect_vec()
     }
 
@@ -72,11 +72,11 @@ impl Cipher for Grille {
 
         for cell in grid.get_rows_mut() {
             match cell {
-                Symbol::Character(_) => {
+                Symbol::Filled(_) => {
                     unreachable!("encryption should encounter no Symbol::Character cells")
                 }
                 Symbol::Empty => match chars.next() {
-                    Some(c) => *cell = Symbol::Character(c),
+                    Some(c) => *cell = Symbol::Filled(c),
                     None => *cell = nulls.pop().unwrap(),
                 },
                 Symbol::Blocked => *cell = nulls.pop().unwrap(),
@@ -85,7 +85,7 @@ impl Cipher for Grille {
 
         Ok(grid
             .get_cols()
-            .filter(|x| x.is_character())
+            .filter(|x| x.is_filled())
             .map(|x| x.contents().unwrap())
             .collect())
     }
@@ -127,7 +127,7 @@ impl Cipher for Grille {
                 let cell = grid.get_mut((r, c)).unwrap();
                 if cell.is_empty() {
                     match chars.next() {
-                        Some(c) => *cell = Symbol::Character(c),
+                        Some(c) => *cell = Symbol::Filled(c),
                         None => (),
                     }
                 }
@@ -136,7 +136,7 @@ impl Cipher for Grille {
             // Read the Character cells by rows, convert them to char, and collect
             Ok(grid
                 .get_rows()
-                .filter(|x| x.is_character())
+                .filter(|x| x.is_filled())
                 .map(|x| x.to_char())
                 .collect())
         }

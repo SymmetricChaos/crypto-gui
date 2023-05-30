@@ -71,7 +71,7 @@ impl Cipher for Columnar {
             let column = g.get_col_mut(*n);
             for cell in column {
                 if !cell.is_blocked() {
-                    *cell = Symbol::Character(symbols.next().unwrap())
+                    *cell = Symbol::Filled(symbols.next().unwrap())
                 }
             }
         }
