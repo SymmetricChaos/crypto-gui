@@ -1,9 +1,14 @@
 use ciphers::{polybius::Trifid, Cipher};
 use egui::{Slider, Ui};
+use rand::{thread_rng, Rng};
+use utils::functions::shuffled_str;
 
 use crate::egui_aux::mono;
 
-use super::{CipherFrame, _generic_components::control_string};
+use super::{
+    CipherFrame,
+    _generic_components::{control_string, randomize_reset},
+};
 
 pub struct TrifidFrame {
     cipher: Trifid,
@@ -23,7 +28,7 @@ impl Default for TrifidFrame {
 
 impl CipherFrame for TrifidFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         let block_size_range = 3..=30;
@@ -60,7 +65,13 @@ impl CipherFrame for TrifidFrame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        self.cipher.block_size = thread_rng().gen_range(3..=30);
+        self.key_string = shuffled_str(&self.alphabet_string, &mut thread_rng());
+        self.cipher
+            .polybius
+            .define_grid(&self.alphabet_string, &self.key_string);
+    }
 
     fn reset(&mut self) {
         *self = Self::default()

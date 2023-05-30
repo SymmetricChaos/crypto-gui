@@ -1,9 +1,14 @@
 use ciphers::{polybius::PolybiusCube, Cipher};
 use egui::Ui;
+use rand::thread_rng;
+use utils::functions::shuffled_str;
 
 use crate::egui_aux::mono;
 
-use super::{CipherFrame, _generic_components::control_string};
+use super::{
+    CipherFrame,
+    _generic_components::{control_string, randomize_reset},
+};
 
 pub struct PolybiusCubeFrame {
     cipher: PolybiusCube,
@@ -25,7 +30,7 @@ impl Default for PolybiusCubeFrame {
 
 impl CipherFrame for PolybiusCubeFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.add_space(16.0);
@@ -62,7 +67,11 @@ impl CipherFrame for PolybiusCubeFrame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        self.key_string = shuffled_str(&self.alphabet_string, &mut thread_rng());
+        self.cipher
+            .define_grid(&self.alphabet_string, &self.key_string);
+    }
 
     fn reset(&mut self) {
         *self = Self::default()

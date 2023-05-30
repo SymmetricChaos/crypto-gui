@@ -182,11 +182,6 @@ impl Cipher for PolybiusCube {
         }
         Ok(out)
     }
-
-    // fn randomize(&mut self) {
-    //     self.key_word = shuffled_str(&self.alphabet_string, &mut get_global_rng());
-    //     self.set_key();
-    // }
 }
 
 #[cfg(test)]

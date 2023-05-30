@@ -110,11 +110,6 @@ impl Cipher for Trifid {
         }
         Ok(out)
     }
-
-    // fn randomize(&mut self) {
-    //     self.block_size = GLOBAL_RNG.lock().unwrap().gen_range(3..=30);
-    //     self.polybius.randomize();
-    // }
 }
 
 #[cfg(test)]
