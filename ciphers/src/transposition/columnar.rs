@@ -24,11 +24,6 @@ impl Cipher for Columnar {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let tlen = text.chars().count();
         let n_cols = self.key.len();
-        if n_cols < 2 {
-            return Err(CipherError::key(
-                "The key for a columnar cipher must have at least two characters",
-            ));
-        }
 
         // TODO: Once this is in std or core use that instead
         let n_rows = num::Integer::div_ceil(&tlen, &self.key.len());
@@ -50,23 +45,18 @@ impl Cipher for Columnar {
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         let tlen = text.chars().count();
         let n_cols = self.key.len();
-        if n_cols < 2 {
-            return Err(CipherError::key(
-                "The key for a columnar cipher must have at least two characters",
-            ));
-        }
 
         // TODO: Once this is in std or core use that instead
         let n_rows = num::Integer::div_ceil(&tlen, &n_cols);
 
         let mut g = Grid::new_empty(n_rows, n_cols);
-        let mut symbols = text.chars();
 
         for n in tlen..(n_rows * n_cols) {
             let coord = g.coord_from_index(n).unwrap();
             g.block_cell(coord);
         }
 
+        let mut symbols = text.chars();
         for n in self.key.iter() {
             let column = g.get_col_mut(*n);
             for cell in column {

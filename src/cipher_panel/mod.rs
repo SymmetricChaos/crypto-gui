@@ -3,19 +3,19 @@ use egui::Ui;
 
 use self::{
     adfgvx_controls::AdfgvxFrame, affine_controls::AffineFrame, alberti_controls::AlbertiFrame,
-    b64_controls::B64Frame, batco_controls::BatcoFrame, bazeries_controls::BazeriesFrame,
-    beaufort_controls::BeaufortFrame, bifid_controls::BifidFrame, caesar_controls::CaesarFrame,
-    chaocipher_controls::ChaocipherFrame, checkerboard_controls::StraddlingCheckerboardFrame,
-    columnar_controls::ColumnarFrame, decoder_ring_controls::DecoderRingFrame,
-    dryad_controls::DryadFrame, enigma_controls::EnigmaM3Frame,
-    four_square_controls::FourSquareFrame, general_sub_controls::GeneralSubstitutionFrame,
-    grille_controls::GrilleFrame, hebern_controls::HebernFrame, hutton_controls::HuttonFrame,
-    m209_controls::M209Frame, m94_controls::M94Frame, playfair_controls::PlayfairFrame,
-    plugboard_controls::PlugboardFrame, polybius_cube_controls::PolybiusCubeFrame,
-    polybius_square_controls::PolybiusSquareFrame, porta_controls::PortaFrame,
-    quagmire_controls::QuagmireFrame, rail_fence_controls::RailFenceFrame,
-    rs44_controls::Rs44Frame, scytale_controls::ScytaleFrame, sigaba_controls::SigabaFrame,
-    slidefair_controls::SlidefairFrame, trifid_controls::TrifidFrame,
+    amsco_controls::AmscoFrame, b64_controls::B64Frame, batco_controls::BatcoFrame,
+    bazeries_controls::BazeriesFrame, beaufort_controls::BeaufortFrame, bifid_controls::BifidFrame,
+    caesar_controls::CaesarFrame, chaocipher_controls::ChaocipherFrame,
+    checkerboard_controls::StraddlingCheckerboardFrame, columnar_controls::ColumnarFrame,
+    decoder_ring_controls::DecoderRingFrame, dryad_controls::DryadFrame,
+    enigma_controls::EnigmaM3Frame, four_square_controls::FourSquareFrame,
+    general_sub_controls::GeneralSubstitutionFrame, grille_controls::GrilleFrame,
+    hebern_controls::HebernFrame, hutton_controls::HuttonFrame, m209_controls::M209Frame,
+    m94_controls::M94Frame, playfair_controls::PlayfairFrame, plugboard_controls::PlugboardFrame,
+    polybius_cube_controls::PolybiusCubeFrame, polybius_square_controls::PolybiusSquareFrame,
+    porta_controls::PortaFrame, quagmire_controls::QuagmireFrame,
+    rail_fence_controls::RailFenceFrame, rs44_controls::Rs44Frame, scytale_controls::ScytaleFrame,
+    sigaba_controls::SigabaFrame, slidefair_controls::SlidefairFrame, trifid_controls::TrifidFrame,
     turning_grille_controls::TurningGrilleFrame, two_square_controls::TwoSquareFrame,
     vigenere_controls::VigenereFrame,
 };
@@ -49,6 +49,7 @@ pub mod polybius_cube_controls;
 pub mod polybius_square_controls;
 pub mod porta_controls;
 // pub mod purple_controls;
+pub mod amsco_controls;
 pub mod quagmire_controls;
 pub mod rail_fence_controls;
 pub mod rs44_controls;
@@ -124,6 +125,7 @@ pub struct CipherInterface {
     four_square: FourSquareFrame,
 
     // Transposition
+    amsco: AmscoFrame,
     columnar: ColumnarFrame,
     grille: GrilleFrame,
     rail_fence: RailFenceFrame,
@@ -243,6 +245,7 @@ impl CipherInterface {
             CipherId::Adfgvx => &mut self.adfgvx,
             CipherId::Affine => &mut self.affine,
             CipherId::Alberti => &mut self.alberti,
+            CipherId::Amsco => &mut self.amsco,
             CipherId::B64 => &mut self.b64,
             CipherId::Batco => &mut self.batco,
             CipherId::Bazeries => &mut self.bazeries,

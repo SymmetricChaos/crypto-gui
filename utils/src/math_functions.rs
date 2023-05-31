@@ -2,6 +2,21 @@ use std::collections::{BTreeMap, HashMap};
 
 use num::{integer::Roots, FromPrimitive, Integer, One, ToPrimitive, Unsigned};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Parity {
+    Odd,
+    Even,
+}
+
+impl Parity {
+    pub fn cycle(&self) -> std::iter::Cycle<std::array::IntoIter<Parity, 2>> {
+        match self {
+            Parity::Odd => [Self::Odd, Self::Even].into_iter().cycle(),
+            Parity::Even => [Self::Even, Self::Odd].into_iter().cycle(),
+        }
+    }
+}
+
 pub fn is_square(n: usize) -> bool {
     n.sqrt().pow(2) == n
 }
