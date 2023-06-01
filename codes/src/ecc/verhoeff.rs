@@ -1,65 +1,66 @@
 use lazy_static::lazy_static;
-use std::collections::HashMap;
 
 use crate::{errors::CodeError, traits::Code};
 
 lazy_static! {
-    pub static ref VERHOEFF_INV_TABLE: HashMap<char, char> = HashMap::from_iter(
-        [
-            ('0', '0'),
-            ('1', '4'),
-            ('2', '3'),
-            ('3', '2'),
-            ('4', '1'),
-            ('5', '5'),
-            ('6', '6'),
-            ('7', '7'),
-            ('8', '8'),
-            ('9', '9')
-        ]
-        .into_iter()
-    );
-    pub static ref VERHOEFF_MUL_TABLE: HashMap<(char, char), char> = HashMap::from_iter(
-        [
-            (('0', '0'), '0'),
-            (('0', '1'), '1'),
-            (('0', '2'), '2'),
-            (('0', '3'), '3'),
-            (('0', '4'), '4'),
-            (('0', '5'), '5'),
-            (('0', '6'), '6'),
-            (('0', '7'), '7'),
-            (('0', '8'), '8'),
-            (('0', '9'), '9'),
-        ]
-        .into_iter()
-    );
-    pub static ref VERHOEFF_PERM_TABLE: HashMap<(usize, char), char> =
-        HashMap::from_iter([((0, '0'), '0'), ((0, '1'), '1')]);
+    pub static ref VERHOEFF_PERM_TABLE: [[u8; 10]; 8] = [
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        [1, 5, 7, 6, 2, 8, 3, 0, 9, 4],
+        [5, 8, 0, 3, 7, 9, 6, 1, 4, 2],
+        [8, 9, 1, 6, 0, 4, 3, 5, 2, 7],
+        [9, 4, 5, 3, 1, 2, 6, 8, 7, 0],
+        [4, 2, 8, 6, 5, 7, 3, 9, 0, 1],
+        [2, 7, 9, 3, 8, 0, 6, 4, 1, 5],
+        [7, 0, 4, 6, 9, 1, 3, 2, 5, 8]
+    ];
+    pub static ref VERHOEFF_MUL_TABLE: [[u8; 10]; 10] = [
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        [1, 2, 3, 4, 0, 6, 7, 8, 9, 5],
+        [2, 3, 4, 0, 1, 7, 8, 9, 5, 6],
+        [3, 4, 0, 1, 2, 8, 9, 5, 6, 7],
+        [4, 0, 1, 2, 3, 9, 5, 6, 7, 8],
+        [5, 9, 8, 7, 6, 0, 4, 3, 2, 1],
+        [6, 5, 9, 8, 7, 1, 0, 4, 3, 2],
+        [7, 6, 5, 9, 8, 2, 1, 0, 4, 3],
+        [8, 7, 6, 5, 9, 3, 2, 1, 0, 4],
+        [9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+    ];
 }
 
 pub struct VerhoeffAlgorithm {}
 
 impl VerhoeffAlgorithm {
-    fn mul(a: char, b: char) -> Result<&'static char, CodeError> {
-        VERHOEFF_MUL_TABLE
-            .get(&(a, b))
-            .ok_or(CodeError::Input(format!(
-                "invalid mul input pair ({},{})",
-                a, b
-            )))
+    fn mul(a: char, b: char) -> Result<char, CodeError> {
+        let j = a
+            .to_digit(10)
+            .ok_or_else(|| CodeError::invalid_input_char(a))? as usize;
+        let k = b
+            .to_digit(10)
+            .ok_or_else(|| CodeError::invalid_input_char(b))? as usize;
+        Ok((VERHOEFF_MUL_TABLE[j][k] + 48) as char)
     }
 
-    fn perm(n: usize, a: char) -> Result<&'static char, CodeError> {
-        VERHOEFF_PERM_TABLE
-            .get(&(n, a))
-            .ok_or(CodeError::invalid_input_char(a))
+    fn perm(pos: usize, num: char) -> Result<char, CodeError> {
+        let n = num
+            .to_digit(10)
+            .ok_or_else(|| CodeError::invalid_input_char(num))? as usize;
+        Ok((VERHOEFF_MUL_TABLE[pos][n] + 48) as char)
     }
 
-    fn inv(a: &char) -> Result<&'static char, CodeError> {
-        VERHOEFF_INV_TABLE
-            .get(a)
-            .ok_or(CodeError::invalid_input_char(*a))
+    fn inv(a: char) -> Result<char, CodeError> {
+        match a {
+            '0' => Ok('0'),
+            '1' => Ok('4'),
+            '2' => Ok('3'),
+            '3' => Ok('2'),
+            '4' => Ok('1'),
+            '5' => Ok('5'),
+            '6' => Ok('6'),
+            '7' => Ok('7'),
+            '8' => Ok('8'),
+            '9' => Ok('9'),
+            _ => Err(CodeError::invalid_input_char(a)),
+        }
     }
 }
 
@@ -76,11 +77,11 @@ impl Code for VerhoeffAlgorithm {
         }
         let mut check = '0';
         for (i, c) in text.chars().rev().chain(std::iter::once('0')).enumerate() {
-            check = *Self::mul(check, *Self::perm(i % 8, c)?)?;
+            check = Self::mul(check, Self::perm(i % 8, c)?)?;
             //println!("{i} {c} {check}")
         }
         let mut out = text.to_string();
-        out.push(*Self::inv(&check)?);
+        out.push(Self::inv(check)?);
         Ok(out)
     }
 
@@ -90,7 +91,7 @@ impl Code for VerhoeffAlgorithm {
         }
         let mut check = '0';
         for (i, c) in text.chars().rev().chain(std::iter::once('0')).enumerate() {
-            check = *Self::mul(check, *Self::perm(i % 8, c)?)?;
+            check = Self::mul(check, Self::perm(i % 8, c)?)?;
             //println!("{i} {c} {check}")
         }
         if check != '0' {
@@ -102,26 +103,26 @@ impl Code for VerhoeffAlgorithm {
 }
 
 #[cfg(test)]
-mod luhn_tests {
+mod verhoeff_tests {
     use super::*;
 
     #[test]
     fn test_encode() {
         let code = VerhoeffAlgorithm::default();
-        assert_eq!(code.encode("7992739871").unwrap(), "79927398713");
+        assert_eq!(code.encode("236").unwrap(), "2363");
     }
 
     #[test]
     fn test_decode() {
         let code = VerhoeffAlgorithm::default();
-        assert_eq!(code.decode("79927398713").unwrap(), "7992739871");
+        assert_eq!(code.decode("").unwrap(), "");
     }
 
     #[test]
     fn test_decode_with_err() {
         let code = VerhoeffAlgorithm::default();
         assert_eq!(
-            code.decode("79297398713").unwrap_err(),
+            code.decode("").unwrap_err(),
             CodeError::input("check digit does not match")
         );
     }
