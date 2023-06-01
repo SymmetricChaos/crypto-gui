@@ -15,6 +15,7 @@ use self::{
     romaji_controls::RomajiFrame, skey_controls::SKeyWordsFrame,
     spelling_alphabet_controls::SpellingAlphabetFrame, tap_code_controls::TapCodeFrame,
     unary_controls::UnaryCodeFrame, unicode_controls::UnicodeFrame,
+    verhoeff_controls::VerhoeffFrame,
 };
 pub mod generic_components;
 
@@ -102,6 +103,7 @@ pub struct CodeInterface {
     m_of_n: MofNCodeFrame,
     parity_bit: ParityBitFrame,
     repetition: RepetitionFrame,
+    verhoeff: VerhoeffFrame,
 
     // Mathematical
     fibonacci: FibonacciCodeFrame,
@@ -164,6 +166,7 @@ impl CodeInterface {
                 CodeId::MofN,
                 CodeId::ParityBit,
                 CodeId::Repetition,
+                CodeId::Verhoeff,
             ],
             "Error Correcting Codes",
             active_code,
@@ -207,6 +210,7 @@ impl CodeInterface {
             CodeId::Tap => &mut self.tap,
             CodeId::Unary => &mut self.unary,
             CodeId::Unicode => &mut self.unicode,
+            CodeId::Verhoeff => &mut self.verhoeff,
         }
     }
 }
