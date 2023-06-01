@@ -194,6 +194,7 @@ impl CipherInterface {
 
         combox_box(
             &[
+                CipherId::Amsco,
                 CipherId::Columnar,
                 CipherId::Grille,
                 CipherId::RailFence,
