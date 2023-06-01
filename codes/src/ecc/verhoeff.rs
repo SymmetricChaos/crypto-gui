@@ -44,7 +44,8 @@ impl VerhoeffAlgorithm {
         let n = num
             .to_digit(10)
             .ok_or_else(|| CodeError::invalid_input_char(num))? as usize;
-        Ok((VERHOEFF_MUL_TABLE[pos][n] + 48) as char)
+
+        Ok((VERHOEFF_PERM_TABLE[pos][n] + 48) as char)
     }
 
     fn inv(a: char) -> Result<char, CodeError> {
@@ -76,9 +77,8 @@ impl Code for VerhoeffAlgorithm {
             return Err(CodeError::input("input cannot be empty"));
         }
         let mut check = '0';
-        for (i, c) in text.chars().rev().chain(std::iter::once('0')).enumerate() {
-            check = Self::mul(check, Self::perm(i % 8, c)?)?;
-            //println!("{i} {c} {check}")
+        for (i, n) in text.chars().chain(std::iter::once('0')).rev().enumerate() {
+            check = Self::mul(check, Self::perm(i % 8, n)?)?;
         }
         let mut out = text.to_string();
         out.push(Self::inv(check)?);
@@ -90,9 +90,8 @@ impl Code for VerhoeffAlgorithm {
             return Err(CodeError::input("input cannot be empty"));
         }
         let mut check = '0';
-        for (i, c) in text.chars().rev().chain(std::iter::once('0')).enumerate() {
+        for (i, c) in text.chars().rev().enumerate() {
             check = Self::mul(check, Self::perm(i % 8, c)?)?;
-            //println!("{i} {c} {check}")
         }
         if check != '0' {
             return Err(CodeError::input("invalid check digit"));
@@ -115,15 +114,15 @@ mod verhoeff_tests {
     #[test]
     fn test_decode() {
         let code = VerhoeffAlgorithm::default();
-        assert_eq!(code.decode("").unwrap(), "");
+        assert_eq!(code.decode("2363").unwrap(), "236");
     }
 
     #[test]
     fn test_decode_with_err() {
         let code = VerhoeffAlgorithm::default();
         assert_eq!(
-            code.decode("").unwrap_err(),
-            CodeError::input("check digit does not match")
+            code.decode("2365").unwrap_err(),
+            CodeError::input("invalid check digit")
         );
     }
 }
