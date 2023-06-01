@@ -33,6 +33,7 @@ pub enum CodeId {
     Tap,
     Unary,
     Unicode,
+    Verhoeff,
 }
 
 impl Default for CodeId {
@@ -81,6 +82,7 @@ impl Display for CodeId {
             CodeId::Tap => "Tap",
             CodeId::Unary => "Unary",
             CodeId::Unicode => "Unicode",
+            CodeId::Verhoeff => "Verhoeff",
         };
         write!(f, "{}", name)
     }

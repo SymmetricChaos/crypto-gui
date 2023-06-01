@@ -63,6 +63,24 @@ impl VerhoeffAlgorithm {
             _ => Err(CodeError::invalid_input_char(a)),
         }
     }
+
+    pub fn check_csv_verhoeff(&self, list: &str) -> String {
+        let mut out = String::new();
+        for line in list.split(",").into_iter() {
+            let result = self.decode(line);
+            if result.is_ok() {
+                out.push_str(line.trim());
+                out.push_str(" [valid],\n");
+            } else {
+                out.push_str(line.trim());
+                out.push_str(" [");
+                out.push_str(&result.unwrap_err().inner());
+                out.push(']');
+                out.push_str(",\n");
+            }
+        }
+        out
+    }
 }
 
 impl Default for VerhoeffAlgorithm {

@@ -45,6 +45,7 @@ mod spelling_alphabet_controls;
 mod tap_code_controls;
 mod unary_controls;
 mod unicode_controls;
+pub mod verhoeff_controls;
 
 pub trait CodeFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
