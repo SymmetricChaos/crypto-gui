@@ -24,3 +24,4 @@ pub mod romaji;
 pub mod errors;
 pub mod ids;
 pub mod traits;
+pub mod upc;
