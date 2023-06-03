@@ -31,7 +31,7 @@ impl Default for Upc {
     }
 }
 
-fn is_valid_upc_a(digits: &str) -> bool {
+pub fn is_valid_upc_a(digits: &str) -> bool {
     if !UPCA_DIGITS.is_match(digits) {
         return false;
     }
@@ -43,12 +43,36 @@ fn is_valid_upc_a(digits: &str) -> bool {
             None => return false,
         }
     }
-    check == 0
+    check % 10 == 0
 }
 
-impl Upc {
-    fn check_digit(text: &str) -> String {
-        todo!()
+fn upc_a_check_digit(digits: &str) -> Result<char, CodeError> {
+    if digits.is_ascii() && digits.len() == 11 {
+        let coefs = [3, 1].into_iter().cycle();
+        let mut check = 0;
+        for (d, co) in digits.chars().zip(coefs) {
+            match d.to_digit(10) {
+                Some(d) => check += d * co,
+                None => return Err(CodeError::invalid_input_char(d)),
+            }
+        }
+        match check % 10 {
+            0 => Ok('0'),
+            1 => Ok('9'),
+            2 => Ok('8'),
+            3 => Ok('7'),
+            4 => Ok('6'),
+            5 => Ok('5'),
+            6 => Ok('4'),
+            7 => Ok('3'),
+            8 => Ok('2'),
+            9 => Ok('1'),
+            _ => unreachable!("an integer modulo 10 is between 0 and 9"),
+        }
+    } else {
+        return Err(CodeError::input(
+            "a UPC-A check digit can only be calculated for 11 digits",
+        ));
     }
 }
 
@@ -128,14 +152,19 @@ mod upc_tests {
     use super::*;
 
     #[test]
+    fn check_digit() {
+        assert_eq!(upc_a_check_digit("03600029145").unwrap(), '2')
+    }
+
+    #[test]
     fn encode() {
         let code = Upc::default();
-        println!("{}", code.encode("012345678912").unwrap())
+        assert_eq!(code.encode("036000291452").unwrap(), "10100011010111101010111100011010001101000110101010110110011101001100110101110010011101101100101");
     }
 
     #[test]
     fn decode() {
         let code = Upc::default();
-        println!("{}", code.decode("10100011010011001001001101111010100011011000101010101000010001001001000111010011001101101100101").unwrap())
+        assert_eq!(code.decode("10100011010111101010111100011010001101000110101010110110011101001100110101110010011101101100101").unwrap(), "036000291452");
     }
 }
