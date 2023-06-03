@@ -5,7 +5,7 @@ use utils::functions::bimap_from_iter;
 
 use crate::{errors::CodeError, traits::Code};
 
-const GUARD: &'static str = "101"; // Stard and End guard pattern
+const GUARD: &'static str = "101"; // Start and End guard pattern
 const MIDDLE: &'static str = "01010";
 
 lazy_static! {
@@ -29,6 +29,21 @@ impl Default for Upc {
     fn default() -> Self {
         Self {}
     }
+}
+
+fn is_valid_upc_a(digits: &str) -> bool {
+    if !UPCA_DIGITS.is_match(digits) {
+        return false;
+    }
+    let coefs = [3, 1].into_iter().cycle();
+    let mut check = 0;
+    for (d, co) in digits.chars().zip(coefs) {
+        match d.to_digit(10) {
+            Some(d) => check += d * co,
+            None => return false,
+        }
+    }
+    check == 0
 }
 
 impl Upc {
@@ -100,7 +115,11 @@ impl Code for Upc {
             out.push(*digit);
         }
 
-        Ok(out)
+        if is_valid_upc_a(&out) {
+            Ok(out)
+        } else {
+            Err(CodeError::input("check digit is incorrect"))
+        }
     }
 }
 
