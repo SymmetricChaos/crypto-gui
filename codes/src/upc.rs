@@ -9,7 +9,8 @@ const GUARD: &'static str = "101"; // Stard and End guard pattern
 const MIDDLE: &'static str = "01010";
 
 lazy_static! {
-    pub static ref UPCA_PATTERN: Regex = Regex::new(r"^101[01]{42}10101[01]{42}101$").unwrap();
+    pub static ref UPCA_PATTERN: Regex = Regex::new(r"^101[01]{42}01010[01]{42}101$").unwrap();
+    pub static ref UPCA_DIGITS: Regex = Regex::new(r"^[0-9]{12}$").unwrap();
     pub static ref UPCA_LEFT: BiMap<char, &'static str> =
         bimap_from_iter("0123456789".chars().zip([
             "0001101", "0011001", "0010011", "0111101", "0100011", "0110001", "0101111", "0111011",
@@ -22,16 +23,26 @@ lazy_static! {
         ]));
 }
 
-pub struct UPC {}
+pub struct Upc {}
 
-impl UPC {
+impl Default for Upc {
+    fn default() -> Self {
+        Self {}
+    }
+}
+
+impl Upc {
     fn check_digit(text: &str) -> String {
         todo!()
     }
 }
 
-impl Code for UPC {
+impl Code for Upc {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
+        if !UPCA_DIGITS.is_match(text) {
+            return Err(CodeError::input("a UPC-A code must have exactly 12 digits"));
+        }
+
         let mut out = String::with_capacity(95);
 
         out.push_str(GUARD);
@@ -98,5 +109,14 @@ mod upc_tests {
     use super::*;
 
     #[test]
-    fn encrypt() {}
+    fn encode() {
+        let code = Upc::default();
+        println!("{}", code.encode("012345678912").unwrap())
+    }
+
+    #[test]
+    fn decode() {
+        let code = Upc::default();
+        println!("{}", code.decode("10100011010011001001001101111010100011011000101010101000010001001001000111010011001101101100101").unwrap())
+    }
 }
