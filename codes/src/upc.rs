@@ -46,7 +46,7 @@ pub fn is_valid_upc_a(digits: &str) -> bool {
     check % 10 == 0
 }
 
-fn upc_a_check_digit(digits: &str) -> Result<char, CodeError> {
+pub fn upc_a_check_digit(digits: &str) -> Result<char, CodeError> {
     if digits.is_ascii() && digits.len() == 11 {
         let coefs = [3, 1].into_iter().cycle();
         let mut check = 0;

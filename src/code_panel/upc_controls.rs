@@ -1,4 +1,12 @@
-use codes::upc::Upc;
+use codes::{
+    errors::CodeError,
+    upc::{is_valid_upc_a, upc_a_check_digit, Upc},
+};
+use itertools::Itertools;
+
+use crate::egui_aux::{error_text, mono};
+
+use super::CodeFrame;
 
 pub struct UpcFrame {
     pub code: Upc,
@@ -9,9 +17,38 @@ impl Default for UpcFrame {
     fn default() -> Self {
         Self {
             code: Default::default(),
-            example: String::from("03600029145"),
+            example: String::from("036000291452"),
         }
     }
+}
+
+fn handle_example(text: &str) -> Result<String, CodeError> {
+    if !text.is_ascii() {
+        return Err(CodeError::Input(format!(
+            "{} is not a valid UPC-A code",
+            text
+        )));
+    }
+
+    let mut out = String::with_capacity(12);
+    out.push_str(text);
+    if text.len() == 11 {
+        out.push(upc_a_check_digit(text)?);
+    } else if text.len() == 12 {
+        if !is_valid_upc_a(text) {
+            return Err(CodeError::Input(format!(
+                "{} is not a valid UPC-A code",
+                text
+            )));
+        }
+    } else {
+        return Err(CodeError::Input(format!(
+            "{} is not a valid UPC-A code",
+            text
+        )));
+    }
+
+    Ok(out)
 }
 
 impl CodeFrame for UpcFrame {
@@ -29,28 +66,29 @@ impl CodeFrame for UpcFrame {
         // };
 
         ui.text_edit_singleline(&mut self.example);
-        match is_valid_upc_a(&self.example) {
-            Ok(_) => {
+        match handle_example(&self.example) {
+            Ok(digits) => {
                 ui.horizontal(|ui| {
-                    ui.label("Digits:  ");
-                    ui.label(self.example.chars().join(" "));
+                    ui.label(mono(digits.chars().join(" ")));
+
+                    ui.label(mono(" (digits)"));
                 });
-                ui.label("Weights:  1 3 1 3 1 3 1 3 1 3 1");
+                ui.label(mono("1 3 1 3 1 3 1 3 1 3 1 3 (weights)"));
                 ui.horizontal(|ui| {
-                    ui.label("Products: ");
-                    ui.label(
-                        self.example
+                    ui.label(mono(
+                        digits
                             .chars()
-                            .filter(|c| *c != '-')
                             .map(|c| c.to_digit(10).unwrap())
                             .zip([1, 3].into_iter().cycle())
                             .map(|(a, b)| (a * b) % 10)
                             .join(" "),
-                    );
+                    ));
+                    ui.label(mono("(weighted values)"));
                 });
+                ui.label("The weighted sum is always a multiple of ten due to the check digit.");
             }
             Err(e) => {
-                ui.label(error_text(&e.inner()));
+                ui.label(error_text(e.inner()));
             }
         }
     }

@@ -156,6 +156,7 @@ impl ClassicCrypto {
 
     fn code_page(&mut self, ctx: &Context) {
         if self.active_page == Page::Code {
+            self.code_selector_panel(ctx);
             SidePanel::right("code_io_panel")
                 .default_width(200.0)
                 .show(ctx, |ui| {
@@ -198,8 +199,6 @@ impl ClassicCrypto {
                     };
                 });
             });
-
-        // If somehow we are here without Page::Code selected
         } else {
             self.code_selector_panel(ctx);
         }

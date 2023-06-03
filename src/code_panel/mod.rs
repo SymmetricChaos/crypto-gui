@@ -14,7 +14,7 @@ use self::{
     punycode_controls::PunycodeFrame, repetition_controls::RepetitionFrame,
     romaji_controls::RomajiFrame, skey_controls::SKeyWordsFrame,
     spelling_alphabet_controls::SpellingAlphabetFrame, tap_code_controls::TapCodeFrame,
-    unary_controls::UnaryCodeFrame, unicode_controls::UnicodeFrame,
+    unary_controls::UnaryCodeFrame, unicode_controls::UnicodeFrame, upc_controls::UpcFrame,
     verhoeff_controls::VerhoeffFrame,
 };
 pub mod generic_components;
@@ -46,6 +46,7 @@ mod spelling_alphabet_controls;
 mod tap_code_controls;
 mod unary_controls;
 mod unicode_controls;
+pub mod upc_controls;
 pub mod verhoeff_controls;
 
 pub trait CodeFrame {
@@ -98,12 +99,15 @@ pub struct CodeInterface {
     skey: SKeyWordsFrame,
 
     // Error Correcting and Detecting
-    isbn: IsbnFrame,
     luhn: LuhnAlgorithmFrame,
     m_of_n: MofNCodeFrame,
     parity_bit: ParityBitFrame,
     repetition: RepetitionFrame,
     verhoeff: VerhoeffFrame,
+
+    // Commercial
+    isbn: IsbnFrame,
+    upc: UpcFrame,
 
     // Mathematical
     fibonacci: FibonacciCodeFrame,
@@ -161,7 +165,6 @@ impl CodeInterface {
         );
         combox_box(
             &[
-                CodeId::Isbn,
                 CodeId::Luhn,
                 CodeId::MofN,
                 CodeId::ParityBit,
@@ -169,6 +172,12 @@ impl CodeInterface {
                 CodeId::Verhoeff,
             ],
             "Error Correcting Codes",
+            active_code,
+            ui,
+        );
+        combox_box(
+            &[CodeId::Isbn, CodeId::Upc],
+            "Commercial Codes",
             active_code,
             ui,
         );
@@ -192,7 +201,7 @@ impl CodeInterface {
             CodeId::ByteAsNum => &mut self.numeric,
             CodeId::Fibonacci => &mut self.fibonacci,
             CodeId::Godel => &mut self.godel,
-            CodeId::Hamming => todo!("ADD HAMMING"),
+            // CodeId::Hamming => &mut self.hamming,
             CodeId::Isbn => &mut self.isbn,
             CodeId::Levenshtein => &mut self.levenshtein,
             CodeId::Linotype => &mut self.linotype,
@@ -210,7 +219,9 @@ impl CodeInterface {
             CodeId::Tap => &mut self.tap,
             CodeId::Unary => &mut self.unary,
             CodeId::Unicode => &mut self.unicode,
+            CodeId::Upc => &mut self.upc,
             CodeId::Verhoeff => &mut self.verhoeff,
+            _ => panic!("unknown code selected"),
         }
     }
 }
