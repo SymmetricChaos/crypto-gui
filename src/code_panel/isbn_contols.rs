@@ -1,5 +1,5 @@
 use super::CodeFrame;
-use crate::egui_aux::{error_text, subheading};
+use crate::egui_aux::{error_text, mono, subheading};
 use codes::ecc::isbn::{is_valid_isbn_10, is_valid_isbn_13, Isbn, IsbnVariant};
 use itertools::Itertools;
 
@@ -47,13 +47,12 @@ impl CodeFrame for IsbnFrame {
             IsbnVariant::Thirteen => match is_valid_isbn_13(&self.example) {
                 Ok(_) => {
                     ui.horizontal(|ui| {
-                        ui.label("Digits:  ");
-                        ui.label(self.example.chars().filter(|c| *c != '-').join(" "));
+                        ui.label(mono(self.example.chars().filter(|c| *c != '-').join(" ")));
+                        ui.label(mono("(digits)"));
                     });
-                    ui.label("Weights:  1 3 1 3 1 3 1 3 1 3 1 3 1");
+                    ui.label(mono("1 3 1 3 1 3 1 3 1 3 1 3 1 (weights)"));
                     ui.horizontal(|ui| {
-                        ui.label("Products: ");
-                        ui.label(
+                        ui.label(mono(
                             self.example
                                 .chars()
                                 .filter(|c| *c != '-')
@@ -61,7 +60,8 @@ impl CodeFrame for IsbnFrame {
                                 .zip([1, 3].into_iter().cycle())
                                 .map(|(a, b)| (a * b) % 10)
                                 .join(" "),
-                        );
+                        ));
+                        ui.label(mono("(weighted values)"));
                     });
                 }
                 Err(e) => {
