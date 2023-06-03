@@ -1,7 +1,14 @@
+use lazy_static::lazy_static;
+use regex::Regex;
+
 use crate::{errors::CodeError, traits::Code};
 
 const GUARD: &'static str = "101"; // Stard and End guard pattern
 const MIDDLE: &'static str = "01010";
+
+lazy_static! {
+    pub static ref UPCA_PATTERN: Regex = Regex::new(r"^101[01]{42}10101[01]{42}101$").unwrap();
+}
 
 pub struct UPC {}
 
@@ -64,6 +71,21 @@ impl Code for UPC {
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
+        // Ignore quiet area on the ends
+        let trimmed = text.trim_matches('0');
+
+        if !UPCA_PATTERN.is_match(trimmed) {
+            return Err(CodeError::input("not structured as a UPC-A code"));
+        }
+
         todo!()
     }
+}
+
+#[cfg(test)]
+mod upc_tests {
+    use super::*;
+
+    #[test]
+    fn encrypt() {}
 }
