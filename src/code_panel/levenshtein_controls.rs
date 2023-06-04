@@ -1,5 +1,5 @@
 use codes::{
-    levenshtein::LevenshteinCode,
+    mathematical::levenshtein::LevenshteinCode,
     traits::{Code, IOMode},
 };
 use egui::TextEdit;

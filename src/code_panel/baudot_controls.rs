@@ -1,4 +1,4 @@
-use codes::baudot::{Baudot, BaudotVersion};
+use codes::text_standards::baudot::{Baudot, BaudotVersion};
 
 use crate::egui_aux::subheading;
 

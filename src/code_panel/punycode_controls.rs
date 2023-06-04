@@ -1,4 +1,4 @@
-use codes::punycode::Punycode;
+use codes::text_standards::punycode::Punycode;
 use egui::Slider;
 
 use super::CodeFrame;

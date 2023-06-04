@@ -1,4 +1,4 @@
-use codes::needle::Needle;
+use codes::text_standards::needle::Needle;
 
 use crate::{cipher_panel::_generic_components::control_string, egui_aux::subheading};
 

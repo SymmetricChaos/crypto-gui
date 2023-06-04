@@ -1,5 +1,6 @@
 use super::{generic_components::fill_code_columns, CodeFrame};
-use codes::{godel::Godel, traits::IOMode};
+
+use codes::{mathematical::godel::Godel, traits::IOMode};
 use egui::TextEdit;
 
 pub struct GodelFrame {

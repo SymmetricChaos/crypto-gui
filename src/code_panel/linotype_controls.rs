@@ -1,4 +1,4 @@
-use codes::linotype::Linotype;
+use codes::text_standards::linotype::Linotype;
 
 use super::{generic_components::fill_code_columns, CodeFrame};
 

@@ -1,5 +1,4 @@
 pub mod hamming;
-pub mod isbn;
 pub mod luhn;
 pub mod m_of_n;
 pub mod parity_check;

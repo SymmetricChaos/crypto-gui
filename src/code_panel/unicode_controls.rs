@@ -1,4 +1,4 @@
-use codes::unicode::{Unicode, UnicodeEncoding};
+use codes::text_standards::unicode::{Unicode, UnicodeEncoding};
 use utils::functions::NumRep;
 
 use crate::egui_aux::subheading;

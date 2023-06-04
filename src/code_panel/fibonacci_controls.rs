@@ -1,5 +1,6 @@
 use super::{generic_components::fill_code_columns, CodeFrame};
-use codes::{fibonacci::FibonacciCode, traits::IOMode};
+
+use codes::{mathematical::fibonacci::FibonacciCode, traits::IOMode};
 use egui::TextEdit;
 
 pub struct FibonacciCodeFrame {

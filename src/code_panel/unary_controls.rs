@@ -1,4 +1,4 @@
-use codes::unary::{UnaryCode, UnaryMode};
+use codes::mathematical::unary::{UnaryCode, UnaryMode};
 use egui::TextEdit;
 
 use super::{generic_components::fill_code_columns, CodeFrame};

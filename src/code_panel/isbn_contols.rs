@@ -1,12 +1,11 @@
+use codes::commercial::isbn::{Isbn, IsbnVariant};
+
 use super::CodeFrame;
-use crate::egui_aux::{error_text, mono, subheading};
-use codes::ecc::isbn::{is_valid_isbn_10, is_valid_isbn_13, Isbn, IsbnVariant};
-use itertools::Itertools;
+use crate::egui_aux::{mono, subheading};
 
 pub struct IsbnFrame {
     pub code: Isbn,
     pub text: String,
-    pub example: String,
 }
 
 impl Default for IsbnFrame {
@@ -14,7 +13,6 @@ impl Default for IsbnFrame {
         Self {
             code: Default::default(),
             text: Default::default(),
-            example: String::from("1234567890128"),
         }
     }
 }
@@ -34,40 +32,24 @@ impl CodeFrame for IsbnFrame {
             IsbnVariant::Thirteen => ui.label("ISBN-13 numbers consist of 12 digits and a final check digit. The prefix value 987 is reserved for ISBN-10 numbers being re-coded at ISBN-13 numbers, the final check digit is also recalculated when doing this."),
         };
 
-        ui.text_edit_singleline(&mut self.example);
+        ui.add_space(8.0);
+
         match self.code.variant {
-            IsbnVariant::Ten => match is_valid_isbn_10(&self.example) {
-                Ok(_) => {
-                    ui.label("<<<UPCOMING>>>");
-                }
-                Err(e) => {
-                    ui.label(error_text(&e.inner()));
-                }
-            },
-            IsbnVariant::Thirteen => match is_valid_isbn_13(&self.example) {
-                Ok(_) => {
-                    ui.horizontal(|ui| {
-                        ui.label(mono(self.example.chars().filter(|c| *c != '-').join(" ")));
-                        ui.label(mono("(digits)"));
-                    });
-                    ui.label(mono("1 3 1 3 1 3 1 3 1 3 1 3 1 (weights)"));
-                    ui.horizontal(|ui| {
-                        ui.label(mono(
-                            self.example
-                                .chars()
-                                .filter(|c| *c != '-')
-                                .map(|c| c.to_digit(10).unwrap())
-                                .zip([1, 3].into_iter().cycle())
-                                .map(|(a, b)| (a * b) % 10)
-                                .join(" "),
-                        ));
-                        ui.label(mono("(weighted values)"));
-                    });
-                }
-                Err(e) => {
-                    ui.label(error_text(&e.inner()));
-                }
-            },
+            IsbnVariant::Ten => ui.label(mono(
+                " 0  3  0  6  4  0  6  1  5  2 (digits)
+10  9  8  7  6  5  4  3  2  1 (weights)
+ 0 27  0 42 24  0 24  3 10  2 (weighted values)
+
+these values sum to 132, which is a multiple of 11, so the code is valid
+                ",
+            )),
+            IsbnVariant::Thirteen => ui.label(mono(
+                "9  7  8  0  3  0  6  4  0  6  1  5  7 (digits)
+1  3  1  3  1  3  1  3  1  3  1  3  1 (weights)
+9 21  8  0  3  0  6 12  0 18  1 15  7 (weighted values)
+
+these values sum to 100, which is a multiple of 10, so the code is valid",
+            )),
         };
 
         ui.add_space(16.0);

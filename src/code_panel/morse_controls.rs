@@ -1,4 +1,4 @@
-use codes::morse::{Morse, MorseRep, MorseStandard};
+use codes::text_standards::morse::{Morse, MorseRep, MorseStandard};
 use egui::SelectableLabel;
 
 use crate::egui_aux::subheading;

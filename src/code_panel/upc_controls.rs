@@ -1,6 +1,6 @@
 use codes::{
+    commercial::upc::{is_valid_upc_a, upc_a_check_digit, Upc},
     errors::CodeError,
-    upc::{is_valid_upc_a, upc_a_check_digit, Upc},
 };
 use itertools::Itertools;
 
@@ -66,6 +66,7 @@ impl CodeFrame for UpcFrame {
         // };
 
         ui.text_edit_singleline(&mut self.example);
+        ui.label(mono("036000291452"));
         match handle_example(&self.example) {
             Ok(digits) => {
                 ui.horizontal(|ui| {
