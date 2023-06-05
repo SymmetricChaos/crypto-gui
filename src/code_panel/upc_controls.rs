@@ -66,7 +66,7 @@ impl CodeFrame for UpcFrame {
         // };
 
         ui.text_edit_singleline(&mut self.example);
-        ui.label(mono("036000291452"));
+        // ui.label(mono("036000291452"));
         match handle_example(&self.example) {
             Ok(digits) => {
                 ui.horizontal(|ui| {

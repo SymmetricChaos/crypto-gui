@@ -1,7 +1,5 @@
 pub mod bacon;
 pub mod block;
-
-pub mod spelling_alphabet;
 pub mod tap_code;
 
 pub mod binary_to_text;

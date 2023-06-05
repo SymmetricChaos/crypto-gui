@@ -5,4 +5,5 @@ pub mod morse;
 pub mod morse_encodings;
 pub mod needle;
 pub mod punycode;
+pub mod spelling_alphabet;
 pub mod unicode;

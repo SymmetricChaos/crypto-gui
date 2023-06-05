@@ -6,7 +6,7 @@ use self::{
     ascii85_controls::Ascii85Frame, ascii_controls::AsciiFrame, bacon_contols::BaconFrame,
     base32_controls::Base32Frame, base64_controls::Base64Frame, baudot_controls::BaudotFrame,
     block_controls::BlockCodeFrame, fibonacci_controls::FibonacciCodeFrame,
-    godel_controls::GodelFrame, isbn_contols::IsbnFrame,
+    godel_controls::GodelFrame, isbn_contols::IsbnFrame, itf_controls::ItfFrame,
     levenshtein_controls::LevenshteinCodeFrame, linotype_controls::LinotypeFrame,
     luhn_controls::LuhnAlgorithmFrame, m_of_n_controls::MofNCodeFrame, morse_controls::MorseFrame,
     needle_controls::NeedleFrame, numeric_controls::BytesAsNumbersFrame,
@@ -29,6 +29,7 @@ mod block_controls;
 mod fibonacci_controls;
 mod godel_controls;
 mod isbn_contols;
+mod itf_controls;
 mod levenshtein_controls;
 mod linotype_controls;
 mod luhn_controls;
@@ -107,6 +108,7 @@ pub struct CodeInterface {
 
     // Commercial
     isbn: IsbnFrame,
+    itf: ItfFrame,
     upc: UpcFrame,
 
     // Mathematical
@@ -176,7 +178,7 @@ impl CodeInterface {
             ui,
         );
         combox_box(
-            &[CodeId::Isbn, CodeId::Upc],
+            &[CodeId::Isbn, CodeId::Itf, CodeId::Upc],
             "Commercial Codes",
             active_code,
             ui,
@@ -203,6 +205,7 @@ impl CodeInterface {
             CodeId::Godel => &mut self.godel,
             // CodeId::Hamming => &mut self.hamming,
             CodeId::Isbn => &mut self.isbn,
+            CodeId::Itf => &mut self.itf,
             CodeId::Levenshtein => &mut self.levenshtein,
             CodeId::Linotype => &mut self.linotype,
             CodeId::Luhn => &mut self.luhn,

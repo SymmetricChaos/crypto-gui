@@ -1,4 +1,4 @@
-use codes::spelling_alphabet::{SpellingAlphabet, SpellingAlphabetMode};
+use codes::text_standards::spelling_alphabet::{SpellingAlphabet, SpellingAlphabetMode};
 
 use crate::egui_aux::subheading;
 
