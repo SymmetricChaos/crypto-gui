@@ -18,6 +18,39 @@ pub struct Isbn {
     pub variant: IsbnVariant,
 }
 
+fn digit_to_char_isbn(digit: u32) -> char {
+    match digit {
+        0 => '0',
+        1 => '1',
+        2 => '2',
+        3 => '3',
+        4 => '4',
+        5 => '5',
+        6 => '6',
+        7 => '7',
+        8 => '8',
+        9 => '9',
+        10 => 'X',
+        _ => unreachable!("only values 1 to 10 appear as ISBN check digits"),
+    }
+}
+
+fn isbn_10_check_digit(text: &str) -> Result<char, CodeError> {
+    let mut check = 0;
+    for (c, idx) in text
+        .chars()
+        .filter(|c| *c != '-')
+        .zip([10, 9, 8, 7, 6, 5, 4, 3, 2, 1].into_iter())
+    {
+        match c.to_digit(10) {
+            Some(n) => check += idx * n,
+            None => return Err(CodeError::input("only ASCII digits are allowed")),
+        }
+    }
+    check %= 11;
+    Ok(digit_to_char_isbn(11 - check))
+}
+
 pub fn is_valid_isbn_10(text: &str) -> Result<(), CodeError> {
     if !ISBN_10.is_match(&text.chars().filter(|c| *c != '-').collect::<String>()) {
         return Err(CodeError::input("not a well formed ISBN-10 code"));
@@ -39,6 +72,22 @@ pub fn is_valid_isbn_10(text: &str) -> Result<(), CodeError> {
     } else {
         Err(CodeError::input("invalid check digit"))
     }
+}
+
+fn isbn_13_check_digit(text: &str) -> Result<char, CodeError> {
+    let mut check = 0;
+    for (c, idx) in text
+        .chars()
+        .filter(|c| *c != '-')
+        .zip([1, 3].into_iter().cycle())
+    {
+        match c.to_digit(10) {
+            Some(n) => check += idx * n,
+            None => unreachable!("only valid digits can reach this point"),
+        }
+    }
+    check %= 10;
+    Ok(digit_to_char_isbn(10 - check))
 }
 
 pub fn is_valid_isbn_13(text: &str) -> Result<(), CodeError> {
@@ -85,6 +134,21 @@ impl Isbn {
         }
         out
     }
+
+    pub fn check_digit(&self, text: &str) -> Result<char, CodeError> {
+        if text.is_empty() {
+            return Err(CodeError::input("input cannot be empty"));
+        }
+
+        if !text.is_ascii() {
+            return Err(CodeError::input("only ASCII digits are allowed"));
+        }
+
+        match self.variant {
+            IsbnVariant::Ten => isbn_10_check_digit(text),
+            IsbnVariant::Thirteen => isbn_13_check_digit(text),
+        }
+    }
 }
 
 impl Default for Isbn {
@@ -97,11 +161,11 @@ impl Default for Isbn {
 
 impl Code for Isbn {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        if text.is_empty() {
-            return Err(CodeError::input("input cannot be empty"));
-        }
-
-        todo!()
+        let check = self.check_digit(text)?;
+        let mut out = String::with_capacity(text.len() + 1);
+        out.push_str(text);
+        out.push(check);
+        Ok(out)
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
