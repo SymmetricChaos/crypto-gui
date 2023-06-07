@@ -4,7 +4,7 @@ pub mod m_of_n;
 pub mod parity_check;
 pub mod repetition;
 pub mod verhoeff;
-use std::ops::{Add, AddAssign, BitXor, BitXorAssign};
+use std::ops::{Add, AddAssign, BitXor, BitXorAssign, Mul, MulAssign};
 
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -51,6 +51,42 @@ impl Bit {
             Bit::Zero => '0',
             Bit::One => '1',
         }
+    }
+}
+
+impl Add for Bit {
+    type Output = Self;
+    fn add(self, rhs: Bit) -> Self::Output {
+        match (self, rhs) {
+            (Bit::Zero, Bit::Zero) => Bit::Zero,
+            (Bit::Zero, Bit::One) => Bit::One,
+            (Bit::One, Bit::Zero) => Bit::One,
+            (Bit::One, Bit::One) => Bit::Zero,
+        }
+    }
+}
+
+impl AddAssign for Bit {
+    fn add_assign(&mut self, rhs: Bit) {
+        *self = *self + rhs;
+    }
+}
+
+impl Mul for Bit {
+    type Output = Self;
+
+    fn mul(self, rhs: Bit) -> Self::Output {
+        if self == Bit::Zero || rhs == Bit::Zero {
+            Bit::Zero
+        } else {
+            Bit::One
+        }
+    }
+}
+
+impl MulAssign for Bit {
+    fn mul_assign(&mut self, rhs: Bit) {
+        *self = *self * rhs;
     }
 }
 
