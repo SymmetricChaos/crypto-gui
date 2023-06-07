@@ -1,5 +1,27 @@
 use crate::{ecc::check_bitstring, errors::CodeError, traits::Code};
 
+use nalgebra::{ArrayStorage, SMatrix};
+
+const GEN_4_7: SMatrix<u8, 4, 7> = SMatrix::from_array_storage(ArrayStorage([
+    [1, 0, 0, 0],
+    [0, 1, 0, 0],
+    [0, 0, 1, 0],
+    [0, 0, 0, 1],
+    [1, 1, 0, 1],
+    [1, 0, 1, 1],
+    [0, 1, 1, 1],
+]));
+
+const CHK_4_7: SMatrix<u8, 3, 7> = SMatrix::from_array_storage(ArrayStorage([
+    [1, 1, 0],
+    [1, 0, 1],
+    [0, 1, 1],
+    [1, 1, 1],
+    [1, 0, 0],
+    [0, 1, 0],
+    [0, 0, 1],
+]));
+
 pub struct HammingCode {
     pub parity_bits: u32,
 }
@@ -46,5 +68,14 @@ impl Code for HammingCode {
 
 #[cfg(test)]
 mod hamming_tests {
+    use nalgebra::Vector4;
+
     use super::*;
+
+    #[test]
+    fn show_matrix() {
+        println!("{:?}", GEN_4_7);
+        let prod = Vector4::from([1, 0, 1, 1]).transpose() * (&GEN_4_7);
+        println!("{:?}", prod);
+    }
 }
