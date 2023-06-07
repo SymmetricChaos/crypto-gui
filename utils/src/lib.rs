@@ -1,3 +1,4 @@
+pub mod bits;
 pub mod functions;
 pub mod grid;
 pub mod math_functions;

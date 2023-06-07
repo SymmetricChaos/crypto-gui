@@ -41,14 +41,8 @@ impl HammingCode {
     //         self.total_bits() - self.parity_bits
     //     }
 
-    fn error_syndrome(&self, vec: Vector3<u8>) -> usize {
-        let mut syndrome = 0u8;
-        let mut m = 1;
-        for b in vec.into_iter() {
-            syndrome += (b % 2) * m;
-            m *= 2;
-        }
-        syndrome as usize
+    fn error_index(&self, vec: Vector3<u8>) -> Option<usize> {
+        CHK_4_7.column_iter().position(|c| c == vec)
     }
 }
 
@@ -108,11 +102,16 @@ impl Code for HammingCode {
             }
 
             if buffer.len() == 7 {
-                let err_location = self.error_syndrome(CHK_4_7 * Vector::from(buffer.clone()));
-                if err_location != 0 {
-                    buffer[err_location - 1] ^= 1;
+                let mut error_syndrome = CHK_4_7 * Vector::from(buffer.clone());
+                error_syndrome.apply(|x| *x = *x % 2);
+                dbg!(error_syndrome);
+                let location = self.error_index(error_syndrome);
+                dbg!(location);
+                dbg!(&buffer);
+                if let Some(idx) = location {
+                    buffer[idx] ^= 1;
                 }
-
+                dbg!(&buffer);
                 for b in buffer.iter().take(4) {
                     match b % 2 {
                         0 => out.push('0'),
@@ -133,17 +132,6 @@ mod hamming_tests {
     use super::*;
 
     #[test]
-    fn show_matrix() {
-        println!("Generation:\n{}", GEN_4_7);
-        println!("Check:\n{}", CHK_4_7);
-    }
-
-    #[test]
-    fn error_syndrome() {
-        println!("{}", CHK_4_7 * Vector::from([1, 0, 0, 0, 0, 0, 0]))
-    }
-
-    #[test]
     fn encode_simple() {
         let code = HammingCode::default();
         assert_eq!(code.encode("1011").unwrap(), "1011010");
@@ -158,6 +146,6 @@ mod hamming_tests {
     #[test]
     fn decode_simple_err() {
         let code = HammingCode::default();
-        assert_eq!(code.decode("1010010").unwrap(), "1011");
+        assert_eq!(code.decode("0011010").unwrap(), "1011");
     }
 }
