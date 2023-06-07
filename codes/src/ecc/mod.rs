@@ -131,6 +131,89 @@ impl BitXorAssign for Bit {
     }
 }
 
+pub struct IntToBitError;
+
+impl From<Bit> for char {
+    fn from(value: Bit) -> Self {
+        match value {
+            Bit::Zero => '0',
+            Bit::One => '1',
+        }
+    }
+}
+
+impl TryFrom<char> for Bit {
+    type Error = IntToBitError;
+
+    fn try_from(value: char) -> Result<Self, Self::Error> {
+        match value {
+            '0' => Ok(Bit::Zero),
+            '1' => Ok(Bit::One),
+            _ => Err(IntToBitError),
+        }
+    }
+}
+
+impl From<Bit> for u8 {
+    fn from(value: Bit) -> Self {
+        match value {
+            Bit::Zero => 0,
+            Bit::One => 1,
+        }
+    }
+}
+
+impl TryFrom<u8> for Bit {
+    type Error = IntToBitError;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Bit::Zero),
+            1 => Ok(Bit::One),
+            _ => Err(IntToBitError),
+        }
+    }
+}
+
+impl From<Bit> for usize {
+    fn from(value: Bit) -> Self {
+        match value {
+            Bit::Zero => 0,
+            Bit::One => 1,
+        }
+    }
+}
+
+impl TryFrom<usize> for Bit {
+    type Error = IntToBitError;
+
+    fn try_from(value: usize) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Bit::Zero),
+            1 => Ok(Bit::One),
+            _ => Err(IntToBitError),
+        }
+    }
+}
+
+impl From<Bit> for bool {
+    fn from(value: Bit) -> Self {
+        match value {
+            Bit::Zero => false,
+            Bit::One => true,
+        }
+    }
+}
+
+impl From<bool> for Bit {
+    fn from(value: bool) -> Self {
+        match value {
+            false => Bit::Zero,
+            true => Bit::One,
+        }
+    }
+}
+
 fn char_to_bit(c: char) -> Bit {
     match c {
         '0' => Bit::Zero,
