@@ -1,10 +1,6 @@
-use crate::{
-    ecc::{bits_from_bitstring, check_bitstring, Bit},
-    errors::CodeError,
-    traits::Code,
-};
+use crate::{ecc::check_bitstring, errors::CodeError, traits::Code};
 
-use nalgebra::{ArrayStorage, SMatrix, Vector, Vector1, Vector3};
+use nalgebra::{ArrayStorage, SMatrix, Vector, Vector3};
 
 const GEN_4_7: SMatrix<u8, 4, 7> = SMatrix::from_array_storage(ArrayStorage([
     [1, 0, 0, 0],
@@ -144,7 +140,7 @@ mod hamming_tests {
 
     #[test]
     fn error_syndrome() {
-        println!("{}", CHK_4_7 * Vector::from([1, 0, 1, 1, 0, 1, 0]))
+        println!("{}", CHK_4_7 * Vector::from([1, 0, 0, 0, 0, 0, 0]))
     }
 
     #[test]
