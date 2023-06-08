@@ -1,22 +1,34 @@
 use codes::text_standards::punycode::Punycode;
 use egui::Slider;
 
+use crate::egui_aux::error_text;
+
 use super::CodeFrame;
 
 pub struct PunycodeFrame {
     code: Punycode,
+    example: String,
 }
 
 impl Default for PunycodeFrame {
     fn default() -> Self {
         Self {
             code: Default::default(),
+            example: String::from("TạisaohọkhôngthểchỉnóitiếngViệt"),
         }
     }
 }
 
 impl CodeFrame for PunycodeFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+        ui.label("Example");
+        ui.text_edit_singleline(&mut self.example);
+        ui.add_space(8.0);
+        match self.encode(&self.example) {
+            Ok(s) => ui.label(s),
+            Err(e) => ui.label(error_text(e.inner())),
+        };
+
         ui.collapsing("Variables", |ui| {
             let tmin_range = 1..=(self.code.tmax - 1);
             let tmax_range = 2..=2000;
