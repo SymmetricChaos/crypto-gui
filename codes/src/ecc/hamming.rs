@@ -1,6 +1,6 @@
 use crate::{ecc::check_bitstring, errors::CodeError, traits::Code};
 
-use nalgebra::{ArrayStorage, SMatrix, Vector, Vector3};
+use nalgebra::{ArrayStorage, SMatrix, Vector, Vector3, Vector4};
 
 const GEN_4_7: SMatrix<u8, 4, 7> = SMatrix::from_array_storage(ArrayStorage([
     [1, 0, 0, 0],
@@ -22,33 +22,50 @@ const CHK_4_7: SMatrix<u8, 3, 7> = SMatrix::from_array_storage(ArrayStorage([
     [0, 0, 1],
 ]));
 
+const GEN_4_8: SMatrix<u8, 4, 8> = SMatrix::from_array_storage(ArrayStorage([
+    [1, 0, 0, 0],
+    [0, 1, 0, 0],
+    [0, 0, 1, 0],
+    [0, 0, 0, 1],
+    [0, 1, 1, 1],
+    [1, 0, 1, 1],
+    [1, 1, 0, 1],
+    [1, 1, 1, 0],
+]));
+
+const CHK_4_8: SMatrix<u8, 4, 8> = SMatrix::from_array_storage(ArrayStorage([
+    [0, 1, 1, 1],
+    [1, 0, 1, 1],
+    [1, 1, 0, 1],
+    [1, 1, 1, 0],
+    [1, 0, 0, 0],
+    [0, 1, 0, 0],
+    [0, 0, 1, 0],
+    [0, 0, 0, 1],
+]));
+
 pub struct HammingCode {
-    // pub parity_bits: u32,
+    // pub check_bits: u32,
+    pub parity_bit: bool,
 }
 
 impl Default for HammingCode {
     fn default() -> Self {
-        Self {}
+        Self { parity_bit: false }
     }
 }
 
-impl HammingCode {
-    //     pub fn total_bits(&self) -> u32 {
-    //         2_u32.pow(self.parity_bits) - 1
-    //     }
+fn error_index_4_7(vec: Vector3<u8>) -> Option<usize> {
+    CHK_4_7.column_iter().position(|c| c == vec)
+}
 
-    //     pub fn data_bits(&self) -> u32 {
-    //         self.total_bits() - self.parity_bits
-    //     }
-
-    fn error_index(&self, vec: Vector3<u8>) -> Option<usize> {
-        CHK_4_7.column_iter().position(|c| c == vec)
-    }
+fn error_index_4_8(vec: Vector4<u8>) -> Option<usize> {
+    CHK_4_8.column_iter().position(|c| c == vec)
 }
 
 impl Code for HammingCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        // if self.parity_bits > 6 || self.parity_bits < 2 {
+        // if self.check_bits > 6 || self.check_bits < 2 {
         //     return Err(CodeError::state(
         //         "only parity bits from 2 to 6 are supported",
         //     ));
@@ -83,7 +100,7 @@ impl Code for HammingCode {
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        // if self.parity_bits > 6 || self.parity_bits < 2 {
+        // if self.check_bits > 6 || self.check_bits < 2 {
         //     return Err(CodeError::state(
         //         "only parity bits from 2 to 6 are supported",
         //     ));
@@ -105,7 +122,7 @@ impl Code for HammingCode {
                 let mut error_syndrome = CHK_4_7 * Vector::from(buffer.clone());
                 error_syndrome.apply(|x| *x = *x % 2);
                 dbg!(error_syndrome);
-                let location = self.error_index(error_syndrome);
+                let location = error_index_4_7(error_syndrome);
                 dbg!(location);
                 dbg!(&buffer);
                 if let Some(idx) = location {
