@@ -45,13 +45,16 @@ const CHK_4_8: SMatrix<u8, 4, 8> = SMatrix::from_array_storage(ArrayStorage([
 ]));
 
 pub struct HammingCode {
-    // pub check_bits: u32,
+    pub check_bits: u32,
     pub parity_bit: bool,
 }
 
 impl Default for HammingCode {
     fn default() -> Self {
-        Self { parity_bit: false }
+        Self {
+            check_bits: 3,
+            parity_bit: false,
+        }
     }
 }
 
@@ -65,11 +68,11 @@ fn error_index_4_8(vec: Vector4<u8>) -> Option<usize> {
 
 impl Code for HammingCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        // if self.check_bits > 6 || self.check_bits < 2 {
-        //     return Err(CodeError::state(
-        //         "only parity bits from 2 to 6 are supported",
-        //     ));
-        // }
+        if self.check_bits > 6 || self.check_bits < 3 {
+            return Err(CodeError::state(
+                "only check_bits bits from 3 to 6 are supported",
+            ));
+        }
         check_bitstring(text)?;
 
         let mut buffer: Vec<u8> = Vec::with_capacity(4);
@@ -100,11 +103,11 @@ impl Code for HammingCode {
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        // if self.check_bits > 6 || self.check_bits < 2 {
-        //     return Err(CodeError::state(
-        //         "only parity bits from 2 to 6 are supported",
-        //     ));
-        // }
+        if self.check_bits > 6 || self.check_bits < 3 {
+            return Err(CodeError::state(
+                "only check_bits bits from 3 to 6 are supported",
+            ));
+        }
         check_bitstring(text)?;
 
         let mut buffer: Vec<u8> = Vec::with_capacity(7);

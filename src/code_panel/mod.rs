@@ -6,16 +6,16 @@ use self::{
     ascii85_controls::Ascii85Frame, ascii_controls::AsciiFrame, bacon_contols::BaconFrame,
     base32_controls::Base32Frame, base64_controls::Base64Frame, baudot_controls::BaudotFrame,
     block_controls::BlockCodeFrame, fibonacci_controls::FibonacciCodeFrame,
-    godel_controls::GodelFrame, isbn_contols::IsbnFrame, itf_controls::ItfFrame,
-    levenshtein_controls::LevenshteinCodeFrame, linotype_controls::LinotypeFrame,
-    luhn_controls::LuhnAlgorithmFrame, m_of_n_controls::MofNCodeFrame, morse_controls::MorseFrame,
-    needle_controls::NeedleFrame, numeric_controls::BytesAsNumbersFrame,
-    parity_check_controls::ParityBitFrame, pgp_controls::PgpWordsFrame,
-    punycode_controls::PunycodeFrame, repetition_controls::RepetitionFrame,
-    romaji_controls::RomajiFrame, skey_controls::SKeyWordsFrame,
-    spelling_alphabet_controls::SpellingAlphabetFrame, tap_code_controls::TapCodeFrame,
-    unary_controls::UnaryCodeFrame, unicode_controls::UnicodeFrame, upc_controls::UpcFrame,
-    verhoeff_controls::VerhoeffFrame,
+    godel_controls::GodelFrame, hamming_controls::HammingFrame, isbn_contols::IsbnFrame,
+    itf_controls::ItfFrame, levenshtein_controls::LevenshteinCodeFrame,
+    linotype_controls::LinotypeFrame, luhn_controls::LuhnAlgorithmFrame,
+    m_of_n_controls::MofNCodeFrame, morse_controls::MorseFrame, needle_controls::NeedleFrame,
+    numeric_controls::BytesAsNumbersFrame, parity_check_controls::ParityBitFrame,
+    pgp_controls::PgpWordsFrame, punycode_controls::PunycodeFrame,
+    repetition_controls::RepetitionFrame, romaji_controls::RomajiFrame,
+    skey_controls::SKeyWordsFrame, spelling_alphabet_controls::SpellingAlphabetFrame,
+    tap_code_controls::TapCodeFrame, unary_controls::UnaryCodeFrame,
+    unicode_controls::UnicodeFrame, upc_controls::UpcFrame, verhoeff_controls::VerhoeffFrame,
 };
 pub mod generic_components;
 
@@ -28,6 +28,7 @@ mod baudot_controls;
 mod block_controls;
 mod fibonacci_controls;
 mod godel_controls;
+mod hamming_controls;
 mod isbn_contols;
 mod itf_controls;
 mod levenshtein_controls;
@@ -47,8 +48,8 @@ mod spelling_alphabet_controls;
 mod tap_code_controls;
 mod unary_controls;
 mod unicode_controls;
-pub mod upc_controls;
-pub mod verhoeff_controls;
+mod upc_controls;
+mod verhoeff_controls;
 
 pub trait CodeFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
@@ -100,6 +101,7 @@ pub struct CodeInterface {
     skey: SKeyWordsFrame,
 
     // Error Correcting and Detecting
+    hamming: HammingFrame,
     luhn: LuhnAlgorithmFrame,
     m_of_n: MofNCodeFrame,
     parity_bit: ParityBitFrame,
@@ -167,19 +169,20 @@ impl CodeInterface {
         );
         combox_box(
             &[
+                CodeId::Hamming,
                 CodeId::Luhn,
                 CodeId::MofN,
                 CodeId::ParityBit,
                 CodeId::Repetition,
                 CodeId::Verhoeff,
             ],
-            "Error Correcting Codes",
+            "Error Correcting",
             active_code,
             ui,
         );
         combox_box(
             &[CodeId::Isbn, CodeId::Itf, CodeId::Upc],
-            "Commercial Codes",
+            "Commercial",
             active_code,
             ui,
         );
@@ -203,7 +206,7 @@ impl CodeInterface {
             CodeId::ByteAsNum => &mut self.numeric,
             CodeId::Fibonacci => &mut self.fibonacci,
             CodeId::Godel => &mut self.godel,
-            // CodeId::Hamming => &mut self.hamming,
+            CodeId::Hamming => &mut self.hamming,
             CodeId::Isbn => &mut self.isbn,
             CodeId::Itf => &mut self.itf,
             CodeId::Levenshtein => &mut self.levenshtein,
@@ -224,7 +227,7 @@ impl CodeInterface {
             CodeId::Unicode => &mut self.unicode,
             CodeId::Upc => &mut self.upc,
             CodeId::Verhoeff => &mut self.verhoeff,
-            _ => panic!("unknown code selected"),
+            // _ => panic!("unknown code selected"),
         }
     }
 }
