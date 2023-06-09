@@ -15,11 +15,11 @@ impl Default for HammingFrame {
 }
 
 impl CodeFrame for HammingFrame {
-    fn ui(&mut self, _ui: &mut egui::Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         // ui.label("Check Bits");
         // ui.add(Slider::new(&mut self.code.check_bits, 3..=5));
-        // ui.add_space(8.0);
-        // ui.checkbox(&mut self.code.parity_bit, "Extra Parity Bit");
+        ui.add_space(8.0);
+        ui.checkbox(&mut self.code.extra_bit, "Extra Parity Bit");
     }
 
     fn code(&self) -> &dyn codes::traits::Code {
