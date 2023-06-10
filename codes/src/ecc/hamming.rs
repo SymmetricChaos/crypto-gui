@@ -2,7 +2,7 @@ use crate::{ecc::check_bitstring, errors::CodeError, traits::Code};
 
 use nalgebra::{ArrayStorage, SMatrix, Vector, Vector3};
 
-const GEN_4_7: SMatrix<u8, 4, 7> = SMatrix::from_array_storage(ArrayStorage([
+pub const GEN_4_7: SMatrix<u8, 4, 7> = SMatrix::from_array_storage(ArrayStorage([
     [1, 0, 0, 0],
     [0, 1, 0, 0],
     [0, 0, 1, 0],
@@ -12,7 +12,7 @@ const GEN_4_7: SMatrix<u8, 4, 7> = SMatrix::from_array_storage(ArrayStorage([
     [0, 1, 1, 1],
 ]));
 
-const CHK_4_7: SMatrix<u8, 3, 7> = SMatrix::from_array_storage(ArrayStorage([
+pub const CHK_4_7: SMatrix<u8, 3, 7> = SMatrix::from_array_storage(ArrayStorage([
     [1, 1, 0],
     [1, 0, 1],
     [0, 1, 1],
@@ -22,7 +22,7 @@ const CHK_4_7: SMatrix<u8, 3, 7> = SMatrix::from_array_storage(ArrayStorage([
     [0, 0, 1],
 ]));
 
-const GEN_4_8: SMatrix<u8, 4, 8> = SMatrix::from_array_storage(ArrayStorage([
+pub const GEN_4_8: SMatrix<u8, 4, 8> = SMatrix::from_array_storage(ArrayStorage([
     [1, 0, 0, 0],
     [0, 1, 0, 0],
     [0, 0, 1, 0],
