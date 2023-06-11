@@ -2,7 +2,8 @@ use crate::{ecc::check_bitstring, errors::CodeError, traits::Code};
 
 use nalgebra::{ArrayStorage, SMatrix, Vector, Vector3};
 
-pub const GEN_4_7: SMatrix<u8, 4, 7> = SMatrix::from_array_storage(ArrayStorage([
+// Matrices for systemtic encoding
+pub const GEN_4_7_SYS: SMatrix<u8, 4, 7> = SMatrix::from_array_storage(ArrayStorage([
     [1, 0, 0, 0],
     [0, 1, 0, 0],
     [0, 0, 1, 0],
@@ -12,7 +13,7 @@ pub const GEN_4_7: SMatrix<u8, 4, 7> = SMatrix::from_array_storage(ArrayStorage(
     [1, 1, 0, 1],
 ]));
 
-pub const CHK_4_7: SMatrix<u8, 3, 7> = SMatrix::from_array_storage(ArrayStorage([
+pub const CHK_4_7_SYS: SMatrix<u8, 3, 7> = SMatrix::from_array_storage(ArrayStorage([
     [1, 1, 0],
     [1, 0, 1],
     [0, 1, 1],
@@ -22,7 +23,7 @@ pub const CHK_4_7: SMatrix<u8, 3, 7> = SMatrix::from_array_storage(ArrayStorage(
     [0, 0, 1],
 ]));
 
-pub const GEN_4_8: SMatrix<u8, 4, 8> = SMatrix::from_array_storage(ArrayStorage([
+pub const GEN_4_8_SYS: SMatrix<u8, 4, 8> = SMatrix::from_array_storage(ArrayStorage([
     [1, 0, 0, 0],
     [0, 1, 0, 0],
     [0, 0, 1, 0],
@@ -35,16 +36,20 @@ pub const GEN_4_8: SMatrix<u8, 4, 8> = SMatrix::from_array_storage(ArrayStorage(
 
 pub struct HammingCode {
     pub extra_bit: bool,
+    pub systemtic: bool,
 }
 
 impl Default for HammingCode {
     fn default() -> Self {
-        Self { extra_bit: false }
+        Self {
+            extra_bit: false,
+            systemtic: true,
+        }
     }
 }
 
 fn error_index_4_7(vec: Vector3<u8>) -> Option<usize> {
-    CHK_4_7.column_iter().position(|c| c == vec)
+    CHK_4_7_SYS.column_iter().position(|c| c == vec)
 }
 
 impl HammingCode {
@@ -63,7 +68,7 @@ impl HammingCode {
             }
 
             if buffer.len() == 7 {
-                let mut error_syndrome = CHK_4_7 * Vector::from(&buffer[..]);
+                let mut error_syndrome = CHK_4_7_SYS * Vector::from(&buffer[..]);
                 error_syndrome.apply(|x| *x = *x % 2);
                 let location = error_index_4_7(error_syndrome);
                 if let Some(idx) = location {
@@ -99,7 +104,7 @@ impl HammingCode {
             if buffer.len() == 8 {
                 let total_parity = buffer.iter().sum::<u8>() % 2;
 
-                let mut error_syndrome = CHK_4_7 * Vector::from(&buffer[0..7]);
+                let mut error_syndrome = CHK_4_7_SYS * Vector::from(&buffer[0..7]);
                 error_syndrome.apply(|x| *x = *x % 2);
                 let location = error_index_4_7(error_syndrome);
 
@@ -157,7 +162,7 @@ impl Code for HammingCode {
 
             if buffer.len() == 4 {
                 if self.extra_bit {
-                    let s = Vector::from(buffer.clone()).transpose() * GEN_4_8;
+                    let s = Vector::from(buffer.clone()).transpose() * GEN_4_8_SYS;
                     for b in s.into_iter() {
                         match b % 2 {
                             0 => out.push('0'),
@@ -166,7 +171,7 @@ impl Code for HammingCode {
                         }
                     }
                 } else {
-                    let s = Vector::from(buffer.clone()).transpose() * GEN_4_7;
+                    let s = Vector::from(buffer.clone()).transpose() * GEN_4_7_SYS;
                     for b in s.into_iter() {
                         match b % 2 {
                             0 => out.push('0'),
@@ -204,7 +209,10 @@ mod hamming_tests {
     #[test]
     fn encode() {
         let code = HammingCode::default();
-        assert_eq!(code.encode("1011").unwrap(), "1011010");
+        assert_eq!(
+            code.encode("100100000001").unwrap(),
+            "100110000000000001111"
+        );
     }
 
     #[test]
