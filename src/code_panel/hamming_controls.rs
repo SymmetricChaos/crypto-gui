@@ -22,9 +22,9 @@ impl CodeFrame for HammingFrame {
         ui.label("When this is checked one additional parity bit is included. That allows detecting, but not correcting, two bit errors.");
         ui.add_space(16.0);
 
-        ui.checkbox(&mut self.code.systemtic, "Systemtic Encoding");
-        ui.label("When this is checked the code is organized so that the data bits and parity bits are separated. When unchecked data and parity bits are mixed so that the error syndrome is the index of the error, written in binary.");
-        ui.add_space(16.0);
+        // ui.checkbox(&mut self.code.systemtic, "Systemtic Encoding");
+        // ui.label("When this is checked the code is organized so that the data bits and parity bits are separated. When unchecked data and parity bits are mixed so that the error syndrome is the index of the error, written in binary.");
+        // ui.add_space(16.0);
 
         ui.label("Generator Matrix");
         match self.code.extra_bit {

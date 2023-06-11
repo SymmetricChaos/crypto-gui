@@ -1,38 +1,47 @@
 use crate::{ecc::check_bitstring, errors::CodeError, traits::Code};
-
+use lazy_static::lazy_static;
 use nalgebra::{ArrayStorage, SMatrix, Vector, Vector3};
+use utils::bits::Bit;
 
-// Matrices for systemtic encoding
-pub const GEN_4_7_SYS: SMatrix<u8, 4, 7> = SMatrix::from_array_storage(ArrayStorage([
-    [1, 0, 0, 0],
-    [0, 1, 0, 0],
-    [0, 0, 1, 0],
-    [0, 0, 0, 1],
-    [0, 1, 1, 1],
-    [1, 0, 1, 1],
-    [1, 1, 0, 1],
-]));
-
-pub const CHK_4_7_SYS: SMatrix<u8, 3, 7> = SMatrix::from_array_storage(ArrayStorage([
-    [1, 1, 0],
-    [1, 0, 1],
-    [0, 1, 1],
-    [1, 1, 1],
-    [1, 0, 0],
-    [0, 1, 0],
-    [0, 0, 1],
-]));
-
-pub const GEN_4_8_SYS: SMatrix<u8, 4, 8> = SMatrix::from_array_storage(ArrayStorage([
-    [1, 0, 0, 0],
-    [0, 1, 0, 0],
-    [0, 0, 1, 0],
-    [0, 0, 0, 1],
-    [0, 1, 1, 1],
-    [1, 0, 1, 1],
-    [1, 1, 0, 1],
-    [1, 1, 1, 0],
-]));
+lazy_static! {
+    pub static ref GEN_4_7_SYS: SMatrix<Bit, 4, 7> = SMatrix::from_array_storage(ArrayStorage(
+        [
+            [1, 0, 0, 0],
+            [0, 1, 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1],
+            [0, 1, 1, 1],
+            [1, 0, 1, 1],
+            [1, 1, 0, 1],
+        ]
+        .map(|i| i.map(|i| Bit::try_from(i).unwrap())),
+    ));
+    pub static ref CHK_4_7_SYS: SMatrix<Bit, 3, 7> = SMatrix::from_array_storage(ArrayStorage(
+        [
+            [1, 1, 0],
+            [1, 0, 1],
+            [0, 1, 1],
+            [1, 1, 1],
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, 1],
+        ]
+        .map(|i| i.map(|i| Bit::try_from(i).unwrap())),
+    ));
+    pub static ref GEN_4_8_SYS: SMatrix<Bit, 4, 8> = SMatrix::from_array_storage(ArrayStorage(
+        [
+            [1, 0, 0, 0],
+            [0, 1, 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1],
+            [0, 1, 1, 1],
+            [1, 0, 1, 1],
+            [1, 1, 0, 1],
+            [1, 1, 1, 0],
+        ]
+        .map(|i| i.map(|i| Bit::try_from(i).unwrap())),
+    ));
+}
 
 pub struct HammingCode {
     pub extra_bit: bool,
@@ -48,7 +57,7 @@ impl Default for HammingCode {
     }
 }
 
-fn error_index_4_7(vec: Vector3<u8>) -> Option<usize> {
+fn error_index_4_7(vec: Vector3<Bit>) -> Option<usize> {
     CHK_4_7_SYS.column_iter().position(|c| c == vec)
 }
 
@@ -56,30 +65,21 @@ impl HammingCode {
     fn decode_4_7(text: &str) -> Result<String, CodeError> {
         check_bitstring(text)?;
 
-        let mut buffer: Vec<u8> = Vec::with_capacity(7);
+        let mut buffer: Vec<Bit> = Vec::with_capacity(7);
         let mut out = String::new();
         for bit in text.chars() {
-            if bit == '0' {
-                buffer.push(0);
-            } else if bit == '1' {
-                buffer.push(1);
-            } else {
-                unreachable!("characters other than 0 and 1 should be filtered out")
-            }
+            // Unwrap justified by check_bitstring()
+            buffer.push(Bit::try_from(bit).unwrap());
 
             if buffer.len() == 7 {
-                let mut error_syndrome = CHK_4_7_SYS * Vector::from(&buffer[..]);
-                error_syndrome.apply(|x| *x = *x % 2);
+                let error_syndrome = *CHK_4_7_SYS * Vector::from(&buffer[..]);
+
                 let location = error_index_4_7(error_syndrome);
                 if let Some(idx) = location {
-                    buffer[idx] ^= 1;
+                    buffer[idx].flip();
                 }
                 for b in buffer.iter().take(4) {
-                    match b % 2 {
-                        0 => out.push('0'),
-                        1 => out.push('1'),
-                        _ => unreachable!("only 0 and 1 can occur"),
-                    }
+                    out.push(b.as_char());
                 }
                 buffer.clear();
             }
@@ -90,48 +90,43 @@ impl HammingCode {
     fn decode_4_8(text: &str) -> Result<String, CodeError> {
         check_bitstring(text)?;
 
-        let mut buffer: Vec<u8> = Vec::with_capacity(8);
+        let mut buffer: Vec<Bit> = Vec::with_capacity(8);
         let mut out = String::new();
         for bit in text.chars() {
-            if bit == '0' {
-                buffer.push(0);
-            } else if bit == '1' {
-                buffer.push(1);
-            } else {
-                unreachable!("characters other than 0 and 1 should be filtered out")
-            }
+            // Unwrap justified by check_bitstring()
+            buffer.push(Bit::try_from(bit).unwrap());
 
             if buffer.len() == 8 {
-                let total_parity = buffer.iter().sum::<u8>() % 2;
+                let total_parity = buffer.iter().cloned().sum();
 
-                let mut error_syndrome = CHK_4_7_SYS * Vector::from(&buffer[0..7]);
-                error_syndrome.apply(|x| *x = *x % 2);
+                let error_syndrome = *CHK_4_7_SYS * Vector::from(&buffer[0..7]);
+
                 let location = error_index_4_7(error_syndrome);
 
                 // If the total parity is zero
-                if total_parity == 0 {
+                match total_parity {
+                    Bit::Zero =>
                     // If an error location is found there must be a two bit error
-                    if location.is_some() {
-                        return Err(CodeError::input("a two bit error was detected"));
-                    } else {
-                        // Otherwise the extra check bit was a single bit error
+                    {
+                        if location.is_some() {
+                            return Err(CodeError::input("a two bit error was detected"));
+                        } else {
+                            // Otherwise the extra check bit was a single bit error
+                        }
                     }
-                // If the total parity is one
-                } else {
+                    Bit::One =>
                     // If the error location is detected fix it
-                    if let Some(idx) = location {
-                        buffer[idx] ^= 1;
-                    } else {
-                        // Otherwise the extra check bit was a single bit error
+                    {
+                        if let Some(idx) = location {
+                            buffer[idx].flip();
+                        } else {
+                            // Otherwise the extra check bit was a single bit error
+                        }
                     }
                 }
 
                 for b in buffer.iter().take(4) {
-                    match b % 2 {
-                        0 => out.push('0'),
-                        1 => out.push('1'),
-                        _ => unreachable!("only 0 and 1 can occur"),
-                    }
+                    out.push(b.as_char());
                 }
                 buffer.clear();
             }
@@ -149,35 +144,22 @@ impl Code for HammingCode {
         // }
         check_bitstring(text)?;
 
-        let mut buffer: Vec<u8> = Vec::with_capacity(4);
+        let mut buffer: Vec<Bit> = Vec::with_capacity(4);
         let mut out = String::new();
         for bit in text.chars() {
-            if bit == '0' {
-                buffer.push(0);
-            } else if bit == '1' {
-                buffer.push(1);
-            } else {
-                unreachable!("characters other than 0 and 1 should be filtered out")
-            }
+            // Unwrap justified by check_bitstring()
+            buffer.push(Bit::try_from(bit).unwrap());
 
             if buffer.len() == 4 {
                 if self.extra_bit {
-                    let s = Vector::from(buffer.clone()).transpose() * GEN_4_8_SYS;
+                    let s = Vector::from(buffer.clone()).transpose() * *GEN_4_8_SYS;
                     for b in s.into_iter() {
-                        match b % 2 {
-                            0 => out.push('0'),
-                            1 => out.push('1'),
-                            _ => unreachable!("only 0 and 1 can occur"),
-                        }
+                        out.push(b.as_char());
                     }
                 } else {
-                    let s = Vector::from(buffer.clone()).transpose() * GEN_4_7_SYS;
+                    let s = Vector::from(buffer.clone()).transpose() * *GEN_4_7_SYS;
                     for b in s.into_iter() {
-                        match b % 2 {
-                            0 => out.push('0'),
-                            1 => out.push('1'),
-                            _ => unreachable!("only 0 and 1 can occur"),
-                        }
+                        out.push(b.as_char());
                     }
                 };
 

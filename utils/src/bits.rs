@@ -1,4 +1,10 @@
-use std::ops::{Add, AddAssign, BitXor, BitXorAssign, Mul, MulAssign};
+use std::{
+    fmt::Display,
+    iter::Sum,
+    ops::{Add, AddAssign, BitXor, BitXorAssign, Mul, MulAssign},
+};
+
+use num::{One, Zero};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Bit {
@@ -14,18 +20,52 @@ impl Bit {
         }
     }
 
-    pub fn flipped(&self) -> Bit {
+    pub const fn flipped(&self) -> Bit {
         match self {
             Bit::Zero => Bit::One,
             Bit::One => Bit::Zero,
         }
     }
 
-    pub fn as_char(&self) -> char {
+    pub const fn as_char(&self) -> char {
         match self {
             Bit::Zero => '0',
             Bit::One => '1',
         }
+    }
+}
+
+impl Display for Bit {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Bit::Zero => write!(f, "0"),
+            Bit::One => write!(f, "1"),
+        }
+    }
+}
+
+impl Zero for Bit {
+    fn zero() -> Self {
+        Self::Zero
+    }
+
+    fn is_zero(&self) -> bool {
+        match self {
+            Bit::Zero => true,
+            Bit::One => false,
+        }
+    }
+}
+
+impl One for Bit {
+    fn one() -> Self {
+        Self::One
+    }
+}
+
+impl Sum for Bit {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(Self::Zero, |a, b| a + b)
     }
 }
 
@@ -108,6 +148,44 @@ impl BitXorAssign for Bit {
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct IntToBitError;
+
+macro_rules! from_into {
+    ($t:ty) => {
+        impl From<Bit> for $t {
+            fn from(value: Bit) -> Self {
+                match value {
+                    Bit::Zero => 0,
+                    Bit::One => 1,
+                }
+            }
+        }
+
+        impl TryFrom<$t> for Bit {
+            type Error = IntToBitError;
+
+            fn try_from(value: $t) -> Result<Self, Self::Error> {
+                match value {
+                    0 => Ok(Bit::Zero),
+                    1 => Ok(Bit::One),
+                    _ => Err(IntToBitError),
+                }
+            }
+        }
+    };
+}
+
+from_into!(u8);
+from_into!(u16);
+from_into!(u32);
+from_into!(u64);
+from_into!(u128);
+
+from_into!(i8);
+from_into!(i16);
+from_into!(i32);
+from_into!(i64);
+from_into!(i128);
+
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct CharToBitError;
 
@@ -128,48 +206,6 @@ impl TryFrom<char> for Bit {
             '0' => Ok(Bit::Zero),
             '1' => Ok(Bit::One),
             _ => Err(CharToBitError),
-        }
-    }
-}
-
-impl From<Bit> for u8 {
-    fn from(value: Bit) -> Self {
-        match value {
-            Bit::Zero => 0,
-            Bit::One => 1,
-        }
-    }
-}
-
-impl TryFrom<u8> for Bit {
-    type Error = IntToBitError;
-
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Bit::Zero),
-            1 => Ok(Bit::One),
-            _ => Err(IntToBitError),
-        }
-    }
-}
-
-impl From<Bit> for usize {
-    fn from(value: Bit) -> Self {
-        match value {
-            Bit::Zero => 0,
-            Bit::One => 1,
-        }
-    }
-}
-
-impl TryFrom<usize> for Bit {
-    type Error = IntToBitError;
-
-    fn try_from(value: usize) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Bit::Zero),
-            1 => Ok(Bit::One),
-            _ => Err(IntToBitError),
         }
     }
 }
