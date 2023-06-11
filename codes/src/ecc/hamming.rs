@@ -7,9 +7,9 @@ pub const GEN_4_7: SMatrix<u8, 4, 7> = SMatrix::from_array_storage(ArrayStorage(
     [0, 1, 0, 0],
     [0, 0, 1, 0],
     [0, 0, 0, 1],
-    [1, 1, 0, 1],
-    [1, 0, 1, 1],
     [0, 1, 1, 1],
+    [1, 0, 1, 1],
+    [1, 1, 0, 1],
 ]));
 
 pub const CHK_4_7: SMatrix<u8, 3, 7> = SMatrix::from_array_storage(ArrayStorage([
@@ -50,7 +50,7 @@ fn error_index_4_7(vec: Vector3<u8>) -> Option<usize> {
 impl HammingCode {
     fn decode_4_7(text: &str) -> Result<String, CodeError> {
         check_bitstring(text)?;
-        dbg!("decoding (4,7)");
+
         let mut buffer: Vec<u8> = Vec::with_capacity(7);
         let mut out = String::new();
         for bit in text.chars() {
@@ -63,7 +63,7 @@ impl HammingCode {
             }
 
             if buffer.len() == 7 {
-                let mut error_syndrome = CHK_4_7 * Vector::from(buffer.clone());
+                let mut error_syndrome = CHK_4_7 * Vector::from(&buffer[..]);
                 error_syndrome.apply(|x| *x = *x % 2);
                 let location = error_index_4_7(error_syndrome);
                 if let Some(idx) = location {

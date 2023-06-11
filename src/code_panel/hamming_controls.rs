@@ -28,7 +28,7 @@ impl CodeFrame for HammingFrame {
         };
         ui.add_space(16.0);
         ui.label("The first four columns are the identity matrix. The last three columns show which of the data bits are covered by each parity bit. For instance the fifth column (controlling the first parity bit) is [1 1 0 1] because the first parity bit covers the first, second, and fourth data bits.");
-        ui.label("Columns can be rearranged to produce codes with equivalent error correcting properties.")
+        ui.label("Columns can be rearranged to produce codes with equivalent error correcting properties.");
     }
 
     fn code(&self) -> &dyn codes::traits::Code {
