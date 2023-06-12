@@ -4,6 +4,7 @@ use nalgebra::{ArrayStorage, SMatrix, Vector, Vector3};
 use utils::bits::Bit;
 
 lazy_static! {
+    // Generator matrix with systemtic order
     pub static ref GEN_4_7_SYS: SMatrix<Bit, 4, 7> = SMatrix::from_array_storage(ArrayStorage(
         [
             [1, 0, 0, 0],
@@ -14,8 +15,23 @@ lazy_static! {
             [1, 0, 1, 1],
             [1, 1, 0, 1],
         ]
-        .map(|i| i.map(|i| Bit::try_from(i).unwrap())),
+        .map(|i| i.map(|j| Bit::try_from(j).unwrap())),
     ));
+
+    // Generator with the commonn mixed bit order
+    pub static ref GEN_4_7_MIX: SMatrix<Bit, 4, 7> = SMatrix::from_array_storage(ArrayStorage(
+        [
+            [1, 1, 0, 1],
+            [1, 0, 1, 1],
+            [1, 0, 0, 0],
+            [0, 1, 1, 1],
+            [0, 1, 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1],
+        ]
+        .map(|i| i.map(|j| Bit::try_from(j).unwrap())),
+    ));
+
     pub static ref CHK_4_7_SYS: SMatrix<Bit, 3, 7> = SMatrix::from_array_storage(ArrayStorage(
         [
             [1, 1, 0],
@@ -26,8 +42,22 @@ lazy_static! {
             [0, 1, 0],
             [0, 0, 1],
         ]
-        .map(|i| i.map(|i| Bit::try_from(i).unwrap())),
+        .map(|i| i.map(|j| Bit::try_from(j).unwrap())),
     ));
+
+    pub static ref CHK_4_7_MIX: SMatrix<Bit, 3, 7> = SMatrix::from_array_storage(ArrayStorage(
+        [
+            [1, 0, 0],
+            [0, 1, 0],
+            [1, 1, 0],
+            [0, 0, 1],
+            [1, 0, 1],
+            [0, 1, 1],
+            [1, 1, 1],
+        ]
+        .map(|i| i.map(|j| Bit::try_from(j).unwrap())),
+    ));
+
     pub static ref GEN_4_8_SYS: SMatrix<Bit, 4, 8> = SMatrix::from_array_storage(ArrayStorage(
         [
             [1, 0, 0, 0],
@@ -39,30 +69,48 @@ lazy_static! {
             [1, 1, 0, 1],
             [1, 1, 1, 0],
         ]
-        .map(|i| i.map(|i| Bit::try_from(i).unwrap())),
+        .map(|i| i.map(|j| Bit::try_from(j).unwrap())),
+    ));
+
+    pub static ref GEN_4_8_MIX: SMatrix<Bit, 4, 8> = SMatrix::from_array_storage(ArrayStorage(
+        [
+            [1, 1, 0, 1],
+            [1, 0, 1, 1],
+            [1, 0, 0, 0],
+            [0, 1, 1, 1],
+            [0, 1, 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1],
+            [1, 1, 1, 0],
+        ]
+        .map(|i| i.map(|j| Bit::try_from(j).unwrap())),
     ));
 }
 
 pub struct HammingCode {
     pub extra_bit: bool,
-    pub systemtic: bool,
+    pub systematic: bool,
 }
 
 impl Default for HammingCode {
     fn default() -> Self {
         Self {
             extra_bit: false,
-            systemtic: true,
+            systematic: true,
         }
     }
 }
 
-fn error_index_4_7(vec: Vector3<Bit>) -> Option<usize> {
-    CHK_4_7_SYS.column_iter().position(|c| c == vec)
-}
-
 impl HammingCode {
-    fn decode_4_7(text: &str) -> Result<String, CodeError> {
+    fn error_index(&self, vec: Vector3<Bit>) -> Option<usize> {
+        match self.systematic {
+            true => CHK_4_7_SYS.column_iter(),
+            false => CHK_4_7_MIX.column_iter(),
+        }
+        .position(|c| c == vec)
+    }
+
+    fn decode_4_7(&self, text: &str) -> Result<String, CodeError> {
         check_bitstring(text)?;
 
         let mut buffer: Vec<Bit> = Vec::with_capacity(7);
@@ -72,22 +120,31 @@ impl HammingCode {
             buffer.push(Bit::try_from(bit).unwrap());
 
             if buffer.len() == 7 {
-                let error_syndrome = *CHK_4_7_SYS * Vector::from(&buffer[..]);
+                let location = self.error_index(match self.systematic {
+                    true => *CHK_4_7_SYS * Vector::from(&buffer[..]),
+                    false => *CHK_4_7_MIX * Vector::from(&buffer[..]),
+                });
 
-                let location = error_index_4_7(error_syndrome);
                 if let Some(idx) = location {
                     buffer[idx].flip();
                 }
-                for b in buffer.iter().take(4) {
-                    out.push(char::from(*b));
+                match self.systematic {
+                    true => buffer.iter().take(4).for_each(|b| out.push(char::from(b))),
+                    false => {
+                        out.push(char::from(&buffer[2]));
+                        out.push(char::from(&buffer[4]));
+                        out.push(char::from(&buffer[5]));
+                        out.push(char::from(&buffer[6]));
+                    }
                 }
+
                 buffer.clear();
             }
         }
         Ok(out)
     }
 
-    fn decode_4_8(text: &str) -> Result<String, CodeError> {
+    fn decode_4_8(&self, text: &str) -> Result<String, CodeError> {
         check_bitstring(text)?;
 
         let mut buffer: Vec<Bit> = Vec::with_capacity(8);
@@ -97,11 +154,12 @@ impl HammingCode {
             buffer.push(Bit::try_from(bit).unwrap());
 
             if buffer.len() == 8 {
-                let total_parity = buffer.iter().fold(Bit::Zero, |a, b| a + *b);
+                let total_parity = buffer.iter().copied().fold(Bit::Zero, |a, b| a + b);
 
-                let error_syndrome = *CHK_4_7_SYS * Vector::from(&buffer[0..7]);
-
-                let location = error_index_4_7(error_syndrome);
+                let location = self.error_index(match self.systematic {
+                    true => *CHK_4_7_SYS * Vector::from(&buffer[0..7]),
+                    false => *CHK_4_7_MIX * Vector::from(&buffer[0..7]),
+                });
 
                 // If the total parity is zero
                 match total_parity {
@@ -125,8 +183,14 @@ impl HammingCode {
                     }
                 }
 
-                for b in buffer.iter().take(4) {
-                    out.push(char::from(*b));
+                match self.systematic {
+                    true => buffer.iter().take(4).for_each(|b| out.push(char::from(b))),
+                    false => {
+                        out.push(char::from(&buffer[2]));
+                        out.push(char::from(&buffer[4]));
+                        out.push(char::from(&buffer[5]));
+                        out.push(char::from(&buffer[6]));
+                    }
                 }
                 buffer.clear();
             }
@@ -137,11 +201,6 @@ impl HammingCode {
 
 impl Code for HammingCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        // if self.check_bits > 6 || self.check_bits < 3 {
-        //     return Err(CodeError::state(
-        //         "only check_bits bits from 3 to 6 are supported",
-        //     ));
-        // }
         check_bitstring(text)?;
 
         let mut buffer: Vec<Bit> = Vec::with_capacity(4);
@@ -151,17 +210,22 @@ impl Code for HammingCode {
             buffer.push(Bit::try_from(bit).unwrap());
 
             if buffer.len() == 4 {
+                let v = Vector::from(&buffer[..]).transpose();
                 if self.extra_bit {
-                    let s = Vector::from(buffer.clone()).transpose() * *GEN_4_8_SYS;
-                    for b in s.into_iter() {
-                        out.push(char::from(*b));
+                    match self.systematic {
+                        true => v * *GEN_4_8_SYS,
+                        false => v * *GEN_4_8_MIX,
                     }
+                    .into_iter()
+                    .for_each(|b| out.push(char::from(*b)));
                 } else {
-                    let s = Vector::from(buffer.clone()).transpose() * *GEN_4_7_SYS;
-                    for b in s.into_iter() {
-                        out.push(char::from(*b));
+                    match self.systematic {
+                        true => v * *GEN_4_7_SYS,
+                        false => v * *GEN_4_7_MIX,
                     }
-                };
+                    .into_iter()
+                    .for_each(|b| out.push(char::from(*b)));
+                }
 
                 buffer.clear();
             }
@@ -171,14 +235,9 @@ impl Code for HammingCode {
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        // if self.check_bits > 6 || self.check_bits < 3 {
-        //     return Err(CodeError::state(
-        //         "only check_bits bits from 3 to 6 are supported",
-        //     ));
-        // }
         match self.extra_bit {
-            true => Self::decode_4_8(text),
-            false => Self::decode_4_7(text),
+            true => self.decode_4_8(text),
+            false => self.decode_4_7(text),
         }
     }
 }
@@ -188,6 +247,7 @@ mod hamming_tests {
 
     use super::*;
 
+    // Default Settings (systemtic with no extra bit)
     #[test]
     fn encode() {
         let code = HammingCode::default();
@@ -198,16 +258,17 @@ mod hamming_tests {
     }
 
     #[test]
+    fn decode() {
+        let code = HammingCode::default();
+        assert_eq!(code.decode("1011010").unwrap(), "1011");
+    }
+
+    // Extra Bit
+    #[test]
     fn encode_extra_bit() {
         let mut code = HammingCode::default();
         code.extra_bit = true;
         assert_eq!(code.encode("1011").unwrap(), "10110100");
-    }
-
-    #[test]
-    fn decode() {
-        let code = HammingCode::default();
-        assert_eq!(code.decode("1011010").unwrap(), "1011");
     }
 
     #[test]
@@ -217,6 +278,39 @@ mod hamming_tests {
         assert_eq!(code.decode("10110100").unwrap(), "1011");
     }
 
+    // Mixed Bit Order
+    #[test]
+    fn encode_mixed() {
+        let mut code = HammingCode::default();
+        code.systematic = false;
+        assert_eq!(code.encode("1001").unwrap(), "0011001");
+    }
+
+    #[test]
+    fn decode_mixed() {
+        let mut code = HammingCode::default();
+        code.systematic = false;
+        assert_eq!(code.decode("0011001").unwrap(), "1001");
+    }
+
+    // Extra Bit and Mixed Bit Order
+    #[test]
+    fn encode_mixed_extra() {
+        let mut code = HammingCode::default();
+        code.systematic = false;
+        code.extra_bit = true;
+        assert_eq!(code.encode("1001").unwrap(), "00110011");
+    }
+
+    #[test]
+    fn decode_mixed_extra() {
+        let mut code = HammingCode::default();
+        code.systematic = false;
+        code.extra_bit = true;
+        assert_eq!(code.decode("00110011").unwrap(), "1001");
+    }
+
+    // Errors
     #[test]
     fn decode_err() {
         let code = HammingCode::default();

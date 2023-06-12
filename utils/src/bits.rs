@@ -229,6 +229,15 @@ macro_rules! from_into_int {
             }
         }
 
+        impl From<&Bit> for $t {
+            fn from(value: &Bit) -> Self {
+                match value {
+                    &Bit::Zero => 0,
+                    &Bit::One => 1,
+                }
+            }
+        }
+
         impl TryFrom<$t> for Bit {
             type Error = IntToBitError;
 
@@ -262,6 +271,15 @@ pub struct CharToBitError;
 
 impl From<Bit> for char {
     fn from(value: Bit) -> Self {
+        match value {
+            Bit::Zero => '0',
+            Bit::One => '1',
+        }
+    }
+}
+
+impl From<&Bit> for char {
+    fn from(value: &Bit) -> Self {
         match value {
             Bit::Zero => '0',
             Bit::One => '1',
