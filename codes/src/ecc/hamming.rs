@@ -79,7 +79,7 @@ impl HammingCode {
                     buffer[idx].flip();
                 }
                 for b in buffer.iter().take(4) {
-                    out.push(b.as_char());
+                    out.push(char::from(*b));
                 }
                 buffer.clear();
             }
@@ -97,7 +97,7 @@ impl HammingCode {
             buffer.push(Bit::try_from(bit).unwrap());
 
             if buffer.len() == 8 {
-                let total_parity = buffer.iter().cloned().sum();
+                let total_parity = buffer.iter().fold(Bit::Zero, |a, b| a + *b);
 
                 let error_syndrome = *CHK_4_7_SYS * Vector::from(&buffer[0..7]);
 
@@ -126,7 +126,7 @@ impl HammingCode {
                 }
 
                 for b in buffer.iter().take(4) {
-                    out.push(b.as_char());
+                    out.push(char::from(*b));
                 }
                 buffer.clear();
             }
@@ -154,12 +154,12 @@ impl Code for HammingCode {
                 if self.extra_bit {
                     let s = Vector::from(buffer.clone()).transpose() * *GEN_4_8_SYS;
                     for b in s.into_iter() {
-                        out.push(b.as_char());
+                        out.push(char::from(*b));
                     }
                 } else {
                     let s = Vector::from(buffer.clone()).transpose() * *GEN_4_7_SYS;
                     for b in s.into_iter() {
-                        out.push(b.as_char());
+                        out.push(char::from(*b));
                     }
                 };
 

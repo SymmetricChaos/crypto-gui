@@ -25,14 +25,14 @@ impl Code for ParityBit {
         let mut out = String::new();
         for bit in bits_from_bitstring(text) {
             ctr += 1;
-            out.push(bit.as_char());
+            out.push(char::from(bit));
             parity ^= bit;
 
             if ctr == self.block_size {
                 if self.inverted {
-                    out.push(parity.flipped().as_char());
+                    out.push(char::from(parity.flipped()));
                 } else {
-                    out.push(parity.as_char());
+                    out.push(char::from(parity));
                 }
 
                 ctr = 0;
@@ -69,7 +69,7 @@ impl Code for ParityBit {
                 buffer.clear();
             } else {
                 parity ^= bit;
-                buffer.push(bit.as_char());
+                buffer.push(char::from(bit));
             }
         }
         Ok(out)

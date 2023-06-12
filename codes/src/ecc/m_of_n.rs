@@ -41,10 +41,9 @@ impl Code for MofNCode {
         let mut counted_weight = 0;
         let mut buffer = String::new();
         for bit in bits {
-            let b = bit;
             ctr += 1;
-            counted_weight += b;
-            buffer.push(b.as_char());
+            counted_weight += bit;
+            buffer.push(char::from(bit));
 
             if ctr == n_data_bits {
                 buffer.push_str(&"1".repeat(self.weight - counted_weight));
@@ -81,7 +80,7 @@ impl Code for MofNCode {
             ctr += 1;
             counted_weight += bit;
             if ctr <= n_data_bits {
-                buffer.push(bit.as_char());
+                buffer.push(char::from(bit));
             } else if ctr == self.length {
                 if counted_weight == self.weight {
                     out.push_str(&buffer)

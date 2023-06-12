@@ -1,7 +1,10 @@
 use std::{
     fmt::Display,
     iter::Sum,
-    ops::{Add, AddAssign, BitXor, BitXorAssign, Mul, MulAssign},
+    ops::{
+        Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Mul,
+        MulAssign, Not,
+    },
 };
 
 use num::{One, Zero};
@@ -26,13 +29,6 @@ impl Bit {
             Bit::One => Bit::Zero,
         }
     }
-
-    pub const fn as_char(&self) -> char {
-        match self {
-            Bit::Zero => '0',
-            Bit::One => '1',
-        }
-    }
 }
 
 impl Display for Bit {
@@ -44,6 +40,9 @@ impl Display for Bit {
     }
 }
 
+///////////////////////////////////
+// Fundamental Arithmetic Traits //
+///////////////////////////////////
 impl Zero for Bit {
     fn zero() -> Self {
         Self::Zero
@@ -60,12 +59,6 @@ impl Zero for Bit {
 impl One for Bit {
     fn one() -> Self {
         Self::One
-    }
-}
-
-impl Sum for Bit {
-    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
-        iter.fold(Self::Zero, |a, b| a + b)
     }
 }
 
@@ -87,6 +80,12 @@ impl AddAssign for Bit {
     }
 }
 
+impl Sum for Bit {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(Self::Zero, |a, b| a + b)
+    }
+}
+
 impl Mul for Bit {
     type Output = Self;
 
@@ -105,20 +104,56 @@ impl MulAssign for Bit {
     }
 }
 
-impl Add<Bit> for usize {
-    type Output = usize;
-
-    fn add(self, rhs: Bit) -> Self::Output {
-        match rhs {
-            Bit::Zero => self,
-            Bit::One => self + 1,
+////////////////////////////////
+// Fundamental Logical Traits //
+////////////////////////////////
+impl Not for Bit {
+    type Output = Self;
+    fn not(self) -> Self::Output {
+        match self {
+            Bit::Zero => Bit::One,
+            Bit::One => Bit::Zero,
         }
     }
 }
 
-impl AddAssign<Bit> for usize {
-    fn add_assign(&mut self, rhs: Bit) {
-        *self = *self + rhs;
+impl BitAnd for Bit {
+    type Output = Self;
+
+    fn bitand(self, rhs: Self) -> Self::Output {
+        match self {
+            Bit::Zero => self,
+            Bit::One => rhs,
+        }
+    }
+}
+
+impl BitAndAssign for Bit {
+    fn bitand_assign(&mut self, rhs: Self) {
+        match self {
+            Bit::Zero => *self = *self,
+            Bit::One => *self = rhs,
+        }
+    }
+}
+
+impl BitOr for Bit {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        match self {
+            Bit::Zero => rhs,
+            Bit::One => self,
+        }
+    }
+}
+
+impl BitOrAssign for Bit {
+    fn bitor_assign(&mut self, rhs: Self) {
+        match self {
+            Bit::Zero => *self = rhs,
+            Bit::One => *self = *self,
+        }
     }
 }
 
@@ -146,10 +181,51 @@ impl BitXorAssign for Bit {
     }
 }
 
+//////////////////////////////////
+// Allow Adding Bit to Integers //
+//////////////////////////////////
+macro_rules! add_to_int {
+    ($t:ty) => {
+        impl Add<Bit> for $t {
+            type Output = $t;
+
+            fn add(self, rhs: Bit) -> Self::Output {
+                match rhs {
+                    Bit::Zero => self,
+                    Bit::One => self + 1,
+                }
+            }
+        }
+
+        impl AddAssign<Bit> for $t {
+            fn add_assign(&mut self, rhs: Bit) {
+                *self = *self + rhs;
+            }
+        }
+    };
+}
+
+add_to_int!(usize);
+add_to_int!(u8);
+add_to_int!(u16);
+add_to_int!(u32);
+add_to_int!(u64);
+add_to_int!(u128);
+
+add_to_int!(isize);
+add_to_int!(i8);
+add_to_int!(i16);
+add_to_int!(i32);
+add_to_int!(i64);
+add_to_int!(i128);
+
+////////////////////////
+// Conversion Methods //
+////////////////////////
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct IntToBitError;
 
-macro_rules! from_into {
+macro_rules! from_into_int {
     ($t:ty) => {
         impl From<Bit> for $t {
             fn from(value: Bit) -> Self {
@@ -174,17 +250,19 @@ macro_rules! from_into {
     };
 }
 
-from_into!(u8);
-from_into!(u16);
-from_into!(u32);
-from_into!(u64);
-from_into!(u128);
+from_into_int!(usize);
+from_into_int!(u8);
+from_into_int!(u16);
+from_into_int!(u32);
+from_into_int!(u64);
+from_into_int!(u128);
 
-from_into!(i8);
-from_into!(i16);
-from_into!(i32);
-from_into!(i64);
-from_into!(i128);
+from_into_int!(isize);
+from_into_int!(i8);
+from_into_int!(i16);
+from_into_int!(i32);
+from_into_int!(i64);
+from_into_int!(i128);
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct CharToBitError;
