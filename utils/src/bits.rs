@@ -1,6 +1,5 @@
 use std::{
     fmt::Display,
-    iter::Sum,
     ops::{
         Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Mul,
         MulAssign, Not,
@@ -9,7 +8,7 @@ use std::{
 
 use num::{One, Zero};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Bit {
     Zero,
     One,
@@ -77,12 +76,6 @@ impl Add for Bit {
 impl AddAssign for Bit {
     fn add_assign(&mut self, rhs: Bit) {
         *self = *self + rhs;
-    }
-}
-
-impl Sum for Bit {
-    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
-        iter.fold(Self::Zero, |a, b| a + b)
     }
 }
 
