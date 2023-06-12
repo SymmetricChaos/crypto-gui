@@ -1,4 +1,4 @@
-use codes::ecc::hamming::{HammingCode, GEN_4_7_SYS, GEN_4_8_SYS};
+use codes::ecc::hamming::{HammingCode, GEN_4_7_MIX, GEN_4_7_SYS, GEN_4_8_MIX, GEN_4_8_SYS};
 
 use crate::egui_aux::mono;
 
@@ -22,18 +22,23 @@ impl CodeFrame for HammingFrame {
         ui.label("When this is checked one additional parity bit is included. That allows detecting, but not correcting, two bit errors.");
         ui.add_space(16.0);
 
-        // ui.checkbox(&mut self.code.systemtic, "Systemtic Encoding");
-        // ui.label("When this is checked the code is organized so that the data bits and parity bits are separated. When unchecked data and parity bits are mixed so that the error syndrome is the index of the error, written in binary.");
-        // ui.add_space(16.0);
+        ui.checkbox(&mut self.code.systematic, "Systematic Encoding");
+        ui.label("When this is checked the code is organized so that the data bits and parity bits are separated. When unchecked data and parity bits are mixed so that the error syndrome is the index of the error, written in binary.");
+        ui.add_space(16.0);
 
         ui.label("Generator Matrix");
-        match self.code.extra_bit {
-            true => ui.label(mono(GEN_4_8_SYS.to_string())),
-            false => ui.label(mono(GEN_4_7_SYS.to_string())),
-        };
+        ui.label(mono(match self.code.extra_bit {
+            true => match self.code.systematic {
+                true => GEN_4_8_SYS.to_string(),
+                false => GEN_4_8_MIX.to_string(),
+            },
+            false => match self.code.systematic {
+                true => GEN_4_7_SYS.to_string(),
+                false => GEN_4_7_MIX.to_string(),
+            },
+        }));
         ui.add_space(16.0);
-        ui.label("The first four columns are the identity matrix. The last three columns show which of the data bits are covered by each parity bit. For instance the fifth column (controlling the first parity bit) is [1 1 0 1] because the first parity bit covers the first, second, and fourth data bits.");
-        ui.label("Columns can be rearranged to produce codes with equivalent error correcting properties.");
+        ui.label("The columns with one bit set capture the data bits. The columns with multiple bits set check the parity of the selected data bits.")
     }
 
     fn code(&self) -> &dyn codes::traits::Code {
