@@ -73,6 +73,18 @@ impl Add for Bit {
     }
 }
 
+impl Add<&Bit> for Bit {
+    type Output = Self;
+    fn add(self, rhs: &Bit) -> Self::Output {
+        match (self, rhs) {
+            (Bit::Zero, Bit::Zero) => Bit::Zero,
+            (Bit::Zero, Bit::One) => Bit::One,
+            (Bit::One, Bit::Zero) => Bit::One,
+            (Bit::One, Bit::One) => Bit::Zero,
+        }
+    }
+}
+
 impl AddAssign for Bit {
     fn add_assign(&mut self, rhs: Bit) {
         *self = *self + rhs;
@@ -121,6 +133,17 @@ impl BitAnd for Bit {
     }
 }
 
+impl BitAnd<&Bit> for Bit {
+    type Output = Self;
+
+    fn bitand(self, rhs: &Self) -> Self::Output {
+        match self {
+            Bit::Zero => self,
+            Bit::One => *rhs,
+        }
+    }
+}
+
 impl BitAndAssign for Bit {
     fn bitand_assign(&mut self, rhs: Self) {
         match self {
@@ -141,6 +164,17 @@ impl BitOr for Bit {
     }
 }
 
+impl BitOr<&Bit> for Bit {
+    type Output = Self;
+
+    fn bitor(self, rhs: &Self) -> Self::Output {
+        match self {
+            Bit::Zero => *rhs,
+            Bit::One => self,
+        }
+    }
+}
+
 impl BitOrAssign for Bit {
     fn bitor_assign(&mut self, rhs: Self) {
         match self {
@@ -154,6 +188,19 @@ impl BitXor for Bit {
     type Output = Bit;
 
     fn bitxor(self, rhs: Self) -> Self::Output {
+        match (self, rhs) {
+            (Bit::Zero, Bit::Zero) => Bit::Zero,
+            (Bit::Zero, Bit::One) => Bit::One,
+            (Bit::One, Bit::Zero) => Bit::One,
+            (Bit::One, Bit::One) => Bit::Zero,
+        }
+    }
+}
+
+impl BitXor<&Bit> for Bit {
+    type Output = Bit;
+
+    fn bitxor(self, rhs: &Self) -> Self::Output {
         match (self, rhs) {
             (Bit::Zero, Bit::Zero) => Bit::Zero,
             (Bit::Zero, Bit::One) => Bit::One,
@@ -183,6 +230,17 @@ macro_rules! add_to_int {
             type Output = $t;
 
             fn add(self, rhs: Bit) -> Self::Output {
+                match rhs {
+                    Bit::Zero => self,
+                    Bit::One => self + 1,
+                }
+            }
+        }
+
+        impl Add<&Bit> for $t {
+            type Output = $t;
+
+            fn add(self, rhs: &Bit) -> Self::Output {
                 match rhs {
                     Bit::Zero => self,
                     Bit::One => self + 1,
@@ -316,3 +374,8 @@ impl From<bool> for Bit {
         }
     }
 }
+
+// #[cfg(test)]
+// mod bit_tests {
+//     use super::*;
+// }
