@@ -1,4 +1,4 @@
-use crate::{ecc::check_bitstring, errors::CodeError, traits::Code};
+use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use nalgebra::{ArrayStorage, SMatrix, Vector, Vector3};
@@ -88,6 +88,34 @@ lazy_static! {
         ]
         .map(|i| i.map(|j| Bit::try_from(j).unwrap())),
     ));
+
+    // pub static ref CHK_4_8_SYS: SMatrix<Bit, 4, 8> = SMatrix::from_array_storage(ArrayStorage(
+    //     [
+    //         [1, 0, 0, 1],
+    //         [0, 1, 0, 1],
+    //         [1, 1, 0, 1],
+    //         [0, 0, 1, 1],
+    //         [1, 0, 1, 1],
+    //         [0, 1, 1, 1],
+    //         [1, 1, 1, 1],
+    //         [1, 0, 0, 0],
+    //     ]
+    //     .map(|i| i.map(|j| Bit::try_from(j).unwrap())),
+    // ));
+
+    // pub static ref CHK_4_8_MIX: SMatrix<Bit, 4, 8> = SMatrix::from_array_storage(ArrayStorage(
+    //     [
+    //         [1, 1, 1, 0],
+    //         [1, 1, 0, 1],
+    //         [1, 0, 1, 1],
+    //         [0, 1, 1, 1],
+    //         [0, 0, 0, 1],
+    //         [0, 0, 1, 0],
+    //         [0, 1, 0, 0],
+    //         [1, 0, 0, 0],
+    //     ]
+    //     .map(|i| i.map(|j| Bit::try_from(j).unwrap())),
+    // ));
 }
 
 pub struct HammingCode {
@@ -105,7 +133,7 @@ impl Default for HammingCode {
 }
 
 impl HammingCode {
-    fn error_index(&self, vec: Vector3<Bit>) -> Option<usize> {
+    fn error_index_4_7(&self, vec: Vector3<Bit>) -> Option<usize> {
         match self.systematic {
             true => CHK_4_7_SYS.column_iter(),
             false => CHK_4_7_MIX.column_iter(),
@@ -114,16 +142,23 @@ impl HammingCode {
     }
 
     fn decode_4_7(&self, text: &str) -> Result<String, CodeError> {
-        check_bitstring(text)?;
+        let bits: Vec<Bit> = bits_from_bitstring(text)?.collect();
+
+        if bits.len() % 7 != 0 {
+            return Err(CodeError::Input(format!(
+                "the input must have a length that is a multiple of 7",
+            )));
+        }
 
         let mut buffer: Vec<Bit> = Vec::with_capacity(7);
         let mut out = String::new();
-        for bit in text.chars() {
-            // Unwrap justified by check_bitstring()
-            buffer.push(Bit::try_from(bit).unwrap());
+        for chunk in &bits.into_iter().chunks(7) {
+            for bit in chunk {
+                buffer.push(bit);
+            }
 
             if buffer.len() == 7 {
-                let location = self.error_index(match self.systematic {
+                let location = self.error_index_4_7(match self.systematic {
                     true => *CHK_4_7_SYS * Vector::from(&buffer[..]),
                     false => *CHK_4_7_MIX * Vector::from(&buffer[..]),
                 });
@@ -148,55 +183,60 @@ impl HammingCode {
     }
 
     fn decode_4_8(&self, text: &str) -> Result<String, CodeError> {
-        check_bitstring(text)?;
+        let bits: Vec<Bit> = bits_from_bitstring(text)?.collect();
+
+        if bits.len() % 8 != 0 {
+            return Err(CodeError::Input(format!(
+                "the input must have a length that is a multiple of 8",
+            )));
+        }
 
         let mut buffer: Vec<Bit> = Vec::with_capacity(8);
         let mut out = String::new();
-        for bit in text.chars() {
-            // Unwrap justified by check_bitstring()
-            buffer.push(Bit::try_from(bit).unwrap());
-
-            if buffer.len() == 8 {
-                let total_parity = buffer.iter().copied().fold(Bit::Zero, |a, b| a + b);
-
-                let location = self.error_index(match self.systematic {
-                    true => *CHK_4_7_SYS * Vector::from(&buffer[0..7]),
-                    false => *CHK_4_7_MIX * Vector::from(&buffer[0..7]),
-                });
-
-                // If the total parity is zero
-                match total_parity {
-                    Bit::Zero =>
-                    // If an error location is found there must be a two bit error
-                    {
-                        if location.is_some() {
-                            return Err(CodeError::input("a two bit error was detected"));
-                        } else {
-                            // Otherwise the extra check bit was a single bit error
-                        }
-                    }
-                    Bit::One =>
-                    // If the error location is detected fix it
-                    {
-                        if let Some(idx) = location {
-                            buffer[idx].flip();
-                        } else {
-                            // Otherwise the extra check bit was a single bit error
-                        }
-                    }
-                }
-
-                match self.systematic {
-                    true => buffer.iter().take(4).for_each(|b| out.push(char::from(b))),
-                    false => {
-                        out.push(char::from(&buffer[2]));
-                        out.push(char::from(&buffer[4]));
-                        out.push(char::from(&buffer[5]));
-                        out.push(char::from(&buffer[6]));
-                    }
-                }
-                buffer.clear();
+        for chunk in &bits.into_iter().chunks(8) {
+            for bit in chunk {
+                buffer.push(bit);
             }
+
+            let total_parity = buffer.iter().copied().fold(Bit::Zero, |a, b| a + b);
+
+            let location = self.error_index_4_7(match self.systematic {
+                true => *CHK_4_7_SYS * Vector::from(&buffer[..7]),
+                false => *CHK_4_7_MIX * Vector::from(&buffer[..7]),
+            });
+
+            // If the total parity is zero
+            match total_parity {
+                Bit::Zero =>
+                // If an error location is found there must be a two bit error
+                {
+                    if location.is_some() {
+                        return Err(CodeError::input("a two bit error was detected"));
+                    } else {
+                        // Otherwise the extra check bit was a single bit error
+                    }
+                }
+                Bit::One =>
+                // If the error location is detected fix it
+                {
+                    if let Some(idx) = location {
+                        buffer[idx].flip();
+                    } else {
+                        // Otherwise the extra check bit was a single bit error
+                    }
+                }
+            }
+
+            match self.systematic {
+                true => buffer.iter().take(4).for_each(|b| out.push(char::from(b))),
+                false => {
+                    out.push(char::from(&buffer[2]));
+                    out.push(char::from(&buffer[4]));
+                    out.push(char::from(&buffer[5]));
+                    out.push(char::from(&buffer[6]));
+                }
+            }
+            buffer.clear();
         }
         Ok(out)
     }
