@@ -1,7 +1,10 @@
 use crate::{ecc::check_bitstring, errors::CodeError, traits::Code};
+use itertools::Itertools;
 use lazy_static::lazy_static;
 use nalgebra::{ArrayStorage, SMatrix, Vector, Vector3};
 use utils::bits::Bit;
+
+use super::bits_from_bitstring;
 
 lazy_static! {
     // Generator matrix with systemtic order
@@ -201,34 +204,39 @@ impl HammingCode {
 
 impl Code for HammingCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        check_bitstring(text)?;
+        let bits: Vec<Bit> = bits_from_bitstring(text)?.collect();
+
+        if bits.len() % 4 != 0 {
+            return Err(CodeError::Input(format!(
+                "the input must have a length that is a multiple of 4",
+            )));
+        }
 
         let mut buffer: Vec<Bit> = Vec::with_capacity(4);
         let mut out = String::new();
-        for bit in text.chars() {
-            // Unwrap justified by check_bitstring()
-            buffer.push(Bit::try_from(bit).unwrap());
-
-            if buffer.len() == 4 {
-                let v = Vector::from(&buffer[..]).transpose();
-                if self.extra_bit {
-                    match self.systematic {
-                        true => v * *GEN_4_8_SYS,
-                        false => v * *GEN_4_8_MIX,
-                    }
-                    .into_iter()
-                    .for_each(|b| out.push(char::from(*b)));
-                } else {
-                    match self.systematic {
-                        true => v * *GEN_4_7_SYS,
-                        false => v * *GEN_4_7_MIX,
-                    }
-                    .into_iter()
-                    .for_each(|b| out.push(char::from(*b)));
-                }
-
-                buffer.clear();
+        for chunk in &bits.into_iter().chunks(4) {
+            for bit in chunk {
+                buffer.push(bit);
             }
+
+            let v = Vector::from(&buffer[..]).transpose();
+            if self.extra_bit {
+                match self.systematic {
+                    true => v * *GEN_4_8_SYS,
+                    false => v * *GEN_4_8_MIX,
+                }
+                .into_iter()
+                .for_each(|b| out.push(char::from(*b)));
+            } else {
+                match self.systematic {
+                    true => v * *GEN_4_7_SYS,
+                    false => v * *GEN_4_7_MIX,
+                }
+                .into_iter()
+                .for_each(|b| out.push(char::from(*b)));
+            }
+
+            buffer.clear();
         }
 
         Ok(out)

@@ -1,3 +1,6 @@
+use itertools::Itertools;
+use utils::bits::Bit;
+
 use crate::{errors::CodeError, traits::Code};
 
 use super::{bits_from_bitstring, check_bitstring};
@@ -27,50 +30,47 @@ impl Code for MofNCode {
         check_bitstring(text)?;
 
         let n_data_bits = self.n_data_bits();
-        if bits_from_bitstring(text).count() % n_data_bits != 0 {
+        if bits_from_bitstring(text)?.count() % n_data_bits != 0 {
             return Err(CodeError::Input(format!(
-                "when encoding an {}-of-{} code must have a length that is a multiple of {}",
+                "when encoding an {}-of-{} code the input must have a length that is a multiple of {}",
                 self.weight, self.length, n_data_bits
             )));
         };
 
-        let bits = bits_from_bitstring(text);
+        let bits = bits_from_bitstring(text)?;
 
         let mut out = String::new();
-        let mut ctr = 0;
         let mut counted_weight = 0;
         let mut buffer = String::new();
-        for bit in bits {
-            ctr += 1;
-            counted_weight += bit;
-            buffer.push(char::from(bit));
-
-            if ctr == n_data_bits {
-                buffer.push_str(&"1".repeat(self.weight - counted_weight));
-                while buffer.len() < self.length {
-                    buffer.push('0')
-                }
-                out.push_str(&buffer);
-                ctr = 0;
-                counted_weight = 0;
-                buffer.clear();
+        for chunk in &bits.chunks(n_data_bits) {
+            for bit in chunk {
+                counted_weight += bit;
+                buffer.push(char::from(bit));
             }
+
+            buffer.push_str(&"1".repeat(self.weight - counted_weight));
+            while buffer.len() < self.length {
+                buffer.push('0')
+            }
+            out.push_str(&buffer);
+
+            counted_weight = 0;
+            buffer.clear();
         }
         Ok(out)
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        check_bitstring(text)?;
-
         let n_data_bits = self.n_data_bits();
-        if bits_from_bitstring(text).count() % self.length != 0 {
+
+        let bits: Vec<Bit> = bits_from_bitstring(text)?.collect();
+
+        if bits.len() % self.length != 0 {
             return Err(CodeError::Input(format!(
                 "when decoding an {}-of-{} code must have a length that is a multiple of {}",
                 self.weight, self.length, self.length
             )));
         };
-
-        let bits = bits_from_bitstring(text);
 
         let mut out = String::new();
         let mut ctr = 0;

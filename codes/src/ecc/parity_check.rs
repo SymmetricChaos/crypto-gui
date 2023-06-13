@@ -1,3 +1,6 @@
+use itertools::Itertools;
+use num::One;
+
 use crate::{errors::CodeError, traits::Code};
 
 use super::{bits_from_bitstring, Bit};
@@ -5,7 +8,7 @@ use super::{bits_from_bitstring, Bit};
 pub struct ParityBit {
     pub block_size: usize,
     pub position: usize,
-    pub inverted: bool,
+    pub parity: Bit,
 }
 
 impl ParityBit {}
@@ -15,73 +18,86 @@ impl Default for ParityBit {
         Self {
             block_size: 4,
             position: 4,
-            inverted: false,
+            parity: Bit::Zero,
         }
     }
 }
 
 impl Code for ParityBit {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        let mut parity = match self.inverted {
-            true => Bit::One,
-            false => Bit::Zero,
+        let bits: Vec<Bit> = bits_from_bitstring(text)?.collect();
+
+        if bits.len() % self.block_size != 0 {
+            return Err(CodeError::Input(format!(
+                "the input must have a length that is a multiple of {}",
+                self.block_size
+            )));
         };
+
+        let mut parity = self.parity;
+
         let mut buffer = Vec::with_capacity(self.block_size);
         let mut out = String::new();
-        for bit in bits_from_bitstring(text) {
-            buffer.push(bit);
-            parity ^= bit;
-
-            if buffer.len() == self.block_size {
-                buffer
-                    .iter()
-                    .take(self.position)
-                    .for_each(|b| out.push(char::from(b)));
-                out.push(char::from(parity));
-
-                buffer
-                    .iter()
-                    .skip(self.position)
-                    .for_each(|b| out.push(char::from(b)));
-                buffer.clear();
-                parity = match self.inverted {
-                    true => Bit::One,
-                    false => Bit::Zero,
-                };
+        for chunk in &bits.into_iter().chunks(self.block_size) {
+            for bit in chunk {
+                buffer.push(bit);
+                parity ^= bit;
             }
+
+            buffer
+                .iter()
+                .take(self.position)
+                .for_each(|b| out.push(char::from(b)));
+            out.push(char::from(parity));
+            buffer
+                .iter()
+                .skip(self.position)
+                .for_each(|b| out.push(char::from(b)));
+
+            buffer.clear();
+            parity = self.parity;
         }
         Ok(out)
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        let mut parity = Bit::Zero;
-        let mut ctr = 0;
+        let bits: Vec<Bit> = bits_from_bitstring(text)?.collect();
+
+        if bits.len() % (self.block_size + 1) != 0 {
+            return Err(CodeError::Input(format!(
+                "the input must have a length that is a multiple of {}",
+                self.block_size + 1
+            )));
+        };
+
+        let mut parity = self.parity;
+
         let mut out = String::new();
         let mut buffer = String::new();
-        for bit in bits_from_bitstring(text) {
-            ctr += 1;
-
-            if ctr == self.block_size + 1 {
-                if self.inverted {
-                    if parity != bit {
-                        out.push_str(&buffer);
-                    } else {
-                        out.push_str(&"�".repeat(self.block_size))
-                    }
-                } else {
-                    if parity == bit {
-                        out.push_str(&buffer);
-                    } else {
-                        out.push_str(&"�".repeat(self.block_size))
-                    }
-                }
-                ctr = 0;
-                parity = Bit::Zero;
-                buffer.clear();
-            } else {
-                parity ^= bit;
+        for chunk in &bits.into_iter().chunks(self.block_size + 1) {
+            for bit in chunk {
                 buffer.push(char::from(bit));
+                parity ^= bit;
             }
+
+            if self.parity.is_one() {
+                if self.parity != parity {
+                    out.push_str(&buffer[..self.position]);
+                    out.push_str(&buffer[self.position + 1..]);
+                } else {
+                    out.push_str(&"�".repeat(self.block_size))
+                }
+            } else {
+                if self.parity == parity {
+                    out.push_str(&buffer[..self.position]);
+                    out.push_str(&buffer[self.position + 1..]);
+                } else {
+                    out.push_str(&"�".repeat(self.block_size))
+                }
+            }
+
+            buffer.clear();
+            parity = self.parity;
         }
         Ok(out)
     }
@@ -100,7 +116,7 @@ mod parity_tests {
     #[test]
     fn test_encode_inv() {
         let mut code = ParityBit::default();
-        code.inverted = true;
+        code.parity = Bit::One;
         assert_eq!(code.encode("111010010000").unwrap(), "111001001100001");
     }
 
@@ -113,14 +129,20 @@ mod parity_tests {
     #[test]
     fn test_decode_inv() {
         let mut code = ParityBit::default();
-        code.inverted = true;
+        code.parity = Bit::One;
         assert_eq!(code.decode("111001001100001").unwrap(), "111010010000");
     }
 
     #[test]
     fn test_decode_with_err() {
-        let mut code = ParityBit::default();
-        code.block_size = 4;
+        let code = ParityBit::default();
         assert_eq!(code.decode("111001001000000").unwrap(), "����10010000");
+    }
+
+    #[test]
+    fn test_decode_inv_with_err() {
+        let mut code = ParityBit::default();
+        code.parity = Bit::One;
+        assert_eq!(code.decode("011001001100001").unwrap(), "����10010000");
     }
 }

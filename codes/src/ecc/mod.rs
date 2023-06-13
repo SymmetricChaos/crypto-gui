@@ -25,8 +25,10 @@ pub fn check_bitstring(text: &str) -> Result<(), CodeError> {
     }
 }
 
-pub fn bits_from_bitstring(text: &str) -> impl Iterator<Item = Bit> + '_ {
-    text.chars()
+pub fn bits_from_bitstring(text: &str) -> Result<impl Iterator<Item = Bit> + '_, CodeError> {
+    check_bitstring(text)?;
+    Ok(text
+        .chars()
         .filter(|c| !c.is_whitespace())
-        .map(|c| Bit::try_from(c).unwrap())
+        .map(|c| Bit::try_from(c).unwrap()))
 }
