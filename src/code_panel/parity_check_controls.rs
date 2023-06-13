@@ -1,5 +1,6 @@
 use codes::ecc::parity_check::ParityBit;
 use egui::Slider;
+use utils::bits::Bit;
 
 use super::CodeFrame;
 
@@ -30,8 +31,10 @@ impl CodeFrame for ParityBitFrame {
 
         ui.add_space(8.0);
 
-        ui.checkbox(&mut self.code.inverted, "Odd Parity Bit");
-        ui.label("An odd parity bit ensures that there are an odd number of bits set rather than an even number.");
+        ui.label("Parity");
+        ui.selectable_value(&mut self.code.parity, Bit::Zero, "Even");
+        ui.selectable_value(&mut self.code.parity, Bit::One, "Odd");
+        ui.label("Even parity means the extra bit ensures there are an even number of 1s. Odd parity means there will be an odd number of 1s.");
     }
 
     fn code(&self) -> &dyn codes::traits::Code {
