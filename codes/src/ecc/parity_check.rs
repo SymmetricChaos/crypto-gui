@@ -4,6 +4,7 @@ use super::{bits_from_bitstring, Bit};
 
 pub struct ParityBit {
     pub block_size: usize,
+    pub position: usize,
     pub inverted: bool,
 }
 
@@ -13,6 +14,7 @@ impl Default for ParityBit {
     fn default() -> Self {
         Self {
             block_size: 4,
+            position: 4,
             inverted: false,
         }
     }
@@ -20,23 +22,32 @@ impl Default for ParityBit {
 
 impl Code for ParityBit {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        let mut parity = Bit::Zero;
-        let mut ctr = 0;
+        let mut parity = match self.inverted {
+            true => Bit::One,
+            false => Bit::Zero,
+        };
+        let mut buffer = Vec::with_capacity(self.block_size);
         let mut out = String::new();
         for bit in bits_from_bitstring(text) {
-            ctr += 1;
-            out.push(char::from(bit));
+            buffer.push(bit);
             parity ^= bit;
 
-            if ctr == self.block_size {
-                if self.inverted {
-                    out.push(char::from(parity.flipped()));
-                } else {
-                    out.push(char::from(parity));
-                }
+            if buffer.len() == self.block_size {
+                buffer
+                    .iter()
+                    .take(self.position)
+                    .for_each(|b| out.push(char::from(b)));
+                out.push(char::from(parity));
 
-                ctr = 0;
-                parity = Bit::Zero;
+                buffer
+                    .iter()
+                    .skip(self.position)
+                    .for_each(|b| out.push(char::from(b)));
+                buffer.clear();
+                parity = match self.inverted {
+                    true => Bit::One,
+                    false => Bit::Zero,
+                };
             }
         }
         Ok(out)
