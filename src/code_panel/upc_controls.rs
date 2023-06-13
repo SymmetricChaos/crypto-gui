@@ -4,7 +4,7 @@ use codes::{
 };
 use itertools::Itertools;
 
-use crate::egui_aux::{error_text, mono};
+use crate::ui_elements::{error_text, mono};
 
 use super::CodeFrame;
 

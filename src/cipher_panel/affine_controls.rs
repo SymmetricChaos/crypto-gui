@@ -6,10 +6,9 @@ use utils::{
     preset_alphabet::Alphabet,
 };
 
-use super::{
-    CipherFrame,
-    _generic_components::{control_string, randomize_reset},
-};
+use crate::ui_elements::{control_string, randomize_reset};
+
+use super::CipherFrame;
 
 pub struct AffineFrame {
     cipher: Affine,

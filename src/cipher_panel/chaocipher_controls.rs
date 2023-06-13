@@ -1,12 +1,9 @@
+use super::CipherFrame;
+use crate::ui_elements::{control_string, randomize_reset};
 use ciphers::{polyalphabetic::Chaocipher, Cipher};
 use egui::Ui;
 use rand::thread_rng;
 use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
-
-use super::{
-    CipherFrame,
-    _generic_components::{control_string, randomize_reset},
-};
 
 pub struct ChaocipherFrame {
     cipher: Chaocipher,

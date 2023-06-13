@@ -1,7 +1,7 @@
 use codes::text_standards::unicode::{Unicode, UnicodeEncoding};
 use utils::functions::NumRep;
 
-use crate::egui_aux::subheading;
+use crate::ui_elements::subheading;
 
 use super::CodeFrame;
 

@@ -1,8 +1,5 @@
-use super::{
-    generic_components::{binary_to_text_input_mode, fill_code_columns},
-    CodeFrame,
-};
-use crate::egui_aux::subheading;
+use super::CodeFrame;
+use crate::ui_elements::{binary_to_text_input_mode, fill_code_columns, subheading};
 use codes::binary_to_text::ascii85::{Ascii85, Ascii85Variant};
 
 pub struct Ascii85Frame {

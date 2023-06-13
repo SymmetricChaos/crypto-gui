@@ -1,10 +1,7 @@
 use codes::tap_code::TapCode;
 use utils::preset_alphabet::Alphabet;
 
-use crate::{
-    cipher_panel::_generic_components::control_string,
-    egui_aux::{mono, subheading},
-};
+use crate::ui_elements::{control_string, mono, subheading};
 
 use super::CodeFrame;
 

@@ -2,7 +2,9 @@ use ciphers::{transposition::Scytale, Cipher};
 use egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
 
-use super::{CipherFrame, _generic_components::randomize_reset};
+use crate::ui_elements::randomize_reset;
+
+use super::CipherFrame;
 
 #[derive(Default)]
 pub struct ScytaleFrame {

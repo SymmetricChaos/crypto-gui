@@ -1,9 +1,6 @@
-use crate::egui_aux::mono;
+use crate::ui_elements::{control_string, mono, randomize_reset};
 
-use super::{
-    CipherFrame,
-    _generic_components::{control_string, randomize_reset},
-};
+use super::CipherFrame;
 use ciphers::{polyalphabetic::Alberti, Cipher};
 use eframe::egui::{Slider, Ui};
 use rand::{thread_rng, Rng};

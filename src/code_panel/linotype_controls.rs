@@ -1,6 +1,8 @@
 use codes::text_standards::linotype::Linotype;
 
-use super::{generic_components::fill_code_columns, CodeFrame};
+use crate::ui_elements::fill_code_columns;
+
+use super::CodeFrame;
 
 pub struct LinotypeFrame {
     code: Linotype,

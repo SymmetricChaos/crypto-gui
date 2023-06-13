@@ -1,9 +1,9 @@
 use codes::text_standards::morse::{Morse, MorseRep, MorseStandard};
 use egui::SelectableLabel;
 
-use crate::egui_aux::subheading;
+use crate::ui_elements::{fill_code_columns, subheading};
 
-use super::{generic_components::fill_code_columns, CodeFrame};
+use super::CodeFrame;
 
 pub struct MorseFrame {
     code: Morse,

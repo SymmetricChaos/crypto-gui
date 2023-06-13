@@ -1,7 +1,7 @@
 use codes::text_standards::punycode::Punycode;
 use egui::Slider;
 
-use crate::egui_aux::error_text;
+use crate::ui_elements::error_text;
 
 use super::CodeFrame;
 

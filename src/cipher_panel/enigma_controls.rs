@@ -1,12 +1,10 @@
+use super::CipherFrame;
+use crate::ui_elements::{control_string, error_text, mono};
 use ciphers::{
     enigma::{REFLECTORS, ROTOR_VEC},
     Cipher, EnigmaM3,
 };
 use egui::{ComboBox, Label, Slider, Ui};
-
-use crate::egui_aux::{error_text, mono};
-
-use super::{CipherFrame, _generic_components::control_string};
 
 #[derive(Default)]
 pub struct EnigmaM3Frame {

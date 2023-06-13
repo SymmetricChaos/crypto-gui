@@ -1,14 +1,9 @@
+use super::CipherFrame;
+use crate::ui_elements::{control_string, error_text, mono, randomize_reset};
 use ciphers::{polyalphabetic::Porta, Cipher};
 use egui::Ui;
 use rand::{thread_rng, Rng};
 use utils::{functions::random_sample_replace, preset_alphabet::Alphabet};
-
-use crate::egui_aux::{error_text, mono};
-
-use super::{
-    CipherFrame,
-    _generic_components::{control_string, randomize_reset},
-};
 
 #[derive(Default)]
 pub struct PortaFrame {

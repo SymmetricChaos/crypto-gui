@@ -1,7 +1,7 @@
 // use crate::attack_panel::AttackInterface;
 use crate::cipher_panel::CipherInterface;
 use crate::code_panel::CodeInterface;
-use crate::egui_aux::{mono_strong, subheading};
+use crate::ui_elements::{mono_strong, subheading};
 // use crate::ids::AttackId;
 use crate::pages::io_panel::IOPanel;
 use crate::pages::{Page, TextPrepPage};

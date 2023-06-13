@@ -1,5 +1,6 @@
-use super::{generic_components::fill_code_columns, CodeFrame};
+use crate::ui_elements::fill_code_columns;
 
+use super::CodeFrame;
 use codes::{mathematical::fibonacci::FibonacciCode, traits::IOMode};
 use egui::TextEdit;
 

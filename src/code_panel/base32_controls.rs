@@ -1,9 +1,6 @@
-use crate::egui_aux::subheading;
+use crate::ui_elements::{binary_to_text_input_mode, fill_code_columns, subheading};
 
-use super::{
-    generic_components::{binary_to_text_input_mode, fill_code_columns},
-    CodeFrame,
-};
+use super::CodeFrame;
 use codes::binary_to_text::base32::{B32Variant, Base32};
 
 pub struct Base32Frame {

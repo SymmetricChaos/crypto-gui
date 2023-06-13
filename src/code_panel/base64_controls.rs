@@ -1,9 +1,5 @@
-use crate::egui_aux::subheading;
-
-use super::{
-    generic_components::{binary_to_text_input_mode, fill_code_columns},
-    CodeFrame,
-};
+use super::CodeFrame;
+use crate::ui_elements::{binary_to_text_input_mode, fill_code_columns, subheading};
 use codes::binary_to_text::base64::{B64Variant, Base64};
 
 pub struct Base64Frame {

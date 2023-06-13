@@ -1,6 +1,6 @@
 use codes::romaji::romaji::{Romaji, RomajiVariant};
 
-use crate::egui_aux::{mono_strong, subheading};
+use crate::ui_elements::{mono_strong, subheading};
 
 use super::CodeFrame;
 

@@ -1,7 +1,9 @@
 use codes::mathematical::unary::{UnaryCode, UnaryMode};
 use egui::TextEdit;
 
-use super::{generic_components::fill_code_columns, CodeFrame};
+use crate::ui_elements::fill_code_columns;
+
+use super::CodeFrame;
 
 pub struct UnaryCodeFrame {
     code: UnaryCode,

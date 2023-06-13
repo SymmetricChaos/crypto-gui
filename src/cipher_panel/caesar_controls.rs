@@ -1,12 +1,9 @@
+use super::CipherFrame;
+use crate::ui_elements::{control_string, randomize_reset};
 use ciphers::{substitution::Caesar, Cipher};
 use egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
 use utils::preset_alphabet::Alphabet;
-
-use super::{
-    CipherFrame,
-    _generic_components::{control_string, randomize_reset},
-};
 
 pub struct CaesarFrame {
     cipher: Caesar,

@@ -1,10 +1,11 @@
+use crate::ui_elements::fill_code_columns;
+
+use super::CodeFrame;
 use codes::{
     mathematical::levenshtein::LevenshteinCode,
     traits::{Code, IOMode},
 };
 use egui::TextEdit;
-
-use super::{generic_components::fill_code_columns, CodeFrame};
 
 pub struct LevenshteinCodeFrame {
     code: LevenshteinCode,

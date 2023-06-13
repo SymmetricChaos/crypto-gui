@@ -17,7 +17,6 @@ use self::{
     tap_code_controls::TapCodeFrame, unary_controls::UnaryCodeFrame,
     unicode_controls::UnicodeFrame, upc_controls::UpcFrame, verhoeff_controls::VerhoeffFrame,
 };
-pub mod generic_components;
 
 mod ascii85_controls;
 mod ascii_controls;

@@ -1,7 +1,6 @@
+use super::CodeFrame;
+use crate::ui_elements::{fill_code_columns, subheading};
 use codes::text_standards::ascii::{Ascii, DisplayMode};
-
-use super::{generic_components::fill_code_columns, CodeFrame};
-use crate::egui_aux::subheading;
 
 pub struct AsciiFrame {
     code: Ascii,

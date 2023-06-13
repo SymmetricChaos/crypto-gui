@@ -1,7 +1,7 @@
 use codes::ecc::luhn::LuhnAlgorithm;
 use egui::Slider;
 
-use crate::egui_aux::error_text;
+use crate::ui_elements::error_text;
 
 use super::CodeFrame;
 

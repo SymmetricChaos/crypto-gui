@@ -1,6 +1,5 @@
-use crate::egui_aux::mono;
-
-use super::{CipherFrame, _generic_components::control_string};
+use super::CipherFrame;
+use crate::ui_elements::{control_string, mono};
 use ciphers::{polybius::PolybiusSquare, Cipher};
 use eframe::egui::Ui;
 use rand::thread_rng;

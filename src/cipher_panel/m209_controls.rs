@@ -3,7 +3,9 @@ use egui::{Slider, Ui};
 use rand::{thread_rng, Fill};
 use utils::functions::random_char_vec;
 
-use super::{CipherFrame, _generic_components::randomize_reset};
+use crate::ui_elements::randomize_reset;
+
+use super::CipherFrame;
 
 fn lug_pair(ui: &mut egui::Ui, pair: &mut (usize, usize)) {
     ui.add(

@@ -1,6 +1,6 @@
 use codes::ecc::hamming::{HammingCode, GEN_4_7_MIX, GEN_4_7_SYS, GEN_4_8_MIX, GEN_4_8_SYS};
 
-use crate::egui_aux::mono;
+use crate::ui_elements::mono;
 
 use super::CodeFrame;
 

@@ -3,7 +3,9 @@ use egui::{TextStyle, Ui};
 use itertools::Itertools;
 use rand::{seq::SliceRandom, thread_rng};
 
-use super::{CipherFrame, _generic_components::randomize_reset};
+use crate::ui_elements::randomize_reset;
+
+use super::CipherFrame;
 
 #[derive(Default)]
 pub struct TurningGrilleFrame {

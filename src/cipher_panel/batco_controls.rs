@@ -1,5 +1,5 @@
-use super::{CipherFrame, _generic_components::randomize_reset};
-use crate::egui_aux::mono;
+use super::CipherFrame;
+use crate::ui_elements::{mono, randomize_reset};
 use ciphers::{tactical::Batco, Cipher};
 use egui::{Slider, Ui};
 use rand::{rngs::StdRng, SeedableRng};

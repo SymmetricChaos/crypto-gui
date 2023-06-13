@@ -1,8 +1,6 @@
+use super::CodeFrame;
+use crate::ui_elements::{control_string, fill_code_columns, subheading};
 use codes::text_standards::needle::Needle;
-
-use crate::{cipher_panel::_generic_components::control_string, egui_aux::subheading};
-
-use super::{generic_components::fill_code_columns, CodeFrame};
 
 pub struct NeedleFrame {
     code: Needle,

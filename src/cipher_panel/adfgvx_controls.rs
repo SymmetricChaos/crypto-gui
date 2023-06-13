@@ -1,7 +1,7 @@
-use crate::egui_aux::mono;
+use crate::ui_elements::{control_string, mono, randomize_reset};
 
 use super::CipherFrame;
-use super::_generic_components::{control_string, randomize_reset};
+
 use ciphers::polybius::adfgvx::AdfgvxMode;
 use ciphers::polybius::Adfgvx;
 use ciphers::traits::Cipher;

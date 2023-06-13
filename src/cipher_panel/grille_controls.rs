@@ -1,12 +1,9 @@
+use super::CipherFrame;
+use crate::ui_elements::{control_string, randomize_reset};
 use ciphers::{transposition::Grille, Cipher};
 use egui::{TextStyle, Ui};
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use utils::{grid::Symbol, preset_alphabet::Alphabet};
-
-use super::{
-    CipherFrame,
-    _generic_components::{control_string, randomize_reset},
-};
 
 pub struct GrilleFrame {
     cipher: Grille,

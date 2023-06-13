@@ -1,9 +1,8 @@
 use codes::binary_to_text::pgp_words::PgpWords;
 
-use super::{
-    generic_components::{binary_to_text_input_mode, fill_code_columns},
-    CodeFrame,
-};
+use crate::ui_elements::{binary_to_text_input_mode, fill_code_columns};
+
+use super::CodeFrame;
 
 pub struct PgpWordsFrame {
     code: PgpWords,

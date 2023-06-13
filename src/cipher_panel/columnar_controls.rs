@@ -1,5 +1,6 @@
 use super::CipherFrame;
-use super::_generic_components::{control_string, randomize_reset};
+
+use crate::ui_elements::{control_string, randomize_reset};
 use ciphers::traits::Cipher;
 use ciphers::transposition::Columnar;
 use eframe::egui::Ui;

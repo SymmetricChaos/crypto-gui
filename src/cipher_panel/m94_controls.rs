@@ -3,9 +3,9 @@ use egui::{Color32, FontFamily, RichText, Slider, Ui};
 use rand::{seq::SliceRandom, thread_rng, Rng};
 use utils::preset_alphabet::Alphabet;
 
-use crate::egui_aux::mono;
+use crate::ui_elements::{mono, randomize_reset};
 
-use super::{CipherFrame, _generic_components::randomize_reset};
+use super::CipherFrame;
 
 #[derive(Default)]
 pub struct M94Frame {

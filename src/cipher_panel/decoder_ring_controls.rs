@@ -1,11 +1,8 @@
+use super::CipherFrame;
+use crate::ui_elements::{control_string, randomize_reset};
 use ciphers::{substitution::DecoderRing, Cipher};
 use egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
-
-use super::{
-    CipherFrame,
-    _generic_components::{control_string, randomize_reset},
-};
 
 pub struct DecoderRingFrame {
     cipher: DecoderRing,

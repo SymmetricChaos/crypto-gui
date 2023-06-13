@@ -13,7 +13,7 @@ pub mod code_panel;
 
 pub mod pages;
 
-pub mod egui_aux;
+pub mod ui_elements;
 
 // pub mod global_rng;
 

@@ -6,7 +6,7 @@ use crate::{
     // attack_panel::{AttackInterface, ViewableAttack},
     cipher_panel::{CipherFrame, CipherInterface},
     code_panel::{CodeFrame, CodeInterface},
-    egui_aux::{error_text, text_manip_menu},
+    ui_elements::{error_text, text_manip_menu},
     // ids::AttackId,
 };
 

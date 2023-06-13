@@ -1,7 +1,7 @@
 use codes::commercial::isbn::{Isbn, IsbnVariant};
 
 use super::CodeFrame;
-use crate::egui_aux::{mono, subheading};
+use crate::ui_elements::{mono, subheading};
 
 pub struct IsbnFrame {
     pub code: Isbn,

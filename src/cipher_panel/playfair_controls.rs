@@ -1,14 +1,9 @@
+use super::CipherFrame;
+use crate::ui_elements::{control_string, mono, randomize_reset};
 use ciphers::{playfair::Playfair, Cipher};
 use egui::{TextEdit, TextStyle, Ui};
 use rand::{rngs::StdRng, SeedableRng};
 use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
-
-use crate::egui_aux::mono;
-
-use super::{
-    CipherFrame,
-    _generic_components::{control_string, randomize_reset},
-};
 
 pub struct PlayfairFrame {
     cipher: Playfair,

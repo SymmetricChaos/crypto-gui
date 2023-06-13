@@ -1,3 +1,5 @@
+use super::CipherFrame;
+use crate::ui_elements::{control_string, error_text, randomize_reset};
 use ciphers::{
     polyalphabetic::{Quagmire, QuagmireVersion},
     Cipher,
@@ -5,13 +7,6 @@ use ciphers::{
 use egui::Ui;
 use rand::thread_rng;
 use utils::{functions::random_sample_replace, preset_alphabet::Alphabet};
-
-use crate::egui_aux::error_text;
-
-use super::{
-    CipherFrame,
-    _generic_components::{control_string, randomize_reset},
-};
 
 pub struct QuagmireFrame {
     cipher: Quagmire,

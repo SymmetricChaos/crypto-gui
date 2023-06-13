@@ -1,14 +1,9 @@
+use super::CipherFrame;
+use crate::ui_elements::{control_string, mono, randomize_reset};
 use ciphers::{polybius::Trifid, Cipher};
 use egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
 use utils::functions::shuffled_str;
-
-use crate::egui_aux::mono;
-
-use super::{
-    CipherFrame,
-    _generic_components::{control_string, randomize_reset},
-};
 
 pub struct TrifidFrame {
     cipher: Trifid,

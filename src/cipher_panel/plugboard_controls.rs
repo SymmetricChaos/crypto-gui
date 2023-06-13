@@ -1,11 +1,9 @@
+use super::CipherFrame;
+use crate::ui_elements::{control_string, error_text, mono_strong};
 use ciphers::{substitution::Plugboard, Cipher};
 use egui::Ui;
 use rand::thread_rng;
 use utils::{functions::random_sample, preset_alphabet::Alphabet};
-
-use crate::egui_aux::{error_text, mono_strong};
-
-use super::{CipherFrame, _generic_components::control_string};
 
 #[derive(Default)]
 pub struct PlugboardFrame {

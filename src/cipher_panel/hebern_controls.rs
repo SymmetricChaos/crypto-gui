@@ -1,8 +1,8 @@
+use super::CipherFrame;
+use crate::ui_elements::control_string;
 use ciphers::{hebern::Hebern, Cipher};
 use egui::{Slider, TextEdit, Ui};
 use utils::preset_alphabet::Alphabet;
-
-use super::{CipherFrame, _generic_components::control_string};
 
 pub struct HebernFrame {
     cipher: Hebern,

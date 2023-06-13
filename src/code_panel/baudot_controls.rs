@@ -1,8 +1,8 @@
 use codes::text_standards::baudot::{Baudot, BaudotVersion};
 
-use crate::egui_aux::subheading;
+use crate::ui_elements::{fill_code_columns, subheading};
 
-use super::{generic_components::fill_code_columns, CodeFrame};
+use super::CodeFrame;
 
 pub struct BaudotFrame {
     code: Baudot,

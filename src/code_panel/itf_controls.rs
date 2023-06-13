@@ -1,6 +1,6 @@
 use codes::{commercial::itf::Itf, traits::Code};
 
-use crate::egui_aux::{error_text, mono};
+use crate::ui_elements::{error_text, mono};
 
 use super::CodeFrame;
 

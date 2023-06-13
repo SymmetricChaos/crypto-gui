@@ -1,5 +1,5 @@
-use super::{generic_components::fill_code_columns, CodeFrame};
-use crate::egui_aux::subheading;
+use super::CodeFrame;
+use crate::ui_elements::{fill_code_columns, subheading};
 use codes::bacon::Bacon;
 use egui::{TextEdit, TextStyle};
 

@@ -1,14 +1,9 @@
+use super::CipherFrame;
+use crate::ui_elements::{control_string, mono, randomize_reset};
 use ciphers::{polybius::PolybiusCube, Cipher};
 use egui::Ui;
 use rand::thread_rng;
 use utils::functions::shuffled_str;
-
-use crate::egui_aux::mono;
-
-use super::{
-    CipherFrame,
-    _generic_components::{control_string, randomize_reset},
-};
 
 pub struct PolybiusCubeFrame {
     cipher: PolybiusCube,

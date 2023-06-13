@@ -10,9 +10,9 @@ use itertools::Itertools;
 use rand::{seq::SliceRandom, thread_rng};
 use utils::grid::{Grid, Symbol};
 
-use crate::egui_aux::mono;
+use crate::ui_elements::{mono, randomize_reset};
 
-use super::{CipherFrame, _generic_components::randomize_reset};
+use super::CipherFrame;
 
 #[derive(Default)]
 pub struct Rs44Frame {
