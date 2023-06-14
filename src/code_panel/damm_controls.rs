@@ -1,5 +1,6 @@
 use super::CodeFrame;
 use codes::ecc::{damm::DAMM_TABLE, verhoeff::VerhoeffAlgorithm};
+use egui::Vec2;
 
 pub struct DammFrame {
     pub code: VerhoeffAlgorithm,
@@ -24,7 +25,17 @@ impl CodeFrame for DammFrame {
             self.text = self.code.check_csv_verhoeff(&self.text);
         }
 
-        // ui.label(format!("{:?}", DAMM_TABLE[0]));
+        // egui::Grid::new("damm_grid")
+        //     .num_columns(10)
+        //     .spacing(Vec2::from((2.0, 2.0)))
+        //     .show(ui, |ui| {
+        //         for row in DAMM_TABLE.iter() {
+        //             for sym in row {
+        //                 ui.label(sym.to_string());
+        //             }
+        //             ui.end_row();
+        //         }
+        //     });
     }
 
     fn code(&self) -> &dyn codes::traits::Code {
