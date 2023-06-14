@@ -5,17 +5,18 @@ use egui::Ui;
 use self::{
     ascii85_controls::Ascii85Frame, ascii_controls::AsciiFrame, bacon_contols::BaconFrame,
     base32_controls::Base32Frame, base64_controls::Base64Frame, baudot_controls::BaudotFrame,
-    block_controls::BlockCodeFrame, fibonacci_controls::FibonacciCodeFrame,
-    godel_controls::GodelFrame, hamming_controls::HammingFrame, isbn_contols::IsbnFrame,
-    itf_controls::ItfFrame, levenshtein_controls::LevenshteinCodeFrame,
-    linotype_controls::LinotypeFrame, luhn_controls::LuhnAlgorithmFrame,
-    m_of_n_controls::MofNCodeFrame, morse_controls::MorseFrame, needle_controls::NeedleFrame,
-    numeric_controls::BytesAsNumbersFrame, parity_check_controls::ParityBitFrame,
-    pgp_controls::PgpWordsFrame, punycode_controls::PunycodeFrame,
-    repetition_controls::RepetitionFrame, romaji_controls::RomajiFrame,
-    skey_controls::SKeyWordsFrame, spelling_alphabet_controls::SpellingAlphabetFrame,
-    tap_code_controls::TapCodeFrame, unary_controls::UnaryCodeFrame,
-    unicode_controls::UnicodeFrame, upc_controls::UpcFrame, verhoeff_controls::VerhoeffFrame,
+    block_controls::BlockCodeFrame, damm_controls::DammFrame,
+    fibonacci_controls::FibonacciCodeFrame, godel_controls::GodelFrame,
+    hamming_controls::HammingFrame, isbn_contols::IsbnFrame, itf_controls::ItfFrame,
+    levenshtein_controls::LevenshteinCodeFrame, linotype_controls::LinotypeFrame,
+    luhn_controls::LuhnAlgorithmFrame, m_of_n_controls::MofNCodeFrame, morse_controls::MorseFrame,
+    needle_controls::NeedleFrame, numeric_controls::BytesAsNumbersFrame,
+    parity_check_controls::ParityBitFrame, pgp_controls::PgpWordsFrame,
+    punycode_controls::PunycodeFrame, repetition_controls::RepetitionFrame,
+    romaji_controls::RomajiFrame, skey_controls::SKeyWordsFrame,
+    spelling_alphabet_controls::SpellingAlphabetFrame, tap_code_controls::TapCodeFrame,
+    unary_controls::UnaryCodeFrame, unicode_controls::UnicodeFrame, upc_controls::UpcFrame,
+    verhoeff_controls::VerhoeffFrame,
 };
 
 mod ascii85_controls;
@@ -25,6 +26,7 @@ mod base32_controls;
 mod base64_controls;
 mod baudot_controls;
 mod block_controls;
+mod damm_controls;
 mod fibonacci_controls;
 mod godel_controls;
 mod hamming_controls;
@@ -100,6 +102,7 @@ pub struct CodeInterface {
     skey: SKeyWordsFrame,
 
     // Error Correcting and Detecting
+    damm: DammFrame,
     hamming: HammingFrame,
     luhn: LuhnAlgorithmFrame,
     m_of_n: MofNCodeFrame,
@@ -168,6 +171,7 @@ impl CodeInterface {
         );
         combox_box(
             &[
+                CodeId::Damm,
                 CodeId::Hamming,
                 CodeId::Luhn,
                 CodeId::MofN,
@@ -203,6 +207,7 @@ impl CodeInterface {
             CodeId::Baudot => &mut self.baudot,
             CodeId::Block => &mut self.block,
             CodeId::ByteAsNum => &mut self.numeric,
+            CodeId::Damm => &mut self.damm,
             CodeId::Fibonacci => &mut self.fibonacci,
             CodeId::Godel => &mut self.godel,
             CodeId::Hamming => &mut self.hamming,

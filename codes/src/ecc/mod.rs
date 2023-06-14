@@ -1,3 +1,4 @@
+pub mod damm;
 pub mod hamming;
 pub mod luhn;
 pub mod m_of_n;
