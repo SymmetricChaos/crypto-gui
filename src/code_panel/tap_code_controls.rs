@@ -1,9 +1,7 @@
-use codes::tap_code::TapCode;
-use utils::preset_alphabet::Alphabet;
-
-use crate::ui_elements::{control_string, mono, subheading};
-
 use super::CodeFrame;
+use crate::ui_elements::{control_string, mono, subheading};
+use codes::other::tap_code::TapCode;
+use utils::preset_alphabet::Alphabet;
 
 pub struct TapCodeFrame {
     code: TapCode,

@@ -1,6 +1,6 @@
 use super::CodeFrame;
 use crate::ui_elements::{fill_code_columns, subheading};
-use codes::bacon::Bacon;
+use codes::other::bacon::Bacon;
 use egui::{TextEdit, TextStyle};
 
 pub struct BaconFrame {

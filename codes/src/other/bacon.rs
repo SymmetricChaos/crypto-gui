@@ -1,7 +1,9 @@
 use itertools::Itertools;
 use utils::preset_alphabet::Alphabet;
 
-use crate::{block::BlockCode, errors::CodeError, traits::Code};
+use crate::{errors::CodeError, traits::Code};
+
+use super::block::BlockCode;
 
 pub struct Bacon {
     pub block: BlockCode,

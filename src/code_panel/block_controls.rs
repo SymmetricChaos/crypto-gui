@@ -1,6 +1,6 @@
 use super::CodeFrame;
 use crate::ui_elements::{fill_code_columns, subheading};
-use codes::block::BlockCode;
+use codes::other::block::BlockCode;
 use egui::TextEdit;
 use itertools::Itertools;
 use utils::preset_alphabet::Alphabet;
