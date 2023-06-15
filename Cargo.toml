@@ -12,7 +12,6 @@ members = ["ciphers", "codes", "utils"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]
-path = "main"
 
 [profile.release]
 opt-level = 2

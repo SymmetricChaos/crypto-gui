@@ -9,23 +9,17 @@ use utils::{
 };
 
 pub struct TurningGrille {
-    pub null_alphabet_string: String,
     pub null_alphabet: VecString,
     pub grid: Grid<Symbol<char>>,
-    pub key_strings: [String; 4],
     pub keys: [Vec<usize>; 4],
-    // rng: RefCell<StdRng>,
 }
 
 impl Default for TurningGrille {
     fn default() -> Self {
         TurningGrille {
-            null_alphabet_string: String::from(Alphabet::BasicLatin),
             null_alphabet: VecString::from(Alphabet::BasicLatin),
             grid: Grid::new_blocked(8, 8),
-            key_strings: [String::new(), String::new(), String::new(), String::new()],
             keys: [Vec::new(), Vec::new(), Vec::new(), Vec::new()],
-            // rng: RefCell::new(StdRng::seed_from_u64(1587782446298476294)),
         }
     }
 }
@@ -76,18 +70,20 @@ impl TurningGrille {
         Ok(())
     }
 
-    pub fn build_key(&mut self) -> Result<(), ParseIntError> {
-        for (n, string) in self.key_strings.iter().enumerate() {
+    pub fn build_key(&mut self, key_strings: &[String; 4]) -> Result<(), ParseIntError> {
+        for (n, string) in key_strings.iter().enumerate() {
             self.keys[n].clear();
             let nums = string.split(',');
             for s in nums {
+                if s.is_empty() {
+                    continue;
+                }
                 self.keys[n].push(s.trim().parse::<usize>()?);
             }
         }
         Ok(())
     }
 
-    // I love .fold()
     fn key_length(&self) -> usize {
         self.keys.iter().fold(0, |acc, vec| acc + vec.len())
     }
