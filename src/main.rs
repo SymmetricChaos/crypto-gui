@@ -5,14 +5,9 @@ pub mod ids;
 pub mod cipher_panel;
 pub mod code_panel;
 
-// pub mod cipher_attacks;
-// pub mod attack_panel;
-
 pub mod pages;
 
 pub mod ui_elements;
-
-// pub mod global_rng;
 
 #[cfg(not(target_arch = "wasm32"))]
 fn main() {

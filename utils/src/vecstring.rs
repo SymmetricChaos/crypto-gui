@@ -80,8 +80,8 @@ impl VecString {
     // For sampling without replacement shuffle and iterate
     pub fn get_rand_chars_replace<R: Rng>(&self, n: usize, rng: &mut R) -> Vec<char> {
         let mut out = Vec::with_capacity(n);
-        for i in out.iter_mut() {
-            *i = self.get_rand_char(rng);
+        for _ in 0..n {
+            out.push(self.get_rand_char(rng));
         }
         out
     }

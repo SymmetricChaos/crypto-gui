@@ -4,7 +4,7 @@ use itertools::Itertools;
 use rand::{seq::SliceRandom, thread_rng};
 use utils::preset_alphabet::Alphabet;
 
-use crate::ui_elements::{control_string, randomize_reset};
+use crate::ui_elements::{control_string, error_text, randomize_reset};
 
 use super::CipherFrame;
 
@@ -19,7 +19,12 @@ impl Default for TurningGrilleFrame {
         Self {
             cipher: Default::default(),
             null_alphabet_string: String::from(Alphabet::BasicLatin),
-            key_strings: Default::default(),
+            key_strings: [
+                "0, 1, 2, 3".into(),
+                "4, 5, 6, 7".into(),
+                "8, 9, 10, 11".into(),
+                "12, 13, 14, 15".into(),
+            ],
         }
     }
 }
@@ -32,7 +37,7 @@ fn cell_button(grille: &mut TurningGrille, x: usize, y: usize, ui: &mut eframe::
 }
 
 impl CipherFrame for TurningGrilleFrame {
-    fn ui(&mut self, ui: &mut Ui, errors: &mut String) {
+    fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 
@@ -41,11 +46,28 @@ impl CipherFrame for TurningGrilleFrame {
             "The numbers from 0 to {} should all be used exactly once among the keys",
             self.cipher.subgrille_size() - 1
         ));
-        for i in 0..4 {
-            if control_string(ui, &mut self.key_strings[i]).changed() {
-                self.cipher.build_key(&self.key_strings);
-                self.cipher.build_grid();
-            }
+
+        for (i, name) in ["Upper Left", "Lower Left", "Lower Right", "Upper Right"]
+            .into_iter()
+            .enumerate()
+        {
+            ui.horizontal(|ui| {
+                ui.label(name);
+                if control_string(ui, &mut self.key_strings[i]).changed() {
+                    match self.cipher.build_key(&self.key_strings) {
+                        Ok(_) => (),
+                        Err(e) => {
+                            ui.label(error_text(e.to_string()));
+                        }
+                    }
+                    match self.cipher.build_grid() {
+                        Ok(_) => (),
+                        Err(e) => {
+                            ui.label(error_text(e.to_string()));
+                        }
+                    }
+                }
+            });
         }
 
         ui.spacing_mut().item_spacing = (2.0, 2.0).into();
@@ -67,6 +89,7 @@ impl CipherFrame for TurningGrilleFrame {
                 self.cipher.increase_size()
             };
         });
+
         ui.add_space(16.0);
         if ui.button("rotate").clicked() {
             self.cipher.grid.rotate()

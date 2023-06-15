@@ -16,11 +16,18 @@ pub struct TurningGrille {
 
 impl Default for TurningGrille {
     fn default() -> Self {
-        TurningGrille {
+        let mut new = TurningGrille {
             null_alphabet: VecString::from(Alphabet::BasicLatin),
             grid: Grid::new_blocked(8, 8),
-            keys: [Vec::new(), Vec::new(), Vec::new(), Vec::new()],
-        }
+            keys: [
+                vec![0, 1, 2, 3],
+                vec![4, 5, 6, 7],
+                vec![8, 9, 10, 11],
+                vec![12, 13, 14, 15],
+            ],
+        };
+        new.build_grid().unwrap();
+        new
     }
 }
 
@@ -110,34 +117,59 @@ impl TurningGrille {
         self.grid.apply(|_| Symbol::Blocked);
     }
 
+    pub fn grille_width(&self) -> usize {
+        self.grid.num_cols()
+    }
+
+    pub fn grille_size(&self) -> usize {
+        self.grid.grid_size()
+    }
+
     pub fn subgrille_width(&self) -> usize {
-        self.grid.num_cols() / 2
+        self.grille_width() / 2
     }
 
     pub fn subgrille_size(&self) -> usize {
-        self.subgrille_width().pow(2)
+        self.grille_size() / 4
     }
 }
 
 impl Cipher for TurningGrille {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+        if text.chars().count() > self.grille_size() {
+            return Err(CipherError::Input(format!(
+                "a {}x{} turning grille cipher can encrypt a maximum of {} characters at a time",
+                self.grille_width(),
+                self.grille_width(),
+                self.grille_size()
+            )));
+        }
+
         let mut crypto_grid = self.grid.clone();
         let mut output_grid: Grid<char> =
             Grid::new_default(self.grid.num_rows(), self.grid.num_cols());
 
-        let w = self.grid.num_cols();
-        let section = crypto_grid.grid_size() / 4;
+        let nulls = self
+            .null_alphabet
+            .get_rand_chars_replace(self.grille_size() - text.chars().count(), &mut thread_rng());
 
-        for i in 0..4 {
-            let lo = i * section;
-            let hi = lo + section;
-            let mut snip = text[lo..hi].chars();
+        let padded_text = {
+            let mut s = String::with_capacity(self.grille_size());
+            s.push_str(text);
+            for c in nulls {
+                s.push(c)
+            }
+            s
+        };
+
+        let w = self.grid.num_cols();
+        let section = self.subgrille_size();
+
+        for mut chunk in &padded_text.chars().chunks(section) {
             for row in 0..w {
                 for col in 0..w {
                     if crypto_grid[(row, col)].is_empty() {
-                        output_grid[(row, col)] = snip
-                            .next()
-                            .unwrap_or(self.null_alphabet.get_rand_char(&mut thread_rng()))
+                        output_grid[(row, col)] = chunk.next().unwrap()
                     }
                 }
             }
@@ -148,6 +180,15 @@ impl Cipher for TurningGrille {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+        if text.chars().count() != self.grille_size() {
+            return Err(CipherError::Input(format!(
+                "to decrypt a {}x{} turning grille cipher exactly {} characters are needed",
+                self.grille_width(),
+                self.grille_width(),
+                self.grille_size()
+            )));
+        }
+
         let input_grid: Grid<char> = Grid::from_cols(
             text.chars().collect_vec(),
             self.grid.num_rows(),
@@ -176,9 +217,10 @@ impl Cipher for TurningGrille {
 mod turning_grille_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYD";
+    const PLAINTEXT: &'static str =
+        "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOGPOHTZAXHOSKWEZSOXIBTNEXJKQVNV";
     const CIPHERTEXT: &'static str =
-        "TECLESRKCQPWTKTAQPRFUOEZTXKNOVUMZDBFMQIYHEROBBHONUUXGWEDHIOJPELC";
+        "TUGXEXJVHMPIBROXEPOBRAZYQSHTAXHOUICKTOKSZSONHWQKDOTZENVWJOVELFNE";
 
     #[test]
     fn encrypt_test_full_grid() {
@@ -190,5 +232,13 @@ mod turning_grille_tests {
     fn decrypt_test_full_grid() {
         let cipher = TurningGrille::default();
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+    }
+
+    #[test]
+    fn encrypt_decrypt_with_nulls() {
+        let cipher = TurningGrille::default();
+        let ptext = "THISISASMALLAMOUNTOFSAMPLETEXT";
+        let ctext = cipher.encrypt(ptext).unwrap();
+        assert_eq!(&cipher.decrypt(&ctext).unwrap()[0..30], ptext);
     }
 }

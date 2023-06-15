@@ -1,6 +1,5 @@
 use super::CodeFrame;
-use codes::ecc::{damm::DAMM_TABLE, verhoeff::VerhoeffAlgorithm};
-use egui::Vec2;
+use codes::ecc::verhoeff::VerhoeffAlgorithm;
 
 pub struct DammFrame {
     pub code: VerhoeffAlgorithm,
