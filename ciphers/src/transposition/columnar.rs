@@ -29,7 +29,7 @@ impl Cipher for Columnar {
         let n_rows = num::Integer::div_ceil(&tlen, &self.key.len());
 
         let symbols = str_to_char_grid(text, '\0', '\0');
-        let g = Grid::from_cols(symbols, n_rows, n_cols);
+        let g = Grid::from_rows(symbols, n_rows, n_cols);
 
         let mut out = String::with_capacity(text.len());
         for k in self.key.iter() {
@@ -66,7 +66,7 @@ impl Cipher for Columnar {
             }
         }
 
-        Ok(g.read_cols_characters().collect())
+        Ok(g.read_rows_characters().collect())
     }
 }
 

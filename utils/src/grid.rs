@@ -430,6 +430,19 @@ impl Display for Grid<Symbol<char>> {
     }
 }
 
+impl Display for Grid<char> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        let mut out = String::with_capacity(self.grid_size());
+        for x in 0..self.num_rows {
+            for c in self.get_row(x) {
+                out.push(*c);
+            }
+            out.push('\n')
+        }
+        write!(f, "{out}")
+    }
+}
+
 // Two index methods. One for coords and one for index.
 impl<T> Index<(usize, usize)> for Grid<T> {
     type Output = T;

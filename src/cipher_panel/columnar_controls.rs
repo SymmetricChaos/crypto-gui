@@ -1,17 +1,19 @@
 use super::CipherFrame;
 
-use crate::ui_elements::{control_string, randomize_reset};
+use crate::ui_elements::{control_string, mono, randomize_reset};
 use ciphers::traits::Cipher;
 use ciphers::transposition::Columnar;
 use eframe::egui::Ui;
 use rand::{thread_rng, Rng};
 use utils::functions::random_sample_replace;
+use utils::grid::Grid;
 use utils::preset_alphabet::Alphabet;
 
 pub struct ColumnarFrame {
     cipher: Columnar,
     alphabet_string: String,
     key_string: String,
+    example: String,
 }
 
 impl Default for ColumnarFrame {
@@ -20,6 +22,7 @@ impl Default for ColumnarFrame {
             cipher: Default::default(),
             alphabet_string: Alphabet::BasicLatin.into(),
             key_string: Default::default(),
+            example: Default::default(),
         }
     }
 }
@@ -40,6 +43,30 @@ impl CipherFrame for ColumnarFrame {
             self.cipher
                 .assign_key(&self.key_string, &self.alphabet_string)
         };
+
+        ui.label("Example Text");
+        control_string(ui, &mut self.example);
+
+        ui.label("Grid");
+        let n_cols = self.cipher.key.len();
+        let n_rows = if n_cols > 0 {
+            num::Integer::div_ceil(&self.example.chars().count(), &self.cipher.key.len())
+        } else {
+            0
+        };
+        let g = Grid::from_rows(self.example.chars().collect(), n_rows, n_cols);
+
+        egui::Grid::new("columnar_grid")
+            .num_columns(n_cols)
+            .max_col_width(5.0)
+            .show(ui, |ui| {
+                for row in 0..n_rows {
+                    for c in g.get_row(row) {
+                        ui.label(mono(c));
+                    }
+                    ui.end_row();
+                }
+            });
     }
 
     fn cipher(&self) -> &dyn Cipher {
