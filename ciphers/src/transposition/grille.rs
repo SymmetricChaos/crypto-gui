@@ -1,6 +1,6 @@
 use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
-use rand::{rngs::StdRng, thread_rng, Rng, SeedableRng};
+use rand::{thread_rng, Rng};
 use utils::{
     grid::{str_to_char_grid, Grid, Symbol},
     preset_alphabet::Alphabet,
@@ -10,23 +10,10 @@ use utils::{
 pub struct Grille {
     null_alphabet: VecString,
     pub grid: Grid<Symbol<char>>,
-    pub seed: Option<u64>,
     pub use_nulls: bool,
-    // rng: RefCell<StdRng>,
 }
 
 impl Grille {
-    fn _randomize_seeded(&mut self, seed: u64) {
-        let mut rng = StdRng::seed_from_u64(seed);
-        for cell in self.grid.get_rows_mut() {
-            if rng.gen_bool(0.5) {
-                *cell = Symbol::Empty;
-            } else {
-                *cell = Symbol::Blocked;
-            }
-        }
-    }
-
     fn random_nulls<R: Rng>(&self, n: usize, rng: &mut R) -> Vec<Symbol<char>> {
         self.null_alphabet
             .get_rand_chars_replace(n, rng)
@@ -42,12 +29,20 @@ impl Grille {
 
 impl Default for Grille {
     fn default() -> Self {
+        let mut grid = Grid::new_blocked(4, 4);
+        grid.empty_cell((1, 0));
+        grid.empty_cell((2, 2));
+        grid.empty_cell((2, 0));
+        grid.empty_cell((3, 1));
+        grid.empty_cell((1, 3));
+        grid.empty_cell((3, 3));
+        grid.empty_cell((0, 3));
+        grid.empty_cell((3, 2));
+
         Grille {
             null_alphabet: VecString::from(Alphabet::BasicLatin),
-            grid: Grid::new_empty(4, 4),
-            seed: None,
+            grid,
             use_nulls: true,
-            // rng: RefCell::new(StdRng::seed_from_u64(7852172251351752522)),
         }
     }
 }
@@ -56,13 +51,13 @@ impl Cipher for Grille {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         if self.grid.num_empty() < text.chars().count() {
             return Err(CipherError::Input(
-                "The text is too long to fit into the open spaces of the Grille".to_string(),
+                "the text is too long to fit into the open spaces of the grille".to_string(),
             ));
         }
 
         if !self.use_nulls && self.grid.num_empty() != text.chars().count() {
             return Err(CipherError::Input(
-                "The text must exactly fill the empty spaces in the Grille".to_string(),
+                "the text must exactly fill the empty spaces in the grille".to_string(),
             ));
         }
 
@@ -70,16 +65,35 @@ impl Cipher for Grille {
         let mut chars = text.chars();
         let mut nulls = self.random_nulls(self.grid.grid_size(), &mut thread_rng());
 
-        for cell in grid.get_rows_mut() {
-            match cell {
-                Symbol::Filled(_) => {
-                    unreachable!("encryption should encounter no Symbol::Character cells")
+        if self.use_nulls {
+            for cell in grid.get_rows_mut() {
+                match cell {
+                    Symbol::Filled(_) => {
+                        unreachable!(
+                            "the grille is predefined and should contain no Symbol::Filled cells"
+                        )
+                    }
+                    Symbol::Empty => match chars.next() {
+                        Some(c) => *cell = Symbol::Filled(c),
+                        None => *cell = nulls.pop().unwrap(),
+                    },
+                    Symbol::Blocked => *cell = nulls.pop().unwrap(),
                 }
-                Symbol::Empty => match chars.next() {
-                    Some(c) => *cell = Symbol::Filled(c),
-                    None => *cell = nulls.pop().unwrap(),
-                },
-                Symbol::Blocked => *cell = nulls.pop().unwrap(),
+            }
+        } else {
+            for cell in grid.get_rows_mut() {
+                match cell {
+                    Symbol::Filled(_) => {
+                        unreachable!(
+                            "the grille is predefined and should contain no Symbol::Filled cells"
+                        )
+                    }
+                    Symbol::Empty => match chars.next() {
+                        Some(c) => *cell = Symbol::Filled(c),
+                        None => (),
+                    },
+                    Symbol::Blocked => (),
+                }
             }
         }
 
@@ -94,7 +108,7 @@ impl Cipher for Grille {
         if self.use_nulls {
             if self.grid.grid_size() != text.chars().count() {
                 return Err(CipherError::Input(
-                    "Text is not the same size as the Grille".to_string(),
+                    "text is not the same size as the grille".to_string(),
                 ));
             }
 
@@ -148,39 +162,20 @@ mod grille_tests {
 
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYD";
-    const CIPHERTEXT: &'static str =
-        "TECLESRKCQPWTKTAQPRFUOEZTXKNOVUMZDBFMQIYHEROBBHONUUXGWEDHIOJPELC";
-    const CIPHERTEXT_NO_NULLS: &'static str = "TECSRQWTAUOZKNVBFMYHROHUXEDIOJPEL";
-    const SEED: u64 = 1587782446298476294;
+    const PLAINTEXT: &'static str = "THEQUICK";
 
     #[test]
-    fn encrypt_test_full_grid() {
-        let mut cipher = Grille::default();
-        cipher._randomize_seeded(SEED);
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+    fn encrypt_decrypt_test() {
+        let cipher = Grille::default();
+        let ptext = cipher.encrypt(PLAINTEXT).unwrap();
+        assert_eq!(&cipher.decrypt(&ptext).unwrap()[0..8], PLAINTEXT);
     }
 
     #[test]
-    fn decrypt_test_full_grid() {
-        let mut cipher = Grille::default();
-        cipher._randomize_seeded(SEED);
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
-    }
-
-    #[test]
-    fn encrypt_test_full_grid_no_nulls() {
+    fn encrypt_test_full_no_nulls() {
         let mut cipher = Grille::default();
         cipher.use_nulls = false;
-        cipher._randomize_seeded(SEED);
-        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_NO_NULLS);
-    }
-
-    #[test]
-    fn decrypt_test_full_grid_no_nulls() {
-        let mut cipher = Grille::default();
-        cipher.use_nulls = false;
-        cipher._randomize_seeded(SEED);
-        assert_eq!(cipher.decrypt(CIPHERTEXT_NO_NULLS).unwrap(), PLAINTEXT);
+        let ptext = cipher.encrypt(PLAINTEXT).unwrap();
+        assert_eq!(&cipher.decrypt(&ptext).unwrap(), PLAINTEXT);
     }
 }

@@ -132,6 +132,10 @@ impl TurningGrille {
     pub fn subgrille_size(&self) -> usize {
         self.grille_size() / 4
     }
+
+    pub fn assign_null_alphabet(&mut self, alphabet: &str) {
+        self.null_alphabet = VecString::unique_from(alphabet)
+    }
 }
 
 impl Cipher for TurningGrille {

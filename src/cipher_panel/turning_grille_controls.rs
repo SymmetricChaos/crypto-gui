@@ -96,7 +96,9 @@ impl CipherFrame for TurningGrilleFrame {
         }
 
         ui.label("Letters to Use as Nulls");
-        control_string(ui, &mut self.null_alphabet_string);
+        if control_string(ui, &mut self.null_alphabet_string).changed() {
+            self.cipher.assign_null_alphabet(&self.null_alphabet_string);
+        };
     }
 
     fn cipher(&self) -> &dyn Cipher {
