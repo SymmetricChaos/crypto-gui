@@ -44,6 +44,8 @@ impl CipherFrame for ColumnarFrame {
                 .assign_key(&self.key_string, &self.alphabet_string)
         };
 
+        ui.add_space(8.0);
+
         ui.label("Example Text");
         control_string(ui, &mut self.example);
 
@@ -58,7 +60,9 @@ impl CipherFrame for ColumnarFrame {
 
         egui::Grid::new("columnar_grid")
             .num_columns(n_cols)
-            .max_col_width(5.0)
+            .min_col_width(1.0)
+            .max_col_width(1.0)
+            .striped(true)
             .show(ui, |ui| {
                 for row in 0..n_rows {
                     for c in g.get_row(row) {
