@@ -60,10 +60,14 @@ impl CipherFrame for ColumnarFrame {
 
         egui::Grid::new("columnar_grid")
             .num_columns(n_cols)
-            .min_col_width(1.0)
-            .max_col_width(1.0)
+            .min_col_width(5.0)
+            .max_col_width(5.0)
             .striped(true)
             .show(ui, |ui| {
+                for digit in self.cipher.key.iter() {
+                    ui.label(mono(digit).underline());
+                }
+                ui.end_row();
                 for row in 0..n_rows {
                     for c in g.get_row(row) {
                         ui.label(mono(c));

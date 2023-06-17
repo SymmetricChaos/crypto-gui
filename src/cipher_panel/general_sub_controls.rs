@@ -16,7 +16,7 @@ impl Default for GeneralSubstitutionFrame {
         Self {
             cipher: Default::default(),
             pt_alphabet_string: String::from(Alphabet::BasicLatin),
-            ct_alphabet_string: String::from("ZYXWVUTSRQPONMLKJIHGFEDCBA"),
+            ct_alphabet_string: String::from("BANYEMSWCUQPRKOVTIDHJXLZFG"),
         }
     }
 }
@@ -37,6 +37,14 @@ impl CipherFrame for GeneralSubstitutionFrame {
             self.cipher.assign_ct_alphabet(&self.ct_alphabet_string);
         }
         ui.add_space(16.0);
+
+
+        if ui.button("Atbash").clicked() {
+            self.pt_alphabet_string = String::from(Alphabet::BasicLatin);
+            self.ct_alphabet_string = String::from("ZYXWVUTSRQPONMLKJIHGFEDCBA");
+            self.cipher.assign_pt_alphabet(&self.pt_alphabet_string);
+            self.cipher.assign_ct_alphabet(&self.ct_alphabet_string);
+        }
     }
 
     fn cipher(&self) -> &dyn Cipher {
