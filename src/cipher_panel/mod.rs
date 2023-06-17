@@ -24,6 +24,7 @@ pub mod _generic_components;
 pub mod adfgvx_controls;
 pub mod affine_controls;
 pub mod alberti_controls;
+pub mod amsco_controls;
 pub mod b64_controls;
 pub mod batco_controls;
 pub mod bazeries_controls;
@@ -48,8 +49,6 @@ pub mod plugboard_controls;
 pub mod polybius_cube_controls;
 pub mod polybius_square_controls;
 pub mod porta_controls;
-// pub mod purple_controls;
-pub mod amsco_controls;
 pub mod quagmire_controls;
 pub mod rail_fence_controls;
 pub mod rs44_controls;
@@ -60,6 +59,7 @@ pub mod trifid_controls;
 pub mod turning_grille_controls;
 pub mod two_square_controls;
 pub mod vigenere_controls;
+// pub mod purple_controls;
 
 pub trait CipherFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
@@ -94,29 +94,29 @@ fn combox_box(
 #[derive(Default)]
 pub struct CipherInterface {
     // Simple Substitution
-    caesar: CaesarFrame,
     affine: AffineFrame,
+    caesar: CaesarFrame,
     decoder_ring: DecoderRingFrame,
     gen_sub: GeneralSubstitutionFrame,
     plugboard: PlugboardFrame,
 
     // Electromechanical
-    m209: M209Frame,
     enigma: EnigmaM3Frame,
-    sigaba: SigabaFrame,
     hebern: HebernFrame,
+    m209: M209Frame,
+    sigaba: SigabaFrame,
     // purple: Purple,
 
     // Polyalphabetic
-    vigenere: VigenereFrame,
-    beaufort: BeaufortFrame,
     alberti: AlbertiFrame,
-    m94: M94Frame,
     bazeries: BazeriesFrame,
-    porta: PortaFrame,
-    quagmire: QuagmireFrame,
+    beaufort: BeaufortFrame,
     chaocipher: ChaocipherFrame,
     hutton: HuttonFrame,
+    m94: M94Frame,
+    porta: PortaFrame,
+    quagmire: QuagmireFrame,
+    vigenere: VigenereFrame,
 
     // Playfair Based
     playfair: PlayfairFrame,
@@ -133,16 +133,16 @@ pub struct CipherInterface {
     turning_grille: TurningGrilleFrame,
 
     // Polybius Based
-    polybius: PolybiusSquareFrame,
-    polybius_cube: PolybiusCubeFrame,
     adfgvx: AdfgvxFrame,
     b64: B64Frame,
     bifid: BifidFrame,
+    polybius: PolybiusSquareFrame,
+    polybius_cube: PolybiusCubeFrame,
     trifid: TrifidFrame,
 
     // Tactical
-    checkerboard: StraddlingCheckerboardFrame,
     batco: BatcoFrame,
+    checkerboard: StraddlingCheckerboardFrame,
     dryad: DryadFrame,
     rs44: Rs44Frame,
 }
@@ -151,11 +151,11 @@ impl CipherInterface {
     pub fn combo_boxes(&mut self, ui: &mut Ui, active_cipher: &mut Option<CipherId>) {
         combox_box(
             &[
+                CipherId::Affine,
                 CipherId::Caesar,
                 CipherId::Decoder,
-                CipherId::Affine,
-                CipherId::Substitution,
                 CipherId::Plugboard,
+                CipherId::Substitution,
             ],
             "Substitution",
             active_cipher,
@@ -164,15 +164,15 @@ impl CipherInterface {
 
         combox_box(
             &[
-                CipherId::Vigenere,
-                CipherId::Beaufort,
-                CipherId::M94,
                 CipherId::Alberti,
                 CipherId::Bazeries,
-                CipherId::Porta,
-                CipherId::Quagmire,
+                CipherId::Beaufort,
                 CipherId::Chaocipher,
                 CipherId::Hutton,
+                CipherId::M94,
+                CipherId::Porta,
+                CipherId::Quagmire,
+                CipherId::Vigenere,
             ],
             "Polyalphabetic",
             active_cipher,
@@ -181,10 +181,10 @@ impl CipherInterface {
 
         combox_box(
             &[
-                CipherId::M209,
                 CipherId::Enigma,
-                CipherId::Sigaba,
                 CipherId::Hebern,
+                CipherId::M209,
+                CipherId::Sigaba,
                 // CipherId::Purple,
             ],
             "Cipher Machine",
@@ -208,10 +208,10 @@ impl CipherInterface {
 
         combox_box(
             &[
+                CipherId::FourSquare,
                 CipherId::Playfair,
                 CipherId::Slidefair,
                 CipherId::TwoSquare,
-                CipherId::FourSquare,
             ],
             "Playfair",
             active_cipher,
@@ -227,13 +227,13 @@ impl CipherInterface {
 
         combox_box(
             &[
-                CipherId::Polybius,
-                CipherId::PolybiusCube,
                 CipherId::Adfgvx,
                 CipherId::B64,
                 CipherId::Bifid,
-                CipherId::Trifid,
                 CipherId::Checkerboard,
+                CipherId::Polybius,
+                CipherId::PolybiusCube,
+                CipherId::Trifid,
             ],
             "Polybius",
             active_cipher,

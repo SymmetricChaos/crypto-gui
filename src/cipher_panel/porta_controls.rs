@@ -1,6 +1,9 @@
 use super::CipherFrame;
 use crate::ui_elements::{control_string, error_text, mono, randomize_reset};
-use ciphers::{polyalphabetic::Porta, Cipher};
+use ciphers::{
+    polyalphabetic::{porta::PORTA_TABLEAUX, Porta},
+    Cipher,
+};
 use egui::Ui;
 use rand::{thread_rng, Rng};
 use utils::{functions::random_sample_replace, preset_alphabet::Alphabet};
@@ -28,9 +31,19 @@ impl CipherFrame for PortaFrame {
         ui.add_space(16.0);
 
         ui.label("Tableaux");
-        for row in self.cipher.tableaux() {
-            ui.label(mono(row));
-        }
+        egui::Grid::new("porta_tableaux")
+            .num_columns(26)
+            .min_col_width(1.0)
+            .max_col_width(1.0)
+            .striped(true)
+            .show(ui, |ui| {
+                for row in PORTA_TABLEAUX.iter() {
+                    for c in row.chars() {
+                        ui.label(mono(c));
+                    }
+                    ui.end_row();
+                }
+            });
         ui.add_space(16.0);
 
         // This is possible but not yet implemented

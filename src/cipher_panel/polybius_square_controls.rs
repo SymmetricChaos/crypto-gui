@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, mono};
+use crate::ui_elements::{control_string, mono, randomize_reset};
 use ciphers::{polybius::PolybiusSquare, Cipher};
 use eframe::egui::Ui;
 use rand::thread_rng;
@@ -15,7 +15,7 @@ pub struct PolybiusSquareFrame {
 
 impl CipherFrame for PolybiusSquareFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        // randomize_reset(ui, self);
+        randomize_reset(ui, self);
         ui.add_space(16.0);
 
         ui.label("Common Alphabets");
