@@ -20,11 +20,9 @@ pub enum Corner {
 
 pub struct Route {
     pub alphabet: PresetAlphabet,
-    dimensions: (usize,usize), // sliders to control this should have a minimum of 4 and a maximum of something
     pub route_type: RouteType,
     pub start: Corner,
     key: Vec<usize>,
-    key_word: String,
 }
 
 impl Default for Route {

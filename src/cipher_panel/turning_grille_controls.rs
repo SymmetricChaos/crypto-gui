@@ -1,12 +1,10 @@
+use super::CipherFrame;
+use crate::ui_elements::{control_string, error_text, mono, randomize_reset};
 use ciphers::{transposition::TurningGrille, Cipher};
-use egui::{TextStyle, Ui};
+use egui::Ui;
 use itertools::Itertools;
 use rand::{seq::SliceRandom, thread_rng};
 use utils::preset_alphabet::Alphabet;
-
-use crate::ui_elements::{control_string, error_text, randomize_reset};
-
-use super::CipherFrame;
 
 pub struct TurningGrilleFrame {
     cipher: TurningGrille,
@@ -29,12 +27,12 @@ impl Default for TurningGrilleFrame {
     }
 }
 
-fn cell_button(grille: &mut TurningGrille, x: usize, y: usize, ui: &mut eframe::egui::Ui) {
-    let cell = grille.grid[(x, y)];
-    if ui.button(cell.to_char().to_string()).clicked() {
-        ()
-    };
-}
+// fn cell_button(grille: &mut TurningGrille, x: usize, y: usize, ui: &mut eframe::egui::Ui) {
+//     let cell = grille.grid[(x, y)];
+//     if ui.button(cell.to_char().to_string()).clicked() {
+//         ()
+//     };
+// }
 
 impl CipherFrame for TurningGrilleFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
@@ -47,12 +45,12 @@ impl CipherFrame for TurningGrilleFrame {
             self.cipher.subgrille_size() - 1
         ));
 
-        for (i, name) in ["Upper Left", "Lower Left", "Lower Right", "Upper Right"]
+        for (i, name) in ["Upper Left ", "Lower Left ", "Lower Right", "Upper Right"]
             .into_iter()
             .enumerate()
         {
             ui.horizontal(|ui| {
-                ui.label(name);
+                ui.label(mono(name));
                 if control_string(ui, &mut self.key_strings[i]).changed() {
                     match self.cipher.build_key(&self.key_strings) {
                         Ok(_) => (),
@@ -70,16 +68,22 @@ impl CipherFrame for TurningGrilleFrame {
             });
         }
 
-        ui.spacing_mut().item_spacing = (2.0, 2.0).into();
-        ui.style_mut().override_text_style = Some(TextStyle::Monospace);
-        for x in 0..self.cipher.grid.num_rows() {
-            ui.horizontal(|ui| {
-                for y in 0..self.cipher.grid.num_cols() {
-                    cell_button(&mut self.cipher, x, y, ui);
+        egui::Grid::new("columnar_grid")
+            .num_columns(self.cipher.grille_width())
+            .min_col_width(2.5)
+            .max_col_width(2.5)
+            .spacing(egui::Vec2::from((2.0, 2.0)))
+            .striped(true)
+            .show(ui, |ui| {
+                for row in 0..self.cipher.grille_width() {
+                    for c in self.cipher.grid.get_row(row) {
+                        ui.label(c.to_char().to_string());
+                    }
+                    ui.end_row();
                 }
             });
-        }
 
+        ui.add_space(8.0);
         ui.horizontal(|ui| {
             if ui.button("-").clicked() {
                 self.cipher.decrease_size()
@@ -90,11 +94,12 @@ impl CipherFrame for TurningGrilleFrame {
             };
         });
 
-        ui.add_space(16.0);
+        ui.add_space(8.0);
         if ui.button("rotate").clicked() {
             self.cipher.grid.rotate()
         }
 
+        ui.add_space(16.0);
         ui.label("Letters to Use as Nulls");
         if control_string(ui, &mut self.null_alphabet_string).changed() {
             self.cipher.assign_null_alphabet(&self.null_alphabet_string);
