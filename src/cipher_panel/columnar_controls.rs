@@ -65,7 +65,7 @@ impl CipherFrame for ColumnarFrame {
             .striped(true)
             .show(ui, |ui| {
                 for digit in self.cipher.key.iter() {
-                    ui.label(mono(digit).underline());
+                    ui.label(mono(digit).strong());
                 }
                 ui.end_row();
                 for row in 0..n_rows {
