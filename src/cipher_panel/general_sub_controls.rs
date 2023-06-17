@@ -13,11 +13,13 @@ pub struct GeneralSubstitutionFrame {
 
 impl Default for GeneralSubstitutionFrame {
     fn default() -> Self {
-        Self {
+        let mut frame = Self {
             cipher: Default::default(),
             pt_alphabet_string: String::from(Alphabet::BasicLatin),
             ct_alphabet_string: String::from("BANYEMSWCUQPRKOVTIDHJXLZFG"),
-        }
+        };
+        frame.cipher.assign_ct_alphabet(&frame.ct_alphabet_string);
+        frame
     }
 }
 
@@ -30,14 +32,13 @@ impl CipherFrame for GeneralSubstitutionFrame {
         if control_string(ui, &mut self.pt_alphabet_string).changed() {
             self.cipher.assign_pt_alphabet(&self.pt_alphabet_string);
         }
-        ui.add_space(16.0);
+        ui.add_space(8.0);
 
         ui.label("Ciphertext Alphabet");
         if control_string(ui, &mut self.ct_alphabet_string).changed() {
             self.cipher.assign_ct_alphabet(&self.ct_alphabet_string);
         }
         ui.add_space(16.0);
-
 
         if ui.button("Atbash").clicked() {
             self.pt_alphabet_string = String::from(Alphabet::BasicLatin);

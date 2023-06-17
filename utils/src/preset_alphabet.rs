@@ -21,8 +21,8 @@ impl Alphabet {
     // Pointer to a static string slice
     pub fn slice(&self) -> &'static str {
         match self {
-            Alphabet::BasicLatin => "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-            Alphabet::BasicLatinNoC => "ABCDEFGHIJLMNOPQRSTUVWXYZ",
+            Alphabet::BasicLatin =>    "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            Alphabet::BasicLatinNoC => "ABDEFGHIJKLMNOPQRSTUVWXYZ",
             Alphabet::BasicLatinNoJ => "ABCDEFGHIKLMNOPQRSTUVWXYZ",
             Alphabet::BasicLatinNoQ => "ABCDEFGHIJKLMNOPRSTUVWXYZ",
             Alphabet::BasicLatinWithDigits => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
