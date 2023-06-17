@@ -1,8 +1,10 @@
+use crate::ui_elements::mono;
+
 use super::CodeFrame;
-use codes::ecc::verhoeff::VerhoeffAlgorithm;
+use codes::ecc::damm::{Damm, DAMM_TABLE};
 
 pub struct DammFrame {
-    pub code: VerhoeffAlgorithm,
+    pub code: Damm,
     pub text: String,
 }
 
@@ -21,20 +23,31 @@ impl CodeFrame for DammFrame {
         ui.label("Check the validity of Damm codes. Put in codes separated by commas.");
         ui.text_edit_multiline(&mut self.text);
         if ui.button("Check").clicked() {
-            self.text = self.code.check_csv_verhoeff(&self.text);
+            self.text = self.code.check_csv_damm(&self.text);
         }
 
-        // egui::Grid::new("damm_grid")
-        //     .num_columns(10)
-        //     .spacing(Vec2::from((2.0, 2.0)))
-        //     .show(ui, |ui| {
-        //         for row in DAMM_TABLE.iter() {
-        //             for sym in row {
-        //                 ui.label(sym.to_string());
-        //             }
-        //             ui.end_row();
-        //         }
-        //     });
+        ui.label("The Cayley table chosen by Damm. Note that it forms a Latin square, no row or column includes any digit more than once.");
+        egui::Grid::new("damm_grid")
+            .num_columns(10)
+            .min_col_width(5.0)
+            .max_col_width(5.0)
+            .striped(true)
+            .show(ui, |ui| {
+                ui.label(" ");
+                for digit in 0..10 {
+                    ui.label(mono(digit).strong());
+                }
+                ui.end_row();
+                for (n, row) in DAMM_TABLE.iter().enumerate() {
+                    ui.label(mono(n).strong());
+                    for digit in row {
+                        ui.label(mono(digit));
+                    }
+                    ui.end_row();
+                }
+            });
+
+        ui.label("The algorithm starts with a check value of 0. Then for each digit in the number the current check digit is used to select a row and the digit is used to select a column. The resulting value becomes the new check digit. The final value is the check digit. When decoding the same process is used and if the final value is 0 the code is valid.\nBecause the principle diagonal is all zeroes a code may be prepended with any number of zeroes without changing its check digit.");
     }
 
     fn code(&self) -> &dyn codes::traits::Code {
