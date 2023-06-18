@@ -62,22 +62,32 @@ impl Playfair {
         &self,
         lpos: (usize, usize),
         rpos: (usize, usize),
-        shift: usize,
-        output: &mut String,
-    ) {
+        encrypt: bool,
+        // output: &mut String,
+    ) -> Result<(char, char), CipherError> {
         let size = self.grid_side_len;
-        // The pairs() function ensures l and r never match so that case is not handled
+        let shift = match encrypt {
+            true => size + 1,
+            false => size - 1,
+        };
+
         if lpos.0 == rpos.0 {
             let x = lpos.0;
-            output.push(self.position_to_char((x, (lpos.1 + shift) % size)));
-            output.push(self.position_to_char((x, (rpos.1 + shift) % size)));
+            Ok((
+                self.position_to_char((x, (lpos.1 + shift) % size)),
+                self.position_to_char((x, (rpos.1 + shift) % size)),
+            ))
         } else if lpos.1 == rpos.1 {
             let y = lpos.1;
-            output.push(self.position_to_char(((lpos.0 + shift) % size, y)));
-            output.push(self.position_to_char(((rpos.0 + shift) % size, y)));
+            Ok((
+                self.position_to_char(((lpos.0 + shift) % size, y)),
+                self.position_to_char(((rpos.0 + shift) % size, y)),
+            ))
         } else {
-            output.push(self.position_to_char((lpos.0, rpos.1)));
-            output.push(self.position_to_char((rpos.0, lpos.1)));
+            Ok((
+                self.position_to_char((lpos.0, rpos.1)),
+                self.position_to_char((rpos.0, lpos.1)),
+            ))
         }
     }
 
@@ -112,11 +122,19 @@ impl Cipher for Playfair {
         self.validate_settings()?;
         let pairs = self.pairs(text);
         let mut out = String::with_capacity(text.chars().count());
-        let shift = self.grid_side_len + 1;
+
         for (l, r) in pairs {
+            if l == r {
+                return Err(CipherError::Input(format!(
+                    "found repeated character {}, a spacer should be inserted",
+                    l
+                )));
+            }
             let lpos = self.char_to_position(l)?;
             let rpos = self.char_to_position(r)?;
-            self.playfair_shift(lpos, rpos, shift, &mut out);
+            let pair = self.playfair_shift(lpos, rpos, true)?;
+            out.push(pair.0);
+            out.push(pair.1);
         }
         Ok(out)
     }
@@ -125,11 +143,19 @@ impl Cipher for Playfair {
         self.validate_settings()?;
         let pairs = self.pairs(text);
         let mut out = String::with_capacity(text.chars().count());
-        let shift = self.grid_side_len - 1;
+
         for (l, r) in pairs {
+            if l == r {
+                return Err(CipherError::Input(format!(
+                    "found repeated character {}, a spacer should be inserted",
+                    l
+                )));
+            }
             let lpos = self.char_to_position(l)?;
             let rpos = self.char_to_position(r)?;
-            self.playfair_shift(lpos, rpos, shift, &mut out);
+            let pair = self.playfair_shift(lpos, rpos, false)?;
+            out.push(pair.0);
+            out.push(pair.1);
         }
         Ok(out)
     }
