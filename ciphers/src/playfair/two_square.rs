@@ -8,6 +8,7 @@ pub struct TwoSquare {
     square1: VecString,
     square2: VecString,
     grid_side_len: usize,
+    spacer: char,
 }
 
 impl Default for TwoSquare {
@@ -17,6 +18,7 @@ impl Default for TwoSquare {
             square1: VecString::from(Alphabet::BasicLatinNoQ),
             square2: VecString::from(Alphabet::BasicLatinNoQ),
             grid_side_len: 5,
+            spacer: 'X',
         }
     }
 }
@@ -33,11 +35,24 @@ impl TwoSquare {
         self.grid_side_len
     }
 
+    pub fn square1(&self) -> &VecString {
+        &self.square1
+    }
+
+    pub fn square2(&self) -> &VecString {
+        &self.square2
+    }
+
     fn pairs(&self, text: &str) -> Vec<(char, char)> {
-        text.chars()
-            .collect_vec()
+        let mut symbols: Vec<char> = text.chars().collect();
+        if symbols.len() % 2 != 0 {
+            symbols.push(self.spacer)
+        };
+        symbols
+            .into_iter()
             .chunks(2)
-            .map(|x| (x[0], x[1]))
+            .into_iter()
+            .map(|c| c.collect_tuple().unwrap())
             .collect_vec()
     }
 
@@ -59,31 +74,28 @@ impl TwoSquare {
     }
 
     // Shift characters according to playfairs method
-    fn encrypt_pair(&self, lpos: (usize, usize), rpos: (usize, usize), output: &mut String) {
+    fn playfair_shift(
+        &self,
+        lpos: (usize, usize),
+        rpos: (usize, usize),
+        encrypt: bool,
+    ) -> (char, char) {
         let size = self.grid_side_len;
-        let shift = self.grid_side_len + 1;
-        // The pairs() function ensures l and r never match so that case is not handled
-        if lpos.0 == rpos.0 {
-            let x = lpos.0;
-            output.push(self.position_to_char((x, (lpos.1 + shift) % size), &self.square1));
-            output.push(self.position_to_char((x, (rpos.1 + shift) % size), &self.square2));
-        } else {
-            output.push(self.position_to_char((lpos.0, rpos.1), &self.square1));
-            output.push(self.position_to_char((rpos.0, lpos.1), &self.square2));
-        }
-    }
+        let shift = match encrypt {
+            true => size + 1,
+            false => size - 1,
+        };
 
-    fn decrypt_pair(&self, lpos: (usize, usize), rpos: (usize, usize), output: &mut String) {
-        let size = self.grid_side_len;
-        let shift = self.grid_side_len - 1;
-        // The pairs() function ensures l and r never match so that case is not handled
         if lpos.0 == rpos.0 {
-            let x = lpos.0;
-            output.push(self.position_to_char((x, (lpos.1 + shift) % size), &self.square1));
-            output.push(self.position_to_char((x, (rpos.1 + shift) % size), &self.square2));
+            (
+                self.position_to_char((lpos.0, (lpos.1 + shift) % size), &self.square1),
+                self.position_to_char((lpos.0, (rpos.1 + shift) % size), &self.square2),
+            )
         } else {
-            output.push(self.position_to_char((lpos.0, rpos.1), &self.square1));
-            output.push(self.position_to_char((rpos.0, lpos.1), &self.square2));
+            (
+                self.position_to_char((lpos.0, rpos.1), &self.square1),
+                self.position_to_char((rpos.0, lpos.1), &self.square2),
+            )
         }
     }
 
@@ -127,7 +139,9 @@ impl Cipher for TwoSquare {
         for (l, r) in self.pairs(text) {
             let lpos = self.char_to_position(l, &self.square1)?;
             let rpos = self.char_to_position(r, &self.square2)?;
-            self.encrypt_pair(lpos, rpos, &mut out);
+            let pair = self.playfair_shift(lpos, rpos, true);
+            out.push(pair.0);
+            out.push(pair.1);
         }
 
         Ok(out)
@@ -140,7 +154,9 @@ impl Cipher for TwoSquare {
         for (l, r) in self.pairs(text) {
             let lpos = self.char_to_position(l, &self.square1)?;
             let rpos = self.char_to_position(r, &self.square2)?;
-            self.decrypt_pair(lpos, rpos, &mut out);
+            let pair = self.playfair_shift(lpos, rpos, false);
+            out.push(pair.0);
+            out.push(pair.1);
         }
 
         Ok(out)

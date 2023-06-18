@@ -1,7 +1,7 @@
 use super::CipherFrame;
 use crate::ui_elements::{control_string, mono, randomize_reset};
 use ciphers::{playfair::Playfair, Cipher};
-use egui::{TextEdit, TextStyle, Ui};
+use egui::Ui;
 use rand::{rngs::StdRng, SeedableRng};
 use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
 
@@ -65,14 +65,14 @@ impl CipherFrame for PlayfairFrame {
         }
         ui.add_space(16.0);
 
-        ui.label("Spacer Character\nInserted as padding where needed");
-        ui.add(
-            TextEdit::singleline(&mut self.cipher.control_spacer().to_string())
-                .font(TextStyle::Monospace)
-                .desired_width(15.0),
-        );
-
-        ui.add_space(16.0);
+        // ui.menu_button("Spacer Character", |ui| {
+        //     for c in self.alphabet_string.chars() {
+        //         if ui.button(c.to_string()).clicked() {
+        //             self.cipher.spacer = c
+        //         }
+        //     }
+        // });
+        // ui.label(self.cipher.spacer.to_string());
 
         ui.horizontal(|ui| {
             ui.label("Grid");

@@ -1,11 +1,12 @@
 use crate::{errors::CipherError, traits::Cipher};
+use itertools::Itertools;
 use num::integer::Roots;
 use std::fmt;
 use utils::{functions::keyed_alphabet, math_functions::is_square, preset_alphabet::Alphabet};
 
 pub struct Playfair {
     pub square: String,
-    spacer: char,
+    pub spacer: char,
     grid_side_len: usize,
 }
 
@@ -15,32 +16,23 @@ impl Playfair {
         self.square = keyed_alphabet(key_word, alphabet);
     }
 
-    pub fn control_spacer(&mut self) -> &mut char {
-        &mut self.spacer
-    }
-
     pub fn grid_side_len(&self) -> usize {
         self.grid_side_len
     }
 
     fn pairs(&self, text: &str) -> Vec<(char, char)> {
-        let mut symbols: Vec<char> = text.chars().rev().collect();
-        let mut out = Vec::with_capacity(text.len() / 2);
-        while symbols.len() >= 2 {
-            //unwrap justified by condition above
-            let l = symbols.pop().unwrap();
-            let r = symbols.pop().unwrap();
-            if l == r {
-                symbols.push(r);
-                out.push((l, self.spacer));
-            } else {
-                out.push((l, r));
-            }
-        }
-        if symbols.len() != 0 {
-            out.push((symbols.pop().unwrap(), self.spacer))
-        }
-        out
+        // The only automatic spacer symbol is the make the total length even
+        // pairs with matching letters will be caught later
+        let mut symbols: Vec<char> = text.chars().collect();
+        if symbols.len() % 2 != 0 {
+            symbols.push(self.spacer)
+        };
+        symbols
+            .into_iter()
+            .chunks(2)
+            .into_iter()
+            .map(|c| c.collect_tuple().unwrap())
+            .collect_vec()
     }
 
     fn char_to_position(&self, symbol: char) -> Result<(usize, usize), CipherError> {
@@ -64,30 +56,32 @@ impl Playfair {
         rpos: (usize, usize),
         encrypt: bool,
         // output: &mut String,
-    ) -> Result<(char, char), CipherError> {
+    ) -> (char, char) {
         let size = self.grid_side_len;
         let shift = match encrypt {
             true => size + 1,
             false => size - 1,
         };
 
+        // identical characters are caught before this function is called so it is guaranteed that lpos != rpos
+
         if lpos.0 == rpos.0 {
             let x = lpos.0;
-            Ok((
+            (
                 self.position_to_char((x, (lpos.1 + shift) % size)),
                 self.position_to_char((x, (rpos.1 + shift) % size)),
-            ))
+            )
         } else if lpos.1 == rpos.1 {
             let y = lpos.1;
-            Ok((
+            (
                 self.position_to_char(((lpos.0 + shift) % size, y)),
                 self.position_to_char(((rpos.0 + shift) % size, y)),
-            ))
+            )
         } else {
-            Ok((
+            (
                 self.position_to_char((lpos.0, rpos.1)),
                 self.position_to_char((rpos.0, lpos.1)),
-            ))
+            )
         }
     }
 
@@ -123,16 +117,15 @@ impl Cipher for Playfair {
         let pairs = self.pairs(text);
         let mut out = String::with_capacity(text.chars().count());
 
-        for (l, r) in pairs {
+        for (n, (l, r)) in pairs.into_iter().enumerate() {
             if l == r {
                 return Err(CipherError::Input(format!(
-                    "found repeated character {}, a spacer should be inserted",
-                    l
+                    "found repeated character {l} at pair {n}, a spacer should be inserted",
                 )));
             }
             let lpos = self.char_to_position(l)?;
             let rpos = self.char_to_position(r)?;
-            let pair = self.playfair_shift(lpos, rpos, true)?;
+            let pair = self.playfair_shift(lpos, rpos, true);
             out.push(pair.0);
             out.push(pair.1);
         }
@@ -153,7 +146,7 @@ impl Cipher for Playfair {
             }
             let lpos = self.char_to_position(l)?;
             let rpos = self.char_to_position(r)?;
-            let pair = self.playfair_shift(lpos, rpos, false)?;
+            let pair = self.playfair_shift(lpos, rpos, false);
             out.push(pair.0);
             out.push(pair.1);
         }

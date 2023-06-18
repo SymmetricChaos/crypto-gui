@@ -8,6 +8,7 @@ pub struct FourSquare {
     square1: VecString,
     square2: VecString,
     grid_side_len: usize,
+    spacer: char,
 }
 
 impl Default for FourSquare {
@@ -17,6 +18,7 @@ impl Default for FourSquare {
             square1: VecString::from(Alphabet::BasicLatinNoQ),
             square2: VecString::from(Alphabet::BasicLatinNoQ),
             grid_side_len: 5,
+            spacer: 'X',
         }
     }
 }
@@ -34,10 +36,15 @@ impl FourSquare {
     }
 
     fn pairs(&self, text: &str) -> Vec<(char, char)> {
-        text.chars()
-            .collect_vec()
+        let mut symbols: Vec<char> = text.chars().collect();
+        if symbols.len() % 2 != 0 {
+            symbols.push(self.spacer)
+        };
+        symbols
+            .into_iter()
             .chunks(2)
-            .map(|x| (x[0], x[1]))
+            .into_iter()
+            .map(|c| c.collect_tuple().unwrap())
             .collect_vec()
     }
 
