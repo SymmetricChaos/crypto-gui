@@ -6,8 +6,8 @@ use utils::{preset_alphabet::Alphabet, vecstring::VecString};
 
 pub struct Slidefair {
     alphabet: VecString,
-    key: Vec<usize>,
     spacer: char,
+    key: Vec<usize>,
 }
 
 impl Default for Slidefair {

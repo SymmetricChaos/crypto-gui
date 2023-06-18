@@ -136,7 +136,6 @@ impl Cipher for FourSquare {
 mod four_square_tests {
     use super::*;
 
-    // Note the X used as padding
     const PLAINTEXT: &'static str = "HELPMEOBIWANKENOBI";
     const CIPHERTEXT: &'static str = "FYGMKYHOBXMFKKKIMD";
 

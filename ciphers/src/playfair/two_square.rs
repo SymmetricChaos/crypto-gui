@@ -7,7 +7,6 @@ pub struct TwoSquare {
     pub alphabet: VecString,
     square1: VecString,
     square2: VecString,
-
     grid_side_len: usize,
 }
 
@@ -146,13 +145,6 @@ impl Cipher for TwoSquare {
 
         Ok(out)
     }
-
-    // fn randomize(&mut self) {
-    //     self.key_word1 = shuffled_str(&self.alphabet.to_string(), &mut get_global_rng());
-    //     self.key_word2 = shuffled_str(&self.alphabet.to_string(), &mut get_global_rng());
-    //     self.set_key1();
-    //     self.set_key2();
-    // }
 }
 
 #[cfg(test)]

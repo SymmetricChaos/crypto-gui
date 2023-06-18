@@ -15,6 +15,7 @@ pub enum Bit {
 }
 
 impl Bit {
+    // Invert the value of the Bit.
     pub fn flip(&mut self) {
         match self {
             Bit::Zero => *self = Bit::One,
@@ -22,6 +23,7 @@ impl Bit {
         }
     }
 
+    // Return the inverse of the Bit.
     pub const fn flipped(&self) -> Bit {
         match self {
             Bit::Zero => Bit::One,
@@ -96,6 +98,18 @@ impl Mul for Bit {
 
     fn mul(self, rhs: Bit) -> Self::Output {
         if self == Bit::Zero || rhs == Bit::Zero {
+            Bit::Zero
+        } else {
+            Bit::One
+        }
+    }
+}
+
+impl Mul<&Bit> for Bit {
+    type Output = Self;
+
+    fn mul(self, rhs: &Bit) -> Self::Output {
+        if self == Bit::Zero || *rhs == Bit::Zero {
             Bit::Zero
         } else {
             Bit::One
@@ -374,8 +388,3 @@ impl From<bool> for Bit {
         }
     }
 }
-
-// #[cfg(test)]
-// mod bit_tests {
-//     use super::*;
-// }
