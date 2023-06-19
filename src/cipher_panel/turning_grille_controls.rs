@@ -72,7 +72,7 @@ impl CipherFrame for TurningGrilleFrame {
             .num_columns(self.cipher.grille_width())
             .min_col_width(2.5)
             .max_col_width(2.5)
-            .spacing(egui::Vec2::from((2.0, 2.0)))
+            .spacing(egui::Vec2::from((3.0, 2.0)))
             .striped(true)
             .show(ui, |ui| {
                 for row in 0..self.cipher.grille_width() {
@@ -83,7 +83,6 @@ impl CipherFrame for TurningGrilleFrame {
                 }
             });
 
-        ui.add_space(8.0);
         ui.horizontal(|ui| {
             if ui.button("-").clicked() {
                 self.cipher.decrease_size()
@@ -92,12 +91,15 @@ impl CipherFrame for TurningGrilleFrame {
             if ui.button("+").clicked() {
                 self.cipher.increase_size()
             };
+            ui.add_space(6.0);
+            if ui.button("rotate").clicked() {
+                self.cipher.grid.rotate()
+            };
+            ui.add_space(6.0);
+            if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
+                ui.output_mut(|o| o.copied_text = self.cipher.grid.to_string())
+            }
         });
-
-        ui.add_space(8.0);
-        if ui.button("rotate").clicked() {
-            self.cipher.grid.rotate()
-        }
 
         ui.add_space(16.0);
         ui.label("Letters to Use as Nulls");

@@ -10,6 +10,7 @@ pub struct FourSquareFrame {
     alphabet_string: String,
     key_word_1: String,
     key_word_2: String,
+    spacer_string: String,
 }
 
 impl Default for FourSquareFrame {
@@ -19,6 +20,7 @@ impl Default for FourSquareFrame {
             alphabet_string: Alphabet::BasicLatinNoQ.into(),
             key_word_1: Default::default(),
             key_word_2: Default::default(),
+            spacer_string: "X".into(),
         }
     }
 }
@@ -57,6 +59,17 @@ impl CipherFrame for FourSquareFrame {
         if control_string(ui, &mut self.alphabet_string).changed() {
             self.cipher
                 .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
+        }
+        ui.add_space(16.0);
+
+        ui.label("Spacer Character\nInserted at end as padding if needed");
+        if control_string(ui, &mut self.spacer_string).changed() {
+            if self.spacer_string.is_empty() {
+                ui.label("defaulting to X");
+            } else {
+                self.spacer_string = self.spacer_string.chars().next().unwrap().to_string()
+            }
+            self.cipher.spacer = self.spacer_string.chars().next().unwrap_or('X');
         }
         ui.add_space(16.0);
 

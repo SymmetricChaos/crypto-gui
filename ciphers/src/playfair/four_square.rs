@@ -8,7 +8,7 @@ pub struct FourSquare {
     square1: VecString,
     square2: VecString,
     grid_side_len: usize,
-    spacer: char,
+    pub spacer: char,
 }
 
 impl Default for FourSquare {

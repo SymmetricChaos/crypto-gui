@@ -9,6 +9,7 @@ pub struct PlayfairFrame {
     cipher: Playfair,
     key_string: String,
     alphabet_string: String,
+    spacer_string: String,
 }
 
 impl Default for PlayfairFrame {
@@ -17,6 +18,7 @@ impl Default for PlayfairFrame {
             cipher: Default::default(),
             key_string: Default::default(),
             alphabet_string: Alphabet::BasicLatinNoQ.into(),
+            spacer_string: "X".into(),
         }
     }
 }
@@ -58,21 +60,23 @@ impl CipherFrame for PlayfairFrame {
         }
         ui.add_space(16.0);
 
+        ui.label("Spacer Character\nInserted at end as padding if needed");
+        if control_string(ui, &mut self.spacer_string).changed() {
+            if self.spacer_string.is_empty() {
+                ui.label("defaulting to X");
+            } else {
+                self.spacer_string = self.spacer_string.chars().next().unwrap().to_string()
+            }
+            self.cipher.spacer = self.spacer_string.chars().next().unwrap_or('X');
+        }
+        ui.add_space(16.0);
+
         ui.label("Key Word");
         if control_string(ui, &mut self.key_string).changed() {
             self.cipher
                 .assign_key(&self.key_string, &self.alphabet_string)
         }
         ui.add_space(16.0);
-
-        // ui.menu_button("Spacer Character", |ui| {
-        //     for c in self.alphabet_string.chars() {
-        //         if ui.button(c.to_string()).clicked() {
-        //             self.cipher.spacer = c
-        //         }
-        //     }
-        // });
-        // ui.label(self.cipher.spacer.to_string());
 
         ui.horizontal(|ui| {
             ui.label("Grid");
