@@ -35,7 +35,7 @@ impl Playfair {
             .collect_vec()
     }
 
-    fn char_to_position(&self, symbol: char) -> Result<(usize, usize), CipherError> {
+    pub fn char_to_position(&self, symbol: char) -> Result<(usize, usize), CipherError> {
         let num = match self.square.chars().position(|x| x == symbol) {
             Some(n) => n,
             None => return Err(CipherError::invalid_input_char(symbol)),
@@ -44,18 +44,17 @@ impl Playfair {
     }
 
     // The inputs to this come only from internal functions that will never give invalid positions
-    fn position_to_char(&self, position: (usize, usize)) -> char {
+    pub fn position_to_char(&self, position: (usize, usize)) -> char {
         let num = position.0 * self.grid_side_len + position.1;
         self.square.chars().nth(num).unwrap()
     }
 
     // Shift characters according to playfairs method
-    fn playfair_shift(
+    pub fn playfair_shift(
         &self,
         lpos: (usize, usize),
         rpos: (usize, usize),
         encrypt: bool,
-        // output: &mut String,
     ) -> (char, char) {
         let size = self.grid_side_len;
         let shift = match encrypt {
@@ -65,12 +64,14 @@ impl Playfair {
 
         // identical characters are caught before this function is called so it is guaranteed that lpos != rpos
 
+        // Same row
         if lpos.0 == rpos.0 {
             let x = lpos.0;
             (
                 self.position_to_char((x, (lpos.1 + shift) % size)),
                 self.position_to_char((x, (rpos.1 + shift) % size)),
             )
+        // Same column
         } else if lpos.1 == rpos.1 {
             let y = lpos.1;
             (
@@ -85,7 +86,7 @@ impl Playfair {
         }
     }
 
-    fn validate_settings(&self) -> Result<(), CipherError> {
+    pub fn validate_settings(&self) -> Result<(), CipherError> {
         if !is_square(self.square.chars().count()) {
             return Err(CipherError::alphabet(
                 "alphabet must have a square number of characters",
@@ -174,6 +175,15 @@ mod playfair_tests {
     // Note Q replaced by K and the X used as padding
     const PLAINTEXT: &'static str = "THEKUICKBROWNFOXJUMPSOVERTHELAZYDOGX";
     const CIPHERTEXT: &'static str = "WGVOEGAOAWNXKHXEGLNKCMULTWIZVDLWCPIT";
+
+    #[test]
+    fn test_pair_types() {
+        let cipher = Playfair::default();
+        assert_eq!(cipher.encrypt("AB").unwrap(), "BC");
+        assert_eq!(cipher.encrypt("DE").unwrap(), "EA");
+        assert_eq!(cipher.encrypt("BG").unwrap(), "GL");
+        assert_eq!(cipher.encrypt("RW").unwrap(), "WB");
+    }
 
     #[test]
     fn encrypt_test() {

@@ -15,7 +15,8 @@ use self::{
     polybius_cube_controls::PolybiusCubeFrame, polybius_square_controls::PolybiusSquareFrame,
     porta_controls::PortaFrame, quagmire_controls::QuagmireFrame,
     rail_fence_controls::RailFenceFrame, rs44_controls::Rs44Frame, scytale_controls::ScytaleFrame,
-    sigaba_controls::SigabaFrame, slidefair_controls::SlidefairFrame, trifid_controls::TrifidFrame,
+    seriated_playfair::SeriatedPlayfairFrame, sigaba_controls::SigabaFrame,
+    slidefair_controls::SlidefairFrame, trifid_controls::TrifidFrame,
     turning_grille_controls::TurningGrilleFrame, two_square_controls::TwoSquareFrame,
     vigenere_controls::VigenereFrame,
 };
@@ -53,6 +54,7 @@ pub mod quagmire_controls;
 pub mod rail_fence_controls;
 pub mod rs44_controls;
 pub mod scytale_controls;
+mod seriated_playfair;
 pub mod sigaba_controls;
 pub mod slidefair_controls;
 pub mod trifid_controls;
@@ -120,6 +122,7 @@ pub struct CipherInterface {
 
     // Playfair Based
     playfair: PlayfairFrame,
+    seriated: SeriatedPlayfairFrame,
     slidefair: SlidefairFrame,
     two_square: TwoSquareFrame,
     four_square: FourSquareFrame,
@@ -210,6 +213,7 @@ impl CipherInterface {
             &[
                 CipherId::FourSquare,
                 CipherId::Playfair,
+                CipherId::SeriatedPlayfair,
                 CipherId::Slidefair,
                 CipherId::TwoSquare,
             ],
@@ -275,6 +279,7 @@ impl CipherInterface {
             CipherId::RailFence => &mut self.rail_fence,
             CipherId::Rs44 => &mut self.rs44,
             CipherId::Scytale => &mut self.scytale,
+            CipherId::SeriatedPlayfair => &mut self.seriated,
             CipherId::Sigaba => &mut self.sigaba,
             CipherId::Slidefair => &mut self.slidefair,
             CipherId::Substitution => &mut self.gen_sub,
