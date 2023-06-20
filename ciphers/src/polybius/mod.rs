@@ -1,3 +1,4 @@
+pub mod nihilist;
 pub mod polybius_cube;
 pub use polybius_cube::PolybiusCube;
 
