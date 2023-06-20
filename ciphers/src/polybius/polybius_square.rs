@@ -8,6 +8,7 @@ pub struct PolybiusSquare {
     pub square: VecString,
     pub labels: VecString,
     pub side_len: usize,
+    pub spaced: bool,
 }
 
 impl Default for PolybiusSquare {
@@ -16,6 +17,7 @@ impl Default for PolybiusSquare {
             square: VecString::from(Alphabet::BasicLatinNoQ),
             side_len: 5,
             labels: VecString::from(Alphabet::Digits1),
+            spaced: false,
         }
     }
 }
@@ -23,7 +25,6 @@ impl Default for PolybiusSquare {
 impl PolybiusSquare {
     pub fn assign_key(&mut self, key_word: &str, alphabet: &str) {
         self.square = VecString::keyed_alphabet(key_word, alphabet);
-        self.square = VecString::unique_from(alphabet);
         self.side_len = alphabet.chars().count().sqrt();
     }
 
@@ -121,25 +122,43 @@ impl Cipher for PolybiusSquare {
                     .get_char(pos.1)
                     .ok_or(CipherError::invalid_input_char(c))?,
             );
+            if self.spaced {
+                out.push(' ')
+            }
         }
+
         Ok(out)
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         self.check_settings()?;
-        if !text.chars().count().is_multiple_of(&2) {
-            return Err(CipherError::input(
-                "Input text must have a length that is a multiple of two.",
-            ));
-        }
 
-        let pairs = self.pairs(text);
-        let mut out = String::with_capacity(text.chars().count() / 2);
+        if self.spaced {
+            let mut out = String::with_capacity(text.chars().count() / 3);
+            for pair in text.split(' ') {
+                if pair.chars().count() != 2 {
+                    return Err(CipherError::input(
+                        "input groups must consists of two symbols",
+                    ));
+                }
+                let p: (char, char) = pair.chars().collect_tuple().unwrap();
+                out.push(self.position_to_char(p)?);
+            }
+            Ok(out)
+        } else {
+            if !text.chars().count().is_multiple_of(&2) {
+                return Err(CipherError::input(
+                    "Input text must have a length that is a multiple of two.",
+                ));
+            }
+            let pairs = self.pairs(text);
+            let mut out = String::with_capacity(text.chars().count() / 2);
 
-        for p in pairs {
-            out.push(self.position_to_char(p)?);
+            for p in pairs {
+                out.push(self.position_to_char(p)?);
+            }
+            Ok(out)
         }
-        Ok(out)
     }
 }
 
@@ -167,7 +186,7 @@ mod polybius_tests {
     // Note Q replaced by K
     const PLAINTEXT: &'static str = "THEKUICKBROWNFOXJUMPSOVERTHELAZYDOG";
     const CIPHERTEXT: &'static str =
-        "4423153145241331124235523421355325453341433551154244231532115554143522";
+        "1535144252113142252221531233215441524445512113142215351443245523322134";
 
     #[test]
     fn encrypt_test() {

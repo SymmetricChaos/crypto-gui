@@ -49,6 +49,9 @@ impl CipherFrame for PolybiusSquareFrame {
         }
         ui.add_space(16.0);
 
+        ui.checkbox(&mut self.cipher.spaced, "Use Spaces")
+            .on_hover_text("Insert spaces between the pairs of symbols");
+
         ui.label("Key Word");
         if control_string(ui, &mut self.key_string).changed() {
             self.cipher
