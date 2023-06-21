@@ -127,6 +127,10 @@ impl Cipher for PolybiusSquare {
             }
         }
 
+        if self.spaced {
+            out.pop();
+        }
+
         Ok(out)
     }
 
@@ -191,7 +195,7 @@ mod polybius_tests {
     const CIPHERTEXT: &'static str =
         "1535144252113142252221531233215441524445512113142215351443245523322134";
     const CIPHERTEXT_SPACED: &'static str =
-        "15 35 14 42 52 11 31 42 25 22 21 53 12 33 21 54 41 52 44 45 51 21 13 14 22 15 35 14 43 24 55 23 32 21 34 ";
+        "15 35 14 42 52 11 31 42 25 22 21 53 12 33 21 54 41 52 44 45 51 21 13 14 22 15 35 14 43 24 55 23 32 21 34";
 
     #[test]
     fn encrypt_test() {
