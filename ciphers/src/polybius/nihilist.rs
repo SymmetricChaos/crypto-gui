@@ -30,7 +30,8 @@ impl Nihilist {
         self.polybius.side_len = alphabet.chars().count().sqrt();
         self.keyword = self
             .polybius
-            .encrypt(additive_keyword)?
+            .encrypt(additive_keyword)
+            .or(Err(CipherError::input("invalid additive key")))?
             .split(' ')
             .filter(|s| !s.is_empty())
             .map(|s| usize::from_str_radix(&s, 10).unwrap())

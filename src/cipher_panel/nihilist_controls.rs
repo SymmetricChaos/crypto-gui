@@ -12,17 +12,28 @@ use utils::{
 pub struct NihilistFrame {
     cipher: Nihilist,
     alphabet_string: String,
-    key_string: String,
-    keyword_string: String,
+    polybius_key_string: String,
+    additive_key_string: String,
 }
 
 impl NihilistFrame {
-    fn assign_keys(&mut self) -> Result<(), ciphers::CipherError> {
-        self.cipher.assign_keys(
-            &self.key_string,
-            &self.keyword_string,
-            &self.alphabet_string,
-        )
+    pub fn valid_additive_key(&self) -> bool {
+        self.additive_key_string
+            .chars()
+            .all(|c| self.alphabet_string.contains(c))
+    }
+
+    fn assign_keys(&mut self) {
+        if !self.valid_additive_key() {
+            self.alphabet_string.clear();
+        }
+        self.cipher
+            .assign_keys(
+                &self.polybius_key_string,
+                &self.additive_key_string,
+                &self.alphabet_string,
+            )
+            .unwrap()
     }
 }
 
@@ -50,14 +61,22 @@ impl CipherFrame for NihilistFrame {
                 self.assign_keys();
             };
         });
+        ui.add_space(8.0);
 
         ui.label("Alphabet");
         if control_string(ui, &mut self.alphabet_string).changed() {
             self.assign_keys();
         }
+        ui.add_space(8.0);
 
-        ui.label("Key Word");
-        if control_string(ui, &mut self.key_string).changed() {
+        ui.label("Polybius Keyword");
+        if control_string(ui, &mut self.additive_key_string).changed() {
+            self.assign_keys();
+        }
+        ui.add_space(8.0);
+
+        ui.label("Additive Keyword");
+        if control_string(ui, &mut self.polybius_key_string).changed() {
             self.assign_keys();
         }
         ui.label(format!("{:?}", self.cipher.keyword_vec()));
@@ -72,9 +91,10 @@ impl CipherFrame for NihilistFrame {
     }
 
     fn randomize(&mut self) {
-        self.key_string = shuffled_str(&self.alphabet_string, &mut thread_rng());
-        self.keyword_string = random_sample_replace(&self.alphabet_string, 6, &mut thread_rng());
-        self.assign_keys().unwrap();
+        self.polybius_key_string = shuffled_str(&self.alphabet_string, &mut thread_rng());
+        self.additive_key_string =
+            random_sample_replace(&self.alphabet_string, 6, &mut thread_rng());
+        self.assign_keys();
     }
 
     fn reset(&mut self) {
