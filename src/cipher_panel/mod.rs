@@ -11,10 +11,11 @@ use self::{
     enigma_controls::EnigmaM3Frame, four_square_controls::FourSquareFrame,
     general_sub_controls::GeneralSubstitutionFrame, grille_controls::GrilleFrame,
     hebern_controls::HebernFrame, hutton_controls::HuttonFrame, m209_controls::M209Frame,
-    m94_controls::M94Frame, playfair_controls::PlayfairFrame, plugboard_controls::PlugboardFrame,
-    polybius_cube_controls::PolybiusCubeFrame, polybius_square_controls::PolybiusSquareFrame,
-    porta_controls::PortaFrame, quagmire_controls::QuagmireFrame,
-    rail_fence_controls::RailFenceFrame, rs44_controls::Rs44Frame, scytale_controls::ScytaleFrame,
+    m94_controls::M94Frame, nihilist_controls::NihilistFrame, playfair_controls::PlayfairFrame,
+    plugboard_controls::PlugboardFrame, polybius_cube_controls::PolybiusCubeFrame,
+    polybius_square_controls::PolybiusSquareFrame, porta_controls::PortaFrame,
+    quagmire_controls::QuagmireFrame, rail_fence_controls::RailFenceFrame,
+    rs44_controls::Rs44Frame, scytale_controls::ScytaleFrame,
     seriated_playfair::SeriatedPlayfairFrame, sigaba_controls::SigabaFrame,
     slidefair_controls::SlidefairFrame, trifid_controls::TrifidFrame,
     turning_grille_controls::TurningGrilleFrame, two_square_controls::TwoSquareFrame,
@@ -55,7 +56,7 @@ pub mod quagmire_controls;
 pub mod rail_fence_controls;
 pub mod rs44_controls;
 pub mod scytale_controls;
-mod seriated_playfair;
+pub mod seriated_playfair;
 pub mod sigaba_controls;
 pub mod slidefair_controls;
 pub mod trifid_controls;
@@ -140,6 +141,7 @@ pub struct CipherInterface {
     adfgvx: AdfgvxFrame,
     b64: B64Frame,
     bifid: BifidFrame,
+    nihilist: NihilistFrame,
     polybius: PolybiusSquareFrame,
     polybius_cube: PolybiusCubeFrame,
     trifid: TrifidFrame,
@@ -236,7 +238,7 @@ impl CipherInterface {
                 CipherId::B64,
                 CipherId::Bifid,
                 CipherId::Checkerboard,
-                // CipherId::Nihilist,
+                CipherId::Nihilist,
                 CipherId::Polybius,
                 CipherId::PolybiusCube,
                 CipherId::Trifid,
@@ -271,7 +273,7 @@ impl CipherInterface {
             CipherId::Hutton => &mut self.hutton,
             CipherId::M209 => &mut self.m209,
             CipherId::M94 => &mut self.m94,
-            // CipherId::Nihilist => &mut self.nihilist,
+            CipherId::Nihilist => &mut self.nihilist,
             CipherId::Playfair => &mut self.playfair,
             CipherId::Plugboard => &mut self.plugboard,
             CipherId::Polybius => &mut self.polybius,
