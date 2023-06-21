@@ -45,6 +45,7 @@ pub mod hebern_controls;
 pub mod hutton_controls;
 pub mod m209_controls;
 pub mod m94_controls;
+pub mod nihilist_controls;
 pub mod playfair_controls;
 pub mod plugboard_controls;
 pub mod polybius_cube_controls;

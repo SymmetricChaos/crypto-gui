@@ -37,6 +37,10 @@ impl Nihilist {
             .collect();
         Ok(())
     }
+
+    pub fn keyword_vec(&self) -> &Vec<usize> {
+        &self.keyword
+    }
 }
 
 impl Cipher for Nihilist {
