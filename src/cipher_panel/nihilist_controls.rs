@@ -24,8 +24,8 @@ impl NihilistFrame {
     }
 
     fn assign_keys(&mut self) {
-        if !self.valid_additive_key() {
-            self.alphabet_string.clear();
+        while !self.valid_additive_key() {
+            self.alphabet_string.pop();
         }
         self.cipher
             .assign_keys(
