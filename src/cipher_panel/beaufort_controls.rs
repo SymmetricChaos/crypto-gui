@@ -88,14 +88,9 @@ impl CipherFrame for BeaufortFrame {
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        self.cipher.keywords[0] =
-            random_sample_replace(&self.alphabet_string, rng.gen_range(3..12), &mut rng);
-        self.cipher.keywords[1] =
-            random_sample_replace(&self.alphabet_string, rng.gen_range(3..12), &mut rng);
-        self.cipher.keywords[2] =
-            random_sample_replace(&self.alphabet_string, rng.gen_range(3..12), &mut rng);
-        self.cipher.keywords[3] = String::new();
-        self.cipher.keywords[4] = String::new();
+        for keyword in self.cipher.keywords.iter_mut() {
+            *keyword = random_sample_replace(&self.alphabet_string, rng.gen_range(3..12), &mut rng);
+        }
     }
 
     fn reset(&mut self) {
