@@ -181,11 +181,23 @@ pub fn string_pairs(text: &str) -> Vec<&str> {
 Rank the characters of a string by their order in the alphabet, making every entry unique and using the smallest possible numbers
 The text APPLE with the BasicLatin alphabet would give: [0, 3, 4, 2, 1, 5]
 */
-pub fn rank_str(text: &str, alphabet: &str) -> Vec<usize> {
-    let mut values = text
-        .chars()
-        .map(|x| alphabet.chars().position(|c| x == c).unwrap())
-        .collect::<Vec<usize>>();
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct StringRankError;
+
+pub fn rank_str(text: &str, alphabet: &str) -> Result<Vec<usize>, StringRankError> {
+    if text.is_empty() {
+        return Ok(Vec::new());
+    }
+
+    let mut values = Vec::new();
+    for c in text.chars() {
+        values.push(
+            alphabet
+                .chars()
+                .position(|x| x == c)
+                .ok_or(StringRankError)?,
+        );
+    }
 
     let len = values.len();
     let biggest = alphabet.chars().count();
@@ -193,7 +205,7 @@ pub fn rank_str(text: &str, alphabet: &str) -> Vec<usize> {
     let mut out = vec![0usize; len];
 
     for i in 0..len {
-        let m = values.iter().min().unwrap();
+        let m = values.iter().min().unwrap(); // justified by test for empty string
         for (pos, v) in values.iter().enumerate() {
             if v == m {
                 out[pos] = i;
@@ -203,7 +215,7 @@ pub fn rank_str(text: &str, alphabet: &str) -> Vec<usize> {
         }
     }
 
-    out
+    Ok(out)
 }
 
 // This ignores repeated numbers
@@ -267,7 +279,7 @@ mod text_function_tests {
     fn string_ranking() {
         let text = "APPLES";
         let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        assert_eq!(vec![0, 3, 4, 2, 1, 5], rank_str(text, alphabet));
+        assert_eq!(vec![0, 3, 4, 2, 1, 5], rank_str(text, alphabet).unwrap());
     }
 
     #[test]
