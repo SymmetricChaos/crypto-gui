@@ -49,6 +49,17 @@ impl AmscoFrame {
             }
         }
     }
+
+    fn assign_key(&mut self) {
+        self.key_string = self
+            .key_string
+            .chars()
+            .filter(|c| !self.alphabet_string.contains(*c))
+            .collect();
+        self.cipher
+            .assign_key(&self.key_string, &self.alphabet_string)
+            .unwrap() // justified by filtering of key_string
+    }
 }
 
 impl CipherFrame for AmscoFrame {
@@ -58,15 +69,13 @@ impl CipherFrame for AmscoFrame {
 
         ui.label("Alphabet");
         if control_string(ui, &mut self.alphabet_string).changed() {
-            self.cipher
-                .assign_key(&self.key_string, &self.alphabet_string);
+            self.assign_key();
             self.build_grid();
         }
 
         ui.label("Keyword");
         if control_string(ui, &mut self.key_string).changed() {
-            self.cipher
-                .assign_key(&self.key_string, &self.alphabet_string);
+            self.assign_key();
             self.build_grid();
         };
 
@@ -109,8 +118,7 @@ impl CipherFrame for AmscoFrame {
 
         self.key_string = random_sample_replace(&self.alphabet_string, n_chars, &mut rng);
 
-        self.cipher
-            .assign_key(&self.key_string, &self.alphabet_string)
+        self.assign_key()
     }
 
     fn reset(&mut self) {

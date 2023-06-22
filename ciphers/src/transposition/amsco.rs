@@ -1,6 +1,10 @@
 use itertools::Itertools;
 
-use utils::{functions::rank_str, grid::Grid, math_functions::Parity};
+use utils::{
+    functions::{rank_str, StringRankError},
+    grid::Grid,
+    math_functions::Parity,
+};
 
 use crate::{Cipher, CipherError};
 
@@ -21,8 +25,9 @@ impl Default for Amsco {
 }
 
 impl Amsco {
-    pub fn assign_key(&mut self, keyword: &str, alphabet: &str) {
-        self.key = rank_str(keyword, alphabet);
+    pub fn assign_key(&mut self, keyword: &str, alphabet: &str) -> Result<(), StringRankError> {
+        self.key = rank_str(keyword, alphabet)?;
+        Ok(())
     }
 
     pub fn groups(&self, text: &str) -> Vec<(char, Option<char>)> {

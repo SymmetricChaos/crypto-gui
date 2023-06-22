@@ -1,6 +1,6 @@
 use crate::{errors::CipherError, traits::Cipher};
 use utils::{
-    functions::rank_str,
+    functions::{rank_str, StringRankError},
     grid::{str_to_char_grid, Grid, Symbol, BLOCK, EMPTY},
 };
 
@@ -9,8 +9,9 @@ pub struct Columnar {
 }
 
 impl Columnar {
-    pub fn assign_key(&mut self, keyword: &str, alphabet: &str) {
-        self.key = rank_str(keyword, alphabet);
+    pub fn assign_key(&mut self, keyword: &str, alphabet: &str) -> Result<(), StringRankError> {
+        self.key = rank_str(keyword, alphabet)?;
+        Ok(())
     }
 }
 
@@ -82,14 +83,18 @@ mod columnar_tests {
     #[test]
     fn encrypt_test() {
         let mut cipher = Columnar::default();
-        cipher.assign_key("TEST", Alphabet::BasicLatin.slice());
+        cipher
+            .assign_key("TEST", Alphabet::BasicLatin.slice())
+            .unwrap();
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = Columnar::default();
-        cipher.assign_key("TEST", Alphabet::BasicLatin.slice());
+        cipher
+            .assign_key("TEST", Alphabet::BasicLatin.slice())
+            .unwrap();
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

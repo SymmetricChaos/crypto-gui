@@ -27,6 +27,19 @@ impl Default for ColumnarFrame {
     }
 }
 
+impl ColumnarFrame {
+    fn assign_key(&mut self) {
+        self.key_string = self
+            .key_string
+            .chars()
+            .filter(|c| !self.alphabet_string.contains(*c))
+            .collect();
+        self.cipher
+            .assign_key(&self.key_string, &self.alphabet_string)
+            .unwrap() // justified by filtering of key_string
+    }
+}
+
 impl CipherFrame for ColumnarFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         randomize_reset(ui, self);
@@ -34,14 +47,12 @@ impl CipherFrame for ColumnarFrame {
 
         ui.label("Alphabet");
         if control_string(ui, &mut self.alphabet_string).changed() {
-            self.cipher
-                .assign_key(&self.key_string, &self.alphabet_string)
+            self.assign_key()
         }
 
         ui.label("Keyword");
         if control_string(ui, &mut self.key_string).changed() {
-            self.cipher
-                .assign_key(&self.key_string, &self.alphabet_string)
+            self.assign_key()
         };
 
         ui.add_space(8.0);
@@ -87,8 +98,7 @@ impl CipherFrame for ColumnarFrame {
 
         self.key_string = random_sample_replace(&self.alphabet_string, n_chars, &mut rng);
 
-        self.cipher
-            .assign_key(&self.key_string, &self.alphabet_string)
+        self.assign_key()
     }
 
     fn reset(&mut self) {

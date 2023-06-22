@@ -28,6 +28,19 @@ impl Default for AdfgvxFrame {
     }
 }
 
+impl AdfgvxFrame {
+    fn assign_columnar_key(&mut self) {
+        self.columnar_key_string = self
+            .columnar_key_string
+            .chars()
+            .filter(|c| !self.alphabet_string.contains(*c))
+            .collect();
+        self.cipher
+            .assign_columnar_key(&self.columnar_key_string)
+            .unwrap() // justified by filtering of key_string
+    }
+}
+
 impl CipherFrame for AdfgvxFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         randomize_reset(ui, self);
@@ -39,13 +52,13 @@ impl CipherFrame for AdfgvxFrame {
                 self.cipher.assign_mode(AdfgvxMode::Short);
                 self.alphabet_string = Alphabet::BasicLatinNoJ.string();
                 self.cipher.assign_polybius_key(&self.polybius_key_string);
-                self.cipher.assign_columnar_key(&self.columnar_key_string);
+                self.assign_columnar_key();
             };
             if ui.button("ADFGVX").clicked() {
                 self.cipher.assign_mode(AdfgvxMode::Long);
                 self.alphabet_string = Alphabet::BasicLatinWithDigits.string();
                 self.cipher.assign_polybius_key(&self.polybius_key_string);
-                self.cipher.assign_columnar_key(&self.columnar_key_string);
+                self.assign_columnar_key();
             };
         });
 
@@ -65,7 +78,7 @@ impl CipherFrame for AdfgvxFrame {
 
         ui.label("Columnar Keyword");
         if control_string(ui, &mut self.columnar_key_string).changed() {
-            self.cipher.assign_columnar_key(&self.columnar_key_string)
+            self.assign_columnar_key()
         }
     }
 
@@ -89,7 +102,7 @@ impl CipherFrame for AdfgvxFrame {
             )
         }
 
-        self.cipher.assign_columnar_key(&self.columnar_key_string)
+        self.assign_columnar_key();
     }
 
     fn reset(&mut self) {

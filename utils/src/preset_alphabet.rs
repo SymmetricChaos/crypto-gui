@@ -1,5 +1,7 @@
 use std::str::Chars;
 
+use itertools::Itertools;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Alphabet {
     BasicLatin,
@@ -51,6 +53,14 @@ impl Alphabet {
     // Iterate over characters
     pub fn chars(&self) -> Chars<'_> {
         self.slice().chars()
+    }
+
+    pub fn contains(&self, c: &char) -> bool {
+        self.chars().contains(c)
+    }
+
+    pub fn position(&self, c: char) -> Option<usize> {
+        self.chars().position(|x| c == x)
     }
 }
 

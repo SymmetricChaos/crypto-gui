@@ -16,6 +16,41 @@ pub struct B64Frame {
     columnar_key_string_2: String,
 }
 
+impl B64Frame {
+    fn assign_columnar_key1(&mut self) {
+        self.columnar_key_string_1 = self
+            .columnar_key_string_1
+            .chars()
+            .filter(|c| !Alphabet::Base64.contains(c))
+            .collect();
+        self.cipher
+            .assign_columnar_key_1(&self.columnar_key_string_1)
+            .unwrap()
+    }
+
+    fn assign_columnar_key2(&mut self) {
+        self.columnar_key_string_2 = self
+            .columnar_key_string_2
+            .chars()
+            .filter(|c| !Alphabet::Base64.contains(c))
+            .collect();
+        self.cipher
+            .assign_columnar_key_2(&self.columnar_key_string_2)
+            .unwrap()
+    }
+
+    fn assign_polybius_key(&mut self) {
+        self.polybius_key_string = self
+            .polybius_key_string
+            .chars()
+            .filter(|c| !Alphabet::Base64.contains(c))
+            .collect();
+        self.cipher
+            .assign_columnar_key_1(&self.polybius_key_string)
+            .unwrap()
+    }
+}
+
 impl CipherFrame for B64Frame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         randomize_reset(ui, self);
@@ -23,7 +58,7 @@ impl CipherFrame for B64Frame {
 
         ui.label("Polybius Keyword");
         if control_string(ui, &mut self.polybius_key_string).changed() {
-            self.cipher.assign_polybius_key(&self.polybius_key_string)
+            self.assign_polybius_key();
         }
         ui.add_space(16.0);
 
@@ -31,17 +66,13 @@ impl CipherFrame for B64Frame {
         ui.add_space(16.0);
 
         ui.label("First Columnar Keyword");
-        ui.label("Polybius Keyword");
         if control_string(ui, &mut self.columnar_key_string_1).changed() {
-            self.cipher
-                .assign_columnar_key_1(&self.columnar_key_string_1)
+            self.assign_columnar_key1()
         }
         ui.add_space(8.0);
         ui.label("Second Columnar Keyword");
-        ui.label("Polybius Keyword");
         if control_string(ui, &mut self.columnar_key_string_2).changed() {
-            self.cipher
-                .assign_columnar_key_2(&self.columnar_key_string_2)
+            self.assign_columnar_key2()
         }
     }
 
@@ -61,14 +92,16 @@ impl CipherFrame for B64Frame {
         self.columnar_key_string_1 =
             random_sample_replace(Alphabet::BasicLatin.slice(), n_chars, &mut rng);
         self.cipher
-            .assign_columnar_key_1(&self.columnar_key_string_1);
+            .assign_columnar_key_1(&self.columnar_key_string_1)
+            .unwrap(); // unwrap justified by pulling from BasicLatin alphabet
 
         // Second columnar
         let n_chars = rng.gen_range(6..10);
         self.columnar_key_string_2 =
             random_sample_replace(Alphabet::BasicLatin.slice(), n_chars, &mut rng);
         self.cipher
-            .assign_columnar_key_1(&self.columnar_key_string_2);
+            .assign_columnar_key_1(&self.columnar_key_string_2)
+            .unwrap(); // unwrap justified by pulling from BasicLatin alphabet
     }
 
     fn reset(&mut self) {

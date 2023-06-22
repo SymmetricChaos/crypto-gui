@@ -14,12 +14,18 @@ impl B64 {
         self.polybius.assign_key(key, Alphabet::Base64.slice());
     }
 
-    pub fn assign_columnar_key_1(&mut self, key: &str) {
-        self.columnar1.assign_key(key, Alphabet::Base64.slice());
+    pub fn assign_columnar_key_1(
+        &mut self,
+        key: &str,
+    ) -> Result<(), utils::functions::StringRankError> {
+        self.columnar1.assign_key(key, Alphabet::Base64.slice())
     }
 
-    pub fn assign_columnar_key_2(&mut self, key: &str) {
-        self.columnar2.assign_key(key, Alphabet::Base64.slice());
+    pub fn assign_columnar_key_2(
+        &mut self,
+        key: &str,
+    ) -> Result<(), utils::functions::StringRankError> {
+        self.columnar2.assign_key(key, Alphabet::Base64.slice())
     }
 
     pub fn polybius_grid(&self) -> String {

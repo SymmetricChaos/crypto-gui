@@ -30,7 +30,10 @@ impl Adfgvx {
         self.polybius.assign_key(key, self.alphabet())
     }
 
-    pub fn assign_columnar_key(&mut self, key: &str) {
+    pub fn assign_columnar_key(
+        &mut self,
+        key: &str,
+    ) -> Result<(), utils::functions::StringRankError> {
         self.columnar.assign_key(key, Alphabet::BasicLatin.into())
     }
 
@@ -79,7 +82,7 @@ mod adfgvx_tests {
     fn encrypt_test_adfgx() {
         let mut cipher = Adfgvx::default();
         cipher.assign_polybius_key("KEYWORKFORUSEINTEST");
-        cipher.assign_columnar_key("SOMEWORD");
+        cipher.assign_columnar_key("SOMEWORD").unwrap();
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT1);
     }
 
@@ -87,7 +90,7 @@ mod adfgvx_tests {
     fn decrypt_test_adfgx() {
         let mut cipher = Adfgvx::default();
         cipher.assign_polybius_key("KEYWORKFORUSEINTEST");
-        cipher.assign_columnar_key("SOMEWORD");
+        cipher.assign_columnar_key("SOMEWORD").unwrap();
         assert_eq!(cipher.decrypt(CIPHERTEXT1).unwrap(), PLAINTEXT);
     }
 
@@ -96,7 +99,7 @@ mod adfgvx_tests {
         let mut cipher = Adfgvx::default();
         cipher.mode = AdfgvxMode::Long;
         cipher.assign_polybius_key("57This9Should0Mix2Words");
-        cipher.assign_columnar_key("SOMEWORD");
+        cipher.assign_columnar_key("SOMEWORD").unwrap();
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT2);
     }
 
@@ -105,7 +108,7 @@ mod adfgvx_tests {
         let mut cipher = Adfgvx::default();
         cipher.mode = AdfgvxMode::Long;
         cipher.assign_polybius_key("57This9Should0Mix2Words");
-        cipher.assign_columnar_key("SOMEWORD");
+        cipher.assign_columnar_key("SOMEWORD").unwrap();
         assert_eq!(cipher.decrypt(CIPHERTEXT2).unwrap(), PLAINTEXT);
     }
 }
