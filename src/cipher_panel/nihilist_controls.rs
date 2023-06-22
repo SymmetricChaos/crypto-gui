@@ -8,7 +8,6 @@ use utils::{
     preset_alphabet::Alphabet,
 };
 
-#[derive(Default)]
 pub struct NihilistFrame {
     cipher: Nihilist,
     alphabet_string: String,
@@ -16,17 +15,32 @@ pub struct NihilistFrame {
     additive_key_string: String,
 }
 
-impl NihilistFrame {
-    pub fn valid_additive_key(&self) -> bool {
-        self.additive_key_string
-            .chars()
-            .all(|c| self.alphabet_string.contains(c))
-    }
-
-    fn assign_keys(&mut self) {
-        while !self.valid_additive_key() {
-            self.alphabet_string.pop();
+impl Default for NihilistFrame {
+    fn default() -> Self {
+        Self {
+            cipher: Default::default(),
+            alphabet_string: Alphabet::BasicLatinNoQ.into(),
+            polybius_key_string: Default::default(),
+            additive_key_string: Default::default(),
         }
+    }
+}
+
+impl NihilistFrame {
+    fn assign_keys(&mut self) {
+        // Filter the keys
+        self.additive_key_string = self
+            .additive_key_string
+            .chars()
+            .filter(|c| !self.alphabet_string.contains(*c))
+            .collect();
+
+        self.polybius_key_string = self
+            .polybius_key_string
+            .chars()
+            .filter(|c| !self.alphabet_string.contains(*c))
+            .collect();
+
         self.cipher
             .assign_keys(
                 &self.polybius_key_string,
@@ -70,16 +84,18 @@ impl CipherFrame for NihilistFrame {
         ui.add_space(8.0);
 
         ui.label("Polybius Keyword");
-        if control_string(ui, &mut self.additive_key_string).changed() {
+        if control_string(ui, &mut self.polybius_key_string).changed() {
             self.assign_keys();
         }
         ui.add_space(8.0);
 
         ui.label("Additive Keyword");
-        if control_string(ui, &mut self.polybius_key_string).changed() {
+        if control_string(ui, &mut self.additive_key_string).changed() {
             self.assign_keys();
         }
-        ui.label(format!("{:?}", self.cipher.keyword_vec()));
+        if !self.cipher.keyword_vec().is_empty() {
+            ui.label(format!("{:?}", self.cipher.keyword_vec()));
+        }
 
         ui.add_space(16.0);
         ui.label("Grid");

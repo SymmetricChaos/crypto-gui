@@ -5,12 +5,22 @@ use eframe::egui::Ui;
 use rand::thread_rng;
 use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
 
-#[derive(Default)]
 pub struct PolybiusSquareFrame {
     cipher: PolybiusSquare,
     alphabet_string: String,
     key_string: String,
     labels_string: String,
+}
+
+impl Default for PolybiusSquareFrame {
+    fn default() -> Self {
+        Self {
+            cipher: Default::default(),
+            alphabet_string: Alphabet::BasicLatinNoQ.into(),
+            key_string: Default::default(),
+            labels_string: Alphabet::Digits1.into(),
+        }
+    }
 }
 
 impl CipherFrame for PolybiusSquareFrame {
