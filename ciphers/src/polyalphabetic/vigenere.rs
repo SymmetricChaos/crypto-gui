@@ -7,7 +7,7 @@ use crate::{errors::CipherError, traits::Cipher};
 use super::PolyMode;
 
 pub struct Vigenere {
-    pub key_words: [String; 5],
+    pub keywords: [String; 5],
     pub alphabet: VecString,
     pub prog_shift: usize,
     pub mode: PolyMode,
@@ -17,7 +17,7 @@ pub struct Vigenere {
 impl Default for Vigenere {
     fn default() -> Self {
         Self {
-            key_words: [
+            keywords: [
                 String::new(),
                 String::new(),
                 String::new(),
@@ -37,7 +37,7 @@ impl Vigenere {
     pub fn key(&self) -> impl Iterator<Item = usize> + '_ {
         if self.multikey {
             let mut effective_key = vec![0usize; self.key_len()];
-            for key in self.key_words.iter().filter(|s| !s.is_empty()) {
+            for key in self.keywords.iter().filter(|s| !s.is_empty()) {
                 for (pos, sym) in key.chars().cycle().take(self.key_len()).enumerate() {
                     let p = self.alphabet.get_pos(sym).unwrap();
                     effective_key[pos] += p
@@ -49,7 +49,7 @@ impl Vigenere {
                 .collect();
             effective_key.into_iter()
         } else {
-            let key: Vec<usize> = self.key_words[0]
+            let key: Vec<usize> = self.keywords[0]
                 .chars()
                 .map(|x| self.alphabet.get_pos(x).unwrap())
                 .collect();
@@ -65,24 +65,24 @@ impl Vigenere {
     //Should multiply together ignoring common factors. [9,6] should give 18
     pub fn key_len(&self) -> usize {
         if self.multikey {
-            self.key_words
+            self.keywords
                 .iter()
                 .filter(|s| !s.is_empty())
                 .map(|s| s.chars().count())
                 .fold(1, num::integer::lcm)
         } else {
-            self.key_words[0].chars().count()
+            self.keywords[0].chars().count()
         }
     }
 
     // Unwrap justified by bounds on key
-    pub fn key_word(&self) -> String {
+    pub fn keyword(&self) -> String {
         if self.multikey {
             self.key()
                 .map(|v| self.alphabet.get_char(v).unwrap())
                 .collect()
         } else {
-            self.key_words[0].clone()
+            self.keywords[0].clone()
         }
     }
 
@@ -91,7 +91,7 @@ impl Vigenere {
     }
 
     fn validate_key(&self) -> Result<(), CipherError> {
-        for key in self.key_words.iter() {
+        for key in self.keywords.iter() {
             for c in key.chars() {
                 if !self.alphabet.contains(c) {
                     return Err(CipherError::invalid_alphabet_char(c));
@@ -236,11 +236,11 @@ impl Cipher for Vigenere {
     // fn randomize(&mut self) {
     //     let rng = &mut get_global_rng();
     //     let alpha = String::from(&self.alphabet_string);
-    //     self.key_words[0] = random_sample_replace(&alpha, 3, rng);
-    //     self.key_words[1] = random_sample_replace(&alpha, 4, rng);
-    //     self.key_words[2] = random_sample_replace(&alpha, 5, rng);
-    //     self.key_words[3] = String::new();
-    //     self.key_words[4] = String::new();
+    //     self.keywords[0] = random_sample_replace(&alpha, 3, rng);
+    //     self.keywords[1] = random_sample_replace(&alpha, 4, rng);
+    //     self.keywords[2] = random_sample_replace(&alpha, 5, rng);
+    //     self.keywords[3] = String::new();
+    //     self.keywords[4] = String::new();
     // }
 }
 
@@ -256,8 +256,8 @@ mod vigenere_tests {
     #[test]
     fn encrypt_test_cyclic() {
         let mut cipher = Vigenere::default();
-        cipher.key_words[1] = String::from("GOOD");
-        cipher.key_words[0] = String::from("ENCRYPTION");
+        cipher.keywords[1] = String::from("GOOD");
+        cipher.keywords[0] = String::from("ENCRYPTION");
         cipher.mode = PolyMode::CylicKey;
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_CYCLIC);
     }
@@ -265,8 +265,8 @@ mod vigenere_tests {
     #[test]
     fn decrypt_test_cyclic() {
         let mut cipher = Vigenere::default();
-        cipher.key_words[1] = String::from("GOOD");
-        cipher.key_words[0] = String::from("ENCRYPTION");
+        cipher.keywords[1] = String::from("GOOD");
+        cipher.keywords[0] = String::from("ENCRYPTION");
         cipher.mode = PolyMode::CylicKey;
         assert_eq!(cipher.decrypt(CIPHERTEXT_CYCLIC).unwrap(), PLAINTEXT);
     }
@@ -274,8 +274,8 @@ mod vigenere_tests {
     #[test]
     fn encrypt_test_auto() {
         let mut cipher = Vigenere::default();
-        cipher.key_words[1] = String::from("GOOD");
-        cipher.key_words[0] = String::from("ENCRYPTION");
+        cipher.keywords[1] = String::from("GOOD");
+        cipher.keywords[0] = String::from("ENCRYPTION");
         cipher.mode = PolyMode::Autokey;
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_AUTO);
     }
@@ -283,8 +283,8 @@ mod vigenere_tests {
     #[test]
     fn decrypt_test_auto() {
         let mut cipher = Vigenere::default();
-        cipher.key_words[1] = String::from("GOOD");
-        cipher.key_words[0] = String::from("ENCRYPTION");
+        cipher.keywords[1] = String::from("GOOD");
+        cipher.keywords[0] = String::from("ENCRYPTION");
         cipher.mode = PolyMode::Autokey;
         assert_eq!(cipher.decrypt(CIPHERTEXT_AUTO).unwrap(), PLAINTEXT);
     }
@@ -292,8 +292,8 @@ mod vigenere_tests {
     #[test]
     fn encrypt_test_prog() {
         let mut cipher = Vigenere::default();
-        cipher.key_words[1] = String::from("GOOD");
-        cipher.key_words[0] = String::from("ENCRYPTION");
+        cipher.keywords[1] = String::from("GOOD");
+        cipher.keywords[0] = String::from("ENCRYPTION");
         cipher.mode = PolyMode::ProgKey;
         cipher.prog_shift = 3;
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_PROG);
@@ -302,8 +302,8 @@ mod vigenere_tests {
     #[test]
     fn decrypt_test_prog() {
         let mut cipher = Vigenere::default();
-        cipher.key_words[1] = String::from("GOOD");
-        cipher.key_words[0] = String::from("ENCRYPTION");
+        cipher.keywords[1] = String::from("GOOD");
+        cipher.keywords[0] = String::from("ENCRYPTION");
         cipher.mode = PolyMode::ProgKey;
         cipher.prog_shift = 3;
         assert_eq!(cipher.decrypt(CIPHERTEXT_PROG).unwrap(), PLAINTEXT);

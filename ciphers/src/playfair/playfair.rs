@@ -11,9 +11,9 @@ pub struct Playfair {
 }
 
 impl Playfair {
-    pub fn assign_key(&mut self, key_word: &str, alphabet: &str) {
+    pub fn assign_key(&mut self, keyword: &str, alphabet: &str) {
         self.grid_side_len = alphabet.chars().count().sqrt();
-        self.square = keyed_alphabet(key_word, alphabet);
+        self.square = keyed_alphabet(keyword, alphabet);
     }
 
     pub fn grid_side_len(&self) -> usize {

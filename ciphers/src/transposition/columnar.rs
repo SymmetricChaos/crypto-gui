@@ -9,8 +9,8 @@ pub struct Columnar {
 }
 
 impl Columnar {
-    pub fn assign_key(&mut self, key_word: &str, alphabet: &str) {
-        self.key = rank_str(key_word, alphabet);
+    pub fn assign_key(&mut self, keyword: &str, alphabet: &str) {
+        self.key = rank_str(keyword, alphabet);
     }
 }
 

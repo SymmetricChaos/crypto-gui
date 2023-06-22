@@ -8,8 +8,8 @@ use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
 pub struct TwoSquareFrame {
     cipher: TwoSquare,
     alphabet_string: String,
-    key_word_1: String,
-    key_word_2: String,
+    keyword_1: String,
+    keyword_2: String,
     spacer_string: String,
 }
 
@@ -18,8 +18,8 @@ impl Default for TwoSquareFrame {
         Self {
             cipher: Default::default(),
             alphabet_string: Alphabet::BasicLatinNoQ.into(),
-            key_word_1: Default::default(),
-            key_word_2: Default::default(),
+            keyword_1: Default::default(),
+            keyword_2: Default::default(),
             spacer_string: "X".into(),
         }
     }
@@ -35,22 +35,22 @@ impl CipherFrame for TwoSquareFrame {
             if ui.button("No Q").clicked() {
                 self.alphabet_string = Alphabet::BasicLatinNoQ.string();
                 self.cipher
-                    .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
+                    .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
             };
             if ui.button("No J").clicked() {
                 self.alphabet_string = Alphabet::BasicLatinNoJ.string();
                 self.cipher
-                    .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
+                    .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
             };
             if ui.button("Alphanumeric").clicked() {
                 self.alphabet_string = Alphabet::BasicLatinWithDigits.string();
                 self.cipher
-                    .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
+                    .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
             };
             if ui.button("Base64").clicked() {
                 self.alphabet_string = Alphabet::Base64.string();
                 self.cipher
-                    .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
+                    .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
             };
         });
         ui.add_space(10.0);
@@ -58,7 +58,7 @@ impl CipherFrame for TwoSquareFrame {
         ui.label("Alphabet");
         if control_string(ui, &mut self.alphabet_string).changed() {
             self.cipher
-                .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
+                .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
         }
         ui.add_space(16.0);
 
@@ -73,17 +73,17 @@ impl CipherFrame for TwoSquareFrame {
         }
         ui.add_space(16.0);
 
-        ui.label("Key Word 1");
-        if control_string(ui, &mut self.key_word_1).changed() {
+        ui.label("Keyword 1");
+        if control_string(ui, &mut self.keyword_1).changed() {
             self.cipher
-                .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
+                .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
         }
 
         ui.add_space(16.0);
-        ui.label("Key Word 2");
-        if control_string(ui, &mut self.key_word_2).changed() {
+        ui.label("Keyword 2");
+        if control_string(ui, &mut self.keyword_2).changed() {
             self.cipher
-                .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
+                .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
         }
 
         ui.label(mono(self.cipher.show_square1()));
@@ -96,10 +96,10 @@ impl CipherFrame for TwoSquareFrame {
     }
 
     fn randomize(&mut self) {
-        self.key_word_1 = shuffled_str(&self.alphabet_string, &mut StdRng::from_entropy());
-        self.key_word_2 = shuffled_str(&self.alphabet_string, &mut StdRng::from_entropy());
+        self.keyword_1 = shuffled_str(&self.alphabet_string, &mut StdRng::from_entropy());
+        self.keyword_2 = shuffled_str(&self.alphabet_string, &mut StdRng::from_entropy());
         self.cipher
-            .assign_keys(&self.key_word_1, &self.key_word_2, &self.alphabet_string)
+            .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
     }
 
     fn reset(&mut self) {

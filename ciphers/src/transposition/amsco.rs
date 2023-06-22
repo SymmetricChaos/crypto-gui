@@ -21,8 +21,8 @@ impl Default for Amsco {
 }
 
 impl Amsco {
-    pub fn assign_key(&mut self, key_word: &str, alphabet: &str) {
-        self.key = rank_str(key_word, alphabet);
+    pub fn assign_key(&mut self, keyword: &str, alphabet: &str) {
+        self.key = rank_str(keyword, alphabet);
     }
 
     pub fn groups(&self, text: &str) -> Vec<(char, Option<char>)> {

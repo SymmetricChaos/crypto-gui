@@ -173,7 +173,7 @@ const SKEY_WORDS: [&'static str; 2048] = [
     "YANG", "YANK", "YARD", "YARN", "YAWL", "YAWN", "YEAH", "YEAR", "YELL", "YOGA", "YOKE",
 ];
 
-fn skey_word(word: &str) -> Result<usize, CodeError> {
+fn skeyword(word: &str) -> Result<usize, CodeError> {
     SKEY_WORDS
         .iter()
         .position(|p| p == &word)
@@ -208,7 +208,7 @@ fn words_to_u64(words: &[&str]) -> Result<u64, CodeError> {
     }
     let mut big_n = 0_u128;
     for (idx, word) in words.into_iter().enumerate() {
-        let n = skey_word(word)? as u128;
+        let n = skeyword(word)? as u128;
         big_n += n << 11 * (5 - idx);
     }
     let parity = (big_n & 0b11) as u64;

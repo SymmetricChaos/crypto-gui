@@ -21,7 +21,7 @@ impl CipherFrame for B64Frame {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 
-        ui.label("Polybius Key Word");
+        ui.label("Polybius Keyword");
         if control_string(ui, &mut self.polybius_key_string).changed() {
             self.cipher.assign_polybius_key(&self.polybius_key_string)
         }
@@ -30,15 +30,15 @@ impl CipherFrame for B64Frame {
         ui.label(mono(format!("Grid\n{}", self.cipher.polybius_grid())));
         ui.add_space(16.0);
 
-        ui.label("First Columnar Key Word");
-        ui.label("Polybius Key Word");
+        ui.label("First Columnar Keyword");
+        ui.label("Polybius Keyword");
         if control_string(ui, &mut self.columnar_key_string_1).changed() {
             self.cipher
                 .assign_columnar_key_1(&self.columnar_key_string_1)
         }
         ui.add_space(8.0);
-        ui.label("Second Columnar Key Word");
-        ui.label("Polybius Key Word");
+        ui.label("Second Columnar Keyword");
+        ui.label("Polybius Keyword");
         if control_string(ui, &mut self.columnar_key_string_2).changed() {
             self.cipher
                 .assign_columnar_key_2(&self.columnar_key_string_2)

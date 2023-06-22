@@ -53,7 +53,7 @@ impl CipherFrame for AdfgvxFrame {
         ui.label(mono(&self.alphabet_string).background_color(Color32::BLACK));
         ui.add_space(16.0);
 
-        ui.label("Polybius Key Word");
+        ui.label("Polybius Keyword");
         if control_string(ui, &mut self.polybius_key_string).changed() {
             self.cipher.assign_polybius_key(&self.polybius_key_string)
         }
@@ -63,7 +63,7 @@ impl CipherFrame for AdfgvxFrame {
         ui.label("Grid");
         ui.label(mono(self.cipher.show_polybius_grid()));
 
-        ui.label("Columnar Key Word");
+        ui.label("Columnar Keyword");
         if control_string(ui, &mut self.columnar_key_string).changed() {
             self.cipher.assign_columnar_key(&self.columnar_key_string)
         }

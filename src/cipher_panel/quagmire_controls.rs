@@ -48,7 +48,7 @@ impl CipherFrame for QuagmireFrame {
         });
 
         ui.add_space(16.0);
-        ui.label("Key Word");
+        ui.label("Keyword");
         if control_string(ui, &mut self.ind_key_string).changed() {
             match self.cipher.assign_ind_key(&self.ind_key_string) {
                 Ok(_) => ui.label(""),

@@ -63,7 +63,7 @@ impl CipherFrame for AmscoFrame {
             self.build_grid();
         }
 
-        ui.label("Key Word");
+        ui.label("Keyword");
         if control_string(ui, &mut self.key_string).changed() {
             self.cipher
                 .assign_key(&self.key_string, &self.alphabet_string);

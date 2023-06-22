@@ -50,7 +50,7 @@ impl CipherFrame for HuttonFrame {
         }
 
         ui.add_space(16.0);
-        ui.label("Key Word");
+        ui.label("Keyword");
         if control_string(ui, &mut self.key_string).changed() {
             self.cipher.assign_key(&self.key_string)
         }

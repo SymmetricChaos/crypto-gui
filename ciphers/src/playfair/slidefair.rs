@@ -25,8 +25,8 @@ impl Slidefair {
         self.alphabet = VecString::unique_from(alphabet)
     }
 
-    pub fn assign_key(&mut self, key_word: &str) {
-        self.key = key_word
+    pub fn assign_key(&mut self, keyword: &str) {
+        self.key = keyword
             .chars()
             .map(|x| self.alphabet.get_pos(x).unwrap())
             .collect();

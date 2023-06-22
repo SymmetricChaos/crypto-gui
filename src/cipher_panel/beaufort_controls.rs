@@ -5,7 +5,7 @@ use ciphers::{
     Cipher,
 };
 use egui::{Slider, TextEdit, TextStyle, Ui};
-use rand::thread_rng;
+use rand::{thread_rng, Rng};
 use utils::{functions::random_sample_replace, preset_alphabet::Alphabet};
 
 pub struct BeaufortFrame {
@@ -51,32 +51,32 @@ impl CipherFrame for BeaufortFrame {
         match self.cipher.multikey {
             true => {
                 ui.horizontal(|ui| {
-                    ui.label("Key Words");
+                    ui.label("Keywords");
                     ui.checkbox(&mut self.cipher.multikey, "Multikey");
                 });
                 ui.add(
-                    TextEdit::singleline(&mut self.cipher.key_words[0]).font(TextStyle::Monospace),
+                    TextEdit::singleline(&mut self.cipher.keywords[0]).font(TextStyle::Monospace),
                 );
                 ui.add(
-                    TextEdit::singleline(&mut self.cipher.key_words[1]).font(TextStyle::Monospace),
+                    TextEdit::singleline(&mut self.cipher.keywords[1]).font(TextStyle::Monospace),
                 );
                 ui.add(
-                    TextEdit::singleline(&mut self.cipher.key_words[2]).font(TextStyle::Monospace),
+                    TextEdit::singleline(&mut self.cipher.keywords[2]).font(TextStyle::Monospace),
                 );
                 ui.add(
-                    TextEdit::singleline(&mut self.cipher.key_words[3]).font(TextStyle::Monospace),
+                    TextEdit::singleline(&mut self.cipher.keywords[3]).font(TextStyle::Monospace),
                 );
                 ui.add(
-                    TextEdit::singleline(&mut self.cipher.key_words[4]).font(TextStyle::Monospace),
+                    TextEdit::singleline(&mut self.cipher.keywords[4]).font(TextStyle::Monospace),
                 );
             }
             false => {
                 ui.horizontal(|ui| {
-                    ui.label("Key Word ");
+                    ui.label("Keyword ");
                     ui.checkbox(&mut self.cipher.multikey, "Multikey");
                 });
                 ui.add(
-                    TextEdit::singleline(&mut self.cipher.key_words[0]).font(TextStyle::Monospace),
+                    TextEdit::singleline(&mut self.cipher.keywords[0]).font(TextStyle::Monospace),
                 );
             }
         }
@@ -88,11 +88,14 @@ impl CipherFrame for BeaufortFrame {
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        self.cipher.key_words[0] = random_sample_replace(&self.alphabet_string, 3, &mut rng);
-        self.cipher.key_words[1] = random_sample_replace(&self.alphabet_string, 5, &mut rng);
-        self.cipher.key_words[2] = random_sample_replace(&self.alphabet_string, 7, &mut rng);
-        self.cipher.key_words[3] = String::new();
-        self.cipher.key_words[4] = String::new();
+        self.cipher.keywords[0] =
+            random_sample_replace(&self.alphabet_string, rng.gen_range(3..12), &mut rng);
+        self.cipher.keywords[1] =
+            random_sample_replace(&self.alphabet_string, rng.gen_range(3..12), &mut rng);
+        self.cipher.keywords[2] =
+            random_sample_replace(&self.alphabet_string, rng.gen_range(3..12), &mut rng);
+        self.cipher.keywords[3] = String::new();
+        self.cipher.keywords[4] = String::new();
     }
 
     fn reset(&mut self) {

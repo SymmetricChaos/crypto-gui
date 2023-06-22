@@ -23,8 +23,8 @@ impl Default for PolybiusSquare {
 }
 
 impl PolybiusSquare {
-    pub fn assign_key(&mut self, key_word: &str, alphabet: &str) {
-        self.square = VecString::keyed_alphabet(key_word, alphabet);
+    pub fn assign_key(&mut self, keyword: &str, alphabet: &str) {
+        self.square = VecString::keyed_alphabet(keyword, alphabet);
         self.side_len = alphabet.chars().count().sqrt();
     }
 

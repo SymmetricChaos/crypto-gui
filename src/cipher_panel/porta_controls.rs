@@ -65,21 +65,21 @@ impl CipherFrame for PortaFrame {
         // match self.multikey {
         //     true => {
         //         ui.horizontal(|ui| {
-        //             ui.label("Key Words");
+        //             ui.label("Keywords");
         //             ui.checkbox(&mut self.multikey, "Multikey");
         //         });
-        //         ui.add(TextEdit::singleline(&mut self.key_words[0]).font(TextStyle::Monospace));
-        //         ui.add(TextEdit::singleline(&mut self.key_words[1]).font(TextStyle::Monospace));
-        //         ui.add(TextEdit::singleline(&mut self.key_words[2]).font(TextStyle::Monospace));
-        //         ui.add(TextEdit::singleline(&mut self.key_words[3]).font(TextStyle::Monospace));
-        //         ui.add(TextEdit::singleline(&mut self.key_words[4]).font(TextStyle::Monospace));
+        //         ui.add(TextEdit::singleline(&mut self.keywords[0]).font(TextStyle::Monospace));
+        //         ui.add(TextEdit::singleline(&mut self.keywords[1]).font(TextStyle::Monospace));
+        //         ui.add(TextEdit::singleline(&mut self.keywords[2]).font(TextStyle::Monospace));
+        //         ui.add(TextEdit::singleline(&mut self.keywords[3]).font(TextStyle::Monospace));
+        //         ui.add(TextEdit::singleline(&mut self.keywords[4]).font(TextStyle::Monospace));
         //     }
         //     false => {
         //         ui.horizontal(|ui| {
-        //             ui.label("Key Word ");
+        //             ui.label("Keyword ");
         //             ui.checkbox(&mut self.multikey, "Multikey");
         //         });
-        //         ui.add(TextEdit::singleline(&mut self.key_words[0]).font(TextStyle::Monospace));
+        //         ui.add(TextEdit::singleline(&mut self.keywords[0]).font(TextStyle::Monospace));
         //     }
         // }
     }

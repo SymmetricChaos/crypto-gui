@@ -6,7 +6,7 @@ use super::PolyMode;
 use crate::{errors::CipherError, traits::Cipher};
 
 pub struct Beaufort {
-    pub key_words: [String; 5],
+    pub keywords: [String; 5],
     alphabet: VecString,
     pub prog_shift: usize,
     pub mode: PolyMode,
@@ -22,7 +22,7 @@ impl Beaufort {
     pub fn key(&self) -> impl Iterator<Item = usize> + '_ {
         if self.multikey {
             let mut effective_key = vec![0usize; self.key_len()];
-            for key in self.key_words.iter().filter(|s| !s.is_empty()) {
+            for key in self.keywords.iter().filter(|s| !s.is_empty()) {
                 for (pos, sym) in key.chars().cycle().take(self.key_len()).enumerate() {
                     let p = self.alphabet.get_pos(sym).unwrap();
                     effective_key[pos] += p
@@ -34,7 +34,7 @@ impl Beaufort {
                 .collect();
             effective_key.into_iter()
         } else {
-            let key: Vec<usize> = self.key_words[0]
+            let key: Vec<usize> = self.keywords[0]
                 .chars()
                 .map(|x| self.alphabet.get_pos(x).unwrap())
                 .collect();
@@ -50,24 +50,24 @@ impl Beaufort {
     pub fn key_len(&self) -> usize {
         if self.multikey {
             // Should multiply together ignoring common factors. [9,6] should give 18
-            self.key_words
+            self.keywords
                 .iter()
                 .filter(|s| !s.is_empty())
                 .map(|s| s.chars().count())
                 .fold(1, num::integer::lcm)
         } else {
-            self.key_words[0].chars().count()
+            self.keywords[0].chars().count()
         }
     }
 
     // Unwrap justified by bounds on key
-    pub fn key_word(&self) -> String {
+    pub fn keyword(&self) -> String {
         if self.multikey {
             self.key()
                 .map(|v| self.alphabet.get_char(v).unwrap())
                 .collect()
         } else {
-            self.key_words[0].clone()
+            self.keywords[0].clone()
         }
     }
 
@@ -76,7 +76,7 @@ impl Beaufort {
     }
 
     fn validate_key(&self) -> Result<(), CipherError> {
-        for key in self.key_words.iter() {
+        for key in self.keywords.iter() {
             for c in key.chars() {
                 if !self.alphabet.contains(c) {
                     return Err(CipherError::invalid_alphabet_char(c));
@@ -207,7 +207,7 @@ impl Beaufort {
 impl Default for Beaufort {
     fn default() -> Self {
         Self {
-            key_words: [
+            keywords: [
                 String::new(),
                 String::new(),
                 String::new(),
@@ -256,8 +256,8 @@ mod beaufort_tests {
     #[test]
     fn encrypt_test_cyclic() {
         let mut cipher = Beaufort::default();
-        cipher.key_words[1] = String::from("GOOD");
-        cipher.key_words[0] = String::from("ENCYPTION");
+        cipher.keywords[1] = String::from("GOOD");
+        cipher.keywords[0] = String::from("ENCYPTION");
 
         cipher.mode = PolyMode::CylicKey;
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_CYCLIC);
@@ -266,8 +266,8 @@ mod beaufort_tests {
     #[test]
     fn decrypt_test_cyclic() {
         let mut cipher = Beaufort::default();
-        cipher.key_words[1] = String::from("GOOD");
-        cipher.key_words[0] = String::from("ENCYPTION");
+        cipher.keywords[1] = String::from("GOOD");
+        cipher.keywords[0] = String::from("ENCYPTION");
         cipher.mode = PolyMode::CylicKey;
         assert_eq!(cipher.decrypt(CIPHERTEXT_CYCLIC).unwrap(), PLAINTEXT);
     }
@@ -275,8 +275,8 @@ mod beaufort_tests {
     #[test]
     fn encrypt_test_auto() {
         let mut cipher = Beaufort::default();
-        cipher.key_words[1] = String::from("GOOD");
-        cipher.key_words[0] = String::from("ENCYPTION");
+        cipher.keywords[1] = String::from("GOOD");
+        cipher.keywords[0] = String::from("ENCYPTION");
         cipher.mode = PolyMode::Autokey;
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_AUTO);
     }
@@ -284,8 +284,8 @@ mod beaufort_tests {
     #[test]
     fn decrypt_test_auto() {
         let mut cipher = Beaufort::default();
-        cipher.key_words[1] = String::from("GOOD");
-        cipher.key_words[0] = String::from("ENCYPTION");
+        cipher.keywords[1] = String::from("GOOD");
+        cipher.keywords[0] = String::from("ENCYPTION");
         cipher.mode = PolyMode::Autokey;
         assert_eq!(cipher.decrypt(CIPHERTEXT_AUTO).unwrap(), PLAINTEXT);
     }
@@ -293,8 +293,8 @@ mod beaufort_tests {
     #[test]
     fn encrypt_test_prog() {
         let mut cipher = Beaufort::default();
-        cipher.key_words[1] = String::from("GOOD");
-        cipher.key_words[0] = String::from("ENCYPTION");
+        cipher.keywords[1] = String::from("GOOD");
+        cipher.keywords[0] = String::from("ENCYPTION");
         cipher.prog_shift = 3;
         cipher.mode = PolyMode::ProgKey;
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_PROG);
@@ -303,8 +303,8 @@ mod beaufort_tests {
     #[test]
     fn decrypt_test_prog() {
         let mut cipher = Beaufort::default();
-        cipher.key_words[1] = String::from("GOOD");
-        cipher.key_words[0] = String::from("ENCYPTION");
+        cipher.keywords[1] = String::from("GOOD");
+        cipher.keywords[0] = String::from("ENCYPTION");
         cipher.prog_shift = 3;
         cipher.mode = PolyMode::ProgKey;
         assert_eq!(cipher.decrypt(CIPHERTEXT_PROG).unwrap(), PLAINTEXT);

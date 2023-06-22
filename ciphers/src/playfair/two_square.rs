@@ -24,9 +24,9 @@ impl Default for TwoSquare {
 }
 
 impl TwoSquare {
-    pub fn assign_keys(&mut self, key_word_1: &str, key_word_2: &str, alphabet: &str) {
-        self.square1 = VecString::keyed_alphabet(key_word_1, alphabet);
-        self.square2 = VecString::keyed_alphabet(key_word_2, alphabet);
+    pub fn assign_keys(&mut self, keyword_1: &str, keyword_2: &str, alphabet: &str) {
+        self.square1 = VecString::keyed_alphabet(keyword_1, alphabet);
+        self.square2 = VecString::keyed_alphabet(keyword_2, alphabet);
         self.alphabet = VecString::unique_from(alphabet);
         self.grid_side_len = alphabet.chars().count().sqrt();
     }

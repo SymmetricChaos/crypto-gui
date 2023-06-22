@@ -8,7 +8,7 @@ use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
 pub struct SlidefairFrame {
     cipher: Slidefair,
     alphabet_string: String,
-    key_word_string: String,
+    keyword_string: String,
     spacer_string: String,
 }
 
@@ -17,7 +17,7 @@ impl Default for SlidefairFrame {
         Self {
             cipher: Default::default(),
             alphabet_string: Alphabet::BasicLatin.into(),
-            key_word_string: Default::default(),
+            keyword_string: Default::default(),
             spacer_string: String::from("X"),
         }
     }
@@ -34,9 +34,9 @@ impl CipherFrame for SlidefairFrame {
         }
         ui.add_space(16.0);
 
-        ui.label("Key Word");
-        if control_string(ui, &mut self.key_word_string).changed() {
-            self.cipher.assign_key(&self.key_word_string)
+        ui.label("Keyword");
+        if control_string(ui, &mut self.keyword_string).changed() {
+            self.cipher.assign_key(&self.keyword_string)
         }
         ui.add_space(16.0);
 
@@ -47,7 +47,7 @@ impl CipherFrame for SlidefairFrame {
             } else {
                 self.spacer_string = self.spacer_string.chars().next().unwrap().to_string()
             }
-            self.cipher.assign_spacer(&self.key_word_string)
+            self.cipher.assign_spacer(&self.keyword_string)
         }
         ui.add_space(16.0);
 
@@ -64,8 +64,8 @@ impl CipherFrame for SlidefairFrame {
     }
 
     fn randomize(&mut self) {
-        self.key_word_string = shuffled_str(&self.alphabet_string, &mut thread_rng());
-        self.cipher.assign_key(&self.key_word_string)
+        self.keyword_string = shuffled_str(&self.alphabet_string, &mut thread_rng());
+        self.cipher.assign_key(&self.keyword_string)
     }
 
     fn reset(&mut self) {

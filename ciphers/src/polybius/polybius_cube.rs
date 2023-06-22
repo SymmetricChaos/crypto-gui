@@ -22,8 +22,8 @@ impl Default for PolybiusCube {
 }
 
 impl PolybiusCube {
-    pub fn assign_grid(&mut self, key_word: &str, alphabet: &str) {
-        self.grid = VecString::keyed_alphabet(key_word, alphabet);
+    pub fn assign_grid(&mut self, keyword: &str, alphabet: &str) {
+        self.grid = VecString::keyed_alphabet(keyword, alphabet);
     }
 
     pub fn assign_labels(&mut self, labels: &str) {
