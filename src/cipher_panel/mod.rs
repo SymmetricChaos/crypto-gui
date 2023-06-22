@@ -157,13 +157,26 @@ impl CipherInterface {
     pub fn combo_boxes(&mut self, ui: &mut Ui, active_cipher: &mut Option<CipherId>) {
         combox_box(
             &[
-                CipherId::Affine,
-                CipherId::Caesar,
-                CipherId::Decoder,
-                CipherId::Plugboard,
-                CipherId::Substitution,
+                CipherId::Enigma,
+                CipherId::Hebern,
+                CipherId::M209,
+                CipherId::Sigaba,
+                // CipherId::Purple,
             ],
-            "Substitution",
+            "Cipher Machine",
+            active_cipher,
+            ui,
+        );
+
+        combox_box(
+            &[
+                CipherId::FourSquare,
+                CipherId::Playfair,
+                CipherId::SeriatedPlayfair,
+                CipherId::Slidefair,
+                CipherId::TwoSquare,
+            ],
+            "Playfair",
             active_cipher,
             ui,
         );
@@ -187,13 +200,36 @@ impl CipherInterface {
 
         combox_box(
             &[
-                CipherId::Enigma,
-                CipherId::Hebern,
-                CipherId::M209,
-                CipherId::Sigaba,
-                // CipherId::Purple,
+                CipherId::Adfgvx,
+                CipherId::B64,
+                CipherId::Bifid,
+                CipherId::Checkerboard,
+                CipherId::Nihilist,
+                CipherId::Polybius,
+                CipherId::PolybiusCube,
+                CipherId::Trifid,
             ],
-            "Cipher Machine",
+            "Polybius",
+            active_cipher,
+            ui,
+        );
+
+        combox_box(
+            &[
+                CipherId::Affine,
+                CipherId::Caesar,
+                CipherId::Decoder,
+                CipherId::Plugboard,
+                CipherId::Substitution,
+            ],
+            "Substitution",
+            active_cipher,
+            ui,
+        );
+
+        combox_box(
+            &[CipherId::Batco, CipherId::Dryad, CipherId::Rs44],
+            "Tactical",
             active_cipher,
             ui,
         );
@@ -208,42 +244,6 @@ impl CipherInterface {
                 CipherId::TurningGrille,
             ],
             "Transposition",
-            active_cipher,
-            ui,
-        );
-
-        combox_box(
-            &[
-                CipherId::FourSquare,
-                CipherId::Playfair,
-                CipherId::SeriatedPlayfair,
-                CipherId::Slidefair,
-                CipherId::TwoSquare,
-            ],
-            "Playfair",
-            active_cipher,
-            ui,
-        );
-
-        combox_box(
-            &[CipherId::Batco, CipherId::Dryad, CipherId::Rs44],
-            "Tactical",
-            active_cipher,
-            ui,
-        );
-
-        combox_box(
-            &[
-                CipherId::Adfgvx,
-                CipherId::B64,
-                CipherId::Bifid,
-                CipherId::Checkerboard,
-                CipherId::Nihilist,
-                CipherId::Polybius,
-                CipherId::PolybiusCube,
-                CipherId::Trifid,
-            ],
-            "Polybius",
             active_cipher,
             ui,
         );
