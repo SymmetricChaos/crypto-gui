@@ -9,6 +9,16 @@ pub struct B64 {
     columnar2: Columnar,
 }
 
+impl Default for B64 {
+    fn default() -> Self {
+        Self {
+            polybius: PolybiusSquare::default(),
+            columnar1: Columnar::default(),
+            columnar2: Columnar::default(),
+        }
+    }
+}
+
 impl B64 {
     pub fn assign_polybius_key(&mut self, key: &str) {
         self.polybius.assign_key(key, Alphabet::Base64.slice());
@@ -30,16 +40,6 @@ impl B64 {
 
     pub fn polybius_grid(&self) -> String {
         self.polybius.show_grid()
-    }
-}
-
-impl Default for B64 {
-    fn default() -> Self {
-        Self {
-            polybius: PolybiusSquare::default(),
-            columnar1: Columnar::default(),
-            columnar2: Columnar::default(),
-        }
     }
 }
 
@@ -72,8 +72,8 @@ mod b64_tests {
     fn encrypt_test() {
         let mut cipher = B64::default();
         cipher.assign_polybius_key("ENCRYPTION");
-        cipher.assign_columnar_key_1("NOVELTY");
-        cipher.assign_columnar_key_2("SHUFFLE");
+        cipher.assign_columnar_key_1("NOVELTY").unwrap();
+        cipher.assign_columnar_key_2("SHUFFLE").unwrap();
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
@@ -81,8 +81,8 @@ mod b64_tests {
     fn decrypt_test() {
         let mut cipher = B64::default();
         cipher.assign_polybius_key("ENCRYPTION");
-        cipher.assign_columnar_key_1("NOVELTY");
-        cipher.assign_columnar_key_2("SHUFFLE");
+        cipher.assign_columnar_key_1("NOVELTY").unwrap();
+        cipher.assign_columnar_key_2("SHUFFLE").unwrap();
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

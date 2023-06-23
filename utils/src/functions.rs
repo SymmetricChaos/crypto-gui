@@ -7,6 +7,10 @@ use rand::{
 };
 use std::hash::Hash;
 
+pub fn filter_string(string: &mut String, alphabet: &str) {
+    *string = string.chars().filter(|c| alphabet.contains(*c)).collect();
+}
+
 pub fn bimap_from_iter<I, S, T>(iter: I) -> BiMap<S, T>
 where
     I: Iterator<Item = (S, T)>,

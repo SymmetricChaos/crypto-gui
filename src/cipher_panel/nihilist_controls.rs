@@ -2,9 +2,9 @@ use super::CipherFrame;
 use crate::ui_elements::{control_string, mono, randomize_reset};
 use ciphers::{polybius::nihilist::Nihilist, Cipher};
 use eframe::egui::Ui;
-use rand::thread_rng;
+use rand::{thread_rng, Rng};
 use utils::{
-    functions::{random_sample_replace, shuffled_str},
+    functions::{filter_string, random_sample_replace, shuffled_str},
     preset_alphabet::Alphabet,
 };
 
@@ -29,17 +29,8 @@ impl Default for NihilistFrame {
 impl NihilistFrame {
     fn assign_keys(&mut self) {
         // Filter the keys
-        self.additive_key_string = self
-            .additive_key_string
-            .chars()
-            .filter(|c| !self.alphabet_string.contains(*c))
-            .collect();
-
-        self.polybius_key_string = self
-            .polybius_key_string
-            .chars()
-            .filter(|c| !self.alphabet_string.contains(*c))
-            .collect();
+        filter_string(&mut self.additive_key_string, &self.alphabet_string);
+        filter_string(&mut self.polybius_key_string, &self.alphabet_string);
 
         self.cipher
             .assign_keys(
@@ -107,9 +98,10 @@ impl CipherFrame for NihilistFrame {
     }
 
     fn randomize(&mut self) {
-        self.polybius_key_string = shuffled_str(&self.alphabet_string, &mut thread_rng());
+        let mut rng = thread_rng();
+        self.polybius_key_string = shuffled_str(&self.alphabet_string, &mut rng);
         self.additive_key_string =
-            random_sample_replace(&self.alphabet_string, 6, &mut thread_rng());
+            random_sample_replace(&self.alphabet_string, rng.gen_range(3..12), &mut rng);
         self.assign_keys();
     }
 

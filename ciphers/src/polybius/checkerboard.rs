@@ -90,7 +90,7 @@ impl Cipher for StraddlingCheckerboard {
             // If in digit mode push the character directly onto the output
             // then turn off digit_mode
             if digit_mode {
-                // check that c is a character and return Error if not
+                // check that c is a digit and return Error if not
                 if !c.is_ascii_digit() {
                     return Err(CipherError::input(
                         "only digits 0 to 9 can be coded as digits",

@@ -68,7 +68,7 @@ impl CipherFrame for TurningGrilleFrame {
             });
         }
 
-        egui::Grid::new("columnar_grid")
+        egui::Grid::new("turning_grille_grid")
             .num_columns(self.cipher.grille_width())
             .min_col_width(2.5)
             .max_col_width(2.5)

@@ -7,7 +7,7 @@ use ciphers::polybius::Adfgvx;
 use ciphers::traits::Cipher;
 use egui::Color32;
 use rand::{thread_rng, Rng};
-use utils::functions::shuffled_str;
+use utils::functions::{filter_string, shuffled_str};
 use utils::preset_alphabet::Alphabet;
 
 pub struct AdfgvxFrame {
@@ -30,11 +30,7 @@ impl Default for AdfgvxFrame {
 
 impl AdfgvxFrame {
     fn assign_columnar_key(&mut self) {
-        self.columnar_key_string = self
-            .columnar_key_string
-            .chars()
-            .filter(|c| !self.alphabet_string.contains(*c))
-            .collect();
+        filter_string(&mut self.columnar_key_string, &self.alphabet_string);
         self.cipher
             .assign_columnar_key(&self.columnar_key_string)
             .unwrap() // justified by filtering of key_string

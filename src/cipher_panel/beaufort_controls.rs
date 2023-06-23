@@ -6,7 +6,10 @@ use ciphers::{
 };
 use egui::{Slider, TextEdit, TextStyle, Ui};
 use rand::{thread_rng, Rng};
-use utils::{functions::random_sample_replace, preset_alphabet::Alphabet};
+use utils::{
+    functions::{filter_string, random_sample_replace},
+    preset_alphabet::Alphabet,
+};
 
 pub struct BeaufortFrame {
     cipher: Beaufort,
@@ -54,21 +57,11 @@ impl CipherFrame for BeaufortFrame {
                     ui.label("Keywords");
                     ui.checkbox(&mut self.cipher.multikey, "Multikey");
                 });
-                ui.add(
-                    TextEdit::singleline(&mut self.cipher.keywords[0]).font(TextStyle::Monospace),
-                );
-                ui.add(
-                    TextEdit::singleline(&mut self.cipher.keywords[1]).font(TextStyle::Monospace),
-                );
-                ui.add(
-                    TextEdit::singleline(&mut self.cipher.keywords[2]).font(TextStyle::Monospace),
-                );
-                ui.add(
-                    TextEdit::singleline(&mut self.cipher.keywords[3]).font(TextStyle::Monospace),
-                );
-                ui.add(
-                    TextEdit::singleline(&mut self.cipher.keywords[4]).font(TextStyle::Monospace),
-                );
+                for keyword in self.cipher.keywords.iter_mut() {
+                    if control_string(ui, keyword).changed() {
+                        filter_string(keyword, &self.alphabet_string)
+                    }
+                }
             }
             false => {
                 ui.horizontal(|ui| {

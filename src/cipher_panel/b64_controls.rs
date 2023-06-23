@@ -4,7 +4,7 @@ use ciphers::{polybius::B64, Cipher};
 use egui::Ui;
 use rand::{thread_rng, Rng};
 use utils::{
-    functions::{random_sample_replace, shuffled_str},
+    functions::{filter_string, random_sample_replace, shuffled_str},
     preset_alphabet::Alphabet,
 };
 
@@ -18,33 +18,21 @@ pub struct B64Frame {
 
 impl B64Frame {
     fn assign_columnar_key1(&mut self) {
-        self.columnar_key_string_1 = self
-            .columnar_key_string_1
-            .chars()
-            .filter(|c| !Alphabet::Base64.contains(c))
-            .collect();
+        filter_string(&mut self.columnar_key_string_1, Alphabet::Base64.into());
         self.cipher
             .assign_columnar_key_1(&self.columnar_key_string_1)
             .unwrap()
     }
 
     fn assign_columnar_key2(&mut self) {
-        self.columnar_key_string_2 = self
-            .columnar_key_string_2
-            .chars()
-            .filter(|c| !Alphabet::Base64.contains(c))
-            .collect();
+        filter_string(&mut self.columnar_key_string_2, Alphabet::Base64.into());
         self.cipher
             .assign_columnar_key_2(&self.columnar_key_string_2)
             .unwrap()
     }
 
     fn assign_polybius_key(&mut self) {
-        self.polybius_key_string = self
-            .polybius_key_string
-            .chars()
-            .filter(|c| !Alphabet::Base64.contains(c))
-            .collect();
+        filter_string(&mut self.polybius_key_string, Alphabet::Base64.into());
         self.cipher
             .assign_columnar_key_1(&self.polybius_key_string)
             .unwrap()
@@ -55,6 +43,9 @@ impl CipherFrame for B64Frame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         randomize_reset(ui, self);
         ui.add_space(16.0);
+
+        ui.label("Base64 Alphabet");
+        ui.label(Alphabet::Base64.slice());
 
         ui.label("Polybius Keyword");
         if control_string(ui, &mut self.polybius_key_string).changed() {
@@ -88,7 +79,7 @@ impl CipherFrame for B64Frame {
         self.cipher.assign_polybius_key(&self.polybius_key_string);
 
         // First columnar
-        let n_chars = rng.gen_range(6..10);
+        let n_chars = rng.gen_range(6..12);
         self.columnar_key_string_1 =
             random_sample_replace(Alphabet::BasicLatin.slice(), n_chars, &mut rng);
         self.cipher
@@ -96,7 +87,7 @@ impl CipherFrame for B64Frame {
             .unwrap(); // unwrap justified by pulling from BasicLatin alphabet
 
         // Second columnar
-        let n_chars = rng.gen_range(6..10);
+        let n_chars = rng.gen_range(6..12);
         self.columnar_key_string_2 =
             random_sample_replace(Alphabet::BasicLatin.slice(), n_chars, &mut rng);
         self.cipher

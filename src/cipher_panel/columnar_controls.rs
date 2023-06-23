@@ -5,7 +5,7 @@ use ciphers::traits::Cipher;
 use ciphers::transposition::Columnar;
 use eframe::egui::Ui;
 use rand::{thread_rng, Rng};
-use utils::functions::random_sample_replace;
+use utils::functions::{filter_string, random_sample_replace};
 use utils::grid::Grid;
 use utils::preset_alphabet::Alphabet;
 
@@ -29,11 +29,7 @@ impl Default for ColumnarFrame {
 
 impl ColumnarFrame {
     fn assign_key(&mut self) {
-        self.key_string = self
-            .key_string
-            .chars()
-            .filter(|c| !self.alphabet_string.contains(*c))
-            .collect();
+        filter_string(&mut self.key_string, &self.alphabet_string);
         self.cipher
             .assign_key(&self.key_string, &self.alphabet_string)
             .unwrap() // justified by filtering of key_string
