@@ -52,6 +52,7 @@ pub mod plugboard_controls;
 pub mod polybius_cube_controls;
 pub mod polybius_square_controls;
 pub mod porta_controls;
+pub mod purple_controls;
 pub mod quagmire_controls;
 pub mod rail_fence_controls;
 pub mod rs44_controls;
@@ -63,7 +64,6 @@ pub mod trifid_controls;
 pub mod turning_grille_controls;
 pub mod two_square_controls;
 pub mod vigenere_controls;
-// pub mod purple_controls;
 
 pub trait CipherFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
