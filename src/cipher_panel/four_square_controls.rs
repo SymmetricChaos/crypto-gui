@@ -32,13 +32,18 @@ impl CipherFrame for FourSquareFrame {
 
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
-            if ui.button("No Q").clicked() {
-                self.alphabet_string = Alphabet::BasicLatinNoQ.string();
+            if ui.button("No C").clicked() {
+                self.alphabet_string = Alphabet::BasicLatinNoC.string();
                 self.cipher
                     .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
             };
             if ui.button("No J").clicked() {
                 self.alphabet_string = Alphabet::BasicLatinNoJ.string();
+                self.cipher
+                    .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
+            };
+            if ui.button("No Q").clicked() {
+                self.alphabet_string = Alphabet::BasicLatinNoQ.string();
                 self.cipher
                     .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
             };

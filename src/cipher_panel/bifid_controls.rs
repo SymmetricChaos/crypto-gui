@@ -32,17 +32,23 @@ impl CipherFrame for BifidFrame {
 
         ui.label("Select Alphabet");
         ui.horizontal(|ui| {
-            if ui.button("No Q").clicked() {
+            if ui.button("No C").clicked() {
                 self.cipher
                     .polybius
-                    .assign_key(&self.key_string, Alphabet::BasicLatinNoQ.into());
-                self.alphabet_string = Alphabet::BasicLatinNoQ.string();
+                    .assign_key(&self.key_string, Alphabet::BasicLatinNoC.into());
+                self.alphabet_string = Alphabet::BasicLatinNoC.string();
             };
             if ui.button("No J").clicked() {
                 self.cipher
                     .polybius
                     .assign_key(&self.key_string, Alphabet::BasicLatinNoJ.into());
                 self.alphabet_string = Alphabet::BasicLatinNoJ.string();
+            };
+            if ui.button("No Q").clicked() {
+                self.cipher
+                    .polybius
+                    .assign_key(&self.key_string, Alphabet::BasicLatinNoQ.into());
+                self.alphabet_string = Alphabet::BasicLatinNoQ.string();
             };
             if ui.button("Alphanumeric").clicked() {
                 self.cipher

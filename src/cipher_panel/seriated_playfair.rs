@@ -28,14 +28,20 @@ impl CipherFrame for SeriatedPlayfairFrame {
 
         ui.label("Common Alphabets");
         ui.horizontal(|ui| {
-            if ui.button("No Q").clicked() {
-                self.alphabet_string = Alphabet::BasicLatinNoQ.string();
+            if ui.button("No C").clicked() {
+                self.alphabet_string = Alphabet::BasicLatinNoC.string();
                 self.cipher
                     .playfair
                     .assign_key(&self.key_string, &self.alphabet_string)
             };
             if ui.button("No J").clicked() {
                 self.alphabet_string = Alphabet::BasicLatinNoJ.string();
+                self.cipher
+                    .playfair
+                    .assign_key(&self.key_string, &self.alphabet_string)
+            };
+            if ui.button("No Q").clicked() {
+                self.alphabet_string = Alphabet::BasicLatinNoQ.string();
                 self.cipher
                     .playfair
                     .assign_key(&self.key_string, &self.alphabet_string)
