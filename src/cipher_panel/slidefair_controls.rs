@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, mono, randomize_reset};
+use crate::ui_elements::{control_string, mono, randomize_reset, string_slider};
 use ciphers::{playfair::Slidefair, Cipher};
 use egui::Ui;
 use rand::thread_rng;
@@ -9,7 +9,7 @@ pub struct SlidefairFrame {
     cipher: Slidefair,
     alphabet_string: String,
     keyword_string: String,
-    spacer_string: String,
+    spacer_position: usize,
 }
 
 impl Default for SlidefairFrame {
@@ -18,7 +18,7 @@ impl Default for SlidefairFrame {
             cipher: Default::default(),
             alphabet_string: Alphabet::BasicLatin.into(),
             keyword_string: Default::default(),
-            spacer_string: String::from("X"),
+            spacer_position: 24,
         }
     }
 }
@@ -41,13 +41,12 @@ impl CipherFrame for SlidefairFrame {
         ui.add_space(16.0);
 
         ui.label("Spacer Character\nInserted at end as padding if needed");
-        if control_string(ui, &mut self.spacer_string).changed() {
-            if self.spacer_string.is_empty() {
-                ui.label("defaulting to X");
-            } else {
-                self.spacer_string = self.spacer_string.chars().next().unwrap().to_string()
-            }
-            self.cipher.assign_spacer(&self.keyword_string)
+        if string_slider(ui, &self.alphabet_string, &mut self.spacer_position).changed() {
+            self.cipher.spacer = self
+                .alphabet_string
+                .chars()
+                .nth(self.spacer_position)
+                .unwrap()
         }
         ui.add_space(16.0);
 

@@ -30,7 +30,7 @@ impl CipherFrame for CaesarFrame {
         }
         ui.add_space(16.0);
 
-        ui.label("Key");
+        ui.label("Shift Distance");
         let alpha_range = 0..=(self.cipher.alphabet.len() as i32 - 1);
         ui.add(Slider::new(&mut self.cipher.shift, alpha_range));
         ui.add_space(16.0);

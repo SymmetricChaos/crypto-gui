@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use codes::binary_to_text::BinaryToTextMode;
 use eframe::egui::RichText;
-use egui::{Color32, Label, TextStyle, Ui};
+use egui::{Color32, DragValue, Label, Response, TextStyle, Ui};
 use utils::grid::{str_to_char_grid, Grid};
 
 use crate::cipher_panel::CipherFrame;
@@ -105,6 +105,26 @@ pub fn randomize_reset(ui: &mut egui::Ui, cipher_frame: &mut dyn CipherFrame) {
     if ui.button("Reset").clicked() {
         cipher_frame.reset()
     }
+}
+
+pub fn string_slider(ui: &mut Ui, string: &str, position: &mut usize) -> Response {
+    ui.add(
+        DragValue::new(position)
+            .clamp_range(0..=string.chars().count() - 1)
+            .custom_formatter(|n, _| {
+                let n = n as usize;
+                string.chars().nth(n).unwrap().to_string()
+            })
+            .custom_parser(|s| {
+                if s.is_empty() {
+                    Some(0.0)
+                } else {
+                    let c = s.chars().next().unwrap();
+                    string.chars().position(|x| x == c).map(|n| n as f64)
+                }
+            })
+            .speed(0.2),
+    )
 }
 
 // pub fn code_button_columns(

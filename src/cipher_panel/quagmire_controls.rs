@@ -1,10 +1,10 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, error_text, randomize_reset};
+use crate::ui_elements::{control_string, error_text, randomize_reset, string_slider};
 use ciphers::{
     polyalphabetic::{Quagmire, QuagmireVersion},
     Cipher,
 };
-use egui::{DragValue, Ui};
+use egui::Ui;
 use rand::thread_rng;
 use utils::{functions::random_sample_replace, preset_alphabet::Alphabet};
 
@@ -60,29 +60,7 @@ impl CipherFrame for QuagmireFrame {
 
         ui.add_space(8.0);
         ui.label("Indicator Letter");
-        if ui
-            .add(
-                DragValue::new(&mut self.indicator_position)
-                    .clamp_range(0..=self.alphabet_string.chars().count() - 1)
-                    .custom_formatter(|n, _| {
-                        let n = n as usize;
-                        self.alphabet_string.chars().nth(n).unwrap().to_string()
-                    })
-                    .custom_parser(|s| {
-                        if s.is_empty() {
-                            Some(0.0)
-                        } else {
-                            let c = s.chars().next().unwrap();
-                            self.alphabet_string
-                                .chars()
-                                .position(|x| x == c)
-                                .map(|n| n as f64)
-                        }
-                    })
-                    .speed(0.2),
-            )
-            .changed()
-        {
+        if string_slider(ui, &self.alphabet_string, &mut self.indicator_position).changed() {
             self.cipher.indicator = self
                 .alphabet_string
                 .chars()

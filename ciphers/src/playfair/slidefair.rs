@@ -6,7 +6,7 @@ use utils::{preset_alphabet::Alphabet, vecstring::VecString};
 
 pub struct Slidefair {
     alphabet: VecString,
-    spacer: char,
+    pub spacer: char,
     key: Vec<usize>,
 }
 
@@ -35,11 +35,6 @@ impl Slidefair {
     // Create cyclic key
     pub fn cyclic_key(&self) -> impl Iterator<Item = &usize> + '_ {
         self.key.iter().cycle()
-    }
-
-    // Set the spacer
-    pub fn assign_spacer(&mut self, spacer_string: &str) {
-        self.spacer = spacer_string.chars().next().unwrap_or('X');
     }
 
     fn encrypt_pair(&self, pair: &[char], slide: usize, output: &mut String) {
