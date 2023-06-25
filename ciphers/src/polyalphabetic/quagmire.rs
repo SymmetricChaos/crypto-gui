@@ -49,11 +49,15 @@ impl Quagmire {
         self.ct_key = VecString::keyed_alphabet(&key, &self.alphabet.to_string());
     }
 
-    // Converts the ind_key_string into a vector of usize that represent how
+    pub fn ind_key(&self) -> &Vec<i32> {
+        &self.ind_key
+    }
+
+    // Converts the ind_key_string into a vector of i32 that represents how
     // many spaces the ct_alphabet is rotated relative to its starting position
     pub fn assign_ind_key(&mut self, key: &str) -> Result<(), CipherError> {
         self.ind_key.clear();
-        let ind_pos = self.indicator_position() as i32;
+        let ind_pos = self.indicator_position()? as i32;
         let len = self.alphabet.len() as i32;
         let ct = match self.version {
             QuagmireVersion::V1 => &self.alphabet,
@@ -69,16 +73,22 @@ impl Quagmire {
         Ok(())
     }
 
-    pub fn indicator_position(&self) -> usize {
+    pub fn indicator_position(&self) -> Result<usize, CipherError> {
         match self.version {
             QuagmireVersion::V2 => self
                 .alphabet
                 .get_pos(self.indicator)
-                .expect(&format!("invalid indicator character `{}`", self.indicator)),
+                .ok_or(CipherError::Key(format!(
+                    "invalid indicator character `{}`",
+                    self.indicator
+                ))),
             _ => self
                 .pt_key
                 .get_pos(self.indicator)
-                .expect(&format!("invalid indicator character `{}`", self.indicator)),
+                .ok_or(CipherError::Key(format!(
+                    "invalid indicator character `{}`",
+                    self.indicator
+                ))),
         }
     }
 
