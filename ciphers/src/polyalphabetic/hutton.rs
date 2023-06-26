@@ -10,7 +10,7 @@ pub enum HuttonVersion {
 
 pub struct Hutton {
     pub version: HuttonVersion,
-    alphabet: VecString,
+    plain_alphabet: VecString,
     keyed_alpha: VecString,
     password: Vec<usize>,
 }
@@ -19,8 +19,8 @@ impl Default for Hutton {
     fn default() -> Self {
         Self {
             version: HuttonVersion::V1,
-            alphabet: VecString::from(Alphabet::BasicLatin),
-            keyed_alpha: VecString::new(),
+            plain_alphabet: VecString::from(Alphabet::BasicLatin),
+            keyed_alpha: VecString::from(Alphabet::BasicLatin),
             password: Default::default(),
         }
     }
@@ -31,19 +31,16 @@ impl Hutton {
         self.password.iter().cycle()
     }
 
-    pub fn assign_alphabet(&mut self, alphabet: &str) {
-        self.alphabet = VecString::unique_from(alphabet);
+    pub fn assign_key(&mut self, key: &str, alphabet: &str) {
+        self.plain_alphabet = VecString::unique_from(alphabet);
+        self.keyed_alpha = VecString::from(keyed_alphabet(key, &self.plain_alphabet.to_string()));
     }
 
     pub fn assign_password(&mut self, password: &str) {
         self.password = password
             .chars()
-            .map(|c| self.alphabet.get_pos(c).unwrap() + 1)
+            .map(|c| self.plain_alphabet.get_pos(c).unwrap() + 1)
             .collect();
-    }
-
-    pub fn assign_key(&mut self, key: &str) {
-        self.keyed_alpha = VecString::from(keyed_alphabet(key, &self.alphabet.to_string()));
     }
 }
 
@@ -51,26 +48,26 @@ impl Cipher for Hutton {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let mut out = String::with_capacity(text.len());
         // mutable alphabet for use while function runs
-        let mut inner_alpha = self.keyed_alpha.clone();
+        let mut inner_alphabet = self.keyed_alpha.clone();
 
-        let len = self.alphabet.len();
+        let len = self.plain_alphabet.len();
 
         for (c, p) in text.chars().zip(self.password_values_cycle()) {
             // add the password number to the position of the character in the keyed alphabet
-            let mut value = inner_alpha.get_pos(c).unwrap() + p;
+            let mut value = inner_alphabet.get_pos(c).unwrap() + p;
             // in Version 2 add the plain alphabet position of the first symbol in the keyed alphabet
             if self.version == HuttonVersion::V2 {
                 value += self
-                    .alphabet
-                    .get_pos(*inner_alpha.get_char(0).unwrap())
+                    .plain_alphabet
+                    .get_pos(*inner_alphabet.get_char(0).unwrap())
                     .unwrap();
                 value += 1;
             }
             // reduce modulo alphabet length and push the character at that position in the keyed alphabet to the ciphertext
             value %= len;
-            out.push(*inner_alpha.get_char(value).unwrap());
+            out.push(*inner_alphabet.get_char(value).unwrap());
 
-            inner_alpha.swap_indicies(inner_alpha.get_pos(c).unwrap(), value);
+            inner_alphabet.swap_indicies(inner_alphabet.get_pos(c).unwrap(), value);
         }
         Ok(out)
     }
@@ -78,15 +75,15 @@ impl Cipher for Hutton {
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         let mut out = String::with_capacity(text.len());
         let mut inner_alphabet = self.keyed_alpha.clone();
-        let len = self.alphabet.len();
+        let len = self.plain_alphabet.len();
 
         // this offset allows us to avoid dealing with negative numbers
-        let offset = self.alphabet.len() * 2;
+        let offset = self.plain_alphabet.len() * 2;
         for (c, p) in text.chars().zip(self.password_values_cycle()) {
             let mut value = offset + inner_alphabet.get_pos(c).unwrap() - p;
             if self.version == HuttonVersion::V2 {
                 value -= self
-                    .alphabet
+                    .plain_alphabet
                     .get_pos(*inner_alphabet.get_char(0).unwrap())
                     .unwrap();
                 value -= 1;
@@ -112,7 +109,7 @@ mod hutton_tests {
     fn encrypt_test_v1() {
         let mut cipher = Hutton::default();
         cipher.assign_password("VUVUZELAS");
-        cipher.assign_key("OBSTACLE");
+        cipher.assign_key("OBSTACLE", Alphabet::BasicLatin.into());
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_V1);
     }
 
@@ -120,7 +117,7 @@ mod hutton_tests {
     fn decrypt_test_v1() {
         let mut cipher = Hutton::default();
         cipher.assign_password("VUVUZELAS");
-        cipher.assign_key("OBSTACLE");
+        cipher.assign_key("OBSTACLE", Alphabet::BasicLatin.into());
         assert_eq!(cipher.decrypt(CIPHERTEXT_V1).unwrap(), PLAINTEXT);
     }
 
@@ -129,7 +126,7 @@ mod hutton_tests {
         let mut cipher = Hutton::default();
         cipher.version = HuttonVersion::V2;
         cipher.assign_password("VUVUZELAS");
-        cipher.assign_key("OBSTACLE");
+        cipher.assign_key("OBSTACLE", Alphabet::BasicLatin.into());
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT_V2);
     }
 
@@ -138,7 +135,7 @@ mod hutton_tests {
         let mut cipher = Hutton::default();
         cipher.version = HuttonVersion::V2;
         cipher.assign_password("VUVUZELAS");
-        cipher.assign_key("OBSTACLE");
+        cipher.assign_key("OBSTACLE", Alphabet::BasicLatin.into());
         assert_eq!(cipher.decrypt(CIPHERTEXT_V2).unwrap(), PLAINTEXT);
     }
 }

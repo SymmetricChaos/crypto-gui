@@ -33,7 +33,9 @@ impl CipherFrame for HuttonFrame {
 
         ui.label("Alphabet");
         if control_string(ui, &mut self.alphabet_string).changed() {
-            self.cipher.assign_alphabet(&self.alphabet_string)
+            self.cipher
+                .assign_key(&self.key_string, &self.alphabet_string);
+            self.cipher.assign_password(&self.password_string);
         }
 
         ui.add_space(16.0);
@@ -52,7 +54,9 @@ impl CipherFrame for HuttonFrame {
         ui.add_space(16.0);
         ui.label("Keyword");
         if control_string(ui, &mut self.key_string).changed() {
-            self.cipher.assign_key(&self.key_string)
+            self.cipher
+                .assign_key(&self.key_string, &self.alphabet_string);
+            self.cipher.assign_password(&self.password_string);
         }
     }
 
@@ -65,7 +69,8 @@ impl CipherFrame for HuttonFrame {
         self.password_string = shuffled_str(&self.alphabet_string, &mut rng);
         self.cipher.assign_password(&self.password_string);
         self.key_string = shuffled_str(&self.alphabet_string, &mut rng);
-        self.cipher.assign_key(&self.key_string);
+        self.cipher
+            .assign_key(&self.key_string, &self.alphabet_string);
     }
 
     fn reset(&mut self) {
