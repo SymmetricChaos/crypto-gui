@@ -5,7 +5,6 @@ use utils::vecstring::VecString;
 pub struct Caesar {
     pub shift: i32,
     pub alphabet: VecString,
-    pub alphabet_string: String,
 }
 
 impl Caesar {
@@ -35,7 +34,6 @@ impl Default for Caesar {
         Self {
             shift: 0,
             alphabet: VecString::from(Alphabet::BasicLatin),
-            alphabet_string: String::from(Alphabet::BasicLatin),
         }
     }
 }
