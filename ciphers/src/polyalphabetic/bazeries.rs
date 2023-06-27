@@ -1,6 +1,6 @@
 use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
-use utils::{preset_alphabet::Alphabet, vecstring::VecString};
+use utils::{functions::keyed_alphabet, preset_alphabet::Alphabet, vecstring::VecString};
 
 pub struct Bazeries {
     pub alphabet: VecString,
@@ -9,12 +9,11 @@ pub struct Bazeries {
 }
 
 impl Bazeries {
-    pub fn control_wheels() {
-        todo!("must be possible to enforce alphabet length, maybe just have function to 'set_wheels' that checks correctness")
-    }
-
     pub fn assign_alphabet(&mut self, alphabet: &str) {
         self.alphabet = VecString::unique_from(alphabet);
+        for wheel in self.wheels.iter_mut() {
+            *wheel = keyed_alphabet(&wheel, alphabet)
+        }
     }
 
     pub fn add_wheel(&mut self) {
