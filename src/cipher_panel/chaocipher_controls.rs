@@ -1,14 +1,28 @@
 use super::CipherFrame;
 use crate::ui_elements::{control_string, randomize_reset};
-use ciphers::{polyalphabetic::Chaocipher, Cipher};
+use ciphers::{
+    polyalphabetic::{
+        chaocipher::{left_permute, right_permute},
+        Chaocipher,
+    },
+    Cipher,
+};
 use egui::Ui;
 use rand::thread_rng;
-use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
+use utils::{
+    functions::{filter_string, shuffled_str},
+    preset_alphabet::Alphabet,
+    vecstring::VecString,
+};
 
 pub struct ChaocipherFrame {
     cipher: Chaocipher,
     left_string: String,
     right_string: String,
+    example: String,
+    example_left: VecString,
+    example_right: VecString,
+    example_outout: String,
 }
 
 impl Default for ChaocipherFrame {
@@ -17,6 +31,10 @@ impl Default for ChaocipherFrame {
             cipher: Default::default(),
             left_string: String::from("HXUCZVAMDSLKPEFJRIGTWOBNYQ"),
             right_string: String::from("PTLNBQDEOYSFAVZKGJRIHWXUMC"),
+            example: String::from("EXAMPLE"),
+            example_outout: String::new(),
+            example_left: VecString::from(Alphabet::BasicLatin),
+            example_right: VecString::from(Alphabet::BasicLatin),
         }
     }
 }
@@ -33,6 +51,26 @@ impl CipherFrame for ChaocipherFrame {
         if control_string(ui, &mut self.right_string).changed() {
             self.cipher.assign_right(&self.right_string)
         }
+        ui.add_space(16.0);
+
+        ui.label("Example Internals");
+        if control_string(ui, &mut self.example).changed() {
+            filter_string(&mut self.example, Alphabet::BasicLatin.into())
+        }
+        if ui.button("Step").clicked() {
+            if !self.example.is_empty() {
+                let c = self.example.remove(0);
+                let n = self.example_right.get_pos(c).unwrap();
+                self.example_outout
+                    .push(*self.example_left.get_char(n).unwrap());
+                left_permute(&mut self.example_left, n);
+                right_permute(&mut self.example_right, n);
+            }
+        }
+        ui.label(self.example_left.to_string());
+        ui.label(self.example_right.to_string());
+        ui.add_space(4.0);
+        ui.label(&self.example_outout);
     }
 
     fn cipher(&self) -> &dyn Cipher {

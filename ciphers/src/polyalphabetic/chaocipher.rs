@@ -6,24 +6,19 @@ pub struct Chaocipher {
     pub right: VecString,
 }
 
+pub fn left_permute(left: &mut VecString, n: usize) {
+    left.rotate_left(n);
+    let t = left.remove(1).unwrap();
+    left.insert(13, t);
+}
+
+pub fn right_permute(right: &mut VecString, n: usize) {
+    right.rotate_left(n + 1);
+    let t = right.remove(2).unwrap();
+    right.insert(13, t);
+}
+
 impl Chaocipher {
-    fn left_permute(left: &mut VecString, n: usize) {
-        left.rotate_left(n);
-        let t = left.remove(1).unwrap();
-        left.insert(13, t);
-    }
-
-    fn right_permute(right: &mut VecString, n: usize) {
-        right.rotate_left(n + 1);
-        let t = right.remove(2).unwrap();
-        right.insert(13, t);
-    }
-
-    pub fn step(&mut self, n: usize) {
-        Chaocipher::left_permute(&mut self.left, n);
-        Chaocipher::right_permute(&mut self.right, n);
-    }
-
     pub fn assign_left(&mut self, s: &str) {
         self.left = VecString::unique_from(s)
     }
@@ -52,8 +47,8 @@ impl Cipher for Chaocipher {
         for c in symbols {
             let n = right.get_pos(c).ok_or(CipherError::invalid_input_char(c))?;
             out.push(*left.get_char(n).unwrap()); // Error will be caught by previous line
-            Chaocipher::left_permute(&mut left, n);
-            Chaocipher::right_permute(&mut right, n);
+            left_permute(&mut left, n);
+            right_permute(&mut right, n);
         }
         Ok(out)
     }
@@ -67,8 +62,8 @@ impl Cipher for Chaocipher {
         for c in symbols {
             let n = left.get_pos(c).ok_or(CipherError::invalid_input_char(c))?;
             out.push(*right.get_char(n).unwrap()); // Error will be caught by previous line
-            Chaocipher::left_permute(&mut left, n);
-            Chaocipher::right_permute(&mut right, n);
+            left_permute(&mut left, n);
+            right_permute(&mut right, n);
         }
         Ok(out)
     }
