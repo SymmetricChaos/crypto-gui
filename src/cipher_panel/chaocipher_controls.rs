@@ -54,6 +54,8 @@ impl CipherFrame for ChaocipherFrame {
         ui.add_space(16.0);
 
         ui.label("Example Internals");
+        ui.add_space(8.0);
+        ui.label("Plaintext");
         if control_string(ui, &mut self.example).changed() {
             filter_string(&mut self.example, Alphabet::BasicLatin.into())
         }
