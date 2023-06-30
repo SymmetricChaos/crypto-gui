@@ -1,10 +1,10 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, randomize_reset};
+use crate::ui_elements::{control_string, mono, randomize_reset};
 use ciphers::{
     polyalphabetic::{Hutton, HuttonVersion},
     Cipher,
 };
-use egui::Ui;
+use egui::{Color32, Ui};
 use rand::thread_rng;
 use utils::{
     functions::{filter_string, shuffled_str},
@@ -18,9 +18,11 @@ pub struct HuttonFrame {
     password_string: String,
     keyword: String,
     example: String,
+    example_version: HuttonVersion,
     example_password_string: String,
     example_password: Vec<usize>,
     example_password_idx: usize,
+    example_keyword: String,
     example_keyed_alphabet: VecString,
     example_output: String,
 }
@@ -33,10 +35,12 @@ impl Default for HuttonFrame {
             password_string: Default::default(),
             keyword: Default::default(),
             example: String::from("EXAMPLE"),
+            example_version: HuttonVersion::V1,
             example_password_string: String::from("TEST"),
             example_password: vec![19, 4, 18, 19],
             example_password_idx: 0,
-            example_keyed_alphabet: VecString::from(Alphabet::BasicLatin),
+            example_keyword: String::from("KEYWORD"),
+            example_keyed_alphabet: VecString::from("KEYWORDABCFGHIJLMNPQSTUVXZ"),
             example_output: String::new(),
         }
     }
@@ -73,6 +77,7 @@ impl HuttonFrame {
 
         self.example_keyed_alphabet
             .swap_indicies(self.example_keyed_alphabet.get_pos(c).unwrap(), value);
+        self.example_keyword = self.example_keyed_alphabet.to_string();
     }
 }
 
@@ -88,10 +93,10 @@ impl CipherFrame for HuttonFrame {
         }
 
         ui.add_space(16.0);
-        ui.label("Select Version");
+        ui.label("Version");
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.cipher.version, HuttonVersion::V1, "V1");
-            ui.selectable_value(&mut self.cipher.version, HuttonVersion::V2, "V2");
+            ui.selectable_value(&mut self.example_version, HuttonVersion::V1, "V1");
+            ui.selectable_value(&mut self.example_version, HuttonVersion::V2, "V2");
         });
 
         ui.add_space(8.0);
@@ -108,41 +113,49 @@ impl CipherFrame for HuttonFrame {
         }
 
         ui.add_space(16.0);
-        ui.label("Example Internals");
-        ui.add_space(8.0);
-        ui.label("Password");
-        if control_string(ui, &mut self.example_password_string).changed() {
-            filter_string(
-                &mut self.example_password_string,
-                Alphabet::BasicLatin.into(),
-            );
-            self.example_password_idx = 0;
-            self.example_password = self
-                .example_password_string
-                .chars()
-                .map(|c| Alphabet::BasicLatin.position(c).unwrap() + 1)
-                .collect();
-        }
-        ui.add_space(8.0);
-        ui.label("Keyword");
-        if control_string(ui, &mut self.example_keyed_alphabet).changed() {
-            filter_string(
-                &mut self.example_password_string,
-                Alphabet::BasicLatin.into(),
-            );
-            self.cipher.assign_password(&self.password_string);
-        }
 
-        ui.label("Plaintext");
-        if control_string(ui, &mut self.example).changed() {
-            filter_string(&mut self.example, Alphabet::BasicLatin.into())
-        }
-        if ui.button("Step").clicked() {
-            self.step_example()
-        }
-        ui.label(self.example_keyed_alphabet.to_string());
-        ui.add_space(4.0);
-        ui.label(&self.example_output);
+        ui.collapsing("Step-by-Step Example", |ui| {
+            ui.label("Alphabet");
+            ui.label(mono(Alphabet::BasicLatin).background_color(Color32::BLACK));
+
+            ui.label("Version");
+            ui.horizontal(|ui| {
+                ui.selectable_value(&mut self.cipher.version, HuttonVersion::V1, "V1");
+                ui.selectable_value(&mut self.cipher.version, HuttonVersion::V2, "V2");
+            });
+
+            ui.label("Password");
+            if control_string(ui, &mut self.example_password_string).changed() {
+                filter_string(
+                    &mut self.example_password_string,
+                    Alphabet::BasicLatin.into(),
+                );
+                self.example_password_idx = 0;
+                self.example_password = self
+                    .example_password_string
+                    .chars()
+                    .map(|c| Alphabet::BasicLatin.position(c).unwrap() + 1)
+                    .collect();
+            }
+            ui.add_space(8.0);
+            ui.label("Keyword");
+            if control_string(ui, &mut self.example_keyword).changed() {
+                filter_string(&mut self.example_keyword, Alphabet::BasicLatin.into());
+                self.example_keyed_alphabet =
+                    VecString::keyed_alphabet(&self.example_keyword, Alphabet::BasicLatin.into());
+            }
+
+            ui.label("Plaintext");
+            if control_string(ui, &mut self.example).changed() {
+                filter_string(&mut self.example, Alphabet::BasicLatin.into())
+            }
+            if ui.button("Step").clicked() {
+                self.step_example()
+            }
+            ui.label(self.example_keyed_alphabet.to_string());
+            ui.add_space(4.0);
+            control_string(ui, &mut self.example_output);
+        });
     }
 
     fn cipher(&self) -> &dyn Cipher {
