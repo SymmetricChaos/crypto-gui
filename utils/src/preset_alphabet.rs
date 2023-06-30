@@ -1,4 +1,4 @@
-use std::str::Chars;
+use std::{fmt::Display, str::Chars};
 
 use itertools::Itertools;
 
@@ -61,6 +61,12 @@ impl Alphabet {
 
     pub fn position(&self, c: char) -> Option<usize> {
         self.chars().position(|x| c == x)
+    }
+}
+
+impl Display for Alphabet {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.slice())
     }
 }
 
