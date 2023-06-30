@@ -1,11 +1,8 @@
-use std::fmt::Display;
-
+use crate::cipher_panel::CipherFrame;
 use codes::binary_to_text::BinaryToTextMode;
 use eframe::egui::RichText;
-use egui::{Color32, DragValue, Label, Response, TextStyle, Ui};
-use utils::grid::{str_to_char_grid, Grid};
-
-use crate::cipher_panel::CipherFrame;
+use egui::{Color32, DragValue, Response, TextStyle, Ui};
+use std::fmt::Display;
 
 pub fn subheading<T: ToString>(text: T) -> RichText {
     RichText::from(text.to_string()).size(16.0)
@@ -42,32 +39,6 @@ pub fn text_manip_menu(ui: &mut Ui, text: &mut String) {
 
 pub fn control_string(ui: &mut egui::Ui, string: &mut String) -> egui::Response {
     ui.add(egui::TextEdit::singleline(string).font(TextStyle::Monospace))
-}
-
-pub fn input_alphabet(ui: &mut egui::Ui, alphabet: &mut String) {
-    ui.label("Alphabet");
-    ui.add(egui::TextEdit::singleline(alphabet).font(TextStyle::Monospace));
-}
-
-pub fn text_edit(ui: &mut egui::Ui, text: &mut String) {
-    ui.add(egui::TextEdit::singleline(text).font(TextStyle::Monospace));
-}
-
-pub fn letter_grid(ui: &mut egui::Ui, n_rows: usize, n_cols: usize, text: &String) {
-    let symbols = str_to_char_grid(text, '\0', '\0');
-    let grid = Grid::from_cols(symbols, n_rows, n_cols);
-
-    egui::Grid::new("letter_grid").show(ui, |ui| {
-        for n in 0..grid.num_rows() {
-            ui.spacing_mut().item_spacing.x = 0.0;
-            let row = grid.get_row(n);
-            for c in row {
-                let character = mono(*c.contents().unwrap()); // RichText::from(String::from(*c.contents().unwrap())).monospace();
-                ui.add_sized([0.0, 0.0], Label::new(character));
-            }
-            ui.end_row()
-        }
-    });
 }
 
 pub fn binary_to_text_input_mode(ui: &mut egui::Ui, current_value: &mut BinaryToTextMode) {
@@ -127,6 +98,22 @@ pub fn string_slider(ui: &mut Ui, string: &str, position: &mut usize) -> Respons
     )
 }
 
+// pub fn letter_grid(ui: &mut egui::Ui, n_rows: usize, n_cols: usize, text: &String) {
+//     let symbols = str_to_char_grid(text, '\0', '\0');
+//     let grid = Grid::from_cols(symbols, n_rows, n_cols);
+//     egui::Grid::new("letter_grid").show(ui, |ui| {
+//         for n in 0..grid.num_rows() {
+//             ui.spacing_mut().item_spacing.x = 0.0;
+//             let row = grid.get_row(n);
+//             for c in row {
+//                 let character = mono(*c.contents().unwrap()); // RichText::from(String::from(*c.contents().unwrap())).monospace();
+//                 ui.add_sized([0.0, 0.0], Label::new(character));
+//             }
+//             ui.end_row()
+//         }
+//     });
+// }
+
 // pub fn code_button_columns(
 //     nrows: usize,
 //     ncols: usize,
@@ -155,7 +142,6 @@ pub fn string_slider(ui: &mut Ui, string: &str, position: &mut usize) -> Respons
 // }
 
 // use std::path::PathBuf;
-
 // use rfd::FileDialog;
 // #[cfg(not(target_arch = "wasm32"))]
 // pub fn upload_file(ui: &mut egui::Ui, file: &mut Option<PathBuf>) {
