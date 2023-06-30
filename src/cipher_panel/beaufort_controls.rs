@@ -50,28 +50,38 @@ impl CipherFrame for BeaufortFrame {
             ui.add(Slider::new(&mut self.cipher.prog_shift, alpha_range));
             ui.add_space(16.0);
         }
+        ui.horizontal(|ui| {
+            if self.cipher.multikey {
+                ui.label("Keywords");
+            } else {
+                ui.label("Keyword ");
+            }
 
-        match self.cipher.multikey {
-            true => {
-                ui.horizontal(|ui| {
-                    ui.label("Keywords");
-                    ui.checkbox(&mut self.cipher.multikey, "Multikey");
-                });
-                for keyword in self.cipher.keywords.iter_mut() {
-                    if control_string(ui, keyword).changed() {
-                        filter_string(keyword, &self.alphabet_string)
+            ui.separator();
+            ui.checkbox(&mut self.cipher.multikey, "Multikey");
+            ui.add_space(4.0);
+            if self.cipher.multikey {
+                if ui.button("+").on_hover_text("add keyword").clicked() {
+                    if self.cipher.keywords.len() <= 9 {
+                        self.cipher.keywords.push(String::new())
+                    }
+                }
+                if ui.button("-").on_hover_text("remove keyword").clicked() {
+                    if self.cipher.keywords.len() >= 2 {
+                        self.cipher.keywords.pop();
                     }
                 }
             }
-            false => {
-                ui.horizontal(|ui| {
-                    ui.label("Keyword ");
-                    ui.checkbox(&mut self.cipher.multikey, "Multikey");
-                });
-                ui.add(
-                    TextEdit::singleline(&mut self.cipher.keywords[0]).font(TextStyle::Monospace),
-                );
+        });
+
+        if self.cipher.multikey {
+            for keyword in self.cipher.keywords.iter_mut() {
+                if control_string(ui, keyword).changed() {
+                    filter_string(keyword, &self.alphabet_string)
+                }
             }
+        } else {
+            ui.add(TextEdit::singleline(&mut self.cipher.keywords[0]).font(TextStyle::Monospace));
         }
     }
 

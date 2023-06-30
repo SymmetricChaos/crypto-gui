@@ -6,11 +6,23 @@ use super::PolyMode;
 use crate::{errors::CipherError, traits::Cipher};
 
 pub struct Beaufort {
-    pub keywords: [String; 5],
+    pub keywords: Vec<String>,
     alphabet: VecString,
     pub prog_shift: usize,
     pub mode: PolyMode,
     pub multikey: bool,
+}
+
+impl Default for Beaufort {
+    fn default() -> Self {
+        Self {
+            keywords: vec![String::new(), String::new(), String::new()],
+            alphabet: VecString::from(Alphabet::BasicLatin),
+            mode: PolyMode::CylicKey,
+            prog_shift: 0,
+            multikey: false,
+        }
+    }
 }
 
 impl Beaufort {
@@ -201,24 +213,6 @@ impl Beaufort {
             }
         }
         Ok(out)
-    }
-}
-
-impl Default for Beaufort {
-    fn default() -> Self {
-        Self {
-            keywords: [
-                String::new(),
-                String::new(),
-                String::new(),
-                String::new(),
-                String::new(),
-            ],
-            alphabet: VecString::from(Alphabet::BasicLatin),
-            mode: PolyMode::CylicKey,
-            prog_shift: 0,
-            multikey: false,
-        }
     }
 }
 

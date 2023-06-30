@@ -3,7 +3,10 @@ use crate::ui_elements::{control_string, randomize_reset};
 use ciphers::{polyalphabetic::Bazeries, Cipher};
 use egui::{Slider, Ui};
 use rand::{rngs::StdRng, SeedableRng};
-use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
+use utils::{
+    functions::{filter_string, shuffled_str},
+    preset_alphabet::Alphabet,
+};
 
 pub struct BazeriesFrame {
     cipher: Bazeries,
@@ -35,12 +38,8 @@ impl CipherFrame for BazeriesFrame {
         ui.add(Slider::new(&mut self.cipher.offset, alpha_range));
         ui.add_space(16.0);
 
-        ui.label("Wheels");
-        for wheel in &self.cipher.wheels {
-            ui.add(egui::Label::new(egui::RichText::from(wheel).monospace()));
-        }
-
         ui.horizontal(|ui| {
+            ui.label("Wheels");
             if ui.button("+").clicked() {
                 self.cipher.add_wheel()
             }
@@ -48,6 +47,11 @@ impl CipherFrame for BazeriesFrame {
                 self.cipher.del_wheel()
             }
         });
+        for wheel in self.cipher.wheels.iter_mut() {
+            if control_string(ui, wheel).changed() {
+                filter_string(wheel, &self.alphabet_string)
+            }
+        }
     }
 
     fn cipher(&self) -> &dyn Cipher {
