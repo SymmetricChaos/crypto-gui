@@ -7,7 +7,7 @@ use crate::{errors::CipherError, traits::Cipher};
 use super::PolyMode;
 
 pub struct Vigenere {
-    pub keywords: [String; 5],
+    pub keywords: Vec<String>,
     pub alphabet: VecString,
     pub prog_shift: usize,
     pub mode: PolyMode,
@@ -17,13 +17,7 @@ pub struct Vigenere {
 impl Default for Vigenere {
     fn default() -> Self {
         Self {
-            keywords: [
-                String::new(),
-                String::new(),
-                String::new(),
-                String::new(),
-                String::new(),
-            ],
+            keywords: vec![String::new(), String::new(), String::new()],
             alphabet: VecString::from(Alphabet::BasicLatin),
             mode: PolyMode::CylicKey,
             prog_shift: 0,

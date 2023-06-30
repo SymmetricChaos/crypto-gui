@@ -3,7 +3,10 @@ use crate::ui_elements::{control_string, mono, randomize_reset, string_slider};
 use ciphers::{playfair::FourSquare, Cipher};
 use egui::Ui;
 use rand::{rngs::StdRng, SeedableRng};
-use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
+use utils::{
+    functions::{filter_string, shuffled_str},
+    preset_alphabet::Alphabet,
+};
 
 pub struct FourSquareFrame {
     cipher: FourSquare,
@@ -75,21 +78,25 @@ impl CipherFrame for FourSquareFrame {
                 .nth(self.spacer_position)
                 .unwrap()
         }
-        ui.add_space(16.0);
 
+        ui.add_space(8.0);
         ui.label("Keyword 1");
         if control_string(ui, &mut self.keyword_1).changed() {
             self.cipher
-                .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
+                .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string);
+            filter_string(&mut self.keyword_1, &self.alphabet_string);
+        }
+
+        ui.add_space(8.0);
+        ui.label("Keyword 2");
+
+        if control_string(ui, &mut self.keyword_2).changed() {
+            self.cipher
+                .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string);
+            filter_string(&mut self.keyword_2, &self.alphabet_string);
         }
 
         ui.add_space(16.0);
-        ui.label("Keyword 2");
-        if control_string(ui, &mut self.keyword_2).changed() {
-            self.cipher
-                .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
-        }
-
         ui.horizontal(|ui| {
             ui.label("Grid");
             if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {

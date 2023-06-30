@@ -4,7 +4,7 @@ use ciphers::{
     polyalphabetic::{PolyMode, Vigenere},
     Cipher,
 };
-use egui::{Slider, TextEdit, TextStyle, Ui};
+use egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
 use utils::{
     functions::{filter_string, random_sample_replace},
@@ -32,7 +32,10 @@ impl CipherFrame for VigenereFrame {
 
         ui.label("Alphabet");
         if control_string(ui, &mut self.alphabet_string).changed() {
-            self.cipher.assign_alphabet(&self.alphabet_string)
+            self.cipher.assign_alphabet(&self.alphabet_string);
+            for keyword in self.cipher.keywords.iter_mut() {
+                filter_string(keyword, &self.alphabet_string)
+            }
         }
         ui.add_space(16.0);
         ui.add_space(16.0);
@@ -52,26 +55,39 @@ impl CipherFrame for VigenereFrame {
             ui.add_space(16.0);
         }
 
-        match self.cipher.multikey {
-            true => {
-                ui.horizontal(|ui| {
-                    ui.label("Keywords");
-                    ui.checkbox(&mut self.cipher.multikey, "Multikey");
-                });
-                for keyword in self.cipher.keywords.iter_mut() {
-                    if control_string(ui, keyword).changed() {
-                        filter_string(keyword, &self.alphabet_string)
+        ui.horizontal(|ui| {
+            if self.cipher.multikey {
+                ui.label("Keywords");
+            } else {
+                ui.label("Keyword ");
+            }
+
+            ui.separator();
+            ui.checkbox(&mut self.cipher.multikey, "Multikey");
+            ui.add_space(4.0);
+            if self.cipher.multikey {
+                if ui.button("+").on_hover_text("add keyword").clicked() {
+                    if self.cipher.keywords.len() <= 9 {
+                        self.cipher.keywords.push(String::new())
+                    }
+                }
+                if ui.button("-").on_hover_text("remove keyword").clicked() {
+                    if self.cipher.keywords.len() >= 2 {
+                        self.cipher.keywords.pop();
                     }
                 }
             }
-            false => {
-                ui.horizontal(|ui| {
-                    ui.label("Keyword ");
-                    ui.checkbox(&mut self.cipher.multikey, "Multikey");
-                });
-                ui.add(
-                    TextEdit::singleline(&mut self.cipher.keywords[0]).font(TextStyle::Monospace),
-                );
+        });
+
+        if self.cipher.multikey {
+            for keyword in self.cipher.keywords.iter_mut() {
+                if control_string(ui, keyword).changed() {
+                    filter_string(keyword, &self.alphabet_string)
+                }
+            }
+        } else {
+            if control_string(ui, &mut self.cipher.keywords[0]).changed() {
+                filter_string(&mut self.cipher.keywords[0], &self.alphabet_string)
             }
         }
     }
