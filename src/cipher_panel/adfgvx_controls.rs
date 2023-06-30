@@ -12,7 +12,6 @@ use utils::preset_alphabet::Alphabet;
 
 pub struct AdfgvxFrame {
     cipher: Adfgvx,
-    alphabet_string: String,
     columnar_key_string: String,
     polybius_key_string: String,
 }
@@ -21,7 +20,6 @@ impl Default for AdfgvxFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
-            alphabet_string: Alphabet::BasicLatinNoJ.string(),
             columnar_key_string: Default::default(),
             polybius_key_string: Default::default(),
         }
@@ -30,7 +28,7 @@ impl Default for AdfgvxFrame {
 
 impl AdfgvxFrame {
     fn assign_columnar_key(&mut self) {
-        filter_string(&mut self.columnar_key_string, &self.alphabet_string);
+        filter_string(&mut self.columnar_key_string, self.cipher.alphabet());
         self.cipher
             .assign_columnar_key(&self.columnar_key_string)
             .unwrap() // justified by filtering of key_string
@@ -46,27 +44,27 @@ impl CipherFrame for AdfgvxFrame {
         ui.horizontal(|ui| {
             if ui.button("ADFGX").clicked() {
                 self.cipher.assign_mode(AdfgvxMode::Short);
-                self.alphabet_string = Alphabet::BasicLatinNoJ.string();
+                filter_string(&mut self.columnar_key_string, self.cipher.alphabet());
+                filter_string(&mut self.polybius_key_string, self.cipher.alphabet());
                 self.cipher.assign_polybius_key(&self.polybius_key_string);
                 self.assign_columnar_key();
             };
             if ui.button("ADFGVX").clicked() {
                 self.cipher.assign_mode(AdfgvxMode::Long);
-                self.alphabet_string = Alphabet::BasicLatinWithDigits.string();
                 self.cipher.assign_polybius_key(&self.polybius_key_string);
                 self.assign_columnar_key();
             };
         });
 
         // False alphabet display
-        ui.label(mono(&self.alphabet_string).background_color(Color32::BLACK));
+        ui.label(mono(&self.cipher.alphabet()).background_color(Color32::BLACK));
         ui.add_space(16.0);
 
         ui.label("Polybius Keyword");
         if control_string(ui, &mut self.polybius_key_string).changed() {
+            filter_string(&mut self.polybius_key_string, self.cipher.alphabet());
             self.cipher.assign_polybius_key(&self.polybius_key_string)
         }
-        ui.add_space(16.0);
 
         ui.add_space(16.0);
         ui.label("Grid");
@@ -83,7 +81,7 @@ impl CipherFrame for AdfgvxFrame {
     }
 
     fn randomize(&mut self) {
-        self.polybius_key_string = shuffled_str(&self.alphabet_string, &mut thread_rng());
+        self.polybius_key_string = shuffled_str(self.cipher.alphabet(), &mut thread_rng());
         self.cipher.assign_polybius_key(&self.polybius_key_string);
 
         let n_chars = thread_rng().gen_range(6..10);

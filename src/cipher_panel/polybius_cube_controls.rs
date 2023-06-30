@@ -3,7 +3,7 @@ use crate::ui_elements::{control_string, mono, randomize_reset};
 use ciphers::{polybius::PolybiusCube, Cipher};
 use egui::Ui;
 use rand::thread_rng;
-use utils::functions::shuffled_str;
+use utils::functions::{filter_string, shuffled_str};
 
 pub struct PolybiusCubeFrame {
     cipher: PolybiusCube,
@@ -38,6 +38,7 @@ impl CipherFrame for PolybiusCubeFrame {
         ui.add_space(16.0);
         ui.label("Keyword");
         if control_string(ui, &mut self.key_string).changed() {
+            filter_string(&mut self.key_string, &self.alphabet_string);
             self.cipher
                 .assign_grid(&self.alphabet_string, &self.key_string)
         }

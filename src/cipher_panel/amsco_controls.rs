@@ -77,7 +77,7 @@ impl CipherFrame for AmscoFrame {
 
         ui.add_space(16.0);
 
-        ui.label("Example");
+        ui.label("Example Plaintext");
         if control_string(ui, &mut self.example).changed() {
             self.build_grid();
         };

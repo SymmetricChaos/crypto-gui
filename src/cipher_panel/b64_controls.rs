@@ -1,7 +1,7 @@
 use super::CipherFrame;
 use crate::ui_elements::{control_string, mono, randomize_reset};
 use ciphers::{polybius::B64, Cipher};
-use egui::Ui;
+use egui::{Color32, Ui};
 use rand::{thread_rng, Rng};
 use utils::{
     functions::{filter_string, random_sample_replace, shuffled_str},
@@ -45,7 +45,7 @@ impl CipherFrame for B64Frame {
         ui.add_space(16.0);
 
         ui.label("Base64 Alphabet");
-        ui.label(Alphabet::Base64.slice());
+        ui.label(mono(Alphabet::Base64.slice()).background_color(Color32::BLACK));
 
         ui.label("Polybius Keyword");
         if control_string(ui, &mut self.polybius_key_string).changed() {
