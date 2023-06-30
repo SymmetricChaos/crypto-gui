@@ -33,32 +33,22 @@ impl CipherFrame for PolybiusSquareFrame {
 
         ui.label("Common Alphabets");
         ui.horizontal(|ui| {
-            if ui.button("No C").clicked() {
-                self.alphabet_string = Alphabet::BasicLatinNoC.string();
-                self.cipher
-                    .assign_key(&self.key_string, &self.alphabet_string)
-            };
-            if ui.button("No J").clicked() {
-                self.alphabet_string = Alphabet::BasicLatinNoJ.string();
-                self.cipher
-                    .assign_key(&self.key_string, &self.alphabet_string)
-            };
-            if ui.button("No Q").clicked() {
-                self.alphabet_string = Alphabet::BasicLatinNoQ.string();
-                self.cipher
-                    .assign_key(&self.key_string, &self.alphabet_string)
-            };
-            if ui.button("Alphanumeric").clicked() {
-                self.alphabet_string = Alphabet::BasicLatinWithDigits.string();
-                self.cipher
-                    .assign_key(&self.key_string, &self.alphabet_string)
-            };
-            if ui.button("Base64").clicked() {
-                self.alphabet_string = Alphabet::Base64.string();
-                self.cipher
-                    .assign_key(&self.key_string, &self.alphabet_string)
-            };
+            for (name, alphabet) in [
+                ("No C", Alphabet::BasicLatinNoC),
+                ("No J", Alphabet::BasicLatinNoJ),
+                ("No Q", Alphabet::BasicLatinNoQ),
+                ("Alphanumeric", Alphabet::BasicLatinWithDigits),
+                ("Base64", Alphabet::Base64),
+            ] {
+                if ui.button(name).clicked() {
+                    self.alphabet_string = alphabet.into();
+                    filter_string(&mut self.key_string, &self.alphabet_string);
+                    self.cipher
+                        .assign_key(&self.key_string, &self.alphabet_string)
+                }
+            }
         });
+        ui.add_space(10.0);
 
         ui.label("Alphabet");
         if control_string(ui, &mut self.alphabet_string).changed() {

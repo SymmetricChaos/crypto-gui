@@ -49,28 +49,20 @@ impl CipherFrame for NihilistFrame {
 
         ui.label("Common Alphabets");
         ui.horizontal(|ui| {
-            if ui.button("No J").clicked() {
-                self.alphabet_string = Alphabet::BasicLatinNoC.string();
-                self.assign_keys();
-            };
-            if ui.button("No J").clicked() {
-                self.alphabet_string = Alphabet::BasicLatinNoJ.string();
-                self.assign_keys();
-            };
-            if ui.button("No Q").clicked() {
-                self.alphabet_string = Alphabet::BasicLatinNoQ.string();
-                self.assign_keys();
-            };
-            if ui.button("Alphanumeric").clicked() {
-                self.alphabet_string = Alphabet::BasicLatinWithDigits.string();
-                self.assign_keys();
-            };
-            if ui.button("Base64").clicked() {
-                self.alphabet_string = Alphabet::Base64.string();
-                self.assign_keys();
-            };
+            for (name, alphabet) in [
+                ("No C", Alphabet::BasicLatinNoC),
+                ("No J", Alphabet::BasicLatinNoJ),
+                ("No Q", Alphabet::BasicLatinNoQ),
+                ("Alphanumeric", Alphabet::BasicLatinWithDigits),
+                ("Base64", Alphabet::Base64),
+            ] {
+                if ui.button(name).clicked() {
+                    self.alphabet_string = alphabet.into();
+                    self.assign_keys();
+                }
+            }
         });
-        ui.add_space(8.0);
+        ui.add_space(10.0);
 
         ui.label("Alphabet");
         if control_string(ui, &mut self.alphabet_string).changed() {

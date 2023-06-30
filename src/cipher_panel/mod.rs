@@ -22,7 +22,6 @@ use self::{
     vigenere_controls::VigenereFrame,
 };
 
-pub mod _generic_components;
 pub mod adfgvx_controls;
 pub mod affine_controls;
 pub mod alberti_controls;

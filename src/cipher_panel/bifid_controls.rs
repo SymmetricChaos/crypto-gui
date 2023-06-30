@@ -33,39 +33,25 @@ impl CipherFrame for BifidFrame {
         ui.label("Block Size");
         ui.add(Slider::new(&mut self.cipher.block_size, block_size_range));
 
-        ui.label("Select Alphabet");
+        ui.label("Common Alphabets");
         ui.horizontal(|ui| {
-            if ui.button("No C").clicked() {
-                self.cipher
-                    .polybius
-                    .assign_key(&self.key_string, Alphabet::BasicLatinNoC.into());
-                self.alphabet_string = Alphabet::BasicLatinNoC.string();
-            };
-            if ui.button("No J").clicked() {
-                self.cipher
-                    .polybius
-                    .assign_key(&self.key_string, Alphabet::BasicLatinNoJ.into());
-                self.alphabet_string = Alphabet::BasicLatinNoJ.string();
-            };
-            if ui.button("No Q").clicked() {
-                self.cipher
-                    .polybius
-                    .assign_key(&self.key_string, Alphabet::BasicLatinNoQ.into());
-                self.alphabet_string = Alphabet::BasicLatinNoQ.string();
-            };
-            if ui.button("Alphanumeric").clicked() {
-                self.cipher
-                    .polybius
-                    .assign_key(&self.key_string, Alphabet::BasicLatinWithDigits.into());
-                self.alphabet_string = Alphabet::BasicLatinWithDigits.string();
-            };
-            if ui.button("Base64").clicked() {
-                self.cipher
-                    .polybius
-                    .assign_key(&self.key_string, Alphabet::Base64.into());
-                self.alphabet_string = Alphabet::Base64.string();
-            };
+            for (name, alphabet) in [
+                ("No C", Alphabet::BasicLatinNoC),
+                ("No J", Alphabet::BasicLatinNoJ),
+                ("No Q", Alphabet::BasicLatinNoQ),
+                ("Alphanumeric", Alphabet::BasicLatinWithDigits),
+                ("Base64", Alphabet::Base64),
+            ] {
+                if ui.button(name).clicked() {
+                    self.alphabet_string = alphabet.into();
+                    filter_string(&mut self.key_string, &self.alphabet_string);
+                    self.cipher
+                        .polybius
+                        .assign_key(&self.key_string, alphabet.into());
+                }
+            }
         });
+        ui.add_space(10.0);
 
         ui.label("Alphabet");
         if control_string(ui, &mut self.alphabet_string).changed() {

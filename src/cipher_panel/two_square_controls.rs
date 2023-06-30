@@ -3,7 +3,10 @@ use crate::ui_elements::{control_string, mono, randomize_reset, string_slider};
 use ciphers::{playfair::TwoSquare, Cipher};
 use egui::Ui;
 use rand::{rngs::StdRng, SeedableRng};
-use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
+use utils::{
+    functions::{filter_string, shuffled_str},
+    preset_alphabet::Alphabet,
+};
 
 pub struct TwoSquareFrame {
     cipher: TwoSquare,
@@ -30,33 +33,23 @@ impl CipherFrame for TwoSquareFrame {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 
-        ui.label("Select Alphabet");
+        ui.label("Common Alphabets");
         ui.horizontal(|ui| {
-            if ui.button("No C").clicked() {
-                self.alphabet_string = Alphabet::BasicLatinNoC.string();
-                self.cipher
-                    .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
-            };
-            if ui.button("No J").clicked() {
-                self.alphabet_string = Alphabet::BasicLatinNoJ.string();
-                self.cipher
-                    .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
-            };
-            if ui.button("No Q").clicked() {
-                self.alphabet_string = Alphabet::BasicLatinNoQ.string();
-                self.cipher
-                    .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
-            };
-            if ui.button("Alphanumeric").clicked() {
-                self.alphabet_string = Alphabet::BasicLatinWithDigits.string();
-                self.cipher
-                    .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
-            };
-            if ui.button("Base64").clicked() {
-                self.alphabet_string = Alphabet::Base64.string();
-                self.cipher
-                    .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
-            };
+            for (name, alphabet) in [
+                ("No C", Alphabet::BasicLatinNoC),
+                ("No J", Alphabet::BasicLatinNoJ),
+                ("No Q", Alphabet::BasicLatinNoQ),
+                ("Alphanumeric", Alphabet::BasicLatinWithDigits),
+                ("Base64", Alphabet::Base64),
+            ] {
+                if ui.button(name).clicked() {
+                    self.alphabet_string = alphabet.into();
+                    filter_string(&mut self.keyword_1, &self.alphabet_string);
+                    filter_string(&mut self.keyword_2, &self.alphabet_string);
+                    self.cipher
+                        .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
+                }
+            }
         });
         ui.add_space(10.0);
 
