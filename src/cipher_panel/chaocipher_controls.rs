@@ -22,6 +22,8 @@ pub struct ChaocipherFrame {
     example: String,
     example_left: VecString,
     example_right: VecString,
+    // example_left_string: String,
+    // example_right_string: String,
     example_outout: String,
 }
 
@@ -32,9 +34,11 @@ impl Default for ChaocipherFrame {
             left_string: String::from("HXUCZVAMDSLKPEFJRIGTWOBNYQ"),
             right_string: String::from("PTLNBQDEOYSFAVZKGJRIHWXUMC"),
             example: String::from("EXAMPLE"),
-            example_outout: String::new(),
             example_left: VecString::from(Alphabet::BasicLatin),
             example_right: VecString::from(Alphabet::BasicLatin),
+            // example_left_string: String::from(Alphabet::BasicLatin),
+            // example_right_string: String::from(Alphabet::BasicLatin),
+            example_outout: String::new(),
         }
     }
 }
@@ -53,26 +57,28 @@ impl CipherFrame for ChaocipherFrame {
         }
         ui.add_space(16.0);
 
-        ui.label("Example Internals");
-        ui.add_space(8.0);
-        ui.label("Plaintext");
-        if control_string(ui, &mut self.example).changed() {
-            filter_string(&mut self.example, Alphabet::BasicLatin.into())
-        }
-        if ui.button("Step").clicked() {
-            if !self.example.is_empty() {
-                let c = self.example.remove(0);
-                let n = self.example_right.get_pos(c).unwrap();
-                self.example_outout
-                    .push(*self.example_left.get_char(n).unwrap());
-                left_permute(&mut self.example_left, n);
-                right_permute(&mut self.example_right, n);
+        ui.collapsing("Step-by-Step Example", |ui| {
+            ui.label("Plaintext");
+            if control_string(ui, &mut self.example).changed() {
+                filter_string(&mut self.example, Alphabet::BasicLatin.into())
             }
-        }
-        ui.label(self.example_left.to_string());
-        ui.label(self.example_right.to_string());
-        ui.add_space(4.0);
-        ui.label(&self.example_outout);
+
+            if ui.button("Step").clicked() {
+                if !self.example.is_empty() {
+                    let c = self.example.remove(0);
+                    let n = self.example_right.get_pos(c).unwrap();
+                    self.example_outout
+                        .push(*self.example_left.get_char(n).unwrap());
+                    left_permute(&mut self.example_left, n);
+                    right_permute(&mut self.example_right, n);
+                }
+            }
+
+            ui.label(self.example_left.to_string());
+            ui.label(self.example_right.to_string());
+            ui.add_space(4.0);
+            ui.label(&self.example_outout);
+        });
     }
 
     fn cipher(&self) -> &dyn Cipher {
