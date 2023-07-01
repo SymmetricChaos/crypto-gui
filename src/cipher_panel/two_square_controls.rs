@@ -83,6 +83,18 @@ impl CipherFrame for TwoSquareFrame {
                 .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
         }
 
+        ui.horizontal(|ui| {
+            ui.label("Grids");
+            if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
+                ui.output_mut(|o| {
+                    o.copied_text = format!(
+                        "{}\n\n{}",
+                        self.cipher.show_square1(),
+                        self.cipher.show_square2()
+                    )
+                })
+            }
+        });
         ui.label(mono(self.cipher.show_square1()));
         ui.add_space(8.0);
         ui.label(mono(self.cipher.show_square2()));

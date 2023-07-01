@@ -28,7 +28,6 @@ impl Default for NihilistFrame {
 
 impl NihilistFrame {
     fn assign_keys(&mut self) {
-        // Filter the keys
         filter_string(&mut self.additive_key_string, &self.alphabet_string);
         filter_string(&mut self.polybius_key_string, &self.alphabet_string);
 

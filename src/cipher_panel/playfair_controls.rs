@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, mono, randomize_reset};
+use crate::ui_elements::{control_string, mono, randomize_reset, string_slider};
 use ciphers::{playfair::Playfair, Cipher};
 use egui::Ui;
 use rand::{rngs::StdRng, SeedableRng};
@@ -12,7 +12,7 @@ pub struct PlayfairFrame {
     cipher: Playfair,
     key_string: String,
     alphabet_string: String,
-    spacer_string: String,
+    spacer_position: usize,
 }
 
 impl Default for PlayfairFrame {
@@ -21,7 +21,7 @@ impl Default for PlayfairFrame {
             cipher: Default::default(),
             key_string: Default::default(),
             alphabet_string: Alphabet::BasicLatinNoQ.into(),
-            spacer_string: "X".into(),
+            spacer_position: 23,
         }
     }
 }
@@ -55,18 +55,17 @@ impl CipherFrame for PlayfairFrame {
             self.cipher
                 .assign_key(&self.key_string, &self.alphabet_string);
         }
-        ui.add_space(16.0);
+        ui.add_space(8.0);
 
         ui.label("Spacer Character\nInserted at end as padding if needed");
-        if control_string(ui, &mut self.spacer_string).changed() {
-            if self.spacer_string.is_empty() {
-                ui.label("defaulting to X");
-            } else {
-                self.spacer_string = self.spacer_string.chars().next().unwrap().to_string()
-            }
-            self.cipher.spacer = self.spacer_string.chars().next().unwrap_or('X');
+        if string_slider(ui, &self.alphabet_string, &mut self.spacer_position).changed() {
+            self.cipher.spacer = self
+                .alphabet_string
+                .chars()
+                .nth(self.spacer_position)
+                .unwrap()
         }
-        ui.add_space(16.0);
+        ui.add_space(8.0);
 
         ui.label("Keyword");
         if control_string(ui, &mut self.key_string).changed() {
