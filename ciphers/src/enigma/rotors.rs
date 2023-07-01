@@ -134,24 +134,22 @@ lazy_static! {
         }
         m
     };
-    pub static ref REFLECTORS: HashMap<&'static str, Reflector> = {
+    pub static ref REFLECTOR_VEC: Vec<Reflector> = {
+        let mut v = Vec::new();
+        v.push(Reflector::new("Alpha", "LEYJVCNIXWPBQMDRTAKZGFUHOS"));
+        v.push(Reflector::new("Beta", "FSOKANUERHMBTIYCWLQPZXVGJD"));
+        v.push(Reflector::new("A", "EJMZALYXVBWFCRQUONTSPIKHGD"));
+        v.push(Reflector::new("B", "YRUHQSLDPXNGOKMIEBFZCWVJAT"));
+        v.push(Reflector::new("C", "FVPJIAOYEDRZXWGCTKUQSBNMHL"));
+        v.push(Reflector::new("B-thin", "ENKQAUYWJICOPBLMDXZVFTHRGS"));
+        v.push(Reflector::new("C-thin", "RDOBJNTKVEHMLFCWZAXGYIPSUQ"));
+        v
+    };
+    pub static ref REFLECTOR_MAP: HashMap<&'static str, Reflector> = {
         let mut m = HashMap::new();
-        m.insert(
-            "Alpha",
-            Reflector::new("Alpha", "LEYJVCNIXWPBQMDRTAKZGFUHOS"),
-        );
-        m.insert("Beta", Reflector::new("Beta", "FSOKANUERHMBTIYCWLQPZXVGJD"));
-        m.insert("A", Reflector::new("A", "EJMZALYXVBWFCRQUONTSPIKHGD"));
-        m.insert("B", Reflector::new("B", "YRUHQSLDPXNGOKMIEBFZCWVJAT"));
-        m.insert("C", Reflector::new("C", "FVPJIAOYEDRZXWGCTKUQSBNMHL"));
-        m.insert(
-            "B-thin",
-            Reflector::new("B-thin", "ENKQAUYWJICOPBLMDXZVFTHRGS"),
-        );
-        m.insert(
-            "C-thin",
-            Reflector::new("C-thin", "RDOBJNTKVEHMLFCWZAXGYIPSUQ"),
-        );
+        for rfl in REFLECTOR_VEC.iter() {
+            m.insert(rfl.name, rfl.clone());
+        }
         m
     };
 }

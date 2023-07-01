@@ -1,4 +1,4 @@
-use super::{char_to_usize, usize_to_char, Reflector, Rotor, REFLECTORS, ROTOR_MAP};
+use super::{char_to_usize, usize_to_char, Reflector, Rotor, REFLECTOR_MAP, ROTOR_MAP};
 use crate::{errors::CipherError, substitution::Plugboard, traits::Cipher};
 use utils::preset_alphabet::Alphabet;
 
@@ -108,7 +108,7 @@ impl Default for EnigmaState {
         Self {
             plugboard: Plugboard::default(),
             rotors: [ROTOR_MAP["I"], ROTOR_MAP["II"], ROTOR_MAP["III"]],
-            reflector: REFLECTORS["B"],
+            reflector: REFLECTOR_MAP["B"],
         }
     }
 }

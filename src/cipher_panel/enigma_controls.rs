@@ -1,10 +1,12 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, error_text, mono};
+use crate::ui_elements::{control_string, error_text, mono, randomize_reset};
 use ciphers::{
-    enigma::{REFLECTORS, ROTOR_VEC},
+    enigma::{rotors::REFLECTOR_VEC, REFLECTOR_MAP, ROTOR_VEC},
     Cipher, EnigmaM3,
 };
 use egui::{ComboBox, Label, Slider, Ui};
+use rand::{thread_rng, Rng};
+use utils::{functions::random_sample, preset_alphabet::Alphabet};
 
 #[derive(Default)]
 pub struct EnigmaM3Frame {
@@ -12,8 +14,38 @@ pub struct EnigmaM3Frame {
     plugboard_string: String,
 }
 
+impl EnigmaM3Frame {
+    fn randomize_plugboard(&mut self) {
+        let alpha = random_sample(Alphabet::BasicLatin.slice(), 14, &mut thread_rng());
+        let mut cs = alpha.chars();
+        self.plugboard_string.clear();
+        for _ in 0..7 {
+            self.plugboard_string.push(cs.next().unwrap());
+            self.plugboard_string.push(cs.next().unwrap());
+            self.plugboard_string.push(' ');
+        }
+
+        self.cipher
+            .state
+            .plugboard
+            .set_plugboard(&self.plugboard_string)
+            .expect("error randomly generating plugboard")
+    }
+
+    fn randomize_rotors(&mut self) {
+        self.cipher.state.reflector = REFLECTOR_VEC[thread_rng().gen_range(0..REFLECTOR_VEC.len())];
+        for rotor in self.cipher.state.rotors.iter_mut() {
+            *rotor = ROTOR_VEC[thread_rng().gen_range(0..ROTOR_VEC.len())];
+            rotor.position = thread_rng().gen_range(0..26);
+            rotor.ring = thread_rng().gen_range(0..26);
+        }
+    }
+}
+
 impl CipherFrame for EnigmaM3Frame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
+        randomize_reset(ui, self);
+
         ui.label("Rotor Positions\nTo Be Changed Every Message");
         for rotor in &mut self.cipher.state.rotors {
             ui.add(Slider::new(&mut rotor.position, 0..=26).clamp_to_range(true));
@@ -55,7 +87,7 @@ impl CipherFrame for EnigmaM3Frame {
         ComboBox::from_id_source("Reflector")
             .selected_text("Select Reflector")
             .show_ui(ui, |ui| {
-                for rfl in REFLECTORS.values() {
+                for rfl in REFLECTOR_MAP.values() {
                     ui.selectable_value(
                         &mut self.cipher.state.reflector,
                         *rfl,
@@ -90,7 +122,10 @@ impl CipherFrame for EnigmaM3Frame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        self.randomize_plugboard();
+        self.randomize_rotors();
+    }
 
     fn reset(&mut self) {
         *self = Self::default()
