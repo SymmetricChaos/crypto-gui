@@ -208,14 +208,73 @@ impl EliasCodeIntegers {
         &self,
         bits: &mut dyn Iterator<Item = Bit>,
     ) -> Result<Vec<u32>, CodeError> {
-        todo!()
+        let mut out = Vec::new();
+        let mut buffer = Vec::new();
+        let mut zero_ctr = 0;
+        loop {
+            if let Some(b) = bits.next() {
+                buffer.push(b);
+                // Count up zeroes until a one is reached
+                if b.is_zero() {
+                    zero_ctr += 1;
+                    continue;
+                } else {
+                    // Once we reach a one clear everything but the one from the buffer and get bits for the zeroes counted
+                    buffer.clear();
+                    buffer.push(Bit::One);
+                    for _ in 0..zero_ctr {
+                        if let Some(b) = bits.next() {
+                            buffer.push(b)
+                        } else {
+                            return Err(CodeError::input("partial or malformed input"));
+                        }
+                    }
+                    // Convert the bits into an integer
+
+                    out.push(bits_to_int_little_endian(&buffer));
+                    // Clear buffer and counter
+                    buffer.clear();
+                    zero_ctr = 0;
+                }
+            } else {
+                break;
+            }
+        }
+        Ok(out)
     }
 
     pub fn decode_to_u32_omega(
         &self,
         bits: &mut dyn Iterator<Item = Bit>,
     ) -> Result<Vec<u32>, CodeError> {
-        todo!()
+        let mut out = Vec::new();
+        let mut buffer = Vec::new();
+        let mut n = 1;
+        loop {
+            if let Some(b) = bits.next() {
+                buffer.push(b);
+                // If we reach a zero stop and return n
+                if b.is_zero() {
+                    out.push(n);
+                    // Reset n
+                    n = 1;
+                } else {
+                    // If we reached a 1 take the next n bits as a number and make them the new value of n
+                    for _ in 0..n {
+                        if let Some(b) = bits.next() {
+                            buffer.push(b)
+                        } else {
+                            return Err(CodeError::input("partial or malformed input"));
+                        }
+                    }
+                    n = bits_to_int_little_endian(&buffer);
+                    buffer.clear();
+                }
+            } else {
+                break;
+            }
+        }
+        Ok(out)
     }
 
     // Operates on a single codegroup
@@ -298,6 +357,28 @@ mod elias_int_tests {
     fn delta_decode_u32() {
         let code = EliasCodeIntegers::default();
         let codes = "101000101011000110101110011110010000000100001";
+        assert_eq!(
+            vec![1, 2, 3, 4, 5, 6, 7, 8, 9],
+            code.decode_to_u32(codes).unwrap()
+        );
+    }
+
+    #[test]
+    fn gamma_decode_u32() {
+        let mut code = EliasCodeIntegers::default();
+        code.variant = EliasVariant::Gamma;
+        let codes = "10100110010000101001100011100010000001001";
+        assert_eq!(
+            vec![1, 2, 3, 4, 5, 6, 7, 8, 9],
+            code.decode_to_u32(codes).unwrap()
+        );
+    }
+
+    #[test]
+    fn omega_decode_u32() {
+        let mut code = EliasCodeIntegers::default();
+        code.variant = EliasVariant::Omega;
+        let codes = "010011010100010101010110010111011100001110010";
         assert_eq!(
             vec![1, 2, 3, 4, 5, 6, 7, 8, 9],
             code.decode_to_u32(codes).unwrap()
