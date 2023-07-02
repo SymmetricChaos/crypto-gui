@@ -1,12 +1,14 @@
-use crate::{errors::CodeError, traits::Code};
-
-use super::{elias_integers::EliasVariant, EliasCodeIntegers, IOMode, LetterAndWordCode};
+use super::elias_integers::EliasCodeIntegers;
+use crate::{
+    errors::CodeError,
+    traits::{Code, IOMode, LetterAndWordCode},
+};
+use itertools::Itertools;
 
 pub struct EliasCode {
-    pub maps: LetterAndWordCode<String>,
+    pub maps: LetterAndWordCode<u32>,
     pub integer_code: EliasCodeIntegers,
     pub mode: IOMode,
-    pub variant: EliasVariant,
 }
 
 impl EliasCode {}
@@ -15,61 +17,62 @@ impl Default for EliasCode {
     fn default() -> Self {
         let codes = EliasCodeIntegers::default();
 
-        let mut maps = LetterAndWordCode::<String>::default();
+        let mut maps = LetterAndWordCode::<u32>::default();
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
-        maps.set_letter_map(|(n, _)| codes.encode_u32((n + 1) as u32));
+        maps.set_letter_map(|(n, _)| (n + 1) as u32);
 
         Self {
             mode: IOMode::Integer,
             integer_code: codes,
             maps,
-            variant: EliasVariant::Delta,
         }
     }
 }
 
 impl Code for EliasCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
+        let mut out = String::new();
         if self.mode == IOMode::Integer {
-            self.integer_code.encode(text)
+            for group in text.split(" ") {
+                let n = u32::from_str_radix(group, 10)
+                    .map_err(|_| CodeError::invalid_input_group(group))?;
+                out.push_str(&self.integer_code.encode_u32(n));
+            }
         } else if self.mode == IOMode::Letter {
-            let mut output = String::new();
             for c in text.chars() {
-                let code = self.maps.get_by_letter(c)?;
-                output.push_str(&code)
+                let n = self.maps.get_by_letter(c)?;
+                out.push_str(&self.integer_code.encode_u32(*n));
             }
-            Ok(output)
         } else {
-            let mut output = String::new();
             for w in text.split(" ") {
-                let code = self.maps.get_by_word(w)?;
-                output.push_str(code)
+                let n = self.maps.get_by_word(w)?;
+                out.push_str(&self.integer_code.encode_u32(*n));
             }
-            Ok(output)
         }
+        Ok(out)
     }
 
-    fn decode(&self, _text: &str) -> Result<String, CodeError> {
-        // let mut output = String::new();
-        // let mut buffer = String::with_capacity(self.max_code_len);
-        // let mut ctr = 0;
-        // for b in text.chars() {
-        //     buffer.push(b);
-        //     ctr += 1;
-        //     if let Some(s) = self.map_inv.get(&buffer) {
-        //         output.push(*s);
-        //         buffer.clear();
-        //         ctr = 0;
-        //     }
-        //     // If we have an impossible code ignore it and start again, it will eventually
-        //     // resychronize
-        //     if ctr == self.max_code_len {
-        //         buffer.clear();
-        //         ctr = 0;
-        //     }
-        // }
-        // Ok(output)
-        todo!()
+    fn decode(&self, text: &str) -> Result<String, CodeError> {
+        let mut out = String::new();
+        let nums = self.integer_code.decode_to_u32(text)?;
+
+        if self.mode == IOMode::Integer {
+            Ok(nums.into_iter().join(" "))
+        } else if self.mode == IOMode::Letter {
+            for n in nums {
+                out.push(*self.maps.get_letter_by_code(&n)?);
+                out.push(' ');
+            }
+            out.pop();
+            Ok(out)
+        } else {
+            for n in nums {
+                out.push_str(self.maps.get_word_by_code(&n)?);
+                out.push(' ');
+            }
+            out.pop();
+            Ok(out)
+        }
     }
 }
 

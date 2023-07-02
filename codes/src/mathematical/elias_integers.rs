@@ -1,8 +1,7 @@
+use crate::errors::CodeError;
 use num::Zero;
-use utils::bits::{bits_from_bitstring, bits_to_int_little_endian, Bit};
-
-use crate::{errors::CodeError, traits::Code};
 use std::{cell::RefCell, collections::BTreeMap};
+use utils::bits::{bits_from_bitstring, bits_to_int_little_endian, Bit};
 
 // https://en.wikipedia.org/wiki/Elias_delta_coding
 // https://en.wikipedia.org/wiki/Elias_gamma_coding
@@ -124,7 +123,7 @@ impl EliasCodeIntegers {
 
     pub fn encode_u32_gamma(&self, n: u32) -> String {
         if let Some(code) = self.gamma_cache.borrow().get(&n) {
-            return code.clone();
+            code.clone()
         } else {
             while self.gamma.borrow().n < n {
                 let (n, c) = self.gamma.borrow_mut().next().unwrap();
@@ -136,7 +135,7 @@ impl EliasCodeIntegers {
 
     pub fn encode_u32_omega(&self, n: u32) -> String {
         if let Some(code) = self.omega_cache.borrow().get(&n) {
-            return code.clone();
+            code.clone()
         } else {
             while self.omega.borrow().n < n {
                 let (n, c) = self.omega.borrow_mut().next().unwrap();
@@ -304,21 +303,6 @@ impl Default for EliasCodeIntegers {
     }
 }
 
-impl Code for EliasCodeIntegers {
-    fn encode(&self, text: &str) -> Result<String, CodeError> {
-        let mut out = String::new();
-        for s in text.split(" ") {
-            let n = u32::from_str_radix(s, 10).map_err(|_| CodeError::invalid_input_group(s))?;
-            out.push_str(&self.encode_u32(n))
-        }
-        Ok(out)
-    }
-
-    fn decode(&self, text: &str) -> Result<String, CodeError> {
-        todo!()
-    }
-}
-
 #[cfg(test)]
 mod elias_int_tests {
     use super::*;
@@ -383,20 +367,5 @@ mod elias_int_tests {
             vec![1, 2, 3, 4, 5, 6, 7, 8, 9],
             code.decode_to_u32(codes).unwrap()
         );
-    }
-
-    const PLAINTEXT: &'static str = "";
-    const ENCODEDTEXT: &'static str = "";
-
-    #[test]
-    fn encode_test() {
-        let code = EliasCodeIntegers::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
-    }
-
-    #[test]
-    fn decode_test() {
-        let code = EliasCodeIntegers::default();
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
     }
 }
