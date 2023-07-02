@@ -1,5 +1,6 @@
-use super::{elias_integers::EliasVariant, Code, EliasCodeIntegers, IOMode, LetterAndWordCode};
-use crate::errors::Error;
+use crate::{errors::CodeError, traits::Code};
+
+use super::{elias_integers::EliasVariant, EliasCodeIntegers, IOMode, LetterAndWordCode};
 
 pub struct EliasCode {
     pub maps: LetterAndWordCode<String>,
@@ -28,7 +29,7 @@ impl Default for EliasCode {
 }
 
 impl Code for EliasCode {
-    fn encode(&self, text: &str) -> Result<String, Error> {
+    fn encode(&self, text: &str) -> Result<String, CodeError> {
         if self.mode == IOMode::Integer {
             self.integer_code.encode(text)
         } else if self.mode == IOMode::Letter {
@@ -48,7 +49,7 @@ impl Code for EliasCode {
         }
     }
 
-    fn decode(&self, _text: &str) -> Result<String, Error> {
+    fn decode(&self, _text: &str) -> Result<String, CodeError> {
         // let mut output = String::new();
         // let mut buffer = String::with_capacity(self.max_code_len);
         // let mut ctr = 0;

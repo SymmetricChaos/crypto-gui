@@ -1,3 +1,5 @@
+// pub mod elias;
+pub mod elias_integers;
 pub mod fibonacci;
 pub mod fibonacci_integers;
 pub mod godel;

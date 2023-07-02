@@ -1,24 +1,15 @@
-use super::Code;
-use crate::errors::Error;
-use lazy_static::lazy_static;
-use std::{cell::RefCell, collections::HashMap};
+use num::Zero;
+use utils::bits::{bits_from_bitstring, bits_to_int_little_endian, Bit};
+
+use crate::{errors::CodeError, traits::Code};
+use std::{cell::RefCell, collections::BTreeMap};
 
 // https://en.wikipedia.org/wiki/Elias_delta_coding
 // https://en.wikipedia.org/wiki/Elias_gamma_coding
 // https://en.wikipedia.org/wiki/Elias_omega_coding
 
-lazy_static! {
-    pub static ref DLETA: OmegaGen = OmegaGen::new();
-}
-
-pub enum EliasVariant {
-    Delta,
-    Gamma,
-    Omega,
-}
-
 pub struct OmegaGen {
-    n: usize,
+    pub n: u32,
 }
 
 impl OmegaGen {
@@ -37,16 +28,14 @@ impl Iterator for OmegaGen {
             println!("{temp_n}");
             out.insert_str(0, &format!("{:b}", temp_n));
             temp_n = temp_n.ilog2();
-            println!("{temp_n}");
         }
-        println!("");
         self.n += 1;
-        Some((temp_n as u32, out))
+        Some((temp_n, out))
     }
 }
 
 pub struct GammaGen {
-    n: usize,
+    pub n: u32,
     prefix: String,
 }
 
@@ -65,19 +54,19 @@ impl Iterator for GammaGen {
     fn next(&mut self) -> Option<(u32, String)> {
         self.n += 1;
         if self.n == 1 {
-            return Some("1".to_string());
+            return Some((self.n, "1".to_string()));
         } else {
             if self.n.is_power_of_two() {
                 self.prefix.push('0');
             }
             let out = format!("{}{:b}", self.prefix, self.n);
-            Some(out)
+            Some((self.n, out))
         }
     }
 }
 
 pub struct DeltaGen {
-    n: usize,
+    pub n: u32,
 }
 
 impl DeltaGen {
@@ -92,63 +81,181 @@ impl Iterator for DeltaGen {
     fn next(&mut self) -> Option<(u32, String)> {
         self.n += 1;
         if self.n == 1 {
-            Some("1".into())
+            Some((self.n, "1".into()))
         } else {
             let p = self.n.ilog2() as usize;
             let l = (p + 1).ilog2() as usize;
             let mut out = "0".repeat(l);
             out.push_str(&format!("{:b}", p + 1));
             out.push_str(&format!("{:b}", self.n)[1..]);
-            Some(out)
+            Some((self.n, out))
         }
     }
+}
+
+pub enum EliasVariant {
+    Delta,
+    Gamma,
+    Omega,
 }
 
 pub struct EliasCodeIntegers {
     pub variant: EliasVariant,
-    cached_codes_delta: RefCell<HashMap<u32, String>>,
-    cached_codes_gamma: RefCell<HashMap<u32, String>>,
-    cached_codes_omega: RefCell<HashMap<u32, String>>,
+    delta: RefCell<DeltaGen>,
+    delta_cache: RefCell<BTreeMap<u32, String>>,
+    gamma: RefCell<GammaGen>,
+    gamma_cache: RefCell<BTreeMap<u32, String>>,
+    omega: RefCell<OmegaGen>,
+    omega_cache: RefCell<BTreeMap<u32, String>>,
 }
 
 impl EliasCodeIntegers {
-    pub fn encode_u32(&self, n: u32) -> String {
-        match self.variant {
-            EliasVariant::Delta => todo!(),
-            EliasVariant::Gamma => todo!(),
-            EliasVariant::Omega => todo!(),
-        }
-        // Quickly check if the number has been encoded before
-        if let Some(code) = self.cached_codes.borrow().get(&n) {
-            return code.clone();
+    pub fn encode_u32_delta(&self, n: u32) -> String {
+        if let Some(code) = self.delta_cache.borrow().get(&n) {
+            code.clone()
+        } else {
+            while self.delta.borrow().n < n {
+                let (n, c) = self.delta.borrow_mut().next().unwrap();
+                self.delta_cache.borrow_mut().insert(n, c);
+            }
+            self.delta_cache.borrow().get(&n).unwrap().clone()
         }
     }
 
-    pub fn decode_to_u32(&self, text: &str) -> Result<Vec<u32>, Error> {
+    pub fn encode_u32_gamma(&self, n: u32) -> String {
+        if let Some(code) = self.gamma_cache.borrow().get(&n) {
+            return code.clone();
+        } else {
+            while self.gamma.borrow().n < n {
+                let (n, c) = self.gamma.borrow_mut().next().unwrap();
+                self.gamma_cache.borrow_mut().insert(n, c);
+            }
+            self.gamma_cache.borrow().get(&n).unwrap().clone()
+        }
+    }
+
+    pub fn encode_u32_omega(&self, n: u32) -> String {
+        if let Some(code) = self.omega_cache.borrow().get(&n) {
+            return code.clone();
+        } else {
+            while self.omega.borrow().n < n {
+                let (n, c) = self.omega.borrow_mut().next().unwrap();
+                self.omega_cache.borrow_mut().insert(n, c);
+            }
+            self.omega_cache.borrow().get(&n).unwrap().clone()
+        }
+    }
+
+    pub fn encode_u32(&self, n: u32) -> String {
+        match self.variant {
+            EliasVariant::Delta => self.encode_u32_delta(n),
+            EliasVariant::Gamma => self.encode_u32_gamma(n),
+            EliasVariant::Omega => self.encode_u32_omega(n),
+        }
+    }
+
+    pub fn decode_to_u32_delta(
+        &self,
+        bits: &mut dyn Iterator<Item = Bit>,
+    ) -> Result<Vec<u32>, CodeError> {
+        let mut out = Vec::new();
+        let mut buffer = Vec::new();
+        let mut zero_ctr = 0;
+        loop {
+            if let Some(b) = bits.next() {
+                buffer.push(b);
+                // Count up zeroes until a one is reached
+                if b.is_zero() {
+                    zero_ctr += 1;
+                    continue;
+                } else {
+                    // Once we reach a one get extra bits equal to the zeroes seen
+                    for _ in 0..zero_ctr {
+                        if let Some(b) = bits.next() {
+                            buffer.push(b)
+                        } else {
+                            return Err(CodeError::input("partial or malformed input"));
+                        }
+                    }
+                    // Convert the bits into an integer
+                    let t = bits_to_int_little_endian(&buffer) - 1;
+
+                    // Take that many more bits
+                    buffer.clear();
+                    for _ in 0..t {
+                        if let Some(b) = bits.next() {
+                            buffer.push(b)
+                        } else {
+                            return Err(CodeError::input("partial or malformed input"));
+                        }
+                    }
+
+                    let f = bits_to_int_little_endian(&buffer);
+
+                    out.push(2_u32.pow(t) + f);
+                    // Clear buffer and counter
+                    buffer.clear();
+                    zero_ctr = 0;
+                }
+            } else {
+                break;
+            }
+        }
+        Ok(out)
+    }
+
+    pub fn decode_to_u32_gamma(
+        &self,
+        bits: &mut dyn Iterator<Item = Bit>,
+    ) -> Result<Vec<u32>, CodeError> {
         todo!()
     }
 
-    fn extend_caches(&self) {
-        let (n, c) = DLETA.next().unwrap();
-        self.cached_codes_delta.borrow_mut().insert(n, c);
+    pub fn decode_to_u32_omega(
+        &self,
+        bits: &mut dyn Iterator<Item = Bit>,
+    ) -> Result<Vec<u32>, CodeError> {
+        todo!()
+    }
+
+    // Operates on a single codegroup
+    pub fn decode_to_u32(&self, text: &str) -> Result<Vec<u32>, CodeError> {
+        let mut filtered = bits_from_bitstring(text).ok_or(CodeError::input(
+            "input should be only 0s, 1s, and whitespace",
+        ))?;
+        match self.variant {
+            EliasVariant::Delta => self.decode_to_u32_delta(&mut filtered),
+            EliasVariant::Gamma => self.decode_to_u32_gamma(&mut filtered),
+            EliasVariant::Omega => self.decode_to_u32_omega(&mut filtered),
+        }
     }
 }
 
 impl Default for EliasCodeIntegers {
-    fn default() -> Self {}
+    fn default() -> Self {
+        Self {
+            variant: EliasVariant::Delta,
+            delta: RefCell::new(DeltaGen::new()),
+            delta_cache: Default::default(),
+            gamma: RefCell::new(GammaGen::new()),
+            gamma_cache: Default::default(),
+            omega: RefCell::new(OmegaGen::new()),
+            omega_cache: Default::default(),
+        }
+    }
 }
 
 impl Code for EliasCodeIntegers {
-    fn encode(&self, text: &str) -> Result<String, Error> {
+    fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::new();
         for s in text.split(" ") {
-            let n = u32::from_str_radix(s, 10).map_err(|_| Error::invalid_input_group(s))?;
+            let n = u32::from_str_radix(s, 10).map_err(|_| CodeError::invalid_input_group(s))?;
             out.push_str(&self.encode_u32(n))
         }
         Ok(out)
     }
 
-    fn decode(&self, text: &str) -> Result<String, Error> {
+    fn decode(&self, text: &str) -> Result<String, CodeError> {
         todo!()
     }
 }
@@ -160,7 +267,7 @@ mod elias_int_tests {
     #[test]
     fn delta_codes() {
         let codes = DeltaGen::new();
-        for (code, check) in codes.zip([
+        for ((_, code), check) in codes.zip([
             "1", "0100", "0101", "01100", "01101", "01110", "01111", "00100000", "00100001",
         ]) {
             assert_eq!(code, check)
@@ -170,7 +277,7 @@ mod elias_int_tests {
     #[test]
     fn gamma_codes() {
         let codes = GammaGen::new();
-        for (code, check) in codes.zip([
+        for ((_, code), check) in codes.zip([
             "1", "010", "011", "00100", "00101", "00110", "00111", "0001000", "0001001",
         ]) {
             assert_eq!(code, check)
@@ -180,11 +287,21 @@ mod elias_int_tests {
     #[test]
     fn omega_codes() {
         let codes = OmegaGen::new();
-        for (code, check) in codes.zip([
+        for ((_, code), check) in codes.zip([
             "0", "100", "110", "101000", "101010", "101100", "101110", "1110000", "1110010",
         ]) {
             assert_eq!(code, check)
         }
+    }
+
+    #[test]
+    fn delta_decode_u32() {
+        let code = EliasCodeIntegers::default();
+        let codes = "101000101011000110101110011110010000000100001";
+        assert_eq!(
+            vec![1, 2, 3, 4, 5, 6, 7, 8, 9],
+            code.decode_to_u32(codes).unwrap()
+        );
     }
 
     const PLAINTEXT: &'static str = "";

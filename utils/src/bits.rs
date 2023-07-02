@@ -1,3 +1,6 @@
+use lazy_static::lazy_static;
+use num::{One, Zero};
+use regex::Regex;
 use std::{
     fmt::Display,
     ops::{
@@ -6,7 +9,45 @@ use std::{
     },
 };
 
-use num::{One, Zero};
+lazy_static! {
+    pub static ref IS_BITS: Regex = Regex::new(r"^[01\s]*$").unwrap();
+}
+
+pub fn bits_from_bitstring(text: &str) -> Option<impl Iterator<Item = Bit> + '_> {
+    if !IS_BITS.is_match(text) {
+        None
+    } else {
+        Some(
+            text.chars()
+                .filter(|c| !c.is_whitespace())
+                .map(|c| Bit::try_from(c).unwrap()),
+        )
+    }
+}
+
+pub fn bits_to_int_little_endian(bits: &[Bit]) -> u32 {
+    let mut out = 0;
+    let mut p = 1;
+    for b in bits.iter().rev() {
+        if b.is_one() {
+            out += p;
+        }
+        p *= 2
+    }
+    out
+}
+
+pub fn bits_to_int_big_endian(bits: &[Bit]) -> u32 {
+    let mut out = 0;
+    let mut p = 1;
+    for b in bits.iter() {
+        if b.is_one() {
+            out += p;
+        }
+        p *= 2
+    }
+    out
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Bit {
@@ -386,5 +427,23 @@ impl From<bool> for Bit {
             false => Bit::Zero,
             true => Bit::One,
         }
+    }
+}
+
+#[cfg(test)]
+mod text_function_tests {
+
+    use super::*;
+
+    #[test]
+    fn bits_to_int() {
+        assert_eq!(
+            5,
+            bits_to_int_little_endian(&[0, 0, 1, 0, 1].map(|n| Bit::try_from(n).unwrap()))
+        );
+        assert_eq!(
+            20,
+            bits_to_int_big_endian(&[0, 0, 1, 0, 1].map(|n| Bit::try_from(n).unwrap()))
+        );
     }
 }
