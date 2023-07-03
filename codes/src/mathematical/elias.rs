@@ -11,7 +11,15 @@ pub struct EliasCode {
     pub mode: IOMode,
 }
 
-impl EliasCode {}
+impl EliasCode {
+    pub fn set_letter_map(&mut self) {
+        self.maps.set_letter_map(|(n, _)| (n + 1) as u32)
+    }
+
+    pub fn set_word_map(&mut self) {
+        self.maps.set_word_map(|(n, _)| (n + 1) as u32)
+    }
+}
 
 impl Default for EliasCode {
     fn default() -> Self {

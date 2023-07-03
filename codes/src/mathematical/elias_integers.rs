@@ -92,6 +92,7 @@ impl Iterator for DeltaGen {
     }
 }
 
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum EliasVariant {
     Delta,
     Gamma,

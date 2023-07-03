@@ -5,7 +5,7 @@ use egui::Ui;
 use self::{
     ascii85_controls::Ascii85Frame, ascii_controls::AsciiFrame, bacon_contols::BaconFrame,
     base32_controls::Base32Frame, base64_controls::Base64Frame, baudot_controls::BaudotFrame,
-    block_controls::BlockCodeFrame, damm_controls::DammFrame,
+    block_controls::BlockCodeFrame, damm_controls::DammFrame, elias_controls::EliasCodeFrame,
     fibonacci_controls::FibonacciCodeFrame, godel_controls::GodelFrame,
     hamming_controls::HammingFrame, isbn_contols::IsbnFrame, itf_controls::ItfFrame,
     levenshtein_controls::LevenshteinCodeFrame, linotype_controls::LinotypeFrame,
@@ -27,6 +27,7 @@ mod base64_controls;
 mod baudot_controls;
 mod block_controls;
 mod damm_controls;
+mod elias_controls;
 mod fibonacci_controls;
 mod godel_controls;
 mod hamming_controls;
@@ -116,6 +117,7 @@ pub struct CodeInterface {
     upc: UpcFrame,
 
     // Mathematical
+    elias: EliasCodeFrame,
     fibonacci: FibonacciCodeFrame,
     godel: GodelFrame,
     levenshtein: LevenshteinCodeFrame,
@@ -160,6 +162,7 @@ impl CodeInterface {
         );
         combox_box(
             &[
+                CodeId::Elias,
                 CodeId::Fibonacci,
                 CodeId::Godel,
                 CodeId::Levenshtein,
@@ -208,6 +211,7 @@ impl CodeInterface {
             CodeId::Block => &mut self.block,
             CodeId::ByteAsNum => &mut self.numeric,
             CodeId::Damm => &mut self.damm,
+            CodeId::Elias => &mut self.elias,
             CodeId::Fibonacci => &mut self.fibonacci,
             CodeId::Godel => &mut self.godel,
             CodeId::Hamming => &mut self.hamming,
