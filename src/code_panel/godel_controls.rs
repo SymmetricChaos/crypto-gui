@@ -1,4 +1,4 @@
-use crate::ui_elements::fill_code_columns;
+use crate::ui_elements::{fill_code_columns, subheading};
 
 use super::CodeFrame;
 
@@ -19,8 +19,13 @@ impl Default for GodelFrame {
 
 impl CodeFrame for GodelFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        ui.selectable_value(&mut self.code.mode, IOMode::Letter, "Letter");
-        ui.selectable_value(&mut self.code.mode, IOMode::Word, "Word");
+        ui.group(|ui| {
+            ui.label(subheading("Mode"));
+            ui.selectable_value(&mut self.code.mode, IOMode::Letter, "Letter");
+            ui.selectable_value(&mut self.code.mode, IOMode::Word, "Word");
+        });
+        ui.add_space(16.0);
+
         match self.code.mode {
             IOMode::Letter => {
                 ui.label("Alphabetical Mode: Provide an alphabet. Codes will be assigned to each character of the alphabet in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");

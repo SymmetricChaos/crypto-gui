@@ -19,7 +19,7 @@ impl Default for TapCodeFrame {
 
 impl CodeFrame for TapCodeFrame {
     fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
-        ui.label(subheading("Common Latin Alphabets"));
+        ui.label(subheading("Common Alphabets"));
         ui.horizontal(|ui| {
             if ui.button("No C").clicked() {
                 self.code.assign_alphabet(Alphabet::BasicLatinNoC)

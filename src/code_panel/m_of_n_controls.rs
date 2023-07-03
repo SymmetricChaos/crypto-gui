@@ -18,10 +18,10 @@ impl Default for MofNCodeFrame {
 impl CodeFrame for MofNCodeFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.group(|ui| {
-            ui.label("Weight");
-            ui.add(Slider::new(&mut self.code.weight, 1..=self.code.length));
             ui.label("Length");
             ui.add(Slider::new(&mut self.code.length, 0..=10));
+            ui.label("Weight");
+            ui.add(Slider::new(&mut self.code.weight, 1..=self.code.length));
         });
     }
 
