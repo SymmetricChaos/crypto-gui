@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, randomize_reset};
+use crate::ui_elements::{control_string, randomize_reset, subheading};
 use ciphers::{
     polyalphabetic::{PolyMode, Vigenere},
     Cipher,
@@ -38,13 +38,14 @@ impl CipherFrame for VigenereFrame {
             }
         }
         ui.add_space(16.0);
-        ui.add_space(16.0);
 
-        ui.label("Mode");
-        ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.cipher.mode, PolyMode::CylicKey, "Cyclic");
-            ui.selectable_value(&mut self.cipher.mode, PolyMode::Autokey, "Autokey");
-            ui.selectable_value(&mut self.cipher.mode, PolyMode::ProgKey, "Progressive");
+        ui.group(|ui| {
+            ui.label(subheading("Mode"));
+            ui.horizontal(|ui| {
+                ui.selectable_value(&mut self.cipher.mode, PolyMode::CylicKey, "Cyclic");
+                ui.selectable_value(&mut self.cipher.mode, PolyMode::Autokey, "Autokey");
+                ui.selectable_value(&mut self.cipher.mode, PolyMode::ProgKey, "Progressive");
+            });
         });
 
         if self.cipher.mode == PolyMode::ProgKey {

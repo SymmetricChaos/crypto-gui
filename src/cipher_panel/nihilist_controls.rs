@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, mono, randomize_reset};
+use crate::ui_elements::{control_string, mono, randomize_reset, subheading};
 use ciphers::{polybius::nihilist::Nihilist, Cipher};
 use eframe::egui::Ui;
 use rand::{thread_rng, Rng};
@@ -46,21 +46,24 @@ impl CipherFrame for NihilistFrame {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 
-        ui.label("Common Alphabets");
-        ui.horizontal(|ui| {
-            for (name, alphabet) in [
-                ("No C", Alphabet::BasicLatinNoC),
-                ("No J", Alphabet::BasicLatinNoJ),
-                ("No Q", Alphabet::BasicLatinNoQ),
-                ("Alphanumeric", Alphabet::BasicLatinWithDigits),
-                ("Base64", Alphabet::Base64),
-            ] {
-                if ui.button(name).clicked() {
-                    self.alphabet_string = alphabet.into();
-                    self.assign_keys();
+        ui.group(|ui| {
+            ui.label(subheading("Common Alphabets"));
+            ui.horizontal(|ui| {
+                for (name, alphabet) in [
+                    ("No C", Alphabet::BasicLatinNoC),
+                    ("No J", Alphabet::BasicLatinNoJ),
+                    ("No Q", Alphabet::BasicLatinNoQ),
+                    ("Alphanumeric", Alphabet::BasicLatinWithDigits),
+                    ("Base64", Alphabet::Base64),
+                ] {
+                    if ui.button(name).clicked() {
+                        self.alphabet_string = alphabet.into();
+                        self.assign_keys();
+                    }
                 }
-            }
+            });
         });
+
         ui.add_space(10.0);
 
         ui.label("Alphabet");

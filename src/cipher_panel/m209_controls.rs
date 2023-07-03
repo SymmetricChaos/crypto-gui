@@ -1,9 +1,9 @@
 use ciphers::{Cipher, M209};
-use egui::{Slider, Ui};
+use egui::{Color32, Slider, Ui};
 use rand::{thread_rng, Fill};
-use utils::functions::random_char_vec;
+use utils::{functions::random_char_vec, preset_alphabet::Alphabet};
 
-use crate::ui_elements::randomize_reset;
+use crate::ui_elements::{mono, randomize_reset};
 
 use super::CipherFrame;
 
@@ -31,7 +31,7 @@ impl CipherFrame for M209Frame {
         ui.add_space(16.0);
 
         ui.label("Alphabet");
-        ui.label("ABDCEFGHIJKLMNOPQRSTUVWXYZ");
+        ui.label(mono(Alphabet::BasicLatin).background_color(Color32::BLACK));
         ui.add_space(16.0);
 
         ui.label("Rotor Settings");

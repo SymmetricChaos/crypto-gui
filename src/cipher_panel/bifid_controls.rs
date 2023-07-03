@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, mono, randomize_reset};
+use crate::ui_elements::{control_string, mono, randomize_reset, subheading};
 use ciphers::{polybius::Bifid, Cipher};
 use egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
@@ -33,23 +33,25 @@ impl CipherFrame for BifidFrame {
         ui.label("Block Size");
         ui.add(Slider::new(&mut self.cipher.block_size, block_size_range));
 
-        ui.label("Common Alphabets");
-        ui.horizontal(|ui| {
-            for (name, alphabet) in [
-                ("No C", Alphabet::BasicLatinNoC),
-                ("No J", Alphabet::BasicLatinNoJ),
-                ("No Q", Alphabet::BasicLatinNoQ),
-                ("Alphanumeric", Alphabet::BasicLatinWithDigits),
-                ("Base64", Alphabet::Base64),
-            ] {
-                if ui.button(name).clicked() {
-                    self.alphabet_string = alphabet.into();
-                    filter_string(&mut self.key_string, &self.alphabet_string);
-                    self.cipher
-                        .polybius
-                        .assign_key(&self.key_string, alphabet.into());
+        ui.group(|ui| {
+            ui.label(subheading("Common Alphabets"));
+            ui.horizontal(|ui| {
+                for (name, alphabet) in [
+                    ("No C", Alphabet::BasicLatinNoC),
+                    ("No J", Alphabet::BasicLatinNoJ),
+                    ("No Q", Alphabet::BasicLatinNoQ),
+                    ("Alphanumeric", Alphabet::BasicLatinWithDigits),
+                    ("Base64", Alphabet::Base64),
+                ] {
+                    if ui.button(name).clicked() {
+                        self.alphabet_string = alphabet.into();
+                        filter_string(&mut self.key_string, &self.alphabet_string);
+                        self.cipher
+                            .polybius
+                            .assign_key(&self.key_string, alphabet.into());
+                    }
                 }
-            }
+            });
         });
         ui.add_space(10.0);
 

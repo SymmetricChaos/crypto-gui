@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, randomize_reset};
+use crate::ui_elements::{control_string, randomize_reset, subheading};
 use ciphers::{
     polyalphabetic::{Beaufort, PolyMode},
     Cipher,
@@ -39,11 +39,13 @@ impl CipherFrame for BeaufortFrame {
         }
         ui.add_space(10.0);
 
-        ui.label("Mode");
-        ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.cipher.mode, PolyMode::CylicKey, "Cyclic");
-            ui.selectable_value(&mut self.cipher.mode, PolyMode::Autokey, "Autokey");
-            ui.selectable_value(&mut self.cipher.mode, PolyMode::ProgKey, "Progressive");
+        ui.group(|ui| {
+            ui.label(subheading("Mode"));
+            ui.horizontal(|ui| {
+                ui.selectable_value(&mut self.cipher.mode, PolyMode::CylicKey, "Cyclic");
+                ui.selectable_value(&mut self.cipher.mode, PolyMode::Autokey, "Autokey");
+                ui.selectable_value(&mut self.cipher.mode, PolyMode::ProgKey, "Progressive");
+            });
         });
 
         ui.add_enabled_ui(self.cipher.mode == PolyMode::ProgKey, |ui| {

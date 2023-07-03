@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, error_text, randomize_reset, string_slider};
+use crate::ui_elements::{control_string, error_text, randomize_reset, string_slider, subheading};
 use ciphers::{
     polyalphabetic::{Quagmire, QuagmireVersion},
     Cipher,
@@ -41,12 +41,14 @@ impl CipherFrame for QuagmireFrame {
         }
 
         ui.add_space(16.0);
-        ui.label("Select Version");
-        ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.cipher.version, QuagmireVersion::V1, "V1");
-            ui.selectable_value(&mut self.cipher.version, QuagmireVersion::V2, "V2");
-            ui.selectable_value(&mut self.cipher.version, QuagmireVersion::V3, "V3");
-            ui.selectable_value(&mut self.cipher.version, QuagmireVersion::V4, "V4");
+        ui.group(|ui| {
+            ui.label(subheading("Version"));
+            ui.horizontal(|ui| {
+                ui.selectable_value(&mut self.cipher.version, QuagmireVersion::V1, "V1");
+                ui.selectable_value(&mut self.cipher.version, QuagmireVersion::V2, "V2");
+                ui.selectable_value(&mut self.cipher.version, QuagmireVersion::V3, "V3");
+                ui.selectable_value(&mut self.cipher.version, QuagmireVersion::V4, "V4");
+            });
         });
 
         ui.add_space(16.0);

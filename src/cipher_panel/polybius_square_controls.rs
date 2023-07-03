@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, mono, randomize_reset};
+use crate::ui_elements::{control_string, mono, randomize_reset, subheading};
 use ciphers::{polybius::PolybiusSquare, Cipher};
 use eframe::egui::Ui;
 use rand::thread_rng;
@@ -31,23 +31,26 @@ impl CipherFrame for PolybiusSquareFrame {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 
-        ui.label("Common Alphabets");
-        ui.horizontal(|ui| {
-            for (name, alphabet) in [
-                ("No C", Alphabet::BasicLatinNoC),
-                ("No J", Alphabet::BasicLatinNoJ),
-                ("No Q", Alphabet::BasicLatinNoQ),
-                ("Alphanumeric", Alphabet::BasicLatinWithDigits),
-                ("Base64", Alphabet::Base64),
-            ] {
-                if ui.button(name).clicked() {
-                    self.alphabet_string = alphabet.into();
-                    filter_string(&mut self.key_string, &self.alphabet_string);
-                    self.cipher
-                        .assign_key(&self.key_string, &self.alphabet_string)
+        ui.group(|ui| {
+            ui.label(subheading("Common Alphabets"));
+            ui.horizontal(|ui| {
+                for (name, alphabet) in [
+                    ("No C", Alphabet::BasicLatinNoC),
+                    ("No J", Alphabet::BasicLatinNoJ),
+                    ("No Q", Alphabet::BasicLatinNoQ),
+                    ("Alphanumeric", Alphabet::BasicLatinWithDigits),
+                    ("Base64", Alphabet::Base64),
+                ] {
+                    if ui.button(name).clicked() {
+                        self.alphabet_string = alphabet.into();
+                        filter_string(&mut self.key_string, &self.alphabet_string);
+                        self.cipher
+                            .assign_key(&self.key_string, &self.alphabet_string)
+                    }
                 }
-            }
+            });
         });
+
         ui.add_space(10.0);
 
         ui.label("Alphabet");

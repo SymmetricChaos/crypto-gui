@@ -1,4 +1,4 @@
-use crate::ui_elements::{control_string, mono, randomize_reset};
+use crate::ui_elements::{control_string, mono, randomize_reset, subheading};
 
 use super::CipherFrame;
 
@@ -40,20 +40,22 @@ impl CipherFrame for AdfgvxFrame {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 
-        ui.label("Select Mode");
-        ui.horizontal(|ui| {
-            if ui.button("ADFGX").clicked() {
-                self.cipher.assign_mode(AdfgvxMode::Short);
-                filter_string(&mut self.columnar_key_string, self.cipher.alphabet());
-                filter_string(&mut self.polybius_key_string, self.cipher.alphabet());
-                self.cipher.assign_polybius_key(&self.polybius_key_string);
-                self.assign_columnar_key();
-            };
-            if ui.button("ADFGVX").clicked() {
-                self.cipher.assign_mode(AdfgvxMode::Long);
-                self.cipher.assign_polybius_key(&self.polybius_key_string);
-                self.assign_columnar_key();
-            };
+        ui.group(|ui| {
+            ui.label(subheading("Select Mode"));
+            ui.horizontal(|ui| {
+                if ui.button("ADFGX").clicked() {
+                    self.cipher.assign_mode(AdfgvxMode::Short);
+                    filter_string(&mut self.columnar_key_string, self.cipher.alphabet());
+                    filter_string(&mut self.polybius_key_string, self.cipher.alphabet());
+                    self.cipher.assign_polybius_key(&self.polybius_key_string);
+                    self.assign_columnar_key();
+                };
+                if ui.button("ADFGVX").clicked() {
+                    self.cipher.assign_mode(AdfgvxMode::Long);
+                    self.cipher.assign_polybius_key(&self.polybius_key_string);
+                    self.assign_columnar_key();
+                };
+            });
         });
 
         // False alphabet display
