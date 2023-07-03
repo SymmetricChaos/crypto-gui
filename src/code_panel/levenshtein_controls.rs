@@ -1,4 +1,4 @@
-use crate::ui_elements::fill_code_columns;
+use crate::ui_elements::{fill_code_columns, subheading};
 
 use super::CodeFrame;
 use codes::{
@@ -21,9 +21,12 @@ impl Default for LevenshteinCodeFrame {
 
 impl CodeFrame for LevenshteinCodeFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        ui.selectable_value(&mut self.code.mode, IOMode::Integer, "Integer");
-        ui.selectable_value(&mut self.code.mode, IOMode::Letter, "Letter");
-        ui.selectable_value(&mut self.code.mode, IOMode::Word, "Word");
+        ui.group(|ui| {
+            ui.label(subheading("Mode"));
+            ui.selectable_value(&mut self.code.mode, IOMode::Integer, "Integer");
+            ui.selectable_value(&mut self.code.mode, IOMode::Letter, "Letter");
+            ui.selectable_value(&mut self.code.mode, IOMode::Word, "Word");
+        });
         ui.add_space(16.0);
 
         match self.code.mode {
