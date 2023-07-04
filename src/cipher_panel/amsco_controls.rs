@@ -30,15 +30,20 @@ impl Default for AmscoFrame {
 }
 
 impl AmscoFrame {
-    fn build_grid(&mut self) {
-        let groups = self.cipher.groups(&self.example);
+    fn build_example_grid(&mut self) {
+        let groups = if let Some(groups) = self.cipher.groups(&self.example) {
+            groups
+        } else {
+            self.example_grid = Grid::<String>::new_default(1, 1);
+            return ();
+        };
         let n_cols = self.cipher.key.len();
         let n_rows = num::Integer::div_ceil(&groups.len(), &n_cols);
         let mut groups_iter = groups.into_iter();
 
         self.example_grid = Grid::<String>::new_default(n_rows, n_cols);
 
-        for k in self.cipher.key.iter() {
+        for k in self.cipher.key_ranks.iter() {
             for row in self.example_grid.get_col_mut(*k) {
                 if let Some(a) = groups_iter.next() {
                     match a {
@@ -66,20 +71,20 @@ impl CipherFrame for AmscoFrame {
         ui.label("Alphabet");
         if control_string(ui, &mut self.alphabet_string).changed() {
             self.assign_key();
-            self.build_grid();
+            self.build_example_grid();
         }
 
         ui.label("Keyword");
         if control_string(ui, &mut self.key_string).changed() {
             self.assign_key();
-            self.build_grid();
+            self.build_example_grid();
         };
 
         ui.add_space(16.0);
 
         ui.label("Example Plaintext");
         if control_string(ui, &mut self.example).changed() {
-            self.build_grid();
+            self.build_example_grid();
         };
 
         ui.add_space(8.0);
@@ -91,6 +96,10 @@ impl CipherFrame for AmscoFrame {
             .max_col_width(20.0)
             .striped(true)
             .show(ui, |ui| {
+                for letter in self.key_string.chars() {
+                    ui.label(mono(letter).strong());
+                }
+                ui.end_row();
                 for digit in self.cipher.key.iter() {
                     ui.label(mono(digit).strong());
                 }

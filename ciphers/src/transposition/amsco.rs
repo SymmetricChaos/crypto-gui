@@ -1,7 +1,7 @@
 use itertools::Itertools;
 
 use utils::{
-    functions::{rank_str, StringRankError},
+    functions::{rank_str, rank_vec, StringRankError},
     grid::Grid,
     math_functions::Parity,
 };
@@ -10,6 +10,7 @@ use crate::{Cipher, CipherError};
 
 pub struct Amsco {
     pub key: Vec<usize>,
+    pub key_ranks: Vec<usize>,
     pub parity: Parity,
     pub spacer: char,
 }
@@ -18,6 +19,7 @@ impl Default for Amsco {
     fn default() -> Self {
         Self {
             key: Vec::new(),
+            key_ranks: Vec::new(),
             parity: Parity::Odd,
             spacer: 'X',
         }
@@ -27,10 +29,14 @@ impl Default for Amsco {
 impl Amsco {
     pub fn assign_key(&mut self, keyword: &str, alphabet: &str) -> Result<(), StringRankError> {
         self.key = rank_str(keyword, alphabet)?;
+        self.key_ranks = rank_vec(&self.key);
         Ok(())
     }
 
-    pub fn groups(&self, text: &str) -> Vec<(char, Option<char>)> {
+    pub fn groups(&self, text: &str) -> Option<Vec<(char, Option<char>)>> {
+        if self.key.is_empty() {
+            return None;
+        }
         let mut pattern = self.parity.cycle();
         let mut c = text.chars();
         let mut out = Vec::new();
@@ -60,13 +66,17 @@ impl Amsco {
                 Parity::Even => out.push((self.spacer, Some(self.spacer))),
             };
         }
-        out
+        Some(out)
     }
 }
 
 impl Cipher for Amsco {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let groups = self.groups(text);
+        let groups = if let Some(groups) = self.groups(text) {
+            groups
+        } else {
+            return Err(CipherError::key("key must have at least one letter"));
+        };
 
         let n_cols = self.key.len();
         let n_rows = num::Integer::div_ceil(&groups.len(), &n_cols);
@@ -74,7 +84,7 @@ impl Cipher for Amsco {
 
         let mut g = Grid::<String>::new_default(n_rows, n_cols);
 
-        for k in self.key.iter() {
+        for k in self.key_ranks.iter() {
             for row in g.get_col_mut(*k) {
                 if let Some(a) = groups_iter.next() {
                     match a {
@@ -85,20 +95,29 @@ impl Cipher for Amsco {
             }
         }
 
+        for row in 0..g.num_rows() {
+            println!("{:?}", g.get_row(row).collect_vec());
+        }
+
         let out = g.get_rows().join("");
         Ok(out)
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+        let groups_len = if let Some(groups) = self.groups(text) {
+            groups.len()
+        } else {
+            return Err(CipherError::key("key must have at least one letter"));
+        };
+
         // Build a grid of 1s and 2s, filled by columns in the order given by the key
         let mut pattern = self.parity.cycle();
 
-        let groups_len = self.groups(text).len(); // We need the length but not the actual groups
         let n_cols = self.key.len();
         let n_rows = num::Integer::div_ceil(&groups_len, &n_cols);
         let mut g = Grid::<String>::new_default(n_rows, n_cols);
 
-        for k in self.key.iter() {
+        for k in self.key_ranks.iter() {
             for cell in g.get_col_mut(*k) {
                 match pattern.next().unwrap() {
                     Parity::Odd => *cell = "1".into(),
@@ -131,7 +150,7 @@ impl Cipher for Amsco {
 
         // Read off the grid by columns in the order given by the key
         let mut out = String::with_capacity(text.len());
-        for k in self.key.iter() {
+        for k in self.key_ranks.iter() {
             for cell in g.get_col(*k) {
                 out.push_str(cell)
             }
@@ -142,24 +161,25 @@ impl Cipher for Amsco {
 
 #[cfg(test)]
 mod amsco_tests {
-    use utils::functions::rank_vec;
+
+    use utils::preset_alphabet::Alphabet;
 
     use super::*;
 
     const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "XZTVEKBJUYDHERRMOQTHOWPSGXUIENOXCLAFO";
+    const CIPHERTEXT: &'static str = "ZXTKBVEYDJUHERROMQOWTHGXPSUINEXOCFOLA";
 
     #[test]
     fn encrypt_test() {
         let mut cipher = Amsco::default();
-        cipher.key = rank_vec(&vec![2, 4, 0, 3, 1]);
+        _ = cipher.assign_key("ECABD", Alphabet::BasicLatin.into());
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = Amsco::default();
-        cipher.key = rank_vec(&vec![2, 4, 0, 3, 1]);
+        _ = cipher.assign_key("ECABD", Alphabet::BasicLatin.into());
         assert_eq!(
             cipher.decrypt(CIPHERTEXT).unwrap(),
             "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOGXX"
