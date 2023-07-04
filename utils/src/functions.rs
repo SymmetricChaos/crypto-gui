@@ -11,6 +11,16 @@ pub fn filter_string(string: &mut String, alphabet: &str) {
     *string = string.chars().filter(|c| alphabet.contains(*c)).collect();
 }
 
+pub fn eval_poly(x: u32, polynomial: &[u32], modulus: u32) -> u32 {
+    let mut acc = 0;
+    for coef in polynomial.iter().rev() {
+        acc += x;
+        acc *= coef;
+        acc %= modulus;
+    }
+    acc
+}
+
 pub fn bimap_from_iter<I, S, T>(iter: I) -> BiMap<S, T>
 where
     I: Iterator<Item = (S, T)>,

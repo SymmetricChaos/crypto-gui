@@ -7,6 +7,7 @@ pub mod tactical;
 pub mod transposition;
 
 pub mod m209;
+pub mod shamir;
 pub use m209::M209;
 
 pub mod enigma;
