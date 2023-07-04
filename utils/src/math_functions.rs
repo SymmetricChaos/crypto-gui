@@ -1,6 +1,8 @@
 use std::collections::{BTreeMap, HashMap};
 
-use num::{integer::Roots, FromPrimitive, Integer, One, ToPrimitive, Unsigned};
+use num::{
+    integer::Roots, traits::MulAddAssign, FromPrimitive, Integer, One, ToPrimitive, Unsigned,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Parity {
@@ -131,5 +133,26 @@ impl Iterator for PrimeSieve {
                 self.sieve.remove(&self.n);
             }
         }
+    }
+}
+
+pub fn eval_poly(x: u32, polynomial: &[u32], modulus: u32) -> u32 {
+    if polynomial.len() == 0 {
+        return 0;
+    }
+    let mut acc = 0;
+    for &coef in polynomial.iter().rev() {
+        acc.mul_add_assign(x, coef);
+        acc %= modulus;
+    }
+    acc
+}
+
+#[cfg(test)]
+mod math_function_tests {
+    use super::*;
+    #[test]
+    fn polynomial() {
+        assert_eq!(eval_poly(2, &[1234, 166, 94], 1613), 329)
     }
 }
