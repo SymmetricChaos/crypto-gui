@@ -16,8 +16,8 @@ use self::{
     polybius_square_controls::PolybiusSquareFrame, porta_controls::PortaFrame,
     purple_controls::PurpleFrame, quagmire_controls::QuagmireFrame,
     rail_fence_controls::RailFenceFrame, rs44_controls::Rs44Frame, scytale_controls::ScytaleFrame,
-    seriated_playfair::SeriatedPlayfairFrame, sigaba_controls::SigabaFrame,
-    slidefair_controls::SlidefairFrame, trifid_controls::TrifidFrame,
+    seriated_playfair::SeriatedPlayfairFrame, shamir_control::ShamirSecretSharingFrame,
+    sigaba_controls::SigabaFrame, slidefair_controls::SlidefairFrame, trifid_controls::TrifidFrame,
     turning_grille_controls::TurningGrilleFrame, two_square_controls::TwoSquareFrame,
     vigenere_controls::VigenereFrame,
 };
@@ -151,6 +151,9 @@ pub struct CipherInterface {
     checkerboard: StraddlingCheckerboardFrame,
     dryad: DryadFrame,
     rs44: Rs44Frame,
+
+    // Other
+    shamir: ShamirSecretSharingFrame,
 }
 
 impl CipherInterface {
@@ -247,6 +250,8 @@ impl CipherInterface {
             active_cipher,
             ui,
         );
+
+        combox_box(&[CipherId::Shamir], "Other", active_cipher, ui);
     }
 
     pub fn get_active_cipher(&mut self, active_cipher: &CipherId) -> &mut dyn CipherFrame {
@@ -285,6 +290,7 @@ impl CipherInterface {
             CipherId::Rs44 => &mut self.rs44,
             CipherId::Scytale => &mut self.scytale,
             CipherId::SeriatedPlayfair => &mut self.seriated,
+            CipherId::Shamir => &mut self.shamir,
             CipherId::Sigaba => &mut self.sigaba,
             CipherId::Slidefair => &mut self.slidefair,
             CipherId::Substitution => &mut self.gen_sub,
