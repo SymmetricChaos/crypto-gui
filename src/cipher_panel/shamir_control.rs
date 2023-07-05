@@ -1,13 +1,15 @@
 use ciphers::shamir::ShamirSecretSharing;
-use utils::{functions::filter_string, preset_alphabet::Alphabet};
+use egui::Slider;
+use utils::{functions::filter_string, math_functions::is_prime32, preset_alphabet::Alphabet};
 
-use crate::ui_elements::control_string;
+use crate::ui_elements::{control_string, error_text};
 
 use super::CipherFrame;
 
 pub struct ShamirSecretSharingFrame {
     cipher: ShamirSecretSharing,
     modulus_string: String,
+    polynomial_string: String,
 }
 
 impl Default for ShamirSecretSharingFrame {
@@ -15,6 +17,7 @@ impl Default for ShamirSecretSharingFrame {
         let cipher = ShamirSecretSharing::default();
         Self {
             modulus_string: format!("{}", cipher.modulus),
+            polynomial_string: String::new(),
             cipher,
         }
     }
@@ -22,9 +25,35 @@ impl Default for ShamirSecretSharingFrame {
 
 impl CipherFrame for ShamirSecretSharingFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+        ui.label("Shares");
+        ui.add(Slider::new(&mut self.cipher.shares, 3..=12));
+        ui.add_space(8.0);
+
+        ui.label("Threshold");
+        ui.add(Slider::new(
+            &mut self.cipher.threshold,
+            3..=self.cipher.shares,
+        ));
+        ui.add_space(8.0);
+
+        ui.label("Polynomial");
+
+        ui.add_space(8.0);
+
+        ui.label("Field Size");
         if control_string(ui, &mut self.modulus_string).changed() {
             filter_string(&mut self.modulus_string, Alphabet::Digits0.into());
-            // self.cipher.modulus = i32::from_str_radix(&self.modulus_string, 10);
+            match i32::from_str_radix(&self.modulus_string, 10) {
+                Ok(n) => match is_prime32(n as u32) {
+                    true => self.cipher.modulus = n,
+                    false => {
+                        ui.label(error_text("field size must be prime"));
+                    }
+                },
+                Err(e) => {
+                    ui.label(error_text(e.to_string()));
+                }
+            }
         }
     }
 

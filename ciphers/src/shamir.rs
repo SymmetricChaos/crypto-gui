@@ -20,9 +20,9 @@ pub struct ShamirSecretSharing {
 impl Default for ShamirSecretSharing {
     fn default() -> Self {
         Self {
-            shares: 6,
-            threshold: 4,
-            polynomial: vec![166, 94],
+            shares: 3,
+            threshold: 3,
+            polynomial: Vec::new(),
             modulus: 2147483423,
         }
     }
@@ -140,6 +140,9 @@ mod shamir_tests {
     fn encrypt_test() {
         let mut cipher = ShamirSecretSharing::default();
         cipher.modulus = 1613;
+        cipher.polynomial = vec![166, 94];
+        cipher.shares = 6;
+        cipher.threshold = 4;
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT)
     }
 
@@ -147,6 +150,9 @@ mod shamir_tests {
     fn decrypt_test() {
         let mut cipher = ShamirSecretSharing::default();
         cipher.modulus = 1613;
+        cipher.polynomial = vec![166, 94];
+        cipher.shares = 6;
+        cipher.threshold = 4;
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT)
     }
 }

@@ -42,16 +42,18 @@ impl CipherFrame for HebernFrame {
             });
         }
 
-        if ui.small_button("+").clicked() {
-            if self.cipher.rotors.rotors.len() <= 8 {
-                self.cipher.rotors.add_rotor(&self.cipher.alphabet);
+        ui.horizontal(|ui| {
+            if ui.small_button("+").clicked() {
+                if self.cipher.rotors.rotors.len() <= 8 {
+                    self.cipher.rotors.add_rotor(&self.cipher.alphabet);
+                }
             }
-        }
-        if ui.small_button("-").clicked() {
-            if self.cipher.rotors.rotors.len() >= 2 {
-                self.cipher.rotors.del_rotor();
+            if ui.small_button("-").clicked() {
+                if self.cipher.rotors.rotors.len() >= 2 {
+                    self.cipher.rotors.del_rotor();
+                }
             }
-        }
+        });
 
         ui.add_space(10.0);
         ui.label("Rotor Positions\nTo Be Changed Every Message");
