@@ -1,7 +1,8 @@
+use std::num::ParseIntError;
+
 use crate::{Cipher, CipherError};
 use itertools::Itertools;
 use lazy_static::lazy_static;
-use num::bigint::ParseBigIntError;
 use regex::Regex;
 use utils::math_functions::{eval_poly, is_prime32, modular_division};
 
@@ -31,7 +32,7 @@ impl Default for ShamirSecretSharing {
 }
 
 impl ShamirSecretSharing {
-    pub fn sting_to_vec(&mut self, text: &str) -> Result<(), ParseBigIntError> {
+    pub fn sting_to_vec(&mut self, text: &str) -> Result<(), ParseIntError> {
         let groups = text.split(",");
         let mut new = Vec::with_capacity(self.polynomial.len());
         for group in groups {

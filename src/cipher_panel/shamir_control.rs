@@ -42,7 +42,12 @@ impl CipherFrame for ShamirSecretSharingFrame {
 
         ui.label("Polynomial");
         if control_string(ui, &mut self.polynomial_string).lost_focus() {
-            self.cipher.sting_to_vec(&self.polynomial_string)
+            match self.cipher.sting_to_vec(&self.polynomial_string) {
+                Ok(_) => (),
+                Err(e) => {
+                    ui.label(error_text(e));
+                }
+            }
         }
         ui.label(polynomial_string(&self.cipher.polynomial, true));
         ui.add_space(8.0);
