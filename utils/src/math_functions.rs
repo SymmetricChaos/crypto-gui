@@ -200,11 +200,109 @@ pub fn eval_poly(x: i32, polynomial: &[i32], modulus: i32) -> i32 {
     acc
 }
 
+pub fn polynomial_string(polynomial: &[i32], ascending: bool) -> String {
+    if polynomial.is_empty() {
+        return String::from("0");
+    }
+
+    let mut out = String::new();
+    let mut first_term = true;
+    if ascending {
+        for (n, c) in polynomial.iter().enumerate() {
+            if c == &0 {
+                continue;
+            }
+            if first_term {
+                first_term = false;
+                out.push_str(&first_term_str(c, n))
+            } else {
+                if c < &0 {
+                    out.push_str(" - ");
+                } else {
+                    out.push_str(" + ");
+                }
+                out.push_str(&term_str(c, n))
+            }
+        }
+    } else {
+        let m = polynomial.len() - 1;
+        for (n, c) in polynomial.iter().enumerate() {
+            if c == &0 {
+                continue;
+            }
+            if first_term {
+                first_term = false;
+                out.push_str(&first_term_str(c, m - n))
+            } else {
+                if c < &0 {
+                    out.push_str(" - ");
+                } else {
+                    out.push_str(" + ");
+                }
+                out.push_str(&term_str(c, m - n))
+            }
+        }
+    }
+
+    out
+}
+
+fn first_term_str(c: &i32, n: usize) -> String {
+    if n == 0 {
+        format!("{}", c)
+    } else if n == 1 {
+        if c.is_one() {
+            format!("x")
+        } else if *c == -1 {
+            format!("-x")
+        } else {
+            format!("{c}x")
+        }
+    } else {
+        if c.is_one() {
+            format!("x^{n}")
+        } else if *c == -1 {
+            format!("-x^{n}")
+        } else {
+            format!("{c}x^{n}")
+        }
+    }
+}
+
+fn term_str(c: &i32, n: usize) -> String {
+    if n == 0 {
+        format!("{}", c)
+    } else if n == 1 {
+        if c.abs() == 1 {
+            format!("x")
+        } else {
+            format!("{}x", c.abs())
+        }
+    } else {
+        if c.abs() == 1 {
+            format!("x^{n}")
+        } else {
+            format!("{}x^{n}", c.abs())
+        }
+    }
+}
+
 #[cfg(test)]
 mod math_function_tests {
     use super::*;
     #[test]
-    fn polynomial() {
+    fn polynomial_eval() {
         assert_eq!(eval_poly(2, &[1234, 166, 94], 1613), 329)
+    }
+    #[test]
+    fn polynomial_display() {
+        assert_eq!(
+            polynomial_string(&[1234, 166, 94], true),
+            "1234 + 166x + 94x^2"
+        );
+        assert_eq!(
+            polynomial_string(&[1234, 166, 94], false),
+            "1234x^2 + 166x + 94"
+        );
     }
 }

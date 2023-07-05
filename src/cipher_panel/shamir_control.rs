@@ -1,6 +1,10 @@
 use ciphers::shamir::ShamirSecretSharing;
 use egui::Slider;
-use utils::{functions::filter_string, math_functions::is_prime32, preset_alphabet::Alphabet};
+use utils::{
+    functions::filter_string,
+    math_functions::{is_prime32, polynomial_string},
+    preset_alphabet::Alphabet,
+};
 
 use crate::ui_elements::{control_string, error_text};
 
@@ -17,7 +21,7 @@ impl Default for ShamirSecretSharingFrame {
         let cipher = ShamirSecretSharing::default();
         Self {
             modulus_string: format!("{}", cipher.modulus),
-            polynomial_string: String::new(),
+            polynomial_string: String::from("65, 2347, 542"),
             cipher,
         }
     }
@@ -37,7 +41,10 @@ impl CipherFrame for ShamirSecretSharingFrame {
         ui.add_space(8.0);
 
         ui.label("Polynomial");
-
+        if control_string(ui, &mut self.polynomial_string).changed() {
+            // parse the string
+        }
+        ui.label(polynomial_string(&self.cipher.polynomial, true));
         ui.add_space(8.0);
 
         ui.label("Field Size");

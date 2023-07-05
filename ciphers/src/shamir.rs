@@ -22,7 +22,7 @@ impl Default for ShamirSecretSharing {
         Self {
             shares: 3,
             threshold: 3,
-            polynomial: Vec::new(),
+            polynomial: vec![65, 2347, 542],
             modulus: 2147483423,
         }
     }
@@ -59,10 +59,8 @@ impl ShamirSecretSharing {
             (modular_division(numerator, denominator, self.modulus)? + self.modulus) % self.modulus,
         )
     }
-}
 
-impl Cipher for ShamirSecretSharing {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+    fn check_state(&self) -> Result<(), CipherError> {
         if self.modulus < 1 {
             return Err(CipherError::state("modulus must be positive"));
         }
@@ -80,6 +78,22 @@ impl Cipher for ShamirSecretSharing {
                 "cannot require a greater threshold than there are shares",
             ));
         };
+        Ok(())
+    }
+}
+
+impl Cipher for ShamirSecretSharing {
+    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+        self.check_state()?;
+
+        if self.polynomial.len() < (self.threshold - 1) as usize {
+            return Err(CipherError::State(format!(
+                "a threshold of {} requires a polynomial with {} coefficients",
+                self.threshold,
+                self.threshold - 1
+            )));
+        }
+
         let secret =
             i32::from_str_radix(text, 10).map_err(|e| CipherError::Input(e.to_string()))?;
 
@@ -98,6 +112,7 @@ impl Cipher for ShamirSecretSharing {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+        self.check_state()?;
         let mut pairs = Vec::new();
         for p in PAIRS.captures_iter(text) {
             let x =
