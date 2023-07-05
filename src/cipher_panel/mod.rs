@@ -57,6 +57,7 @@ pub mod rail_fence_controls;
 pub mod rs44_controls;
 pub mod scytale_controls;
 pub mod seriated_playfair;
+pub mod shamir_control;
 pub mod sigaba_controls;
 pub mod slidefair_controls;
 pub mod trifid_controls;

@@ -2,7 +2,7 @@ use crate::{Cipher, CipherError};
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use regex::Regex;
-use utils::math_functions::{eval_poly, modular_division};
+use utils::math_functions::{eval_poly, is_prime32, modular_division};
 
 // https://en.wikipedia.org/wiki/Shamir%27s_secret_sharing
 
@@ -11,10 +11,10 @@ lazy_static! {
 }
 
 pub struct ShamirSecretSharing {
-    shares: i32,
-    threshold: i32,
-    polynomial: Vec<i32>, // The constant coefficient of the polynomial is the secret
-    modulus: i32,
+    pub shares: i32,
+    pub threshold: i32,
+    pub polynomial: Vec<i32>, // The constant coefficient of the polynomial is the secret
+    pub modulus: i32,
 }
 
 impl Default for ShamirSecretSharing {
@@ -65,6 +65,15 @@ impl Cipher for ShamirSecretSharing {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         if self.modulus < 1 {
             return Err(CipherError::state("modulus must be positive"));
+        }
+        if !is_prime32(self.modulus as u32) {
+            return Err(CipherError::state("modulus must be prime"));
+        }
+        if self.threshold < 1 {
+            return Err(CipherError::state("threshold must be positive"));
+        }
+        if self.shares < 1 {
+            return Err(CipherError::state("shares must be positive"));
         }
         if self.threshold > self.shares {
             return Err(CipherError::state(
