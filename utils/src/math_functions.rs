@@ -24,7 +24,7 @@ pub fn is_square(n: usize) -> bool {
 }
 
 pub fn mul_inv<N: Integer + Copy + ToPrimitive + FromPrimitive>(num: N, modulus: N) -> Option<N> {
-    if num < N::one() {
+    if num.is_zero() {
         return None;
     }
     let num = num.to_isize()?;
@@ -35,6 +35,10 @@ pub fn mul_inv<N: Integer + Copy + ToPrimitive + FromPrimitive>(num: N, modulus:
     } else {
         Some(N::from_isize(egcd.x.mod_floor(&modulus))?)
     }
+}
+
+pub fn modular_division(n: i32, d: i32, m: i32) -> Option<i32> {
+    Some(n * mul_inv(d, m)?)
 }
 
 // We're not going to deal with big numbers so this thse crude factorizations are plenty
@@ -136,7 +140,7 @@ impl Iterator for PrimeSieve {
     }
 }
 
-pub fn eval_poly(x: u32, polynomial: &[u32], modulus: u32) -> u32 {
+pub fn eval_poly(x: i32, polynomial: &[i32], modulus: i32) -> i32 {
     if polynomial.len() == 0 {
         return 0;
     }
