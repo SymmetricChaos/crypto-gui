@@ -20,8 +20,8 @@ pub struct ShamirSecretSharing {
 impl Default for ShamirSecretSharing {
     fn default() -> Self {
         Self {
-            shares: 3,
-            threshold: 3,
+            shares: 4,
+            threshold: 4,
             polynomial: vec![65, 2347, 542],
             modulus: 2147483423,
         }
@@ -86,7 +86,7 @@ impl Cipher for ShamirSecretSharing {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         self.check_state()?;
 
-        if self.polynomial.len() < (self.threshold - 1) as usize {
+        if self.polynomial.len() != (self.threshold - 1) as usize {
             return Err(CipherError::State(format!(
                 "a threshold of {} requires a polynomial with {} coefficients",
                 self.threshold,
