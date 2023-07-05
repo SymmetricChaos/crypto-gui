@@ -1,6 +1,7 @@
 use crate::{Cipher, CipherError};
 use itertools::Itertools;
 use lazy_static::lazy_static;
+use num::bigint::ParseBigIntError;
 use regex::Regex;
 use utils::math_functions::{eval_poly, is_prime32, modular_division};
 
@@ -8,6 +9,7 @@ use utils::math_functions::{eval_poly, is_prime32, modular_division};
 
 lazy_static! {
     pub static ref PAIRS: Regex = Regex::new(r"\((\d+),\s*(\d+)\)+").unwrap();
+    pub static ref NUMBER: Regex = Regex::new(r"(\d+)").unwrap();
 }
 
 pub struct ShamirSecretSharing {
@@ -29,6 +31,16 @@ impl Default for ShamirSecretSharing {
 }
 
 impl ShamirSecretSharing {
+    pub fn sting_to_vec(&mut self, text: &str) -> Result<(), ParseBigIntError> {
+        let groups = text.split(",");
+        let mut new = Vec::with_capacity(self.polynomial.len());
+        for group in groups {
+            new.push(i32::from_str_radix(group.trim(), 10)?)
+        }
+        self.polynomial = new;
+        Ok(())
+    }
+
     fn lagrange(&self, x: i32, pairs: Vec<(i32, i32)>) -> Option<i32> {
         let mut nums: Vec<i32> = Vec::new();
         let mut dens = Vec::new();
