@@ -1,9 +1,9 @@
 use ciphers::shamir::ShamirSecretSharing;
 use egui::Slider;
 use utils::{
-    functions::filter_string,
     math_functions::{is_prime32, polynomial_string},
     preset_alphabet::Alphabet,
+    text_functions::filter_string,
 };
 
 use crate::ui_elements::{control_string, error_text};
@@ -34,10 +34,15 @@ impl CipherFrame for ShamirSecretSharingFrame {
         ui.add_space(8.0);
 
         ui.label("Threshold");
-        ui.add(Slider::new(
-            &mut self.cipher.threshold,
-            3..=self.cipher.shares,
-        ));
+        ui.add(Slider::new(&mut self.cipher.threshold, 3..=12));
+        match self.cipher.threshold > self.cipher.shares {
+            true => (),
+            false => {
+                ui.label(error_text(
+                    "threshold cannot be greater than the number of shares",
+                ));
+            }
+        }
         ui.add_space(8.0);
 
         ui.label("Polynomial");
@@ -56,10 +61,15 @@ impl CipherFrame for ShamirSecretSharingFrame {
         if control_string(ui, &mut self.modulus_string).changed() {
             filter_string(&mut self.modulus_string, Alphabet::Digits0.into());
             match i32::from_str_radix(&self.modulus_string, 10) {
-                Ok(n) => match is_prime32(n as u32) {
-                    true => self.cipher.modulus = n,
+                Ok(n) => match n > 0 {
+                    true => match is_prime32(n as u32) {
+                        true => self.cipher.modulus = n,
+                        false => {
+                            ui.label(error_text("field size must be prime"));
+                        }
+                    },
                     false => {
-                        ui.label(error_text("field size must be prime"));
+                        ui.label(error_text("field size must be positive"));
                     }
                 },
                 Err(e) => {
