@@ -5,8 +5,8 @@ use bimap::BiMap;
 use lazy_static::lazy_static;
 use std::fs::read;
 use std::path::PathBuf;
-use utils::functions::bimap_from_iter;
 use utils::preset_alphabet::Alphabet;
+use utils::text_functions::bimap_from_iter;
 
 const MASK: u8 = 0b00111111;
 const PAD: u8 = '=' as u8;

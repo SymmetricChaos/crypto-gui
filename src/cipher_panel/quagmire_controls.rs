@@ -6,7 +6,7 @@ use ciphers::{
 };
 use egui::Ui;
 use rand::thread_rng;
-use utils::{functions::random_sample_replace, preset_alphabet::Alphabet};
+use utils::{preset_alphabet::Alphabet, text_functions::random_sample_replace};
 
 pub struct QuagmireFrame {
     cipher: Quagmire,

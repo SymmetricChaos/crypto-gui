@@ -1,7 +1,7 @@
 use ciphers::{Cipher, M209};
 use egui::{Color32, Slider, Ui};
 use rand::{thread_rng, Fill};
-use utils::{functions::random_char_vec, preset_alphabet::Alphabet};
+use utils::{preset_alphabet::Alphabet, text_functions::random_char_vec};
 
 use crate::ui_elements::{mono, randomize_reset};
 

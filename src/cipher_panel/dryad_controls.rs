@@ -1,7 +1,7 @@
 use ciphers::{tactical::Dryad, Cipher};
 use egui::{Slider, Ui};
 use rand::thread_rng;
-use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
+use utils::{preset_alphabet::Alphabet, text_functions::shuffled_str};
 
 use crate::ui_elements::{mono, randomize_reset};
 

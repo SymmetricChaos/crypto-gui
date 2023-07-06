@@ -4,8 +4,8 @@ use ciphers::{polybius::Bifid, Cipher};
 use egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
 use utils::{
-    functions::{filter_string, shuffled_str},
     preset_alphabet::Alphabet,
+    text_functions::{filter_string, shuffled_str},
 };
 
 pub struct BifidFrame {

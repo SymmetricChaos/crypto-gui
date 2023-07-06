@@ -3,7 +3,7 @@ use crate::ui_elements::{control_string, error_text, mono_strong, randomize_rese
 use ciphers::{substitution::Plugboard, Cipher};
 use egui::Ui;
 use rand::thread_rng;
-use utils::{functions::random_sample, preset_alphabet::Alphabet};
+use utils::{preset_alphabet::Alphabet, text_functions::random_sample};
 
 #[derive(Default)]
 pub struct PlugboardFrame {

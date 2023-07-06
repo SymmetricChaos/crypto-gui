@@ -6,7 +6,7 @@ use ciphers::{
 };
 use egui::{ComboBox, Label, Slider, Ui};
 use rand::{thread_rng, Rng};
-use utils::{functions::random_sample, preset_alphabet::Alphabet};
+use utils::{preset_alphabet::Alphabet, text_functions::random_sample};
 
 #[derive(Default)]
 pub struct EnigmaM3Frame {

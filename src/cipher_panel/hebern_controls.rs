@@ -2,7 +2,7 @@ use super::CipherFrame;
 use crate::ui_elements::control_string;
 use ciphers::{hebern::Hebern, Cipher};
 use egui::{Slider, Ui};
-use utils::{functions::keyed_alphabet, preset_alphabet::Alphabet};
+use utils::{preset_alphabet::Alphabet, text_functions::keyed_alphabet};
 
 pub struct HebernFrame {
     cipher: Hebern,

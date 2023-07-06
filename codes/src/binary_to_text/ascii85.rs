@@ -5,7 +5,7 @@ use lazy_static::lazy_static;
 use num::Integer;
 use std::fs::read;
 use std::path::PathBuf;
-use utils::functions::bimap_from_iter;
+use utils::text_functions::bimap_from_iter;
 
 const ASCII85_BTOA: &'static str =
     "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstu";

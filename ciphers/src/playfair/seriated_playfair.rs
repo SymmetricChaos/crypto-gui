@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use utils::functions::string_chunks;
+use utils::text_functions::string_chunks;
 
 use crate::{Cipher, CipherError};
 

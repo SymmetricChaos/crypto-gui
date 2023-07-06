@@ -3,7 +3,7 @@ use crate::ui_elements::{control_string, randomize_reset};
 use ciphers::{substitution::GeneralSubstitution, Cipher};
 use egui::Ui;
 use rand::thread_rng;
-use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
+use utils::{preset_alphabet::Alphabet, text_functions::shuffled_str};
 
 pub struct GeneralSubstitutionFrame {
     cipher: GeneralSubstitution,

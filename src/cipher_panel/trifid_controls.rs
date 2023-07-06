@@ -3,7 +3,7 @@ use crate::ui_elements::{control_string, mono, randomize_reset};
 use ciphers::{polybius::Trifid, Cipher};
 use egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
-use utils::functions::shuffled_str;
+use utils::text_functions::shuffled_str;
 
 pub struct TrifidFrame {
     cipher: Trifid,

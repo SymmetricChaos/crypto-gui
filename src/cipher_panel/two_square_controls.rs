@@ -4,8 +4,8 @@ use ciphers::{playfair::TwoSquare, Cipher};
 use egui::Ui;
 use rand::{rngs::StdRng, SeedableRng};
 use utils::{
-    functions::{filter_string, shuffled_str},
     preset_alphabet::Alphabet,
+    text_functions::{filter_string, shuffled_str},
 };
 
 pub struct TwoSquareFrame {

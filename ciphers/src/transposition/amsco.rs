@@ -1,9 +1,9 @@
 use itertools::Itertools;
 
 use utils::{
-    functions::{rank_str, rank_vec, StringRankError},
     grid::Grid,
     math_functions::Parity,
+    text_functions::{rank_str, rank_vec, StringRankError},
 };
 
 use crate::{Cipher, CipherError};

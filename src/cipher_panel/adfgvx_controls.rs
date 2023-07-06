@@ -7,8 +7,8 @@ use ciphers::polybius::Adfgvx;
 use ciphers::traits::Cipher;
 use egui::Color32;
 use rand::{thread_rng, Rng};
-use utils::functions::{filter_string, shuffled_str};
 use utils::preset_alphabet::Alphabet;
+use utils::text_functions::{filter_string, shuffled_str};
 
 pub struct AdfgvxFrame {
     cipher: Adfgvx,

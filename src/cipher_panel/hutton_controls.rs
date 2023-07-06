@@ -7,8 +7,8 @@ use ciphers::{
 use egui::{Color32, Ui};
 use rand::thread_rng;
 use utils::{
-    functions::{filter_string, shuffled_str},
     preset_alphabet::Alphabet,
+    text_functions::{filter_string, shuffled_str},
     vecstring::VecString,
 };
 

@@ -4,8 +4,8 @@ use ciphers::{polybius::PolybiusSquare, Cipher};
 use eframe::egui::Ui;
 use rand::thread_rng;
 use utils::{
-    functions::{filter_string, shuffled_str},
     preset_alphabet::Alphabet,
+    text_functions::{filter_string, shuffled_str},
 };
 
 pub struct PolybiusSquareFrame {

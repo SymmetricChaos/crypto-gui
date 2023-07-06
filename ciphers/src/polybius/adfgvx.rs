@@ -33,7 +33,7 @@ impl Adfgvx {
     pub fn assign_columnar_key(
         &mut self,
         key: &str,
-    ) -> Result<(), utils::functions::StringRankError> {
+    ) -> Result<(), utils::text_functions::StringRankError> {
         self.columnar.assign_key(key, Alphabet::BasicLatin.into())
     }
 

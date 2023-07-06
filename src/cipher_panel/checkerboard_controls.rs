@@ -4,7 +4,7 @@ use crate::ui_elements::randomize_reset;
 use ciphers::{polybius::StraddlingCheckerboard, Cipher};
 use egui::{DragValue, Ui};
 use rand::thread_rng;
-use utils::functions::shuffled_str;
+use utils::text_functions::shuffled_str;
 
 use super::CipherFrame;
 

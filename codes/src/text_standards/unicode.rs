@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use utils::functions::{u16_to_string, u32_to_string, u8_to_string, NumRep};
+use utils::text_functions::{u16_to_string, u32_to_string, u8_to_string, NumRep};
 
 use crate::{errors::CodeError, traits::Code};
 

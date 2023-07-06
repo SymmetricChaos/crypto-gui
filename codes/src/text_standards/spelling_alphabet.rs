@@ -1,6 +1,6 @@
 use bimap::BiMap;
 use lazy_static::lazy_static;
-use utils::{functions::bimap_from_iter, preset_alphabet::Alphabet};
+use utils::{preset_alphabet::Alphabet, text_functions::bimap_from_iter};
 
 use crate::{errors::CodeError, traits::Code};
 

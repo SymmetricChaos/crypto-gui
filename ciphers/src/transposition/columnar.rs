@@ -1,7 +1,7 @@
 use crate::{errors::CipherError, traits::Cipher};
 use utils::{
-    functions::{rank_str, StringRankError},
     grid::{str_to_char_grid, Grid, Symbol, BLOCK, EMPTY},
+    text_functions::{rank_str, StringRankError},
 };
 
 pub struct Columnar {

@@ -1,5 +1,5 @@
 use bimap::BiMap;
-use utils::functions::bimap_from_iter;
+use utils::text_functions::bimap_from_iter;
 
 use crate::{errors::CodeError, traits::Code};
 

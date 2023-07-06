@@ -4,8 +4,8 @@ use ciphers::{playfair::seriated_playfair::SeriatedPlayfair, Cipher};
 use egui::{Slider, Ui};
 use rand::{rngs::StdRng, SeedableRng};
 use utils::{
-    functions::{filter_string, shuffled_str},
     preset_alphabet::Alphabet,
+    text_functions::{filter_string, shuffled_str},
 };
 
 pub struct SeriatedPlayfairFrame {

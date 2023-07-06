@@ -1,6 +1,6 @@
 use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
-use utils::{functions::keyed_alphabet, preset_alphabet::Alphabet, vecstring::VecString};
+use utils::{preset_alphabet::Alphabet, text_functions::keyed_alphabet, vecstring::VecString};
 
 pub struct Bazeries {
     pub alphabet: VecString,

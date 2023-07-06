@@ -4,8 +4,8 @@ use ciphers::{polybius::B64, Cipher};
 use egui::{Color32, Ui};
 use rand::{thread_rng, Rng};
 use utils::{
-    functions::{filter_string, random_sample_replace, shuffled_str},
     preset_alphabet::Alphabet,
+    text_functions::{filter_string, random_sample_replace, shuffled_str},
 };
 
 #[derive(Default)]

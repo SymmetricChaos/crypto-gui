@@ -5,9 +5,9 @@ use ciphers::traits::Cipher;
 use ciphers::transposition::Amsco;
 use eframe::egui::Ui;
 use rand::{thread_rng, Rng};
-use utils::functions::{filter_string, random_sample_replace};
 use utils::grid::Grid;
 use utils::preset_alphabet::Alphabet;
+use utils::text_functions::{filter_string, random_sample_replace};
 
 pub struct AmscoFrame {
     cipher: Amsco,

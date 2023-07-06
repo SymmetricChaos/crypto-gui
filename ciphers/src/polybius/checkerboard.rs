@@ -1,6 +1,6 @@
 use crate::{errors::CipherError, traits::Cipher};
 use std::char;
-use utils::functions::keyed_alphabet;
+use utils::text_functions::keyed_alphabet;
 
 // Use this to fill partial inputs for the interface
 const CHECKERBOARD_ALPHABET: &'static str = "ABCDEFGHIJKLM/NOPQRSTUVWXYZ.";

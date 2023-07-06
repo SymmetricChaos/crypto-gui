@@ -4,8 +4,8 @@ use ciphers::{polybius::nihilist::Nihilist, Cipher};
 use eframe::egui::Ui;
 use rand::{thread_rng, Rng};
 use utils::{
-    functions::{filter_string, random_sample_replace, shuffled_str},
     preset_alphabet::Alphabet,
+    text_functions::{filter_string, random_sample_replace, shuffled_str},
 };
 
 pub struct NihilistFrame {

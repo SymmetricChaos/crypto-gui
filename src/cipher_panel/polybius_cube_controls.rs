@@ -3,7 +3,7 @@ use crate::ui_elements::{control_string, mono, randomize_reset};
 use ciphers::{polybius::PolybiusCube, Cipher};
 use egui::Ui;
 use rand::thread_rng;
-use utils::functions::{filter_string, shuffled_str};
+use utils::text_functions::{filter_string, shuffled_str};
 
 pub struct PolybiusCubeFrame {
     cipher: PolybiusCube,

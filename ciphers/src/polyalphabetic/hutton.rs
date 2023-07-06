@@ -1,4 +1,4 @@
-use utils::{functions::keyed_alphabet, preset_alphabet::Alphabet, vecstring::VecString};
+use utils::{preset_alphabet::Alphabet, text_functions::keyed_alphabet, vecstring::VecString};
 
 use crate::{errors::CipherError, traits::Cipher};
 

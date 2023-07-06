@@ -7,8 +7,8 @@ use ciphers::{
 use egui::{Slider, TextEdit, TextStyle, Ui};
 use rand::{thread_rng, Rng};
 use utils::{
-    functions::{filter_string, random_sample_replace},
     preset_alphabet::Alphabet,
+    text_functions::{filter_string, random_sample_replace},
 };
 
 pub struct BeaufortFrame {

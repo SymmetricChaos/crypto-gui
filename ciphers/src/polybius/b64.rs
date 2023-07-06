@@ -27,14 +27,14 @@ impl B64 {
     pub fn assign_columnar_key_1(
         &mut self,
         key: &str,
-    ) -> Result<(), utils::functions::StringRankError> {
+    ) -> Result<(), utils::text_functions::StringRankError> {
         self.columnar1.assign_key(key, Alphabet::Base64.slice())
     }
 
     pub fn assign_columnar_key_2(
         &mut self,
         key: &str,
-    ) -> Result<(), utils::functions::StringRankError> {
+    ) -> Result<(), utils::text_functions::StringRankError> {
         self.columnar2.assign_key(key, Alphabet::Base64.slice())
     }
 

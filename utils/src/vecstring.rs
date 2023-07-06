@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use rand::{prelude::SliceRandom, Rng};
 
-use crate::functions::keyed_alphabet;
+use crate::text_functions::keyed_alphabet;
 
 use super::preset_alphabet::Alphabet;
 use std::collections::vec_deque::{Iter, IterMut};

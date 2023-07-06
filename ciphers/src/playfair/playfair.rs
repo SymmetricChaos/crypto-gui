@@ -2,7 +2,7 @@ use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
 use num::integer::Roots;
 use std::fmt;
-use utils::{functions::keyed_alphabet, math_functions::is_square, preset_alphabet::Alphabet};
+use utils::{math_functions::is_square, preset_alphabet::Alphabet, text_functions::keyed_alphabet};
 
 pub struct Playfair {
     pub square: String,

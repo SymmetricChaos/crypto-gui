@@ -3,7 +3,7 @@ use crate::ui_elements::{mono, randomize_reset};
 use ciphers::{tactical::Batco, Cipher};
 use egui::{Slider, Ui};
 use rand::{rngs::StdRng, SeedableRng};
-use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
+use utils::{preset_alphabet::Alphabet, text_functions::shuffled_str};
 
 #[derive(Default)]
 pub struct BatcoFrame {

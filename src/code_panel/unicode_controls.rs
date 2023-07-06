@@ -1,5 +1,5 @@
 use codes::text_standards::unicode::{Unicode, UnicodeEncoding};
-use utils::functions::NumRep;
+use utils::text_functions::NumRep;
 
 use crate::ui_elements::subheading;
 

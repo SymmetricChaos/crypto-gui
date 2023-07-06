@@ -3,7 +3,7 @@ use crate::ui_elements::{control_string, mono, randomize_reset, string_slider};
 use ciphers::{playfair::Slidefair, Cipher};
 use egui::Ui;
 use rand::thread_rng;
-use utils::{functions::shuffled_str, preset_alphabet::Alphabet};
+use utils::{preset_alphabet::Alphabet, text_functions::shuffled_str};
 
 pub struct SlidefairFrame {
     cipher: Slidefair,

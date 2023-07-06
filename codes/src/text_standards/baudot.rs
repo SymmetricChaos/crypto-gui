@@ -2,7 +2,7 @@ use bimap::BiMap;
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use std::cell::Cell;
-use utils::functions::{bimap_from_iter, chunk_and_join};
+use utils::text_functions::{bimap_from_iter, chunk_and_join};
 
 use crate::{errors::CodeError, traits::Code};
 
