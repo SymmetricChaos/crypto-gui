@@ -1,7 +1,7 @@
 use ciphers::shamir::ShamirSecretSharing;
 use egui::Slider;
 use utils::{
-    math_functions::{is_prime32, polynomial_string},
+    math_functions::{is_prime32, polynomial_string_unsigned},
     preset_alphabet::Alphabet,
     text_functions::filter_string,
 };
@@ -54,13 +54,13 @@ impl CipherFrame for ShamirSecretSharingFrame {
                 }
             }
         }
-        ui.label(polynomial_string(&self.cipher.polynomial, true));
+        ui.label(polynomial_string_unsigned(&self.cipher.polynomial, true));
         ui.add_space(8.0);
 
         ui.label("Field Size");
         if control_string(ui, &mut self.modulus_string).changed() {
             filter_string(&mut self.modulus_string, Alphabet::Digits0.into());
-            match i32::from_str_radix(&self.modulus_string, 10) {
+            match u32::from_str_radix(&self.modulus_string, 10) {
                 Ok(n) => match n > 0 {
                     true => match is_prime32(n as u32) {
                         true => self.cipher.modulus = n,

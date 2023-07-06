@@ -3,6 +3,7 @@ use std::num::ParseIntError;
 use crate::{Cipher, CipherError};
 use itertools::Itertools;
 use lazy_static::lazy_static;
+use rand::{thread_rng, Rng};
 use regex::Regex;
 use utils::math_functions::{eval_poly_big, is_prime32, modular_division};
 
@@ -14,10 +15,10 @@ lazy_static! {
 }
 
 pub struct ShamirSecretSharing {
-    pub shares: i32,
-    pub threshold: i32,
-    pub polynomial: Vec<i32>, // The constant coefficient of the polynomial is the secret
-    pub modulus: i32,
+    pub shares: u32,
+    pub threshold: u32,
+    pub polynomial: Vec<u32>, // The constant coefficient of the polynomial is the secret
+    pub modulus: u32,
     pub random_shares: bool,
 }
 
@@ -27,7 +28,7 @@ impl Default for ShamirSecretSharing {
             shares: 4,
             threshold: 4,
             polynomial: vec![65, 2347, 542],
-            modulus: 2147483423,
+            modulus: 4294967029,
             random_shares: true,
         }
     }
@@ -38,14 +39,14 @@ impl ShamirSecretSharing {
         let groups = text.split(",");
         let mut new = Vec::with_capacity(self.polynomial.len());
         for group in groups {
-            new.push(i32::from_str_radix(group.trim(), 10)?)
+            new.push(u32::from_str_radix(group.trim(), 10)?)
         }
         self.polynomial = new;
         Ok(())
     }
 
-    fn lagrange(&self, x: i32, pairs: Vec<(i32, i32)>) -> Option<i32> {
-        let mut nums: Vec<i32> = Vec::new();
+    fn lagrange(&self, x: u32, pairs: Vec<(u32, u32)>) -> Option<u32> {
+        let mut nums: Vec<u32> = Vec::new();
         let mut dens = Vec::new();
 
         for i in 0..pairs.len() {
@@ -55,7 +56,7 @@ impl ShamirSecretSharing {
             dens.push(others.iter().map(|e| cur - *e).product());
         }
 
-        let denominator = dens.iter().product::<i32>() % self.modulus;
+        let denominator = dens.iter().product::<u32>() % self.modulus;
 
         let numerator = {
             let mut n = 0;
@@ -110,7 +111,7 @@ impl Cipher for ShamirSecretSharing {
         }
 
         let secret =
-            i32::from_str_radix(text, 10).map_err(|e| CipherError::Input(e.to_string()))?;
+            u32::from_str_radix(text, 10).map_err(|e| CipherError::Input(e.to_string()))?;
 
         let p = {
             let mut p = self.polynomial.clone();
@@ -119,8 +120,22 @@ impl Cipher for ShamirSecretSharing {
         };
 
         let mut out = Vec::with_capacity(self.shares as usize);
-        for x in 1..=self.shares {
-            out.push((x, eval_poly_big(x, &p, self.modulus) as i32))
+
+        if self.random_shares {
+            let mut rng = thread_rng();
+
+            for _ in 0..self.shares {
+                let x = rng.gen_range(1..self.modulus);
+                let y = u32::try_from(eval_poly_big(x, &p, self.modulus))
+                    .expect("conversion from BigInt to u32 failed");
+                out.push((x, y))
+            }
+        } else {
+            for x in 1..=self.shares {
+                let y = u32::try_from(eval_poly_big(x, &p, self.modulus))
+                    .expect("conversion from BigInt to u32 failed");
+                out.push((x, y))
+            }
         }
 
         Ok(out.iter().map(|p| format!("{p:?}")).join(", "))
@@ -132,9 +147,9 @@ impl Cipher for ShamirSecretSharing {
         let mut pairs = Vec::new();
         for p in PAIRS.captures_iter(text) {
             let x =
-                i32::from_str_radix(&p[1], 10).map_err(|e| CipherError::Input(e.to_string()))?;
+                u32::from_str_radix(&p[1], 10).map_err(|e| CipherError::Input(e.to_string()))?;
             let y =
-                i32::from_str_radix(&p[2], 10).map_err(|e| CipherError::Input(e.to_string()))?;
+                u32::from_str_radix(&p[2], 10).map_err(|e| CipherError::Input(e.to_string()))?;
             pairs.push((x, y));
         }
 

@@ -1,9 +1,13 @@
 use mod_exp::mod_exp;
 use num::{
-    integer::Roots, traits::MulAddAssign, BigInt, FromPrimitive, Integer, One, ToPrimitive,
-    Unsigned, Zero,
+    bigint::ToBigInt, integer::Roots, traits::MulAddAssign, BigInt, FromPrimitive, Integer, One,
+    Signed, ToPrimitive, Unsigned, Zero,
 };
-use std::collections::{BTreeMap, HashMap};
+use std::{
+    collections::{BTreeMap, HashMap},
+    fmt::Display,
+    ops::RemAssign,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Parity {
@@ -38,7 +42,11 @@ pub fn mul_inv<N: Integer + Copy + ToPrimitive + FromPrimitive>(num: N, modulus:
     }
 }
 
-pub fn modular_division(n: i32, d: i32, m: i32) -> Option<i32> {
+pub fn modular_division<N: Integer + Copy + ToPrimitive + FromPrimitive>(
+    n: N,
+    d: N,
+    m: N,
+) -> Option<N> {
     Some(n * mul_inv(d, m)?)
 }
 
@@ -143,7 +151,8 @@ impl Iterator for PrimeSieve {
 
 // 32-bit primality test
 // First checks small possible factors then switches to deterministic Miller-Rabin
-pub fn is_prime32(n: u32) -> bool {
+pub fn is_prime32<N: Into<u32>>(n: N) -> bool {
+    let n = n.into();
     if n <= 1 {
         return false;
     }
@@ -189,11 +198,15 @@ pub fn is_prime32(n: u32) -> bool {
     true
 }
 
-pub fn eval_poly(x: i64, polynomial: &[i64], modulus: i64) -> i64 {
+pub fn eval_poly<N: Integer + Copy + ToPrimitive + FromPrimitive + MulAddAssign + RemAssign>(
+    x: N,
+    polynomial: &[N],
+    modulus: N,
+) -> N {
     if polynomial.len() == 0 {
-        return 0;
+        return N::zero();
     }
-    let mut acc = 0;
+    let mut acc = N::zero();
     for &coef in polynomial.iter().rev() {
         acc.mul_add_assign(x, coef);
         acc %= modulus;
@@ -201,21 +214,25 @@ pub fn eval_poly(x: i64, polynomial: &[i64], modulus: i64) -> i64 {
     acc
 }
 
-pub fn eval_poly_big(x: i32, polynomial: &[i32], modulus: i32) -> i32 {
+pub fn eval_poly_big<N: Integer + Copy + ToBigInt>(x: N, polynomial: &[N], modulus: N) -> BigInt {
     if polynomial.len() == 0 {
-        return 0;
+        return BigInt::zero();
     }
-    let x = BigInt::from(x);
+    let x = x.to_bigint().unwrap();
+    let modulus = modulus.to_bigint().unwrap();
     let mut acc = BigInt::zero();
-    for coef in polynomial.iter().map(|n| BigInt::from(*n)).rev() {
+    for coef in polynomial.iter().map(|n| n.to_bigint().unwrap()).rev() {
         acc *= &x;
         acc += coef;
-        acc %= modulus;
+        acc %= &modulus;
     }
-    i32::try_from(acc).expect("accumulation should be i32 range due to modulo operation")
+    acc
 }
 
-pub fn polynomial_string(polynomial: &[i32], ascending: bool) -> String {
+pub fn polynomial_string_unsigned<N: Display + Zero + One + PartialEq + Unsigned>(
+    polynomial: &[N],
+    ascending: bool,
+) -> String {
     if polynomial.is_empty() {
         return String::from("0");
     }
@@ -224,36 +241,30 @@ pub fn polynomial_string(polynomial: &[i32], ascending: bool) -> String {
     let mut first_term = true;
     if ascending {
         for (n, c) in polynomial.iter().enumerate() {
-            if c == &0 {
+            if c.is_zero() {
                 continue;
             }
             if first_term {
                 first_term = false;
                 out.push_str(&first_term_str(c, n))
             } else {
-                if c < &0 {
-                    out.push_str(" - ");
-                } else {
-                    out.push_str(" + ");
-                }
+                out.push_str(" + ");
+
                 out.push_str(&term_str(c, n))
             }
         }
     } else {
         let m = polynomial.len() - 1;
         for (n, c) in polynomial.iter().enumerate() {
-            if c == &0 {
+            if c.is_zero() {
                 continue;
             }
             if first_term {
                 first_term = false;
                 out.push_str(&first_term_str(c, m - n))
             } else {
-                if c < &0 {
-                    out.push_str(" - ");
-                } else {
-                    out.push_str(" + ");
-                }
+                out.push_str(" + ");
+
                 out.push_str(&term_str(c, m - n))
             }
         }
@@ -262,39 +273,122 @@ pub fn polynomial_string(polynomial: &[i32], ascending: bool) -> String {
     out
 }
 
-fn first_term_str(c: &i32, n: usize) -> String {
+fn first_term_str<N: Display + Zero + One + PartialEq + Unsigned>(c: &N, n: usize) -> String {
     if n == 0 {
         format!("{}", c)
     } else if n == 1 {
         if c.is_one() {
             format!("x")
-        } else if *c == -1 {
-            format!("-x")
         } else {
             format!("{c}x")
         }
     } else {
         if c.is_one() {
             format!("x^{n}")
-        } else if *c == -1 {
-            format!("-x^{n}")
         } else {
             format!("{c}x^{n}")
         }
     }
 }
 
-fn term_str(c: &i32, n: usize) -> String {
+fn term_str<N: Display + Zero + One + PartialEq + Unsigned>(c: &N, n: usize) -> String {
     if n == 0 {
         format!("{}", c)
     } else if n == 1 {
-        if c.abs() == 1 {
+        if c.is_one() {
+            format!("x")
+        } else {
+            format!("{}x", c)
+        }
+    } else {
+        if c.is_one() {
+            format!("x^{n}")
+        } else {
+            format!("{}x^{n}", c)
+        }
+    }
+}
+
+pub fn polynomial_string_signed<N: Display + Zero + One + PartialEq + Signed>(
+    polynomial: &[N],
+    ascending: bool,
+) -> String {
+    if polynomial.is_empty() {
+        return String::from("0");
+    }
+
+    let mut out = String::new();
+    let mut first_term = true;
+    if ascending {
+        for (n, c) in polynomial.iter().enumerate() {
+            if c.is_zero() {
+                continue;
+            }
+            if first_term {
+                first_term = false;
+                out.push_str(&first_term_str_signed(c, n))
+            } else {
+                if c.is_negative() {
+                    out.push_str(" - ");
+                } else {
+                    out.push_str(" + ");
+                }
+                out.push_str(&term_str_signed(c, n))
+            }
+        }
+    } else {
+        let m = polynomial.len() - 1;
+        for (n, c) in polynomial.iter().enumerate() {
+            if c.is_zero() {
+                continue;
+            }
+            if first_term {
+                first_term = false;
+                out.push_str(&first_term_str_signed(c, m - n))
+            } else {
+                if c.is_negative() {
+                    out.push_str(" - ");
+                } else {
+                    out.push_str(" + ");
+                }
+
+                out.push_str(&term_str_signed(c, m - n))
+            }
+        }
+    }
+
+    out
+}
+
+fn first_term_str_signed<N: Display + Zero + One + PartialEq + Signed>(c: &N, n: usize) -> String {
+    if n == 0 {
+        format!("{}", c)
+    } else if n == 1 {
+        if c.abs().is_one() {
+            format!("x")
+        } else {
+            format!("{c}x")
+        }
+    } else {
+        if c.abs().is_one() {
+            format!("x^{n}")
+        } else {
+            format!("{c}x^{n}")
+        }
+    }
+}
+
+fn term_str_signed<N: Display + Zero + One + PartialEq + Signed>(c: &N, n: usize) -> String {
+    if n == 0 {
+        format!("{}", c)
+    } else if n == 1 {
+        if c.abs().is_one() {
             format!("x")
         } else {
             format!("{}x", c.abs())
         }
     } else {
-        if c.abs() == 1 {
+        if c.abs().is_one() {
             format!("x^{n}")
         } else {
             format!("{}x^{n}", c.abs())
@@ -311,17 +405,20 @@ mod math_function_tests {
     }
     #[test]
     fn polynomial_eval_big() {
-        assert_eq!(eval_poly_big(2, &[1234, 166, 94], 1613), 329)
+        assert_eq!(
+            i64::try_from(eval_poly_big(2, &[1234, 166, 94], 1613)).unwrap(),
+            329_i64
+        )
     }
     #[test]
     fn polynomial_display() {
         assert_eq!(
-            polynomial_string(&[1234, 166, 94], true),
-            "1234 + 166x + 94x^2"
+            polynomial_string_unsigned(&[1234_u32, 0, 166, 1, 94], true),
+            "1234 + 166x^2 + x^3 + 94x^4"
         );
         assert_eq!(
-            polynomial_string(&[1234, 166, 94], false),
-            "1234x^2 + 166x + 94"
+            polynomial_string_signed(&[1234_i64, 0, -166, 1, 94], false),
+            "1234x^4 - 166x^2 + x + 94"
         );
     }
 }
