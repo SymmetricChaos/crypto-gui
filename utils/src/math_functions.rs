@@ -1,6 +1,7 @@
 use mod_exp::mod_exp;
 use num::{
-    integer::Roots, traits::MulAddAssign, FromPrimitive, Integer, One, ToPrimitive, Unsigned,
+    integer::Roots, traits::MulAddAssign, BigInt, FromPrimitive, Integer, One, ToPrimitive,
+    Unsigned, Zero,
 };
 use std::collections::{BTreeMap, HashMap};
 
@@ -188,7 +189,7 @@ pub fn is_prime32(n: u32) -> bool {
     true
 }
 
-pub fn eval_poly(x: i32, polynomial: &[i32], modulus: i32) -> i32 {
+pub fn eval_poly(x: i64, polynomial: &[i64], modulus: i64) -> i64 {
     if polynomial.len() == 0 {
         return 0;
     }
@@ -198,6 +199,20 @@ pub fn eval_poly(x: i32, polynomial: &[i32], modulus: i32) -> i32 {
         acc %= modulus;
     }
     acc
+}
+
+pub fn eval_poly_big(x: i32, polynomial: &[i32], modulus: i32) -> i32 {
+    if polynomial.len() == 0 {
+        return 0;
+    }
+    let x = BigInt::from(x);
+    let mut acc = BigInt::zero();
+    for coef in polynomial.iter().map(|n| BigInt::from(*n)).rev() {
+        acc *= &x;
+        acc += coef;
+        acc %= modulus;
+    }
+    i32::try_from(acc).expect("accumulation should be i32 range due to modulo operation")
 }
 
 pub fn polynomial_string(polynomial: &[i32], ascending: bool) -> String {
@@ -293,6 +308,10 @@ mod math_function_tests {
     #[test]
     fn polynomial_eval() {
         assert_eq!(eval_poly(2, &[1234, 166, 94], 1613), 329)
+    }
+    #[test]
+    fn polynomial_eval_big() {
+        assert_eq!(eval_poly_big(2, &[1234, 166, 94], 1613), 329)
     }
     #[test]
     fn polynomial_display() {

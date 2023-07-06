@@ -4,7 +4,7 @@ use crate::{Cipher, CipherError};
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use regex::Regex;
-use utils::math_functions::{eval_poly, is_prime32, modular_division};
+use utils::math_functions::{eval_poly_big, is_prime32, modular_division};
 
 // https://en.wikipedia.org/wiki/Shamir%27s_secret_sharing
 
@@ -18,6 +18,7 @@ pub struct ShamirSecretSharing {
     pub threshold: i32,
     pub polynomial: Vec<i32>, // The constant coefficient of the polynomial is the secret
     pub modulus: i32,
+    pub random_shares: bool,
 }
 
 impl Default for ShamirSecretSharing {
@@ -27,6 +28,7 @@ impl Default for ShamirSecretSharing {
             threshold: 4,
             polynomial: vec![65, 2347, 542],
             modulus: 2147483423,
+            random_shares: true,
         }
     }
 }
@@ -80,15 +82,15 @@ impl ShamirSecretSharing {
         if !is_prime32(self.modulus as u32) {
             return Err(CipherError::state("modulus must be prime"));
         }
-        if self.threshold < 1 {
-            return Err(CipherError::state("threshold must be positive"));
+        if self.threshold < 2 {
+            return Err(CipherError::state("threshold must be greater than 1"));
         }
-        if self.shares < 1 {
-            return Err(CipherError::state("shares must be positive"));
+        if self.shares < 2 {
+            return Err(CipherError::state("shares must be positive 1"));
         }
         if self.threshold > self.shares {
             return Err(CipherError::state(
-                "cannot require a greater threshold than there are shares",
+                "cannot require a greater threshold than shares",
             ));
         };
         Ok(())
@@ -118,7 +120,7 @@ impl Cipher for ShamirSecretSharing {
 
         let mut out = Vec::with_capacity(self.shares as usize);
         for x in 1..=self.shares {
-            out.push((x, eval_poly(x, &p, self.modulus) as i32))
+            out.push((x, eval_poly_big(x, &p, self.modulus) as i32))
         }
 
         Ok(out.iter().map(|p| format!("{p:?}")).join(", "))
@@ -126,6 +128,7 @@ impl Cipher for ShamirSecretSharing {
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         self.check_state()?;
+
         let mut pairs = Vec::new();
         for p in PAIRS.captures_iter(text) {
             let x =
@@ -171,6 +174,7 @@ mod shamir_tests {
         cipher.polynomial = vec![166, 94];
         cipher.shares = 6;
         cipher.threshold = 4;
+        cipher.random_shares = false;
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT)
     }
 
@@ -181,6 +185,7 @@ mod shamir_tests {
         cipher.polynomial = vec![166, 94];
         cipher.shares = 6;
         cipher.threshold = 4;
+        cipher.random_shares = false;
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT)
     }
 }
