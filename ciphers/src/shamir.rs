@@ -86,6 +86,11 @@ impl ShamirSecretSharing {
         if self.threshold < 2 {
             return Err(CipherError::state("threshold must be greater than 1"));
         }
+        if self.threshold > self.modulus {
+            return Err(CipherError::state(
+                "threshold must be less than the order of the field",
+            ));
+        }
         if self.shares < 2 {
             return Err(CipherError::state("shares must be positive 1"));
         }
@@ -123,9 +128,18 @@ impl Cipher for ShamirSecretSharing {
 
         if self.random_shares {
             let mut rng = thread_rng();
+            let mut used = Vec::with_capacity(self.threshold as usize);
 
             for _ in 0..self.shares {
-                let x = rng.gen_range(1..self.modulus);
+                let x = {
+                    loop {
+                        let t = rng.gen_range(1..self.modulus);
+                        if !used.contains(&t) {
+                            used.push(t);
+                            break t;
+                        }
+                    }
+                };
                 let y = u32::try_from(eval_poly_big(x, &p, self.modulus))
                     .expect("conversion from BigInt to u32 failed");
                 out.push((x, y))

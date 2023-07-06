@@ -198,6 +198,7 @@ pub fn is_prime32<N: Into<u32>>(n: N) -> bool {
     true
 }
 
+// Evaluate a polynomial (with aescending degrees) at the point x
 pub fn eval_poly<N: Integer + Copy + ToPrimitive + FromPrimitive + MulAddAssign + RemAssign>(
     x: N,
     polynomial: &[N],
@@ -214,6 +215,7 @@ pub fn eval_poly<N: Integer + Copy + ToPrimitive + FromPrimitive + MulAddAssign 
     acc
 }
 
+// Evaluate a polynomial (with aescending degrees) at the point x by converting to BigInt to avoid overflow
 pub fn eval_poly_big<N: Integer + Copy + ToBigInt>(x: N, polynomial: &[N], modulus: N) -> BigInt {
     if polynomial.len() == 0 {
         return BigInt::zero();
