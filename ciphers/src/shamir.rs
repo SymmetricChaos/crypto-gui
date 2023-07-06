@@ -107,11 +107,11 @@ impl Cipher for ShamirSecretSharing {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         self.check_state()?;
 
-        if self.polynomial.len() != (self.threshold - 1) as usize {
+        if self.polynomial.len() != (self.threshold - 2) as usize {
             return Err(CipherError::State(format!(
                 "a threshold of {} requires a polynomial with {} coefficients",
                 self.threshold,
-                self.threshold - 1
+                self.threshold - 2
             )));
         }
 
