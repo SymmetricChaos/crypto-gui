@@ -46,6 +46,7 @@ impl CipherFrame for ShamirSecretSharingFrame {
         ui.add_space(8.0);
 
         ui.checkbox(&mut self.cipher.random_shares, "Use Random Shares");
+        ui.add_space(8.0);
 
         ui.label("Polynomial");
         if control_string(ui, &mut self.polynomial_string).changed() {
