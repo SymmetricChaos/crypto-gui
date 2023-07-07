@@ -36,19 +36,19 @@ impl CipherFrame for ShamirSecretSharingFrame {
         ui.label("Threshold");
         ui.add(Slider::new(&mut self.cipher.threshold, 3..=12));
         match self.cipher.threshold > self.cipher.shares {
-            true => (),
-            false => {
+            true => {
                 ui.label(error_text(
                     "threshold cannot be greater than the number of shares",
                 ));
             }
+            false => (),
         }
         ui.add_space(8.0);
 
         ui.checkbox(&mut self.cipher.random_shares, "Use Random Shares");
 
         ui.label("Polynomial");
-        if control_string(ui, &mut self.polynomial_string).lost_focus() {
+        if control_string(ui, &mut self.polynomial_string).changed() {
             match self.cipher.sting_to_vec(&self.polynomial_string) {
                 Ok(_) => (),
                 Err(e) => {

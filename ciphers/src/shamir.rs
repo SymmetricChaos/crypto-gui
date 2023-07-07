@@ -80,19 +80,19 @@ impl ShamirSecretSharing {
         if self.modulus < 1 {
             return Err(CipherError::state("modulus must be positive"));
         }
-        if !is_prime32(self.modulus as u32) {
+        if !is_prime32(self.modulus) {
             return Err(CipherError::state("modulus must be prime"));
         }
-        if self.threshold < 2 {
-            return Err(CipherError::state("threshold must be greater than 1"));
+        if self.threshold < 3 {
+            return Err(CipherError::state("threshold must be at least 3"));
         }
         if self.threshold > self.modulus {
             return Err(CipherError::state(
                 "threshold must be less than the order of the field",
             ));
         }
-        if self.shares < 2 {
-            return Err(CipherError::state("shares must be positive 1"));
+        if self.shares < 3 {
+            return Err(CipherError::state("there must be at least 3 shares"));
         }
         if self.threshold > self.shares {
             return Err(CipherError::state(
@@ -109,7 +109,7 @@ impl Cipher for ShamirSecretSharing {
 
         if self.polynomial.len() != (self.threshold - 2) as usize {
             return Err(CipherError::State(format!(
-                "a threshold of {} requires a polynomial with {} coefficients",
+                "a threshold of {} requires a polynomial with exactly {} coefficients",
                 self.threshold,
                 self.threshold - 2
             )));
