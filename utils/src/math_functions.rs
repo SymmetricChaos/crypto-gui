@@ -198,7 +198,7 @@ pub fn is_prime32<N: Into<u32>>(n: N) -> bool {
 }
 
 // Evaluate a polynomial (with aescending degrees) at the point x by converting to BigInt to avoid overflow
-pub fn eval_poly<N: Integer + Copy + ToBigInt>(x: N, polynomial: &[N], modulus: N) -> BigInt {
+pub fn eval_poly<N: ToBigInt>(x: N, polynomial: &[N], modulus: N) -> BigInt {
     if polynomial.len() == 0 {
         return BigInt::zero();
     }
@@ -384,7 +384,7 @@ mod math_function_tests {
     use super::*;
 
     #[test]
-    fn polynomial_eval_big() {
+    fn polynomial_eval() {
         assert_eq!(
             i64::try_from(eval_poly(2, &[1234, 166, 94], 1613)).unwrap(),
             329_i64
@@ -395,6 +395,14 @@ mod math_function_tests {
         assert_eq!(
             polynomial_string_unsigned(&[1234_u32, 0, 166, 1, 94], true),
             "1234 + 166x^2 + x^3 + 94x^4"
+        );
+        assert_eq!(
+            polynomial_string_unsigned(&[1234_u32, 0, 166, 1, 94], false),
+            "1234x^4 + 166x^2 + x + 94"
+        );
+        assert_eq!(
+            polynomial_string_signed(&[1234_i64, 0, -166, 1, 94], true),
+            "1234 - 166x^2 + x^3 + 94x^4"
         );
         assert_eq!(
             polynomial_string_signed(&[1234_i64, 0, -166, 1, 94], false),
