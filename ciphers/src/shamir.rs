@@ -145,13 +145,13 @@ impl Cipher for ShamirSecretSharing {
                         }
                     }
                 };
-                let y = u32::try_from(eval_poly(x, &p, self.modulus))
+                let y = u32::try_from(eval_poly(x, &p, self.modulus, true))
                     .expect("conversion from BigInt to u32 failed");
                 out.push((x, y))
             }
         } else {
             for x in 1..=self.shares {
-                let y = u32::try_from(eval_poly(x, &p, self.modulus))
+                let y = u32::try_from(eval_poly(x, &p, self.modulus, true))
                     .expect("conversion from BigInt to u32 failed");
                 out.push((x, y))
             }

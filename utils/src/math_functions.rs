@@ -197,18 +197,26 @@ pub fn is_prime32<N: Into<u32>>(n: N) -> bool {
     true
 }
 
-// Evaluate a polynomial (with aescending degrees) at the point x by converting to BigInt to avoid overflow
-pub fn eval_poly<N: ToBigInt>(x: N, polynomial: &[N], modulus: N) -> BigInt {
+// Evaluate a polynomial (with aescending terms) at the point x by converting to BigInt to avoid overflow
+pub fn eval_poly<N: ToBigInt>(x: N, polynomial: &[N], modulus: N, ascending: bool) -> BigInt {
     if polynomial.len() == 0 {
         return BigInt::zero();
     }
     let x = x.to_bigint().unwrap();
     let modulus = modulus.to_bigint().unwrap();
     let mut acc = BigInt::zero();
-    for coef in polynomial.iter().map(|n| n.to_bigint().unwrap()).rev() {
-        acc *= &x;
-        acc += coef;
-        acc %= &modulus;
+    if ascending {
+        for coef in polynomial.iter().map(|n| n.to_bigint().unwrap()).rev() {
+            acc *= &x;
+            acc += coef;
+            acc %= &modulus;
+        }
+    } else {
+        for coef in polynomial.iter().map(|n| n.to_bigint().unwrap()) {
+            acc *= &x;
+            acc += coef;
+            acc %= &modulus;
+        }
     }
     acc
 }
@@ -386,7 +394,7 @@ mod math_function_tests {
     #[test]
     fn polynomial_eval() {
         assert_eq!(
-            i64::try_from(eval_poly(2, &[1234, 166, 94], 1613)).unwrap(),
+            i64::try_from(eval_poly(2, &[1234, 166, 94], 1613, true)).unwrap(),
             329_i64
         )
     }
