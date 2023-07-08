@@ -5,7 +5,7 @@ use itertools::Itertools;
 use lazy_static::lazy_static;
 use rand::{thread_rng, Rng};
 use regex::Regex;
-use utils::math_functions::{eval_poly_big, is_prime32, modular_division};
+use utils::math_functions::{eval_poly, is_prime32, modular_division};
 
 // https://en.wikipedia.org/wiki/Shamir%27s_secret_sharing
 
@@ -36,12 +36,17 @@ impl Default for ShamirSecretSharing {
 
 impl ShamirSecretSharing {
     pub fn sting_to_vec(&mut self, text: &str) -> Result<(), ParseIntError> {
+        self.polynomial.clear();
         let groups = text.split(",");
-        let mut new = Vec::with_capacity(self.polynomial.len());
         for group in groups {
-            new.push(u32::from_str_radix(group.trim(), 10)?)
+            match u32::from_str_radix(group.trim(), 10) {
+                Ok(n) => self.polynomial.push(n),
+                Err(e) => {
+                    self.polynomial.clear();
+                    return Err(e);
+                }
+            }
         }
-        self.polynomial = new;
         Ok(())
     }
 
@@ -140,13 +145,13 @@ impl Cipher for ShamirSecretSharing {
                         }
                     }
                 };
-                let y = u32::try_from(eval_poly_big(x, &p, self.modulus))
+                let y = u32::try_from(eval_poly(x, &p, self.modulus))
                     .expect("conversion from BigInt to u32 failed");
                 out.push((x, y))
             }
         } else {
             for x in 1..=self.shares {
-                let y = u32::try_from(eval_poly_big(x, &p, self.modulus))
+                let y = u32::try_from(eval_poly(x, &p, self.modulus))
                     .expect("conversion from BigInt to u32 failed");
                 out.push((x, y))
             }

@@ -1,12 +1,11 @@
 use mod_exp::mod_exp;
 use num::{
-    bigint::ToBigInt, integer::Roots, traits::MulAddAssign, BigInt, FromPrimitive, Integer, One,
-    Signed, ToPrimitive, Unsigned, Zero,
+    bigint::ToBigInt, integer::Roots, BigInt, FromPrimitive, Integer, One, Signed, ToPrimitive,
+    Unsigned, Zero,
 };
 use std::{
     collections::{BTreeMap, HashMap},
     fmt::Display,
-    ops::RemAssign,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -198,25 +197,8 @@ pub fn is_prime32<N: Into<u32>>(n: N) -> bool {
     true
 }
 
-// Evaluate a polynomial (with aescending degrees) at the point x
-pub fn eval_poly<N: Integer + Copy + ToPrimitive + FromPrimitive + MulAddAssign + RemAssign>(
-    x: N,
-    polynomial: &[N],
-    modulus: N,
-) -> N {
-    if polynomial.len() == 0 {
-        return N::zero();
-    }
-    let mut acc = N::zero();
-    for &coef in polynomial.iter().rev() {
-        acc.mul_add_assign(x, coef);
-        acc %= modulus;
-    }
-    acc
-}
-
 // Evaluate a polynomial (with aescending degrees) at the point x by converting to BigInt to avoid overflow
-pub fn eval_poly_big<N: Integer + Copy + ToBigInt>(x: N, polynomial: &[N], modulus: N) -> BigInt {
+pub fn eval_poly<N: Integer + Copy + ToBigInt>(x: N, polynomial: &[N], modulus: N) -> BigInt {
     if polynomial.len() == 0 {
         return BigInt::zero();
     }
@@ -240,42 +222,43 @@ pub fn polynomial_string_unsigned<N: Display + Zero + One + PartialEq + Unsigned
     }
 
     let mut out = String::new();
-    let mut first_term = true;
+    let mut coefs = polynomial.iter().skip_while(|c| c.is_zero()).enumerate();
+
     if ascending {
-        for (n, c) in polynomial.iter().enumerate() {
+        match coefs.next() {
+            Some((n, c)) => out.push_str(&first_term_str_unsigned(c, n)),
+            None => return String::from("0"),
+        };
+        for (n, c) in coefs {
             if c.is_zero() {
                 continue;
             }
-            if first_term {
-                first_term = false;
-                out.push_str(&first_term_str(c, n))
-            } else {
-                out.push_str(" + ");
-
-                out.push_str(&term_str(c, n))
-            }
+            out.push_str(" + ");
+            out.push_str(&term_str_unsigned(c, n))
         }
     } else {
         let m = polynomial.len() - 1;
-        for (n, c) in polynomial.iter().enumerate() {
+
+        match coefs.next() {
+            Some((n, c)) => out.push_str(&first_term_str_unsigned(c, m - n)),
+            None => return String::from("0"),
+        };
+        for (n, c) in coefs {
             if c.is_zero() {
                 continue;
             }
-            if first_term {
-                first_term = false;
-                out.push_str(&first_term_str(c, m - n))
-            } else {
-                out.push_str(" + ");
-
-                out.push_str(&term_str(c, m - n))
-            }
+            out.push_str(" + ");
+            out.push_str(&term_str_unsigned(c, m - n))
         }
     }
 
     out
 }
 
-fn first_term_str<N: Display + Zero + One + PartialEq + Unsigned>(c: &N, n: usize) -> String {
+fn first_term_str_unsigned<N: Display + Zero + One + PartialEq + Unsigned>(
+    c: &N,
+    n: usize,
+) -> String {
     if n == 0 {
         format!("{}", c)
     } else if n == 1 {
@@ -293,7 +276,7 @@ fn first_term_str<N: Display + Zero + One + PartialEq + Unsigned>(c: &N, n: usiz
     }
 }
 
-fn term_str<N: Display + Zero + One + PartialEq + Unsigned>(c: &N, n: usize) -> String {
+fn term_str_unsigned<N: Display + Zero + One + PartialEq + Unsigned>(c: &N, n: usize) -> String {
     if n == 0 {
         format!("{}", c)
     } else if n == 1 {
@@ -320,45 +303,43 @@ pub fn polynomial_string_signed<N: Display + Zero + One + PartialEq + Signed>(
     }
 
     let mut out = String::new();
-    let mut first_term = true;
+    let mut coefs = polynomial.iter().skip_while(|c| c.is_zero()).enumerate();
+
     if ascending {
-        for (n, c) in polynomial.iter().enumerate() {
+        match coefs.next() {
+            Some((n, c)) => out.push_str(&first_term_str_signed(c, n)),
+            None => return String::from("0"),
+        };
+        for (n, c) in coefs {
             if c.is_zero() {
                 continue;
             }
-            if first_term {
-                first_term = false;
-                out.push_str(&first_term_str_signed(c, n))
+            if c.is_negative() {
+                out.push_str(" - ");
             } else {
-                if c.is_negative() {
-                    out.push_str(" - ");
-                } else {
-                    out.push_str(" + ");
-                }
-                out.push_str(&term_str_signed(c, n))
+                out.push_str(" + ");
             }
+            out.push_str(&term_str_signed(c, n))
         }
     } else {
         let m = polynomial.len() - 1;
-        for (n, c) in polynomial.iter().enumerate() {
+
+        match coefs.next() {
+            Some((n, c)) => out.push_str(&first_term_str_signed(c, m - n)),
+            None => return String::from("0"),
+        };
+        for (n, c) in coefs {
             if c.is_zero() {
                 continue;
             }
-            if first_term {
-                first_term = false;
-                out.push_str(&first_term_str_signed(c, m - n))
+            if c.is_negative() {
+                out.push_str(" - ");
             } else {
-                if c.is_negative() {
-                    out.push_str(" - ");
-                } else {
-                    out.push_str(" + ");
-                }
-
-                out.push_str(&term_str_signed(c, m - n))
+                out.push_str(" + ");
             }
+            out.push_str(&term_str_signed(c, m - n))
         }
     }
-
     out
 }
 
@@ -401,14 +382,11 @@ fn term_str_signed<N: Display + Zero + One + PartialEq + Signed>(c: &N, n: usize
 #[cfg(test)]
 mod math_function_tests {
     use super::*;
-    #[test]
-    fn polynomial_eval() {
-        assert_eq!(eval_poly(2, &[1234, 166, 94], 1613), 329)
-    }
+
     #[test]
     fn polynomial_eval_big() {
         assert_eq!(
-            i64::try_from(eval_poly_big(2, &[1234, 166, 94], 1613)).unwrap(),
+            i64::try_from(eval_poly(2, &[1234, 166, 94], 1613)).unwrap(),
             329_i64
         )
     }
