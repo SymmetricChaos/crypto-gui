@@ -1,9 +1,6 @@
 use ciphers::shamir::ShamirSecretSharing;
 use egui::Slider;
-use utils::{
-    math_functions::is_prime32, polynomials::polynomial_string_unsigned, preset_alphabet::Alphabet,
-    text_functions::filter_string,
-};
+use utils::{math_functions::is_prime32, preset_alphabet::Alphabet, text_functions::filter_string};
 
 use crate::ui_elements::{control_string, error_text};
 
@@ -20,7 +17,7 @@ impl Default for ShamirSecretSharingFrame {
         let cipher = ShamirSecretSharing::default();
         Self {
             modulus_string: format!("{}", cipher.modulus),
-            polynomial_string: String::from("65, 2347, 542"),
+            polynomial_string: String::from("65, 2347"),
             cipher,
         }
     }
@@ -30,15 +27,13 @@ impl CipherFrame for ShamirSecretSharingFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.label("Threshold");
         ui.add(Slider::new(&mut self.cipher.threshold, 3..=12));
+
+        ui.add_space(8.0);
+        ui.label("Shares");
+        ui.add(Slider::new(&mut self.cipher.shares, 3..=20));
         if self.cipher.threshold > self.cipher.shares {
             self.cipher.shares = self.cipher.threshold;
         }
-        ui.add_space(8.0);
-        ui.label("Shares");
-        ui.add(Slider::new(
-            &mut self.cipher.shares,
-            (self.cipher.threshold)..=20,
-        ));
         ui.add_space(8.0);
 
         ui.checkbox(&mut self.cipher.random_shares, "Use Random Shares");
@@ -53,7 +48,9 @@ impl CipherFrame for ShamirSecretSharingFrame {
                 }
             }
         }
-        ui.label(polynomial_string_unsigned(&self.cipher.polynomial, true));
+        ui.label(self.cipher.polynomial_string());
+        ui.add_space(4.0);
+        ui.label("(secret number becomes the constant coefficient)");
         ui.add_space(8.0);
 
         ui.label("Field Size");

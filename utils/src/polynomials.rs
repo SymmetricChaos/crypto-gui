@@ -5,7 +5,7 @@ use num::{bigint::ToBigInt, BigInt, One, Signed, Unsigned, Zero};
 
 use crate::math_functions::modular_division;
 
-pub fn lagrange<N: ToBigInt>(x: N, pairs: &[(N, N)], modulus: N) -> Option<BigInt> {
+pub fn lagrange_interpolation<N: ToBigInt>(x: N, pairs: &[(N, N)], modulus: N) -> Option<BigInt> {
     let mut nums: Vec<BigInt> = Vec::new();
     let mut dens: Vec<BigInt> = Vec::new();
     let x = x.to_bigint().expect("unable to convert x to BigInt");
@@ -43,7 +43,7 @@ pub fn lagrange<N: ToBigInt>(x: N, pairs: &[(N, N)], modulus: N) -> Option<BigIn
         n
     };
 
-    Some((modular_division(&numerator, &denominator, &m)? + &m) % &m)
+    Some((modular_division(&numerator, &denominator, &m)? % &m + &m) % &m)
 }
 
 // Evaluate a polynomial (with aescending terms) at the point x by converting to BigInt to avoid overflow

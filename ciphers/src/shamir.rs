@@ -1,12 +1,13 @@
 use crate::{Cipher, CipherError};
 use itertools::Itertools;
 use lazy_static::lazy_static;
+use num::Zero;
 use rand::{thread_rng, Rng};
 use regex::Regex;
 use std::num::ParseIntError;
 use utils::{
     math_functions::is_prime32,
-    polynomials::{eval_poly, lagrange},
+    polynomials::{eval_poly, lagrange_interpolation, polynomial_string_unsigned},
 };
 
 // https://en.wikipedia.org/wiki/Shamir%27s_secret_sharing
@@ -19,7 +20,7 @@ lazy_static! {
 pub struct ShamirSecretSharing {
     pub shares: u32,
     pub threshold: u32,
-    pub polynomial: Vec<u32>, // The constant coefficient of the polynomial is the secret
+    polynomial: Vec<u32>, // The constant coefficient of the polynomial is the secret
     pub modulus: u32,
     pub random_shares: bool,
 }
@@ -29,7 +30,7 @@ impl Default for ShamirSecretSharing {
         Self {
             shares: 3,
             threshold: 3,
-            polynomial: vec![0, 65, 2347, 542],
+            polynomial: vec![0, 65, 2347],
             modulus: 4294967029,
             random_shares: true,
         }
@@ -42,6 +43,9 @@ impl ShamirSecretSharing {
         let groups = text.split(",");
         self.polynomial.push(0);
         for group in groups {
+            if group.is_empty() {
+                continue;
+            }
             match u32::from_str_radix(group.trim(), 10) {
                 Ok(n) => self.polynomial.push(n),
                 Err(e) => {
@@ -50,7 +54,38 @@ impl ShamirSecretSharing {
                 }
             }
         }
+        loop {
+            match self.polynomial.last() {
+                Some(n) => {
+                    if n.is_zero() {
+                        self.polynomial.pop();
+                    } else {
+                        break;
+                    }
+                }
+                None => break,
+            }
+        }
         Ok(())
+    }
+
+    pub fn degree(&self) -> usize {
+        let high_zeroes = self
+            .polynomial
+            .iter()
+            .rev()
+            .take_while(|x| x.is_zero())
+            .count();
+
+        if high_zeroes.is_zero() {
+            self.polynomial.len() - 1
+        } else {
+            self.polynomial.len() - high_zeroes - 1
+        }
+    }
+
+    pub fn polynomial_string(&self) -> String {
+        polynomial_string_unsigned(&self.polynomial, true)
     }
 
     fn check_state(&self) -> Result<(), CipherError> {
@@ -84,11 +119,10 @@ impl Cipher for ShamirSecretSharing {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         self.check_state()?;
 
-        if self.polynomial.len() != (self.threshold - 1) as usize {
+        if self.degree() != (self.threshold - 1) as usize {
             return Err(CipherError::State(format!(
-                "a threshold of {} requires a polynomial with exactly {} coefficients",
-                self.threshold,
-                self.threshold - 2
+                "polynomial of degree {} is required",
+                self.threshold - 1
             )));
         }
 
@@ -151,8 +185,8 @@ impl Cipher for ShamirSecretSharing {
             )));
         }
 
-        match lagrange(0, &pairs, self.modulus) {
-            Some(n) => Ok(format!("{n}")),
+        match lagrange_interpolation(0, &pairs, self.modulus) {
+            Some(n) => Ok(n.to_str_radix(10)),
             None => Err(CipherError::input("Lagrange interpolation failed")),
         }
     }
