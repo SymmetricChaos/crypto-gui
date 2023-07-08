@@ -39,8 +39,13 @@ impl Affine {
     }
 
     pub fn find_mul_inverse(&self) -> Result<usize, CipherError> {
-        match mul_inv(self.mul_key, self.alphabet.chars().count()) {
-            Some(n) => Ok(n),
+        match mul_inv(&self.mul_key, &self.alphabet.chars().count()) {
+            Some(n) => {
+                match usize::try_from(n) {
+                    Ok(n) => Ok(n),
+                    Err(e) => Err(CipherError::Key(e.to_string())),
+                }
+            }  
             None => Err(CipherError::key("the multiplicative key of an Affine Cipher cannot share any factors with the length of the alphabet"))
         }
     }

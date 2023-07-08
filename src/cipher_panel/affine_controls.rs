@@ -60,7 +60,7 @@ impl CipherFrame for AffineFrame {
         self.cipher.add_key = rng.gen_range(0..length);
         loop {
             let mul = rng.gen_range(1..length);
-            if mul_inv(mul, self.cipher.alphabet_len()).is_some() {
+            if mul_inv(&mul, &self.cipher.alphabet_len()).is_some() {
                 self.cipher.mul_key = mul;
                 break;
             };

@@ -1,8 +1,7 @@
 use ciphers::shamir::ShamirSecretSharing;
 use egui::Slider;
 use utils::{
-    math_functions::{is_prime32, polynomial_string_unsigned},
-    preset_alphabet::Alphabet,
+    math_functions::is_prime32, polynomials::polynomial_string_unsigned, preset_alphabet::Alphabet,
     text_functions::filter_string,
 };
 
@@ -29,20 +28,17 @@ impl Default for ShamirSecretSharingFrame {
 
 impl CipherFrame for ShamirSecretSharingFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        ui.label("Shares");
-        ui.add(Slider::new(&mut self.cipher.shares, 3..=12));
-        ui.add_space(8.0);
-
         ui.label("Threshold");
         ui.add(Slider::new(&mut self.cipher.threshold, 3..=12));
-        match self.cipher.threshold > self.cipher.shares {
-            true => {
-                ui.label(error_text(
-                    "threshold cannot be greater than the number of shares",
-                ));
-            }
-            false => (),
+        if self.cipher.threshold > self.cipher.shares {
+            self.cipher.shares = self.cipher.threshold;
         }
+        ui.add_space(8.0);
+        ui.label("Shares");
+        ui.add(Slider::new(
+            &mut self.cipher.shares,
+            (self.cipher.threshold)..=20,
+        ));
         ui.add_space(8.0);
 
         ui.checkbox(&mut self.cipher.random_shares, "Use Random Shares");

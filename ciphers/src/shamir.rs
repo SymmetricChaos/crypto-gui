@@ -1,11 +1,13 @@
-use std::num::ParseIntError;
-
 use crate::{Cipher, CipherError};
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use rand::{thread_rng, Rng};
 use regex::Regex;
-use utils::math_functions::{eval_poly, is_prime32, modular_division};
+use std::num::ParseIntError;
+use utils::{
+    math_functions::is_prime32,
+    polynomials::{eval_poly, lagrange},
+};
 
 // https://en.wikipedia.org/wiki/Shamir%27s_secret_sharing
 
@@ -25,9 +27,9 @@ pub struct ShamirSecretSharing {
 impl Default for ShamirSecretSharing {
     fn default() -> Self {
         Self {
-            shares: 4,
-            threshold: 4,
-            polynomial: vec![65, 2347, 542],
+            shares: 3,
+            threshold: 3,
+            polynomial: vec![0, 65, 2347, 542],
             modulus: 4294967029,
             random_shares: true,
         }
@@ -38,6 +40,7 @@ impl ShamirSecretSharing {
     pub fn sting_to_vec(&mut self, text: &str) -> Result<(), ParseIntError> {
         self.polynomial.clear();
         let groups = text.split(",");
+        self.polynomial.push(0);
         for group in groups {
             match u32::from_str_radix(group.trim(), 10) {
                 Ok(n) => self.polynomial.push(n),
@@ -50,37 +53,6 @@ impl ShamirSecretSharing {
         Ok(())
     }
 
-    fn lagrange(&self, x: u32, pairs: Vec<(u32, u32)>) -> Option<u32> {
-        let mut nums: Vec<u32> = Vec::new();
-        let mut dens = Vec::new();
-
-        for i in 0..pairs.len() {
-            let mut others = pairs.iter().map(|(x, _)| *x).collect_vec();
-            let cur = others.remove(i);
-            nums.push(others.iter().map(|e| x - *e).product());
-            dens.push(others.iter().map(|e| cur - *e).product());
-        }
-
-        let denominator = dens.iter().product::<u32>() % self.modulus;
-
-        let numerator = {
-            let mut n = 0;
-            for i in 0..pairs.len() {
-                n += modular_division(
-                    (nums[i] * denominator * pairs[i].1) % self.modulus,
-                    dens[i],
-                    self.modulus,
-                )?;
-            }
-            n %= self.modulus;
-            n
-        };
-
-        Some(
-            (modular_division(numerator, denominator, self.modulus)? + self.modulus) % self.modulus,
-        )
-    }
-
     fn check_state(&self) -> Result<(), CipherError> {
         if self.modulus < 1 {
             return Err(CipherError::state("modulus must be positive"));
@@ -88,7 +60,7 @@ impl ShamirSecretSharing {
         if !is_prime32(self.modulus) {
             return Err(CipherError::state("modulus must be prime"));
         }
-        if self.threshold < 3 {
+        if self.threshold < 2 {
             return Err(CipherError::state("threshold must be at least 3"));
         }
         if self.threshold > self.modulus {
@@ -96,7 +68,7 @@ impl ShamirSecretSharing {
                 "threshold must be less than the order of the field",
             ));
         }
-        if self.shares < 3 {
+        if self.shares < 2 {
             return Err(CipherError::state("there must be at least 3 shares"));
         }
         if self.threshold > self.shares {
@@ -112,7 +84,7 @@ impl Cipher for ShamirSecretSharing {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         self.check_state()?;
 
-        if self.polynomial.len() != (self.threshold - 2) as usize {
+        if self.polynomial.len() != (self.threshold - 1) as usize {
             return Err(CipherError::State(format!(
                 "a threshold of {} requires a polynomial with exactly {} coefficients",
                 self.threshold,
@@ -125,7 +97,7 @@ impl Cipher for ShamirSecretSharing {
 
         let p = {
             let mut p = self.polynomial.clone();
-            p.insert(0, secret);
+            p[0] = secret;
             p
         };
 
@@ -179,7 +151,7 @@ impl Cipher for ShamirSecretSharing {
             )));
         }
 
-        match self.lagrange(0, pairs) {
+        match lagrange(0, &pairs, self.modulus) {
             Some(n) => Ok(format!("{n}")),
             None => Err(CipherError::input("Lagrange interpolation failed")),
         }
