@@ -9,10 +9,7 @@ pub enum Alphabet {
     BasicLatinNoJ,
     BasicLatinNoQ,
     BasicLatinWithDigits,
-    Digits0,        // Digits starting at 0 and ending at 9
-    Digits1,        // Digits start at 1 and ending with 0
-    Ascii94,        // The printing ASCII symbols without the space
-    Ascii95,        // The printing ASCII symbols with the space
+    Ascii94,        // The printing ASCII symbols (not including space)
     Ascii128, // The ASCII symbols with control pictures for non-printing characters except space
     AsciiLdh, // The LDH (letter, digit, hyphen) subset of ASCII used by IDNA, in ascending order per ASCII code
     ClassicalLatin, // Classical Latin lacks J, U, and W
@@ -21,17 +18,14 @@ pub enum Alphabet {
 
 impl Alphabet {
     // Pointer to a static string slice
-    pub fn slice(&self) -> &'static str {
+    pub const fn slice(&self) -> &'static str {
         match self {
             Alphabet::BasicLatin =>    "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
             Alphabet::BasicLatinNoC => "ABDEFGHIJKLMNOPQRSTUVWXYZ",
             Alphabet::BasicLatinNoJ => "ABCDEFGHIKLMNOPQRSTUVWXYZ",
             Alphabet::BasicLatinNoQ => "ABCDEFGHIJKLMNOPRSTUVWXYZ",
             Alphabet::BasicLatinWithDigits => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-            Alphabet::Digits0 => "0123456789",
-            Alphabet::Digits1 => "1234567890",
             Alphabet::Ascii94 => "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
-            Alphabet::Ascii95 => " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
             Alphabet::Ascii128 => "␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~␡",
             Alphabet::AsciiLdh => "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
             Alphabet::ClassicalLatin => "ABCDEFGHIKLMNOPQRSTVXYZ",

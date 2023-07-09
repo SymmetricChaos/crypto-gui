@@ -21,7 +21,7 @@ impl Default for PolybiusSquareFrame {
             cipher: Default::default(),
             alphabet_string: Alphabet::BasicLatinNoQ.into(),
             key_string: Default::default(),
-            labels_string: Alphabet::Digits1.into(),
+            labels_string: String::from("123456789"),
         }
     }
 }

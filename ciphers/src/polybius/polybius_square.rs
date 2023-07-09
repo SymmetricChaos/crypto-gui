@@ -16,7 +16,7 @@ impl Default for PolybiusSquare {
         Self {
             square: VecString::from(Alphabet::BasicLatinNoQ),
             side_len: 5,
-            labels: VecString::from(Alphabet::Digits1),
+            labels: VecString::from("123456789"),
             spaced: false,
         }
     }

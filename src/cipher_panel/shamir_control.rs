@@ -1,6 +1,6 @@
 use ciphers::shamir::ShamirSecretSharing;
 use egui::Slider;
-use utils::{math_functions::is_prime32, preset_alphabet::Alphabet, text_functions::filter_string};
+use utils::{math_functions::is_prime32, text_functions::filter_string};
 
 use crate::ui_elements::{control_string, error_text};
 
@@ -55,7 +55,7 @@ impl CipherFrame for ShamirSecretSharingFrame {
 
         ui.label("Field Size");
         if control_string(ui, &mut self.modulus_string).changed() {
-            filter_string(&mut self.modulus_string, Alphabet::Digits0.into());
+            filter_string(&mut self.modulus_string, "0123456789");
             match u32::from_str_radix(&self.modulus_string, 10) {
                 Ok(n) => match n > 0 {
                     true => match is_prime32(n as u32) {
