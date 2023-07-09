@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use itertools::Itertools;
-use num::{bigint::ToBigInt, BigInt, One, Signed, Unsigned, Zero};
+use num::{bigint::ToBigInt, BigInt, One, Signed, Zero};
 
 use crate::math_functions::modular_division;
 
@@ -70,7 +70,7 @@ pub fn eval_poly<N: ToBigInt>(x: N, polynomial: &[N], modulus: N, ascending: boo
     acc
 }
 
-pub fn polynomial_string_unsigned<N: Display + Zero + One + PartialEq + Unsigned>(
+pub fn polynomial_string_unsigned<N: Display + Zero + One + PartialEq>(
     polynomial: &[N],
     ascending: bool,
 ) -> String {
@@ -79,6 +79,7 @@ pub fn polynomial_string_unsigned<N: Display + Zero + One + PartialEq + Unsigned
     }
 
     let mut out = String::new();
+
     let mut coefs = polynomial
         .iter()
         .enumerate()
@@ -115,10 +116,7 @@ pub fn polynomial_string_unsigned<N: Display + Zero + One + PartialEq + Unsigned
     out
 }
 
-fn first_term_str_unsigned<N: Display + Zero + One + PartialEq + Unsigned>(
-    c: &N,
-    n: usize,
-) -> String {
+fn first_term_str_unsigned<N: Display + Zero + One + PartialEq>(c: &N, n: usize) -> String {
     if n == 0 {
         format!("{}", c)
     } else if n == 1 {
@@ -136,7 +134,7 @@ fn first_term_str_unsigned<N: Display + Zero + One + PartialEq + Unsigned>(
     }
 }
 
-fn term_str_unsigned<N: Display + Zero + One + PartialEq + Unsigned>(c: &N, n: usize) -> String {
+fn term_str_unsigned<N: Display + Zero + One + PartialEq>(c: &N, n: usize) -> String {
     if n == 0 {
         format!("{}", c)
     } else if n == 1 {
@@ -256,20 +254,20 @@ mod math_function_tests {
     #[test]
     fn polynomial_display() {
         assert_eq!(
-            polynomial_string_unsigned(&[1234_u32, 0, 166, 1, 94, 0], true),
-            "1234 + 166x^2 + x^3 + 94x^4"
+            polynomial_string_unsigned(&[0, 1234, 0, 166, 1, 94, 0], true),
+            "1234x + 166x^3 + x^4 + 94x^5"
         );
         assert_eq!(
-            polynomial_string_unsigned(&[1234_u32, 0, 166, 1, 94, 0], false),
+            polynomial_string_unsigned(&[0, 1234, 0, 166, 1, 94, 0], false),
             "1234x^5 + 166x^3 + x^2 + 94x"
         );
         assert_eq!(
-            polynomial_string_signed(&[1234_i64, 0, -166, 1, 94, 0], true),
-            "1234 - 166x^2 + x^3 + 94x^4"
+            polynomial_string_signed(&[0, 1234, 0, -166, -1, 94, 0], true),
+            "1234x - 166x^3 - x^4 + 94x^5"
         );
         assert_eq!(
-            polynomial_string_signed(&[1234_i64, 0, -166, 1, 94, 0], false),
-            "1234x^5 - 166x^3 + x^2 + 94x"
+            polynomial_string_signed(&[0, -1234, 0, -166, 1, 94, 0], false),
+            "-1234x^5 - 166x^3 + x^2 + 94x"
         );
     }
 }
