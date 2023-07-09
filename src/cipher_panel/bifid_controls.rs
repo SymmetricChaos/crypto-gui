@@ -71,7 +71,14 @@ impl CipherFrame for BifidFrame {
                 .assign_key(&self.key_string, &self.alphabet_string)
         }
         ui.add_space(16.0);
-        ui.label(mono(format!("Grid\n{}", self.cipher.polybius)));
+
+        ui.horizontal(|ui| {
+            ui.label("Grid");
+            if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
+                ui.output_mut(|o| o.copied_text = self.cipher.polybius.show_grid())
+            }
+        });
+        ui.label(mono(self.cipher.polybius.show_grid()));
     }
 
     fn cipher(&self) -> &dyn Cipher {

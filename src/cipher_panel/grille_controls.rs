@@ -67,6 +67,12 @@ impl CipherFrame for GrilleFrame {
         });
         ui.add_space(16.0);
 
+        ui.horizontal(|ui| {
+            ui.label("Grid");
+            if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
+                ui.output_mut(|o| o.copied_text = self.cipher.grid.to_string())
+            }
+        });
         ui.spacing_mut().item_spacing = (2.0, 2.0).into();
         ui.style_mut().override_text_style = Some(TextStyle::Monospace);
         for x in 0..self.cipher.grid.num_rows() {

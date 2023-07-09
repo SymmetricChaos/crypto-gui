@@ -51,7 +51,7 @@ impl CipherFrame for PolybiusSquareFrame {
             });
         });
 
-        ui.add_space(10.0);
+        ui.add_space(8.0);
 
         ui.label("Alphabet");
         if control_string(ui, &mut self.alphabet_string).changed() {
@@ -70,14 +70,19 @@ impl CipherFrame for PolybiusSquareFrame {
                 .assign_key(&self.key_string, &self.alphabet_string)
         }
 
-        ui.add_space(16.0);
+        ui.add_space(8.0);
         ui.label("Labels");
         if control_string(ui, &mut self.labels_string).changed() {
             self.cipher.assign_labels(&self.labels_string)
         }
 
         ui.add_space(16.0);
-        ui.label("Grid");
+        ui.horizontal(|ui| {
+            ui.label("Grid");
+            if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
+                ui.output_mut(|o| o.copied_text = self.cipher.show_grid())
+            }
+        });
         ui.label(mono(self.cipher.show_grid()));
     }
 

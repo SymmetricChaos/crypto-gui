@@ -51,7 +51,13 @@ impl CipherFrame for B64Frame {
         }
         ui.add_space(16.0);
 
-        ui.label(mono(format!("Grid\n{}", self.cipher.polybius_grid())));
+        ui.horizontal(|ui| {
+            ui.label("Polybius Grid");
+            if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
+                ui.output_mut(|o| o.copied_text = self.cipher.polybius_grid())
+            }
+        });
+        ui.label(mono(self.cipher.polybius_grid()));
         ui.add_space(16.0);
 
         ui.label("First Columnar Keyword");

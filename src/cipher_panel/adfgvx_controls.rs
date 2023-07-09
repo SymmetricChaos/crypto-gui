@@ -68,9 +68,15 @@ impl CipherFrame for AdfgvxFrame {
             self.cipher.assign_polybius_key(&self.polybius_key_string)
         }
 
-        ui.add_space(16.0);
-        ui.label("Grid");
+        ui.add_space(8.0);
+        ui.horizontal(|ui| {
+            ui.label("Polybius Grid");
+            if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
+                ui.output_mut(|o| o.copied_text = self.cipher.show_polybius_grid())
+            }
+        });
         ui.label(mono(self.cipher.show_polybius_grid()));
+        ui.add_space(8.0);
 
         ui.label("Columnar Keyword");
         if control_string(ui, &mut self.columnar_key_string).changed() {

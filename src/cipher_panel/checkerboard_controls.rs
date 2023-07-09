@@ -31,7 +31,7 @@ impl CipherFrame for StraddlingCheckerboardFrame {
             self.cipher.assign_alphabet(&self.alphabet_string)
         }
 
-        ui.add_space(16.0);
+        ui.add_space(8.0);
         let gap0 = 0..=(self.cipher.gaps.1 - 1);
         let gap1 = (self.cipher.gaps.0 + 1)..=9;
 
@@ -39,13 +39,16 @@ impl CipherFrame for StraddlingCheckerboardFrame {
             ui.label(mono("First Gap"));
             ui.add(DragValue::new(&mut self.cipher.gaps.0).clamp_range(gap0));
         });
-
+        ui.add_space(4.0);
         ui.horizontal(|ui| {
             ui.label(mono("Second Gap"));
             ui.add(DragValue::new(&mut self.cipher.gaps.1).clamp_range(gap1));
         });
 
         ui.add_space(16.0);
+        if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
+            ui.output_mut(|o| o.copied_text = self.cipher.cipher_page())
+        }
         ui.label(mono(self.cipher.cipher_page()).size(15.0));
     }
 

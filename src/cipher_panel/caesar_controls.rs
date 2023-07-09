@@ -36,21 +36,25 @@ impl CipherFrame for CaesarFrame {
                 ] {
                     if ui.button(name).clicked() {
                         self.alphabet_string = alphabet.into();
+                        self.cipher.assign_alphabet(&self.alphabet_string)
                     }
                 }
             });
         });
+        ui.add_space(8.0);
 
         ui.label(subheading("Alphabet"));
         if control_string(ui, &mut self.alphabet_string).changed() {
             self.cipher.assign_alphabet(&self.alphabet_string)
         }
-        ui.add_space(16.0);
+        ui.add_space(8.0);
 
         ui.label(subheading("Shift Distance"));
-        let alpha_range = 0..=(self.cipher.alphabet.len() as i32 - 1);
-        ui.add(Slider::new(&mut self.cipher.shift, alpha_range));
-        ui.add_space(16.0);
+        ui.add(Slider::new(
+            &mut self.cipher.shift,
+            0..=(self.cipher.alphabet.len() as i32 - 1),
+        ));
+        ui.add_space(8.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

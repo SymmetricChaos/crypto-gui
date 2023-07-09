@@ -16,7 +16,6 @@ impl CipherFrame for BatcoFrame {
         ui.add_space(16.0);
 
         ui.label("Message Key");
-
         ui.horizontal(|ui| {
             ui.label(mono(&self.cipher.message_number_to_char()));
             ui.add(
@@ -25,7 +24,7 @@ impl CipherFrame for BatcoFrame {
                     .show_value(false),
             );
         });
-
+        ui.add_space(4.0);
         ui.horizontal(|ui| {
             ui.label(mono(&self.cipher.message_letter_to_char()));
 
@@ -35,9 +34,14 @@ impl CipherFrame for BatcoFrame {
                     .show_value(false),
             );
         });
-
         ui.add_space(16.0);
 
+        ui.horizontal(|ui| {
+            ui.label("Code Page");
+            if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
+                ui.output_mut(|o| o.copied_text = self.cipher.show_code_page())
+            }
+        });
         ui.label(mono(&self.cipher.show_code_page()));
     }
 
