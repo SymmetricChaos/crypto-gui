@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::control_string;
-use ciphers::{hebern::Hebern, Cipher};
+use ciphers::{machines::hebern::Hebern, Cipher};
 use egui::{Slider, Ui};
 use utils::{preset_alphabet::Alphabet, text_functions::keyed_alphabet};
 

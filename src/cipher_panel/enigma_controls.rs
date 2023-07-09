@@ -1,8 +1,8 @@
 use super::CipherFrame;
 use crate::ui_elements::{control_string, error_text, mono, randomize_reset};
 use ciphers::{
-    enigma::{rotors::REFLECTOR_VEC, REFLECTOR_MAP, ROTOR_VEC},
-    Cipher, EnigmaM3,
+    machines::enigma::{rotors::REFLECTOR_VEC, EnigmaM3, REFLECTOR_MAP, ROTOR_VEC},
+    Cipher,
 };
 use egui::{ComboBox, Label, Slider, Ui};
 use rand::{thread_rng, Rng};

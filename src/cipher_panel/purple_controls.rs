@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::error_text;
-use ciphers::{purple::switch::SwitchSpeed, Purple};
+use ciphers::machines::purple::{switch::SwitchSpeed, Purple};
 use eframe::egui::{Slider, TextEdit, TextStyle, Ui};
 
 #[derive(Default)]

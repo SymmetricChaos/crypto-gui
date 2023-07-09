@@ -1,7 +1,10 @@
-use ciphers::{rotors::Rotor, sigaba::BIG_ROTOR_VEC, Cipher, Sigaba};
-use egui::{ComboBox, RichText, Slider, Ui};
-
 use super::CipherFrame;
+use ciphers::{
+    machines::sigaba::{Sigaba, BIG_ROTOR_VEC},
+    rotors::Rotor,
+    Cipher,
+};
+use egui::{ComboBox, RichText, Slider, Ui};
 
 #[derive(Default)]
 pub struct SigabaFrame {

@@ -1,4 +1,4 @@
-use ciphers::{Cipher, M209};
+use ciphers::{machines::m209::M209, Cipher};
 use egui::{Color32, Slider, Ui};
 use rand::{thread_rng, Fill};
 use utils::{preset_alphabet::Alphabet, text_functions::random_char_vec};
