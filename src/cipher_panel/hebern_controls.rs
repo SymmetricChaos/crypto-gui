@@ -2,7 +2,11 @@ use super::CipherFrame;
 use crate::ui_elements::control_string;
 use ciphers::{machines::hebern::Hebern, Cipher};
 use egui::{Slider, Ui};
-use utils::{preset_alphabet::Alphabet, text_functions::keyed_alphabet};
+use rand::{thread_rng, Rng};
+use utils::{
+    preset_alphabet::Alphabet,
+    text_functions::{keyed_alphabet, shuffled_str},
+};
 
 pub struct HebernFrame {
     cipher: Hebern,
@@ -31,7 +35,17 @@ impl CipherFrame for HebernFrame {
         }
 
         ui.add_space(10.0);
-        ui.label("Rotor Wiring");
+        ui.horizontal(|ui| {
+            ui.label("Rotors");
+            ui.separator();
+            if ui.button("randomize").clicked() {
+                let mut rng = thread_rng();
+                for rotor in self.cipher.rotors.rotors.iter_mut() {
+                    rotor.wiring_str = shuffled_str(&self.alphabet_string, &mut rng)
+                }
+            }
+        });
+
         for rotor in self.cipher.rotors.rotors.iter_mut() {
             ui.horizontal(|ui| {
                 if control_string(ui, &mut rotor.wiring_str).lost_focus() {
@@ -56,12 +70,22 @@ impl CipherFrame for HebernFrame {
         });
 
         ui.add_space(10.0);
-        ui.label("Rotor Positions\nTo Be Changed Every Message");
+        ui.horizontal(|ui| {
+            ui.label("Rotor Positions");
+            ui.separator();
+            if ui.button("randomize").clicked() {
+                let mut rng = thread_rng();
+                let max = self.alphabet_string.chars().count() - 1;
+                for rotor in self.cipher.rotors.rotors.iter_mut() {
+                    rotor.position = rng.gen_range(0..max);
+                }
+            }
+        });
         for rotor in &mut self.cipher.rotors.rotors {
             ui.add(
                 Slider::new(
                     &mut rotor.position,
-                    0..=self.alphabet_string.chars().count(),
+                    0..=self.alphabet_string.chars().count() - 1,
                 )
                 .clamp_to_range(true),
             );
@@ -72,7 +96,14 @@ impl CipherFrame for HebernFrame {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        let mut rng = thread_rng();
+        let max = self.alphabet_string.chars().count() - 1;
+        for rotor in self.cipher.rotors.rotors.iter_mut() {
+            rotor.wiring_str = shuffled_str(&self.alphabet_string, &mut rng);
+            rotor.position = rng.gen_range(0..max);
+        }
+    }
 
     fn reset(&mut self) {
         *self = Self::default()
