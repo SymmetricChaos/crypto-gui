@@ -28,11 +28,11 @@ pub struct M209Frame {
 impl CipherFrame for M209Frame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         randomize_reset(ui, self);
-        ui.add_space(16.0);
+        ui.add_space(8.0);
 
         ui.label("Alphabet");
         ui.label(mono(Alphabet::BasicLatin).background_color(Color32::BLACK));
-        ui.add_space(16.0);
+        ui.add_space(8.0);
 
         ui.label("Rotor Settings");
         for rotor in self.cipher.get_wheels() {
@@ -40,8 +40,7 @@ impl CipherFrame for M209Frame {
             ui.add(Slider::new(&mut rotor.active, 0..=len).show_value(false));
             ui.label(format!("{}", rotor));
         }
-
-        ui.add_space(16.0);
+        ui.add_space(8.0);
 
         let lugs = &mut self.cipher.lugs;
         ui.label("Lugs");

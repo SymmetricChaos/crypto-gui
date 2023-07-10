@@ -150,6 +150,7 @@ impl ClassicCrypto {
             .min_width(100.0)
             .max_width(200.0)
             .show(ctx, |ui| {
+                ui.add_space(32.0);
                 self.code_interface.combo_boxes(ui, &mut self.active_code)
             });
     }
@@ -211,6 +212,7 @@ impl ClassicCrypto {
             .min_width(100.0)
             .max_width(200.0)
             .show(ctx, |ui| {
+                ui.add_space(32.0);
                 self.cipher_interface
                     .combo_boxes(ui, &mut self.active_cipher)
             });
