@@ -13,6 +13,7 @@ lazy_static! {
     pub static ref IS_BITS: Regex = Regex::new(r"^[01\s]*$").unwrap();
 }
 
+// Converts a &str to an iterator of bits, skipping white space. Returns None if there are any characters other than 0, 1, and whitespace.
 pub fn bits_from_bitstring(text: &str) -> Option<impl Iterator<Item = Bit> + '_> {
     if !IS_BITS.is_match(text) {
         None
@@ -47,6 +48,33 @@ pub fn bits_to_int_big_endian(bits: &[Bit]) -> u32 {
         p *= 2
     }
     out
+}
+
+// pub fn int_to_bits<N: Integer + From<u8> + Unsigned>(int: N) -> Vec<Bit> {
+//     let mut bits = Vec::new();
+//     let mut n = int;
+//     while !n.is_zero() {
+//         let (q, r) = n.div_rem(&N::from(2));
+//         if r.is_zero() {
+//             bits.push(Bit::Zero)
+//         } else {
+//             bits.push(Bit::One)
+//         }
+//         n = q;
+//     }
+//     bits
+// }
+
+pub fn to_bit_array<T: Copy, const N: usize>(arr: [T; N]) -> Result<[Bit; N], IntToBitError>
+where
+    Bit: TryFrom<T>,
+    IntToBitError: From<<Bit as TryFrom<T>>::Error>,
+{
+    let mut v = [Bit::Zero; N];
+    for (n, i) in arr.iter().enumerate() {
+        v[n] = Bit::try_from(*i)?;
+    }
+    Ok(v)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -362,6 +390,18 @@ macro_rules! from_into_int {
                 }
             }
         }
+
+        impl TryFrom<&$t> for Bit {
+            type Error = IntToBitError;
+
+            fn try_from(value: &$t) -> Result<Self, Self::Error> {
+                match value {
+                    0 => Ok(Bit::Zero),
+                    1 => Ok(Bit::One),
+                    _ => Err(IntToBitError),
+                }
+            }
+        }
     };
 }
 
@@ -439,11 +479,11 @@ mod text_function_tests {
     fn bits_to_int() {
         assert_eq!(
             5,
-            bits_to_int_little_endian(&[0, 0, 1, 0, 1].map(|n| Bit::try_from(n).unwrap()))
+            bits_to_int_little_endian(&to_bit_array([0, 0, 1, 0, 1]).unwrap())
         );
         assert_eq!(
             20,
-            bits_to_int_big_endian(&[0, 0, 1, 0, 1].map(|n| Bit::try_from(n).unwrap()))
+            bits_to_int_big_endian(&to_bit_array([0, 0, 1, 0, 1]).unwrap())
         );
     }
 }

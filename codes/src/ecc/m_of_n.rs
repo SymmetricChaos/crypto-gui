@@ -1,9 +1,7 @@
 use itertools::Itertools;
-use utils::bits::Bit;
+use utils::bits::{bits_from_bitstring, Bit, IS_BITS};
 
 use crate::{errors::CodeError, traits::Code};
-
-use super::{bits_from_bitstring, check_bitstring};
 
 pub struct MofNCode {
     pub weight: usize,
@@ -27,17 +25,26 @@ impl Default for MofNCode {
 
 impl Code for MofNCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        check_bitstring(text)?;
+        if !IS_BITS.is_match(text) {
+            return Err(CodeError::Input(format!(
+                "bitstrings can only contain 0, 1, and whitespace",
+            )));
+        }
 
         let n_data_bits = self.n_data_bits();
-        if bits_from_bitstring(text)?.count() % n_data_bits != 0 {
+        if bits_from_bitstring(text)
+            .ok_or(CodeError::input("text is not a bitstring"))?
+            .count()
+            % n_data_bits
+            != 0
+        {
             return Err(CodeError::Input(format!(
                 "when encoding an {}-of-{} code the input must have a length that is a multiple of {}",
                 self.weight, self.length, n_data_bits
             )));
         };
 
-        let bits = bits_from_bitstring(text)?;
+        let bits = bits_from_bitstring(text).ok_or(CodeError::input("text is not a bitstring"))?;
 
         let mut out = String::new();
         let mut counted_weight = 0;
@@ -63,7 +70,9 @@ impl Code for MofNCode {
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let n_data_bits = self.n_data_bits();
 
-        let bits: Vec<Bit> = bits_from_bitstring(text)?.collect();
+        let bits: Vec<Bit> = bits_from_bitstring(text)
+            .ok_or(CodeError::input("text is not a bitstring"))?
+            .collect();
 
         if bits.len() % self.length != 0 {
             return Err(CodeError::Input(format!(

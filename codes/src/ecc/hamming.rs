@@ -2,9 +2,7 @@ use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use nalgebra::{ArrayStorage, SMatrix, Vector, Vector3};
-use utils::bits::Bit;
-
-use super::bits_from_bitstring;
+use utils::bits::{bits_from_bitstring, to_bit_array, Bit};
 
 lazy_static! {
     // Generator matrix with systemtic order
@@ -18,7 +16,7 @@ lazy_static! {
             [1, 0, 1, 1],
             [1, 1, 0, 1],
         ]
-        .map(|i| i.map(|j| Bit::try_from(j).unwrap())),
+        .map(|i| to_bit_array(i).unwrap()),
     ));
 
     // Generator with the commonn mixed bit order
@@ -32,7 +30,7 @@ lazy_static! {
             [0, 0, 1, 0],
             [0, 0, 0, 1],
         ]
-        .map(|i| i.map(|j| Bit::try_from(j).unwrap())),
+        .map(|i| to_bit_array(i).unwrap()),
     ));
 
     pub static ref CHK_4_7_SYS: SMatrix<Bit, 3, 7> = SMatrix::from_array_storage(ArrayStorage(
@@ -45,7 +43,7 @@ lazy_static! {
             [0, 1, 0],
             [0, 0, 1],
         ]
-        .map(|i| i.map(|j| Bit::try_from(j).unwrap())),
+        .map(|i| to_bit_array(i).unwrap()),
     ));
 
     pub static ref CHK_4_7_MIX: SMatrix<Bit, 3, 7> = SMatrix::from_array_storage(ArrayStorage(
@@ -58,7 +56,7 @@ lazy_static! {
             [0, 1, 1],
             [1, 1, 1],
         ]
-        .map(|i| i.map(|j| Bit::try_from(j).unwrap())),
+        .map(|i| to_bit_array(i).unwrap()),
     ));
 
     pub static ref GEN_4_8_SYS: SMatrix<Bit, 4, 8> = SMatrix::from_array_storage(ArrayStorage(
@@ -72,7 +70,7 @@ lazy_static! {
             [1, 1, 0, 1],
             [1, 1, 1, 0],
         ]
-        .map(|i| i.map(|j| Bit::try_from(j).unwrap())),
+        .map(|i| to_bit_array(i).unwrap()),
     ));
 
     pub static ref GEN_4_8_MIX: SMatrix<Bit, 4, 8> = SMatrix::from_array_storage(ArrayStorage(
@@ -86,7 +84,7 @@ lazy_static! {
             [0, 0, 0, 1],
             [1, 1, 1, 0],
         ]
-        .map(|i| i.map(|j| Bit::try_from(j).unwrap())),
+        .map(|i| to_bit_array(i).unwrap()),
     ));
 
     // pub static ref CHK_4_8_SYS: SMatrix<Bit, 4, 8> = SMatrix::from_array_storage(ArrayStorage(
@@ -100,7 +98,7 @@ lazy_static! {
     //         [1, 1, 1, 1],
     //         [1, 0, 0, 0],
     //     ]
-    //     .map(|i| i.map(|j| Bit::try_from(j).unwrap())),
+    // .map(|i| to_bit_array(i).unwrap()),
     // ));
 
     // pub static ref CHK_4_8_MIX: SMatrix<Bit, 4, 8> = SMatrix::from_array_storage(ArrayStorage(
@@ -114,7 +112,7 @@ lazy_static! {
     //         [0, 1, 0, 0],
     //         [1, 0, 0, 0],
     //     ]
-    //     .map(|i| i.map(|j| Bit::try_from(j).unwrap())),
+    // .map(|i| to_bit_array(i).unwrap()),
     // ));
 }
 
@@ -142,7 +140,9 @@ impl HammingCode {
     }
 
     fn decode_4_7(&self, text: &str) -> Result<String, CodeError> {
-        let bits: Vec<Bit> = bits_from_bitstring(text)?.collect();
+        let bits: Vec<Bit> = bits_from_bitstring(text)
+            .ok_or(CodeError::input("text is not a bitstring"))?
+            .collect();
 
         if bits.len() % 7 != 0 {
             return Err(CodeError::Input(format!(
@@ -183,7 +183,9 @@ impl HammingCode {
     }
 
     fn decode_4_8(&self, text: &str) -> Result<String, CodeError> {
-        let bits: Vec<Bit> = bits_from_bitstring(text)?.collect();
+        let bits: Vec<Bit> = bits_from_bitstring(text)
+            .ok_or(CodeError::input("text is not a bitstring"))?
+            .collect();
 
         if bits.len() % 8 != 0 {
             return Err(CodeError::Input(format!(
@@ -244,7 +246,9 @@ impl HammingCode {
 
 impl Code for HammingCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        let bits: Vec<Bit> = bits_from_bitstring(text)?.collect();
+        let bits: Vec<Bit> = bits_from_bitstring(text)
+            .ok_or(CodeError::input("text is not a bitstring"))?
+            .collect();
 
         if bits.len() % 4 != 0 {
             return Err(CodeError::Input(format!(

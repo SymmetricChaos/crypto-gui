@@ -1,6 +1,5 @@
 use crate::{errors::CodeError, traits::Code};
-
-use super::{bits_from_bitstring, Bit};
+use utils::bits::{bits_from_bitstring, Bit};
 
 pub struct Repetition {
     pub block_size: usize,
@@ -19,7 +18,7 @@ impl Code for Repetition {
         let zeroes = "0".repeat(self.block_size);
         let ones = "1".repeat(self.block_size);
         let mut out = String::new();
-        for bit in bits_from_bitstring(text)? {
+        for bit in bits_from_bitstring(text).ok_or(CodeError::input("text is not a bitstring"))? {
             match bit {
                 Bit::Zero => out.push_str(&zeroes),
                 Bit::One => out.push_str(&ones),
@@ -33,7 +32,7 @@ impl Code for Repetition {
         let mut zeroes = 0;
         let mut ones = 0;
         let mut ctr = 0;
-        for bit in bits_from_bitstring(text)? {
+        for bit in bits_from_bitstring(text).ok_or(CodeError::input("text is not a bitstring"))? {
             match bit {
                 Bit::Zero => zeroes += 1,
                 Bit::One => ones += 1,
