@@ -1,7 +1,5 @@
 pub mod app;
 
-pub mod ids;
-
 pub mod cipher_panel;
 pub mod code_panel;
 

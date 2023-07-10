@@ -3,11 +3,9 @@ use codes::ids::CodeId;
 use egui::{Color32, RichText, TextEdit, TextStyle, Ui};
 
 use crate::{
-    // attack_panel::{AttackInterface, ViewableAttack},
     cipher_panel::{CipherFrame, CipherInterface},
     code_panel::{CodeFrame, CodeInterface},
     ui_elements::{error_text, text_manip_menu},
-    // ids::AttackId,
 };
 
 use super::Page;
@@ -73,27 +71,6 @@ pub fn encode_decode(
         }
     });
 }
-
-// pub fn attack(
-//     ui: &mut Ui,
-//     attack: &dyn ViewableAttack,
-//     input: &mut String,
-//     output: &mut String,
-//     errors: &mut String,
-// ) {
-//     ui.horizontal(|ui| {
-//         if ui
-//             .button(RichText::from("DECRYPT").color(Color32::GOLD))
-//             .clicked()
-//         {
-//             errors.clear();
-//             match attack.attack_cipher(input) {
-//                 Ok(text) => *output = text,
-//                 Err(e) => *errors = e.to_string(),
-//             }
-//         };
-//     });
-// }
 
 #[derive(Default)]
 pub struct IOPanel {}
