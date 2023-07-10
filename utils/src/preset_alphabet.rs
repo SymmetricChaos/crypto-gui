@@ -9,9 +9,9 @@ pub enum Alphabet {
     BasicLatinNoJ,
     BasicLatinNoQ,
     BasicLatinWithDigits,
-    Ascii94,        // The printing ASCII symbols (not including space)
+    Ascii94,  // The printing ASCII symbols (not including space)
     Ascii128, // The ASCII symbols with control pictures for non-printing characters except space
-    AsciiLdh, // The LDH (letter, digit, hyphen) subset of ASCII used by IDNA, in ascending order per ASCII code
+    // AsciiLdh, // The LDH (letter, digit, hyphen) subset of ASCII used by IDNA, in ascending order per ASCII code
     ClassicalLatin, // Classical Latin lacks J, U, and W
     Base64, // 64 safe to use ASCII symbols, low chance of being interpreted if the string is parsed
 }
@@ -27,7 +27,7 @@ impl Alphabet {
             Alphabet::BasicLatinWithDigits => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
             Alphabet::Ascii94 => "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
             Alphabet::Ascii128 => "␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~␡",
-            Alphabet::AsciiLdh => "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+            // Alphabet::AsciiLdh => "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
             Alphabet::ClassicalLatin => "ABCDEFGHIKLMNOPQRSTVXYZ",
             Alphabet::Base64 => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
         }
