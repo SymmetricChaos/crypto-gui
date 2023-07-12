@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, randomize_reset};
+use crate::ui_elements::{control_string, randomize_reset, subheading};
 use ciphers::{polyalphabetic::Bazeries, Cipher};
 use egui::{Slider, Ui};
 use rand::{rngs::StdRng, SeedableRng};
@@ -27,19 +27,19 @@ impl CipherFrame for BazeriesFrame {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 
-        ui.label("Alphabet");
+        ui.label(subheading("Alphabet"));
         if control_string(ui, &mut self.alphabet_string).changed() {
             self.cipher.assign_alphabet(&self.alphabet_string)
         }
         ui.add_space(16.0);
 
-        ui.label("Offset");
+        ui.label(subheading("Offset"));
         let alpha_range = 0..=(self.cipher.alphabet_len());
         ui.add(Slider::new(&mut self.cipher.offset, alpha_range));
         ui.add_space(16.0);
 
         ui.horizontal(|ui| {
-            ui.label("Wheels");
+            ui.label(subheading("Wheels"));
             if ui.button("+").clicked() {
                 self.cipher.add_wheel()
             }

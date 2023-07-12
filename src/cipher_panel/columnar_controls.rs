@@ -1,6 +1,6 @@
 use super::CipherFrame;
 
-use crate::ui_elements::{control_string, mono, randomize_reset};
+use crate::ui_elements::{control_string, mono, randomize_reset, subheading};
 use ciphers::traits::Cipher;
 use ciphers::transposition::Columnar;
 use eframe::egui::Ui;
@@ -41,47 +41,49 @@ impl CipherFrame for ColumnarFrame {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 
-        ui.label("Alphabet");
+        ui.label(subheading("Alphabet"));
         if control_string(ui, &mut self.alphabet_string).changed() {
             self.assign_key()
         }
 
-        ui.label("Keyword");
+        ui.label(subheading("Keyword"));
         if control_string(ui, &mut self.key_string).changed() {
             self.assign_key()
         };
 
         ui.add_space(8.0);
 
-        ui.label("Example Text");
-        control_string(ui, &mut self.example);
+        ui.collapsing("Example Grid", |ui| {
+            ui.label(subheading("Text"));
+            control_string(ui, &mut self.example);
 
-        ui.label("Grid");
-        let n_cols = self.cipher.key.len();
-        let n_rows = if n_cols > 0 {
-            num::Integer::div_ceil(&self.example.chars().count(), &self.cipher.key.len())
-        } else {
-            0
-        };
-        let g = Grid::from_rows(self.example.chars().collect(), n_rows, n_cols);
+            ui.label(subheading("Grid"));
+            let n_cols = self.cipher.key.len();
+            let n_rows = if n_cols > 0 {
+                num::Integer::div_ceil(&self.example.chars().count(), &self.cipher.key.len())
+            } else {
+                0
+            };
+            let g = Grid::from_rows(self.example.chars().collect(), n_rows, n_cols);
 
-        egui::Grid::new("columnar_grid")
-            .num_columns(n_cols)
-            .min_col_width(5.0)
-            .max_col_width(5.0)
-            .striped(true)
-            .show(ui, |ui| {
-                for digit in self.cipher.key.iter() {
-                    ui.label(mono(digit).strong());
-                }
-                ui.end_row();
-                for row in 0..n_rows {
-                    for c in g.get_row(row) {
-                        ui.label(mono(c));
+            egui::Grid::new("columnar_grid")
+                .num_columns(n_cols)
+                .min_col_width(5.0)
+                .max_col_width(5.0)
+                .striped(true)
+                .show(ui, |ui| {
+                    for digit in self.cipher.key.iter() {
+                        ui.label(mono(digit).strong());
                     }
                     ui.end_row();
-                }
-            });
+                    for row in 0..n_rows {
+                        for c in g.get_row(row) {
+                            ui.label(mono(c));
+                        }
+                        ui.end_row();
+                    }
+                });
+        });
     }
 
     fn cipher(&self) -> &dyn Cipher {

@@ -1,6 +1,7 @@
 use crate::ui_elements::control_string;
 use crate::ui_elements::mono;
 use crate::ui_elements::randomize_reset;
+use crate::ui_elements::subheading;
 use ciphers::{polybius::StraddlingCheckerboard, Cipher};
 use egui::{DragValue, Ui};
 use rand::thread_rng;
@@ -26,7 +27,7 @@ impl CipherFrame for StraddlingCheckerboardFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         randomize_reset(ui, self);
 
-        ui.label("Alphabet");
+        ui.label(subheading("Alphabet"));
         if control_string(ui, &mut self.alphabet_string).changed() {
             self.cipher.assign_alphabet(&self.alphabet_string)
         }
@@ -46,9 +47,12 @@ impl CipherFrame for StraddlingCheckerboardFrame {
         });
 
         ui.add_space(16.0);
-        if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
-            ui.output_mut(|o| o.copied_text = self.cipher.cipher_page())
-        }
+        ui.horizontal(|ui| {
+            ui.label(subheading("Checkerboard"));
+            if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
+                ui.output_mut(|o| o.copied_text = self.cipher.cipher_page())
+            }
+        });
         ui.label(mono(self.cipher.cipher_page()).size(15.0));
     }
 

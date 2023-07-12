@@ -30,7 +30,7 @@ impl CipherFrame for BeaufortFrame {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 
-        ui.label("Alphabet");
+        ui.label(subheading("Alphabet"));
         if control_string(ui, &mut self.alphabet_string).changed() {
             self.cipher.assign_alphabet(&self.alphabet_string);
             for keyword in self.cipher.keywords.iter_mut() {
@@ -49,7 +49,7 @@ impl CipherFrame for BeaufortFrame {
         });
 
         ui.add_enabled_ui(self.cipher.mode == PolyMode::ProgKey, |ui| {
-            ui.label("Progressive Key Controls");
+            ui.label(subheading("Progressive Key Controls"));
             ui.add_space(8.0);
             ui.label("Step size");
             let alpha_range = 0..=(self.cipher.alphabet_len() - 1);
@@ -59,9 +59,9 @@ impl CipherFrame for BeaufortFrame {
 
         ui.horizontal(|ui| {
             if self.cipher.multikey {
-                ui.label("Keywords");
+                ui.label(subheading("Keywords"));
             } else {
-                ui.label("Keyword ");
+                ui.label(subheading("Keyword "));
             }
 
             ui.separator();

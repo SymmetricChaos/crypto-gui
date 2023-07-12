@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, randomize_reset};
+use crate::ui_elements::{control_string, randomize_reset, subheading};
 use ciphers::{substitution::DecoderRing, Cipher};
 use egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
@@ -23,13 +23,13 @@ impl CipherFrame for DecoderRingFrame {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 
-        ui.label("Alphabet");
+        ui.label(subheading("Alphabet"));
         if control_string(ui, &mut self.alphabet_string).changed() {
             self.cipher.assign_alphabet(&self.alphabet_string)
         }
         ui.add_space(16.0);
 
-        ui.label("Key");
+        ui.label(subheading("Key"));
         let alpha_range = 0..=(self.cipher.length() - 1);
         ui.add(Slider::new(&mut self.cipher.index, alpha_range));
         ui.add_space(16.0);

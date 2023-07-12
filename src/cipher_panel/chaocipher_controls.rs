@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, randomize_reset};
+use crate::ui_elements::{control_string, randomize_reset, subheading};
 use ciphers::{
     polyalphabetic::{
         chaocipher::{left_permute, right_permute},
@@ -24,7 +24,7 @@ pub struct ChaocipherFrame {
     example_right: VecString,
     // example_left_string: String,
     // example_right_string: String,
-    example_outout: String,
+    example_output: String,
 }
 
 impl Default for ChaocipherFrame {
@@ -38,7 +38,7 @@ impl Default for ChaocipherFrame {
             example_right: VecString::from(Alphabet::BasicLatin),
             // example_left_string: String::from(Alphabet::BasicLatin),
             // example_right_string: String::from(Alphabet::BasicLatin),
-            example_outout: String::new(),
+            example_output: String::new(),
         }
     }
 }
@@ -48,10 +48,12 @@ impl CipherFrame for ChaocipherFrame {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 
+        ui.label(subheading("Left Alphabet"));
         if control_string(ui, &mut self.left_string).changed() {
             self.cipher.assign_left(&self.left_string)
         }
 
+        ui.label(subheading("Right Alphabet"));
         if control_string(ui, &mut self.right_string).changed() {
             self.cipher.assign_right(&self.right_string)
         }
@@ -67,17 +69,17 @@ impl CipherFrame for ChaocipherFrame {
                 if !self.example.is_empty() {
                     let c = self.example.remove(0);
                     let n = self.example_right.get_pos(c).unwrap();
-                    self.example_outout
+                    self.example_output
                         .push(*self.example_left.get_char(n).unwrap());
                     left_permute(&mut self.example_left, n);
                     right_permute(&mut self.example_right, n);
                 }
             }
-
-            ui.label(self.example_left.to_string());
-            ui.label(self.example_right.to_string());
             ui.add_space(4.0);
-            ui.label(&self.example_outout);
+            ui.label(format!("Left:  {}", self.example_left.to_string()));
+            ui.label(format!("Right: {}", self.example_left.to_string()));
+            ui.add_space(4.0);
+            ui.label(&self.example_output);
         });
     }
 

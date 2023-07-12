@@ -30,7 +30,7 @@ impl CipherFrame for BifidFrame {
         ui.add_space(16.0);
 
         let block_size_range = 3..=30;
-        ui.label("Block Size");
+        ui.label(subheading("Block Size"));
         ui.add(Slider::new(&mut self.cipher.block_size, block_size_range));
 
         ui.group(|ui| {
@@ -55,7 +55,7 @@ impl CipherFrame for BifidFrame {
         });
         ui.add_space(10.0);
 
-        ui.label("Alphabet");
+        ui.label(subheading("Alphabet"));
         if control_string(ui, &mut self.alphabet_string).changed() {
             self.cipher
                 .polybius
@@ -63,7 +63,7 @@ impl CipherFrame for BifidFrame {
         }
         ui.add_space(16.0);
 
-        ui.label("Keyword");
+        ui.label(subheading("Keyword"));
         if control_string(ui, &mut self.key_string).changed() {
             filter_string(&mut self.key_string, &self.alphabet_string);
             self.cipher
@@ -73,7 +73,7 @@ impl CipherFrame for BifidFrame {
         ui.add_space(16.0);
 
         ui.horizontal(|ui| {
-            ui.label("Grid");
+            ui.label(subheading("Grid"));
             if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
                 ui.output_mut(|o| o.copied_text = self.cipher.polybius.show_grid())
             }

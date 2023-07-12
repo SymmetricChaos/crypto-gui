@@ -55,6 +55,19 @@ impl CipherFrame for CaesarFrame {
             0..=(self.cipher.alphabet.len() as i32 - 1),
         ));
         ui.add_space(8.0);
+
+        ui.horizontal(|ui| {
+            if ui.button("ROT13").clicked() {
+                self.alphabet_string = Alphabet::BasicLatin.into();
+                self.cipher.assign_alphabet(Alphabet::BasicLatin.into());
+                self.cipher.shift = 13;
+            }
+            if ui.button("ROT47").clicked() {
+                self.alphabet_string = Alphabet::Ascii94.into();
+                self.cipher.assign_alphabet(Alphabet::Ascii94.into());
+                self.cipher.shift = 47;
+            }
+        });
     }
 
     fn cipher(&self) -> &dyn Cipher {

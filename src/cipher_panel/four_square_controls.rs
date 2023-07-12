@@ -59,14 +59,16 @@ impl CipherFrame for FourSquareFrame {
 
         ui.add_space(10.0);
 
-        ui.label("Alphabet");
+        ui.label(subheading("Alphabet"));
         if control_string(ui, &mut self.alphabet_string).changed() {
             self.cipher
                 .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
         }
         ui.add_space(16.0);
 
-        ui.label("Spacer Character\nInserted at end as padding if needed");
+        ui.label(subheading(
+            "Spacer Character\nInserted at end as padding if needed",
+        ));
         if string_slider(ui, &self.alphabet_string, &mut self.spacer_position).changed() {
             self.cipher.spacer = self
                 .alphabet_string
@@ -76,7 +78,7 @@ impl CipherFrame for FourSquareFrame {
         }
 
         ui.add_space(8.0);
-        ui.label("Keyword 1");
+        ui.label(subheading("Keyword 1"));
         if control_string(ui, &mut self.keyword_1).changed() {
             filter_string(&mut self.keyword_1, &self.alphabet_string);
             self.cipher
@@ -84,8 +86,7 @@ impl CipherFrame for FourSquareFrame {
         }
 
         ui.add_space(8.0);
-        ui.label("Keyword 2");
-
+        ui.label(subheading("Keyword 2"));
         if control_string(ui, &mut self.keyword_2).changed() {
             filter_string(&mut self.keyword_2, &self.alphabet_string);
             self.cipher
@@ -94,7 +95,7 @@ impl CipherFrame for FourSquareFrame {
 
         ui.add_space(16.0);
         ui.horizontal(|ui| {
-            ui.label("Grid");
+            ui.label(subheading("Grid"));
             if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
                 ui.output_mut(|o| o.copied_text = self.cipher.grid_lines())
             }
