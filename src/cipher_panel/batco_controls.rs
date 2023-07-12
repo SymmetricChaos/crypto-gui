@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{mono, randomize_reset};
+use crate::ui_elements::{mono, randomize_reset, subheading};
 use ciphers::{tactical::Batco, Cipher};
 use egui::{Slider, Ui};
 use rand::{rngs::StdRng, SeedableRng};
@@ -15,7 +15,7 @@ impl CipherFrame for BatcoFrame {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 
-        ui.label("Message Key");
+        ui.label(subheading("Message Key"));
         ui.horizontal(|ui| {
             ui.label(mono(&self.cipher.message_number_to_char()));
             ui.add(
@@ -37,7 +37,7 @@ impl CipherFrame for BatcoFrame {
         ui.add_space(16.0);
 
         ui.horizontal(|ui| {
-            ui.label("Code Page");
+            ui.label(subheading("Code Page"));
             if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
                 ui.output_mut(|o| o.copied_text = self.cipher.show_code_page())
             }

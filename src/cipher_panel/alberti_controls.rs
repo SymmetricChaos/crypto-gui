@@ -1,4 +1,4 @@
-use crate::ui_elements::{control_string, mono, randomize_reset};
+use crate::ui_elements::{control_string, mono, randomize_reset, subheading};
 
 use super::CipherFrame;
 use ciphers::{polyalphabetic::Alberti, Cipher};
@@ -27,13 +27,13 @@ impl CipherFrame for AlbertiFrame {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 
-        ui.label("Fixed Alphabet");
+        ui.label(subheading("Fixed Alphabet"));
         if control_string(ui, &mut self.fixed_alphabet_string).changed() {
             self.cipher
                 .assign_fixed_alphabet(&self.fixed_alphabet_string)
         }
 
-        ui.label("Moving Alphabet");
+        ui.label(subheading("Moving Alphabet"));
         if control_string(ui, &mut self.moving_alphabet_string).changed() {
             self.cipher
                 .assign_moving_alphabet(&self.moving_alphabet_string)
@@ -41,7 +41,7 @@ impl CipherFrame for AlbertiFrame {
 
         ui.label(mono(&self.cipher));
 
-        ui.label("Index");
+        ui.label(subheading("Index"));
         let alpha_range = 0..=(self.cipher.alphabet_len() - 1);
         ui.add(Slider::new(
             &mut self.cipher.start_index,

@@ -1,6 +1,6 @@
 use super::CipherFrame;
 
-use crate::ui_elements::{control_string, mono, randomize_reset};
+use crate::ui_elements::{control_string, mono, randomize_reset, subheading};
 use ciphers::traits::Cipher;
 use ciphers::transposition::Amsco;
 use eframe::egui::Ui;
@@ -68,13 +68,13 @@ impl CipherFrame for AmscoFrame {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 
-        ui.label("Alphabet");
+        ui.label(subheading("Alphabet"));
         if control_string(ui, &mut self.alphabet_string).changed() {
             self.assign_key();
             self.build_example_grid();
         }
 
-        ui.label("Keyword");
+        ui.label(subheading("Keyword"));
         if control_string(ui, &mut self.key_string).changed() {
             self.assign_key();
             self.build_example_grid();
@@ -82,35 +82,41 @@ impl CipherFrame for AmscoFrame {
 
         ui.add_space(16.0);
 
-        ui.label("Example Plaintext");
-        if control_string(ui, &mut self.example).changed() {
-            self.build_example_grid();
-        };
+        ui.collapsing("Example", |ui| {
+            ui.label("Example Plaintext");
+            if control_string(ui, &mut self.example).changed() {
+                self.build_example_grid();
+            };
 
-        ui.add_space(8.0);
+            ui.add_space(8.0);
 
-        ui.label("Grid");
-        egui::Grid::new("amsco_grid")
-            .num_columns(self.example_grid.num_cols())
-            .min_col_width(20.0)
-            .max_col_width(20.0)
-            .striped(true)
-            .show(ui, |ui| {
-                for letter in self.key_string.chars() {
-                    ui.label(mono(letter).strong());
-                }
-                ui.end_row();
-                for digit in self.cipher.key.iter() {
-                    ui.label(mono(digit).strong());
-                }
-                ui.end_row();
-                for row in 0..self.example_grid.num_rows() {
-                    for c in self.example_grid.get_row(row) {
-                        ui.label(mono(c));
+            ui.label("Grid");
+            egui::Grid::new("amsco_grid")
+                .num_columns(self.example_grid.num_cols())
+                .min_col_width(20.0)
+                .max_col_width(20.0)
+                .striped(true)
+                .show(ui, |ui| {
+                    for letter in self.key_string.chars() {
+                        ui.label(mono(letter).strong());
                     }
                     ui.end_row();
-                }
-            });
+                    for digit in self.cipher.key.iter() {
+                        ui.label(mono(digit).strong());
+                    }
+                    ui.end_row();
+                    for row in 0..self.example_grid.num_rows() {
+                        for c in self.example_grid.get_row(row) {
+                            ui.label(mono(c));
+                        }
+                        ui.end_row();
+                    }
+                });
+
+            ui.add_space(8.0);
+        });
+
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

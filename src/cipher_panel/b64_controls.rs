@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, mono, randomize_reset};
+use crate::ui_elements::{control_string, mono, randomize_reset, subheading};
 use ciphers::{polybius::B64, Cipher};
 use egui::{Color32, Ui};
 use rand::{thread_rng, Rng};
@@ -42,17 +42,17 @@ impl CipherFrame for B64Frame {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 
-        ui.label("Base64 Alphabet");
+        ui.label(subheading("Base64 Alphabet"));
         ui.label(mono(Alphabet::Base64.slice()).background_color(Color32::BLACK));
 
-        ui.label("Polybius Keyword");
+        ui.label(subheading("Polybius Keyword"));
         if control_string(ui, &mut self.polybius_key_string).changed() {
             self.assign_polybius_key();
         }
         ui.add_space(16.0);
 
         ui.horizontal(|ui| {
-            ui.label("Polybius Grid");
+            ui.label(subheading("Polybius Grid"));
             if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
                 ui.output_mut(|o| o.copied_text = self.cipher.polybius_grid())
             }
@@ -60,12 +60,12 @@ impl CipherFrame for B64Frame {
         ui.label(mono(self.cipher.polybius_grid()));
         ui.add_space(16.0);
 
-        ui.label("First Columnar Keyword");
+        ui.label(subheading("First Columnar Keyword"));
         if control_string(ui, &mut self.columnar_key_string_1).changed() {
             self.assign_columnar_key1()
         }
         ui.add_space(8.0);
-        ui.label("Second Columnar Keyword");
+        ui.label(subheading("Second Columnar Keyword"));
         if control_string(ui, &mut self.columnar_key_string_2).changed() {
             self.assign_columnar_key2()
         }

@@ -62,7 +62,7 @@ impl CipherFrame for AdfgvxFrame {
         ui.label(mono(&self.cipher.alphabet()).background_color(Color32::BLACK));
         ui.add_space(16.0);
 
-        ui.label("Polybius Keyword");
+        ui.label(subheading("Polybius Keyword"));
         if control_string(ui, &mut self.polybius_key_string).changed() {
             filter_string(&mut self.polybius_key_string, self.cipher.alphabet());
             self.cipher.assign_polybius_key(&self.polybius_key_string)
@@ -70,7 +70,7 @@ impl CipherFrame for AdfgvxFrame {
 
         ui.add_space(8.0);
         ui.horizontal(|ui| {
-            ui.label("Polybius Grid");
+            ui.label(subheading("Polybius Grid"));
             if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
                 ui.output_mut(|o| o.copied_text = self.cipher.show_polybius_grid())
             }
@@ -78,7 +78,7 @@ impl CipherFrame for AdfgvxFrame {
         ui.label(mono(self.cipher.show_polybius_grid()));
         ui.add_space(8.0);
 
-        ui.label("Columnar Keyword");
+        ui.label(subheading("Columnar Keyword"));
         if control_string(ui, &mut self.columnar_key_string).changed() {
             self.assign_columnar_key()
         }
