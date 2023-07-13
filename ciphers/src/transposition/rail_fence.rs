@@ -3,11 +3,25 @@ use std::iter::Iterator;
 
 pub struct RailFence {
     pub rails: usize, // the slider to control this should be limited
+    pub start_rail: usize,
 }
 
 impl Default for RailFence {
     fn default() -> RailFence {
-        RailFence { rails: 3 }
+        RailFence {
+            rails: 3,
+            start_rail: 0,
+        }
+    }
+}
+
+impl RailFence {
+    pub fn positions(&self) -> std::iter::Cycle<std::vec::IntoIter<usize>> {
+        let mut v: Vec<usize> = (0..self.rails).collect();
+        for p in 2..self.rails {
+            v.push(self.rails - p)
+        }
+        v.into_iter().cycle()
     }
 }
 
@@ -17,18 +31,10 @@ impl Cipher for RailFence {
             return Err(CipherError::key("Rail Fence key must be greater than 1"));
         }
 
-        let mut rows = Vec::new();
-        for _ in 0..self.rails {
-            rows.push(Vec::<char>::new());
-        }
+        let mut rows: Vec<Vec<char>> = Vec::new();
 
-        let mut positions: Vec<usize> = (0..self.rails).collect();
-        for p in 2..self.rails {
-            positions.push(self.rails - p)
-        }
-
-        for (c, n) in text.chars().zip(positions.iter().cycle()) {
-            rows[*n].push(c)
+        for (c, n) in text.chars().zip(self.positions()) {
+            rows[n].push(c)
         }
 
         let mut out = String::new();
@@ -105,6 +111,7 @@ mod railfence_tests {
     fn encrypt_test() {
         let mut cipher = RailFence::default();
         cipher.rails = 5;
+        cipher.start_rail = 4;
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
@@ -112,6 +119,7 @@ mod railfence_tests {
     fn decrypt_test() {
         let mut cipher = RailFence::default();
         cipher.rails = 5;
+        cipher.start_rail = 4;
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }
