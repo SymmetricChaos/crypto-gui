@@ -7,7 +7,7 @@ pub struct RailFence {
 
 impl Default for RailFence {
     fn default() -> RailFence {
-        RailFence { rails: 5 }
+        RailFence { rails: 3 }
     }
 }
 
