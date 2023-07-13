@@ -66,19 +66,19 @@ impl CipherFrame for NihilistFrame {
 
         ui.add_space(10.0);
 
-        ui.label("Alphabet");
+        ui.label(subheading("Alphabet"));
         if control_string(ui, &mut self.alphabet_string).changed() {
             self.assign_keys();
         }
         ui.add_space(8.0);
 
-        ui.label("Polybius Keyword");
+        ui.label(subheading("Polybius Keyword"));
         if control_string(ui, &mut self.polybius_key_string).changed() {
             self.assign_keys();
         }
         ui.add_space(8.0);
 
-        ui.label("Additive Keyword");
+        ui.label(subheading("Additive Keyword"));
         if control_string(ui, &mut self.additive_key_string).changed() {
             self.assign_keys();
         }
@@ -88,7 +88,7 @@ impl CipherFrame for NihilistFrame {
 
         ui.add_space(16.0);
         ui.horizontal(|ui| {
-            ui.label("Grid");
+            ui.label(subheading("Grid"));
             if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
                 ui.output_mut(|o| o.copied_text = self.cipher.polybius.show_grid())
             }

@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, mono, randomize_reset};
+use crate::ui_elements::{control_string, mono, randomize_reset, subheading};
 use ciphers::{
     polyalphabetic::{Hutton, HuttonVersion},
     Cipher,
@@ -86,27 +86,27 @@ impl CipherFrame for HuttonFrame {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 
-        ui.label("Alphabet");
+        ui.label(subheading("Alphabet"));
         if control_string(ui, &mut self.alphabet_string).changed() {
             self.cipher.assign_key(&self.keyword, &self.alphabet_string);
             self.cipher.assign_password(&self.password_string);
         }
 
         ui.add_space(16.0);
-        ui.label("Version");
+        ui.label(subheading("Version"));
         ui.horizontal(|ui| {
             ui.selectable_value(&mut self.example_version, HuttonVersion::V1, "V1");
             ui.selectable_value(&mut self.example_version, HuttonVersion::V2, "V2");
         });
 
         ui.add_space(8.0);
-        ui.label("Password");
+        ui.label(subheading("Password"));
         if control_string(ui, &mut self.password_string).changed() {
             self.cipher.assign_password(&self.password_string)
         }
 
         ui.add_space(8.0);
-        ui.label("Keyword");
+        ui.label(subheading("Keyword"));
         if control_string(ui, &mut self.keyword).changed() {
             self.cipher.assign_key(&self.keyword, &self.alphabet_string);
             self.cipher.assign_password(&self.password_string);

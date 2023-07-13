@@ -53,7 +53,7 @@ impl CipherFrame for PolybiusSquareFrame {
 
         ui.add_space(8.0);
 
-        ui.label("Alphabet");
+        ui.label(subheading("Alphabet"));
         if control_string(ui, &mut self.alphabet_string).changed() {
             self.cipher
                 .assign_key(&self.key_string, &self.alphabet_string);
@@ -63,7 +63,7 @@ impl CipherFrame for PolybiusSquareFrame {
         ui.checkbox(&mut self.cipher.spaced, "Use Spaces")
             .on_hover_text("Insert spaces between the pairs of symbols");
 
-        ui.label("Keyword");
+        ui.label(subheading("Keyword"));
         if control_string(ui, &mut self.key_string).changed() {
             filter_string(&mut self.key_string, &self.alphabet_string);
             self.cipher
@@ -71,14 +71,14 @@ impl CipherFrame for PolybiusSquareFrame {
         }
 
         ui.add_space(8.0);
-        ui.label("Labels");
+        ui.label(subheading("Labels"));
         if control_string(ui, &mut self.labels_string).changed() {
             self.cipher.assign_labels(&self.labels_string)
         }
 
         ui.add_space(16.0);
         ui.horizontal(|ui| {
-            ui.label("Grid");
+            ui.label(subheading("Grid"));
             if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
                 ui.output_mut(|o| o.copied_text = self.cipher.show_grid())
             }

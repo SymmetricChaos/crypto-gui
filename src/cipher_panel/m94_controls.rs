@@ -3,7 +3,7 @@ use egui::{Color32, FontFamily, RichText, Slider, Ui};
 use rand::{seq::SliceRandom, thread_rng, Rng};
 use utils::preset_alphabet::Alphabet;
 
-use crate::ui_elements::{mono, randomize_reset};
+use crate::ui_elements::{mono, randomize_reset, subheading};
 
 use super::CipherFrame;
 
@@ -17,15 +17,15 @@ impl CipherFrame for M94Frame {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 
-        ui.label("Alphabet");
+        ui.label(subheading("Alphabet"));
         ui.label(mono(Alphabet::BasicLatin.slice()).background_color(Color32::BLACK));
         ui.add_space(16.0);
 
-        ui.label("Offset");
+        ui.label(subheading("Offset"));
         ui.add(Slider::new(&mut self.cipher.offset, 0..=25));
         ui.add_space(16.0);
 
-        ui.label("Wheels");
+        ui.label(subheading("Wheels"));
         for n in 0..25 {
             ui.horizontal(|ui| {
                 ui.add(egui::Label::new(

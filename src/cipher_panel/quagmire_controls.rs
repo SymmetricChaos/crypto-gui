@@ -35,7 +35,7 @@ impl CipherFrame for QuagmireFrame {
         randomize_reset(ui, self);
         ui.add_space(16.0);
 
-        ui.label("Alphabet");
+        ui.label(subheading("Alphabet"));
         if control_string(ui, &mut self.alphabet_string).changed() {
             self.cipher.assign_alphabet(&self.alphabet_string)
         }
@@ -52,7 +52,7 @@ impl CipherFrame for QuagmireFrame {
         });
 
         ui.add_space(16.0);
-        ui.label("Indicator Keyword");
+        ui.label(subheading("Indicator Keyword"));
         if control_string(ui, &mut self.ind_key_string).changed() {
             match self.cipher.assign_ind_key(&self.ind_key_string) {
                 Ok(_) => ui.label(format!("{:?}", self.cipher.ind_key())),
@@ -61,7 +61,7 @@ impl CipherFrame for QuagmireFrame {
         };
 
         ui.add_space(8.0);
-        ui.label("Indicator Letter");
+        ui.label(subheading("Indicator Letter"));
         if string_slider(ui, &self.alphabet_string, &mut self.indicator_position).changed() {
             self.cipher.indicator = self
                 .alphabet_string
@@ -71,14 +71,14 @@ impl CipherFrame for QuagmireFrame {
         }
 
         ui.add_space(16.0);
-        ui.label("Key #1");
+        ui.label(subheading("Key #1"));
         if control_string(ui, &mut self.pt_key_string).changed() {
             self.cipher.assign_pt_key(&self.pt_key_string)
         }
 
         if self.cipher.version == QuagmireVersion::V4 {
             ui.add_space(16.0);
-            ui.label("Key #2");
+            ui.label(subheading("Key #2"));
             if control_string(ui, &mut self.ct_key_string).changed() {
                 self.cipher.assign_ct_key(&self.ct_key_string)
             }

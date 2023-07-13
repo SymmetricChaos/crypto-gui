@@ -3,7 +3,7 @@ use egui::{Color32, Slider, Ui};
 use rand::{thread_rng, Fill};
 use utils::{preset_alphabet::Alphabet, text_functions::random_char_vec};
 
-use crate::ui_elements::{mono, randomize_reset};
+use crate::ui_elements::{mono, randomize_reset, subheading};
 
 use super::CipherFrame;
 
@@ -30,11 +30,11 @@ impl CipherFrame for M209Frame {
         randomize_reset(ui, self);
         ui.add_space(8.0);
 
-        ui.label("Alphabet");
+        ui.label(subheading("Alphabet"));
         ui.label(mono(Alphabet::BasicLatin).background_color(Color32::BLACK));
         ui.add_space(8.0);
 
-        ui.label("Rotor Settings");
+        ui.label(subheading("Rotor Settings"));
         for rotor in self.cipher.get_wheels() {
             let len = rotor.rotor_length() - 1;
             ui.add(Slider::new(&mut rotor.active, 0..=len).show_value(false));
@@ -43,7 +43,7 @@ impl CipherFrame for M209Frame {
         ui.add_space(8.0);
 
         let lugs = &mut self.cipher.lugs;
-        ui.label("Lugs");
+        ui.label(subheading("Lugs"));
         for triple in lugs.chunks_exact_mut(3) {
             ui.horizontal(|ui| {
                 lug_pair(ui, &mut triple[0]);

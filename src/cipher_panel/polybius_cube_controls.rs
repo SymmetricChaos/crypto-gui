@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, mono, randomize_reset};
+use crate::ui_elements::{control_string, mono, randomize_reset, subheading};
 use ciphers::{polybius::PolybiusCube, Cipher};
 use egui::Ui;
 use rand::thread_rng;
@@ -29,14 +29,14 @@ impl CipherFrame for PolybiusCubeFrame {
         ui.add_space(16.0);
 
         ui.add_space(16.0);
-        ui.label("Alphabet");
+        ui.label(subheading("Alphabet"));
         if control_string(ui, &mut self.alphabet_string).changed() {
             self.cipher
                 .assign_grid(&self.alphabet_string, &self.key_string)
         }
 
         ui.add_space(16.0);
-        ui.label("Keyword");
+        ui.label(subheading("Keyword"));
         if control_string(ui, &mut self.key_string).changed() {
             filter_string(&mut self.key_string, &self.alphabet_string);
             self.cipher
@@ -44,13 +44,13 @@ impl CipherFrame for PolybiusCubeFrame {
         }
 
         ui.add_space(16.0);
-        ui.label("Labels");
+        ui.label(subheading("Labels"));
         if control_string(ui, &mut self.label_string).changed() {
             self.cipher.assign_labels(&self.label_string);
         }
 
         ui.add_space(16.0);
-        ui.label("Grid");
+        ui.label(subheading("Grid"));
         let grids = self.cipher.show_grids();
         ui.horizontal(|ui| {
             ui.label(mono(&grids[0]));

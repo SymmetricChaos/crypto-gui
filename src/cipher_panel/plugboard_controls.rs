@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, error_text, mono_strong, randomize_reset};
+use crate::ui_elements::{control_string, error_text, mono_strong, randomize_reset, subheading};
 use ciphers::{substitution::Plugboard, Cipher};
 use egui::Ui;
 use rand::thread_rng;
@@ -16,7 +16,7 @@ impl CipherFrame for PlugboardFrame {
         randomize_reset(ui, self);
 
         ui.add_space(16.0);
-        ui.label("Plugboard Pairs");
+        ui.label(subheading("Plugboard Pairs"));
         if control_string(ui, &mut self.pairs).changed() {
             match self.cipher.set_plugboard(&self.pairs) {
                 Ok(_) => (),
