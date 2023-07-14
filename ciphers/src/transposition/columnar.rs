@@ -1,23 +1,28 @@
 use crate::{errors::CipherError, traits::Cipher};
 use utils::{
     grid::{str_to_char_grid, Grid, Symbol, BLOCK, EMPTY},
-    text_functions::{rank_str, StringRankError},
+    text_functions::{rank_str, rank_vec, StringRankError},
 };
 
 pub struct Columnar {
     pub key: Vec<usize>,
+    pub key_ranks: Vec<usize>,
 }
 
 impl Columnar {
     pub fn assign_key(&mut self, keyword: &str, alphabet: &str) -> Result<(), StringRankError> {
         self.key = rank_str(keyword, alphabet)?;
+        self.key_ranks = rank_vec(&self.key);
         Ok(())
     }
 }
 
 impl Default for Columnar {
     fn default() -> Self {
-        Self { key: Vec::new() }
+        Self {
+            key: Vec::new(),
+            key_ranks: Vec::new(),
+        }
     }
 }
 
@@ -33,7 +38,7 @@ impl Cipher for Columnar {
         let g = Grid::from_rows(symbols, n_rows, n_cols);
 
         let mut out = String::with_capacity(text.len());
-        for k in self.key.iter() {
+        for k in self.key_ranks.iter() {
             let mut s: String = g.get_col(*k).map(|sym| sym.to_char()).collect();
             s = s.replace(EMPTY, "");
             s = s.replace(BLOCK, "");
@@ -58,7 +63,7 @@ impl Cipher for Columnar {
         }
 
         let mut symbols = text.chars();
-        for n in self.key.iter() {
+        for n in self.key_ranks.iter() {
             let column = g.get_col_mut(*n);
             for cell in column {
                 if !cell.is_blocked() {
@@ -78,13 +83,13 @@ mod columnar_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "ECOOMVHZGTUBNJSRLDHIRFUOTAOQKWXPEEY";
+    const CIPHERTEXT: &'static str = "EKNUVEDQBFMELOHCWJOHYUROPRAGTIOXSTZ";
 
     #[test]
     fn encrypt_test() {
         let mut cipher = Columnar::default();
         cipher
-            .assign_key("TEST", Alphabet::BasicLatin.slice())
+            .assign_key("ECABD", Alphabet::BasicLatin.slice())
             .unwrap();
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
@@ -93,7 +98,7 @@ mod columnar_tests {
     fn decrypt_test() {
         let mut cipher = Columnar::default();
         cipher
-            .assign_key("TEST", Alphabet::BasicLatin.slice())
+            .assign_key("ECABD", Alphabet::BasicLatin.slice())
             .unwrap();
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }

@@ -1,6 +1,6 @@
 use super::CipherFrame;
 
-use crate::ui_elements::{control_string, mono, randomize_reset, subheading};
+use crate::ui_elements::{control_string, error_text, mono, randomize_reset, subheading};
 use ciphers::traits::Cipher;
 use ciphers::transposition::Columnar;
 use eframe::egui::Ui;
@@ -14,16 +14,21 @@ pub struct ColumnarFrame {
     alphabet_string: String,
     key_string: String,
     example: String,
+    example_grid: Grid<char>,
 }
 
 impl Default for ColumnarFrame {
     fn default() -> Self {
-        Self {
+        let mut f = Self {
             cipher: Default::default(),
             alphabet_string: Alphabet::BasicLatin.into(),
-            key_string: Default::default(),
-            example: Default::default(),
-        }
+            key_string: String::from("CIPHER"),
+            example: String::from("COLUMNARTRANSPOSITIONCIPHEREXAMPLE"),
+            example_grid: Grid::new_default(1, 1),
+        };
+        f.assign_key();
+        f.set_example();
+        f
     }
 }
 
@@ -34,6 +39,20 @@ impl ColumnarFrame {
             .assign_key(&self.key_string, &self.alphabet_string)
             .unwrap() // justified by filtering of key_string
     }
+
+    fn set_example(&mut self) {
+        if self.example.is_empty() || self.cipher.key.is_empty() {
+            self.example_grid = Grid::new_default(1, 1);
+            return;
+        }
+        let n_cols = self.cipher.key.len();
+        let n_rows = if n_cols > 0 {
+            num::Integer::div_ceil(&self.example.chars().count(), &self.cipher.key.len())
+        } else {
+            0
+        };
+        self.example_grid = Grid::from_rows(self.example.chars().collect(), n_rows, n_cols);
+    }
 }
 
 impl CipherFrame for ColumnarFrame {
@@ -43,46 +62,61 @@ impl CipherFrame for ColumnarFrame {
 
         ui.label(subheading("Alphabet"));
         if control_string(ui, &mut self.alphabet_string).changed() {
-            self.assign_key()
+            self.assign_key();
+            self.set_example();
         }
 
         ui.label(subheading("Keyword"));
         if control_string(ui, &mut self.key_string).changed() {
-            self.assign_key()
+            self.assign_key();
+            self.set_example();
         };
 
         ui.add_space(8.0);
 
-        ui.collapsing("Example Grid", |ui| {
+        ui.collapsing("Example", |ui| {
             ui.label(subheading("Text"));
-            control_string(ui, &mut self.example);
+            if control_string(ui, &mut self.example).changed() {
+                self.set_example();
+            }
+            ui.add_space(4.0);
 
-            ui.label(subheading("Grid"));
-            let n_cols = self.cipher.key.len();
-            let n_rows = if n_cols > 0 {
-                num::Integer::div_ceil(&self.example.chars().count(), &self.cipher.key.len())
+            ui.horizontal(|ui| {
+                ui.label(subheading("Grid"));
+                if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
+                    ui.output_mut(|o| o.copied_text = self.example_grid.to_string())
+                }
+            });
+
+            if self.example.is_empty() {
+                ui.label(error_text("no plaintext provided"));
+            } else if self.key_string.is_empty() {
+                ui.label(error_text("no key provided"));
             } else {
-                0
-            };
-            let g = Grid::from_rows(self.example.chars().collect(), n_rows, n_cols);
-
-            egui::Grid::new("columnar_grid")
-                .num_columns(n_cols)
-                .min_col_width(5.0)
-                .max_col_width(5.0)
-                .striped(true)
-                .show(ui, |ui| {
-                    for digit in self.cipher.key.iter() {
-                        ui.label(mono(digit).strong());
-                    }
-                    ui.end_row();
-                    for row in 0..n_rows {
-                        for c in g.get_row(row) {
-                            ui.label(mono(c));
+                egui::Grid::new("columnar_grid")
+                    .num_columns(self.example_grid.num_cols())
+                    .min_col_width(5.0)
+                    .max_col_width(5.0)
+                    .striped(true)
+                    .show(ui, |ui| {
+                        for digit in self.cipher.key.iter() {
+                            ui.label(mono(digit).strong());
                         }
                         ui.end_row();
-                    }
-                });
+                        for row in 0..self.example_grid.num_rows() {
+                            for c in self.example_grid.get_row(row) {
+                                ui.label(mono(c));
+                            }
+                            ui.end_row();
+                        }
+                    });
+
+                ui.add_space(4.0);
+                match self.cipher.encrypt(&self.example) {
+                    Ok(t) => ui.label(mono(t)),
+                    Err(e) => ui.label(error_text(e)),
+                };
+            }
         });
     }
 
@@ -96,7 +130,8 @@ impl CipherFrame for ColumnarFrame {
 
         self.key_string = random_sample_replace(&self.alphabet_string, n_chars, &mut rng);
 
-        self.assign_key()
+        self.assign_key();
+        self.set_example();
     }
 
     fn reset(&mut self) {
