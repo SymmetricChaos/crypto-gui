@@ -4,7 +4,8 @@ use std::iter::Iterator;
 pub struct RailFence {
     pub num_rails: usize, // the slider to control this should be limited
     pub start_rail: usize,
-    pub start_falling: bool,
+    pub falling: bool,
+    pub wrapping: bool,
 }
 
 impl Default for RailFence {
@@ -12,31 +13,47 @@ impl Default for RailFence {
         RailFence {
             num_rails: 3,
             start_rail: 0,
-            start_falling: true,
+            falling: true,
+            wrapping: false,
         }
     }
 }
 
 impl RailFence {
     pub fn positions(&self) -> std::iter::Cycle<std::vec::IntoIter<usize>> {
-        let mut idx = self.start_rail;
-        let mut falling = self.start_falling;
-
         let mut positions = Vec::new();
-        for _ in 0..(self.num_rails * 2 - 2) {
-            positions.push(idx);
-            if idx >= self.num_rails - 1 {
-                falling = false;
+        let mut idx = self.start_rail;
+        if self.wrapping {
+            for _ in 0..self.num_rails {
+                positions.push(idx);
+                if self.falling && idx == self.num_rails - 1 {
+                    idx = 0;
+                } else if !self.falling && idx == 0 {
+                    idx = self.num_rails - 1;
+                } else {
+                    match self.falling {
+                        true => idx += 1,
+                        false => idx -= 1,
+                    };
+                }
             }
-            if idx == 0 {
-                falling = true;
+        } else {
+            let mut falling = self.falling;
+
+            for _ in 0..(self.num_rails * 2 - 2) {
+                positions.push(idx);
+                if idx >= self.num_rails - 1 {
+                    falling = false;
+                }
+                if idx == 0 {
+                    falling = true;
+                }
+                match falling {
+                    true => idx += 1,
+                    false => idx -= 1,
+                };
             }
-            match falling {
-                true => idx += 1,
-                false => idx -= 1,
-            };
         }
-        // println!("{:?}", positions);
         positions.into_iter().cycle()
     }
 }
@@ -44,7 +61,7 @@ impl RailFence {
 impl Cipher for RailFence {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         if self.num_rails < 2 {
-            return Err(CipherError::key("Rail Fence key must be greater than 1"));
+            return Err(CipherError::key("Rail Fence must have at least two rails"));
         }
         if self.num_rails <= self.start_rail {
             return Err(CipherError::key("invalid starting rail"));
@@ -69,7 +86,7 @@ impl Cipher for RailFence {
     // There's probably an easier way to do this.
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         if self.num_rails < 2 {
-            return Err(CipherError::key("Rail Fence key must be greater than 1"));
+            return Err(CipherError::key("Rail Fence must have at least two rails"));
         }
         if self.num_rails <= self.start_rail {
             return Err(CipherError::key("invalid starting rail"));
@@ -134,7 +151,7 @@ mod railfence_tests {
         let mut cipher = RailFence::default();
         cipher.num_rails = 5;
         cipher.start_rail = 0;
-        cipher.start_falling = false;
+        cipher.falling = false;
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
@@ -143,7 +160,7 @@ mod railfence_tests {
         let mut cipher = RailFence::default();
         cipher.num_rails = 5;
         cipher.start_rail = 0;
-        cipher.start_falling = false;
+        cipher.falling = false;
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

@@ -62,7 +62,10 @@ impl CipherFrame for RailFenceFrame {
         ui.add_space(8.0);
         ui.label(subheading("Starting Rail"));
         if ui
-            .add(Slider::new(&mut self.cipher.start_rail, 0..=12))
+            .add(
+                Slider::new(&mut self.cipher.start_rail, 0..=12)
+                    .custom_formatter(|n, _| format!("{}", n + 1.0)),
+            )
             .changed()
         {
             if self.cipher.start_rail >= self.cipher.num_rails {
@@ -72,12 +75,14 @@ impl CipherFrame for RailFenceFrame {
         }
         ui.add_space(2.0);
 
-        if ui
-            .checkbox(&mut self.cipher.start_falling, "Falling")
-            .changed()
-        {
-            self.set_rail_example()
-        };
+        ui.group(|ui| {
+            if ui.checkbox(&mut self.cipher.falling, "Falling").changed() {
+                self.set_rail_example()
+            };
+            // if ui.checkbox(&mut self.cipher.wrapping, "Wrapping").changed() {
+            //     self.set_rail_example()
+            // };
+        });
         ui.add_space(8.0);
 
         ui.collapsing("Example", |ui| {
