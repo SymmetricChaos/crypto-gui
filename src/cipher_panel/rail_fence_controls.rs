@@ -28,7 +28,7 @@ impl Default for RailFenceFrame {
 
 impl RailFenceFrame {
     fn set_rail_example(&mut self) {
-        self.example_rails = vec![String::new(); self.cipher.rails];
+        self.example_rails = vec![String::new(); self.cipher.num_rails];
 
         let positions = self.cipher.positions();
 
@@ -51,11 +51,11 @@ impl CipherFrame for RailFenceFrame {
 
         ui.label(subheading("Number of Rails"));
         if ui
-            .add(Slider::new(&mut self.cipher.rails, 2..=12))
+            .add(Slider::new(&mut self.cipher.num_rails, 2..=12))
             .changed()
         {
-            if self.cipher.start_rail >= self.cipher.rails {
-                self.cipher.start_rail = self.cipher.rails - 1;
+            if self.cipher.start_rail >= self.cipher.num_rails {
+                self.cipher.start_rail = self.cipher.num_rails - 1;
             }
             self.set_rail_example()
         }
@@ -65,8 +65,8 @@ impl CipherFrame for RailFenceFrame {
             .add(Slider::new(&mut self.cipher.start_rail, 0..=12))
             .changed()
         {
-            if self.cipher.start_rail >= self.cipher.rails {
-                self.cipher.start_rail = self.cipher.rails - 1;
+            if self.cipher.start_rail >= self.cipher.num_rails {
+                self.cipher.start_rail = self.cipher.num_rails - 1;
             }
             self.set_rail_example()
         }
@@ -88,6 +88,10 @@ impl CipherFrame for RailFenceFrame {
             for rail in self.example_rails.iter() {
                 ui.label(mono(rail));
             }
+
+            ui.add_space(8.0);
+
+            ui.label(self.cipher.encrypt(&self.example).unwrap());
         });
 
         ui.add_space(8.0);
@@ -98,7 +102,7 @@ impl CipherFrame for RailFenceFrame {
     }
 
     fn randomize(&mut self) {
-        self.cipher.rails = thread_rng().gen_range(2..12);
+        self.cipher.num_rails = thread_rng().gen_range(2..12);
     }
 
     fn reset(&mut self) {

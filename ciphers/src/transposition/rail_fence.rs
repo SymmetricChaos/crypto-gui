@@ -2,7 +2,7 @@ use crate::{errors::CipherError, traits::Cipher};
 use std::iter::Iterator;
 
 pub struct RailFence {
-    pub rails: usize, // the slider to control this should be limited
+    pub num_rails: usize, // the slider to control this should be limited
     pub start_rail: usize,
     pub start_falling: bool,
 }
@@ -10,7 +10,7 @@ pub struct RailFence {
 impl Default for RailFence {
     fn default() -> RailFence {
         RailFence {
-            rails: 3,
+            num_rails: 3,
             start_rail: 0,
             start_falling: true,
         }
@@ -21,12 +21,11 @@ impl RailFence {
     pub fn positions(&self) -> std::iter::Cycle<std::vec::IntoIter<usize>> {
         let mut idx = self.start_rail;
         let mut falling = self.start_falling;
-        // 0 1 2 3 2 1 0
-        // 2 3 2 1 0 1 2
+
         let mut positions = Vec::new();
-        for _ in 0..(self.rails * 2 - 2) {
+        for _ in 0..(self.num_rails * 2 - 2) {
             positions.push(idx);
-            if idx >= self.rails - 1 {
+            if idx >= self.num_rails - 1 {
                 falling = false;
             }
             if idx == 0 {
@@ -37,21 +36,21 @@ impl RailFence {
                 false => idx -= 1,
             };
         }
-        println!("{:?}", positions);
+        // println!("{:?}", positions);
         positions.into_iter().cycle()
     }
 }
 
 impl Cipher for RailFence {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        if self.rails < 2 {
+        if self.num_rails < 2 {
             return Err(CipherError::key("Rail Fence key must be greater than 1"));
         }
-        if self.rails <= self.start_rail {
+        if self.num_rails <= self.start_rail {
             return Err(CipherError::key("invalid starting rail"));
         }
 
-        let mut rows: Vec<Vec<char>> = vec![Vec::new(); self.rails];
+        let mut rows: Vec<Vec<char>> = vec![Vec::new(); self.num_rails];
 
         for (c, n) in text.chars().zip(self.positions()) {
             rows[n].push(c)
@@ -69,15 +68,15 @@ impl Cipher for RailFence {
 
     // There's probably an easier way to do this.
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        if self.rails < 2 {
+        if self.num_rails < 2 {
             return Err(CipherError::key("Rail Fence key must be greater than 1"));
         }
-        if self.rails <= self.start_rail {
+        if self.num_rails <= self.start_rail {
             return Err(CipherError::key("invalid starting rail"));
         }
 
         // Count how many letters must be on each rail
-        let mut chunks = vec![0usize; self.rails];
+        let mut chunks = vec![0usize; self.num_rails];
         let mut rail = 0;
         let mut down = true;
 
@@ -87,7 +86,7 @@ impl Cipher for RailFence {
                 true => rail += 1,
                 false => rail -= 1,
             }
-            if rail == 0 || rail == self.rails - 1 {
+            if rail == 0 || rail == self.num_rails - 1 {
                 down = !down
             }
         }
@@ -115,7 +114,7 @@ impl Cipher for RailFence {
                 true => rail += 1,
                 false => rail -= 1,
             }
-            if rail == 0 || rail == self.rails - 1 {
+            if rail == 0 || rail == self.num_rails - 1 {
                 down = !down
             }
         }
@@ -133,7 +132,7 @@ mod railfence_tests {
     #[test]
     fn encrypt_test() {
         let mut cipher = RailFence::default();
-        cipher.rails = 5;
+        cipher.num_rails = 5;
         cipher.start_rail = 0;
         cipher.start_falling = false;
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
@@ -142,7 +141,7 @@ mod railfence_tests {
     #[test]
     fn decrypt_test() {
         let mut cipher = RailFence::default();
-        cipher.rails = 5;
+        cipher.num_rails = 5;
         cipher.start_rail = 0;
         cipher.start_falling = false;
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
