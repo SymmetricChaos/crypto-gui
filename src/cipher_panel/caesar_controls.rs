@@ -1,7 +1,7 @@
 use super::CipherFrame;
 use crate::ui_elements::{control_string, randomize_reset, subheading};
 use ciphers::{substitution::Caesar, Cipher};
-use egui::{Slider, Ui};
+use egui::{Color32, RichText, Slider, Ui};
 use rand::{thread_rng, Rng};
 use utils::preset_alphabet::Alphabet;
 
@@ -16,6 +16,24 @@ impl Default for CaesarFrame {
             cipher: Default::default(),
             alphabet_string: Alphabet::BasicLatin.into(),
         }
+    }
+}
+
+impl CaesarFrame {
+    fn shifted_alphabet(&self) -> String {
+        let mut s: String = self
+            .alphabet_string
+            .chars()
+            .skip(self.cipher.shift as usize)
+            .collect();
+        s.push_str(
+            &self
+                .alphabet_string
+                .chars()
+                .take(self.cipher.shift as usize)
+                .collect::<String>(),
+        );
+        s
     }
 }
 
@@ -47,6 +65,7 @@ impl CipherFrame for CaesarFrame {
         if control_string(ui, &mut self.alphabet_string).changed() {
             self.cipher.assign_alphabet(&self.alphabet_string)
         }
+
         ui.add_space(8.0);
 
         ui.label(subheading("Shift Distance"));
@@ -68,6 +87,28 @@ impl CipherFrame for CaesarFrame {
                 self.cipher.shift = 47;
             }
         });
+        ui.add_space(8.0);
+
+        ui.group(|ui| {
+            ui.label(subheading("Example"));
+            ui.horizontal(|ui| {
+                ui.label(
+                    RichText::new(&self.alphabet_string)
+                        .monospace()
+                        .background_color(Color32::BLACK),
+                );
+                ui.label("plaintext");
+            });
+            ui.horizontal(|ui| {
+                ui.label(
+                    RichText::new(self.shifted_alphabet())
+                        .monospace()
+                        .background_color(Color32::BLACK),
+                );
+                ui.label("ciphertext")
+            });
+        });
+        ui.add_space(8.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {
