@@ -5,7 +5,6 @@ pub struct RailFence {
     pub num_rails: usize, // the slider to control this should be limited
     pub start_rail: usize,
     pub falling: bool,
-    pub wrapping: bool,
 }
 
 impl Default for RailFence {
@@ -14,7 +13,6 @@ impl Default for RailFence {
             num_rails: 3,
             start_rail: 0,
             falling: true,
-            wrapping: false,
         }
     }
 }
@@ -23,36 +21,21 @@ impl RailFence {
     pub fn positions(&self) -> std::iter::Cycle<std::vec::IntoIter<usize>> {
         let mut positions = Vec::new();
         let mut idx = self.start_rail;
-        if self.wrapping {
-            for _ in 0..self.num_rails {
-                positions.push(idx);
-                if self.falling && idx == self.num_rails - 1 {
-                    idx = 0;
-                } else if !self.falling && idx == 0 {
-                    idx = self.num_rails - 1;
-                } else {
-                    match self.falling {
-                        true => idx += 1,
-                        false => idx -= 1,
-                    };
-                }
-            }
-        } else {
-            let mut falling = self.falling;
 
-            for _ in 0..(self.num_rails * 2 - 2) {
-                positions.push(idx);
-                if idx >= self.num_rails - 1 {
-                    falling = false;
-                }
-                if idx == 0 {
-                    falling = true;
-                }
-                match falling {
-                    true => idx += 1,
-                    false => idx -= 1,
-                };
+        let mut falling = self.falling;
+
+        for _ in 0..(self.num_rails * 2 - 2) {
+            positions.push(idx);
+            if idx >= self.num_rails - 1 {
+                falling = false;
             }
+            if idx == 0 {
+                falling = true;
+            }
+            match falling {
+                true => idx += 1,
+                false => idx -= 1,
+            };
         }
         positions.into_iter().cycle()
     }

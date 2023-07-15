@@ -60,6 +60,7 @@ impl CipherFrame for RailFenceFrame {
             self.set_rail_example()
         }
         ui.add_space(8.0);
+
         ui.label(subheading("Starting Rail"));
         if ui
             .add(
@@ -73,30 +74,33 @@ impl CipherFrame for RailFenceFrame {
             }
             self.set_rail_example()
         }
-        ui.add_space(2.0);
-
-        ui.group(|ui| {
-            if ui.checkbox(&mut self.cipher.falling, "Falling").changed() {
-                self.set_rail_example()
-            };
-            // if ui.checkbox(&mut self.cipher.wrapping, "Wrapping").changed() {
-            //     self.set_rail_example()
-            // };
+        ui.add_space(4.0);
+        ui.horizontal(|ui| {
+            ui.selectable_value(&mut self.cipher.falling, true, "Falling");
+            ui.selectable_value(&mut self.cipher.falling, false, "Rising");
         });
+
         ui.add_space(8.0);
 
-        ui.collapsing("Example", |ui| {
+        ui.group(|ui| {
+            ui.label(subheading("Example"));
             if control_string(ui, &mut self.example).changed() {
                 self.set_rail_example()
             }
             ui.add_space(4.0);
+
             for rail in self.example_rails.iter() {
                 ui.label(mono(rail));
             }
+            ui.add_space(4.0);
 
-            ui.add_space(8.0);
-
-            ui.label(self.cipher.encrypt(&self.example).unwrap());
+            ui.horizontal(|ui| {
+                ui.label(self.cipher.encrypt(&self.example).unwrap());
+                if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
+                    ui.output_mut(|o| o.copied_text = self.cipher.encrypt(&self.example).unwrap())
+                }
+            });
+            ui.add_space(2.0);
         });
 
         ui.add_space(8.0);
