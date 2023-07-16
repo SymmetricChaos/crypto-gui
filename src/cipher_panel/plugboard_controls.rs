@@ -5,10 +5,20 @@ use egui::Ui;
 use rand::thread_rng;
 use utils::{preset_alphabet::Alphabet, text_functions::random_sample};
 
-#[derive(Default)]
 pub struct PlugboardFrame {
     cipher: Plugboard,
     pairs: String,
+}
+
+impl Default for PlugboardFrame {
+    fn default() -> Self {
+        let mut f = Self {
+            cipher: Default::default(),
+            pairs: String::from("AC EG IK MO QS UW"),
+        };
+        f.cipher.set_plugboard(&f.pairs).unwrap();
+        f
+    }
 }
 
 impl CipherFrame for PlugboardFrame {

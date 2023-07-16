@@ -9,7 +9,7 @@ pub struct Plugboard {
 impl Default for Plugboard {
     fn default() -> Self {
         Self {
-            wiring: HashMap::with_capacity(15),
+            wiring: HashMap::with_capacity(26),
         }
     }
 }
@@ -21,9 +21,12 @@ impl Plugboard {
         // Clear the wiring and rebuild it, returning an Error if anything goes wrong
         let mut wiring = HashMap::with_capacity(self.wiring.capacity());
         for d in digraphs {
+            if d.is_empty() {
+                continue;
+            }
             if d.len() != 2 {
                 return Err(CipherError::key(
-                    "Plugboard settings must be given as pairs of letters",
+                    "plugboard settings must be given as pairs of letters",
                 ));
             }
             let mut cs = d.chars();
@@ -31,7 +34,7 @@ impl Plugboard {
             let b = cs.next().unwrap();
             if a == b || wiring.contains_key(&a) || wiring.contains_key(&b) {
                 return Err(CipherError::key(
-                    "Plugboard settings cannot include cycles or chains",
+                    "plugboards cannot include cycles or chains",
                 ));
             }
             wiring.insert(a, b);
