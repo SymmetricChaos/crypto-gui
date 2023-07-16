@@ -84,7 +84,6 @@ impl CipherFrame for PurpleFrame {
                 Err(e) => *errors = e.to_string(),
             }
         };
-        ui.mono(self.cipher.plugboard_string)
     }
 
     fn cipher(&self) -> &dyn ciphers::Cipher {
