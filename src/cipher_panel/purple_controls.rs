@@ -3,9 +3,34 @@ use crate::ui_elements::UiElements;
 use ciphers::machines::purple::{switch::SwitchSpeed, Purple};
 use eframe::egui::{Slider, TextEdit, TextStyle, Ui};
 
-#[derive(Default)]
 pub struct PurpleFrame {
     cipher: Purple,
+    plugboard_string: String,
+}
+
+impl Default for PurpleFrame {
+    fn default() -> Self {
+        Self {
+            cipher: Default::default(),
+            plugboard_string: String::from("NOKTYUXEQLHBRMPDICJASVWGZF"),
+        }
+    }
+}
+
+impl PurpleFrame {
+    fn swap_switches(&mut self, speed: SwitchSpeed, switch_idx: usize) {
+        let other_switch_idx = self
+            .cipher
+            .switches
+            .twenties
+            .iter()
+            .position(|s| s.speed == speed)
+            .unwrap();
+
+        self.cipher.switches.twenties[other_switch_idx].speed =
+            self.cipher.switches.twenties[switch_idx].speed;
+        self.cipher.switches.twenties[switch_idx].speed = speed;
+    }
 }
 
 impl CipherFrame for PurpleFrame {
@@ -23,71 +48,43 @@ impl CipherFrame for PurpleFrame {
         ui.subheading("Twenties Positions");
         for switch in self.cipher.switches.twenties.iter_mut() {
             ui.horizontal(|ui| {
-                ui.add(Slider::new(&mut switch.borrow_mut().position, 0..=24).clamp_to_range(true));
-                ui.label(switch.borrow().to_string());
+                ui.add(Slider::new(&mut switch.position, 0..=24).clamp_to_range(true));
+                ui.label(switch.to_string());
             });
         }
+        ui.add_space(8.0);
 
-        // Rather than automatically create a valid setting (which seems hard)
-        // we just detect invalid state when switches are changed and report it
-        // to the errors
-        ui.label("Select Twenties Speeds");
+        ui.subheading("Twenties Speeds");
         for n in 0..3 {
             ui.horizontal(|ui| {
                 ui.label(format!("\nSwitch {}", n + 1));
-                if ui
-                    .selectable_value(
-                        &mut self.cipher.switches.twenties[n].borrow_mut().speed,
-                        SwitchSpeed::Slow,
-                        "Slow",
-                    )
-                    .clicked()
-                {
-                    self.cipher
-                        .switches
-                        .set_slow(self.cipher.switches.twenties[n].clone());
-                };
-                if ui
-                    .selectable_value(
-                        &mut self.cipher.switches.twenties[n].borrow_mut().speed,
-                        SwitchSpeed::Middle,
-                        "Middle",
-                    )
-                    .clicked()
-                {
-                    self.cipher
-                        .switches
-                        .set_middle(self.cipher.switches.twenties[n].clone());
-                };
-                if ui
-                    .selectable_value(
-                        &mut self.cipher.switches.twenties[n].borrow_mut().speed,
-                        SwitchSpeed::Fast,
-                        "Fast",
-                    )
-                    .clicked()
-                {
-                    self.cipher
-                        .switches
-                        .set_fast(self.cipher.switches.twenties[n].clone());
-                };
+                for speed in [SwitchSpeed::Slow, SwitchSpeed::Middle, SwitchSpeed::Fast] {
+                    if ui
+                        .selectable_value(
+                            &mut self.cipher.switches.twenties[n].speed,
+                            speed,
+                            speed.name(),
+                        )
+                        .clicked()
+                    {
+                        self.swap_switches(speed, n)
+                    };
+                }
             });
         }
-        if let Err(e) = self.cipher.switches.validate_switches() {
-            ui.error_text(e);
-        };
 
         ui.add_space(10.0);
         ui.subheading("Plugboard");
         if ui
-            .add(TextEdit::singleline(&mut self.cipher.plugboard_string).font(TextStyle::Monospace))
+            .add(TextEdit::singleline(&mut self.plugboard_string).font(TextStyle::Monospace))
             .changed()
         {
-            match self.cipher.set_plugboard() {
+            match self.cipher.set_plugboard(&self.plugboard_string) {
                 Ok(_) => (),
                 Err(e) => *errors = e.to_string(),
             }
         };
+        ui.mono(self.cipher.plugboard_string)
     }
 
     fn cipher(&self) -> &dyn ciphers::Cipher {

@@ -1,12 +1,97 @@
-use std::{cell::RefCell, fmt::Display, rc::Rc};
-
 use super::wiring::*;
+use std::fmt::Display;
+
+#[derive(Clone)]
+pub struct Switches {
+    pub sixes: Switch<6>,
+    pub twenties: [Switch<20>; 3],
+    pub slow: Switch<20>,
+    pub middle: Switch<20>,
+    pub fast: Switch<20>,
+}
+
+impl Default for Switches {
+    fn default() -> Self {
+        let twenties = Switch::twenties();
+        let slow = twenties[0].clone();
+        let middle = twenties[2].clone();
+        let fast = twenties[1].clone();
+        Self {
+            sixes: Switch::sixes(),
+            twenties,
+            slow,
+            middle,
+            fast,
+        }
+    }
+}
+
+impl Switches {
+    pub fn set_slow(&mut self, switch: Switch<20>) {
+        self.slow = switch
+    }
+
+    pub fn set_middle(&mut self, switch: Switch<20>) {
+        self.middle = switch
+    }
+
+    pub fn set_fast(&mut self, switch: Switch<20>) {
+        self.fast = switch
+    }
+
+    pub fn step(&mut self) {
+        let spos = self.sixes.position;
+        let mpos = self.middle.position;
+
+        // Sixes always steps
+        self.sixes.step();
+
+        // Exactly one of the Twenties steps at a time
+        if spos == 23 && mpos == 24 {
+            self.slow.step();
+        } else if spos == 24 {
+            self.middle.step();
+        } else {
+            self.fast.step();
+        }
+    }
+
+    pub fn encrypt_num(&self, n: usize) -> usize {
+        if n < 6 {
+            self.sixes.encrypt(n)
+        } else {
+            let n = self.twenties[0].encrypt(n - 6);
+            let n = self.twenties[1].encrypt(n);
+            self.twenties[2].encrypt(n) + 6
+        }
+    }
+
+    pub fn decrypt_num(&self, n: usize) -> usize {
+        if n < 6 {
+            self.sixes.decrypt(n)
+        } else {
+            let n = self.twenties[2].decrypt(n - 6);
+            let n = self.twenties[1].decrypt(n);
+            self.twenties[0].decrypt(n) + 6
+        }
+    }
+}
 
 #[derive(PartialEq, Clone, Copy, Debug)]
 pub enum SwitchSpeed {
     Slow,
     Middle,
     Fast,
+}
+
+impl SwitchSpeed {
+    pub fn name(&self) -> &str {
+        match self {
+            SwitchSpeed::Slow => "Slow",
+            SwitchSpeed::Middle => "Middle",
+            SwitchSpeed::Fast => "Fast",
+        }
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -24,25 +109,10 @@ impl Switch<6> {
 }
 
 impl Switch<20> {
-    pub fn twenties() -> [Rc<RefCell<Switch<20>>>; 3] {
-        let t1 = Rc::new(RefCell::new(Switch::new(
-            0,
-            SwitchSpeed::Slow,
-            &TWENTIES_1_ENC,
-            &TWENTIES_1_DEC,
-        )));
-        let t2 = Rc::new(RefCell::new(Switch::new(
-            23,
-            SwitchSpeed::Fast,
-            &TWENTIES_2_ENC,
-            &TWENTIES_2_DEC,
-        )));
-        let t3 = Rc::new(RefCell::new(Switch::new(
-            5,
-            SwitchSpeed::Middle,
-            &TWENTIES_3_ENC,
-            &TWENTIES_3_DEC,
-        )));
+    pub fn twenties() -> [Switch<20>; 3] {
+        let t1 = Switch::new(0, SwitchSpeed::Slow, &TWENTIES_1_ENC, &TWENTIES_1_DEC);
+        let t2 = Switch::new(23, SwitchSpeed::Fast, &TWENTIES_2_ENC, &TWENTIES_2_DEC);
+        let t3 = Switch::new(5, SwitchSpeed::Middle, &TWENTIES_3_ENC, &TWENTIES_3_DEC);
 
         [t1, t2, t3]
     }
