@@ -1,5 +1,5 @@
 use super::CodeFrame;
-use crate::ui_elements::{fill_code_columns, subheading};
+use crate::ui_elements::UiElements;
 use codes::other::bacon::Bacon;
 use egui::{TextEdit, TextStyle};
 
@@ -17,9 +17,9 @@ impl Default for BaconFrame {
 
 impl CodeFrame for BaconFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        ui.label(subheading("False Text"));
+        ui.subheading("False Text");
         ui.add(TextEdit::multiline(&mut self.code.false_text).font(TextStyle::Monospace));
-        fill_code_columns(12, 4, ui, self.code.chars_codes());
+        ui.fill_code_columns(12, 4, self.code.chars_codes());
     }
 
     fn code(&self) -> &dyn codes::traits::Code {

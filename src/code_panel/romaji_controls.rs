@@ -1,8 +1,7 @@
-use codes::romaji::romaji::{Romaji, RomajiVariant};
-
-use crate::ui_elements::{mono_strong, subheading};
-
 use super::CodeFrame;
+use crate::ui_elements::UiElements;
+use codes::romaji::romaji::{Romaji, RomajiVariant};
+use egui::RichText;
 
 pub struct RomajiFrame {
     code: Romaji,
@@ -19,7 +18,7 @@ impl Default for RomajiFrame {
 impl CodeFrame for RomajiFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.group(|ui| {
-            ui.label(subheading("Variant"));
+            ui.subheading("Variant");
             ui.horizontal(|ui| {
                 ui.selectable_value(&mut self.code.variant, RomajiVariant::Kunrei, "Kunrei");
                 ui.selectable_value(&mut self.code.variant, RomajiVariant::Hepbern, "Hepbern");
@@ -43,7 +42,7 @@ impl CodeFrame for RomajiFrame {
                 for _row in 0..16 {
                     for _col in 0..8 {
                         let (kana, romaji) = pairs.next().unwrap();
-                        ui.label(mono_strong(format!("{} {}  ", kana, romaji)).size(16.0));
+                        ui.label(RichText::new(format!("{} {}  ", kana, romaji)).size(16.0));
                     }
                     ui.end_row()
                 }

@@ -1,6 +1,6 @@
 use codes::text_standards::baudot::{Baudot, BaudotVersion};
 
-use crate::ui_elements::{fill_code_columns, subheading};
+use crate::ui_elements::UiElements;
 
 use super::CodeFrame;
 
@@ -19,7 +19,7 @@ impl Default for BaudotFrame {
 impl CodeFrame for BaudotFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.group(|ui| {
-            ui.label(subheading("Variant"));
+            ui.subheading("Variant");
             ui.horizontal(|ui| {
                 ui.selectable_value(&mut self.code.version, BaudotVersion::Ita1, "ITA1 (Baudot)");
                 ui.selectable_value(
@@ -38,7 +38,7 @@ impl CodeFrame for BaudotFrame {
         };
 
         ui.add_space(16.0);
-        fill_code_columns(16, 4, ui, self.code.codes_chars());
+        ui.fill_code_columns(16, 4, self.code.codes_chars());
     }
 
     fn code(&self) -> &dyn codes::traits::Code {

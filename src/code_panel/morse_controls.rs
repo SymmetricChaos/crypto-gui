@@ -1,9 +1,7 @@
+use super::CodeFrame;
+use crate::ui_elements::UiElements;
 use codes::text_standards::morse::{Morse, MorseRep, MorseStandard};
 use egui::SelectableLabel;
-
-use crate::ui_elements::{fill_code_columns, subheading};
-
-use super::CodeFrame;
 
 pub struct MorseFrame {
     code: Morse,
@@ -20,7 +18,7 @@ impl Default for MorseFrame {
 impl CodeFrame for MorseFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.group(|ui| {
-            ui.label(subheading("Variant"));
+            ui.subheading("Variant");
             ui.horizontal(|ui| {
                 ui.selectable_value(&mut self.code.standard, MorseStandard::Itu, "ITU Morse");
                 if ui
@@ -38,7 +36,7 @@ impl CodeFrame for MorseFrame {
             });
         });
 
-        ui.label(subheading("Representation"));
+        ui.subheading("Representation");
         if self.code.standard != MorseStandard::American {
             ui.horizontal(|ui| {
                 ui.selectable_value(
@@ -70,7 +68,7 @@ impl CodeFrame for MorseFrame {
         };
 
         ui.add_space(16.0);
-        fill_code_columns(20, 3, ui, Box::new(self.code.chars_codes()))
+        ui.fill_code_columns(20, 3, Box::new(self.code.chars_codes()))
     }
 
     fn code(&self) -> &dyn codes::traits::Code {

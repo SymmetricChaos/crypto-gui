@@ -1,12 +1,11 @@
-use ciphers::ids::CipherId;
-use codes::ids::CodeId;
-use egui::{Color32, RichText, TextEdit, TextStyle, Ui};
-
 use crate::{
     cipher_panel::{CipherFrame, CipherInterface},
     code_panel::{CodeFrame, CodeInterface},
-    ui_elements::{error_text, text_manip_menu},
+    ui_elements::{text_manip_menu, UiElements},
 };
+use ciphers::ids::CipherId;
+use codes::ids::CodeId;
+use egui::{Color32, RichText, TextEdit, TextStyle, Ui};
 
 use super::Page;
 
@@ -160,7 +159,7 @@ impl IOPanel {
 
         if !errors.is_empty() {
             ui.add_space(24.0);
-            ui.label(error_text(errors));
+            ui.error_text(errors);
         }
     }
 }

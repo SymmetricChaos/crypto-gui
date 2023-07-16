@@ -1,8 +1,6 @@
-use codes::binary_to_text::pgp_words::PgpWords;
-
-use crate::ui_elements::{binary_to_text_input_mode, fill_code_columns};
-
 use super::CodeFrame;
+use crate::ui_elements::UiElements;
+use codes::binary_to_text::pgp_words::PgpWords;
 
 pub struct PgpWordsFrame {
     code: PgpWords,
@@ -19,9 +17,9 @@ impl Default for PgpWordsFrame {
 impl CodeFrame for PgpWordsFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.add_space(16.0);
-        binary_to_text_input_mode(ui, &mut self.code.mode);
+        ui.binary_to_text_input_mode(&mut self.code.mode);
         ui.add_space(16.0);
-        fill_code_columns(64, 4, ui, Box::new(self.code.chars_codes()));
+        ui.fill_code_columns(64, 4, Box::new(self.code.chars_codes()));
     }
 
     fn code(&self) -> &dyn codes::traits::Code {

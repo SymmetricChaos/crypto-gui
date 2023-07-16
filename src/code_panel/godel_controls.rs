@@ -1,4 +1,4 @@
-use crate::ui_elements::{fill_code_columns, subheading};
+use crate::ui_elements::UiElements;
 
 use super::CodeFrame;
 
@@ -20,7 +20,7 @@ impl Default for GodelFrame {
 impl CodeFrame for GodelFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.group(|ui| {
-            ui.label(subheading("Mode"));
+            ui.subheading("Mode");
             ui.selectable_value(&mut self.code.mode, IOMode::Letter, "Letter");
             ui.selectable_value(&mut self.code.mode, IOMode::Word, "Word");
         });
@@ -35,7 +35,7 @@ impl CodeFrame for GodelFrame {
                 {
                     self.code.set_letter_map();
                 };
-                fill_code_columns(16, 5, ui, Box::new(self.code.maps.codes_chars()));
+                ui.fill_code_columns(16, 5, Box::new(self.code.maps.codes_chars()));
             }
             IOMode::Word => {
                 ui.label("Word Mode: Provide any number of words or phrases separated by commas. Codes will be assigned to each word or phrase in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
@@ -45,7 +45,7 @@ impl CodeFrame for GodelFrame {
                 {
                     self.code.set_word_map();
                 };
-                fill_code_columns(16, 5, ui, Box::new(self.code.maps.codes_words()));
+                ui.fill_code_columns(16, 5, Box::new(self.code.maps.codes_words()));
             }
             IOMode::Integer => {
                 ui.label("<<<ERROR INTEGER MODE IS NOT DEFINED FOR GODEL CODE>>>");

@@ -1,4 +1,4 @@
-use crate::ui_elements::mono;
+use crate::ui_elements::UiElements;
 
 use super::CodeFrame;
 use codes::ecc::damm::{Damm, DAMM_TABLE};
@@ -35,13 +35,13 @@ impl CodeFrame for DammFrame {
             .show(ui, |ui| {
                 ui.label(" ");
                 for digit in 0..10 {
-                    ui.label(mono(digit).strong());
+                    ui.mono_strong(digit);
                 }
                 ui.end_row();
                 for (n, row) in DAMM_TABLE.iter().enumerate() {
-                    ui.label(mono(n).strong());
+                    ui.mono_strong(n);
                     for digit in row {
-                        ui.label(mono(digit));
+                        ui.mono(digit);
                     }
                     ui.end_row();
                 }

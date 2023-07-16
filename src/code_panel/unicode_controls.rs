@@ -1,9 +1,7 @@
+use super::CodeFrame;
+use crate::ui_elements::UiElements;
 use codes::text_standards::unicode::{Unicode, UnicodeEncoding};
 use utils::text_functions::NumRep;
-
-use crate::ui_elements::subheading;
-
-use super::CodeFrame;
 
 pub struct UnicodeFrame {
     code: Unicode,
@@ -20,7 +18,7 @@ impl Default for UnicodeFrame {
 impl CodeFrame for UnicodeFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.group(|ui| {
-            ui.label(subheading("Encoding"));
+            ui.subheading("Encoding");
             ui.horizontal(|ui| {
                 ui.selectable_value(&mut self.code.encoding, UnicodeEncoding::Utf8, "UTF-8");
                 ui.selectable_value(&mut self.code.encoding, UnicodeEncoding::Utf16, "UTF-16");
@@ -35,7 +33,7 @@ impl CodeFrame for UnicodeFrame {
         };
 
         ui.group(|ui| {
-            ui.label(subheading("Representation"));
+            ui.subheading("Representation");
             ui.horizontal(|ui| {
                 ui.selectable_value(&mut self.code.mode, NumRep::Binary, "Binary");
                 ui.selectable_value(&mut self.code.mode, NumRep::Octal, "Octal");

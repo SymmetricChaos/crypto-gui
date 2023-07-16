@@ -1,5 +1,5 @@
 use super::CodeFrame;
-use crate::ui_elements::subheading;
+use crate::ui_elements::UiElements;
 use codes::text_standards::ascii::{Ascii, DisplayMode};
 use egui::RichText;
 
@@ -18,7 +18,7 @@ impl Default for AsciiFrame {
 impl CodeFrame for AsciiFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.group(|ui| {
-            ui.label(subheading("Representation"));
+            ui.subheading("Representation");
             ui.horizontal(|ui| {
                 ui.selectable_value(&mut self.code.mode, DisplayMode::EightBitBinary, "8-Bit");
                 ui.selectable_value(&mut self.code.mode, DisplayMode::SevenBitBinary, "7-Bit");

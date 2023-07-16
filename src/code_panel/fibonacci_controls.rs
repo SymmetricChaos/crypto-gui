@@ -1,4 +1,4 @@
-use crate::ui_elements::{fill_code_columns, subheading};
+use crate::ui_elements::UiElements;
 
 use super::CodeFrame;
 use codes::{mathematical::fibonacci::FibonacciCode, traits::IOMode};
@@ -19,7 +19,7 @@ impl Default for FibonacciCodeFrame {
 impl CodeFrame for FibonacciCodeFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.group(|ui| {
-            ui.label(subheading("Mode"));
+            ui.subheading("Mode");
             ui.selectable_value(&mut self.code.mode, IOMode::Integer, "Integer");
             ui.selectable_value(&mut self.code.mode, IOMode::Letter, "Letter");
             ui.selectable_value(&mut self.code.mode, IOMode::Word, "Word");
@@ -35,7 +35,7 @@ impl CodeFrame for FibonacciCodeFrame {
                 {
                     self.code.set_letter_map();
                 };
-                fill_code_columns(16, 5, ui, Box::new(self.code.maps.chars_codes()));
+                ui.fill_code_columns(16, 5, Box::new(self.code.maps.chars_codes()));
             }
             IOMode::Word => {
                 ui.label("Word Mode: Provide any number of words or phrases separated by commas. Fibonacci codes will be assigned to each word or phrase in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
@@ -45,12 +45,12 @@ impl CodeFrame for FibonacciCodeFrame {
                 {
                     self.code.set_word_map();
                 };
-                fill_code_columns(16, 5, ui, Box::new(self.code.maps.words_codes()));
+                ui.fill_code_columns(16, 5, Box::new(self.code.maps.words_codes()));
             }
             IOMode::Integer => {
                 ui.label("Integer Mode: Get the Fibonacci coding for any list of positive integers or decode any string of 0s and 1s into a list of positive integers. A sample list of encodings it provided below.");
                 let pairs = (1..=64).map(|n| (n.to_string(), self.code.integer_code.encode_u32(n)));
-                fill_code_columns(16, 5, ui, Box::new(pairs));
+                ui.fill_code_columns(16, 5, Box::new(pairs));
             }
         }
     }

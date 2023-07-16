@@ -21,6 +21,13 @@ pub trait UiElements {
     fn randomize_reset(&mut self, cipher_frame: &mut dyn CipherFrame);
     // Slider variant that has a position at some character index of a &str
     fn string_slider(&mut self, string: &str, position: &mut usize) -> Response;
+    fn fill_code_columns<T: Display, S: Display>(
+        &mut self,
+        nrows: usize,
+        ncols: usize,
+        iter: Box<dyn Iterator<Item = (T, S)> + '_>,
+    );
+    fn binary_to_text_input_mode(&mut self, current_value: &mut BinaryToTextMode);
 }
 
 impl UiElements for Ui {
@@ -89,6 +96,34 @@ impl UiElements for Ui {
                 .speed(0.2),
         )
     }
+
+    fn fill_code_columns<T: Display, S: Display>(
+        &mut self,
+        nrows: usize,
+        ncols: usize,
+        iter: Box<dyn Iterator<Item = (T, S)> + '_>,
+    ) {
+        self.columns(ncols, |columns| {
+            let mut ctr = 0;
+            let mut col = 0;
+            for (c, code) in iter {
+                let pair = format!("{}  {} ", c, code);
+                columns[col].label(mono_strong(&pair).size(18.0));
+                ctr += 1;
+                if ctr % nrows == 0 {
+                    col += 1
+                }
+            }
+        })
+    }
+
+    fn binary_to_text_input_mode(&mut self, current_value: &mut BinaryToTextMode) {
+        self.label("Encoding Mode");
+        self.selectable_value(current_value, BinaryToTextMode::Hex, "Hex")
+            .on_hover_text("interpret input as hexcode");
+        self.selectable_value(current_value, BinaryToTextMode::Utf8, "UTF-8")
+            .on_hover_text("convert text to raw bytes");
+    }
 }
 
 pub fn subheading<T: ToString>(text: T) -> RichText {
@@ -125,20 +160,6 @@ pub fn randomize_reset(ui: &mut egui::Ui, cipher_frame: &mut dyn CipherFrame) {
     if ui.button("Reset").clicked() {
         cipher_frame.reset()
     }
-}
-
-pub fn text_manip_menu(ui: &mut Ui, text: &mut String) {
-    ui.menu_button("+", |ui| {
-        if ui.button("Remove Whitespace").clicked() {
-            *text = text.split_whitespace().collect();
-        }
-        if ui.button("UPPERCASE").clicked() {
-            *text = text.to_uppercase();
-        }
-        if ui.button("lowercase").clicked() {
-            *text = text.to_lowercase();
-        }
-    });
 }
 
 pub fn string_slider(ui: &mut Ui, string: &str, position: &mut usize) -> Response {
@@ -185,6 +206,20 @@ pub fn fill_code_columns<T: Display, S: Display>(
             if ctr % nrows == 0 {
                 col += 1
             }
+        }
+    });
+}
+
+pub fn text_manip_menu(ui: &mut Ui, text: &mut String) {
+    ui.menu_button("+", |ui| {
+        if ui.button("Remove Whitespace").clicked() {
+            *text = text.split_whitespace().collect();
+        }
+        if ui.button("UPPERCASE").clicked() {
+            *text = text.to_uppercase();
+        }
+        if ui.button("lowercase").clicked() {
+            *text = text.to_lowercase();
         }
     });
 }

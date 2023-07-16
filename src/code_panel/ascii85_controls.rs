@@ -1,5 +1,5 @@
 use super::CodeFrame;
-use crate::ui_elements::{binary_to_text_input_mode, fill_code_columns, subheading};
+use crate::ui_elements::{binary_to_text_input_mode, UiElements};
 use codes::binary_to_text::ascii85::{Ascii85, Ascii85Variant};
 
 pub struct Ascii85Frame {
@@ -17,7 +17,7 @@ impl Default for Ascii85Frame {
 impl CodeFrame for Ascii85Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.group(|ui| {
-            ui.label(subheading("Variant"));
+            ui.subheading("Variant");
             ui.horizontal(|ui| {
                 ui.selectable_value(&mut self.code.variant, Ascii85Variant::Btoa, "btoa");
                 ui.selectable_value(&mut self.code.variant, Ascii85Variant::Adobe, "Adobe");
@@ -49,7 +49,7 @@ impl CodeFrame for Ascii85Frame {
         //     encode_file_and_save(ui, self, self.file.clone());
         // }
         ui.add_space(32.0);
-        fill_code_columns(17, 5, ui, Box::new(self.code.chars_codes()));
+        ui.fill_code_columns(17, 5, Box::new(self.code.chars_codes()));
     }
 
     fn code(&self) -> &dyn codes::traits::Code {

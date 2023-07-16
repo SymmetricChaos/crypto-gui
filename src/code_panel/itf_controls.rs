@@ -1,6 +1,6 @@
 use codes::{commercial::itf::Itf, traits::Code};
 
-use crate::ui_elements::{error_text, mono};
+use crate::ui_elements::UiElements;
 
 use super::CodeFrame;
 
@@ -24,8 +24,8 @@ impl CodeFrame for ItfFrame {
 
         ui.text_edit_singleline(&mut self.example);
         match self.code.encode(&self.example) {
-            Ok(bits) => ui.label(mono(bits)),
-            Err(e) => ui.label(error_text(e.inner())),
+            Ok(bits) => ui.mono(bits),
+            Err(e) => ui.error_text(e.inner()),
         };
     }
 

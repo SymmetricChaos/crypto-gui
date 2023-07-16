@@ -4,7 +4,7 @@ use codes::{
 };
 use itertools::Itertools;
 
-use crate::ui_elements::{error_text, mono};
+use crate::ui_elements::UiElements;
 
 use super::CodeFrame;
 
@@ -54,7 +54,7 @@ fn handle_example(text: &str) -> Result<String, CodeError> {
 impl CodeFrame for UpcFrame {
     fn ui(&mut self, ui: &mut eframe::egui::Ui, _errors: &mut String) {
         // ui.group(|ui| {
-        //     ui.label(subheading("Variant"));
+        //     ui.subheading("Variant");
         //     ui.horizontal(|ui| {
         //         ui.selectable_value(&mut self.code.variant, , );
 
@@ -66,30 +66,30 @@ impl CodeFrame for UpcFrame {
         // };
 
         ui.text_edit_singleline(&mut self.example);
-        // ui.label(mono("036000291452"));
+        // ui.mono("036000291452");
         match handle_example(&self.example) {
             Ok(digits) => {
                 ui.horizontal(|ui| {
-                    ui.label(mono(digits.chars().join(" ")));
+                    ui.mono(digits.chars().join(" "));
 
-                    ui.label(mono(" (digits)"));
+                    ui.mono(" (digits)");
                 });
-                ui.label(mono("1 3 1 3 1 3 1 3 1 3 1 3 (weights)"));
+                ui.mono("1 3 1 3 1 3 1 3 1 3 1 3 (weights)");
                 ui.horizontal(|ui| {
-                    ui.label(mono(
+                    ui.mono(
                         digits
                             .chars()
                             .map(|c| c.to_digit(10).unwrap())
                             .zip([1, 3].into_iter().cycle())
                             .map(|(a, b)| (a * b) % 10)
                             .join(" "),
-                    ));
-                    ui.label(mono("(weighted values)"));
+                    );
+                    ui.mono("(weighted values)");
                 });
                 ui.label("The weighted sum is always a multiple of ten due to the check digit.");
             }
             Err(e) => {
-                ui.label(error_text(e.inner()));
+                ui.error_text(e.inner());
             }
         }
     }

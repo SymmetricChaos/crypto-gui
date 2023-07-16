@@ -1,5 +1,5 @@
 use super::CodeFrame;
-use crate::ui_elements::{fill_code_columns, subheading};
+use crate::ui_elements::UiElements;
 use codes::other::block::BlockCode;
 use egui::TextEdit;
 use itertools::Itertools;
@@ -23,7 +23,7 @@ impl Default for BlockCodeFrame {
 
 impl CodeFrame for BlockCodeFrame {
     fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
-        ui.label(subheading("Alphabet"));
+        ui.subheading("Alphabet");
         if ui
             .add(TextEdit::singleline(&mut self.alphabet_string))
             .changed()
@@ -32,7 +32,7 @@ impl CodeFrame for BlockCodeFrame {
         };
         ui.add_space(16.0);
 
-        ui.label(subheading("Symbols"));
+        ui.subheading("Symbols");
         if ui
             .add(TextEdit::singleline(&mut self.symbol_string))
             .changed()
@@ -59,7 +59,7 @@ impl CodeFrame for BlockCodeFrame {
             }
         });
         ui.add_space(16.0);
-        fill_code_columns(24, 6, ui, self.code.chars_codes());
+        ui.fill_code_columns(24, 6, self.code.chars_codes());
     }
 
     fn code(&self) -> &dyn codes::traits::Code {

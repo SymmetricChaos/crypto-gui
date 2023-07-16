@@ -1,9 +1,7 @@
+use super::CodeFrame;
+use crate::ui_elements::UiElements;
 use codes::ecc::luhn::LuhnAlgorithm;
 use egui::Slider;
-
-use crate::ui_elements::error_text;
-
-use super::CodeFrame;
 
 pub struct LuhnAlgorithmFrame {
     code: LuhnAlgorithm,
@@ -23,7 +21,7 @@ impl CodeFrame for LuhnAlgorithmFrame {
             ui.label("Modulus");
             ui.add(Slider::new(&mut self.code.modulus, 2..=36).step_by(2.0));
             if self.code.modulus % 2 != 0 {
-                ui.label(error_text("modulus must be even"));
+                ui.error_text("modulus must be even");
             }
         });
     }

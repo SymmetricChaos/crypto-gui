@@ -1,6 +1,6 @@
 use codes::text_standards::spelling_alphabet::{SpellingAlphabet, SpellingAlphabetMode};
 
-use crate::ui_elements::{fill_code_columns, subheading};
+use crate::ui_elements::UiElements;
 
 use super::CodeFrame;
 
@@ -19,7 +19,7 @@ impl Default for SpellingAlphabetFrame {
 impl CodeFrame for SpellingAlphabetFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.group(|ui| {
-            ui.label(subheading("Alphabet"));
+            ui.subheading("Alphabet");
             ui.horizontal(|ui| {
                 ui.selectable_value(
                     &mut self.code.variant,
@@ -81,7 +81,7 @@ impl CodeFrame for SpellingAlphabetFrame {
             SpellingAlphabetMode::Uka1904 => ui.label("This very early standard from the UK Army Signalling Regulations in 1904 is unusual in several ways. The non-word 'ACK' is used for A, rhyming words EDDY and FREDDY are both present, EMMA and ESSES do not start with the letter they represent."),
         };
         ui.add_space(16.0);
-        fill_code_columns(9, 4, ui, Box::new(self.code.chars_codes()));
+        ui.fill_code_columns(9, 4, Box::new(self.code.chars_codes()));
     }
 
     fn code(&self) -> &dyn codes::traits::Code {

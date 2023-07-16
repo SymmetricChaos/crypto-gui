@@ -1,10 +1,8 @@
-// use crate::attack_panel::AttackInterface;
 use crate::cipher_panel::CipherInterface;
 use crate::code_panel::CodeInterface;
-use crate::ui_elements::{mono_strong, subheading};
-// use crate::ids::AttackId;
 use crate::pages::io_panel::IOPanel;
 use crate::pages::{Page, TextPrepPage};
+use crate::ui_elements::mono_strong;
 use ciphers::ids::CipherId;
 use codes::ids::CodeId;
 use eframe::egui;
@@ -351,10 +349,10 @@ impl ClassicCrypto {
             ui.label( RichText::new("Classical Cryptography").heading().strong());
             ui.label("The era of classical cryptography dates back to at least the invention of written language. In societies with low literacy writing itself was often a secure form of encryption as it was incomprehensible to most people. The era ends in the middle of the 20th century with Claude Shannon's publication of the paper 'Communication Theory of Secrecy Systems' at Bell Labs which established the modern theory of cryptography and contained and early mathematics proof of the security of an encryption system, the one-time pad. The pre-modern ciphers presented here were mostly based on an intuitive sense of what would be difficult for the enemy to decipher and limitations of what the person encrypting the message could accomplish by hand or with a simple tool. This changed slightly in the early 20th century when improvements in engineering caused the rise of electromechanical devices, such as the famous Enigma Mahchine, that could rapidly perform encryption not feasible to do by hand.");
             ui.add_space(16.0);
-            ui.label(subheading("A Note on the Terms Cipher and Code").strong());
+            ui.label(RichText::from("A Note on the Terms Cipher and Code").size(16.0).strong());
             ui.label("No strong distinction is made in literature between a 'cipher' and a 'code' in this era. However this project adopts the modern convention that a cipher has a changeable key and a code does not. That is: to understand a cipher one must know both the method as some secret additional information while a code can be read by anyone who knows the method of encoding.");
             ui.add_space(16.0);
-            ui.label(subheading("Supported Text Characters").strong());
+            ui.label(RichText::from("Supported Text Characters").size(16.0).strong());
             ui.label("Most Latin alphabets are supported by the site.\n\nIt is important to note that all ciphers operated on Rust's character type which represents a single Unicode codepoint. Not all graphemes are formed from single code points. Text can be normalized on the Text Prep page.");
         });
     }
