@@ -16,7 +16,7 @@ pub struct HuttonFrame {
     cipher: Hutton,
     alphabet_string: String,
     password_string: String,
-    keyword: String,
+    keyword_string: String,
     example: String,
     example_version: HuttonVersion,
     example_password_string: String,
@@ -33,7 +33,7 @@ impl Default for HuttonFrame {
             cipher: Default::default(),
             alphabet_string: Alphabet::BasicLatin.into(),
             password_string: Default::default(),
-            keyword: Default::default(),
+            keyword_string: Default::default(),
             example: String::from("EXAMPLE"),
             example_version: HuttonVersion::V1,
             example_password_string: String::from("TEST"),
@@ -88,8 +88,11 @@ impl CipherFrame for HuttonFrame {
 
         ui.subheading("Alphabet");
         if ui.control_string(&mut self.alphabet_string).changed() {
-            self.cipher.assign_key(&self.keyword, &self.alphabet_string);
+            self.cipher
+                .assign_key(&self.keyword_string, &self.alphabet_string);
             self.cipher.assign_password(&self.password_string);
+            filter_string(&mut self.password_string, &self.alphabet_string);
+            filter_string(&mut self.keyword_string, &self.alphabet_string);
         }
 
         ui.add_space(16.0);
@@ -102,19 +105,23 @@ impl CipherFrame for HuttonFrame {
         ui.add_space(8.0);
         ui.subheading("Password");
         if ui.control_string(&mut self.password_string).changed() {
+            filter_string(&mut self.password_string, &self.alphabet_string);
             self.cipher.assign_password(&self.password_string)
         }
 
         ui.add_space(8.0);
         ui.subheading("Keyword");
-        if ui.control_string(&mut self.keyword).changed() {
-            self.cipher.assign_key(&self.keyword, &self.alphabet_string);
+        if ui.control_string(&mut self.keyword_string).changed() {
+            filter_string(&mut self.keyword_string, &self.alphabet_string);
+            self.cipher
+                .assign_key(&self.keyword_string, &self.alphabet_string);
             self.cipher.assign_password(&self.password_string);
         }
 
         ui.add_space(16.0);
 
-        ui.collapsing("Step-by-Step Example", |ui| {
+        ui.group(|ui| {
+            ui.subheading("Example");
             ui.label("Alphabet");
             ui.false_control_string(Alphabet::BasicLatin);
 
@@ -169,8 +176,9 @@ impl CipherFrame for HuttonFrame {
         let mut rng = thread_rng();
         self.password_string = shuffled_str(&self.alphabet_string, &mut rng);
         self.cipher.assign_password(&self.password_string);
-        self.keyword = shuffled_str(&self.alphabet_string, &mut rng);
-        self.cipher.assign_key(&self.keyword, &self.alphabet_string);
+        self.keyword_string = shuffled_str(&self.alphabet_string, &mut rng);
+        self.cipher
+            .assign_key(&self.keyword_string, &self.alphabet_string);
     }
 
     fn reset(&mut self) {
