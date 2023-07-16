@@ -75,6 +75,7 @@ impl CipherFrame for PlayfairFrame {
 
         ui.subheading("Keyword");
         if ui.control_string(&mut self.key_string).changed() {
+            filter_string(&mut self.key_string, &self.alphabet_string);
             self.cipher
                 .assign_key(&self.key_string, &self.alphabet_string)
         }

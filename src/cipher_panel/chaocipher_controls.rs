@@ -22,8 +22,6 @@ pub struct ChaocipherFrame {
     example: String,
     example_left: VecString,
     example_right: VecString,
-    // example_left_string: String,
-    // example_right_string: String,
     example_output: String,
 }
 
@@ -36,8 +34,6 @@ impl Default for ChaocipherFrame {
             example: String::from("EXAMPLE"),
             example_left: VecString::from(Alphabet::BasicLatin),
             example_right: VecString::from(Alphabet::BasicLatin),
-            // example_left_string: String::from(Alphabet::BasicLatin),
-            // example_right_string: String::from(Alphabet::BasicLatin),
             example_output: String::new(),
         }
     }
@@ -59,7 +55,9 @@ impl CipherFrame for ChaocipherFrame {
         }
         ui.add_space(16.0);
 
-        ui.collapsing("Step-by-Step Example", |ui| {
+        ui.group(|ui| {
+            ui.subheading("Step-by-Step Example");
+            ui.add_space(4.0);
             ui.label("Plaintext");
             if ui.control_string(&mut self.example).changed() {
                 filter_string(&mut self.example, Alphabet::BasicLatin.into())
@@ -76,10 +74,10 @@ impl CipherFrame for ChaocipherFrame {
                 }
             }
             ui.add_space(4.0);
-            ui.label(format!("Left:  {}", self.example_left.to_string()));
-            ui.label(format!("Right: {}", self.example_left.to_string()));
+            ui.mono(format!("Left:  {}", self.example_left.to_string()));
+            ui.mono(format!("Right: {}", self.example_left.to_string()));
             ui.add_space(4.0);
-            ui.label(&self.example_output);
+            ui.mono(&self.example_output);
         });
     }
 

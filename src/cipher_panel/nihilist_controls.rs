@@ -74,6 +74,7 @@ impl CipherFrame for NihilistFrame {
 
         ui.subheading("Polybius Keyword");
         if ui.control_string(&mut self.polybius_key_string).changed() {
+            filter_string(&mut self.polybius_key_string, &self.alphabet_string);
             self.assign_keys();
         }
         ui.add_space(8.0);

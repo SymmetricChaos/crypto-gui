@@ -6,7 +6,10 @@ use ciphers::{
 };
 use egui::Ui;
 use rand::{thread_rng, Rng};
-use utils::{preset_alphabet::Alphabet, text_functions::random_sample_replace};
+use utils::{
+    preset_alphabet::Alphabet,
+    text_functions::{filter_string, random_sample_replace},
+};
 
 #[derive(Default)]
 pub struct PortaFrame {
@@ -21,6 +24,7 @@ impl CipherFrame for PortaFrame {
 
         ui.subheading("Keyword");
         if ui.control_string(&mut self.key_string).changed() {
+            filter_string(&mut self.key_string, Alphabet::BasicLatin.slice());
             match self.cipher.assign_key(&self.key_string) {
                 Ok(_) => (),
                 Err(e) => {
