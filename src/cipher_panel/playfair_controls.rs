@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, mono, randomize_reset, string_slider, subheading};
+use crate::ui_elements::UiElements;
 use ciphers::{playfair::Playfair, Cipher};
 use egui::Ui;
 use rand::{rngs::StdRng, SeedableRng};
@@ -28,11 +28,11 @@ impl Default for PlayfairFrame {
 
 impl CipherFrame for PlayfairFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
         ui.group(|ui| {
-            ui.label(subheading("Common Alphabets"));
+            ui.subheading("Common Alphabets");
             ui.horizontal(|ui| {
                 for (name, alphabet) in [
                     ("No C", Alphabet::BasicLatinNoC),
@@ -53,15 +53,18 @@ impl CipherFrame for PlayfairFrame {
 
         ui.add_space(10.0);
 
-        ui.label(subheading("Alphabet"));
-        if control_string(ui, &mut self.alphabet_string).changed() {
+        ui.subheading("Alphabet");
+        if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher
                 .assign_key(&self.key_string, &self.alphabet_string);
         }
         ui.add_space(8.0);
 
-        ui.label(subheading("Spacer Character"));
-        if string_slider(ui, &self.alphabet_string, &mut self.spacer_position).changed() {
+        ui.subheading("Spacer Character");
+        if ui
+            .string_slider(&self.alphabet_string, &mut self.spacer_position)
+            .changed()
+        {
             self.cipher.spacer = self
                 .alphabet_string
                 .chars()
@@ -70,20 +73,20 @@ impl CipherFrame for PlayfairFrame {
         }
         ui.add_space(8.0);
 
-        ui.label(subheading("Keyword"));
-        if control_string(ui, &mut self.key_string).changed() {
+        ui.subheading("Keyword");
+        if ui.control_string(&mut self.key_string).changed() {
             self.cipher
                 .assign_key(&self.key_string, &self.alphabet_string)
         }
         ui.add_space(16.0);
 
         ui.horizontal(|ui| {
-            ui.label(subheading("Grid"));
+            ui.subheading("Grid");
             if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
                 ui.output_mut(|o| o.copied_text = self.cipher.to_string())
             }
         });
-        ui.label(mono(self.cipher.to_string()));
+        ui.mono(self.cipher.to_string());
     }
 
     fn cipher(&self) -> &dyn Cipher {

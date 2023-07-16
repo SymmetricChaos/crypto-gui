@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, randomize_reset, subheading};
+use crate::ui_elements::UiElements;
 use ciphers::{
     polyalphabetic::{
         chaocipher::{left_permute, right_permute},
@@ -45,23 +45,23 @@ impl Default for ChaocipherFrame {
 
 impl CipherFrame for ChaocipherFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.label(subheading("Left Alphabet"));
-        if control_string(ui, &mut self.left_string).changed() {
+        ui.subheading("Left Alphabet");
+        if ui.control_string(&mut self.left_string).changed() {
             self.cipher.assign_left(&self.left_string)
         }
 
-        ui.label(subheading("Right Alphabet"));
-        if control_string(ui, &mut self.right_string).changed() {
+        ui.subheading("Right Alphabet");
+        if ui.control_string(&mut self.right_string).changed() {
             self.cipher.assign_right(&self.right_string)
         }
         ui.add_space(16.0);
 
         ui.collapsing("Step-by-Step Example", |ui| {
             ui.label("Plaintext");
-            if control_string(ui, &mut self.example).changed() {
+            if ui.control_string(&mut self.example).changed() {
                 filter_string(&mut self.example, Alphabet::BasicLatin.into())
             }
 

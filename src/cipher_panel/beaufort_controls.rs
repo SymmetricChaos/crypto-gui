@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, randomize_reset, subheading};
+use crate::ui_elements::UiElements;
 use ciphers::{
     polyalphabetic::{Beaufort, PolyMode},
     Cipher,
@@ -27,11 +27,11 @@ impl Default for BeaufortFrame {
 
 impl CipherFrame for BeaufortFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.label(subheading("Alphabet"));
-        if control_string(ui, &mut self.alphabet_string).changed() {
+        ui.subheading("Alphabet");
+        if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher.assign_alphabet(&self.alphabet_string);
             for keyword in self.cipher.keywords.iter_mut() {
                 filter_string(keyword, &self.alphabet_string)
@@ -40,7 +40,7 @@ impl CipherFrame for BeaufortFrame {
         ui.add_space(10.0);
 
         ui.group(|ui| {
-            ui.label(subheading("Mode"));
+            ui.subheading("Mode");
             ui.horizontal(|ui| {
                 ui.selectable_value(&mut self.cipher.mode, PolyMode::CylicKey, "Cyclic");
                 ui.selectable_value(&mut self.cipher.mode, PolyMode::Autokey, "Autokey");
@@ -57,9 +57,9 @@ impl CipherFrame for BeaufortFrame {
 
         ui.horizontal(|ui| {
             if self.cipher.multikey {
-                ui.label(subheading("Keywords"));
+                ui.subheading("Keywords");
             } else {
-                ui.label(subheading("Keyword "));
+                ui.subheading("Keyword ");
             }
 
             ui.separator();
@@ -81,7 +81,7 @@ impl CipherFrame for BeaufortFrame {
 
         if self.cipher.multikey {
             for keyword in self.cipher.keywords.iter_mut() {
-                if control_string(ui, keyword).changed() {
+                if ui.control_string(keyword).changed() {
                     filter_string(keyword, &self.alphabet_string)
                 }
             }

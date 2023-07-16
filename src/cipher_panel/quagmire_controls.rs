@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, error_text, randomize_reset, string_slider, subheading};
+use crate::ui_elements::UiElements;
 use ciphers::{
     polyalphabetic::{Quagmire, QuagmireVersion},
     Cipher,
@@ -32,17 +32,17 @@ impl Default for QuagmireFrame {
 
 impl CipherFrame for QuagmireFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.label(subheading("Alphabet"));
-        if control_string(ui, &mut self.alphabet_string).changed() {
+        ui.subheading("Alphabet");
+        if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher.assign_alphabet(&self.alphabet_string)
         }
 
         ui.add_space(16.0);
         ui.group(|ui| {
-            ui.label(subheading("Version"));
+            ui.subheading("Version");
             ui.horizontal(|ui| {
                 ui.selectable_value(&mut self.cipher.version, QuagmireVersion::V1, "V1");
                 ui.selectable_value(&mut self.cipher.version, QuagmireVersion::V2, "V2");
@@ -52,17 +52,20 @@ impl CipherFrame for QuagmireFrame {
         });
 
         ui.add_space(16.0);
-        ui.label(subheading("Indicator Keyword"));
-        if control_string(ui, &mut self.ind_key_string).changed() {
+        ui.subheading("Indicator Keyword");
+        if ui.control_string(&mut self.ind_key_string).changed() {
             match self.cipher.assign_ind_key(&self.ind_key_string) {
                 Ok(_) => ui.label(format!("{:?}", self.cipher.ind_key())),
-                Err(e) => ui.label(error_text(e.inner())),
+                Err(e) => ui.error_text(e),
             };
         };
 
         ui.add_space(8.0);
-        ui.label(subheading("Indicator Letter"));
-        if string_slider(ui, &self.alphabet_string, &mut self.indicator_position).changed() {
+        ui.subheading("Indicator Letter");
+        if ui
+            .string_slider(&self.alphabet_string, &mut self.indicator_position)
+            .changed()
+        {
             self.cipher.indicator = self
                 .alphabet_string
                 .chars()
@@ -71,15 +74,15 @@ impl CipherFrame for QuagmireFrame {
         }
 
         ui.add_space(16.0);
-        ui.label(subheading("Key #1"));
-        if control_string(ui, &mut self.pt_key_string).changed() {
+        ui.subheading("Key #1");
+        if ui.control_string(&mut self.pt_key_string).changed() {
             self.cipher.assign_pt_key(&self.pt_key_string)
         }
 
         if self.cipher.version == QuagmireVersion::V4 {
             ui.add_space(16.0);
-            ui.label(subheading("Key #2"));
-            if control_string(ui, &mut self.ct_key_string).changed() {
+            ui.subheading("Key #2");
+            if ui.control_string(&mut self.ct_key_string).changed() {
                 self.cipher.assign_ct_key(&self.ct_key_string)
             }
         }

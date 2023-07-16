@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, mono, randomize_reset, subheading};
+use crate::ui_elements::UiElements;
 use ciphers::{polybius::PolybiusCube, Cipher};
 use egui::Ui;
 use rand::thread_rng;
@@ -25,37 +25,37 @@ impl Default for PolybiusCubeFrame {
 
 impl CipherFrame for PolybiusCubeFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
         ui.add_space(16.0);
-        ui.label(subheading("Alphabet"));
-        if control_string(ui, &mut self.alphabet_string).changed() {
+        ui.subheading("Alphabet");
+        if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher
                 .assign_grid(&self.alphabet_string, &self.key_string)
         }
 
         ui.add_space(16.0);
-        ui.label(subheading("Keyword"));
-        if control_string(ui, &mut self.key_string).changed() {
+        ui.subheading("Keyword");
+        if ui.control_string(&mut self.key_string).changed() {
             filter_string(&mut self.key_string, &self.alphabet_string);
             self.cipher
                 .assign_grid(&self.alphabet_string, &self.key_string)
         }
 
         ui.add_space(16.0);
-        ui.label(subheading("Labels"));
-        if control_string(ui, &mut self.label_string).changed() {
+        ui.subheading("Labels");
+        if ui.control_string(&mut self.label_string).changed() {
             self.cipher.assign_labels(&self.label_string);
         }
 
         ui.add_space(16.0);
-        ui.label(subheading("Grid"));
+        ui.subheading("Grid");
         let grids = self.cipher.show_grids();
         ui.horizontal(|ui| {
-            ui.label(mono(&grids[0]));
-            ui.label(mono(&grids[1]));
-            ui.label(mono(&grids[2]));
+            ui.mono(&grids[0]);
+            ui.mono(&grids[1]);
+            ui.mono(&grids[2]);
         });
     }
 

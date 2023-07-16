@@ -10,7 +10,7 @@ use itertools::Itertools;
 use rand::{seq::SliceRandom, thread_rng};
 use utils::grid::{Grid, Symbol};
 
-use crate::ui_elements::{mono, randomize_reset};
+use crate::ui_elements::UiElements;
 
 use super::CipherFrame;
 
@@ -27,7 +27,7 @@ fn cell_button_char(grille: &Grid<char>, x: usize, y: usize, ui: &mut eframe::eg
 
 impl CipherFrame for Rs44Frame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
         ui.label("Start Column")
@@ -168,7 +168,7 @@ impl CipherFrame for Rs44Frame {
                     }
                     ui.label(self.cipher.ylabels[row]);
                     for s in self.cipher.stencil.get_row(row) {
-                        ui.label(mono(s.to_char()).size(24.0));
+                        ui.label(RichText::new(s.to_char()).monospace().size(24.0));
                     }
                     ui.end_row();
                 }

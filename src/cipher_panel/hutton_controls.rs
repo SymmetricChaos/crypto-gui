@@ -1,10 +1,10 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, mono, randomize_reset, subheading};
+use crate::ui_elements::UiElements;
 use ciphers::{
     polyalphabetic::{Hutton, HuttonVersion},
     Cipher,
 };
-use egui::{Color32, Ui};
+use egui::Ui;
 use rand::thread_rng;
 use utils::{
     preset_alphabet::Alphabet,
@@ -83,31 +83,31 @@ impl HuttonFrame {
 
 impl CipherFrame for HuttonFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.label(subheading("Alphabet"));
-        if control_string(ui, &mut self.alphabet_string).changed() {
+        ui.subheading("Alphabet");
+        if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher.assign_key(&self.keyword, &self.alphabet_string);
             self.cipher.assign_password(&self.password_string);
         }
 
         ui.add_space(16.0);
-        ui.label(subheading("Version"));
+        ui.subheading("Version");
         ui.horizontal(|ui| {
             ui.selectable_value(&mut self.example_version, HuttonVersion::V1, "V1");
             ui.selectable_value(&mut self.example_version, HuttonVersion::V2, "V2");
         });
 
         ui.add_space(8.0);
-        ui.label(subheading("Password"));
-        if control_string(ui, &mut self.password_string).changed() {
+        ui.subheading("Password");
+        if ui.control_string(&mut self.password_string).changed() {
             self.cipher.assign_password(&self.password_string)
         }
 
         ui.add_space(8.0);
-        ui.label(subheading("Keyword"));
-        if control_string(ui, &mut self.keyword).changed() {
+        ui.subheading("Keyword");
+        if ui.control_string(&mut self.keyword).changed() {
             self.cipher.assign_key(&self.keyword, &self.alphabet_string);
             self.cipher.assign_password(&self.password_string);
         }
@@ -116,7 +116,7 @@ impl CipherFrame for HuttonFrame {
 
         ui.collapsing("Step-by-Step Example", |ui| {
             ui.label("Alphabet");
-            ui.label(mono(Alphabet::BasicLatin).background_color(Color32::BLACK));
+            ui.false_control_string(Alphabet::BasicLatin);
 
             ui.label("Version");
             ui.horizontal(|ui| {
@@ -125,7 +125,10 @@ impl CipherFrame for HuttonFrame {
             });
 
             ui.label("Password");
-            if control_string(ui, &mut self.example_password_string).changed() {
+            if ui
+                .control_string(&mut self.example_password_string)
+                .changed()
+            {
                 filter_string(
                     &mut self.example_password_string,
                     Alphabet::BasicLatin.into(),
@@ -139,14 +142,14 @@ impl CipherFrame for HuttonFrame {
             }
             ui.add_space(8.0);
             ui.label("Keyword");
-            if control_string(ui, &mut self.example_keyword).changed() {
+            if ui.control_string(&mut self.example_keyword).changed() {
                 filter_string(&mut self.example_keyword, Alphabet::BasicLatin.into());
                 self.example_keyed_alphabet =
                     VecString::keyed_alphabet(&self.example_keyword, Alphabet::BasicLatin.into());
             }
 
             ui.label("Plaintext");
-            if control_string(ui, &mut self.example).changed() {
+            if ui.control_string(&mut self.example).changed() {
                 filter_string(&mut self.example, Alphabet::BasicLatin.into())
             }
             if ui.button("Step").clicked() {
@@ -154,7 +157,7 @@ impl CipherFrame for HuttonFrame {
             }
             ui.label(self.example_keyed_alphabet.to_string());
             ui.add_space(4.0);
-            control_string(ui, &mut self.example_output);
+            ui.control_string(&mut self.example_output);
         });
     }
 

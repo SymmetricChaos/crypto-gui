@@ -1,7 +1,7 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, mono, randomize_reset, subheading};
+use crate::ui_elements::UiElements;
 use ciphers::{polybius::B64, Cipher};
-use egui::{Color32, Ui};
+use egui::Ui;
 use rand::{thread_rng, Rng};
 use utils::{
     preset_alphabet::Alphabet,
@@ -39,34 +39,34 @@ impl B64Frame {
 
 impl CipherFrame for B64Frame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.label(subheading("Base64 Alphabet"));
-        ui.label(mono(Alphabet::Base64.slice()).background_color(Color32::BLACK));
+        ui.subheading("Base64 Alphabet");
+        ui.false_control_string(Alphabet::Base64.slice());
 
-        ui.label(subheading("Polybius Keyword"));
-        if control_string(ui, &mut self.polybius_key_string).changed() {
+        ui.subheading("Polybius Keyword");
+        if ui.control_string(&mut self.polybius_key_string).changed() {
             self.assign_polybius_key();
         }
         ui.add_space(16.0);
 
         ui.horizontal(|ui| {
-            ui.label(subheading("Polybius Grid"));
+            ui.subheading("Polybius Grid");
             if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
                 ui.output_mut(|o| o.copied_text = self.cipher.polybius_grid())
             }
         });
-        ui.label(mono(self.cipher.polybius_grid()));
+        ui.mono(self.cipher.polybius_grid());
         ui.add_space(16.0);
 
-        ui.label(subheading("First Columnar Keyword"));
-        if control_string(ui, &mut self.columnar_key_string_1).changed() {
+        ui.subheading("First Columnar Keyword");
+        if ui.control_string(&mut self.columnar_key_string_1).changed() {
             self.assign_columnar_key1()
         }
         ui.add_space(8.0);
-        ui.label(subheading("Second Columnar Keyword"));
-        if control_string(ui, &mut self.columnar_key_string_2).changed() {
+        ui.subheading("Second Columnar Keyword");
+        if ui.control_string(&mut self.columnar_key_string_2).changed() {
             self.assign_columnar_key2()
         }
     }

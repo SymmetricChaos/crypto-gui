@@ -1,9 +1,6 @@
-use crate::ui_elements::control_string;
-use crate::ui_elements::mono;
-use crate::ui_elements::randomize_reset;
-use crate::ui_elements::subheading;
+use crate::ui_elements::UiElements;
 use ciphers::{polybius::StraddlingCheckerboard, Cipher};
-use egui::{DragValue, Ui};
+use egui::{DragValue, RichText, Ui};
 use rand::thread_rng;
 use utils::text_functions::shuffled_str;
 
@@ -25,10 +22,10 @@ impl Default for StraddlingCheckerboardFrame {
 
 impl CipherFrame for StraddlingCheckerboardFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
 
-        ui.label(subheading("Alphabet"));
-        if control_string(ui, &mut self.alphabet_string).changed() {
+        ui.subheading("Alphabet");
+        if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher.assign_alphabet(&self.alphabet_string)
         }
 
@@ -37,23 +34,23 @@ impl CipherFrame for StraddlingCheckerboardFrame {
         let gap1 = (self.cipher.gaps.0 + 1)..=9;
 
         ui.horizontal(|ui| {
-            ui.label(mono("First Gap"));
+            ui.mono("First Gap");
             ui.add(DragValue::new(&mut self.cipher.gaps.0).clamp_range(gap0));
         });
         ui.add_space(4.0);
         ui.horizontal(|ui| {
-            ui.label(mono("Second Gap"));
+            ui.mono("Second Gap");
             ui.add(DragValue::new(&mut self.cipher.gaps.1).clamp_range(gap1));
         });
 
         ui.add_space(16.0);
         ui.horizontal(|ui| {
-            ui.label(subheading("Checkerboard"));
+            ui.subheading("Checkerboard");
             if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
                 ui.output_mut(|o| o.copied_text = self.cipher.cipher_page())
             }
         });
-        ui.label(mono(self.cipher.cipher_page()).size(15.0));
+        ui.label(RichText::new(self.cipher.cipher_page()).size(15.0));
     }
 
     fn cipher(&self) -> &dyn Cipher {

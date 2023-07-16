@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, mono, randomize_reset, string_slider, subheading};
+use crate::ui_elements::{string_slider, UiElements};
 use ciphers::{playfair::FourSquare, Cipher};
 use egui::Ui;
 use rand::{rngs::StdRng, SeedableRng};
@@ -30,11 +30,11 @@ impl Default for FourSquareFrame {
 
 impl CipherFrame for FourSquareFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
         ui.group(|ui| {
-            ui.label(subheading("Common Alphabets"));
+            ui.subheading("Common Alphabets");
             ui.horizontal(|ui| {
                 for (name, alphabet) in [
                     ("No C", Alphabet::BasicLatinNoC),
@@ -59,16 +59,14 @@ impl CipherFrame for FourSquareFrame {
 
         ui.add_space(10.0);
 
-        ui.label(subheading("Alphabet"));
-        if control_string(ui, &mut self.alphabet_string).changed() {
+        ui.subheading("Alphabet");
+        if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher
                 .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
         }
         ui.add_space(16.0);
 
-        ui.label(subheading(
-            "Spacer Character\nInserted at end as padding if needed",
-        ));
+        ui.subheading("Spacer Character\nInserted at end as padding if needed");
         if string_slider(ui, &self.alphabet_string, &mut self.spacer_position).changed() {
             self.cipher.spacer = self
                 .alphabet_string
@@ -78,16 +76,16 @@ impl CipherFrame for FourSquareFrame {
         }
 
         ui.add_space(8.0);
-        ui.label(subheading("Keyword 1"));
-        if control_string(ui, &mut self.keyword_1).changed() {
+        ui.subheading("Keyword 1");
+        if ui.control_string(&mut self.keyword_1).changed() {
             filter_string(&mut self.keyword_1, &self.alphabet_string);
             self.cipher
                 .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string);
         }
 
         ui.add_space(8.0);
-        ui.label(subheading("Keyword 2"));
-        if control_string(ui, &mut self.keyword_2).changed() {
+        ui.subheading("Keyword 2");
+        if ui.control_string(&mut self.keyword_2).changed() {
             filter_string(&mut self.keyword_2, &self.alphabet_string);
             self.cipher
                 .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string);
@@ -95,12 +93,12 @@ impl CipherFrame for FourSquareFrame {
 
         ui.add_space(16.0);
         ui.horizontal(|ui| {
-            ui.label(subheading("Grid"));
+            ui.subheading("Grid");
             if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
                 ui.output_mut(|o| o.copied_text = self.cipher.grid_lines())
             }
         });
-        ui.label(mono(self.cipher.grid_lines()));
+        ui.mono(self.cipher.grid_lines());
     }
 
     fn cipher(&self) -> &dyn Cipher {

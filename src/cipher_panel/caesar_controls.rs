@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, randomize_reset, subheading};
+use crate::ui_elements::UiElements;
 use ciphers::{substitution::Caesar, Cipher};
 use egui::{Color32, RichText, Slider, Ui};
 use rand::{thread_rng, Rng};
@@ -39,11 +39,11 @@ impl CaesarFrame {
 
 impl CipherFrame for CaesarFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
         ui.group(|ui| {
-            ui.label(subheading("Common Alphabets"));
+            ui.subheading("Common Alphabets");
             ui.horizontal(|ui| {
                 for (name, alphabet) in [
                     ("Basic Latin", Alphabet::BasicLatin),
@@ -61,14 +61,14 @@ impl CipherFrame for CaesarFrame {
         });
         ui.add_space(8.0);
 
-        ui.label(subheading("Alphabet"));
-        if control_string(ui, &mut self.alphabet_string).changed() {
+        ui.subheading("Alphabet");
+        if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher.assign_alphabet(&self.alphabet_string)
         }
 
         ui.add_space(8.0);
 
-        ui.label(subheading("Shift Distance"));
+        ui.subheading("Shift Distance");
         ui.add(Slider::new(
             &mut self.cipher.shift,
             0..=(self.cipher.alphabet.len() as i32 - 1),
@@ -90,7 +90,7 @@ impl CipherFrame for CaesarFrame {
         ui.add_space(8.0);
 
         ui.group(|ui| {
-            ui.label(subheading("Example"));
+            ui.subheading("Example");
             ui.horizontal(|ui| {
                 ui.label(
                     RichText::new(&self.alphabet_string)

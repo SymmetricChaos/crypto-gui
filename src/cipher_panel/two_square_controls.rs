@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, mono, randomize_reset, string_slider};
+use crate::ui_elements::UiElements;
 use ciphers::{playfair::TwoSquare, Cipher};
 use egui::Ui;
 use rand::{rngs::StdRng, SeedableRng};
@@ -30,7 +30,7 @@ impl Default for TwoSquareFrame {
 
 impl CipherFrame for TwoSquareFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
         ui.label("Common Alphabets");
@@ -54,14 +54,17 @@ impl CipherFrame for TwoSquareFrame {
         ui.add_space(10.0);
 
         ui.label("Alphabet");
-        if control_string(ui, &mut self.alphabet_string).changed() {
+        if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher
                 .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
         }
         ui.add_space(16.0);
 
         ui.label("Spacer Character\nInserted at end as padding if needed");
-        if string_slider(ui, &self.alphabet_string, &mut self.spacer_position).changed() {
+        if ui
+            .string_slider(&self.alphabet_string, &mut self.spacer_position)
+            .changed()
+        {
             self.cipher.spacer = self
                 .alphabet_string
                 .chars()
@@ -71,14 +74,14 @@ impl CipherFrame for TwoSquareFrame {
         ui.add_space(16.0);
 
         ui.label("Keyword 1");
-        if control_string(ui, &mut self.keyword_1).changed() {
+        if ui.control_string(&mut self.keyword_1).changed() {
             self.cipher
                 .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
         }
 
         ui.add_space(16.0);
         ui.label("Keyword 2");
-        if control_string(ui, &mut self.keyword_2).changed() {
+        if ui.control_string(&mut self.keyword_2).changed() {
             self.cipher
                 .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
         }
@@ -95,9 +98,9 @@ impl CipherFrame for TwoSquareFrame {
                 })
             }
         });
-        ui.label(mono(self.cipher.show_square1()));
+        ui.mono(self.cipher.show_square1());
         ui.add_space(8.0);
-        ui.label(mono(self.cipher.show_square2()));
+        ui.mono(self.cipher.show_square2());
     }
 
     fn cipher(&self) -> &dyn Cipher {

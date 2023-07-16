@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, mono, randomize_reset, subheading};
+use crate::ui_elements::UiElements;
 use ciphers::{playfair::seriated_playfair::SeriatedPlayfair, Cipher};
 use egui::{Slider, Ui};
 use rand::{rngs::StdRng, SeedableRng};
@@ -26,11 +26,11 @@ impl Default for SeriatedPlayfairFrame {
 
 impl CipherFrame for SeriatedPlayfairFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
         ui.group(|ui| {
-            ui.label(subheading("Common Alphabets"));
+            ui.subheading("Common Alphabets");
             ui.horizontal(|ui| {
                 for (name, alphabet) in [
                     ("No C", Alphabet::BasicLatinNoC),
@@ -53,7 +53,7 @@ impl CipherFrame for SeriatedPlayfairFrame {
         ui.add_space(10.0);
 
         ui.label("Alphabet");
-        if control_string(ui, &mut self.alphabet_string).changed() {
+        if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher
                 .playfair
                 .assign_key(&self.key_string, &self.alphabet_string);
@@ -61,7 +61,7 @@ impl CipherFrame for SeriatedPlayfairFrame {
         ui.add_space(16.0);
 
         ui.label("Keyword");
-        if control_string(ui, &mut self.key_string).changed() {
+        if ui.control_string(&mut self.key_string).changed() {
             self.cipher
                 .playfair
                 .assign_key(&self.key_string, &self.alphabet_string)
@@ -86,7 +86,7 @@ impl CipherFrame for SeriatedPlayfairFrame {
                 ui.output_mut(|o| o.copied_text = self.cipher.playfair.to_string())
             }
         });
-        ui.label(mono(self.cipher.playfair.to_string()));
+        ui.mono(self.cipher.playfair.to_string());
     }
 
     fn cipher(&self) -> &dyn Cipher {

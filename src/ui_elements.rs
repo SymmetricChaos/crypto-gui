@@ -4,6 +4,93 @@ use eframe::egui::RichText;
 use egui::{Color32, DragValue, Response, TextStyle, Ui};
 use std::fmt::Display;
 
+pub trait UiElements {
+    // A label with larger text
+    fn subheading<T: ToString>(&mut self, text: T) -> Response;
+    // Label with monospaced text
+    fn mono<T: ToString>(&mut self, text: T) -> Response;
+    // Label with strong monospaced text
+    fn mono_strong<T: ToString>(&mut self, text: T) -> Response;
+    // Label with red monospaced text on a black background
+    fn error_text<T: ToString>(&mut self, text: T) -> Response;
+    //A monospaced TextEdit that does not clip the text length
+    fn control_string(&mut self, string: &mut String) -> Response;
+    // Label with monospaced text and a black background, looks similar to control_string
+    fn false_control_string<T: ToString>(&mut self, text: T) -> Response;
+    // Buttons for Randomize and Reset
+    fn randomize_reset(&mut self, cipher_frame: &mut dyn CipherFrame);
+    // Slider variant that has a position at some character index of a &str
+    fn string_slider(&mut self, string: &str, position: &mut usize) -> Response;
+}
+
+impl UiElements for Ui {
+    fn subheading<T: ToString>(&mut self, text: T) -> Response {
+        self.label(RichText::from(text.to_string()).size(16.0))
+    }
+
+    fn mono<T: ToString>(&mut self, text: T) -> Response {
+        self.label(RichText::from(text.to_string()).monospace())
+    }
+
+    fn mono_strong<T: ToString>(&mut self, text: T) -> Response {
+        self.label(RichText::from(text.to_string()).monospace().strong())
+    }
+
+    fn error_text<T: ToString>(&mut self, text: T) -> Response {
+        self.label(
+            RichText::from(text.to_string())
+                .color(Color32::RED)
+                .background_color(Color32::BLACK)
+                .monospace(),
+        )
+    }
+
+    fn control_string(&mut self, string: &mut String) -> Response {
+        self.add(
+            egui::TextEdit::singleline(string)
+                .font(TextStyle::Monospace)
+                .clip_text(false),
+        )
+    }
+
+    fn false_control_string<T: ToString>(&mut self, text: T) -> Response {
+        self.label(
+            RichText::from(text.to_string())
+                .monospace()
+                .background_color(Color32::BLACK),
+        )
+    }
+
+    fn randomize_reset(&mut self, cipher_frame: &mut dyn CipherFrame) {
+        if self.button("Randomize").clicked() {
+            cipher_frame.randomize()
+        }
+        if self.button("Reset").clicked() {
+            cipher_frame.reset()
+        }
+    }
+
+    fn string_slider(&mut self, string: &str, position: &mut usize) -> Response {
+        self.add(
+            DragValue::new(position)
+                .clamp_range(0..=string.chars().count() - 1)
+                .custom_formatter(|n, _| {
+                    let n = n as usize;
+                    string.chars().nth(n).unwrap().to_string()
+                })
+                .custom_parser(|s| {
+                    if s.is_empty() {
+                        Some(0.0)
+                    } else {
+                        let c = s.chars().next().unwrap();
+                        string.chars().position(|x| x == c).map(|n| n as f64)
+                    }
+                })
+                .speed(0.2),
+        )
+    }
+}
+
 pub fn subheading<T: ToString>(text: T) -> RichText {
     RichText::from(text.to_string()).size(16.0)
 }
@@ -23,6 +110,23 @@ pub fn error_text<T: ToString>(text: T) -> RichText {
         .monospace()
 }
 
+pub fn control_string(ui: &mut egui::Ui, string: &mut String) -> egui::Response {
+    ui.add(
+        egui::TextEdit::singleline(string)
+            .font(TextStyle::Monospace)
+            .clip_text(false),
+    )
+}
+
+pub fn randomize_reset(ui: &mut egui::Ui, cipher_frame: &mut dyn CipherFrame) {
+    if ui.button("Randomize").clicked() {
+        cipher_frame.randomize()
+    }
+    if ui.button("Reset").clicked() {
+        cipher_frame.reset()
+    }
+}
+
 pub fn text_manip_menu(ui: &mut Ui, text: &mut String) {
     ui.menu_button("+", |ui| {
         if ui.button("Remove Whitespace").clicked() {
@@ -37,15 +141,31 @@ pub fn text_manip_menu(ui: &mut Ui, text: &mut String) {
     });
 }
 
-pub fn control_string(ui: &mut egui::Ui, string: &mut String) -> egui::Response {
-    ui.add(egui::TextEdit::singleline(string).font(TextStyle::Monospace))
+pub fn string_slider(ui: &mut Ui, string: &str, position: &mut usize) -> Response {
+    ui.add(
+        DragValue::new(position)
+            .clamp_range(0..=string.chars().count() - 1)
+            .custom_formatter(|n, _| {
+                let n = n as usize;
+                string.chars().nth(n).unwrap().to_string()
+            })
+            .custom_parser(|s| {
+                if s.is_empty() {
+                    Some(0.0)
+                } else {
+                    let c = s.chars().next().unwrap();
+                    string.chars().position(|x| x == c).map(|n| n as f64)
+                }
+            })
+            .speed(0.2),
+    )
 }
 
 pub fn binary_to_text_input_mode(ui: &mut egui::Ui, current_value: &mut BinaryToTextMode) {
     ui.label("Encoding Mode");
     ui.selectable_value(current_value, BinaryToTextMode::Hex, "Hex")
         .on_hover_text("interpret input as hexcode");
-    ui.selectable_value(current_value, BinaryToTextMode::Utf8, "Text")
+    ui.selectable_value(current_value, BinaryToTextMode::Utf8, "UTF-8")
         .on_hover_text("convert text to raw bytes");
 }
 
@@ -67,35 +187,6 @@ pub fn fill_code_columns<T: Display, S: Display>(
             }
         }
     });
-}
-
-pub fn randomize_reset(ui: &mut egui::Ui, cipher_frame: &mut dyn CipherFrame) {
-    if ui.button("Randomize").clicked() {
-        cipher_frame.randomize()
-    }
-    if ui.button("Reset").clicked() {
-        cipher_frame.reset()
-    }
-}
-
-pub fn string_slider(ui: &mut Ui, string: &str, position: &mut usize) -> Response {
-    ui.add(
-        DragValue::new(position)
-            .clamp_range(0..=string.chars().count() - 1)
-            .custom_formatter(|n, _| {
-                let n = n as usize;
-                string.chars().nth(n).unwrap().to_string()
-            })
-            .custom_parser(|s| {
-                if s.is_empty() {
-                    Some(0.0)
-                } else {
-                    let c = s.chars().next().unwrap();
-                    string.chars().position(|x| x == c).map(|n| n as f64)
-                }
-            })
-            .speed(0.2),
-    )
 }
 
 // pub fn letter_grid(ui: &mut egui::Ui, n_rows: usize, n_cols: usize, text: &String) {

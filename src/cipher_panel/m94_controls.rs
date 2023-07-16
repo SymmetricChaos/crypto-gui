@@ -1,11 +1,9 @@
+use super::CipherFrame;
+use crate::ui_elements::UiElements;
 use ciphers::{polyalphabetic::M94, Cipher};
-use egui::{Color32, FontFamily, RichText, Slider, Ui};
+use egui::{FontFamily, RichText, Slider, Ui};
 use rand::{seq::SliceRandom, thread_rng, Rng};
 use utils::preset_alphabet::Alphabet;
-
-use crate::ui_elements::{mono, randomize_reset, subheading};
-
-use super::CipherFrame;
 
 #[derive(Default)]
 pub struct M94Frame {
@@ -14,18 +12,18 @@ pub struct M94Frame {
 
 impl CipherFrame for M94Frame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.label(subheading("Alphabet"));
-        ui.label(mono(Alphabet::BasicLatin.slice()).background_color(Color32::BLACK));
+        ui.subheading("Alphabet");
+        ui.false_control_string(Alphabet::BasicLatin.slice());
         ui.add_space(16.0);
 
-        ui.label(subheading("Offset"));
+        ui.subheading("Offset");
         ui.add(Slider::new(&mut self.cipher.offset, 0..=25));
         ui.add_space(16.0);
 
-        ui.label(subheading("Wheels"));
+        ui.subheading("Wheels");
         for n in 0..25 {
             ui.horizontal(|ui| {
                 ui.add(egui::Label::new(

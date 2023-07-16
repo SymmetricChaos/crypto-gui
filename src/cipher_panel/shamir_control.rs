@@ -1,10 +1,8 @@
+use super::CipherFrame;
+use crate::ui_elements::UiElements;
 use ciphers::shamir::ShamirSecretSharing;
 use egui::Slider;
 use utils::{math_functions::is_prime32, text_functions::filter_string};
-
-use crate::ui_elements::{control_string, error_text};
-
-use super::CipherFrame;
 
 pub struct ShamirSecretSharingFrame {
     cipher: ShamirSecretSharing,
@@ -40,11 +38,11 @@ impl CipherFrame for ShamirSecretSharingFrame {
         ui.add_space(8.0);
 
         ui.label("Polynomial");
-        if control_string(ui, &mut self.polynomial_string).changed() {
+        if ui.control_string(&mut self.polynomial_string).changed() {
             match self.cipher.sting_to_vec(&self.polynomial_string) {
                 Ok(_) => (),
                 Err(e) => {
-                    ui.label(error_text(e));
+                    ui.error_text(e);
                 }
             }
         }
@@ -54,22 +52,22 @@ impl CipherFrame for ShamirSecretSharingFrame {
         ui.add_space(8.0);
 
         ui.label("Field Size");
-        if control_string(ui, &mut self.modulus_string).changed() {
+        if ui.control_string(&mut self.modulus_string).changed() {
             filter_string(&mut self.modulus_string, "0123456789");
             match u32::from_str_radix(&self.modulus_string, 10) {
                 Ok(n) => match n > 0 {
                     true => match is_prime32(n as u32) {
                         true => self.cipher.modulus = n,
                         false => {
-                            ui.label(error_text("field size must be prime"));
+                            ui.error_text("field size must be prime");
                         }
                     },
                     false => {
-                        ui.label(error_text("field size must be positive"));
+                        ui.error_text("field size must be positive");
                     }
                 },
                 Err(e) => {
-                    ui.label(error_text(e.to_string()));
+                    ui.error_text(e.to_string());
                 }
             }
         }

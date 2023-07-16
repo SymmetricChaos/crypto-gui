@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, mono, randomize_reset, subheading};
+use crate::ui_elements::UiElements;
 use ciphers::{polybius::nihilist::Nihilist, Cipher};
 use eframe::egui::Ui;
 use rand::{thread_rng, Rng};
@@ -43,11 +43,11 @@ impl NihilistFrame {
 
 impl CipherFrame for NihilistFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
         ui.group(|ui| {
-            ui.label(subheading("Common Alphabets"));
+            ui.subheading("Common Alphabets");
             ui.horizontal(|ui| {
                 for (name, alphabet) in [
                     ("No C", Alphabet::BasicLatinNoC),
@@ -66,20 +66,20 @@ impl CipherFrame for NihilistFrame {
 
         ui.add_space(10.0);
 
-        ui.label(subheading("Alphabet"));
-        if control_string(ui, &mut self.alphabet_string).changed() {
+        ui.subheading("Alphabet");
+        if ui.control_string(&mut self.alphabet_string).changed() {
             self.assign_keys();
         }
         ui.add_space(8.0);
 
-        ui.label(subheading("Polybius Keyword"));
-        if control_string(ui, &mut self.polybius_key_string).changed() {
+        ui.subheading("Polybius Keyword");
+        if ui.control_string(&mut self.polybius_key_string).changed() {
             self.assign_keys();
         }
         ui.add_space(8.0);
 
-        ui.label(subheading("Additive Keyword"));
-        if control_string(ui, &mut self.additive_key_string).changed() {
+        ui.subheading("Additive Keyword");
+        if ui.control_string(&mut self.additive_key_string).changed() {
             self.assign_keys();
         }
         if !self.cipher.keyword_vec().is_empty() {
@@ -88,12 +88,12 @@ impl CipherFrame for NihilistFrame {
 
         ui.add_space(16.0);
         ui.horizontal(|ui| {
-            ui.label(subheading("Grid"));
+            ui.subheading("Grid");
             if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
                 ui.output_mut(|o| o.copied_text = self.cipher.polybius.show_grid())
             }
         });
-        ui.label(mono(self.cipher.polybius.show_grid()));
+        ui.mono(self.cipher.polybius.show_grid());
     }
 
     fn cipher(&self) -> &dyn Cipher {

@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, error_text, mono, randomize_reset};
+use crate::ui_elements::{mono, UiElements};
 use ciphers::{
     machines::enigma::{rotors::REFLECTOR_VEC, EnigmaM3, REFLECTOR_MAP, ROTOR_VEC},
     Cipher,
@@ -44,7 +44,7 @@ impl EnigmaM3Frame {
 
 impl CipherFrame for EnigmaM3Frame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
 
         ui.label("Rotor Positions\nTo Be Changed Every Message");
         for rotor in &mut self.cipher.state.rotors {
@@ -79,7 +79,7 @@ impl CipherFrame for EnigmaM3Frame {
         for rotor in &mut self.cipher.state.rotors {
             ui.horizontal(|ui| {
                 ui.add_sized([20.0, 20.0], Label::new(mono(rotor.name)));
-                ui.label(mono(rotor));
+                ui.mono(rotor);
             });
         }
 
@@ -103,16 +103,16 @@ impl CipherFrame for EnigmaM3Frame {
                 [20.0, 20.0],
                 Label::new(mono(self.cipher.state.reflector.name)),
             );
-            ui.label(mono(self.cipher.state.reflector));
+            ui.mono(self.cipher.state.reflector);
         });
 
         ui.add_space(10.0);
         ui.label("Plugboard").on_hover_text("Steckerbrett");
-        if control_string(ui, &mut self.plugboard_string).changed() {
+        if ui.control_string(&mut self.plugboard_string).changed() {
             match self.cipher.state.set_plugboard(&self.plugboard_string) {
                 Ok(_) => (),
                 Err(e) => {
-                    ui.label(error_text(&e.inner()));
+                    ui.error_text(&e.inner());
                 }
             }
         };

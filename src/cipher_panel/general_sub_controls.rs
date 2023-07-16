@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, randomize_reset, subheading};
+use crate::ui_elements::UiElements;
 use ciphers::{substitution::GeneralSubstitution, Cipher};
 use egui::Ui;
 use rand::thread_rng;
@@ -25,17 +25,17 @@ impl Default for GeneralSubstitutionFrame {
 
 impl CipherFrame for GeneralSubstitutionFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.label(subheading("Plaintext Alphabet"));
-        if control_string(ui, &mut self.pt_alphabet_string).changed() {
+        ui.subheading("Plaintext Alphabet");
+        if ui.control_string(&mut self.pt_alphabet_string).changed() {
             self.cipher.assign_pt_alphabet(&self.pt_alphabet_string);
         }
         ui.add_space(8.0);
 
-        ui.label(subheading("Ciphertext Alphabet"));
-        if control_string(ui, &mut self.ct_alphabet_string).changed() {
+        ui.subheading("Ciphertext Alphabet");
+        if ui.control_string(&mut self.ct_alphabet_string).changed() {
             self.cipher.assign_ct_alphabet(&self.ct_alphabet_string);
         }
         ui.add_space(16.0);

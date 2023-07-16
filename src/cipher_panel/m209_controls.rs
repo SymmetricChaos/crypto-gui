@@ -1,11 +1,9 @@
+use super::CipherFrame;
+use crate::ui_elements::UiElements;
 use ciphers::{machines::m209::M209, Cipher};
-use egui::{Color32, Slider, Ui};
+use egui::{Slider, Ui};
 use rand::{thread_rng, Fill};
 use utils::{preset_alphabet::Alphabet, text_functions::random_char_vec};
-
-use crate::ui_elements::{mono, randomize_reset, subheading};
-
-use super::CipherFrame;
 
 fn lug_pair(ui: &mut egui::Ui, pair: &mut (usize, usize)) {
     ui.add(
@@ -27,14 +25,14 @@ pub struct M209Frame {
 
 impl CipherFrame for M209Frame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(8.0);
 
-        ui.label(subheading("Alphabet"));
-        ui.label(mono(Alphabet::BasicLatin).background_color(Color32::BLACK));
+        ui.subheading("Alphabet");
+        ui.false_control_string(Alphabet::BasicLatin);
         ui.add_space(8.0);
 
-        ui.label(subheading("Rotor Settings"));
+        ui.subheading("Rotor Settings");
         for rotor in self.cipher.get_wheels() {
             let len = rotor.rotor_length() - 1;
             ui.add(Slider::new(&mut rotor.active, 0..=len).show_value(false));
@@ -43,7 +41,7 @@ impl CipherFrame for M209Frame {
         ui.add_space(8.0);
 
         let lugs = &mut self.cipher.lugs;
-        ui.label(subheading("Lugs"));
+        ui.subheading("Lugs");
         for triple in lugs.chunks_exact_mut(3) {
             ui.horizontal(|ui| {
                 lug_pair(ui, &mut triple[0]);

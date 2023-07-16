@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, mono, randomize_reset, subheading};
+use crate::ui_elements::UiElements;
 use ciphers::{polybius::PolybiusSquare, Cipher};
 use eframe::egui::Ui;
 use rand::thread_rng;
@@ -28,11 +28,11 @@ impl Default for PolybiusSquareFrame {
 
 impl CipherFrame for PolybiusSquareFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
         ui.group(|ui| {
-            ui.label(subheading("Common Alphabets"));
+            ui.subheading("Common Alphabets");
             ui.horizontal(|ui| {
                 for (name, alphabet) in [
                     ("No C", Alphabet::BasicLatinNoC),
@@ -53,8 +53,8 @@ impl CipherFrame for PolybiusSquareFrame {
 
         ui.add_space(8.0);
 
-        ui.label(subheading("Alphabet"));
-        if control_string(ui, &mut self.alphabet_string).changed() {
+        ui.subheading("Alphabet");
+        if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher
                 .assign_key(&self.key_string, &self.alphabet_string);
         }
@@ -63,27 +63,27 @@ impl CipherFrame for PolybiusSquareFrame {
         ui.checkbox(&mut self.cipher.spaced, "Use Spaces")
             .on_hover_text("Insert spaces between the pairs of symbols");
 
-        ui.label(subheading("Keyword"));
-        if control_string(ui, &mut self.key_string).changed() {
+        ui.subheading("Keyword");
+        if ui.control_string(&mut self.key_string).changed() {
             filter_string(&mut self.key_string, &self.alphabet_string);
             self.cipher
                 .assign_key(&self.key_string, &self.alphabet_string)
         }
 
         ui.add_space(8.0);
-        ui.label(subheading("Labels"));
-        if control_string(ui, &mut self.labels_string).changed() {
+        ui.subheading("Labels");
+        if ui.control_string(&mut self.labels_string).changed() {
             self.cipher.assign_labels(&self.labels_string)
         }
 
         ui.add_space(16.0);
         ui.horizontal(|ui| {
-            ui.label(subheading("Grid"));
+            ui.subheading("Grid");
             if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
                 ui.output_mut(|o| o.copied_text = self.cipher.show_grid())
             }
         });
-        ui.label(mono(self.cipher.show_grid()));
+        ui.mono(self.cipher.show_grid());
     }
 
     fn cipher(&self) -> &dyn Cipher {

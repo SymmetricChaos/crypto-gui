@@ -2,7 +2,7 @@ use ciphers::{transposition::RailFence, Cipher};
 use egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
 
-use crate::ui_elements::{control_string, mono, randomize_reset, subheading};
+use crate::ui_elements::UiElements;
 
 use super::CipherFrame;
 
@@ -46,10 +46,10 @@ impl RailFenceFrame {
 
 impl CipherFrame for RailFenceFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(8.0);
 
-        ui.label(subheading("Number of Rails"));
+        ui.subheading("Number of Rails");
         if ui
             .add(Slider::new(&mut self.cipher.num_rails, 2..=12))
             .changed()
@@ -61,7 +61,7 @@ impl CipherFrame for RailFenceFrame {
         }
         ui.add_space(8.0);
 
-        ui.label(subheading("Starting Rail"));
+        ui.subheading("Starting Rail");
         if ui
             .add(
                 Slider::new(&mut self.cipher.start_rail, 0..=12)
@@ -83,14 +83,14 @@ impl CipherFrame for RailFenceFrame {
         ui.add_space(8.0);
 
         ui.group(|ui| {
-            ui.label(subheading("Example"));
-            if control_string(ui, &mut self.example).changed() {
+            ui.subheading("Example");
+            if ui.control_string(&mut self.example).changed() {
                 self.set_rail_example()
             }
             ui.add_space(4.0);
 
             for rail in self.example_rails.iter() {
-                ui.label(mono(rail));
+                ui.mono(rail);
             }
             ui.add_space(4.0);
 

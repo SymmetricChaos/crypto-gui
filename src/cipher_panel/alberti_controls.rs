@@ -1,6 +1,5 @@
-use crate::ui_elements::{control_string, mono, randomize_reset, subheading};
-
 use super::CipherFrame;
+use crate::ui_elements::UiElements;
 use ciphers::{polyalphabetic::Alberti, Cipher};
 use eframe::egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
@@ -24,24 +23,27 @@ impl Default for AlbertiFrame {
 
 impl CipherFrame for AlbertiFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.label(subheading("Fixed Alphabet"));
-        if control_string(ui, &mut self.fixed_alphabet_string).changed() {
+        ui.subheading("Fixed Alphabet");
+        if ui.control_string(&mut self.fixed_alphabet_string).changed() {
             self.cipher
                 .assign_fixed_alphabet(&self.fixed_alphabet_string)
         }
 
-        ui.label(subheading("Moving Alphabet"));
-        if control_string(ui, &mut self.moving_alphabet_string).changed() {
+        ui.subheading("Moving Alphabet");
+        if ui
+            .control_string(&mut self.moving_alphabet_string)
+            .changed()
+        {
             self.cipher
                 .assign_moving_alphabet(&self.moving_alphabet_string)
         }
 
-        ui.label(mono(&self.cipher));
+        ui.mono(&self.cipher);
 
-        ui.label(subheading("Index"));
+        ui.subheading("Index");
         let alpha_range = 0..=(self.cipher.alphabet_len() - 1);
         ui.add(Slider::new(
             &mut self.cipher.start_index,

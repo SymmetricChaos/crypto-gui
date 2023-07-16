@@ -1,6 +1,5 @@
 use super::CipherFrame;
-
-use crate::ui_elements::{control_string, mono, randomize_reset, subheading};
+use crate::ui_elements::UiElements;
 use ciphers::traits::Cipher;
 use ciphers::transposition::Amsco;
 use eframe::egui::Ui;
@@ -65,17 +64,17 @@ impl AmscoFrame {
 
 impl CipherFrame for AmscoFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.label(subheading("Alphabet"));
-        if control_string(ui, &mut self.alphabet_string).changed() {
+        ui.subheading("Alphabet");
+        if ui.control_string(&mut self.alphabet_string).changed() {
             self.assign_key();
             self.build_example_grid();
         }
 
-        ui.label(subheading("Keyword"));
-        if control_string(ui, &mut self.key_string).changed() {
+        ui.subheading("Keyword");
+        if ui.control_string(&mut self.key_string).changed() {
             self.assign_key();
             self.build_example_grid();
         };
@@ -84,7 +83,7 @@ impl CipherFrame for AmscoFrame {
 
         ui.collapsing("Example", |ui| {
             ui.label("Example Plaintext");
-            if control_string(ui, &mut self.example).changed() {
+            if ui.control_string(&mut self.example).changed() {
                 self.build_example_grid();
             };
 
@@ -98,16 +97,16 @@ impl CipherFrame for AmscoFrame {
                 .striped(true)
                 .show(ui, |ui| {
                     for letter in self.key_string.chars() {
-                        ui.label(mono(letter).strong());
+                        ui.mono_strong(letter);
                     }
                     ui.end_row();
                     for digit in self.cipher.key.iter() {
-                        ui.label(mono(digit).strong());
+                        ui.mono_strong(digit);
                     }
                     ui.end_row();
                     for row in 0..self.example_grid.num_rows() {
                         for c in self.example_grid.get_row(row) {
-                            ui.label(mono(c));
+                            ui.mono(c);
                         }
                         ui.end_row();
                     }

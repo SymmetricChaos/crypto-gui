@@ -1,6 +1,6 @@
 use super::CipherFrame;
 
-use crate::ui_elements::{control_string, error_text, mono, randomize_reset, subheading};
+use crate::ui_elements::UiElements;
 use ciphers::traits::Cipher;
 use ciphers::transposition::Columnar;
 use eframe::egui::Ui;
@@ -57,17 +57,17 @@ impl ColumnarFrame {
 
 impl CipherFrame for ColumnarFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.label(subheading("Alphabet"));
-        if control_string(ui, &mut self.alphabet_string).changed() {
+        ui.subheading("Alphabet");
+        if ui.control_string(&mut self.alphabet_string).changed() {
             self.assign_key();
             self.set_example();
         }
 
-        ui.label(subheading("Keyword"));
-        if control_string(ui, &mut self.key_string).changed() {
+        ui.subheading("Keyword");
+        if ui.control_string(&mut self.key_string).changed() {
             self.assign_key();
             self.set_example();
         };
@@ -75,23 +75,23 @@ impl CipherFrame for ColumnarFrame {
         ui.add_space(8.0);
 
         ui.collapsing("Example", |ui| {
-            ui.label(subheading("Text"));
-            if control_string(ui, &mut self.example).changed() {
+            ui.subheading("Text");
+            if ui.control_string(&mut self.example).changed() {
                 self.set_example();
             }
             ui.add_space(4.0);
 
             ui.horizontal(|ui| {
-                ui.label(subheading("Grid"));
+                ui.subheading("Grid");
                 if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
                     ui.output_mut(|o| o.copied_text = self.example_grid.to_string())
                 }
             });
 
             if self.example.is_empty() {
-                ui.label(error_text("no plaintext provided"));
+                ui.error_text("no plaintext provided")
             } else if self.key_string.is_empty() {
-                ui.label(error_text("no key provided"));
+                ui.error_text("no key provided")
             } else {
                 egui::Grid::new("columnar_grid")
                     .num_columns(self.example_grid.num_cols())
@@ -100,12 +100,12 @@ impl CipherFrame for ColumnarFrame {
                     .striped(true)
                     .show(ui, |ui| {
                         for digit in self.cipher.key.iter() {
-                            ui.label(mono(digit).strong());
+                            ui.mono_strong(digit);
                         }
                         ui.end_row();
                         for row in 0..self.example_grid.num_rows() {
                             for c in self.example_grid.get_row(row) {
-                                ui.label(mono(c));
+                                ui.mono(c);
                             }
                             ui.end_row();
                         }
@@ -113,9 +113,9 @@ impl CipherFrame for ColumnarFrame {
 
                 ui.add_space(4.0);
                 match self.cipher.encrypt(&self.example) {
-                    Ok(t) => ui.label(mono(t)),
-                    Err(e) => ui.label(error_text(e)),
-                };
+                    Ok(t) => ui.mono(t),
+                    Err(e) => ui.error_text(e),
+                }
             }
         });
     }

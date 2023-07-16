@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{error_text, subheading};
+use crate::ui_elements::UiElements;
 use ciphers::machines::purple::{switch::SwitchSpeed, Purple};
 use eframe::egui::{Slider, TextEdit, TextStyle, Ui};
 
@@ -10,7 +10,7 @@ pub struct PurpleFrame {
 
 impl CipherFrame for PurpleFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String) {
-        ui.label(subheading("Sixes Position"));
+        ui.subheading("Sixes Position");
         ui.horizontal(|ui| {
             ui.add(
                 Slider::new(&mut self.cipher.switches.sixes.position, 0..=24).clamp_to_range(true),
@@ -20,7 +20,7 @@ impl CipherFrame for PurpleFrame {
 
         ui.add_space(16.0);
 
-        ui.label(subheading("Twenties Positions"));
+        ui.subheading("Twenties Positions");
         for switch in self.cipher.switches.twenties.iter_mut() {
             ui.horizontal(|ui| {
                 ui.add(Slider::new(&mut switch.borrow_mut().position, 0..=24).clamp_to_range(true));
@@ -74,11 +74,11 @@ impl CipherFrame for PurpleFrame {
             });
         }
         if let Err(e) = self.cipher.switches.validate_switches() {
-            ui.label(error_text(e.to_string()));
+            ui.error_text(e);
         };
 
         ui.add_space(10.0);
-        ui.label(subheading("Plugboard"));
+        ui.subheading("Plugboard");
         if ui
             .add(TextEdit::singleline(&mut self.cipher.plugboard_string).font(TextStyle::Monospace))
             .changed()

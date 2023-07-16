@@ -1,5 +1,6 @@
+use crate::ui_elements::UiElements;
+
 use super::CipherFrame;
-use crate::ui_elements::{control_string, randomize_reset};
 use ciphers::{machines::hebern::Hebern, Cipher};
 use egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
@@ -24,10 +25,10 @@ impl Default for HebernFrame {
 
 impl CipherFrame for HebernFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(8.0);
         ui.label("Alphabet");
-        if control_string(ui, &mut self.alphabet_string).changed() {
+        if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher.set_alphabet(&self.alphabet_string);
             for rotor in self.cipher.rotors.rotors.iter_mut() {
                 rotor.wiring_str = keyed_alphabet(&mut rotor.wiring_str, &mut self.alphabet_string);
@@ -72,7 +73,7 @@ impl CipherFrame for HebernFrame {
 
         for rotor in self.cipher.rotors.rotors.iter_mut() {
             ui.horizontal(|ui| {
-                if control_string(ui, &mut rotor.wiring_str).lost_focus() {
+                if ui.control_string(&mut rotor.wiring_str).lost_focus() {
                     rotor.wiring_str =
                         keyed_alphabet(&mut rotor.wiring_str, &mut self.alphabet_string);
                     _ = rotor.set(&self.cipher.alphabet);

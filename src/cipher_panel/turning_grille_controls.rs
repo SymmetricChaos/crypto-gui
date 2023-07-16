@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, error_text, mono, randomize_reset};
+use crate::ui_elements::UiElements;
 use ciphers::{transposition::TurningGrille, Cipher};
 use egui::Ui;
 use itertools::Itertools;
@@ -36,7 +36,7 @@ impl Default for TurningGrilleFrame {
 
 impl CipherFrame for TurningGrilleFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
         ui.label("Keys");
@@ -50,18 +50,18 @@ impl CipherFrame for TurningGrilleFrame {
             .enumerate()
         {
             ui.horizontal(|ui| {
-                ui.label(mono(name));
-                if control_string(ui, &mut self.key_strings[i]).changed() {
+                ui.mono(name);
+                if ui.control_string(&mut self.key_strings[i]).changed() {
                     match self.cipher.build_key(&self.key_strings) {
                         Ok(_) => (),
                         Err(e) => {
-                            ui.label(error_text(e.to_string()));
+                            ui.error_text(e);
                         }
                     }
                     match self.cipher.build_grid() {
                         Ok(_) => (),
                         Err(e) => {
-                            ui.label(error_text(e.to_string()));
+                            ui.error_text(e);
                         }
                     }
                 }
@@ -103,7 +103,7 @@ impl CipherFrame for TurningGrilleFrame {
 
         ui.add_space(16.0);
         ui.label("Letters to Use as Nulls");
-        if control_string(ui, &mut self.null_alphabet_string).changed() {
+        if ui.control_string(&mut self.null_alphabet_string).changed() {
             self.cipher.assign_null_alphabet(&self.null_alphabet_string);
         };
     }

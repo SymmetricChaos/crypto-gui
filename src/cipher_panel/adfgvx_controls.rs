@@ -1,14 +1,14 @@
-use crate::ui_elements::{control_string, mono, randomize_reset, subheading};
-
 use super::CipherFrame;
-
-use ciphers::polybius::adfgvx::AdfgvxMode;
-use ciphers::polybius::Adfgvx;
-use ciphers::traits::Cipher;
-use egui::Color32;
+use crate::ui_elements::UiElements;
+use ciphers::{
+    polybius::{adfgvx::AdfgvxMode, Adfgvx},
+    traits::Cipher,
+};
 use rand::{thread_rng, Rng};
-use utils::preset_alphabet::Alphabet;
-use utils::text_functions::{filter_string, shuffled_str};
+use utils::{
+    preset_alphabet::Alphabet,
+    text_functions::{filter_string, shuffled_str},
+};
 
 pub struct AdfgvxFrame {
     cipher: Adfgvx,
@@ -37,11 +37,11 @@ impl AdfgvxFrame {
 
 impl CipherFrame for AdfgvxFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
         ui.group(|ui| {
-            ui.label(subheading("Select Mode"));
+            ui.subheading("Select Mode");
             ui.horizontal(|ui| {
                 if ui.button("ADFGX").clicked() {
                     self.cipher.assign_mode(AdfgvxMode::Short);
@@ -59,27 +59,27 @@ impl CipherFrame for AdfgvxFrame {
         });
 
         // False alphabet display
-        ui.label(mono(&self.cipher.alphabet()).background_color(Color32::BLACK));
+        ui.false_control_string(&self.cipher.alphabet());
         ui.add_space(16.0);
 
-        ui.label(subheading("Polybius Keyword"));
-        if control_string(ui, &mut self.polybius_key_string).changed() {
+        ui.subheading("Polybius Keyword");
+        if ui.control_string(&mut self.polybius_key_string).changed() {
             filter_string(&mut self.polybius_key_string, self.cipher.alphabet());
             self.cipher.assign_polybius_key(&self.polybius_key_string)
         }
 
         ui.add_space(8.0);
         ui.horizontal(|ui| {
-            ui.label(subheading("Polybius Grid"));
+            ui.subheading("Polybius Grid");
             if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
                 ui.output_mut(|o| o.copied_text = self.cipher.show_polybius_grid())
             }
         });
-        ui.label(mono(self.cipher.show_polybius_grid()));
+        ui.mono(self.cipher.show_polybius_grid());
         ui.add_space(8.0);
 
-        ui.label(subheading("Columnar Keyword"));
-        if control_string(ui, &mut self.columnar_key_string).changed() {
+        ui.subheading("Columnar Keyword");
+        if ui.control_string(&mut self.columnar_key_string).changed() {
             self.assign_columnar_key()
         }
     }

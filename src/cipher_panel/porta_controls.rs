@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, error_text, mono, randomize_reset, subheading};
+use crate::ui_elements::UiElements;
 use ciphers::{
     polyalphabetic::{porta::PORTA_TABLEAUX, Porta},
     Cipher,
@@ -16,21 +16,21 @@ pub struct PortaFrame {
 
 impl CipherFrame for PortaFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.label(subheading("Keyword"));
-        if control_string(ui, &mut self.key_string).changed() {
+        ui.subheading("Keyword");
+        if ui.control_string(&mut self.key_string).changed() {
             match self.cipher.assign_key(&self.key_string) {
                 Ok(_) => (),
                 Err(e) => {
-                    ui.label(error_text(e.inner()));
+                    ui.error_text(e.inner());
                 }
             }
         }
         ui.add_space(16.0);
 
-        ui.label(subheading("Tableaux"));
+        ui.subheading("Tableaux");
         egui::Grid::new("porta_tableaux")
             .num_columns(26)
             .min_col_width(1.0)
@@ -39,7 +39,7 @@ impl CipherFrame for PortaFrame {
             .show(ui, |ui| {
                 for row in PORTA_TABLEAUX.iter() {
                     for c in row.chars() {
-                        ui.label(mono(c));
+                        ui.mono(c);
                     }
                     ui.end_row();
                 }

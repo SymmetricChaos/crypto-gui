@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, mono, randomize_reset};
+use crate::ui_elements::UiElements;
 use ciphers::{polybius::Trifid, Cipher};
 use egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
@@ -23,7 +23,7 @@ impl Default for TrifidFrame {
 
 impl CipherFrame for TrifidFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
         let block_size_range = 3..=30;
@@ -32,7 +32,7 @@ impl CipherFrame for TrifidFrame {
 
         ui.add_space(16.0);
         ui.label("Alphabet");
-        if control_string(ui, &mut self.alphabet_string).changed() {
+        if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher
                 .polybius
                 .assign_grid(&self.alphabet_string, &self.key_string)
@@ -40,7 +40,7 @@ impl CipherFrame for TrifidFrame {
 
         ui.add_space(16.0);
         ui.label("Keyword");
-        if control_string(ui, &mut self.key_string).changed() {
+        if ui.control_string(&mut self.key_string).changed() {
             self.cipher
                 .polybius
                 .assign_grid(&self.alphabet_string, &self.key_string)
@@ -50,9 +50,9 @@ impl CipherFrame for TrifidFrame {
         ui.label("Grid");
         let grids = self.cipher.polybius.show_grids();
         ui.horizontal(|ui| {
-            ui.label(mono(&grids[0]));
-            ui.label(mono(&grids[1]));
-            ui.label(mono(&grids[2]));
+            ui.mono(&grids[0]);
+            ui.mono(&grids[1]);
+            ui.mono(&grids[2]);
         });
     }
 

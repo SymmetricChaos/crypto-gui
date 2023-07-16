@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{control_string, randomize_reset};
+use crate::ui_elements::UiElements;
 use ciphers::{transposition::Grille, Cipher};
 use egui::{TextStyle, Ui};
 use rand::{rngs::StdRng, Rng, SeedableRng};
@@ -32,12 +32,12 @@ fn cell_button(grille: &mut Grille, x: usize, y: usize, ui: &mut eframe::egui::U
 
 impl CipherFrame for GrilleFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        randomize_reset(ui, self);
+        ui.randomize_reset(self);
         ui.add_space(16.0);
 
         ui.checkbox(&mut self.cipher.use_nulls, "Use Nulls?");
         if self.cipher.use_nulls {
-            if control_string(ui, &mut self.null_alphabet_string).changed() {
+            if ui.control_string(&mut self.null_alphabet_string).changed() {
                 self.cipher.assign_null_alphabet(&self.null_alphabet_string)
             }
         }
