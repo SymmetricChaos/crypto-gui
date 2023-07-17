@@ -76,8 +76,18 @@ impl CipherFrame for RailFenceFrame {
         }
         ui.add_space(4.0);
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.cipher.falling, true, "Falling");
-            ui.selectable_value(&mut self.cipher.falling, false, "Rising");
+            if ui
+                .selectable_value(&mut self.cipher.falling, true, "Falling")
+                .clicked()
+            {
+                self.set_rail_example();
+            };
+            if ui
+                .selectable_value(&mut self.cipher.falling, false, "Rising")
+                .clicked()
+            {
+                self.set_rail_example();
+            };
         });
 
         ui.add_space(8.0);
@@ -112,6 +122,8 @@ impl CipherFrame for RailFenceFrame {
 
     fn randomize(&mut self) {
         self.cipher.num_rails = thread_rng().gen_range(2..12);
+        self.cipher.start_rail = thread_rng().gen_range(0..self.cipher.num_rails - 1);
+        self.cipher.falling = thread_rng().gen_bool(0.5);
     }
 
     fn reset(&mut self) {

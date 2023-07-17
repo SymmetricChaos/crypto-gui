@@ -72,7 +72,7 @@ impl CipherFrame for ColumnarFrame {
             self.set_example();
         };
 
-        ui.add_space(8.0);
+        ui.add_space(16.0);
 
         ui.collapsing("Example", |ui| {
             ui.subheading("Text");
@@ -87,7 +87,7 @@ impl CipherFrame for ColumnarFrame {
                     ui.output_mut(|o| o.copied_text = self.example_grid.to_string())
                 }
             });
-
+            ui.add_space(4.0);
             if self.example.is_empty() {
                 ui.error_text("no plaintext provided")
             } else if self.key_string.is_empty() {
@@ -111,7 +111,7 @@ impl CipherFrame for ColumnarFrame {
                         }
                     });
 
-                ui.add_space(4.0);
+                ui.add_space(8.0);
                 match self.cipher.encrypt(&self.example) {
                     Ok(t) => ui.mono(t),
                     Err(e) => ui.error_text(e),
