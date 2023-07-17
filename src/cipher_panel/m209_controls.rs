@@ -46,7 +46,11 @@ impl CipherFrame for M209Frame {
             ui.horizontal(|ui| {
                 lug_pair(ui, &mut triple[0]);
                 ui.add_space(4.0);
+                ui.separator();
+                ui.add_space(4.0);
                 lug_pair(ui, &mut triple[1]);
+                ui.add_space(4.0);
+                ui.separator();
                 ui.add_space(4.0);
                 lug_pair(ui, &mut triple[2]);
             });
