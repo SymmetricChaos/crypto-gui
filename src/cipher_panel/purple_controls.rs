@@ -18,18 +18,35 @@ impl Default for PurpleFrame {
 }
 
 impl PurpleFrame {
+    fn unused_speed(&mut self) -> Option<SwitchSpeed> {
+        for speed in [SwitchSpeed::Slow, SwitchSpeed::Middle, SwitchSpeed::Fast].iter() {
+            match self
+                .cipher
+                .switches
+                .twenties
+                .iter()
+                .position(|s| s.speed == *speed)
+            {
+                Some(_) => (),
+                None => return Some(*speed),
+            }
+        }
+        None
+    }
     fn swap_switches(&mut self, speed: SwitchSpeed, switch_idx: usize) {
         let other_switch_idx = self
             .cipher
             .switches
             .twenties
             .iter()
-            .position(|s| s.speed == speed)
+            .enumerate()
+            .position(|(n, s)| s.speed == speed && n != switch_idx)
             .unwrap();
 
-        self.cipher.switches.twenties[other_switch_idx].speed =
-            self.cipher.switches.twenties[switch_idx].speed;
-        self.cipher.switches.twenties[switch_idx].speed = speed;
+        match self.unused_speed() {
+            Some(s) => self.cipher.switches.twenties[other_switch_idx].speed = s,
+            None => (),
+        }
     }
 }
 
@@ -67,7 +84,7 @@ impl CipherFrame for PurpleFrame {
                         )
                         .clicked()
                     {
-                        self.swap_switches(speed, n)
+                        self.swap_switches(speed, n);
                     };
                 }
             });
