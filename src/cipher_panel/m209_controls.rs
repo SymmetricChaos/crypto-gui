@@ -1,9 +1,15 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{machines::m209::M209, Cipher};
+use ciphers::{
+    machines::m209::{M209, M209_ALPHABETS},
+    Cipher,
+};
 use egui::{Slider, Ui};
 use rand::{thread_rng, Fill};
-use utils::{preset_alphabet::Alphabet, text_functions::random_char_vec};
+use utils::{
+    preset_alphabet::Alphabet,
+    text_functions::{filter_string, random_char_vec},
+};
 
 fn lug_pair(ui: &mut egui::Ui, pair: &mut (usize, usize)) {
     ui.add(
@@ -21,6 +27,7 @@ fn lug_pair(ui: &mut egui::Ui, pair: &mut (usize, usize)) {
 #[derive(Default)]
 pub struct M209Frame {
     cipher: M209,
+    effective_pins: [String; 6],
 }
 
 impl CipherFrame for M209Frame {
@@ -32,28 +39,38 @@ impl CipherFrame for M209Frame {
         ui.false_control_string(Alphabet::BasicLatin);
         ui.add_space(8.0);
 
-        ui.subheading("Rotor Settings");
-        for rotor in self.cipher.get_wheels() {
+        ui.subheading("Rotors");
+        for (n, (rotor, pins)) in self
+            .cipher
+            .get_wheels()
+            .zip(&mut self.effective_pins)
+            .enumerate()
+        {
             let len = rotor.rotor_length() - 1;
             ui.add(Slider::new(&mut rotor.active, 0..=len).show_value(false));
             ui.label(format!("{}", rotor));
+            ui.add_space(4.0);
+            if ui.control_string(pins).changed() {
+                filter_string(pins, M209_ALPHABETS[n]);
+                rotor
+                    .set_pins(pins)
+                    .expect("filtering should prevent invalid pins from being reached");
+            };
+            ui.add_space(8.0);
         }
-        ui.add_space(8.0);
+        ui.add_space(16.0);
 
         let lugs = &mut self.cipher.lugs;
-        ui.subheading("Lugs");
+        ui.subheading("Lug Pairs");
         for triple in lugs.chunks_exact_mut(3) {
             ui.horizontal(|ui| {
                 lug_pair(ui, &mut triple[0]);
-                ui.add_space(4.0);
-                ui.separator();
-                ui.add_space(4.0);
+                ui.add_space(8.0);
                 lug_pair(ui, &mut triple[1]);
-                ui.add_space(4.0);
-                ui.separator();
-                ui.add_space(4.0);
+                ui.add_space(8.0);
                 lug_pair(ui, &mut triple[2]);
             });
+            ui.add_space(8.0);
         }
     }
 

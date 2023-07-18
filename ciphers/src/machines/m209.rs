@@ -115,7 +115,7 @@ impl fmt::Display for Rotor {
                 s.push(*letter)
             }
         }
-        s.push_str(&format!(" ({})", self.pins.iter().collect::<String>()));
+        // s.push_str(&format!(" ({})", self.pins.iter().collect::<String>()));
         write!(f, "{}", s)
     }
 }
@@ -132,6 +132,14 @@ lazy_static! {
             Rotor::new("ABCDEFGHIJKLMNOPQ", 10),
         ]
     };
+    pub static ref M209_ALPHABETS: [&'static str; 6] = [
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        "ABCDEFGHIJKLMNOPQRSTUVXYZ",
+        "ABCDEFGHIJKLMNOPQRSTUVX",
+        "ABCDEFGHIJKLMNOPQRSTU",
+        "ABCDEFGHIJKLMNOPQRS",
+        "ABCDEFGHIJKLMNOPQ"
+    ];
 }
 
 fn char_to_usize(c: char) -> usize {
