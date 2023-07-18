@@ -2,19 +2,18 @@ use ciphers::{errors::CipherError, ids::CipherId, traits::Cipher};
 use egui::Ui;
 
 use self::{
-    adfgvx_controls::AdfgvxFrame, affine_controls::AffineFrame, alberti_controls::AlbertiFrame,
-    amsco_controls::AmscoFrame, b64_controls::B64Frame, batco_controls::BatcoFrame,
-    bazeries_controls::BazeriesFrame, beaufort_controls::BeaufortFrame, bifid_controls::BifidFrame,
-    caesar_controls::CaesarFrame, chaocipher_controls::ChaocipherFrame,
-    checkerboard_controls::StraddlingCheckerboardFrame, columnar_controls::ColumnarFrame,
-    decoder_ring_controls::DecoderRingFrame, dryad_controls::DryadFrame,
-    enigma_controls::EnigmaM3Frame, four_square_controls::FourSquareFrame,
-    general_sub_controls::GeneralSubstitutionFrame, grille_controls::GrilleFrame,
-    hebern_controls::HebernFrame, hutton_controls::HuttonFrame, m209_controls::M209Frame,
-    m94_controls::M94Frame, nihilist_controls::NihilistFrame, playfair_controls::PlayfairFrame,
-    plugboard_controls::PlugboardFrame, polybius_cube_controls::PolybiusCubeFrame,
-    polybius_square_controls::PolybiusSquareFrame, porta_controls::PortaFrame,
-    purple_controls::PurpleFrame, quagmire_controls::QuagmireFrame,
+    adfgvx_controls::AdfgvxFrame, affine_controls::AffineFrame, amsco_controls::AmscoFrame,
+    b64_controls::B64Frame, batco_controls::BatcoFrame, bazeries_controls::BazeriesFrame,
+    beaufort_controls::BeaufortFrame, bifid_controls::BifidFrame, caesar_controls::CaesarFrame,
+    chaocipher_controls::ChaocipherFrame, checkerboard_controls::StraddlingCheckerboardFrame,
+    columnar_controls::ColumnarFrame, decoder_ring_controls::DecoderRingFrame,
+    dryad_controls::DryadFrame, enigma_controls::EnigmaM3Frame,
+    four_square_controls::FourSquareFrame, general_sub_controls::GeneralSubstitutionFrame,
+    grille_controls::GrilleFrame, hebern_controls::HebernFrame, hutton_controls::HuttonFrame,
+    m209_controls::M209Frame, m94_controls::M94Frame, nihilist_controls::NihilistFrame,
+    playfair_controls::PlayfairFrame, plugboard_controls::PlugboardFrame,
+    polybius_cube_controls::PolybiusCubeFrame, polybius_square_controls::PolybiusSquareFrame,
+    porta_controls::PortaFrame, purple_controls::PurpleFrame, quagmire_controls::QuagmireFrame,
     rail_fence_controls::RailFenceFrame, rs44_controls::Rs44Frame, scytale_controls::ScytaleFrame,
     seriated_playfair::SeriatedPlayfairFrame, shamir_control::ShamirSecretSharingFrame,
     sigaba_controls::SigabaFrame, slidefair_controls::SlidefairFrame, trifid_controls::TrifidFrame,
@@ -112,7 +111,7 @@ pub struct CipherInterface {
     purple: PurpleFrame,
 
     // Polyalphabetic
-    alberti: AlbertiFrame,
+    // alberti: AlbertiFrame,
     bazeries: BazeriesFrame,
     beaufort: BeaufortFrame,
     chaocipher: ChaocipherFrame,
@@ -186,7 +185,7 @@ impl CipherInterface {
 
         combox_box(
             &[
-                CipherId::Alberti,
+                // CipherId::Alberti,
                 CipherId::Bazeries,
                 CipherId::Beaufort,
                 CipherId::Chaocipher,
@@ -258,7 +257,7 @@ impl CipherInterface {
         match active_cipher {
             CipherId::Adfgvx => &mut self.adfgvx,
             CipherId::Affine => &mut self.affine,
-            CipherId::Alberti => &mut self.alberti,
+            // CipherId::Alberti => &mut self.alberti,
             CipherId::Amsco => &mut self.amsco,
             CipherId::B64 => &mut self.b64,
             CipherId::Batco => &mut self.batco,

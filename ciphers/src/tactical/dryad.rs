@@ -3,9 +3,7 @@ use rand::{thread_rng, Rng};
 
 pub struct Dryad {
     pub cipher_rows: [String; 25],
-    pub message_key: u8, // easy conversion with char
-                         // pub seed_string: String,
-                         // pub seed: u64,
+    pub message_key: usize, // easy conversion with char
 }
 
 impl Default for Dryad {
@@ -39,17 +37,11 @@ impl Default for Dryad {
                 "WIVGMCAHPSRXEQODFKLUYJTNZB".to_string(),
             ],
             message_key: 0,
-            // seed_string: "0".to_string(),
-            // seed: 0,
         }
     }
 }
 
 impl Dryad {
-    pub fn message_key_to_char(&self) -> char {
-        (self.message_key + 65) as char
-    }
-
     pub fn show_code_page(&self) -> String {
         let breaks = [0, 4, 7, 10, 12, 14, 17, 19, 21, 23, 25];
         let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXY";
@@ -72,7 +64,7 @@ impl Dryad {
 impl Cipher for Dryad {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let breaks = [0, 4, 7, 10, 12, 14, 17, 19, 21, 23, 25];
-        let alphabet = &self.cipher_rows[self.message_key as usize];
+        let alphabet = &self.cipher_rows[self.message_key];
 
         let mut out = String::with_capacity(text.len());
 
@@ -91,7 +83,7 @@ impl Cipher for Dryad {
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         let digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-        let alphabet = &self.cipher_rows[self.message_key as usize];
+        let alphabet = &self.cipher_rows[self.message_key];
 
         let mut out = String::with_capacity(text.len());
         for c in text.chars() {

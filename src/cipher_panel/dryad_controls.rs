@@ -1,11 +1,9 @@
+use super::CipherFrame;
+use crate::ui_elements::UiElements;
 use ciphers::{tactical::Dryad, Cipher};
-use egui::{Slider, Ui};
+use egui::Ui;
 use rand::thread_rng;
 use utils::{preset_alphabet::Alphabet, text_functions::shuffled_str};
-
-use crate::ui_elements::UiElements;
-
-use super::CipherFrame;
 
 #[derive(Default)]
 pub struct DryadFrame {
@@ -18,14 +16,7 @@ impl CipherFrame for DryadFrame {
         ui.add_space(16.0);
 
         ui.subheading("Message Key");
-        ui.horizontal(|ui| {
-            ui.mono(self.cipher.message_key_to_char());
-            ui.add(
-                Slider::new(&mut self.cipher.message_key, 0..=24)
-                    .clamp_to_range(true)
-                    .show_value(false),
-            );
-        });
+        ui.string_slider("ABCDEFGHIJKLMNOPQRSTUVWXY", &mut self.cipher.message_key);
 
         ui.add_space(16.0);
 
