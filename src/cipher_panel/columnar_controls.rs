@@ -7,7 +7,7 @@ use eframe::egui::Ui;
 use rand::{thread_rng, Rng};
 use utils::grid::Grid;
 use utils::preset_alphabet::Alphabet;
-use utils::text_functions::{filter_string, random_sample_replace};
+use utils::text_functions::{filter_string, random_string_sample_replace};
 
 pub struct ColumnarFrame {
     cipher: Columnar,
@@ -128,7 +128,7 @@ impl CipherFrame for ColumnarFrame {
         let mut rng = thread_rng();
         let n_chars = rng.gen_range(6..10);
 
-        self.key_string = random_sample_replace(&self.alphabet_string, n_chars, &mut rng);
+        self.key_string = random_string_sample_replace(&self.alphabet_string, n_chars, &mut rng);
 
         self.assign_key();
         self.set_example();

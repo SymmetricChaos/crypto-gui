@@ -5,7 +5,7 @@ use egui::Ui;
 use rand::{thread_rng, Rng};
 use utils::{
     preset_alphabet::Alphabet,
-    text_functions::{filter_string, random_sample_replace, shuffled_str},
+    text_functions::{filter_string, random_string_sample_replace, shuffled_str},
 };
 
 #[derive(Default)]
@@ -85,7 +85,7 @@ impl CipherFrame for B64Frame {
         // First columnar
         let n_chars = rng.gen_range(6..12);
         self.columnar_key_string_1 =
-            random_sample_replace(Alphabet::BasicLatin.slice(), n_chars, &mut rng);
+            random_string_sample_replace(Alphabet::BasicLatin.slice(), n_chars, &mut rng);
         self.cipher
             .assign_columnar_key_1(&self.columnar_key_string_1)
             .unwrap(); // unwrap justified by pulling from BasicLatin alphabet
@@ -93,7 +93,7 @@ impl CipherFrame for B64Frame {
         // Second columnar
         let n_chars = rng.gen_range(6..12);
         self.columnar_key_string_2 =
-            random_sample_replace(Alphabet::BasicLatin.slice(), n_chars, &mut rng);
+            random_string_sample_replace(Alphabet::BasicLatin.slice(), n_chars, &mut rng);
         self.cipher
             .assign_columnar_key_1(&self.columnar_key_string_2)
             .unwrap(); // unwrap justified by pulling from BasicLatin alphabet

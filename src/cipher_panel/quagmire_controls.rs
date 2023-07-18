@@ -6,7 +6,7 @@ use ciphers::{
 };
 use egui::Ui;
 use rand::thread_rng;
-use utils::{preset_alphabet::Alphabet, text_functions::random_sample_replace};
+use utils::{preset_alphabet::Alphabet, text_functions::random_string_sample_replace};
 
 pub struct QuagmireFrame {
     cipher: Quagmire,
@@ -94,9 +94,9 @@ impl CipherFrame for QuagmireFrame {
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        self.ct_key_string = random_sample_replace(&self.alphabet_string, 9, &mut rng);
-        self.pt_key_string = random_sample_replace(&self.alphabet_string, 9, &mut rng);
-        self.ind_key_string = random_sample_replace(&self.alphabet_string, 9, &mut rng);
+        self.ct_key_string = random_string_sample_replace(&self.alphabet_string, 9, &mut rng);
+        self.pt_key_string = random_string_sample_replace(&self.alphabet_string, 9, &mut rng);
+        self.ind_key_string = random_string_sample_replace(&self.alphabet_string, 9, &mut rng);
         self.cipher.assign_ct_key(&self.ct_key_string);
         self.cipher.assign_pt_key(&self.pt_key_string);
         self.cipher

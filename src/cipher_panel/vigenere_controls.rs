@@ -8,7 +8,7 @@ use egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
 use utils::{
     preset_alphabet::Alphabet,
-    text_functions::{filter_string, random_sample_replace},
+    text_functions::{filter_string, random_string_sample_replace},
 };
 
 pub struct VigenereFrame {
@@ -99,7 +99,8 @@ impl CipherFrame for VigenereFrame {
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         for keyword in self.cipher.keywords.iter_mut() {
-            *keyword = random_sample_replace(&self.alphabet_string, rng.gen_range(3..12), &mut rng);
+            *keyword =
+                random_string_sample_replace(&self.alphabet_string, rng.gen_range(3..12), &mut rng);
         }
     }
 

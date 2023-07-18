@@ -5,7 +5,7 @@ use eframe::egui::Ui;
 use rand::{thread_rng, Rng};
 use utils::{
     preset_alphabet::Alphabet,
-    text_functions::{filter_string, random_sample_replace, shuffled_str},
+    text_functions::{filter_string, random_string_sample_replace, shuffled_str},
 };
 
 pub struct NihilistFrame {
@@ -105,7 +105,7 @@ impl CipherFrame for NihilistFrame {
         let mut rng = thread_rng();
         self.polybius_key_string = shuffled_str(&self.alphabet_string, &mut rng);
         self.additive_key_string =
-            random_sample_replace(&self.alphabet_string, rng.gen_range(3..12), &mut rng);
+            random_string_sample_replace(&self.alphabet_string, rng.gen_range(3..12), &mut rng);
         self.assign_keys();
     }
 

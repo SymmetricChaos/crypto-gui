@@ -8,7 +8,7 @@ use egui::Ui;
 use rand::{thread_rng, Rng};
 use utils::{
     preset_alphabet::Alphabet,
-    text_functions::{filter_string, random_sample_replace},
+    text_functions::{filter_string, random_string_sample_replace},
 };
 
 #[derive(Default)]
@@ -95,7 +95,8 @@ impl CipherFrame for PortaFrame {
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         let n_chars = rng.gen_range(6..10);
-        self.key_string = random_sample_replace(Alphabet::BasicLatin.into(), n_chars, &mut rng);
+        self.key_string =
+            random_string_sample_replace(Alphabet::BasicLatin.into(), n_chars, &mut rng);
         self.cipher
             .assign_key(&self.key_string)
             .expect("randomizer picked invalid characters")

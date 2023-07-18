@@ -6,7 +6,7 @@ use ciphers::{
 };
 use egui::{ComboBox, Label, Slider, Ui};
 use rand::{thread_rng, Rng};
-use utils::{preset_alphabet::Alphabet, text_functions::random_sample};
+use utils::{preset_alphabet::Alphabet, text_functions::random_string_sample};
 
 #[derive(Default)]
 pub struct EnigmaM3Frame {
@@ -16,7 +16,7 @@ pub struct EnigmaM3Frame {
 
 impl EnigmaM3Frame {
     fn randomize_plugboard(&mut self) {
-        let alpha = random_sample(Alphabet::BasicLatin.slice(), 14, &mut thread_rng());
+        let alpha = random_string_sample(Alphabet::BasicLatin.slice(), 14, &mut thread_rng());
         let mut cs = alpha.chars();
         self.plugboard_string.clear();
         for _ in 0..7 {

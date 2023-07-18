@@ -4,11 +4,11 @@ use ciphers::{
     machines::m209::{M209, M209_ALPHABETS},
     Cipher,
 };
-use egui::{Slider, Ui};
+use egui::Ui;
 use rand::{thread_rng, Fill};
 use utils::{
     preset_alphabet::Alphabet,
-    text_functions::{filter_string, random_sample},
+    text_functions::{filter_unique_string, random_string_sample},
 };
 
 fn lug_pair(ui: &mut egui::Ui, pair: &mut (usize, usize)) {
@@ -36,21 +36,25 @@ impl CipherFrame for M209Frame {
         ui.add_space(8.0);
 
         ui.subheading("Alphabet");
+        ui.label("The M029 can only use the basic Latin alphabet.");
         ui.false_control_string(Alphabet::BasicLatin);
         ui.add_space(8.0);
 
         ui.subheading("Rotors");
-        for (n, (rotor, pins)) in self
+        ui.label("Each rotor shows its fixed alphabet. The active letter is chosen by the slider next to it. Below the effective pins may be chosen. Notice that the lengths of the alphabets are 26, 25, 23, 21, 19, 17 which are pairwise coprime.");
+        ui.add_space(4.0);
+        for ((rotor, pins), alphabet) in self
             .cipher
             .get_wheels()
             .zip(&mut self.effective_pins)
-            .enumerate()
+            .zip(M209_ALPHABETS.iter())
         {
-            let len = rotor.rotor_length() - 1;
-            ui.add(Slider::new(&mut rotor.active, 0..=len).show_value(false));
-            ui.mono(&rotor);
+            ui.horizontal(|ui| {
+                ui.mono(alphabet);
+                ui.string_slider(alphabet, &mut rotor.active);
+            });
             if ui.control_string(pins).changed() {
-                filter_string(pins, M209_ALPHABETS[n]);
+                filter_unique_string(pins, alphabet);
                 rotor
                     .set_pins(pins)
                     .expect("filtering should prevent invalid pins from being reached");
@@ -62,6 +66,7 @@ impl CipherFrame for M209Frame {
 
         let lugs = &mut self.cipher.lugs;
         ui.subheading("Lug Pairs");
+        ui.label("There are 27 pairs of lugs each of which may be set to the values 1-6 or set to 0 to make then inactive.");
         for triple in lugs.chunks_exact_mut(3) {
             ui.horizontal(|ui| {
                 lug_pair(ui, &mut triple[0]);
@@ -97,7 +102,7 @@ impl CipherFrame for M209Frame {
             .zip(M209_ALPHABETS.iter())
             .zip(self.cipher.get_wheels())
         {
-            *pins = random_sample(alphabet, 12, &mut rng);
+            *pins = random_string_sample(alphabet, 12, &mut rng);
             rotor
                 .set_pins(pins)
                 .expect("random pins should be drawn only from valid alphabets");

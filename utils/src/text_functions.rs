@@ -7,8 +7,23 @@ use rand::{
 };
 use std::hash::Hash;
 
+// Mutate a string so that it contains only characters in a provided alphabet
 pub fn filter_string(string: &mut String, alphabet: &str) {
     *string = string.chars().filter(|c| alphabet.contains(*c)).collect();
+}
+
+// Mutate a string so that it contains only unique characters
+pub fn unique_string(string: &mut String) {
+    *string = string.chars().unique().collect();
+}
+
+// Mutate a string so that it contains only characters in a provided alphabet and only unique characters
+pub fn filter_unique_string(string: &mut String, alphabet: &str) {
+    *string = string
+        .chars()
+        .filter(|c| alphabet.contains(*c))
+        .unique()
+        .collect();
 }
 
 pub fn bimap_from_iter<I, S, T>(iter: I) -> BiMap<S, T>
@@ -45,6 +60,25 @@ pub fn string_chunks(text: &str, width: usize) -> Vec<String> {
         .into_iter()
         .map(|chunk| chunk.collect::<String>())
         .collect_vec()
+}
+
+pub fn shuffled_str<R: Rng>(s: &str, rng: &mut R) -> String {
+    let mut characters = s.chars().collect::<Vec<char>>();
+    let slice = characters.as_mut_slice();
+    slice.shuffle(rng);
+    slice.iter().map(|x| *x).collect::<String>()
+}
+
+pub fn random_string_sample<R: Rng>(s: &str, n: usize, rng: &mut R) -> String {
+    s.chars().choose_multiple(rng, n).iter().collect()
+}
+
+pub fn random_string_sample_replace<R: Rng>(s: &str, n: usize, rng: &mut R) -> String {
+    let mut out = String::with_capacity(n);
+    for _ in 0..n {
+        out.push(s.chars().choose(rng).unwrap())
+    }
+    out
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -135,25 +169,6 @@ pub fn u8_to_string_with_radix_and_width(byte: &u8, radix: u8, width: usize) -> 
     }
     let zeroes = std::iter::repeat('0' as u8).take(width - s.len());
     String::from_utf8(zeroes.chain(s.into_iter().rev()).collect()).unwrap()
-}
-
-pub fn shuffled_str<R: Rng>(s: &str, rng: &mut R) -> String {
-    let mut characters = s.chars().collect::<Vec<char>>();
-    let slice = characters.as_mut_slice();
-    slice.shuffle(rng);
-    slice.iter().map(|x| *x).collect::<String>()
-}
-
-pub fn random_sample<R: Rng>(s: &str, n: usize, rng: &mut R) -> String {
-    s.chars().choose_multiple(rng, n).iter().collect()
-}
-
-pub fn random_sample_replace<R: Rng>(s: &str, n: usize, rng: &mut R) -> String {
-    let mut out = String::with_capacity(n);
-    for _ in 0..n {
-        out.push(s.chars().choose(rng).unwrap())
-    }
-    out
 }
 
 pub fn random_char_vec<R: Rng>(s: &str, n: usize, rng: &mut R) -> Vec<char> {
@@ -258,19 +273,19 @@ pub fn keyed_alphabet(keyword: &str, alphabet: &str) -> String {
     keyed_alpha
 }
 
-pub fn dedup_alphabet(s: &str) -> String {
-    let mut seen: Vec<char> = Vec::with_capacity(s.len());
-    let mut out = String::with_capacity(s.len());
-    for c in s.chars() {
-        if seen.contains(&c) {
-            continue;
-        } else {
-            out.push(c);
-            seen.push(c)
-        }
-    }
-    out
-}
+// pub fn dedup_alphabet(s: &str) -> String {
+//     let mut seen: Vec<char> = Vec::with_capacity(s.len());
+//     let mut out = String::with_capacity(s.len());
+//     for c in s.chars() {
+//         if seen.contains(&c) {
+//             continue;
+//         } else {
+//             out.push(c);
+//             seen.push(c)
+//         }
+//     }
+//     out
+// }
 
 #[cfg(test)]
 mod text_function_tests {
