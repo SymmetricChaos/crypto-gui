@@ -8,7 +8,7 @@ use egui::{Slider, Ui};
 use rand::{thread_rng, Fill};
 use utils::{
     preset_alphabet::Alphabet,
-    text_functions::{filter_string, random_char_vec},
+    text_functions::{filter_string, random_sample},
 };
 
 fn lug_pair(ui: &mut egui::Ui, pair: &mut (usize, usize)) {
@@ -48,14 +48,14 @@ impl CipherFrame for M209Frame {
         {
             let len = rotor.rotor_length() - 1;
             ui.add(Slider::new(&mut rotor.active, 0..=len).show_value(false));
-            ui.label(format!("{}", rotor));
-            ui.add_space(4.0);
+            ui.mono(&rotor);
             if ui.control_string(pins).changed() {
                 filter_string(pins, M209_ALPHABETS[n]);
                 rotor
                     .set_pins(pins)
                     .expect("filtering should prevent invalid pins from being reached");
             };
+
             ui.add_space(8.0);
         }
         ui.add_space(16.0);
@@ -65,12 +65,12 @@ impl CipherFrame for M209Frame {
         for triple in lugs.chunks_exact_mut(3) {
             ui.horizontal(|ui| {
                 lug_pair(ui, &mut triple[0]);
-                ui.add_space(8.0);
+                ui.add_space(10.0);
                 lug_pair(ui, &mut triple[1]);
-                ui.add_space(8.0);
+                ui.add_space(10.0);
                 lug_pair(ui, &mut triple[2]);
             });
-            ui.add_space(8.0);
+            ui.add_space(10.0);
         }
     }
 
@@ -91,19 +91,16 @@ impl CipherFrame for M209Frame {
             .try_into()
             .unwrap();
 
-        let pins1 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 13, &mut rng);
-        let pins2 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVXYZ", 12, &mut rng);
-        let pins3 = random_char_vec("ABCDEFGHIJKLMNOPQRSTUVX", 12, &mut rng);
-        let pins4 = random_char_vec("ABCDEFGHIJKLMNOPQRSTU", 12, &mut rng);
-        let pins5 = random_char_vec("ABCDEFGHIJKLMNOPQRS", 12, &mut rng);
-        let pins6 = random_char_vec("ABCDEFGHIJKLMNOPQ", 12, &mut rng);
-
-        for (rotor, new_pins) in self
-            .cipher
-            .get_wheels()
-            .zip([pins1, pins2, pins3, pins4, pins5, pins6].iter())
+        for ((pins, alphabet), rotor) in self
+            .effective_pins
+            .iter_mut()
+            .zip(M209_ALPHABETS.iter())
+            .zip(self.cipher.get_wheels())
         {
-            rotor.pins = new_pins.clone()
+            *pins = random_sample(alphabet, 12, &mut rng);
+            rotor
+                .set_pins(pins)
+                .expect("random pins should be drawn only from valid alphabets");
         }
     }
 

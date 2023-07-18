@@ -64,7 +64,7 @@ impl Rotor {
                 ));
             }
         }
-        self.pins = pins.chars().collect();
+        self.pins = pins.chars().unique().collect();
         Ok(())
     }
 
