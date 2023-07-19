@@ -23,21 +23,24 @@ impl Default for ShamirSecretSharingFrame {
 
 impl CipherFrame for ShamirSecretSharingFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        ui.label("Threshold");
+        ui.subheading("Threshold");
+        ui.label("Number of points needed to reconstruct the secret number.");
         ui.add(Slider::new(&mut self.cipher.threshold, 3..=12));
 
         ui.add_space(8.0);
-        ui.label("Shares");
+        ui.subheading("Shares");
+        ui.label("Number of points to create in total. Cannot be less than the threshold.");
         ui.add(Slider::new(&mut self.cipher.shares, 3..=20));
         if self.cipher.threshold > self.cipher.shares {
             self.cipher.shares = self.cipher.threshold;
         }
         ui.add_space(8.0);
 
-        ui.checkbox(&mut self.cipher.random_shares, "Use Random Shares");
-        ui.add_space(8.0);
+        // Unlikely a user would want any other option. Nonrandom shares only needed for testing.
+        // ui.checkbox(&mut self.cipher.random_shares, "Use Random Shares");
+        // ui.add_space(8.0);
 
-        ui.label("Polynomial");
+        ui.subheading("Polynomial");
         if ui.control_string(&mut self.polynomial_string).changed() {
             match self.cipher.sting_to_vec(&self.polynomial_string) {
                 Ok(_) => (),
@@ -48,10 +51,11 @@ impl CipherFrame for ShamirSecretSharingFrame {
         }
         ui.label(self.cipher.polynomial_string());
         ui.add_space(4.0);
-        ui.label("(secret number becomes the constant coefficient)");
+        ui.label("(note constant coefficient is not used, that value is the secret itself)");
         ui.add_space(8.0);
 
-        ui.label("Field Size");
+        ui.subheading("Field Size");
+        ui.label("A prime numbner less than 2^32-1. The default value 4294967029 is the largest possibe. The secret message cannot have a value larger than the field size.");
         if ui.control_string(&mut self.modulus_string).changed() {
             filter_string(&mut self.modulus_string, "0123456789");
             match u32::from_str_radix(&self.modulus_string, 10) {
