@@ -111,13 +111,6 @@ impl ShamirSecretSharing {
                 "cannot require a greater threshold than shares",
             ));
         };
-        Ok(())
-    }
-}
-
-impl Cipher for ShamirSecretSharing {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        self.check_state()?;
 
         if self.degree() != (self.threshold - 1) as usize {
             return Err(CipherError::State(format!(
@@ -125,6 +118,13 @@ impl Cipher for ShamirSecretSharing {
                 self.threshold - 1
             )));
         }
+        Ok(())
+    }
+}
+
+impl Cipher for ShamirSecretSharing {
+    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+        self.check_state()?;
 
         let secret =
             u32::from_str_radix(text, 10).map_err(|e| CipherError::Input(e.to_string()))?;
@@ -178,9 +178,9 @@ impl Cipher for ShamirSecretSharing {
             pairs.push((x, y));
         }
 
-        if pairs.len() < self.threshold as usize {
+        if pairs.len() != self.threshold as usize {
             return Err(CipherError::Input(format!(
-                "threshold requires at least {} pairs",
+                "threshold requires exactly {} pairs of the form (a,b) where a and b are positive integers",
                 self.threshold
             )));
         }

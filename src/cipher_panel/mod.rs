@@ -15,7 +15,7 @@ use self::{
     polybius_cube_controls::PolybiusCubeFrame, polybius_square_controls::PolybiusSquareFrame,
     porta_controls::PortaFrame, purple_controls::PurpleFrame, quagmire_controls::QuagmireFrame,
     rail_fence_controls::RailFenceFrame, rs44_controls::Rs44Frame, scytale_controls::ScytaleFrame,
-    seriated_playfair::SeriatedPlayfairFrame, shamir_control::ShamirSecretSharingFrame,
+    seriated_playfair_controls::SeriatedPlayfairFrame, shamir_controls::ShamirSecretSharingFrame,
     sigaba_controls::SigabaFrame, slidefair_controls::SlidefairFrame, trifid_controls::TrifidFrame,
     turning_grille_controls::TurningGrilleFrame, two_square_controls::TwoSquareFrame,
     vigenere_controls::VigenereFrame,
@@ -55,8 +55,8 @@ pub mod quagmire_controls;
 pub mod rail_fence_controls;
 pub mod rs44_controls;
 pub mod scytale_controls;
-pub mod seriated_playfair;
-pub mod shamir_control;
+pub mod seriated_playfair_controls;
+pub mod shamir_controls;
 pub mod sigaba_controls;
 pub mod slidefair_controls;
 pub mod trifid_controls;

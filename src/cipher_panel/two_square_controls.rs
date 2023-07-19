@@ -33,7 +33,7 @@ impl CipherFrame for TwoSquareFrame {
         ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.label("Common Alphabets");
+        ui.subheading("Common Alphabets");
         ui.horizontal(|ui| {
             for (name, alphabet) in [
                 ("No C", Alphabet::BasicLatinNoC),
@@ -53,14 +53,15 @@ impl CipherFrame for TwoSquareFrame {
         });
         ui.add_space(10.0);
 
-        ui.label("Alphabet");
+        ui.subheading("Alphabet");
         if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher
                 .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
         }
         ui.add_space(16.0);
 
-        ui.label("Spacer Character\nInserted at end as padding if needed");
+        ui.subheading("Spacer Character");
+        ui.label("Inserted at the end if needed.");
         if ui
             .string_slider(&self.alphabet_string, &mut self.spacer_position)
             .changed()
@@ -73,21 +74,21 @@ impl CipherFrame for TwoSquareFrame {
         }
         ui.add_space(16.0);
 
-        ui.label("Keyword 1");
+        ui.subheading("Keyword 1");
         if ui.control_string(&mut self.keyword_1).changed() {
             self.cipher
                 .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
         }
 
-        ui.add_space(16.0);
-        ui.label("Keyword 2");
+        ui.add_space(8.0);
+        ui.subheading("Keyword 2");
         if ui.control_string(&mut self.keyword_2).changed() {
             self.cipher
                 .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
         }
 
         ui.horizontal(|ui| {
-            ui.label("Grids");
+            ui.subheading("Grids");
             if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
                 ui.output_mut(|o| {
                     o.copied_text = format!(

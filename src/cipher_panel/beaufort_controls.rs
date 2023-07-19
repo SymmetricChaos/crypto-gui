@@ -49,7 +49,7 @@ impl CipherFrame for BeaufortFrame {
         });
 
         ui.add_enabled_ui(self.cipher.mode == PolyMode::ProgKey, |ui| {
-            ui.label("Step size");
+            ui.subheading("Step size");
             let alpha_range = 0..=(self.cipher.alphabet_len() - 1);
             ui.add(Slider::new(&mut self.cipher.prog_shift, alpha_range));
             ui.add_space(8.0);

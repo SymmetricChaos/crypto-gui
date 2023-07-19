@@ -39,7 +39,7 @@ impl CipherFrame for TurningGrilleFrame {
         ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.label("Keys");
+        ui.subheading("Keys");
         ui.label(format!(
             "The numbers from 0 to {} should all be used exactly once among the keys",
             self.cipher.subgrille_size() - 1
@@ -102,7 +102,7 @@ impl CipherFrame for TurningGrilleFrame {
         });
 
         ui.add_space(16.0);
-        ui.label("Letters to Use as Nulls");
+        ui.subheading("Letters to Use as Nulls");
         if ui.control_string(&mut self.null_alphabet_string).changed() {
             self.cipher.assign_null_alphabet(&self.null_alphabet_string);
         };

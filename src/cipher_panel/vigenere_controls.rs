@@ -30,7 +30,7 @@ impl CipherFrame for VigenereFrame {
         ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.label("Alphabet");
+        ui.subheading("Alphabet");
         if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher.assign_alphabet(&self.alphabet_string);
             for keyword in self.cipher.keywords.iter_mut() {
@@ -49,7 +49,7 @@ impl CipherFrame for VigenereFrame {
         });
 
         ui.add_enabled_ui(self.cipher.mode == PolyMode::ProgKey, |ui| {
-            ui.label("Step size");
+            ui.subheading("Step size");
             let alpha_range = 0..=(self.cipher.alphabet_len() - 1);
             ui.add(Slider::new(&mut self.cipher.prog_shift, alpha_range));
             ui.add_space(8.0);
@@ -57,9 +57,9 @@ impl CipherFrame for VigenereFrame {
 
         ui.horizontal(|ui| {
             if self.cipher.multikey {
-                ui.label("Keywords");
+                ui.subheading("Keywords");
             } else {
-                ui.label("Keyword ");
+                ui.subheading("Keyword ");
             }
 
             ui.separator();

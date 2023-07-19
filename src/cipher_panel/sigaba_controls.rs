@@ -1,3 +1,5 @@
+use crate::ui_elements::UiElements;
+
 use super::CipherFrame;
 use ciphers::{
     machines::sigaba::{Sigaba, BIG_ROTOR_VEC},
@@ -37,8 +39,7 @@ impl CipherFrame for SigabaFrame {
         ///////////////////////
         let cipher_rotors = self.cipher.cipher_rotors();
         ui.add_space(10.0);
-        ui.label(
-            RichText::new("Cipher Rotors").heading()
+        ui.subheading("Cipher Rotors"
         ).on_hover_text("Message passes through these rotors during operation. Their pseudorandom movement is decided by the Control Rotors and Index Rotors.");
         for i in 0..5 {
             ui.horizontal(|ui| {
@@ -64,8 +65,8 @@ impl CipherFrame for SigabaFrame {
         ////////////////////////
         let control_rotors = self.cipher.control_rotors();
         ui.add_space(20.0);
-        ui.label(
-            RichText::new("Control Rotors").heading()
+        ui.subheading(
+            "Control Rotors"
         ).on_hover_text("These rotors move in a simple pattern during operation to produce control signals and send that to the Index Rotors.");
         for i in 0..5 {
             ui.horizontal(|ui| {
@@ -90,8 +91,8 @@ impl CipherFrame for SigabaFrame {
         //// INDEX ROTORS ////
         //////////////////////
         ui.add_space(20.0);
-        ui.label(
-            RichText::new("Index Rotors").heading()
+        ui.subheading(
+            "Index Rotors"
         ).on_hover_text("These rotors stay in position during encryption. The signal from the Control Rotors is sent through them to the Cipher Rotors to decide which move.");
         ui.horizontal(|ui| {
             for (n, rotor) in &mut self.cipher.index_rotors().iter_mut().enumerate() {

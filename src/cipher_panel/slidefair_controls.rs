@@ -28,19 +28,20 @@ impl CipherFrame for SlidefairFrame {
         ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.label("Alphabet");
+        ui.subheading("Alphabet");
         if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher.assign_alphabet(&self.alphabet_string)
         }
         ui.add_space(16.0);
 
-        ui.label("Keyword");
+        ui.subheading("Keyword");
         if ui.control_string(&mut self.keyword_string).changed() {
             self.cipher.assign_key(&self.keyword_string)
         }
         ui.add_space(16.0);
 
-        ui.label("Spacer Character\nInserted at end as padding if needed");
+        ui.subheading("Spacer Character");
+        ui.label("Inserted at end if needed.");
         if ui
             .string_slider(&self.alphabet_string, &mut self.spacer_position)
             .changed()
@@ -53,7 +54,7 @@ impl CipherFrame for SlidefairFrame {
         }
         ui.add_space(16.0);
 
-        ui.label("Grid");
+        ui.subheading("Grid");
         for row in self.cipher.rows() {
             ui.mono(row);
         }

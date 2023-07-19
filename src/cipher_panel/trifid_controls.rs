@@ -26,12 +26,11 @@ impl CipherFrame for TrifidFrame {
         ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        let block_size_range = 3..=30;
-        ui.label("Block Size");
-        ui.add(Slider::new(&mut self.cipher.block_size, block_size_range));
+        ui.subheading("Block Size");
+        ui.add(Slider::new(&mut self.cipher.block_size, 3..=30));
 
         ui.add_space(16.0);
-        ui.label("Alphabet");
+        ui.subheading("Alphabet");
         if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher
                 .polybius
@@ -39,7 +38,7 @@ impl CipherFrame for TrifidFrame {
         }
 
         ui.add_space(16.0);
-        ui.label("Keyword");
+        ui.subheading("Keyword");
         if ui.control_string(&mut self.key_string).changed() {
             self.cipher
                 .polybius
@@ -47,7 +46,7 @@ impl CipherFrame for TrifidFrame {
         }
         ui.add_space(16.0);
 
-        ui.label("Grid");
+        ui.subheading("Grid");
         let grids = self.cipher.polybius.show_grids();
         ui.horizontal(|ui| {
             ui.mono(&grids[0]);

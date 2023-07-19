@@ -81,15 +81,15 @@ impl CipherFrame for AmscoFrame {
 
         ui.add_space(16.0);
 
-        ui.collapsing("Example", |ui| {
-            ui.label("Example Plaintext");
+        ui.group(|ui| {
+            ui.subheading("Example Plaintext");
             if ui.control_string(&mut self.example).changed() {
                 self.build_example_grid();
             };
 
             ui.add_space(8.0);
 
-            ui.label("Grid");
+            ui.subheading("Example Grid");
             egui::Grid::new("amsco_grid")
                 .num_columns(self.example_grid.num_cols())
                 .min_col_width(20.0)

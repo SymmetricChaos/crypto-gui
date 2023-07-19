@@ -41,6 +41,10 @@ impl CipherFrame for ShamirSecretSharingFrame {
         // ui.add_space(8.0);
 
         ui.subheading("Polynomial");
+        ui.label(format!(
+            "Exactly {} integers must be provided.",
+            self.cipher.threshold - 1
+        ));
         if ui.control_string(&mut self.polynomial_string).changed() {
             match self.cipher.sting_to_vec(&self.polynomial_string) {
                 Ok(_) => (),
@@ -51,11 +55,13 @@ impl CipherFrame for ShamirSecretSharingFrame {
         }
         ui.label(self.cipher.polynomial_string());
         ui.add_space(4.0);
-        ui.label("(note constant coefficient is not used, that value is the secret itself)");
+        ui.label(
+            "Note that the constant coefficient is not used, during calculation the secret is inserted there.",
+        );
         ui.add_space(8.0);
 
         ui.subheading("Field Size");
-        ui.label("A prime numbner less than 2^32-1. The default value 4294967029 is the largest possibe. The secret message cannot have a value larger than the field size.");
+        ui.label("A positive prime less than 2^32-1. The secret message cannot have a value larger than the field size.");
         if ui.control_string(&mut self.modulus_string).changed() {
             filter_string(&mut self.modulus_string, "0123456789");
             match u32::from_str_radix(&self.modulus_string, 10) {
