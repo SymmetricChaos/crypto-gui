@@ -53,9 +53,7 @@ impl CipherFrame for B64Frame {
 
         ui.horizontal(|ui| {
             ui.subheading("Polybius Grid");
-            if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
-                ui.output_mut(|o| o.copied_text = self.cipher.polybius_grid())
-            }
+            ui.copy_to_clipboard(self.cipher.polybius_grid());
         });
         ui.mono(self.cipher.polybius_grid());
         ui.add_space(16.0);

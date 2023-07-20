@@ -69,9 +69,7 @@ impl CipherFrame for GrilleFrame {
 
         ui.horizontal(|ui| {
             ui.subheading("Grid");
-            if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
-                ui.output_mut(|o| o.copied_text = self.cipher.grid.to_string())
-            }
+            ui.copy_to_clipboard(self.cipher.grid.to_string());
         });
         ui.spacing_mut().item_spacing = (2.0, 2.0).into();
         ui.style_mut().override_text_style = Some(TextStyle::Monospace);

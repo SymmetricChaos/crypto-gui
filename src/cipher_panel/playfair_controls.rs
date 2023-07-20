@@ -83,9 +83,7 @@ impl CipherFrame for PlayfairFrame {
 
         ui.horizontal(|ui| {
             ui.subheading("Grid");
-            if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
-                ui.output_mut(|o| o.copied_text = self.cipher.to_string())
-            }
+            ui.copy_to_clipboard(self.cipher.to_string());
         });
         ui.mono(self.cipher.to_string());
     }

@@ -96,9 +96,7 @@ impl CipherFrame for TurningGrilleFrame {
                 self.cipher.grid.rotate()
             };
             ui.add_space(6.0);
-            if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
-                ui.output_mut(|o| o.copied_text = self.cipher.grid.to_string())
-            }
+            ui.copy_to_clipboard(self.cipher.grid.to_string());
         });
 
         ui.add_space(16.0);

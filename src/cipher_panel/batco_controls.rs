@@ -38,9 +38,7 @@ impl CipherFrame for BatcoFrame {
 
         ui.horizontal(|ui| {
             ui.subheading("Code Page");
-            if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
-                ui.output_mut(|o| o.copied_text = self.cipher.show_code_page())
-            }
+            ui.copy_to_clipboard(self.cipher.show_code_page());
         });
         ui.mono(&self.cipher.show_code_page());
     }

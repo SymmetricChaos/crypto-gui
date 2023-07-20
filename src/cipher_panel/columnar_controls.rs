@@ -83,9 +83,7 @@ impl CipherFrame for ColumnarFrame {
 
             ui.horizontal(|ui| {
                 ui.subheading("Grid");
-                if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
-                    ui.output_mut(|o| o.copied_text = self.example_grid.to_string())
-                }
+                ui.copy_to_clipboard(self.example_grid.to_string());
             });
             ui.add_space(4.0);
             if self.example.is_empty() {

@@ -46,9 +46,7 @@ impl CipherFrame for StraddlingCheckerboardFrame {
         ui.add_space(16.0);
         ui.horizontal(|ui| {
             ui.subheading("Checkerboard");
-            if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
-                ui.output_mut(|o| o.copied_text = self.cipher.cipher_page())
-            }
+            ui.copy_to_clipboard(self.cipher.cipher_page())
         });
         ui.label(RichText::new(self.cipher.cipher_page()).size(15.0));
     }

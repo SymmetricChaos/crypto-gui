@@ -79,9 +79,7 @@ impl CipherFrame for PolybiusSquareFrame {
         ui.add_space(16.0);
         ui.horizontal(|ui| {
             ui.subheading("Grid");
-            if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
-                ui.output_mut(|o| o.copied_text = self.cipher.show_grid())
-            }
+            ui.copy_to_clipboard(self.cipher.show_grid());
         });
         ui.mono(self.cipher.show_grid());
     }

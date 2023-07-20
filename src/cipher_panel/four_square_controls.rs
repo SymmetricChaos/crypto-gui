@@ -96,9 +96,7 @@ impl CipherFrame for FourSquareFrame {
         ui.add_space(16.0);
         ui.horizontal(|ui| {
             ui.subheading("Grid");
-            if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
-                ui.output_mut(|o| o.copied_text = self.cipher.grid_lines())
-            }
+            ui.copy_to_clipboard(self.cipher.grid_lines());
         });
         ui.mono(self.cipher.grid_lines());
     }

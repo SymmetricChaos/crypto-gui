@@ -28,6 +28,7 @@ pub trait UiElements {
         iter: Box<dyn Iterator<Item = (T, S)> + '_>,
     );
     fn binary_to_text_input_mode(&mut self, current_value: &mut BinaryToTextMode);
+    fn copy_to_clipboard<S: ToString>(&mut self, text: S);
 }
 
 impl UiElements for Ui {
@@ -123,6 +124,16 @@ impl UiElements for Ui {
             .on_hover_text("interpret input as hexcode");
         self.selectable_value(current_value, BinaryToTextMode::Utf8, "UTF-8")
             .on_hover_text("convert text to raw bytes");
+    }
+
+    fn copy_to_clipboard<S: ToString>(&mut self, text: S) {
+        if self
+            .button("📋")
+            .on_hover_text("copy to clipboard")
+            .clicked()
+        {
+            self.output_mut(|o| o.copied_text = text.to_string())
+        }
     }
 }
 

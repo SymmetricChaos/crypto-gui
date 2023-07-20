@@ -71,9 +71,7 @@ impl CipherFrame for AdfgvxFrame {
         ui.add_space(8.0);
         ui.horizontal(|ui| {
             ui.subheading("Polybius Grid");
-            if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
-                ui.output_mut(|o| o.copied_text = self.cipher.show_polybius_grid())
-            }
+            ui.copy_to_clipboard(self.cipher.show_polybius_grid());
         });
         ui.mono(self.cipher.show_polybius_grid());
         ui.add_space(8.0);

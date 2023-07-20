@@ -95,15 +95,11 @@ impl CipherFrame for TwoSquareFrame {
 
         ui.horizontal(|ui| {
             ui.subheading("Grids");
-            if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
-                ui.output_mut(|o| {
-                    o.copied_text = format!(
-                        "{}\n\n{}",
-                        self.cipher.show_square1(),
-                        self.cipher.show_square2()
-                    )
-                })
-            }
+            ui.copy_to_clipboard(format!(
+                "{}\n\n{}",
+                self.cipher.show_square1(),
+                self.cipher.show_square2()
+            ));
         });
         ui.mono(self.cipher.show_square1());
         ui.add_space(8.0);

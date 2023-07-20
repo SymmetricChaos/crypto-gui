@@ -106,9 +106,7 @@ impl CipherFrame for RailFenceFrame {
 
             ui.horizontal(|ui| {
                 ui.label(self.cipher.encrypt(&self.example).unwrap());
-                if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
-                    ui.output_mut(|o| o.copied_text = self.cipher.encrypt(&self.example).unwrap())
-                }
+                ui.copy_to_clipboard(self.cipher.encrypt(&self.example).unwrap());
             });
             ui.add_space(2.0);
         });
