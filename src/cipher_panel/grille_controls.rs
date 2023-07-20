@@ -43,7 +43,7 @@ impl CipherFrame for GrilleFrame {
         }
         ui.add_space(16.0);
 
-        ui.label("Rows");
+        ui.subheading("Rows");
         ui.horizontal(|ui| {
             if ui.button("-").clicked() {
                 self.cipher.grid.del_row();
@@ -55,7 +55,7 @@ impl CipherFrame for GrilleFrame {
         });
         ui.add_space(10.0);
 
-        ui.label("Columns");
+        ui.subheading("Columns");
         ui.horizontal(|ui| {
             if ui.button("-").clicked() {
                 self.cipher.grid.del_col();
@@ -68,7 +68,7 @@ impl CipherFrame for GrilleFrame {
         ui.add_space(16.0);
 
         ui.horizontal(|ui| {
-            ui.label("Grid");
+            ui.subheading("Grid");
             if ui.button("📋").on_hover_text("Copy to Clipboard").clicked() {
                 ui.output_mut(|o| o.copied_text = self.cipher.grid.to_string())
             }

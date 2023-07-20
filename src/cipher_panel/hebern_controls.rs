@@ -27,7 +27,8 @@ impl CipherFrame for HebernFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.randomize_reset(self);
         ui.add_space(8.0);
-        ui.label("Alphabet");
+
+        ui.subheading("Alphabet");
         if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher.set_alphabet(&self.alphabet_string);
             for rotor in self.cipher.rotors.rotors.iter_mut() {
@@ -38,7 +39,7 @@ impl CipherFrame for HebernFrame {
 
         ui.add_space(8.0);
         ui.horizontal(|ui| {
-            ui.label("Rotors");
+            ui.subheading("Rotors");
             ui.separator();
             if ui.button("randomize wiring").clicked() {
                 let mut rng = thread_rng();
