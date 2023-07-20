@@ -24,7 +24,7 @@ impl CipherFrame for PortaFrame {
 
         ui.subheading("Keyword");
         if ui.control_string(&mut self.key_string).changed() {
-            filter_string(&mut self.key_string, Alphabet::BasicLatin.slice());
+            filter_string(&mut self.key_string, &Alphabet::BasicLatin);
             match self.cipher.assign_key(&self.key_string) {
                 Ok(_) => (),
                 Err(e) => {

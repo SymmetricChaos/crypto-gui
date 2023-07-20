@@ -28,7 +28,7 @@ impl Default for AdfgvxFrame {
 
 impl AdfgvxFrame {
     fn assign_columnar_key(&mut self) {
-        filter_string(&mut self.columnar_key_string, self.cipher.alphabet());
+        filter_string(&mut self.columnar_key_string, &self.cipher.alphabet());
         self.cipher
             .assign_columnar_key(&self.columnar_key_string)
             .unwrap() // justified by filtering of key_string
@@ -45,8 +45,8 @@ impl CipherFrame for AdfgvxFrame {
             ui.horizontal(|ui| {
                 if ui.button("ADFGX").clicked() {
                     self.cipher.assign_mode(AdfgvxMode::Short);
-                    filter_string(&mut self.columnar_key_string, self.cipher.alphabet());
-                    filter_string(&mut self.polybius_key_string, self.cipher.alphabet());
+                    filter_string(&mut self.columnar_key_string, &self.cipher.alphabet());
+                    filter_string(&mut self.polybius_key_string, &self.cipher.alphabet());
                     self.cipher.assign_polybius_key(&self.polybius_key_string);
                     self.assign_columnar_key();
                 };
@@ -64,7 +64,7 @@ impl CipherFrame for AdfgvxFrame {
 
         ui.subheading("Polybius Keyword");
         if ui.control_string(&mut self.polybius_key_string).changed() {
-            filter_string(&mut self.polybius_key_string, self.cipher.alphabet());
+            filter_string(&mut self.polybius_key_string, &self.cipher.alphabet());
             self.cipher.assign_polybius_key(&self.polybius_key_string)
         }
 

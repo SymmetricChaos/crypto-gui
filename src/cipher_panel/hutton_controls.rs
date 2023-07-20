@@ -136,10 +136,7 @@ impl CipherFrame for HuttonFrame {
                 .control_string(&mut self.example_password_string)
                 .changed()
             {
-                filter_string(
-                    &mut self.example_password_string,
-                    Alphabet::BasicLatin.into(),
-                );
+                filter_string(&mut self.example_password_string, &Alphabet::BasicLatin);
                 self.example_password_idx = 0;
                 self.example_password = self
                     .example_password_string
@@ -150,14 +147,14 @@ impl CipherFrame for HuttonFrame {
             ui.add_space(8.0);
             ui.label("Keyword");
             if ui.control_string(&mut self.example_keyword).changed() {
-                filter_string(&mut self.example_keyword, Alphabet::BasicLatin.into());
+                filter_string(&mut self.example_keyword, &Alphabet::BasicLatin);
                 self.example_keyed_alphabet =
                     VecString::keyed_alphabet(&self.example_keyword, Alphabet::BasicLatin.into());
             }
 
             ui.label("Plaintext");
             if ui.control_string(&mut self.example).changed() {
-                filter_string(&mut self.example, Alphabet::BasicLatin.into())
+                filter_string(&mut self.example, &Alphabet::BasicLatin)
             }
             if ui.button("Step").clicked() {
                 self.step_example()

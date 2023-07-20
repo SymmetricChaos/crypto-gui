@@ -8,7 +8,7 @@ pub enum Alphabet {
     BasicLatinNoC,
     BasicLatinNoJ,
     BasicLatinNoQ,
-    BasicLatinWithDigits,
+    Alphanumeric,
     Ascii94,  // The printing ASCII symbols (not including space)
     Ascii128, // The ASCII symbols with control pictures for non-printing characters except space
     // AsciiLdh, // The LDH (letter, digit, hyphen) subset of ASCII used by IDNA, in ascending order per ASCII code
@@ -24,7 +24,7 @@ impl Alphabet {
             Alphabet::BasicLatinNoC => "ABDEFGHIJKLMNOPQRSTUVWXYZ",
             Alphabet::BasicLatinNoJ => "ABCDEFGHIKLMNOPQRSTUVWXYZ",
             Alphabet::BasicLatinNoQ => "ABCDEFGHIJKLMNOPRSTUVWXYZ",
-            Alphabet::BasicLatinWithDigits => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+            Alphabet::Alphanumeric => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
             Alphabet::Ascii94 => "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
             Alphabet::Ascii128 => "␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~␡",
             // Alphabet::AsciiLdh => "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
@@ -56,6 +56,20 @@ impl Alphabet {
     pub fn position(&self, c: char) -> Option<usize> {
         self.chars().position(|x| c == x)
     }
+
+    pub fn name(&self) -> &str {
+        match self {
+            Alphabet::BasicLatin => "Basic Latin",
+            Alphabet::BasicLatinNoC => "Basic Latin, No C",
+            Alphabet::BasicLatinNoJ => "Basic Latin, No J",
+            Alphabet::BasicLatinNoQ => "Basic Latin, No Q",
+            Alphabet::Alphanumeric => "Alphanumeric",
+            Alphabet::Ascii94 => "ASCII",
+            Alphabet::Ascii128 => "Full ASCII",
+            Alphabet::ClassicalLatin => "Classical Latin",
+            Alphabet::Base64 => "Base64",
+        }
+    }
 }
 
 impl Display for Alphabet {
@@ -73,5 +87,11 @@ impl From<Alphabet> for String {
 impl From<Alphabet> for &'static str {
     fn from(alphabet: Alphabet) -> Self {
         alphabet.slice()
+    }
+}
+
+impl AsRef<str> for Alphabet {
+    fn as_ref(&self) -> &str {
+        self.slice()
     }
 }

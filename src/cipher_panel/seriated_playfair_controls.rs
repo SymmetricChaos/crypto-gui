@@ -36,7 +36,7 @@ impl CipherFrame for SeriatedPlayfairFrame {
                     ("No C", Alphabet::BasicLatinNoC),
                     ("No J", Alphabet::BasicLatinNoJ),
                     ("No Q", Alphabet::BasicLatinNoQ),
-                    ("Alphanumeric", Alphabet::BasicLatinWithDigits),
+                    ("Alphanumeric", Alphabet::Alphanumeric),
                     ("Base64", Alphabet::Base64),
                 ] {
                     if ui.button(name).clicked() {

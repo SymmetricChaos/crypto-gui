@@ -34,14 +34,14 @@ impl CipherFrame for PolybiusSquareFrame {
         ui.group(|ui| {
             ui.subheading("Common Alphabets");
             ui.horizontal(|ui| {
-                for (name, alphabet) in [
-                    ("No C", Alphabet::BasicLatinNoC),
-                    ("No J", Alphabet::BasicLatinNoJ),
-                    ("No Q", Alphabet::BasicLatinNoQ),
-                    ("Alphanumeric", Alphabet::BasicLatinWithDigits),
-                    ("Base64", Alphabet::Base64),
+                for alphabet in [
+                    Alphabet::Alphanumeric,
+                    Alphabet::BasicLatinNoC,
+                    Alphabet::BasicLatinNoJ,
+                    Alphabet::BasicLatinNoQ,
+                    Alphabet::Base64,
                 ] {
-                    if ui.button(name).clicked() {
+                    if ui.button(alphabet.name()).clicked() {
                         self.alphabet_string = alphabet.into();
                         filter_string(&mut self.key_string, &self.alphabet_string);
                         self.cipher

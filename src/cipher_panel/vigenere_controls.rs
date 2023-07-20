@@ -30,6 +30,25 @@ impl CipherFrame for VigenereFrame {
         ui.randomize_reset(self);
         ui.add_space(16.0);
 
+        ui.group(|ui| {
+            ui.subheading("Common Alphabets");
+            ui.horizontal(|ui| {
+                for alphabet in [
+                    Alphabet::Alphanumeric,
+                    Alphabet::BasicLatin,
+                    Alphabet::Ascii94,
+                    Alphabet::Base64,
+                ] {
+                    if ui.button(alphabet.name()).clicked() {
+                        self.cipher.assign_alphabet(alphabet.slice());
+                        for keyword in self.cipher.keywords.iter_mut() {
+                            filter_string(keyword, &self.alphabet_string)
+                        }
+                    }
+                }
+            });
+        });
+
         ui.subheading("Alphabet");
         if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher.assign_alphabet(&self.alphabet_string);

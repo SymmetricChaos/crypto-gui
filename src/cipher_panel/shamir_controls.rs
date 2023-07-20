@@ -63,7 +63,7 @@ impl CipherFrame for ShamirSecretSharingFrame {
         ui.subheading("Field Size");
         ui.label("A positive prime less than 2^32-1. The secret message cannot have a value larger than the field size.");
         if ui.control_string(&mut self.modulus_string).changed() {
-            filter_string(&mut self.modulus_string, "0123456789");
+            filter_string(&mut self.modulus_string, &"0123456789");
             match u32::from_str_radix(&self.modulus_string, 10) {
                 Ok(n) => match n > 0 {
                     true => match is_prime32(n as u32) {

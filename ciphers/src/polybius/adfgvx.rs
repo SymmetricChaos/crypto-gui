@@ -18,7 +18,7 @@ impl Adfgvx {
     pub fn alphabet(&self) -> &'static str {
         match self.mode {
             AdfgvxMode::Short => Alphabet::BasicLatinNoJ.slice(),
-            AdfgvxMode::Long => Alphabet::BasicLatinWithDigits.slice(),
+            AdfgvxMode::Long => Alphabet::Alphanumeric.slice(),
         }
     }
 

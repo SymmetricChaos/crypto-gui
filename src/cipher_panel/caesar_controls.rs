@@ -1,7 +1,7 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
 use ciphers::{substitution::Caesar, Cipher};
-use egui::{Color32, RichText, Slider, Ui};
+use egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
 use utils::preset_alphabet::Alphabet;
 
@@ -47,8 +47,7 @@ impl CipherFrame for CaesarFrame {
             ui.horizontal(|ui| {
                 for (name, alphabet) in [
                     ("Basic Latin", Alphabet::BasicLatin),
-                    ("Classical Latin", Alphabet::ClassicalLatin),
-                    ("Alphanumeric", Alphabet::BasicLatinWithDigits),
+                    ("Alphanumeric", Alphabet::Alphanumeric),
                     ("ASCII", Alphabet::Ascii94),
                     ("Base64", Alphabet::Base64),
                 ] {
@@ -65,7 +64,7 @@ impl CipherFrame for CaesarFrame {
         if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher.assign_alphabet(&self.alphabet_string)
         }
-
+        ui.mono(self.shifted_alphabet());
         ui.add_space(8.0);
 
         ui.subheading("Shift Distance");
@@ -86,27 +85,6 @@ impl CipherFrame for CaesarFrame {
                 self.cipher.assign_alphabet(Alphabet::Ascii94.into());
                 self.cipher.shift = 47;
             }
-        });
-        ui.add_space(8.0);
-
-        ui.group(|ui| {
-            ui.subheading("Example");
-            ui.horizontal(|ui| {
-                ui.label(
-                    RichText::new(&self.alphabet_string)
-                        .monospace()
-                        .background_color(Color32::BLACK),
-                );
-                ui.label("plaintext");
-            });
-            ui.horizontal(|ui| {
-                ui.label(
-                    RichText::new(self.shifted_alphabet())
-                        .monospace()
-                        .background_color(Color32::BLACK),
-                );
-                ui.label("ciphertext")
-            });
         });
         ui.add_space(8.0);
     }

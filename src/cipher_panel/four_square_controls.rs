@@ -36,14 +36,14 @@ impl CipherFrame for FourSquareFrame {
         ui.group(|ui| {
             ui.subheading("Common Alphabets");
             ui.horizontal(|ui| {
-                for (name, alphabet) in [
-                    ("No C", Alphabet::BasicLatinNoC),
-                    ("No J", Alphabet::BasicLatinNoJ),
-                    ("No Q", Alphabet::BasicLatinNoQ),
-                    ("Alphanumeric", Alphabet::BasicLatinWithDigits),
-                    ("Base64", Alphabet::Base64),
+                for alphabet in [
+                    Alphabet::Alphanumeric,
+                    Alphabet::BasicLatinNoC,
+                    Alphabet::BasicLatinNoJ,
+                    Alphabet::BasicLatinNoQ,
+                    Alphabet::Base64,
                 ] {
-                    if ui.button(name).clicked() {
+                    if ui.button(alphabet.name()).clicked() {
                         self.alphabet_string = alphabet.into();
                         filter_string(&mut self.keyword_1, &self.alphabet_string);
                         filter_string(&mut self.keyword_2, &self.alphabet_string);
@@ -61,6 +61,8 @@ impl CipherFrame for FourSquareFrame {
 
         ui.subheading("Alphabet");
         if ui.control_string(&mut self.alphabet_string).changed() {
+            filter_string(&mut self.keyword_1, &self.alphabet_string);
+            filter_string(&mut self.keyword_2, &self.alphabet_string);
             self.cipher
                 .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
         }

@@ -34,7 +34,14 @@ impl CipherFrame for GeneralSubstitutionFrame {
         }
         ui.add_space(8.0);
 
-        ui.subheading("Ciphertext Alphabet");
+        ui.horizontal(|ui| {
+            ui.subheading("Ciphertext Alphabet");
+            if ui.button("🎲").on_hover_text("randomize").clicked() {
+                self.ct_alphabet_string = shuffled_str(&self.pt_alphabet_string, &mut thread_rng());
+                self.cipher.assign_ct_alphabet(&self.ct_alphabet_string);
+            }
+        });
+
         if ui.control_string(&mut self.ct_alphabet_string).changed() {
             self.cipher.assign_ct_alphabet(&self.ct_alphabet_string);
         }

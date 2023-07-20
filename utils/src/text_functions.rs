@@ -8,8 +8,11 @@ use rand::{
 use std::hash::Hash;
 
 // Mutate a string so that it contains only characters in a provided alphabet
-pub fn filter_string(string: &mut String, alphabet: &str) {
-    *string = string.chars().filter(|c| alphabet.contains(*c)).collect();
+pub fn filter_string<S: AsRef<str>>(string: &mut String, alphabet: &S) {
+    *string = string
+        .chars()
+        .filter(|c| alphabet.as_ref().contains(*c))
+        .collect();
 }
 
 // Mutate a string so that it contains only unique characters
@@ -18,10 +21,10 @@ pub fn unique_string(string: &mut String) {
 }
 
 // Mutate a string so that it contains only characters in a provided alphabet and only unique characters
-pub fn filter_unique_string(string: &mut String, alphabet: &str) {
+pub fn filter_unique_string<S: AsRef<str>>(string: &mut String, alphabet: &S) {
     *string = string
         .chars()
-        .filter(|c| alphabet.contains(*c))
+        .filter(|c| alphabet.as_ref().contains(*c))
         .unique()
         .collect();
 }

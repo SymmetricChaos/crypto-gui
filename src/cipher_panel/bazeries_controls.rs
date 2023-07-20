@@ -2,10 +2,10 @@ use super::CipherFrame;
 use crate::ui_elements::UiElements;
 use ciphers::{polyalphabetic::Bazeries, Cipher};
 use egui::{Slider, Ui};
-use rand::{rngs::StdRng, SeedableRng};
+use rand::thread_rng;
 use utils::{
     preset_alphabet::Alphabet,
-    text_functions::{filter_string, shuffled_str},
+    text_functions::{keyed_alphabet, shuffled_str},
 };
 
 pub struct BazeriesFrame {
@@ -26,6 +26,24 @@ impl CipherFrame for BazeriesFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.randomize_reset(self);
         ui.add_space(16.0);
+
+        ui.group(|ui| {
+            ui.subheading("Common Alphabets");
+            ui.horizontal(|ui| {
+                for alphabet in [
+                    Alphabet::BasicLatin,
+                    Alphabet::Alphanumeric,
+                    Alphabet::Ascii94,
+                    Alphabet::Base64,
+                ] {
+                    if ui.button(alphabet.name()).clicked() {
+                        self.alphabet_string = alphabet.into();
+                        self.cipher.assign_alphabet(&self.alphabet_string)
+                    }
+                }
+            });
+        });
+        ui.add_space(8.0);
 
         ui.subheading("Alphabet");
         if ui.control_string(&mut self.alphabet_string).changed() {
@@ -48,9 +66,14 @@ impl CipherFrame for BazeriesFrame {
             }
         });
         for wheel in self.cipher.wheels.iter_mut() {
-            if ui.control_string(wheel).changed() {
-                filter_string(wheel, &self.alphabet_string)
-            }
+            ui.horizontal(|ui| {
+                if ui.control_string(wheel).changed() {
+                    *wheel = keyed_alphabet(&wheel, &self.alphabet_string)
+                }
+                if ui.button("🎲").on_hover_text("randomize").clicked() {
+                    *wheel = shuffled_str(&self.alphabet_string, &mut thread_rng())
+                }
+            });
         }
     }
 
@@ -59,7 +82,7 @@ impl CipherFrame for BazeriesFrame {
     }
 
     fn randomize(&mut self) {
-        let mut rng = StdRng::from_entropy();
+        let mut rng = thread_rng();
         for wheel in self.cipher.wheels.iter_mut() {
             *wheel = shuffled_str(&self.alphabet_string, &mut rng);
         }

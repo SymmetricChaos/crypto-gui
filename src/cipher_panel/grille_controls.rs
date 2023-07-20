@@ -35,7 +35,7 @@ impl CipherFrame for GrilleFrame {
         ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.checkbox(&mut self.cipher.use_nulls, "Use Nulls?");
+        ui.checkbox(&mut self.cipher.use_nulls, "Use Nulls");
         if self.cipher.use_nulls {
             if ui.control_string(&mut self.null_alphabet_string).changed() {
                 self.cipher.assign_null_alphabet(&self.null_alphabet_string)

@@ -18,21 +18,21 @@ pub struct B64Frame {
 
 impl B64Frame {
     fn assign_columnar_key1(&mut self) {
-        filter_string(&mut self.columnar_key_string_1, Alphabet::Base64.into());
+        filter_string(&mut self.columnar_key_string_1, &Alphabet::Base64);
         self.cipher
             .assign_columnar_key_1(&self.columnar_key_string_1)
             .unwrap()
     }
 
     fn assign_columnar_key2(&mut self) {
-        filter_string(&mut self.columnar_key_string_2, Alphabet::Base64.into());
+        filter_string(&mut self.columnar_key_string_2, &Alphabet::Base64);
         self.cipher
             .assign_columnar_key_2(&self.columnar_key_string_2)
             .unwrap()
     }
 
     fn assign_polybius_key(&mut self) {
-        filter_string(&mut self.polybius_key_string, Alphabet::Base64.into());
+        filter_string(&mut self.polybius_key_string, &Alphabet::Base64);
         self.cipher.assign_polybius_key(&self.polybius_key_string)
     }
 }

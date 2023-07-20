@@ -11,7 +11,7 @@ use egui::Ui;
 use rand::thread_rng;
 use utils::{
     preset_alphabet::Alphabet,
-    text_functions::{filter_string, shuffled_str},
+    text_functions::{filter_string, filter_unique_string, shuffled_str},
     vecstring::VecString,
 };
 
@@ -46,11 +46,13 @@ impl CipherFrame for ChaocipherFrame {
 
         ui.subheading("Left Alphabet");
         if ui.control_string(&mut self.left_string).changed() {
+            filter_unique_string(&mut self.left_string, &Alphabet::BasicLatin);
             self.cipher.assign_left(&self.left_string)
         }
 
         ui.subheading("Right Alphabet");
         if ui.control_string(&mut self.right_string).changed() {
+            filter_unique_string(&mut self.right_string, &Alphabet::BasicLatin);
             self.cipher.assign_right(&self.right_string)
         }
         ui.add_space(16.0);
@@ -60,9 +62,10 @@ impl CipherFrame for ChaocipherFrame {
             ui.add_space(4.0);
             ui.label("Plaintext");
             if ui.control_string(&mut self.example).changed() {
-                filter_string(&mut self.example, Alphabet::BasicLatin.into())
+                filter_string(&mut self.example, &Alphabet::BasicLatin)
             }
 
+            ui.label("Encrypt one letter from the plaintext and see how the alphabets change.");
             if ui.button("Step").clicked() {
                 if !self.example.is_empty() {
                     let c = self.example.remove(0);

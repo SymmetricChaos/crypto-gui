@@ -32,14 +32,13 @@ impl CipherFrame for AffineFrame {
         ui.group(|ui| {
             ui.subheading("Common Alphabets");
             ui.horizontal(|ui| {
-                for (name, alphabet) in [
-                    ("Basic Latin", Alphabet::BasicLatin),
-                    ("Classical Latin", Alphabet::ClassicalLatin),
-                    ("Alphanumeric", Alphabet::BasicLatinWithDigits),
-                    ("ASCII", Alphabet::Ascii94),
-                    ("Base64", Alphabet::Base64),
+                for alphabet in [
+                    Alphabet::BasicLatin,
+                    Alphabet::Alphanumeric,
+                    Alphabet::Ascii94,
+                    Alphabet::Base64,
                 ] {
-                    if ui.button(name).clicked() {
+                    if ui.button(alphabet.name()).clicked() {
                         self.alphabet_string = alphabet.into();
                         self.cipher.assign_alphabet(&self.alphabet_string)
                     }
