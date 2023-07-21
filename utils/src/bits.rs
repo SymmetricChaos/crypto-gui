@@ -14,15 +14,14 @@ lazy_static! {
 }
 
 // Converts a &str to an iterator of bits, skipping white space. Returns None if there are any characters other than 0, 1, and whitespace.
-pub fn bits_from_bitstring(text: &str) -> Option<impl Iterator<Item = Bit> + '_> {
+pub fn bits_from_bitstring(text: &str) -> Result<impl Iterator<Item = Bit> + '_, &str> {
     if !IS_BITS.is_match(text) {
-        None
+        Err("input must contain only 0, 1, and whitespace")
     } else {
-        Some(
-            text.chars()
-                .filter(|c| !c.is_whitespace())
-                .map(|c| Bit::try_from(c).unwrap()),
-        )
+        Ok(text
+            .chars()
+            .filter(|c| !c.is_whitespace())
+            .map(|c| Bit::try_from(c).unwrap()))
     }
 }
 
@@ -33,7 +32,7 @@ pub fn bits_to_int_little_endian(bits: &[Bit]) -> u32 {
         if b.is_one() {
             out += p;
         }
-        p *= 2
+        p *= 2;
     }
     out
 }
@@ -304,9 +303,9 @@ impl BitXorAssign for Bit {
     }
 }
 
-//////////////////////////////////
-// Allow Adding Bit to Integers //
-//////////////////////////////////
+//////////////////////////////////////////////////////
+// Addition and Conversion with Primitive Int Types //
+//////////////////////////////////////////////////////
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct IntToBitError;
 
@@ -339,6 +338,7 @@ macro_rules! int_methods {
                 *self = *self + rhs;
             }
         }
+
         impl From<Bit> for $t {
             fn from(value: Bit) -> Self {
                 match value {

@@ -24,7 +24,7 @@ impl Default for ParityBit {
 impl Code for ParityBit {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let bits: Vec<Bit> = bits_from_bitstring(text)
-            .ok_or(CodeError::input("text is not a bitstring"))?
+            .map_err(|e| CodeError::input(e))?
             .collect();
 
         if bits.len() % self.block_size != 0 {
@@ -62,7 +62,7 @@ impl Code for ParityBit {
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let bits: Vec<Bit> = bits_from_bitstring(text)
-            .ok_or(CodeError::input("text is not a bitstring"))?
+            .map_err(|e| CodeError::input(e))?
             .collect();
 
         if bits.len() % (self.block_size + 1) != 0 {

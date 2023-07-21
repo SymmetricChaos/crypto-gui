@@ -141,7 +141,7 @@ impl HammingCode {
 
     fn decode_4_7(&self, text: &str) -> Result<String, CodeError> {
         let bits: Vec<Bit> = bits_from_bitstring(text)
-            .ok_or(CodeError::input("text is not a bitstring"))?
+            .map_err(|e| CodeError::input(e))?
             .collect();
 
         if bits.len() % 7 != 0 {
@@ -184,7 +184,7 @@ impl HammingCode {
 
     fn decode_4_8(&self, text: &str) -> Result<String, CodeError> {
         let bits: Vec<Bit> = bits_from_bitstring(text)
-            .ok_or(CodeError::input("text is not a bitstring"))?
+            .map_err(|e| CodeError::input(e))?
             .collect();
 
         if bits.len() % 8 != 0 {
@@ -247,7 +247,7 @@ impl HammingCode {
 impl Code for HammingCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let bits: Vec<Bit> = bits_from_bitstring(text)
-            .ok_or(CodeError::input("text is not a bitstring"))?
+            .map_err(|e| CodeError::input(e))?
             .collect();
 
         if bits.len() % 4 != 0 {

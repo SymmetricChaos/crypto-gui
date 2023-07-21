@@ -279,9 +279,7 @@ impl EliasCodeIntegers {
 
     // Operates on a single codegroup
     pub fn decode_to_u32(&self, text: &str) -> Result<Vec<u32>, CodeError> {
-        let mut filtered = bits_from_bitstring(text).ok_or(CodeError::input(
-            "input should be only 0s, 1s, and whitespace",
-        ))?;
+        let mut filtered = bits_from_bitstring(text).map_err(|e| CodeError::input(e))?;
         match self.variant {
             EliasVariant::Delta => self.decode_to_u32_delta(&mut filtered),
             EliasVariant::Gamma => self.decode_to_u32_gamma(&mut filtered),
