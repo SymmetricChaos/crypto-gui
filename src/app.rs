@@ -23,7 +23,6 @@ fn load_font(name: &str, family: &FontFamily, font_data: FontData, font_def: &mu
 pub struct ClassicCrypto {
     cipher_interface: CipherInterface,
     code_interface: CodeInterface,
-    // attack_interface: AttackInterface,
     io_panel: IOPanel,
     input: String,
     output: String,
@@ -31,7 +30,6 @@ pub struct ClassicCrypto {
 
     active_cipher: Option<CipherId>,
     active_code: Option<CodeId>,
-    // active_attack: AttackId,
     active_page: Page,
     text_prep_page: TextPrepPage,
 }
@@ -50,7 +48,6 @@ impl Default for ClassicCrypto {
             // ID of the active Cipher or Code
             active_cipher: None,
             active_code: None,
-            // active_attack: AttackId::default(),
 
             // Which page we are on
             active_page: Page::About,
@@ -61,7 +58,6 @@ impl Default for ClassicCrypto {
             // Contains each Cipher and Code along with with controls and a panel for selecting them
             cipher_interface: CipherInterface::default(),
             code_interface: CodeInterface::default(),
-            // attack_interface: AttackInterface::default(),
         }
     }
 }

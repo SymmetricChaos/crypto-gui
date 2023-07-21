@@ -307,7 +307,10 @@ impl BitXorAssign for Bit {
 //////////////////////////////////
 // Allow Adding Bit to Integers //
 //////////////////////////////////
-macro_rules! add_to_int {
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub struct IntToBitError;
+
+macro_rules! int_methods {
     ($t:ty) => {
         impl Add<Bit> for $t {
             type Output = $t;
@@ -336,31 +339,6 @@ macro_rules! add_to_int {
                 *self = *self + rhs;
             }
         }
-    };
-}
-
-add_to_int!(usize);
-add_to_int!(u8);
-add_to_int!(u16);
-add_to_int!(u32);
-add_to_int!(u64);
-add_to_int!(u128);
-
-add_to_int!(isize);
-add_to_int!(i8);
-add_to_int!(i16);
-add_to_int!(i32);
-add_to_int!(i64);
-add_to_int!(i128);
-
-////////////////////////
-// Conversion Methods //
-////////////////////////
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
-pub struct IntToBitError;
-
-macro_rules! from_into_int {
-    ($t:ty) => {
         impl From<Bit> for $t {
             fn from(value: Bit) -> Self {
                 match value {
@@ -405,19 +383,19 @@ macro_rules! from_into_int {
     };
 }
 
-from_into_int!(usize);
-from_into_int!(u8);
-from_into_int!(u16);
-from_into_int!(u32);
-from_into_int!(u64);
-from_into_int!(u128);
+int_methods!(usize);
+int_methods!(u8);
+int_methods!(u16);
+int_methods!(u32);
+int_methods!(u64);
+int_methods!(u128);
 
-from_into_int!(isize);
-from_into_int!(i8);
-from_into_int!(i16);
-from_into_int!(i32);
-from_into_int!(i64);
-from_into_int!(i128);
+int_methods!(isize);
+int_methods!(i8);
+int_methods!(i16);
+int_methods!(i32);
+int_methods!(i64);
+int_methods!(i128);
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct CharToBitError;
