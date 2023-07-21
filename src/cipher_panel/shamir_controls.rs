@@ -81,6 +81,7 @@ impl CipherFrame for ShamirSecretSharingFrame {
                 }
             }
         }
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn ciphers::Cipher {

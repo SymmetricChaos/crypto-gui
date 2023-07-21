@@ -80,6 +80,7 @@ impl CipherFrame for AdfgvxFrame {
         if ui.control_string(&mut self.columnar_key_string).changed() {
             self.assign_columnar_key()
         }
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

@@ -86,6 +86,7 @@ impl CipherFrame for PlayfairFrame {
             ui.copy_to_clipboard(self.cipher.to_string());
         });
         ui.mono(self.cipher.to_string());
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

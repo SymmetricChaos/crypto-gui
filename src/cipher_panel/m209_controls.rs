@@ -77,6 +77,7 @@ impl CipherFrame for M209Frame {
             });
             ui.add_space(10.0);
         }
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

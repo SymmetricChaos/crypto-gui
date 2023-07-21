@@ -41,6 +41,7 @@ impl CipherFrame for BatcoFrame {
             ui.copy_to_clipboard(self.cipher.show_code_page());
         });
         ui.mono(&self.cipher.show_code_page());
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

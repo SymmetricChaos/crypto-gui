@@ -65,6 +65,7 @@ impl CipherFrame for ScytaleFrame {
 
             ui.mono(self.cipher.encrypt(&self.example).unwrap());
         });
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

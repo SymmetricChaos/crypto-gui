@@ -104,6 +104,7 @@ impl CipherFrame for TwoSquareFrame {
         ui.mono(self.cipher.show_square1());
         ui.add_space(8.0);
         ui.mono(self.cipher.show_square2());
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

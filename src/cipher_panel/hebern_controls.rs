@@ -85,6 +85,7 @@ impl CipherFrame for HebernFrame {
                 ));
             });
         }
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

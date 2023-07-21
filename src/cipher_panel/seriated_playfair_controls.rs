@@ -85,6 +85,7 @@ impl CipherFrame for SeriatedPlayfairFrame {
             ui.copy_to_clipboard(self.cipher.playfair.to_string());
         });
         ui.mono(self.cipher.playfair.to_string());
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

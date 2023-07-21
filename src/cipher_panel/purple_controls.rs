@@ -101,6 +101,7 @@ impl CipherFrame for PurpleFrame {
                 Err(e) => *errors = e.to_string(),
             }
         };
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn ciphers::Cipher {

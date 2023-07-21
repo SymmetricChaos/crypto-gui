@@ -107,6 +107,7 @@ impl CipherFrame for BeaufortFrame {
         } else {
             ui.add(TextEdit::singleline(&mut self.cipher.keywords[0]).font(TextStyle::Monospace));
         }
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

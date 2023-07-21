@@ -112,7 +112,7 @@ impl IOPanel {
                     errors,
                 );
             } else {
-                ui.label("<<<CIPHER HOMEPAGE>>>");
+                // ui.label("<<<CIPHER HOMEPAGE>>>");
             }
         }
 
@@ -126,7 +126,7 @@ impl IOPanel {
                     errors,
                 );
             } else {
-                ui.label("<<<CODE HOMEPAGE>>>");
+                // ui.label("<<<CODE HOMEPAGE>>>");
             }
         }
 

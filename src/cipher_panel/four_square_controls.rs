@@ -99,6 +99,7 @@ impl CipherFrame for FourSquareFrame {
             ui.copy_to_clipboard(self.cipher.grid_lines());
         });
         ui.mono(self.cipher.grid_lines());
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

@@ -82,6 +82,7 @@ impl CipherFrame for ChaocipherFrame {
             ui.add_space(4.0);
             ui.mono(&self.example_output);
         });
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

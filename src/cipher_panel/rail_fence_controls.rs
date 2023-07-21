@@ -110,8 +110,7 @@ impl CipherFrame for RailFenceFrame {
             });
             ui.add_space(2.0);
         });
-
-        ui.add_space(8.0);
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

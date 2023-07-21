@@ -77,6 +77,7 @@ impl CipherFrame for BifidFrame {
             ui.copy_to_clipboard(self.cipher.polybius.show_grid());
         });
         ui.mono(self.cipher.polybius.show_grid());
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

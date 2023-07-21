@@ -64,7 +64,7 @@ impl CipherFrame for AffineFrame {
             prime_factors(self.cipher.alphabet_len())
         ));
         ui.add(Slider::new(&mut self.cipher.mul_key, 1..=slider_len));
-        ui.add_space(8.0);
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn ciphers::Cipher {

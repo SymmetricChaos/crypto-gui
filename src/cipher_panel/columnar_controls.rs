@@ -116,6 +116,7 @@ impl CipherFrame for ColumnarFrame {
                 }
             }
         });
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

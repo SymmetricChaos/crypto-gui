@@ -67,6 +67,7 @@ impl CipherFrame for B64Frame {
         if ui.control_string(&mut self.columnar_key_string_2).changed() {
             self.assign_columnar_key2()
         }
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

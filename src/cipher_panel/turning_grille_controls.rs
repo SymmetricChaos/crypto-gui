@@ -104,6 +104,8 @@ impl CipherFrame for TurningGrilleFrame {
         if ui.control_string(&mut self.null_alphabet_string).changed() {
             self.cipher.assign_null_alphabet(&self.null_alphabet_string);
         };
+
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

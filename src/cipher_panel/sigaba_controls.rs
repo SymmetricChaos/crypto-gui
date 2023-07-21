@@ -109,6 +109,7 @@ impl CipherFrame for SigabaFrame {
                 );
             }
         });
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

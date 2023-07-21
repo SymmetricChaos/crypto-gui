@@ -163,6 +163,7 @@ impl CipherFrame for HuttonFrame {
             ui.add_space(4.0);
             ui.control_string(&mut self.example_output);
         });
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

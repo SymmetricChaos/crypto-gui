@@ -109,6 +109,7 @@ impl CipherFrame for VigenereFrame {
                 filter_string(&mut self.cipher.keywords[0], &self.alphabet_string)
             }
         }
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

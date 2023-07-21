@@ -43,6 +43,7 @@ impl CipherFrame for M94Frame {
                 }
             });
         }
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

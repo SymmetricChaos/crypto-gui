@@ -49,6 +49,7 @@ impl CipherFrame for StraddlingCheckerboardFrame {
             ui.copy_to_clipboard(self.cipher.cipher_page())
         });
         ui.label(RichText::new(self.cipher.cipher_page()).size(15.0));
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

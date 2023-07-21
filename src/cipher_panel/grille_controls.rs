@@ -81,6 +81,7 @@ impl CipherFrame for GrilleFrame {
             });
         }
         ui.label(format!("{} empty cells", self.cipher.grid.num_empty()));
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

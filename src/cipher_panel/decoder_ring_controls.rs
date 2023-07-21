@@ -44,6 +44,7 @@ impl CipherFrame for DecoderRingFrame {
                 self.cipher.assign_alphabet("_AEXDTZKNYCJWSGUMBOQHRIVFPL")
             }
         });
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

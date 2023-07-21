@@ -86,7 +86,7 @@ impl CipherFrame for CaesarFrame {
                 self.cipher.shift = 47;
             }
         });
-        ui.add_space(8.0);
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

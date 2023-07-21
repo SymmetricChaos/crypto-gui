@@ -49,6 +49,7 @@ impl CipherFrame for PlugboardFrame {
                 }
             }
         });
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

@@ -185,6 +185,7 @@ impl CipherFrame for Rs44Frame {
                 Err(e) => *errors = e.to_string(),
             }
         }
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

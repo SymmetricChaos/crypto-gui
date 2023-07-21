@@ -53,6 +53,7 @@ impl CipherFrame for GeneralSubstitutionFrame {
             self.cipher.assign_pt_alphabet(&self.pt_alphabet_string);
             self.cipher.assign_ct_alphabet(&self.ct_alphabet_string);
         }
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

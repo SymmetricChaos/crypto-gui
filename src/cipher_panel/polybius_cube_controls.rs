@@ -57,6 +57,7 @@ impl CipherFrame for PolybiusCubeFrame {
             ui.mono(&grids[1]);
             ui.mono(&grids[2]);
         });
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

@@ -86,6 +86,7 @@ impl CipherFrame for QuagmireFrame {
                 self.cipher.assign_ct_key(&self.ct_key_string)
             }
         }
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {
