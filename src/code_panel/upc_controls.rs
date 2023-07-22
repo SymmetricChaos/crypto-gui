@@ -65,8 +65,12 @@ impl CodeFrame for UpcFrame {
 
         // };
 
-        ui.text_edit_singleline(&mut self.example);
-        // ui.mono("036000291452");
+        ui.subheading("Example");
+        if ui.text_edit_singleline(&mut self.example).changed() {
+            while self.example.chars().count() > 12 {
+                self.example.pop();
+            }
+        }
         match handle_example(&self.example) {
             Ok(digits) => {
                 ui.horizontal(|ui| {
