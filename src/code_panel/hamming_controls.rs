@@ -39,6 +39,7 @@ impl CodeFrame for HammingFrame {
         }));
         ui.add_space(16.0);
         ui.label("The columns with one bit set capture the data bits. The columns with multiple bits set check the parity of the selected data bits.");
+        ui.add_space(16.0);
     }
 
     fn code(&self) -> &dyn codes::traits::Code {

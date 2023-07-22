@@ -35,6 +35,7 @@ impl CodeFrame for BytesAsNumbersFrame {
         ui.add_space(16.0);
 
         ui.fill_code_columns(32, 8, Box::new(self.code.chars_codes()));
+        ui.add_space(16.0);
     }
 
     fn code(&self) -> &dyn codes::traits::Code {

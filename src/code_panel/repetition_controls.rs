@@ -1,6 +1,8 @@
 use codes::ecc::repetition::Repetition;
 use egui::Slider;
 
+use crate::ui_elements::UiElements;
+
 use super::CodeFrame;
 
 pub struct RepetitionFrame {
@@ -17,7 +19,7 @@ impl Default for RepetitionFrame {
 
 impl CodeFrame for RepetitionFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        ui.label("Block Size");
+        ui.subheading("Block Size");
         ui.add(Slider::new(&mut self.code.block_size, 3..=9));
 
         ui.add_space(16.0);
@@ -29,7 +31,7 @@ impl CodeFrame for RepetitionFrame {
                 self.code.block_size / 2
             ));
         } else {
-            ui.label(format!("Correct {}-bit errors", self.code.block_size / 2,));
+            ui.label(format!("Correct {}-bit errors", self.code.block_size / 2));
         }
     }
 

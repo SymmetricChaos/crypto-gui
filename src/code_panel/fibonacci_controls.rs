@@ -53,6 +53,7 @@ impl CodeFrame for FibonacciCodeFrame {
                 ui.fill_code_columns(16, 5, Box::new(pairs));
             }
         }
+        ui.add_space(16.0);
     }
 
     fn code(&self) -> &dyn codes::traits::Code {

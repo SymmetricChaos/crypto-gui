@@ -22,11 +22,13 @@ impl CodeFrame for ItfFrame {
     fn ui(&mut self, ui: &mut eframe::egui::Ui, _errors: &mut String) {
         ui.checkbox(&mut self.code.insert_zero, "Automatically Insert Zero");
 
+        ui.subheading("Example");
         ui.text_edit_singleline(&mut self.example);
         match self.code.encode(&self.example) {
             Ok(bits) => ui.mono(bits),
             Err(e) => ui.error_text(e.inner()),
         };
+        ui.add_space(16.0);
     }
 
     fn code(&self) -> &dyn codes::traits::Code {

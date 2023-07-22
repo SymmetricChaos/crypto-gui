@@ -50,6 +50,7 @@ impl CodeFrame for Ascii85Frame {
         // }
         ui.add_space(32.0);
         ui.fill_code_columns(17, 5, Box::new(self.code.chars_codes()));
+        ui.add_space(16.0);
     }
 
     fn code(&self) -> &dyn codes::traits::Code {

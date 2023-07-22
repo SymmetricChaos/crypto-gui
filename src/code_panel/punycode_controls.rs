@@ -1,7 +1,7 @@
 use codes::text_standards::punycode::Punycode;
 use egui::Slider;
 
-use crate::ui_elements::error_text;
+use crate::ui_elements::{error_text, UiElements};
 
 use super::CodeFrame;
 
@@ -21,7 +21,7 @@ impl Default for PunycodeFrame {
 
 impl CodeFrame for PunycodeFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        ui.label("Example");
+        ui.subheading("Example");
         ui.text_edit_singleline(&mut self.example);
         ui.add_space(8.0);
         match self.encode(&self.example) {

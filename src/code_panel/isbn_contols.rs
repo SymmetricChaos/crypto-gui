@@ -58,6 +58,7 @@ these values sum to 100, which is a multiple of 10, so the code is valid",
         if ui.button("Check").clicked() {
             self.text = self.code.check_csv_isbn(&self.text);
         }
+        ui.add_space(16.0);
     }
 
     fn code(&self) -> &dyn codes::traits::Code {

@@ -20,6 +20,7 @@ impl CodeFrame for BaconFrame {
         ui.subheading("False Text");
         ui.add(TextEdit::multiline(&mut self.code.false_text).font(TextStyle::Monospace));
         ui.fill_code_columns(12, 4, self.code.chars_codes());
+        ui.add_space(16.0);
     }
 
     fn code(&self) -> &dyn codes::traits::Code {

@@ -17,13 +17,12 @@ impl Default for LuhnAlgorithmFrame {
 
 impl CodeFrame for LuhnAlgorithmFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        ui.group(|ui| {
-            ui.label("Modulus");
-            ui.add(Slider::new(&mut self.code.modulus, 2..=36).step_by(2.0));
-            if self.code.modulus % 2 != 0 {
-                ui.error_text("modulus must be even");
-            }
-        });
+        ui.subheading("Modulus");
+        ui.add(Slider::new(&mut self.code.modulus, 2..=36).step_by(2.0));
+        if self.code.modulus % 2 != 0 {
+            ui.error_text("modulus must be even");
+        }
+        ui.add_space(16.0);
     }
 
     fn code(&self) -> &dyn codes::traits::Code {

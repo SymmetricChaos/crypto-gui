@@ -39,6 +39,7 @@ impl CodeFrame for BaudotFrame {
 
         ui.add_space(16.0);
         ui.fill_code_columns(16, 4, self.code.codes_chars());
+        ui.add_space(16.0);
     }
 
     fn code(&self) -> &dyn codes::traits::Code {
