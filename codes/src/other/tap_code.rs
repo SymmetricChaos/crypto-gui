@@ -20,16 +20,6 @@ impl Default for TapCode {
 }
 
 impl TapCode {
-    pub fn assign_alphabet(&mut self, mode: Alphabet) {
-        match mode {
-            Alphabet::BasicLatinNoC | Alphabet::BasicLatinNoJ | Alphabet::BasicLatinNoQ => {
-                self.grid = mode.chars().collect_vec();
-                self.side_len = (mode.len() as f64).sqrt().ceil() as usize;
-            }
-            _ => (),
-        }
-    }
-
     pub fn set_alphabet(&mut self, alphabet_string: &str) {
         let new_alpha_len = alphabet_string.chars().count();
 

@@ -1,7 +1,11 @@
 use super::CodeFrame;
 use crate::ui_elements::UiElements;
 use codes::other::tap_code::TapCode;
-use utils::{preset_alphabet::Alphabet, text_functions::unique_string};
+use rand::thread_rng;
+use utils::{
+    preset_alphabet::Alphabet,
+    text_functions::{shuffled_str, unique_string},
+};
 
 pub struct TapCodeFrame {
     code: TapCode,
@@ -19,21 +23,31 @@ impl Default for TapCodeFrame {
 
 impl CodeFrame for TapCodeFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
-        ui.subheading("Common Alphabets");
-        ui.horizontal(|ui| {
-            if ui.button("No C").clicked() {
-                self.code.assign_alphabet(Alphabet::BasicLatinNoC)
-            };
-            if ui.button("No J").clicked() {
-                self.code.assign_alphabet(Alphabet::BasicLatinNoJ)
-            };
-            if ui.button("No Q").clicked() {
-                self.code.assign_alphabet(Alphabet::BasicLatinNoQ)
-            };
+        ui.group(|ui| {
+            ui.subheading("Common Alphabets");
+            ui.horizontal(|ui| {
+                for alphabet in [
+                    Alphabet::BasicLatinNoC,
+                    Alphabet::BasicLatinNoJ,
+                    Alphabet::BasicLatinNoQ,
+                    Alphabet::Alphanumeric,
+                ] {
+                    if ui.button(alphabet.name()).clicked() {
+                        self.alphabet_string = alphabet.into();
+                        self.code.set_alphabet(&self.alphabet_string)
+                    }
+                }
+            });
         });
+
         ui.add_space(8.0);
 
-        ui.subheading("Alphabet");
+        ui.horizontal(|ui| {
+            ui.subheading("Alphabet");
+            if ui.button("🎲").on_hover_text("shuffle").clicked() {
+                self.alphabet_string = shuffled_str(&self.alphabet_string, &mut thread_rng())
+            }
+        });
         if ui.control_string(&mut self.alphabet_string).changed() {
             unique_string(&mut self.alphabet_string);
             while self.alphabet_string.chars().count() > 100 {
