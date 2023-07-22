@@ -25,14 +25,16 @@ impl CodeFrame for RomajiFrame {
                 ui.selectable_value(&mut self.code.variant, RomajiVariant::Nihon, "Nihon");
             });
         });
-
         ui.add_space(16.0);
+
         match self.code.variant {
             RomajiVariant::Nihon => ui.label("Nihon-shiki is a now obsolete style of romanization. It keeps closely to morphology of Japanese with two letter per kana excepting ん (n) and the single vowel sounds and different consonants for every row of the . It does not reflect modern Japanese pronunciation of some kana."),
             RomajiVariant::Kunrei => ui.label("Kunrei-shiki is the style of romanization prefered by the government of Japan. While similar to Nihon-shiki it does not distinguish some kana because they are usually pronounced identically. For instance ぢ and じ are both romanized as 'zi'."),
             RomajiVariant::Hepbern => ui.label("Hepbern-shiki is commonly seen outside of Japan as it attempts to give phonetic spellings for kana, making it easier to read. In particular し is written 'shi', ち is written 'chi, and つ is written 'tsu'. Like Kunrein-shiki it does not distinguish some kana."),
         };
+        ui.add_space(16.0);
 
+        ui.subheading("Gojūon with dakuten, handakuten, and yōon.");
         ui.add_space(16.0);
         egui::Grid::new("romaji_grid")
             .num_columns(8)
@@ -47,6 +49,7 @@ impl CodeFrame for RomajiFrame {
                     ui.end_row()
                 }
             });
+        ui.add_space(16.0);
     }
 
     fn code(&self) -> &dyn codes::traits::Code {

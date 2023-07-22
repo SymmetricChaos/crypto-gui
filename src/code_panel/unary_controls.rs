@@ -48,6 +48,7 @@ impl CodeFrame for UnaryCodeFrame {
                 ui.fill_code_columns(16, 3, Box::new(self.code.maps.words_codes()));
             }
         }
+        ui.add_space(16.0);
     }
 
     fn code(&self) -> &dyn codes::traits::Code {

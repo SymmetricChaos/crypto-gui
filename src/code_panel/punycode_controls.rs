@@ -61,6 +61,7 @@ impl CodeFrame for PunycodeFrame {
             ui.label("Initial N");
             ui.add(Slider::new(&mut self.code.init_n, n_range));
         });
+        ui.add_space(16.0);
     }
 
     fn code(&self) -> &dyn codes::traits::Code {

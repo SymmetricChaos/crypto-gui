@@ -23,6 +23,7 @@ impl CodeFrame for VerhoeffFrame {
         if ui.button("Check").clicked() {
             self.text = self.code.check_csv_verhoeff(&self.text);
         }
+        ui.add_space(16.0);
     }
 
     fn code(&self) -> &dyn codes::traits::Code {

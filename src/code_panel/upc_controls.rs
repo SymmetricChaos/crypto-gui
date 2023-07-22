@@ -92,6 +92,7 @@ impl CodeFrame for UpcFrame {
                 ui.error_text(e.inner());
             }
         }
+        ui.add_space(16.0);
     }
 
     fn code(&self) -> &dyn codes::traits::Code {

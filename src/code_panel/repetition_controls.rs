@@ -33,6 +33,7 @@ impl CodeFrame for RepetitionFrame {
         } else {
             ui.label(format!("Correct {}-bit errors", self.code.block_size / 2));
         }
+        ui.add_space(16.0);
     }
 
     fn code(&self) -> &dyn codes::traits::Code {
