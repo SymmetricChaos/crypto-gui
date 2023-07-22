@@ -17,7 +17,7 @@ impl Default for SpellingAlphabetFrame {
 }
 
 impl CodeFrame for SpellingAlphabetFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui) {
         ui.group(|ui| {
             ui.subheading("Alphabet");
             ui.horizontal(|ui| {

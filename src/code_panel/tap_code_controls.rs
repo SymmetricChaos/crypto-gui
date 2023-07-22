@@ -1,7 +1,7 @@
 use super::CodeFrame;
 use crate::ui_elements::UiElements;
 use codes::other::tap_code::TapCode;
-use utils::preset_alphabet::Alphabet;
+use utils::{preset_alphabet::Alphabet, text_functions::unique_string};
 
 pub struct TapCodeFrame {
     code: TapCode,
@@ -18,7 +18,7 @@ impl Default for TapCodeFrame {
 }
 
 impl CodeFrame for TapCodeFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui) {
         ui.subheading("Common Alphabets");
         ui.horizontal(|ui| {
             if ui.button("No C").clicked() {
@@ -31,13 +31,15 @@ impl CodeFrame for TapCodeFrame {
                 self.code.assign_alphabet(Alphabet::BasicLatinNoQ)
             };
         });
+        ui.add_space(8.0);
 
         ui.subheading("Alphabet");
         if ui.control_string(&mut self.alphabet_string).changed() {
-            match self.code.set_alphabet(&self.alphabet_string) {
-                Ok(_) => (),
-                Err(e) => *errors = e.to_string(),
+            unique_string(&mut self.alphabet_string);
+            while self.alphabet_string.chars().count() > 100 {
+                self.alphabet_string.pop();
             }
+            self.code.set_alphabet(&self.alphabet_string);
         }
         ui.add_space(16.0);
 

@@ -16,7 +16,7 @@ impl Default for BaconFrame {
 }
 
 impl CodeFrame for BaconFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui) {
         ui.subheading("False Text");
         ui.add(TextEdit::multiline(&mut self.code.false_text).font(TextStyle::Monospace));
         ui.fill_code_columns(12, 4, self.code.chars_codes());

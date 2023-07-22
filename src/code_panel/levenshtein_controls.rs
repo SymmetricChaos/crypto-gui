@@ -20,7 +20,7 @@ impl Default for LevenshteinCodeFrame {
 }
 
 impl CodeFrame for LevenshteinCodeFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui) {
         ui.group(|ui| {
             ui.subheading("Mode");
             ui.selectable_value(&mut self.code.mode, IOMode::Integer, "Integer");

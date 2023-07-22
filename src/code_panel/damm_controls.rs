@@ -18,7 +18,7 @@ impl Default for DammFrame {
 }
 
 impl CodeFrame for DammFrame {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut eframe::egui::Ui) {
         ui.add_space(16.0);
 
         ui.label("The Cayley table chosen by Damm. Note that it forms a Latin square, no row or column includes any digit more than once.");

@@ -18,7 +18,7 @@ impl Default for MofNCodeFrame {
 }
 
 impl CodeFrame for MofNCodeFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui) {
         ui.group(|ui| {
             ui.subheading("Length");
             ui.label("Total number of bits.");

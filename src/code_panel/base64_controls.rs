@@ -15,7 +15,7 @@ impl Default for Base64Frame {
 }
 
 impl CodeFrame for Base64Frame {
-    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui) {
         ui.group(|ui| {
             ui.subheading("Variant");
             ui.horizontal(|ui| {

@@ -17,7 +17,7 @@ impl Default for HammingFrame {
 }
 
 impl CodeFrame for HammingFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui) {
         ui.checkbox(&mut self.code.extra_bit, "Extra Parity Bit");
         ui.label("When this is checked one additional parity bit is included. That allows detecting, but not correcting, two bit errors.");
         ui.add_space(16.0);

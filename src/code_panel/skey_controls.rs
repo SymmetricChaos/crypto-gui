@@ -15,7 +15,7 @@ impl Default for SKeyWordsFrame {
 }
 
 impl CodeFrame for SKeyWordsFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui) {
         ui.add_space(16.0);
         ui.binary_to_text_input_mode(&mut self.code.mode);
         ui.add_space(16.0);

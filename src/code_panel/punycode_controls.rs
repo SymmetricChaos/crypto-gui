@@ -20,7 +20,7 @@ impl Default for PunycodeFrame {
 }
 
 impl CodeFrame for PunycodeFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui) {
         ui.subheading("Example");
         ui.text_edit_singleline(&mut self.example);
         ui.add_space(8.0);

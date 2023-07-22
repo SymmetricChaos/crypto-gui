@@ -15,7 +15,7 @@ impl Default for Base32Frame {
 }
 
 impl CodeFrame for Base32Frame {
-    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui) {
         ui.group(|ui| {
             ui.subheading("Variant");
             ui.horizontal(|ui| {

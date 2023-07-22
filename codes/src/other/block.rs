@@ -1,5 +1,3 @@
-use std::ops::{Add, Sub};
-
 use itertools::Itertools;
 use num::{Integer, Zero};
 use utils::preset_alphabet::Alphabet;
@@ -44,15 +42,15 @@ impl BlockCode {
         to_str_radix(n, self.symbols.len(), self.width, &self.symbols)
     }
 
-    pub fn decrease_width(&mut self) -> Result<(), CodeError> {
-        self.width = self.width.sub(1).clamp(2, 8);
-        self.check_code_width()
-    }
+    // pub fn decrease_width(&mut self) -> Result<(), CodeError> {
+    //     self.width = self.width.sub(1).clamp(2, 8);
+    //     self.check_code_width()
+    // }
 
-    pub fn increase_width(&mut self) -> Result<(), CodeError> {
-        self.width = self.width.add(1).clamp(2, 8);
-        self.check_code_width()
-    }
+    // pub fn increase_width(&mut self) -> Result<(), CodeError> {
+    //     self.width = self.width.add(1).clamp(2, 8);
+    //     self.check_code_width()
+    // }
 
     pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (&char, String)> + '_> {
         Box::new(
@@ -64,11 +62,11 @@ impl BlockCode {
         )
     }
 
-    fn max_codes(&self) -> usize {
+    pub fn max_codes(&self) -> usize {
         self.symbols.len().pow(self.width as u32)
     }
 
-    fn min_code_width(&self) -> usize {
+    pub fn min_code_width(&self) -> usize {
         (self.alphabet.len() as f32)
             .log(self.symbols.len() as f32)
             .ceil() as usize

@@ -18,7 +18,7 @@ impl Default for IsbnFrame {
 }
 
 impl CodeFrame for IsbnFrame {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut eframe::egui::Ui) {
         ui.group(|ui| {
             ui.subheading("Variant");
             ui.horizontal(|ui| {

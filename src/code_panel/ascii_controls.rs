@@ -16,7 +16,7 @@ impl Default for AsciiFrame {
 }
 
 impl CodeFrame for AsciiFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui) {
         ui.group(|ui| {
             ui.subheading("Representation");
             ui.horizontal(|ui| {

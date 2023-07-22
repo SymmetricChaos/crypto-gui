@@ -16,7 +16,7 @@ impl Default for BytesAsNumbersFrame {
 }
 
 impl CodeFrame for BytesAsNumbersFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui) {
         ui.add_space(16.0);
         ui.subheading("Radix");
         ui.label("The radix (or base) of the representation can vary between 2 and 36 as there are standard ways of printing these.");

@@ -30,19 +30,11 @@ impl TapCode {
         }
     }
 
-    pub fn set_alphabet(&mut self, alphabet_string: &str) -> Result<(), CodeError> {
+    pub fn set_alphabet(&mut self, alphabet_string: &str) {
         let new_alpha_len = alphabet_string.chars().count();
-
-        if new_alpha_len > 100 {
-            return Err(CodeError::alphabet(
-                "alphabet length currently limited to 100 characters",
-            ));
-        }
 
         self.grid = alphabet_string.chars().unique().collect();
         self.side_len = (new_alpha_len as f64).sqrt().ceil() as usize;
-
-        Ok(())
     }
 
     pub fn alphabet_len(&self) -> usize {

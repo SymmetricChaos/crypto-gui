@@ -16,7 +16,7 @@ impl Default for LuhnAlgorithmFrame {
 }
 
 impl CodeFrame for LuhnAlgorithmFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui) {
         ui.subheading("Modulus");
         ui.add(Slider::new(&mut self.code.modulus, 2..=36).step_by(2.0));
         if self.code.modulus % 2 != 0 {

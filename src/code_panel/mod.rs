@@ -54,7 +54,7 @@ mod upc_controls;
 mod verhoeff_controls;
 
 pub trait CodeFrame {
-    fn ui(&mut self, ui: &mut Ui, errors: &mut String);
+    fn ui(&mut self, ui: &mut Ui);
     fn code(&self) -> &dyn Code;
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         self.code().encode(text)

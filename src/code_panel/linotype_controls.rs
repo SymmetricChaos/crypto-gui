@@ -15,7 +15,7 @@ impl Default for LinotypeFrame {
 }
 
 impl CodeFrame for LinotypeFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui) {
         ui.label("Basic Linotype characters. The machines could be expanded with additional magazines of characters.");
         ui.fill_code_columns(32, 4, self.code.chars_codes());
         ui.add_space(16.0);

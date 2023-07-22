@@ -16,7 +16,7 @@ impl Default for VerhoeffFrame {
 }
 
 impl CodeFrame for VerhoeffFrame {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut eframe::egui::Ui) {
         ui.add_space(16.0);
         ui.label("Check the validity of Verhoeff codes. Put in codes separated by commas.");
         ui.text_edit_multiline(&mut self.text);

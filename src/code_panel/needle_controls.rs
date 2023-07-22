@@ -15,7 +15,7 @@ impl Default for NeedleFrame {
 }
 
 impl CodeFrame for NeedleFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui) {
         ui.subheading("Alphabet");
         if ui.control_string(&mut self.code.alphabet).changed() {
             self.code.set_map()

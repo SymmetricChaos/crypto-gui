@@ -15,7 +15,7 @@ impl Default for Ascii85Frame {
 }
 
 impl CodeFrame for Ascii85Frame {
-    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui) {
         ui.group(|ui| {
             ui.subheading("Variant");
             ui.horizontal(|ui| {

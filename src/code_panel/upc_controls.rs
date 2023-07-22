@@ -22,7 +22,7 @@ impl Default for UpcFrame {
     }
 }
 
-fn handle_example(text: &str) -> Result<String, CodeError> {
+fn upca_example(text: &str) -> Result<String, CodeError> {
     if !text.is_ascii() {
         return Err(CodeError::Input(format!(
             "{} is not a valid UPC-A code",
@@ -52,7 +52,7 @@ fn handle_example(text: &str) -> Result<String, CodeError> {
 }
 
 impl CodeFrame for UpcFrame {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut eframe::egui::Ui) {
         // ui.group(|ui| {
         //     ui.subheading("Variant");
         //     ui.horizontal(|ui| {
@@ -65,13 +65,13 @@ impl CodeFrame for UpcFrame {
 
         // };
 
-        ui.subheading("Example");
+        ui.subheading("Example UPC-A");
         if ui.text_edit_singleline(&mut self.example).changed() {
             while self.example.chars().count() > 12 {
                 self.example.pop();
             }
         }
-        match handle_example(&self.example) {
+        match upca_example(&self.example) {
             Ok(digits) => {
                 ui.horizontal(|ui| {
                     ui.mono(digits.chars().join(" "));

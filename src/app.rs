@@ -181,7 +181,7 @@ impl ClassicCrypto {
                             ui.add_space(16.0);
                             self.code_interface
                                 .get_active_code(&code)
-                                .ui(ui, &mut self.errors);
+                                .ui(ui);
                         }
                         None => {
                             ui.label(mono_strong("Codes").heading());

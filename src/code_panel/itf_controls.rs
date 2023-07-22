@@ -19,7 +19,7 @@ impl Default for ItfFrame {
 }
 
 impl CodeFrame for ItfFrame {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut eframe::egui::Ui) {
         ui.checkbox(&mut self.code.insert_zero, "Automatically Insert Zero");
 
         ui.subheading("Example");
