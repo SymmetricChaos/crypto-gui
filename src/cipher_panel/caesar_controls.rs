@@ -45,13 +45,13 @@ impl CipherFrame for CaesarFrame {
         ui.group(|ui| {
             ui.subheading("Common Alphabets");
             ui.horizontal(|ui| {
-                for (name, alphabet) in [
-                    ("Basic Latin", Alphabet::BasicLatin),
-                    ("Alphanumeric", Alphabet::Alphanumeric),
-                    ("ASCII", Alphabet::Ascii94),
-                    ("Base64", Alphabet::Base64),
+                for alphabet in [
+                    Alphabet::Alphanumeric,
+                    Alphabet::BasicLatin,
+                    Alphabet::Ascii94,
+                    Alphabet::Base64,
                 ] {
-                    if ui.button(name).clicked() {
+                    if ui.button(alphabet.name()).clicked() {
                         self.alphabet_string = alphabet.into();
                         self.cipher.assign_alphabet(&self.alphabet_string)
                     }
