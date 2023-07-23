@@ -1,5 +1,6 @@
 use codes::mathematical::unary::{UnaryCode, UnaryMode};
 use egui::TextEdit;
+use utils::text_functions::unique_string;
 
 use crate::ui_elements::UiElements;
 
@@ -28,17 +29,16 @@ impl CodeFrame for UnaryCodeFrame {
 
         match self.code.mode {
             UnaryMode::Letter => {
-                ui.label("Alphabetical Mode: Provide an alphabet. Codes will be assigned to each character of the alphabet in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
-                if ui
-                    .add(TextEdit::singleline(&mut self.code.maps.alphabet))
-                    .changed()
-                {
+                ui.label("Provide an alphabet. Codes will be assigned to each character of the alphabet in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
+                if ui.control_string(&mut self.code.maps.alphabet).changed() {
+                    unique_string(&mut self.code.maps.alphabet);
+                    self.code.maps.alphabet.retain(|x| x != '�');
                     self.code.set_letter_map();
                 };
                 ui.fill_code_columns(16, 3, Box::new(self.code.maps.chars_codes()));
             }
             UnaryMode::Word => {
-                ui.label("Word Mode: Provide any number of words or phrases separated by commas. Codes will be assigned to each word or phrase in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
+                ui.label("Provide any number of words or phrases separated by commas. Codes will be assigned to each word or phrase in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
                 if ui
                     .add(TextEdit::singleline(&mut self.code.maps.words_string))
                     .changed()

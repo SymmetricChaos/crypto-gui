@@ -29,7 +29,7 @@ impl Default for Godel {
     fn default() -> Self {
         let mut maps = LetterAndWordCode::<usize>::default();
         maps.words_string = String::from(
-            "0, s, +, ×, =, (, ), implies, not, forall, exists, and, or, x1, x2, x3, x4, x5, P1, P2, P3, P4, P5",
+            "0, s, +, ×, =, (, ), implies, not, forall, exists, and, or, x1, P1, x2, P2, x3, P3, x4, P4, x5, P5",
         );
         maps.set_word_map(|(n, _)| n + 1);
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
@@ -68,16 +68,20 @@ impl Code for Godel {
                     Err(e) => return Err(e),
                 }
             }
-        } else {
+            return Ok(out.to_str_radix(10));
+        } else if self.mode == IOMode::Letter {
             for (s, prime) in text.split(" ").zip(self.primes.iter()) {
                 match self.maps.get_by_word(s) {
                     Ok(v) => out *= BigUint::from(*prime).pow(*v as u32),
                     Err(e) => return Err(e),
                 }
             }
+            return Ok(out.to_str_radix(10));
+        } else {
+            Err(CodeError::state(
+                "Godel encoding is not currently defined for IOMode::Integer",
+            ))
         }
-
-        Ok(out.to_str_radix(10))
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
@@ -110,7 +114,7 @@ impl Code for Godel {
                 }
             }
             Ok(words.iter().join(" "))
-        } else {
+        } else if self.mode == IOMode::Letter {
             let mut words = Vec::with_capacity(MESSAGE_LIMIT);
             for p in self.primes.iter() {
                 let mut ctr = 0;
@@ -134,6 +138,10 @@ impl Code for Godel {
                 }
             }
             Ok(words.iter().collect())
+        } else {
+            Err(CodeError::state(
+                "Godel encoding is not currently defined for IOMode::Integer",
+            ))
         }
     }
 }

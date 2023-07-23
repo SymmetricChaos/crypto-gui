@@ -4,6 +4,7 @@ use super::CodeFrame;
 
 use codes::{mathematical::godel::Godel, traits::IOMode};
 use egui::TextEdit;
+use utils::text_functions::unique_string;
 
 pub struct GodelFrame {
     code: Godel,
@@ -24,23 +25,22 @@ impl CodeFrame for GodelFrame {
             ui.selectable_value(&mut self.code.mode, IOMode::Letter, "Letter");
             ui.selectable_value(&mut self.code.mode, IOMode::Word, "Word");
         });
-        ui.add_space(16.0);
+        ui.add_space(8.0);
 
         match self.code.mode {
             IOMode::Letter => {
-                ui.label("Alphabetical Mode: Provide an alphabet. Codes will be assigned to each character of the alphabet in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
-                if ui
-                    .add(TextEdit::singleline(&mut self.code.maps.alphabet))
-                    .changed()
-                {
+                ui.label("Provide an alphabet. Codes will be assigned to each character of the alphabet in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
+                if ui.control_string(&mut self.code.maps.alphabet).changed() {
+                    unique_string(&mut self.code.maps.alphabet);
+                    self.code.maps.alphabet.retain(|x| x != '�');
                     self.code.set_letter_map();
                 };
                 ui.fill_code_columns(16, 5, Box::new(self.code.maps.codes_chars()));
             }
             IOMode::Word => {
-                ui.label("Word Mode: Provide any number of words or phrases separated by commas. Codes will be assigned to each word or phrase in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
+                ui.label("Provide any number of words or phrases separated by commas. Codes will be assigned to each word or phrase in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
                 if ui
-                    .add(TextEdit::singleline(&mut self.code.maps.words_string))
+                    .add(TextEdit::multiline(&mut self.code.maps.words_string))
                     .changed()
                 {
                     self.code.set_word_map();
