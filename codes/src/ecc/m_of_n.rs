@@ -1,5 +1,9 @@
 use itertools::Itertools;
-use utils::bits::{bits_from_bitstring, Bit, IS_BITS};
+use num::integer::binomial;
+use utils::{
+    bits::{bits_from_bitstring, Bit, IS_BITS},
+    text_functions::u8_to_string_with_radix_and_width,
+};
 
 use crate::{errors::CodeError, traits::Code};
 
@@ -11,6 +15,34 @@ pub struct MofNCode {
 impl MofNCode {
     pub fn n_data_bits(&self) -> usize {
         self.length - self.weight
+    }
+
+    pub fn validate(&self) -> Result<(), CodeError> {
+        if self.length > 10 {
+            return Err(CodeError::state(
+                "lengths greater than 10 not currently supported",
+            ));
+        }
+        if self.weight >= self.length {
+            return Err(CodeError::state("weight must be less than length"));
+        }
+        Ok(())
+    }
+
+    pub fn total_codes(&self) -> usize {
+        binomial(self.length, self.weight)
+    }
+
+    pub fn list_codes(&self) -> Vec<String> {
+        let mut out = Vec::new();
+        for i in 0..self.total_codes() {
+            let s = u8_to_string_with_radix_and_width(&(i as u8), 2, self.n_data_bits());
+            out.push(
+                self.encode(&s)
+                    .expect("list_codes() assumes length is never greater than 10"),
+            )
+        }
+        out
     }
 }
 
@@ -25,6 +57,8 @@ impl Default for MofNCode {
 
 impl Code for MofNCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
+        self.validate()?;
+
         if !IS_BITS.is_match(text) {
             return Err(CodeError::Input(format!(
                 "bitstrings can only contain 0, 1, and whitespace",
@@ -68,6 +102,14 @@ impl Code for MofNCode {
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
+        self.validate()?;
+
+        if !IS_BITS.is_match(text) {
+            return Err(CodeError::Input(format!(
+                "bitstrings can only contain 0, 1, and whitespace",
+            )));
+        }
+
         let n_data_bits = self.n_data_bits();
 
         let bits: Vec<Bit> = bits_from_bitstring(text)
@@ -76,7 +118,7 @@ impl Code for MofNCode {
 
         if bits.len() % self.length != 0 {
             return Err(CodeError::Input(format!(
-                "when decoding an {}-of-{} code must have a length that is a multiple of {}",
+                "when decoding an {}-of-{} code the input must have a length that is a multiple of {}",
                 self.weight, self.length, self.length
             )));
         };
