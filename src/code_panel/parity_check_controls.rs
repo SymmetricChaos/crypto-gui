@@ -20,12 +20,12 @@ impl Default for ParityBitFrame {
 
 impl CodeFrame for ParityBitFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
-        ui.label("Data Bits");
+        ui.subheading("Data Bits");
         ui.add(Slider::new(&mut self.code.block_size, 1..=10));
 
         ui.add_space(8.0);
 
-        ui.label("Parity Bit Position");
+        ui.subheading("Parity Bit Position");
         ui.add(Slider::new(
             &mut self.code.position,
             0..=self.code.block_size,

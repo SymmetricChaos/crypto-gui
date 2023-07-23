@@ -38,8 +38,12 @@ impl CodeFrame for Base64Frame {
         ui.add_space(16.0);
         ui.binary_to_text_input_mode(&mut self.code.mode);
         ui.add_space(16.0);
+        ui.subheading("Padding");
         ui.label("When padding is enabled the padding symbol `=` is added to the end until the length is a multiple of three. Padding is ignored when decoding.");
-        ui.checkbox(&mut self.code.use_padding, "Use Padding");
+        ui.horizontal(|ui| {
+            ui.selectable_value(&mut self.code.use_padding, true, "On");
+            ui.selectable_value(&mut self.code.use_padding, false, "Off");
+        });
         ui.add_space(16.0);
         // use rfd::FileDialog;
         // ui.label("You can upload a file and encode its binary data as text. Decoding files is not supported as it is impossible to know the contents.");
