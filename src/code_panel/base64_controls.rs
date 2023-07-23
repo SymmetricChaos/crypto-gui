@@ -33,7 +33,7 @@ impl CodeFrame for Base64Frame {
             B64Variant::Standard => {
                 ui.label("The most commonly used Base64 variant is defined by RFC 4684 section 4.")
             }
-            B64Variant::UrlSafe => ui.label("URL and Filename Safe variant is defioned in RFC 4684 section 5 to be used in situations where the + and / characters might have special use defined for them. They are replaced by - and _."),
+            B64Variant::UrlSafe => ui.label("URL and Filename Safe variant is defined in RFC 4684 section 5 to be used in situations where the + and / characters might have special use defined for them. They are replaced by - and _."),
         };
         ui.add_space(16.0);
         ui.binary_to_text_input_mode(&mut self.code.mode);
