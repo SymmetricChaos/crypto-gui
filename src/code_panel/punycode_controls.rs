@@ -1,7 +1,7 @@
 use codes::text_standards::punycode::Punycode;
 use egui::Slider;
 
-use crate::ui_elements::{error_text, UiElements};
+use crate::ui_elements::UiElements;
 
 use super::CodeFrame;
 
@@ -26,7 +26,7 @@ impl CodeFrame for PunycodeFrame {
         ui.add_space(8.0);
         match self.encode(&self.example) {
             Ok(s) => ui.label(s),
-            Err(e) => ui.label(error_text(e.inner())),
+            Err(e) => ui.error_text(e),
         };
 
         ui.collapsing("Variables", |ui| {

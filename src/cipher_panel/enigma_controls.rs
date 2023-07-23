@@ -1,10 +1,10 @@
 use super::CipherFrame;
-use crate::ui_elements::{mono, UiElements};
+use crate::ui_elements::UiElements;
 use ciphers::{
     machines::enigma::{rotors::REFLECTOR_VEC, EnigmaM3, REFLECTOR_MAP, ROTOR_VEC},
     Cipher,
 };
-use egui::{ComboBox, Label, Slider, Ui};
+use egui::{ComboBox, Label, RichText, Slider, Ui};
 use rand::{thread_rng, Rng};
 use utils::{preset_alphabet::Alphabet, text_functions::random_string_sample};
 
@@ -78,7 +78,10 @@ impl CipherFrame for EnigmaM3Frame {
         ui.label("Rotors").on_hover_text("Walzen");
         for rotor in &mut self.cipher.state.rotors {
             ui.horizontal(|ui| {
-                ui.add_sized([20.0, 20.0], Label::new(mono(rotor.name)));
+                ui.add_sized(
+                    [20.0, 20.0],
+                    Label::new(RichText::from(rotor.name).monospace()),
+                );
                 ui.mono(rotor);
             });
         }
@@ -101,7 +104,7 @@ impl CipherFrame for EnigmaM3Frame {
         ui.horizontal(|ui| {
             ui.add_sized(
                 [20.0, 20.0],
-                Label::new(mono(self.cipher.state.reflector.name)),
+                Label::new(RichText::from(self.cipher.state.reflector.name).monospace()),
             );
             ui.mono(self.cipher.state.reflector);
         });

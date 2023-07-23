@@ -1,8 +1,7 @@
-use codes::ecc::hamming::{HammingCode, GEN_4_7_MIX, GEN_4_7_SYS, GEN_4_8_MIX, GEN_4_8_SYS};
-
-use crate::ui_elements::mono;
+use crate::ui_elements::UiElements;
 
 use super::CodeFrame;
+use codes::ecc::hamming::{HammingCode, GEN_4_7_MIX, GEN_4_7_SYS, GEN_4_8_MIX, GEN_4_8_SYS};
 
 pub struct HammingFrame {
     code: HammingCode,
@@ -27,7 +26,7 @@ impl CodeFrame for HammingFrame {
         ui.add_space(16.0);
 
         ui.label("Generator Matrix");
-        ui.label(mono(match self.code.extra_bit {
+        ui.mono(match self.code.extra_bit {
             true => match self.code.systematic {
                 true => GEN_4_8_SYS.to_string(),
                 false => GEN_4_8_MIX.to_string(),
@@ -36,7 +35,7 @@ impl CodeFrame for HammingFrame {
                 true => GEN_4_7_SYS.to_string(),
                 false => GEN_4_7_MIX.to_string(),
             },
-        }));
+        });
         ui.add_space(16.0);
         ui.label("The columns with one bit set capture the data bits. The columns with multiple bits set check the parity of the selected data bits.");
         ui.add_space(16.0);

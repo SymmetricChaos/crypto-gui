@@ -2,7 +2,7 @@ use crate::cipher_panel::CipherInterface;
 use crate::code_panel::CodeInterface;
 use crate::pages::io_panel::IOPanel;
 use crate::pages::{Page, TextPrepPage};
-use crate::ui_elements::mono_strong;
+use crate::ui_elements::UiElements;
 use ciphers::ids::CipherId;
 use codes::ids::CodeId;
 use eframe::egui;
@@ -174,7 +174,7 @@ impl ClassicCrypto {
                 ScrollArea::vertical().show(ui, |ui| {
                     match self.active_code {
                         Some(code) => {
-                            ui.label(mono_strong(code).heading());
+                            ui.label(RichText::from(code.to_string()).heading());
                             ui.label(RichText::new(code.description()).size(12.0));
                             ui.add_space(16.0);
                             ui.separator();
@@ -184,17 +184,18 @@ impl ClassicCrypto {
                                 .ui(ui);
                         }
                         None => {
-                            ui.label(mono_strong("Codes").heading());
+                            ui.label(RichText::from("Codes").heading());
                             ui.label(RichText::new("A code is a method of transforming information in one form to another form.").size(12.0));
                             ui.add_space(16.0);
                             ui.separator();
                             ui.add_space(16.0);
-                            ui.label(mono_strong("Codes exist for many reasons but the most common is ease of use. Often information in one form is difficult to use for a particular purpose and so needs to be changed. A spoken explanation vanishes in moments and travels only a short distance while the same explanation encoded as symbols can survive for years and be transported thousands of kilometers. Those same symbols become a problem for transmitting electronically so instead they may be enoded again as a sequence of signals, often just binary bits. The reciever of those bits then transforms then back to symbols and the reader interprets the symbols using their knowledge of how they relate to spoken language."));
+                            ui.mono_strong("Codes exist for many reasons but the most common is ease of use. Often information in one form is difficult to use for a particular purpose and so needs to be changed. A spoken explanation vanishes in moments and travels only a short distance while the same explanation encoded as symbols can survive for years and be transported thousands of kilometers. Those same symbols become a problem for transmitting electronically so instead they may be enoded again as a sequence of signals, often just binary bits. The reciever of those bits then transforms then back to symbols and the reader interprets the symbols using their knowledge of how they relate to spoken language.");
                         }
                     };
                 });
             });
         } else {
+            // If somehow we are here without Page::Code selected
             self.code_selector_panel(ctx);
         }
     }
@@ -238,7 +239,7 @@ impl ClassicCrypto {
                 ScrollArea::vertical().show(ui, |ui| {
                     match self.active_cipher {
                         Some(cipher) => {
-                            ui.label(mono_strong(cipher).heading());
+                            ui.label(RichText::from(cipher.to_string()).heading());
                             ui.label(RichText::new(cipher.description()).size(12.0));
                             ui.add_space(16.0);
                             ui.separator();
@@ -248,7 +249,7 @@ impl ClassicCrypto {
                                 .ui(ui, &mut self.errors);
                         }
                         None => {
-                            ui.label(mono_strong("Ciphers").heading());
+                            ui.label(RichText::from("Ciphers").heading());
                             ui.label(RichText::new("A cipher is a method of making information inaccessible to those without knowledge of a secret key.").size(12.0));
                             ui.add_space(16.0);
                             ui.separator();

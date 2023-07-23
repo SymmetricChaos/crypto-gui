@@ -109,7 +109,7 @@ impl UiElements for Ui {
             let mut col = 0;
             for (c, code) in iter {
                 let pair = format!("{}  {} ", c, code);
-                columns[col].label(mono_strong(&pair).size(18.0));
+                columns[col].label(RichText::from(&pair).monospace().strong().size(18.0));
                 ctr += 1;
                 if ctr % nrows == 0 {
                     col += 1
@@ -137,32 +137,32 @@ impl UiElements for Ui {
     }
 }
 
-pub fn subheading<T: ToString>(text: T) -> RichText {
-    RichText::from(text.to_string()).size(16.0)
-}
+// pub fn subheading<T: ToString>(text: T) -> RichText {
+//     RichText::from(text.to_string()).size(16.0)
+// }
 
-pub fn mono<T: ToString>(text: T) -> RichText {
-    RichText::from(text.to_string()).monospace()
-}
+// pub fn mono<T: ToString>(text: T) -> RichText {
+//     RichText::from(text.to_string()).monospace()
+// }
 
-pub fn mono_strong<T: ToString>(text: T) -> RichText {
-    RichText::from(text.to_string()).monospace().strong()
-}
+// pub fn mono_strong<T: ToString>(text: T) -> RichText {
+//     RichText::from(text.to_string()).monospace().strong()
+// }
 
-pub fn error_text<T: ToString>(text: T) -> RichText {
-    RichText::from(text.to_string())
-        .color(Color32::RED)
-        .background_color(Color32::BLACK)
-        .monospace()
-}
+// pub fn error_text<T: ToString>(text: T) -> RichText {
+//     RichText::from(text.to_string())
+//         .color(Color32::RED)
+//         .background_color(Color32::BLACK)
+//         .monospace()
+// }
 
-pub fn control_string(ui: &mut egui::Ui, string: &mut String) -> egui::Response {
-    ui.add(
-        egui::TextEdit::singleline(string)
-            .font(TextStyle::Monospace)
-            .clip_text(false),
-    )
-}
+// pub fn control_string(ui: &mut egui::Ui, string: &mut String) -> egui::Response {
+//     ui.add(
+//         egui::TextEdit::singleline(string)
+//             .font(TextStyle::Monospace)
+//             .clip_text(false),
+//     )
+// }
 
 pub fn randomize_reset(ui: &mut egui::Ui, cipher_frame: &mut dyn CipherFrame) {
     if ui.button("Randomize").clicked() {
@@ -212,7 +212,7 @@ pub fn fill_code_columns<T: Display, S: Display>(
         let mut col = 0;
         for (c, code) in iter {
             let pair = format!("{}  {} ", c, code);
-            columns[col].label(mono_strong(&pair).size(18.0));
+            columns[col].label(RichText::from(&pair).monospace().strong().size(18.0));
             ctr += 1;
             if ctr % nrows == 0 {
                 col += 1
