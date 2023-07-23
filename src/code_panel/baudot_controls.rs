@@ -31,13 +31,14 @@ impl CodeFrame for BaudotFrame {
             });
         });
         ui.add_space(16.0);
+
         match self.code.version {
             BaudotVersion::Ita1 => ui.label("The first International Telegraphy Alphabet was a version of Baudot's original encoding."),
             BaudotVersion::Ita2 => ui.label("The second International Telegraphy Alphabet based on work by Baudot and Murray became a widely used standard that made ITA1 obsolete. This variant is still in minor usage."),
             BaudotVersion::UsTty => ui.label("The US Teleteypewriter code is a less common variant used in the United States."),
         };
-
         ui.add_space(16.0);
+
         ui.fill_code_columns(16, 4, self.code.codes_chars());
         ui.add_space(16.0);
     }
