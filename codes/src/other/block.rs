@@ -13,9 +13,9 @@ fn to_str_radix(n: usize, radix: usize, width: usize, symbols: &Vec<char>) -> St
 
     let mut n = n;
     while n != 0 || values.len() < width {
-        let (n_temp, r) = n.div_mod_floor(&radix);
+        let (q, r) = n.div_mod_floor(&radix);
         values.push(r);
-        n = n_temp;
+        n = q;
     }
 
     values.into_iter().map(|x| symbols[x]).rev().collect()
@@ -41,16 +41,6 @@ impl BlockCode {
     fn num_to_string(&self, n: usize) -> String {
         to_str_radix(n, self.symbols.len(), self.width, &self.symbols)
     }
-
-    // pub fn decrease_width(&mut self) -> Result<(), CodeError> {
-    //     self.width = self.width.sub(1).clamp(2, 8);
-    //     self.check_code_width()
-    // }
-
-    // pub fn increase_width(&mut self) -> Result<(), CodeError> {
-    //     self.width = self.width.add(1).clamp(2, 8);
-    //     self.check_code_width()
-    // }
 
     pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (&char, String)> + '_> {
         Box::new(
