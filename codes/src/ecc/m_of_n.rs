@@ -1,9 +1,6 @@
 use itertools::Itertools;
 use num::integer::binomial;
-use utils::{
-    bits::{bits_from_bitstring, Bit, IS_BITS},
-    text_functions::u8_to_string_with_radix_and_width,
-};
+use utils::bits::{bits_from_bitstring, Bit, IS_BITS};
 
 use crate::{errors::CodeError, traits::Code};
 
@@ -33,17 +30,17 @@ impl MofNCode {
         binomial(self.length, self.weight)
     }
 
-    pub fn list_codes(&self) -> Vec<String> {
-        let mut out = Vec::new();
-        for i in 0..self.total_codes() {
-            let s = u8_to_string_with_radix_and_width(&(i as u8), 2, self.n_data_bits());
-            out.push(
-                self.encode(&s)
-                    .expect("list_codes() assumes length is never greater than 10"),
-            )
-        }
-        out
-    }
+    // pub fn list_codes(&self) -> Vec<String> {
+    //     let mut out = Vec::new();
+    //     for i in 0..self.total_codes() {
+    //         let s = u8_to_string_with_radix_and_width(&(i as u8), 2, self.n_data_bits());
+    //         out.push(
+    //             self.encode(&s)
+    //                 .expect("list_codes() assumes length is never greater than 10"),
+    //         )
+    //     }
+    //     out
+    // }
 }
 
 impl Default for MofNCode {

@@ -1,3 +1,4 @@
+pub mod base_n;
 pub mod elias;
 pub mod elias_integers;
 pub mod fibonacci;
