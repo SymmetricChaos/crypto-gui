@@ -54,6 +54,14 @@ impl BaseN {
     pub fn decode_to_u32(&self, s: &str) -> Result<u32, CodeError> {
         u32::from_str_radix(s, self.radix).map_err(|e| CodeError::Input(e.to_string()))
     }
+
+    pub fn set_letter_map(&mut self) {
+        self.maps.set_letter_map(|(n, _)| n as u32)
+    }
+
+    pub fn set_word_map(&mut self) {
+        self.maps.set_word_map(|(n, _)| n as u32)
+    }
 }
 
 impl Code for BaseN {
@@ -88,9 +96,8 @@ impl Code for BaseN {
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         self.validate()?;
-
+        let mut output = String::new();
         if self.mode == IOMode::Integer {
-            let mut output = String::new();
             for s in text.split(" ") {
                 if s.is_empty() {
                     continue;
@@ -98,9 +105,7 @@ impl Code for BaseN {
                 output.push_str(&format!("{} ", self.decode_to_u32(s)?))
             }
             output.pop();
-            Ok(output)
         } else if self.mode == IOMode::Letter {
-            let mut output = String::new();
             for s in text.split(" ") {
                 if s.is_empty() {
                     continue;
@@ -108,9 +113,7 @@ impl Code for BaseN {
                 let n = self.decode_to_u32(s)?;
                 output.push(*self.maps.get_letter_by_code(&n)?)
             }
-            Ok(output)
         } else {
-            let mut output = String::new();
             for s in text.split(" ") {
                 if s.is_empty() {
                     continue;
@@ -120,7 +123,33 @@ impl Code for BaseN {
                 output.push(' ');
             }
             output.pop();
-            Ok(output)
         }
+
+        Ok(output)
+    }
+}
+
+#[cfg(test)]
+mod base_n_tests {
+    use super::*;
+
+    const PLAINTEXT_INT: &'static str = "0 1 2 3 4 5";
+    const PLAINTEXT_LET: &'static str = "ETAOIN";
+    const ENCODEDTEXT: &'static str = "0 1 10 11 100 101";
+
+    #[test]
+    fn encode_test() {
+        let mut code = BaseN::default();
+        assert_eq!(code.encode(PLAINTEXT_INT).unwrap(), ENCODEDTEXT);
+        code.mode = IOMode::Letter;
+        assert_eq!(code.encode(PLAINTEXT_LET).unwrap(), ENCODEDTEXT);
+    }
+
+    #[test]
+    fn decode_test() {
+        let mut code = BaseN::default();
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT_INT);
+        code.mode = IOMode::Letter;
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT_LET);
     }
 }
