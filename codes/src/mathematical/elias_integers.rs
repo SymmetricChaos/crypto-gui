@@ -1,6 +1,6 @@
 use crate::errors::CodeError;
 use num::Zero;
-use std::{cell::RefCell, collections::BTreeMap};
+use std::collections::BTreeMap;
 use utils::bits::{bits_from_bitstring, bits_to_int_little_endian, Bit};
 
 // https://en.wikipedia.org/wiki/Elias_delta_coding
@@ -13,7 +13,7 @@ pub struct OmegaGen {
 
 impl OmegaGen {
     pub fn new() -> Self {
-        OmegaGen { n: 1 }
+        OmegaGen { n: 0 }
     }
 }
 
@@ -21,15 +21,14 @@ impl Iterator for OmegaGen {
     type Item = (u32, String);
 
     fn next(&mut self) -> Option<(u32, String)> {
-        let mut temp_n = self.n as u32;
+        self.n += 1;
+        let mut temp_n = self.n;
         let mut out = String::from("0");
         while temp_n > 1 {
-            println!("{temp_n}");
             out.insert_str(0, &format!("{:b}", temp_n));
             temp_n = temp_n.ilog2();
         }
-        self.n += 1;
-        Some((temp_n, out))
+        Some((self.n, out))
     }
 }
 
@@ -101,56 +100,36 @@ pub enum EliasVariant {
 
 pub struct EliasCodeIntegers {
     pub variant: EliasVariant,
-    delta: RefCell<DeltaGen>,
-    delta_cache: RefCell<BTreeMap<u32, String>>,
-    gamma: RefCell<GammaGen>,
-    gamma_cache: RefCell<BTreeMap<u32, String>>,
-    omega: RefCell<OmegaGen>,
-    omega_cache: RefCell<BTreeMap<u32, String>>,
+    current_max: u32,
+    delta: DeltaGen,
+    pub delta_cache: BTreeMap<u32, String>,
+    gamma: GammaGen,
+    pub gamma_cache: BTreeMap<u32, String>,
+    omega: OmegaGen,
+    pub omega_cache: BTreeMap<u32, String>,
 }
 
 impl EliasCodeIntegers {
-    pub fn encode_u32_delta(&self, n: u32) -> String {
-        if let Some(code) = self.delta_cache.borrow().get(&n) {
-            code.clone()
-        } else {
-            while self.delta.borrow().n < n {
-                let (n, c) = self.delta.borrow_mut().next().unwrap();
-                self.delta_cache.borrow_mut().insert(n, c);
-            }
-            self.delta_cache.borrow().get(&n).unwrap().clone()
+    pub fn extend_all(&mut self, value: u32) {
+        while value > self.current_max {
+            let (n, c) = self.delta.next().unwrap();
+            self.delta_cache.insert(n, c);
+
+            let (n, c) = self.gamma.next().unwrap();
+            self.gamma_cache.insert(n, c);
+
+            let (n, c) = self.omega.next().unwrap();
+            self.omega_cache.insert(n, c);
+
+            self.current_max += 1;
         }
     }
 
-    pub fn encode_u32_gamma(&self, n: u32) -> String {
-        if let Some(code) = self.gamma_cache.borrow().get(&n) {
-            code.clone()
-        } else {
-            while self.gamma.borrow().n < n {
-                let (n, c) = self.gamma.borrow_mut().next().unwrap();
-                self.gamma_cache.borrow_mut().insert(n, c);
-            }
-            self.gamma_cache.borrow().get(&n).unwrap().clone()
-        }
-    }
-
-    pub fn encode_u32_omega(&self, n: u32) -> String {
-        if let Some(code) = self.omega_cache.borrow().get(&n) {
-            code.clone()
-        } else {
-            while self.omega.borrow().n < n {
-                let (n, c) = self.omega.borrow_mut().next().unwrap();
-                self.omega_cache.borrow_mut().insert(n, c);
-            }
-            self.omega_cache.borrow().get(&n).unwrap().clone()
-        }
-    }
-
-    pub fn encode_u32(&self, n: u32) -> String {
+    pub fn encode_u32(&self, n: u32) -> Option<&String> {
         match self.variant {
-            EliasVariant::Delta => self.encode_u32_delta(n),
-            EliasVariant::Gamma => self.encode_u32_gamma(n),
-            EliasVariant::Omega => self.encode_u32_omega(n),
+            EliasVariant::Delta => self.delta_cache.get(&n),
+            EliasVariant::Gamma => self.gamma_cache.get(&n),
+            EliasVariant::Omega => self.omega_cache.get(&n),
         }
     }
 
@@ -292,11 +271,12 @@ impl Default for EliasCodeIntegers {
     fn default() -> Self {
         Self {
             variant: EliasVariant::Delta,
-            delta: RefCell::new(DeltaGen::new()),
+            current_max: 0,
+            delta: DeltaGen::new(),
             delta_cache: Default::default(),
-            gamma: RefCell::new(GammaGen::new()),
+            gamma: GammaGen::new(),
             gamma_cache: Default::default(),
-            omega: RefCell::new(OmegaGen::new()),
+            omega: OmegaGen::new(),
             omega_cache: Default::default(),
         }
     }

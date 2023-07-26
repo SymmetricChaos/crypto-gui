@@ -119,15 +119,17 @@ pub struct CodeInterface {
 
     // Mathematical
     basen: BaseNFrame,
+    godel: GodelFrame,
+
+    // Prefix
+    block: BlockCodeFrame,
     elias: EliasCodeFrame,
     fibonacci: FibonacciCodeFrame,
-    godel: GodelFrame,
     levenshtein: LevenshteinCodeFrame,
     unary: UnaryCodeFrame,
 
     // Other Codes
     bacon: BaconFrame,
-    block: BlockCodeFrame,
     tap: TapCodeFrame,
 }
 
@@ -163,15 +165,20 @@ impl CodeInterface {
             ui,
         );
         combox_box(
+            &[CodeId::BaseN, CodeId::Godel],
+            "Mathematical",
+            active_code,
+            ui,
+        );
+        combox_box(
             &[
-                CodeId::BaseN,
+                CodeId::Block,
                 CodeId::Elias,
                 CodeId::Fibonacci,
-                CodeId::Godel,
                 CodeId::Levenshtein,
                 CodeId::Unary,
             ],
-            "Mathematical",
+            "Prefix Codes",
             active_code,
             ui,
         );
@@ -196,7 +203,7 @@ impl CodeInterface {
             ui,
         );
         combox_box(
-            &[CodeId::Bacon, CodeId::Block, CodeId::Tap],
+            &[CodeId::Bacon, CodeId::Tap],
             "Other Codes",
             active_code,
             ui,
