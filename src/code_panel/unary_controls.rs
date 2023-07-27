@@ -1,10 +1,8 @@
-use codes::mathematical::unary::{UnaryCode, UnaryMode};
+use super::CodeFrame;
+use crate::ui_elements::UiElements;
+use codes::{mathematical::unary::UnaryCode, traits::IOMode};
 use egui::TextEdit;
 use utils::text_functions::unique_string;
-
-use crate::ui_elements::UiElements;
-
-use super::CodeFrame;
 
 pub struct UnaryCodeFrame {
     code: UnaryCode,
@@ -22,13 +20,14 @@ impl CodeFrame for UnaryCodeFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
         ui.group(|ui| {
             ui.subheading("Mode");
-            ui.selectable_value(&mut self.code.mode, UnaryMode::Letter, "Letter");
-            ui.selectable_value(&mut self.code.mode, UnaryMode::Word, "Word");
+            ui.selectable_value(&mut self.code.mode, IOMode::Integer, "Integer");
+            ui.selectable_value(&mut self.code.mode, IOMode::Letter, "Letter");
+            ui.selectable_value(&mut self.code.mode, IOMode::Word, "Word");
         });
         ui.add_space(16.0);
 
         match self.code.mode {
-            UnaryMode::Letter => {
+            IOMode::Letter => {
                 ui.label("Provide an alphabet. Codes will be assigned to each character of the alphabet in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
                 if ui.control_string(&mut self.code.maps.alphabet).changed() {
                     unique_string(&mut self.code.maps.alphabet);
@@ -37,7 +36,7 @@ impl CodeFrame for UnaryCodeFrame {
                 };
                 ui.fill_code_columns(16, 3, Box::new(self.code.maps.chars_codes()));
             }
-            UnaryMode::Word => {
+            IOMode::Word => {
                 ui.label("Provide any number of words or phrases separated by commas. Codes will be assigned to each word or phrase in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
                 if ui
                     .add(TextEdit::singleline(&mut self.code.maps.words_string))
@@ -46,6 +45,14 @@ impl CodeFrame for UnaryCodeFrame {
                     self.code.set_word_map();
                 };
                 ui.fill_code_columns(16, 3, Box::new(self.code.maps.words_codes()));
+            }
+            IOMode::Integer => {
+                ui.label("Convert between numbers a unary codes for those numbers. When decoding the '�' symbol appears when an invalid code is encoutered.");
+                ui.fill_code_columns(
+                    6,
+                    1,
+                    Box::new((0..6).into_iter().map(|n| (n, self.code.usize_to_unary(n)))),
+                );
             }
         }
         ui.add_space(16.0);
