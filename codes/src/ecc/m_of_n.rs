@@ -29,18 +29,6 @@ impl MofNCode {
     pub fn total_codes(&self) -> usize {
         binomial(self.length, self.weight)
     }
-
-    // pub fn list_codes(&self) -> Vec<String> {
-    //     let mut out = Vec::new();
-    //     for i in 0..self.total_codes() {
-    //         let s = u8_to_string_with_radix_and_width(&(i as u8), 2, self.n_data_bits());
-    //         out.push(
-    //             self.encode(&s)
-    //                 .expect("list_codes() assumes length is never greater than 10"),
-    //         )
-    //     }
-    //     out
-    // }
 }
 
 impl Default for MofNCode {
@@ -84,6 +72,13 @@ impl Code for MofNCode {
             for bit in chunk {
                 counted_weight += bit;
                 buffer.push(char::from(bit));
+            }
+
+            if counted_weight > self.weight {
+                return Err(CodeError::Input(format!(
+                    "encoutered more than {} set bits",
+                    self.weight
+                )));
             }
 
             buffer.push_str(&"1".repeat(self.weight - counted_weight));

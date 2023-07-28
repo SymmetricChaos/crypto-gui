@@ -35,8 +35,6 @@ impl CodeFrame for MofNCodeFrame {
 
         ui.label(format!("Total Codes: {}", self.code.total_codes()));
         ui.add_space(16.0);
-
-        // ui.label(format!("{:?}", self.code.list_codes()));
     }
 
     fn code(&self) -> &dyn codes::traits::Code {
