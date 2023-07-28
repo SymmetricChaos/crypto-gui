@@ -48,11 +48,11 @@ impl BlockCode {
                 .iter()
                 .enumerate()
                 .map(|(n, c)| (c, self.num_to_string(n)))
-                .take(self.max_codes()),
+                .take(self.total_codes()),
         )
     }
 
-    pub fn max_codes(&self) -> usize {
+    pub fn total_codes(&self) -> usize {
         self.symbols.len().pow(self.width as u32)
     }
 
@@ -84,7 +84,7 @@ impl Code for BlockCode {
                 .iter()
                 .position(|x| x == &c)
                 .ok_or_else(|| CodeError::invalid_input_char(c))?;
-            if n > self.max_codes() {
+            if n > self.total_codes() {
                 return Err(CodeError::invalid_input_char(c));
             }
             out.push(self.num_to_string(n));
@@ -106,7 +106,7 @@ impl Code for BlockCode {
             val += n * self.symbols.len().pow(p as u32);
 
             if p == 0 {
-                if val > self.max_codes() {
+                if val > self.total_codes() {
                     return Err(CodeError::input("unable to decode"));
                 }
                 out.push(
