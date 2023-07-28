@@ -1,4 +1,4 @@
-use codes::ecc::parity_check::ParityBit;
+use codes::ecc::parity_bit::ParityBit;
 use egui::Slider;
 use utils::bits::Bit;
 
