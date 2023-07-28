@@ -21,14 +21,19 @@ impl CodeFrame for MofNCodeFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
         ui.subheading("Length");
         ui.label("Total number of bits in each code.");
-        ui.add(Slider::new(&mut self.code.length, 0..=10));
+        if ui.add(Slider::new(&mut self.code.length, 2..=10)).changed() {
+            self.code.weight = self.code.weight.clamp(1, self.code.length - 1);
+        }
         ui.add_space(8.0);
 
         ui.subheading("Weight");
         ui.label("Number of 1s in each code.");
-        if ui.add(Slider::new(&mut self.code.weight, 1..=10)).changed() {
+        if ui.add(Slider::new(&mut self.code.weight, 1..=9)).changed() {
             self.code.weight = self.code.weight.clamp(1, self.code.length - 1);
         }
+        ui.add_space(8.0);
+
+        ui.label(format!("Total Codes: {}", self.code.total_codes()));
         ui.add_space(16.0);
 
         // ui.label(format!("{:?}", self.code.list_codes()));
