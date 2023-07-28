@@ -143,14 +143,10 @@ pub fn u8_to_string_with_radix(byte: &u8, radix: u8) -> String {
     let mut s = Vec::new();
     while b != 0 {
         let (q, r) = b.div_rem(&radix);
-        if r < 10 {
-            s.push(r + 48) // shift to start of ASCII numbers
-        } else {
-            s.push(r + 55) // shift to start of ASCII uppercase letters
-        }
+        s.push(num_to_digit(r as u32).expect("remainder should always be less than 36"));
         b = q;
     }
-    String::from_utf8(s.into_iter().rev().collect()).unwrap()
+    s.into_iter().rev().collect()
 }
 
 pub fn u8_to_string_with_radix_and_width(byte: &u8, radix: u8, width: usize) -> String {
@@ -205,7 +201,7 @@ pub fn num_to_digit(n: u32) -> Option<char> {
     } else if n < 10 {
         char::from_u32(n + 48)
     } else {
-        char::from_u32(n + 65)
+        char::from_u32(n + 55)
     }
 }
 

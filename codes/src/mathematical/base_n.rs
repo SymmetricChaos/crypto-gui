@@ -4,6 +4,7 @@ use crate::{
 };
 use itertools::Itertools;
 use num::{Integer, Zero};
+use utils::text_functions::num_to_digit;
 
 pub struct BaseN {
     pub maps: LetterAndWordCode<u32>,
@@ -41,14 +42,11 @@ impl BaseN {
         let mut s = Vec::new();
         while n != 0 {
             let (q, r) = n.div_rem(&self.radix);
-            if r < 10 {
-                s.push(r as u8 + 48) // shift to start of ASCII numbers
-            } else {
-                s.push(r as u8 + 55) // shift to start of ASCII uppercase letters
-            }
+            s.push(num_to_digit(r).expect("remainder should always be less than 36"));
+
             n = q;
         }
-        String::from_utf8(s.into_iter().rev().collect()).unwrap()
+        s.into_iter().rev().collect()
     }
 
     pub fn decode_to_u32(&self, s: &str) -> Result<u32, CodeError> {
