@@ -199,6 +199,16 @@ pub fn string_pairs(text: &str) -> Vec<&str> {
     }
 }
 
+pub fn num_to_digit(n: u32) -> Option<char> {
+    if n > 36 {
+        None
+    } else if n < 10 {
+        char::from_u32(n + 48)
+    } else {
+        char::from_u32(n + 65)
+    }
+}
+
 /*
 Rank the characters of a string by their order in the alphabet, making every entry unique and using the smallest possible numbers
 The text APPLE with the BasicLatin alphabet would give: [0, 3, 4, 2, 1, 5]

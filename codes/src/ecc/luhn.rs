@@ -1,4 +1,5 @@
 use num::Integer;
+use utils::text_functions::num_to_digit;
 
 use crate::{errors::CodeError, traits::Code};
 
@@ -6,7 +7,20 @@ pub struct LuhnAlgorithm {
     pub modulus: u32,
 }
 
-impl LuhnAlgorithm {}
+impl LuhnAlgorithm {
+    fn validate(&self) -> Result<(), CodeError> {
+        if self.modulus % 2 != 0 {
+            return Err(CodeError::state("modulus must be even"));
+        }
+
+        if self.modulus < 2 || self.modulus > 36 {
+            return Err(CodeError::state(
+                "modulus must be between 2 and 36, inclusive",
+            ));
+        }
+        Ok(())
+    }
+}
 
 impl Default for LuhnAlgorithm {
     fn default() -> Self {
@@ -27,15 +41,10 @@ fn digital_sum(n: u32, m: u32) -> u32 {
 
 impl Code for LuhnAlgorithm {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        if self.modulus % 2 != 0 {
-            return Err(CodeError::state("modulus must be even"));
+        if text.is_empty() {
+            return Err(CodeError::input("input cannot be empty"));
         }
-
-        if self.modulus < 2 || self.modulus > 36 {
-            return Err(CodeError::state(
-                "modulus must be between 2 and 36, inclusive",
-            ));
-        }
+        self.validate()?;
 
         let mut check = 0;
         for (p, c) in text.chars().rev().enumerate() {
@@ -48,7 +57,7 @@ impl Code for LuhnAlgorithm {
                 check += n;
             }
         }
-        let digit = char::from_u32((self.modulus - (check % self.modulus)) + 48).unwrap();
+        let digit = num_to_digit(self.modulus - (check % self.modulus)).unwrap();
 
         let mut out = String::with_capacity(text.len() + 1);
         out.push_str(text);
@@ -61,21 +70,13 @@ impl Code for LuhnAlgorithm {
             return Err(CodeError::input("input cannot be empty"));
         }
 
-        if self.modulus % 2 != 0 {
-            return Err(CodeError::state("modulus must be even"));
-        }
-
-        if self.modulus < 2 || self.modulus > 36 {
-            return Err(CodeError::state(
-                "modulus must be between 2 and 36, inclusive",
-            ));
-        }
+        self.validate()?;
 
         let stored_check_num = text
             .chars()
             .last()
             .unwrap()
-            .to_digit(10)
+            .to_digit(self.modulus)
             .ok_or(CodeError::input("check digit is not a valid digit"))?;
 
         let mut check = 0;
