@@ -10,6 +10,7 @@ pub struct BaseN {
     pub maps: LetterAndWordCode<u32>,
     pub radix: u32,
     pub mode: IOMode,
+    pub bijective: bool,
 }
 
 impl Default for BaseN {
@@ -22,19 +23,57 @@ impl Default for BaseN {
             mode: IOMode::Integer,
             maps,
             radix: 2,
+            bijective: false,
         }
     }
 }
 
 impl BaseN {
     pub fn validate(&self) -> Result<(), CodeError> {
+        if self.bijective {
+            if self.radix < 1 || self.radix > 35 {
+                return Err(CodeError::state(
+                    "bijective radix must be between 1 and 35, inclusive",
+                ));
+            }
+        }
         if self.radix < 2 || self.radix > 36 {
-            return Err(CodeError::state("radix must be between 2 and 36"));
+            return Err(CodeError::state(
+                "radix must be between 2 and 36, inclusive",
+            ));
         }
         Ok(())
     }
 
-    pub fn encode_u32(&self, n: u32) -> String {
+    pub fn encode_bijective_u32(&self, n: u32) -> Result<String, CodeError> {
+        // For any all Bijective Base-k, 0 is always the empty string
+        if n == 0 {
+            return Err(CodeError::input(
+                "in bijective representation 0 is the empty string and cannot be represented",
+            ));
+        };
+
+        if self.radix == 1 {
+            return Ok("1".repeat(n as usize));
+        }
+
+        let mut out = Vec::with_capacity(32);
+        let mut n = n;
+        loop {
+            let q = num::integer::div_ceil(n, self.radix) - 1;
+            let a = n - q * self.radix;
+            out.push(num_to_digit(a).expect("remainder should always be less than 35"));
+            n = q;
+            if n == 0 {
+                break;
+            }
+        }
+
+        // Reverse the characters and collect them into a string
+        Ok(out.iter().rev().collect())
+    }
+
+    pub fn encode_regular_u32(&self, n: u32) -> String {
         if n.is_zero() {
             return String::from("0");
         }
@@ -47,6 +86,13 @@ impl BaseN {
             n = q;
         }
         s.into_iter().rev().collect()
+    }
+
+    pub fn encode_u32(&self, n: u32) -> Result<String, CodeError> {
+        match self.bijective {
+            true => self.encode_bijective_u32(n),
+            false => Ok(self.encode_regular_u32(n)),
+        }
     }
 
     pub fn decode_to_u32(&self, s: &str) -> Result<u32, CodeError> {
@@ -73,12 +119,12 @@ impl Code for BaseN {
                 }
                 let n = u32::from_str_radix(group, 10)
                     .map_err(|_| CodeError::invalid_input_group(group))?;
-                output.push(n);
+                output.push(self.encode_u32(n)?);
             }
         } else if self.mode == IOMode::Letter {
             for c in text.chars() {
                 let n = self.maps.get_by_letter(c)?;
-                output.push(*n);
+                output.push(self.encode_u32(*n)?);
             }
         } else {
             for w in text.split(" ") {
@@ -86,10 +132,10 @@ impl Code for BaseN {
                     continue;
                 }
                 let n = self.maps.get_by_word(w)?;
-                output.push(*n);
+                output.push(self.encode_u32(*n)?);
             }
         }
-        Ok(output.into_iter().map(|n| self.encode_u32(n)).join(" "))
+        Ok(output.into_iter().join(" "))
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
