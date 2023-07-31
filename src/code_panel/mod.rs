@@ -46,6 +46,7 @@ mod pgp_controls;
 mod punycode_controls;
 mod repetition_controls;
 mod romaji_controls;
+mod roman_numeral_controls;
 mod skey_controls;
 mod spelling_alphabet_controls;
 mod tap_code_controls;

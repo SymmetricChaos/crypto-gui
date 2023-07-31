@@ -6,5 +6,5 @@ pub mod fibonacci_integers;
 pub mod godel;
 pub mod levenshtein;
 pub mod levenshtein_integers;
-mod roman_numeral;
+pub mod roman_numeral;
 pub mod unary;
