@@ -168,7 +168,15 @@ impl CodeInterface {
             ui,
         );
         combox_box(
-            &[CodeId::BaseN, CodeId::Godel],
+            &[
+                CodeId::BaseN,
+                CodeId::Elias,
+                CodeId::Fibonacci,
+                CodeId::Godel,
+                CodeId::Levenshtein,
+                CodeId::RomanNumeral,
+                CodeId::Unary,
+            ],
             "Mathematical",
             active_code,
             ui,
