@@ -14,9 +14,10 @@ use self::{
     numeric_controls::BytesAsNumbersFrame, parity_check_controls::ParityBitFrame,
     pgp_controls::PgpWordsFrame, punycode_controls::PunycodeFrame,
     repetition_controls::RepetitionFrame, romaji_controls::RomajiFrame,
-    skey_controls::SKeyWordsFrame, spelling_alphabet_controls::SpellingAlphabetFrame,
-    tap_code_controls::TapCodeFrame, unary_controls::UnaryCodeFrame,
-    unicode_controls::UnicodeFrame, upc_controls::UpcFrame, verhoeff_controls::VerhoeffFrame,
+    roman_numeral_controls::RomanNumeralFrame, skey_controls::SKeyWordsFrame,
+    spelling_alphabet_controls::SpellingAlphabetFrame, tap_code_controls::TapCodeFrame,
+    unary_controls::UnaryCodeFrame, unicode_controls::UnicodeFrame, upc_controls::UpcFrame,
+    verhoeff_controls::VerhoeffFrame,
 };
 
 mod ascii85_controls;
@@ -121,6 +122,7 @@ pub struct CodeInterface {
     // Mathematical
     basen: BaseNFrame,
     godel: GodelFrame,
+    roman: RomanNumeralFrame,
 
     // Prefix
     block: BlockCodeFrame,
@@ -240,6 +242,7 @@ impl CodeInterface {
             CodeId::Punycode => &mut self.punycode,
             CodeId::Repetition => &mut self.repetition,
             CodeId::Romaji => &mut self.romaji,
+            CodeId::RomanNumeral => &mut self.roman,
             CodeId::Skey => &mut self.skey,
             CodeId::SpellingAlphabet => &mut self.spelling,
             CodeId::Tap => &mut self.tap,
