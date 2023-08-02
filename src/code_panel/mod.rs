@@ -187,6 +187,7 @@ impl CodeInterface {
                 CodeId::Elias,
                 CodeId::Fibonacci,
                 CodeId::Levenshtein,
+                CodeId::MofN,
                 CodeId::Unary,
             ],
             "Prefix Codes",
