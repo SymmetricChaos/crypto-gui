@@ -1,4 +1,8 @@
-use codes::{errors::CodeError, ids::CodeId, traits::Code};
+use codes::{
+    errors::CodeError,
+    ids::{CodeCategory, CodeId},
+    traits::Code,
+};
 use eframe::egui;
 use egui::Ui;
 
@@ -70,17 +74,21 @@ pub trait CodeFrame {
 // Quick simple combo box builder
 fn combox_box(
     code: &[CodeId],
-    identifier: &'static str,
     active_code: &mut Option<CodeId>,
+    code_category: CodeCategory,
     ui: &mut Ui,
 ) {
-    egui::ComboBox::from_id_source(identifier)
-        .selected_text(identifier)
-        .show_ui(ui, |ui| {
-            for id in code {
-                ui.selectable_value(active_code, Some(*id), id.to_string());
-            }
-        });
+    ui.horizontal(|ui| {
+        egui::ComboBox::from_id_source(code_category.to_string())
+            .selected_text(code_category.to_string())
+            .show_ui(ui, |ui| {
+                for id in code {
+                    ui.selectable_value(active_code, Some(*id), id.to_string());
+                }
+            });
+        ui.label("+").on_hover_text(code_category.description());
+    });
+
     ui.add_space(10.0);
 }
 
@@ -150,8 +158,8 @@ impl CodeInterface {
                 CodeId::SpellingAlphabet,
                 CodeId::Unicode,
             ],
-            "Text Standards",
             active_code,
+            CodeCategory::TextStandard,
             ui,
         );
         combox_box(
@@ -163,8 +171,8 @@ impl CodeInterface {
                 CodeId::Pgp,
                 CodeId::Skey,
             ],
-            "Binary-to-Text",
             active_code,
+            CodeCategory::BinaryToText,
             ui,
         );
         combox_box(
@@ -177,8 +185,8 @@ impl CodeInterface {
                 CodeId::RomanNumeral,
                 CodeId::Unary,
             ],
-            "Mathematical",
             active_code,
+            CodeCategory::Mathematical,
             ui,
         );
         combox_box(
@@ -190,8 +198,8 @@ impl CodeInterface {
                 CodeId::MofN,
                 CodeId::Unary,
             ],
-            "Prefix Codes",
             active_code,
+            CodeCategory::Prefix,
             ui,
         );
         combox_box(
@@ -204,20 +212,20 @@ impl CodeInterface {
                 CodeId::Repetition,
                 CodeId::Verhoeff,
             ],
-            "Error Correcting",
             active_code,
+            CodeCategory::ErrorCorrecting,
             ui,
         );
         combox_box(
             &[CodeId::Isbn, CodeId::Itf, CodeId::Upc],
-            "Commercial",
             active_code,
+            CodeCategory::Commercial,
             ui,
         );
         combox_box(
             &[CodeId::Bacon, CodeId::Tap],
-            "Other Codes",
             active_code,
+            CodeCategory::Other,
             ui,
         );
     }

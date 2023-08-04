@@ -129,13 +129,13 @@ impl ClassicCrypto {
     }
 
     // Direct invalid selections here
-    fn blank_page(&mut self, ctx: &Context) {
-        CentralPanel::default().show(ctx, |ui| {
-            ScrollArea::vertical().show(ui, |ui| {
-                ui.label("<<<THIS PAGE INTENTIONALLY LEFT BLANK>>>")
-            });
-        });
-    }
+    // fn blank_page(&mut self, ctx: &Context) {
+    //     CentralPanel::default().show(ctx, |ui| {
+    //         ScrollArea::vertical().show(ui, |ui| {
+    //             ui.label("<<<THIS PAGE INTENTIONALLY LEFT BLANK>>>")
+    //         });
+    //     });
+    // }
 
     // Combox boxes for selecting codes
     fn code_selector_panel(&mut self, ctx: &Context) {
@@ -163,10 +163,8 @@ impl ClassicCrypto {
                         &mut self.active_page,
                         &mut self.active_cipher,
                         &mut self.active_code,
-                        // &mut self.active_attack,
                         &mut self.cipher_interface,
                         &mut self.code_interface,
-                        // &mut self.attack_interface,
                     );
                 });
 
@@ -266,63 +264,6 @@ impl ClassicCrypto {
         }
     }
 
-    // Combox boxes for selecting ciphers
-    // fn attack_selector_panel(&mut self, ctx: &Context) {
-    //     SidePanel::left("attack_selector_panel")
-    //         .default_width(150.0)
-    //         .min_width(100.0)
-    //         .max_width(200.0)
-    //         .show(ctx, |ui| {
-    //             self.attack_interface
-    //                 .combo_boxes(ui, &mut self.active_attack)
-    //         });
-    // }
-
-    // fn attack_page(&mut self, ctx: &Context) {
-    //     if self.active_page == Page::Attack {
-    //         self.attack_selector_panel(ctx);
-
-    //         SidePanel::right("attack_io_panel")
-    //             .default_width(200.0)
-    //             .show(ctx, |ui| {
-    //                 self.io_panel.ui(
-    //                     ui,
-    //                     &mut self.input,
-    //                     &mut self.output,
-    //                     &mut self.errors,
-    //                     &mut self.active_page,
-    //                     &mut self.active_cipher,
-    //                     &mut self.active_code,
-    //                     &mut self.active_attack,
-    //                     &mut self.cipher_interface,
-    //                     &mut self.code_interface,
-    //                     // &mut self.attack_interface,
-    //                 );
-    //             });
-
-    //         CentralPanel::default().show(ctx, |ui| {
-    //             ScrollArea::vertical().show(ui, |ui| {
-    //                 let name = RichText::new(String::from(self.active_attack))
-    //                     .strong()
-    //                     .heading();
-    //                 ui.add(egui::Label::new(name));
-    //                 ui.label(RichText::new(self.active_attack.description()).size(12.0));
-
-    //                 ui.add_space(16.0);
-    //                 ui.separator();
-    //                 ui.add_space(16.0);
-    //                 self.attack_interface
-    //                     .get_active_attack(&self.active_attack)
-    //                     .ui(ui, &mut self.errors)
-    //             });
-    //         });
-
-    //     // If somehow we are here without Page::Attack selected
-    //     } else {
-    //         self.blank_page(ctx)
-    //     }
-    // }
-
     fn about_page(&mut self, ctx: &Context) {
         SidePanel::left("about_display_panel")
             .default_width(500.0)
@@ -394,11 +335,8 @@ impl App for ClassicCrypto {
             Page::About => self.about_page(ctx),
             Page::Cipher => self.cipher_page(ctx),
             Page::Code => self.code_page(ctx),
-            // Page::Attack => self.attack_page(ctx),
-            // Page::Rng(_) => todo!("make a method for the RNG page"),
-            // Page::CipherCategory => self.cipher_category_page(ctx),
             Page::TextPrep => self.text_prep_page(ctx),
-            _ => self.blank_page(ctx),
+            //_ => self.blank_page(ctx),
         }
     }
 }

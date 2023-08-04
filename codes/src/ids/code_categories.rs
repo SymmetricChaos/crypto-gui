@@ -10,6 +10,7 @@ pub enum CodeCategory {
     Mathematical,
     TextStandard,
     Commercial,
+    Prefix,
     Other,
 }
 
@@ -37,13 +38,14 @@ impl Display for CodeCategory {
             CodeCategory::TextStandard => "Text Standards",
             CodeCategory::Commercial => "Commerial",
             CodeCategory::Other => "Other",
+            CodeCategory::Prefix => "Prefix",
         };
         write!(f, "{}", name)
     }
 }
 
-impl From<CodeId> for String {
-    fn from(id: CodeId) -> Self {
+impl From<CodeCategory> for String {
+    fn from(id: CodeCategory) -> Self {
         id.to_string()
     }
 }
