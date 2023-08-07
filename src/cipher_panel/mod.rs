@@ -1,4 +1,8 @@
-use ciphers::{errors::CipherError, ids::CipherId, traits::Cipher};
+use ciphers::{
+    errors::CipherError,
+    ids::{cipher_categories::CipherCategory, CipherId},
+    traits::Cipher,
+};
 use egui::Ui;
 
 use self::{
@@ -79,18 +83,22 @@ pub trait CipherFrame {
 
 // Quick simple combo box builder
 fn combox_box(
-    ciphers: &[CipherId],
-    identifier: &'static str,
-    active_cipher: &mut Option<CipherId>,
+    code: &[CipherId],
+    active_code: &mut Option<CipherId>,
+    code_category: CipherCategory,
     ui: &mut Ui,
 ) {
-    egui::ComboBox::from_id_source(identifier)
-        .selected_text(identifier)
-        .show_ui(ui, |ui| {
-            for id in ciphers {
-                ui.selectable_value(active_cipher, Some(*id), id.to_string());
-            }
-        });
+    ui.horizontal(|ui| {
+        egui::ComboBox::from_id_source(code_category.to_string())
+            .selected_text(code_category.to_string())
+            .show_ui(ui, |ui| {
+                for id in code {
+                    ui.selectable_value(active_code, Some(*id), id.to_string());
+                }
+            });
+        ui.label("+").on_hover_text(code_category.description());
+    });
+
     ui.add_space(10.0);
 }
 
@@ -165,8 +173,8 @@ impl CipherInterface {
                 CipherId::Purple,
                 CipherId::Sigaba,
             ],
-            "Cipher Machine",
             active_cipher,
+            CipherCategory::Machine,
             ui,
         );
 
@@ -178,8 +186,8 @@ impl CipherInterface {
                 CipherId::Slidefair,
                 CipherId::TwoSquare,
             ],
-            "Playfair",
             active_cipher,
+            CipherCategory::Machine,
             ui,
         );
 
@@ -195,8 +203,8 @@ impl CipherInterface {
                 CipherId::Quagmire,
                 CipherId::Vigenere,
             ],
-            "Polyalphabetic",
             active_cipher,
+            CipherCategory::Machine,
             ui,
         );
 
@@ -211,8 +219,8 @@ impl CipherInterface {
                 CipherId::PolybiusCube,
                 CipherId::Trifid,
             ],
-            "Polybius",
             active_cipher,
+            CipherCategory::Machine,
             ui,
         );
 
@@ -224,15 +232,15 @@ impl CipherInterface {
                 CipherId::Plugboard,
                 CipherId::Substitution,
             ],
-            "Substitution",
             active_cipher,
+            CipherCategory::Machine,
             ui,
         );
 
         combox_box(
             &[CipherId::Batco, CipherId::Dryad, CipherId::Rs44],
-            "Tactical",
             active_cipher,
+            CipherCategory::Machine,
             ui,
         );
 
@@ -245,12 +253,17 @@ impl CipherInterface {
                 CipherId::Scytale,
                 CipherId::TurningGrille,
             ],
-            "Transposition",
             active_cipher,
+            CipherCategory::Machine,
             ui,
         );
 
-        combox_box(&[CipherId::Shamir], "Other", active_cipher, ui);
+        combox_box(
+            &[CipherId::Shamir],
+            active_cipher,
+            CipherCategory::Machine,
+            ui,
+        );
     }
 
     pub fn get_active_cipher(&mut self, active_cipher: &CipherId) -> &mut dyn CipherFrame {
