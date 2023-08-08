@@ -7,7 +7,7 @@ use lazy_static::lazy_static;
 pub enum CipherCategory {
     Substituion,
     Polyalphabetic,
-    Machine,
+    Electromechanical,
     Transposition,
     Playfair,
     Tactical,
@@ -35,7 +35,7 @@ impl Display for CipherCategory {
         let name = match self {
             CipherCategory::Substituion => "Substitution",
             CipherCategory::Polyalphabetic => "Polyalphabetic",
-            CipherCategory::Machine => "Machine",
+            CipherCategory::Electromechanical => "Electromechanical",
             CipherCategory::Transposition => "Transposition",
             CipherCategory::Playfair => "Playfair",
             CipherCategory::Tactical => "Tactical",

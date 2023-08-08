@@ -1,5 +1,5 @@
 ﻿{
-  "Machine": "In the 20th century powerful electromechanical cipher machines like Enigma rose to dominance before being usurped by modern digital ciphers.",
+  "Electromechanical": "In the 20th century powerful electromechanical cipher machines like Enigma rose to dominance before being usurped by modern digital ciphers.",
   "Polyalphabetic": "Polyalphabetic ciphers encrypt characters using a sequence of substitution ciphers, ideally a different one each time.",
   "Substituion": "The simplest kind of cipher is to substitute each character with some other character or group of characters.",
   "Transposition": "These ciphers encrypt information by moving characters around, creating a complex anagram.",

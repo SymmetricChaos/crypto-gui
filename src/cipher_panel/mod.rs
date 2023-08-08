@@ -174,7 +174,7 @@ impl CipherInterface {
                 CipherId::Sigaba,
             ],
             active_cipher,
-            CipherCategory::Machine,
+            CipherCategory::Electromechanical,
             ui,
         );
 
@@ -187,7 +187,7 @@ impl CipherInterface {
                 CipherId::TwoSquare,
             ],
             active_cipher,
-            CipherCategory::Machine,
+            CipherCategory::Playfair,
             ui,
         );
 
@@ -204,7 +204,7 @@ impl CipherInterface {
                 CipherId::Vigenere,
             ],
             active_cipher,
-            CipherCategory::Machine,
+            CipherCategory::Polyalphabetic,
             ui,
         );
 
@@ -220,7 +220,7 @@ impl CipherInterface {
                 CipherId::Trifid,
             ],
             active_cipher,
-            CipherCategory::Machine,
+            CipherCategory::Polybius,
             ui,
         );
 
@@ -233,14 +233,14 @@ impl CipherInterface {
                 CipherId::Substitution,
             ],
             active_cipher,
-            CipherCategory::Machine,
+            CipherCategory::Substituion,
             ui,
         );
 
         combox_box(
             &[CipherId::Batco, CipherId::Dryad, CipherId::Rs44],
             active_cipher,
-            CipherCategory::Machine,
+            CipherCategory::Tactical,
             ui,
         );
 
@@ -254,14 +254,14 @@ impl CipherInterface {
                 CipherId::TurningGrille,
             ],
             active_cipher,
-            CipherCategory::Machine,
+            CipherCategory::Transposition,
             ui,
         );
 
         combox_box(
             &[CipherId::Shamir],
             active_cipher,
-            CipherCategory::Machine,
+            CipherCategory::Other,
             ui,
         );
     }
