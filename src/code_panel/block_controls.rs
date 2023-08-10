@@ -50,7 +50,7 @@ impl CodeFrame for BlockCodeFrame {
 
         ui.label(format!("There are {} codes.", self.code.total_codes()));
 
-        ui.fill_code_columns(24, 6, self.code.chars_codes());
+        ui.two_column_table("Code", "Value", self.code.chars_codes());
         ui.add_space(16.0);
     }
 

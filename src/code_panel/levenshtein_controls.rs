@@ -39,7 +39,7 @@ impl CodeFrame for LevenshteinCodeFrame {
                     self.code.set_letter_map();
                 };
                 ui.add_space(16.0);
-                ui.fill_code_columns(16, 5, Box::new(self.code.maps.chars_codes()));
+                ui.two_column_table("Code", "Character", Box::new(self.code.maps.chars_codes()));
             }
             IOMode::Word => {
                 ui.label("Provide any number of words or phrases separated by commas. Levenshtein codes will be assigned to each word or phrase in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
@@ -50,13 +50,13 @@ impl CodeFrame for LevenshteinCodeFrame {
                     self.code.set_word_map();
                 };
                 ui.add_space(16.0);
-                ui.fill_code_columns(16, 5, Box::new(self.code.maps.words_codes()));
+                ui.two_column_table("Code", "Word", Box::new(self.code.maps.words_codes()));
             }
             IOMode::Integer => {
                 ui.label("Get the Levenshtein coding for any list of non-negative integers or decode any string of 0s and 1s into a list of non-negative integers. A sample list of encodings it provided below.");
                 let pairs = (0..32).map(|n| (n.to_string(), self.code.integer_code.encode_u32(n)));
                 ui.add_space(16.0);
-                ui.fill_code_columns(16, 5, Box::new(pairs));
+                ui.two_column_table("Code", "Integer", Box::new(pairs));
             }
         }
         ui.add_space(16.0);

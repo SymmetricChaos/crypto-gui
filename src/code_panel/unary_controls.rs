@@ -35,7 +35,7 @@ impl CodeFrame for UnaryCodeFrame {
                     self.code.set_letter_map();
                 };
                 ui.add_space(16.0);
-                ui.fill_code_columns(16, 3, Box::new(self.code.maps.chars_codes()));
+                ui.two_column_table("Code", "Character", Box::new(self.code.maps.chars_codes()));
             }
             IOMode::Word => {
                 ui.label("Provide any number of words or phrases separated by commas. Codes will be assigned to each word or phrase in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
@@ -46,14 +46,14 @@ impl CodeFrame for UnaryCodeFrame {
                     self.code.set_word_map();
                 };
                 ui.add_space(16.0);
-                ui.fill_code_columns(16, 3, Box::new(self.code.maps.words_codes()));
+                ui.two_column_table("Code", "Word", Box::new(self.code.maps.words_codes()));
             }
             IOMode::Integer => {
-                ui.label("Convert between numbers a unary codes for those numbers. When decoding the '�' symbol appears when an invalid code is encoutered.");
+                ui.label("Convert between numbers their unary codes. When decoding the '�' symbol appears when an invalid code is encoutered.");
                 ui.add_space(16.0);
-                ui.fill_code_columns(
-                    6,
-                    1,
+                ui.two_column_table(
+                    "Code",
+                    "Integer",
                     Box::new((0..6).into_iter().map(|n| (n, self.code.usize_to_unary(n)))),
                 );
             }

@@ -36,7 +36,7 @@ impl CodeFrame for GodelFrame {
                     self.code.set_letter_map();
                 };
                 ui.add_space(16.0);
-                ui.fill_code_columns(16, 5, Box::new(self.code.maps.codes_chars()));
+                ui.two_column_table("Code", "Character", Box::new(self.code.maps.codes_chars()));
             }
             IOMode::Word => {
                 ui.label("Provide any number of words or phrases separated by commas. Codes will be assigned to each word or phrase in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
@@ -47,7 +47,7 @@ impl CodeFrame for GodelFrame {
                     self.code.set_word_map();
                 };
                 ui.add_space(16.0);
-                ui.fill_code_columns(16, 5, Box::new(self.code.maps.codes_words()));
+                ui.two_column_table("Code", "Word", Box::new(self.code.maps.codes_words()));
             }
             IOMode::Integer => {
                 ui.label("<<<ERROR INTEGER MODE IS NOT DEFINED FOR GODEL CODE>>>");
