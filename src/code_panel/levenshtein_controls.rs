@@ -38,6 +38,7 @@ impl CodeFrame for LevenshteinCodeFrame {
                     self.code.maps.alphabet.retain(|x| x != '�');
                     self.code.set_letter_map();
                 };
+                ui.add_space(16.0);
                 ui.fill_code_columns(16, 5, Box::new(self.code.maps.chars_codes()));
             }
             IOMode::Word => {
@@ -48,11 +49,13 @@ impl CodeFrame for LevenshteinCodeFrame {
                 {
                     self.code.set_word_map();
                 };
+                ui.add_space(16.0);
                 ui.fill_code_columns(16, 5, Box::new(self.code.maps.words_codes()));
             }
             IOMode::Integer => {
                 ui.label("Get the Levenshtein coding for any list of non-negative integers or decode any string of 0s and 1s into a list of non-negative integers. A sample list of encodings it provided below.");
                 let pairs = (0..32).map(|n| (n.to_string(), self.code.integer_code.encode_u32(n)));
+                ui.add_space(16.0);
                 ui.fill_code_columns(16, 5, Box::new(pairs));
             }
         }

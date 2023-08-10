@@ -2,6 +2,7 @@ use crate::cipher_panel::CipherFrame;
 use codes::binary_to_text::BinaryToTextMode;
 use eframe::egui::RichText;
 use egui::{Color32, DragValue, Response, TextStyle, Ui};
+use egui_extras::{Column, TableBuilder};
 use std::fmt::Display;
 
 pub trait UiElements {
@@ -21,14 +22,22 @@ pub trait UiElements {
     fn randomize_reset(&mut self, cipher_frame: &mut dyn CipherFrame);
     // Slider variant that has a position at some character index of a &str
     fn string_slider(&mut self, string: &str, position: &mut usize) -> Response;
-    fn fill_code_columns<T: Display, S: Display>(
+    // Button showing a clipboard that copies some text to the clipboard
+    fn copy_to_clipboard<S: ToString>(&mut self, text: S);
+    // Scrollable table with two columns and any number of rows
+    fn two_column_table<S: ToString, T: ToString>(
+        &mut self,
+        left_label: &str,
+        right_label: &str,
+        iter: Box<dyn Iterator<Item = (S, T)> + '_>,
+    );
+    fn fill_code_columns<S: Display, T: Display>(
         &mut self,
         nrows: usize,
         ncols: usize,
-        iter: Box<dyn Iterator<Item = (T, S)> + '_>,
+        iter: Box<dyn Iterator<Item = (S, T)> + '_>,
     );
     fn binary_to_text_input_mode(&mut self, current_value: &mut BinaryToTextMode);
-    fn copy_to_clipboard<S: ToString>(&mut self, text: S);
 }
 
 impl UiElements for Ui {
@@ -134,6 +143,44 @@ impl UiElements for Ui {
         {
             self.output_mut(|o| o.copied_text = text.to_string())
         }
+    }
+
+    fn two_column_table<S: ToString, T: ToString>(
+        &mut self,
+        left_label: &str,
+        right_label: &str,
+        iter: Box<dyn Iterator<Item = (S, T)> + '_>,
+    ) {
+        let table = TableBuilder::new(self)
+            .striped(true)
+            .resizable(true)
+            .cell_layout(egui::Layout::left_to_right(egui::Align::Center))
+            .column(Column::initial(70.0).range(20.0..=300.0))
+            .column(Column::remainder())
+            .min_scrolled_height(0.0);
+
+        table
+            .header(30.0, |mut header| {
+                header.col(|ui| {
+                    ui.strong(RichText::new(left_label).size(20.0));
+                });
+                header.col(|ui| {
+                    ui.strong(RichText::new(right_label).size(20.0));
+                });
+            })
+            .body(|mut body| {
+                for (chr, code) in iter {
+                    body.row(20.0, |mut row| {
+                        row.col(|ui| {
+                            ui.label(RichText::new(code.to_string()).size(18.0));
+                        });
+
+                        row.col(|ui| {
+                            ui.label(RichText::new(chr.to_string()).size(18.0));
+                        });
+                    });
+                }
+            });
     }
 }
 

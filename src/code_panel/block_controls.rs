@@ -28,6 +28,7 @@ impl CodeFrame for BlockCodeFrame {
         if ui.control_string(&mut self.alphabet_string).changed() {
             self.code.alphabet = self.alphabet_string.chars().collect_vec()
         }
+        ui.add_space(16.0);
 
         ui.subheading("Code Symbols");
         ui.label("The symbols to be used in the code.");
@@ -42,8 +43,9 @@ impl CodeFrame for BlockCodeFrame {
 
         ui.subheading("Code Width");
         ui.label("How many symbols appear in each code.");
-        let min_code_width = self.code.min_code_width();
-        ui.add(Slider::new(&mut self.code.width, min_code_width..=8));
+        if ui.add(Slider::new(&mut self.code.width, 1..=8)).changed() {
+            self.code.width = self.code.min_code_width();
+        }
         ui.add_space(16.0);
 
         ui.label(format!("There are {} codes.", self.code.total_codes()));

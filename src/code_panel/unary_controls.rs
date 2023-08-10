@@ -34,6 +34,7 @@ impl CodeFrame for UnaryCodeFrame {
                     self.code.maps.alphabet.retain(|x| x != '�');
                     self.code.set_letter_map();
                 };
+                ui.add_space(16.0);
                 ui.fill_code_columns(16, 3, Box::new(self.code.maps.chars_codes()));
             }
             IOMode::Word => {
@@ -44,10 +45,12 @@ impl CodeFrame for UnaryCodeFrame {
                 {
                     self.code.set_word_map();
                 };
+                ui.add_space(16.0);
                 ui.fill_code_columns(16, 3, Box::new(self.code.maps.words_codes()));
             }
             IOMode::Integer => {
                 ui.label("Convert between numbers a unary codes for those numbers. When decoding the '�' symbol appears when an invalid code is encoutered.");
+                ui.add_space(16.0);
                 ui.fill_code_columns(
                     6,
                     1,

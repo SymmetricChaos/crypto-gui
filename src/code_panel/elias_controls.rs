@@ -46,7 +46,6 @@ impl CodeFrame for EliasCodeFrame {
             ui.selectable_value(&mut self.code.mode, IOMode::Letter, "Letter");
             ui.selectable_value(&mut self.code.mode, IOMode::Word, "Word");
         });
-
         ui.add_space(16.0);
 
         match self.code.mode {
@@ -57,10 +56,10 @@ impl CodeFrame for EliasCodeFrame {
                     self.code.maps.alphabet.retain(|x| x != '�');
                     self.code.set_letter_map();
                 };
-
-                ui.fill_code_columns(
-                    16,
-                    5,
+                ui.add_space(16.0);
+                ui.two_column_table(
+                    "Code",
+                    "Integer",
                     Box::new(self.code.maps.alphabet.chars().zip(self.code.values())),
                 );
             }
@@ -72,18 +71,19 @@ impl CodeFrame for EliasCodeFrame {
                 {
                     self.code.set_word_map();
                 };
-                ui.fill_code_columns(
-                    16,
-                    5,
+                ui.add_space(16.0);
+                ui.two_column_table(
+                    "Code",
+                    "Integer",
                     Box::new(self.code.maps.words.iter().zip(self.code.values())),
                 );
             }
             IOMode::Integer => {
                 ui.label("Get the Elias coding for any list of positive integers or decode any string of 0s and 1s into a list of positive integers. A sample list of encodings it provided below.");
-
-                ui.fill_code_columns(
-                    16,
-                    5,
+                ui.add_space(16.0);
+                ui.two_column_table(
+                    "Code",
+                    "Integer",
                     Box::new(
                         (1..33).map(|n| (n.to_string(), self.code.encode(&n.to_string()).unwrap())),
                     ),

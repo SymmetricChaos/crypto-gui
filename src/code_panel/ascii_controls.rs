@@ -1,7 +1,6 @@
 use super::CodeFrame;
 use crate::ui_elements::UiElements;
 use codes::text_standards::ascii::{Ascii, DisplayMode};
-use egui::RichText;
 
 pub struct AsciiFrame {
     code: Ascii,
@@ -27,37 +26,8 @@ impl CodeFrame for AsciiFrame {
                 ui.selectable_value(&mut self.code.mode, DisplayMode::Hex, "Hexadecimal");
             });
         });
-        use egui_extras::{Column, TableBuilder};
-        let table = TableBuilder::new(ui)
-            .striped(true)
-            .resizable(true)
-            .cell_layout(egui::Layout::left_to_right(egui::Align::Center))
-            .column(Column::initial(70.0).range(20.0..=300.0))
-            .column(Column::remainder())
-            .min_scrolled_height(0.0);
-
-        table
-            .header(30.0, |mut header| {
-                header.col(|ui| {
-                    ui.strong(RichText::new("Code").size(20.0));
-                });
-                header.col(|ui| {
-                    ui.strong(RichText::new("Character").size(20.0));
-                });
-            })
-            .body(|mut body| {
-                for (chr, code) in self.code.chars_codes_display() {
-                    body.row(20.0, |mut row| {
-                        row.col(|ui| {
-                            ui.label(RichText::new(code).size(18.0));
-                        });
-
-                        row.col(|ui| {
-                            ui.label(RichText::new(*chr).size(18.0));
-                        });
-                    });
-                }
-            });
+        ui.add_space(16.0);
+        ui.two_column_table("Code", "Character", self.code.chars_codes_display());
         ui.add_space(32.0)
     }
 

@@ -35,6 +35,7 @@ impl CodeFrame for GodelFrame {
                     self.code.maps.alphabet.retain(|x| x != '�');
                     self.code.set_letter_map();
                 };
+                ui.add_space(16.0);
                 ui.fill_code_columns(16, 5, Box::new(self.code.maps.codes_chars()));
             }
             IOMode::Word => {
@@ -45,6 +46,7 @@ impl CodeFrame for GodelFrame {
                 {
                     self.code.set_word_map();
                 };
+                ui.add_space(16.0);
                 ui.fill_code_columns(16, 5, Box::new(self.code.maps.codes_words()));
             }
             IOMode::Integer => {

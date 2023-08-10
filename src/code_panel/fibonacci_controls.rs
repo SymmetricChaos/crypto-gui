@@ -35,6 +35,7 @@ impl CodeFrame for FibonacciCodeFrame {
                     self.code.maps.alphabet.retain(|x| x != '�');
                     self.code.set_letter_map();
                 };
+                ui.add_space(16.0);
                 ui.fill_code_columns(16, 5, Box::new(self.code.maps.chars_codes()));
             }
             IOMode::Word => {
@@ -45,11 +46,13 @@ impl CodeFrame for FibonacciCodeFrame {
                 {
                     self.code.set_word_map();
                 };
+                ui.add_space(16.0);
                 ui.fill_code_columns(16, 5, Box::new(self.code.maps.words_codes()));
             }
             IOMode::Integer => {
                 ui.label("Get the Fibonacci coding for any list of positive integers or decode any string of 0s and 1s into a list of positive integers. A sample list of encodings is provided below.");
                 let pairs = (1..=64).map(|n| (n.to_string(), self.code.integer_code.encode_u32(n)));
+                ui.add_space(16.0);
                 ui.fill_code_columns(16, 5, Box::new(pairs));
             }
         }
