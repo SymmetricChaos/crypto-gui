@@ -5,7 +5,7 @@ use std::{
     fmt::Display,
     ops::{
         Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Mul,
-        MulAssign, Not,
+        MulAssign, Neg, Not,
     },
 };
 
@@ -300,6 +300,14 @@ impl BitXorAssign for Bit {
             (Bit::One, Bit::Zero) => *self = Bit::One,
             (Bit::One, Bit::One) => *self = Bit::Zero,
         };
+    }
+}
+
+impl Neg for Bit {
+    type Output = Bit;
+
+    fn neg(self) -> Self::Output {
+        self
     }
 }
 
