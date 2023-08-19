@@ -1,16 +1,13 @@
-use std::ops::{Add, AddAssign, Mul, MulAssign, Neg};
-
-use itertools::Itertools;
-use num::{One, Zero};
-
 use crate::bits::{Bit, IntToBitError};
+use num::{One, Zero};
+use std::ops::{Add, AddAssign, Mul, MulAssign};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct PolynomialUV<T> {
-    pub coef: Vec<T>,
+pub struct BitPolynomial {
+    pub coef: Vec<Bit>,
 }
 
-impl<T: Zero> PolynomialUV<T> {
+impl BitPolynomial {
     pub fn trim(&mut self) {
         loop {
             match self.coef.pop() {
@@ -26,26 +23,22 @@ impl<T: Zero> PolynomialUV<T> {
             }
         }
     }
-}
 
-impl<T: Zero + Clone> PolynomialUV<T> {
     // Get irrefutable, returns a clone of the coefficient or zero if the value is too high
-    pub fn get_irref(&self, n: usize) -> T {
+    pub fn get_irref(&self, n: usize) -> Bit {
         match self.get(n) {
             Some(n) => n.clone(),
-            None => T::zero(),
+            None => Bit::zero(),
         }
     }
 
-    pub fn increase_degree(mut self, n: usize) -> PolynomialUV<T> {
+    pub fn increase_degree(mut self, n: usize) -> BitPolynomial {
         for _ in 0..n {
-            self.coef.insert(0, T::zero());
+            self.coef.insert(0, Bit::zero());
         }
         self
     }
-}
 
-impl<T> PolynomialUV<T> {
     pub fn len(&self) -> usize {
         self.coef.len()
     }
@@ -58,33 +51,14 @@ impl<T> PolynomialUV<T> {
         }
     }
 
-    pub fn get(&self, n: usize) -> Option<&T> {
+    pub fn get(&self, n: usize) -> Option<&Bit> {
         self.coef.get(n)
     }
 
-    pub fn get_mut(&mut self, n: usize) -> Option<&mut T> {
+    pub fn get_mut(&mut self, n: usize) -> Option<&mut Bit> {
         self.coef.get_mut(n)
     }
-}
 
-impl<T: Zero> From<Vec<T>> for PolynomialUV<T> {
-    fn from(coef: Vec<T>) -> Self {
-        let mut p = PolynomialUV { coef };
-        p.trim();
-        p
-    }
-}
-
-impl<T: Clone + Zero, const K: usize> From<[T; K]> for PolynomialUV<T> {
-    fn from(coef: [T; K]) -> Self {
-        let coef: Vec<T> = coef.iter().cloned().collect_vec();
-        let mut p = PolynomialUV { coef };
-        p.trim();
-        p
-    }
-}
-
-impl PolynomialUV<Bit> {
     pub fn evaluate(&self, x: usize) -> usize {
         let mut out = 0;
         let mut n = 1;
@@ -99,7 +73,7 @@ impl PolynomialUV<Bit> {
 
     pub fn from_int_array<T: Copy, const N: usize>(
         arr: [T; N],
-    ) -> Result<PolynomialUV<Bit>, IntToBitError>
+    ) -> Result<BitPolynomial, IntToBitError>
     where
         Bit: TryFrom<T>,
         IntToBitError: From<<Bit as TryFrom<T>>::Error>,
@@ -108,12 +82,10 @@ impl PolynomialUV<Bit> {
         for (n, i) in arr.iter().enumerate() {
             v[n] = Bit::try_from(*i)?;
         }
-        Ok(PolynomialUV::from(v))
+        Ok(BitPolynomial::from(v))
     }
 
-    pub fn from_int_vec<T: Copy, const N: usize>(
-        vec: Vec<T>,
-    ) -> Result<PolynomialUV<Bit>, IntToBitError>
+    pub fn from_int_vec<T: Copy>(vec: &Vec<T>) -> Result<BitPolynomial, IntToBitError>
     where
         Bit: TryFrom<T>,
         IntToBitError: From<<Bit as TryFrom<T>>::Error>,
@@ -122,32 +94,30 @@ impl PolynomialUV<Bit> {
         for (n, i) in vec.iter().enumerate() {
             v[n] = Bit::try_from(*i)?;
         }
-        Ok(PolynomialUV::from(v))
+        Ok(BitPolynomial::from(v))
     }
-}
 
-impl PolynomialUV<Bit> {
-    pub fn div_rem(&self, rhs: PolynomialUV<Bit>) -> (PolynomialUV<Bit>, PolynomialUV<Bit>) {
+    pub fn div_rem(&self, rhs: BitPolynomial) -> (BitPolynomial, BitPolynomial) {
         // Handle special cases
         if rhs.is_zero() {
             panic!("division by zero")
         }
 
         if self.is_zero() {
-            return (PolynomialUV::zero(), PolynomialUV::zero());
+            return (BitPolynomial::zero(), BitPolynomial::zero());
         }
 
         if self.degree() < rhs.degree() {
-            return (PolynomialUV::zero(), self.clone());
+            return (BitPolynomial::zero(), self.clone());
         }
 
         // General case
-        let mut quotient = PolynomialUV::zero();
+        let mut quotient = BitPolynomial::zero();
         let mut remainder = self.clone();
 
         while !remainder.is_zero() && remainder.degree() >= rhs.degree() {
             let pow = remainder.degree() - rhs.degree();
-            let intermediate = PolynomialUV::one().increase_degree(pow);
+            let intermediate = BitPolynomial::one().increase_degree(pow);
             quotient += intermediate.clone();
             remainder += intermediate * rhs.clone();
         }
@@ -156,9 +126,23 @@ impl PolynomialUV<Bit> {
     }
 }
 
-impl Zero for PolynomialUV<Bit> {
+impl From<Vec<Bit>> for BitPolynomial {
+    fn from(value: Vec<Bit>) -> Self {
+        Self { coef: value }
+    }
+}
+
+impl<const N: usize> From<[Bit; N]> for BitPolynomial {
+    fn from(value: [Bit; N]) -> Self {
+        Self {
+            coef: value.to_vec(),
+        }
+    }
+}
+
+impl Zero for BitPolynomial {
     fn zero() -> Self {
-        PolynomialUV { coef: vec![] }
+        BitPolynomial { coef: vec![] }
     }
 
     fn is_zero(&self) -> bool {
@@ -170,30 +154,30 @@ impl Zero for PolynomialUV<Bit> {
     }
 }
 
-impl One for PolynomialUV<Bit> {
+impl One for BitPolynomial {
     fn one() -> Self {
-        PolynomialUV {
+        BitPolynomial {
             coef: vec![Bit::One],
         }
     }
 }
 
-// Addition (also Subtraction for PolynomialUV<Bit>)
-impl Add for PolynomialUV<Bit> {
+// Addition (also Subtraction for PolynomialUV)
+impl Add for BitPolynomial {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
         let len = self.len().max(rhs.len());
-        let mut coef: Vec<Bit> = Vec::with_capacity(len);
+        let mut coef = Vec::with_capacity(len);
         for idx in 0..len {
             let sum = self.get_irref(idx) + rhs.get_irref(idx);
             coef.push(sum);
         }
-        PolynomialUV::from(coef)
+        BitPolynomial::from(coef)
     }
 }
 
-impl AddAssign for PolynomialUV<Bit> {
+impl AddAssign for BitPolynomial {
     fn add_assign(&mut self, rhs: Self) {
         while self.len() < rhs.len() {
             self.coef.push(Bit::Zero)
@@ -205,82 +189,30 @@ impl AddAssign for PolynomialUV<Bit> {
     }
 }
 
-// Addition of an scalar
-impl Add<Bit> for PolynomialUV<Bit> {
-    type Output = Self;
-
-    fn add(self, rhs: Bit) -> Self::Output {
-        let mut coef: Vec<Bit> = self.coef.clone();
-        coef[0] += rhs;
-        PolynomialUV::from(coef)
-    }
-}
-
-impl AddAssign<Bit> for PolynomialUV<Bit> {
-    fn add_assign(&mut self, rhs: Bit) {
-        self.coef[0] += rhs;
-        self.trim();
-    }
-}
-
 // Multiplication
-impl Mul for PolynomialUV<Bit> {
+impl Mul for BitPolynomial {
     type Output = Self;
 
     fn mul(self, rhs: Self) -> Self::Output {
-        let mut coef: Vec<Bit> = vec![Bit::Zero; self.len() + rhs.len()];
+        let mut coef = vec![Bit::Zero; self.len() + rhs.len()];
         for (n, lhs_coef) in self.coef.iter().enumerate() {
             for (k, rhs_coef) in rhs.coef.iter().enumerate() {
                 coef[n + k] += *lhs_coef * rhs_coef;
             }
         }
-        PolynomialUV::from(coef)
+        BitPolynomial::from(coef)
     }
 }
 
-impl MulAssign for PolynomialUV<Bit> {
+impl MulAssign for BitPolynomial {
     fn mul_assign(&mut self, rhs: Self) {
-        let mut coef: Vec<Bit> = vec![Bit::Zero; self.len() + rhs.len()];
+        let mut coef = vec![Bit::Zero; self.len() + rhs.len()];
         for (n, lhs_coef) in self.coef.iter().enumerate() {
             for (k, rhs_coef) in rhs.coef.iter().enumerate() {
                 coef[n + k] += *lhs_coef * rhs_coef;
             }
         }
-        *self = PolynomialUV::from(coef)
-    }
-}
-
-// Scalar Multiplication
-impl Mul<Bit> for PolynomialUV<Bit> {
-    type Output = Self;
-
-    fn mul(self, rhs: Bit) -> Self::Output {
-        PolynomialUV::from(
-            self.coef
-                .iter()
-                .map(|x| x.clone() * rhs.clone())
-                .collect_vec(),
-        )
-    }
-}
-
-impl MulAssign<Bit> for PolynomialUV<Bit> {
-    fn mul_assign(&mut self, rhs: Bit) {
-        *self = PolynomialUV::from(
-            self.coef
-                .iter()
-                .map(|x| x.clone() * rhs.clone())
-                .collect_vec(),
-        )
-    }
-}
-
-// Additive inverse
-impl Neg for PolynomialUV<Bit> {
-    type Output = Self;
-
-    fn neg(self) -> Self::Output {
-        PolynomialUV::from(self.coef.iter().cloned().map(|x| -x).collect_vec())
+        *self = BitPolynomial::from(coef)
     }
 }
 
@@ -291,22 +223,22 @@ mod math_function_tests {
 
     #[test]
     fn polynomial_mul() {
-        let m = PolynomialUV::from_int_array([1, 0, 1]).unwrap();
-        let n = PolynomialUV::from_int_array([1, 1]).unwrap();
+        let m = BitPolynomial::from_int_array([1, 0, 1]).unwrap();
+        let n = BitPolynomial::from_int_array([1, 1]).unwrap();
         assert_eq!(n.clone() * n, m)
     }
 
     #[test]
     fn polynomial_add() {
-        let m = PolynomialUV::from_int_array([1, 0, 1]).unwrap();
-        let n = PolynomialUV::from_int_array([1, 1]).unwrap();
-        assert_eq!(m + n, PolynomialUV::from_int_array([0, 1, 1]).unwrap())
+        let m = BitPolynomial::from_int_array([1, 0, 1]).unwrap();
+        let n = BitPolynomial::from_int_array([1, 1]).unwrap();
+        assert_eq!(m + n, BitPolynomial::from_int_array([0, 1, 1]).unwrap())
     }
 
     #[test]
     fn polynomial_div() {
-        let m = PolynomialUV::from_int_array([1, 0, 1]).unwrap();
-        let n = PolynomialUV::from_int_array([1, 1]).unwrap();
+        let m = BitPolynomial::from_int_array([1, 0, 1]).unwrap();
+        let n = BitPolynomial::from_int_array([1, 1]).unwrap();
         assert_eq!(m.div_rem(n.clone()).0, n)
     }
 }

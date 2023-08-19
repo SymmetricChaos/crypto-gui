@@ -7,7 +7,7 @@ use regex::Regex;
 use std::num::ParseIntError;
 use utils::{
     math_functions::is_prime32,
-    polynomials::{eval_poly, lagrange_interpolation, polynomial_string_unsigned},
+    polynomial_interpolation::{eval_poly, lagrange_interpolation, polynomial_string_unsigned},
 };
 
 // https://en.wikipedia.org/wiki/Shamir%27s_secret_sharing
