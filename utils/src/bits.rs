@@ -3,6 +3,7 @@ use num::{One, Zero};
 use regex::Regex;
 use std::{
     fmt::Display,
+    iter::{Product, Sum},
     ops::{
         Add, AddAssign, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Mul,
         MulAssign, Neg, Not,
@@ -155,9 +156,39 @@ impl Add<&Bit> for Bit {
     }
 }
 
+impl Add<&Bit> for &Bit {
+    type Output = Self;
+    fn add(self, rhs: &Bit) -> Self::Output {
+        match (self, rhs) {
+            (Bit::Zero, Bit::Zero) => &Bit::Zero,
+            (Bit::Zero, Bit::One) => &Bit::One,
+            (Bit::One, Bit::Zero) => &Bit::One,
+            (Bit::One, Bit::One) => &Bit::Zero,
+        }
+    }
+}
+
 impl AddAssign for Bit {
     fn add_assign(&mut self, rhs: Bit) {
         *self = *self + rhs;
+    }
+}
+
+impl AddAssign for &Bit {
+    fn add_assign(&mut self, rhs: &Bit) {
+        *self = *self + rhs;
+    }
+}
+
+impl Sum for Bit {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(Bit::Zero, |acc, x| acc + x)
+    }
+}
+
+impl Sum for &Bit {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(&Bit::Zero, |acc, x| acc + x)
     }
 }
 
@@ -177,7 +208,7 @@ impl Mul<&Bit> for Bit {
     type Output = Self;
 
     fn mul(self, rhs: &Bit) -> Self::Output {
-        if self == Bit::Zero || *rhs == Bit::Zero {
+        if self.is_zero() || rhs.is_zero() {
             Bit::Zero
         } else {
             Bit::One
@@ -185,9 +216,39 @@ impl Mul<&Bit> for Bit {
     }
 }
 
+impl Mul<&Bit> for &Bit {
+    type Output = Self;
+
+    fn mul(self, rhs: &Bit) -> Self::Output {
+        if self.is_zero() || rhs.is_zero() {
+            &Bit::Zero
+        } else {
+            &Bit::One
+        }
+    }
+}
+
 impl MulAssign for Bit {
     fn mul_assign(&mut self, rhs: Bit) {
         *self = *self * rhs;
+    }
+}
+
+impl MulAssign for &Bit {
+    fn mul_assign(&mut self, rhs: &Bit) {
+        *self = *self * rhs;
+    }
+}
+
+impl Product for Bit {
+    fn product<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(Bit::One, |acc, x| acc * x)
+    }
+}
+
+impl Product for &Bit {
+    fn product<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(&Bit::One, |acc, x| acc * x)
     }
 }
 

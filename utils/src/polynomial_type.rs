@@ -67,6 +67,23 @@ impl<T> PolynomialUV<T> {
     }
 }
 
+impl<T: Zero> From<Vec<T>> for PolynomialUV<T> {
+    fn from(coef: Vec<T>) -> Self {
+        let mut p = PolynomialUV { coef };
+        p.trim();
+        p
+    }
+}
+
+impl<T: Clone + Zero, const K: usize> From<[T; K]> for PolynomialUV<T> {
+    fn from(coef: [T; K]) -> Self {
+        let coef: Vec<T> = coef.iter().cloned().collect_vec();
+        let mut p = PolynomialUV { coef };
+        p.trim();
+        p
+    }
+}
+
 impl PolynomialUV<Bit> {
     pub fn evaluate(&self, x: usize) -> usize {
         let mut out = 0;
@@ -93,22 +110,19 @@ impl PolynomialUV<Bit> {
         }
         Ok(PolynomialUV::from(v))
     }
-}
 
-impl<T: Zero> From<Vec<T>> for PolynomialUV<T> {
-    fn from(coef: Vec<T>) -> Self {
-        let mut p = PolynomialUV { coef };
-        p.trim();
-        p
-    }
-}
-
-impl<T: Clone + Zero, const K: usize> From<[T; K]> for PolynomialUV<T> {
-    fn from(coef: [T; K]) -> Self {
-        let coef: Vec<T> = coef.iter().cloned().collect_vec();
-        let mut p = PolynomialUV { coef };
-        p.trim();
-        p
+    pub fn from_int_vec<T: Copy, const N: usize>(
+        vec: Vec<T>,
+    ) -> Result<PolynomialUV<Bit>, IntToBitError>
+    where
+        Bit: TryFrom<T>,
+        IntToBitError: From<<Bit as TryFrom<T>>::Error>,
+    {
+        let mut v = vec![Bit::Zero; vec.len()];
+        for (n, i) in vec.iter().enumerate() {
+            v[n] = Bit::try_from(*i)?;
+        }
+        Ok(PolynomialUV::from(v))
     }
 }
 
