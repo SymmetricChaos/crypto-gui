@@ -162,7 +162,7 @@ impl One for BitPolynomial {
     }
 }
 
-// Addition (also Subtraction for PolynomialUV)
+// Addition (also Subtraction)
 impl Add for BitPolynomial {
     type Output = Self;
 
@@ -177,8 +177,34 @@ impl Add for BitPolynomial {
     }
 }
 
+impl Add<&BitPolynomial> for BitPolynomial {
+    type Output = Self;
+
+    fn add(self, rhs: &Self) -> Self::Output {
+        let len = self.len().max(rhs.len());
+        let mut coef = Vec::with_capacity(len);
+        for idx in 0..len {
+            let sum = self.get_irref(idx) + rhs.get_irref(idx);
+            coef.push(sum);
+        }
+        BitPolynomial::from(coef)
+    }
+}
+
 impl AddAssign for BitPolynomial {
     fn add_assign(&mut self, rhs: Self) {
+        while self.len() < rhs.len() {
+            self.coef.push(Bit::Zero)
+        }
+        for (idx, rhs_coef) in rhs.coef.iter().cloned().enumerate() {
+            self.coef[idx] += rhs_coef;
+        }
+        self.trim()
+    }
+}
+
+impl AddAssign<&BitPolynomial> for BitPolynomial {
+    fn add_assign(&mut self, rhs: &Self) {
         while self.len() < rhs.len() {
             self.coef.push(Bit::Zero)
         }
@@ -204,8 +230,34 @@ impl Mul for BitPolynomial {
     }
 }
 
+impl Mul<&BitPolynomial> for BitPolynomial {
+    type Output = Self;
+
+    fn mul(self, rhs: &Self) -> Self::Output {
+        let mut coef = vec![Bit::Zero; self.len() + rhs.len()];
+        for (n, lhs_coef) in self.coef.iter().enumerate() {
+            for (k, rhs_coef) in rhs.coef.iter().enumerate() {
+                coef[n + k] += *lhs_coef * rhs_coef;
+            }
+        }
+        BitPolynomial::from(coef)
+    }
+}
+
 impl MulAssign for BitPolynomial {
     fn mul_assign(&mut self, rhs: Self) {
+        let mut coef = vec![Bit::Zero; self.len() + rhs.len()];
+        for (n, lhs_coef) in self.coef.iter().enumerate() {
+            for (k, rhs_coef) in rhs.coef.iter().enumerate() {
+                coef[n + k] += *lhs_coef * rhs_coef;
+            }
+        }
+        *self = BitPolynomial::from(coef)
+    }
+}
+
+impl MulAssign<&BitPolynomial> for BitPolynomial {
+    fn mul_assign(&mut self, rhs: &Self) {
         let mut coef = vec![Bit::Zero; self.len() + rhs.len()];
         for (n, lhs_coef) in self.coef.iter().enumerate() {
             for (k, rhs_coef) in rhs.coef.iter().enumerate() {

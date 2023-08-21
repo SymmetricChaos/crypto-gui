@@ -14,7 +14,7 @@ lazy_static! {
     pub static ref IS_BITS: Regex = Regex::new(r"^[01\s]*$").unwrap();
 }
 
-// Converts a &str to an iterator of bits, skipping white space. Returns None if there are any characters other than 0, 1, and whitespace.
+/// Converts a &str to an iterator of bits, skipping white space. Returns None if there are any characters other than 0, 1, and whitespace.
 pub fn bits_from_bitstring(text: &str) -> Result<impl Iterator<Item = Bit> + '_, &str> {
     if !IS_BITS.is_match(text) {
         Err("input must contain only 0, 1, and whitespace")
@@ -97,6 +97,13 @@ impl Bit {
         match self {
             Bit::Zero => Bit::One,
             Bit::One => Bit::Zero,
+        }
+    }
+
+    pub const fn to_char(&self) -> char {
+        match self {
+            Bit::Zero => '0',
+            Bit::One => '1',
         }
     }
 }
@@ -378,6 +385,12 @@ impl Neg for Bit {
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct IntToBitError;
 
+impl Display for IntToBitError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "integer could not be converted to a bit")
+    }
+}
+
 macro_rules! int_methods {
     ($t:ty) => {
         impl Add<Bit> for $t {
@@ -468,6 +481,12 @@ int_methods!(i128);
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct CharToBitError;
+
+impl Display for CharToBitError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "character could not be converted to a bit")
+    }
+}
 
 impl From<Bit> for char {
     fn from(value: Bit) -> Self {
