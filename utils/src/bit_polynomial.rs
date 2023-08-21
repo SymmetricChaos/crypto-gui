@@ -97,7 +97,7 @@ impl BitPolynomial {
         Ok(BitPolynomial::from(v))
     }
 
-    pub fn div_rem(&self, rhs: BitPolynomial) -> (BitPolynomial, BitPolynomial) {
+    pub fn div_rem(&self, rhs: &BitPolynomial) -> (BitPolynomial, BitPolynomial) {
         // Handle special cases
         if rhs.is_zero() {
             panic!("division by zero")
@@ -128,15 +128,19 @@ impl BitPolynomial {
 
 impl From<Vec<Bit>> for BitPolynomial {
     fn from(value: Vec<Bit>) -> Self {
-        Self { coef: value }
+        let mut p = Self { coef: value };
+        p.trim();
+        p
     }
 }
 
 impl<const N: usize> From<[Bit; N]> for BitPolynomial {
     fn from(value: [Bit; N]) -> Self {
-        Self {
+        let mut p = Self {
             coef: value.to_vec(),
-        }
+        };
+        p.trim();
+        p
     }
 }
 
@@ -252,7 +256,8 @@ impl MulAssign for BitPolynomial {
                 coef[n + k] += *lhs_coef * rhs_coef;
             }
         }
-        *self = BitPolynomial::from(coef)
+        *self = BitPolynomial::from(coef);
+        self.trim()
     }
 }
 
@@ -264,7 +269,8 @@ impl MulAssign<&BitPolynomial> for BitPolynomial {
                 coef[n + k] += *lhs_coef * rhs_coef;
             }
         }
-        *self = BitPolynomial::from(coef)
+        *self = BitPolynomial::from(coef);
+        self.trim()
     }
 }
 
@@ -275,9 +281,16 @@ mod math_function_tests {
 
     #[test]
     fn polynomial_mul() {
-        let m = BitPolynomial::from_int_array([1, 0, 1]).unwrap();
-        let n = BitPolynomial::from_int_array([1, 1]).unwrap();
-        assert_eq!(n.clone() * n, m)
+        let a = BitPolynomial::from_int_array([1, 1]).unwrap();
+        let b = BitPolynomial::from_int_array([1, 1]).unwrap();
+        assert_eq!(a * b, BitPolynomial::from_int_array([1, 0, 1]).unwrap());
+
+        let a = BitPolynomial::from_int_array([1, 1, 1]).unwrap();
+        let b = BitPolynomial::from_int_array([1, 1, 1]).unwrap();
+        assert_eq!(
+            a * b,
+            BitPolynomial::from_int_array([1, 0, 1, 0, 1]).unwrap()
+        );
     }
 
     #[test]
@@ -291,6 +304,6 @@ mod math_function_tests {
     fn polynomial_div() {
         let m = BitPolynomial::from_int_array([1, 0, 1]).unwrap();
         let n = BitPolynomial::from_int_array([1, 1]).unwrap();
-        assert_eq!(m.div_rem(n.clone()).0, n)
+        assert_eq!(m.div_rem(&n).0, n)
     }
 }

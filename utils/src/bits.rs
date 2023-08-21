@@ -1,5 +1,5 @@
 use lazy_static::lazy_static;
-use num::{One, Zero};
+use num::{Integer, One, Zero};
 use regex::Regex;
 use std::{
     fmt::Display,
@@ -50,20 +50,20 @@ pub fn bits_to_int_big_endian(bits: &[Bit]) -> u32 {
     out
 }
 
-// pub fn int_to_bits<N: Integer + From<u8> + Unsigned>(int: N) -> Vec<Bit> {
-//     let mut bits = Vec::new();
-//     let mut n = int;
-//     while !n.is_zero() {
-//         let (q, r) = n.div_rem(&N::from(2));
-//         if r.is_zero() {
-//             bits.push(Bit::Zero)
-//         } else {
-//             bits.push(Bit::One)
-//         }
-//         n = q;
-//     }
-//     bits
-// }
+pub fn int_to_bits(int: u32) -> Vec<Bit> {
+    let mut bits = Vec::new();
+    let mut n = int;
+    while !n.is_zero() {
+        let (q, r) = n.div_rem(&2);
+        if r.is_zero() {
+            bits.push(Bit::Zero)
+        } else {
+            bits.push(Bit::One)
+        }
+        n = q;
+    }
+    bits
+}
 
 pub fn to_bit_array<T: Copy, const N: usize>(arr: [T; N]) -> Result<[Bit; N], IntToBitError>
 where
