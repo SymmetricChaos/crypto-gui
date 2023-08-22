@@ -14,10 +14,19 @@ lazy_static! {
     pub static ref IS_BITS: Regex = Regex::new(r"^[01\s]*$").unwrap();
 }
 
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub struct CharToBitError;
+
+impl Display for CharToBitError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "character could not be converted to a bit")
+    }
+}
+
 /// Converts a &str to an iterator of bits, skipping white space. Returns None if there are any characters other than 0, 1, and whitespace.
-pub fn bits_from_bitstring(text: &str) -> Result<impl Iterator<Item = Bit> + '_, &str> {
+pub fn bits_from_string(text: &str) -> Result<impl Iterator<Item = Bit> + '_, CharToBitError> {
     if !IS_BITS.is_match(text) {
-        Err("input must contain only 0, 1, and whitespace")
+        Err(CharToBitError)
     } else {
         Ok(text
             .chars()
@@ -478,15 +487,6 @@ int_methods!(i16);
 int_methods!(i32);
 int_methods!(i64);
 int_methods!(i128);
-
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
-pub struct CharToBitError;
-
-impl Display for CharToBitError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "character could not be converted to a bit")
-    }
-}
 
 impl From<Bit> for char {
     fn from(value: Bit) -> Self {

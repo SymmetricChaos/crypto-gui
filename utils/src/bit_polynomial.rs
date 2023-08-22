@@ -1,10 +1,21 @@
-use crate::bits::{Bit, IntToBitError};
+use crate::bits::{bits_from_string, Bit, CharToBitError, IntToBitError};
+use itertools::Itertools;
 use num::{One, Zero};
-use std::ops::{Add, AddAssign, Mul, MulAssign};
+use std::{
+    fmt::Display,
+    ops::{Add, AddAssign, Mul, MulAssign},
+};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct BitPolynomial {
     pub coef: Vec<Bit>,
+}
+
+impl Display for BitPolynomial {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s: String = self.coef.iter().map(|b| b.to_char()).collect();
+        write!(f, "{}", s)
+    }
 }
 
 impl BitPolynomial {
@@ -95,6 +106,15 @@ impl BitPolynomial {
             v[n] = Bit::try_from(*i)?;
         }
         Ok(BitPolynomial::from(v))
+    }
+
+    pub fn from_string(s: &str) -> Result<BitPolynomial, CharToBitError> {
+        let bits = bits_from_string(s)?;
+        Ok(BitPolynomial::from(bits.collect_vec()))
+    }
+
+    pub fn from_iter(iter: impl Iterator<Item = Bit>) -> BitPolynomial {
+        BitPolynomial::from(iter.collect_vec())
     }
 
     pub fn div_rem(&self, rhs: &BitPolynomial) -> (BitPolynomial, BitPolynomial) {

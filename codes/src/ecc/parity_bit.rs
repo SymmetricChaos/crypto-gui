@@ -1,7 +1,7 @@
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use num::One;
-use utils::bits::{bits_from_bitstring, Bit};
+use utils::bits::{bits_from_string, Bit};
 
 pub struct ParityBit {
     pub block_size: usize,
@@ -23,8 +23,8 @@ impl Default for ParityBit {
 
 impl Code for ParityBit {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        let bits: Vec<Bit> = bits_from_bitstring(text)
-            .map_err(|e| CodeError::input(e))?
+        let bits: Vec<Bit> = bits_from_string(text)
+            .map_err(|e| CodeError::input(&e.to_string()))?
             .collect();
 
         if bits.len() % self.block_size != 0 {
@@ -61,8 +61,8 @@ impl Code for ParityBit {
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        let bits: Vec<Bit> = bits_from_bitstring(text)
-            .map_err(|e| CodeError::input(e))?
+        let bits: Vec<Bit> = bits_from_string(text)
+            .map_err(|e| CodeError::input(&e.to_string()))?
             .collect();
 
         if bits.len() % (self.block_size + 1) != 0 {

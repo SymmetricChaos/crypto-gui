@@ -2,7 +2,7 @@ use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use nalgebra::{ArrayStorage, SMatrix, Vector, Vector3};
-use utils::bits::{bits_from_bitstring, to_bit_array, Bit};
+use utils::bits::{bits_from_string, to_bit_array, Bit};
 
 lazy_static! {
     // Generator matrix with systemtic order
@@ -140,8 +140,8 @@ impl HammingCode {
     }
 
     fn decode_4_7(&self, text: &str) -> Result<String, CodeError> {
-        let bits: Vec<Bit> = bits_from_bitstring(text)
-            .map_err(|e| CodeError::input(e))?
+        let bits: Vec<Bit> = bits_from_string(text)
+            .map_err(|e| CodeError::input(&e.to_string()))?
             .collect();
 
         if bits.len() % 7 != 0 {
@@ -183,8 +183,8 @@ impl HammingCode {
     }
 
     fn decode_4_8(&self, text: &str) -> Result<String, CodeError> {
-        let bits: Vec<Bit> = bits_from_bitstring(text)
-            .map_err(|e| CodeError::input(e))?
+        let bits: Vec<Bit> = bits_from_string(text)
+            .map_err(|e| CodeError::input(&e.to_string()))?
             .collect();
 
         if bits.len() % 8 != 0 {
@@ -246,8 +246,8 @@ impl HammingCode {
 
 impl Code for HammingCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        let bits: Vec<Bit> = bits_from_bitstring(text)
-            .map_err(|e| CodeError::input(e))?
+        let bits: Vec<Bit> = bits_from_string(text)
+            .map_err(|e| CodeError::input(&e.to_string()))?
             .collect();
 
         if bits.len() % 4 != 0 {

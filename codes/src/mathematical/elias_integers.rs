@@ -1,7 +1,7 @@
 use crate::errors::CodeError;
 use num::Zero;
 use std::collections::BTreeMap;
-use utils::bits::{bits_from_bitstring, bits_to_int_little_endian, Bit};
+use utils::bits::{bits_from_string, bits_to_int_little_endian, Bit};
 
 // https://en.wikipedia.org/wiki/Elias_delta_coding
 // https://en.wikipedia.org/wiki/Elias_gamma_coding
@@ -258,7 +258,7 @@ impl EliasCodeIntegers {
 
     // Operates on a single codegroup
     pub fn decode_to_u32(&self, text: &str) -> Result<Vec<u32>, CodeError> {
-        let mut filtered = bits_from_bitstring(text).map_err(|e| CodeError::input(e))?;
+        let mut filtered = bits_from_string(text).map_err(|e| CodeError::input(&e.to_string()))?;
         match self.variant {
             EliasVariant::Delta => self.decode_to_u32_delta(&mut filtered),
             EliasVariant::Gamma => self.decode_to_u32_gamma(&mut filtered),

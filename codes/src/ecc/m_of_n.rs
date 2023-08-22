@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use num::integer::binomial;
-use utils::bits::{bits_from_bitstring, Bit, IS_BITS};
+use utils::bits::{bits_from_string, Bit, IS_BITS};
 
 use crate::{errors::CodeError, traits::Code};
 
@@ -51,8 +51,8 @@ impl Code for MofNCode {
         }
 
         let n_data_bits = self.n_data_bits();
-        if bits_from_bitstring(text)
-            .map_err(|e| CodeError::input(e))?
+        if bits_from_string(text)
+            .map_err(|e| CodeError::input(&e.to_string()))?
             .count()
             % n_data_bits
             != 0
@@ -63,7 +63,7 @@ impl Code for MofNCode {
             )));
         };
 
-        let bits = bits_from_bitstring(text).map_err(|e| CodeError::input(e))?;
+        let bits = bits_from_string(text).map_err(|e| CodeError::input(&e.to_string()))?;
 
         let mut out = String::new();
         let mut counted_weight = 0;
@@ -104,8 +104,8 @@ impl Code for MofNCode {
 
         let n_data_bits = self.n_data_bits();
 
-        let bits: Vec<Bit> = bits_from_bitstring(text)
-            .map_err(|e| CodeError::input(e))?
+        let bits: Vec<Bit> = bits_from_string(text)
+            .map_err(|e| CodeError::input(&e.to_string()))?
             .collect();
 
         if bits.len() % self.length != 0 {
