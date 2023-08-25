@@ -19,7 +19,10 @@ impl CyclicCode {
         let mut out = Vec::with_capacity(self.generator_word.len());
         let mut word = VecDeque::from(self.generator_word.clone());
         for _ in 0..self.generator_word.len() {
-            out.push(Vec::from(word.clone()));
+            let v = Vec::from(word.clone());
+            if !out.contains(&v) {
+                out.push(v);
+            }
             word.rotate_right(1);
         }
         out
