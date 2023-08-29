@@ -175,17 +175,20 @@ impl BitPolynomial {
 
         // General case
         let mut dividend = self.clone();
+        let mut quotient = BitPolynomial::zero();
         while !dividend.is_zero() && dividend.degree() >= rhs.degree() {
             let mut intermediate = rhs.clone();
-            while intermediate.degree() < dividend.degree() {
-                intermediate.increase_degree(1)
-            }
-            // println!("{}\n{}", dividend, intermediate);
+            let alignment = dividend.degree() - intermediate.degree();
+            intermediate.increase_degree(alignment);
+            let mut bit = BitPolynomial::one();
+            bit.increase_degree(alignment);
+
+            quotient += bit;
             dividend += intermediate;
         }
 
         // Dividend is now the remainder
-        (self.clone() - dividend.clone(), dividend)
+        (quotient, dividend)
     }
 }
 
@@ -431,10 +434,11 @@ mod math_function_tests {
 
     #[test]
     fn example_division_for_crc() {
-        let m = BitPolynomial::from_str("00000110111001011").unwrap();
-        let n = BitPolynomial::from_str("1101").unwrap();
-        println!("{}\n{}", m.polynomial_string(), n.polynomial_string());
-        let (q, r) = m.div_rem(&n);
-        println!("{} {}", q, r)
+        let a = BitPolynomial::from_str("00000110111001011").unwrap();
+        let b = BitPolynomial::from_str("1101").unwrap();
+        println!("{}\n{}", a.polynomial_string(), b.polynomial_string());
+        let (q, r) = a.div_rem(&b);
+        println!("{} {}", q, r);
+        assert_eq!(q * b + r, a);
     }
 }
