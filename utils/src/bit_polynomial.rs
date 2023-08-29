@@ -70,6 +70,59 @@ impl BitPolynomial {
         self.coef.get_mut(n)
     }
 
+    // Reverse order of coefficients
+    pub fn reverse(&mut self) {
+        self.coef.reverse()
+    }
+
+    // Clone of the polynomial with coefficients in reversed order
+    pub fn reversed(&self) -> BitPolynomial {
+        let mut out = self.clone();
+        out.reverse();
+        out
+    }
+
+    fn polynomial_term(n: usize) -> String {
+        if n == 0 {
+            String::from("1")
+        } else if n == 1 {
+            String::from("x")
+        } else {
+            format!("x^{n}")
+        }
+    }
+
+    pub fn polynomial_string(&self) -> String {
+        if self.coef.is_empty() {
+            return String::from("0");
+        }
+
+        let mut out = String::new();
+
+        let mut coefs = self
+            .coef
+            .iter()
+            .enumerate()
+            .skip_while(|(_, c)| c.is_zero());
+
+        let m = self.coef.len() - 1;
+
+        match coefs.next() {
+            Some((n, _)) => out.push_str(&Self::polynomial_term(m - n)),
+            None => return String::from("0"),
+        }
+
+        for (n, c) in coefs {
+            if c.is_zero() {
+                continue;
+            }
+            out.push_str(" + ");
+            out.push_str(&Self::polynomial_term(m - n))
+        }
+
+        out
+    }
+
     pub fn evaluate(&self, x: usize) -> usize {
         let mut out = 0;
         let mut n = 1;
@@ -108,8 +161,8 @@ impl BitPolynomial {
         Ok(BitPolynomial::from(v))
     }
 
-    pub fn from_string(s: &str) -> Result<BitPolynomial, CharToBitError> {
-        let bits = bits_from_string(s)?;
+    pub fn from_str<S: AsRef<str>>(s: S) -> Result<BitPolynomial, CharToBitError> {
+        let bits = bits_from_string(s.as_ref())?;
         Ok(BitPolynomial::from(bits.collect_vec()))
     }
 
@@ -325,5 +378,14 @@ mod math_function_tests {
         let m = BitPolynomial::from_int_array([1, 0, 1]).unwrap();
         let n = BitPolynomial::from_int_array([1, 1]).unwrap();
         assert_eq!(m.div_rem(&n).0, n)
+    }
+
+    #[test]
+    fn example_division_for_crc() {
+        let m = BitPolynomial::from_str("11010011101100000").unwrap();
+        let n = BitPolynomial::from_str("1011").unwrap();
+        println!("{}\n{}", m.polynomial_string(), n.polynomial_string());
+        let (q, r) = m.div_rem(&n);
+        println!("{} {}", q, r)
     }
 }
