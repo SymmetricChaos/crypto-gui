@@ -3,10 +3,10 @@ use itertools::Itertools;
 use num::{One, Zero};
 use std::{
     fmt::Display,
-    ops::{Add, AddAssign, Index, IndexMut, Mul, MulAssign},
+    ops::{Add, AddAssign, Index, IndexMut, Mul, MulAssign, Sub, SubAssign},
 };
 
-// Polynomial of GF(2) with coefficients in ascending order so that the coefficient at index n is with power n
+// Polynomial of GF(2) with coefficients in ascending order so that the coefficient at index n is paired with the indeterminate with power n
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct BitPolynomial {
     pub coef: Vec<Bit>,
@@ -124,18 +124,6 @@ impl BitPolynomial {
         out
     }
 
-    pub fn evaluate(&self, x: usize) -> usize {
-        let mut out = 0;
-        let mut n = 1;
-        for c in self.coef.iter().rev() {
-            if c.is_one() {
-                out += n;
-            }
-            n += x
-        }
-        out
-    }
-
     pub fn from_int_array<T: Copy, const N: usize>(
         arr: [T; N],
     ) -> Result<BitPolynomial, IntToBitError>
@@ -186,18 +174,18 @@ impl BitPolynomial {
         }
 
         // General case
-        let mut quotient = BitPolynomial::zero();
-        let mut remainder = self.clone().reversed();
-
-        while !remainder.is_zero() && remainder.degree() >= rhs.degree() {
-            let pow = remainder.degree() - rhs.degree();
-            let mut intermediate = BitPolynomial::one();
-            intermediate.increase_degree(pow);
-            quotient += intermediate.clone();
-            remainder += intermediate * rhs.clone();
+        let mut dividend = self.clone();
+        while !dividend.is_zero() && dividend.degree() >= rhs.degree() {
+            let mut intermediate = rhs.clone();
+            while intermediate.degree() < dividend.degree() {
+                intermediate.increase_degree(1)
+            }
+            // println!("{}\n{}", dividend, intermediate);
+            dividend += intermediate;
         }
 
-        (quotient, remainder)
+        // Dividend is now the remainder
+        (self.clone() - dividend.clone(), dividend)
     }
 }
 
@@ -308,6 +296,58 @@ impl AddAssign<&BitPolynomial> for BitPolynomial {
     }
 }
 
+impl Sub for BitPolynomial {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        let len = self.len().max(rhs.len());
+        let mut coef = Vec::with_capacity(len);
+        for idx in 0..len {
+            let sum = self.get_irref(idx) + rhs.get_irref(idx);
+            coef.push(sum);
+        }
+        BitPolynomial::from(coef)
+    }
+}
+
+impl Sub<&BitPolynomial> for BitPolynomial {
+    type Output = Self;
+
+    fn sub(self, rhs: &Self) -> Self::Output {
+        let len = self.len().max(rhs.len());
+        let mut coef = Vec::with_capacity(len);
+        for idx in 0..len {
+            let sum = self.get_irref(idx) + rhs.get_irref(idx);
+            coef.push(sum);
+        }
+        BitPolynomial::from(coef)
+    }
+}
+
+impl SubAssign for BitPolynomial {
+    fn sub_assign(&mut self, rhs: Self) {
+        while self.len() < rhs.len() {
+            self.coef.push(Bit::Zero)
+        }
+        for (idx, rhs_coef) in rhs.coef.iter().cloned().enumerate() {
+            self.coef[idx] += rhs_coef;
+        }
+        self.trim()
+    }
+}
+
+impl SubAssign<&BitPolynomial> for BitPolynomial {
+    fn sub_assign(&mut self, rhs: &Self) {
+        while self.len() < rhs.len() {
+            self.coef.push(Bit::Zero)
+        }
+        for (idx, rhs_coef) in rhs.coef.iter().cloned().enumerate() {
+            self.coef[idx] += rhs_coef;
+        }
+        self.trim()
+    }
+}
+
 // Multiplication
 impl Mul for BitPolynomial {
     type Output = Self;
@@ -390,18 +430,9 @@ mod math_function_tests {
     }
 
     #[test]
-    fn polynomial_div() {
-        let m = BitPolynomial::from_str("101").unwrap();
-        let n = BitPolynomial::from_str("11").unwrap();
-        assert_eq!(m.div_rem(&n).0, n)
-    }
-
-    #[test]
     fn example_division_for_crc() {
-        let m = BitPolynomial::from_str("11010011101100000")
-            .unwrap()
-            .reversed();
-        let n = BitPolynomial::from_str("1011").unwrap().reversed();
+        let m = BitPolynomial::from_str("00000110111001011").unwrap();
+        let n = BitPolynomial::from_str("1101").unwrap();
         println!("{}\n{}", m.polynomial_string(), n.polynomial_string());
         let (q, r) = m.div_rem(&n);
         println!("{} {}", q, r)
