@@ -3,9 +3,10 @@ use itertools::Itertools;
 use num::{One, Zero};
 use std::{
     fmt::Display,
-    ops::{Add, AddAssign, Mul, MulAssign},
+    ops::{Add, AddAssign, Index, IndexMut, Mul, MulAssign},
 };
 
+// Polynomial of GF(2) with coefficients in ascending order so that the coefficient at index n is with power n
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct BitPolynomial {
     pub coef: Vec<Bit>,
@@ -43,11 +44,10 @@ impl BitPolynomial {
         }
     }
 
-    pub fn increase_degree(mut self, n: usize) -> BitPolynomial {
+    pub fn increase_degree(&mut self, n: usize) {
         for _ in 0..n {
-            self.coef.insert(0, Bit::zero());
+            self.coef.insert(0, Bit::zero())
         }
-        self
     }
 
     pub fn len(&self) -> usize {
@@ -102,6 +102,7 @@ impl BitPolynomial {
         let mut coefs = self
             .coef
             .iter()
+            .rev()
             .enumerate()
             .skip_while(|(_, c)| c.is_zero());
 
@@ -186,11 +187,12 @@ impl BitPolynomial {
 
         // General case
         let mut quotient = BitPolynomial::zero();
-        let mut remainder = self.clone();
+        let mut remainder = self.clone().reversed();
 
         while !remainder.is_zero() && remainder.degree() >= rhs.degree() {
             let pow = remainder.degree() - rhs.degree();
-            let intermediate = BitPolynomial::one().increase_degree(pow);
+            let mut intermediate = BitPolynomial::one();
+            intermediate.increase_degree(pow);
             quotient += intermediate.clone();
             remainder += intermediate * rhs.clone();
         }
@@ -214,6 +216,20 @@ impl<const N: usize> From<[Bit; N]> for BitPolynomial {
         };
         p.trim();
         p
+    }
+}
+
+impl Index<usize> for BitPolynomial {
+    type Output = Bit;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        self.get(index).unwrap()
+    }
+}
+
+impl IndexMut<usize> for BitPolynomial {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        self.get_mut(index).unwrap()
     }
 }
 
@@ -354,12 +370,12 @@ mod math_function_tests {
 
     #[test]
     fn polynomial_mul() {
-        let a = BitPolynomial::from_int_array([1, 1]).unwrap();
-        let b = BitPolynomial::from_int_array([1, 1]).unwrap();
+        let a = BitPolynomial::from_str("11").unwrap();
+        let b = BitPolynomial::from_str("11").unwrap();
         assert_eq!(a * b, BitPolynomial::from_int_array([1, 0, 1]).unwrap());
 
-        let a = BitPolynomial::from_int_array([1, 1, 1]).unwrap();
-        let b = BitPolynomial::from_int_array([1, 1, 1]).unwrap();
+        let a = BitPolynomial::from_str("111").unwrap();
+        let b = BitPolynomial::from_str("111").unwrap();
         assert_eq!(
             a * b,
             BitPolynomial::from_int_array([1, 0, 1, 0, 1]).unwrap()
@@ -368,22 +384,24 @@ mod math_function_tests {
 
     #[test]
     fn polynomial_add() {
-        let m = BitPolynomial::from_int_array([1, 0, 1]).unwrap();
-        let n = BitPolynomial::from_int_array([1, 1]).unwrap();
-        assert_eq!(m + n, BitPolynomial::from_int_array([0, 1, 1]).unwrap())
+        let m = BitPolynomial::from_str("101").unwrap();
+        let n = BitPolynomial::from_str("11").unwrap();
+        assert_eq!(m + n, BitPolynomial::from_str("011").unwrap())
     }
 
     #[test]
     fn polynomial_div() {
-        let m = BitPolynomial::from_int_array([1, 0, 1]).unwrap();
-        let n = BitPolynomial::from_int_array([1, 1]).unwrap();
+        let m = BitPolynomial::from_str("101").unwrap();
+        let n = BitPolynomial::from_str("11").unwrap();
         assert_eq!(m.div_rem(&n).0, n)
     }
 
     #[test]
     fn example_division_for_crc() {
-        let m = BitPolynomial::from_str("11010011101100000").unwrap();
-        let n = BitPolynomial::from_str("1011").unwrap();
+        let m = BitPolynomial::from_str("11010011101100000")
+            .unwrap()
+            .reversed();
+        let n = BitPolynomial::from_str("1011").unwrap().reversed();
         println!("{}\n{}", m.polynomial_string(), n.polynomial_string());
         let (q, r) = m.div_rem(&n);
         println!("{} {}", q, r)
