@@ -53,7 +53,7 @@ impl Code for CyclicRedundancyCheck {
 
         let mut out = String::new();
 
-        for chunk in bits.chunks(self.block_size) {
+        for chunk in bits.chunks_exact(self.block_size) {
             let poly = BitPolynomial::from(chunk.to_vec());
             let (_, r) = poly.div_rem(&self.generator);
             out.push_str(&poly.to_string());
@@ -76,13 +76,13 @@ impl Code for CyclicRedundancyCheck {
                 )));
         };
 
-        for chunk in bits.chunks(self.block_size + self.check_bits()) {
-            let v = chunk.to_vec();
-            let poly = BitPolynomial::from(v[0..self.block_size]);
-            let (_, r) = poly.div_rem(&self.generator);
+        // for chunk in bits.chunks_exact(self.block_size + self.check_bits()) {
+        //     let v = chunk.to_vec();
+        //     let poly = BitPolynomial::from(v[0..self.block_size]);
+        //     let (_, r) = poly.div_rem(&self.generator);
 
-            out.push_str(&poly.to_string());
-        }
+        //     out.push_str(&poly.to_string());
+        // }
 
         todo!()
     }
