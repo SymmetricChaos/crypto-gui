@@ -1,4 +1,3 @@
-pub mod cyclic_code;
 pub mod cyclic_redundancy_check;
 pub mod damm;
 pub mod hamming;

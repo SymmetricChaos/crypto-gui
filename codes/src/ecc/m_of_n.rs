@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use num::integer::binomial;
-use utils::bits::{bits_from_string, Bit, IS_BITS};
+use utils::bits::{bits_from_string, Bit};
 
 use crate::{errors::CodeError, traits::Code};
 
@@ -43,12 +43,6 @@ impl Default for MofNCode {
 impl Code for MofNCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         self.validate()?;
-
-        if !IS_BITS.is_match(text) {
-            return Err(CodeError::Input(format!(
-                "bitstrings can only contain 0, 1, and whitespace",
-            )));
-        }
 
         let n_data_bits = self.n_data_bits();
         if bits_from_string(text)
@@ -95,12 +89,6 @@ impl Code for MofNCode {
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         self.validate()?;
-
-        if !IS_BITS.is_match(text) {
-            return Err(CodeError::Input(format!(
-                "bitstrings can only contain 0, 1, and whitespace",
-            )));
-        }
 
         let n_data_bits = self.n_data_bits();
 
