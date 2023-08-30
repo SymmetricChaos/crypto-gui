@@ -436,9 +436,12 @@ mod math_function_tests {
     fn example_division_for_crc() {
         let a = BitPolynomial::from_str("00000110111001011").unwrap();
         let b = BitPolynomial::from_str("1101").unwrap();
-        println!("{}\n{}", a.polynomial_string(), b.polynomial_string());
+        assert_eq!(
+            "x^16 + x^15 + x^13 + x^10 + x^9 + x^8 + x^6 + x^5 | x^3 + x + 1",
+            format!("{} | {}", a.polynomial_string(), b.polynomial_string())
+        );
         let (q, r) = a.div_rem(&b);
-        println!("{} {}", q, r);
+        assert_eq!("00111110001111 001", format!("{} {}", q, r));
         assert_eq!(q * b + r, a);
     }
 }
