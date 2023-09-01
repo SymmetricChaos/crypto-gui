@@ -54,8 +54,10 @@ impl Code for CyclicRedundancyCheck {
         let mut out = String::new();
 
         for chunk in bits.chunks_exact(self.block_size) {
-            let poly = BitPolynomial::from(chunk.to_vec());
+            let mut poly = BitPolynomial::from(chunk.to_vec());
+            poly.increase_degree(self.check_bits());
             let (_, r) = poly.div_rem(&self.generator);
+
             out.push_str(&poly.to_string());
             out.push_str(&r.to_string());
         }
@@ -94,8 +96,9 @@ mod crc_tests {
 
     #[test]
     fn test_encode() {
-        let code = CyclicRedundancyCheck::default();
-        assert_eq!(code.encode("").unwrap(), "");
+        let mut code = CyclicRedundancyCheck::default();
+        code.block_size = 14;
+        assert_eq!(code.encode("00110111001011").unwrap(), "00110111001011001");
     }
 
     #[test]

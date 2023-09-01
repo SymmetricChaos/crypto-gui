@@ -1,6 +1,7 @@
 use crate::bits::{bits_from_string, Bit, CharToBitError, IntToBitError};
 use itertools::Itertools;
 use num::{One, Zero};
+use rand::distributions::Slice;
 use std::{
     fmt::Display,
     ops::{Add, AddAssign, Index, IndexMut, Mul, MulAssign, Sub, SubAssign},
@@ -47,6 +48,12 @@ impl BitPolynomial {
     pub fn increase_degree(&mut self, n: usize) {
         for _ in 0..n {
             self.coef.insert(0, Bit::zero())
+        }
+    }
+
+    pub fn decrease_degree(&mut self, n: usize) {
+        for _ in 0..n {
+            self.coef.remove(0);
         }
     }
 
