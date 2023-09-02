@@ -6,8 +6,6 @@ use crate::{
 pub struct UnaryCode {
     pub maps: LetterAndWordCode<String>,
     pub mode: IOMode,
-    // pub s1: char,
-    // pub s2: char,
 }
 
 impl UnaryCode {
@@ -18,12 +16,6 @@ impl UnaryCode {
     pub fn set_word_map(&mut self) {
         self.maps.set_word_map(|(n, _)| "1".repeat(n) + "0")
     }
-
-    // fn remap_symbols(&self, mut s: String) -> String {
-    //     s = s.replace('1', &self.s1.to_string());
-    //     s = s.replace('0', &self.s2.to_string());
-    //     s
-    // }
 
     pub fn usize_to_unary(&self, n: usize) -> String {
         "1".repeat(n) + "0"
