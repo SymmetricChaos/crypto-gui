@@ -41,7 +41,7 @@ impl Code for Repetition {
             if ctr == self.block_size {
                 match zeroes.cmp(&ones) {
                     std::cmp::Ordering::Less => out.push('1'),
-                    std::cmp::Ordering::Equal => out.push('�'),
+                    std::cmp::Ordering::Equal => out.push('?'),
                     std::cmp::Ordering::Greater => out.push('0'),
                 }
                 zeroes = 0;
@@ -73,6 +73,6 @@ mod repetition_tests {
     fn test_decode_with_err() {
         let mut code = Repetition::default();
         code.block_size = 4;
-        assert_eq!(code.decode("110100110000").unwrap(), "1�0");
+        assert_eq!(code.decode("110100110000").unwrap(), "1?0");
     }
 }

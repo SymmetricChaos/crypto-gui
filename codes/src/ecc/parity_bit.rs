@@ -87,14 +87,14 @@ impl Code for ParityBit {
                     out.push_str(&buffer[..self.position]);
                     out.push_str(&buffer[self.position + 1..]);
                 } else {
-                    out.push_str(&"�".repeat(self.block_size))
+                    out.push_str(&"?".repeat(self.block_size))
                 }
             } else {
                 if self.parity == parity {
                     out.push_str(&buffer[..self.position]);
                     out.push_str(&buffer[self.position + 1..]);
                 } else {
-                    out.push_str(&"�".repeat(self.block_size))
+                    out.push_str(&"?".repeat(self.block_size))
                 }
             }
 
@@ -138,13 +138,13 @@ mod parity_tests {
     #[test]
     fn test_decode_with_err() {
         let code = ParityBit::default();
-        assert_eq!(code.decode("111001001000000").unwrap(), "����10010000");
+        assert_eq!(code.decode("111001001000000").unwrap(), "????10010000");
     }
 
     #[test]
     fn test_decode_inv_with_err() {
         let mut code = ParityBit::default();
         code.parity = Bit::One;
-        assert_eq!(code.decode("011001001100001").unwrap(), "����10010000");
+        assert_eq!(code.decode("011001001100001").unwrap(), "????10010000");
     }
 }

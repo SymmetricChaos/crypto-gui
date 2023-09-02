@@ -116,7 +116,7 @@ impl Code for MofNCode {
                 if counted_weight == self.weight {
                     out.push_str(&buffer)
                 } else {
-                    out.push_str(&"�".repeat(n_data_bits))
+                    out.push_str(&"?".repeat(n_data_bits))
                 }
                 ctr = 0;
                 counted_weight = 0;
@@ -147,6 +147,6 @@ mod m_of_n_tests {
     #[test]
     fn decode_with_errors_test() {
         let code = MofNCode::default();
-        assert_eq!(code.decode("011001100001011").unwrap(), "011110���");
+        assert_eq!(code.decode("011001100001011").unwrap(), "011110???");
     }
 }

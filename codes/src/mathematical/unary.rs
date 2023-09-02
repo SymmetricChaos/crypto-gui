@@ -82,7 +82,7 @@ impl Code for UnaryCode {
                             buffer.clear();
                         }
                         None => {
-                            output.push('�');
+                            output.push('?');
                             buffer.clear();
                         }
                     }
@@ -99,7 +99,7 @@ impl Code for UnaryCode {
                             buffer.clear();
                         }
                         None => {
-                            output.push('�');
+                            output.push('?');
                             buffer.clear();
                         }
                     }
@@ -116,7 +116,7 @@ impl Code for UnaryCode {
                     output.push(' ');
                     ctr = 0;
                 } else {
-                    output.push_str("� ");
+                    output.push_str("? ");
                     ctr = 0;
                 }
             }

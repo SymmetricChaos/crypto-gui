@@ -219,6 +219,16 @@ impl<const N: usize> From<[Bit; N]> for BitPolynomial {
     }
 }
 
+impl From<&[Bit]> for BitPolynomial {
+    fn from(value: &[Bit]) -> Self {
+        let mut p = Self {
+            coef: value.to_vec(),
+        };
+        p.trim();
+        p
+    }
+}
+
 impl Index<usize> for BitPolynomial {
     type Output = Bit;
 
@@ -694,8 +704,8 @@ mod math_function_tests {
         let a = BitPolynomial::from_str("00000110111001011").unwrap();
         let b = BitPolynomial::from_str("1101").unwrap();
         assert_eq!(
-            "x^16 + x^15 + x^13 + x^10 + x^9 + x^8 + x^6 + x^5 | x^3 + x + 1",
-            format!("{} | {}", a.polynomial_string(), b.polynomial_string())
+            "x^16 + x^15 + x^13 + x^10 + x^9 + x^8 + x^6 + x^5\nx^3 + x + 1",
+            format!("{}\n{}", a.polynomial_string(), b.polynomial_string())
         );
         let (q, r) = a.div_rem(&b);
         assert_eq!("00111110001111 001", format!("{} {}", q, r));

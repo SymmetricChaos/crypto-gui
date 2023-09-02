@@ -57,7 +57,7 @@ impl Code for CyclicRedundancyCheck {
             let mut poly = BitPolynomial::from(chunk.to_vec());
             poly.increase_degree(self.check_bits());
             let (_, r) = poly.div_rem(&self.generator);
-
+            poly.decrease_degree(self.check_bits());
             out.push_str(&poly.to_string());
             out.push_str(&r.to_string());
         }
@@ -78,15 +78,22 @@ impl Code for CyclicRedundancyCheck {
                 )));
         };
 
-        // for chunk in bits.chunks_exact(self.block_size + self.check_bits()) {
-        //     let v = chunk.to_vec();
-        //     let poly = BitPolynomial::from(v[0..self.block_size]);
-        //     let (_, r) = poly.div_rem(&self.generator);
+        let mut out = String::new();
 
-        //     out.push_str(&poly.to_string());
-        // }
+        for chunk in bits.chunks_exact(self.block_size + self.check_bits()) {
+            let check = BitPolynomial::from(&chunk[self.block_size..]);
+            let mut poly = BitPolynomial::from(&chunk[0..self.block_size]);
+            poly.increase_degree(self.check_bits());
+            let (_, r) = poly.div_rem(&self.generator);
+            poly.decrease_degree(self.check_bits());
+            if r == check {
+                out.push_str(&poly.to_string());
+            } else {
+                out.push_str(&"?".repeat(self.block_size))
+            }
+        }
 
-        todo!()
+        Ok(out)
     }
 }
 
@@ -103,13 +110,15 @@ mod crc_tests {
 
     #[test]
     fn test_decode() {
-        let code = CyclicRedundancyCheck::default();
-        assert_eq!(code.decode("").unwrap(), "");
+        let mut code = CyclicRedundancyCheck::default();
+        code.block_size = 14;
+        assert_eq!(code.decode("00110111001011001").unwrap(), "00110111001011");
     }
 
     #[test]
     fn test_decode_with_err() {
-        let code = CyclicRedundancyCheck::default();
-        assert_eq!(code.decode("").unwrap(), "");
+        let mut code = CyclicRedundancyCheck::default();
+        code.block_size = 14;
+        assert_eq!(code.decode("01110111001011001").unwrap(), "??????????????");
     }
 }

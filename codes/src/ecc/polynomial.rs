@@ -79,7 +79,7 @@ impl Code for PolynomialCode {
                     out.push('0')
                 }
             } else {
-                out.push_str(&"�".repeat(self.data_size()))
+                out.push_str(&"?".repeat(self.data_size()))
             }
         }
         Ok(out)

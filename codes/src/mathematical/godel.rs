@@ -102,12 +102,12 @@ impl Code for Godel {
                 if ctr != 0 {
                     let c = match self.maps.get_word_by_code(&ctr) {
                         Ok(c) => c,
-                        Err(_) => "�",
+                        Err(_) => "?",
                     };
                     words.push(c);
                 }
                 if ctr == 0 {
-                    words.push("�")
+                    words.push("?")
                 }
                 if num.is_one() {
                     break;
@@ -126,12 +126,12 @@ impl Code for Godel {
                 if ctr != 0 {
                     let c = match self.maps.get_letter_by_code(&ctr) {
                         Ok(c) => c,
-                        Err(_) => &'�',
+                        Err(_) => &'?',
                     };
                     words.push(*c);
                 }
                 if ctr == 0 {
-                    words.push('�')
+                    words.push('?')
                 }
                 if num.is_one() {
                     break;

@@ -71,13 +71,13 @@ impl Code for LevenshteinCode {
             for n in self.integer_code.decode_to_u32(text)?.into_iter() {
                 match self.maps.alphabet.chars().nth((n - 1) as usize) {
                     Some(w) => output.push(w),
-                    None => output.push('�'),
+                    None => output.push('?'),
                 }
             }
             Ok(output)
         } else {
             let mut output = Vec::new();
-            let e = String::from("�");
+            let e = String::from("?");
             for n in self.integer_code.decode_to_u32(text)?.into_iter() {
                 if n == 0 {
                     output.push(&e);
