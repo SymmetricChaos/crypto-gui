@@ -1,10 +1,12 @@
 use crate::bits::{bits_from_string, Bit, CharToBitError, IntToBitError};
 use itertools::Itertools;
 use num::{One, Zero};
-use rand::distributions::Slice;
 use std::{
     fmt::Display,
-    ops::{Add, AddAssign, Index, IndexMut, Mul, MulAssign, Sub, SubAssign},
+    ops::{
+        Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Rem, RemAssign, Sub,
+        SubAssign,
+    },
 };
 
 // Polynomial of GF(2) with coefficients in ascending order so that the coefficient at index n is paired with the indeterminate with power n
@@ -410,6 +412,254 @@ impl MulAssign<&BitPolynomial> for BitPolynomial {
         }
         *self = BitPolynomial::from(coef);
         self.trim()
+    }
+}
+
+impl Div for BitPolynomial {
+    type Output = BitPolynomial;
+
+    fn div(self, rhs: Self) -> Self::Output {
+        // Handle special cases
+        if rhs.is_zero() {
+            panic!("division by zero")
+        }
+
+        if self.is_zero() || self.degree() < rhs.degree() {
+            return BitPolynomial::zero();
+        }
+
+        // General case
+        let mut dividend = self.clone();
+        let mut quotient = BitPolynomial::zero();
+        while !dividend.is_zero() && dividend.degree() >= rhs.degree() {
+            let mut intermediate = rhs.clone();
+            let alignment = dividend.degree() - intermediate.degree();
+            intermediate.increase_degree(alignment);
+            let mut bit = BitPolynomial::one();
+            bit.increase_degree(alignment);
+
+            quotient += bit;
+            dividend += intermediate;
+        }
+
+        quotient
+    }
+}
+
+impl Div<&BitPolynomial> for BitPolynomial {
+    type Output = BitPolynomial;
+
+    fn div(self, rhs: &Self) -> Self::Output {
+        // Handle special cases
+        if rhs.is_zero() {
+            panic!("division by zero")
+        }
+
+        if self.is_zero() || self.degree() < rhs.degree() {
+            return BitPolynomial::zero();
+        }
+
+        // General case
+        let mut dividend = self.clone();
+        let mut quotient = BitPolynomial::zero();
+        while !dividend.is_zero() && dividend.degree() >= rhs.degree() {
+            let mut intermediate = rhs.clone();
+            let alignment = dividend.degree() - intermediate.degree();
+            intermediate.increase_degree(alignment);
+            let mut bit = BitPolynomial::one();
+            bit.increase_degree(alignment);
+
+            quotient += bit;
+            dividend += intermediate;
+        }
+
+        quotient
+    }
+}
+
+impl DivAssign for BitPolynomial {
+    fn div_assign(&mut self, rhs: Self) {
+        // Handle special cases
+        if rhs.is_zero() {
+            panic!("division by zero")
+        }
+
+        if self.is_zero() || self.degree() < rhs.degree() {
+            *self = BitPolynomial::zero()
+        }
+
+        // General case
+        let mut dividend = self.clone();
+        let mut quotient = BitPolynomial::zero();
+        while !dividend.is_zero() && dividend.degree() >= rhs.degree() {
+            let mut intermediate = rhs.clone();
+            let alignment = dividend.degree() - intermediate.degree();
+            intermediate.increase_degree(alignment);
+            let mut bit = BitPolynomial::one();
+            bit.increase_degree(alignment);
+
+            quotient += bit;
+            dividend += intermediate;
+        }
+
+        *self = quotient
+    }
+}
+
+impl DivAssign<&BitPolynomial> for BitPolynomial {
+    fn div_assign(&mut self, rhs: &Self) {
+        // Handle special cases
+        if rhs.is_zero() {
+            panic!("division by zero")
+        }
+
+        if self.is_zero() || self.degree() < rhs.degree() {
+            *self = BitPolynomial::zero()
+        }
+
+        // General case
+        let mut dividend = self.clone();
+        let mut quotient = BitPolynomial::zero();
+        while !dividend.is_zero() && dividend.degree() >= rhs.degree() {
+            let mut intermediate = rhs.clone();
+            let alignment = dividend.degree() - intermediate.degree();
+            intermediate.increase_degree(alignment);
+            let mut bit = BitPolynomial::one();
+            bit.increase_degree(alignment);
+
+            quotient += bit;
+            dividend += intermediate;
+        }
+
+        *self = quotient
+    }
+}
+
+impl Rem for BitPolynomial {
+    type Output = BitPolynomial;
+
+    fn rem(self, rhs: Self) -> Self::Output {
+        // Handle special cases
+        if rhs.is_zero() {
+            panic!("division by zero")
+        }
+
+        if self.is_zero() || self.degree() < rhs.degree() {
+            return BitPolynomial::zero();
+        }
+
+        // General case
+        let mut dividend = self.clone();
+        let mut quotient = BitPolynomial::zero();
+        while !dividend.is_zero() && dividend.degree() >= rhs.degree() {
+            let mut intermediate = rhs.clone();
+            let alignment = dividend.degree() - intermediate.degree();
+            intermediate.increase_degree(alignment);
+            let mut bit = BitPolynomial::one();
+            bit.increase_degree(alignment);
+
+            quotient += bit;
+            dividend += intermediate;
+        }
+
+        dividend
+    }
+}
+
+impl Rem<&BitPolynomial> for BitPolynomial {
+    type Output = BitPolynomial;
+
+    fn rem(self, rhs: &Self) -> Self::Output {
+        // Handle special cases
+        if rhs.is_zero() {
+            panic!("division by zero")
+        }
+
+        if self.is_zero() || self.degree() < rhs.degree() {
+            return BitPolynomial::zero();
+        }
+
+        // General case
+        let mut dividend = self.clone();
+        let mut quotient = BitPolynomial::zero();
+        while !dividend.is_zero() && dividend.degree() >= rhs.degree() {
+            let mut intermediate = rhs.clone();
+            let alignment = dividend.degree() - intermediate.degree();
+            intermediate.increase_degree(alignment);
+            let mut bit = BitPolynomial::one();
+            bit.increase_degree(alignment);
+
+            quotient += bit;
+            dividend += intermediate;
+        }
+
+        dividend
+    }
+}
+
+impl RemAssign for BitPolynomial {
+    fn rem_assign(&mut self, rhs: Self) {
+        // Handle special cases
+        if rhs.is_zero() {
+            panic!("division by zero")
+        }
+
+        if self.is_zero() {
+            *self = BitPolynomial::zero();
+        }
+
+        if self.degree() < rhs.degree() {
+            return ();
+        }
+
+        // General case
+        let mut dividend = self.clone();
+        let mut quotient = BitPolynomial::zero();
+        while !dividend.is_zero() && dividend.degree() >= rhs.degree() {
+            let mut intermediate = rhs.clone();
+            let alignment = dividend.degree() - intermediate.degree();
+            intermediate.increase_degree(alignment);
+            let mut bit = BitPolynomial::one();
+            bit.increase_degree(alignment);
+
+            quotient += bit;
+            dividend += intermediate;
+        }
+
+        *self = dividend
+    }
+}
+
+impl RemAssign<&BitPolynomial> for BitPolynomial {
+    fn rem_assign(&mut self, rhs: &Self) {
+        // Handle special cases
+        if rhs.is_zero() {
+            panic!("division by zero")
+        }
+
+        if self.is_zero() {
+            *self = BitPolynomial::zero();
+        }
+
+        if self.degree() < rhs.degree() {
+            return ();
+        }
+
+        // General case
+        let mut dividend = self.clone();
+        let mut quotient = BitPolynomial::zero();
+        while !dividend.is_zero() && dividend.degree() >= rhs.degree() {
+            let mut intermediate = rhs.clone();
+            let alignment = dividend.degree() - intermediate.degree();
+            intermediate.increase_degree(alignment);
+            let mut bit = BitPolynomial::one();
+            bit.increase_degree(alignment);
+
+            quotient += bit;
+            dividend += intermediate;
+        }
+
+        *self = dividend
     }
 }
 
