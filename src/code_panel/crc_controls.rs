@@ -21,8 +21,46 @@ impl Default for CyclicRedundancyCheckFrame {
     }
 }
 
+impl CyclicRedundancyCheckFrame {
+    fn set_generator(&mut self, s: &str) {
+        self.generator_string = String::from(s);
+        self.generator_string_err.clear();
+        self.code.generator = BitPolynomial::from_str(&self.generator_string).unwrap();
+    }
+}
+
 impl CodeFrame for CyclicRedundancyCheckFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
+        ui.group(|ui| {
+            ui.subheading("CRC Standards");
+            ui.horizontal(|ui| {
+                if ui.button("CRC-3-GSM").clicked() {
+                    self.set_generator("1101");
+                }
+                if ui.button("CRC-4-ITU").clicked() {
+                    self.set_generator("11001");
+                }
+                if ui.button("CRC-5-EPC").clicked() {
+                    self.set_generator("100101");
+                }
+                if ui.button("CRC-5-ITU").clicked() {
+                    self.set_generator("101011");
+                }
+                if ui.button("CRC-5-USB").clicked() {
+                    self.set_generator("101001");
+                }
+                if ui.button("CRC-6-GSM").clicked() {
+                    self.set_generator("1111011");
+                }
+                if ui.button("CRC-6-ITU").clicked() {
+                    self.set_generator("1100001");
+                }
+                if ui.button("CRC-32").clicked() {
+                    self.set_generator("111011011011100010000011001000001");
+                }
+            });
+        });
+
         ui.subheading("Generator Polynomial");
         if ui.control_string(&mut self.generator_string).changed() {
             match BitPolynomial::from_str(&self.generator_string) {

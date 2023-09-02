@@ -207,6 +207,7 @@ impl CodeInterface {
         );
         combox_box(
             &[
+                CodeId::CyclicRedundancyCheck,
                 CodeId::Damm,
                 CodeId::Hamming,
                 CodeId::Luhn,
