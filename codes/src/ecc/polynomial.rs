@@ -2,7 +2,7 @@ use itertools::Itertools;
 use num::Zero;
 use utils::{
     bit_polynomial::BitPolynomial,
-    bits::{bits_from_string, int_to_bits, Bit},
+    bits::{bits_from_str, int_to_bits, Bit},
 };
 
 use crate::{errors::CodeError, traits::Code};
@@ -33,7 +33,7 @@ impl PolynomialCode {
 
 impl Code for PolynomialCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        let bits: Vec<Bit> = bits_from_string(text)
+        let bits: Vec<Bit> = bits_from_str(text)
             .map_err(|e| CodeError::input(&e.to_string()))?
             .collect();
         if bits.len() % self.data_size() != 0 {
@@ -56,7 +56,7 @@ impl Code for PolynomialCode {
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        let bits: Vec<Bit> = bits_from_string(text)
+        let bits: Vec<Bit> = bits_from_str(text)
             .map_err(|e| CodeError::input(&e.to_string()))?
             .collect();
         if bits.len() % self.block_size != 0 {

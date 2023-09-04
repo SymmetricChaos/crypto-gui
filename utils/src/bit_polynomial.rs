@@ -1,4 +1,4 @@
-use crate::bits::{bits_from_string, Bit, CharToBitError, IntToBitError};
+use crate::bits::{bits_from_str, Bit, CharToBitError, IntToBitError};
 use itertools::Itertools;
 use num::{One, Zero};
 use std::{
@@ -160,7 +160,7 @@ impl BitPolynomial {
     }
 
     pub fn from_str<S: AsRef<str>>(s: S) -> Result<BitPolynomial, CharToBitError> {
-        let bits = bits_from_string(s.as_ref())?;
+        let bits = bits_from_str(s.as_ref())?;
         Ok(BitPolynomial::from(bits.collect_vec()))
     }
 
@@ -198,6 +198,42 @@ impl BitPolynomial {
 
         // Dividend is now the remainder
         (quotient, dividend)
+    }
+
+    pub fn bitwise_xor(&self, rhs: &BitPolynomial) -> BitPolynomial {
+        let n = self.len().max(rhs.len());
+        let mut vec = vec![Bit::Zero; n];
+        for i in 0..n {
+            vec[i] = self.get_irref(i) + rhs.get_irref(i)
+        }
+        BitPolynomial::from(vec)
+    }
+
+    pub fn bitwise_and(&self, rhs: &BitPolynomial) -> BitPolynomial {
+        let n = self.len().max(rhs.len());
+        let mut vec = vec![Bit::Zero; n];
+        for i in 0..n {
+            vec[i] = self.get_irref(i) & rhs.get_irref(i)
+        }
+        BitPolynomial::from(vec)
+    }
+
+    pub fn bitwise_or(&self, rhs: &BitPolynomial) -> BitPolynomial {
+        let n = self.len().max(rhs.len());
+        let mut vec = vec![Bit::Zero; n];
+        for i in 0..n {
+            vec[i] = self.get_irref(i) | rhs.get_irref(i)
+        }
+        BitPolynomial::from(vec)
+    }
+
+    pub fn bitwise_nor(&self, rhs: &BitPolynomial) -> BitPolynomial {
+        let n = self.len().max(rhs.len());
+        let mut vec = vec![Bit::Zero; n];
+        for i in 0..n {
+            vec[i] = -(self.get_irref(i) | rhs.get_irref(i))
+        }
+        BitPolynomial::from(vec)
     }
 }
 

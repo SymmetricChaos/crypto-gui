@@ -1,5 +1,5 @@
 use crate::{errors::CodeError, traits::Code};
-use utils::bits::{bits_from_string, Bit};
+use utils::bits::{bits_from_str, Bit};
 
 pub struct Repetition {
     pub block_size: usize,
@@ -18,7 +18,7 @@ impl Code for Repetition {
         let zeroes = "0".repeat(self.block_size);
         let ones = "1".repeat(self.block_size);
         let mut out = String::new();
-        for bit in bits_from_string(text).map_err(|e| CodeError::input(&e.to_string()))? {
+        for bit in bits_from_str(text).map_err(|e| CodeError::input(&e.to_string()))? {
             match bit {
                 Bit::Zero => out.push_str(&zeroes),
                 Bit::One => out.push_str(&ones),
@@ -32,7 +32,7 @@ impl Code for Repetition {
         let mut zeroes = 0;
         let mut ones = 0;
         let mut ctr = 0;
-        for bit in bits_from_string(text).map_err(|e| CodeError::input(&e.to_string()))? {
+        for bit in bits_from_str(text).map_err(|e| CodeError::input(&e.to_string()))? {
             match bit {
                 Bit::Zero => zeroes += 1,
                 Bit::One => ones += 1,

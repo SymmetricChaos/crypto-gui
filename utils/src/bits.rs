@@ -23,8 +23,7 @@ impl Display for CharToBitError {
     }
 }
 
-/// Converts a &str to an iterator of bits, skipping white space. Returns None if there are any characters other than 0, 1, and whitespace.
-pub fn bits_from_string(text: &str) -> Result<impl Iterator<Item = Bit> + '_, CharToBitError> {
+pub fn bits_from_str(text: &str) -> Result<impl Iterator<Item = Bit> + '_, CharToBitError> {
     if !IS_BITS.is_match(text) {
         Err(CharToBitError)
     } else {
@@ -80,6 +79,18 @@ where
     IntToBitError: From<<Bit as TryFrom<T>>::Error>,
 {
     let mut v = [Bit::Zero; N];
+    for (n, i) in arr.iter().enumerate() {
+        v[n] = Bit::try_from(*i)?;
+    }
+    Ok(v)
+}
+
+pub fn to_bit_vec<T: Copy>(arr: Vec<T>) -> Result<Vec<Bit>, IntToBitError>
+where
+    Bit: TryFrom<T>,
+    IntToBitError: From<<Bit as TryFrom<T>>::Error>,
+{
+    let mut v = Vec::with_capacity(arr.len());
     for (n, i) in arr.iter().enumerate() {
         v[n] = Bit::try_from(*i)?;
     }
