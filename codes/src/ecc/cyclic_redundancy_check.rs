@@ -2,7 +2,7 @@ use crate::{errors::CodeError, traits::Code};
 
 use utils::{
     bit_polynomial::BitPolynomial,
-    bits::{bits_from_string, Bit},
+    bits::{bits_from_str, Bit},
 };
 
 pub struct CyclicRedundancyCheck {
@@ -40,7 +40,7 @@ impl CyclicRedundancyCheck {
 impl Code for CyclicRedundancyCheck {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         self.validate()?;
-        let bits: Vec<Bit> = bits_from_string(text)
+        let bits: Vec<Bit> = bits_from_str(text)
             .map_err(|e| CodeError::input(&e.to_string()))?
             .collect();
 
@@ -67,7 +67,7 @@ impl Code for CyclicRedundancyCheck {
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         self.validate()?;
-        let bits: Vec<Bit> = bits_from_string(text)
+        let bits: Vec<Bit> = bits_from_str(text)
             .map_err(|e| CodeError::input(&e.to_string()))?
             .collect();
 
