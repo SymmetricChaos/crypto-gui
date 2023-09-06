@@ -194,7 +194,7 @@ impl CodeInterface {
         );
         combox_box(
             &[
-                CodeId::Block,
+                CodeId::FixedWidth,
                 CodeId::Elias,
                 CodeId::Fibonacci,
                 CodeId::Levenshtein,
@@ -243,7 +243,7 @@ impl CodeInterface {
             CodeId::Base32 => &mut self.base32,
             CodeId::Base64 => &mut self.base64,
             CodeId::Baudot => &mut self.baudot,
-            CodeId::Block => &mut self.block,
+            CodeId::FixedWidth => &mut self.block,
             CodeId::ByteAsNum => &mut self.numeric,
             CodeId::CyclicRedundancyCheck => &mut self.crc,
             CodeId::Damm => &mut self.damm,
