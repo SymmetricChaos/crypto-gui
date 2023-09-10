@@ -1,6 +1,6 @@
 use crate::ui_elements::UiElements;
 use ciphers::{polybius::StraddlingCheckerboard, Cipher};
-use egui::{DragValue, RichText, Ui};
+use egui::{DragValue, Ui};
 use rand::thread_rng;
 use utils::text_functions::shuffled_str;
 
@@ -48,7 +48,7 @@ impl CipherFrame for StraddlingCheckerboardFrame {
             ui.subheading("Checkerboard");
             ui.copy_to_clipboard(self.cipher.cipher_page())
         });
-        ui.label(RichText::new(self.cipher.cipher_page()).size(15.0));
+        ui.mono(self.cipher.cipher_page());
         ui.add_space(16.0);
     }
 
@@ -58,7 +58,8 @@ impl CipherFrame for StraddlingCheckerboardFrame {
 
     fn randomize(&mut self) {
         self.alphabet_string = shuffled_str(&self.alphabet_string, &mut thread_rng());
-        self.cipher.assign_alphabet(&self.alphabet_string)
+        self.cipher.assign_alphabet(&self.alphabet_string);
+        self.cipher.top_row = shuffled_str("0123456789", &mut thread_rng());
     }
 
     fn reset(&mut self) {
