@@ -33,7 +33,7 @@ impl CodeFrame for CyclicRedundancyCheckFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
         ui.group(|ui| {
             ui.subheading("CRC Standards");
-            ui.label("While many generator polyomials can be chosen not all are equally effective and various standards exist.");
+            ui.label("While many generator polyomials can be used not all are equally effective and various standard choices exist.");
             ui.horizontal(|ui| {
                 if ui.button("CRC-3-GSM").clicked() {
                     self.set_generator("1101");

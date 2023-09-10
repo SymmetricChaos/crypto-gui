@@ -7,6 +7,7 @@ pub mod tactical;
 pub mod transposition;
 
 pub mod shamir;
+pub mod vic;
 
 pub mod errors;
 pub use errors::CipherError;
