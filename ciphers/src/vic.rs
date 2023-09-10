@@ -160,9 +160,10 @@ impl Vic {
         };
 
         derivation.push_str(&format!(
-            "\n\nThe last two unequal digits are {} and {} so the key lengths will be {} and {}\n",
+            "\n\nThe last two unequal digits are {} and {}, since the personal number is {} the key lengths will be {} and {}\n",
             key_lengths.0 - pin as usize,
             key_lengths.1 - pin as usize,
+            pin,
             key_lengths.0,
             key_lengths.1
         ));
@@ -211,12 +212,34 @@ mod vic_tests {
     #[test]
     fn derivation_test() {
         let cipher = Vic::default();
-        println!(
-            "{}",
+        assert_eq!(
+            "A: 72401\nB: 13919\nC: 69592\nD: TWASTHENIG HTBEFORECH\nE: 8017942653 6013589427\nF: 6959254417 1234567890\nG: 4966196060\nH: 3288628787\nJ: 3178429506\nK: 50648055525602850077\nL: 5602850077\nM: 1620350748\nN: 7823857125\nP: 5051328370\n\nThe last two unequal digits are 7 and 0, since the personal number is 6 the key lengths will be 13 and 6\n\nQ: 0668005552551\nR: 758838\nS: 5961328470",
             cipher
                 .key_derivation_string(KEY_GROUP, DATE, PHRASE, PIN)
                 .unwrap()
         );
+        /* The key derivation page looks like this
+        A: 72401
+        B: 13919
+        C: 69592
+        D: TWASTHENIG HTBEFORECH
+        E: 8017942653 6013589427
+        F: 6959254417 1234567890
+        G: 4966196060
+        H: 3288628787
+        J: 3178429506
+        K: 50648055525602850077
+        L: 5602850077
+        M: 1620350748
+        N: 7823857125
+        P: 5051328370
+
+        The last two unequal digits are 7 and 0, since the personal number is 6 the key lengths will be 13 and 6
+
+        Q: 0668005552551
+        R: 758838
+        S: 5961328470
+        */
     }
 
     // #[test]
