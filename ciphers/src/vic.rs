@@ -1,15 +1,27 @@
 use itertools::Itertools;
 use utils::{preset_alphabet::Alphabet, text_functions::rank_str};
 
-use crate::{transposition::Columnar, Cipher, CipherError};
+use crate::{
+    polybius::{checkerboard, StraddlingCheckerboard},
+    transposition::Columnar,
+    Cipher, CipherError,
+};
 
 pub struct Vic {
-    alphabet: String,
+    pub key_group: String,
+    pub date: String,
+    pub phrase: String,
+    pub pin: u32,
+    pub alphabet: String,
 }
 
 impl Default for Vic {
     fn default() -> Self {
         Self {
+            key_group: String::new(),
+            date: String::new(),
+            phrase: String::new(),
+            pin: 0,
             alphabet: String::from(Alphabet::BasicLatin),
         }
     }
@@ -60,25 +72,19 @@ impl Vic {
         u32::from(c) - 48
     }
 
-    pub fn key_derivation_string(
-        &self,
-        key_group: &str,
-        date: &str,
-        phrase: &str,
-        pin: u32,
-    ) -> Result<String, CipherError> {
+    pub fn key_derivation_string(&self) -> Result<String, CipherError> {
         let mut derivation = String::new();
         // Line-A
         derivation.push_str("A: ");
-        derivation.push_str(&key_group[..5]);
+        derivation.push_str(&self.key_group[..5]);
 
         // Line-B
         derivation.push_str("\nB: ");
-        derivation.push_str(&date[..5]);
+        derivation.push_str(&self.date[..5]);
 
         // Line-C
         let mut c = String::new();
-        for (c1, c2) in key_group.chars().zip(date.chars()) {
+        for (c1, c2) in self.key_group.chars().zip(self.date.chars()) {
             c.push(Self::digital_subtraction(c1, c2))
         }
         derivation.push_str("\nC: ");
@@ -86,13 +92,13 @@ impl Vic {
 
         // Line-D
         derivation.push_str("\nD: ");
-        derivation.push_str(&phrase[0..10]);
+        derivation.push_str(&self.phrase[0..10]);
         derivation.push(' ');
-        derivation.push_str(&phrase[10..20]);
+        derivation.push_str(&self.phrase[10..20]);
 
         // Line-E
-        let e1 = self.sequencing(&phrase[0..10], &self.alphabet)?;
-        let e2 = self.sequencing(&phrase[10..20], &self.alphabet)?;
+        let e1 = self.sequencing(&self.phrase[0..10], &self.alphabet)?;
+        let e2 = self.sequencing(&self.phrase[10..20], &self.alphabet)?;
         derivation.push_str("\nE: ");
         derivation.push_str(&e1);
         derivation.push(' ');
@@ -154,16 +160,16 @@ impl Vic {
                 b = last_digits.next().unwrap();
             }
             (
-                (Self::char_to_digit(b) + pin) as usize,
-                (Self::char_to_digit(a) + pin) as usize,
+                (Self::char_to_digit(b) + self.pin) as usize,
+                (Self::char_to_digit(a) + self.pin) as usize,
             )
         };
 
         derivation.push_str(&format!(
             "\n\nThe last two unequal digits are {} and {}, since the personal number is {} the key lengths will be {} and {}\n",
-            key_lengths.0 - pin as usize,
-            key_lengths.1 - pin as usize,
-            pin,
+            key_lengths.0 - self.pin as usize,
+            key_lengths.1 - self.pin as usize,
+            self.pin,
             key_lengths.0,
             key_lengths.1
         ));
@@ -184,20 +190,90 @@ impl Vic {
         Ok(derivation)
     }
 
-    pub fn key_derivation(&self) {
-        todo!()
+    pub fn key_derivation(&self) -> Result<(String, String, String), CipherError> {
+        let a = &self.key_group[..5];
+        let b = &self.date[..5];
+
+        let c = {
+            let mut c = String::new();
+            for (c1, c2) in a.chars().zip(b.chars()) {
+                c.push(Self::digital_subtraction(c1, c2))
+            }
+            c
+        };
+
+        // Line-D is skipped
+
+        let e1 = self.sequencing(&self.phrase[0..10], &self.alphabet)?;
+        let e2 = self.sequencing(&self.phrase[10..20], &self.alphabet)?;
+
+        let f = {
+            let mut temp = c.clone();
+            temp.push_str(&Self::chain_addition(&c, 5));
+            temp.push_str("1234567890");
+            temp
+        };
+
+        let g = {
+            let mut temp = String::new();
+            for (c1, c2) in e1.chars().zip(f[0..10].chars()) {
+                temp.push(Self::digital_addition(c1, c2))
+            }
+            temp
+        };
+
+        let h = Self::digit_encoding(&g, &e2);
+
+        let j = self.sequencing(&h, "1234567890")?;
+
+        let block = Self::chain_addition(&h, 50);
+
+        let key_lengths = {
+            let mut last_digits = block.chars().rev();
+            let mut a = last_digits.next().unwrap();
+            let mut b = last_digits.next().unwrap();
+            while a == b {
+                a = b;
+                b = last_digits.next().unwrap();
+            }
+            (
+                (Self::char_to_digit(b) + self.pin) as usize,
+                (Self::char_to_digit(a) + self.pin) as usize,
+            )
+        };
+
+        // Line-Q
+        let mut columnar = Columnar::default();
+        columnar.assign_key(&j, "1234567890").unwrap();
+        let encrypted_block = columnar.encrypt(&block)?;
+
+        Ok((
+            encrypted_block[..key_lengths.0].to_string(),
+            encrypted_block[key_lengths.0..key_lengths.0 + key_lengths.1].to_string(),
+            self.sequencing(&block[40..50], "1234567890")?.to_string(),
+        ))
     }
 }
 
-// impl Cipher for Vic {
-//     fn encrypt(&self, text: &str) -> Result<String, crate::CipherError> {
-//         todo!()
-//     }
+impl Cipher for Vic {
+    fn encrypt(&self, text: &str) -> Result<String, crate::CipherError> {
+        let (q, r, s) = self.key_derivation()?;
 
-//     fn decrypt(&self, text: &str) -> Result<String, crate::CipherError> {
-//         todo!()
-//     }
-// }
+        let mut checkerboard = StraddlingCheckerboard::default();
+        checkerboard.assign_alphabet(&self.alphabet);
+        let mut ctext = checkerboard.encrypt(text)?;
+
+        let mut columnar = Columnar::default();
+        columnar.assign_key(&q, "1234567890").unwrap();
+        ctext = columnar.encrypt(&ctext)?;
+
+        todo!()
+    }
+
+    fn decrypt(&self, text: &str) -> Result<String, crate::CipherError> {
+        todo!()
+    }
+}
 
 #[cfg(test)]
 mod vic_tests {
@@ -211,11 +287,15 @@ mod vic_tests {
 
     #[test]
     fn derivation_test() {
-        let cipher = Vic::default();
+        let mut cipher = Vic::default();
+        cipher.key_group = KEY_GROUP.to_string();
+        cipher.date = DATE.to_string();
+        cipher.phrase = PHRASE.to_string();
+        cipher.pin = PIN;
         assert_eq!(
             "A: 72401\nB: 13919\nC: 69592\nD: TWASTHENIG HTBEFORECH\nE: 8017942653 6013589427\nF: 6959254417 1234567890\nG: 4966196060\nH: 3288628787\nJ: 3178429506\nK: 50648055525602850077\nL: 5602850077\nM: 1620350748\nN: 7823857125\nP: 5051328370\n\nThe last two unequal digits are 7 and 0, since the personal number is 6 the key lengths will be 13 and 6\n\nQ: 0668005552551\nR: 758838\nS: 5961328470",
             cipher
-                .key_derivation_string(KEY_GROUP, DATE, PHRASE, PIN)
+                .key_derivation_string()
                 .unwrap()
         );
         /* The key derivation page looks like this

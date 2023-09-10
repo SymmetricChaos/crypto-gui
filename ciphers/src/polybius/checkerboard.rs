@@ -6,28 +6,38 @@ use utils::text_functions::keyed_alphabet;
 const CHECKERBOARD_ALPHABET: &'static str = "ABCDEFGHIJKLM/NOPQRSTUVWXYZ.";
 
 pub struct StraddlingCheckerboard {
-    rows: Vec<char>,
+    pub top_row: String,
+    pub letter_rows: Vec<char>,
     pub gaps: (usize, usize),
 }
 
 impl Default for StraddlingCheckerboard {
     fn default() -> Self {
-        let rows = "ETAONRISBCDFGHJKLMPQ/UVWXYZ.".chars().collect();
+        let top_row = String::from("0123456789");
+        let letter_rows = "ETAONRISBCDFGHJKLMPQ/UVWXYZ.".chars().collect();
         let gaps = (2, 6);
-        StraddlingCheckerboard { rows, gaps }
+        StraddlingCheckerboard {
+            top_row,
+            letter_rows,
+            gaps,
+        }
     }
 }
 
 // need to handle the digit encoding scheme
 impl StraddlingCheckerboard {
     pub fn assign_alphabet(&mut self, alphabet: &str) {
-        self.rows = keyed_alphabet(alphabet, CHECKERBOARD_ALPHABET)
+        self.letter_rows = keyed_alphabet(alphabet, CHECKERBOARD_ALPHABET)
             .chars()
             .collect();
     }
 
+    pub fn assign_top_row(&mut self, row: &str) {
+        self.top_row = keyed_alphabet(row, "0123456789")
+    }
+
     fn char_to_num(&self, c: char) -> Result<usize, CipherError> {
-        if let Some(mut n) = self.rows.iter().position(|x| *x == c) {
+        if let Some(mut n) = self.letter_rows.iter().position(|x| *x == c) {
             if n >= self.gaps.0 {
                 n += 1
             }
@@ -41,21 +51,30 @@ impl StraddlingCheckerboard {
     }
 
     fn encrypt_char(&self, num: usize, output: &mut String) -> Result<(), CipherError> {
-        let qt = num / 10;
-        let rem = num % 10;
-        match qt {
-            0 => output.push_str(&format!("{}", rem)),
-            1 => output.push_str(&format!("{}{}", self.gaps.0, rem)),
-            2 => output.push_str(&format!("{}{}", self.gaps.1, rem)),
+        let y_digit = num / 10;
+        let x_digit = self.top_row.chars().nth(num % 10).unwrap();
+        match y_digit {
+            0 => output.push_str(&format!("{}", x_digit)),
+            1 => output.push_str(&format!("{}{}", self.gaps.0, x_digit)),
+            2 => output.push_str(&format!("{}{}", self.gaps.1, x_digit)),
             _ => return Err(CipherError::input("invalid character")),
         }
         Ok(())
     }
 
+    fn x_position(&self, c: char) -> usize {
+        self.top_row.chars().position(|x| x == c).unwrap()
+    }
+
     pub fn cipher_page(&self) -> String {
         let mut page = String::with_capacity(87);
-        page.push_str("  0 1 2 3 4 5 6 7 8 9\n ");
-        let mut symbols = self.rows.iter();
+        page.push(' ');
+        for digit in self.top_row.chars() {
+            page.push(' ');
+            page.push(digit);
+        }
+        page.push_str("\n ");
+        let mut symbols = self.letter_rows.iter();
 
         for idx in 0..10 {
             page.push(' ');
@@ -120,17 +139,17 @@ impl Cipher for StraddlingCheckerboard {
         while let Some(n) = numbers.next() {
             let c = if n == self.gaps.0 {
                 let x = numbers.next().unwrap();
-                *self.rows.iter().nth(x + 8).unwrap()
+                *self.letter_rows.iter().nth(x + 8).unwrap()
             } else if n == self.gaps.1 {
                 let x = numbers.next().unwrap();
-                *self.rows.iter().nth(x + 18).unwrap()
+                *self.letter_rows.iter().nth(x + 18).unwrap()
             } else {
                 if n >= self.gaps.1 {
-                    *self.rows.iter().nth(n - 2).unwrap()
+                    *self.letter_rows.iter().nth(n - 2).unwrap()
                 } else if n >= self.gaps.0 {
-                    *self.rows.iter().nth(n - 1).unwrap()
+                    *self.letter_rows.iter().nth(n - 1).unwrap()
                 } else {
-                    *self.rows.iter().nth(n).unwrap()
+                    *self.letter_rows.iter().nth(n).unwrap()
                 }
             };
             out.push(c);
@@ -161,5 +180,14 @@ mod checkerboard_tests {
     fn decrypt_test() {
         let cipher = StraddlingCheckerboard::default();
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+    }
+
+    #[test]
+    fn circular_test() {
+        let mut cipher = StraddlingCheckerboard::default();
+        cipher.assign_top_row("923");
+        let ctext = cipher.encrypt("ESTONIA").unwrap();
+        let ptext = cipher.decrypt(&ctext).unwrap();
+        assert_eq!("ESTONIA", ptext);
     }
 }
