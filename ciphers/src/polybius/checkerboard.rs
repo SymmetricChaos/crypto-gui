@@ -62,15 +62,15 @@ impl StraddlingCheckerboard {
         Ok(())
     }
 
-    pub fn gap_0_char(&self) -> char {
+    fn gap_0_char(&self) -> char {
         self.top_row.chars().nth(self.gaps.0).unwrap()
     }
 
-    pub fn gap_1_char(&self) -> char {
+    fn gap_1_char(&self) -> char {
         self.top_row.chars().nth(self.gaps.1).unwrap()
     }
 
-    pub fn x_position(&self, c: char) -> usize {
+    fn x_position(&self, c: char) -> usize {
         self.top_row.chars().position(|x| x == c).unwrap()
     }
 
