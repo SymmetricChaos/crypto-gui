@@ -7,6 +7,7 @@ use utils::{
 pub struct DiagonalColumnar {
     pub key: Vec<usize>,
     pub key_ranks: Vec<usize>,
+    pub filler: String,
 }
 
 impl DiagonalColumnar {
@@ -15,6 +16,33 @@ impl DiagonalColumnar {
         self.key_ranks = rank_vec(&self.key);
         Ok(())
     }
+
+    pub fn display_page(&self, text_length: usize) -> String {
+        let n_cols = self.key.len();
+        let n_rows = num::Integer::div_ceil(&text_length, &self.key.len());
+
+        let mut g: Grid<Symbol<char>> = Grid::new_empty(n_rows, n_cols);
+
+        let mut disruption_ctr = 0;
+        let mut disruption_start = self.key.iter().position(|n| *n == disruption_ctr).unwrap();
+        for row in 0..n_rows {
+            g.get_row_mut(row)
+                .skip(disruption_start)
+                .for_each(|l| *l = Symbol::Blocked);
+
+            if disruption_start >= n_cols {
+                disruption_ctr += 1;
+                disruption_start = match self.key.iter().position(|n| *n == disruption_ctr) {
+                    Some(n) => n,
+                    None => break,
+                };
+                continue;
+            }
+            disruption_start += 1;
+        }
+
+        g.to_string()
+    }
 }
 
 impl Default for DiagonalColumnar {
@@ -22,6 +50,7 @@ impl Default for DiagonalColumnar {
         Self {
             key: Vec::new(),
             key_ranks: Vec::new(),
+            filler: String::from("X"),
         }
     }
 }
@@ -58,7 +87,7 @@ impl Cipher for DiagonalColumnar {
 
         // println!("{g}");
         // Now fill the Empty cells left to right and top to bottomy
-        let mut symbols = text.chars();
+        let mut symbols = text.chars().chain(self.filler.chars().cycle());
         for cell in g.get_rows_mut() {
             if cell.is_empty() {
                 match symbols.next() {
@@ -67,6 +96,7 @@ impl Cipher for DiagonalColumnar {
                 }
             }
         }
+
         // println!("{g}");
         // Now fill the Blocked cells left to right and top to bottomy
         for cell in g.get_rows_mut() {
@@ -125,29 +155,29 @@ mod diagonal_columnar_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    // const CIPHERTEXT: &'static str = "EKNUVEDQBFMELOHCWJOHYUROPRAGTIOXSTZ";
+    const CIPHERTEXT: &'static str = "HUKWJPEEABNDSRHQCOXMVLZYFOGTTEIROUO";
+
+    // #[test]
+    // fn display_test() {
+    //     let mut cipher = DiagonalColumnar::default();
+    //     cipher
+    //         .assign_key("ECABD", Alphabet::BasicLatin.slice())
+    //         .unwrap();
+    //     cipher.encrypt(PLAINTEXT).unwrap();
+    // }
 
     #[test]
-    fn display_test() {
+    fn encrypt_test() {
         let mut cipher = DiagonalColumnar::default();
         cipher
             .assign_key("ECABD", Alphabet::BasicLatin.slice())
             .unwrap();
-        cipher.encrypt(PLAINTEXT).unwrap();
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     // #[test]
-    // fn encrypt_test() {
-    //     let mut cipher = Columnar::default();
-    //     cipher
-    //         .assign_key("ECABD", Alphabet::BasicLatin.slice())
-    //         .unwrap();
-    //     assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
-    // }
-
-    // #[test]
     // fn decrypt_test() {
-    //     let mut cipher = Columnar::default();
+    //     let mut cipher = DiagonalColumnar::default();
     //     cipher
     //         .assign_key("ECABD", Alphabet::BasicLatin.slice())
     //         .unwrap();

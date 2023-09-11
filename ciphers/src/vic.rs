@@ -1,11 +1,7 @@
 use itertools::Itertools;
 use utils::{preset_alphabet::Alphabet, text_functions::rank_str};
 
-use crate::{
-    polybius::{checkerboard, StraddlingCheckerboard},
-    transposition::Columnar,
-    Cipher, CipherError,
-};
+use crate::{polybius::StraddlingCheckerboard, transposition::Columnar, Cipher, CipherError};
 
 pub struct Vic {
     pub key_group: String,
@@ -260,6 +256,7 @@ impl Cipher for Vic {
         let (q, r, s) = self.key_derivation()?;
 
         let mut checkerboard = StraddlingCheckerboard::default();
+        checkerboard.assign_top_row(&s);
         checkerboard.assign_alphabet(&self.alphabet);
         let mut ctext = checkerboard.encrypt(text)?;
 
@@ -267,7 +264,11 @@ impl Cipher for Vic {
         columnar.assign_key(&q, "1234567890").unwrap();
         ctext = columnar.encrypt(&ctext)?;
 
-        todo!()
+        let mut diagonal_columnar = Columnar::default();
+        diagonal_columnar.assign_key(&r, "1234567890").unwrap();
+        ctext = diagonal_columnar.encrypt(&ctext)?;
+
+        Ok(ctext)
     }
 
     fn decrypt(&self, text: &str) -> Result<String, crate::CipherError> {
