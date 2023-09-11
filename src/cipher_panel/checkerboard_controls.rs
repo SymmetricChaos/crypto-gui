@@ -9,6 +9,7 @@ use super::CipherFrame;
 pub struct StraddlingCheckerboardFrame {
     cipher: StraddlingCheckerboard,
     alphabet_string: String,
+    top_row: String,
 }
 
 impl Default for StraddlingCheckerboardFrame {
@@ -16,6 +17,7 @@ impl Default for StraddlingCheckerboardFrame {
         Self {
             cipher: Default::default(),
             alphabet_string: String::from("ETAONRISBCDFGHJKLMPQ/UVWXYZ."),
+            top_row: String::from("0123456789"),
         }
     }
 }
@@ -27,6 +29,11 @@ impl CipherFrame for StraddlingCheckerboardFrame {
         ui.subheading("Alphabet");
         if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher.assign_alphabet(&self.alphabet_string)
+        }
+
+        ui.subheading("Top Row");
+        if ui.control_string(&mut self.top_row).changed() {
+            self.cipher.assign_top_row(&self.top_row)
         }
 
         ui.add_space(8.0);
@@ -59,7 +66,8 @@ impl CipherFrame for StraddlingCheckerboardFrame {
     fn randomize(&mut self) {
         self.alphabet_string = shuffled_str(&self.alphabet_string, &mut thread_rng());
         self.cipher.assign_alphabet(&self.alphabet_string);
-        self.cipher.top_row = shuffled_str("0123456789", &mut thread_rng());
+        self.top_row = shuffled_str("0123456789", &mut thread_rng());
+        self.cipher.assign_top_row(&self.top_row);
     }
 
     fn reset(&mut self) {
