@@ -1,4 +1,5 @@
 pub mod columnar;
+pub mod diagonal_columnar;
 pub use columnar::Columnar;
 
 pub mod syctale;
