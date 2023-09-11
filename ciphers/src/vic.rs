@@ -272,7 +272,22 @@ impl Cipher for Vic {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, crate::CipherError> {
-        todo!()
+        let (q, r, s) = self.key_derivation()?;
+
+        let mut diagonal_columnar = Columnar::default();
+        diagonal_columnar.assign_key(&r, "1234567890").unwrap();
+        let mut ptext = diagonal_columnar.decrypt(&text)?;
+
+        let mut columnar = Columnar::default();
+        columnar.assign_key(&q, "1234567890").unwrap();
+        ptext = columnar.decrypt(&ptext)?;
+
+        let mut checkerboard = StraddlingCheckerboard::default();
+        checkerboard.assign_top_row(&s);
+        checkerboard.assign_alphabet(&self.alphabet);
+        ptext = checkerboard.decrypt(&ptext)?;
+
+        Ok(ptext)
     }
 }
 
