@@ -1,8 +1,6 @@
-use std::fmt::Display;
-
 use crate::{errors::CipherError, traits::Cipher};
 use utils::{
-    grid::{Grid, Symbol},
+    grid::{Grid, Symbol, BLOCK, EMPTY},
     text_functions::{rank_str, rank_vec, StringRankError},
 };
 
@@ -58,12 +56,36 @@ impl Cipher for DiagonalColumnar {
             disruption_start += 1;
         }
 
-        println!("{g}");
-        // Now fill the Empty cells left to right and top to bottom, then fill the Blocked cells the same way
-        let symbols = text.chars();
+        // println!("{g}");
+        // Now fill the Empty cells left to right and top to bottomy
+        let mut symbols = text.chars();
+        for cell in g.get_rows_mut() {
+            if cell.is_empty() {
+                match symbols.next() {
+                    Some(c) => *cell = Symbol::Filled(c),
+                    None => break,
+                }
+            }
+        }
+        // println!("{g}");
+        // Now fill the Blocked cells left to right and top to bottomy
+        for cell in g.get_rows_mut() {
+            if cell.is_blocked() {
+                match symbols.next() {
+                    Some(c) => *cell = Symbol::Filled(c),
+                    None => break,
+                }
+            }
+        }
+        // println!("{g}");
 
-        let out = String::with_capacity(text.len());
-        // for k in self.key_ranks.iter() {}
+        let mut out = String::with_capacity(text.len());
+        for k in self.key_ranks.iter() {
+            let mut s: String = g.get_col(*k).map(|sym| sym.to_char()).collect();
+            s = s.replace(EMPTY, "");
+            s = s.replace(BLOCK, "");
+            out.push_str(&s);
+        }
 
         Ok(out)
     }
