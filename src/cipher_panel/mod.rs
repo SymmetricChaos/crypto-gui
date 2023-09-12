@@ -39,6 +39,7 @@ pub mod chaocipher_controls;
 pub mod checkerboard_controls;
 pub mod columnar_controls;
 pub mod decoder_ring_controls;
+pub mod diagonal_columnar_controls;
 pub mod dryad_controls;
 pub mod enigma_controls;
 pub mod four_square_controls;
@@ -249,6 +250,7 @@ impl CipherInterface {
             &[
                 CipherId::Amsco,
                 CipherId::Columnar,
+                CipherId::DiagonalColumnar,
                 CipherId::Grille,
                 CipherId::RailFence,
                 CipherId::Scytale,
@@ -260,7 +262,7 @@ impl CipherInterface {
         );
 
         combox_box(
-            &[CipherId::Shamir],
+            &[CipherId::Shamir, CipherId::Vic],
             active_cipher,
             CipherCategory::Other,
             ui,
