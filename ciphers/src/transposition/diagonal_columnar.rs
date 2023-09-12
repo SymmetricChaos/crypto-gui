@@ -7,7 +7,6 @@ use utils::{
 pub struct DiagonalColumnar {
     pub key: Vec<usize>,
     pub key_ranks: Vec<usize>,
-    pub filler: String,
 }
 
 impl DiagonalColumnar {
@@ -17,10 +16,9 @@ impl DiagonalColumnar {
         Ok(())
     }
 
-    pub fn display_page(&self, text_length: usize) -> String {
+    pub fn build_grid(&self, text_length: usize) -> Grid<Symbol<char>> {
         let n_cols = self.key.len();
         let n_rows = num::Integer::div_ceil(&text_length, &self.key.len());
-
         let mut g: Grid<Symbol<char>> = Grid::new_empty(n_rows, n_cols);
 
         let mut disruption_ctr = 0;
@@ -40,52 +38,12 @@ impl DiagonalColumnar {
             }
             disruption_start += 1;
         }
-
-        g.to_string()
+        g
     }
-}
 
-impl Default for DiagonalColumnar {
-    fn default() -> Self {
-        Self {
-            key: Vec::new(),
-            key_ranks: Vec::new(),
-            filler: String::from("X"),
-        }
-    }
-}
-
-impl Cipher for DiagonalColumnar {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let tlen = text.chars().count();
-        let n_cols = self.key.len();
-
-        // TODO: Once this is in std or core use that instead
-        let n_rows = num::Integer::div_ceil(&tlen, &self.key.len());
-
-        // Build the grid with first all Empty symbols and then Block the disrupted areas
-        let mut g: Grid<Symbol<char>> = Grid::new_empty(n_rows, n_cols);
-
-        let mut disruption_ctr = 0;
-        let mut disruption_start = self.key.iter().position(|n| *n == disruption_ctr).unwrap();
-        for row in 0..n_rows {
-            g.get_row_mut(row)
-                .skip(disruption_start)
-                .for_each(|l| *l = Symbol::Blocked);
-
-            if disruption_start >= n_cols {
-                disruption_ctr += 1;
-                disruption_start = match self.key.iter().position(|n| *n == disruption_ctr) {
-                    Some(n) => n,
-                    None => break,
-                };
-                continue;
-            }
-            disruption_start += 1;
-        }
-
-        // Now fill the Empty cells left to right and top to bottomy
-        let mut symbols = text.chars().chain(self.filler.chars().cycle());
+    fn fill_grid(&self, mut g: Grid<Symbol<char>>, text: &str) -> Grid<Symbol<char>> {
+        // Fill the Empty cells left to right and top to bottom
+        let mut symbols = text.chars();
         for cell in g.get_rows_mut() {
             if cell.is_empty() {
                 match symbols.next() {
@@ -95,7 +53,7 @@ impl Cipher for DiagonalColumnar {
             }
         }
 
-        // Now fill the Blocked cells left to right and top to bottomy
+        // Fill the Blocked cells left to right and top to bottom
         for cell in g.get_rows_mut() {
             if cell.is_blocked() {
                 match symbols.next() {
@@ -104,6 +62,34 @@ impl Cipher for DiagonalColumnar {
                 }
             }
         }
+        g
+    }
+
+    pub fn display_page(&self, text_length: usize) -> String {
+        self.build_grid(text_length).to_string()
+    }
+
+    pub fn display_page_filled(&self, text: &str) -> String {
+        let text_length = text.chars().count();
+        let g = self.fill_grid(self.build_grid(text_length), text);
+        g.to_string()
+    }
+}
+
+impl Default for DiagonalColumnar {
+    fn default() -> Self {
+        Self {
+            key: Vec::new(),
+            key_ranks: Vec::new(),
+        }
+    }
+}
+
+impl Cipher for DiagonalColumnar {
+    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+        let text_length = text.chars().count();
+
+        let g = self.fill_grid(self.build_grid(text_length), text);
 
         let mut out = String::with_capacity(text.len());
         for k in self.key_ranks.iter() {
@@ -117,18 +103,9 @@ impl Cipher for DiagonalColumnar {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        let tlen = text.chars().count();
-        let n_cols = self.key.len();
+        let text_length = text.chars().count();
 
-        // TODO: Once this is in std or core use that instead
-        let n_rows = num::Integer::div_ceil(&tlen, &n_cols);
-
-        if tlen != n_cols * n_rows {
-            return Err(CipherError::input(
-                "inocrrect number of characters, diagonal transposition must use a full grid",
-            ));
-        }
-        let mut g = Grid::new_empty(n_rows, n_cols);
+        let mut g = self.build_grid(text_length);
 
         // Fill the grid by columns
         let mut symbols = text.chars();
@@ -144,13 +121,13 @@ impl Cipher for DiagonalColumnar {
         // Read the outer part of the disrupted sections
         let mut disruption_ctr = 0;
         let mut disruption_start = self.key.iter().position(|n| *n == disruption_ctr).unwrap();
-        for row in 0..n_rows {
+        for row in 0..g.num_rows() {
             g.get_row_mut(row).take(disruption_start).for_each(|l| {
                 out.push(l.to_char());
                 *l = Symbol::Blocked;
             });
 
-            if disruption_start >= n_cols {
+            if disruption_start >= g.num_cols() {
                 disruption_ctr += 1;
                 disruption_start = match self.key.iter().position(|n| *n == disruption_ctr) {
                     Some(n) => n,
@@ -162,7 +139,7 @@ impl Cipher for DiagonalColumnar {
         }
 
         // Read the inner parts of the disrupted sections
-        for row in 0..n_rows {
+        for row in 0..g.num_rows() {
             g.get_row(row)
                 .filter(|cell| !cell.is_blocked())
                 .for_each(|cell| out.push(cell.to_char()))
@@ -178,23 +155,24 @@ mod diagonal_columnar_tests {
 
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const CIPHERTEXT: &'static str = "HUKWJPEEABNDSRHQCOXMVLZYFOGTTEIROUO";
+    const PLAINTEXT: &'static str = "WHENINTHECOURSEOFHUMANEVENTSITBECOMESNECESSARYFORONEPEOPLETODISSOLVETHEPOLITICALBANDSWHICHHAVECONNECTEDTHEMWITHANOTHERANDTOASSUMEAMONGTHEPOWERSOFTHEEARTHTHESEPARATEANDEQUALSTATIONTOWHICHTHELAWSOFNATUREANDOFNATURESGODENTITLETHEMADECENTRESPECTTOTHEOPINIONSOFMANKINDREQUIRESTHATTHEYSHOULDDECLARETHECAUSESWHICHIMPELTHEMTOTHESEPARATION";
+    const CIPHERTEXT: &'static str = "NTOONISAEPDVLAHVCWODFDRATOOASAEUTNCWTTPFUOLEDCECNOSCTOCEPITIOSKUHEODECRHSHHMPNTETTEUFETNRTLIEINIETITTMRETYWFRERCEATHSHHAIRDITMHVBEYRPSTTTCCETHOAESTSUTTPEASIOTOEEROETHAEEECFEETHIHOODNEANQTHHLDHATUWCIHFMSANWNHRUNOERPESEADHNHHRNSUEOHEHTAEDATWEATRNNEENCEASESNOOLOBWAEMNNONIMGPSEELNQSOIALOAOTGHIESMTMSOETOPLSHNEAASIMANEREHTAELIHLEUEDAS";
 
-    // #[test]
-    // fn display_test() {
-    //     let mut cipher = DiagonalColumnar::default();
-    //     cipher
-    //         .assign_key("ECABD", Alphabet::BasicLatin.slice())
-    //         .unwrap();
-    //     println!("{}", cipher.display_page(PLAINTEXT.chars().count()));
-    // }
+    #[test]
+    fn display_test() {
+        let mut cipher = DiagonalColumnar::default();
+        cipher
+            .assign_key("RUTABEGA", Alphabet::BasicLatin.slice())
+            .unwrap();
+        println!("{}", cipher.display_page(PLAINTEXT.chars().count()));
+        println!("{}", cipher.display_page_filled(PLAINTEXT));
+    }
 
     #[test]
     fn encrypt_test() {
         let mut cipher = DiagonalColumnar::default();
         cipher
-            .assign_key("ECABD", Alphabet::BasicLatin.slice())
+            .assign_key("RUTABEGA", Alphabet::BasicLatin.slice())
             .unwrap();
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
     }

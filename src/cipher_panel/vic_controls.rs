@@ -58,7 +58,7 @@ impl CipherFrame for VicFrame {
         }
 
         ui.subheading("Personal Number");
-        ui.add(DragValue::new(&mut self.cipher.pin).clamp_range(1..=10));
+        ui.add(DragValue::new(&mut self.cipher.pin).clamp_range(1..=20));
 
         match self.cipher.key_derivation_string() {
             Ok(text) => ui.mono(text),
