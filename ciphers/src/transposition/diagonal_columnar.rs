@@ -104,30 +104,54 @@ impl Cipher for DiagonalColumnar {
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         let text_length = text.chars().count();
+        let n_cols = self.key.len();
+        let n_rows = num::Integer::div_ceil(&text_length, &self.key.len());
 
-        let mut g = self.build_grid(text_length);
+        let disrupted_grid = self.fill_grid(self.build_grid(text_length), text);
+        let mut empty_grid: Grid<Symbol<char>> = Grid::new_empty(n_rows, n_cols);
+
+        // Find where symbols stop being entered into the disrupted grid so the empty grid can be blocked in the remaining places
+        //let n_inner = text_length - disrupted_grid.num_empty();
+        disrupted_grid
+            .get_rows()
+            .zip(empty_grid.get_rows_mut())
+            .filter(|(a, _)| a.is_blocked())
+            //.skip(n_inner)
+            .for_each(|(_, b)| *b = Symbol::Blocked);
+
+        //println!("{}", empty_grid.to_string());
 
         // Fill the grid by columns
         let mut symbols = text.chars();
         for n in self.key_ranks.iter() {
-            let column = g.get_col_mut(*n);
+            let column = empty_grid.get_col_mut(*n);
             for cell in column {
-                *cell = Symbol::Filled(symbols.next().unwrap())
+                if cell.is_empty() {
+                    match symbols.next() {
+                        Some(c) => *cell = Symbol::Filled(c),
+                        None => break,
+                    }
+                }
             }
         }
+
+        //println!("{}", empty_grid.to_string());
 
         let mut out = String::new();
 
         // Read the outer part of the disrupted sections
         let mut disruption_ctr = 0;
         let mut disruption_start = self.key.iter().position(|n| *n == disruption_ctr).unwrap();
-        for row in 0..g.num_rows() {
-            g.get_row_mut(row).take(disruption_start).for_each(|l| {
-                out.push(l.to_char());
-                *l = Symbol::Blocked;
-            });
+        for row in 0..empty_grid.num_rows() {
+            empty_grid
+                .get_row_mut(row)
+                .take(disruption_start)
+                .for_each(|l| {
+                    out.push(l.to_char());
+                    *l = Symbol::Blocked;
+                });
 
-            if disruption_start >= g.num_cols() {
+            if disruption_start >= empty_grid.num_cols() {
                 disruption_ctr += 1;
                 disruption_start = match self.key.iter().position(|n| *n == disruption_ctr) {
                     Some(n) => n,
@@ -139,8 +163,9 @@ impl Cipher for DiagonalColumnar {
         }
 
         // Read the inner parts of the disrupted sections
-        for row in 0..g.num_rows() {
-            g.get_row(row)
+        for row in 0..empty_grid.num_rows() {
+            empty_grid
+                .get_row(row)
                 .filter(|cell| !cell.is_blocked())
                 .for_each(|cell| out.push(cell.to_char()))
         }
@@ -181,7 +206,7 @@ mod diagonal_columnar_tests {
     fn decrypt_test() {
         let mut cipher = DiagonalColumnar::default();
         cipher
-            .assign_key("ECABD", Alphabet::BasicLatin.slice())
+            .assign_key("RUTABEGA", Alphabet::BasicLatin.slice())
             .unwrap();
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
