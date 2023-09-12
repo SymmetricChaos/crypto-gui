@@ -111,6 +111,7 @@ impl Cipher for DiagonalColumnar {
         let mut empty_grid: Grid<Symbol<char>> = Grid::new_empty(n_rows, n_cols);
 
         // Find where symbols stop being entered into the disrupted grid so the empty grid can be blocked in the remaining places
+        // I have no idea how this work the way it is written.
         //let n_inner = text_length - disrupted_grid.num_empty();
         disrupted_grid
             .get_rows()
@@ -119,7 +120,7 @@ impl Cipher for DiagonalColumnar {
             //.skip(n_inner)
             .for_each(|(_, b)| *b = Symbol::Blocked);
 
-        //println!("{}", empty_grid.to_string());
+        // println!("{}", empty_grid.to_string());
 
         // Fill the grid by columns
         let mut symbols = text.chars();
@@ -134,8 +135,6 @@ impl Cipher for DiagonalColumnar {
                 }
             }
         }
-
-        //println!("{}", empty_grid.to_string());
 
         let mut out = String::new();
 
