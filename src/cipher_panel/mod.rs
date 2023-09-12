@@ -66,6 +66,7 @@ pub mod slidefair_controls;
 pub mod trifid_controls;
 pub mod turning_grille_controls;
 pub mod two_square_controls;
+pub mod vic_controls;
 pub mod vigenere_controls;
 
 pub trait CipherFrame {

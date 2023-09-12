@@ -14,10 +14,10 @@ pub struct Vic {
 impl Default for Vic {
     fn default() -> Self {
         Self {
-            key_group: String::new(),
-            date: String::new(),
-            phrase: String::new(),
-            pin: 0,
+            key_group: String::from("72401"),
+            date: String::from("139195"),
+            phrase: String::from("TWASTHENIGHTBEFORECHRISTMAS"),
+            pin: 6,
             alphabet: String::from(Alphabet::BasicLatin),
         }
     }
@@ -173,7 +173,7 @@ impl Vic {
         // Line-Q
         let mut columnar = Columnar::default();
         columnar.assign_key(&j, "1234567890").unwrap();
-        let encrypted_block = columnar.encrypt(&block)?;
+        let encrypted_block = columnar.encrypt(&block).unwrap();
         derivation.push_str("\nQ: ");
         derivation.push_str(&encrypted_block[..key_lengths.0]);
 
