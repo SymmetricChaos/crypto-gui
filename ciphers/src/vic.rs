@@ -15,7 +15,7 @@ impl Default for Vic {
     fn default() -> Self {
         Self {
             key_group: String::from("72401"),
-            date: String::from("139195"),
+            date: String::from("1391959"),
             phrase: String::from("TWASTHENIGHTBEFORECHRISTMAS"),
             pin: 6,
             alphabet: String::from(Alphabet::BasicLatin),
@@ -68,19 +68,25 @@ impl Vic {
         u32::from(c) - 48
     }
 
+    fn extract_date(&self) -> String {
+        self.date.chars().filter(|c| c.is_ascii_digit()).collect()
+    }
+
     pub fn key_derivation_string(&self) -> Result<String, CipherError> {
         let mut derivation = String::new();
+        let date_digits = self.extract_date();
+
         // Line-A
         derivation.push_str("A: ");
         derivation.push_str(&self.key_group[..5]);
 
         // Line-B
         derivation.push_str("\nB: ");
-        derivation.push_str(&self.date[..5]);
+        derivation.push_str(&date_digits[..5]);
 
         // Line-C
         let mut c = String::new();
-        for (c1, c2) in self.key_group.chars().zip(self.date.chars()) {
+        for (c1, c2) in self.key_group.chars().zip(date_digits.chars().take(5)) {
             c.push(Self::digital_subtraction(c1, c2))
         }
         derivation.push_str("\nC: ");

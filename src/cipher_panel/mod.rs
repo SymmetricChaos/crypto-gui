@@ -11,18 +11,19 @@ use self::{
     beaufort_controls::BeaufortFrame, bifid_controls::BifidFrame, caesar_controls::CaesarFrame,
     chaocipher_controls::ChaocipherFrame, checkerboard_controls::StraddlingCheckerboardFrame,
     columnar_controls::ColumnarFrame, decoder_ring_controls::DecoderRingFrame,
-    dryad_controls::DryadFrame, enigma_controls::EnigmaM3Frame,
-    four_square_controls::FourSquareFrame, general_sub_controls::GeneralSubstitutionFrame,
-    grille_controls::GrilleFrame, hebern_controls::HebernFrame, hutton_controls::HuttonFrame,
-    m209_controls::M209Frame, m94_controls::M94Frame, nihilist_controls::NihilistFrame,
-    playfair_controls::PlayfairFrame, plugboard_controls::PlugboardFrame,
-    polybius_cube_controls::PolybiusCubeFrame, polybius_square_controls::PolybiusSquareFrame,
-    porta_controls::PortaFrame, purple_controls::PurpleFrame, quagmire_controls::QuagmireFrame,
+    diagonal_columnar_controls::DiagonalColumnarFrame, dryad_controls::DryadFrame,
+    enigma_controls::EnigmaM3Frame, four_square_controls::FourSquareFrame,
+    general_sub_controls::GeneralSubstitutionFrame, grille_controls::GrilleFrame,
+    hebern_controls::HebernFrame, hutton_controls::HuttonFrame, m209_controls::M209Frame,
+    m94_controls::M94Frame, nihilist_controls::NihilistFrame, playfair_controls::PlayfairFrame,
+    plugboard_controls::PlugboardFrame, polybius_cube_controls::PolybiusCubeFrame,
+    polybius_square_controls::PolybiusSquareFrame, porta_controls::PortaFrame,
+    purple_controls::PurpleFrame, quagmire_controls::QuagmireFrame,
     rail_fence_controls::RailFenceFrame, rs44_controls::Rs44Frame, scytale_controls::ScytaleFrame,
     seriated_playfair_controls::SeriatedPlayfairFrame, shamir_controls::ShamirSecretSharingFrame,
     sigaba_controls::SigabaFrame, slidefair_controls::SlidefairFrame, trifid_controls::TrifidFrame,
     turning_grille_controls::TurningGrilleFrame, two_square_controls::TwoSquareFrame,
-    vigenere_controls::VigenereFrame,
+    vic_controls::VicFrame, vigenere_controls::VigenereFrame,
 };
 
 pub mod adfgvx_controls;
@@ -141,6 +142,7 @@ pub struct CipherInterface {
     // Transposition
     amsco: AmscoFrame,
     columnar: ColumnarFrame,
+    diagonal_columnar: DiagonalColumnarFrame,
     grille: GrilleFrame,
     rail_fence: RailFenceFrame,
     scytale: ScytaleFrame,
@@ -163,6 +165,7 @@ pub struct CipherInterface {
 
     // Other
     shamir: ShamirSecretSharingFrame,
+    vic: VicFrame,
 }
 
 impl CipherInterface {
@@ -285,6 +288,7 @@ impl CipherInterface {
             CipherId::Checkerboard => &mut self.checkerboard,
             CipherId::Columnar => &mut self.columnar,
             CipherId::Decoder => &mut self.decoder_ring,
+            CipherId::DiagonalColumnar => &mut self.diagonal_columnar,
             CipherId::Dryad => &mut self.dryad,
             CipherId::Enigma => &mut self.enigma,
             CipherId::FourSquare => &mut self.four_square,
@@ -312,6 +316,7 @@ impl CipherInterface {
             CipherId::Trifid => &mut self.trifid,
             CipherId::TurningGrille => &mut self.turning_grille,
             CipherId::TwoSquare => &mut self.two_square,
+            CipherId::Vic => &mut self.vic,
             CipherId::Vigenere => &mut self.vigenere,
             _ => todo!("<<<CIPHER NOT FOUND>>>"),
         }
