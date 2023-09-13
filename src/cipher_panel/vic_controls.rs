@@ -22,6 +22,7 @@ impl CipherFrame for VicFrame {
         ui.randomize_reset(self);
 
         ui.subheading("Key Group");
+        ui.label("A uniqe key group is chosen for each message.");
         if ui.control_string(&mut self.cipher.key_group).changed() {
             self.cipher.key_group = self.cipher.key_group.chars().take(5).collect();
         }
@@ -43,6 +44,7 @@ impl CipherFrame for VicFrame {
         ui.add_space(8.0);
 
         ui.subheading("Phrase");
+        ui.label("Each spy was given their own phrase to memorize.");
         if ui.control_string(&mut self.cipher.phrase).changed() {
             self.cipher.phrase = self
                 .cipher
@@ -59,22 +61,24 @@ impl CipherFrame for VicFrame {
         ui.add_space(8.0);
 
         ui.subheading("Personal Number");
+        ui.label("A number was assigned to each spy.");
         ui.add(DragValue::new(&mut self.cipher.pin).clamp_range(1..=20));
 
         ui.add_space(8.0);
 
-        ui.subheading("Code Group Position");
-        ui.label("The VIC cipher is written into roups of five digits. The last digit of the date is the group where the codegroup is inserted.");
+        ui.subheading("Key Derivation");
+        match self.cipher.key_derivation_string() {
+            Ok(text) => ui.mono(text),
+            Err(e) => ui.error_text(e),
+        };
+
+        ui.subheading("Key Group Position");
+        ui.label("The unique key group needed to be transmitted to the reciever. The message was divided into groups of five digits and and key group was inserted at the given position, the sixth digit of the date.");
         match self.cipher.date.chars().nth(5) {
             Some(c) => ui.mono(c),
             None => ui.error_text("date does not have a sixth digit"),
         };
         ui.add_space(12.0);
-
-        match self.cipher.key_derivation_string() {
-            Ok(text) => ui.mono(text),
-            Err(e) => ui.error_text(e),
-        };
     }
 
     fn cipher(&self) -> &dyn Cipher {
