@@ -15,7 +15,7 @@ impl Default for Vic {
     fn default() -> Self {
         Self {
             key_group: String::from("72401"),
-            date: String::from("1391959"),
+            date: String::from("13/9/1959"),
             phrase: String::from("TWASTHENIGHTBEFORECHRISTMAS"),
             pin: 6,
             alphabet: String::from(Alphabet::BasicLatin),
@@ -142,7 +142,7 @@ impl Vic {
         // Line-K through Line-P (there is no Line-O)
         let block = Self::chain_addition(&h, 50);
         derivation.push_str("\nK: ");
-        derivation.push_str(&block[..20]);
+        derivation.push_str(&block[..10]);
         derivation.push_str("\nL: ");
         derivation.push_str(&block[10..20]);
         derivation.push_str("\nM: ");
@@ -309,7 +309,7 @@ mod vic_tests {
     fn derivation_test() {
         let cipher = Vic::default();
         assert_eq!(
-            "A: 72401\nB: 13919\nC: 69592\nD: TWASTHENIG HTBEFORECH\nE: 8017942653 6013589427\nF: 6959254417 1234567890\nG: 4966196060\nH: 3288628787\nJ: 3178429506\nK: 50648055525602850077\nL: 5602850077\nM: 1620350748\nN: 7823857125\nP: 5051328370\n\nThe last two unequal digits are 7 and 0, since the personal number is 6 the key lengths will be 13 and 6\n\nQ: 0668005552551\nR: 758838\nS: 5961328470",
+            "A: 72401\nB: 13919\nC: 69592\nD: TWASTHENIG HTBEFORECH\nE: 8017942653 6013589427\nF: 6959254417 1234567890\nG: 4966196060\nH: 3288628787\nJ: 3178429506\nK: 5064805552\nL: 5602850077\nM: 1620350748\nN: 7823857125\nP: 5051328370\n\nThe last two unequal digits are 7 and 0, since the personal number is 6 the key lengths will be 13 and 6\n\nQ: 0668005552551\nR: 758838\nS: 5961328470",
             cipher
                 .key_derivation_string()
                 .unwrap()
@@ -324,7 +324,7 @@ mod vic_tests {
         G: 4966196060
         H: 3288628787
         J: 3178429506
-        K: 50648055525602850077
+        K: 5064805552
         L: 5602850077
         M: 1620350748
         N: 7823857125
