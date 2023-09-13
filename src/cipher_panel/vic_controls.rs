@@ -1,7 +1,8 @@
 use crate::ui_elements::UiElements;
 use ciphers::{vic::Vic, Cipher};
 use egui::{DragValue, Ui};
-use utils::preset_alphabet::Alphabet;
+use rand::{thread_rng, Rng};
+use utils::{preset_alphabet::Alphabet, text_functions::random_string_sample_replace};
 
 use super::CipherFrame;
 
@@ -64,13 +65,14 @@ impl CipherFrame for VicFrame {
         ui.label("A number was assigned to each spy.");
         ui.add(DragValue::new(&mut self.cipher.pin).clamp_range(1..=20));
 
-        ui.add_space(8.0);
+        ui.add_space(16.0);
 
         ui.subheading("Key Derivation");
         match self.cipher.key_derivation_string() {
             Ok(text) => ui.mono(text),
             Err(e) => ui.error_text(e),
         };
+        ui.add_space(12.0);
 
         ui.subheading("Key Group Position");
         ui.label("The unique key group needed to be transmitted to the reciever. The message was divided into groups of five digits and and key group was inserted at the given position, the sixth digit of the date.");
@@ -78,14 +80,22 @@ impl CipherFrame for VicFrame {
             Some(c) => ui.mono(c),
             None => ui.error_text("date does not have a sixth digit"),
         };
-        ui.add_space(12.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {
         &self.cipher
     }
 
-    fn randomize(&mut self) {}
+    fn randomize(&mut self) {
+        let mut rng = thread_rng();
+        self.cipher.key_group = random_string_sample_replace("0123456789", 5, &mut rng);
+        self.cipher.date = {
+            let day = rng.gen_range(1..=31);
+            let month = rng.gen_range(1..=12);
+            let year = rng.gen_range(1922..=1991);
+            format!("{day}/{month}/{year}")
+        };
+    }
 
     fn reset(&mut self) {
         *self = Self::default()
