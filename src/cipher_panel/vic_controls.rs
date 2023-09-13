@@ -23,10 +23,8 @@ impl CipherFrame for VicFrame {
         ui.randomize_reset(self);
 
         ui.subheading("Key Group");
-        ui.label("A uniqe key group is chosen for each message.");
-        if ui.control_string(&mut self.cipher.key_group).changed() {
-            self.cipher.key_group = self.cipher.key_group.chars().take(5).collect();
-        }
+        ui.label("A unique key group is chosen for each message.");
+        ui.control_string(&mut self.cipher.key_group);
         if self.cipher.key_group.chars().count() != 5 {
             ui.error_text("key group must have exactly five digits");
         } else {
@@ -42,6 +40,20 @@ impl CipherFrame for VicFrame {
         } else {
             ui.error_text("");
         }
+        ui.add_space(8.0);
+
+        ui.subheading("Key Group Position");
+        ui.label("The unique key group needed to be transmitted to the reciever. The message was divided into groups of five digits and and key group was inserted at the given position, the sixth digit of the date.");
+        match self
+            .cipher
+            .date
+            .chars()
+            .filter(|c| c.is_ascii_digit())
+            .nth(5)
+        {
+            Some(c) => ui.mono(c),
+            None => ui.error_text("date does not have a sixth digit"),
+        };
         ui.add_space(8.0);
 
         ui.subheading("Phrase");
@@ -72,14 +84,7 @@ impl CipherFrame for VicFrame {
             Ok(text) => ui.mono(text),
             Err(e) => ui.error_text(e),
         };
-        ui.add_space(12.0);
-
-        ui.subheading("Key Group Position");
-        ui.label("The unique key group needed to be transmitted to the reciever. The message was divided into groups of five digits and and key group was inserted at the given position, the sixth digit of the date.");
-        match self.cipher.date.chars().nth(5) {
-            Some(c) => ui.mono(c),
-            None => ui.error_text("date does not have a sixth digit"),
-        };
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {
