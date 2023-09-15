@@ -22,16 +22,6 @@ impl CipherFrame for VicFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.randomize_reset(self);
 
-        ui.subheading("Key Group");
-        ui.label("A unique key group is chosen for each message.");
-        ui.control_string(&mut self.cipher.key_group);
-        if self.cipher.key_group.chars().count() != 5 {
-            ui.error_text("key group must have exactly five digits");
-        } else {
-            ui.error_text("");
-        }
-        ui.add_space(8.0);
-
         ui.subheading("Date");
         ui.label("The date that the message is sent. Leading zeroes should not be used.");
         ui.control_string(&mut self.cipher.date);
@@ -42,8 +32,18 @@ impl CipherFrame for VicFrame {
         }
         ui.add_space(8.0);
 
+        ui.subheading("Key Group");
+        ui.label("A unique key group is chosen for each message.");
+        ui.control_string(&mut self.cipher.key_group);
+        if self.cipher.key_group.chars().count() != 5 {
+            ui.error_text("key group must have exactly five digits");
+        } else {
+            ui.error_text("");
+        }
+        ui.add_space(8.0);
+
         ui.subheading("Key Group Position");
-        ui.label("The unique key group needed to be transmitted to the reciever. The message was divided into groups of five digits and and key group was inserted at the given position, the sixth digit of the date.");
+        ui.label("The unique key group needs to be transmitted to the reciever. The message is divided into groups of five digits and and key group inserted at the given position, the sixth digit of the date.");
         match self
             .cipher
             .date
@@ -57,7 +57,7 @@ impl CipherFrame for VicFrame {
         ui.add_space(8.0);
 
         ui.subheading("Phrase");
-        ui.label("Each spy was given their own phrase to memorize.");
+        ui.label("Each spy is given their own phrase to memorize.");
         if ui.control_string(&mut self.cipher.phrase).changed() {
             self.cipher.phrase = self
                 .cipher
@@ -74,16 +74,22 @@ impl CipherFrame for VicFrame {
         ui.add_space(8.0);
 
         ui.subheading("Personal Number");
-        ui.label("A number was assigned to each spy.");
+        ui.label("A number is assigned to each spy.");
         ui.add(DragValue::new(&mut self.cipher.pin).clamp_range(1..=20));
 
         ui.add_space(16.0);
 
         ui.subheading("Key Derivation");
+        ui.collapsing("Sequencing", |ui| ui.label("The letters or digits are assigned new digits in increasing order from left to right, starting with one and ending with zero."));
+        ui.collapsing("Chain Addition", |ui| {
+            ui.label("Add pairs of digits together, wrapping around to zero after nine.")
+        });
         match self.cipher.key_derivation_string() {
             Ok(text) => ui.mono(text),
             Err(e) => ui.error_text(e),
         };
+        ui.add_space(16.0);
+        ui.label("First the S key is used to set the top row of a Straddling Checkerboard and the text encrypted that way. Afterward the Q key is used for Columnar Transposition then the R key for Diagonal Columnar Transposition.");
         ui.add_space(16.0);
     }
 
