@@ -1,5 +1,5 @@
 use crate::ui_elements::UiElements;
-use ciphers::{vic::Vic, Cipher};
+use ciphers::{polybius::StraddlingCheckerboard, vic::Vic, Cipher};
 use egui::{DragValue, Ui};
 use rand::{thread_rng, Rng};
 use utils::{preset_alphabet::Alphabet, text_functions::random_string_sample_replace};
@@ -8,12 +8,14 @@ use super::CipherFrame;
 
 pub struct VicFrame {
     cipher: Vic,
+    checkerboard: StraddlingCheckerboard,
 }
 
 impl Default for VicFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
+            checkerboard: StraddlingCheckerboard::default(),
         }
     }
 }
@@ -33,27 +35,28 @@ impl CipherFrame for VicFrame {
         ui.add_space(8.0);
 
         ui.subheading("Key Group");
-        ui.label("A unique key group is chosen for each message.");
+        ui.label("A unique key group is chosen randomly for each message.");
         ui.control_string(&mut self.cipher.key_group);
         if self.cipher.key_group.chars().count() != 5 {
             ui.error_text("key group must have exactly five digits");
         } else {
             ui.error_text("");
         }
-        ui.add_space(8.0);
 
-        ui.subheading("Key Group Position");
-        ui.label("The unique key group needs to be transmitted to the reciever. The message is divided into groups of five digits and and key group inserted at the given position, the sixth digit of the date.");
-        match self
-            .cipher
-            .date
-            .chars()
-            .filter(|c| c.is_ascii_digit())
-            .nth(5)
-        {
-            Some(c) => ui.mono(c),
-            None => ui.error_text("date does not have a sixth digit"),
-        };
+        ui.collapsing("Key Group Position", |ui| {
+            ui.label("The unique key group needs to be transmitted to the reciever. The message is divided into groups of five digits and and key group inserted at the given position, the sixth digit of the date. This tool does not insert the keygroup on encryption or extract it during decryption.");
+            match self
+                .cipher
+                .date
+                .chars()
+                .filter(|c| c.is_ascii_digit())
+                .nth(5)
+            {
+                Some(c) => ui.mono(c),
+                None => ui.error_text("date does not have a sixth digit"),
+            };
+        });
+
         ui.add_space(8.0);
 
         ui.subheading("Phrase");
@@ -85,11 +88,20 @@ impl CipherFrame for VicFrame {
             ui.label("Add pairs of digits together, wrapping around to zero after nine.")
         });
         match self.cipher.key_derivation_string() {
-            Ok(text) => ui.mono(text),
+            Ok(text) => {
+                self.checkerboard
+                    .assign_top_row(&self.cipher.key_derivation().unwrap().2);
+                ui.mono(text)
+            }
             Err(e) => ui.error_text(e),
         };
         ui.add_space(16.0);
-        ui.label("First the S key is used to set the top row of a Straddling Checkerboard and the text encrypted that way. Afterward the Q key is used for Columnar Transposition then the R key for Diagonal Columnar Transposition.");
+        ui.label("First the S key is used to set the top row of a Straddling Checkerboard, shown below, and the text encrypted that way. Afterward the Q key is used for Columnar Transposition then the R key for Diagonal Columnar Transposition.");
+        ui.add_space(16.0);
+
+        ui.subheading("Straddling Checkerboard");
+        ui.mono(self.checkerboard.cipher_page());
+
         ui.add_space(16.0);
     }
 

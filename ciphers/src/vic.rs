@@ -205,8 +205,9 @@ impl Vic {
     }
 
     pub fn key_derivation(&self) -> Result<(String, String, String), CipherError> {
+        let date_digits = self.extract_date();
         let a = &self.key_group[..5];
-        let b = &self.date[..5];
+        let b = &date_digits[..5];
 
         let c = {
             let mut c = String::new();
