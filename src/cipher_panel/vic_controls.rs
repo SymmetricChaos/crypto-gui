@@ -84,8 +84,9 @@ impl CipherFrame for VicFrame {
 
         ui.subheading("Key Derivation");
         ui.collapsing("Sequencing", |ui| ui.label("Ten symbols are replaced with digits. First the symbol with the lowest value is assigned '1', then the next lowest values is assigned '2', and so on ending with '0'. Ties are resolved left to right."));
+        ui.collapsing("Addition/Subtraction", |ui| {ui.label("Addition and subtraction are performed modulo 10 so that zero follows nine when adding and nine follows zero when subtracting.")});
         ui.collapsing("Chain Addition", |ui| {
-            ui.label("Sequentially add pairs of digits together with any result greater than 9 wrapping around to 0. So to extend 934 by three digits the result is 276 because: 9 + 3 = 2, 3 + 4 = 7, 4 + 2 = 6.")
+            ui.label("Sequentially add pairs of digits together. So when extending 934 by three digits the result is 276 because: 9 + 3 = 2, 3 + 4 = 7, 4 + 2 = 6.")
         });
         match self.cipher.key_derivation_string() {
             Ok(text) => {
