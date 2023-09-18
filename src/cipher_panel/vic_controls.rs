@@ -114,9 +114,20 @@ impl CipherFrame for VicFrame {
         let mut rng = thread_rng();
         self.cipher.key_group = random_string_sample_replace("0123456789", 5, &mut rng);
         self.cipher.date = {
-            let day = rng.gen_range(1..=31);
-            let month = rng.gen_range(1..=12);
             let year = rng.gen_range(1922..=1991);
+            let month = rng.gen_range(1..=12);
+            let day = match month {
+                1 | 3 | 5 | 7 | 8 | 10 | 12 => rng.gen_range(1..=31),
+                4 | 6 | 9 | 11 => rng.gen_range(1..=30),
+                2 => {
+                    if year % 4 == 0 {
+                        rng.gen_range(1..=29)
+                    } else {
+                        rng.gen_range(1..=28)
+                    }
+                }
+                _ => unreachable!("month is restricted to the range 1..=12"),
+            };
             format!("{day}/{month}/{year}")
         };
     }
