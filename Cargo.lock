@@ -731,6 +731,7 @@ dependencies = [
  "rand",
  "regex",
  "rfd",
+ "rngs",
  "tracing-subscriber",
  "tracing-wasm",
  "unicode-normalization",
@@ -2275,6 +2276,26 @@ dependencies = [
  "wasm-bindgen-futures",
  "web-sys",
  "windows",
+]
+
+[[package]]
+name = "rngs"
+version = "0.1.0"
+dependencies = [
+ "bimap",
+ "csv",
+ "getrandom",
+ "itertools",
+ "json",
+ "lazy_static",
+ "num 0.4.0",
+ "primal",
+ "rand",
+ "regex",
+ "rfd",
+ "unicode-normalization",
+ "unicode-segmentation",
+ "utils",
 ]
 
 [[package]]

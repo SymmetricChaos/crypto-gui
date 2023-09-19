@@ -8,7 +8,7 @@ rust-version = "1.68"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace]
-members = ["ciphers", "codes", "utils"]
+members = ["ciphers", "codes", "utils", "rngs"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -24,6 +24,7 @@ egui_extras = "0.22.0"
 ciphers = {path = "ciphers"}
 codes = {path = "codes"}
 utils = {path = "utils"}
+rngs = {path = "rngs"}
 
 lazy_static = "1.4.0"
 num = "0.4.0"
