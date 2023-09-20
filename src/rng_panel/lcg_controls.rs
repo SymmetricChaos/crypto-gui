@@ -49,21 +49,6 @@ impl LcgFrame {
 
 impl ClassicRngFrame for LcgFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        ui.subheading("Calculation for Next Value");
-        ui.label(format!(
-            "({} × {} + {}) % {} = {}",
-            self.state_string,
-            self.multiplier_string,
-            self.increment_string,
-            self.modulus_string,
-            (self.rng.state * self.rng.multiplier + self.rng.increment) % self.rng.modulus
-        ));
-
-        if ui.button("step").clicked() {
-            self.rng.step();
-            self.set_all_strings();
-        }
-
         ui.subheading("State");
         Self::input_control(ui, &mut self.state_string, &mut self.rng.state);
 
@@ -75,6 +60,23 @@ impl ClassicRngFrame for LcgFrame {
 
         ui.subheading("Modulus (Divisor)");
         Self::input_control(ui, &mut self.modulus_string, &mut self.rng.modulus);
+
+        ui.subheading("Calculation for Next Value");
+        let mut m = (self.rng.multiplier as u64 * self.rng.state as u64) % self.rng.modulus as u64;
+        m = (m + self.rng.increment as u64) % self.rng.modulus as u64;
+        ui.label(format!(
+            "({} × {} + {}) % {} = {}",
+            self.state_string,
+            self.multiplier_string,
+            self.increment_string,
+            self.modulus_string,
+            m
+        ));
+
+        if ui.button("step").clicked() {
+            self.rng.step();
+            self.set_all_strings();
+        }
     }
 
     fn rng(&self) -> &dyn rngs::ClassicRng {
