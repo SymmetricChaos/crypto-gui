@@ -5,6 +5,7 @@ use std::fmt::Display;
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub enum RngId {
     Lcg,
+    Lfsr,
 }
 
 impl Default for RngId {
@@ -27,6 +28,7 @@ impl Display for RngId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let name = match self {
             RngId::Lcg => "Linear Congruential Generator",
+            RngId::Lfsr => "Linear Feedback Shift Register",
             // _ => "<<<MISSING NAME>>>",
         };
         write!(f, "{}", name)

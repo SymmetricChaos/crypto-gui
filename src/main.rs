@@ -5,6 +5,7 @@ pub mod code_panel;
 
 pub mod pages;
 
+pub mod rng_panel;
 pub mod ui_elements;
 
 // When compiling natively:
