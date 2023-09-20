@@ -37,12 +37,12 @@ fn combox_box(
 }
 
 #[derive(Default)]
-pub struct CipherInterface {
+pub struct RngInterface {
     lcg: LcgFrame,
     // lfsr: LfsrFrame,
 }
 
-impl CipherInterface {
+impl RngInterface {
     pub fn combo_boxes(&mut self, ui: &mut Ui, active_rng: &mut Option<RngId>) {
         combox_box(
             &[RngId::Lcg, RngId::Lfsr],

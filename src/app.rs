@@ -1,19 +1,21 @@
-use crate::cipher_panel::CipherInterface;
-use crate::code_panel::CodeInterface;
-use crate::pages::io_panel::IOPanel;
-use crate::pages::{Page, TextPrepPage};
-use crate::ui_elements::UiElements;
+use crate::{
+    cipher_panel::CipherInterface,
+    code_panel::CodeInterface,
+    pages::{io_panel::IOPanel, Page, TextPrepPage},
+    rng_panel::RngInterface,
+    ui_elements::UiElements,
+};
 use ciphers::ids::CipherId;
 use codes::ids::CodeId;
-use eframe::egui;
 use eframe::{
     egui::{
-        warn_if_debug_build, widgets, CentralPanel, Context, FontData, FontDefinitions, RichText,
-        ScrollArea, SidePanel, TopBottomPanel,
+        self, warn_if_debug_build, widgets, CentralPanel, Context, FontData, FontDefinitions,
+        RichText, ScrollArea, SidePanel, TopBottomPanel,
     },
     epaint::FontFamily,
     App,
 };
+use rngs::ids::RngId;
 
 fn load_font(name: &str, family: &FontFamily, font_data: FontData, font_def: &mut FontDefinitions) {
     font_def.font_data.insert(name.into(), font_data);
@@ -23,6 +25,8 @@ fn load_font(name: &str, family: &FontFamily, font_data: FontData, font_def: &mu
 pub struct ClassicCrypto {
     cipher_interface: CipherInterface,
     code_interface: CodeInterface,
+    rng_interface: RngInterface,
+
     io_panel: IOPanel,
     input: String,
     output: String,
@@ -30,6 +34,8 @@ pub struct ClassicCrypto {
 
     active_cipher: Option<CipherId>,
     active_code: Option<CodeId>,
+    active_rng: Option<RngId>,
+
     active_page: Page,
     text_prep_page: TextPrepPage,
 }
@@ -48,6 +54,7 @@ impl Default for ClassicCrypto {
             // ID of the active Cipher or Code
             active_cipher: None,
             active_code: None,
+            active_rng: None,
 
             // Which page we are on
             active_page: Page::About,
@@ -58,6 +65,7 @@ impl Default for ClassicCrypto {
             // Contains each Cipher and Code along with with controls and a panel for selecting them
             cipher_interface: CipherInterface::default(),
             code_interface: CodeInterface::default(),
+            rng_interface: RngInterface::default(),
         }
     }
 }
@@ -163,8 +171,10 @@ impl ClassicCrypto {
                         &mut self.active_page,
                         &mut self.active_cipher,
                         &mut self.active_code,
+                        &mut self.active_rng,
                         &mut self.cipher_interface,
                         &mut self.code_interface,
+                        &mut self.rng_interface,
                     );
                 });
 
@@ -226,9 +236,11 @@ impl ClassicCrypto {
                         &mut self.active_page,
                         &mut self.active_cipher,
                         &mut self.active_code,
+                        &mut self.active_rng,
                         // &mut self.active_attack,
                         &mut self.cipher_interface,
                         &mut self.code_interface,
+                        &mut self.rng_interface,
                         // &mut self.attack_interface,
                     );
                 });
@@ -260,7 +272,74 @@ impl ClassicCrypto {
 
         // If somehow we are here without Page::Cipher selected
         } else {
-            self.code_selector_panel(ctx);
+            self.cipher_selector_panel(ctx);
+        }
+    }
+
+    // Combox boxes for selecting rng
+    fn rng_selector_panel(&mut self, ctx: &Context) {
+        SidePanel::left("rng_selector_panel")
+            .default_width(150.0)
+            .min_width(100.0)
+            .max_width(200.0)
+            .show(ctx, |ui| {
+                ui.add_space(32.0);
+                self.rng_interface.combo_boxes(ui, &mut self.active_rng)
+            });
+    }
+
+    fn rng_page(&mut self, ctx: &Context) {
+        if self.active_page == Page::Rng {
+            self.rng_selector_panel(ctx);
+
+            SidePanel::right("rng_io_panel")
+                .default_width(200.0)
+                .show(ctx, |ui| {
+                    self.io_panel.ui(
+                        ui,
+                        &mut self.input,
+                        &mut self.output,
+                        &mut self.errors,
+                        &mut self.active_page,
+                        &mut self.active_cipher,
+                        &mut self.active_code,
+                        &mut self.active_rng,
+                        // &mut self.active_attack,
+                        &mut self.cipher_interface,
+                        &mut self.code_interface,
+                        &mut self.rng_interface,
+                        // &mut self.attack_interface,
+                    );
+                });
+
+            CentralPanel::default().show(ctx, |ui| {
+                ScrollArea::vertical().show(ui, |ui| {
+                    match self.active_rng {
+                        Some(rng) => {
+                            ui.label(RichText::from(rng.to_string()).heading());
+                            ui.label(RichText::new(rng.description()).size(12.0));
+                            ui.add_space(16.0);
+                            ui.separator();
+                            ui.add_space(16.0);
+                            self.rng_interface
+                                .get_active_rng(&rng)
+                                .ui(ui, &mut self.errors);
+                        }
+                        None => {
+                            ui.label(RichText::from("Random Number Generators").heading());
+                            ui.label(RichText::new("Random number generators.").size(12.0));
+                            ui.add_space(16.0);
+                            ui.separator();
+                            // ui.add_space(16.0);
+                            // ui.label(mono_strong("<<<INTERFACE>>>"));
+                        }
+                    };
+                });
+            });
+
+        // If somehow we are here without Page::Rng selected
+        } else {
+            self.rng_selector_panel(ctx);
         }
     }
 
@@ -319,11 +398,15 @@ impl App for ClassicCrypto {
                 }
                 if ui.button("Ciphers").clicked() {
                     self.active_page = Page::Cipher;
-                    self.active_cipher = None;
+                    // self.active_cipher = None;
                 }
                 if ui.button("Codes").clicked() {
                     self.active_page = Page::Code;
                     // self.active_code = None;
+                }
+                if ui.button("RNGs").clicked() {
+                    self.active_page = Page::Rng;
+                    // self.active_rng = None;
                 }
                 if ui.button("Text").clicked() {
                     self.active_page = Page::TextPrep;
@@ -336,6 +419,7 @@ impl App for ClassicCrypto {
             Page::Cipher => self.cipher_page(ctx),
             Page::Code => self.code_page(ctx),
             Page::TextPrep => self.text_prep_page(ctx),
+            Page::Rng => self.rng_page(ctx),
             //_ => self.blank_page(ctx),
         }
     }

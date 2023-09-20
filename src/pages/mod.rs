@@ -11,4 +11,5 @@ pub enum Page {
     Cipher,
     Code,
     TextPrep,
+    Rng,
 }
