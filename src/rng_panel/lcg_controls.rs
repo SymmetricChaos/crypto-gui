@@ -1,3 +1,4 @@
+use egui::TextStyle;
 use rand::{thread_rng, Rng};
 use rngs::{lcg::Lcg, ClassicRng};
 
@@ -27,7 +28,15 @@ impl Default for LcgFrame {
 
 impl LcgFrame {
     fn input_control(ui: &mut egui::Ui, string: &mut String, n: &mut u32) {
-        if ui.control_string(string).changed() {
+        if ui
+            .add_sized(
+                [40.0, 20.0],
+                egui::TextEdit::singleline(string)
+                    .font(TextStyle::Monospace)
+                    .clip_text(false),
+            )
+            .changed()
+        {
             let x: u32 = match string.parse() {
                 Ok(x) => x,
                 Err(_) => {
@@ -49,29 +58,33 @@ impl LcgFrame {
 
 impl ClassicRngFrame for LcgFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        ui.subheading("State");
-        Self::input_control(ui, &mut self.state_string, &mut self.rng.state);
+        ui.horizontal(|ui| {
+            ui.subheading("(");
+            Self::input_control(ui, &mut self.state_string, &mut self.rng.state);
+            ui.subheading(" × ");
+            Self::input_control(ui, &mut self.multiplier_string, &mut self.rng.multiplier);
+            ui.subheading(" + ");
+            Self::input_control(ui, &mut self.increment_string, &mut self.rng.increment);
+            ui.subheading(") % ");
+            Self::input_control(ui, &mut self.modulus_string, &mut self.rng.modulus);
+            ui.subheading(" = ");
+            let mut m =
+                (self.rng.multiplier as u64 * self.rng.state as u64) % self.rng.modulus as u64;
+            m = (m + self.rng.increment as u64) % self.rng.modulus as u64;
+            ui.false_control_string(format!("{m}"));
+        });
 
-        ui.subheading("Multiplier");
-        Self::input_control(ui, &mut self.multiplier_string, &mut self.rng.multiplier);
+        // ui.subheading("State");
+        // Self::input_control(ui, &mut self.state_string, &mut self.rng.state);
 
-        ui.subheading("Increment");
-        Self::input_control(ui, &mut self.increment_string, &mut self.rng.increment);
+        // ui.subheading("Multiplier");
+        // Self::input_control(ui, &mut self.multiplier_string, &mut self.rng.multiplier);
 
-        ui.subheading("Modulus (Divisor)");
-        Self::input_control(ui, &mut self.modulus_string, &mut self.rng.modulus);
+        // ui.subheading("Increment");
+        // Self::input_control(ui, &mut self.increment_string, &mut self.rng.increment);
 
-        ui.subheading("Calculation for Next Value");
-        let mut m = (self.rng.multiplier as u64 * self.rng.state as u64) % self.rng.modulus as u64;
-        m = (m + self.rng.increment as u64) % self.rng.modulus as u64;
-        ui.label(format!(
-            "({} × {} + {}) % {} = {}",
-            self.state_string,
-            self.multiplier_string,
-            self.increment_string,
-            self.modulus_string,
-            m
-        ));
+        // ui.subheading("Modulus (Divisor)");
+        // Self::input_control(ui, &mut self.modulus_string, &mut self.rng.modulus);
 
         if ui.button("step").clicked() {
             self.rng.step();
