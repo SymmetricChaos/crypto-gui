@@ -1,4 +1,5 @@
 pub mod lcg_controls;
+pub mod lfsr_controls;
 
 use egui::Ui;
 use rngs::{
@@ -6,7 +7,7 @@ use rngs::{
     ClassicRng,
 };
 
-use self::lcg_controls::LcgFrame;
+use self::{lcg_controls::LcgFrame, lfsr_controls::LfsrFrame};
 
 pub trait ClassicRngFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
@@ -39,7 +40,7 @@ fn combox_box(
 #[derive(Default)]
 pub struct RngInterface {
     lcg: LcgFrame,
-    // lfsr: LfsrFrame,
+    lfsr: LfsrFrame,
 }
 
 impl RngInterface {
@@ -55,8 +56,8 @@ impl RngInterface {
     pub fn get_active_rng(&mut self, active_rng: &RngId) -> &mut dyn ClassicRngFrame {
         match active_rng {
             RngId::Lcg => &mut self.lcg,
-            // RngId::Lfsr => &mut self.lfsr,
-            _ => todo!("<<<RNG NOT FOUND>>>"),
+            RngId::Lfsr => &mut self.lfsr,
+            // _ => todo!("<<<RNG NOT FOUND>>>"),
         }
     }
 }

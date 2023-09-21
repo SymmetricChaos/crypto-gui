@@ -1,11 +1,23 @@
 use num::Zero;
-use utils::bits::Bit;
+use utils::bits::{bits_from_str, Bit};
 
 use crate::traits::ClassicRng;
 
 pub struct Lfsr {
-    bits: Vec<Bit>,
-    taps: Vec<bool>,
+    pub bits: Vec<Bit>,
+    pub taps: Vec<bool>,
+}
+
+impl Default for Lfsr {
+    fn default() -> Self {
+        Self {
+            bits: bits_from_str("0110111100000001").unwrap().collect(),
+            taps: vec![
+                false, false, false, false, false, false, false, false, false, false, true, false,
+                true, true, false, true,
+            ],
+        }
+    }
 }
 
 impl ClassicRng for Lfsr {
