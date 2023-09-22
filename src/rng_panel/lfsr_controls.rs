@@ -1,4 +1,4 @@
-use egui::DragValue;
+use egui::{DragValue, RichText};
 use rand::{thread_rng, Rng};
 use rngs::{lfsr::Lfsr, ClassicRng};
 use utils::bits::{bits_to_int_big_endian, bits_to_int_little_endian, Bit};
@@ -25,8 +25,9 @@ impl LfsrFrame {}
 
 impl ClassicRngFrame for LfsrFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+        ui.subheading("Number of Bits");
         if ui
-            .add(DragValue::new(&mut self.vector_length).clamp_range(8..=16))
+            .add(DragValue::new(&mut self.vector_length).clamp_range(8..=20))
             .changed()
         {
             self.rng.bits.truncate(self.vector_length);
@@ -38,32 +39,47 @@ impl ClassicRngFrame for LfsrFrame {
                 self.rng.taps.push(false)
             }
         };
+        ui.add_space(16.0);
 
-        ui.horizontal(|ui| {
-            for b in self.rng.bits.iter_mut() {
-                if ui.small_button(b.to_string()).clicked() {
-                    b.flip()
-                }
-            }
-        });
-        ui.horizontal(|ui| {
-            for t in self.rng.taps.iter_mut() {
-                match t {
-                    true => {
-                        if ui.small_button("↑").clicked() {
-                            *t = false
-                        }
-                    }
-                    false => {
-                        if ui.small_button("⋅").clicked() {
-                            *t = true
-                        }
+        ui.subheading("RNG Internal State");
+        ui.label("Bits of state along the top row. And the bits tapped along the bottom row.");
+        ui.add_space(8.0);
+        if ui.button("step").clicked() {
+            self.rng.step();
+        }
+        ui.add_space(8.0);
+        egui::Grid::new("lfsr_grid")
+            .num_columns(self.vector_length)
+            .max_col_width(5.0)
+            .min_col_width(5.0)
+            .show(ui, |ui| {
+                for b in self.rng.bits.iter_mut() {
+                    let x = RichText::from(b.to_string()).monospace();
+                    if ui.button(x).clicked() {
+                        b.flip()
                     }
                 }
-            }
-        });
+                ui.end_row();
+                for t in self.rng.taps.iter_mut() {
+                    match t {
+                        true => {
+                            if ui.button(RichText::from("^").monospace()).clicked() {
+                                *t = false
+                            }
+                        }
+                        false => {
+                            if ui.button(RichText::from("_").monospace()).clicked() {
+                                *t = true
+                            }
+                        }
+                    }
+                }
+            });
 
-        ui.subheading("State as an Integer");
+        ui.subheading(format!("Next Bit: {}", self.rng.next_bit()));
+
+        ui.add_space(16.0);
+        ui.subheading("Current State as an Integer");
         ui.label(format!(
             "{} (big endian)",
             bits_to_int_big_endian(&self.rng.bits)
@@ -72,10 +88,6 @@ impl ClassicRngFrame for LfsrFrame {
             "{} (little endian)",
             bits_to_int_little_endian(&self.rng.bits)
         ));
-
-        if ui.button("step").clicked() {
-            self.rng.step();
-        }
     }
 
     fn rng(&self) -> &dyn rngs::ClassicRng {

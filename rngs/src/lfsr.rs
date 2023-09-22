@@ -20,6 +20,18 @@ impl Default for Lfsr {
     }
 }
 
+impl Lfsr {
+    pub fn next_bit(&mut self) -> Bit {
+        let mut next_bit = Bit::zero();
+        for (bit, tap) in self.bits.iter().zip(self.taps.iter()) {
+            if *tap {
+                next_bit ^= *bit;
+            }
+        }
+        next_bit
+    }
+}
+
 impl ClassicRng for Lfsr {
     // fn next(&mut self) -> u32 {
     //     let mut next_bit = Bit::zero();
