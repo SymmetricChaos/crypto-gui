@@ -41,7 +41,7 @@ impl ClassicRngFrame for LfsrFrame {
         };
         ui.add_space(16.0);
 
-        ui.subheading("RNG Internal State");
+        ui.subheading("Internal State");
         ui.label("Bits of state along the top row. And the bits tapped along the bottom row.");
         ui.add_space(8.0);
         if ui.button("step").clicked() {
@@ -54,7 +54,7 @@ impl ClassicRngFrame for LfsrFrame {
             .min_col_width(5.0)
             .show(ui, |ui| {
                 for b in self.rng.bits.iter_mut() {
-                    let x = RichText::from(b.to_string()).monospace();
+                    let x = RichText::from(b.to_string()).monospace().size(12.0);
                     if ui.button(x).clicked() {
                         b.flip()
                     }
@@ -63,12 +63,18 @@ impl ClassicRngFrame for LfsrFrame {
                 for t in self.rng.taps.iter_mut() {
                     match t {
                         true => {
-                            if ui.button(RichText::from("^").monospace()).clicked() {
+                            if ui
+                                .button(RichText::from("^").monospace().size(12.0))
+                                .clicked()
+                            {
                                 *t = false
                             }
                         }
                         false => {
-                            if ui.button(RichText::from("_").monospace()).clicked() {
+                            if ui
+                                .button(RichText::from("_").monospace().size(12.0))
+                                .clicked()
+                            {
                                 *t = true
                             }
                         }
