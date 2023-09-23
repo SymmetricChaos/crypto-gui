@@ -5,12 +5,14 @@ use lazy_static::lazy_static;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum RngCategory {
-    Other,
+    Pseudorandom,
+    Quasirandom,
+    Truerandom,
 }
 
 impl Default for RngCategory {
     fn default() -> Self {
-        Self::Other
+        Self::Pseudorandom
     }
 }
 
@@ -26,7 +28,9 @@ impl RngCategory {
 impl Display for RngCategory {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let name = match self {
-            RngCategory::Other => "Other",
+            RngCategory::Pseudorandom => "Pseudorandom",
+            RngCategory::Quasirandom => "Quasirandom",
+            RngCategory::Truerandom => "True Random",
         };
         write!(f, "{}", name)
     }

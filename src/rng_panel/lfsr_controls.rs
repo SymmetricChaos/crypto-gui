@@ -42,7 +42,7 @@ impl ClassicRngFrame for LfsrFrame {
         ui.add_space(16.0);
 
         ui.subheading("Internal State");
-        ui.label("Bits of state along the top row. And the bits tapped along the bottom row.");
+        ui.label("Bits of state along the top row with the tagged bits marked on the second row. New bits are pushed in from the left.");
         ui.add_space(8.0);
         if ui.button("step").clicked() {
             self.rng.step();
@@ -82,6 +82,7 @@ impl ClassicRngFrame for LfsrFrame {
                 }
             });
 
+        ui.add_space(8.0);
         ui.subheading(format!("Next Bit: {}", self.rng.next_bit()));
 
         ui.add_space(16.0);

@@ -1,1 +1,5 @@
-﻿{}
+﻿{
+    "Pseudorandom": "Pseudorandom numbers are sequences that pass statistical tests of randomness. While modern PRNGs pass dozens of intensive tests early PRNGs passed only a few weak tests.",
+    "Quasirandom": "Quasirandom numbers are sequences that while not passing statistical tests for randomness share the equidistribution property of random sequences.",
+    "True Random": "Truly random numbers cannot be created algorithmically and so no true random number generators are provded. It is unclear if truly random numbers exist though radioactive decay and electical noise are popular sources of randomness."
+}
