@@ -1,3 +1,4 @@
+pub mod halton_controls;
 pub mod lcg_controls;
 pub mod lfsr_controls;
 
