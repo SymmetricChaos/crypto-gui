@@ -50,6 +50,10 @@ impl ClassicRngFrame for HaltonFrame {
 
         ui.add_space(8.0);
         ui.subheading("Fractions");
+        if ui.small_button("Set to Start").clicked() {
+            self.rng.nums.iter_mut().for_each(|x| *x = 0);
+            self.rng.dens.iter_mut().for_each(|x| *x = 1);
+        }
         ui.label(format!("{:?}", self.rng.ratio_strings()));
 
         ui.add_space(8.0);

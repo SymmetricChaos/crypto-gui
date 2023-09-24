@@ -6,6 +6,7 @@ use std::fmt::Display;
 pub enum RngId {
     Lcg,
     Lfsr,
+    Halton,
 }
 
 impl Default for RngId {
@@ -29,6 +30,7 @@ impl Display for RngId {
         let name = match self {
             RngId::Lcg => "Linear Congruential Generator",
             RngId::Lfsr => "Linear Feedback Shift Register",
+            RngId::Halton => "Halton Sequence",
             // _ => "<<<MISSING NAME>>>",
         };
         write!(f, "{}", name)

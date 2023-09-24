@@ -8,7 +8,7 @@ use rngs::{
     ClassicRng,
 };
 
-use self::{lcg_controls::LcgFrame, lfsr_controls::LfsrFrame};
+use self::{halton_controls::HaltonFrame, lcg_controls::LcgFrame, lfsr_controls::LfsrFrame};
 
 pub trait ClassicRngFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
@@ -42,6 +42,7 @@ fn combox_box(
 pub struct RngInterface {
     lcg: LcgFrame,
     lfsr: LfsrFrame,
+    halton: HaltonFrame,
 }
 
 impl RngInterface {
@@ -53,7 +54,7 @@ impl RngInterface {
             ui,
         );
 
-        combox_box(&[], active_rng, RngCategory::Quasirandom, ui);
+        combox_box(&[RngId::Halton], active_rng, RngCategory::Quasirandom, ui);
 
         combox_box(&[], active_rng, RngCategory::Truerandom, ui);
     }
@@ -62,6 +63,7 @@ impl RngInterface {
         match active_rng {
             RngId::Lcg => &mut self.lcg,
             RngId::Lfsr => &mut self.lfsr,
+            RngId::Halton => &mut self.halton,
             // _ => todo!("<<<RNG NOT FOUND>>>"),
         }
     }
