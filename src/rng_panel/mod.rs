@@ -53,6 +53,8 @@ impl RngInterface {
         );
 
         combox_box(&[], active_rng, RngCategory::Quasirandom, ui);
+
+        combox_box(&[], active_rng, RngCategory::Truerandom, ui);
     }
 
     pub fn get_active_rng(&mut self, active_rng: &RngId) -> &mut dyn ClassicRngFrame {
