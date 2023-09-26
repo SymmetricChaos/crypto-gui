@@ -1,6 +1,7 @@
 pub mod halton_controls;
 pub mod lcg_controls;
 pub mod lfsr_controls;
+pub mod middle_square_controls;
 
 use egui::Ui;
 use rngs::{
