@@ -22,7 +22,7 @@ impl ClassicRngFrame for HaltonFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.subheading("Width");
         if ui
-            .add(DragValue::new(&mut self.rng.width).clamp_range(4..=8))
+            .add(DragValue::new(&mut self.rng.width).clamp_range(2..=8))
             .changed()
         {
             self.rng.state = self.rng.state % (10_u64.pow((self.rng.width + 1) as u32));

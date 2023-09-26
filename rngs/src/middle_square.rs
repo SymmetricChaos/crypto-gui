@@ -17,7 +17,7 @@ impl Default for MiddleSquare {
 impl ClassicRng for MiddleSquare {
     fn step(&mut self) {
         let sq = self.state * self.state;
-        let digits = format!("{:0w$}", sq, w = self.width);
+        let digits = format!("{:0w$}", sq, w = self.width * 2);
         self.state =
             u64::from_str_radix(&digits[self.width / 2..self.width + self.width / 2], 10).unwrap();
     }
