@@ -2,6 +2,7 @@ pub mod halton_controls;
 pub mod lcg_controls;
 pub mod lfsr_controls;
 pub mod middle_square_controls;
+pub mod weyl_controls;
 
 use egui::Ui;
 use rngs::{
@@ -11,7 +12,7 @@ use rngs::{
 
 use self::{
     halton_controls::HaltonFrame, lcg_controls::LcgFrame, lfsr_controls::LfsrFrame,
-    middle_square_controls::MiddleSquareFrame,
+    middle_square_controls::MiddleSquareFrame, weyl_controls::WeylSequenceFrame,
 };
 
 pub trait ClassicRngFrame {
@@ -48,6 +49,7 @@ pub struct RngInterface {
     lcg: LcgFrame,
     lfsr: LfsrFrame,
     middle_square: MiddleSquareFrame,
+    weyl: WeylSequenceFrame,
 }
 
 impl RngInterface {
@@ -59,7 +61,12 @@ impl RngInterface {
             ui,
         );
 
-        combox_box(&[RngId::Halton], active_rng, RngCategory::Quasirandom, ui);
+        combox_box(
+            &[RngId::Halton, RngId::Weyl],
+            active_rng,
+            RngCategory::Quasirandom,
+            ui,
+        );
 
         combox_box(&[], active_rng, RngCategory::Truerandom, ui);
     }
@@ -70,6 +77,7 @@ impl RngInterface {
             RngId::Lcg => &mut self.lcg,
             RngId::Lfsr => &mut self.lfsr,
             RngId::MiddleSquare => &mut self.middle_square,
+            RngId::Weyl => &mut self.weyl,
             // _ => todo!("<<<RNG NOT FOUND>>>"),
         }
     }

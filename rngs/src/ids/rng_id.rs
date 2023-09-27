@@ -8,6 +8,7 @@ pub enum RngId {
     Lcg,
     Lfsr,
     MiddleSquare,
+    Weyl,
 }
 
 impl Default for RngId {
@@ -33,6 +34,7 @@ impl Display for RngId {
             RngId::Lcg => "Linear Congruential Generator",
             RngId::Lfsr => "Linear Feedback Shift Register",
             RngId::MiddleSquare => "Middle Square",
+            RngId::Weyl => "Weyl Sequence",
             // _ => "<<<MISSING NAME>>>",
         };
         write!(f, "{}", name)
