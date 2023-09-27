@@ -9,7 +9,10 @@ use rngs::{
     ClassicRng,
 };
 
-use self::{halton_controls::HaltonFrame, lcg_controls::LcgFrame, lfsr_controls::LfsrFrame};
+use self::{
+    halton_controls::HaltonFrame, lcg_controls::LcgFrame, lfsr_controls::LfsrFrame,
+    middle_square_controls::MiddleSquareFrame,
+};
 
 pub trait ClassicRngFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
@@ -41,15 +44,16 @@ fn combox_box(
 
 #[derive(Default)]
 pub struct RngInterface {
+    halton: HaltonFrame,
     lcg: LcgFrame,
     lfsr: LfsrFrame,
-    halton: HaltonFrame,
+    middle_square: MiddleSquareFrame,
 }
 
 impl RngInterface {
     pub fn combo_boxes(&mut self, ui: &mut Ui, active_rng: &mut Option<RngId>) {
         combox_box(
-            &[RngId::Lcg, RngId::Lfsr],
+            &[RngId::Lcg, RngId::Lfsr, RngId::MiddleSquare],
             active_rng,
             RngCategory::Pseudorandom,
             ui,
@@ -62,9 +66,10 @@ impl RngInterface {
 
     pub fn get_active_rng(&mut self, active_rng: &RngId) -> &mut dyn ClassicRngFrame {
         match active_rng {
+            RngId::Halton => &mut self.halton,
             RngId::Lcg => &mut self.lcg,
             RngId::Lfsr => &mut self.lfsr,
-            RngId::Halton => &mut self.halton,
+            RngId::MiddleSquare => &mut self.middle_square,
             // _ => todo!("<<<RNG NOT FOUND>>>"),
         }
     }

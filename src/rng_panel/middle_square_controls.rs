@@ -4,11 +4,11 @@ use egui::{Button, DragValue};
 use rand::{thread_rng, Rng};
 use rngs::{middle_square::MiddleSquare, ClassicRng};
 
-pub struct HaltonFrame {
+pub struct MiddleSquareFrame {
     rng: MiddleSquare,
 }
 
-impl Default for HaltonFrame {
+impl Default for MiddleSquareFrame {
     fn default() -> Self {
         Self {
             rng: Default::default(),
@@ -16,9 +16,9 @@ impl Default for HaltonFrame {
     }
 }
 
-impl HaltonFrame {}
+impl MiddleSquareFrame {}
 
-impl ClassicRngFrame for HaltonFrame {
+impl ClassicRngFrame for MiddleSquareFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.subheading("Width");
         if ui
