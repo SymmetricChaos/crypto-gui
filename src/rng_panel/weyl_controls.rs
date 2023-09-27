@@ -2,7 +2,7 @@ use super::ClassicRngFrame;
 use crate::ui_elements::UiElements;
 use num::Integer;
 use rand::{thread_rng, Rng};
-use rngs::weyl::WeylSequence;
+use rngs::{weyl::WeylSequence, ClassicRng};
 use utils::text_functions::filter_string;
 
 pub struct WeylSequenceFrame {
@@ -43,6 +43,10 @@ impl ClassicRngFrame for WeylSequenceFrame {
             ui.error_text("");
         } else {
             ui.error_text("Increment must be co-prime to the Modulus.");
+        }
+        ui.add_space(16.0);
+        if ui.button("step").clicked() {
+            self.rng.step()
         }
     }
 

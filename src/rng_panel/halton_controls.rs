@@ -1,7 +1,7 @@
 use super::ClassicRngFrame;
 use crate::ui_elements::UiElements;
 use egui::DragValue;
-use rand::thread_rng;
+use rand::{thread_rng, Rng};
 use rngs::{halton::HaltonSequence, ClassicRng};
 
 pub struct HaltonFrame {
@@ -68,6 +68,9 @@ impl ClassicRngFrame for HaltonFrame {
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
+        for base in self.rng.bases.iter_mut() {
+            *base = rng.gen();
+        }
     }
 
     fn reset(&mut self) {

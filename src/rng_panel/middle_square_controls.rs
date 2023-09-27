@@ -1,34 +1,78 @@
 use super::ClassicRngFrame;
 use crate::ui_elements::UiElements;
-use egui::{Button, DragValue};
+use egui::{Button, DragValue, RichText};
 use rand::{thread_rng, Rng};
 use rngs::{middle_square::MiddleSquare, ClassicRng};
+use utils::text_functions::filter_string;
 
 pub struct MiddleSquareFrame {
     rng: MiddleSquare,
+    state_string: String,
+    position: usize,
 }
 
 impl Default for MiddleSquareFrame {
     fn default() -> Self {
+        let rng = MiddleSquare::default();
+        let state_string = rng.state.to_string();
         Self {
-            rng: Default::default(),
+            rng,
+            state_string,
+            position: 3,
         }
     }
 }
 
-impl MiddleSquareFrame {}
+impl MiddleSquareFrame {
+    fn show_method(&self, ui: &mut egui::Ui) {
+        let mut display_state = String::from("State:  ");
+        display_state.push_str(&" ".repeat(self.rng.width / 2));
+        display_state.push_str(&format!("{:0w$}", self.rng.state, w = self.rng.width));
+        ui.label(RichText::from(display_state).monospace().size(14.0));
+        let mut square_string = String::from("Square: ");
+        let digit_string = format!(
+            "{:0w$}",
+            self.rng.state * self.rng.state,
+            w = self.rng.width * 2
+        );
+        square_string.push_str(&digit_string);
+        ui.label(RichText::from(&square_string).monospace().size(14.0));
+        let mut next_string = String::from("Next:   ");
+        next_string.push_str(&" ".repeat(self.rng.width / 2));
+        next_string
+            .push_str(&digit_string[self.rng.width / 2..self.rng.width + self.rng.width / 2]);
+        ui.label(RichText::from(next_string).monospace().size(14.0));
+    }
+}
 
 impl ClassicRngFrame for MiddleSquareFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        ui.subheading("Width");
+        ui.subheading("Choose Width");
+
         if ui
-            .add(DragValue::new(&mut self.rng.width).clamp_range(2..=8))
+            .add(
+                DragValue::new(&mut self.position)
+                    .clamp_range(1..=4)
+                    .custom_formatter(|n, _| (2.0 * n).to_string())
+                    .speed(0.2),
+            )
             .changed()
         {
-            self.rng.state = self.rng.state % (10_u64.pow((self.rng.width + 1) as u32));
-        };
-        ui.label(format!("{:0w$}", self.rng.state, w = self.rng.width));
+            self.rng.width = self.position * 2;
+            self.rng.state = self.rng.state % (10_u64.pow((self.rng.width) as u32));
+        }
+
+        ui.subheading("Choose State");
+        if ui.control_string(&mut self.state_string).changed() {
+            filter_string(&mut self.state_string, &"0123456789");
+            self.rng.state = self.state_string.parse().unwrap_or(0);
+            self.rng.state = self.rng.state % (10_u64.pow((self.rng.width) as u32));
+        }
+
         ui.add_space(16.0);
+        self.show_method(ui);
+        ui.add_space(16.0);
+
         if self.rng.width % 2 == 0 {
             if ui.button("step").clicked() {
                 self.rng.step();
