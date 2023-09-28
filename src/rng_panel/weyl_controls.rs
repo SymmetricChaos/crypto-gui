@@ -7,38 +7,69 @@ use utils::text_functions::filter_string;
 
 pub struct WeylSequenceFrame {
     rng: WeylSequence,
+    state_string: String,
     modulus_string: String,
     increment_string: String,
 }
 
 impl Default for WeylSequenceFrame {
     fn default() -> Self {
-        let r = WeylSequence::default();
-        let m = r.modulus.to_string();
-        let i = r.increment.to_string();
+        let rng = WeylSequence::default();
+        let state_string = rng.state.to_string();
+        let modulus_string = rng.modulus.to_string();
+        let increment_string = rng.increment.to_string();
         Self {
-            rng: r,
-            modulus_string: m,
-            increment_string: i,
+            rng,
+            state_string,
+            modulus_string,
+            increment_string,
         }
     }
 }
 
-impl WeylSequenceFrame {}
+impl WeylSequenceFrame {
+    fn filter_and_parse(number: &mut u64, string: &mut String) {
+        filter_string(string, &"0123456789");
+        if string.is_empty() {
+            *string = String::from("0");
+            *number = 0;
+        }
+        *number = match string.parse() {
+            Ok(n) => n,
+            Err(_) => {
+                *string = u64::MAX.to_string();
+                u64::MAX
+            }
+        }
+    }
+}
 
 impl ClassicRngFrame for WeylSequenceFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        ui.subheading("Modulus");
-        if ui.control_string(&mut self.modulus_string).changed() {
-            filter_string(&mut self.modulus_string, &"0123456789");
-            self.rng.modulus = self.modulus_string.parse().unwrap();
+        ui.subheading("Set State");
+        if ui.control_string(&mut self.state_string).changed() {
+            Self::filter_and_parse(&mut self.rng.state, &mut self.state_string);
         }
         ui.add_space(16.0);
-        ui.subheading("Increment");
+        ui.subheading("Set Increment");
         if ui.control_string(&mut self.increment_string).changed() {
-            filter_string(&mut self.increment_string, &"0123456789");
-            self.rng.increment = self.increment_string.parse().unwrap();
+            Self::filter_and_parse(&mut self.rng.increment, &mut self.increment_string);
         }
+        ui.add_space(16.0);
+        ui.subheading("Set Modulus");
+        if ui.control_string(&mut self.modulus_string).changed() {
+            Self::filter_and_parse(&mut self.rng.modulus, &mut self.modulus_string);
+        }
+        ui.add_space(16.0);
+        ui.subheading("Calculation");
+        ui.label(format!(
+            "({} + {}) % {} = {}",
+            self.rng.state,
+            self.rng.increment,
+            self.rng.modulus,
+            (self.rng.state + self.rng.increment) % self.rng.modulus
+        ));
+
         if self.rng.increment.gcd(&self.rng.modulus) == 1 {
             ui.error_text("");
         } else {
