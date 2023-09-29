@@ -1,5 +1,6 @@
 use super::ClassicRngFrame;
 use crate::ui_elements::UiElements;
+use egui::RichText;
 use num::Integer;
 use rand::{thread_rng, Rng};
 use rngs::{weyl::WeylSequence, ClassicRng};
@@ -47,7 +48,8 @@ impl WeylSequenceFrame {
 impl ClassicRngFrame for WeylSequenceFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.subheading("Set State");
-        if ui.control_string(&mut self.state_string).changed() {
+        let state = ui.control_string(&mut self.state_string);
+        if state.changed() || state.lost_focus() {
             Self::filter_and_parse(&mut self.rng.state, &mut self.state_string);
         }
         ui.add_space(16.0);
@@ -62,13 +64,14 @@ impl ClassicRngFrame for WeylSequenceFrame {
         }
         ui.add_space(16.0);
         ui.subheading("Calculation");
-        ui.label(format!(
+        let calc = format!(
             "({} + {}) % {} = {}",
             self.rng.state,
             self.rng.increment,
             self.rng.modulus,
             (self.rng.state + self.rng.increment) % self.rng.modulus
-        ));
+        );
+        ui.label(RichText::new(calc).size(16.0));
 
         if self.rng.increment.gcd(&self.rng.modulus) == 1 {
             ui.error_text("");
