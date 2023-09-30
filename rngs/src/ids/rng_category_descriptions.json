@@ -1,5 +1,5 @@
 ﻿{
     "Pseudorandom": "Pseudorandom numbers are sequences that pass statistical tests of randomness. While modern PRNGs pass dozens of intensive tests early PRNGs passed only a few weak tests.",
-    "Quasirandom": "Quasirandom numbers are used in some circumstances to replace pseudorandom numbners due to their highly uniform distribution and tendency not to create clumps or voids. In dimensions greater than one quasirandom numbers can fill a volume more evenly than a grid or lattice.",
+    "Quasirandom": "Quasirandom numbers are used in some circumstances to replace pseudorandom numbners due to their highly uniform distribution. In dimensions greater than one quasirandom numbers can fill a volume more evenly than a grid or lattice.",
     "True Random": "Truly random numbers cannot be created algorithmically and so no true random number generators are provided. It is unclear if truly random numbers exist though radioactive decay and electical noise are popular sources of randomness."
 }
