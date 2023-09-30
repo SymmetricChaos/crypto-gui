@@ -2,7 +2,6 @@ use crate::traits::ClassicRng;
 
 pub struct Pcg {
     pub state: u64,
-    pub modulus: u64,
     pub multiplier: u64,
     pub increment: u64,
 }
@@ -11,7 +10,6 @@ impl Default for Pcg {
     fn default() -> Self {
         Self {
             state: 1257924810,
-            modulus: 4294967295,
             multiplier: 1664525,
             increment: 1013904223,
         }
@@ -20,7 +18,7 @@ impl Default for Pcg {
 
 impl Pcg {
     pub fn pcg_rs(&self) -> u32 {
-        (self.state >> (29 - (self.state >> 61))) as u32
+        (self.state >> (29 - (self.state >> 61))) as u32 // the cast from u64 to u32 truncates
     }
 
     pub fn pcg_rr(&self) -> u32 {
@@ -41,8 +39,7 @@ impl Pcg {
 
 impl ClassicRng for Pcg {
     fn step(&mut self) {
-        // No overflows can happen here because the inputs are are u32 initially
-        let m = (self.multiplier as u128 * self.state as u128) % self.modulus as u128;
-        self.state = ((m + self.increment as u128) % self.modulus as u128) as u64;
+        let m = (self.multiplier as u128).wrapping_mul(self.multiplier as u128);
+        self.state = m.wrapping_add(self.increment as u128) as u64; // the cast from u128 to u64 truncates
     }
 }
