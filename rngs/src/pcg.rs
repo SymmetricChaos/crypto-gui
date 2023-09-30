@@ -39,7 +39,7 @@ impl Pcg {
 
 impl ClassicRng for Pcg {
     fn step(&mut self) {
-        let m = (self.multiplier as u128).wrapping_mul(self.multiplier as u128);
-        self.state = m.wrapping_add(self.increment as u128) as u64; // the cast from u128 to u64 truncates
+        let m = (self.multiplier).wrapping_mul(self.multiplier);
+        self.state = m.wrapping_add(self.increment); // the cast from u128 to u64 truncates
     }
 }
