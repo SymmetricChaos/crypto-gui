@@ -1,5 +1,5 @@
 use super::ClassicRngFrame;
-use crate::ui_elements::UiElements;
+use crate::ui_elements::{filter_and_parse_u64, UiElements};
 use egui::RichText;
 use num::Integer;
 use rand::{thread_rng, Rng};
@@ -28,39 +28,24 @@ impl Default for WeylSequenceFrame {
     }
 }
 
-impl WeylSequenceFrame {
-    fn filter_and_parse(number: &mut u64, string: &mut String) {
-        filter_string(string, &"0123456789");
-        if string.is_empty() {
-            *string = String::from("0");
-            *number = 0;
-        }
-        *number = match string.parse() {
-            Ok(n) => n,
-            Err(_) => {
-                *string = u64::MAX.to_string();
-                u64::MAX
-            }
-        }
-    }
-}
+impl WeylSequenceFrame {}
 
 impl ClassicRngFrame for WeylSequenceFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.subheading("Set State");
         let state = ui.control_string(&mut self.state_string);
         if state.changed() || state.lost_focus() {
-            Self::filter_and_parse(&mut self.rng.state, &mut self.state_string);
+            filter_and_parse_u64(&mut self.rng.state, &mut self.state_string);
         }
         ui.add_space(16.0);
         ui.subheading("Set Increment");
         if ui.control_string(&mut self.increment_string).changed() {
-            Self::filter_and_parse(&mut self.rng.increment, &mut self.increment_string);
+            filter_and_parse_u64(&mut self.rng.increment, &mut self.increment_string);
         }
         ui.add_space(16.0);
         ui.subheading("Set Modulus");
         if ui.control_string(&mut self.modulus_string).changed() {
-            Self::filter_and_parse(&mut self.rng.modulus, &mut self.modulus_string);
+            filter_and_parse_u64(&mut self.rng.modulus, &mut self.modulus_string);
         }
         ui.add_space(16.0);
         ui.subheading("Calculation");

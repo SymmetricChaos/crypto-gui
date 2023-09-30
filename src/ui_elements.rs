@@ -4,6 +4,7 @@ use eframe::egui::RichText;
 use egui::{Color32, DragValue, Response, TextStyle, Ui};
 use egui_extras::{Column, TableBuilder};
 use std::fmt::Display;
+use utils::text_functions::filter_string;
 
 pub trait UiElements {
     // A label with larger text
@@ -238,6 +239,21 @@ pub fn string_slider(ui: &mut Ui, string: &str, position: &mut usize) -> Respons
             })
             .speed(0.2),
     )
+}
+
+pub fn filter_and_parse_u64(number: &mut u64, string: &mut String) {
+    filter_string(string, &"0123456789");
+    if string.is_empty() {
+        *string = String::from("0");
+        *number = 0;
+    }
+    *number = match string.parse() {
+        Ok(n) => n,
+        Err(_) => {
+            *string = u64::MAX.to_string();
+            u64::MAX
+        }
+    }
 }
 
 pub fn binary_to_text_input_mode(ui: &mut egui::Ui, current_value: &mut BinaryToTextMode) {
