@@ -241,6 +241,21 @@ pub fn string_slider(ui: &mut Ui, string: &str, position: &mut usize) -> Respons
     )
 }
 
+pub fn filter_and_parse_u32(number: &mut u32, string: &mut String) {
+    filter_string(string, &"0123456789");
+    if string.is_empty() {
+        *string = String::from("0");
+        *number = 0;
+    }
+    *number = match string.parse() {
+        Ok(n) => n,
+        Err(_) => {
+            *string = u32::MAX.to_string();
+            u32::MAX
+        }
+    }
+}
+
 pub fn filter_and_parse_u64(number: &mut u64, string: &mut String) {
     filter_string(string, &"0123456789");
     if string.is_empty() {

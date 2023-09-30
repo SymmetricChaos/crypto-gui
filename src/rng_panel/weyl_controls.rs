@@ -4,7 +4,6 @@ use egui::RichText;
 use num::Integer;
 use rand::{thread_rng, Rng};
 use rngs::{weyl::WeylSequence, ClassicRng};
-use utils::text_functions::filter_string;
 
 pub struct WeylSequenceFrame {
     rng: WeylSequence,

@@ -2,7 +2,7 @@ use egui::TextStyle;
 use rand::{thread_rng, Rng};
 use rngs::{lcg::Lcg, ClassicRng};
 
-use crate::ui_elements::UiElements;
+use crate::ui_elements::{filter_and_parse_u32, UiElements};
 
 use super::ClassicRngFrame;
 
@@ -37,14 +37,7 @@ impl LcgFrame {
             )
             .changed()
         {
-            let x: u32 = match string.parse() {
-                Ok(x) => x,
-                Err(_) => {
-                    *string = u32::MAX.to_string();
-                    u32::MAX
-                }
-            };
-            *n = x
+            filter_and_parse_u32(n, string);
         }
     }
 
@@ -58,6 +51,31 @@ impl LcgFrame {
 
 impl ClassicRngFrame for LcgFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+        // ui.subheading("State");
+        // if ui.control_string(&mut self.state_string).changed() {
+        //     filter_and_parse_u32(&mut self.rng.state, &mut self.state_string);
+        // }
+        // ui.add_space(8.0);
+
+        // ui.subheading("Multiplier");
+        // if ui.control_string(&mut self.multiplier_string).changed() {
+        //     filter_and_parse_u32(&mut self.rng.multiplier, &mut self.multiplier_string);
+        // }
+        // ui.add_space(8.0);
+
+        // ui.subheading("Increment");
+        // if ui.control_string(&mut self.increment_string).changed() {
+        //     filter_and_parse_u32(&mut self.rng.increment, &mut self.increment_string);
+        // }
+        // ui.add_space(8.0);
+
+        // ui.subheading("Modulus (Divisor)");
+        // if ui.control_string(&mut self.modulus_string).changed() {
+        //     filter_and_parse_u32(&mut self.rng.modulus, &mut self.modulus_string);
+        // }
+        // ui.add_space(8.0);
+
+        ui.subheading("Calculation");
         ui.horizontal(|ui| {
             ui.subheading("(");
             Self::input_control(ui, &mut self.state_string, &mut self.rng.state);
@@ -73,18 +91,6 @@ impl ClassicRngFrame for LcgFrame {
             m = (m + self.rng.increment as u64) % self.rng.modulus as u64;
             ui.false_control_string(format!("{m}"));
         });
-
-        // ui.subheading("State");
-        // Self::input_control(ui, &mut self.state_string, &mut self.rng.state);
-
-        // ui.subheading("Multiplier");
-        // Self::input_control(ui, &mut self.multiplier_string, &mut self.rng.multiplier);
-
-        // ui.subheading("Increment");
-        // Self::input_control(ui, &mut self.increment_string, &mut self.rng.increment);
-
-        // ui.subheading("Modulus (Divisor)");
-        // Self::input_control(ui, &mut self.modulus_string, &mut self.rng.modulus);
 
         if ui.button("step").clicked() {
             self.rng.step();
