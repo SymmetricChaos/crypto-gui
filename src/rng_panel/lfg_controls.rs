@@ -1,12 +1,9 @@
 use std::collections::VecDeque;
 
-use crypto_gui::ui_elements::UiElements;
-use egui::{DragValue, RichText};
-use rand::{thread_rng, Rng};
+use egui::{DragValue, TextStyle};
 use rngs::{lfg::Lfg, ClassicRng};
-use utils::bits::{bits_to_int_big_endian, bits_to_int_little_endian, Bit};
 
-use crate::ui_elements::UiElements;
+use crate::ui_elements::{filter_and_parse_u32, UiElements};
 
 use super::ClassicRngFrame;
 
@@ -18,15 +15,35 @@ pub struct LfgFrame {
 
 impl Default for LfgFrame {
     fn default() -> Self {
-        Self {
+        let mut s = Self {
             rng: Default::default(),
             vector_length: 16,
             state_strings: VecDeque::from([]),
-        }
+        };
+        s.set_state_strings();
+        s
     }
 }
 
-impl LfgFrame {}
+impl LfgFrame {
+    fn set_state_strings(&mut self) {
+        self.state_strings = self.rng.state.iter().map(|n| n.to_string()).collect();
+    }
+
+    fn input_control(ui: &mut egui::Ui, string: &mut String, n: &mut u32) {
+        if ui
+            .add_sized(
+                [40.0, 20.0],
+                egui::TextEdit::singleline(string)
+                    .font(TextStyle::Monospace)
+                    .clip_text(false),
+            )
+            .changed()
+        {
+            filter_and_parse_u32(n, string);
+        }
+    }
+}
 
 impl ClassicRngFrame for LfgFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
@@ -39,13 +56,19 @@ impl ClassicRngFrame for LfgFrame {
             while self.rng.state.len() < self.vector_length {
                 self.rng.state.push_back(1)
             }
-
             self.rng.tap = self.rng.tap.min(self.rng.state.len() - 1);
+            self.set_state_strings();
         };
         ui.add_space(16.0);
 
+        ui.subheading("Tap Location");
+        ui.add(DragValue::new(&mut self.rng.tap).clamp_range(1..=(self.vector_length - 1)));
+
         ui.subheading("State");
         ui.label("Numbers stored in the vector");
+        for (s, n) in self.state_strings.iter_mut().zip(self.rng.state.iter_mut()) {
+            Self::input_control(ui, s, n);
+        }
 
         ui.add_space(8.0);
 
@@ -54,8 +77,8 @@ impl ClassicRngFrame for LfgFrame {
             self.rng.step();
         }
 
-        ui.add_space(8.0);
-        ui.subheading(format!("Next Value: {}", self.rng.next_bit()));
+        // ui.add_space(8.0);
+        // ui.subheading(format!("Next Value: {}", self.rng.next_bit()));
     }
 
     fn rng(&self) -> &dyn rngs::ClassicRng {
@@ -63,13 +86,7 @@ impl ClassicRngFrame for LfgFrame {
     }
 
     fn randomize(&mut self) {
-        let mut rng = thread_rng();
-        for b in self.rng.bits.iter_mut() {
-            *b = Bit::from(rng.gen_bool(0.5));
-        }
-        for t in self.rng.taps.iter_mut() {
-            *t = rng.gen_bool(0.15);
-        }
+        todo!()
     }
 
     fn reset(&mut self) {

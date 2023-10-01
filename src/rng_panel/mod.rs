@@ -14,7 +14,8 @@ use rngs::{
 
 use self::{
     halton_controls::HaltonFrame, lcg_controls::LcgFrame, lfsr_controls::LfsrFrame,
-    middle_square_controls::MiddleSquareFrame, weyl_controls::WeylSequenceFrame,
+    middle_square_controls::MiddleSquareFrame, pcg_controls::PcgFrame,
+    weyl_controls::WeylSequenceFrame,
 };
 
 pub trait ClassicRngFrame {
@@ -51,13 +52,14 @@ pub struct RngInterface {
     lcg: LcgFrame,
     lfsr: LfsrFrame,
     middle_square: MiddleSquareFrame,
+    pcg: PcgFrame,
     weyl: WeylSequenceFrame,
 }
 
 impl RngInterface {
     pub fn combo_boxes(&mut self, ui: &mut Ui, active_rng: &mut Option<RngId>) {
         combox_box(
-            &[RngId::Lcg, RngId::Lfsr, RngId::MiddleSquare],
+            &[RngId::Lcg, RngId::Lfsr, RngId::MiddleSquare, RngId::Pcg],
             active_rng,
             RngCategory::Pseudorandom,
             ui,
@@ -77,10 +79,12 @@ impl RngInterface {
         match active_rng {
             RngId::Halton => &mut self.halton,
             RngId::Lcg => &mut self.lcg,
+            // RngId::Lfg => &mut self.lfg,
             RngId::Lfsr => &mut self.lfsr,
             RngId::MiddleSquare => &mut self.middle_square,
+            RngId::Pcg => &mut self.pcg,
             RngId::Weyl => &mut self.weyl,
-            // _ => todo!("<<<RNG NOT FOUND>>>"),
+            _ => todo!("<<<RNG NOT FOUND>>>"),
         }
     }
 }

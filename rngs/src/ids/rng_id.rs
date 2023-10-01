@@ -6,8 +6,10 @@ use std::fmt::Display;
 pub enum RngId {
     Halton,
     Lcg,
+    Lfg,
     Lfsr,
     MiddleSquare,
+    Pcg,
     Weyl,
 }
 
@@ -32,8 +34,10 @@ impl Display for RngId {
         let name = match self {
             RngId::Halton => "Halton Sequence",
             RngId::Lcg => "Linear Congruential Generator",
+            RngId::Lfg => "Lagged Fibonacci Generator",
             RngId::Lfsr => "Linear Feedback Shift Register",
             RngId::MiddleSquare => "Middle Square",
+            RngId::Pcg => "Permuted Congruential Generator",
             RngId::Weyl => "Weyl Sequence",
             // _ => "<<<MISSING NAME>>>",
         };
