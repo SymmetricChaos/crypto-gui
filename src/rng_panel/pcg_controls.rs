@@ -5,7 +5,7 @@ use rngs::{
     ClassicRng,
 };
 
-use crate::ui_elements::{filter_and_parse_u32, UiElements};
+use crate::ui_elements::{filter_and_parse_u64, UiElements};
 
 use super::ClassicRngFrame;
 
@@ -28,7 +28,7 @@ impl Default for PcgFrame {
 }
 
 impl PcgFrame {
-    fn input_control(ui: &mut egui::Ui, string: &mut String, n: &mut u32) {
+    fn input_control(ui: &mut egui::Ui, string: &mut String, n: &mut u64) {
         if ui
             .add_sized(
                 [40.0, 20.0],
@@ -38,7 +38,7 @@ impl PcgFrame {
             )
             .changed()
         {
-            filter_and_parse_u32(n, string);
+            filter_and_parse_u64(n, string);
         }
     }
 
@@ -52,6 +52,9 @@ impl PcgFrame {
 impl ClassicRngFrame for PcgFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.subheading("Calculation");
+        let m = (self.rng.state)
+            .wrapping_mul(self.rng.multiplier)
+            .wrapping_add(self.rng.increment);
         ui.horizontal(|ui| {
             ui.subheading("(");
             Self::input_control(ui, &mut self.state_string, &mut self.rng.state);
@@ -60,9 +63,7 @@ impl ClassicRngFrame for PcgFrame {
             ui.subheading(" + ");
             Self::input_control(ui, &mut self.increment_string, &mut self.rng.increment);
             ui.subheading(" = ");
-            let mut m =
-                (self.rng.multiplier as u64 * self.rng.state as u64) % self.rng.modulus as u64;
-            m = (m + self.rng.increment as u64) % self.rng.modulus as u64;
+
             ui.false_control_string(format!("{m}"));
         });
 
@@ -114,7 +115,6 @@ impl ClassicRngFrame for PcgFrame {
         self.rng.state = rng.gen();
         self.rng.multiplier = rng.gen();
         self.rng.increment = rng.gen();
-        self.rng.modulus = rng.gen();
         self.set_all_strings();
     }
 

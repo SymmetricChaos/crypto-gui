@@ -21,7 +21,7 @@ impl Default for Lcg {
 impl ClassicRng for Lcg {
     fn step(&mut self) {
         // No overflows can happen here because the inputs are are u32 initially
-        let m = (self.multiplier as u64 * self.state as u64) % self.modulus as u64;
+        let m = (self.state as u64 * self.multiplier as u64) % self.modulus as u64;
         self.state = ((m + self.increment as u64) % self.modulus as u64) as u32;
     }
 }

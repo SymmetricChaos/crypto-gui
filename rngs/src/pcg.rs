@@ -1,5 +1,6 @@
 use crate::traits::ClassicRng;
 
+#[derive(Debug, PartialEq, Eq)]
 pub enum PcgTransform {
     Rs,
     Rr,
@@ -53,7 +54,7 @@ impl Pcg {
 
 impl ClassicRng for Pcg {
     fn step(&mut self) {
-        self.state = (self.multiplier)
+        self.state = (self.state)
             .wrapping_mul(self.multiplier)
             .wrapping_add(self.increment);
     }
