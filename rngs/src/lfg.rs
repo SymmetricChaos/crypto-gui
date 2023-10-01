@@ -19,12 +19,13 @@ impl Default for Lfg {
 }
 
 impl ClassicRng for Lfg {
-    fn step(&mut self) {
+    fn step(&mut self) -> u32 {
         // Will panic if tap is invalid
         // No overflows can happen here because the inputs are are u32 initially
         let m =
             ((self.state[0] as u64) + (self.state[self.tap] as u64) % self.modulus as u64) as u32;
         self.state.pop_front();
         self.state.push_back(m);
+        m
     }
 }

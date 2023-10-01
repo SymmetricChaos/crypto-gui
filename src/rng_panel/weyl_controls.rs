@@ -1,5 +1,5 @@
 use super::ClassicRngFrame;
-use crate::ui_elements::{filter_and_parse_u64, UiElements};
+use crate::ui_elements::{filter_and_parse_u32, UiElements};
 use egui::RichText;
 use num::Integer;
 use rand::{thread_rng, Rng};
@@ -34,17 +34,17 @@ impl ClassicRngFrame for WeylSequenceFrame {
         ui.subheading("Set State");
         let state = ui.control_string(&mut self.state_string);
         if state.changed() || state.lost_focus() {
-            filter_and_parse_u64(&mut self.rng.state, &mut self.state_string);
+            filter_and_parse_u32(&mut self.rng.state, &mut self.state_string);
         }
         ui.add_space(16.0);
         ui.subheading("Set Increment");
         if ui.control_string(&mut self.increment_string).changed() {
-            filter_and_parse_u64(&mut self.rng.increment, &mut self.increment_string);
+            filter_and_parse_u32(&mut self.rng.increment, &mut self.increment_string);
         }
         ui.add_space(16.0);
         ui.subheading("Set Modulus");
         if ui.control_string(&mut self.modulus_string).changed() {
-            filter_and_parse_u64(&mut self.rng.modulus, &mut self.modulus_string);
+            filter_and_parse_u32(&mut self.rng.modulus, &mut self.modulus_string);
         }
         ui.add_space(16.0);
         ui.subheading("Calculation");
@@ -64,7 +64,7 @@ impl ClassicRngFrame for WeylSequenceFrame {
         }
         ui.add_space(16.0);
         if ui.button("step").clicked() {
-            self.rng.step()
+            self.rng.step();
         }
     }
 

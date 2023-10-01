@@ -1,9 +1,9 @@
 use crate::traits::ClassicRng;
 
 pub struct WeylSequence {
-    pub state: u64,
-    pub increment: u64,
-    pub modulus: u64,
+    pub state: u32,
+    pub increment: u32,
+    pub modulus: u32,
 }
 
 impl Default for WeylSequence {
@@ -17,7 +17,8 @@ impl Default for WeylSequence {
 }
 
 impl ClassicRng for WeylSequence {
-    fn step(&mut self) {
+    fn step(&mut self) -> u32 {
         self.state = (self.state + self.increment) % self.modulus;
+        self.state
     }
 }

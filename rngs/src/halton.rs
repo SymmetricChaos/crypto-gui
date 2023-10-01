@@ -33,7 +33,7 @@ impl HaltonSequence {
 }
 
 impl ClassicRng for HaltonSequence {
-    fn step(&mut self) {
+    fn step(&mut self) -> u32 {
         for ((num, den), base) in self
             .nums
             .iter_mut()
@@ -53,6 +53,7 @@ impl ClassicRng for HaltonSequence {
                 *num = (*base + 1) * y - x;
             }
         }
+        0
     }
 }
 
