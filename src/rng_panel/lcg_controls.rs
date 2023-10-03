@@ -2,7 +2,7 @@ use egui::TextStyle;
 use rand::{thread_rng, Rng};
 use rngs::{lcg::Lcg, ClassicRng};
 
-use crate::ui_elements::{filter_and_parse_u32, UiElements};
+use crate::ui_elements::{filter_and_parse_u32, generate_random_nums, UiElements};
 
 use super::ClassicRngFrame;
 
@@ -12,6 +12,7 @@ pub struct LcgFrame {
     multiplier_string: String,
     increment_string: String,
     modulus_string: String,
+    randoms: String,
 }
 
 impl Default for LcgFrame {
@@ -22,6 +23,7 @@ impl Default for LcgFrame {
             multiplier_string: String::from("1664525"),
             increment_string: String::from("1013904223"),
             modulus_string: String::from("4294967295"),
+            randoms: String::new(),
         }
     }
 }
@@ -91,11 +93,15 @@ impl ClassicRngFrame for LcgFrame {
             m = (m + self.rng.increment as u64) % self.rng.modulus as u64;
             ui.false_control_string(format!("{m}"));
         });
-
+        ui.add_space(8.0);
         if ui.button("step").clicked() {
             self.rng.step();
             self.set_all_strings();
         }
+        ui.add_space(8.0);
+        generate_random_nums(ui, &mut self.rng, 10, &mut self.randoms);
+        self.state_string = self.rng.state.to_string();
+        ui.text_edit_multiline(&mut self.randoms);
     }
 
     fn rng(&self) -> &dyn rngs::ClassicRng {

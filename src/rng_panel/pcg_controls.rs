@@ -1,5 +1,4 @@
 use egui::TextStyle;
-use itertools::Itertools;
 use rand::{thread_rng, Rng};
 use rngs::{
     pcg::{Pcg, PcgTransform},
@@ -15,7 +14,6 @@ pub struct PcgFrame {
     state_string: String,
     multiplier_string: String,
     increment_string: String,
-    n_randoms: usize,
     randoms: String,
 }
 
@@ -26,7 +24,6 @@ impl Default for PcgFrame {
             state_string: String::from("1257924810"),
             multiplier_string: String::from("1664525"),
             increment_string: String::from("1013904223"),
-            n_randoms: 10,
             randoms: String::new(),
         }
     }
@@ -111,10 +108,8 @@ impl ClassicRngFrame for PcgFrame {
         }
         ui.add_space(16.0);
 
-        if ui.button("Generate").clicked() {
-            self.randoms = generate_random_nums(&mut self.rng, self.n_randoms);
-            self.state_string = self.rng.state.to_string();
-        }
+        generate_random_nums(ui, &mut self.rng, 10, &mut self.randoms);
+        self.state_string = self.rng.state.to_string();
         ui.text_edit_multiline(&mut self.randoms);
     }
 

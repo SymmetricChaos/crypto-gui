@@ -3,7 +3,7 @@ use std::collections::VecDeque;
 use egui::{DragValue, TextStyle};
 use rngs::{lfg::Lfg, ClassicRng};
 
-use crate::ui_elements::{filter_and_parse_u32, UiElements};
+use crate::ui_elements::{filter_and_parse_u32, generate_random_nums, UiElements};
 
 use super::ClassicRngFrame;
 
@@ -11,6 +11,7 @@ pub struct LfgFrame {
     rng: Lfg,
     vector_length: usize,
     state_strings: VecDeque<String>,
+    randoms: String,
 }
 
 impl Default for LfgFrame {
@@ -19,6 +20,7 @@ impl Default for LfgFrame {
             rng: Default::default(),
             vector_length: 16,
             state_strings: VecDeque::from([]),
+            randoms: String::new(),
         };
         s.set_state_strings();
         s
@@ -71,14 +73,14 @@ impl ClassicRngFrame for LfgFrame {
         }
 
         ui.add_space(8.0);
-
-        ui.add_space(8.0);
         if ui.button("step").clicked() {
             self.rng.step();
         }
 
-        // ui.add_space(8.0);
-        // ui.subheading(format!("Next Value: {}", self.rng.next_bit()));
+        ui.add_space(8.0);
+        generate_random_nums(ui, &mut self.rng, 10, &mut self.randoms);
+        self.set_state_strings();
+        ui.text_edit_multiline(&mut self.randoms);
     }
 
     fn rng(&self) -> &dyn rngs::ClassicRng {
