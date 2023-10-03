@@ -1,11 +1,12 @@
 use egui::TextStyle;
+use itertools::Itertools;
 use rand::{thread_rng, Rng};
 use rngs::{
     pcg::{Pcg, PcgTransform},
     ClassicRng,
 };
 
-use crate::ui_elements::{filter_and_parse_u64, UiElements};
+use crate::ui_elements::{filter_and_parse_u64, generate_random_nums, UiElements};
 
 use super::ClassicRngFrame;
 
@@ -14,6 +15,8 @@ pub struct PcgFrame {
     state_string: String,
     multiplier_string: String,
     increment_string: String,
+    n_randoms: usize,
+    randoms: String,
 }
 
 impl Default for PcgFrame {
@@ -23,6 +26,8 @@ impl Default for PcgFrame {
             state_string: String::from("1257924810"),
             multiplier_string: String::from("1664525"),
             increment_string: String::from("1013904223"),
+            n_randoms: 10,
+            randoms: String::new(),
         }
     }
 }
@@ -102,8 +107,16 @@ impl ClassicRngFrame for PcgFrame {
 
         if ui.button("step").clicked() {
             self.rng.step();
-            self.set_all_strings();
+            self.state_string = self.rng.state.to_string();
         }
+        ui.add_space(16.0);
+
+        if ui.button("Generate").clicked() {
+            let v = generate_random_nums(&mut self.rng, self.n_randoms);
+            self.randoms = v.iter().map(|x| x.to_string()).join(", ");
+            self.state_string = self.rng.state.to_string();
+        }
+        ui.text_edit_multiline(&mut self.randoms);
     }
 
     fn rng(&self) -> &dyn rngs::ClassicRng {
