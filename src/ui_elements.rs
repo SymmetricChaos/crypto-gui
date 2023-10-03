@@ -3,6 +3,7 @@ use codes::binary_to_text::BinaryToTextMode;
 use eframe::egui::RichText;
 use egui::{Color32, DragValue, Response, TextStyle, Ui};
 use egui_extras::{Column, TableBuilder};
+use itertools::Itertools;
 use rngs::ClassicRng;
 use std::fmt::Display;
 use utils::text_functions::filter_string;
@@ -272,12 +273,12 @@ pub fn filter_and_parse_u64(number: &mut u64, string: &mut String) {
     }
 }
 
-pub fn generate_random_nums(rng: &mut dyn ClassicRng, n: usize) -> Vec<u32> {
+pub fn generate_random_nums(rng: &mut dyn ClassicRng, n: usize) -> String {
     let mut vec = Vec::with_capacity(n);
     for _ in 0..n {
         vec.push(rng.step())
     }
-    vec
+    vec.iter().map(|x| x.to_string()).join(", ")
 }
 
 pub fn binary_to_text_input_mode(ui: &mut egui::Ui, current_value: &mut BinaryToTextMode) {

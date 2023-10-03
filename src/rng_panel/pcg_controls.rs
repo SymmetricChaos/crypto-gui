@@ -112,8 +112,7 @@ impl ClassicRngFrame for PcgFrame {
         ui.add_space(16.0);
 
         if ui.button("Generate").clicked() {
-            let v = generate_random_nums(&mut self.rng, self.n_randoms);
-            self.randoms = v.iter().map(|x| x.to_string()).join(", ");
+            self.randoms = generate_random_nums(&mut self.rng, self.n_randoms);
             self.state_string = self.rng.state.to_string();
         }
         ui.text_edit_multiline(&mut self.randoms);
