@@ -24,35 +24,27 @@ impl HaltonFrame {}
 
 impl ClassicRngFrame for HaltonFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        ui.subheading("Number of Dimensions");
-        if ui
-            .add(DragValue::new(&mut self.vector_length).clamp_range(1..=4))
-            .changed()
-        {
-            self.rng.bases.truncate(self.vector_length);
-            while self.rng.bases.len() < self.vector_length {
-                self.rng.bases.push(2)
-            }
-            self.rng.nums.truncate(self.vector_length);
-            while self.rng.nums.len() < self.vector_length {
-                self.rng.nums.push(0)
-            }
-            self.rng.dens.truncate(self.vector_length);
-            while self.rng.dens.len() < self.vector_length {
-                self.rng.dens.push(1)
-            }
-        };
         ui.add_space(16.0);
 
-        ui.subheading("Bases");
-        if ui.small_button("reset").clicked() {
-            for n in self.rng.nums.iter_mut() {
-                *n = 0;
-            }
-            for d in self.rng.dens.iter_mut() {
-                *d = 1;
-            }
-        }
+        ui.horizontal(|ui| {
+            ui.subheading("Bases");
+            ui.subheading("Number of Dimensions");
+            if ui
+                .add(DragValue::new(&mut self.vector_length).clamp_range(1..=4))
+                .changed()
+            {
+                if self.vector_length > self.rng.bases.len() {
+                    let extra = self.vector_length - self.rng.bases.len();
+                    self.rng.bases.extend(std::iter::once(2).take(extra));
+                    self.rng.nums.extend(std::iter::once(0).take(extra));
+                    self.rng.dens.extend(std::iter::once(1).take(extra));
+                } else {
+                    self.rng.bases.truncate(self.vector_length);
+                    self.rng.nums.truncate(self.vector_length);
+                    self.rng.dens.truncate(self.vector_length);
+                }
+            };
+        });
         for b in self.rng.bases.iter_mut() {
             ui.add(DragValue::new(b).clamp_range(2..=32));
             ui.end_row();
@@ -60,11 +52,11 @@ impl ClassicRngFrame for HaltonFrame {
 
         ui.add_space(8.0);
         ui.subheading("Fractions");
-        if ui.small_button("Set to Start").clicked() {
+        if ui.small_button("Return to Start").clicked() {
             self.rng.nums.iter_mut().for_each(|x| *x = 0);
             self.rng.dens.iter_mut().for_each(|x| *x = 1);
         }
-        ui.label(format!("{:?}", self.rng.ratio_strings()));
+        ui.label(format!("({:?})", self.rng.ratio_strings().join(", ")));
 
         ui.add_space(8.0);
         if ui.button("step").clicked() {
@@ -75,12 +67,12 @@ impl ClassicRngFrame for HaltonFrame {
         if ui.button("Generate Random Tuples").clicked() {
             for _ in 0..5 {
                 self.rng.step();
-                for r in self.rng.ratio_strings() {
-                    if !self.randoms.is_empty() {
-                        self.randoms.push_str(", ");
-                    }
-                    self.randoms.push_str(&r);
+                if !self.randoms.is_empty() {
+                    self.randoms.push_str(", ");
                 }
+                self.randoms.push('(');
+                self.randoms.push_str(&self.rng.ratio_strings().join(", "));
+                self.randoms.push(')');
             }
         }
         ui.text_edit_multiline(&mut self.randoms);
