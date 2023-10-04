@@ -7,6 +7,7 @@ use rngs::{halton::HaltonSequence, ClassicRng};
 pub struct HaltonFrame {
     rng: HaltonSequence,
     vector_length: usize,
+    randoms: String,
 }
 
 impl Default for HaltonFrame {
@@ -14,6 +15,7 @@ impl Default for HaltonFrame {
         Self {
             rng: Default::default(),
             vector_length: 2,
+            randoms: String::new(),
         }
     }
 }
@@ -60,6 +62,20 @@ impl ClassicRngFrame for HaltonFrame {
         if ui.button("step").clicked() {
             self.rng.step();
         }
+        ui.add_space(8.0);
+
+        if ui.button("Generate Random Tuples").clicked() {
+            for _ in 0..5 {
+                self.rng.step();
+                if !self.randoms.is_empty() {
+                    self.randoms.push_str(", ");
+                }
+                for r in self.rng.ratio_strings() {
+                    self.randoms.push_str(&r);
+                }
+            }
+        }
+        ui.text_edit_multiline(&mut self.randoms);
     }
 
     fn rng(&self) -> &dyn rngs::ClassicRng {
