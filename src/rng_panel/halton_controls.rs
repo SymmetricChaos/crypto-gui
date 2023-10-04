@@ -45,6 +45,14 @@ impl ClassicRngFrame for HaltonFrame {
         ui.add_space(16.0);
 
         ui.subheading("Bases");
+        if ui.small_button("reset").clicked() {
+            for n in self.rng.nums.iter_mut() {
+                *n = 0;
+            }
+            for d in self.rng.dens.iter_mut() {
+                *d = 1;
+            }
+        }
         for b in self.rng.bases.iter_mut() {
             ui.add(DragValue::new(b).clamp_range(2..=32));
             ui.end_row();
@@ -67,10 +75,10 @@ impl ClassicRngFrame for HaltonFrame {
         if ui.button("Generate Random Tuples").clicked() {
             for _ in 0..5 {
                 self.rng.step();
-                if !self.randoms.is_empty() {
-                    self.randoms.push_str(", ");
-                }
                 for r in self.rng.ratio_strings() {
+                    if !self.randoms.is_empty() {
+                        self.randoms.push_str(", ");
+                    }
                     self.randoms.push_str(&r);
                 }
             }
