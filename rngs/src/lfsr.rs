@@ -1,11 +1,12 @@
 use num::Zero;
-use utils::bits::{bits_from_str, Bit};
+use utils::bits::{bits_from_str, bits_to_int_big_endian, bits_to_int_little_endian, Bit};
 
 use crate::traits::ClassicRng;
 
 pub struct Lfsr {
     pub bits: Vec<Bit>,
     pub taps: Vec<bool>,
+    pub big_endian: bool,
 }
 
 impl Default for Lfsr {
@@ -16,6 +17,7 @@ impl Default for Lfsr {
                 false, false, false, false, false, false, false, false, false, false, true, false,
                 true, true, false, true,
             ],
+            big_endian: true,
         }
     }
 }
@@ -42,6 +44,9 @@ impl ClassicRng for Lfsr {
         }
         self.bits.pop();
         self.bits.insert(0, next_bit);
-        0
+        match self.big_endian {
+            true => bits_to_int_big_endian(&self.bits),
+            false => bits_to_int_little_endian(&self.bits),
+        }
     }
 }

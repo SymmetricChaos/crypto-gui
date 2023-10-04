@@ -3,13 +3,14 @@ use rand::{thread_rng, Rng};
 use rngs::{lfsr::Lfsr, ClassicRng};
 use utils::bits::{bits_to_int_big_endian, bits_to_int_little_endian, Bit};
 
-use crate::ui_elements::UiElements;
+use crate::ui_elements::{generate_random_nums_box, UiElements};
 
 use super::ClassicRngFrame;
 
 pub struct LfsrFrame {
     rng: Lfsr,
     vector_length: usize,
+    randoms: String,
 }
 
 impl Default for LfsrFrame {
@@ -17,6 +18,7 @@ impl Default for LfsrFrame {
         Self {
             rng: Default::default(),
             vector_length: 16,
+            randoms: String::new(),
         }
     }
 }
@@ -27,7 +29,7 @@ impl ClassicRngFrame for LfsrFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.subheading("Number of Bits");
         if ui
-            .add(DragValue::new(&mut self.vector_length).clamp_range(8..=20))
+            .add(DragValue::new(&mut self.vector_length).clamp_range(4..=32))
             .changed()
         {
             self.rng.bits.truncate(self.vector_length);
@@ -87,14 +89,16 @@ impl ClassicRngFrame for LfsrFrame {
 
         ui.add_space(16.0);
         ui.subheading("Current State as an Integer");
-        ui.label(format!(
-            "{} (big endian)",
-            bits_to_int_big_endian(&self.rng.bits)
-        ));
-        ui.label(format!(
-            "{} (little endian)",
-            bits_to_int_little_endian(&self.rng.bits)
-        ));
+        match self.rng.big_endian {
+            true => {
+                ui.label(format!("{}", bits_to_int_big_endian(&self.rng.bits)));
+            }
+            false => {
+                ui.label(format!("{}", bits_to_int_little_endian(&self.rng.bits)));
+            }
+        }
+        ui.add_space(16.0);
+        generate_random_nums_box(ui, &mut self.rng, 10, &mut self.randoms);
     }
 
     fn rng(&self) -> &dyn rngs::ClassicRng {
