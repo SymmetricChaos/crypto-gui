@@ -273,17 +273,23 @@ pub fn filter_and_parse_u64(number: &mut u64, string: &mut String) {
     }
 }
 
-pub fn generate_random_nums(ui: &mut Ui, rng: &mut dyn ClassicRng, n: usize, randoms: &mut String) {
-    let mut vec = Vec::with_capacity(n);
-    for _ in 0..n {
-        vec.push(rng.step())
-    }
+pub fn generate_random_nums_box(
+    ui: &mut Ui,
+    rng: &mut dyn ClassicRng,
+    n: usize,
+    randoms: &mut String,
+) {
     if ui.button("Generate Random Numbers").clicked() {
+        let mut vec = Vec::with_capacity(n);
+        for _ in 0..n {
+            vec.push(rng.step())
+        }
         if !randoms.is_empty() {
             randoms.push_str(", ");
         }
         randoms.push_str(&vec.iter().map(|x| x.to_string()).join(", "));
     }
+    ui.text_edit_multiline(randoms);
 }
 
 pub fn binary_to_text_input_mode(ui: &mut egui::Ui, current_value: &mut BinaryToTextMode) {

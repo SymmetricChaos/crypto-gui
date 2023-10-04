@@ -1,5 +1,5 @@
 use super::ClassicRngFrame;
-use crate::ui_elements::{filter_and_parse_u32, UiElements};
+use crate::ui_elements::{filter_and_parse_u32, generate_random_nums_box, UiElements};
 use egui::RichText;
 use num::Integer;
 use rand::{thread_rng, Rng};
@@ -10,6 +10,7 @@ pub struct WeylSequenceFrame {
     state_string: String,
     modulus_string: String,
     increment_string: String,
+    randoms: String,
 }
 
 impl Default for WeylSequenceFrame {
@@ -23,6 +24,7 @@ impl Default for WeylSequenceFrame {
             state_string,
             modulus_string,
             increment_string,
+            randoms: String::new(),
         }
     }
 }
@@ -66,6 +68,9 @@ impl ClassicRngFrame for WeylSequenceFrame {
         if ui.button("step").clicked() {
             self.rng.step();
         }
+        ui.add_space(16.0);
+        generate_random_nums_box(ui, &mut self.rng, 10, &mut self.randoms);
+        self.state_string = self.rng.state.to_string();
     }
 
     fn rng(&self) -> &dyn rngs::ClassicRng {

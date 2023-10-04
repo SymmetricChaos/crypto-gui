@@ -5,7 +5,7 @@ use rngs::{
     ClassicRng,
 };
 
-use crate::ui_elements::{filter_and_parse_u64, generate_random_nums, UiElements};
+use crate::ui_elements::{filter_and_parse_u64, generate_random_nums_box, UiElements};
 
 use super::ClassicRngFrame;
 
@@ -108,9 +108,8 @@ impl ClassicRngFrame for PcgFrame {
         }
         ui.add_space(16.0);
 
-        generate_random_nums(ui, &mut self.rng, 10, &mut self.randoms);
+        generate_random_nums_box(ui, &mut self.rng, 10, &mut self.randoms);
         self.state_string = self.rng.state.to_string();
-        ui.text_edit_multiline(&mut self.randoms);
     }
 
     fn rng(&self) -> &dyn rngs::ClassicRng {
