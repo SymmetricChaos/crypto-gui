@@ -65,6 +65,14 @@ impl ClassicRngFrame for PcgFrame {
             ui.subheading(" + ");
             Self::input_control(ui, &mut self.increment_string, &mut self.rng.increment);
             ui.subheading(" = ");
+            if self.rng.increment % 2 == 0 {
+                self.rng.increment = self.rng.increment.wrapping_add(1);
+                self.increment_string = self.rng.increment.to_string();
+            }
+            if self.rng.multiplier == 0 {
+                self.rng.multiplier = 1;
+                self.multiplier_string = String::from("1");
+            }
 
             ui.false_control_string(format!("{m}"));
         });

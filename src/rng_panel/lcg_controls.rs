@@ -1,4 +1,5 @@
 use egui::TextStyle;
+use num::Integer;
 use rand::{thread_rng, Rng};
 use rngs::{lcg::Lcg, ClassicRng};
 
@@ -53,30 +54,6 @@ impl LcgFrame {
 
 impl ClassicRngFrame for LcgFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        // ui.subheading("State");
-        // if ui.control_string(&mut self.state_string).changed() {
-        //     filter_and_parse_u32(&mut self.rng.state, &mut self.state_string);
-        // }
-        // ui.add_space(8.0);
-
-        // ui.subheading("Multiplier");
-        // if ui.control_string(&mut self.multiplier_string).changed() {
-        //     filter_and_parse_u32(&mut self.rng.multiplier, &mut self.multiplier_string);
-        // }
-        // ui.add_space(8.0);
-
-        // ui.subheading("Increment");
-        // if ui.control_string(&mut self.increment_string).changed() {
-        //     filter_and_parse_u32(&mut self.rng.increment, &mut self.increment_string);
-        // }
-        // ui.add_space(8.0);
-
-        // ui.subheading("Modulus (Divisor)");
-        // if ui.control_string(&mut self.modulus_string).changed() {
-        //     filter_and_parse_u32(&mut self.rng.modulus, &mut self.modulus_string);
-        // }
-        // ui.add_space(8.0);
-
         ui.subheading("Calculation");
         ui.horizontal(|ui| {
             ui.subheading("(");
@@ -93,6 +70,22 @@ impl ClassicRngFrame for LcgFrame {
             m = (m + self.rng.increment as u64) % self.rng.modulus as u64;
             ui.false_control_string(format!("{m}"));
         });
+        if self.rng.modulus < 2 {
+            self.rng.modulus = 2;
+        }
+        if self.rng.increment.gcd(&self.rng.modulus) != 1 {
+            self.rng.increment = self.rng.increment.wrapping_add(1);
+        }
+        if self.rng.multiplier == 0 {
+            self.rng.multiplier = 1;
+        }
+        if self.rng.increment > self.rng.modulus {
+            self.rng.increment %= self.rng.modulus;
+        }
+        if self.rng.multiplier > self.rng.modulus {
+            self.rng.multiplier %= self.rng.modulus;
+        }
+        self.set_all_strings();
         ui.add_space(8.0);
         if ui.button("step").clicked() {
             self.rng.step();
