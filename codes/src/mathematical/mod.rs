@@ -4,6 +4,7 @@ pub mod elias_integers;
 pub mod fibonacci;
 pub mod fibonacci_integers;
 pub mod godel;
+pub mod gray;
 pub mod levenshtein;
 pub mod levenshtein_integers;
 pub mod roman_numeral;
