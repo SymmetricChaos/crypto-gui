@@ -1,7 +1,10 @@
 use std::collections::VecDeque;
 
 use egui::{DragValue, TextStyle};
-use rngs::{lfg::Lfg, ClassicRng};
+use rngs::{
+    lfg::{FibOp, Lfg},
+    ClassicRng,
+};
 
 use crate::ui_elements::{filter_and_parse_u32, generate_random_nums_box, UiElements};
 
@@ -61,11 +64,18 @@ impl ClassicRngFrame for LfgFrame {
             self.rng.tap = self.rng.tap.min(self.rng.state.len() - 1);
             self.set_state_strings();
         };
-        ui.add_space(16.0);
+        ui.add_space(8.0);
 
         ui.subheading("Tap Location");
         ui.add(DragValue::new(&mut self.rng.tap).clamp_range(1..=(self.vector_length - 1)));
 
+        ui.add_space(8.0);
+        ui.subheading("Operation");
+        ui.selectable_value(&mut self.rng.op, FibOp::Add, "Addition");
+        ui.selectable_value(&mut self.rng.op, FibOp::Mul, "Multiplication");
+        ui.selectable_value(&mut self.rng.op, FibOp::Xor, "Bitwise XOR");
+
+        ui.add_space(8.0);
         ui.subheading("State");
         ui.label("Numbers stored in the vector");
         for (s, n) in self.state_strings.iter_mut().zip(self.rng.state.iter_mut()) {
