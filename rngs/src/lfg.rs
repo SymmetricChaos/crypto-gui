@@ -40,7 +40,7 @@ impl Default for Lfg {
 impl ClassicRng for Lfg {
     fn step(&mut self) -> u32 {
         // Will panic if tap is invalid
-        // No overflows can happen here because the inputs are are u32 initially
+        // No overflows can happen here for addition, multiplication, or XOR because the inputs are are u32 initially
         let m = (self
             .op
             .op(self.state[0] as u64, self.state[self.tap] as u64)

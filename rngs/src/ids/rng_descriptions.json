@@ -1,6 +1,6 @@
 ﻿{
   "Halton Sequence": "The Halton sequence produces tuples of rational numbers between 0 and 1 distributed across any number of dimensions.",
-  "Lagged Fibonacci Generator": "An LFG uses a generalized Fibonacci sequence to generate pseudorandom numbers.",
+  "Lagged Fibonacci Generator": "An LFG uses a generalized Fibonacci sequence to generate pseudorandom numbers. They are similar to a Linear Feedback Shift Register operating on number rather than bits and like LFSRs selection of parameters has a very strong influence on the quality of the output.",
   "Linear Congruential Generator": "LCGs are among the simplest forms of pseduorandom number generators using the well known arithmetic operations of multiplication, addition, and division. At each step the current state is multiplied by a constant, then has a constant added, and finally is divided by a constant and the remainder taken. The increment must be coprime to the modulus and the multiplier must be greater than one.",
   "Linear Feedback Shift Register": "LFRSs are simple pseudorandom number generators that work by examining a few bits of their state to calculate the next bit.",
   "Middle Square": "The middle square method produces random numbers of a given width, padded on the left with zeroes, by squaring a value and then taking the middle digits as the next value. The quality of these sequences is very low and often falls quickly into short repeating sequences.",
