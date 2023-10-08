@@ -33,8 +33,8 @@ impl CodeFrame for BytesAsNumbersFrame {
         ui.checkbox(&mut self.code.fixed_width, "Fixed Width");
 
         ui.add_space(16.0);
-        ui.subheading("Endianness");
-        ui.label("Little-endian numbers are written in the \"usual\" way with place values decreasing left-to-right. Big-endian numbers have place values increase left-to-right.");
+        ui.subheading("Digit Order");
+        ui.label("Digits in little-endian order are written in the \"usual\" way starting with the most significant digits with place value decreasing from left-to-right. Numbers may also be written with digits in reverse order.");
         ui.selectable_value(&mut self.code.little_endian, true, "little-endian");
         ui.selectable_value(&mut self.code.little_endian, false, "big-endian");
         ui.add_space(16.0);
