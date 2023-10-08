@@ -1,70 +1,93 @@
-use crate::{
-    errors::CodeError,
-    traits::{Code, IOMode, LetterAndWordCode},
-};
+use utils::bits::IS_BITS;
 
-pub struct Gray {
-    pub maps: LetterAndWordCode<usize>,
+use crate::{errors::CodeError, traits::Code};
+
+pub struct GrayCode {
     pub width: usize,
-    pub mode: IOMode,
 }
 
-impl Gray {
+impl Default for GrayCode {
+    fn default() -> Self {
+        Self { width: 4 }
+    }
+}
+
+impl GrayCode {
     pub fn encode_u32(&self, n: u32) -> String {
         let gray = n ^ (n >> 1);
-        format!("{:0<1$b}", gray, self.width)
+        format!("{:0>1$b}", gray, self.width)
     }
-}
 
-impl Default for Gray {
-    fn default() -> Self {
-        let maps = LetterAndWordCode::<usize>::default();
-        Self {
-            maps,
-            width: 4,
-            mode: IOMode::Integer,
+    pub fn decode_u32(&self, n: u32) -> String {
+        let mut mask = n;
+        let mut out = n;
+        while mask != 0 {
+            mask >>= 1;
+            out ^= mask;
         }
+        out.to_string()
     }
 }
 
-impl Code for Gray {
+impl Code for GrayCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        if self.mode == IOMode::Integer {
-            let m = 2_u32.pow(self.width as u32);
-            let mut out = String::new();
-            for s in text.split(" ") {
-                let n =
-                    u32::from_str_radix(s, 10).map_err(|_| CodeError::invalid_input_group(s))?;
-                if n >= m {
-                    return Err(CodeError::Input(format!(
-                        "for a width of {} inputs must be less than {}",
-                        self.width, m
-                    )));
-                };
-                out.push_str(&self.encode_u32(n))
-            }
-            Ok(out)
-        } else if self.mode == IOMode::Letter {
-            todo!()
-        } else {
-            todo!()
+        let m = 2_u32.pow(self.width as u32);
+        let mut out = String::new();
+        for s in text.split(" ") {
+            let n = u32::from_str_radix(s, 10).map_err(|_| CodeError::invalid_input_group(s))?;
+            if n >= m {
+                return Err(CodeError::Input(format!(
+                    "for a width of {} inputs must be less than {}",
+                    self.width, m
+                )));
+            };
+            out.push_str(&self.encode_u32(n));
+            out.push(' ');
         }
+        out.pop();
+        Ok(out)
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        todo!()
+        let mut out = String::new();
+        for s in text.split(" ") {
+            if !IS_BITS.is_match(s) || s.chars().count() != self.width {
+                return Err(CodeError::invalid_input_group(s));
+            }
+            let n = u32::from_str_radix(s, 2).map_err(|_| CodeError::invalid_input_group(s))?;
+            out.push_str(&self.decode_u32(n));
+            out.push(' ');
+        }
+        out.pop();
+        Ok(out)
     }
 }
 
 #[cfg(test)]
-mod rgray_tests {
+mod gray_tests {
     use super::*;
 
+    #[ignore]
     #[test]
     fn gray_code_generator() {
-        let code = Gray::default();
+        let code = GrayCode::default();
         for n in 0..16 {
-            println!("{}", code.encode_u32(n))
+            println!("{}", code.encode_u32(n));
         }
+    }
+
+    const PLAINTEXT: &'static str = "1 2 3 14 15";
+    const ENCODEDTEXT: &'static str = "0001 0011 0010 1001 1000";
+
+    #[test]
+    fn encode_test() {
+        let code = GrayCode::default();
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
+    }
+
+    #[test]
+    fn decode_test() {
+        let code = GrayCode::default();
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
     }
 }
