@@ -28,8 +28,17 @@ impl CodeFrame for BytesAsNumbersFrame {
             self.code.set_width()
         }
         ui.add_space(16.0);
+        ui.subheading("Fixed Width");
         ui.label("Fixed width numbers insert zeroes to the left so that every number takes up the same amount of space. This may be easier to read.");
         ui.checkbox(&mut self.code.fixed_width, "Fixed Width");
+
+        ui.add_space(16.0);
+        ui.subheading("Endianness");
+        ui.label("Little-endian numbers are written in the \"usual\" way with place values decreasing left-to-right. Big-endian numbers have place values increase left-to-right.");
+        ui.selectable_value(&mut self.code.little_endian, true, "little-endian");
+        ui.selectable_value(&mut self.code.little_endian, false, "big-endian");
+        ui.add_space(16.0);
+
         ui.add_space(16.0);
         ui.binary_to_text_input_mode(&mut self.code.mode);
         ui.add_space(16.0);

@@ -10,6 +10,7 @@ pub struct BytesAsNumbers {
     pub fixed_width: bool,
     pub radix: u32,
     pub width: usize,
+    pub little_endian: bool,
 }
 
 impl Default for BytesAsNumbers {
@@ -19,6 +20,7 @@ impl Default for BytesAsNumbers {
             fixed_width: false,
             radix: 10,
             width: 3,
+            little_endian: true,
         }
     }
 }
@@ -33,7 +35,7 @@ impl BytesAsNumbers {
     }
 
     pub fn byte_to_number(&self, byte: &u8) -> String {
-        if self.fixed_width {
+        let s = if self.fixed_width {
             match self.radix {
                 2 => return format!("{:08b}", byte),
                 8 => return format!("{:03o}", byte),
@@ -49,11 +51,21 @@ impl BytesAsNumbers {
                 16 => format!("{:X}", byte),
                 r => u8_to_string_with_radix(byte, r as u8),
             }
+        };
+        if !self.little_endian {
+            s.chars().rev().collect()
+        } else {
+            s
         }
     }
 
     pub fn number_to_byte(&self, number: &str) -> Result<u8, CodeError> {
-        u8::from_str_radix(number, self.radix).map_err(|e| CodeError::Input(e.to_string()))
+        if !self.little_endian {
+            u8::from_str_radix(&number.chars().rev().collect::<String>(), self.radix)
+                .map_err(|e| CodeError::Input(e.to_string()))
+        } else {
+            u8::from_str_radix(number, self.radix).map_err(|e| CodeError::Input(e.to_string()))
+        }
     }
 
     // pub fn encode_file(&self) -> Result<String, CodeError> {
@@ -104,8 +116,11 @@ mod numeric_tests {
 
     const TESTS_10: [(&'static str, &'static str); 2] =
         [("<=>", "60 61 62"), ("tHe", "116 72 101")];
+    const TESTS_10_BE: [(&'static str, &'static str); 2] =
+        [("<=>", "06 16 26"), ("tHe", "611 27 101")];
     const TESTS_36: [(&'static str, &'static str); 2] = [("<=>", "1O 1P 1Q"), ("tHe", "38 20 2T")];
-
+    const TESTS_36_BE: [(&'static str, &'static str); 2] =
+        [("<=>", "O1 P1 Q1"), ("tHe", "83 02 T2")];
     #[test]
     fn encode_test() {
         let mut code = BytesAsNumbers::default();
@@ -119,6 +134,19 @@ mod numeric_tests {
     }
 
     #[test]
+    fn encode_test_bigendian() {
+        let mut code = BytesAsNumbers::default();
+        code.little_endian = false;
+        for (ptext, ctext) in TESTS_10_BE {
+            assert_eq!(code.encode(ptext).unwrap(), ctext);
+        }
+        code.radix = 36;
+        for (ptext, ctext) in TESTS_36_BE {
+            assert_eq!(code.encode(ptext).unwrap(), ctext);
+        }
+    }
+
+    #[test]
     fn decode_test() {
         let mut code = BytesAsNumbers::default();
         for (ptext, ctext) in TESTS_10 {
@@ -126,6 +154,19 @@ mod numeric_tests {
         }
         code.radix = 36;
         for (ptext, ctext) in TESTS_36 {
+            assert_eq!(code.decode(ctext).unwrap(), ptext);
+        }
+    }
+
+    #[test]
+    fn decode_test_bigendian() {
+        let mut code = BytesAsNumbers::default();
+        code.little_endian = false;
+        for (ptext, ctext) in TESTS_10_BE {
+            assert_eq!(code.decode(ctext).unwrap(), ptext);
+        }
+        code.radix = 36;
+        for (ptext, ctext) in TESTS_36_BE {
             assert_eq!(code.decode(ctext).unwrap(), ptext);
         }
     }
