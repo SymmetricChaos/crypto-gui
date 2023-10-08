@@ -69,7 +69,7 @@ impl Code for Godel {
                 }
             }
             return Ok(out.to_str_radix(10));
-        } else if self.mode == IOMode::Letter {
+        } else if self.mode == IOMode::Word {
             for (s, prime) in text.split(" ").zip(self.primes.iter()) {
                 match self.maps.get_by_word(s) {
                     Ok(v) => out *= BigUint::from(*prime).pow(*v as u32),
