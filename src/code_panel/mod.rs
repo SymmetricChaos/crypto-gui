@@ -12,8 +12,8 @@ use self::{
     baudot_controls::BaudotFrame, block_controls::BlockCodeFrame,
     crc_controls::CyclicRedundancyCheckFrame, damm_controls::DammFrame,
     elias_controls::EliasCodeFrame, fibonacci_controls::FibonacciCodeFrame,
-    godel_controls::GodelFrame, hamming_controls::HammingFrame, isbn_contols::IsbnFrame,
-    itf_controls::ItfFrame, levenshtein_controls::LevenshteinCodeFrame,
+    godel_controls::GodelFrame, gray_controls::GrayCodeFrame, hamming_controls::HammingFrame,
+    isbn_contols::IsbnFrame, itf_controls::ItfFrame, levenshtein_controls::LevenshteinCodeFrame,
     linotype_controls::LinotypeFrame, luhn_controls::LuhnAlgorithmFrame,
     m_of_n_controls::MofNCodeFrame, morse_controls::MorseFrame, needle_controls::NeedleFrame,
     numeric_controls::BytesAsNumbersFrame, parity_check_controls::ParityBitFrame,
@@ -38,6 +38,7 @@ mod damm_controls;
 mod elias_controls;
 mod fibonacci_controls;
 mod godel_controls;
+pub mod gray_controls;
 mod hamming_controls;
 mod isbn_contols;
 mod itf_controls;
@@ -133,6 +134,7 @@ pub struct CodeInterface {
     // Mathematical
     basen: BaseNFrame,
     godel: GodelFrame,
+    gray: GrayCodeFrame,
     roman: RomanNumeralFrame,
 
     // Prefix
@@ -184,6 +186,7 @@ impl CodeInterface {
                 CodeId::Elias,
                 CodeId::Fibonacci,
                 CodeId::Godel,
+                CodeId::Gray,
                 CodeId::Levenshtein,
                 CodeId::RomanNumeral,
                 CodeId::Unary,
@@ -250,6 +253,7 @@ impl CodeInterface {
             CodeId::Elias => &mut self.elias,
             CodeId::Fibonacci => &mut self.fibonacci,
             CodeId::Godel => &mut self.godel,
+            CodeId::Gray => &mut self.gray,
             CodeId::Hamming => &mut self.hamming,
             CodeId::Isbn => &mut self.isbn,
             CodeId::Itf => &mut self.itf,

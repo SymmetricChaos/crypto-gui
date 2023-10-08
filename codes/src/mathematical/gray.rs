@@ -27,6 +27,11 @@ impl GrayCode {
         }
         out.to_string()
     }
+
+    // pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (u32, String)>> {
+    //     let m = 2_u32.pow(self.width as u32);
+    //     Box::new((0..m).map(|n| (n, self.encode_u32(n))))
+    // }
 }
 
 impl Code for GrayCode {
