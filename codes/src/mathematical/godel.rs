@@ -154,13 +154,13 @@ mod godel_tests {
     const ENCODEDTEXT: &'static str = "2250";
 
     #[test]
-    fn encrypt_test() {
+    fn encode_test() {
         let code = Godel::default();
         assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
     }
 
     #[test]
-    fn decrypt_test() {
+    fn decode_test() {
         let code = Godel::default();
         assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
     }

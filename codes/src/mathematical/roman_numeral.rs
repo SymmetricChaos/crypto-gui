@@ -180,13 +180,13 @@ mod roman_numeral_tests {
     const ENCODEDTEXT: &'static str = "XXXIX CCXLVI DCCLXXXIX MMCDXXI IX";
 
     #[test]
-    fn encrypt_test() {
+    fn encode_test() {
         let code = RomanNumeral::default();
         assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
     }
 
     #[test]
-    fn decrypt_test() {
+    fn decode_test() {
         let code = RomanNumeral::default();
         assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
     }

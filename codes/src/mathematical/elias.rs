@@ -125,7 +125,7 @@ mod elias_tests {
     const ENCODEDTEXT_OMEGA: &'static str = "0100110";
 
     #[test]
-    fn encrypt_test() {
+    fn encode_test() {
         let mut code = EliasCode::default();
         code.mode = IOMode::Letter;
         assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_DELTA);
@@ -136,7 +136,7 @@ mod elias_tests {
     }
 
     #[test]
-    fn decrypt_test() {
+    fn decode_test() {
         let mut code = EliasCode::default();
         code.mode = IOMode::Letter;
         assert_eq!(code.decode(ENCODEDTEXT_DELTA).unwrap(), PLAINTEXT);
