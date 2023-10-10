@@ -6,6 +6,8 @@ use crate::{
 pub struct UnaryCode {
     pub maps: LetterAndWordCode<String>,
     pub mode: IOMode,
+    pub invert: bool,
+    pub symmetric: bool,
 }
 
 impl UnaryCode {
@@ -20,6 +22,20 @@ impl UnaryCode {
     pub fn usize_to_unary(&self, n: usize) -> String {
         "1".repeat(n) + "0"
     }
+
+    pub fn swap_01(s: String) -> String {
+        s.chars()
+            .map(|c| {
+                if c == '0' {
+                    '1'
+                } else if c == '1' {
+                    '0'
+                } else {
+                    c
+                }
+            })
+            .collect()
+    }
 }
 
 impl Default for UnaryCode {
@@ -30,8 +46,8 @@ impl Default for UnaryCode {
         UnaryCode {
             maps,
             mode: IOMode::Letter,
-            // s1: '1',
-            // s2: '0',
+            invert: false,
+            symmetric: false,
         }
     }
 }
@@ -58,12 +74,21 @@ impl Code for UnaryCode {
                 output.push('0');
             }
         }
-        Ok(output)
+        if self.invert {
+            Ok(Self::swap_01(output))
+        } else {
+            Ok(output)
+        }
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut output = String::new();
         let mut buffer = String::with_capacity(self.maps.letter_map.len());
+        let text = if self.invert {
+            Self::swap_01(text.to_string())
+        } else {
+            text.to_string()
+        };
         if self.mode == IOMode::Letter {
             for b in text.chars() {
                 buffer.push(b);
