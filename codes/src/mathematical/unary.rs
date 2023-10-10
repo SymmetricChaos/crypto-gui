@@ -1,3 +1,5 @@
+use utils::text_functions::swap_ab;
+
 use crate::{
     errors::CodeError,
     traits::{Code, IOMode, LetterAndWordCode},
@@ -17,24 +19,6 @@ impl UnaryCode {
 
     pub fn set_word_map(&mut self) {
         self.maps.set_word_map(|(n, _)| "1".repeat(n) + "0")
-    }
-
-    pub fn usize_to_unary(&self, n: usize) -> String {
-        "1".repeat(n) + "0"
-    }
-
-    pub fn swap_01(s: String) -> String {
-        s.chars()
-            .map(|c| {
-                if c == '0' {
-                    '1'
-                } else if c == '1' {
-                    '0'
-                } else {
-                    c
-                }
-            })
-            .collect()
     }
 }
 
@@ -75,7 +59,7 @@ impl Code for UnaryCode {
             }
         }
         if self.invert {
-            Ok(Self::swap_01(output))
+            Ok(swap_ab('0', '1', &output))
         } else {
             Ok(output)
         }
@@ -85,7 +69,7 @@ impl Code for UnaryCode {
         let mut output = String::new();
         let mut buffer = String::with_capacity(self.maps.letter_map.len());
         let text = if self.invert {
-            Self::swap_01(text.to_string())
+            swap_ab('0', '1', text)
         } else {
             text.to_string()
         };

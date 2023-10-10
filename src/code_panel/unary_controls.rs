@@ -16,6 +16,16 @@ impl Default for UnaryCodeFrame {
     }
 }
 
+impl UnaryCodeFrame {
+    pub fn usize_to_unary(&self, n: usize) -> String {
+        if self.code.invert {
+            "0".repeat(n) + "1"
+        } else {
+            "1".repeat(n) + "0"
+        }
+    }
+}
+
 impl CodeFrame for UnaryCodeFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
         ui.group(|ui| {
@@ -49,12 +59,12 @@ impl CodeFrame for UnaryCodeFrame {
                 ui.two_column_table("Code", "Word", Box::new(self.code.maps.words_codes()));
             }
             IOMode::Integer => {
-                ui.label("Convert between numbers their unary codes. When decoding the '�' symbol appears when an invalid code is encoutered.");
+                ui.label("Convert between numbers and their unary encodings. When decoding the '�' symbol appears when an invalid code is encoutered.");
                 ui.add_space(16.0);
                 ui.two_column_table(
                     "Code",
                     "Integer",
-                    Box::new((0..6).into_iter().map(|n| (n, self.code.usize_to_unary(n)))),
+                    Box::new((0..6).into_iter().map(|n| (n, self.usize_to_unary(n)))),
                 );
             }
         }

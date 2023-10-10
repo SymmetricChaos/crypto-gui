@@ -84,6 +84,20 @@ pub fn random_string_sample_replace<R: Rng>(s: &str, n: usize, rng: &mut R) -> S
     out
 }
 
+pub fn swap_ab(a: char, b: char, text: &str) -> String {
+    text.chars()
+        .map(|c| {
+            if c == a {
+                b
+            } else if c == b {
+                a
+            } else {
+                c
+            }
+        })
+        .collect()
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum NumRep {
     Binary,
