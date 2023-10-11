@@ -197,12 +197,14 @@ impl CodeInterface {
         );
         combox_box(
             &[
+                CodeId::Ascii,
                 CodeId::FixedWidth,
                 CodeId::Elias,
                 CodeId::Fibonacci,
                 CodeId::Levenshtein,
                 CodeId::MofN,
                 CodeId::Unary,
+                CodeId::Unicode,
             ],
             active_code,
             CodeCategory::Prefix,

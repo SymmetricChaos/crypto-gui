@@ -8,4 +8,5 @@ pub mod gray;
 pub mod levenshtein;
 pub mod levenshtein_integers;
 pub mod roman_numeral;
+pub mod symmetric_unary;
 pub mod unary;

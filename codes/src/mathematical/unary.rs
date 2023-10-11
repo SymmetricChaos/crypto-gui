@@ -9,7 +9,6 @@ pub struct UnaryCode {
     pub maps: LetterAndWordCode<String>,
     pub mode: IOMode,
     pub invert: bool,
-    pub symmetric: bool,
 }
 
 impl UnaryCode {
@@ -31,7 +30,6 @@ impl Default for UnaryCode {
             maps,
             mode: IOMode::Letter,
             invert: false,
-            symmetric: false,
         }
     }
 }
