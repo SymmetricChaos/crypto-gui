@@ -14,20 +14,20 @@ pub struct UnaryCode {
 impl UnaryCode {
     pub fn set_letter_map(&mut self) {
         self.maps.set_letter_map(|(n, _)| {
-            if n == 1 {
+            if n == 0 {
                 return String::from("1");
             } else {
-                format!("0{}0", "1".repeat(n - 2))
+                format!("0{}0", "1".repeat(n - 1))
             }
         })
     }
 
     pub fn set_word_map(&mut self) {
         self.maps.set_word_map(|(n, _)| {
-            if n == 1 {
+            if n == 0 {
                 return String::from("1");
             } else {
-                format!("0{}0", "1".repeat(n - 2))
+                format!("0{}0", "1".repeat(n - 1))
             }
         })
     }
@@ -73,10 +73,10 @@ impl Default for UnaryCode {
         let mut maps = LetterAndWordCode::<String>::default();
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
         maps.set_letter_map(|(n, _)| {
-            if n == 1 {
+            if n == 0 {
                 return String::from("1");
             } else {
-                format!("0{}0", "1".repeat(n - 2))
+                format!("0{}0", "1".repeat(n - 1))
             }
         });
         UnaryCode {
@@ -105,10 +105,10 @@ impl Code for UnaryCode {
             for w in text.split(" ") {
                 let n =
                     usize::from_str_radix(w, 10).map_err(|e| CodeError::Input(e.to_string()))?;
-                if n == 1 {
+                if n == 0 {
                     output.push('1');
                 } else {
-                    output.push_str(&format!("0{}0", "1".repeat(n - 2)))
+                    output.push_str(&format!("0{}0", "1".repeat(n - 1)))
                 }
             }
         }

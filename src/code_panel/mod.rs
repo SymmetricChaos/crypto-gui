@@ -3,6 +3,7 @@ use codes::{
     ids::{CodeCategory, CodeId},
     traits::Code,
 };
+
 use eframe::egui;
 use egui::Ui;
 
@@ -20,9 +21,9 @@ use self::{
     pgp_controls::PgpWordsFrame, punycode_controls::PunycodeFrame,
     repetition_controls::RepetitionFrame, romaji_controls::RomajiFrame,
     roman_numeral_controls::RomanNumeralFrame, skey_controls::SKeyWordsFrame,
-    spelling_alphabet_controls::SpellingAlphabetFrame, tap_code_controls::TapCodeFrame,
-    unary_controls::UnaryCodeFrame, unicode_controls::UnicodeFrame, upc_controls::UpcFrame,
-    verhoeff_controls::VerhoeffFrame,
+    spelling_alphabet_controls::SpellingAlphabetFrame, symmetric_unary_controls::SymUnaryCodeFrame,
+    tap_code_controls::TapCodeFrame, unary_controls::UnaryCodeFrame,
+    unicode_controls::UnicodeFrame, upc_controls::UpcFrame, verhoeff_controls::VerhoeffFrame,
 };
 
 mod ascii85_controls;
@@ -38,7 +39,7 @@ mod damm_controls;
 mod elias_controls;
 mod fibonacci_controls;
 mod godel_controls;
-pub mod gray_controls;
+mod gray_controls;
 mod hamming_controls;
 mod isbn_contols;
 mod itf_controls;
@@ -57,6 +58,7 @@ mod romaji_controls;
 mod roman_numeral_controls;
 mod skey_controls;
 mod spelling_alphabet_controls;
+mod symmetric_unary_controls;
 mod tap_code_controls;
 mod unary_controls;
 mod unicode_controls;
@@ -143,6 +145,7 @@ pub struct CodeInterface {
     fibonacci: FibonacciCodeFrame,
     levenshtein: LevenshteinCodeFrame,
     unary: UnaryCodeFrame,
+    unary_symmetric: SymUnaryCodeFrame,
 
     // Other Codes
     bacon: BaconFrame,
@@ -190,6 +193,7 @@ impl CodeInterface {
                 CodeId::Levenshtein,
                 CodeId::RomanNumeral,
                 CodeId::Unary,
+                CodeId::UnarySymmetric,
             ],
             active_code,
             CodeCategory::Mathematical,
@@ -204,6 +208,7 @@ impl CodeInterface {
                 CodeId::Levenshtein,
                 CodeId::MofN,
                 CodeId::Unary,
+                CodeId::UnarySymmetric,
                 CodeId::Unicode,
             ],
             active_code,
@@ -275,6 +280,7 @@ impl CodeInterface {
             CodeId::SpellingAlphabet => &mut self.spelling,
             CodeId::Tap => &mut self.tap,
             CodeId::Unary => &mut self.unary,
+            CodeId::UnarySymmetric => &mut self.unary_symmetric,
             CodeId::Unicode => &mut self.unicode,
             CodeId::Upc => &mut self.upc,
             CodeId::Verhoeff => &mut self.verhoeff,
