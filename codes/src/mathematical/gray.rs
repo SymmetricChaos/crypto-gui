@@ -4,11 +4,15 @@ use crate::{errors::CodeError, traits::Code};
 
 pub struct GrayCode {
     pub width: usize,
+    pub fixed_width: bool,
 }
 
 impl Default for GrayCode {
     fn default() -> Self {
-        Self { width: 4 }
+        Self {
+            width: 4,
+            fixed_width: true,
+        }
     }
 }
 
@@ -16,6 +20,11 @@ impl GrayCode {
     pub fn encode_u32(&self, n: u32) -> String {
         let gray = n ^ (n >> 1);
         format!("{:0>1$b}", gray, self.width)
+    }
+
+    pub fn encode_u32_var(&self, n: u32) -> String {
+        let gray = n ^ (n >> 1);
+        format!("{:b}", gray)
     }
 
     pub fn decode_u32(&self, n: u32) -> String {
@@ -46,7 +55,11 @@ impl Code for GrayCode {
                     self.width, m
                 )));
             };
-            out.push_str(&self.encode_u32(n));
+            match self.fixed_width {
+                true => out.push_str(&self.encode_u32(n)),
+                false => out.push_str(&self.encode_u32_var(n)),
+            }
+
             out.push(' ');
         }
         out.pop();
@@ -56,7 +69,7 @@ impl Code for GrayCode {
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::new();
         for s in text.split(" ") {
-            if !IS_BITS.is_match(s) || s.chars().count() != self.width {
+            if !IS_BITS.is_match(s) || (self.fixed_width && s.chars().count() != self.width) {
                 return Err(CodeError::invalid_input_group(s));
             }
             let n = u32::from_str_radix(s, 2).map_err(|_| CodeError::invalid_input_group(s))?;
@@ -83,6 +96,7 @@ mod gray_tests {
 
     const PLAINTEXT: &'static str = "1 2 3 14 15";
     const ENCODEDTEXT: &'static str = "0001 0011 0010 1001 1000";
+    const ENCODEDTEXT_VAR: &'static str = "1 11 10 1001 1000";
 
     #[test]
     fn encode_test() {
@@ -91,8 +105,22 @@ mod gray_tests {
     }
 
     #[test]
+    fn encode_test_var() {
+        let mut code = GrayCode::default();
+        code.fixed_width = false;
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_VAR);
+    }
+
+    #[test]
     fn decode_test() {
         let code = GrayCode::default();
         assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
+    }
+
+    #[test]
+    fn decode_test_var() {
+        let mut code = GrayCode::default();
+        code.fixed_width = false;
+        assert_eq!(code.decode(ENCODEDTEXT_VAR).unwrap(), PLAINTEXT);
     }
 }
