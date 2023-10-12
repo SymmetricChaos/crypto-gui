@@ -7,7 +7,7 @@ use lazy_static::lazy_static;
 pub enum CodeCategory {
     BinaryToText,
     ErrorCorrecting,
-    Mathematical,
+    Integer,
     TextStandard,
     Commercial,
     Prefix,
@@ -34,7 +34,7 @@ impl Display for CodeCategory {
         let name = match self {
             CodeCategory::BinaryToText => "Binary-to-Text",
             CodeCategory::ErrorCorrecting => "Error Correcting",
-            CodeCategory::Mathematical => "Mathematical",
+            CodeCategory::Integer => "Integer",
             CodeCategory::TextStandard => "Text Standards",
             CodeCategory::Commercial => "Commerial",
             CodeCategory::Other => "Other",

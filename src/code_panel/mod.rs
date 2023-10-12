@@ -196,7 +196,7 @@ impl CodeInterface {
                 CodeId::UnarySymmetric,
             ],
             active_code,
-            CodeCategory::Mathematical,
+            CodeCategory::Integer,
             ui,
         );
         combox_box(
