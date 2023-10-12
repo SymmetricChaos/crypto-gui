@@ -27,11 +27,11 @@ pub struct LetterAndWordCode<T> {
 impl<T: Default + Hash + Eq + PartialEq> Default for LetterAndWordCode<T> {
     fn default() -> Self {
         Self {
-            letter_map: Default::default(),
-            word_map: Default::default(),
-            alphabet: Default::default(),
-            words: Default::default(),
-            words_string: Default::default(),
+            letter_map: BiMap::default(),
+            word_map: BiMap::default(),
+            alphabet: String::new(),
+            words: Vec::new(),
+            words_string: String::new(),
         }
     }
 }
@@ -57,28 +57,36 @@ impl<T: Hash + Eq + PartialEq + ToString> LetterAndWordCode<T> {
         }
     }
 
-    pub fn chars_codes(&mut self) -> impl Iterator<Item = (char, &T)> + '_ {
+    pub fn chars_codes(&self) -> impl Iterator<Item = (char, &T)> + '_ {
         self.alphabet
             .chars()
             .map(|x| (x, self.letter_map.get_by_left(&x).unwrap()))
     }
 
-    pub fn words_codes(&mut self) -> impl Iterator<Item = (&String, &T)> + '_ {
+    pub fn words_codes(&self) -> impl Iterator<Item = (&String, &T)> + '_ {
         self.words
             .iter()
             .map(|x| (x, self.word_map.get_by_left(x).unwrap()))
     }
 
-    pub fn codes_chars(&mut self) -> impl Iterator<Item = (&T, char)> + '_ {
+    pub fn codes_chars(&self) -> impl Iterator<Item = (&T, char)> + '_ {
         self.alphabet
             .chars()
             .map(|x| (self.letter_map.get_by_left(&x).unwrap(), x))
     }
 
-    pub fn codes_words(&mut self) -> impl Iterator<Item = (&T, &String)> + '_ {
+    pub fn codes_words(&self) -> impl Iterator<Item = (&T, &String)> + '_ {
         self.words
             .iter()
             .map(|x| (self.word_map.get_by_left(x).unwrap(), x))
+    }
+
+    pub fn nums_chars(&self) -> impl Iterator<Item = (usize, char)> + '_ {
+        self.alphabet.chars().enumerate()
+    }
+
+    pub fn nums_words(&self) -> impl Iterator<Item = (usize, &String)> + '_ {
+        self.words.iter().enumerate()
     }
 
     pub fn get_by_letter(&self, c: char) -> Result<&T, CodeError> {
