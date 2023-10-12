@@ -1,17 +1,19 @@
 use super::CodeFrame;
 use crate::ui_elements::UiElements;
-use codes::{mathematical::roman_numeral::RomanNumeral, traits::IOMode};
+use codes::{letter_word_code::IOMode, mathematical::roman_numeral::RomanNumeral};
 use egui::TextEdit;
 use utils::text_functions::unique_string;
 
 pub struct RomanNumeralFrame {
     code: RomanNumeral,
+    words_string: String,
 }
 
 impl Default for RomanNumeralFrame {
     fn default() -> Self {
         Self {
             code: Default::default(),
+            words_string: String::new(),
         }
     }
 }
@@ -33,19 +35,18 @@ impl CodeFrame for RomanNumeralFrame {
                 if ui.control_string(&mut self.code.maps.alphabet).changed() {
                     unique_string(&mut self.code.maps.alphabet);
                     self.code.maps.alphabet.retain(|x| x != '�');
-                    self.code.set_letter_map();
                 };
-                ui.fill_code_columns(16, 5, Box::new(self.code.maps.chars_codes()));
+                // ui.fill_code_columns(16, 5, Box::new(self.code.maps.chars_codes()));
             }
             IOMode::Word => {
                 ui.label("Provide any number of words or phrases separated by commas. Roman numerals, starting with one, will be assigned to each word.");
                 if ui
-                    .add(TextEdit::multiline(&mut self.code.maps.words_string))
+                    .add(TextEdit::multiline(&mut self.words_string))
                     .changed()
                 {
-                    self.code.set_word_map();
+                    self.code.maps.set_words(&self.words_string);
                 };
-                ui.fill_code_columns(16, 5, Box::new(self.code.maps.words_codes()));
+                // ui.fill_code_columns(16, 5, Box::new(self.code.maps.words_codes()));
             }
             IOMode::Integer => {
                 ui.label("Convert between standard numbers and their representation as Roman Numerals. The first 16 encodings appear below.");

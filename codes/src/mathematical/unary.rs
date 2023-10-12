@@ -2,30 +2,31 @@ use utils::text_functions::swap_ab;
 
 use crate::{
     errors::CodeError,
-    traits::{Code, IOMode, LetterAndWordCode},
+    letter_word_code::{IOMode, LetterWordIntCode},
+    traits::Code,
 };
 
 pub struct UnaryCode {
-    pub maps: LetterAndWordCode<String>,
+    pub maps: LetterWordIntCode,
     pub mode: IOMode,
     pub invert: bool,
 }
 
 impl UnaryCode {
-    pub fn set_letter_map(&mut self) {
-        self.maps.set_letter_map(|(n, _)| "1".repeat(n) + "0")
-    }
-
-    pub fn set_word_map(&mut self) {
-        self.maps.set_word_map(|(n, _)| "1".repeat(n) + "0")
+    pub fn encode_usize(&self, n: usize) -> String {
+        if self.invert {
+            "0".repeat(n) + "1"
+        } else {
+            "1".repeat(n) + "0"
+        }
     }
 }
 
 impl Default for UnaryCode {
     fn default() -> Self {
-        let mut maps = LetterAndWordCode::<String>::default();
+        let mut maps = LetterWordIntCode::new();
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
-        maps.set_letter_map(|(n, _)| "1".repeat(n) + "0");
+        // maps.set_letter_map(|(n, _)| "1".repeat(n) + "0");
         UnaryCode {
             maps,
             mode: IOMode::Letter,
@@ -40,13 +41,13 @@ impl Code for UnaryCode {
 
         if self.mode == IOMode::Letter {
             for c in text.chars() {
-                let code = self.maps.get_by_letter(c)?;
-                output.push_str(&code)
+                let n = self.maps.char_to_int(c)?;
+                output.push_str(&self.encode_usize(n))
             }
         } else if self.mode == IOMode::Word {
             for w in text.split(" ") {
-                let code = self.maps.get_by_word(w)?;
-                output.push_str(code)
+                let n = self.maps.word_to_int(w)?;
+                output.push_str(&self.encode_usize(n))
             }
         } else {
             for w in text.split(" ") {
@@ -64,64 +65,65 @@ impl Code for UnaryCode {
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        let mut output = String::new();
-        let mut buffer = String::with_capacity(self.maps.letter_map.len());
-        let text = if self.invert {
-            swap_ab('0', '1', text)
-        } else {
-            text.to_string()
-        };
-        if self.mode == IOMode::Letter {
-            for b in text.chars() {
-                buffer.push(b);
-                if b == '0' {
-                    match self.maps.letter_map.get_by_right(&buffer) {
-                        Some(s) => {
-                            output.push(*s);
-                            buffer.clear();
-                        }
-                        None => {
-                            output.push('?');
-                            buffer.clear();
-                        }
-                    }
-                }
-            }
-        } else if self.mode == IOMode::Word {
-            for b in text.chars() {
-                buffer.push(b);
-                if b == '0' {
-                    match self.maps.word_map.get_by_right(&buffer) {
-                        Some(s) => {
-                            output.push_str(s);
-                            output.push(' ');
-                            buffer.clear();
-                        }
-                        None => {
-                            output.push('?');
-                            buffer.clear();
-                        }
-                    }
-                }
-            }
-            output.pop();
-        } else {
-            let mut ctr = 0;
-            for b in text.chars() {
-                if b == '1' {
-                    ctr += 1
-                } else if b == '0' {
-                    output.push_str(&ctr.to_string());
-                    output.push(' ');
-                    ctr = 0;
-                } else {
-                    output.push_str("? ");
-                    ctr = 0;
-                }
-            }
-        }
+        // let mut output = String::new();
+        // let mut buffer = String::with_capacity(self.maps.letter_map.len());
+        // let text = if self.invert {
+        //     swap_ab('0', '1', text)
+        // } else {
+        //     text.to_string()
+        // };
+        // if self.mode == IOMode::Letter {
+        //     for b in text.chars() {
+        //         buffer.push(b);
+        //         if b == '0' {
+        //             match self.maps.letter_map.get_by_right(&buffer) {
+        //                 Some(s) => {
+        //                     output.push(*s);
+        //                     buffer.clear();
+        //                 }
+        //                 None => {
+        //                     output.push('?');
+        //                     buffer.clear();
+        //                 }
+        //             }
+        //         }
+        //     }
+        // } else if self.mode == IOMode::Word {
+        //     for b in text.chars() {
+        //         buffer.push(b);
+        //         if b == '0' {
+        //             match self.maps.word_map.get_by_right(&buffer) {
+        //                 Some(s) => {
+        //                     output.push_str(s);
+        //                     output.push(' ');
+        //                     buffer.clear();
+        //                 }
+        //                 None => {
+        //                     output.push('?');
+        //                     buffer.clear();
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     output.pop();
+        // } else {
+        //     let mut ctr = 0;
+        //     for b in text.chars() {
+        //         if b == '1' {
+        //             ctr += 1
+        //         } else if b == '0' {
+        //             output.push_str(&ctr.to_string());
+        //             output.push(' ');
+        //             ctr = 0;
+        //         } else {
+        //             output.push_str("? ");
+        //             ctr = 0;
+        //         }
+        //     }
+        // }
 
-        Ok(output)
+        // Ok(output)
+        todo!()
     }
 }
 

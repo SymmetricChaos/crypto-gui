@@ -2,39 +2,28 @@ use utils::text_functions::swap_ab;
 
 use crate::{
     errors::CodeError,
-    traits::{Code, IOMode, LetterAndWordCode},
+    letter_word_code::{IOMode, LetterWordIntCode},
+    traits::Code,
 };
 
 pub struct UnaryCode {
-    pub maps: LetterAndWordCode<String>,
+    pub maps: LetterWordIntCode,
     pub mode: IOMode,
     pub invert: bool,
 }
 
 impl UnaryCode {
-    pub fn set_letter_map(&mut self) {
-        self.maps.set_letter_map(|(n, _)| {
-            if n == 0 {
-                return String::from("1");
-            } else {
-                format!("0{}0", "1".repeat(n - 1))
-            }
-        })
-    }
-
-    pub fn set_word_map(&mut self) {
-        self.maps.set_word_map(|(n, _)| {
-            if n == 0 {
-                return String::from("1");
-            } else {
-                format!("0{}0", "1".repeat(n - 1))
-            }
-        })
+    pub fn encode_usize(&self, n: usize) -> String {
+        if n == 0 {
+            return String::from("1");
+        } else {
+            format!("0{}0", "1".repeat(n - 1))
+        }
     }
 
     pub fn recognize_code(&self, text: &str) -> Vec<String> {
         let mut output = Vec::new();
-        let mut buffer = String::with_capacity(self.maps.letter_map.len());
+        let mut buffer = String::with_capacity(self.maps.alphabet.chars().count());
 
         for b in text.chars() {
             // Invalid characters immediatly give '?' response and restart
@@ -70,15 +59,9 @@ impl UnaryCode {
 
 impl Default for UnaryCode {
     fn default() -> Self {
-        let mut maps = LetterAndWordCode::<String>::default();
+        let mut maps = LetterWordIntCode::new();
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
-        maps.set_letter_map(|(n, _)| {
-            if n == 0 {
-                return String::from("1");
-            } else {
-                format!("0{}0", "1".repeat(n - 1))
-            }
-        });
+
         UnaryCode {
             maps,
             mode: IOMode::Letter,
@@ -93,13 +76,13 @@ impl Code for UnaryCode {
 
         if self.mode == IOMode::Letter {
             for c in text.chars() {
-                let code = self.maps.get_by_letter(c)?;
-                output.push_str(&code)
+                let n = self.maps.char_to_int(c)?;
+                output.push_str(&self.encode_usize(n))
             }
         } else if self.mode == IOMode::Word {
             for w in text.split(" ") {
-                let code = self.maps.get_by_word(w)?;
-                output.push_str(code)
+                let n = self.maps.word_to_int(w)?;
+                output.push_str(&self.encode_usize(n))
             }
         } else {
             for w in text.split(" ") {
@@ -120,52 +103,52 @@ impl Code for UnaryCode {
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        let mut output = String::new();
-        let mut buffer = String::with_capacity(self.maps.letter_map.len());
-        let text = if self.invert {
-            swap_ab('0', '1', text)
-        } else {
-            text.to_string()
-        };
-        if self.mode == IOMode::Letter {
-            for code in self.recognize_code(&text) {
-                match self.maps.letter_map.get_by_right(&code) {
-                    Some(s) => {
-                        output.push(*s);
-                        buffer.clear();
-                    }
-                    None => {
-                        output.push('?');
-                        buffer.clear();
-                    }
-                }
-            }
-        } else if self.mode == IOMode::Word {
-            for code in self.recognize_code(&text) {
-                match self.maps.word_map.get_by_right(&code) {
-                    Some(s) => {
-                        output.push_str(s);
-                        output.push(' ');
-                        buffer.clear();
-                    }
-                    None => {
-                        output.push_str("? ");
-                        buffer.clear();
-                    }
-                }
-            }
-            output.pop();
-        } else {
-            for code in self.recognize_code(&text) {
-                if code == "?" {
-                    output.push_str("? ")
-                } else {
-                    output.push_str(&format!("{} ", code.chars().count()))
-                }
-            }
-        }
+        // let mut output = String::new();
+        // let text = if self.invert {
+        //     swap_ab('0', '1', text)
+        // } else {
+        //     text.to_string()
+        // };
+        // if self.mode == IOMode::Letter {
+        //     for code in self.recognize_code(&text) {
+        //         match self.maps.word_to_int(&code) {
+        //             Some(s) => {
+        //                 output.push(*s);
+        //                 buffer.clear();
+        //             }
+        //             None => {
+        //                 output.push('?');
+        //                 buffer.clear();
+        //             }
+        //         }
+        //     }
+        // } else if self.mode == IOMode::Word {
+        //     for code in self.recognize_code(&text) {
+        //         match self.maps.word_map.get_by_right(&code) {
+        //             Some(s) => {
+        //                 output.push_str(s);
+        //                 output.push(' ');
+        //                 buffer.clear();
+        //             }
+        //             None => {
+        //                 output.push_str("? ");
+        //                 buffer.clear();
+        //             }
+        //         }
+        //     }
+        //     output.pop();
+        // } else {
+        //     for code in self.recognize_code(&text) {
+        //         if code == "?" {
+        //             output.push_str("? ")
+        //         } else {
+        //             output.push_str(&format!("{} ", code.chars().count()))
+        //         }
+        //     }
+        // }
 
-        Ok(output)
+        // Ok(output)
+        todo!()
     }
 }
 

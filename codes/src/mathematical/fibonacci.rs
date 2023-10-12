@@ -2,7 +2,8 @@ use itertools::Itertools;
 
 use crate::{
     errors::CodeError,
-    traits::{Code, IOMode, LetterAndWordCode},
+    letter_word_code::{IOMode, LetterWordIntCode},
+    traits::Code,
 };
 
 use super::fibonacci_integers::FibonacciCodeIntegers;
@@ -10,30 +11,17 @@ use super::fibonacci_integers::FibonacciCodeIntegers;
 // https://en.wikipedia.org/wiki/Fibonacci_coding
 
 pub struct FibonacciCode {
-    pub maps: LetterAndWordCode<String>,
+    pub maps: LetterWordIntCode,
     pub mode: IOMode,
     pub integer_code: FibonacciCodeIntegers,
-}
-
-impl FibonacciCode {
-    pub fn set_letter_map(&mut self) {
-        self.maps
-            .set_letter_map(|(n, _)| self.integer_code.encode_u32((n + 1) as u32))
-    }
-
-    pub fn set_word_map(&mut self) {
-        self.maps
-            .set_word_map(|(n, _)| self.integer_code.encode_u32((n + 1) as u32))
-    }
 }
 
 impl Default for FibonacciCode {
     fn default() -> Self {
         let codes = FibonacciCodeIntegers::default();
 
-        let mut maps = LetterAndWordCode::<String>::default();
+        let mut maps = LetterWordIntCode::new();
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
-        maps.set_letter_map(|(n, _)| codes.encode_u32((n + 1) as u32));
         FibonacciCode {
             mode: IOMode::Integer,
             integer_code: codes,
@@ -49,15 +37,15 @@ impl Code for FibonacciCode {
         } else if self.mode == IOMode::Letter {
             let mut output = String::new();
             for c in text.chars() {
-                let code = self.maps.get_by_letter(c)?;
-                output.push_str(&code)
+                let n = self.maps.char_to_int(c)?;
+                output.push_str(&self.integer_code.encode_u32(n as u32))
             }
             Ok(output)
         } else {
             let mut output = String::new();
             for w in text.split(" ") {
-                let code = self.maps.get_by_word(w)?;
-                output.push_str(code)
+                let n = self.maps.word_to_int(w)?;
+                output.push_str(&self.integer_code.encode_u32(n as u32))
             }
             Ok(output)
         }
@@ -139,8 +127,7 @@ mod fibonacci_tests {
     fn encode_test_words() {
         let mut code = FibonacciCode::default();
         code.mode = IOMode::Word;
-        code.maps.words_string = String::from(WORDS);
-        code.set_word_map();
+        code.maps.set_words(WORDS);
         assert_eq!(code.encode(PLAINTEXT_WORDS).unwrap(), ENCODEDTEXT_WORDS);
     }
 
@@ -148,8 +135,7 @@ mod fibonacci_tests {
     fn decode_test_words() {
         let mut code = FibonacciCode::default();
         code.mode = IOMode::Word;
-        code.maps.words_string = String::from(WORDS);
-        code.set_word_map();
+        code.maps.set_words(WORDS);
         assert_eq!(code.decode(ENCODEDTEXT_WORDS).unwrap(), PLAINTEXT_WORDS);
     }
 }

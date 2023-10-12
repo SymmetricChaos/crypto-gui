@@ -1,17 +1,19 @@
 use super::CodeFrame;
 use crate::ui_elements::UiElements;
-use codes::{mathematical::base_n::BaseN, traits::IOMode};
+use codes::{letter_word_code::IOMode, mathematical::base_n::BaseN};
 use egui::{Slider, TextEdit};
 use utils::text_functions::unique_string;
 
 pub struct BaseNFrame {
     code: BaseN,
+    words_string: String,
 }
 
 impl Default for BaseNFrame {
     fn default() -> Self {
         Self {
             code: Default::default(),
+            words_string: String::new(),
         }
     }
 }
@@ -54,19 +56,18 @@ impl CodeFrame for BaseNFrame {
                 if ui.control_string(&mut self.code.maps.alphabet).changed() {
                     unique_string(&mut self.code.maps.alphabet);
                     self.code.maps.alphabet.retain(|x| x != '�');
-                    self.code.set_letter_map();
                 };
-                ui.fill_code_columns(16, 5, Box::new(self.code.maps.chars_codes()));
+                // ui.fill_code_columns(16, 5, Box::new(self.code.maps.chars_codes()));
             }
             IOMode::Word => {
                 ui.label("Provide any number of words or phrases separated by commas. Numerical codes, starting with zero, will be created in ascending order will be assigned to each character.");
                 if ui
-                    .add(TextEdit::multiline(&mut self.code.maps.words_string))
+                    .add(TextEdit::multiline(&mut self.words_string))
                     .changed()
                 {
-                    self.code.set_word_map();
+                    self.code.maps.set_words(&self.words_string)
                 };
-                ui.fill_code_columns(16, 5, Box::new(self.code.maps.words_codes()));
+                // ui.fill_code_columns(16, 5, Box::new(self.code.maps.words_codes()));
             }
             IOMode::Integer => {
                 if self.code.bijective {

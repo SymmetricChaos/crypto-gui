@@ -4,36 +4,25 @@ use primal::Primes;
 
 use crate::{
     errors::CodeError,
-    traits::{Code, IOMode, LetterAndWordCode},
+    letter_word_code::{IOMode, LetterWordIntCode},
+    traits::Code,
 };
 
 const MESSAGE_LIMIT: usize = 50;
 
 pub struct Godel {
-    pub maps: LetterAndWordCode<usize>,
+    pub maps: LetterWordIntCode,
     primes: Vec<usize>,
     pub mode: IOMode,
 }
 
-impl Godel {
-    pub fn set_letter_map(&mut self) {
-        self.maps.set_letter_map(|(n, _)| n + 1)
-    }
-
-    pub fn set_word_map(&mut self) {
-        self.maps.set_word_map(|(n, _)| n + 1)
-    }
-}
-
 impl Default for Godel {
     fn default() -> Self {
-        let mut maps = LetterAndWordCode::<usize>::default();
-        maps.words_string = String::from(
+        let mut maps = LetterWordIntCode::new();
+        maps.set_words(
             "0, s, +, ×, =, (, ), implies, not, forall, exists, and, or, x1, P1, x2, P2, x3, P3, x4, P4, x5, P5",
         );
-        maps.set_word_map(|(n, _)| n + 1);
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
-        maps.set_letter_map(|(n, _)| n + 1);
 
         let primes = Primes::all().take(MESSAGE_LIMIT).collect_vec();
 
@@ -63,16 +52,16 @@ impl Code for Godel {
 
         if self.mode == IOMode::Letter {
             for (s, prime) in text.chars().zip(self.primes.iter()) {
-                match self.maps.get_by_letter(s) {
-                    Ok(v) => out *= BigUint::from(*prime).pow(*v as u32),
+                match self.maps.char_to_int(s) {
+                    Ok(v) => out *= BigUint::from(*prime).pow(v as u32),
                     Err(e) => return Err(e),
                 }
             }
             return Ok(out.to_str_radix(10));
         } else if self.mode == IOMode::Word {
             for (s, prime) in text.split(" ").zip(self.primes.iter()) {
-                match self.maps.get_by_word(s) {
-                    Ok(v) => out *= BigUint::from(*prime).pow(*v as u32),
+                match self.maps.word_to_int(s) {
+                    Ok(v) => out *= BigUint::from(*prime).pow(v as u32),
                     Err(e) => return Err(e),
                 }
             }
@@ -100,7 +89,7 @@ impl Code for Godel {
                     num = num.div_floor(&big_p)
                 }
                 if ctr != 0 {
-                    let c = match self.maps.get_word_by_code(&ctr) {
+                    let c = match self.maps.int_to_word(ctr) {
                         Ok(c) => c,
                         Err(_) => "?",
                     };
@@ -124,11 +113,11 @@ impl Code for Godel {
                     num = num.div_floor(&big_p)
                 }
                 if ctr != 0 {
-                    let c = match self.maps.get_letter_by_code(&ctr) {
+                    let c = match self.maps.int_to_char(ctr) {
                         Ok(c) => c,
-                        Err(_) => &'?',
+                        Err(_) => '?',
                     };
-                    words.push(*c);
+                    words.push(c);
                 }
                 if ctr == 0 {
                     words.push('?')

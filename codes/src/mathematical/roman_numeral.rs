@@ -1,6 +1,7 @@
 use crate::{
     errors::CodeError,
-    traits::{Code, IOMode, LetterAndWordCode},
+    letter_word_code::{IOMode, LetterWordIntCode},
+    traits::Code,
 };
 use itertools::Itertools;
 use lazy_static::lazy_static;
@@ -19,15 +20,14 @@ lazy_static! {
 }
 
 pub struct RomanNumeral {
-    pub maps: LetterAndWordCode<usize>,
+    pub maps: LetterWordIntCode,
     pub mode: IOMode,
 }
 
 impl Default for RomanNumeral {
     fn default() -> Self {
-        let mut maps = LetterAndWordCode::<usize>::default();
+        let mut maps = LetterWordIntCode::new();
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
-        maps.set_letter_map(|(n, _)| n as usize);
 
         Self {
             maps,
@@ -95,14 +95,6 @@ impl RomanNumeral {
         }
         Ok(n as usize)
     }
-
-    pub fn set_letter_map(&mut self) {
-        self.maps.set_letter_map(|(n, _)| n)
-    }
-
-    pub fn set_word_map(&mut self) {
-        self.maps.set_word_map(|(n, _)| n)
-    }
 }
 
 impl Code for RomanNumeral {
@@ -120,8 +112,8 @@ impl Code for RomanNumeral {
             }
         } else if self.mode == IOMode::Letter {
             for c in text.chars() {
-                let n = self.maps.get_by_letter(c)?;
-                output.push_str(&Self::encode_int(*n)?);
+                let n = self.maps.char_to_int(c)?;
+                output.push_str(&Self::encode_int(n)?);
                 output.push(' ')
             }
         } else {
@@ -129,8 +121,8 @@ impl Code for RomanNumeral {
                 if w.is_empty() {
                     continue;
                 }
-                let n = self.maps.get_by_word(w)?;
-                output.push_str(&Self::encode_int(*n)?);
+                let n = self.maps.word_to_int(w)?;
+                output.push_str(&Self::encode_int(n)?);
                 output.push(' ')
             }
         }
@@ -154,7 +146,7 @@ impl Code for RomanNumeral {
                     continue;
                 }
                 let n = Self::decode_to_int(s)?;
-                output.push(*self.maps.get_letter_by_code(&n)?);
+                output.push(self.maps.int_to_char(n)?);
             }
         } else {
             for s in text.split(" ") {
@@ -162,7 +154,7 @@ impl Code for RomanNumeral {
                     continue;
                 }
                 let n = Self::decode_to_int(s)?;
-                output.push_str(self.maps.get_word_by_code(&n)?);
+                output.push_str(self.maps.int_to_word(n)?);
                 output.push(' ');
             }
             output.pop();

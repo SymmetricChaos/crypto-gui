@@ -1,26 +1,19 @@
 use super::elias_integers::EliasCodeIntegers;
 use crate::{
     errors::CodeError,
-    traits::{Code, IOMode, LetterAndWordCode},
+    letter_word_code::{IOMode, LetterWordIntCode},
+    traits::Code,
 };
 use itertools::Itertools;
 use std::cell::RefCell;
 
 pub struct EliasCode {
-    pub maps: LetterAndWordCode<u32>,
+    pub maps: LetterWordIntCode,
     pub integer_code: RefCell<EliasCodeIntegers>,
     pub mode: IOMode,
 }
 
 impl EliasCode {
-    pub fn set_letter_map(&mut self) {
-        self.maps.set_letter_map(|(n, _)| (n + 1) as u32)
-    }
-
-    pub fn set_word_map(&mut self) {
-        self.maps.set_word_map(|(n, _)| (n + 1) as u32)
-    }
-
     pub fn values(&self) -> Vec<String> {
         match self.integer_code.borrow().variant {
             super::elias_integers::EliasVariant::Delta => self
@@ -53,9 +46,8 @@ impl Default for EliasCode {
         let mut codes = EliasCodeIntegers::default();
         codes.extend_all(33);
 
-        let mut maps = LetterAndWordCode::<u32>::default();
+        let mut maps = LetterWordIntCode::new();
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
-        maps.set_letter_map(|(n, _)| (n + 1) as u32);
 
         Self {
             mode: IOMode::Integer,
@@ -77,15 +69,15 @@ impl Code for EliasCode {
             }
         } else if self.mode == IOMode::Letter {
             for c in text.chars() {
-                let n = self.maps.get_by_letter(c)?;
-                self.integer_code.borrow_mut().extend_all(*n);
-                out.push_str(self.integer_code.borrow().encode_u32(*n).unwrap());
+                let n = self.maps.char_to_int(c)?;
+                self.integer_code.borrow_mut().extend_all(n as u32);
+                out.push_str(self.integer_code.borrow().encode_u32(n as u32).unwrap());
             }
         } else {
             for w in text.split(" ") {
-                let n = self.maps.get_by_word(w)?;
-                self.integer_code.borrow_mut().extend_all(*n);
-                out.push_str(self.integer_code.borrow().encode_u32(*n).unwrap());
+                let n = self.maps.word_to_int(w)?;
+                self.integer_code.borrow_mut().extend_all(n as u32);
+                out.push_str(self.integer_code.borrow().encode_u32(n as u32).unwrap());
             }
         }
         Ok(out)
@@ -99,12 +91,12 @@ impl Code for EliasCode {
             Ok(nums.into_iter().join(" "))
         } else if self.mode == IOMode::Letter {
             for n in nums {
-                out.push(*self.maps.get_letter_by_code(&n)?);
+                out.push(self.maps.int_to_char(n as usize)?);
             }
             Ok(out)
         } else {
             for n in nums {
-                out.push_str(self.maps.get_word_by_code(&n)?);
+                out.push_str(self.maps.int_to_word(n as usize)?);
                 out.push(' ');
             }
             out.pop();

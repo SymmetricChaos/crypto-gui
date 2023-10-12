@@ -1,13 +1,14 @@
 use crate::{
     errors::CodeError,
-    traits::{Code, IOMode, LetterAndWordCode},
+    letter_word_code::{IOMode, LetterWordIntCode},
+    traits::Code,
 };
 use itertools::Itertools;
 use num::{Integer, Zero};
 use utils::text_functions::num_to_digit;
 
 pub struct BaseN {
-    pub maps: LetterAndWordCode<u32>,
+    pub maps: LetterWordIntCode,
     pub radix: u32,
     pub mode: IOMode,
     pub bijective: bool,
@@ -16,9 +17,8 @@ pub struct BaseN {
 
 impl Default for BaseN {
     fn default() -> Self {
-        let mut maps = LetterAndWordCode::<u32>::default();
+        let mut maps = LetterWordIntCode::new();
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
-        maps.set_letter_map(|(n, _)| n as u32);
 
         Self {
             mode: IOMode::Integer,
@@ -114,14 +114,6 @@ impl BaseN {
             u32::from_str_radix(&word, self.radix).map_err(|e| CodeError::Input(e.to_string()))
         }
     }
-
-    pub fn set_letter_map(&mut self) {
-        self.maps.set_letter_map(|(n, _)| n as u32)
-    }
-
-    pub fn set_word_map(&mut self) {
-        self.maps.set_word_map(|(n, _)| n as u32)
-    }
 }
 
 impl Code for BaseN {
@@ -139,11 +131,11 @@ impl Code for BaseN {
             }
         } else if self.mode == IOMode::Letter {
             for c in text.chars() {
-                let n = self.maps.get_by_letter(c)?;
+                let n = self.maps.char_to_int(c)?;
                 if self.bijective {
-                    output.push(self.encode_u32(*n + 1)?);
+                    output.push(self.encode_u32((n + 1) as u32)?);
                 } else {
-                    output.push(self.encode_u32(*n)?);
+                    output.push(self.encode_u32(n as u32)?);
                 }
             }
         } else {
@@ -151,11 +143,11 @@ impl Code for BaseN {
                 if w.is_empty() {
                     continue;
                 }
-                let n = self.maps.get_by_word(w)?;
+                let n = self.maps.word_to_int(w)?;
                 if self.bijective {
-                    output.push(self.encode_u32(*n + 1)?);
+                    output.push(self.encode_u32((n + 1) as u32)?);
                 } else {
-                    output.push(self.encode_u32(*n)?);
+                    output.push(self.encode_u32(n as u32)?);
                 }
             }
         }
@@ -179,7 +171,7 @@ impl Code for BaseN {
                     continue;
                 }
                 let n = self.decode_to_u32(s)?;
-                output.push(*self.maps.get_letter_by_code(&n)?)
+                output.push(self.maps.int_to_char(n as usize)?)
             }
         } else {
             for s in text.split(" ") {
@@ -187,7 +179,7 @@ impl Code for BaseN {
                     continue;
                 }
                 let n = self.decode_to_u32(s)?;
-                output.push_str(self.maps.get_word_by_code(&n)?);
+                output.push_str(self.maps.int_to_word(n as usize)?);
                 output.push(' ');
             }
             output.pop();

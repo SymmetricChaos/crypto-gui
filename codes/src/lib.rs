@@ -8,4 +8,5 @@ pub mod text_standards;
 
 pub mod errors;
 pub mod ids;
+pub mod letter_word_code;
 pub mod traits;

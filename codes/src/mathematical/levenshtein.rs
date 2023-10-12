@@ -2,7 +2,8 @@ use itertools::Itertools;
 
 use crate::{
     errors::CodeError,
-    traits::{Code, IOMode, LetterAndWordCode},
+    letter_word_code::{IOMode, LetterWordIntCode},
+    traits::Code,
 };
 
 use super::levenshtein_integers::LevenshteinCodeIntegers;
@@ -10,30 +11,18 @@ use super::levenshtein_integers::LevenshteinCodeIntegers;
 // https://en.wikipedia.org/wiki/Levenshtein_coding
 
 pub struct LevenshteinCode {
-    pub maps: LetterAndWordCode<String>,
+    pub maps: LetterWordIntCode,
     pub mode: IOMode,
     pub integer_code: LevenshteinCodeIntegers,
-}
-
-impl LevenshteinCode {
-    pub fn set_letter_map(&mut self) {
-        self.maps
-            .set_letter_map(|(n, _)| self.integer_code.encode_u32((n + 1) as u32))
-    }
-
-    pub fn set_word_map(&mut self) {
-        self.maps
-            .set_word_map(|(n, _)| self.integer_code.encode_u32((n + 1) as u32))
-    }
 }
 
 impl Default for LevenshteinCode {
     fn default() -> Self {
         let codes = LevenshteinCodeIntegers::default();
 
-        let mut maps = LetterAndWordCode::<String>::default();
+        let mut maps = LetterWordIntCode::new();
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
-        maps.set_letter_map(|(n, _)| codes.encode_u32((n + 1) as u32));
+        // maps.set_letter_map(|(n, _)| codes.encode_u32((n + 1) as u32));
         LevenshteinCode {
             mode: IOMode::Integer,
             integer_code: codes,
@@ -49,15 +38,15 @@ impl Code for LevenshteinCode {
         } else if self.mode == IOMode::Letter {
             let mut output = String::new();
             for c in text.chars() {
-                let code = self.maps.get_by_letter(c)?;
-                output.push_str(&code)
+                let code = self.maps.char_to_int(c)? as u32;
+                output.push_str(&self.integer_code.encode_u32(code))
             }
             Ok(output)
         } else {
             let mut output = String::new();
             for w in text.split(" ") {
-                let code = self.maps.get_by_word(w)?;
-                output.push_str(code)
+                let code = self.maps.word_to_int(w)? as u32;
+                output.push_str(&self.integer_code.encode_u32(code))
             }
             Ok(output)
         }

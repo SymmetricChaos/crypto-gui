@@ -2,11 +2,12 @@ use utils::bits::IS_BITS;
 
 use crate::{
     errors::CodeError,
-    traits::{Code, IOMode, LetterAndWordCode},
+    letter_word_code::{IOMode, LetterWordIntCode},
+    traits::Code,
 };
 
 pub struct GrayCode {
-    pub maps: LetterAndWordCode<usize>,
+    pub maps: LetterWordIntCode,
     pub mode: IOMode,
     pub width: usize,
     pub fixed_width: bool,
@@ -14,11 +15,10 @@ pub struct GrayCode {
 
 impl Default for GrayCode {
     fn default() -> Self {
-        let mut maps = LetterAndWordCode::default();
+        let mut maps = LetterWordIntCode::new();
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
-        maps.set_letter_map(|(n, _)| n ^ (n >> 1));
         Self {
-            width: 4,
+            width: 5,
             fixed_width: true,
             maps,
             mode: IOMode::Integer,
@@ -45,30 +45,49 @@ impl GrayCode {
         }
         out.to_string()
     }
-
-    pub fn set_letter_map(&mut self) {
-        self.maps.set_letter_map(|(n, _)| n ^ (n >> 1))
-    }
-
-    pub fn set_word_map(&mut self) {
-        self.maps.set_word_map(|(n, _)| n ^ (n >> 1))
-    }
 }
 
 impl Code for GrayCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let m = 2_u32.pow(self.width as u32);
         let mut out = String::new();
-        for s in text.split(" ") {
-            let n = u32::from_str_radix(s, 10).map_err(|_| CodeError::invalid_input_group(s))?;
-            if n >= m && self.fixed_width {
-                return Err(CodeError::Input(format!(
-                    "for a width of {} inputs must be less than {}",
-                    self.width, m
-                )));
-            };
-            out.push_str(&self.encode_u32(n));
-            out.push(' ');
+
+        if self.mode == IOMode::Letter {
+            for c in text.chars() {
+                let code = self.maps.char_to_int(c)? as u32;
+                if code >= m && self.fixed_width {
+                    return Err(CodeError::Input(format!(
+                        "for a width of {} inputs must be less than {}",
+                        self.width, m
+                    )));
+                };
+                out.push_str(&self.encode_u32(code));
+                out.push(' ');
+            }
+        } else if self.mode == IOMode::Word {
+            for w in text.split(" ") {
+                let code = self.maps.word_to_int(w)? as u32;
+                if code >= m && self.fixed_width {
+                    return Err(CodeError::Input(format!(
+                        "for a width of {} inputs must be less than {}",
+                        self.width, m
+                    )));
+                };
+                out.push_str(&self.encode_u32(code));
+                out.push(' ');
+            }
+        } else {
+            for w in text.split(" ") {
+                let n = u32::from_str_radix(w, 10).map_err(|e| CodeError::Input(e.to_string()))?;
+                if n >= m && self.fixed_width {
+                    return Err(CodeError::Input(format!(
+                        "for a width of {} inputs must be less than {}",
+                        self.width, m
+                    )));
+                };
+                out.push_str(&self.encode_u32(n));
+                out.push(' ');
+            }
         }
         out.pop();
         Ok(out)
@@ -76,15 +95,36 @@ impl Code for GrayCode {
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::new();
-        for s in text.split(" ") {
-            if !IS_BITS.is_match(s) || (self.fixed_width && s.chars().count() != self.width) {
-                return Err(CodeError::invalid_input_group(s));
+        if self.mode == IOMode::Letter {
+            for s in text.split(" ") {
+                if !IS_BITS.is_match(s) || (self.fixed_width && s.chars().count() != self.width) {
+                    return Err(CodeError::invalid_input_group(s));
+                }
+                let n = u32::from_str_radix(s, 2).map_err(|_| CodeError::invalid_input_group(s))?;
+                out.push(self.maps.int_to_char(n as usize)?);
             }
-            let n = u32::from_str_radix(s, 2).map_err(|_| CodeError::invalid_input_group(s))?;
-            out.push_str(&self.decode_u32(n));
-            out.push(' ');
+        } else if self.mode == IOMode::Word {
+            for s in text.split(" ") {
+                if !IS_BITS.is_match(s) || (self.fixed_width && s.chars().count() != self.width) {
+                    return Err(CodeError::invalid_input_group(s));
+                }
+                let n = u32::from_str_radix(s, 2).map_err(|_| CodeError::invalid_input_group(s))?;
+                out.push_str(self.maps.int_to_word(n as usize)?);
+                out.push(' ');
+            }
+            out.pop();
+        } else {
+            for s in text.split(" ") {
+                if !IS_BITS.is_match(s) || (self.fixed_width && s.chars().count() != self.width) {
+                    return Err(CodeError::invalid_input_group(s));
+                }
+                let n = u32::from_str_radix(s, 2).map_err(|_| CodeError::invalid_input_group(s))?;
+                out.push_str(&self.decode_u32(n));
+                out.push(' ');
+            }
+            out.pop();
         }
-        out.pop();
+
         Ok(out)
     }
 }
@@ -101,19 +141,28 @@ mod gray_tests {
             println!("{}", code.encode_u32(n));
         }
         code.fixed_width = false;
-        for n in [2,3,8,9,15,16] {
+        for n in [2, 3, 8, 9, 15, 16] {
             println!("{}", code.encode_u32(n));
         }
     }
 
+    const PLAINTEXT_LTR: &'static str = "ABCXYZ";
+    const ENCODEDTEXT_LTR: &'static str = "00010 10111 01001 10010 10101 11111";
     const PLAINTEXT: &'static str = "1 2 3 14 15";
-    const ENCODEDTEXT: &'static str = "0001 0011 0010 1001 1000";
+    const ENCODEDTEXT: &'static str = "00001 00011 00010 01001 01000";
     const ENCODEDTEXT_VAR: &'static str = "1 11 10 1001 1000";
 
     #[test]
     fn encode_test() {
         let code = GrayCode::default();
         assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
+    }
+
+    #[test]
+    fn encode_test_ltr() {
+        let mut code = GrayCode::default();
+        code.mode = IOMode::Letter;
+        assert_eq!(code.encode(PLAINTEXT_LTR).unwrap(), ENCODEDTEXT_LTR);
     }
 
     #[test]
@@ -134,5 +183,12 @@ mod gray_tests {
         let mut code = GrayCode::default();
         code.fixed_width = false;
         assert_eq!(code.decode(ENCODEDTEXT_VAR).unwrap(), PLAINTEXT);
+    }
+
+    #[test]
+    fn decode_test_ltr() {
+        let mut code = GrayCode::default();
+        code.mode = IOMode::Letter;
+        assert_eq!(code.decode(ENCODEDTEXT_LTR).unwrap(), PLAINTEXT_LTR);
     }
 }

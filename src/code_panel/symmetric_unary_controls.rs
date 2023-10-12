@@ -1,17 +1,19 @@
 use super::CodeFrame;
 use crate::ui_elements::UiElements;
-use codes::{mathematical::unary::UnaryCode, traits::IOMode};
+use codes::{letter_word_code::IOMode, mathematical::unary::UnaryCode};
 use egui::TextEdit;
 use utils::text_functions::unique_string;
 
 pub struct SymUnaryCodeFrame {
     code: UnaryCode,
+    words_string: String,
 }
 
 impl Default for SymUnaryCodeFrame {
     fn default() -> Self {
         Self {
             code: Default::default(),
+            words_string: String::new(),
         }
     }
 }
@@ -55,7 +57,6 @@ impl CodeFrame for SymUnaryCodeFrame {
                 if ui.control_string(&mut self.code.maps.alphabet).changed() {
                     unique_string(&mut self.code.maps.alphabet);
                     self.code.maps.alphabet.retain(|x| x != '�');
-                    self.code.set_letter_map();
                 };
                 ui.add_space(16.0);
                 ui.two_column_table(
@@ -64,7 +65,7 @@ impl CodeFrame for SymUnaryCodeFrame {
                     Box::new(
                         self.code
                             .maps
-                            .nums_chars()
+                            .ints_chars()
                             .map(|(a, b)| (self.usize_to_unary(a), b)),
                     ),
                 );
@@ -72,10 +73,10 @@ impl CodeFrame for SymUnaryCodeFrame {
             IOMode::Word => {
                 ui.label("Provide any number of words or phrases separated by commas. Codes will be assigned to each word or phrase in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
                 if ui
-                    .add(TextEdit::singleline(&mut self.code.maps.words_string))
+                    .add(TextEdit::singleline(&mut self.words_string))
                     .changed()
                 {
-                    self.code.set_word_map();
+                    self.code.maps.set_words(&self.words_string);
                 };
                 ui.add_space(16.0);
                 ui.two_column_table(
@@ -84,7 +85,7 @@ impl CodeFrame for SymUnaryCodeFrame {
                     Box::new(
                         self.code
                             .maps
-                            .nums_words()
+                            .ints_words()
                             .map(|(a, b)| (self.usize_to_unary(a), b)),
                     ),
                 );
