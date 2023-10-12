@@ -109,7 +109,16 @@ impl BaseN {
             s.chars().rev().collect()
         };
         if self.bijective {
-            todo!("decode bijective numbers")
+            let mut base = 1;
+            let mut out = 0;
+            for c in word.chars().rev() {
+                let n = c
+                    .to_digit(36)
+                    .ok_or_else(|| CodeError::invalid_input_char(c))?;
+                out += base * n;
+                base *= self.radix;
+            }
+            Ok(out)
         } else {
             u32::from_str_radix(&word, self.radix).map_err(|e| CodeError::Input(e.to_string()))
         }
@@ -171,7 +180,11 @@ impl Code for BaseN {
                     continue;
                 }
                 let n = self.decode_to_u32(s)?;
-                output.push(self.maps.int_to_char(n as usize)?)
+                if self.bijective {
+                    output.push(self.maps.int_to_char((n - 1) as usize)?)
+                } else {
+                    output.push(self.maps.int_to_char(n as usize)?)
+                }
             }
         } else {
             for s in text.split(" ") {
@@ -179,7 +192,11 @@ impl Code for BaseN {
                     continue;
                 }
                 let n = self.decode_to_u32(s)?;
-                output.push_str(self.maps.int_to_word(n as usize)?);
+                if self.bijective {
+                    output.push_str(self.maps.int_to_word((n - 1) as usize)?)
+                } else {
+                    output.push_str(self.maps.int_to_word(n as usize)?)
+                }
                 output.push(' ');
             }
             output.pop();
@@ -252,8 +269,8 @@ mod base_n_tests {
     fn decode_test_bijective() {
         let mut code = BaseN::default();
         code.bijective = true;
-        assert_eq!(code.encode(ENCODEDTEXT_BIJ).unwrap(), PLAINTEXT_INT_BIJ);
+        assert_eq!(code.decode(ENCODEDTEXT_BIJ).unwrap(), PLAINTEXT_INT_BIJ);
         code.mode = IOMode::Letter;
-        assert_eq!(code.encode(ENCODEDTEXT_BIJ).unwrap(), PLAINTEXT_LET_BIJ);
+        assert_eq!(code.decode(ENCODEDTEXT_BIJ).unwrap(), PLAINTEXT_LET_BIJ);
     }
 }
