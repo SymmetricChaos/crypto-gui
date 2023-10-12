@@ -38,14 +38,14 @@ impl Code for FibonacciCode {
             let mut output = String::new();
             for c in text.chars() {
                 let n = self.maps.char_to_int(c)?;
-                output.push_str(&self.integer_code.encode_u32(n as u32))
+                output.push_str(&self.integer_code.encode_u32((n + 1) as u32))
             }
             Ok(output)
         } else {
             let mut output = String::new();
             for w in text.split(" ") {
                 let n = self.maps.word_to_int(w)?;
-                output.push_str(&self.integer_code.encode_u32(n as u32))
+                output.push_str(&self.integer_code.encode_u32((n + 1) as u32))
             }
             Ok(output)
         }
