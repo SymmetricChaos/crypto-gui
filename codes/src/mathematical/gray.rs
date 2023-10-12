@@ -1,17 +1,27 @@
 use utils::bits::IS_BITS;
 
-use crate::{errors::CodeError, traits::Code};
+use crate::{
+    errors::CodeError,
+    traits::{Code, IOMode, LetterAndWordCode},
+};
 
 pub struct GrayCode {
+    pub maps: LetterAndWordCode<usize>,
+    pub mode: IOMode,
     pub width: usize,
     pub fixed_width: bool,
 }
 
 impl Default for GrayCode {
     fn default() -> Self {
+        let mut maps = LetterAndWordCode::default();
+        maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
+        maps.set_letter_map(|(n, _)| n ^ (n >> 1));
         Self {
             width: 4,
             fixed_width: true,
+            maps,
+            mode: IOMode::Integer,
         }
     }
 }
@@ -19,12 +29,11 @@ impl Default for GrayCode {
 impl GrayCode {
     pub fn encode_u32(&self, n: u32) -> String {
         let gray = n ^ (n >> 1);
-        format!("{:0>1$b}", gray, self.width)
-    }
-
-    pub fn encode_u32_var(&self, n: u32) -> String {
-        let gray = n ^ (n >> 1);
-        format!("{:b}", gray)
+        if self.fixed_width {
+            format!("{:0>1$b}", gray, self.width)
+        } else {
+            format!("{:b}", gray)
+        }
     }
 
     pub fn decode_u32(&self, n: u32) -> String {
@@ -37,10 +46,13 @@ impl GrayCode {
         out.to_string()
     }
 
-    // pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (u32, String)>> {
-    //     let m = 2_u32.pow(self.width as u32);
-    //     Box::new((0..m).map(|n| (n, self.encode_u32(n))))
-    // }
+    pub fn set_letter_map(&mut self) {
+        self.maps.set_letter_map(|(n, _)| n ^ (n >> 1))
+    }
+
+    pub fn set_word_map(&mut self) {
+        self.maps.set_word_map(|(n, _)| n ^ (n >> 1))
+    }
 }
 
 impl Code for GrayCode {
@@ -49,17 +61,13 @@ impl Code for GrayCode {
         let mut out = String::new();
         for s in text.split(" ") {
             let n = u32::from_str_radix(s, 10).map_err(|_| CodeError::invalid_input_group(s))?;
-            if n >= m {
+            if n >= m && self.fixed_width {
                 return Err(CodeError::Input(format!(
                     "for a width of {} inputs must be less than {}",
                     self.width, m
                 )));
             };
-            match self.fixed_width {
-                true => out.push_str(&self.encode_u32(n)),
-                false => out.push_str(&self.encode_u32_var(n)),
-            }
-
+            out.push_str(&self.encode_u32(n));
             out.push(' ');
         }
         out.pop();
@@ -88,8 +96,12 @@ mod gray_tests {
     #[ignore]
     #[test]
     fn gray_code_generator() {
-        let code = GrayCode::default();
+        let mut code = GrayCode::default();
         for n in 0..16 {
+            println!("{}", code.encode_u32(n));
+        }
+        code.fixed_width = false;
+        for n in [2,3,8,9,15,16] {
             println!("{}", code.encode_u32(n));
         }
     }
