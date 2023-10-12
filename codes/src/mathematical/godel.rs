@@ -53,7 +53,7 @@ impl Code for Godel {
         if self.mode == IOMode::Letter {
             for (s, prime) in text.chars().zip(self.primes.iter()) {
                 match self.maps.char_to_int(s) {
-                    Ok(v) => out *= BigUint::from(*prime).pow(v as u32),
+                    Ok(v) => out *= BigUint::from(*prime).pow((v + 1) as u32),
                     Err(e) => return Err(e),
                 }
             }
@@ -61,7 +61,7 @@ impl Code for Godel {
         } else if self.mode == IOMode::Word {
             for (s, prime) in text.split(" ").zip(self.primes.iter()) {
                 match self.maps.word_to_int(s) {
-                    Ok(v) => out *= BigUint::from(*prime).pow(v as u32),
+                    Ok(v) => out *= BigUint::from(*prime).pow((v + 1) as u32),
                     Err(e) => return Err(e),
                 }
             }
@@ -89,7 +89,7 @@ impl Code for Godel {
                     num = num.div_floor(&big_p)
                 }
                 if ctr != 0 {
-                    let c = match self.maps.int_to_word(ctr) {
+                    let c = match self.maps.int_to_word(ctr - 1) {
                         Ok(c) => c,
                         Err(_) => "?",
                     };
@@ -113,7 +113,7 @@ impl Code for Godel {
                     num = num.div_floor(&big_p)
                 }
                 if ctr != 0 {
-                    let c = match self.maps.int_to_char(ctr) {
+                    let c = match self.maps.int_to_char(ctr - 1) {
                         Ok(c) => c,
                         Err(_) => '?',
                     };
