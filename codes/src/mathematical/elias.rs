@@ -71,13 +71,23 @@ impl Code for EliasCode {
             for c in text.chars() {
                 let n = self.maps.char_to_int(c)?;
                 self.integer_code.borrow_mut().extend_all(n as u32);
-                out.push_str(self.integer_code.borrow().encode_u32(n as u32).unwrap());
+                out.push_str(
+                    self.integer_code
+                        .borrow()
+                        .encode_u32((n + 1) as u32)
+                        .unwrap(),
+                );
             }
         } else {
             for w in text.split(" ") {
                 let n = self.maps.word_to_int(w)?;
                 self.integer_code.borrow_mut().extend_all(n as u32);
-                out.push_str(self.integer_code.borrow().encode_u32(n as u32).unwrap());
+                out.push_str(
+                    self.integer_code
+                        .borrow()
+                        .encode_u32((n + 1) as u32)
+                        .unwrap(),
+                );
             }
         }
         Ok(out)
@@ -91,12 +101,12 @@ impl Code for EliasCode {
             Ok(nums.into_iter().join(" "))
         } else if self.mode == IOMode::Letter {
             for n in nums {
-                out.push(self.maps.int_to_char(n as usize)?);
+                out.push(self.maps.int_to_char((n - 1) as usize)?);
             }
             Ok(out)
         } else {
             for n in nums {
-                out.push_str(self.maps.int_to_word(n as usize)?);
+                out.push_str(self.maps.int_to_word((n - 1) as usize)?);
                 out.push(' ');
             }
             out.pop();
@@ -112,6 +122,7 @@ mod elias_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "ETA";
+    const PLAINTEXT_INT: &'static str = "1 2 3";
     const ENCODEDTEXT_DELTA: &'static str = "101000101";
     const ENCODEDTEXT_GAMMA: &'static str = "1010011";
     const ENCODEDTEXT_OMEGA: &'static str = "0100110";
@@ -128,6 +139,17 @@ mod elias_tests {
     }
 
     #[test]
+    fn encode_test_int() {
+        let mut code = EliasCode::default();
+        code.mode = IOMode::Integer;
+        assert_eq!(code.encode(PLAINTEXT_INT).unwrap(), ENCODEDTEXT_DELTA);
+        code.integer_code.borrow_mut().variant = EliasVariant::Gamma;
+        assert_eq!(code.encode(PLAINTEXT_INT).unwrap(), ENCODEDTEXT_GAMMA);
+        code.integer_code.borrow_mut().variant = EliasVariant::Omega;
+        assert_eq!(code.encode(PLAINTEXT_INT).unwrap(), ENCODEDTEXT_OMEGA);
+    }
+
+    #[test]
     fn decode_test() {
         let mut code = EliasCode::default();
         code.mode = IOMode::Letter;
@@ -136,5 +158,16 @@ mod elias_tests {
         assert_eq!(code.decode(ENCODEDTEXT_GAMMA).unwrap(), PLAINTEXT);
         code.integer_code.borrow_mut().variant = EliasVariant::Omega;
         assert_eq!(code.decode(ENCODEDTEXT_OMEGA).unwrap(), PLAINTEXT);
+    }
+
+    #[test]
+    fn decode_test_int() {
+        let mut code = EliasCode::default();
+        code.mode = IOMode::Integer;
+        assert_eq!(code.decode(ENCODEDTEXT_DELTA).unwrap(), PLAINTEXT_INT);
+        code.integer_code.borrow_mut().variant = EliasVariant::Gamma;
+        assert_eq!(code.decode(ENCODEDTEXT_GAMMA).unwrap(), PLAINTEXT_INT);
+        code.integer_code.borrow_mut().variant = EliasVariant::Omega;
+        assert_eq!(code.decode(ENCODEDTEXT_OMEGA).unwrap(), PLAINTEXT_INT);
     }
 }
