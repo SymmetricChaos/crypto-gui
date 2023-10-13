@@ -20,13 +20,33 @@ impl UnaryCode {
             "1".repeat(n) + "0"
         }
     }
+
+    pub fn recognize_code(&self, text: &str) -> Vec<Option<usize>> {
+        let mut output = Vec::new();
+
+        let mut ctr = 0;
+        for b in text.chars() {
+            if b == '1' {
+                ctr += 1
+            } else if b == '0' {
+                output.push(Some(ctr));
+                ctr = 0;
+            } else {
+                output.push(None);
+                ctr = 0;
+            }
+        }
+        if ctr != 0 {
+            output.push(None)
+        }
+        output
+    }
 }
 
 impl Default for UnaryCode {
     fn default() -> Self {
         let mut maps = LetterWordIntCode::new();
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
-        // maps.set_letter_map(|(n, _)| "1".repeat(n) + "0");
         UnaryCode {
             maps,
             mode: IOMode::Letter,
@@ -65,65 +85,50 @@ impl Code for UnaryCode {
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        // let mut output = String::new();
-        // let mut buffer = String::with_capacity(self.maps.letter_map.len());
-        // let text = if self.invert {
-        //     swap_ab('0', '1', text)
-        // } else {
-        //     text.to_string()
-        // };
-        // if self.mode == IOMode::Letter {
-        //     for b in text.chars() {
-        //         buffer.push(b);
-        //         if b == '0' {
-        //             match self.maps.letter_map.get_by_right(&buffer) {
-        //                 Some(s) => {
-        //                     output.push(*s);
-        //                     buffer.clear();
-        //                 }
-        //                 None => {
-        //                     output.push('?');
-        //                     buffer.clear();
-        //                 }
-        //             }
-        //         }
-        //     }
-        // } else if self.mode == IOMode::Word {
-        //     for b in text.chars() {
-        //         buffer.push(b);
-        //         if b == '0' {
-        //             match self.maps.word_map.get_by_right(&buffer) {
-        //                 Some(s) => {
-        //                     output.push_str(s);
-        //                     output.push(' ');
-        //                     buffer.clear();
-        //                 }
-        //                 None => {
-        //                     output.push('?');
-        //                     buffer.clear();
-        //                 }
-        //             }
-        //         }
-        //     }
-        //     output.pop();
-        // } else {
-        //     let mut ctr = 0;
-        //     for b in text.chars() {
-        //         if b == '1' {
-        //             ctr += 1
-        //         } else if b == '0' {
-        //             output.push_str(&ctr.to_string());
-        //             output.push(' ');
-        //             ctr = 0;
-        //         } else {
-        //             output.push_str("? ");
-        //             ctr = 0;
-        //         }
-        //     }
-        // }
+        let mut output = String::new();
+        let text = if self.invert {
+            swap_ab('0', '1', text)
+        } else {
+            text.to_string()
+        };
+        if self.mode == IOMode::Letter {
+            for section in self.recognize_code(&text) {
+                if let Some(code) = section {
+                    if let Ok(c) = self.maps.int_to_char(code) {
+                        output.push(c);
+                    } else {
+                        output.push('�');
+                    }
+                } else {
+                    output.push('�');
+                }
+            }
+        } else if self.mode == IOMode::Word {
+            for section in self.recognize_code(&text) {
+                if let Some(code) = section {
+                    if let Ok(s) = self.maps.int_to_word(code) {
+                        output.push_str(s);
+                        output.push(' ');
+                    } else {
+                        output.push_str("� ");
+                    }
+                } else {
+                    output.push_str("� ");
+                }
+            }
+            output.pop();
+        } else {
+            for section in self.recognize_code(&text) {
+                if let Some(code) = section {
+                    output.push_str(&code.to_string());
+                    output.push(' ');
+                } else {
+                    output.push_str("� ");
+                }
+            }
+        }
 
-        // Ok(output)
-        todo!()
+        Ok(output)
     }
 }
 
