@@ -113,7 +113,7 @@ impl Code for RomanNumeral {
         } else if self.mode == IOMode::Letter {
             for c in text.chars() {
                 let n = self.maps.char_to_int(c)?;
-                output.push_str(&Self::encode_int(n)?);
+                output.push_str(&Self::encode_int(n + 1)?);
                 output.push(' ')
             }
         } else {
@@ -122,7 +122,7 @@ impl Code for RomanNumeral {
                     continue;
                 }
                 let n = self.maps.word_to_int(w)?;
-                output.push_str(&Self::encode_int(n)?);
+                output.push_str(&Self::encode_int(n + 1)?);
                 output.push(' ')
             }
         }
@@ -146,7 +146,7 @@ impl Code for RomanNumeral {
                     continue;
                 }
                 let n = Self::decode_to_int(s)?;
-                output.push(self.maps.int_to_char(n)?);
+                output.push(self.maps.int_to_char(n - 1)?);
             }
         } else {
             for s in text.split(" ") {
@@ -154,7 +154,7 @@ impl Code for RomanNumeral {
                     continue;
                 }
                 let n = Self::decode_to_int(s)?;
-                output.push_str(self.maps.int_to_word(n)?);
+                output.push_str(self.maps.int_to_word(n - 1)?);
                 output.push(' ');
             }
             output.pop();
@@ -169,7 +169,9 @@ mod roman_numeral_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "39 246 789 2421 9";
+    const PLAINTEXT_LTR: &'static str = "ETAOI";
     const ENCODEDTEXT: &'static str = "XXXIX CCXLVI DCCLXXXIX MMCDXXI IX";
+    const ENCODEDTEXT_LTR: &'static str = "I II III IV V";
 
     #[test]
     fn encode_test() {
@@ -181,5 +183,19 @@ mod roman_numeral_tests {
     fn decode_test() {
         let code = RomanNumeral::default();
         assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
+    }
+
+    #[test]
+    fn encode_test_letter() {
+        let mut code = RomanNumeral::default();
+        code.mode = IOMode::Letter;
+        assert_eq!(code.encode(PLAINTEXT_LTR).unwrap(), ENCODEDTEXT_LTR);
+    }
+
+    #[test]
+    fn decode_test_letter() {
+        let mut code = RomanNumeral::default();
+        code.mode = IOMode::Letter;
+        assert_eq!(code.decode(ENCODEDTEXT_LTR).unwrap(), PLAINTEXT_LTR);
     }
 }
