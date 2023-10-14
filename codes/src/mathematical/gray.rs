@@ -36,14 +36,14 @@ impl GrayCode {
         }
     }
 
-    pub fn decode_u32(&self, n: u32) -> String {
+    pub fn decode_to_u32(&self, n: u32) -> u32 {
         let mut mask = n;
         let mut out = n;
         while mask != 0 {
             mask >>= 1;
             out ^= mask;
         }
-        out.to_string()
+        out
     }
 }
 
@@ -101,7 +101,8 @@ impl Code for GrayCode {
                     return Err(CodeError::invalid_input_group(s));
                 }
                 let n = u32::from_str_radix(s, 2).map_err(|_| CodeError::invalid_input_group(s))?;
-                out.push(self.maps.int_to_char(n as usize)?);
+                let code = self.decode_to_u32(n);
+                out.push(self.maps.int_to_char(code as usize)?);
             }
         } else if self.mode == IOMode::Word {
             for s in text.split(" ") {
@@ -109,7 +110,8 @@ impl Code for GrayCode {
                     return Err(CodeError::invalid_input_group(s));
                 }
                 let n = u32::from_str_radix(s, 2).map_err(|_| CodeError::invalid_input_group(s))?;
-                out.push_str(self.maps.int_to_word(n as usize)?);
+                let code = self.decode_to_u32(n);
+                out.push_str(self.maps.int_to_word(code as usize)?);
                 out.push(' ');
             }
             out.pop();
@@ -119,7 +121,7 @@ impl Code for GrayCode {
                     return Err(CodeError::invalid_input_group(s));
                 }
                 let n = u32::from_str_radix(s, 2).map_err(|_| CodeError::invalid_input_group(s))?;
-                out.push_str(&self.decode_u32(n));
+                out.push_str(&self.decode_to_u32(n).to_string());
                 out.push(' ');
             }
             out.pop();
@@ -146,10 +148,11 @@ mod gray_tests {
         }
     }
 
-    const PLAINTEXT_LTR: &'static str = "ABCXYZ";
-    const ENCODEDTEXT_LTR: &'static str = "00010 10111 01001 10010 10101 11111";
-    const PLAINTEXT: &'static str = "1 2 3 14 15";
-    const ENCODEDTEXT: &'static str = "00001 00011 00010 01001 01000";
+    const PLAINTEXT_LTR: &'static str = "ETAOIN";
+    const ENCODEDTEXT_LTR: &'static str = "00000 00001 00011 00010 00110 00111";
+
+    const PLAINTEXT: &'static str = "1 2 3 4 5 14 15";
+    const ENCODEDTEXT: &'static str = "00001 00011 00010 00110 00111 01001 01000";
     const ENCODEDTEXT_VAR: &'static str = "1 11 10 1001 1000";
 
     #[test]
