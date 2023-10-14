@@ -1,11 +1,11 @@
 use super::CodeFrame;
 use crate::ui_elements::UiElements;
-use codes::{letter_word_code::IOMode, mathematical::unary::UnaryCode};
+use codes::{letter_word_code::IOMode, mathematical::symmetric_unary::SymmetricUnaryCode};
 use egui::TextEdit;
 use utils::text_functions::unique_string;
 
 pub struct SymUnaryCodeFrame {
-    code: UnaryCode,
+    code: SymmetricUnaryCode,
     words_string: String,
 }
 

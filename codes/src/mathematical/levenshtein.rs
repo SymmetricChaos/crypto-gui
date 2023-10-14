@@ -22,7 +22,6 @@ impl Default for LevenshteinCode {
 
         let mut maps = LetterWordIntCode::new();
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
-        // maps.set_letter_map(|(n, _)| codes.encode_u32((n + 1) as u32));
         LevenshteinCode {
             mode: IOMode::Integer,
             integer_code: codes,
@@ -39,14 +38,14 @@ impl Code for LevenshteinCode {
             let mut output = String::new();
             for c in text.chars() {
                 let code = self.maps.char_to_int(c)? as u32;
-                output.push_str(&self.integer_code.encode_u32(code))
+                output.push_str(&self.integer_code.encode_u32(code + 1))
             }
             Ok(output)
         } else {
             let mut output = String::new();
             for w in text.split(" ") {
                 let code = self.maps.word_to_int(w)? as u32;
-                output.push_str(&self.integer_code.encode_u32(code))
+                output.push_str(&self.integer_code.encode_u32(code + 1))
             }
             Ok(output)
         }
@@ -78,5 +77,27 @@ impl Code for LevenshteinCode {
             }
             Ok(output.into_iter().join(" "))
         }
+    }
+}
+
+#[cfg(test)]
+mod levenshtein_int_tests {
+    use super::*;
+
+    const PLAINTEXT: &'static str = "ETAO";
+    const ENCODEDTEXT: &'static str = "10110011011110000";
+
+    #[test]
+    fn encode_test() {
+        let mut code = LevenshteinCode::default();
+        code.mode = IOMode::Letter;
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
+    }
+
+    #[test]
+    fn decode_test() {
+        let mut code = LevenshteinCode::default();
+        code.mode = IOMode::Letter;
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
     }
 }
