@@ -6,13 +6,13 @@ use crate::{
     traits::Code,
 };
 
-pub struct UnaryCode {
+pub struct SymmetricUnaryCode {
     pub maps: LetterWordIntCode,
     pub mode: IOMode,
     pub invert: bool,
 }
 
-impl UnaryCode {
+impl SymmetricUnaryCode {
     pub fn encode_usize(&self, n: usize) -> String {
         if n == 0 {
             return String::from("1");
@@ -21,20 +21,21 @@ impl UnaryCode {
         }
     }
 
-    pub fn recognize_code(&self, text: &str) -> Vec<String> {
+    pub fn recognize_code(&self, text: &str) -> Vec<Option<usize>> {
         let mut output = Vec::new();
         let mut buffer = String::with_capacity(self.maps.alphabet.chars().count());
 
         for b in text.chars() {
             // Invalid characters immediatly give '?' response and restart
             if b != '0' && b != '1' {
-                output.push(String::from('?'));
+                output.push(None);
                 buffer.clear();
                 continue;
             }
             // The '1' bit on its own is a valid code
             if buffer.is_empty() && b == '1' {
-                output.push(String::from("1"));
+                output.push(Some(0));
+                buffer.clear();
                 continue;
             }
             // If the starting bit is '0' push it and continue
@@ -42,27 +43,28 @@ impl UnaryCode {
                 buffer.push(b);
             // Otherwise push the next bit on
             } else {
-                buffer.push(b);
                 if b == '0' {
-                    output.push(buffer.clone());
+                    output.push(Some(buffer.chars().count()));
                     buffer.clear();
+                } else {
+                    buffer.push('1')
                 }
             }
         }
-        // If anything remains in the buffer it is unknown
+        // If anything remains in the buffer it is invalid
         if !buffer.is_empty() {
-            output.push(String::from('?'))
+            output.push(None)
         }
         output
     }
 }
 
-impl Default for UnaryCode {
+impl Default for SymmetricUnaryCode {
     fn default() -> Self {
         let mut maps = LetterWordIntCode::new();
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
 
-        UnaryCode {
+        SymmetricUnaryCode {
             maps,
             mode: IOMode::Letter,
             invert: false,
@@ -70,7 +72,7 @@ impl Default for UnaryCode {
     }
 }
 
-impl Code for UnaryCode {
+impl Code for SymmetricUnaryCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut output = String::new();
 
@@ -103,52 +105,50 @@ impl Code for UnaryCode {
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        // let mut output = String::new();
-        // let text = if self.invert {
-        //     swap_ab('0', '1', text)
-        // } else {
-        //     text.to_string()
-        // };
-        // if self.mode == IOMode::Letter {
-        //     for code in self.recognize_code(&text) {
-        //         match self.maps.word_to_int(&code) {
-        //             Some(s) => {
-        //                 output.push(*s);
-        //                 buffer.clear();
-        //             }
-        //             None => {
-        //                 output.push('?');
-        //                 buffer.clear();
-        //             }
-        //         }
-        //     }
-        // } else if self.mode == IOMode::Word {
-        //     for code in self.recognize_code(&text) {
-        //         match self.maps.word_map.get_by_right(&code) {
-        //             Some(s) => {
-        //                 output.push_str(s);
-        //                 output.push(' ');
-        //                 buffer.clear();
-        //             }
-        //             None => {
-        //                 output.push_str("? ");
-        //                 buffer.clear();
-        //             }
-        //         }
-        //     }
-        //     output.pop();
-        // } else {
-        //     for code in self.recognize_code(&text) {
-        //         if code == "?" {
-        //             output.push_str("? ")
-        //         } else {
-        //             output.push_str(&format!("{} ", code.chars().count()))
-        //         }
-        //     }
-        // }
+        let mut output = String::new();
+        let text = if self.invert {
+            swap_ab('0', '1', text)
+        } else {
+            text.to_string()
+        };
+        if self.mode == IOMode::Letter {
+            for section in self.recognize_code(&text) {
+                if let Some(code) = section {
+                    if let Ok(c) = self.maps.int_to_char(code) {
+                        output.push(c);
+                    } else {
+                        output.push('�');
+                    }
+                } else {
+                    output.push('�');
+                }
+            }
+        } else if self.mode == IOMode::Word {
+            for section in self.recognize_code(&text) {
+                if let Some(code) = section {
+                    if let Ok(s) = self.maps.int_to_word(code) {
+                        output.push_str(s);
+                        output.push(' ');
+                    } else {
+                        output.push_str("� ");
+                    }
+                } else {
+                    output.push_str("� ");
+                }
+            }
+            output.pop();
+        } else {
+            for section in self.recognize_code(&text) {
+                if let Some(code) = section {
+                    output.push_str(&code.to_string());
+                    output.push(' ');
+                } else {
+                    output.push_str("� ");
+                }
+            }
+        }
 
-        // Ok(output)
-        todo!()
+        Ok(output)
     }
 }
 
@@ -161,13 +161,13 @@ mod symmetric_unary_tests {
 
     #[test]
     fn encode_test() {
-        let code = UnaryCode::default();
+        let code = SymmetricUnaryCode::default();
         assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
     }
 
     #[test]
     fn decode_test() {
-        let code = UnaryCode::default();
+        let code = SymmetricUnaryCode::default();
         assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
     }
 }
