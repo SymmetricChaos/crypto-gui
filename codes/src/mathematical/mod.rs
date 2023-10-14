@@ -1,6 +1,7 @@
 pub mod base_n;
 pub mod elias;
 pub mod elias_integers;
+pub mod factoradic;
 pub mod fibonacci;
 pub mod fibonacci_integers;
 pub mod godel;
