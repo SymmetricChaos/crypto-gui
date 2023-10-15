@@ -10,7 +10,7 @@ use crate::{
 };
 
 lazy_static! {
-    pub static ref TUPLE: Regex = Regex::new(r"(([0-9]:)*[0-9])").unwrap();
+    pub static ref TUPLE: Regex = Regex::new(r"(([0-9]+:)*[0-9]+)").unwrap();
 }
 
 pub struct Factoradic {
