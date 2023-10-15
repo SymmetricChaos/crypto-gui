@@ -38,14 +38,22 @@ impl Factoradic {
     pub fn recognize_code(text: &str) -> Vec<Option<usize>> {
         let mut output = Vec::new();
 
-        for t in TUPLE.captures_iter(text) {
+        for cap in TUPLE.captures_iter(text) {
             let mut base = 1;
             let mut ctr = 1;
             let mut value = 0;
 
-            for n in t.get(1).unwrap().as_str().rsplit(":") {
+            let s = match cap.get(1) {
+                Some(m) => m.as_str(),
+                None => {
+                    output.push(None);
+                    continue;
+                }
+            };
+
+            for n in s.rsplit(":").filter(|s| !s.is_empty()) {
                 let x = usize::from_str_radix(n.trim(), 10)
-                    .expect("captures by regex will always be valid numbers");
+                    .expect("captures by regex should always be valid numbers");
                 value += x * base;
                 base *= ctr;
                 ctr += 1;
@@ -153,8 +161,8 @@ mod factoradic_tests {
         for m in TUPLE.find_iter(ENCODEDTEXT) {
             println!("{}", m.as_str())
         }
-        for n in Factoradic::recognize_code(ENCODEDTEXT) {
-            println!("{:?}", n)
+        for m in TUPLE.find_iter("10:9:222 0 :1:2:4: ::") {
+            println!("{}", m.as_str())
         }
     }
 
