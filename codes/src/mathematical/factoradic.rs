@@ -35,14 +35,27 @@ impl Factoradic {
         format!("{}", out.iter().rev().join(":"))
     }
 
+    fn code_string_to_num(s: &str) -> Option<usize> {
+        let mut base = 1;
+        let mut ctr = 1;
+        let mut value = 0;
+        for n in s.rsplit(":").filter(|s| !s.is_empty()) {
+            let x = usize::from_str_radix(n.trim(), 10)
+                .expect("captures by regex should always be valid numbers");
+            if x >= ctr {
+                return None;
+            }
+            value += x * base;
+            base *= ctr;
+            ctr += 1;
+        }
+        Some(value)
+    }
+
     pub fn recognize_code(text: &str) -> Vec<Option<usize>> {
         let mut output = Vec::new();
 
         for cap in TUPLE.captures_iter(text) {
-            let mut base = 1;
-            let mut ctr = 1;
-            let mut value = 0;
-
             let s = match cap.get(1) {
                 Some(m) => m.as_str(),
                 None => {
@@ -50,15 +63,7 @@ impl Factoradic {
                     continue;
                 }
             };
-
-            for n in s.rsplit(":").filter(|s| !s.is_empty()) {
-                let x = usize::from_str_radix(n.trim(), 10)
-                    .expect("captures by regex should always be valid numbers");
-                value += x * base;
-                base *= ctr;
-                ctr += 1;
-            }
-            output.push(Some(value))
+            output.push(Self::code_string_to_num(s));
         }
 
         output
