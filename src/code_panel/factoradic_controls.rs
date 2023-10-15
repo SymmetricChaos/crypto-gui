@@ -20,6 +20,11 @@ impl Default for FactoradicFrame {
 
 impl CodeFrame for FactoradicFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
+        ui.subheading("Example");
+        ui.mono(
+            "factoradic number     3:4:2:2:1:0\n\ndigits                3   4  2  2  1  0\nplace values       ×120 ×24 ×6 ×2 ×1 ×1\ndigit values        360  96 12  4  1  0\n\ntheir sum is 473",
+        );
+
         ui.group(|ui| {
             ui.subheading("Mode");
             ui.selectable_value(&mut self.code.mode, IOMode::Integer, "Integer");
