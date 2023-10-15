@@ -10,7 +10,7 @@ use crate::{
 };
 
 lazy_static! {
-    pub static ref TUPLE: Regex = Regex::new(r"\(([0-9, ]+)\)").unwrap();
+    pub static ref TUPLE: Regex = Regex::new(r"(([0-9]:)*[0-9])").unwrap();
 }
 
 pub struct Factoradic {
@@ -21,7 +21,7 @@ pub struct Factoradic {
 impl Factoradic {
     pub fn encode_usize(&self, n: usize) -> String {
         if n == 0 {
-            return String::from("(0)");
+            return String::from("0");
         }
         let mut out = Vec::new();
         let mut divisor = 1;
@@ -32,7 +32,7 @@ impl Factoradic {
             n = q;
             divisor += 1;
         }
-        format!("({})", out.iter().rev().join(", "))
+        format!("{}", out.iter().rev().join(":"))
     }
 
     pub fn recognize_code(text: &str) -> Vec<Option<usize>> {
@@ -43,7 +43,7 @@ impl Factoradic {
             let mut ctr = 1;
             let mut value = 0;
 
-            for n in t.get(1).unwrap().as_str().rsplit(", ") {
+            for n in t.get(1).unwrap().as_str().rsplit(":") {
                 let x = usize::from_str_radix(n.trim(), 10)
                     .expect("captures by regex will always be valid numbers");
                 value += x * base;
@@ -145,7 +145,7 @@ mod factoradic_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "ETAOIN";
-    const ENCODEDTEXT: &'static str = "(0) (1, 0) (1, 0, 0) (1, 1, 0) (2, 0, 0) (2, 1, 0)";
+    const ENCODEDTEXT: &'static str = "0 1:0 1:0:0 1:1:0 2:0:0 2:1:0";
 
     #[test]
     #[ignore]
