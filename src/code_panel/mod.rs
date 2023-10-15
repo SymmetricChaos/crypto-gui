@@ -12,9 +12,10 @@ use self::{
     base32_controls::Base32Frame, base64_controls::Base64Frame, base_n_controls::BaseNFrame,
     baudot_controls::BaudotFrame, block_controls::BlockCodeFrame,
     crc_controls::CyclicRedundancyCheckFrame, damm_controls::DammFrame,
-    elias_controls::EliasCodeFrame, fibonacci_controls::FibonacciCodeFrame,
-    godel_controls::GodelFrame, gray_controls::GrayCodeFrame, hamming_controls::HammingFrame,
-    isbn_contols::IsbnFrame, itf_controls::ItfFrame, levenshtein_controls::LevenshteinCodeFrame,
+    elias_controls::EliasCodeFrame, factoradic_controls::FactoradicFrame,
+    fibonacci_controls::FibonacciCodeFrame, godel_controls::GodelFrame,
+    gray_controls::GrayCodeFrame, hamming_controls::HammingFrame, isbn_contols::IsbnFrame,
+    itf_controls::ItfFrame, levenshtein_controls::LevenshteinCodeFrame,
     linotype_controls::LinotypeFrame, luhn_controls::LuhnAlgorithmFrame,
     m_of_n_controls::MofNCodeFrame, morse_controls::MorseFrame, needle_controls::NeedleFrame,
     numeric_controls::BytesAsNumbersFrame, parity_check_controls::ParityBitFrame,
@@ -37,6 +38,7 @@ mod block_controls;
 mod crc_controls;
 mod damm_controls;
 mod elias_controls;
+mod factoradic_controls;
 mod fibonacci_controls;
 mod godel_controls;
 mod gray_controls;
@@ -133,11 +135,12 @@ pub struct CodeInterface {
     itf: ItfFrame,
     upc: UpcFrame,
 
-    // Mathematical
+    // Integer
     basen: BaseNFrame,
     godel: GodelFrame,
     gray: GrayCodeFrame,
     roman: RomanNumeralFrame,
+    factoradic: FactoradicFrame,
 
     // Prefix
     block: BlockCodeFrame,
@@ -187,6 +190,7 @@ impl CodeInterface {
             &[
                 CodeId::BaseN,
                 CodeId::Elias,
+                CodeId::Factoradic,
                 CodeId::Fibonacci,
                 CodeId::Godel,
                 CodeId::Gray,
@@ -258,6 +262,7 @@ impl CodeInterface {
             CodeId::CyclicRedundancyCheck => &mut self.crc,
             CodeId::Damm => &mut self.damm,
             CodeId::Elias => &mut self.elias,
+            CodeId::Factoradic => &mut self.factoradic,
             CodeId::Fibonacci => &mut self.fibonacci,
             CodeId::Godel => &mut self.godel,
             CodeId::Gray => &mut self.gray,
