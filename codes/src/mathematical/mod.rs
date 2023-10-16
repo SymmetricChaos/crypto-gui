@@ -1,4 +1,5 @@
 pub mod base_n;
+pub mod combinadic;
 pub mod elias;
 pub mod elias_integers;
 pub mod factoradic;
