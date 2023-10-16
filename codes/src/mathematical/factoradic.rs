@@ -41,7 +41,7 @@ impl Factoradic {
         let mut value = 0;
         for n in s.rsplit(":").filter(|s| !s.is_empty()) {
             let x = usize::from_str_radix(n.trim(), 10)
-                .expect("captures by regex should always be valid numbers");
+                .expect("captures by the regex should always be valid numbers");
             if x >= ctr {
                 return None;
             }
