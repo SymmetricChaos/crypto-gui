@@ -19,6 +19,18 @@ pub struct Combinadic {
     pub k: usize,
 }
 
+impl Default for Combinadic {
+    fn default() -> Self {
+        let mut maps = LetterWordIntCode::new();
+        maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
+        Self {
+            maps,
+            mode: IOMode::Letter,
+            k: 5,
+        }
+    }
+}
+
 impl Combinadic {
     pub fn encode_usize(&self, n: usize) -> String {
         let mut out = Vec::new();
@@ -75,18 +87,6 @@ impl Combinadic {
         }
 
         output
-    }
-}
-
-impl Default for Combinadic {
-    fn default() -> Self {
-        let mut maps = LetterWordIntCode::new();
-        maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
-        Self {
-            maps,
-            mode: IOMode::Letter,
-            k: 5,
-        }
     }
 }
 

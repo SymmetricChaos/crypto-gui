@@ -18,6 +18,17 @@ pub struct Factoradic {
     pub mode: IOMode,
 }
 
+impl Default for Factoradic {
+    fn default() -> Self {
+        let mut maps = LetterWordIntCode::new();
+        maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
+        Factoradic {
+            maps,
+            mode: IOMode::Letter,
+        }
+    }
+}
+
 impl Factoradic {
     pub fn encode_usize(&self, n: usize) -> String {
         if n == 0 {
@@ -67,17 +78,6 @@ impl Factoradic {
         }
 
         output
-    }
-}
-
-impl Default for Factoradic {
-    fn default() -> Self {
-        let mut maps = LetterWordIntCode::new();
-        maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
-        Factoradic {
-            maps,
-            mode: IOMode::Letter,
-        }
     }
 }
 

@@ -1,3 +1,4 @@
+pub mod balanced_ternary;
 pub mod base_n;
 pub mod combinadic;
 pub mod elias;
