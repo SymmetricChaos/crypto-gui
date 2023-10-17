@@ -1,23 +1,51 @@
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
-use lazy_static::lazy_static;
-use regex::Regex;
 
-lazy_static! {
-    pub static ref BALANCED_TERNARY: Regex = Regex::new(r"[-0\+]+").unwrap();
-}
+pub struct BalancedTernary {}
 
-pub struct BaseN {}
-
-impl Default for BaseN {
+impl Default for BalancedTernary {
     fn default() -> Self {
         Self {}
     }
 }
 
-impl BaseN {
+impl BalancedTernary {
     pub fn encode_i32(n: i32) -> Result<String, CodeError> {
-        todo!()
+        if n == 0 {
+            return Ok(String::from("0"));
+        }
+        let neg = n.is_negative();
+        let mut n = n.abs();
+        let mut output = String::new();
+
+        while n != 0 {
+            let mut rem = n % 3;
+            n = n / 3;
+
+            if rem == 2 {
+                rem = -1;
+                n += 1;
+            }
+
+            if rem == 0 {
+                output.push('0')
+            } else {
+                if neg {
+                    if rem == 1 {
+                        output.push('-')
+                    } else {
+                        output.push('+')
+                    }
+                } else {
+                    if rem == 1 {
+                        output.push('+')
+                    } else {
+                        output.push('-')
+                    }
+                }
+            }
+        }
+        Ok(output.chars().rev().collect())
     }
 
     pub fn decode_to_i32(s: &str) -> Result<i32, CodeError> {
@@ -38,22 +66,15 @@ impl BaseN {
     pub fn recognize_code(text: &str) -> Vec<Option<i32>> {
         let mut output = Vec::new();
 
-        for cap in BALANCED_TERNARY.captures_iter(text) {
-            let s = match cap.get(1) {
-                Some(m) => m.as_str(),
-                None => {
-                    output.push(None);
-                    continue;
-                }
-            };
-            output.push(Some(Self::decode_to_i32(s).unwrap()));
+        for group in text.split(" ").filter(|s| !s.is_empty()) {
+            output.push(Self::decode_to_i32(group).ok());
         }
 
         output
     }
 }
 
-impl Code for BaseN {
+impl Code for BalancedTernary {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut output = Vec::new();
 
@@ -87,21 +108,21 @@ impl Code for BaseN {
 }
 
 #[cfg(test)]
-mod base_n_tests {
+mod balanced_ternary_tests {
     use super::*;
 
-    const PLAINTEXT_INT: &'static str = "-3 -2 -1 0 1 2 3";
-    const ENCODEDTEXT: &'static str = "";
+    const PLAINTEXT: &'static str = "-3 -2 -1 0 1 2 3";
+    const ENCODEDTEXT: &'static str = "-0 -+ - 0 + +- +0";
 
     #[test]
     fn encode_test() {
-        let code = BaseN::default();
-        assert_eq!(code.encode(PLAINTEXT_INT).unwrap(), ENCODEDTEXT);
+        let code = BalancedTernary::default();
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
     }
 
     #[test]
     fn decode_test() {
-        let code = BaseN::default();
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT_INT);
+        let code = BalancedTernary::default();
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
     }
 }
