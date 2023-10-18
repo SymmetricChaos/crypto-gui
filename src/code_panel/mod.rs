@@ -9,10 +9,10 @@ use egui::Ui;
 
 use self::{
     ascii85_controls::Ascii85Frame, ascii_controls::AsciiFrame, bacon_contols::BaconFrame,
-    base32_controls::Base32Frame, base64_controls::Base64Frame, base_n_controls::BaseNFrame,
-    baudot_controls::BaudotFrame, block_controls::BlockCodeFrame,
-    crc_controls::CyclicRedundancyCheckFrame, damm_controls::DammFrame,
-    elias_controls::EliasCodeFrame, factoradic_controls::FactoradicFrame,
+    balanced_ternary_controls::BalancedTernaryFrame, base32_controls::Base32Frame,
+    base64_controls::Base64Frame, base_n_controls::BaseNFrame, baudot_controls::BaudotFrame,
+    block_controls::BlockCodeFrame, crc_controls::CyclicRedundancyCheckFrame,
+    damm_controls::DammFrame, elias_controls::EliasCodeFrame, factoradic_controls::FactoradicFrame,
     fibonacci_controls::FibonacciCodeFrame, godel_controls::GodelFrame,
     gray_controls::GrayCodeFrame, hamming_controls::HammingFrame, isbn_contols::IsbnFrame,
     itf_controls::ItfFrame, levenshtein_controls::LevenshteinCodeFrame,
@@ -30,6 +30,7 @@ use self::{
 mod ascii85_controls;
 mod ascii_controls;
 mod bacon_contols;
+mod balanced_ternary_controls;
 mod base32_controls;
 mod base64_controls;
 mod base_n_controls;
@@ -137,6 +138,7 @@ pub struct CodeInterface {
 
     // Integer
     basen: BaseNFrame,
+    balanced_ternary: BalancedTernaryFrame,
     godel: GodelFrame,
     gray: GrayCodeFrame,
     roman: RomanNumeralFrame,
@@ -189,6 +191,7 @@ impl CodeInterface {
         combox_box(
             &[
                 CodeId::BaseN,
+                CodeId::BalancedTernary,
                 CodeId::Elias,
                 CodeId::Factoradic,
                 CodeId::Fibonacci,
@@ -253,6 +256,7 @@ impl CodeInterface {
             CodeId::Ascii => &mut self.ascii,
             CodeId::Ascii85 => &mut self.ascii85,
             CodeId::Bacon => &mut self.bacon,
+            CodeId::BalancedTernary => &mut self.balanced_ternary,
             CodeId::BaseN => &mut self.basen,
             CodeId::Base32 => &mut self.base32,
             CodeId::Base64 => &mut self.base64,
