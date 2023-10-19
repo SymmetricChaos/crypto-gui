@@ -1,15 +1,21 @@
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 
-pub struct TwosComplement {}
+pub struct TwosComplement {
+    _bits: u32,
+}
 
 impl Default for TwosComplement {
     fn default() -> Self {
-        Self {}
+        Self { _bits: 32 }
     }
 }
 
 impl TwosComplement {
+    pub fn encode_i32(n: i32) -> String {
+        format!("{n:0>32b}")
+    }
+
     pub fn decode_to_i32(s: &str) -> Result<i32, CodeError> {
         let mut bits = s.chars();
         let mut out = if let Some(c) = bits.next() {
@@ -47,7 +53,7 @@ impl Code for TwosComplement {
             }
             let n = i32::from_str_radix(group, 10)
                 .map_err(|_| CodeError::invalid_input_group(group))?;
-            output.push(format!("{n:0>32b}"));
+            output.push(Self::encode_i32(n));
         }
 
         Ok(output.into_iter().join(" "))

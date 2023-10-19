@@ -23,8 +23,9 @@ use self::{
     repetition_controls::RepetitionFrame, romaji_controls::RomajiFrame,
     roman_numeral_controls::RomanNumeralFrame, skey_controls::SKeyWordsFrame,
     spelling_alphabet_controls::SpellingAlphabetFrame, symmetric_unary_controls::SymUnaryCodeFrame,
-    tap_code_controls::TapCodeFrame, unary_controls::UnaryCodeFrame,
-    unicode_controls::UnicodeFrame, upc_controls::UpcFrame, verhoeff_controls::VerhoeffFrame,
+    tap_code_controls::TapCodeFrame, twos_complement_controls::TwosComplementFrame,
+    unary_controls::UnaryCodeFrame, unicode_controls::UnicodeFrame, upc_controls::UpcFrame,
+    verhoeff_controls::VerhoeffFrame,
 };
 
 mod ascii85_controls;
@@ -63,6 +64,7 @@ mod skey_controls;
 mod spelling_alphabet_controls;
 mod symmetric_unary_controls;
 mod tap_code_controls;
+pub mod twos_complement_controls;
 mod unary_controls;
 mod unicode_controls;
 mod upc_controls;
@@ -142,6 +144,7 @@ pub struct CodeInterface {
     godel: GodelFrame,
     gray: GrayCodeFrame,
     roman: RomanNumeralFrame,
+    twos_complement: TwosComplementFrame,
     factoradic: FactoradicFrame,
 
     // Prefix
@@ -199,6 +202,7 @@ impl CodeInterface {
                 CodeId::Gray,
                 CodeId::Levenshtein,
                 CodeId::RomanNumeral,
+                CodeId::TwosComplement,
                 CodeId::Unary,
                 CodeId::UnarySymmetric,
             ],
@@ -288,6 +292,7 @@ impl CodeInterface {
             CodeId::Skey => &mut self.skey,
             CodeId::SpellingAlphabet => &mut self.spelling,
             CodeId::Tap => &mut self.tap,
+            CodeId::TwosComplement => &mut self.twos_complement,
             CodeId::Unary => &mut self.unary,
             CodeId::UnarySymmetric => &mut self.unary_symmetric,
             CodeId::Unicode => &mut self.unicode,
