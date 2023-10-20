@@ -1,4 +1,5 @@
-use utils::bits::IS_BITS;
+use itertools::Itertools;
+use utils::{bits::IS_BITS, text_functions::string_chunks};
 
 use crate::{
     errors::CodeError,
@@ -62,7 +63,9 @@ impl Code for GrayCode {
                     )));
                 };
                 out.push_str(&self.encode_u32(code));
-                out.push(' ');
+                if !self.fixed_width {
+                    out.push(' ');
+                }
             }
         } else if self.mode == IOMode::Word {
             for w in text.split(" ") {
@@ -74,7 +77,9 @@ impl Code for GrayCode {
                     )));
                 };
                 out.push_str(&self.encode_u32(code));
-                out.push(' ');
+                if !self.fixed_width {
+                    out.push(' ');
+                }
             }
         } else {
             for w in text.split(" ") {
@@ -86,41 +91,52 @@ impl Code for GrayCode {
                     )));
                 };
                 out.push_str(&self.encode_u32(n));
-                out.push(' ');
+                if !self.fixed_width {
+                    out.push(' ');
+                }
             }
         }
-        out.pop();
+        if !self.fixed_width {
+            out.pop();
+        };
         Ok(out)
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::new();
+        let chunks = match self.fixed_width {
+            true => string_chunks(text, self.width),
+            false => text.split(" ").map(|st| st.to_string()).collect_vec(),
+        };
         if self.mode == IOMode::Letter {
-            for s in text.split(" ") {
-                if !IS_BITS.is_match(s) || (self.fixed_width && s.chars().count() != self.width) {
-                    return Err(CodeError::invalid_input_group(s));
+            for s in chunks {
+                if !IS_BITS.is_match(&s) || (self.fixed_width && s.chars().count() != self.width) {
+                    return Err(CodeError::invalid_input_group(&s));
                 }
-                let n = u32::from_str_radix(s, 2).map_err(|_| CodeError::invalid_input_group(s))?;
+                let n =
+                    u32::from_str_radix(&s, 2).map_err(|_| CodeError::invalid_input_group(&s))?;
                 let code = self.decode_to_u32(n);
                 out.push(self.maps.int_to_char(code as usize)?);
             }
         } else if self.mode == IOMode::Word {
-            for s in text.split(" ") {
-                if !IS_BITS.is_match(s) || (self.fixed_width && s.chars().count() != self.width) {
-                    return Err(CodeError::invalid_input_group(s));
+            for s in chunks {
+                if !IS_BITS.is_match(&s) || (self.fixed_width && s.chars().count() != self.width) {
+                    return Err(CodeError::invalid_input_group(&s));
                 }
-                let n = u32::from_str_radix(s, 2).map_err(|_| CodeError::invalid_input_group(s))?;
+                let n =
+                    u32::from_str_radix(&s, 2).map_err(|_| CodeError::invalid_input_group(&s))?;
                 let code = self.decode_to_u32(n);
                 out.push_str(self.maps.int_to_word(code as usize)?);
                 out.push(' ');
             }
             out.pop();
         } else {
-            for s in text.split(" ") {
-                if !IS_BITS.is_match(s) || (self.fixed_width && s.chars().count() != self.width) {
-                    return Err(CodeError::invalid_input_group(s));
+            for s in chunks {
+                if !IS_BITS.is_match(&s) || (self.fixed_width && s.chars().count() != self.width) {
+                    return Err(CodeError::invalid_input_group(&s));
                 }
-                let n = u32::from_str_radix(s, 2).map_err(|_| CodeError::invalid_input_group(s))?;
+                let n =
+                    u32::from_str_radix(&s, 2).map_err(|_| CodeError::invalid_input_group(&s))?;
                 out.push_str(&self.decode_to_u32(n).to_string());
                 out.push(' ');
             }
@@ -149,11 +165,11 @@ mod gray_tests {
     }
 
     const PLAINTEXT_LTR: &'static str = "ETAOIN";
-    const ENCODEDTEXT_LTR: &'static str = "00000 00001 00011 00010 00110 00111";
+    const ENCODEDTEXT_LTR: &'static str = "000000000100011000100011000111";
 
     const PLAINTEXT: &'static str = "1 2 3 4 5 14 15";
-    const ENCODEDTEXT: &'static str = "00001 00011 00010 00110 00111 01001 01000";
-    const ENCODEDTEXT_VAR: &'static str = "1 11 10 1001 1000";
+    const ENCODEDTEXT: &'static str = "00001000110001000110001110100101000";
+    const ENCODEDTEXT_VAR: &'static str = "1 11 10 110 111 1001 1000";
 
     #[test]
     fn encode_test() {
