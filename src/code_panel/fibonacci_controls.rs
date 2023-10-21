@@ -37,7 +37,18 @@ impl CodeFrame for FibonacciCodeFrame {
                     self.code.maps.alphabet.retain(|x| x != '�');
                 };
                 ui.add_space(16.0);
-                // ui.two_column_table("Code", "Character", Box::new(self.code.maps.chars_codes()));
+
+                let pairs = self.code.maps.alphabet.chars().enumerate().map(|(a, b)| {
+                    (
+                        b,
+                        self.code
+                            .integer_code
+                            .borrow_mut()
+                            .encode_u32((a as u32) + 1)
+                            .to_owned(),
+                    )
+                });
+                ui.two_column_table("Character", "Code", Box::new(pairs));
             }
             IOMode::Word => {
                 ui.label("Provide any number of words or phrases separated by commas. Fibonacci codes will be assigned to each word or phrase in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
@@ -48,13 +59,28 @@ impl CodeFrame for FibonacciCodeFrame {
                     self.code.maps.set_words(&self.words_string);
                 };
                 ui.add_space(16.0);
-                // ui.two_column_table("Code", "Word", Box::new(self.code.maps.words_codes()));
+                let pairs = self.code.maps.words.iter().enumerate().map(|(a, b)| {
+                    (
+                        b,
+                        self.code
+                            .integer_code
+                            .borrow_mut()
+                            .encode_u32((a as u32) + 1)
+                            .to_owned(),
+                    )
+                });
+                ui.two_column_table("Word", "Code", Box::new(pairs));
             }
             IOMode::Integer => {
                 ui.label("Get the Fibonacci coding for any list of positive integers or decode any string of 0s and 1s into a list of positive integers. A sample list of encodings is provided below.");
-                let pairs = (1..=64).map(|n| (n.to_string(), self.code.integer_code.encode_u32(n)));
+                let pairs = (1..=64).map(|n| {
+                    (
+                        n.to_string(),
+                        self.code.integer_code.borrow_mut().encode_u32(n).to_owned(),
+                    )
+                });
                 ui.add_space(16.0);
-                ui.two_column_table("Code", "Integer", Box::new(pairs));
+                ui.two_column_table("Integer", "Code", Box::new(pairs));
             }
         }
         ui.add_space(8.0);

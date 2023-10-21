@@ -27,14 +27,14 @@ impl EliasCode {
             super::elias_integers::EliasVariant::Gamma => self
                 .integer_code
                 .borrow()
-                .delta_cache
+                .gamma_cache
                 .values()
                 .cloned()
                 .collect_vec(),
             super::elias_integers::EliasVariant::Omega => self
                 .integer_code
                 .borrow()
-                .delta_cache
+                .omega_cache
                 .values()
                 .cloned()
                 .collect_vec(),

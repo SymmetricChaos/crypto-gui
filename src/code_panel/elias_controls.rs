@@ -61,7 +61,7 @@ impl CodeFrame for EliasCodeFrame {
                 ui.add_space(16.0);
                 ui.two_column_table(
                     "Code",
-                    "Integer",
+                    "Character",
                     Box::new(self.code.maps.alphabet.chars().zip(self.code.values())),
                 );
             }
@@ -76,7 +76,7 @@ impl CodeFrame for EliasCodeFrame {
                 ui.add_space(16.0);
                 ui.two_column_table(
                     "Code",
-                    "Integer",
+                    "Word",
                     Box::new(self.code.maps.words.iter().zip(self.code.values())),
                 );
             }

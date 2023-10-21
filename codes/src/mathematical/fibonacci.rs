@@ -1,3 +1,5 @@
+use std::cell::RefCell;
+
 use itertools::Itertools;
 
 use crate::{
@@ -13,7 +15,7 @@ use super::fibonacci_integers::FibonacciCodeIntegers;
 pub struct FibonacciCode {
     pub maps: LetterWordIntCode,
     pub mode: IOMode,
-    pub integer_code: FibonacciCodeIntegers,
+    pub integer_code: RefCell<FibonacciCodeIntegers>,
     pub spaced: bool,
 }
 
@@ -25,7 +27,7 @@ impl Default for FibonacciCode {
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
         FibonacciCode {
             mode: IOMode::Integer,
-            integer_code: codes,
+            integer_code: RefCell::new(codes),
             maps,
             spaced: false,
         }
@@ -39,7 +41,7 @@ impl Code for FibonacciCode {
             for s in text.split(" ") {
                 let n =
                     u32::from_str_radix(s, 10).map_err(|_| CodeError::invalid_input_group(s))?;
-                output.push_str(&self.integer_code.encode_u32(n));
+                output.push_str(&self.integer_code.borrow_mut().encode_u32(n));
                 if self.spaced {
                     output.push(' ');
                 }
@@ -47,7 +49,7 @@ impl Code for FibonacciCode {
         } else if self.mode == IOMode::Letter {
             for c in text.chars() {
                 let n = self.maps.char_to_int(c)?;
-                output.push_str(&self.integer_code.encode_u32((n + 1) as u32));
+                output.push_str(&self.integer_code.borrow_mut().encode_u32((n + 1) as u32));
                 if self.spaced {
                     output.push(' ');
                 }
@@ -55,7 +57,7 @@ impl Code for FibonacciCode {
         } else {
             for w in text.split(" ") {
                 let n = self.maps.word_to_int(w)?;
-                output.push_str(&self.integer_code.encode_u32((n + 1) as u32));
+                output.push_str(&self.integer_code.borrow_mut().encode_u32((n + 1) as u32));
                 if self.spaced {
                     output.push(' ');
                 }
@@ -69,10 +71,10 @@ impl Code for FibonacciCode {
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let text = text.replace(" ", "");
-        let nums = self.integer_code.decode_to_u32(&text)?;
+        let nums = self.integer_code.borrow_mut().decode_to_u32(&text)?;
 
         if self.mode == IOMode::Integer {
-            self.integer_code.decode(&text)
+            Ok(nums.into_iter().map(|n| n.to_string()).join(" "))
         } else if self.mode == IOMode::Letter {
             let mut output = String::new();
             for n in nums.into_iter() {
