@@ -2,7 +2,7 @@ use bimap::BiMap;
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use std::cell::Cell;
-use utils::text_functions::bimap_from_iter;
+use utils::text_functions::{bimap_from_iter, chunk_and_join};
 
 use crate::{errors::CodeError, traits::Code};
 
@@ -20,6 +20,7 @@ lazy_static! {
 
 pub struct Linotype {
     first_e_channel: Cell<bool>,
+    pub spaced: bool,
 }
 
 pub fn space_to_name(c: char) -> &'static str {
@@ -32,6 +33,8 @@ pub fn space_to_name(c: char) -> &'static str {
 }
 
 impl Linotype {
+    const WIDTH: usize = 7;
+
     pub fn map_inv(&self, s: &str) -> Result<&char, CodeError> {
         if s == "0000010" {
             Ok(&'e')
@@ -60,6 +63,7 @@ impl Default for Linotype {
     fn default() -> Self {
         Linotype {
             first_e_channel: Cell::new(true),
+            spaced: false,
         }
     }
 }
@@ -87,7 +91,11 @@ impl Code for Linotype {
                 )
             }
         }
-        Ok(out)
+        if self.spaced {
+            Ok(chunk_and_join(&out, Self::WIDTH, ' '))
+        } else {
+            Ok(out)
+        }
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
