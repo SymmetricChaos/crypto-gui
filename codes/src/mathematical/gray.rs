@@ -12,6 +12,7 @@ pub struct GrayCode {
     pub mode: IOMode,
     pub width: usize,
     pub fixed_width: bool,
+    pub spaced: bool,
 }
 
 impl Default for GrayCode {
@@ -23,6 +24,7 @@ impl Default for GrayCode {
             fixed_width: true,
             maps,
             mode: IOMode::Integer,
+            spaced: false,
         }
     }
 }
@@ -63,7 +65,7 @@ impl Code for GrayCode {
                     )));
                 };
                 out.push_str(&self.encode_u32(code));
-                if !self.fixed_width {
+                if !self.fixed_width || self.spaced {
                     out.push(' ');
                 }
             }
@@ -77,7 +79,7 @@ impl Code for GrayCode {
                     )));
                 };
                 out.push_str(&self.encode_u32(code));
-                if !self.fixed_width {
+                if !self.fixed_width || self.spaced {
                     out.push(' ');
                 }
             }
@@ -91,12 +93,12 @@ impl Code for GrayCode {
                     )));
                 };
                 out.push_str(&self.encode_u32(n));
-                if !self.fixed_width {
+                if !self.fixed_width || self.spaced {
                     out.push(' ');
                 }
             }
         }
-        if !self.fixed_width {
+        if !self.fixed_width || self.spaced {
             out.pop();
         };
         Ok(out)
@@ -105,7 +107,7 @@ impl Code for GrayCode {
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::new();
         let chunks = match self.fixed_width {
-            true => string_chunks(text, self.width),
+            true => string_chunks(&text.replace(" ", ""), self.width),
             false => text.split(" ").map(|st| st.to_string()).collect_vec(),
         };
         if self.mode == IOMode::Letter {
@@ -169,6 +171,7 @@ mod gray_tests {
 
     const PLAINTEXT: &'static str = "1 2 3 4 5 14 15";
     const ENCODEDTEXT: &'static str = "00001000110001000110001110100101000";
+    const ENCODEDTEXT_SPACED: &'static str = "00001 00011 00010 00110 00111 01001 01000";
     const ENCODEDTEXT_VAR: &'static str = "1 11 10 110 111 1001 1000";
 
     #[test]
@@ -192,6 +195,13 @@ mod gray_tests {
     }
 
     #[test]
+    fn encode_test_spaced() {
+        let mut code = GrayCode::default();
+        code.spaced = true;
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_SPACED);
+    }
+
+    #[test]
     fn decode_test() {
         let code = GrayCode::default();
         assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
@@ -202,6 +212,12 @@ mod gray_tests {
         let mut code = GrayCode::default();
         code.fixed_width = false;
         assert_eq!(code.decode(ENCODEDTEXT_VAR).unwrap(), PLAINTEXT);
+    }
+
+    #[test]
+    fn decode_test_spaced() {
+        let code = GrayCode::default();
+        assert_eq!(code.decode(ENCODEDTEXT_SPACED).unwrap(), PLAINTEXT);
     }
 
     #[test]

@@ -21,6 +21,8 @@ impl CodeFrame for GrayCodeFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
         ui.subheading("Width");
         ui.add(Slider::new(&mut self.code.width, 4..=8));
+        ui.add_space(8.0);
+        ui.checkbox(&mut self.code.spaced, "Use Spaces");
         ui.add_space(16.0);
         let chars_codes =
             (0..2_u32.pow(self.code.width as u32)).map(|n| (n, self.code.encode_u32(n)));
