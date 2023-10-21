@@ -92,6 +92,8 @@ impl CodeFrame for EliasCodeFrame {
                 );
             }
         }
+        ui.add_space(8.0);
+        ui.checkbox(&mut self.code.spaced, "Use Spaces");
         ui.add_space(16.0);
     }
 

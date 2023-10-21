@@ -11,6 +11,7 @@ pub struct EliasCode {
     pub maps: LetterWordIntCode,
     pub integer_code: RefCell<EliasCodeIntegers>,
     pub mode: IOMode,
+    pub spaced: bool,
 }
 
 impl EliasCode {
@@ -53,6 +54,7 @@ impl Default for EliasCode {
             mode: IOMode::Integer,
             integer_code: RefCell::new(codes),
             maps,
+            spaced: false,
         }
     }
 }
@@ -66,6 +68,9 @@ impl Code for EliasCode {
                     .map_err(|_| CodeError::invalid_input_group(group))?;
                 self.integer_code.borrow_mut().extend_all(n);
                 out.push_str(self.integer_code.borrow().encode_u32(n).unwrap());
+                if self.spaced {
+                    out.push(' ');
+                }
             }
         } else if self.mode == IOMode::Letter {
             for c in text.chars() {
@@ -77,6 +82,9 @@ impl Code for EliasCode {
                         .encode_u32((n + 1) as u32)
                         .unwrap(),
                 );
+                if self.spaced {
+                    out.push(' ');
+                }
             }
         } else {
             for w in text.split(" ") {
@@ -88,14 +96,21 @@ impl Code for EliasCode {
                         .encode_u32((n + 1) as u32)
                         .unwrap(),
                 );
+                if self.spaced {
+                    out.push(' ');
+                }
             }
+        }
+        if self.spaced {
+            out.pop();
         }
         Ok(out)
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::new();
-        let nums = self.integer_code.borrow().decode_to_u32(text)?;
+        let text = text.replace(" ", "");
+        let nums = self.integer_code.borrow().decode_to_u32(&text)?;
 
         if self.mode == IOMode::Integer {
             Ok(nums.into_iter().join(" "))
@@ -126,6 +141,7 @@ mod elias_tests {
     const ENCODEDTEXT_DELTA: &'static str = "101000101";
     const ENCODEDTEXT_GAMMA: &'static str = "1010011";
     const ENCODEDTEXT_OMEGA: &'static str = "0100110";
+    const ENCODEDTEXT_OMEGA_SPACED: &'static str = "0 100 110";
 
     #[test]
     fn encode_test() {
@@ -136,6 +152,8 @@ mod elias_tests {
         assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_GAMMA);
         code.integer_code.borrow_mut().variant = EliasVariant::Omega;
         assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_OMEGA);
+        code.spaced = true;
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_OMEGA_SPACED);
     }
 
     #[test]
@@ -158,6 +176,7 @@ mod elias_tests {
         assert_eq!(code.decode(ENCODEDTEXT_GAMMA).unwrap(), PLAINTEXT);
         code.integer_code.borrow_mut().variant = EliasVariant::Omega;
         assert_eq!(code.decode(ENCODEDTEXT_OMEGA).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_OMEGA_SPACED).unwrap(), PLAINTEXT);
     }
 
     #[test]
