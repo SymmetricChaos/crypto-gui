@@ -2,7 +2,7 @@ use bimap::BiMap;
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use std::cell::Cell;
-use utils::text_functions::{bimap_from_iter, chunk_and_join};
+use utils::text_functions::{bimap_from_iter, chunk_and_join, string_chunks};
 
 use crate::{errors::CodeError, traits::Code};
 
@@ -50,6 +50,7 @@ lazy_static! {
 pub struct Baudot {
     mode: Cell<BaudotMode>, // interior mutability to make encoding and decoding easier
     pub version: BaudotVersion,
+    pub spaced: bool,
 }
 
 impl Baudot {
@@ -149,6 +150,7 @@ impl Default for Baudot {
         Baudot {
             mode: Cell::new(BaudotMode::Letters),
             version: BaudotVersion::Ita2,
+            spaced: false,
         }
     }
 }
@@ -174,8 +176,14 @@ impl Code for Baudot {
                 _ => (),
             };
         }
-        self.mode.replace(BaudotMode::Letters);
-        Ok(out)
+        // Always return to letter mode
+        self.letter_shift();
+
+        if self.spaced {
+            Ok(chunk_and_join(&out, Self::WIDTH, ' '))
+        } else {
+            Ok(out)
+        }
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
@@ -183,7 +191,7 @@ impl Code for Baudot {
         self.letter_shift();
 
         let mut out = String::with_capacity(text.len() / Self::WIDTH);
-        for group in chunk_and_join(text, Self::WIDTH, ' ').split(' ') {
+        for group in string_chunks(&text.replace(' ', ""), Self::WIDTH) {
             match self.map_inv(&group) {
                 Some(code_group) => out.push(*code_group),
                 None => {
@@ -193,7 +201,7 @@ impl Code for Baudot {
                     )))
                 }
             }
-            match group {
+            match group.as_str() {
                 "11011" => {
                     self.figure_shift();
                 }
@@ -203,6 +211,10 @@ impl Code for Baudot {
                 _ => (),
             };
         }
+
+        // Always return to letter mode
+        self.letter_shift();
+
         Ok(out)
     }
 }

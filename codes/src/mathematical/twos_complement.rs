@@ -1,13 +1,11 @@
 use crate::{errors::CodeError, traits::Code};
-use itertools::Itertools;
+use utils::text_functions::string_chunks;
 
-pub struct TwosComplement {
-    _bits: u32,
-}
+pub struct TwosComplement {}
 
 impl Default for TwosComplement {
     fn default() -> Self {
-        Self { _bits: 32 }
+        Self {}
     }
 }
 
@@ -17,6 +15,9 @@ impl TwosComplement {
     }
 
     pub fn decode_to_i32(s: &str) -> Result<i32, CodeError> {
+        if s.len() != 32 || !s.chars().all(|c| c == '1' || c == '0') {
+            return Err(CodeError::invalid_input_group(s));
+        }
         let mut bits = s.chars();
         let mut out = if let Some(c) = bits.next() {
             match c {
@@ -35,8 +36,8 @@ impl TwosComplement {
     pub fn recognize_code(text: &str) -> Vec<Option<i32>> {
         let mut output = Vec::new();
 
-        for group in text.split(" ").filter(|s| !s.is_empty()) {
-            output.push(Self::decode_to_i32(group).ok());
+        for group in string_chunks(text, 32) {
+            output.push(Self::decode_to_i32(&group).ok());
         }
 
         output
@@ -45,7 +46,7 @@ impl TwosComplement {
 
 impl Code for TwosComplement {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        let mut output = Vec::new();
+        let mut output = String::new();
 
         for group in text.split(" ") {
             if group.is_empty() {
@@ -53,10 +54,10 @@ impl Code for TwosComplement {
             }
             let n = i32::from_str_radix(group, 10)
                 .map_err(|_| CodeError::invalid_input_group(group))?;
-            output.push(Self::encode_i32(n));
+            output.push_str(&Self::encode_i32(n));
         }
 
-        Ok(output.into_iter().join(" "))
+        Ok(output)
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
@@ -77,11 +78,11 @@ impl Code for TwosComplement {
 }
 
 #[cfg(test)]
-mod balanced_ternary_tests {
+mod twos_complement_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "-3 -2 -1 0 1 2 3";
-    const ENCODEDTEXT: &'static str = "11111111111111111111111111111101 11111111111111111111111111111110 11111111111111111111111111111111 00000000000000000000000000000000 00000000000000000000000000000001 00000000000000000000000000000010 00000000000000000000000000000011";
+    const ENCODEDTEXT: &'static str = "11111111111111111111111111111101111111111111111111111111111111101111111111111111111111111111111100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000001000000000000000000000000000000011";
 
     #[test]
     #[ignore]

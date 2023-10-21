@@ -2,7 +2,10 @@ use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use itertools::Itertools;
 use lazy_static::lazy_static;
-use utils::{preset_alphabet::Alphabet, text_functions::bimap_from_iter};
+use utils::{
+    preset_alphabet::Alphabet,
+    text_functions::{bimap_from_iter, string_chunks},
+};
 
 lazy_static! {
     pub static ref CONTROL_PICTURE_MAP: BiMap<u8, char> = bimap_from_iter(
@@ -190,7 +193,7 @@ lazy_static! {
         (0..128).map(|n| format!(" {:07b}", n)).collect_vec();
     pub static ref EIGHT_BIT: Vec<String> = (0..128).map(|n| format!("{:08b}", n)).collect_vec();
     pub static ref OCTAL: Vec<String> = (0..128).map(|n| format!("{:03o}", n)).collect_vec();
-    pub static ref DECIMAL: Vec<String> = (0..128).map(|n| format!("{}", n)).collect_vec();
+    pub static ref DECIMAL: Vec<String> = (0..128).map(|n| format!("{:03}", n)).collect_vec();
     pub static ref DECIMAL_DISPLAY: Vec<String> =
         (0..128).map(|n| format!(" {:3}", n)).collect_vec();
     pub static ref HEX: Vec<String> = (0..128).map(|n| format!("{:02x}", n)).collect_vec();
@@ -198,6 +201,7 @@ lazy_static! {
 
 pub struct Ascii {
     pub mode: DisplayMode,
+    pub spaced: bool,
 }
 
 impl Ascii {
@@ -227,8 +231,7 @@ impl Ascii {
     }
 
     pub fn map_inv(&self, s: &str) -> Result<char, CodeError> {
-        let radix = self.mode.radix();
-        match usize::from_str_radix(s, radix) {
+        match usize::from_str_radix(s, self.mode.radix()) {
             Ok(n) => Alphabet::Ascii128
                 .chars()
                 .nth(n)
@@ -273,6 +276,7 @@ impl Default for Ascii {
     fn default() -> Self {
         Ascii {
             mode: DisplayMode::EightBitBinary,
+            spaced: false,
         }
     }
 }
@@ -283,15 +287,19 @@ impl Code for Ascii {
         for c in text.chars() {
             out.push(self.map(c)?)
         }
-        Ok(out.into_iter().join(" "))
+        if self.spaced {
+            Ok(out.into_iter().join(" "))
+        } else {
+            Ok(out.into_iter().join(""))
+        }
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        let chunks = text.split(" ");
-        let mut out = String::with_capacity(chunks.clone().count());
+        let chunks = string_chunks(&text.replace(' ', ""), self.mode.width());
+        let mut out = String::with_capacity(chunks.len());
 
         for chunk in chunks {
-            out.push(self.map_inv(chunk)?)
+            out.push(self.map_inv(&chunk)?)
         }
 
         Ok(out)
@@ -303,7 +311,7 @@ mod ascii_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "0\0␀A ␠";
-    const CIPHERTEXT: &'static str = "00110000 00000000 00000000 01000001 00100000 00100000";
+    const CIPHERTEXT: &'static str = "001100000000000000000000010000010010000000100000";
 
     #[test]
     fn encrypt_test() {
