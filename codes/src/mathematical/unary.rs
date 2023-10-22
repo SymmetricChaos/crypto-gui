@@ -10,6 +10,7 @@ pub struct UnaryCode {
     pub maps: LetterWordIntCode,
     pub mode: IOMode,
     pub invert: bool,
+    pub spaced: bool,
 }
 
 impl UnaryCode {
@@ -51,6 +52,7 @@ impl Default for UnaryCode {
             maps,
             mode: IOMode::Letter,
             invert: false,
+            spaced: false,
         }
     }
 }
@@ -62,12 +64,18 @@ impl Code for UnaryCode {
         if self.mode == IOMode::Letter {
             for c in text.chars() {
                 let n = self.maps.char_to_int(c)?;
-                output.push_str(&self.encode_usize(n))
+                output.push_str(&self.encode_usize(n));
+                if self.spaced {
+                    output.push(' ');
+                }
             }
         } else if self.mode == IOMode::Word {
             for w in text.split(" ") {
                 let n = self.maps.word_to_int(w)?;
-                output.push_str(&self.encode_usize(n))
+                output.push_str(&self.encode_usize(n));
+                if self.spaced {
+                    output.push(' ');
+                }
             }
         } else {
             for w in text.split(" ") {
@@ -75,7 +83,13 @@ impl Code for UnaryCode {
                     usize::from_str_radix(w, 10).map_err(|e| CodeError::Input(e.to_string()))?;
                 output.push_str(&"1".repeat(n));
                 output.push('0');
+                if self.spaced {
+                    output.push(' ');
+                }
             }
+        }
+        if self.spaced {
+            output.pop();
         }
         if self.invert {
             Ok(swap_ab('0', '1', &output))
@@ -87,9 +101,9 @@ impl Code for UnaryCode {
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut output = String::new();
         let text = if self.invert {
-            swap_ab('0', '1', text)
+            swap_ab('0', '1', text).replace(" ", "")
         } else {
-            text.to_string()
+            text.replace(" ", "")
         };
         if self.mode == IOMode::Letter {
             for section in self.recognize_code(&text) {
