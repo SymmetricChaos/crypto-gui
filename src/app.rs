@@ -160,7 +160,8 @@ impl ClassicCrypto {
         if self.active_page == Page::Code {
             self.code_selector_panel(ctx);
             SidePanel::right("code_io_panel")
-                .default_width(200.0)
+                .default_width(300.0)
+                .min_width(200.0)
                 .show(ctx, |ui| {
                     self.io_panel.ui(
                         ui,
@@ -224,7 +225,8 @@ impl ClassicCrypto {
             self.cipher_selector_panel(ctx);
 
             SidePanel::right("cipher_io_panel")
-                .default_width(200.0)
+                .default_width(300.0)
+                .min_width(200.0)
                 .show(ctx, |ui| {
                     self.io_panel.ui(
                         ui,
@@ -290,7 +292,8 @@ impl ClassicCrypto {
             self.rng_selector_panel(ctx);
 
             SidePanel::right("rng_io_panel")
-                .default_width(200.0)
+                .default_width(300.0)
+                .min_width(200.0)
                 .show(ctx, |ui| {
                     self.io_panel.ui(
                         ui,
@@ -343,7 +346,7 @@ impl ClassicCrypto {
     fn about_page(&mut self, ctx: &Context) {
         SidePanel::left("about_display_panel")
             .default_width(500.0)
-            .max_width(500.0)
+            .min_width(200.0)
             .show(ctx, |ui| {
                 warn_if_debug_build(ui);
                 let hello = RichText::new(
@@ -372,18 +375,8 @@ impl ClassicCrypto {
     }
 }
 
-// fn old_page_selector(ui: &mut Ui, name: &str, selected_page: Page, active_page: &mut Page) {
-//     if ui
-//         .add(SelectableLabel::new(active_page == &selected_page, name))
-//         .clicked()
-//     {
-//         *active_page = selected_page
-//     }
-// }
-
 impl App for ClassicCrypto {
     fn update(&mut self, ctx: &Context, _frame: &mut eframe::Frame) {
-        //frame.set_window_size((900.0, 700.0).into());
         egui_extras::install_image_loaders(ctx);
 
         TopBottomPanel::top("top_panel").show(ctx, |ui| {
