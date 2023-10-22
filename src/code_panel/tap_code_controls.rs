@@ -45,7 +45,8 @@ impl CodeFrame for TapCodeFrame {
         ui.horizontal(|ui| {
             ui.subheading("Alphabet");
             if ui.button("🎲").on_hover_text("shuffle").clicked() {
-                self.alphabet_string = shuffled_str(&self.alphabet_string, &mut thread_rng())
+                self.alphabet_string = shuffled_str(&self.alphabet_string, &mut thread_rng());
+                self.code.set_alphabet(&self.alphabet_string)
             }
         });
         if ui.control_string(&mut self.alphabet_string).changed() {
