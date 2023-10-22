@@ -28,11 +28,13 @@ impl CodeFrame for NeedleFrame {
 
         ui.add_space(16.0);
         ui.fill_code_columns(5, 4, self.code.chars_codes());
-        ui.add_space(16.0);
+        ui.add_space(8.0);
 
+        ui.subheading("Default Arrangement");
         ui.image(egui::include_image!("needle_telegraph.png"))
             .rect
             .set_height(765.0);
+        ui.add_space(16.0);
     }
 
     fn code(&self) -> &dyn codes::traits::Code {
