@@ -19,6 +19,10 @@ impl CodeFrame for TwosComplementFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
         ui.add_space(16.0);
 
+        // ui.add_space(8.0);
+        // ui.checkbox(&mut self.code.spaced, "Use Spaces");
+        // ui.add_space(8.0);
+
         ui.subheading("Example of Finding the Negative (8-bits)");
         ui.label("The additive inverse (negative) of a number in two's complement is found by inverting all of the bits and then adding one to the result.");
         ui.mono("number       00111000\nbits flipped 11000111\nplus one     11001000");

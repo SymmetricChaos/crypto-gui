@@ -27,7 +27,9 @@ impl CodeFrame for FibonacciCodeFrame {
             ui.selectable_value(&mut self.code.mode, IOMode::Letter, "Letter");
             ui.selectable_value(&mut self.code.mode, IOMode::Word, "Word");
         });
-        ui.add_space(16.0);
+        ui.add_space(8.0);
+        ui.checkbox(&mut self.code.spaced, "Use Spaces");
+        ui.add_space(8.0);
 
         match self.code.mode {
             IOMode::Letter => {
@@ -83,8 +85,6 @@ impl CodeFrame for FibonacciCodeFrame {
                 ui.two_column_table("Integer", "Code", Box::new(pairs));
             }
         }
-        ui.add_space(8.0);
-        ui.checkbox(&mut self.code.spaced, "Use Spaces");
         ui.add_space(16.0);
     }
 
