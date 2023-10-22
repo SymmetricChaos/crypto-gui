@@ -148,9 +148,8 @@ impl ClassicCrypto {
     // Combox boxes for selecting codes
     fn code_selector_panel(&mut self, ctx: &Context) {
         SidePanel::left("code_selector_panel")
-            .default_width(150.0)
+            .default_width(300.0)
             .min_width(100.0)
-            .max_width(200.0)
             .show(ctx, |ui| {
                 ui.add_space(32.0);
                 self.code_interface.combo_boxes(ui, &mut self.active_code)
@@ -211,9 +210,8 @@ impl ClassicCrypto {
     // Combox boxes for selecting ciphers
     fn cipher_selector_panel(&mut self, ctx: &Context) {
         SidePanel::left("cipher_selector_panel")
-            .default_width(150.0)
+            .default_width(300.0)
             .min_width(100.0)
-            .max_width(200.0)
             .show(ctx, |ui| {
                 ui.add_space(32.0);
                 self.cipher_interface
@@ -279,9 +277,8 @@ impl ClassicCrypto {
     // Combox boxes for selecting rng
     fn rng_selector_panel(&mut self, ctx: &Context) {
         SidePanel::left("rng_selector_panel")
-            .default_width(150.0)
+            .default_width(300.0)
             .min_width(100.0)
-            .max_width(200.0)
             .show(ctx, |ui| {
                 ui.add_space(32.0);
                 self.rng_interface.combo_boxes(ui, &mut self.active_rng)
@@ -387,6 +384,7 @@ impl ClassicCrypto {
 impl App for ClassicCrypto {
     fn update(&mut self, ctx: &Context, _frame: &mut eframe::Frame) {
         //frame.set_window_size((900.0, 700.0).into());
+        egui_extras::install_image_loaders(ctx);
 
         TopBottomPanel::top("top_panel").show(ctx, |ui| {
             ui.horizontal_top(|ui| {

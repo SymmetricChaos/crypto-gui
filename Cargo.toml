@@ -3,7 +3,7 @@ name = "crypto-gui"
 version = "0.1.0"
 authors = ["Alexander"]
 edition = "2021"
-rust-version = "1.68"
+rust-version = "1.73"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -17,9 +17,10 @@ crate-type = ["cdylib", "rlib"]
 opt-level = 2
 
 [dependencies]
-egui = "0.22.0"
-eframe = "0.22.0"
-egui_extras = "0.22.0"
+egui = "0.23.0"
+eframe = "0.23.0"
+egui_extras = { version = "0.23", features = ["all_loaders"] }
+image = { version = "0.24", features = ["png"] }
 
 ciphers = {path = "ciphers"}
 codes = {path = "codes"}

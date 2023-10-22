@@ -263,7 +263,7 @@ pub fn rank_str(text: &str, alphabet: &str) -> Result<Vec<usize>, StringRankErro
 // This ignores repeated numbers
 pub fn rank_vec<O: Ord>(vec: &Vec<O>) -> Vec<usize> {
     let mut out = Vec::with_capacity(vec.len());
-    let ranks = vec.clone().iter().sorted().dedup().collect_vec();
+    let ranks = vec.iter().sorted().dedup().collect_vec();
 
     for o in ranks.iter() {
         out.push(vec.iter().position(|x| &x == o).unwrap())
