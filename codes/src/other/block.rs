@@ -25,6 +25,7 @@ pub struct BlockCode {
     pub width: usize,
     pub alphabet: Vec<char>,
     pub symbols: Vec<char>,
+    pub spaced: bool,
 }
 
 impl Default for BlockCode {
@@ -33,6 +34,7 @@ impl Default for BlockCode {
             width: 5,
             alphabet: Alphabet::BasicLatin.chars().collect_vec(),
             symbols: vec!['0', '1'],
+            spaced: false,
         }
     }
 }
@@ -89,12 +91,16 @@ impl Code for BlockCode {
             }
             out.push(self.num_to_string(n));
         }
-        Ok(out.join(""))
+        if self.spaced {
+            Ok(out.join(" "))
+        } else {
+            Ok(out.join(""))
+        }
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::new();
-
+        let text = text.replace(" ", "");
         let pows = (0..self.width).rev().cycle();
         let mut val = 0;
         for (c, p) in text.chars().zip(pows) {
