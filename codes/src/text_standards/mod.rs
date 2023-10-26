@@ -1,5 +1,6 @@
 pub mod ascii;
 pub mod baudot;
+pub mod braille;
 pub mod linotype;
 pub mod morse;
 pub mod morse_encodings;
