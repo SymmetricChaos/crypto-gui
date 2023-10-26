@@ -148,7 +148,7 @@ pub struct CodeInterface {
     factoradic: FactoradicFrame,
 
     // Prefix
-    block: BlockCodeFrame,
+    fixed_width: BlockCodeFrame,
     elias: EliasCodeFrame,
     fibonacci: FibonacciCodeFrame,
     levenshtein: LevenshteinCodeFrame,
@@ -166,6 +166,7 @@ impl CodeInterface {
             &[
                 CodeId::Ascii,
                 CodeId::Baudot,
+                CodeId::Braille,
                 CodeId::Linotype,
                 CodeId::Morse,
                 CodeId::Needle,
@@ -265,13 +266,14 @@ impl CodeInterface {
             CodeId::Base32 => &mut self.base32,
             CodeId::Base64 => &mut self.base64,
             CodeId::Baudot => &mut self.baudot,
-            CodeId::FixedWidth => &mut self.block,
+            CodeId::Braille => panic!("unknown code"),
             CodeId::ByteAsNum => &mut self.numeric,
             CodeId::CyclicRedundancyCheck => &mut self.crc,
             CodeId::Damm => &mut self.damm,
             CodeId::Elias => &mut self.elias,
             CodeId::Factoradic => &mut self.factoradic,
             CodeId::Fibonacci => &mut self.fibonacci,
+            CodeId::FixedWidth => &mut self.fixed_width,
             CodeId::Godel => &mut self.godel,
             CodeId::Gray => &mut self.gray,
             CodeId::Hamming => &mut self.hamming,
