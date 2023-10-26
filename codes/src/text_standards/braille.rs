@@ -4,24 +4,31 @@ use utils::{preset_alphabet::Alphabet, text_functions::bimap_from_iter};
 
 use crate::{errors::CodeError, traits::Code};
 
-const BRAILLE_26: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠺⠭⠽⠵";
+const BRAILLE_ENGLISH: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠺⠭⠽⠵";
+const BRAILLE_FRENCH: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠭⠽⠵⠯⠿⠷⠮⠾⠡⠣⠩⠹⠱⠫⠻⠳⠪⠺";
 
 lazy_static! {
-    pub static ref LATIN_MAP: BiMap<char, char> =
-        bimap_from_iter(Alphabet::BasicLatin.chars().zip(BRAILLE_26.chars()));
+    pub static ref ENGLISH_MAP: BiMap<char, char> =
+        bimap_from_iter(Alphabet::BasicLatin.chars().zip(BRAILLE_ENGLISH.chars()));
+    pub static ref FRENCH_MAP: BiMap<char, char> = bimap_from_iter(
+        "ABCDEFGHIJKLMNOPQRSTUVXYZÇÉÀÈÙÂÊÎÔÛËÏÜŒW"
+            .chars()
+            .zip(BRAILLE_FRENCH.chars())
+    );
 }
 
 pub enum BrailleLanguage {
     English,
+    French,
 }
 
 impl BrailleLanguage {
     pub fn encode(&self, c: char) -> Option<&char> {
-        LATIN_MAP.get_by_left(&c)
+        ENGLISH_MAP.get_by_left(&c)
     }
 
     pub fn decode(&self, c: char) -> Option<&char> {
-        LATIN_MAP.get_by_right(&c)
+        ENGLISH_MAP.get_by_right(&c)
     }
 }
 
