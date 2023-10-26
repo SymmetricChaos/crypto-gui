@@ -11,29 +11,47 @@ lazy_static! {
     pub static ref ENGLISH_MAP: BiMap<char, char> =
         bimap_from_iter(Alphabet::BasicLatin.chars().zip(BRAILLE_ENGLISH.chars()));
     pub static ref FRENCH_MAP: BiMap<char, char> = bimap_from_iter(
-        "ABCDEFGHIJKLMNOPQRSTUVXYZÇÉÀÈÙÂÊÎÔÛËÏÜŒW" // These are all normalized single character symbols to .chars() can be used
+        "ABCDEFGHIJKLMNOPQRSTUVXYZÇÉÀÈÙÂÊÎÔÛËÏÜŒW" // These are all normalized single character symbols so .chars() can be used
             .chars()
             .zip(BRAILLE_FRENCH.chars())
     );
 }
 
+#[derive(Debug, PartialEq, Eq)]
 pub enum BrailleLanguage {
     English,
     French,
 }
 
 impl BrailleLanguage {
+    pub fn chars_codes(&self) -> std::iter::Zip<std::str::Chars<'_>, std::str::Chars<'_>> {
+        match self {
+            BrailleLanguage::English => Alphabet::BasicLatin.chars().zip(BRAILLE_ENGLISH.chars()),
+            BrailleLanguage::French => {
+                "ABCDEFGHIJKLMNOPQRSTUVXYZÇÉÀÈÙÂÊÎÔÛËÏÜŒW" // These are all normalized single character symbols so .chars() can be used
+                    .chars()
+                    .zip(BRAILLE_FRENCH.chars())
+            }
+        }
+    }
+
     pub fn encode(&self, c: char) -> Option<&char> {
-        ENGLISH_MAP.get_by_left(&c)
+        match self {
+            Self::English => ENGLISH_MAP.get_by_left(&c),
+            Self::French => FRENCH_MAP.get_by_left(&c),
+        }
     }
 
     pub fn decode(&self, c: char) -> Option<&char> {
-        ENGLISH_MAP.get_by_right(&c)
+        match self {
+            Self::English => ENGLISH_MAP.get_by_right(&c),
+            Self::French => FRENCH_MAP.get_by_right(&c),
+        }
     }
 }
 
 pub struct Braille {
-    language: BrailleLanguage,
+    pub language: BrailleLanguage,
 }
 
 impl Default for Braille {

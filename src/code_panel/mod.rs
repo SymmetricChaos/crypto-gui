@@ -11,8 +11,9 @@ use self::{
     ascii85_controls::Ascii85Frame, ascii_controls::AsciiFrame, bacon_contols::BaconFrame,
     balanced_ternary_controls::BalancedTernaryFrame, base32_controls::Base32Frame,
     base64_controls::Base64Frame, base_n_controls::BaseNFrame, baudot_controls::BaudotFrame,
-    block_controls::BlockCodeFrame, crc_controls::CyclicRedundancyCheckFrame,
-    damm_controls::DammFrame, elias_controls::EliasCodeFrame, factoradic_controls::FactoradicFrame,
+    block_controls::BlockCodeFrame, braille_controls::BrailleFrame,
+    crc_controls::CyclicRedundancyCheckFrame, damm_controls::DammFrame,
+    elias_controls::EliasCodeFrame, factoradic_controls::FactoradicFrame,
     fibonacci_controls::FibonacciCodeFrame, godel_controls::GodelFrame,
     gray_controls::GrayCodeFrame, hamming_controls::HammingFrame, isbn_contols::IsbnFrame,
     itf_controls::ItfFrame, levenshtein_controls::LevenshteinCodeFrame,
@@ -37,6 +38,7 @@ mod base64_controls;
 mod base_n_controls;
 mod baudot_controls;
 mod block_controls;
+mod braille_controls;
 mod crc_controls;
 mod damm_controls;
 mod elias_controls;
@@ -64,7 +66,7 @@ mod skey_controls;
 mod spelling_alphabet_controls;
 mod symmetric_unary_controls;
 mod tap_code_controls;
-pub mod twos_complement_controls;
+mod twos_complement_controls;
 mod unary_controls;
 mod unicode_controls;
 mod upc_controls;
@@ -107,6 +109,7 @@ pub struct CodeInterface {
     // Text Standards
     ascii: AsciiFrame,
     baudot: BaudotFrame,
+    braille: BrailleFrame,
     linotype: LinotypeFrame,
     morse: MorseFrame,
     needle: NeedleFrame,
@@ -266,7 +269,7 @@ impl CodeInterface {
             CodeId::Base32 => &mut self.base32,
             CodeId::Base64 => &mut self.base64,
             CodeId::Baudot => &mut self.baudot,
-            CodeId::Braille => panic!("unknown code"),
+            CodeId::Braille => &mut self.braille,
             CodeId::ByteAsNum => &mut self.numeric,
             CodeId::CyclicRedundancyCheck => &mut self.crc,
             CodeId::Damm => &mut self.damm,
