@@ -11,7 +11,7 @@ lazy_static! {
     pub static ref ENGLISH_MAP: BiMap<char, char> =
         bimap_from_iter(Alphabet::BasicLatin.chars().zip(BRAILLE_ENGLISH.chars()));
     pub static ref FRENCH_MAP: BiMap<char, char> = bimap_from_iter(
-        "ABCDEFGHIJKLMNOPQRSTUVXYZÇÉÀÈÙÂÊÎÔÛËÏÜŒW"
+        "ABCDEFGHIJKLMNOPQRSTUVXYZÇÉÀÈÙÂÊÎÔÛËÏÜŒW" // These are all normalized single character symbols to .chars() can be used
             .chars()
             .zip(BRAILLE_FRENCH.chars())
     );
