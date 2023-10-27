@@ -177,8 +177,12 @@ impl TextPrepPage {
             let main_text = TextEdit::multiline(&mut self.text)
                 .desired_width(800.0)
                 .desired_rows(10);
+
             if ui.add(main_text).changed() {
                 self.counts();
+            };
+            if ui.button("📋").clicked() {
+                ui.output_mut(|o| o.copied_text = self.text.to_string());
             };
             ui.label(format!("Bytes:      {}", self.num_bytes))
                 .on_hover_text_at_pointer(

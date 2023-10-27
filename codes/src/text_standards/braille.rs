@@ -4,10 +4,10 @@ use utils::text_functions::bimap_from_iter;
 
 use crate::{errors::CodeError, traits::Code};
 
-const ENGLISH_CHARS: &'static str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ! ";
-const BRAILLE_ENGLISH: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠺⠭⠽⠵⠖⠀";
-const FRENCH_CHARS: &'static str = "ABCDEFGHIJKLMNOPQRSTUVXYZÇÉÀÈÙÂÊÎÔÛËÏÜŒW ";
-const BRAILLE_FRENCH: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠭⠽⠵⠯⠿⠷⠮⠾⠡⠣⠩⠹⠱⠫⠻⠳⠪⠺⠀";
+const ENGLISH_CHARS: &'static str = "abcdefghijklmnopqrstuvwxyz !'-";
+const BRAILLE_ENGLISH: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠺⠭⠽⠵⠀⠖⠄⠤";
+const FRENCH_CHARS: &'static str = "abcdefghijklmnopqrstuvxyzçéàèùâêîôûëïüœw !'-";
+const BRAILLE_FRENCH: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠭⠽⠵⠯⠿⠷⠮⠾⠡⠣⠩⠹⠱⠫⠻⠳⠪⠺⠀⠖⠄⠤";
 
 lazy_static! {
     pub static ref ENGLISH_MAP: BiMap<char, char> =
@@ -50,6 +50,20 @@ impl BrailleLanguage {
             Self::French => FRENCH_MAP.get_by_right(&c),
         }
     }
+
+    pub fn capital_sign(&self) -> char {
+        match self {
+            Self::English => '⠠',
+            Self::French => '⠨',
+        }
+    }
+
+    pub fn number_sign(&self) -> char {
+        match self {
+            Self::English => '⠼',
+            Self::French => '⠼',
+        }
+    }
 }
 
 pub struct Braille {
@@ -68,6 +82,9 @@ impl Code for Braille {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::new();
         for c in text.chars() {
+            if c.is_ascii_uppercase() {
+                out.push(self.language.capital_sign())
+            }
             let x = self
                 .language
                 .encode(c)
@@ -79,12 +96,21 @@ impl Code for Braille {
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::new();
+        let mut capital = false;
         for c in text.chars() {
+            if c == self.language.capital_sign() {
+                capital = true;
+                continue;
+            }
             let x = self
                 .language
                 .decode(c)
                 .ok_or_else(|| CodeError::invalid_input_char(c))?;
-            out.push(*x)
+            if capital {
+                out.push_str(&x.to_uppercase().collect::<String>())
+            } else {
+                out.push(*x)
+            }
         }
         Ok(out)
     }
