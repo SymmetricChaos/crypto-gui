@@ -66,7 +66,7 @@ impl Default for SymmetricUnaryCode {
 
         SymmetricUnaryCode {
             maps,
-            mode: IOMode::Letter,
+            mode: IOMode::Integer,
             invert: false,
         }
     }

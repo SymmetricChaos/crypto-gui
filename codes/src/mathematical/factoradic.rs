@@ -24,7 +24,7 @@ impl Default for Factoradic {
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
         Factoradic {
             maps,
-            mode: IOMode::Letter,
+            mode: IOMode::Integer,
         }
     }
 }

@@ -50,7 +50,7 @@ impl Default for UnaryCode {
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
         UnaryCode {
             maps,
-            mode: IOMode::Letter,
+            mode: IOMode::Integer,
             invert: false,
             spaced: false,
         }

@@ -48,7 +48,7 @@ impl CodeFrame for FactoradicFrame {
                         self.code
                             .maps
                             .ints_chars()
-                            .map(|(a, b)| (self.code.encode_usize(a), b)),
+                            .map(|(a, b)| (b, self.code.encode_usize(a))),
                     ),
                 );
             }
@@ -69,7 +69,7 @@ impl CodeFrame for FactoradicFrame {
                         self.code
                             .maps
                             .ints_words()
-                            .map(|(a, b)| (self.code.encode_usize(a), b)),
+                            .map(|(a, b)| (b, self.code.encode_usize(a))),
                     ),
                 );
             }
@@ -79,7 +79,7 @@ impl CodeFrame for FactoradicFrame {
                 ui.two_column_table(
                     "Integer",
                     "Code",
-                    Box::new((0..6).into_iter().map(|n| (n, self.code.encode_usize(n)))),
+                    Box::new((0..10).into_iter().map(|n| (n, self.code.encode_usize(n)))),
                 );
             }
         }
