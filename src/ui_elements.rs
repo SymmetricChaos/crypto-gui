@@ -172,14 +172,14 @@ impl UiElements for Ui {
                 });
             })
             .body(|mut body| {
-                for (chr, code) in iter {
+                for (left, right) in iter {
                     body.row(20.0, |mut row| {
                         row.col(|ui| {
-                            ui.label(RichText::new(code.to_string()).size(18.0));
+                            ui.label(RichText::new(left.to_string()).size(18.0));
                         });
 
                         row.col(|ui| {
-                            ui.label(RichText::new(chr.to_string()).size(18.0));
+                            ui.label(RichText::new(right.to_string()).size(18.0));
                         });
                     });
                 }

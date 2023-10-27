@@ -29,7 +29,7 @@ impl CodeFrame for AsciiFrame {
         ui.add_space(8.0);
         ui.checkbox(&mut self.code.spaced, "Use Spaces");
         ui.add_space(16.0);
-        ui.two_column_table("Code", "Character", self.code.chars_codes_display());
+        ui.two_column_table("Character", "Code", self.code.chars_codes_display());
         ui.add_space(32.0)
     }
 

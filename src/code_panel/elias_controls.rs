@@ -63,8 +63,8 @@ impl CodeFrame for EliasCodeFrame {
                 };
                 ui.add_space(16.0);
                 ui.two_column_table(
-                    "Code",
                     "Character",
+                    "Code",
                     Box::new(self.code.maps.alphabet.chars().zip(self.code.values())),
                 );
             }
@@ -78,17 +78,17 @@ impl CodeFrame for EliasCodeFrame {
                 };
                 ui.add_space(16.0);
                 ui.two_column_table(
-                    "Code",
+                    "Character",
                     "Word",
                     Box::new(self.code.maps.words.iter().zip(self.code.values())),
                 );
             }
             IOMode::Integer => {
-                ui.label("Get the Elias coding for any list of positive integers or decode any string of 0s and 1s into a list of positive integers. A sample list of encodings it provided below.");
+                ui.label("Get the Elias coding for any list of positive integers or decode any string of 0s and 1s into a list of positive integers. A sample list of encodings is provided below.");
                 ui.add_space(16.0);
                 ui.two_column_table(
-                    "Code",
                     "Integer",
+                    "Code",
                     Box::new(
                         (1..33).map(|n| (n.to_string(), self.code.encode(&n.to_string()).unwrap())),
                     ),

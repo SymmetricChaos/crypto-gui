@@ -55,8 +55,8 @@ impl CodeFrame for UnaryCodeFrame {
                 };
                 ui.add_space(16.0);
                 ui.two_column_table(
-                    "Code",
                     "Character",
+                    "Code",
                     Box::new(
                         self.code
                             .maps
@@ -76,8 +76,8 @@ impl CodeFrame for UnaryCodeFrame {
                 ui.add_space(16.0);
 
                 ui.two_column_table(
-                    "Code",
                     "Word",
+                    "Code",
                     Box::new(
                         self.code
                             .maps
@@ -90,8 +90,8 @@ impl CodeFrame for UnaryCodeFrame {
                 ui.label("Convert between numbers and their unary encodings. When decoding the '�' symbol appears when an invalid code is encoutered.");
                 ui.add_space(16.0);
                 ui.two_column_table(
-                    "Code",
                     "Integer",
+                    "Code",
                     Box::new((0..6).into_iter().map(|n| (n, self.usize_to_unary(n)))),
                 );
             }

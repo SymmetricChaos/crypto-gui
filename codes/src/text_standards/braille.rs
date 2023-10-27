@@ -1,17 +1,19 @@
 use bimap::BiMap;
 use lazy_static::lazy_static;
-use utils::{preset_alphabet::Alphabet, text_functions::bimap_from_iter};
+use utils::text_functions::bimap_from_iter;
 
 use crate::{errors::CodeError, traits::Code};
 
-const BRAILLE_ENGLISH: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠺⠭⠽⠵";
-const BRAILLE_FRENCH: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠭⠽⠵⠯⠿⠷⠮⠾⠡⠣⠩⠹⠱⠫⠻⠳⠪⠺";
+const ENGLISH_CHARS: &'static str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ! ";
+const BRAILLE_ENGLISH: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠺⠭⠽⠵⠖⠀";
+const FRENCH_CHARS: &'static str = "ABCDEFGHIJKLMNOPQRSTUVXYZÇÉÀÈÙÂÊÎÔÛËÏÜŒW ";
+const BRAILLE_FRENCH: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠭⠽⠵⠯⠿⠷⠮⠾⠡⠣⠩⠹⠱⠫⠻⠳⠪⠺⠀";
 
 lazy_static! {
     pub static ref ENGLISH_MAP: BiMap<char, char> =
-        bimap_from_iter(Alphabet::BasicLatin.chars().zip(BRAILLE_ENGLISH.chars()));
+        bimap_from_iter(ENGLISH_CHARS.chars().zip(BRAILLE_ENGLISH.chars()));
     pub static ref FRENCH_MAP: BiMap<char, char> = bimap_from_iter(
-        "ABCDEFGHIJKLMNOPQRSTUVXYZÇÉÀÈÙÂÊÎÔÛËÏÜŒW" // These are all normalized single character symbols so .chars() can be used
+        FRENCH_CHARS // These are all normalized single character symbols so .chars() can be used
             .chars()
             .zip(BRAILLE_FRENCH.chars())
     );
@@ -26,11 +28,11 @@ pub enum BrailleLanguage {
 impl BrailleLanguage {
     pub fn chars_codes(&self) -> std::iter::Zip<std::str::Chars<'_>, std::str::Chars<'_>> {
         match self {
-            BrailleLanguage::English => Alphabet::BasicLatin.chars().zip(BRAILLE_ENGLISH.chars()),
+            BrailleLanguage::English => BRAILLE_ENGLISH.chars().zip(ENGLISH_CHARS.chars()),
             BrailleLanguage::French => {
-                "ABCDEFGHIJKLMNOPQRSTUVXYZÇÉÀÈÙÂÊÎÔÛËÏÜŒW" // These are all normalized single character symbols so .chars() can be used
+                BRAILLE_FRENCH // These are all normalized single character symbols so .chars() can be used
                     .chars()
-                    .zip(BRAILLE_FRENCH.chars())
+                    .zip(FRENCH_CHARS.chars())
             }
         }
     }
