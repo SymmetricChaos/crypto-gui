@@ -4,10 +4,10 @@ use utils::text_functions::bimap_from_iter;
 
 use crate::{errors::CodeError, traits::Code};
 
-const ENGLISH_CHARS: &'static str = "abcdefghijklmnopqrstuvwxyz !'-";
-const BRAILLE_ENGLISH: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠺⠭⠽⠵⠀⠖⠄⠤";
-const FRENCH_CHARS: &'static str = "abcdefghijklmnopqrstuvxyzçéàèùâêîôûëïüœw !'-";
-const BRAILLE_FRENCH: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠭⠽⠵⠯⠿⠷⠮⠾⠡⠣⠩⠹⠱⠫⠻⠳⠪⠺⠀⠖⠄⠤";
+const ENGLISH_CHARS: &'static str = "abcdefghijklmnopqrstuvwxyz!'-,;:.?";
+const BRAILLE_ENGLISH: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠺⠭⠽⠵⠖⠄⠤⠂⠆⠒⠲⠦";
+const FRENCH_CHARS: &'static str = "abcdefghijklmnopqrstuvxyzçéàèùâêîôûëïüœw!'-,;:.?";
+const BRAILLE_FRENCH: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠭⠽⠵⠯⠿⠷⠮⠾⠡⠣⠩⠹⠱⠫⠻⠳⠪⠺⠖⠄⠤⠂⠆⠒⠲⠢";
 
 lazy_static! {
     pub static ref ENGLISH_MAP: BiMap<char, char> =
@@ -82,7 +82,11 @@ impl Code for Braille {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::new();
         for c in text.chars() {
-            if c.is_ascii_uppercase() {
+            if c.is_whitespace() {
+                out.push(c);
+                continue;
+            }
+            if c.is_uppercase() {
                 out.push(self.language.capital_sign())
             }
             let x = self
@@ -98,6 +102,10 @@ impl Code for Braille {
         let mut out = String::new();
         let mut capital = false;
         for c in text.chars() {
+            if c.is_whitespace() {
+                out.push(c);
+                continue;
+            }
             if c == self.language.capital_sign() {
                 capital = true;
                 continue;
