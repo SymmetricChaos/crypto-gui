@@ -10,6 +10,58 @@ pub const ITU_ASCII: [&'static str; 50] = [
     "-----", ".-.-.-", "--..--", "---...", "..--..", ".---.", "-...-", "-..-.", "-.--.", "-.--.-",
     ".-..-.", "-...-", ".-.-.", ".--.-.",
 ];
+pub const ITU_WORD: [&'static str; 50] = [
+    "di dah",
+    "dah di di dit",
+    "dah di dah dit",
+    "dah di dit",
+    "dit",
+    "di di dah di dit",
+    "di di dah dit",
+    "dah dah dit",
+    "di di di dit",
+    "di dit",
+    "di dah dah dah",
+    "dah di dah",
+    "di dah di dit",
+    "dah dah",
+    "dah dit",
+    "dah dah dah",
+    "di dah dah dit",
+    "dah dah di dah",
+    "di dah dit",
+    "di di dit",
+    "dah",
+    "di di dah",
+    "di di di dah",
+    "di dah dah",
+    "dah di di dah",
+    "dah di dah dah",
+    "dah dah di dit",
+    "di dah dah dah dah",
+    "di di dah dah dah",
+    "di di di dah dah",
+    "di di di di dah",
+    "di di di di dit",
+    "dah di di di dit",
+    "dah dah di di dit",
+    "dah dah dah di dit",
+    "dah dah dah dah dit",
+    "dah dah dah dah dah",
+    "di dah di dah di dah",
+    "dah dah di di dah dah",
+    "dah dah dah di di dit",
+    "di di dah dah di dit",
+    "di dah dah dah dit",
+    "dah di di di dah",
+    "dah di di dah dit",
+    "dah di dah dah dit",
+    "dah di dah dah di dah",
+    "di dah di di dah dit",
+    "dah di di di dah",
+    "di dah di dah dit",
+    "di dah dah di dah dit",
+];
 
 pub const ITU_DOT_DASH: [&'static str; 50] = [
     "·–",
@@ -302,6 +354,8 @@ pub const AMERICAN_HALFBLOCK: [&'static str; 41] = [
 lazy_static! {
     pub static ref ITU_ASCII_MAP: BiMap<char, &'static str> =
         bimap_from_iter(ITU_LETTERS.chars().zip(ITU_ASCII.iter().copied()));
+    pub static ref ITU_WORD_MAP: BiMap<char, &'static str> =
+        bimap_from_iter(ITU_LETTERS.chars().zip(ITU_WORD.iter().copied()));
     pub static ref ITU_BINARY_MAP: BiMap<char, &'static str> =
         bimap_from_iter(ITU_LETTERS.chars().zip(ITU_BINARY.iter().copied()));
     pub static ref ITU_DOT_DASH_MAP: BiMap<char, &'static str> =
