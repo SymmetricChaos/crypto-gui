@@ -1,7 +1,13 @@
-use crate::{errors::CodeError, traits::Code};
-
 use super::morse_encodings::*;
+use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
+
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum MorseStandard {
+    Itu,
+    American,
+    Gerke,
+}
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum MorseRep {
@@ -49,14 +55,17 @@ impl MorseRep {
                     ))
                 }
             },
+            MorseStandard::Gerke => match self {
+                Self::Binary => &GERKE_BINARY_MAP,
+                Self::HalfBlock => &GERKE_HALFBLOCK_MAP,
+                _ => {
+                    return Err(CodeError::State(
+                        "Only line codes work for Gerke's code".into(),
+                    ))
+                }
+            },
         })
     }
-}
-
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub enum MorseStandard {
-    Itu,
-    American,
 }
 
 pub struct Morse {
@@ -80,6 +89,14 @@ impl Morse {
                 _ => Box::new(
                     std::iter::once(' ')
                         .zip(std::iter::once("Only line codes work for American Morse")),
+                ),
+            },
+            MorseStandard::Gerke => match self.mode {
+                MorseRep::Binary => Box::new(GERKE_LETTERS.chars().zip(GERKE_BINARY)),
+                MorseRep::HalfBlock => Box::new(GERKE_LETTERS.chars().zip(GERKE_HALFBLOCK)),
+                _ => Box::new(
+                    std::iter::once(' ')
+                        .zip(std::iter::once("Only line codes work for Gerke's code")),
                 ),
             },
         }

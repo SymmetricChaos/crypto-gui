@@ -221,6 +221,96 @@ pub const ITU_HALFBLOCK: [&'static str; 50] = [
     "▄ ▄▄▄ ▄▄▄ ▄ ▄▄▄ ▄",
 ];
 
+pub const GERKE_LETTERS: &'static str = "AÄBCDEFGHJKLMNOÖPQRSTUÜVWXYZ1234567890?";
+// pub const GERKE_ASCII: &'static [&'static str] = &[
+//     ".-", ".-.-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..", "-.-", ".-..", "--",
+//     "-.", ".-...", "---.", ".....", "--.-", ".-.", "...", "-", "..-", "..--", "...-", ".--",
+//     "..-...", "--...", ".--..", ".--.", "..-..", "...-.", "....-", "---", "......", "--..",
+//     "-....", "-..-", "---",
+// ];
+pub const GERKE_BINARY: [&'static str; 39] = [
+    "10111",
+    "10111010111",
+    "111010101",
+    "11101011101",
+    "1110101",
+    "1",
+    "101011101",
+    "111011101",
+    "1010101",
+    "101",
+    "111010111",
+    "101110101",
+    "1110111",
+    "11101",
+    "10111010101",
+    "1110111011101",
+    "101010101",
+    "1110111010111",
+    "1011101",
+    "10101",
+    "111",
+    "1010111",
+    "10101110111",
+    "101010111",
+    "101110111",
+    "1010111010101",
+    "1110111010101",
+    "1011101110101",
+    "10111011101",
+    "10101110101",
+    "10101011101",
+    "10101010111",
+    "11101110111",
+    "10101010101",
+    "11101110101",
+    "11101010101",
+    "11101010111",
+    "111111",
+    "1010101110101",
+];
+pub const GERKE_HALFBLOCK: [&'static str; 39] = [
+    "▄ ▄▄▄",
+    "▄ ▄▄▄ ▄ ▄▄▄",
+    "▄▄▄ ▄ ▄ ▄",
+    "▄▄▄ ▄ ▄▄▄ ▄",
+    "▄▄▄ ▄ ▄",
+    "▄",
+    "▄ ▄ ▄▄▄ ▄",
+    "▄▄▄ ▄▄▄ ▄",
+    "▄ ▄ ▄ ▄",
+    "▄ ▄",
+    "▄▄▄ ▄ ▄▄▄",
+    "▄ ▄▄▄ ▄ ▄",
+    "▄▄▄ ▄▄▄",
+    "▄▄▄ ▄",
+    "▄ ▄▄▄ ▄ ▄ ▄",
+    "▄▄▄ ▄▄▄ ▄▄▄ ▄",
+    "▄ ▄ ▄ ▄ ▄",
+    "▄▄▄ ▄▄▄ ▄ ▄▄▄",
+    "▄ ▄▄▄ ▄",
+    "▄ ▄ ▄",
+    "▄▄▄",
+    "▄ ▄ ▄▄▄",
+    "▄ ▄ ▄▄▄ ▄▄▄",
+    "▄ ▄ ▄ ▄▄▄",
+    "▄ ▄▄▄ ▄▄▄",
+    "▄ ▄ ▄▄▄ ▄ ▄ ▄",
+    "▄▄▄ ▄▄▄ ▄ ▄ ▄",
+    "▄ ▄▄▄ ▄▄▄ ▄ ▄",
+    "▄ ▄▄▄ ▄▄▄ ▄",
+    "▄ ▄ ▄▄▄ ▄ ▄",
+    "▄ ▄ ▄ ▄▄▄ ▄",
+    "▄ ▄ ▄ ▄ ▄▄▄",
+    "▄▄▄ ▄▄▄ ▄▄▄",
+    "▄ ▄ ▄ ▄ ▄ ▄",
+    "▄▄▄ ▄▄▄ ▄ ▄",
+    "▄▄▄ ▄ ▄ ▄ ▄",
+    "▄▄▄ ▄ ▄ ▄▄▄",
+    "▄▄▄▄▄▄",
+    "▄ ▄ ▄ ▄▄▄ ▄ ▄",
+];
+
 pub const AMERICAN_LETTERS: &'static str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ&1234567890,.?!";
 pub const AMERICAN_BINARY: [&'static str; 41] = [
     "1011",
@@ -372,12 +462,10 @@ lazy_static! {
             .chars()
             .zip(AMERICAN_HALFBLOCK.iter().copied())
     );
-}
-
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub enum MorseStandard {
-    Itu,
-    American,
+    pub static ref GERKE_BINARY_MAP: BiMap<char, &'static str> =
+        bimap_from_iter(GERKE_LETTERS.chars().zip(GERKE_BINARY.iter().copied()));
+    pub static ref GERKE_HALFBLOCK_MAP: BiMap<char, &'static str> =
+        bimap_from_iter(GERKE_LETTERS.chars().zip(GERKE_HALFBLOCK.iter().copied()));
 }
 
 #[cfg(test)]
@@ -385,8 +473,25 @@ mod morseitu_tests {
     use super::*;
 
     #[test]
+    #[ignore = "visual correctness check"]
     fn itu_pairs() {
         for (letter, code) in ITU_LETTERS.chars().zip(ITU_HALFBLOCK) {
+            println!("{letter} {code}")
+        }
+    }
+
+    #[test]
+    #[ignore = "visual correctness check"]
+    fn gerke_pairs() {
+        for (letter, code) in GERKE_LETTERS.chars().zip(GERKE_HALFBLOCK) {
+            println!("{letter} {code}")
+        }
+    }
+
+    #[test]
+    #[ignore = "visual correctness check"]
+    fn american_pairs() {
+        for (letter, code) in AMERICAN_LETTERS.chars().zip(AMERICAN_HALFBLOCK) {
             println!("{letter} {code}")
         }
     }
