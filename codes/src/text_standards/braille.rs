@@ -81,6 +81,7 @@ impl Default for Braille {
 impl Code for Braille {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::new();
+        // let mut numeric = false;
         for c in text.chars() {
             if c.is_whitespace() {
                 out.push(c);
@@ -89,6 +90,11 @@ impl Code for Braille {
             if c.is_uppercase() {
                 out.push(self.language.capital_sign())
             }
+            // if c.is_ascii_digit() {
+            //     if !numeric {
+            //         out.push(self.language.number_sign());
+            //     }
+            // }
             let x = self
                 .language
                 .encode(c)
