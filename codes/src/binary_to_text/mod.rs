@@ -1,6 +1,7 @@
 pub mod ascii85;
 pub mod base32;
 pub mod base64;
+pub mod basex;
 pub mod numeric;
 pub mod pgp_words;
 pub mod skey;
