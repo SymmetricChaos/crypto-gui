@@ -164,16 +164,22 @@ impl Code for Ascii85 {
                 break;
             }
 
-            // Handle special 'z' and 'y' characters
-            if *chars.peek().unwrap() == 'z' {
-                out.extend_from_slice(&[0, 0, 0, 0]);
-                chars.next(); // remove the 'z'
-                continue;
+            // Btoa and Adobe optimize runs of null bytes
+            if self.variant == Ascii85Variant::Btoa || self.variant == Ascii85Variant::Adobe {
+                if *chars.peek().unwrap() == 'z' {
+                    out.extend_from_slice(&[0, 0, 0, 0]);
+                    chars.next(); // remove the 'z'
+                    continue;
+                }
             }
-            if *chars.peek().unwrap() == 'y' {
-                out.extend_from_slice(&[0x20, 0x20, 0x20, 0x20]);
-                chars.next(); // remove the 'y'
-                continue;
+
+            // Btoa optimizes runs of spaces
+            if self.variant == Ascii85Variant::Btoa {
+                if *chars.peek().unwrap() == 'y' {
+                    out.extend_from_slice(&[0x20, 0x20, 0x20, 0x20]);
+                    chars.next(); // remove the 'y'
+                    continue;
+                }
             }
 
             // If those are handled we fill the buffer algebraically
