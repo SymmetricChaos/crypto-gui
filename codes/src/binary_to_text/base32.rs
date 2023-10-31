@@ -1,7 +1,5 @@
 use bimap::BiMap;
 use lazy_static::lazy_static;
-use std::fs::read;
-use std::path::PathBuf;
 use utils::text_functions::bimap_from_iter;
 
 use crate::{errors::CodeError, traits::Code};
@@ -46,7 +44,6 @@ pub enum B32Variant {
 
 // Make it possible to encode an aribtrary file
 pub struct Base32 {
-    pub file: Option<PathBuf>,
     pub variant: B32Variant,
     pub mode: BinaryToTextMode,
     pub use_padding: bool,
@@ -55,7 +52,6 @@ pub struct Base32 {
 impl Default for Base32 {
     fn default() -> Self {
         Self {
-            file: None,
             variant: B32Variant::Rfc4648,
             mode: BinaryToTextMode::Utf8,
             use_padding: true,
@@ -79,14 +75,6 @@ impl Base32 {
                 *self.map().get_by_left(&x).unwrap() as char,
             )
         })
-    }
-
-    pub fn encode_file(&self) -> Result<String, CodeError> {
-        if self.file.is_none() {
-            return Err(CodeError::input("no file stored"));
-        }
-        let bytes = &read(self.file.as_ref().unwrap()).unwrap()[..];
-        self.encode_bytes(bytes)
     }
 }
 

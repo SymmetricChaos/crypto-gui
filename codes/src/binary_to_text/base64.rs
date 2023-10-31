@@ -34,7 +34,7 @@ lazy_static! {
 
 // Make it possible to encode an aribtrary file
 pub struct Base64 {
-    pub file: Option<PathBuf>,
+    // pub file: Option<PathBuf>,
     pub use_padding: bool,
     pub mode: BinaryToTextMode,
     pub variant: B64Variant,
@@ -43,7 +43,7 @@ pub struct Base64 {
 impl Default for Base64 {
     fn default() -> Self {
         Self {
-            file: None,
+            // file: None,
             use_padding: true,
             mode: BinaryToTextMode::Utf8,
             variant: B64Variant::Standard,
@@ -68,13 +68,13 @@ impl Base64 {
         })
     }
 
-    pub fn encode_file(&self) -> Result<String, CodeError> {
-        if self.file.is_none() {
-            return Err(CodeError::input("no file stored"));
-        }
-        let bytes = &read(self.file.as_ref().unwrap()).unwrap()[..];
-        self.encode_bytes(bytes)
-    }
+    // pub fn encode_file(&self) -> Result<String, CodeError> {
+    //     if self.file.is_none() {
+    //         return Err(CodeError::input("no file stored"));
+    //     }
+    //     let bytes = &read(self.file.as_ref().unwrap()).unwrap()[..];
+    //     self.encode_bytes(bytes)
+    // }
 }
 
 impl BinaryToText for Base64 {
@@ -86,7 +86,7 @@ impl BinaryToText for Base64 {
         let mut bytes = bytes.iter();
 
         loop {
-            // If less than 6 bits are bring used get the next byte
+            // If less than 6 bits are being used get the next byte
             if bits_in_use < 6 {
                 match bytes.next() {
                     // If it exists put it into the buffer
@@ -99,7 +99,7 @@ impl BinaryToText for Base64 {
                     None => break,
                 };
             }
-            // Get the five highest USED bites in the buffer and map them
+            // Get the five highest USED bits in the buffer and map them
             let n = ((buffer >> (bits_in_use - 6)) as u8) & MASK;
             out.push(*map.get_by_left(&n).unwrap());
             bits_in_use -= 6;
