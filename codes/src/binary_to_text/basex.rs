@@ -1,13 +1,16 @@
 use super::{bytes_to_hex, BinaryToText, BinaryToTextMode};
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
+use itertools::Itertools;
 use num::Zero;
 use utils::text_functions::bimap_from_iter;
 
-// Make it possible to encode an aribtrary file
+// Translated from
+// https://github.com/eknkc/basex/blob/6baac8ea8b19cc66d125286d213770fec0691867/basex.go#L46
+
 pub struct BaseX {
     pub mode: BinaryToTextMode,
-    pub base: u32,
+    base: u32,
     map: BiMap<char, u32>,
 }
 
@@ -36,6 +39,11 @@ impl BaseX {
             )
         })
     }
+
+    pub fn set_map(&mut self, alphabet: &str) {
+        self.map = bimap_from_iter(alphabet.chars().enumerate().map(|(n, c)| (c, n as u32)));
+        self.base = self.map.len() as u32;
+    }
 }
 
 impl BinaryToText for BaseX {
@@ -59,7 +67,7 @@ impl BinaryToText for BaseX {
             }
         }
 
-        let leading_zeroes = digits.iter().take_while(|n| n.is_zero()).count();
+        let leading_zeroes = bytes.iter().take_while(|n| n.is_zero()).count();
 
         let mut out = format!("{}", self.map.get_by_right(&0).unwrap()).repeat(leading_zeroes);
         out.push_str(
@@ -83,57 +91,38 @@ impl Code for BaseX {
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        let mut out: Vec<u8> = Vec::new();
-        let mut chars = text.chars().filter(|c| !c.is_whitespace()).peekable();
-
-        loop {
-            // Break if done
-            if chars.peek().is_none() {
-                break;
+        let mut bytes: Vec<u8> = Vec::new();
+        for c in text.chars() {
+            let mut carry = *self
+                .map
+                .get_by_left(&c)
+                .ok_or_else(|| CodeError::invalid_input_char(c))?;
+            for j in 0..bytes.len() {
+                carry += bytes[j] as u32 * self.base;
+                bytes[j] = (carry & 0xFF) as u8;
+                carry >>= 8;
             }
 
-            // Handle special 'z' and 'y' characters
-            if *chars.peek().unwrap() == 'z' {
-                out.extend_from_slice(&[0, 0, 0, 0]);
-                chars.next(); // remove the 'z'
-                continue;
-            }
-            if *chars.peek().unwrap() == 'y' {
-                out.extend_from_slice(&[0x20, 0x20, 0x20, 0x20]);
-                chars.next(); // remove the 'y'
-                continue;
-            }
-
-            // If those are handled we fill the buffer algebraically
-            let mut buffer = 0_u32;
-
-            let mut used_chars = 4;
-            for i in (0..5).rev() {
-                match chars.next() {
-                    Some(byte) => {
-                        buffer += *self
-                            .map
-                            .get_by_right(&(byte as u32))
-                            .ok_or_else(|| CodeError::invalid_input_char(byte as char))?
-                            as u32
-                            * 85_u32.pow(i)
-                    }
-                    None => {
-                        used_chars -= 1;
-                        buffer += 84 * 85_u32.pow(i);
-                    }
-                }
-            }
-
-            // Extract the used bytes from the buffer
-            for b in buffer.to_le_bytes().into_iter().rev().take(used_chars) {
-                out.push(b)
+            while carry > 0 {
+                bytes.push((carry & 0xFF) as u8);
+                carry >>= 8;
             }
         }
+
+        for _ in 0..text
+            .chars()
+            .take_while(|n| n == self.map.get_by_right(&0).unwrap())
+            .count()
+        {
+            bytes.push(0);
+        }
+
+        let bytes = bytes.into_iter().rev().collect_vec();
+
         match self.mode {
-            BinaryToTextMode::Hex => bytes_to_hex(&out),
+            BinaryToTextMode::Hex => bytes_to_hex(&bytes),
             BinaryToTextMode::Utf8 => {
-                String::from_utf8(out).map_err(|e| CodeError::Input(e.to_string()))
+                String::from_utf8(bytes).map_err(|e| CodeError::Input(e.to_string()))
             }
         }
     }
@@ -143,22 +132,32 @@ impl Code for BaseX {
 mod basex_tests {
     use super::*;
 
-    const TESTS: [(&'static str, &'static str); 2] =
-        [("Man is d", "DwgwXHnykZ9"), ("Man ", "2yimnw")];
+    const TESTS: &[(&'static str, &'static str)] =
+        &[("Man is d", "DwgwXHnykZ9"), ("Man ", "2yimnw"), ("a", "2g")];
+
+    const HEX_TESTS: &[(&'static str, &'static str)] = &[("0000287fb4cd", "11233QC4")];
 
     #[test]
     fn encode_test() {
-        let code = BaseX::default();
+        let mut code = BaseX::default();
         for (ptext, ctext) in TESTS {
-            assert_eq!(code.encode(ptext).unwrap(), ctext);
+            assert_eq!(code.encode(ptext).unwrap(), *ctext);
+        }
+        code.mode = BinaryToTextMode::Hex;
+        for (ptext, ctext) in HEX_TESTS {
+            assert_eq!(code.encode(ptext).unwrap(), *ctext);
         }
     }
 
     #[test]
     fn decode_test() {
-        let code = BaseX::default();
+        let mut code = BaseX::default();
         for (ptext, ctext) in TESTS {
-            assert_eq!(code.decode(ctext).unwrap(), ptext);
+            assert_eq!(code.decode(ctext).unwrap(), *ptext);
+        }
+        code.mode = BinaryToTextMode::Hex;
+        for (ptext, ctext) in HEX_TESTS {
+            assert_eq!(code.decode(ctext).unwrap(), *ptext);
         }
     }
 }

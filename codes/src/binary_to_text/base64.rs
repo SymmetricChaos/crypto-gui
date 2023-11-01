@@ -32,7 +32,6 @@ lazy_static! {
     );
 }
 
-// Make it possible to encode an aribtrary file
 pub struct Base64 {
     // pub file: Option<PathBuf>,
     pub use_padding: bool,
