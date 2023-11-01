@@ -14,14 +14,14 @@ pub struct BaseX {
 impl Default for BaseX {
     fn default() -> Self {
         let map = bimap_from_iter(
-            "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+            "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
                 .chars()
                 .enumerate()
                 .map(|(n, c)| (c, n as u32)),
         );
         Self {
             mode: BinaryToTextMode::Utf8,
-            base: 62,
+            base: 58,
             map,
         }
     }
@@ -140,19 +140,11 @@ impl Code for BaseX {
 }
 
 #[cfg(test)]
-mod ascii85_tests {
+mod basex_tests {
     use super::*;
 
-    const TESTS: [(&'static str, &'static str); 8] = [
-        ("Man is d", "9jqo^BlbD-"),      // multiple blocks
-        ("Man ", "9jqo^"),               // single block
-        ("Man", "9jqo"),                 // partial
-        ("Ma", "9jn"),                   // partial
-        ("M", "9`"),                     // partial
-        ("    ", "y"),                   // special
-        ("\0\0\0\0", "z"),               // special
-        ("abcd    efgh", "@:E_WyAS,Rg"), // special in contex
-    ];
+    const TESTS: [(&'static str, &'static str); 2] =
+        [("Man is d", "DwgwXHnykZ9"), ("Man ", "2yimnw")];
 
     #[test]
     fn encode_test() {
@@ -168,25 +160,5 @@ mod ascii85_tests {
         for (ptext, ctext) in TESTS {
             assert_eq!(code.decode(ctext).unwrap(), ptext);
         }
-    }
-
-    #[test]
-    fn decode_test_errs() {
-        let code = BaseX::default();
-        // Fail on character that is always invalid
-        assert_eq!(
-            code.decode("abdc}").unwrap_err(),
-            CodeError::Input("invalid character `}`, alphabets are case sensitive".into())
-        );
-        // Fail on z if not found at the start of a chunk
-        assert_eq!(
-            code.decode("azg}").unwrap_err(),
-            CodeError::Input("invalid character `z`, alphabets are case sensitive".into())
-        );
-        // Fail on y if not found at the start of a chunk
-        assert_eq!(
-            code.decode("agy{").unwrap_err(),
-            CodeError::Input("invalid character `y`, alphabets are case sensitive".into())
-        );
     }
 }
