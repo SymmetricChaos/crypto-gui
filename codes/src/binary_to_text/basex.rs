@@ -44,6 +44,10 @@ impl BaseX {
         self.map = bimap_from_iter(alphabet.chars().enumerate().map(|(n, c)| (c, n as u32)));
         self.base = self.map.len() as u32;
     }
+
+    pub fn base(&self) -> u32 {
+        self.base
+    }
 }
 
 impl BinaryToText for BaseX {
