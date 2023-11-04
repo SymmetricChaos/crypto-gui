@@ -24,13 +24,23 @@ pub enum UebMode {
 
 impl UebMode {
     pub const BRAILLE: [&'static str; 5] = ["⠫", "⠳", "⠼", "⠐⠒", "⠰"];
-    pub const ENGLISH: [&'static str; 5] = [
+    pub const LATIN: [&'static str; 5] = [
         "[shape]",
         "[arrow]",
         "[numeric]",
         "[horizontal-line]",
         "[grade-1]",
     ];
+
+    pub fn as_braille(&self) -> &'static str {
+        match self {
+            Self::Shape => Self::BRAILLE[0],
+            Self::Arrow => Self::BRAILLE[1],
+            Self::Numeric => Self::BRAILLE[2],
+            Self::HorizontalLine => Self::BRAILLE[3],
+            Self::GradeOne => Self::BRAILLE[4],
+        }
+    }
 
     pub fn from_braille(s: &str) -> Option<Self> {
         match s {
@@ -43,7 +53,17 @@ impl UebMode {
         }
     }
 
-    pub fn from_english(s: &str) -> Option<Self> {
+    pub fn as_latin(&self) -> &'static str {
+        match self {
+            Self::Shape => Self::LATIN[0],
+            Self::Arrow => Self::LATIN[1],
+            Self::Numeric => Self::LATIN[2],
+            Self::HorizontalLine => Self::LATIN[3],
+            Self::GradeOne => Self::LATIN[4],
+        }
+    }
+
+    pub fn from_latin(s: &str) -> Option<Self> {
         match s {
             "[shape]" => Some(Self::Shape),
             "[arrow]" => Some(Self::Arrow),
@@ -68,7 +88,7 @@ pub enum UebIndicator {
 
 impl UebIndicator {
     pub const BRAILLE: [&'static str; 8] = ["⠢", "⠔", "⠈⠆", "⠘⠆", "⠘⠖", "⠸⠆", "⠨⠆", "⠠⠠"];
-    pub const ENGLISH: [&'static str; 8] = [
+    pub const LATIN: [&'static str; 8] = [
         "[subscript]",
         "[superscript]",
         "[script]",
@@ -78,6 +98,19 @@ impl UebIndicator {
         "[italic]",
         "[capital]",
     ];
+
+    pub fn as_braille(&self) -> &'static str {
+        match self {
+            Self::Subscript => Self::BRAILLE[0],
+            Self::Superscript => Self::BRAILLE[1],
+            Self::Script => Self::BRAILLE[2],
+            Self::Bold => Self::BRAILLE[3],
+            Self::Ligature => Self::BRAILLE[4],
+            Self::Underline => Self::BRAILLE[5],
+            Self::Italic => Self::BRAILLE[6],
+            Self::Capital => Self::BRAILLE[7],
+        }
+    }
 
     pub fn from_braille(s: &str) -> Option<Self> {
         match s {
@@ -93,7 +126,20 @@ impl UebIndicator {
         }
     }
 
-    pub fn from_english(s: &str) -> Option<Self> {
+    pub fn as_latin(&self) -> &'static str {
+        match self {
+            Self::Subscript => Self::LATIN[0],
+            Self::Superscript => Self::LATIN[1],
+            Self::Script => Self::LATIN[2],
+            Self::Bold => Self::LATIN[3],
+            Self::Ligature => Self::LATIN[4],
+            Self::Underline => Self::LATIN[5],
+            Self::Italic => Self::LATIN[6],
+            Self::Capital => Self::LATIN[7],
+        }
+    }
+
+    pub fn from_latin(s: &str) -> Option<Self> {
         match s {
             "[subscript]" => Some(Self::Subscript),
             "[superscript]" => Some(Self::Superscript),
@@ -116,19 +162,16 @@ impl UebIndicator {
 //     "→", "↓", "←",
 // ]
 
-const LETTERS_ENGLISH: &'static str = "abcdefghijklmnopqrstuvwxyz";
+const LETTERS_LATIN: &'static str = "abcdefghijklmnopqrstuvwxyz";
 const LETTERS_BRAILLE: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠺⠭⠽⠵";
 
 lazy_static! {
     pub static ref LETTER_MAP: BiMap<char, char> =
-        bimap_from_iter(LETTERS_ENGLISH.chars().zip(LETTERS_BRAILLE.chars()));
-    pub static ref MODE_MAP: BiMap<&'static str, &'static str> = bimap_from_iter(
-        UebMode::ENGLISH
-            .into_iter()
-            .zip(UebMode::BRAILLE.into_iter())
-    );
+        bimap_from_iter(LETTERS_LATIN.chars().zip(LETTERS_BRAILLE.chars()));
+    pub static ref MODE_MAP: BiMap<&'static str, &'static str> =
+        bimap_from_iter(UebMode::LATIN.into_iter().zip(UebMode::BRAILLE.into_iter()));
     pub static ref INDICATOR_MAP: BiMap<&'static str, &'static str> = bimap_from_iter(
-        UebIndicator::ENGLISH
+        UebIndicator::LATIN
             .into_iter()
             .zip(UebIndicator::BRAILLE.into_iter())
     );
