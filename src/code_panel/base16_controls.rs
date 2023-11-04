@@ -18,7 +18,12 @@ impl CodeFrame for Base16Frame {
     fn ui(&mut self, ui: &mut egui::Ui) {
         ui.checkbox(&mut self.code.upper, "Uppercase");
 
-        // ui.fill_code_columns(8, 4, Box::new(self.code.chars_codes()));
+        if self.code.upper {
+            ui.fill_code_columns(8, 4, Box::new((0..16).zip("0123456789ABCDEF".chars())));
+        } else {
+            ui.fill_code_columns(8, 4, Box::new((0..16).zip("0123456789abcdef".chars())));
+        }
+
         ui.add_space(16.0);
     }
 
