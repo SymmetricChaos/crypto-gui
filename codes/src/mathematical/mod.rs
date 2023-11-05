@@ -1,5 +1,6 @@
 pub mod balanced_ternary;
 pub mod base_n;
+pub mod biquinary_decimal;
 pub mod combinadic;
 pub mod elias;
 pub mod elias_integers;
