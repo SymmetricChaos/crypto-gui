@@ -19,8 +19,18 @@ impl CodeFrame for BrailleFrame {
         ui.group(|ui| {
             ui.subheading("Language");
             ui.horizontal(|ui| {
-                ui.selectable_value(&mut self.code.language, BrailleLanguage::English, "English");
+                ui.selectable_value(
+                    &mut self.code.language,
+                    BrailleLanguage::English,
+                    "English (Unified)",
+                );
                 ui.selectable_value(&mut self.code.language, BrailleLanguage::French, "French");
+                ui.selectable_value(
+                    &mut self.code.language,
+                    BrailleLanguage::American,
+                    "American",
+                );
+                ui.selectable_value(&mut self.code.language, BrailleLanguage::American, "ASCII");
             });
         });
 

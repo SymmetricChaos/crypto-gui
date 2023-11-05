@@ -4,18 +4,33 @@ use utils::text_functions::bimap_from_iter;
 
 use crate::{errors::CodeError, traits::Code};
 
-const ENGLISH_CHARS: &'static str = "abcdefghijklmnopqrstuvwxyz!'-,;:.?";
-const BRAILLE_ENGLISH: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠺⠭⠽⠵⠖⠄⠤⠂⠆⠒⠲⠦";
-const FRENCH_CHARS: &'static str = "abcdefghijklmnopqrstuvxyzçéàèùâêîôûëïüœw!'-,;:.?";
-const BRAILLE_FRENCH: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠭⠽⠵⠯⠿⠷⠮⠾⠡⠣⠩⠹⠱⠫⠻⠳⠪⠺⠖⠄⠤⠂⠆⠒⠲⠢";
+const ASCII_LETTERS: &'static str = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_";
+const ASCII_BRAILLE: &'static str =
+    " ⠮⠐⠼⠫⠩⠯⠄⠷⠾⠡⠬⠠⠤⠨⠌⠴⠂⠆⠒⠲⠢⠖⠶⠦⠔⠱⠰⠣⠿⠜⠹⠈⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠺⠭⠽⠵⠪⠳⠻⠘⠸";
+const AMERICAN_LETTERS: &'static str = "abcdefghijklmnopqrstuvwxyz!'-,;:?\"";
+const AMERICAN_BRAILLE: &'static str = "⠁⠣⠚⠙⠂⠋⠛⠓⠊⠽⠗⠇⠍⠬⠑⠩⠟⠉⠅⠃⠥⠧⠺⠷⠜⠻⠾⠈⠒⠄⠆⠴⠲⠦";
+const ENGLISH_LETTERS: &'static str = "abcdefghijklmnopqrstuvwxyz!'-,;:.?";
+const ENGLISH_BRAILLE: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠺⠭⠽⠵⠖⠄⠤⠂⠆⠒⠲⠦";
+const FRENCH_LETTERS: &'static str = "abcdefghijklmnopqrstuvxyzçéàèùâêîôûëïüœw!'-,;:.?";
+const FRENCH_BRAILLE: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠭⠽⠵⠯⠿⠷⠮⠾⠡⠣⠩⠹⠱⠫⠻⠳⠪⠺⠖⠄⠤⠂⠆⠒⠲⠢";
 
 lazy_static! {
     pub static ref ENGLISH_MAP: BiMap<char, char> =
-        bimap_from_iter(ENGLISH_CHARS.chars().zip(BRAILLE_ENGLISH.chars()));
+        bimap_from_iter(ENGLISH_LETTERS.chars().zip(ENGLISH_BRAILLE.chars()));
     pub static ref FRENCH_MAP: BiMap<char, char> = bimap_from_iter(
-        FRENCH_CHARS // These are all normalized single character symbols so .chars() can be used
+        FRENCH_LETTERS // These are all normalized single character symbols so .chars() can be used
             .chars()
-            .zip(BRAILLE_FRENCH.chars())
+            .zip(FRENCH_BRAILLE.chars())
+    );
+    pub static ref AMERICAN_MAP: BiMap<char, char> = bimap_from_iter(
+        AMERICAN_LETTERS
+            .chars()
+            .zip(AMERICAN_BRAILLE.chars())
+    );
+    pub static ref ASCII_MAP: BiMap<char, char> = bimap_from_iter(
+        ASCII_LETTERS
+            .chars()
+            .zip(ASCII_BRAILLE.chars())
     );
 }
 
@@ -23,17 +38,19 @@ lazy_static! {
 pub enum BrailleLanguage {
     English,
     French,
+    American,
 }
 
 impl BrailleLanguage {
     pub fn chars_codes(&self) -> std::iter::Zip<std::str::Chars<'_>, std::str::Chars<'_>> {
         match self {
-            BrailleLanguage::English => BRAILLE_ENGLISH.chars().zip(ENGLISH_CHARS.chars()),
-            BrailleLanguage::French => {
-                BRAILLE_FRENCH // These are all normalized single character symbols so .chars() can be used
+            Self::English => ENGLISH_BRAILLE.chars().zip(ENGLISH_LETTERS.chars()),
+            Self::French => {
+                FRENCH_BRAILLE // These are all normalized single character symbols so .chars() can be used
                     .chars()
-                    .zip(FRENCH_CHARS.chars())
+                    .zip(FRENCH_LETTERS.chars())
             }
+            Self::American => AMERICAN_BRAILLE.chars().zip(AMERICAN_LETTERS.chars()),
         }
     }
 
@@ -41,6 +58,7 @@ impl BrailleLanguage {
         match self {
             Self::English => ENGLISH_MAP.get_by_left(&c),
             Self::French => FRENCH_MAP.get_by_left(&c),
+            Self::American => AMERICAN_MAP.get_by_left(&c),
         }
     }
 
@@ -48,20 +66,23 @@ impl BrailleLanguage {
         match self {
             Self::English => ENGLISH_MAP.get_by_right(&c),
             Self::French => FRENCH_MAP.get_by_right(&c),
+            Self::American => AMERICAN_MAP.get_by_right(&c),
         }
     }
 
-    pub fn capital_sign(&self) -> char {
+    pub fn capital_sign(&self) -> Option<char> {
         match self {
-            Self::English => '⠠',
-            Self::French => '⠨',
+            Self::English => Some('⠠'),
+            Self::French => Some('⠨'),
+            Self::American => Some('⠤'),
         }
     }
 
-    pub fn number_sign(&self) -> char {
+    pub fn number_sign(&self) -> Option<char> {
         match self {
-            Self::English => '⠼',
-            Self::French => '⠼',
+            Self::English => Some('⠼'),
+            Self::French => Some('⠼'),
+            Self::American => None,
         }
     }
 }
@@ -88,18 +109,31 @@ impl Code for Braille {
                 continue;
             }
             if c.is_uppercase() {
-                out.push(self.language.capital_sign())
+                out.push(
+                    self.language
+                        .capital_sign()
+                        .expect("all version current have a capital sign"),
+                );
+                for code_point in c.to_lowercase().into_iter() {
+                    out.push(
+                        *self
+                            .language
+                            .encode(code_point)
+                            .ok_or_else(|| CodeError::invalid_input_char(c))?,
+                    )
+                }
+            } else {
+                let x = self
+                    .language
+                    .encode(c)
+                    .ok_or_else(|| CodeError::invalid_input_char(c))?;
+                out.push(*x)
             }
             // if c.is_ascii_digit() {
             //     if !numeric {
             //         out.push(self.language.number_sign());
             //     }
             // }
-            let x = self
-                .language
-                .encode(c)
-                .ok_or_else(|| CodeError::invalid_input_char(c))?;
-            out.push(*x)
         }
         Ok(out)
     }
@@ -112,7 +146,7 @@ impl Code for Braille {
                 out.push(c);
                 continue;
             }
-            if c == self.language.capital_sign() {
+            if Some(c) == self.language.capital_sign() {
                 capital = true;
                 continue;
             }
@@ -125,7 +159,49 @@ impl Code for Braille {
             } else {
                 out.push(*x)
             }
+            capital = false;
         }
         Ok(out)
+    }
+}
+
+#[cfg(test)]
+mod braille_tests {
+    use super::*;
+
+    const PLAINTEXT: &'static str = "The Quick";
+    const CIPHERTEXT: &'static str = "⠠⠞⠓⠑ ⠠⠟⠥⠊⠉⠅";
+
+    #[test]
+    #[ignore = "letter pairing test"]
+    fn letter_pairing() {
+        // println!("American");
+        // for c in AMERICAN_LETTERS.chars() {
+        //     println!("{} {}", c, AMERICAN_MAP.get_by_left(&c).unwrap())
+        // }
+        // println!("Unified English");
+        // for c in ENGLISH_LETTERS.chars() {
+        //     println!("{} {}", c, ENGLISH_MAP.get_by_left(&c).unwrap())
+        // }
+        // println!("French");
+        // for c in FRENCH_LETTERS.chars() {
+        //     println!("{} {}", c, FRENCH_MAP.get_by_left(&c).unwrap())
+        // }
+        println!("ASCII");
+        for c in ASCII_LETTERS.chars() {
+            println!("{} {}", c, ASCII_MAP.get_by_left(&c).unwrap())
+        }
+    }
+
+    #[test]
+    fn encode_test() {
+        let code = Braille::default();
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT);
+    }
+
+    #[test]
+    fn decode_test() {
+        let code = Braille::default();
+        assert_eq!(code.decode(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }
