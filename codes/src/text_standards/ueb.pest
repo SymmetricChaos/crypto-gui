@@ -1,0 +1,10 @@
+letter          =  { "⠁" | "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠊" | "⠚" | "⠅" | "⠇" | "⠍" | "⠝" | "⠕" | "⠏" | "⠟" | "⠗" | "⠎" | "⠞" | "⠥" | "⠧" | "⠺" | "⠭" | "⠽" | "⠵" }
+WHITESPACE      =  { " "+ }
+number_cell     =  { "⠁" | "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠊" | "⠚" }
+digit           = @{ "⠼" ~ number_cell }
+word            = @{ letter+ }
+capital_letter  = @{ "⠠" ~ letter }
+capital_word    =  { "⠠⠠" ~ word }
+capital_passage =  { "⠠⠠⠠" ~ word+ ~ "⠠⠄" }
+
+passage = { (capital_passage | capital_word | capital_letter | word | letter | digit)+ }
