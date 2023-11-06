@@ -39,6 +39,7 @@ mod base64_controls;
 mod base_n_controls;
 mod basex_controls;
 mod baudot_controls;
+mod biquinary_controls;
 mod block_controls;
 mod braille_controls;
 mod crc_controls;

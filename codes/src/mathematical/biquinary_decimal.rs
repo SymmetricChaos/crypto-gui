@@ -15,12 +15,57 @@ lazy_static! {
             .into_iter()
         )
     );
+    pub static ref BIQUINARY_MAP_INV_LOWER: BiMap<char, &'static str> = bimap_from_iter(
+        "0123456789".chars().zip(
+            [
+                "01-11110", "01-11101", "01-11011", "01-10111", "01-01111", "10-11110", "10-11101",
+                "10-11011", "10-10111", "10-01111"
+            ]
+            .into_iter()
+        )
+    );
 }
-pub struct BiquinaryDecimal {}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum BiQuinaryMode {
+    Normal,
+    InvertedLower,
+}
+
+impl BiQuinaryMode {
+    fn map(&self) -> &BiMap<char, &'static str> {
+        match self {
+            BiQuinaryMode::Normal => &BIQUINARY_MAP,
+            BiQuinaryMode::InvertedLower => &BIQUINARY_MAP_INV_LOWER,
+        }
+    }
+
+    fn encode(&self, c: char) -> Option<&'static str> {
+        self.map().get_by_left(&c).copied()
+    }
+
+    fn decode(&self, s: &str) -> Option<char> {
+        self.map().get_by_right(s).copied()
+    }
+}
+
+pub struct BiquinaryDecimal {
+    pub mode: BiQuinaryMode,
+}
 
 impl Default for BiquinaryDecimal {
     fn default() -> Self {
-        Self {}
+        Self {
+            mode: BiQuinaryMode::InvertedLower,
+        }
+    }
+}
+
+impl BiquinaryDecimal {
+    pub fn chars_codes(&self) -> impl Iterator<Item = (char, &str)> + '_ {
+        "0123456789"
+            .chars()
+            .map(|c| (c, self.mode.encode(c).unwrap()))
     }
 }
 
@@ -28,7 +73,7 @@ impl Code for BiquinaryDecimal {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::new();
         for c in text.chars() {
-            match BIQUINARY_MAP.get_by_left(&c) {
+            match self.mode.encode(c) {
                 Some(s) => {
                     out.push_str(s);
                 }
@@ -41,9 +86,9 @@ impl Code for BiquinaryDecimal {
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::new();
         for s in text.split(" ") {
-            match BIQUINARY_MAP.get_by_right(s) {
+            match self.mode.decode(s) {
                 Some(c) => {
-                    out.push(*c);
+                    out.push(c);
                 }
                 None => out.push_str(s),
             }
@@ -59,7 +104,7 @@ mod balanced_ternary_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "0 9 1 8 2";
-    const ENCODEDTEXT: &'static str = "01-00001 10-10000 01-00010 10-01000 01-00100";
+    const ENCODEDTEXT: &'static str = "01-11110 10-01111 01-11101 10-10111 01-11011";
 
     #[test]
     fn encode_test() {
