@@ -30,7 +30,7 @@ impl CodeFrame for BrailleFrame {
                     BrailleLanguage::American,
                     "American",
                 );
-                ui.selectable_value(&mut self.code.language, BrailleLanguage::American, "ASCII");
+                ui.selectable_value(&mut self.code.language, BrailleLanguage::Ascii, "ASCII");
             });
         });
 
