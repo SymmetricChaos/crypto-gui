@@ -11,7 +11,8 @@ use self::{
     ascii85_controls::Ascii85Frame, ascii_controls::AsciiFrame, bacon_contols::BaconFrame,
     balanced_ternary_controls::BalancedTernaryFrame, base16_controls::Base16Frame,
     base32_controls::Base32Frame, base64_controls::Base64Frame, base_n_controls::BaseNFrame,
-    basex_controls::BaseXFrame, baudot_controls::BaudotFrame, block_controls::BlockCodeFrame,
+    basex_controls::BaseXFrame, baudot_controls::BaudotFrame,
+    biquinary_controls::BiquinaryDecimalFrame, block_controls::BlockCodeFrame,
     braille_controls::BrailleFrame, crc_controls::CyclicRedundancyCheckFrame,
     damm_controls::DammFrame, elias_controls::EliasCodeFrame, factoradic_controls::FactoradicFrame,
     fibonacci_controls::FibonacciCodeFrame, godel_controls::GodelFrame,
@@ -154,6 +155,7 @@ pub struct CodeInterface {
     roman: RomanNumeralFrame,
     twos_complement: TwosComplementFrame,
     factoradic: FactoradicFrame,
+    biquinary: BiquinaryDecimalFrame,
 
     // Prefix
     fixed_width: BlockCodeFrame,
@@ -205,6 +207,7 @@ impl CodeInterface {
             &[
                 CodeId::BaseN,
                 CodeId::BalancedTernary,
+                CodeId::BiquinaryDecimal,
                 CodeId::Elias,
                 CodeId::Factoradic,
                 CodeId::Fibonacci,
@@ -277,6 +280,7 @@ impl CodeInterface {
             CodeId::Base32 => &mut self.base32,
             CodeId::Base64 => &mut self.base64,
             CodeId::Baudot => &mut self.baudot,
+            CodeId::BiquinaryDecimal => &mut self.biquinary,
             CodeId::Braille => &mut self.braille,
             CodeId::ByteAsNum => &mut self.numeric,
             CodeId::CyclicRedundancyCheck => &mut self.crc,

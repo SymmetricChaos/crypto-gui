@@ -36,7 +36,7 @@ impl Display for CodeCategory {
             CodeCategory::ErrorCorrecting => "Error Correcting",
             CodeCategory::Integer => "Integer",
             CodeCategory::TextStandard => "Text Standards",
-            CodeCategory::Commercial => "Commerial",
+            CodeCategory::Commercial => "Commercial",
             CodeCategory::Other => "Other",
             CodeCategory::Prefix => "Prefix",
         };

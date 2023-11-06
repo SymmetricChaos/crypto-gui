@@ -34,6 +34,13 @@ impl CodeFrame for BrailleFrame {
             });
         });
 
+        match self.code.language {
+            BrailleLanguage::English => ui.label("A partial implementation of Unified English Braille."),
+            BrailleLanguage::French => ui.label("Louis Braille's orginal encoding."),
+            BrailleLanguage::American => ui.label("American Braille is a now obsolete Braille encoding that rearranged some characters so that frequently used ones required fewer dots to ease writing by hand."),
+            BrailleLanguage::Ascii => ui.label("Braille ASCII is a strict one-to-one encoding from a range of ASCII characters to the 64 possible braille characters. This encoding it not meant to be used directly as there is no particular meaningful correspondence between the ASCII symbols and the Braille symbols. Instead it is a standard for alternative fonts."),
+        };
+
         ui.add_space(16.0);
         ui.fill_code_columns(10, 6, Box::new(self.code.language.chars_codes()));
         ui.add_space(32.0)
