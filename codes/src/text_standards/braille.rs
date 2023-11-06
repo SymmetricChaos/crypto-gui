@@ -4,7 +4,8 @@ use utils::text_functions::bimap_from_iter;
 
 use crate::{errors::CodeError, traits::Code};
 
-const ASCII_LETTERS: &'static str = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_";
+const ASCII_LETTERS: &'static str =
+    " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_";
 const ASCII_BRAILLE: &'static str =
     " ⠮⠐⠼⠫⠩⠯⠄⠷⠾⠡⠬⠠⠤⠨⠌⠴⠂⠆⠒⠲⠢⠖⠶⠦⠔⠱⠰⠣⠿⠜⠹⠈⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠺⠭⠽⠵⠪⠳⠻⠘⠸";
 const AMERICAN_LETTERS: &'static str = "abcdefghijklmnopqrstuvwxyz!'-,;:?\"";
@@ -39,6 +40,7 @@ pub enum BrailleLanguage {
     English,
     French,
     American,
+    Ascii,
 }
 
 impl BrailleLanguage {
@@ -51,6 +53,7 @@ impl BrailleLanguage {
                     .zip(FRENCH_LETTERS.chars())
             }
             Self::American => AMERICAN_BRAILLE.chars().zip(AMERICAN_LETTERS.chars()),
+            Self::Ascii => ASCII_BRAILLE.chars().zip(ASCII_LETTERS.chars()),
         }
     }
 
@@ -59,6 +62,7 @@ impl BrailleLanguage {
             Self::English => ENGLISH_MAP.get_by_left(&c),
             Self::French => FRENCH_MAP.get_by_left(&c),
             Self::American => AMERICAN_MAP.get_by_left(&c),
+            Self::Ascii => ASCII_MAP.get_by_left(&c),
         }
     }
 
@@ -67,6 +71,7 @@ impl BrailleLanguage {
             Self::English => ENGLISH_MAP.get_by_right(&c),
             Self::French => FRENCH_MAP.get_by_right(&c),
             Self::American => AMERICAN_MAP.get_by_right(&c),
+            Self::Ascii => ASCII_MAP.get_by_right(&c),
         }
     }
 
@@ -75,6 +80,7 @@ impl BrailleLanguage {
             Self::English => Some('⠠'),
             Self::French => Some('⠨'),
             Self::American => Some('⠤'),
+            Self::Ascii => Some('⠠'),
         }
     }
 
@@ -83,6 +89,7 @@ impl BrailleLanguage {
             Self::English => Some('⠼'),
             Self::French => Some('⠼'),
             Self::American => None,
+            Self::Ascii => Some('⠼'),
         }
     }
 }
