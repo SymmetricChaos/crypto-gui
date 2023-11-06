@@ -144,7 +144,7 @@ impl Code for Braille {
                 out.push(
                     self.language
                         .capital_sign()
-                        .expect("all version current have a capital sign"),
+                        .expect("all versions currently have a capital sign"),
                 );
                 for code_point in c.to_lowercase().into_iter() {
                     out.push(

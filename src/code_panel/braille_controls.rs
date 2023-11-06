@@ -42,7 +42,7 @@ impl CodeFrame for BrailleFrame {
         };
 
         ui.add_space(16.0);
-        ui.fill_code_columns(10, 6, Box::new(self.code.language.chars_codes()));
+        ui.fill_code_columns(8, 8, Box::new(self.code.language.chars_codes()));
         ui.add_space(32.0)
     }
 
