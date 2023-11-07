@@ -46,14 +46,14 @@ pub enum BrailleLanguage {
 impl BrailleLanguage {
     pub fn chars_codes(&self) -> std::iter::Zip<std::str::Chars<'_>, std::str::Chars<'_>> {
         match self {
-            Self::English => ENGLISH_BRAILLE.chars().zip(ENGLISH_LETTERS.chars()),
+            Self::English => ENGLISH_LETTERS.chars().zip(ENGLISH_BRAILLE.chars()),
             Self::French => {
-                FRENCH_BRAILLE // These are all normalized single character symbols so .chars() can be used
+                FRENCH_LETTERS // These are all normalized single character symbols so .chars() can be used
                     .chars()
-                    .zip(FRENCH_LETTERS.chars())
+                    .zip(FRENCH_BRAILLE.chars())
             }
-            Self::American => AMERICAN_BRAILLE.chars().zip(AMERICAN_LETTERS.chars()),
-            Self::Ascii => ASCII_BRAILLE.chars().zip(ASCII_LETTERS.chars()),
+            Self::American => AMERICAN_LETTERS.chars().zip(AMERICAN_BRAILLE.chars()),
+            Self::Ascii => ASCII_LETTERS.chars().zip(ASCII_BRAILLE.chars()),
         }
     }
 
@@ -132,94 +132,128 @@ impl Default for Braille {
 impl Code for Braille {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::new();
-        for c in text.chars() {
-            // Ignore whitespace
-            if c.is_whitespace() {
-                out.push(c);
-                continue;
-            }
-
-            // Handle uppercase by prepending capital
-            if c.is_uppercase() {
-                out.push(
-                    self.language
-                        .capital_sign()
-                        .expect("all versions currently have a capital sign"),
-                );
-                for code_point in c.to_lowercase().into_iter() {
-                    out.push(
-                        *self
-                            .language
-                            .encode(code_point)
-                            .ok_or_else(|| CodeError::invalid_input_char(code_point))?,
-                    )
+        // Braille ASCII is a strict 1:1 coding of a range of ASCII values
+        if self.language == BrailleLanguage::Ascii {
+            for c in text.chars() {
+                if c.is_whitespace() {
+                    out.push(c);
+                    continue;
                 }
-                continue;
-            }
-
-            // Handle numbers by prepending the numeric sign and converting to a character
-            if c.is_ascii_digit() {
-                out.push(self.language.number_sign().ok_or_else(|| {
-                    CodeError::state("numeric characters are not handled in this encoding")
-                })?);
                 out.push(
-                    self.language
-                        .encode_number(c)
-                        .expect("all chars other than ascii digits already caught"),
+                    *self
+                        .language
+                        .encode(c)
+                        .ok_or_else(|| CodeError::invalid_input_char(c))?,
                 );
-                continue;
             }
+        } else {
+            for c in text.chars() {
+                // Ignore whitespace
+                if c.is_whitespace() {
+                    out.push(c);
+                    continue;
+                }
 
-            out.push(
-                *self
-                    .language
-                    .encode(c)
-                    .ok_or_else(|| CodeError::invalid_input_char(c))?,
-            )
+                // Handle uppercase by prepending capital
+                if c.is_uppercase() {
+                    out.push(
+                        self.language
+                            .capital_sign()
+                            .expect("all versions currently have a capital sign"),
+                    );
+                    for code_point in c.to_lowercase().into_iter() {
+                        out.push(
+                            *self
+                                .language
+                                .encode(code_point)
+                                .ok_or_else(|| CodeError::invalid_input_char(code_point))?,
+                        )
+                    }
+                    continue;
+                }
+
+                // Handle numbers by prepending the numeric sign and converting to a character
+                if c.is_ascii_digit() {
+                    out.push(self.language.number_sign().ok_or_else(|| {
+                        CodeError::state("numeric characters are not handled in this encoding")
+                    })?);
+                    out.push(
+                        self.language
+                            .encode_number(c)
+                            .expect("all chars other than ascii digits already caught"),
+                    );
+                    continue;
+                }
+
+                out.push(
+                    *self
+                        .language
+                        .encode(c)
+                        .ok_or_else(|| CodeError::invalid_input_char(c))?,
+                )
+            }
         }
+
         Ok(out)
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::new();
-        let mut mode = BrailleMode::Letter;
-        for c in text.chars() {
-            // Skip whitespace
-            if c.is_whitespace() {
-                out.push(c);
-                continue;
-            }
-            // Detect the capital or number sign
-            if Some(c) == self.language.capital_sign() {
-                mode = BrailleMode::Capital;
-                continue;
-            }
-            if Some(c) == self.language.number_sign() {
-                mode = BrailleMode::Numeric;
-                continue;
-            }
-            let x = self
-                .language
-                .decode(c)
-                .ok_or_else(|| CodeError::invalid_input_char(c))?;
 
-            match mode {
-                BrailleMode::Letter => out.push(*x),
-                BrailleMode::Numeric => {
-                    if c.is_ascii_digit() {
-                        out.push(((c as u32) - 49) as u8 as char)
-                    } else {
-                        return Err(CodeError::Input(format!(
-                            "character `{}` encountered in numeric mode, where it has no meaning",
-                            c
-                        )));
-                    }
+        if self.language == BrailleLanguage::Ascii {
+            for c in text.chars() {
+                if c.is_whitespace() {
+                    out.push(c);
+                    continue;
                 }
-                BrailleMode::Capital => out.push_str(&x.to_uppercase().collect::<String>()),
+                out.push(
+                    *self
+                        .language
+                        .decode(c)
+                        .ok_or_else(|| CodeError::invalid_input_char(c))?,
+                );
             }
+        } else {
+            let mut mode = BrailleMode::Letter;
+            for c in text.chars() {
+                // Skip whitespace
+                if c.is_whitespace() {
+                    out.push(c);
+                    continue;
+                }
+                // Detect the capital or number sign
+                if Some(c) == self.language.capital_sign() {
+                    mode = BrailleMode::Capital;
+                    continue;
+                }
+                if Some(c) == self.language.number_sign() {
+                    mode = BrailleMode::Numeric;
+                    continue;
+                }
+                let x = self
+                    .language
+                    .decode(c)
+                    .ok_or_else(|| CodeError::invalid_input_char(c))?;
 
-            mode = BrailleMode::Letter;
+                match mode {
+                    BrailleMode::Letter => out.push(*x),
+                    BrailleMode::Numeric => {
+                        if c.is_ascii_digit() {
+                            out.push(((c as u32) - 49) as u8 as char)
+                        } else {
+                            return Err(CodeError::Input(format!(
+                                "character `{}` encountered in numeric mode, where it has no meaning",
+                                c
+                            )));
+                        }
+                    }
+                    BrailleMode::Capital => out.push_str(&x.to_uppercase().collect::<String>()),
+                }
+
+                mode = BrailleMode::Letter;
+            }
         }
+
         Ok(out)
     }
 }
