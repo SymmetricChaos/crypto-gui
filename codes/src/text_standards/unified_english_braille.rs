@@ -1,9 +1,9 @@
+use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use lazy_static::lazy_static;
 use utils::text_functions::bimap_from_iter;
 
-use crate::{errors::CodeError, traits::Code};
-
+// The 64 possible Braille cells as organized by UEB specification, excluding the space
 pub const LINE1: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚";
 pub const LINE2: &'static str = "⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞";
 pub const LINE3: &'static str = "⠥⠧⠭⠽⠵⠯⠿⠷⠮⠾";
@@ -13,6 +13,9 @@ pub const LINE6: &'static str = "⠌⠬⠼⠜⠄⠤";
 pub const LINE7: &'static str = "⠈⠘⠸⠐⠨⠰⠠";
 
 pub const BRAILLE_ORDER: [&'static str; 7] = [LINE1, LINE2, LINE3, LINE4, LINE5, LINE6, LINE7];
+
+// These eight characters are the UEB prefixes. All others characters are called roots as is the space.
+const PREFIXES: &'static str = "⠼⠈⠘⠸⠐⠨⠰⠠";
 
 pub enum UebMode {
     Shape,
@@ -154,7 +157,7 @@ impl UebIndicator {
     }
 }
 
-// const SYMBOLS_ENGLISH [&'static str; 20] = [
+// const SYMBOLS_LATIN [&'static str; 20] = [
 //     "→", "↓", "←",
 // ]
 
@@ -165,6 +168,68 @@ impl UebIndicator {
 const LETTERS_LATIN: &'static str = "abcdefghijklmnopqrstuvwxyz";
 const LETTERS_BRAILLE: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠺⠭⠽⠵";
 
+const SYMBOLS_LATIN: &'static str = "→↓←↑∶∷′″♮♭♯@¢€₣£₦$¥&<^~>†‡©°¶®§™♀♂#•〃+=×*÷-%";
+const SYMBOLS_BRAILLE: &[&'static str] = &[
+    "⠳⠕",
+    "⠳⠩",
+    "⠳⠪",
+    "⠳⠬",
+    "⠒",
+    "⠒⠒",
+    "⠶",
+    "⠶⠶",
+    "⠼⠡",
+    "⠼⠣",
+    "⠼⠩",
+    "⠈⠁",
+    "⠈⠉",
+    "⠈⠑",
+    "⠈⠋",
+    "⠈⠇",
+    "⠈⠝",
+    "⠈⠎",
+    "⠈⠽",
+    "⠈⠯",
+    "⠈⠣",
+    "⠈⠢",
+    "⠈⠔",
+    "⠈⠜",
+    "⠈⠠⠹",
+    "⠈⠠⠻",
+    "⠘⠉",
+    "⠘⠚",
+    "⠘⠏",
+    "⠘⠗",
+    "⠘⠎",
+    "⠘⠞",
+    "⠘⠭",
+    "⠘⠽",
+    "⠸⠹",
+    "⠸⠲",
+    "⠐⠂",
+    "⠐⠖",
+    "⠐⠶",
+    "⠐⠦",
+    "⠐⠔",
+    "⠐⠌",
+    "⠐⠤",
+    "⠨⠴",
+];
+
+#[cfg(test)]
+mod ueb_pairing_tests {
+    use super::*;
+
+    #[test]
+    #[ignore = "letter pairing test"]
+    fn letter_pairing() {
+        println!("Symbols");
+        for (a, b) in SYMBOLS_LATIN.chars().zip(SYMBOLS_BRAILLE.into_iter()) {
+            println!("{} {}", a, b)
+        }
+    }
+}
+
 lazy_static! {
     pub static ref LETTER_MAP: BiMap<char, char> =
         bimap_from_iter(LETTERS_LATIN.chars().zip(LETTERS_BRAILLE.chars()));
@@ -174,6 +239,11 @@ lazy_static! {
         UebIndicator::LATIN
             .into_iter()
             .zip(UebIndicator::BRAILLE.into_iter())
+    );
+    pub static ref SYMBOL_MAP: BiMap<char, &'static str> = bimap_from_iter(
+        SYMBOLS_LATIN
+            .chars()
+            .zip(SYMBOLS_BRAILLE.into_iter().copied())
     );
 }
 
