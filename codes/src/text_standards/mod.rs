@@ -10,3 +10,4 @@ pub mod spelling_alphabet;
 pub mod unicode;
 pub mod unified_english_braille;
 pub mod unified_english_braille_parser;
+pub mod braille_ascii;

@@ -13,8 +13,9 @@ use self::{
     base32_controls::Base32Frame, base64_controls::Base64Frame, base_n_controls::BaseNFrame,
     basex_controls::BaseXFrame, baudot_controls::BaudotFrame,
     biquinary_controls::BiquinaryDecimalFrame, block_controls::BlockCodeFrame,
-    braille_controls::BrailleFrame, crc_controls::CyclicRedundancyCheckFrame,
-    damm_controls::DammFrame, elias_controls::EliasCodeFrame, factoradic_controls::FactoradicFrame,
+    braille_ascii_controls::BrailleAsciiFrame, braille_controls::BrailleFrame,
+    crc_controls::CyclicRedundancyCheckFrame, damm_controls::DammFrame,
+    elias_controls::EliasCodeFrame, factoradic_controls::FactoradicFrame,
     fibonacci_controls::FibonacciCodeFrame, godel_controls::GodelFrame,
     gray_controls::GrayCodeFrame, hamming_controls::HammingFrame, isbn_contols::IsbnFrame,
     itf_controls::ItfFrame, levenshtein_controls::LevenshteinCodeFrame,
@@ -42,6 +43,7 @@ mod basex_controls;
 mod baudot_controls;
 mod biquinary_controls;
 mod block_controls;
+mod braille_ascii_controls;
 mod braille_controls;
 mod crc_controls;
 mod damm_controls;
@@ -114,6 +116,7 @@ pub struct CodeInterface {
     ascii: AsciiFrame,
     baudot: BaudotFrame,
     braille: BrailleFrame,
+    braille_ascii: BrailleAsciiFrame,
     linotype: LinotypeFrame,
     morse: MorseFrame,
     needle: NeedleFrame,
@@ -177,6 +180,7 @@ impl CodeInterface {
                 CodeId::Ascii,
                 CodeId::Baudot,
                 CodeId::Braille,
+                CodeId::BrailleAscii,
                 CodeId::Linotype,
                 CodeId::Morse,
                 CodeId::Needle,
@@ -282,6 +286,7 @@ impl CodeInterface {
             CodeId::Baudot => &mut self.baudot,
             CodeId::BiquinaryDecimal => &mut self.biquinary,
             CodeId::Braille => &mut self.braille,
+            CodeId::BrailleAscii => &mut self.braille_ascii,
             CodeId::ByteAsNum => &mut self.numeric,
             CodeId::CyclicRedundancyCheck => &mut self.crc,
             CodeId::Damm => &mut self.damm,
