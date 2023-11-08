@@ -37,7 +37,7 @@ mod ueb_parser_tests {
     }
 
     //Étienne háček Im Frühling
-    const TEXT: &'static str = "⠠⠘⠌⠑⠞⠊⠝⠝⠑ ⠓⠘⠌⠁⠘⠬⠉⠑⠅ ⠠⠊⠍ ⠠⠋⠗⠘⠒⠥⠓⠇⠬";
+    const TEXT: &'static str = "⠠⠘⠌⠑⠞⠊⠑⠝⠝⠑⠀⠓⠘⠌⠁⠘⠬⠉⠑⠅⠀⠠⠊⠍⠀⠠⠋⠗⠘⠒⠥⠓⠇⠊⠝⠛";
 
     #[test]
     #[ignore = "parsing experiment"]

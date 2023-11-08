@@ -3,6 +3,7 @@ use lazy_static::lazy_static;
 use utils::text_functions::bimap_from_iter;
 
 // The 64 possible Braille cells as organized by UEB specification, excluding the space
+// Unicode Braille space: "⠀" <- right there
 pub const LINE1: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚";
 pub const LINE2: &'static str = "⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞";
 pub const LINE3: &'static str = "⠥⠧⠭⠽⠵⠯⠿⠷⠮⠾";
