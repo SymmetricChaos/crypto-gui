@@ -1,10 +1,11 @@
-letter          =  { "⠁" | "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠊" | "⠚" | "⠅" | "⠇" | "⠍" | "⠝" | "⠕" | "⠏" | "⠟" | "⠗" | "⠎" | "⠞" | "⠥" | "⠧" | "⠺" | "⠭" | "⠽" | "⠵" }
 WHITESPACE      =  { " "+ }
-number_cell     =  { "⠁" | "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠊" | "⠚" }
-digit           = @{ "⠼" ~ number_cell }
-word            = @{ letter+ }
-capital_letter  = @{ "⠠" ~ letter }
-capital_word    =  { "⠠⠠" ~ word }
-capital_passage =  { "⠠⠠⠠" ~ word+ ~ "⠠⠄" }
+basic_letter    =  { "⠁" | "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠊" | "⠚" | "⠅" | "⠇" | "⠍" | "⠝" | "⠕" | "⠏" | "⠟" | "⠗" | "⠎" | "⠞" | "⠥" | "⠧" | "⠺" | "⠭" | "⠽" | "⠵" }
+capitalize      =  { "⠠" }
+other_modifier  =  { "⠈⠡" | "⠈⠒" | "⠈⠬" | "⠈⠤" | "⠘⠯" | "⠘⠡" | "⠘⠩" | "⠘⠫" | "⠘⠻" | "⠘⠒" | "⠘⠌" | "⠘⠬" }
+modifier        =  { capitalize | other_modifier }
+letter          = ${ modifier* ~ basic_letter }
+letter_sequence = ${ letter+ }
+// capitalized_sequence = { "⠠⠠" ~ letter_sequence }
+// capitalized_passage  = { "⠠⠠⠠" ~ letter_sequence+ ~ "⠠⠄" }
 
-passage = { (capital_passage | capital_word | capital_letter | word | letter | digit)+ }
+passage = { letter_sequence ~ (WHITESPACE? ~ letter_sequence)* }
