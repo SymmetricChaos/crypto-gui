@@ -17,6 +17,40 @@ pub const BRAILLE_ORDER: [&'static str; 7] = [LINE1, LINE2, LINE3, LINE4, LINE5,
 // These eight characters are the UEB prefixes. All others characters are called roots as is the space.
 const PREFIXES: &'static str = "⠼⠈⠘⠸⠐⠨⠰⠠";
 
+pub enum LetterModifier {
+    Soldius,
+    HorizontalStroke,
+    Breve,
+    Macron,
+    Cedilla,
+    GraveAccent,
+    Circumflex,
+    Ring,
+    Tilde,
+    Diaeresis,
+    AcuteAccent,
+    Caron,
+}
+
+impl LetterModifier {
+    pub fn to_symbol(&self) -> char {
+        match self {
+            Self::Soldius => '̸',
+            Self::HorizontalStroke => '̶',
+            Self::Breve => '̆',
+            Self::Macron => '̄',
+            Self::Cedilla => '̧',
+            Self::GraveAccent => '̀',
+            Self::Circumflex => '̂',
+            Self::Ring => '̊',
+            Self::Tilde => '̃',
+            Self::Diaeresis => '̈',
+            Self::AcuteAccent => '́',
+            Self::Caron => '̌',
+        }
+    }
+}
+
 pub enum UebMode {
     Shape,
     Arrow,

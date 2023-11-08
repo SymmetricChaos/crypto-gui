@@ -4,8 +4,8 @@ basic_letter    =  { "⠁" | "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "�
 capitalize      =  { "⠠" }
 other_modifier  =  { "⠈⠡" | "⠈⠒" | "⠈⠬" | "⠈⠤" | "⠘⠯" | "⠘⠡" | "⠘⠩" | "⠘⠫" | "⠘⠻" | "⠘⠒" | "⠘⠌" | "⠘⠬" }
 modifier        =  { capitalize | other_modifier }
-letter          = ${ modifier* ~ basic_letter }
-letter_sequence = ${ letter+ }
+letter          = ${ capitalize? ~ other_modifier? ~ basic_letter }
+letter_sequence = ${ (basic_letter | letter)+ }
 // capitalized_sequence = { "⠠⠠" ~ letter_sequence }
 // capitalized_passage  = { "⠠⠠⠠" ~ letter_sequence+ ~ "⠠⠄" }
 
