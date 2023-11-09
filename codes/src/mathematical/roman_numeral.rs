@@ -22,6 +22,7 @@ lazy_static! {
 pub struct RomanNumeral {
     pub maps: LetterWordIntCode,
     pub mode: IOMode,
+    // pub apostrophus: bool,
 }
 
 impl Default for RomanNumeral {

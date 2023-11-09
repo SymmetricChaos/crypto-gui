@@ -1,11 +1,13 @@
 WHITESPACE      =  { (" " | "⠀")+ }
 // braille_cell    =  { "⠁" | "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠊" | "⠚" | "⠅" | "⠇" | "⠍" | "⠝" | "⠕" | "⠏" | "⠟" | "⠗" | "⠎" | "⠞" | "⠥" | "⠧" | "⠭" | "⠽" | "⠵" | "⠯" | "⠿" | "⠷" | "⠮" | "⠾" | "⠡" | "⠣" | "⠩" | "⠹" | "⠱" | "⠫" | "⠻" | "⠳" | "⠪" | "⠺" | "⠂" | "⠆" | "⠒" | "⠲" | "⠢" | "⠖" | "⠶" | "⠦" | "⠔" | "⠴" | "⠌" | "⠬" | "⠼" | "⠜" | "⠄" | "⠤" | "⠈" | "⠘" | "⠸" | "⠐" | "⠨" | "⠰" | "⠠"}
+prefix          =  {"⠼" | "⠈" | "⠘" | "⠸" | "⠐" | "⠨" | "⠰" | "⠠" }
 basic_letter    =  { "⠁" | "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠊" | "⠚" | "⠅" | "⠇" | "⠍" | "⠝" | "⠕" | "⠏" | "⠟" | "⠗" | "⠎" | "⠞" | "⠥" | "⠧" | "⠺" | "⠭" | "⠽" | "⠵" }
 capitalize      =  { "⠠" }
-other_modifier  =  { "⠈⠡" | "⠈⠒" | "⠈⠬" | "⠈⠤" | "⠘⠯" | "⠘⠡" | "⠘⠩" | "⠘⠫" | "⠘⠻" | "⠘⠒" | "⠘⠌" | "⠘⠬" }
-modifier        =  { capitalize | other_modifier }
-letter          = ${ capitalize? ~ other_modifier? ~ basic_letter }
-letter_sequence = ${ (basic_letter | letter)+ }
+greek           =  { "⠨" }
+diacritic       =  { "⠈⠡" | "⠈⠒" | "⠈⠬" | "⠈⠤" | "⠘⠯" | "⠘⠡" | "⠘⠩" | "⠘⠫" | "⠘⠻" | "⠘⠒" | "⠘⠌" | "⠘⠬" }
+modifier        =  { capitalize | greek | diacritic }
+letter          = @{ capitalize? ~ (diacritic|greek)? ~ basic_letter }
+letter_sequence = ${ letter+ }
 // capitalized_sequence = { "⠠⠠" ~ letter_sequence }
 // capitalized_passage  = { "⠠⠠⠠" ~ letter_sequence+ ~ "⠠⠄" }
 
