@@ -11,7 +11,7 @@ use crate::text_standards::unified_english_braille_maps::{
 use pest::iterators::{Pair, Pairs};
 use unicode_normalization::UnicodeNormalization;
 
-use super::unified_english_braille_maps::NUMERIC_MAP;
+use super::unified_english_braille_maps::{NUMERIC_MAP, SYMBOL_MAP};
 pub fn descend(pairs: Pairs<'_, Rule>, space: String) {
     for pair in pairs.into_iter() {
         let mut space = space.clone();
@@ -23,7 +23,7 @@ pub fn descend(pairs: Pairs<'_, Rule>, space: String) {
             Rule::number => println!("{space}letter({})", pair.as_str()),
             Rule::letter => println!("{space}letter({})", pair.as_str()),
             Rule::character => println!("{space}character({})", pair.as_str()),
-            Rule::number => println!("{space}number({})", pair.as_str()),
+            Rule::symbol => println!("{space}symbol({})", pair.as_str()),
             Rule::numeric_symbols => println!("{space}numeric_symbols({})", pair.as_str()),
             Rule::punctuation => println!("{space}punctuation({})", pair.as_str()),
             Rule::passage => println!("{space}passage({})", pair.as_str()),
@@ -58,7 +58,8 @@ pub fn decode_character(pairs: Pairs<'_, Rule>, string: &mut String) {
             Rule::letter => decode_letter(pair.into_inner(), string),
             Rule::punctuation => string.push(*PUNCTUATION_MAP.get_by_right(pair.as_str()).unwrap()),
             Rule::number => decode_number(pair.into_inner(), string),
-            _ => unreachable!("characters are only: letter, number and punctuation"),
+            Rule::symbol => string.push_str(SYMBOL_MAP.get_by_right(pair.as_str()).unwrap()),
+            _ => unreachable!("characters are only: letter, number, symbol and punctuation"),
         }
     }
 }
@@ -122,9 +123,9 @@ pub fn decode_letter(pairs: Pairs<'_, Rule>, string: &mut String) {
 mod ueb_parser_tests {
 
     use super::*;
-    const TEXT: &'static str = "Étienne! 123 háček 9 Im-Frühling Ω σ 7:30 a.m.";
+    const TEXT: &'static str = "Étienne! 123 háček 9 Im-Frühling Ω σ 7:30 a.m. 1 € = 6.55957₣";
     const BRAILLE: &'static str =
-        "⠠⠘⠌⠑⠞⠊⠑⠝⠝⠑⠖ ⠼⠁⠃⠉⠀⠓⠘⠌⠁⠘⠬⠉⠑⠅ ⠼⠊⠀⠠⠊⠍⠤⠠⠋⠗⠘⠒⠥⠓⠇⠊⠝⠛ ⠠⠨⠺ ⠨⠎ ⠼⠛⠒⠼⠉⠚ ⠁⠲⠍⠲";
+        "⠠⠘⠌⠑⠞⠊⠑⠝⠝⠑⠖ ⠼⠁⠃⠉⠀⠓⠘⠌⠁⠘⠬⠉⠑⠅ ⠼⠊⠀⠠⠊⠍⠤⠠⠋⠗⠘⠒⠥⠓⠇⠊⠝⠛ ⠠⠨⠺ ⠨⠎ ⠼⠛⠒⠼⠉⠚ ⠁⠲⠍⠲ ⠼⠁ ⠈⠑ ⠐⠶ ⠼⠋⠲⠑⠑⠊⠑⠛⠈⠋";
 
     use pest::Parser;
 

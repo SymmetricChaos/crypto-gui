@@ -30,8 +30,12 @@ const GREEK_BRAILLE: [&'static str; 24] = [
     "⠥", "⠋", "⠯", "⠽", "⠺",
 ];
 
-const SYMBOLS: &'static str = "→↓←↑∶∷′″♮♭♯@¢€₣£₦$¥&<^~>†‡©°¶®§™♀♂#•〃+=×*÷-%";
-const SYMBOLS_BRAILLE: &[&'static str] = &[
+const SYMBOLS: [&'static str; 44] = [
+    "→", "↓", "←", "↑", "∶", "∷", "′", "″", "♮", "♭", "♯", "@", "¢", "€", "₣", "£", "₦", "$", "¥",
+    "&", "<", "^", "~", ">", "†", "‡", "©", "°", "¶", "®", "§", "™", "♀", "♂", "#", "•", "〃", "+",
+    "=", "×", "*", "÷", "-", "%",
+];
+const SYMBOLS_BRAILLE: [&'static str; 44] = [
     "⠳⠕",
     "⠳⠩",
     "⠳⠪",
@@ -117,15 +121,20 @@ const PUNCTUATION_BRAILLE: &[&'static str] = &[
     "⠨⠤",
 ];
 
-const NUMERIC: [&'static str; 12] = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ",", "."];
-const NUMERIC_BRAILLE: [&'static str; 12] =
-    ["⠁", "⠃", "⠉", "⠙", "⠑", "⠋", "⠛", "⠓", "⠊", "⠚", "⠂", "⠲"];
+const NUMERIC: [&'static str; 23] = [
+    "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ",", ".", " 1", " 2", " 3", " 4", " 5", " 6",
+    " 7", " 8", " 9", " 0", "/",
+];
+const NUMERIC_BRAILLE: [&'static str; 23] = [
+    "⠁", "⠃", "⠉", "⠙", "⠑", "⠋", "⠛", "⠓", "⠊", "⠚", "⠂", "⠲", "⠐⠁", "⠐⠃", "⠐⠉", "⠐⠙", "⠐⠑", "⠐⠋",
+    "⠐⠛", "⠐⠓", "⠐⠊", "⠐⠚", "⠌",
+];
 
 lazy_static! {
     pub static ref LETTER_MAP: BiMap<char, char> =
         bimap_from_iter(LETTERS.chars().zip(LETTERS_BRAILLE.chars()));
-    pub static ref SYMBOL_MAP: BiMap<char, &'static str> =
-        bimap_from_iter(SYMBOLS.chars().zip(SYMBOLS_BRAILLE.into_iter().copied()));
+    pub static ref SYMBOL_MAP: BiMap<&'static str, &'static str> =
+        bimap_from_iter(SYMBOLS.into_iter().zip(SYMBOLS_BRAILLE.into_iter()));
     pub static ref PUNCTUATION_MAP: BiMap<char, &'static str> = bimap_from_iter(
         PUNCTUATION
             .chars()
@@ -151,7 +160,7 @@ mod ueb_pairing_tests {
     #[ignore = "symbol pairing test"]
     fn symbols() {
         println!("Symbols");
-        for (a, b) in SYMBOLS.chars().zip(SYMBOLS_BRAILLE.into_iter()) {
+        for (a, b) in SYMBOLS.into_iter().zip(SYMBOLS_BRAILLE.into_iter()) {
             println!("{} {}", a, b)
         }
     }
