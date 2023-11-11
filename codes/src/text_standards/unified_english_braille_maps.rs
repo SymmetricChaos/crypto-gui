@@ -194,6 +194,16 @@ impl UebIndicator {
 const LETTERS: &'static str = "abcdefghijklmnopqrstuvwxyz";
 const LETTERS_BRAILLE: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠺⠭⠽⠵";
 
+const GREEK: [&'static str; 24] = [
+    "α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ", "ν", "ξ", "ο", "π", "ρ", "σ", "τ",
+    "υ", "φ", "χ", "ψ", "ω",
+];
+// Preceeded by ⠨ prefix
+const GREEK_BRAILLE: [&'static str; 24] = [
+    "⠁", "⠃", "⠛", "⠙", "⠑", "⠵", "⠱", "⠹", "⠊", "⠅", "⠇", "⠍", "⠝", "⠭", "⠕", "⠏", "⠗", "⠎", "⠞",
+    "⠥", "⠋", "⠯", "⠽", "⠺",
+];
+
 const SYMBOLS: &'static str = "→↓←↑∶∷′″♮♭♯@¢€₣£₦$¥&<^~>†‡©°¶®§™♀♂#•〃+=×*÷-%";
 const SYMBOLS_BRAILLE: &[&'static str] = &[
     "⠳⠕",
@@ -242,8 +252,8 @@ const SYMBOLS_BRAILLE: &[&'static str] = &[
     "⠨⠴",
 ];
 
-const LETTER_MODIFIDERS: &[&'static str] = &["̸", "̶", "̆", "̄", "̧", "̀", "̂", "̊", "̃", "̈", "́", "̌"];
-const LETTER_MODIFIDERS_BRAILLE: &[&'static str] = &[
+const DIACRITIC: &[&'static str] = &["̸", "̶", "̆", "̄", "̧", "̀", "̂", "̊", "̃", "̈", "́", "̌"];
+const DIACRITIC_BRAILLE: &[&'static str] = &[
     "⠈⠡", "⠈⠒", "⠈⠬", "⠈⠤", "⠘⠯", "⠘⠡", "⠘⠩", "⠘⠫", "⠘⠻", "⠘⠒", "⠘⠌", "⠘⠬",
 ];
 
@@ -298,12 +308,14 @@ lazy_static! {
             .chars()
             .zip(PUNCTUATION_BRAILLE.into_iter().copied())
     );
-    pub static ref LETTER_MODIFER_MAP: BiMap<&'static str, &'static str> = bimap_from_iter(
-        LETTER_MODIFIDERS
+    pub static ref DIACRITIC_MAP: BiMap<&'static str, &'static str> = bimap_from_iter(
+        DIACRITIC
             .into_iter()
             .copied()
-            .zip(LETTER_MODIFIDERS_BRAILLE.into_iter().copied())
+            .zip(DIACRITIC_BRAILLE.into_iter().copied())
     );
+    pub static ref GREEK_MAP: BiMap<&'static str, &'static str> =
+        bimap_from_iter(GREEK.into_iter().zip(GREEK_BRAILLE.into_iter()));
 }
 
 #[cfg(test)]
@@ -341,10 +353,7 @@ mod ueb_pairing_tests {
     #[ignore = "letter modifier pairing test"]
     fn letter_modifiers() {
         println!("Letter Modifiers");
-        for (a, b) in LETTER_MODIFIDERS
-            .into_iter()
-            .zip(LETTER_MODIFIDERS_BRAILLE.into_iter())
-        {
+        for (a, b) in DIACRITIC.into_iter().zip(DIACRITIC_BRAILLE.into_iter()) {
             println!("{} {}", a, b)
         }
     }
