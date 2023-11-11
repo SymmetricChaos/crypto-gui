@@ -17,17 +17,15 @@ pub const BRAILLE_ORDER: [&'static str; 7] = [LINE1, LINE2, LINE3, LINE4, LINE5,
 // These eight characters are the UEB prefixes. All others characters are called roots as is the space.
 pub const PREFIXES: &'static str = "⠼⠈⠘⠸⠐⠨⠰⠠";
 
-const LETTERS: &'static str = "abcdefghijklmnopqrstuvwxyz";
-const LETTERS_BRAILLE: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠺⠭⠽⠵";
-
-const GREEK: [&'static str; 24] = [
-    "α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ", "ν", "ξ", "ο", "π", "ρ", "σ", "τ",
-    "υ", "φ", "χ", "ψ", "ω",
+const LETTERS: [&'static str; 52] = [
+    "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s",
+    "t", "u", "v", "w", "x", "y", "z", "ŋ", "ə", "α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ",
+    "λ", "μ", "ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "χ", "ψ", "ω",
 ];
-// Preceeded by ⠨ prefix
-const GREEK_BRAILLE: [&'static str; 24] = [
-    "⠁", "⠃", "⠛", "⠙", "⠑", "⠵", "⠱", "⠹", "⠊", "⠅", "⠇", "⠍", "⠝", "⠭", "⠕", "⠏", "⠗", "⠎", "⠞",
-    "⠥", "⠋", "⠯", "⠽", "⠺",
+const LETTERS_BRAILLE: [&'static str; 52] = [
+    "⠁", "⠃", "⠉", "⠙", "⠑", "⠋", "⠛", "⠓", "⠊", "⠚", "⠅", "⠇", "⠍", "⠝", "⠕", "⠏", "⠟", "⠗", "⠎",
+    "⠞", "⠥", "⠧", "⠺", "⠭", "⠽", "⠵", "⠘⠝", "⠸⠢", "⠨⠁", "⠨⠃", "⠨⠛", "⠨⠙", "⠨⠑", "⠨⠵", "⠨⠱", "⠨⠹",
+    "⠨⠊", "⠨⠅", "⠨⠇", "⠨⠍", "⠨⠝", "⠨⠭", "⠨⠕", "⠨⠏", "⠨⠗", "⠨⠎", "⠨⠞", "⠨⠥", "⠨⠋", "⠨⠯", "⠨⠽", "⠨⠺",
 ];
 
 const SYMBOLS: [&'static str; 44] = [
@@ -131,8 +129,8 @@ const NUMERIC_BRAILLE: [&'static str; 23] = [
 ];
 
 lazy_static! {
-    pub static ref LETTER_MAP: BiMap<char, char> =
-        bimap_from_iter(LETTERS.chars().zip(LETTERS_BRAILLE.chars()));
+    pub static ref LETTER_MAP: BiMap<&'static str, &'static str> =
+        bimap_from_iter(LETTERS.into_iter().zip(LETTERS_BRAILLE.into_iter()));
     pub static ref SYMBOL_MAP: BiMap<&'static str, &'static str> =
         bimap_from_iter(SYMBOLS.into_iter().zip(SYMBOLS_BRAILLE.into_iter()));
     pub static ref PUNCTUATION_MAP: BiMap<char, &'static str> = bimap_from_iter(
@@ -146,8 +144,6 @@ lazy_static! {
             .copied()
             .zip(DIACRITIC_BRAILLE.into_iter().copied())
     );
-    pub static ref GREEK_MAP: BiMap<&'static str, &'static str> =
-        bimap_from_iter(GREEK.into_iter().zip(GREEK_BRAILLE.into_iter()));
     pub static ref NUMERIC_MAP: BiMap<&'static str, &'static str> =
         bimap_from_iter(NUMERIC.into_iter().zip(NUMERIC_BRAILLE.into_iter()));
 }
@@ -169,7 +165,7 @@ mod ueb_pairing_tests {
     #[ignore = "letter pairing test"]
     fn letters() {
         println!("Letters");
-        for (a, b) in LETTERS.chars().zip(LETTERS_BRAILLE.chars()) {
+        for (a, b) in LETTERS.into_iter().zip(LETTERS_BRAILLE.into_iter()) {
             println!("{} {}", a, b)
         }
     }
@@ -186,7 +182,7 @@ mod ueb_pairing_tests {
     #[test]
     #[ignore = "letter modifier pairing test"]
     fn letter_modifiers() {
-        println!("Letter Modifiers");
+        println!("Diacritics");
         for (a, b) in DIACRITIC.into_iter().zip(DIACRITIC_BRAILLE.into_iter()) {
             println!("{} {}", a, b)
         }
