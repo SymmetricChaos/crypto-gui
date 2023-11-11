@@ -258,7 +258,7 @@ const DIACRITIC_BRAILLE: &[&'static str] = &[
 ];
 
 // Ellipsis is a specific punctuation symbol listed for UEB but it written as a sequence of full stops
-// The dashes are Unicode specifier: en-dash, em-dash, and double em-dash.
+// The dashes are Unicode specified: en-dash, em-dash, and double em-dash.
 const PUNCTUATION: &'static str = ",;:.!?“”‘’«»\"'()[]<>{}/\\–—⸺_";
 const PUNCTUATION_BRAILLE: &[&'static str] = &[
     "⠂",

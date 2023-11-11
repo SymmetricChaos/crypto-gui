@@ -1,14 +1,16 @@
 WHITESPACE      =  { (" " | "⠀")+ }
 // braille_cell    =  { "⠁" | "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠊" | "⠚" | "⠅" | "⠇" | "⠍" | "⠝" | "⠕" | "⠏" | "⠟" | "⠗" | "⠎" | "⠞" | "⠥" | "⠧" | "⠭" | "⠽" | "⠵" | "⠯" | "⠿" | "⠷" | "⠮" | "⠾" | "⠡" | "⠣" | "⠩" | "⠹" | "⠱" | "⠫" | "⠻" | "⠳" | "⠪" | "⠺" | "⠂" | "⠆" | "⠒" | "⠲" | "⠢" | "⠖" | "⠶" | "⠦" | "⠔" | "⠴" | "⠌" | "⠬" | "⠼" | "⠜" | "⠄" | "⠤" | "⠈" | "⠘" | "⠸" | "⠐" | "⠨" | "⠰" | "⠠"}
-prefix          =  {"⠼" | "⠈" | "⠘" | "⠸" | "⠐" | "⠨" | "⠰" | "⠠" }
+// prefix          =  { "⠼" | "⠈" | "⠘" | "⠸" | "⠐" | "⠨" | "⠰" | "⠠" }
 basic_letter    =  { "⠁" | "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠊" | "⠚" | "⠅" | "⠇" | "⠍" | "⠝" | "⠕" | "⠏" | "⠟" | "⠗" | "⠎" | "⠞" | "⠥" | "⠧" | "⠺" | "⠭" | "⠽" | "⠵" }
+punctuation     =  { "⠂" | "⠆" | "⠒" | "⠲" | "⠖" | "⠦" | "⠘⠦" | "⠘⠴" | "⠠⠦" | "⠠⠴" | "⠸⠦" | "⠸⠴" | "⠠⠶" | "⠄" | "⠐⠣" | "⠐⠜" | "⠨⠣" | "⠨⠜" | "⠈⠣" | "⠈⠜" | "⠸⠣" | "⠸⠜" | "⠸⠌" | "⠸⠡" | "⠤" | "⠠⠤" | "⠐⠠⠤" | "⠨⠤" }
 capitalize      =  { "⠠" }
 greek           =  { "⠨" }
 diacritic       =  { "⠈⠡" | "⠈⠒" | "⠈⠬" | "⠈⠤" | "⠘⠯" | "⠘⠡" | "⠘⠩" | "⠘⠫" | "⠘⠻" | "⠘⠒" | "⠘⠌" | "⠘⠬" }
-modifier        =  { capitalize | greek | diacritic }
 letter          = ${ capitalize? ~ greek? ~ diacritic* ~ basic_letter }
-letter_sequence = ${ letter+ }
+character       =  { letter | punctuation }
+// letter_sequence = ${ letter+ }
+// punctuation_sequence = ${ punctuation+ }
 // capitalized_sequence = { "⠠⠠" ~ letter_sequence }
 // capitalized_passage  = { "⠠⠠⠠" ~ letter_sequence+ ~ "⠠⠄" }
 
-passage = { letter_sequence ~ ( letter_sequence)* }
+passage = { character ~ (character)* }
