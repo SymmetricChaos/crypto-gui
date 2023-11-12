@@ -24,7 +24,7 @@ pub fn descend(pairs: Pairs<'_, Rule>, space: String) {
             Rule::letter => println!("{space}letter({})", pair.as_str()),
             Rule::character => println!("{space}character({})", pair.as_str()),
             Rule::symbol => println!("{space}symbol({})", pair.as_str()),
-            Rule::numeric_symbols => println!("{space}numeric_symbols({})", pair.as_str()),
+            Rule::numeric_symbol => println!("{space}numeric_symbols({})", pair.as_str()),
             Rule::punctuation => println!("{space}punctuation({})", pair.as_str()),
             Rule::passage => println!("{space}passage({})", pair.as_str()),
             Rule::diacritic => println!("{space}diacritic({})", pair.as_str()),
@@ -56,7 +56,7 @@ pub fn decode_character(pairs: Pairs<'_, Rule>, string: &mut String) {
     for pair in pairs.into_iter() {
         match pair.as_rule() {
             Rule::letter => decode_letter(pair.into_inner(), string),
-            Rule::punctuation => string.push(*PUNCTUATION_MAP.get_by_right(pair.as_str()).unwrap()),
+            Rule::punctuation => string.push_str(*PUNCTUATION_MAP.get_by_right(pair.as_str()).unwrap()),
             Rule::number => decode_number(pair.into_inner(), string),
             Rule::symbol => string.push_str(SYMBOL_MAP.get_by_right(pair.as_str()).unwrap()),
             _ => unreachable!("characters are only: letter, number, symbol and punctuation"),

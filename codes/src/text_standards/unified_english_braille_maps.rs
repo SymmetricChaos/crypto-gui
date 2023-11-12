@@ -80,15 +80,18 @@ const SYMBOLS_BRAILLE: [&'static str; 44] = [
     "⠨⠴",
 ];
 
-const DIACRITIC: &[&'static str] = &["̸", "̶", "̆", "̄", "̧", "̀", "̂", "̊", "̃", "̈", "́", "̌"];
-const DIACRITIC_BRAILLE: &[&'static str] = &[
+const DIACRITIC: [&'static str; 12] = ["̸", "̶", "̆", "̄", "̧", "̀", "̂", "̊", "̃", "̈", "́", "̌"];
+const DIACRITIC_BRAILLE: [&'static str; 12] = [
     "⠈⠡", "⠈⠒", "⠈⠬", "⠈⠤", "⠘⠯", "⠘⠡", "⠘⠩", "⠘⠫", "⠘⠻", "⠘⠒", "⠘⠌", "⠘⠬",
 ];
 
 // Ellipsis is a specific punctuation symbol listed for UEB but it written as a sequence of full stops
 // The dashes are Unicode specified: hyphen, em-dash, and double em-dash.
-const PUNCTUATION: &'static str = ",;:.!?“”‘’«»\"'()[]<>{}/\\-—⸺_";
-const PUNCTUATION_BRAILLE: &[&'static str] = &[
+const PUNCTUATION: [&'static str; 28] = [
+    ",", ";", ":", ".", "!", "?", "“", "”", "‘", "’", "«", "»", "\"", "'", "(", ")", "[", "]", "<",
+    ">", "{", "}", "/", "\\", "-", "—", "⸺", "_",
+];
+const PUNCTUATION_BRAILLE: [&'static str; 28] = [
     "⠂",
     "⠆",
     "⠒",
@@ -133,17 +136,10 @@ lazy_static! {
         bimap_from_iter(LETTERS.into_iter().zip(LETTERS_BRAILLE.into_iter()));
     pub static ref SYMBOL_MAP: BiMap<&'static str, &'static str> =
         bimap_from_iter(SYMBOLS.into_iter().zip(SYMBOLS_BRAILLE.into_iter()));
-    pub static ref PUNCTUATION_MAP: BiMap<char, &'static str> = bimap_from_iter(
-        PUNCTUATION
-            .chars()
-            .zip(PUNCTUATION_BRAILLE.into_iter().copied())
-    );
-    pub static ref DIACRITIC_MAP: BiMap<&'static str, &'static str> = bimap_from_iter(
-        DIACRITIC
-            .into_iter()
-            .copied()
-            .zip(DIACRITIC_BRAILLE.into_iter().copied())
-    );
+    pub static ref PUNCTUATION_MAP: BiMap<&'static str, &'static str> =
+        bimap_from_iter(PUNCTUATION.into_iter().zip(PUNCTUATION_BRAILLE.into_iter()));
+    pub static ref DIACRITIC_MAP: BiMap<&'static str, &'static str> =
+        bimap_from_iter(DIACRITIC.into_iter().zip(DIACRITIC_BRAILLE.into_iter()));
     pub static ref NUMERIC_MAP: BiMap<&'static str, &'static str> =
         bimap_from_iter(NUMERIC.into_iter().zip(NUMERIC_BRAILLE.into_iter()));
 }
@@ -174,7 +170,7 @@ mod ueb_pairing_tests {
     #[ignore = "punctuation pairing test"]
     fn punctuation() {
         println!("Punctuation");
-        for (a, b) in PUNCTUATION.chars().zip(PUNCTUATION_BRAILLE.into_iter()) {
+        for (a, b) in PUNCTUATION.into_iter().zip(PUNCTUATION_BRAILLE.into_iter()) {
             println!("{} {}", a, b)
         }
     }
