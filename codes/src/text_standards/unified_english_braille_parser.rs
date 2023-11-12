@@ -1,17 +1,15 @@
+use pest::iterators::Pairs;
 use pest_derive::Parser;
+use unicode_normalization::UnicodeNormalization;
+
+use super::unified_english_braille_maps::{
+    DIACRITIC_MAP, LETTER_MAP, NUMERIC_MAP, PUNCTUATION_MAP, SYMBOL_MAP,
+};
 
 #[derive(Parser)]
 #[grammar = "text_standards/ueb.pest"] // relative to src
 struct UebParser;
 
-use crate::text_standards::unified_english_braille_maps::{
-    DIACRITIC_MAP, LETTER_MAP, PUNCTUATION_MAP,
-};
-
-use pest::iterators::Pairs;
-use unicode_normalization::UnicodeNormalization;
-
-use super::unified_english_braille_maps::{NUMERIC_MAP, SYMBOL_MAP};
 pub fn descend(pairs: Pairs<'_, Rule>, space: String) {
     for pair in pairs.into_iter() {
         let mut space = space.clone();
@@ -29,6 +27,7 @@ pub fn descend(pairs: Pairs<'_, Rule>, space: String) {
             Rule::passage => println!("{space}passage({})", pair.as_str()),
             Rule::diacritic => println!("{space}diacritic({})", pair.as_str()),
             Rule::capital_sequence => println!("{space}capital_sequence({})", pair.as_str()),
+            Rule::unknown => println!("{space}unknown({})", pair.as_str()),
         }
 
         descend(pair.into_inner(), space)
@@ -41,11 +40,12 @@ pub fn decode_passage(pairs: Pairs<'_, Rule>) -> String {
         match pair.as_rule() {
             Rule::passage => out.push_str(&decode_passage(pair.into_inner())),
             Rule::WHITESPACE => out.push_str(" "),
-            Rule::character => 
+            Rule::character =>
                 decode_character(pair.into_inner(), &mut out),
             Rule::capital_sequence => decode_capital_sequence(pair.into_inner(), &mut out),
+            Rule::unknown => out.push_str(pair.as_str()),
             _ => unreachable!(
-                "a passage consists only of WHITESPACE, character, and capital_sequence at the top level"
+                "a passage consists only of WHITESPACE, unknown, character, and capital_sequence at the top level"
             ),
         }
     }
@@ -56,7 +56,9 @@ pub fn decode_character(pairs: Pairs<'_, Rule>, string: &mut String) {
     for pair in pairs.into_iter() {
         match pair.as_rule() {
             Rule::letter => decode_letter(pair.into_inner(), string),
-            Rule::punctuation => string.push_str(*PUNCTUATION_MAP.get_by_right(pair.as_str()).unwrap()),
+            Rule::punctuation => {
+                string.push_str(*PUNCTUATION_MAP.get_by_right(pair.as_str()).unwrap())
+            }
             Rule::number => decode_number(pair.into_inner(), string),
             Rule::symbol => string.push_str(SYMBOL_MAP.get_by_right(pair.as_str()).unwrap()),
             _ => unreachable!("characters are only: letter, number, symbol and punctuation"),
@@ -78,13 +80,11 @@ pub fn decode_letter(pairs: Pairs<'_, Rule>, string: &mut String) {
             Rule::basic_letter => {
                 let letter = if capital {
                     LETTER_MAP
-                                .get_by_right(&pair.as_str())
-                                .unwrap()
-                                .to_uppercase()
+                        .get_by_right(&pair.as_str())
+                        .unwrap()
+                        .to_uppercase()
                 } else {
-                    LETTER_MAP
-                                .get_by_right(&pair.as_str())
-                                .unwrap().to_string()
+                    LETTER_MAP.get_by_right(&pair.as_str()).unwrap().to_string()
                 };
                 string.push_str(&letter);
                 string.push_str(&diacritics);
@@ -95,9 +95,7 @@ pub fn decode_letter(pairs: Pairs<'_, Rule>, string: &mut String) {
             Rule::diacritic => {
                 diacritics.push_str(DIACRITIC_MAP.get_by_right(pair.as_str()).unwrap())
             }
-            _ => unreachable!(
-                "letters should only contain the rules: basic_letter, capitalize, greek, and diacritic"
-            ),
+            _ => string.push_str(pair.as_str()),
         }
     }
 }
@@ -130,9 +128,10 @@ mod ueb_parser_tests {
 
     use super::*;
 
-    const TEXT: &'static str = "Étienne! 123 háček 9 ΣAŨB  Xyz Im-Frühling Ω σ 7:30 a.m. 1 € = 6.55957₣";
+    const TEXT: &'static str =
+        "Étienne! 123 háček 9 ΣAŨB  Xyz 13% Im-Frühling Ω σ 7:30 a.m. 1 € = 6.55957₣";
     const BRAILLE: &'static str =
-        "⠠⠘⠌⠑⠞⠊⠑⠝⠝⠑⠖ ⠼⠁⠃⠉⠀⠓⠘⠌⠁⠘⠬⠉⠑⠅ ⠼⠊ ⠠⠠⠨⠎⠁⠘⠻⠥⠃  ⠠⠭⠽⠵⠀⠠⠊⠍⠤⠠⠋⠗⠘⠒⠥⠓⠇⠊⠝⠛ ⠠⠨⠺ ⠨⠎ ⠼⠛⠒⠼⠉⠚ ⠁⠲⠍⠲ ⠼⠁ ⠈⠑ ⠐⠶ ⠼⠋⠲⠑⠑⠊⠑⠛⠈⠋";
+        "⠠⠘⠌⠑⠞⠊⠑⠝⠝⠑⠖ ⠼⠁⠃⠉⠀⠓⠘⠌⠁⠘⠬⠉⠑⠅ ⠼⠊ ⠠⠠⠨⠎⠁⠘⠻⠥⠃  ⠠⠭⠽⠵ 13%⠀⠠⠊⠍⠤⠠⠋⠗⠘⠒⠥⠓⠇⠊⠝⠛ ⠠⠨⠺ ⠨⠎ ⠼⠛⠒⠼⠉⠚ ⠁⠲⠍⠲ ⠼⠁ ⠈⠑ ⠐⠶ ⠼⠋⠲⠑⠑⠊⠑⠛⠈⠋";
 
     use pest::Parser;
 
