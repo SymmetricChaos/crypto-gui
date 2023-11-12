@@ -130,9 +130,9 @@ mod ueb_parser_tests {
 
     use super::*;
 
-    const TEXT: &'static str = "Étienne! 123 háček 9 ΣAŨBXyz Im-Frühling Ω σ 7:30 a.m. 1 € = 6.55957₣";
+    const TEXT: &'static str = "Étienne! 123 háček 9 ΣAŨB  Xyz Im-Frühling Ω σ 7:30 a.m. 1 € = 6.55957₣";
     const BRAILLE: &'static str =
-        "⠠⠘⠌⠑⠞⠊⠑⠝⠝⠑⠖ ⠼⠁⠃⠉⠀⠓⠘⠌⠁⠘⠬⠉⠑⠅ ⠼⠊ ⠠⠠⠨⠎⠁⠘⠻⠥⠃⠠⠭⠽⠵⠀⠠⠊⠍⠤⠠⠋⠗⠘⠒⠥⠓⠇⠊⠝⠛ ⠠⠨⠺ ⠨⠎ ⠼⠛⠒⠼⠉⠚ ⠁⠲⠍⠲ ⠼⠁ ⠈⠑ ⠐⠶ ⠼⠋⠲⠑⠑⠊⠑⠛⠈⠋";
+        "⠠⠘⠌⠑⠞⠊⠑⠝⠝⠑⠖ ⠼⠁⠃⠉⠀⠓⠘⠌⠁⠘⠬⠉⠑⠅ ⠼⠊ ⠠⠠⠨⠎⠁⠘⠻⠥⠃  ⠠⠭⠽⠵⠀⠠⠊⠍⠤⠠⠋⠗⠘⠒⠥⠓⠇⠊⠝⠛ ⠠⠨⠺ ⠨⠎ ⠼⠛⠒⠼⠉⠚ ⠁⠲⠍⠲ ⠼⠁ ⠈⠑ ⠐⠶ ⠼⠋⠲⠑⠑⠊⠑⠛⠈⠋";
 
     use pest::Parser;
 
