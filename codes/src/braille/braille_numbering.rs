@@ -1,8 +1,10 @@
 use bimap::BiMap;
 use lazy_static::lazy_static;
 
-use crate::{braille::braille_data::BRAILLE_ORDER, errors::CodeError, traits::Code};
+use crate::{braille::braille_data::UEB_ORDER, errors::CodeError, traits::Code};
 use utils::text_functions::bimap_from_iter;
+
+use super::braille_data::UNICODE_ORDER;
 
 const BRAILLE_DOTS: [&'static str; 63] = [
     "1", "12", "14", "145", "15", "124", "1245", "125", "24", "245", "13", "123", "143", "1453",
@@ -31,31 +33,21 @@ const BRAILLE_HEX: [&'static str; 63] = [
 ];
 
 // Offsets from 10240 (decimal)
-// const BRAILLE_OFFSETS: [u32; 63] = [
-//     1, 3, 9, 19, 11, 11, 21, 13, 10, 20, 5, 7, 13, 23, 15, 15, 25, 17, 14, 24, 25, 27, 33, 43, 35,
-//     35, 45, 37, 34, 44, 21, 23, 29, 39, 31, 31, 41, 33, 30, 40, 2, 6, 12, 32, 22, 16, 36, 26, 14,
-//     34, 12, 32, 42, 22, 4, 24, 8, 18, 38, 10, 28, 30, 20,
-// ];
+const BRAILLE_OFFSETS: [u32; 63] = [
+    1, 3, 9, 25, 17, 11, 27, 19, 10, 26, 5, 7, 13, 29, 21, 15, 31, 23, 14, 30, 37, 39, 45, 61, 53,
+    47, 63, 55, 46, 62, 33, 35, 41, 57, 49, 43, 59, 51, 42, 58, 2, 6, 18, 50, 34, 22, 54, 38, 20,
+    52, 12, 44, 60, 28, 4, 36, 8, 24, 56, 16, 40, 48, 32,
+];
 
 lazy_static! {
-    pub static ref BRAILLE_DOTS_MAP: BiMap<char, &'static str> = bimap_from_iter(
-        BRAILLE_ORDER
-            .into_iter()
-            .flat_map(|s| s.chars())
-            .zip(BRAILLE_DOTS.into_iter())
-    );
-    pub static ref BRAILLE_BITS_MAP: BiMap<char, &'static str> = bimap_from_iter(
-        BRAILLE_ORDER
-            .into_iter()
-            .flat_map(|s| s.chars())
-            .zip(BRAILLE_BITS.into_iter())
-    );
-    pub static ref BRAILLE_HEX_MAP: BiMap<char, &'static str> = bimap_from_iter(
-        BRAILLE_ORDER
-            .into_iter()
-            .flat_map(|s| s.chars())
-            .zip(BRAILLE_HEX.into_iter())
-    );
+    pub static ref BRAILLE_DOTS_MAP: BiMap<char, &'static str> =
+        bimap_from_iter(UEB_ORDER.chars().zip(BRAILLE_DOTS.into_iter()));
+    pub static ref BRAILLE_BITS_MAP: BiMap<char, &'static str> =
+        bimap_from_iter(UEB_ORDER.chars().zip(BRAILLE_BITS.into_iter()));
+    pub static ref BRAILLE_HEX_MAP: BiMap<char, &'static str> =
+        bimap_from_iter(UEB_ORDER.chars().zip(BRAILLE_HEX.into_iter()));
+    pub static ref BRAILLE_OFFSET_MAP: BiMap<char, u32> =
+        bimap_from_iter(UEB_ORDER.chars().zip(BRAILLE_OFFSETS.into_iter()));
 }
 
 pub enum BrailleNumberingMode {
@@ -64,24 +56,52 @@ pub enum BrailleNumberingMode {
     Hex,
 }
 
-pub struct BrailleNumbering {}
+impl BrailleNumberingMode {
+    pub fn encode(&self, c: char) -> Option<&str> {
+        match self {
+            Self::Dots => BRAILLE_DOTS_MAP.get_by_left(&c).copied(),
+            Self::Bits => BRAILLE_BITS_MAP.get_by_left(&c).copied(),
+            Self::Hex => BRAILLE_HEX_MAP.get_by_left(&c).copied(),
+        }
+    }
 
-impl Default for BrailleNumbering {
-    fn default() -> Self {
-        Self {}
+    pub fn decode(&self, s: &str) -> Option<&char> {
+        match self {
+            Self::Dots => BRAILLE_DOTS_MAP.get_by_right(s),
+            Self::Bits => BRAILLE_BITS_MAP.get_by_right(s),
+            Self::Hex => BRAILLE_HEX_MAP.get_by_right(s),
+        }
     }
 }
 
-// impl BrailleNumbering {
-//     pub fn chars_codes() -> impl Iterator<Item = (char, char)> {
-//         ASCII_LETTERS.chars().zip(ASCII_BRAILLE.chars())
-//     }
-// }
+pub struct BrailleNumbering {
+    ueb_order: bool,
+    mode: BrailleNumberingMode,
+}
+
+impl Default for BrailleNumbering {
+    fn default() -> Self {
+        Self {
+            ueb_order: true,
+            mode: BrailleNumberingMode::Dots,
+        }
+    }
+}
+
+impl BrailleNumbering {
+    pub fn chars_codes(&self) -> impl Iterator<Item = (char, &str)> {
+        let cs = if self.ueb_order {
+            UEB_ORDER.chars()
+        } else {
+            UNICODE_ORDER.chars()
+        };
+        cs.map(|c| (c, self.mode.encode(c).unwrap()))
+    }
+}
 
 // impl Code for BrailleNumbering {
 //     fn encode(&self, text: &str) -> Result<String, CodeError> {
 //         let mut out = String::new();
-//         // Braille ASCII is a strict 1:1 coding of a range of ASCII values
 
 //         for c in text.chars() {
 //             if c.is_whitespace() {
@@ -120,14 +140,20 @@ impl Default for BrailleNumbering {
 
 #[cfg(test)]
 mod braille_ascii_tests {
+    use crate::braille::braille_data::UEB_ORDER;
+
     use super::*;
 
     #[test]
     #[ignore = "pairing test"]
     fn pairing() {
-        for c in BRAILLE_ORDER.into_iter().flat_map(|s| s.chars()) {
+        for c in UEB_ORDER.chars() {
             println!("{} {}", c, BRAILLE_DOTS_MAP.get_by_left(&c).unwrap())
         }
+        for n in 1..64 {
+            print!("{}", BRAILLE_OFFSET_MAP.get_by_right(&n).unwrap());
+        }
+        println!("")
     }
 
     #[test]
@@ -146,7 +172,7 @@ mod braille_ascii_tests {
 
         let mut hex_values: Vec<String> = Vec::new();
         let mut braille_nums = Vec::new();
-        let values = [1, 2, 4, 8, 10, 20];
+        let values = [1, 2, 4, 8, 16, 32];
         for s in BRAILLE_BITS.into_iter() {
             let mut v: u32 = 0;
             for (pos, c) in s.chars().enumerate() {
