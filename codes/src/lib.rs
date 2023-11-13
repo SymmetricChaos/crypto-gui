@@ -1,4 +1,5 @@
 pub mod binary_to_text;
+pub mod braille;
 pub mod commercial;
 pub mod ecc;
 pub mod mathematical;

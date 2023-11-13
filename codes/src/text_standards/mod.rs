@@ -1,7 +1,5 @@
 pub mod ascii;
 pub mod baudot;
-pub mod braille;
-pub mod braille_ascii;
 pub mod linotype;
 pub mod morse;
 pub mod morse_encodings;
@@ -9,6 +7,3 @@ pub mod needle;
 pub mod punycode;
 pub mod spelling_alphabet;
 pub mod unicode;
-pub mod unified_english_braille;
-pub mod unified_english_braille_maps;
-pub mod unified_english_braille_parser;

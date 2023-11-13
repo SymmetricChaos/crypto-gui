@@ -7,7 +7,7 @@ use super::unified_english_braille_maps::{
 };
 
 #[derive(Parser)]
-#[grammar = "text_standards/ueb.pest"] // relative to src
+#[grammar = "braille/ueb.pest"] // relative to src
 struct UebParser;
 
 pub fn descend(pairs: Pairs<'_, Rule>, space: String) {

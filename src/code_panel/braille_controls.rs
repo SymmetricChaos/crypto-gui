@@ -1,9 +1,10 @@
+use codes::braille::simple_braille::{BrailleLanguage, SimpleBraille};
+
 use super::CodeFrame;
 use crate::ui_elements::UiElements;
-use codes::text_standards::braille::{Braille, BrailleLanguage};
 
 pub struct BrailleFrame {
-    code: Braille,
+    code: SimpleBraille,
 }
 
 impl Default for BrailleFrame {

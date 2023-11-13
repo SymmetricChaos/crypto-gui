@@ -102,11 +102,11 @@ pub enum BrailleMode {
     Capital,
 }
 
-pub struct Braille {
+pub struct SimpleBraille {
     pub language: BrailleLanguage,
 }
 
-impl Default for Braille {
+impl Default for SimpleBraille {
     fn default() -> Self {
         Self {
             language: BrailleLanguage::English,
@@ -114,7 +114,7 @@ impl Default for Braille {
     }
 }
 
-impl Code for Braille {
+impl Code for SimpleBraille {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::new();
 
@@ -239,13 +239,13 @@ mod braille_tests {
 
     #[test]
     fn encode_test() {
-        let code = Braille::default();
+        let code = SimpleBraille::default();
         assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
     fn decode_test() {
-        let code = Braille::default();
+        let code = SimpleBraille::default();
         assert_eq!(code.decode(CIPHERTEXT).unwrap(), PLAINTEXT);
     }
 }

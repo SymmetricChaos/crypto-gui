@@ -1,6 +1,7 @@
+use codes::braille::braille_ascii::BrailleAscii;
+
 use super::CodeFrame;
 use crate::ui_elements::UiElements;
-use codes::text_standards::braille_ascii::BrailleAscii;
 
 pub struct BrailleAsciiFrame {
     code: BrailleAscii,
