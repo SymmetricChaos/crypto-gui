@@ -5,9 +5,9 @@ use utils::text_functions::bimap_from_iter;
 use crate::{errors::CodeError, traits::Code};
 
 const ASCII_LETTERS: &'static str =
-    "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_";
+    " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_";
 const ASCII_BRAILLE: &'static str =
-    "⠮⠐⠼⠫⠩⠯⠄⠷⠾⠡⠬⠠⠤⠨⠌⠴⠂⠆⠒⠲⠢⠖⠶⠦⠔⠱⠰⠣⠿⠜⠹⠈⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠺⠭⠽⠵⠪⠳⠻⠘⠸";
+    "⠀⠮⠐⠼⠫⠩⠯⠄⠷⠾⠡⠬⠠⠤⠨⠌⠴⠂⠆⠒⠲⠢⠖⠶⠦⠔⠱⠰⠣⠿⠜⠹⠈⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠺⠭⠽⠵⠪⠳⠻⠘⠸";
 
 lazy_static! {
     pub static ref ASCII_MAP: BiMap<char, char> =
@@ -70,6 +70,8 @@ impl Code for BrailleAscii {
 
 #[cfg(test)]
 mod braille_ascii_tests {
+    use crate::braille::braille_data::UEB_ORDER;
+
     use super::*;
 
     #[test]
@@ -79,5 +81,11 @@ mod braille_ascii_tests {
         for c in ASCII_LETTERS.chars() {
             println!("{} {}", c, ASCII_MAP.get_by_left(&c).unwrap())
         }
+    }
+
+    #[test]
+    fn ueb() {
+        let code = BrailleAscii::default();
+        println!("{}", code.decode(UEB_ORDER).unwrap())
     }
 }

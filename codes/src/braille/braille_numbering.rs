@@ -40,6 +40,13 @@ const BRAILLE_OFFSETS: [u32; 64] = [
     20, 52, 12, 44, 60, 28, 4, 36, 8, 24, 56, 16, 40, 48, 32,
 ];
 
+const BRAILLE_ASCII: [&'static str; 64] = [
+    " ", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R",
+    "S", "T", "U", "V", "X", "Y", "Z", "&", "=", "(", "!", ")", "*", "<", "%", "?", ":", "$", "]",
+    "\\", "[", "W", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "/", "+", "#", ">", "'", "-",
+    "@", "^", "_", "\"", ".", ";", ",",
+];
+
 lazy_static! {
     pub static ref BRAILLE_DOTS_MAP: BiMap<char, &'static str> =
         bimap_from_iter(UEB_ORDER.chars().zip(BRAILLE_DOTS.into_iter()));
@@ -49,12 +56,15 @@ lazy_static! {
         bimap_from_iter(UEB_ORDER.chars().zip(BRAILLE_HEX.into_iter()));
     pub static ref BRAILLE_OFFSET_MAP: BiMap<char, u32> =
         bimap_from_iter(UEB_ORDER.chars().zip(BRAILLE_OFFSETS.into_iter()));
+    pub static ref BRAILLE_ASCII_MAP: BiMap<char, &'static str> =
+        bimap_from_iter(UEB_ORDER.chars().zip(BRAILLE_ASCII.into_iter()));
 }
 
 pub enum BrailleNumberingMode {
     Dots,
     Bits,
     Hex,
+    Ascii,
 }
 
 impl BrailleNumberingMode {
@@ -63,6 +73,7 @@ impl BrailleNumberingMode {
             Self::Dots => BRAILLE_DOTS_MAP.get_by_left(&c).copied(),
             Self::Bits => BRAILLE_BITS_MAP.get_by_left(&c).copied(),
             Self::Hex => BRAILLE_HEX_MAP.get_by_left(&c).copied(),
+            Self::Ascii => BRAILLE_ASCII_MAP.get_by_left(&c).copied(),
         }
     }
 
@@ -71,6 +82,7 @@ impl BrailleNumberingMode {
             Self::Dots => BRAILLE_DOTS_MAP.get_by_right(s),
             Self::Bits => BRAILLE_BITS_MAP.get_by_right(s),
             Self::Hex => BRAILLE_HEX_MAP.get_by_right(s),
+            Self::Ascii => BRAILLE_ASCII_MAP.get_by_right(s),
         }
     }
 }
