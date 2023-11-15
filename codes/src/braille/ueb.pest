@@ -8,16 +8,21 @@ letter       = ${ capitalize? ~ diacritic* ~ basic_letter }
 
 punctuation = { "⠂" | "⠆" | "⠒" | "⠲" | "⠖" | "⠦" | "⠘⠦" | "⠘⠴" | "⠠⠦" | "⠠⠴" | "⠸⠦" | "⠸⠴" | "⠠⠶" | "⠄" | "⠐⠣" | "⠐⠜" | "⠨⠣" | "⠨⠜" | "⠈⠣" | "⠈⠜" | "⠸⠣" | "⠸⠜" | "⠸⠌" | "⠸⠡" | "⠤" | "⠠⠤" | "⠐⠠⠤" | "⠨⠤" }
 
-numeric_symbol =  { "⠁" | "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠊" | "⠚" | "⠂" | "⠲" }
-number         = ${ "⠼" ~ numeric_symbol+ }
+digit          =  { "⠁" | "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠊" | "⠚" } 
+number         = ${ "⠼" ~ digit+ }
 
 symbol = { "⠳⠕" | "⠳⠩" | "⠳⠪" | "⠳⠬" | "⠒" | "⠒⠒" | "⠶" | "⠶⠶" | "⠼⠡" | "⠼⠣" | "⠼⠩" | "⠈⠁" | "⠈⠉" | "⠈⠑" | "⠈⠋" | "⠈⠇" | "⠈⠝" | "⠈⠎" | "⠈⠽" | "⠈⠯" | "⠈⠣" | "⠈⠢" | "⠈⠔" | "⠈⠜" | "⠈⠠⠹" | "⠈⠠⠻" | "⠘⠉" | "⠘⠚" | "⠘⠏" | "⠘⠗" | "⠘⠎" | "⠘⠞" | "⠘⠭" | "⠘⠽" | "⠸⠹" | "⠸⠲" | "⠐⠂" | "⠐⠖" | "⠐⠶" | "⠐⠦" | "⠐⠔" | "⠐⠌" | "⠐⠤" | "⠨⠴" }
 
 character = { letter | punctuation | number | symbol }
 
-capital_sequence = ${ "⠠⠠" ~ (diacritic* ~ basic_letter)+ ~ (&"⠠" | &WHITESPACE | "⠠⠄")? }
-// capital_passage  =  { "⠠⠠" ~ (diacritic* ~ basic_letter)+  ~ "⠠⠄" }
+// numeric symbols = { "⠁" | "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠊" | "⠚" | "⠂" | "⠲" | "⠐" }
+// numeric_sequence = {}
 
-passage = { (character | capital_sequence | unknown)+ }
+// numeric_passage = { "⠼⠼" ~ ~ "⠼⠄"}
+
+capital_sequence = ${ "⠠⠠" ~ (diacritic* ~ basic_letter)+ ~ (&"⠠" | &WHITESPACE | "⠠⠄")? }
+capital_passage  =  { "⠠⠠⠠" ~ (diacritic* ~ basic_letter)+  ~ "⠠⠄" }
+
+passage = { (capital_passage | capital_sequence | character |  unknown)+ }
 
 // braille_cell    =  { "⠁" | "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠊" | "⠚" | "⠅" | "⠇" | "⠍" | "⠝" | "⠕" | "⠏" | "⠟" | "⠗" | "⠎" | "⠞" | "⠥" | "⠧" | "⠭" | "⠽" | "⠵" | "⠯" | "⠿" | "⠷" | "⠮" | "⠾" | "⠡" | "⠣" | "⠩" | "⠹" | "⠱" | "⠫" | "⠻" | "⠳" | "⠪" | "⠺" | "⠂" | "⠆" | "⠒" | "⠲" | "⠢" | "⠖" | "⠶" | "⠦" | "⠔" | "⠴" | "⠌" | "⠬" | "⠼" | "⠜" | "⠄" | "⠤" | "⠈" | "⠘" | "⠸" | "⠐" | "⠨" | "⠰" | "⠠"}
