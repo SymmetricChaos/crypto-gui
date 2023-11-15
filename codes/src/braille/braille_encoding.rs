@@ -125,6 +125,13 @@ impl Code for BrailleEncoding {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::new();
 
+        // Commonly BrailleASCII values are given with lowercase letters
+        let text = if self.mode == BrailleEncodingType::Ascii {
+            text.to_ascii_uppercase()
+        } else {
+            text.to_string()
+        };
+
         for c in text.chars() {
             if c.is_whitespace() {
                 out.push_str(self.mode.encode('⠀').unwrap());
