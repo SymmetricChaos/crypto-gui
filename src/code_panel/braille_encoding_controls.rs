@@ -19,22 +19,37 @@ impl CodeFrame for BrailleEncodingFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
         ui.group(|ui| {
             ui.subheading("Encoding");
-            ui.horizontal(|ui| {
-                ui.selectable_value(&mut self.code.mode, BrailleEncodingType::Dots, "Dots");
-                ui.selectable_value(&mut self.code.mode, BrailleEncodingType::Hex, "Hex");
-                ui.selectable_value(&mut self.code.mode, BrailleEncodingType::Bits, "Bit");
-                ui.selectable_value(&mut self.code.mode, BrailleEncodingType::Ascii, "ASCII");
-            });
+            ui.selectable_value(&mut self.code.mode, BrailleEncodingType::Dots, "Dots");
+            ui.selectable_value(&mut self.code.mode, BrailleEncodingType::Hex, "Hex");
+            ui.selectable_value(&mut self.code.mode, BrailleEncodingType::Bits, "Bit");
+            ui.selectable_value(&mut self.code.mode, BrailleEncodingType::Ascii, "ASCII");
         });
 
+        ui.add_space(16.0);
+        ui.label(match self.code.mode {
+            BrailleEncodingType::Dots => "Braille cells are commonly identified by simply naming the dots which are raised. So dots-0 stands for the cell with no dots raised and dots-135 stands for the cells with dots 1, 3, and 5 raised.",
+            BrailleEncodingType::Bits => "A simple binary encoding of Braiile is to use six bits with them set if the corresponding cell is raised.",
+            BrailleEncodingType::Hex => "The Unicode standard assigns each dot a numeric value (1, 2, 4, 8, 16, 32) and each cell is assigned a value equal to the sum of its dots. The range of Braille characters starts at the hex value of 2800 and each cell can be described by its offset.",
+            BrailleEncodingType::Ascii => "A popular encoding of Braille assigns the cells to the range of ASCII characters from '!' to '_' with dots-0 represented by the space.",
+        });
+        ui.add_space(16.0);
+
         ui.group(|ui| {
-            ui.subheading("Ordering");
+            ui.subheading("Ordering (for display)");
             ui.horizontal(|ui| {
                 ui.selectable_value(&mut self.code.order, BrailleOrder::Ueb, "UEB");
                 ui.selectable_value(&mut self.code.order, BrailleOrder::Unicode, "Unicode");
                 ui.selectable_value(&mut self.code.order, BrailleOrder::Ascii, "ASCII");
             });
         });
+
+        ui.add_space(4.0);
+        ui.label(match self.code.order {
+            BrailleOrder::Ueb => "The UEB order is meant for easy human memorization, arranged into seven rows.",
+            BrailleOrder::Unicode => "The Unicode order is a simple numerical ordering convenient for computers and programmers.",
+            BrailleOrder::Ascii => "The ASCII order is largely arbitrary with only some Braille cells assigned to characters related to their meaning.",
+        });
+        ui.add_space(4.0);
 
         ui.add_space(16.0);
         ui.fill_code_columns(8, 8, Box::new(self.code.chars_codes()));
