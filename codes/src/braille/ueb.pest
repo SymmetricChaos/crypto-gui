@@ -8,21 +8,19 @@ letter       = ${ capitalize? ~ diacritic* ~ basic_letter }
 
 punctuation = { "⠂" | "⠆" | "⠒" | "⠲" | "⠖" | "⠦" | "⠘⠦" | "⠘⠴" | "⠠⠦" | "⠠⠴" | "⠸⠦" | "⠸⠴" | "⠠⠶" | "⠄" | "⠐⠣" | "⠐⠜" | "⠨⠣" | "⠨⠜" | "⠈⠣" | "⠈⠜" | "⠸⠣" | "⠸⠜" | "⠸⠌" | "⠸⠡" | "⠤" | "⠠⠤" | "⠐⠠⠤" | "⠨⠤" }
 
-digit          =  { "⠁" | "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠊" | "⠚" } 
-number         = ${ "⠼" ~ digit+ }
+character = { letter | punctuation | symbol }
+
+// The numeric_symbols are the digits, the digits preceeded by a numeric space, the period and comma, and the fraction bar.
+numeric_symbol   =  { "⠁" | "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠊" | "⠚" | "⠐⠁" |"⠐⠃"| "⠐⠉"|"⠐⠙"| "⠐⠑"| "⠐⠋" | "⠐⠛"|"⠐⠓"|"⠐⠊" | "⠐⠚" | "⠂" | "⠲" | "⠌" }
+numeric_sequence = ${ "⠼" ~ WHITESPACE* ~ numeric_symbol+ }
 
 symbol = { "⠳⠕" | "⠳⠩" | "⠳⠪" | "⠳⠬" | "⠒" | "⠒⠒" | "⠶" | "⠶⠶" | "⠼⠡" | "⠼⠣" | "⠼⠩" | "⠈⠁" | "⠈⠉" | "⠈⠑" | "⠈⠋" | "⠈⠇" | "⠈⠝" | "⠈⠎" | "⠈⠽" | "⠈⠯" | "⠈⠣" | "⠈⠢" | "⠈⠔" | "⠈⠜" | "⠈⠠⠹" | "⠈⠠⠻" | "⠘⠉" | "⠘⠚" | "⠘⠏" | "⠘⠗" | "⠘⠎" | "⠘⠞" | "⠘⠭" | "⠘⠽" | "⠸⠹" | "⠸⠲" | "⠐⠂" | "⠐⠖" | "⠐⠶" | "⠐⠦" | "⠐⠔" | "⠐⠌" | "⠐⠤" | "⠨⠴" }
-
-character = { letter | punctuation | number | symbol }
-
-// numeric symbols = { "⠁" | "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠊" | "⠚" | "⠂" | "⠲" | "⠐" }
-// numeric_sequence = {}
 
 // numeric_passage = { "⠼⠼" ~ ~ "⠼⠄"}
 
 capital_sequence = ${ "⠠⠠" ~ (diacritic* ~ basic_letter)+ ~ (&"⠠" | &WHITESPACE | "⠠⠄")? }
 capital_passage  =  { "⠠⠠⠠" ~ (diacritic* ~ basic_letter)+  ~ "⠠⠄" }
 
-passage = { (capital_passage | capital_sequence | character |  unknown)+ }
+passage = { (capital_passage | capital_sequence | numeric_sequence | character |  unknown)+ }
 
 // braille_cell    =  { "⠁" | "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠊" | "⠚" | "⠅" | "⠇" | "⠍" | "⠝" | "⠕" | "⠏" | "⠟" | "⠗" | "⠎" | "⠞" | "⠥" | "⠧" | "⠭" | "⠽" | "⠵" | "⠯" | "⠿" | "⠷" | "⠮" | "⠾" | "⠡" | "⠣" | "⠩" | "⠹" | "⠱" | "⠫" | "⠻" | "⠳" | "⠪" | "⠺" | "⠂" | "⠆" | "⠒" | "⠲" | "⠢" | "⠖" | "⠶" | "⠦" | "⠔" | "⠴" | "⠌" | "⠬" | "⠼" | "⠜" | "⠄" | "⠤" | "⠈" | "⠘" | "⠸" | "⠐" | "⠨" | "⠰" | "⠠"}

@@ -16,11 +16,11 @@ pub fn visualize_tree(pairs: Pairs<'_, Rule>, space: String) {
             Rule::WHITESPACE => println!("{space}WHITESPACE({})", pair.as_str()),
             Rule::basic_letter => println!("{space}basic_letter({})", pair.as_str()),
             Rule::capitalize => println!("{space}capitalize({})", pair.as_str()),
-            Rule::number => println!("{space}letter({})", pair.as_str()),
+            Rule::numeric_symbol => println!("{space}numeric_symbol({})", pair.as_str()),
+            Rule::numeric_sequence => println!("{space}numeric_sequence({})", pair.as_str()),
             Rule::letter => println!("{space}letter({})", pair.as_str()),
             Rule::character => println!("{space}character({})", pair.as_str()),
             Rule::symbol => println!("{space}symbol({})", pair.as_str()),
-            Rule::digit => println!("{space}digit({})", pair.as_str()),
             Rule::punctuation => println!("{space}punctuation({})", pair.as_str()),
             Rule::passage => println!("{space}passage({})", pair.as_str()),
             Rule::diacritic => println!("{space}diacritic({})", pair.as_str()),
@@ -44,6 +44,7 @@ pub fn decode_passage(pairs: Pairs<'_, Rule>) -> String {
                 decode_character(pair.into_inner(), &mut out),
             Rule::capital_sequence => decode_capital_sequence(pair.into_inner(), &mut out),
             Rule::capital_passage => decode_capital_passage(pair.into_inner(), &mut out),
+            Rule::numeric_sequence => decode_numeric_sequence(pair.into_inner(), &mut out),
             Rule::unknown => out.push_str(pair.as_str()),
             _ => unreachable!(
                 "a passage consists only of WHITESPACE, unknown, character, and capital_sequence at the top level"
@@ -60,14 +61,13 @@ pub fn decode_character(pairs: Pairs<'_, Rule>, string: &mut String) {
             Rule::punctuation => {
                 string.push_str(*PUNCTUATION_MAP.get_by_right(pair.as_str()).unwrap())
             }
-            Rule::number => decode_number(pair.into_inner(), string),
             Rule::symbol => string.push_str(SYMBOL_MAP.get_by_right(pair.as_str()).unwrap()),
             _ => unreachable!("characters are only: letter, number, symbol and punctuation"),
         }
     }
 }
 
-pub fn decode_number(pairs: Pairs<'_, Rule>, string: &mut String) {
+pub fn decode_numeric_sequence(pairs: Pairs<'_, Rule>, string: &mut String) {
     for pair in pairs.into_iter() {
         string.push_str(NUMERIC_MAP.get_by_right(pair.as_str()).unwrap())
     }
@@ -164,10 +164,15 @@ mod ueb_parser_tests {
             "Étienne! háček Im-Frühling",
             "⠠⠘⠌⠑⠞⠊⠑⠝⠝⠑⠖ ⠓⠘⠌⠁⠘⠬⠉⠑⠅ ⠠⠊⠍⠤⠠⠋⠗⠘⠒⠥⠓⠇⠊⠝⠛",
         ),
+        // Numbers
+        (
+            "123 1€ = 6.55957₣ 9 7:30 a.m",
+            "⠼⠁⠃⠉⠀⠼⠁⠈⠑⠀⠐⠶⠀⠼⠋⠲⠑⠑⠊⠑⠛⠈⠋⠀⠼⠊⠀⠼⠛⠒⠼⠉⠚⠀⠁⠲⠍",
+        ),
     ];
 
     // const TEXT: &'static str =
-    //     " 123  9  13%  Ω σ 7:30 a.m. CAPITAL PASSAGE WITH SPACES 1 € = 6.55957₣";
+    //     " 123  9  13%  Ω σ 7:30 a.m. CAPITAL PASSAGE WITH SPACES ";
     // const BRAILLE: &'static str =
     //     " ⠼⠁⠃⠉⠀⠓⠘⠌⠁⠘⠬⠉⠑⠅ ⠼⠊    13%⠀⠠⠊⠍⠤⠠⠋⠗⠘⠒⠥⠓⠇⠊⠝⠛ ⠠⠨⠺ ⠨⠎ ⠼⠛⠒⠼⠉⠚ ⠁⠲⠍⠲   ⠼⠁ ⠈⠑ ⠐⠶ ⠼⠋⠲⠑⠑⠊⠑⠛⠈⠋";
 
