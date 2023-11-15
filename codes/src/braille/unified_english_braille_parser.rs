@@ -69,6 +69,9 @@ pub fn decode_character(pairs: Pairs<'_, Rule>, string: &mut String) {
 
 pub fn decode_numeric_sequence(pairs: Pairs<'_, Rule>, string: &mut String) {
     for pair in pairs.into_iter() {
+        if pair.as_rule() == Rule::WHITESPACE {
+            continue;
+        }
         string.push_str(NUMERIC_MAP.get_by_right(pair.as_str()).unwrap())
     }
 }
@@ -159,22 +162,18 @@ mod ueb_parser_tests {
             "ΣAŨB  Xyz CAPITAL PASSAGE WITH SPACES",
             "⠠⠠⠨⠎⠁⠘⠻⠥⠃  ⠠⠭⠽⠵ ⠠⠠⠠⠉⠁⠏⠊⠞⠁⠇⠀⠏⠁⠎⠎⠁⠛⠑⠀⠺⠊⠞⠓⠀⠎⠏⠁⠉⠑⠎⠠⠄",
         ),
-        // Diacritics
+        // Diacritics and Greek
         (
-            "Étienne! háček Im-Frühling",
-            "⠠⠘⠌⠑⠞⠊⠑⠝⠝⠑⠖ ⠓⠘⠌⠁⠘⠬⠉⠑⠅ ⠠⠊⠍⠤⠠⠋⠗⠘⠒⠥⠓⠇⠊⠝⠛",
+            "Étienne! háček Im-Frühling Ω σ",
+            "⠠⠘⠌⠑⠞⠊⠑⠝⠝⠑⠖ ⠓⠘⠌⠁⠘⠬⠉⠑⠅ ⠠⠊⠍⠤⠠⠋⠗⠘⠒⠥⠓⠇⠊⠝⠛ ⠠⠨⠺ ⠨⠎",
         ),
         // Numbers
+        // Note spaced numeric indicator at start
         (
             "123 1€ = 6.55957₣ 9 7:30 a.m",
-            "⠼⠁⠃⠉⠀⠼⠁⠈⠑⠀⠐⠶⠀⠼⠋⠲⠑⠑⠊⠑⠛⠈⠋⠀⠼⠊⠀⠼⠛⠒⠼⠉⠚⠀⠁⠲⠍",
+            "⠼  ⠁⠃⠉⠀⠼⠁⠈⠑⠀⠐⠶⠀⠼⠋⠲⠑⠑⠊⠑⠛⠈⠋⠀⠼⠊⠀⠼⠛⠒⠼⠉⠚⠀⠁⠲⠍",
         ),
     ];
-
-    // const TEXT: &'static str =
-    //     " 123  9  13%  Ω σ 7:30 a.m. CAPITAL PASSAGE WITH SPACES ";
-    // const BRAILLE: &'static str =
-    //     " ⠼⠁⠃⠉⠀⠓⠘⠌⠁⠘⠬⠉⠑⠅ ⠼⠊    13%⠀⠠⠊⠍⠤⠠⠋⠗⠘⠒⠥⠓⠇⠊⠝⠛ ⠠⠨⠺ ⠨⠎ ⠼⠛⠒⠼⠉⠚ ⠁⠲⠍⠲   ⠼⠁ ⠈⠑ ⠐⠶ ⠼⠋⠲⠑⠑⠊⠑⠛⠈⠋";
 
     use pest::Parser;
 
