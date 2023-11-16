@@ -72,20 +72,22 @@ pub enum BrailleEncodingType {
 impl BrailleEncodingType {
     pub fn encode(&self, c: char) -> Option<&str> {
         match self {
-            Self::Dots => BRAILLE_DOTS_MAP.get_by_left(&c).copied(),
-            Self::Bits => BRAILLE_BITS_MAP.get_by_left(&c).copied(),
-            Self::Hex => BRAILLE_HEX_MAP.get_by_left(&c).copied(),
-            Self::Ascii => BRAILLE_ASCII_MAP.get_by_left(&c).copied(),
+            Self::Dots => BRAILLE_DOTS_MAP.get_by_left(&c),
+            Self::Bits => BRAILLE_BITS_MAP.get_by_left(&c),
+            Self::Hex => BRAILLE_HEX_MAP.get_by_left(&c),
+            Self::Ascii => BRAILLE_ASCII_MAP.get_by_left(&c),
         }
+        .copied()
     }
 
-    pub fn decode(&self, s: &str) -> Option<&char> {
+    pub fn decode(&self, s: &str) -> Option<char> {
         match self {
             Self::Dots => BRAILLE_DOTS_MAP.get_by_right(s),
             Self::Bits => BRAILLE_BITS_MAP.get_by_right(s),
             Self::Hex => BRAILLE_HEX_MAP.get_by_right(s),
             Self::Ascii => BRAILLE_ASCII_MAP.get_by_right(s),
         }
+        .copied()
     }
 }
 
@@ -125,16 +127,9 @@ impl Code for BrailleEncoding {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::new();
 
-        // Commonly BrailleASCII values are given with lowercase letters
-        let text = if self.mode == BrailleEncodingType::Ascii {
-            text.to_ascii_uppercase()
-        } else {
-            text.to_string()
-        };
-
         for c in text.chars() {
             if c.is_whitespace() {
-                out.push_str(self.mode.encode('⠀').unwrap());
+                out.push(c);
             } else {
                 out.push_str(
                     self.mode
@@ -142,7 +137,9 @@ impl Code for BrailleEncoding {
                         .ok_or_else(|| CodeError::invalid_input_char(c))?,
                 );
             }
+            out.push(' ');
         }
+        out.pop();
 
         Ok(out)
     }
@@ -150,13 +147,28 @@ impl Code for BrailleEncoding {
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::new();
 
-        for s in text.split(" ") {
-            out.push(
-                *self
-                    .mode
-                    .decode(s)
-                    .ok_or_else(|| CodeError::invalid_input_group(s))?,
-            );
+        if self.mode == BrailleEncodingType::Ascii {
+            // Commonly BrailleASCII values are given with lowercase letters so that is fixed here
+            let upper = text.to_ascii_uppercase();
+            for c in upper.chars() {
+                if c.is_whitespace() {
+                    out.push(c);
+                } else {
+                    out.push_str(
+                        self.mode
+                            .encode(c)
+                            .ok_or_else(|| CodeError::invalid_input_char(c))?,
+                    );
+                }
+            }
+        } else {
+            for s in text.split(" ") {
+                out.push(
+                    self.mode
+                        .decode(s)
+                        .ok_or_else(|| CodeError::invalid_input_group(s))?,
+                );
+            }
         }
 
         Ok(out)
@@ -165,7 +177,6 @@ impl Code for BrailleEncoding {
 
 #[cfg(test)]
 mod braille_ascii_tests {
-    use itertools::Itertools;
 
     use crate::braille::braille_data::UEB_ORDER;
 
@@ -211,19 +222,5 @@ mod braille_ascii_tests {
         }
         println!("{:?}", hex_values);
         println!("{:?}", braille_nums);
-    }
-
-    #[test]
-    fn iterators() {
-        let mut code = BrailleEncoding::default();
-        for c in code.chars_codes() {
-            println!("{c:?}")
-        }
-        code.mode = BrailleEncodingType::Hex;
-        for c in code.chars_codes() {
-            println!("{c:?}")
-        }
-        println!("{}", BRAILLE_BITS.into_iter().unique().count());
-        println!("{}", BRAILLE_HEX.into_iter().unique().count());
     }
 }
