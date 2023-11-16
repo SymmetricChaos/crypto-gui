@@ -137,9 +137,13 @@ impl Code for BrailleEncoding {
                         .ok_or_else(|| CodeError::invalid_input_char(c))?,
                 );
             }
-            out.push(' ');
+            if self.mode != BrailleEncodingType::Ascii {
+                out.push(' ');
+            }
         }
-        out.pop();
+        if self.mode != BrailleEncodingType::Ascii {
+            out.pop();
+        }
 
         Ok(out)
     }
@@ -149,14 +153,13 @@ impl Code for BrailleEncoding {
 
         if self.mode == BrailleEncodingType::Ascii {
             // Commonly BrailleASCII values are given with lowercase letters so that is fixed here
-            let upper = text.to_ascii_uppercase();
-            for c in upper.chars() {
+            for c in text.to_ascii_uppercase().chars() {
                 if c.is_whitespace() {
                     out.push(c);
                 } else {
-                    out.push_str(
+                    out.push(
                         self.mode
-                            .encode(c)
+                            .decode(&c.to_string())
                             .ok_or_else(|| CodeError::invalid_input_char(c))?,
                     );
                 }
@@ -181,6 +184,41 @@ mod braille_ascii_tests {
     use crate::braille::braille_data::UEB_ORDER;
 
     use super::*;
+
+    const BRAILLE_TEXT: &'static str = "⠀⠮⠐⠼⠫⠩⠯⠄⠷";
+    const ASCII_TEXT: &'static str = " !\"#$%&'(";
+    const BITS_TEXT: &'static str =
+        "000000 011101 000010 001111 110101 100101 111101 001000 111011";
+    const DOTS_TEXT: &'static str = "0 2346 5 3456 1246 146 12436 3 12356";
+    const HEX_TEXT: &'static str = "00 2E 10 3C 2B 29 2F 04 37";
+
+    #[test]
+    fn encode() {
+        let mut code = BrailleEncoding::default();
+        for (mode, text) in [
+            (BrailleEncodingType::Ascii, ASCII_TEXT),
+            (BrailleEncodingType::Bits, BITS_TEXT),
+            (BrailleEncodingType::Dots, DOTS_TEXT),
+            (BrailleEncodingType::Hex, HEX_TEXT),
+        ] {
+            code.mode = mode;
+            assert_eq!(text, code.encode(BRAILLE_TEXT).unwrap())
+        }
+    }
+
+    #[test]
+    fn decode() {
+        let mut code = BrailleEncoding::default();
+        for (mode, text) in [
+            (BrailleEncodingType::Ascii, ASCII_TEXT),
+            (BrailleEncodingType::Bits, BITS_TEXT),
+            (BrailleEncodingType::Dots, DOTS_TEXT),
+            (BrailleEncodingType::Hex, HEX_TEXT),
+        ] {
+            code.mode = mode;
+            assert_eq!(BRAILLE_TEXT, code.decode(text).unwrap())
+        }
+    }
 
     #[test]
     #[ignore = "pairing test"]
