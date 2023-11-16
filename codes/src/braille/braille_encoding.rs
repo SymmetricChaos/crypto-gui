@@ -28,10 +28,10 @@ const BRAILLE_BITS: [&'static str; 64] = [
 
 // Offsets from 2800 (hex)
 const BRAILLE_HEX: [&'static str; 64] = [
-    "00", "01", "03", "09", "13", "0B", "0B", "15", "0D", "0A", "14", "05", "07", "0D", "17", "0F",
-    "0F", "19", "11", "0E", "18", "19", "1B", "21", "2B", "23", "23", "2D", "25", "22", "2C", "15",
-    "17", "1D", "27", "1F", "1F", "29", "21", "1E", "28", "02", "06", "0C", "20", "16", "10", "24",
-    "1A", "0E", "22", "0C", "20", "2A", "16", "04", "18", "08", "12", "26", "0A", "1C", "1E", "14",
+    "00", "01", "03", "09", "19", "11", "0B", "1B", "13", "0A", "1A", "05", "07", "0D", "1D", "15",
+    "0F", "1F", "17", "0E", "1E", "25", "27", "2D", "3D", "35", "2F", "3F", "37", "2E", "3E", "21",
+    "23", "29", "39", "31", "2B", "3B", "33", "2A", "3A", "02", "06", "12", "32", "22", "16", "36",
+    "26", "14", "34", "0C", "2C", "3C", "1C", "04", "24", "08", "18", "38", "10", "28", "30", "20",
 ];
 
 // Offsets from 10240 (decimal)
@@ -165,6 +165,8 @@ impl Code for BrailleEncoding {
 
 #[cfg(test)]
 mod braille_ascii_tests {
+    use itertools::Itertools;
+
     use crate::braille::braille_data::UEB_ORDER;
 
     use super::*;
@@ -180,16 +182,19 @@ mod braille_ascii_tests {
     #[test]
     #[ignore = "create alternatives"]
     fn create() {
-        println!("create bits");
-        let mut output: Vec<String> = Vec::new();
-        for s in BRAILLE_DOTS.into_iter() {
-            let mut bits = ['0'; 6];
-            for c in s.chars() {
-                bits[c.to_digit(10).unwrap() as usize - 1] = '1';
-            }
-            output.push(bits.into_iter().collect())
-        }
-        println!("{:?}", output);
+        // println!("create bits");
+        // let mut output: Vec<String> = Vec::new();
+        // for s in BRAILLE_DOTS.into_iter() {
+        //     let mut bits = ['0'; 6];
+        //     for c in s.chars() {
+        //         if c == '0' {
+        //             continue;
+        //         }
+        //         bits[c.to_digit(10).unwrap() as usize - 1] = '1';
+        //     }
+        //     output.push(bits.into_iter().collect())
+        // }
+        // println!("{:?}", output);
 
         let mut hex_values: Vec<String> = Vec::new();
         let mut braille_nums = Vec::new();
@@ -202,9 +207,23 @@ mod braille_ascii_tests {
                 };
             }
             braille_nums.push(v);
-            hex_values.push(format!("{v:02x}"))
+            hex_values.push(format!("{v:02X}"))
         }
         println!("{:?}", hex_values);
         println!("{:?}", braille_nums);
+    }
+
+    #[test]
+    fn iterators() {
+        let mut code = BrailleEncoding::default();
+        for c in code.chars_codes() {
+            println!("{c:?}")
+        }
+        code.mode = BrailleEncodingType::Hex;
+        for c in code.chars_codes() {
+            println!("{c:?}")
+        }
+        println!("{}", BRAILLE_BITS.into_iter().unique().count());
+        println!("{}", BRAILLE_HEX.into_iter().unique().count());
     }
 }
