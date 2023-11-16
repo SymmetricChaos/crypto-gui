@@ -116,6 +116,41 @@ const NUMERIC_BRAILLE: [&'static str; 23] = [
     "⠐⠛", "⠐⠓", "⠐⠊", "⠐⠚", "⠌",
 ];
 
+const ALPHABETIC_WORDSIGNS: [&'static str; 23] = [
+    "but",
+    "can",
+    "do",
+    "every",
+    "from",
+    "go",
+    "have",
+    "just",
+    "knowledge",
+    "like",
+    "more",
+    "not",
+    "people",
+    "quite",
+    "rather",
+    "so",
+    "that",
+    "us",
+    "very",
+    "it",
+    "you",
+    "as",
+    "will",
+];
+const ALPHABETIC_WORDSIGNS_BRAILLE: [&'static str; 23] = [
+    "⠃", "⠉", "⠙", "⠑", "⠋", "⠛", "⠓", "⠚", "⠅", "⠇", "⠍", "⠝", "⠏", "⠟", "⠗", "⠎", "⠞", "⠥", "⠧",
+    "⠭", "⠽", "⠵", "⠺",
+];
+
+// const STRONG_CONTRACTIONS: [&'static str; 5] = ["and", "for", "of", "the", "with"];
+// const STRONG_GROUPSIGNS: [&'static str; 12] = [
+//     "ch", "gh", "sh", "th", "wh", "ed", "er", "ou", "ow", "st", "ing", "ar",
+// ];
+
 lazy_static! {
     pub static ref LETTER_MAP: BiMap<&'static str, &'static str> =
         bimap_from_iter(LETTERS.into_iter().zip(LETTERS_BRAILLE.into_iter()));
@@ -127,6 +162,11 @@ lazy_static! {
         bimap_from_iter(DIACRITIC.into_iter().zip(DIACRITIC_BRAILLE.into_iter()));
     pub static ref NUMERIC_MAP: BiMap<&'static str, &'static str> =
         bimap_from_iter(NUMERIC.into_iter().zip(NUMERIC_BRAILLE.into_iter()));
+    pub static ref ALPHABETIC_WORDSIGNS_MAP: BiMap<&'static str, &'static str> = bimap_from_iter(
+        ALPHABETIC_WORDSIGNS
+            .into_iter()
+            .zip(ALPHABETIC_WORDSIGNS_BRAILLE.into_iter())
+    );
 }
 
 #[cfg(test)]
