@@ -12,22 +12,25 @@ struct UebParser;
 
 pub fn visualize_tree(pairs: Pairs<'_, Rule>, space: String) {
     for pair in pairs.into_iter() {
-        match pair.as_rule() {
-            Rule::WHITESPACE => println!("{space}WHITESPACE({})", pair.as_str()),
-            Rule::basic_letter => println!("{space}basic_letter({})", pair.as_str()),
-            Rule::capitalize => println!("{space}capitalize({})", pair.as_str()),
-            Rule::numeric_symbol => println!("{space}numeric_symbol({})", pair.as_str()),
-            Rule::numeric_sequence => println!("{space}numeric_sequence({})", pair.as_str()),
-            Rule::letter => println!("{space}letter({})", pair.as_str()),
-            Rule::character => println!("{space}character({})", pair.as_str()),
-            Rule::symbol => println!("{space}symbol({})", pair.as_str()),
-            Rule::punctuation => println!("{space}punctuation({})", pair.as_str()),
-            Rule::passage => println!("{space}passage({})", pair.as_str()),
-            Rule::diacritic => println!("{space}diacritic({})", pair.as_str()),
-            Rule::capital_sequence => println!("{space}capital_sequence({})", pair.as_str()),
-            Rule::capital_passage => println!("{space}capital_passage({})", pair.as_str()),
-            Rule::unknown => println!("{space}unknown({})", pair.as_str()),
-        }
+        let x = pair.to_string();
+        println!("{space}{:?}({})", pair.as_rule(), pair.as_str());
+        // match pair.as_rule() {
+        //     Rule::WHITESPACE => println!("{space}WHITESPACE({})", pair.as_str()),
+        //     Rule::basic_letter => println!("{space}basic_letter({})", pair.as_str()),
+        //     Rule::capitalize => println!("{space}capitalize({})", pair.as_str()),
+        //     Rule::numeric_symbol => println!("{space}numeric_symbol({})", pair.as_str()),
+        //     Rule::numeric_sequence => println!("{space}numeric_sequence({})", pair.as_str()),
+        //     Rule::numeric_passage => println!("{space}numeric_passage({})", pair.as_str()),
+        //     Rule::letter => println!("{space}letter({})", pair.as_str()),
+        //     Rule::character => println!("{space}character({})", pair.as_str()),
+        //     Rule::symbol => println!("{space}symbol({})", pair.as_str()),
+        //     Rule::punctuation => println!("{space}punctuation({})", pair.as_str()),
+        //     Rule::passage => println!("{space}passage({})", pair.as_str()),
+        //     Rule::diacritic => println!("{space}diacritic({})", pair.as_str()),
+        //     Rule::capital_sequence => println!("{space}capital_sequence({})", pair.as_str()),
+        //     Rule::capital_passage => println!("{space}capital_passage({})", pair.as_str()),
+        //     Rule::unknown => println!("{space}unknown({})", pair.as_str()),
+        // }
         let mut space = space.clone();
         space.push_str("  ");
         visualize_tree(pair.into_inner(), space)
@@ -40,15 +43,13 @@ pub fn decode_passage(pairs: Pairs<'_, Rule>) -> String {
         match pair.as_rule() {
             Rule::passage => out.push_str(&decode_passage(pair.into_inner())),
             Rule::WHITESPACE => out.push_str(" "),
-            Rule::character =>
-                decode_character(pair.into_inner(), &mut out),
+            Rule::character => decode_character(pair.into_inner(), &mut out),
             Rule::capital_sequence => decode_capital_sequence(pair.into_inner(), &mut out),
             Rule::capital_passage => decode_capital_passage(pair.into_inner(), &mut out),
             Rule::numeric_sequence => decode_numeric_sequence(pair.into_inner(), &mut out),
+            // Rule::numeric_passage => decode_numeric_passage(pair.into_inner(), &mut out),
             Rule::unknown => out.push_str(pair.as_str()),
-            _ => unreachable!(
-                "a passage consists only of WHITESPACE, unknown, character, and capital_sequence at the top level"
-            ),
+            _ => unreachable!("unexpected Rule in Rule::passage {:?}", pair.as_rule()),
         }
     }
     out.nfc().collect()
@@ -62,7 +63,7 @@ pub fn decode_character(pairs: Pairs<'_, Rule>, string: &mut String) {
                 string.push_str(*PUNCTUATION_MAP.get_by_right(pair.as_str()).unwrap())
             }
             Rule::symbol => string.push_str(SYMBOL_MAP.get_by_right(pair.as_str()).unwrap()),
-            _ => unreachable!("characters are only: letter, number, symbol and punctuation"),
+            _ => unreachable!("unexpected Rule in Rule::character {:?}", pair.as_rule()),
         }
     }
 }
@@ -110,9 +111,9 @@ pub fn decode_capital_sequence(pairs: Pairs<'_, Rule>, string: &mut String) {
         match pair.as_rule() {
             Rule::basic_letter => {
                 let letter = LETTER_MAP
-                                .get_by_right(&pair.as_str())
-                                .unwrap()
-                                .to_uppercase();
+                    .get_by_right(&pair.as_str())
+                    .unwrap()
+                    .to_uppercase();
                 string.push_str(&letter);
                 string.push_str(&diacritics);
                 diacritics.clear();
@@ -121,7 +122,8 @@ pub fn decode_capital_sequence(pairs: Pairs<'_, Rule>, string: &mut String) {
                 diacritics.push_str(DIACRITIC_MAP.get_by_right(pair.as_str()).unwrap())
             }
             _ => unreachable!(
-                "capital sequence should only contain the rules: basic_letter, and diacritic; found {:?}", pair.as_rule()
+                "unexpected Rule in Rule::capital_sequence {:?}",
+                pair.as_rule()
             ),
         }
     }
