@@ -171,8 +171,6 @@ lazy_static! {
             .into_iter()
             .zip(ALPHABETIC_WORDSIGNS_BRAILLE.into_iter())
     );
-    pub static ref SPACER_MAP: BiMap<&'static str, &'static str> =
-        bimap_from_iter(SPACER.into_iter().zip(SPACER_BRAILLE.into_iter()));
 }
 
 #[cfg(test)]

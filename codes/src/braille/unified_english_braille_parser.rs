@@ -3,8 +3,7 @@ use pest_derive::Parser;
 use unicode_normalization::UnicodeNormalization;
 
 use super::unified_english_braille_maps::{
-    ALPHABETIC_WORDSIGNS_MAP, DIACRITIC_MAP, LETTER_MAP, NUMERIC_MAP, PUNCTUATION_MAP, SPACER_MAP,
-    SYMBOL_MAP,
+    ALPHABETIC_WORDSIGNS_MAP, DIACRITIC_MAP, LETTER_MAP, NUMERIC_MAP, PUNCTUATION_MAP, SYMBOL_MAP,
 };
 
 #[derive(Parser)]
@@ -28,8 +27,8 @@ pub fn decode_passage(pairs: Pairs<'_, Rule>) -> String {
             Rule::capital_sequence => decode_capital_sequence(pair.into_inner(), &mut out),
             Rule::capital_passage => decode_capital_passage(pair.into_inner(), &mut out),
             Rule::numeric_sequence => decode_numeric_sequence(pair.into_inner(), &mut out),
-            // Rule::numeric_passage => decode_numeric_passage(pair.into_inner(), &mut out),
-            Rule::alphabetic_wordsign => decode_alphabetic_wordsign(pair.into_inner(), &mut out),
+            Rule::numeric_passage => decode_numeric_passage(pair.into_inner(), &mut out),
+            // Rule::alpha_ws_alone => decode_alphabetic_wordsign(pair.into_inner(), &mut out),
             Rule::unknown => out.push_str(pair.as_str()),
             _ => unreachable!("unexpected Rule in Rule::passage {:?}", pair.as_rule()),
         }
@@ -50,25 +49,34 @@ pub fn decode_character(pairs: Pairs<'_, Rule>, string: &mut String) {
     }
 }
 
-pub fn decode_alphabetic_wordsign(pairs: Pairs<'_, Rule>, string: &mut String) {
+// pub fn decode_alphabetic_wordsign(pairs: Pairs<'_, Rule>, string: &mut String) {
+//     for pair in pairs.into_iter() {
+//         match pair.as_rule() {
+//             Rule::WHITESPACE => string.push_str(" "),
+//             //Rule::spacer => string.push_str(PUNCTUATION_MAP.get_by_right(pair.as_str()).unwrap()),
+//             Rule::alphabetic_wordsign => string.push_str(
+//                 *ALPHABETIC_WORDSIGNS_MAP
+//                     .get_by_right(pair.as_str())
+//                     .unwrap(),
+//             ),
+//             _ => unreachable!(
+//                 "unexpected Rule in Rule::alphabetic_wordsign {:?}",
+//                 pair.as_rule()
+//             ),
+//         }
+//     }
+// }
+
+pub fn decode_numeric_sequence(pairs: Pairs<'_, Rule>, string: &mut String) {
     for pair in pairs.into_iter() {
-        match pair.as_rule() {
-            Rule::WHITESPACE => string.push_str(" "),
-            Rule::spacer => string.push_str(SPACER_MAP.get_by_right(pair.as_str()).unwrap()),
-            Rule::wordsign => string.push_str(
-                *ALPHABETIC_WORDSIGNS_MAP
-                    .get_by_right(pair.as_str())
-                    .unwrap(),
-            ),
-            _ => unreachable!(
-                "unexpected Rule in Rule::alphabetic_wordsign {:?}",
-                pair.as_rule()
-            ),
+        if pair.as_rule() == Rule::WHITESPACE {
+            continue;
         }
+        string.push_str(NUMERIC_MAP.get_by_right(pair.as_str()).unwrap())
     }
 }
 
-pub fn decode_numeric_sequence(pairs: Pairs<'_, Rule>, string: &mut String) {
+pub fn decode_numeric_passage(pairs: Pairs<'_, Rule>, string: &mut String) {
     for pair in pairs.into_iter() {
         if pair.as_rule() == Rule::WHITESPACE {
             continue;
@@ -175,11 +183,11 @@ mod ueb_parser_tests {
             "123 1€ = 6.55957₣ 9 7:30 a.m",
             "⠼  ⠁⠃⠉⠀⠼⠁⠈⠑⠀⠐⠶⠀⠼⠋⠲⠑⠑⠊⠑⠛⠈⠋⠀⠼⠊⠀⠼⠛⠒⠼⠉⠚⠀⠁⠲⠍",
         ),
-        // Use wordsigns
-        (
-            "more people like pizza than will say so",
-            "⠍⠀⠏⠀⠇⠀⠏⠊⠵⠵⠁⠀⠞⠓⠁⠝⠀⠺⠀⠎⠁⠽⠀⠎ ",
-        ),
+        // // Use wordsigns
+        // (
+        //     "pizza more people like pizza than will say so",
+        //     "⠏⠊⠵⠵⠁  ⠍⠀⠏ ⠇⠀ ⠏⠊⠵⠵⠁⠀⠞⠓⠁⠝ ⠺ ⠎⠁⠽⠀⠎",
+        // ),
     ];
 
     use pest::Parser;
@@ -195,7 +203,6 @@ mod ueb_parser_tests {
     }
 
     #[test]
-    #[ignore = "decoding experiment"]
     fn decode() {
         for (sighted, braille) in TESTS.into_iter().copied() {
             let pairs = UebParser::parse(Rule::passage, braille).unwrap();

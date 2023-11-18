@@ -12,10 +12,12 @@ symbol = { "⠳⠕" | "⠳⠩" | "⠳⠪" | "⠳⠬" | "⠒" | "⠒⠒" | "⠶" 
 
 character = { letter | punctuation | symbol }
 
-// simple standing alone = preceeded and followed by a space, hyphen, or dash (a cell may stand alone at the start or end of text)
-spacer              =  { "⠤" | "⠠⠤" | "⠐⠠⠤" }
-wordsign            =  { "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠚" | "⠅" | "⠇" | "⠍" | "⠝" | "⠏" | "⠟" | "⠗" | "⠎" | "⠞" | "⠥" | "⠧" | "⠭" | "⠽" | "⠵" | "⠺" }
-alphabetic_wordsign = ${ (spacer | WHITESPACE | SOI) ~ wordsign ~ (spacer | WHITESPACE | EOI) }
+// simple standing alone = preceeded and followed by a space, hyphen, or dash (a cell may stand alone at the start or end of text) 
+//l_spacer            =  { "⠘⠦" | "⠠⠦" | "⠸⠦" | "⠠⠶" | "⠄" | "⠐⠣" | "⠨⠣" | "⠸⠣" }
+//r_spacer            =  { "⠂" | "⠆" | "⠒" | "⠲" | "⠖" | "⠦" | "⠘⠴" | "⠠⠴" | "⠸⠴" | "⠠⠶" | "⠄" | "⠐⠜" | "⠨⠜" | "⠸⠜" }
+//spacer              =  { "⠤" | "⠠⠤" | "⠐⠠⠤" }
+// alphabetic_wordsign =  { "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠚" | "⠅" | "⠇" | "⠍" | "⠝" | "⠏" | "⠟" | "⠗" | "⠎" | "⠞" | "⠥" | "⠧" | "⠭" | "⠽" | "⠵" | "⠺" }
+// alpha_ws_alone      =  { (WHITESPACE | SOI) ~ (alphabetic_wordsign ~ (WHITESPACE | EOI))+ }
 
 // The numeric_symbols are the digits, the digits preceeded by a numeric space, the period, comma, and the fraction bar.
 numeric_symbol   =  { "⠁" | "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠊" | "⠚" | "⠐⠁" |"⠐⠃"| "⠐⠉"|"⠐⠙"| "⠐⠑"| "⠐⠋" | "⠐⠛"|"⠐⠓"|"⠐⠊" | "⠐⠚" | "⠂" | "⠲" | "⠌" }
@@ -26,7 +28,7 @@ numeric_passage = { "⠼⠼" ~ numeric_symbol+ ~ "⠼⠄"}
 capital_sequence = ${ "⠠⠠" ~ (diacritic* ~ basic_letter)+ ~ (&"⠠" | &WHITESPACE | "⠠⠄")? }
 capital_passage  =  { "⠠⠠⠠" ~ (diacritic* ~ basic_letter)+  ~ "⠠⠄" }
 
-passage = { (capital_passage | capital_sequence | numeric_sequence | alphabetic_wordsign | character | unknown )+ }
+passage = { ( capital_passage | capital_sequence | numeric_sequence | character | unknown )+ }
 
 // grade_2_passage = {}
 
