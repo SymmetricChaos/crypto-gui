@@ -15,7 +15,7 @@ symbol = { "⠳⠕" | "⠳⠩" | "⠳⠪" | "⠳⠬" | "⠒" | "⠒⠒" | "⠶" 
 character = { letter | punctuation | number | symbol }
 
 capital_sequence = ${ capital_letter{3,} }
-capital_passage  =  { capital_letter{3,} ~ capital_letter+ }
+capital_passage  =  { capital_letter+ }
 
 passage = { (character | capital_sequence)+ }
 

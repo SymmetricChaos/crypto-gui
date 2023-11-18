@@ -3,7 +3,8 @@ use pest_derive::Parser;
 use unicode_normalization::UnicodeNormalization;
 
 use super::unified_english_braille_maps::{
-    DIACRITIC_MAP, LETTER_MAP, NUMERIC_MAP, PUNCTUATION_MAP, SYMBOL_MAP,
+    ALPHABETIC_WORDSIGNS_MAP, DIACRITIC_MAP, LETTER_MAP, NUMERIC_MAP, PUNCTUATION_MAP, SPACER_MAP,
+    SYMBOL_MAP,
 };
 
 #[derive(Parser)]
@@ -12,28 +13,8 @@ struct UebParser;
 
 pub fn visualize_tree(pairs: Pairs<'_, Rule>, space: String) {
     for pair in pairs.into_iter() {
-        let x = pair.to_string();
         println!("{space}{:?}({})", pair.as_rule(), pair.as_str());
-        // match pair.as_rule() {
-        //     Rule::WHITESPACE => println!("{space}WHITESPACE({})", pair.as_str()),
-        //     Rule::basic_letter => println!("{space}basic_letter({})", pair.as_str()),
-        //     Rule::capitalize => println!("{space}capitalize({})", pair.as_str()),
-        //     Rule::numeric_symbol => println!("{space}numeric_symbol({})", pair.as_str()),
-        //     Rule::numeric_sequence => println!("{space}numeric_sequence({})", pair.as_str()),
-        //     Rule::numeric_passage => println!("{space}numeric_passage({})", pair.as_str()),
-        //     Rule::letter => println!("{space}letter({})", pair.as_str()),
-        //     Rule::character => println!("{space}character({})", pair.as_str()),
-        //     Rule::symbol => println!("{space}symbol({})", pair.as_str()),
-        //     Rule::punctuation => println!("{space}punctuation({})", pair.as_str()),
-        //     Rule::passage => println!("{space}passage({})", pair.as_str()),
-        //     Rule::diacritic => println!("{space}diacritic({})", pair.as_str()),
-        //     Rule::capital_sequence => println!("{space}capital_sequence({})", pair.as_str()),
-        //     Rule::capital_passage => println!("{space}capital_passage({})", pair.as_str()),
-        //     Rule::unknown => println!("{space}unknown({})", pair.as_str()),
-        // }
-        let mut space = space.clone();
-        space.push_str("  ");
-        visualize_tree(pair.into_inner(), space)
+        visualize_tree(pair.into_inner(), format!("{space} "))
     }
 }
 
@@ -48,6 +29,7 @@ pub fn decode_passage(pairs: Pairs<'_, Rule>) -> String {
             Rule::capital_passage => decode_capital_passage(pair.into_inner(), &mut out),
             Rule::numeric_sequence => decode_numeric_sequence(pair.into_inner(), &mut out),
             // Rule::numeric_passage => decode_numeric_passage(pair.into_inner(), &mut out),
+            Rule::alphabetic_wordsign => decode_alphabetic_wordsign(pair.into_inner(), &mut out),
             Rule::unknown => out.push_str(pair.as_str()),
             _ => unreachable!("unexpected Rule in Rule::passage {:?}", pair.as_rule()),
         }
@@ -64,6 +46,24 @@ pub fn decode_character(pairs: Pairs<'_, Rule>, string: &mut String) {
             }
             Rule::symbol => string.push_str(SYMBOL_MAP.get_by_right(pair.as_str()).unwrap()),
             _ => unreachable!("unexpected Rule in Rule::character {:?}", pair.as_rule()),
+        }
+    }
+}
+
+pub fn decode_alphabetic_wordsign(pairs: Pairs<'_, Rule>, string: &mut String) {
+    for pair in pairs.into_iter() {
+        match pair.as_rule() {
+            Rule::WHITESPACE => string.push_str(" "),
+            Rule::spacer => string.push_str(SPACER_MAP.get_by_right(pair.as_str()).unwrap()),
+            Rule::wordsign => string.push_str(
+                *ALPHABETIC_WORDSIGNS_MAP
+                    .get_by_right(pair.as_str())
+                    .unwrap(),
+            ),
+            _ => unreachable!(
+                "unexpected Rule in Rule::alphabetic_wordsign {:?}",
+                pair.as_rule()
+            ),
         }
     }
 }
@@ -175,6 +175,11 @@ mod ueb_parser_tests {
             "123 1€ = 6.55957₣ 9 7:30 a.m",
             "⠼  ⠁⠃⠉⠀⠼⠁⠈⠑⠀⠐⠶⠀⠼⠋⠲⠑⠑⠊⠑⠛⠈⠋⠀⠼⠊⠀⠼⠛⠒⠼⠉⠚⠀⠁⠲⠍",
         ),
+        // Use wordsigns
+        (
+            "more people like pizza than will say so",
+            "⠍⠀⠏⠀⠇⠀⠏⠊⠵⠵⠁⠀⠞⠓⠁⠝⠀⠺⠀⠎⠁⠽⠀⠎ ",
+        ),
     ];
 
     use pest::Parser;
@@ -185,6 +190,7 @@ mod ueb_parser_tests {
         for (_sighted, braille) in TESTS.into_iter().copied() {
             let pairs = UebParser::parse(Rule::passage, braille).unwrap();
             visualize_tree(pairs, String::new());
+            println!();
         }
     }
 

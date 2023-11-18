@@ -146,6 +146,10 @@ const ALPHABETIC_WORDSIGNS_BRAILLE: [&'static str; 23] = [
     "⠭", "⠽", "⠵", "⠺",
 ];
 
+// Non-space characters that allow a character to Stand Alone
+const SPACER: [&'static str; 3] = ["-", "—", "⸺"];
+const SPACER_BRAILLE: [&'static str; 3] = ["⠤", "⠠⠤", "⠐⠠⠤"];
+
 // const STRONG_CONTRACTIONS: [&'static str; 5] = ["and", "for", "of", "the", "with"];
 // const STRONG_GROUPSIGNS: [&'static str; 12] = [
 //     "ch", "gh", "sh", "th", "wh", "ed", "er", "ou", "ow", "st", "ing", "ar",
@@ -167,6 +171,8 @@ lazy_static! {
             .into_iter()
             .zip(ALPHABETIC_WORDSIGNS_BRAILLE.into_iter())
     );
+    pub static ref SPACER_MAP: BiMap<&'static str, &'static str> =
+        bimap_from_iter(SPACER.into_iter().zip(SPACER_BRAILLE.into_iter()));
 }
 
 #[cfg(test)]
