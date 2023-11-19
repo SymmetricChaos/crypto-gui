@@ -4,3 +4,4 @@ pub mod simple_braille;
 pub mod unified_english_braille;
 pub mod unified_english_braille_maps;
 pub mod unified_english_braille_parser;
+pub mod unified_english_braille_parser_inv;
