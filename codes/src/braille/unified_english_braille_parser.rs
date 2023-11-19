@@ -59,7 +59,9 @@ pub fn decode_alpha_ws_alone(pairs: Pairs<'_, Rule>, string: &mut String) {
             Rule::WHITESPACE => string.push_str(" "),
             Rule::EOI => (),
             // Rule::SOI => (),
-            //Rule::spacer => string.push_str(PUNCTUATION_MAP.get_by_right(pair.as_str()).unwrap()),
+            Rule::spacer | Rule::l_spacer | Rule::r_spacer => {
+                string.push_str(PUNCTUATION_MAP.get_by_right(pair.as_str()).unwrap())
+            }
             Rule::alphabetic_wordsign => string.push_str(
                 *ALPHABETIC_WORDSIGNS_MAP
                     .get_by_right(pair.as_str())
@@ -192,8 +194,8 @@ mod ueb_parser_tests {
         ),
         // Use wordsigns
         (
-            "more people like pizza than will say so",
-            "⠍⠀⠏ ⠇ ⠏⠊⠵⠵⠁⠀⠞⠓⠁⠝ ⠺ ⠎⠁⠽⠀⠎",
+            "more, (people) like pizza than will say so",
+            "⠍⠂⠀⠐⠣⠏⠐⠜ ⠇ ⠏⠊⠵⠵⠁⠀⠞⠓⠁⠝ ⠺ ⠎⠁⠽⠀⠎",
         ),
     ];
 
