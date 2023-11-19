@@ -3,7 +3,7 @@ use pest_derive::Parser;
 use unicode_normalization::UnicodeNormalization;
 
 use super::unified_english_braille_maps::{
-    ALPHABETIC_WORDSIGNS_MAP, DIACRITIC_MAP, LETTER_MAP, NUMERIC_MAP, PUNCTUATION_MAP, SYMBOL_MAP,
+    DIACRITIC_MAP, LETTER_MAP, NUMERIC_MAP, PUNCTUATION_MAP, SYMBOL_MAP,
 };
 
 #[derive(Parser)]
@@ -22,19 +22,16 @@ pub fn decode_passage(pairs: Pairs<'_, Rule>) -> String {
     for pair in pairs.into_iter() {
         match pair.as_rule() {
             Rule::g1_passage => out.push_str(&decode_passage(pair.into_inner())),
-            Rule::g2_passage => out.push_str(&decode_passage(pair.into_inner())),
+            // Rule::g2_passage => out.push_str(&decode_passage(pair.into_inner())),
             Rule::WHITESPACE => out.push_str(" "),
             Rule::character => decode_character(pair.into_inner(), &mut out),
             Rule::capital_sequence => decode_capital_sequence(pair.into_inner(), &mut out),
             Rule::capital_passage => decode_capital_passage(pair.into_inner(), &mut out),
             Rule::numeric_sequence => decode_numeric_sequence(pair.into_inner(), &mut out),
             Rule::numeric_passage => decode_numeric_passage(pair.into_inner(), &mut out),
-            Rule::alpha_ws_alone => decode_alpha_ws_alone(pair.into_inner(), &mut out),
+            // Rule::alpha_ws_alone => decode_alpha_ws_alone(pair.into_inner(), &mut out),
             Rule::unknown => out.push_str(pair.as_str()),
-            _ => unreachable!(
-                "unexpected Rule in Rule::grade_1_passage {:?}",
-                pair.as_rule()
-            ),
+            _ => unreachable!("unexpected Rule in Rule::g1_passage {:?}", pair.as_rule()),
         }
     }
     out.nfc().collect()
@@ -53,27 +50,27 @@ pub fn decode_character(pairs: Pairs<'_, Rule>, string: &mut String) {
     }
 }
 
-pub fn decode_alpha_ws_alone(pairs: Pairs<'_, Rule>, string: &mut String) {
-    for pair in pairs.into_iter() {
-        match pair.as_rule() {
-            Rule::WHITESPACE => string.push_str(" "),
-            Rule::EOI => (),
-            // Rule::SOI => (),
-            Rule::spacer | Rule::l_spacer | Rule::r_spacer => {
-                string.push_str(PUNCTUATION_MAP.get_by_right(pair.as_str()).unwrap())
-            }
-            Rule::alphabetic_wordsign => string.push_str(
-                *ALPHABETIC_WORDSIGNS_MAP
-                    .get_by_right(pair.as_str())
-                    .unwrap(),
-            ),
-            _ => unreachable!(
-                "unexpected Rule in Rule::alpha_ws_alone {:?}",
-                pair.as_rule()
-            ),
-        }
-    }
-}
+// pub fn decode_alpha_ws_alone(pairs: Pairs<'_, Rule>, string: &mut String) {
+//     for pair in pairs.into_iter() {
+//         match pair.as_rule() {
+//             Rule::WHITESPACE => string.push_str(" "),
+//             Rule::EOI => (),
+//             // Rule::SOI => (),
+//             Rule::spacer | Rule::l_spacer | Rule::r_spacer => {
+//                 string.push_str(PUNCTUATION_MAP.get_by_right(pair.as_str()).unwrap())
+//             }
+//             Rule::alphabetic_wordsign => string.push_str(
+//                 *ALPHABETIC_WORDSIGNS_MAP
+//                     .get_by_right(pair.as_str())
+//                     .unwrap(),
+//             ),
+//             _ => unreachable!(
+//                 "unexpected Rule in Rule::alpha_ws_alone {:?}",
+//                 pair.as_rule()
+//             ),
+//         }
+//     }
+// }
 
 pub fn decode_numeric_sequence(pairs: Pairs<'_, Rule>, string: &mut String) {
     for pair in pairs.into_iter() {
@@ -193,10 +190,10 @@ mod ueb_parser_tests {
             "⠼  ⠁⠃⠉⠀⠼⠁⠈⠑⠀⠐⠶⠀⠼⠋⠲⠑⠑⠊⠑⠛⠈⠋⠀⠼⠊⠀⠼⠛⠒⠼⠉⠚⠀⠁⠲⠍",
         ),
         // Use wordsigns
-        (
-            "more, (people) like pizza than will say so",
-            "⠍⠂⠀⠐⠣⠏⠐⠜ ⠇ ⠏⠊⠵⠵⠁⠀⠞⠓⠁⠝ ⠺ ⠎⠁⠽⠀⠎",
-        ),
+        // (
+        //     "more, (people) like pizza than will say so a e i o u",
+        //     "⠍⠂⠀⠐⠣⠏⠐⠜ ⠇ ⠏⠊⠵⠵⠁⠀⠞⠓⠁⠝ ⠺ ⠎⠁⠽⠀⠎ ⠁⠀⠰⠑⠀⠊⠀⠕⠀⠰⠥",
+        // ),
     ];
 
     use pest::Parser;
@@ -204,8 +201,8 @@ mod ueb_parser_tests {
     #[test]
     #[ignore = "parsing experiment"]
     fn parse_tree() {
-        for (_sighted, braille) in TESTS.into_iter().copied() {
-            let pairs = UebParser::parse(Rule::g2_passage, braille).unwrap();
+        for (_print, braille) in TESTS.into_iter().copied() {
+            let pairs = UebParser::parse(Rule::g1_passage, braille).unwrap();
             visualize_tree(pairs, String::new());
             println!();
         }
@@ -213,11 +210,11 @@ mod ueb_parser_tests {
 
     #[test]
     fn decode() {
-        for (sighted, braille) in TESTS.into_iter().copied() {
-            let pairs = UebParser::parse(Rule::g2_passage, braille).unwrap();
+        for (print, braille) in TESTS.into_iter().copied() {
+            let pairs = UebParser::parse(Rule::g1_passage, braille).unwrap();
             let decoded = decode_passage(pairs);
             println!("{}", decoded);
-            assert_eq!(sighted, decoded)
+            assert_eq!(print, decoded)
         }
     }
 }
