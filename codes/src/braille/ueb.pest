@@ -1,9 +1,10 @@
-WHITESPACE =  { (" " | "⠀") }
+WHITESPACE =  { (" " | "⠀" | "\t") }
 unknown    = !{ ANY }
 
 basic_letter =  { "⠁" | "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠊" | "⠚" | "⠅" | "⠇" | "⠍" | "⠝" | "⠕" | "⠏" | "⠟" | "⠗" | "⠎" | "⠞" | "⠥" | "⠧" | "⠺" | "⠭" | "⠽" | "⠵" | "⠘⠝" | "⠸⠢" | "⠨⠁" | "⠨⠃" | "⠨⠛" | "⠨⠙" | "⠨⠑" | "⠨⠵" | "⠨⠱" | "⠨⠹" | "⠨⠊" | "⠨⠅" | "⠨⠇" | "⠨⠍" | "⠨⠝" | "⠨⠭" | "⠨⠕" | "⠨⠏" | "⠨⠗" | "⠨⠎" | "⠨⠞" | "⠨⠥" | "⠨⠋" | "⠨⠯" | "⠨⠽" | "⠨⠺" }
 capitalize   =  { "⠠" }
 diacritic    =  { "⠈⠡" | "⠈⠒" | "⠈⠬" | "⠈⠤" | "⠘⠯" | "⠘⠡" | "⠘⠩" | "⠘⠫" | "⠘⠻" | "⠘⠒" | "⠘⠌" | "⠘⠬" }
+lower_letter = ${ diacritic* ~ basic_letter }
 letter       = ${ capitalize? ~ diacritic* ~ basic_letter }
 
 punctuation = { "⠂" | "⠆" | "⠒" | "⠲" | "⠖" | "⠦" | "⠘⠦" | "⠘⠴" | "⠠⠦" | "⠠⠴" | "⠸⠦" | "⠸⠴" | "⠠⠶" | "⠄" | "⠐⠣" | "⠐⠜" | "⠨⠣" | "⠨⠜" | "⠈⠣" | "⠈⠜" | "⠸⠣" | "⠸⠜" | "⠸⠌" | "⠸⠡" | "⠤" | "⠠⠤" | "⠐⠠⠤" | "⠨⠤" }
@@ -16,20 +17,19 @@ character = { letter | punctuation | symbol }
 //l_spacer            =  { "⠘⠦" | "⠠⠦" | "⠸⠦" | "⠠⠶" | "⠄" | "⠐⠣" | "⠨⠣" | "⠸⠣" }
 //r_spacer            =  { "⠂" | "⠆" | "⠒" | "⠲" | "⠖" | "⠦" | "⠘⠴" | "⠠⠴" | "⠸⠴" | "⠠⠶" | "⠄" | "⠐⠜" | "⠨⠜" | "⠸⠜" }
 //spacer              =  { "⠤" | "⠠⠤" | "⠐⠠⠤" }
-// alphabetic_wordsign =  { "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠚" | "⠅" | "⠇" | "⠍" | "⠝" | "⠏" | "⠟" | "⠗" | "⠎" | "⠞" | "⠥" | "⠧" | "⠭" | "⠽" | "⠵" | "⠺" }
-// alpha_ws_alone      =  { (WHITESPACE | SOI) ~ (alphabetic_wordsign ~ (WHITESPACE | EOI))+ }
+alphabetic_wordsign =  { "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠚" | "⠅" | "⠇" | "⠍" | "⠝" | "⠏" | "⠟" | "⠗" | "⠎" | "⠞" | "⠥" | "⠧" | "⠭" | "⠽" | "⠵" | "⠺" }
+alpha_ws_alone      =  { (WHITESPACE | SOI) ~ (alphabetic_wordsign ~ (WHITESPACE | EOI))+ }
 
 // The numeric_symbols are the digits, the digits preceeded by a numeric space, the period, comma, and the fraction bar.
 numeric_symbol   =  { "⠁" | "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠊" | "⠚" | "⠐⠁" |"⠐⠃"| "⠐⠉"|"⠐⠙"| "⠐⠑"| "⠐⠋" | "⠐⠛"|"⠐⠓"|"⠐⠊" | "⠐⠚" | "⠂" | "⠲" | "⠌" }
 numeric_sequence = ${ "⠼" ~ WHITESPACE* ~ numeric_symbol+ }
 
-numeric_passage = { "⠼⠼" ~ numeric_symbol+ ~ "⠼⠄"}
+numeric_passage = ${ "⠼⠼" ~ numeric_symbol+ ~ "⠼⠄"}
 
-capital_sequence = ${ "⠠⠠" ~ (diacritic* ~ basic_letter)+ ~ (&"⠠" | &WHITESPACE | "⠠⠄")? }
-capital_passage  =  { "⠠⠠⠠" ~ (diacritic* ~ basic_letter)+  ~ "⠠⠄" }
+capital_sequence = ${ "⠠⠠" ~ lower_letter+ ~ (&"⠠" | &WHITESPACE | "⠠⠄")? }
+capital_passage  = ${ "⠠⠠⠠" ~ (lower_letter | punctuation | symbol | numeric_sequence)+ ~ (WHITESPACE+ ~ (lower_letter | punctuation | symbol | numeric_sequence)+)+ ~ "⠠⠄" }
 
-passage = { ( capital_passage | capital_sequence | numeric_sequence | character | unknown )+ }
-
-// grade_2_passage = {}
+g1_passage = ${ ( capital_passage | capital_sequence | numeric_sequence | character | WHITESPACE | unknown )+ }
+g2_passage = ${ ( alpha_ws_alone | capital_passage | capital_sequence | numeric_sequence | character | WHITESPACE | unknown )+ }
 
 // braille_cell    =  { "⠁" | "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠊" | "⠚" | "⠅" | "⠇" | "⠍" | "⠝" | "⠕" | "⠏" | "⠟" | "⠗" | "⠎" | "⠞" | "⠥" | "⠧" | "⠭" | "⠽" | "⠵" | "⠯" | "⠿" | "⠷" | "⠮" | "⠾" | "⠡" | "⠣" | "⠩" | "⠹" | "⠱" | "⠫" | "⠻" | "⠳" | "⠪" | "⠺" | "⠂" | "⠆" | "⠒" | "⠲" | "⠢" | "⠖" | "⠶" | "⠦" | "⠔" | "⠴" | "⠌" | "⠬" | "⠼" | "⠜" | "⠄" | "⠤" | "⠈" | "⠘" | "⠸" | "⠐" | "⠨" | "⠰" | "⠠"}

@@ -21,16 +21,20 @@ pub fn decode_passage(pairs: Pairs<'_, Rule>) -> String {
     let mut out = String::new();
     for pair in pairs.into_iter() {
         match pair.as_rule() {
-            Rule::passage => out.push_str(&decode_passage(pair.into_inner())),
+            Rule::g1_passage => out.push_str(&decode_passage(pair.into_inner())),
+            Rule::g2_passage => out.push_str(&decode_passage(pair.into_inner())),
             Rule::WHITESPACE => out.push_str(" "),
             Rule::character => decode_character(pair.into_inner(), &mut out),
             Rule::capital_sequence => decode_capital_sequence(pair.into_inner(), &mut out),
             Rule::capital_passage => decode_capital_passage(pair.into_inner(), &mut out),
             Rule::numeric_sequence => decode_numeric_sequence(pair.into_inner(), &mut out),
             Rule::numeric_passage => decode_numeric_passage(pair.into_inner(), &mut out),
-            // Rule::alpha_ws_alone => decode_alphabetic_wordsign(pair.into_inner(), &mut out),
+            Rule::alpha_ws_alone => decode_alpha_ws_alone(pair.into_inner(), &mut out),
             Rule::unknown => out.push_str(pair.as_str()),
-            _ => unreachable!("unexpected Rule in Rule::passage {:?}", pair.as_rule()),
+            _ => unreachable!(
+                "unexpected Rule in Rule::grade_1_passage {:?}",
+                pair.as_rule()
+            ),
         }
     }
     out.nfc().collect()
@@ -49,23 +53,25 @@ pub fn decode_character(pairs: Pairs<'_, Rule>, string: &mut String) {
     }
 }
 
-// pub fn decode_alphabetic_wordsign(pairs: Pairs<'_, Rule>, string: &mut String) {
-//     for pair in pairs.into_iter() {
-//         match pair.as_rule() {
-//             Rule::WHITESPACE => string.push_str(" "),
-//             //Rule::spacer => string.push_str(PUNCTUATION_MAP.get_by_right(pair.as_str()).unwrap()),
-//             Rule::alphabetic_wordsign => string.push_str(
-//                 *ALPHABETIC_WORDSIGNS_MAP
-//                     .get_by_right(pair.as_str())
-//                     .unwrap(),
-//             ),
-//             _ => unreachable!(
-//                 "unexpected Rule in Rule::alphabetic_wordsign {:?}",
-//                 pair.as_rule()
-//             ),
-//         }
-//     }
-// }
+pub fn decode_alpha_ws_alone(pairs: Pairs<'_, Rule>, string: &mut String) {
+    for pair in pairs.into_iter() {
+        match pair.as_rule() {
+            Rule::WHITESPACE => string.push_str(" "),
+            Rule::EOI => (),
+            // Rule::SOI => (),
+            //Rule::spacer => string.push_str(PUNCTUATION_MAP.get_by_right(pair.as_str()).unwrap()),
+            Rule::alphabetic_wordsign => string.push_str(
+                *ALPHABETIC_WORDSIGNS_MAP
+                    .get_by_right(pair.as_str())
+                    .unwrap(),
+            ),
+            _ => unreachable!(
+                "unexpected Rule in Rule::alpha_ws_alone {:?}",
+                pair.as_rule()
+            ),
+        }
+    }
+}
 
 pub fn decode_numeric_sequence(pairs: Pairs<'_, Rule>, string: &mut String) {
     for pair in pairs.into_iter() {
@@ -82,6 +88,26 @@ pub fn decode_numeric_passage(pairs: Pairs<'_, Rule>, string: &mut String) {
             continue;
         }
         string.push_str(NUMERIC_MAP.get_by_right(pair.as_str()).unwrap())
+    }
+}
+
+pub fn decode_lower_letter_in_capital_mode(pairs: Pairs<'_, Rule>, string: &mut String) {
+    let mut diacritics = String::new();
+    for pair in pairs.into_iter() {
+        match pair.as_rule() {
+            Rule::basic_letter => {
+                let letter = LETTER_MAP
+                    .get_by_right(&pair.as_str())
+                    .unwrap()
+                    .to_uppercase();
+                string.push_str(&letter);
+                string.push_str(&diacritics);
+            }
+            Rule::diacritic => {
+                diacritics.push_str(DIACRITIC_MAP.get_by_right(pair.as_str()).unwrap())
+            }
+            _ => string.push_str(pair.as_str()),
+        }
     }
 }
 
@@ -114,21 +140,9 @@ pub fn decode_letter(pairs: Pairs<'_, Rule>, string: &mut String) {
 }
 
 pub fn decode_capital_sequence(pairs: Pairs<'_, Rule>, string: &mut String) {
-    let mut diacritics = String::new();
     for pair in pairs.into_iter() {
         match pair.as_rule() {
-            Rule::basic_letter => {
-                let letter = LETTER_MAP
-                    .get_by_right(&pair.as_str())
-                    .unwrap()
-                    .to_uppercase();
-                string.push_str(&letter);
-                string.push_str(&diacritics);
-                diacritics.clear();
-            }
-            Rule::diacritic => {
-                diacritics.push_str(DIACRITIC_MAP.get_by_right(pair.as_str()).unwrap())
-            }
+            Rule::lower_letter => decode_lower_letter_in_capital_mode(pair.into_inner(), string),
             _ => unreachable!(
                 "unexpected Rule in Rule::capital_sequence {:?}",
                 pair.as_rule()
@@ -138,22 +152,15 @@ pub fn decode_capital_sequence(pairs: Pairs<'_, Rule>, string: &mut String) {
 }
 
 pub fn decode_capital_passage(pairs: Pairs<'_, Rule>, string: &mut String) {
-    let mut diacritics = String::new();
     for pair in pairs.into_iter() {
         match pair.as_rule() {
             Rule::WHITESPACE => string.push_str(" "),
-            Rule::basic_letter => {
-                let letter = LETTER_MAP
-                                .get_by_right(&pair.as_str())
-                                .unwrap()
-                                .to_uppercase();
-                string.push_str(&letter);
-                string.push_str(&diacritics);
-                diacritics.clear();
+            Rule::lower_letter => decode_lower_letter_in_capital_mode(pair.into_inner(), string),
+            Rule::punctuation => {
+                string.push_str(*PUNCTUATION_MAP.get_by_right(pair.as_str()).unwrap())
             }
-            Rule::diacritic => {
-                diacritics.push_str(DIACRITIC_MAP.get_by_right(pair.as_str()).unwrap())
-            }
+            Rule::symbol => string.push_str(SYMBOL_MAP.get_by_right(pair.as_str()).unwrap()),
+            Rule::numeric_sequence => decode_numeric_sequence(pair.into_inner(), string),
             _ => unreachable!(
                 "capital passage should only contain the rules: WHITESPACE, basic_letter, and diacritic; found {:?}", pair.as_rule()
             ),
@@ -169,8 +176,8 @@ mod ueb_parser_tests {
     const TESTS: &[(&'static str, &'static str)] = &[
         // Capitalization
         (
-            "ΣAŨB  Xyz CAPITAL PASSAGE WITH SPACES",
-            "⠠⠠⠨⠎⠁⠘⠻⠥⠃  ⠠⠭⠽⠵ ⠠⠠⠠⠉⠁⠏⠊⠞⠁⠇⠀⠏⠁⠎⠎⠁⠛⠑⠀⠺⠊⠞⠓⠀⠎⠏⠁⠉⠑⠎⠠⠄",
+            "ΣAŨB  Xyz FOR SALE: 1975 FIREBIRD",
+            "⠠⠠⠨⠎⠁⠘⠻⠥⠃  ⠠⠭⠽⠵ ⠠⠠⠠⠋⠕⠗⠀⠎⠁⠇⠑⠒⠀⠼⠁⠊⠛⠑⠀⠋⠊⠗⠑⠃⠊⠗⠙⠠⠄",
         ),
         // Diacritics and Greek
         (
@@ -183,11 +190,11 @@ mod ueb_parser_tests {
             "123 1€ = 6.55957₣ 9 7:30 a.m",
             "⠼  ⠁⠃⠉⠀⠼⠁⠈⠑⠀⠐⠶⠀⠼⠋⠲⠑⠑⠊⠑⠛⠈⠋⠀⠼⠊⠀⠼⠛⠒⠼⠉⠚⠀⠁⠲⠍",
         ),
-        // // Use wordsigns
-        // (
-        //     "pizza more people like pizza than will say so",
-        //     "⠏⠊⠵⠵⠁  ⠍⠀⠏ ⠇⠀ ⠏⠊⠵⠵⠁⠀⠞⠓⠁⠝ ⠺ ⠎⠁⠽⠀⠎",
-        // ),
+        // Use wordsigns
+        (
+            "more people like pizza than will say so",
+            "⠍⠀⠏ ⠇ ⠏⠊⠵⠵⠁⠀⠞⠓⠁⠝ ⠺ ⠎⠁⠽⠀⠎",
+        ),
     ];
 
     use pest::Parser;
@@ -196,7 +203,7 @@ mod ueb_parser_tests {
     #[ignore = "parsing experiment"]
     fn parse_tree() {
         for (_sighted, braille) in TESTS.into_iter().copied() {
-            let pairs = UebParser::parse(Rule::passage, braille).unwrap();
+            let pairs = UebParser::parse(Rule::g2_passage, braille).unwrap();
             visualize_tree(pairs, String::new());
             println!();
         }
@@ -205,7 +212,7 @@ mod ueb_parser_tests {
     #[test]
     fn decode() {
         for (sighted, braille) in TESTS.into_iter().copied() {
-            let pairs = UebParser::parse(Rule::passage, braille).unwrap();
+            let pairs = UebParser::parse(Rule::g2_passage, braille).unwrap();
             let decoded = decode_passage(pairs);
             println!("{}", decoded);
             assert_eq!(sighted, decoded)
