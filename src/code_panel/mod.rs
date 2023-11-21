@@ -9,9 +9,9 @@ use egui::Ui;
 
 use self::{
     ascii85_controls::Ascii85Frame, ascii_controls::AsciiFrame, bacon_contols::BaconFrame,
-    balanced_ternary_controls::BalancedTernaryFrame, base16_controls::Base16Frame,
-    base32_controls::Base32Frame, base64_controls::Base64Frame, base_n_controls::BaseNFrame,
-    basex_controls::BaseXFrame, baudot_controls::BaudotFrame,
+    balanced_ternary_controls::BalancedTernaryFrame, barbier_controls::BarbierFrame,
+    base16_controls::Base16Frame, base32_controls::Base32Frame, base64_controls::Base64Frame,
+    base_n_controls::BaseNFrame, basex_controls::BaseXFrame, baudot_controls::BaudotFrame,
     biquinary_controls::BiquinaryDecimalFrame, block_controls::BlockCodeFrame,
     braille_controls::BrailleFrame, braille_encoding_controls::BrailleEncodingFrame,
     crc_controls::CyclicRedundancyCheckFrame, damm_controls::DammFrame,
@@ -35,6 +35,7 @@ mod ascii85_controls;
 mod ascii_controls;
 mod bacon_contols;
 mod balanced_ternary_controls;
+mod barbier_controls;
 mod base16_controls;
 mod base32_controls;
 mod base64_controls;
@@ -170,6 +171,7 @@ pub struct CodeInterface {
 
     // Other Codes
     bacon: BaconFrame,
+    barbier: BarbierFrame,
     tap: TapCodeFrame,
 }
 
@@ -265,7 +267,7 @@ impl CodeInterface {
             ui,
         );
         combox_box(
-            &[CodeId::Bacon, CodeId::Tap],
+            &[CodeId::Bacon, CodeId::Barbier, CodeId::Tap],
             active_code,
             CodeCategory::Other,
             ui,
@@ -277,6 +279,7 @@ impl CodeInterface {
             CodeId::Ascii => &mut self.ascii,
             CodeId::Ascii85 => &mut self.ascii85,
             CodeId::Bacon => &mut self.bacon,
+            CodeId::Barbier => &mut self.barbier,
             CodeId::BalancedTernary => &mut self.balanced_ternary,
             CodeId::BaseN => &mut self.basen,
             CodeId::BaseX => &mut self.basex,
