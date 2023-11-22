@@ -28,20 +28,6 @@ impl BarbierCode {
             .ok_or_else(|| CodeError::invalid_input_group(symbol))?;
         Ok((num / Self::SIDE_LEN, num % Self::SIDE_LEN))
     }
-
-    pub fn show_grid(&self) -> String {
-        let size = (Self::SIDE_LEN + 2) * (Self::SIDE_LEN + 1);
-        let mut square = String::with_capacity(size);
-
-        square.push_str("    1    2    3    4    5    6");
-        for (n, c) in Self::GRID.iter().enumerate() {
-            if n % Self::SIDE_LEN == 0 {
-                square.push_str(&format!("\n"));
-            }
-            square.push_str(&format!("{c:5}"));
-        }
-        square
-    }
 }
 
 impl Code for BarbierCode {
