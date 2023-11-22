@@ -19,7 +19,20 @@ impl CodeFrame for BarbierFrame {
         ui.add_space(8.0);
 
         ui.subheading("Grid");
-        ui.mono(self.code.show_grid());
+        egui::Grid::new("columnar_grid")
+            .num_columns(6)
+            .min_col_width(5.0)
+            .striped(true)
+            .show(ui, |ui| {
+                let mut sylls = BarbierCode::GRID.into_iter();
+                for _row in 0..6 {
+                    for _col in 0..6 {
+                        ui.mono(sylls.next().unwrap());
+                    }
+                    ui.end_row();
+                }
+            });
+
         ui.add_space(16.0);
     }
 

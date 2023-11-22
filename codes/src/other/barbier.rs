@@ -15,7 +15,7 @@ impl Default for BarbierCode {
 impl BarbierCode {
     const SIDE_LEN: usize = 6;
 
-    const GRID: [&'static str; 36] = [
+    pub const GRID: [&'static str; 36] = [
         "a", "i", "o", "u", "é", "è", "an", "in", "on", "un", "eu", "ou", "b", "d", "g", "j", "v",
         "z", "p", "t", "q", "ch", "f", "s", "l", "m", "n", "r", "gn", "ll", "oi", "oin", "ian",
         "ien", "ion", "ieu",
@@ -33,12 +33,12 @@ impl BarbierCode {
         let size = (Self::SIDE_LEN + 2) * (Self::SIDE_LEN + 1);
         let mut square = String::with_capacity(size);
 
+        square.push_str("    1    2    3    4    5    6");
         for (n, c) in Self::GRID.iter().enumerate() {
             if n % Self::SIDE_LEN == 0 {
                 square.push_str(&format!("\n"));
             }
-            square.push_str(*c);
-            square.push(' ');
+            square.push_str(&format!("{c:5}"));
         }
         square
     }
