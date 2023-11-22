@@ -13,6 +13,17 @@ const LETTERS_BRAILLE: [&'static str; 52] = [
     "⠨⠊", "⠨⠅", "⠨⠇", "⠨⠍", "⠨⠝", "⠨⠭", "⠨⠕", "⠨⠏", "⠨⠗", "⠨⠎", "⠨⠞", "⠨⠥", "⠨⠋", "⠨⠯", "⠨⠽", "⠨⠺",
 ];
 
+const LETTERS_UPPER: [&'static str; 52] = [
+    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S",
+    "T", "U", "V", "W", "X", "Y", "Z", "Ŋ", "Ə", "Α", "Β", "Γ", "Δ", "Ε", "Ζ", "Η", "Θ", "Ι", "Κ",
+    "Λ", "Μ", "Ν", "Ξ", "Ο", "Π", "Ρ", "Σ", "Τ", "Υ", "Φ", "Χ", "Ψ", "Ω",
+];
+const LETTERS_UPPER_BRAILLE: [&'static str; 52] = [
+    "⠁", "⠃", "⠉", "⠙", "⠑", "⠋", "⠛", "⠓", "⠊", "⠚", "⠅", "⠇", "⠍", "⠝", "⠕", "⠏", "⠟", "⠗", "⠎",
+    "⠞", "⠥", "⠧", "⠺", "⠭", "⠽", "⠵", "⠘⠝", "⠸⠢", "⠨⠁", "⠨⠃", "⠨⠛", "⠨⠙", "⠨⠑", "⠨⠵", "⠨⠱", "⠨⠹",
+    "⠨⠊", "⠨⠅", "⠨⠇", "⠨⠍", "⠨⠝", "⠨⠭", "⠨⠕", "⠨⠏", "⠨⠗", "⠨⠎", "⠨⠞", "⠨⠥", "⠨⠋", "⠨⠯", "⠨⠽", "⠨⠺",
+];
+
 const SYMBOLS: [&'static str; 44] = [
     "→", "↓", "←", "↑", "∶", "∷", "′", "″", "♮", "♭", "♯", "@", "¢", "€", "₣", "£", "₦", "$", "¥",
     "&", "<", "^", "~", ">", "†", "‡", "©", "°", "¶", "®", "§", "™", "♀", "♂", "#", "•", "〃", "+",
@@ -154,6 +165,11 @@ const ALPHABETIC_WORDSIGNS_BRAILLE: [&'static str; 23] = [
 lazy_static! {
     pub static ref LETTER_MAP: BiMap<&'static str, &'static str> =
         bimap_from_iter(LETTERS.into_iter().zip(LETTERS_BRAILLE.into_iter()));
+    pub static ref LETTER_UPPER_MAP: BiMap<&'static str, &'static str> = bimap_from_iter(
+        LETTERS_UPPER
+            .into_iter()
+            .zip(LETTERS_UPPER_BRAILLE.into_iter())
+    );
     pub static ref SYMBOL_MAP: BiMap<&'static str, &'static str> =
         bimap_from_iter(SYMBOLS.into_iter().zip(SYMBOLS_BRAILLE.into_iter()));
     pub static ref PUNCTUATION_MAP: BiMap<&'static str, &'static str> =

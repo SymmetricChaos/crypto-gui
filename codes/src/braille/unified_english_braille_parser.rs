@@ -204,7 +204,6 @@ mod ueb_parser_tests {
         for (_print, braille) in TESTS.into_iter().copied() {
             let pairs = UebParser::parse(Rule::g1_passage, braille).unwrap();
             visualize_tree(pairs, String::new());
-            println!();
         }
     }
 

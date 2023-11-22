@@ -3,7 +3,7 @@ use pest_derive::Parser;
 use unicode_normalization::UnicodeNormalization;
 
 use super::unified_english_braille_maps::{
-    DIACRITIC_MAP, LETTER_MAP, NUMERIC_MAP, PUNCTUATION_MAP, SYMBOL_MAP,
+    DIACRITIC_MAP, LETTER_MAP, LETTER_UPPER_MAP, NUMERIC_MAP, PUNCTUATION_MAP, SYMBOL_MAP,
 };
 
 #[derive(Parser)]
@@ -66,7 +66,7 @@ pub fn encode_character(pairs: Pairs<'_, Rule>, string: &mut String) {
 //     }
 // }
 
-// pub fn encode_lower_letter_in_capital_mode(pairs: Pairs<'_, Rule>, string: &mut String) {
+// pub fn encode_upper_letter_in_capital_mode(pairs: Pairs<'_, Rule>, string: &mut String) {
 //     let mut diacritics = String::new();
 //     for pair in pairs.into_iter() {
 //         match pair.as_rule() {
@@ -87,23 +87,35 @@ pub fn encode_character(pairs: Pairs<'_, Rule>, string: &mut String) {
 // }
 
 pub fn encode_letter(pairs: Pairs<'_, Rule>, string: &mut String) {
+    let mut letter = String::new();
     let mut diacritics = String::new();
     for pair in pairs.into_iter() {
         match pair.as_rule() {
-            Rule::upper_letter => {}
-            Rule::upper_letter => {}
+            Rule::upper_letter => {
+                diacritics.push('⠠');
+                letter.push_str(LETTER_UPPER_MAP.get_by_left(pair.as_str()).unwrap())
+            }
+            Rule::lower_letter => letter.push_str(LETTER_MAP.get_by_left(pair.as_str()).unwrap()),
             Rule::diacritic => {
-                diacritics.push_str(DIACRITIC_MAP.get_by_right(pair.as_str()).unwrap())
+                diacritics.push_str(DIACRITIC_MAP.get_by_left(pair.as_str()).unwrap())
             }
             _ => unreachable!("unexpected Rule in Rule::letter {:?}", pair.as_rule()),
         }
     }
+    string.push_str(&diacritics);
+    string.push_str(&letter);
 }
 
 // pub fn encode_capital_sequence(pairs: Pairs<'_, Rule>, string: &mut String) {
+//     let mut letter = String::new();
+//     let mut diacritics = String::new();
+//     string.push_str("⠠⠠");
 //     for pair in pairs.into_iter() {
 //         match pair.as_rule() {
-//             Rule::lower_letter => encode_lower_letter_in_capital_mode(pair.into_inner(), string),
+//             Rule::upper_letter => encode_lower_letter_in_capital_mode(pair.into_inner(), string),
+//             Rule::diacritic => {
+//                 diacritics.push_str(DIACRITIC_MAP.get_by_left(pair.as_str()).unwrap())
+//             }
 //             _ => unreachable!(
 //                 "unexpected Rule in Rule::capital_sequence {:?}",
 //                 pair.as_rule()
@@ -156,17 +168,17 @@ mod ueb_parser_tests {
             let decomposed: String = print.nfd().collect();
             let pairs = UebInvParser::parse(Rule::g1_passage, &decomposed).unwrap();
             visualize_tree(pairs, String::new());
-            println!();
         }
     }
 
-    // #[test]
-    // fn encode() {
-    //     for (print, braille) in TESTS.into_iter().copied() {
-    //         let pairs = UebInvParser::parse(Rule::g1_passage, print).unwrap();
-    //         let encoded = encode_passage(pairs);
-    //         println!("{}", encoded);
-    //         assert_eq!(print, encoded)
-    //     }
-    // }
+    #[test]
+    fn encode() {
+        for (print, braille) in TESTS.into_iter().copied() {
+            let decomposed: String = print.nfd().collect();
+            let pairs = UebInvParser::parse(Rule::g1_passage, &decomposed).unwrap();
+            let encoded = encode_passage(pairs);
+            println!("{}", encoded);
+            assert_eq!(braille, encoded)
+        }
+    }
 }
