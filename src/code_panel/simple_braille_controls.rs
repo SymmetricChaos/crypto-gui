@@ -35,10 +35,18 @@ impl CodeFrame for BrailleFrame {
         });
 
         match self.code.language {
-            BrailleLanguage::English => ui.label("A partial implementation of Unified English Braille."),
+            BrailleLanguage::English => ui.label("A partial implementation of the modern Unified English Braille. A more complete implementation of Grade 1 UEB is availble."),
             BrailleLanguage::French => ui.label("Louis Braille's orginal encoding."),
             BrailleLanguage::American => ui.label("American Braille is a now obsolete Braille encoding that rearranged some characters so that frequently used ones required fewer dots to ease writing by hand."),
         };
+
+        if let Some(sign) = self.code.language.capital_sign() {
+            ui.label(format!("Capital Prefix  {}", sign));
+        }
+
+        if let Some(sign) = self.code.language.number_sign() {
+            ui.label(format!("Numeric Prefix  {}", sign));
+        }
 
         ui.add_space(16.0);
         ui.fill_code_columns(8, 8, Box::new(self.code.language.chars_codes()));

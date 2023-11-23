@@ -13,9 +13,8 @@ use self::{
     base16_controls::Base16Frame, base32_controls::Base32Frame, base64_controls::Base64Frame,
     base_n_controls::BaseNFrame, basex_controls::BaseXFrame, baudot_controls::BaudotFrame,
     biquinary_controls::BiquinaryDecimalFrame, block_controls::BlockCodeFrame,
-    braille_controls::BrailleFrame, braille_encoding_controls::BrailleEncodingFrame,
-    crc_controls::CyclicRedundancyCheckFrame, damm_controls::DammFrame,
-    elias_controls::EliasCodeFrame, factoradic_controls::FactoradicFrame,
+    braille_encoding_controls::BrailleEncodingFrame, crc_controls::CyclicRedundancyCheckFrame,
+    damm_controls::DammFrame, elias_controls::EliasCodeFrame, factoradic_controls::FactoradicFrame,
     fibonacci_controls::FibonacciCodeFrame, godel_controls::GodelFrame,
     gray_controls::GrayCodeFrame, hamming_controls::HammingFrame, isbn_contols::IsbnFrame,
     itf_controls::ItfFrame, levenshtein_controls::LevenshteinCodeFrame,
@@ -24,11 +23,11 @@ use self::{
     numeric_controls::BytesAsNumbersFrame, parity_check_controls::ParityBitFrame,
     pgp_controls::PgpWordsFrame, punycode_controls::PunycodeFrame,
     repetition_controls::RepetitionFrame, romaji_controls::RomajiFrame,
-    roman_numeral_controls::RomanNumeralFrame, skey_controls::SKeyWordsFrame,
-    spelling_alphabet_controls::SpellingAlphabetFrame, symmetric_unary_controls::SymUnaryCodeFrame,
-    tap_code_controls::TapCodeFrame, twos_complement_controls::TwosComplementFrame,
-    unary_controls::UnaryCodeFrame, unicode_controls::UnicodeFrame, upc_controls::UpcFrame,
-    verhoeff_controls::VerhoeffFrame,
+    roman_numeral_controls::RomanNumeralFrame, simple_braille_controls::BrailleFrame,
+    skey_controls::SKeyWordsFrame, spelling_alphabet_controls::SpellingAlphabetFrame,
+    symmetric_unary_controls::SymUnaryCodeFrame, tap_code_controls::TapCodeFrame,
+    twos_complement_controls::TwosComplementFrame, unary_controls::UnaryCodeFrame,
+    unicode_controls::UnicodeFrame, upc_controls::UpcFrame, verhoeff_controls::VerhoeffFrame,
 };
 
 mod ascii85_controls;
@@ -44,7 +43,6 @@ mod basex_controls;
 mod baudot_controls;
 mod biquinary_controls;
 mod block_controls;
-mod braille_controls;
 mod braille_encoding_controls;
 mod crc_controls;
 mod damm_controls;
@@ -69,6 +67,7 @@ mod punycode_controls;
 mod repetition_controls;
 mod romaji_controls;
 mod roman_numeral_controls;
+mod simple_braille_controls;
 mod skey_controls;
 mod spelling_alphabet_controls;
 mod symmetric_unary_controls;
@@ -318,6 +317,7 @@ impl CodeInterface {
             CodeId::SpellingAlphabet => &mut self.spelling,
             CodeId::Tap => &mut self.tap,
             CodeId::TwosComplement => &mut self.twos_complement,
+            CodeId::Ueb => todo!("add UEB"),
             CodeId::Unary => &mut self.unary,
             CodeId::UnarySymmetric => &mut self.unary_symmetric,
             CodeId::Unicode => &mut self.unicode,

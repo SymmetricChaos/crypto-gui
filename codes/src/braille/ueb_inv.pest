@@ -1,23 +1,20 @@
 WHITESPACE =  { (" " | "⠀") }
 unknown    = !{ ANY }
 
-upper_letter =  { ASCII_ALPHA_UPPER | "Ŋ" | "Ə" | "Α" | "Β" | "Γ" | "Δ" | "Ε" | "Ζ" | "Η" | "Θ" | "Ι" | "Κ" | "Λ" | "Μ" | "Ν" | "Ξ" | "Ο" | "Π" | "Ρ" | "Σ" | "Τ" | "Υ" | "Φ" | "Χ" | "Ψ" | "Ω" }
-lower_letter =  { ASCII_ALPHA_LOWER | "ŋ" | "ə" | "α" | "β" | "γ" | "δ" | "ε" | "ζ" | "η" | "θ" | "ι" | "κ" | "λ" | "μ" | "ν" | "ξ" | "ο" | "π" | "ρ" | "σ" | "τ" | "υ" | "φ" | "χ" | "ψ" | "ω" }
-diacritic    =  { "̸" | "̶" | "̆" | "̄" | "̧" | "̀" | "̂" | "̊" | "̃" | "̈" | "́" | "̌" }
-letter       = ${ (upper_letter | lower_letter) ~ diacritic* }
+basic_upper_letter =  { ASCII_ALPHA_UPPER | "Ŋ" | "Ə" | "Α" | "Β" | "Γ" | "Δ" | "Ε" | "Ζ" | "Η" | "Θ" | "Ι" | "Κ" | "Λ" | "Μ" | "Ν" | "Ξ" | "Ο" | "Π" | "Ρ" | "Σ" | "Τ" | "Υ" | "Φ" | "Χ" | "Ψ" | "Ω" }
+basic_lower_letter =  { ASCII_ALPHA_LOWER | "ŋ" | "ə" | "α" | "β" | "γ" | "δ" | "ε" | "ζ" | "η" | "θ" | "ι" | "κ" | "λ" | "μ" | "ν" | "ξ" | "ο" | "π" | "ρ" | "σ" | "τ" | "υ" | "φ" | "χ" | "ψ" | "ω" }
+diacritic          =  { "̸" | "̶" | "̆" | "̄" | "̧" | "̀" | "̂" | "̊" | "̃" | "̈" | "́" | "̌" }
+upper_letter       = ${ basic_upper_letter ~ diacritic*}
+lower_letter       = ${ basic_lower_letter ~ diacritic*}
 
 punctuation = { "," | ";" | ":" | "." | "!" | "?" | "“" | "”" | "‘" | "’" | "«" | "»" | "\"" | "'" | "(" | ")" | "[" | "]" | "<" | ">" | "{" | "}" | "/" | "\\" | "-" | "—" | "⸺" | "_" }
 symbol      = { "→" | "↓" | "←" | "↑" | "∶" | "∷" | "′" | "″" | "♮" | "♭" | "♯" | "@" | "¢" | "€" | "₣" | "£" | "₦" | "$" | "¥" | "&" | "<" | "^" | "~" | ">" | "†" | "‡" | "©" | "°" | "¶" | "®" | "§" | "™" | "♀" | "♂" | "#" | "•" | "〃" | "+" | "=" | "×" | "*" | "÷" | "-" | "%" }
 
 numeric_symbol    =  { ASCII_DIGIT | "," | "." | "/" }
-numberic_sequence = ${ &(ASCII_DIGIT) ~ numeric_symbol+ }
-
-
-character = { letter | punctuation | numberic_sequence | symbol }
+numeric_sequence = ${ &(ASCII_DIGIT | "," | ".") ~ numeric_symbol+ | ASCII_DIGIT }
 
 capital_sequence = ${ upper_letter{3,} }
-// capital_passage  =  { upper_letter+ }
 
-g1_passage = { (character | capital_sequence | unknown)+ }
+g1_passage = { (capital_sequence | punctuation | numeric_sequence | upper_letter | lower_letter | symbol | unknown)+ }
 
 // braille_cell    =  { "⠁" | "⠃" | "⠉" | "⠙" | "⠑" | "⠋" | "⠛" | "⠓" | "⠊" | "⠚" | "⠅" | "⠇" | "⠍" | "⠝" | "⠕" | "⠏" | "⠟" | "⠗" | "⠎" | "⠞" | "⠥" | "⠧" | "⠭" | "⠽" | "⠵" | "⠯" | "⠿" | "⠷" | "⠮" | "⠾" | "⠡" | "⠣" | "⠩" | "⠹" | "⠱" | "⠫" | "⠻" | "⠳" | "⠪" | "⠺" | "⠂" | "⠆" | "⠒" | "⠲" | "⠢" | "⠖" | "⠶" | "⠦" | "⠔" | "⠴" | "⠌" | "⠬" | "⠼" | "⠜" | "⠄" | "⠤" | "⠈" | "⠘" | "⠸" | "⠐" | "⠨" | "⠰" | "⠠"}

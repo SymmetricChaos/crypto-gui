@@ -17,6 +17,12 @@ pub fn visualize_tree(pairs: Pairs<'_, Rule>, space: String) {
     }
 }
 
+pub fn decode_g1_braille(text: &str) -> String {
+    use pest::Parser;
+    let pairs = UebParser::parse(Rule::g1_passage, text).unwrap();
+    decode_passage(pairs)
+}
+
 pub fn decode_passage(pairs: Pairs<'_, Rule>) -> String {
     let mut out = String::new();
     for pair in pairs.into_iter() {
@@ -210,8 +216,7 @@ mod ueb_parser_tests {
     #[test]
     fn decode() {
         for (print, braille) in TESTS.into_iter().copied() {
-            let pairs = UebParser::parse(Rule::g1_passage, braille).unwrap();
-            let decoded = decode_passage(pairs);
+            let decoded = decode_g1_braille(braille);
             println!("{}", decoded);
             assert_eq!(print, decoded)
         }
