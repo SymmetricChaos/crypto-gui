@@ -52,6 +52,7 @@ impl UiElements for Ui {
         self.label(RichText::from(text.to_string()).monospace())
     }
 
+
     fn mono_strong<T: ToString>(&mut self, text: T) -> Response {
         self.label(RichText::from(text.to_string()).monospace().strong())
     }

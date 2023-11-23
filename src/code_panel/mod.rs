@@ -26,8 +26,9 @@ use self::{
     roman_numeral_controls::RomanNumeralFrame, simple_braille_controls::BrailleFrame,
     skey_controls::SKeyWordsFrame, spelling_alphabet_controls::SpellingAlphabetFrame,
     symmetric_unary_controls::SymUnaryCodeFrame, tap_code_controls::TapCodeFrame,
-    twos_complement_controls::TwosComplementFrame, unary_controls::UnaryCodeFrame,
-    unicode_controls::UnicodeFrame, upc_controls::UpcFrame, verhoeff_controls::VerhoeffFrame,
+    twos_complement_controls::TwosComplementFrame, ueb_controls::UebFrame,
+    unary_controls::UnaryCodeFrame, unicode_controls::UnicodeFrame, upc_controls::UpcFrame,
+    verhoeff_controls::VerhoeffFrame,
 };
 
 mod ascii85_controls;
@@ -73,6 +74,7 @@ mod spelling_alphabet_controls;
 mod symmetric_unary_controls;
 mod tap_code_controls;
 mod twos_complement_controls;
+pub mod ueb_controls;
 mod unary_controls;
 mod unicode_controls;
 mod upc_controls;
@@ -123,6 +125,7 @@ pub struct CodeInterface {
     punycode: PunycodeFrame,
     romaji: RomajiFrame,
     spelling: SpellingAlphabetFrame,
+    ueb: UebFrame,
     unicode: UnicodeFrame,
 
     // Binary to Text
@@ -188,6 +191,7 @@ impl CodeInterface {
                 CodeId::Punycode,
                 CodeId::Romaji,
                 CodeId::SpellingAlphabet,
+                CodeId::Ueb,
                 CodeId::Unicode,
             ],
             active_code,
@@ -317,7 +321,7 @@ impl CodeInterface {
             CodeId::SpellingAlphabet => &mut self.spelling,
             CodeId::Tap => &mut self.tap,
             CodeId::TwosComplement => &mut self.twos_complement,
-            CodeId::Ueb => todo!("add UEB"),
+            CodeId::Ueb => &mut self.ueb,
             CodeId::Unary => &mut self.unary,
             CodeId::UnarySymmetric => &mut self.unary_symmetric,
             CodeId::Unicode => &mut self.unicode,
