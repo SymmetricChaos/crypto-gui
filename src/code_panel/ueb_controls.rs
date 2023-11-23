@@ -1,23 +1,36 @@
 use egui::RichText;
 
+use crate::ui_elements::UiElements;
+
 use super::CodeFrame;
 use codes::braille::{braille_data::UEB_ROWS, unified_english_braille::UnifiedEnglishBraille};
 
+#[derive(Debug, PartialEq, Eq)]
+enum UebInfo {
+    Alphabet,
+    Punctuation,
+    Symbols,
+    Capitalization,
+    Numbers,
+}
+
 pub struct UebFrame {
     code: UnifiedEnglishBraille,
+    info: UebInfo,
 }
 
 impl Default for UebFrame {
     fn default() -> Self {
         Self {
             code: Default::default(),
+            info: UebInfo::Alphabet,
         }
     }
 }
 
 impl CodeFrame for UebFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
-        ui.label("Braille Order");
+        ui.subheading("Braille Order");
         egui::Grid::new("columnar_grid")
             .num_columns(10)
             .min_col_width(5.0)
@@ -33,6 +46,56 @@ impl CodeFrame for UebFrame {
                     ui.end_row();
                 }
             });
+
+        ui.add_space(16.0);
+        ui.group(|ui| {
+            ui.subheading("Information");
+            ui.horizontal(|ui| {
+                ui.selectable_value(&mut self.info, UebInfo::Alphabet, "Alphabet");
+                ui.selectable_value(&mut self.info, UebInfo::Punctuation, "Punctuation");
+                ui.selectable_value(&mut self.info, UebInfo::Symbols, "Symbols");
+                ui.selectable_value(&mut self.info, UebInfo::Capitalization, "Capitalization");
+                ui.selectable_value(&mut self.info, UebInfo::Numbers, "Numbers");
+            });
+        });
+
+        ui.add_space(8.0);
+        match self.info {
+            UebInfo::Alphabet => ui.label("A letter in UEB can be any of the 26 letters of the English alphabet, any of the 24 letters of the Greek alphabet, and the two special symbols for the schwa and eng. Any of these may be preceeded by diacritical marks and the capitalization symbol."),
+            UebInfo::Punctuation => ui.label("A wide array of punctuation is included in UEB."),
+            UebInfo::Symbols => ui.label("Various symbols are included in UEB."),
+            UebInfo::Capitalization => ui.label("A single letter is capitalized by prepending the capitalization symbol. A sequence of letters can be capitalized by prepending the capitalization symbol twice. Finally with three capitalization symbols a capitalized passage is created, meaning every letter symbol is treated as capitalized while other symbols are included unchanged."),
+            UebInfo::Numbers => ui.label("A sequence of symbols can be read as numeric symbols by prepending the numeric symbol."),
+        };
+
+        ui.add_space(8.0);
+        ui.subheading("Examples");
+        match self.info {
+            UebInfo::Alphabet => ui.label("The Grand Façade\n⠠⠞⠓⠑⠀⠠⠛⠗⠁⠝⠙⠀⠠⠋⠁⠘⠯⠉⠁⠙⠑"),
+            UebInfo::Punctuation => todo!(),
+            UebInfo::Symbols => todo!(),
+            UebInfo::Capitalization => todo!(),
+            UebInfo::Numbers => todo!(),
+        };
+
+        ui.add_space(8.0);
+        ui.subheading("Dictionary");
+        match self.info {
+            UebInfo::Alphabet => {
+                ui.fill_code_columns(
+                    13,
+                    4,
+                    Box::new(
+                        UnifiedEnglishBraille::alphabet_triples()
+                            .map(|(b, l, u)| (b, format!("{}  {}", l, u))),
+                    ),
+                );
+            }
+            UebInfo::Punctuation => todo!(),
+            UebInfo::Symbols => todo!(),
+            UebInfo::Capitalization => todo!(),
+            UebInfo::Numbers => todo!(),
+        };
     }
 
     fn code(&self) -> &dyn codes::traits::Code {
