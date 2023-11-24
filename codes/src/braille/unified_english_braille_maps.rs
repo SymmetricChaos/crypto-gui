@@ -24,12 +24,17 @@ pub const LETTERS_UPPER: [&'static str; 52] = [
 //     "⠨⠊", "⠨⠅", "⠨⠇", "⠨⠍", "⠨⠝", "⠨⠭", "⠨⠕", "⠨⠏", "⠨⠗", "⠨⠎", "⠨⠞", "⠨⠥", "⠨⠋", "⠨⠯", "⠨⠽", "⠨⠺",
 // ];
 
-const SYMBOLS: [&'static str; 44] = [
+pub const DIACRITIC: [&'static str; 12] = ["̸", "̶", "̆", "̄", "̧", "̀", "̂", "̊", "̃", "̈", "́", "̌"];
+pub const DIACRITIC_BRAILLE: [&'static str; 12] = [
+    "⠈⠡", "⠈⠒", "⠈⠬", "⠈⠤", "⠘⠯", "⠘⠡", "⠘⠩", "⠘⠫", "⠘⠻", "⠘⠒", "⠘⠌", "⠘⠬",
+];
+
+pub const SYMBOLS: [&'static str; 44] = [
     "→", "↓", "←", "↑", "∶", "∷", "′", "″", "♮", "♭", "♯", "@", "¢", "€", "₣", "£", "₦", "$", "¥",
     "&", "<", "^", "~", ">", "†", "‡", "©", "°", "¶", "®", "§", "™", "♀", "♂", "#", "•", "〃", "+",
     "=", "×", "*", "÷", "-", "%",
 ];
-const SYMBOLS_BRAILLE: [&'static str; 44] = [
+pub const SYMBOLS_BRAILLE: [&'static str; 44] = [
     "⠳⠕",
     "⠳⠩",
     "⠳⠪",
@@ -76,18 +81,13 @@ const SYMBOLS_BRAILLE: [&'static str; 44] = [
     "⠨⠴",
 ];
 
-const DIACRITIC: [&'static str; 12] = ["̸", "̶", "̆", "̄", "̧", "̀", "̂", "̊", "̃", "̈", "́", "̌"];
-const DIACRITIC_BRAILLE: [&'static str; 12] = [
-    "⠈⠡", "⠈⠒", "⠈⠬", "⠈⠤", "⠘⠯", "⠘⠡", "⠘⠩", "⠘⠫", "⠘⠻", "⠘⠒", "⠘⠌", "⠘⠬",
-];
-
 // Ellipsis is a specific punctuation symbol listed for UEB but it written as a sequence of full stops
 // The dashes are Unicode specified: hyphen, em-dash, and double em-dash.
-const PUNCTUATION: [&'static str; 28] = [
+pub const PUNCTUATION: [&'static str; 28] = [
     ",", ";", ":", ".", "!", "?", "“", "”", "‘", "’", "«", "»", "\"", "'", "(", ")", "[", "]", "<",
     ">", "{", "}", "/", "\\", "-", "—", "⸺", "_",
 ];
-const PUNCTUATION_BRAILLE: [&'static str; 28] = [
+pub const PUNCTUATION_BRAILLE: [&'static str; 28] = [
     "⠂",
     "⠆",
     "⠒",
@@ -118,16 +118,16 @@ const PUNCTUATION_BRAILLE: [&'static str; 28] = [
     "⠨⠤",
 ];
 
-const NUMERIC: [&'static str; 23] = [
+pub const NUMERIC: [&'static str; 23] = [
     "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ",", ".", " 1", " 2", " 3", " 4", " 5", " 6",
     " 7", " 8", " 9", " 0", "/",
 ];
-const NUMERIC_BRAILLE: [&'static str; 23] = [
+pub const NUMERIC_BRAILLE: [&'static str; 23] = [
     "⠁", "⠃", "⠉", "⠙", "⠑", "⠋", "⠛", "⠓", "⠊", "⠚", "⠂", "⠲", "⠐⠁", "⠐⠃", "⠐⠉", "⠐⠙", "⠐⠑", "⠐⠋",
     "⠐⠛", "⠐⠓", "⠐⠊", "⠐⠚", "⠌",
 ];
 
-const ALPHABETIC_WORDSIGNS: [&'static str; 23] = [
+pub const ALPHABETIC_WORDSIGNS: [&'static str; 23] = [
     "but",
     "can",
     "do",
@@ -152,7 +152,7 @@ const ALPHABETIC_WORDSIGNS: [&'static str; 23] = [
     "as",
     "will",
 ];
-const ALPHABETIC_WORDSIGNS_BRAILLE: [&'static str; 23] = [
+pub const ALPHABETIC_WORDSIGNS_BRAILLE: [&'static str; 23] = [
     "⠃", "⠉", "⠙", "⠑", "⠋", "⠛", "⠓", "⠚", "⠅", "⠇", "⠍", "⠝", "⠏", "⠟", "⠗", "⠎", "⠞", "⠥", "⠧",
     "⠭", "⠽", "⠵", "⠺",
 ];
