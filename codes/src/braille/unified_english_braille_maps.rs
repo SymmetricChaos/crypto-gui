@@ -25,16 +25,18 @@ pub const LETTERS_UPPER: [&'static str; 52] = [
 // ];
 
 pub const DIACRITIC: [&'static str; 12] = ["̸", "̶", "̆", "̄", "̧", "̀", "̂", "̊", "̃", "̈", "́", "̌"];
+pub const DIACRITIC_DISPLAY: [&'static str; 12] =
+    ["̸◌", "̶◌", "̆◌", "̄◌", "̧◌", "̀◌", "̂◌", "̊◌", "̃◌", "̈◌", "́◌", "̌◌"];
 pub const DIACRITIC_BRAILLE: [&'static str; 12] = [
     "⠈⠡", "⠈⠒", "⠈⠬", "⠈⠤", "⠘⠯", "⠘⠡", "⠘⠩", "⠘⠫", "⠘⠻", "⠘⠒", "⠘⠌", "⠘⠬",
 ];
 
-pub const SYMBOLS: [&'static str; 44] = [
+pub const SYMBOLS: [&'static str; 45] = [
     "→", "↓", "←", "↑", "∶", "∷", "′", "″", "♮", "♭", "♯", "@", "¢", "€", "₣", "£", "₦", "$", "¥",
     "&", "<", "^", "~", ">", "†", "‡", "©", "°", "¶", "®", "§", "™", "♀", "♂", "#", "•", "〃", "+",
-    "=", "×", "*", "÷", "-", "%",
+    "=", "×", "*", "÷", "-", "%", "✓",
 ];
-pub const SYMBOLS_BRAILLE: [&'static str; 44] = [
+pub const SYMBOLS_BRAILLE: [&'static str; 45] = [
     "⠳⠕",
     "⠳⠩",
     "⠳⠪",
@@ -79,15 +81,15 @@ pub const SYMBOLS_BRAILLE: [&'static str; 44] = [
     "⠐⠌",
     "⠐⠤",
     "⠨⠴",
+    "⠈⠩",
 ];
 
-// Ellipsis is a specific punctuation symbol listed for UEB but it written as a sequence of full stops
 // The dashes are Unicode specified: hyphen, em-dash, and double em-dash.
-pub const PUNCTUATION: [&'static str; 28] = [
+pub const PUNCTUATION: [&'static str; 29] = [
     ",", ";", ":", ".", "!", "?", "“", "”", "‘", "’", "«", "»", "\"", "'", "(", ")", "[", "]", "<",
-    ">", "{", "}", "/", "\\", "-", "—", "⸺", "_",
+    ">", "{", "}", "/", "\\", "-", "—", "⸺", "_", "…",
 ];
-pub const PUNCTUATION_BRAILLE: [&'static str; 28] = [
+pub const PUNCTUATION_BRAILLE: [&'static str; 29] = [
     "⠂",
     "⠆",
     "⠒",
@@ -116,15 +118,16 @@ pub const PUNCTUATION_BRAILLE: [&'static str; 28] = [
     "⠠⠤",
     "⠐⠠⠤",
     "⠨⠤",
+    "⠲⠲⠲",
 ];
 
 pub const NUMERIC: [&'static str; 23] = [
-    "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ",", ".", " 1", " 2", " 3", " 4", " 5", " 6",
-    " 7", " 8", " 9", " 0", "/",
+    "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ",", ".", "/", " 1", " 2", " 3", " 4", " 5",
+    " 6", " 7", " 8", " 9", " 0",
 ];
 pub const NUMERIC_BRAILLE: [&'static str; 23] = [
-    "⠁", "⠃", "⠉", "⠙", "⠑", "⠋", "⠛", "⠓", "⠊", "⠚", "⠂", "⠲", "⠐⠁", "⠐⠃", "⠐⠉", "⠐⠙", "⠐⠑", "⠐⠋",
-    "⠐⠛", "⠐⠓", "⠐⠊", "⠐⠚", "⠌",
+    "⠁", "⠃", "⠉", "⠙", "⠑", "⠋", "⠛", "⠓", "⠊", "⠚", "⠂", "⠲", "⠌", "⠐⠁", "⠐⠃", "⠐⠉", "⠐⠙", "⠐⠑",
+    "⠐⠋", "⠐⠛", "⠐⠓", "⠐⠊", "⠐⠚",
 ];
 
 pub const ALPHABETIC_WORDSIGNS: [&'static str; 23] = [

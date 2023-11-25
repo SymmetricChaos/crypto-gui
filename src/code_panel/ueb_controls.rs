@@ -7,7 +7,8 @@ use codes::braille::{
     braille_data::UEB_ROWS,
     unified_english_braille::UnifiedEnglishBraille,
     unified_english_braille_maps::{
-        DIACRITIC_BRAILLE, PUNCTUATION, PUNCTUATION_BRAILLE, SYMBOLS, SYMBOLS_BRAILLE,
+        DIACRITIC_BRAILLE, DIACRITIC_DISPLAY, NUMERIC, NUMERIC_BRAILLE, PUNCTUATION,
+        PUNCTUATION_BRAILLE, SYMBOLS, SYMBOLS_BRAILLE,
     },
 };
 
@@ -61,17 +62,17 @@ impl CodeFrame for UebFrame {
                 ui.selectable_value(&mut self.info, UebInfo::Punctuation, "Punctuation");
                 ui.selectable_value(&mut self.info, UebInfo::Symbols, "Symbols");
                 ui.selectable_value(&mut self.info, UebInfo::Capitalization, "Capitalization");
-                ui.selectable_value(&mut self.info, UebInfo::Numbers, "Numbers");
+                ui.selectable_value(&mut self.info, UebInfo::Numbers, "Numeric Mode");
             });
         });
 
         ui.add_space(8.0);
         match self.info {
-            UebInfo::Alphabet => ui.label("A letter in UEB can be any of the 26 letters of the English alphabet, any of the 24 letters of the Greek alphabet, and the two special symbols for the schwa and eng. Any of these may be preceeded by diacritical marks and the capitalization symbol."),
-            UebInfo::Punctuation => ui.label("A wide array of punctuation is included in UEB."),
-            UebInfo::Symbols => ui.label("Various symbols are included in UEB."),
-            UebInfo::Capitalization => ui.label("A single letter is capitalized by prepending the capitalization symbol. A sequence of letters can be capitalized by prepending the capitalization symbol twice. Finally with three capitalization symbols a capitalized passage is created, meaning every letter symbol is treated as capitalized while other symbols are included unchanged."),
-            UebInfo::Numbers => ui.label("A sequence of symbols can be read as numeric symbols by prepending the numeric symbol."),
+            UebInfo::Alphabet => ui.subheading("A letter in UEB can be any of the 26 letters of the English alphabet, any of the 24 letters of the Greek alphabet (mainly for use in technical literature), and the characters representing the eng (ŋ) and schwa (ə). Any of these may be preceeded by diacritical marks and the capitalization symbol."),
+            UebInfo::Punctuation => ui.subheading("A wide array of punctuation is included in UEB."),
+            UebInfo::Symbols => ui.subheading("Various symbols are included in UEB."),
+            UebInfo::Capitalization => ui.subheading("A single letter is capitalized by prepending the capitalization symbol. A sequence of letters can be capitalized by prepending the capitalization symbol twice. Finally with three capitalization symbols a capitalized passage is created, meaning every letter symbol is treated as capitalized while other symbols are included unchanged."),
+            UebInfo::Numbers => ui.subheading("A sequence of symbols can be read as numeric symbols by prepending the numeric indicator. Spaces within a number, used for grouping, are represented with the Braille numeric space."),
         };
 
         // ui.add_space(8.0);
@@ -84,7 +85,7 @@ impl CodeFrame for UebFrame {
         //     UebInfo::Numbers => ui.label("<<<TODO>>>"),
         // };
 
-        ui.add_space(8.0);
+        ui.add_space(16.0);
         match self.info {
             UebInfo::Alphabet => {
                 ui.subheading("Letters");
@@ -102,27 +103,34 @@ impl CodeFrame for UebFrame {
                     3,
                     4,
                     Box::new(
-                        ["̸◌", "̶◌", "̆◌", "̄◌", "̧◌", "̀◌", "̂◌", "̊◌", "̃◌", "̈◌", "́◌", "̌◌"]
+                        DIACRITIC_DISPLAY
                             .into_iter()
                             .zip(DIACRITIC_BRAILLE.into_iter()),
                     ),
                 );
             }
             UebInfo::Punctuation => ui.fill_code_columns(
-                7,
+                8,
                 4,
                 Box::new(PUNCTUATION.into_iter().zip(PUNCTUATION_BRAILLE.into_iter())),
             ),
             UebInfo::Symbols => ui.fill_code_columns(
-                11,
+                12,
                 4,
                 Box::new(SYMBOLS.into_iter().zip(SYMBOLS_BRAILLE.into_iter())),
             ),
             UebInfo::Capitalization => {
-                ui.label("");
+                ui.subheading("Capital Symbol Indicator:   ⠠");
+                ui.subheading("Capital Sequence Indicator: ⠠⠠");
+                ui.subheading("Capital Passage Indicator:  ⠠⠠⠠");
             }
             UebInfo::Numbers => {
-                ui.label("");
+                ui.subheading("Numeric Indicator: ⠼");
+                ui.fill_code_columns(
+                    6,
+                    4,
+                    Box::new(NUMERIC.into_iter().zip(NUMERIC_BRAILLE.into_iter())),
+                )
             }
         };
     }

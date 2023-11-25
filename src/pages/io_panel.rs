@@ -98,12 +98,18 @@ impl IOPanel {
             ui.horizontal(|ui| {
                 ui.label("INPUT TEXT");
                 text_manip_menu(ui, input);
+                if ui.button("📋").clicked() {
+                    ui.output_mut(|o| o.copied_text = input.clone());
+                };
             });
             ui.add(TextEdit::multiline(input).font(TextStyle::Monospace));
             ui.add_space(16.0);
             ui.horizontal(|ui| {
                 ui.label("OUTPUT TEXT");
                 text_manip_menu(ui, output);
+                if ui.button("📋").clicked() {
+                    ui.output_mut(|o| o.copied_text = input.clone());
+                };
             });
             ui.add(TextEdit::multiline(output).font(TextStyle::Monospace));
         }
