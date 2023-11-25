@@ -130,6 +130,34 @@ pub const NUMERIC_BRAILLE: [&'static str; 23] = [
     "⠐⠋", "⠐⠛", "⠐⠓", "⠐⠊", "⠐⠚",
 ];
 
+pub const TYPEFORM_PREFIX: [&'static str; 4] = ["italic", "boldface", "underlined", "script"];
+pub const TYPEFORM_PREFIX_BRAILLE: [&'static str; 4] = ["⠨", "⠘", "⠸", "⠈"];
+
+pub const TYPEFORM_ROOT: [&'static str; 4] = ["symbol", "word", "passage", "terminator"];
+pub const TYPEFORM_ROOT_BRAILLE: [&'static str; 4] = ["⠆", "⠂", "⠶", "⠄"];
+
+// pub const TYPEFORMS: [&'static str; 16] = [
+//     "italic symbol",
+//     "italic word",
+//     "italic passage",
+//     "italic terminator",
+//     "bold symbol",
+//     "bold word",
+//     "bold passage",
+//     "bold terminator",
+//     "underlined symbol",
+//     "underlined word",
+//     "underlined passage",
+//     "underlined terminator",
+//     "script symbol",
+//     "script word",
+//     "script passage",
+//     "script terminator",
+// ];
+// pub const TYPEFORMS_BRAILLE: [&'static str; 16] = [
+//     "⠨⠆", "⠨⠂", "⠨⠶", "⠨⠄", "⠘⠆", "⠘⠂", "⠘⠶", "⠘⠄", "⠸⠆", "⠸⠂", "⠸⠶", "⠸⠄", "⠈⠆", "⠈⠂", "⠈⠶", "⠈⠄",
+// ];
+
 pub const ALPHABETIC_WORDSIGNS: [&'static str; 23] = [
     "but",
     "can",
@@ -160,10 +188,135 @@ pub const ALPHABETIC_WORDSIGNS_BRAILLE: [&'static str; 23] = [
     "⠭", "⠽", "⠵", "⠺",
 ];
 
-// const STRONG_CONTRACTIONS: [&'static str; 5] = ["and", "for", "of", "the", "with"];
-// const STRONG_GROUPSIGNS: [&'static str; 12] = [
-//     "ch", "gh", "sh", "th", "wh", "ed", "er", "ou", "ow", "st", "ing", "ar",
-// ];
+pub const STRONG_WORDSIGNS: [&'static str; 6] = ["child", "shall", "this", "which", "out", "still"];
+pub const STRONG_WORDSIGNS_BRAILLE: [&'static str; 6] = ["⠡", "⠩", "⠹", "⠱", "⠳", "⠌"];
+
+pub const STRONG_CONTRACTIONS: [&'static str; 5] = ["and", "for", "of", "the", "with"];
+pub const STRONG_CONTRACTIONS_BRAILLE: [&'static str; 5] = ["⠽", "⠿", "⠷", "⠮", "⠾"];
+
+const STRONG_GROUPSIGNS: [&'static str; 12] = [
+    "ch", "gh", "sh", "th", "wh", "ed", "er", "ou", "ow", "st", "ing", "ar",
+];
+pub const LOWER_GROUPSIGNS: [&'static str; 10] =
+    ["ea", "be", "bb", "con", "cc", "dis", "en", "ff", "gg", "in"];
+
+pub const INITIAL_LETTER_CONTRACTIONS: [&'static str; 33] = [
+    "upon",
+    "these",
+    "those",
+    "whose",
+    "word",
+    "cannot",
+    "had",
+    "many",
+    "spirit",
+    "their",
+    "world",
+    "day",
+    "ever",
+    "father",
+    "here",
+    "know",
+    "lord",
+    "mother",
+    "name",
+    "one",
+    "part",
+    "question",
+    "right",
+    "some",
+    "time",
+    "under",
+    "young",
+    "there",
+    "character",
+    "through",
+    "where",
+    "ought",
+    "work",
+];
+
+pub const FINAL_LETTER_GROUPSIGNS: [&'static str; 12] = [
+    "ound", "ance", "sion", "less", "ount", "ence", "ong", "ful", "tion", "ness", "ment", "ity",
+];
+
+pub const SHORTFORMS: [&'static str; 75] = [
+    "about",
+    "above",
+    "according",
+    "accross",
+    "after",
+    "afternoon",
+    "afterward",
+    "again",
+    "against",
+    "also",
+    "almost",
+    "already",
+    "altogether",
+    "although",
+    "always",
+    "blind",
+    "braille",
+    "could",
+    "declare",
+    "declaring",
+    "deceive",
+    "deceiving",
+    "either",
+    "friend",
+    "first",
+    "good",
+    "great",
+    "him",
+    "himself",
+    "herself",
+    "immediate",
+    "little",
+    "letter",
+    "myself",
+    "much",
+    "must",
+    "necessary",
+    "neither",
+    "paid",
+    "perceive",
+    "perceiving",
+    "perhaps",
+    "quick",
+    "receive",
+    "receiving",
+    "rejoice",
+    "rejoicing",
+    "said",
+    "such",
+    "today",
+    "together",
+    "tomorrow",
+    "tonight",
+    "itself",
+    "its",
+    "your",
+    "yourself",
+    "yourselves",
+    "themselves",
+    "children",
+    "should",
+    "thyself",
+    "ourselves",
+    "would",
+    "because",
+    "before",
+    "behind",
+    "below",
+    "beneath",
+    "beside",
+    "between",
+    "beyond",
+    "conceive",
+    "conceiving",
+    "oneself",
+];
 
 lazy_static! {
     pub static ref LETTER_MAP: BiMap<&'static str, &'static str> =
