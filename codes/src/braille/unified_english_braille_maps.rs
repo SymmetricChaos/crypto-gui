@@ -194,11 +194,19 @@ pub const STRONG_WORDSIGNS_BRAILLE: [&'static str; 6] = ["⠡", "⠩", "⠹", "�
 pub const STRONG_CONTRACTIONS: [&'static str; 5] = ["and", "for", "of", "the", "with"];
 pub const STRONG_CONTRACTIONS_BRAILLE: [&'static str; 5] = ["⠽", "⠿", "⠷", "⠮", "⠾"];
 
-const STRONG_GROUPSIGNS: [&'static str; 12] = [
+pub const STRONG_GROUPSIGNS: [&'static str; 12] = [
     "ch", "gh", "sh", "th", "wh", "ed", "er", "ou", "ow", "st", "ing", "ar",
 ];
-pub const LOWER_GROUPSIGNS: [&'static str; 10] =
-    ["ea", "be", "bb", "con", "cc", "dis", "en", "ff", "gg", "in"];
+pub const STRONG_GROUPSIGNS_BRAILLE: [&'static str; 12] =
+    ["⠡", "⠣", "⠩", "⠹", "⠱", "⠫", "⠻", "⠳", "⠪", "⠌", "⠬", "⠜"];
+
+// Only used within a word meaning: preceeded and followed by a letter, contraction, or modified letter
+pub const LOWER_GROUPSIGNS: [&'static str; 7] = ["ea", "bb", "cc", "en", "ff", "gg", "in"];
+pub const LOWER_GROUPSIGNS_BRAILLE: [&'static str; 7] = ["⠂", "⠆", "⠒", "⠢", "⠖", "⠶", "⠔"];
+
+// Only used used at the start of a world followed by a letter, contraction, or modified letter
+pub const LOWER_GROUPSIGNS_STARTING: [&'static str; 3] = ["be", "con", "dis"];
+pub const LOWER_GROUPSIGNS_STARTING_BRAILLE: [&'static str; 3] = ["⠆", "⠆", "⠲"];
 
 pub const INITIAL_LETTER_CONTRACTIONS: [&'static str; 33] = [
     "upon",
