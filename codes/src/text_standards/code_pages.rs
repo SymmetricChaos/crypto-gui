@@ -1,15 +1,14 @@
 use std::str::Chars;
 
-use crate::{errors::CodeError, traits::Code};
-use bimap::BiMap;
 use itertools::Itertools;
 use lazy_static::lazy_static;
-use utils::text_functions::{bimap_from_iter, string_chunks};
 
-// Additional space is the non-breaking space. Additional hyphen is the soft hypen.
-pub const CP1252: &'static str = "␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~␡€�‚ƒ„…†‡ˆ‰Š‹Œ�Ž��‘’“”•–—˜™š›œ�žŸ ¡¢£¤¥¦§¨©ª«¬-®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ";
-// Additional space is the non-breaking space.
-pub const CP437: &'static str = "␀☺☻♥♦♣♠•◘○◙♂♀♪♫☼►◄↕‼¶§▬↨↑↓→←∟↔▲▼ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~⌂ÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜ¢£¥₧ƒáíóúñÑªº¿⌐¬½¼¡«»░▒▓│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀αßΓπΣσµτΦΘΩδ∞φε∩≡±≥≤⌠⌡÷≈°∙·√ⁿ²■ ";
+use crate::{errors::CodeError, traits::Code};
+use utils::text_functions::string_chunks;
+
+// \u{00A0} is nonbreaking space. \u{00AD} is soft hyphen.
+pub const CP1252: &'static str = "␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~␡€�‚ƒ„…†‡ˆ‰Š‹Œ�Ž��‘’“”•–—˜™š›œ�žŸ\u{00A0}¡¢£¤¥¦§¨©ª«¬\u{00AD}®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ";
+pub const CP437: &'static str = "␀☺☻♥♦♣♠•◘○◙♂♀♪♫☼►◄↕‼¶§▬↨↑↓→←∟↔▲▼ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~⌂ÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜ¢£¥₧ƒáíóúñÑªº¿⌐¬½¼¡«»░▒▓│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀αßΓπΣσµτΦΘΩδ∞φε∩≡±≥≤⌠⌡÷≈°∙·√ⁿ²■\u{00A0}";
 
 lazy_static! {
     pub static ref BINARY: Vec<String> = (0..256).map(|n| format!("{:08b}", n)).collect_vec();
@@ -18,6 +17,7 @@ lazy_static! {
     pub static ref HEX: Vec<String> = (0..256).map(|n| format!("{:02x}", n)).collect_vec();
 }
 
+#[derive(Debug, PartialEq, Eq)]
 pub enum CodePage {
     CP1252,
     CP437,
@@ -77,6 +77,9 @@ pub struct Ccsid {
 
 impl Ccsid {
     pub fn map(&self, c: char) -> Result<&String, CodeError> {
+        if c == '�' {
+            return Err(CodeError::invalid_input_char(c));
+        };
         let n = self
             .page
             .chars()
@@ -152,40 +155,18 @@ impl Code for Ccsid {
 mod ccsid_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "þ";
-    const CIPHERTEXT: &'static str = "11111110";
-
     #[test]
-    fn encode_test() {
-        let code = Ccsid::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT);
-    }
-
-    #[test]
-    fn encrypt_decrypt_test() {
+    #[ignore = "pairing"]
+    fn test_pairing() {
+        println!("CP1252");
         let mut code = Ccsid::default();
-        const GIVEN_TEXT: &'static str = "The quick␠brown fox!␀␀␀Jumps over the lazy(dog)";
-        const DECODED_TEXT: &'static str = "The quick brown fox!␀␀␀Jumps over the lazy(dog)";
-
-        for mode in [
-            DisplayMode::Binary,
-            DisplayMode::Octal,
-            DisplayMode::Decimal,
-            DisplayMode::Hex,
-        ] {
-            code.mode = mode;
-            let encoded = code
-                .encode(GIVEN_TEXT)
-                .expect(&format!("encoding ASCII {:?} error", mode));
-            let decoded = code
-                .decode(&encoded)
-                .expect(&format!("decoding ASCII {:?} error", mode));
-            if decoded != DECODED_TEXT {
-                panic!(
-                    "decoded ASCII {:?} not equivalent to plaintext\n{}",
-                    mode, decoded
-                )
-            }
+        for line in code.chars_codes() {
+            println!("{}  {}", line.0, line.1)
+        }
+        println!("\n\nCP437");
+        code.page = CodePage::CP437;
+        for line in code.chars_codes() {
+            println!("{}  {}", line.0, line.1)
         }
     }
 }

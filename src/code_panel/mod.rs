@@ -45,6 +45,7 @@ mod baudot_controls;
 mod biquinary_controls;
 mod block_controls;
 mod braille_encoding_controls;
+pub mod ccsid_controls;
 mod crc_controls;
 mod damm_controls;
 mod elias_controls;
