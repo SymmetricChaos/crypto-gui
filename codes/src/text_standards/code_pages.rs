@@ -1,22 +1,35 @@
+use std::str::Chars;
+
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use itertools::Itertools;
 use lazy_static::lazy_static;
-use utils::{
-    preset_alphabet::Alphabet,
-    text_functions::{bimap_from_iter, string_chunks},
-};
+use utils::text_functions::{bimap_from_iter, string_chunks};
 
-pub const CP1252: &'static str = "␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~␡€�‚ƒ„…†‡ˆ‰Š‹Œ�Ž��‘’“”•–—˜™š›œžŸ ¡¢£¤¥¦§¨©ª«¬SHY®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ";
+// Additional space is the non-breaking space. Additional hyphen is the soft hypen.
+pub const CP1252: &'static str = "␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~␡€�‚ƒ„…†‡ˆ‰Š‹Œ�Ž��‘’“”•–—˜™š›œ�žŸ ¡¢£¤¥¦§¨©ª«¬-®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ";
+// Additional space is the non-breaking space.
 pub const CP437: &'static str = "␀☺☻♥♦♣♠•◘○◙♂♀♪♫☼►◄↕‼¶§▬↨↑↓→←∟↔▲▼ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~⌂ÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜ¢£¥₧ƒáíóúñÑªº¿⌐¬½¼¡«»░▒▓│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀αßΓπΣσµτΦΘΩδ∞φε∩≡±≥≤⌠⌡÷≈°∙·√ⁿ²■ ";
 
-// lazy_static! {
-//     pub static ref
-// }
+lazy_static! {
+    pub static ref BINARY: Vec<String> = (0..256).map(|n| format!("{:08b}", n)).collect_vec();
+    pub static ref OCTAL: Vec<String> = (0..256).map(|n| format!("{:03o}", n)).collect_vec();
+    pub static ref DECIMAL: Vec<String> = (0..256).map(|n| format!("{:03}", n)).collect_vec();
+    pub static ref HEX: Vec<String> = (0..256).map(|n| format!("{:02x}", n)).collect_vec();
+}
 
 pub enum CodePage {
     CP1252,
     CP437,
+}
+
+impl CodePage {
+    pub fn chars(&self) -> Chars<'_> {
+        match self {
+            CodePage::CP1252 => CP1252.chars(),
+            CodePage::CP437 => CP437.chars(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -64,68 +77,38 @@ pub struct Ccsid {
 
 impl Ccsid {
     pub fn map(&self, c: char) -> Result<&String, CodeError> {
-        if c.is_ascii() {
-            return match self.mode {
-                DisplayMode::EightBitBinary => EIGHT_BIT.get(c as u8 as usize),
-                DisplayMode::SevenBitBinary => SEVEN_BIT.get(c as u8 as usize),
-                DisplayMode::Octal => OCTAL.get(c as u8 as usize),
-                DisplayMode::Decimal => DECIMAL.get(c as u8 as usize),
-                DisplayMode::Hex => HEX.get(c as u8 as usize),
-            }
-            .ok_or(CodeError::invalid_input_char(c));
-        }
-        if let Some(control_val) = CONTROL_PICTURE_MAP.get_by_right(&c) {
-            match self.mode {
-                DisplayMode::EightBitBinary => EIGHT_BIT.get(*control_val as usize),
-                DisplayMode::SevenBitBinary => SEVEN_BIT.get(*control_val as usize),
-                DisplayMode::Octal => OCTAL.get(*control_val as usize),
-                DisplayMode::Decimal => DECIMAL.get(*control_val as usize),
-                DisplayMode::Hex => HEX.get(*control_val as usize),
-            }
-            .ok_or(CodeError::invalid_input_char(c))
-        } else {
-            Err(CodeError::invalid_input_char(c))
+        let n = self
+            .page
+            .chars()
+            .position(|x| x == c)
+            .ok_or(CodeError::invalid_input_char(c))?;
+        match self.mode {
+            DisplayMode::Binary => Ok(BINARY.get(n).unwrap()),
+            DisplayMode::Octal => Ok(OCTAL.get(n).unwrap()),
+            DisplayMode::Decimal => Ok(DECIMAL.get(n).unwrap()),
+            DisplayMode::Hex => Ok(HEX.get(n).unwrap()),
         }
     }
 
     pub fn map_inv(&self, s: &str) -> Result<char, CodeError> {
-        match usize::from_str_radix(s, self.mode.radix()) {
-            Ok(n) => Alphabet::Ascii128
-                .chars()
-                .nth(n)
-                .ok_or(CodeError::invalid_input_group(s)),
-            Err(_) => {
-                return Err(CodeError::Input(format!(
-                    "error decoding ASCII ({} representation), unable to parse string: {}",
-                    self.mode.name(),
-                    s
-                )))
-            }
+        let n = match self.mode {
+            DisplayMode::Binary => BINARY.iter().position(|x| x == s),
+            DisplayMode::Octal => OCTAL.iter().position(|x| x == s),
+            DisplayMode::Decimal => DECIMAL.iter().position(|x| x == s),
+            DisplayMode::Hex => HEX.iter().position(|x| x == s),
         }
+        .ok_or(CodeError::invalid_input_group(s))?;
+
+        Ok(self.page.chars().nth(n).unwrap())
     }
 
     pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (char, &String)> + '_> {
-        let cs = Alphabet::Ascii128.chars();
+        let cs = self.page.chars();
         match self.mode {
-            DisplayMode::EightBitBinary => Box::new(cs.zip(EIGHT_BIT.iter())),
-            DisplayMode::SevenBitBinary => Box::new(cs.zip(SEVEN_BIT.iter())),
+            DisplayMode::Binary => Box::new(cs.zip(BINARY.iter())),
             DisplayMode::Octal => Box::new(cs.zip(OCTAL.iter())),
             DisplayMode::Decimal => Box::new(cs.zip(DECIMAL.iter())),
             DisplayMode::Hex => Box::new(cs.zip(HEX.iter())),
-        }
-    }
-
-    pub fn chars_codes_display(&self) -> Box<dyn Iterator<Item = (&&str, &String)> + '_> {
-        match self.mode {
-            DisplayMode::EightBitBinary => {
-                Box::new(CHARACTER_DESCRIPTIONS.iter().zip(EIGHT_BIT.iter()))
-            }
-            DisplayMode::SevenBitBinary => {
-                Box::new(CHARACTER_DESCRIPTIONS.iter().zip(SEVEN_BIT_DISPLAY.iter()))
-            }
-            DisplayMode::Octal => Box::new(CHARACTER_DESCRIPTIONS.iter().zip(OCTAL.iter())),
-            DisplayMode::Decimal => Box::new(CHARACTER_DESCRIPTIONS.iter().zip(DECIMAL.iter())),
-            DisplayMode::Hex => Box::new(CHARACTER_DESCRIPTIONS.iter().zip(HEX.iter())),
         }
     }
 }
@@ -169,11 +152,11 @@ impl Code for Ccsid {
 mod ccsid_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "0\0␀A ␠";
-    const CIPHERTEXT: &'static str = "001100000000000000000000010000010010000000100000";
+    const PLAINTEXT: &'static str = "þ";
+    const CIPHERTEXT: &'static str = "11111110";
 
     #[test]
-    fn encrypt_test() {
+    fn encode_test() {
         let code = Ccsid::default();
         assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT);
     }

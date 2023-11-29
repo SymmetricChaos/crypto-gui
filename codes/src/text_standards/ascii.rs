@@ -314,13 +314,13 @@ mod ascii_tests {
     const CIPHERTEXT: &'static str = "001100000000000000000000010000010010000000100000";
 
     #[test]
-    fn encrypt_test() {
+    fn encode_test() {
         let code = Ascii::default();
         assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
     #[test]
-    fn encrypt_decrypt_test() {
+    fn encode_decode_test() {
         let mut code = Ascii::default();
         const GIVEN_TEXT: &'static str = "The quick␠brown fox!␀␀␀Jumps over the lazy(dog)";
         const DECODED_TEXT: &'static str = "The quick brown fox!␀␀␀Jumps over the lazy(dog)";
