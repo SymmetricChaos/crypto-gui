@@ -3,7 +3,11 @@ use std::str::Chars;
 use itertools::Itertools;
 use lazy_static::lazy_static;
 
-use crate::{errors::CodeError, traits::Code};
+use crate::{
+    binary_to_text::{bytes_to_hex, BinaryToText, BinaryToTextMode},
+    errors::CodeError,
+    traits::Code,
+};
 use utils::text_functions::string_chunks;
 
 // \u{00A0} is nonbreaking space. \u{00AD} is soft hyphen.
@@ -11,6 +15,7 @@ pub const CP1252: &'static str = "␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎�
 pub const CP437: &'static str = "␀☺☻♥♦♣♠•◘○◙♂♀♪♫☼►◄↕‼¶§▬↨↑↓→←∟↔▲▼ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~⌂ÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜ¢£¥₧ƒáíóúñÑªº¿⌐¬½¼¡«»░▒▓│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀αßΓπΣσµτΦΘΩδ∞φε∩≡±≥≤⌠⌡÷≈°∙·√ⁿ²■\u{00A0}";
 
 lazy_static! {
+    // pub static ref BYTES: Vec<u8> = (0..=255u8).collect_vec();
     pub static ref BINARY: Vec<String> = (0..256).map(|n| format!("{:08b}", n)).collect_vec();
     pub static ref OCTAL: Vec<String> = (0..256).map(|n| format!("{:03o}", n)).collect_vec();
     pub static ref DECIMAL: Vec<String> = (0..256).map(|n| format!("{:03}", n)).collect_vec();
@@ -41,21 +46,12 @@ pub enum DisplayMode {
 }
 
 impl DisplayMode {
-    pub fn radix(&self) -> u32 {
-        match self {
-            DisplayMode::Binary => 2,
-            DisplayMode::Octal => 8,
-            DisplayMode::Decimal => 10,
-            DisplayMode::Hex => 16,
-        }
-    }
-
     pub fn name(&self) -> &str {
         match self {
-            DisplayMode::Binary => "binary",
-            DisplayMode::Octal => "octal",
-            DisplayMode::Decimal => "decimal",
-            DisplayMode::Hex => "hexadecimal",
+            DisplayMode::Binary => "Binary",
+            DisplayMode::Octal => "Octal",
+            DisplayMode::Decimal => "Decimal",
+            DisplayMode::Hex => "Hexadecimal",
         }
     }
 
@@ -73,6 +69,16 @@ pub struct Ccsid {
     pub mode: DisplayMode,
     pub page: CodePage,
     pub spaced: bool,
+    pub b2t_mode: Option<BinaryToTextMode>,
+}
+
+impl BinaryToText for Ccsid {
+    fn encode_bytes(&self, bytes: &[u8]) -> Result<String, CodeError> {
+        Ok(bytes
+            .into_iter()
+            .map(|b| self.page.chars().nth(*b as usize).unwrap())
+            .collect())
+    }
 }
 
 impl Ccsid {
@@ -114,6 +120,20 @@ impl Ccsid {
             DisplayMode::Hex => Box::new(cs.zip(HEX.iter())),
         }
     }
+
+    pub fn decode_to_bytes(&self, text: &str) -> Result<String, CodeError> {
+        let out = text
+            .chars()
+            .map(|c| self.page.chars().position(|x| x == c).unwrap() as u8)
+            .collect_vec();
+        match self.b2t_mode {
+            Some(BinaryToTextMode::Hex) => bytes_to_hex(&out),
+            Some(BinaryToTextMode::Utf8) => {
+                String::from_utf8(out).map_err(|e| CodeError::Input(e.to_string()))
+            }
+            None => Err(CodeError::state("Binary to Text Mode is not set")),
+        }
+    }
 }
 
 impl Default for Ccsid {
@@ -122,32 +142,44 @@ impl Default for Ccsid {
             mode: DisplayMode::Binary,
             page: CodePage::CP1252,
             spaced: false,
+            b2t_mode: None,
         }
     }
 }
 
 impl Code for Ccsid {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        let mut out = Vec::new();
-        for c in text.chars() {
-            out.push(self.map(c)?)
-        }
-        if self.spaced {
-            Ok(out.into_iter().join(" "))
+        if let Some(m) = self.b2t_mode {
+            match m {
+                BinaryToTextMode::Hex => self.encode_hex(text),
+                BinaryToTextMode::Utf8 => self.encode_utf8(text),
+            }
         } else {
-            Ok(out.into_iter().join(""))
+            let mut out = Vec::new();
+            for c in text.chars() {
+                out.push(self.map(c)?)
+            }
+            if self.spaced {
+                Ok(out.into_iter().join(" "))
+            } else {
+                Ok(out.into_iter().join(""))
+            }
         }
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        let chunks = string_chunks(&text.replace(' ', ""), self.mode.width());
-        let mut out = String::with_capacity(chunks.len());
+        if self.b2t_mode.is_some() {
+            self.decode_to_bytes(text)
+        } else {
+            let chunks = string_chunks(&text.replace(' ', ""), self.mode.width());
+            let mut out = String::with_capacity(chunks.len());
 
-        for chunk in chunks {
-            out.push(self.map_inv(&chunk)?)
+            for chunk in chunks {
+                out.push(self.map_inv(&chunk)?)
+            }
+
+            Ok(out)
         }
-
-        Ok(out)
     }
 }
 
