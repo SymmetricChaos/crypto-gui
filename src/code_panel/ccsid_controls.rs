@@ -35,6 +35,12 @@ impl CodeFrame for CcsidFrame {
             });
         });
         ui.add_space(8.0);
+        match self.code.page {
+            CodePage::CP1252 => ui.label("Also known as Windows-1252 this code page is compatible with the ASCII standard with special characters assigned to the 128 characters available with the extra bit unused by ASCII. The � symbol denotes positions with now assigned value and will be rejected when encoding."),
+            CodePage::CP437 => ui.label("This code page was used by the influential IBM PC from 1981. English letters and common symbols are identical to ASCCI but most control characters are replaced with printing symbols. The characters encoded with the eight bit include both characters for European languages that also use the Latin alphabet along with drawing symbols."),
+        };
+
+        ui.add_space(8.0);
         ui.checkbox(&mut self.code.spaced, "Use Spaces");
         ui.add_space(16.0);
         ui.two_column_table("Character", "Code", self.code.chars_codes());
