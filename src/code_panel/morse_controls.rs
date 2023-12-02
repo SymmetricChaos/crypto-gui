@@ -27,11 +27,10 @@ impl CodeFrame for MorseFrame {
                     )
                     .clicked()
                 {
-                    if self.code.mode == MorseRep::Ascii
-                        || self.code.mode == MorseRep::CdotNDash
-                        || self.code.mode == MorseRep::Word
+                    if self.code.representation == MorseRep::Ascii
+                        || self.code.representation == MorseRep::Word
                     {
-                        self.code.mode = MorseRep::HalfBlock
+                        self.code.representation = MorseRep::HalfBlock
                     }
                 }
                 if ui
@@ -42,11 +41,10 @@ impl CodeFrame for MorseFrame {
                     )
                     .clicked()
                 {
-                    if self.code.mode == MorseRep::Ascii
-                        || self.code.mode == MorseRep::CdotNDash
-                        || self.code.mode == MorseRep::Word
+                    if self.code.representation == MorseRep::Ascii
+                        || self.code.representation == MorseRep::Word
                     {
-                        self.code.mode = MorseRep::HalfBlock
+                        self.code.representation = MorseRep::HalfBlock
                     }
                 }
                 ui.selectable_value(
@@ -60,15 +58,26 @@ impl CodeFrame for MorseFrame {
         ui.subheading("Representation");
         ui.horizontal(|ui| {
             ui.selectable_value(
-                &mut self.code.mode,
+                &mut self.code.representation,
                 MorseRep::HalfBlock,
                 "Halfblock (Line Code)",
             );
-            ui.selectable_value(&mut self.code.mode, MorseRep::Binary, "Binary (Line Code)");
+            ui.selectable_value(
+                &mut self.code.representation,
+                MorseRep::Binary,
+                "Binary (Line Code)",
+            );
             ui.add_enabled_ui(self.code.standard == MorseStandard::Itu, |ui| {
-                ui.selectable_value(&mut self.code.mode, MorseRep::Ascii, "ASCII symbols");
-                ui.selectable_value(&mut self.code.mode, MorseRep::CdotNDash, "Cdot and En-dash");
-                ui.selectable_value(&mut self.code.mode, MorseRep::Word, "Dit/Dah (Words)");
+                ui.selectable_value(
+                    &mut self.code.representation,
+                    MorseRep::Ascii,
+                    "ASCII symbols",
+                );
+                ui.selectable_value(
+                    &mut self.code.representation,
+                    MorseRep::Word,
+                    "Dit/Dah (Words)",
+                );
             });
         });
 

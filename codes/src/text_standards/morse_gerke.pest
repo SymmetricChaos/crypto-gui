@@ -1,0 +1,7 @@
+unknown    = !{ ANY }
+
+letter    =  { "CH" | ASCII_ALPHA_UPPER | "Ä" | "Ö" | "Ü" } 
+figure    = { ASCII_DIGIT }
+
+morse_passage = { (letter | figure | unknown) }
+
