@@ -3,6 +3,7 @@ use lazy_static::lazy_static;
 use utils::text_functions::bimap_from_iter;
 
 // pub const ITU_LETTERS: &'static str = "ABCDEÉFGHIJKLMNOPQRSTUVWXYZ1234567890.,:?'-/()\"=+@";
+
 pub const ITU_SIGNS: [&'static str; 55] = [
     "A",
     "B",
@@ -332,7 +333,11 @@ pub const GERKE_HALFBLOCK: [&'static str; 40] = [
     "▄ ▄ ▄ ▄▄▄ ▄ ▄",
 ];
 
-pub const AMERICAN_LETTERS: &'static str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ&1234567890,.?!";
+pub const AMERICAN_LETTERS: [&'static str; 41] = [
+    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S",
+    "T", "U", "V", "W", "X", "Y", "Z", "&", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ",",
+    ".", "?", "!",
+];
 pub const AMERICAN_BINARY: [&'static str; 41] = [
     "1011",
     "11010101",
@@ -471,15 +476,15 @@ lazy_static! {
         bimap_from_iter(ITU_SIGNS.into_iter().zip(ITU_BINARY.into_iter()));
     pub static ref ITU_HALFBLOCK_MAP: BiMap<&'static str, &'static str> =
         bimap_from_iter(ITU_SIGNS.into_iter().zip(ITU_HALFBLOCK.into_iter()));
-    pub static ref AMERICAN_BINARY_MAP: BiMap<char, &'static str> = bimap_from_iter(
+    pub static ref AMERICAN_BINARY_MAP: BiMap<&'static str, &'static str> = bimap_from_iter(
         AMERICAN_LETTERS
-            .chars()
-            .zip(AMERICAN_BINARY.iter().copied())
+            .into_iter()
+            .zip(AMERICAN_BINARY.into_iter())
     );
-    pub static ref AMERICAN_HALFBLOCK_MAP: BiMap<char, &'static str> = bimap_from_iter(
+    pub static ref AMERICAN_HALFBLOCK_MAP: BiMap<&'static str, &'static str> = bimap_from_iter(
         AMERICAN_LETTERS
-            .chars()
-            .zip(AMERICAN_HALFBLOCK.iter().copied())
+            .into_iter()
+            .zip(AMERICAN_HALFBLOCK.into_iter())
     );
     pub static ref GERKE_BINARY_MAP: BiMap<&'static str, &'static str> =
         bimap_from_iter(GERKE_LETTERS.into_iter().zip(GERKE_BINARY.into_iter()));
@@ -561,7 +566,7 @@ mod morseitu_tests {
     #[test]
     #[ignore = "visual correctness check"]
     fn american_pairs() {
-        for (letter, code) in AMERICAN_LETTERS.chars().zip(AMERICAN_HALFBLOCK) {
+        for (letter, code) in AMERICAN_LETTERS.into_iter().zip(AMERICAN_HALFBLOCK) {
             println!("{letter} {code}")
         }
     }

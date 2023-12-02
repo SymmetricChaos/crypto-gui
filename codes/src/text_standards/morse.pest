@@ -1,0 +1,11 @@
+unknown    = !{ ANY }
+
+itu_sign   = { "É" | ASCII_ALPHA_UPPER | ASCII_DIGIT | "." | "," | ":" | "?" | "'" | "-" | "/" | "(" | ")" | "\"" | "=" | "+" | "@" | "[UNDERSTOOD]" | "[ERROR]" | "[INVITATION-TO-TRANSMIT]" | "[WAIT]" | "[END-OF-WORK]" | "[STARTING-SIGNAL]" } 
+gerke_sign = { "CH" | "Ä" | "Ö" | "Ü" | ASCII_ALPHA_UPPER | ASCII_DIGIT | "?" } 
+american_sign = { ASCII_ALPHA_UPPER | "&" | ASCII_DIGIT | "," | "." | "?" | "!"}
+
+space = { " " }
+
+itu_passage = { (itu_sign | space | unknown)+ }
+gerke_passage = { (gerke_sign | space | unknown)+ }
+american_passage = { (american_sign | space | unknown)+ }

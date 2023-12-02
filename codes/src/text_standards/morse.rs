@@ -11,15 +11,15 @@ pub enum MorseStandard {
 }
 
 #[derive(pest_derive::Parser)]
-#[grammar = "text_standards/morse_itu.pest"] // relative to src
-struct MorseItuParser;
+#[grammar = "text_standards/morse.pest"] // relative to src
+pub struct MorseParser;
 
 impl MorseStandard {
     pub fn parse<'a>(&self, text: &'a str) -> Pairs<'a, Rule> {
         match self {
-            MorseStandard::Itu => MorseItuParser::parse(Rule::morse_passage, text).unwrap(),
-            MorseStandard::American => todo!(),
-            MorseStandard::Gerke => todo!(),
+            MorseStandard::Itu => MorseParser::parse(Rule::itu_passage, text).unwrap(),
+            MorseStandard::American => MorseParser::parse(Rule::american_passage, text).unwrap(),
+            MorseStandard::Gerke => MorseParser::parse(Rule::gerke_passage, text).unwrap(),
         }
     }
 }
@@ -59,7 +59,6 @@ impl MorseRep {
                 Self::Ascii => &ITU_ASCII_MAP,
                 Self::Word => &ITU_WORD_MAP,
             },
-            _ => todo!("not implemented")
             // MorseStandard::American => match self {
             //     Self::Binary => &AMERICAN_BINARY_MAP,
             //     Self::HalfBlock => &AMERICAN_HALFBLOCK_MAP,
@@ -69,15 +68,16 @@ impl MorseRep {
             //         ))
             //     }
             // },
-            // MorseStandard::Gerke => match self {
-            //     Self::Binary => &GERKE_BINARY_MAP,
-            //     Self::HalfBlock => &GERKE_HALFBLOCK_MAP,
-            //     _ => {
-            //         return Err(CodeError::State(
-            //             "Only line codes work for Gerke's code".into(),
-            //         ))
-            //     }
-            // },
+            MorseStandard::Gerke => match self {
+                Self::Binary => &GERKE_BINARY_MAP,
+                Self::HalfBlock => &GERKE_HALFBLOCK_MAP,
+                _ => {
+                    return Err(CodeError::State(
+                        "Only line codes work for Gerke's code".into(),
+                    ))
+                }
+            },
+            _ => todo!("not implemented"),
         })
     }
 }
@@ -96,7 +96,6 @@ impl Morse {
                 MorseRep::Ascii => Box::new(ITU_SIGNS.into_iter().zip(ITU_ASCII)),
                 MorseRep::Word => Box::new(ITU_SIGNS.into_iter().zip(ITU_WORD)),
             },
-            _ => todo!("not implemented")
             // MorseStandard::American => match self.representation {
             //     MorseRep::Binary => Box::new(AMERICAN_LETTERS.chars().zip(AMERICAN_BINARY)),
             //     MorseRep::HalfBlock => Box::new(AMERICAN_LETTERS.chars().zip(AMERICAN_HALFBLOCK)),
@@ -105,14 +104,15 @@ impl Morse {
             //             .zip(std::iter::once("Only line codes work for American Morse")),
             //     ),
             // },
-            // MorseStandard::Gerke => match self.representation {
-            //     MorseRep::Binary => Box::new(GERKE_LETTERS.chars().zip(GERKE_BINARY)),
-            //     MorseRep::HalfBlock => Box::new(GERKE_LETTERS.chars().zip(GERKE_HALFBLOCK)),
-            //     _ => Box::new(
-            //         std::iter::once(' ')
-            //             .zip(std::iter::once("Only line codes work for Gerke's code")),
-            //     ),
-            // },
+            MorseStandard::Gerke => match self.representation {
+                MorseRep::Binary => Box::new(GERKE_LETTERS.into_iter().zip(GERKE_BINARY)),
+                MorseRep::HalfBlock => Box::new(GERKE_LETTERS.into_iter().zip(GERKE_HALFBLOCK)),
+                _ => Box::new(
+                    std::iter::once("")
+                        .zip(std::iter::once("Only line codes work for Gerke's code")),
+                ),
+            },
+            _ => todo!("not implemented"),
         }
     }
 }
@@ -144,15 +144,17 @@ impl Code for Morse {
         for pair in self.standard.parse(&filtered).flatten() {
             match pair.as_rule() {
                 Rule::unknown => return Err(CodeError::invalid_input_group(pair.as_str())),
-                Rule::signs => match map.get_by_left(pair.as_str()) {
-                    Some(s) => out.push(*s),
-                    None => return Err(CodeError::invalid_input_group(pair.as_str())),
-                },
+                Rule::itu_sign | Rule::gerke_sign | Rule::american_sign => {
+                    match map.get_by_left(pair.as_str()) {
+                        Some(s) => out.push(*s),
+                        None => return Err(CodeError::invalid_input_group(pair.as_str())),
+                    }
+                }
                 Rule::space => match self.representation {
                     MorseRep::Binary => out.push("0"),
                     _ => out.push(" "),
                 },
-                Rule::morse_passage => (),
+                Rule::itu_passage | Rule::gerke_passage | Rule::american_passage => (),
             }
         }
 
