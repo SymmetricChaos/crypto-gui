@@ -425,6 +425,94 @@ pub const AMERICAN_HALFBLOCK: [&'static str; 41] = [
     "▄▄ ▄▄ ▄▄ ▄",
 ];
 
+pub const GREEK_SIGNS: [&'static str; 24] = [
+    "Α", "Β", "Γ", "Δ", "Ε", "Ζ", "Η", "Θ", "Ι", "Κ", "Λ", "Μ", "Ν", "Ξ", "Ο", "Π", "Ρ", "Σ", "Τ",
+    "Υ", "Φ", "Χ", "Ψ", "Ω",
+];
+
+pub const GREEK_ASCII: [&'static str; 24] = [
+    ".-", "-...", "--.", "-..", ".", "--..", "....", "-.-.", "..", "-.-", ".-..", "--", "-.",
+    "-..-", "---", ".--.", ".-.", "...", "-", "-.--", "..-.", "----", "--.-", ".--",
+];
+pub const GREEK_WORD: [&'static str; 24] = [
+    "di dah",
+    "dah di di dit",
+    "dah dah dit",
+    "dah di dit",
+    "dit",
+    "dah dah di dit",
+    "di di di dit",
+    "dah di dah dit",
+    "di dit",
+    "dah di dah",
+    "di dah di dit",
+    "dah dah",
+    "dah dit",
+    "dah di di dah",
+    "dah dah dah",
+    "di dah dah dit",
+    "di dah dit",
+    "di di dit",
+    "dah",
+    "dah di dah dah",
+    "di di dah dit",
+    "dah dah dah dah",
+    "dah dah di dah",
+    "di dah dah",
+];
+pub const GREEK_BINARY: [&'static str; 24] = [
+    "10111",
+    "111010101",
+    "111011101",
+    "1110101",
+    "1",
+    "11101110101",
+    "1010101",
+    "11101011101",
+    "101",
+    "111010111",
+    "101110101",
+    "1110111",
+    "11101",
+    "11101010111",
+    "11101110111",
+    "10111011101",
+    "1011101",
+    "10101",
+    "111",
+    "1110101110111",
+    "101011101",
+    "111011101110111",
+    "1110111010111",
+    "101110111",
+];
+pub const GREEK_HALFBLOCK: [&'static str; 24] = [
+    "▄ ▄▄▄",
+    "▄▄▄ ▄ ▄ ▄",
+    "▄▄▄ ▄▄▄ ▄",
+    "▄▄▄ ▄ ▄",
+    "▄",
+    "▄▄▄ ▄▄▄ ▄ ▄",
+    "▄ ▄ ▄ ▄",
+    "▄▄▄ ▄ ▄▄▄ ▄",
+    "▄ ▄",
+    "▄▄▄ ▄ ▄▄▄",
+    "▄ ▄▄▄ ▄ ▄",
+    "▄▄▄ ▄▄▄",
+    "▄▄▄ ▄",
+    "▄▄▄ ▄ ▄ ▄▄▄",
+    "▄▄▄ ▄▄▄ ▄▄▄",
+    "▄ ▄▄▄ ▄▄▄ ▄",
+    "▄ ▄▄▄ ▄",
+    "▄ ▄ ▄",
+    "▄▄▄",
+    "▄▄▄ ▄ ▄▄▄ ▄▄▄",
+    "▄ ▄ ▄▄▄ ▄",
+    "▄▄▄ ▄▄▄ ▄▄▄ ▄▄▄",
+    "▄▄▄ ▄▄▄ ▄ ▄▄▄",
+    "▄ ▄▄▄ ▄▄▄",
+];
+
 // the organization of the array should be preserved for legibility
 // #[rustfmt::skip]
 // pub const HIRAGANA: [&str; 109] = [
@@ -490,6 +578,14 @@ lazy_static! {
         bimap_from_iter(GERKE_LETTERS.into_iter().zip(GERKE_BINARY.into_iter()));
     pub static ref GERKE_HALFBLOCK_MAP: BiMap<&'static str, &'static str> =
         bimap_from_iter(GERKE_LETTERS.into_iter().zip(GERKE_HALFBLOCK.into_iter()));
+    pub static ref GREEK_ASCII_MAP: BiMap<&'static str, &'static str> =
+        bimap_from_iter(GREEK_SIGNS.into_iter().zip(GREEK_ASCII.into_iter()));
+    pub static ref GREEK_WORD_MAP: BiMap<&'static str, &'static str> =
+        bimap_from_iter(GREEK_SIGNS.into_iter().zip(GREEK_WORD.into_iter()));
+    pub static ref GREEK_BINARY_MAP: BiMap<&'static str, &'static str> =
+        bimap_from_iter(GREEK_SIGNS.into_iter().zip(GREEK_BINARY.into_iter()));
+    pub static ref GREEK_HALFBLOCK_MAP: BiMap<&'static str, &'static str> =
+        bimap_from_iter(GREEK_SIGNS.into_iter().zip(GREEK_HALFBLOCK.into_iter()));
 }
 
 #[cfg(test)]
@@ -541,7 +637,7 @@ mod morseitu_tests {
     #[test]
     #[ignore = "conversions"]
     fn convert() {
-        convert_ascii(&ITU_ASCII);
+        convert_ascii(&GREEK_ASCII);
         convert_binary_to_halfblock(&ITU_BINARY);
         convert_binary_to_halfblock(&AMERICAN_BINARY);
         convert_binary_to_halfblock(&GERKE_BINARY);

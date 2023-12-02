@@ -8,6 +8,7 @@ pub enum MorseStandard {
     Itu,
     American,
     Gerke,
+    Greek,
 }
 
 #[derive(pest_derive::Parser)]
@@ -20,6 +21,7 @@ impl MorseStandard {
             MorseStandard::Itu => MorseParser::parse(Rule::itu_passage, text).unwrap(),
             MorseStandard::American => MorseParser::parse(Rule::american_passage, text).unwrap(),
             MorseStandard::Gerke => MorseParser::parse(Rule::gerke_passage, text).unwrap(),
+            MorseStandard::Greek => MorseParser::parse(Rule::greek_passage, text).unwrap(),
         }
     }
 }
@@ -96,14 +98,22 @@ impl Morse {
                 MorseRep::Ascii => Box::new(ITU_SIGNS.into_iter().zip(ITU_ASCII)),
                 MorseRep::Word => Box::new(ITU_SIGNS.into_iter().zip(ITU_WORD)),
             },
-            // MorseStandard::American => match self.representation {
-            //     MorseRep::Binary => Box::new(AMERICAN_LETTERS.chars().zip(AMERICAN_BINARY)),
-            //     MorseRep::HalfBlock => Box::new(AMERICAN_LETTERS.chars().zip(AMERICAN_HALFBLOCK)),
-            //     _ => Box::new(
-            //         std::iter::once(' ')
-            //             .zip(std::iter::once("Only line codes work for American Morse")),
-            //     ),
-            // },
+            MorseStandard::Greek => match self.representation {
+                MorseRep::Binary => Box::new(GREEK_SIGNS.into_iter().zip(GREEK_BINARY)),
+                MorseRep::HalfBlock => Box::new(GREEK_SIGNS.into_iter().zip(GREEK_HALFBLOCK)),
+                MorseRep::Ascii => Box::new(GREEK_SIGNS.into_iter().zip(GREEK_ASCII)),
+                MorseRep::Word => Box::new(GREEK_SIGNS.into_iter().zip(GREEK_WORD)),
+            },
+            MorseStandard::American => match self.representation {
+                MorseRep::Binary => Box::new(AMERICAN_LETTERS.into_iter().zip(AMERICAN_BINARY)),
+                MorseRep::HalfBlock => {
+                    Box::new(AMERICAN_LETTERS.into_iter().zip(AMERICAN_HALFBLOCK))
+                }
+                _ => Box::new(
+                    std::iter::once("")
+                        .zip(std::iter::once("Only line codes work for American Morse")),
+                ),
+            },
             MorseStandard::Gerke => match self.representation {
                 MorseRep::Binary => Box::new(GERKE_LETTERS.into_iter().zip(GERKE_BINARY)),
                 MorseRep::HalfBlock => Box::new(GERKE_LETTERS.into_iter().zip(GERKE_HALFBLOCK)),
@@ -112,7 +122,6 @@ impl Morse {
                         .zip(std::iter::once("Only line codes work for Gerke's code")),
                 ),
             },
-            _ => todo!("not implemented"),
         }
     }
 }
@@ -144,7 +153,7 @@ impl Code for Morse {
         for pair in self.standard.parse(&filtered).flatten() {
             match pair.as_rule() {
                 Rule::unknown => return Err(CodeError::invalid_input_group(pair.as_str())),
-                Rule::itu_sign | Rule::gerke_sign | Rule::american_sign => {
+                Rule::itu_sign | Rule::gerke_sign | Rule::american_sign | Rule::greek_sign => {
                     match map.get_by_left(pair.as_str()) {
                         Some(s) => out.push(*s),
                         None => return Err(CodeError::invalid_input_group(pair.as_str())),
@@ -154,7 +163,10 @@ impl Code for Morse {
                     MorseRep::Binary => out.push("0"),
                     _ => out.push(" "),
                 },
-                Rule::itu_passage | Rule::gerke_passage | Rule::american_passage => (),
+                Rule::itu_passage
+                | Rule::gerke_passage
+                | Rule::american_passage
+                | Rule::greek_passage => (),
             }
         }
 
