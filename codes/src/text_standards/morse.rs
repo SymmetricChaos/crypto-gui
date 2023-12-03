@@ -9,6 +9,7 @@ pub enum MorseStandard {
     American,
     Gerke,
     Greek,
+    Wabun,
 }
 
 #[derive(pest_derive::Parser)]
@@ -22,13 +23,13 @@ impl MorseStandard {
             MorseStandard::American => MorseParser::parse(Rule::american_passage, text).unwrap(),
             MorseStandard::Gerke => MorseParser::parse(Rule::gerke_passage, text).unwrap(),
             MorseStandard::Greek => MorseParser::parse(Rule::greek_passage, text).unwrap(),
+            MorseStandard::Wabun => MorseParser::parse(Rule::wabun_passage, text).unwrap(),
         }
     }
 }
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum MorseRep {
-    Binary,
     HalfBlock,
     Ascii,
     Word,
@@ -37,7 +38,6 @@ pub enum MorseRep {
 impl MorseRep {
     pub fn letter_sep(&self) -> &str {
         match self {
-            Self::Binary => "000",
             Self::Ascii => " ",
             Self::HalfBlock => "   ",
             Self::Word => "   ",
@@ -46,7 +46,6 @@ impl MorseRep {
 
     pub fn word_sep(&self) -> &str {
         match self {
-            Self::Binary => "0000000",
             Self::Ascii => "   ",
             Self::HalfBlock => "       ",
             Self::Word => "       ",
@@ -56,13 +55,11 @@ impl MorseRep {
     pub fn map(&self, standard: MorseStandard) -> Result<&BiMap<&str, &str>, CodeError> {
         Ok(match standard {
             MorseStandard::Itu => match self {
-                Self::Binary => &ITU_BINARY_MAP,
                 Self::HalfBlock => &ITU_HALFBLOCK_MAP,
                 Self::Ascii => &ITU_ASCII_MAP,
                 Self::Word => &ITU_WORD_MAP,
             },
             MorseStandard::American => match self {
-                Self::Binary => &AMERICAN_BINARY_MAP,
                 Self::HalfBlock => &AMERICAN_HALFBLOCK_MAP,
                 _ => {
                     return Err(CodeError::State(
@@ -71,7 +68,6 @@ impl MorseRep {
                 }
             },
             MorseStandard::Gerke => match self {
-                Self::Binary => &GERKE_BINARY_MAP,
                 Self::HalfBlock => &GERKE_HALFBLOCK_MAP,
                 _ => {
                     return Err(CodeError::State(
@@ -80,10 +76,14 @@ impl MorseRep {
                 }
             },
             MorseStandard::Greek => match self {
-                Self::Binary => &GREEK_BINARY_MAP,
                 Self::HalfBlock => &GREEK_HALFBLOCK_MAP,
                 Self::Ascii => &GREEK_ASCII_MAP,
                 Self::Word => &GREEK_WORD_MAP,
+            },
+            MorseStandard::Wabun => match self {
+                Self::HalfBlock => &WABUN_ASCII_MAP,
+                Self::Ascii => &WABUN_ASCII_MAP,
+                Self::Word => &WABUN_ASCII_MAP,
             },
         })
     }
@@ -133,19 +133,21 @@ impl Morse {
     pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (&str, &str)> + '_> {
         match self.standard {
             MorseStandard::Itu => match self.representation {
-                MorseRep::Binary => Box::new(ITU_SIGNS.into_iter().zip(ITU_BINARY)),
                 MorseRep::HalfBlock => Box::new(ITU_SIGNS.into_iter().zip(ITU_HALFBLOCK)),
                 MorseRep::Ascii => Box::new(ITU_SIGNS.into_iter().zip(ITU_ASCII)),
                 MorseRep::Word => Box::new(ITU_SIGNS.into_iter().zip(ITU_WORD)),
             },
             MorseStandard::Greek => match self.representation {
-                MorseRep::Binary => Box::new(GREEK_SIGNS.into_iter().zip(GREEK_BINARY)),
                 MorseRep::HalfBlock => Box::new(GREEK_SIGNS.into_iter().zip(GREEK_HALFBLOCK)),
                 MorseRep::Ascii => Box::new(GREEK_SIGNS.into_iter().zip(GREEK_ASCII)),
                 MorseRep::Word => Box::new(GREEK_SIGNS.into_iter().zip(GREEK_WORD)),
             },
+            MorseStandard::Wabun => match self.representation {
+                MorseRep::HalfBlock => Box::new(HIRAGANA.into_iter().zip(WABUN_HALFBLOCK)),
+                MorseRep::Ascii => Box::new(HIRAGANA.into_iter().zip(WABUN_ASCII)),
+                MorseRep::Word => Box::new(HIRAGANA.into_iter().zip(WABUN_WORD)),
+            },
             MorseStandard::American => match self.representation {
-                MorseRep::Binary => Box::new(AMERICAN_LETTERS.into_iter().zip(AMERICAN_BINARY)),
                 MorseRep::HalfBlock => {
                     Box::new(AMERICAN_LETTERS.into_iter().zip(AMERICAN_HALFBLOCK))
                 }
@@ -155,7 +157,6 @@ impl Morse {
                 ),
             },
             MorseStandard::Gerke => match self.representation {
-                MorseRep::Binary => Box::new(GERKE_LETTERS.into_iter().zip(GERKE_BINARY)),
                 MorseRep::HalfBlock => Box::new(GERKE_LETTERS.into_iter().zip(GERKE_HALFBLOCK)),
                 _ => Box::new(
                     std::iter::once("")
@@ -193,20 +194,20 @@ impl Code for Morse {
         for pair in self.standard.parse(&filtered).flatten() {
             match pair.as_rule() {
                 Rule::unknown => return Err(CodeError::invalid_input_group(pair.as_str())),
-                Rule::itu_sign | Rule::gerke_sign | Rule::american_sign | Rule::greek_sign => {
-                    match map.get_by_left(pair.as_str()) {
-                        Some(s) => out.push(*s),
-                        None => return Err(CodeError::invalid_input_group(pair.as_str())),
-                    }
-                }
-                Rule::space => match self.representation {
-                    MorseRep::Binary => out.push("0"),
-                    _ => out.push(" "),
+                Rule::itu_sign
+                | Rule::gerke_sign
+                | Rule::american_sign
+                | Rule::greek_sign
+                | Rule::wabun_sign => match map.get_by_left(pair.as_str()) {
+                    Some(s) => out.push(*s),
+                    None => return Err(CodeError::invalid_input_group(pair.as_str())),
                 },
+                Rule::space => out.push(" "),
                 Rule::itu_passage
                 | Rule::gerke_passage
                 | Rule::american_passage
-                | Rule::greek_passage => (),
+                | Rule::greek_passage
+                | Rule::wabun_passage => (),
             }
         }
 
@@ -239,7 +240,6 @@ mod morseitu_tests {
     const PLAINTEXT: &'static str = "THE QUICK BROWN FOX";
     const MORSE_ASCII: &'static str =
         "- .... .   --.- ..- .. -.-. -.-   -... .-. --- .-- -.   ..-. --- -..-";
-    const MORSE_BINARY: &'static str = "111000101010100010000000111011101011100010101110001010001110101110100011101011100000001110101010001011101000111011101110001011101110001110100000001010111010001110111011100011101010111";
     const MORSE_WORD: &'static str = "dah   di di di dit   dit       dah dah di dah   di di dah   di dit   dah di dah dit   dah di dah       dah di di dit   di dah dit   dah dah dah   di dah dah   dah dit       di di dah dit   dah dah dah   dah di di dah";
 
     // fn visualize_tree(pairs: Pairs<'_, Rule>, space: String) {
@@ -248,20 +248,6 @@ mod morseitu_tests {
     //         visualize_tree(pair.into_inner(), format!("{space} "))
     //     }
     // }
-
-    #[test]
-    fn encode_test_binary() {
-        let mut code = Morse::default();
-        code.representation = MorseRep::Binary;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), MORSE_BINARY);
-    }
-
-    #[test]
-    fn decode_test_binary() {
-        let mut code = Morse::default();
-        code.representation = MorseRep::Binary;
-        assert_eq!(code.decode(MORSE_BINARY).unwrap(), PLAINTEXT);
-    }
 
     #[test]
     fn encode_test_ascii() {
