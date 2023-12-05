@@ -52,30 +52,40 @@ impl CodeFrame for MorseFrame {
                 ui.selectable_value(
                     &mut self.code.standard,
                     MorseStandard::Wabun,
-                    "Waban Code (Japanese Morse)",
+                    "Wabun Code (Japanese Morse)",
                 );
             });
         });
 
         ui.subheading("Representation");
         ui.horizontal(|ui| {
+            // Line code works for everything
             ui.selectable_value(
                 &mut self.code.representation,
                 MorseRep::HalfBlock,
                 "Halfblock (Line Code)",
             );
-            ui.add_enabled_ui(self.code.standard == MorseStandard::Itu, |ui| {
-                ui.selectable_value(
-                    &mut self.code.representation,
-                    MorseRep::Ascii,
-                    "ASCII symbols",
-                );
-                ui.selectable_value(
-                    &mut self.code.representation,
-                    MorseRep::Word,
-                    "Dit/Dah (Words)",
-                );
-            });
+            // ASCII and words only work for codes with standardized sizes
+            ui.add_enabled_ui(
+                [
+                    MorseStandard::Itu,
+                    MorseStandard::Greek,
+                    MorseStandard::Wabun,
+                ]
+                .contains(&self.code.standard),
+                |ui| {
+                    ui.selectable_value(
+                        &mut self.code.representation,
+                        MorseRep::Ascii,
+                        "ASCII symbols",
+                    );
+                    ui.selectable_value(
+                        &mut self.code.representation,
+                        MorseRep::Word,
+                        "Dit/Dah (Words)",
+                    );
+                },
+            );
         });
 
         ui.add_space(16.0);
