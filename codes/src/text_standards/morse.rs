@@ -87,41 +87,6 @@ impl MorseRep {
             },
         })
     }
-
-    // pub fn map(&self, standard: MorseStandard) -> Result<&BiMap<&str, &str>, CodeError> {
-    //     Ok(match standard {
-    //         MorseStandard::Itu => match self {
-    //             Self::Binary => &ITU_BINARY_MAP,
-    //             Self::HalfBlock => &ITU_HALFBLOCK_MAP,
-    //             Self::Ascii => &ITU_ASCII_MAP,
-    //             Self::Word => &ITU_WORD_MAP,
-    //         },
-    //         MorseStandard::American => match self {
-    //             Self::Binary => &AMERICAN_BINARY_MAP,
-    //             Self::HalfBlock => &AMERICAN_HALFBLOCK_MAP,
-    //             _ => {
-    //                 return Err(CodeError::State(
-    //                     "Only line codes work for American Morse".into(),
-    //                 ))
-    //             }
-    //         },
-    //         MorseStandard::Gerke => match self {
-    //             Self::Binary => &GERKE_BINARY_MAP,
-    //             Self::HalfBlock => &GERKE_HALFBLOCK_MAP,
-    //             _ => {
-    //                 return Err(CodeError::State(
-    //                     "Only line codes work for Gerke's code".into(),
-    //                 ))
-    //             }
-    //         },
-    //         MorseStandard::Greek => match self {
-    //             Self::Binary => &GREEK_BINARY_MAP,
-    //             Self::HalfBlock => &GREEK_HALFBLOCK_MAP,
-    //             Self::Ascii => &GREEK_ASCII_MAP,
-    //             Self::Word => &GREEK_WORD_MAP,
-    //         },
-    //     })
-    // }
 }
 
 pub struct Morse {

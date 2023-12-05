@@ -722,4 +722,12 @@ mod morseitu_tests {
             println!("{letter} {code}")
         }
     }
+
+    #[test]
+    #[ignore = "visual correctness check"]
+    fn wabun_pairs() {
+        for (letter, code) in HIRAGANA.into_iter().zip(WABUN_ASCII) {
+            println!("{letter} {code}")
+        }
+    }
 }

@@ -8,3 +8,4 @@ pub mod needle;
 pub mod punycode;
 pub mod spelling_alphabet;
 pub mod unicode;
+pub mod wabun;
