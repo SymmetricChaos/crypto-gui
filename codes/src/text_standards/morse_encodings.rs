@@ -693,7 +693,7 @@ mod morseitu_tests {
     #[test]
     #[ignore = "conversions"]
     fn convert() {
-        convert_ascii(&WABUN_ASCII);
+        convert_ascii(&[".-.-.", "-.-.-", "-...-", "-..-.", "-..--", "---.-", "..-.-", "..-..", ".-.--", "--..-", ".---.", "--.-.", ".--..", ".-..-", "-.-..", "-.--.", "-.---", ".-...", ".--.", "..-.", "---.", "----", "-.--", "-.-.", "...-", ".-..", "--.-", "-..-", ".---", "....", ".-.-", ".-.-.", "--..", "..--", "-...", "--.--", "---", "--.", "-.-", ".-.", "...", "..-", "-..", ".--", ".-", "--", "-.", ".", "-"]);
         // convert_binary_to_halfblock(&ITU_BINARY);
         // convert_binary_to_halfblock(&AMERICAN_BINARY);
         // convert_binary_to_halfblock(&GERKE_BINARY);
