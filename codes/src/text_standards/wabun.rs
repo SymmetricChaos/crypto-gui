@@ -13,6 +13,12 @@ lazy_static! {
         r"((▄ ▄▄▄ ▄ ▄▄▄ ▄|▄▄▄ ▄ ▄▄▄ ▄ ▄▄▄|▄▄▄ ▄ ▄ ▄ ▄▄▄|▄▄▄ ▄ ▄ ▄▄▄ ▄|▄▄▄ ▄ ▄ ▄▄▄ ▄▄▄|▄▄▄ ▄▄▄ ▄▄▄ ▄ ▄▄▄|▄ ▄ ▄▄▄ ▄ ▄▄▄|▄ ▄ ▄▄▄ ▄ ▄|▄ ▄▄▄ ▄ ▄▄▄ ▄▄▄|▄▄▄ ▄▄▄ ▄ ▄ ▄▄▄|▄ ▄▄▄ ▄▄▄ ▄▄▄ ▄|▄▄▄ ▄▄▄ ▄ ▄▄▄ ▄|▄ ▄▄▄ ▄▄▄ ▄ ▄|▄ ▄▄▄ ▄ ▄ ▄▄▄|▄▄▄ ▄ ▄▄▄ ▄ ▄|▄▄▄ ▄ ▄▄▄ ▄▄▄ ▄|▄▄▄ ▄ ▄▄▄ ▄▄▄ ▄▄▄|▄ ▄▄▄ ▄ ▄ ▄|▄ ▄▄▄ ▄▄▄ ▄|▄ ▄ ▄▄▄ ▄|▄▄▄ ▄▄▄ ▄▄▄ ▄|▄▄▄ ▄▄▄ ▄▄▄ ▄▄▄|▄▄▄ ▄ ▄▄▄ ▄▄▄|▄▄▄ ▄ ▄▄▄ ▄|▄ ▄ ▄ ▄▄▄|▄ ▄▄▄ ▄ ▄|▄▄▄ ▄▄▄ ▄ ▄▄▄|▄▄▄ ▄ ▄ ▄▄▄|▄ ▄▄▄ ▄▄▄ ▄▄▄|▄ ▄ ▄ ▄|▄ ▄▄▄ ▄ ▄▄▄|▄ ▄▄▄ ▄ ▄▄▄ ▄|▄▄▄ ▄▄▄ ▄ ▄|▄ ▄ ▄▄▄ ▄▄▄|▄▄▄ ▄ ▄ ▄|▄▄▄ ▄▄▄ ▄ ▄▄▄ ▄▄▄|▄▄▄ ▄▄▄ ▄▄▄|▄▄▄ ▄▄▄ ▄|▄▄▄ ▄ ▄▄▄|▄ ▄▄▄ ▄|▄ ▄ ▄|▄ ▄ ▄▄▄|▄▄▄ ▄ ▄|▄ ▄▄▄ ▄▄▄|▄ ▄▄▄|▄▄▄ ▄▄▄|▄▄▄ ▄|▄|▄▄▄)(   ▄ ▄▄▄ ▄▄▄|   ▄▄▄ ▄ ▄ ▄▄▄ ▄▄▄|   ▄▄▄ ▄▄▄)?(   ▄ ▄|   ▄ ▄ ▄▄▄ ▄▄▄ ▄)?)(   |$)"
     )
     .unwrap();
+pub static ref WABUN_WORD_REGEX: Regex = Regex::new(
+    r"((di dah di dah dit|dah di dah di dah|dah di di di dah|dah di di dah dit|dah di di dah dah|dah dah dah di dah|di di dah di dah|di di dah di dit|di dah di dah dah|dah dah di di dah|di dah dah dah dit|dah dah di dah dit|di dah dah di dit|di dah di di dah|dah di dah di dit|dah di dah dah dit|dah di dah dah dah|di dah di di dit|di dah dah dit|di di
+        dah dit|dah dah dah dit|dah dah dah dah|dah di dah dah|dah di dah dit|di di di dah|di dah di dit|dah dah di dah|dah di di dah|di dah dah dah|di di di dit|di dah di dah|di dah di dah dit|dah dah di dit|di di dah dah|dah di di dit|dah dah di dah dah|dah dah dah|dah dah dit|dah di dah|di dah dit|di di dit|di di dah|dah di dit|di dah 
+        dah|di dah|dah dah|dah dit|dit|dah)(   di dah dah|   dah di di dah dah|   dah dah)?(   di dit|   di di dah dah dit)?)(   |$)"
+)
+.unwrap();
 }
 
 #[derive(pest_derive::Parser)]
@@ -99,7 +105,7 @@ impl Code for Wabun {
         let regex: &Regex = match self.representation {
             WabunRep::HalfBlock => &WABUN_HALFBLOCK_REGEX,
             WabunRep::Ascii => &WABUN_ASCII_REGEX,
-            WabunRep::Word => todo!(),
+            WabunRep::Word => &WABUN_WORD_REGEX,
         };
         let mut word_buffer = String::new();
         for word in text.split(self.representation.word_sep()) {
@@ -125,6 +131,7 @@ mod wabun_tests {
     const KANA: &'static str = "ひらがな にゃん";
     const ASCII: &'static str = "--..- ... .-.. .. .-.   -.-. .-- .-.-.";
     const HALFBLOCK: &'static str = "▄▄▄ ▄▄▄ ▄ ▄ ▄▄▄   ▄ ▄ ▄   ▄ ▄▄▄ ▄ ▄   ▄ ▄   ▄ ▄▄▄ ▄       ▄▄▄ ▄ ▄▄▄ ▄   ▄ ▄▄▄ ▄▄▄   ▄ ▄▄▄ ▄ ▄▄▄ ▄";
+    const WORD: &'static str = "dah dah di di dah   di di dit   di dah di dit   di dit   di dah dit       dah di dah dit   di dah dah   di dah di dah dit";
 
     // fn visualize_tree(pairs: pest::iterators::Pairs<'_, Rule>, space: String) {
     //     for pair in pairs.into_iter() {
@@ -139,14 +146,13 @@ mod wabun_tests {
     //         WabunParser::parse(Rule::kana_passage, KANA).unwrap(),
     //         String::new(),
     //     );
-    //     visualize_tree(
-    //         WabunParser::parse(Rule::ascii_passage, ASCII).unwrap(),
-    //         String::new(),
-    //     );
     //     for c in WABUN_ASCII_REGEX.captures_iter(ASCII) {
     //         println!("{:?}", c.get(1).unwrap().as_str());
     //     }
     //     for c in WABUN_HALFBLOCK_REGEX.captures_iter(HALFBLOCK) {
+    //         println!("{:?}", c.get(1).unwrap().as_str());
+    //     }
+    //     for c in WABUN_WORD_REGEX.captures_iter(WORD) {
     //         println!("{:?}", c.get(1).unwrap().as_str());
     //     }
     // }
@@ -177,5 +183,19 @@ mod wabun_tests {
         let mut code = Wabun::default();
         code.representation = WabunRep::HalfBlock;
         assert_eq!(code.decode(HALFBLOCK).unwrap(), KANA);
+    }
+
+    #[test]
+    fn encode_test_word() {
+        let mut code = Wabun::default();
+        code.representation = WabunRep::Word;
+        assert_eq!(code.encode(KANA).unwrap(), WORD);
+    }
+
+    #[test]
+    fn decode_test_word() {
+        let mut code = Wabun::default();
+        code.representation = WabunRep::Word;
+        assert_eq!(code.decode(WORD).unwrap(), KANA);
     }
 }
