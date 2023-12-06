@@ -99,10 +99,7 @@ impl Code for Wabun {
             println!("{}", pair.as_str());
             match pair.as_rule() {
                 // Rule::unknown => out.push(pair.as_str()),
-                Rule::ascii_kana => {
-                    println!("{:?}", map.get_by_left(pair.as_str()));
-                    out.push(*map.get_by_left(pair.as_str()).unwrap())
-                }
+                Rule::ascii_kana => out.push(*map.get_by_right(pair.as_str()).unwrap()),
                 Rule::space => out.push(" "),
                 _ => (),
             }
