@@ -55,6 +55,7 @@ pub enum CodeId {
     Unicode,
     Upc,
     Verhoeff,
+    Wabun,
 }
 
 impl Default for CodeId {
@@ -125,6 +126,7 @@ impl Display for CodeId {
             CodeId::Unicode => "Unicode",
             CodeId::Upc => "UPC",
             CodeId::Verhoeff => "Verhoeff",
+            CodeId::Wabun => "Wabun",
         };
         write!(f, "{}", name)
     }

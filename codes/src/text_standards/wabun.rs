@@ -140,7 +140,7 @@ mod wabun_tests {
     use super::*;
 
     const KANA: &'static str = "ひらがな にゃん";
-    const ASCII: &'static str = "--..- ... .-.. .. .-.   -.-. .-- .-.-. B";
+    const ASCII: &'static str = "--..- ... .-.. .. .-.   -.-. .-- .-.-.";
     const HALFBLOCK: &'static str = "▄▄▄ ▄▄▄ ▄ ▄ ▄▄▄   ▄ ▄ ▄   ▄ ▄▄▄ ▄ ▄   ▄ ▄   ▄ ▄▄▄ ▄       ▄▄▄ ▄ ▄▄▄ ▄   ▄ ▄▄▄ ▄▄▄   ▄ ▄▄▄ ▄ ▄▄▄ ▄";
     const WORD: &'static str = "dah dah di di dah   di di dit   di dah di dit   di dit   di dah dit       dah di dah dit   di dah dah   di dah di dah dit";
 

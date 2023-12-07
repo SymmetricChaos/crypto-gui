@@ -108,6 +108,7 @@ mod unary_controls;
 mod unicode_controls;
 mod upc_controls;
 mod verhoeff_controls;
+pub mod wabun_controls;
 
 pub trait CodeFrame {
     fn ui(&mut self, ui: &mut Ui);
