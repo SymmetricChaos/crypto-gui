@@ -9,3 +9,4 @@ pub mod punycode;
 pub mod spelling_alphabet;
 pub mod unicode;
 pub mod wabun;
+pub mod wabun_encoding;

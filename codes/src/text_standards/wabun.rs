@@ -1,12 +1,19 @@
-use super::morse_encodings::*;
+use std::collections::HashMap;
+
 use crate::{errors::CodeError, traits::Code};
-use bimap::BiMap;
-use pest::Parser;
 
 use lazy_static::lazy_static;
 use regex::Regex;
 
+use super::wabun_encoding::{
+    ASCII_TO_HIRA, HALFBLOCK_TO_HIRA, HIRAGANA, KANA_TO_ASCII, KANA_TO_HALFBLOCK, KANA_TO_WORD,
+    WABUN_ASCII, WABUN_HALFBLOCK, WABUN_WORD, WORD_TO_HIRA,
+};
+
 lazy_static! {
+    // Just a list of all kana combinations, Japanese punctuation, and two spaces commonly used
+    pub static ref WABUN_KANA_REGEX: Regex = Regex::new(r"(っ|ッ|キャ|キュ|キョ|シャ|シュ|ショ|チャ|チュ|チョ|ニャ|ニュ|ニョ|ヒャ|ヒュ|ヒョ|ミャ|ミュ|ミョ|リャ|リュ|リョ|ギャ|ギュ|ギョ|ジャ|ジュ|ジョ|ヂャ|ヂュ|ヂョ|ビャ|ビュ|ビョ|ピャ|ピュ|ピョ|ア|イ|ウ|エ|オ|カ|キ|ク|ケ|コ|サ|シ|ス|セ|ソ|タ|チ|ツ|テ|ト|ナ|ニ|ヌ|ネ|ノ|ハ|ヒ|フ|ヘ|ホ|マ|ミ|ム|メ|モ|ヤ|ユ|ヨ|ラ|リ|ル|レ|ロ|ワ|ヰ|ヱ|ヲ|ン|ガ|ギ|グ|ゲ|ゴ|ザ|ジ|ズ|ゼ|ゾ|ダ|ヂ|ヅ|デ|ド|バ|ビ|ブ|ベ|ボ|パ|ピ|プ|ペ|ポ|きゃ|きゅ|きょ|しゃ|しゅ|しょ|ちゃ|ちゅ|ちょ|にゃ|にゅ|にょ|ひゃ|ひゅ|ひょ|みゃ|みゅ|みょ|りゃ|りゅ|りょ|ぎゃ|ぎゅ|ぎょ|じゃ|じゅ|じょ|ぢゃ|ぢゅ|ぢょ|びゃ|びゅ|びょ|ぴゃ|ぴゅ|ぴょ|あ|い|う|え|お|か|き|く|け|こ|さ|し|す|せ|そ|た|ち|つ|て|と|な|に|ぬ|ね|の|は|ひ|ふ|へ|ほ|ま|み|む|め|も|や|ゆ|よ|ら|り|る|れ|ろ|わ|ゐ|ゑ|を|ん|が|ぎ|ぐ|げ|ご|ざ|じ|ず|ぜ|ぞ|だ|ぢ|づ|で|ど|ば|び|ぶ|べ|ぼ|ぱ|ぴ|ぷ|ぺ|ぽ|、|。|ー|（|）|゛|゜)| |　|.").unwrap();
+    // A valid Wabun code is a kana, followed by optionally one of two diacritic codes, followed optionally by one of three small kana codes, followed by a space of end of input
     pub static ref WABUN_ASCII_REGEX: Regex =
         Regex::new(r"([-\.]+( \.--| -\.\.--| --)?( \.\.| \.\.--\.)?)( |$)").unwrap();
     pub static ref WABUN_HALFBLOCK_REGEX: Regex = Regex::new(
@@ -20,10 +27,6 @@ pub static ref WABUN_WORD_REGEX: Regex = Regex::new(
 )
 .unwrap();
 }
-
-#[derive(pest_derive::Parser)]
-#[grammar = "text_standards/wabun.pest"] // relative to src
-pub struct WabunParser;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum WabunRep {
@@ -49,11 +52,19 @@ impl WabunRep {
         }
     }
 
-    pub fn map(&self) -> &BiMap<&str, &str> {
+    pub fn kana_to_code(&self) -> &HashMap<&str, &str> {
         match self {
-            Self::HalfBlock => &WABUN_HALFBLOCK_MAP,
-            Self::Ascii => &WABUN_ASCII_MAP,
-            Self::Word => &WABUN_WORD_MAP,
+            Self::HalfBlock => &KANA_TO_HALFBLOCK,
+            Self::Ascii => &KANA_TO_ASCII,
+            Self::Word => &KANA_TO_WORD,
+        }
+    }
+
+    pub fn code_to_kana(&self) -> &HashMap<&str, &str> {
+        match self {
+            Self::HalfBlock => &HALFBLOCK_TO_HIRA,
+            Self::Ascii => &ASCII_TO_HIRA,
+            Self::Word => &WORD_TO_HIRA,
         }
     }
 }
@@ -82,17 +93,15 @@ impl Default for Wabun {
 
 impl Code for Wabun {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        let map = self.representation.map();
-        let mut out = Vec::new();
-        for pair in WabunParser::parse(Rule::kana_passage, text)
-            .unwrap()
-            .into_iter()
-            .flatten()
+        let map = self.representation.kana_to_code();
+        let mut out: Vec<&str> = Vec::new();
+        for symbol in WABUN_KANA_REGEX
+            .captures_iter(text)
+            .map(|cap| cap.get(0).unwrap().as_str())
         {
-            match pair.as_rule() {
-                Rule::kata | Rule::hira => out.push(*map.get_by_left(pair.as_str()).unwrap()),
-                Rule::space => out.push(" "),
-                _ => (),
+            match map.get(symbol) {
+                Some(code) => out.push(code),
+                None => out.push(symbol),
             }
         }
 
@@ -101,7 +110,7 @@ impl Code for Wabun {
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = Vec::new();
-        let map = self.representation.map();
+        let map = self.representation.code_to_kana();
         let regex: &Regex = match self.representation {
             WabunRep::HalfBlock => &WABUN_HALFBLOCK_REGEX,
             WabunRep::Ascii => &WABUN_ASCII_REGEX,
@@ -109,11 +118,13 @@ impl Code for Wabun {
         };
         let mut word_buffer = String::new();
         for word in text.split(self.representation.word_sep()) {
-            for cap in regex.captures_iter(word) {
-                let s = cap.get(1).unwrap().as_str();
-                match map.get_by_right(s) {
+            for cap in regex
+                .captures_iter(word)
+                .map(|cap| cap.get(1).unwrap().as_str())
+            {
+                match map.get(cap) {
                     Some(kana) => word_buffer.push_str(kana),
-                    None => return Err(CodeError::invalid_input_group(s)),
+                    None => return Err(CodeError::invalid_input_group(cap)),
                 }
             }
             out.push(word_buffer.to_string());
@@ -129,33 +140,25 @@ mod wabun_tests {
     use super::*;
 
     const KANA: &'static str = "ひらがな にゃん";
-    const ASCII: &'static str = "--..- ... .-.. .. .-.   -.-. .-- .-.-.";
+    const ASCII: &'static str = "--..- ... .-.. .. .-.   -.-. .-- .-.-. B";
     const HALFBLOCK: &'static str = "▄▄▄ ▄▄▄ ▄ ▄ ▄▄▄   ▄ ▄ ▄   ▄ ▄▄▄ ▄ ▄   ▄ ▄   ▄ ▄▄▄ ▄       ▄▄▄ ▄ ▄▄▄ ▄   ▄ ▄▄▄ ▄▄▄   ▄ ▄▄▄ ▄ ▄▄▄ ▄";
     const WORD: &'static str = "dah dah di di dah   di di dit   di dah di dit   di dit   di dah dit       dah di dah dit   di dah dah   di dah di dah dit";
 
-    // fn visualize_tree(pairs: pest::iterators::Pairs<'_, Rule>, space: String) {
-    //     for pair in pairs.into_iter() {
-    //         println!("{space}{:?}({})", pair.as_rule(), pair.as_str());
-    //         visualize_tree(pair.into_inner(), format!("{space} "))
-    //     }
-    // }
-
-    // #[test]
-    // fn tree() {
-    //     visualize_tree(
-    //         WabunParser::parse(Rule::kana_passage, KANA).unwrap(),
-    //         String::new(),
-    //     );
-    //     for c in WABUN_ASCII_REGEX.captures_iter(ASCII) {
-    //         println!("{:?}", c.get(1).unwrap().as_str());
-    //     }
-    //     for c in WABUN_HALFBLOCK_REGEX.captures_iter(HALFBLOCK) {
-    //         println!("{:?}", c.get(1).unwrap().as_str());
-    //     }
-    //     for c in WABUN_WORD_REGEX.captures_iter(WORD) {
-    //         println!("{:?}", c.get(1).unwrap().as_str());
-    //     }
-    // }
+    #[test]
+    fn tree() {
+        // for c in WABUN_KANA_REGEX.captures_iter(KANA) {
+        //     println!("{:?}", c.get(0).unwrap().as_str());
+        // }
+        for c in WABUN_ASCII_REGEX.captures_iter(ASCII) {
+            println!("{:?}", c.get(1).unwrap().as_str());
+        }
+        // for c in WABUN_HALFBLOCK_REGEX.captures_iter(HALFBLOCK) {
+        //     println!("{:?}", c.get(1).unwrap().as_str());
+        // }
+        // for c in WABUN_WORD_REGEX.captures_iter(WORD) {
+        //     println!("{:?}", c.get(1).unwrap().as_str());
+        // }
+    }
 
     #[test]
     fn encode_test_ascii() {

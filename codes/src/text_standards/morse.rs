@@ -9,7 +9,6 @@ pub enum MorseStandard {
     American,
     Gerke,
     Greek,
-    Wabun,
 }
 
 #[derive(pest_derive::Parser)]
@@ -23,7 +22,6 @@ impl MorseStandard {
             MorseStandard::American => MorseParser::parse(Rule::american_passage, text).unwrap(),
             MorseStandard::Gerke => MorseParser::parse(Rule::gerke_passage, text).unwrap(),
             MorseStandard::Greek => MorseParser::parse(Rule::greek_passage, text).unwrap(),
-            MorseStandard::Wabun => MorseParser::parse(Rule::wabun_passage, text).unwrap(),
         }
     }
 }
@@ -80,11 +78,6 @@ impl MorseRep {
                 Self::Ascii => &GREEK_ASCII_MAP,
                 Self::Word => &GREEK_WORD_MAP,
             },
-            MorseStandard::Wabun => match self {
-                Self::HalfBlock => &WABUN_ASCII_MAP,
-                Self::Ascii => &WABUN_ASCII_MAP,
-                Self::Word => &WABUN_ASCII_MAP,
-            },
         })
     }
 }
@@ -106,11 +99,6 @@ impl Morse {
                 MorseRep::HalfBlock => Box::new(GREEK_SIGNS.into_iter().zip(GREEK_HALFBLOCK)),
                 MorseRep::Ascii => Box::new(GREEK_SIGNS.into_iter().zip(GREEK_ASCII)),
                 MorseRep::Word => Box::new(GREEK_SIGNS.into_iter().zip(GREEK_WORD)),
-            },
-            MorseStandard::Wabun => match self.representation {
-                MorseRep::HalfBlock => Box::new(HIRAGANA.into_iter().zip(WABUN_HALFBLOCK)),
-                MorseRep::Ascii => Box::new(HIRAGANA.into_iter().zip(WABUN_ASCII)),
-                MorseRep::Word => Box::new(HIRAGANA.into_iter().zip(WABUN_WORD)),
             },
             MorseStandard::American => match self.representation {
                 MorseRep::HalfBlock => {
@@ -159,20 +147,17 @@ impl Code for Morse {
         for pair in self.standard.parse(&filtered).flatten() {
             match pair.as_rule() {
                 Rule::unknown => return Err(CodeError::invalid_input_group(pair.as_str())),
-                Rule::itu_sign
-                | Rule::gerke_sign
-                | Rule::american_sign
-                | Rule::greek_sign
-                | Rule::wabun_sign => match map.get_by_left(pair.as_str()) {
-                    Some(s) => out.push(*s),
-                    None => return Err(CodeError::invalid_input_group(pair.as_str())),
-                },
+                Rule::itu_sign | Rule::gerke_sign | Rule::american_sign | Rule::greek_sign => {
+                    match map.get_by_left(pair.as_str()) {
+                        Some(s) => out.push(*s),
+                        None => return Err(CodeError::invalid_input_group(pair.as_str())),
+                    }
+                }
                 Rule::space => out.push(" "),
                 Rule::itu_passage
                 | Rule::gerke_passage
                 | Rule::american_passage
-                | Rule::greek_passage
-                | Rule::wabun_passage => (),
+                | Rule::greek_passage => (),
             }
         }
 
