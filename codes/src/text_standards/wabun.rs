@@ -99,6 +99,10 @@ impl Code for Wabun {
             .captures_iter(text)
             .map(|cap| cap.get(0).unwrap().as_str())
         {
+            if symbol == " " || symbol == "\u{3000}" {
+                out.push(" ");
+                continue;
+            }
             match map.get(symbol) {
                 Some(code) => out.push(code),
                 None => out.push(symbol),

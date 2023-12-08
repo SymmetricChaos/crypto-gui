@@ -29,7 +29,6 @@ impl CodeFrame for WabunFrame {
                 WabunRep::HalfBlock,
                 "Halfblock (Line Code)",
             );
-
             ui.selectable_value(
                 &mut self.code.representation,
                 WabunRep::Word,
@@ -38,7 +37,7 @@ impl CodeFrame for WabunFrame {
         });
 
         ui.add_space(16.0);
-        ui.fill_code_columns(20, 3, Box::new(self.code.chars_codes()));
+        ui.fill_code_columns(30, 4, Box::new(self.code.chars_codes()));
         ui.add_space(16.0);
     }
 

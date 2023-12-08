@@ -57,6 +57,7 @@ use self::{
     unicode_controls::UnicodeFrame,
     upc_controls::UpcFrame,
     verhoeff_controls::VerhoeffFrame,
+    wabun_controls::WabunFrame,
 };
 
 mod ascii85_controls;
@@ -158,6 +159,7 @@ pub struct CodeInterface {
     spelling: SpellingAlphabetFrame,
     ueb: UebFrame,
     unicode: UnicodeFrame,
+    wabun: WabunFrame,
 
     // Binary to Text
     ascii85: Ascii85Frame,
@@ -226,6 +228,7 @@ impl CodeInterface {
                 CodeId::SpellingAlphabet,
                 CodeId::Ueb,
                 CodeId::Unicode,
+                CodeId::Wabun,
             ],
             active_code,
             CodeCategory::TextStandard,
@@ -363,6 +366,7 @@ impl CodeInterface {
             CodeId::Unicode => &mut self.unicode,
             CodeId::Upc => &mut self.upc,
             CodeId::Verhoeff => &mut self.verhoeff,
+            CodeId::Wabun => &mut self.wabun,
             // _ => panic!("unknown code selected"),
         }
     }
