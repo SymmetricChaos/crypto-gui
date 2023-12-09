@@ -344,13 +344,84 @@ pub const GREEK_HALFBLOCK: [&'static str; 24] = [
     "▄ ▄▄▄ ▄▄▄",
 ];
 
+pub const RUSSIAN_LETTERS: [&'static str; 31] = [
+    "А", "Б", "В", "Г", "Д", "Е", "Ж", "З", "И", "Й", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т",
+    "У", "Ф", "Х", "Ц", "Ч", "Ш", "Щ", "Ь", "Ы", "Э", "Ю", "Я", //"Ї",
+];
+pub const RUSSIAN_ASCII: [&'static str; 31] = [
+    ".-", "-...", ".--", "--.", "-..", ".", "...-", "--..", "..", ".---", "-.-", ".-..", "--",
+    "-.", "---", ".--.", ".-.", "...", "-", "..-", "..-.", "....", "-.-.", "---.", "----", "--.-",
+    "-..-", "-.--", "..-..", "..--", ".-.-", //".--.",
+];
+pub const RUSSIAN_WORD: [&'static str; 31] = [
+    "di dah",
+    "dah di di dit",
+    "di dah dah",
+    "dah dah dit",
+    "dah di dit",
+    "dit",
+    "di di di dah",
+    "dah dah di dit",
+    "di dit",
+    "di dah dah dah",
+    "dah di dah",
+    "di dah di dit",
+    "dah dah",
+    "dah dit",
+    "dah dah dah",
+    "di dah dah dit",
+    "di dah dit",
+    "di di dit",
+    "dah",
+    "di di dah",
+    "di di dah dit",
+    "di di di dit",
+    "dah di dah dit",
+    "dah dah dah dit",
+    "dah dah dah dah",
+    "dah dah di dah",
+    "dah di di dah",
+    "dah di dah dah",
+    "di di dah di dit",
+    "di di dah dah",
+    "di dah di dah",
+];
+pub const RUSSIAN_HALFBLOCK: [&'static str; 31] = [
+    "▄ ▄▄▄",
+    "▄▄▄ ▄ ▄ ▄",
+    "▄ ▄▄▄ ▄▄▄",
+    "▄▄▄ ▄▄▄ ▄",
+    "▄▄▄ ▄ ▄",
+    "▄",
+    "▄ ▄ ▄ ▄▄▄",
+    "▄▄▄ ▄▄▄ ▄ ▄",
+    "▄ ▄",
+    "▄ ▄▄▄ ▄▄▄ ▄▄▄",
+    "▄▄▄ ▄ ▄▄▄",
+    "▄ ▄▄▄ ▄ ▄",
+    "▄▄▄ ▄▄▄",
+    "▄▄▄ ▄",
+    "▄▄▄ ▄▄▄ ▄▄▄",
+    "▄ ▄▄▄ ▄▄▄ ▄",
+    "▄ ▄▄▄ ▄",
+    "▄ ▄ ▄",
+    "▄▄▄",
+    "▄ ▄ ▄▄▄",
+    "▄ ▄ ▄▄▄ ▄",
+    "▄ ▄ ▄ ▄",
+    "▄▄▄ ▄ ▄▄▄ ▄",
+    "▄▄▄ ▄▄▄ ▄▄▄ ▄",
+    "▄▄▄ ▄▄▄ ▄▄▄ ▄▄▄",
+    "▄▄▄ ▄▄▄ ▄ ▄▄▄",
+    "▄▄▄ ▄ ▄ ▄▄▄",
+    "▄▄▄ ▄ ▄▄▄ ▄▄▄",
+    "▄ ▄ ▄▄▄ ▄ ▄",
+    "▄ ▄ ▄▄▄ ▄▄▄",
+    "▄ ▄▄▄ ▄ ▄▄▄",
+];
+
 lazy_static! {
-    pub static ref ITU_ASCII_MAP: BiMap<&'static str, &'static str> =
-        bimap_from_iter(ITU_SIGNS.into_iter().zip(ITU_ASCII.into_iter()));
-    pub static ref ITU_WORD_MAP: BiMap<&'static str, &'static str> =
-        bimap_from_iter(ITU_SIGNS.into_iter().zip(ITU_WORD.into_iter()));
-    pub static ref ITU_HALFBLOCK_MAP: BiMap<&'static str, &'static str> =
-        bimap_from_iter(ITU_SIGNS.into_iter().zip(ITU_HALFBLOCK.into_iter()));
+    // These have only one possible representation.
     pub static ref AMERICAN_HALFBLOCK_MAP: BiMap<&'static str, &'static str> = bimap_from_iter(
         AMERICAN_LETTERS
             .into_iter()
@@ -358,12 +429,25 @@ lazy_static! {
     );
     pub static ref GERKE_HALFBLOCK_MAP: BiMap<&'static str, &'static str> =
         bimap_from_iter(GERKE_LETTERS.into_iter().zip(GERKE_HALFBLOCK.into_iter()));
+    // These all have three representations.
+    pub static ref ITU_ASCII_MAP: BiMap<&'static str, &'static str> =
+        bimap_from_iter(ITU_SIGNS.into_iter().zip(ITU_ASCII.into_iter()));
+    pub static ref ITU_WORD_MAP: BiMap<&'static str, &'static str> =
+        bimap_from_iter(ITU_SIGNS.into_iter().zip(ITU_WORD.into_iter()));
+    pub static ref ITU_HALFBLOCK_MAP: BiMap<&'static str, &'static str> =
+        bimap_from_iter(ITU_SIGNS.into_iter().zip(ITU_HALFBLOCK.into_iter()));
     pub static ref GREEK_ASCII_MAP: BiMap<&'static str, &'static str> =
         bimap_from_iter(GREEK_SIGNS.into_iter().zip(GREEK_ASCII.into_iter()));
     pub static ref GREEK_WORD_MAP: BiMap<&'static str, &'static str> =
         bimap_from_iter(GREEK_SIGNS.into_iter().zip(GREEK_WORD.into_iter()));
     pub static ref GREEK_HALFBLOCK_MAP: BiMap<&'static str, &'static str> =
         bimap_from_iter(GREEK_SIGNS.into_iter().zip(GREEK_HALFBLOCK.into_iter()));
+    pub static ref RUSSIAN_ASCII_MAP: BiMap<&'static str, &'static str> =
+        bimap_from_iter(RUSSIAN_LETTERS.into_iter().zip(RUSSIAN_ASCII.into_iter()));
+    pub static ref RUSSIAN_WORD_MAP: BiMap<&'static str, &'static str> =
+        bimap_from_iter(RUSSIAN_LETTERS.into_iter().zip(RUSSIAN_WORD.into_iter()));
+    pub static ref RUSSIAN_HALFBLOCK_MAP: BiMap<&'static str, &'static str> =
+        bimap_from_iter(RUSSIAN_LETTERS.into_iter().zip(RUSSIAN_HALFBLOCK.into_iter()));
 }
 
 #[cfg(test)]
@@ -409,13 +493,7 @@ mod morseitu_tests {
     #[test]
     #[ignore = "conversions"]
     fn convert() {
-        convert_ascii(&[
-            ".-.-.", "-.-.-", "-...-", "-..-.", "-..--", "---.-", "..-.-", "..-..", ".-.--",
-            "--..-", ".---.", "--.-.", ".--..", ".-..-", "-.-..", "-.--.", "-.---", ".-...",
-            ".--.", "..-.", "---.", "----", "-.--", "-.-.", "...-", ".-..", "--.-", "-..-", ".---",
-            "....", ".-.-", ".-.-.", "--..", "..--", "-...", "--.--", "---", "--.", "-.-", ".-.",
-            "...", "..-", "-..", ".--", ".-", "--", "-.", ".", "-",
-        ]);
+        convert_ascii(&RUSSIAN_ASCII);
         // convert_binary_to_halfblock(&ITU_BINARY);
         // convert_binary_to_halfblock(&AMERICAN_BINARY);
         // convert_binary_to_halfblock(&GERKE_BINARY);
@@ -441,6 +519,14 @@ mod morseitu_tests {
     #[ignore = "visual correctness check"]
     fn american_pairs() {
         for (letter, code) in AMERICAN_LETTERS.into_iter().zip(AMERICAN_HALFBLOCK) {
+            println!("{letter} {code}")
+        }
+    }
+
+    #[test]
+    #[ignore = "visual correctness check"]
+    fn russian_pairs() {
+        for (letter, code) in RUSSIAN_LETTERS.into_iter().zip(RUSSIAN_HALFBLOCK) {
             println!("{letter} {code}")
         }
     }

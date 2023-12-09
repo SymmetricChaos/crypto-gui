@@ -9,6 +9,7 @@ pub enum MorseStandard {
     American,
     Gerke,
     Greek,
+    Russian,
 }
 
 #[derive(pest_derive::Parser)]
@@ -22,6 +23,7 @@ impl MorseStandard {
             MorseStandard::American => MorseParser::parse(Rule::american_passage, text).unwrap(),
             MorseStandard::Gerke => MorseParser::parse(Rule::gerke_passage, text).unwrap(),
             MorseStandard::Greek => MorseParser::parse(Rule::greek_passage, text).unwrap(),
+            MorseStandard::Russian => MorseParser::parse(Rule::russian_passage, text).unwrap(),
         }
     }
 }
@@ -78,6 +80,11 @@ impl MorseRep {
                 Self::Ascii => &GREEK_ASCII_MAP,
                 Self::Word => &GREEK_WORD_MAP,
             },
+            MorseStandard::Russian => match self {
+                Self::HalfBlock => &RUSSIAN_HALFBLOCK_MAP,
+                Self::Ascii => &RUSSIAN_ASCII_MAP,
+                Self::Word => &RUSSIAN_WORD_MAP,
+            },
         })
     }
 }
@@ -116,6 +123,11 @@ impl Morse {
                         .zip(std::iter::once("Only line codes work for Gerke's code")),
                 ),
             },
+            MorseStandard::Russian => match self.representation {
+                MorseRep::HalfBlock => Box::new(RUSSIAN_LETTERS.into_iter().zip(RUSSIAN_HALFBLOCK)),
+                MorseRep::Ascii => Box::new(RUSSIAN_LETTERS.into_iter().zip(RUSSIAN_ASCII)),
+                MorseRep::Word => Box::new(RUSSIAN_LETTERS.into_iter().zip(RUSSIAN_WORD)),
+            },
         }
     }
 }
@@ -147,17 +159,16 @@ impl Code for Morse {
         for pair in self.standard.parse(&filtered).flatten() {
             match pair.as_rule() {
                 Rule::unknown => return Err(CodeError::invalid_input_group(pair.as_str())),
-                Rule::itu_sign | Rule::gerke_sign | Rule::american_sign | Rule::greek_sign => {
-                    match map.get_by_left(pair.as_str()) {
-                        Some(s) => out.push(*s),
-                        None => return Err(CodeError::invalid_input_group(pair.as_str())),
-                    }
-                }
+                Rule::itu_sign
+                | Rule::gerke_sign
+                | Rule::american_sign
+                | Rule::greek_sign
+                | Rule::russian_sign => match map.get_by_left(pair.as_str()) {
+                    Some(s) => out.push(*s),
+                    None => return Err(CodeError::invalid_input_group(pair.as_str())),
+                },
                 Rule::space => out.push(" "),
-                Rule::itu_passage
-                | Rule::gerke_passage
-                | Rule::american_passage
-                | Rule::greek_passage => (),
+                _ => (),
             }
         }
 

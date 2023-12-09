@@ -4,9 +4,11 @@ itu_sign      = { "É" | ASCII_ALPHA_UPPER | ASCII_DIGIT | "." | "," | ":" | "?"
 gerke_sign    = { "CH" | "Ä" | "Ö" | "Ü" | ASCII_ALPHA_UPPER | ASCII_DIGIT | "?" }
 american_sign = { ASCII_ALPHA_UPPER | "&" | ASCII_DIGIT | "," | "." | "?" | "!" }
 greek_sign    = { "Α" | "Β" | "Γ" | "Δ" | "Ε" | "Ζ" | "Η" | "Θ" | "Ι" | "Κ" | "Λ" | "Μ" | "Ν" | "Ξ" | "Ο" | "Π" | "Ρ" | "Σ" | "Τ" | "Υ" | "Φ" | "Χ" | "Ψ" | "Ω" }
+russian_sign  = { "А" | "Б" | "В" | "Г" | "Д" | "Е" | "Ж" | "З" | "И" | "Й" | "К" | "Л" | "М" | "Н" | "О" | "П" | "Р" | "С" | "Т" | "У" | "Ф" | "Х" | "Ц" | "Ч" | "Ш" | "Щ" | "Ь" | "Ы" | "Э" | "Ю" | "Я" | "Ї" }
 space         = { " " }
 
 itu_passage      = { (itu_sign | space | unknown)+ }
 gerke_passage    = { (gerke_sign | space | unknown)+ }
 american_passage = { (american_sign | space | unknown)+ }
 greek_passage    = { (greek_sign | space | unknown)+ }
+russian_passage  = { (russian_sign | space | unknown)+ }
