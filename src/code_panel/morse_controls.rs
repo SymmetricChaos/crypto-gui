@@ -22,13 +22,13 @@ impl CodeFrame for MorseFrame {
                 ui.selectable_value(
                     &mut self.code.standard,
                     MorseStandard::Itu,
-                    "ITU Morse (1865)",
+                    "ITU Standard Morse",
                 );
                 if ui
                     .selectable_value(
                         &mut self.code.standard,
                         MorseStandard::American,
-                        "American Morse (1844)",
+                        "American Morse (obsolete)",
                     )
                     .clicked()
                 {
@@ -39,7 +39,11 @@ impl CodeFrame for MorseFrame {
                     }
                 }
                 if ui
-                    .selectable_value(&mut self.code.standard, MorseStandard::Gerke, "Gerke Code")
+                    .selectable_value(
+                        &mut self.code.standard,
+                        MorseStandard::Gerke,
+                        "Gerke Code (obsolete)",
+                    )
                     .clicked()
                 {
                     if self.code.representation == MorseRep::Ascii
@@ -49,6 +53,11 @@ impl CodeFrame for MorseFrame {
                     }
                 }
                 ui.selectable_value(&mut self.code.standard, MorseStandard::Greek, "Greek Morse");
+                ui.selectable_value(
+                    &mut self.code.standard,
+                    MorseStandard::Russian,
+                    "Russian Morse",
+                );
             });
         });
 
@@ -62,7 +71,12 @@ impl CodeFrame for MorseFrame {
             );
             // ASCII and words only work for codes with standardized sizes
             ui.add_enabled_ui(
-                [MorseStandard::Itu, MorseStandard::Greek].contains(&self.code.standard),
+                [
+                    MorseStandard::Itu,
+                    MorseStandard::Greek,
+                    MorseStandard::Russian,
+                ]
+                .contains(&self.code.standard),
                 |ui| {
                     ui.selectable_value(
                         &mut self.code.representation,
@@ -80,11 +94,11 @@ impl CodeFrame for MorseFrame {
 
         ui.add_space(16.0);
         match self.code.standard {
-            MorseStandard::Itu => ui.label("The best known variant of Morse code is the standard adopted by the International Telegraphy Union. There are two kinds of marks, dits and dahs. A dit lasts for one unit of time and a dah for three times that. The space between marks is the length of a dit. Between letters a space the length of a dah is used. Sentences words a space the length of seven dits is used."),
+            MorseStandard::Itu => ui.label("The best known variant of Morse code is the standard adopted by the International Telegraphy Union adopted in 1865. There are two kinds of marks, dits and dahs. A dit lasts for one unit of time and a dah for three times that. The space between marks is the length of a dit. Between letters a space the length of a dah is used. Sentences words a space the length of seven dits is used."),
             MorseStandard::American => ui.label("The original 1844 code created by Morse and Vail was much more complex than the better known international standard. Rather than two kinds of marks there were four. The dit was of one unit, the dash of two units, the long dash of five (used for the letter 'L'), and the longer dash of six (used for the number '0'). Gaps between marks also varied in size. A gap within a character could be either one or two units in length. Only line codes have standard ways of representing American Morse."),
-            MorseStandard::Gerke => ui.label("Gerke considerably simplified Morse and Vail's code by standardizing the size of marks and gaps. There are two kinds of marks, dits and dahs. A dit lasts for one unit of time and a dah for three times that. The space between marks is the length of a dit. Between letters a space the length of a dah is used. Sentences words a space the length of seven dits is used. An exception, however, is made for '0' which was encoded as a single mark of length six as in American Morse. Gerke made various other changes: addition of letters commonly needed in German, removal of the letter 'I', and fixed width digits (excepting zero). Due to the long '0' only line codes have standard ways of representing Gerke's code."),
-            MorseStandard::Greek => ui.label("Greek Morse Code largely reassigns the codes used for ITU Morse Code."),
-            MorseStandard::Russian => ui.label("Russian Morse Code largely reassigns the codes used for ITU Morse Code."),
+            MorseStandard::Gerke => ui.label("Around 1848 Gerke considerably simplified Morse and Vail's code by standardizing the size of marks and gaps. There are two kinds of marks, dits and dahs. A dit lasts for one unit of time and a dah for three times that. The space between marks is the length of a dit. Between letters a space the length of a dah is used. Sentences words a space the length of seven dits is used. An exception, however, is made for the number zero which was encoded as a single mark of length six as in American Morse. Gerke made various other changes: addition of letters commonly needed in German, removal of the letter 'I', and fixed width digits (excepting zero). Due to the long '0' only line codes have standard ways of representing Gerke's code."),
+            MorseStandard::Greek => ui.label("Greek Morse Code largely reassigns the codes used for ITU Morse Code letters."),
+            MorseStandard::Russian => ui.label("Russian Morse Code largely reassigns the codes used for ITU Morse Code letters."),
         };
 
         ui.add_space(16.0);
