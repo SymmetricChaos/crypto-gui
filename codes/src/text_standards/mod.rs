@@ -4,6 +4,7 @@ pub mod code_pages;
 pub mod linotype;
 pub mod morse;
 pub mod morse_encodings;
+pub mod mtk2;
 pub mod needle;
 pub mod punycode;
 pub mod spelling_alphabet;
