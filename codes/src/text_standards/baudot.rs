@@ -1,26 +1,29 @@
 use bimap::BiMap;
 use itertools::Itertools;
 use lazy_static::lazy_static;
-use std::cell::Cell;
 use utils::text_functions::{bimap_from_iter, chunk_and_join, string_chunks};
 
 use crate::{errors::CodeError, traits::Code};
 
-pub const ITA1_LETTERS: &'static str = "␀␍␊ QWERTYUIOPASDFGHJKLZXCVBNM␎␏";
-pub const ITA1_FIGURES: &'static str = "␀␍␊ 1234567890-'␅!&£␇()+/:=?,.␎␏";
-pub const ITA2_LETTERS: &'static str = "␀␍␊ QWERTYUIOPASDFGHJKLZXCVBNM␎␏";
-pub const ITA2_FIGURES: &'static str = "␀␍␊ 1234567890-'␅!&£␇()+/:=?,.␎␏";
-pub const MTK_LETTERS: &'static str = "␀␍␊ QWERTYUIOPASDFGHJKLZXCVBNM␎␏";
-pub const MTK_FIGURES: &'static str = "␑␍␊ 1234567890-'ЧЭШЩЮ()+/:=?,.␒␓";
-pub const MTK_CYRILLIC: &'static str = "␑␍␊ ЯВЕPТЫУИОПАСДФГХЙКЛЗЬЦЖБНМ␒␓";
-pub const US_TTY_FIGURES: &'static str = "␀3␊- ␇87␍$4',!:(5\")2#6019?&␎./;␏";
+pub const ITA1_UK_LETTERS: &'static str = "AE/YUIO␎JGHBCFD -XZSTWV␡KMLRQNP";
+pub const ITA1_UK_FIGURES: &'static str = "";
+pub const ITA2_LETTERS: &'static str = "␀E␊A SIU␍DRJNFCKTZLWHYPQOBG␎MXV␏";
+pub const ITA2_FIGURES: &'static str = "␀3␊- '87␍$4',!:(5\")2#6019?&␎./;␏";
+pub const US_TTY_FIGURES: &'static str = "␀3␊- '87␍␅4␇,!:(5+)2#6019?&␎./;␏";
 
-pub const GRAY_CODES: [&'static str; 32] = [
-    "00000", "00010", "01000", "00100", "11101", "11001", "10000", "01010", "00001", "10101",
-    "11100", "01100", "00011", "01101", "11000", "10100", "10010", "10110", "01011", "00101",
-    "11010", "11110", "01001", "10001", "10111", "01110", "01111", "10011", "00110", "00111",
-    "11011", "11111",
+pub const CODES: [&'static str; 32] = [
+    "00000", "00001", "00010", "00011", "00100", "00101", "00110", "00111", "01000", "01001",
+    "01010", "01011", "01100", "01101", "01110", "01111", "10000", "10001", "10010", "10011",
+    "10100", "10101", "10110", "10111", "11000", "11001", "11010", "11011", "11100", "11101",
+    "11110", "11111",
 ];
+
+// pub const GRAY_CODES: [&'static str; 32] = [
+//     "00000", "00001", "00011", "00010", "00110", "00111", "00101", "00100", "01100", "01101",
+//     "01111", "01110", "01010", "01011", "01001", "01000", "11000", "11001", "11011", "11010",
+//     "11110", "11111", "11101", "11100", "10100", "10101", "10111", "10110", "10010", "10011",
+//     "10001", "10000",
+// ];
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum BaudotMode {
@@ -39,15 +42,15 @@ lazy_static! {
     pub static ref FIVE_BIT_CODES: Vec<String> =
         (0..32).map(|n| format!("{:05b}", n)).collect_vec();
     pub static ref ITA1_LETTER_MAP: BiMap<char, &'static str> =
-        bimap_from_iter(ITA1_LETTERS.chars().zip(GRAY_CODES.into_iter()));
+        bimap_from_iter(ITA1_UK_LETTERS.chars().zip(CODES.into_iter()));
     pub static ref ITA1_FIGURE_MAP: BiMap<char, &'static str> =
-        bimap_from_iter(ITA1_FIGURES.chars().zip(GRAY_CODES.into_iter()));
+        bimap_from_iter(ITA1_UK_FIGURES.chars().zip(CODES.into_iter()));
     pub static ref ITA2_LETTER_MAP: BiMap<char, &'static str> =
-        bimap_from_iter(ITA2_LETTERS.chars().zip(GRAY_CODES.into_iter()));
+        bimap_from_iter(ITA2_LETTERS.chars().zip(CODES.into_iter()));
     pub static ref ITA2_FIGURE_MAP: BiMap<char, &'static str> =
-        bimap_from_iter(ITA2_FIGURES.chars().zip(GRAY_CODES.into_iter()));
+        bimap_from_iter(ITA2_FIGURES.chars().zip(CODES.into_iter()));
     pub static ref US_TTY_FIGURE_MAP: BiMap<char, &'static str> =
-        bimap_from_iter(US_TTY_FIGURES.chars().zip(GRAY_CODES.into_iter()));
+        bimap_from_iter(US_TTY_FIGURES.chars().zip(CODES.into_iter()));
 }
 
 pub struct Baudot {
@@ -76,7 +79,7 @@ impl Baudot {
     // }
 
     pub fn codes_chars(&self) -> Box<dyn Iterator<Item = (&str, String)> + '_> {
-        Box::new(GRAY_CODES.into_iter().map(|code| {
+        Box::new(CODES.into_iter().map(|code| {
             (
                 code,
                 format!(
@@ -209,9 +212,18 @@ mod baudot_tests {
     #[test]
     #[ignore = "visual correctness check"]
     fn ita2_pairs() {
-        for (letter, code) in ITA2_LETTERS.chars().zip(GRAY_CODES) {
+        for (letter, code) in ITA2_LETTERS.chars().zip(CODES) {
             println!("{letter} {code}")
         }
+    }
+
+    #[test]
+    #[ignore = "visual correctness check"]
+    fn re_order() {
+        for code in CODES {
+            print!("{}", ITA2_LETTER_MAP.get_by_right(code).unwrap());
+        }
+        println!()
     }
 
     #[test]

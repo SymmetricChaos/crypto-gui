@@ -1,5 +1,5 @@
 use bimap::BiMap;
-use itertools::{izip, Itertools};
+use itertools::izip;
 use lazy_static::lazy_static;
 use utils::text_functions::{bimap_from_iter, chunk_and_join, string_chunks};
 
@@ -9,7 +9,7 @@ pub const MTK_LETTERS: &'static str = "␑␍␊ QWERTYUIOPASDFGHJKLZXCVBNM␒�
 pub const MTK_FIGURES: &'static str = "␑␍␊ 1234567890-'ЧЭШЩЮ()+/:=?,.␒␓";
 pub const MTK_CYRILLIC: &'static str = "␑␍␊ ЯВЕPТЫУИОПАСДФГХЙКЛЗЬЦЖБНМ␒␓";
 
-pub const GRAY_CODES: [&'static str; 32] = [
+pub const CODES: [&'static str; 32] = [
     "00000", "00010", "01000", "00100", "11101", "11001", "10000", "01010", "00001", "10101",
     "11100", "01100", "00011", "01101", "11000", "10100", "10010", "10110", "01011", "00101",
     "11010", "11110", "01001", "10001", "10111", "01110", "01111", "10011", "00110", "00111",
@@ -25,11 +25,11 @@ pub enum Mtk2Mode {
 
 lazy_static! {
     pub static ref LETTER_MAP: BiMap<char, &'static str> =
-        bimap_from_iter(MTK_LETTERS.chars().zip(GRAY_CODES.into_iter()));
+        bimap_from_iter(MTK_LETTERS.chars().zip(CODES.into_iter()));
     pub static ref FIGURE_MAP: BiMap<char, &'static str> =
-        bimap_from_iter(MTK_FIGURES.chars().zip(GRAY_CODES.into_iter()));
+        bimap_from_iter(MTK_FIGURES.chars().zip(CODES.into_iter()));
     pub static ref CYRILLIC_MAP: BiMap<char, &'static str> =
-        bimap_from_iter(MTK_CYRILLIC.chars().zip(GRAY_CODES.into_iter()));
+        bimap_from_iter(MTK_CYRILLIC.chars().zip(CODES.into_iter()));
 }
 
 pub struct Mtk2 {
@@ -42,7 +42,7 @@ impl Mtk2 {
     pub fn codes_chars(&self) -> Box<dyn Iterator<Item = (&str, String)> + '_> {
         Box::new(
             izip!(
-                GRAY_CODES,
+                CODES,
                 MTK_LETTERS.chars(),
                 MTK_FIGURES.chars(),
                 MTK_CYRILLIC.chars()
@@ -137,7 +137,7 @@ mod baudot_tests {
     #[test]
     #[ignore = "visual correctness check"]
     fn ita2_pairs() {
-        for (letter, code) in MTK_CYRILLIC.chars().zip(GRAY_CODES) {
+        for (letter, code) in MTK_CYRILLIC.chars().zip(CODES) {
             println!("{letter} {code}")
         }
     }
