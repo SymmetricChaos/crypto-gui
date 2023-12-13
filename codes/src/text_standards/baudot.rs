@@ -1,15 +1,14 @@
 use bimap::BiMap;
-use itertools::Itertools;
 use lazy_static::lazy_static;
 use utils::text_functions::{bimap_from_iter, chunk_and_join, string_chunks};
 
 use crate::{errors::CodeError, traits::Code};
 
-pub const ITA1_UK_LETTERS: &'static str = "AE/YUIO␎JGHBCFD -XZSTWV␡KMLRQNP";
-pub const ITA1_UK_FIGURES: &'static str = "";
+// pub const ITA1_EU_LETTERS: &'static str = "␀AEÉYUIO␎JGHBCFD -XZSTWV␡KMLRQNP";
+// pub const ITA1_EU_FIGURES: &'static str = "␀12⅟34";
 pub const ITA2_LETTERS: &'static str = "␀E␊A SIU␍DRJNFCKTZLWHYPQOBG␎MXV␏";
-pub const ITA2_FIGURES: &'static str = "␀3␊- '87␍$4',!:(5\")2#6019?&␎./;␏";
-pub const US_TTY_FIGURES: &'static str = "␀3␊- '87␍␅4␇,!:(5+)2#6019?&␎./;␏";
+pub const ITA2_FIGURES: &'static str = "␀3␊- '87␍␅4␇,!:(5+)2£6019?&␎./=␏";
+pub const US_TTY_FIGURES: &'static str = "␀3␊- ␇87␍$4',!:(5\")2#6019?&␎./;␏";
 
 pub const CODES: [&'static str; 32] = [
     "00000", "00001", "00010", "00011", "00100", "00101", "00110", "00111", "01000", "01001",
@@ -33,18 +32,16 @@ pub enum BaudotMode {
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum BaudotVersion {
-    Ita1,
+    // Ita1,
     Ita2,
     UsTty,
 }
 
 lazy_static! {
-    pub static ref FIVE_BIT_CODES: Vec<String> =
-        (0..32).map(|n| format!("{:05b}", n)).collect_vec();
-    pub static ref ITA1_LETTER_MAP: BiMap<char, &'static str> =
-        bimap_from_iter(ITA1_UK_LETTERS.chars().zip(CODES.into_iter()));
-    pub static ref ITA1_FIGURE_MAP: BiMap<char, &'static str> =
-        bimap_from_iter(ITA1_UK_FIGURES.chars().zip(CODES.into_iter()));
+    // pub static ref ITA1_LETTER_MAP: BiMap<char, &'static str> =
+    //     bimap_from_iter(ITA1_UK_LETTERS.chars().zip(CODES.into_iter()));
+    // pub static ref ITA1_FIGURE_MAP: BiMap<char, &'static str> =
+    //     bimap_from_iter(ITA1_UK_FIGURES.chars().zip(CODES.into_iter()));
     pub static ref ITA2_LETTER_MAP: BiMap<char, &'static str> =
         bimap_from_iter(ITA2_LETTERS.chars().zip(CODES.into_iter()));
     pub static ref ITA2_FIGURE_MAP: BiMap<char, &'static str> =
@@ -93,7 +90,7 @@ impl Baudot {
 
     pub fn figure_map(&self) -> &BiMap<char, &str> {
         match self.version {
-            BaudotVersion::Ita1 => &ITA1_FIGURE_MAP,
+            // BaudotVersion::Ita1 => &ITA1_FIGURE_MAP,
             BaudotVersion::Ita2 => &ITA2_FIGURE_MAP,
             BaudotVersion::UsTty => &US_TTY_FIGURE_MAP,
         }
@@ -101,7 +98,7 @@ impl Baudot {
 
     pub fn letter_map(&self) -> &BiMap<char, &str> {
         match self.version {
-            BaudotVersion::Ita1 => &ITA1_LETTER_MAP,
+            // BaudotVersion::Ita1 => &ITA1_LETTER_MAP,
             BaudotVersion::Ita2 => &ITA2_LETTER_MAP,
             BaudotVersion::UsTty => &ITA2_LETTER_MAP,
         }
@@ -109,10 +106,10 @@ impl Baudot {
 
     pub fn map(&self, k: &char, mode: &BaudotMode) -> Option<&&str> {
         match self.version {
-            BaudotVersion::Ita1 => match mode {
-                BaudotMode::Letters => ITA1_LETTER_MAP.get_by_left(k),
-                BaudotMode::Figures => ITA1_FIGURE_MAP.get_by_left(k),
-            },
+            // BaudotVersion::Ita1 => match mode {
+            //     BaudotMode::Letters => ITA1_LETTER_MAP.get_by_left(k),
+            //     BaudotMode::Figures => ITA1_FIGURE_MAP.get_by_left(k),
+            // },
             BaudotVersion::Ita2 => match mode {
                 BaudotMode::Letters => ITA2_LETTER_MAP.get_by_left(k),
                 BaudotMode::Figures => ITA2_FIGURE_MAP.get_by_left(k),
@@ -126,10 +123,10 @@ impl Baudot {
 
     pub fn map_inv(&self, k: &str, mode: &BaudotMode) -> Option<&char> {
         match self.version {
-            BaudotVersion::Ita1 => match mode {
-                BaudotMode::Letters => ITA1_LETTER_MAP.get_by_right(k),
-                BaudotMode::Figures => ITA1_FIGURE_MAP.get_by_right(k),
-            },
+            // BaudotVersion::Ita1 => match mode {
+            //     BaudotMode::Letters => ITA1_LETTER_MAP.get_by_right(k),
+            //     BaudotMode::Figures => ITA1_FIGURE_MAP.get_by_right(k),
+            // },
             BaudotVersion::Ita2 => match mode {
                 BaudotMode::Letters => ITA2_LETTER_MAP.get_by_right(k),
                 BaudotMode::Figures => ITA2_FIGURE_MAP.get_by_right(k),
@@ -207,7 +204,7 @@ mod baudot_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "THEQUICKBROWNFOXCOSTS␎£572␏WHILEONSALE";
-    const CIPHERTEXT: &'static str = "0000100101100001110111100011000111011110100110101000011110010011010110000111011101110000111010000001101001101100101000011110011001111111100100101011000100110000000110011010100110000100110000";
+    const CIPHERTEXT: &'static str = "1000010100000011011100111001100111001111110010101011000100110110001101110001110101110110000010110000001011101110100100000011110011111111001110100001101001000001110000110000101000111001000001";
 
     #[test]
     #[ignore = "visual correctness check"]
@@ -215,15 +212,6 @@ mod baudot_tests {
         for (letter, code) in ITA2_LETTERS.chars().zip(CODES) {
             println!("{letter} {code}")
         }
-    }
-
-    #[test]
-    #[ignore = "visual correctness check"]
-    fn re_order() {
-        for code in CODES {
-            print!("{}", ITA2_LETTER_MAP.get_by_right(code).unwrap());
-        }
-        println!()
     }
 
     #[test]
