@@ -4,17 +4,16 @@ use crate::{
     traits::Code,
 };
 use itertools::Itertools;
-use num::{Integer, Zero};
 use utils::text_functions::num_to_digit;
 
-pub struct BaseN {
+pub struct BaseNBijective {
     pub maps: LetterWordIntCode,
     pub radix: u32,
     pub mode: IOMode,
     pub little_endian: bool,
 }
 
-impl Default for BaseN {
+impl Default for BaseNBijective {
     fn default() -> Self {
         let mut maps = LetterWordIntCode::new();
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
@@ -28,32 +27,43 @@ impl Default for BaseN {
     }
 }
 
-impl BaseN {
+impl BaseNBijective {
     pub fn validate(&self) -> Result<(), CodeError> {
-        if self.radix < 2 || self.radix > 36 {
+        if self.radix < 1 || self.radix > 35 {
             return Err(CodeError::state(
-                "radix must be between 2 and 36, inclusive",
+                "bijective radix must be between 1 and 35, inclusive",
             ));
         }
+
         Ok(())
     }
 
     pub fn encode_u32(&self, n: u32) -> Result<String, CodeError> {
-        if n.is_zero() {
-            return Ok(String::from("0"));
-        }
-        let mut n = n;
-        let mut s = Vec::new();
-        while n != 0 {
-            let (q, r) = n.div_rem(&self.radix);
-            s.push(num_to_digit(r).expect("remainder should always be less than 36"));
+        if n == 0 {
+            return Err(CodeError::input(
+                "in bijective representation 0 is the empty string and cannot be represented",
+            ));
+        };
 
+        if self.radix == 1 {
+            return Ok("1".repeat(n as usize));
+        }
+
+        let mut out = Vec::with_capacity(32);
+        let mut n = n;
+        loop {
+            let q = num::integer::div_ceil(n, self.radix) - 1;
+            let a = n - q * self.radix;
+            out.push(num_to_digit(a).expect("remainder should always be less than 35"));
             n = q;
+            if n == 0 {
+                break;
+            }
         }
         if self.little_endian {
-            Ok(s.iter().rev().collect())
+            Ok(out.iter().rev().collect())
         } else {
-            Ok(s.iter().collect())
+            Ok(out.iter().collect())
         }
     }
 
@@ -64,11 +74,20 @@ impl BaseN {
             s.chars().rev().collect()
         };
 
-        u32::from_str_radix(&word, self.radix).map_err(|e| CodeError::Input(e.to_string()))
+        let mut base = 1;
+        let mut out = 0;
+        for c in word.chars().rev() {
+            let n = c
+                .to_digit(36)
+                .ok_or_else(|| CodeError::invalid_input_char(c))?;
+            out += base * n;
+            base *= self.radix;
+        }
+        Ok(out)
     }
 }
 
-impl Code for BaseN {
+impl Code for BaseNBijective {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         self.validate()?;
         let mut output = Vec::new();
@@ -84,7 +103,7 @@ impl Code for BaseN {
         } else if self.mode == IOMode::Letter {
             for c in text.chars() {
                 let n = self.maps.char_to_int(c)?;
-                output.push(self.encode_u32(n as u32)?);
+                output.push(self.encode_u32((n + 1) as u32)?);
             }
         } else {
             for w in text.split(" ") {
@@ -92,7 +111,7 @@ impl Code for BaseN {
                     continue;
                 }
                 let n = self.maps.word_to_int(w)?;
-                output.push(self.encode_u32(n as u32)?);
+                output.push(self.encode_u32((n + 1) as u32)?);
             }
         }
         Ok(output.into_iter().join(" "))
@@ -115,7 +134,7 @@ impl Code for BaseN {
                     continue;
                 }
                 let n = self.decode_to_u32(s)?;
-                output.push(self.maps.int_to_char(n as usize)?)
+                output.push(self.maps.int_to_char((n - 1) as usize)?)
             }
         } else {
             for s in text.split(" ") {
@@ -123,7 +142,7 @@ impl Code for BaseN {
                     continue;
                 }
                 let n = self.decode_to_u32(s)?;
-                output.push_str(self.maps.int_to_word(n as usize)?);
+                output.push(self.maps.int_to_char((n - 1) as usize)?);
                 output.push(' ');
             }
             output.pop();
@@ -137,45 +156,23 @@ impl Code for BaseN {
 mod base_n_tests {
     use super::*;
 
-    const PLAINTEXT_INT: &'static str = "0 1 2 3 4 5";
-    const PLAINTEXT_LET: &'static str = "ETAOIN";
-    const ENCODEDTEXT: &'static str = "0 1 10 11 100 101";
-
-    const PLAINTEXT_INT_BE: &'static str = "0 1 2 3 4 5";
-    const PLAINTEXT_LET_BE: &'static str = "ETAOIN";
-    const ENCODEDTEXT_BE: &'static str = "0 1 01 11 001 101";
+    const PLAINTEXT_INT_BIJ: &'static str = "1 2 3 4 5 6";
+    const PLAINTEXT_LET_BIJ: &'static str = "ETAOIN";
+    const ENCODEDTEXT_BIJ: &'static str = "1 2 11 12 21 22";
 
     #[test]
-    fn encode_test() {
-        let mut code = BaseN::default();
-        assert_eq!(code.encode(PLAINTEXT_INT).unwrap(), ENCODEDTEXT);
+    fn encode_test_bijective() {
+        let mut code = BaseNBijective::default();
+        assert_eq!(code.encode(PLAINTEXT_INT_BIJ).unwrap(), ENCODEDTEXT_BIJ);
         code.mode = IOMode::Letter;
-        assert_eq!(code.encode(PLAINTEXT_LET).unwrap(), ENCODEDTEXT);
+        assert_eq!(code.encode(PLAINTEXT_LET_BIJ).unwrap(), ENCODEDTEXT_BIJ);
     }
 
     #[test]
-    fn encode_test_be() {
-        let mut code = BaseN::default();
-        code.little_endian = false;
-        assert_eq!(code.encode(PLAINTEXT_INT_BE).unwrap(), ENCODEDTEXT_BE);
+    fn decode_test_bijective() {
+        let mut code = BaseNBijective::default();
+        assert_eq!(code.decode(ENCODEDTEXT_BIJ).unwrap(), PLAINTEXT_INT_BIJ);
         code.mode = IOMode::Letter;
-        assert_eq!(code.encode(PLAINTEXT_LET_BE).unwrap(), ENCODEDTEXT_BE);
-    }
-
-    #[test]
-    fn decode_test() {
-        let mut code = BaseN::default();
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT_INT);
-        code.mode = IOMode::Letter;
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT_LET);
-    }
-
-    #[test]
-    fn decode_test_be() {
-        let mut code = BaseN::default();
-        code.little_endian = false;
-        assert_eq!(code.decode(ENCODEDTEXT_BE).unwrap(), PLAINTEXT_INT_BE);
-        code.mode = IOMode::Letter;
-        assert_eq!(code.decode(ENCODEDTEXT_BE).unwrap(), PLAINTEXT_LET_BE);
+        assert_eq!(code.decode(ENCODEDTEXT_BIJ).unwrap(), PLAINTEXT_LET_BIJ);
     }
 }

@@ -1,15 +1,15 @@
 use super::CodeFrame;
 use crate::ui_elements::UiElements;
-use codes::{letter_word_code::IOMode, mathematical::base_n::BaseN};
+use codes::{letter_word_code::IOMode, mathematical::base_n_bijective::BaseNBijective};
 use egui::{Slider, TextEdit};
 use utils::text_functions::unique_string;
 
-pub struct BaseNFrame {
-    code: BaseN,
+pub struct BaseNBijectiveFrame {
+    code: BaseNBijective,
     words_string: String,
 }
 
-impl Default for BaseNFrame {
+impl Default for BaseNBijectiveFrame {
     fn default() -> Self {
         Self {
             code: Default::default(),
@@ -18,7 +18,7 @@ impl Default for BaseNFrame {
     }
 }
 
-impl CodeFrame for BaseNFrame {
+impl CodeFrame for BaseNBijectiveFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
         ui.add_space(16.0);
 
@@ -30,25 +30,12 @@ impl CodeFrame for BaseNFrame {
         });
         ui.add_space(16.0);
 
-        // ui.subheading("Bijective Base-N");
-        // ui.label("Bijective representation covers all positive integers without using zero. This allows a bijection between numbers and their representations as no leading zeros can be added.");
-        // ui.checkbox(&mut self.code.bijective, "");
-
-        // if self.code.bijective {
-        //     ui.subheading("Base");
-        //     ui.label(
-        //         "Widely accepted representations for bijective numbers in base-N exist only for values 1 to 35.",
-        //     );
-        //     ui.add(Slider::new(&mut self.code.radix, 1..=35));
-        //     ui.add_space(16.0);
-        // } else {
         ui.subheading("Base");
         ui.label(
-            "Widely accepted representations for numbers in base-N exist only for values 2 to 36.",
-        );
-        ui.add(Slider::new(&mut self.code.radix, 2..=36));
+                "Widely accepted representations for bijective numbers in base-N exist only for values 1 to 35.",
+            );
+        ui.add(Slider::new(&mut self.code.radix, 1..=35));
         ui.add_space(16.0);
-        // }
 
         match self.code.mode {
             IOMode::Letter => {
@@ -70,15 +57,9 @@ impl CodeFrame for BaseNFrame {
                 // ui.fill_code_columns(16, 5, Box::new(self.code.maps.words_codes()));
             }
             IOMode::Integer => {
-                // if self.code.bijective {
-                //     ui.label("Convert between \"standard\" base-10 numbers and their representation in another a bijective base. The first 32 encodings appear below.");
-                //     let pairs = (1..33).map(|n| (n.to_string(), self.code.encode_u32(n).unwrap()));
-                //     ui.fill_code_columns(16, 5, Box::new(pairs));
-                // } else {
-                ui.label("Convert between \"standard\" base-10 numbers and their representation in another base. The first 32 encodings appear below.");
-                let pairs = (0..32).map(|n| (n.to_string(), self.code.encode_u32(n).unwrap()));
+                ui.label("Convert between \"standard\" base-10 numbers and their representation in a bijective base. The first 32 encodings appear below.");
+                let pairs = (1..33).map(|n| (n.to_string(), self.code.encode_u32(n).unwrap()));
                 ui.fill_code_columns(16, 5, Box::new(pairs));
-                // }
             }
         }
         ui.add_space(16.0);

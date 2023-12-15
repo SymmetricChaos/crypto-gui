@@ -16,6 +16,7 @@ use self::{
     base16_controls::Base16Frame,
     base32_controls::Base32Frame,
     base64_controls::Base64Frame,
+    base_n_bijective_controls::BaseNBijectiveFrame,
     base_n_controls::BaseNFrame,
     basex_controls::BaseXFrame,
     baudot_controls::BaudotFrame,
@@ -68,6 +69,7 @@ mod barbier_controls;
 mod base16_controls;
 mod base32_controls;
 mod base64_controls;
+pub mod base_n_bijective_controls;
 mod base_n_controls;
 mod basex_controls;
 mod baudot_controls;
@@ -188,7 +190,8 @@ pub struct CodeInterface {
     upc: UpcFrame,
 
     // Integer
-    basen: BaseNFrame,
+    base_n: BaseNFrame,
+    base_n_bij: BaseNBijectiveFrame,
     balanced_ternary: BalancedTernaryFrame,
     godel: GodelFrame,
     gray: GrayCodeFrame,
@@ -321,7 +324,8 @@ impl CodeInterface {
             CodeId::Bacon => &mut self.bacon,
             CodeId::Barbier => &mut self.barbier,
             CodeId::BalancedTernary => &mut self.balanced_ternary,
-            CodeId::BaseN => &mut self.basen,
+            CodeId::BaseN => &mut self.base_n,
+            CodeId::BaseNBijective => &mut self.base_n_bij,
             CodeId::BaseX => &mut self.basex,
             CodeId::Base16 => &mut self.base16,
             CodeId::Base32 => &mut self.base32,
