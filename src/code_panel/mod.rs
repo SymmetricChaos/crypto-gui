@@ -69,14 +69,14 @@ mod barbier_controls;
 mod base16_controls;
 mod base32_controls;
 mod base64_controls;
-pub mod base_n_bijective_controls;
+mod base_n_bijective_controls;
 mod base_n_controls;
 mod basex_controls;
 mod baudot_controls;
 mod biquinary_controls;
 mod block_controls;
 mod braille_encoding_controls;
-pub mod ccsid_controls;
+mod ccsid_controls;
 mod crc_controls;
 mod damm_controls;
 mod elias_controls;
@@ -106,12 +106,12 @@ mod spelling_alphabet_controls;
 mod symmetric_unary_controls;
 mod tap_code_controls;
 mod twos_complement_controls;
-pub mod ueb_controls;
+mod ueb_controls;
 mod unary_controls;
 mod unicode_controls;
 mod upc_controls;
 mod verhoeff_controls;
-pub mod wabun_controls;
+mod wabun_controls;
 
 pub trait CodeFrame {
     fn ui(&mut self, ui: &mut Ui);
@@ -254,8 +254,9 @@ impl CodeInterface {
         );
         combox_box(
             &[
-                CodeId::BaseN,
                 CodeId::BalancedTernary,
+                CodeId::BaseN,
+                CodeId::BaseNBijective,
                 CodeId::BiquinaryDecimal,
                 CodeId::Elias,
                 CodeId::Factoradic,
