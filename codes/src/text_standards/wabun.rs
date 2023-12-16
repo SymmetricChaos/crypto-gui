@@ -20,12 +20,12 @@ lazy_static! {
         r"((▄ ▄▄▄ ▄ ▄▄▄ ▄|▄▄▄ ▄ ▄▄▄ ▄ ▄▄▄|▄▄▄ ▄ ▄ ▄ ▄▄▄|▄▄▄ ▄ ▄ ▄▄▄ ▄|▄▄▄ ▄ ▄ ▄▄▄ ▄▄▄|▄▄▄ ▄▄▄ ▄▄▄ ▄ ▄▄▄|▄ ▄ ▄▄▄ ▄ ▄▄▄|▄ ▄ ▄▄▄ ▄ ▄|▄ ▄▄▄ ▄ ▄▄▄ ▄▄▄|▄▄▄ ▄▄▄ ▄ ▄ ▄▄▄|▄ ▄▄▄ ▄▄▄ ▄▄▄ ▄|▄▄▄ ▄▄▄ ▄ ▄▄▄ ▄|▄ ▄▄▄ ▄▄▄ ▄ ▄|▄ ▄▄▄ ▄ ▄ ▄▄▄|▄▄▄ ▄ ▄▄▄ ▄ ▄|▄▄▄ ▄ ▄▄▄ ▄▄▄ ▄|▄▄▄ ▄ ▄▄▄ ▄▄▄ ▄▄▄|▄ ▄▄▄ ▄ ▄ ▄|▄ ▄▄▄ ▄▄▄ ▄|▄ ▄ ▄▄▄ ▄|▄▄▄ ▄▄▄ ▄▄▄ ▄|▄▄▄ ▄▄▄ ▄▄▄ ▄▄▄|▄▄▄ ▄ ▄▄▄ ▄▄▄|▄▄▄ ▄ ▄▄▄ ▄|▄ ▄ ▄ ▄▄▄|▄ ▄▄▄ ▄ ▄|▄▄▄ ▄▄▄ ▄ ▄▄▄|▄▄▄ ▄ ▄ ▄▄▄|▄ ▄▄▄ ▄▄▄ ▄▄▄|▄ ▄ ▄ ▄|▄ ▄▄▄ ▄ ▄▄▄|▄ ▄▄▄ ▄ ▄▄▄ ▄|▄▄▄ ▄▄▄ ▄ ▄|▄ ▄ ▄▄▄ ▄▄▄|▄▄▄ ▄ ▄ ▄|▄▄▄ ▄▄▄ ▄ ▄▄▄ ▄▄▄|▄▄▄ ▄▄▄ ▄▄▄|▄▄▄ ▄▄▄ ▄|▄▄▄ ▄ ▄▄▄|▄ ▄▄▄ ▄|▄ ▄ ▄|▄ ▄ ▄▄▄|▄▄▄ ▄ ▄|▄ ▄▄▄ ▄▄▄|▄ ▄▄▄|▄▄▄ ▄▄▄|▄▄▄ ▄|▄|▄▄▄)(   ▄ ▄▄▄ ▄▄▄|   ▄▄▄ ▄ ▄ ▄▄▄ ▄▄▄|   ▄▄▄ ▄▄▄)?(   ▄ ▄|   ▄ ▄ ▄▄▄ ▄▄▄ ▄)?)(   |$)"
     )
     .unwrap();
-pub static ref WABUN_WORD_REGEX: Regex = Regex::new(
-    r"((di dah di dah dit|dah di dah di dah|dah di di di dah|dah di di dah dit|dah di di dah dah|dah dah dah di dah|di di dah di dah|di di dah di dit|di dah di dah dah|dah dah di di dah|di dah dah dah dit|dah dah di dah dit|di dah dah di dit|di dah di di dah|dah di dah di dit|dah di dah dah dit|dah di dah dah dah|di dah di di dit|di dah dah dit|di di
+    pub static ref WABUN_WORD_REGEX: Regex = Regex::new(
+        r"((di dah di dah dit|dah di dah di dah|dah di di di dah|dah di di dah dit|dah di di dah dah|dah dah dah di dah|di di dah di dah|di di dah di dit|di dah di dah dah|dah dah di di dah|di dah dah dah dit|dah dah di dah dit|di dah dah di dit|di dah di di dah|dah di dah di dit|dah di dah dah dit|dah di dah dah dah|di dah di di dit|di dah dah dit|di di
         dah dit|dah dah dah dit|dah dah dah dah|dah di dah dah|dah di dah dit|di di di dah|di dah di dit|dah dah di dah|dah di di dah|di dah dah dah|di di di dit|di dah di dah|di dah di dah dit|dah dah di dit|di di dah dah|dah di di dit|dah dah di dah dah|dah dah dah|dah dah dit|dah di dah|di dah dit|di di dit|di di dah|dah di dit|di dah 
         dah|di dah|dah dah|dah dit|dit|dah)(   di dah dah|   dah di di dah dah|   dah dah)?(   di dit|   di di dah dah dit)?)(   |$)"
-)
-.unwrap();
+    )
+    .unwrap();
 }
 
 #[derive(Clone, Copy, PartialEq, Debug)]

@@ -7,6 +7,7 @@ pub mod morse_encodings;
 pub mod mtk2;
 pub mod needle;
 pub mod punycode;
+pub mod semaphore;
 pub mod spelling_alphabet;
 pub mod unicode;
 pub mod wabun;
