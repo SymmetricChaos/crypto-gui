@@ -7,14 +7,6 @@ use utils::{
     text_functions::{bimap_from_iter, string_chunks},
 };
 
-lazy_static! {
-    pub static ref CONTROL_PICTURE_MAP: BiMap<u8, char> = bimap_from_iter(
-        (0..33)
-            .chain(std::iter::once(127))
-            .zip("␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟␠␡".chars())
-    );
-}
-
 const CHARACTER_DESCRIPTIONS: [&'static str; 128] = [
     "␀  null",
     "␁  start of heading",
@@ -47,7 +39,7 @@ const CHARACTER_DESCRIPTIONS: [&'static str; 128] = [
     "␜  file separator",
     "␝  group separator",
     "␞  record separator",
-    "␟  uni separator",
+    "␟  unit separator",
     "␠  space",
     "!  exclamation mark",
     "\"  quotation mark",
@@ -147,9 +139,17 @@ const CHARACTER_DESCRIPTIONS: [&'static str; 128] = [
 ];
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum UpperBit {
+    Unset,
+    Set,
+    Even,
+    Odd,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DisplayMode {
-    EightBitBinary,
-    SevenBitBinary,
+    EightBit,
+    SevenBit,
     Octal,
     Decimal,
     Hex,
@@ -158,8 +158,8 @@ pub enum DisplayMode {
 impl DisplayMode {
     pub fn radix(&self) -> u32 {
         match self {
-            DisplayMode::EightBitBinary => 2,
-            DisplayMode::SevenBitBinary => 2,
+            DisplayMode::EightBit => 2,
+            DisplayMode::SevenBit => 2,
             DisplayMode::Octal => 8,
             DisplayMode::Decimal => 10,
             DisplayMode::Hex => 16,
@@ -168,8 +168,8 @@ impl DisplayMode {
 
     pub fn name(&self) -> &str {
         match self {
-            DisplayMode::EightBitBinary => "binary",
-            DisplayMode::SevenBitBinary => "binary",
+            DisplayMode::EightBit => "binary",
+            DisplayMode::SevenBit => "binary",
             DisplayMode::Octal => "octal",
             DisplayMode::Decimal => "decimal",
             DisplayMode::Hex => "hexadecimal",
@@ -178,8 +178,8 @@ impl DisplayMode {
 
     pub fn width(&self) -> usize {
         match self {
-            DisplayMode::EightBitBinary => 8,
-            DisplayMode::SevenBitBinary => 7,
+            DisplayMode::EightBit => 8,
+            DisplayMode::SevenBit => 7,
             DisplayMode::Octal => 3,
             DisplayMode::Decimal => 3,
             DisplayMode::Hex => 2,
@@ -188,95 +188,152 @@ impl DisplayMode {
 }
 
 lazy_static! {
-    pub static ref SEVEN_BIT: Vec<String> = (0..128).map(|n| format!("{:07b}", n)).collect_vec();
-    pub static ref SEVEN_BIT_DISPLAY: Vec<String> =
-        (0..128).map(|n| format!(" {:07b}", n)).collect_vec();
-    pub static ref EIGHT_BIT: Vec<String> = (0..128).map(|n| format!("{:08b}", n)).collect_vec();
-    pub static ref OCTAL: Vec<String> = (0..128).map(|n| format!("{:03o}", n)).collect_vec();
-    pub static ref DECIMAL: Vec<String> = (0..128).map(|n| format!("{:03}", n)).collect_vec();
-    pub static ref DECIMAL_DISPLAY: Vec<String> =
-        (0..128).map(|n| format!(" {:3}", n)).collect_vec();
-    pub static ref HEX: Vec<String> = (0..128).map(|n| format!("{:02x}", n)).collect_vec();
+    pub static ref CONTROL_PICTURE_MAP: BiMap<u8, char> = bimap_from_iter(
+        (0..33)
+            .chain(std::iter::once(127))
+            .zip("␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟␠␡".chars())
+    );
+    // pub static ref SEVEN_BIT: Vec<String> = (0..128).map(|n| format!("{:07b}", n)).collect_vec();
+    // pub static ref EIGHT_BIT: Vec<String> = (0..128).map(|n| format!("{:08b}", n)).collect_vec();
+    // pub static ref OCTAL: Vec<String> = (0..128).map(|n| format!("{:03o}", n)).collect_vec();
+    // pub static ref DECIMAL: Vec<String> = (0..128).map(|n| format!("{:03}", n)).collect_vec();
+    // pub static ref HEX: Vec<String> = (0..128).map(|n| format!("{:02x}", n)).collect_vec();
+    // pub static ref ASCII_U8: Vec<u8> = (0..128).collect_vec();
+    // pub static ref ASCII_U8_HIGH_BIT_SET: Vec<u8> = (128..=255).collect_vec();
+    // pub static ref ASCII_U8_EVEN_PARITY: Vec<u8> = (0..128_u8)
+    //     .map(|n| if n.count_ones() % 2 == 1 { n } else { n + 128 })
+    //     .collect_vec();
+    // pub static ref ASCII_U8_ODD_PARITY: Vec<u8> = (0..128_u8)
+    //     .map(|n| if n.count_ones() % 2 == 0 { n } else { n + 128 })
+    //     .collect_vec();
 }
 
 pub struct Ascii {
     pub mode: DisplayMode,
     pub spaced: bool,
+    pub upper_bit: UpperBit,
 }
 
 impl Ascii {
-    pub fn map(&self, c: char) -> Result<&String, CodeError> {
-        if c.is_ascii() {
-            return match self.mode {
-                DisplayMode::EightBitBinary => EIGHT_BIT.get(c as u8 as usize),
-                DisplayMode::SevenBitBinary => SEVEN_BIT.get(c as u8 as usize),
-                DisplayMode::Octal => OCTAL.get(c as u8 as usize),
-                DisplayMode::Decimal => DECIMAL.get(c as u8 as usize),
-                DisplayMode::Hex => HEX.get(c as u8 as usize),
+    fn transform(&self, n: u8) -> String {
+        match self.mode {
+            DisplayMode::EightBit => format!("{:08b}", n),
+            DisplayMode::SevenBit => format!("{:07b}", n),
+            DisplayMode::Octal => format!("{:03o}", n),
+            DisplayMode::Decimal => format!("{:03}", n),
+            DisplayMode::Hex => format!("{:02x}", n),
+        }
+    }
+
+    fn change_upper_bit(&self, n: u8) -> u8 {
+        match self.upper_bit {
+            UpperBit::Unset => n,
+            UpperBit::Set => n | 0b1000_0000,
+            UpperBit::Even => {
+                if n.count_ones() % 2 == 1 {
+                    n | 0b1000_0000
+                } else {
+                    n
+                }
             }
-            .ok_or(CodeError::invalid_input_char(c));
+            UpperBit::Odd => {
+                if n.count_ones() % 2 == 0 {
+                    n | 0b1000_0000
+                } else {
+                    n
+                }
+            }
+        }
+    }
+
+    pub fn map(&self, c: char) -> Result<String, CodeError> {
+        if c.is_ascii() {
+            if self.mode == DisplayMode::SevenBit {
+                return Ok(self.transform(c as u8));
+            }
+            let n = self.change_upper_bit(c as u8);
+            return Ok(self.transform(n));
         }
         if let Some(control_val) = CONTROL_PICTURE_MAP.get_by_right(&c) {
-            match self.mode {
-                DisplayMode::EightBitBinary => EIGHT_BIT.get(*control_val as usize),
-                DisplayMode::SevenBitBinary => SEVEN_BIT.get(*control_val as usize),
-                DisplayMode::Octal => OCTAL.get(*control_val as usize),
-                DisplayMode::Decimal => DECIMAL.get(*control_val as usize),
-                DisplayMode::Hex => HEX.get(*control_val as usize),
+            if self.mode == DisplayMode::SevenBit {
+                return Ok(self.transform(*control_val));
             }
-            .ok_or(CodeError::invalid_input_char(c))
+            let n = self.change_upper_bit(*control_val);
+            return Ok(self.transform(n));
         } else {
             Err(CodeError::invalid_input_char(c))
         }
     }
 
     pub fn map_inv(&self, s: &str) -> Result<char, CodeError> {
-        match usize::from_str_radix(s, self.mode.radix()) {
-            Ok(n) => Alphabet::Ascii128
-                .chars()
-                .nth(n)
-                .ok_or(CodeError::invalid_input_group(s)),
-            Err(_) => {
-                return Err(CodeError::Input(format!(
-                    "error decoding ASCII ({} representation), unable to parse string: {}",
-                    self.mode.name(),
-                    s
-                )))
+        if let Ok(n) = usize::from_str_radix(s, self.mode.radix()) {
+            if self.mode == DisplayMode::SevenBit {
+                return Alphabet::Ascii128
+                    .chars()
+                    .nth(n)
+                    .ok_or(CodeError::invalid_input_group(s));
             }
+            match self.upper_bit {
+                UpperBit::Set | UpperBit::Unset => Alphabet::Ascii128
+                    .chars()
+                    .nth(n % 128)
+                    .ok_or(CodeError::invalid_input_group(s)),
+                UpperBit::Even => {
+                    if n.count_ones() % 2 == 0 {
+                        Alphabet::Ascii128
+                            .chars()
+                            .nth(n % 128)
+                            .ok_or(CodeError::invalid_input_group(s))
+                    } else {
+                        Ok('�')
+                    }
+                }
+                UpperBit::Odd => {
+                    if n.count_ones() % 2 == 1 {
+                        Alphabet::Ascii128
+                            .chars()
+                            .nth(n % 128)
+                            .ok_or(CodeError::invalid_input_group(s))
+                    } else {
+                        Ok('�')
+                    }
+                }
+            }
+        } else {
+            return Err(CodeError::Input(format!(
+                "error decoding ASCII ({} representation), unable to parse string: {}",
+                self.mode.name(),
+                s
+            )));
         }
     }
 
-    pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (char, &String)> + '_> {
-        let cs = Alphabet::Ascii128.chars();
-        match self.mode {
-            DisplayMode::EightBitBinary => Box::new(cs.zip(EIGHT_BIT.iter())),
-            DisplayMode::SevenBitBinary => Box::new(cs.zip(SEVEN_BIT.iter())),
-            DisplayMode::Octal => Box::new(cs.zip(OCTAL.iter())),
-            DisplayMode::Decimal => Box::new(cs.zip(DECIMAL.iter())),
-            DisplayMode::Hex => Box::new(cs.zip(HEX.iter())),
-        }
-    }
+    // pub fn chars_codes(&self) -> Box<dyn Iterator<Item = (char, &String)> + '_> {
+    //     let cs = Alphabet::Ascii128.chars();
+    //     match self.mode {
+    //         DisplayMode::EightBit => Box::new(cs.zip(EIGHT_BIT.iter())),
+    //         DisplayMode::SevenBit => Box::new(cs.zip(SEVEN_BIT.iter())),
+    //         DisplayMode::Octal => Box::new(cs.zip(OCTAL.iter())),
+    //         DisplayMode::Decimal => Box::new(cs.zip(DECIMAL.iter())),
+    //         DisplayMode::Hex => Box::new(cs.zip(HEX.iter())),
+    //     }
+    // }
 
-    pub fn chars_codes_display(&self) -> Box<dyn Iterator<Item = (&&str, &String)> + '_> {
-        match self.mode {
-            DisplayMode::EightBitBinary => {
-                Box::new(CHARACTER_DESCRIPTIONS.iter().zip(EIGHT_BIT.iter()))
-            }
-            DisplayMode::SevenBitBinary => {
-                Box::new(CHARACTER_DESCRIPTIONS.iter().zip(SEVEN_BIT_DISPLAY.iter()))
-            }
-            DisplayMode::Octal => Box::new(CHARACTER_DESCRIPTIONS.iter().zip(OCTAL.iter())),
-            DisplayMode::Decimal => Box::new(CHARACTER_DESCRIPTIONS.iter().zip(DECIMAL.iter())),
-            DisplayMode::Hex => Box::new(CHARACTER_DESCRIPTIONS.iter().zip(HEX.iter())),
-        }
+    pub fn chars_codes_display(&self) -> Box<dyn Iterator<Item = (&&str, String)> + '_> {
+        Box::new(
+            CHARACTER_DESCRIPTIONS
+                .iter()
+                .zip((0..128).map(|n| self.transform(self.change_upper_bit(n)))),
+        )
     }
 }
 
 impl Default for Ascii {
     fn default() -> Self {
         Ascii {
-            mode: DisplayMode::EightBitBinary,
+            mode: DisplayMode::EightBit,
             spaced: false,
+            upper_bit: UpperBit::Unset,
         }
     }
 }
@@ -315,7 +372,10 @@ mod ascii_tests {
 
     #[test]
     fn encode_test() {
-        let code = Ascii::default();
+        let mut code = Ascii::default();
+        code.mode = DisplayMode::SevenBit;
+        code.upper_bit = UpperBit::Set;
+        code.spaced = true;
         assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT);
     }
 
@@ -325,25 +385,35 @@ mod ascii_tests {
         const GIVEN_TEXT: &'static str = "The quick␠brown fox!␀␀␀Jumps over the lazy(dog)";
         const DECODED_TEXT: &'static str = "The quick brown fox!␀␀␀Jumps over the lazy(dog)";
 
+        code.upper_bit = UpperBit::Set;
+
         for mode in [
-            DisplayMode::EightBitBinary,
-            DisplayMode::SevenBitBinary,
+            DisplayMode::EightBit,
+            DisplayMode::SevenBit,
             DisplayMode::Octal,
             DisplayMode::Decimal,
             DisplayMode::Hex,
         ] {
             code.mode = mode;
-            let encoded = code
-                .encode(GIVEN_TEXT)
-                .expect(&format!("encoding ASCII {:?} error", mode));
-            let decoded = code
-                .decode(&encoded)
-                .expect(&format!("decoding ASCII {:?} error", mode));
-            if decoded != DECODED_TEXT {
-                panic!(
-                    "decoded ASCII {:?} not equivalent to plaintext\n{}",
-                    mode, decoded
-                )
+            for upper_bit in [
+                UpperBit::Even,
+                UpperBit::Odd,
+                UpperBit::Set,
+                UpperBit::Unset,
+            ] {
+                code.upper_bit = upper_bit;
+                let encoded = code
+                    .encode(GIVEN_TEXT)
+                    .expect(&format!("encoding ASCII {:?} {:?} error", mode, upper_bit));
+                let decoded = code
+                    .decode(&encoded)
+                    .expect(&format!("decoding ASCII {:?} {:?} error", mode, upper_bit));
+                if decoded != DECODED_TEXT {
+                    panic!(
+                        "decoded ASCII {:?} {:?} not equivalent to plaintext\n{}",
+                        mode, upper_bit, decoded
+                    )
+                }
             }
         }
     }
