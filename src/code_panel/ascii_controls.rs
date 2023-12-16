@@ -1,6 +1,6 @@
 use super::CodeFrame;
 use crate::ui_elements::UiElements;
-use codes::text_standards::ascii::{Ascii, DisplayMode};
+use codes::text_standards::ascii::{Ascii, DisplayMode, UpperBit};
 
 pub struct AsciiFrame {
     code: Ascii,
@@ -24,6 +24,20 @@ impl CodeFrame for AsciiFrame {
                 ui.selectable_value(&mut self.code.mode, DisplayMode::Octal, "Octal");
                 ui.selectable_value(&mut self.code.mode, DisplayMode::Decimal, "Decimal");
                 ui.selectable_value(&mut self.code.mode, DisplayMode::Hex, "Hexadecimal");
+            });
+        });
+        ui.add_space(8.0);
+        ui.group(|ui| {
+            ui.subheading("High Bit");
+            ui.horizontal(|ui| {
+                ui.selectable_value(
+                    &mut self.code.upper_bit,
+                    UpperBit::Unset,
+                    "Unset (most common)",
+                );
+                ui.selectable_value(&mut self.code.upper_bit, UpperBit::Set, "Set");
+                ui.selectable_value(&mut self.code.upper_bit, UpperBit::Even, "Even Parity");
+                ui.selectable_value(&mut self.code.upper_bit, UpperBit::Odd, "Odd Parity");
             });
         });
         ui.add_space(8.0);
