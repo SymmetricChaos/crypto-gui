@@ -47,6 +47,7 @@ use self::{
     repetition_controls::RepetitionFrame,
     romaji_controls::RomajiFrame,
     roman_numeral_controls::RomanNumeralFrame,
+    semaphore_controls::SemaphoreFrame,
     simple_braille_controls::BrailleFrame,
     skey_controls::SKeyWordsFrame,
     spelling_alphabet_controls::SpellingAlphabetFrame,
@@ -100,6 +101,7 @@ mod punycode_controls;
 mod repetition_controls;
 mod romaji_controls;
 mod roman_numeral_controls;
+mod semaphore_controls;
 mod simple_braille_controls;
 mod skey_controls;
 mod spelling_alphabet_controls;
@@ -153,6 +155,7 @@ pub struct CodeInterface {
     braille: BrailleFrame,
     braille_encoding: BrailleEncodingFrame,
     ccsid: CcsidFrame,
+    flag_semaphore: SemaphoreFrame,
     linotype: LinotypeFrame,
     morse: MorseFrame,
     needle: NeedleFrame,
@@ -223,6 +226,7 @@ impl CodeInterface {
                 CodeId::Braille,
                 CodeId::BrailleEncoding,
                 CodeId::Ccsid,
+                CodeId::FlagSemaphore,
                 CodeId::Linotype,
                 CodeId::Morse,
                 CodeId::Needle,
@@ -344,6 +348,7 @@ impl CodeInterface {
             CodeId::Factoradic => &mut self.factoradic,
             CodeId::Fibonacci => &mut self.fibonacci,
             CodeId::FixedWidth => &mut self.fixed_width,
+            CodeId::FlagSemaphore => &mut self.flag_semaphore,
             CodeId::Godel => &mut self.godel,
             CodeId::Gray => &mut self.gray,
             CodeId::Hamming => &mut self.hamming,
