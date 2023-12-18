@@ -6,7 +6,7 @@ use utils::text_functions::bimap_from_iter;
 
 const SEMAPHORE_MEANING: [&'static str; 30] = [
     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S",
-    "T", "U", "V", "W", "X", "Y", "Z", "numeric", "annul", "error", "ready",
+    "T", "U", "V", "W", "X", "Y", "Z", "numeric", "cancel", "error", "ready",
 ];
 
 const SEMAPHORE_POSITIONS: [&'static str; 30] = [
@@ -38,7 +38,7 @@ const SEMAPHORE_POSITIONS: [&'static str; 30] = [
     "out/across-low",
     "high/up",
     "low/high",
-    "raised-and-lowered/raised-and-lowered",
+    "both-raised-and-lowered",
     "low/low",
 ];
 
@@ -49,7 +49,7 @@ lazy_static! {
             .zip(SEMAPHORE_POSITIONS.into_iter())
     );
     pub static ref SEMAPHORE_REGEX: Regex =
-        Regex::new(r"[A-Z0-9 ]|numeric|annul|error|ready|.+").unwrap();
+        Regex::new(r"[A-Z0-9 ]|numeric|cancel|error|ready|.").unwrap();
 }
 
 pub struct Semaphore {}
