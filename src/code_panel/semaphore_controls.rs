@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use crate::ui_elements::UiElements;
+
 use super::CodeFrame;
 use codes::text_standards::semaphore::Semaphore;
 use egui::Image;
@@ -10,123 +12,123 @@ lazy_static! {
         let mut map = HashMap::with_capacity(30);
         map.insert(
             "A",
-            egui::Image::new(egui::include_image!("semaphore_flags/Alpha.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/Alpha.png")),
         );
         map.insert(
             "B",
-            egui::Image::new(egui::include_image!("semaphore_flags/Bravo.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/Bravo.png")),
         );
         map.insert(
             "C",
-            egui::Image::new(egui::include_image!("semaphore_flags/Charlie.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/Charlie.png")),
         );
         map.insert(
             "D",
-            egui::Image::new(egui::include_image!("semaphore_flags/Delta.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/Delta.png")),
         );
         map.insert(
             "E",
-            egui::Image::new(egui::include_image!("semaphore_flags/Echo.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/Echo.png")),
         );
         map.insert(
             "F",
-            egui::Image::new(egui::include_image!("semaphore_flags/Foxtrot.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/Foxtrot.png")),
         );
         map.insert(
             "G",
-            egui::Image::new(egui::include_image!("semaphore_flags/Golf.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/Golf.png")),
         );
         map.insert(
             "H",
-            egui::Image::new(egui::include_image!("semaphore_flags/Hotel.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/Hotel.png")),
         );
         map.insert(
             "I",
-            egui::Image::new(egui::include_image!("semaphore_flags/India.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/India.png")),
         );
         map.insert(
             "J",
-            egui::Image::new(egui::include_image!("semaphore_flags/Juliet.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/Juliet.png")),
         );
         map.insert(
             "K",
-            egui::Image::new(egui::include_image!("semaphore_flags/Kilo.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/Kilo.png")),
         );
         map.insert(
             "L",
-            egui::Image::new(egui::include_image!("semaphore_flags/Lima.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/Lima.png")),
         );
         map.insert(
             "M",
-            egui::Image::new(egui::include_image!("semaphore_flags/Mike.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/Mike.png")),
         );
         map.insert(
             "N",
-            egui::Image::new(egui::include_image!("semaphore_flags/November.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/November.png")),
         );
         map.insert(
             "O",
-            egui::Image::new(egui::include_image!("semaphore_flags/Oscar.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/Oscar.png")),
         );
         map.insert(
             "P",
-            egui::Image::new(egui::include_image!("semaphore_flags/Papa.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/Papa.png")),
         );
         map.insert(
             "Q",
-            egui::Image::new(egui::include_image!("semaphore_flags/Quebec.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/Quebec.png")),
         );
         map.insert(
             "R",
-            egui::Image::new(egui::include_image!("semaphore_flags/Romeo.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/Romeo.png")),
         );
         map.insert(
             "S",
-            egui::Image::new(egui::include_image!("semaphore_flags/Sierra.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/Sierra.png")),
         );
         map.insert(
             "T",
-            egui::Image::new(egui::include_image!("semaphore_flags/Tango.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/Tango.png")),
         );
         map.insert(
             "U",
-            egui::Image::new(egui::include_image!("semaphore_flags/Uniform.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/Uniform.png")),
         );
         map.insert(
             "V",
-            egui::Image::new(egui::include_image!("semaphore_flags/Victor.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/Victor.png")),
         );
         map.insert(
             "W",
-            egui::Image::new(egui::include_image!("semaphore_flags/Whiskey.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/Whiskey.png")),
         );
         map.insert(
             "X",
-            egui::Image::new(egui::include_image!("semaphore_flags/X-ray.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/X-ray.png")),
         );
         map.insert(
             "Y",
-            egui::Image::new(egui::include_image!("semaphore_flags/Yankee.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/Yankee.png")),
         );
         map.insert(
             "Z",
-            egui::Image::new(egui::include_image!("semaphore_flags/Zulu.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/Zulu.png")),
         );
         map.insert(
             "cancel",
-            egui::Image::new(egui::include_image!("semaphore_flags/_Cancel.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/_Cancel.png")),
         );
         map.insert(
             "error",
-            egui::Image::new(egui::include_image!("semaphore_flags/_Error.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/_Error.png")),
         );
         map.insert(
             "numeric",
-            egui::Image::new(egui::include_image!("semaphore_flags/_Numeric.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/_Numeric.png")),
         );
         map.insert(
             "ready",
-            egui::Image::new(egui::include_image!("semaphore_flags/_Ready.svg")),
+            egui::Image::new(egui::include_image!("semaphore_flags/_Ready.png")),
         );
         map
     };
@@ -149,10 +151,11 @@ impl CodeFrame for SemaphoreFrame {
         egui::Grid::new("flag_grid")
             .num_columns(3)
             .striped(true)
+            .min_row_height(200.0)
             .show(ui, |ui| {
                 for (a, b) in self.code.chars_codes() {
-                    ui.label(a);
-                    ui.label(b);
+                    ui.mono_strong(a);
+                    ui.mono_strong(b);
                     if let Some(img) = SEMAPHORE_IMAGES.get(a) {
                         ui.add(img.clone());
                     }
