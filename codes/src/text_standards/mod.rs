@@ -1,6 +1,7 @@
 pub mod ascii;
 pub mod baudot;
 pub mod code_pages;
+pub mod ics_flags;
 pub mod linotype;
 pub mod morse;
 pub mod morse_encodings;
