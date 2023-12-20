@@ -10,38 +10,39 @@ const ICS_MEANING: [&'static str; 26] = [
 ];
 
 const ICS_FLAG_BLAZON: [&'static str; 26] = [
-    "Swallowtailed, per pale argent and azure",
-    "Swallowtailed, gules",
-    "Azure, a fess gules fimbriated argent",
-    "Or, a Spanish fess azure",
-    "Per fess azure and gules",
-    "Argent, a lozenge throughout gules",
-    "Paly of six or and azure",
-    "Per pale argent and gules",
-    "Or, a pellet",
-    "Azure, a fess argent",
-    "Per pale or and azure",
-    "Quarterly or and sable",
-    "Azure, a saltire argent",
-    "Chequy of sixteen azure and argent",
-    "Per bend gules and or",
-    "Azure, an inescutcheon argent",
-    "Or",
-    "Gules, a cross or",
-    "Argent, an inescutcheon azure",
-    "Tierced in pale gules, argent and azure",
-    "Quarterly gules and argent",
-    "Argent, a saltire gules",
-    "Azure, an inescutcheon gules fimbriated argent",
-    "Argent, a cross azure",
-    "Bendy sinister of ten or and gules",
-    "Per saltire or, sable, gules and azure",
+    "Swallowtailed, per pale argent and azure.",
+    "Swallowtailed, gules.",
+    "Azure, a fess gules fimbriated argent.",
+    "Or, a Spanish fess azure.",
+    "Per fess azure and gules.",
+    "Argent, a lozenge throughout gules.",
+    "Paly of six or and azure.",
+    "Per pale argent and gules.",
+    "Or, a pellet.",
+    "Azure, a fess argent.",
+    "Per pale or and azure.",
+    "Quarterly or and sable.",
+    "Azure, a saltire argent.",
+    "Chequy of sixteen azure and argent.",
+    "Per bend gules and or.",
+    "Azure, an inescutcheon argent.",
+    "Or.",
+    "Gules, a cross or.",
+    "Argent, an inescutcheon azure.",
+    "Tierced in pale gules, argent and azure.",
+    "Quarterly gules and argent.",
+    "Argent, a saltire gules.",
+    "Azure, an inescutcheon gules fimbriated argent.",
+    "Argent, a cross azure.",
+    "Bendy sinister of ten or and gules.",
+    "Per saltire or, sable, gules and azure.",
 ];
 
 lazy_static! {
     pub static ref ICS_MAP: BiMap<&'static str, &'static str> =
         bimap_from_iter(ICS_MEANING.into_iter().zip(ICS_FLAG_BLAZON.into_iter()));
     pub static ref ICS_REGEX: Regex = Regex::new(r"[A-Z]| |.").unwrap();
+    pub static ref ICS_BLAZON_REGEX: Regex = Regex::new(r"[A-Z][a-z ,]+\.").unwrap();
 }
 
 pub struct IcsFlags {}
@@ -79,20 +80,26 @@ impl Code for IcsFlags {
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        let mut output = String::new();
-        for code in text.split(" ") {
-            output.push_str(symbol)
+        let mut out = String::new();
+        for code in ICS_BLAZON_REGEX
+            .captures_iter(text)
+            .map(|cap| cap.get(0).unwrap().as_str())
+        {
+            match ICS_MAP.get_by_right(code) {
+                Some(code) => out.push_str(code),
+                None => return Err(CodeError::invalid_input_group(code)),
+            }
         }
-        Ok(output)
+        Ok(out)
     }
 }
 
 #[cfg(test)]
-mod semaphore_tests {
+mod ics_flag_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "TEST";
-    const CIPHERTEXT: &'static str = "";
+    const PLAINTEXT: &'static str = "EXAMPLE";
+    const CIPHERTEXT: &'static str = "Per fess azure and gules. Argent, a cross azure. Swallowtailed, per pale argent and azure. Azure, a saltire argent. Azure, an inescutcheon argent. Quarterly or and sable. Per fess azure and gules.";
 
     #[test]
     fn encrypt_test() {
