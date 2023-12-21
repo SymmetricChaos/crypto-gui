@@ -32,6 +32,7 @@ use self::{
     godel_controls::GodelFrame,
     gray_controls::GrayCodeFrame,
     hamming_controls::HammingFrame,
+    ics_flags_controls::IcsFlagsFrame,
     isbn_contols::IsbnFrame,
     itf_controls::ItfFrame,
     levenshtein_controls::LevenshteinCodeFrame,
@@ -86,6 +87,7 @@ mod fibonacci_controls;
 mod godel_controls;
 mod gray_controls;
 mod hamming_controls;
+mod ics_flags_controls;
 mod isbn_contols;
 mod itf_controls;
 mod levenshtein_controls;
@@ -156,6 +158,7 @@ pub struct CodeInterface {
     braille_encoding: BrailleEncodingFrame,
     ccsid: CcsidFrame,
     flag_semaphore: SemaphoreFrame,
+    ics_flags: IcsFlagsFrame,
     linotype: LinotypeFrame,
     morse: MorseFrame,
     needle: NeedleFrame,
@@ -227,6 +230,7 @@ impl CodeInterface {
                 CodeId::BrailleEncoding,
                 CodeId::Ccsid,
                 CodeId::FlagSemaphore,
+                CodeId::IcsFlags,
                 CodeId::Linotype,
                 CodeId::Morse,
                 CodeId::Needle,
@@ -352,6 +356,7 @@ impl CodeInterface {
             CodeId::Godel => &mut self.godel,
             CodeId::Gray => &mut self.gray,
             CodeId::Hamming => &mut self.hamming,
+            CodeId::IcsFlags => &mut self.ics_flags,
             CodeId::Isbn => &mut self.isbn,
             CodeId::Itf => &mut self.itf,
             CodeId::Levenshtein => &mut self.levenshtein,
