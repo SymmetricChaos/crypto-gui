@@ -7,6 +7,7 @@ pub mod ids;
 pub mod lfg;
 pub mod middle_square;
 pub mod pcg;
+pub mod rc4;
 pub mod traits;
 pub mod weyl;
 pub use traits::ClassicRng;
