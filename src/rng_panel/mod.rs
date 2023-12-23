@@ -4,6 +4,7 @@ pub mod lfg_controls;
 pub mod lfsr_controls;
 pub mod middle_square_controls;
 pub mod pcg_controls;
+pub mod rc4_controls;
 pub mod weyl_controls;
 
 use egui::Ui;
@@ -14,7 +15,7 @@ use rngs::{
 
 use self::{
     halton_controls::HaltonFrame, lcg_controls::LcgFrame, lfsr_controls::LfsrFrame,
-    middle_square_controls::MiddleSquareFrame, pcg_controls::PcgFrame,
+    middle_square_controls::MiddleSquareFrame, pcg_controls::PcgFrame, rc4_controls::Rc4Frame,
     weyl_controls::WeylSequenceFrame,
 };
 
@@ -53,13 +54,20 @@ pub struct RngInterface {
     lfsr: LfsrFrame,
     middle_square: MiddleSquareFrame,
     pcg: PcgFrame,
+    rc4: Rc4Frame,
     weyl: WeylSequenceFrame,
 }
 
 impl RngInterface {
     pub fn combo_boxes(&mut self, ui: &mut Ui, active_rng: &mut Option<RngId>) {
         combox_box(
-            &[RngId::Lcg, RngId::Lfsr, RngId::MiddleSquare, RngId::Pcg],
+            &[
+                RngId::Lcg,
+                RngId::Lfsr,
+                RngId::MiddleSquare,
+                RngId::Pcg,
+                RngId::Rc4,
+            ],
             active_rng,
             RngCategory::Pseudorandom,
             ui,
@@ -83,6 +91,7 @@ impl RngInterface {
             RngId::Lfsr => &mut self.lfsr,
             RngId::MiddleSquare => &mut self.middle_square,
             RngId::Pcg => &mut self.pcg,
+            RngId::Rc4 => &mut self.rc4,
             RngId::Weyl => &mut self.weyl,
             _ => todo!("<<<RNG NOT FOUND>>>"),
         }

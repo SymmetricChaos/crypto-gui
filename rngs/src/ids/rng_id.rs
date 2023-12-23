@@ -10,6 +10,7 @@ pub enum RngId {
     Lfsr,
     MiddleSquare,
     Pcg,
+    Rc4,
     Weyl,
 }
 
@@ -38,6 +39,7 @@ impl Display for RngId {
             RngId::Lfsr => "Linear Feedback Shift Register",
             RngId::MiddleSquare => "Middle Square",
             RngId::Pcg => "Permuted Congruential Generator",
+            RngId::Rc4 => "RC4",
             RngId::Weyl => "Weyl Sequence",
             // _ => "<<<MISSING NAME>>>",
         };
