@@ -59,13 +59,14 @@ impl ClassicRngFrame for HaltonFrame {
 
         ui.add_space(8.0);
         if ui.button("step").clicked() {
-            self.rng.step();
+            self.rng.next_u32();
         }
         ui.add_space(8.0);
 
         if ui.button("Generate Random Tuples").clicked() {
             for _ in 0..5 {
-                self.rng.step();
+                // This always produces zero and so is just dropped. We're just advancing the state of the rng.
+                self.rng.next_u32();
                 if !self.randoms.is_empty() {
                     self.randoms.push_str(", ");
                 }

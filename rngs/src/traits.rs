@@ -1,3 +1,3 @@
 pub trait ClassicRng {
-    fn step(&mut self) -> u32;
+    fn next_u32(&mut self) -> u32;
 }

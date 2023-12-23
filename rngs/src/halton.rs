@@ -33,7 +33,7 @@ impl HaltonSequence {
 }
 
 impl ClassicRng for HaltonSequence {
-    fn step(&mut self) -> u32 {
+    fn next_u32(&mut self) -> u32 {
         for ((num, den), base) in self
             .nums
             .iter_mut()

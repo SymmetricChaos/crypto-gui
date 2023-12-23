@@ -66,7 +66,7 @@ impl ClassicRngFrame for WeylSequenceFrame {
         }
         ui.add_space(16.0);
         if ui.button("step").clicked() {
-            self.rng.step();
+            self.rng.next_u32();
         }
         ui.add_space(16.0);
         generate_random_nums_box(ui, &mut self.rng, 10, &mut self.randoms);

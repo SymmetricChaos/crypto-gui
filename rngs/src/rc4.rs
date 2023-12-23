@@ -14,7 +14,7 @@ impl Default for Rc4 {
             arr[i as usize] = i;
         }
         Self {
-            arr: arr,
+            arr,
             i: 0,
             j: 0,
             big_endian: true,
@@ -51,7 +51,7 @@ impl Rc4 {
 }
 
 impl ClassicRng for Rc4 {
-    fn step(&mut self) -> u32 {
+    fn next_u32(&mut self) -> u32 {
         let mut bytes = [0u8; 4];
         for i in 0..4 {
             bytes[i] = self.next_byte();

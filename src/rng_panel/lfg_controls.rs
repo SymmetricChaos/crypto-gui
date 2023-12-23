@@ -84,7 +84,7 @@ impl ClassicRngFrame for LfgFrame {
 
         ui.add_space(8.0);
         if ui.button("step").clicked() {
-            self.rng.step();
+            self.rng.next_u32();
         }
 
         ui.add_space(8.0);

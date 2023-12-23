@@ -66,7 +66,7 @@ impl Pcg {
 }
 
 impl ClassicRng for Pcg {
-    fn step(&mut self) -> u32 {
+    fn next_u32(&mut self) -> u32 {
         self.state = (self.state)
             .wrapping_mul(self.multiplier)
             .wrapping_add(self.increment);

@@ -88,7 +88,7 @@ impl ClassicRngFrame for LcgFrame {
         self.set_all_strings();
         ui.add_space(8.0);
         if ui.button("step").clicked() {
-            self.rng.step();
+            self.rng.next_u32();
             self.set_all_strings();
         }
         ui.add_space(8.0);

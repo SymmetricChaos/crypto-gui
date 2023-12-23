@@ -17,7 +17,7 @@ impl Default for WeylSequence {
 }
 
 impl ClassicRng for WeylSequence {
-    fn step(&mut self) -> u32 {
+    fn next_u32(&mut self) -> u32 {
         self.state = (self.state + self.increment) % self.modulus;
         self.state
     }

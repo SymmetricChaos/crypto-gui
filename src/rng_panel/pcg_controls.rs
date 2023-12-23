@@ -111,7 +111,7 @@ impl ClassicRngFrame for PcgFrame {
         ui.label(format!("{}", self.rng.transform(m)));
 
         if ui.button("step").clicked() {
-            self.rng.step();
+            self.rng.next_u32();
             self.state_string = self.rng.state.to_string();
         }
         ui.add_space(16.0);

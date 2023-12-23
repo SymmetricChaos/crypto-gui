@@ -52,7 +52,6 @@ impl UiElements for Ui {
         self.label(RichText::from(text.to_string()).monospace())
     }
 
-
     fn mono_strong<T: ToString>(&mut self, text: T) -> Response {
         self.label(RichText::from(text.to_string()).monospace().strong())
     }
@@ -283,7 +282,7 @@ pub fn generate_random_nums_box(
     if ui.button("Generate Random Numbers").clicked() {
         let mut vec = Vec::with_capacity(n);
         for _ in 0..n {
-            vec.push(rng.step())
+            vec.push(rng.next_u32())
         }
         if !randoms.is_empty() {
             randoms.push_str(", ");

@@ -35,7 +35,7 @@ impl Lfsr {
 }
 
 impl ClassicRng for Lfsr {
-    fn step(&mut self) -> u32 {
+    fn next_u32(&mut self) -> u32 {
         let mut next_bit = Bit::zero();
         for (bit, tap) in self.bits.iter().zip(self.taps.iter()) {
             if *tap {

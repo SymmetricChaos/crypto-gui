@@ -47,7 +47,7 @@ impl ClassicRngFrame for LfsrFrame {
         ui.label("Bits of state along the top row with the tagged bits marked on the second row. New bits are pushed in from the left.");
         ui.add_space(8.0);
         if ui.button("step").clicked() {
-            self.rng.step();
+            self.rng.next_u32();
         }
         ui.add_space(8.0);
         egui::Grid::new("lfsr_grid")

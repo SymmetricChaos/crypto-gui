@@ -77,7 +77,7 @@ impl ClassicRngFrame for MiddleSquareFrame {
 
         if self.rng.width % 2 == 0 {
             if ui.button("step").clicked() {
-                self.rng.step();
+                self.rng.next_u32();
             };
             ui.error_text("");
         } else {
