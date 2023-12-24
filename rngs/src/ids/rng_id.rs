@@ -12,6 +12,7 @@ pub enum RngId {
     Pcg,
     Rc4,
     Weyl,
+    Xorshift,
 }
 
 impl Default for RngId {
@@ -41,6 +42,7 @@ impl Display for RngId {
             RngId::Pcg => "Permuted Congruential Generator",
             RngId::Rc4 => "RC4",
             RngId::Weyl => "Weyl Sequence",
+            RngId::Xorshift => "XorShift",
             // _ => "<<<MISSING NAME>>>",
         };
         write!(f, "{}", name)
