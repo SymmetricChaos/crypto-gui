@@ -26,19 +26,19 @@ impl Rc4 {
     pub fn ksa(&mut self, key: &[u8]) {
         // Set array to identity permutation
         let mut arr = [0u8; 256];
-        for i in 0..255 {
-            arr[i as usize] = i;
+        for n in 0..255 {
+            arr[n as usize] = n;
         }
         // Perform 256 swaps
         let key_length = key.len();
         let mut j: u8 = 0;
-        for i in 0..255 {
-            j = j
-                .wrapping_add(self.arr[i])
-                .wrapping_add(key[i % key_length]);
-            arr.swap(i, j as usize)
+        for n in 0..255 {
+            j = j.wrapping_add(arr[n]).wrapping_add(key[n % key_length]);
+            arr.swap(n, j as usize)
         }
-        self.arr = arr
+        self.arr = arr;
+        self.i = 0;
+        self.j = 0;
     }
 
     pub fn next_byte(&mut self) -> u8 {
