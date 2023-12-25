@@ -42,7 +42,12 @@ impl ClassicRngFrame for Rc4Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.add_space(16.0);
 
-        ui.subheading("Key");
+        ui.horizontal(|ui| {
+            ui.subheading("Key");
+            if ui.button("🎲").on_hover_text("randomize").clicked() {
+                self.randomize();
+            }
+        });
         ui.label("Key should be provided as a string of hexadecimal digits.");
         if ui.text_edit_multiline(&mut self.key).changed() {
             self.key = self.key.chars().filter(|c| c.is_ascii_hexdigit()).collect();
