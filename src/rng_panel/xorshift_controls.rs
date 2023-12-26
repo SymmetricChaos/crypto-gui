@@ -56,7 +56,7 @@ impl ClassicRngFrame for XorshiftFrame {
                 .key
                 .chars()
                 .filter(|c| c.is_ascii_hexdigit())
-                .take(16)
+                .take(8)
                 .collect();
             self.rng.state = u32::from_str_radix(&self.key, 16)
                 .expect("filtering should force this to be valid");
@@ -65,7 +65,7 @@ impl ClassicRngFrame for XorshiftFrame {
 
         ui.add_space(16.0);
         ui.subheading("Internal State");
-        ui.label(format!("{:04X}", self.rng.state));
+        ui.label(format!("{:08X}", self.rng.state));
 
         ui.add_space(16.0);
         if ui.button("step").clicked() {
@@ -113,7 +113,7 @@ impl ClassicRngFrame for XorshiftFrame {
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        self.key = format!("{:04X}", rng.gen::<u32>());
+        self.key = format!("{:08X}", rng.gen::<u32>());
         self.rng.state =
             u32::from_str_radix(&self.key, 16).expect("thread_rng should have provided a valid u32")
     }
