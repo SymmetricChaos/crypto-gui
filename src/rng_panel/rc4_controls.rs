@@ -4,7 +4,7 @@ use super::ClassicRngFrame;
 use crate::ui_elements::{generate_random_nums_box, UiElements};
 use egui::{DragValue, FontId, RichText};
 use rand::{thread_rng, Rng};
-use rngs::{rc4::Rc4, ClassicRng};
+use rngs::rc4::Rc4;
 
 pub struct Rc4Frame {
     rng: Rc4,
@@ -17,6 +17,8 @@ pub struct Rc4Frame {
 
 impl Default for Rc4Frame {
     fn default() -> Self {
+        let mut rng = Rc4::default();
+        rng.ksa(&[0xDE_u8, 0xAD, 0xBE, 0xEF, 0x42]);
         Self {
             rng: Default::default(),
             key: String::from("DEADBEEF42"),

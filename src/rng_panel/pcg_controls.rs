@@ -61,7 +61,7 @@ impl ClassicRngFrame for PcgFrame {
         }
 
         ui.add_space(16.0);
-        ui.subheading("Calculation");
+        ui.subheading("Calculations");
         let m = (self.rng.state)
             .wrapping_mul(self.rng.multiplier)
             .wrapping_add(self.rng.increment);
@@ -87,7 +87,7 @@ impl ClassicRngFrame for PcgFrame {
 
         ui.add_space(16.0);
 
-        ui.subheading("Permutation");
+        ui.subheading("Permutation Function");
         ui.horizontal(|ui| {
             ui.selectable_value(
                 &mut self.rng.transform,

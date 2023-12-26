@@ -9,6 +9,7 @@ pub mod mersenne_twister;
 pub mod middle_square;
 pub mod pcg;
 pub mod rc4;
+pub mod splitmix;
 pub mod traits;
 pub mod weyl;
 pub mod xorshift;

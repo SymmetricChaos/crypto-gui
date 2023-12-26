@@ -35,22 +35,31 @@ impl WeylSequenceFrame {}
 
 impl ClassicRngFrame for WeylSequenceFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        ui.subheading("Set State");
+        if ui.button("Randomize").clicked() {
+            ui.add_space(16.0);
+        }
+
+        ui.subheading("State");
         let state = ui.control_string(&mut self.state_string);
         if state.changed() || state.lost_focus() {
             filter_and_parse_u32(&mut self.rng.state, &mut self.state_string);
         }
-        ui.add_space(16.0);
-        ui.subheading("Set Increment");
+        ui.add_space(8.0);
+        ui.subheading("Increment");
         if ui.control_string(&mut self.increment_string).changed() {
             filter_and_parse_u32(&mut self.rng.increment, &mut self.increment_string);
         }
-        ui.add_space(16.0);
-        ui.subheading("Set Modulus");
+        ui.add_space(8.0);
+        ui.subheading("Modulus");
         if ui.control_string(&mut self.modulus_string).changed() {
             filter_and_parse_u32(&mut self.rng.modulus, &mut self.modulus_string);
         }
-        ui.add_space(16.0);
+        if self.rng.increment.gcd(&self.rng.modulus) == 1 {
+            ui.error_text("");
+        } else {
+            ui.error_text("Increment must be co-prime to the Modulus.");
+        }
+        ui.add_space(8.0);
         ui.subheading("Calculation");
         let calc = format!(
             "({} + {}) % {} = {}",
@@ -61,11 +70,6 @@ impl ClassicRngFrame for WeylSequenceFrame {
         );
         ui.label(RichText::new(calc).size(16.0));
 
-        if self.rng.increment.gcd(&self.rng.modulus) == 1 {
-            ui.error_text("");
-        } else {
-            ui.error_text("Increment must be co-prime to the Modulus.");
-        }
         ui.add_space(16.0);
         if ui.button("step").clicked() {
             self.rng.next_u32();
