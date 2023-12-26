@@ -6,6 +6,7 @@ pub mod middle_square_controls;
 pub mod pcg_controls;
 pub mod rc4_controls;
 pub mod weyl_controls;
+mod xorshift_controls;
 
 use egui::Ui;
 use rngs::{
@@ -16,7 +17,7 @@ use rngs::{
 use self::{
     halton_controls::HaltonFrame, lcg_controls::LcgFrame, lfsr_controls::LfsrFrame,
     middle_square_controls::MiddleSquareFrame, pcg_controls::PcgFrame, rc4_controls::Rc4Frame,
-    weyl_controls::WeylSequenceFrame,
+    weyl_controls::WeylSequenceFrame, xorshift_controls::XorshiftFrame,
 };
 
 pub trait ClassicRngFrame {
@@ -56,6 +57,7 @@ pub struct RngInterface {
     pcg: PcgFrame,
     rc4: Rc4Frame,
     weyl: WeylSequenceFrame,
+    xorshift: XorshiftFrame,
 }
 
 impl RngInterface {
@@ -67,6 +69,7 @@ impl RngInterface {
                 RngId::MiddleSquare,
                 RngId::Pcg,
                 RngId::Rc4,
+                RngId::Xorshift,
             ],
             active_rng,
             RngCategory::Pseudorandom,
@@ -93,6 +96,7 @@ impl RngInterface {
             RngId::Pcg => &mut self.pcg,
             RngId::Rc4 => &mut self.rc4,
             RngId::Weyl => &mut self.weyl,
+            RngId::Xorshift => &mut self.xorshift,
             _ => todo!("<<<RNG NOT FOUND>>>"),
         }
     }
