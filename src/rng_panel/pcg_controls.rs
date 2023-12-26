@@ -15,16 +15,19 @@ pub struct PcgFrame {
     multiplier_string: String,
     increment_string: String,
     randoms: String,
+    n_random: usize,
 }
 
 impl Default for PcgFrame {
     fn default() -> Self {
+        let rng = Pcg::default();
         Self {
-            rng: Default::default(),
-            state_string: String::from("1257924810"),
-            multiplier_string: String::from("1664525"),
-            increment_string: String::from("1013904223"),
+            state_string: rng.state.to_string(),
+            multiplier_string: rng.multiplier.to_string(),
+            increment_string: rng.increment.to_string(),
             randoms: String::new(),
+            rng,
+            n_random: 5,
         }
     }
 }
@@ -53,6 +56,11 @@ impl PcgFrame {
 
 impl ClassicRngFrame for PcgFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+        if ui.button("Randomize").clicked() {
+            self.randomize()
+        }
+
+        ui.add_space(16.0);
         ui.subheading("Calculation");
         let m = (self.rng.state)
             .wrapping_mul(self.rng.multiplier)
@@ -116,7 +124,7 @@ impl ClassicRngFrame for PcgFrame {
         }
         ui.add_space(16.0);
 
-        generate_random_nums_box(ui, &mut self.rng, 10, &mut self.randoms);
+        generate_random_nums_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
         self.state_string = self.rng.state.to_string();
     }
 

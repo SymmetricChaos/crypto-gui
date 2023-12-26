@@ -15,6 +15,7 @@ pub struct LfgFrame {
     vector_length: usize,
     state_strings: VecDeque<String>,
     randoms: String,
+    n_random: usize,
 }
 
 impl Default for LfgFrame {
@@ -24,6 +25,7 @@ impl Default for LfgFrame {
             vector_length: 16,
             state_strings: VecDeque::from([]),
             randoms: String::new(),
+            n_random: 5,
         };
         s.set_state_strings();
         s
@@ -88,7 +90,7 @@ impl ClassicRngFrame for LfgFrame {
         }
 
         ui.add_space(8.0);
-        generate_random_nums_box(ui, &mut self.rng, 10, &mut self.randoms);
+        generate_random_nums_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
         self.set_state_strings();
     }
 

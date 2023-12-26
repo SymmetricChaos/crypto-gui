@@ -10,6 +10,7 @@ pub struct MiddleSquareFrame {
     state_string: String,
     position: usize,
     randoms: String,
+    n_random: usize,
 }
 
 impl Default for MiddleSquareFrame {
@@ -21,6 +22,7 @@ impl Default for MiddleSquareFrame {
             state_string,
             position: 3,
             randoms: String::new(),
+            n_random: 5,
         }
     }
 }
@@ -85,7 +87,7 @@ impl ClassicRngFrame for MiddleSquareFrame {
             ui.error_text("width must be even");
         }
 
-        generate_random_nums_box(ui, &mut self.rng, 10, &mut self.randoms);
+        generate_random_nums_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
         self.state_string = self.rng.state.to_string();
     }
 

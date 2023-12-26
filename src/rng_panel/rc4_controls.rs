@@ -1,7 +1,7 @@
 use std::num::ParseIntError;
 
 use super::ClassicRngFrame;
-use crate::ui_elements::UiElements;
+use crate::ui_elements::{generate_random_nums_box, UiElements};
 use egui::{DragValue, FontId, RichText};
 use rand::{thread_rng, Rng};
 use rngs::{rc4::Rc4, ClassicRng};
@@ -11,6 +11,8 @@ pub struct Rc4Frame {
     key: String,
     random_bytes: String,
     randoms: String,
+    n_random_bytes: usize,
+    n_random: usize,
 }
 
 impl Default for Rc4Frame {
@@ -20,6 +22,8 @@ impl Default for Rc4Frame {
             key: String::from("DEADBEEF42"),
             random_bytes: String::new(),
             randoms: String::new(),
+            n_random_bytes: 5,
+            n_random: 5,
         }
     }
 }
@@ -105,28 +109,22 @@ impl ClassicRngFrame for Rc4Frame {
         });
 
         ui.add_space(16.0);
-        if ui.button("Random Bytes").clicked() {
-            for _ in 0..5 {
-                if !self.random_bytes.is_empty() {
-                    self.random_bytes.push_str(", ");
+        ui.horizontal(|ui| {
+            if ui.button("Random Bytes").clicked() {
+                for _ in 0..self.n_random_bytes {
+                    if !self.random_bytes.is_empty() {
+                        self.random_bytes.push_str(", ");
+                    }
+                    self.random_bytes
+                        .push_str(&format!("{:02X}", self.rng.next_byte()));
                 }
-                self.random_bytes
-                    .push_str(&format!("{:02X}", self.rng.next_byte()));
             }
-        }
+            ui.add(DragValue::new(&mut self.n_random_bytes).clamp_range(1..=10))
+        });
         ui.text_edit_multiline(&mut self.random_bytes);
 
         ui.add_space(16.0);
-        if ui.button("Random Numbers").clicked() {
-            for _ in 0..5 {
-                if !self.randoms.is_empty() {
-                    self.randoms.push_str(", ");
-                }
-                self.randoms.push_str(&self.rng.next_u32().to_string());
-            }
-        }
-        ui.label("(each number is four bytes concatenated)");
-        ui.text_edit_multiline(&mut self.randoms);
+        generate_random_nums_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
         ui.add_space(16.0);
     }
 

@@ -11,6 +11,7 @@ pub struct WeylSequenceFrame {
     modulus_string: String,
     increment_string: String,
     randoms: String,
+    n_random: usize,
 }
 
 impl Default for WeylSequenceFrame {
@@ -25,6 +26,7 @@ impl Default for WeylSequenceFrame {
             modulus_string,
             increment_string,
             randoms: String::new(),
+            n_random: 5,
         }
     }
 }
@@ -69,7 +71,7 @@ impl ClassicRngFrame for WeylSequenceFrame {
             self.rng.next_u32();
         }
         ui.add_space(16.0);
-        generate_random_nums_box(ui, &mut self.rng, 10, &mut self.randoms);
+        generate_random_nums_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
         self.state_string = self.rng.state.to_string();
     }
 

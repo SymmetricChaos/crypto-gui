@@ -276,19 +276,21 @@ pub fn filter_and_parse_u64(number: &mut u64, string: &mut String) {
 pub fn generate_random_nums_box(
     ui: &mut Ui,
     rng: &mut dyn ClassicRng,
-    n: usize,
+    n_random: &mut usize,
     randoms: &mut String,
 ) {
-    if ui.button("Generate Random Numbers").clicked() {
-        let mut vec = Vec::with_capacity(n);
-        for _ in 0..n {
-            vec.push(rng.next_u32())
+    ui.horizontal(|ui| {
+        if ui.button("Random Numbers").clicked() {
+            for _ in 0..*n_random {
+                if !randoms.is_empty() {
+                    randoms.push_str(", ");
+                }
+                randoms.push_str(&rng.next_u32().to_string());
+            }
         }
-        if !randoms.is_empty() {
-            randoms.push_str(", ");
-        }
-        randoms.push_str(&vec.iter().map(|x| x.to_string()).join(", "));
-    }
+        ui.add(DragValue::new(n_random).clamp_range(1..=10))
+    });
+
     ui.text_edit_multiline(randoms);
 }
 

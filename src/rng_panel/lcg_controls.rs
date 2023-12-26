@@ -14,6 +14,7 @@ pub struct LcgFrame {
     increment_string: String,
     modulus_string: String,
     randoms: String,
+    n_random: usize,
 }
 
 impl Default for LcgFrame {
@@ -25,6 +26,7 @@ impl Default for LcgFrame {
             increment_string: String::from("1013904223"),
             modulus_string: String::from("4294967295"),
             randoms: String::new(),
+            n_random: 5,
         }
     }
 }
@@ -54,6 +56,11 @@ impl LcgFrame {
 
 impl ClassicRngFrame for LcgFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+        if ui.button("Randomize").clicked() {
+            self.randomize()
+        }
+
+        ui.add_space(16.0);
         ui.subheading("Calculation");
         ui.horizontal(|ui| {
             ui.subheading("(");
@@ -92,7 +99,7 @@ impl ClassicRngFrame for LcgFrame {
             self.set_all_strings();
         }
         ui.add_space(8.0);
-        generate_random_nums_box(ui, &mut self.rng, 10, &mut self.randoms);
+        generate_random_nums_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
         self.state_string = self.rng.state.to_string();
     }
 

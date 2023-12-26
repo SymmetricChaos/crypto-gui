@@ -11,6 +11,7 @@ pub struct LfsrFrame {
     rng: Lfsr,
     vector_length: usize,
     randoms: String,
+    n_random: usize,
 }
 
 impl Default for LfsrFrame {
@@ -19,6 +20,7 @@ impl Default for LfsrFrame {
             rng: Default::default(),
             vector_length: 16,
             randoms: String::new(),
+            n_random: 5,
         }
     }
 }
@@ -98,7 +100,7 @@ impl ClassicRngFrame for LfsrFrame {
             }
         }
         ui.add_space(16.0);
-        generate_random_nums_box(ui, &mut self.rng, 10, &mut self.randoms);
+        generate_random_nums_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
     }
 
     fn rng(&self) -> &dyn rngs::ClassicRng {

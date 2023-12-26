@@ -1,5 +1,5 @@
 use super::ClassicRngFrame;
-use crate::ui_elements::UiElements;
+use crate::ui_elements::{generate_random_nums_box, UiElements};
 use rand::{thread_rng, Rng};
 use rngs::{xorshift::Xorshift, ClassicRng};
 
@@ -7,6 +7,7 @@ pub struct XorshiftFrame {
     rng: Xorshift,
     key: String,
     randoms: String,
+    n_random: usize,
     s0: u32,
     s1: u32,
     s2: u32,
@@ -18,6 +19,7 @@ impl Default for XorshiftFrame {
             rng: Default::default(),
             key: String::new(),
             randoms: String::new(),
+            n_random: 5,
             s0: 0,
             s1: 0,
             s2: 0,
@@ -95,15 +97,7 @@ impl ClassicRngFrame for XorshiftFrame {
         });
 
         ui.add_space(16.0);
-        if ui.button("Random Numbers").clicked() {
-            for _ in 0..5 {
-                if !self.randoms.is_empty() {
-                    self.randoms.push_str(", ");
-                }
-                self.randoms.push_str(&self.rng.next_u32().to_string());
-            }
-        }
-        ui.text_edit_multiline(&mut self.randoms);
+        generate_random_nums_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
         ui.add_space(16.0);
     }
 
