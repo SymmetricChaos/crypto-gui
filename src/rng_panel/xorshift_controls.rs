@@ -7,6 +7,9 @@ pub struct XorshiftFrame {
     rng: Xorshift,
     key: String,
     randoms: String,
+    s0: u32,
+    s1: u32,
+    s2: u32,
 }
 
 impl Default for XorshiftFrame {
@@ -15,11 +18,20 @@ impl Default for XorshiftFrame {
             rng: Default::default(),
             key: String::new(),
             randoms: String::new(),
+            s0: 0,
+            s1: 0,
+            s2: 0,
         }
     }
 }
 
-impl XorshiftFrame {}
+impl XorshiftFrame {
+    fn set_shifts(&mut self) {
+        self.s0 = self.rng.state ^ (self.rng.state << 13);
+        self.s1 = self.s0 ^ (self.s0 >> 17);
+        self.s2 = self.s1 ^ (self.s1 << 5);
+    }
+}
 
 impl ClassicRngFrame for XorshiftFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
@@ -31,20 +43,24 @@ impl ClassicRngFrame for XorshiftFrame {
                 self.randomize();
             }
         });
-        ui.label("Key should be provided as a string of hexadecimal digits.");
-        if ui.button("set").clicked() {
-            self.rng.state =
-                u32::from_str_radix(&self.key, 8).expect("filtering should force this to be valid")
-        }
-        if ui.text_edit_multiline(&mut self.key).changed() {
+        ui.horizontal(|ui| {
+            ui.label("Key should be provided as a string of hexadecimal digits.");
+            if ui.button("set").clicked() {
+                self.rng.state = u32::from_str_radix(&self.key, 16)
+                    .expect("filtering should force this to be valid");
+                self.set_shifts();
+            }
+        });
+        if ui.text_edit_singleline(&mut self.key).changed() {
             self.key = self
                 .key
                 .chars()
                 .filter(|c| c.is_ascii_hexdigit())
                 .take(16)
                 .collect();
-            self.rng.state =
-                u32::from_str_radix(&self.key, 16).expect("filtering should force this to be valid")
+            self.rng.state = u32::from_str_radix(&self.key, 16)
+                .expect("filtering should force this to be valid");
+            self.set_shifts();
         }
 
         ui.add_space(16.0);
@@ -55,6 +71,28 @@ impl ClassicRngFrame for XorshiftFrame {
         if ui.button("step").clicked() {
             self.rng.next_u32();
         }
+        ui.collapsing("calculations", |ui| {
+            ui.monospace(format!(
+                "{:08X}  ⊕  {:08X}  =  {:08X}",
+                self.rng.state,
+                self.rng.state << 13,
+                self.s0
+            ));
+            ui.add_space(4.0);
+            ui.monospace(format!(
+                "{:08X}  ⊕  {:08X}  =  {:08X}",
+                self.s0,
+                self.s0 >> 17,
+                self.s1
+            ));
+            ui.add_space(4.0);
+            ui.monospace(format!(
+                "{:08X}  ⊕  {:08X}  =  {:08X}",
+                self.s1,
+                self.s1 << 5,
+                self.s2
+            ));
+        });
 
         ui.add_space(16.0);
         if ui.button("Random Numbers").clicked() {
