@@ -1,11 +1,12 @@
-pub mod halton_controls;
-pub mod lcg_controls;
-pub mod lfg_controls;
-pub mod lfsr_controls;
-pub mod middle_square_controls;
-pub mod pcg_controls;
-pub mod rc4_controls;
-pub mod weyl_controls;
+mod halton_controls;
+mod lcg_controls;
+mod lfg_controls;
+mod lfsr_controls;
+mod middle_square_controls;
+mod pcg_controls;
+mod rc4_controls;
+mod splitmix_controls;
+mod weyl_controls;
 mod xorshift_controls;
 
 use egui::Ui;

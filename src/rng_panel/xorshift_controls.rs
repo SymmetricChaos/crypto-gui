@@ -40,13 +40,13 @@ impl ClassicRngFrame for XorshiftFrame {
         ui.add_space(16.0);
 
         ui.horizontal(|ui| {
-            ui.subheading("Key");
+            ui.subheading("Seed Value");
             if ui.button("🎲").on_hover_text("randomize").clicked() {
                 self.randomize();
             }
         });
         ui.horizontal(|ui| {
-            ui.label("Key should be provided as a string of hexadecimal digits.");
+            ui.label("Seed should be provided as a string of hexadecimal digits.");
             if ui.button("set").clicked() {
                 self.rng.state = u32::from_str_radix(&self.key, 16)
                     .expect("filtering should force this to be valid");

@@ -52,7 +52,6 @@ impl MiddleSquareFrame {
 impl ClassicRngFrame for MiddleSquareFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.subheading("Choose Width");
-
         if ui
             .add(
                 DragValue::new(&mut self.position)
@@ -66,7 +65,7 @@ impl ClassicRngFrame for MiddleSquareFrame {
             self.rng.state = self.rng.state % (10_u64.pow((self.rng.width) as u32));
         }
 
-        ui.subheading("Choose State");
+        ui.subheading("Seed Value");
         if ui.control_string(&mut self.state_string).changed() {
             filter_string(&mut self.state_string, &"0123456789");
             self.rng.state = self.state_string.parse().unwrap_or(0);
@@ -88,7 +87,6 @@ impl ClassicRngFrame for MiddleSquareFrame {
         }
 
         generate_random_nums_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
-        self.state_string = self.rng.state.to_string();
     }
 
     fn rng(&self) -> &dyn rngs::ClassicRng {
