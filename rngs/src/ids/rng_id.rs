@@ -11,6 +11,7 @@ pub enum RngId {
     MiddleSquare,
     Pcg,
     Rc4,
+    Splitmix,
     Weyl,
     Xorshift,
 }
@@ -41,6 +42,7 @@ impl Display for RngId {
             RngId::MiddleSquare => "Middle Square",
             RngId::Pcg => "Permuted Congruential Generator",
             RngId::Rc4 => "RC4",
+            RngId::Splitmix => "Splitmix64",
             RngId::Weyl => "Weyl Sequence",
             RngId::Xorshift => "XorShift",
             // _ => "<<<MISSING NAME>>>",

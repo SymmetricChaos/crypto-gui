@@ -18,7 +18,8 @@ use rngs::{
 use self::{
     halton_controls::HaltonFrame, lcg_controls::LcgFrame, lfsr_controls::LfsrFrame,
     middle_square_controls::MiddleSquareFrame, pcg_controls::PcgFrame, rc4_controls::Rc4Frame,
-    weyl_controls::WeylSequenceFrame, xorshift_controls::XorshiftFrame,
+    splitmix_controls::SplitmixFrame, weyl_controls::WeylSequenceFrame,
+    xorshift_controls::XorshiftFrame,
 };
 
 pub trait ClassicRngFrame {
@@ -57,6 +58,7 @@ pub struct RngInterface {
     middle_square: MiddleSquareFrame,
     pcg: PcgFrame,
     rc4: Rc4Frame,
+    splitmix: SplitmixFrame,
     weyl: WeylSequenceFrame,
     xorshift: XorshiftFrame,
 }
@@ -70,6 +72,7 @@ impl RngInterface {
                 RngId::MiddleSquare,
                 RngId::Pcg,
                 RngId::Rc4,
+                RngId::Splitmix,
                 RngId::Xorshift,
             ],
             active_rng,
@@ -96,6 +99,7 @@ impl RngInterface {
             RngId::MiddleSquare => &mut self.middle_square,
             RngId::Pcg => &mut self.pcg,
             RngId::Rc4 => &mut self.rc4,
+            RngId::Splitmix => &mut self.splitmix,
             RngId::Weyl => &mut self.weyl,
             RngId::Xorshift => &mut self.xorshift,
             _ => todo!("<<<RNG NOT FOUND>>>"),

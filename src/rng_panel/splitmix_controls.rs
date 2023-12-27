@@ -2,16 +2,16 @@ use super::ClassicRngFrame;
 use crate::ui_elements::{generate_random_nums_box, UiElements};
 
 use rand::{thread_rng, Rng};
-use rngs::splitmix::SplitMix;
+use rngs::splitmix::Splitmix;
 
-pub struct SplitMixFrame {
-    rng: SplitMix,
+pub struct SplitmixFrame {
+    rng: Splitmix,
     key: String,
     randoms: String,
     n_random: usize,
 }
 
-impl Default for SplitMixFrame {
+impl Default for SplitmixFrame {
     fn default() -> Self {
         Self {
             rng: Default::default(),
@@ -22,9 +22,9 @@ impl Default for SplitMixFrame {
     }
 }
 
-impl SplitMixFrame {}
+impl SplitmixFrame {}
 
-impl ClassicRngFrame for SplitMixFrame {
+impl ClassicRngFrame for SplitmixFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.add_space(16.0);
 
@@ -63,14 +63,15 @@ impl ClassicRngFrame for SplitMixFrame {
             let mut t = self.rng.state.wrapping_add(0x9e3779b97f4a7c15);
             ui.add_space(4.0);
             ui.monospace("(the state is then copied to a variable, the following calculations change the output but not the state)");
+            ui.add_space(4.0);
             ui.monospace(format!(
-                "{:016X}  ⊕  {:016X}  =  {:016X}    (XOR the value with itself shifted by 30 bits)",
+                "{:016X}  ⊕  {:016X}  =  {:016X}    (XOR the value with itself shifted right by 30 bits)",
                 t,
                 t >> 30,
                 t ^ (t>>30)
             ));
             t ^= t >> 30;
-
+            ui.add_space(4.0);
             ui.monospace(format!(
                 "{:016X}  ×  {:016X}  =  {:016X}    (multiply the value by a constant)",
                 t,
@@ -78,15 +79,15 @@ impl ClassicRngFrame for SplitMixFrame {
                 t.wrapping_mul(0xbf58476d1ce4e5b9)
             ));
             t = t.wrapping_mul(0xbf58476d1ce4e5b9);
-
+            ui.add_space(4.0);
             ui.monospace(format!(
-                "{:016X}  ⊕  {:016X}  =  {:016X}    (XOR the value with itself shifted by 27 bits)",
+                "{:016X}  ⊕  {:016X}  =  {:016X}    (XOR the value with itself shifted right by 27 bits)",
                 t,
                 t >> 27,
                 t ^ (t>>27)
             ));
             t ^= t >> 27;
-
+            ui.add_space(4.0);
             ui.monospace(format!(
                 "{:016X}  ×  {:016X}  =  {:016X}    (multiply the value by a constant)",
                 t,
@@ -94,9 +95,9 @@ impl ClassicRngFrame for SplitMixFrame {
                 t.wrapping_mul(0x94d049bb133111eb)
             ));
             t = t.wrapping_mul(0x94d049bb133111eb);
-
+            ui.add_space(4.0);
             ui.monospace(format!(
-                "{:016X}  ⊕  {:016X}  =  {:016X}    (XOR the value with itself shifted by 31 bits)",
+                "{:016X}  ⊕  {:016X}  =  {:016X}    (XOR the value with itself shifted right by 31 bits)",
                 t,
                 t >> 31,
                 t ^ (t>>31)

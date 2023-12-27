@@ -1,16 +1,16 @@
 use crate::traits::ClassicRng;
 
-pub struct SplitMix {
+pub struct Splitmix {
     pub state: u64,
 }
 
-impl Default for SplitMix {
+impl Default for Splitmix {
     fn default() -> Self {
         Self { state: 0 }
     }
 }
 
-impl SplitMix {
+impl Splitmix {
     pub fn next_u64(&mut self) -> u64 {
         self.state = self.state.wrapping_add(0x9e3779b97f4a7c15);
         let mut t = self.state;
@@ -22,7 +22,7 @@ impl SplitMix {
     }
 }
 
-impl ClassicRng for SplitMix {
+impl ClassicRng for Splitmix {
     fn next_u32(&mut self) -> u32 {
         // Only the lower 32 bits are used
         self.next_u64() as u32
@@ -35,7 +35,7 @@ mod splitmix_tests {
 
     #[test]
     fn first_five() {
-        let mut rng = SplitMix::default();
+        let mut rng = Splitmix::default();
         rng.state = 1234567;
         for _ in 0..5 {
             println!("{}", rng.next_u64())

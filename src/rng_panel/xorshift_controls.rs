@@ -72,27 +72,33 @@ impl ClassicRngFrame for XorshiftFrame {
         ui.add_space(16.0);
         if ui.button("step").clicked() {
             self.rng.next_u32();
+            self.set_shifts();
         }
         ui.collapsing("calculations", |ui| {
+
+            let mut t = self.rng.state;
             ui.monospace(format!(
-                "{:08X}  ⊕  {:08X}  =  {:08X}",
-                self.rng.state,
-                self.rng.state << 13,
-                self.s0
+                "{:016X}  ⊕  {:016X}  =  {:016X}    (XOR the state with itself shifted left by 13 bits)",
+                t,
+                t << 13,
+                t ^ (t << 13)
             ));
-            ui.add_space(4.0);
+            t ^= t << 13;
+
+
             ui.monospace(format!(
-                "{:08X}  ⊕  {:08X}  =  {:08X}",
-                self.s0,
-                self.s0 >> 17,
-                self.s1
+                "{:016X}  ⊕  {:016X}  =  {:016X}    (XOR the state with itself shifted right by 17 bits)",
+                t,
+                t >> 17,
+                t ^ (t >> 17)
             ));
-            ui.add_space(4.0);
+            t ^= t >> 17;
+
             ui.monospace(format!(
-                "{:08X}  ⊕  {:08X}  =  {:08X}",
-                self.s1,
-                self.s1 << 5,
-                self.s2
+                "{:016X}  ⊕  {:016X}  =  {:016X}    (XOR the state with itself shifted left by 5 bits)",
+                t,
+                t << 5,
+                t ^ (t << 5)
             ));
         });
 
