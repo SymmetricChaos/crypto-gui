@@ -46,7 +46,7 @@ impl ClassicRngFrame for XorshiroFrame {
         //         .key
         //         .chars()
         //         .filter(|c| c.is_ascii_hexdigit())
-        //         .take(8)
+        //         .take(64)
         //         .collect();
         // }
 
@@ -54,7 +54,7 @@ impl ClassicRngFrame for XorshiroFrame {
         ui.subheading("Internal State");
         ui.label("Four 64 bit words.");
         ui.label(format!(
-            "{:08X} {:08X} {:08X} {:08X}",
+            "{:016X} {:016X} {:016X} {:016X}",
             self.rng.state[0], self.rng.state[1], self.rng.state[2], self.rng.state[3],
         ));
 

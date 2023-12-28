@@ -1,21 +1,23 @@
 use crate::traits::ClassicRng;
 
-pub struct Xorshift32 {
-    pub state: u32,
+pub struct Xorshift64 {
+    pub state: u64,
 }
 
-impl Default for Xorshift32 {
+impl Default for Xorshift64 {
     fn default() -> Self {
-        Self { state: 0x0BAD_5EED }
+        Self {
+            state: 0x0BAD_5EED0BAD_5EED,
+        }
     }
 }
 
-impl ClassicRng for Xorshift32 {
+impl ClassicRng for Xorshift64 {
     fn next_u32(&mut self) -> u32 {
         self.state ^= self.state << 13;
-        self.state ^= self.state >> 17;
-        self.state ^= self.state << 5;
-        self.state
+        self.state ^= self.state >> 7;
+        self.state ^= self.state << 17;
+        (self.state >> 32) as u32
     }
 }
 
