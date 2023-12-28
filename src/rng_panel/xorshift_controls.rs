@@ -1,10 +1,10 @@
 use super::ClassicRngFrame;
 use crate::ui_elements::{generate_random_nums_box, UiElements};
 use rand::{thread_rng, Rng};
-use rngs::{xorshift::Xorshift, ClassicRng};
+use rngs::{xorshift::Xorshift32, ClassicRng};
 
 pub struct XorshiftFrame {
-    rng: Xorshift,
+    rng: Xorshift32,
     key: String,
     randoms: String,
     n_random: usize,

@@ -54,7 +54,7 @@ impl ClassicRngFrame for Rc4Frame {
                 self.randomize();
             }
         });
-        ui.label("Key should be provided as a string of hexadecimal digits.");
+        ui.label("Key should be provided as a string of hexadecimal digits representing between 1 and 256 bytes.");
         if ui.text_edit_multiline(&mut self.key).changed() {
             self.key = self.key.chars().filter(|c| c.is_ascii_hexdigit()).collect();
         }

@@ -8,6 +8,7 @@ mod rc4_controls;
 mod splitmix_controls;
 mod weyl_controls;
 mod xorshift_controls;
+mod xoshiro_controls;
 
 use egui::Ui;
 use rngs::{
