@@ -13,4 +13,5 @@ pub mod splitmix;
 pub mod traits;
 pub mod weyl;
 pub mod xorshift;
+pub mod xoshiro;
 pub use traits::ClassicRng;
