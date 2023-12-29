@@ -3,57 +3,69 @@ use crate::ui_elements::{generate_random_nums_box, UiElements};
 use rand::{thread_rng, Rng};
 use rngs::xoshiro::Xoshiro256;
 
-pub struct XorshiroFrame {
+pub struct XoshiroFrame {
     rng: Xoshiro256,
-    key: String,
+    key: [String; 4],
     randoms: String,
     n_random: usize,
 }
 
-impl Default for XorshiroFrame {
+impl Default for XoshiroFrame {
     fn default() -> Self {
         Self {
             rng: Default::default(),
-            key: String::new(),
+            key: [
+                String::from("0"),
+                String::from("0"),
+                String::from("0"),
+                String::from("0"),
+            ],
             randoms: String::new(),
             n_random: 5,
         }
     }
 }
 
-impl XorshiroFrame {}
+impl XoshiroFrame {}
 
-impl ClassicRngFrame for XorshiroFrame {
+impl ClassicRngFrame for XoshiroFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.add_space(16.0);
 
         ui.horizontal(|ui| {
-            ui.subheading("Seed Value");
+            ui.subheading("Seed Values");
             if ui.button("🎲").on_hover_text("randomize").clicked() {
                 self.randomize();
             }
         });
-        // ui.horizontal(|ui| {
-        //     ui.label("Seed should be provided as a string of hexadecimal digits.");
-        //     if ui.button("set").clicked() {
-        //         self.rng.state = u64::from_str_radix(&self.key, 16)
-        //             .expect("filtering should force this to be valid");
-        //         self.set_shifts();
-        //     }
-        // });
-        // if ui.text_edit_singleline(&mut self.key).changed() {
-        //     self.key = self
-        //         .key
-        //         .chars()
-        //         .filter(|c| c.is_ascii_hexdigit())
-        //         .take(64)
-        //         .collect();
-        // }
+        ui.horizontal(|ui| {
+            ui.label("Seed should be provided as four hexadecmial numbers.");
+            if ui.button("set").clicked() {
+                for i in 0..4 {
+                    self.rng.state[i] = u64::from_str_radix(&self.key[i], 16)
+                        .expect("filtering should force this to be valid");
+                }
+            }
+        });
+        for (i, subkey) in self.key.iter_mut().enumerate() {
+            if ui.control_string(subkey).changed() {
+                if subkey.is_empty() {
+                    subkey.push('0')
+                } else {
+                    *subkey = subkey
+                        .chars()
+                        .filter(|c| c.is_ascii_hexdigit())
+                        .take(16)
+                        .collect()
+                }
+                self.rng.state[i] = u64::from_str_radix(&subkey, 16)
+                    .expect("filtering should force this to be valid");
+            }
+        }
 
         ui.add_space(16.0);
         ui.subheading("Internal State");
-        ui.label("Four 64 bit words.");
-        ui.label(format!(
+        ui.monospace(format!(
             "{:016X} {:016X} {:016X} {:016X}",
             self.rng.state[0], self.rng.state[1], self.rng.state[2], self.rng.state[3],
         ));
@@ -71,7 +83,7 @@ impl ClassicRngFrame for XorshiroFrame {
             }
         });
 
-        ui.collapsing("calculations", |ui| {});
+        // ui.collapsing("calculations", |ui| {});
 
         ui.add_space(16.0);
         generate_random_nums_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);

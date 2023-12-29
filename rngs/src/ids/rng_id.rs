@@ -14,6 +14,7 @@ pub enum RngId {
     Splitmix,
     Weyl,
     Xorshift,
+    Xoshiro,
 }
 
 impl Default for RngId {
@@ -44,7 +45,8 @@ impl Display for RngId {
             RngId::Rc4 => "RC4",
             RngId::Splitmix => "Splitmix64",
             RngId::Weyl => "Weyl Sequence",
-            RngId::Xorshift => "XorShift",
+            RngId::Xorshift => "Xorshift",
+            RngId::Xoshiro => "Xoshiro",
             // _ => "<<<MISSING NAME>>>",
         };
         write!(f, "{}", name)

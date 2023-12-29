@@ -14,7 +14,7 @@ impl Default for XorshiftFrame {
     fn default() -> Self {
         Self {
             rng: Default::default(),
-            key: String::new(),
+            key: String::from("0BAD5EED0BAD5EED"),
             randoms: String::new(),
             n_random: 5,
         }

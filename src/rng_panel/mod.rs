@@ -20,7 +20,7 @@ use self::{
     halton_controls::HaltonFrame, lcg_controls::LcgFrame, lfsr_controls::LfsrFrame,
     middle_square_controls::MiddleSquareFrame, pcg_controls::PcgFrame, rc4_controls::Rc4Frame,
     splitmix_controls::SplitmixFrame, weyl_controls::WeylSequenceFrame,
-    xorshift_controls::XorshiftFrame,
+    xorshift_controls::XorshiftFrame, xoshiro_controls::XoshiroFrame,
 };
 
 pub trait ClassicRngFrame {
@@ -62,6 +62,7 @@ pub struct RngInterface {
     splitmix: SplitmixFrame,
     weyl: WeylSequenceFrame,
     xorshift: XorshiftFrame,
+    xoshiro: XoshiroFrame,
 }
 
 impl RngInterface {
@@ -75,6 +76,7 @@ impl RngInterface {
                 RngId::Rc4,
                 RngId::Splitmix,
                 RngId::Xorshift,
+                RngId::Xoshiro,
             ],
             active_rng,
             RngCategory::Pseudorandom,
@@ -103,6 +105,7 @@ impl RngInterface {
             RngId::Splitmix => &mut self.splitmix,
             RngId::Weyl => &mut self.weyl,
             RngId::Xorshift => &mut self.xorshift,
+            RngId::Xoshiro => &mut self.xoshiro,
             _ => todo!("<<<RNG NOT FOUND>>>"),
         }
     }
