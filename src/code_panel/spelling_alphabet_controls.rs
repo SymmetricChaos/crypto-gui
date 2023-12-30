@@ -37,6 +37,8 @@ impl CodeFrame for SpellingAlphabetFrame {
                     SpellingAlphabetMode::Usn1908,
                     "US Navy, long (1908)",
                 );
+            });
+            ui.horizontal(|ui| {
                 ui.selectable_value(
                     &mut self.code.variant,
                     SpellingAlphabetMode::Usn1908Alt,
@@ -52,7 +54,8 @@ impl CodeFrame for SpellingAlphabetFrame {
                     SpellingAlphabetMode::Wu1942,
                     "Western Union (1942)",
                 );
-
+            });
+            ui.horizontal(|ui| {
                 ui.selectable_value(
                     &mut self.code.variant,
                     SpellingAlphabetMode::Us1941,
@@ -62,15 +65,15 @@ impl CodeFrame for SpellingAlphabetFrame {
                 ui.selectable_value(
                     &mut self.code.variant,
                     SpellingAlphabetMode::FirstLetter,
-                    "First Character (decoding only)",
+                    "First Character",
                 );
-            });
+            })
         });
 
         ui.add_space(16.0);
 
         match self.code.variant {
-            SpellingAlphabetMode::Nato => ui.label("The most widely used international standard today is the one specified by the ICAO, though it is commonly called the NATO Phonetic Alphabet. Note the intentionally unusual spellings for ALFA (for non-English speakers generally) and JULIET (for French speakers)."),
+            SpellingAlphabetMode::Nato => ui.label("The most widely used international standard today is the one specified by the ICAO, though it is commonly called the NATO Phonetic Alphabet. Note the intentionally unusual spellings for ALFA (for non-English speakers generally) and JULIETT (for French speakers)."),
             SpellingAlphabetMode::Ccb => ui.label("The Combined Communications Board was formed during World War II to improve the interoperability of communications systems for UK and US forces. It was the immediate predececessor to the NATO/ICAO standard."),
             SpellingAlphabetMode::Wu1912 => ui.label("In 1912 Western Union introduced a spelling alphabet for its employees that mostly used place names to represent letters."),
             SpellingAlphabetMode::Wu1942 => ui.label("The 1942 update to the Western Union standard."),
