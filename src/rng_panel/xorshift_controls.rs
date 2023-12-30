@@ -98,9 +98,8 @@ impl ClassicRngFrame for XorshiftFrame {
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        self.key = format!("{:016X}", rng.gen::<u64>());
-        self.rng.state =
-            u64::from_str_radix(&self.key, 16).expect("thread_rng should have provided a valid u32")
+        self.rng.state = rng.gen::<u64>();
+        self.key = format!("{:016X}", self.rng.state);
     }
 
     fn reset(&mut self) {

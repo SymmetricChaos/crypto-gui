@@ -1,21 +1,21 @@
 use crate::traits::ClassicRng;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Transform {
+pub enum Scrambler {
     PlusPlus,
     StarStar,
 }
 
 pub struct Xoshiro256 {
     pub state: [u64; 4],
-    pub transform: Transform,
+    pub scrambler: Scrambler,
 }
 
 impl Default for Xoshiro256 {
     fn default() -> Self {
         Self {
             state: [0, 0, 0, 0],
-            transform: Transform::PlusPlus,
+            scrambler: Scrambler::PlusPlus,
         }
     }
 }
@@ -45,11 +45,11 @@ impl Xoshiro256 {
     }
 
     pub fn output(&mut self) -> u64 {
-        match self.transform {
-            Transform::PlusPlus => (self.state[0].wrapping_add(self.state[3]))
+        match self.scrambler {
+            Scrambler::PlusPlus => (self.state[0].wrapping_add(self.state[3]))
                 .rotate_left(23)
                 .wrapping_add(self.state[0]),
-            Transform::StarStar => (self.state[1].wrapping_mul(5))
+            Scrambler::StarStar => (self.state[1].wrapping_mul(5))
                 .rotate_left(7)
                 .wrapping_mul(9),
         }
