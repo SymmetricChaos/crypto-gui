@@ -4,9 +4,9 @@ use ciphers::{
     machines::enigma::{rotors::REFLECTOR_VEC, EnigmaM3, REFLECTOR_MAP, ROTOR_VEC},
     Cipher,
 };
-use egui::{ComboBox, Label, RichText, Slider, Ui};
+use egui::{ComboBox, Slider, Ui};
 use rand::{thread_rng, Rng};
-use utils::{preset_alphabet::Alphabet, text_functions::random_string_sample};
+use utils::{preset_alphabet::Alphabet, text_functions::shuffled_str};
 
 #[derive(Default)]
 pub struct EnigmaM3Frame {
@@ -16,14 +16,16 @@ pub struct EnigmaM3Frame {
 
 impl EnigmaM3Frame {
     fn randomize_plugboard(&mut self) {
-        let alpha = random_string_sample(Alphabet::BasicLatin.slice(), 14, &mut thread_rng());
+        let mut rng = thread_rng();
+        let alpha = shuffled_str(Alphabet::BasicLatin.slice(), &mut rng);
         let mut cs = alpha.chars();
         self.plugboard_string.clear();
-        for _ in 0..7 {
+        for _ in 0..rng.gen_range(6..10) {
             self.plugboard_string.push(cs.next().unwrap());
             self.plugboard_string.push(cs.next().unwrap());
             self.plugboard_string.push(' ');
         }
+        self.plugboard_string.pop();
 
         self.cipher
             .state
@@ -94,7 +96,7 @@ impl CipherFrame for EnigmaM3Frame {
         for i in 0..3 {
             ui.horizontal(|ui| {
                 ComboBox::from_id_source(format!("Rotor {}", i + 1))
-                    .selected_text(format!("Rotor {}", i + 1))
+                    .selected_text(self.cipher.state.rotors[i].name)
                     .show_ui(ui, |ui| {
                         for rtr in ROTOR_VEC.iter() {
                             ui.selectable_value(
@@ -104,10 +106,6 @@ impl CipherFrame for EnigmaM3Frame {
                             );
                         }
                     });
-                ui.add_sized(
-                    [20.0, 20.0],
-                    Label::new(RichText::from(self.cipher.state.rotors[i].name).monospace()),
-                );
                 ui.mono(self.cipher.state.rotors[i]);
             });
         }
@@ -131,10 +129,6 @@ impl CipherFrame for EnigmaM3Frame {
                         );
                     }
                 });
-            ui.add_sized(
-                [20.0, 20.0],
-                Label::new(RichText::from(self.cipher.state.reflector.name).monospace()),
-            );
             ui.mono(self.cipher.state.reflector);
         });
 
@@ -145,6 +139,7 @@ impl CipherFrame for EnigmaM3Frame {
                 self.randomize_plugboard();
             }
         });
+        ui.label("Changed daily.");
         if ui.control_string(&mut self.plugboard_string).changed() {
             match self.cipher.state.set_plugboard(&self.plugboard_string) {
                 Ok(_) => (),
