@@ -25,8 +25,8 @@ impl Plugboard {
                 continue;
             }
             if d.len() != 2 {
-                return Err(CipherError::key(
-                    "plugboard settings must be given as pairs of letters",
+                return Err(CipherError::Key(
+                    format!("plugboard settings must be given as pairs of letters seperated by spaces, found `{}` instead", d),
                 ));
             }
             let mut cs = d.chars();
