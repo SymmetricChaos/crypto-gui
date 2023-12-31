@@ -47,8 +47,8 @@ impl RailFenceFrame {
 impl CipherFrame for RailFenceFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.randomize_reset(self);
-        ui.add_space(8.0);
 
+        ui.add_space(16.0);
         ui.subheading("Number of Rails");
         if ui
             .add(Slider::new(&mut self.cipher.num_rails, 2..=12))

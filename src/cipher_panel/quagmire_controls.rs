@@ -33,8 +33,8 @@ impl Default for QuagmireFrame {
 impl CipherFrame for QuagmireFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.randomize_reset(self);
-        ui.add_space(16.0);
 
+        ui.add_space(16.0);
         ui.subheading("Alphabet");
         if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher.assign_alphabet(&self.alphabet_string)

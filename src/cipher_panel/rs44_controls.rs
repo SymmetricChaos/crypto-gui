@@ -40,7 +40,6 @@ impl CipherFrame for Rs44Frame {
         };
 
         ui.add_space(16.0);
-
         ui.label("Starting Cell").on_hover_text_at_pointer(
             "the coordinates of the cell where the text is written into the grid when encrypting",
         );
@@ -79,9 +78,8 @@ impl CipherFrame for Rs44Frame {
             }
         });
 
-        ui.add_space(16.0);
-
         // The Message Key area. Not needed for encryption.
+        ui.add_space(16.0);
         ui.collapsing("Message Key", |ui| {
             ui.spacing_mut().item_spacing = (2.0, 2.0).into();
             ui.style_mut().override_text_style = Some(TextStyle::Monospace);

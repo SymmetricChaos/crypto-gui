@@ -70,14 +70,14 @@ impl CipherFrame for NihilistFrame {
         if ui.control_string(&mut self.alphabet_string).changed() {
             self.assign_keys();
         }
-        ui.add_space(8.0);
+        ui.add_space(16.0);
 
         ui.subheading("Polybius Keyword");
         if ui.control_string(&mut self.polybius_key_string).changed() {
             filter_string(&mut self.polybius_key_string, &self.alphabet_string);
             self.assign_keys();
         }
-        ui.add_space(8.0);
+        ui.add_space(16.0);
 
         ui.subheading("Additive Keyword");
         if ui.control_string(&mut self.additive_key_string).changed() {

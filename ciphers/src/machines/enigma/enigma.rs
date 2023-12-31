@@ -50,7 +50,7 @@ pub struct EnigmaState {
 }
 
 impl EnigmaState {
-    fn advance_rotors(&mut self) {
+    pub fn advance_rotors(&mut self) {
         let mut on_notch = self.rotors[2].position == self.rotors[2].notch.0
             || self.rotors[2].position == self.rotors[2].notch.1;
         self.rotors[2].step();

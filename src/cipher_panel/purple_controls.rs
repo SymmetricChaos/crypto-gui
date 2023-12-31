@@ -69,8 +69,8 @@ impl CipherFrame for PurpleFrame {
                 ui.label(switch.to_string());
             });
         }
-        ui.add_space(8.0);
 
+        ui.add_space(16.0);
         ui.subheading("Twenties Speeds");
         for n in 0..3 {
             ui.horizontal(|ui| {
@@ -90,7 +90,7 @@ impl CipherFrame for PurpleFrame {
             });
         }
 
-        ui.add_space(10.0);
+        ui.add_space(16.0);
         ui.subheading("Plugboard");
         if ui
             .add(TextEdit::singleline(&mut self.plugboard_string).font(TextStyle::Monospace))

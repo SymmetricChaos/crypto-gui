@@ -67,6 +67,7 @@ impl CipherFrame for VigenereFrame {
             });
         });
 
+        ui.add_space(16.0);
         ui.add_enabled_ui(self.cipher.mode == PolyMode::ProgKey, |ui| {
             ui.subheading("Step size");
             let alpha_range = 0..=(self.cipher.alphabet_len() - 1);

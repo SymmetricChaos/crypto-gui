@@ -29,8 +29,8 @@ impl Default for PolybiusSquareFrame {
 impl CipherFrame for PolybiusSquareFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.randomize_reset(self);
-        ui.add_space(16.0);
 
+        ui.add_space(16.0);
         ui.group(|ui| {
             ui.subheading("Common Alphabets");
             ui.horizontal(|ui| {
@@ -51,18 +51,17 @@ impl CipherFrame for PolybiusSquareFrame {
             });
         });
 
-        ui.add_space(8.0);
-
+        ui.add_space(16.0);
         ui.subheading("Alphabet");
         if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher
                 .assign_key(&self.key_string, &self.alphabet_string);
         }
         ui.add_space(16.0);
-
         ui.checkbox(&mut self.cipher.spaced, "Use Spaces")
             .on_hover_text("Insert spaces between the pairs of symbols");
 
+        ui.add_space(16.0);
         ui.subheading("Keyword");
         if ui.control_string(&mut self.key_string).changed() {
             filter_string(&mut self.key_string, &self.alphabet_string);
@@ -70,7 +69,7 @@ impl CipherFrame for PolybiusSquareFrame {
                 .assign_key(&self.key_string, &self.alphabet_string)
         }
 
-        ui.add_space(8.0);
+        ui.add_space(16.0);
         ui.subheading("Labels");
         if ui.control_string(&mut self.labels_string).changed() {
             self.cipher.assign_labels(&self.labels_string)
@@ -82,6 +81,7 @@ impl CipherFrame for PolybiusSquareFrame {
             ui.copy_to_clipboard(self.cipher.show_grid());
         });
         ui.mono(self.cipher.show_grid());
+
         ui.add_space(16.0);
     }
 

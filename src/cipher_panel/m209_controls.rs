@@ -33,13 +33,13 @@ pub struct M209Frame {
 impl CipherFrame for M209Frame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.randomize_reset(self);
-        ui.add_space(8.0);
 
+        ui.add_space(16.0);
         ui.subheading("Alphabet");
         ui.label("The M029 can only use the basic Latin alphabet.");
         ui.false_control_string(Alphabet::BasicLatin);
-        ui.add_space(8.0);
 
+        ui.add_space(16.0);
         ui.subheading("Rotors");
         ui.label("Each rotor shows its fixed alphabet. The active letter is chosen by the slider next to it. Below the effective pins may be chosen. Notice that the lengths of the alphabets are 26, 25, 23, 21, 19, 17 which are pairwise coprime.");
         ui.add_space(4.0);
@@ -62,7 +62,7 @@ impl CipherFrame for M209Frame {
 
             ui.add_space(8.0);
         }
-        ui.add_space(16.0);
+        ui.add_space(8.0);
 
         let lugs = &mut self.cipher.lugs;
         ui.subheading("Lug Pairs");

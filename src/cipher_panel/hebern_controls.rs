@@ -85,7 +85,11 @@ impl CipherFrame for HebernFrame {
                 ));
             });
         }
+
         ui.add_space(16.0);
+        if ui.button("Advance Rotors").clicked() {
+            self.cipher.rotors.step()
+        }
     }
 
     fn cipher(&self) -> &dyn Cipher {

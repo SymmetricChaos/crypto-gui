@@ -26,7 +26,6 @@ impl Default for PolybiusCubeFrame {
 impl CipherFrame for PolybiusCubeFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.randomize_reset(self);
-        ui.add_space(16.0);
 
         ui.add_space(16.0);
         ui.subheading("Alphabet");

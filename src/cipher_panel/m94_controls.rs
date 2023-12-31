@@ -16,7 +16,7 @@ impl CipherFrame for M94Frame {
         ui.add_space(16.0);
 
         ui.subheading("Alphabet");
-        ui.false_control_string(Alphabet::BasicLatin.slice());
+        ui.label(Alphabet::BasicLatin.slice());
         ui.add_space(16.0);
 
         ui.subheading("Offset");

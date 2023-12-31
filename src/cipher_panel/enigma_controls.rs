@@ -148,6 +148,12 @@ impl CipherFrame for EnigmaM3Frame {
                 }
             }
         };
+
+        ui.add_space(16.0);
+        if ui.button("Advance Rotors").clicked() {
+            self.cipher.state.advance_rotors()
+        }
+
         ui.add_space(16.0);
     }
 

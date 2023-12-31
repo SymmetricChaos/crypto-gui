@@ -27,19 +27,19 @@ impl CipherFrame for ShamirSecretSharingFrame {
         ui.label("Number of points needed to reconstruct the secret number.");
         ui.add(Slider::new(&mut self.cipher.threshold, 3..=12));
 
-        ui.add_space(8.0);
+        ui.add_space(16.0);
         ui.subheading("Shares");
         ui.label("Number of points to create in total. Cannot be less than the threshold.");
         ui.add(Slider::new(&mut self.cipher.shares, 3..=20));
         if self.cipher.threshold > self.cipher.shares {
             self.cipher.shares = self.cipher.threshold;
         }
-        ui.add_space(8.0);
 
         // Unlikely a user would want any other option. Nonrandom shares only needed for testing.
         // ui.checkbox(&mut self.cipher.random_shares, "Use Random Shares");
         // ui.add_space(8.0);
 
+        ui.add_space(16.0);
         ui.subheading("Polynomial");
         ui.label(format!(
             "Exactly {} integers must be provided.",

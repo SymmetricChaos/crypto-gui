@@ -58,21 +58,21 @@ impl CipherFrame for CaesarFrame {
                 }
             });
         });
-        ui.add_space(8.0);
+        ui.add_space(16.0);
 
         ui.subheading("Alphabet");
         if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher.assign_alphabet(&self.alphabet_string)
         }
         ui.mono(self.shifted_alphabet());
-        ui.add_space(8.0);
+        ui.add_space(16.0);
 
         ui.subheading("Shift Distance");
         ui.add(Slider::new(
             &mut self.cipher.shift,
             0..=(self.cipher.alphabet.len() as i32 - 1),
         ));
-        ui.add_space(8.0);
+        ui.add_space(16.0);
 
         ui.horizontal(|ui| {
             if ui.button("ROT13").clicked() {
