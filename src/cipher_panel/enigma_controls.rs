@@ -33,10 +33,23 @@ impl EnigmaM3Frame {
     }
 
     fn randomize_rotors(&mut self) {
-        self.cipher.state.reflector = REFLECTOR_VEC[thread_rng().gen_range(0..REFLECTOR_VEC.len())];
         for rotor in self.cipher.state.rotors.iter_mut() {
             *rotor = ROTOR_VEC[thread_rng().gen_range(0..ROTOR_VEC.len())];
+        }
+    }
+
+    fn randomize_reflector(&mut self) {
+        self.cipher.state.reflector = REFLECTOR_VEC[thread_rng().gen_range(0..REFLECTOR_VEC.len())];
+    }
+
+    fn randomize_positions(&mut self) {
+        for rotor in self.cipher.state.rotors.iter_mut() {
             rotor.position = thread_rng().gen_range(0..26);
+        }
+    }
+
+    fn randomize_rings(&mut self) {
+        for rotor in self.cipher.state.rotors.iter_mut() {
             rotor.ring = thread_rng().gen_range(0..26);
         }
     }
@@ -46,62 +59,78 @@ impl CipherFrame for EnigmaM3Frame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.randomize_reset(self);
 
-        ui.label("Rotor Positions\nTo Be Changed Every Message");
+        ui.add_space(16.0);
+        ui.horizontal(|ui| {
+            ui.subheading("Rotor Positions");
+            if ui.button("🎲").clicked() {
+                self.randomize_positions();
+            }
+        });
+        ui.label("Changed for every message");
         for rotor in &mut self.cipher.state.rotors {
             ui.add(Slider::new(&mut rotor.position, 0..=26).clamp_to_range(true));
         }
 
-        ui.add_space(10.0);
-        ui.label("Ring Settings").on_hover_text("Ringstellung");
+        ui.add_space(16.0);
+        ui.horizontal(|ui| {
+            ui.subheading("Ring Settings (Ringstellung)");
+            if ui.button("🎲").clicked() {
+                self.randomize_rings();
+            }
+        });
+        ui.label("Changed daily.");
         for rotor in &mut self.cipher.state.rotors {
             ui.add(Slider::new(&mut rotor.ring, 0..=26).clamp_to_range(true));
         }
 
-        ui.add_space(10.0);
-        ui.label("Select Rotors");
-
+        ui.add_space(16.0);
+        ui.horizontal(|ui| {
+            ui.subheading("Rotors (Walzen)");
+            if ui.button("🎲").clicked() {
+                self.randomize_rotors();
+            }
+        });
+        ui.label("Changed daily.");
         for i in 0..3 {
-            ComboBox::from_id_source(format!("Rotor {}", i + 1))
-                .selected_text(format!("Rotor {}", i + 1))
+            ui.horizontal(|ui| {
+                ComboBox::from_id_source(format!("Rotor {}", i + 1))
+                    .selected_text(format!("Rotor {}", i + 1))
+                    .show_ui(ui, |ui| {
+                        for rtr in ROTOR_VEC.iter() {
+                            ui.selectable_value(
+                                &mut self.cipher.state.rotors[i],
+                                *rtr,
+                                rtr.name.to_string(),
+                            );
+                        }
+                    });
+                ui.add_sized(
+                    [20.0, 20.0],
+                    Label::new(RichText::from(self.cipher.state.rotors[i].name).monospace()),
+                );
+                ui.mono(self.cipher.state.rotors[i]);
+            });
+        }
+
+        ui.add_space(16.0);
+        ui.horizontal(|ui| {
+            ui.subheading("Reflector (Umkehrwalze)");
+            if ui.button("🎲").clicked() {
+                self.randomize_reflector();
+            }
+        });
+        ui.horizontal(|ui| {
+            ComboBox::from_id_source("Reflector")
+                .selected_text(self.cipher.state.reflector.name)
                 .show_ui(ui, |ui| {
-                    for rtr in ROTOR_VEC.iter() {
+                    for rfl in REFLECTOR_MAP.values() {
                         ui.selectable_value(
-                            &mut self.cipher.state.rotors[i],
-                            *rtr,
-                            rtr.name.to_string(),
+                            &mut self.cipher.state.reflector,
+                            *rfl,
+                            format!("{}", rfl.name),
                         );
                     }
                 });
-        }
-
-        ui.add_space(10.0);
-        ui.label("Rotors").on_hover_text("Walzen");
-        for rotor in &mut self.cipher.state.rotors {
-            ui.horizontal(|ui| {
-                ui.add_sized(
-                    [20.0, 20.0],
-                    Label::new(RichText::from(rotor.name).monospace()),
-                );
-                ui.mono(rotor);
-            });
-        }
-
-        ui.add_space(10.0);
-        ComboBox::from_id_source("Reflector")
-            .selected_text("Select Reflector")
-            .show_ui(ui, |ui| {
-                for rfl in REFLECTOR_MAP.values() {
-                    ui.selectable_value(
-                        &mut self.cipher.state.reflector,
-                        *rfl,
-                        format!("{}", rfl.name),
-                    );
-                }
-            });
-
-        ui.add_space(10.0);
-        ui.label("Reflector").on_hover_text("Umkehrwalze");
-        ui.horizontal(|ui| {
             ui.add_sized(
                 [20.0, 20.0],
                 Label::new(RichText::from(self.cipher.state.reflector.name).monospace()),
@@ -109,8 +138,13 @@ impl CipherFrame for EnigmaM3Frame {
             ui.mono(self.cipher.state.reflector);
         });
 
-        ui.add_space(10.0);
-        ui.label("Plugboard").on_hover_text("Steckerbrett");
+        ui.add_space(16.0);
+        ui.horizontal(|ui| {
+            ui.subheading("Plugboard (Steckerbrett)");
+            if ui.button("🎲").clicked() {
+                self.randomize_plugboard();
+            }
+        });
         if ui.control_string(&mut self.plugboard_string).changed() {
             match self.cipher.state.set_plugboard(&self.plugboard_string) {
                 Ok(_) => (),
@@ -129,6 +163,9 @@ impl CipherFrame for EnigmaM3Frame {
     fn randomize(&mut self) {
         self.randomize_plugboard();
         self.randomize_rotors();
+        self.randomize_positions();
+        self.randomize_rings();
+        self.randomize_reflector();
     }
 
     fn reset(&mut self) {

@@ -94,7 +94,7 @@ impl ClassicRngFrame for XoshiroFrame {
 
         ui.collapsing("calculations", |ui| {
             ui.label(
-                "let output = scrambler_function(state)\nlet t = shift_left(state[1], 17)\nstate[2] ^= state[0]\nstate[3] ^= state[1]\nstate[1] ^= state[2]\nstate[0] ^= state[3]\nstate[2] ^= t\nstate[3] = rotate_left_45(state[3])\nreturn output",
+                "let output = scrambler_function(state)\nlet t = shift_left_17(state[1])\nstate[2] ^= state[0]\nstate[3] ^= state[1]\nstate[1] ^= state[2]\nstate[0] ^= state[3]\nstate[2] ^= t\nstate[3] = rotate_left_45(state[3])\nreturn output",
             );
         });
 
