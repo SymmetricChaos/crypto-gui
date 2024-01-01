@@ -24,6 +24,7 @@ impl CipherFrame for VicFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.randomize_reset(self);
 
+        ui.add_space(16.0);
         ui.subheading("Date");
         ui.label("The date that the message is sent. Leading zeroes should not be used.");
         ui.control_string(&mut self.cipher.date);
@@ -32,8 +33,8 @@ impl CipherFrame for VicFrame {
         } else {
             ui.error_text("");
         }
-        ui.add_space(8.0);
 
+        ui.add_space(16.0);
         ui.subheading("Key Group");
         ui.label("A unique key group is chosen randomly for each message.");
         ui.control_string(&mut self.cipher.key_group);
@@ -57,8 +58,7 @@ impl CipherFrame for VicFrame {
             };
         });
 
-        ui.add_space(8.0);
-
+        ui.add_space(16.0);
         ui.subheading("Phrase");
         ui.label("Each spy is given their own phrase to memorize.");
         if ui.control_string(&mut self.cipher.phrase).changed() {

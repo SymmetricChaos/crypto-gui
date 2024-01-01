@@ -25,7 +25,7 @@ impl CodeFrame for BaseXFrame {
         if ui.control_string(&mut self.alphabet_string).changed() {
             self.code.set_map(&self.alphabet_string)
         }
-
+        ui.add_space(8.0);
         ui.group(|ui| {
             ui.subheading("Common Alphabets");
             ui.horizontal(|ui| {

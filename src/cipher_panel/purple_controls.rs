@@ -61,7 +61,6 @@ impl CipherFrame for PurpleFrame {
         });
 
         ui.add_space(16.0);
-
         ui.subheading("Twenties Positions");
         for switch in self.cipher.switches.twenties.iter_mut() {
             ui.horizontal(|ui| {

@@ -17,6 +17,7 @@ impl Default for BaconFrame {
 
 impl CodeFrame for BaconFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
+        ui.add_space(8.0);
         ui.subheading("False Text");
         ui.add(TextEdit::multiline(&mut self.code.false_text).font(TextStyle::Monospace));
         ui.add_space(4.0);

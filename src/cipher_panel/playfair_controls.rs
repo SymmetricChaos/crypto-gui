@@ -29,8 +29,8 @@ impl Default for PlayfairFrame {
 impl CipherFrame for PlayfairFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.randomize_reset(self);
-        ui.add_space(16.0);
 
+        ui.add_space(16.0);
         ui.group(|ui| {
             ui.subheading("Common Alphabets");
             ui.horizontal(|ui| {
@@ -52,14 +52,13 @@ impl CipherFrame for PlayfairFrame {
         });
 
         ui.add_space(16.0);
-
         ui.subheading("Alphabet");
         if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher
                 .assign_key(&self.key_string, &self.alphabet_string);
         }
-        ui.add_space(16.0);
 
+        ui.add_space(16.0);
         ui.subheading("Spacer Character");
         if ui
             .string_slider(&self.alphabet_string, &mut self.spacer_position)
@@ -71,16 +70,16 @@ impl CipherFrame for PlayfairFrame {
                 .nth(self.spacer_position)
                 .unwrap()
         }
-        ui.add_space(16.0);
 
+        ui.add_space(16.0);
         ui.subheading("Keyword");
         if ui.control_string(&mut self.key_string).changed() {
             filter_string(&mut self.key_string, &self.alphabet_string);
             self.cipher
                 .assign_key(&self.key_string, &self.alphabet_string)
         }
-        ui.add_space(16.0);
 
+        ui.add_space(16.0);
         ui.horizontal(|ui| {
             ui.subheading("Grid");
             ui.copy_to_clipboard(self.cipher.to_string());
