@@ -36,6 +36,7 @@ impl ClassicRngFrame for Md4Frame {
         });
         ui.add(DragValue::new(&mut self.rng.ctr));
 
+        ui.add_space(16.0);
         ui.collapsing("Hash Text", |ui| {
             if ui.text_edit_multiline(&mut self.to_hash).changed() {
                 self.hashed = format!("{:X}", Md4::hash(&self.to_hash.as_bytes()))

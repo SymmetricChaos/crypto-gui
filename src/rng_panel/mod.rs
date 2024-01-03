@@ -19,8 +19,8 @@ use rngs::{
 
 use self::{
     halton_controls::HaltonFrame, lcg_controls::LcgFrame, lfsr_controls::LfsrFrame,
-    middle_square_controls::MiddleSquareFrame, pcg_controls::PcgFrame, rc4_controls::Rc4Frame,
-    splitmix_controls::SplitmixFrame, weyl_controls::WeylSequenceFrame,
+    md4_controls::Md4Frame, middle_square_controls::MiddleSquareFrame, pcg_controls::PcgFrame,
+    rc4_controls::Rc4Frame, splitmix_controls::SplitmixFrame, weyl_controls::WeylSequenceFrame,
     xorshift_controls::XorshiftFrame, xoshiro_controls::XoshiroFrame,
 };
 
@@ -35,18 +35,18 @@ pub trait ClassicRngFrame {
 fn combox_box(
     rng: &[RngId],
     active_rng: &mut Option<RngId>,
-    code_category: RngCategory,
+    rng_category: RngCategory,
     ui: &mut Ui,
 ) {
     ui.horizontal(|ui| {
-        egui::ComboBox::from_id_source(code_category.to_string())
-            .selected_text(code_category.to_string())
+        egui::ComboBox::from_id_source(rng_category.to_string())
+            .selected_text(rng_category.to_string())
             .show_ui(ui, |ui| {
                 for id in rng {
                     ui.selectable_value(active_rng, Some(*id), id.to_string());
                 }
             });
-        ui.label("+").on_hover_text(code_category.description());
+        ui.menu_button("+", |ui| ui.label(rng_category.description()))
     });
 
     ui.add_space(10.0);
@@ -57,6 +57,7 @@ pub struct RngInterface {
     halton: HaltonFrame,
     lcg: LcgFrame,
     lfsr: LfsrFrame,
+    md4: Md4Frame,
     middle_square: MiddleSquareFrame,
     pcg: PcgFrame,
     rc4: Rc4Frame,
@@ -72,6 +73,7 @@ impl RngInterface {
             &[
                 RngId::Lcg,
                 RngId::Lfsr,
+                RngId::Md4,
                 RngId::MiddleSquare,
                 RngId::Pcg,
                 RngId::Rc4,
@@ -100,6 +102,7 @@ impl RngInterface {
             RngId::Lcg => &mut self.lcg,
             // RngId::Lfg => &mut self.lfg,
             RngId::Lfsr => &mut self.lfsr,
+            RngId::Md4 => &mut self.md4,
             RngId::MiddleSquare => &mut self.middle_square,
             RngId::Pcg => &mut self.pcg,
             RngId::Rc4 => &mut self.rc4,

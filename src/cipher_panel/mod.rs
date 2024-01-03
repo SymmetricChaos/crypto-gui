@@ -87,19 +87,21 @@ pub trait CipherFrame {
 // Quick simple combo box builder
 fn combox_box(
     code: &[CipherId],
-    active_code: &mut Option<CipherId>,
-    code_category: CipherCategory,
+    active_cipher: &mut Option<CipherId>,
+    cipher_category: CipherCategory,
     ui: &mut Ui,
 ) {
     ui.horizontal(|ui| {
-        egui::ComboBox::from_id_source(code_category.to_string())
-            .selected_text(code_category.to_string())
+        egui::ComboBox::from_id_source(cipher_category.to_string())
+            .selected_text(cipher_category.to_string())
             .show_ui(ui, |ui| {
                 for id in code {
-                    ui.selectable_value(active_code, Some(*id), id.to_string());
+                    ui.selectable_value(active_cipher, Some(*id), id.to_string());
                 }
             });
-        ui.label("+").on_hover_text(code_category.description());
+        ui.menu_button("+", |ui| {
+            ui.label(cipher_category.description());
+        })
     });
 
     ui.add_space(10.0);

@@ -143,7 +143,9 @@ fn combox_box(
                     ui.selectable_value(active_code, Some(*id), id.to_string());
                 }
             });
-        ui.label("+").on_hover_text(code_category.description());
+        ui.menu_button("+", |ui| {
+            ui.label(code_category.description());
+        })
     });
 
     ui.add_space(10.0);
