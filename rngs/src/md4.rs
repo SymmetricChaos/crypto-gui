@@ -1,22 +1,12 @@
-use num::{BigUint, One, Zero};
-
 use crate::traits::ClassicRng;
 
-fn as_u32_le(array: &[u8]) -> u32 {
-    ((array[0] as u32) << 0)
-        + ((array[1] as u32) << 8)
-        + ((array[2] as u32) << 16)
-        + ((array[3] as u32) << 24)
-}
 pub struct Md4 {
-    ctr: BigUint,
+    pub ctr: u64,
 }
 
 impl Default for Md4 {
     fn default() -> Self {
-        Self {
-            ctr: BigUint::zero(),
-        }
+        Self { ctr: 0 }
     }
 }
 
@@ -126,8 +116,9 @@ impl Md4 {
 
 impl ClassicRng for Md4 {
     fn next_u32(&mut self) -> u32 {
-        self.ctr += BigUint::one();
-        (Self::hash(&self.ctr.to_bytes_le()) >> 96) as u32
+        let out = (Self::hash(&self.ctr.to_be_bytes()) >> 96) as u32;
+        self.ctr = self.ctr.wrapping_add(1);
+        out
     }
 }
 
