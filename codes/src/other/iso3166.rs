@@ -3,6 +3,28 @@ use itertools::Itertools;
 use lazy_static::lazy_static;
 use utils::text_functions::bimap_from_iter;
 
+const COUNTRY_CODES_STR: &'static str = include_str!("country_codes.txt");
+
+lazy_static! {
+    pub static ref COUNTRY_CODES: Vec<Vec<String>> = {
+        let mut rdr = csv::ReaderBuilder::new()
+            .has_headers(false)
+            .trim(csv::Trim::Fields)
+            .from_reader(COUNTRY_CODES_STR.as_bytes());
+
+        let mut out = Vec::with_capacity(249);
+
+        for record in rdr.records() {
+            let fields = record
+                .into_iter()
+                .map(|r| r.as_slice().to_string())
+                .collect_vec();
+            out.push(fields)
+        }
+        out
+    };
+}
+
 pub enum Iso3166Version {
     Alpha2,
     Alpha3,
@@ -46,7 +68,11 @@ mod iso3166_tests {
     #[test]
     fn csv_manip() {
         // Build the CSV reader and iterate over each record.
-        let mut rdr = csv::ReaderBuilder::new().has_headers(false).trim(csv::Trim::Fields).from_path("src\\other\\country_codes.txt").unwrap();
+        let mut rdr = csv::ReaderBuilder::new()
+            .has_headers(false)
+            .trim(csv::Trim::Fields)
+            .from_path("src\\other\\country_codes.txt")
+            .unwrap();
         // let mut rdr = csv::Reader::from_path().unwrap();
 
         for result in rdr.records() {
