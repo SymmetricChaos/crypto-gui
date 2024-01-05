@@ -40,7 +40,7 @@ impl ClassicRngFrame for Md4Frame {
         generate_random_nums_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
         ui.add_space(16.0);
 
-        ui.collapsing("Hash Text", |ui| {
+        ui.collapsing("Hashing", |ui| {
             ui.label("The proper use of a hash function is to take an arbitrary sequence of bytes and produce a fixed length output. In the case of MD4 the hash result is always 128 bits in length.\n");
             ui.subheading("Text");
             if ui.text_edit_multiline(&mut self.to_hash).changed() {

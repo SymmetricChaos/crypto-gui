@@ -46,7 +46,7 @@ impl Md4 {
     pub fn hash(k: &[u8]) -> u128 {
         let mut input = k.to_vec();
         // Length in bits before padding
-        let b_len = (input.len() * 8) as u64;
+        let b_len = (input.len().wrapping_mul(8)) as u64;
         // Step 1. Append padding bits (here bytes)
         // push a byte with a leading 1 to the bytes
         input.push(0x80);

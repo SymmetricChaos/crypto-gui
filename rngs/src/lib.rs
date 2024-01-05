@@ -5,6 +5,7 @@ pub mod lcg;
 pub mod lfg;
 pub mod lfsr;
 pub mod md4;
+pub mod md5;
 pub mod mersenne_twister;
 pub mod middle_square;
 pub mod pcg;
