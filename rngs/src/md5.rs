@@ -74,10 +74,10 @@ impl Md5 {
 
         // Step 4. Process message in 16-word blocks
         for block in input.chunks_exact(64) {
-            let ta = a;
-            let tb = b;
-            let tc = c;
-            let td = d;
+            let mut ta = a;
+            let mut tb = b;
+            let mut tc = c;
+            let mut td = d;
 
             let mut x = [0u32; 16];
             for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)) {
@@ -88,28 +88,35 @@ impl Md5 {
                 let mut f = 0;
                 let mut g = 0;
                 if i < 16 {
-                    f = (b * c) | (!b & d);
+                    f = (tb & tc) | (!tb & td);
                     g = i
                 }
                 if i >= 16 && i < 32 {
-                    f = (d & b) | (!d * c);
+                    f = (td & tb) | (!td & tc);
                     g = (5 * i + 1) % 16;
                 }
                 if i >= 32 && i < 48 {
-                    f = b ^ c ^ d;
+                    f = tb ^ tc ^ td;
                     g = (3 * i + 5) % 16;
                 }
                 if i >= 48 {
-                    f = c ^ (b | !d);
+                    f = tc ^ (tb | !td);
                     g = (7 * i) % 16;
                 }
 
-                f = f + a + Self::K[i] + x[g];
-                a = d;
-                d = c;
-                c = b;
-                b = b.wrapping_add(f.rotate_left(Self::S[i]))
+                f = f
+                    .wrapping_add(ta)
+                    .wrapping_add(Self::K[i])
+                    .wrapping_add(x[g]);
+                ta = td;
+                td = tc;
+                tc = tb;
+                tb = tb.wrapping_add(f.rotate_left(Self::S[i]))
             }
+            a = a.wrapping_add(ta);
+            b = b.wrapping_add(tb);
+            c = c.wrapping_add(tc);
+            d = d.wrapping_add(td);
         }
 
         let mut out = 0;
@@ -130,18 +137,22 @@ impl ClassicRng for Md5 {
 }
 
 #[cfg(test)]
-mod md4_tests {
+mod md5_tests {
     use super::*;
 
     #[test]
     fn test_suite() {
         assert_eq!(
-            "31d6cfe0d16ae931b73c59d7e0c089c0",
+            "d41d8cd98f00b204e9800998ecf8427e",
             format!("{:x}", Md5::hash("".as_bytes()))
         );
         assert_eq!(
-            "bde52cb31de33e46245e05fbdbd6fb24",
-            format!("{:x}", Md5::hash("a".as_bytes()))
+            "9e107d9d372bb6826bd81d3542a419d6",
+            format!("{:x}", Md5::hash("The quick brown fox jumps over the lazy dog".as_bytes()))
+        );
+        assert_eq!(
+            "e4d909c290d0fb1ca068ffaddf22cbd0",
+            format!("{:x}", Md5::hash("The quick brown fox jumps over the lazy dog.".as_bytes()))
         );
     }
 }
