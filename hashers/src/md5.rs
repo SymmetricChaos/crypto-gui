@@ -146,21 +146,15 @@ mod md5_tests {
     fn test_suite() {
         assert_eq!(
             "d41d8cd98f00b204e9800998ecf8427e",
-            format!("{:x}", u128::from_be_bytes(Md5::hash("".as_bytes())))
+            Md5::hash_string("".as_bytes())
         );
         assert_eq!(
             "9e107d9d372bb6826bd81d3542a419d6",
-            format!(
-                "{:x}",
-                u128::from_be_bytes(Md5::hash("The quick brown fox jumps over the lazy dog".as_bytes()))
-            )
+            Md5::hash_string("The quick brown fox jumps over the lazy dog".as_bytes())
         );
         assert_eq!(
             "e4d909c290d0fb1ca068ffaddf22cbd0",
-            format!(
-                "{:x}",
-                u128::from_be_bytes(Md5::hash("The quick brown fox jumps over the lazy dog.".as_bytes()))
-            )
+            Md5::hash_string("The quick brown fox jumps over the lazy dog.".as_bytes())
         );
     }
 }

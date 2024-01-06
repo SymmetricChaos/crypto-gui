@@ -1,52 +1,48 @@
-use std::fmt::Display;
-
 use json::JsonValue;
 use lazy_static::lazy_static;
+use std::fmt::Display;
 
 #[derive(Debug, PartialEq, Eq)]
-pub enum RngCategory {
-    Pseudorandom,
-    Quasirandom,
-    Truerandom,
+pub enum HasherCategory {
+    Hasher,
 }
 
-impl Default for RngCategory {
+impl Default for HasherCategory {
     fn default() -> Self {
-        Self::Pseudorandom
+        Self::Hasher
     }
 }
 
-impl RngCategory {
+impl HasherCategory {
     pub fn description(&self) -> &'static str {
-        match RNG_CATEGORY_INFORMATION[self.to_string()].as_str() {
+        match HASHER_CATEGORY_INFORMATION[self.to_string()].as_str() {
             Some(s) => s,
             None => "<<<MISSING DESCRIPTION>>>",
         }
     }
 }
 
-impl Display for RngCategory {
+impl Display for HasherCategory {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let name = match self {
-            RngCategory::Pseudorandom => "Pseudorandom",
-            RngCategory::Quasirandom => "Quasirandom",
-            RngCategory::Truerandom => "True Random",
+            Self::Hasher => "Hasher",
         };
         write!(f, "{}", name)
     }
 }
 
-impl From<RngCategory> for String {
-    fn from(id: RngCategory) -> Self {
+impl From<HasherCategory> for String {
+    fn from(id: HasherCategory) -> Self {
         id.to_string()
     }
 }
 
-const JSON_RNG_CATEGORY_INFORMATION: &'static str = include_str!("rng_category_descriptions.json");
+const JSON_HASHER_CATEGORY_INFORMATION: &'static str =
+    include_str!("rng_category_descriptions.json");
 
 lazy_static! {
-    pub static ref RNG_CATEGORY_INFORMATION: JsonValue = {
-        json::parse(&JSON_RNG_CATEGORY_INFORMATION.replace('\u{feff}', ""))
-            .expect("unable to parse rng_category_descriptions.json")
+    pub static ref HASHER_CATEGORY_INFORMATION: JsonValue = {
+        json::parse(&JSON_HASHER_CATEGORY_INFORMATION.replace('\u{feff}', ""))
+            .expect("unable to parse hasher_category_descriptions.json")
     };
 }

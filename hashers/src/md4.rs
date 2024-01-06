@@ -132,11 +132,11 @@ mod md4_tests {
     fn test_suite() {
         assert_eq!(
             "31d6cfe0d16ae931b73c59d7e0c089c0",
-            format!("{:x}", u128::from_be_bytes(Md4::hash("".as_bytes())))
+            Md4::hash_string("".as_bytes())
         );
         assert_eq!(
             "bde52cb31de33e46245e05fbdbd6fb24",
-            format!("{:x}", u128::from_be_bytes(Md4::hash("a".as_bytes())))
+            Md4::hash_string("a".as_bytes())
         );
     }
 }

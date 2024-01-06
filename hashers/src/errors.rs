@@ -1,24 +1,19 @@
 use std::fmt::Display;
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum RngError {
+pub enum HasherError {
     General(String),
-    State(String),
 }
 
-impl RngError {
+impl HasherError {
     pub fn general(error: &str) -> Self {
-        RngError::General(format!("{error}"))
-    }
-
-    pub fn state(error: &str) -> Self {
-        RngError::State(format!("{error}"))
+        Self::General(format!("{error}"))
     }
 
     pub fn inner(self) -> String {
         match self {
-            RngError::General(e) => e,
-            RngError::State(e) => e,
+            Self::General(e) => e,
+            Self::State(e) => e,
         }
     }
 }
@@ -26,8 +21,7 @@ impl RngError {
 impl Display for RngError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let error = match self {
-            RngError::General(e) => format!("General Error: {e}"),
-            RngError::State(e) => format!("State Error: {e}"),
+            Self::General(e) => format!("General Error: {e}"),
         };
         write!(f, "{error}")
     }
