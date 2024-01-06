@@ -44,8 +44,8 @@ impl Md4 {
     }
 }
 
-impl ClassicHasher<16> for Md4 {
-    fn hash(bytes: &[u8]) -> [u8; 16] {
+impl ClassicHasher for Md4 {
+    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut input = bytes.to_vec();
         // Length in bits before padding
         let b_len = (input.len().wrapping_mul(8)) as u64;
@@ -107,7 +107,7 @@ impl ClassicHasher<16> for Md4 {
             d = d.wrapping_add(td);
         }
 
-        let mut out = [0; 16];
+        let mut out = vec![0; 16];
         for (i, byte) in a.to_le_bytes().iter().enumerate() {
             out[i] = *byte
         }
@@ -130,13 +130,14 @@ mod md4_tests {
 
     #[test]
     fn test_suite() {
+        let hasher = Md4::default();
         assert_eq!(
             "31d6cfe0d16ae931b73c59d7e0c089c0",
-            Md4::hash_string("".as_bytes())
+            hasher.hash_to_string("".as_bytes())
         );
         assert_eq!(
             "bde52cb31de33e46245e05fbdbd6fb24",
-            Md4::hash_string("a".as_bytes())
+            hasher.hash_to_string("a".as_bytes())
         );
     }
 }

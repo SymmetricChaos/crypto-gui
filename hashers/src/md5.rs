@@ -47,8 +47,8 @@ impl Md5 {
     }
 }
 
-impl ClassicHasher<16> for Md5 {
-    fn hash(bytes: &[u8]) -> [u8; 16] {
+impl ClassicHasher for Md5 {
+    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut input = bytes.to_vec();
 
         // Steps 1, 2, and 3 are identical to MD4
@@ -121,7 +121,7 @@ impl ClassicHasher<16> for Md5 {
             d = d.wrapping_add(td);
         }
 
-        let mut out = [0; 16];
+        let mut out = vec![0; 16];
         for (i, byte) in a.to_le_bytes().iter().enumerate() {
             out[i] = *byte
         }
@@ -144,17 +144,18 @@ mod md5_tests {
 
     #[test]
     fn test_suite() {
+        let hasher = Md5::default();
         assert_eq!(
             "d41d8cd98f00b204e9800998ecf8427e",
-            Md5::hash_string("".as_bytes())
+            hasher.hash_to_string("".as_bytes())
         );
         assert_eq!(
             "9e107d9d372bb6826bd81d3542a419d6",
-            Md5::hash_string("The quick brown fox jumps over the lazy dog".as_bytes())
+            hasher.hash_to_string("The quick brown fox jumps over the lazy dog".as_bytes())
         );
         assert_eq!(
             "e4d909c290d0fb1ca068ffaddf22cbd0",
-            Md5::hash_string("The quick brown fox jumps over the lazy dog.".as_bytes())
+            hasher.hash_to_string("The quick brown fox jumps over the lazy dog.".as_bytes())
         );
     }
 }

@@ -10,6 +10,7 @@ pub enum Page {
     About,
     Cipher,
     Code,
+    Hash,
     TextPrep,
     Rng,
 }

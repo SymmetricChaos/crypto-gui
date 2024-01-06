@@ -27,8 +27,8 @@ impl HasherId {
 impl Display for HasherId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let name = match self {
-            Self::Rc4 => "RC4",
-            Self::Rc5 => "RC5", // _ => "<<<MISSING NAME>>>",
+            Self::Md4 => "MD4",
+            Self::Md5 => "MD5",
         };
         write!(f, "{}", name)
     }

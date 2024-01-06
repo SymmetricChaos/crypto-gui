@@ -1,15 +1,17 @@
 use egui::Ui;
+use hashers::ids::{hasher_categories::HasherCategory, HasherId};
 
-pub trait ClassicHasherFrame {
+pub trait HasherFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
-    fn hasher(&self) -> &dyn ClassicHasher;
+    fn hash(&self, bytes: &[u8]) -> Vec<u8>;
+    fn hash_to_string(&self, bytes: &[u8]) -> String;
 }
 
 // Quick simple combo box builder
 fn combox_box(
     hasher: &[HasherId],
-    active_hasher: &mut Option<RngId>,
-    hasher_category: RngCategory,
+    active_hasher: &mut Option<HasherId>,
+    hasher_category: HasherCategory,
     ui: &mut Ui,
 ) {
     ui.horizontal(|ui| {
@@ -30,16 +32,16 @@ fn combox_box(
 pub struct HasherInterface {}
 
 impl HasherInterface {
-    pub fn combo_boxes(&mut self, ui: &mut Ui, active_hasher: &mut Option<RngId>) {
+    pub fn combo_boxes(&mut self, ui: &mut Ui, active_hasher: &mut Option<HasherId>) {
         combox_box(
-            &[HasherId::MD4, HasherId::MD5],
+            &[HasherId::Md4, HasherId::Md5],
             active_hasher,
-            HasherCategory::Classic,
+            HasherCategory::Hasher,
             ui,
         );
     }
 
-    pub fn get_active_hasher(&mut self, active_hasher: &HasherId) -> &mut dyn ClassicRngFrame {
+    pub fn get_active_hasher(&mut self, active_hasher: &HasherId) -> &mut dyn HasherFrame {
         match active_hasher {
             _ => todo!("<<<RNG NOT FOUND>>>"),
         }

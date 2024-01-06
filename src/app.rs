@@ -1,6 +1,7 @@
 use crate::{
     cipher_panel::CipherInterface,
     code_panel::CodeInterface,
+    hasher_panel::HasherInterface,
     pages::{io_panel::IOPanel, Page, TextPrepPage},
     rng_panel::RngInterface,
     ui_elements::UiElements,
@@ -15,6 +16,7 @@ use eframe::{
     epaint::FontFamily,
     App,
 };
+use hashers::ids::HasherId;
 use rngs::ids::RngId;
 
 fn load_font(name: &str, family: &FontFamily, font_data: FontData, font_def: &mut FontDefinitions) {
@@ -26,6 +28,7 @@ pub struct ClassicCrypto {
     cipher_interface: CipherInterface,
     code_interface: CodeInterface,
     rng_interface: RngInterface,
+    hasher_interface: HasherInterface,
 
     io_panel: IOPanel,
     input: String,
@@ -35,6 +38,7 @@ pub struct ClassicCrypto {
     active_cipher: Option<CipherId>,
     active_code: Option<CodeId>,
     active_rng: Option<RngId>,
+    active_hasher: Option<HasherId>,
 
     active_page: Page,
     text_prep_page: TextPrepPage,
@@ -55,6 +59,7 @@ impl Default for ClassicCrypto {
             active_cipher: None,
             active_code: None,
             active_rng: None,
+            active_hasher: None,
 
             // Which page we are on
             active_page: Page::About,
@@ -66,6 +71,7 @@ impl Default for ClassicCrypto {
             cipher_interface: CipherInterface::default(),
             code_interface: CodeInterface::default(),
             rng_interface: RngInterface::default(),
+            hasher_interface: HasherInterface::default(),
         }
     }
 }
@@ -172,9 +178,11 @@ impl ClassicCrypto {
                         &mut self.active_cipher,
                         &mut self.active_code,
                         &mut self.active_rng,
+                        &mut self.active_hasher,
                         &mut self.cipher_interface,
                         &mut self.code_interface,
                         &mut self.rng_interface,
+                        &mut self.hasher_interface,
                     );
                 });
 
@@ -237,11 +245,13 @@ impl ClassicCrypto {
                         &mut self.active_cipher,
                         &mut self.active_code,
                         &mut self.active_rng,
+                        &mut self.active_hasher,
                         // &mut self.active_attack,
                         &mut self.cipher_interface,
                         &mut self.code_interface,
                         &mut self.rng_interface,
                         // &mut self.attack_interface,
+                        &mut self.hasher_interface,
                     );
                 });
 
@@ -304,11 +314,13 @@ impl ClassicCrypto {
                         &mut self.active_cipher,
                         &mut self.active_code,
                         &mut self.active_rng,
+                        &mut self.active_hasher,
                         // &mut self.active_attack,
                         &mut self.cipher_interface,
                         &mut self.code_interface,
                         &mut self.rng_interface,
                         // &mut self.attack_interface,
+                        &mut self.hasher_interface,
                     );
                 });
 
@@ -327,7 +339,7 @@ impl ClassicCrypto {
                         }
                         None => {
                             ui.label(RichText::from("Random Number Generators").heading());
-                            ui.label(RichText::new("Random number generators.").size(12.0));
+                            ui.label(RichText::new("Random number generators are methods of creating random or seemingly random numbers.").size(12.0));
                             ui.add_space(16.0);
                             ui.separator();
                             // ui.add_space(16.0);
@@ -340,6 +352,75 @@ impl ClassicCrypto {
         // If somehow we are here without Page::Rng selected
         } else {
             self.rng_selector_panel(ctx);
+        }
+    }
+
+    // Combox boxes for selecting hash function
+    fn hash_selector_panel(&mut self, ctx: &Context) {
+        SidePanel::left("hash_selector_panel")
+            .default_width(300.0)
+            .min_width(100.0)
+            .show(ctx, |ui| {
+                ui.add_space(32.0);
+                self.hasher_interface
+                    .combo_boxes(ui, &mut self.active_hasher)
+            });
+    }
+    fn hash_page(&mut self, ctx: &Context) {
+        if self.active_page == Page::Hash {
+            self.hash_selector_panel(ctx);
+
+            SidePanel::right("hash_io_panel")
+                .default_width(300.0)
+                .min_width(200.0)
+                .show(ctx, |ui| {
+                    self.io_panel.ui(
+                        ui,
+                        &mut self.input,
+                        &mut self.output,
+                        &mut self.errors,
+                        &mut self.active_page,
+                        &mut self.active_cipher,
+                        &mut self.active_code,
+                        &mut self.active_rng,
+                        &mut self.active_hasher,
+                        // &mut self.active_attack,
+                        &mut self.cipher_interface,
+                        &mut self.code_interface,
+                        &mut self.rng_interface,
+                        // &mut self.attack_interface,
+                        &mut self.hasher_interface,
+                    );
+                });
+
+            CentralPanel::default().show(ctx, |ui| {
+                ScrollArea::vertical().show(ui, |ui| {
+                    match self.active_hasher {
+                        Some(hasher) => {
+                            ui.label(RichText::from(hasher.to_string()).heading());
+                            ui.label(RichText::new(hasher.description()).size(12.0));
+                            ui.add_space(16.0);
+                            ui.separator();
+                            ui.add_space(16.0);
+                            self.hasher_interface
+                                .get_active_hasher(&hasher)
+                                .ui(ui, &mut self.errors);
+                        }
+                        None => {
+                            ui.label(RichText::from("Hash Functions").heading());
+                            ui.label(RichText::new("Hash Functions are . . .").size(12.0));
+                            ui.add_space(16.0);
+                            ui.separator();
+                            // ui.add_space(16.0);
+                            // ui.label(mono_strong("<<<INTERFACE>>>"));
+                        }
+                    };
+                });
+            });
+
+        // If somehow we are here without Page::Rng selected
+        } else {
+            self.hash_selector_panel(ctx);
         }
     }
 
@@ -411,6 +492,7 @@ impl App for ClassicCrypto {
             Page::Code => self.code_page(ctx),
             Page::TextPrep => self.text_prep_page(ctx),
             Page::Rng => self.rng_page(ctx),
+            Page::Hash => self.hash_page(ctx),
             //_ => self.blank_page(ctx),
         }
     }

@@ -1,12 +1,14 @@
 use crate::{
     cipher_panel::{CipherFrame, CipherInterface},
     code_panel::{CodeFrame, CodeInterface},
+    hasher_panel::{HasherFrame, HasherInterface},
     rng_panel::RngInterface,
     ui_elements::{text_manip_menu, UiElements},
 };
 use ciphers::ids::CipherId;
 use codes::ids::CodeId;
 use egui::{Color32, RichText, TextEdit, TextStyle, Ui};
+use hashers::ids::HasherId;
 use rngs::ids::RngId;
 
 use super::Page;
@@ -73,6 +75,24 @@ pub fn encode_decode(
     });
 }
 
+pub fn hash(
+    ui: &mut Ui,
+    hasher: &dyn HasherFrame,
+    input: &mut String,
+    output: &mut String,
+    errors: &mut String,
+) {
+    ui.horizontal(|ui| {
+        if ui
+            .button(RichText::from("HASH").color(Color32::GOLD))
+            .clicked()
+        {
+            errors.clear();
+            *output = hasher.hash_to_string(input.as_bytes());
+        };
+    });
+}
+
 #[derive(Default)]
 pub struct IOPanel {}
 
@@ -87,10 +107,12 @@ impl IOPanel {
         active_cipher: &mut Option<CipherId>,
         active_code: &mut Option<CodeId>,
         _active_rng: &mut Option<RngId>,
+        active_hasher: &mut Option<HasherId>,
         // active_attack: &mut AttackId,
         cipher_interface: &mut CipherInterface,
         code_interface: &mut CodeInterface,
         _rng_interface: &mut RngInterface,
+        hasher_interface: &mut HasherInterface,
         // attack_interface: &mut AttackInterface,
     ) {
         if active_page == &mut Page::Cipher || active_page == &mut Page::Code {
@@ -142,6 +164,20 @@ impl IOPanel {
             }
         }
 
+        if active_page == &mut Page::Hash {
+            if let Some(hasher) = active_hasher {
+                hash(
+                    ui,
+                    hasher_interface.get_active_hasher(hasher),
+                    input,
+                    output,
+                    errors,
+                );
+            } else {
+                // ui.label("<<<CODE HOMEPAGE>>>");
+            }
+        }
+
         if active_page == &mut Page::Cipher || active_page == &mut Page::Code {
             ui.add_space(10.0);
             if ui.button("clear").clicked() {
@@ -154,11 +190,6 @@ impl IOPanel {
             if ui.button("swap input/output").clicked() {
                 std::mem::swap(input, output)
             }
-
-            // if active_page == &Page::Cipher {
-            //     ui.add_space(16.0);
-            //     global_rng_controls(ui);
-            // }
 
             if !errors.is_empty() {
                 ui.add_space(24.0);

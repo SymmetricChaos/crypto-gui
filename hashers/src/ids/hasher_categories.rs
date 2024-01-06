@@ -38,7 +38,7 @@ impl From<HasherCategory> for String {
 }
 
 const JSON_HASHER_CATEGORY_INFORMATION: &'static str =
-    include_str!("rng_category_descriptions.json");
+    include_str!("hasher_category_descriptions.json");
 
 lazy_static! {
     pub static ref HASHER_CATEGORY_INFORMATION: JsonValue = {
