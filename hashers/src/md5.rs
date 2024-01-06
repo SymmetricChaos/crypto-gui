@@ -1,4 +1,4 @@
-use crate::traits::ClassicRng;
+use crate::traits::ClassicHasher;
 
 pub struct Md5 {
     pub ctr: u64,
@@ -45,9 +45,11 @@ impl Md5 {
     pub fn i(x: u32, y: u32, z: u32) -> u32 {
         y ^ (x & !z)
     }
+}
 
-    pub fn hash(k: &[u8]) -> u128 {
-        let mut input = k.to_vec();
+impl ClassicHasher<16> for Md5 {
+    fn hash(bytes: &[u8]) -> [u8; 16] {
+        let mut input = bytes.to_vec();
 
         // Steps 1, 2, and 3 are identical to MD4
         // Length in bits before padding
@@ -119,19 +121,19 @@ impl Md5 {
             d = d.wrapping_add(td);
         }
 
-        let mut out = 0;
-        out += (a.to_be() as u128) << 96;
-        out += (b.to_be() as u128) << 64;
-        out += (c.to_be() as u128) << 32;
-        out += (d.to_be() as u128) << 0;
-        out
-    }
-}
-
-impl ClassicRng for Md5 {
-    fn next_u32(&mut self) -> u32 {
-        let out = (Self::hash(&self.ctr.to_be_bytes()) >> 96) as u32;
-        self.ctr = self.ctr.wrapping_add(1);
+        let mut out = [0; 16];
+        for (i, byte) in a.to_le_bytes().iter().enumerate() {
+            out[i] = *byte
+        }
+        for (i, byte) in b.to_le_bytes().iter().enumerate() {
+            out[i + 4] = *byte
+        }
+        for (i, byte) in c.to_le_bytes().iter().enumerate() {
+            out[i + 8] = *byte
+        }
+        for (i, byte) in d.to_le_bytes().iter().enumerate() {
+            out[i + 12] = *byte
+        }
         out
     }
 }
@@ -144,15 +146,21 @@ mod md5_tests {
     fn test_suite() {
         assert_eq!(
             "d41d8cd98f00b204e9800998ecf8427e",
-            format!("{:x}", Md5::hash("".as_bytes()))
+            format!("{:x}", u128::from_be_bytes(Md5::hash("".as_bytes())))
         );
         assert_eq!(
             "9e107d9d372bb6826bd81d3542a419d6",
-            format!("{:x}", Md5::hash("The quick brown fox jumps over the lazy dog".as_bytes()))
+            format!(
+                "{:x}",
+                u128::from_be_bytes(Md5::hash("The quick brown fox jumps over the lazy dog".as_bytes()))
+            )
         );
         assert_eq!(
             "e4d909c290d0fb1ca068ffaddf22cbd0",
-            format!("{:x}", Md5::hash("The quick brown fox jumps over the lazy dog.".as_bytes()))
+            format!(
+                "{:x}",
+                u128::from_be_bytes(Md5::hash("The quick brown fox jumps over the lazy dog.".as_bytes()))
+            )
         );
     }
 }

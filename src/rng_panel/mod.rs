@@ -2,7 +2,6 @@ mod halton_controls;
 mod lcg_controls;
 mod lfg_controls;
 mod lfsr_controls;
-mod md4_controls;
 mod middle_square_controls;
 mod pcg_controls;
 mod rc4_controls;
@@ -19,8 +18,8 @@ use rngs::{
 
 use self::{
     halton_controls::HaltonFrame, lcg_controls::LcgFrame, lfsr_controls::LfsrFrame,
-    md4_controls::Md4Frame, middle_square_controls::MiddleSquareFrame, pcg_controls::PcgFrame,
-    rc4_controls::Rc4Frame, splitmix_controls::SplitmixFrame, weyl_controls::WeylSequenceFrame,
+    middle_square_controls::MiddleSquareFrame, pcg_controls::PcgFrame, rc4_controls::Rc4Frame,
+    splitmix_controls::SplitmixFrame, weyl_controls::WeylSequenceFrame,
     xorshift_controls::XorshiftFrame, xoshiro_controls::XoshiroFrame,
 };
 
@@ -57,7 +56,6 @@ pub struct RngInterface {
     halton: HaltonFrame,
     lcg: LcgFrame,
     lfsr: LfsrFrame,
-    md4: Md4Frame,
     middle_square: MiddleSquareFrame,
     pcg: PcgFrame,
     rc4: Rc4Frame,
@@ -73,7 +71,6 @@ impl RngInterface {
             &[
                 RngId::Lcg,
                 RngId::Lfsr,
-                RngId::Md4,
                 RngId::MiddleSquare,
                 RngId::Pcg,
                 RngId::Rc4,
@@ -102,7 +99,6 @@ impl RngInterface {
             RngId::Lcg => &mut self.lcg,
             // RngId::Lfg => &mut self.lfg,
             RngId::Lfsr => &mut self.lfsr,
-            RngId::Md4 => &mut self.md4,
             RngId::MiddleSquare => &mut self.middle_square,
             RngId::Pcg => &mut self.pcg,
             RngId::Rc4 => &mut self.rc4,

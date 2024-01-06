@@ -1,4 +1,4 @@
-use crate::traits::ClassicRng;
+use crate::traits::ClassicHasher;
 
 pub struct Md4 {
     pub ctr: u64,
@@ -42,9 +42,11 @@ impl Md4 {
             .wrapping_add(0x6ED9EBA1))
         .rotate_left(s)
     }
+}
 
-    pub fn hash(k: &[u8]) -> u128 {
-        let mut input = k.to_vec();
+impl ClassicHasher<16> for Md4 {
+    fn hash(bytes: &[u8]) -> [u8; 16] {
+        let mut input = bytes.to_vec();
         // Length in bits before padding
         let b_len = (input.len().wrapping_mul(8)) as u64;
         // Step 1. Append padding bits (here bytes)
@@ -105,19 +107,19 @@ impl Md4 {
             d = d.wrapping_add(td);
         }
 
-        let mut out = 0;
-        out += (a.to_be() as u128) << 96;
-        out += (b.to_be() as u128) << 64;
-        out += (c.to_be() as u128) << 32;
-        out += (d.to_be() as u128) << 0;
-        out
-    }
-}
-
-impl ClassicRng for Md4 {
-    fn next_u32(&mut self) -> u32 {
-        let out = (Self::hash(&self.ctr.to_be_bytes()) >> 96) as u32;
-        self.ctr = self.ctr.wrapping_add(1);
+        let mut out = [0; 16];
+        for (i, byte) in a.to_le_bytes().iter().enumerate() {
+            out[i] = *byte
+        }
+        for (i, byte) in b.to_le_bytes().iter().enumerate() {
+            out[i + 4] = *byte
+        }
+        for (i, byte) in c.to_le_bytes().iter().enumerate() {
+            out[i + 8] = *byte
+        }
+        for (i, byte) in d.to_le_bytes().iter().enumerate() {
+            out[i + 12] = *byte
+        }
         out
     }
 }
@@ -130,11 +132,11 @@ mod md4_tests {
     fn test_suite() {
         assert_eq!(
             "31d6cfe0d16ae931b73c59d7e0c089c0",
-            format!("{:x}", Md4::hash("".as_bytes()))
+            format!("{:x}", u128::from_be_bytes(Md4::hash("".as_bytes())))
         );
         assert_eq!(
             "bde52cb31de33e46245e05fbdbd6fb24",
-            format!("{:x}", Md4::hash("a".as_bytes()))
+            format!("{:x}", u128::from_be_bytes(Md4::hash("a".as_bytes())))
         );
     }
 }
