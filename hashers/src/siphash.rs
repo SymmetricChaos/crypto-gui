@@ -28,35 +28,35 @@ impl SipHash {
     }
 
     pub fn sip_round(mut v: [u64; 4]) -> [u64; 4] {
-        v[0] = v[0].wrapping_add(v[1]);
-        v[1] = v[1].rotate_left(13);
-        v[1] ^= v[0];
-        v[0] = v[0].rotate_left(32);
-        v[2] = v[2].wrapping_add(v[3]);
-        v[3] = v[3].rotate_left(16);
-        v[3] ^= v[2];
-        v[0] = v[0].wrapping_add(v[3]);
-        v[3] = v[3].rotate_left(21);
-        v[3] ^= v[0];
-        v[2] = v[2].wrapping_add(v[1]);
-        v[1] = v[1].rotate_left(17);
-        v[1] ^= v[2];
-        v[2] = v[2].rotate_left(32);
-
         // v[0] = v[0].wrapping_add(v[1]);
-        // v[2] = v[2].wrapping_add(v[3]);
         // v[1] = v[1].rotate_left(13);
-        // v[3] = v[3].rotate_left(16);
         // v[1] ^= v[0];
-        // v[3] ^= v[2];
         // v[0] = v[0].rotate_left(32);
-        // v[2] = v[2].wrapping_add(v[1]);
+        // v[2] = v[2].wrapping_add(v[3]);
+        // v[3] = v[3].rotate_left(16);
+        // v[3] ^= v[2];
         // v[0] = v[0].wrapping_add(v[3]);
-        // v[1] = v[1].rotate_left(17);
         // v[3] = v[3].rotate_left(21);
-        // v[1] ^= v[2];
         // v[3] ^= v[0];
+        // v[2] = v[2].wrapping_add(v[1]);
+        // v[1] = v[1].rotate_left(17);
+        // v[1] ^= v[2];
         // v[2] = v[2].rotate_left(32);
+
+        v[0] = v[0].wrapping_add(v[1]);
+        v[2] = v[2].wrapping_add(v[3]);
+        v[1] = v[1].rotate_left(13);
+        v[3] = v[3].rotate_left(16);
+        v[1] ^= v[0];
+        v[3] ^= v[2];
+        v[0] = v[0].rotate_left(32);
+        v[2] = v[2].wrapping_add(v[1]);
+        v[0] = v[0].wrapping_add(v[3]);
+        v[1] = v[1].rotate_left(17);
+        v[3] = v[3].rotate_left(21);
+        v[1] ^= v[2];
+        v[3] ^= v[0];
+        v[2] = v[2].rotate_left(32);
         v
     }
 }
@@ -65,7 +65,7 @@ impl ClassicHasher for SipHash {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut input = bytes.to_vec();
 
-        // Initialization is four 64-bit words xored with each half of the 128-bit key
+        // Initialization is four 64-bit words XORed with each half of the 128-bit key
         // Confirmed from spec
         let mut state: [u64; 4] = [
             self.k0 ^ 0x736f6d6570736575,
@@ -77,18 +77,18 @@ impl ClassicHasher for SipHash {
         // Padding
         // Confirmed from spec
         let final_byte = (input.len() % 256) as u8;
-        let total_len = (input.len() + 1).div_ceil(8);
+        let total_len = (input.len() + 1).div_ceil(8) * 8;
         while input.len() < total_len - 1 {
             input.push(0);
         }
         input.push(final_byte);
 
         // Compression
-        for block in input.chunks_exact(8) {
+        for block in input.chunks(8) {
             // Confirmed from spec
             let mi: u64 = u64::from_le_bytes(block.try_into().unwrap());
 
-            println!("\n\n<<<BEGIN BLOCK>>>");
+            println!("\n\n<<<BEGIN COMPRESSION BLOCK>>>");
             println!("\nmessage word: {:016x}", mi);
             println!("\nCurrent state");
             for s in state {
@@ -96,7 +96,7 @@ impl ClassicHasher for SipHash {
             }
             // Confirmed from spec
             state[3] ^= mi;
-            println!("\nmessage word XORed with state[3");
+            println!("\nmessage word XORed with state[3]");
             for s in state {
                 println!("{:016x}", s);
             }
@@ -114,7 +114,7 @@ impl ClassicHasher for SipHash {
             for s in state {
                 println!("{:016x}", s);
             }
-            println!("\n<<<END BLOCK>>>");
+            println!("\n<<<END COMPRESSION BLOCK>>>");
         }
 
         // Finalization
