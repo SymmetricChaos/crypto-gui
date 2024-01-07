@@ -28,21 +28,6 @@ impl SipHash {
     }
 
     pub fn sip_round(mut v: [u64; 4]) -> [u64; 4] {
-        // v[0] = v[0].wrapping_add(v[1]);
-        // v[1] = v[1].rotate_left(13);
-        // v[1] ^= v[0];
-        // v[0] = v[0].rotate_left(32);
-        // v[2] = v[2].wrapping_add(v[3]);
-        // v[3] = v[3].rotate_left(16);
-        // v[3] ^= v[2];
-        // v[0] = v[0].wrapping_add(v[3]);
-        // v[3] = v[3].rotate_left(21);
-        // v[3] ^= v[0];
-        // v[2] = v[2].wrapping_add(v[1]);
-        // v[1] = v[1].rotate_left(17);
-        // v[1] ^= v[2];
-        // v[2] = v[2].rotate_left(32);
-
         v[0] = v[0].wrapping_add(v[1]);
         v[2] = v[2].wrapping_add(v[3]);
         v[1] = v[1].rotate_left(13);
@@ -88,54 +73,55 @@ impl ClassicHasher for SipHash {
             // Confirmed from spec
             let mi: u64 = u64::from_le_bytes(block.try_into().unwrap());
 
-            println!("\n\n<<<BEGIN COMPRESSION BLOCK>>>");
-            println!("\nmessage word: {:016x}", mi);
-            println!("\nCurrent state");
-            for s in state {
-                println!("{:016x}", s);
-            }
+            // println!("\n\n<<<BEGIN COMPRESSION BLOCK>>>");
+
+            // println!("\nCurrent state");
+            // for s in state {
+            //     println!("{:016x}", s);
+            // }
             // Confirmed from spec
+            // println!("\nmessage word: {:016x}", mi);
             state[3] ^= mi;
-            println!("\nmessage word XORed with state[3]");
-            for s in state {
-                println!("{:016x}", s);
-            }
+            // println!("\nmessage word XORed with state[3]");
+            // for s in state {
+            //     println!("{:016x}", s);
+            // }
 
             for _ in 0..self.compression_rounds {
                 state = Self::sip_round(state);
             }
-            println!("\ncompression rounds run");
-            for s in state {
-                println!("{:016x}", s);
-            }
+            // println!("\ncompression rounds run");
+            // for s in state {
+            //     println!("{:016x}", s);
+            // }
 
             state[0] ^= mi;
-            println!("\nmessage word XORed with state[0]");
-            for s in state {
-                println!("{:016x}", s);
-            }
-            println!("\n<<<END COMPRESSION BLOCK>>>");
+            // println!("\nmessage word XORed with state[0]");
+            // for s in state {
+            //     println!("{:016x}", s);
+            // }
+            // println!("\n<<<END COMPRESSION BLOCK>>>");
         }
 
         // Finalization
         state[2] ^= 0xff;
-        println!("After XOR with 0xff");
-        for s in state {
-            println!("{:016x}", s);
-        }
-        print!("\n");
+        // println!("After XOR with 0xff");
+        // for s in state {
+        //     println!("{:016x}", s);
+        // }
+        // print!("\n");
 
         for _ in 0..self.finalization_rounds {
             state = Self::sip_round(state);
         }
-        println!("After Finalization Rounds");
-        for s in state {
-            println!("{:016x}", s);
-        }
-        print!("\n");
+        // println!("After Finalization Rounds");
+        // for s in state {
+        //     println!("{:016x}", s);
+        // }
+        // print!("\n");
 
         (state[0] ^ state[1] ^ state[2] ^ state[3])
-            .to_le_bytes()
+            .to_be_bytes()
             .to_vec()
     }
 }
@@ -147,7 +133,7 @@ mod siphash_tests {
     #[test]
     fn test_suite() {
         let mut hasher = SipHash::default();
-        hasher.set_keys(0x0010020304050607, 0x08090a0b0c0d0e0f);
+        hasher.set_keys(0x0001020304050607, 0x08090a0b0c0d0e0f);
 
         assert_eq!(
             "a129ca6149be45e5",
