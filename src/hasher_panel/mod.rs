@@ -1,5 +1,10 @@
+mod md4_controls;
+mod md5_controls;
+
 use egui::Ui;
 use hashers::ids::{hasher_categories::HasherCategory, HasherId};
+
+use self::{md4_controls::Md4Frame, md5_controls::Md5Frame};
 
 pub trait HasherFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
@@ -29,7 +34,10 @@ fn combox_box(
 }
 
 #[derive(Default)]
-pub struct HasherInterface {}
+pub struct HasherInterface {
+    md4: Md4Frame,
+    md5: Md5Frame,
+}
 
 impl HasherInterface {
     pub fn combo_boxes(&mut self, ui: &mut Ui, active_hasher: &mut Option<HasherId>) {
@@ -43,7 +51,9 @@ impl HasherInterface {
 
     pub fn get_active_hasher(&mut self, active_hasher: &HasherId) -> &mut dyn HasherFrame {
         match active_hasher {
-            _ => todo!("<<<RNG NOT FOUND>>>"),
+            HasherId::Md4 => &mut self.md4,
+            HasherId::Md5 => &mut self.md5,
+            // _ => todo!("<<<RNG NOT FOUND>>>"),
         }
     }
 }

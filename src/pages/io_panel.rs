@@ -115,10 +115,13 @@ impl IOPanel {
         hasher_interface: &mut HasherInterface,
         // attack_interface: &mut AttackInterface,
     ) {
-        if active_page == &mut Page::Cipher || active_page == &mut Page::Code {
+        if active_page == &mut Page::Cipher
+            || active_page == &mut Page::Code
+            || active_page == &mut Page::Hash
+        {
             ui.add_space(32.0);
             ui.horizontal(|ui| {
-                ui.label("INPUT TEXT");
+                ui.label("INPUT");
                 text_manip_menu(ui, input);
                 if ui.button("📋").clicked() {
                     ui.output_mut(|o| o.copied_text = input.clone());
@@ -127,7 +130,7 @@ impl IOPanel {
             ui.add(TextEdit::multiline(input).font(TextStyle::Monospace));
             ui.add_space(16.0);
             ui.horizontal(|ui| {
-                ui.label("OUTPUT TEXT");
+                ui.label("OUTPUT");
                 text_manip_menu(ui, output);
                 if ui.button("📋").clicked() {
                     ui.output_mut(|o| o.copied_text = input.clone());
@@ -173,12 +176,13 @@ impl IOPanel {
                     output,
                     errors,
                 );
-            } else {
-                // ui.label("<<<CODE HOMEPAGE>>>");
             }
         }
 
-        if active_page == &mut Page::Cipher || active_page == &mut Page::Code {
+        if active_page == &mut Page::Cipher
+            || active_page == &mut Page::Code
+            || active_page == &mut Page::Hash
+        {
             ui.add_space(10.0);
             if ui.button("clear").clicked() {
                 input.clear();

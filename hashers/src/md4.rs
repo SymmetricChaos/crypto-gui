@@ -1,16 +1,14 @@
 use crate::traits::ClassicHasher;
 
-pub struct Md4 {
-    pub ctr: u64,
-}
+pub struct Md5 {}
 
-impl Default for Md4 {
+impl Default for Md5 {
     fn default() -> Self {
-        Self { ctr: 0 }
+        Self {}
     }
 }
 
-impl Md4 {
+impl Md5 {
     pub fn f(x: u32, y: u32, z: u32) -> u32 {
         (x & y) | (!x & z)
     }
@@ -44,7 +42,7 @@ impl Md4 {
     }
 }
 
-impl ClassicHasher for Md4 {
+impl ClassicHasher for Md5 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut input = bytes.to_vec();
         // Length in bits before padding
@@ -130,7 +128,7 @@ mod md4_tests {
 
     #[test]
     fn test_suite() {
-        let hasher = Md4::default();
+        let hasher = Md5::default();
         assert_eq!(
             "31d6cfe0d16ae931b73c59d7e0c089c0",
             hasher.hash_to_string("".as_bytes())

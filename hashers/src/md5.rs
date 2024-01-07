@@ -1,12 +1,10 @@
 use crate::traits::ClassicHasher;
 
-pub struct Md5 {
-    pub ctr: u64,
-}
+pub struct Md5 {}
 
 impl Default for Md5 {
     fn default() -> Self {
-        Self { ctr: 0 }
+        Self {}
     }
 }
 
