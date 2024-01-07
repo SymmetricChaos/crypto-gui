@@ -408,11 +408,11 @@ impl ClassicCrypto {
                         }
                         None => {
                             ui.label(RichText::from("Hash Functions").heading());
-                            ui.label(RichText::new("Hash functions take an arbitrary amount of data and map it onto a value of a fixed size. Often it is desireable for the mapping to be highly chaotic, so that even similar inputs result in different output, and hundreds of bits in length, to make it unlikely that two inputs will have the same hash.").size(12.0));
+                            ui.label(RichText::new("Hash functions take an arbitrary amount of data and map it onto a value of a fixed size.").size(12.0));
                             ui.add_space(16.0);
                             ui.separator();
-                            // ui.add_space(16.0);
-                            // ui.label(mono_strong("<<<INTERFACE>>>"));
+                            ui.add_space(16.0);
+                            ui.label(RichText::new("Often it is desireable for the mapping of a hash function to be highly chaotic, so that even similar inputs result in different output, and hundreds of bits in length, to make it unlikely that two inputs will have the same hash. In some cases, however, a hash function can be as simple as taking the low bits of a number.").size(12.0));
                         }
                     };
                 });
@@ -470,15 +470,19 @@ impl App for ClassicCrypto {
                 }
                 if ui.button("Ciphers").clicked() {
                     self.active_page = Page::Cipher;
-                    // self.active_cipher = None;
+                    self.active_cipher = None;
                 }
                 if ui.button("Codes").clicked() {
                     self.active_page = Page::Code;
-                    // self.active_code = None;
+                    self.active_code = None;
                 }
                 if ui.button("RNGs").clicked() {
                     self.active_page = Page::Rng;
-                    // self.active_rng = None;
+                    self.active_rng = None;
+                }
+                if ui.button("Hashers").clicked() {
+                    self.active_page = Page::Hash;
+                    self.active_hasher = None;
                 }
                 if ui.button("Text").clicked() {
                     self.active_page = Page::TextPrep;
