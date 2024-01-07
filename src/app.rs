@@ -339,11 +339,11 @@ impl ClassicCrypto {
                         }
                         None => {
                             ui.label(RichText::from("Random Number Generators").heading());
-                            ui.label(RichText::new("Random number generators are methods of creating random or seemingly random numbers. Truly random numbers can be defined mathematically but it is unclear if such things exist in reality. When something similar to truly random numbers is needed hardware RNGs are used which extract randomness from some physical process such as electrical noise or radioactive decacy. However hardware random number generation lacks the potentially valuable properties of speed, portability, and repeatability so for many purposes pseudorandom numbers are preferred. These are numbers which pass statistical tests of randomness but are created by an algorithm. The fastest modern PRNGs (such as the xoshiro family) can produce several gigabytes per second and run on even very simple processors while passing stringent tests. Algorithms are also used to produce quasirandom numbers which pass few statistical tests but possess some important properties in common with random numbers. The most desirable property of quasirandom numbers is low-discrepancy, meaning that they cover an area more evenly than random or uniformly spaced points do in the sense that it is more difficult to draw a box that contains an unusually large or small number of points for its volume.").size(12.0));
+                            ui.label(RichText::new("Random number generators are methods of creating seemingly random numbers.").size(12.0));
                             ui.add_space(16.0);
                             ui.separator();
-                            // ui.add_space(16.0);
-                            // ui.label(mono_strong("<<<INTERFACE>>>"));
+                            ui.add_space(16.0);
+                            ui.label(RichText::new("Truly random numbers can be defined mathematically but it is unclear if such things exist in reality. When something similar to truly random numbers is needed hardware RNGs are used which extract randomness from some physical process such as electrical noise or radioactive decacy. However hardware random number generation lacks the potentially valuable properties of speed, portability, and repeatability so for many purposes pseudorandom numbers are preferred. These are numbers which pass statistical tests of randomness but are created by an algorithm. The fastest modern PRNGs (such as the xoshiro family) can produce several gigabytes per second and run on even very simple processors while passing stringent tests. Algorithms are also used to produce quasirandom numbers which pass few statistical tests but possess some important properties in common with random numbers. The most desirable property of quasirandom numbers is low-discrepancy, meaning that they cover an area more evenly than random or uniformly spaced points do in the sense that it is more difficult to draw a box that contains an unusually large or small number of points for its volume.").size(12.0));
                         }
                     };
                 });
@@ -408,7 +408,7 @@ impl ClassicCrypto {
                         }
                         None => {
                             ui.label(RichText::from("Hash Functions").heading());
-                            ui.label(RichText::new("Hash Functions are . . .").size(12.0));
+                            ui.label(RichText::new("Hash functions take an arbitrary amount of data and map it onto a value of a fixed size. Often it is desireable for the mapping to be highly chaotic, so that even similar inputs result in different output, and hundreds of bits in length, to make it unlikely that two inputs will have the same hash.").size(12.0));
                             ui.add_space(16.0);
                             ui.separator();
                             // ui.add_space(16.0);
