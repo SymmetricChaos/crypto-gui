@@ -1,3 +1,5 @@
 ﻿{
-  "MD4": "The MD4 hash function can be used to generate random numbers simply by giving it a counter."
+  "MD4": "The MD4 hash function can be used to generate random numbers simply by giving it a counter.",
+  "MD5": "The MD5 hash function",
+  "SipHash": "SipHash is a family of keyed hash functions."
 }
