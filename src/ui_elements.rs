@@ -3,7 +3,7 @@ use codes::binary_to_text::BinaryToTextMode;
 use eframe::egui::RichText;
 use egui::{Color32, DragValue, Response, TextStyle, Ui};
 use egui_extras::{Column, TableBuilder};
-use itertools::Itertools;
+// use itertools::Itertools;
 use rngs::ClassicRng;
 use std::fmt::Display;
 use utils::text_functions::filter_string;
