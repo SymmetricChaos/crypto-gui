@@ -21,7 +21,6 @@ impl Default for SipHash {
 }
 
 impl SipHash {
-    // Confirmed from spec
     pub fn set_keys(&mut self, k0: u64, k1: u64) {
         self.k0 = k0.to_be();
         self.k1 = k1.to_be();
@@ -51,7 +50,6 @@ impl ClassicHasher for SipHash {
         let mut input = bytes.to_vec();
 
         // Initialization is four 64-bit words XORed with each half of the 128-bit key
-        // Confirmed from spec
         let mut state: [u64; 4] = [
             self.k0 ^ 0x736f6d6570736575,
             self.k1 ^ 0x646f72616e646f6d,
@@ -60,7 +58,6 @@ impl ClassicHasher for SipHash {
         ];
 
         // Padding
-        // Confirmed from spec
         let final_byte = (input.len() % 256) as u8;
         let total_len = (input.len() + 1).div_ceil(8) * 8;
         while input.len() < total_len - 1 {
@@ -70,10 +67,7 @@ impl ClassicHasher for SipHash {
 
         // Compression
         for block in input.chunks(8) {
-            // Confirmed from spec
             let mi: u64 = u64::from_le_bytes(block.try_into().unwrap());
-
-            // println!("\n\n<<<BEGIN COMPRESSION BLOCK>>>");
 
             // println!("\nCurrent state");
             // for s in state {
@@ -90,35 +84,29 @@ impl ClassicHasher for SipHash {
             for _ in 0..self.compression_rounds {
                 state = Self::sip_round(state);
             }
-            // println!("\ncompression rounds run");
             // for s in state {
             //     println!("{:016x}", s);
             // }
 
             state[0] ^= mi;
-            // println!("\nmessage word XORed with state[0]");
+
             // for s in state {
             //     println!("{:016x}", s);
             // }
-            // println!("\n<<<END COMPRESSION BLOCK>>>");
         }
 
         // Finalization
         state[2] ^= 0xff;
-        // println!("After XOR with 0xff");
         // for s in state {
         //     println!("{:016x}", s);
         // }
-        // print!("\n");
 
         for _ in 0..self.finalization_rounds {
             state = Self::sip_round(state);
         }
-        // println!("After Finalization Rounds");
         // for s in state {
         //     println!("{:016x}", s);
         // }
-        // print!("\n");
 
         (state[0] ^ state[1] ^ state[2] ^ state[3])
             .to_be_bytes()
