@@ -1,5 +1,6 @@
 ﻿{
-  "MD4": "The MD4 hash function can be used to generate random numbers simply by giving it a counter.",
-  "MD5": "The MD5 hash function",
+  "MD4": "The MD4 hash function, created by Ronald Rivest in 1990, is an obsolete hash algorithm that influenced the design of later hash functions.",
+  "MD5": "The MD5 hash function, created by Ronald Rivest in 1991, is among the best known and most widely used in history. Weaknesses were discovered in the algorithm within a few years that resulted in its deprecation for secure purposes. It wasn't until 2004, however, that collisions were discovered. Today MD5 is used to verify message integrity against accidental changes.",
+  "Pearson": "Pearson hashing is one of the simplest hashing algorithms.",
   "SipHash": "SipHash is a family of keyed hash functions."
 }
