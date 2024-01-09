@@ -4,11 +4,11 @@ use itertools::Itertools;
 use lazy_static::lazy_static;
 
 use crate::{
-    binary_to_text::{bytes_to_hex, BinaryToText, BinaryToTextMode},
+    binary_to_text::{BinaryToText, BinaryToTextMode},
     errors::CodeError,
     traits::Code,
 };
-use utils::text_functions::string_chunks;
+use utils::text_functions::{bytes_to_hex, string_chunks};
 
 // \u{00A0} is nonbreaking space. \u{00AD} is soft hyphen.
 pub const CP1252: &'static str = "␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~␡€�‚ƒ„…†‡ˆ‰Š‹Œ�Ž��‘’“”•–—˜™š›œ�žŸ\u{00A0}¡¢£¤¥¦§¨©ª«¬\u{00AD}®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ";
@@ -127,7 +127,7 @@ impl Ccsid {
             .map(|c| self.page.chars().position(|x| x == c).unwrap() as u8)
             .collect_vec();
         match self.b2t_mode {
-            Some(BinaryToTextMode::Hex) => bytes_to_hex(&out),
+            Some(BinaryToTextMode::Hex) => Ok(bytes_to_hex(&out)),
             Some(BinaryToTextMode::Utf8) => {
                 String::from_utf8(out).map_err(|e| CodeError::Input(e.to_string()))
             }

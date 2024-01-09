@@ -1,9 +1,9 @@
-use super::{bytes_to_hex, BinaryToText, BinaryToTextMode};
+use super::{BinaryToText, BinaryToTextMode};
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use itertools::Itertools;
 use num::Zero;
-use utils::text_functions::bimap_from_iter;
+use utils::text_functions::{bimap_from_iter, bytes_to_hex};
 
 // Translated from
 // https://github.com/eknkc/basex/blob/6baac8ea8b19cc66d125286d213770fec0691867/basex.go#L46
@@ -124,7 +124,7 @@ impl Code for BaseX {
         let bytes = bytes.into_iter().rev().collect_vec();
 
         match self.mode {
-            BinaryToTextMode::Hex => bytes_to_hex(&bytes),
+            BinaryToTextMode::Hex => Ok(bytes_to_hex(&bytes)),
             BinaryToTextMode::Utf8 => {
                 String::from_utf8(bytes).map_err(|e| CodeError::Input(e.to_string()))
             }

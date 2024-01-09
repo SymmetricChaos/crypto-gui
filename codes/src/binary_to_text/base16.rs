@@ -1,8 +1,9 @@
-use super::{bytes_to_hex, BinaryToText, BinaryToTextMode};
+use super::{BinaryToText, BinaryToTextMode};
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use regex::Regex;
+use utils::text_functions::bytes_to_hex;
 
 lazy_static! {
     pub static ref IS_BASE16: Regex = Regex::new(r"^([0-9A-F][0-9A-F])*$").unwrap();
@@ -55,7 +56,7 @@ impl Code for Base16 {
             .collect_vec();
 
         match self.mode {
-            BinaryToTextMode::Hex => bytes_to_hex(&out),
+            BinaryToTextMode::Hex => Ok(bytes_to_hex(&out)),
             BinaryToTextMode::Utf8 => {
                 String::from_utf8(out).map_err(|e| CodeError::Input(e.to_string()))
             }

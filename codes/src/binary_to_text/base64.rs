@@ -1,4 +1,4 @@
-use super::{bytes_to_hex, BinaryToText, BinaryToTextMode};
+use super::{BinaryToText, BinaryToTextMode};
 use crate::errors::CodeError;
 use crate::traits::Code;
 use bimap::BiMap;
@@ -6,7 +6,7 @@ use lazy_static::lazy_static;
 // use std::fs::read;
 // use std::path::PathBuf;
 use utils::preset_alphabet::Alphabet;
-use utils::text_functions::bimap_from_iter;
+use utils::text_functions::{bimap_from_iter, bytes_to_hex};
 
 const MASK: u8 = 0b00111111;
 const PAD: u8 = '=' as u8;
@@ -177,7 +177,7 @@ impl Code for Base64 {
             }
         }
         match self.mode {
-            BinaryToTextMode::Hex => bytes_to_hex(&out),
+            BinaryToTextMode::Hex => Ok(bytes_to_hex(&out)),
             BinaryToTextMode::Utf8 => {
                 String::from_utf8(out).map_err(|e| CodeError::Input(e.to_string()))
             }

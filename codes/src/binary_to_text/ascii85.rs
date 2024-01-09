@@ -1,11 +1,11 @@
-use super::{bytes_to_hex, BinaryToText, BinaryToTextMode};
+use super::{BinaryToText, BinaryToTextMode};
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use lazy_static::lazy_static;
 use num::Integer;
 use std::fs::read;
 use std::path::PathBuf;
-use utils::text_functions::bimap_from_iter;
+use utils::text_functions::{bimap_from_iter, bytes_to_hex};
 
 const ASCII85_BTOA: &'static str =
     "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstu";
@@ -208,7 +208,7 @@ impl Code for Ascii85 {
             }
         }
         match self.mode {
-            BinaryToTextMode::Hex => bytes_to_hex(&out),
+            BinaryToTextMode::Hex => Ok(bytes_to_hex(&out)),
             BinaryToTextMode::Utf8 => {
                 String::from_utf8(out).map_err(|e| CodeError::Input(e.to_string()))
             }

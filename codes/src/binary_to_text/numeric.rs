@@ -1,8 +1,10 @@
 use crate::{errors::CodeError, traits::Code};
 
-use super::{bytes_to_hex, BinaryToText, BinaryToTextMode};
+use super::{BinaryToText, BinaryToTextMode};
 use itertools::Itertools;
-use utils::text_functions::{u8_to_string_with_radix, u8_to_string_with_radix_and_width};
+use utils::text_functions::{
+    bytes_to_hex, u8_to_string_with_radix, u8_to_string_with_radix_and_width,
+};
 
 // Make it possible to encode an aribtrary file
 pub struct BytesAsNumbers {
@@ -102,7 +104,7 @@ impl Code for BytesAsNumbers {
             }
         }
         match self.mode {
-            BinaryToTextMode::Hex => bytes_to_hex(&bytes),
+            BinaryToTextMode::Hex => Ok(bytes_to_hex(&bytes)),
             BinaryToTextMode::Utf8 => {
                 String::from_utf8(bytes).map_err(|e| CodeError::Input(e.to_string()))
             }

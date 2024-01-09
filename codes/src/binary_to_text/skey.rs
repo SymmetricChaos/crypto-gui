@@ -1,7 +1,8 @@
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
+use utils::text_functions::bytes_to_hex;
 
-use super::{bytes_to_hex, BinaryToText, BinaryToTextMode};
+use super::{BinaryToText, BinaryToTextMode};
 // rfc2289
 
 const SKEY_WORDS: [&'static str; 2048] = [
@@ -282,7 +283,7 @@ impl Code for SKeyWords {
                 out.extend_from_slice(&words_to_u64(chunk)?.to_le_bytes());
             }
             match self.mode {
-                BinaryToTextMode::Hex => bytes_to_hex(&out),
+                BinaryToTextMode::Hex => Ok(bytes_to_hex(&out)),
                 BinaryToTextMode::Utf8 => {
                     String::from_utf8(out).map_err(|e| CodeError::Input(e.to_string()))
                 }

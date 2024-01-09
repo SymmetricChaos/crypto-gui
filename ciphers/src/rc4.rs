@@ -1,31 +1,8 @@
+use utils::text_functions::hex_to_bytes;
+
 use crate::{Cipher, CipherError};
-use bimap::BiMap;
-use lazy_static::lazy_static;
-use regex::Regex;
 
-lazy_static! {
-    pub static ref IS_HEX_BYTES: Regex = Regex::new(r"^([0-9a-f][0-9a-f])*$").unwrap();
-    pub static ref HEX: BiMap<String, u8> = (0..255).map(|n| (format!("{:02x}", n), n)).collect();
-}
-
-// A string containing hex characters converted into bytes
-// "DEADBEEF" -> [222, 173, 190, 239]
-pub fn hex_to_bytes(hex: &str) -> Result<Vec<u8>, CipherError> {
-    let mut text: String = hex.split_whitespace().collect();
-    text.make_ascii_lowercase();
-    if !IS_HEX_BYTES.is_match(&text) {
-        return Err(CipherError::input("not valid hex bytes"));
-    } else {
-        let mut out = Vec::new();
-        for i in 0..(text.len() / 2) {
-            let lo = i * 2;
-            out.push(*HEX.get_by_left(&text[lo..lo + 2]).unwrap())
-        }
-        Ok(out)
-    }
-}
-
-pub enum ByteOutputFormat {
+pub enum ByteFormat {
     Hex,
     Base64,
 }
@@ -34,7 +11,7 @@ pub struct Rc4 {
     pub arr: [u8; 256],
     pub i: u8,
     pub j: u8,
-    pub output_format: ByteOutputFormat,
+    pub byte_format: ByteFormat,
 }
 
 impl Default for Rc4 {
@@ -47,7 +24,7 @@ impl Default for Rc4 {
             arr,
             i: 0,
             j: 0,
-            output_format: ByteOutputFormat::Hex,
+            byte_format: ByteFormat::Hex,
         }
     }
 }
@@ -79,21 +56,18 @@ impl Rc4 {
         self.arr[t as usize]
     }
 
-    pub fn bytes_then_reset(&mut self, n: usize) -> Vec<u8> {
-        let arr = self.arr;
-        let i = self.i;
-        let j = self.j;
+    pub fn encrypt_bytes_cloned(&self, bytes: &mut [u8]) {
+        let mut arr = self.arr;
+        let mut i = self.i;
+        let mut j = self.j;
 
-        let mut out = Vec::with_capacity(n);
-        for _ in 0..n {
-            out.push(self.next_byte());
+        for byte in bytes.iter_mut() {
+            i = i.wrapping_add(1);
+            j = j.wrapping_add(arr[i as usize]);
+            arr.swap(i as usize, j as usize);
+            let t = arr[i as usize].wrapping_add(arr[j as usize]);
+            *byte = *byte ^ arr[t as usize]
         }
-
-        self.arr = arr;
-        self.i = i;
-        self.j = j;
-
-        out
     }
 
     pub fn encrypt_bytes(&mut self, bytes: &mut [u8]) {
@@ -102,22 +76,25 @@ impl Rc4 {
         }
     }
 
-    pub fn encrypt_utf8(&self, text: &str) {
-        todo!()
-    }
+    // pub fn encrypt_utf8(&self, text: &str) -> Result<String, CipherError> {
+    //     let mut bytes = text.as_bytes().to_owned();
+    //     self.encrypt_bytes_cloned(&mut bytes);
+    //     Ok(bytes.iter().map(|byte| format!("{:0x}", byte)).collect())
+    // }
 
-    pub fn encrypt_hex(&self, text: &str) {
-        todo!()
+    pub fn encrypt_hex(&self, text: &str) -> Result<String, CipherError> {
+        let mut bytes = hex_to_bytes(text).map_err(|_| CipherError::input("not valid hexcode"))?;
+        self.encrypt_bytes_cloned(&mut bytes);
+        Ok(bytes.iter().map(|byte| format!("{:0x}", byte)).collect())
     }
 }
 
 impl Cipher for Rc4 {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let bytes = text.as_bytes();
-        todo!()
+        self.encrypt_hex(text)
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        todo!()
+        self.encrypt_hex(text)
     }
 }

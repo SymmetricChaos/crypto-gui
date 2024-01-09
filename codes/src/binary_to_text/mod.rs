@@ -10,7 +10,6 @@ pub mod skey;
 use std::{fs::read, path::PathBuf};
 
 use bimap::BiMap;
-use itertools::Itertools;
 use lazy_static::lazy_static;
 use regex::Regex;
 
@@ -30,7 +29,7 @@ lazy_static! {
 // A string containing hex characters converted into bytes
 // "DEADBEEF" -> [222, 173, 190, 239]
 pub fn hex_to_bytes(hex: &str) -> Result<Vec<u8>, CodeError> {
-    let mut text: String = hex.split_whitespace().collect();
+    let mut text: String = hex.lines().collect();
     text.make_ascii_lowercase();
     if !IS_HEX_BYTES.is_match(&text) {
         return Err(CodeError::Input("not valid hex bytes".into()));
@@ -42,14 +41,6 @@ pub fn hex_to_bytes(hex: &str) -> Result<Vec<u8>, CodeError> {
         }
         Ok(out)
     }
-}
-
-// Convert bytes into a string containing hex code representing them
-pub fn bytes_to_hex(bytes: &[u8]) -> Result<String, CodeError> {
-    Ok(bytes
-        .into_iter()
-        .map(|b| HEX.get_by_right(b).unwrap())
-        .join(""))
 }
 
 pub trait BinaryToText {
@@ -73,17 +64,5 @@ pub trait BinaryToText {
         }
         let bytes = &read(path.as_ref().unwrap()).unwrap()[..];
         self.encode_bytes(bytes)
-    }
-}
-
-// #[cfg(target_arch = "wasm32")]
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn hex_convert() {
-        let hex = "   01  2 0";
-        assert_eq!(hex_to_bytes(hex).unwrap(), vec![1, 32]);
     }
 }
