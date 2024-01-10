@@ -2,16 +2,10 @@ use utils::text_functions::hex_to_bytes;
 
 use crate::{Cipher, CipherError};
 
-pub enum ByteFormat {
-    Hex,
-    Base64,
-}
-
 pub struct Rc4 {
     pub arr: [u8; 256],
     pub i: u8,
     pub j: u8,
-    pub byte_format: ByteFormat,
 }
 
 impl Default for Rc4 {
@@ -20,12 +14,7 @@ impl Default for Rc4 {
         for i in 0..256 {
             arr[i] = i as u8;
         }
-        Self {
-            arr,
-            i: 0,
-            j: 0,
-            byte_format: ByteFormat::Hex,
-        }
+        Self { arr, i: 0, j: 0 }
     }
 }
 

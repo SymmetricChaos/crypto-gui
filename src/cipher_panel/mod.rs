@@ -19,9 +19,10 @@ use self::{
     plugboard_controls::PlugboardFrame, polybius_cube_controls::PolybiusCubeFrame,
     polybius_square_controls::PolybiusSquareFrame, porta_controls::PortaFrame,
     purple_controls::PurpleFrame, quagmire_controls::QuagmireFrame,
-    rail_fence_controls::RailFenceFrame, rs44_controls::Rs44Frame, scytale_controls::ScytaleFrame,
-    seriated_playfair_controls::SeriatedPlayfairFrame, shamir_controls::ShamirSecretSharingFrame,
-    sigaba_controls::SigabaFrame, slidefair_controls::SlidefairFrame, trifid_controls::TrifidFrame,
+    rail_fence_controls::RailFenceFrame, rc4_controls::Rc4Frame, rs44_controls::Rs44Frame,
+    scytale_controls::ScytaleFrame, seriated_playfair_controls::SeriatedPlayfairFrame,
+    shamir_controls::ShamirSecretSharingFrame, sigaba_controls::SigabaFrame,
+    slidefair_controls::SlidefairFrame, trifid_controls::TrifidFrame,
     turning_grille_controls::TurningGrilleFrame, two_square_controls::TwoSquareFrame,
     vic_controls::VicFrame, vigenere_controls::VigenereFrame,
 };
@@ -59,6 +60,7 @@ pub mod porta_controls;
 pub mod purple_controls;
 pub mod quagmire_controls;
 pub mod rail_fence_controls;
+mod rc4_controls;
 pub mod rs44_controls;
 pub mod scytale_controls;
 pub mod seriated_playfair_controls;
@@ -165,6 +167,9 @@ pub struct CipherInterface {
     dryad: DryadFrame,
     rs44: Rs44Frame,
 
+    // Digital
+    rc4: Rc4Frame,
+
     // Other
     shamir: ShamirSecretSharingFrame,
     vic: VicFrame,
@@ -265,6 +270,8 @@ impl CipherInterface {
             CipherCategory::Transposition,
             ui,
         );
+
+        combox_box(&[CipherId::Rc4], active_cipher, CipherCategory::Digital, ui);
 
         combox_box(
             &[CipherId::Shamir, CipherId::Vic],

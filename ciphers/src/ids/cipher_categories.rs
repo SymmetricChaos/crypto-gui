@@ -12,6 +12,7 @@ pub enum CipherCategory {
     Playfair,
     Tactical,
     Polybius,
+    Digital,
     Other,
 }
 
@@ -40,6 +41,7 @@ impl Display for CipherCategory {
             CipherCategory::Playfair => "Playfair",
             CipherCategory::Tactical => "Tactical",
             CipherCategory::Polybius => "Polybius",
+            CipherCategory::Digital => "Digital",
             CipherCategory::Other => "Other",
         };
         write!(f, "{}", name)
