@@ -323,8 +323,7 @@ pub struct HexToBytesError;
 // A string containing hex characters converted into bytes
 // "DEADBEEF" -> [222, 173, 190, 239]
 pub fn hex_to_bytes(hex: &str) -> Result<Vec<u8>, HexToBytesError> {
-    let mut text: String = hex.lines().collect();
-    text.make_ascii_lowercase();
+    let text: String = hex.lines().collect();
     if !IS_HEX_BYTES.is_match(&text) {
         return Err(HexToBytesError);
     } else {

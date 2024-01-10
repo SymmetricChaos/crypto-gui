@@ -12,6 +12,7 @@ use std::{fs::read, path::PathBuf};
 use bimap::BiMap;
 use lazy_static::lazy_static;
 use regex::Regex;
+use utils::text_functions::hex_to_bytes;
 
 use crate::errors::CodeError;
 
@@ -21,35 +22,13 @@ pub enum BinaryToTextMode {
     Utf8,
 }
 
-lazy_static! {
-    pub static ref IS_HEX_BYTES: Regex = Regex::new(r"^([0-9a-f][0-9a-f])*$").unwrap();
-    pub static ref HEX: BiMap<String, u8> = (0..255).map(|n| (format!("{:02x}", n), n)).collect();
-}
-
-// A string containing hex characters converted into bytes
-// "DEADBEEF" -> [222, 173, 190, 239]
-pub fn hex_to_bytes(hex: &str) -> Result<Vec<u8>, CodeError> {
-    let mut text: String = hex.lines().collect();
-    text.make_ascii_lowercase();
-    if !IS_HEX_BYTES.is_match(&text) {
-        return Err(CodeError::Input("not valid hex bytes".into()));
-    } else {
-        let mut out = Vec::new();
-        for i in 0..(text.len() / 2) {
-            let lo = i * 2;
-            out.push(*HEX.get_by_left(&text[lo..lo + 2]).unwrap())
-        }
-        Ok(out)
-    }
-}
-
 pub trait BinaryToText {
     // Encode some literal bytes
     fn encode_bytes(&self, bytes: &[u8]) -> Result<String, CodeError>;
 
     // Take a hex string, convert it to bytes, and then encode it
     fn encode_hex(&self, hex: &str) -> Result<String, CodeError> {
-        let bytes = hex_to_bytes(hex)?;
+        let bytes = hex_to_bytes(hex).map_err(|_| CodeError::input("not valid hexcode"))?;
         self.encode_bytes(&bytes)
     }
 
