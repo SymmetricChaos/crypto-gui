@@ -315,6 +315,7 @@ impl CipherInterface {
             CipherId::Purple => &mut self.purple,
             CipherId::Quagmire => &mut self.quagmire,
             CipherId::RailFence => &mut self.rail_fence,
+            CipherId::Rc4 => &mut self.rc4,
             CipherId::Rs44 => &mut self.rs44,
             CipherId::Scytale => &mut self.scytale,
             CipherId::SeriatedPlayfair => &mut self.seriated,
