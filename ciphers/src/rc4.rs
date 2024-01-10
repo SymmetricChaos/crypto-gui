@@ -17,8 +17,8 @@ pub struct Rc4 {
 impl Default for Rc4 {
     fn default() -> Self {
         let mut arr = [0u8; 256];
-        for i in 0..255 {
-            arr[i as usize] = i;
+        for i in 0..256 {
+            arr[i] = i as u8;
         }
         Self {
             arr,
@@ -32,18 +32,15 @@ impl Default for Rc4 {
 impl Rc4 {
     pub fn ksa(&mut self, key: &[u8]) {
         // Set array to identity permutation
-        let mut arr = [0u8; 256];
-        for n in 0..255 {
-            arr[n as usize] = n;
+        for n in 0..256 {
+            self.arr[n] = n as u8;
         }
         // Perform 256 swaps
-        let key_length = key.len();
         let mut j: u8 = 0;
-        for n in 0..255 {
-            j = j.wrapping_add(arr[n]).wrapping_add(key[n % key_length]);
-            arr.swap(n, j as usize)
+        for (i, k) in (0..256).zip(key.iter().cycle()) {
+            j = j.wrapping_add(self.arr[i]).wrapping_add(*k);
+            self.arr.swap(i, j as usize)
         }
-        self.arr = arr;
         self.i = 0;
         self.j = 0;
     }
@@ -85,7 +82,7 @@ impl Rc4 {
     pub fn encrypt_hex(&self, text: &str) -> Result<String, CipherError> {
         let mut bytes = hex_to_bytes(text).map_err(|_| CipherError::input("not valid hexcode"))?;
         self.encrypt_bytes_cloned(&mut bytes);
-        Ok(bytes.iter().map(|byte| format!("{:0x}", byte)).collect())
+        Ok(bytes.iter().map(|byte| format!("{:02x}", byte)).collect())
     }
 }
 
@@ -96,5 +93,35 @@ impl Cipher for Rc4 {
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         self.encrypt_hex(text)
+    }
+}
+
+#[cfg(test)]
+mod rc4_tests {
+
+    use utils::text_functions::bytes_to_hex;
+
+    use super::*;
+
+    const PLAINTEXT: &'static str = "Attack at dawn";
+    const CIPHERTEXT: &'static str = "45a01f645fc35b383552544b9bf5";
+
+    #[test]
+    fn encrypt_test() {
+        let mut cipher = Rc4::default();
+        cipher.ksa("Secret".as_bytes());
+        assert_eq!(
+            cipher.encrypt(&bytes_to_hex(PLAINTEXT.as_bytes())).unwrap(),
+            CIPHERTEXT
+        )
+    }
+
+    #[test]
+    fn decrypt_test() {
+        let mut cipher = Rc4::default();
+        cipher.ksa("Secret".as_bytes());
+        let hex = cipher.decrypt(CIPHERTEXT).unwrap();
+        let ptext = String::from_utf8(hex_to_bytes(&hex).unwrap()).unwrap();
+        assert_eq!(ptext, PLAINTEXT)
     }
 }

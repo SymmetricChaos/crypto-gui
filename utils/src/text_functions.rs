@@ -313,7 +313,7 @@ pub fn keyed_alphabet(keyword: &str, alphabet: &str) -> String {
 // }
 
 lazy_static! {
-    pub static ref IS_HEX_BYTES: Regex = Regex::new(r"^([0-9a-fA-F][0-9a-fA-F])*$").unwrap();
+    pub static ref IS_HEX_BYTES: Regex = Regex::new(r"^(?:[0-9a-fA-F]{2})+$").unwrap();
     pub static ref HEX: BiMap<String, u8> = (0..255).map(|n| (format!("{:02x}", n), n)).collect();
 }
 
@@ -337,10 +337,7 @@ pub fn hex_to_bytes(hex: &str) -> Result<Vec<u8>, HexToBytesError> {
 }
 
 pub fn bytes_to_hex(bytes: &[u8]) -> String {
-    bytes
-        .into_iter()
-        .map(|b| HEX.get_by_right(b).unwrap())
-        .join("")
+    bytes.into_iter().map(|b| format!("{:02x}", b)).join("")
 }
 
 #[cfg(test)]
