@@ -2,10 +2,24 @@ use utils::text_functions::hex_to_bytes;
 
 use crate::{Cipher, CipherError};
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum OutputFormat {
+    Hex,
+    Utf8,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum InputFormat {
+    Hex,
+    Utf8,
+}
+
 pub struct Rc4 {
     pub arr: [u8; 256],
     pub i: u8,
     pub j: u8,
+    pub output_format: OutputFormat,
+    pub input_format: InputFormat,
 }
 
 impl Default for Rc4 {
@@ -14,7 +28,13 @@ impl Default for Rc4 {
         for i in 0..256 {
             arr[i] = i as u8;
         }
-        Self { arr, i: 0, j: 0 }
+        Self {
+            arr,
+            i: 0,
+            j: 0,
+            output_format: OutputFormat::Hex,
+            input_format: InputFormat::Utf8,
+        }
     }
 }
 
@@ -61,34 +81,30 @@ impl Rc4 {
             *byte = *byte ^ self.next_byte()
         }
     }
-
-    // pub fn encrypt_utf8(&self, text: &str) -> Result<String, CipherError> {
-    //     let mut bytes = text.as_bytes().to_owned();
-    //     self.encrypt_bytes_cloned(&mut bytes);
-    //     Ok(bytes.iter().map(|byte| format!("{:0x}", byte)).collect())
-    // }
-
-    pub fn encrypt_hex(&self, text: &str) -> Result<String, CipherError> {
-        let mut bytes = hex_to_bytes(text).map_err(|_| CipherError::input("not valid hexcode"))?;
-        self.encrypt_bytes_cloned(&mut bytes);
-        Ok(bytes.iter().map(|byte| format!("{:02x}", byte)).collect())
-    }
 }
 
 impl Cipher for Rc4 {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        self.encrypt_hex(text)
+        let mut bytes = match self.input_format {
+            InputFormat::Hex => {
+                hex_to_bytes(text).map_err(|_| CipherError::input("not valid hexcode"))?
+            }
+            InputFormat::Utf8 => text.bytes().collect(),
+        };
+        self.encrypt_bytes_cloned(&mut bytes);
+        match self.output_format {
+            OutputFormat::Hex => Ok(bytes.iter().map(|byte| format!("{:02x}", byte)).collect()),
+            OutputFormat::Utf8 => Ok(String::from_utf8_lossy(&bytes).to_string()),
+        }
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        self.encrypt_hex(text)
+        self.encrypt(text)
     }
 }
 
 #[cfg(test)]
 mod rc4_tests {
-
-    use utils::text_functions::bytes_to_hex;
 
     use super::*;
 
@@ -99,18 +115,15 @@ mod rc4_tests {
     fn encrypt_test() {
         let mut cipher = Rc4::default();
         cipher.ksa("Secret".as_bytes());
-        assert_eq!(
-            cipher.encrypt(&bytes_to_hex(PLAINTEXT.as_bytes())).unwrap(),
-            CIPHERTEXT
-        )
+        assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT)
     }
 
     #[test]
     fn decrypt_test() {
         let mut cipher = Rc4::default();
         cipher.ksa("Secret".as_bytes());
-        let hex = cipher.decrypt(CIPHERTEXT).unwrap();
-        let ptext = String::from_utf8(hex_to_bytes(&hex).unwrap()).unwrap();
-        assert_eq!(ptext, PLAINTEXT)
+        cipher.input_format = InputFormat::Hex;
+        cipher.output_format = OutputFormat::Utf8;
+        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT)
     }
 }
