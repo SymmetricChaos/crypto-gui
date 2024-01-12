@@ -2,7 +2,10 @@ use std::num::ParseIntError;
 
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{rc4::Rc4, Cipher};
+use ciphers::{
+    rc4::{InputFormat, OutputFormat, Rc4},
+    Cipher,
+};
 use egui::{DragValue, FontId, RichText, Ui};
 use rand::{thread_rng, Rng};
 
@@ -29,6 +32,40 @@ impl Rc4Frame {
 impl CipherFrame for Rc4Frame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.randomize_reset(self);
+        ui.add_space(16.0);
+
+        ui.subheading("Input Format");
+        ui.label("Input can be either hexadecimal representing bytes or text, which will be interpreted as UTF-8 bytes.");
+        ui.horizontal(|ui| {
+            ui.selectable_value(
+                &mut self.cipher.input_format,
+                InputFormat::Hex,
+                "Hexadecimal",
+            );
+            ui.selectable_value(
+                &mut self.cipher.input_format,
+                InputFormat::Utf8,
+                "Text (UTF-8)",
+            );
+        });
+
+        ui.add_space(8.0);
+
+        ui.subheading("Output Format");
+        ui.label("Output can be either hexadecimal representing the encrypted bytes or the bytes interpreted as UTF-8 encoded text. When outputing text information may be lost due to some bytes not forming valid characters.");
+        ui.horizontal(|ui| {
+            ui.selectable_value(
+                &mut self.cipher.output_format,
+                OutputFormat::Hex,
+                "Hexadecimal",
+            );
+            ui.selectable_value(
+                &mut self.cipher.output_format,
+                OutputFormat::Utf8,
+                "Text (UTF-8)",
+            );
+        });
+
         ui.add_space(16.0);
 
         ui.subheading("Key");
