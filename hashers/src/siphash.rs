@@ -69,44 +69,21 @@ impl ClassicHasher for SipHash {
         for block in input.chunks(8) {
             let mi: u64 = u64::from_le_bytes(block.try_into().unwrap());
 
-            // println!("\nCurrent state");
-            // for s in state {
-            //     println!("{:016x}", s);
-            // }
-            // Confirmed from spec
-            // println!("\nmessage word: {:016x}", mi);
             state[3] ^= mi;
-            // println!("\nmessage word XORed with state[3]");
-            // for s in state {
-            //     println!("{:016x}", s);
-            // }
 
             for _ in 0..self.compression_rounds {
                 state = Self::sip_round(state);
             }
-            // for s in state {
-            //     println!("{:016x}", s);
-            // }
 
             state[0] ^= mi;
-
-            // for s in state {
-            //     println!("{:016x}", s);
-            // }
         }
 
         // Finalization
         state[2] ^= 0xff;
-        // for s in state {
-        //     println!("{:016x}", s);
-        // }
 
         for _ in 0..self.finalization_rounds {
             state = Self::sip_round(state);
         }
-        // for s in state {
-        //     println!("{:016x}", s);
-        // }
 
         (state[0] ^ state[1] ^ state[2] ^ state[3])
             .to_be_bytes()

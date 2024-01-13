@@ -117,7 +117,7 @@ impl ClassicHasher for Sha1 {
 }
 
 #[cfg(test)]
-mod md5_tests {
+mod sha1_tests {
     use super::*;
 
     #[test]
