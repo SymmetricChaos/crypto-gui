@@ -1,3 +1,4 @@
+pub mod digital;
 pub mod machines;
 pub mod playfair;
 pub mod polyalphabetic;
@@ -10,7 +11,6 @@ pub mod shamir;
 pub mod vic;
 
 pub mod errors;
-pub mod rc4;
 pub use errors::CipherError;
 pub mod ids;
 pub mod rotors;
