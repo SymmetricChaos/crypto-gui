@@ -1,5 +1,3 @@
-use std::intrinsics::rotate_right;
-
 use crate::traits::ClassicHasher;
 
 pub struct Sha256 {}
@@ -70,17 +68,17 @@ impl ClassicHasher for Sha256 {
 
             let mut x = [0u32; 64];
             for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)).take(16) {
-                *elem = u32::from_be_bytes(chunk.try_into().unwrap());
+                *elem = u32::from_le_bytes(chunk.try_into().unwrap());
             }
 
             // Extend the 16 words to 64 words
             for i in 16..64 {
                 let s0 = (x[i - 15].rotate_right(7))
-                    ^ (w[i - 15].rotate_right(18))
-                    ^ (w[i - 15].rotate_right(3));
+                    ^ (x[i - 15].rotate_right(18))
+                    ^ (x[i - 15].rotate_right(3));
                 let s1 = (x[i - 2].rotate_right(17))
-                    ^ (w[i - 2].rotate_right(19))
-                    ^ (w[i - 2].rotate_right(10));
+                    ^ (x[i - 2].rotate_right(19))
+                    ^ (x[i - 2].rotate_right(10));
                 x[i] = x[i - 16]
                     .wrapping_add(s0)
                     .wrapping_add(x[i - 2])
@@ -118,30 +116,11 @@ impl ClassicHasher for Sha256 {
             h7 = h7.wrapping_add(h);
         }
 
-        let mut out = vec![0; 20];
-        for (i, byte) in h0.to_be_bytes().iter().enumerate() {
-            out[i] = *byte
-        }
-        for (i, byte) in h1.to_be_bytes().iter().enumerate() {
-            out[i + 4] = *byte
-        }
-        for (i, byte) in h2.to_be_bytes().iter().enumerate() {
-            out[i + 8] = *byte
-        }
-        for (i, byte) in h3.to_be_bytes().iter().enumerate() {
-            out[i + 12] = *byte
-        }
-        for (i, byte) in h4.to_be_bytes().iter().enumerate() {
-            out[i + 16] = *byte
-        }
-        for (i, byte) in h5.to_be_bytes().iter().enumerate() {
-            out[i + 20] = *byte
-        }
-        for (i, byte) in h6.to_be_bytes().iter().enumerate() {
-            out[i + 24] = *byte
-        }
-        for (i, byte) in h7.to_be_bytes().iter().enumerate() {
-            out[i + 28] = *byte
+        let mut out = vec![0; 32];
+        for (offset, word) in [h0, h1, h2, h3, h4, h5, h6, h7].iter().enumerate() {
+            for (i, byte) in word.to_be_bytes().iter().enumerate() {
+                out[i + offset * 4] = *byte
+            }
         }
         out
     }
@@ -153,15 +132,10 @@ mod sha256_tests {
 
     #[test]
     fn test_suite() {
-        let hasher = Sha1::default();
-        assert_eq!("", hasher.hash_to_string("".as_bytes()));
+        let hasher = Sha256::default();
         assert_eq!(
-            "",
-            hasher.hash_to_string("The quick brown fox jumps over the lazy dog".as_bytes())
-        );
-        assert_eq!(
-            "",
-            hasher.hash_to_string("The quick brown fox jumps over the lazy cog".as_bytes())
+            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            hasher.hash_to_string("".as_bytes())
         );
     }
 }

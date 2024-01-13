@@ -97,20 +97,10 @@ impl ClassicHasher for Sha1 {
         }
 
         let mut out = vec![0; 20];
-        for (i, byte) in a.to_be_bytes().iter().enumerate() {
-            out[i] = *byte
-        }
-        for (i, byte) in b.to_be_bytes().iter().enumerate() {
-            out[i + 4] = *byte
-        }
-        for (i, byte) in c.to_be_bytes().iter().enumerate() {
-            out[i + 8] = *byte
-        }
-        for (i, byte) in d.to_be_bytes().iter().enumerate() {
-            out[i + 12] = *byte
-        }
-        for (i, byte) in e.to_be_bytes().iter().enumerate() {
-            out[i + 16] = *byte
+        for (offset, word) in [a, b, c, d, e].iter().enumerate() {
+            for (i, byte) in word.to_be_bytes().iter().enumerate() {
+                out[i + offset * 4] = *byte
+            }
         }
         out
     }

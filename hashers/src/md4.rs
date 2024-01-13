@@ -106,17 +106,10 @@ impl ClassicHasher for Md5 {
         }
 
         let mut out = vec![0; 16];
-        for (i, byte) in a.to_le_bytes().iter().enumerate() {
-            out[i] = *byte
-        }
-        for (i, byte) in b.to_le_bytes().iter().enumerate() {
-            out[i + 4] = *byte
-        }
-        for (i, byte) in c.to_le_bytes().iter().enumerate() {
-            out[i + 8] = *byte
-        }
-        for (i, byte) in d.to_le_bytes().iter().enumerate() {
-            out[i + 12] = *byte
+        for (offset, word) in [a, b, c, d].iter().enumerate() {
+            for (i, byte) in word.to_le_bytes().iter().enumerate() {
+                out[i + offset * 4] = *byte
+            }
         }
         out
     }
