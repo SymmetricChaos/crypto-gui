@@ -1,3 +1,5 @@
+use std::ops::Shr;
+
 use itertools::Itertools;
 
 use crate::traits::ClassicHasher;
@@ -119,22 +121,45 @@ impl Sha512 {
         0xdb0c2e0d64f98fa7,
         0x47b5481dbefa4fa4,
     ];
+
+    pub fn sigma_0(a: u64) -> u64 {
+        (a.rotate_right(1)) ^ (a.rotate_right(8)) ^ (a.shr(7))
+    }
+
+    pub fn sigma_1(a: u64) -> u64 {
+        (a.rotate_right(19)) ^ (a.rotate_right(61)) ^ (a.shr(6))
+    }
+
+    pub fn sum_0(a: u64) -> u64 {
+        (a.rotate_right(28)) ^ (a.rotate_right(34)) ^ (a.rotate_right(39))
+    }
+
+    pub fn sum_1(a: u64) -> u64 {
+        (a.rotate_right(14)) ^ (a.rotate_right(18)) ^ (a.rotate_right(41))
+    }
+
+    pub fn choice(a: u64, b: u64, c: u64) -> u64 {
+        (a & b) ^ (!a & c)
+    }
+
+    pub fn majority(a: u64, b: u64, c: u64) -> u64 {
+        (a & b) ^ (a & c) ^ (b & c)
+    }
 }
 
 impl ClassicHasher for Sha512 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut input = bytes.to_vec();
 
-        // Padding and appending length is identical to MD4 and MD5
-        // Length in bits before padding
-        let b_len = (input.len().wrapping_mul(8)) as u64;
+        // Length in bits before padding as 128 bit number
+        let b_len = (input.len().wrapping_mul(8)) as u128;
 
         // Step 1.Padding
         // push a byte with a leading 1 to the bytes
         input.push(0x80);
-        // push zeros until the length in bits is 448 mod 512
-        // equivalently until the length in bytes is 56 mod 64
-        while (input.len() % 64) != 56 {
+        // push zeros until the length in bits is 896 mod 1024
+        // equivalently until the length in bytes is 112 mod 128
+        while (input.len() % 128) != 112 {
             input.push(0)
         }
 
@@ -143,7 +168,7 @@ impl ClassicHasher for Sha512 {
             input.push(b)
         }
 
-        // println!("{:0x?}", input);
+        // println!("{:016x?}", input);
 
         // Step 3. Initialize variables
         let (mut h0, mut h1, mut h2, mut h3, mut h4, mut h5, mut h6, mut h7) = if self.reduced {
@@ -151,8 +176,9 @@ impl ClassicHasher for Sha512 {
         } else {
             Self::SHA512.iter().copied().collect_tuple().unwrap()
         };
-        // Step 4. Process message in 32-word blocks
+        // Step 4. Process message in chunks of 128 bytes (1024 bits)
         for block in input.chunks_exact(128) {
+            // Copy variable values into working variables
             let mut a = h0;
             let mut b = h1;
             let mut c = h2;
@@ -162,40 +188,34 @@ impl ClassicHasher for Sha512 {
             let mut g = h6;
             let mut h = h7;
 
+            // Array of 64 words
             let mut x = [0u64; 80];
-            for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)).take(32) {
+
+            // Copy the first words into the array
+            // Each word is 8 bytes and 16 are taken in total
+            for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(8)).take(16) {
                 *elem = u64::from_be_bytes(chunk.try_into().unwrap());
             }
 
-            // println!("{:0x?}", x);
+            // println!("{:016x?}", x);
 
-            // Extend the 16 words to 80 words
+            // Extend the 16 words already in the array into a total of 64 words
             for i in 16..80 {
-                let s0 = (x[i - 15].rotate_right(1))
-                    ^ (x[i - 15].rotate_right(8))
-                    ^ (x[i - 15].rotate_right(7));
-                let s1 = (x[i - 2].rotate_right(19))
-                    ^ (x[i - 2].rotate_right(61))
-                    ^ (x[i - 2].rotate_right(6));
                 x[i] = x[i - 16]
-                    .wrapping_add(s0)
+                    .wrapping_add(Self::sigma_0(x[i - 15]))
                     .wrapping_add(x[i - 7])
-                    .wrapping_add(s1);
+                    .wrapping_add(Self::sigma_1(x[i - 2]));
             }
 
-            println!("{:0x?}", x);
+            // println!("{:016x?}", x);
 
-            for i in 0..64 {
-                let s1 = e.rotate_right(28) ^ e.rotate_right(34) ^ e.rotate_right(39);
-                let ch = (e & f) & (!e & g);
+            for i in 0..80 {
                 let temp1 = h
-                    .wrapping_add(s1)
-                    .wrapping_add(ch)
+                    .wrapping_add(Self::sum_1(e))
+                    .wrapping_add(Self::choice(e, f, g))
                     .wrapping_add(Self::K[i])
                     .wrapping_add(x[i]);
-                let s0 = a.rotate_right(14) ^ a.rotate_right(18) ^ a.rotate_right(41);
-                let maj = (a & b) ^ (a & c) ^ (b & c);
-                let temp2 = s0.wrapping_add(maj);
+                let temp2 = Self::sum_0(a).wrapping_add(Self::majority(a, b, c));
 
                 h = g;
                 g = f;
@@ -243,10 +263,10 @@ mod sha512_tests {
     #[test]
     fn test_suite() {
         let mut hasher = Sha512::default();
-        // assert_eq!(
-        //     "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
-        //     hasher.hash_to_string("".as_bytes())
-        // );
+        assert_eq!(
+            "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
+            hasher.hash_to_string("".as_bytes())
+        );
         hasher.reduced = true;
         assert_eq!(
             "38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da274edebfe76f65fbd51ad2f14898b95b",

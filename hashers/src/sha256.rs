@@ -1,3 +1,5 @@
+use std::ops::Shr;
+
 use itertools::Itertools;
 
 use crate::traits::ClassicHasher;
@@ -37,6 +39,30 @@ impl Sha256 {
         0xc1059ed8, 0x367cd507, 0x3070dd17, 0xf70e5939, 0xffc00b31, 0x68581511, 0x64f98fa7,
         0xbefa4fa4,
     ];
+
+    pub fn sigma_0(a: u32) -> u32 {
+        (a.rotate_right(7)) ^ (a.rotate_right(18)) ^ (a.shr(3))
+    }
+
+    pub fn sigma_1(a: u32) -> u32 {
+        (a.rotate_right(17)) ^ (a.rotate_right(19)) ^ (a.shr(10))
+    }
+
+    pub fn sum_0(a: u32) -> u32 {
+        (a.rotate_right(2)) ^ (a.rotate_right(13)) ^ (a.rotate_right(22))
+    }
+
+    pub fn sum_1(a: u32) -> u32 {
+        (a.rotate_right(6)) ^ (a.rotate_right(11)) ^ (a.rotate_right(25))
+    }
+
+    pub fn choice(a: u32, b: u32, c: u32) -> u32 {
+        (a & b) ^ (!a & c)
+    }
+
+    pub fn majority(a: u32, b: u32, c: u32) -> u32 {
+        (a & b) ^ (a & c) ^ (b & c)
+    }
 }
 
 impl ClassicHasher for Sha256 {
@@ -61,7 +87,7 @@ impl ClassicHasher for Sha256 {
             input.push(b)
         }
 
-        // println!("{:0x?}", input);
+        // println!("{:08x?}", input);
 
         // Step 3. Initialize variables
         let (mut h0, mut h1, mut h2, mut h3, mut h4, mut h5, mut h6, mut h7) = if self.reduced {
@@ -70,8 +96,10 @@ impl ClassicHasher for Sha256 {
             Self::SHA256.iter().copied().collect_tuple().unwrap()
         };
 
-        // Step 4. Process message in 16-word blocks
+        // Step 4. Process message
+        // 64 bytes are enough for 16 words
         for block in input.chunks_exact(64) {
+            // Copy variable values into working variables
             let mut a = h0;
             let mut b = h1;
             let mut c = h2;
@@ -81,40 +109,34 @@ impl ClassicHasher for Sha256 {
             let mut g = h6;
             let mut h = h7;
 
+            // Array of 64 words
             let mut x = [0u32; 64];
+
+            // Copy the first words into the array
+            // Each word is 4 bytes and 16 are taken in total
             for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)).take(16) {
                 *elem = u32::from_be_bytes(chunk.try_into().unwrap());
             }
 
-            // println!("{:0x?}", x);
+            // println!("{:08x?}", x);
 
-            // Extend the 16 words to 64 words
+            // Extend the 16 words already in the array into a total of 64 words
             for i in 16..64 {
-                let s0 = (x[i - 15].rotate_right(7))
-                    ^ (x[i - 15].rotate_right(18))
-                    ^ (x[i - 15].rotate_right(3));
-                let s1 = (x[i - 2].rotate_right(17))
-                    ^ (x[i - 2].rotate_right(19))
-                    ^ (x[i - 2].rotate_right(10));
                 x[i] = x[i - 16]
-                    .wrapping_add(s0)
+                    .wrapping_add(Self::sigma_0(x[i - 15]))
                     .wrapping_add(x[i - 7])
-                    .wrapping_add(s1);
+                    .wrapping_add(Self::sigma_1(x[i - 2]));
             }
 
-            // println!("{:0x?}", x);
+            // println!("{:08x?}", x);
 
             for i in 0..64 {
-                let s1 = e.rotate_right(6) ^ e.rotate_right(11) ^ e.rotate_right(25);
-                let ch = (e & f) & (!e & g);
                 let temp1 = h
-                    .wrapping_add(s1)
-                    .wrapping_add(ch)
+                    .wrapping_add(Self::sum_1(e))
+                    .wrapping_add(Self::choice(e, f, g))
                     .wrapping_add(Self::K[i])
                     .wrapping_add(x[i]);
-                let s0 = a.rotate_right(2) ^ a.rotate_right(13) ^ a.rotate_right(22);
-                let maj = (a & b) ^ (a & c) ^ (b & c);
-                let temp2 = s0.wrapping_add(maj);
+                let temp2 = Self::sum_0(a).wrapping_add(Self::majority(a, b, c));
 
                 h = g;
                 g = f;
@@ -162,10 +184,10 @@ mod sha256_tests {
     #[test]
     fn test_suite() {
         let mut hasher = Sha256::default();
-        // assert_eq!(
-        //     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        //     hasher.hash_to_string("".as_bytes())
-        // );
+        assert_eq!(
+            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            hasher.hash_to_string("".as_bytes())
+        );
         hasher.reduced = true;
         assert_eq!(
             "d14a028c2a3a2bc9476102bb288234c415a2b01f828ea62ac5b3e42f",
