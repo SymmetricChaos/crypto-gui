@@ -4,6 +4,7 @@ use crate::{
     traits::ClassicHasher,
 };
 
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Sha2Variant {
     Sha224,
     Sha256,
@@ -12,7 +13,7 @@ pub enum Sha2Variant {
 }
 
 pub struct Sha2 {
-    variant: Sha2Variant,
+    pub variant: Sha2Variant,
     sha224: Sha224,
     sha256: Sha256,
     sha384: Sha384,

@@ -7,6 +7,8 @@ pub enum HasherId {
     Md4,
     Md5,
     Pearson,
+    Sha1,
+    Sha2,
     SipHash,
 }
 
@@ -32,6 +34,8 @@ impl Display for HasherId {
             Self::Md4 => "MD4",
             Self::Md5 => "MD5",
             Self::Pearson => "Pearson",
+            Self::Sha1 => "SHA-1",
+            Self::Sha2 => "SHA-2",
             Self::SipHash => "SipHash",
         };
         write!(f, "{}", name)
