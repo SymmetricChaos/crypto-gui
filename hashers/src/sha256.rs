@@ -1,10 +1,14 @@
+use itertools::Itertools;
+
 use crate::traits::ClassicHasher;
 
-pub struct Sha256 {}
+pub struct Sha256 {
+    reduced: bool,
+}
 
 impl Default for Sha256 {
     fn default() -> Self {
-        Self {}
+        Self { reduced: false }
     }
 }
 
@@ -20,6 +24,18 @@ impl Sha256 {
         0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
         0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7,
         0xc67178f2,
+    ];
+
+    // Initialization for SHA256
+    pub const SHA256: [u32; 8] = [
+        0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab,
+        0x5be0cd19,
+    ];
+
+    // Initialization for SHA224
+    pub const SHA224: [u32; 8] = [
+        0xc1059ed8, 0x367cd507, 0x3070dd17, 0xf70e5939, 0xffc00b31, 0x68581511, 0x64f98fa7,
+        0xbefa4fa4,
     ];
 }
 
@@ -45,15 +61,14 @@ impl ClassicHasher for Sha256 {
             input.push(b)
         }
 
+        // println!("{:0x?}", input);
+
         // Step 3. Initialize variables
-        let mut h0 = 0x6a09e667_u32;
-        let mut h1 = 0xbb67ae85_u32;
-        let mut h2 = 0x3c6ef372_u32;
-        let mut h3 = 0xa54ff53a_u32;
-        let mut h4 = 0x510e527f_u32;
-        let mut h5 = 0x9b05688c_u32;
-        let mut h6 = 0x1f83d9ab_u32;
-        let mut h7 = 0x5be0cd19_u32;
+        let (mut h0, mut h1, mut h2, mut h3, mut h4, mut h5, mut h6, mut h7) = if self.reduced {
+            Self::SHA224.iter().copied().collect_tuple().unwrap()
+        } else {
+            Self::SHA256.iter().copied().collect_tuple().unwrap()
+        };
 
         // Step 4. Process message in 16-word blocks
         for block in input.chunks_exact(64) {
@@ -68,8 +83,10 @@ impl ClassicHasher for Sha256 {
 
             let mut x = [0u32; 64];
             for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)).take(16) {
-                *elem = u32::from_le_bytes(chunk.try_into().unwrap());
+                *elem = u32::from_be_bytes(chunk.try_into().unwrap());
             }
+
+            // println!("{:0x?}", x);
 
             // Extend the 16 words to 64 words
             for i in 16..64 {
@@ -81,9 +98,11 @@ impl ClassicHasher for Sha256 {
                     ^ (x[i - 2].rotate_right(10));
                 x[i] = x[i - 16]
                     .wrapping_add(s0)
-                    .wrapping_add(x[i - 2])
+                    .wrapping_add(x[i - 7])
                     .wrapping_add(s1);
             }
+
+            // println!("{:0x?}", x);
 
             for i in 0..64 {
                 let s1 = e.rotate_right(6) ^ e.rotate_right(11) ^ e.rotate_right(25);
@@ -116,13 +135,23 @@ impl ClassicHasher for Sha256 {
             h7 = h7.wrapping_add(h);
         }
 
-        let mut out = vec![0; 32];
-        for (offset, word) in [h0, h1, h2, h3, h4, h5, h6, h7].iter().enumerate() {
-            for (i, byte) in word.to_be_bytes().iter().enumerate() {
-                out[i + offset * 4] = *byte
+        if self.reduced {
+            let mut out = vec![0; 28];
+            for (offset, word) in [h0, h1, h2, h3, h4, h5, h6].iter().enumerate() {
+                for (i, byte) in word.to_be_bytes().iter().enumerate() {
+                    out[i + offset * 4] = *byte
+                }
             }
+            out
+        } else {
+            let mut out = vec![0; 32];
+            for (offset, word) in [h0, h1, h2, h3, h4, h5, h6, h7].iter().enumerate() {
+                for (i, byte) in word.to_be_bytes().iter().enumerate() {
+                    out[i + offset * 4] = *byte
+                }
+            }
+            out
         }
-        out
     }
 }
 
@@ -132,9 +161,14 @@ mod sha256_tests {
 
     #[test]
     fn test_suite() {
-        let hasher = Sha256::default();
+        let mut hasher = Sha256::default();
+        // assert_eq!(
+        //     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        //     hasher.hash_to_string("".as_bytes())
+        // );
+        hasher.reduced = true;
         assert_eq!(
-            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "d14a028c2a3a2bc9476102bb288234c415a2b01f828ea62ac5b3e42f",
             hasher.hash_to_string("".as_bytes())
         );
     }
