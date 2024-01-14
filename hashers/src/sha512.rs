@@ -58,19 +58,7 @@ impl Default for Sha512 {
     }
 }
 
-impl Sha512 {
-    // Initialization for SHA384
-    pub const SHA384: [u64; 8] = [
-        0xcbbb9d5dc1059ed8,
-        0x629a292a367cd507,
-        0x9159015a3070dd17,
-        0x152fecd8f70e5939,
-        0x67332667ffc00b31,
-        0x8eb44a8768581511,
-        0xdb0c2e0d64f98fa7,
-        0x47b5481dbefa4fa4,
-    ];
-}
+impl Sha512 {}
 
 impl ClassicHasher for Sha512 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
@@ -161,15 +149,6 @@ impl ClassicHasher for Sha512 {
             v[7] = v[7].wrapping_add(h);
         }
 
-        // if self.reduced {
-        //     let mut out = vec![0; 48];
-        //     for (offset, word) in [v[0], v[1], v[2], v[3], v[4], v[5]].iter().enumerate() {
-        //         for (i, byte) in word.to_be_bytes().iter().enumerate() {
-        //             out[i + offset * 8] = *byte
-        //         }
-        //     }
-        //     out
-        // } else {
         let mut out = vec![0; 64];
         for (offset, word) in v.iter().enumerate() {
             for (i, byte) in word.to_be_bytes().iter().enumerate() {
@@ -177,7 +156,6 @@ impl ClassicHasher for Sha512 {
             }
         }
         out
-        // }
     }
 }
 
