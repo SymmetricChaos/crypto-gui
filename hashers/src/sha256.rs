@@ -1,5 +1,7 @@
 use std::ops::Shr;
 
+use itertools::Itertools;
+
 use crate::traits::ClassicHasher;
 
 pub const K: [u32; 64] = [
@@ -143,36 +145,7 @@ impl ClassicHasher for Sha256 {
             v[7] = v[7].wrapping_add(h);
         }
 
-        // if self.reduced {
-        //     let mut out = vec![0; 28];
-        //     for (offset, word) in [v[0], v[1], v[2], v[3], v[4], v[5], v[6]]
-        //         .iter()
-        //         .enumerate()
-        //     {
-        //         for (i, byte) in word.to_be_bytes().iter().enumerate() {
-        //             out[i + offset * 4] = *byte
-        //         }
-        //     }
-        //     out
-        // } else {
-        //     let mut out = vec![0; 32];
-        //     for (offset, word) in [v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7]]
-        //         .iter()
-        //         .enumerate()
-        //     {
-        //         for (i, byte) in word.to_be_bytes().iter().enumerate() {
-        //             out[i + offset * 4] = *byte
-        //         }
-        //     }
-        //     out
-        // }
-        let mut out = vec![0; 32];
-        for (offset, word) in v.iter().enumerate() {
-            for (i, byte) in word.to_be_bytes().iter().enumerate() {
-                out[i + offset * 4] = *byte
-            }
-        }
-        out
+        v.iter().map(|x| x.to_be_bytes()).flatten().collect_vec()
     }
 }
 
@@ -271,13 +244,11 @@ impl ClassicHasher for Sha224 {
             v[7] = v[7].wrapping_add(h);
         }
 
-        let mut out = vec![0; 28];
-        for (offset, word) in v[0..7].iter().enumerate() {
-            for (i, byte) in word.to_be_bytes().iter().enumerate() {
-                out[i + offset * 4] = *byte
-            }
-        }
-        out
+        v[0..7]
+            .iter()
+            .map(|x| x.to_be_bytes())
+            .flatten()
+            .collect_vec()
     }
 }
 

@@ -1,6 +1,6 @@
 use crate::{
     sha256::{Sha224, Sha256},
-    sha512::{Sha384, Sha512},
+    sha512::Sha512,
     traits::ClassicHasher,
 };
 
@@ -10,14 +10,18 @@ pub enum Sha2Variant {
     Sha256,
     Sha384,
     Sha512,
+    Sha512_224,
+    Sha512_256,
 }
 
 pub struct Sha2 {
     pub variant: Sha2Variant,
     sha224: Sha224,
     sha256: Sha256,
-    sha384: Sha384,
+    sha384: Sha512,
     sha512: Sha512,
+    sha512_224: Sha512,
+    sha512_256: Sha512,
 }
 
 impl Default for Sha2 {
@@ -26,8 +30,10 @@ impl Default for Sha2 {
             variant: Sha2Variant::Sha256,
             sha224: Default::default(),
             sha256: Default::default(),
-            sha384: Default::default(),
-            sha512: Default::default(),
+            sha384: Sha512::sha384(),
+            sha512: Sha512::sha512(),
+            sha512_224: Sha512::sha512_224(),
+            sha512_256: Sha512::sha512_256(),
         }
     }
 }
@@ -41,6 +47,8 @@ impl ClassicHasher for Sha2 {
             Sha2Variant::Sha256 => self.sha256.hash(bytes),
             Sha2Variant::Sha384 => self.sha384.hash(bytes),
             Sha2Variant::Sha512 => self.sha512.hash(bytes),
+            Sha2Variant::Sha512_224 => self.sha512_224.hash(bytes),
+            Sha2Variant::Sha512_256 => self.sha512_256.hash(bytes),
         }
     }
 }
