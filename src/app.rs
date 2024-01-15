@@ -408,11 +408,13 @@ impl ClassicCrypto {
                         }
                         None => {
                             ui.label(RichText::from("Hash Functions").heading());
-                            ui.label(RichText::new("Hash functions take an arbitrary amount of data and map it onto a value of a fixed size.").size(12.0));
+                            ui.label(RichText::new("Hash functions take an arbitrary amount of data and map it onto a value of a fixed size, called a \"hash\" or a \"message digest\". Additionally a hash function should ensure that even a small change in the input dramatically changes the output. The fixed size is usually hundreds of bits to make it unlikely in practice that two inputs will have the same hash.").size(12.0));
                             ui.add_space(16.0);
                             ui.separator();
                             ui.add_space(16.0);
-                            ui.label(RichText::new("Often it is desireable for the mapping of a hash function to be highly chaotic, so that even similar inputs result in different output, and hundreds of bits in length, to make it unlikely that two inputs will have the same hash. In some cases, however, a hash function can be as simple as taking the low bits of a number.").size(12.0));
+                            ui.label(RichText::new("There are numerous uses for hash functions:\nThe hash of a file serves as a \"fingerprint\" of its contents and can be used to ensure that the file has not been changed. This can be used to check that a file was transmitted successfully.\nHash functions are used to create hash tables or \"dictionaries\" in programming languages. For instance a program keep a collection of book summaries (the values) be to looked up by their name (the key). A hash function converts the name into a numeric value which is used to select a location in memory where the summary is then stored. When a summary is looked up the name is hashed and the address is accessed. When a large number of objects need to be looked up this way it is often much faster to use a hash table than other methods.\nHash functions are used in message authentication, proving that the message came from the correct source. This is known as HMAC (Hash-based Message Authentication Code) and works by hashing the message together with a secret key. When the message is recieved the the HMAC is calculated again to confirm that the message was sent by a person with the secret key."));
+                            ui.add_space(16.0);
+                            ui.label(RichText::new("In cryptographic usage there are two main kinds of attacks that hash functions must resist: preimage attacks and collision attacks. A preimage attacks starts with a particular input and its hash and seeks to find some other input which has the same hash. If this attack is feasible a hash function used to authenticate messages become useless. A collision attack attempts to find any two inputs that have an identical hash. Because any pair of inputs are acceptable in this attack it is harder to resist. While a successful preimage attack is  is a much more severe a collision attack can ").size(12.0));
                         }
                     };
                 });
@@ -431,7 +433,7 @@ impl ClassicCrypto {
             .show(ctx, |ui| {
                 warn_if_debug_build(ui);
                 let hello = RichText::new(
-                    "Welcome to Classic Crypto!\nCheck out the Ciphers and Codes available.",
+                    "Welcome to Classic Crypto!\nCheck out the Ciphers, Codes, RNGs, and Hash Functions available.",
                 )
                 .strong();
                 ui.label(hello);
