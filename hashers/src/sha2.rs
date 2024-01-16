@@ -80,5 +80,15 @@ mod sha2_tests {
             "38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da274edebfe76f65fbd51ad2f14898b95b",
             hasher.hash_to_string("".as_bytes())
         );
+        hasher.variant = Sha2Variant::Sha512_224;
+        assert_eq!(
+            "6ed0dd02806fa89e25de060c19d3ac86cabb87d6a0ddd05c333b84f4",
+            hasher.hash_to_string("".as_bytes())
+        );
+        hasher.variant = Sha2Variant::Sha512_256;
+        assert_eq!(
+            "c672b8d1ef56ed28ab87c3622c5114069bdd3ad7b8f9737498d0c01ecef0967a",
+            hasher.hash_to_string("".as_bytes())
+        );
     }
 }

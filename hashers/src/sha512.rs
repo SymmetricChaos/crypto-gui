@@ -83,16 +83,6 @@ impl Sha512Mode {
                 0x5be0cd19137e2179,
             ],
             Sha512Mode::SHA512_224 => [
-                0x22312194fc2bf72c,
-                0x9f555fa3c84c64c2,
-                0x2393b86b6f53b151,
-                0x963877195940eabd,
-                0x96283ee2a88effe3,
-                0xbe5e1e2553863992,
-                0x2b0199fc2c85b8aa,
-                0x0eb72ddc81c52ca2,
-            ],
-            Sha512Mode::SHA512_256 => [
                 0x8c3d37c819544da2,
                 0x73e1996689dcd4d6,
                 0x1dfab7ae32ff9c82,
@@ -101,6 +91,16 @@ impl Sha512Mode {
                 0x77e36f7304c48942,
                 0x3f9d85a86a1d36c8,
                 0x1112e6ad91d692a1,
+            ],
+            Sha512Mode::SHA512_256 => [
+                0x22312194fc2bf72c,
+                0x9f555fa3c84c64c2,
+                0x2393b86b6f53b151,
+                0x963877195940eabd,
+                0x96283ee2a88effe3,
+                0xbe5e1e2553863992,
+                0x2b0199fc2c85b8aa,
+                0x0eb72ddc81c52ca2,
             ],
         }
     }
@@ -253,6 +253,16 @@ mod sha512_tests {
         let hasher = Sha512::sha384();
         assert_eq!(
             "38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da274edebfe76f65fbd51ad2f14898b95b",
+            hasher.hash_to_string("".as_bytes())
+        );
+        let hasher = Sha512::sha512_224();
+        assert_eq!(
+            "6ed0dd02806fa89e25de060c19d3ac86cabb87d6a0ddd05c333b84f4",
+            hasher.hash_to_string("".as_bytes())
+        );
+        let hasher = Sha512::sha512_256();
+        assert_eq!(
+            "c672b8d1ef56ed28ab87c3622c5114069bdd3ad7b8f9737498d0c01ecef0967a",
             hasher.hash_to_string("".as_bytes())
         );
     }
