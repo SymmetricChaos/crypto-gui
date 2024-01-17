@@ -75,8 +75,8 @@ mod rc4_tests {
 
     #[test]
     fn keystream_test() {
-        let mut cipher = Rc4::default();
-        cipher.ksa(&0x0102030405060708_u64.to_be_bytes());
+        let mut rng = Rc4::default();
+        rng.ksa(&0x0102030405060708_u64.to_be_bytes());
 
         println!("First 32 Bytes of Keystream for 0x0102030405060708");
         for byte in [
@@ -84,7 +84,7 @@ mod rc4_tests {
             0x15, 0xa8, 0x82, 0x63, 0xef, 0xdb, 0x45, 0xc4, 0xa1, 0x86, 0x84, 0xef, 0x87, 0xe6,
             0xb1, 0x9e, 0x5b, 0x09,
         ] {
-            let b = cipher.next_byte();
+            let b = rng.next_byte();
 
             print!("{:02x} {:02x}", byte, b);
             if b != byte {
@@ -94,14 +94,14 @@ mod rc4_tests {
             }
         }
 
-        cipher.ksa(&0x641910833222772a_u64.to_be_bytes());
+        rng.ksa(&0x641910833222772a_u64.to_be_bytes());
         println!("\n\nFirst 32 Bytes of Keystream for 0x641910833222772a");
         for byte in [
             0xbb, 0xf6, 0x09, 0xde, 0x94, 0x13, 0x17, 0x2d, 0x07, 0x66, 0x0c, 0xb6, 0x80, 0x71,
             0x69, 0x26, 0x46, 0x10, 0x1a, 0x6d, 0xab, 0x43, 0x11, 0x5d, 0x6c, 0x52, 0x2b, 0x4f,
             0xe9, 0x36, 0x04, 0xa9,
         ] {
-            let b = cipher.next_byte();
+            let b = rng.next_byte();
 
             print!("{:02x} {:02x}", byte, b);
             if b != byte {

@@ -85,3 +85,18 @@ impl ClassicRng for MersenneTwister {
         y
     }
 }
+
+#[cfg(test)]
+mod mt_tests {
+
+    use super::*;
+
+    #[test]
+    fn keystream_test() {
+        let mut rng = MersenneTwister::default();
+        rng.ksa(5489);
+        for _ in 0..10 {
+            println!("{}", rng.next_u32())
+        }
+    }
+}
