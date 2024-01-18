@@ -9,8 +9,8 @@ const UPPER_MASK: u32 = 0x80000000;
 const LOWER_MASK: u32 = 0x7fffffff;
 
 pub struct MersenneTwister {
-    index: usize,
-    arr: [u32; N],
+    pub index: usize,
+    pub arr: [u32; N],
 }
 
 impl Default for MersenneTwister {

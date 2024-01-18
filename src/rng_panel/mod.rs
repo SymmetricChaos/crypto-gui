@@ -2,6 +2,7 @@ mod halton_controls;
 mod lcg_controls;
 mod lfg_controls;
 mod lfsr_controls;
+mod mersenne_twister_controls;
 mod middle_square_controls;
 mod pcg_controls;
 mod rc4_controls;
