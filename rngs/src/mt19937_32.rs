@@ -455,7 +455,7 @@ mod mt_tests {
     #[test]
     fn keystream_test_slice() {
         let mut rng = Mt19937_32::default();
-        rng.ksa_from_array(&[0x123u32, 0x234u32, 0x345u32, 0x456u32][..]);
+        rng.ksa_from_array(&[0x123u32, 0x234u32, 0x345u32, 0x456u32]);
         for word in TEST_OUTPUT {
             assert_eq!(rng.next_u32(), word)
         }
@@ -464,7 +464,7 @@ mod mt_tests {
     #[test]
     fn state_test_slice() {
         let mut rng = Mt19937_32::default();
-        rng.ksa_from_array(&[0x123u32, 0x234u32, 0x345u32, 0x456u32][..]);
+        rng.ksa_from_array(&[0x123u32, 0x234u32, 0x345u32, 0x456u32]);
         for (a, b) in STATE_SEEDED_BY_SLICE.iter().zip(rng.arr.iter()) {
             assert_eq!(a, b)
         }

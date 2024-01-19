@@ -1763,28 +1763,28 @@ mod mt_64_tests {
         994412663058993407,
     ];
 
-    // #[test]
-    // fn keystream_test_slice() {
-    //     let mut rng = Mt19937_64::default();
-    //     rng.ksa_from_array(&[0x123u32, 0x234u32, 0x345u32, 0x456u32][..]);
-    //     for word in TEST_OUTPUT {
-    //         assert_eq!(rng.next_u32(), word)
-    //     }
-    // }
+    #[test]
+    fn keystream_test_slice() {
+        let mut rng = Mt19937_64::default();
+        rng.ksa_from_array(&[0x12345u64, 0x23456u64, 0x34567u64, 0x45678u64]);
+        for word in TEST_OUTPUT {
+            assert_eq!(rng.next_u64(), word)
+        }
+    }
 
-    // #[test]
-    // fn state_test_slice() {
-    //     let mut rng = Mt19937_64::default();
-    //     rng.ksa_from_array(&[0x123u32, 0x234u32, 0x345u32, 0x456u32][..]);
-    //     for (a, b) in STATE_SEEDED_BY_SLICE.iter().zip(rng.arr.iter()) {
-    //         assert_eq!(a, b)
-    //     }
-    // }
+    #[test]
+    fn state_test_slice() {
+        let mut rng = Mt19937_64::default();
+        rng.ksa_from_array(&[0x12345u64, 0x23456u64, 0x34567u64, 0x45678u64]);
+        for (a, b) in STATE_SEEDED_BY_SLICE.iter().zip(rng.arr.iter()) {
+            assert_eq!(a, b)
+        }
+    }
 
     #[test]
     fn state_test_u64() {
         let mut rng = Mt19937_64::default();
-        rng.ksa_from_u64(0x12345678);
+        rng.ksa_from_u64(0x123456789abcdefu64);
         for (a, b) in STATE_SEEDED_BY_U64.iter().zip(rng.arr.iter()) {
             assert_eq!(a, b)
         }
