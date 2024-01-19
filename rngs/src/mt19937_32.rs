@@ -8,12 +8,12 @@ const A: u32 = 0x9908b0df;
 const UPPER_MASK: u32 = 0x80000000;
 const LOWER_MASK: u32 = 0x7fffffff;
 
-pub struct MersenneTwister {
+pub struct Mt19937_32 {
     pub index: usize,
     pub arr: [u32; N],
 }
 
-impl Default for MersenneTwister {
+impl Default for Mt19937_32 {
     fn default() -> Self {
         Self {
             index: 0,
@@ -22,7 +22,7 @@ impl Default for MersenneTwister {
     }
 }
 
-impl MersenneTwister {
+impl Mt19937_32 {
     pub fn ksa_default(&mut self) {
         self.ksa_from_u32(5489)
     }
@@ -110,7 +110,7 @@ impl MersenneTwister {
     }
 }
 
-impl ClassicRng for MersenneTwister {
+impl ClassicRng for Mt19937_32 {
     fn next_u32(&mut self) -> u32 {
         debug_assert!(self.index != 0);
         if self.index >= N {
@@ -454,7 +454,7 @@ mod mt_tests {
 
     #[test]
     fn keystream_test_slice() {
-        let mut rng = MersenneTwister::default();
+        let mut rng = Mt19937_32::default();
         rng.ksa_from_array(&[0x123u32, 0x234u32, 0x345u32, 0x456u32][..]);
         for word in TEST_OUTPUT {
             assert_eq!(rng.next_u32(), word)
@@ -463,7 +463,7 @@ mod mt_tests {
 
     #[test]
     fn state_test_slice() {
-        let mut rng = MersenneTwister::default();
+        let mut rng = Mt19937_32::default();
         rng.ksa_from_array(&[0x123u32, 0x234u32, 0x345u32, 0x456u32][..]);
         for (a, b) in STATE_SEEDED_BY_SLICE.iter().zip(rng.arr.iter()) {
             assert_eq!(a, b)
@@ -472,7 +472,7 @@ mod mt_tests {
 
     #[test]
     fn state_test_u32() {
-        let mut rng = MersenneTwister::default();
+        let mut rng = Mt19937_32::default();
         rng.ksa_from_u32(0x12345678);
         for (a, b) in STATE_SEEDED_BY_U32.iter().zip(rng.arr.iter()) {
             assert_eq!(a, b)

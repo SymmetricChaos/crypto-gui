@@ -4,10 +4,10 @@ use super::ClassicRngFrame;
 use crate::ui_elements::{generate_random_nums_box, UiElements};
 use egui::{FontId, RichText};
 use rand::{thread_rng, Rng};
-use rngs::mersenne_twister::MersenneTwister;
+use rngs::mt19937_32::Mt19937_32;
 
 pub struct MTFrame {
-    rng: MersenneTwister,
+    rng: Mt19937_32,
     key: String,
     randoms: String,
     n_random: usize,
@@ -15,7 +15,7 @@ pub struct MTFrame {
 
 impl Default for MTFrame {
     fn default() -> Self {
-        let mut rng = MersenneTwister::default();
+        let mut rng = Mt19937_32::default();
         rng.ksa_from_array(&[0xDE_u32, 0xAD, 0xBE, 0xEF, 0x42]);
         Self {
             rng: Default::default(),
