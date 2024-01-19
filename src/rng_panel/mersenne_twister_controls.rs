@@ -9,7 +9,8 @@ use rngs::{mt19937_32::Mt19937_32, mt19937_64::Mt19937_64};
 pub struct MTFrame {
     rng_32: Mt19937_32,
     rng_64: Mt19937_64,
-    key: String,
+    key_32: String,
+    key_64: String,
     randoms: String,
     n_random: usize,
 }
@@ -23,7 +24,8 @@ impl Default for MTFrame {
         Self {
             rng_32,
             rng_64,
-            key: String::from("1571"),
+            key_32: String::from("00001571"),
+            key_64: String::from("0000000000001571"),
             randoms: String::new(),
             n_random: 5,
         }
@@ -32,12 +34,12 @@ impl Default for MTFrame {
 
 impl MTFrame {
     fn run_ksa(&mut self) {
-        while self.key.len() % 8 != 0 {
-            self.key.push('0')
+        while self.key_32.len() % 8 != 0 {
+            self.key_32.push('0')
         }
-        let key_vec: Result<Vec<u32>, ParseIntError> = (0..self.key.len())
+        let key_vec: Result<Vec<u32>, ParseIntError> = (0..self.key_32.len())
             .step_by(2)
-            .map(|i| u32::from_str_radix(&self.key[i..i + 8], 16))
+            .map(|i| u32::from_str_radix(&self.key_32[i..i + 8], 16))
             .collect();
         if let Ok(vec) = key_vec {
             self.rng_32.ksa_from_array(&vec)
@@ -58,8 +60,12 @@ impl ClassicRngFrame for MTFrame {
             }
         });
         ui.label("Key should be provided as a string of hexadecimal digits representing any number of bytes.");
-        if ui.text_edit_multiline(&mut self.key).changed() {
-            self.key = self.key.chars().filter(|c| c.is_ascii_hexdigit()).collect();
+        if ui.text_edit_multiline(&mut self.key_32).changed() {
+            self.key_32 = self
+                .key_32
+                .chars()
+                .filter(|c| c.is_ascii_hexdigit())
+                .collect();
         }
         if ui.button("Set Array from Key").clicked() {
             self.run_ksa()
@@ -105,7 +111,7 @@ impl ClassicRngFrame for MTFrame {
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        self.key = format!("{:08X}", rng.gen::<u64>());
+        self.key_32 = format!("{:08X}", rng.gen::<u64>());
         self.run_ksa();
     }
 
