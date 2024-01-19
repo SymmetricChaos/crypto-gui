@@ -108,7 +108,9 @@ impl Mt19937_64 {
     }
 
     pub fn next_u64(&mut self) -> u64 {
-        debug_assert!(self.index != 0);
+        if self.index == 0 {
+            self.ksa_default()
+        }
         if self.index >= N {
             self.twist();
         }

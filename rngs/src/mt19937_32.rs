@@ -112,7 +112,9 @@ impl Mt19937_32 {
 
 impl ClassicRng for Mt19937_32 {
     fn next_u32(&mut self) -> u32 {
-        debug_assert!(self.index != 0);
+        if self.index == 0 {
+            self.ksa_default()
+        }
         if self.index >= N {
             self.twist();
         }
