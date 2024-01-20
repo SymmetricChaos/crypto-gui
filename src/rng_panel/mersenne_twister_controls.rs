@@ -73,6 +73,9 @@ impl ClassicRngFrame for MTFrame {
         ui.add_space(16.0);
 
         ui.subheading("Internal State");
+        if ui.button("Twist").clicked() {
+            self.rng_32.twist()
+        }
         ui.label(format!("Index: {}", self.rng_32.index));
         ui.collapsing("Array of 624 32-bit words", |ui| {
             egui::Grid::new("mt_array")
