@@ -2,17 +2,7 @@ use utils::text_functions::hex_to_bytes;
 
 use crate::{Cipher, CipherError};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum OutputFormat {
-    Hex,
-    Utf8,
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum InputFormat {
-    Hex,
-    Utf8,
-}
+use super::{InputFormat, OutputFormat};
 
 pub struct Rc4 {
     pub arr: [u8; 256],
@@ -33,7 +23,7 @@ impl Default for Rc4 {
             i: 0,
             j: 0,
             output_format: OutputFormat::Hex,
-            input_format: InputFormat::Utf8,
+            input_format: InputFormat::Hex,
         }
     }
 }

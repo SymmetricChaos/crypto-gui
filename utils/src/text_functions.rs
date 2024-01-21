@@ -348,6 +348,13 @@ mod text_function_tests {
     use super::*;
 
     #[test]
+    fn hex_map() {
+        for i in HEX.iter() {
+            println!("{i:?}")
+        }
+    }
+
+    #[test]
     fn string_ranking() {
         let text = "APPLES";
         let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
