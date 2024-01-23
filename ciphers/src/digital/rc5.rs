@@ -1,6 +1,6 @@
 use super::{InputFormat, OutputFormat};
 use crate::{Cipher, CipherError};
-use std::cmp::max;
+use std::{cmp::max, ops::Shl};
 use utils::text_functions::hex_to_bytes;
 
 const P32: u32 = 0xb7e15163;
@@ -33,12 +33,12 @@ impl Rc5 {
             "RC5 key is limited to 255 bytes, which is enough for anybody"
         );
 
-        let b = key.len();
         let u = 4; // Bytes in a word
-        let c = max(b.div_ceil(u), 1);
+        let b = key.len(); // Bytes in the key
+        let c = max(b.div_ceil(u), 1); // number of words in the key
         let mut l = vec![0_u32; c];
         for i in (0..b).rev() {
-            l[i / u] = (l[i / u].rotate_left(8)).wrapping_add(key[i] as u32)
+            l[i / u] = (l[i / u].shl(8_u32)).wrapping_add(key[i] as u32)
         }
 
         let t = 2 * (self.rounds + 1);
@@ -94,23 +94,25 @@ impl Rc5 {
     //     }
     // }
 
-    pub fn encrypt_block_32(&self, bytes: &[u8]) -> Vec<u8> {
-        // Pad with zeroes. No padding rule is given by Rivest
-        let mut input = bytes.to_vec();
-        while input.len() % 8 != 0 {
-            input.push(0)
+    pub fn encrypt_block_32(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
+        // No padding rule is given by Rivest
+        if bytes.len() % 8 != 0 {
+            return Err(CipherError::input(
+                "decrypted data must be in chunks of 64 bits",
+            ));
         }
 
-        let mut out = Vec::with_capacity(input.len());
+        let mut out = Vec::with_capacity(bytes.len());
 
-        for block in input.chunks_exact(8) {
+        for block in bytes.chunks_exact(8) {
             let mut x = [0u32; 2];
             for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)) {
-                *elem = u32::from_be_bytes(chunk.try_into().unwrap());
+                *elem = u32::from_le_bytes(chunk.try_into().unwrap());
             }
 
             x[0] = x[0].wrapping_add(self.state[0]);
             x[1] = x[1].wrapping_add(self.state[1]);
+
             for i in 1..=self.rounds {
                 x[0] = (x[0] ^ x[1])
                     .rotate_left(x[1])
@@ -119,10 +121,11 @@ impl Rc5 {
                     .rotate_left(x[0])
                     .wrapping_add(self.state[(2 * i) + 1])
             }
+
             out.extend_from_slice(&x[0].to_le_bytes());
             out.extend_from_slice(&x[1].to_le_bytes());
         }
-        out
+        Ok(out)
     }
 
     pub fn decrypt_block_32(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
@@ -150,12 +153,9 @@ impl Rc5 {
 
             x[0] = x[0].wrapping_sub(self.state[0]);
             x[1] = x[1].wrapping_sub(self.state[1]);
-            for b in x[0].to_le_bytes() {
-                out.push(b)
-            }
-            for b in x[1].to_le_bytes() {
-                out.push(b)
-            }
+
+            out.extend_from_slice(&x[0].to_le_bytes());
+            out.extend_from_slice(&x[1].to_le_bytes());
         }
         Ok(out)
     }
@@ -171,7 +171,7 @@ impl Cipher for Rc5 {
             }
             InputFormat::Utf8 => text.bytes().collect(),
         };
-        let b = self.encrypt_block_32(&mut bytes);
+        let b = self.encrypt_block_32(&mut bytes)?;
         match self.output_format {
             OutputFormat::Hex => Ok(b.iter().map(|byte| format!("{:02x}", byte)).collect()),
             OutputFormat::Utf8 => Ok(String::from_utf8_lossy(&b).to_string()),
@@ -209,30 +209,10 @@ mod rc5_tests {
     }
 
     #[test]
-    fn encrypt_test_2() {
-        const PTEXT: &'static str = "21a5dbee154b8f6d";
-        const CTEXT: &'static str = "f7c013ac5b2b8952";
-        const KEY: &'static str = "915f4619be41b2516355a50110a9ce91";
-        let mut cipher = Rc5::default();
-        cipher.ksa_32(&hex_to_bytes(KEY).unwrap());
-        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
-    }
-
-    #[test]
     fn decrypt_test() {
         const PTEXT: &'static str = "0000000000000000";
         const CTEXT: &'static str = "21a5dbee154b8f6d";
         const KEY: &'static str = "00000000000000000000000000000000";
-        let mut cipher = Rc5::default();
-        cipher.ksa_32(&hex_to_bytes(KEY).unwrap());
-        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
-    }
-
-    #[test]
-    fn decrypt_test_2() {
-        const PTEXT: &'static str = "21a5dbee154b8f6d";
-        const CTEXT: &'static str = "f7c013ac5b2b8952";
-        const KEY: &'static str = "915f4619be41b2516355a50110a9ce91";
         let mut cipher = Rc5::default();
         cipher.ksa_32(&hex_to_bytes(KEY).unwrap());
         assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
@@ -246,6 +226,26 @@ mod rc5_tests {
         cipher.ksa_32(&hex_to_bytes(KEY).unwrap());
         let ctext = cipher.encrypt(PTEXT).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), PTEXT);
+    }
+
+    #[test]
+    fn encrypt_test_2() {
+        const PTEXT: &'static str = "21a5dbee154b8f6d";
+        const CTEXT: &'static str = "f7c013ac5b2b8952";
+        const KEY: &'static str = "915f4619be41b2516355a50110a9ce91";
+        let mut cipher = Rc5::default();
+        cipher.ksa_32(&hex_to_bytes(KEY).unwrap());
+        assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
+    }
+
+    #[test]
+    fn decrypt_test_2() {
+        const PTEXT: &'static str = "21a5dbee154b8f6d";
+        const CTEXT: &'static str = "f7c013ac5b2b8952";
+        const KEY: &'static str = "915f4619be41b2516355a50110a9ce91";
+        let mut cipher = Rc5::default();
+        cipher.ksa_32(&hex_to_bytes(KEY).unwrap());
+        assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 
     #[test]
