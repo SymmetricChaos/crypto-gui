@@ -5,6 +5,7 @@ use std::fmt::Display;
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub enum CipherId {
     Adfgvx,
+    Aes,
     Affine,
     Alberti,
     Amsco,
@@ -18,6 +19,7 @@ pub enum CipherId {
     Checkerboard,
     Columnar,
     Decoder,
+    Des,
     DiagonalColumnar,
     Dryad,
     Enigma,
@@ -38,6 +40,7 @@ pub enum CipherId {
     Quagmire,
     RailFence,
     Rc4,
+    Rc5,
     Rs44,
     Scytale,
     SeriatedPlayfair,
@@ -72,6 +75,7 @@ impl Display for CipherId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let name = match self {
             CipherId::Adfgvx => "ADFGVX",
+            CipherId::Aes => "AES",
             CipherId::Affine => "Affine",
             CipherId::Alberti => "Alberti Cipher Disk",
             CipherId::Amsco => "AMSCO",
@@ -85,6 +89,7 @@ impl Display for CipherId {
             CipherId::Checkerboard => "Straddling Checkerboard",
             CipherId::Columnar => "Columnar Transposition",
             CipherId::Decoder => "Decoder Ring",
+            CipherId::Des => "DES",
             CipherId::DiagonalColumnar => "Diagonal Columnar",
             CipherId::Dryad => "DRYAD",
             CipherId::Enigma => "Enigma",
@@ -105,6 +110,7 @@ impl Display for CipherId {
             CipherId::Quagmire => "Quagmire",
             CipherId::RailFence => "Rail Fence",
             CipherId::Rc4 => "RC4",
+            CipherId::Rc5 => "RC5",
             CipherId::Rs44 => "RS44",
             CipherId::Scytale => "Scytale",
             CipherId::SeriatedPlayfair => "Seriated Playfair",
