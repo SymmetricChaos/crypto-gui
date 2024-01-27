@@ -1,8 +1,7 @@
-use std::ops::Shr;
-
-use crate::{Cipher, CipherError};
-
 use super::{InputFormat, OutputFormat};
+use crate::{Cipher, CipherError};
+use std::ops::Shr;
+use utils::text_functions::hex_to_bytes;
 
 pub struct Des {
     pub output_format: OutputFormat,
@@ -28,7 +27,7 @@ fn delta_swap(a: u64, delta: u64, mask: u64) -> u64 {
 impl Des {
     const KEYSHIFT: [u32; 16] = [1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1];
 
-    // Permuted choice
+    //  Swap bits using the PC-1 table
     pub fn pc1(mut key: u64) -> u64 {
         key = delta_swap(key, 2, 0x3333000033330000);
         key = delta_swap(key, 4, 0x0f0f0f0f00000000);
@@ -62,38 +61,38 @@ impl Des {
         b1 | b2 | b3 | b4 | b5 | b6 | b7 | b8 | b9 | b10
     }
 
-    /// Swap bits using the reverse FP table
+    /// Swap bits using the reverse final permutation table
     fn fp(mut message: u64) -> u64 {
-        message = delta_swap(message, 24, 0x000000FF000000FF);
-        message = delta_swap(message, 24, 0x00000000FF00FF00);
-        message = delta_swap(message, 36, 0x000000000F0F0F0F);
+        message = delta_swap(message, 24, 0x000000ff000000ff);
+        message = delta_swap(message, 24, 0x00000000ff00ff00);
+        message = delta_swap(message, 36, 0x000000000f0f0f0f);
         message = delta_swap(message, 18, 0x0000333300003333);
         delta_swap(message, 9, 0x0055005500550055)
     }
 
-    /// Swap bits using the IP table
+    /// Swap bits using the initial permutation table
     fn ip(mut message: u64) -> u64 {
         message = delta_swap(message, 9, 0x0055005500550055);
         message = delta_swap(message, 18, 0x0000333300003333);
-        message = delta_swap(message, 36, 0x000000000F0F0F0F);
-        message = delta_swap(message, 24, 0x00000000FF00FF00);
-        delta_swap(message, 24, 0x000000FF000000FF)
+        message = delta_swap(message, 36, 0x000000000f0f0f0f);
+        message = delta_swap(message, 24, 0x00000000ff00ff00);
+        delta_swap(message, 24, 0x000000ff000000ff)
     }
 
-    /// Swap bits using the E table
+    /// Swap bits using the expansion table
     fn e(block: u64) -> u64 {
         const BLOCK_LEN: usize = 32;
         const RESULT_LEN: usize = 48;
 
         let b1 = (block << (BLOCK_LEN - 1)) & 0x8000000000000000;
-        let b2 = (block >> 1) & 0x7C00000000000000;
-        let b3 = (block >> 3) & 0x03F0000000000000;
-        let b4 = (block >> 5) & 0x000FC00000000000;
-        let b5 = (block >> 7) & 0x00003F0000000000;
-        let b6 = (block >> 9) & 0x000000FC00000000;
-        let b7 = (block >> 11) & 0x00000003F0000000;
-        let b8 = (block >> 13) & 0x000000000FC00000;
-        let b9 = (block >> 15) & 0x00000000003E0000;
+        let b2 = (block >> 1) & 0x7c00000000000000;
+        let b3 = (block >> 3) & 0x03f0000000000000;
+        let b4 = (block >> 5) & 0x000fc00000000000;
+        let b5 = (block >> 7) & 0x00003f0000000000;
+        let b6 = (block >> 9) & 0x000000fc00000000;
+        let b7 = (block >> 11) & 0x00000003f0000000;
+        let b8 = (block >> 13) & 0x000000000fc00000;
+        let b9 = (block >> 15) & 0x00000000003e0000;
         let b10 = (block >> (RESULT_LEN - 1)) & 0x0000000000010000;
         b1 | b2 | b3 | b4 | b5 | b6 | b7 | b8 | b9 | b10
     }
@@ -123,8 +122,8 @@ impl Des {
     pub fn ksa(&mut self, key: u64) {
         let key = Self::pc1(key);
         let key = key >> 8;
-        let mut left: u64 = key.shr(28) & 0xFFFFFFF_u64;
-        let mut right = key & 0xFFFFFFF;
+        let mut left: u64 = key.shr(28) & 0xfffffff_u64;
+        let mut right = key & 0xfffffff;
         for i in 0..16 {
             right = right.rotate_left(Self::KEYSHIFT[i]);
             left = left.rotate_left(Self::KEYSHIFT[i]);
@@ -139,7 +138,17 @@ impl Des {
             ));
         };
 
+        let mut temp = 0;
         let mut out = Vec::with_capacity(bytes.len());
+
+        for block in bytes.chunks_exact(8) {
+            let mut x = [0u32; 2];
+            for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)) {
+                *elem = u32::from_le_bytes(chunk.try_into().unwrap());
+            }
+            temp = x[1];
+            // x[1] = Self::e(x[1]);
+        }
 
         Ok(out)
     }
@@ -159,7 +168,17 @@ impl Des {
 
 impl Cipher for Des {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        todo!()
+        let mut bytes = match self.input_format {
+            InputFormat::Hex => {
+                hex_to_bytes(text).map_err(|_| CipherError::input("not valid hexcode"))?
+            }
+            InputFormat::Utf8 => text.bytes().collect(),
+        };
+        let out = self.encrypt_bytes(&mut bytes)?;
+        match self.output_format {
+            OutputFormat::Hex => Ok(out.iter().map(|byte| format!("{:02x}", byte)).collect()),
+            OutputFormat::Utf8 => Ok(String::from_utf8_lossy(&out).to_string()),
+        }
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
