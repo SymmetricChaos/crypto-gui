@@ -27,6 +27,10 @@ impl Default for Rc5 {
 }
 
 impl Rc5 {
+    pub fn state_size(&self) -> usize {
+        2 * (self.rounds + 1)
+    }
+
     pub fn ksa_32(&mut self, key: &[u8]) {
         assert!(
             key.len() < 256,
@@ -41,7 +45,7 @@ impl Rc5 {
             l[i / u] = (l[i / u].shl(8_u32)).wrapping_add(key[i] as u32)
         }
 
-        let t = 2 * (self.rounds + 1);
+        let t = self.state_size();
         let mut s = vec![0; t];
         s[0] = P32;
         for i in 1..t {
