@@ -3,7 +3,7 @@ use std::num::ParseIntError;
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
 use ciphers::{
-    digital::{InputFormat, OutputFormat, Rc4},
+    digital::{ByteFormat, Rc4},
     Cipher,
 };
 use egui::{DragValue, FontId, RichText, Ui};
@@ -39,12 +39,12 @@ impl CipherFrame for Rc4Frame {
         ui.horizontal(|ui| {
             ui.selectable_value(
                 &mut self.cipher.input_format,
-                InputFormat::Hex,
+                ByteFormat::Hex,
                 "Hexadecimal",
             );
             ui.selectable_value(
                 &mut self.cipher.input_format,
-                InputFormat::Utf8,
+                ByteFormat::Utf8,
                 "Text (UTF-8)",
             );
         });
@@ -56,12 +56,12 @@ impl CipherFrame for Rc4Frame {
         ui.horizontal(|ui| {
             ui.selectable_value(
                 &mut self.cipher.output_format,
-                OutputFormat::Hex,
+                ByteFormat::Hex,
                 "Hexadecimal",
             );
             ui.selectable_value(
                 &mut self.cipher.output_format,
-                OutputFormat::Utf8,
+                ByteFormat::Utf8,
                 "Text (UTF-8)",
             );
         });

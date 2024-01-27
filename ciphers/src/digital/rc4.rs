@@ -2,14 +2,14 @@ use utils::text_functions::hex_to_bytes;
 
 use crate::{Cipher, CipherError};
 
-use super::{InputFormat, OutputFormat};
+use super::ByteFormat;
 
 pub struct Rc4 {
     pub arr: [u8; 256],
     pub i: u8,
     pub j: u8,
-    pub output_format: OutputFormat,
-    pub input_format: InputFormat,
+    pub output_format: ByteFormat,
+    pub input_format: ByteFormat,
 }
 
 impl Default for Rc4 {
@@ -22,8 +22,8 @@ impl Default for Rc4 {
             arr,
             i: 0,
             j: 0,
-            output_format: OutputFormat::Hex,
-            input_format: InputFormat::Hex,
+            output_format: ByteFormat::Hex,
+            input_format: ByteFormat::Hex,
         }
     }
 }
@@ -76,15 +76,15 @@ impl Rc4 {
 impl Cipher for Rc4 {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let mut bytes = match self.input_format {
-            InputFormat::Hex => {
+            ByteFormat::Hex => {
                 hex_to_bytes(text).map_err(|_| CipherError::input("not valid hexcode"))?
             }
-            InputFormat::Utf8 => text.bytes().collect(),
+            ByteFormat::Utf8 => text.bytes().collect(),
         };
         self.encrypt_bytes_cloned(&mut bytes);
         match self.output_format {
-            OutputFormat::Hex => Ok(bytes.iter().map(|byte| format!("{:02x}", byte)).collect()),
-            OutputFormat::Utf8 => Ok(String::from_utf8_lossy(&bytes).to_string()),
+            ByteFormat::Hex => Ok(bytes.iter().map(|byte| format!("{:02x}", byte)).collect()),
+            ByteFormat::Utf8 => Ok(String::from_utf8_lossy(&bytes).to_string()),
         }
     }
 
@@ -112,8 +112,8 @@ mod rc4_tests {
     fn decrypt_test() {
         let mut cipher = Rc4::default();
         cipher.ksa("Secret".as_bytes());
-        cipher.input_format = InputFormat::Hex;
-        cipher.output_format = OutputFormat::Utf8;
+        cipher.input_format = ByteFormat::Hex;
+        cipher.output_format = ByteFormat::Utf8;
         assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT)
     }
 }

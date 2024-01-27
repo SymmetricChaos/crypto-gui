@@ -1,4 +1,4 @@
-use super::{InputFormat, OutputFormat};
+use super::ByteFormat;
 use crate::{Cipher, CipherError};
 use std::{cmp::max, ops::Shl};
 use utils::text_functions::hex_to_bytes;
@@ -9,8 +9,8 @@ const Q32: u32 = 0x9e3779b9;
 // const Q64: u64 = 0x9e3779b97f4a7c15;
 
 pub struct Rc5 {
-    pub output_format: OutputFormat,
-    pub input_format: InputFormat,
+    pub output_format: ByteFormat,
+    pub input_format: ByteFormat,
     pub rounds: usize,
     pub state: Vec<u32>,
 }
@@ -20,8 +20,8 @@ impl Default for Rc5 {
         Self {
             rounds: 12,
             state: Vec::new(),
-            output_format: OutputFormat::Hex,
-            input_format: InputFormat::Hex,
+            output_format: ByteFormat::Hex,
+            input_format: ByteFormat::Hex,
         }
     }
 }
@@ -166,29 +166,29 @@ impl Rc5 {
 impl Cipher for Rc5 {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let mut bytes = match self.input_format {
-            InputFormat::Hex => {
+            ByteFormat::Hex => {
                 hex_to_bytes(text).map_err(|_| CipherError::input("not valid hexcode"))?
             }
-            InputFormat::Utf8 => text.bytes().collect(),
+            ByteFormat::Utf8 => text.bytes().collect(),
         };
         let b = self.encrypt_block_32(&mut bytes)?;
         match self.output_format {
-            OutputFormat::Hex => Ok(b.iter().map(|byte| format!("{:02x}", byte)).collect()),
-            OutputFormat::Utf8 => Ok(String::from_utf8_lossy(&b).to_string()),
+            ByteFormat::Hex => Ok(b.iter().map(|byte| format!("{:02x}", byte)).collect()),
+            ByteFormat::Utf8 => Ok(String::from_utf8_lossy(&b).to_string()),
         }
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         let mut bytes = match self.input_format {
-            InputFormat::Hex => {
+            ByteFormat::Hex => {
                 hex_to_bytes(text).map_err(|_| CipherError::input("not valid hexcode"))?
             }
-            InputFormat::Utf8 => text.bytes().collect(),
+            ByteFormat::Utf8 => text.bytes().collect(),
         };
         let b = self.decrypt_block_32(&mut bytes)?;
         match self.output_format {
-            OutputFormat::Hex => Ok(b.iter().map(|byte| format!("{:02x}", byte)).collect()),
-            OutputFormat::Utf8 => Ok(String::from_utf8_lossy(&b).to_string()),
+            ByteFormat::Hex => Ok(b.iter().map(|byte| format!("{:02x}", byte)).collect()),
+            ByteFormat::Utf8 => Ok(String::from_utf8_lossy(&b).to_string()),
         }
     }
 }

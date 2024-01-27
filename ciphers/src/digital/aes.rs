@@ -2,18 +2,18 @@ use utils::text_functions::hex_to_bytes;
 
 use crate::{Cipher, CipherError};
 
-use super::{InputFormat, OutputFormat};
+use super::ByteFormat;
 
 pub struct Aes {
-    pub output_format: OutputFormat,
-    pub input_format: InputFormat,
+    pub output_format: ByteFormat,
+    pub input_format: ByteFormat,
 }
 
 impl Default for Aes {
     fn default() -> Self {
         Self {
-            output_format: OutputFormat::Hex,
-            input_format: InputFormat::Hex,
+            output_format: ByteFormat::Hex,
+            input_format: ByteFormat::Hex,
         }
     }
 }
@@ -47,20 +47,30 @@ impl Aes {
 impl Cipher for Aes {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let mut bytes = match self.input_format {
-            InputFormat::Hex => {
+            ByteFormat::Hex => {
                 hex_to_bytes(text).map_err(|_| CipherError::input("not valid hexcode"))?
             }
-            InputFormat::Utf8 => text.bytes().collect(),
+            ByteFormat::Utf8 => text.bytes().collect(),
         };
         let out = self.encrypt_bytes(&mut bytes)?;
         match self.output_format {
-            OutputFormat::Hex => Ok(out.iter().map(|byte| format!("{:02x}", byte)).collect()),
-            OutputFormat::Utf8 => Ok(String::from_utf8_lossy(&out).to_string()),
+            ByteFormat::Hex => Ok(out.iter().map(|byte| format!("{:02x}", byte)).collect()),
+            ByteFormat::Utf8 => Ok(String::from_utf8_lossy(&out).to_string()),
         }
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        todo!()
+        let mut bytes = match self.input_format {
+            ByteFormat::Hex => {
+                hex_to_bytes(text).map_err(|_| CipherError::input("not valid hexcode"))?
+            }
+            ByteFormat::Utf8 => text.bytes().collect(),
+        };
+        let out = self.decrypt_bytes(&mut bytes)?;
+        match self.output_format {
+            ByteFormat::Hex => Ok(out.iter().map(|byte| format!("{:02x}", byte)).collect()),
+            ByteFormat::Utf8 => Ok(String::from_utf8_lossy(&out).to_string()),
+        }
     }
 }
 
