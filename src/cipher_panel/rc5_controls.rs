@@ -73,7 +73,7 @@ impl CipherFrame for Rc5Frame {
         if ui.text_edit_multiline(&mut self.key).changed() {
             self.key = self.key.chars().filter(|c| c.is_ascii_hexdigit()).collect();
         }
-        if ui.button("Set Byte Array from Key").clicked() {
+        if ui.button("Set State from Key").clicked() {
             if self.key.len() > 510 {
                 self.key.truncate(510)
             }
@@ -86,7 +86,7 @@ impl CipherFrame for Rc5Frame {
 
         ui.subheading("Internal State");
 
-        ui.collapsing("Array of Bytes", |ui| {
+        ui.collapsing("Array of 32-bit Words", |ui| {
             egui::Grid::new("rc4_array")
                 .num_columns(16)
                 .striped(true)
@@ -96,7 +96,7 @@ impl CipherFrame for Rc5Frame {
                             ui.end_row()
                         }
                         ui.label(
-                            RichText::from(format!("{:02X}", b)).font(FontId::monospace(15.0)),
+                            RichText::from(format!("{:08X}", b)).font(FontId::monospace(15.0)),
                         );
                     }
                 });

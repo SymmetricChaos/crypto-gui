@@ -19,10 +19,10 @@ use self::{
     plugboard_controls::PlugboardFrame, polybius_cube_controls::PolybiusCubeFrame,
     polybius_square_controls::PolybiusSquareFrame, porta_controls::PortaFrame,
     purple_controls::PurpleFrame, quagmire_controls::QuagmireFrame,
-    rail_fence_controls::RailFenceFrame, rc4_controls::Rc4Frame, rs44_controls::Rs44Frame,
-    scytale_controls::ScytaleFrame, seriated_playfair_controls::SeriatedPlayfairFrame,
-    shamir_controls::ShamirSecretSharingFrame, sigaba_controls::SigabaFrame,
-    slidefair_controls::SlidefairFrame, trifid_controls::TrifidFrame,
+    rail_fence_controls::RailFenceFrame, rc4_controls::Rc4Frame, rc5_controls::Rc5Frame,
+    rs44_controls::Rs44Frame, scytale_controls::ScytaleFrame,
+    seriated_playfair_controls::SeriatedPlayfairFrame, shamir_controls::ShamirSecretSharingFrame,
+    sigaba_controls::SigabaFrame, slidefair_controls::SlidefairFrame, trifid_controls::TrifidFrame,
     turning_grille_controls::TurningGrilleFrame, two_square_controls::TwoSquareFrame,
     vic_controls::VicFrame, vigenere_controls::VigenereFrame,
 };
@@ -170,6 +170,7 @@ pub struct CipherInterface {
 
     // Digital
     rc4: Rc4Frame,
+    rc5: Rc5Frame,
 
     // Other
     shamir: ShamirSecretSharingFrame,
@@ -272,7 +273,12 @@ impl CipherInterface {
             ui,
         );
 
-        combox_box(&[CipherId::Rc4], active_cipher, CipherCategory::Digital, ui);
+        combox_box(
+            &[CipherId::Rc4, CipherId::Rc5],
+            active_cipher,
+            CipherCategory::Digital,
+            ui,
+        );
 
         combox_box(
             &[CipherId::Shamir, CipherId::Vic],
@@ -317,6 +323,7 @@ impl CipherInterface {
             CipherId::Quagmire => &mut self.quagmire,
             CipherId::RailFence => &mut self.rail_fence,
             CipherId::Rc4 => &mut self.rc4,
+            CipherId::Rc5 => &mut self.rc5,
             CipherId::Rs44 => &mut self.rs44,
             CipherId::Scytale => &mut self.scytale,
             CipherId::SeriatedPlayfair => &mut self.seriated,

@@ -1,7 +1,6 @@
 use super::ByteFormat;
 use crate::{Cipher, CipherError};
 use std::{cmp::max, ops::Shl};
-use utils::text_functions::hex_to_bytes;
 
 const P32: u32 = 0xb7e15163;
 const Q32: u32 = 0x9e3779b9;
@@ -169,36 +168,22 @@ impl Rc5 {
 
 impl Cipher for Rc5 {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut bytes = match self.input_format {
-            ByteFormat::Hex => {
-                hex_to_bytes(text).map_err(|_| CipherError::input("not valid hexcode"))?
-            }
-            ByteFormat::Utf8 => text.bytes().collect(),
-        };
-        let b = self.encrypt_block_32(&mut bytes)?;
-        match self.output_format {
-            ByteFormat::Hex => Ok(b.iter().map(|byte| format!("{:02x}", byte)).collect()),
-            ByteFormat::Utf8 => Ok(String::from_utf8_lossy(&b).to_string()),
-        }
+        let mut bytes = self.input_format.text_to_bytes(text)?;
+        let out = self.encrypt_block_32(&mut bytes)?;
+        Ok(self.output_format.bytes_to_text(&out))
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut bytes = match self.input_format {
-            ByteFormat::Hex => {
-                hex_to_bytes(text).map_err(|_| CipherError::input("not valid hexcode"))?
-            }
-            ByteFormat::Utf8 => text.bytes().collect(),
-        };
-        let b = self.decrypt_block_32(&mut bytes)?;
-        match self.output_format {
-            ByteFormat::Hex => Ok(b.iter().map(|byte| format!("{:02x}", byte)).collect()),
-            ByteFormat::Utf8 => Ok(String::from_utf8_lossy(&b).to_string()),
-        }
+        let mut bytes = self.input_format.text_to_bytes(text)?;
+        let out = self.decrypt_block_32(&mut bytes)?;
+        Ok(self.output_format.bytes_to_text(&out))
     }
 }
 
 #[cfg(test)]
 mod rc5_tests {
+
+    use utils::text_functions::hex_to_bytes;
 
     use super::*;
 
