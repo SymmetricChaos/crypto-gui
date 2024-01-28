@@ -18,6 +18,8 @@ impl Default for Des {
     }
 }
 
+// All the bit manipulation is taken from here:
+// https://docs.rs/des/latest/src/des/des.rs.html
 fn delta_swap(a: u64, delta: u64, mask: u64) -> u64 {
     let b = (a ^ (a >> delta)) & mask;
     a ^ b ^ (b << delta)
@@ -27,7 +29,7 @@ impl Des {
     const KEYSHIFT: [u32; 16] = [1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1];
 
     //  Swap bits using the PC-1 table
-    pub fn pc1(mut key: u64) -> u64 {
+    fn pc1(mut key: u64) -> u64 {
         key = delta_swap(key, 2, 0x3333000033330000);
         key = delta_swap(key, 4, 0x0f0f0f0f00000000);
         key = delta_swap(key, 8, 0x009a000a00a200a8);
@@ -114,10 +116,6 @@ impl Des {
         b1 | b2 | b3 | b4 | b5 | b6 | b7 | b8 | b9 | b10
     }
 
-    pub fn initial_permutation() {}
-
-    pub fn initial_permutation_inv() {}
-
     pub fn ksa(&mut self, key: u64) {
         let key = Self::pc1(key);
         let key = key >> 8;
@@ -137,16 +135,23 @@ impl Des {
             ));
         };
 
-        let mut temp = 0;
         let mut out = Vec::with_capacity(bytes.len());
 
         for block in bytes.chunks_exact(8) {
-            let mut x = [0u32; 2];
-            for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)) {
-                *elem = u32::from_le_bytes(chunk.try_into().unwrap());
+            let chunk = Self::ip(u64::from_le_bytes(block.try_into().unwrap()));
+            let mut l = chunk << 32;
+            let mut r = chunk & 0xfffffff_u64;
+            for key in self.state {
+                let temp = r;
+                r = Self::e(r);
+                r = r ^ key;
+                // SBox goes here
+                r = Self::p(r);
+                r = r ^ l;
+                l = temp;
             }
-            temp = x[1];
-            // x[1] = Self::e(x[1]);
+
+            out.extend(Self::fp((r << 32) | l).to_le_bytes());
         }
 
         Ok(out)
@@ -160,6 +165,24 @@ impl Des {
         };
 
         let mut out = Vec::with_capacity(bytes.len());
+
+        for block in bytes.chunks_exact(8) {
+            let chunk = Self::ip(u64::from_le_bytes(block.try_into().unwrap()));
+            let mut l = chunk << 32;
+            let mut r = chunk & 0xfffffff_u64;
+
+            for key in self.state.iter().rev() {
+                let temp = r;
+                r = Self::e(r);
+                r = r ^ key;
+                // SBox goes here
+                r = Self::p(r);
+                r = r ^ l;
+                l = temp;
+            }
+
+            out.extend(Self::fp((r << 32) | l).to_le_bytes());
+        }
 
         Ok(out)
     }
