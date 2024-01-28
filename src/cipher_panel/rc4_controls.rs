@@ -3,7 +3,7 @@ use std::num::ParseIntError;
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
 use ciphers::{
-    digital::{ByteFormat, Rc4},
+    digital::{rc4::Rc4, ByteFormat},
     Cipher,
 };
 use egui::{DragValue, FontId, RichText, Ui};
