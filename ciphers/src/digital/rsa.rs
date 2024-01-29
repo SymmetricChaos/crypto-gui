@@ -51,15 +51,13 @@ impl Rsa {
     pub fn public_key(&self) {}
 
     pub fn encrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        let mut out = Vec::with_capacity(bytes.len());
-
-        Ok(out)
+        let m = BigUint::from_bytes_be(bytes);
+        Ok(m.modpow(&self.e, &self.n).to_bytes_be())
     }
 
     pub fn decrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        let mut out = Vec::with_capacity(bytes.len());
-
-        Ok(out)
+        let c = BigUint::from_bytes_be(bytes);
+        Ok(c.modpow(&self.d, &self.n).to_bytes_be())
     }
 }
 
@@ -78,7 +76,7 @@ impl Cipher for Rsa {
 }
 
 #[cfg(test)]
-mod aes_tests {
+mod rsa_tests {
 
     use super::*;
 
@@ -86,5 +84,14 @@ mod aes_tests {
     fn test_ksa() {
         let mut cipher = Rsa::default();
         cipher.set_key(&5623, &5869);
+    }
+
+    #[test]
+    fn encrypt_decrypt() {
+        let mut cipher = Rsa::default();
+        cipher.set_key(&5623, &5869);
+        let ptext = "010203";
+        let ctext = cipher.encrypt(ptext).unwrap();
+        assert_eq!(cipher.decrypt(&ctext).unwrap(), ptext);
     }
 }
