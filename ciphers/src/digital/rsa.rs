@@ -28,10 +28,6 @@ impl Default for Rsa {
 }
 
 impl Rsa {
-    pub fn key_length(&self) -> u64 {
-        self.n.bits()
-    }
-
     pub fn set_key<N: ToBigUint>(&mut self, p: &N, q: &N) {
         let p = p.to_biguint().expect("p could not be converted to BigUint");
         let q = q.to_biguint().expect("q could not be converted to BigUint");
@@ -48,7 +44,13 @@ impl Rsa {
             .expect("modular multiplicative inverse could not convert to BigUint");
     }
 
-    pub fn public_key(&self) {}
+    pub fn padding(&self, bytes: &[u8]) -> Vec<u8> {
+        todo!()
+    }
+
+    pub fn public_key(&self) -> (BigUint, BigUint) {
+        (self.e.clone(), self.n.clone())
+    }
 
     pub fn encrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
         let m = BigUint::from_bytes_be(bytes);
