@@ -63,6 +63,7 @@ pub mod rail_fence_controls;
 pub mod rc4_controls;
 pub mod rc5_controls;
 pub mod rs44_controls;
+mod rsa_controls;
 pub mod scytale_controls;
 pub mod seriated_playfair_controls;
 pub mod shamir_controls;

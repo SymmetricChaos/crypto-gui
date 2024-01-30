@@ -1,0 +1,106 @@
+use std::{num::ParseIntError, str::FromStr};
+
+use super::CipherFrame;
+use crate::ui_elements::UiElements;
+use ciphers::{
+    digital::{rsa::Rsa, ByteFormat},
+    Cipher,
+};
+use egui::Ui;
+use num::BigUint;
+use rand::{thread_rng, Rng};
+
+#[derive(Default)]
+pub struct RsaFrame {
+    cipher: Rsa,
+    p: String,
+    p_num: BigUint,
+    q: String,
+    q_num: BigUint,
+}
+
+impl RsaFrame {
+    fn run_ksa(&mut self) {}
+}
+
+impl CipherFrame for RsaFrame {
+    fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
+        ui.randomize_reset(self);
+        ui.add_space(16.0);
+
+        ui.subheading("Input Format");
+        ui.label("Input can be text (interpreted as UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
+        ui.horizontal(|ui| {
+            ui.selectable_value(
+                &mut self.cipher.input_format,
+                ByteFormat::Utf8,
+                "Text (UTF-8)",
+            );
+            ui.selectable_value(
+                &mut self.cipher.input_format,
+                ByteFormat::Hex,
+                "Hexadecimal",
+            );
+            ui.selectable_value(&mut self.cipher.input_format, ByteFormat::Utf8, "Base64");
+        });
+
+        ui.add_space(8.0);
+
+        ui.subheading("Output Format");
+        ui.label("Output can be text (but information will be lost if the encrypted bytes are not valid UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
+        ui.horizontal(|ui| {
+            ui.selectable_value(
+                &mut self.cipher.output_format,
+                ByteFormat::Utf8,
+                "Text (UTF-8)",
+            );
+            ui.selectable_value(
+                &mut self.cipher.output_format,
+                ByteFormat::Hex,
+                "Hexadecimal",
+            );
+            ui.selectable_value(&mut self.cipher.output_format, ByteFormat::Base64, "Base64");
+        });
+
+        ui.add_space(16.0);
+
+        ui.subheading("Prime (p)");
+        if ui.control_string(&mut self.p).changed() {
+            self.p = self.p.chars().filter(|c| c.is_ascii_digit()).collect();
+            self.p_num = BigUint::from_str(&self.p).expect("invalid inputs should be filtered out")
+        }
+
+        ui.subheading("Prime (q)");
+        if ui.control_string(&mut self.q).changed() {
+            self.q = self.p.chars().filter(|c| c.is_ascii_digit()).collect();
+            self.q_num = BigUint::from_str(&self.q).expect("invalid inputs should be filtered out")
+        }
+
+        ui.subheading("Key (n)");
+        ui.label(format!(
+            "{} × {} = {}",
+            self.p,
+            self.q,
+            &self.p_num * &self.q_num
+        ));
+
+        ui.add_space(16.0);
+    }
+
+    fn cipher(&self) -> &dyn Cipher {
+        &self.cipher
+    }
+
+    fn randomize(&mut self) {
+        let mut rng = thread_rng();
+        self.p = format!("{:08X}", rng.gen::<u64>());
+        self.p_num = BigUint::from_str(&self.p).expect("invalid inputs should be filtered out");
+        self.q = format!("{:08X}", rng.gen::<u64>());
+        self.q_num = BigUint::from_str(&self.q).expect("invalid inputs should be filtered out");
+        self.run_ksa();
+    }
+
+    fn reset(&mut self) {
+        *self = Self::default()
+    }
+}
