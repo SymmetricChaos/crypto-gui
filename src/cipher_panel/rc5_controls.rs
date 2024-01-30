@@ -39,14 +39,15 @@ impl CipherFrame for Rc5Frame {
         ui.horizontal(|ui| {
             ui.selectable_value(
                 &mut self.cipher.input_format,
-                ByteFormat::Hex,
-                "Hexadecimal",
-            );
-            ui.selectable_value(
-                &mut self.cipher.input_format,
                 ByteFormat::Utf8,
                 "Text (UTF-8)",
             );
+            ui.selectable_value(
+                &mut self.cipher.input_format,
+                ByteFormat::Hex,
+                "Hexadecimal",
+            );
+            ui.selectable_value(&mut self.cipher.input_format, ByteFormat::Utf8, "Base64");
         });
 
         ui.add_space(8.0);
@@ -56,14 +57,15 @@ impl CipherFrame for Rc5Frame {
         ui.horizontal(|ui| {
             ui.selectable_value(
                 &mut self.cipher.output_format,
-                ByteFormat::Hex,
-                "Hexadecimal",
-            );
-            ui.selectable_value(
-                &mut self.cipher.output_format,
                 ByteFormat::Utf8,
                 "Text (UTF-8)",
             );
+            ui.selectable_value(
+                &mut self.cipher.output_format,
+                ByteFormat::Hex,
+                "Hexadecimal",
+            );
+            ui.selectable_value(&mut self.cipher.output_format, ByteFormat::Base64, "Base64");
         });
 
         ui.add_space(16.0);
