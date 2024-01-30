@@ -49,7 +49,7 @@ impl Rsa {
     }
 
     pub fn public_key(&self) -> (BigUint, BigUint) {
-        (self.e.clone(), self.n.clone())
+        (self.n.clone(), self.e.clone())
     }
 
     pub fn encrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
@@ -66,12 +66,22 @@ impl Rsa {
 impl Cipher for Rsa {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let mut bytes = self.input_format.text_to_bytes(text)?;
+        if (bytes.len() * 8) > self.n.bits() as usize {
+            return Err(CipherError::input(
+                "message length, in bits, cannot be greater than the key size, in bits",
+            ));
+        }
         let out = self.encrypt_bytes(&mut bytes)?;
         Ok(self.output_format.bytes_to_text(&out))
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         let mut bytes = self.input_format.text_to_bytes(text)?;
+        if (bytes.len() * 8) > self.n.bits() as usize {
+            return Err(CipherError::input(
+                "message length, in bits, cannot be greater than the key size, in bits",
+            ));
+        }
         let out = self.decrypt_bytes(&mut bytes)?;
         Ok(self.output_format.bytes_to_text(&out))
     }
