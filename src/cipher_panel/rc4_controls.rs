@@ -34,38 +34,40 @@ impl CipherFrame for Rc4Frame {
         ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.subheading("Input Format");
-        ui.label("Input can be text (interpreted as UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
-        ui.horizontal(|ui| {
-            ui.selectable_value(
-                &mut self.cipher.input_format,
-                ByteFormat::Utf8,
-                "Text (UTF-8)",
-            );
-            ui.selectable_value(
-                &mut self.cipher.input_format,
-                ByteFormat::Hex,
-                "Hexadecimal",
-            );
-            ui.selectable_value(&mut self.cipher.input_format, ByteFormat::Utf8, "Base64");
+        ui.collapsing("Input Format", |ui| {
+            ui.label("Input can be text (interpreted as UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
+            ui.horizontal(|ui| {
+                ui.selectable_value(
+                    &mut self.cipher.input_format,
+                    ByteFormat::Utf8,
+                    "Text (UTF-8)",
+                );
+                ui.selectable_value(
+                    &mut self.cipher.input_format,
+                    ByteFormat::Hex,
+                    "Hexadecimal",
+                );
+                ui.selectable_value(&mut self.cipher.input_format, ByteFormat::Utf8, "Base64");
+            });
         });
 
         ui.add_space(8.0);
 
-        ui.subheading("Output Format");
-        ui.label("Output can be text (but information will be lost if the encrypted bytes are not valid UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
-        ui.horizontal(|ui| {
-            ui.selectable_value(
-                &mut self.cipher.output_format,
-                ByteFormat::Utf8,
-                "Text (UTF-8)",
-            );
-            ui.selectable_value(
-                &mut self.cipher.output_format,
-                ByteFormat::Hex,
-                "Hexadecimal",
-            );
-            ui.selectable_value(&mut self.cipher.output_format, ByteFormat::Base64, "Base64");
+        ui.collapsing("Output Format", |ui| {
+            ui.label("Output can be text (but information will be lost if the encrypted bytes are not valid UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
+            ui.horizontal(|ui| {
+                ui.selectable_value(
+                    &mut self.cipher.output_format,
+                    ByteFormat::Utf8,
+                    "Text (UTF-8)",
+                );
+                ui.selectable_value(
+                    &mut self.cipher.output_format,
+                    ByteFormat::Hex,
+                    "Hexadecimal",
+                );
+                ui.selectable_value(&mut self.cipher.output_format, ByteFormat::Base64, "Base64");
+            });
         });
 
         ui.add_space(16.0);
