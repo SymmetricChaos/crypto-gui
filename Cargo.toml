@@ -29,7 +29,8 @@ rngs = {path = "rngs"}
 hashers = {path = "hashers"}
 
 lazy_static = "1.4.0"
-num = "0.4.0"
+num = "0.4.1"
+num-prime = "0.4.3"
 itertools = "0.10.0"
 rand = "0.8.3"
 getrandom = { version = "0.2", features = ["js"] }

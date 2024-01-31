@@ -8,6 +8,7 @@ use ciphers::{
 };
 use egui::Ui;
 use num::BigUint;
+use num_prime::RandPrime;
 use rand::{thread_rng, Rng};
 
 #[derive(Default)]
@@ -65,16 +66,48 @@ impl CipherFrame for RsaFrame {
         ui.add_space(16.0);
 
         ui.subheading("Prime (p)");
-        if ui.control_string(&mut self.p).changed() {
-            self.p = self.p.chars().filter(|c| c.is_ascii_digit()).collect();
-            self.p_num = BigUint::from_str(&self.p).expect("invalid inputs should be filtered out")
-        }
+        ui.horizontal(|ui| {
+            if ui.control_string(&mut self.p).changed() {
+                self.p = self
+                    .p
+                    .chars()
+                    .filter(|c| c.is_ascii_digit())
+                    .take(40)
+                    .collect();
+                self.p_num =
+                    BigUint::from_str(&self.p).expect("invalid inputs should be filtered out")
+            };
+            if ui
+                .button("🎲")
+                .on_hover_text("random 128-bit prime")
+                .clicked()
+            {
+                self.p_num = thread_rng().gen_prime(128, None);
+                self.p = self.p_num.to_str_radix(10);
+            }
+        });
 
         ui.subheading("Prime (q)");
-        if ui.control_string(&mut self.q).changed() {
-            self.q = self.p.chars().filter(|c| c.is_ascii_digit()).collect();
-            self.q_num = BigUint::from_str(&self.q).expect("invalid inputs should be filtered out")
-        }
+        ui.horizontal(|ui| {
+            if ui.control_string(&mut self.q).changed() {
+                self.q = self
+                    .p
+                    .chars()
+                    .filter(|c| c.is_ascii_digit())
+                    .take(40)
+                    .collect();
+                self.q_num =
+                    BigUint::from_str(&self.q).expect("invalid inputs should be filtered out")
+            };
+            if ui
+                .button("🎲")
+                .on_hover_text("random 128-bit prime")
+                .clicked()
+            {
+                self.q_num = thread_rng().gen_prime(128, None);
+                self.q = self.q_num.to_str_radix(10);
+            }
+        });
 
         ui.subheading("Key (n)");
         ui.label(format!(
@@ -93,10 +126,13 @@ impl CipherFrame for RsaFrame {
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        self.p = format!("{:08X}", rng.gen::<u64>());
-        self.p_num = BigUint::from_str(&self.p).expect("invalid inputs should be filtered out");
-        self.q = format!("{:08X}", rng.gen::<u64>());
-        self.q_num = BigUint::from_str(&self.q).expect("invalid inputs should be filtered out");
+
+        self.p_num = rng.gen_prime(128, None);
+        self.p = self.p_num.to_str_radix(10);
+
+        self.q_num = rng.gen_prime(128, None);
+        self.q = self.q_num.to_str_radix(10);
+
         self.run_ksa();
     }
 
