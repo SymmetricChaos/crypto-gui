@@ -8,7 +8,7 @@ use ciphers::{
 };
 use egui::Ui;
 use num::BigUint;
-use num_prime::RandPrime;
+use num_prime::{nt_funcs::is_prime, PrimalityUtils, RandPrime};
 use rand::{thread_rng, Rng};
 
 #[derive(Default)]
@@ -85,6 +85,11 @@ impl CipherFrame for RsaFrame {
                 self.p_num = thread_rng().gen_prime(128, None);
                 self.p = self.p_num.to_str_radix(10);
             }
+            match is_prime(&self.p_num, None) {
+                num_prime::Primality::Yes => ui.label("prime"),
+                num_prime::Primality::No => ui.error_text("NOT PRIME"),
+                num_prime::Primality::Probable(f) => ui.label(format!("prime ({:.3})", f)),
+            }
         });
 
         ui.subheading("Prime (q)");
@@ -106,6 +111,11 @@ impl CipherFrame for RsaFrame {
             {
                 self.q_num = thread_rng().gen_prime(128, None);
                 self.q = self.q_num.to_str_radix(10);
+            }
+            match is_prime(&self.q_num, None) {
+                num_prime::Primality::Yes => ui.label("prime"),
+                num_prime::Primality::No => ui.error_text("NOT PRIME"),
+                num_prime::Primality::Probable(f) => ui.label(format!("prime ({:.3})", f)),
             }
         });
 
