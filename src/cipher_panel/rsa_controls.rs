@@ -1,4 +1,4 @@
-use std::{num::ParseIntError, str::FromStr};
+use std::str::FromStr;
 
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
@@ -8,8 +8,8 @@ use ciphers::{
 };
 use egui::Ui;
 use num::BigUint;
-use num_prime::{nt_funcs::is_prime, PrimalityUtils, RandPrime};
-use rand::{thread_rng, Rng};
+use num_prime::{nt_funcs::is_prime, PrimalityTestConfig, RandPrime};
+use rand::thread_rng;
 
 #[derive(Default)]
 pub struct RsaFrame {
@@ -21,7 +21,9 @@ pub struct RsaFrame {
 }
 
 impl RsaFrame {
-    fn run_ksa(&mut self) {}
+    fn run_ksa(&mut self) {
+        self.cipher.set_key(&self.p_num, &self.q_num)
+    }
 }
 
 impl CipherFrame for RsaFrame {
@@ -29,40 +31,41 @@ impl CipherFrame for RsaFrame {
         ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.subheading("Input Format");
-        ui.label("Input can be text (interpreted as UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
-        ui.horizontal(|ui| {
-            ui.selectable_value(
-                &mut self.cipher.input_format,
-                ByteFormat::Utf8,
-                "Text (UTF-8)",
-            );
-            ui.selectable_value(
-                &mut self.cipher.input_format,
-                ByteFormat::Hex,
-                "Hexadecimal",
-            );
-            ui.selectable_value(&mut self.cipher.input_format, ByteFormat::Utf8, "Base64");
+        ui.collapsing("Input Format", |ui| {
+            ui.label("Input can be text (interpreted as UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
+            ui.horizontal(|ui| {
+                ui.selectable_value(
+                    &mut self.cipher.input_format,
+                    ByteFormat::Utf8,
+                    "Text (UTF-8)",
+                );
+                ui.selectable_value(
+                    &mut self.cipher.input_format,
+                    ByteFormat::Hex,
+                    "Hexadecimal",
+                );
+                ui.selectable_value(&mut self.cipher.input_format, ByteFormat::Utf8, "Base64");
+            });
         });
 
         ui.add_space(8.0);
 
-        ui.subheading("Output Format");
-        ui.label("Output can be text (but information will be lost if the encrypted bytes are not valid UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
-        ui.horizontal(|ui| {
-            ui.selectable_value(
-                &mut self.cipher.output_format,
-                ByteFormat::Utf8,
-                "Text (UTF-8)",
-            );
-            ui.selectable_value(
-                &mut self.cipher.output_format,
-                ByteFormat::Hex,
-                "Hexadecimal",
-            );
-            ui.selectable_value(&mut self.cipher.output_format, ByteFormat::Base64, "Base64");
+        ui.collapsing("Output Format", |ui| {
+            ui.label("Output can be text (but information will be lost if the encrypted bytes are not valid UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
+            ui.horizontal(|ui| {
+                ui.selectable_value(
+                    &mut self.cipher.output_format,
+                    ByteFormat::Utf8,
+                    "Text (UTF-8)",
+                );
+                ui.selectable_value(
+                    &mut self.cipher.output_format,
+                    ByteFormat::Hex,
+                    "Hexadecimal",
+                );
+                ui.selectable_value(&mut self.cipher.output_format, ByteFormat::Base64, "Base64");
+            });
         });
-
         ui.add_space(16.0);
 
         ui.subheading("Prime (p)");
@@ -72,17 +75,17 @@ impl CipherFrame for RsaFrame {
                     .p
                     .chars()
                     .filter(|c| c.is_ascii_digit())
-                    .take(40)
+                    .take(38)
                     .collect();
                 self.p_num =
                     BigUint::from_str(&self.p).expect("invalid inputs should be filtered out")
             };
             if ui
                 .button("🎲")
-                .on_hover_text("random 128-bit prime")
+                .on_hover_text("random 64-bit prime")
                 .clicked()
             {
-                self.p_num = thread_rng().gen_prime(128, None);
+                self.p_num = thread_rng().gen_prime(64, Some(PrimalityTestConfig::strict()));
                 self.p = self.p_num.to_str_radix(10);
             }
             match is_prime(&self.p_num, None) {
@@ -92,6 +95,8 @@ impl CipherFrame for RsaFrame {
             }
         });
 
+        ui.add_space(8.0);
+
         ui.subheading("Prime (q)");
         ui.horizontal(|ui| {
             if ui.control_string(&mut self.q).changed() {
@@ -99,17 +104,17 @@ impl CipherFrame for RsaFrame {
                     .p
                     .chars()
                     .filter(|c| c.is_ascii_digit())
-                    .take(40)
+                    .take(38)
                     .collect();
                 self.q_num =
                     BigUint::from_str(&self.q).expect("invalid inputs should be filtered out")
             };
             if ui
                 .button("🎲")
-                .on_hover_text("random 128-bit prime")
+                .on_hover_text("random 64-bit prime")
                 .clicked()
             {
-                self.q_num = thread_rng().gen_prime(128, None);
+                self.q_num = thread_rng().gen_prime(64, Some(PrimalityTestConfig::strict()));
                 self.q = self.q_num.to_str_radix(10);
             }
             match is_prime(&self.q_num, None) {
@@ -119,13 +124,27 @@ impl CipherFrame for RsaFrame {
             }
         });
 
-        ui.subheading("Key (n)");
-        ui.label(format!(
-            "{} × {} = {}",
-            self.p,
-            self.q,
-            &self.p_num * &self.q_num
-        ));
+        ui.add_space(16.0);
+
+        if ui.button("Calculate Keys").clicked() {
+            self.run_ksa()
+        }
+        ui.add_space(16.0);
+
+        ui.subheading(format!("Product (n) {}-bits", self.cipher.n.bits()));
+        ui.label(format!("{}", &self.p_num * &self.q_num));
+
+        ui.add_space(16.0);
+
+        ui.subheading("Public Key");
+        ui.label("To use the public only n (the product of the primes) and e (a small constant) are needed");
+        ui.label(format!("e = {}", self.cipher.e));
+
+        ui.add_space(8.0);
+
+        ui.subheading("Private Key");
+        ui.label("To use the private only n (the product of the primes) and d (the inverse of e) are needed");
+        ui.label(format!("d = {}", self.cipher.d));
 
         ui.add_space(16.0);
     }
@@ -137,10 +156,10 @@ impl CipherFrame for RsaFrame {
     fn randomize(&mut self) {
         let mut rng = thread_rng();
 
-        self.p_num = rng.gen_prime(128, None);
+        self.p_num = rng.gen_prime(64, None);
         self.p = self.p_num.to_str_radix(10);
 
-        self.q_num = rng.gen_prime(128, None);
+        self.q_num = rng.gen_prime(64, None);
         self.q = self.q_num.to_str_radix(10);
 
         self.run_ksa();

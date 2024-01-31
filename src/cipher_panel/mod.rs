@@ -20,7 +20,7 @@ use self::{
     polybius_square_controls::PolybiusSquareFrame, porta_controls::PortaFrame,
     purple_controls::PurpleFrame, quagmire_controls::QuagmireFrame,
     rail_fence_controls::RailFenceFrame, rc4_controls::Rc4Frame, rc5_controls::Rc5Frame,
-    rs44_controls::Rs44Frame, scytale_controls::ScytaleFrame,
+    rs44_controls::Rs44Frame, rsa_controls::RsaFrame, scytale_controls::ScytaleFrame,
     seriated_playfair_controls::SeriatedPlayfairFrame, shamir_controls::ShamirSecretSharingFrame,
     sigaba_controls::SigabaFrame, slidefair_controls::SlidefairFrame, trifid_controls::TrifidFrame,
     turning_grille_controls::TurningGrilleFrame, two_square_controls::TwoSquareFrame,
@@ -172,6 +172,7 @@ pub struct CipherInterface {
     // Digital
     rc4: Rc4Frame,
     rc5: Rc5Frame,
+    rsa: RsaFrame,
 
     // Other
     shamir: ShamirSecretSharingFrame,
@@ -275,7 +276,7 @@ impl CipherInterface {
         );
 
         combox_box(
-            &[CipherId::Rc4, CipherId::Rc5],
+            &[CipherId::Rc4, CipherId::Rc5, CipherId::Rsa],
             active_cipher,
             CipherCategory::Digital,
             ui,
@@ -325,6 +326,7 @@ impl CipherInterface {
             CipherId::RailFence => &mut self.rail_fence,
             CipherId::Rc4 => &mut self.rc4,
             CipherId::Rc5 => &mut self.rc5,
+            CipherId::Rsa => &mut self.rsa,
             CipherId::Rs44 => &mut self.rs44,
             CipherId::Scytale => &mut self.scytale,
             CipherId::SeriatedPlayfair => &mut self.seriated,

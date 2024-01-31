@@ -21,7 +21,7 @@ impl Default for Rsa {
             input_format: ByteFormat::Hex,
             n: BigUint::default(),
             d: BigUint::default(),
-            e: BigUint::default(),
+            e: BigUint::from(65537_u32), // a small prime constant
             lambda: BigUint::default(),
         }
     }
@@ -34,22 +34,27 @@ impl Rsa {
         let n = &p * &q;
         let one = &BigUint::from(1_u32);
         let lambda = (&p - one).lcm(&(&q - one));
-        let e = BigUint::from(65537_u32); // A prime constant
-        let d = mul_inv(&e, &lambda).expect("modular multiplicative inverse could not be computed");
+        let d = mul_inv(&self.e, &lambda)
+            .expect("modular multiplicative inverse could not be computed");
 
         self.n = n;
         self.lambda = lambda;
-        self.e = e;
         self.d = BigUint::try_from(d)
             .expect("modular multiplicative inverse could not convert to BigUint");
     }
 
-    pub fn padding(&self, bytes: &[u8]) -> Vec<u8> {
-        todo!()
-    }
+    // pub fn padding(&self, bytes: &[u8]) -> Vec<u8> {
+    //     todo!()
+    // }
 
+    // Returns n and e
     pub fn public_key(&self) -> (BigUint, BigUint) {
         (self.n.clone(), self.e.clone())
+    }
+
+    // Returns n and d
+    pub fn private_key(&self) -> (BigUint, BigUint) {
+        (self.n.clone(), self.d.clone())
     }
 
     pub fn encrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
