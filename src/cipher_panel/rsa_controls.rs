@@ -8,7 +8,7 @@ use ciphers::{
 };
 use egui::Ui;
 use num::BigUint;
-use num_prime::{nt_funcs::is_prime, PrimalityTestConfig, RandPrime};
+use num_prime::{nt_funcs::is_prime, RandPrime};
 use rand::thread_rng;
 
 #[derive(Default)]
@@ -85,7 +85,7 @@ impl CipherFrame for RsaFrame {
                 .on_hover_text("random 64-bit prime")
                 .clicked()
             {
-                self.p_num = thread_rng().gen_prime(64, Some(PrimalityTestConfig::strict()));
+                self.p_num = thread_rng().gen_prime(64, None);
                 self.p = self.p_num.to_str_radix(10);
             }
             match is_prime(&self.p_num, None) {
@@ -101,7 +101,7 @@ impl CipherFrame for RsaFrame {
         ui.horizontal(|ui| {
             if ui.control_string(&mut self.q).changed() {
                 self.q = self
-                    .p
+                    .q
                     .chars()
                     .filter(|c| c.is_ascii_digit())
                     .take(38)
@@ -114,7 +114,7 @@ impl CipherFrame for RsaFrame {
                 .on_hover_text("random 64-bit prime")
                 .clicked()
             {
-                self.q_num = thread_rng().gen_prime(64, Some(PrimalityTestConfig::strict()));
+                self.q_num = thread_rng().gen_prime(64, None);
                 self.q = self.q_num.to_str_radix(10);
             }
             match is_prime(&self.q_num, None) {
@@ -132,7 +132,7 @@ impl CipherFrame for RsaFrame {
         ui.add_space(16.0);
 
         ui.subheading(format!("Product (n) {}-bits", self.cipher.n.bits()));
-        ui.label(format!("{}", &self.p_num * &self.q_num));
+        ui.label(format!("{}", &self.cipher.n));
 
         ui.add_space(16.0);
 
