@@ -1,0 +1,96 @@
+use num::{bigint::ToBigUint, BigUint, Integer};
+use utils::math_functions::mul_inv;
+
+use crate::{Cipher, CipherError};
+
+use super::ByteFormat;
+
+pub struct ElGamal {
+    pub output_format: ByteFormat,
+    pub input_format: ByteFormat,
+    pub group_size: BigUint,
+    pub generator: BigUint,
+    pub private_key: BigUint,
+    pub alpha_a: BigUint,
+    pub message_key: BigUint,
+}
+
+impl Default for ElGamal {
+    fn default() -> Self {
+        Self {
+            output_format: ByteFormat::Hex,
+            input_format: ByteFormat::Hex,
+            group_size: BigUint::from(2357_u32),
+            generator: BigUint::from(2_u32),
+            private_key: BigUint::from(1751_u32),
+            alpha_a: BigUint::from(1185_u32),
+            message_key: BigUint::from(1520_u32),
+        }
+    }
+}
+
+impl ElGamal {
+    pub fn set_key<N: ToBigUint>(&mut self) {}
+
+    // Returns group_size, generator, alpha_a
+    pub fn public_key(&self) -> (&BigUint, &BigUint, &BigUint) {
+        (&self.group_size, &self.generator, &self.alpha_a)
+    }
+
+    pub fn encrypt_bytes(&self, bytes: &[u8]) -> Result<(Vec<u8>, Vec<u8>), CipherError> {
+        let m = BigUint::from_bytes_be(bytes);
+        if m > self.group_size {
+            return Err(CipherError::input(
+                "message length cannot be greater than group size",
+            ));
+        };
+        let gamma = self.generator.modpow(&self.message_key, &self.group_size);
+        let delta =
+            (m * self.alpha_a.modpow(&self.message_key, &self.group_size)) % &self.group_size;
+
+        Ok((gamma.to_bytes_be(), delta.to_bytes_be()))
+    }
+}
+
+impl Cipher for ElGamal {
+    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+        let mut bytes = self.input_format.text_to_bytes(text)?;
+        let pair = self.encrypt_bytes(&mut bytes)?;
+        let out = format!(
+            "{}\n{}",
+            self.output_format.bytes_to_text(&pair.0),
+            self.output_format.bytes_to_text(&pair.1)
+        );
+        Ok(out)
+    }
+
+    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+        // let mut bytes = self.input_format.text_to_bytes(text)?;
+
+        // let out = self.decrypt_bytes(&mut bytes)?;
+        // Ok(self.output_format.bytes_to_text(&out))
+        todo!()
+    }
+}
+
+#[cfg(test)]
+mod elgamal_tests {
+
+    use super::*;
+
+    #[test]
+    fn encrypt_decrypt() {
+        let mut cipher = ElGamal::default();
+        let ptext = "";
+        let ctext = cipher.encrypt(ptext).unwrap();
+        assert_eq!(cipher.decrypt(&ctext).unwrap(), ptext);
+    }
+
+    #[test]
+    fn encrypt() {
+        let cipher = ElGamal::default();
+        let ptext = "07f3";
+        let ctext = cipher.encrypt(ptext).unwrap();
+        assert_eq!("0596\n02b9", ctext);
+    }
+}
