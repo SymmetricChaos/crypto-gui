@@ -43,6 +43,7 @@ pub mod columnar_controls;
 pub mod decoder_ring_controls;
 pub mod diagonal_columnar_controls;
 pub mod dryad_controls;
+mod elgamal_controls;
 pub mod enigma_controls;
 pub mod four_square_controls;
 pub mod general_sub_controls;

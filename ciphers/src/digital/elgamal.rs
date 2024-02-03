@@ -1,5 +1,4 @@
-use num::{bigint::ToBigUint, BigUint, Integer};
-use utils::math_functions::mul_inv;
+use num::{bigint::ToBigUint, BigUint};
 
 use crate::{Cipher, CipherError};
 
@@ -11,7 +10,7 @@ pub struct ElGamal {
     pub group_size: BigUint,
     pub generator: BigUint,
     pub private_key: BigUint,
-    pub alpha_a: BigUint,
+    pub point: BigUint,
     pub message_key: BigUint,
 }
 
@@ -23,18 +22,19 @@ impl Default for ElGamal {
             group_size: BigUint::from(2357_u32),
             generator: BigUint::from(2_u32),
             private_key: BigUint::from(1751_u32),
-            alpha_a: BigUint::from(1185_u32),
+            point: BigUint::from(1185_u32),
             message_key: BigUint::from(1520_u32),
         }
     }
 }
 
 impl ElGamal {
-    pub fn set_key<N: ToBigUint>(&mut self) {}
-
-    // Returns group_size, generator, alpha_a
-    pub fn public_key(&self) -> (&BigUint, &BigUint, &BigUint) {
-        (&self.group_size, &self.generator, &self.alpha_a)
+    pub fn set_key<N: ToBigUint>(&mut self, group_size: &N, generator: &N, private_key: &N) {
+        self.group_size = group_size.to_biguint().unwrap();
+        self.generator = generator.to_biguint().unwrap();
+        self.point = self
+            .generator
+            .modpow(&private_key.to_biguint().unwrap(), &self.group_size);
     }
 
     pub fn encrypt_bytes(&self, bytes: &[u8]) -> Result<(Vec<u8>, Vec<u8>), CipherError> {
@@ -45,8 +45,7 @@ impl ElGamal {
             ));
         };
         let gamma = self.generator.modpow(&self.message_key, &self.group_size);
-        let delta =
-            (m * self.alpha_a.modpow(&self.message_key, &self.group_size)) % &self.group_size;
+        let delta = (m * self.point.modpow(&self.message_key, &self.group_size)) % &self.group_size;
 
         Ok((gamma.to_bytes_be(), delta.to_bytes_be()))
     }
@@ -98,7 +97,7 @@ mod elgamal_tests {
 
     #[test]
     fn encrypt_decrypt() {
-        let mut cipher = ElGamal::default();
+        let cipher = ElGamal::default();
         let ptext = "07f3";
         let ctext = cipher.encrypt(ptext).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), ptext);
