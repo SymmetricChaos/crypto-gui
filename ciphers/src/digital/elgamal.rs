@@ -50,6 +50,20 @@ impl ElGamal {
 
         Ok((gamma.to_bytes_be(), delta.to_bytes_be()))
     }
+
+    pub fn decrypt_bytes(&self, gamma: &[u8], delta: &[u8]) -> Result<Vec<u8>, CipherError> {
+        let gamma = BigUint::from_bytes_be(gamma);
+        let delta = BigUint::from_bytes_be(delta);
+
+        let inv = gamma.modpow(
+            &(&self.group_size - &BigUint::from(1_u32) - &self.private_key),
+            &self.group_size,
+        );
+
+        let m = (inv * delta) % &self.group_size;
+
+        Ok(m.to_bytes_be())
+    }
 }
 
 impl Cipher for ElGamal {
@@ -65,11 +79,15 @@ impl Cipher for ElGamal {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        // let mut bytes = self.input_format.text_to_bytes(text)?;
+        if !text.contains('\n') {
+            return Err(CipherError::input("no linebreak found"));
+        }
+        let (t_gamma, t_delta) = text.split_once('\n').unwrap();
+        let gamma = self.input_format.text_to_bytes(t_gamma)?;
+        let delta = self.input_format.text_to_bytes(t_delta)?;
 
-        // let out = self.decrypt_bytes(&mut bytes)?;
-        // Ok(self.output_format.bytes_to_text(&out))
-        todo!()
+        let out = self.decrypt_bytes(&gamma, &delta)?;
+        Ok(self.output_format.bytes_to_text(&out))
     }
 }
 
@@ -81,7 +99,7 @@ mod elgamal_tests {
     #[test]
     fn encrypt_decrypt() {
         let mut cipher = ElGamal::default();
-        let ptext = "";
+        let ptext = "07f3";
         let ctext = cipher.encrypt(ptext).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), ptext);
     }
