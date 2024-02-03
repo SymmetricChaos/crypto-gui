@@ -29,12 +29,10 @@ impl Default for ElGamal {
 }
 
 impl ElGamal {
-    pub fn set_key<N: ToBigUint>(&mut self, group_size: &N, generator: &N, private_key: &N) {
-        self.group_size = group_size.to_biguint().unwrap();
-        self.generator = generator.to_biguint().unwrap();
+    pub fn set_key(&mut self) {
         self.point = self
             .generator
-            .modpow(&private_key.to_biguint().unwrap(), &self.group_size);
+            .modpow(&self.private_key.to_biguint().unwrap(), &self.group_size);
     }
 
     pub fn encrypt_bytes(&self, bytes: &[u8]) -> Result<(Vec<u8>, Vec<u8>), CipherError> {

@@ -11,6 +11,28 @@ use num::BigUint;
 use num_prime::{nt_funcs::is_prime, RandPrime};
 use rand::thread_rng;
 
+fn prime_string(ui: &mut Ui, s: &mut String, n: &mut BigUint) {
+    ui.horizontal(|ui| {
+        if ui.control_string(s).changed() {
+            *s = s.chars().filter(|c| c.is_ascii_digit()).take(38).collect();
+            *n = BigUint::from_str(s).expect("invalid inputs should be filtered out")
+        };
+        if ui
+            .button("🎲")
+            .on_hover_text("random 64-bit prime")
+            .clicked()
+        {
+            *n = thread_rng().gen_prime(64, None);
+            *s = n.to_str_radix(10);
+        }
+        match is_prime(n, None) {
+            num_prime::Primality::Yes => ui.label("prime"),
+            num_prime::Primality::No => ui.error_text("NOT PRIME"),
+            num_prime::Primality::Probable(f) => ui.label(format!("prime ({:.3})", f)),
+        }
+    });
+}
+
 #[derive(Default)]
 pub struct RsaFrame {
     cipher: Rsa,
@@ -69,60 +91,12 @@ impl CipherFrame for RsaFrame {
         ui.add_space(16.0);
 
         ui.subheading("Prime (p)");
-        ui.horizontal(|ui| {
-            if ui.control_string(&mut self.p).changed() {
-                self.p = self
-                    .p
-                    .chars()
-                    .filter(|c| c.is_ascii_digit())
-                    .take(38)
-                    .collect();
-                self.p_num =
-                    BigUint::from_str(&self.p).expect("invalid inputs should be filtered out")
-            };
-            if ui
-                .button("🎲")
-                .on_hover_text("random 64-bit prime")
-                .clicked()
-            {
-                self.p_num = thread_rng().gen_prime(64, None);
-                self.p = self.p_num.to_str_radix(10);
-            }
-            match is_prime(&self.p_num, None) {
-                num_prime::Primality::Yes => ui.label("prime"),
-                num_prime::Primality::No => ui.error_text("NOT PRIME"),
-                num_prime::Primality::Probable(f) => ui.label(format!("prime ({:.3})", f)),
-            }
-        });
+        prime_string(ui, &mut self.p, &mut self.p_num);
 
         ui.add_space(8.0);
 
         ui.subheading("Prime (q)");
-        ui.horizontal(|ui| {
-            if ui.control_string(&mut self.q).changed() {
-                self.q = self
-                    .q
-                    .chars()
-                    .filter(|c| c.is_ascii_digit())
-                    .take(38)
-                    .collect();
-                self.q_num =
-                    BigUint::from_str(&self.q).expect("invalid inputs should be filtered out")
-            };
-            if ui
-                .button("🎲")
-                .on_hover_text("random 64-bit prime")
-                .clicked()
-            {
-                self.q_num = thread_rng().gen_prime(64, None);
-                self.q = self.q_num.to_str_radix(10);
-            }
-            match is_prime(&self.q_num, None) {
-                num_prime::Primality::Yes => ui.label("prime"),
-                num_prime::Primality::No => ui.error_text("NOT PRIME"),
-                num_prime::Primality::Probable(f) => ui.label(format!("prime ({:.3})", f)),
-            }
-        });
+        prime_string(ui, &mut self.q, &mut self.q_num);
 
         ui.add_space(16.0);
 
