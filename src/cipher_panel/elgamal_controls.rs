@@ -9,7 +9,7 @@ use ciphers::{
 use egui::Ui;
 use num::BigUint;
 use num_prime::{nt_funcs::is_prime, RandPrime};
-use rand::thread_rng;
+use rand::{thread_rng, Rng, RngCore};
 
 fn prime_string(ui: &mut Ui, s: &mut String, n: &mut BigUint) {
     ui.horizontal(|ui| {
@@ -87,6 +87,7 @@ impl CipherFrame for ElGamalFrame {
                 );
                 ui.selectable_value(&mut self.cipher.output_format, ByteFormat::Base64, "Base64");
             });
+            self.cipher.set_key()
         });
         ui.add_space(16.0);
 
@@ -104,7 +105,8 @@ impl CipherFrame for ElGamalFrame {
                 .take(38)
                 .collect();
             self.cipher.generator =
-                BigUint::from_str(&self.generator).expect("invalid inputs should be filtered out")
+                BigUint::from_str(&self.generator).expect("invalid inputs should be filtered out");
+            self.cipher.set_key()
         }
         ui.add_space(8.0);
 
@@ -116,8 +118,9 @@ impl CipherFrame for ElGamalFrame {
                 .filter(|c| c.is_ascii_digit())
                 .take(38)
                 .collect();
-            self.cipher.private_key =
-                BigUint::from_str(&self.private_key).expect("invalid inputs should be filtered out")
+            self.cipher.private_key = BigUint::from_str(&self.private_key)
+                .expect("invalid inputs should be filtered out");
+            self.cipher.set_key()
         }
 
         ui.add_space(8.0);
@@ -156,10 +159,15 @@ impl CipherFrame for ElGamalFrame {
         self.cipher.group_size = rng.gen_prime(64, None);
         self.group_size = self.cipher.group_size.to_str_radix(10);
 
-        self.cipher.message_key = rng.gen_prime(64, None);
+        self.cipher.private_key =
+            BigUint::from(rng.gen_range(2..u64::MAX)) % &self.cipher.generator;
+        self.private_key = self.cipher.private_key.to_str_radix(10);
+
+        self.cipher.message_key =
+            BigUint::from(rng.gen_range(2..u64::MAX)) % &self.cipher.generator;
         self.message_key = self.cipher.message_key.to_str_radix(10);
 
-        self.cipher.generator = rng.gen_prime(64, None);
+        self.cipher.generator = BigUint::from(rng.gen_range(2..u64::MAX)) % &self.cipher.generator;
         self.generator = self.cipher.generator.to_str_radix(10);
 
         self.run_ksa();

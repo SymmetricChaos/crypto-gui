@@ -19,11 +19,11 @@ impl Default for ElGamal {
         Self {
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
-            group_size: BigUint::from(2357_u32),
-            generator: BigUint::from(2_u32),
-            private_key: BigUint::from(1751_u32),
-            point: BigUint::from(1185_u32),
-            message_key: BigUint::from(1520_u32),
+            group_size: BigUint::default(),
+            generator: BigUint::default(),
+            private_key: BigUint::default(),
+            point: BigUint::default(),
+            message_key: BigUint::default(),
         }
     }
 }
@@ -95,7 +95,15 @@ mod elgamal_tests {
 
     #[test]
     fn encrypt_decrypt() {
-        let cipher = ElGamal::default();
+        let cipher = ElGamal {
+            output_format: ByteFormat::Hex,
+            input_format: ByteFormat::Hex,
+            group_size: BigUint::from(2357_u32),
+            generator: BigUint::from(2_u32),
+            private_key: BigUint::from(1751_u32),
+            point: BigUint::from(1185_u32),
+            message_key: BigUint::from(1520_u32),
+        };
         let ptext = "07f3";
         let ctext = cipher.encrypt(ptext).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), ptext);
@@ -103,7 +111,15 @@ mod elgamal_tests {
 
     #[test]
     fn encrypt() {
-        let cipher = ElGamal::default();
+        let cipher = ElGamal {
+            output_format: ByteFormat::Hex,
+            input_format: ByteFormat::Hex,
+            group_size: BigUint::from(2357_u32),
+            generator: BigUint::from(2_u32),
+            private_key: BigUint::from(1751_u32),
+            point: BigUint::from(1185_u32),
+            message_key: BigUint::from(1520_u32),
+        };
         let ptext = "07f3";
         let ctext = cipher.encrypt(ptext).unwrap();
         assert_eq!("0596\n02b9", ctext);
