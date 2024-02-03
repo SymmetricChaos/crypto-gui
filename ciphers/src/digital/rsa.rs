@@ -43,27 +43,33 @@ impl Rsa {
             .expect("modular multiplicative inverse could not convert to BigUint");
     }
 
-    // pub fn padding(&self, bytes: &[u8]) -> Vec<u8> {
-    //     todo!()
-    // }
-
     // Returns n and e
-    pub fn public_key(&self) -> (BigUint, BigUint) {
-        (self.n.clone(), self.e.clone())
+    pub fn public_key(&self) -> (&BigUint, &BigUint) {
+        (&self.n, &self.e)
     }
 
     // Returns n and d
-    pub fn private_key(&self) -> (BigUint, BigUint) {
-        (self.n.clone(), self.d.clone())
+    pub fn private_key(&self) -> (&BigUint, &BigUint) {
+        (&self.n, &self.d)
     }
 
     pub fn encrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
         let m = BigUint::from_bytes_be(bytes);
+        if m > self.n {
+            return Err(CipherError::input(
+                "message length cannot be greater than group size",
+            ));
+        };
         Ok(m.modpow(&self.e, &self.n).to_bytes_be())
     }
 
     pub fn decrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
         let c = BigUint::from_bytes_be(bytes);
+        if c > self.n {
+            return Err(CipherError::input(
+                "message length cannot be greater than group size",
+            ));
+        };
         Ok(c.modpow(&self.d, &self.n).to_bytes_be())
     }
 }
@@ -71,22 +77,12 @@ impl Rsa {
 impl Cipher for Rsa {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let mut bytes = self.input_format.text_to_bytes(text)?;
-        if (bytes.len() * 8) > self.n.bits() as usize {
-            return Err(CipherError::input(
-                "message length, in bits, cannot be greater than the key size, in bits",
-            ));
-        }
         let out = self.encrypt_bytes(&mut bytes)?;
         Ok(self.output_format.bytes_to_text(&out))
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         let mut bytes = self.input_format.text_to_bytes(text)?;
-        if (bytes.len() * 8) > self.n.bits() as usize {
-            return Err(CipherError::input(
-                "message length, in bits, cannot be greater than the key size, in bits",
-            ));
-        }
         let out = self.decrypt_bytes(&mut bytes)?;
         Ok(self.output_format.bytes_to_text(&out))
     }
