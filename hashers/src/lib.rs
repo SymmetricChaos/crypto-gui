@@ -1,3 +1,4 @@
+pub mod blake2b;
 pub mod ids;
 pub mod md4;
 pub mod md5;
