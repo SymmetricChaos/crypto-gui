@@ -6,14 +6,20 @@ mod sha2_controls;
 mod siphash_controls;
 
 use egui::Ui;
-use hashers::ids::{hasher_categories::HasherCategory, HasherId};
+use hashers::{
+    errors::HasherError,
+    ids::{hasher_categories::HasherCategory, HasherId},
+};
 
-use self::{md4_controls::Md4Frame, md5_controls::Md5Frame, siphash_controls::SipHashFrame};
+use self::{
+    md4_controls::Md4Frame, md5_controls::Md5Frame, pearson_controls::PearsonFrame,
+    sha1_controls::Sha1Frame, sha2_controls::Sha2Frame, siphash_controls::SipHashFrame,
+};
 
 pub trait HasherFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
     fn hash(&self, bytes: &[u8]) -> Vec<u8>;
-    fn hash_to_string(&self, bytes: &[u8]) -> String;
+    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError>;
 }
 
 // Quick simple combo box builder
@@ -41,7 +47,10 @@ fn combox_box(
 pub struct HasherInterface {
     md4: Md4Frame,
     md5: Md5Frame,
+    pearson: PearsonFrame,
     siphash: SipHashFrame,
+    sha1: Sha1Frame,
+    sha2: Sha2Frame,
 }
 
 impl HasherInterface {
@@ -51,6 +60,8 @@ impl HasherInterface {
                 HasherId::Md4,
                 HasherId::Md5,
                 HasherId::Pearson,
+                HasherId::Sha1,
+                HasherId::Sha2,
                 HasherId::SipHash,
             ],
             active_hasher,
@@ -63,9 +74,11 @@ impl HasherInterface {
         match active_hasher {
             HasherId::Md4 => &mut self.md4,
             HasherId::Md5 => &mut self.md5,
-            // HasherId::Pearson => &mut self.pearson,
+            HasherId::Sha1 => &mut self.sha1,
+            HasherId::Sha2 => &mut self.sha2,
+            HasherId::Pearson => &mut self.pearson,
             HasherId::SipHash => &mut self.siphash,
-            _ => todo!("<<<RNG NOT FOUND>>>"),
+            // _ => todo!("<<<HASHER NOT FOUND>>>"),
         }
     }
 }

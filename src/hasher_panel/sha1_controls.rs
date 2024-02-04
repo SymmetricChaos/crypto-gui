@@ -1,4 +1,4 @@
-use hashers::{sha1::Sha1, traits::ClassicHasher};
+use hashers::{errors::HasherError, sha1::Sha1, traits::ClassicHasher};
 
 use super::HasherFrame;
 
@@ -29,7 +29,7 @@ impl HasherFrame for Sha1Frame {
         self.hasher.hash(bytes)
     }
 
-    fn hash_to_string(&self, bytes: &[u8]) -> String {
-        self.hasher.hash_to_string(bytes)
+    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
+        self.hasher.hash_bytes_from_string(text)
     }
 }

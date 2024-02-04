@@ -2,7 +2,7 @@ use crate::ui_elements::UiElements;
 
 use super::HasherFrame;
 use egui::DragValue;
-use hashers::{siphash::SipHash, traits::ClassicHasher};
+use hashers::{errors::HasherError, siphash::SipHash, traits::ClassicHasher};
 
 pub struct SipHashFrame {
     hasher: SipHash,
@@ -50,7 +50,7 @@ impl HasherFrame for SipHashFrame {
         self.hasher.hash(bytes)
     }
 
-    fn hash_to_string(&self, bytes: &[u8]) -> String {
-        self.hasher.hash_to_string(bytes)
+    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
+        self.hasher.hash_bytes_from_string(text)
     }
 }

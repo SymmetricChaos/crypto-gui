@@ -1,5 +1,5 @@
 use super::HasherFrame;
-use hashers::{md4::Md5, traits::ClassicHasher};
+use hashers::{errors::HasherError, md4::Md5, traits::ClassicHasher};
 
 pub struct Md4Frame {
     hasher: Md5,
@@ -28,7 +28,7 @@ impl HasherFrame for Md4Frame {
         self.hasher.hash(bytes)
     }
 
-    fn hash_to_string(&self, bytes: &[u8]) -> String {
-        self.hasher.hash_to_string(bytes)
+    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
+        self.hasher.hash_bytes_from_string(text)
     }
 }

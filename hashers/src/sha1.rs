@@ -1,10 +1,18 @@
-use crate::traits::ClassicHasher;
+use utils::byte_formatting::ByteFormat;
 
-pub struct Sha1 {}
+use crate::{errors::HasherError, traits::ClassicHasher};
+
+pub struct Sha1 {
+    pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
+}
 
 impl Default for Sha1 {
     fn default() -> Self {
-        Self {}
+        Self {
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
+        }
     }
 }
 
@@ -104,6 +112,15 @@ impl ClassicHasher for Sha1 {
         }
         out
     }
+
+    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
+        let mut bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| HasherError::general("byte format error"))?;
+        let out = self.hash(&mut bytes);
+        Ok(self.output_format.bytes_to_text(&out))
+    }
 }
 
 #[cfg(test)]
@@ -112,18 +129,24 @@ mod sha1_tests {
 
     #[test]
     fn test_suite() {
-        let hasher = Sha1::default();
+        let mut hasher = Sha1::default();
+        hasher.input_format = ByteFormat::Utf8;
+        hasher.output_format = ByteFormat::Hex;
         assert_eq!(
             "da39a3ee5e6b4b0d3255bfef95601890afd80709",
-            hasher.hash_to_string("".as_bytes())
+            hasher.hash_bytes_from_string("").unwrap()
         );
         assert_eq!(
             "2fd4e1c67a2d28fced849ee1bb76e7391b93eb12",
-            hasher.hash_to_string("The quick brown fox jumps over the lazy dog".as_bytes())
+            hasher
+                .hash_bytes_from_string("The quick brown fox jumps over the lazy dog")
+                .unwrap()
         );
         assert_eq!(
             "de9f2c7fd25e1b3afad3e85a0bd17d9b100db4b3",
-            hasher.hash_to_string("The quick brown fox jumps over the lazy cog".as_bytes())
+            hasher
+                .hash_bytes_from_string("The quick brown fox jumps over the lazy cog")
+                .unwrap()
         );
     }
 }

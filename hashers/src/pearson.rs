@@ -1,12 +1,18 @@
-use crate::traits::ClassicHasher;
+use utils::byte_formatting::ByteFormat;
+
+use crate::{errors::HasherError, traits::ClassicHasher};
 
 pub struct Pearson {
+    pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
     pub array: [u8; 256],
 }
 
 impl Default for Pearson {
     fn default() -> Self {
         Self {
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
             array: [
                 1, 87, 49, 12, 176, 178, 102, 166, 121, 193, 6, 84, 249, 230, 44, 163, 14, 197,
                 213, 181, 161, 85, 218, 80, 64, 239, 24, 226, 236, 142, 38, 200, 110, 177, 104,
@@ -40,6 +46,15 @@ impl ClassicHasher for Pearson {
 
         vec![out]
     }
+
+    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
+        let mut bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| HasherError::general("byte format error"))?;
+        let out = self.hash(&mut bytes);
+        Ok(self.output_format.bytes_to_text(&out))
+    }
 }
 
 #[cfg(test)]
@@ -48,7 +63,9 @@ mod md5_tests {
 
     #[test]
     fn test_suite() {
-        let hasher = Pearson::default();
-        assert_eq!("9d", hasher.hash_to_string("the".as_bytes()));
+        let mut hasher = Pearson::default();
+        hasher.input_format = ByteFormat::Utf8;
+        hasher.output_format = ByteFormat::Hex;
+        assert_eq!("9d", hasher.hash_bytes_from_string("the").unwrap());
     }
 }

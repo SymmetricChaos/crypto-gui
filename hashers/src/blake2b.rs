@@ -1,10 +1,13 @@
 use itertools::Itertools;
+use utils::byte_formatting::ByteFormat;
 
-use crate::traits::ClassicHasher;
+use crate::{errors::HasherError, traits::ClassicHasher};
 
 // https://eprint.iacr.org/2012/351.pdf
 
 pub struct Blake2b {
+    pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
     pub key: Vec<u8>,    // optional key, length from 0 to 64 bytes
     pub hash_len: usize, // length of output in bytes, 1 to 64
 }
@@ -12,6 +15,8 @@ pub struct Blake2b {
 impl Default for Blake2b {
     fn default() -> Self {
         Self {
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
             key: Vec::new(),
             hash_len: 16,
         }
@@ -152,9 +157,21 @@ impl ClassicHasher for Blake2b {
             .take(self.hash_len)
             .collect_vec()
     }
+
+    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
+        let mut bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| HasherError::general("byte format error"))?;
+        let out = self.hash(&mut bytes);
+        Ok(self.output_format.bytes_to_text(&out))
+    }
 }
 
 #[cfg(test)]
 mod blake2b_tests {
     use super::*;
+
+    #[test]
+    fn test() {}
 }

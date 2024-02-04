@@ -1,10 +1,18 @@
-use crate::traits::ClassicHasher;
+use utils::byte_formatting::ByteFormat;
 
-pub struct Md5 {}
+use crate::{errors::HasherError, traits::ClassicHasher};
+
+pub struct Md5 {
+    pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
+}
 
 impl Default for Md5 {
     fn default() -> Self {
-        Self {}
+        Self {
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
+        }
     }
 }
 
@@ -113,6 +121,15 @@ impl ClassicHasher for Md5 {
         }
         out
     }
+
+    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
+        let mut bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| HasherError::general("byte format error"))?;
+        let out = self.hash(&mut bytes);
+        Ok(self.output_format.bytes_to_text(&out))
+    }
 }
 
 #[cfg(test)]
@@ -121,14 +138,16 @@ mod md4_tests {
 
     #[test]
     fn test_suite() {
-        let hasher = Md5::default();
+        let mut hasher = Md5::default();
+        hasher.input_format = ByteFormat::Utf8;
+        hasher.output_format = ByteFormat::Hex;
         assert_eq!(
             "31d6cfe0d16ae931b73c59d7e0c089c0",
-            hasher.hash_to_string("".as_bytes())
+            hasher.hash_bytes_from_string("").unwrap()
         );
         assert_eq!(
             "bde52cb31de33e46245e05fbdbd6fb24",
-            hasher.hash_to_string("a".as_bytes())
+            hasher.hash_bytes_from_string("a").unwrap()
         );
     }
 }

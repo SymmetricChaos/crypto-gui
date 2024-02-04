@@ -1,8 +1,12 @@
-use crate::traits::ClassicHasher;
+use utils::byte_formatting::ByteFormat;
+
+use crate::{errors::HasherError, traits::ClassicHasher};
 
 // https://eprint.iacr.org/2012/351.pdf
 
 pub struct SipHash {
+    pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
     k0: u64,
     k1: u64,
     pub compression_rounds: usize,
@@ -12,6 +16,8 @@ pub struct SipHash {
 impl Default for SipHash {
     fn default() -> Self {
         Self {
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
             k0: 0,
             k1: 0,
             compression_rounds: 2,
@@ -89,6 +95,15 @@ impl ClassicHasher for SipHash {
             .to_be_bytes()
             .to_vec()
     }
+
+    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
+        let mut bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| HasherError::general("byte format error"))?;
+        let out = self.hash(&mut bytes);
+        Ok(self.output_format.bytes_to_text(&out))
+    }
 }
 
 #[cfg(test)]
@@ -99,10 +114,13 @@ mod siphash_tests {
     fn test_suite() {
         let mut hasher = SipHash::default();
         hasher.set_keys(0x0001020304050607, 0x08090a0b0c0d0e0f);
-
+        hasher.input_format = ByteFormat::Hex;
+        hasher.output_format = ByteFormat::Hex;
         assert_eq!(
             "a129ca6149be45e5",
-            hasher.hash_to_string(&[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14])
+            hasher
+                .hash_bytes_from_string("000102030405060708090a0b0c0d0e")
+                .unwrap()
         );
     }
 }

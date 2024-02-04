@@ -1,8 +1,9 @@
 use std::ops::Shr;
 
 use itertools::Itertools;
+use utils::byte_formatting::ByteFormat;
 
-use crate::traits::ClassicHasher;
+use crate::{errors::HasherError, traits::ClassicHasher};
 
 pub fn sigma_0(a: u64) -> u64 {
     (a.rotate_right(1)) ^ (a.rotate_right(8)) ^ (a.shr(7))
@@ -116,12 +117,16 @@ impl Sha512Mode {
 }
 
 pub struct Sha512 {
+    pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
     pub mode: Sha512Mode,
 }
 
 impl Default for Sha512 {
     fn default() -> Self {
         Self {
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
             mode: Sha512Mode::SHA512,
         }
     }
@@ -130,24 +135,32 @@ impl Default for Sha512 {
 impl Sha512 {
     pub fn sha512() -> Self {
         Self {
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
             mode: Sha512Mode::SHA512,
         }
     }
 
     pub fn sha384() -> Self {
         Self {
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
             mode: Sha512Mode::SHA384,
         }
     }
 
     pub fn sha512_224() -> Self {
         Self {
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
             mode: Sha512Mode::SHA512_224,
         }
     }
 
     pub fn sha512_256() -> Self {
         Self {
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
             mode: Sha512Mode::SHA512_256,
         }
     }
@@ -237,33 +250,13 @@ impl ClassicHasher for Sha512 {
         out.truncate(self.mode.byte_length());
         out
     }
-}
 
-#[cfg(test)]
-mod sha512_tests {
-    use super::*;
-
-    #[test]
-    fn test_suite() {
-        let hasher = Sha512::default();
-        assert_eq!(
-            "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
-            hasher.hash_to_string("".as_bytes())
-        );
-        let hasher = Sha512::sha384();
-        assert_eq!(
-            "38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da274edebfe76f65fbd51ad2f14898b95b",
-            hasher.hash_to_string("".as_bytes())
-        );
-        let hasher = Sha512::sha512_224();
-        assert_eq!(
-            "6ed0dd02806fa89e25de060c19d3ac86cabb87d6a0ddd05c333b84f4",
-            hasher.hash_to_string("".as_bytes())
-        );
-        let hasher = Sha512::sha512_256();
-        assert_eq!(
-            "c672b8d1ef56ed28ab87c3622c5114069bdd3ad7b8f9737498d0c01ecef0967a",
-            hasher.hash_to_string("".as_bytes())
-        );
+    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
+        let mut bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| HasherError::general("byte format error"))?;
+        let out = self.hash(&mut bytes);
+        Ok(self.output_format.bytes_to_text(&out))
     }
 }

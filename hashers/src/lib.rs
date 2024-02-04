@@ -9,3 +9,5 @@ pub mod sha256;
 pub mod sha512;
 pub mod siphash;
 pub mod traits;
+
+pub mod errors;

@@ -14,6 +14,9 @@ pub enum ByteFormat {
 
 impl ByteFormat {
     pub fn text_to_bytes(&self, text: &str) -> Result<Vec<u8>, ByteFormatError> {
+        if text.len() == 0 {
+            return Ok(Vec::new());
+        }
         match self {
             ByteFormat::Hex => hex_to_bytes(text).map_err(|_| ByteFormatError),
             ByteFormat::Utf8 => Ok(text.as_bytes().to_owned()),

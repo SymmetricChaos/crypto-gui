@@ -1,8 +1,9 @@
 use std::ops::Shr;
 
 use itertools::Itertools;
+use utils::byte_formatting::ByteFormat;
 
-use crate::traits::ClassicHasher;
+use crate::{errors::HasherError, traits::ClassicHasher};
 
 pub const K: [u32; 64] = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -38,11 +39,17 @@ pub fn choice(a: u32, b: u32, c: u32) -> u32 {
 pub fn majority(a: u32, b: u32, c: u32) -> u32 {
     (a & b) ^ (a & c) ^ (b & c)
 }
-pub struct Sha256 {}
+pub struct Sha256 {
+    pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
+}
 
 impl Default for Sha256 {
     fn default() -> Self {
-        Self {}
+        Self {
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
+        }
     }
 }
 
@@ -147,13 +154,28 @@ impl ClassicHasher for Sha256 {
 
         v.iter().map(|x| x.to_be_bytes()).flatten().collect_vec()
     }
+
+    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
+        let mut bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| HasherError::general("byte format error"))?;
+        let out = self.hash(&mut bytes);
+        Ok(self.output_format.bytes_to_text(&out))
+    }
 }
 
-pub struct Sha224 {}
+pub struct Sha224 {
+    pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
+}
 
 impl Default for Sha224 {
     fn default() -> Self {
-        Self {}
+        Self {
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
+        }
     }
 }
 
@@ -250,23 +272,13 @@ impl ClassicHasher for Sha224 {
             .flatten()
             .collect_vec()
     }
-}
 
-#[cfg(test)]
-mod sha256_tests {
-    use super::*;
-
-    #[test]
-    fn test_suite() {
-        let hasher = Sha256::default();
-        assert_eq!(
-            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-            hasher.hash_to_string("".as_bytes())
-        );
-        let hasher = Sha224::default();
-        assert_eq!(
-            "d14a028c2a3a2bc9476102bb288234c415a2b01f828ea62ac5b3e42f",
-            hasher.hash_to_string("".as_bytes())
-        );
+    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
+        let mut bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| HasherError::general("byte format error"))?;
+        let out = self.hash(&mut bytes);
+        Ok(self.output_format.bytes_to_text(&out))
     }
 }

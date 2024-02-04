@@ -88,7 +88,10 @@ pub fn hash(
             .clicked()
         {
             errors.clear();
-            *output = hasher.hash_to_string(input.as_bytes());
+            match hasher.hash_bytes_from_string(input) {
+                Ok(text) => *output = text,
+                Err(e) => *errors = e.to_string(),
+            }
         };
     });
 }
