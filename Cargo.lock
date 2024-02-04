@@ -3640,6 +3640,7 @@ dependencies = [
 name = "utils"
 version = "0.1.0"
 dependencies = [
+ "base64 0.21.7",
  "bimap",
  "csv",
  "getrandom",

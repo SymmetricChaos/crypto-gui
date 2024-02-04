@@ -2,12 +2,10 @@ use std::num::ParseIntError;
 
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{
-    digital::{rc4::Rc4, ByteFormat},
-    Cipher,
-};
+use ciphers::{digital::rc4::Rc4, Cipher};
 use egui::{DragValue, FontId, RichText, Ui};
 use rand::{thread_rng, Rng};
+use utils::byte_formatting::ByteFormat;
 
 #[derive(Default)]
 pub struct Rc4Frame {

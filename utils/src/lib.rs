@@ -1,5 +1,6 @@
 pub mod bit_polynomial;
 pub mod bits;
+pub mod byte_formatting;
 pub mod grid;
 pub mod math_functions;
 pub mod polynomial_interpolation;

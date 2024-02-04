@@ -1,6 +1,6 @@
-use crate::{Cipher, CipherError};
+use utils::byte_formatting::ByteFormat;
 
-use super::ByteFormat;
+use crate::{Cipher, CipherError};
 
 pub struct Rc4 {
     pub arr: [u8; 256],
@@ -73,7 +73,10 @@ impl Rc4 {
 
 impl Cipher for Rc4 {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut bytes = self.input_format.text_to_bytes(text)?;
+        let mut bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| CipherError::input("byte format error"))?;
         self.encrypt_bytes_cloned(&mut bytes);
         Ok(self.output_format.bytes_to_text(&bytes))
     }

@@ -2,14 +2,12 @@ use std::str::FromStr;
 
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{
-    digital::{rsa::Rsa, ByteFormat},
-    Cipher,
-};
+use ciphers::{digital::rsa::Rsa, Cipher};
 use egui::Ui;
 use num::BigUint;
 use num_prime::{nt_funcs::is_prime, RandPrime};
 use rand::thread_rng;
+use utils::byte_formatting::ByteFormat;
 
 fn prime_string(ui: &mut Ui, s: &mut String, n: &mut BigUint) {
     ui.horizontal(|ui| {

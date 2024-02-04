@@ -1,8 +1,7 @@
 use num::{bigint::ToBigUint, BigUint};
+use utils::byte_formatting::ByteFormat;
 
 use crate::{Cipher, CipherError};
-
-use super::ByteFormat;
 
 pub struct ElGamal {
     pub output_format: ByteFormat,
@@ -65,7 +64,10 @@ impl ElGamal {
 
 impl Cipher for ElGamal {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut bytes = self.input_format.text_to_bytes(text)?;
+        let mut bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| CipherError::input("byte format error"))?;
         let pair = self.encrypt_bytes(&mut bytes)?;
         let out = format!(
             "{}\n{}",
@@ -80,8 +82,14 @@ impl Cipher for ElGamal {
             return Err(CipherError::input("no linebreak found"));
         }
         let (t_gamma, t_delta) = text.split_once('\n').unwrap();
-        let gamma = self.input_format.text_to_bytes(t_gamma)?;
-        let delta = self.input_format.text_to_bytes(t_delta)?;
+        let gamma = self
+            .input_format
+            .text_to_bytes(t_gamma)
+            .map_err(|_| CipherError::input("byte format error"))?;
+        let delta = self
+            .input_format
+            .text_to_bytes(t_delta)
+            .map_err(|_| CipherError::input("byte format error"))?;
 
         let out = self.decrypt_bytes(&gamma, &delta)?;
         Ok(self.output_format.bytes_to_text(&out))

@@ -1,4 +1,5 @@
-use super::ByteFormat;
+use utils::byte_formatting::ByteFormat;
+
 use crate::{Cipher, CipherError};
 use std::ops::Shr;
 
@@ -190,13 +191,19 @@ impl Des {
 
 impl Cipher for Des {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut bytes = self.input_format.text_to_bytes(text)?;
+        let mut bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| CipherError::input("byte format error"))?;
         let out = self.encrypt_bytes(&mut bytes)?;
         Ok(self.output_format.bytes_to_text(&out))
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut bytes = self.input_format.text_to_bytes(text)?;
+        let mut bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| CipherError::input("byte format error"))?;
         let out = self.decrypt_bytes(&mut bytes)?;
         Ok(self.output_format.bytes_to_text(&out))
     }
