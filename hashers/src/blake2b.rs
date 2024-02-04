@@ -1,5 +1,3 @@
-use std::io::Read;
-
 use itertools::Itertools;
 
 use crate::traits::ClassicHasher;
@@ -33,7 +31,80 @@ impl Blake2b {
         0x5be0cd19137e2179,
     ];
 
-    pub fn compress() {}
+    // Message permutation schedule
+    const SIGMA: [[usize; 16]; 12] = [
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+        [14, 10, 4, 8, 9, 15, 13, 6, 1, 12, 0, 2, 11, 7, 5, 3],
+        [11, 8, 12, 0, 5, 2, 15, 13, 10, 14, 3, 6, 7, 1, 9, 4],
+        [7, 9, 3, 1, 13, 12, 11, 14, 2, 6, 5, 10, 4, 0, 15, 8],
+        [9, 0, 5, 7, 2, 4, 10, 15, 14, 1, 11, 12, 6, 8, 3, 13],
+        [2, 12, 6, 10, 0, 11, 8, 3, 4, 13, 7, 5, 15, 14, 1, 9],
+        [12, 5, 1, 15, 14, 13, 4, 10, 0, 7, 6, 3, 9, 2, 8, 11],
+        [13, 11, 7, 14, 12, 1, 3, 9, 5, 0, 15, 4, 8, 6, 2, 10],
+        [6, 15, 14, 9, 11, 3, 0, 8, 12, 2, 13, 7, 1, 4, 10, 5],
+        [10, 2, 8, 4, 7, 6, 1, 5, 15, 11, 9, 14, 3, 12, 13, 0],
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], // the 11th and 12th rounds reuse the permutations from the 1st and 2nd rounds
+        [14, 10, 4, 8, 9, 15, 13, 6, 1, 12, 0, 2, 11, 7, 5, 3],
+    ];
+
+    pub fn mix(v: &mut [u64; 16], a: usize, b: usize, c: usize, d: usize, x: u64, y: u64) {
+        v[a] = v[a].wrapping_add(v[b]).wrapping_add(x);
+        v[d] = (v[d] ^ v[a]).rotate_right(32);
+
+        v[c] = v[c].wrapping_add(v[d]);
+        v[b] = (v[b] ^ v[c]).rotate_right(24);
+
+        v[a] = v[a].wrapping_add(v[b]).wrapping_add(y);
+        v[d] = (v[d] ^ v[a]).rotate_right(16);
+
+        v[c] = v[c].wrapping_add(v[d]);
+        v[b] = (v[b] ^ v[c]).rotate_right(63);
+    }
+
+    pub fn compress(state: &mut [u64; 8], chunk: &[u64; 8], bytes_taken: u128, last_chunk: bool) {
+        // create a working vector
+        let mut work = [0_u64; 16];
+        for i in 0..8 {
+            work[i] = state[i];
+            work[i + 8] = Self::IV[i]
+        }
+
+        // Mix the bytes taken counter into the working vector
+        work[12] = (bytes_taken >> 64) as u64;
+        work[13] = bytes_taken as u64;
+
+        // invert all bits of the work[14] if the last chunk
+        if last_chunk {
+            work[14] ^= u64::MAX;
+        }
+
+        for i in 0..11 {
+            let s = Self::SIGMA[i];
+
+            Self::mix(&mut work, 0, 4, 8, 12, chunk[s[0]], chunk[s[1]]);
+            Self::mix(&mut work, 1, 5, 9, 13, chunk[s[2]], chunk[s[3]]);
+            Self::mix(&mut work, 2, 6, 10, 14, chunk[s[4]], chunk[s[5]]);
+            Self::mix(&mut work, 3, 7, 11, 15, chunk[s[6]], chunk[s[7]]);
+
+            Self::mix(&mut work, 0, 5, 10, 15, chunk[s[8]], chunk[s[9]]);
+            Self::mix(&mut work, 1, 6, 11, 12, chunk[s[10]], chunk[s[11]]);
+            Self::mix(&mut work, 2, 7, 8, 13, chunk[s[12]], chunk[s[13]]);
+            Self::mix(&mut work, 3, 4, 9, 14, chunk[s[14]], chunk[s[15]]);
+        }
+
+        for i in 0..8 {
+            state[i] ^= work[i];
+            state[i] ^= work[i + 8];
+        }
+    }
+
+    fn create_chunk(bytes: &[u8]) -> [u64; 8] {
+        let mut k = [0u64; 8];
+        for (elem, chunk) in k.iter_mut().zip(bytes.chunks_exact(8)).take(16) {
+            *elem = u64::from_be_bytes(chunk.try_into().unwrap());
+        }
+        k
+    }
 }
 
 impl ClassicHasher for Blake2b {
@@ -48,16 +119,29 @@ impl ClassicHasher for Blake2b {
         state[0] ^= mixer;
 
         let mut bytes_taken = 0;
-        let mut bytes_remaining = bytes.len() + 128;
+        let mut bytes_remaining = bytes.len();
 
         let mut key = self.key.clone();
         while key.len() != 128 {
             key.push(0);
         }
 
-        // compress the key
+        Self::compress(&mut state, &Self::create_chunk(&key), bytes_taken, false);
 
-        // compress the data in 128 byte chunks, excluding the last chunk
+        let mut chunks = bytes.chunks_exact(128);
+
+        while bytes_remaining > 128 {
+            let chunk = Self::create_chunk(chunks.next().unwrap());
+            Self::compress(&mut state, &chunk, bytes_taken, false);
+            bytes_taken += 128;
+            bytes_remaining -= 128;
+        }
+
+        let mut last = chunks.remainder().to_vec();
+        while last.len() != 128 {
+            last.push(0);
+        }
+        Self::compress(&mut state, &Self::create_chunk(&last), bytes_taken, true);
 
         // compress the last chunk, padding with zeroes if it is too short
 
