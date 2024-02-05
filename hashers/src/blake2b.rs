@@ -18,7 +18,7 @@ impl Default for Blake2b {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
             key: Vec::new(),
-            hash_len: 16,
+            hash_len: 32,
         }
     }
 }
@@ -66,7 +66,7 @@ impl Blake2b {
         v[b] = (v[b] ^ v[c]).rotate_right(63);
     }
 
-    pub fn compress(state: &mut [u64; 8], chunk: &[u64; 8], bytes_taken: u128, last_chunk: bool) {
+    pub fn compress(state: &mut [u64; 8], chunk: &[u64; 16], bytes_taken: u128, last_chunk: bool) {
         // create a working vector
         let mut work = [0_u64; 16];
         for i in 0..8 {
@@ -103,8 +103,8 @@ impl Blake2b {
         }
     }
 
-    fn create_chunk(bytes: &[u8]) -> [u64; 8] {
-        let mut k = [0u64; 8];
+    fn create_chunk(bytes: &[u8]) -> [u64; 16] {
+        let mut k = [0u64; 16];
         for (elem, chunk) in k.iter_mut().zip(bytes.chunks_exact(8)).take(16) {
             *elem = u64::from_be_bytes(chunk.try_into().unwrap());
         }
@@ -118,6 +118,14 @@ impl ClassicHasher for Blake2b {
             panic!("hash_len cannot be greater than 64 as there are only 64 bytes of state")
         }
 
+        if self.hash_len == 0 {
+            panic!("hash_len cannot be zero, obviously")
+        }
+
+        if self.key.len() > 64 {
+            panic!("the length of the key cannot be more than 64 bytes")
+        }
+
         let mut state = Self::IV.clone();
         // Key length and hash length are mixed into the state, this ensures identical inputs don't resemble each other when these inputs are varied
         let mixer: u64 = 0x01010000 ^ ((self.key.len() as u64) << 8) ^ self.hash_len as u64;
@@ -126,12 +134,14 @@ impl ClassicHasher for Blake2b {
         let mut bytes_taken = 0;
         let mut bytes_remaining = bytes.len();
 
-        let mut key = self.key.clone();
-        while key.len() != 128 {
-            key.push(0);
-        }
+        if self.key.len() > 0 {
+            let mut key = self.key.clone();
+            while key.len() != 128 {
+                key.push(0);
+            }
 
-        Self::compress(&mut state, &Self::create_chunk(&key), bytes_taken, false);
+            Self::compress(&mut state, &Self::create_chunk(&key), bytes_taken, false);
+        }
 
         let mut chunks = bytes.chunks_exact(128);
 
@@ -173,5 +183,18 @@ mod blake2b_tests {
     use super::*;
 
     #[test]
-    fn test() {}
+    fn test_suite() {
+        let mut hasher = Blake2b::default();
+        hasher.input_format = ByteFormat::Utf8;
+        hasher.output_format = ByteFormat::Hex;
+        assert_eq!(
+            "69217a3079908094e11121d042354a7c1f55b6482ca1a51e1b250dfd1ed0eef9",
+            hasher.hash_bytes_from_string("").unwrap()
+        );
+        // hasher.hash_len = 64;
+        // assert_eq!(
+        //     "a8add4bdddfd93e4877d2746e62817b116364a1fa7bc148d95090bc7333b3673f82401cf7aa2e4cb1ecd90296e3f14cb5413f8ed77be73045b13914cdcd6a918",
+        //     hasher.hash_bytes_from_string("The quick brown fox jumps over the lazy dog").unwrap()
+        // );
+    }
 }
