@@ -18,7 +18,7 @@ impl Default for Blake2b {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
             key: Vec::new(),
-            hash_len: 32,
+            hash_len: 32, // default to 256 bits
         }
     }
 }
@@ -75,8 +75,8 @@ impl Blake2b {
         }
 
         // Mix the bytes taken counter into the working vector
-        work[12] = (bytes_taken >> 64) as u64;
-        work[13] = bytes_taken as u64;
+        work[12] = bytes_taken as u64;
+        work[13] = (bytes_taken >> 64) as u64;
 
         // invert all bits of the work[14] if the last chunk
         if last_chunk {
