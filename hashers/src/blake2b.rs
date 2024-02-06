@@ -189,14 +189,22 @@ mod blake2b_tests {
     use super::*;
 
     #[test]
-    fn test_suite() {
+    fn test_empty() {
         let mut hasher = Blake2b::default();
         hasher.input_format = ByteFormat::Utf8;
         hasher.output_format = ByteFormat::Hex;
-        // assert_eq!(
-        //     "69217a3079908094e11121d042354a7c1f55b6482ca1a51e1b250dfd1ed0eef9",
-        //     hasher.hash_bytes_from_string("").unwrap()
-        // );
+        assert_eq!(
+            "69217a3079908094e11121d042354a7c1f55b6482ca1a51e1b250dfd1ed0eef9",
+            hasher.hash_bytes_from_string("").unwrap()
+        );
+    }
+
+    #[test]
+    fn test_abc() {
+        let mut hasher = Blake2b::default();
+        hasher.input_format = ByteFormat::Utf8;
+        hasher.output_format = ByteFormat::Hex;
+
         hasher.hash_len = 64;
         assert_eq!(
             "ba80a53f981c4d0d6a2797b69f12f6e94c212f14685ac4b74b12bb6fdbffa2d17d87c5392aab792dc252d5de4533cc9518d38aa8dbf1925ab92386edd4009923",
