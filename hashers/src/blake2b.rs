@@ -66,7 +66,9 @@ impl Blake2b {
         v[b] = (v[b] ^ v[c]).rotate_right(63);
     }
 
+    // https://datatracker.ietf.org/doc/html/rfc7693.html#appendix-A
     pub fn compress(state: &mut [u64; 8], chunk: &[u64; 16], bytes_taken: u128, last_chunk: bool) {
+        // println!("Original Chunk:\n{chunk:016x?}\n");
         // create a working vector
         let mut work = [0_u64; 16];
         for i in 0..8 {
@@ -75,15 +77,15 @@ impl Blake2b {
         }
 
         // Mix the bytes taken counter into the working vector
-        work[12] = bytes_taken as u64;
-        work[13] = (bytes_taken >> 64) as u64;
+        work[12] ^= bytes_taken as u64; // low bytes
+        work[13] ^= (bytes_taken >> 64) as u64; // high bytes
 
         // invert all bits of the work[14] if the last chunk
         if last_chunk {
             work[14] ^= u64::MAX;
         }
-
-        for i in 0..11 {
+        // println!("Working Vector Before Compression:\n{work:016x?}\n");
+        for i in 0..12 {
             let s = Self::SIGMA[i];
 
             Self::mix(&mut work, 0, 4, 8, 12, chunk[s[0]], chunk[s[1]]);
@@ -95,6 +97,7 @@ impl Blake2b {
             Self::mix(&mut work, 1, 6, 11, 12, chunk[s[10]], chunk[s[11]]);
             Self::mix(&mut work, 2, 7, 8, 13, chunk[s[12]], chunk[s[13]]);
             Self::mix(&mut work, 3, 4, 9, 14, chunk[s[14]], chunk[s[15]]);
+            // println!("Working Vector at [{i}]:\n{work:016x?}\n");
         }
 
         for i in 0..8 {
@@ -106,7 +109,7 @@ impl Blake2b {
     fn create_chunk(bytes: &[u8]) -> [u64; 16] {
         let mut k = [0u64; 16];
         for (elem, chunk) in k.iter_mut().zip(bytes.chunks_exact(8)).take(16) {
-            *elem = u64::from_be_bytes(chunk.try_into().unwrap());
+            *elem = u64::from_le_bytes(chunk.try_into().unwrap());
         }
         k
     }
@@ -127,6 +130,7 @@ impl ClassicHasher for Blake2b {
         }
 
         let mut state = Self::IV.clone();
+
         // Key length and hash length are mixed into the state, this ensures identical inputs don't resemble each other when these inputs are varied
         let mixer: u64 = 0x01010000 ^ ((self.key.len() as u64) << 8) ^ self.hash_len as u64;
         state[0] ^= mixer;
@@ -134,35 +138,37 @@ impl ClassicHasher for Blake2b {
         let mut bytes_taken = 0;
         let mut bytes_remaining = bytes.len();
 
+        // If no key is provided the process of padding out the key and compressing it is skipped
         if self.key.len() > 0 {
             let mut key = self.key.clone();
             while key.len() != 128 {
                 key.push(0);
             }
-
             Self::compress(&mut state, &Self::create_chunk(&key), bytes_taken, false);
+            bytes_taken += 128;
         }
 
         let mut chunks = bytes.chunks_exact(128);
 
         while bytes_remaining > 128 {
             let chunk = Self::create_chunk(chunks.next().unwrap());
-            Self::compress(&mut state, &chunk, bytes_taken, false);
             bytes_taken += 128;
             bytes_remaining -= 128;
+            Self::compress(&mut state, &chunk, bytes_taken, false);
         }
 
+        // compress the last chunk, padding with zeroes if it is too short
         let mut last = chunks.remainder().to_vec();
+        bytes_taken += last.len() as u128;
         while last.len() != 128 {
             last.push(0);
         }
-        Self::compress(&mut state, &Self::create_chunk(&last), bytes_taken, true);
 
-        // compress the last chunk, padding with zeroes if it is too short
+        Self::compress(&mut state, &Self::create_chunk(&last), bytes_taken, true);
 
         state
             .iter()
-            .map(|x| x.to_be_bytes())
+            .map(|x| x.to_le_bytes())
             .flatten()
             .take(self.hash_len)
             .collect_vec()
@@ -187,14 +193,14 @@ mod blake2b_tests {
         let mut hasher = Blake2b::default();
         hasher.input_format = ByteFormat::Utf8;
         hasher.output_format = ByteFormat::Hex;
-        assert_eq!(
-            "69217a3079908094e11121d042354a7c1f55b6482ca1a51e1b250dfd1ed0eef9",
-            hasher.hash_bytes_from_string("").unwrap()
-        );
-        // hasher.hash_len = 64;
         // assert_eq!(
-        //     "a8add4bdddfd93e4877d2746e62817b116364a1fa7bc148d95090bc7333b3673f82401cf7aa2e4cb1ecd90296e3f14cb5413f8ed77be73045b13914cdcd6a918",
-        //     hasher.hash_bytes_from_string("The quick brown fox jumps over the lazy dog").unwrap()
+        //     "69217a3079908094e11121d042354a7c1f55b6482ca1a51e1b250dfd1ed0eef9",
+        //     hasher.hash_bytes_from_string("").unwrap()
         // );
+        hasher.hash_len = 64;
+        assert_eq!(
+            "ba80a53f981c4d0d6a2797b69f12f6e94c212f14685ac4b74b12bb6fdbffa2d17d87c5392aab792dc252d5de4533cc9518d38aa8dbf1925ab92386edd4009923",
+            hasher.hash_bytes_from_string("abc").unwrap()
+        );
     }
 }
