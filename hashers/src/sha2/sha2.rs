@@ -1,11 +1,8 @@
+use crate::sha2::Sha224;
+use crate::sha2::Sha256;
+use crate::sha2::Sha512;
+use crate::{errors::HasherError, traits::ClassicHasher};
 use utils::byte_formatting::ByteFormat;
-
-use crate::{
-    errors::HasherError,
-    sha256::{Sha224, Sha256},
-    sha512::Sha512,
-    traits::ClassicHasher,
-};
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Sha2Variant {

@@ -1,5 +1,5 @@
 use super::HasherFrame;
-use hashers::{blake2b::Blake2b, errors::HasherError, traits::ClassicHasher};
+use hashers::{blake::Blake2b, errors::HasherError, traits::ClassicHasher};
 
 pub struct Blake2Frame {
     hasher: Blake2b,

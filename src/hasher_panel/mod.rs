@@ -1,4 +1,4 @@
-mod blake;
+mod blake2;
 mod md4_controls;
 mod md5_controls;
 mod pearson_controls;
@@ -13,8 +13,9 @@ use hashers::{
 };
 
 use self::{
-    md4_controls::Md4Frame, md5_controls::Md5Frame, pearson_controls::PearsonFrame,
-    sha1_controls::Sha1Frame, sha2_controls::Sha2Frame, siphash_controls::SipHashFrame,
+    blake2::Blake2Frame, md4_controls::Md4Frame, md5_controls::Md5Frame,
+    pearson_controls::PearsonFrame, sha1_controls::Sha1Frame, sha2_controls::Sha2Frame,
+    siphash_controls::SipHashFrame,
 };
 
 pub trait HasherFrame {
@@ -46,6 +47,7 @@ fn combox_box(
 
 #[derive(Default)]
 pub struct HasherInterface {
+    blake2: Blake2Frame,
     md4: Md4Frame,
     md5: Md5Frame,
     pearson: PearsonFrame,
@@ -58,6 +60,7 @@ impl HasherInterface {
     pub fn combo_boxes(&mut self, ui: &mut Ui, active_hasher: &mut Option<HasherId>) {
         combox_box(
             &[
+                HasherId::Blake2,
                 HasherId::Md4,
                 HasherId::Md5,
                 HasherId::Pearson,
@@ -73,6 +76,7 @@ impl HasherInterface {
 
     pub fn get_active_hasher(&mut self, active_hasher: &HasherId) -> &mut dyn HasherFrame {
         match active_hasher {
+            HasherId::Blake2 => &mut self.blake2,
             HasherId::Md4 => &mut self.md4,
             HasherId::Md5 => &mut self.md5,
             HasherId::Sha1 => &mut self.sha1,

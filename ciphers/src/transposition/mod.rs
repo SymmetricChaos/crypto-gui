@@ -1,6 +1,8 @@
 pub mod columnar;
-pub mod diagonal_columnar;
 pub use columnar::Columnar;
+
+pub mod diagonal_columnar;
+pub use diagonal_columnar::DiagonalColumnar;
 
 pub mod syctale;
 pub use syctale::Scytale;
