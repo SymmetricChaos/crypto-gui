@@ -20,7 +20,6 @@ use self::{
 
 pub trait HasherFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
-    fn hash(&self, bytes: &[u8]) -> Vec<u8>;
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError>;
 }
 

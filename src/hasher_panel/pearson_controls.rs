@@ -45,10 +45,6 @@ impl HasherFrame for PearsonFrame {
         ui.add_space(16.0);
     }
 
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        self.hasher.hash(bytes)
-    }
-
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
         self.hasher.hash_bytes_from_string(text)
     }
