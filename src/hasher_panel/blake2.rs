@@ -1,14 +1,27 @@
 use super::HasherFrame;
-use hashers::{blake::Blake2b, errors::HasherError, traits::ClassicHasher};
+use hashers::{
+    blake::{Blake2b, Blake2s},
+    errors::HasherError,
+    traits::ClassicHasher,
+};
+
+enum Blake2Variant {
+    Big,
+    Small,
+}
 
 pub struct Blake2Frame {
-    hasher: Blake2b,
+    variant: Blake2Variant,
+    hasher_b: Blake2b,
+    hasher_s: Blake2s,
 }
 
 impl Default for Blake2Frame {
     fn default() -> Self {
         Self {
-            hasher: Default::default(),
+            variant: Blake2Variant::Big,
+            hasher_b: Default::default(),
+            hasher_s: Default::default(),
         }
     }
 }
@@ -25,6 +38,9 @@ impl HasherFrame for Blake2Frame {
     }
 
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        self.hasher.hash_bytes_from_string(text)
+        match self.variant {
+            Blake2Variant::Big => self.hasher_b.hash_bytes_from_string(text),
+            Blake2Variant::Small => self.hasher_s.hash_bytes_from_string(text),
+        }
     }
 }
