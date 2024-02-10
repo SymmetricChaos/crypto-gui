@@ -1,6 +1,6 @@
 use crate::ui_elements::UiElements;
 
-use super::HasherFrame;
+use super::{byte_formatting_io, HasherFrame};
 use hashers::{
     blake::{Blake2b, Blake2s},
     errors::HasherError,
@@ -40,6 +40,26 @@ impl HasherFrame for Blake2Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.add_space(16.0);
 
+        ui.horizontal(|ui| {
+            ui.selectable_value(&mut self.variant, Blake2Variant::Big, "BLAKE2b");
+            ui.selectable_value(&mut self.variant, Blake2Variant::Small, "BLAKE2bs");
+        });
+
+        ui.add_space(16.0);
+        match self.variant {
+            Blake2Variant::Big => byte_formatting_io(
+                ui,
+                &mut self.hasher_b.input_format,
+                &mut self.hasher_b.output_format,
+            ),
+            Blake2Variant::Small => byte_formatting_io(
+                ui,
+                &mut self.hasher_s.input_format,
+                &mut self.hasher_s.output_format,
+            ),
+        }
+
+        ui.add_space(16.0);
         ui.subheading("Key (hexadecimal)");
         match self.variant {
             Blake2Variant::Big => {
