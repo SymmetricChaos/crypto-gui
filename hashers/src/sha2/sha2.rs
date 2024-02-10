@@ -1,4 +1,3 @@
-use crate::sha2::Sha224;
 use crate::sha2::Sha256;
 use crate::sha2::Sha512;
 use crate::{errors::HasherError, traits::ClassicHasher};
@@ -18,7 +17,7 @@ pub struct Sha2 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
     pub variant: Sha2Variant,
-    sha224: Sha224,
+    sha224: Sha256,
     sha256: Sha256,
     sha384: Sha512,
     sha512: Sha512,
@@ -32,8 +31,8 @@ impl Default for Sha2 {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
             variant: Sha2Variant::Sha256,
-            sha224: Default::default(),
-            sha256: Default::default(),
+            sha224: Sha256::sha224(),
+            sha256: Sha256::sha256(),
             sha384: Sha512::sha384(),
             sha512: Sha512::sha512(),
             sha512_224: Sha512::sha512_224(),
