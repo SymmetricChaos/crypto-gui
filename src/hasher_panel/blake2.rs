@@ -1,10 +1,14 @@
+use crate::ui_elements::UiElements;
+
 use super::HasherFrame;
 use hashers::{
     blake::{Blake2b, Blake2s},
     errors::HasherError,
     traits::ClassicHasher,
 };
+use utils::byte_formatting::ByteFormat;
 
+#[derive(Debug, PartialEq, Eq)]
 enum Blake2Variant {
     Big,
     Small,
@@ -14,6 +18,8 @@ pub struct Blake2Frame {
     variant: Blake2Variant,
     hasher_b: Blake2b,
     hasher_s: Blake2s,
+    key_string_b: String,
+    key_string_s: String,
 }
 
 impl Default for Blake2Frame {
@@ -22,6 +28,8 @@ impl Default for Blake2Frame {
             variant: Blake2Variant::Big,
             hasher_b: Default::default(),
             hasher_s: Default::default(),
+            key_string_b: String::new(),
+            key_string_s: String::new(),
         }
     }
 }
@@ -31,6 +39,16 @@ impl Blake2Frame {}
 impl HasherFrame for Blake2Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.add_space(16.0);
+
+        ui.subheading("Key (hexadecimal)");
+        match self.variant {
+            Blake2Variant::Big => {
+                if ui.control_string(&mut self.key_string_b).changed() {
+                    self.hasher_b.key = ByteFormat::Hex.text_to_bytes(&self.key_string_b).unwrap()
+                }
+            }
+            Blake2Variant::Small => ui.control_string(&mut self.key_string_s),
+        };
 
         ui.label("<<<EXPLANATION OF HASH FUNCTION CODE>>>");
 

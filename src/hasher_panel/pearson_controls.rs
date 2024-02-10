@@ -1,6 +1,6 @@
 use crate::ui_elements::UiElements;
 
-use super::HasherFrame;
+use super::{byte_formatting_io, HasherFrame};
 use egui::{FontId, RichText};
 use hashers::{errors::HasherError, pearson::Pearson, traits::ClassicHasher};
 use rand::{seq::SliceRandom, thread_rng};
@@ -21,6 +21,14 @@ impl PearsonFrame {}
 
 impl HasherFrame for PearsonFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+        ui.add_space(16.0);
+
+        byte_formatting_io(
+            ui,
+            &mut self.hasher.input_format,
+            &mut self.hasher.output_format,
+        );
+
         ui.add_space(16.0);
         ui.horizontal(|ui| {
             ui.subheading("Array of Bytes");

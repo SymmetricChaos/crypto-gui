@@ -1,6 +1,6 @@
 use crate::ui_elements::UiElements;
 
-use super::HasherFrame;
+use super::{byte_formatting_io, HasherFrame};
 use egui::DragValue;
 use hashers::{errors::HasherError, siphash::SipHash, traits::ClassicHasher};
 
@@ -26,6 +26,13 @@ impl HasherFrame for SipHashFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.add_space(16.0);
 
+        byte_formatting_io(
+            ui,
+            &mut self.hasher.input_format,
+            &mut self.hasher.output_format,
+        );
+
+        ui.add_space(16.0);
         ui.subheading("Key0");
         if ui.add(DragValue::new(&mut self.k0)).changed() {
             self.hasher.set_keys(self.k0, self.k1)

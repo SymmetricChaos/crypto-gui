@@ -1,4 +1,4 @@
-use super::HasherFrame;
+use super::{byte_formatting_io, HasherFrame};
 use hashers::{errors::HasherError, md5::Md5, traits::ClassicHasher};
 
 pub struct Md5Frame {
@@ -18,6 +18,12 @@ impl Md5Frame {}
 impl HasherFrame for Md5Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.add_space(16.0);
+
+        byte_formatting_io(
+            ui,
+            &mut self.hasher.input_format,
+            &mut self.hasher.output_format,
+        );
 
         ui.label("<<<EXPLANATION OF HASH FUNCTION CODE>>>");
 
