@@ -44,10 +44,24 @@ impl HasherFrame for Blake2Frame {
         match self.variant {
             Blake2Variant::Big => {
                 if ui.control_string(&mut self.key_string_b).changed() {
-                    self.hasher_b.key = ByteFormat::Hex.text_to_bytes(&self.key_string_b).unwrap()
+                    match ByteFormat::Hex.text_to_bytes(&self.key_string_b) {
+                        Ok(bytes) => self.hasher_b.key = bytes,
+                        Err(_) => {
+                            ui.error_text("unable to read key");
+                        }
+                    };
                 }
             }
-            Blake2Variant::Small => ui.control_string(&mut self.key_string_s),
+            Blake2Variant::Small => {
+                if ui.control_string(&mut self.key_string_s).changed() {
+                    match ByteFormat::Hex.text_to_bytes(&self.key_string_s) {
+                        Ok(bytes) => self.hasher_s.key = bytes,
+                        Err(_) => {
+                            ui.error_text("unable to read key");
+                        }
+                    };
+                }
+            }
         };
 
         ui.label("<<<EXPLANATION OF HASH FUNCTION CODE>>>");
