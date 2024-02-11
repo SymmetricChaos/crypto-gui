@@ -1,4 +1,4 @@
-mod blake2;
+mod blake2_controls;
 mod md4_controls;
 mod md5_controls;
 mod pearson_controls;
@@ -14,7 +14,7 @@ use hashers::{
 use utils::byte_formatting::ByteFormat;
 
 use self::{
-    blake2::Blake2Frame, md4_controls::Md4Frame, md5_controls::Md5Frame,
+    blake2_controls::Blake2Frame, md4_controls::Md4Frame, md5_controls::Md5Frame,
     pearson_controls::PearsonFrame, sha1_controls::Sha1Frame, sha2_controls::Sha2Frame,
     siphash_controls::SipHashFrame,
 };

@@ -45,6 +45,15 @@ impl HasherFrame for Blake2Frame {
             ui.selectable_value(&mut self.variant, Blake2Variant::Small, "BLAKE2bs");
         });
 
+        match self.variant {
+            Blake2Variant::Big => {
+                ui.label("BLAKE2b is designed for 64-bit hardware. It uses 12 rounds per chunk.")
+            }
+            Blake2Variant::Small => {
+                ui.label("BLAKE2s is designed for 32-bit hardware. It uses 10 rounds per chunk.")
+            }
+        };
+
         ui.add_space(16.0);
         match self.variant {
             Blake2Variant::Big => byte_formatting_io(
@@ -64,6 +73,11 @@ impl HasherFrame for Blake2Frame {
         match self.variant {
             Blake2Variant::Big => {
                 if ui.control_string(&mut self.key_string_b).changed() {
+                    self.key_string_b = self
+                        .key_string_b
+                        .chars()
+                        .filter(|c| c.is_ascii_hexdigit())
+                        .collect();
                     match ByteFormat::Hex.text_to_bytes(&self.key_string_b) {
                         Ok(bytes) => self.hasher_b.key = bytes,
                         Err(_) => {
@@ -74,6 +88,11 @@ impl HasherFrame for Blake2Frame {
             }
             Blake2Variant::Small => {
                 if ui.control_string(&mut self.key_string_s).changed() {
+                    self.key_string_s = self
+                        .key_string_s
+                        .chars()
+                        .filter(|c| c.is_ascii_hexdigit())
+                        .collect();
                     match ByteFormat::Hex.text_to_bytes(&self.key_string_s) {
                         Ok(bytes) => self.hasher_s.key = bytes,
                         Err(_) => {

@@ -1,4 +1,5 @@
 ﻿{
+  "BLAKE2": "The BLAKE2 family of hash functions were created as drop in replacement for MD5 and SHA-1, which had been broken, with superior speed and security. They are closely related to the original BLAKE family of hash functions.",
   "MD4": "The MD4 hash function, created by Ronald Rivest in 1990, is an obsolete hash algorithm that influenced the design of later hash functions. It produces a 128 bit (16 byte) hash.",
   "MD5": "The MD5 hash function, created by Ronald Rivest in 1991, is among the best known and most widely used in history. It produces a 128 bit (16 byte) hash. Weaknesses were discovered in the algorithm within a few years that resulted in its deprecation for secure purposes. It wasn't until 2004, however, that collisions were discovered. Today MD5 is used to verify message integrity against accidental changes.",
   "Pearson": "Pearson hashing, created by Peter Pearson in 1990, is one of the simplest hashing algorithms. It produces an 8 bit (1 byte) hash. While it runs quickly it has almost no collision resistance and was designed to create hashes for small numbers of short inputs.",

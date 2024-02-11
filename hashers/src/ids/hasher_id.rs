@@ -32,7 +32,7 @@ impl HasherId {
 impl Display for HasherId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let name = match self {
-            Self::Blake2 => "Blake2",
+            Self::Blake2 => "BLAKE2",
             Self::Md4 => "MD4",
             Self::Md5 => "MD5",
             Self::Pearson => "Pearson",
