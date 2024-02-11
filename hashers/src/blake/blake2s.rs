@@ -8,8 +8,8 @@ use crate::{errors::HasherError, traits::ClassicHasher};
 pub struct Blake2s {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    pub key: Vec<u8>,    // optional key, length from 0 to 64 bytes
-    pub hash_len: usize, // length of output in bytes, 1 to 64
+    pub key: Vec<u8>,    // optional key, length from 0 to 32 bytes
+    pub hash_len: usize, // length of output in bytes, 1 to 32
 }
 
 impl Default for Blake2s {
@@ -110,7 +110,7 @@ impl Blake2s {
 impl ClassicHasher for Blake2s {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         if self.hash_len > 32 {
-            panic!("hash_len cannot be greater than 64 as there are only 64 bytes of state")
+            panic!("hash_len cannot be greater than 32 as there are only 32 bytes of state")
         }
 
         if self.hash_len == 0 {
@@ -118,7 +118,7 @@ impl ClassicHasher for Blake2s {
         }
 
         if self.key.len() > 32 {
-            panic!("the length of the key cannot be more than 64 bytes")
+            panic!("the length of the key cannot be more than 32 bytes")
         }
 
         let mut state = Self::IV.clone();
