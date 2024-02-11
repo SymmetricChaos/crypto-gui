@@ -42,41 +42,45 @@ impl Default for Blake2Frame {
 impl Blake2Frame {
     fn key_control(ui: &mut egui::Ui, string: &mut String, bytes: &mut Vec<u8>) {
         ui.horizontal(|ui| {
-            *string = string.chars().filter(|c| c.is_ascii_hexdigit()).collect();
-            match ByteFormat::Hex.text_to_bytes(string) {
-                Ok(new) => *bytes = new,
-                Err(_) => {
-                    ui.error_text("unable to read key");
+            if ui.control_string(string).changed() {
+                *string = string.chars().filter(|c| c.is_ascii_hexdigit()).collect();
+                if ui.button("🎲").on_hover_text("randomize").clicked() {
+                    let mut rng = thread_rng();
+                    rng.fill_bytes(bytes);
+                    *string = ByteFormat::Hex.bytes_to_text(bytes)
                 }
-            };
-            if ui.button("🎲").on_hover_text("randomize").clicked() {
-                let mut rng = thread_rng();
-                rng.fill_bytes(bytes);
-                *string = ByteFormat::Hex.bytes_to_text(bytes)
+                match ByteFormat::Hex.text_to_bytes(string) {
+                    Ok(new) => *bytes = new,
+                    Err(_) => {
+                        ui.error_text("unable to read key");
+                    }
+                };
             }
         });
     }
 
     fn hash_len_control(ui: &mut egui::Ui, string: &mut String, value: &mut usize, max: usize) {
-        if ui.control_string(string).changed() {
-            *string = string
-                .chars()
-                .filter(|c| c.is_ascii_digit())
-                .take(2)
-                .collect();
-            match usize::from_str_radix(string, 10) {
-                Ok(new) => {
-                    if new == 0 || new > max {
-                        ui.error_text("invalid hash length_size");
-                    } else {
-                        *value = new
+        ui.horizontal(|ui| {
+            if ui.control_string(string).changed() {
+                *string = string
+                    .chars()
+                    .filter(|c| c.is_ascii_digit())
+                    .take(2)
+                    .collect();
+                match usize::from_str_radix(string, 10) {
+                    Ok(new) => {
+                        if new == 0 || new > max {
+                            ui.error_text("invalid hash length_size");
+                        } else {
+                            *value = new
+                        }
                     }
-                }
-                Err(_) => {
-                    ui.error_text("unable to parse hash_len value");
-                }
-            };
-        }
+                    Err(_) => {
+                        ui.error_text("unable to parse hash_len value");
+                    }
+                };
+            }
+        });
     }
 }
 

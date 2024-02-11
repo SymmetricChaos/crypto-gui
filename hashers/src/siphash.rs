@@ -7,8 +7,8 @@ use crate::{errors::HasherError, traits::ClassicHasher};
 pub struct SipHash {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    k0: u64,
-    k1: u64,
+    pub k0: u64,
+    pub k1: u64,
     pub compression_rounds: usize,
     pub finalization_rounds: usize,
 }

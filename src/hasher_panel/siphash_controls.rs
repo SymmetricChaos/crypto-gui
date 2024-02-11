@@ -3,24 +3,49 @@ use crate::ui_elements::UiElements;
 use super::{byte_formatting_io, HasherFrame};
 use egui::DragValue;
 use hashers::{errors::HasherError, siphash::SipHash, traits::ClassicHasher};
+use rand::{thread_rng, Rng};
 
 pub struct SipHashFrame {
     hasher: SipHash,
-    k0: u64,
-    k1: u64,
+    k0_string: String,
+    k1_string: String,
 }
 
 impl Default for SipHashFrame {
     fn default() -> Self {
         Self {
             hasher: Default::default(),
-            k0: 0,
-            k1: 0,
+            k0_string: String::new(),
+            k1_string: String::new(),
         }
     }
 }
 
-impl SipHashFrame {}
+impl SipHashFrame {
+    fn key_control(ui: &mut egui::Ui, string: &mut String, key: &mut u64) {
+        ui.horizontal(|ui| {
+            if ui.control_string(string).changed() {
+                *string = string
+                    .chars()
+                    .filter(|c| c.is_ascii_hexdigit())
+                    .take(16)
+                    .collect();
+
+                if ui.button("🎲").on_hover_text("randomize").clicked() {
+                    let mut rng = thread_rng();
+                    *key = rng.gen();
+                    *string = format!("{:016x}", key);
+                }
+                match u64::from_str_radix(string, 16) {
+                    Ok(new) => *key = new.to_be(),
+                    Err(_) => {
+                        ui.error_text("unable to parse key");
+                    }
+                };
+            }
+        });
+    }
+}
 
 impl HasherFrame for SipHashFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
@@ -33,15 +58,12 @@ impl HasherFrame for SipHashFrame {
         );
 
         ui.add_space(16.0);
-        ui.subheading("Key0");
-        if ui.add(DragValue::new(&mut self.k0)).changed() {
-            self.hasher.set_keys(self.k0, self.k1)
-        }
+        ui.subheading("Key0 (hexadecimal)");
+        Self::key_control(ui, &mut self.k0_string, &mut self.hasher.k0);
         ui.add_space(8.0);
-        ui.subheading("Key1");
-        if ui.add(DragValue::new(&mut self.k1)).changed() {
-            self.hasher.set_keys(self.k0, self.k1)
-        }
+        ui.subheading("Key1 (hexadecimal)");
+        Self::key_control(ui, &mut self.k1_string, &mut self.hasher.k1);
+
         ui.add_space(16.0);
         ui.subheading("Compression Rounds");
         ui.add(DragValue::new(&mut self.hasher.compression_rounds).clamp_range(0..=8));
