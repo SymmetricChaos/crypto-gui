@@ -6,6 +6,7 @@ use hashers::{
     errors::HasherError,
     traits::ClassicHasher,
 };
+use rand::{thread_rng, RngCore};
 use utils::byte_formatting::ByteFormat;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -40,7 +41,7 @@ impl Default for Blake2Frame {
 
 impl Blake2Frame {
     fn key_control(ui: &mut egui::Ui, string: &mut String, bytes: &mut Vec<u8>) {
-        if ui.control_string(string).changed() {
+        ui.horizontal(|ui| {
             *string = string.chars().filter(|c| c.is_ascii_hexdigit()).collect();
             match ByteFormat::Hex.text_to_bytes(string) {
                 Ok(new) => *bytes = new,
@@ -48,7 +49,12 @@ impl Blake2Frame {
                     ui.error_text("unable to read key");
                 }
             };
-        }
+            if ui.button("🎲").on_hover_text("randomize").clicked() {
+                let mut rng = thread_rng();
+                rng.fill_bytes(bytes);
+                *string = ByteFormat::Hex.bytes_to_text(bytes)
+            }
+        });
     }
 
     fn hash_len_control(ui: &mut egui::Ui, string: &mut String, value: &mut usize, max: usize) {
@@ -116,18 +122,20 @@ impl HasherFrame for Blake2Frame {
         }
 
         ui.add_space(16.0);
-        ui.subheading("Key (hexadecimal)");
-        ui.label("The BLAKE2 functions allow a key to be included ");
+        ui.subheading("Key (provide as hexadecimal)");
+        ui.label("The BLAKE2 functions allow a key to be included.");
         match self.variant {
             Blake2Variant::Big => {
-                Self::key_control(ui, &mut self.key_string_b, &mut self.hasher_b.key)
+                ui.label("BLAKE2b has a maximum key size of of 64 bytes (512 bits).");
+                Self::key_control(ui, &mut self.key_string_b, &mut self.hasher_b.key);
             }
             Blake2Variant::Small => {
+                ui.label("BLAKE2s has a maximum key size of of 32 bytes (256 bits).");
                 Self::key_control(ui, &mut self.key_string_s, &mut self.hasher_s.key)
             }
         };
 
-        ui.label("<<<EXPLANATION OF HASH FUNCTION CODE>>>");
+        // ui.label("<<<EXPLANATION OF HASH FUNCTION CODE>>>");
 
         ui.add_space(16.0);
     }
