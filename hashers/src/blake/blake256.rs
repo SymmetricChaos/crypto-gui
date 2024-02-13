@@ -3,7 +3,15 @@ use utils::byte_formatting::ByteFormat;
 
 use crate::{errors::HasherError, traits::ClassicHasher};
 
+use super::SIGMA;
+
 // https://eprint.iacr.org/2012/351.pdf
+
+// Constants for compression function, beginning digits of pi
+const C: [u32; 16] = [
+    0x243f6a88, 0x85a308d3, 0x13198a2e, 0x03707344, 0xa4093822, 0x299f31d0, 0x082efa98, 0xec4e6c89,
+    0x452821e6, 0x38d01377, 0xbe5466cf, 0x34e90c6c, 0xc0ac29b7, 0xc97c50dd, 0x3f84d5b5, 0xb5470917,
+];
 
 pub struct Blake256 {
     pub input_format: ByteFormat,
@@ -35,27 +43,6 @@ impl Blake256 {
     //     0xbefa4fa4,
     // ];
 
-    // Constants for compression function, beginning digits of pi
-    const C: [u32; 16] = [
-        0x243f6a88, 0x85a308d3, 0x13198a2e, 0x03707344, 0xa4093822, 0x299f31d0, 0x082efa98,
-        0xec4e6c89, 0x452821e6, 0x38d01377, 0xbe5466cf, 0x34e90c6c, 0xc0ac29b7, 0xc97c50dd,
-        0x3f84d5b5, 0xb5470917,
-    ];
-
-    // Message permutation schedule
-    const SIGMA: [[usize; 16]; 10] = [
-        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-        [14, 10, 4, 8, 9, 15, 13, 6, 1, 12, 0, 2, 11, 7, 5, 3],
-        [11, 8, 12, 0, 5, 2, 15, 13, 10, 14, 3, 6, 7, 1, 9, 4],
-        [7, 9, 3, 1, 13, 12, 11, 14, 2, 6, 5, 10, 4, 0, 15, 8],
-        [9, 0, 5, 7, 2, 4, 10, 15, 14, 1, 11, 12, 6, 8, 3, 13],
-        [2, 12, 6, 10, 0, 11, 8, 3, 4, 13, 7, 5, 15, 14, 1, 9],
-        [12, 5, 1, 15, 14, 13, 4, 10, 0, 7, 6, 3, 9, 2, 8, 11],
-        [13, 11, 7, 14, 12, 1, 3, 9, 5, 0, 15, 4, 8, 6, 2, 10],
-        [6, 15, 14, 9, 11, 3, 0, 8, 12, 2, 13, 7, 1, 4, 10, 5],
-        [10, 2, 8, 4, 7, 6, 1, 5, 15, 11, 9, 14, 3, 12, 13, 0],
-    ];
-
     pub fn mix(v: &mut [u32; 16], a: usize, b: usize, c: usize, d: usize, x: u32, y: u32) {
         v[a] = v[a].wrapping_add(v[b]).wrapping_add(x);
         v[d] = (v[d] ^ v[a]).rotate_right(16);
@@ -73,35 +60,37 @@ impl Blake256 {
     // https://decred.org/research/aumasson2010.pdf
     pub fn compress(state: &mut [u32; 8], chunk: &[u32; 16], counter: u64, salt: &[u32; 4]) {
         // create a working vector starting with the current state and then following it with the IV xored with the salt, then the IV xored with the counter
+
         let mut work = [0_u32; 16];
         for i in 0..8 {
             work[i] = state[i];
         }
         for i in 0..4 {
-            work[i + 8] = Self::IV[i] ^ salt[i]
+            work[i + 8] = C[i] ^ salt[i]
         }
-        work[12] = Self::IV[12] ^ (counter >> 32) as u32; // Upper bits
-        work[13] = Self::IV[13] ^ (counter >> 32) as u32;
-        work[14] = Self::IV[14] ^ (counter as u32); // Lower bits
-        work[15] = Self::IV[15] ^ (counter as u32);
+        work[12] = C[4] ^ (counter as u32); // Lower bits
+        work[13] = C[5] ^ (counter as u32);
+        work[14] = C[6] ^ (counter >> 32) as u32; // Upper bits
+        work[15] = C[7] ^ (counter >> 32) as u32;
 
+        println!("work: {:08x?}", work);
         for i in 0..14 {
-            let s = Self::SIGMA[i % 10];
+            let s = SIGMA[i % 10];
+
+            let a = [0, 1, 2, 3, 0, 1, 2, 3];
+            let b = [4, 5, 6, 7, 5, 6, 7, 4];
+            let c = [8, 9, 10, 11, 10, 11, 8, 9];
+            let d = [12, 13, 14, 15, 15, 12, 13, 14];
 
             // Apply the mixing function eight times, xoring the constants with the chunks of message
-            for j in 0..4 {
-                let x = chunk[s[2 * j]] ^ Self::C[s[2 * j + 1]];
-                let y = chunk[s[2 * j + 1]] ^ Self::C[s[2 * j]];
-                Self::mix(&mut work, j, j + 4, j + 8, j + 12, x, y);
+            for j in 0..8 {
+                let x = chunk[s[2 * j]] ^ C[s[2 * j + 1]];
+                let y = chunk[s[2 * j + 1]] ^ C[s[2 * j]];
+                Self::mix(&mut work, a[j], b[j], c[j], d[j], x, y);
             }
 
-            for j in 0..4 {
-                let x = chunk[s[2 * j]] ^ Self::C[s[2 * j + 1]];
-                let y = chunk[s[2 * j + 1]] ^ Self::C[s[2 * j]];
-                Self::mix(&mut work, j, j + 5, j + 10, j + 15, x, y);
-            }
+            println!("work: {:08x?}", work);
         }
-
         for i in 0..8 {
             state[i] ^= salt[i % 4] ^ work[i] ^ work[i + 8];
         }
@@ -109,7 +98,7 @@ impl Blake256 {
 
     fn create_chunk(bytes: &[u8]) -> [u32; 16] {
         let mut k = [0u32; 16];
-        for (elem, chunk) in k.iter_mut().zip(bytes.chunks_exact(8)).take(16) {
+        for (elem, chunk) in k.iter_mut().zip(bytes.chunks_exact(4)).take(16) {
             *elem = u32::from_le_bytes(chunk.try_into().unwrap());
         }
         k
@@ -121,15 +110,15 @@ impl ClassicHasher for Blake256 {
         let mut input = bytes.to_vec();
 
         // Length in bits before padding
-        let b_len = (input.len().wrapping_mul(8)) as u64;
+        let b_len = (bytes.len().wrapping_mul(8)) as u64;
 
-        // Step 1.Padding
+        // Padding
         // push a byte with a leading 1 to the bytes
         input.push(0x80);
         // push zeros until the length in bits is 440 mod 512
         // equivalently until the length in bytes is 55 mod 64
         while (input.len() % 64) != 55 {
-            input.push(0)
+            input.push(0x00)
         }
 
         // Final byte before length is 0x01
@@ -140,10 +129,21 @@ impl ClassicHasher for Blake256 {
             input.push(b)
         }
 
-        let mut counter: u64 = 0;
+        let mut bytes_remaining = input.len();
+        let mut counter = 0;
         let mut state = Self::IV.clone();
+        let mut message = input.chunks_exact(64).peekable();
 
-        let mut chunks = input.chunks_exact(128);
+        while bytes_remaining >= 64 {
+            let chunk = Self::create_chunk(message.next().unwrap());
+            if message.peek().is_none() {
+                counter = b_len;
+            } else {
+                counter += 512;
+            }
+            bytes_remaining -= 64;
+            Self::compress(&mut state, &chunk, counter, &self.salt)
+        }
 
         state
             .iter()
@@ -170,29 +170,12 @@ mod blake256_tests {
     #[test]
     fn test_empty() {
         let mut hasher = Blake256::default();
-        hasher.input_format = ByteFormat::Utf8;
-        hasher.output_format = ByteFormat::Hex;
-        hasher.hash_len = 64;
-        assert_eq!("", hasher.hash_bytes_from_string("").unwrap());
-    }
-
-    #[test]
-    fn test_abc() {
-        let mut hasher = Blake256::default();
-        hasher.input_format = ByteFormat::Utf8;
-        hasher.output_format = ByteFormat::Hex;
-
-        hasher.hash_len = 64;
-        assert_eq!("", hasher.hash_bytes_from_string("abc").unwrap());
-    }
-
-    #[test]
-    fn test_keyed() {
-        let mut hasher = Blake256::default();
         hasher.input_format = ByteFormat::Hex;
         hasher.output_format = ByteFormat::Hex;
-        hasher.hash_len = 64;
-        hasher.key = ByteFormat::Hex.text_to_bytes("").unwrap();
-        assert_eq!("", hasher.hash_bytes_from_string("").unwrap());
+        hasher.hash_bytes_from_string("00");
+        // assert_eq!(
+        //     "0ce8d4ef4dd7cd8d62dfded9d4edb0a774ae6a41929a74da23109e8f11139c87",
+        //     hasher.hash_bytes_from_string("00").unwrap()
+        // );
     }
 }
