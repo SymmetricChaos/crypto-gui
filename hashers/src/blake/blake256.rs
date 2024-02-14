@@ -33,7 +33,7 @@ impl Default for Blake256 {
 
 impl Blake256 {
     // Initialization vector, sqrt of the first eight primes
-    const IV: [u32; 8] = [
+    const IV_256: [u32; 8] = [
         0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB,
         0x5BE0CD19,
     ];
@@ -152,7 +152,7 @@ impl ClassicHasher for Blake256 {
         let mut counter = 0;
         let mut state = match self.truncated {
             true => Self::IV_224.clone(),
-            false => Self::IV.clone(),
+            false => Self::IV_256.clone(),
         };
         let mut message = input.chunks_exact(64).peekable();
 

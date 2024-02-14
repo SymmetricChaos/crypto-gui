@@ -99,7 +99,7 @@ impl Blake512 {
     // https://decred.org/research/aumasson2010.pdf
     pub fn compress(state: &mut [u64; 8], chunk: &[u64; 16], counter: u128, salt: &[u64; 4]) {
         // create a working vector starting with the current state and then following it with the IV xored with the salt, then the IV xored with the counter
-        // println!("chunk: {:08x?}\n", chunk);
+        // println!("chunk: {:016x?}\n", chunk);
         let mut work = [0_u64; 16];
         for i in 0..8 {
             work[i] = state[i];
@@ -113,8 +113,8 @@ impl Blake512 {
         work[15] = C[7] ^ (counter >> 64) as u64;
 
         // At this point the working vector is correct, I have triple checked
-        // println!("work: {:08x?}\n", work);
-        for i in 0..14 {
+        // println!("work: {:016x?}\n", work);
+        for i in 0..16 {
             let s = SIGMA[i % 10];
 
             let a = [0, 1, 2, 3, 0, 1, 2, 3];
@@ -129,17 +129,17 @@ impl Blake512 {
                 Self::mix(&mut work, a[j], b[j], c[j], d[j], x, y);
             }
 
-            // println!("work {}:\n{:08x?}\n", i + 1, work);
+            // println!("work {}:\n{:016x?}\n", i + 1, work);
         }
         for i in 0..8 {
             state[i] ^= salt[i % 4] ^ work[i] ^ work[i + 8];
         }
-        // println!("intermediate: {:08x?}\n", state);
+        // println!("intermediate: {:016x?}\n", state);
     }
 
     fn create_chunk(bytes: &[u8]) -> [u64; 16] {
         let mut k = [0u64; 16];
-        for (elem, chunk) in k.iter_mut().zip(bytes.chunks_exact(4)).take(16) {
+        for (elem, chunk) in k.iter_mut().zip(bytes.chunks_exact(8)).take(16) {
             *elem = u64::from_be_bytes(chunk.try_into().unwrap());
         }
         k
@@ -156,13 +156,13 @@ impl ClassicHasher for Blake512 {
         // Padding
         // push a byte with a leading 1 to the bytes
         input.push(0x80);
-        // push zeros until the length in bits is 440 mod 512
-        // equivalently until the length in bytes is 55 mod 128
-        while (input.len() % 128) != 55 {
+        // push zeros until the length in bits is 888 mod 1024
+        // equivalently until the length in bytes is 111 mod 128
+        while (input.len() % 128) != 111 {
             input.push(0x00)
         }
 
-        // Final byte before length is 0x01 for BLAKE512 and is 0x00 for BLAKE224
+        // Final byte before length is 0x01 for BLAKE512 and is 0x00 for BLAKE384
         if self.truncated {
             input.push(0x00);
         } else {
@@ -187,7 +187,7 @@ impl ClassicHasher for Blake512 {
             if message.peek().is_none() {
                 counter = b_len;
             } else {
-                counter += 512;
+                counter += 128;
             }
             bytes_remaining -= 128;
             Self::compress(&mut state, &chunk, counter, &self.salt)
@@ -228,8 +228,7 @@ mod blake512_tests {
         let mut hasher = Blake512::default();
         hasher.input_format = ByteFormat::Hex;
         hasher.output_format = ByteFormat::Hex;
-
-        assert_eq!("", hasher.hash_bytes_from_string("00").unwrap());
-        assert_eq!("", hasher.hash_bytes_from_string("").unwrap());
+        // hasher.hash_bytes_from_string("00");
+        assert_eq!("97961587f6d970faba6d2478045de6d1fabd09b61ae50932054d52bc29d31be4ff9102b9f69e2bbdb83be13d4b9c06091e5fa0b48bd081b634058be0ec49beb3", hasher.hash_bytes_from_string("00").unwrap());
     }
 }
