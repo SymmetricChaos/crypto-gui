@@ -16,8 +16,7 @@ const C: [u32; 16] = [
 pub struct Blake256 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    pub salt: [u32; 4],  // optional salt
-    pub hash_len: usize, // length of output in bytes, 1 to 64
+    pub salt: [u32; 4], // optional salt
 }
 
 impl Default for Blake256 {
@@ -26,7 +25,6 @@ impl Default for Blake256 {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
             salt: [0, 0, 0, 0],
-            hash_len: 32, // default to 256 bits
         }
     }
 }
@@ -60,7 +58,7 @@ impl Blake256 {
     // https://decred.org/research/aumasson2010.pdf
     pub fn compress(state: &mut [u32; 8], chunk: &[u32; 16], counter: u64, salt: &[u32; 4]) {
         // create a working vector starting with the current state and then following it with the IV xored with the salt, then the IV xored with the counter
-
+        // println!("chunk: {:08x?}\n", chunk);
         let mut work = [0_u32; 16];
         for i in 0..8 {
             work[i] = state[i];
@@ -73,7 +71,8 @@ impl Blake256 {
         work[14] = C[6] ^ (counter >> 32) as u32; // Upper bits
         work[15] = C[7] ^ (counter >> 32) as u32;
 
-        println!("work: {:08x?}", work);
+        // At this point the working vector is correct, I have triple checked
+        // println!("work: {:08x?}\n", work);
         for i in 0..14 {
             let s = SIGMA[i % 10];
 
@@ -89,17 +88,18 @@ impl Blake256 {
                 Self::mix(&mut work, a[j], b[j], c[j], d[j], x, y);
             }
 
-            println!("work: {:08x?}", work);
+            // println!("work {}:\n{:08x?}\n", i + 1, work);
         }
         for i in 0..8 {
             state[i] ^= salt[i % 4] ^ work[i] ^ work[i + 8];
         }
+        // println!("intermediate: {:08x?}\n", state);
     }
 
     fn create_chunk(bytes: &[u8]) -> [u32; 16] {
         let mut k = [0u32; 16];
         for (elem, chunk) in k.iter_mut().zip(bytes.chunks_exact(4)).take(16) {
-            *elem = u32::from_le_bytes(chunk.try_into().unwrap());
+            *elem = u32::from_be_bytes(chunk.try_into().unwrap());
         }
         k
     }
@@ -147,9 +147,8 @@ impl ClassicHasher for Blake256 {
 
         state
             .iter()
-            .map(|x| x.to_le_bytes())
+            .map(|x| x.to_be_bytes())
             .flatten()
-            .take(self.hash_len)
             .collect_vec()
     }
 
@@ -172,10 +171,14 @@ mod blake256_tests {
         let mut hasher = Blake256::default();
         hasher.input_format = ByteFormat::Hex;
         hasher.output_format = ByteFormat::Hex;
-        hasher.hash_bytes_from_string("00");
-        // assert_eq!(
-        //     "0ce8d4ef4dd7cd8d62dfded9d4edb0a774ae6a41929a74da23109e8f11139c87",
-        //     hasher.hash_bytes_from_string("00").unwrap()
-        // );
+
+        assert_eq!(
+            "0ce8d4ef4dd7cd8d62dfded9d4edb0a774ae6a41929a74da23109e8f11139c87",
+            hasher.hash_bytes_from_string("00").unwrap()
+        );
+        assert_eq!(
+            "d419bad32d504fb7d44d460c42c5593fe544fa4c135dec31e21bd9abdcc22d41",
+            hasher.hash_bytes_from_string("000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000").unwrap()
+        );
     }
 }
