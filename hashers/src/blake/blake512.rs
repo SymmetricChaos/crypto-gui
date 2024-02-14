@@ -8,19 +8,33 @@ use super::SIGMA;
 // https://eprint.iacr.org/2012/351.pdf
 
 // Constants for compression function, beginning digits of pi
-const C: [u32; 16] = [
-    0x243f6a88, 0x85a308d3, 0x13198a2e, 0x03707344, 0xa4093822, 0x299f31d0, 0x082efa98, 0xec4e6c89,
-    0x452821e6, 0x38d01377, 0xbe5466cf, 0x34e90c6c, 0xc0ac29b7, 0xc97c50dd, 0x3f84d5b5, 0xb5470917,
+const C: [u64; 16] = [
+    0x243f6a8885a308d3,
+    0x13198a2e03707344,
+    0xa4093822299f31d0,
+    0x082efa98ec4e6c89,
+    0x452821e638d01377,
+    0xbe5466cf34e90c6c,
+    0xc0ac29b7c97c50dd,
+    0x3f84d5b5b5470917,
+    0x9216d5d98979fb1b,
+    0xd1310ba698dfb5ac,
+    0x2ffd72dbd01adfb7,
+    0xb8e1afed6a267e96,
+    0xba7c9045f12c7f99,
+    0x24a19947b3916cf7,
+    0x0801f2e2858efc16,
+    0x636920d871574e69,
 ];
 
-pub struct Blake256 {
+pub struct Blake512 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    pub salt: [u32; 4], // optional salt
+    pub salt: [u64; 4], // optional salt
     truncated: bool,
 }
 
-impl Default for Blake256 {
+impl Default for Blake512 {
     fn default() -> Self {
         Self {
             input_format: ByteFormat::Hex,
@@ -31,23 +45,35 @@ impl Default for Blake256 {
     }
 }
 
-impl Blake256 {
+impl Blake512 {
     // Initialization vector, sqrt of the first eight primes
-    const IV: [u32; 8] = [
-        0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB,
-        0x5BE0CD19,
+    const IV_512: [u64; 8] = [
+        0x6a09e667f3bcc908,
+        0xbb67ae8584caa73b,
+        0x3c6ef372fe94f82b,
+        0xa54ff53a5f1d36f1,
+        0x510e527fade682d1,
+        0x9b05688c2b3e6c1f,
+        0x1f83d9abfb41bd6b,
+        0x5be0cd19137e2179,
     ];
 
-    const IV_224: [u32; 8] = [
-        0xc1059ed8, 0x367cd507, 0x3070dd17, 0xf70e5939, 0xffc00b31, 0x68581511, 0x64f98fa7,
-        0xbefa4fa4,
+    const IV_384: [u64; 8] = [
+        0xcbbb9d5dc1059ed8,
+        0x629a292a367cd507,
+        0x9159015a3070dd17,
+        0x152fecd8f70e5939,
+        0x67332667ffc00b31,
+        0x8eb44a8768581511,
+        0xdb0c2e0d64f98fa7,
+        0x47b5481dbefa4fa4,
     ];
 
-    pub fn blake256() -> Self {
+    pub fn blake512() -> Self {
         Self::default()
     }
 
-    pub fn blake224() -> Self {
+    pub fn blake384() -> Self {
         Self {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
@@ -56,35 +82,35 @@ impl Blake256 {
         }
     }
 
-    pub fn mix(v: &mut [u32; 16], a: usize, b: usize, c: usize, d: usize, x: u32, y: u32) {
+    pub fn mix(v: &mut [u64; 16], a: usize, b: usize, c: usize, d: usize, x: u64, y: u64) {
         v[a] = v[a].wrapping_add(v[b]).wrapping_add(x);
+        v[d] = (v[d] ^ v[a]).rotate_right(32);
+
+        v[c] = v[c].wrapping_add(v[d]);
+        v[b] = (v[b] ^ v[c]).rotate_right(25);
+
+        v[a] = v[a].wrapping_add(v[b]).wrapping_add(y);
         v[d] = (v[d] ^ v[a]).rotate_right(16);
 
         v[c] = v[c].wrapping_add(v[d]);
-        v[b] = (v[b] ^ v[c]).rotate_right(12);
-
-        v[a] = v[a].wrapping_add(v[b]).wrapping_add(y);
-        v[d] = (v[d] ^ v[a]).rotate_right(8);
-
-        v[c] = v[c].wrapping_add(v[d]);
-        v[b] = (v[b] ^ v[c]).rotate_right(7);
+        v[b] = (v[b] ^ v[c]).rotate_right(11);
     }
 
     // https://decred.org/research/aumasson2010.pdf
-    pub fn compress(state: &mut [u32; 8], chunk: &[u32; 16], counter: u64, salt: &[u32; 4]) {
+    pub fn compress(state: &mut [u64; 8], chunk: &[u64; 16], counter: u128, salt: &[u64; 4]) {
         // create a working vector starting with the current state and then following it with the IV xored with the salt, then the IV xored with the counter
         // println!("chunk: {:08x?}\n", chunk);
-        let mut work = [0_u32; 16];
+        let mut work = [0_u64; 16];
         for i in 0..8 {
             work[i] = state[i];
         }
         for i in 0..4 {
             work[i + 8] = C[i] ^ salt[i]
         }
-        work[12] = C[4] ^ (counter as u32); // Lower bits
-        work[13] = C[5] ^ (counter as u32);
-        work[14] = C[6] ^ (counter >> 32) as u32; // Upper bits
-        work[15] = C[7] ^ (counter >> 32) as u32;
+        work[12] = C[4] ^ (counter as u64); // Lower bits
+        work[13] = C[5] ^ (counter as u64);
+        work[14] = C[6] ^ (counter >> 64) as u64; // Upper bits
+        work[15] = C[7] ^ (counter >> 64) as u64;
 
         // At this point the working vector is correct, I have triple checked
         // println!("work: {:08x?}\n", work);
@@ -111,32 +137,32 @@ impl Blake256 {
         // println!("intermediate: {:08x?}\n", state);
     }
 
-    fn create_chunk(bytes: &[u8]) -> [u32; 16] {
-        let mut k = [0u32; 16];
+    fn create_chunk(bytes: &[u8]) -> [u64; 16] {
+        let mut k = [0u64; 16];
         for (elem, chunk) in k.iter_mut().zip(bytes.chunks_exact(4)).take(16) {
-            *elem = u32::from_be_bytes(chunk.try_into().unwrap());
+            *elem = u64::from_be_bytes(chunk.try_into().unwrap());
         }
         k
     }
 }
 
-impl ClassicHasher for Blake256 {
+impl ClassicHasher for Blake512 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut input = bytes.to_vec();
 
         // Length in bits before padding
-        let b_len = (bytes.len().wrapping_mul(8)) as u64;
+        let b_len = (bytes.len().wrapping_mul(8)) as u128;
 
         // Padding
         // push a byte with a leading 1 to the bytes
         input.push(0x80);
         // push zeros until the length in bits is 440 mod 512
-        // equivalently until the length in bytes is 55 mod 64
-        while (input.len() % 64) != 55 {
+        // equivalently until the length in bytes is 55 mod 128
+        while (input.len() % 128) != 55 {
             input.push(0x00)
         }
 
-        // Final byte before length is 0x01 for BLAKE256 and is 0x00 for BLAKE224
+        // Final byte before length is 0x01 for BLAKE512 and is 0x00 for BLAKE224
         if self.truncated {
             input.push(0x00);
         } else {
@@ -151,19 +177,19 @@ impl ClassicHasher for Blake256 {
         let mut bytes_remaining = input.len();
         let mut counter = 0;
         let mut state = match self.truncated {
-            true => Self::IV_224.clone(),
-            false => Self::IV.clone(),
+            true => Self::IV_384.clone(),
+            false => Self::IV_512.clone(),
         };
-        let mut message = input.chunks_exact(64).peekable();
+        let mut message = input.chunks_exact(128).peekable();
 
-        while bytes_remaining >= 64 {
+        while bytes_remaining >= 128 {
             let chunk = Self::create_chunk(message.next().unwrap());
             if message.peek().is_none() {
                 counter = b_len;
             } else {
                 counter += 512;
             }
-            bytes_remaining -= 64;
+            bytes_remaining -= 128;
             Self::compress(&mut state, &chunk, counter, &self.salt)
         }
 
@@ -194,22 +220,16 @@ impl ClassicHasher for Blake256 {
 }
 
 #[cfg(test)]
-mod blake256_tests {
+mod blake512_tests {
     use super::*;
 
     #[test]
     fn test_empty() {
-        let mut hasher = Blake256::default();
+        let mut hasher = Blake512::default();
         hasher.input_format = ByteFormat::Hex;
         hasher.output_format = ByteFormat::Hex;
 
-        assert_eq!(
-            "0ce8d4ef4dd7cd8d62dfded9d4edb0a774ae6a41929a74da23109e8f11139c87",
-            hasher.hash_bytes_from_string("00").unwrap()
-        );
-        assert_eq!(
-            "d419bad32d504fb7d44d460c42c5593fe544fa4c135dec31e21bd9abdcc22d41",
-            hasher.hash_bytes_from_string("000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000").unwrap()
-        );
+        assert_eq!("", hasher.hash_bytes_from_string("00").unwrap());
+        assert_eq!("", hasher.hash_bytes_from_string("").unwrap());
     }
 }
