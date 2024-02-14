@@ -196,7 +196,7 @@ impl ClassicHasher for Blake512 {
         if self.truncated {
             state
                 .iter()
-                .take(7)
+                .take(6)
                 .map(|x| x.to_be_bytes())
                 .flatten()
                 .collect_vec()

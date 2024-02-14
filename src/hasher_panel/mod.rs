@@ -1,4 +1,5 @@
 mod blake2_controls;
+mod blake_controls;
 mod md4_controls;
 mod md5_controls;
 mod pearson_controls;
