@@ -1,9 +1,6 @@
 use bimap::BiMap;
 use lazy_static::lazy_static;
-use utils::{
-    byte_formatting::{bytes_to_hex, ByteFormat},
-    text_functions::bimap_from_iter,
-};
+use utils::{byte_formatting::ByteFormat, text_functions::bimap_from_iter};
 
 use crate::{errors::CodeError, traits::Code};
 
@@ -149,7 +146,7 @@ impl Code for Base32 {
         match self.mode {
             ByteFormat::Hex => self.encode_hex(text),
             ByteFormat::Utf8 => self.encode_utf8(text),
-            ByteFormat::Base64 => todo!(),
+            ByteFormat::Base64 => self.encode_base64(text),
         }
     }
 
@@ -178,11 +175,7 @@ impl Code for Base32 {
                 bits_in_use -= 8;
             }
         }
-        match self.mode {
-            ByteFormat::Hex => Ok(bytes_to_hex(&out)),
-            ByteFormat::Utf8 => String::from_utf8(out).map_err(|e| CodeError::Input(e.to_string())),
-            ByteFormat::Base64 => todo!(),
-        }
+        Ok(self.mode.byte_slice_to_text(out))
     }
 }
 

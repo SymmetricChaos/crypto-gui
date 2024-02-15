@@ -3,7 +3,7 @@ use crate::{errors::CodeError, traits::Code};
 use super::BinaryToText;
 use itertools::Itertools;
 use utils::{
-    byte_formatting::{bytes_to_hex, ByteFormat},
+    byte_formatting::ByteFormat,
     text_functions::{u8_to_string_with_radix, u8_to_string_with_radix_and_width},
 };
 
@@ -91,7 +91,7 @@ impl Code for BytesAsNumbers {
         match self.mode {
             ByteFormat::Hex => self.encode_hex(text),
             ByteFormat::Utf8 => self.encode_utf8(text),
-            ByteFormat::Base64 => todo!(),
+            ByteFormat::Base64 => self.encode_base64(text),
         }
     }
 
@@ -105,13 +105,7 @@ impl Code for BytesAsNumbers {
                 bytes.push(b)
             }
         }
-        match self.mode {
-            ByteFormat::Hex => Ok(bytes_to_hex(&bytes)),
-            ByteFormat::Utf8 => {
-                String::from_utf8(bytes).map_err(|e| CodeError::Input(e.to_string()))
-            }
-            ByteFormat::Base64 => todo!(),
-        }
+        Ok(self.mode.byte_slice_to_text(bytes))
     }
 }
 

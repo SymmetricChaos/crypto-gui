@@ -3,10 +3,7 @@ use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use itertools::Itertools;
 use num::Zero;
-use utils::{
-    byte_formatting::{bytes_to_hex, ByteFormat},
-    text_functions::bimap_from_iter,
-};
+use utils::{byte_formatting::ByteFormat, text_functions::bimap_from_iter};
 
 // Translated from
 // https://github.com/eknkc/basex/blob/6baac8ea8b19cc66d125286d213770fec0691867/basex.go#L46
@@ -94,7 +91,7 @@ impl Code for BaseX {
         match self.mode {
             ByteFormat::Hex => self.encode_hex(text),
             ByteFormat::Utf8 => self.encode_utf8(text),
-            ByteFormat::Base64 => todo!(),
+            ByteFormat::Base64 => self.encode_base64(text),
         }
     }
 
@@ -127,13 +124,7 @@ impl Code for BaseX {
 
         let bytes = bytes.into_iter().rev().collect_vec();
 
-        match self.mode {
-            ByteFormat::Hex => Ok(bytes_to_hex(&bytes)),
-            ByteFormat::Utf8 => {
-                String::from_utf8(bytes).map_err(|e| CodeError::Input(e.to_string()))
-            }
-            ByteFormat::Base64 => todo!(),
-        }
+        Ok(self.mode.byte_slice_to_text(bytes))
     }
 }
 

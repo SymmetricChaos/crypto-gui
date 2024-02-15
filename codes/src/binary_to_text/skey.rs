@@ -1,6 +1,6 @@
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
-use utils::byte_formatting::{bytes_to_hex, ByteFormat};
+use utils::byte_formatting::ByteFormat;
 
 use super::BinaryToText;
 // rfc2289
@@ -266,7 +266,7 @@ impl Code for SKeyWords {
         match self.mode {
             ByteFormat::Hex => self.encode_hex(text),
             ByteFormat::Utf8 => self.encode_utf8(text),
-            ByteFormat::Base64 => todo!(),
+            ByteFormat::Base64 => self.encode_base64(text),
         }
     }
 
@@ -283,13 +283,7 @@ impl Code for SKeyWords {
             for chunk in chunks {
                 out.extend_from_slice(&words_to_u64(chunk)?.to_le_bytes());
             }
-            match self.mode {
-                ByteFormat::Hex => Ok(bytes_to_hex(&out)),
-                ByteFormat::Utf8 => {
-                    String::from_utf8(out).map_err(|e| CodeError::Input(e.to_string()))
-                }
-                ByteFormat::Base64 => todo!(),
-            }
+            Ok(self.mode.byte_slice_to_text(out))
         }
     }
 }

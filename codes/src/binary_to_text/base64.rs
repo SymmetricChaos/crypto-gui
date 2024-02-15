@@ -3,7 +3,7 @@ use crate::errors::CodeError;
 use crate::traits::Code;
 use bimap::BiMap;
 use lazy_static::lazy_static;
-use utils::byte_formatting::{bytes_to_hex, ByteFormat};
+use utils::byte_formatting::ByteFormat;
 // use std::fs::read;
 // use std::path::PathBuf;
 use utils::preset_alphabet::Alphabet;
@@ -145,7 +145,7 @@ impl Code for Base64 {
         match self.mode {
             ByteFormat::Hex => self.encode_hex(text),
             ByteFormat::Utf8 => self.encode_utf8(text),
-            ByteFormat::Base64 => todo!(),
+            ByteFormat::Base64 => self.encode_base64(text),
         }
     }
 
@@ -178,11 +178,7 @@ impl Code for Base64 {
                 bits_in_use -= 8;
             }
         }
-        match self.mode {
-            ByteFormat::Hex => Ok(bytes_to_hex(&out)),
-            ByteFormat::Utf8 => String::from_utf8(out).map_err(|e| CodeError::Input(e.to_string())),
-            ByteFormat::Base64 => todo!(),
-        }
+        Ok(self.mode.byte_slice_to_text(out))
     }
 }
 
