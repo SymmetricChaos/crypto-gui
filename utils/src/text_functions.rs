@@ -312,48 +312,12 @@ pub fn keyed_alphabet(keyword: &str, alphabet: &str) -> String {
 //     out
 // }
 
-lazy_static! {
-    pub static ref IS_HEX_BYTES: Regex = Regex::new(r"^(?:[0-9a-fA-F]{2})+$").unwrap();
-    pub static ref HEX: BiMap<String, u8> = (0..255).map(|n| (format!("{:02x}", n), n)).collect();
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct HexToBytesError;
-
-// A string containing hex characters converted into bytes
-// "DEADBEEF" -> [222, 173, 190, 239]
-pub fn hex_to_bytes(hex: &str) -> Result<Vec<u8>, HexToBytesError> {
-    let mut text: String = hex.lines().collect();
-    text = text.to_ascii_lowercase();
-    if !IS_HEX_BYTES.is_match(&text) {
-        return Err(HexToBytesError);
-    } else {
-        let mut out = Vec::new();
-        for i in 0..(text.len() / 2) {
-            let lo = i * 2;
-            out.push(*HEX.get_by_left(&text[lo..lo + 2]).unwrap())
-        }
-        Ok(out)
-    }
-}
-
-pub fn bytes_to_hex(bytes: &[u8]) -> String {
-    bytes.into_iter().map(|b| format!("{:02x}", b)).join("")
-}
-
 #[cfg(test)]
 mod text_function_tests {
 
     use rand::{rngs::StdRng, SeedableRng};
 
     use super::*;
-
-    #[test]
-    fn hex_map() {
-        for i in HEX.iter() {
-            println!("{i:?}")
-        }
-    }
 
     #[test]
     fn string_ranking() {

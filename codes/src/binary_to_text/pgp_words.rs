@@ -1,6 +1,7 @@
-use super::{BinaryToText, BinaryToTextMode};
+use super::BinaryToText;
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
+use utils::byte_formatting::ByteFormat;
 
 const PGP_WORDS: [[&'static str; 2]; 256] = [
     ["aardvark", "adroitness"],
@@ -277,13 +278,13 @@ pub fn right_word(word: &str) -> Result<usize, CodeError> {
 }
 
 pub struct PgpWords {
-    pub mode: BinaryToTextMode,
+    pub mode: ByteFormat,
 }
 
 impl Default for PgpWords {
     fn default() -> Self {
         Self {
-            mode: BinaryToTextMode::Utf8,
+            mode: ByteFormat::Utf8,
         }
     }
 }
@@ -312,8 +313,9 @@ impl BinaryToText for PgpWords {
 impl Code for PgpWords {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         match self.mode {
-            BinaryToTextMode::Hex => self.encode_hex(text),
-            BinaryToTextMode::Utf8 => self.encode_utf8(text),
+            ByteFormat::Hex => self.encode_hex(text),
+            ByteFormat::Utf8 => self.encode_utf8(text),
+            ByteFormat::Base64 => todo!(),
         }
     }
 
@@ -342,7 +344,7 @@ mod pgp_tests {
         let words = "topmost Istanbul Pluto vagabond treadmill Pacific brackish dictator goldfish Medusa afflict bravado chatter revolver Dupont midsummer stopwatch whimsical cowbell bottomless";
         let nums = "E5 82 94 F2 E9 A2 27 48 6E 8B 06 1B 31 CC 52 8F D7 FA 3F 19";
         let code = PgpWords {
-            mode: BinaryToTextMode::Hex,
+            mode: ByteFormat::Hex,
         };
         assert_eq!(words, code.encode(nums).unwrap())
     }
@@ -351,7 +353,7 @@ mod pgp_tests {
     pub fn encode_pgp_words_errs() {
         let nums = "E5 82 94 F2 E9 A2 27 48 6E 8B 06 1B 31 C 52 8F D7 FA 3F 19";
         let code = PgpWords {
-            mode: BinaryToTextMode::Hex,
+            mode: ByteFormat::Hex,
         };
         assert_eq!(
             CodeError::Input("not valid hex bytes".into()),
@@ -364,7 +366,7 @@ mod pgp_tests {
         let words = "topmost Istanbul Pluto vagabond treadmill Pacific brackish dictator goldfish Medusa afflict bravado chatter revolver Dupont midsummer stopwatch whimsical cowbell bottomless";
         let nums = "E5 82 94 F2 E9 A2 27 48 6E 8B 06 1B 31 CC 52 8F D7 FA 3F 19";
         let code = PgpWords {
-            mode: BinaryToTextMode::Hex,
+            mode: ByteFormat::Hex,
         };
         assert_eq!(nums, code.decode(words).unwrap())
     }

@@ -3,12 +3,11 @@ use std::str::Chars;
 use itertools::Itertools;
 use lazy_static::lazy_static;
 
-use crate::{
-    binary_to_text::{BinaryToText, BinaryToTextMode},
-    errors::CodeError,
-    traits::Code,
+use crate::{binary_to_text::BinaryToText, errors::CodeError, traits::Code};
+use utils::{
+    byte_formatting::{bytes_to_hex, ByteFormat},
+    text_functions::string_chunks,
 };
-use utils::text_functions::{bytes_to_hex, string_chunks};
 
 // \u{00A0} is nonbreaking space. \u{00AD} is soft hyphen.
 pub const CP1252: &'static str = "␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~␡€�‚ƒ„…†‡ˆ‰Š‹Œ�Ž��‘’“”•–—˜™š›œ�žŸ\u{00A0}¡¢£¤¥¦§¨©ª«¬\u{00AD}®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ";
@@ -69,7 +68,7 @@ pub struct Ccsid {
     pub mode: DisplayMode,
     pub page: CodePage,
     pub spaced: bool,
-    pub b2t_mode: Option<BinaryToTextMode>,
+    pub b2t_mode: Option<ByteFormat>,
 }
 
 impl BinaryToText for Ccsid {
@@ -127,10 +126,11 @@ impl Ccsid {
             .map(|c| self.page.chars().position(|x| x == c).unwrap() as u8)
             .collect_vec();
         match self.b2t_mode {
-            Some(BinaryToTextMode::Hex) => Ok(bytes_to_hex(&out)),
-            Some(BinaryToTextMode::Utf8) => {
+            Some(ByteFormat::Hex) => Ok(bytes_to_hex(&out)),
+            Some(ByteFormat::Utf8) => {
                 String::from_utf8(out).map_err(|e| CodeError::Input(e.to_string()))
             }
+            Some(ByteFormat::Base64) => todo!(),
             None => Err(CodeError::state("Binary to Text Mode is not set")),
         }
     }
@@ -151,8 +151,9 @@ impl Code for Ccsid {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         if let Some(m) = self.b2t_mode {
             match m {
-                BinaryToTextMode::Hex => self.encode_hex(text),
-                BinaryToTextMode::Utf8 => self.encode_utf8(text),
+                ByteFormat::Hex => self.encode_hex(text),
+                ByteFormat::Utf8 => self.encode_utf8(text),
+                ByteFormat::Base64 => todo!(),
             }
         } else {
             let mut out = Vec::new();

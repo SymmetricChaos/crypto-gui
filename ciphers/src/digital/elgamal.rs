@@ -71,8 +71,8 @@ impl Cipher for ElGamal {
         let pair = self.encrypt_bytes(&mut bytes)?;
         let out = format!(
             "{}\n{}",
-            self.output_format.bytes_to_text(&pair.0),
-            self.output_format.bytes_to_text(&pair.1)
+            self.output_format.byte_slice_to_text(&pair.0),
+            self.output_format.byte_slice_to_text(&pair.1)
         );
         Ok(out)
     }
@@ -92,7 +92,7 @@ impl Cipher for ElGamal {
             .map_err(|_| CipherError::input("byte format error"))?;
 
         let out = self.decrypt_bytes(&gamma, &delta)?;
-        Ok(self.output_format.bytes_to_text(&out))
+        Ok(self.output_format.byte_slice_to_text(&out))
     }
 }
 

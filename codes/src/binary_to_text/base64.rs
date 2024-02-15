@@ -1,12 +1,13 @@
-use super::{BinaryToText, BinaryToTextMode};
+use super::BinaryToText;
 use crate::errors::CodeError;
 use crate::traits::Code;
 use bimap::BiMap;
 use lazy_static::lazy_static;
+use utils::byte_formatting::{bytes_to_hex, ByteFormat};
 // use std::fs::read;
 // use std::path::PathBuf;
 use utils::preset_alphabet::Alphabet;
-use utils::text_functions::{bimap_from_iter, bytes_to_hex};
+use utils::text_functions::bimap_from_iter;
 
 const MASK: u8 = 0b00111111;
 const PAD: u8 = '=' as u8;
@@ -35,7 +36,7 @@ lazy_static! {
 pub struct Base64 {
     // pub file: Option<PathBuf>,
     pub use_padding: bool,
-    pub mode: BinaryToTextMode,
+    pub mode: ByteFormat,
     pub variant: B64Variant,
 }
 
@@ -44,7 +45,7 @@ impl Default for Base64 {
         Self {
             // file: None,
             use_padding: true,
-            mode: BinaryToTextMode::Utf8,
+            mode: ByteFormat::Utf8,
             variant: B64Variant::Standard,
         }
     }
@@ -142,8 +143,9 @@ impl BinaryToText for Base64 {
 impl Code for Base64 {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         match self.mode {
-            BinaryToTextMode::Hex => self.encode_hex(text),
-            BinaryToTextMode::Utf8 => self.encode_utf8(text),
+            ByteFormat::Hex => self.encode_hex(text),
+            ByteFormat::Utf8 => self.encode_utf8(text),
+            ByteFormat::Base64 => todo!(),
         }
     }
 
@@ -177,10 +179,9 @@ impl Code for Base64 {
             }
         }
         match self.mode {
-            BinaryToTextMode::Hex => Ok(bytes_to_hex(&out)),
-            BinaryToTextMode::Utf8 => {
-                String::from_utf8(out).map_err(|e| CodeError::Input(e.to_string()))
-            }
+            ByteFormat::Hex => Ok(bytes_to_hex(&out)),
+            ByteFormat::Utf8 => String::from_utf8(out).map_err(|e| CodeError::Input(e.to_string())),
+            ByteFormat::Base64 => todo!(),
         }
     }
 }

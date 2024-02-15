@@ -194,6 +194,6 @@ impl ClassicHasher for Sha256 {
             .text_to_bytes(text)
             .map_err(|_| HasherError::general("byte format error"))?;
         let out = self.hash(&mut bytes);
-        Ok(self.output_format.bytes_to_text(&out))
+        Ok(self.output_format.byte_slice_to_text(&out))
     }
 }

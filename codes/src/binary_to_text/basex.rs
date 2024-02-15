@@ -1,15 +1,18 @@
-use super::{BinaryToText, BinaryToTextMode};
+use super::BinaryToText;
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use itertools::Itertools;
 use num::Zero;
-use utils::text_functions::{bimap_from_iter, bytes_to_hex};
+use utils::{
+    byte_formatting::{bytes_to_hex, ByteFormat},
+    text_functions::bimap_from_iter,
+};
 
 // Translated from
 // https://github.com/eknkc/basex/blob/6baac8ea8b19cc66d125286d213770fec0691867/basex.go#L46
 
 pub struct BaseX {
-    pub mode: BinaryToTextMode,
+    pub mode: ByteFormat,
     base: u32,
     map: BiMap<char, u32>,
 }
@@ -23,7 +26,7 @@ impl Default for BaseX {
                 .map(|(n, c)| (c, n as u32)),
         );
         Self {
-            mode: BinaryToTextMode::Utf8,
+            mode: ByteFormat::Utf8,
             base: 58,
             map,
         }
@@ -89,8 +92,9 @@ impl BinaryToText for BaseX {
 impl Code for BaseX {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         match self.mode {
-            BinaryToTextMode::Hex => self.encode_hex(text),
-            BinaryToTextMode::Utf8 => self.encode_utf8(text),
+            ByteFormat::Hex => self.encode_hex(text),
+            ByteFormat::Utf8 => self.encode_utf8(text),
+            ByteFormat::Base64 => todo!(),
         }
     }
 
@@ -124,10 +128,11 @@ impl Code for BaseX {
         let bytes = bytes.into_iter().rev().collect_vec();
 
         match self.mode {
-            BinaryToTextMode::Hex => Ok(bytes_to_hex(&bytes)),
-            BinaryToTextMode::Utf8 => {
+            ByteFormat::Hex => Ok(bytes_to_hex(&bytes)),
+            ByteFormat::Utf8 => {
                 String::from_utf8(bytes).map_err(|e| CodeError::Input(e.to_string()))
             }
+            ByteFormat::Base64 => todo!(),
         }
     }
 }
@@ -147,7 +152,7 @@ mod basex_tests {
         for (ptext, ctext) in TESTS {
             assert_eq!(code.encode(ptext).unwrap(), *ctext);
         }
-        code.mode = BinaryToTextMode::Hex;
+        code.mode = ByteFormat::Hex;
         for (ptext, ctext) in HEX_TESTS {
             assert_eq!(code.encode(ptext).unwrap(), *ctext);
         }
@@ -159,7 +164,7 @@ mod basex_tests {
         for (ptext, ctext) in TESTS {
             assert_eq!(code.decode(ctext).unwrap(), *ptext);
         }
-        code.mode = BinaryToTextMode::Hex;
+        code.mode = ByteFormat::Hex;
         for (ptext, ctext) in HEX_TESTS {
             assert_eq!(code.decode(ctext).unwrap(), *ptext);
         }

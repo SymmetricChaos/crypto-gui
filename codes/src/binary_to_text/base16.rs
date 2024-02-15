@@ -1,23 +1,23 @@
-use super::{BinaryToText, BinaryToTextMode};
+use super::BinaryToText;
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use regex::Regex;
-use utils::text_functions::bytes_to_hex;
+use utils::byte_formatting::{bytes_to_hex, ByteFormat};
 
 lazy_static! {
     pub static ref IS_BASE16: Regex = Regex::new(r"^([0-9A-F][0-9A-F])*$").unwrap();
 }
 
 pub struct Base16 {
-    pub mode: BinaryToTextMode,
+    pub mode: ByteFormat,
     pub upper: bool,
 }
 
 impl Default for Base16 {
     fn default() -> Self {
         Self {
-            mode: BinaryToTextMode::Utf8,
+            mode: ByteFormat::Utf8,
             upper: true,
         }
     }
@@ -36,8 +36,9 @@ impl BinaryToText for Base16 {
 impl Code for Base16 {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         match self.mode {
-            BinaryToTextMode::Hex => self.encode_hex(text),
-            BinaryToTextMode::Utf8 => self.encode_utf8(text),
+            ByteFormat::Hex => self.encode_hex(text),
+            ByteFormat::Utf8 => self.encode_utf8(text),
+            ByteFormat::Base64 => todo!(),
         }
     }
 
@@ -56,10 +57,9 @@ impl Code for Base16 {
             .collect_vec();
 
         match self.mode {
-            BinaryToTextMode::Hex => Ok(bytes_to_hex(&out)),
-            BinaryToTextMode::Utf8 => {
-                String::from_utf8(out).map_err(|e| CodeError::Input(e.to_string()))
-            }
+            ByteFormat::Hex => Ok(bytes_to_hex(&out)),
+            ByteFormat::Utf8 => String::from_utf8(out).map_err(|e| CodeError::Input(e.to_string())),
+            ByteFormat::Base64 => todo!(),
         }
     }
 }

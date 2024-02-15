@@ -48,9 +48,7 @@ impl Blake2Frame {
                 if ui.button("🎲").on_hover_text("randomize").clicked() {
                     let mut rng = thread_rng();
                     rng.fill(salt);
-                    *string = ByteFormat::Hex.bytes_to_text(
-                        &salt.iter().map(|x| x.to_be_bytes()).flatten().collect_vec(),
-                    )
+                    *string = ByteFormat::Hex.u32_slice_to_text_be(&salt);
                 }
                 match ByteFormat::Hex.text_to_bytes(string) {
                     Ok(new) => *bytes = new,

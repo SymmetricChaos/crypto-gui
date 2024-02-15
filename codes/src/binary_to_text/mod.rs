@@ -9,18 +9,9 @@ pub mod skey;
 
 use std::{fs::read, path::PathBuf};
 
-use bimap::BiMap;
-use lazy_static::lazy_static;
-use regex::Regex;
-use utils::text_functions::hex_to_bytes;
+use utils::byte_formatting::hex_to_bytes;
 
 use crate::errors::CodeError;
-
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub enum BinaryToTextMode {
-    Hex,
-    Utf8,
-}
 
 pub trait BinaryToText {
     // Encode some literal bytes

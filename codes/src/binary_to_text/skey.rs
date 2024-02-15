@@ -1,8 +1,8 @@
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
-use utils::text_functions::bytes_to_hex;
+use utils::byte_formatting::{bytes_to_hex, ByteFormat};
 
-use super::{BinaryToText, BinaryToTextMode};
+use super::BinaryToText;
 // rfc2289
 
 const SKEY_WORDS: [&'static str; 2048] = [
@@ -225,13 +225,13 @@ fn words_to_u64(words: &[&str]) -> Result<u64, CodeError> {
 }
 
 pub struct SKeyWords {
-    pub mode: BinaryToTextMode,
+    pub mode: ByteFormat,
 }
 
 impl Default for SKeyWords {
     fn default() -> Self {
         Self {
-            mode: BinaryToTextMode::Utf8,
+            mode: ByteFormat::Utf8,
         }
     }
 }
@@ -264,8 +264,9 @@ impl BinaryToText for SKeyWords {
 impl Code for SKeyWords {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         match self.mode {
-            BinaryToTextMode::Hex => self.encode_hex(text),
-            BinaryToTextMode::Utf8 => self.encode_utf8(text),
+            ByteFormat::Hex => self.encode_hex(text),
+            ByteFormat::Utf8 => self.encode_utf8(text),
+            ByteFormat::Base64 => todo!(),
         }
     }
 
@@ -283,10 +284,11 @@ impl Code for SKeyWords {
                 out.extend_from_slice(&words_to_u64(chunk)?.to_le_bytes());
             }
             match self.mode {
-                BinaryToTextMode::Hex => Ok(bytes_to_hex(&out)),
-                BinaryToTextMode::Utf8 => {
+                ByteFormat::Hex => Ok(bytes_to_hex(&out)),
+                ByteFormat::Utf8 => {
                     String::from_utf8(out).map_err(|e| CodeError::Input(e.to_string()))
                 }
+                ByteFormat::Base64 => todo!(),
             }
         }
     }

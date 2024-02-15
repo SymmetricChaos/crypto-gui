@@ -1,14 +1,15 @@
 use crate::{errors::CodeError, traits::Code};
 
-use super::{BinaryToText, BinaryToTextMode};
+use super::BinaryToText;
 use itertools::Itertools;
-use utils::text_functions::{
-    bytes_to_hex, u8_to_string_with_radix, u8_to_string_with_radix_and_width,
+use utils::{
+    byte_formatting::{bytes_to_hex, ByteFormat},
+    text_functions::{u8_to_string_with_radix, u8_to_string_with_radix_and_width},
 };
 
 // Make it possible to encode an aribtrary file
 pub struct BytesAsNumbers {
-    pub mode: BinaryToTextMode,
+    pub mode: ByteFormat,
     pub fixed_width: bool,
     pub radix: u32,
     pub width: usize,
@@ -18,7 +19,7 @@ pub struct BytesAsNumbers {
 impl Default for BytesAsNumbers {
     fn default() -> Self {
         Self {
-            mode: BinaryToTextMode::Utf8,
+            mode: ByteFormat::Utf8,
             fixed_width: false,
             radix: 10,
             width: 3,
@@ -88,8 +89,9 @@ impl BinaryToText for BytesAsNumbers {
 impl Code for BytesAsNumbers {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         match self.mode {
-            BinaryToTextMode::Hex => self.encode_hex(text),
-            BinaryToTextMode::Utf8 => self.encode_utf8(text),
+            ByteFormat::Hex => self.encode_hex(text),
+            ByteFormat::Utf8 => self.encode_utf8(text),
+            ByteFormat::Base64 => todo!(),
         }
     }
 
@@ -104,10 +106,11 @@ impl Code for BytesAsNumbers {
             }
         }
         match self.mode {
-            BinaryToTextMode::Hex => Ok(bytes_to_hex(&bytes)),
-            BinaryToTextMode::Utf8 => {
+            ByteFormat::Hex => Ok(bytes_to_hex(&bytes)),
+            ByteFormat::Utf8 => {
                 String::from_utf8(bytes).map_err(|e| CodeError::Input(e.to_string()))
             }
+            ByteFormat::Base64 => todo!(),
         }
     }
 }

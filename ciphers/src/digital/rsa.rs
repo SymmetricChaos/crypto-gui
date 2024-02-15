@@ -79,7 +79,7 @@ impl Cipher for Rsa {
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
         let out = self.encrypt_bytes(&mut bytes)?;
-        Ok(self.output_format.bytes_to_text(&out))
+        Ok(self.output_format.byte_slice_to_text(&out))
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
@@ -88,7 +88,7 @@ impl Cipher for Rsa {
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
         let out = self.decrypt_bytes(&mut bytes)?;
-        Ok(self.output_format.bytes_to_text(&out))
+        Ok(self.output_format.byte_slice_to_text(&out))
     }
 }
 

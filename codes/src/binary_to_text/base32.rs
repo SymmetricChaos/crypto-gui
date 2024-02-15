@@ -1,10 +1,13 @@
 use bimap::BiMap;
 use lazy_static::lazy_static;
-use utils::text_functions::{bimap_from_iter, bytes_to_hex};
+use utils::{
+    byte_formatting::{bytes_to_hex, ByteFormat},
+    text_functions::bimap_from_iter,
+};
 
 use crate::{errors::CodeError, traits::Code};
 
-use super::{BinaryToText, BinaryToTextMode};
+use super::BinaryToText;
 
 // Mask to set top three bits to zero
 const MASK: u8 = 0b00011111;
@@ -45,7 +48,7 @@ pub enum B32Variant {
 // Make it possible to encode an aribtrary file
 pub struct Base32 {
     pub variant: B32Variant,
-    pub mode: BinaryToTextMode,
+    pub mode: ByteFormat,
     pub use_padding: bool,
 }
 
@@ -53,7 +56,7 @@ impl Default for Base32 {
     fn default() -> Self {
         Self {
             variant: B32Variant::Rfc4648,
-            mode: BinaryToTextMode::Utf8,
+            mode: ByteFormat::Utf8,
             use_padding: true,
         }
     }
@@ -144,8 +147,9 @@ impl BinaryToText for Base32 {
 impl Code for Base32 {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         match self.mode {
-            BinaryToTextMode::Hex => self.encode_hex(text),
-            BinaryToTextMode::Utf8 => self.encode_utf8(text),
+            ByteFormat::Hex => self.encode_hex(text),
+            ByteFormat::Utf8 => self.encode_utf8(text),
+            ByteFormat::Base64 => todo!(),
         }
     }
 
@@ -175,10 +179,9 @@ impl Code for Base32 {
             }
         }
         match self.mode {
-            BinaryToTextMode::Hex => Ok(bytes_to_hex(&out)),
-            BinaryToTextMode::Utf8 => {
-                String::from_utf8(out).map_err(|e| CodeError::Input(e.to_string()))
-            }
+            ByteFormat::Hex => Ok(bytes_to_hex(&out)),
+            ByteFormat::Utf8 => String::from_utf8(out).map_err(|e| CodeError::Input(e.to_string())),
+            ByteFormat::Base64 => todo!(),
         }
     }
 }
