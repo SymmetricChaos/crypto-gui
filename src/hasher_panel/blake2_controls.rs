@@ -50,7 +50,7 @@ impl Blake2Frame {
                     *string = ByteFormat::Hex.byte_slice_to_text(bytes)
                 }
                 match ByteFormat::Hex.text_to_bytes(string) {
-                    Ok(new) => *bytes = new,
+                    Ok(new) => *bytes = new.clone(),
                     Err(_) => {
                         ui.error_text("unable to read key");
                     }

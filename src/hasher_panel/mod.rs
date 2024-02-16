@@ -61,6 +61,7 @@ impl HasherInterface {
     pub fn combo_boxes(&mut self, ui: &mut Ui, active_hasher: &mut Option<HasherId>) {
         combox_box(
             &[
+                HasherId::Blake,
                 HasherId::Blake2,
                 HasherId::Md4,
                 HasherId::Md5,
@@ -77,6 +78,7 @@ impl HasherInterface {
 
     pub fn get_active_hasher(&mut self, active_hasher: &HasherId) -> &mut dyn HasherFrame {
         match active_hasher {
+            HasherId::Blake => todo!(),
             HasherId::Blake2 => &mut self.blake2,
             HasherId::Md4 => &mut self.md4,
             HasherId::Md5 => &mut self.md5,
@@ -84,7 +86,6 @@ impl HasherInterface {
             HasherId::Sha2 => &mut self.sha2,
             HasherId::Pearson => &mut self.pearson,
             HasherId::SipHash => &mut self.siphash,
-            // _ => todo!("<<<HASHER NOT FOUND>>>"),
         }
     }
 }

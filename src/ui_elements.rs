@@ -1,12 +1,11 @@
 use crate::cipher_panel::CipherFrame;
-use codes::binary_to_text::BinaryToTextMode;
 use eframe::egui::RichText;
 use egui::{Color32, DragValue, Response, TextStyle, Ui};
 use egui_extras::{Column, TableBuilder};
 // use itertools::Itertools;
 use rngs::ClassicRng;
 use std::fmt::Display;
-use utils::text_functions::filter_string;
+use utils::{byte_formatting::ByteFormat, text_functions::filter_string};
 
 pub trait UiElements {
     // A label with larger text
@@ -40,7 +39,7 @@ pub trait UiElements {
         ncols: usize,
         iter: Box<dyn Iterator<Item = (S, T)> + '_>,
     );
-    fn binary_to_text_input_mode(&mut self, current_value: &mut BinaryToTextMode);
+    fn binary_to_text_input_mode(&mut self, current_value: &mut ByteFormat);
 }
 
 impl UiElements for Ui {
@@ -130,12 +129,14 @@ impl UiElements for Ui {
         })
     }
 
-    fn binary_to_text_input_mode(&mut self, current_value: &mut BinaryToTextMode) {
+    fn binary_to_text_input_mode(&mut self, current_value: &mut ByteFormat) {
         self.label("Encoding Mode");
-        self.selectable_value(current_value, BinaryToTextMode::Hex, "Hex")
+        self.selectable_value(current_value, ByteFormat::Hex, "Hex")
             .on_hover_text("interpret input as hexcode");
-        self.selectable_value(current_value, BinaryToTextMode::Utf8, "UTF-8")
-            .on_hover_text("convert text to raw bytes");
+        self.selectable_value(current_value, ByteFormat::Utf8, "UTF-8")
+            .on_hover_text("convert text (UTF-8) to raw bytes");
+        self.selectable_value(current_value, ByteFormat::Base64, "Base64")
+            .on_hover_text("interpret input as Base64");
     }
 
     fn copy_to_clipboard<S: ToString>(&mut self, text: S) {
@@ -294,13 +295,13 @@ pub fn generate_random_nums_box(
     ui.text_edit_multiline(randoms);
 }
 
-pub fn binary_to_text_input_mode(ui: &mut egui::Ui, current_value: &mut BinaryToTextMode) {
-    ui.label("Encoding Mode");
-    ui.selectable_value(current_value, BinaryToTextMode::Hex, "Hex")
-        .on_hover_text("interpret input as hexcode");
-    ui.selectable_value(current_value, BinaryToTextMode::Utf8, "UTF-8")
-        .on_hover_text("convert text to raw bytes");
-}
+// pub fn binary_to_text_input_mode(ui: &mut egui::Ui, current_value: &mut BinaryToTextMode) {
+//     ui.label("Encoding Mode");
+//     ui.selectable_value(current_value, BinaryToTextMode::Hex, "Hex")
+//         .on_hover_text("interpret input as hexcode");
+//     ui.selectable_value(current_value, BinaryToTextMode::Utf8, "UTF-8")
+//         .on_hover_text("convert text to raw bytes");
+// }
 
 pub fn fill_code_columns<T: Display, S: Display>(
     nrows: usize,

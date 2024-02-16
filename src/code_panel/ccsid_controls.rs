@@ -1,9 +1,7 @@
 use super::CodeFrame;
 use crate::ui_elements::UiElements;
-use codes::{
-    binary_to_text::BinaryToTextMode,
-    text_standards::code_pages::{Ccsid, CodePage, DisplayMode},
-};
+use codes::text_standards::code_pages::{Ccsid, CodePage, DisplayMode};
+use utils::byte_formatting::ByteFormat;
 
 pub struct CcsidFrame {
     code: Ccsid,
@@ -59,7 +57,7 @@ pub struct CcsidBinaryFrame {
 impl Default for CcsidBinaryFrame {
     fn default() -> Self {
         let mut code = Ccsid::default();
-        code.b2t_mode = Some(codes::binary_to_text::BinaryToTextMode::Hex);
+        code.b2t_mode = Some(ByteFormat::Hex);
         Self {
             code: Default::default(),
         }
@@ -74,15 +72,14 @@ impl CodeFrame for CcsidBinaryFrame {
             ui.selectable_value(&mut self.code.page, CodePage::CP437, "CP437");
         });
 
+        ui.add_space(16.0);
         ui.label("Encoding Mode");
-        ui.selectable_value(&mut self.code.b2t_mode, Some(BinaryToTextMode::Hex), "Hex")
+        ui.selectable_value(&mut self.code.b2t_mode, Some(ByteFormat::Hex), "Hex")
             .on_hover_text("interpret input as hexcode");
-        ui.selectable_value(
-            &mut self.code.b2t_mode,
-            Some(BinaryToTextMode::Utf8),
-            "UTF-8",
-        )
-        .on_hover_text("treat text as bytes of UTF-8");
+        ui.selectable_value(&mut self.code.b2t_mode, Some(ByteFormat::Utf8), "UTF-8")
+            .on_hover_text("treat text as bytes of UTF-8");
+        ui.selectable_value(&mut self.code.b2t_mode, Some(ByteFormat::Base64), "Base64")
+            .on_hover_text("treat text as Base64");
 
         ui.add_space(16.0);
         ui.two_column_table("Character", "Code", self.code.chars_codes());

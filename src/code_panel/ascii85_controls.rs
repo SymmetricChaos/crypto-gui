@@ -1,5 +1,5 @@
 use super::CodeFrame;
-use crate::ui_elements::{binary_to_text_input_mode, UiElements};
+use crate::ui_elements::UiElements;
 use codes::binary_to_text::ascii85::{Ascii85, Ascii85Variant};
 
 pub struct Ascii85Frame {
@@ -38,7 +38,7 @@ impl CodeFrame for Ascii85Frame {
             Ascii85Variant::Adobe => ui.label("The Adobe variant of is used in PDFs and differs from the original btoa only in that it does not have the 'y' special rule and that Adobe marks the start and end of the encoded string differently."),
         };
         ui.add_space(16.0);
-        binary_to_text_input_mode(ui, &mut self.code.mode);
+        ui.binary_to_text_input_mode(&mut self.code.mode);
 
         // ui.label("You can upload a file and encode its binary data as text. Decoding files is not supported as it is impossible to know the contents.");
         // upload_file(ui, &mut self.file);
