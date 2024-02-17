@@ -77,7 +77,7 @@ impl Display for CipherId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let name = match self {
             CipherId::Adfgvx => "ADFGVX",
-            CipherId::Aes => "AES",
+            CipherId::Aes => "AES (Rijndael)",
             CipherId::Affine => "Affine",
             CipherId::Alberti => "Alberti Cipher Disk",
             CipherId::Amsco => "AMSCO",
