@@ -1,4 +1,4 @@
 ﻿{
-    "Hasher": "Hash functions not of cryptographic quality. These prioritize speed while still providing a useful level of collision resistance. Some are designed to resist hash flooding attacks that exploit the small size of hash tables.",
-    "Cryptographic Hasher": "These hash functions are designed to fulfill cryptographic requirements. Ideally they should be impossible to distinguish from a random oracle even when an attacker can provide billion of malicious inputs."
+    "Non-cryptographic": "Hash functions not of cryptographic quality. These prioritize speed while still providing a useful level of collision resistance. Some are designed to resist hash flooding attacks that exploit the small size of hash tables.",
+    "Cryptographic": "These hash functions are designed to fulfill cryptographic requirements. Ideally they should be impossible to distinguish from a random oracle even when an attacker can provide billion of malicious inputs."
 }

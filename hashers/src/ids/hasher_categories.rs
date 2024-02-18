@@ -4,12 +4,13 @@ use std::fmt::Display;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum HasherCategory {
-    Hasher,
+    NonCryptographic,
+    Cryptographic,
 }
 
 impl Default for HasherCategory {
     fn default() -> Self {
-        Self::Hasher
+        Self::NonCryptographic
     }
 }
 
@@ -25,7 +26,8 @@ impl HasherCategory {
 impl Display for HasherCategory {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let name = match self {
-            Self::Hasher => "Hasher",
+            Self::NonCryptographic => "Non-cryptographic",
+            Self::Cryptographic => "Cryptographic",
         };
         write!(f, "{}", name)
     }
