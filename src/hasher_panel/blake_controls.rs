@@ -6,6 +6,8 @@ use hashers::{
     errors::HasherError,
     traits::ClassicHasher,
 };
+use rand::{thread_rng, Rng};
+use utils::byte_formatting::ByteFormat;
 
 #[derive(Debug, PartialEq, Eq)]
 enum BlakeVariant {
@@ -21,7 +23,10 @@ pub struct BlakeFrame {
     hasher_256: Blake256,
     hasher_384: Blake512,
     hasher_512: Blake512,
-    salt_string: String,
+    salt_224: String,
+    salt_256: String,
+    salt_384: String,
+    salt_512: String,
 }
 
 impl Default for BlakeFrame {
@@ -32,30 +37,64 @@ impl Default for BlakeFrame {
             hasher_256: Blake256::blake256(),
             hasher_384: Blake512::blake384(),
             hasher_512: Blake512::blake512(),
-            salt_string: String::new(),
+            salt_224: String::new(),
+            salt_256: String::new(),
+            salt_384: String::new(),
+            salt_512: String::new(),
         }
     }
 }
 
 impl BlakeFrame {
-    //     fn salt_control_32(ui: &mut egui::Ui, string: &mut String, salt: &mut [u32; 4]) {
-    //         ui.horizontal(|ui| {
-    //             if ui.control_string(string).changed() {
-    //                 *string = string.chars().filter(|c| c.is_ascii_hexdigit()).collect();
-    //                 if ui.button("🎲").on_hover_text("randomize").clicked() {
-    //                     let mut rng = thread_rng();
-    //                     rng.fill(salt);
-    //                     *string = ByteFormat::Hex.u32_slice_to_text_be(&salt);
-    //                 }
-    //                 match ByteFormat::Hex.text_to_bytes(string) {
-    //                     Ok(new) => *bytes = new,
-    //                     Err(_) => {
-    //                         ui.error_text("unable to read salt");
-    //                     }
-    //                 };
-    //             }
-    //         });
-    //     }
+    fn salt_control_32(ui: &mut egui::Ui, string: &mut String, salt: &mut [u32; 4]) {
+        ui.horizontal(|ui| {
+            if ui.control_string(string).changed() {
+                *string = string.chars().filter(|c| c.is_ascii_hexdigit()).collect();
+                if ui.button("🎲").on_hover_text("randomize").clicked() {
+                    let mut rng = thread_rng();
+                    rng.fill(salt);
+                    *string = ByteFormat::Hex.u32_slice_to_text_be(&salt);
+                }
+                match ByteFormat::Hex.text_to_u32(string) {
+                    Ok(mut new) => {
+                        while new.len() < 4 {
+                            new.push(0)
+                        }
+                        new.truncate(4);
+                        *salt = new.try_into().expect("input too long")
+                    }
+                    Err(_) => {
+                        ui.error_text("unable to read salt");
+                    }
+                };
+            }
+        });
+    }
+
+    fn salt_control_64(ui: &mut egui::Ui, string: &mut String, salt: &mut [u64; 4]) {
+        ui.horizontal(|ui| {
+            if ui.control_string(string).changed() {
+                *string = string.chars().filter(|c| c.is_ascii_hexdigit()).collect();
+                if ui.button("🎲").on_hover_text("randomize").clicked() {
+                    let mut rng = thread_rng();
+                    rng.fill(salt);
+                    *string = ByteFormat::Hex.u64_slice_to_text_be(&salt);
+                }
+                match ByteFormat::Hex.text_to_u64(string) {
+                    Ok(mut new) => {
+                        while new.len() < 4 {
+                            new.push(0)
+                        }
+                        new.truncate(4);
+                        *salt = new.try_into().expect("input too long")
+                    }
+                    Err(_) => {
+                        ui.error_text("unable to read salt");
+                    }
+                };
+            }
+        });
+    }
 }
 
 impl HasherFrame for BlakeFrame {
@@ -111,15 +150,24 @@ impl HasherFrame for BlakeFrame {
         ui.add_space(16.0);
         ui.subheading("Key (provide as hexadecimal)");
         ui.label("The BLAKE functions allow a salt to be included. It consists of four integers totalling 128 bits for BLAKE-224/BLAKE-256 and 256 bits for BLAKE-382/BLAKE-512.");
-        // match self.variant {
-        //     BlakeVariant::B224 => todo!(),
-        //     BlakeVariant::B256 => todo!(),
-        //     BlakeVariant::B384 => todo!(),
-        //     BlakeVariant::B512 => {
-        //         ui.label("BLAKE2s has a maximum key size of of 32 bytes (256 bits).");
-        //         Self::key_control(ui, &mut self.salt_string, &mut self.hasher_512.salt)
-        //     }
-        // };
+        match self.variant {
+            BlakeVariant::B224 => {
+                ui.label("BLAKE-224 has a salt with four 32-bit words (256 bits).");
+                Self::salt_control_32(ui, &mut self.salt_224, &mut self.hasher_224.salt)
+            }
+            BlakeVariant::B256 => {
+                ui.label("BLAKE-256 has a salt with four 34-bit words (256 bits).");
+                Self::salt_control_32(ui, &mut self.salt_256, &mut self.hasher_256.salt)
+            }
+            BlakeVariant::B384 => {
+                ui.label("BLAKE-384 has a salt with four 64-bit words (512 bits).");
+                Self::salt_control_64(ui, &mut self.salt_384, &mut self.hasher_384.salt)
+            }
+            BlakeVariant::B512 => {
+                ui.label("BLAKE-512 has a salt with four 64-bit words (512 bits).");
+                Self::salt_control_64(ui, &mut self.salt_512, &mut self.hasher_512.salt)
+            }
+        };
 
         // ui.label("<<<EXPLANATION OF HASH FUNCTION CODE>>>");
 

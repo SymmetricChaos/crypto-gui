@@ -55,14 +55,42 @@ impl ByteFormat {
         }
     }
 
-    pub fn text_to_u16(&self, text: &str) -> Result<Vec<u8>, ByteFormatError> {
-        if text.len() == 0 {
-            return Ok(Vec::new());
+    pub fn text_to_u16(&self, text: &str) -> Result<Vec<u16>, ByteFormatError> {
+        let bytes = self.text_to_bytes(text)?;
+
+        if bytes.len() % 2 != 0 {
+            Err(ByteFormatError)
+        } else {
+            Ok(bytes
+                .chunks_exact(2)
+                .map(|p| u16::from_be_bytes(p.try_into().unwrap()))
+                .collect_vec())
         }
-        match self {
-            ByteFormat::Hex => hex_to_bytes(text).map_err(|_| ByteFormatError),
-            ByteFormat::Utf8 => Ok(text.as_bytes().to_owned()),
-            ByteFormat::Base64 => BASE64_STANDARD.decode(text).map_err(|_| ByteFormatError),
+    }
+
+    pub fn text_to_u32(&self, text: &str) -> Result<Vec<u32>, ByteFormatError> {
+        let bytes = self.text_to_bytes(text)?;
+
+        if bytes.len() % 4 != 0 {
+            Err(ByteFormatError)
+        } else {
+            Ok(bytes
+                .chunks_exact(4)
+                .map(|p| u32::from_be_bytes(p.try_into().unwrap()))
+                .collect_vec())
+        }
+    }
+
+    pub fn text_to_u64(&self, text: &str) -> Result<Vec<u64>, ByteFormatError> {
+        let bytes = self.text_to_bytes(text)?;
+
+        if bytes.len() % 8 != 0 {
+            Err(ByteFormatError)
+        } else {
+            Ok(bytes
+                .chunks_exact(8)
+                .map(|p| u64::from_be_bytes(p.try_into().unwrap()))
+                .collect_vec())
         }
     }
 
