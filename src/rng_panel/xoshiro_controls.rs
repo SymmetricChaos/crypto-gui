@@ -36,6 +36,9 @@ impl ClassicRngFrame for XoshiroFrame {
             ui.subheading("Seed Values");
             if ui.button("🎲").on_hover_text("randomize").clicked() {
                 self.randomize();
+                for i in 0..4 {
+                    self.rng.state[i] = u64::from_str_radix(&self.key[i], 16).unwrap_or(0)
+                }
             }
             if ui.button("set").clicked() {
                 for i in 0..4 {

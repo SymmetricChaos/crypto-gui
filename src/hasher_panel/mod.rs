@@ -110,7 +110,7 @@ pub fn byte_formatting_io(ui: &mut Ui, input: &mut ByteFormat, output: &mut Byte
                 ByteFormat::Hex,
                 "Hexadecimal",
             );
-            ui.selectable_value(input, ByteFormat::Utf8, "Base64");
+            ui.selectable_value(input, ByteFormat::Base64, "Base64");
         });
     });
 

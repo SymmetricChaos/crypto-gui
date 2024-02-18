@@ -66,7 +66,6 @@ impl ClassicRngFrame for PcgFrame {
             .wrapping_mul(self.rng.multiplier)
             .wrapping_add(self.rng.increment);
         ui.horizontal(|ui| {
-            ui.subheading("(");
             Self::input_control(ui, &mut self.state_string, &mut self.rng.state);
             ui.subheading(" × ");
             Self::input_control(ui, &mut self.multiplier_string, &mut self.rng.multiplier);
