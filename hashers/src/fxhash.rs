@@ -90,12 +90,6 @@ mod fxhash_tests {
 
     #[test]
     fn test_suite() {
-        const SEED64: u64 = 0x517cc1b727220a95;
-        const SEED32: u32 = (SEED64 & 0xFFFF_FFFF) as u32;
-
-        println!("{SEED64}");
-        println!("{SEED32:0x?}");
-
         let mut hasher = FxHash::default();
         hasher.input_format = ByteFormat::Hex;
         hasher.output_format = ByteFormat::Hex;
