@@ -9,3 +9,4 @@ pub mod siphash;
 pub mod traits;
 
 pub mod errors;
+pub mod fxhash;
