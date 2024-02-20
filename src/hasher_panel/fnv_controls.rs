@@ -3,7 +3,7 @@ use crate::ui_elements::UiElements;
 use super::{byte_formatting_io, HasherFrame};
 use hashers::{
     errors::HasherError,
-    fnv::{Fnv, PrimeSize, O128, O32, O64, P128, P32, P64},
+    fnv::{Fnv, PrimeSize, O128, O256, O32, O64, P128, P256, P32, P64},
     traits::ClassicHasher,
 };
 
@@ -44,6 +44,8 @@ impl HasherFrame for FnvFrame {
             "Use Alternate Mode (recommended)",
         );
 
+        ui.subheading("Hash Size");
+        ui.label("Three FNV variants are provided here but the original FNV paper defines constants for 512 and 1024 versions of the algorithm. However these run much more slowly and add no real utility.");
         match self.hasher.size {
             PrimeSize::P32 => ui.label(format!(
                 "FNV-32 uses the prime {} as the multiplier and is initialized with a value of {}",
@@ -56,6 +58,10 @@ impl HasherFrame for FnvFrame {
             PrimeSize::P128 => ui.label(format!(
                 "FNV-128 uses the prime {} as the multiplier and is initialized with a value of {}",
                 P128, O128,
+            )),
+            PrimeSize::P256 => ui.label(format!(
+                "FNV-256 uses the prime {} as the multiplier and is initialized with a value of {}",
+                P256, O256,
             )),
         };
 

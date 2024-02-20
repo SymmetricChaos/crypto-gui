@@ -13,3 +13,4 @@ num = "0.4.1"
 itertools = "0.10.0"
 json = "0.12.4"
 csv = "1.2.1"
+crypto-bigint = { version = "0.5.5", features = ["generic-array"] } 

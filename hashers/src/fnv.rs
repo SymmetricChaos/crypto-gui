@@ -1,4 +1,5 @@
 use crate::{errors::HasherError, traits::ClassicHasher};
+use crypto_bigint::{ArrayEncoding, U256};
 use utils::byte_formatting::ByteFormat;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -6,15 +7,20 @@ pub enum PrimeSize {
     P32,
     P64,
     P128,
+    P256,
 }
 
 pub const P32: u32 = 16777619;
 pub const P64: u64 = 1099511628211;
 pub const P128: u128 = 309485009821345068724781371;
+pub const P256: U256 =
+    U256::from_be_hex("0000000000000000000001000000000000000000000000000000000000000163");
 
 pub const O32: u32 = 2166136261;
 pub const O64: u64 = 14695981039346656037;
 pub const O128: u128 = 144066263297769815596495629667062367629;
+pub const O256: U256 =
+    U256::from_be_hex("DD268DBCAAC550362D98C384C4E576CCC8B1536847B6BBB31023B4C8CAEE0535");
 
 pub struct Fnv {
     pub input_format: ByteFormat,
@@ -64,6 +70,16 @@ impl Fnv {
             *state ^= byte as u128;
         }
     }
+
+    pub fn hash_byte_256(&self, state: &mut U256, byte: u8) {
+        if self.alternate {
+            *state ^= U256::from_u8(byte);
+            *state = state.wrapping_mul(&P256)
+        } else {
+            *state = state.wrapping_mul(&P256);
+            *state ^= U256::from_u8(byte);
+        }
+    }
 }
 
 impl ClassicHasher for Fnv {
@@ -89,6 +105,13 @@ impl ClassicHasher for Fnv {
                     self.hash_byte_128(&mut state, *byte)
                 }
                 state.to_be_bytes().to_vec()
+            }
+            PrimeSize::P256 => {
+                let mut state = O256;
+                for byte in bytes {
+                    self.hash_byte_256(&mut state, *byte)
+                }
+                state.to_be_byte_array().to_vec()
             }
         }
     }
