@@ -1,7 +1,9 @@
+use crate::ui_elements::UiElements;
+
 use super::{byte_formatting_io, HasherFrame};
 use hashers::{
     errors::HasherError,
-    fnv::{Fnv, PrimeSize},
+    fnv::{Fnv, PrimeSize, O128, O32, O64, P128, P32, P64},
     traits::ClassicHasher,
 };
 
@@ -22,21 +24,40 @@ impl FnvFrame {}
 impl HasherFrame for FnvFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.add_space(16.0);
-
         byte_formatting_io(
             ui,
             &mut self.hasher.input_format,
             &mut self.hasher.output_format,
         );
-        ui.add_space(16.0);
 
+        ui.add_space(16.0);
         ui.horizontal(|ui| {
             ui.selectable_value(&mut self.hasher.size, PrimeSize::P32, "32-bit");
             ui.selectable_value(&mut self.hasher.size, PrimeSize::P64, "64-bit");
             ui.selectable_value(&mut self.hasher.size, PrimeSize::P128, "128-bit");
         });
 
-        ui.label("<<<EXPLANATION OF HASH FUNCTION CODE>>>");
+        ui.add_space(16.0);
+        ui.label("In the original FNV algorithm the multiplication was performed before the XOR but better results were found when using the XOR first.");
+        ui.checkbox(
+            &mut self.hasher.alternate,
+            "Use Alternate Mode (recommended)",
+        );
+
+        match self.hasher.size {
+            PrimeSize::P32 => ui.label(format!(
+                "FNV-32 uses the prime {} as the multiplier and is initialized with a value of {}",
+                P32, O32,
+            )),
+            PrimeSize::P64 => ui.label(format!(
+                "FNV-64 uses the prime {} as the multiplier and is initialized with a value of {}",
+                P64, O64,
+            )),
+            PrimeSize::P128 => ui.label(format!(
+                "FNV-128 uses the prime {} as the multiplier and is initialized with a value of {}",
+                P128, O128,
+            )),
+        };
 
         ui.add_space(16.0);
     }
