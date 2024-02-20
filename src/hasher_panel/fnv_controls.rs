@@ -1,5 +1,9 @@
 use super::{byte_formatting_io, HasherFrame};
-use hashers::{errors::HasherError, fnv::Fnv, traits::ClassicHasher};
+use hashers::{
+    errors::HasherError,
+    fnv::{Fnv, PrimeSize},
+    traits::ClassicHasher,
+};
 
 pub struct FnvFrame {
     hasher: Fnv,
@@ -24,6 +28,13 @@ impl HasherFrame for FnvFrame {
             &mut self.hasher.input_format,
             &mut self.hasher.output_format,
         );
+        ui.add_space(16.0);
+
+        ui.horizontal(|ui| {
+            ui.selectable_value(&mut self.hasher.size, PrimeSize::P32, "32-bit");
+            ui.selectable_value(&mut self.hasher.size, PrimeSize::P64, "64-bit");
+            ui.selectable_value(&mut self.hasher.size, PrimeSize::P128, "128-bit");
+        });
 
         ui.label("<<<EXPLANATION OF HASH FUNCTION CODE>>>");
 
