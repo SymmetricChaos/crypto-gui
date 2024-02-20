@@ -2,12 +2,12 @@ use utils::byte_formatting::ByteFormat;
 
 use crate::{errors::HasherError, traits::ClassicHasher};
 
-pub struct Md5 {
+pub struct Md4 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
 }
 
-impl Default for Md5 {
+impl Default for Md4 {
     fn default() -> Self {
         Self {
             input_format: ByteFormat::Hex,
@@ -16,7 +16,7 @@ impl Default for Md5 {
     }
 }
 
-impl Md5 {
+impl Md4 {
     pub fn f(x: u32, y: u32, z: u32) -> u32 {
         (x & y) | (!x & z)
     }
@@ -50,7 +50,7 @@ impl Md5 {
     }
 }
 
-impl ClassicHasher for Md5 {
+impl ClassicHasher for Md4 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut input = bytes.to_vec();
         // Length in bits before padding
@@ -138,7 +138,7 @@ mod md4_tests {
 
     #[test]
     fn test_suite() {
-        let mut hasher = Md5::default();
+        let mut hasher = Md4::default();
         hasher.input_format = ByteFormat::Utf8;
         hasher.output_format = ByteFormat::Hex;
         assert_eq!(

@@ -1,11 +1,11 @@
 use super::{byte_formatting_io, HasherFrame};
-use hashers::{errors::HasherError, md4::Md4, traits::ClassicHasher};
+use hashers::{errors::HasherError, fnv::Fnv, traits::ClassicHasher};
 
-pub struct Md4Frame {
-    hasher: Md4,
+pub struct FnvFrame {
+    hasher: Fnv,
 }
 
-impl Default for Md4Frame {
+impl Default for FnvFrame {
     fn default() -> Self {
         Self {
             hasher: Default::default(),
@@ -13,9 +13,9 @@ impl Default for Md4Frame {
     }
 }
 
-impl Md4Frame {}
+impl FnvFrame {}
 
-impl HasherFrame for Md4Frame {
+impl HasherFrame for FnvFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.add_space(16.0);
 
