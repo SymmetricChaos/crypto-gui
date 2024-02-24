@@ -1,6 +1,6 @@
-use utils::byte_formatting::ByteFormat;
-
 use crate::{errors::HasherError, traits::ClassicHasher};
+use crypto_bigint::U192;
+use utils::byte_formatting::ByteFormat;
 
 pub struct Poly1305 {
     pub input_format: ByteFormat,
@@ -19,11 +19,27 @@ impl Default for Poly1305 {
 }
 
 impl Poly1305 {
-    //const PRIME: u8 = 2 * *130 - 5;
+    //const MODULUS: U192 = 2 ** 130 - 5;
 }
 
 impl ClassicHasher for Poly1305 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
+        let mut input = bytes.to_vec();
+
+        // Padding
+        while input.len() != 16 {
+            input.push(0x00)
+        }
+
+        let mut coefs = Vec::with_capacity(input.len() / 16);
+
+        // Message is taken 16 bytes at a time.
+        for block in input.chunks_exact(16) {
+            let mut block = block.to_vec();
+            block.push(0x01);
+            coefs.push(U192::from_be_slice(&block));
+        }
+
         todo!()
     }
 
