@@ -1,5 +1,6 @@
 use crate::{errors::HasherError, traits::ClassicHasher};
 use crypto_bigint::U192;
+use num::{pow::Pow, BigUint, FromPrimitive};
 use utils::byte_formatting::ByteFormat;
 
 pub struct Poly1305 {
@@ -19,11 +20,19 @@ impl Default for Poly1305 {
 }
 
 impl Poly1305 {
-    //const MODULUS: U192 = 2 ** 130 - 5;
+    //const MODULUS: BigUint = 2 ** 130 - 5;
 }
 
 impl ClassicHasher for Poly1305 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
+        // Calculated the prime modulus but simpler to initialize via byte array
+        //let modulus = BigUint::from_i32(2).unwrap().pow(130_u32) - BigUint::from_i32(5).unwrap();
+        //println!("{:0x?}", modulus.to_bytes_be());
+        let modulus = BigUint::from_bytes_be(&[
+            0x03_u8, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+            0xff, 0xff, 0xfb,
+        ]);
+
         let mut input = bytes.to_vec();
 
         // Padding
@@ -37,7 +46,7 @@ impl ClassicHasher for Poly1305 {
         for block in input.chunks_exact(16) {
             let mut block = block.to_vec();
             block.push(0x01);
-            coefs.push(U192::from_be_slice(&block));
+            coefs.push(BigUint::from_bytes_be(&block));
         }
 
         todo!()
