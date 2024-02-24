@@ -1,6 +1,6 @@
 use crate::{errors::HasherError, traits::ClassicHasher};
 use crypto_bigint::U192;
-use num::{pow::Pow, BigUint, FromPrimitive};
+use num::{pow::Pow, BigUint, FromPrimitive, One};
 use utils::byte_formatting::ByteFormat;
 
 pub struct Poly1305 {
@@ -33,23 +33,38 @@ impl ClassicHasher for Poly1305 {
             0xff, 0xff, 0xfb,
         ]);
 
-        let mut input = bytes.to_vec();
+        let key = BigUint::from_bytes_le(&self.key);
+        let blocks = bytes.chunks_exact(16);
+        let mut accumulator = BigUint::one();
 
-        // Padding
-        while input.len() != 16 {
-            input.push(0x00)
+        // Create and padd out the last
+        let mut last_block = blocks.remainder().to_vec();
+        if last_block.len() != 0 {
+            if last_block.len() != 16 {
+                last_block.push(0x01);
+            }
+            while last_block.len() != 16 {
+                last_block.push(0x00);
+            }
         }
-
-        let mut coefs = Vec::with_capacity(input.len() / 16);
 
         // Message is taken 16 bytes at a time.
-        for block in input.chunks_exact(16) {
+        for block in blocks {
             let mut block = block.to_vec();
             block.push(0x01);
-            coefs.push(BigUint::from_bytes_be(&block));
+            accumulator += BigUint::from_bytes_le(&block);
+            accumulator *= &key;
+            accumulator %= &modulus;
         }
 
-        todo!()
+        // Final step
+        if last_block.len() != 0 {
+            accumulator += BigUint::from_bytes_le(&last_block);
+            accumulator *= &key;
+            accumulator %= &modulus;
+        }
+
+        accumulator.to_bytes_le()
     }
 
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
