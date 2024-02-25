@@ -6,7 +6,7 @@ use utils::byte_formatting::ByteFormat;
 pub struct Poly1305 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    pub key: [u8; 16],
+    pub key: [u8; 32],
 }
 
 impl Default for Poly1305 {
@@ -14,7 +14,7 @@ impl Default for Poly1305 {
         Self {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
-            key: [0; 16],
+            key: [0; 32],
         }
     }
 }
@@ -37,13 +37,13 @@ impl ClassicHasher for Poly1305 {
         let blocks = bytes.chunks_exact(16);
         let mut accumulator = BigUint::one();
 
-        // Create and padd out the last
+        // Create and pad the last block. If the remainder is empty it is ignored.
         let mut last_block = blocks.remainder().to_vec();
         if last_block.len() != 0 {
             if last_block.len() != 16 {
                 last_block.push(0x01);
             }
-            while last_block.len() != 16 {
+            while last_block.len() != 17 {
                 last_block.push(0x00);
             }
         }
@@ -51,7 +51,7 @@ impl ClassicHasher for Poly1305 {
         // Message is taken 16 bytes at a time.
         for block in blocks {
             let mut block = block.to_vec();
-            block.push(0x01);
+            block.insert(0, 0x01);
             accumulator += BigUint::from_bytes_le(&block);
             accumulator *= &key;
             accumulator %= &modulus;
@@ -63,6 +63,8 @@ impl ClassicHasher for Poly1305 {
             accumulator *= &key;
             accumulator %= &modulus;
         }
+
+        accumulator %= BigUint::from_u128(u128::MAX).unwrap();
 
         accumulator.to_bytes_le()
     }
@@ -84,11 +86,20 @@ mod md5_tests {
     #[test]
     fn test_suite() {
         let mut hasher = Poly1305::default();
-        hasher.input_format = ByteFormat::Utf8;
+        hasher.input_format = ByteFormat::Hex;
         hasher.output_format = ByteFormat::Hex;
+        //https://datatracker.ietf.org/doc/html/draft-agl-tls-chacha20poly1305-00#section-4
+        hasher.key = [
+            116, 104, 105, 115, 32, 105, 115, 32, 51, 50, 45, 98, 121, 116, 101, 32, 107, 101, 121,
+            32, 102, 111, 114, 32, 80, 111, 108, 121, 49, 51, 48, 53,
+        ];
         assert_eq!(
-            "d41d8cd98f00b204e9800998ecf8427e",
-            hasher.hash_bytes_from_string("").unwrap()
+            "49ec78090e481ec6c26b33b91ccc0307",
+            hasher
+                .hash_bytes_from_string(
+                    "0000000000000000000000000000000000000000000000000000000000000000"
+                )
+                .unwrap()
         );
     }
 }
