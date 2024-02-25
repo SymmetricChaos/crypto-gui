@@ -88,10 +88,11 @@ mod md5_tests {
         let mut hasher = Poly1305::default();
         hasher.input_format = ByteFormat::Hex;
         hasher.output_format = ByteFormat::Hex;
-        //https://datatracker.ietf.org/doc/html/draft-agl-tls-chacha20poly1305-00#section-4
+        //https://datatracker.ietf.org/doc/html/draft-agl-tls-chacha20poly1305-00#section-8
         hasher.key = [
-            116, 104, 105, 115, 32, 105, 115, 32, 51, 50, 45, 98, 121, 116, 101, 32, 107, 101, 121,
-            32, 102, 111, 114, 32, 80, 111, 108, 121, 49, 51, 48, 53,
+            0x74, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20, 0x33, 0x32, 0x2d, 0x62, 0x79, 0x74,
+            0x65, 0x20, 0x6b, 0x65, 0x79, 0x20, 0x66, 0x6f, 0x72, 0x20, 0x50, 0x6f, 0x6c, 0x79,
+            0x31, 0x33, 0x30, 0x35,
         ];
         assert_eq!(
             "49ec78090e481ec6c26b33b91ccc0307",
