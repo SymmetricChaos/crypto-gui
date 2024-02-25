@@ -43,6 +43,22 @@ impl Blake256 {
         0xbefa4fa4,
     ];
 
+    pub fn salt_from_string(&mut self, text: &str) -> Result<(), HasherError> {
+        if text.len() != 32 {
+            return Err(HasherError::key(
+                "key must be given as exactly 32 hex digits",
+            ));
+        }
+        let v = ByteFormat::Hex
+            .text_to_u32(text)
+            .expect("salt text did not have exactly 32 digits");
+        self.salt = v
+            .try_into()
+            .expect("failed to convert Vec<u32> to [u32; 4]");
+
+        Ok(())
+    }
+
     pub fn blake256() -> Self {
         Self::default()
     }

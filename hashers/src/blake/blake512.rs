@@ -69,6 +69,22 @@ impl Blake512 {
         0x47b5481dbefa4fa4,
     ];
 
+    pub fn salt_from_string(&mut self, text: &str) -> Result<(), HasherError> {
+        if text.len() != 64 {
+            return Err(HasherError::key(
+                "key must be given as exactly 64 hex digits",
+            ));
+        }
+        let v = ByteFormat::Hex
+            .text_to_u64(text)
+            .expect("salt text did not have exactly 64 digits");
+        self.salt = v
+            .try_into()
+            .expect("failed to convert Vec<u64> to [u64; 4]");
+
+        Ok(())
+    }
+
     pub fn blake512() -> Self {
         Self::default()
     }

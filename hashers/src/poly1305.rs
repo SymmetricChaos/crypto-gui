@@ -43,7 +43,7 @@ impl Poly1305 {
 
     pub fn key_from_string_lossy(&mut self, s: &str) -> Result<(), HasherError> {
         if s.len() != 64 {
-            return Err(HasherError::general(
+            return Err(HasherError::key(
                 "key must be given as exactly 64 hex digits",
             ));
         } else {
@@ -51,7 +51,7 @@ impl Poly1305 {
                 self.key = v.try_into().expect("failed to convert Vec<u8> to [u8; 32]");
                 self.restrict_key();
             } else {
-                return Err(HasherError::general(
+                return Err(HasherError::key(
                     "key must be given as exactly 64 hex digits",
                 ));
             }
