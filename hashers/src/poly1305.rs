@@ -21,19 +21,22 @@ impl Default for Poly1305 {
 impl Poly1305 {
     pub fn restrict_key(&mut self) {
         for i in [3, 7, 11, 15] {
-            // if v[i] >= 16 {
-            //     return Err(HasherError::general(
-            //         "bytes 3, 7, 11, and 15 must be less than 16 (top four bits cleared)",
-            //     ));
-            // }
+            // [3, 7, 11, 15]
+            // [29, 25, 21, 17]
+
+            if self.key[i] >= 16 {
+                println!("k{} = {:08b} {:02x}", i, self.key[i], self.key[i])
+                // panic!("bytes 3, 7, 11, and 15 must be less than 16 (top four bits cleared)",);
+            }
             self.key[i] &= 0b11110000;
         }
         for i in [4, 8, 12] {
-            // if v[i] % 4 != 0 {
-            //     return Err(HasherError::general(
-            //         "bytes 4, 8, 12 must be multiplies of four (bottom two bits cleared)",
-            //     ));
-            // }
+            // [4, 8, 12]
+            // [28, 24, 20]
+            if self.key[i] % 4 != 0 {
+                println!("k{} = {:08b} {:02x}", i, self.key[i], self.key[i])
+                // panic!("bytes 4, 8, 12 must be multiplies of four (bottom two bits cleared)",);
+            }
             self.key[i] &= 0b00000011;
         }
     }
@@ -59,13 +62,16 @@ impl Poly1305 {
 
 impl ClassicHasher for Poly1305 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        // Calculated the prime modulus but simpler to initialize via byte array
-        //let modulus = BigUint::from_i32(2).unwrap().pow(130_u32) - BigUint::from_i32(5).unwrap();
-        //println!("{:0x?}", modulus.to_bytes_be());
+        // Prime modulus (2**130 - 5) initialized from array
         let modulus = BigUint::from_bytes_be(&[
             0x03_u8, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
             0xff, 0xff, 0xfb,
         ]);
+        // let prime = BigUint::from_u32(2)
+        //     .unwrap()
+        //     .pow(130)
+        //     .sub(BigUint::from_u32(5).unwrap());
+        // assert_eq!(prime, modulus);
 
         let key = BigUint::from_bytes_le(&self.key);
         let blocks = bytes.chunks_exact(16);
@@ -102,6 +108,7 @@ impl ClassicHasher for Poly1305 {
             accumulator %= &modulus;
         }
 
+        // Lower 16 bytes
         accumulator %= BigUint::from_u128(u128::MAX).unwrap();
 
         accumulator.to_bytes_le()
