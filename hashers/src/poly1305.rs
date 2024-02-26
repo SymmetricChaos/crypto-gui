@@ -85,11 +85,6 @@ impl ClassicHasher for Poly1305 {
             0x03_u8, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
             0xff, 0xff, 0xfb,
         ]);
-        // let prime = BigUint::from_u32(2)
-        //     .unwrap()
-        //     .pow(130)
-        //     .sub(BigUint::from_u32(5).unwrap());
-        // assert_eq!(prime, modulus);
 
         let key = BigUint::from_bytes_le(&self.key_r);
         println!("keyr: {}", key.to_str_radix(16));
@@ -129,18 +124,19 @@ impl ClassicHasher for Poly1305 {
             );
             accumulator += BigUint::from_bytes_be(&last_block);
             accumulator *= &key;
+
             accumulator %= &modulus;
         }
-
         println!("m(r): {}", accumulator.to_str_radix(16));
 
         accumulator += BigUint::from_bytes_le(&self.key_kn);
-        accumulator %= &modulus;
 
-        // Lower 16 bytes
-        accumulator %= BigUint::from_u128(u128::MAX).unwrap();
+        let mut out = accumulator.to_bytes_le();
+        while out.len() < 16 {
+            out.push(0x00);
+        }
 
-        accumulator.to_bytes_le()
+        out[0..16].to_vec()
     }
 
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
@@ -157,49 +153,9 @@ impl ClassicHasher for Poly1305 {
 mod poly1305_tests {
     use super::*;
 
+    //https://cr.yp.to/mac/poly1305-20050329.pdf
     #[test]
-    fn test_zero_input() {
-        let mut hasher = Poly1305::default();
-        hasher.input_format = ByteFormat::Hex;
-        hasher.output_format = ByteFormat::Hex;
-        //https://datatracker.ietf.org/doc/html/draft-agl-tls-chacha20poly1305-00#section-7
-        hasher
-            .key_r_from_string_lossy("6b657920666f7220506f6c7931333035")
-            .unwrap();
-
-        assert_eq!(
-            "49ec78090e481ec6c26b33b91ccc0307",
-            hasher
-                .hash_bytes_from_string(
-                    "0000000000000000000000000000000000000000000000000000000000000000"
-                )
-                .unwrap()
-        );
-    }
-
-    #[test]
-    fn test_input() {
-        let mut hasher = Poly1305::default();
-        hasher.input_format = ByteFormat::Hex;
-        hasher.output_format = ByteFormat::Hex;
-        //https://datatracker.ietf.org/doc/html/draft-agl-tls-chacha20poly1305-00#section-7
-        hasher
-            .key_r_from_string_lossy(
-                "746869732069732033322d62797465206b657920666f7220506f6c7931333035",
-            )
-            .unwrap();
-
-        assert_eq!(
-            "a6f745008f81c916a20dcc74eef2b2f0",
-            hasher
-                .hash_bytes_from_string("48656c6c6f20776f726c6421")
-                .unwrap()
-        );
-    }
-
-    //ab0812724a7f1e342742cbed374d94d136c6b8795d45b3819830f2c04491faf0990c62e48b8018b2c3e4a0fa3134cb67fa83e158c994d961c4cb21095c1bf9
-    #[test]
-    fn test_chunks() {
+    fn test_chunks_1() {
         let mut hasher = Poly1305::default();
         hasher.input_format = ByteFormat::Hex;
         hasher.output_format = ByteFormat::Hex;
@@ -210,15 +166,38 @@ mod poly1305_tests {
             .key_kn_from_string("80f8c20aa71202d1e29179cbcb555a57")
             .unwrap();
         /*
-        main: [01, d1, 94, 4d, 37, ed, cb, 42, 27, 34, 1e, 7f, 4a, 72, 12, 08, ab]
-        main: [01, f0, fa, 91, 44, c0, f2, 30, 98, 81, b3, 45, 5d, 79, b8, c6, 36]
-        main: [01, 67, cb, 34, 31, fa, a0, e4, c3, b2, 18, 80, 8b, e4, 62, 0c, 99]
-        last: [00, 01, f9, 1b, 5c, 09, 21, cb, c4, 61, d9, 94, c9, 58, e1, 83, fa]
+        keyr: 782f4c40724a8e80c6d42c4086a9712
+        main: 1d1944d37edcb4227341e7f4a721208ab
+        main: 1f0fa9144c0f2309881b3455d79b8c636
+        main: 167cb3431faa0e4c3b218808be4620c99
+        last: 1f91b5c0921cbc461d994c958e183fa
         m(r): 0c3c4f37c464bbd44306c9f8502ea5bd1
         */
         assert_eq!(
             "5154ad0d2cb26e01274fc51148491f1b",
             hasher.hash_bytes_from_string("ab0812724a7f1e342742cbed374d94d136c6b8795d45b3819830f2c04491faf0990c62e48b8018b2c3e4a0fa3134cb67fa83e158c994d961c4cb21095c1bf9").unwrap()
+        )
+    }
+
+    #[test]
+    fn test_chunks_2() {
+        let mut hasher = Poly1305::default();
+        hasher.input_format = ByteFormat::Hex;
+        hasher.output_format = ByteFormat::Hex;
+        hasher
+            .key_r_from_string_lossy("851fc40c3467ac0be05cc20404f3f700")
+            .unwrap();
+        hasher
+            .key_kn_from_string("580b3b0f9447bb1e69d095b5928b6dbc")
+            .unwrap();
+        /*
+        keyr: f7f30404c25ce00bac67340cc41f85
+        main: 1f6f3
+        m(r): 321e58e25a69d7f8f27060770b3f8bb9c
+        */
+        assert_eq!(
+            "f4c633c3044fc145f84f335cb81953de",
+            hasher.hash_bytes_from_string("f3f6").unwrap()
         )
     }
 }
