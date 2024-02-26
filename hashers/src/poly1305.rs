@@ -50,7 +50,7 @@ impl Poly1305 {
         } else {
             if let Ok(v) = ByteFormat::Hex.text_to_bytes(s) {
                 self.key_r = v.try_into().expect("failed to convert Vec<u8> to [u8; 32]");
-                self.restrict_key_r();
+                // self.restrict_key_r();
             } else {
                 return Err(HasherError::key(
                     "key must be given as exactly 32 hex digits",
@@ -92,6 +92,7 @@ impl ClassicHasher for Poly1305 {
         // assert_eq!(prime, modulus);
 
         let key = BigUint::from_bytes_le(&self.key_r);
+        println!("keyr: {}", key.to_str_radix(16));
         let blocks = bytes.chunks_exact(16);
         let mut accumulator = BigUint::zero();
 
@@ -131,9 +132,10 @@ impl ClassicHasher for Poly1305 {
             accumulator %= &modulus;
         }
 
-        accumulator += BigUint::from_bytes_le(&self.key_kn);
-
         println!("m(r): {}", accumulator.to_str_radix(16));
+
+        accumulator += BigUint::from_bytes_le(&self.key_kn);
+        accumulator %= &modulus;
 
         // Lower 16 bytes
         accumulator %= BigUint::from_u128(u128::MAX).unwrap();
@@ -212,9 +214,10 @@ mod poly1305_tests {
         main: [01, f0, fa, 91, 44, c0, f2, 30, 98, 81, b3, 45, 5d, 79, b8, c6, 36]
         main: [01, 67, cb, 34, 31, fa, a0, e4, c3, b2, 18, 80, 8b, e4, 62, 0c, 99]
         last: [00, 01, f9, 1b, 5c, 09, 21, cb, c4, 61, d9, 94, c9, 58, e1, 83, fa]
+        m(r): 0c3c4f37c464bbd44306c9f8502ea5bd1
         */
         assert_eq!(
-            "0c3c4f37c464bbd44306c9f8502ea5bd1",
+            "5154ad0d2cb26e01274fc51148491f1b",
             hasher.hash_bytes_from_string("ab0812724a7f1e342742cbed374d94d136c6b8795d45b3819830f2c04491faf0990c62e48b8018b2c3e4a0fa3134cb67fa83e158c994d961c4cb21095c1bf9").unwrap()
         )
     }
