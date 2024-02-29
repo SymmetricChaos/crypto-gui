@@ -1,5 +1,5 @@
 use crate::{errors::HasherError, traits::ClassicHasher};
-use num::{BigUint, FromPrimitive, Zero};
+use num::{BigUint, Zero};
 use utils::byte_formatting::ByteFormat;
 
 pub struct Poly1305 {

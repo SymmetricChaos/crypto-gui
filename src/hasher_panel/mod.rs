@@ -1,9 +1,10 @@
 mod blake2_controls;
 mod blake_controls;
-pub mod fnv_controls;
+mod fnv_controls;
 mod md4_controls;
 mod md5_controls;
 mod pearson_controls;
+mod poly1305_controls;
 mod sha1_controls;
 mod sha2_controls;
 mod siphash_controls;
