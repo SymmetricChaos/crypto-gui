@@ -18,8 +18,8 @@ use utils::byte_formatting::ByteFormat;
 
 use self::{
     blake2_controls::Blake2Frame, blake_controls::BlakeFrame, md4_controls::Md4Frame,
-    md5_controls::Md5Frame, pearson_controls::PearsonFrame, sha1_controls::Sha1Frame,
-    sha2_controls::Sha2Frame, siphash_controls::SipHashFrame,
+    md5_controls::Md5Frame, pearson_controls::PearsonFrame, poly1305_controls::Poly1305Frame,
+    sha1_controls::Sha1Frame, sha2_controls::Sha2Frame, siphash_controls::SipHashFrame,
 };
 
 pub trait HasherFrame {
@@ -55,6 +55,7 @@ pub struct HasherInterface {
     md4: Md4Frame,
     md5: Md5Frame,
     pearson: PearsonFrame,
+    poly1305: Poly1305Frame,
     siphash: SipHashFrame,
     sha1: Sha1Frame,
     sha2: Sha2Frame,
@@ -75,6 +76,7 @@ impl HasherInterface {
                 HasherId::Blake2,
                 HasherId::Md4,
                 HasherId::Md5,
+                HasherId::Poly1305,
                 HasherId::Sha1,
                 HasherId::Sha2,
             ],
@@ -93,6 +95,7 @@ impl HasherInterface {
             HasherId::Sha1 => &mut self.sha1,
             HasherId::Sha2 => &mut self.sha2,
             HasherId::Pearson => &mut self.pearson,
+            HasherId::Poly1305 => &mut self.poly1305,
             HasherId::SipHash => &mut self.siphash,
         }
     }
