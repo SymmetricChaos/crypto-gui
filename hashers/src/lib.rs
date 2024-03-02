@@ -11,4 +11,5 @@ pub mod traits;
 pub mod errors;
 pub mod fnv;
 pub mod fxhash;
+pub mod keccak;
 pub mod poly1305;
