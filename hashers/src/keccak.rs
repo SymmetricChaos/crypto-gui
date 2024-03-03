@@ -2,9 +2,17 @@ use utils::byte_formatting::ByteFormat;
 
 use crate::{errors::HasherError, traits::ClassicHasher};
 
+pub fn index_from_coord(x: usize, y: usize) -> usize {
+    5 * y + x
+}
+
+// https://chemejon.wordpress.com/2021/12/06/sha-3-explained-in-plain-english/
 pub struct Keccak {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
+    pub rate: usize, // bit rate, block size
+    pub capacity: usize,
+    pub output_size: usize,
 }
 
 impl Default for Keccak {
@@ -12,6 +20,9 @@ impl Default for Keccak {
         Self {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
+            rate: 1088,
+            capacity: 512,
+            output_size: 256,
         }
     }
 }
@@ -49,6 +60,50 @@ impl Keccak {
         0x8000000080008008,
     ];
 
+    pub fn sha3_224() -> Self {
+        Self {
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
+            rate: 1152,
+            capacity: 448,
+            output_size: 224,
+        }
+    }
+
+    pub fn sha3_256() -> Self {
+        Self {
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
+            rate: 1088,
+            capacity: 512,
+            output_size: 256,
+        }
+    }
+
+    pub fn sha3_384() -> Self {
+        Self {
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
+            rate: 832,
+            capacity: 768,
+            output_size: 384,
+        }
+    }
+
+    pub fn sha3_512() -> Self {
+        Self {
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
+            rate: 576,
+            capacity: 1024,
+            output_size: 512,
+        }
+    }
+
+    fn lane(state: &mut [u64; 25], x: usize, y: usize) -> &mut u64 {
+        &mut state[5 * y + x]
+    }
+
     pub fn theta(state: &mut [u64; 25]) {}
     pub fn rho(state: &mut [u64; 25]) {
         let mut rot = 0;
@@ -57,8 +112,22 @@ impl Keccak {
             state[i] = state[i].rotate_right(rot)
         }
     }
-    pub fn pi(state: &mut [u64; 25]) {}
+
+    // Algorithm pi rearranges the lines, leaving a fixed point at index 0
+    pub fn pi(state: &mut [u64; 25]) {
+        let temp = state.clone();
+        for x in 0..5 {
+            for y in 0..5 {
+                let i = index_from_coord(x, y);
+                let j = index_from_coord((x + 3 * y) % 5, x);
+                state[i] = temp[j];
+            }
+        }
+    }
+
     pub fn chi(state: &mut [u64; 25]) {}
+
+    // Algorithm iota XORs a constant into the lane at index 0
     pub fn iota(state: &mut [u64; 25], round: usize) {
         state[0] ^= Self::IOTA_CONSTANTS[round]
     }
@@ -77,6 +146,14 @@ impl Keccak {
 impl ClassicHasher for Keccak {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut input = bytes.to_vec();
+
+        // Pad with a 1 bit then fill with zeroes and a final 1 bit
+        input.push(0x80);
+        while input.len() % self.rate != 0 {
+            input.push(0x00)
+        }
+        input.pop();
+        input.push(0x01);
 
         let mut state = [0_u64; 25];
         Self::permutation(&mut state);
