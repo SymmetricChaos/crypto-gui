@@ -35,6 +35,7 @@ impl HasherFrame for FnvFrame {
             ui.selectable_value(&mut self.hasher.size, FnvSize::P32, "32-bit");
             ui.selectable_value(&mut self.hasher.size, FnvSize::P64, "64-bit");
             ui.selectable_value(&mut self.hasher.size, FnvSize::P128, "128-bit");
+            ui.selectable_value(&mut self.hasher.size, FnvSize::P256, "256-bit");
         });
 
         ui.add_space(16.0);
