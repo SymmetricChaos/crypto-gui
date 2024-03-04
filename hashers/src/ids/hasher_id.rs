@@ -6,6 +6,7 @@ use std::fmt::Display;
 pub enum HasherId {
     Blake,
     Blake2,
+    Fnv,
     Md4,
     Md5,
     Pearson,
@@ -36,6 +37,7 @@ impl Display for HasherId {
         let name = match self {
             Self::Blake => "BLAKE",
             Self::Blake2 => "BLAKE2",
+            Self::Fnv => "FNV Hash",
             Self::Md4 => "MD4",
             Self::Md5 => "MD5",
             Self::Pearson => "Pearson",

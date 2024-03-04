@@ -17,9 +17,10 @@ use hashers::{
 use utils::byte_formatting::ByteFormat;
 
 use self::{
-    blake2_controls::Blake2Frame, blake_controls::BlakeFrame, md4_controls::Md4Frame,
-    md5_controls::Md5Frame, pearson_controls::PearsonFrame, poly1305_controls::Poly1305Frame,
-    sha1_controls::Sha1Frame, sha2_controls::Sha2Frame, siphash_controls::SipHashFrame,
+    blake2_controls::Blake2Frame, blake_controls::BlakeFrame, fnv_controls::FnvFrame,
+    md4_controls::Md4Frame, md5_controls::Md5Frame, pearson_controls::PearsonFrame,
+    poly1305_controls::Poly1305Frame, sha1_controls::Sha1Frame, sha2_controls::Sha2Frame,
+    siphash_controls::SipHashFrame,
 };
 
 pub trait HasherFrame {
@@ -52,6 +53,7 @@ fn combox_box(
 pub struct HasherInterface {
     blake: BlakeFrame,
     blake2: Blake2Frame,
+    fnv: FnvFrame,
     md4: Md4Frame,
     md5: Md5Frame,
     pearson: PearsonFrame,
@@ -64,7 +66,7 @@ pub struct HasherInterface {
 impl HasherInterface {
     pub fn combo_boxes(&mut self, ui: &mut Ui, active_hasher: &mut Option<HasherId>) {
         combox_box(
-            &[HasherId::Pearson, HasherId::SipHash],
+            &[HasherId::Pearson, HasherId::SipHash, HasherId::Fnv],
             active_hasher,
             HasherCategory::NonCryptographic,
             ui,
@@ -90,6 +92,7 @@ impl HasherInterface {
         match active_hasher {
             HasherId::Blake => &mut self.blake,
             HasherId::Blake2 => &mut self.blake2,
+            HasherId::Fnv => &mut self.fnv,
             HasherId::Md4 => &mut self.md4,
             HasherId::Md5 => &mut self.md5,
             HasherId::Sha1 => &mut self.sha1,
