@@ -100,9 +100,9 @@ impl Keccak {
         }
     }
 
-    fn lane(state: &mut [u64; 25], x: usize, y: usize) -> &mut u64 {
-        &mut state[5 * y + x]
-    }
+    // fn lane(state: &mut [u64; 25], x: usize, y: usize) -> &mut u64 {
+    //     &mut state[5 * y + x]
+    // }
 
     pub fn theta(state: &mut [u64; 25]) {}
     pub fn rho(state: &mut [u64; 25]) {
