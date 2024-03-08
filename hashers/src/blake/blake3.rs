@@ -3,10 +3,24 @@ use utils::byte_formatting::ByteFormat;
 
 use crate::{errors::HasherError, traits::ClassicHasher};
 
-use super::SIGMA;
-
 // https://github.com/BLAKE3-team/BLAKE3
 // https://github.com/BLAKE3-team/BLAKE3-specs/blob/master/blake3.pdf
+// https://github.com/BLAKE3-team/BLAKE3/blob/master/reference_impl/reference_impl.rs
+
+const OUT_LEN: usize = 32;
+const KEY_LEN: usize = 32;
+const BLOCK_LEN: usize = 64;
+const CHUNK_LEN: usize = 1024;
+
+const CHUNK_START: u32 = 1 << 0;
+const CHUNK_END: u32 = 1 << 1;
+const PARENT: u32 = 1 << 2;
+const ROOT: u32 = 1 << 3;
+const KEYED_HASH: u32 = 1 << 4;
+const DERIVE_KEY_CONTEXT: u32 = 1 << 5;
+const DERIVE_KEY_MATERIAL: u32 = 1 << 6;
+
+const MSG_PERMUTATION: [usize; 16] = [2, 6, 3, 10, 7, 0, 4, 13, 1, 11, 12, 5, 9, 14, 15, 8];
 
 pub struct Blake3 {
     pub input_format: ByteFormat,
@@ -35,10 +49,6 @@ impl Blake3 {
         0x5BE0CD19,
     ];
 
-    pub fn set_keyed_hash_flag(&mut self) {}
-
-    pub fn set_key_derivation_flag(&mut self) {}
-
     pub fn mix(v: &mut [u32; 16], a: usize, b: usize, c: usize, d: usize, x: u32, y: u32) {
         v[a] = v[a].wrapping_add(v[b]).wrapping_add(x);
         v[d] = (v[d] ^ v[a]).rotate_right(16);
@@ -51,6 +61,28 @@ impl Blake3 {
 
         v[c] = v[c].wrapping_add(v[d]);
         v[b] = (v[b] ^ v[c]).rotate_right(7);
+    }
+
+    fn full_round(work: &mut [u32; 16], block: &[u32; 16]) {
+        Self::mix(work, 0, 4, 8, 12, block[0], block[1]);
+        Self::mix(work, 1, 5, 9, 13, block[2], block[3]);
+        Self::mix(work, 2, 6, 10, 14, block[4], block[5]);
+        Self::mix(work, 3, 7, 11, 15, block[6], block[7]);
+
+        Self::mix(work, 0, 5, 10, 15, block[8], block[9]);
+        Self::mix(work, 1, 6, 11, 12, block[10], block[11]);
+        Self::mix(work, 2, 7, 8, 13, block[12], block[13]);
+        Self::mix(work, 3, 4, 9, 14, block[14], block[15]);
+
+        // println!("Working Vector at [{i}]:\n{work:016x?}\n");
+    }
+
+    fn permute_working_vector(v: &mut [u32; 16]) {
+        let mut permuted = [0; 16];
+        for i in 0..16 {
+            permuted[i] = v[MSG_PERMUTATION[i]];
+        }
+        *v = permuted;
     }
 
     pub fn create_initialization_vector(&self) -> [u32; 8] {
@@ -73,46 +105,48 @@ impl Blake3 {
         block: &[u32; 16],
         initialization_vector: &[u32; 8],
         counter: u64,
-        byte_length: u32,
+        block_length: u32,
         flags: u32,
     ) {
-        // println!("Original Chunk:\n{chunk:016x?}\n");
-        // create a working vector
-        let mut work = [0_u32; 16];
+        // create the working vector
+        let mut work = [
+            state[0],
+            state[1],
+            state[2],
+            state[3],
+            state[4],
+            state[5],
+            state[6],
+            state[7],
+            initialization_vector[0],
+            initialization_vector[1],
+            initialization_vector[2],
+            initialization_vector[3],
+            counter as u32,
+            (counter >> 32) as u32,
+            block_length,
+            flags,
+        ];
+
+        // Seven full rounds with a permutation between each
+        Self::full_round(&mut work, &block);
+        Self::permute_working_vector(&mut work);
+        Self::full_round(&mut work, &block);
+        Self::permute_working_vector(&mut work);
+        Self::full_round(&mut work, &block);
+        Self::permute_working_vector(&mut work);
+        Self::full_round(&mut work, &block);
+        Self::permute_working_vector(&mut work);
+        Self::full_round(&mut work, &block);
+        Self::permute_working_vector(&mut work);
+        Self::full_round(&mut work, &block);
+        Self::permute_working_vector(&mut work);
+        Self::full_round(&mut work, &block);
+
+        // with the working vector and the state
         for i in 0..8 {
-            work[i] = state[i];
-        }
-
-        for i in 0..4 {
-            work[i + 8] = initialization_vector[i]
-        }
-
-        // Mix the bytes taken counter into the working vector
-        work[12] ^= counter as u32; // low bytes
-        work[13] ^= (counter >> 32) as u32; // high bytes
-
-        // work[14] ^= bytes in the chunk
-        work[15] ^= flags;
-
-        // println!("Working Vector Before Compression:\n{work:016x?}\n");
-        for i in 0..7 {
-            let s = SIGMA[i];
-
-            Self::mix(&mut work, 0, 4, 8, 12, block[s[0]], block[s[1]]);
-            Self::mix(&mut work, 1, 5, 9, 13, block[s[2]], block[s[3]]);
-            Self::mix(&mut work, 2, 6, 10, 14, block[s[4]], block[s[5]]);
-            Self::mix(&mut work, 3, 7, 11, 15, block[s[6]], block[s[7]]);
-
-            Self::mix(&mut work, 0, 5, 10, 15, block[s[8]], block[s[9]]);
-            Self::mix(&mut work, 1, 6, 11, 12, block[s[10]], block[s[11]]);
-            Self::mix(&mut work, 2, 7, 8, 13, block[s[12]], block[s[13]]);
-            Self::mix(&mut work, 3, 4, 9, 14, block[s[14]], block[s[15]]);
-            // println!("Working Vector at [{i}]:\n{work:016x?}\n");
-        }
-
-        for i in 0..8 {
-            state[i] ^= work[i];
-            state[i] ^= work[i + 8];
+            work[i] ^= work[i];
+            work[i + 8] ^= state[i];
         }
     }
 
@@ -141,47 +175,16 @@ impl ClassicHasher for Blake3 {
 
         let initialization_vector = self.create_initialization_vector();
 
-        // Key length and hash length are mixed into the state, this ensures identical inputs don't resemble each other when these inputs are varied
-        let mixer: u32 = 0x01010000 ^ ((self.key.len() as u32) << 8) ^ self.hash_len as u32;
-        state[0] ^= mixer;
-
-        let mut bytes_taken = 0;
-        let mut bytes_remaining = bytes.len();
-
-        // If no key is provided the process of padding out the key and compressing it is skipped
-        if self.key.len() > 0 {
-            let mut key = self.key.clone();
-            while key.len() != 64 {
-                key.push(0);
-            }
-            bytes_taken += 64;
-            Self::compress(&mut state, &Self::create_chunk(&key), bytes_taken, false);
-        }
+        let mut counter: u64 = 0;
 
         // Divide the input into chunks of 1024 bytes
         let mut chunks = bytes.chunks_exact(1024);
-
-        while bytes_remaining > 64 {
-            let chunk = Self::create_chunk(chunks.next().unwrap());
-            bytes_taken += 64;
-            bytes_remaining -= 64;
-            Self::compress(&mut state, &chunk, bytes_taken, false);
-        }
-
-        // compress the last chunk, padding with zeroes if it is too short
-        let mut last = chunks.remainder().to_vec();
-        bytes_taken += last.len() as u64;
-        while last.len() != 64 {
-            last.push(0);
-        }
-
-        Self::compress(&mut state, &Self::create_chunk(&last), bytes_taken, true);
 
         state
             .iter()
             .map(|x| x.to_le_bytes())
             .flatten()
-            .take(self.hash_len)
+            .take(32)
             .collect_vec()
     }
 
@@ -196,7 +199,7 @@ impl ClassicHasher for Blake3 {
 }
 
 #[cfg(test)]
-mod blake2s_tests {
+mod blake3_tests {
     use super::*;
 
     #[test]
@@ -204,7 +207,7 @@ mod blake2s_tests {
         let mut hasher = Blake3::default();
         hasher.input_format = ByteFormat::Utf8;
         hasher.output_format = ByteFormat::Hex;
-        hasher.hash_len = 32;
+        // hasher.hash_len = 32;
         assert_eq!(
             "69217a3079908094e11121d042354a7c1f55b6482ca1a51e1b250dfd1ed0eef9",
             hasher.hash_bytes_from_string("").unwrap()
