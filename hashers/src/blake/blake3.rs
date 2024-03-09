@@ -1,7 +1,6 @@
-use itertools::Itertools;
-use utils::byte_formatting::ByteFormat;
-
 use crate::{errors::HasherError, traits::ClassicHasher};
+use std::cmp::min;
+use utils::byte_formatting::ByteFormat;
 
 // https://github.com/BLAKE3-team/BLAKE3
 // https://github.com/BLAKE3-team/BLAKE3-specs/blob/master/blake3.pdf
@@ -20,123 +19,168 @@ const KEYED_HASH: u32 = 1 << 4;
 const DERIVE_KEY_CONTEXT: u32 = 1 << 5;
 const DERIVE_KEY_MATERIAL: u32 = 1 << 6;
 
-const MSG_PERMUTATION: [usize; 16] = [2, 6, 3, 10, 7, 0, 4, 13, 1, 11, 12, 5, 9, 14, 15, 8];
-
-// Initialization vector, sqrt of the first eight primes
 const IV: [u32; 8] = [
     0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19,
 ];
 
-pub fn mix(v: &mut [u32; 16], a: usize, b: usize, c: usize, d: usize, x: u32, y: u32) {
-    v[a] = v[a].wrapping_add(v[b]).wrapping_add(x);
-    v[d] = (v[d] ^ v[a]).rotate_right(16);
+const MSG_PERMUTATION: [usize; 16] = [2, 6, 3, 10, 7, 0, 4, 13, 1, 11, 12, 5, 9, 14, 15, 8];
 
-    v[c] = v[c].wrapping_add(v[d]);
-    v[b] = (v[b] ^ v[c]).rotate_right(12);
-
-    v[a] = v[a].wrapping_add(v[b]).wrapping_add(y);
-    v[d] = (v[d] ^ v[a]).rotate_right(8);
-
-    v[c] = v[c].wrapping_add(v[d]);
-    v[b] = (v[b] ^ v[c]).rotate_right(7);
+// The mixing function, G, which mixes either a column or a diagonal.
+fn g(state: &mut [u32; 16], a: usize, b: usize, c: usize, d: usize, mx: u32, my: u32) {
+    state[a] = state[a].wrapping_add(state[b]).wrapping_add(mx);
+    state[d] = (state[d] ^ state[a]).rotate_right(16);
+    state[c] = state[c].wrapping_add(state[d]);
+    state[b] = (state[b] ^ state[c]).rotate_right(12);
+    state[a] = state[a].wrapping_add(state[b]).wrapping_add(my);
+    state[d] = (state[d] ^ state[a]).rotate_right(8);
+    state[c] = state[c].wrapping_add(state[d]);
+    state[b] = (state[b] ^ state[c]).rotate_right(7);
 }
 
-fn full_round(work: &mut [u32; 16], block: &[u32; 16]) {
-    mix(work, 0, 4, 8, 12, block[0], block[1]);
-    mix(work, 1, 5, 9, 13, block[2], block[3]);
-    mix(work, 2, 6, 10, 14, block[4], block[5]);
-    mix(work, 3, 7, 11, 15, block[6], block[7]);
-
-    mix(work, 0, 5, 10, 15, block[8], block[9]);
-    mix(work, 1, 6, 11, 12, block[10], block[11]);
-    mix(work, 2, 7, 8, 13, block[12], block[13]);
-    mix(work, 3, 4, 9, 14, block[14], block[15]);
-
-    // println!("Working Vector at [{i}]:\n{work:016x?}\n");
+fn round(state: &mut [u32; 16], m: &[u32; 16]) {
+    // Mix the columns.
+    g(state, 0, 4, 8, 12, m[0], m[1]);
+    g(state, 1, 5, 9, 13, m[2], m[3]);
+    g(state, 2, 6, 10, 14, m[4], m[5]);
+    g(state, 3, 7, 11, 15, m[6], m[7]);
+    // Mix the diagonals.
+    g(state, 0, 5, 10, 15, m[8], m[9]);
+    g(state, 1, 6, 11, 12, m[10], m[11]);
+    g(state, 2, 7, 8, 13, m[12], m[13]);
+    g(state, 3, 4, 9, 14, m[14], m[15]);
 }
 
-fn permute_words(v: &mut [u32; 16]) {
+fn permute(m: &mut [u32; 16]) {
     let mut permuted = [0; 16];
     for i in 0..16 {
-        permuted[i] = v[MSG_PERMUTATION[i]];
+        permuted[i] = m[MSG_PERMUTATION[i]];
     }
-    *v = permuted;
+    *m = permuted;
 }
 
-// Up to 64 bytes
-fn create_block(bytes: &[u8]) -> [u32; 16] {
-    let mut k = [0u32; 16];
-    for (elem, chunk) in k.iter_mut().zip(bytes.chunks_exact(4)).take(16) {
-        *elem = u32::from_le_bytes(chunk.try_into().unwrap());
-    }
-    k
-}
-// https://github.com/BLAKE3-team/BLAKE3-specs/blob/master/blake3.pdf
-// Blocks of 64 bytes (512 bits) are compressed as a sequence of u32s
-pub fn compress_block(
-    chain: &[u32; 8],
-    block: &[u32; 16],
-    initialization_vector: &[u32; 8],
+fn compress(
+    chaining_value: &[u32; 8],
+    block_words: &[u32; 16],
     counter: u64,
-    block_length: u32,
+    block_len: u32,
     flags: u32,
 ) -> [u32; 16] {
-    // create the working vector
-    let mut work = [
-        chain[0],
-        chain[1],
-        chain[2],
-        chain[3],
-        chain[4],
-        chain[5],
-        chain[6],
-        chain[7],
-        initialization_vector[0],
-        initialization_vector[1],
-        initialization_vector[2],
-        initialization_vector[3],
+    let mut state = [
+        chaining_value[0],
+        chaining_value[1],
+        chaining_value[2],
+        chaining_value[3],
+        chaining_value[4],
+        chaining_value[5],
+        chaining_value[6],
+        chaining_value[7],
+        IV[0],
+        IV[1],
+        IV[2],
+        IV[3],
         counter as u32,
         (counter >> 32) as u32,
-        block_length,
+        block_len,
         flags,
     ];
+    let mut block = *block_words;
 
-    // Seven full rounds with a permutation between each
-    full_round(&mut work, &block);
-    permute_words(&mut work);
-    full_round(&mut work, &block);
-    permute_words(&mut work);
-    full_round(&mut work, &block);
-    permute_words(&mut work);
-    full_round(&mut work, &block);
-    permute_words(&mut work);
-    full_round(&mut work, &block);
-    permute_words(&mut work);
-    full_round(&mut work, &block);
-    permute_words(&mut work);
-    full_round(&mut work, &block);
+    round(&mut state, &block); // round 1
+    permute(&mut block);
+    round(&mut state, &block); // round 2
+    permute(&mut block);
+    round(&mut state, &block); // round 3
+    permute(&mut block);
+    round(&mut state, &block); // round 4
+    permute(&mut block);
+    round(&mut state, &block); // round 5
+    permute(&mut block);
+    round(&mut state, &block); // round 6
+    permute(&mut block);
+    round(&mut state, &block); // round 7
 
-    // mix the working vector and the chain
     for i in 0..8 {
-        work[i] ^= work[i];
-        work[i + 8] ^= chain[i];
+        state[i] ^= state[i + 8];
+        state[i + 8] ^= chaining_value[i];
     }
-    work
+    state
 }
 
-pub struct Chunk {
-    chain: [u32; 8],
-    chunk_counter: u64,
-    block: [u8; BLOCK_LEN],
-    block_len: usize,
-    blocks_compressed: usize,
-    initialization_vector: [u32; 8],
+fn first_8_words(compression_output: [u32; 16]) -> [u32; 8] {
+    compression_output[0..8].try_into().unwrap()
+}
+
+fn words_from_little_endian_bytes(bytes: &[u8], words: &mut [u32]) {
+    debug_assert_eq!(bytes.len(), 4 * words.len());
+    for (four_bytes, word) in bytes.chunks_exact(4).zip(words) {
+        *word = u32::from_le_bytes(four_bytes.try_into().unwrap());
+    }
+}
+
+// Each chunk or parent node can produce either an 8-word chaining value or, by
+// setting the ROOT flag, any number of final output bytes. The Output struct
+// captures the state just prior to choosing between those two possibilities.
+struct Output {
+    input_chaining_value: [u32; 8],
+    block_words: [u32; 16],
+    counter: u64,
+    block_len: u32,
     flags: u32,
 }
 
-impl Chunk {
+impl Output {
+    fn chaining_value(&self) -> [u32; 8] {
+        first_8_words(compress(
+            &self.input_chaining_value,
+            &self.block_words,
+            self.counter,
+            self.block_len,
+            self.flags,
+        ))
+    }
+
+    fn root_output_bytes(&self, out_slice: &mut [u8]) {
+        let mut output_block_counter = 0;
+        for out_block in out_slice.chunks_mut(2 * OUT_LEN) {
+            let words = compress(
+                &self.input_chaining_value,
+                &self.block_words,
+                output_block_counter,
+                self.block_len,
+                self.flags | ROOT,
+            );
+            // The output length might not be a multiple of 4.
+            for (word, out_word) in words.iter().zip(out_block.chunks_mut(4)) {
+                out_word.copy_from_slice(&word.to_le_bytes()[..out_word.len()]);
+            }
+            output_block_counter += 1;
+        }
+    }
+}
+
+struct ChunkState {
+    chaining_value: [u32; 8],
+    chunk_counter: u64,
+    block: [u8; BLOCK_LEN],
+    block_len: u8,
+    blocks_compressed: u8,
+    flags: u32,
+}
+
+impl ChunkState {
+    fn new(key_words: [u32; 8], chunk_counter: u64, flags: u32) -> Self {
+        Self {
+            chaining_value: key_words,
+            chunk_counter,
+            block: [0; BLOCK_LEN],
+            block_len: 0,
+            blocks_compressed: 0,
+            flags,
+        }
+    }
+
     fn len(&self) -> usize {
-        BLOCK_LEN & self.blocks_compressed + self.block_len
+        BLOCK_LEN * self.blocks_compressed as usize + self.block_len as usize
     }
 
     fn start_flag(&self) -> u32 {
@@ -149,21 +193,70 @@ impl Chunk {
 
     fn update(&mut self, mut input: &[u8]) {
         while !input.is_empty() {
-            if self.block_len == BLOCK_LEN {
-                let mut block = create_block(&self.block);
-                self.chain = compress_block(
-                    &self.chain,
-                    &block,
-                    &self.initialization_vector,
+            // If the block buffer is full, compress it and clear it. More
+            // input is coming, so this compression is not CHUNK_END.
+            if self.block_len as usize == BLOCK_LEN {
+                let mut block_words = [0; 16];
+                words_from_little_endian_bytes(&self.block, &mut block_words);
+                self.chaining_value = first_8_words(compress(
+                    &self.chaining_value,
+                    &block_words,
                     self.chunk_counter,
                     BLOCK_LEN as u32,
-                    self.flags,
-                )[0..8]
-                    .try_into()
-                    .unwrap();
+                    self.flags | self.start_flag(),
+                ));
+                self.blocks_compressed += 1;
+                self.block = [0; BLOCK_LEN];
+                self.block_len = 0;
             }
+
+            // Copy input bytes into the block buffer.
+            let want = BLOCK_LEN - self.block_len as usize;
+            let take = min(want, input.len());
+            self.block[self.block_len as usize..][..take].copy_from_slice(&input[..take]);
+            self.block_len += take as u8;
+            input = &input[take..];
         }
     }
+
+    fn output(&self) -> Output {
+        let mut block_words = [0; 16];
+        words_from_little_endian_bytes(&self.block, &mut block_words);
+        Output {
+            input_chaining_value: self.chaining_value,
+            block_words,
+            counter: self.chunk_counter,
+            block_len: self.block_len as u32,
+            flags: self.flags | self.start_flag() | CHUNK_END,
+        }
+    }
+}
+
+fn parent_output(
+    left_child_cv: [u32; 8],
+    right_child_cv: [u32; 8],
+    key_words: [u32; 8],
+    flags: u32,
+) -> Output {
+    let mut block_words = [0; 16];
+    block_words[..8].copy_from_slice(&left_child_cv);
+    block_words[8..].copy_from_slice(&right_child_cv);
+    Output {
+        input_chaining_value: key_words,
+        block_words,
+        counter: 0,                  // Always 0 for parent nodes.
+        block_len: BLOCK_LEN as u32, // Always BLOCK_LEN (64) for parent nodes.
+        flags: PARENT | flags,
+    }
+}
+
+fn parent_cv(
+    left_child_cv: [u32; 8],
+    right_child_cv: [u32; 8],
+    key_words: [u32; 8],
+    flags: u32,
+) -> [u32; 8] {
+    parent_output(left_child_cv, right_child_cv, key_words, flags).chaining_value()
 }
 
 pub struct Blake3 {
@@ -195,31 +288,13 @@ impl Blake3 {
             }
             k
         } else {
-            Self::IV
+            IV
         }
-    }
-
-    // Up to 1024 bytes
-    fn create_chunk(bytes: &[u8]) -> [u32; 16] {
-        let mut k = [0u32; 16];
-        for (elem, chunk) in k.iter_mut().zip(bytes.chunks_exact(4)).take(16) {
-            *elem = u32::from_le_bytes(chunk.try_into().unwrap());
-        }
-        k
     }
 }
 
 impl ClassicHasher for Blake3 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut chain = Self::IV.clone();
-
-        let initialization_vector = self.create_initialization_vector();
-
-        let mut counter: u64 = 0;
-
-        // Divide the input into chunks of 1024 bytes
-        let mut chunks = bytes.chunks_exact(1024);
-
         chain
             .iter()
             .map(|x| x.to_le_bytes())
