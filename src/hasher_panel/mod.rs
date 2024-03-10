@@ -1,4 +1,5 @@
 mod blake2_controls;
+mod blake3_controls;
 mod blake_controls;
 mod fnv_controls;
 mod md4_controls;
