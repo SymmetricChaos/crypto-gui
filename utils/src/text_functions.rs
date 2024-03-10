@@ -1,12 +1,10 @@
 use bimap::BiMap;
 use itertools::Itertools;
-use lazy_static::lazy_static;
 use num::Integer;
 use rand::{
     prelude::{IteratorRandom, SliceRandom},
     Rng,
 };
-use regex::Regex;
 use std::hash::Hash;
 
 // Mutate a string so that it contains only characters in a provided alphabet

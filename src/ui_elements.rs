@@ -207,13 +207,14 @@ impl UiElements for Ui {
 //         .monospace()
 // }
 
-// pub fn control_string(ui: &mut egui::Ui, string: &mut String) -> egui::Response {
-//     ui.add(
-//         egui::TextEdit::singleline(string)
-//             .font(TextStyle::Monospace)
-//             .clip_text(false),
-//     )
-// }
+pub fn control_string(ui: &mut egui::Ui, string: &mut String, enabled: bool) -> egui::Response {
+    ui.add_enabled(
+        enabled,
+        egui::TextEdit::singleline(string)
+            .font(TextStyle::Monospace)
+            .clip_text(false),
+    )
+}
 
 pub fn randomize_reset(ui: &mut egui::Ui, cipher_frame: &mut dyn CipherFrame) {
     if ui.button("Randomize").clicked() {

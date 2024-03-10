@@ -374,6 +374,7 @@ pub struct Blake3 {
     pub output_format: ByteFormat,
     pub key: [u8; 32], // optional 256-bit key
     pub keyed_hash: bool,
+    pub hash_len: u64, // output length in bytes
 }
 
 impl Default for Blake3 {
@@ -383,13 +384,14 @@ impl Default for Blake3 {
             output_format: ByteFormat::Hex,
             key: [0; 32],
             keyed_hash: false,
+            hash_len: 32,
         }
     }
 }
 
 impl ClassicHasher for Blake3 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut out = vec![0; 32];
+        let mut out = vec![0; self.hash_len as usize];
         let mut h = match self.keyed_hash {
             true => Hasher::new_keyed(&self.key),
             false => Hasher::new(),

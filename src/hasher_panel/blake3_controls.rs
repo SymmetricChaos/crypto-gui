@@ -1,6 +1,7 @@
-use crate::ui_elements::UiElements;
+use crate::ui_elements::{control_string, UiElements};
 
 use super::{byte_formatting_io, HasherFrame};
+use egui::Button;
 use hashers::{blake::blake3::Blake3, errors::HasherError, traits::ClassicHasher};
 use rand::{thread_rng, RngCore};
 use utils::byte_formatting::ByteFormat;
@@ -8,7 +9,7 @@ use utils::byte_formatting::ByteFormat;
 pub struct Blake3Frame {
     hasher: Blake3,
     key_string: String,
-    hash_len: String,
+    valid_key: bool,
 }
 
 impl Default for Blake3Frame {
@@ -16,58 +17,55 @@ impl Default for Blake3Frame {
         Self {
             hasher: Default::default(),
             key_string: String::new(),
-            hash_len: String::from("32"),
+            valid_key: false,
         }
     }
 }
 
 impl Blake3Frame {
-    fn key_control(ui: &mut egui::Ui, string: &mut String, bytes: &mut [u8; 32]) {
+    fn key_control(&mut self, ui: &mut egui::Ui) {
+        let string = &mut self.key_string;
+        let enabled = self.hasher.keyed_hash;
         ui.horizontal(|ui| {
-            if ui.control_string(string).changed() {
-                *string = string.chars().filter(|c| c.is_ascii_hexdigit()).collect();
-                if ui.button("🎲").on_hover_text("randomize").clicked() {
-                    let mut rng = thread_rng();
-                    rng.fill_bytes(bytes);
-                    *string = ByteFormat::Hex.byte_slice_to_text(&bytes)
-                }
-                if string.len() != 64 {
-                    ui.error_text("the key must be exactly 64 hexadecimal digits");
-                }
-                if let Ok(new) = ByteFormat::Hex.text_to_bytes(string) {
-                    match new.try_into() {
-                        Ok(key) => *bytes = key,
-                        Err(_) => todo!(),
-                    }
-                } else {
-                    ui.error_text("unable to parse input");
-                }
-            };
-        });
-    }
-
-    fn hash_len_control(ui: &mut egui::Ui, string: &mut String, value: &mut usize, max: usize) {
-        ui.horizontal(|ui| {
-            if ui.control_string(string).changed() {
+            if control_string(ui, string, enabled).changed() {
                 *string = string
                     .chars()
-                    .filter(|c| c.is_ascii_digit())
-                    .take(2)
+                    .filter(|c| c.is_ascii_hexdigit())
+                    .take(64)
                     .collect();
-                match usize::from_str_radix(string, 10) {
-                    Ok(new) => {
-                        if new == 0 || new > max {
-                            ui.error_text("invalid hash length_size");
-                        } else {
-                            *value = new
-                        }
-                    }
-                    Err(_) => {
-                        ui.error_text("unable to parse hash_len value");
-                    }
-                };
+            };
+            if string.len() != 64 {
+                self.valid_key = false;
+            } else {
+                self.valid_key = true;
+            }
+            if ui
+                .add_enabled(enabled, Button::new("🎲"))
+                .on_hover_text("randomize")
+                .clicked()
+            {
+                let mut rng = thread_rng();
+                rng.fill_bytes(&mut self.hasher.key);
+                *string = ByteFormat::Hex.byte_slice_to_text(&mut self.hasher.key)
             }
         });
+
+        if self.valid_key {
+            if let Ok(new) = ByteFormat::Hex.text_to_bytes(string) {
+                match new.try_into() {
+                    Ok(key) => self.hasher.key = key,
+                    Err(_) => unreachable!(),
+                }
+            } else {
+                unreachable!("unable to parse input");
+            }
+        } else {
+            if self.hasher.keyed_hash {
+                ui.error_text("invalid key");
+            } else {
+                ui.error_text("");
+            }
+        }
     }
 }
 
@@ -80,26 +78,26 @@ impl HasherFrame for Blake3Frame {
             &mut self.hasher.input_format,
             &mut self.hasher.output_format,
         );
-
-        ui.subheading("Hash Length");
-        ui.label("The BLAKE3 function allows a variety of output lengths.");
-        // Self::hash_len_control(ui, &mut self.hash_len, &mut self.hasher.hash_len, 32);
-
         ui.add_space(16.0);
+
         ui.horizontal(|ui| {
             ui.selectable_value(&mut self.hasher.keyed_hash, true, "Keyed");
             ui.selectable_value(&mut self.hasher.keyed_hash, false, "Unkeyed");
         });
-        if self.hasher.keyed_hash {
-            Self::key_control(ui, &mut self.key_string, &mut self.hasher.key)
-        }
-
-        // ui.label("<<<EXPLANATION OF HASH FUNCTION CODE>>>");
+        self.key_control(ui);
 
         ui.add_space(16.0);
+
+        ui.subheading("Hash Length");
+        ui.label("BLAKE3 allows a variety of output lengths, with a default of 32 bytes (256 bits). While up to 2^64 bytes can be returned this interface limits output to 256 bytes (2048 bits). Unlike BLAKE2 there is no domain seperation for different lengths so short outputs are prefixes of long ones.");
+        ui.add(egui::DragValue::new(&mut self.hasher.hash_len).clamp_range(1..=256));
     }
 
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        self.hasher.hash_bytes_from_string(text)
+        if self.hasher.keyed_hash && !self.valid_key {
+            Err(HasherError::key("BLAKE3 keyed hash can only be called when exactly 64 hexadecimal digits (256 bits) of key are given"))
+        } else {
+            self.hasher.hash_bytes_from_string(text)
+        }
     }
 }
