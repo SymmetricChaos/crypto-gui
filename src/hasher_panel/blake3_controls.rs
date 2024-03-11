@@ -2,13 +2,18 @@ use crate::ui_elements::{control_string, UiElements};
 
 use super::{byte_formatting_io, HasherFrame};
 use egui::Button;
-use hashers::{blake::blake3::Blake3, errors::HasherError, traits::ClassicHasher};
+use hashers::{
+    blake::blake3::{Blake3, Blake3Mode},
+    errors::HasherError,
+    traits::ClassicHasher,
+};
 use rand::{thread_rng, RngCore};
 use utils::byte_formatting::ByteFormat;
 
 pub struct Blake3Frame {
     hasher: Blake3,
     key_string: String,
+    context_string: String,
     valid_key: bool,
 }
 
@@ -17,6 +22,7 @@ impl Default for Blake3Frame {
         Self {
             hasher: Default::default(),
             key_string: String::new(),
+            context_string: String::new(),
             valid_key: false,
         }
     }
@@ -25,7 +31,11 @@ impl Default for Blake3Frame {
 impl Blake3Frame {
     fn key_control(&mut self, ui: &mut egui::Ui) {
         let string = &mut self.key_string;
-        let enabled = self.hasher.keyed_hash;
+        let enabled = self.hasher.mode == Blake3Mode::Keyed;
+        ui.subheading("Key");
+        ui.label(
+            "Exactly 64 hexadecimal digits must be supplied, specifying all 256 bits of the key.",
+        );
         ui.horizontal(|ui| {
             if control_string(ui, string, enabled).changed() {
                 *string = string
@@ -60,12 +70,22 @@ impl Blake3Frame {
                 unreachable!("unable to parse input");
             }
         } else {
-            if self.hasher.keyed_hash {
+            if self.hasher.mode == Blake3Mode::Keyed {
                 ui.error_text("invalid key");
             } else {
                 ui.error_text("");
             }
         }
+    }
+
+    fn context_control(&mut self, ui: &mut egui::Ui) {
+        let string = &mut self.context_string;
+        let enabled = self.hasher.mode == Blake3Mode::KeyDerivation;
+        ui.subheading("Context String");
+        ui.label("For key derivation a static globally unique string must be provided. The suggested format is [application] [creation timestamp] [purpose].");
+        ui.horizontal(|ui| {
+            control_string(ui, string, enabled);
+        });
     }
 }
 
@@ -81,10 +101,22 @@ impl HasherFrame for Blake3Frame {
         ui.add_space(16.0);
 
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.hasher.keyed_hash, true, "Keyed");
-            ui.selectable_value(&mut self.hasher.keyed_hash, false, "Unkeyed");
+            ui.selectable_value(&mut self.hasher.mode, Blake3Mode::Unkeyed, "Unkeyed");
+            ui.selectable_value(&mut self.hasher.mode, Blake3Mode::Keyed, "Keyed");
+            ui.selectable_value(
+                &mut self.hasher.mode,
+                Blake3Mode::KeyDerivation,
+                "Key Derivation",
+            );
         });
+
+        ui.add_space(16.0);
+
         self.key_control(ui);
+
+        ui.add_space(16.0);
+
+        self.context_control(ui);
 
         ui.add_space(16.0);
 
@@ -94,7 +126,7 @@ impl HasherFrame for Blake3Frame {
     }
 
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        if self.hasher.keyed_hash && !self.valid_key {
+        if self.hasher.mode == Blake3Mode::Keyed && !self.valid_key {
             Err(HasherError::key("BLAKE3 keyed hash can only be called when exactly 64 hexadecimal digits (256 bits) of key are given"))
         } else {
             self.hasher.hash_bytes_from_string(text)

@@ -369,12 +369,19 @@ impl Hasher {
     }
 }
 
+#[derive(Debug, PartialEq, Eq)]
+pub enum Blake3Mode {
+    Unkeyed,
+    Keyed,
+    KeyDerivation,
+}
 pub struct Blake3 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
     pub key: [u8; 32], // optional 256-bit key
-    pub keyed_hash: bool,
+    pub key_context: String,
     pub hash_len: u64, // output length in bytes
+    pub mode: Blake3Mode,
 }
 
 impl Default for Blake3 {
@@ -383,8 +390,9 @@ impl Default for Blake3 {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
             key: [0; 32],
-            keyed_hash: false,
+            key_context: String::new(),
             hash_len: 32,
+            mode: Blake3Mode::Unkeyed,
         }
     }
 }
@@ -392,9 +400,10 @@ impl Default for Blake3 {
 impl ClassicHasher for Blake3 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut out = vec![0; self.hash_len as usize];
-        let mut h = match self.keyed_hash {
-            true => Hasher::new_keyed(&self.key),
-            false => Hasher::new(),
+        let mut h = match self.mode {
+            Blake3Mode::Unkeyed => Hasher::new(),
+            Blake3Mode::Keyed => Hasher::new_keyed(&self.key),
+            Blake3Mode::KeyDerivation => Hasher::new_derive_key(&self.key_context),
         };
         h.update(bytes);
         h.finalize(&mut out);
@@ -425,7 +434,7 @@ mod blake3_tests {
         let mut hasher = Blake3::default();
         hasher.input_format = ByteFormat::Hex;
         hasher.output_format = ByteFormat::Hex;
-        hasher.keyed_hash = false;
+        hasher.mode = Blake3Mode::Unkeyed;
 
         let input: Vec<u8> = (0..251).collect_vec();
 
@@ -454,7 +463,7 @@ mod blake3_tests {
         let mut hasher = Blake3::default();
         hasher.input_format = ByteFormat::Hex;
         hasher.output_format = ByteFormat::Hex;
-        hasher.keyed_hash = true;
+        hasher.mode = Blake3Mode::Keyed;
         hasher.key = "whats the Elvish word for friend"
             .as_bytes()
             .try_into()
