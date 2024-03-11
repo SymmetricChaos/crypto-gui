@@ -19,9 +19,10 @@ use rngs::{
 
 use self::{
     halton_controls::HaltonFrame, lcg_controls::LcgFrame, lfsr_controls::LfsrFrame,
-    middle_square_controls::MiddleSquareFrame, pcg_controls::PcgFrame, rc4_controls::Rc4Frame,
-    splitmix_controls::SplitmixFrame, weyl_controls::WeylSequenceFrame,
-    xorshift_controls::XorshiftFrame, xoshiro_controls::XoshiroFrame,
+    mersenne_twister_controls::MTFrame, middle_square_controls::MiddleSquareFrame,
+    pcg_controls::PcgFrame, rc4_controls::Rc4Frame, splitmix_controls::SplitmixFrame,
+    weyl_controls::WeylSequenceFrame, xorshift_controls::XorshiftFrame,
+    xoshiro_controls::XoshiroFrame,
 };
 
 pub trait ClassicRngFrame {
@@ -57,6 +58,7 @@ pub struct RngInterface {
     halton: HaltonFrame,
     lcg: LcgFrame,
     lfsr: LfsrFrame,
+    mersenne_twister: MTFrame,
     middle_square: MiddleSquareFrame,
     pcg: PcgFrame,
     rc4: Rc4Frame,
@@ -72,6 +74,7 @@ impl RngInterface {
             &[
                 RngId::Lcg,
                 RngId::Lfsr,
+                RngId::MersenneTwister,
                 RngId::MiddleSquare,
                 RngId::Pcg,
                 RngId::Rc4,
@@ -100,6 +103,7 @@ impl RngInterface {
             RngId::Lcg => &mut self.lcg,
             // RngId::Lfg => &mut self.lfg,
             RngId::Lfsr => &mut self.lfsr,
+            RngId::MersenneTwister => &mut self.mersenne_twister,
             RngId::MiddleSquare => &mut self.middle_square,
             RngId::Pcg => &mut self.pcg,
             RngId::Rc4 => &mut self.rc4,
