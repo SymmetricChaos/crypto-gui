@@ -378,9 +378,9 @@ pub enum Blake3Mode {
 pub struct Blake3 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    pub key: [u8; 32], // optional 256-bit key
-    pub key_context: String,
-    pub hash_len: u64, // output length in bytes
+    pub key: [u8; 32],       // optional 256-bit key
+    pub key_context: String, // context for key derivation
+    pub hash_len: u64,       // output length in bytes
     pub mode: Blake3Mode,
 }
 
