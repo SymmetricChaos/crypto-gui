@@ -34,6 +34,20 @@ pub fn bits_from_str(text: &str) -> Result<impl Iterator<Item = Bit> + '_, CharT
     }
 }
 
+pub fn byte_to_bits(byte: u8) -> [Bit; 8] {
+    let mut out = [Bit::Zero; 8];
+    for bit in 0..8_u8 {
+        if (1 << bit) & byte != 0 {
+            out[bit as usize] = Bit::One
+        }
+    }
+    out
+}
+
+pub fn bit_vec_from_bytes(bytes: &[u8]) -> Vec<Bit> {
+    bytes.iter().map(|c| byte_to_bits(*c)).flatten().collect()
+}
+
 pub fn bits_to_int_little_endian(bits: &[Bit]) -> u32 {
     let mut out = 0;
     let mut p = 1;

@@ -1,4 +1,4 @@
-use crate::bits::{bits_from_str, Bit, CharToBitError, IntToBitError};
+use crate::bits::{bit_vec_from_bytes, bits_from_str, Bit, CharToBitError, IntToBitError};
 use itertools::Itertools;
 use num::{One, Zero};
 use std::{
@@ -162,6 +162,10 @@ impl BitPolynomial {
     pub fn from_str<S: AsRef<str>>(s: S) -> Result<BitPolynomial, CharToBitError> {
         let bits = bits_from_str(s.as_ref())?;
         Ok(BitPolynomial::from(bits.collect_vec()))
+    }
+
+    pub fn from_bytes(bytes: &[u8]) -> BitPolynomial {
+        BitPolynomial::from(bit_vec_from_bytes(bytes))
     }
 
     pub fn from_iter(iter: impl Iterator<Item = Bit>) -> BitPolynomial {
