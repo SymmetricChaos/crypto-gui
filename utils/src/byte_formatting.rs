@@ -1,12 +1,12 @@
 use base64::prelude::*;
-use bimap::BiMap;
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use regex::Regex;
 
 lazy_static! {
     pub static ref IS_HEX_BYTES: Regex = Regex::new(r"^(?:[0-9a-fA-F]{2})+$").unwrap();
-    pub static ref HEX: BiMap<String, u8> = (0..255).map(|n| (format!("{:02x}", n), n)).collect();
+    // pub static ref IS_OCT_BYTES: Regex = Regex::new(r"^(?:[0-7]{3})+$").unwrap();
+    pub static ref IS_BINARY_BYTES: Regex = Regex::new(r"^(?:[0-1]{8})+$").unwrap();
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -23,7 +23,7 @@ pub fn hex_to_bytes(hex: &str) -> Result<Vec<u8>, HexToBytesError> {
         let mut out = Vec::new();
         for i in 0..(text.len() / 2) {
             let lo = i * 2;
-            out.push(*HEX.get_by_left(&text[lo..lo + 2]).unwrap())
+            out.push(u8::from_str_radix(&text[lo..lo + 2], 16).unwrap())
         }
         Ok(out)
     }
@@ -31,6 +31,50 @@ pub fn hex_to_bytes(hex: &str) -> Result<Vec<u8>, HexToBytesError> {
 
 pub fn bytes_to_hex(bytes: &[u8]) -> String {
     bytes.into_iter().map(|b| format!("{:02x}", b)).join("")
+}
+
+// #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+// pub struct OctToBytesError;
+
+// pub fn oct_to_bytes(hex: &str) -> Result<Vec<u8>, OctToBytesError> {
+//     let mut text: String = hex.lines().collect();
+//     text = text.to_ascii_lowercase();
+//     if !IS_OCT_BYTES.is_match(&text) {
+//         return Err(OctToBytesError);
+//     } else {
+//         let mut out = Vec::new();
+//         for i in 0..(text.len() / 3) {
+//             let lo = i * 3;
+//             out.push(u8::from_str_radix(&text[lo..lo + 3], 8).unwrap())
+//         }
+//         Ok(out)
+//     }
+// }
+
+// pub fn bytes_to_oct(bytes: &[u8]) -> String {
+//     bytes.into_iter().map(|b| format!("{:03o}", b)).join("")
+// }
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct BitstringToBytesError;
+
+pub fn bitstring_to_bytes(hex: &str) -> Result<Vec<u8>, BitstringToBytesError> {
+    let mut text: String = hex.lines().collect();
+    text = text.to_ascii_lowercase();
+    if !IS_BINARY_BYTES.is_match(&text) {
+        return Err(BitstringToBytesError);
+    } else {
+        let mut out = Vec::new();
+        for i in 0..(text.len() / 8) {
+            let lo = i * 8;
+            out.push(u8::from_str_radix(&text[lo..lo + 2], 2).unwrap())
+        }
+        Ok(out)
+    }
+}
+
+pub fn bytes_to_bitstring(bytes: &[u8]) -> String {
+    bytes.into_iter().map(|b| format!("{:08b}", b)).join("")
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -41,6 +85,8 @@ pub enum ByteFormat {
     Hex,
     Utf8,
     Base64,
+    // Oct,
+    Bit,
 }
 
 impl ByteFormat {
@@ -52,6 +98,8 @@ impl ByteFormat {
             ByteFormat::Hex => hex_to_bytes(text).map_err(|_| ByteFormatError),
             ByteFormat::Utf8 => Ok(text.as_bytes().to_owned()),
             ByteFormat::Base64 => BASE64_STANDARD.decode(text).map_err(|_| ByteFormatError),
+            // ByteFormat::Oct => oct_to_bytes(text).map_err(|_| ByteFormatError),
+            ByteFormat::Bit => bitstring_to_bytes(text).map_err(|_| ByteFormatError),
         }
     }
 
@@ -103,6 +151,16 @@ impl ByteFormat {
                 .collect(),
             ByteFormat::Utf8 => String::from_utf8_lossy(bytes.as_ref()).to_string(),
             ByteFormat::Base64 => BASE64_STANDARD.encode(bytes),
+            // ByteFormat::Oct => bytes
+            //     .as_ref()
+            //     .iter()
+            //     .map(|byte| format!("{:03o}", byte))
+            //     .collect(),
+            ByteFormat::Bit => bytes
+                .as_ref()
+                .iter()
+                .map(|byte| format!("{:08b}", byte))
+                .collect(),
         }
     }
 
@@ -111,6 +169,8 @@ impl ByteFormat {
             ByteFormat::Hex => bytes.map(|byte| format!("{:02x}", byte)).collect(),
             ByteFormat::Utf8 => String::from_utf8_lossy(&bytes.collect_vec()).to_string(),
             ByteFormat::Base64 => BASE64_STANDARD.encode(&bytes.collect_vec()),
+            // ByteFormat::Oct => bytes.map(|byte| format!("{:03o}", byte)).collect(),
+            ByteFormat::Bit => bytes.map(|byte| format!("{:08b}", byte)).collect(),
         }
     }
 

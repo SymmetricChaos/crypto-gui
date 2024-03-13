@@ -52,10 +52,8 @@ impl ClassicHasher for CyclicRedundancyCheckHash {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let bits = bit_vec_from_bytes(bytes);
 
-        let mut poly = BitPolynomial::from(bits);
+        let poly = BitPolynomial::from(bits);
         let (_, r) = poly.div_rem(&self.generator);
-
-        println!("{}", r.to_string());
 
         todo!()
     }
