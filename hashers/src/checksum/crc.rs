@@ -50,12 +50,14 @@ impl CyclicRedundancyCheckHash {
 
 impl ClassicHasher for CyclicRedundancyCheckHash {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let bits = bit_vec_from_bytes(bytes);
+        // Convert the bytes to a vector of Bits and treat it as a polynomial
+        let poly = BitPolynomial::from(bit_vec_from_bytes(bytes));
 
-        let poly = BitPolynomial::from(bits);
+        // The remainder of the division is the CRC syndrome
         let (_, r) = poly.div_rem(&self.generator);
 
-        todo!()
+        // Convert the CRC syndrome into bytes for output
+        ByteFormat::Bit.text_to_bytes(&r.bit_string()).unwrap()
     }
 
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {

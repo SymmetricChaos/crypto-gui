@@ -133,6 +133,14 @@ impl BitPolynomial {
         out
     }
 
+    pub fn bit_string(&self) -> String {
+        let mut out = String::with_capacity(self.len());
+        for bit in self.coef.iter() {
+            out.push(bit.to_char())
+        }
+        out
+    }
+
     pub fn from_int_array<T: Copy, const N: usize>(
         arr: [T; N],
     ) -> Result<BitPolynomial, IntToBitError>
