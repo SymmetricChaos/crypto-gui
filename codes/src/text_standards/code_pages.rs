@@ -131,6 +131,7 @@ impl Ccsid {
                 String::from_utf8(out).map_err(|e| CodeError::Input(e.to_string()))
             }
             Some(ByteFormat::Base64) => todo!(),
+            Some(ByteFormat::Bit) => todo!(),
             None => Err(CodeError::state("Binary to Text Mode is not set")),
         }
     }
@@ -154,6 +155,7 @@ impl Code for Ccsid {
                 ByteFormat::Hex => self.encode_hex(text),
                 ByteFormat::Utf8 => self.encode_utf8(text),
                 ByteFormat::Base64 => todo!(),
+                ByteFormat::Bit => todo!(),
             }
         } else {
             let mut out = Vec::new();
