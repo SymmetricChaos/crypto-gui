@@ -5,7 +5,6 @@ use regex::Regex;
 
 lazy_static! {
     pub static ref IS_HEX_BYTES: Regex = Regex::new(r"^(?:[0-9a-fA-F]{2})+$").unwrap();
-    // pub static ref IS_OCT_BYTES: Regex = Regex::new(r"^(?:[0-7]{3})+$").unwrap();
     pub static ref IS_BINARY_BYTES: Regex = Regex::new(r"^(?:[0-1]{8})+$").unwrap();
 }
 
@@ -13,6 +12,7 @@ lazy_static! {
 pub struct HexToBytesError;
 
 // A string containing hex characters converted into bytes
+// Bytes are read as pairs of characters from left to right, only an even number of characters are accepted
 // "DEADBEEF" -> [222, 173, 190, 239]
 pub fn hex_to_bytes(hex: &str) -> Result<Vec<u8>, HexToBytesError> {
     let mut text: String = hex.lines().collect();

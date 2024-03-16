@@ -1,6 +1,6 @@
 use crate::{errors::HasherError, traits::ClassicHasher};
 
-use utils::{bit_polynomial::BitPolynomial, bits::bit_vec_from_bytes, byte_formatting::ByteFormat};
+use utils::{bit_polynomial::BitPolynomial, byte_formatting::ByteFormat};
 
 pub enum CrcAlgorithm {
     Crc32,
@@ -15,7 +15,10 @@ impl CrcAlgorithm {
 
     pub fn generator(&self) -> BitPolynomial {
         match self {
-            CrcAlgorithm::Crc32 => todo!(),
+            CrcAlgorithm::Crc32 => {
+                //BitPolynomial::from_bytes(&ByteFormat::Hex.text_to_bytes("04C11DB7").unwrap())
+                BitPolynomial::from_str("111011011011100010000011001000001").unwrap()
+            }
         }
     }
 }
@@ -53,7 +56,7 @@ impl CyclicRedundancyCheckHash {
 impl ClassicHasher for CyclicRedundancyCheckHash {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         // Convert the bytes to a vector of Bits and treat it as a polynomial
-        let poly = BitPolynomial::from(bit_vec_from_bytes(bytes));
+        let poly = BitPolynomial::from_bytes_rtl(bytes);
 
         // The remainder of the division is the CRC syndrome
         let (_, r) = poly.div_rem(&self.mode.generator());
@@ -74,10 +77,19 @@ impl ClassicHasher for CyclicRedundancyCheckHash {
 
 #[cfg(test)]
 mod crc_hasher_tests {
+    use itertools::Itertools;
+
     use super::*;
 
     #[test]
     fn test() {
         let mut hasher = CyclicRedundancyCheckHash::default();
+
+        let mut from_hex =
+            BitPolynomial::from_bytes_rtl(&ByteFormat::Hex.text_to_bytes("1021").unwrap());
+
+        println!("{}", from_hex.polynomial_string());
+        from_hex.coef.push(utils::bits::Bit::One);
+        println!("{}", from_hex.polynomial_string());
     }
 }

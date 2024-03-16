@@ -34,18 +34,43 @@ pub fn bits_from_str(text: &str) -> Result<impl Iterator<Item = Bit> + '_, CharT
     }
 }
 
-pub fn byte_to_bits(byte: u8) -> [Bit; 8] {
+pub fn byte_to_bits_ltr(byte: u8) -> [Bit; 8] {
     let mut out = [Bit::Zero; 8];
-    for bit in 0..8_u8 {
-        if (1 << bit) & byte != 0 {
-            out[bit as usize] = Bit::One
+    for idx in 0..8_u8 {
+        println!("{}", (1 << idx) & byte);
+        if (1 << idx) & byte != 0 {
+            out[(7 - idx) as usize] = Bit::One
         }
     }
     out
 }
 
-pub fn bit_vec_from_bytes(bytes: &[u8]) -> Vec<Bit> {
-    bytes.iter().map(|c| byte_to_bits(*c)).flatten().collect()
+pub fn byte_to_bits_rtl(byte: u8) -> [Bit; 8] {
+    let mut out = [Bit::Zero; 8];
+    for idx in 0..8_u8 {
+        if (1 << idx) & byte != 0 {
+            out[idx as usize] = Bit::One
+        }
+    }
+    out
+}
+
+// Take bytes in sequence and read their bits from left to right
+pub fn bit_vec_from_bytes_ltr(bytes: &[u8]) -> Vec<Bit> {
+    bytes
+        .iter()
+        .map(|c| byte_to_bits_ltr(*c))
+        .flatten()
+        .collect()
+}
+
+// Take bytes in sequence and read their bits from right to left
+pub fn bit_vec_from_bytes_rtl(bytes: &[u8]) -> Vec<Bit> {
+    bytes
+        .iter()
+        .map(|c| byte_to_bits_rtl(*c))
+        .flatten()
+        .collect()
 }
 
 pub fn bits_to_int_little_endian(bits: &[Bit]) -> u32 {
@@ -562,7 +587,7 @@ impl From<bool> for Bit {
 }
 
 #[cfg(test)]
-mod text_function_tests {
+mod bit_function_tests {
 
     use super::*;
 
@@ -576,5 +601,12 @@ mod text_function_tests {
             20,
             bits_to_int_big_endian(&to_bit_array([0, 0, 1, 0, 1]).unwrap())
         );
+    }
+
+    #[test]
+    fn byte_to_bits() {
+        let byte = 0b11000001_u8;
+        println!("{:?}", byte_to_bits_ltr(byte));
+        println!("{:?}", byte_to_bits_rtl(byte));
     }
 }

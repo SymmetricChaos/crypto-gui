@@ -1,4 +1,7 @@
-use crate::bits::{bit_vec_from_bytes, bits_from_str, Bit, CharToBitError, IntToBitError};
+use crate::bits::{
+    bit_vec_from_bytes_ltr, bit_vec_from_bytes_rtl, bits_from_str, Bit, CharToBitError,
+    IntToBitError,
+};
 use itertools::Itertools;
 use num::{One, Zero};
 use std::{
@@ -172,8 +175,18 @@ impl BitPolynomial {
         Ok(BitPolynomial::from(bits.collect_vec()))
     }
 
-    pub fn from_bytes(bytes: &[u8]) -> BitPolynomial {
-        BitPolynomial::from(bit_vec_from_bytes(bytes))
+    pub fn from_vec_untrimmed(value: Vec<Bit>) -> Self {
+        Self { coef: value }
+    }
+
+    // Take bytes in sequence and read their bits left to right, untrimmed
+    pub fn from_bytes_ltr(bytes: &[u8]) -> BitPolynomial {
+        BitPolynomial::from_vec_untrimmed(bit_vec_from_bytes_ltr(bytes))
+    }
+
+    // Take bytes in sequence and read their bits right to left, untrimmed
+    pub fn from_bytes_rtl(bytes: &[u8]) -> BitPolynomial {
+        BitPolynomial::from_vec_untrimmed(bit_vec_from_bytes_rtl(bytes))
     }
 
     pub fn from_iter(iter: impl Iterator<Item = Bit>) -> BitPolynomial {
