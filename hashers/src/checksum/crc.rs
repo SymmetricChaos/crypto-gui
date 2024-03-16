@@ -4,22 +4,26 @@ use utils::{bit_polynomial::BitPolynomial, byte_formatting::ByteFormat};
 
 pub enum CrcAlgorithm {
     Crc32,
+    Crc32C,
+    Crc32K,
 }
 
 impl CrcAlgorithm {
     pub fn bits(&self) -> usize {
         match self {
             CrcAlgorithm::Crc32 => 32,
+            CrcAlgorithm::Crc32C => 32,
+            CrcAlgorithm::Crc32K => 16,
         }
     }
 
     pub fn generator(&self) -> BitPolynomial {
-        match self {
-            CrcAlgorithm::Crc32 => {
-                //BitPolynomial::from_bytes(&ByteFormat::Hex.text_to_bytes("04C11DB7").unwrap())
-                BitPolynomial::from_str("111011011011100010000011001000001").unwrap()
-            }
-        }
+        BitPolynomial::from_str(match self {
+            CrcAlgorithm::Crc32 => "111011011011100010000011001000001",
+            CrcAlgorithm::Crc32C => "100000101111011000111011011110001",
+            CrcAlgorithm::Crc32K => "111010110011000111011000001011101",
+        })
+        .unwrap()
     }
 }
 
@@ -81,15 +85,23 @@ mod crc_hasher_tests {
 
     use super::*;
 
+    // fn crc_bits_from_hex(hex: &str) {
+    //     let mut from_hex =
+    //         BitPolynomial::from_bytes_rtl(&ByteFormat::HexLe.text_to_bytes(hex).unwrap());
+    //     from_hex.coef.push(utils::bits::Bit::One);
+    //     println!("{}", from_hex.polynomial_string());
+    //     println!("{}", from_hex);
+    // }
+
+    // #[test]
+    // fn polynomial_bits() {
+    //     for hex in ["04C11DB7", "1EDC6F41", "741B8CD7"] {
+    //         crc_bits_from_hex(hex)
+    //     }
+    // }
+
     #[test]
     fn test() {
         let mut hasher = CyclicRedundancyCheckHash::default();
-
-        let mut from_hex =
-            BitPolynomial::from_bytes_rtl(&ByteFormat::Hex.text_to_bytes("1021").unwrap());
-
-        println!("{}", from_hex.polynomial_string());
-        from_hex.coef.push(utils::bits::Bit::One);
-        println!("{}", from_hex.polynomial_string());
     }
 }

@@ -14,7 +14,7 @@ pub struct HexToBytesError;
 // A string containing hex characters converted into bytes
 // Bytes are read as pairs of characters from left to right, only an even number of characters are accepted
 // "DEADBEEF" -> [222, 173, 190, 239]
-pub fn hex_to_bytes(hex: &str) -> Result<Vec<u8>, HexToBytesError> {
+pub fn hex_to_bytes_be(hex: &str) -> Result<Vec<u8>, HexToBytesError> {
     let mut text: String = hex.lines().collect();
     text = text.to_ascii_lowercase();
     if !IS_HEX_BYTES.is_match(&text) {
@@ -29,8 +29,34 @@ pub fn hex_to_bytes(hex: &str) -> Result<Vec<u8>, HexToBytesError> {
     }
 }
 
-pub fn bytes_to_hex(bytes: &[u8]) -> String {
+// A string containing hex characters converted into bytes
+// Bytes are read as pairs of characters from right to left, only an even number of characters are accepted
+// "DEADBEEF" -> [239, 190, 173, 222]
+pub fn hex_to_bytes_le(hex: &str) -> Result<Vec<u8>, HexToBytesError> {
+    let mut text: String = hex.lines().collect();
+    text = text.to_ascii_lowercase();
+    if !IS_HEX_BYTES.is_match(&text) {
+        return Err(HexToBytesError);
+    } else {
+        let mut out = Vec::new();
+        for i in (0..(text.len() / 2)).rev() {
+            let lo = i * 2;
+            out.push(u8::from_str_radix(&text[lo..lo + 2], 16).unwrap())
+        }
+        Ok(out)
+    }
+}
+
+pub fn bytes_to_hex_be(bytes: &[u8]) -> String {
     bytes.into_iter().map(|b| format!("{:02x}", b)).join("")
+}
+
+pub fn bytes_to_hex_le(bytes: &[u8]) -> String {
+    bytes
+        .into_iter()
+        .rev()
+        .map(|b| format!("{:02x}", b))
+        .join("")
 }
 
 // #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -83,6 +109,7 @@ pub struct ByteFormatError;
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum ByteFormat {
     Hex,
+    HexLe,
     Utf8,
     Base64,
     // Oct,
@@ -95,10 +122,10 @@ impl ByteFormat {
             return Ok(Vec::new());
         }
         match self {
-            ByteFormat::Hex => hex_to_bytes(text).map_err(|_| ByteFormatError),
+            ByteFormat::Hex => hex_to_bytes_be(text).map_err(|_| ByteFormatError),
+            ByteFormat::HexLe => hex_to_bytes_le(text).map_err(|_| ByteFormatError),
             ByteFormat::Utf8 => Ok(text.as_bytes().to_owned()),
             ByteFormat::Base64 => BASE64_STANDARD.decode(text).map_err(|_| ByteFormatError),
-            // ByteFormat::Oct => oct_to_bytes(text).map_err(|_| ByteFormatError),
             ByteFormat::Bit => bitstring_to_bytes(text).map_err(|_| ByteFormatError),
         }
     }
@@ -151,15 +178,16 @@ impl ByteFormat {
                 .collect(),
             ByteFormat::Utf8 => String::from_utf8_lossy(bytes.as_ref()).to_string(),
             ByteFormat::Base64 => BASE64_STANDARD.encode(bytes),
-            // ByteFormat::Oct => bytes
-            //     .as_ref()
-            //     .iter()
-            //     .map(|byte| format!("{:03o}", byte))
-            //     .collect(),
             ByteFormat::Bit => bytes
                 .as_ref()
                 .iter()
                 .map(|byte| format!("{:08b}", byte))
+                .collect(),
+            ByteFormat::HexLe => bytes
+                .as_ref()
+                .iter()
+                .rev()
+                .map(|byte| format!("{:02x}", byte))
                 .collect(),
         }
     }
@@ -167,9 +195,9 @@ impl ByteFormat {
     pub fn byte_iter_to_text(&self, bytes: impl Iterator<Item = u8>) -> String {
         match self {
             ByteFormat::Hex => bytes.map(|byte| format!("{:02x}", byte)).collect(),
+            ByteFormat::HexLe => todo!("can't read all iterators backward"),
             ByteFormat::Utf8 => String::from_utf8_lossy(&bytes.collect_vec()).to_string(),
             ByteFormat::Base64 => BASE64_STANDARD.encode(&bytes.collect_vec()),
-            // ByteFormat::Oct => bytes.map(|byte| format!("{:03o}", byte)).collect(),
             ByteFormat::Bit => bytes.map(|byte| format!("{:08b}", byte)).collect(),
         }
     }
@@ -226,5 +254,32 @@ impl ByteFormat {
                 .flat_map(|n| n.to_le_bytes())
                 .collect_vec(),
         )
+    }
+}
+
+#[cfg(test)]
+mod bit_function_tests {
+
+    use super::*;
+
+    #[test]
+    fn hex_endianness() {
+        assert_eq!(
+            vec![222, 173, 190, 239],
+            ByteFormat::Hex.text_to_bytes("DEADBEEF").unwrap()
+        );
+        assert_eq!(
+            vec![239, 190, 173, 222],
+            ByteFormat::HexLe.text_to_bytes("DEADBEEF").unwrap()
+        );
+
+        assert_eq!(
+            "deadbeef",
+            ByteFormat::Hex.byte_slice_to_text(&[222, 173, 190, 239])
+        );
+        assert_eq!(
+            "deadbeef",
+            ByteFormat::HexLe.byte_slice_to_text(&[239, 190, 173, 222])
+        );
     }
 }

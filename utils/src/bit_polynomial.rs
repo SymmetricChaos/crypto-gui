@@ -12,7 +12,7 @@ use std::{
     },
 };
 
-// Polynomial of GF(2) with coefficients in ascending order so that the coefficient at index n is paired with the indeterminate with power n
+// Polynomial of GF(2) with coefficients in ascending order so that the coefficient at index n is paired with the indeterminate of power n
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct BitPolynomial {
     pub coef: Vec<Bit>,
@@ -738,6 +738,16 @@ impl RemAssign<&BitPolynomial> for BitPolynomial {
 mod math_function_tests {
 
     use super::*;
+
+    #[test]
+    fn polynomial_print() {
+        let a = BitPolynomial::from_int_array([1, 1, 0, 0, 1]).unwrap();
+        println!("{a} = {}", a.polynomial_string());
+        let mut b = BitPolynomial::from_int_array([1, 1, 0, 0, 1, 1]).unwrap();
+        println!("{b} = {}", b.polynomial_string());
+        b.coef.push(Bit::One);
+        println!("{b} = {}", b.polynomial_string());
+    }
 
     #[test]
     fn polynomial_mul() {

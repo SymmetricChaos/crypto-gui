@@ -92,7 +92,7 @@ impl Code for BaseX {
             ByteFormat::Hex => self.encode_hex(text),
             ByteFormat::Utf8 => self.encode_utf8(text),
             ByteFormat::Base64 => self.encode_base64(text),
-            ByteFormat::Bit => todo!(),
+            _ => todo!(),
         }
     }
 

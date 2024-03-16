@@ -190,7 +190,7 @@ impl Cipher for Rc5 {
 #[cfg(test)]
 mod rc5_tests {
 
-    use utils::byte_formatting::hex_to_bytes;
+    use utils::byte_formatting::hex_to_bytes_be;
 
     use super::*;
 
@@ -200,7 +200,7 @@ mod rc5_tests {
         const CTEXT: &'static str = "21a5dbee154b8f6d";
         const KEY: &'static str = "00000000000000000000000000000000";
         let mut cipher = Rc5::default();
-        cipher.ksa_32(&hex_to_bytes(KEY).unwrap());
+        cipher.ksa_32(&hex_to_bytes_be(KEY).unwrap());
         assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
@@ -210,7 +210,7 @@ mod rc5_tests {
         const CTEXT: &'static str = "21a5dbee154b8f6d";
         const KEY: &'static str = "00000000000000000000000000000000";
         let mut cipher = Rc5::default();
-        cipher.ksa_32(&hex_to_bytes(KEY).unwrap());
+        cipher.ksa_32(&hex_to_bytes_be(KEY).unwrap());
         assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 
@@ -219,7 +219,7 @@ mod rc5_tests {
         const PTEXT: &'static str = "0000000000000000";
         const KEY: &'static str = "00000000000000000000000000000000";
         let mut cipher = Rc5::default();
-        cipher.ksa_32(&hex_to_bytes(KEY).unwrap());
+        cipher.ksa_32(&hex_to_bytes_be(KEY).unwrap());
         let ctext = cipher.encrypt(PTEXT).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), PTEXT);
     }
@@ -230,7 +230,7 @@ mod rc5_tests {
         const CTEXT: &'static str = "f7c013ac5b2b8952";
         const KEY: &'static str = "915f4619be41b2516355a50110a9ce91";
         let mut cipher = Rc5::default();
-        cipher.ksa_32(&hex_to_bytes(KEY).unwrap());
+        cipher.ksa_32(&hex_to_bytes_be(KEY).unwrap());
         assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
@@ -240,7 +240,7 @@ mod rc5_tests {
         const CTEXT: &'static str = "f7c013ac5b2b8952";
         const KEY: &'static str = "915f4619be41b2516355a50110a9ce91";
         let mut cipher = Rc5::default();
-        cipher.ksa_32(&hex_to_bytes(KEY).unwrap());
+        cipher.ksa_32(&hex_to_bytes_be(KEY).unwrap());
         assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 
@@ -249,7 +249,7 @@ mod rc5_tests {
         const PTEXT: &'static str = "21a5dbee154b8f6d";
         const KEY: &'static str = "915f4619be41b2516355a50110a9ce91";
         let mut cipher = Rc5::default();
-        cipher.ksa_32(&hex_to_bytes(KEY).unwrap());
+        cipher.ksa_32(&hex_to_bytes_be(KEY).unwrap());
         let ctext = cipher.encrypt(PTEXT).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), PTEXT);
     }
