@@ -37,7 +37,6 @@ pub fn bits_from_str(text: &str) -> Result<impl Iterator<Item = Bit> + '_, CharT
 pub fn byte_to_bits_ltr(byte: u8) -> [Bit; 8] {
     let mut out = [Bit::Zero; 8];
     for idx in 0..8_u8 {
-        println!("{}", (1 << idx) & byte);
         if (1 << idx) & byte != 0 {
             out[(7 - idx) as usize] = Bit::One
         }

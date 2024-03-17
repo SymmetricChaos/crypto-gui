@@ -30,7 +30,6 @@ impl CrcAlgorithm {
 pub struct CyclicRedundancyCheckHash {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    // pub generator: BitPolynomial,
     pub mode: CrcAlgorithm,
 }
 
@@ -39,23 +38,12 @@ impl Default for CyclicRedundancyCheckHash {
         Self {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
-            // generator: BitPolynomial::from_str("1101").unwrap(),
             mode: CrcAlgorithm::Crc32,
         }
     }
 }
 
-impl CyclicRedundancyCheckHash {
-    // pub fn check_bits(&self) -> usize {
-    //     self.generator.degree()
-    // }
-
-    // pub fn set_generator_from_hex(&mut self, text: &str) -> Result<(), ByteFormatError> {
-    //     let bytes = ByteFormat::Hex.text_to_bytes(text)?;
-    //     self.generator = BitPolynomial::from_bytes(&bytes);
-    //     Ok(())
-    // }
-}
+impl CyclicRedundancyCheckHash {}
 
 impl ClassicHasher for CyclicRedundancyCheckHash {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
@@ -63,7 +51,12 @@ impl ClassicHasher for CyclicRedundancyCheckHash {
         let poly = BitPolynomial::from_bytes_rtl(bytes);
 
         // The remainder of the division is the CRC syndrome
-        let (_, r) = poly.div_rem(&self.mode.generator());
+        let (_, mut r) = poly.div_rem(&self.mode.generator());
+
+        println!("{r}");
+        while r.coef.len() < self.mode.bits() {
+            r.coef.push(utils::bits::Bit::Zero)
+        }
 
         // Convert the CRC syndrome into bytes for output
         ByteFormat::Bit.text_to_bytes(&r.bit_string()).unwrap()
@@ -81,7 +74,6 @@ impl ClassicHasher for CyclicRedundancyCheckHash {
 
 #[cfg(test)]
 mod crc_hasher_tests {
-    use itertools::Itertools;
 
     use super::*;
 
@@ -103,5 +95,11 @@ mod crc_hasher_tests {
     #[test]
     fn test() {
         let mut hasher = CyclicRedundancyCheckHash::default();
+        hasher.input_format = ByteFormat::Utf8;
+
+        println!(
+            "{}",
+            hasher.hash_bytes_from_string("TheQuickBrownFox").unwrap()
+        );
     }
 }
