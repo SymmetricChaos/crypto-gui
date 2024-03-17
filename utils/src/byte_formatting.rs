@@ -93,7 +93,7 @@ pub fn bitstring_to_bytes(hex: &str) -> Result<Vec<u8>, BitstringToBytesError> {
         let mut out = Vec::new();
         for i in 0..(text.len() / 8) {
             let lo = i * 8;
-            out.push(u8::from_str_radix(&text[lo..lo + 2], 2).unwrap())
+            out.push(u8::from_str_radix(&text[lo..lo + 8], 2).unwrap())
         }
         Ok(out)
     }

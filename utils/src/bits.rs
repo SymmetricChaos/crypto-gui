@@ -175,6 +175,14 @@ impl Display for Bit {
     }
 }
 
+pub fn bit_string(bits: &[Bit]) -> String {
+    let mut s = String::with_capacity(bits.len());
+    for b in bits {
+        s.push(b.to_char())
+    }
+    s
+}
+
 ///////////////////////////////////
 // Fundamental Arithmetic Traits //
 ///////////////////////////////////
