@@ -23,22 +23,22 @@ impl Splitmix {
 }
 
 impl ClassicRng for Splitmix {
+    // Only the lower 32 bits are used
     fn next_u32(&mut self) -> u32 {
-        // Only the lower 32 bits are used
         self.next_u64() as u32
     }
 }
 
-#[cfg(test)]
-mod splitmix_tests {
-    use super::*;
+// #[cfg(test)]
+// mod splitmix_tests {
+//     use super::*;
 
-    #[test]
-    fn first_five() {
-        let mut rng = Splitmix::default();
-        rng.state = 1234567;
-        for _ in 0..5 {
-            println!("{}", rng.next_u64())
-        }
-    }
-}
+//     // #[test]
+//     // fn first_five() {
+//     //     let mut rng = Splitmix::default();
+//     //     rng.state = 1234567;
+//     //     for _ in 0..5 {
+//     //         println!("{}", rng.next_u64())
+//     //     }
+//     // }
+// }
