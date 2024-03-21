@@ -36,6 +36,14 @@ pub trait BinaryToText {
         self.encode_bytes(text.as_bytes())
     }
 
+    // Encode some string of characters representing bits
+    fn encode_bits(&self, text: &str) -> Result<String, CodeError> {
+        let bytes = ByteFormat::Bit
+            .text_to_bytes(text)
+            .map_err(|_| CodeError::input("not valid binary"))?;
+        self.encode_bytes(&bytes)
+    }
+
     fn encode_file(&self, path: Option<PathBuf>) -> Result<String, CodeError> {
         if path.is_none() {
             return Err(CodeError::input("no file stored"));

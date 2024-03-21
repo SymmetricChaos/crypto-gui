@@ -80,27 +80,43 @@ fn bytes_to_words(bytes: &[u8]) -> Vec<&'static str> {
     out
 }
 
+pub enum Seperator {
+    Space,
+    Dash,
+}
+
+impl Seperator {
+    pub fn str(&self) -> &'static str {
+        match self {
+            Seperator::Space => " ",
+            Seperator::Dash => "-",
+        }
+    }
+}
+
 pub struct ByteWords {
     pub mode: ByteFormat,
+    pub sep: Seperator,
 }
 
 impl Default for ByteWords {
     fn default() -> Self {
         Self {
             mode: ByteFormat::Utf8,
+            sep: Seperator::Space,
         }
     }
 }
 
 impl ByteWords {
     pub fn chars_codes(&self) -> impl Iterator<Item = (String, String)> + '_ {
-        (0..2048).map(|n| (format!("{n:03x}"), format!("{}", BYTEWORD_WORDS[n])))
+        (0..255).map(|n| (format!("{n:03x}"), format!("{}", BYTEWORD_WORDS[n])))
     }
 }
 
 impl BinaryToText for ByteWords {
     fn encode_bytes(&self, bytes: &[u8]) -> Result<String, CodeError> {
-        Ok(bytes_to_words(bytes).join(" "))
+        Ok(bytes_to_words(bytes).join(self.sep.str()))
     }
 }
 
@@ -110,12 +126,13 @@ impl Code for ByteWords {
             ByteFormat::Hex => self.encode_hex(text),
             ByteFormat::Utf8 => self.encode_utf8(text),
             ByteFormat::Base64 => self.encode_base64(text),
+            ByteFormat::Bit => self.encode_bits(text),
             _ => todo!(),
         }
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        let words = text.split(" ").collect_vec();
+        let words = text.split(self.sep.str()).collect_vec();
         let bytes = words_to_bytes(&words)?;
         Ok(self.mode.byte_slice_to_text(bytes))
     }
@@ -127,48 +144,23 @@ mod byteword_tests {
 
     #[test]
     fn test_encode() {
-        let code = ByteWords::default();
-        let text = "abcdefghijklmnop";
+        let mut code = ByteWords::default();
+        code.mode = ByteFormat::Hex;
+        let bytes = "d99d6ca20150c7098580125e2ab0981253468b2dbc5202c11947dac904f40b";
         assert_eq!(
-            code.encode(text).unwrap(),
-            "COAT SEC HOFF ONLY RAM OW DAWN EMIL HOVE SEEN MALL POW"
-        );
-    }
-
-    #[test]
-    fn test_encode_errs() {
-        let code = ByteWords::default();
-        let text = "abcdefghijklmno";
-        assert_eq!(
-            code.encode(text).unwrap_err(),
-            CodeError::Input("S/KEY operates on chunks of 8 bytes at a time".into())
+            code.encode(bytes).unwrap(),
+            "tuna next jazz oboe acid good slot axis limp lava brag holy door puff monk brag guru frog luau drop roof grim also safe chef fuel twin solo aqua work bald"
         );
     }
 
     #[test]
     fn test_decode() {
-        let code = ByteWords::default();
-        let text = "COAT SEC HOFF ONLY RAM OW DAWN EMIL HOVE SEEN MALL POW";
-        assert_eq!(code.decode(text).unwrap(), "abcdefghijklmnop");
-    }
-
-    #[test]
-    fn test_decode_errs() {
-        let code = ByteWords::default();
+        let mut code = ByteWords::default();
+        code.mode = ByteFormat::Hex;
+        let words = "tuna next jazz oboe acid good slot axis limp lava brag holy door puff monk brag guru frog luau drop roof grim also safe chef fuel twin solo aqua work bald";
         assert_eq!(
-            code.decode("COAT SEC HOFF ONLY RAM OW DAWN EMIL HOVE MALL POW")
-                .unwrap_err(),
-            CodeError::Input("S/KEY operates on chunks of 6 words at a time".into())
-        );
-        assert_eq!(
-            code.decode("COAST SEC HOFF ONLY RAM OW DAWN EMIL HOVE SEEN MALL POW")
-                .unwrap_err(),
-            CodeError::Input("invalid word `COAST` found".into())
-        );
-        assert_eq!(
-            code.decode("COAT SEC HOFF ONLY RAM OVA DAWN EMIL HOVE SEEN MALL POW")
-                .unwrap_err(),
-            CodeError::Input("invalid words [\"COAT\", \"SEC\", \"HOFF\", \"ONLY\", \"RAM\", \"OVA\"], parity check failed".into())
+            code.decode(words).unwrap(),
+            "d99d6ca20150c7098580125e2ab0981253468b2dbc5202c11947dac904f40b"
         );
     }
 }
