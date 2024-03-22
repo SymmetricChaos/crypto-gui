@@ -112,7 +112,6 @@ pub enum ByteFormat {
     HexLe,
     Utf8,
     Base64,
-    // Oct,
     Bit,
 }
 

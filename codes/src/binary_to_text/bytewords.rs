@@ -110,7 +110,7 @@ impl Default for ByteWords {
 
 impl ByteWords {
     pub fn chars_codes(&self) -> impl Iterator<Item = (String, String)> + '_ {
-        (0..255).map(|n| (format!("{n:03x}"), format!("{}", BYTEWORD_WORDS[n])))
+        (0..255).map(|n| (format!("{n:02x}"), format!("{}", BYTEWORD_WORDS[n])))
     }
 }
 
@@ -148,8 +148,8 @@ mod byteword_tests {
         code.mode = ByteFormat::Hex;
         let bytes = "d99d6ca20150c7098580125e2ab0981253468b2dbc5202c11947dac904f40b";
         assert_eq!(
+            "tuna next jazz oboe acid good slot axis limp lava brag holy door puff monk brag guru frog luau drop roof grim also safe chef fuel twin solo aqua work bald",
             code.encode(bytes).unwrap(),
-            "tuna next jazz oboe acid good slot axis limp lava brag holy door puff monk brag guru frog luau drop roof grim also safe chef fuel twin solo aqua work bald"
         );
     }
 
