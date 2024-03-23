@@ -134,9 +134,11 @@ impl UiElements for Ui {
         self.selectable_value(current_value, ByteFormat::Hex, "Hex")
             .on_hover_text("interpret input as hexcode");
         self.selectable_value(current_value, ByteFormat::Utf8, "UTF-8")
-            .on_hover_text("convert text (UTF-8) to raw bytes");
+            .on_hover_text("interpret intput text (UTF-8) as raw bytes");
         self.selectable_value(current_value, ByteFormat::Base64, "Base64")
             .on_hover_text("interpret input as Base64");
+        self.selectable_value(current_value, ByteFormat::Bit, "Binary")
+            .on_hover_text("interpret input as binary");
     }
 
     fn copy_to_clipboard<S: ToString>(&mut self, text: S) {

@@ -80,16 +80,17 @@ fn bytes_to_words(bytes: &[u8]) -> Vec<&'static str> {
     out
 }
 
-pub enum Seperator {
+#[derive(Debug, PartialEq, Eq)]
+pub enum Separator {
     Space,
     Dash,
 }
 
-impl Seperator {
+impl Separator {
     pub fn str(&self) -> &'static str {
         match self {
-            Seperator::Space => " ",
-            Seperator::Dash => "-",
+            Self::Space => " ",
+            Self::Dash => "-",
         }
     }
 }
