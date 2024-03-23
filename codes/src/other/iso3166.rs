@@ -1,7 +1,6 @@
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use lazy_static::lazy_static;
-use utils::text_functions::bimap_from_iter;
 
 const COUNTRY_CODES_STR: &'static str = include_str!("country_codes.txt");
 

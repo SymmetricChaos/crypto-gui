@@ -1,6 +1,9 @@
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
-use utils::byte_formatting::ByteFormat;
+use utils::{
+    byte_formatting::ByteFormat,
+    text_functions::{closest_match, string_pairs},
+};
 
 use super::BinaryToText;
 
@@ -48,34 +51,62 @@ const BYTEWORD_MINWORDS: [&'static str; 256] = [
     "wt", "wn", "wz", "wf", "wk", "yk", "yn", "yl", "ya", "yt", "zs", "zo", "zt", "zc", "ze", "zm",
 ];
 
-fn word_to_byte(word: &str) -> Result<u8, CodeError> {
-    BYTEWORD_WORDS
-        .iter()
-        .position(|p| p == &word)
-        .ok_or_else(|| CodeError::Input(format!("invalid word `{}` found", word)))
-        .map(|n| n as u8)
+fn bytes_to_words(bytes: &[u8]) -> Vec<&'static str> {
+    let mut out = Vec::with_capacity(bytes.len());
+    for byte in bytes {
+        out.push(byte_to_word(byte))
+    }
+    out
 }
 
 fn byte_to_word(byte: &u8) -> &'static str {
     BYTEWORD_WORDS[*byte as usize]
 }
 
+// Find the closest matching word
+fn word_to_byte(word: &str) -> Result<u8, CodeError> {
+    let (idx, dist) = closest_match(word, &BYTEWORD_WORDS);
+    if dist >= 2 {
+        // println!("{dist}");
+        Err(CodeError::Input(format!("invalid word `{}` found", word)))
+    } else {
+        // println!("{dist}");
+        Ok(idx as u8)
+    }
+}
+
 fn words_to_bytes(words: &[&str]) -> Result<Vec<u8>, CodeError> {
     let mut out = Vec::with_capacity(words.len());
     for word in words {
-        if let Ok(byte) = word_to_byte(word) {
-            out.push(byte)
-        } else {
-            return Err(CodeError::input("invalid word"));
-        }
+        out.push(word_to_byte(word)?);
     }
     Ok(out)
 }
 
-fn bytes_to_words(bytes: &[u8]) -> Vec<&'static str> {
+fn minword_to_byte(word: &str) -> Result<u8, CodeError> {
+    BYTEWORD_MINWORDS
+        .iter()
+        .position(|p| p == &word)
+        .ok_or_else(|| CodeError::Input(format!("invalid word `{}` found", word)))
+        .map(|n| n as u8)
+}
+
+fn minwords_to_bytes(words: &[&str]) -> Result<Vec<u8>, CodeError> {
+    let mut out = Vec::with_capacity(words.len());
+    for word in words {
+        out.push(minword_to_byte(word)?);
+    }
+    Ok(out)
+}
+
+fn byte_to_minword(byte: &u8) -> &'static str {
+    BYTEWORD_MINWORDS[*byte as usize]
+}
+
+fn bytes_to_minwords(bytes: &[u8]) -> Vec<&'static str> {
     let mut out = Vec::with_capacity(bytes.len());
     for byte in bytes {
-        out.push(byte_to_word(byte))
+        out.push(byte_to_minword(byte))
     }
     out
 }
@@ -95,33 +126,42 @@ impl Separator {
     }
 }
 
-pub struct ByteWords {
+pub struct Bytewords {
     pub mode: ByteFormat,
-    pub sep: Seperator,
+    pub sep: Separator,
+    pub minwords: bool,
 }
 
-impl Default for ByteWords {
+impl Default for Bytewords {
     fn default() -> Self {
         Self {
-            mode: ByteFormat::Utf8,
-            sep: Seperator::Space,
+            mode: ByteFormat::Hex,
+            sep: Separator::Space,
+            minwords: false,
         }
     }
 }
 
-impl ByteWords {
+impl Bytewords {
     pub fn chars_codes(&self) -> impl Iterator<Item = (String, String)> + '_ {
-        (0..255).map(|n| (format!("{n:02x}"), format!("{}", BYTEWORD_WORDS[n])))
+        let words = match self.minwords {
+            true => &BYTEWORD_WORDS,
+            false => &BYTEWORD_MINWORDS,
+        };
+        (0..255).map(|n| (format!("{n:02x}"), format!("{}", words[n])))
     }
 }
 
-impl BinaryToText for ByteWords {
+impl BinaryToText for Bytewords {
     fn encode_bytes(&self, bytes: &[u8]) -> Result<String, CodeError> {
-        Ok(bytes_to_words(bytes).join(self.sep.str()))
+        match self.minwords {
+            true => Ok(bytes_to_minwords(bytes).join("")),
+            false => Ok(bytes_to_words(bytes).join(self.sep.str())),
+        }
     }
 }
 
-impl Code for ByteWords {
+impl Code for Bytewords {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         match self.mode {
             ByteFormat::Hex => self.encode_hex(text),
@@ -133,9 +173,15 @@ impl Code for ByteWords {
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        let words = text.split(self.sep.str()).collect_vec();
-        let bytes = words_to_bytes(&words)?;
-        Ok(self.mode.byte_slice_to_text(bytes))
+        if self.minwords {
+            let words = string_pairs(text);
+            let bytes = minwords_to_bytes(&words)?;
+            Ok(self.mode.byte_slice_to_text(bytes))
+        } else {
+            let words = text.split(self.sep.str()).collect_vec();
+            let bytes = words_to_bytes(&words)?;
+            Ok(self.mode.byte_slice_to_text(&bytes))
+        }
     }
 }
 
@@ -145,7 +191,7 @@ mod byteword_tests {
 
     #[test]
     fn test_encode() {
-        let mut code = ByteWords::default();
+        let mut code = Bytewords::default();
         code.mode = ByteFormat::Hex;
         let bytes = "d99d6ca20150c7098580125e2ab0981253468b2dbc5202c11947dac904f40b";
         assert_eq!(
@@ -156,12 +202,82 @@ mod byteword_tests {
 
     #[test]
     fn test_decode() {
-        let mut code = ByteWords::default();
+        let mut code = Bytewords::default();
         code.mode = ByteFormat::Hex;
         let words = "tuna next jazz oboe acid good slot axis limp lava brag holy door puff monk brag guru frog luau drop roof grim also safe chef fuel twin solo aqua work bald";
         assert_eq!(
             code.decode(words).unwrap(),
             "d99d6ca20150c7098580125e2ab0981253468b2dbc5202c11947dac904f40b"
+        );
+    }
+
+    #[test]
+    fn test_decode_errs() {
+        let mut code = Bytewords::default();
+        code.mode = ByteFormat::Hex;
+        // Simple errors can be corrected
+        let words = "tun! ne私xt jazd";
+        assert_eq!(code.decode(words).unwrap(), "d99d6c");
+
+        // Others cannot, words with a distance of more than 1 from a valid word are rejected
+        let words = "tuna next jamq";
+        assert_eq!(
+            code.decode(words).unwrap_err(),
+            CodeError::input("invalid word `jamq` found")
+        );
+        let words = "ttunna next jazz";
+        assert_eq!(
+            code.decode(words).unwrap_err(),
+            CodeError::input("invalid word `ttunna` found")
+        );
+        // Sometimes error correction fails due to similarity (jadz is the same distance from 'jade' and 'jazz')
+        // Since 'jade' is earlier in the list it is the preferred decoding, this changes the decoding from the intended d99d6c to d99d6b
+        let words = "tuna next jadz";
+        assert_eq!(code.decode(words).unwrap(), "d99d6b");
+    }
+
+    #[test]
+    fn test_encode_minwords() {
+        let mut code = Bytewords::default();
+        code.mode = ByteFormat::Hex;
+        code.minwords = true;
+        let bytes = "d99d6ca20150c7098580125e2ab0981253468b2dbc5202c11947dac904f40b";
+        assert_eq!(
+            "tantjzoeadgdstaslplabghydrpfmkbggufgludprfgmaosecffltnsoaawkbd",
+            code.encode(bytes).unwrap(),
+        );
+    }
+
+    #[test]
+    fn test_decode_minwords() {
+        let mut code = Bytewords::default();
+        code.mode = ByteFormat::Hex;
+        code.minwords = true;
+        let words = "tantjzoeadgdstaslplabghydrpfmkbggufgludprfgmaosecffltnsoaawkbd";
+        assert_eq!(
+            code.decode(words).unwrap(),
+            "d99d6ca20150c7098580125e2ab0981253468b2dbc5202c11947dac904f40b"
+        );
+    }
+
+    #[test]
+    fn test_decode_minwords_errs() {
+        let mut code = Bytewords::default();
+        code.minwords = true;
+        let words = "tantj";
+        assert_eq!(
+            code.decode(words).unwrap_err(),
+            CodeError::input("invalid word")
+        );
+        let words = "t!nt";
+        assert_eq!(
+            code.decode(words).unwrap_err(),
+            CodeError::input("invalid word")
+        );
+        let words = "t私nt";
+        assert_eq!(
+            code.decode(words).unwrap_err(),
+            CodeError::input("invalid word")
         );
     }
 }

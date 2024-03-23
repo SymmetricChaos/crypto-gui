@@ -936,6 +936,7 @@ dependencies = [
  "regex",
  "rfd",
  "rngs",
+ "strsim",
  "tracing-subscriber",
  "tracing-wasm",
  "unicode-normalization",
@@ -3295,6 +3296,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "strsim"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5ee073c9e4cd00e28217186dbe12796d692868f432bf2e97ee73bed0c56dfa01"
+
+[[package]]
 name = "subtle"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3687,6 +3694,7 @@ dependencies = [
  "rand",
  "regex",
  "rfd",
+ "strsim",
  "unicode-normalization",
  "unicode-segmentation",
 ]

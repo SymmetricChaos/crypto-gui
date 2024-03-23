@@ -6,6 +6,7 @@ use rand::{
     Rng,
 };
 use std::hash::Hash;
+use strsim::damerau_levenshtein;
 
 // Mutate a string so that it contains only characters in a provided alphabet
 pub fn filter_string<S: AsRef<str>>(string: &mut String, alphabet: &S) {
@@ -294,6 +295,24 @@ pub fn keyed_alphabet(keyword: &str, alphabet: &str) -> String {
         }
     }
     keyed_alpha
+}
+
+// Takes a word and a corpus. Return a tuple (a,b) where a is the index of the (leftmost) best match in the corpus and the b is the damerau-levenshtein distance between the word and its best match
+pub fn closest_match<T: AsRef<str>>(word: T, corpus: &[T]) -> (usize, usize) {
+    let mut idx = 0_usize;
+    let mut best_distance = usize::MAX;
+    for (i, candidate) in corpus.into_iter().enumerate() {
+        let candidate_distance = damerau_levenshtein(word.as_ref(), candidate.as_ref());
+        // Short circuit on exact mathc
+        if candidate_distance == 0 {
+            return (i, candidate_distance);
+        }
+        if candidate_distance < best_distance {
+            best_distance = candidate_distance;
+            idx = i
+        }
+    }
+    (idx, best_distance)
 }
 
 // pub fn dedup_alphabet(s: &str) -> String {

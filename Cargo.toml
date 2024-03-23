@@ -43,6 +43,7 @@ bimap = "0.6.3"
 regex = "1"
 rfd = "0.11.3"
 nalgebra = "0.32.2"
+strsim = "0.11.0"
 
 # native:
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]

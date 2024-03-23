@@ -1,13 +1,13 @@
-use codes::binary_to_text::bytewords::{ByteWords, Separator};
+use codes::binary_to_text::bytewords::{Bytewords, Separator};
 
 use super::CodeFrame;
 use crate::ui_elements::UiElements;
 
-pub struct ByteWordsFrame {
-    code: ByteWords,
+pub struct BytewordsFrame {
+    code: Bytewords,
 }
 
-impl Default for ByteWordsFrame {
+impl Default for BytewordsFrame {
     fn default() -> Self {
         Self {
             code: Default::default(),
@@ -15,7 +15,7 @@ impl Default for ByteWordsFrame {
     }
 }
 
-impl CodeFrame for ByteWordsFrame {
+impl CodeFrame for BytewordsFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
         ui.add_space(16.0);
         ui.binary_to_text_input_mode(&mut self.code.mode);
