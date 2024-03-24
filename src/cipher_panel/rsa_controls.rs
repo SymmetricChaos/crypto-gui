@@ -5,11 +5,13 @@ use crate::ui_elements::UiElements;
 use ciphers::{digital::rsa::Rsa, Cipher};
 use egui::Ui;
 use num::BigUint;
-use num_prime::{nt_funcs::is_prime, RandPrime};
+use num_prime::{nt_funcs::is_prime, PrimalityTestConfig, RandPrime};
 use rand::thread_rng;
 use utils::byte_formatting::ByteFormat;
 
 fn prime_string(ui: &mut Ui, s: &mut String, n: &mut BigUint) {
+    let mut primality_test = PrimalityTestConfig::strict();
+    primality_test.sprp_random_trials = 1;
     ui.horizontal(|ui| {
         if ui.control_string(s).changed() {
             *s = s.chars().filter(|c| c.is_ascii_digit()).take(38).collect();
@@ -23,7 +25,7 @@ fn prime_string(ui: &mut Ui, s: &mut String, n: &mut BigUint) {
             *n = thread_rng().gen_prime(64, None);
             *s = n.to_str_radix(10);
         }
-        match is_prime(n, None) {
+        match is_prime(n, Some(primality_test)) {
             num_prime::Primality::Yes => ui.label("prime"),
             num_prime::Primality::No => ui.error_text("NOT PRIME"),
             num_prime::Primality::Probable(f) => ui.label(format!("prime ({:.3})", f)),
