@@ -145,10 +145,10 @@ impl Default for Bytewords {
 impl Bytewords {
     pub fn chars_codes(&self) -> impl Iterator<Item = (String, String)> + '_ {
         let words = match self.minwords {
-            true => &BYTEWORD_WORDS,
-            false => &BYTEWORD_MINWORDS,
+            true => &BYTEWORD_MINWORDS,
+            false => &BYTEWORD_WORDS,
         };
-        (0..255).map(|n| (format!("{n:02x}"), format!("{}", words[n])))
+        (0..256).map(|n| (format!("{n:02x}"), format!("{}", words[n])))
     }
 }
 

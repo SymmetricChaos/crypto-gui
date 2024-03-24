@@ -24,7 +24,11 @@ impl CodeFrame for BytewordsFrame {
         ui.selectable_value(&mut self.code.sep, Separator::Space, "Space");
         ui.selectable_value(&mut self.code.sep, Separator::Dash, "Dash");
         ui.add_space(16.0);
-        ui.fill_code_columns(256, 8, Box::new(self.code.chars_codes()));
+        ui.subheading("Minwords");
+        ui.label("A compressed version of Bytewodes eliminates separators and uses only the first and last letters of each word. This also does not benefit from error correction.");
+        ui.checkbox(&mut self.code.minwords, "Use Minwords");
+        ui.add_space(16.0);
+        ui.fill_code_columns(32, 8, Box::new(self.code.chars_codes()));
         ui.add_space(16.0);
     }
 

@@ -257,6 +257,7 @@ impl CodeInterface {
                 CodeId::Base32,
                 CodeId::Base64,
                 CodeId::ByteAsNum,
+                CodeId::Bytewords,
                 CodeId::CcsidBinary,
                 CodeId::Pgp,
                 CodeId::Skey,
