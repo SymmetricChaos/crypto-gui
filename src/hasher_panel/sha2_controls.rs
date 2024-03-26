@@ -51,7 +51,7 @@ impl HasherFrame for Sha2Frame {
             ui.selectable_value(
                 &mut self.hasher.variant,
                 Sha2Variant::Sha512_256,
-                "SHA-512/245",
+                "SHA-512/256",
             );
         });
 
