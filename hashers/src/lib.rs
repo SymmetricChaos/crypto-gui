@@ -15,3 +15,4 @@ pub mod fxhash;
 pub mod keccak;
 pub mod mgf1;
 pub mod poly1305;
+pub mod sha0;

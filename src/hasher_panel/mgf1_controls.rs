@@ -1,20 +1,16 @@
 use crate::ui_elements::UiElements;
 
 use super::{byte_formatting_io, HasherFrame};
-use egui::DragValue;
 use hashers::{errors::HasherError, mgf1::Mgf1, sha2::Sha2Variant, traits::ClassicHasher};
-use rand::{thread_rng, Rng};
 
 pub struct Mgf1Frame {
     hasher: Mgf1,
-    key_string: String,
 }
 
 impl Default for Mgf1Frame {
     fn default() -> Self {
         Self {
             hasher: Default::default(),
-            key_string: String::new(),
         }
     }
 }
