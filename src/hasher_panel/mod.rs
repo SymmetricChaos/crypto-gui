@@ -7,6 +7,7 @@ mod md5_controls;
 pub mod mgf1_controls;
 mod pearson_controls;
 mod poly1305_controls;
+pub mod sha0_controls;
 mod sha1_controls;
 mod sha2_controls;
 mod siphash_controls;
@@ -22,7 +23,8 @@ use self::{
     blake2_controls::Blake2Frame, blake3_controls::Blake3Frame, blake_controls::BlakeFrame,
     fnv_controls::FnvFrame, md4_controls::Md4Frame, md5_controls::Md5Frame,
     mgf1_controls::Mgf1Frame, pearson_controls::PearsonFrame, poly1305_controls::Poly1305Frame,
-    sha1_controls::Sha1Frame, sha2_controls::Sha2Frame, siphash_controls::SipHashFrame,
+    sha0_controls::Sha0Frame, sha1_controls::Sha1Frame, sha2_controls::Sha2Frame,
+    siphash_controls::SipHashFrame,
 };
 
 pub trait HasherFrame {
@@ -63,6 +65,7 @@ pub struct HasherInterface {
     pearson: PearsonFrame,
     poly1305: Poly1305Frame,
     siphash: SipHashFrame,
+    sha0: Sha0Frame,
     sha1: Sha1Frame,
     sha2: Sha2Frame,
 }
@@ -85,6 +88,7 @@ impl HasherInterface {
                 HasherId::Md5,
                 HasherId::Mgf1,
                 HasherId::Poly1305,
+                HasherId::Sha0,
                 HasherId::Sha1,
                 HasherId::Sha2,
             ],
@@ -103,6 +107,7 @@ impl HasherInterface {
             HasherId::Md4 => &mut self.md4,
             HasherId::Md5 => &mut self.md5,
             HasherId::Mgf1 => &mut self.mgf1,
+            HasherId::Sha0 => &mut self.sha0,
             HasherId::Sha1 => &mut self.sha1,
             HasherId::Sha2 => &mut self.sha2,
             HasherId::Pearson => &mut self.pearson,
