@@ -7,6 +7,7 @@ mod md5_controls;
 pub mod mgf1_controls;
 mod pearson_controls;
 mod poly1305_controls;
+mod radio_gatun;
 pub mod sha0_controls;
 mod sha1_controls;
 mod sha2_controls;

@@ -8,6 +8,7 @@ use crate::{errors::HasherError, traits::ClassicHasher};
 pub struct RadioGatun {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
+    pub hash_len: u32,
 }
 
 impl Default for RadioGatun {
@@ -15,6 +16,7 @@ impl Default for RadioGatun {
         Self {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
+            hash_len: 32,
         }
     }
 }
@@ -23,9 +25,9 @@ impl RadioGatun {
     const ROTATION_32: [u32; 19] = [
         0, 1, 3, 6, 10, 15, 21, 28, 4, 13, 23, 2, 14, 27, 9, 24, 8, 25, 11,
     ];
-    const ROTATION_64: [u32; 19] = [
-        0, 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 2, 14, 27, 41, 56, 8, 25, 43,
-    ];
+    // const ROTATION_64: [u32; 19] = [
+    //     0, 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 2, 14, 27, 41, 56, 8, 25, 43,
+    // ];
 
     // XOR words from the mill into the belt
     fn belt_to_mill_feedforward(belt_words: &mut [u32], mill_words: &[u32]) {
@@ -68,23 +70,18 @@ impl RadioGatun {
 
     pub fn beltmill(belt_words: &mut [u32], mill_words: &mut [u32]) {
         Self::belt_to_mill_feedforward(belt_words, mill_words);
-        // Self::print_state(belt_words, mill_words);
         Self::rotate_belt(belt_words);
-        // Self::print_state(belt_words, mill_words);
         Self::mill(mill_words);
-        // Self::print_state(belt_words, mill_words);
         Self::iota(mill_words);
-
         Self::belt_to_mill(belt_words, mill_words);
-        // Self::print_state(belt_words, mill_words);
     }
 
-    pub fn print_state(belt_words: &[u32], mill_words: &[u32]) {
-        println!("{:08x?}", mill_words);
-        println!("{:08x?}", &belt_words[0..13]);
-        println!("{:08x?}", &belt_words[13..26]);
-        println!("{:08x?}\n\n", &belt_words[26..39]);
-    }
+    // pub fn print_state(belt_words: &[u32], mill_words: &[u32]) {
+    // println!("{:08x?}", mill_words);
+    // println!("{:08x?}", &belt_words[0..13]);
+    // println!("{:08x?}", &belt_words[13..26]);
+    // println!("{:08x?}\n\n", &belt_words[26..39]);
+    // }
 }
 
 impl ClassicHasher for RadioGatun {
@@ -100,8 +97,8 @@ impl ClassicHasher for RadioGatun {
             .map(|c| u32::from_le_bytes(c.try_into().unwrap()))
             .collect_vec();
 
-        let mut belt = [0_u32; 39];
-        let mut mill = [0_u32; 19];
+        let mut belt = [0_u32; 39]; // three rows of 13 words
+        let mut mill = [0_u32; 19]; // one row of 19 words
 
         for words in words.chunks_exact(3) {
             belt[0] ^= words[0];
@@ -116,11 +113,17 @@ impl ClassicHasher for RadioGatun {
             for _ in 0..18 {
                 Self::beltmill(&mut belt, &mut mill);
             }
-
-            Self::print_state(&belt, &mill);
+            // Self::print_state(&belt, &mill);
         }
 
-        todo!()
+        let mut out = Vec::new();
+        while out.len() < self.hash_len as usize {
+            out.extend_from_slice(&mill[1].to_le_bytes());
+            out.extend_from_slice(&mill[2].to_le_bytes());
+            Self::beltmill(&mut belt, &mut mill);
+        }
+        out.truncate(self.hash_len as usize);
+        out
     }
 
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
@@ -142,6 +145,9 @@ mod radio_gatun_tests {
         let mut hasher = RadioGatun::default();
         hasher.input_format = ByteFormat::Utf8;
         hasher.output_format = ByteFormat::Hex;
-        hasher.hash_bytes_from_string("1234");
+        assert_eq!(
+            "9ebdd24f469993796c4aac6a821735a65a3cdef8a359944ce71f34e7a08e1182",
+            hasher.hash_bytes_from_string("1234").unwrap()
+        );
     }
 }
