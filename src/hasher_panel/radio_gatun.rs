@@ -1,10 +1,10 @@
 use super::{byte_formatting_io, HasherFrame};
 use crate::ui_elements::UiElements;
 use egui::DragValue;
-use hashers::{errors::HasherError, radio_gatun::RadioGatun, traits::ClassicHasher};
+use hashers::{errors::HasherError, radio_gatun::RadioGatun32, traits::ClassicHasher};
 
 pub struct RadioGatunFrame {
-    hasher: RadioGatun,
+    hasher: RadioGatun32,
 }
 
 impl Default for RadioGatunFrame {
