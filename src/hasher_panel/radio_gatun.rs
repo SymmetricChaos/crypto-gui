@@ -1,16 +1,24 @@
 use super::{byte_formatting_io, HasherFrame};
 use crate::ui_elements::UiElements;
 use egui::DragValue;
-use hashers::{errors::HasherError, radio_gatun::RadioGatun32, traits::ClassicHasher};
+use hashers::{
+    errors::HasherError,
+    radio_gatun::{RadioGatun32, RadioGatun64},
+    traits::ClassicHasher,
+};
 
 pub struct RadioGatunFrame {
-    hasher: RadioGatun32,
+    hasher32: RadioGatun32,
+    hasher64: RadioGatun64,
+    wide: bool,
 }
 
 impl Default for RadioGatunFrame {
     fn default() -> Self {
         Self {
-            hasher: Default::default(),
+            hasher32: Default::default(),
+            hasher64: Default::default(),
+            wide: false,
         }
     }
 }
@@ -21,20 +29,35 @@ impl HasherFrame for RadioGatunFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.add_space(16.0);
 
-        byte_formatting_io(
-            ui,
-            &mut self.hasher.input_format,
-            &mut self.hasher.output_format,
-        );
-
+        ui.checkbox(&mut self.wide, "Use 64-Bit Version");
         ui.add_space(8.0);
-        ui.subheading("Hash Length (bytes)");
-        ui.add(DragValue::new(&mut self.hasher.hash_len).clamp_range(1..=512));
+
+        if self.wide {
+            byte_formatting_io(
+                ui,
+                &mut self.hasher64.input_format,
+                &mut self.hasher64.output_format,
+            );
+
+            ui.add_space(8.0);
+            ui.subheading("Hash Length (bytes)");
+            ui.add(DragValue::new(&mut self.hasher64.hash_len).clamp_range(1..=512));
+        } else {
+            byte_formatting_io(
+                ui,
+                &mut self.hasher32.input_format,
+                &mut self.hasher32.output_format,
+            );
+
+            ui.add_space(8.0);
+            ui.subheading("Hash Length (bytes)");
+            ui.add(DragValue::new(&mut self.hasher32.hash_len).clamp_range(1..=512));
+        }
 
         ui.add_space(16.0);
     }
 
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        self.hasher.hash_bytes_from_string(text)
+        self.hasher32.hash_bytes_from_string(text)
     }
 }
