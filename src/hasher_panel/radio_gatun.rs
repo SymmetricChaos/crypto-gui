@@ -23,7 +23,17 @@ impl Default for RadioGatunFrame {
     }
 }
 
-impl RadioGatunFrame {}
+impl RadioGatunFrame {
+    fn byte_formatting(&mut self, ui: &mut egui::Ui) {
+        byte_formatting_io(
+            ui,
+            &mut self.hasher32.input_format,
+            &mut self.hasher32.output_format,
+        );
+        self.hasher64.input_format = self.hasher32.input_format;
+        self.hasher64.output_format = self.hasher32.output_format;
+    }
+}
 
 impl HasherFrame for RadioGatunFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
@@ -32,32 +42,24 @@ impl HasherFrame for RadioGatunFrame {
         ui.checkbox(&mut self.wide, "Use 64-Bit Version");
         ui.add_space(8.0);
 
-        if self.wide {
-            byte_formatting_io(
-                ui,
-                &mut self.hasher64.input_format,
-                &mut self.hasher64.output_format,
-            );
-
-            ui.add_space(8.0);
-            ui.subheading("Hash Length (bytes)");
-            ui.add(DragValue::new(&mut self.hasher64.hash_len).clamp_range(1..=512));
-        } else {
-            byte_formatting_io(
-                ui,
-                &mut self.hasher32.input_format,
-                &mut self.hasher32.output_format,
-            );
-
-            ui.add_space(8.0);
-            ui.subheading("Hash Length (bytes)");
-            ui.add(DragValue::new(&mut self.hasher32.hash_len).clamp_range(1..=512));
+        self.byte_formatting(ui);
+        ui.add_space(8.0);
+        ui.subheading("Hash Length (bytes)");
+        if ui
+            .add(DragValue::new(&mut self.hasher32.hash_len).clamp_range(1..=512))
+            .changed()
+        {
+            self.hasher64.hash_len = self.hasher32.hash_len as u64;
         }
 
         ui.add_space(16.0);
     }
 
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        self.hasher32.hash_bytes_from_string(text)
+        if self.wide {
+            self.hasher64.hash_bytes_from_string(text)
+        } else {
+            self.hasher32.hash_bytes_from_string(text)
+        }
     }
 }
