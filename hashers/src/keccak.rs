@@ -1,6 +1,6 @@
-use utils::byte_formatting::ByteFormat;
-
 use crate::{errors::HasherError, traits::ClassicHasher};
+use crypto_bigint::{ArrayEncoding, CtChoice, U64};
+use utils::byte_formatting::ByteFormat;
 
 pub fn index_from_coord(x: usize, y: usize) -> usize {
     5 * y + x
@@ -100,11 +100,16 @@ impl Keccak {
         }
     }
 
-    // fn lane(state: &mut [u64; 25], x: usize, y: usize) -> &mut u64 {
-    //     &mut state[5 * y + x]
-    // }
+    fn lane(state: &mut [U64; 25], x: usize, y: usize) -> &mut U64 {
+        &mut state[5 * y + x]
+    }
+
+    fn bit(state: &mut [U64; 25], x: usize, y: usize, z: usize) -> CtChoice {
+        state[5 * y + x].bit(z)
+    }
 
     pub fn theta(state: &mut [u64; 25]) {}
+
     pub fn rho(state: &mut [u64; 25]) {
         let mut rot = 0;
         for i in 1..26 {
