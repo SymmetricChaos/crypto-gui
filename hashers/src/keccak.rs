@@ -19,10 +19,12 @@ impl KeccackState {
 
 impl std::fmt::Display for KeccackState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for i in 0..4 {
-            write!(f, "{:016x?}\n", self.array[i]);
+        for x in 0..5 {
+            for y in 0..5 {
+                write!(f, "{:016x?} ", self.array[y][x]);
+            }
+            write!(f, "\n");
         }
-        write!(f, "{:016x?}", self.array[4]);
         Ok(())
     }
 }
@@ -141,44 +143,58 @@ impl Keccak {
         for round in 0..rounds {
             println!("Round {round}\n-----------------------------");
             // Theta
-            let mut c = [0; 4];
-            for x in 0..4 {
+            let mut c = [0; 5];
+            for x in 0..5 {
                 c[x] = state.array[x][0]
                     ^ state.array[x][1]
                     ^ state.array[x][2]
                     ^ state.array[x][3]
                     ^ state.array[x][4];
             }
-            let mut d = [0; 4];
-            for x in 0..4 {
-                d[x] = c[(x + 5) % 4] ^ c[(x + 1) % 4].rotate_left(1);
+            let mut d = [0; 5];
+            for x in 0..5 {
+                d[x] = c[(x + 4) % 5] ^ c[(x + 1) % 5].rotate_left(1);
             }
-            for x in 0..4 {
-                for y in 0..4 {
+            for x in 0..5 {
+                for y in 0..5 {
                     state.array[x][y] ^= d[x]
                 }
             }
             println!("Theta:\n{}\n", state);
 
-            // Rho and Pi
-            let mut b = [[0_u64; 5]; 5];
-            for x in 0..4 {
-                for y in 0..4 {
-                    b[y][(2 * x + 3 * y) % 5] =
-                        state.array[x][y].rotate_left(Self::ROTATION_CONSTANTS[x][y])
+            // Rho: Rotate the bits of each word of the array
+            // let mut b = [[0_u64; 5]; 5];
+            for x in 0..5 {
+                for y in 0..5 {
+                    state.array[x][y] =
+                        state.array[x][y].rotate_left(Self::ROTATION_CONSTANTS[x][y]);
+                    // This is a matrix multiplication in disguise
+                    // let (tx, ty) = (x * 0 + y * 1, 2 * x + 3 * y);
+                    // b[tx % 5][ty % 5] = state.array[x][y]
                 }
             }
-            println!("Rho and Pi:\n{}\n", state);
+            println!("Rho:\n{}\n", state);
+
+            // Pi: shuffle the lanes of the array, can be merged with previous step
+            let b = state.array;
+            for x in 0..5 {
+                for y in 0..5 {
+                    // This is a matrix multiplication in disguise
+                    let (tx, ty) = (x * 0 + y * 1, 2 * x + 3 * y);
+                    state.array[tx % 5][ty % 5] = b[x][y];
+                }
+            }
+            println!("Pi:\n{}\n", state);
 
             // Chi
-            for x in 0..4 {
-                for y in 0..4 {
+            for x in 0..5 {
+                for y in 0..5 {
                     state.array[x][y] = b[x][y] ^ (!b[(x + 1) % 5][y] & b[(x + 2) % 5][y])
                 }
             }
             println!("Chi:\n{}\n", state);
 
-            // Iota
+            // Iota: xor a round constant into the [0][0] lane
             state.array[0][0] ^= Self::IOTA_CONSTANTS[round];
             println!("Iota:\n{}\n\n", state);
         }
