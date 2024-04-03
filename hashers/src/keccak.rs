@@ -1,6 +1,25 @@
+use std::ops::{Index, IndexMut};
+
 use crate::{errors::HasherError, traits::ClassicHasher};
 use utils::byte_formatting::ByteFormat;
 
+fn bytes_to_u64_le(bytes: &[u8]) -> Vec<u64> {
+    assert!(
+        bytes.len() % 8 == 0,
+        "must have a length that is a multiple of eight bytes"
+    );
+    let output_len = bytes.len() / 8;
+    let mut out = Vec::with_capacity(output_len);
+
+    for i in 0..output_len {
+        let mut word_bits: [u8; 8] = Default::default();
+        word_bits.copy_from_slice(&bytes[i * 8..i * 8 + 8]);
+        out.push(u64::from_le_bytes(word_bits));
+    }
+    out
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct KeccackState {
     array: [[u64; 5]; 5],
 }
@@ -10,6 +29,20 @@ impl KeccackState {
         Self {
             array: [[0_u64; 5]; 5],
         }
+    }
+}
+
+impl Index<usize> for KeccackState {
+    type Output = [u64; 5];
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.array[index]
+    }
+}
+
+impl IndexMut<usize> for KeccackState {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.array[index]
     }
 }
 
@@ -47,8 +80,8 @@ impl Default for Keccak {
 }
 
 impl Keccak {
-    const L: usize = 6;
-    const W: usize = 64; // word size, 2**6
+    // const L: usize = 6;
+    // const W: usize = 64; // word size, 2**6
     const ROUNDS: usize = 24; // 12 + 2L
 
     const ROTATION_CONSTANTS: [[u32; 5]; 5] = [
@@ -139,11 +172,7 @@ impl Keccak {
             // Theta
             let mut c = [0; 5];
             for x in 0..5 {
-                c[x] = state.array[x][0]
-                    ^ state.array[x][1]
-                    ^ state.array[x][2]
-                    ^ state.array[x][3]
-                    ^ state.array[x][4];
+                c[x] = state[x][0] ^ state[x][1] ^ state[x][2] ^ state[x][3] ^ state[x][4];
             }
             let mut d = [0; 5];
             for x in 0..5 {
@@ -151,7 +180,7 @@ impl Keccak {
             }
             for x in 0..5 {
                 for y in 0..5 {
-                    state.array[x][y] ^= d[x]
+                    state[x][y] ^= d[x]
                 }
             }
             if !silent {
@@ -161,8 +190,7 @@ impl Keccak {
             // Rho: Rotate the bits of each word of the array
             for x in 0..5 {
                 for y in 0..5 {
-                    state.array[x][y] =
-                        state.array[x][y].rotate_left(Self::ROTATION_CONSTANTS[x][y]);
+                    state[x][y] = state[x][y].rotate_left(Self::ROTATION_CONSTANTS[x][y]);
                 }
             }
             if !silent {
@@ -170,12 +198,12 @@ impl Keccak {
             }
 
             // Pi: shuffle the lanes of the array, can be merged with previous step
-            let a = state.array;
+            let a = state.clone();
             for x in 0..5 {
                 for y in 0..5 {
                     // This is a matrix multiplication in disguise
                     let (tx, ty) = (x * 0 + y * 1, 2 * x + 3 * y);
-                    state.array[tx % 5][ty % 5] = a[x][y];
+                    state[tx % 5][ty % 5] = a[x][y];
                 }
             }
             if !silent {
@@ -183,10 +211,10 @@ impl Keccak {
             }
 
             // Chi: this is the only non-linear step
-            let a = state.array;
+            let a = state;
             for x in 0..5 {
                 for y in 0..5 {
-                    state.array[x][y] = a[x][y] ^ (!a[(x + 1) % 5][y] & a[(x + 2) % 5][y])
+                    state[x][y] = a[x][y] ^ (!a[(x + 1) % 5][y] & a[(x + 2) % 5][y])
                 }
             }
             if !silent {
@@ -194,7 +222,7 @@ impl Keccak {
             }
 
             // Iota: xor a round constant into the [0][0] lane
-            state.array[0][0] ^= Self::IOTA_CONSTANTS[round];
+            state[0][0] ^= Self::IOTA_CONSTANTS[round];
             if !silent {
                 println!("Iota:\n{}\n\n", state);
             }
@@ -206,11 +234,7 @@ impl Keccak {
         // Theta
         let mut c = [0; 5];
         for x in 0..5 {
-            c[x] = state.array[x][0]
-                ^ state.array[x][1]
-                ^ state.array[x][2]
-                ^ state.array[x][3]
-                ^ state.array[x][4];
+            c[x] = state[x][0] ^ state[x][1] ^ state[x][2] ^ state[x][3] ^ state[x][4];
         }
         let mut d = [0; 5];
         for x in 0..5 {
@@ -218,37 +242,37 @@ impl Keccak {
         }
         for x in 0..5 {
             for y in 0..5 {
-                state.array[x][y] ^= d[x]
+                state[x][y] ^= d[x]
             }
         }
 
         // Rho: Rotate the bits of each word of the array
         for x in 0..5 {
             for y in 0..5 {
-                state.array[x][y] = state.array[x][y].rotate_left(Self::ROTATION_CONSTANTS[x][y]);
+                state[x][y] = state[x][y].rotate_left(Self::ROTATION_CONSTANTS[x][y]);
             }
         }
 
         // Pi: shuffle the lanes of the array, can easily be merged with previous step
-        let a = state.array;
+        let a = state.clone();
         for x in 0..5 {
             for y in 0..5 {
                 // This is a matrix multiplication in disguise
                 let (tx, ty) = (x * 0 + y * 1, 2 * x + 3 * y);
-                state.array[tx % 5][ty % 5] = a[x][y];
+                state[tx % 5][ty % 5] = a[x][y];
             }
         }
 
         // Chi: this is the only non-linear step
-        let a = state.array;
+        let a = state.clone();
         for x in 0..5 {
             for y in 0..5 {
-                state.array[x][y] = a[x][y] ^ (!a[(x + 1) % 5][y] & a[(x + 2) % 5][y])
+                state[x][y] = a[x][y] ^ (!a[(x + 1) % 5][y] & a[(x + 2) % 5][y])
             }
         }
 
         // Iota: xor a round constant into the [0][0] lane
-        state.array[0][0] ^= Self::IOTA_CONSTANTS[round];
+        state[0][0] ^= Self::IOTA_CONSTANTS[round];
     }
 
     // Keccak-f
@@ -258,7 +282,41 @@ impl Keccak {
         }
     }
 
-    pub fn absorb(state: &mut KeccackState, message: &[u8]) {}
+    pub fn absorb(&self, state: &mut KeccackState, message: &[u8]) {
+        let byte_rate = self.rate / 8;
+        assert!(
+            message.len() % byte_rate == 0,
+            "message length must be a multiple of byte rate, {}",
+            byte_rate
+        );
+
+        let n_chunks = message.len() / byte_rate;
+        let words = bytes_to_u64_le(message);
+
+        for chunk_i in 0..n_chunks {
+            let chunk_offset: usize = chunk_i * (self.rate / 8);
+            let mut x = 0;
+            let mut y = 0;
+            for i in 0..(self.rate / 8) {
+                let word = words[chunk_offset + i];
+                state[x][y] ^= word;
+                // Notice that not all of the state is used during absorb
+                // The state size if 1600 bits, 1088 are used for absorbing, and 512 are reserved as capacity
+                if x < 5 - 1 {
+                    x += 1;
+                } else {
+                    y += 1;
+                    x = 0;
+                }
+            }
+            // At the end of each 1088 bit chunk the state is fully permuted
+            Self::permutations(state);
+        }
+    }
+
+    pub fn squeeze(&self, state: &mut KeccackState) -> Vec<u8> {
+        todo!()
+    }
 }
 
 impl ClassicHasher for Keccak {
@@ -274,9 +332,8 @@ impl ClassicHasher for Keccak {
         input.push(0x01);
 
         let mut state = KeccackState::new();
-        Self::permutations(&mut state);
-
-        todo!()
+        self.absorb(&mut state, bytes);
+        self.squeeze(&mut state)
     }
 
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
