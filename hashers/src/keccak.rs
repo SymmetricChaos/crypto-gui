@@ -1,10 +1,6 @@
 use crate::{errors::HasherError, traits::ClassicHasher};
 use utils::byte_formatting::ByteFormat;
 
-pub fn index_from_coord(x: usize, y: usize) -> usize {
-    5 * y + x
-}
-
 pub struct KeccackState {
     array: [[u64; 5]; 5],
 }
@@ -21,9 +17,9 @@ impl std::fmt::Display for KeccackState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for x in 0..5 {
             for y in 0..5 {
-                write!(f, "{:016x?} ", self.array[y][x]);
+                write!(f, "{:016x?} ", self.array[y][x]).unwrap();
             }
-            write!(f, "\n");
+            write!(f, "\n").unwrap();
         }
         Ok(())
     }
@@ -131,12 +127,15 @@ impl Keccak {
         }
     }
 
-    // Test vectors with intermediate states
+    // Most basic test with option to print out intermediate values
     // https://github.com/XKCP/XKCP/blob/master/tests/TestVectors/KeccakF-1600-IntermediateValues.txt
-    pub fn test_blank_permutation(rounds: usize) {
+    pub fn test_blank_permutation(rounds: usize, silent: bool) -> KeccackState {
         let mut state = KeccackState::new();
         for round in 0..rounds {
-            println!("Round {round}\n-----------------------------");
+            if !silent {
+                println!("Round {round}\n-----------------------------");
+            }
+
             // Theta
             let mut c = [0; 5];
             for x in 0..5 {
@@ -155,7 +154,9 @@ impl Keccak {
                     state.array[x][y] ^= d[x]
                 }
             }
-            println!("Theta:\n{}\n", state);
+            if !silent {
+                println!("Theta:\n{}\n", state);
+            }
 
             // Rho: Rotate the bits of each word of the array
             for x in 0..5 {
@@ -164,7 +165,9 @@ impl Keccak {
                         state.array[x][y].rotate_left(Self::ROTATION_CONSTANTS[x][y]);
                 }
             }
-            println!("Rho:\n{}\n", state);
+            if !silent {
+                println!("Rho:\n{}\n", state);
+            }
 
             // Pi: shuffle the lanes of the array, can be merged with previous step
             let a = state.array;
@@ -175,7 +178,9 @@ impl Keccak {
                     state.array[tx % 5][ty % 5] = a[x][y];
                 }
             }
-            println!("Pi:\n{}\n", state);
+            if !silent {
+                println!("Pi:\n{}\n", state);
+            }
 
             // Chi: this is the only non-linear step
             let a = state.array;
@@ -184,12 +189,17 @@ impl Keccak {
                     state.array[x][y] = a[x][y] ^ (!a[(x + 1) % 5][y] & a[(x + 2) % 5][y])
                 }
             }
-            println!("Chi:\n{}\n", state);
+            if !silent {
+                println!("Chi:\n{}\n", state);
+            }
 
             // Iota: xor a round constant into the [0][0] lane
             state.array[0][0] ^= Self::IOTA_CONSTANTS[round];
-            println!("Iota:\n{}\n\n", state);
+            if !silent {
+                println!("Iota:\n{}\n\n", state);
+            }
         }
+        state
     }
 
     pub fn permutation(state: &mut KeccackState, round: usize) {
@@ -219,7 +229,7 @@ impl Keccak {
             }
         }
 
-        // Pi: shuffle the lanes of the array, can be merged with previous step
+        // Pi: shuffle the lanes of the array, can easily be merged with previous step
         let a = state.array;
         for x in 0..5 {
             for y in 0..5 {
@@ -248,7 +258,7 @@ impl Keccak {
         }
     }
 
-    // pub fn sponge()
+    pub fn absorb(state: &mut KeccackState, message: &[u8]) {}
 }
 
 impl ClassicHasher for Keccak {
@@ -284,10 +294,10 @@ mod keccak_tests {
     use super::*;
 
     #[test]
-    fn test_suite() {
-        let mut hasher = Keccak::default();
-        hasher.input_format = ByteFormat::Hex;
-        hasher.output_format = ByteFormat::Hex;
-        Keccak::test_blank_permutation(24);
+    fn test() {
+        // https://github.com/XKCP/XKCP/blob/master/tests/TestVectors/KeccakF-1600-IntermediateValues.txt
+        assert_eq!(
+            format!("{}", Keccak::test_blank_permutation(24, true)).trim_end(),
+            "f1258f7940e1dde7 84d5ccf933c0478a d598261ea65aa9ee bd1547306f80494d 8b284e056253d057 \nff97a42d7f8e6fd4 90fee5a0a44647c4 8c5bda0cd6192e76 ad30a6f71b19059c 30935ab7d08ffc64 \neb5aa93f2317d635 a9a6e6260d712103 81a57c16dbcf555f 43b831cd0347c826 01f22f1a11a5569f \n05e5635a21d9ae61 64befef28cc970f2 613670957bc46611 b87c5a554fd00ecb 8c3ee88a1ccf32c8 \n940c7922ae3a2614 1841f924a2c509e4 16f53526e70465c2 75f644e97f30a13b eaf1ff7b5ceca249");
     }
 }
