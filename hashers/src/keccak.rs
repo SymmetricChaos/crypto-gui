@@ -1,7 +1,6 @@
 use std::ops::{Index, IndexMut};
 
 use crate::{errors::HasherError, traits::ClassicHasher};
-use num::traits::ToBytes;
 use utils::byte_formatting::ByteFormat;
 
 fn bytes_to_u64_le(bytes: &[u8]) -> Vec<u64> {
@@ -72,77 +71,10 @@ impl KeccackState {
         0x8000000080008008,
     ];
 
-    // Most basic test with option to print out intermediate values
+    // Intermediate values can be checked by un-commenting the println! lines
     // https://github.com/XKCP/XKCP/blob/master/tests/TestVectors/KeccakF-1600-IntermediateValues.txt
-    pub fn test_blank_permutation(rounds: usize, silent: bool) -> KeccackState {
-        let mut state = KeccackState::new();
-        for round in 0..rounds {
-            if !silent {
-                println!("Round {round}\n-----------------------------");
-            }
-
-            // Theta
-            let mut c = [0; 5];
-            for x in 0..5 {
-                c[x] = state[x][0] ^ state[x][1] ^ state[x][2] ^ state[x][3] ^ state[x][4];
-            }
-            let mut d = [0; 5];
-            for x in 0..5 {
-                d[x] = c[(x + 4) % 5] ^ c[(x + 1) % 5].rotate_left(1);
-            }
-            for x in 0..5 {
-                for y in 0..5 {
-                    state[x][y] ^= d[x]
-                }
-            }
-            if !silent {
-                println!("Theta:\n{}\n", state);
-            }
-
-            // Rho: Rotate the bits of each word of the array
-            for x in 0..5 {
-                for y in 0..5 {
-                    state[x][y] = state[x][y].rotate_left(Self::ROTATION_CONSTANTS[x][y]);
-                }
-            }
-            if !silent {
-                println!("Rho:\n{}\n", state);
-            }
-
-            // Pi: shuffle the lanes of the array, can be merged with previous step
-            let a = state.clone();
-            for x in 0..5 {
-                for y in 0..5 {
-                    // This is a matrix multiplication in disguise
-                    let (tx, ty) = (x * 0 + y * 1, 2 * x + 3 * y);
-                    state[tx % 5][ty % 5] = a[x][y];
-                }
-            }
-            if !silent {
-                println!("Pi:\n{}\n", state);
-            }
-
-            // Chi: this is the only non-linear step
-            let a = state;
-            for x in 0..5 {
-                for y in 0..5 {
-                    state[x][y] = a[x][y] ^ (!a[(x + 1) % 5][y] & a[(x + 2) % 5][y])
-                }
-            }
-            if !silent {
-                println!("Chi:\n{}\n", state);
-            }
-
-            // Iota: xor a round constant into the [0][0] lane
-            state[0][0] ^= Self::IOTA_CONSTANTS[round];
-            if !silent {
-                println!("Iota:\n{}\n\n", state);
-            }
-        }
-        state
-    }
-
-    pub fn permutation(&mut self, round: usize) {
+    pub fn round(&mut self, round: usize) {
+        //println!("Round {round}\n-----------------------------");
         // Theta
         let mut c = [0; 5];
         for x in 0..5 {
@@ -157,6 +89,7 @@ impl KeccackState {
                 self[x][y] ^= d[x]
             }
         }
+        // println!("Theta:\n{}\n", state);
 
         // Rho: Rotate the bits of each word of the array
         for x in 0..5 {
@@ -164,6 +97,7 @@ impl KeccackState {
                 self[x][y] = self[x][y].rotate_left(Self::ROTATION_CONSTANTS[x][y]);
             }
         }
+        // println!("Rho:\n{}\n", state);
 
         // Pi: shuffle the lanes of the array, can easily be merged with previous step
         let a = self.clone();
@@ -174,6 +108,7 @@ impl KeccackState {
                 self[tx % 5][ty % 5] = a[x][y];
             }
         }
+        // println!("Pi:\n{}\n", state);
 
         // Chi: this is the only non-linear step
         let a = self.clone();
@@ -182,34 +117,37 @@ impl KeccackState {
                 self[x][y] = a[x][y] ^ (!a[(x + 1) % 5][y] & a[(x + 2) % 5][y])
             }
         }
+        // println!("Chi:\n{}\n", state);
 
         // Iota: xor a round constant into the [0][0] lane
         self[0][0] ^= Self::IOTA_CONSTANTS[round];
+        // println!("Iota:\n{}\n", state);
     }
 
-    // Keccak-f
-    pub fn permutations(&mut self) {
+    // Keccak-f[1600]
+    pub fn keccack_f(&mut self) {
         for round in 0..Self::ROUNDS {
-            self.permutation(round)
+            self.round(round)
         }
     }
 
-    pub fn absorb(&mut self, message: &[u8], bit_rate: usize) {
-        let byte_rate = bit_rate / 8;
+    // Rate given in bytes
+    // TODO: Test this
+    pub fn absorb(&mut self, message: &[u8], rate: usize) {
         assert!(
-            message.len() % byte_rate == 0,
-            "message length must be a multiple of byte rate, {}",
-            byte_rate
+            message.len() % rate == 0,
+            "message length in bytes must be a multiple of rate, {}",
+            rate
         );
 
-        let n_chunks = message.len() / byte_rate;
+        let n_chunks = message.len() / rate;
         let words = bytes_to_u64_le(message);
 
         for chunk_i in 0..n_chunks {
-            let chunk_offset: usize = chunk_i * (bit_rate / 8);
+            let chunk_offset: usize = chunk_i * rate;
             let mut x = 0;
             let mut y = 0;
-            for i in 0..(bit_rate / 8) {
+            for i in 0..rate {
                 let word = words[chunk_offset + i];
                 self[x][y] ^= word;
                 // Notice that not all of the state is used during absorbing, several words are reserved for the capacity
@@ -221,20 +159,20 @@ impl KeccackState {
                 }
             }
             // At the end of each chunk the state is fully permuted
-            self.permutations()
+            self.keccack_f()
         }
     }
 
-    // TODO: This is correct for SHA-3 usage but for XOF modes it has to be changed
+    // TODO: This should be correct for SHA-3 usage but for XOF modes it has to be changed
+    // TODO: Test this
     pub fn squeeze(&mut self, output_size: usize) -> Vec<u8> {
-        let output_bytes = output_size / 8;
-        let mut output = Vec::with_capacity(output_bytes);
+        let mut output = Vec::with_capacity(output_size);
 
-        for x in 0..5 {
-            for y in 0..5 {
+        for y in 0..5 {
+            for x in 0..5 {
                 output.extend_from_slice(&self[x][y].to_le_bytes());
-                if output.len() >= output_bytes {
-                    output.truncate(output_bytes);
+                if output.len() >= output_size {
+                    output.truncate(output_size);
                     return output;
                 }
             }
@@ -270,35 +208,47 @@ impl std::fmt::Display for KeccackState {
     }
 }
 
-// https://chemejon.wordpress.com/2021/12/06/sha-3-explained-in-plain-english/
-pub struct Keccak {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-    rate: usize,        // bit rate, block size
-    capacity: usize,    // reserved portion of state in bits,
-    output_size: usize, // output length in bits, recommended to be half the capacity
+pub enum Domain {
+    Sha3,
+    Shake,
 }
 
-impl Default for Keccak {
-    fn default() -> Self {
-        Self {
-            input_format: ByteFormat::Hex,
-            output_format: ByteFormat::Hex,
-            rate: 1088,
-            capacity: 512,
-            output_size: 256,
+impl Domain {
+    pub fn byte(&self) -> u8 {
+        match self {
+            Domain::Sha3 => 0b00000001,
+            Domain::Shake => 0b00001111,
         }
     }
 }
 
+// https://chemejon.wordpress.com/2021/12/06/sha-3-explained-in-plain-english/
+pub struct Keccak {
+    pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
+    rate: usize,        // rate in bytes, block size
+    capacity: usize,    // reserved portion of state in bytes,
+    output_size: usize, // output length in bytes, recommended to be half the capacity
+    domain: Domain,
+}
+
+impl Default for Keccak {
+    fn default() -> Self {
+        Self::sha3_256()
+    }
+}
+
 impl Keccak {
+    // For ease of use rate, capacity, and output size are in bytes
+    // For ease of comparing to sepcification their they are shown as the length in bits divided by eight
     pub fn sha3_224() -> Self {
         Self {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
-            rate: 1152,
-            capacity: 448,
-            output_size: 224,
+            rate: 1152 / 8,
+            capacity: 448 / 8,
+            output_size: 224 / 8,
+            domain: Domain::Sha3,
         }
     }
 
@@ -306,9 +256,10 @@ impl Keccak {
         Self {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
-            rate: 1088,
-            capacity: 512,
-            output_size: 256,
+            rate: 1088 / 8,
+            capacity: 512 / 8,
+            output_size: 256 / 8,
+            domain: Domain::Sha3,
         }
     }
 
@@ -316,9 +267,10 @@ impl Keccak {
         Self {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
-            rate: 832,
-            capacity: 768,
-            output_size: 384,
+            rate: 832 / 8,
+            capacity: 768 / 8,
+            output_size: 384 / 8,
+            domain: Domain::Sha3,
         }
     }
 
@@ -326,9 +278,32 @@ impl Keccak {
         Self {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
-            rate: 576,
-            capacity: 1024,
-            output_size: 512,
+            rate: 72 / 8,
+            capacity: 128 / 8,
+            output_size: 64 / 8,
+            domain: Domain::Sha3,
+        }
+    }
+
+    pub fn shake_128(output_size: usize) -> Self {
+        Self {
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
+            rate: 1344 / 8,
+            capacity: 256 / 8,
+            output_size,
+            domain: Domain::Shake,
+        }
+    }
+
+    pub fn shake_256(output_size: usize) -> Self {
+        Self {
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
+            rate: 1088 / 8,
+            capacity: 512 / 8,
+            output_size,
+            domain: Domain::Shake,
         }
     }
 }
@@ -337,13 +312,29 @@ impl ClassicHasher for Keccak {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut input = bytes.to_vec();
 
-        // Pad with a 1 bit then fill with zeroes and a final 1 bit
-        input.push(0x80);
-        while input.len() % self.rate != 0 {
-            input.push(0x00)
+        // Padding rules taken from NIST FIPS-202
+        // https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf
+        let padding_len = self.rate - (input.len() % self.rate);
+
+        // This will never be zero since. Notably in the input length is equal to the rate we push an entire extra block
+        if padding_len == 1 {
+            match self.domain {
+                Domain::Sha3 => input.push(0x86),
+                Domain::Shake => input.push(0x9f),
+            }
+        } else if padding_len == 2 {
+            match self.domain {
+                Domain::Sha3 => input.extend([0x06, 0x80]),
+                Domain::Shake => input.extend([0x1F, 0x80]),
+            }
+        } else if padding_len > 2 {
+            match self.domain {
+                Domain::Sha3 => input.push(0x06),
+                Domain::Shake => input.push(0x1F),
+            }
+            input.extend(vec![0x00; padding_len - 2]);
+            input.push(0x80)
         }
-        input.pop();
-        input.push(0x01);
 
         let mut state = KeccackState::new();
         state.absorb(bytes, self.rate);
@@ -365,12 +356,18 @@ mod keccak_tests {
     use super::*;
 
     #[test]
-    fn test() {
+    fn test_permutation() {
         // https://github.com/XKCP/XKCP/blob/master/tests/TestVectors/KeccakF-1600-IntermediateValues.txt
+        let mut state = KeccackState::new();
+        state.keccack_f();
         assert_eq!(
-            format!("{}", KeccackState::test_blank_permutation(24, true)).trim_end(),
+            format!("{}", state).trim_end(),
             "f1258f7940e1dde7 84d5ccf933c0478a d598261ea65aa9ee bd1547306f80494d 8b284e056253d057 \nff97a42d7f8e6fd4 90fee5a0a44647c4 8c5bda0cd6192e76 ad30a6f71b19059c 30935ab7d08ffc64 \neb5aa93f2317d635 a9a6e6260d712103 81a57c16dbcf555f 43b831cd0347c826 01f22f1a11a5569f \n05e5635a21d9ae61 64befef28cc970f2 613670957bc46611 b87c5a554fd00ecb 8c3ee88a1ccf32c8 \n940c7922ae3a2614 1841f924a2c509e4 16f53526e70465c2 75f644e97f30a13b eaf1ff7b5ceca249");
-        let mut s = KeccackState::test_blank_permutation(24, true);
-        println!("{:02x?}", s.squeeze(64));
+        assert_eq!(format!("{:02x?}",state.squeeze(512)), "[e7, dd, e1, 40, 79, 8f, 25, f1, 8a, 47, c0, 33, f9, cc, d5, 84, ee, a9, 5a, a6, 1e, 26, 98, d5, 4d, 49, 80, 6f, 30, 47, 15, bd, 57, d0, 53, 62, 05, 4e, 28, 8b, d4, 6f, 8e, 7f, 2d, a4, 97, ff, c4, 47, 46, a4, a0, e5, fe, 90, 76, 2e, 19, d6, 0c, da, 5b, 8c]")
     }
+
+    // #[test]
+    // fn test_absorb() {
+    //     let mut
+    // }
 }
