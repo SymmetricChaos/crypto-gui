@@ -131,8 +131,6 @@ impl KeccackState {
         }
     }
 
-    // Rate given in bytes
-    // TODO: Test this
     pub fn absorb(&mut self, message: &[u8], rate: usize) {
         assert!(
             message.len() % rate == 0,
@@ -163,22 +161,26 @@ impl KeccackState {
         }
     }
 
-    // TODO: This should be correct for SHA-3 usage but for XOF modes it has to be changed
-    // TODO: Test this
-    pub fn squeeze(&mut self, output_size: usize) -> Vec<u8> {
+    pub fn squeeze(&mut self, rate: usize, output_size: usize) -> Vec<u8> {
         let mut output = Vec::with_capacity(output_size);
 
-        for y in 0..5 {
-            for x in 0..5 {
-                output.extend_from_slice(&self[x][y].to_le_bytes());
-                if output.len() >= output_size {
-                    output.truncate(output_size);
-                    return output;
+        loop {
+            let mut ctr = 0;
+            'y_loop: for y in 0..5 {
+                for x in 0..5 {
+                    output.extend_from_slice(&self[x][y].to_le_bytes());
+                    if output.len() >= output_size {
+                        output.truncate(output_size);
+                        return output;
+                    }
+                    ctr += 8;
+                    if ctr >= rate {
+                        self.keccack_f();
+                        break 'y_loop;
+                    }
                 }
             }
         }
-
-        output
     }
 }
 
@@ -338,7 +340,7 @@ impl ClassicHasher for Keccak {
 
         let mut state = KeccackState::new();
         state.absorb(&input, self.rate);
-        state.squeeze(self.output_size)
+        state.squeeze(self.rate, self.output_size)
     }
 
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
@@ -363,7 +365,7 @@ mod keccak_tests {
         assert_eq!(
             format!("{}", state).trim_end(),
             "f1258f7940e1dde7 84d5ccf933c0478a d598261ea65aa9ee bd1547306f80494d 8b284e056253d057 \nff97a42d7f8e6fd4 90fee5a0a44647c4 8c5bda0cd6192e76 ad30a6f71b19059c 30935ab7d08ffc64 \neb5aa93f2317d635 a9a6e6260d712103 81a57c16dbcf555f 43b831cd0347c826 01f22f1a11a5569f \n05e5635a21d9ae61 64befef28cc970f2 613670957bc46611 b87c5a554fd00ecb 8c3ee88a1ccf32c8 \n940c7922ae3a2614 1841f924a2c509e4 16f53526e70465c2 75f644e97f30a13b eaf1ff7b5ceca249");
-        assert_eq!(format!("{:02x?}",state.squeeze(512)), "[e7, dd, e1, 40, 79, 8f, 25, f1, 8a, 47, c0, 33, f9, cc, d5, 84, ee, a9, 5a, a6, 1e, 26, 98, d5, 4d, 49, 80, 6f, 30, 47, 15, bd, 57, d0, 53, 62, 05, 4e, 28, 8b, d4, 6f, 8e, 7f, 2d, a4, 97, ff, c4, 47, 46, a4, a0, e5, fe, 90, 76, 2e, 19, d6, 0c, da, 5b, 8c]")
+        assert_eq!(format!("{:02x?}",state.squeeze(1088 / 8, 512)), "[e7, dd, e1, 40, 79, 8f, 25, f1, 8a, 47, c0, 33, f9, cc, d5, 84, ee, a9, 5a, a6, 1e, 26, 98, d5, 4d, 49, 80, 6f, 30, 47, 15, bd, 57, d0, 53, 62, 05, 4e, 28, 8b, d4, 6f, 8e, 7f, 2d, a4, 97, ff, c4, 47, 46, a4, a0, e5, fe, 90, 76, 2e, 19, d6, 0c, da, 5b, 8c]")
     }
 
     #[test]
@@ -391,7 +393,7 @@ mod keccak_tests {
                 0xd6, 0x62, 0xf5, 0x80, 0xff, 0x4d, 0xe4, 0x3b, 0x49, 0xfa, 0x82, 0xd8, 0x0a, 0x4b,
                 0x80, 0xf8, 0x43, 0x4a
             ],
-            state.squeeze(256 / 8)
+            state.squeeze(1088 / 8, 256 / 8)
         );
     }
 
@@ -422,6 +424,13 @@ mod keccak_tests {
         let output = hasher.hash_bytes_from_string("").unwrap();
         assert_eq!(
             "a69f73cca23a9ac5c8b567dc185a756e97c982164fe25859e0d1dcc1475c80a615b2123af1f5f94c11e3e9402c3ac558f500199d95b6d3e301758586281dcd26",
+            output
+        );
+
+        let hasher = Keccak::shake_128(200);
+        let output = hasher.hash_bytes_from_string("").unwrap();
+        assert_eq!(
+            "7f9c2ba4e88f827d616045507605853ed73b8093f6efbc88eb1a6eacfa66ef263cb1eea988004b93103cfb0aeefd2a686e01fa4a58e8a3639ca8a1e3f9ae57e235b8cc873c23dc62b8d260169afa2f75ab916a58d974918835d25e6a435085b2badfd6dfaac359a5efbb7bcc4b59d538df9a04302e10c8bc1cbf1a0b3a5120ea17cda7cfad765f5623474d368ccca8af0007cd9f5e4c849f167a580b14aabdefaee7eef47cb0fca9767be1fda69419dfb927e9df07348b196691abaeb580b32def58538b8d23f877",
             output
         );
     }
