@@ -136,7 +136,7 @@ impl KeccackState {
     pub fn absorb(&mut self, message: &[u8], rate: usize) {
         assert!(
             message.len() % rate == 0,
-            "message length in bytes must be a multiple of rate, {}",
+            "message length in bytes must be a multiple of rate in bytes, {}",
             rate
         );
 
@@ -144,10 +144,10 @@ impl KeccackState {
         let words = bytes_to_u64_le(message);
 
         for chunk_i in 0..n_chunks {
-            let chunk_offset: usize = chunk_i * rate;
+            let chunk_offset: usize = chunk_i * (rate / 8);
             let mut x = 0;
             let mut y = 0;
-            for i in 0..rate {
+            for i in 0..(rate / 8) {
                 let word = words[chunk_offset + i];
                 self[x][y] ^= word;
                 // Notice that not all of the state is used during absorbing, several words are reserved for the capacity
@@ -337,7 +337,7 @@ impl ClassicHasher for Keccak {
         }
 
         let mut state = KeccackState::new();
-        state.absorb(bytes, self.rate);
+        state.absorb(&input, self.rate);
         state.squeeze(self.output_size)
     }
 
@@ -366,8 +366,42 @@ mod keccak_tests {
         assert_eq!(format!("{:02x?}",state.squeeze(512)), "[e7, dd, e1, 40, 79, 8f, 25, f1, 8a, 47, c0, 33, f9, cc, d5, 84, ee, a9, 5a, a6, 1e, 26, 98, d5, 4d, 49, 80, 6f, 30, 47, 15, bd, 57, d0, 53, 62, 05, 4e, 28, 8b, d4, 6f, 8e, 7f, 2d, a4, 97, ff, c4, 47, 46, a4, a0, e5, fe, 90, 76, 2e, 19, d6, 0c, da, 5b, 8c]")
     }
 
-    // #[test]
-    // fn test_absorb() {
-    //     let mut
-    // }
+    #[test]
+    fn test_absorb_and_squeeze() {
+        // Padded version of an empty input
+        let message: [u8; 136] = [
+            0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80,
+        ];
+
+        let mut state = KeccackState::new();
+        state.absorb(&message, 1088 / 8);
+
+        assert_eq!(
+            vec![
+                0xa7, 0xff, 0xc6, 0xf8, 0xbf, 0x1e, 0xd7, 0x66, 0x51, 0xc1, 0x47, 0x56, 0xa0, 0x61,
+                0xd6, 0x62, 0xf5, 0x80, 0xff, 0x4d, 0xe4, 0x3b, 0x49, 0xfa, 0x82, 0xd8, 0x0a, 0x4b,
+                0x80, 0xf8, 0x43, 0x4a
+            ],
+            state.squeeze(256 / 8)
+        );
+    }
+
+    #[test]
+    fn test() {
+        let hasher = Keccak::sha3_256();
+        let output = hasher.hash_bytes_from_string("").unwrap();
+        assert_eq!(
+            "a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a",
+            output
+        )
+    }
 }
