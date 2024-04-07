@@ -147,7 +147,6 @@ impl KeccackState {
             let mut y = 0;
             for i in 0..(rate / 8) {
                 let word = words[chunk_offset + i];
-                // let word = words.next().unwrap();
                 self[x][y] ^= word;
                 // Notice that not all of the state is used during absorbing, several words are reserved
                 if x < 5 - 1 {
@@ -157,8 +156,10 @@ impl KeccackState {
                     x = 0;
                 }
             }
+            // println!("{}", self);
             // At the end of each chunk the state is fully permuted
-            self.keccak_f()
+            self.keccak_f();
+            // println!("{}", self);
         }
     }
 
@@ -432,9 +433,15 @@ mod keccak_tests {
     #[test]
     fn test_multiblock_input() {
         let hasher = Keccak::sha3_256();
-        let output = hasher.hash_bytes_from_string("a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a303").unwrap();
+        let output = hasher.hash_bytes_from_string("a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3").unwrap();
         assert_eq!(
-            "81ee769bed0950862b1ddded2e84aaa6ab7bfdd3ceaa471be31163d40336363c",
+            "79f38adec5c20307a98ef76e8324afbfd46cfd81b22e3973c65fa1bd9de31787",
+            output
+        );
+
+        let output = hasher.hash_bytes_from_string("83af34279ccb5430febec07a81950d30f4b66f484826afee7456f0071a51e1bbc55570b5cc7ec6f9309c17bf5befdd7c6ba6e968cf218a2b34bd5cf927ab846e38a40bbd81759e9e33381016a755f699df35d660007b5eadf292feefb735207ebf70b5bd17834f7bfa0e16cb219ad4af524ab1ea37334aa66435e5d397fc0a065c411ebbce32c240b90476d307ce802ec82c1c49bc1bec48c0675ec2a6c6f3ed3e5b741d13437095707c565e10d8a20b8c20468ff9514fcf31b4249cd82dcee58c0a2af538b291a87e3390d737191a07484a5d3f3fb8c8f15ce056e5e5f8febe5e1fb59d6740980aa06ca8a0c20f5712b4cde5d032e92ab89f0ae1").unwrap();
+        assert_eq!(
+            "3298a95cfe59b9d6cab99c36dc1324194c09f97f08944a02d9574bbca3186b41",
             output
         );
     }
