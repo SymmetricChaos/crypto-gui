@@ -125,7 +125,7 @@ impl KeccackState {
     }
 
     // Keccak-f[1600]
-    pub fn keccack_f(&mut self) {
+    pub fn keccak_f(&mut self) {
         for round in 0..Self::ROUNDS {
             self.round(round)
         }
@@ -147,6 +147,7 @@ impl KeccackState {
             let mut y = 0;
             for i in 0..(rate / 8) {
                 let word = words[chunk_offset + i];
+                // let word = words.next().unwrap();
                 self[x][y] ^= word;
                 // Notice that not all of the state is used during absorbing, several words are reserved
                 if x < 5 - 1 {
@@ -157,7 +158,7 @@ impl KeccackState {
                 }
             }
             // At the end of each chunk the state is fully permuted
-            self.keccack_f()
+            self.keccak_f()
         }
     }
 
@@ -175,7 +176,7 @@ impl KeccackState {
                     }
                     ctr += 8;
                     if ctr >= rate {
-                        self.keccack_f();
+                        self.keccak_f();
                         break 'y_loop;
                     }
                 }
@@ -278,27 +279,27 @@ impl Keccak {
         }
     }
 
-    // pub fn shake_128(output_size: usize) -> Self {
-    //     Self {
-    //         input_format: ByteFormat::Hex,
-    //         output_format: ByteFormat::Hex,
-    //         rate: 1344 / 8,
-    //         capacity: 256 / 8,
-    //         output_size,
-    //         domain: Domain::Shake,
-    //     }
-    // }
+    pub fn shake_128(output_size: usize) -> Self {
+        Self {
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
+            rate: 1344 / 8,
+            // capacity: 256 / 8,
+            output_size,
+            domain: Domain::Shake,
+        }
+    }
 
-    // pub fn shake_256(output_size: usize) -> Self {
-    //     Self {
-    //         input_format: ByteFormat::Hex,
-    //         output_format: ByteFormat::Hex,
-    //         rate: 1088 / 8,
-    //         capacity: 512 / 8,
-    //         output_size,
-    //         domain: Domain::Shake,
-    //     }
-    // }
+    pub fn shake_256(output_size: usize) -> Self {
+        Self {
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
+            rate: 1088 / 8,
+            // capacity: 512 / 8,
+            output_size,
+            domain: Domain::Shake,
+        }
+    }
 }
 
 impl ClassicHasher for Keccak {
@@ -347,7 +348,7 @@ mod keccak_tests {
     fn test_permutation() {
         // https://github.com/XKCP/XKCP/blob/master/tests/TestVectors/KeccakF-1600-IntermediateValues.txt
         let mut state = KeccackState::new();
-        state.keccack_f();
+        state.keccak_f();
         assert_eq!(
             format!("{}", state).trim_end(),
             "f1258f7940e1dde7 84d5ccf933c0478a d598261ea65aa9ee bd1547306f80494d 8b284e056253d057 \nff97a42d7f8e6fd4 90fee5a0a44647c4 8c5bda0cd6192e76 ad30a6f71b19059c 30935ab7d08ffc64 \neb5aa93f2317d635 a9a6e6260d712103 81a57c16dbcf555f 43b831cd0347c826 01f22f1a11a5569f \n05e5635a21d9ae61 64befef28cc970f2 613670957bc46611 b87c5a554fd00ecb 8c3ee88a1ccf32c8 \n940c7922ae3a2614 1841f924a2c509e4 16f53526e70465c2 75f644e97f30a13b eaf1ff7b5ceca249");
@@ -410,6 +411,30 @@ mod keccak_tests {
         let output = hasher.hash_bytes_from_string("").unwrap();
         assert_eq!(
             "a69f73cca23a9ac5c8b567dc185a756e97c982164fe25859e0d1dcc1475c80a615b2123af1f5f94c11e3e9402c3ac558f500199d95b6d3e301758586281dcd26",
+            output
+        );
+
+        let hasher = Keccak::shake_128(200);
+        let output = hasher.hash_bytes_from_string("").unwrap();
+        assert_eq!(
+            "7f9c2ba4e88f827d616045507605853ed73b8093f6efbc88eb1a6eacfa66ef263cb1eea988004b93103cfb0aeefd2a686e01fa4a58e8a3639ca8a1e3f9ae57e235b8cc873c23dc62b8d260169afa2f75ab916a58d974918835d25e6a435085b2badfd6dfaac359a5efbb7bcc4b59d538df9a04302e10c8bc1cbf1a0b3a5120ea17cda7cfad765f5623474d368ccca8af0007cd9f5e4c849f167a580b14aabdefaee7eef47cb0fca9767be1fda69419dfb927e9df07348b196691abaeb580b32def58538b8d23f877",
+            output
+        );
+
+        let hasher = Keccak::shake_256(200);
+        let output = hasher.hash_bytes_from_string("").unwrap();
+        assert_eq!(
+            "46b9dd2b0ba88d13233b3feb743eeb243fcd52ea62b81b82b50c27646ed5762fd75dc4ddd8c0f200cb05019d67b592f6fc821c49479ab48640292eacb3b7c4be141e96616fb13957692cc7edd0b45ae3dc07223c8e92937bef84bc0eab862853349ec75546f58fb7c2775c38462c5010d846c185c15111e595522a6bcd16cf86f3d122109e3b1fdd943b6aec468a2d621a7c06c6a957c62b54dafc3be87567d677231395f6147293b68ceab7a9e0c58d864e8efde4e1b9a46cbe854713672f5caaae314ed9083dab",
+            output
+        );
+    }
+
+    #[test]
+    fn test_multiblock_input() {
+        let hasher = Keccak::sha3_256();
+        let output = hasher.hash_bytes_from_string("a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a303").unwrap();
+        assert_eq!(
+            "81ee769bed0950862b1ddded2e84aaa6ab7bfdd3ceaa471be31163d40336363c",
             output
         );
     }
