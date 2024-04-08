@@ -4,13 +4,14 @@ mod blake_controls;
 mod fnv_controls;
 mod md4_controls;
 mod md5_controls;
-pub mod mgf1_controls;
+mod mgf1_controls;
 mod pearson_controls;
 mod poly1305_controls;
 mod radio_gatun;
-pub mod sha0_controls;
+mod sha0_controls;
 mod sha1_controls;
 mod sha2_controls;
+mod sha3_controls;
 mod siphash_controls;
 
 use egui::Ui;
