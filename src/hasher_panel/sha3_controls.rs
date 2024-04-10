@@ -1,5 +1,9 @@
 use egui::{DragValue, RichText};
-use hashers::{errors::HasherError, keccak::Keccak, traits::ClassicHasher};
+use hashers::{
+    errors::HasherError,
+    keccak::{KeccackState, Keccak},
+    traits::ClassicHasher,
+};
 
 use crate::ui_elements::UiElements;
 
@@ -19,6 +23,7 @@ pub struct Sha3Frame {
     hasher: Keccak,
     variant: Sha3Variant,
     shake_output_len: usize,
+    example_state: KeccackState,
 }
 
 impl Default for Sha3Frame {
@@ -27,6 +32,7 @@ impl Default for Sha3Frame {
             hasher: Default::default(),
             variant: Sha3Variant::Sha3_256,
             shake_output_len: 128,
+            example_state: KeccackState::new(),
         }
     }
 }
@@ -57,16 +63,34 @@ impl HasherFrame for Sha3Frame {
         ui.add_space(16.0);
         ui.subheading("SHA-3 Hash Algorithms");
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.variant, Sha3Variant::Sha3_224, "SHA3-224");
-            ui.selectable_value(&mut self.variant, Sha3Variant::Sha3_256, "SHA3-256");
-            ui.selectable_value(&mut self.variant, Sha3Variant::Sha3_384, "SHA3-384");
-            ui.selectable_value(&mut self.variant, Sha3Variant::Sha3_512, "SHA3-512");
+            if ui
+                .selectable_value(&mut self.variant, Sha3Variant::Sha3_224, "SHA3-224")
+                .changed()
+                || ui
+                    .selectable_value(&mut self.variant, Sha3Variant::Sha3_256, "SHA3-256")
+                    .changed()
+                || ui
+                    .selectable_value(&mut self.variant, Sha3Variant::Sha3_384, "SHA3-384")
+                    .changed()
+                || ui
+                    .selectable_value(&mut self.variant, Sha3Variant::Sha3_512, "SHA3-512")
+                    .changed()
+            {
+                self.set_hasher()
+            }
         });
         ui.add_space(8.0);
         ui.subheading("SHA-3 Extensible Output Functions");
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.variant, Sha3Variant::Shake128, "SHAKE128");
-            ui.selectable_value(&mut self.variant, Sha3Variant::Shake256, "SHAKE256");
+            if ui
+                .selectable_value(&mut self.variant, Sha3Variant::Shake128, "SHAKE128")
+                .changed()
+                || ui
+                    .selectable_value(&mut self.variant, Sha3Variant::Shake256, "SHAKE256")
+                    .changed()
+            {
+                self.set_hasher()
+            }
         });
 
         ui.add_space(8.0);
@@ -87,7 +111,32 @@ impl HasherFrame for Sha3Frame {
             Sha3Variant::Shake256 => ui.label("SHAKE256 "),
         };
 
-        ui.label("<<<EXPLANATION OF HASH FUNCTION CODE>>>");
+        ui.add_space(16.0);
+        ui.collapsing("Interactive State", |ui| {
+            for y in 0..5 {
+                ui.horizontal(|ui| {
+                    for x in 0..5 {
+                        ui.add(DragValue::new(&mut self.example_state[x][y]));
+                    }
+                });
+            }
+
+            if ui.button("Theta").clicked() {
+                self.example_state.theta()
+            }
+            if ui.button("Rho").clicked() {
+                self.example_state.rho()
+            }
+            if ui.button("Pi").clicked() {
+                self.example_state.pi()
+            }
+            if ui.button("Chi").clicked() {
+                self.example_state.chi()
+            }
+            if ui.button("Iota").clicked() {
+                self.example_state.chi()
+            }
+        });
 
         ui.add_space(16.0);
     }

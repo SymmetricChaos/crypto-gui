@@ -26,7 +26,7 @@ use self::{
     fnv_controls::FnvFrame, md4_controls::Md4Frame, md5_controls::Md5Frame,
     mgf1_controls::Mgf1Frame, pearson_controls::PearsonFrame, poly1305_controls::Poly1305Frame,
     sha0_controls::Sha0Frame, sha1_controls::Sha1Frame, sha2_controls::Sha2Frame,
-    siphash_controls::SipHashFrame,
+    sha3_controls::Sha3Frame, siphash_controls::SipHashFrame,
 };
 
 pub trait HasherFrame {
@@ -70,6 +70,7 @@ pub struct HasherInterface {
     sha0: Sha0Frame,
     sha1: Sha1Frame,
     sha2: Sha2Frame,
+    sha3: Sha3Frame,
 }
 
 impl HasherInterface {
@@ -93,6 +94,7 @@ impl HasherInterface {
                 HasherId::Sha0,
                 HasherId::Sha1,
                 HasherId::Sha2,
+                HasherId::Sha3,
             ],
             active_hasher,
             HasherCategory::Cryptographic,
@@ -112,6 +114,7 @@ impl HasherInterface {
             HasherId::Sha0 => &mut self.sha0,
             HasherId::Sha1 => &mut self.sha1,
             HasherId::Sha2 => &mut self.sha2,
+            HasherId::Sha3 => &mut self.sha3,
             HasherId::Pearson => &mut self.pearson,
             HasherId::Poly1305 => &mut self.poly1305,
             HasherId::SipHash => &mut self.siphash,

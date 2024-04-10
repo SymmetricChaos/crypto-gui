@@ -16,6 +16,7 @@ pub enum HasherId {
     Sha0,
     Sha1,
     Sha2,
+    Sha3,
     SipHash,
 }
 
@@ -50,6 +51,7 @@ impl Display for HasherId {
             Self::Sha0 => "SHA-0",
             Self::Sha1 => "SHA-1",
             Self::Sha2 => "SHA-2",
+            Self::Sha3 => "SHA-3",
             Self::SipHash => "SipHash",
         };
         write!(f, "{}", name)
