@@ -51,7 +51,7 @@ impl Display for HasherId {
             Self::Sha0 => "SHA-0",
             Self::Sha1 => "SHA-1",
             Self::Sha2 => "SHA-2",
-            Self::Sha3 => "SHA-3",
+            Self::Sha3 => "SHA-3 (Keccak)",
             Self::SipHash => "SipHash",
         };
         write!(f, "{}", name)
