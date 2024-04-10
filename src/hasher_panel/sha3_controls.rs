@@ -125,34 +125,34 @@ impl HasherFrame for Sha3Frame {
                     }
                 });
             }
-
-            ui.subheading("Round Number");
+            ui.add_space(8.0);
+            ui.subheading("Round Number (only alters the iota step)");
             ui.add(DragValue::new(&mut self.example_round).clamp_range(0..=23));
-
+            ui.add_space(8.0);
             ui.subheading("Steps");
             ui.group(|ui| {
-                if ui.button("Theta").clicked() {
+                if ui.button("θ theta").clicked() {
                     self.example_state.theta()
                 }
-                if ui.button("Rho").clicked() {
+                if ui.button("ρ rho").clicked() {
                     self.example_state.rho()
                 }
-                if ui.button("Pi").clicked() {
+                if ui.button("π pi").clicked() {
                     self.example_state.pi()
                 }
-                if ui.button("Chi").clicked() {
+                if ui.button("χ chi").clicked() {
                     self.example_state.chi()
                 }
-                if ui.button("Iota").clicked() {
+                if ui.button("ι iota").clicked() {
                     self.example_state.iota(self.example_round)
                 }
             });
-
+            ui.add_space(8.0);
             if ui.button("Single Round").clicked() {
                 self.example_state.round(self.example_round);
                 self.example_round += 1;
             }
-
+            ui.add_space(8.0);
             if ui.button("Full Permutation (24 Rounds)").clicked() {
                 self.example_state.keccak_f()
             }
