@@ -329,9 +329,9 @@ impl ClassicHasher for Keccak {
 
         // Padding rules taken from NIST FIPS-202
         // https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf
+        // This will never be zero since. Notably if the input length is equal to the rate we push an entire extra block
         let padding_len = self.rate - (input.len() % self.rate);
 
-        // This will never be zero since. Notably in the input length is equal to the rate we push an entire extra block
         if padding_len == 1 {
             match self.domain {
                 Domain::Sha3 => input.push(0x86),

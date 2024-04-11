@@ -1,7 +1,9 @@
-use crate::sha2::Sha256;
-use crate::sha2::Sha512;
 use crate::{errors::HasherError, traits::ClassicHasher};
 use utils::byte_formatting::ByteFormat;
+
+use super::sha256::Sha2_224;
+use super::sha256::Sha2_256;
+use super::sha512::{Sha2_384, Sha2_512, Sha2_512_224, Sha2_512_256};
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Sha2Variant {
@@ -17,12 +19,12 @@ pub struct Sha2 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
     pub variant: Sha2Variant,
-    sha224: Sha256,
-    sha256: Sha256,
-    sha384: Sha512,
-    sha512: Sha512,
-    sha512_224: Sha512,
-    sha512_256: Sha512,
+    sha224: Sha2_224,
+    sha256: Sha2_256,
+    sha384: Sha2_384,
+    sha512: Sha2_512,
+    sha512_224: Sha2_512_224,
+    sha512_256: Sha2_512_256,
 }
 
 impl Default for Sha2 {
@@ -31,12 +33,12 @@ impl Default for Sha2 {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
             variant: Sha2Variant::Sha256,
-            sha224: Sha256::sha224(),
-            sha256: Sha256::sha256(),
-            sha384: Sha512::sha384(),
-            sha512: Sha512::sha512(),
-            sha512_224: Sha512::sha512_224(),
-            sha512_256: Sha512::sha512_256(),
+            sha224: Sha2_224::default(),
+            sha256: Sha2_256::default(),
+            sha384: Sha2_384::default(),
+            sha512: Sha2_512::default(),
+            sha512_224: Sha2_512_224::default(),
+            sha512_256: Sha2_512_256::default(),
         }
     }
 }

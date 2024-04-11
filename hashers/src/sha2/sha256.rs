@@ -40,160 +40,134 @@ pub fn majority(a: u32, b: u32, c: u32) -> u32 {
     (a & b) ^ (a & c) ^ (b & c)
 }
 
-pub enum Sha256Mode {
-    SHA224,
-    SHA256,
-}
-
-impl Sha256Mode {
-    pub fn initialization(&self) -> [u32; 8] {
-        match self {
-            Sha256Mode::SHA224 => [
-                0xc1059ed8, 0x367cd507, 0x3070dd17, 0xf70e5939, 0xffc00b31, 0x68581511, 0x64f98fa7,
-                0xbefa4fa4,
-            ],
-            Sha256Mode::SHA256 => [
-                0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab,
-                0x5be0cd19,
-            ],
-        }
-    }
-
-    pub fn byte_length(&self) -> usize {
-        match self {
-            Sha256Mode::SHA224 => 28,
-            Sha256Mode::SHA256 => 32,
-        }
-    }
-}
-
-pub struct Sha256 {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-    pub mode: Sha256Mode,
-}
-
-impl Default for Sha256 {
-    fn default() -> Self {
-        Self {
-            input_format: ByteFormat::Hex,
-            output_format: ByteFormat::Hex,
-            mode: Sha256Mode::SHA256,
-        }
-    }
-}
-
-impl Sha256 {
-    pub fn sha224() -> Self {
-        Self {
-            input_format: ByteFormat::Hex,
-            output_format: ByteFormat::Hex,
-            mode: Sha256Mode::SHA224,
-        }
-    }
-
-    pub fn sha256() -> Self {
-        Self {
-            input_format: ByteFormat::Hex,
-            output_format: ByteFormat::Hex,
-            mode: Sha256Mode::SHA256,
-        }
-    }
-}
-
-impl ClassicHasher for Sha256 {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut input = bytes.to_vec();
-
-        // Padding and appending length is identical to MD4 and MD5
-        // Length in bits before padding
-        let b_len = (input.len().wrapping_mul(8)) as u64;
-
-        // Step 1.Padding
-        // push a byte with a leading 1 to the bytes
-        input.push(0x80);
-        // push zeros until the length in bits is 448 mod 512
-        // equivalently until the length in bytes is 56 mod 64
-        while (input.len() % 64) != 56 {
-            input.push(0)
+macro_rules! sha2_256 {
+    ($name: ident, $iv: expr, $output_len: literal) => {
+        pub struct $name {
+            pub input_format: ByteFormat,
+            pub output_format: ByteFormat,
         }
 
-        // Step 2. Append length
-        for b in b_len.to_be_bytes() {
-            input.push(b)
+        impl Default for $name {
+            fn default() -> Self {
+                Self {
+                    input_format: ByteFormat::Hex,
+                    output_format: ByteFormat::Hex,
+                }
+            }
         }
 
-        // Step 3. Initialize variables
-        let mut v: [u32; 8] = self.mode.initialization();
+        impl ClassicHasher for $name {
+            fn hash(&self, bytes: &[u8]) -> Vec<u8> {
+                let mut input = bytes.to_vec();
 
-        // Step 4. Process message
-        // 64 bytes are enough for 16 words
-        for block in input.chunks_exact(64) {
-            // Copy variable values into working variables
-            let mut a = v[0];
-            let mut b = v[1];
-            let mut c = v[2];
-            let mut d = v[3];
-            let mut e = v[4];
-            let mut f = v[5];
-            let mut g = v[6];
-            let mut h = v[7];
+                // Padding and appending length is identical to MD4 and MD5
+                // Length in bits before padding
+                let b_len = (input.len().wrapping_mul(8)) as u64;
 
-            // Array of 64 words
-            let mut x = [0u32; 64];
+                // Step 1.Padding
+                // push a byte with a leading 1 to the bytes
+                input.push(0x80);
+                // push zeros until the length in bits is 448 mod 512
+                // equivalently until the length in bytes is 56 mod 64
+                while (input.len() % 64) != 56 {
+                    input.push(0)
+                }
 
-            // Copy the first words into the array
-            // Each word is 4 bytes and 16 are taken in total
-            for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)).take(16) {
-                *elem = u32::from_be_bytes(chunk.try_into().unwrap());
+                // Step 2. Append length
+                for b in b_len.to_be_bytes() {
+                    input.push(b)
+                }
+
+                // Step 3. Initialize variables
+                let mut v: [u32; 8] = $iv;
+
+                // Step 4. Process message
+                // 64 bytes are enough for 16 words
+                for block in input.chunks_exact(64) {
+                    // Copy variable values into working variables
+                    let mut a = v[0];
+                    let mut b = v[1];
+                    let mut c = v[2];
+                    let mut d = v[3];
+                    let mut e = v[4];
+                    let mut f = v[5];
+                    let mut g = v[6];
+                    let mut h = v[7];
+
+                    // Array of 64 words
+                    let mut x = [0u32; 64];
+
+                    // Copy the first words into the array
+                    // Each word is 4 bytes and 16 are taken in total
+                    for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)).take(16) {
+                        *elem = u32::from_be_bytes(chunk.try_into().unwrap());
+                    }
+
+                    // Extend the 16 words already in the array into a total of 64 words
+                    for i in 16..64 {
+                        x[i] = x[i - 16]
+                            .wrapping_add(sigma_0(x[i - 15]))
+                            .wrapping_add(x[i - 7])
+                            .wrapping_add(sigma_1(x[i - 2]));
+                    }
+
+                    for i in 0..64 {
+                        let temp1 = h
+                            .wrapping_add(sum_1(e))
+                            .wrapping_add(choice(e, f, g))
+                            .wrapping_add(K[i])
+                            .wrapping_add(x[i]);
+                        let temp2 = sum_0(a).wrapping_add(majority(a, b, c));
+
+                        h = g;
+                        g = f;
+                        f = e;
+                        e = d.wrapping_add(temp1);
+                        d = c;
+                        c = b;
+                        b = a;
+                        a = temp1.wrapping_add(temp2);
+                    }
+                    v[0] = v[0].wrapping_add(a);
+                    v[1] = v[1].wrapping_add(b);
+                    v[2] = v[2].wrapping_add(c);
+                    v[3] = v[3].wrapping_add(d);
+                    v[4] = v[4].wrapping_add(e);
+                    v[5] = v[5].wrapping_add(f);
+                    v[6] = v[6].wrapping_add(g);
+                    v[7] = v[7].wrapping_add(h);
+                }
+
+                let mut out = v.iter().map(|x| x.to_be_bytes()).flatten().collect_vec();
+                out.truncate($output_len);
+                out
             }
 
-            // Extend the 16 words already in the array into a total of 64 words
-            for i in 16..64 {
-                x[i] = x[i - 16]
-                    .wrapping_add(sigma_0(x[i - 15]))
-                    .wrapping_add(x[i - 7])
-                    .wrapping_add(sigma_1(x[i - 2]));
+            fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
+                let mut bytes = self
+                    .input_format
+                    .text_to_bytes(text)
+                    .map_err(|_| HasherError::general("byte format error"))?;
+                let out = self.hash(&mut bytes);
+                Ok(self.output_format.byte_slice_to_text(&out))
             }
-
-            for i in 0..64 {
-                let temp1 = h
-                    .wrapping_add(sum_1(e))
-                    .wrapping_add(choice(e, f, g))
-                    .wrapping_add(K[i])
-                    .wrapping_add(x[i]);
-                let temp2 = sum_0(a).wrapping_add(majority(a, b, c));
-
-                h = g;
-                g = f;
-                f = e;
-                e = d.wrapping_add(temp1);
-                d = c;
-                c = b;
-                b = a;
-                a = temp1.wrapping_add(temp2);
-            }
-            v[0] = v[0].wrapping_add(a);
-            v[1] = v[1].wrapping_add(b);
-            v[2] = v[2].wrapping_add(c);
-            v[3] = v[3].wrapping_add(d);
-            v[4] = v[4].wrapping_add(e);
-            v[5] = v[5].wrapping_add(f);
-            v[6] = v[6].wrapping_add(g);
-            v[7] = v[7].wrapping_add(h);
         }
-
-        let mut out = v.iter().map(|x| x.to_be_bytes()).flatten().collect_vec();
-        out.truncate(self.mode.byte_length());
-        out
-    }
-
-    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        let mut bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| HasherError::general("byte format error"))?;
-        let out = self.hash(&mut bytes);
-        Ok(self.output_format.byte_slice_to_text(&out))
-    }
+    };
 }
+
+sha2_256!(
+    Sha2_224,
+    [
+        0xc1059ed8, 0x367cd507, 0x3070dd17, 0xf70e5939, 0xffc00b31, 0x68581511, 0x64f98fa7,
+        0xbefa4fa4,
+    ],
+    28
+);
+sha2_256!(
+    Sha2_256,
+    [
+        0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab,
+        0x5be0cd19,
+    ],
+    32
+);
