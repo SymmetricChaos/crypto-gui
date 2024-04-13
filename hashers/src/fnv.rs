@@ -141,7 +141,7 @@ impl ClassicHasher for Fnv {
 }
 
 #[cfg(test)]
-mod fxhash_tests {
+mod fnvhash_tests {
     use super::*;
 
     #[test]
