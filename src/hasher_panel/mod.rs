@@ -24,10 +24,10 @@ use utils::byte_formatting::ByteFormat;
 
 use self::{
     blake2_controls::Blake2Frame, blake3_controls::Blake3Frame, blake_controls::BlakeFrame,
-    fnv_controls::FnvFrame, md4_controls::Md4Frame, md5_controls::Md5Frame,
-    mgf1_controls::Mgf1Frame, pearson_controls::PearsonFrame, poly1305_controls::Poly1305Frame,
-    sha0_controls::Sha0Frame, sha1_controls::Sha1Frame, sha2_controls::Sha2Frame,
-    sha3_controls::Sha3Frame, siphash_controls::SipHashFrame,
+    fnv_controls::FnvFrame, hmac_controls::HmacFrame, md4_controls::Md4Frame,
+    md5_controls::Md5Frame, mgf1_controls::Mgf1Frame, pearson_controls::PearsonFrame,
+    poly1305_controls::Poly1305Frame, sha0_controls::Sha0Frame, sha1_controls::Sha1Frame,
+    sha2_controls::Sha2Frame, sha3_controls::Sha3Frame, siphash_controls::SipHashFrame,
 };
 
 pub trait HasherFrame {
@@ -62,6 +62,7 @@ pub struct HasherInterface {
     blake2: Blake2Frame,
     blake3: Blake3Frame,
     fnv: FnvFrame,
+    hmac: HmacFrame,
     md4: Md4Frame,
     md5: Md5Frame,
     mgf1: Mgf1Frame,
@@ -110,7 +111,7 @@ impl HasherInterface {
             HasherId::Blake2 => &mut self.blake2,
             HasherId::Blake3 => &mut self.blake3,
             HasherId::Fnv => &mut self.fnv,
-            HasherId::Hmac => todo!(),
+            HasherId::Hmac => &mut self.hmac,
             HasherId::Md4 => &mut self.md4,
             HasherId::Md5 => &mut self.md5,
             HasherId::Mgf1 => &mut self.mgf1,

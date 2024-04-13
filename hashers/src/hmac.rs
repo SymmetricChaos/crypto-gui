@@ -72,6 +72,8 @@ impl ClassicHasher for Hmac {
 
 #[cfg(test)]
 mod hmac_tests {
+    use crate::sha2::sha512::Sha2_512;
+
     use super::*;
 
     #[test]
@@ -86,6 +88,17 @@ mod hmac_tests {
 
         assert_eq!(
             "f7bc83f430538424b13298e6aa6fb143ef4d59a14946175997479dbc2d1a3cd8",
+            hasher
+                .hash_bytes_from_string("The quick brown fox jumps over the lazy dog")
+                .unwrap()
+        );
+
+        hasher.hasher = Box::new(Sha2_512::default());
+        hasher.block_size = 128;
+        hasher.key_from_str("key").unwrap();
+
+        assert_eq!(
+            "b42af09057bac1e2d41708e48a902e09b5ff7f12ab428a4fe86653c73dd248fb82f948a549f7b791a5b41915ee4d1ec3935357e4e2317250d0372afa2ebeeb3a",
             hasher
                 .hash_bytes_from_string("The quick brown fox jumps over the lazy dog")
                 .unwrap()
