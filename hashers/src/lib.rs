@@ -12,6 +12,7 @@ pub mod checksum;
 pub mod errors;
 pub mod fnv;
 pub mod fxhash;
+pub mod hmac;
 pub mod keccak;
 pub mod mgf1;
 pub mod poly1305;

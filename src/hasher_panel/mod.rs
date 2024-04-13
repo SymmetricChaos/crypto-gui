@@ -76,17 +76,11 @@ pub struct HasherInterface {
 impl HasherInterface {
     pub fn combo_boxes(&mut self, ui: &mut Ui, active_hasher: &mut Option<HasherId>) {
         combox_box(
-            &[HasherId::Pearson, HasherId::SipHash, HasherId::Fnv],
-            active_hasher,
-            HasherCategory::NonCryptographic,
-            ui,
-        );
-
-        combox_box(
             &[
                 HasherId::Blake,
                 HasherId::Blake2,
                 HasherId::Blake3,
+                HasherId::Hmac,
                 HasherId::Md4,
                 HasherId::Md5,
                 HasherId::Mgf1,
@@ -100,6 +94,13 @@ impl HasherInterface {
             HasherCategory::Cryptographic,
             ui,
         );
+
+        combox_box(
+            &[HasherId::Pearson, HasherId::SipHash, HasherId::Fnv],
+            active_hasher,
+            HasherCategory::NonCryptographic,
+            ui,
+        );
     }
 
     pub fn get_active_hasher(&mut self, active_hasher: &HasherId) -> &mut dyn HasherFrame {
@@ -108,6 +109,7 @@ impl HasherInterface {
             HasherId::Blake2 => &mut self.blake2,
             HasherId::Blake3 => &mut self.blake3,
             HasherId::Fnv => &mut self.fnv,
+            HasherId::Hmac => todo!(),
             HasherId::Md4 => &mut self.md4,
             HasherId::Md5 => &mut self.md5,
             HasherId::Mgf1 => &mut self.mgf1,
