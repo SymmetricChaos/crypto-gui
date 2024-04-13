@@ -1,14 +1,13 @@
 use crate::{errors::HasherError, sha2::sha256::Sha2_256, traits::ClassicHasher};
-use itertools::Itertools;
 use utils::byte_formatting::ByteFormat;
 
 pub struct Hmac {
-    input_format: ByteFormat,
-    output_format: ByteFormat,
-    key_format: ByteFormat,
-    key: Vec<u8>,
-    block_size: usize,
-    hasher: Box<dyn ClassicHasher>,
+    pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
+    pub key_format: ByteFormat,
+    pub key: Vec<u8>,
+    pub block_size: usize,
+    pub hasher: Box<dyn ClassicHasher>,
 }
 
 impl Default for Hmac {

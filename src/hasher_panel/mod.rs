@@ -2,6 +2,7 @@ mod blake2_controls;
 mod blake3_controls;
 mod blake_controls;
 mod fnv_controls;
+mod hmac_controls;
 mod md4_controls;
 mod md5_controls;
 mod mgf1_controls;
