@@ -82,6 +82,10 @@ impl CipherFrame for Rc4Frame {
             self.run_ksa()
         }
         ui.add_space(16.0);
+        ui.subheading("Drop Bytes");
+        ui.label("The early bytes of RC4 can leak information about the key so some implementations drop the first few hundred bytes.");
+        ui.add(DragValue::new(&mut self.cipher.drop).clamp_range(0..=1024));
+        ui.add_space(16.0);
 
         ui.subheading("Internal State");
         ui.group(|ui| {

@@ -6,6 +6,7 @@ pub struct Rc4 {
     pub arr: [u8; 256],
     pub i: u8,
     pub j: u8,
+    pub drop: u32,
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
 }
@@ -20,6 +21,7 @@ impl Default for Rc4 {
             arr,
             i: 0,
             j: 0,
+            drop: 0,
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
         }
@@ -55,6 +57,12 @@ impl Rc4 {
         let mut i = self.i;
         let mut j = self.j;
 
+        for _ in 0..self.drop {
+            i = i.wrapping_add(1);
+            j = j.wrapping_add(arr[i as usize]);
+            arr.swap(i as usize, j as usize);
+        }
+
         for byte in bytes.iter_mut() {
             i = i.wrapping_add(1);
             j = j.wrapping_add(arr[i as usize]);
@@ -65,6 +73,9 @@ impl Rc4 {
     }
 
     pub fn encrypt_bytes(&mut self, bytes: &mut [u8]) {
+        for _ in 0..self.drop {
+            self.next_byte();
+        }
         for byte in bytes.iter_mut() {
             *byte = *byte ^ self.next_byte()
         }
