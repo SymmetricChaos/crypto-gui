@@ -1,3 +1,4 @@
+pub mod blumblumshub;
 pub mod errors;
 pub mod halton;
 pub mod ids;

@@ -2942,6 +2942,7 @@ dependencies = [
  "json",
  "lazy_static",
  "num 0.4.1",
+ "num-prime",
  "primal",
  "rand",
  "regex",
