@@ -7,6 +7,7 @@ mod middle_square_controls;
 mod pcg_controls;
 mod rc4_controls;
 mod splitmix_controls;
+mod vmpcr_controls;
 mod weyl_controls;
 mod xorshift_controls;
 mod xoshiro_controls;
@@ -21,7 +22,7 @@ use self::{
     halton_controls::HaltonFrame, lcg_controls::LcgFrame, lfsr_controls::LfsrFrame,
     mersenne_twister_controls::MTFrame, middle_square_controls::MiddleSquareFrame,
     pcg_controls::PcgFrame, rc4_controls::Rc4Frame, splitmix_controls::SplitmixFrame,
-    weyl_controls::WeylSequenceFrame, xorshift_controls::XorshiftFrame,
+    vmpcr_controls::VmpcrFrame, weyl_controls::WeylSequenceFrame, xorshift_controls::XorshiftFrame,
     xoshiro_controls::XoshiroFrame,
 };
 
@@ -63,6 +64,7 @@ pub struct RngInterface {
     pcg: PcgFrame,
     rc4: Rc4Frame,
     splitmix: SplitmixFrame,
+    vmpcr: VmpcrFrame,
     weyl: WeylSequenceFrame,
     xorshift: XorshiftFrame,
     xoshiro: XoshiroFrame,
@@ -79,6 +81,7 @@ impl RngInterface {
                 RngId::Pcg,
                 RngId::Rc4,
                 RngId::Splitmix,
+                RngId::Vmpcr,
                 RngId::Xorshift,
                 RngId::Xoshiro,
             ],
@@ -108,6 +111,7 @@ impl RngInterface {
             RngId::Pcg => &mut self.pcg,
             RngId::Rc4 => &mut self.rc4,
             RngId::Splitmix => &mut self.splitmix,
+            RngId::Vmpcr => &mut self.vmpcr,
             RngId::Weyl => &mut self.weyl,
             RngId::Xorshift => &mut self.xorshift,
             RngId::Xoshiro => &mut self.xoshiro,
