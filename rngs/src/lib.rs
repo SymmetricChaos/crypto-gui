@@ -11,6 +11,7 @@ pub mod pcg;
 pub mod rc4;
 pub mod splitmix;
 pub mod traits;
+pub mod vmpcr;
 pub mod weyl;
 pub mod xorshift;
 pub mod xoshiro;
