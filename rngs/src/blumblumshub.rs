@@ -6,6 +6,7 @@ pub fn acceptable_num(n: u64) -> bool {
     is_safe_prime(&n).probably() && n % 4 == 3
 }
 
+// https://shub.ccny.cuny.edu/articles/1986-A_simple_unpredictable_pseudo-random_number_generator.pdf
 pub struct BlumBlumShub {
     m: BigUint,
     state: BigUint,
@@ -20,12 +21,20 @@ impl BlumBlumShub {
             Err(RngError::general("either p or q is not acceptable"))
         }
     }
+
+    pub fn step(&mut self) {
+        self.state = (&self.state * &self.state) % &self.m;
+    }
 }
 
 impl ClassicRng for BlumBlumShub {
     fn next_u32(&mut self) -> u32 {
-        self.state = (&self.state * &self.state) % &self.m;
-        // Lower 32 bits
-        self.state.to_u32_digits()[0]
+        let mut out = 0;
+        // Extract 32 bits using the parity of value
+        for i in 0..32 {
+            self.state = (&self.state * &self.state) % &self.m;
+            out |= ((self.state.count_ones() % 2) as u32) << i;
+        }
+        out
     }
 }
