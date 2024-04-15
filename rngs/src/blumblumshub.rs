@@ -8,8 +8,17 @@ pub fn acceptable_num(n: u64) -> bool {
 
 // https://shub.ccny.cuny.edu/articles/1986-A_simple_unpredictable_pseudo-random_number_generator.pdf
 pub struct BlumBlumShub {
-    m: BigUint,
-    state: BigUint,
+    pub m: BigUint,
+    pub state: BigUint,
+}
+
+impl Default for BlumBlumShub {
+    fn default() -> Self {
+        Self {
+            m: Default::default(),
+            state: Default::default(),
+        }
+    }
 }
 
 impl BlumBlumShub {

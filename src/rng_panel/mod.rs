@@ -1,3 +1,4 @@
+mod blumblumshub_controls;
 mod halton_controls;
 mod lcg_controls;
 mod lfg_controls;
