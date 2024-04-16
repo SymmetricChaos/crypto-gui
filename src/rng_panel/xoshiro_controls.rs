@@ -1,5 +1,5 @@
 use super::ClassicRngFrame;
-use crate::ui_elements::{generate_random_nums_box, UiElements};
+use crate::ui_elements::{generate_random_u32s_box, UiElements};
 use rand::{thread_rng, Rng};
 use rngs::xoshiro::{Scrambler, Xoshiro256};
 
@@ -102,7 +102,7 @@ impl ClassicRngFrame for XoshiroFrame {
         });
 
         ui.add_space(16.0);
-        generate_random_nums_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
+        generate_random_u32s_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
         ui.add_space(16.0);
     }
 

@@ -1,7 +1,7 @@
 use std::num::ParseIntError;
 
 use super::ClassicRngFrame;
-use crate::ui_elements::{generate_random_nums_box, UiElements};
+use crate::ui_elements::{generate_random_u32s_box, UiElements};
 use egui::{FontId, RichText, Ui};
 use rand::{thread_rng, Rng};
 use rngs::{mt19937_32::Mt19937_32, mt19937_64::Mt19937_64};
@@ -198,7 +198,7 @@ impl ClassicRngFrame for MTFrame {
         //ui.collapsing("explain", |ui| ui.label(""));
 
         ui.add_space(16.0);
-        generate_random_nums_box(ui, &mut self.rng_32, &mut self.n_random, &mut self.randoms);
+        generate_random_u32s_box(ui, &mut self.rng_32, &mut self.n_random, &mut self.randoms);
         ui.add_space(16.0);
     }
 

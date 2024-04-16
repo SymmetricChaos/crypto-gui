@@ -269,7 +269,7 @@ macro_rules! filter_and_parse_int {
 filter_and_parse_int!(filter_and_parse_u32, u32);
 filter_and_parse_int!(filter_and_parse_u64, u64);
 
-pub fn generate_random_nums_box(
+pub fn generate_random_u32s_box(
     ui: &mut Ui,
     rng: &mut dyn ClassicRng,
     n_random: &mut usize,

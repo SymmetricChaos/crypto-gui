@@ -3,7 +3,7 @@ use rand::{thread_rng, Rng};
 use rngs::{lfsr::Lfsr, ClassicRng};
 use utils::bits::{bits_to_int_big_endian, bits_to_int_little_endian, Bit};
 
-use crate::ui_elements::{generate_random_nums_box, UiElements};
+use crate::ui_elements::{generate_random_u32s_box, UiElements};
 
 use super::ClassicRngFrame;
 
@@ -100,7 +100,7 @@ impl ClassicRngFrame for LfsrFrame {
             }
         }
         ui.add_space(16.0);
-        generate_random_nums_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
+        generate_random_u32s_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
     }
 
     fn rng(&self) -> &dyn rngs::ClassicRng {

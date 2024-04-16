@@ -1,5 +1,5 @@
 use super::ClassicRngFrame;
-use crate::ui_elements::{generate_random_nums_box, UiElements};
+use crate::ui_elements::{generate_random_u32s_box, UiElements};
 use egui::{Button, DragValue, RichText};
 use rand::{thread_rng, Rng};
 use rngs::{middle_square::MiddleSquare, ClassicRng};
@@ -86,7 +86,7 @@ impl ClassicRngFrame for MiddleSquareFrame {
             ui.error_text("width must be even");
         }
 
-        generate_random_nums_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
+        generate_random_u32s_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
     }
 
     fn rng(&self) -> &dyn rngs::ClassicRng {
