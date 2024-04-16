@@ -34,12 +34,22 @@ impl BlumBlumShub {
     pub fn step(&mut self) {
         self.state = (&self.state * &self.state) % &self.m;
     }
+
+    pub fn next_u8(&mut self) -> u8 {
+        let mut out = 0;
+        // Extract 8 bits using the parity of 8 consecutive states
+        for i in 0..8 {
+            self.state = (&self.state * &self.state) % &self.m;
+            out |= ((self.state.count_ones() % 2) as u8) << i;
+        }
+        out
+    }
 }
 
 impl ClassicRng for BlumBlumShub {
     fn next_u32(&mut self) -> u32 {
         let mut out = 0;
-        // Extract 32 bits using the parity of value
+        // Extract 32 bits using the parity of 32 consecutive states
         for i in 0..32 {
             self.state = (&self.state * &self.state) % &self.m;
             out |= ((self.state.count_ones() % 2) as u32) << i;

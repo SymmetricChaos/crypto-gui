@@ -1,10 +1,10 @@
 use super::ClassicRngFrame;
 use crate::ui_elements::{generate_random_nums_box, UiElements};
-use egui::{DragValue, FontId, RichText};
+use egui::DragValue;
 
 use num::BigUint;
 use num_prime::RandPrime;
-use rand::{thread_rng, Rng};
+use rand::thread_rng;
 use rngs::blumblumshub::BlumBlumShub;
 
 pub struct BlumBlumShubFrame {
@@ -15,6 +15,7 @@ pub struct BlumBlumShubFrame {
     randoms: String,
     // n_random_bytes: usize,
     n_random: usize,
+    valid_m: bool,
 }
 
 impl Default for BlumBlumShubFrame {
@@ -31,6 +32,7 @@ impl Default for BlumBlumShubFrame {
             randoms: String::new(),
             // n_random_bytes: 5,
             n_random: 5,
+            valid_m: true,
         }
     }
 }
@@ -46,21 +48,33 @@ impl ClassicRngFrame for BlumBlumShubFrame {
             if ui.button("🎲").on_hover_text("randomize").clicked() {
                 let mut rng = thread_rng();
                 self.p = rng.gen_safe_prime(64);
-                self.rng.set_m(self.p, self.q);
+                self.valid_m = self.rng.set_m(self.p, self.q).is_ok();
             }
         });
+        if ui.add(DragValue::new(&mut self.p)).changed() {
+            self.valid_m = self.rng.set_m(self.p, self.q).is_ok();
+        };
         ui.horizontal(|ui| {
             ui.subheading("Q");
             if ui.button("🎲").on_hover_text("randomize").clicked() {
                 let mut rng = thread_rng();
                 self.q = rng.gen_safe_prime(64);
-                self.rng.set_m(self.p, self.q);
+                self.valid_m = self.rng.set_m(self.p, self.q).is_ok();
             }
         });
+        if ui.add(DragValue::new(&mut self.q)).changed() {
+            self.valid_m = self.rng.set_m(self.p, self.q).is_ok();
+        };
 
-        // Gray out when invalid inputs are given
         ui.subheading("Modulus");
-        ui.label(format!("{} {} = {}", self.p, self.q, self.rng.m));
+        if self.valid_m {
+            ui.label(format!("{} {} = {}", self.p, self.q, self.rng.m));
+        } else {
+            ui.error_text(format!(
+                "{} {} = {}; p and q are not safe primes",
+                self.p, self.q, self.rng.m
+            ));
+        }
 
         ui.add_space(16.0);
         ui.subheading(
