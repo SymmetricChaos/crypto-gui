@@ -59,28 +59,6 @@ pub fn bytes_to_hex_le(bytes: &[u8]) -> String {
         .join("")
 }
 
-// #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-// pub struct OctToBytesError;
-
-// pub fn oct_to_bytes(hex: &str) -> Result<Vec<u8>, OctToBytesError> {
-//     let mut text: String = hex.lines().collect();
-//     text = text.to_ascii_lowercase();
-//     if !IS_OCT_BYTES.is_match(&text) {
-//         return Err(OctToBytesError);
-//     } else {
-//         let mut out = Vec::new();
-//         for i in 0..(text.len() / 3) {
-//             let lo = i * 3;
-//             out.push(u8::from_str_radix(&text[lo..lo + 3], 8).unwrap())
-//         }
-//         Ok(out)
-//     }
-// }
-
-// pub fn bytes_to_oct(bytes: &[u8]) -> String {
-//     bytes.into_iter().map(|b| format!("{:03o}", b)).join("")
-// }
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BitstringToBytesError;
 

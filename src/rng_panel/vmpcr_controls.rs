@@ -47,7 +47,9 @@ impl ClassicRngFrame for VmpcrFrame {
         ui.horizontal(|ui| {
             ui.subheading("Key");
             if ui.button("🎲").on_hover_text("randomize").clicked() {
-                self.randomize();
+                let mut rng = thread_rng();
+                self.key = format!("{:08X}", rng.gen::<u64>());
+                self.key_bytes = Some(ByteFormat::Hex.text_to_bytes(&self.key).unwrap());
             }
         });
         ui.label("Up to 256 bytes as hexadecimal.");
@@ -67,11 +69,13 @@ impl ClassicRngFrame for VmpcrFrame {
         ui.horizontal(|ui| {
             ui.subheading("Initialization Vector");
             if ui.button("🎲").on_hover_text("randomize").clicked() {
-                self.randomize();
+                let mut rng = thread_rng();
+                self.iv = format!("{:08X}", rng.gen::<u64>());
+                self.iv_bytes = Some(ByteFormat::Hex.text_to_bytes(&self.iv).unwrap());
             }
         });
         ui.label("Up to 256 bytes as hexadecimal.");
-        if ui.text_edit_multiline(&mut self.key).changed() {
+        if ui.text_edit_multiline(&mut self.iv).changed() {
             self.iv = self.iv.chars().filter(|c| c.is_ascii_hexdigit()).collect();
             self.iv_bytes = match ByteFormat::Hex.text_to_bytes(&self.iv) {
                 Ok(b) => Some(b),
