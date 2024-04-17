@@ -20,11 +20,11 @@ use rngs::{
 };
 
 use self::{
-    halton_controls::HaltonFrame, lcg_controls::LcgFrame, lfsr_controls::LfsrFrame,
-    mersenne_twister_controls::MTFrame, middle_square_controls::MiddleSquareFrame,
-    pcg_controls::PcgFrame, rc4_controls::Rc4Frame, splitmix_controls::SplitmixFrame,
-    vmpcr_controls::VmpcrFrame, weyl_controls::WeylSequenceFrame, xorshift_controls::XorshiftFrame,
-    xoshiro_controls::XoshiroFrame,
+    blumblumshub_controls::BlumBlumShubFrame, halton_controls::HaltonFrame, lcg_controls::LcgFrame,
+    lfsr_controls::LfsrFrame, mersenne_twister_controls::MTFrame,
+    middle_square_controls::MiddleSquareFrame, pcg_controls::PcgFrame, rc4_controls::Rc4Frame,
+    splitmix_controls::SplitmixFrame, vmpcr_controls::VmpcrFrame, weyl_controls::WeylSequenceFrame,
+    xorshift_controls::XorshiftFrame, xoshiro_controls::XoshiroFrame,
 };
 
 pub trait ClassicRngFrame {
@@ -57,6 +57,7 @@ fn combox_box(
 
 #[derive(Default)]
 pub struct RngInterface {
+    blumblumshub: BlumBlumShubFrame,
     halton: HaltonFrame,
     lcg: LcgFrame,
     lfsr: LfsrFrame,
@@ -75,6 +76,7 @@ impl RngInterface {
     pub fn combo_boxes(&mut self, ui: &mut Ui, active_rng: &mut Option<RngId>) {
         combox_box(
             &[
+                RngId::BlumBlumShub,
                 RngId::Lcg,
                 RngId::Lfsr,
                 RngId::MersenneTwister,
@@ -103,6 +105,7 @@ impl RngInterface {
 
     pub fn get_active_rng(&mut self, active_rng: &RngId) -> &mut dyn ClassicRngFrame {
         match active_rng {
+            RngId::BlumBlumShub => &mut self.blumblumshub,
             RngId::Halton => &mut self.halton,
             RngId::Lcg => &mut self.lcg,
             // RngId::Lfg => &mut self.lfg,

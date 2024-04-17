@@ -2,7 +2,7 @@ use super::ClassicRngFrame;
 use crate::ui_elements::{generate_random_u32s_box, UiElements};
 use egui::DragValue;
 
-use num::BigUint;
+use num::{BigUint, FromPrimitive};
 use num_prime::RandPrime;
 use rand::thread_rng;
 use rngs::blumblumshub::BlumBlumShub;
@@ -11,6 +11,7 @@ pub struct BlumBlumShubFrame {
     rng: BlumBlumShub,
     p: u64,
     q: u64,
+    local_state: u64,
     // random_bytes: String,
     randoms: String,
     // n_random_bytes: usize,
@@ -28,6 +29,7 @@ impl Default for BlumBlumShubFrame {
             rng,
             p,
             q,
+            local_state: 2,
             // random_bytes: String::new(),
             randoms: String::new(),
             // n_random_bytes: 5,
@@ -44,7 +46,7 @@ impl ClassicRngFrame for BlumBlumShubFrame {
         ui.add_space(16.0);
 
         ui.horizontal(|ui| {
-            ui.subheading("P");
+            ui.subheading("Prime-P");
             if ui.button("🎲").on_hover_text("randomize").clicked() {
                 let mut rng = thread_rng();
                 self.p = rng.gen_safe_prime(64);
@@ -54,8 +56,9 @@ impl ClassicRngFrame for BlumBlumShubFrame {
         if ui.add(DragValue::new(&mut self.p)).changed() {
             self.valid_m = self.rng.set_m(self.p, self.q).is_ok();
         };
+        ui.add_space(4.0);
         ui.horizontal(|ui| {
-            ui.subheading("Q");
+            ui.subheading("Prime-Q");
             if ui.button("🎲").on_hover_text("randomize").clicked() {
                 let mut rng = thread_rng();
                 self.q = rng.gen_safe_prime(64);
@@ -66,6 +69,7 @@ impl ClassicRngFrame for BlumBlumShubFrame {
             self.valid_m = self.rng.set_m(self.p, self.q).is_ok();
         };
 
+        ui.add_space(16.0);
         ui.subheading("Modulus");
         if self.valid_m {
             ui.label(format!("{} {} = {}", self.p, self.q, self.rng.m));
@@ -77,9 +81,16 @@ impl ClassicRngFrame for BlumBlumShubFrame {
         }
 
         ui.add_space(16.0);
-        ui.subheading(
-            "Normally the Blum-Blum-Shub algorithm steps 32 times to produce an integer output.",
-        );
+        ui.subheading("Seed Value");
+        if ui.add(DragValue::new(&mut self.local_state)).changed() {
+            self.rng.state = BigUint::from_u64(self.local_state).unwrap()
+        }
+        ui.add_space(4.0);
+        ui.subheading("Current State");
+        ui.label(self.rng.state.to_str_radix(10));
+
+        ui.add_space(16.0);
+        ui.subheading("Step Once");
         if ui.button("step").clicked() {
             self.rng.step();
         }
