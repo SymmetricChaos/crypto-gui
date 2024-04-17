@@ -102,7 +102,7 @@ impl Rc5 {
         // No padding rule is given by Rivest
         if bytes.len() % 8 != 0 {
             return Err(CipherError::input(
-                "decrypted data must be in chunks of 64 bits",
+                "encrypted data must be in chunks of 64 bits",
             ));
         }
 
