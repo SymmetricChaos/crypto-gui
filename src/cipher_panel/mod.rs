@@ -22,9 +22,9 @@ use self::{
     rail_fence_controls::RailFenceFrame, rc4_controls::Rc4Frame, rc5_controls::Rc5Frame,
     rs44_controls::Rs44Frame, rsa_controls::RsaFrame, scytale_controls::ScytaleFrame,
     seriated_playfair_controls::SeriatedPlayfairFrame, shamir_controls::ShamirSecretSharingFrame,
-    sigaba_controls::SigabaFrame, slidefair_controls::SlidefairFrame, trifid_controls::TrifidFrame,
-    turning_grille_controls::TurningGrilleFrame, two_square_controls::TwoSquareFrame,
-    vic_controls::VicFrame, vigenere_controls::VigenereFrame,
+    sigaba_controls::SigabaFrame, slidefair_controls::SlidefairFrame, tea_controls::TeaFrame,
+    trifid_controls::TrifidFrame, turning_grille_controls::TurningGrilleFrame,
+    two_square_controls::TwoSquareFrame, vic_controls::VicFrame, vigenere_controls::VigenereFrame,
 };
 
 pub mod adfgvx_controls;
@@ -175,6 +175,7 @@ pub struct CipherInterface {
     rc4: Rc4Frame,
     rc5: Rc5Frame,
     rsa: RsaFrame,
+    tea: TeaFrame,
 
     // Other
     shamir: ShamirSecretSharingFrame,
@@ -278,7 +279,7 @@ impl CipherInterface {
         );
 
         combox_box(
-            &[CipherId::Rc4, CipherId::Rc5, CipherId::Rsa],
+            &[CipherId::Rc4, CipherId::Rc5, CipherId::Rsa, CipherId::Tea],
             active_cipher,
             CipherCategory::Digital,
             ui,
@@ -336,6 +337,7 @@ impl CipherInterface {
             CipherId::Sigaba => &mut self.sigaba,
             CipherId::Slidefair => &mut self.slidefair,
             CipherId::Substitution => &mut self.gen_sub,
+            CipherId::Tea => &mut self.tea,
             CipherId::Trifid => &mut self.trifid,
             CipherId::TurningGrille => &mut self.turning_grille,
             CipherId::TwoSquare => &mut self.two_square,

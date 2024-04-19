@@ -50,11 +50,13 @@ pub enum CipherId {
     Sigaba,
     Slidefair,
     Substitution,
+    Tea,
     Trifid,
     TurningGrille,
     TwoSquare,
     Vic,
     Vigenere,
+    Xtea,
 }
 
 impl Default for CipherId {
@@ -122,11 +124,13 @@ impl Display for CipherId {
             CipherId::Sigaba => "SIGABA",
             CipherId::Slidefair => "Slidefair",
             CipherId::Substitution => "Substitution",
+            CipherId::Tea => "TEA",
             CipherId::Trifid => "Trifid",
             CipherId::TurningGrille => "Turning Grille",
             CipherId::TwoSquare => "Two-Square",
             CipherId::Vic => "VIC",
             CipherId::Vigenere => "Vigenère",
+            CipherId::Xtea => "XTEA",
             _ => "<<<MISSING NAME>>>",
         };
         write!(f, "{}", name)

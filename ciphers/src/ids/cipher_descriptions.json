@@ -44,7 +44,7 @@
   "Slidefair": "The slidefair cipher is a stronger but more complex variation on the Playfair Cipher developed by Helen Gaines. The grid is a tabula-recta of every shift of the alphabet. ",
   "Straddling Checkerboard": "The straddling checkerboard is a modernized version of the Polybius square that assigns single digits to certain letters, usually the most common. It is weak on its own but its irregularity makes it useful when combined with other ciphers.",
   "Substitution": "The general substitution cipher maps a set of symbols one-to-one onto another arbitary set. This implementation allows only maping the symbols of an alphabet but all simple substitution ciphers are included in principle.",
-  "TEA": "The Tiny Encryption Algorithm (TEA) is a block cipher.",
+  "TEA": "The Tiny Encryption Algorithm (TEA) is a block cipher known for its use in the original Xbox.",
   "XTEA": "The Extended Tiny Encryption Algorithm (XTEA) is a block cipher.",
   "Trifid": "The trifid cipher uses the same principles as the bifid cipher but is based on a a Polybius cube rather than a Polybius square, slightly increasing diffusion.",
   "Turning Grille": "The turning grille cipher is a transposition cipher that uses a grille to distribute characters across a square. The grille is carefully chosen so that when turned 90 degrees no positions are reused and addition characters can be written in. To accomplish this each quadrant of the grid is assigned a sequence of numbers that appear correctly when rotated to the upper right and different numbers are punched out in each quadrant.",
