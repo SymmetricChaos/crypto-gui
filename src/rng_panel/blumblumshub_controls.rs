@@ -30,9 +30,7 @@ impl Default for BlumBlumShubFrame {
             p,
             q,
             local_state: 2,
-            // random_bytes: String::new(),
             randoms: String::new(),
-            // n_random_bytes: 5,
             n_random: 5,
             valid_m: true,
         }
@@ -72,10 +70,10 @@ impl ClassicRngFrame for BlumBlumShubFrame {
         ui.add_space(16.0);
         ui.subheading("Modulus");
         if self.valid_m {
-            ui.label(format!("{} {} = {}", self.p, self.q, self.rng.m));
+            ui.label(format!("{} × {} = {}", self.p, self.q, self.rng.m));
         } else {
             ui.error_text(format!(
-                "{} {} = {}; p and q are not safe primes",
+                "{} × {} = {}; p and q should both be safe primes",
                 self.p, self.q, self.rng.m
             ));
         }
@@ -91,6 +89,7 @@ impl ClassicRngFrame for BlumBlumShubFrame {
 
         ui.add_space(16.0);
         ui.subheading("Step Once");
+        ui.label("Blum-Blum-Shub steps 32 times to produce a new integer. This steps once.");
         if ui.button("step").clicked() {
             self.rng.step();
         }
@@ -105,11 +104,10 @@ impl ClassicRngFrame for BlumBlumShubFrame {
     }
 
     fn randomize(&mut self) {
-        // let mut rng = thread_rng();
-        // self.key = format!("{:08X}", rng.gen::<u64>());
-        // self.rng.i = 0;
-        // self.rng.j = 0;
-        // self.run_ksa();
+        let mut rng = thread_rng();
+        self.q = rng.gen_safe_prime(64);
+        self.p = rng.gen_safe_prime(64);
+        self.valid_m = self.rng.set_m(self.p, self.q).is_ok();
     }
 
     fn reset(&mut self) {

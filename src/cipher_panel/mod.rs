@@ -70,6 +70,7 @@ pub mod seriated_playfair_controls;
 pub mod shamir_controls;
 pub mod sigaba_controls;
 pub mod slidefair_controls;
+mod tea_controls;
 pub mod trifid_controls;
 pub mod turning_grille_controls;
 pub mod two_square_controls;
