@@ -1,13 +1,23 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{digital::tea::Tea, Cipher};
+use ciphers::{
+    digital::{tea::Tea, BlockCipherMode},
+    Cipher,
+};
 use egui::{DragValue, Ui};
 use rand::{thread_rng, Rng};
 use utils::byte_formatting::ByteFormat;
 
-#[derive(Default)]
 pub struct TeaFrame {
     cipher: Tea,
+}
+
+impl Default for TeaFrame {
+    fn default() -> Self {
+        Self {
+            cipher: Default::default(),
+        }
+    }
 }
 
 impl TeaFrame {}
@@ -54,6 +64,21 @@ impl CipherFrame for TeaFrame {
         });
         ui.add_space(16.0);
 
+        ui.collapsing("Block Cipher Mode", |ui| {
+            ui.label("Input can be text (interpreted as UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
+            ui.horizontal(|ui| {
+                ui.selectable_value(
+                    &mut self.cipher.mode,
+                    BlockCipherMode::ECB,
+                    "ECB (Electronic Code Book)",
+                );
+                ui.selectable_value(
+                    &mut self.cipher.mode,
+                    BlockCipherMode::CTR,
+                    "CTR (Counter)",
+                );
+            });
+        });
         ui.add_space(8.0);
 
         ui.subheading("Key");
@@ -62,6 +87,14 @@ impl CipherFrame for TeaFrame {
         ui.add(DragValue::new(&mut self.cipher.key[1]).hexadecimal(8, false, true));
         ui.add(DragValue::new(&mut self.cipher.key[2]).hexadecimal(8, false, true));
         ui.add(DragValue::new(&mut self.cipher.key[3]).hexadecimal(8, false, true));
+
+        ui.add_space(8.0);
+
+        ui.add_enabled_ui(self.cipher.mode == BlockCipherMode::CTR, |ui| {
+            ui.subheading("Counter");
+            ui.label("In CTR mode the cipher must have a 64-bit counter value provided.");
+            ui.add(DragValue::new(&mut self.cipher.ctr).hexadecimal(16, false, true));
+        });
 
         ui.add_space(16.0);
     }
