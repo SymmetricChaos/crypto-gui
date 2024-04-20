@@ -1,4 +1,6 @@
-use super::{byte_formatting_io, HasherFrame};
+use crate::ui_elements::UiElements;
+
+use super::HasherFrame;
 use hashers::{errors::HasherError, md4::Md4, traits::ClassicHasher};
 
 pub struct Md4Frame {
@@ -19,8 +21,7 @@ impl HasherFrame for Md4Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.add_space(16.0);
 
-        byte_formatting_io(
-            ui,
+        ui.byte_io_mode(
             &mut self.hasher.input_format,
             &mut self.hasher.output_format,
         );

@@ -1,6 +1,6 @@
 use crate::ui_elements::UiElements;
 
-use super::{byte_formatting_io, HasherFrame};
+use super::HasherFrame;
 use hashers::{
     errors::HasherError,
     hmac::Hmac,
@@ -105,8 +105,7 @@ impl HasherFrame for HmacFrame {
         ui.subheading("Algorithm");
         ui.label("HMAC accepts a hasher, a key, and a message. In the case that the key is larger than the block size of the hasher it is hashed and that hash is used as the key instead.\n1) Each byte of the key is XORed with the padding byte 0x5c and the padding bytes continue up to the block size of the hasher.\n2) The message is appended to the key and that entire sequence of bytes is hashed.\n3) Each byte of the key is XORed with the padding byte 0x36 and the padding bytes continue up to the block size of the hasher.\n4) The previously hashed result is appended to this padded key and that entire sequence of bytes is hashed.\nHMAC = H((key ⊕ outer_pad) || H( (key ⊕ inner_pad) || message )))");
 
-        byte_formatting_io(
-            ui,
+        ui.byte_io_mode(
             &mut self.hasher.input_format,
             &mut self.hasher.output_format,
         );

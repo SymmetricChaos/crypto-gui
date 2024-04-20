@@ -1,4 +1,4 @@
-use super::{byte_formatting_io, HasherFrame};
+use super::HasherFrame;
 use crate::ui_elements::UiElements;
 use hashers::{errors::HasherError, poly1305::Poly1305, traits::ClassicHasher};
 use rand::{thread_rng, RngCore};
@@ -48,8 +48,7 @@ impl HasherFrame for Poly1305Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.add_space(16.0);
 
-        byte_formatting_io(
-            ui,
+        ui.byte_io_mode(
             &mut self.hasher.input_format,
             &mut self.hasher.output_format,
         );

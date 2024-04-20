@@ -1,6 +1,6 @@
 use crate::ui_elements::UiElements;
 
-use super::{byte_formatting_io, HasherFrame};
+use super::HasherFrame;
 use hashers::{
     blake::{blake256::Blake256, blake512::Blake512},
     errors::HasherError,
@@ -113,23 +113,19 @@ impl HasherFrame for BlakeFrame {
         ui.add_space(16.0);
 
         match self.variant {
-            BlakeVariant::B224 => byte_formatting_io(
-                ui,
+            BlakeVariant::B224 => ui.byte_io_mode(
                 &mut self.hasher_224.input_format,
                 &mut self.hasher_224.output_format,
             ),
-            BlakeVariant::B256 => byte_formatting_io(
-                ui,
+            BlakeVariant::B256 => ui.byte_io_mode(
                 &mut self.hasher_256.input_format,
                 &mut self.hasher_256.output_format,
             ),
-            BlakeVariant::B384 => byte_formatting_io(
-                ui,
+            BlakeVariant::B384 => ui.byte_io_mode(
                 &mut self.hasher_384.input_format,
                 &mut self.hasher_384.output_format,
             ),
-            BlakeVariant::B512 => byte_formatting_io(
-                ui,
+            BlakeVariant::B512 => ui.byte_io_mode(
                 &mut self.hasher_512.input_format,
                 &mut self.hasher_512.output_format,
             ),

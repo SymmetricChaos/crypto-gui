@@ -20,7 +20,6 @@ use hashers::{
     errors::HasherError,
     ids::{hasher_categories::HasherCategory, HasherId},
 };
-use utils::byte_formatting::ByteFormat;
 
 use self::{
     blake2_controls::Blake2Frame, blake3_controls::Blake3Frame, blake_controls::BlakeFrame,
@@ -124,42 +123,4 @@ impl HasherInterface {
             HasherId::SipHash => &mut self.siphash,
         }
     }
-}
-
-pub fn byte_formatting_io(ui: &mut Ui, input: &mut ByteFormat, output: &mut ByteFormat) {
-    ui.collapsing("Input Format", |ui| {
-        ui.label("Input can be text (interpreted as UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
-        ui.horizontal(|ui| {
-            ui.selectable_value(
-                input,
-                ByteFormat::Utf8,
-                "Text (UTF-8)",
-            );
-            ui.selectable_value(
-                input,
-                ByteFormat::Hex,
-                "Hexadecimal",
-            );
-            ui.selectable_value(input, ByteFormat::Base64, "Base64");
-        });
-    });
-
-    ui.add_space(8.0);
-
-    ui.collapsing("Output Format", |ui| {
-        ui.label("Output can be text (but information will be lost if the encrypted bytes are not valid UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
-        ui.horizontal(|ui| {
-            ui.selectable_value(
-                output,
-                ByteFormat::Utf8,
-                "Text (UTF-8)",
-            );
-            ui.selectable_value(
-                output,
-                ByteFormat::Hex,
-                "Hexadecimal",
-            );
-            ui.selectable_value(output, ByteFormat::Base64, "Base64");
-        });
-    });
 }

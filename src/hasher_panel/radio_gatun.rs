@@ -1,4 +1,4 @@
-use super::{byte_formatting_io, HasherFrame};
+use super::HasherFrame;
 use crate::ui_elements::UiElements;
 use egui::DragValue;
 use hashers::{
@@ -25,8 +25,7 @@ impl Default for RadioGatunFrame {
 
 impl RadioGatunFrame {
     fn byte_formatting(&mut self, ui: &mut egui::Ui) {
-        byte_formatting_io(
-            ui,
+        ui.byte_io_mode(
             &mut self.hasher32.input_format,
             &mut self.hasher32.output_format,
         );

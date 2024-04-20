@@ -1,6 +1,6 @@
 use crate::ui_elements::UiElements;
 
-use super::{byte_formatting_io, HasherFrame};
+use super::HasherFrame;
 use hashers::{
     errors::HasherError,
     fnv::{Fnv, FnvSize, O128, O256, O32, O64, P128, P256, P32, P64},
@@ -24,8 +24,7 @@ impl FnvFrame {}
 impl HasherFrame for FnvFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.add_space(16.0);
-        byte_formatting_io(
-            ui,
+        ui.byte_io_mode(
             &mut self.hasher.input_format,
             &mut self.hasher.output_format,
         );
