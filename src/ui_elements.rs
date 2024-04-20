@@ -1,4 +1,5 @@
 use crate::cipher_panel::CipherFrame;
+use ciphers::digital::BlockCipherMode;
 use eframe::egui::RichText;
 use egui::{Color32, DragValue, Response, TextStyle, Ui};
 use egui_extras::{Column, TableBuilder};
@@ -40,6 +41,7 @@ pub trait UiElements {
         iter: Box<dyn Iterator<Item = (S, T)> + '_>,
     );
     fn binary_to_text_input_mode(&mut self, current_value: &mut ByteFormat);
+    fn byte_io_mode(&mut self, input: &mut ByteFormat, output: &mut ByteFormat);
 }
 
 impl UiElements for Ui {
@@ -139,6 +141,44 @@ impl UiElements for Ui {
             .on_hover_text("interpret input as Base64");
         self.selectable_value(current_value, ByteFormat::Bit, "Binary")
             .on_hover_text("interpret input as binary");
+    }
+
+    fn byte_io_mode(&mut self, input: &mut ByteFormat, output: &mut ByteFormat) {
+        self.collapsing("Input Format", |ui| {
+            ui.label("Input can be text (interpreted as UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
+            ui.horizontal(|ui| {
+                ui.selectable_value(
+                    input,
+                    ByteFormat::Utf8,
+                    "Text (UTF-8)",
+                );
+                ui.selectable_value(
+                    input,
+                    ByteFormat::Hex,
+                    "Hexadecimal",
+                );
+                ui.selectable_value(input, ByteFormat::Base64, "Base64");
+            });
+        });
+
+        self.add_space(8.0);
+
+        self.collapsing("Output Format", |ui| {
+            ui.label("Output can be text (but information will be lost if the bytes are not valid UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
+            ui.horizontal(|ui| {
+                ui.selectable_value(
+                    output,
+                    ByteFormat::Utf8,
+                    "Text (UTF-8)",
+                );
+                ui.selectable_value(
+                    output,
+                    ByteFormat::Hex,
+                    "Hexadecimal",
+                );
+                ui.selectable_value(output, ByteFormat::Base64, "Base64");
+            });
+        });
     }
 
     fn copy_to_clipboard<S: ToString>(&mut self, text: S) {
@@ -329,6 +369,32 @@ pub fn text_manip_menu(ui: &mut Ui, text: &mut String) {
         if ui.button("lowercase").clicked() {
             *text = text.to_lowercase();
         }
+    });
+}
+
+pub fn block_cipher_mode(ui: &mut Ui, mode: &mut BlockCipherMode) {
+    ui.collapsing("Block Cipher Mode", |ui| {
+        ui.label("Input can be text (interpreted as UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
+        ui.horizontal(|ui| {
+            ui.selectable_value(
+                mode,
+                BlockCipherMode::ECB,
+                "ECB (Electronic Code Book)",
+            );
+            ui.collapsing("more", |ui| {
+                ui.label("ECB mode is the simplest but least secure way to operate a block cipher. Each block of plaintext is encrypted directly. This is fast and can be parallelized trivially for even greater speed but if two blocks are the same they will be encrypted exactly the same way, exposing information about the plaintext.");
+            });
+        });
+        ui.horizontal(|ui| {
+            ui.selectable_value(
+                mode,
+                BlockCipherMode::CTR,
+                "CTR (Counter)",
+            );
+            ui.collapsing("more", |ui| {
+                ui.label("CTR mode turns the block cipher into a sort of stream cipher or secure PRNG. Rather than encrypting the plaintext directly the cipher is used to encrypt a sequence of numbers and the result is XORed with the plaintext. This helps ensure that identical sections of plaintext will not be encrypted to the same value. CTR mode is also easy to parallelize.");
+            });
+        });
     });
 }
 

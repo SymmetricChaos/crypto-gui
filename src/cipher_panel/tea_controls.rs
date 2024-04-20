@@ -1,12 +1,11 @@
 use super::CipherFrame;
-use crate::ui_elements::UiElements;
+use crate::ui_elements::{block_cipher_mode, UiElements};
 use ciphers::{
     digital::{tea::Tea, BlockCipherMode},
     Cipher,
 };
 use egui::{DragValue, Ui};
 use rand::{thread_rng, Rng};
-use utils::byte_formatting::ByteFormat;
 
 pub struct TeaFrame {
     cipher: Tea,
@@ -27,58 +26,14 @@ impl CipherFrame for TeaFrame {
         ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.collapsing("Input Format", |ui| {
-            ui.label("Input can be text (interpreted as UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
-            ui.horizontal(|ui| {
-                ui.selectable_value(
-                    &mut self.cipher.input_format,
-                    ByteFormat::Utf8,
-                    "Text (UTF-8)",
-                );
-                ui.selectable_value(
-                    &mut self.cipher.input_format,
-                    ByteFormat::Hex,
-                    "Hexadecimal",
-                );
-                ui.selectable_value(&mut self.cipher.input_format, ByteFormat::Utf8, "Base64");
-            });
-        });
+        ui.byte_io_mode(
+            &mut self.cipher.input_format,
+            &mut self.cipher.output_format,
+        );
 
-        ui.add_space(8.0);
-
-        ui.collapsing("Output Format", |ui| {
-            ui.label("Output can be text (but information will be lost if the encrypted bytes are not valid UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
-            ui.horizontal(|ui| {
-                ui.selectable_value(
-                    &mut self.cipher.output_format,
-                    ByteFormat::Utf8,
-                    "Text (UTF-8)",
-                );
-                ui.selectable_value(
-                    &mut self.cipher.output_format,
-                    ByteFormat::Hex,
-                    "Hexadecimal",
-                );
-                ui.selectable_value(&mut self.cipher.output_format, ByteFormat::Base64, "Base64");
-            });
-        });
         ui.add_space(16.0);
 
-        ui.collapsing("Block Cipher Mode", |ui| {
-            ui.label("Input can be text (interpreted as UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
-            ui.horizontal(|ui| {
-                ui.selectable_value(
-                    &mut self.cipher.mode,
-                    BlockCipherMode::ECB,
-                    "ECB (Electronic Code Book)",
-                );
-                ui.selectable_value(
-                    &mut self.cipher.mode,
-                    BlockCipherMode::CTR,
-                    "CTR (Counter)",
-                );
-            });
-        });
+        block_cipher_mode(ui, &mut self.cipher.mode);
         ui.add_space(8.0);
 
         ui.subheading("Key");

@@ -5,7 +5,6 @@ use crate::ui_elements::UiElements;
 use ciphers::{digital::rc4::Rc4, Cipher};
 use egui::{DragValue, FontId, RichText, Ui};
 use rand::{thread_rng, Rng};
-use utils::byte_formatting::ByteFormat;
 
 #[derive(Default)]
 pub struct Rc4Frame {
@@ -32,41 +31,10 @@ impl CipherFrame for Rc4Frame {
         ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.collapsing("Input Format", |ui| {
-            ui.label("Input can be text (interpreted as UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
-            ui.horizontal(|ui| {
-                ui.selectable_value(
-                    &mut self.cipher.input_format,
-                    ByteFormat::Utf8,
-                    "Text (UTF-8)",
-                );
-                ui.selectable_value(
-                    &mut self.cipher.input_format,
-                    ByteFormat::Hex,
-                    "Hexadecimal",
-                );
-                ui.selectable_value(&mut self.cipher.input_format, ByteFormat::Utf8, "Base64");
-            });
-        });
-
-        ui.add_space(8.0);
-
-        ui.collapsing("Output Format", |ui| {
-            ui.label("Output can be text (but information will be lost if the encrypted bytes are not valid UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
-            ui.horizontal(|ui| {
-                ui.selectable_value(
-                    &mut self.cipher.output_format,
-                    ByteFormat::Utf8,
-                    "Text (UTF-8)",
-                );
-                ui.selectable_value(
-                    &mut self.cipher.output_format,
-                    ByteFormat::Hex,
-                    "Hexadecimal",
-                );
-                ui.selectable_value(&mut self.cipher.output_format, ByteFormat::Base64, "Base64");
-            });
-        });
+        ui.byte_io_mode(
+            &mut self.cipher.input_format,
+            &mut self.cipher.output_format,
+        );
 
         ui.add_space(16.0);
 
