@@ -374,14 +374,14 @@ pub fn text_manip_menu(ui: &mut Ui, text: &mut String) {
 
 pub fn block_cipher_mode(ui: &mut Ui, mode: &mut BlockCipherMode) {
     ui.collapsing("Block Cipher Mode", |ui| {
-        ui.label("Input can be text (interpreted as UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
+        ui.label("Block ciphers have several possible modes of operation.");
         ui.horizontal(|ui| {
             ui.selectable_value(
                 mode,
                 BlockCipherMode::ECB,
                 "ECB (Electronic Code Book)",
             );
-            ui.collapsing("more", |ui| {
+            ui.collapsing("ECB info", |ui| {
                 ui.label("ECB mode is the simplest but least secure way to operate a block cipher. Each block of plaintext is encrypted directly. This is fast and can be parallelized trivially for even greater speed but if two blocks are the same they will be encrypted exactly the same way, exposing information about the plaintext.");
             });
         });
@@ -391,7 +391,7 @@ pub fn block_cipher_mode(ui: &mut Ui, mode: &mut BlockCipherMode) {
                 BlockCipherMode::CTR,
                 "CTR (Counter)",
             );
-            ui.collapsing("more", |ui| {
+            ui.collapsing("CTR info", |ui| {
                 ui.label("CTR mode turns the block cipher into a sort of stream cipher or secure PRNG. Rather than encrypting the plaintext directly the cipher is used to encrypt a sequence of numbers and the result is XORed with the plaintext. This helps ensure that identical sections of plaintext will not be encrypted to the same value. CTR mode is also easy to parallelize.");
             });
         });
