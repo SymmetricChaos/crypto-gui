@@ -4,6 +4,7 @@ pub mod elgamal;
 pub mod rc4;
 pub mod rc5;
 pub mod rsa;
+pub mod salsa20;
 pub mod tea;
 pub mod xtea;
 

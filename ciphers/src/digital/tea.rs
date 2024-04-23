@@ -46,17 +46,11 @@ impl Tea {
 
     // Encrypt in CTR mode.
     pub fn encrypt_ctr(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        // No padding rule is given
-        if bytes.len() % 8 != 0 {
-            return Err(CipherError::input(
-                "encrypted data must be in chunks of 64 bits",
-            ));
-        }
         let mut out = Vec::new();
         let mut ctr = self.ctr;
 
         // Take 8 byte chunks
-        for block in bytes.chunks_exact(8) {
+        for block in bytes.chunks(8) {
             // Encrypt the counter
             let mut b = [(ctr >> 32) as u32, ctr as u32];
             self.encrypt_block(&mut b);
@@ -188,9 +182,19 @@ mod tea_tests {
     use super::*;
 
     #[test]
-    fn encrypt_decrypt_test() {
-        let ptext = "0102030405060708";
-        let cipher = Tea::default();
+    fn encrypt_decrypt_ecb() {
+        let ptext = "01020304050607080102030405060708";
+        let mut cipher = Tea::default();
+        cipher.mode = BlockCipherMode::ECB;
+        let ctext = cipher.encrypt(ptext).unwrap();
+        assert_eq!(cipher.decrypt(&ctext).unwrap(), ptext);
+    }
+
+    #[test]
+    fn encrypt_decrypt_ctr() {
+        let ptext = "01020304050607080102030405060708";
+        let mut cipher = Tea::default();
+        cipher.mode = BlockCipherMode::CTR;
         let ctext = cipher.encrypt(ptext).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), ptext);
     }
