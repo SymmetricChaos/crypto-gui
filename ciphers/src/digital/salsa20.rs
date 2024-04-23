@@ -25,32 +25,11 @@ impl Default for Salsa20 {
 }
 
 impl Salsa20 {
-    pub fn starting_state(&self, ctr: u64) -> [u32; 16] {
-        [
-            0x61707865,
-            self.key[0],
-            self.key[1],
-            self.key[2],
-            self.key[3],
-            0x3320646e,
-            self.nonce[0],
-            self.nonce[1],
-            ctr as u32,
-            (ctr >> 32) as u32,
-            0x79622d32,
-            self.key[4],
-            self.key[5],
-            self.key[6],
-            self.key[7],
-            0x6b206574,
-        ]
-    }
-
     pub fn quarter_round(state: &mut [u32; 16], a: usize, b: usize, c: usize, d: usize) {
-        state[b] ^= (state[a] + state[d]).rotate_left(7);
-        state[c] ^= (state[b] + state[a]).rotate_left(9);
-        state[d] ^= (state[c] + state[b]).rotate_left(13);
-        state[a] ^= (state[d] + state[c]).rotate_left(18);
+        state[b] ^= (state[a].wrapping_add(state[d])).rotate_left(7);
+        state[c] ^= (state[b].wrapping_add(state[a])).rotate_left(9);
+        state[d] ^= (state[c].wrapping_add(state[b])).rotate_left(13);
+        state[a] ^= (state[d].wrapping_add(state[c])).rotate_left(18);
     }
 
     // Acts on columns
@@ -133,7 +112,7 @@ impl Salsa20 {
 
 impl Cipher for Salsa20 {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut bytes = self
+        let bytes = self
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
@@ -148,7 +127,7 @@ impl Cipher for Salsa20 {
 }
 
 #[cfg(test)]
-mod salsa_tests {
+mod salsa20_tests {
 
     use super::*;
 

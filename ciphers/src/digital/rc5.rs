@@ -169,20 +169,20 @@ impl Rc5 {
 
 impl Cipher for Rc5 {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut bytes = self
+        let bytes = self
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
-        let out = self.encrypt_block_32(&mut bytes)?;
+        let out = self.encrypt_block_32(&bytes)?;
         Ok(self.output_format.byte_slice_to_text(&out))
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut bytes = self
+        let bytes = self
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
-        let out = self.decrypt_block_32(&mut bytes)?;
+        let out = self.decrypt_block_32(&bytes)?;
         Ok(self.output_format.byte_slice_to_text(&out))
     }
 }
