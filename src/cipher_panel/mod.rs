@@ -20,11 +20,12 @@ use self::{
     polybius_square_controls::PolybiusSquareFrame, porta_controls::PortaFrame,
     purple_controls::PurpleFrame, quagmire_controls::QuagmireFrame,
     rail_fence_controls::RailFenceFrame, rc4_controls::Rc4Frame, rc5_controls::Rc5Frame,
-    rs44_controls::Rs44Frame, rsa_controls::RsaFrame, scytale_controls::ScytaleFrame,
-    seriated_playfair_controls::SeriatedPlayfairFrame, shamir_controls::ShamirSecretSharingFrame,
-    sigaba_controls::SigabaFrame, slidefair_controls::SlidefairFrame, tea_controls::TeaFrame,
-    trifid_controls::TrifidFrame, turning_grille_controls::TurningGrilleFrame,
-    two_square_controls::TwoSquareFrame, vic_controls::VicFrame, vigenere_controls::VigenereFrame,
+    rs44_controls::Rs44Frame, rsa_controls::RsaFrame, salsa20_controls::Salsa20Frame,
+    scytale_controls::ScytaleFrame, seriated_playfair_controls::SeriatedPlayfairFrame,
+    shamir_controls::ShamirSecretSharingFrame, sigaba_controls::SigabaFrame,
+    slidefair_controls::SlidefairFrame, tea_controls::TeaFrame, trifid_controls::TrifidFrame,
+    turning_grille_controls::TurningGrilleFrame, two_square_controls::TwoSquareFrame,
+    vic_controls::VicFrame, vigenere_controls::VigenereFrame,
 };
 
 pub mod adfgvx_controls;
@@ -65,6 +66,7 @@ pub mod rc4_controls;
 pub mod rc5_controls;
 pub mod rs44_controls;
 mod rsa_controls;
+mod salsa20_controls;
 pub mod scytale_controls;
 pub mod seriated_playfair_controls;
 pub mod shamir_controls;
@@ -176,6 +178,7 @@ pub struct CipherInterface {
     rc5: Rc5Frame,
     rsa: RsaFrame,
     tea: TeaFrame,
+    salsa20: Salsa20Frame,
 
     // Other
     shamir: ShamirSecretSharingFrame,
@@ -279,7 +282,13 @@ impl CipherInterface {
         );
 
         combox_box(
-            &[CipherId::Rc4, CipherId::Rc5, CipherId::Rsa, CipherId::Tea],
+            &[
+                CipherId::Rc4,
+                CipherId::Rc5,
+                CipherId::Rsa,
+                CipherId::Salsa20,
+                CipherId::Tea,
+            ],
             active_cipher,
             CipherCategory::Digital,
             ui,
@@ -331,6 +340,7 @@ impl CipherInterface {
             CipherId::Rc5 => &mut self.rc5,
             CipherId::Rsa => &mut self.rsa,
             CipherId::Rs44 => &mut self.rs44,
+            CipherId::Salsa20 => &mut self.salsa20,
             CipherId::Scytale => &mut self.scytale,
             CipherId::SeriatedPlayfair => &mut self.seriated,
             CipherId::Shamir => &mut self.shamir,

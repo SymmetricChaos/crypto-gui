@@ -99,8 +99,8 @@ impl Salsa20 {
 
         for block in bytes.chunks(64) {
             // Mix the counter into the state
-            state[8] = ctr as u32;
-            state[9] = (ctr >> 32) as u32;
+            state[8] = ctr as u32; // low bits, "as" cast truncates
+            state[9] = (ctr >> 32) as u32; // high bits
 
             // Temporary state
             let mut t_state = state.clone();
