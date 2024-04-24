@@ -1,4 +1,5 @@
 pub mod aes;
+pub mod chacha;
 pub mod des;
 pub mod elgamal;
 pub mod rc4;
