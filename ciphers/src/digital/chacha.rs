@@ -3,7 +3,6 @@ use std::num::Wrapping;
 use crate::{Cipher, CipherError};
 use utils::byte_formatting::ByteFormat;
 
-// https://cr.yp.to/snuffle/salsafamily-20071225.pdf
 pub struct ChaCha {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,

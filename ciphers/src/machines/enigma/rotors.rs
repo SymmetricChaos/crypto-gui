@@ -101,7 +101,7 @@ impl Reflector {
     }
 }
 
-// Reflector equality is only based on the wiring not a specific position
+// Reflector equality is only based on the wiring
 impl PartialEq for Reflector {
     fn eq(&self, other: &Self) -> bool {
         self.wiring_str == other.wiring_str
