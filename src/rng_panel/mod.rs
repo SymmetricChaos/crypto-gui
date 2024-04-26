@@ -89,18 +89,25 @@ impl RngInterface {
                 RngId::Xoshiro,
             ],
             active_rng,
-            RngCategory::Pseudorandom,
+            RngCategory::PRNG,
             ui,
         );
 
         combox_box(
             &[RngId::Halton, RngId::Weyl],
             active_rng,
-            RngCategory::Quasirandom,
+            RngCategory::QRNG,
             ui,
         );
 
-        combox_box(&[], active_rng, RngCategory::Truerandom, ui);
+        combox_box(
+            &[RngId::BlumBlumShub, RngId::ChaCha],
+            active_rng,
+            RngCategory::CSPRNG,
+            ui,
+        );
+
+        combox_box(&[], active_rng, RngCategory::TRNG, ui);
     }
 
     pub fn get_active_rng(&mut self, active_rng: &RngId) -> &mut dyn ClassicRngFrame {
