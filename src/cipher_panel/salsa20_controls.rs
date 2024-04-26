@@ -1,5 +1,5 @@
 use ciphers::digital::salsa20::Salsa20;
-use egui::DragValue;
+use egui::{DragValue, Slider};
 use rand::{thread_rng, Rng};
 
 use crate::ui_elements::UiElements;
@@ -32,6 +32,19 @@ impl CipherFrame for Salsa20Frame {
         for i in 0..2 {
             ui.add(DragValue::new(&mut self.cipher.nonce[i]).hexadecimal(8, false, true));
         }
+        ui.add_space(8.0);
+        ui.horizontal(|ui| {
+            if ui.small_button("Salsa20/8").clicked() {
+                self.cipher.rounds = 8;
+            }
+            if ui.small_button("Salsa20/12").clicked() {
+                self.cipher.rounds = 8;
+            }
+            if ui.small_button("Salsa20/20").clicked() {
+                self.cipher.rounds = 8;
+            }
+        });
+        ui.add(Slider::new(&mut self.cipher.rounds, 2..=20));
     }
 
     fn cipher(&self) -> &dyn ciphers::Cipher {
