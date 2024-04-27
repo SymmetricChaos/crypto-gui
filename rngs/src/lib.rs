@@ -7,6 +7,7 @@ pub mod lcg;
 pub mod lfg;
 pub mod lfsr;
 pub mod middle_square;
+pub mod middle_square_binary;
 pub mod mt19937_32;
 pub mod mt19937_64;
 pub mod pcg;
