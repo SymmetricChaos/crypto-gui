@@ -5,9 +5,7 @@ use utils::byte_formatting::ByteFormat;
 pub struct Poly1305 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    pub key_r: [u8; 16], // point at which the polynomial is evaluated
-    // pub key_k: [u8; 16], // AES key
-    // pub key_n: [u8; 16], // nonce
+    pub key_r: [u8; 16],  // point at which the polynomial is evaluated
     pub key_kn: [u8; 16], // nonce (n) as encrypted by AES with key (k)
 }
 
@@ -17,8 +15,6 @@ impl Default for Poly1305 {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
             key_r: [0; 16],
-            // key_k: [0; 16],
-            // key_k: [0; 16],
             key_kn: [0; 16],
         }
     }
@@ -27,17 +23,17 @@ impl Default for Poly1305 {
 impl Poly1305 {
     pub fn restrict_key_r(&mut self) {
         for i in [3, 7, 11, 15] {
-            if self.key_r[i] >= 16 {
-                println!("k{} = {:08b} {:02x}", i, self.key_r[i], self.key_r[i])
-                // panic!("bytes 3, 7, 11, and 15 must be less than 16 (top four bits cleared)",);
-            }
+            // if self.key_r[i] >= 16 {
+            //     // println!("k{} = {:08b} {:02x}", i, self.key_r[i], self.key_r[i])
+            //     // panic!("bytes 3, 7, 11, and 15 must be less than 16 (top four bits cleared)",);
+            // }
             self.key_r[i] &= 0b11110000;
         }
         for i in [4, 8, 12] {
-            if self.key_r[i] % 4 != 0 {
-                println!("k{} = {:08b} {:02x}", i, self.key_r[i], self.key_r[i])
-                // panic!("bytes 4, 8, 12 must be multiplies of four (bottom two bits cleared)",);
-            }
+            // if self.key_r[i] % 4 != 0 {
+            //     // println!("k{} = {:08b} {:02x}", i, self.key_r[i], self.key_r[i])
+            //     // panic!("bytes 4, 8, 12 must be multiplies of four (bottom two bits cleared)",);
+            // }
             self.key_r[i] &= 0b00000011;
         }
     }
@@ -87,7 +83,7 @@ impl ClassicHasher for Poly1305 {
         ]);
 
         let key = BigUint::from_bytes_le(&self.key_r);
-        println!("keyr: {}", key.to_str_radix(16));
+        // println!("keyr: {}", key.to_str_radix(16));
         let blocks = bytes.chunks_exact(16);
         let mut accumulator = BigUint::zero();
 
@@ -109,7 +105,7 @@ impl ClassicHasher for Poly1305 {
             block.push(0x01);
             block.reverse();
             //println!("main: {:02x?}", &block);
-            println!("main: {}", BigUint::from_bytes_be(&block).to_str_radix(16));
+            // println!("main: {}", BigUint::from_bytes_be(&block).to_str_radix(16));
             accumulator += BigUint::from_bytes_be(&block);
             accumulator *= &key;
             accumulator %= &modulus;
@@ -118,16 +114,16 @@ impl ClassicHasher for Poly1305 {
         // Final step
         if last_block.len() != 0 {
             //println!("last: {:02x?}", &last_block);
-            println!(
-                "last: {}",
-                BigUint::from_bytes_be(&last_block).to_str_radix(16)
-            );
+            // println!(
+            //     "last: {}",
+            //     BigUint::from_bytes_be(&last_block).to_str_radix(16)
+            // );
             accumulator += BigUint::from_bytes_be(&last_block);
             accumulator *= &key;
 
             accumulator %= &modulus;
         }
-        println!("m(r): {}", accumulator.to_str_radix(16));
+        // println!("m(r): {}", accumulator.to_str_radix(16));
 
         accumulator += BigUint::from_bytes_le(&self.key_kn);
 

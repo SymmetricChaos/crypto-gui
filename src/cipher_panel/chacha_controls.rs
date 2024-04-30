@@ -1,6 +1,5 @@
 use ciphers::digital::chacha::ChaCha;
 use egui::{DragValue, Slider};
-use hashers::poly1305::Poly1305;
 use rand::{thread_rng, Rng};
 
 use crate::ui_elements::UiElements;
@@ -9,16 +8,12 @@ use super::CipherFrame;
 
 pub struct ChaChaFrame {
     cipher: ChaCha,
-    hasher: Poly1305,
-    authenticated: bool,
 }
 
 impl Default for ChaChaFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
-            hasher: Default::default(),
-            authenticated: false,
         }
     }
 }
@@ -52,9 +47,9 @@ impl CipherFrame for ChaChaFrame {
         });
         ui.add(Slider::new(&mut self.cipher.rounds, 2..=20));
         ui.add_space(8.0);
-        ui.subheading("Authenticated");
-        ui.label("The Poly1305 hash function can be used for authenticated encryption.");
-        ui.checkbox(&mut self.authenticated, "");
+        // ui.subheading("Authenticated");
+        // ui.label("The Poly1305 hash function can be used for authenticated encryption.");
+        // ui.checkbox(&mut self.authenticated, "");
     }
 
     fn cipher(&self) -> &dyn ciphers::Cipher {

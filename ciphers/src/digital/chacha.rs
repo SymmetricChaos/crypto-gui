@@ -9,6 +9,7 @@ pub struct ChaCha {
     pub key: [u32; 8],
     pub nonce: [u32; 2],
     pub rounds: u8,
+    pub ctr: u64,
 }
 
 impl Default for ChaCha {
@@ -23,6 +24,7 @@ impl Default for ChaCha {
             ],
             nonce: [0x03020100, 0x07060504],
             rounds: 20,
+            ctr: 0,
         }
     }
 }
@@ -87,7 +89,7 @@ impl ChaCha {
     }
 
     pub fn encrypt_bytes(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut ctr = 0_u64;
+        let mut ctr = self.ctr;
         let mut out = Vec::new();
         let mut state = [
             Wrapping(0x61707865),
