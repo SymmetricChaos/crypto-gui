@@ -88,8 +88,8 @@ impl ChaCha {
         Self::diag_round(state);
     }
 
-    pub fn encrypt_bytes(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut ctr = self.ctr;
+    pub fn encrypt_bytes_with_ctr(&self, bytes: &[u8], ctr: u64) -> Vec<u8> {
+        let mut ctr = ctr;
         let mut out = Vec::new();
         let mut state = [
             Wrapping(0x61707865),
@@ -142,6 +142,10 @@ impl ChaCha {
         }
 
         out
+    }
+
+    pub fn encrypt_bytes(&self, bytes: &[u8]) -> Vec<u8> {
+        self.encrypt_bytes_with_ctr(bytes, 0)
     }
 }
 

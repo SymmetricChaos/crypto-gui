@@ -5,8 +5,8 @@ use utils::byte_formatting::ByteFormat;
 pub struct Poly1305 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    pub key_r: [u8; 16],  // point at which the polynomial is evaluated
-    pub key_kn: [u8; 16], // nonce (n) as encrypted by AES with key (k)
+    pub key_r: [u8; 16], // point at which the polynomial is evaluated
+    pub key_s: [u8; 16], // nonce that is added at the end
 }
 
 impl Default for Poly1305 {
@@ -15,7 +15,7 @@ impl Default for Poly1305 {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
             key_r: [0; 16],
-            key_kn: [0; 16],
+            key_s: [0; 16],
         }
     }
 }
@@ -63,7 +63,7 @@ impl Poly1305 {
             ));
         } else {
             if let Ok(v) = ByteFormat::Hex.text_to_bytes(s) {
-                self.key_kn = v.try_into().expect("failed to convert Vec<u8> to [u8; 32]");
+                self.key_s = v.try_into().expect("failed to convert Vec<u8> to [u8; 32]");
             } else {
                 return Err(HasherError::key(
                     "key must be given as exactly 32 hex digits",
@@ -125,7 +125,7 @@ impl ClassicHasher for Poly1305 {
         }
         // println!("m(r): {}", accumulator.to_str_radix(16));
 
-        accumulator += BigUint::from_bytes_le(&self.key_kn);
+        accumulator += BigUint::from_bytes_le(&self.key_s);
 
         let mut out = accumulator.to_bytes_le();
         while out.len() < 16 {
