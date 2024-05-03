@@ -123,12 +123,17 @@ impl Cipher for ChaCha20Poly1305 {
             .map_err(|_| CipherError::input("byte format error"))?;
 
         // Remove the tag and check that it is valid
+        // If it fails return an error
         let message_tag = encrypted_bytes.split_off(16);
         if message_tag != self.hash(&encrypted_bytes, keys.0, keys.1) {
             return Err(CipherError::input("message failed authentication"));
         }
 
-        // Decrypt the encrypted portion
-        todo!();
+        // ChaCha is reciprocal
+        let decrypted_bytes = self.cipher.encrypt_bytes_with_ctr(&encrypted_bytes, 1);
+        Ok(self
+            .cipher
+            .output_format
+            .byte_slice_to_text(&decrypted_bytes))
     }
 }
