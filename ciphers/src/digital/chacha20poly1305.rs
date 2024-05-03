@@ -94,24 +94,39 @@ impl Cipher for ChaCha20Poly1305 {
         };
 
         // Create encrypted bytes
-        let mut bytes = self
+        let bytes = self
             .cipher
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
-        let out = self.cipher.encrypt_bytes_with_ctr(&bytes, 1);
+        let encrypted_bytes = self.cipher.encrypt_bytes_with_ctr(&bytes, 1);
 
-        // Hash the encrypted message
+        // Hash the *encrypted* message
         // The r key is restricted within the hash invocation
-        let tag = self.hash(&bytes, keys.0, keys.1);
-        bytes.extend_from_slice(&tag);
+        // Put the tag first for simplicity when decoding
+        let mut tag = self.hash(&encrypted_bytes, keys.0, keys.1);
+        tag.extend_from_slice(&encrypted_bytes);
 
-        Ok(self.cipher.output_format.byte_slice_to_text(&out))
+        Ok(self.cipher.output_format.byte_slice_to_text(&tag))
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+        let keys: ([u8; 16], [u8; 16]) = {
+            let v = self.cipher.encrypt_bytes(&[0; 32]);
+            (v[0..16].try_into().unwrap(), v[16..].try_into().unwrap())
+        };
+
+        let mut encrypted_bytes = self
+            .cipher
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| CipherError::input("byte format error"))?;
+
         // Remove the tag and check that it is valid
-        todo!();
+        let message_tag = encrypted_bytes.split_off(16);
+        if message_tag != self.hash(&encrypted_bytes, keys.0, keys.1) {
+            return Err(CipherError::input("message failed authentication"));
+        }
 
         // Decrypt the encrypted portion
         todo!();
