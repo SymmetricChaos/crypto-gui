@@ -1,6 +1,6 @@
 use super::chacha::ChaCha;
 use crate::{Cipher, CipherError};
-use num::{traits::ToBytes, BigUint, Zero};
+use num::{BigUint, Zero};
 
 // https://datatracker.ietf.org/doc/html/rfc8439
 pub struct ChaCha20Poly1305 {
@@ -18,6 +18,31 @@ impl Default for ChaCha20Poly1305 {
 }
 
 impl ChaCha20Poly1305 {
+    fn create_tag(&self, encrypted_bytes: &[u8]) -> Vec<u8> {
+        // The r key will be restricted within the hash invocation
+        let keys: ([u8; 16], [u8; 16]) = {
+            let v = self.cipher.encrypt_bytes(&[0; 32]);
+            (v[0..16].try_into().unwrap(), v[16..].try_into().unwrap())
+        };
+        let inputs = self.tag_input(encrypted_bytes);
+        self.hash(&inputs, keys.0, keys.1)
+    }
+
+    // Hash the *encrypted* message, associated data, and padding
+    fn tag_input(&self, encrypted_bytes: &[u8]) -> Vec<u8> {
+        let mut concat = self.associated_data.clone();
+        while concat.len() % 16 != 0 {
+            concat.push(0x00);
+        }
+        concat.extend_from_slice(&encrypted_bytes);
+        while concat.len() % 16 != 0 {
+            concat.push(0x00);
+        }
+        concat.extend_from_slice(&(self.associated_data.len() as u64).to_le_bytes());
+        concat.extend_from_slice(&(encrypted_bytes.len() as u64).to_le_bytes());
+        concat
+    }
+
     fn hash(&self, bytes: &[u8], key_r: [u8; 16], key_s: [u8; 16]) -> Vec<u8> {
         // Prime modulus (2**130 - 5) initialized from array
         let modulus = BigUint::from_bytes_be(&[
@@ -35,7 +60,6 @@ impl ChaCha20Poly1305 {
         }
 
         let key = BigUint::from_bytes_le(&key_r);
-        // println!("keyr: {}", key.to_str_radix(16));
         let blocks = bytes.chunks_exact(16);
         let mut accumulator = BigUint::zero();
 
@@ -56,8 +80,6 @@ impl ChaCha20Poly1305 {
             let mut block = block.to_vec();
             block.push(0x01);
             block.reverse();
-            //println!("main: {:02x?}", &block);
-            // println!("main: {}", BigUint::from_bytes_be(&block).to_str_radix(16));
             accumulator += BigUint::from_bytes_be(&block);
             accumulator *= &key;
             accumulator %= &modulus;
@@ -65,17 +87,11 @@ impl ChaCha20Poly1305 {
 
         // Final step
         if last_block.len() != 0 {
-            //println!("last: {:02x?}", &last_block);
-            // println!(
-            //     "last: {}",
-            //     BigUint::from_bytes_be(&last_block).to_str_radix(16)
-            // );
             accumulator += BigUint::from_bytes_be(&last_block);
             accumulator *= &key;
 
             accumulator %= &modulus;
         }
-        // println!("m(r): {}", accumulator.to_str_radix(16));
 
         accumulator += BigUint::from_bytes_le(&key_s);
 
@@ -90,11 +106,6 @@ impl ChaCha20Poly1305 {
 
 impl Cipher for ChaCha20Poly1305 {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let keys: ([u8; 16], [u8; 16]) = {
-            let v = self.cipher.encrypt_bytes(&[0; 32]);
-            (v[0..16].try_into().unwrap(), v[16..].try_into().unwrap())
-        };
-
         // Create encrypted bytes
         let bytes = self
             .cipher
@@ -103,41 +114,25 @@ impl Cipher for ChaCha20Poly1305 {
             .map_err(|_| CipherError::input("byte format error"))?;
         let encrypted_bytes = self.cipher.encrypt_bytes_with_ctr(&bytes, 1);
 
-        // Hash the *encrypted* message
         // The r key is restricted within the hash invocation
         // Put the tag first for simplicity when decoding
-        let mut concat = self.associated_data.clone();
-        while concat.len() % 16 != 0 {
-            concat.push(0x00);
-        }
-        concat.extend_from_slice(&encrypted_bytes);
-        while concat.len() % 16 != 0 {
-            concat.push(0x00);
-        }
-        concat.extend_from_slice(&(self.associated_data.len() as u64).to_le_bytes());
-        concat.extend_from_slice(&(bytes.len() as u64).to_le_bytes());
-        let mut tag = self.hash(&encrypted_bytes, keys.0, keys.1);
+        let mut tag = self.create_tag(&encrypted_bytes);
         tag.extend_from_slice(&encrypted_bytes);
 
         Ok(self.cipher.output_format.byte_slice_to_text(&tag))
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        let keys: ([u8; 16], [u8; 16]) = {
-            let v = self.cipher.encrypt_bytes(&[0; 32]);
-            (v[0..16].try_into().unwrap(), v[16..].try_into().unwrap())
-        };
-
-        let mut encrypted_bytes = self
+        let message = self
             .cipher
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
 
-        // Remove the tag and check that it is valid
-        // If it fails return an error
-        let message_tag = encrypted_bytes.split_off(16);
-        if message_tag != self.hash(&encrypted_bytes, keys.0, keys.1) {
+        // Split the tag and the encrypted message
+        let (message_tag, encrypted_bytes) = message.split_at(16);
+
+        if message_tag != self.create_tag(&encrypted_bytes) {
             return Err(CipherError::input("message failed authentication"));
         }
 
@@ -147,5 +142,20 @@ impl Cipher for ChaCha20Poly1305 {
             .cipher
             .output_format
             .byte_slice_to_text(&decrypted_bytes))
+    }
+}
+
+#[cfg(test)]
+mod chacha_tests {
+
+    use super::*;
+
+    #[test]
+    fn encrypt_decrypt_test() {
+        let ptext = "01020304050607080910111213141516";
+        let cipher = ChaCha20Poly1305::default();
+
+        let ctext = cipher.encrypt(ptext).unwrap();
+        assert_eq!(cipher.decrypt(&ctext).unwrap(), ptext);
     }
 }

@@ -104,7 +104,7 @@ impl ClassicHasher for Poly1305 {
             let mut block = block.to_vec();
             block.push(0x01);
             block.reverse();
-            //println!("main: {:02x?}", &block);
+            // println!("main: {:02x?}", &block);
             // println!("main: {}", BigUint::from_bytes_be(&block).to_str_radix(16));
             accumulator += BigUint::from_bytes_be(&block);
             accumulator *= &key;
@@ -113,7 +113,7 @@ impl ClassicHasher for Poly1305 {
 
         // Final step
         if last_block.len() != 0 {
-            //println!("last: {:02x?}", &last_block);
+            // println!("last: {:02x?}", &last_block);
             // println!(
             //     "last: {}",
             //     BigUint::from_bytes_be(&last_block).to_str_radix(16)
@@ -149,7 +149,7 @@ impl ClassicHasher for Poly1305 {
 mod poly1305_tests {
     use super::*;
 
-    //https://cr.yp.to/mac/poly1305-20050329.pdf
+    // https://cr.yp.to/mac/poly1305-20050329.pdf
     #[test]
     fn test_chunks_1() {
         let mut hasher = Poly1305::default();
