@@ -1,16 +1,18 @@
 use super::chacha::ChaCha;
 use crate::{Cipher, CipherError};
-use num::{BigUint, Zero};
+use num::{traits::ToBytes, BigUint, Zero};
 
 // https://datatracker.ietf.org/doc/html/rfc8439
 pub struct ChaCha20Poly1305 {
     pub cipher: ChaCha,
+    pub associated_data: Vec<u8>,
 }
 
 impl Default for ChaCha20Poly1305 {
     fn default() -> Self {
         Self {
             cipher: ChaCha::default(),
+            associated_data: Vec::new(),
         }
     }
 }
@@ -104,6 +106,16 @@ impl Cipher for ChaCha20Poly1305 {
         // Hash the *encrypted* message
         // The r key is restricted within the hash invocation
         // Put the tag first for simplicity when decoding
+        let mut concat = self.associated_data.clone();
+        while concat.len() % 16 != 0 {
+            concat.push(0x00);
+        }
+        concat.extend_from_slice(&encrypted_bytes);
+        while concat.len() % 16 != 0 {
+            concat.push(0x00);
+        }
+        concat.extend_from_slice(&(self.associated_data.len() as u64).to_le_bytes());
+        concat.extend_from_slice(&(bytes.len() as u64).to_le_bytes());
         let mut tag = self.hash(&encrypted_bytes, keys.0, keys.1);
         tag.extend_from_slice(&encrypted_bytes);
 
