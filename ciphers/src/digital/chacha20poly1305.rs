@@ -6,6 +6,7 @@ use num::{BigUint, Zero};
 pub struct ChaCha20Poly1305 {
     pub cipher: ChaCha,
     pub associated_data: Vec<u8>,
+    pub ctr: u64,
 }
 
 impl Default for ChaCha20Poly1305 {
@@ -13,6 +14,7 @@ impl Default for ChaCha20Poly1305 {
         Self {
             cipher: ChaCha::default(),
             associated_data: Vec::new(),
+            ctr: 0,
         }
     }
 }
@@ -20,10 +22,17 @@ impl Default for ChaCha20Poly1305 {
 impl ChaCha20Poly1305 {
     fn create_tag(&self, encrypted_bytes: &[u8]) -> Vec<u8> {
         // The r key will be restricted within the hash invocation
-        let keys: ([u8; 16], [u8; 16]) = {
-            let v = self.cipher.encrypt_bytes(&[0; 32]);
+        let mut keys: ([u8; 16], [u8; 16]) = {
+            let v = self
+                .cipher
+                .encrypt_bytes_with_ctr(&[0; 32], self.ctr.rotate_left(32));
             (v[0..16].try_into().unwrap(), v[16..].try_into().unwrap())
         };
+
+        // Reverse the bytes
+        keys.0.reverse();
+        keys.1.reverse();
+
         let inputs = self.tag_input(encrypted_bytes);
         self.hash(&inputs, keys.0, keys.1)
     }
@@ -51,13 +60,18 @@ impl ChaCha20Poly1305 {
         ]);
 
         // Restrict key_r, the point where the polynomial is evaluated
+        //  r[3], r[7], r[11], and r[15] are required to have their top four bits clear (be smaller than 16)
         let mut key_r = key_r;
         for i in [3, 7, 11, 15] {
-            key_r[i] &= 0b11110000;
+            key_r[i] &= 0b00001111;
         }
+        // r[4], r[8], and r[12] are required to have their bottom two bits clear (be divisible by 4)
         for i in [4, 8, 12] {
-            key_r[i] &= 0b00000011;
+            key_r[i] &= 0b11111100;
         }
+
+        println!("key r: {:02x?}", key_r);
+        println!("key s: {:02x?}", key_s);
 
         let key = BigUint::from_bytes_le(&key_r);
         let blocks = bytes.chunks_exact(16);
@@ -100,6 +114,8 @@ impl ChaCha20Poly1305 {
             out.push(0x00);
         }
 
+        println!("{:02x?}", &out[0..16]);
+
         out[0..16].to_vec()
     }
 }
@@ -112,7 +128,9 @@ impl Cipher for ChaCha20Poly1305 {
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
-        let encrypted_bytes = self.cipher.encrypt_bytes_with_ctr(&bytes, 1);
+        let encrypted_bytes = self
+            .cipher
+            .encrypt_bytes_with_ctr(&bytes, (self.ctr + 1).rotate_left(32));
 
         // The r key is restricted within the hash invocation
         // Put the tag first for simplicity when decoding
@@ -137,7 +155,9 @@ impl Cipher for ChaCha20Poly1305 {
         }
 
         // ChaCha is reciprocal
-        let decrypted_bytes = self.cipher.encrypt_bytes_with_ctr(&encrypted_bytes, 1);
+        let decrypted_bytes = self
+            .cipher
+            .encrypt_bytes_with_ctr(&encrypted_bytes, (self.ctr + 1).rotate_left(32));
         Ok(self
             .cipher
             .output_format
@@ -148,6 +168,9 @@ impl Cipher for ChaCha20Poly1305 {
 #[cfg(test)]
 mod chacha_tests {
 
+    use itertools::Itertools;
+    use utils::byte_formatting::ByteFormat;
+
     use super::*;
 
     #[test]
@@ -157,5 +180,41 @@ mod chacha_tests {
 
         let ctext = cipher.encrypt(ptext).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), ptext);
+    }
+
+    #[test]
+    fn encrypt_test() {
+        // https://datatracker.ietf.org/doc/html/rfc8439#section-2.8.2
+        let ptext = "Ladies and Gentlemen of the class of '99: If I could offer you only one tip for the future, sunscreen would be it.";
+        let aad = vec![
+            0x50, 0x51, 0x52, 0x53, 0xc0, 0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7,
+        ];
+        let mut cipher = ChaCha20Poly1305::default();
+        cipher.cipher.input_format = ByteFormat::Utf8;
+        cipher.associated_data = aad;
+        cipher.cipher.key = [
+            0x80818283_u32,
+            0x84858687,
+            0x88898a8b,
+            0x8c8d8e8f,
+            0x90919293,
+            0x94959697,
+            0x98999a9b,
+            0x9c9d9e9f,
+        ]
+        .iter()
+        .map(|n| n.to_be())
+        .collect_vec()
+        .try_into()
+        .unwrap();
+        cipher.cipher.nonce = [0x40414243_u32, 0x44454647]
+            .iter()
+            .map(|n| n.to_be())
+            .collect_vec()
+            .try_into()
+            .unwrap();
+        cipher.ctr = 7;
+
+        let _ctext = cipher.encrypt(ptext).unwrap();
     }
 }
