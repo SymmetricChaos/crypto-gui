@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::shamir::ShamirSecretSharing;
+use ciphers::shamir_secret_sharing::ShamirSecretSharing;
 use egui::Slider;
 use utils::{math_functions::is_prime32, text_functions::filter_string};
 
@@ -35,7 +35,7 @@ impl CipherFrame for ShamirSecretSharingFrame {
             self.cipher.shares = self.cipher.threshold;
         }
 
-        // Unlikely a user would want any other option. Nonrandom shares only needed for testing.
+        // Nonrandom shares only needed for testing?
         // ui.checkbox(&mut self.cipher.random_shares, "Use Random Shares");
         // ui.add_space(8.0);
 
@@ -46,7 +46,7 @@ impl CipherFrame for ShamirSecretSharingFrame {
             self.cipher.threshold - 1
         ));
         if ui.control_string(&mut self.polynomial_string).changed() {
-            match self.cipher.sting_to_vec(&self.polynomial_string) {
+            match self.cipher.pairs_string_to_vec(&self.polynomial_string) {
                 Ok(_) => (),
                 Err(e) => {
                     ui.error_text(e);

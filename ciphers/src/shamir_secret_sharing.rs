@@ -38,7 +38,7 @@ impl Default for ShamirSecretSharing {
 }
 
 impl ShamirSecretSharing {
-    pub fn sting_to_vec(&mut self, text: &str) -> Result<(), ParseIntError> {
+    pub fn pairs_string_to_vec(&mut self, text: &str) -> Result<(), ParseIntError> {
         self.polynomial.clear();
         let groups = text.split(",");
         self.polynomial.push(0);
@@ -178,14 +178,14 @@ impl Cipher for ShamirSecretSharing {
             pairs.push((x, y));
         }
 
-        if pairs.len() != self.threshold as usize {
+        if pairs.len() < self.threshold as usize {
             return Err(CipherError::Input(format!(
-                "threshold requires exactly {} pairs of the form (a,b) where a and b are positive integers",
+                "threshold requires at least {} pairs of positive integers",
                 self.threshold
             )));
         }
 
-        match lagrange_interpolation(0, &pairs, self.modulus) {
+        match lagrange_interpolation(0, &pairs[0..self.threshold as usize], self.modulus) {
             Some(n) => Ok(n.to_str_radix(10)),
             None => Err(CipherError::input("Lagrange interpolation failed")),
         }
@@ -199,21 +199,16 @@ mod shamir_tests {
 
     const PLAINTEXT: &'static str = "1234";
     const CIPHERTEXT: &'static str = "(1, 1494), (2, 329), (3, 965), (4, 176), (5, 1188), (6, 775)";
-
-    // #[test]
-    // fn capture_test() {
-    //     for p in PAIRS.captures_iter(CIPHERTEXT) {
-    //         println!("{} {}", &p[1], &p[2])
-    //     }
-    // }
+    const CIPHERTEXT_PARTIAL: &'static str = "(2, 329), (3, 965), (5, 1188)";
+    const CIPHERTEXT_INSUFFICIENT: &'static str = "(5, 1188), (6, 775)";
 
     #[test]
     fn encrypt_test() {
         let mut cipher = ShamirSecretSharing::default();
         cipher.modulus = 1613;
-        cipher.polynomial = vec![166, 94];
+        cipher.polynomial = vec![0, 166, 94];
         cipher.shares = 6;
-        cipher.threshold = 4;
+        cipher.threshold = 3;
         cipher.random_shares = false;
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT)
     }
@@ -222,10 +217,12 @@ mod shamir_tests {
     fn decrypt_test() {
         let mut cipher = ShamirSecretSharing::default();
         cipher.modulus = 1613;
-        cipher.polynomial = vec![166, 94];
+        cipher.polynomial = vec![0, 166, 94];
         cipher.shares = 6;
-        cipher.threshold = 4;
+        cipher.threshold = 3;
         cipher.random_shares = false;
-        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT)
+        assert_eq!(cipher.decrypt(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decrypt(CIPHERTEXT_PARTIAL).unwrap(), PLAINTEXT);
+        assert!(cipher.decrypt(CIPHERTEXT_INSUFFICIENT).is_err());
     }
 }
