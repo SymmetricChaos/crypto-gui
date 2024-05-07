@@ -1,6 +1,7 @@
 pub mod aes;
 pub mod chacha;
 pub mod chacha20poly1305;
+pub mod chacha_extended_nonce;
 pub mod des;
 pub mod elgamal;
 pub mod rc4;

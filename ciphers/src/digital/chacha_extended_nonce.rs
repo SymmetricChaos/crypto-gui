@@ -2,16 +2,16 @@ use crate::{Cipher, CipherError};
 use std::num::Wrapping;
 use utils::byte_formatting::ByteFormat;
 
-pub struct ChaCha {
+pub struct ChaChaExtendedNonce {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
     pub key: [u32; 8],
-    pub nonce: [u32; 2],
+    pub nonce: [u32; 3],
     pub rounds: u8,
-    pub ctr: u64,
+    pub ctr: u32,
 }
 
-impl Default for ChaCha {
+impl Default for ChaChaExtendedNonce {
     fn default() -> Self {
         Self {
             output_format: ByteFormat::Hex,
@@ -21,15 +21,15 @@ impl Default for ChaCha {
                 0x03020100, 0x07060504, 0x0b0a0908, 0x0f0e0d0c, 0x13121110, 0x17161514, 0x1b1a1918,
                 0x1f1e1d1c,
             ],
-            nonce: [0x03020100, 0x07060504],
+            nonce: [0x09000000, 0x4a000000, 0x000000],
             rounds: 20,
             ctr: 0,
         }
     }
 }
 
-impl ChaCha {
-    pub fn create_state(&self, ctr: u64) -> [u32; 16] {
+impl ChaChaExtendedNonce {
+    pub fn create_state(&self, ctr: u32) -> [u32; 16] {
         [
             0x61707865,
             0x3320646e,
@@ -43,10 +43,10 @@ impl ChaCha {
             self.key[5],
             self.key[6],
             self.key[7],
-            ctr as u32,
-            (ctr >> 32) as u32,
+            ctr,
             self.nonce[0],
             self.nonce[1],
+            self.nonce[2],
         ]
     }
 
@@ -87,8 +87,7 @@ impl ChaCha {
         Self::diag_round(state);
     }
 
-    pub fn key_stream_with_ctr(&self, blocks: u64, ctr: u64) -> Vec<u8> {
-        let mut ctr = ctr;
+    pub fn key_stream_with_ctr(&self, blocks: u64, ctr: u32) -> Vec<u8> {
         let mut out = Vec::with_capacity((blocks * 64) as usize);
         let mut state = [
             Wrapping(0x61707865),
@@ -103,17 +102,13 @@ impl ChaCha {
             Wrapping(self.key[5]),
             Wrapping(self.key[6]),
             Wrapping(self.key[7]),
-            Wrapping(0x00000000),
-            Wrapping(0x00000000),
+            Wrapping(ctr),
             Wrapping(self.nonce[0]),
             Wrapping(self.nonce[1]),
+            Wrapping(self.nonce[2]),
         ];
 
         for _block in 0..blocks {
-            // Mix the counter into the state
-            state[12] = Wrapping(ctr as u32); // low bits, "as" cast truncates
-            state[13] = Wrapping((ctr >> 32) as u32); // high bits
-
             println!("key_stream_state: {:08x?}", state);
 
             // Temporary state
@@ -137,14 +132,14 @@ impl ChaCha {
 
             out.extend(key_stream);
 
-            ctr = ctr.wrapping_add(1);
+            // Increment
+            state[12] += 1;
         }
 
         out
     }
 
-    pub fn encrypt_bytes_with_ctr(&self, bytes: &[u8], ctr: u64) -> Vec<u8> {
-        let mut ctr = ctr;
+    pub fn encrypt_bytes_with_ctr(&self, bytes: &[u8], ctr: u32) -> Vec<u8> {
         let mut out = Vec::new();
         let mut state = [
             Wrapping(0x61707865),
@@ -159,16 +154,15 @@ impl ChaCha {
             Wrapping(self.key[5]),
             Wrapping(self.key[6]),
             Wrapping(self.key[7]),
-            Wrapping(0x00000000),
-            Wrapping(0x00000000),
+            Wrapping(ctr),
             Wrapping(self.nonce[0]),
             Wrapping(self.nonce[1]),
+            Wrapping(self.nonce[2]),
         ];
 
         for block in bytes.chunks(64) {
             // Mix the counter into the state
-            state[12] = Wrapping(ctr as u32); // low bits, "as" cast truncates
-            state[13] = Wrapping((ctr >> 32) as u32); // high bits
+            state[12] = Wrapping(ctr);
 
             // Temporary state
             let mut t_state = state.clone();
@@ -193,18 +187,19 @@ impl ChaCha {
                 out.push(*input_byte ^ key_byte)
             }
 
-            ctr = ctr.wrapping_add(1);
+            // Increment
+            state[12] += 1;
         }
 
         out
     }
 
     pub fn encrypt_bytes(&self, bytes: &[u8]) -> Vec<u8> {
-        self.encrypt_bytes_with_ctr(bytes, 0)
+        self.encrypt_bytes_with_ctr(bytes, self.ctr)
     }
 }
 
-impl Cipher for ChaCha {
+impl Cipher for ChaChaExtendedNonce {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let bytes = self
             .input_format
@@ -228,36 +223,23 @@ mod chacha_tests {
     #[test]
     fn encrypt_decrypt_test() {
         let ptext = "0102030405060708";
-        let cipher = ChaCha::default();
+        let cipher = ChaChaExtendedNonce::default();
 
         let ctext = cipher.encrypt(ptext).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), ptext);
     }
 
     #[test]
-    fn state_test_empty() {
+    fn keystream_test() {
         // https://datatracker.ietf.org/doc/html/draft-agl-tls-chacha20poly1305-04#section-7
-        let mut cipher = ChaCha::default();
-        cipher.key = [0, 0, 0, 0, 0, 0, 0, 0];
-        cipher.nonce = [0, 0];
+        let mut cipher = ChaChaExtendedNonce::default();
+        cipher.ctr = 1;
 
         let key_stream = cipher.encrypt_bytes(&[0u8; 64]);
 
         assert_eq!(
             key_stream,
-            ByteFormat::Hex.text_to_bytes("76b8e0ada0f13d90405d6ae55386bd28bdd219b8a08ded1aa836efcc8b770dc7da41597c5157488d7724e03fb8d84a376a43b8f41518a11cc387b669b2ee6586").unwrap()
-        );
-    }
-
-    #[test]
-    fn state_test() {
-        // https://datatracker.ietf.org/doc/html/draft-agl-tls-chacha20poly1305-04#section-7
-        let cipher = ChaCha::default();
-        let key_stream = cipher.encrypt_bytes(&[0u8; 256]);
-
-        assert_eq!(
-            key_stream,
-            ByteFormat::Hex.text_to_bytes("f798a189f195e66982105ffb640bb7757f579da31602fc93ec01ac56f85ac3c134a4547b733b46413042c9440049176905d3be59ea1c53f15916155c2be8241a38008b9a26bc35941e2444177c8ade6689de95264986d95889fb60e84629c9bd9a5acb1cc118be563eb9b3a4a472f82e09a7e778492b562ef7130e88dfe031c79db9d4f7c7a899151b9a475032b63fc385245fe054e3dd5a97a5f576fe064025d3ce042c566ab2c507b138db853e3d6959660996546cc9c4a6eafdc777c040d70eaf46f76dad3979e5c5360c3317166a1c894c94a371876a94df7628fe4eaaf2ccb27d5aaae0ad7ad0f9d4b6ad3b54098746d4524d38407a6deb3ab78fab78c9").unwrap()
+            ByteFormat::Hex.text_to_bytes("10f1e7e4d13b5915500fdd1fa32071c4c7d1f4c733c068030422aa9ac3d46c4ed2826446079faa0914c2d705d98b02a2b5129cd1de164eb9cbd083e8a2503c4e").unwrap()
         );
     }
 }
