@@ -198,11 +198,11 @@ mod chacha_tests {
     fn state_test() {
         // https://datatracker.ietf.org/doc/html/draft-agl-tls-chacha20poly1305-04#section-7
         let cipher = ChaCha::default();
-        let key_stream = cipher.encrypt_bytes(&[0u8; 64]);
+        let key_stream = cipher.encrypt_bytes(&[0u8; 256]);
 
         assert_eq!(
             key_stream,
-            ByteFormat::Hex.text_to_bytes("f798a189f195e66982105ffb640bb7757f579da31602fc93ec01ac56f85ac3c134a4547b733b46413042c9440049176905d3be59ea1c53f15916155c2be8241a").unwrap()
+            ByteFormat::Hex.text_to_bytes("f798a189f195e66982105ffb640bb7757f579da31602fc93ec01ac56f85ac3c134a4547b733b46413042c9440049176905d3be59ea1c53f15916155c2be8241a38008b9a26bc35941e2444177c8ade6689de95264986d95889fb60e84629c9bd9a5acb1cc118be563eb9b3a4a472f82e09a7e778492b562ef7130e88dfe031c79db9d4f7c7a899151b9a475032b63fc385245fe054e3dd5a97a5f576fe064025d3ce042c566ab2c507b138db853e3d6959660996546cc9c4a6eafdc777c040d70eaf46f76dad3979e5c5360c3317166a1c894c94a371876a94df7628fe4eaaf2ccb27d5aaae0ad7ad0f9d4b6ad3b54098746d4524d38407a6deb3ab78fab78c9").unwrap()
         );
     }
 }

@@ -38,7 +38,7 @@ impl Default for ShamirSecretSharing {
 }
 
 impl ShamirSecretSharing {
-    pub fn pairs_string_to_vec(&mut self, text: &str) -> Result<(), ParseIntError> {
+    pub fn polynomial_string_to_vec(&mut self, text: &str) -> Result<(), ParseIntError> {
         self.polynomial.clear();
         let groups = text.split(",");
         self.polynomial.push(0);

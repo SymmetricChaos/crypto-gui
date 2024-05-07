@@ -23,22 +23,16 @@ impl Default for Poly1305 {
 impl Poly1305 {
     pub fn restrict_key_r(&mut self) {
         for i in [3, 7, 11, 15] {
-            // if self.key_r[i] >= 16 {
-            //     // println!("k{} = {:08b} {:02x}", i, self.key_r[i], self.key_r[i])
-            //     // panic!("bytes 3, 7, 11, and 15 must be less than 16 (top four bits cleared)",);
-            // }
+            // The top four bits must be 0
             self.key_r[i] &= 0b00001111;
         }
         for i in [4, 8, 12] {
-            // if self.key_r[i] % 4 != 0 {
-            //     // println!("k{} = {:08b} {:02x}", i, self.key_r[i], self.key_r[i])
-            //     // panic!("bytes 4, 8, 12 must be multiplies of four (bottom two bits cleared)",);
-            // }
+            // The lower two bits must be 0
             self.key_r[i] &= 0b11111100;
         }
     }
 
-    pub fn key_r_from_string_lossy(&mut self, s: &str) -> Result<(), HasherError> {
+    pub fn key_r_from_string(&mut self, s: &str) -> Result<(), HasherError> {
         if s.len() != 32 {
             return Err(HasherError::key(
                 "key must be given as exactly 32 hex digits",
@@ -156,7 +150,7 @@ mod poly1305_tests {
         hasher.input_format = ByteFormat::Hex;
         hasher.output_format = ByteFormat::Hex;
         hasher
-            .key_r_from_string_lossy("12976a08c4426d0ce8a82407c4f48207")
+            .key_r_from_string("12976a08c4426d0ce8a82407c4f48207")
             .unwrap();
         hasher
             .key_s_from_string("80f8c20aa71202d1e29179cbcb555a57")
@@ -181,7 +175,7 @@ mod poly1305_tests {
         hasher.input_format = ByteFormat::Hex;
         hasher.output_format = ByteFormat::Hex;
         hasher
-            .key_r_from_string_lossy("851fc40c3467ac0be05cc20404f3f700")
+            .key_r_from_string("851fc40c3467ac0be05cc20404f3f700")
             .unwrap();
         hasher
             .key_s_from_string("580b3b0f9447bb1e69d095b5928b6dbc")

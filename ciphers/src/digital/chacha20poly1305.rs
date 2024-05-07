@@ -29,9 +29,21 @@ impl ChaCha20Poly1305 {
             (v[0..16].try_into().unwrap(), v[16..].try_into().unwrap())
         };
 
+        // Restrict key_r, the point where the polynomial is evaluated
+        //  r[3], r[7], r[11], and r[15] are required to have their top four bits clear (be smaller than 16)
+        for i in [3, 7, 11, 15] {
+            keys.0[i] &= 0b00001111;
+        }
+        // r[4], r[8], and r[12] are required to have their bottom two bits clear (be divisible by 4)
+        for i in [4, 8, 12] {
+            keys.0[i] &= 0b11111100;
+        }
         // Reverse the bytes
-        keys.0.reverse();
-        keys.1.reverse();
+        // keys.0.reverse();
+        // keys.1.reverse();
+
+        // println!("key r: {:02x?}", keys.0);
+        // println!("key s: {:02x?}", keys.1);
 
         let inputs = self.tag_input(encrypted_bytes);
         self.hash(&inputs, keys.0, keys.1)
@@ -39,39 +51,31 @@ impl ChaCha20Poly1305 {
 
     // Hash the *encrypted* message, associated data, and padding
     fn tag_input(&self, encrypted_bytes: &[u8]) -> Vec<u8> {
-        let mut concat = self.associated_data.clone();
-        while concat.len() % 16 != 0 {
-            concat.push(0x00);
+        let mut input = self.associated_data.clone();
+        while input.len() % 16 != 0 {
+            input.push(0x00);
         }
-        concat.extend_from_slice(&encrypted_bytes);
-        while concat.len() % 16 != 0 {
-            concat.push(0x00);
+        input.extend_from_slice(&encrypted_bytes);
+        while input.len() % 16 != 0 {
+            input.push(0x00);
         }
-        concat.extend_from_slice(&(self.associated_data.len() as u64).to_le_bytes());
-        concat.extend_from_slice(&(encrypted_bytes.len() as u64).to_le_bytes());
-        concat
+        input.extend_from_slice(&(self.associated_data.len() as u64).to_le_bytes());
+        input.extend_from_slice(&(encrypted_bytes.len() as u64).to_le_bytes());
+
+        for line in input.chunks(16) {
+            println!("{:02x?}", line);
+        }
+
+        input
     }
 
+    // We expect key_r to be correctly clamped
     fn hash(&self, bytes: &[u8], key_r: [u8; 16], key_s: [u8; 16]) -> Vec<u8> {
         // Prime modulus (2**130 - 5) initialized from array
         let modulus = BigUint::from_bytes_be(&[
             0x03_u8, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
             0xff, 0xff, 0xfb,
         ]);
-
-        // Restrict key_r, the point where the polynomial is evaluated
-        //  r[3], r[7], r[11], and r[15] are required to have their top four bits clear (be smaller than 16)
-        let mut key_r = key_r;
-        for i in [3, 7, 11, 15] {
-            key_r[i] &= 0b00001111;
-        }
-        // r[4], r[8], and r[12] are required to have their bottom two bits clear (be divisible by 4)
-        for i in [4, 8, 12] {
-            key_r[i] &= 0b11111100;
-        }
-
-        println!("key r: {:02x?}", key_r);
-        println!("key s: {:02x?}", key_s);
 
         let key = BigUint::from_bytes_le(&key_r);
         let blocks = bytes.chunks_exact(16);
@@ -114,7 +118,7 @@ impl ChaCha20Poly1305 {
             out.push(0x00);
         }
 
-        println!("{:02x?}", &out[0..16]);
+        // println!("{:02x?}", &out[0..16]);
 
         out[0..16].to_vec()
     }

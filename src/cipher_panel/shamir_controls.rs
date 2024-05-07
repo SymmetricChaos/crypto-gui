@@ -46,7 +46,10 @@ impl CipherFrame for ShamirSecretSharingFrame {
             self.cipher.threshold - 1
         ));
         if ui.control_string(&mut self.polynomial_string).changed() {
-            match self.cipher.pairs_string_to_vec(&self.polynomial_string) {
+            match self
+                .cipher
+                .polynomial_string_to_vec(&self.polynomial_string)
+            {
                 Ok(_) => (),
                 Err(e) => {
                     ui.error_text(e);

@@ -28,7 +28,7 @@ impl Poly1305Frame {
                     .take(32)
                     .collect();
 
-                match self.hasher.key_r_from_string_lossy(&self.key_string) {
+                match self.hasher.key_r_from_string(&self.key_string) {
                     Ok(_) => self.key_string = format!("{:032x?}", self.hasher.key_r),
                     Err(e) => {
                         ui.error_text(e.to_string());
