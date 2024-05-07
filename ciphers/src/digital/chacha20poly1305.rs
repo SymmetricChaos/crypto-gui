@@ -38,7 +38,7 @@ impl ChaCha20Poly1305 {
         for i in [4, 8, 12] {
             keys.0[i] &= 0b11111100;
         }
-        // Reverse the bytes
+        // Reverse the bytes?
         // keys.0.reverse();
         // keys.1.reverse();
 
@@ -177,6 +177,11 @@ mod chacha_tests {
 
     use super::*;
 
+    const PTEXT: &'static str = "Ladies and Gentlemen of the class of '99: If I could offer you only one tip for the future, sunscreen would be it.";
+    const AAD: [u8; 12] = [
+        0x50, 0x51, 0x52, 0x53, 0xc0, 0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7,
+    ];
+
     #[test]
     fn encrypt_decrypt_test() {
         let ptext = "01020304050607080910111213141516";
@@ -186,16 +191,46 @@ mod chacha_tests {
         assert_eq!(cipher.decrypt(&ctext).unwrap(), ptext);
     }
 
+    // DISCOVERY: I forgot that the ctr inside of ChaCha won't count up in the offset way needed
+    #[test]
+    fn key_stream_test() {
+        let mut cipher = ChaCha20Poly1305::default();
+        cipher.cipher.input_format = ByteFormat::Utf8;
+        cipher.associated_data = AAD.to_vec();
+        cipher.cipher.key = [
+            0x80818283_u32,
+            0x84858687,
+            0x88898a8b,
+            0x8c8d8e8f,
+            0x90919293,
+            0x94959697,
+            0x98999a9b,
+            0x9c9d9e9f,
+        ]
+        .iter()
+        .map(|n| n.to_be())
+        .collect_vec()
+        .try_into()
+        .unwrap();
+        cipher.cipher.nonce = [0x40414243_u32, 0x44454647]
+            .iter()
+            .map(|n| n.to_be())
+            .collect_vec()
+            .try_into()
+            .unwrap();
+        cipher.ctr = 7;
+
+        let key_stream = cipher.cipher.key_stream_with_ctr(2, 8 << 32);
+        println!("key_stream: {:02x?}", key_stream);
+    }
+
     #[test]
     fn encrypt_test() {
         // https://datatracker.ietf.org/doc/html/rfc8439#section-2.8.2
-        let ptext = "Ladies and Gentlemen of the class of '99: If I could offer you only one tip for the future, sunscreen would be it.";
-        let aad = vec![
-            0x50, 0x51, 0x52, 0x53, 0xc0, 0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7,
-        ];
+
         let mut cipher = ChaCha20Poly1305::default();
         cipher.cipher.input_format = ByteFormat::Utf8;
-        cipher.associated_data = aad;
+        cipher.associated_data = AAD.to_vec();
         cipher.cipher.key = [
             0x80818283_u32,
             0x84858687,
@@ -223,11 +258,7 @@ mod chacha_tests {
         // let ptext_bytes = ByteFormat::Utf8.text_to_bytes(&ptext).unwrap();
         // println!("ptext_bytes: {:02x?}", ptext_bytes);
 
-        // This does not match
-        let key_stream = cipher.cipher.key_stream_with_ctr(2, 7 << 32);
-        println!("key_stream: {:02x?}", key_stream);
-
-        let mut ctext = cipher.encrypt(ptext).unwrap();
+        let mut ctext = cipher.encrypt(PTEXT).unwrap();
         let rem = ctext.split_off(32);
 
         println!("{ctext}");

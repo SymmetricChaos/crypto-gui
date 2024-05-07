@@ -114,6 +114,8 @@ impl ChaCha {
             state[12] = Wrapping(ctr as u32); // low bits, "as" cast truncates
             state[13] = Wrapping((ctr >> 32) as u32); // high bits
 
+            println!("key_stream_state: {:08x?}", state);
+
             // Temporary state
             let mut t_state = state.clone();
 
