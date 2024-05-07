@@ -219,6 +219,18 @@ mod chacha_tests {
             .unwrap();
         cipher.ctr = 7;
 
-        let _ctext = cipher.encrypt(ptext).unwrap();
+        // Checked that these are correct
+        // let ptext_bytes = ByteFormat::Utf8.text_to_bytes(&ptext).unwrap();
+        // println!("ptext_bytes: {:02x?}", ptext_bytes);
+
+        // This does not match
+        let key_stream = cipher.cipher.key_stream_with_ctr(2, 7 << 32);
+        println!("key_stream: {:02x?}", key_stream);
+
+        let mut ctext = cipher.encrypt(ptext).unwrap();
+        let rem = ctext.split_off(32);
+
+        println!("{ctext}");
+        println!("{rem}");
     }
 }

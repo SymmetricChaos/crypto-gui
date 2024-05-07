@@ -1,6 +1,5 @@
-use std::num::Wrapping;
-
 use crate::{Cipher, CipherError};
+use std::num::Wrapping;
 use utils::byte_formatting::ByteFormat;
 
 pub struct ChaCha {
@@ -86,6 +85,60 @@ impl ChaCha {
     pub fn double_round(state: &mut [Wrapping<u32>; 16]) {
         Self::column_round(state);
         Self::diag_round(state);
+    }
+
+    pub fn key_stream_with_ctr(&self, blocks: u64, ctr: u64) -> Vec<u8> {
+        let mut ctr = ctr;
+        let mut out = Vec::with_capacity((blocks * 64) as usize);
+        let mut state = [
+            Wrapping(0x61707865),
+            Wrapping(0x3320646e),
+            Wrapping(0x79622d32),
+            Wrapping(0x6b206574),
+            Wrapping(self.key[0]),
+            Wrapping(self.key[1]),
+            Wrapping(self.key[2]),
+            Wrapping(self.key[3]),
+            Wrapping(self.key[4]),
+            Wrapping(self.key[5]),
+            Wrapping(self.key[6]),
+            Wrapping(self.key[7]),
+            Wrapping(0x00000000),
+            Wrapping(0x00000000),
+            Wrapping(self.nonce[0]),
+            Wrapping(self.nonce[1]),
+        ];
+
+        for _block in 0..blocks {
+            // Mix the counter into the state
+            state[12] = Wrapping(ctr as u32); // low bits, "as" cast truncates
+            state[13] = Wrapping((ctr >> 32) as u32); // high bits
+
+            // Temporary state
+            let mut t_state = state.clone();
+
+            // Only ChaCha20, ChaCha12, and ChaCha8 are official but any number is usable
+            for _round in 0..self.rounds / 2 {
+                Self::double_round(&mut t_state);
+            }
+            if self.rounds % 2 == 1 {
+                Self::column_round(&mut t_state)
+            }
+
+            // XOR the current state into the temporary state
+            for (i, word) in t_state.iter_mut().enumerate() {
+                *word += state[i]
+            }
+
+            // Create a byte stream
+            let key_stream = t_state.iter().flat_map(|w| w.0.to_le_bytes());
+
+            out.extend(key_stream);
+
+            ctr += 1;
+        }
+
+        out
     }
 
     pub fn encrypt_bytes_with_ctr(&self, bytes: &[u8], ctr: u64) -> Vec<u8> {
