@@ -1,18 +1,18 @@
-use super::chacha::ChaCha;
+use super::{chacha::ChaCha, chacha_extended_nonce::ChaChaExtendedNonce};
 use crate::{Cipher, CipherError};
 use num::{BigUint, Zero};
 
 // https://datatracker.ietf.org/doc/html/rfc8439
 pub struct ChaCha20Poly1305 {
-    pub cipher: ChaCha,
+    pub cipher: ChaChaExtendedNonce,
     pub associated_data: Vec<u8>,
-    pub ctr: u64,
+    pub ctr: u32,
 }
 
 impl Default for ChaCha20Poly1305 {
     fn default() -> Self {
         Self {
-            cipher: ChaCha::default(),
+            cipher: ChaChaExtendedNonce::default(),
             associated_data: Vec::new(),
             ctr: 0,
         }
@@ -23,9 +23,7 @@ impl ChaCha20Poly1305 {
     fn create_tag(&self, encrypted_bytes: &[u8]) -> Vec<u8> {
         // The r key will be restricted within the hash invocation
         let mut keys: ([u8; 16], [u8; 16]) = {
-            let v = self
-                .cipher
-                .encrypt_bytes_with_ctr(&[0; 32], self.ctr.rotate_left(32));
+            let v = self.cipher.encrypt_bytes_with_ctr(&[0; 32], self.ctr);
             (v[0..16].try_into().unwrap(), v[16..].try_into().unwrap())
         };
 
@@ -132,9 +130,7 @@ impl Cipher for ChaCha20Poly1305 {
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
-        let encrypted_bytes = self
-            .cipher
-            .encrypt_bytes_with_ctr(&bytes, (self.ctr + 1).rotate_left(32));
+        let encrypted_bytes = self.cipher.encrypt_bytes_with_ctr(&bytes, self.ctr + 1);
 
         // The r key is restricted within the hash invocation
         // Put the tag first for simplicity when decoding
@@ -161,7 +157,7 @@ impl Cipher for ChaCha20Poly1305 {
         // ChaCha is reciprocal
         let decrypted_bytes = self
             .cipher
-            .encrypt_bytes_with_ctr(&encrypted_bytes, (self.ctr + 1).rotate_left(32));
+            .encrypt_bytes_with_ctr(&encrypted_bytes, self.ctr + 1);
         Ok(self
             .cipher
             .output_format
@@ -212,15 +208,15 @@ mod chacha_tests {
         .collect_vec()
         .try_into()
         .unwrap();
-        cipher.cipher.nonce = [0x40414243_u32, 0x44454647]
+        cipher.cipher.nonce = [0x08000000_u32, 0x40414243, 0x44454647]
             .iter()
             .map(|n| n.to_be())
             .collect_vec()
             .try_into()
             .unwrap();
-        cipher.ctr = 7;
+        cipher.ctr = 0;
 
-        let key_stream = cipher.cipher.key_stream_with_ctr(2, 8 << 32);
+        let key_stream = cipher.cipher.key_stream_with_ctr(2, 0);
         println!("key_stream: {:02x?}", key_stream);
     }
 

@@ -16,7 +16,7 @@ impl Default for ChaChaExtendedNonce {
         Self {
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
-            // default for key and nonce taken from test vector here: https://datatracker.ietf.org/doc/html/draft-agl-tls-chacha20poly1305-04#section-7
+            // default for key and nonce taken from test vector here: https://datatracker.ietf.org/doc/html/rfc8439#section-2.3.2
             key: [
                 0x03020100, 0x07060504, 0x0b0a0908, 0x0f0e0d0c, 0x13121110, 0x17161514, 0x1b1a1918,
                 0x1f1e1d1c,
@@ -231,7 +231,7 @@ mod chacha_tests {
 
     #[test]
     fn keystream_test() {
-        // https://datatracker.ietf.org/doc/html/draft-agl-tls-chacha20poly1305-04#section-7
+        // https://datatracker.ietf.org/doc/html/rfc8439#section-2.3.2
         let mut cipher = ChaChaExtendedNonce::default();
         cipher.ctr = 1;
 
