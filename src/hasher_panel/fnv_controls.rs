@@ -47,10 +47,11 @@ impl HasherFrame for FnvFrame {
         ui.add_space(16.0);
         ui.label("The initialization value is for FNV-1 and (FNV-1a) was created by hashing the ASCII string \"chongo <Landon Curt Noll> /\\../\\\" with the zero basis version FNV-1, that is starting with a value of zero. These zero basis version are called FNV-0.");
         ui.checkbox(
-            &mut self.hasher.alternate,
+            &mut self.hasher.zero_basis,
             "Use Zero Basis Mode (not recommended)",
         );
 
+        ui.add_space(16.0);
         ui.subheading("Hash Size");
         ui.label("The FNV primes are of a specific form, close to a power of 256, which the developers found to be highly effective at dispersing the bits of the input throughout the state. Four FNV variants are provided here but the original FNV paper also defines constants for 512 and 1024 versions of the algorithm. However these run much more slowly, take more space to store, and offer no practical increase in collision resistance.");
         match self.hasher.size {
