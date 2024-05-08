@@ -208,7 +208,7 @@ mod chacha_tests {
         .collect_vec()
         .try_into()
         .unwrap();
-        cipher.cipher.nonce = [0x08000000_u32, 0x40414243, 0x44454647]
+        cipher.cipher.nonce = [0x07000000_u32, 0x40414243, 0x44454647]
             .iter()
             .map(|n| n.to_be())
             .collect_vec()
@@ -242,22 +242,20 @@ mod chacha_tests {
         .collect_vec()
         .try_into()
         .unwrap();
-        cipher.cipher.nonce = [0x40414243_u32, 0x44454647]
+        cipher.cipher.nonce = [0x07000000_u32, 0x40414243, 0x44454647]
             .iter()
             .map(|n| n.to_be())
             .collect_vec()
             .try_into()
             .unwrap();
-        cipher.ctr = 7;
+        cipher.ctr = 0;
 
-        // Checked that these are correct
-        // let ptext_bytes = ByteFormat::Utf8.text_to_bytes(&ptext).unwrap();
-        // println!("ptext_bytes: {:02x?}", ptext_bytes);
+        let ctext = cipher.encrypt(PTEXT).unwrap();
+        let (tag, ctext) = ctext.split_at(32);
 
-        let mut ctext = cipher.encrypt(PTEXT).unwrap();
-        let rem = ctext.split_off(32);
+        // Remaining errors are caused by the second block of ciphertext not encrypting the same as in the test vector
 
-        println!("{ctext}");
-        println!("{rem}");
+        assert_eq!(tag, "1ae10b594f09e26a7e902ecbd0600691");
+        assert_eq!(ctext, "d31a8d34648e60db7b86afbc53ef7ec2a4aded51296e08fea9e2b5a736ee62d63dbea45e8ca9671282fafb69da92728b1a71de0a9e060b2905d6a5b67ecd3b3692ddbd7f2d778b8c9803aee328091b58fab324e4fad675945585808b4831d7bc3ff4def08e4b7a9de576d26586cec64b6116");
     }
 }

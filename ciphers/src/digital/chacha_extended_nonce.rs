@@ -109,8 +109,6 @@ impl ChaChaExtendedNonce {
         ];
 
         for _block in 0..blocks {
-            println!("key_stream_state: {:08x?}", state);
-
             // Temporary state
             let mut t_state = state.clone();
 
@@ -161,9 +159,6 @@ impl ChaChaExtendedNonce {
         ];
 
         for block in bytes.chunks(64) {
-            // Mix the counter into the state
-            state[12] = Wrapping(ctr);
-
             // Temporary state
             let mut t_state = state.clone();
 
@@ -240,6 +235,27 @@ mod chacha_tests {
         assert_eq!(
             key_stream,
             ByteFormat::Hex.text_to_bytes("10f1e7e4d13b5915500fdd1fa32071c4c7d1f4c733c068030422aa9ac3d46c4ed2826446079faa0914c2d705d98b02a2b5129cd1de164eb9cbd083e8a2503c4e").unwrap()
+        );
+    }
+
+    #[test]
+    fn encrypt_test() {
+        // https://datatracker.ietf.org/doc/html/rfc8439#section-2.3.2
+        const PTEXT: &'static str = "Ladies and Gentlemen of the class of '99: If I could offer you only one tip for the future, sunscreen would be it.";
+        let mut cipher = ChaChaExtendedNonce::default();
+        cipher.input_format = ByteFormat::Utf8;
+        cipher.key = [
+            0x03020100, 0x07060504, 0x0b0a0908, 0x0f0e0d0c, 0x13121110, 0x17161514, 0x1b1a1918,
+            0x1f1e1d1c,
+        ];
+        cipher.nonce = [0, 0x4a000000, 0];
+        cipher.ctr = 1;
+
+        let key_stream = cipher.encrypt(PTEXT).unwrap();
+
+        assert_eq!(
+            key_stream,
+            "6e2e359a2568f98041ba0728dd0d6981e97e7aec1d4360c20a27afccfd9fae0bf91b65c5524733ab8f593dabcd62b3571639d624e65152ab8f530c359f0861d807ca0dbf500d6a6156a38e088a22b65e52bc514d16ccf806818ce91ab77937365af90bbf74a35be6b40b8eedf2785e42874d"
         );
     }
 }
