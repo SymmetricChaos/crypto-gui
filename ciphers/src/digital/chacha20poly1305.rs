@@ -1,4 +1,4 @@
-use super::{chacha::ChaCha, chacha_extended_nonce::ChaChaExtendedNonce};
+use super::chacha_extended_nonce::ChaChaExtendedNonce;
 use crate::{Cipher, CipherError};
 use num::{BigUint, Zero};
 

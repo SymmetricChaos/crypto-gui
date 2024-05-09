@@ -1,4 +1,4 @@
-use ciphers::digital::chacha::ChaCha;
+use ciphers::digital::{chacha::ChaCha, chacha_extended_nonce::ChaChaExtendedNonce};
 use egui::{DragValue, Slider};
 use rand::{thread_rng, Rng};
 
@@ -7,13 +7,17 @@ use crate::ui_elements::UiElements;
 use super::CipherFrame;
 
 pub struct ChaChaFrame {
-    cipher: ChaCha,
+    regular: ChaCha,
+    extended: ChaChaExtendedNonce,
+    ex: bool,
 }
 
 impl Default for ChaChaFrame {
     fn default() -> Self {
         Self {
-            cipher: Default::default(),
+            regular: Default::default(),
+            extended: Default::default(),
+            ex: false,
         }
     }
 }
@@ -23,43 +27,81 @@ impl CipherFrame for ChaChaFrame {
         ui.randomize_reset(self);
         ui.add_space(16.0);
 
+        ui.add_space(8.0);
+        ui.selectable_value(&mut self.ex, false, "64-bit Nonce");
+        ui.selectable_value(&mut self.ex, true, "96-bit Nonce");
+
+        ui.add_space(8.0);
         ui.subheading("Key");
-        for i in 0..4 {
-            ui.add(DragValue::new(&mut self.cipher.key[i]).hexadecimal(8, false, true));
+        if self.ex {
+            for i in 0..4 {
+                ui.add(DragValue::new(&mut self.extended.key[i]).hexadecimal(8, false, false));
+            }
+        } else {
+            for i in 0..4 {
+                ui.add(DragValue::new(&mut self.regular.key[i]).hexadecimal(8, false, false));
+            }
         }
+
         ui.add_space(8.0);
         ui.subheading("Nonce");
-        for i in 0..2 {
-            ui.add(DragValue::new(&mut self.cipher.nonce[i]).hexadecimal(8, false, true));
+        ui.label("A nonce should never be reused with the same key.");
+        if self.ex {
+            for i in 0..3 {
+                ui.add(DragValue::new(&mut self.extended.nonce[i]).hexadecimal(8, false, false));
+            }
+        } else {
+            for i in 0..2 {
+                ui.add(DragValue::new(&mut self.regular.nonce[i]).hexadecimal(8, false, false));
+            }
         }
+        ui.add_space(8.0);
+        ui.subheading("Counter");
+        ui.label("The counter ensures that each block of the keystream is different. It can usually be left to start at zero.");
+        if self.ex {
+            ui.add(DragValue::new(&mut self.regular.ctr).hexadecimal(8, false, false));
+        } else {
+            ui.add(DragValue::new(&mut self.regular.ctr).hexadecimal(16, false, false));
+        }
+
         ui.add_space(8.0);
         ui.subheading("Number of Rounds");
         ui.horizontal(|ui| {
             if ui.small_button("ChaCha8").clicked() {
-                self.cipher.rounds = 8;
+                self.regular.rounds = 8;
+                self.extended.rounds = 8;
             }
             if ui.small_button("ChaCha12").clicked() {
-                self.cipher.rounds = 8;
+                self.regular.rounds = 12;
+                self.extended.rounds = 12;
             }
             if ui.small_button("ChaCha20").clicked() {
-                self.cipher.rounds = 8;
+                self.regular.rounds = 20;
+                self.extended.rounds = 20;
             }
         });
-        ui.add(Slider::new(&mut self.cipher.rounds, 2..=20));
+        if ui
+            .add(Slider::new(&mut self.regular.rounds, 2..=20))
+            .changed()
+        {
+            self.extended.rounds = self.regular.rounds
+        }
         ui.add_space(8.0);
-        // ui.subheading("Authenticated");
-        // ui.label("The Poly1305 hash function can be used for authenticated encryption.");
-        // ui.checkbox(&mut self.authenticated, "");
     }
 
     fn cipher(&self) -> &dyn ciphers::Cipher {
-        &self.cipher
+        &self.regular
     }
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        rng.fill(&mut self.cipher.key);
-        rng.fill(&mut self.cipher.nonce);
+        if self.ex {
+            rng.fill(&mut self.extended.key);
+            rng.fill(&mut self.extended.nonce);
+        } else {
+            rng.fill(&mut self.regular.key);
+            rng.fill(&mut self.regular.nonce);
+        }
     }
 
     fn reset(&mut self) {
