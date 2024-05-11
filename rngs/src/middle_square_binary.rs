@@ -1,5 +1,3 @@
-use std::default;
-
 use crate::traits::ClassicRng;
 
 macro_rules! middle_square_binary {

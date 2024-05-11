@@ -29,16 +29,23 @@ impl ClassicRng for Splitmix {
     }
 }
 
-// #[cfg(test)]
-// mod splitmix_tests {
-//     use super::*;
+#[cfg(test)]
+mod splitmix_tests {
+    use super::*;
 
-//     // #[test]
-//     // fn first_five() {
-//     //     let mut rng = Splitmix::default();
-//     //     rng.state = 1234567;
-//     //     for _ in 0..5 {
-//     //         println!("{}", rng.next_u64())
-//     //     }
-//     // }
-// }
+    #[test]
+    fn first_five() {
+        let mut rng = Splitmix::default();
+        let ints: [u64; 5] = [
+            6457827717110365317,
+            3203168211198807973,
+            9817491932198370423,
+            4593380528125082431,
+            16408922859458223821,
+        ];
+        rng.state = 1234567;
+        for int in ints {
+            assert_eq!(int, rng.next_u64());
+        }
+    }
+}

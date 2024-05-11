@@ -3,6 +3,7 @@ pub mod chacha;
 pub mod errors;
 pub mod halton;
 pub mod ids;
+pub mod jsf;
 pub mod lcg;
 pub mod lfg;
 pub mod lfsr;
