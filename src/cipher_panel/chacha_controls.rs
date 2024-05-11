@@ -22,6 +22,27 @@ impl Default for ChaChaFrame {
     }
 }
 
+impl ChaChaFrame {
+    fn start_state(&self) -> String {
+        let mut out = String::new();
+
+        let state = if self.ex {
+            self.extended.create_state(self.extended.ctr)
+        } else {
+            self.regular.create_state(self.regular.ctr)
+        };
+
+        for line in state.chunks_exact(4) {
+            for word in line {
+                out.push_str(&format!("{:08x?}  ", word))
+            }
+            out.push('\n')
+        }
+
+        out
+    }
+}
+
 impl CipherFrame for ChaChaFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.randomize_reset(self);
@@ -87,6 +108,9 @@ impl CipherFrame for ChaChaFrame {
             self.extended.rounds = self.regular.rounds
         }
         ui.add_space(8.0);
+
+        ui.subheading("Starting State");
+        ui.label(self.start_state());
     }
 
     fn cipher(&self) -> &dyn ciphers::Cipher {

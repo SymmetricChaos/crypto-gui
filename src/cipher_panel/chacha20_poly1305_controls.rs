@@ -1,5 +1,5 @@
 use ciphers::digital::chacha20poly1305::ChaCha20Poly1305;
-use egui::{DragValue, Slider};
+use egui::DragValue;
 use rand::{thread_rng, Rng};
 
 use crate::ui_elements::UiElements;
@@ -34,6 +34,11 @@ impl CipherFrame for ChaCha20Poly1305Frame {
         for i in 0..3 {
             ui.add(DragValue::new(&mut self.cipher.cipher.nonce[i]).hexadecimal(8, false, true));
         }
+
+        ui.add_space(8.0);
+        ui.subheading("Counter");
+        ui.add(DragValue::new(&mut self.cipher.cipher.ctr).hexadecimal(8, false, true));
+
         ui.add_space(8.0);
         ui.subheading("Number of Rounds");
         ui.label("The ChaCha20-Poly1305 standard does not accept a variant number of rounds.");
