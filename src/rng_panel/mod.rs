@@ -1,5 +1,6 @@
 mod blumblumshub_controls;
 mod halton_controls;
+mod jsf_controls;
 mod lcg_controls;
 mod lfg_controls;
 mod lfsr_controls;
@@ -21,8 +22,8 @@ use rngs::{
 };
 
 use self::{
-    blumblumshub_controls::BlumBlumShubFrame, halton_controls::HaltonFrame, lcg_controls::LcgFrame,
-    lfsr_controls::LfsrFrame, mersenne_twister_controls::MTFrame,
+    blumblumshub_controls::BlumBlumShubFrame, halton_controls::HaltonFrame, jsf_controls::JsfFrame,
+    lcg_controls::LcgFrame, lfsr_controls::LfsrFrame, mersenne_twister_controls::MTFrame,
     middle_square_controls::MiddleSquareFrame, pcg_controls::PcgFrame, rc4_controls::Rc4Frame,
     splitmix_controls::SplitmixFrame, vmpcr_controls::VmpcrFrame, weyl_controls::WeylSequenceFrame,
     xorshift_controls::XorshiftFrame, xoshiro_controls::XoshiroFrame,
@@ -60,6 +61,7 @@ fn combox_box(
 pub struct RngInterface {
     blumblumshub: BlumBlumShubFrame,
     halton: HaltonFrame,
+    jsf: JsfFrame,
     lcg: LcgFrame,
     lfsr: LfsrFrame,
     mersenne_twister: MTFrame,
@@ -73,11 +75,30 @@ pub struct RngInterface {
     xoshiro: XoshiroFrame,
 }
 
+impl ClassicRngFrame for RngInterface {
+    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+        <JsfFrame as ClassicRngFrame>::ui(&mut self.jsf, ui, _errors)
+    }
+
+    fn rng(&self) -> &dyn rngs::ClassicRng {
+        <JsfFrame as ClassicRngFrame>::rng(&self.jsf)
+    }
+
+    fn randomize(&mut self) {
+        <JsfFrame as ClassicRngFrame>::randomize(&mut self.jsf)
+    }
+
+    fn reset(&mut self) {
+        <JsfFrame as ClassicRngFrame>::reset(&mut self.jsf)
+    }
+}
+
 impl RngInterface {
     pub fn combo_boxes(&mut self, ui: &mut Ui, active_rng: &mut Option<RngId>) {
         combox_box(
             &[
                 RngId::BlumBlumShub,
+                RngId::Jsf,
                 RngId::Lcg,
                 RngId::Lfsr,
                 RngId::MersenneTwister,
@@ -115,6 +136,7 @@ impl RngInterface {
         match active_rng {
             RngId::BlumBlumShub => &mut self.blumblumshub,
             RngId::Halton => &mut self.halton,
+            RngId::Jsf => &mut self.jsf,
             RngId::Lcg => &mut self.lcg,
             // RngId::Lfg => &mut self.lfg,
             RngId::Lfsr => &mut self.lfsr,

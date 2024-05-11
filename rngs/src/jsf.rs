@@ -1,7 +1,7 @@
 use crate::traits::ClassicRng;
 
 pub struct Jsf32 {
-    state: [u32; 4],
+    pub state: [u32; 4],
 }
 
 impl Default for Jsf32 {
@@ -31,7 +31,7 @@ impl ClassicRng for Jsf32 {
 }
 
 pub struct Jsf64 {
-    state: [u64; 4],
+    pub state: [u64; 4],
 }
 
 impl Default for Jsf64 {

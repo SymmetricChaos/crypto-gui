@@ -3,6 +3,7 @@ use ciphers::digital::BlockCipherMode;
 use eframe::egui::RichText;
 use egui::{Color32, DragValue, Response, TextStyle, Ui};
 use egui_extras::{Column, TableBuilder};
+use num::ToPrimitive;
 // use itertools::Itertools;
 use rngs::ClassicRng;
 use std::fmt::Display;
@@ -322,6 +323,28 @@ pub fn generate_random_u32s_box(
                     randoms.push_str(", ");
                 }
                 randoms.push_str(&rng.next_u32().to_string());
+            }
+        }
+        ui.add(DragValue::new(n_random).clamp_range(1..=10))
+    });
+
+    ui.text_edit_multiline(randoms);
+}
+
+pub fn generate_random_f32s_box(
+    ui: &mut Ui,
+    rng: &mut dyn ClassicRng,
+    n_random: &mut usize,
+    randoms: &mut String,
+) {
+    ui.horizontal(|ui| {
+        if ui.button("Random Numbers").clicked() {
+            for _ in 0..*n_random {
+                if !randoms.is_empty() {
+                    randoms.push_str(", ");
+                }
+                let next_float = rng.next_u32().to_f32().unwrap() / u32::MAX.to_f32().unwrap(); // TODO: this does always work, right?
+                randoms.push_str(&next_float.to_string());
             }
         }
         ui.add(DragValue::new(n_random).clamp_range(1..=10))
