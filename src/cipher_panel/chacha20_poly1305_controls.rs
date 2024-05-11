@@ -18,6 +18,23 @@ impl Default for ChaCha20Poly1305Frame {
     }
 }
 
+impl ChaCha20Poly1305Frame {
+    fn start_state(&self) -> String {
+        let mut out = String::new();
+
+        let state = self.cipher.cipher.create_state(self.cipher.ctr);
+
+        for line in state.chunks_exact(4) {
+            for word in line {
+                out.push_str(&format!("{:08x?}  ", word))
+            }
+            out.push('\n')
+        }
+
+        out
+    }
+}
+
 impl CipherFrame for ChaCha20Poly1305Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.randomize_reset(self);
@@ -42,7 +59,10 @@ impl CipherFrame for ChaCha20Poly1305Frame {
         ui.add_space(8.0);
         ui.subheading("Number of Rounds");
         ui.label("The ChaCha20-Poly1305 standard does not accept a variant number of rounds.");
+
         ui.add_space(8.0);
+        ui.subheading("Starting State");
+        ui.label(self.start_state());
     }
 
     fn cipher(&self) -> &dyn ciphers::Cipher {
