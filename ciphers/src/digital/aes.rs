@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use utils::byte_formatting::ByteFormat;
 
 use crate::{Cipher, CipherError};
@@ -12,6 +13,10 @@ pub fn sbox(byte: u8) -> u8 {
 
 pub fn inv_sbox(byte: u8) -> u8 {
     byte ^ byte.rotate_left(1) ^ byte.rotate_left(3) ^ byte.rotate_left(4) ^ 0x05
+}
+
+fn sub_word(n: u32) -> u32 {
+    u32::from_be_bytes(n.to_be_bytes().map(|b| sbox(b)))
 }
 
 pub fn mul2(byte: u8) -> u8 {
@@ -158,23 +163,69 @@ pub fn print_aes_state(state: [u8; 16]) {
     }
 }
 
-pub struct Aes {
+pub struct Aes128 {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
-    pub state: [u8; 16],
+    pub key: [u32; Self::KEY_WORDS],
+    //pub state: [u8; 16],
 }
 
-impl Default for Aes {
+impl Default for Aes128 {
     fn default() -> Self {
         Self {
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
-            state: [0; 16],
+            key: [0; Self::KEY_WORDS],
+            //state: [0; 16],
         }
     }
 }
 
-impl Aes {
+impl Aes128 {
+    pub const ROUNDS: usize = 10;
+    pub const KEY_WORDS: usize = 4;
+
+    pub fn key_schedule(&self) -> Vec<Vec<u8>> {
+        let rc: [u32; 10] = [
+            0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000, 0x20000000, 0x40000000,
+            0x80000000, 0x1b000000, 0x36000000,
+        ];
+
+        let mut round_keys = Vec::with_capacity(4 * Self::ROUNDS - 1);
+
+        for i in 0..(4 * Self::ROUNDS - 1) {
+            if i < Self::KEY_WORDS {
+                round_keys.push(self.key[i])
+            } else if i > Self::KEY_WORDS && i % Self::KEY_WORDS == 0 {
+                let w = round_keys[i - Self::KEY_WORDS]
+                    ^ sub_word(round_keys[i - 1].rotate_left(1))
+                    ^ rc[i / Self::KEY_WORDS];
+                round_keys.push(w);
+            // This does nothing for AES128 and AES192 but is needed for AES256
+            } else if i > Self::KEY_WORDS && Self::KEY_WORDS > 6 && i % Self::KEY_WORDS == 0 {
+                let w = round_keys[i - Self::KEY_WORDS] ^ sub_word(round_keys[i - 1]);
+                round_keys.push(w);
+            } else {
+                round_keys.push(round_keys[i - Self::KEY_WORDS] ^ round_keys[i - 1])
+            }
+        }
+
+        round_keys
+            .chunks_exact(4)
+            .map(|w| {
+                [
+                    w[0].to_be_bytes(),
+                    w[1].to_be_bytes(),
+                    w[2].to_be_bytes(),
+                    w[3].to_be_bytes(),
+                ]
+                .into_iter()
+                .flatten()
+                .collect_vec()
+            })
+            .collect_vec()
+    }
+
     pub fn sub_bytes(state: &mut [u8; 16]) {
         for byte in state {
             *byte = sbox(*byte)
@@ -193,12 +244,26 @@ impl Aes {
         state[12..16].rotate_left(3);
     }
 
+    pub fn inv_shift_rows(state: &mut [u8; 16]) {
+        state[4..8].rotate_right(1);
+        state[8..12].rotate_right(2);
+        state[12..16].rotate_right(3);
+    }
+
     pub fn mix_columns(state: &mut [u8; 16]) {
         // Columns
         Self::mix_column(state, [0, 4, 8, 12]);
         Self::mix_column(state, [1, 5, 9, 13]);
         Self::mix_column(state, [2, 6, 10, 14]);
         Self::mix_column(state, [3, 7, 11, 15]);
+    }
+
+    pub fn inv_mix_columns(state: &mut [u8; 16]) {
+        // Columns
+        Self::inv_mix_column(state, [0, 4, 8, 12]);
+        Self::inv_mix_column(state, [1, 5, 9, 13]);
+        Self::inv_mix_column(state, [2, 6, 10, 14]);
+        Self::inv_mix_column(state, [3, 7, 11, 15]);
     }
 
     pub fn mix_column(state: &mut [u8; 16], idxs: [usize; 4]) {
@@ -212,12 +277,49 @@ impl Aes {
         state[idxs[3]] = mul3(a) ^ b ^ c ^ mul2(d);
     }
 
+    pub fn inv_mix_column(state: &mut [u8; 16], idxs: [usize; 4]) {
+        let a = state[idxs[0]];
+        let b = state[idxs[1]];
+        let c = state[idxs[2]];
+        let d = state[idxs[3]];
+        state[idxs[0]] = mul14(a) ^ mul11(b) ^ mul13(c) ^ mul9(d);
+        state[idxs[1]] = mul9(a) ^ mul14(b) ^ mul11(c) ^ mul13(d);
+        state[idxs[2]] = mul13(a) ^ mul9(b) ^ mul14(c) ^ mul11(d);
+        state[idxs[3]] = mul11(a) ^ mul13(b) ^ mul9(c) ^ mul14(d);
+    }
+
+    pub fn add_round_key(state: &mut [u8; 16], round_key: &[u8]) {
+        for (byte, key) in &mut state.iter_mut().zip(round_key) {
+            *byte ^= key
+        }
+    }
+
+    pub fn encrypt_block(block: &mut [u8; 16], round_keys: &Vec<Vec<u8>>) {
+        // Initial round key
+        Self::add_round_key(block, &round_keys[0]);
+
+        // Main rounds
+        for i in 0..Self::ROUNDS - 1 {
+            Self::sub_bytes(block);
+            Self::shift_rows(block);
+            Self::mix_columns(block);
+            Self::add_round_key(block, &round_keys[i + 1])
+        }
+
+        // Finalization round
+        Self::sub_bytes(block);
+        Self::shift_rows(block);
+        Self::add_round_key(block, &round_keys[Self::ROUNDS]);
+    }
+
     pub fn encrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
         if bytes.len() % 8 != 0 {
             return Err(CipherError::input(
                 "input length must be a multiple of 64 bits",
             ));
         };
+
+        let round_keys = self.key_schedule();
 
         let mut out = Vec::with_capacity(bytes.len());
 
@@ -231,13 +333,15 @@ impl Aes {
             ));
         };
 
+        let round_keys = self.key_schedule();
+
         let mut out = Vec::with_capacity(bytes.len());
 
         Ok(out)
     }
 }
 
-impl Cipher for Aes {
+impl Cipher for Aes128 {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let mut bytes = self
             .input_format
@@ -267,7 +371,7 @@ mod aes_tests {
         let mut state = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
         let output = [0, 1, 2, 3, 5, 6, 7, 4, 10, 11, 8, 9, 15, 12, 13, 14];
         // print_aes_state(state);
-        Aes::shift_rows(&mut state);
+        Aes128::shift_rows(&mut state);
         // print_aes_state(state);
         assert_eq!(state, output)
     }
@@ -275,16 +379,20 @@ mod aes_tests {
     #[test]
     fn test_mix_cols() {
         let mut state = [
-            0xDB, 0x01, 0xF2, 0xD4, 0x13, 0x01, 0xA, 0xD4, 0x53, 0x01, 0x22, 0xD4, 0x45, 0x01,
-            0x5C, 0xD5,
+            0xdb, 0x01, 0xf2, 0xd4, 0x13, 0x01, 0xa, 0xd4, 0x53, 0x01, 0x22, 0xd4, 0x45, 0x01,
+            0x5c, 0xd5,
         ];
+        let original_state = state.clone();
         let output = [
-            0x8E, 0x01, 0x9F, 0xD5, 0x4D, 0x01, 0xDC, 0xD5, 0xA1, 0x01, 0x58, 0xD7, 0xBC, 0x01,
-            0x9D, 0xD6,
+            0x8e, 0x01, 0x9f, 0xd5, 0x4d, 0x01, 0xdc, 0xd5, 0xa1, 0x01, 0x58, 0xd7, 0xbc, 0x01,
+            0x9d, 0xd6,
         ];
         // print_aes_state(state);
-        Aes::mix_columns(&mut state);
+        Aes128::mix_columns(&mut state);
         // print_aes_state(state);
-        assert_eq!(state, output)
+        assert_eq!(state, output);
+        Aes128::inv_mix_columns(&mut state);
+        // print_aes_state(state);
+        assert_eq!(state, original_state);
     }
 }
