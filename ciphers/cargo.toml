@@ -22,3 +22,4 @@ bimap = "0.6.3"
 regex = "1"
 rfd = "0.11.3"
 base64 = "0.21.7"
+crypto-bigint = { version = "0.5.5", features = ["generic-array"] }

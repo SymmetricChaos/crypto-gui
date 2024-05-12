@@ -1,7 +1,10 @@
 use itertools::Itertools;
+use num::{BigUint, FromPrimitive, Zero};
 use utils::byte_formatting::ByteFormat;
 
 use crate::{Cipher, CipherError};
+
+use super::BlockCipherMode;
 
 pub fn sbox(byte: u8) -> u8 {
     byte ^ byte.rotate_left(1)
@@ -167,7 +170,7 @@ pub struct Aes128 {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
     pub key: [u32; Self::KEY_WORDS],
-    //pub state: [u8; 16],
+    pub mode: BlockCipherMode,
 }
 
 impl Default for Aes128 {
@@ -176,7 +179,7 @@ impl Default for Aes128 {
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
             key: [0; Self::KEY_WORDS],
-            //state: [0; 16],
+            mode: BlockCipherMode::ECB,
         }
     }
 }
@@ -312,32 +315,34 @@ impl Aes128 {
         Self::add_round_key(block, &round_keys[Self::ROUNDS]);
     }
 
-    pub fn encrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        if bytes.len() % 8 != 0 {
-            return Err(CipherError::input(
-                "input length must be a multiple of 64 bits",
-            ));
-        };
-
+    pub fn encrypt_ctr(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
+        let counter: u128 = 0;
         let round_keys = self.key_schedule();
 
         let mut out = Vec::with_capacity(bytes.len());
+
+        for input in bytes.chunks(16) {
+            let mut state: [u8; 16] = counter.to_be_bytes().try_into().unwrap();
+            Self::encrypt_block(&mut state, &round_keys);
+            for (i, k) in input.into_iter().zip(state.into_iter()) {
+                out.push(*i ^ k)
+            }
+        }
 
         Ok(out)
     }
 
-    pub fn decrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        if bytes.len() % 8 != 0 {
-            return Err(CipherError::input(
-                "input length must be a multiple of 64 bits",
-            ));
-        };
+    // CTR mode is reciprocal
+    pub fn decrypt_ctr(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
+        self.encrypt_ctr(bytes)
+    }
 
-        let round_keys = self.key_schedule();
+    pub fn encrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
+        todo!()
+    }
 
-        let mut out = Vec::with_capacity(bytes.len());
-
-        Ok(out)
+    pub fn decrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
+        todo!()
     }
 }
 
@@ -347,7 +352,10 @@ impl Cipher for Aes128 {
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
-        let out = self.encrypt_bytes(&mut bytes)?;
+        let out = match self.mode {
+            BlockCipherMode::ECB => self.encrypt_ecb(&mut bytes)?,
+            BlockCipherMode::CTR => self.encrypt_ctr(&mut bytes)?,
+        };
         Ok(self.output_format.byte_slice_to_text(&out))
     }
 
@@ -356,7 +364,10 @@ impl Cipher for Aes128 {
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
-        let out = self.decrypt_bytes(&mut bytes)?;
+        let out = match self.mode {
+            BlockCipherMode::ECB => self.decrypt_ecb(&mut bytes)?,
+            BlockCipherMode::CTR => self.decrypt_ctr(&mut bytes)?,
+        };
         Ok(self.output_format.byte_slice_to_text(&out))
     }
 }
