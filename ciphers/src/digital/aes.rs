@@ -170,6 +170,7 @@ pub struct Aes128 {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
     pub key: [u32; Self::KEY_WORDS],
+    pub ctr: u128,
     pub mode: BlockCipherMode,
 }
 
@@ -179,13 +180,14 @@ impl Default for Aes128 {
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
             key: [0; Self::KEY_WORDS],
+            ctr: 0,
             mode: BlockCipherMode::ECB,
         }
     }
 }
 
 impl Aes128 {
-    pub const ROUNDS: usize = 10;
+    pub const ROUNDS: usize = 11;
     pub const KEY_WORDS: usize = 4;
 
     pub fn key_schedule(&self) -> Vec<Vec<u8>> {
@@ -194,15 +196,15 @@ impl Aes128 {
             0x80000000, 0x1b000000, 0x36000000,
         ];
 
-        let mut round_keys = Vec::with_capacity(4 * Self::ROUNDS - 1);
+        let mut round_keys = Vec::with_capacity(4 * Self::ROUNDS);
 
-        for i in 0..(4 * Self::ROUNDS - 1) {
+        for i in 0..(4 * Self::ROUNDS) {
             if i < Self::KEY_WORDS {
                 round_keys.push(self.key[i])
             } else if i > Self::KEY_WORDS && i % Self::KEY_WORDS == 0 {
                 let w = round_keys[i - Self::KEY_WORDS]
                     ^ sub_word(round_keys[i - 1].rotate_left(1))
-                    ^ rc[i / Self::KEY_WORDS];
+                    ^ rc[(i / Self::KEY_WORDS) - 1];
                 round_keys.push(w);
             // This does nothing for AES128 and AES192 but is needed for AES256
             } else if i > Self::KEY_WORDS && Self::KEY_WORDS > 6 && i % Self::KEY_WORDS == 0 {
@@ -292,8 +294,12 @@ impl Aes128 {
     }
 
     pub fn add_round_key(state: &mut [u8; 16], round_key: &[u8]) {
-        for (byte, key) in &mut state.iter_mut().zip(round_key) {
-            *byte ^= key
+        // Key is added column by column
+        for (idx, key) in [0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15]
+            .into_iter()
+            .zip(round_key)
+        {
+            state[idx] ^= key
         }
     }
 
@@ -302,11 +308,11 @@ impl Aes128 {
         Self::add_round_key(block, &round_keys[0]);
 
         // Main rounds
-        for i in 0..Self::ROUNDS - 1 {
+        for i in 1..Self::ROUNDS {
             Self::sub_bytes(block);
             Self::shift_rows(block);
             Self::mix_columns(block);
-            Self::add_round_key(block, &round_keys[i + 1])
+            Self::add_round_key(block, &round_keys[i])
         }
 
         // Finalization round
@@ -316,8 +322,10 @@ impl Aes128 {
     }
 
     pub fn encrypt_ctr(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        let counter: u128 = 0;
+        let mut counter = self.ctr;
         let round_keys = self.key_schedule();
+
+        println!("{:?}", round_keys.len());
 
         let mut out = Vec::with_capacity(bytes.len());
 
@@ -327,6 +335,7 @@ impl Aes128 {
             for (i, k) in input.into_iter().zip(state.into_iter()) {
                 out.push(*i ^ k)
             }
+            counter += 1;
         }
 
         Ok(out)
@@ -338,7 +347,18 @@ impl Aes128 {
     }
 
     pub fn encrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        todo!()
+        let round_keys = self.key_schedule();
+        let mut input = bytes.to_vec();
+        input.push(0x80);
+        while input.len() % 16 != 0 {
+            input.push(0x00)
+        }
+
+        for block in input.chunks_exact_mut(16) {
+            Self::encrypt_block(block.try_into().unwrap(), &round_keys);
+        }
+
+        Ok(input)
     }
 
     pub fn decrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
@@ -405,5 +425,31 @@ mod aes_tests {
         Aes128::inv_mix_columns(&mut state);
         // print_aes_state(state);
         assert_eq!(state, original_state);
+    }
+
+    #[test]
+    fn test_key_schedule() {
+        // https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf
+        let mut cipher = Aes128::default();
+        cipher.key = [0x2b7e1516, 0x28aed2a6, 0xabf71588, 0x09cf4f3c];
+        for k in cipher.key_schedule() {
+            println!("{:02x?}", k);
+        }
+
+        todo!("key schedule doesn't work")
+    }
+
+    #[test]
+    fn test_ctr_mode() {
+        let ptext = ByteFormat::Hex
+            .text_to_bytes("6bc1bee22e409f96e93d7e117393172a")
+            .unwrap();
+        let ctext = ByteFormat::Hex
+            .text_to_bytes("874d6191b620e3261bef6864990db6ce")
+            .unwrap();
+        let mut cipher = Aes128::default();
+        cipher.ctr = 0xf0f1f2f3f4f5f6f7f8f9fafbfcfdfeff;
+        cipher.key = [0x2b7e1516, 0x28aed2a6, 0xabf71588, 0x09cf4f3c];
+        assert_eq!(ctext, cipher.encrypt_ctr(&ptext).unwrap())
     }
 }
