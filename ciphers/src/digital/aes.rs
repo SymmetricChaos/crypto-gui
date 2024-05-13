@@ -308,7 +308,7 @@ impl Aes128 {
         Self::add_round_key(block, &round_keys[0]);
 
         // Main rounds
-        for i in 1..Self::ROUNDS {
+        for i in 1..(Self::ROUNDS - 1) {
             Self::sub_bytes(block);
             Self::shift_rows(block);
             Self::mix_columns(block);
@@ -318,14 +318,12 @@ impl Aes128 {
         // Finalization round
         Self::sub_bytes(block);
         Self::shift_rows(block);
-        Self::add_round_key(block, &round_keys[Self::ROUNDS]);
+        Self::add_round_key(block, &round_keys[Self::ROUNDS - 1]);
     }
 
     pub fn encrypt_ctr(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
         let mut counter = self.ctr;
         let round_keys = self.key_schedule();
-
-        println!("{:?}", round_keys.len());
 
         let mut out = Vec::with_capacity(bytes.len());
 
