@@ -401,7 +401,7 @@ pub fn block_cipher_mode(ui: &mut Ui, mode: &mut BlockCipherMode) {
         ui.horizontal(|ui| {
             ui.selectable_value(
                 mode,
-                BlockCipherMode::ECB,
+                BlockCipherMode::Ecb,
                 "ECB (Electronic Code Book)",
             );
             ui.collapsing("ECB info", |ui| {
@@ -411,7 +411,7 @@ pub fn block_cipher_mode(ui: &mut Ui, mode: &mut BlockCipherMode) {
         ui.horizontal(|ui| {
             ui.selectable_value(
                 mode,
-                BlockCipherMode::CTR,
+                BlockCipherMode::Ctr,
                 "CTR (Counter)",
             );
             ui.collapsing("CTR info", |ui| {

@@ -13,6 +13,6 @@ pub mod xtea;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum BlockCipherMode {
-    ECB,
-    CTR,
+    Ecb,
+    Ctr,
 }

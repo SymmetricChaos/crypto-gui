@@ -45,7 +45,7 @@ impl CipherFrame for TeaFrame {
 
         ui.add_space(8.0);
 
-        ui.add_enabled_ui(self.cipher.mode == BlockCipherMode::CTR, |ui| {
+        ui.add_enabled_ui(self.cipher.mode == BlockCipherMode::Ctr, |ui| {
             ui.subheading("Counter");
             ui.label("In CTR mode the cipher must have a 64-bit counter value provided.");
             ui.add(DragValue::new(&mut self.cipher.ctr).hexadecimal(16, false, true));

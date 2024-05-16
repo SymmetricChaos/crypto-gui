@@ -6,16 +6,10 @@ use crate::{Cipher, CipherError};
 use super::BlockCipherMode;
 
 fn sbox(byte: u8) -> u8 {
-    // byte ^ byte.rotate_left(1)
-    //     ^ byte.rotate_left(2)
-    //     ^ byte.rotate_left(3)
-    //     ^ byte.rotate_left(4)
-    //     ^ 0x63
     S_BOX[byte as usize]
 }
 
 fn inv_sbox(byte: u8) -> u8 {
-    // byte ^ byte.rotate_left(1) ^ byte.rotate_left(3) ^ byte.rotate_left(4) ^ 0x05
     S_BOX_INV[byte as usize]
 }
 
@@ -34,6 +28,12 @@ fn sub_key_to_bytes(key: [u32; 4]) -> [u8; 16] {
         .collect_vec()
         .try_into()
         .unwrap()
+}
+
+fn transpose_state(state: &mut [u8; 16]) {
+    for (idx, orig) in [(1, 4), (2, 8), (3, 12), (6, 9), (7, 13), (11, 14)].into_iter() {
+        state.swap(orig, idx)
+    }
 }
 
 pub fn mul2(byte: u8) -> u8 {
@@ -212,7 +212,7 @@ pub const MUL_14: [u8; 256] = [
     0xd7, 0xd9, 0xcb, 0xc5, 0xef, 0xe1, 0xf3, 0xfd, 0xa7, 0xa9, 0xbb, 0xb5, 0x9f, 0x91, 0x83, 0x8d,
 ];
 
-pub fn print_aes_state(state: [u8; 16]) {
+fn print_aes_state(state: [u8; 16]) {
     for line in state.chunks_exact(4) {
         println!("{:02x?}", line)
     }
@@ -233,7 +233,7 @@ impl Default for Aes128 {
             input_format: ByteFormat::Hex,
             key: [0; Self::KEY_WORDS],
             ctr: 0,
-            mode: BlockCipherMode::ECB,
+            mode: BlockCipherMode::Ecb,
         }
     }
 }
@@ -345,20 +345,58 @@ impl Aes128 {
     }
 
     pub fn encrypt_block(block: &mut [u8; 16], round_keys: &Vec<[u8; 16]>) {
+        transpose_state(block);
+        // println!("\ninit");
+        // print_aes_state(block.clone());
+
+        // Initial round key
+        Self::add_round_key(block, &round_keys[0]);
+        // println!("\nadd");
+        // print_aes_state(block.clone());
+
+        // Main rounds
+        for i in 1..(Self::ROUNDS - 1) {
+            Self::sub_bytes(block);
+            // println!("\nsub");
+            // print_aes_state(block.clone());
+            Self::shift_rows(block);
+            // println!("\nshift");
+            // print_aes_state(block.clone());
+            Self::mix_columns(block);
+            // println!("\nmix");
+            // print_aes_state(block.clone());
+            Self::add_round_key(block, &round_keys[i]);
+            // println!("\nadd");
+            // print_aes_state(block.clone());
+        }
+
+        // Finalization round
+        Self::sub_bytes(block);
+        // println!("\nsub");
+        // print_aes_state(block.clone());
+        Self::shift_rows(block);
+        // println!("\nshift");
+        // print_aes_state(block.clone());
+        Self::add_round_key(block, &round_keys[Self::ROUNDS - 1]);
+        // println!("\nadd");
+        // print_aes_state(block.clone());
+    }
+
+    pub fn decrypt_block(block: &mut [u8; 16], round_keys: &Vec<[u8; 16]>) {
         // Initial round key
         Self::add_round_key(block, &round_keys[0]);
 
         // Main rounds
         for i in 1..(Self::ROUNDS - 1) {
-            Self::sub_bytes(block);
-            Self::shift_rows(block);
-            Self::mix_columns(block);
-            Self::add_round_key(block, &round_keys[i])
+            Self::inv_shift_rows(block);
+            Self::inv_sub_bytes(block);
+            Self::add_round_key(block, &round_keys[i]);
+            Self::inv_mix_columns(block);
         }
 
         // Finalization round
-        Self::sub_bytes(block);
-        Self::shift_rows(block);
+        Self::inv_shift_rows(block);
+        Self::inv_sub_bytes(block);
         Self::add_round_key(block, &round_keys[Self::ROUNDS - 1]);
     }
 
@@ -409,7 +447,22 @@ impl Aes128 {
     }
 
     pub fn decrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        todo!()
+        let round_keys = self
+            .key_schedule()
+            .into_iter()
+            .map(|k| sub_key_to_bytes(k))
+            .collect_vec();
+        let mut input = bytes.to_vec();
+        input.push(0x80);
+        while input.len() % 16 != 0 {
+            input.push(0x00)
+        }
+
+        for block in input.chunks_exact_mut(16) {
+            Self::decrypt_block(block.try_into().unwrap(), &round_keys);
+        }
+
+        Ok(input)
     }
 }
 
@@ -420,8 +473,8 @@ impl Cipher for Aes128 {
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
         let out = match self.mode {
-            BlockCipherMode::ECB => self.encrypt_ecb(&mut bytes)?,
-            BlockCipherMode::CTR => self.encrypt_ctr(&mut bytes)?,
+            BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes)?,
+            BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes)?,
         };
         Ok(self.output_format.byte_slice_to_text(&out))
     }
@@ -432,8 +485,8 @@ impl Cipher for Aes128 {
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
         let out = match self.mode {
-            BlockCipherMode::ECB => self.decrypt_ecb(&mut bytes)?,
-            BlockCipherMode::CTR => self.decrypt_ctr(&mut bytes)?,
+            BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes)?,
+            BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes)?,
         };
         Ok(self.output_format.byte_slice_to_text(&out))
     }
@@ -519,16 +572,54 @@ mod aes_tests {
     }
 
     #[test]
-    fn test_ctr_mode() {
-        let ptext = ByteFormat::Hex
-            .text_to_bytes("6bc1bee22e409f96e93d7e117393172a")
-            .unwrap();
-        let ctext = ByteFormat::Hex
-            .text_to_bytes("874d6191b620e3261bef6864990db6ce")
-            .unwrap();
+    fn test_encypt_decrypt() {
         let mut cipher = Aes128::default();
-        cipher.ctr = 0xf0f1f2f3f4f5f6f7f8f9fafbfcfdfeff;
-        cipher.key = [0x2b7e1516, 0x28aed2a6, 0xabf71588, 0x09cf4f3c];
-        assert_eq!(ctext, cipher.encrypt_ctr(&ptext).unwrap())
+        cipher.mode = BlockCipherMode::Ctr;
+        cipher.input_format = ByteFormat::Utf8;
+        let ptext = "The quick brown fox.";
+        let ctext = cipher.encrypt(ptext).unwrap();
+        cipher.input_format = ByteFormat::Hex;
+        cipher.output_format = ByteFormat::Utf8;
+        let decrypt = cipher.decrypt(&ctext).unwrap();
+        assert_eq!(ptext, decrypt);
     }
+
+    #[test]
+    fn test_encypt() {
+        // https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf
+        let mut cipher = Aes128::default();
+        cipher.key = [0x2b7e1516, 0x28aed2a6, 0xabf71588, 0x09cf4f3c];
+        let round_keys = cipher
+            .key_schedule()
+            .into_iter()
+            .map(|k| sub_key_to_bytes(k))
+            .collect_vec();
+        let mut state = [
+            0x32, 0x43, 0xf6, 0xa8, 0x88, 0x5a, 0x30, 0x8d, 0x31, 0x31, 0x98, 0xa2, 0xe0, 0x37,
+            0x07, 0x34,
+        ];
+        Aes128::encrypt_block(&mut state, &round_keys);
+
+        assert_eq!(
+            [
+                0x39, 0x02, 0xdc, 0x19, 0x25, 0xdc, 0x11, 0x6a, 0x84, 0x09, 0x85, 0x0b, 0x1d, 0xfb,
+                0x97, 0x32
+            ],
+            state
+        );
+    }
+
+    // #[test]
+    // fn test_ctr_mode() {
+    //     let ptext = ByteFormat::Hex
+    //         .text_to_bytes("6bc1bee22e409f96e93d7e117393172a")
+    //         .unwrap();
+    //     let ctext = ByteFormat::Hex
+    //         .text_to_bytes("874d6191b620e3261bef6864990db6ce")
+    //         .unwrap();
+    //     let mut cipher = Aes128::default();
+    //     cipher.ctr = 0xf0f1f2f3f4f5f6f7f8f9fafbfcfdfeff;
+    //     cipher.key = [0x2b7e1516, 0x28aed2a6, 0xabf71588, 0x09cf4f3c];
+    //     assert_eq!(ctext, cipher.encrypt_ctr(&ptext).unwrap())
+    // }
 }

@@ -18,7 +18,7 @@ impl Default for Tea {
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
             ctr: 0,
-            mode: BlockCipherMode::ECB,
+            mode: BlockCipherMode::Ecb,
         }
     }
 }
@@ -157,8 +157,8 @@ impl Cipher for Tea {
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
         let out = match self.mode {
-            BlockCipherMode::ECB => self.encrypt_ecb(&mut bytes)?,
-            BlockCipherMode::CTR => self.encrypt_ctr(&mut bytes)?,
+            BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes)?,
+            BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes)?,
         };
         Ok(self.output_format.byte_slice_to_text(&out))
     }
@@ -169,8 +169,8 @@ impl Cipher for Tea {
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
         let out = match self.mode {
-            BlockCipherMode::ECB => self.decrypt_ecb(&mut bytes)?,
-            BlockCipherMode::CTR => self.decrypt_ctr(&mut bytes)?,
+            BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes)?,
+            BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes)?,
         };
         Ok(self.output_format.byte_slice_to_text(&out))
     }
@@ -185,7 +185,7 @@ mod tea_tests {
     fn encrypt_decrypt_ecb() {
         let ptext = "01020304050607080102030405060708";
         let mut cipher = Tea::default();
-        cipher.mode = BlockCipherMode::ECB;
+        cipher.mode = BlockCipherMode::Ecb;
         let ctext = cipher.encrypt(ptext).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), ptext);
     }
@@ -194,7 +194,7 @@ mod tea_tests {
     fn encrypt_decrypt_ctr() {
         let ptext = "01020304050607080102030405060708";
         let mut cipher = Tea::default();
-        cipher.mode = BlockCipherMode::CTR;
+        cipher.mode = BlockCipherMode::Ctr;
         let ctext = cipher.encrypt(ptext).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), ptext);
     }
