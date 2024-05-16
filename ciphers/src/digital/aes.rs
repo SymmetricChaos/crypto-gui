@@ -413,6 +413,7 @@ impl Aes128 {
         for input in bytes.chunks(16) {
             let mut state: [u8; 16] = counter.to_be_bytes().try_into().unwrap();
             Self::encrypt_block(&mut state, &round_keys);
+            transpose_state(&mut state);
             for (i, k) in input.into_iter().zip(state.into_iter()) {
                 out.push(*i ^ k)
             }
@@ -609,17 +610,17 @@ mod aes_tests {
         );
     }
 
-    // #[test]
-    // fn test_ctr_mode() {
-    //     let ptext = ByteFormat::Hex
-    //         .text_to_bytes("6bc1bee22e409f96e93d7e117393172a")
-    //         .unwrap();
-    //     let ctext = ByteFormat::Hex
-    //         .text_to_bytes("874d6191b620e3261bef6864990db6ce")
-    //         .unwrap();
-    //     let mut cipher = Aes128::default();
-    //     cipher.ctr = 0xf0f1f2f3f4f5f6f7f8f9fafbfcfdfeff;
-    //     cipher.key = [0x2b7e1516, 0x28aed2a6, 0xabf71588, 0x09cf4f3c];
-    //     assert_eq!(ctext, cipher.encrypt_ctr(&ptext).unwrap())
-    // }
+    #[test]
+    fn test_ctr_mode() {
+        let ptext = ByteFormat::Hex
+            .text_to_bytes("6bc1bee22e409f96e93d7e117393172a")
+            .unwrap();
+        let ctext = ByteFormat::Hex
+            .text_to_bytes("874d6191b620e3261bef6864990db6ce")
+            .unwrap();
+        let mut cipher = Aes128::default();
+        cipher.ctr = 0xf0f1f2f3f4f5f6f7f8f9fafbfcfdfeff;
+        cipher.key = [0x2b7e1516, 0x28aed2a6, 0xabf71588, 0x09cf4f3c];
+        assert_eq!(ctext, cipher.encrypt_ctr(&ptext).unwrap())
+    }
 }
