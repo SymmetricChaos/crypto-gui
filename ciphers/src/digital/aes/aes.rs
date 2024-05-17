@@ -230,6 +230,8 @@ impl Aes128 {
             .into_iter()
             .map(|k| sub_key_to_bytes(k))
             .collect_vec();
+
+        // padding as defined by ISO/IEC 9797-1 method 2
         let mut input = bytes.to_vec();
         input.push(0x80);
         while input.len() % 16 != 0 {

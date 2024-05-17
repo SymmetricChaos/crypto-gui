@@ -6,20 +6,20 @@ use ciphers::{
 use egui::Ui;
 
 use self::{
-    adfgvx_controls::AdfgvxFrame, affine_controls::AffineFrame, amsco_controls::AmscoFrame,
-    b64_controls::B64Frame, batco_controls::BatcoFrame, bazeries_controls::BazeriesFrame,
-    beaufort_controls::BeaufortFrame, bifid_controls::BifidFrame, caesar_controls::CaesarFrame,
-    chacha20_poly1305_controls::ChaCha20Poly1305Frame, chacha_controls::ChaChaFrame,
-    chaocipher_controls::ChaocipherFrame, checkerboard_controls::StraddlingCheckerboardFrame,
-    columnar_controls::ColumnarFrame, decoder_ring_controls::DecoderRingFrame,
-    diagonal_columnar_controls::DiagonalColumnarFrame, dryad_controls::DryadFrame,
-    enigma_controls::EnigmaM3Frame, four_square_controls::FourSquareFrame,
-    general_sub_controls::GeneralSubstitutionFrame, grille_controls::GrilleFrame,
-    hebern_controls::HebernFrame, hutton_controls::HuttonFrame, m209_controls::M209Frame,
-    m94_controls::M94Frame, nihilist_controls::NihilistFrame, playfair_controls::PlayfairFrame,
-    plugboard_controls::PlugboardFrame, polybius_cube_controls::PolybiusCubeFrame,
-    polybius_square_controls::PolybiusSquareFrame, porta_controls::PortaFrame,
-    purple_controls::PurpleFrame, quagmire_controls::QuagmireFrame,
+    adfgvx_controls::AdfgvxFrame, aes_controls::AesFrame, affine_controls::AffineFrame,
+    amsco_controls::AmscoFrame, b64_controls::B64Frame, batco_controls::BatcoFrame,
+    bazeries_controls::BazeriesFrame, beaufort_controls::BeaufortFrame, bifid_controls::BifidFrame,
+    caesar_controls::CaesarFrame, chacha20_poly1305_controls::ChaCha20Poly1305Frame,
+    chacha_controls::ChaChaFrame, chaocipher_controls::ChaocipherFrame,
+    checkerboard_controls::StraddlingCheckerboardFrame, columnar_controls::ColumnarFrame,
+    decoder_ring_controls::DecoderRingFrame, diagonal_columnar_controls::DiagonalColumnarFrame,
+    dryad_controls::DryadFrame, enigma_controls::EnigmaM3Frame,
+    four_square_controls::FourSquareFrame, general_sub_controls::GeneralSubstitutionFrame,
+    grille_controls::GrilleFrame, hebern_controls::HebernFrame, hutton_controls::HuttonFrame,
+    m209_controls::M209Frame, m94_controls::M94Frame, nihilist_controls::NihilistFrame,
+    playfair_controls::PlayfairFrame, plugboard_controls::PlugboardFrame,
+    polybius_cube_controls::PolybiusCubeFrame, polybius_square_controls::PolybiusSquareFrame,
+    porta_controls::PortaFrame, purple_controls::PurpleFrame, quagmire_controls::QuagmireFrame,
     rail_fence_controls::RailFenceFrame, rc4_controls::Rc4Frame, rc5_controls::Rc5Frame,
     rs44_controls::Rs44Frame, rsa_controls::RsaFrame, salsa20_controls::Salsa20Frame,
     scytale_controls::ScytaleFrame, seriated_playfair_controls::SeriatedPlayfairFrame,
@@ -30,6 +30,7 @@ use self::{
 };
 
 pub mod adfgvx_controls;
+mod aes_controls;
 pub mod affine_controls;
 pub mod alberti_controls;
 pub mod amsco_controls;
@@ -177,6 +178,7 @@ pub struct CipherInterface {
     rs44: Rs44Frame,
 
     // Digital
+    aes: AesFrame,
     chacha: ChaChaFrame,
     chacha20poly1305: ChaCha20Poly1305Frame,
     rc4: Rc4Frame,
@@ -288,6 +290,7 @@ impl CipherInterface {
 
         combox_box(
             &[
+                CipherId::Aes,
                 CipherId::ChaCha,
                 CipherId::ChaCha20Poly1305,
                 CipherId::Rc4,
@@ -311,6 +314,7 @@ impl CipherInterface {
 
     pub fn get_active_cipher(&mut self, active_cipher: &CipherId) -> &mut dyn CipherFrame {
         match active_cipher {
+            CipherId::Aes => &mut self.aes,
             CipherId::Adfgvx => &mut self.adfgvx,
             CipherId::Affine => &mut self.affine,
             // CipherId::Alberti => &mut self.alberti,
