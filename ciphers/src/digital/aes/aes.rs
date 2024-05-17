@@ -180,10 +180,10 @@ impl Aes128 {
     pub fn decrypt_block(block: &mut [u8; 16], round_keys: &Vec<[u8; 16]>) {
         transpose_state(block);
         // Initial round key
-        add_round_key(block, &round_keys[0]);
+        add_round_key(block, &round_keys[Self::ROUNDS - 1]);
 
         // Main rounds
-        for i in 1..(Self::ROUNDS - 1) {
+        for i in (1..(Self::ROUNDS - 1)).rev() {
             inv_shift_rows(block);
             inv_sub_bytes(block);
             add_round_key(block, &round_keys[i]);
@@ -193,7 +193,7 @@ impl Aes128 {
         // Finalization round
         inv_shift_rows(block);
         inv_sub_bytes(block);
-        add_round_key(block, &round_keys[Self::ROUNDS - 1]);
+        add_round_key(block, &round_keys[0]);
         transpose_state(block);
     }
 
@@ -253,6 +253,13 @@ impl Aes128 {
 
         for block in input.chunks_exact_mut(16) {
             Self::decrypt_block(block.try_into().unwrap(), &round_keys);
+        }
+
+        // Remove padding. Assumes that padding is valid.
+        loop {
+            if input.pop() != Some(0x00) {
+                break;
+            }
         }
 
         Ok(input)
