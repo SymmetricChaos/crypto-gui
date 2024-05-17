@@ -250,10 +250,6 @@ impl Aes128 {
             .map(|k| sub_key_to_bytes(k))
             .collect_vec();
         let mut input = bytes.to_vec();
-        input.push(0x80);
-        while input.len() % 16 != 0 {
-            input.push(0x00)
-        }
 
         for block in input.chunks_exact_mut(16) {
             Self::decrypt_block(block.try_into().unwrap(), &round_keys);
@@ -369,9 +365,22 @@ mod aes_tests {
     }
 
     #[test]
-    fn test_encypt_decrypt() {
+    fn test_encypt_decrypt_ctr() {
         let mut cipher = Aes128::default();
         cipher.mode = BlockCipherMode::Ctr;
+        cipher.input_format = ByteFormat::Utf8;
+        let ptext = "The quick brown fox.";
+        let ctext = cipher.encrypt(ptext).unwrap();
+        cipher.input_format = ByteFormat::Hex;
+        cipher.output_format = ByteFormat::Utf8;
+        let decrypt = cipher.decrypt(&ctext).unwrap();
+        assert_eq!(ptext, decrypt);
+    }
+
+    #[test]
+    fn test_encypt_decrypt_ecb() {
+        let mut cipher = Aes128::default();
+        cipher.mode = BlockCipherMode::Ecb;
         cipher.input_format = ByteFormat::Utf8;
         let ptext = "The quick brown fox.";
         let ctext = cipher.encrypt(ptext).unwrap();
