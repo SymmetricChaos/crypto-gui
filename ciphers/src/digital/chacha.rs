@@ -87,6 +87,7 @@ impl ChaCha {
         Self::diag_round(state);
     }
 
+    // Create a key_stream with the specified number of blocks and with the counter started at a particular value
     pub fn key_stream_with_ctr(&self, blocks: u64, ctr: u64) -> Vec<u8> {
         let mut ctr = ctr;
         let mut out = Vec::with_capacity((blocks * 64) as usize);
@@ -143,6 +144,7 @@ impl ChaCha {
         out
     }
 
+    // Encrypt a message with the counter started at a particular value
     pub fn encrypt_bytes_with_ctr(&self, bytes: &[u8], ctr: u64) -> Vec<u8> {
         let mut ctr = ctr;
         let mut out = Vec::new();
@@ -166,7 +168,7 @@ impl ChaCha {
         ];
 
         for block in bytes.chunks(64) {
-            // Mix the counter into the state
+            // Insert the counter into the state
             state[12] = Wrapping(ctr as u32); // low bits, "as" cast truncates
             state[13] = Wrapping((ctr >> 32) as u32); // high bits
 
@@ -189,6 +191,7 @@ impl ChaCha {
             // Create a byte stream
             let key_steam = t_state.iter().flat_map(|w| w.0.to_le_bytes());
 
+            // XOR the keystream into the message bytes
             for (input_byte, key_byte) in block.iter().zip(key_steam) {
                 out.push(*input_byte ^ key_byte)
             }
@@ -199,8 +202,9 @@ impl ChaCha {
         out
     }
 
+    // Encrypt a message with the counter started at the stored value
     pub fn encrypt_bytes(&self, bytes: &[u8]) -> Vec<u8> {
-        self.encrypt_bytes_with_ctr(bytes, 0)
+        self.encrypt_bytes_with_ctr(bytes, self.ctr)
     }
 }
 

@@ -149,6 +149,7 @@ impl Aes128 {
     pub const ROUNDS: usize = 11;
     pub const KEY_WORDS: usize = 4;
 
+    // Create the round keys
     pub fn key_schedule(&self) -> Vec<[u32; 4]> {
         let rc: [u32; 10] = [
             0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000, 0x20000000, 0x40000000,
@@ -219,6 +220,7 @@ impl Aes128 {
         transpose_state(block);
     }
 
+    // Encrypt bytes in CTR mode
     pub fn encrypt_ctr(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
         let mut counter = self.ctr;
         let round_keys = self
@@ -246,6 +248,7 @@ impl Aes128 {
         self.encrypt_ctr(bytes)
     }
 
+    // Encrypt bytes in ECB mode
     pub fn encrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
         let round_keys = self
             .key_schedule()
@@ -262,7 +265,6 @@ impl Aes128 {
                 bytes.to_vec()
             }
         } else if self.padding == BlockCipherPadding::Bit {
-            // padding as defined by ISO/IEC 7816
             let mut input = bytes.to_vec();
             bit_padding(&mut input, 16);
             input
@@ -277,6 +279,7 @@ impl Aes128 {
         Ok(input)
     }
 
+    // Decrypt bytes in ECB mode
     pub fn decrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
         let round_keys = self
             .key_schedule()
