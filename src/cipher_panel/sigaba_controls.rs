@@ -30,6 +30,12 @@ fn rotor_display<const N: usize>(ui: &mut eframe::egui::Ui, rotors: &mut [Rotor<
 
 impl CipherFrame for SigabaFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/tree/master/ciphers/src/machines/sigaba",
+        );
+        ui.add_space(8.0);
+
         // if ui.button("Restore State").clicked() {
         //     self.previous_state()
         // }
