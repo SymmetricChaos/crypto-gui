@@ -1,7 +1,7 @@
 use crate::{Cipher, CipherError};
 use utils::byte_formatting::ByteFormat;
 
-use super::BlockCipherMode;
+use super::{bit_padding, BlockCipherMode, BlockCipherPadding};
 
 pub struct Tea {
     pub output_format: ByteFormat,
@@ -9,6 +9,7 @@ pub struct Tea {
     pub key: [u32; 4],
     pub ctr: u64,
     pub mode: BlockCipherMode,
+    pub padding: BlockCipherPadding,
 }
 
 impl Default for Tea {
@@ -19,6 +20,7 @@ impl Default for Tea {
             input_format: ByteFormat::Hex,
             ctr: 0,
             mode: BlockCipherMode::Ecb,
+            padding: BlockCipherPadding::None,
         }
     }
 }
@@ -74,16 +76,26 @@ impl Tea {
 
     // Encrypt in ECB mode.
     pub fn encrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        // No padding rule is given
-        if bytes.len() % 8 != 0 {
-            return Err(CipherError::input(
-                "encrypted data must be in chunks of 64 bits",
-            ));
-        }
+        let input = if self.padding == BlockCipherPadding::None {
+            if bytes.len() % 8 != 0 {
+                return Err(CipherError::input(
+                    "encrypted data must be in chunks of 64 bits",
+                ));
+            } else {
+                bytes.to_vec()
+            }
+        } else if self.padding == BlockCipherPadding::Bit {
+            let mut input = bytes.to_vec();
+            bit_padding(&mut input, 8);
+            input
+        } else {
+            unreachable!()
+        };
+
         let mut out = Vec::new();
 
         // Take 8 byte chunks
-        for block in bytes.chunks_exact(8) {
+        for block in input.chunks_exact(8) {
             // Turn each chunk into a pair of u32
             let mut x = [0u32; 2];
             for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)) {
@@ -126,11 +138,12 @@ impl Tea {
 
     // Decrypt in ECB mode.
     pub fn decrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        // No padding rule is given
-        if bytes.len() % 8 != 0 {
-            return Err(CipherError::input(
-                "decrypted data must be in chunks of 64 bits",
-            ));
+        if self.padding == BlockCipherPadding::None {
+            if bytes.len() % 8 != 0 {
+                return Err(CipherError::input(
+                    "encrypted data must be in chunks of 64 bits",
+                ));
+            }
         }
         let mut out = Vec::new();
 

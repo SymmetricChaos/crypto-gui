@@ -2,7 +2,7 @@ use itertools::Itertools;
 use utils::byte_formatting::ByteFormat;
 
 use crate::{
-    digital::{bit_padding, BlockCipherMode, Padding},
+    digital::{bit_padding, BlockCipherMode, BlockCipherPadding},
     Cipher, CipherError,
 };
 
@@ -129,7 +129,7 @@ pub struct Aes128 {
     pub key: [u32; Self::KEY_WORDS],
     pub ctr: u128,
     pub mode: BlockCipherMode,
-    pub padding: Padding,
+    pub padding: BlockCipherPadding,
 }
 
 impl Default for Aes128 {
@@ -140,7 +140,7 @@ impl Default for Aes128 {
             key: [0; Self::KEY_WORDS],
             ctr: 0,
             mode: BlockCipherMode::Ecb,
-            padding: Padding::None,
+            padding: BlockCipherPadding::None,
         }
     }
 }
@@ -253,7 +253,7 @@ impl Aes128 {
             .map(|k| sub_key_to_bytes(k))
             .collect_vec();
 
-        let mut input = if self.padding == Padding::None {
+        let mut input = if self.padding == BlockCipherPadding::None {
             if bytes.len() % 16 != 0 {
                 return Err(CipherError::input(
                     "input must have a length in bytes that is a multiple of 16",
@@ -261,7 +261,7 @@ impl Aes128 {
             } else {
                 bytes.to_vec()
             }
-        } else if self.padding == Padding::Bit {
+        } else if self.padding == BlockCipherPadding::Bit {
             // padding as defined by ISO/IEC 7816
             let mut input = bytes.to_vec();
             bit_padding(&mut input, 16);
@@ -284,7 +284,7 @@ impl Aes128 {
             .map(|k| sub_key_to_bytes(k))
             .collect_vec();
 
-        if self.padding == Padding::None {
+        if self.padding == BlockCipherPadding::None {
             if bytes.len() % 16 != 0 {
                 return Err(CipherError::input(
                     "input must have a length in bytes that is a multiple of 16",
@@ -298,7 +298,7 @@ impl Aes128 {
             Self::decrypt_block(block.try_into().unwrap(), &round_keys);
         }
 
-        if self.padding == Padding::Bit {
+        if self.padding == BlockCipherPadding::Bit {
             // Remove padding. Assumes that padding is valid.
             loop {
                 if input.pop() != Some(0x00) {
@@ -432,7 +432,7 @@ mod aes_tests {
     #[test]
     fn test_encypt_decrypt_ecb() {
         let mut cipher = Aes128::default();
-        cipher.padding = Padding::Bit;
+        cipher.padding = BlockCipherPadding::Bit;
         cipher.mode = BlockCipherMode::Ecb;
         cipher.input_format = ByteFormat::Utf8;
         let ptext = "The quick brown fox.";

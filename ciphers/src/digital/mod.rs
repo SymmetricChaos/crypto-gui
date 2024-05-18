@@ -18,15 +18,15 @@ pub enum BlockCipherMode {
 }
 
 #[derive(Debug, PartialEq, Eq)]
-pub enum Padding {
+pub enum BlockCipherPadding {
     None,
     Bit, // add the byte 0x80, then add 0x00 bytes until the block size is reached
          // equivalently add a single 1 bit then append 0 bits until the block size is reached
 }
 
-pub fn bit_padding(vec: &mut Vec<u8>, block_size: u32) {
-    vec.push(0x80);
-    while vec.len() % block_size as usize != 0 {
-        vec.push(0x00)
+pub fn bit_padding(bytes: &mut Vec<u8>, block_size: u32) {
+    bytes.push(0x80);
+    while bytes.len() % block_size as usize != 0 {
+        bytes.push(0x00)
     }
 }

@@ -25,6 +25,12 @@ impl AesFrame {}
 
 impl CipherFrame for AesFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/tree/master/ciphers/src/digital/aes",
+        );
+        ui.add_space(8.0);
+
         ui.randomize_reset(self);
         ui.add_space(16.0);
 
@@ -51,11 +57,11 @@ impl CipherFrame for AesFrame {
             ui.subheading("Counter");
             ui.label("In CTR mode the cipher must have a 128-bit counter value provided. The selectors below control the upper and lower 64-bit respectively.");
             if ui.add(DragValue::new(&mut self.ctr_upper).hexadecimal(16, false, true)) .changed() {
-                self.cipher.ctr &= 0x00000000000000001111111111111111;
+                self.cipher.ctr &= 0x0000000000000000FFFFFFFFFFFFFFFF;
                 self.cipher.ctr |= (self.ctr_upper as u128) << 64;
             }
             if ui.add(DragValue::new(&mut self.ctr_lower).hexadecimal(16, false, true)) .changed() {
-                self.cipher.ctr &= 0x11111111111111110000000000000000;
+                self.cipher.ctr &= 0xFFFFFFFFFFFFFFFF0000000000000000;
                 self.cipher.ctr |= self.ctr_lower as u128;
             }
             ui.label(format!("{:032x?}",self.cipher.ctr))
