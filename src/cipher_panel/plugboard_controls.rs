@@ -40,6 +40,12 @@ impl PlugboardFrame {
 
 impl CipherFrame for PlugboardFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/ciphers/src/substitution/plugboard.rs",
+        );
+        ui.add_space(8.0);
+
         ui.add_space(16.0);
         ui.subheading("Alphaabet");
         ui.control_string(&mut self.alphabet);

@@ -52,6 +52,12 @@ impl PurpleFrame {
 
 impl CipherFrame for PurpleFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/tree/master/ciphers/src/machines/purple",
+        );
+        ui.add_space(8.0);
+
         ui.subheading("Sixes Position");
         ui.horizontal(|ui| {
             ui.add(

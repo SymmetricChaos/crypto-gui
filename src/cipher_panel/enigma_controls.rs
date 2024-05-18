@@ -59,9 +59,15 @@ impl EnigmaM3Frame {
 
 impl CipherFrame for EnigmaM3Frame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        ui.randomize_reset(self);
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/tree/master/ciphers/src/machines/enigma",
+        );
+        ui.add_space(8.0);
 
+        ui.randomize_reset(self);
         ui.add_space(16.0);
+
         ui.horizontal(|ui| {
             ui.subheading("Rotor Positions");
             if ui.button("🎲").clicked() {

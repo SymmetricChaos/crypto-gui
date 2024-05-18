@@ -25,9 +25,15 @@ impl Default for PolybiusCubeFrame {
 
 impl CipherFrame for PolybiusCubeFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
-        ui.randomize_reset(self);
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/ciphers/src/polybius/polybius_cube.rs",
+        );
+        ui.add_space(8.0);
 
+        ui.randomize_reset(self);
         ui.add_space(16.0);
+
         ui.subheading("Alphabet");
         if ui.control_string(&mut self.alphabet_string).changed() {
             self.cipher

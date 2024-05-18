@@ -25,6 +25,12 @@ impl Default for HebernFrame {
 
 impl CipherFrame for HebernFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/tree/master/ciphers/src/machines/hebern",
+        );
+        ui.add_space(8.0);
+
         ui.randomize_reset(self);
         ui.add_space(8.0);
 

@@ -19,6 +19,12 @@ pub struct PortaFrame {
 
 impl CipherFrame for PortaFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/ciphers/src/polyalphabetic/porta.rs",
+        );
+        ui.add_space(8.0);
+
         ui.randomize_reset(self);
         ui.add_space(16.0);
 
