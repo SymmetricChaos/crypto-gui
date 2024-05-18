@@ -1,7 +1,10 @@
 use itertools::Itertools;
 use utils::byte_formatting::ByteFormat;
 
-use crate::{digital::BlockCipherMode, Cipher, CipherError};
+use crate::{
+    digital::{bit_padding, BlockCipherMode, Padding},
+    Cipher, CipherError,
+};
 
 use super::{
     multiplication::{mul11, mul13, mul14, mul2, mul3, mul9},
@@ -126,6 +129,7 @@ pub struct Aes128 {
     pub key: [u32; Self::KEY_WORDS],
     pub ctr: u128,
     pub mode: BlockCipherMode,
+    pub padding: Padding,
 }
 
 impl Default for Aes128 {
@@ -136,6 +140,7 @@ impl Default for Aes128 {
             key: [0; Self::KEY_WORDS],
             ctr: 0,
             mode: BlockCipherMode::Ecb,
+            padding: Padding::None,
         }
     }
 }
@@ -248,12 +253,22 @@ impl Aes128 {
             .map(|k| sub_key_to_bytes(k))
             .collect_vec();
 
-        // padding as defined by ISO/IEC 9797-1 method 2
-        let mut input = bytes.to_vec();
-        input.push(0x80);
-        while input.len() % 16 != 0 {
-            input.push(0x00)
-        }
+        let mut input = if self.padding == Padding::None {
+            if bytes.len() % 16 != 0 {
+                return Err(CipherError::input(
+                    "input must have a length in bytes that is a multiple of 16",
+                ));
+            } else {
+                bytes.to_vec()
+            }
+        } else if self.padding == Padding::Bit {
+            // padding as defined by ISO/IEC 7816
+            let mut input = bytes.to_vec();
+            bit_padding(&mut input, 16);
+            input
+        } else {
+            unreachable!()
+        };
 
         for block in input.chunks_exact_mut(16) {
             Self::encrypt_block(block.try_into().unwrap(), &round_keys);
@@ -268,16 +283,27 @@ impl Aes128 {
             .into_iter()
             .map(|k| sub_key_to_bytes(k))
             .collect_vec();
+
+        if self.padding == Padding::None {
+            if bytes.len() % 16 != 0 {
+                return Err(CipherError::input(
+                    "input must have a length in bytes that is a multiple of 16",
+                ));
+            }
+        }
+
         let mut input = bytes.to_vec();
 
         for block in input.chunks_exact_mut(16) {
             Self::decrypt_block(block.try_into().unwrap(), &round_keys);
         }
 
-        // Remove padding. Assumes that padding is valid.
-        loop {
-            if input.pop() != Some(0x00) {
-                break;
+        if self.padding == Padding::Bit {
+            // Remove padding. Assumes that padding is valid.
+            loop {
+                if input.pop() != Some(0x00) {
+                    break;
+                }
             }
         }
 
@@ -406,6 +432,7 @@ mod aes_tests {
     #[test]
     fn test_encypt_decrypt_ecb() {
         let mut cipher = Aes128::default();
+        cipher.padding = Padding::Bit;
         cipher.mode = BlockCipherMode::Ecb;
         cipher.input_format = ByteFormat::Utf8;
         let ptext = "The quick brown fox.";
