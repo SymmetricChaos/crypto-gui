@@ -2,7 +2,7 @@ use itertools::Itertools;
 use utils::byte_formatting::ByteFormat;
 
 use crate::{
-    digital::{bit_padding, BlockCipherMode, BlockCipherPadding},
+    digital::{bit_padding, none_padding, strip_bit_padding, BlockCipherMode, BlockCipherPadding},
     Cipher, CipherError,
 };
 
@@ -256,20 +256,11 @@ impl Aes128 {
             .map(|k| sub_key_to_bytes(k))
             .collect_vec();
 
-        let mut input = if self.padding == BlockCipherPadding::None {
-            if bytes.len() % 16 != 0 {
-                return Err(CipherError::input(
-                    "input must have a length in bytes that is a multiple of 16",
-                ));
-            } else {
-                bytes.to_vec()
-            }
-        } else if self.padding == BlockCipherPadding::Bit {
-            let mut input = bytes.to_vec();
-            bit_padding(&mut input, 16);
-            input
-        } else {
-            unreachable!()
+        let mut input = bytes.to_vec();
+
+        match self.padding {
+            BlockCipherPadding::None => none_padding(&mut input, 16)?,
+            BlockCipherPadding::Bit => bit_padding(&mut input, 16),
         };
 
         for block in input.chunks_exact_mut(16) {
@@ -301,14 +292,10 @@ impl Aes128 {
             Self::decrypt_block(block.try_into().unwrap(), &round_keys);
         }
 
-        if self.padding == BlockCipherPadding::Bit {
-            // Remove padding. Assumes that padding is valid.
-            loop {
-                if input.pop() != Some(0x00) {
-                    break;
-                }
-            }
-        }
+        match self.padding {
+            BlockCipherPadding::None => none_padding(&mut input, 16)?,
+            BlockCipherPadding::Bit => strip_bit_padding(&mut input),
+        };
 
         Ok(input)
     }

@@ -2,10 +2,13 @@ use utils::byte_formatting::ByteFormat;
 
 use crate::{Cipher, CipherError};
 
+use super::{bit_padding, none_padding, strip_bit_padding, BlockCipherPadding};
+
 pub struct Xtea {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
     pub key: [u32; 4],
+    pub padding: BlockCipherPadding,
 }
 
 impl Default for Xtea {
@@ -14,6 +17,7 @@ impl Default for Xtea {
             key: [0, 1, 2, 3],
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
+            padding: BlockCipherPadding::None,
         }
     }
 }
@@ -39,16 +43,17 @@ impl Xtea {
     }
 
     pub fn encrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        // No padding rule is given
-        if bytes.len() % 8 != 0 {
-            return Err(CipherError::input(
-                "encrypted data must be in chunks of 64 bits",
-            ));
-        }
+        let mut input = bytes.to_vec();
+
+        match self.padding {
+            BlockCipherPadding::None => none_padding(&mut input, 8)?,
+            BlockCipherPadding::Bit => bit_padding(&mut input, 8),
+        };
+
         let mut out = Vec::new();
 
         // Take 8 byte chunks
-        for block in bytes.chunks_exact(8) {
+        for block in input.chunks_exact(8) {
             // Turn each chunk into a pair of u32
             let mut x = [0u32; 2];
             for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)) {
@@ -84,12 +89,6 @@ impl Xtea {
     }
 
     pub fn decrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        // No padding rule is given
-        if bytes.len() % 8 != 0 {
-            return Err(CipherError::input(
-                "decrypted data must be in chunks of 64 bits",
-            ));
-        }
         let mut out = Vec::new();
 
         for block in bytes.chunks_exact(8) {
@@ -103,6 +102,11 @@ impl Xtea {
             out.extend_from_slice(&x[0].to_be_bytes());
             out.extend_from_slice(&x[1].to_be_bytes());
         }
+
+        match self.padding {
+            BlockCipherPadding::None => none_padding(&mut out, 16)?,
+            BlockCipherPadding::Bit => strip_bit_padding(&mut out),
+        };
 
         Ok(out)
     }

@@ -1,3 +1,5 @@
+use crate::CipherError;
+
 pub mod aes;
 pub mod chacha;
 pub mod chacha20poly1305;
@@ -25,9 +27,29 @@ pub enum BlockCipherPadding {
          // equivalently add a single 1 bit then append 0 bits until the block size is reached
 }
 
+pub fn none_padding(bytes: &mut Vec<u8>, block_size: u32) -> Result<(), CipherError> {
+    if bytes.len() % block_size as usize != 0 {
+        Err(CipherError::Input(format!(
+            "encrypted data must be in chunks of {} bytes",
+            block_size
+        )))
+    } else {
+        Ok(())
+    }
+}
+
 pub fn bit_padding(bytes: &mut Vec<u8>, block_size: u32) {
     bytes.push(0x80);
     while bytes.len() % block_size as usize != 0 {
         bytes.push(0x00)
+    }
+}
+
+// Assumes valid bit padding is applied
+pub fn strip_bit_padding(bytes: &mut Vec<u8>) {
+    loop {
+        if bytes.pop() != Some(0x00) {
+            break;
+        }
     }
 }

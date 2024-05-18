@@ -1,7 +1,7 @@
 use crate::{Cipher, CipherError};
 use utils::byte_formatting::ByteFormat;
 
-use super::{bit_padding, BlockCipherMode, BlockCipherPadding};
+use super::{bit_padding, none_padding, strip_bit_padding, BlockCipherMode, BlockCipherPadding};
 
 pub struct Tea {
     pub output_format: ByteFormat,
@@ -76,20 +76,11 @@ impl Tea {
 
     // Encrypt in ECB mode.
     pub fn encrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        let input = if self.padding == BlockCipherPadding::None {
-            if bytes.len() % 8 != 0 {
-                return Err(CipherError::input(
-                    "encrypted data must be in chunks of 64 bits",
-                ));
-            } else {
-                bytes.to_vec()
-            }
-        } else if self.padding == BlockCipherPadding::Bit {
-            let mut input = bytes.to_vec();
-            bit_padding(&mut input, 8);
-            input
-        } else {
-            unreachable!()
+        let mut input = bytes.to_vec();
+
+        match self.padding {
+            BlockCipherPadding::None => none_padding(&mut input, 8)?,
+            BlockCipherPadding::Bit => bit_padding(&mut input, 8),
         };
 
         let mut out = Vec::new();
@@ -138,13 +129,6 @@ impl Tea {
 
     // Decrypt in ECB mode.
     pub fn decrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        if self.padding == BlockCipherPadding::None {
-            if bytes.len() % 8 != 0 {
-                return Err(CipherError::input(
-                    "encrypted data must be in chunks of 64 bits",
-                ));
-            }
-        }
         let mut out = Vec::new();
 
         for block in bytes.chunks_exact(8) {
@@ -158,6 +142,11 @@ impl Tea {
             out.extend_from_slice(&x[0].to_be_bytes());
             out.extend_from_slice(&x[1].to_be_bytes());
         }
+
+        match self.padding {
+            BlockCipherPadding::None => none_padding(&mut out, 16)?,
+            BlockCipherPadding::Bit => strip_bit_padding(&mut out),
+        };
 
         Ok(out)
     }

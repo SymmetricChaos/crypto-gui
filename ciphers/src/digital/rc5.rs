@@ -3,6 +3,8 @@ use utils::byte_formatting::ByteFormat;
 use crate::{Cipher, CipherError};
 use std::{cmp::max, ops::Shl};
 
+use super::{bit_padding, none_padding, strip_bit_padding, BlockCipherPadding};
+
 const P32: u32 = 0xb7e15163;
 const Q32: u32 = 0x9e3779b9;
 // const P64: u64 = 0xb7e151628aed2a6b;
@@ -13,6 +15,7 @@ pub struct Rc5 {
     pub input_format: ByteFormat,
     pub rounds: usize,
     pub state: Vec<u32>,
+    pub padding: BlockCipherPadding,
 }
 
 impl Default for Rc5 {
@@ -22,6 +25,7 @@ impl Default for Rc5 {
             state: Vec::new(),
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
+            padding: BlockCipherPadding::None,
         }
     }
 }
@@ -99,16 +103,16 @@ impl Rc5 {
     // }
 
     pub fn encrypt_block_32(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        // No padding rule is given by Rivest
-        if bytes.len() % 8 != 0 {
-            return Err(CipherError::input(
-                "encrypted data must be in chunks of 64 bits",
-            ));
-        }
+        let mut input = bytes.to_vec();
+
+        match self.padding {
+            BlockCipherPadding::None => none_padding(&mut input, 8)?,
+            BlockCipherPadding::Bit => bit_padding(&mut input, 8),
+        };
 
         let mut out = Vec::with_capacity(bytes.len());
 
-        for block in bytes.chunks_exact(8) {
+        for block in input.chunks_exact(8) {
             let mut x = [0u32; 2];
             for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)) {
                 *elem = u32::from_le_bytes(chunk.try_into().unwrap());
@@ -133,12 +137,6 @@ impl Rc5 {
     }
 
     pub fn decrypt_block_32(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        if bytes.len() % 8 != 0 {
-            return Err(CipherError::input(
-                "decrypted data must be in chunks of 64 bits",
-            ));
-        }
-
         let mut out = Vec::with_capacity(bytes.len());
 
         for block in bytes.chunks_exact(8).rev() {
@@ -160,11 +158,17 @@ impl Rc5 {
 
             out.extend_from_slice(&x[0].to_le_bytes());
             out.extend_from_slice(&x[1].to_le_bytes());
+
+            match self.padding {
+                BlockCipherPadding::None => none_padding(&mut out, 8)?,
+                BlockCipherPadding::Bit => strip_bit_padding(&mut out),
+            };
         }
         Ok(out)
     }
 
     // pub fn encrypt_block_64(&self, bytes: &[u8]) {}
+    // pub fn decrypt_block_64(&self, bytes: &[u8]) {}
 }
 
 impl Cipher for Rc5 {
