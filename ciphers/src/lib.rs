@@ -7,7 +7,6 @@ pub mod substitution;
 pub mod tactical;
 pub mod transposition;
 
-pub mod shamir_secret_sharing;
 pub mod vic;
 
 pub mod errors;

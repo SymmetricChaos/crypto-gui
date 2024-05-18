@@ -8,6 +8,7 @@ pub mod rc4;
 pub mod rc5;
 pub mod rsa;
 pub mod salsa20;
+pub mod shamir_secret_sharing;
 pub mod tea;
 pub mod xtea;
 
