@@ -6,7 +6,7 @@ use rand::{thread_rng, Rng};
 use regex::Regex;
 use std::num::ParseIntError;
 use utils::{
-    math_functions::is_prime32,
+    math_functions::is_prime64,
     polynomial_interpolation::{eval_poly, lagrange_interpolation, polynomial_string_unsigned},
 };
 
@@ -18,10 +18,10 @@ lazy_static! {
 }
 
 pub struct ShamirSecretSharing {
-    pub shares: u32,
-    pub threshold: u32,
-    polynomial: Vec<u32>, // The constant coefficient of the polynomial is the secret
-    pub modulus: u32,
+    pub shares: u64,
+    pub threshold: u64,
+    polynomial: Vec<u64>, // The constant coefficient of the polynomial is the secret
+    pub modulus: u64,
     pub random_shares: bool,
 }
 
@@ -46,7 +46,7 @@ impl ShamirSecretSharing {
             if group.is_empty() {
                 continue;
             }
-            match u32::from_str_radix(group.trim(), 10) {
+            match u64::from_str_radix(group.trim(), 10) {
                 Ok(n) => self.polynomial.push(n),
                 Err(e) => {
                     self.polynomial.clear();
@@ -92,7 +92,7 @@ impl ShamirSecretSharing {
         if self.modulus < 1 {
             return Err(CipherError::state("modulus must be positive"));
         }
-        if !is_prime32(self.modulus) {
+        if !is_prime64(self.modulus) {
             return Err(CipherError::state("modulus must be prime"));
         }
         if self.threshold < 2 {
@@ -127,7 +127,7 @@ impl Cipher for ShamirSecretSharing {
         self.check_state()?;
 
         let secret =
-            u32::from_str_radix(text, 10).map_err(|e| CipherError::Input(e.to_string()))?;
+            u64::from_str_radix(text, 10).map_err(|e| CipherError::Input(e.to_string()))?;
 
         let p = {
             let mut p = self.polynomial.clone();
@@ -151,14 +151,14 @@ impl Cipher for ShamirSecretSharing {
                         }
                     }
                 };
-                let y = u32::try_from(eval_poly(x, &p, self.modulus, true))
-                    .expect("conversion from BigInt to u32 failed");
+                let y = u64::try_from(eval_poly(x, &p, self.modulus, true))
+                    .expect("conversion from BigInt to u64 failed");
                 out.push((x, y))
             }
         } else {
             for x in 1..=self.shares {
-                let y = u32::try_from(eval_poly(x, &p, self.modulus, true))
-                    .expect("conversion from BigInt to u32 failed");
+                let y = u64::try_from(eval_poly(x, &p, self.modulus, true))
+                    .expect("conversion from BigInt to u64 failed");
                 out.push((x, y))
             }
         }
@@ -172,9 +172,9 @@ impl Cipher for ShamirSecretSharing {
         let mut pairs = Vec::new();
         for p in PAIRS.captures_iter(text) {
             let x =
-                u32::from_str_radix(&p[1], 10).map_err(|e| CipherError::Input(e.to_string()))?;
+                u64::from_str_radix(&p[1], 10).map_err(|e| CipherError::Input(e.to_string()))?;
             let y =
-                u32::from_str_radix(&p[2], 10).map_err(|e| CipherError::Input(e.to_string()))?;
+                u64::from_str_radix(&p[2], 10).map_err(|e| CipherError::Input(e.to_string()))?;
             pairs.push((x, y));
         }
 

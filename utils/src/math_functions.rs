@@ -146,7 +146,7 @@ impl Iterator for PrimeSieve {
 }
 
 // 32-bit primality test
-// First checks small possible factors then switches to deterministic Miller-Rabin
+// First checks small prime factors then switches to deterministic Miller-Rabin
 pub fn is_prime32<N: Into<u32>>(n: N) -> bool {
     let n = n.into();
     if n <= 1 {
@@ -184,6 +184,52 @@ pub fn is_prime32<N: Into<u32>>(n: N) -> bool {
         }
         for _ in 0..r - 1 {
             x = mod_exp(x as u64, 2u64, n as u64) as u32;
+
+            if x == n - 1 {
+                continue 'outer;
+            }
+        }
+        return false;
+    }
+    true
+}
+
+// 64-bit primality test
+// First checks small prime factors then switches to deterministic Miller-Rabin
+pub fn is_prime64<N: Into<u64>>(n: N) -> bool {
+    let n = n.into();
+    if n <= 1 {
+        return false;
+    }
+
+    // The first 12 primes are sufficient witnesses
+    let witnesses = [2_u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37];
+
+    // Quickly check each witness and short circuit if needed
+    for p in witnesses.iter() {
+        if n == *p {
+            return true;
+        }
+        if n % *p == 0 {
+            return false;
+        }
+    }
+
+    let mut d = (n - 1) / 2;
+    let mut r = 1;
+    while d % 2 == 0 {
+        d /= 2;
+        r += 1;
+    }
+
+    'outer: for w in witnesses.iter() {
+        let mut x = mod_exp(*w as u128, d as u128, n as u128) as u64;
+
+        if x == 1 || x == n - 1 {
+            continue 'outer;
+        }
+        for _ in 0..r - 1 {
+            x = mod_exp(x as u128, 2u128, n as u128) as u64;
 
             if x == n - 1 {
                 continue 'outer;
