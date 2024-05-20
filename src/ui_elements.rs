@@ -43,6 +43,8 @@ pub trait UiElements {
     );
     fn binary_to_text_input_mode(&mut self, current_value: &mut ByteFormat);
     fn byte_io_mode(&mut self, input: &mut ByteFormat, output: &mut ByteFormat);
+    fn u32_drag_value(&mut self, n: &mut u32);
+    fn u64_drag_value(&mut self, n: &mut u64);
 }
 
 impl UiElements for Ui {
@@ -228,6 +230,14 @@ impl UiElements for Ui {
                     });
                 }
             });
+    }
+
+    fn u32_drag_value(&mut self, n: &mut u32) {
+        self.add(DragValue::new(n).speed(100).hexadecimal(8, false, true));
+    }
+
+    fn u64_drag_value(&mut self, n: &mut u64) {
+        self.add(DragValue::new(n).speed(100).hexadecimal(16, false, true));
     }
 }
 

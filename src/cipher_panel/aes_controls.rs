@@ -46,10 +46,10 @@ impl CipherFrame for AesFrame {
 
         ui.subheading("Key");
         ui.label("AES128 uses four 32-bit keys or, equivalently, a single 128-bit key.");
-        ui.add(DragValue::new(&mut self.cipher.key[0]).hexadecimal(8, false, true));
-        ui.add(DragValue::new(&mut self.cipher.key[1]).hexadecimal(8, false, true));
-        ui.add(DragValue::new(&mut self.cipher.key[2]).hexadecimal(8, false, true));
-        ui.add(DragValue::new(&mut self.cipher.key[3]).hexadecimal(8, false, true));
+        ui.u32_drag_value(&mut self.cipher.key[0]);
+        ui.u32_drag_value(&mut self.cipher.key[1]);
+        ui.u32_drag_value(&mut self.cipher.key[2]);
+        ui.u32_drag_value(&mut self.cipher.key[3]);
 
         ui.add_space(8.0);
 
@@ -80,6 +80,10 @@ impl CipherFrame for AesFrame {
         self.cipher.key[1] = rng.gen();
         self.cipher.key[2] = rng.gen();
         self.cipher.key[3] = rng.gen();
+
+        if self.cipher.mode == BlockCipherMode::Ctr {
+            self.cipher.ctr = rng.gen();
+        }
     }
 
     fn reset(&mut self) {
