@@ -275,7 +275,8 @@ impl ClassicCrypto {
                             ui.separator();
                             ui.add_space(16.0);
                             ui.mono("Traditional ciphers operated on two mechanisms: substitution and transposition. Substitutions change symbols of plaintext into different ones while transpositions shift the positions of plaintext symbols. A few ciphers combined both methods.");
-                            
+                            ui.add_space(4.0);
+                            ui.mono("In 1945 the mathematician Claude Shannon defined two requirement for a secure cipher: confusion and diffusion. Confusion requires that every bit of the ciphertext should rely on many parts of the key. Diffusion requires that each part of the ciphertext should rely on many parts of the plaintext. A secure cipher by Shannon's definition must have both of these properties. While both of these are important considerations in the design of ciphers in application stream ciphers (and block ciphers in CTR mode) only apply confusion, with diffusion being important mainly in producing the keystream.");
                         }
                     };
                 });

@@ -117,11 +117,11 @@ pub fn add_round_key(state: &mut [u8; 16], round_key: &[u8; 16]) {
     }
 }
 
-// fn print_aes_state(state: &[u8; 16]) {
-//     for line in state.chunks_exact(4) {
-//         println!("{:02x?}", line)
-//     }
-// }
+pub fn print_aes_state(state: &[u8; 16]) {
+    for line in state.chunks_exact(4) {
+        println!("{:02x?}", line)
+    }
+}
 
 pub struct Aes128 {
     pub output_format: ByteFormat,
@@ -336,9 +336,9 @@ mod aes_tests {
     fn test_shift_rows() {
         let mut state = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
         let output = [0, 1, 2, 3, 5, 6, 7, 4, 10, 11, 8, 9, 15, 12, 13, 14];
-        // print_aes_state(state);
+        // print_aes_state(&state);
         shift_rows(&mut state);
-        // print_aes_state(state);
+        // print_aes_state(&state);
         assert_eq!(state, output)
     }
 
@@ -353,12 +353,12 @@ mod aes_tests {
             0x8e, 0x01, 0x9f, 0xd5, 0x4d, 0x01, 0xdc, 0xd5, 0xa1, 0x01, 0x58, 0xd7, 0xbc, 0x01,
             0x9d, 0xd6,
         ];
-        // print_aes_state(state);
+        // print_aes_state(&state);
         mix_columns(&mut state);
-        // print_aes_state(state);
+        // print_aes_state(&state);
         assert_eq!(state, output);
         inv_mix_columns(&mut state);
-        // print_aes_state(state);
+        // print_aes_state(&state);
         assert_eq!(state, original_state);
     }
 
