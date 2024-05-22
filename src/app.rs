@@ -205,7 +205,7 @@ impl ClassicCrypto {
                             ui.add_space(16.0);
                             ui.separator();
                             ui.add_space(16.0);
-                            ui.mono_strong("Codes exist for many reasons but the most common is ease of use. Often information in one form is difficult to use for a particular purpose and so needs to be changed. A spoken explanation vanishes in moments and travels only a short distance while the same explanation encoded as symbols can survive for years and be transported thousands of kilometers. Those same symbols become a problem for transmitting electronically so instead they may be enoded again as a sequence of signals, often just binary bits. The reciever of those bits then transforms then back to symbols and the reader interprets the symbols using their knowledge of how they relate to spoken language.");
+                            ui.mono("Codes exist for many reasons but the most common is ease of use. Often information in one form is difficult to use for a particular purpose and so needs to be changed. A spoken explanation vanishes in moments and travels only a short distance while the same explanation encoded as symbols can survive for years and be transported thousands of kilometers. Those same symbols become a problem for transmitting electronically so instead they may be enoded again as a sequence of signals, often just binary bits. The reciever of those bits then transforms then back to symbols and the reader interprets the symbols using their knowledge of how they relate to spoken language.");
                         }
                     };
                 });
@@ -270,11 +270,12 @@ impl ClassicCrypto {
                         }
                         None => {
                             ui.label(RichText::from("Ciphers").heading());
-                            ui.label(RichText::new("A cipher is a method of making information inaccessible to those without knowledge of a secret key.").size(12.0));
+                            ui.label(RichText::new("A cipher is a method of making information inaccessible to those without knowledge of a secret key. Traditionally creators of ciphers kept their methods secret, sometimes going to great lengths to maintain that secrecy. However modern digital ciphers are designed on nearly the opposite principle and must demonstrate that they are secure when only the key is unknown to an attacker.").size(12.0));
                             ui.add_space(16.0);
                             ui.separator();
-                            // ui.add_space(16.0);
-                            // ui.label(mono_strong("<<<INTERFACE>>>"));
+                            ui.add_space(16.0);
+                            ui.mono("Traditional ciphers operated on two mechanisms: substitution and transposition. Substitutions change symbols of plaintext into different ones while transpositions shift the positions of plaintext symbols. A few ciphers combined both methods.");
+                            
                         }
                     };
                 });
