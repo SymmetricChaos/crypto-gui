@@ -16,7 +16,7 @@ lazy_static! {
 pub struct Combinadic {
     pub maps: LetterWordIntCode,
     pub mode: IOMode,
-    pub k: usize,
+    pub k: u64,
 }
 
 impl Default for Combinadic {
@@ -32,7 +32,7 @@ impl Default for Combinadic {
 }
 
 impl Combinadic {
-    pub fn encode_usize(&self, n: usize) -> String {
+    pub fn encode_u64(&self, n: u64) -> String {
         let mut out = Vec::new();
         let mut base = self.k;
         let mut n = n;
@@ -54,12 +54,12 @@ impl Combinadic {
         format!("{}", out.iter().rev().join(":"))
     }
 
-    fn code_string_to_num(s: &str) -> Option<usize> {
+    fn code_string_to_num(s: &str) -> Option<u64> {
         // let mut base = 1;
         // let mut ctr = 1;
         // let mut value = 0;
         // for n in s.rsplit(":").filter(|s| !s.is_empty()) {
-        //     let x = usize::from_str_radix(n.trim(), 10)
+        //     let x = u64::from_str_radix(n.trim(), 10)
         //         .expect("captures by the regex should always be valid numbers");
         //     if x >= ctr {
         //         return None;
@@ -72,7 +72,7 @@ impl Combinadic {
         todo!()
     }
 
-    pub fn recognize_code(text: &str) -> Vec<Option<usize>> {
+    pub fn recognize_code(text: &str) -> Vec<Option<u64>> {
         let mut output = Vec::new();
 
         for cap in TUPLE.captures_iter(text) {
@@ -97,20 +97,19 @@ impl Code for Combinadic {
         if self.mode == IOMode::Letter {
             for c in text.chars() {
                 let n = self.maps.char_to_int(c)?;
-                output.push_str(&self.encode_usize(n));
+                output.push_str(&self.encode_u64(n as u64));
                 output.push(' ');
             }
         } else if self.mode == IOMode::Word {
             for w in text.split(" ") {
                 let n = self.maps.word_to_int(w)?;
-                output.push_str(&self.encode_usize(n));
+                output.push_str(&self.encode_u64(n as u64));
                 output.push(' ');
             }
         } else {
             for w in text.split(" ") {
-                let n =
-                    usize::from_str_radix(w, 10).map_err(|e| CodeError::Input(e.to_string()))?;
-                output.push_str(&self.encode_usize(n));
+                let n = u64::from_str_radix(w, 10).map_err(|e| CodeError::Input(e.to_string()))?;
+                output.push_str(&self.encode_u64(n));
                 output.push(' ');
             }
         }
@@ -124,7 +123,7 @@ impl Code for Combinadic {
         if self.mode == IOMode::Letter {
             for section in Self::recognize_code(&text) {
                 if let Some(code) = section {
-                    if let Ok(c) = self.maps.int_to_char(code) {
+                    if let Ok(c) = self.maps.int_to_char(code as usize) {
                         output.push(c);
                     } else {
                         output.push('�');
@@ -136,7 +135,7 @@ impl Code for Combinadic {
         } else if self.mode == IOMode::Word {
             for section in Self::recognize_code(&text) {
                 if let Some(code) = section {
-                    if let Ok(s) = self.maps.int_to_word(code) {
+                    if let Ok(s) = self.maps.int_to_word(code as usize) {
                         output.push_str(s);
                         output.push(' ');
                     } else {
