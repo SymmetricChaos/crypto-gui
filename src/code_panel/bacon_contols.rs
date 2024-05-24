@@ -17,6 +17,12 @@ impl Default for BaconFrame {
 
 impl CodeFrame for BaconFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/other/bacon.rs",
+        );
+        ui.add_space(8.0);
+
         ui.add_space(8.0);
         ui.subheading("False Text");
         ui.add(TextEdit::multiline(&mut self.code.false_text).font(TextStyle::Monospace));

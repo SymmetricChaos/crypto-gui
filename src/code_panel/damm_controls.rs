@@ -19,7 +19,11 @@ impl Default for DammFrame {
 
 impl CodeFrame for DammFrame {
     fn ui(&mut self, ui: &mut eframe::egui::Ui) {
-        ui.add_space(16.0);
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/ecc/damm.rs",
+        );
+        ui.add_space(8.0);
 
         ui.label("The Cayley table chosen by Damm. Note that it forms a Latin square, no row or column includes any digit more than once.");
         egui::Grid::new("damm_grid")

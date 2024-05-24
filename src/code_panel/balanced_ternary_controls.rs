@@ -16,7 +16,11 @@ impl Default for BalancedTernaryFrame {
 
 impl CodeFrame for BalancedTernaryFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
-        ui.add_space(16.0);
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/mathematical/balanced_ternary.rs",
+        );
+        ui.add_space(8.0);
 
         ui.label("Convert between \"standard\" base-10 numbers and their representation in balanced ternary. The encodings from -15 to 16 appear below.");
         let pairs = (-15..=16).map(|n| (n.to_string(), BalancedTernary::encode_i32(n).unwrap()));

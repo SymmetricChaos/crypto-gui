@@ -18,6 +18,12 @@ impl Default for NeedleFrame {
 
 impl CodeFrame for NeedleFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/text_standards/needle.rs",
+        );
+        ui.add_space(8.0);
+
         ui.horizontal(|ui| {
             ui.subheading("Alphabet");
             if ui.button("🎲").on_hover_text("shuffle").clicked() {

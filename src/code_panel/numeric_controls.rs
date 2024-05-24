@@ -17,7 +17,12 @@ impl Default for BytesAsNumbersFrame {
 
 impl CodeFrame for BytesAsNumbersFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
-        ui.add_space(16.0);
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/binary_to_text/numeric.rs",
+        );
+        ui.add_space(8.0);
+
         ui.subheading("Radix");
         ui.label("The radix (or base) of the representation can vary between 2 and 36 as there are standard ways of printing these.");
         let radix_range = 2..=36;

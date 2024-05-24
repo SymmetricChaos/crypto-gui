@@ -19,6 +19,12 @@ impl Default for MofNCodeFrame {
 
 impl CodeFrame for MofNCodeFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/ecc/m_of_n.rs",
+        );
+        ui.add_space(8.0);
+
         ui.subheading("Length");
         ui.label("Total number of bits in each code.");
         if ui.add(Slider::new(&mut self.code.length, 2..=10)).changed() {

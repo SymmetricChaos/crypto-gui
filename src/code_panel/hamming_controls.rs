@@ -17,6 +17,12 @@ impl Default for HammingFrame {
 
 impl CodeFrame for HammingFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/ecc/hamming.rs",
+        );
+        ui.add_space(8.0);
+
         ui.checkbox(&mut self.code.extra_bit, "Extra Parity Bit");
         ui.label("When this is checked one additional parity bit is included. That allows detecting, but not correcting, two bit errors.");
         ui.add_space(16.0);

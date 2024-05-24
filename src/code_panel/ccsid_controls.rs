@@ -17,6 +17,11 @@ impl Default for CcsidFrame {
 
 impl CodeFrame for CcsidFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/text_standards/code_pages.rs",
+        );
+        ui.add_space(8.0);
         ui.group(|ui| {
             ui.subheading("Code Page");
             ui.selectable_value(&mut self.code.page, CodePage::CP1252, "CP1252");

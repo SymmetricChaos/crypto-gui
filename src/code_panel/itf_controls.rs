@@ -20,6 +20,12 @@ impl Default for ItfFrame {
 
 impl CodeFrame for ItfFrame {
     fn ui(&mut self, ui: &mut eframe::egui::Ui) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/commercial/itf.rs",
+        );
+        ui.add_space(8.0);
+
         ui.checkbox(&mut self.code.insert_zero, "Automatically Insert Zero");
 
         ui.subheading("Example");

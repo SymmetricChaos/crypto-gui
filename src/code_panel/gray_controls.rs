@@ -19,6 +19,12 @@ impl Default for GrayCodeFrame {
 
 impl CodeFrame for GrayCodeFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/mathematical/gray.rs",
+        );
+        ui.add_space(8.0);
+
         ui.subheading("Width");
         ui.add(Slider::new(&mut self.code.width, 4..=8));
         ui.add_space(8.0);

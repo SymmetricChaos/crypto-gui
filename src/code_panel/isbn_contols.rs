@@ -19,6 +19,12 @@ impl Default for IsbnFrame {
 
 impl CodeFrame for IsbnFrame {
     fn ui(&mut self, ui: &mut eframe::egui::Ui) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/commercial/isbn.rs",
+        );
+        ui.add_space(8.0);
+
         ui.group(|ui| {
             ui.subheading("Variant");
             ui.horizontal(|ui| {

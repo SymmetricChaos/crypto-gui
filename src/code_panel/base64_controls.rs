@@ -17,6 +17,12 @@ impl Default for Base64Frame {
 impl CodeFrame for Base64Frame {
     fn ui(&mut self, ui: &mut egui::Ui) {
         ui.group(|ui| {
+            ui.hyperlink_to(
+                "see the code",
+                "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/binary_to_text/base64.rs",
+            );
+            ui.add_space(8.0);
+
             ui.subheading("Variant");
             ui.horizontal(|ui| {
                 ui.selectable_value(&mut self.code.variant, B64Variant::Standard, "Standard");
