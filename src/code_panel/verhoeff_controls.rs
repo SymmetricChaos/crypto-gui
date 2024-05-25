@@ -17,7 +17,12 @@ impl Default for VerhoeffFrame {
 
 impl CodeFrame for VerhoeffFrame {
     fn ui(&mut self, ui: &mut eframe::egui::Ui) {
-        ui.add_space(16.0);
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/ecc/verhoeff.rs",
+        );
+        ui.add_space(8.0);
+
         ui.label("Check the validity of Verhoeff codes. Put in codes separated by commas.");
         ui.text_edit_multiline(&mut self.text);
         if ui.button("Check").clicked() {

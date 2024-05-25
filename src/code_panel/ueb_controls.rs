@@ -37,6 +37,12 @@ impl Default for UebFrame {
 
 impl CodeFrame for UebFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/tree/master/codes/src/braille",
+        );
+        ui.add_space(8.0);
+
         ui.subheading("Braille Order");
         egui::Grid::new("columnar_grid")
             .num_columns(10)

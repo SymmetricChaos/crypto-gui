@@ -52,6 +52,12 @@ impl Default for SemaphoreFrame {
 
 impl CodeFrame for SemaphoreFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/text_standards/semaphore.rs",
+        );
+        ui.add_space(8.0);
+
         egui::Grid::new("flag_grid")
             .num_columns(3)
             .striped(true)

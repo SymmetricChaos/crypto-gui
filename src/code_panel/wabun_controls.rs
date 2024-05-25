@@ -17,6 +17,12 @@ impl Default for WabunFrame {
 
 impl CodeFrame for WabunFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/text_standards/wabun.rs",
+        );
+        ui.add_space(8.0);
+
         ui.subheading("Representation");
         ui.horizontal(|ui| {
             ui.selectable_value(

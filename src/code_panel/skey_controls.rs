@@ -16,7 +16,12 @@ impl Default for SKeyWordsFrame {
 
 impl CodeFrame for SKeyWordsFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
-        ui.add_space(16.0);
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/binary_to_text/skey.rs",
+        );
+        ui.add_space(8.0);
+
         ui.binary_to_text_input_mode(&mut self.code.mode);
         ui.add_space(16.0);
         ui.fill_code_columns(256, 8, Box::new(self.code.chars_codes()));

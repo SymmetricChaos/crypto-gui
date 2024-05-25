@@ -19,6 +19,12 @@ impl Default for RepetitionFrame {
 
 impl CodeFrame for RepetitionFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/ecc/repetition.rs",
+        );
+        ui.add_space(8.0);
+
         ui.subheading("Block Size");
         ui.add(Slider::new(&mut self.code.block_size, 3..=9));
 

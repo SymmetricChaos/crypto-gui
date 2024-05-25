@@ -17,6 +17,12 @@ impl Default for RomajiFrame {
 
 impl CodeFrame for RomajiFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/tree/master/codes/src/romaji",
+        );
+        ui.add_space(8.0);
+
         ui.group(|ui| {
             ui.subheading("Variant");
             ui.horizontal(|ui| {

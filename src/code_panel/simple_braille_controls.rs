@@ -17,6 +17,12 @@ impl Default for BrailleFrame {
 
 impl CodeFrame for BrailleFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/tree/master/codes/src/braille",
+        );
+        ui.add_space(8.0);
+
         ui.group(|ui| {
             ui.subheading("Language");
             ui.horizontal(|ui| {

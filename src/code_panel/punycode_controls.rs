@@ -21,6 +21,12 @@ impl Default for PunycodeFrame {
 
 impl CodeFrame for PunycodeFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/text_standards/punycode.rs",
+        );
+        ui.add_space(8.0);
+
         ui.subheading("Example");
         ui.text_edit_singleline(&mut self.example);
         ui.add_space(8.0);

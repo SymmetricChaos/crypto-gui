@@ -20,6 +20,12 @@ impl Default for ParityBitFrame {
 
 impl CodeFrame for ParityBitFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/ecc/parity_bit.rs",
+        );
+        ui.add_space(8.0);
+
         ui.subheading("Data Bits");
         ui.add(Slider::new(&mut self.code.block_size, 1..=10));
 

@@ -53,6 +53,12 @@ fn upca_example(text: &str) -> Result<String, CodeError> {
 
 impl CodeFrame for UpcFrame {
     fn ui(&mut self, ui: &mut eframe::egui::Ui) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/commercial/upc.rs",
+        );
+        ui.add_space(8.0);
+
         // ui.group(|ui| {
         //     ui.subheading("Variant");
         //     ui.horizontal(|ui| {
