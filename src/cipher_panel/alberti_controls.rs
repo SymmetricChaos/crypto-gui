@@ -1,9 +1,9 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
 use ciphers::{polyalphabetic::Alberti, Cipher};
-use eframe::egui::{Slider, Ui};
-use rand::{thread_rng, Rng};
-use utils::preset_alphabet::Alphabet;
+use eframe::egui::Ui;
+use rand::thread_rng;
+use utils::{preset_alphabet::Alphabet, text_functions::shuffled_str};
 
 pub struct AlbertiFrame {
     cipher: Alberti,
@@ -41,14 +41,14 @@ impl CipherFrame for AlbertiFrame {
                 .assign_moving_alphabet(&self.moving_alphabet_string)
         }
 
-        ui.mono(&self.cipher);
+        // ui.mono(&self.cipher);
 
-        ui.subheading("Index");
-        let alpha_range = 0..=(self.cipher.alphabet_len() - 1);
-        ui.add(Slider::new(
-            &mut self.cipher.start_index,
-            alpha_range.clone(),
-        ));
+        // ui.subheading("Index");
+        // let alpha_range = 0..=(self.cipher.alphabet_len() - 1);
+        // ui.add(Slider::new(
+        //     &mut self.cipher.start_index,
+        //     alpha_range.clone(),
+        // ));
         ui.add_space(16.0);
     }
 
@@ -57,8 +57,10 @@ impl CipherFrame for AlbertiFrame {
     }
 
     fn randomize(&mut self) {
-        let length = self.cipher.moving_alphabet.len();
-        self.cipher.start_index = thread_rng().gen_range(0..length);
+        let s = shuffled_str(&self.moving_alphabet_string, &mut thread_rng());
+        self.moving_alphabet_string = s;
+        self.cipher
+            .assign_moving_alphabet(&self.moving_alphabet_string)
     }
 
     fn reset(&mut self) {

@@ -6,7 +6,15 @@ use utils::vecstring::VecString;
 pub struct Alberti {
     pub fixed_alphabet: VecString,
     pub moving_alphabet: VecString,
-    pub start_index: usize,
+}
+
+impl Default for Alberti {
+    fn default() -> Self {
+        Self {
+            fixed_alphabet: VecString::from(Alphabet::BasicLatin),
+            moving_alphabet: VecString::from(Alphabet::BasicLatin.string().to_ascii_lowercase()),
+        }
+    }
 }
 
 impl Alberti {
@@ -51,7 +59,7 @@ impl Alberti {
 impl Cipher for Alberti {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         self.validate_settings()?;
-        let mut index = self.start_index.clone();
+        let mut index = 0;
         let mut out = String::with_capacity(text.len());
         for s in text.chars() {
             if self.fixed_alphabet.contains(s) {
@@ -71,7 +79,7 @@ impl Cipher for Alberti {
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         self.validate_settings()?;
-        let mut index = self.start_index.clone();
+        let mut index = 0;
         let mut out = String::with_capacity(text.len());
         for s in text.chars() {
             if self.moving_alphabet.contains(s) {
@@ -90,26 +98,15 @@ impl Cipher for Alberti {
     }
 }
 
-impl Default for Alberti {
-    fn default() -> Self {
-        Self {
-            fixed_alphabet: VecString::from(Alphabet::BasicLatin),
-
-            moving_alphabet: VecString::from(Alphabet::BasicLatin.string().to_ascii_lowercase()),
-            start_index: 0,
-        }
-    }
-}
-
-impl Display for Alberti {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut out = self.fixed_alphabet.to_string();
-        out.push('\n');
-        out.push_str(&self.moving_alphabet.to_string()[self.start_index..]);
-        out.push_str(&self.moving_alphabet.to_string()[0..self.start_index]);
-        write!(f, "{}", out)
-    }
-}
+// impl Display for Alberti {
+//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//         let mut out = self.fixed_alphabet.to_string();
+//         out.push('\n');
+//         out.push_str(&self.moving_alphabet.to_string()[self.start_index..]);
+//         out.push_str(&self.moving_alphabet.to_string()[0..self.start_index]);
+//         write!(f, "{}", out)
+//     }
+// }
 
 #[cfg(test)]
 mod alberti_tests {
@@ -122,6 +119,17 @@ mod alberti_tests {
     fn encrypt_test() {
         let cipher = Alberti::default();
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT);
+    }
+
+    #[test]
+    fn encrypt_test_2() {
+        let mut cipher = Alberti::default();
+        cipher.assign_fixed_alphabet("ABCDEFGILMNOPQRSTVXZ1234");
+        cipher.assign_moving_alphabet("acegklnprtuz&xysomqihfdb");
+        assert_eq!(
+            cipher.encrypt("gLAGVER2RAySIFARA").unwrap(),
+            "DzgthpmamgRlfiyky"
+        );
     }
 
     #[test]
