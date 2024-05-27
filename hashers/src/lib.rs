@@ -8,6 +8,7 @@ pub mod sha2;
 pub mod siphash;
 pub mod traits;
 
+pub mod argon2;
 pub mod checksum;
 pub mod errors;
 pub mod fnv;
