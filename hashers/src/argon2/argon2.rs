@@ -1,21 +1,22 @@
 use std::ops::{Index, IndexMut};
 
+use itertools::Itertools;
 use num::Integer;
 use utils::byte_formatting::ByteFormat;
 
 use crate::{blake::Blake2b, errors::HasherError, traits::ClassicHasher};
 
 #[derive(Clone, Debug)]
-pub struct Argon2Block(Vec<[u8; 1024]>);
+pub struct Argon2Block([u64; 16]);
 
 impl Default for Argon2Block {
     fn default() -> Self {
-        Self(Default::default())
+        Self([0u64; 16])
     }
 }
 
 impl Index<usize> for Argon2Block {
-    type Output = [u8; 1024];
+    type Output = u64;
 
     fn index(&self, index: usize) -> &Self::Output {
         self.0.index(index)
@@ -26,6 +27,65 @@ impl IndexMut<usize> for Argon2Block {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         self.0.index_mut(index)
     }
+}
+
+impl From<[u64; 16]> for Argon2Block {
+    fn from(value: [u64; 16]) -> Self {
+        Self(value)
+    }
+}
+
+impl TryFrom<Vec<u8>> for Argon2Block {
+    type Error = HasherError;
+
+    fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
+        let bytes: [u64; 16] = match value.try_into() {
+            Ok(b) => b,
+            Err(_) => {
+                return Err(HasherError::general(
+                    "Argon2Block must be exactly 1024 bytes",
+                ))
+            }
+        };
+        Ok(Self(bytes))
+    }
+}
+
+// https://docs.rs/argon2/latest/src/argon2/block.rs.html
+
+const TRUNC: u64 = u32::MAX as u64;
+
+#[rustfmt::skip]
+macro_rules! permute_step {
+    ($a:expr, $b:expr, $c:expr, $d:expr) => {
+        $a = (Wrapping($a) + Wrapping($b) + (Wrapping(2) * Wrapping(($a & TRUNC) * ($b & TRUNC)))).0;
+        $d = ($d ^ $a).rotate_right(32);
+        $c = (Wrapping($c) + Wrapping($d) + (Wrapping(2) * Wrapping(($c & TRUNC) * ($d & TRUNC)))).0;
+        $b = ($b ^ $c).rotate_right(24);
+
+        $a = (Wrapping($a) + Wrapping($b) + (Wrapping(2) * Wrapping(($a & TRUNC) * ($b & TRUNC)))).0;
+        $d = ($d ^ $a).rotate_right(16);
+        $c = (Wrapping($c) + Wrapping($d) + (Wrapping(2) * Wrapping(($c & TRUNC) * ($d & TRUNC)))).0;
+        $b = ($b ^ $c).rotate_right(63);
+    };
+}
+
+macro_rules! permute {
+    (
+        $v0:expr, $v1:expr, $v2:expr, $v3:expr,
+        $v4:expr, $v5:expr, $v6:expr, $v7:expr,
+        $v8:expr, $v9:expr, $v10:expr, $v11:expr,
+        $v12:expr, $v13:expr, $v14:expr, $v15:expr,
+    ) => {
+        permute_step!($v0, $v4, $v8, $v12);
+        permute_step!($v1, $v5, $v9, $v13);
+        permute_step!($v2, $v6, $v10, $v14);
+        permute_step!($v3, $v7, $v11, $v15);
+        permute_step!($v0, $v5, $v10, $v15);
+        permute_step!($v1, $v6, $v11, $v12);
+        permute_step!($v2, $v7, $v8, $v13);
+        permute_step!($v3, $v4, $v9, $v14);
+    };
 }
 
 pub struct Argon2 {
@@ -108,7 +168,8 @@ impl ClassicHasher for Argon2 {
         let block_count = self.memory.prev_multiple_of(&(4 * self.parallelism));
         let column_count = block_count / self.parallelism;
 
-        let mut blocks = vec![Argon2Block::default(); block_count as usize];
+        let mut blocks =
+            vec![vec![Argon2Block::default(); block_count as usize]; self.parallelism as usize];
 
         // Initialize the blocks
         hasher.hash_len = 1024;
@@ -116,22 +177,20 @@ impl ClassicHasher for Argon2 {
             let mut h = h0.clone();
             h.extend(0_u32.to_le_bytes());
             h.extend(i.to_le_bytes());
-            blocks[i as usize].0.push(
-                hasher
-                    .hash(&h)
-                    .try_into()
-                    .expect("blocks should be 1024-bytes"),
-            );
+            let block = hasher
+                .hash(&h)
+                .try_into()
+                .expect("blocks should be 1024-bytes");
+            blocks[i as usize][0] = block;
 
             let mut h = h0.clone();
             h.extend(1_u32.to_le_bytes());
             h.extend(i.to_le_bytes());
-            blocks[i as usize].0.push(
-                hasher
-                    .hash(&h)
-                    .try_into()
-                    .expect("blocks should be 1024-bytes"),
-            )
+            let block = hasher
+                .hash(&h)
+                .try_into()
+                .expect("blocks should be 1024-bytes");
+            blocks[i as usize][1] = block;
         }
         todo!()
     }
