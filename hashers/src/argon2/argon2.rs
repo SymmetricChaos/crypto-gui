@@ -1,13 +1,12 @@
 use std::ops::{Index, IndexMut};
 
-use itertools::Itertools;
 use num::Integer;
 use utils::byte_formatting::ByteFormat;
 
 use crate::{blake::Blake2b, errors::HasherError, traits::ClassicHasher};
 
 #[derive(Clone, Debug)]
-pub struct Argon2Block(Vec<Vec<u8>>);
+pub struct Argon2Block(Vec<[u8; 1024]>);
 
 impl Default for Argon2Block {
     fn default() -> Self {
@@ -16,7 +15,7 @@ impl Default for Argon2Block {
 }
 
 impl Index<usize> for Argon2Block {
-    type Output = Vec<u8>;
+    type Output = [u8; 1024];
 
     fn index(&self, index: usize) -> &Self::Output {
         self.0.index(index)
@@ -39,7 +38,7 @@ pub struct Argon2 {
     tag_len: u32,     // tag length in bytes
     memory: u32,      // memory requirement in kibibytes (1024 bytes)
     iterations: u32,  // number of iterations run
-    version: u8,      // currently 0x13
+    version: u32,     // currently 0x13
     mode: u32,        // 0 for Argon2d, 1 for Argon2i, 2 for Argon2id
 }
 
@@ -92,12 +91,12 @@ impl ClassicHasher for Argon2 {
             "parallelism must be less than 2^24"
         );
         assert!(self.iterations > 0, "iterations cannot be 0");
-        assert!(self.tag_len >= 4, "tag_len must be at least 4");
+        assert!(self.tag_len >= 4, "tag_len must be at least 4 bytes");
         assert!(
             self.memory >= 8 * self.parallelism,
             "memory must be at least 8 times parallelism"
         );
-        assert!(self.salt.len() >= 8, "salt length must be at least 8");
+        assert!(self.salt.len() >= 8, "salt length must be at least 8 bytes");
 
         let mut hasher = Blake2b::default();
         hasher.hash_len = 64;
@@ -116,13 +115,23 @@ impl ClassicHasher for Argon2 {
         for i in 0..self.parallelism {
             let mut h = h0.clone();
             h.extend(0_u32.to_le_bytes());
-            h.extend((i).to_le_bytes());
-            blocks[i as usize].0.push(hasher.hash(&h));
+            h.extend(i.to_le_bytes());
+            blocks[i as usize].0.push(
+                hasher
+                    .hash(&h)
+                    .try_into()
+                    .expect("blocks should be 1024-bytes"),
+            );
 
             let mut h = h0.clone();
             h.extend(1_u32.to_le_bytes());
-            h.extend((i).to_le_bytes());
-            blocks[i as usize].0.push(hasher.hash(&h))
+            h.extend(i.to_le_bytes());
+            blocks[i as usize].0.push(
+                hasher
+                    .hash(&h)
+                    .try_into()
+                    .expect("blocks should be 1024-bytes"),
+            )
         }
         todo!()
     }
@@ -131,9 +140,27 @@ impl ClassicHasher for Argon2 {
         if self.parallelism == 0 {
             return Err(HasherError::general("parallelism cannot be 0"));
         }
-        if self.salt.len() == 0 {
-            return Err(HasherError::general("salt length must be at least 8"));
+        if self.parallelism >= 0x1000000 {
+            return Err(HasherError::general("parallelism must be less than 2^24"));
         }
+        if self.salt.len() == 0 {
+            return Err(HasherError::general("salt length must be at least 8 bytes"));
+        }
+        if self.iterations == 0 {
+            return Err(HasherError::general("iterations cannot be 0"));
+        }
+        if self.tag_len < 4 {
+            return Err(HasherError::general("tag_len must be at least 4 bytes"));
+        }
+        if self.memory < 8 * self.parallelism {
+            return Err(HasherError::general(
+                "memory must be at least 8 times parallelism",
+            ));
+        }
+        if self.salt.len() < 8 {
+            return Err(HasherError::general("salt length must be at least 8 bytes"));
+        }
+
         let mut bytes = self
             .input_format
             .text_to_bytes(text)
