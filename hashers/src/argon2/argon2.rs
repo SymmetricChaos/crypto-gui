@@ -39,15 +39,16 @@ impl TryFrom<Vec<u8>> for Argon2Block {
     type Error = HasherError;
 
     fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
-        let bytes: [u64; 16] = match value.try_into() {
-            Ok(b) => b,
-            Err(_) => {
-                return Err(HasherError::general(
-                    "Argon2Block must be exactly 1024 bytes",
-                ))
-            }
+        if value.len() != 1024 {
+            return Err(HasherError::general(
+                "Argon2Block must be exactly 1024 bytes",
+            ));
         };
-        Ok(Self(bytes))
+        let mut block = [0u64; 16];
+        for (i, chunk) in value.chunks_exact(8).enumerate() {
+            block[i] = u64::from_le_bytes(chunk.try_into().unwrap());
+        }
+        Ok(Self(block))
     }
 }
 
