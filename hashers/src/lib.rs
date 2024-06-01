@@ -16,6 +16,8 @@ pub mod fxhash;
 pub mod hmac;
 pub mod keccak;
 pub mod mgf1;
+pub mod pbkdf;
 pub mod poly1305;
 pub mod radio_gatun;
+pub mod scrypt;
 pub mod sha0;
