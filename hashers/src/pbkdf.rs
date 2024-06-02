@@ -1,13 +1,16 @@
 use itertools::Itertools;
 use utils::byte_formatting::ByteFormat;
 
-use crate::{errors::HasherError, hmac::HmacSha1, traits::ClassicHasher};
+use crate::{
+    errors::HasherError,
+    hmac::SelectHmac,
+    traits::{ClassicHasher, KeyedHasher},
+};
 
-#[derive(Debug, Clone)]
 pub struct Pbkdf2 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    // hmac: HmacSha1,
+    hmac: SelectHmac,
     pub salt: Vec<u8>,
     pub iterations: u32,
     pub output_length: u32, // size of the output in bytes
@@ -18,7 +21,7 @@ impl Default for Pbkdf2 {
         Self {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
-            // hmac: HmacSha1::default(),
+            hmac: SelectHmac::Sha1,
             salt: Vec::new(),
             iterations: 4096,
             output_length: 32,
@@ -27,22 +30,32 @@ impl Default for Pbkdf2 {
 }
 
 impl Pbkdf2 {
-    pub fn hash_block(&self, hmac: &HmacSha1, block_num: u32) -> Vec<u8> {
+    pub fn hash_block(&self, hmac: &Box<dyn KeyedHasher>, block_num: u32) -> Vec<u8> {
         // The salt followed by the block nunber are the initial input
         let mut s = self.salt.clone();
         s.extend(block_num.to_be_bytes());
 
-        // Create the first output block in the chain
-        let mut out = hmac.hash(&s);
+        // Create the first output block in the chain by hashing the salt (the password has already been set for the hmac)
+        let mut block = hmac.hash(&s);
+        let mut temp: Vec<u8> = Vec::new();
 
-        for _ in 1..self.iterations {
-            let t = hmac.hash(&out);
-            for (target, new) in out.iter_mut().zip_eq(t.iter()) {
+        // The second iteration uses the block as input as temp is still empty.
+        if self.iterations > 1 {
+            temp = hmac.hash(&block);
+            for (target, new) in block.iter_mut().zip_eq(temp.iter()) {
                 *target ^= new
             }
         }
 
-        out
+        // After the second iteration the previous temp is hashed, saved, and xored into the block
+        for _ in 2..self.iterations {
+            temp = hmac.hash(&temp);
+            for (target, new) in block.iter_mut().zip_eq(temp.iter()) {
+                *target ^= new
+            }
+        }
+
+        block
     }
 }
 
@@ -51,9 +64,9 @@ impl ClassicHasher for Pbkdf2 {
         assert!(self.iterations != 0);
 
         let mut out = Vec::new();
-        let mut hmac = HmacSha1::default();
+        let mut hmac = self.hmac.new();
 
-        hmac.key = bytes.to_vec();
+        hmac.set_key(bytes);
 
         let mut block_num = 0;
         while out.len() < self.output_length as usize {
@@ -99,6 +112,20 @@ mod pbkdf2_tests {
         hasher.input_format = ByteFormat::Utf8;
         hasher.output_format = ByteFormat::Hex;
         hasher.salt = "salt".as_bytes().to_vec();
+        hasher.iterations = 2;
+        hasher.output_length = 20;
+        assert_eq!(
+            "ea6c014dc72d6f8ccd1ed92ace1d41f0d8de8957",
+            hasher.hash_bytes_from_string("password").unwrap()
+        );
+    }
+
+    #[test]
+    fn test3() {
+        let mut hasher = Pbkdf2::default();
+        hasher.input_format = ByteFormat::Utf8;
+        hasher.output_format = ByteFormat::Hex;
+        hasher.salt = "salt".as_bytes().to_vec();
         hasher.iterations = 4096;
         hasher.output_length = 20;
         assert_eq!(
@@ -108,7 +135,7 @@ mod pbkdf2_tests {
     }
 
     #[test]
-    fn test3() {
+    fn test4() {
         let mut hasher = Pbkdf2::default();
         hasher.input_format = ByteFormat::Utf8;
         hasher.output_format = ByteFormat::Hex;
@@ -120,6 +147,20 @@ mod pbkdf2_tests {
             hasher
                 .hash_bytes_from_string("passwordPASSWORDpassword")
                 .unwrap()
+        );
+    }
+
+    #[test]
+    fn test5() {
+        let mut hasher = Pbkdf2::default();
+        hasher.input_format = ByteFormat::Utf8;
+        hasher.output_format = ByteFormat::Hex;
+        hasher.salt = "sa\0lt".as_bytes().to_vec();
+        hasher.iterations = 4096;
+        hasher.output_length = 16;
+        assert_eq!(
+            "56fa6aa75548099dcc37d7f03425e0c3",
+            hasher.hash_bytes_from_string("pass\0word").unwrap()
         );
     }
 }

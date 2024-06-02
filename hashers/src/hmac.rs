@@ -7,7 +7,7 @@ use crate::{
         sha256::{Sha2_224, Sha2_256},
         sha512::{Sha2_384, Sha2_512},
     },
-    traits::ClassicHasher,
+    traits::{ClassicHasher, KeyedHasher},
 };
 use utils::byte_formatting::ByteFormat;
 
@@ -86,6 +86,16 @@ macro_rules! hmac {
                 Ok(self.output_format.byte_slice_to_text(&out))
             }
         }
+
+        impl KeyedHasher for $name {
+            fn set_salt(&mut self, _bytes: &[u8]) {
+                unimplemented!("HMAC does not accept a salt argument")
+            }
+
+            fn set_key(&mut self, bytes: &[u8]) {
+                self.key = bytes.to_vec();
+            }
+        }
     };
 }
 
@@ -96,6 +106,30 @@ hmac!(HmacSha224, Sha2_224, 64);
 hmac!(HmacSha256, Sha2_256, 64);
 hmac!(HmacSha384, Sha2_384, 128);
 hmac!(HmacSha512, Sha2_512, 128);
+
+pub enum SelectHmac {
+    Sha1,
+    MD4,
+    Md5,
+    Sha224,
+    Sha256,
+    Sha384,
+    Sha512,
+}
+
+impl SelectHmac {
+    pub fn new(&self) -> Box<dyn KeyedHasher> {
+        match self {
+            SelectHmac::Sha1 => Box::new(HmacSha1::default()),
+            SelectHmac::Md5 => Box::new(HmacMd5::default()),
+            SelectHmac::MD4 => Box::new(HmacMd4::default()),
+            SelectHmac::Sha224 => Box::new(HmacSha224::default()),
+            SelectHmac::Sha256 => Box::new(HmacSha256::default()),
+            SelectHmac::Sha384 => Box::new(HmacSha384::default()),
+            SelectHmac::Sha512 => Box::new(HmacSha512::default()),
+        }
+    }
+}
 
 #[cfg(test)]
 mod hmac_tests {
