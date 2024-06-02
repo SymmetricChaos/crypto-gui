@@ -1,57 +1,23 @@
 use crate::ui_elements::UiElements;
 
 use super::HasherFrame;
-use hashers::{
-    errors::HasherError,
-    hmac::Hmac,
-    md4::Md4,
-    md5::Md5,
-    sha2::{
-        sha256::{Sha2_224, Sha2_256},
-        sha512::{Sha2_384, Sha2_512},
-    },
-    traits::ClassicHasher,
-};
+use hashers::{errors::HasherError, hmac::HmacSha256, traits::ClassicHasher};
 use rand::{thread_rng, RngCore};
 use utils::byte_formatting::ByteFormat;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum HmacHasher {
-    Md4,
-    Md5,
-    Sha2_224,
-    Sha2_256,
-    Sha2_384,
-    Sha2_512,
-}
-
-impl HmacHasher {
-    pub fn block_size(&self) -> usize {
-        match self {
-            HmacHasher::Md4 => 64,
-            HmacHasher::Md5 => 64,
-            HmacHasher::Sha2_224 => 64,
-            HmacHasher::Sha2_256 => 64,
-            HmacHasher::Sha2_384 => 128,
-            HmacHasher::Sha2_512 => 128,
-        }
-    }
-
-    pub fn hasher(&self) -> Box<dyn ClassicHasher> {
-        match self {
-            HmacHasher::Md4 => Box::new(Md4::default()),
-            HmacHasher::Md5 => Box::new(Md5::default()),
-            HmacHasher::Sha2_224 => Box::new(Sha2_224::default()),
-            HmacHasher::Sha2_256 => Box::new(Sha2_256::default()),
-            HmacHasher::Sha2_384 => Box::new(Sha2_384::default()),
-            HmacHasher::Sha2_512 => Box::new(Sha2_512::default()),
-        }
-    }
-}
+// #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+// pub enum HmacHasher {
+//     Md4,
+//     Md5,
+//     Sha2_224,
+//     Sha2_256,
+//     Sha2_384,
+//     Sha2_512,
+// }
 
 pub struct HmacFrame {
-    hasher: Hmac,
-    inner_hasher: HmacHasher,
+    hasher: HmacSha256,
+    // select_hasher: HmacHasher,
     key_string: String,
     valid_key: bool,
 }
@@ -59,8 +25,8 @@ pub struct HmacFrame {
 impl Default for HmacFrame {
     fn default() -> Self {
         Self {
-            hasher: Default::default(),
-            inner_hasher: HmacHasher::Sha2_256,
+            hasher: HmacSha256::default(),
+            // select_hasher: HmacHasher::Sha2_256,
             key_string: String::new(),
             valid_key: false,
         }
@@ -81,7 +47,7 @@ impl HmacFrame {
             };
             if ui.button("🎲").on_hover_text("randomize").clicked() {
                 let mut rng = thread_rng();
-                self.hasher.key = vec![0; self.hasher.block_size / 4];
+                self.hasher.key = vec![0; self.hasher.block_size() / 4];
                 rng.fill_bytes(&mut self.hasher.key);
                 self.key_string = self
                     .hasher
@@ -103,7 +69,7 @@ impl HasherFrame for HmacFrame {
         ui.add_space(16.0);
 
         ui.subheading("Algorithm");
-        ui.label("HMAC accepts a hasher, a key, and a message. In the case that the key is larger than the block size of the hasher it is hashed and that hash is used as the key instead.\n1) Each byte of the key is XORed with the padding byte 0x5c and the padding bytes continue up to the block size of the hasher.\n2) The message is appended to the key and that entire sequence of bytes is hashed.\n3) Each byte of the key is XORed with the padding byte 0x36 and the padding bytes continue up to the block size of the hasher.\n4) The previously hashed result is appended to this padded key and that entire sequence of bytes is hashed.\nHMAC = H((key ⊕ outer_pad) || H( (key ⊕ inner_pad) || message )))");
+        ui.label("HMAC accepts a hash function (currently only SHA2-256 is provided), a key, and a message. In the case that the key is larger than the block size of the hasher it is hashed and that hash is used as the key instead.\n1) Each byte of the key is XORed with the padding byte 0x5c and the padding bytes continue up to the block size of the hasher.\n2) The message is appended to the key and that entire sequence of bytes is hashed.\n3) Each byte of the key is XORed with the padding byte 0x36 and the padding bytes continue up to the block size of the hasher.\n4) The previously hashed result is appended to this padded key and that entire sequence of bytes is hashed.\nHMAC = H((key ⊕ outer_pad) || H( (key ⊕ inner_pad) || message )))");
 
         ui.byte_io_mode(
             &mut self.hasher.input_format,
@@ -111,30 +77,30 @@ impl HasherFrame for HmacFrame {
         );
         ui.add_space(16.0);
 
-        ui.horizontal(|ui| {
-            if ui
-                .selectable_value(&mut self.inner_hasher, HmacHasher::Md4, "MD4")
-                .clicked()
-                || ui
-                    .selectable_value(&mut self.inner_hasher, HmacHasher::Md5, "MD5")
-                    .clicked()
-                || ui
-                    .selectable_value(&mut self.inner_hasher, HmacHasher::Sha2_224, "SHA224")
-                    .clicked()
-                || ui
-                    .selectable_value(&mut self.inner_hasher, HmacHasher::Sha2_256, "SHA256")
-                    .clicked()
-                || ui
-                    .selectable_value(&mut self.inner_hasher, HmacHasher::Sha2_384, "SHA384")
-                    .clicked()
-                || ui
-                    .selectable_value(&mut self.inner_hasher, HmacHasher::Sha2_512, "SHA512")
-                    .clicked()
-            {
-                self.hasher.block_size = self.inner_hasher.block_size();
-                self.hasher.hasher = self.inner_hasher.hasher();
-            }
-        });
+        // ui.horizontal(|ui| {
+        //     if ui
+        //         .selectable_value(&mut self.inner_hasher, HmacHasher::Md4, "MD4")
+        //         .clicked()
+        //         || ui
+        //             .selectable_value(&mut self.inner_hasher, HmacHasher::Md5, "MD5")
+        //             .clicked()
+        //         || ui
+        //             .selectable_value(&mut self.inner_hasher, HmacHasher::Sha2_224, "SHA224")
+        //             .clicked()
+        //         || ui
+        //             .selectable_value(&mut self.inner_hasher, HmacHasher::Sha2_256, "SHA256")
+        //             .clicked()
+        //         || ui
+        //             .selectable_value(&mut self.inner_hasher, HmacHasher::Sha2_384, "SHA384")
+        //             .clicked()
+        //         || ui
+        //             .selectable_value(&mut self.inner_hasher, HmacHasher::Sha2_512, "SHA512")
+        //             .clicked()
+        //     {
+        //         self.hasher.block_size = self.inner_hasher.block_size();
+        //         self.hasher.hasher = self.inner_hasher.hasher();
+        //     }
+        // });
 
         ui.add_space(16.0);
         ui.collapsing("Key Format", |ui| {

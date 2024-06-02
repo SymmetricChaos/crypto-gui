@@ -1,84 +1,110 @@
-use crate::{errors::HasherError, sha2::sha256::Sha2_256, traits::ClassicHasher};
+use crate::{
+    errors::HasherError,
+    md4::Md4,
+    md5::Md5,
+    sha1::Sha1,
+    sha2::{
+        sha256::{Sha2_224, Sha2_256},
+        sha512::{Sha2_384, Sha2_512},
+    },
+    traits::ClassicHasher,
+};
 use utils::byte_formatting::ByteFormat;
 
-pub struct Hmac {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-    pub key_format: ByteFormat,
-    pub key: Vec<u8>,
-    pub block_size: usize,
-    pub hasher: Box<dyn ClassicHasher>,
-}
-
-impl Default for Hmac {
-    fn default() -> Self {
-        Self {
-            input_format: ByteFormat::Hex,
-            output_format: ByteFormat::Hex,
-            key_format: ByteFormat::Hex,
-            key: Vec::new(),
-            block_size: 64,
-            hasher: Box::new(Sha2_256::default()),
-        }
-    }
-}
-
-impl Hmac {
-    pub fn key_from_str(&mut self, key_str: &str) -> Result<(), HasherError> {
-        let bytes = self
-            .key_format
-            .text_to_bytes(key_str)
-            .map_err(|_| HasherError::general("byte format error"))?;
-        self.key = bytes;
-        Ok(())
-    }
-}
-
-impl ClassicHasher for Hmac {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        // Compress the key if necessary
-        let k = if self.key.len() > self.block_size {
-            let mut k = self.hasher.hash(&self.key);
-            k.truncate(self.block_size);
-            k
-        } else {
-            self.key.clone()
-        };
-        // XOR the key into the outer padding and the inner padding
-        let mut o_key: Vec<u8> = vec![0x5c; self.block_size];
-        for (i, byte) in k.iter().enumerate() {
-            o_key[i] ^= byte;
-        }
-        let mut i_key: Vec<u8> = vec![0x36; self.block_size];
-        for (i, byte) in k.iter().enumerate() {
-            i_key[i] ^= byte;
+macro_rules! hmac {
+    ($name: ident, $hash_function: ty, $block_size: literal) => {
+        #[derive(Debug, Clone)]
+        pub struct $name {
+            pub input_format: ByteFormat,
+            pub output_format: ByteFormat,
+            pub key_format: ByteFormat,
+            pub key: Vec<u8>,
+            pub hasher: $hash_function,
         }
 
-        i_key.extend_from_slice(bytes);
-        let inner = self.hasher.hash(&i_key);
-        o_key.extend_from_slice(&inner);
-        self.hasher.hash(&o_key)
-    }
+        impl Default for $name {
+            fn default() -> Self {
+                Self {
+                    input_format: ByteFormat::Hex,
+                    output_format: ByteFormat::Hex,
+                    key_format: ByteFormat::Hex,
+                    key: Vec::new(),
+                    hasher: <$hash_function>::default(),
+                }
+            }
+        }
 
-    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        let mut bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| HasherError::general("byte format error"))?;
-        let out = self.hash(&mut bytes);
-        Ok(self.output_format.byte_slice_to_text(&out))
-    }
+        impl $name {
+            pub const BLOCK_SIZE: usize = $block_size;
+
+            pub fn block_size(&self) -> usize {
+                $block_size
+            }
+
+            pub fn key_from_str(&mut self, key_str: &str) -> Result<(), HasherError> {
+                let bytes = self
+                    .key_format
+                    .text_to_bytes(key_str)
+                    .map_err(|_| HasherError::general("byte format error"))?;
+                self.key = bytes;
+                Ok(())
+            }
+        }
+
+        impl ClassicHasher for $name {
+            fn hash(&self, bytes: &[u8]) -> Vec<u8> {
+                // Compress the key if necessary
+                let k = if self.key.len() > Self::BLOCK_SIZE {
+                    let mut k = self.hasher.hash(&self.key);
+                    k.truncate(Self::BLOCK_SIZE);
+                    k
+                } else {
+                    self.key.clone()
+                };
+                // XOR the key into the outer padding and the inner padding
+                let mut o_key: Vec<u8> = vec![0x5c; Self::BLOCK_SIZE];
+                for (i, byte) in k.iter().enumerate() {
+                    o_key[i] ^= byte;
+                }
+                let mut i_key: Vec<u8> = vec![0x36; Self::BLOCK_SIZE];
+                for (i, byte) in k.iter().enumerate() {
+                    i_key[i] ^= byte;
+                }
+
+                i_key.extend_from_slice(bytes);
+                let inner = self.hasher.hash(&i_key);
+                o_key.extend_from_slice(&inner);
+                self.hasher.hash(&o_key)
+            }
+
+            fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
+                let mut bytes = self
+                    .input_format
+                    .text_to_bytes(text)
+                    .map_err(|_| HasherError::general("byte format error"))?;
+                let out = self.hash(&mut bytes);
+                Ok(self.output_format.byte_slice_to_text(&out))
+            }
+        }
+    };
 }
+
+hmac!(HmacSha1, Sha1, 64);
+hmac!(HmacMd4, Md4, 64);
+hmac!(HmacMd5, Md5, 64);
+hmac!(HmacSha224, Sha2_224, 64);
+hmac!(HmacSha256, Sha2_256, 64);
+hmac!(HmacSha384, Sha2_384, 128);
+hmac!(HmacSha512, Sha2_512, 128);
 
 #[cfg(test)]
 mod hmac_tests {
-    use crate::sha2::sha512::Sha2_512;
 
     use super::*;
 
     #[test]
     fn test_suite() {
-        let mut hasher = Hmac::default();
+        let mut hasher = HmacSha256::default();
 
         hasher.input_format = ByteFormat::Utf8;
         hasher.output_format = ByteFormat::Hex;
@@ -93,8 +119,12 @@ mod hmac_tests {
                 .unwrap()
         );
 
-        hasher.hasher = Box::new(Sha2_512::default());
-        hasher.block_size = 128;
+        let mut hasher = HmacSha512::default();
+
+        hasher.input_format = ByteFormat::Utf8;
+        hasher.output_format = ByteFormat::Hex;
+        hasher.key_format = ByteFormat::Utf8;
+
         hasher.key_from_str("key").unwrap();
 
         assert_eq!(
