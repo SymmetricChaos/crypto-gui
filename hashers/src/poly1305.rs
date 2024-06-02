@@ -2,6 +2,7 @@ use crate::{errors::HasherError, traits::ClassicHasher};
 use num::{BigUint, Zero};
 use utils::byte_formatting::ByteFormat;
 
+#[derive(Debug, Clone)]
 pub struct Poly1305 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,

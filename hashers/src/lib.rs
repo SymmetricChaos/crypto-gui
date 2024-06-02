@@ -1,23 +1,23 @@
-pub mod blake;
-pub mod ids;
-pub mod md4;
-pub mod md5;
-pub mod pearson;
-pub mod sha1;
-pub mod sha2;
-pub mod siphash;
-pub mod traits;
-
 pub mod argon2;
+pub mod blake;
 pub mod checksum;
 pub mod errors;
 pub mod fnv;
 pub mod fxhash;
 pub mod hmac;
+pub mod ids;
 pub mod keccak;
+pub mod md4;
+pub mod md5;
 pub mod mgf1;
 pub mod pbkdf;
+pub mod pearson;
 pub mod poly1305;
 pub mod radio_gatun;
 pub mod scrypt;
 pub mod sha0;
+pub mod sha1;
+pub mod sha2;
+pub mod siphash;
+
+pub mod traits;

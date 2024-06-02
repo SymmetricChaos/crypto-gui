@@ -7,6 +7,8 @@ use super::SIGMA;
 
 // https://eprint.iacr.org/2012/351.pdf
 
+#[derive(Debug, Clone)]
+
 pub struct Blake2b {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,

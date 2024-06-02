@@ -13,6 +13,7 @@ const C: [u32; 16] = [
     0x452821e6, 0x38d01377, 0xbe5466cf, 0x34e90c6c, 0xc0ac29b7, 0xc97c50dd, 0x3f84d5b5, 0xb5470917,
 ];
 
+#[derive(Debug, Clone)]
 pub struct Blake256 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,

@@ -42,6 +42,7 @@ pub fn majority(a: u32, b: u32, c: u32) -> u32 {
 
 macro_rules! sha2_256 {
     ($name: ident, $iv: expr, $output_len: literal) => {
+        #[derive(Debug, Clone)]
         pub struct $name {
             pub input_format: ByteFormat,
             pub output_format: ByteFormat,

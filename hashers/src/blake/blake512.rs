@@ -27,6 +27,7 @@ const C: [u64; 16] = [
     0x636920d871574e69,
 ];
 
+#[derive(Debug, Clone)]
 pub struct Blake512 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,

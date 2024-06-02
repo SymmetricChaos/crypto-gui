@@ -2,6 +2,7 @@ use utils::byte_formatting::ByteFormat;
 
 use crate::{errors::HasherError, traits::ClassicHasher};
 
+#[derive(Debug, Clone)]
 pub struct Pearson {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
@@ -58,7 +59,7 @@ impl ClassicHasher for Pearson {
 }
 
 #[cfg(test)]
-mod md5_tests {
+mod pearson_tests {
     use super::*;
 
     #[test]

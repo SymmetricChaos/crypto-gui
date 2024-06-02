@@ -15,6 +15,7 @@ pub enum Sha2Variant {
     Sha512_256,
 }
 
+#[derive(Debug, Clone)]
 pub struct Sha2 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,

@@ -7,6 +7,7 @@ use utils::byte_formatting::ByteFormat;
 
 macro_rules! radio_gatun {
     ($word_size: ty, $name: ident, $rotations: expr) => {
+        #[derive(Debug, Clone)]
         pub struct $name {
             pub input_format: ByteFormat,
             pub output_format: ByteFormat,

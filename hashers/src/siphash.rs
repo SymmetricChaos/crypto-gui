@@ -4,6 +4,8 @@ use crate::{errors::HasherError, traits::ClassicHasher};
 
 // https://eprint.iacr.org/2012/351.pdf
 
+#[derive(Debug, Clone)]
+
 pub struct SipHash {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,

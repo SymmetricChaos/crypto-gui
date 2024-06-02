@@ -55,6 +55,7 @@ pub const K: [u64; 80] = [
 
 macro_rules! sha512 {
     ($name: ident, $iv: expr, $output_len: literal) => {
+        #[derive(Debug, Clone)]
         pub struct $name {
             pub input_format: ByteFormat,
             pub output_format: ByteFormat,

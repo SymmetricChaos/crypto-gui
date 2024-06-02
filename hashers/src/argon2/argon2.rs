@@ -89,6 +89,7 @@ macro_rules! permute {
     };
 }
 
+#[derive(Debug, Clone)]
 pub struct Argon2 {
     input_format: ByteFormat,
     output_format: ByteFormat,

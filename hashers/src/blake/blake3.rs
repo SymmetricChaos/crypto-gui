@@ -369,12 +369,15 @@ impl Hasher {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Blake3Mode {
     Unkeyed,
     Keyed,
     KeyDerivation,
 }
+
+#[derive(Debug, Clone)]
+
 pub struct Blake3 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,

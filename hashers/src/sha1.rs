@@ -2,6 +2,7 @@ use utils::byte_formatting::ByteFormat;
 
 use crate::{errors::HasherError, traits::ClassicHasher};
 
+#[derive(Debug, Clone)]
 pub struct Sha1 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
