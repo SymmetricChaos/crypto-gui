@@ -1,5 +1,6 @@
 use egui::DragValue;
 use hashers::{errors::HasherError, hmac::SelectHmac, pbkdf::Pbkdf2, traits::ClassicHasher};
+use utils::byte_formatting::ByteFormat;
 
 use crate::ui_elements::UiElements;
 
@@ -7,12 +8,16 @@ use super::HasherFrame;
 
 pub struct Pbkdf2Frame {
     hasher: Pbkdf2,
+    salt: String,
+    valid_salt: bool,
 }
 
 impl Default for Pbkdf2Frame {
     fn default() -> Self {
         Self {
             hasher: Default::default(),
+            salt: String::from("BEEF"),
+            valid_salt: true,
         }
     }
 }
@@ -38,8 +43,20 @@ impl HasherFrame for Pbkdf2Frame {
         ui.subheading("Select Number of Iterations");
         ui.add(DragValue::new(&mut self.hasher.iterations).clamp_range(1..=32768));
 
-        ui.subheading("Provide Salt");
-        ui.label("<<<TODO>>>");
+        ui.horizontal(|ui| {
+            ui.subheading("Provide Salt (Hexadecimal)");
+            if !self.valid_salt {
+                ui.error_text("invalid salt");
+            }
+        });
+        if ui.control_string(&mut self.salt).changed() {
+            if let Ok(bytes) = ByteFormat::Hex.text_to_bytes(&self.salt) {
+                self.valid_salt = true;
+                self.hasher.salt = bytes;
+            } else {
+                self.valid_salt = false;
+            }
+        }
 
         ui.subheading("Output Length (Bytes)");
         ui.add(DragValue::new(&mut self.hasher.output_length).clamp_range(4..=512));
