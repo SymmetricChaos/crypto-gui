@@ -1,6 +1,9 @@
 use utils::byte_formatting::ByteFormat;
 
-use crate::{errors::HasherError, traits::ClassicHasher};
+use crate::{
+    errors::HasherError,
+    traits::{ClassicHasher, KeyedHasher},
+};
 
 // https://eprint.iacr.org/2012/351.pdf
 
@@ -105,6 +108,21 @@ impl ClassicHasher for SipHash {
             .map_err(|_| HasherError::general("byte format error"))?;
         let out = self.hash(&mut bytes);
         Ok(self.output_format.byte_slice_to_text(&out))
+    }
+}
+
+impl KeyedHasher for SipHash {
+    fn set_salt(&mut self, _bytes: &[u8]) {
+        unimplemented!("SipHash does not accept a salt argument")
+    }
+
+    fn set_key(&mut self, bytes: &[u8]) {
+        if bytes.len() == 16 {
+            self.k0 = u64::from_be_bytes(bytes[0..8].try_into().unwrap());
+            self.k1 = u64::from_be_bytes(bytes[8..16].try_into().unwrap());
+        } else {
+            panic!("SipHash key must be exactly 16 bytes")
+        }
     }
 }
 

@@ -84,7 +84,7 @@ impl HasherFrame for Poly1305Frame {
         ui.subheading("Key (r)");
         ui.label("The point at which the polynomial is evaluated.");
         self.key_r_control(ui);
-        
+
         ui.add_space(8.0);
         ui.subheading("Key (s)");
         ui.label("A constant that is added after the polynomial is evaluated.");

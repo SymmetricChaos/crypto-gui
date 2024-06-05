@@ -6,6 +6,7 @@ mod hmac_controls;
 mod md4_controls;
 mod md5_controls;
 mod mgf1_controls;
+pub mod pbkdf2_controls;
 mod pearson_controls;
 mod poly1305_controls;
 mod radio_gatun;
@@ -20,6 +21,7 @@ use hashers::{
     errors::HasherError,
     ids::{hasher_categories::HasherCategory, HasherId},
 };
+use pbkdf2_controls::Pbkdf2Frame;
 
 use self::{
     blake2_controls::Blake2Frame, blake3_controls::Blake3Frame, blake_controls::BlakeFrame,
@@ -65,6 +67,7 @@ pub struct HasherInterface {
     md4: Md4Frame,
     md5: Md5Frame,
     mgf1: Mgf1Frame,
+    pbkdf2: Pbkdf2Frame,
     pearson: PearsonFrame,
     poly1305: Poly1305Frame,
     siphash: SipHashFrame,
@@ -85,6 +88,7 @@ impl HasherInterface {
                 HasherId::Md4,
                 HasherId::Md5,
                 HasherId::Mgf1,
+                HasherId::Pbkdf2,
                 HasherId::Poly1305,
                 HasherId::Sha0,
                 HasherId::Sha1,
@@ -106,6 +110,7 @@ impl HasherInterface {
 
     pub fn get_active_hasher(&mut self, active_hasher: &HasherId) -> &mut dyn HasherFrame {
         match active_hasher {
+            HasherId::Argon2 => todo!(),
             HasherId::Blake => &mut self.blake,
             HasherId::Blake2 => &mut self.blake2,
             HasherId::Blake3 => &mut self.blake3,
@@ -118,6 +123,7 @@ impl HasherInterface {
             HasherId::Sha1 => &mut self.sha1,
             HasherId::Sha2 => &mut self.sha2,
             HasherId::Sha3 => &mut self.sha3,
+            HasherId::Pbkdf2 => &mut self.pbkdf2,
             HasherId::Pearson => &mut self.pearson,
             HasherId::Poly1305 => &mut self.poly1305,
             HasherId::SipHash => &mut self.siphash,

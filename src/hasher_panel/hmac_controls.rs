@@ -5,16 +5,6 @@ use hashers::{errors::HasherError, hmac::HmacSha256, traits::ClassicHasher};
 use rand::{thread_rng, RngCore};
 use utils::byte_formatting::ByteFormat;
 
-// #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-// pub enum HmacHasher {
-//     Md4,
-//     Md5,
-//     Sha2_224,
-//     Sha2_256,
-//     Sha2_384,
-//     Sha2_512,
-// }
-
 pub struct HmacFrame {
     hasher: HmacSha256,
     // select_hasher: HmacHasher,

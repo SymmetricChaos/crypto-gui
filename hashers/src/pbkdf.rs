@@ -10,7 +10,7 @@ use crate::{
 pub struct Pbkdf2 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    hmac: SelectHmac,
+    pub hmac: SelectHmac,
     pub salt: Vec<u8>,
     pub iterations: u32,
     pub output_length: u32, // size of the output in bytes
