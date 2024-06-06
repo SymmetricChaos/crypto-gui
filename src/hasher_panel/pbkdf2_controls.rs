@@ -55,6 +55,7 @@ impl HasherFrame for Pbkdf2Frame {
                 self.hasher.salt = bytes;
             } else {
                 self.valid_salt = false;
+                self.hasher.salt.clear();
             }
         }
 

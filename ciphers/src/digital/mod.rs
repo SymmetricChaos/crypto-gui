@@ -3,6 +3,8 @@ use crate::CipherError;
 pub mod aes;
 pub mod asmuth_bloom_secret_sharing;
 pub mod blakely_secret_sharing;
+pub mod blowfish;
+pub mod blowfish_arrays;
 pub mod chacha;
 pub mod chacha20poly1305;
 pub mod chacha_extended_nonce;
