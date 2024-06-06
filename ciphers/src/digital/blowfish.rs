@@ -68,7 +68,7 @@ impl Blowfish {
     }
 
     pub fn f(&self, x: u32) -> u32 {
-        let h = SBOX0[(x >> 24) as usize].wrapping_add(SBOX1[((x >> 24) & 0xff) as usize]);
+        let h = SBOX0[(x >> 24) as usize].wrapping_add(SBOX1[((x >> 16) & 0xff) as usize]);
         (h ^ SBOX2[((x >> 8) & 0xff) as usize]).wrapping_add(SBOX3[(x & 0xff) as usize])
     }
 
@@ -110,32 +110,42 @@ impl Cipher for Blowfish {
 #[cfg(test)]
 mod blowfish_tests {
 
-    use utils::byte_formatting::ByteFormat;
-
     use super::*;
 
-    #[test]
-    fn key_generation() {
-        let mut cipher = Blowfish::default();
-    }
+    // #[test]
+    // fn key_generation() {
+    //     let mut cipher = Blowfish::default();
+    // }
 
     #[test]
-    fn test_vector() {
+    fn encrypt_decrypt_block() {
         let mut cipher = Blowfish::default();
         cipher.key = 0x00000000000000000_u64.to_be_bytes().to_vec();
         cipher.key_schedule();
         let mut l = 0u32;
         let mut r = 0u32;
         cipher.encrypt_block(&mut l, &mut r);
-        println!("{:08x} {:08x}", l, r);
-        // assert_eq!((l, r), (0x4EF99745, 0x6198DD78));
+        cipher.decrypt_block(&mut l, &mut r);
+        assert_eq!((l, r), (0, 0));
+    }
 
-        cipher.key = 0xffffffffffffffff_u64.to_be_bytes().to_vec();
+    #[test]
+    fn test_vector() {
+        let mut cipher = Blowfish::default();
+        cipher.key = 0_u64.to_be_bytes().to_vec();
         cipher.key_schedule();
-        let mut l = 0xffffffff;
-        let mut r = 0xffffffff;
+        let mut l = 0u32;
+        let mut r = 0u32;
         cipher.encrypt_block(&mut l, &mut r);
-        println!("{:08x} {:08x}", l, r);
-        // assert_eq!((l, r), (0x51866FD5, 0xB85ECB8A));
+        let s = format!("{:08X} {:08X}", l, r);
+        assert_eq!(s, "4EF99745 6198DD78");
+
+        // cipher.key = 0xffffffffffffffff_u64.to_be_bytes().to_vec();
+        // cipher.key_schedule();
+        // let mut l = 0xffffffff;
+        // let mut r = 0xffffffff;
+        // cipher.encrypt_block(&mut l, &mut r);
+        // let s = format!("{:08X} {:08X}", l, r);
+        // assert_eq!(s, "51866FD5 B85ECB8A");
     }
 }
