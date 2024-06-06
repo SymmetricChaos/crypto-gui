@@ -4,22 +4,33 @@ use super::blowfish_arrays::{PARRAY, SBOX0, SBOX1, SBOX2, SBOX3};
 use crate::{Cipher, CipherError};
 
 pub struct Blowfish {
-    key: Vec<u8>,
+    pub key: Vec<u8>,
+    pub parray: [u32; 18],
+    pub sboxes: [[u32; 256]; 4],
 }
 
 impl Default for Blowfish {
     fn default() -> Self {
-        Self { key: vec![0; 4] }
+        Self {
+            key: vec![0; 4],
+            parray: PARRAY,
+            sboxes: [SBOX0, SBOX1, SBOX2, SBOX3],
+        }
     }
 }
 
 impl Blowfish {
     // Derive the P-array and S-boxes from the key
-    pub fn p_array_schedule(&self) -> [u32; 18] {
+    pub fn key_schedule(&mut self) {
+        // Reset the P-array and sboxes to their IVs
+        self.parray = PARRAY;
+        self.sboxes = [SBOX0, SBOX1, SBOX2, SBOX3];
+
         // Endlessly repeat the key as needed
         let mut key_bytes = self.key.iter().cycle();
-        let mut p = PARRAY.clone();
-        for word in p.iter_mut() {
+
+        // Xoring the key into the IV
+        for word in self.parray.iter_mut() {
             let mut k = 0u32;
             for _ in 0..4 {
                 k <<= 8;
@@ -27,7 +38,23 @@ impl Blowfish {
             }
             *word ^= k;
         }
-        p
+
+        // Entries in the P-array and sboxes are replaced by encrypting a chain of values
+        // This makes key generation relatively expensive.
+        let mut l = 0u32;
+        let mut r = 0u32;
+        for i in 0..8 {
+            self.encrypt_block(&mut l, &mut r);
+            self.parray[i * 2] = l;
+            self.parray[i * 2 + 1] = r;
+        }
+        for sbox in 0..4 {
+            for i in 0..128 {
+                self.encrypt_block(&mut l, &mut r);
+                self.sboxes[sbox][i * 2] = l;
+                self.sboxes[sbox][i * 2 + 1] = r;
+            }
+        }
     }
 
     pub fn valid_key(&self) -> Result<(), CipherError> {
@@ -45,26 +72,26 @@ impl Blowfish {
         (h ^ SBOX2[((x >> 8) & 0xff) as usize]).wrapping_add(SBOX3[(x & 0xff) as usize])
     }
 
-    pub fn encrypt_block(&self, l: &mut u32, r: &mut u32, parray: &[u32; 18]) {
+    pub fn encrypt_block(&self, l: &mut u32, r: &mut u32) {
         for i in 0..16 {
-            *l ^= parray[i];
+            *l ^= self.parray[i];
             *r = self.f(*l) ^ *r;
             mem::swap(l, r);
         }
         mem::swap(l, r);
-        *r ^= parray[16];
-        *l ^= parray[17];
+        *r ^= self.parray[16];
+        *l ^= self.parray[17];
     }
 
-    pub fn decrypt_block(&self, l: &mut u32, r: &mut u32, parray: &[u32; 18]) {
+    pub fn decrypt_block(&self, l: &mut u32, r: &mut u32) {
         for i in (2..18).rev() {
-            *l ^= parray[i];
+            *l ^= self.parray[i];
             *r = self.f(*l) ^ *r;
             mem::swap(l, r);
         }
         mem::swap(l, r);
-        *r ^= parray[1];
-        *l ^= parray[0];
+        *r ^= self.parray[1];
+        *l ^= self.parray[0];
     }
 }
 
@@ -83,5 +110,32 @@ impl Cipher for Blowfish {
 #[cfg(test)]
 mod blowfish_tests {
 
+    use utils::byte_formatting::ByteFormat;
+
     use super::*;
+
+    #[test]
+    fn key_generation() {
+        let mut cipher = Blowfish::default();
+    }
+
+    #[test]
+    fn test_vector() {
+        let mut cipher = Blowfish::default();
+        cipher.key = 0x00000000000000000_u64.to_be_bytes().to_vec();
+        cipher.key_schedule();
+        let mut l = 0u32;
+        let mut r = 0u32;
+        cipher.encrypt_block(&mut l, &mut r);
+        println!("{:08x} {:08x}", l, r);
+        // assert_eq!((l, r), (0x4EF99745, 0x6198DD78));
+
+        cipher.key = 0xffffffffffffffff_u64.to_be_bytes().to_vec();
+        cipher.key_schedule();
+        let mut l = 0xffffffff;
+        let mut r = 0xffffffff;
+        cipher.encrypt_block(&mut l, &mut r);
+        println!("{:08x} {:08x}", l, r);
+        // assert_eq!((l, r), (0x51866FD5, 0xB85ECB8A));
+    }
 }
