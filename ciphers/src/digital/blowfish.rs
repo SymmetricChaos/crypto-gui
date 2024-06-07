@@ -5,8 +5,8 @@ use crate::{Cipher, CipherError};
 
 pub struct Blowfish {
     pub key: Vec<u8>,
-    pub parray: [u32; 18],
-    pub sboxes: [[u32; 256]; 4],
+    parray: [u32; 18],
+    sboxes: [[u32; 256]; 4],
 }
 
 impl Default for Blowfish {
@@ -43,7 +43,7 @@ impl Blowfish {
         // This makes key generation relatively expensive.
         let mut l = 0u32;
         let mut r = 0u32;
-        for i in 0..8 {
+        for i in 0..9 {
             self.encrypt_block(&mut l, &mut r);
             self.parray[i * 2] = l;
             self.parray[i * 2 + 1] = r;
@@ -68,14 +68,17 @@ impl Blowfish {
     }
 
     pub fn f(&self, x: u32) -> u32 {
-        let h = SBOX0[(x >> 24) as usize].wrapping_add(SBOX1[((x >> 16) & 0xff) as usize]);
-        (h ^ SBOX2[((x >> 8) & 0xff) as usize]).wrapping_add(SBOX3[(x & 0xff) as usize])
+        let a = self.sboxes[0][(x >> 24) as usize];
+        let b = self.sboxes[1][((x >> 16) & 0xff) as usize];
+        let c = self.sboxes[2][((x >> 8) & 0xff) as usize];
+        let d = self.sboxes[3][(x & 0xff) as usize];
+        (a.wrapping_add(b) ^ c).wrapping_add(d)
     }
 
     pub fn encrypt_block(&self, l: &mut u32, r: &mut u32) {
         for i in 0..16 {
             *l ^= self.parray[i];
-            *r = self.f(*l) ^ *r;
+            *r ^= self.f(*l);
             mem::swap(l, r);
         }
         mem::swap(l, r);
@@ -86,7 +89,7 @@ impl Blowfish {
     pub fn decrypt_block(&self, l: &mut u32, r: &mut u32) {
         for i in (2..18).rev() {
             *l ^= self.parray[i];
-            *r = self.f(*l) ^ *r;
+            *r ^= self.f(*l);
             mem::swap(l, r);
         }
         mem::swap(l, r);
@@ -120,11 +123,12 @@ mod blowfish_tests {
     #[test]
     fn encrypt_decrypt_block() {
         let mut cipher = Blowfish::default();
-        cipher.key = 0x00000000000000000_u64.to_be_bytes().to_vec();
+        cipher.key = 0_u64.to_be_bytes().to_vec();
         cipher.key_schedule();
         let mut l = 0u32;
         let mut r = 0u32;
         cipher.encrypt_block(&mut l, &mut r);
+        assert_ne!((l, r), (0, 0));
         cipher.decrypt_block(&mut l, &mut r);
         assert_eq!((l, r), (0, 0));
     }
