@@ -237,7 +237,7 @@ impl Aes128 {
             for (i, k) in input.into_iter().zip(state.into_iter()) {
                 out.push(*i ^ k)
             }
-            counter += 1;
+            counter = counter.wrapping_add(1);
         }
 
         Ok(out)
