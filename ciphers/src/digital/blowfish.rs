@@ -1,4 +1,9 @@
-use super::blowfish_arrays::{PARRAY, SBOX0, SBOX1, SBOX2, SBOX3};
+use utils::byte_formatting::ByteFormat;
+
+use super::{
+    blowfish_arrays::{PARRAY, SBOX0, SBOX1, SBOX2, SBOX3},
+    BlockCipherMode, BlockCipherPadding,
+};
 use crate::{Cipher, CipherError};
 
 pub fn u64_to_u32_pairs(n: u64) -> [u32; 2] {
@@ -18,17 +23,25 @@ pub fn slice_to_u32_pair(s: &[u8]) -> [u32; 2] {
 }
 
 pub struct Blowfish {
+    pub output_format: ByteFormat,
+    pub input_format: ByteFormat,
     pub key: Vec<u8>,
     parray: [u32; 18],
     sboxes: [[u32; 256]; 4],
+    pub mode: BlockCipherMode,
+    pub padding: BlockCipherPadding,
 }
 
 impl Default for Blowfish {
     fn default() -> Self {
         Self {
+            output_format: ByteFormat::Hex,
+            input_format: ByteFormat::Hex,
             key: vec![0; 4],
             parray: PARRAY,
             sboxes: [SBOX0, SBOX1, SBOX2, SBOX3],
+            mode: BlockCipherMode::Ecb,
+            padding: BlockCipherPadding::Bit,
         }
     }
 }
@@ -110,18 +123,17 @@ impl Blowfish {
         lr[0] ^= self.parray[0];
     }
 
-    pub fn encrypt_ecb(&self, bytes: &[u8]) -> Vec<u8> {
+    pub fn encrypt_ecb(&self, bytes: &mut [u8]) {
         todo!()
     }
 
-    pub fn decrypt_ecb(&self, bytes: &[u8]) -> Vec<u8> {
+    pub fn decrypt_ecb(&self, bytes: &mut [u8]) {
         todo!()
     }
 
-    pub fn encrypt_ctr(&self, bytes: &[u8]) -> Vec<u8> {
+    pub fn encrypt_ctr(&self, bytes: &mut [u8]) {
         let mut ctr = 0u64;
-        let chunks = bytes.chunks(8);
-        let mut out = Vec::with_capacity(bytes.len());
+        let chunks = bytes.chunks_mut(8);
 
         for chunk in chunks {
             let mut c = u64_to_u32_pairs(ctr);
@@ -130,31 +142,45 @@ impl Blowfish {
                 .iter()
                 .map(|w| w.to_le_bytes())
                 .flatten()
-                .zip(chunk.iter())
+                .zip(chunk.iter_mut())
             {
-                out.push(byte ^ input)
+                *input ^= byte
             }
             ctr = ctr.wrapping_add(1);
         }
-
-        out
     }
 
     // CTR mode is reciprocal
-    pub fn decrypt_ctr(&self, bytes: &[u8]) -> Vec<u8> {
+    pub fn decrypt_ctr(&self, bytes: &mut [u8]) {
         self.encrypt_ctr(bytes)
     }
 }
 
 impl Cipher for Blowfish {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        self.valid_key()?;
-        todo!()
+        let mut bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| CipherError::input("byte format error"))?;
+        match self.mode {
+            BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes),
+            BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes),
+            BlockCipherMode::Cbc => todo!(),
+        };
+        Ok(self.output_format.byte_slice_to_text(&bytes))
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        self.valid_key()?;
-        todo!()
+        let mut bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| CipherError::input("byte format error"))?;
+        match self.mode {
+            BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes),
+            BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes),
+            BlockCipherMode::Cbc => todo!(),
+        };
+        Ok(self.output_format.byte_slice_to_text(&bytes))
     }
 }
 
@@ -162,7 +188,6 @@ impl Cipher for Blowfish {
 mod blowfish_tests {
 
     use super::*;
-
 
     #[test]
     fn encrypt_decrypt_block() {

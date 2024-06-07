@@ -310,6 +310,7 @@ impl Cipher for Aes128 {
         let out = match self.mode {
             BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes)?,
             BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes)?,
+            BlockCipherMode::Cbc => todo!(),
         };
         Ok(self.output_format.byte_slice_to_text(&out))
     }
@@ -322,6 +323,7 @@ impl Cipher for Aes128 {
         let out = match self.mode {
             BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes)?,
             BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes)?,
+            BlockCipherMode::Cbc => todo!(),
         };
         Ok(self.output_format.byte_slice_to_text(&out))
     }
