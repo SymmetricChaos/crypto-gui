@@ -28,6 +28,7 @@ pub struct Blowfish {
     pub key: Vec<u8>,
     parray: [u32; 18],
     sboxes: [[u32; 256]; 4],
+    pub ctr: u64,
     pub mode: BlockCipherMode,
     pub padding: BlockCipherPadding,
 }
@@ -40,6 +41,7 @@ impl Default for Blowfish {
             key: vec![0; 4],
             parray: PARRAY,
             sboxes: [SBOX0, SBOX1, SBOX2, SBOX3],
+            ctr: 0,
             mode: BlockCipherMode::Ecb,
             padding: BlockCipherPadding::Bit,
         }
@@ -124,15 +126,41 @@ impl Blowfish {
     }
 
     pub fn encrypt_ecb(&self, bytes: &mut [u8]) {
-        todo!()
+        let chunks = bytes.chunks_mut(8);
+
+        for chunk in chunks {
+            let mut c = slice_to_u32_pair(chunk);
+            self.encrypt_block(&mut c);
+            for (byte, input) in c
+                .iter()
+                .map(|w| w.to_le_bytes())
+                .flatten()
+                .zip(chunk.iter_mut())
+            {
+                *input = byte
+            }
+        }
     }
 
     pub fn decrypt_ecb(&self, bytes: &mut [u8]) {
-        todo!()
+        let chunks = bytes.chunks_mut(8);
+
+        for chunk in chunks {
+            let mut c = slice_to_u32_pair(chunk);
+            self.decrypt_block(&mut c);
+            for (byte, input) in c
+                .iter()
+                .map(|w| w.to_le_bytes())
+                .flatten()
+                .zip(chunk.iter_mut())
+            {
+                *input = byte
+            }
+        }
     }
 
     pub fn encrypt_ctr(&self, bytes: &mut [u8]) {
-        let mut ctr = 0u64;
+        let mut ctr = self.ctr;
         let chunks = bytes.chunks_mut(8);
 
         for chunk in chunks {
@@ -154,6 +182,14 @@ impl Blowfish {
     pub fn decrypt_ctr(&self, bytes: &mut [u8]) {
         self.encrypt_ctr(bytes)
     }
+
+    pub fn encrypt_cbc(&self, bytes: &mut [u8]) {
+        todo!()
+    }
+
+    pub fn decrypt_cbc(&self, bytes: &mut [u8]) {
+        todo!()
+    }
 }
 
 impl Cipher for Blowfish {
@@ -165,7 +201,7 @@ impl Cipher for Blowfish {
         match self.mode {
             BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes),
             BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes),
-            BlockCipherMode::Cbc => todo!(),
+            BlockCipherMode::Cbc => return Err(CipherError::state("CBC mode not implemented")),
         };
         Ok(self.output_format.byte_slice_to_text(&bytes))
     }
@@ -178,7 +214,7 @@ impl Cipher for Blowfish {
         match self.mode {
             BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes),
             BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes),
-            BlockCipherMode::Cbc => todo!(),
+            BlockCipherMode::Cbc => return Err(CipherError::state("CBC mode not implemented")),
         };
         Ok(self.output_format.byte_slice_to_text(&bytes))
     }
