@@ -1,8 +1,9 @@
 use utils::byte_formatting::ByteFormat;
 
 use super::{
+    bit_padding,
     blowfish_arrays::{PARRAY, SBOX0, SBOX1, SBOX2, SBOX3},
-    BlockCipherMode, BlockCipherPadding,
+    strip_bit_padding, BlockCipherMode,
 };
 use crate::{Cipher, CipherError};
 
@@ -10,7 +11,7 @@ pub fn u64_to_u32_pairs(n: u64) -> [u32; 2] {
     [(n >> 32) as u32, n as u32]
 }
 
-pub fn slice_to_u32_pair(s: &[u8]) -> [u32; 2] {
+pub fn u8_slice_to_u32_pair(s: &[u8]) -> [u32; 2] {
     let mut a = 0;
     let mut b = 0;
     for i in 0..4 {
@@ -22,6 +23,18 @@ pub fn slice_to_u32_pair(s: &[u8]) -> [u32; 2] {
     [a, b]
 }
 
+pub fn u32_pair_to_u8_array(s: [u32; 2]) -> [u8; 8] {
+    let a = s[0].to_be_bytes();
+    let b = s[1].to_be_bytes();
+    let mut out = [0; 8];
+    for i in 0..4 {
+        out[i] = a[i];
+        out[i + 4] = b[i];
+    }
+
+    out
+}
+
 pub struct Blowfish {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
@@ -29,8 +42,8 @@ pub struct Blowfish {
     parray: [u32; 18],
     sboxes: [[u32; 256]; 4],
     pub ctr: u64,
+    pub iv: u64,
     pub mode: BlockCipherMode,
-    pub padding: BlockCipherPadding,
 }
 
 impl Default for Blowfish {
@@ -42,8 +55,8 @@ impl Default for Blowfish {
             parray: PARRAY,
             sboxes: [SBOX0, SBOX1, SBOX2, SBOX3],
             ctr: 0,
+            iv: 0,
             mode: BlockCipherMode::Ecb,
-            padding: BlockCipherPadding::Bit,
         }
     }
 }
@@ -126,53 +139,58 @@ impl Blowfish {
     }
 
     pub fn encrypt_ecb(&self, bytes: &mut [u8]) {
-        let chunks = bytes.chunks_mut(8);
+        assert!(bytes.len() % 8 == 0);
 
-        for chunk in chunks {
-            let mut c = slice_to_u32_pair(chunk);
+        for plaintext in bytes.chunks_mut(8) {
+            // Encrypt the plaintext chunk
+            let mut c = u8_slice_to_u32_pair(plaintext);
             self.encrypt_block(&mut c);
-            for (byte, input) in c
+            // Overwrite the plaintext bytes with the ciphertext
+            for (ctext, source) in c
                 .iter()
-                .map(|w| w.to_le_bytes())
+                .map(|w| w.to_be_bytes())
                 .flatten()
-                .zip(chunk.iter_mut())
+                .zip(plaintext.iter_mut())
             {
-                *input = byte
+                *source = ctext
             }
         }
     }
 
     pub fn decrypt_ecb(&self, bytes: &mut [u8]) {
-        let chunks = bytes.chunks_mut(8);
+        assert!(bytes.len() % 8 == 0);
 
-        for chunk in chunks {
-            let mut c = slice_to_u32_pair(chunk);
+        for ciphertext in bytes.chunks_mut(8) {
+            // Decrypt the ciphertext chunk
+            let mut c = u8_slice_to_u32_pair(ciphertext);
             self.decrypt_block(&mut c);
-            for (byte, input) in c
+            // Overwrite the ciphertext bytes with the plaintext
+            for (ptext, source) in c
                 .iter()
-                .map(|w| w.to_le_bytes())
+                .map(|w| w.to_be_bytes())
                 .flatten()
-                .zip(chunk.iter_mut())
+                .zip(ciphertext.iter_mut())
             {
-                *input = byte
+                *source = ptext
             }
         }
     }
 
     pub fn encrypt_ctr(&self, bytes: &mut [u8]) {
         let mut ctr = self.ctr;
-        let chunks = bytes.chunks_mut(8);
 
-        for chunk in chunks {
-            let mut c = u64_to_u32_pairs(ctr);
-            self.encrypt_block(&mut c);
-            for (byte, input) in c
+        for plaintext in bytes.chunks_mut(8) {
+            // Encrypt the counter to create a mask
+            let mut mask = u64_to_u32_pairs(ctr);
+            self.encrypt_block(&mut mask);
+            // XOR the mask into the plaintext at the source, creating ciphertext
+            for (key_byte, ptext) in mask
                 .iter()
-                .map(|w| w.to_le_bytes())
+                .map(|w| w.to_be_bytes())
                 .flatten()
-                .zip(chunk.iter_mut())
+                .zip(plaintext.iter_mut())
             {
-                *input ^= byte
+                *ptext ^= key_byte
             }
             ctr = ctr.wrapping_add(1);
         }
@@ -184,11 +202,72 @@ impl Blowfish {
     }
 
     pub fn encrypt_cbc(&self, bytes: &mut [u8]) {
-        todo!()
+        assert!(bytes.len() % 8 == 0);
+        println!("bytes {:?}", bytes);
+        // Start chain with an IV
+        let mut chain = self.iv.to_le_bytes();
+
+        for source in bytes.chunks_mut(8) {
+            println!("\n\nencrypt");
+            println!("chain {:?}", chain);
+            // XOR the plaintext into the chain, creating a mixed array
+            for (c, b) in chain.iter_mut().zip(source.iter()) {
+                *c ^= b;
+            }
+
+            println!("mixed {:?}", chain);
+
+            // Encrypt the mixed value, producing ciphertext
+            let mut ciphertext: [u32; 2] = u8_slice_to_u32_pair(&chain);
+            self.encrypt_block(&mut ciphertext);
+
+            // Store the ciphertext as the next chain value
+            chain = u32_pair_to_u8_array(ciphertext);
+
+            println!("ctext {:?}", chain);
+
+            // Overwrite plaintext at source with the ciphertext
+            for (ctext, source) in ciphertext
+                .iter()
+                .map(|w| w.to_be_bytes())
+                .flatten()
+                .zip(source.iter_mut())
+            {
+                *source = ctext
+            }
+        }
     }
 
     pub fn decrypt_cbc(&self, bytes: &mut [u8]) {
-        todo!()
+        assert!(bytes.len() % 8 == 0);
+
+        // Start chain with an IV
+        let mut chain = self.iv.to_le_bytes();
+
+        for source in bytes.chunks_mut(8) {
+            println!("\n\ndecrypt");
+            println!("chain {:?}", chain);
+
+            // Decrypt the ciphertext at the source to get the plaintext XORed with the previous chain value
+            let mut temp = u8_slice_to_u32_pair(&source);
+            self.decrypt_block(&mut temp);
+            let mut mixed = u32_pair_to_u8_array(temp);
+            println!("mixed {:?}", mixed);
+
+            println!("ciphertext {:?}", source);
+
+            // XOR the current chain value into the mixed text
+            for (c, b) in mixed.iter_mut().zip(chain.iter()) {
+                *c ^= b;
+            }
+
+            // The overwrite ciphertext at source with the plaintext
+            for (ptext, source) in mixed.into_iter().zip(source.iter_mut()) {
+                *source = ptext
+            }
+            // Store the ciphertext as the next chain value
+            chain = source.try_into().unwrap();
+        }
     }
 }
 
@@ -198,10 +277,16 @@ impl Cipher for Blowfish {
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
+
+        // ECB and CBC need padding
+        if [BlockCipherMode::Ecb, BlockCipherMode::Cbc].contains(&self.mode) {
+            bit_padding(&mut bytes, 8)
+        }
+
         match self.mode {
             BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes),
             BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes),
-            BlockCipherMode::Cbc => return Err(CipherError::state("CBC mode not implemented")),
+            BlockCipherMode::Cbc => self.encrypt_cbc(&mut bytes),
         };
         Ok(self.output_format.byte_slice_to_text(&bytes))
     }
@@ -214,8 +299,13 @@ impl Cipher for Blowfish {
         match self.mode {
             BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes),
             BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes),
-            BlockCipherMode::Cbc => return Err(CipherError::state("CBC mode not implemented")),
+            BlockCipherMode::Cbc => self.decrypt_cbc(&mut bytes),
         };
+
+        // ECB and CBC need padding removed
+        if [BlockCipherMode::Ecb, BlockCipherMode::Cbc].contains(&self.mode) {
+            strip_bit_padding(&mut bytes)
+        }
         Ok(self.output_format.byte_slice_to_text(&bytes))
     }
 }
@@ -228,13 +318,51 @@ mod blowfish_tests {
     #[test]
     fn encrypt_decrypt_block() {
         let mut cipher = Blowfish::default();
-        cipher.key = 0_u64.to_be_bytes().to_vec();
+        cipher.key = 123_u64.to_be_bytes().to_vec();
         cipher.key_schedule();
         let mut lr = [0, 0];
         cipher.encrypt_block(&mut lr);
         assert_ne!(lr, [0, 0]);
         cipher.decrypt_block(&mut lr);
         assert_eq!(lr, [0, 0]);
+    }
+
+    #[test]
+    fn encrypt_decrypt_ctr() {
+        let mut cipher = Blowfish::default();
+        cipher.mode = BlockCipherMode::Ctr;
+        cipher.ctr = 0xAB12CD34;
+        cipher.key = 0x9078563412_u64.to_be_bytes().to_vec();
+        cipher.key_schedule();
+        let ptext = "abcdef123456abcdef123456abcdef123456abcdef123456";
+        let ctext = cipher.encrypt(ptext).unwrap();
+        let dtext = cipher.decrypt(&ctext).unwrap();
+        assert_eq!(ptext, dtext);
+    }
+
+    #[test]
+    fn encrypt_decrypt_ecb() {
+        let mut cipher = Blowfish::default();
+        cipher.mode = BlockCipherMode::Ecb;
+        cipher.key = 0x9078563412_u64.to_be_bytes().to_vec();
+        cipher.key_schedule();
+        let ptext = "abcdef123456abcdef123456abcdef123456abcdef123456";
+        let ctext = cipher.encrypt(ptext).unwrap();
+        let dtext = cipher.decrypt(&ctext).unwrap();
+        assert_eq!(ptext, dtext);
+    }
+
+    #[test]
+    fn encrypt_decrypt_cbc() {
+        let mut cipher = Blowfish::default();
+        cipher.mode = BlockCipherMode::Cbc;
+        cipher.iv = 0x0123456789;
+        cipher.key = 0x9078563412_u64.to_be_bytes().to_vec();
+        cipher.key_schedule();
+        let ptext = "abcdef123456abcdef123456abcdef123456abcdef123456";
+        let ctext = cipher.encrypt(ptext).unwrap();
+        let dtext = cipher.decrypt(&ctext).unwrap();
+        assert_eq!(ptext, dtext);
     }
 
     #[test]
