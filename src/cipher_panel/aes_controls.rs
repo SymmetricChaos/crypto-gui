@@ -1,7 +1,10 @@
 use super::CipherFrame;
 use crate::ui_elements::{block_cipher_mode, UiElements};
-use ciphers::digital::aes::aes::Aes128;
-use ciphers::{digital::BlockCipherMode, Cipher};
+
+use ciphers::{
+    digital::block_ciphers::{aes::aes::Aes128, BlockCipherMode},
+    Cipher,
+};
 use egui::{DragValue, Ui};
 use rand::{thread_rng, Rng};
 
@@ -55,7 +58,7 @@ impl CipherFrame for AesFrame {
 
         ui.add_enabled_ui(self.cipher.mode == BlockCipherMode::Ctr, |ui| {
             ui.subheading("Counter");
-            ui.label("In CTR mode the cipher must have a 128-bit counter value provided. The selectors below control the upper and lower 64-bit respectively.");
+            ui.label("In CTR mode the cipher must have a 128-bit counter value provided. The selectors below control the upper and lower 64-bits respectively.");
             if ui.add(DragValue::new(&mut self.ctr_upper).hexadecimal(16, false, true)) .changed() {
                 self.cipher.ctr &= 0x0000000000000000FFFFFFFFFFFFFFFF;
                 self.cipher.ctr |= (self.ctr_upper as u128) << 64;
