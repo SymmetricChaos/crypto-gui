@@ -40,6 +40,7 @@ pub mod batco_controls;
 pub mod bazeries_controls;
 pub mod beaufort_controls;
 pub mod bifid_controls;
+pub mod blowfish;
 pub mod caesar_controls;
 mod chacha20_poly1305_controls;
 mod chacha_controls;
