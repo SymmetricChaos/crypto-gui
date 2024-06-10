@@ -3,7 +3,7 @@ use utils::byte_formatting::ByteFormat;
 use super::{
     bit_padding,
     blowfish_arrays::{PARRAY, SBOX0, SBOX1, SBOX2, SBOX3},
-    strip_bit_padding, BlockCipherMode,
+    strip_bit_padding, BlockCipher, BlockCipherMode,
 };
 use crate::{Cipher, CipherError};
 
@@ -270,6 +270,30 @@ impl Blowfish {
         }
     }
 }
+
+// impl BlockCipher for Blowfish {
+//     fn encrypt_block(&self, lr: &mut [u32; 2]) {
+//         for i in 0..16 {
+//             lr[0] ^= self.parray[i];
+//             lr[1] ^= self.f(lr[0]);
+//             lr.swap(0, 1);
+//         }
+//         lr.swap(0, 1);
+//         lr[1] ^= self.parray[16];
+//         lr[0] ^= self.parray[17];
+//     }
+
+//     fn decrypt_block(&self, lr: &mut [u32; 2]) {
+//         for i in (2..18).rev() {
+//             lr[0] ^= self.parray[i];
+//             lr[1] ^= self.f(lr[0]);
+//             lr.swap(0, 1);
+//         }
+//         lr.swap(0, 1);
+//         lr[1] ^= self.parray[1];
+//         lr[0] ^= self.parray[0];
+//     }
+// }
 
 impl Cipher for Blowfish {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {

@@ -1,60 +1,14 @@
 use crate::CipherError;
 
-pub mod aes;
 pub mod asmuth_bloom_secret_sharing;
 pub mod blakely_secret_sharing;
-pub mod blowfish;
-pub mod blowfish_arrays;
 pub mod chacha;
 pub mod chacha20poly1305;
 pub mod chacha_extended_nonce;
-pub mod des;
 pub mod elgamal;
 pub mod rc4;
-pub mod rc5;
 pub mod rsa;
 pub mod salsa20;
 pub mod shamir_secret_sharing;
-pub mod tea;
-pub mod xtea;
 
-#[derive(Debug, PartialEq, Eq)]
-pub enum BlockCipherMode {
-    Ecb,
-    Ctr,
-    Cbc,
-}
-
-#[derive(Debug, PartialEq, Eq)]
-pub enum BlockCipherPadding {
-    None,
-    Bit, // add the byte 0x80, then add 0x00 bytes until the block size is reached
-         // equivalently add a single 1 bit then append 0 bits until the block size is reached
-}
-
-pub fn none_padding(bytes: &mut Vec<u8>, block_size: u32) -> Result<(), CipherError> {
-    if bytes.len() % block_size as usize != 0 {
-        Err(CipherError::Input(format!(
-            "encrypted data must be in chunks of {} bytes",
-            block_size
-        )))
-    } else {
-        Ok(())
-    }
-}
-
-pub fn bit_padding(bytes: &mut Vec<u8>, block_size: u32) {
-    bytes.push(0x80);
-    while bytes.len() % block_size as usize != 0 {
-        bytes.push(0x00)
-    }
-}
-
-// Assumes valid bit padding is applied
-pub fn strip_bit_padding(bytes: &mut Vec<u8>) {
-    loop {
-        if bytes.pop() != Some(0x00) {
-            break;
-        }
-    }
-}
+pub mod block_ciphers;

@@ -2,7 +2,7 @@ use std::num::ParseIntError;
 
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{digital::rc5::Rc5, Cipher};
+use ciphers::{digital::block_ciphers::rc5::Rc5, Cipher};
 use egui::{FontId, RichText, Ui};
 use rand::{thread_rng, Rng};
 

@@ -1,5 +1,5 @@
 use ciphers::{
-    digital::{blowfish::Blowfish, BlockCipherMode},
+    digital::block_ciphers::{blowfish::Blowfish, BlockCipherMode},
     Cipher,
 };
 use rand::{thread_rng, Rng};

@@ -1,0 +1,59 @@
+pub mod aes;
+pub mod blowfish;
+pub mod blowfish_arrays;
+pub mod des;
+pub mod rc5;
+pub mod tea;
+pub mod xtea;
+
+use crate::CipherError;
+
+pub trait BlockCipher {
+    fn encrypt_block(&self, bytes: &mut [u8]);
+    fn decrypt_block(&self, bytes: &mut [u8]);
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum BlockCipherMode {
+    Ecb,
+    Ctr,
+    Cbc,
+}
+
+pub fn ecb_mode(cipher: &dyn BlockCipher, bytes: &mut Vec<u8>) {}
+pub fn ctr_mode(cipher: &dyn BlockCipher) {}
+pub fn cbc_mode(cipher: &dyn BlockCipher) {}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum BlockCipherPadding {
+    None,
+    Bit, // add the byte 0x80, then add 0x00 bytes until the block size is reached
+         // equivalently add a single 1 bit then append 0 bits until the block size is reached
+}
+
+pub fn none_padding(bytes: &mut Vec<u8>, block_size: u32) -> Result<(), CipherError> {
+    if bytes.len() % block_size as usize != 0 {
+        Err(CipherError::Input(format!(
+            "encrypted data must be in chunks of {} bytes",
+            block_size
+        )))
+    } else {
+        Ok(())
+    }
+}
+
+pub fn bit_padding(bytes: &mut Vec<u8>, block_size: u32) {
+    bytes.push(0x80);
+    while bytes.len() % block_size as usize != 0 {
+        bytes.push(0x00)
+    }
+}
+
+// Assumes valid bit padding is applied
+pub fn strip_bit_padding(bytes: &mut Vec<u8>) {
+    loop {
+        if bytes.pop() != Some(0x00) {
+            break;
+        }
+    }
+}

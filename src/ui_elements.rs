@@ -1,10 +1,9 @@
 use crate::cipher_panel::CipherFrame;
-use ciphers::digital::BlockCipherMode;
+use ciphers::digital::block_ciphers::BlockCipherMode;
 use eframe::egui::RichText;
 use egui::{Color32, DragValue, Response, TextStyle, Ui};
 use egui_extras::{Column, TableBuilder};
 use num::ToPrimitive;
-// use itertools::Itertools;
 use rngs::ClassicRng;
 use std::fmt::Display;
 use utils::{byte_formatting::ByteFormat, text_functions::filter_string};
