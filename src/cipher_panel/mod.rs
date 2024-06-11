@@ -1,3 +1,4 @@
+use blowfish::BlowfishFrame;
 use ciphers::{
     errors::CipherError,
     ids::{cipher_categories::CipherCategory, CipherId},
@@ -181,6 +182,7 @@ pub struct CipherInterface {
 
     // Digital
     aes: AesFrame,
+    blowfish: BlowfishFrame,
     chacha: ChaChaFrame,
     chacha20poly1305: ChaCha20Poly1305Frame,
     rc4: Rc4Frame,
@@ -293,6 +295,7 @@ impl CipherInterface {
         combox_box(
             &[
                 CipherId::Aes,
+                CipherId::Blowfish,
                 CipherId::ChaCha,
                 CipherId::ChaCha20Poly1305,
                 CipherId::Rc4,
@@ -326,6 +329,7 @@ impl CipherInterface {
             CipherId::Bazeries => &mut self.bazeries,
             CipherId::Beaufort => &mut self.beaufort,
             CipherId::Bifid => &mut self.bifid,
+            CipherId::Blowfish => &mut self.blowfish,
             CipherId::Caesar => &mut self.caesar,
             CipherId::ChaCha => &mut self.chacha,
             CipherId::ChaCha20Poly1305 => &mut self.chacha20poly1305,
