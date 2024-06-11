@@ -30,7 +30,7 @@ impl CipherFrame for AesFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
-            "https://github.com/SymmetricChaos/crypto-gui/tree/master/ciphers/src/digital/aes",
+            "https://github.com/SymmetricChaos/crypto-gui/tree/master/ciphers/src/digital/block_ciphers/aes",
         );
         ui.add_space(8.0);
 

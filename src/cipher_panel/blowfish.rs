@@ -21,10 +21,10 @@ impl Default for BlowfishFrame {
 }
 
 impl CipherFrame for BlowfishFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
-            "https://github.com/SymmetricChaos/crypto-gui/blob/master/ciphers/src/digital/blowfish.rs",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/ciphers/src/digital/block_ciphers/blowfish.rs",
         );
         ui.add_space(8.0);
 
@@ -40,6 +40,35 @@ impl CipherFrame for BlowfishFrame {
 
         block_cipher_mode(ui, &mut self.cipher.mode);
         ui.add_space(8.0);
+
+        ui.subheading("Key");
+        ui.label("Blowfish uses a key of between 4 and 72 bytes.");
+        ui.horizontal(|ui| {
+            if ui.small_button("-").clicked() {
+                if self.cipher.key.len() > 4 {
+                    self.cipher.key.pop();
+                }
+            }
+            ui.mono(self.cipher.key.len());
+            if ui.small_button("+").clicked() {
+                if self.cipher.key.len() < 72 {
+                    self.cipher.key.push(0)
+                }
+            }
+        });
+        for i in self.cipher.key.iter_mut() {
+            ui.u8_drag_value(i)
+        }
+
+        ui.add_space(8.0);
+
+        ui.add_enabled_ui(self.cipher.mode == BlockCipherMode::Ctr, |ui| {
+            ui.subheading("Counter");
+            ui.label("In CTR mode the cipher must have a 64-bit counter value provided. ");
+            ui.u64_drag_value(&mut self.cipher.ctr);
+        });
+
+        ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {

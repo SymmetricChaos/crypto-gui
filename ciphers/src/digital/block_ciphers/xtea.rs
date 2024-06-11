@@ -17,7 +17,7 @@ impl Default for Xtea {
             key: [0, 1, 2, 3],
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
-            padding: BlockCipherPadding::None,
+            padding: BlockCipherPadding::Bit,
         }
     }
 }

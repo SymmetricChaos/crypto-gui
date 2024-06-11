@@ -3,7 +3,8 @@ use utils::byte_formatting::ByteFormat;
 use super::{
     bit_padding,
     blowfish_arrays::{PARRAY, SBOX0, SBOX1, SBOX2, SBOX3},
-    ecb_decrypt, ecb_encrypt, strip_bit_padding, BlockCipher, BlockCipherMode, BlockCipherPadding,
+    ecb_decrypt, ecb_encrypt, none_padding, strip_bit_padding, BlockCipher, BlockCipherMode,
+    BlockCipherPadding,
 };
 use crate::{Cipher, CipherError};
 
@@ -274,10 +275,10 @@ impl Cipher for Blowfish {
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
 
-        // ECB and CBC need padding
-        if [BlockCipherMode::Ecb, BlockCipherMode::Cbc].contains(&self.mode) {
-            bit_padding(&mut bytes, 8)
-        }
+        match self.padding {
+            BlockCipherPadding::None => none_padding(&mut bytes, 8)?,
+            BlockCipherPadding::Bit => bit_padding(&mut bytes, 8),
+        };
 
         match self.mode {
             BlockCipherMode::Ecb => ecb_encrypt(self, &mut bytes, 8),
@@ -298,10 +299,11 @@ impl Cipher for Blowfish {
             BlockCipherMode::Cbc => self.decrypt_cbc(&mut bytes),
         };
 
-        // ECB and CBC need padding removed
-        if [BlockCipherMode::Ecb, BlockCipherMode::Cbc].contains(&self.mode) {
-            strip_bit_padding(&mut bytes)?
-        }
+        match self.padding {
+            BlockCipherPadding::None => none_padding(&mut bytes, 8)?,
+            BlockCipherPadding::Bit => strip_bit_padding(&mut bytes)?,
+        };
+
         Ok(self.output_format.byte_slice_to_text(&bytes))
     }
 }

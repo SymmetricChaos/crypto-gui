@@ -4,7 +4,7 @@ use ciphers::{
     digital::block_ciphers::{tea::Tea, BlockCipherMode},
     Cipher,
 };
-use egui::{DragValue, Ui};
+use egui::Ui;
 use rand::{thread_rng, Rng};
 
 pub struct TeaFrame {
@@ -25,7 +25,7 @@ impl CipherFrame for TeaFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
-            "https://github.com/SymmetricChaos/crypto-gui/blob/master/ciphers/src/digital/tea.rs",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/ciphers/src/digital/block_ciphers/tea.rs",
         );
         ui.add_space(8.0);
 
@@ -44,17 +44,16 @@ impl CipherFrame for TeaFrame {
 
         ui.subheading("Key");
         ui.label("TEA uses four 32-bit keys or, equivalently, a single 128-bit key.");
-        ui.add(DragValue::new(&mut self.cipher.key[0]).hexadecimal(8, false, true));
-        ui.add(DragValue::new(&mut self.cipher.key[1]).hexadecimal(8, false, true));
-        ui.add(DragValue::new(&mut self.cipher.key[2]).hexadecimal(8, false, true));
-        ui.add(DragValue::new(&mut self.cipher.key[3]).hexadecimal(8, false, true));
+        for i in 0..4 {
+            ui.u32_drag_value(&mut self.cipher.key[i])
+        }
 
         ui.add_space(8.0);
 
         ui.add_enabled_ui(self.cipher.mode == BlockCipherMode::Ctr, |ui| {
             ui.subheading("Counter");
             ui.label("In CTR mode the cipher must have a 64-bit counter value provided.");
-            ui.add(DragValue::new(&mut self.cipher.ctr).hexadecimal(16, false, true));
+            ui.u64_drag_value(&mut self.cipher.ctr);
         });
 
         ui.add_space(16.0);

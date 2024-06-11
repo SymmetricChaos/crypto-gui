@@ -20,7 +20,7 @@ impl Default for Tea {
             input_format: ByteFormat::Hex,
             ctr: 0,
             mode: BlockCipherMode::Ecb,
-            padding: BlockCipherPadding::None,
+            padding: BlockCipherPadding::Bit,
         }
     }
 }

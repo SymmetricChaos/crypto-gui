@@ -25,7 +25,7 @@ impl Default for Rc5 {
             state: Vec::new(),
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
-            padding: BlockCipherPadding::None,
+            padding: BlockCipherPadding::Bit,
         }
     }
 }
