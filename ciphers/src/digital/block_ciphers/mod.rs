@@ -38,16 +38,14 @@ pub fn ecb_decrypt(cipher: &dyn BlockCipher, bytes: &mut Vec<u8>, block_size: u3
     }
 }
 
-pub fn ctr_mode(cipher: &dyn BlockCipher, bytes: &mut Vec<u8>, ) {
-
-}
-pub fn cbc_mode(cipher: &dyn BlockCipher) {}
+pub fn ctr_mode(cipher: &dyn BlockCipher, bytes: &mut Vec<u8>) {}
+pub fn cbc_mode(cipher: &dyn BlockCipher, bytes: &mut Vec<u8>) {}
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum BlockCipherPadding {
     None,
-    Bit, // add the byte 0x80, then add 0x00 bytes until the block size is reached
-         // equivalently add a single 1 bit then append 0 bits until the block size is reached
+    Bit, // add the byte 0x80, then add 0x00 bytes until the block size (in bytes) is reached
+         // equivalently add a single 1 bit then append 0 bits until the block size (in bytes) is reached
 }
 
 pub fn none_padding(bytes: &mut Vec<u8>, block_size: u32) -> Result<(), CipherError> {
@@ -69,10 +67,18 @@ pub fn bit_padding(bytes: &mut Vec<u8>, block_size: u32) {
 }
 
 // Assumes valid bit padding is applied
-pub fn strip_bit_padding(bytes: &mut Vec<u8>) {
+pub fn strip_bit_padding(bytes: &mut Vec<u8>) -> Result<(), CipherError> {
     loop {
-        if bytes.pop() != Some(0x00) {
-            break;
+        let p = bytes.pop();
+        if p == Some(0x00) {
+            continue;
+        } else if p == Some(0x80) || p == None {
+            return Ok(());
+        } else {
+            return Err(CipherError::Input(format!(
+                "bit padding was invalid, found byte {:02x}",
+                p.unwrap()
+            )));
         }
     }
 }

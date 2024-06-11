@@ -145,7 +145,7 @@ impl Tea {
 
         match self.padding {
             BlockCipherPadding::None => none_padding(&mut out, 16)?,
-            BlockCipherPadding::Bit => strip_bit_padding(&mut out),
+            BlockCipherPadding::Bit => strip_bit_padding(&mut out)?,
         };
 
         Ok(out)

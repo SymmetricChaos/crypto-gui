@@ -300,7 +300,7 @@ impl Cipher for Blowfish {
 
         // ECB and CBC need padding removed
         if [BlockCipherMode::Ecb, BlockCipherMode::Cbc].contains(&self.mode) {
-            strip_bit_padding(&mut bytes)
+            strip_bit_padding(&mut bytes)?
         }
         Ok(self.output_format.byte_slice_to_text(&bytes))
     }

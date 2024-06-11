@@ -296,7 +296,7 @@ impl Aes128 {
 
         match self.padding {
             BlockCipherPadding::None => none_padding(&mut input, 16)?,
-            BlockCipherPadding::Bit => strip_bit_padding(&mut input),
+            BlockCipherPadding::Bit => strip_bit_padding(&mut input)?,
         };
 
         Ok(input)
