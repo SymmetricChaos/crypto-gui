@@ -20,8 +20,27 @@ pub enum BlockCipherMode {
     Cbc,
 }
 
-pub fn ecb_mode(cipher: &dyn BlockCipher, bytes: &mut Vec<u8>) {}
-pub fn ctr_mode(cipher: &dyn BlockCipher) {}
+pub fn ecb_encrypt(cipher: &dyn BlockCipher, bytes: &mut Vec<u8>, block_size: u32) {
+    // Padding should have been used before bytes are given or an error thrown to the user
+    assert!(bytes.len() % (block_size as usize) == 0);
+
+    for plaintext in bytes.chunks_mut(block_size as usize) {
+        cipher.encrypt_block(plaintext);
+    }
+}
+
+pub fn ecb_decrypt(cipher: &dyn BlockCipher, bytes: &mut Vec<u8>, block_size: u32) {
+    // Padding should have been used before bytes are given or an error thrown to the user
+    assert!(bytes.len() % (block_size as usize) == 0);
+
+    for ciphertext in bytes.chunks_mut(block_size as usize) {
+        cipher.decrypt_block(ciphertext);
+    }
+}
+
+pub fn ctr_mode(cipher: &dyn BlockCipher, bytes: &mut Vec<u8>, ) {
+
+}
 pub fn cbc_mode(cipher: &dyn BlockCipher) {}
 
 #[derive(Debug, PartialEq, Eq)]

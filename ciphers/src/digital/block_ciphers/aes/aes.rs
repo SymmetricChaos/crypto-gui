@@ -142,7 +142,7 @@ impl Default for Aes128 {
             key: [0; Self::KEY_WORDS],
             ctr: 0,
             mode: BlockCipherMode::Ecb,
-            padding: BlockCipherPadding::None,
+            padding: BlockCipherPadding::Bit,
         }
     }
 }

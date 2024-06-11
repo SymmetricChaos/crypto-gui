@@ -3,7 +3,7 @@ use utils::byte_formatting::ByteFormat;
 use super::{
     bit_padding,
     blowfish_arrays::{PARRAY, SBOX0, SBOX1, SBOX2, SBOX3},
-    strip_bit_padding, BlockCipher, BlockCipherMode,
+    ecb_decrypt, ecb_encrypt, strip_bit_padding, BlockCipher, BlockCipherMode, BlockCipherPadding,
 };
 use crate::{Cipher, CipherError};
 
@@ -44,6 +44,7 @@ pub struct Blowfish {
     pub ctr: u64,
     pub iv: u64,
     pub mode: BlockCipherMode,
+    pub padding: BlockCipherPadding,
 }
 
 impl Default for Blowfish {
@@ -57,6 +58,7 @@ impl Default for Blowfish {
             ctr: 0,
             iv: 0,
             mode: BlockCipherMode::Ecb,
+            padding: BlockCipherPadding::Bit,
         }
     }
 }
@@ -85,13 +87,13 @@ impl Blowfish {
         // This makes key generation relatively expensive.
         let mut lr = [0, 0];
         for i in 0..9 {
-            self.encrypt_block(&mut lr);
+            self.encrypt_u32_pair(&mut lr);
             self.parray[i * 2] = lr[0];
             self.parray[i * 2 + 1] = lr[1];
         }
         for sbox in 0..4 {
             for i in 0..128 {
-                self.encrypt_block(&mut lr);
+                self.encrypt_u32_pair(&mut lr);
                 self.sboxes[sbox][i * 2] = lr[0];
                 self.sboxes[sbox][i * 2 + 1] = lr[1];
             }
@@ -116,7 +118,7 @@ impl Blowfish {
         (a.wrapping_add(b) ^ c).wrapping_add(d)
     }
 
-    pub fn encrypt_block(&self, lr: &mut [u32; 2]) {
+    pub fn encrypt_u32_pair(&self, lr: &mut [u32; 2]) {
         for i in 0..16 {
             lr[0] ^= self.parray[i];
             lr[1] ^= self.f(lr[0]);
@@ -127,7 +129,7 @@ impl Blowfish {
         lr[0] ^= self.parray[17];
     }
 
-    pub fn decrypt_block(&self, lr: &mut [u32; 2]) {
+    pub fn decrypt_u32_pair(&self, lr: &mut [u32; 2]) {
         for i in (2..18).rev() {
             lr[0] ^= self.parray[i];
             lr[1] ^= self.f(lr[0]);
@@ -138,51 +140,13 @@ impl Blowfish {
         lr[0] ^= self.parray[0];
     }
 
-    pub fn encrypt_ecb(&self, bytes: &mut [u8]) {
-        assert!(bytes.len() % 8 == 0);
-
-        for plaintext in bytes.chunks_mut(8) {
-            // Encrypt the plaintext chunk
-            let mut c = u8_slice_to_u32_pair(plaintext);
-            self.encrypt_block(&mut c);
-            // Overwrite the plaintext bytes with the ciphertext
-            for (ctext, source) in c
-                .iter()
-                .map(|w| w.to_be_bytes())
-                .flatten()
-                .zip(plaintext.iter_mut())
-            {
-                *source = ctext
-            }
-        }
-    }
-
-    pub fn decrypt_ecb(&self, bytes: &mut [u8]) {
-        assert!(bytes.len() % 8 == 0);
-
-        for ciphertext in bytes.chunks_mut(8) {
-            // Decrypt the ciphertext chunk
-            let mut c = u8_slice_to_u32_pair(ciphertext);
-            self.decrypt_block(&mut c);
-            // Overwrite the ciphertext bytes with the plaintext
-            for (ptext, source) in c
-                .iter()
-                .map(|w| w.to_be_bytes())
-                .flatten()
-                .zip(ciphertext.iter_mut())
-            {
-                *source = ptext
-            }
-        }
-    }
-
     pub fn encrypt_ctr(&self, bytes: &mut [u8]) {
         let mut ctr = self.ctr;
 
         for plaintext in bytes.chunks_mut(8) {
             // Encrypt the counter to create a mask
             let mut mask = u64_to_u32_pairs(ctr);
-            self.encrypt_block(&mut mask);
+            self.encrypt_u32_pair(&mut mask);
             // XOR the mask into the plaintext at the source, creating ciphertext
             for (key_byte, ptext) in mask
                 .iter()
@@ -219,7 +183,7 @@ impl Blowfish {
 
             // Encrypt the mixed value, producing ciphertext
             let mut ciphertext: [u32; 2] = u8_slice_to_u32_pair(&chain);
-            self.encrypt_block(&mut ciphertext);
+            self.encrypt_u32_pair(&mut ciphertext);
 
             // Store the ciphertext as the next chain value
             chain = u32_pair_to_u8_array(ciphertext);
@@ -250,7 +214,7 @@ impl Blowfish {
 
             // Decrypt the ciphertext at the source to get the plaintext XORed with the previous chain value
             let mut temp = u8_slice_to_u32_pair(&source);
-            self.decrypt_block(&mut temp);
+            self.decrypt_u32_pair(&mut temp);
             let mut mixed = u32_pair_to_u8_array(temp);
             println!("mixed {:?}", mixed);
 
@@ -271,29 +235,37 @@ impl Blowfish {
     }
 }
 
-// impl BlockCipher for Blowfish {
-//     fn encrypt_block(&self, lr: &mut [u32; 2]) {
-//         for i in 0..16 {
-//             lr[0] ^= self.parray[i];
-//             lr[1] ^= self.f(lr[0]);
-//             lr.swap(0, 1);
-//         }
-//         lr.swap(0, 1);
-//         lr[1] ^= self.parray[16];
-//         lr[0] ^= self.parray[17];
-//     }
+impl BlockCipher for Blowfish {
+    fn encrypt_block(&self, bytes: &mut [u8]) {
+        let mut lr = u8_slice_to_u32_pair(&bytes);
+        for i in 0..16 {
+            lr[0] ^= self.parray[i];
+            lr[1] ^= self.f(lr[0]);
+            lr.swap(0, 1);
+        }
+        lr.swap(0, 1);
+        lr[1] ^= self.parray[16];
+        lr[0] ^= self.parray[17];
+        for (plaintext, ciphertext) in bytes.iter_mut().zip(u32_pair_to_u8_array(lr).iter()) {
+            *plaintext = *ciphertext
+        }
+    }
 
-//     fn decrypt_block(&self, lr: &mut [u32; 2]) {
-//         for i in (2..18).rev() {
-//             lr[0] ^= self.parray[i];
-//             lr[1] ^= self.f(lr[0]);
-//             lr.swap(0, 1);
-//         }
-//         lr.swap(0, 1);
-//         lr[1] ^= self.parray[1];
-//         lr[0] ^= self.parray[0];
-//     }
-// }
+    fn decrypt_block(&self, bytes: &mut [u8]) {
+        let mut lr = u8_slice_to_u32_pair(&bytes);
+        for i in (2..18).rev() {
+            lr[0] ^= self.parray[i];
+            lr[1] ^= self.f(lr[0]);
+            lr.swap(0, 1);
+        }
+        lr.swap(0, 1);
+        lr[1] ^= self.parray[1];
+        lr[0] ^= self.parray[0];
+        for (plaintext, ciphertext) in bytes.iter_mut().zip(u32_pair_to_u8_array(lr).iter()) {
+            *plaintext = *ciphertext
+        }
+    }
+}
 
 impl Cipher for Blowfish {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
@@ -308,7 +280,7 @@ impl Cipher for Blowfish {
         }
 
         match self.mode {
-            BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes),
+            BlockCipherMode::Ecb => ecb_encrypt(self, &mut bytes, 8),
             BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes),
             BlockCipherMode::Cbc => self.encrypt_cbc(&mut bytes),
         };
@@ -321,7 +293,7 @@ impl Cipher for Blowfish {
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
         match self.mode {
-            BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes),
+            BlockCipherMode::Ecb => ecb_decrypt(self, &mut bytes, 8),
             BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes),
             BlockCipherMode::Cbc => self.decrypt_cbc(&mut bytes),
         };
@@ -345,9 +317,9 @@ mod blowfish_tests {
         cipher.key = 123_u64.to_be_bytes().to_vec();
         cipher.key_schedule();
         let mut lr = [0, 0];
-        cipher.encrypt_block(&mut lr);
+        cipher.encrypt_u32_pair(&mut lr);
         assert_ne!(lr, [0, 0]);
-        cipher.decrypt_block(&mut lr);
+        cipher.decrypt_u32_pair(&mut lr);
         assert_eq!(lr, [0, 0]);
     }
 
@@ -395,16 +367,35 @@ mod blowfish_tests {
         cipher.key = 0_u64.to_be_bytes().to_vec();
         cipher.key_schedule();
         let mut lr = [0, 0];
-        cipher.encrypt_block(&mut lr);
+        cipher.encrypt_u32_pair(&mut lr);
         let s = format!("{:08X} {:08X}", lr[0], lr[1]);
         assert_eq!(s, "4EF99745 6198DD78");
 
-        // cipher.key = 0xffffffffffffffff_u64.to_be_bytes().to_vec();
-        // cipher.key_schedule();
-        // let mut l = 0xffffffff;
-        // let mut r = 0xffffffff;
-        // cipher.encrypt_block(&mut l, &mut r);
-        // let s = format!("{:08X} {:08X}", l, r);
-        // assert_eq!(s, "51866FD5 B85ECB8A");
+        cipher.key = 0_u64.to_be_bytes().to_vec();
+        cipher.key_schedule();
+        let mut lr = [0_u8; 8];
+        cipher.encrypt_block(&mut lr);
+        let s = format!(
+            "{:02X}{:02X}{:02X}{:02X} {:02X}{:02X}{:02X}{:02X}",
+            lr[0], lr[1], lr[2], lr[3], lr[4], lr[5], lr[6], lr[7]
+        );
+        assert_eq!(s, "4EF99745 6198DD78");
+
+        cipher.key = 0xffffffffffffffff_u64.to_be_bytes().to_vec();
+        cipher.key_schedule();
+        let mut lr = [0xffffffff, 0xffffffff];
+        cipher.encrypt_u32_pair(&mut lr);
+        let s = format!("{:08X} {:08X}", lr[0], lr[1]);
+        assert_eq!(s, "51866FD5 B85ECB8A");
+
+        cipher.key = 0xffffffffffffffff_u64.to_be_bytes().to_vec();
+        cipher.key_schedule();
+        let mut lr = [0xff_u8; 8];
+        cipher.encrypt_block(&mut lr);
+        let s = format!(
+            "{:02X}{:02X}{:02X}{:02X} {:02X}{:02X}{:02X}{:02X}",
+            lr[0], lr[1], lr[2], lr[3], lr[4], lr[5], lr[6], lr[7]
+        );
+        assert_eq!(s, "51866FD5 B85ECB8A");
     }
 }
