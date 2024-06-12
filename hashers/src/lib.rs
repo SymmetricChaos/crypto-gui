@@ -1,5 +1,7 @@
 pub mod argon2;
+pub mod bcrypt;
 pub mod blake;
+pub mod blowfish_arrays;
 pub mod checksum;
 pub mod errors;
 pub mod fnv;
@@ -19,5 +21,4 @@ pub mod sha0;
 pub mod sha1;
 pub mod sha2;
 pub mod siphash;
-
 pub mod traits;
