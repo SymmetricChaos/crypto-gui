@@ -3,7 +3,7 @@ use utils::byte_formatting::ByteFormat;
 use crate::{Cipher, CipherError};
 use std::{cmp::max, ops::Shl};
 
-use super::{bit_padding, none_padding, strip_bit_padding, BlockCipherPadding};
+use super::{bit_padding, none_padding, strip_bit_padding, BlockCipherMode, BlockCipherPadding};
 
 const P32: u32 = 0xb7e15163;
 const Q32: u32 = 0x9e3779b9;
@@ -15,6 +15,8 @@ pub struct Rc5 {
     pub input_format: ByteFormat,
     pub rounds: usize,
     pub state: Vec<u32>,
+    pub ctr: u64,
+    pub mode: BlockCipherMode,
     pub padding: BlockCipherPadding,
 }
 
@@ -25,7 +27,9 @@ impl Default for Rc5 {
             state: Vec::new(),
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
-            padding: BlockCipherPadding::Bit,
+            ctr: 0,
+            mode: BlockCipherMode::default(),
+            padding: BlockCipherPadding::default(),
         }
     }
 }
@@ -102,33 +106,30 @@ impl Rc5 {
     //     }
     // }
 
-    pub fn encrypt_block_32(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        let mut input = bytes.to_vec();
+    pub fn encrypt_block_32(&self, block: &mut [u32; 2]) {
+        block[0] = block[0].wrapping_add(self.state[0]);
+        block[1] = block[1].wrapping_add(self.state[1]);
 
-        match self.padding {
-            BlockCipherPadding::None => none_padding(&mut input, 8)?,
-            BlockCipherPadding::Bit => bit_padding(&mut input, 8),
-        };
+        for i in 1..=self.rounds {
+            block[0] = (block[0] ^ block[1])
+                .rotate_left(block[1])
+                .wrapping_add(self.state[2 * i]);
+            block[1] = (block[1] ^ block[0])
+                .rotate_left(block[0])
+                .wrapping_add(self.state[(2 * i) + 1])
+        }
+    }
 
+    pub fn encrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
         let mut out = Vec::with_capacity(bytes.len());
 
-        for block in input.chunks_exact(8) {
+        for block in bytes.chunks_exact(8) {
             let mut x = [0u32; 2];
             for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)) {
                 *elem = u32::from_le_bytes(chunk.try_into().unwrap());
             }
 
-            x[0] = x[0].wrapping_add(self.state[0]);
-            x[1] = x[1].wrapping_add(self.state[1]);
-
-            for i in 1..=self.rounds {
-                x[0] = (x[0] ^ x[1])
-                    .rotate_left(x[1])
-                    .wrapping_add(self.state[2 * i]);
-                x[1] = (x[1] ^ x[0])
-                    .rotate_left(x[0])
-                    .wrapping_add(self.state[(2 * i) + 1])
-            }
+            self.encrypt_block_32(&mut x);
 
             out.extend_from_slice(&x[0].to_le_bytes());
             out.extend_from_slice(&x[1].to_le_bytes());
@@ -136,7 +137,7 @@ impl Rc5 {
         Ok(out)
     }
 
-    pub fn decrypt_block_32(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
+    pub fn decrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
         let mut out = Vec::with_capacity(bytes.len());
 
         for block in bytes.chunks_exact(8).rev() {
@@ -158,13 +159,20 @@ impl Rc5 {
 
             out.extend_from_slice(&x[0].to_le_bytes());
             out.extend_from_slice(&x[1].to_le_bytes());
-
-            match self.padding {
-                BlockCipherPadding::None => none_padding(&mut out, 8)?,
-                BlockCipherPadding::Bit => strip_bit_padding(&mut out)?,
-            };
         }
         Ok(out)
+    }
+
+    pub fn encrypt_ctr(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
+        let mut ctr = self.ctr;
+
+        for block in bytes.chunks_exact(8) {
+            ctr.wrapping_add(1);
+        }
+        todo!()
+    }
+    pub fn decrypt_ctr(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
+        self.encrypt_ctr(bytes)
     }
 
     // pub fn encrypt_block_64(&self, bytes: &[u8]) {}
@@ -173,11 +181,21 @@ impl Rc5 {
 
 impl Cipher for Rc5 {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let bytes = self
+        let mut bytes = self
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
-        let out = self.encrypt_block_32(&bytes)?;
+
+        match self.padding {
+            BlockCipherPadding::None => none_padding(&mut bytes, 8)?,
+            BlockCipherPadding::Bit => bit_padding(&mut bytes, 8),
+        };
+
+        let out = match self.mode {
+            BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes)?,
+            BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes)?,
+            BlockCipherMode::Cbc => return Err(CipherError::general("CBC mode not implemented")),
+        };
         Ok(self.output_format.byte_slice_to_text(&out))
     }
 
@@ -186,7 +204,18 @@ impl Cipher for Rc5 {
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
-        let out = self.decrypt_block_32(&bytes)?;
+
+        let mut out = match self.mode {
+            BlockCipherMode::Ecb => self.decrypt_ecb(&bytes)?,
+            BlockCipherMode::Ctr => self.decrypt_ctr(&bytes)?,
+            BlockCipherMode::Cbc => return Err(CipherError::general("CBC mode not implemented")),
+        };
+
+        match self.padding {
+            BlockCipherPadding::None => none_padding(&mut out, 8)?,
+            BlockCipherPadding::Bit => strip_bit_padding(&mut out)?,
+        };
+
         Ok(self.output_format.byte_slice_to_text(&out))
     }
 }
@@ -204,6 +233,8 @@ mod rc5_tests {
         const CTEXT: &'static str = "21a5dbee154b8f6d";
         const KEY: &'static str = "00000000000000000000000000000000";
         let mut cipher = Rc5::default();
+        cipher.mode = BlockCipherMode::Ecb;
+        cipher.padding = BlockCipherPadding::None;
         cipher.ksa_32(&hex_to_bytes_be(KEY).unwrap());
         assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
@@ -214,6 +245,8 @@ mod rc5_tests {
         const CTEXT: &'static str = "21a5dbee154b8f6d";
         const KEY: &'static str = "00000000000000000000000000000000";
         let mut cipher = Rc5::default();
+        cipher.mode = BlockCipherMode::Ecb;
+        cipher.padding = BlockCipherPadding::None;
         cipher.ksa_32(&hex_to_bytes_be(KEY).unwrap());
         assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
@@ -223,6 +256,8 @@ mod rc5_tests {
         const PTEXT: &'static str = "0000000000000000";
         const KEY: &'static str = "00000000000000000000000000000000";
         let mut cipher = Rc5::default();
+        cipher.mode = BlockCipherMode::Ecb;
+        cipher.padding = BlockCipherPadding::None;
         cipher.ksa_32(&hex_to_bytes_be(KEY).unwrap());
         let ctext = cipher.encrypt(PTEXT).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), PTEXT);
@@ -234,6 +269,8 @@ mod rc5_tests {
         const CTEXT: &'static str = "f7c013ac5b2b8952";
         const KEY: &'static str = "915f4619be41b2516355a50110a9ce91";
         let mut cipher = Rc5::default();
+        cipher.mode = BlockCipherMode::Ecb;
+        cipher.padding = BlockCipherPadding::None;
         cipher.ksa_32(&hex_to_bytes_be(KEY).unwrap());
         assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
@@ -244,6 +281,8 @@ mod rc5_tests {
         const CTEXT: &'static str = "f7c013ac5b2b8952";
         const KEY: &'static str = "915f4619be41b2516355a50110a9ce91";
         let mut cipher = Rc5::default();
+        cipher.mode = BlockCipherMode::Ecb;
+        cipher.padding = BlockCipherPadding::None;
         cipher.ksa_32(&hex_to_bytes_be(KEY).unwrap());
         assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
@@ -253,6 +292,8 @@ mod rc5_tests {
         const PTEXT: &'static str = "21a5dbee154b8f6d";
         const KEY: &'static str = "915f4619be41b2516355a50110a9ce91";
         let mut cipher = Rc5::default();
+        cipher.mode = BlockCipherMode::Ecb;
+        cipher.padding = BlockCipherPadding::None;
         cipher.ksa_32(&hex_to_bytes_be(KEY).unwrap());
         let ctext = cipher.encrypt(PTEXT).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), PTEXT);

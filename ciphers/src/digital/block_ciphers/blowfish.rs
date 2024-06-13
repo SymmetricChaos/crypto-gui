@@ -58,8 +58,8 @@ impl Default for Blowfish {
             sboxes: [SBOX0, SBOX1, SBOX2, SBOX3],
             ctr: 0,
             iv: 0,
-            mode: BlockCipherMode::Ecb,
-            padding: BlockCipherPadding::Bit,
+            mode: BlockCipherMode::default(),
+            padding: BlockCipherPadding::default(),
         }
     }
 }
@@ -293,6 +293,7 @@ impl Cipher for Blowfish {
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
+        
         match self.mode {
             BlockCipherMode::Ecb => ecb_decrypt(self, &mut bytes, 8),
             BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes),

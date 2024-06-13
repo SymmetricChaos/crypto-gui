@@ -3,10 +3,15 @@ use utils::byte_formatting::ByteFormat;
 use crate::{Cipher, CipherError};
 use std::ops::Shr;
 
+use super::{des_arrays::KEYSHIFT, BlockCipherMode, BlockCipherPadding};
+
 pub struct Des {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
     pub state: [u64; 16],
+    pub ctr: u128,
+    pub mode: BlockCipherMode,
+    pub padding: BlockCipherPadding,
 }
 
 impl Default for Des {
@@ -15,6 +20,9 @@ impl Default for Des {
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
             state: [0; 16],
+            ctr: 0,
+            mode: BlockCipherMode::default(),
+            padding: BlockCipherPadding::default(),
         }
     }
 }
@@ -27,8 +35,6 @@ fn delta_swap(a: u64, delta: u64, mask: u64) -> u64 {
 }
 
 impl Des {
-    const KEYSHIFT: [u32; 16] = [1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1];
-
     //  Swap bits using the PC-1 table
     fn pc1(mut key: u64) -> u64 {
         key = delta_swap(key, 2, 0x3333000033330000);
@@ -123,8 +129,8 @@ impl Des {
         let mut left: u64 = key.shr(28) & 0xfffffff_u64;
         let mut right = key & 0xfffffff;
         for i in 0..16 {
-            right = right.rotate_left(Self::KEYSHIFT[i]);
-            left = left.rotate_left(Self::KEYSHIFT[i]);
+            right = right.rotate_left(KEYSHIFT[i]);
+            left = left.rotate_left(KEYSHIFT[i]);
             self.state[i] = Self::pc2(((left << 28) | right) << 8);
         }
     }

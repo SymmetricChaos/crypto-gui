@@ -141,8 +141,8 @@ impl Default for Aes128 {
             input_format: ByteFormat::Hex,
             key: [0; Self::KEY_WORDS],
             ctr: 0,
-            mode: BlockCipherMode::Ecb,
-            padding: BlockCipherPadding::Bit,
+            mode: BlockCipherMode::default(),
+            padding: BlockCipherPadding::default(),
         }
     }
 }
