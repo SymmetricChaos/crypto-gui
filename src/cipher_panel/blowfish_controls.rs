@@ -2,6 +2,7 @@ use ciphers::{
     digital::block_ciphers::{blowfish::Blowfish, BlockCipherMode},
     Cipher,
 };
+use itertools::Itertools;
 use rand::{thread_rng, Rng};
 
 use crate::ui_elements::{block_cipher_mode, UiElements};
@@ -60,11 +61,19 @@ impl CipherFrame for BlowfishFrame {
             ui.u8_drag_value(i)
         }
 
+        ui.collapsing("Expanded Key", |ui| {
+            ui.subheading("P-array");
+            ui.label(self.cipher.parray_string());
+            ui.add_space(8.0);
+            ui.subheading("S-boxes");
+            ui.label(self.cipher.sboxes_string());
+        });
+
         ui.add_space(8.0);
 
         ui.add_enabled_ui(self.cipher.mode == BlockCipherMode::Ctr, |ui| {
             ui.subheading("Counter");
-            ui.label("In CTR mode the cipher must have a 64-bit counter value provided. ");
+            ui.label("In CTR mode the cipher must have a 64-bit counter provided.");
             ui.u64_drag_value(&mut self.cipher.ctr);
         });
 

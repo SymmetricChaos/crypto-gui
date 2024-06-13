@@ -1,4 +1,4 @@
-use blowfish::BlowfishFrame;
+use blowfish_controls::BlowfishFrame;
 use ciphers::{
     errors::CipherError,
     ids::{cipher_categories::CipherCategory, CipherId},
@@ -41,7 +41,7 @@ pub mod batco_controls;
 pub mod bazeries_controls;
 pub mod beaufort_controls;
 pub mod bifid_controls;
-pub mod blowfish;
+pub mod blowfish_controls;
 pub mod caesar_controls;
 mod chacha20_poly1305_controls;
 mod chacha_controls;

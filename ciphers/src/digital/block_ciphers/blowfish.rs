@@ -39,6 +39,25 @@ impl Default for Blowfish {
 }
 
 impl Blowfish {
+    pub fn parray_string(&self) -> String {
+        format!("{:08x?}", self.parray)
+    }
+
+    pub fn parray(&self) -> &[u32; 18] {
+        &self.parray
+    }
+
+    pub fn sboxes_string(&self) -> String {
+        format!(
+            "{:08x?}\n{:08x?}\n{:08x?}\n{:08x?}\n",
+            self.sboxes[0], self.sboxes[1], self.sboxes[2], self.sboxes[3]
+        )
+    }
+
+    pub fn sboxes(&self) -> &[[u32; 256]; 4] {
+        &self.sboxes
+    }
+
     // Derive the P-array and S-boxes from the key
     pub fn key_schedule(&mut self) {
         // Reset the P-array and sboxes to their IVs
