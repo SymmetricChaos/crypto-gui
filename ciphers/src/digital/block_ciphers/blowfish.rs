@@ -1,4 +1,6 @@
-use utils::byte_formatting::ByteFormat;
+use utils::byte_formatting::{
+    u32_pair_to_u8_array, u64_to_u32_pair, u8_slice_to_u32_pair, ByteFormat,
+};
 
 use super::{
     bit_padding,
@@ -7,34 +9,6 @@ use super::{
     BlockCipherPadding,
 };
 use crate::{Cipher, CipherError};
-
-pub fn u64_to_u32_pairs(n: u64) -> [u32; 2] {
-    [(n >> 32) as u32, n as u32]
-}
-
-pub fn u8_slice_to_u32_pair(s: &[u8]) -> [u32; 2] {
-    let mut a = 0;
-    let mut b = 0;
-    for i in 0..4 {
-        a <<= 8;
-        a |= s[i] as u32;
-        b <<= 8;
-        b |= s[i + 4] as u32;
-    }
-    [a, b]
-}
-
-pub fn u32_pair_to_u8_array(s: [u32; 2]) -> [u8; 8] {
-    let a = s[0].to_be_bytes();
-    let b = s[1].to_be_bytes();
-    let mut out = [0; 8];
-    for i in 0..4 {
-        out[i] = a[i];
-        out[i + 4] = b[i];
-    }
-
-    out
-}
 
 pub struct Blowfish {
     pub output_format: ByteFormat,
@@ -146,7 +120,7 @@ impl Blowfish {
 
         for plaintext in bytes.chunks_mut(8) {
             // Encrypt the counter to create a mask
-            let mut mask = u64_to_u32_pairs(ctr);
+            let mut mask = u64_to_u32_pair(ctr);
             self.encrypt_u32_pair(&mut mask);
             // XOR the mask into the plaintext at the source, creating ciphertext
             for (key_byte, ptext) in mask
@@ -293,7 +267,7 @@ impl Cipher for Blowfish {
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
-        
+
         match self.mode {
             BlockCipherMode::Ecb => ecb_decrypt(self, &mut bytes, 8),
             BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes),

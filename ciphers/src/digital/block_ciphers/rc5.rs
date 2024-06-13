@@ -1,4 +1,4 @@
-use utils::byte_formatting::ByteFormat;
+use utils::byte_formatting::{u32_pair_to_u64, u64_to_u32_pair, ByteFormat};
 
 use crate::{Cipher, CipherError};
 use std::{cmp::max, ops::Shl};
@@ -120,6 +120,22 @@ impl Rc5 {
         }
     }
 
+    pub fn decrypt_block_32(&self, block: &mut [u32; 2]) {
+        for i in (1..=self.rounds).rev() {
+            block[1] = block[1]
+                .wrapping_sub(self.state[(2 * i) + 1])
+                .rotate_right(block[0])
+                ^ block[0];
+            block[0] = block[0]
+                .wrapping_sub(self.state[2 * i])
+                .rotate_right(block[1])
+                ^ block[1];
+        }
+
+        block[0] = block[0].wrapping_sub(self.state[0]);
+        block[1] = block[1].wrapping_sub(self.state[1]);
+    }
+
     pub fn encrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
         let mut out = Vec::with_capacity(bytes.len());
 
@@ -146,16 +162,7 @@ impl Rc5 {
                 *elem = u32::from_le_bytes(chunk.try_into().unwrap());
             }
 
-            for i in (1..=self.rounds).rev() {
-                x[1] = x[1]
-                    .wrapping_sub(self.state[(2 * i) + 1])
-                    .rotate_right(x[0])
-                    ^ x[0];
-                x[0] = x[0].wrapping_sub(self.state[2 * i]).rotate_right(x[1]) ^ x[1];
-            }
-
-            x[0] = x[0].wrapping_sub(self.state[0]);
-            x[1] = x[1].wrapping_sub(self.state[1]);
+            self.decrypt_block_32(&mut x);
 
             out.extend_from_slice(&x[0].to_le_bytes());
             out.extend_from_slice(&x[1].to_le_bytes());
@@ -164,12 +171,22 @@ impl Rc5 {
     }
 
     pub fn encrypt_ctr(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
+        let mut out = Vec::with_capacity(bytes.len());
         let mut ctr = self.ctr;
 
         for block in bytes.chunks_exact(8) {
-            ctr.wrapping_add(1);
+            let mut p = u64_to_u32_pair(ctr);
+            self.encrypt_block_32(&mut p);
+            let keystream = u32_pair_to_u64(p).to_le_bytes();
+
+            for (k, b) in keystream.iter().zip(block.iter()) {
+                out.push(k ^ b)
+            }
+
+            ctr = ctr.wrapping_add(1);
         }
-        todo!()
+
+        Ok(out)
     }
     pub fn decrypt_ctr(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
         self.encrypt_ctr(bytes)

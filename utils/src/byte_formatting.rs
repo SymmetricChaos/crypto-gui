@@ -260,3 +260,35 @@ mod bit_function_tests {
         );
     }
 }
+
+pub fn u64_to_u32_pair(n: u64) -> [u32; 2] {
+    [(n >> 32) as u32, n as u32]
+}
+
+pub fn u32_pair_to_u64(n: [u32; 2]) -> u64 {
+    (n[0] as u64) << 32 | n[1] as u64
+}
+
+pub fn u8_slice_to_u32_pair(s: &[u8]) -> [u32; 2] {
+    let mut a = 0;
+    let mut b = 0;
+    for i in 0..4 {
+        a <<= 8;
+        a |= s[i] as u32;
+        b <<= 8;
+        b |= s[i + 4] as u32;
+    }
+    [a, b]
+}
+
+pub fn u32_pair_to_u8_array(s: [u32; 2]) -> [u8; 8] {
+    let a = s[0].to_be_bytes();
+    let b = s[1].to_be_bytes();
+    let mut out = [0; 8];
+    for i in 0..4 {
+        out[i] = a[i];
+        out[i + 4] = b[i];
+    }
+
+    out
+}
