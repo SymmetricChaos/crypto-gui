@@ -1,13 +1,10 @@
+use super::CipherFrame;
+use crate::ui_elements::{block_cipher_mode, UiElements};
 use ciphers::{
     digital::block_ciphers::{blowfish::Blowfish, BlockCipherMode},
     Cipher,
 };
-use itertools::Itertools;
 use rand::{thread_rng, Rng};
-
-use crate::ui_elements::{block_cipher_mode, UiElements};
-
-use super::CipherFrame;
 
 pub struct BlowfishFrame {
     cipher: Blowfish,

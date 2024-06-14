@@ -1,7 +1,7 @@
 use utils::byte_formatting::ByteFormat;
 
 use crate::{
-    blowfish_arrays::{PARRAY, SBOX0, SBOX1, SBOX2, SBOX3},
+    blowfish_arrays::{PARRAY, SBOXES},
     errors::HasherError,
     traits::ClassicHasher,
 };
@@ -9,8 +9,8 @@ use crate::{
 pub struct Bcrypt {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    parray: [u32; 18],
-    sboxes: [[u32; 256]; 4],
+    // parray: [u32; 18],
+    // sboxes: [[u32; 256]; 4],
     pub cost: u8,
     pub salt: [u8; 16],
 }
@@ -20,8 +20,8 @@ impl Default for Bcrypt {
         Self {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
-            parray: PARRAY,
-            sboxes: [SBOX0, SBOX1, SBOX2, SBOX3],
+            // parray: PARRAY,
+            // sboxes: SBOXES,
             cost: 12,
             salt: [0; 16],
         }
@@ -30,12 +30,17 @@ impl Default for Bcrypt {
 
 impl Bcrypt {
     pub fn eks_blowfish_setup(&self, password: &[u8]) {}
-    pub fn expand_key(&mut self, password: &[u8]) {
+    pub fn expand_key(
+        &mut self,
+        password: &[u8],
+        parray: &mut [u32; 18],
+        sboxes: &mut [[u32; 256]; 4],
+    ) {
         // Endlessly repeat the key as needed
         let mut key_bytes = password.iter().cycle();
 
         // Xoring the password into the IV
-        for word in self.parray.iter_mut() {
+        for word in parray.iter_mut() {
             let mut k = 0u32;
             for _ in 0..4 {
                 k <<= 8;

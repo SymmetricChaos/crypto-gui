@@ -4,7 +4,7 @@ use utils::byte_formatting::{
 
 use super::{
     bit_padding,
-    blowfish_arrays::{PARRAY, SBOX0, SBOX1, SBOX2, SBOX3},
+    blowfish_arrays::{PARRAY, SBOXES},
     ecb_decrypt, ecb_encrypt, none_padding, strip_bit_padding, BlockCipher, BlockCipherMode,
     BlockCipherPadding,
 };
@@ -29,7 +29,7 @@ impl Default for Blowfish {
             input_format: ByteFormat::Hex,
             key: vec![0; 4],
             parray: PARRAY,
-            sboxes: [SBOX0, SBOX1, SBOX2, SBOX3],
+            sboxes: SBOXES,
             ctr: 0,
             iv: 0,
             mode: BlockCipherMode::default(),
@@ -62,7 +62,7 @@ impl Blowfish {
     pub fn key_schedule(&mut self) {
         // Reset the P-array and sboxes to their IVs
         self.parray = PARRAY;
-        self.sboxes = [SBOX0, SBOX1, SBOX2, SBOX3];
+        self.sboxes = SBOXES;
 
         // Endlessly repeat the key as needed
         let mut key_bytes = self.key.iter().cycle();
