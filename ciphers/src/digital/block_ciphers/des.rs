@@ -3,7 +3,10 @@ use utils::byte_formatting::ByteFormat;
 use crate::{Cipher, CipherError};
 use std::ops::Shr;
 
-use super::{des_arrays::KEYSHIFT, BlockCipherMode, BlockCipherPadding};
+use super::{
+    bit_padding, des_arrays::KEYSHIFT, none_padding, strip_bit_padding, BlockCipherMode,
+    BlockCipherPadding,
+};
 
 pub struct Des {
     pub output_format: ByteFormat,
@@ -201,6 +204,12 @@ impl Cipher for Des {
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
+
+        match self.padding {
+            BlockCipherPadding::None => none_padding(&mut bytes, 8)?,
+            BlockCipherPadding::Bit => bit_padding(&mut bytes, 8),
+        };
+
         let out = self.encrypt_bytes(&mut bytes)?;
         Ok(self.output_format.byte_slice_to_text(&out))
     }
@@ -210,7 +219,13 @@ impl Cipher for Des {
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
-        let out = self.decrypt_bytes(&mut bytes)?;
+        let mut out = self.decrypt_bytes(&mut bytes)?;
+
+        match self.padding {
+            BlockCipherPadding::None => none_padding(&mut out, 8)?,
+            BlockCipherPadding::Bit => strip_bit_padding(&mut out)?,
+        };
+
         Ok(self.output_format.byte_slice_to_text(&out))
     }
 }
