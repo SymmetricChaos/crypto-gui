@@ -4,8 +4,9 @@ use crate::{Cipher, CipherError};
 use std::ops::Shr;
 
 use super::{
-    bit_padding, des_arrays::KEYSHIFT, none_padding, strip_bit_padding, BlockCipherMode,
-    BlockCipherPadding,
+    bit_padding,
+    des_arrays::{KEYSHIFT, SBOXES},
+    none_padding, strip_bit_padding, BlockCipherMode, BlockCipherPadding,
 };
 
 pub struct Des {
@@ -126,6 +127,27 @@ impl Des {
         b1 | b2 | b3 | b4 | b5 | b6 | b7 | b8 | b9 | b10
     }
 
+    pub fn f(block: u64, key: u64) -> u64 {
+        let mut v = Self::e(block);
+        v ^= key;
+        v = Self::sboxes(v);
+        Self::p(v)
+    }
+
+    // Take an input of 48 bits (in a u64), then take it as eight 6-bit chunks, feed each into a sbox that returns 4-bit value, and stitch those together into a 32-bit value (in a u64)
+    // The data is stored and saved in the upper bits of the u64s, this is the reason for the initial shift values below
+    pub fn sboxes(input: u64) -> u64 {
+        let mut out = 0;
+
+        for (i, sbox) in SBOXES.iter().enumerate() {
+            let six = (input >> (58 - (i * 6))) & 0x3F; // 0x3F = 0b111111 so this masking keeps only the lower six bits
+            out |= u64::from(sbox[six as usize]) << (60 - (i * 4));
+        }
+
+        out
+    }
+
+    // Key Scheduling Algorithm (key generation)
     pub fn ksa(&mut self, key: u64) {
         let key = Self::pc1(key);
         let key = key >> 8;
@@ -134,6 +156,7 @@ impl Des {
         for i in 0..16 {
             right = right.rotate_left(KEYSHIFT[i]);
             left = left.rotate_left(KEYSHIFT[i]);
+            // Overwrite the old state
             self.state[i] = Self::pc2(((left << 28) | right) << 8);
         }
     }
@@ -150,7 +173,7 @@ impl Des {
         for block in bytes.chunks_exact(8) {
             let chunk = Self::ip(u64::from_le_bytes(block.try_into().unwrap()));
             let mut l = chunk << 32;
-            let mut r = chunk & 0xfffffff_u64;
+            let mut r = chunk & 0xffffffff_u64;
             for key in self.state {
                 let temp = r;
                 r = Self::e(r);
