@@ -38,8 +38,16 @@ fn delta_swap(a: u64, delta: u64, mask: u64) -> u64 {
     a ^ b ^ (b << delta)
 }
 
+/// Rotate a 28 bit number stored in a u64
+fn rotate_28(mut val: u64, shift: u8) -> u64 {
+    let top_bits = val >> (28 - shift);
+    val <<= shift;
+
+    (val | top_bits) & 0x0fff_ffff
+}
+
 impl Des {
-    //  Swap bits using the PC-1 table
+    ///  Swap bits using the PC-1 table, note that the eight least significant bits are zero
     fn pc1(mut key: u64) -> u64 {
         key = delta_swap(key, 2, 0x3333000033330000);
         key = delta_swap(key, 4, 0x0f0f0f0f00000000);
@@ -134,8 +142,8 @@ impl Des {
         Self::p(v)
     }
 
-    // Take an input of 48 bits (in a u64), then take it as eight 6-bit chunks, feed each into a sbox that returns 4-bit value, and stitch those together into a 32-bit value (in a u64)
-    // The data is stored and saved in the upper bits of the u64s, this is the reason for the initial shift values below
+    /// Take an input of 48 bits (in a u64), then take it as eight 6-bit chunks, feed each into a sbox that returns 4-bit value, and stitch those together into a 32-bit value (in a u64)
+    /// The data is stored and saved in the upper bits of the u64s, this is the reason for the initial shift values below
     pub fn sboxes(input: u64) -> u64 {
         let mut out = 0;
 
@@ -151,14 +159,37 @@ impl Des {
     pub fn ksa(&mut self, key: u64) {
         let key = Self::pc1(key);
         let key = key >> 8;
-        let mut left: u64 = key.shr(28) & 0xfffffff_u64;
-        let mut right = key & 0xfffffff;
+        let mut left: u64 = key.shr(28) & 0x0fff_ffff_u64;
+        let mut right = key & 0x0fff_ffff;
         for i in 0..16 {
-            right = right.rotate_left(KEYSHIFT[i]);
-            left = left.rotate_left(KEYSHIFT[i]);
+            left = rotate_28(left, KEYSHIFT[i]);
+            right = rotate_28(right, KEYSHIFT[i]);
             // Overwrite the old state
             self.state[i] = Self::pc2(((left << 28) | right) << 8);
         }
+    }
+
+    pub fn round(input: u64, key: u64) -> u64 {
+        let l = input & (0xffff_ffff << 32);
+        let r = input << 32;
+
+        r | ((Self::f(r, key) ^ l) >> 32)
+    }
+
+    pub fn encrypt_block(&self, block: u64) -> u64 {
+        let mut b = Self::ip(block);
+        for key in self.state.iter() {
+            b = Self::round(b, *key);
+        }
+        Self::fp((b << 32) | (b >> 32))
+    }
+
+    pub fn decrypt_block(&self, block: u64) -> u64 {
+        let mut b = Self::ip(block);
+        for key in self.state.iter().rev() {
+            b = Self::round(b, *key);
+        }
+        Self::fp((b << 32) | (b >> 32))
     }
 
     pub fn encrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
@@ -173,7 +204,7 @@ impl Des {
         for block in bytes.chunks_exact(8) {
             let chunk = Self::ip(u64::from_le_bytes(block.try_into().unwrap()));
             let mut l = chunk << 32;
-            let mut r = chunk & 0xffffffff_u64;
+            let mut r = chunk & 0xffff_ffff;
             for key in self.state {
                 let temp = r;
                 r = Self::e(r);
@@ -202,7 +233,7 @@ impl Des {
         for block in bytes.chunks_exact(8) {
             let chunk = Self::ip(u64::from_le_bytes(block.try_into().unwrap()));
             let mut l = chunk << 32;
-            let mut r = chunk & 0xfffffff_u64;
+            let mut r = chunk & 0x0fff_ffff;
 
             for key in self.state.iter().rev() {
                 let temp = r;

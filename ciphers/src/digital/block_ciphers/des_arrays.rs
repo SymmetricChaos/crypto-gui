@@ -1,4 +1,4 @@
-pub const KEYSHIFT: [u32; 16] = [1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1];
+pub const KEYSHIFT: [u8; 16] = [1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1];
 
 pub const SBOXES: [[u8; 64]; 8] = [
     [
