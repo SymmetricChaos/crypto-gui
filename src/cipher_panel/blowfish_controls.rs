@@ -58,6 +58,8 @@ impl CipherFrame for BlowfishFrame {
             ui.u8_drag_value(i)
         }
 
+        ui.add_space(8.0);
+
         ui.collapsing("Expanded Key", |ui| {
             ui.subheading("P-array");
             ui.label(self.cipher.parray_string());

@@ -260,11 +260,6 @@ impl Aes128 {
 
         let mut input = bytes.to_vec();
 
-        match self.padding {
-            BlockCipherPadding::None => none_padding(&mut input, 16)?,
-            BlockCipherPadding::Bit => bit_padding(&mut input, 16),
-        };
-
         for block in input.chunks_exact_mut(16) {
             Self::encrypt_block(block.try_into().unwrap(), &round_keys);
         }
@@ -280,24 +275,11 @@ impl Aes128 {
             .map(|k| sub_key_to_bytes(k))
             .collect_vec();
 
-        if self.padding == BlockCipherPadding::None {
-            if bytes.len() % 16 != 0 {
-                return Err(CipherError::input(
-                    "input must have a length in bytes that is a multiple of 16",
-                ));
-            }
-        }
-
         let mut input = bytes.to_vec();
 
         for block in input.chunks_exact_mut(16) {
             Self::decrypt_block(block.try_into().unwrap(), &round_keys);
         }
-
-        match self.padding {
-            BlockCipherPadding::None => none_padding(&mut input, 16)?,
-            BlockCipherPadding::Bit => strip_bit_padding(&mut input)?,
-        };
 
         Ok(input)
     }
@@ -309,6 +291,12 @@ impl Cipher for Aes128 {
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
+
+        match self.padding {
+            BlockCipherPadding::None => none_padding(&mut bytes, 8)?,
+            BlockCipherPadding::Bit => bit_padding(&mut bytes, 8),
+        };
+
         let out = match self.mode {
             BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes)?,
             BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes)?,
@@ -326,6 +314,10 @@ impl Cipher for Aes128 {
             BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes)?,
             BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes)?,
             BlockCipherMode::Cbc => return Err(CipherError::state("CBC mode not implemented")),
+        };
+        match self.padding {
+            BlockCipherPadding::None => none_padding(&mut bytes, 8)?,
+            BlockCipherPadding::Bit => strip_bit_padding(&mut bytes)?,
         };
         Ok(self.output_format.byte_slice_to_text(&out))
     }

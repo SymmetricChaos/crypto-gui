@@ -13,7 +13,7 @@ pub struct Des {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
     pub state: [u64; 16],
-    pub ctr: u128,
+    pub ctr: u64,
     pub mode: BlockCipherMode,
     pub padding: BlockCipherPadding,
 }
@@ -192,63 +192,49 @@ impl Des {
         Self::fp((b << 32) | (b >> 32))
     }
 
-    pub fn encrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        if bytes.len() % 8 != 0 {
-            return Err(CipherError::input(
-                "input length must be a multiple of 64 bits",
-            ));
-        };
-
+    pub fn encrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
+        assert!(bytes.len() % 8 == 0);
         let mut out = Vec::with_capacity(bytes.len());
 
-        for block in bytes.chunks_exact(8) {
-            let chunk = Self::ip(u64::from_le_bytes(block.try_into().unwrap()));
-            let mut l = chunk << 32;
-            let mut r = chunk & 0xffff_ffff;
-            for key in self.state {
-                let temp = r;
-                r = Self::e(r);
-                r = r ^ key;
-                // SBox goes here
-                r = Self::p(r);
-                r = r ^ l;
-                l = temp;
-            }
-
-            out.extend(Self::fp((r << 32) | l).to_le_bytes());
+        for plaintext in bytes.chunks_exact(8) {
+            let ciphertext = self.encrypt_block(u64::from_le_bytes(plaintext.try_into().unwrap()));
+            out.extend_from_slice(&ciphertext.to_le_bytes());
         }
 
         Ok(out)
     }
 
-    pub fn decrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        if bytes.len() % 8 != 0 {
-            return Err(CipherError::input(
-                "input length must be a multiple of 64 bits",
-            ));
-        };
-
+    pub fn decrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
+        assert!(bytes.len() % 8 == 0);
         let mut out = Vec::with_capacity(bytes.len());
 
-        for block in bytes.chunks_exact(8) {
-            let chunk = Self::ip(u64::from_le_bytes(block.try_into().unwrap()));
-            let mut l = chunk << 32;
-            let mut r = chunk & 0x0fff_ffff;
-
-            for key in self.state.iter().rev() {
-                let temp = r;
-                r = Self::e(r);
-                r = r ^ key;
-                // SBox goes here
-                r = Self::p(r);
-                r = r ^ l;
-                l = temp;
-            }
-
-            out.extend(Self::fp((r << 32) | l).to_le_bytes());
+        for ciphertext in bytes.chunks_exact(8) {
+            let plaintext = self.encrypt_block(u64::from_le_bytes(ciphertext.try_into().unwrap()));
+            out.extend_from_slice(&plaintext.to_le_bytes());
         }
 
         Ok(out)
+    }
+
+    pub fn encrypt_ctr(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
+        let mut ctr = self.ctr;
+        let mut out = Vec::with_capacity(bytes.len());
+
+        for plaintext in bytes.chunks_exact(8) {
+            let keytext = self.encrypt_block(ctr).to_le_bytes();
+
+            for (k, p) in keytext.into_iter().zip(plaintext.iter()) {
+                out.push(k ^ p)
+            }
+
+            ctr = ctr.wrapping_add(1);
+        }
+
+        Ok(out)
+    }
+
+    pub fn decrypt_ctr(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
+        self.encrypt_ctr(bytes)
     }
 }
 
@@ -264,7 +250,12 @@ impl Cipher for Des {
             BlockCipherPadding::Bit => bit_padding(&mut bytes, 8),
         };
 
-        let out = self.encrypt_bytes(&mut bytes)?;
+        let out = match self.mode {
+            BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes)?,
+            BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes)?,
+            BlockCipherMode::Cbc => return Err(CipherError::state("CBC mode not implemented")),
+        };
+
         Ok(self.output_format.byte_slice_to_text(&out))
     }
 
@@ -273,7 +264,12 @@ impl Cipher for Des {
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
-        let mut out = self.decrypt_bytes(&mut bytes)?;
+
+        let mut out = match self.mode {
+            BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes)?,
+            BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes)?,
+            BlockCipherMode::Cbc => return Err(CipherError::state("CBC mode not implemented")),
+        };
 
         match self.padding {
             BlockCipherPadding::None => none_padding(&mut out, 8)?,
