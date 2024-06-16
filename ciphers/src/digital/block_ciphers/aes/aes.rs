@@ -310,6 +310,11 @@ impl Cipher for Aes128 {
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
+
+        if self.padding == BlockCipherPadding::None {
+            none_padding(&mut bytes, 8)?
+        };
+
         let out = match self.mode {
             BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes)?,
             BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes)?,

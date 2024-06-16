@@ -76,17 +76,11 @@ impl Tea {
 
     // Encrypt in ECB mode.
     pub fn encrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        let mut input = bytes.to_vec();
-
-        match self.padding {
-            BlockCipherPadding::None => none_padding(&mut input, 8)?,
-            BlockCipherPadding::Bit => bit_padding(&mut input, 8),
-        };
-
-        let mut out = Vec::new();
+        assert!(bytes.len() % 8 == 0);
+        let mut out = Vec::with_capacity(bytes.len());
 
         // Take 8 byte chunks
-        for block in input.chunks_exact(8) {
+        for block in bytes.chunks_exact(8) {
             // Turn each chunk into a pair of u32
             let mut x = [0u32; 2];
             for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)) {
@@ -129,7 +123,8 @@ impl Tea {
 
     // Decrypt in ECB mode.
     pub fn decrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        let mut out = Vec::new();
+        assert!(bytes.len() % 8 == 0);
+        let mut out = Vec::with_capacity(bytes.len());
 
         for block in bytes.chunks_exact(8) {
             let mut x = [0u32; 2];
@@ -143,11 +138,6 @@ impl Tea {
             out.extend_from_slice(&x[1].to_be_bytes());
         }
 
-        match self.padding {
-            BlockCipherPadding::None => none_padding(&mut out, 16)?,
-            BlockCipherPadding::Bit => strip_bit_padding(&mut out)?,
-        };
-
         Ok(out)
     }
 }
@@ -158,11 +148,18 @@ impl Cipher for Tea {
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
+
+        match self.padding {
+            BlockCipherPadding::None => none_padding(&mut bytes, 8)?,
+            BlockCipherPadding::Bit => bit_padding(&mut bytes, 8),
+        };
+
         let out = match self.mode {
             BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes)?,
             BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes)?,
             BlockCipherMode::Cbc => return Err(CipherError::state("CBC mode not implemented")),
         };
+
         Ok(self.output_format.byte_slice_to_text(&out))
     }
 
@@ -171,11 +168,22 @@ impl Cipher for Tea {
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
+
+        if self.padding == BlockCipherPadding::None {
+            none_padding(&mut bytes, 8)?
+        };
+
         let out = match self.mode {
             BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes)?,
             BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes)?,
             BlockCipherMode::Cbc => return Err(CipherError::state("CBC mode not implemented")),
         };
+
+        match self.padding {
+            BlockCipherPadding::None => none_padding(&mut bytes, 8)?,
+            BlockCipherPadding::Bit => strip_bit_padding(&mut bytes)?,
+        };
+
         Ok(self.output_format.byte_slice_to_text(&out))
     }
 }

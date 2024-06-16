@@ -137,6 +137,7 @@ impl Rc5 {
     }
 
     pub fn encrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
+        assert!(bytes.len() % 8 == 0);
         let mut out = Vec::with_capacity(bytes.len());
 
         for block in bytes.chunks_exact(8) {
@@ -154,6 +155,7 @@ impl Rc5 {
     }
 
     pub fn decrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
+        assert!(bytes.len() % 8 == 0);
         let mut out = Vec::with_capacity(bytes.len());
 
         for block in bytes.chunks_exact(8).rev() {
@@ -217,10 +219,14 @@ impl Cipher for Rc5 {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        let bytes = self
+        let mut bytes = self
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
+
+        if self.padding == BlockCipherPadding::None {
+            none_padding(&mut bytes, 8)?
+        };
 
         let mut out = match self.mode {
             BlockCipherMode::Ecb => self.decrypt_ecb(&bytes)?,

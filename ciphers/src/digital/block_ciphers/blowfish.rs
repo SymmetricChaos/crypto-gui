@@ -287,6 +287,10 @@ impl Cipher for Blowfish {
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
 
+        if self.padding == BlockCipherPadding::None {
+            none_padding(&mut bytes, 8)?
+        };
+
         match self.mode {
             BlockCipherMode::Ecb => ecb_decrypt(self, &mut bytes, 8),
             BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes),
