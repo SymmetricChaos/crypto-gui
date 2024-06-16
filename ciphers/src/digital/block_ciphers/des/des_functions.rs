@@ -1,7 +1,5 @@
 use std::ops::Shr;
 
-use num::PrimInt;
-
 use crate::CipherError;
 
 use super::des_arrays::{KEYSHIFT, SBOXES};
@@ -135,9 +133,9 @@ pub fn round(input: u64, key: u64) -> u64 {
     r | ((f(r, key) ^ l) >> 32)
 }
 
-pub fn des_ksa(subkeys: &mut [u64; 16], key: u64) {
-    let key = pc1(key);
-    let key = key >> 8;
+pub fn des_ksa(key: u64) -> [u64; 16] {
+    let mut subkeys = [0; 16];
+    let key = pc1(key) >> 8;
     let mut left: u64 = key.shr(28) & 0x0fff_ffff_u64;
     let mut right = key & 0x0fff_ffff;
     for i in 0..16 {
@@ -146,6 +144,7 @@ pub fn des_ksa(subkeys: &mut [u64; 16], key: u64) {
         // Overwrite the old state
         subkeys[i] = pc2(((left << 28) | right) << 8);
     }
+    subkeys
 }
 
 pub fn test_des_key(key: u64) -> Result<(), CipherError> {

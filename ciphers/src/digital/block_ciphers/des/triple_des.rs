@@ -30,53 +30,39 @@ impl Default for TripleDes {
 }
 
 impl TripleDes {
-    pub fn ksa(&mut self, key1: u64, key2: u64, key3: u64) -> Result<(), CipherError> {
-        for (i, key) in [key1, key2, key3].into_iter().enumerate() {
+    pub fn ksa(&mut self, keys: [u64; 3]) -> Result<(), CipherError> {
+        for (i, key) in keys.into_iter().enumerate() {
             test_des_key(key)?;
-            des_ksa(&mut self.subkeys[i], key);
+            self.subkeys[i] = des_ksa(key);
         }
         Ok(())
     }
 
-    pub fn encrypt_block(&self, block: u64) -> u64 {
-        // Encrypt with K3
+    fn encrypt_with_subkey(&self, block: u64, i: usize) -> u64 {
         let mut b = initial_permutation(block);
-        for key in self.subkeys[3].iter() {
-            b = round(b, *key);
-        }
-        b = final_permutation((b << 32) | (b >> 32));
-        // Decrypt with K2
-        b = initial_permutation(b);
-        for key in self.subkeys[1].iter().rev() {
-            b = round(b, *key);
-        }
-        b = final_permutation((b << 32) | (b >> 32));
-        // Encrypt with K1
-        b = initial_permutation(b);
-        for key in self.subkeys[0].iter() {
+        for key in self.subkeys[i].iter() {
             b = round(b, *key);
         }
         final_permutation((b << 32) | (b >> 32))
     }
 
-    pub fn decrypt_block(&self, block: u64) -> u64 {
-        // Decrypt with K1
+    fn decrypt_with_subkey(&self, block: u64, i: usize) -> u64 {
         let mut b = initial_permutation(block);
-        for key in self.subkeys[0].iter().rev() {
-            b = round(b, *key);
-        }
-        b = final_permutation((b << 32) | (b >> 32));
-        // Encrypt with K2
-        b = initial_permutation(b);
-        for key in self.subkeys[1].iter() {
-            b = round(b, *key);
-        }
-        b = final_permutation((b << 32) | (b >> 32));
-        // Decrypt with K3
-        b = initial_permutation(b);
-        for key in self.subkeys[2].iter().rev() {
+        for key in self.subkeys[i].iter().rev() {
             b = round(b, *key);
         }
         final_permutation((b << 32) | (b >> 32))
+    }
+
+    pub fn encrypt_block(&self, block: u64) -> u64 {
+        let b = self.encrypt_with_subkey(block, 2);
+        let b = self.decrypt_with_subkey(b, 1);
+        self.encrypt_with_subkey(b, 0)
+    }
+
+    pub fn decrypt_block(&self, block: u64) -> u64 {
+        let b = self.decrypt_with_subkey(block, 0);
+        let b = self.encrypt_with_subkey(b, 1);
+        self.decrypt_with_subkey(b, 2)
     }
 }

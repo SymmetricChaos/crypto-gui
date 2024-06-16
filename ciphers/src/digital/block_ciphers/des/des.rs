@@ -33,7 +33,7 @@ impl Des {
     // Key Scheduling Algorithm (key generation)
     pub fn ksa(&mut self, key: u64) -> Result<(), CipherError> {
         test_des_key(key)?;
-        des_ksa(&mut self.subkeys, key);
+        self.subkeys = des_ksa(key);
         Ok(())
     }
 
@@ -153,7 +153,7 @@ mod des_tests {
     #[test]
     fn test_encypt_block() {
         let mut cipher = Des::default();
-        cipher.ksa(0x0123456789ABCDEF);
+        cipher.ksa(0x0123456789ABCDEF).unwrap();
 
         let cblock = cipher.encrypt_block(0x4E6F772069732074);
         assert_eq!(cblock, 0x3FA40E8A984D4815);
@@ -165,7 +165,7 @@ mod des_tests {
     #[test]
     fn test_encypt_ecb() {
         let mut cipher = Des::default();
-        cipher.ksa(0x0123456789ABCDEF);
+        cipher.ksa(0x0123456789ABCDEF).unwrap();
         cipher.mode = BlockCipherMode::Ecb;
         cipher.padding = BlockCipherPadding::None;
 
