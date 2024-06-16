@@ -148,7 +148,6 @@ impl Code for Base32 {
             ByteFormat::Utf8 => self.encode_utf8(text),
             ByteFormat::Base64 => self.encode_base64(text),
             ByteFormat::Bit => self.encode_bits(text),
-            _ => todo!(),
         }
     }
 

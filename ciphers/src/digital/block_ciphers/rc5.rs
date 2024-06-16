@@ -246,7 +246,7 @@ impl Cipher for Rc5 {
 #[cfg(test)]
 mod rc5_tests {
 
-    use utils::byte_formatting::hex_to_bytes_be;
+    use utils::byte_formatting::hex_to_bytes_ltr;
 
     use super::*;
 
@@ -258,7 +258,7 @@ mod rc5_tests {
         let mut cipher = Rc5::default();
         cipher.mode = BlockCipherMode::Ecb;
         cipher.padding = BlockCipherPadding::None;
-        cipher.ksa_32(&hex_to_bytes_be(KEY).unwrap());
+        cipher.ksa_32(&hex_to_bytes_ltr(KEY).unwrap());
         assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
@@ -270,7 +270,7 @@ mod rc5_tests {
         let mut cipher = Rc5::default();
         cipher.mode = BlockCipherMode::Ecb;
         cipher.padding = BlockCipherPadding::None;
-        cipher.ksa_32(&hex_to_bytes_be(KEY).unwrap());
+        cipher.ksa_32(&hex_to_bytes_ltr(KEY).unwrap());
         assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 
@@ -281,7 +281,7 @@ mod rc5_tests {
         let mut cipher = Rc5::default();
         cipher.mode = BlockCipherMode::Ecb;
         cipher.padding = BlockCipherPadding::None;
-        cipher.ksa_32(&hex_to_bytes_be(KEY).unwrap());
+        cipher.ksa_32(&hex_to_bytes_ltr(KEY).unwrap());
         let ctext = cipher.encrypt(PTEXT).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), PTEXT);
     }
@@ -294,7 +294,7 @@ mod rc5_tests {
         let mut cipher = Rc5::default();
         cipher.mode = BlockCipherMode::Ecb;
         cipher.padding = BlockCipherPadding::None;
-        cipher.ksa_32(&hex_to_bytes_be(KEY).unwrap());
+        cipher.ksa_32(&hex_to_bytes_ltr(KEY).unwrap());
         assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
@@ -306,7 +306,7 @@ mod rc5_tests {
         let mut cipher = Rc5::default();
         cipher.mode = BlockCipherMode::Ecb;
         cipher.padding = BlockCipherPadding::None;
-        cipher.ksa_32(&hex_to_bytes_be(KEY).unwrap());
+        cipher.ksa_32(&hex_to_bytes_ltr(KEY).unwrap());
         assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 
@@ -317,7 +317,7 @@ mod rc5_tests {
         let mut cipher = Rc5::default();
         cipher.mode = BlockCipherMode::Ecb;
         cipher.padding = BlockCipherPadding::None;
-        cipher.ksa_32(&hex_to_bytes_be(KEY).unwrap());
+        cipher.ksa_32(&hex_to_bytes_ltr(KEY).unwrap());
         let ctext = cipher.encrypt(PTEXT).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), PTEXT);
     }

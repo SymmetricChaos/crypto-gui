@@ -5,7 +5,7 @@ use lazy_static::lazy_static;
 
 use crate::{binary_to_text::BinaryToText, errors::CodeError, traits::Code};
 use utils::{
-    byte_formatting::{bytes_to_hex_be, ByteFormat},
+    byte_formatting::{bytes_to_hex, ByteFormat},
     text_functions::string_chunks,
 };
 
@@ -126,14 +126,13 @@ impl Ccsid {
             .map(|c| self.page.chars().position(|x| x == c).unwrap() as u8)
             .collect_vec();
         match self.b2t_mode {
-            Some(ByteFormat::Hex) => Ok(bytes_to_hex_be(&out)),
+            Some(ByteFormat::Hex) => Ok(bytes_to_hex(out)),
             Some(ByteFormat::Utf8) => {
                 String::from_utf8(out).map_err(|e| CodeError::Input(e.to_string()))
             }
             Some(ByteFormat::Base64) => todo!(),
             Some(ByteFormat::Bit) => todo!(),
             None => Err(CodeError::state("Binary to Text Mode is not set")),
-            _ => todo!(),
         }
     }
 }

@@ -2,12 +2,13 @@ use utils::byte_formatting::ByteFormat;
 
 use crate::{Cipher, CipherError};
 
-use super::{bit_padding, none_padding, strip_bit_padding, BlockCipherPadding};
+use super::{bit_padding, none_padding, strip_bit_padding, BlockCipherMode, BlockCipherPadding};
 
 pub struct Xtea {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
     pub key: [u32; 4],
+    pub mode: BlockCipherMode,
     pub padding: BlockCipherPadding,
 }
 
@@ -17,7 +18,8 @@ impl Default for Xtea {
             key: [0, 1, 2, 3],
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
-            padding: BlockCipherPadding::Bit,
+            mode: BlockCipherMode::default(),
+            padding: BlockCipherPadding::default(),
         }
     }
 }

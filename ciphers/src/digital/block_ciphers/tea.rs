@@ -19,8 +19,8 @@ impl Default for Tea {
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
             ctr: 0,
-            mode: BlockCipherMode::Ecb,
-            padding: BlockCipherPadding::Bit,
+            mode: BlockCipherMode::default(),
+            padding: BlockCipherPadding::default(),
         }
     }
 }
