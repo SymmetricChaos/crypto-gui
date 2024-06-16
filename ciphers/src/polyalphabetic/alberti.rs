@@ -1,5 +1,4 @@
 use crate::{errors::CipherError, traits::Cipher};
-use std::fmt::Display;
 use utils::preset_alphabet::Alphabet;
 use utils::vecstring::VecString;
 

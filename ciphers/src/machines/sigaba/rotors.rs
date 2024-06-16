@@ -1,5 +1,4 @@
 use crate::rotors::Rotor;
-use itertools::zip;
 use lazy_static::lazy_static;
 use std::{
     collections::HashMap,
@@ -43,7 +42,7 @@ lazy_static! {
             "EZJQXMOGYTCSFRIUPVNADLHWBK",
         ];
         let mut v = Vec::with_capacity(10);
-        for (name, wiring) in zip(names, wirings) {
+        for (name, wiring) in std::iter::zip(names, wirings) {
             v.push(CipherRotor::new(name, wiring, &|c: char| (c as u8 as usize) - 65).unwrap())
         }
         v
@@ -65,7 +64,7 @@ lazy_static! {
             "6497135280",
         ];
         let mut v = Vec::with_capacity(5);
-        for (name, wiring) in zip(names, wirings) {
+        for (name, wiring) in std::iter::zip(names, wirings) {
             v.push(IndexRotor::new(name, wiring, &|c: char| (c as u8 as usize) - 48).unwrap())
         }
         v

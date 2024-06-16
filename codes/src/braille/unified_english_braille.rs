@@ -1,4 +1,4 @@
-use itertools::{izip, multizip};
+use itertools::izip;
 
 use crate::{
     braille::unified_english_braille_maps::{LETTERS, LETTERS_BRAILLE, LETTERS_UPPER},

@@ -1,5 +1,4 @@
 use crate::errors::CipherError;
-use itertools::zip;
 use std::collections::HashMap;
 use std::hash::Hash;
 
@@ -23,7 +22,7 @@ impl<A: Hash + Eq + Clone> Plugboard<A> {
             ));
         }
         let mut wiring = HashMap::with_capacity(left.len());
-        for (l, r) in zip(left, right) {
+        for (l, r) in std::iter::zip(left, right) {
             if l == r || wiring.contains_key(l) || wiring.contains_key(r) {
                 return Err(CipherError::general(
                     "plugboard inputs cannot form chains or cycles",
@@ -43,7 +42,7 @@ impl<A: Hash + Eq + Clone> Plugboard<A> {
         }
         self.wiring.clear();
 
-        for (l, r) in zip(left, right) {
+        for (l, r) in std::iter::zip(left, right) {
             if l == r || self.wiring.contains_key(l) || self.wiring.contains_key(r) {
                 return Err(CipherError::general(
                     "plugboard inputs cannot form chains or cycles",
