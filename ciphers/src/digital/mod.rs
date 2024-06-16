@@ -1,5 +1,3 @@
-use crate::CipherError;
-
 pub mod asmuth_bloom_secret_sharing;
 pub mod blakely_secret_sharing;
 pub mod chacha;
