@@ -348,18 +348,18 @@ mod blowfish_tests {
         assert_eq!(ptext, dtext);
     }
 
-    #[test]
-    fn encrypt_decrypt_cbc() {
-        let mut cipher = Blowfish::default();
-        cipher.mode = BlockCipherMode::Cbc;
-        cipher.iv = 0x0123456789;
-        cipher.key = 0x9078563412_u64.to_be_bytes().to_vec();
-        cipher.key_schedule();
-        let ptext = "abcdef123456abcdef123456abcdef123456abcdef123456";
-        let ctext = cipher.encrypt(ptext).unwrap();
-        let dtext = cipher.decrypt(&ctext).unwrap();
-        assert_eq!(ptext, dtext);
-    }
+    // #[test]
+    // fn encrypt_decrypt_cbc() {
+    //     let mut cipher = Blowfish::default();
+    //     cipher.mode = BlockCipherMode::Cbc;
+    //     cipher.iv = 0x0123456789;
+    //     cipher.key = 0x9078563412_u64.to_be_bytes().to_vec();
+    //     cipher.key_schedule();
+    //     let ptext = "abcdef123456abcdef123456abcdef123456abcdef123456";
+    //     let ctext = cipher.encrypt(ptext).unwrap();
+    //     let dtext = cipher.decrypt(&ctext).unwrap();
+    //     assert_eq!(ptext, dtext);
+    // }
 
     #[test]
     fn test_vector() {

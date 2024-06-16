@@ -663,7 +663,7 @@ dependencies = [
  "crypto-bigint",
  "csv",
  "getrandom",
- "itertools",
+ "itertools 0.13.0",
  "json",
  "lazy_static",
  "num 0.4.1",
@@ -726,7 +726,7 @@ dependencies = [
  "crc",
  "csv",
  "getrandom",
- "itertools",
+ "itertools 0.10.3",
  "json",
  "lazy_static",
  "nalgebra",
@@ -926,7 +926,7 @@ dependencies = [
  "getrandom",
  "hashers",
  "image",
- "itertools",
+ "itertools 0.10.3",
  "json",
  "lazy_static",
  "nalgebra",
@@ -1715,7 +1715,7 @@ version = "0.1.0"
 dependencies = [
  "crypto-bigint",
  "csv",
- "itertools",
+ "itertools 0.10.3",
  "json",
  "lazy_static",
  "num 0.4.1",
@@ -1814,6 +1814,15 @@ name = "itertools"
 version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a9a9d19fa1e79b6215ff29b9d6880b706147f16e9b1dbb1e4e5947b5b02bc5e3"
+dependencies = [
+ "either",
+]
+
+[[package]]
+name = "itertools"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "413ee7dfc52ee1a4949ceeb7dbc8a33f2d6c088194d9f922fb8318faf1f01186"
 dependencies = [
  "either",
 ]
@@ -2939,7 +2948,7 @@ dependencies = [
  "bimap",
  "csv",
  "getrandom",
- "itertools",
+ "itertools 0.10.3",
  "json",
  "lazy_static",
  "num 0.4.1",
@@ -3687,7 +3696,7 @@ dependencies = [
  "bimap",
  "csv",
  "getrandom",
- "itertools",
+ "itertools 0.10.3",
  "json",
  "lazy_static",
  "mod_exp",

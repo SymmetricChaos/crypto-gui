@@ -12,7 +12,7 @@ use super::{
 pub struct Des {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
-    pub state: [u64; 16],
+    subkeys: [u64; 16],
     pub ctr: u64,
     pub mode: BlockCipherMode,
     pub padding: BlockCipherPadding,
@@ -23,7 +23,7 @@ impl Default for Des {
         Self {
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
-            state: [0; 16],
+            subkeys: [0; 16],
             ctr: 0,
             mode: BlockCipherMode::default(),
             padding: BlockCipherPadding::default(),
@@ -165,7 +165,7 @@ impl Des {
             left = rotate_28(left, KEYSHIFT[i]);
             right = rotate_28(right, KEYSHIFT[i]);
             // Overwrite the old state
-            self.state[i] = Self::pc2(((left << 28) | right) << 8);
+            self.subkeys[i] = Self::pc2(((left << 28) | right) << 8);
         }
     }
 
@@ -178,7 +178,7 @@ impl Des {
 
     pub fn encrypt_block(&self, block: u64) -> u64 {
         let mut b = Self::ip(block);
-        for key in self.state.iter() {
+        for key in self.subkeys.iter() {
             b = Self::round(b, *key);
         }
         Self::fp((b << 32) | (b >> 32))
@@ -186,7 +186,7 @@ impl Des {
 
     pub fn decrypt_block(&self, block: u64) -> u64 {
         let mut b = Self::ip(block);
-        for key in self.state.iter().rev() {
+        for key in self.subkeys.iter().rev() {
             b = Self::round(b, *key);
         }
         Self::fp((b << 32) | (b >> 32))
@@ -197,8 +197,8 @@ impl Des {
         let mut out = Vec::with_capacity(bytes.len());
 
         for plaintext in bytes.chunks_exact(8) {
-            let ciphertext = self.encrypt_block(u64::from_le_bytes(plaintext.try_into().unwrap()));
-            out.extend_from_slice(&ciphertext.to_le_bytes());
+            let ciphertext = self.encrypt_block(u64::from_be_bytes(plaintext.try_into().unwrap()));
+            out.extend_from_slice(&ciphertext.to_be_bytes());
         }
 
         Ok(out)
@@ -209,8 +209,8 @@ impl Des {
         let mut out = Vec::with_capacity(bytes.len());
 
         for ciphertext in bytes.chunks_exact(8) {
-            let plaintext = self.encrypt_block(u64::from_le_bytes(ciphertext.try_into().unwrap()));
-            out.extend_from_slice(&plaintext.to_le_bytes());
+            let plaintext = self.decrypt_block(u64::from_be_bytes(ciphertext.try_into().unwrap()));
+            out.extend_from_slice(&plaintext.to_be_bytes());
         }
 
         Ok(out)
@@ -270,8 +270,8 @@ impl Cipher for Des {
         };
 
         let mut out = match self.mode {
-            BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes)?,
-            BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes)?,
+            BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes)?,
+            BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes)?,
             BlockCipherMode::Cbc => return Err(CipherError::state("CBC mode not implemented")),
         };
 
@@ -288,4 +288,33 @@ impl Cipher for Des {
 mod des_tests {
 
     use super::*;
+
+    #[test]
+    fn test_encypt_block() {
+        let mut cipher = Des::default();
+        cipher.ksa(0x0123456789ABCDEF);
+
+        let cblock = cipher.encrypt_block(0x4E6F772069732074);
+        assert_eq!(cblock, 0x3FA40E8A984D4815);
+
+        let dblock = cipher.decrypt_block(0x3FA40E8A984D4815);
+        assert_eq!(dblock, 0x4E6F772069732074);
+    }
+
+    #[test]
+    fn test_encypt_ecb() {
+        let mut cipher = Des::default();
+        cipher.ksa(0x0123456789ABCDEF);
+        cipher.mode = BlockCipherMode::Ecb;
+        cipher.padding = BlockCipherPadding::None;
+
+        const PTEXT: &'static str = "4e6f772069732074";
+        const CTEXT: &'static str = "3fa40e8a984d4815";
+
+        let ctext = cipher.encrypt(PTEXT).unwrap();
+        assert_eq!(CTEXT, ctext);
+
+        let dtext = cipher.decrypt(&ctext).unwrap();
+        assert_eq!(PTEXT, dtext);
+    }
 }

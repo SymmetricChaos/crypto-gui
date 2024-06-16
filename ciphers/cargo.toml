@@ -10,7 +10,7 @@ utils = {path = "../utils"}
 
 lazy_static = "1.4.0"
 num = "0.4.1"
-itertools = "0.10.0"
+itertools = "0.13.0"
 rand = "0.8.3"
 getrandom = { version = "0.2", features = ["js"] }
 json = "0.12.4"
