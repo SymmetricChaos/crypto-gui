@@ -49,6 +49,7 @@ pub mod chaocipher_controls;
 pub mod checkerboard_controls;
 pub mod columnar_controls;
 pub mod decoder_ring_controls;
+mod des_controls;
 pub mod diagonal_columnar_controls;
 pub mod dryad_controls;
 mod elgamal_controls;

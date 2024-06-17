@@ -264,13 +264,19 @@ impl UiElements for Ui {
 //         .monospace()
 // }
 
-pub fn control_string(ui: &mut egui::Ui, string: &mut String, enabled: bool) -> egui::Response {
+pub fn control_string(ui: &mut egui::Ui, string: &mut String, enabled: bool) -> Response {
     ui.add_enabled(
         enabled,
         egui::TextEdit::singleline(string)
             .font(TextStyle::Monospace)
             .clip_text(false),
     )
+}
+
+// fn u8_drag_value(&mut self, n: &mut u8);
+// fn u32_drag_value(&mut self, n: &mut u32);
+pub fn u64_drag_value(ui: &mut egui::Ui, n: &mut u64) -> Response {
+    ui.add(DragValue::new(n).speed(100).hexadecimal(16, false, true))
 }
 
 pub fn randomize_reset(ui: &mut egui::Ui, cipher_frame: &mut dyn CipherFrame) {
