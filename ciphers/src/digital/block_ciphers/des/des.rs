@@ -32,8 +32,7 @@ impl Default for Des {
 impl Des {
     // Key Scheduling Algorithm (key generation)
     pub fn ksa(&mut self, key: u64) -> Result<(), CipherError> {
-        test_des_key(key)?;
-        self.subkeys = des_ksa(key);
+        self.subkeys = des_ksa(key)?;
         Ok(())
     }
 

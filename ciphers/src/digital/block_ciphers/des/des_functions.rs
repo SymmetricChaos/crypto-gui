@@ -133,7 +133,8 @@ pub fn round(input: u64, key: u64) -> u64 {
     r | ((f(r, key) ^ l) >> 32)
 }
 
-pub fn des_ksa(key: u64) -> [u64; 16] {
+pub fn des_ksa(key: u64) -> Result<[u64; 16], CipherError> {
+    test_des_key(key)?;
     let mut subkeys = [0; 16];
     let key = pc1(key) >> 8;
     let mut left: u64 = key.shr(28) & 0x0fff_ffff_u64;
@@ -144,14 +145,14 @@ pub fn des_ksa(key: u64) -> [u64; 16] {
         // Overwrite the old state
         subkeys[i] = pc2(((left << 28) | right) << 8);
     }
-    subkeys
+    Ok(subkeys)
 }
 
 pub fn test_des_key(key: u64) -> Result<(), CipherError> {
     for byte in key.to_le_bytes() {
         if byte.count_ones() % 2 == 0 {
             return Err(CipherError::key(
-                "all bytes of a DES key must have odd parity",
+                "all bytes of a DES key must have odd parity, the eighth bit is the parity bit",
             ));
         }
     }

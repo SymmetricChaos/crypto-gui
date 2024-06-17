@@ -31,10 +31,11 @@ impl Default for TripleDes {
 
 impl TripleDes {
     pub fn ksa(&mut self, keys: [u64; 3]) -> Result<(), CipherError> {
+        let mut temp = [[0u64; 16]; 3];
         for (i, key) in keys.into_iter().enumerate() {
-            test_des_key(key)?;
-            self.subkeys[i] = des_ksa(key);
+            temp[i] = des_ksa(key)?;
         }
+        self.subkeys = temp;
         Ok(())
     }
 
