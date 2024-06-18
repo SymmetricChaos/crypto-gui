@@ -158,3 +158,13 @@ pub fn test_des_key(key: u64) -> Result<(), CipherError> {
     }
     Ok(())
 }
+
+pub fn set_des_key_parity(key: u64) -> u64 {
+    let mut bytes = key.to_le_bytes();
+    for byte in bytes.iter_mut() {
+        if byte.count_ones() % 2 != 1 {
+            *byte ^= 0x01;
+        }
+    }
+    u64::from_le_bytes(bytes)
+}

@@ -1,7 +1,10 @@
 use super::CipherFrame;
 use crate::ui_elements::{block_cipher_mode, u64_drag_value, UiElements};
 use ciphers::{
-    digital::block_ciphers::{des::des::Des, BlockCipherMode},
+    digital::block_ciphers::{
+        des::{des::Des, des_functions::set_des_key_parity},
+        BlockCipherMode,
+    },
     Cipher,
 };
 use egui::Ui;
@@ -48,6 +51,9 @@ impl CipherFrame for DesFrame {
 
         ui.subheading("Key");
         ui.label("DES uses a 64-bit key but the eighth bit of each byte is used for parity, reducing the actual key size to 56-bits.\nFor simplicity the parity bits are ignored for this implementation rather than causing an error if they are incorrect.");
+        if ui.small_button("set parity").clicked() {
+            self.key = set_des_key_parity(self.key)
+        }
         if u64_drag_value(ui, &mut self.key).changed() {
             match self.cipher.ksa(self.key) {
                 Ok(_) => self.ksa_error.clear(),

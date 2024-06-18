@@ -1,7 +1,10 @@
 use super::CipherFrame;
 use crate::ui_elements::{block_cipher_mode, u64_drag_value, UiElements};
 use ciphers::{
-    digital::block_ciphers::{des::triple_des::TripleDes, BlockCipherMode},
+    digital::block_ciphers::{
+        des::{des_functions::set_des_key_parity, triple_des::TripleDes},
+        BlockCipherMode,
+    },
     Cipher,
 };
 use egui::Ui;
@@ -47,7 +50,13 @@ impl CipherFrame for TripleDesFrame {
         ui.add_space(8.0);
 
         ui.subheading("Key");
-        ui.label("DES uses a 64-bit key but the eighth bit of each byte is used for parity, reducing the actual key size to 56-bits.\nFor simplicity the parity bits are ignored for this implementation rather than causing an error if they are incorrect.");
+        ui.label("Triple-DES uses three 64-bit keys but the eighth bit of each byte is used for parity, reducing the actual key size. For simplicity the parity bits are ignored in this implementation. The second key must not be the same as either the first or third key. If the first and third key are the same this is sometimes referred to as Double-DES.");
+        if ui.small_button("set parity").clicked() {
+            for key in self.keys.iter_mut() {
+                *key = set_des_key_parity(*key)
+            }
+        }
+
         for i in 0..3 {
             if u64_drag_value(ui, &mut self.keys[i]).changed() {
                 match self.cipher.ksa(self.keys) {
