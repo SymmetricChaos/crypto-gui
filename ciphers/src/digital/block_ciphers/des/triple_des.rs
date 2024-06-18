@@ -160,3 +160,40 @@ impl Cipher for TripleDes {
         Ok(self.output_format.byte_slice_to_text(&out))
     }
 }
+
+#[cfg(test)]
+mod des_tests {
+
+    use super::*;
+
+    #[test]
+    fn test_encypt_decrypt_block() {
+        let mut cipher = TripleDes::default();
+        cipher
+            .ksa([0x0123456789ABCDEF, 0x0101010101010101, 0x1010101010101010])
+            .unwrap();
+
+        let pblock = 0x4E6F772069732074;
+
+        let cblock = cipher.encrypt_block(pblock);
+        let dblock = cipher.decrypt_block(cblock);
+        assert_eq!(dblock, pblock);
+    }
+
+    // #[test]
+    // fn test_encypt_ecb() {
+    //     let mut cipher = Des::default();
+    //     cipher.ksa(0x0123456789ABCDEF).unwrap();
+    //     cipher.mode = BlockCipherMode::Ecb;
+    //     cipher.padding = BlockCipherPadding::None;
+
+    //     const PTEXT: &'static str = "4e6f772069732074";
+    //     const CTEXT: &'static str = "3fa40e8a984d4815";
+
+    //     let ctext = cipher.encrypt(PTEXT).unwrap();
+    //     assert_eq!(CTEXT, ctext);
+
+    //     let dtext = cipher.decrypt(&ctext).unwrap();
+    //     assert_eq!(PTEXT, dtext);
+    // }
+}

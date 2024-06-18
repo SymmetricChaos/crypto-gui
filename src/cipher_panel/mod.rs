@@ -4,7 +4,9 @@ use ciphers::{
     ids::{cipher_categories::CipherCategory, CipherId},
     traits::Cipher,
 };
+use des_controls::DesFrame;
 use egui::Ui;
+use triple_des_controls::TripleDesFrame;
 
 use self::{
     adfgvx_controls::AdfgvxFrame, aes_controls::AesFrame, affine_controls::AffineFrame,
@@ -31,61 +33,62 @@ use self::{
     vic_controls::VicFrame, vigenere_controls::VigenereFrame,
 };
 
-pub mod adfgvx_controls;
+mod adfgvx_controls;
 mod aes_controls;
-pub mod affine_controls;
-pub mod alberti_controls;
-pub mod amsco_controls;
-pub mod b64_controls;
-pub mod batco_controls;
-pub mod bazeries_controls;
-pub mod beaufort_controls;
-pub mod bifid_controls;
-pub mod blowfish_controls;
-pub mod caesar_controls;
+mod affine_controls;
+mod alberti_controls;
+mod amsco_controls;
+mod b64_controls;
+mod batco_controls;
+mod bazeries_controls;
+mod beaufort_controls;
+mod bifid_controls;
+mod blowfish_controls;
+mod caesar_controls;
 mod chacha20_poly1305_controls;
 mod chacha_controls;
-pub mod chaocipher_controls;
-pub mod checkerboard_controls;
-pub mod columnar_controls;
-pub mod decoder_ring_controls;
+mod chaocipher_controls;
+mod checkerboard_controls;
+mod columnar_controls;
+mod decoder_ring_controls;
 mod des_controls;
-pub mod diagonal_columnar_controls;
-pub mod dryad_controls;
+mod diagonal_columnar_controls;
+mod dryad_controls;
 mod elgamal_controls;
-pub mod enigma_controls;
-pub mod four_square_controls;
-pub mod general_sub_controls;
-pub mod grille_controls;
-pub mod hebern_controls;
-pub mod hutton_controls;
-pub mod m209_controls;
-pub mod m94_controls;
-pub mod nihilist_controls;
-pub mod playfair_controls;
-pub mod plugboard_controls;
-pub mod polybius_cube_controls;
-pub mod polybius_square_controls;
-pub mod porta_controls;
-pub mod purple_controls;
-pub mod quagmire_controls;
-pub mod rail_fence_controls;
-pub mod rc4_controls;
-pub mod rc5_controls;
-pub mod rs44_controls;
+mod enigma_controls;
+mod four_square_controls;
+mod general_sub_controls;
+mod grille_controls;
+mod hebern_controls;
+mod hutton_controls;
+mod m209_controls;
+mod m94_controls;
+mod nihilist_controls;
+mod playfair_controls;
+mod plugboard_controls;
+mod polybius_cube_controls;
+mod polybius_square_controls;
+mod porta_controls;
+mod purple_controls;
+mod quagmire_controls;
+mod rail_fence_controls;
+mod rc4_controls;
+mod rc5_controls;
+mod rs44_controls;
 mod rsa_controls;
 mod salsa20_controls;
-pub mod scytale_controls;
-pub mod seriated_playfair_controls;
-pub mod shamir_controls;
-pub mod sigaba_controls;
-pub mod slidefair_controls;
+mod scytale_controls;
+mod seriated_playfair_controls;
+mod shamir_controls;
+mod sigaba_controls;
+mod slidefair_controls;
 mod tea_controls;
-pub mod trifid_controls;
-pub mod turning_grille_controls;
-pub mod two_square_controls;
-pub mod vic_controls;
-pub mod vigenere_controls;
+mod trifid_controls;
+mod triple_des_controls;
+mod turning_grille_controls;
+mod two_square_controls;
+mod vic_controls;
+mod vigenere_controls;
 
 pub trait CipherFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
@@ -186,10 +189,12 @@ pub struct CipherInterface {
     blowfish: BlowfishFrame,
     chacha: ChaChaFrame,
     chacha20poly1305: ChaCha20Poly1305Frame,
+    des: DesFrame,
     rc4: Rc4Frame,
     rc5: Rc5Frame,
     rsa: RsaFrame,
     tea: TeaFrame,
+    triple_des: TripleDesFrame,
     salsa20: Salsa20Frame,
 
     // Other
@@ -299,11 +304,13 @@ impl CipherInterface {
                 CipherId::Blowfish,
                 CipherId::ChaCha,
                 CipherId::ChaCha20Poly1305,
+                CipherId::Des,
                 CipherId::Rc4,
                 CipherId::Rc5,
                 CipherId::Rsa,
                 CipherId::Salsa20,
                 CipherId::Tea,
+                CipherId::TripleDes,
             ],
             active_cipher,
             CipherCategory::Digital,
@@ -338,6 +345,7 @@ impl CipherInterface {
             CipherId::Checkerboard => &mut self.checkerboard,
             CipherId::Columnar => &mut self.columnar,
             CipherId::Decoder => &mut self.decoder_ring,
+            CipherId::Des => &mut self.des,
             CipherId::DiagonalColumnar => &mut self.diagonal_columnar,
             CipherId::Dryad => &mut self.dryad,
             CipherId::Enigma => &mut self.enigma,
@@ -369,6 +377,7 @@ impl CipherInterface {
             CipherId::Substitution => &mut self.gen_sub,
             CipherId::Tea => &mut self.tea,
             CipherId::Trifid => &mut self.trifid,
+            CipherId::TripleDes => &mut self.triple_des,
             CipherId::TurningGrille => &mut self.turning_grille,
             CipherId::TwoSquare => &mut self.two_square,
             CipherId::Vic => &mut self.vic,

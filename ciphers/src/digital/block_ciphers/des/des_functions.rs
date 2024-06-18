@@ -134,7 +134,7 @@ pub fn round(input: u64, key: u64) -> u64 {
 }
 
 pub fn des_ksa(key: u64) -> Result<[u64; 16], CipherError> {
-    test_des_key(key)?;
+    // test_des_key(key)?;
     let mut subkeys = [0; 16];
     let key = pc1(key) >> 8;
     let mut left: u64 = key.shr(28) & 0x0fff_ffff_u64;

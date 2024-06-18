@@ -1,31 +1,31 @@
 use super::CipherFrame;
 use crate::ui_elements::{block_cipher_mode, u64_drag_value, UiElements};
 use ciphers::{
-    digital::block_ciphers::{des::des::Des, BlockCipherMode},
+    digital::block_ciphers::{des::triple_des::TripleDes, BlockCipherMode},
     Cipher,
 };
 use egui::Ui;
 use rand::{thread_rng, Rng};
 
-pub struct DesFrame {
-    cipher: Des,
-    key: u64,
+pub struct TripleDesFrame {
+    cipher: TripleDes,
+    keys: [u64; 3],
     ksa_error: String,
 }
 
-impl Default for DesFrame {
+impl Default for TripleDesFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
-            key: 0x0101010101010101,
+            keys: [0x0101010101010101, 0x0202020202020202, 0x0303030303030303],
             ksa_error: String::new(),
         }
     }
 }
 
-impl DesFrame {}
+impl TripleDesFrame {}
 
-impl CipherFrame for DesFrame {
+impl CipherFrame for TripleDesFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
@@ -48,10 +48,12 @@ impl CipherFrame for DesFrame {
 
         ui.subheading("Key");
         ui.label("DES uses a 64-bit key but the eighth bit of each byte is used for parity, reducing the actual key size to 56-bits.\nFor simplicity the parity bits are ignored for this implementation rather than causing an error if they are incorrect.");
-        if u64_drag_value(ui, &mut self.key).changed() {
-            match self.cipher.ksa(self.key) {
-                Ok(_) => self.ksa_error.clear(),
-                Err(e) => self.ksa_error = e.to_string(),
+        for i in 0..3 {
+            if u64_drag_value(ui, &mut self.keys[i]).changed() {
+                match self.cipher.ksa(self.keys) {
+                    Ok(_) => self.ksa_error.clear(),
+                    Err(e) => self.ksa_error = e.to_string(),
+                }
             }
         }
         ui.error_text(&self.ksa_error);
@@ -73,8 +75,11 @@ impl CipherFrame for DesFrame {
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        self.key = rng.gen();
-        match self.cipher.ksa(self.key) {
+        for key in self.keys.iter_mut() {
+            *key = rng.gen();
+        }
+
+        match self.cipher.ksa(self.keys) {
             Ok(_) => self.ksa_error.clear(),
             Err(e) => self.ksa_error = e.to_string(),
         }
