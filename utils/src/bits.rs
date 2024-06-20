@@ -72,7 +72,7 @@ pub fn bit_vec_from_bytes_rtl(bytes: &[u8]) -> Vec<Bit> {
         .collect()
 }
 
-pub fn bits_to_int_little_endian(bits: &[Bit]) -> u32 {
+pub fn bits_to_u32_le(bits: &[Bit]) -> u32 {
     let mut out = 0;
     let mut p = 1;
     for b in bits.iter().rev() {
@@ -84,7 +84,7 @@ pub fn bits_to_int_little_endian(bits: &[Bit]) -> u32 {
     out
 }
 
-pub fn bits_to_int_big_endian(bits: &[Bit]) -> u32 {
+pub fn bits_to_u32_be(bits: &[Bit]) -> u32 {
     let mut out = 0;
     let mut p = 1;
     for b in bits.iter() {
@@ -600,14 +600,8 @@ mod bit_function_tests {
 
     #[test]
     fn bits_to_int() {
-        assert_eq!(
-            5,
-            bits_to_int_little_endian(&to_bit_array([0, 0, 1, 0, 1]).unwrap())
-        );
-        assert_eq!(
-            20,
-            bits_to_int_big_endian(&to_bit_array([0, 0, 1, 0, 1]).unwrap())
-        );
+        assert_eq!(5, bits_to_u32_le(&to_bit_array([0, 0, 1, 0, 1]).unwrap()));
+        assert_eq!(20, bits_to_u32_be(&to_bit_array([0, 0, 1, 0, 1]).unwrap()));
     }
 
     #[test]

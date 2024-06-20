@@ -1,7 +1,7 @@
 use egui::{DragValue, RichText};
 use rand::{thread_rng, Rng};
 use rngs::{lfsr::Lfsr, ClassicRng};
-use utils::bits::{bits_to_int_big_endian, bits_to_int_little_endian, Bit};
+use utils::bits::Bit;
 
 use crate::ui_elements::{generate_random_u32s_box, UiElements};
 
@@ -87,18 +87,18 @@ impl ClassicRngFrame for LfsrFrame {
             });
 
         ui.add_space(8.0);
-        ui.subheading(format!("Next Bit: {}", self.rng.next_bit()));
+        ui.subheading(format!("Next Bit: {}", self.rng.peek_next_bit()));
 
-        ui.add_space(16.0);
-        ui.subheading("Current State as an Integer");
-        match self.rng.big_endian {
-            true => {
-                ui.label(format!("{}", bits_to_int_big_endian(&self.rng.bits)));
-            }
-            false => {
-                ui.label(format!("{}", bits_to_int_little_endian(&self.rng.bits)));
-            }
-        }
+        // ui.add_space(16.0);
+        // ui.subheading("Current State as an Integer");
+        // match self.rng.big_endian {
+        //     true => {
+        //         ui.label(format!("{}", bits_to_u32_be(&self.rng.bits)));
+        //     }
+        //     false => {
+        //         ui.label(format!("{}", bits_to_u32_le(&self.rng.bits)));
+        //     }
+        // }
         ui.add_space(16.0);
         generate_random_u32s_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
     }
