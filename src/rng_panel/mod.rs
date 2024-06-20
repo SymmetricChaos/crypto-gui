@@ -1,11 +1,13 @@
 mod blumblumshub_controls;
+mod chacha_controls;
+mod geffe_controls;
 mod halton_controls;
 mod jsf_controls;
 mod lcg_controls;
 mod lfg_controls;
 mod lfsr_controls;
 mod mersenne_twister_controls;
-pub mod middle_square_binary_controls;
+mod middle_square_binary_controls;
 mod middle_square_controls;
 mod pcg_controls;
 mod rc4_controls;
@@ -15,7 +17,9 @@ mod weyl_controls;
 mod xorshift_controls;
 mod xoshiro_controls;
 
+use chacha_controls::ChaChaFrame;
 use egui::Ui;
+use geffe_controls::GeffeFrame;
 use rngs::{
     ids::{rng_categories::RngCategory, RngId},
     ClassicRng,
@@ -60,6 +64,8 @@ fn combox_box(
 #[derive(Default)]
 pub struct RngInterface {
     blumblumshub: BlumBlumShubFrame,
+    chacha: ChaChaFrame,
+    geffe: GeffeFrame,
     halton: HaltonFrame,
     jsf: JsfFrame,
     lcg: LcgFrame,
@@ -123,7 +129,7 @@ impl RngInterface {
         );
 
         combox_box(
-            &[RngId::BlumBlumShub, RngId::ChaCha],
+            &[RngId::BlumBlumShub, RngId::ChaCha, RngId::Geffe],
             active_rng,
             RngCategory::CSPRNG,
             ui,
@@ -135,6 +141,8 @@ impl RngInterface {
     pub fn get_active_rng(&mut self, active_rng: &RngId) -> &mut dyn ClassicRngFrame {
         match active_rng {
             RngId::BlumBlumShub => &mut self.blumblumshub,
+            RngId::ChaCha => &mut self.chacha,
+            RngId::Geffe => &mut self.geffe,
             RngId::Halton => &mut self.halton,
             RngId::Jsf => &mut self.jsf,
             RngId::Lcg => &mut self.lcg,

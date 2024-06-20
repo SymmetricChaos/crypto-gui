@@ -1,6 +1,7 @@
 pub mod blumblumshub;
 pub mod chacha;
 pub mod errors;
+pub mod geffe;
 pub mod halton;
 pub mod ids;
 pub mod jsf;

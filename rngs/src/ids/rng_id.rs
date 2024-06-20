@@ -6,6 +6,7 @@ use std::fmt::Display;
 pub enum RngId {
     BlumBlumShub,
     ChaCha,
+    Geffe,
     Halton,
     Jsf,
     Lcg,
@@ -44,6 +45,7 @@ impl Display for RngId {
         let name = match self {
             RngId::BlumBlumShub => "Blum-Blum-Shub",
             RngId::ChaCha => "ChaCha",
+            RngId::Geffe => "Geffe",
             RngId::Halton => "Halton Sequence",
             RngId::Jsf => "JSF",
             RngId::Lcg => "Linear Congruential Generator",
