@@ -16,10 +16,12 @@ mod vmpcr_controls;
 mod weyl_controls;
 mod xorshift_controls;
 mod xoshiro_controls;
-
 use chacha_controls::ChaChaFrame;
-use egui::Ui;
 use geffe_controls::GeffeFrame;
+use middle_square_binary_controls::MiddleSquareBinaryFrame;
+
+use egui::Ui;
+
 use rngs::{
     ids::{rng_categories::RngCategory, RngId},
     ClassicRng,
@@ -72,6 +74,7 @@ pub struct RngInterface {
     lfsr: LfsrFrame,
     mersenne_twister: MTFrame,
     middle_square: MiddleSquareFrame,
+    middle_square_binary: MiddleSquareBinaryFrame,
     pcg: PcgFrame,
     rc4: Rc4Frame,
     splitmix: SplitmixFrame,
@@ -109,7 +112,7 @@ impl RngInterface {
                 RngId::Lfsr,
                 RngId::MersenneTwister,
                 RngId::MiddleSquare,
-                RngId::Pcg,
+                RngId::MiddleSquareBinary,
                 RngId::Rc4,
                 RngId::Splitmix,
                 RngId::Vmpcr,
@@ -129,7 +132,7 @@ impl RngInterface {
         );
 
         combox_box(
-            &[RngId::BlumBlumShub, RngId::ChaCha, RngId::Geffe],
+            &[RngId::BlumBlumShub, RngId::ChaCha, RngId::Geffe, RngId::Pcg],
             active_rng,
             RngCategory::CSPRNG,
             ui,
@@ -150,6 +153,7 @@ impl RngInterface {
             RngId::Lfsr => &mut self.lfsr,
             RngId::MersenneTwister => &mut self.mersenne_twister,
             RngId::MiddleSquare => &mut self.middle_square,
+            RngId::MiddleSquareBinary => &mut self.middle_square_binary,
             RngId::Pcg => &mut self.pcg,
             RngId::Rc4 => &mut self.rc4,
             RngId::Splitmix => &mut self.splitmix,
