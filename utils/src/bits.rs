@@ -73,25 +73,27 @@ pub fn bit_vec_from_bytes_rtl(bytes: &[u8]) -> Vec<Bit> {
 }
 
 pub fn bits_to_u32_le(bits: &[Bit]) -> u32 {
-    let mut out = 0;
+    let mut it = bits.iter().rev();
+    let mut out = *it.next().unwrap() as u32;
     let mut p = 1;
-    for b in bits.iter().rev() {
+    for b in it {
+        p *= 2;
         if b.is_one() {
             out += p;
         }
-        p *= 2;
     }
     out
 }
 
+/// Panics if bits.len() > 32
 pub fn bits_to_u32_be(bits: &[Bit]) -> u32 {
-    let mut out = 0;
+    let mut out = bits[0] as u32;
     let mut p = 1;
-    for b in bits.iter() {
+    for b in bits.iter().skip(1) {
+        p *= 2;
         if b.is_one() {
             out += p;
         }
-        p *= 2
     }
     out
 }

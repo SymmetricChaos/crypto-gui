@@ -31,6 +31,7 @@ impl ClassicRngFrame for GeffeFrame {
             ui.selectable_value(&mut self.rng.big_endian, true, "Big Endian");
             ui.selectable_value(&mut self.rng.big_endian, false, "Little Endian");
         });
+        ui.add_space(16.0);
 
         for i in 0..3 {
             let lfsr = &mut self.rng.rngs[i];
@@ -49,11 +50,11 @@ impl ClassicRngFrame for GeffeFrame {
                     lfsr.taps.push(false)
                 }
             };
-            ui.add_space(16.0);
+            ui.add_space(4.0);
 
             ui.subheading("Internal State");
             ui.add_space(8.0);
-            egui::Grid::new("lfsr_grid")
+            egui::Grid::new(format!("lfsr_state{}", i))
                 .num_columns(self.vector_lengths[i])
                 .max_col_width(5.0)
                 .min_col_width(5.0)
@@ -86,9 +87,8 @@ impl ClassicRngFrame for GeffeFrame {
                         }
                     }
                 });
-
-            ui.subheading("Next Bit");
-            ui.label(lfsr.peek_next_bit().to_string());
+            ui.subheading(format!("Next Bit: {}", self.rng.peek_next_bit()));
+            ui.add_space(8.0);
         }
 
         ui.subheading("Multiplexer State");
@@ -98,9 +98,9 @@ impl ClassicRngFrame for GeffeFrame {
             self.rng.rngs[2].peek_next_bit(),
         );
         ui.label(format!("({a} & {b}) ⊕ (¬{a} & {c})"));
-        ui.label(format!("Next bit: {}", self.rng.peek_next_bit()));
+        ui.label(format!("Next Bit: {}", self.rng.peek_next_bit()));
 
-        ui.add_space(16.0);
+        ui.add_space(8.0);
         generate_random_u32s_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
     }
 

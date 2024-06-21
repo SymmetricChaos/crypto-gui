@@ -1,17 +1,21 @@
 use super::ClassicRngFrame;
-use crate::ui_elements::UiElements;
+use crate::ui_elements::{generate_random_u32s_box, UiElements};
 use egui::Slider;
 use rand::{thread_rng, Rng};
 use rngs::chacha::ChaCha;
 
 pub struct ChaChaFrame {
     rng: ChaCha,
+    n_random: usize,
+    randoms: String,
 }
 
 impl Default for ChaChaFrame {
     fn default() -> Self {
         Self {
             rng: Default::default(),
+            n_random: 5,
+            randoms: String::new(),
         }
     }
 }
@@ -81,6 +85,9 @@ impl ClassicRngFrame for ChaChaFrame {
 
         ui.subheading("Starting State");
         ui.label(self.start_state());
+
+        ui.add_space(8.0);
+        generate_random_u32s_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
     }
 
     fn rng(&self) -> &dyn rngs::ClassicRng {

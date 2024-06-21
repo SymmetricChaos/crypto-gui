@@ -1,49 +1,49 @@
 use crate::traits::ClassicRng;
 
-macro_rules! middle_square_binary {
-    ($name: ident, $state_type: ty, $square_type: ty, $shift: literal) => {
-        pub struct $name {
-            pub state: $state_type,
-        }
+// macro_rules! middle_square_binary {
+//     ($name: ident, $state_type: ty, $square_type: ty, $shift: literal) => {
+//         pub struct $name {
+//             pub state: $state_type,
+//         }
 
-        impl Default for $name {
-            fn default() -> Self {
-                Self { state: 255 }
-            }
-        }
+//         impl Default for $name {
+//             fn default() -> Self {
+//                 Self { state: 255 }
+//             }
+//         }
 
-        impl $name {
-            /// Step the RNG forward
-            pub fn next(&mut self) -> $state_type {
-                let sq = self.state as $square_type * self.state as $square_type;
-                let mid = (sq >> $shift) as $state_type;
-                self.state = mid;
-                mid
-            }
+//         impl $name {
+//             /// Step the RNG forward
+//             pub fn next(&mut self) -> $state_type {
+//                 let sq = self.state as $square_type * self.state as $square_type;
+//                 let mid = (sq >> $shift) as $state_type;
+//                 self.state = mid;
+//                 mid
+//             }
 
-            /// Nonadvancing version of next
-            pub fn peek_next(&self) -> $state_type {
-                let sq = self.state as $square_type * self.state as $square_type;
-                (sq >> $shift) as $state_type
-            }
-        }
-    };
-}
+//             /// Nonadvancing version of next
+//             pub fn peek_next(&self) -> $state_type {
+//                 let sq = self.state as $square_type * self.state as $square_type;
+//                 (sq >> $shift) as $state_type
+//             }
+//         }
 
-middle_square_binary!(MiddleSquareBinary64, u64, u128, 16);
-middle_square_binary!(MiddleSquareBinary32, u32, u64, 8);
-middle_square_binary!(MiddleSquareBinary16, u16, u32, 4);
-middle_square_binary!(MiddleSquareBinary8, u8, u16, 2);
+//         impl ClassicRng for $name {
+//             fn next_u32(&mut self) -> u32 {
+//                 self.next() as u32
+//             }
+//         }
+//     };
+// }
 
-impl ClassicRng for MiddleSquareBinary32 {
-    fn next_u32(&mut self) -> u32 {
-        self.next()
-    }
-}
+// middle_square_binary!(MiddleSquareBinary64, u64, u128, 16);
+// middle_square_binary!(MiddleSquareBinary32, u32, u64, 8);
+// middle_square_binary!(MiddleSquareBinary16, u16, u32, 4);
+// middle_square_binary!(MiddleSquareBinary8, u8, u16, 2);
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum MSBSize {
-    B64,
+    // B64,
     B32,
     B16,
     B8,
@@ -52,7 +52,7 @@ pub enum MSBSize {
 impl MSBSize {
     pub fn mask(&self) -> u64 {
         match self {
-            MSBSize::B64 => 0xFFFFFFFFFFFFFFFF,
+            // MSBSize::B64 => 0xFFFFFFFFFFFFFFFF,
             MSBSize::B32 => 0xFFFFFFFF,
             MSBSize::B16 => 0xFFFF,
             MSBSize::B8 => 0xFF,
@@ -61,7 +61,7 @@ impl MSBSize {
 
     pub fn quarter_size(&self) -> usize {
         match self {
-            MSBSize::B64 => 16,
+            // MSBSize::B64 => 16,
             MSBSize::B32 => 8,
             MSBSize::B16 => 4,
             MSBSize::B8 => 2,

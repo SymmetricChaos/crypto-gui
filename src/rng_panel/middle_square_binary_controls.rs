@@ -23,7 +23,7 @@ impl Default for MiddleSquareBinaryFrame {
 impl ClassicRngFrame for MiddleSquareBinaryFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.subheading("Size");
-        ui.label("Modern desktop and server computer architecture generally has registers of size 32-bits and 64-bits so all of these except the 64-bit version can be performed exceptionally quickly. The 16-bit and 8-bit versions are mainly of academic interest as they fall into short repeating sequences very quickly.");
+        ui.label("Modern desktop and server computer architecture generally has registers of size 32-bits and 64-bits so all of these can be performed exceptionally quickly. The 16-bit and 8-bit versions are mainly of academic interest as they fall into short repeating sequences very quickly.");
         // ui.selectable_value(&mut self.rng.width, MSBSize::B64, "64-Bit");
         if ui
             .selectable_value(&mut self.rng.width, MSBSize::B32, "32-Bit")
@@ -46,7 +46,7 @@ impl ClassicRngFrame for MiddleSquareBinaryFrame {
 
         ui.subheading("State");
         match self.rng.width {
-            MSBSize::B64 => todo!(),
+            // MSBSize::B64 => todo!(),
             MSBSize::B32 => {
                 if ui
                     .add(
