@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use crate::traits::ClassicRng;
+use crate::{errors::RngError, traits::ClassicRng};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum FibOp {
@@ -34,6 +34,20 @@ impl Default for Lfg {
             tap: 3,
             op: FibOp::Add,
         }
+    }
+}
+
+impl Lfg {
+    pub fn set_tap(&mut self, position: u32) -> Result<(), RngError> {
+        if position == 0 {
+            return Err(RngError::general("LFG tap cannot be at position zero"));
+        } else if position as usize >= self.state.len() {
+            return Err(RngError::general("LFG tap must be within the state vector"));
+        } else {
+            self.tap = position as usize;
+        }
+
+        Ok(())
     }
 }
 

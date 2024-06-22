@@ -18,6 +18,7 @@ mod xorshift_controls;
 mod xoshiro_controls;
 use chacha_controls::ChaChaFrame;
 use geffe_controls::GeffeFrame;
+use lfg_controls::LfgFrame;
 use middle_square_binary_controls::MiddleSquareBinaryFrame;
 
 use egui::Ui;
@@ -71,6 +72,7 @@ pub struct RngInterface {
     halton: HaltonFrame,
     jsf: JsfFrame,
     lcg: LcgFrame,
+    lfg: LfgFrame,
     lfsr: LfsrFrame,
     mersenne_twister: MTFrame,
     middle_square: MiddleSquareFrame,
@@ -161,7 +163,7 @@ impl RngInterface {
             RngId::Weyl => &mut self.weyl,
             RngId::Xorshift => &mut self.xorshift,
             RngId::Xoshiro => &mut self.xoshiro,
-            _ => todo!("<<<RNG NOT FOUND>>>"),
+            // _ => todo!("<<<RNG NOT FOUND>>>"),
         }
     }
 }

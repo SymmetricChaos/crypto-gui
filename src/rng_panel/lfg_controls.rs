@@ -20,9 +20,11 @@ pub struct LfgFrame {
 
 impl Default for LfgFrame {
     fn default() -> Self {
+        let rng = Lfg::default();
+        let vector_length = rng.state.len();
         let mut s = Self {
-            rng: Default::default(),
-            vector_length: 16,
+            rng,
+            vector_length,
             state_strings: VecDeque::from([]),
             randoms: String::new(),
             n_random: 5,
@@ -54,40 +56,57 @@ impl LfgFrame {
 
 impl ClassicRngFrame for LfgFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        ui.subheading("Vector Length");
-        if ui
-            .add(DragValue::new(&mut self.vector_length).clamp_range(2..=20))
-            .changed()
-        {
-            self.rng.state.truncate(self.vector_length);
-            while self.rng.state.len() < self.vector_length {
-                self.rng.state.push_back(1)
-            }
-            self.rng.tap = self.rng.tap.min(self.rng.state.len() - 1);
-            self.set_state_strings();
-        };
-        ui.add_space(8.0);
-
         ui.subheading("Tap Location");
         ui.add(DragValue::new(&mut self.rng.tap).clamp_range(1..=(self.vector_length - 1)));
+
+        ui.add_space(8.0);
+        ui.subheading("Modulus");
+        ui.add(DragValue::new(&mut self.rng.modulus));
+
+        ui.add_space(8.0);
+        ui.horizontal(|ui| {
+            ui.subheading("State");
+            if ui
+                .add(DragValue::new(&mut self.vector_length).clamp_range(2..=20))
+                .changed()
+            {
+                self.rng.state.truncate(self.vector_length);
+                while self.rng.state.len() < self.vector_length {
+                    self.rng.state.push_back(1)
+                }
+                self.rng.tap = self.rng.tap.min(self.rng.state.len() - 1);
+                self.set_state_strings();
+            };
+        });
+
+        ui.label("Numbers stored in the vector");
+        ui.horizontal(|ui| {
+            for (i, (s, n)) in self
+                .state_strings
+                .iter_mut()
+                .zip(self.rng.state.iter_mut())
+                .enumerate()
+            {
+                if i == self.rng.tap || i == 0 {
+                    ui.subheading("[");
+                }
+                Self::input_control(ui, s, n);
+                if i == self.rng.tap || i == 0 {
+                    ui.subheading("]");
+                }
+            }
+        });
+
+        ui.add_space(8.0);
+        if ui.button("step").clicked() {
+            self.rng.next_u32();
+        }
 
         ui.add_space(8.0);
         ui.subheading("Operation");
         ui.selectable_value(&mut self.rng.op, FibOp::Add, "Addition");
         ui.selectable_value(&mut self.rng.op, FibOp::Mul, "Multiplication");
         ui.selectable_value(&mut self.rng.op, FibOp::Xor, "Bitwise XOR");
-
-        ui.add_space(8.0);
-        ui.subheading("State");
-        ui.label("Numbers stored in the vector");
-        for (s, n) in self.state_strings.iter_mut().zip(self.rng.state.iter_mut()) {
-            Self::input_control(ui, s, n);
-        }
-
-        ui.add_space(8.0);
-        if ui.button("step").clicked() {
-            self.rng.next_u32();
-        }
 
         ui.add_space(8.0);
         generate_random_u32s_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
