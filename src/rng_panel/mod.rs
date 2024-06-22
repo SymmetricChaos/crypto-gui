@@ -106,9 +106,9 @@ impl RngInterface {
     pub fn combo_boxes(&mut self, ui: &mut Ui, active_rng: &mut Option<RngId>) {
         combox_box(
             &[
-                RngId::BlumBlumShub,
                 RngId::Jsf,
                 RngId::Lcg,
+                RngId::Lfg,
                 RngId::Lfsr,
                 RngId::MersenneTwister,
                 RngId::MiddleSquare,
@@ -149,7 +149,7 @@ impl RngInterface {
             RngId::Halton => &mut self.halton,
             RngId::Jsf => &mut self.jsf,
             RngId::Lcg => &mut self.lcg,
-            // RngId::Lfg => &mut self.lfg,
+            RngId::Lfg => &mut self.lfg,
             RngId::Lfsr => &mut self.lfsr,
             RngId::MersenneTwister => &mut self.mersenne_twister,
             RngId::MiddleSquare => &mut self.middle_square,

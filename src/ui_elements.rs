@@ -345,7 +345,7 @@ pub fn generate_random_u32s_box(
                 randoms.push_str(&rng.next_u32().to_string());
             }
         }
-        ui.add(DragValue::new(n_random).clamp_range(1..=10))
+        ui.add(DragValue::new(n_random).clamp_range(1..=100))
     });
 
     ui.text_edit_multiline(randoms);
@@ -367,7 +367,7 @@ pub fn generate_random_f32s_box(
                 randoms.push_str(&next_float.to_string());
             }
         }
-        ui.add(DragValue::new(n_random).clamp_range(1..=10))
+        ui.add(DragValue::new(n_random).clamp_range(1..=100))
     });
 
     ui.text_edit_multiline(randoms);
