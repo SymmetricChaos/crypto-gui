@@ -7,6 +7,7 @@ pub mod elgamal;
 pub mod rc4;
 pub mod rsa;
 pub mod salsa20;
+pub mod seal;
 pub mod shamir_secret_sharing;
 
 pub mod block_ciphers;
