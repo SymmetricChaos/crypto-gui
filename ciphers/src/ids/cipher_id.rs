@@ -49,6 +49,7 @@ pub enum CipherId {
     Rs44,
     Salsa20,
     Scytale,
+    Seal3,
     SeriatedPlayfair,
     Shamir,
     Sigaba,
@@ -106,7 +107,7 @@ impl Display for CipherId {
             CipherId::Dryad => "DRYAD",
             CipherId::ElGamal => "ElGamal",
             CipherId::Enigma => "Enigma",
-            // CipherID::Fialka => "Fialka",
+            CipherId::Fialka => "Fialka",
             CipherId::FourSquare => "Four-Square",
             CipherId::Grille => "Grille",
             CipherId::Hebern => "Hebern",
@@ -127,6 +128,7 @@ impl Display for CipherId {
             CipherId::Rsa => "RSA",
             CipherId::Rs44 => "RS44",
             CipherId::Salsa20 => "Salsa20",
+            CipherId::Seal3 => "SEAL 3.0",
             CipherId::Scytale => "Scytale",
             CipherId::SeriatedPlayfair => "Seriated Playfair",
             CipherId::Shamir => "Shamir's Secret Sharing",
@@ -141,7 +143,6 @@ impl Display for CipherId {
             CipherId::Vic => "VIC",
             CipherId::Vigenere => "Vigenère",
             CipherId::Xtea => "XTEA",
-            _ => "<<<MISSING NAME>>>",
         };
         write!(f, "{}", name)
     }
