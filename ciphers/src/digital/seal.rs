@@ -115,12 +115,6 @@ impl Seal3 {
         *r1 = r1.rotate_right(9);
     }
 
-    // fn twist(&self, p: &mut u32, r1: &mut u32, r2: &mut u32) {
-    //     *p = *r1 & 0x7fc_u32;
-    //     *r2 = r2.wrapping_add(self.t[*p as usize / 4]);
-    //     *r1 = r1.rotate_right(9);
-    // }
-
     pub fn initialize(&self, ctr: usize, registers: &mut [u32; 4], ns: &mut [u32; 4]) {
         let mut a = self.n ^ self.r[4 * ctr];
         let mut b = self.n.rotate_right(8) ^ self.r[4 * ctr + 1];
