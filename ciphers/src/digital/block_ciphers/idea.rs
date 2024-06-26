@@ -1,4 +1,4 @@
-use utils::{byte_formatting::ByteFormat, math_functions::mul_inv};
+use utils::byte_formatting::ByteFormat;
 
 use crate::Cipher;
 
@@ -32,7 +32,7 @@ impl Default for Idea {
 }
 
 impl Idea {
-    pub fn ksa(&mut self, key: &[u16; 8]) -> [u16; N_SUBKEYS] {
+    pub fn ksa(self, key: &[u16; 8]) -> [u16; N_SUBKEYS] {
         // There are six subkeys used in each of the eight rounds and then four additional subkeys
         let mut subkeys = [0_u16; N_SUBKEYS];
 
@@ -53,8 +53,10 @@ impl Idea {
         subkeys
     }
 
-    pub fn ksa_inv(&mut self, key: &[u16; 8]) -> [u16; N_SUBKEYS] {
+    pub fn ksa_inv(&mut self, subkeys: &[u16; N_SUBKEYS]) -> [u16; N_SUBKEYS] {
         let mut subkeys = [0_u16; N_SUBKEYS];
+
+        for i in 0..ROUNDS {}
 
         subkeys
     }
@@ -73,6 +75,7 @@ impl Idea {
         }
     }
 
+    // Multiplicative inverse modulo 2^16+1
     fn mul_inv(a: u16) -> u16 {
         if a <= 1 {
             a
@@ -106,7 +109,7 @@ impl Idea {
         a.wrapping_sub(b)
     }
 
-    // 16-bit XOR
+    // 16-bit XOR, self inverse
     fn xor(a: u16, b: u16) -> u16 {
         a ^ b
     }
@@ -136,5 +139,26 @@ impl Cipher for Idea {
 
     fn decrypt(&self, text: &str) -> Result<String, crate::CipherError> {
         todo!()
+    }
+}
+
+#[cfg(test)]
+mod idea_tests {
+
+    use super::*;
+
+    #[test]
+    fn subkey_test() {
+        let cipher = Idea::default();
+        let subkeys = cipher.ksa(&[1, 2, 3, 4, 5, 6, 7, 8]);
+        assert_eq!(
+            [
+                1, 2, 3, 4, 5, 6, 7, 8, 1024, 1536, 2048, 2560, 3072, 3584, 4096, 512, 16, 20, 24,
+                28, 32, 4, 8, 12, 10240, 12288, 14336, 16384, 2048, 4096, 6144, 8192, 112, 128, 16,
+                32, 48, 64, 80, 96, 0, 8192, 16384, 24576, 32768, 40960, 49152, 57345, 128, 192,
+                256, 320
+            ],
+            subkeys
+        )
     }
 }
