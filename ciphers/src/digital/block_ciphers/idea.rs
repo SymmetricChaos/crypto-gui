@@ -10,7 +10,10 @@ pub const MAXIM: u32 = 0x10001;
 pub const N_SUBKEYS: usize = 52;
 pub const ROUNDS: usize = 8;
 
+// Original paper
 // https://link.springer.com/chapter/10.1007/3-540-46877-3_35
+// Implementation in Rust
+// https://docs.rs/idea/latest/src/idea/lib.rs.html
 pub struct Idea {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
@@ -32,7 +35,7 @@ impl Default for Idea {
 }
 
 impl Idea {
-    pub fn ksa(self, key: &[u16; 8]) -> [u16; N_SUBKEYS] {
+    pub fn ksa(&self, key: &[u16; 8]) -> [u16; N_SUBKEYS] {
         // There are six subkeys used in each of the eight rounds and then four additional subkeys
         let mut subkeys = [0_u16; N_SUBKEYS];
 
@@ -53,12 +56,30 @@ impl Idea {
         subkeys
     }
 
-    pub fn ksa_inv(&mut self, subkeys: &[u16; N_SUBKEYS]) -> [u16; N_SUBKEYS] {
-        let mut subkeys = [0_u16; N_SUBKEYS];
+    pub fn ksa_inv(&self, subkeys: &[u16; N_SUBKEYS]) -> [u16; N_SUBKEYS] {
+        let mut subkeys_inv = [0_u16; N_SUBKEYS];
 
-        for i in 0..ROUNDS {}
+        let mut k = ROUNDS * 6;
+        for i in 0..=ROUNDS {
+            let j = i * 6;
+            let l = k - j;
 
-        subkeys
+            // Not sure why the Rust implementation I checked had this not matching the paper
+            subkeys_inv[j] = Self::mul_inv(subkeys[l]);
+            subkeys_inv[j + 1] = Self::mul_inv(subkeys[l + 1]);
+            subkeys_inv[j + 2] = Self::add_inv(subkeys[l + 2]);
+            subkeys_inv[j + 3] = Self::add_inv(subkeys[l + 3]);
+        }
+
+        k = (ROUNDS - 1) * 6;
+        for i in 0..ROUNDS {
+            let j = i * 6;
+            let l = k - j;
+            subkeys_inv[j + 4] = subkeys[l + 4];
+            subkeys_inv[j + 5] = subkeys[l + 5];
+        }
+
+        subkeys_inv
     }
 
     // Multiplication modulo 2^16+1, accomplished by swapping 0x0000 and 0xffff.
@@ -104,17 +125,12 @@ impl Idea {
         a.wrapping_add(b)
     }
 
-    // Subtraction modulo 2^16
-    fn sub(a: u16, b: u16) -> u16 {
-        a.wrapping_sub(b)
+    // Additive inverse modulo 2^16
+    fn add_inv(a: u16) -> u16 {
+        ((FUYI - (u32::from(a))) & ONE) as u16
     }
 
-    // 16-bit XOR, self inverse
-    fn xor(a: u16, b: u16) -> u16 {
-        a ^ b
-    }
-
-    pub fn encrypt_block(&self, block: u64, subkeys: &[u16; N_SUBKEYS]) {
+    pub fn encrypt_block(&self, block: u64, keys: &[u16; N_SUBKEYS]) {
         let mut x1 = (block >> 48) as u16;
         let mut x2 = (block >> 32) as u16;
         let mut x3 = (block >> 16) as u16;
@@ -122,10 +138,10 @@ impl Idea {
 
         for r in 0..ROUNDS {
             let j = r * 6;
-            x1 = Self::mul(x1, subkeys[j]);
-            x2 = Self::mul(x2, subkeys[j + 1]);
-            x3 = Self::add(x3, subkeys[j + 2]);
-            x4 = Self::add(x4, subkeys[j + 3]);
+            x1 = Self::mul(x1, keys[j]);
+            x2 = Self::mul(x2, keys[j + 1]);
+            x3 = Self::add(x3, keys[j + 2]);
+            x4 = Self::add(x4, keys[j + 3]);
         }
     }
 
@@ -159,6 +175,23 @@ mod idea_tests {
                 256, 320
             ],
             subkeys
-        )
+        );
+    }
+
+    #[test]
+    fn subkey_inv_test() {
+        let cipher = Idea::default();
+        let subkeys = cipher.ksa(&[1, 2, 3, 4, 5, 6, 7, 8]);
+        let subkeys_inv = cipher.ksa_inv(&subkeys);
+
+        assert_eq!(
+            [
+                65025, 43350, 65280, 65216, 49152, 57345, 65533, 21843, 32768, 24576, 0, 8192,
+                42326, 64513, 65456, 65440, 16, 32, 21835, 65529, 65424, 65408, 2048, 4096, 13101,
+                43686, 51200, 49152, 8, 12, 19115, 53834, 65504, 65532, 16, 20, 43670, 28069,
+                61440, 65024, 2048, 2560, 18725, 57345, 64512, 64000, 5, 6, 1, 32769, 65533, 65532
+            ],
+            subkeys_inv
+        );
     }
 }
