@@ -7,6 +7,8 @@ use super::{BlockCipherMode, BlockCipherPadding};
 pub const ONE: u32 = 0xffff;
 pub const FUYI: u32 = 0x10000;
 pub const MAXIM: u32 = 0x10001;
+pub const N_SUBKEYS: usize = 52;
+pub const ROUNDS: usize = 8;
 
 // https://link.springer.com/chapter/10.1007/3-540-46877-3_35
 pub struct Idea {
@@ -30,8 +32,31 @@ impl Default for Idea {
 }
 
 impl Idea {
-    pub fn ksa(&mut self, key: u128) -> [u16; 16] {
-        todo!()
+    pub fn ksa(&mut self, key: &[u16; 8]) -> [u16; N_SUBKEYS] {
+        // There are six subkeys used in each of the eight rounds and then four additional subkeys
+        let mut subkeys = [0_u16; N_SUBKEYS];
+
+        for (i, k) in key.iter().enumerate() {
+            subkeys[i] = *k;
+        }
+
+        for i in 8..N_SUBKEYS {
+            if (i + 2) % 8 == 0 {
+                subkeys[i] = (subkeys[i - 7] << 9) ^ (subkeys[i - 14] >> 7)
+            } else if (i + 1) % 8 == 0 {
+                subkeys[i] = (subkeys[i - 15] << 9) ^ (subkeys[i - 14] >> 7)
+            } else {
+                subkeys[i] = (subkeys[i - 7] << 9) ^ (subkeys[i - 6] >> 7)
+            }
+        }
+
+        subkeys
+    }
+
+    pub fn ksa_inv(&mut self, key: &[u16; 8]) -> [u16; N_SUBKEYS] {
+        let mut subkeys = [0_u16; N_SUBKEYS];
+
+        subkeys
     }
 
     // Multiplication modulo 2^16+1, accomplished by swapping 0x0000 and 0xffff.
@@ -48,10 +73,28 @@ impl Idea {
         }
     }
 
-    // fn mul_inv(a: u16) -> u16 {
-    //     // Can use .unwrap() because 2^16+1 is prime
-    //     let i = mul_inv(&u32::from(a), &MAXIM).unwrap();
-    // }
+    fn mul_inv(a: u16) -> u16 {
+        if a <= 1 {
+            a
+        } else {
+            let mut x = u32::from(a);
+            let mut y = MAXIM;
+            let mut t0 = 1u32;
+            let mut t1 = 0u32;
+            loop {
+                t1 += y / x * t0;
+                y %= x;
+                if y == 1 {
+                    return (MAXIM - t1) as u16;
+                }
+                t0 += x / y * t1;
+                x %= y;
+                if x == 1 {
+                    return t0 as u16;
+                }
+            }
+        }
+    }
 
     // Addition modulo 2^16
     fn add(a: u16, b: u16) -> u16 {
@@ -68,8 +111,22 @@ impl Idea {
         a ^ b
     }
 
-    pub fn encrypt_block(&self, block: u64) {}
-    pub fn decrypt_block(&self, block: u64) {}
+    pub fn encrypt_block(&self, block: u64, subkeys: &[u16; N_SUBKEYS]) {
+        let mut x1 = (block >> 48) as u16;
+        let mut x2 = (block >> 32) as u16;
+        let mut x3 = (block >> 16) as u16;
+        let mut x4 = (block >> 0) as u16;
+
+        for r in 0..ROUNDS {
+            let j = r * 6;
+            x1 = Self::mul(x1, subkeys[j]);
+            x2 = Self::mul(x2, subkeys[j + 1]);
+            x3 = Self::add(x3, subkeys[j + 2]);
+            x4 = Self::add(x4, subkeys[j + 3]);
+        }
+    }
+
+    pub fn decrypt_block(&self, block: u64, subkeys: &[u16; N_SUBKEYS]) {}
 }
 
 impl Cipher for Idea {
