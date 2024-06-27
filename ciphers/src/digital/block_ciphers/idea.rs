@@ -18,6 +18,8 @@ pub struct Idea {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
     pub ctr: u64,
+    subkeys_enc: [u16; N_SUBKEYS],
+    subkeys_dec: [u16; N_SUBKEYS],
     pub mode: BlockCipherMode,
     pub padding: BlockCipherPadding,
 }
@@ -28,6 +30,8 @@ impl Default for Idea {
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
             ctr: 0,
+            subkeys_enc: [0u16; N_SUBKEYS],
+            subkeys_dec: [0u16; N_SUBKEYS],
             mode: Default::default(),
             padding: Default::default(),
         }
@@ -35,51 +39,54 @@ impl Default for Idea {
 }
 
 impl Idea {
-    pub fn ksa(&self, key: &[u16; 8]) -> [u16; N_SUBKEYS] {
+    pub fn subkeys_enc(&self) -> &[u16; N_SUBKEYS] {
+        &self.subkeys_enc
+    }
+
+    pub fn subkeys_dec(&self) -> &[u16; N_SUBKEYS] {
+        &self.subkeys_dec
+    }
+
+    pub fn ksa(&mut self, key: &[u16; 8]) {
         // There are six subkeys used in each of the eight rounds and then four additional subkeys
-        let mut subkeys = [0_u16; N_SUBKEYS];
 
         for (i, k) in key.iter().enumerate() {
-            subkeys[i] = *k;
+            self.subkeys_enc[i] = *k;
         }
 
         for i in 8..N_SUBKEYS {
             if (i + 2) % 8 == 0 {
-                subkeys[i] = (subkeys[i - 7] << 9) ^ (subkeys[i - 14] >> 7)
+                self.subkeys_enc[i] =
+                    (self.subkeys_enc[i - 7] << 9) ^ (self.subkeys_enc[i - 14] >> 7)
             } else if (i + 1) % 8 == 0 {
-                subkeys[i] = (subkeys[i - 15] << 9) ^ (subkeys[i - 14] >> 7)
+                self.subkeys_enc[i] =
+                    (self.subkeys_enc[i - 15] << 9) ^ (self.subkeys_enc[i - 14] >> 7)
             } else {
-                subkeys[i] = (subkeys[i - 7] << 9) ^ (subkeys[i - 6] >> 7)
+                self.subkeys_enc[i] =
+                    (self.subkeys_enc[i - 7] << 9) ^ (self.subkeys_enc[i - 6] >> 7)
             }
         }
 
-        subkeys
-    }
-
-    pub fn ksa_inv(&self, subkeys: &[u16; N_SUBKEYS]) -> [u16; N_SUBKEYS] {
-        let mut subkeys_inv = [0_u16; N_SUBKEYS];
-
+        // Calculate the inverse keys
         let mut k = ROUNDS * 6;
         for i in 0..=ROUNDS {
             let j = i * 6;
             let l = k - j;
 
             // Not sure why the Rust implementation I checked had this not matching the paper
-            subkeys_inv[j] = Self::mul_inv(subkeys[l]);
-            subkeys_inv[j + 1] = Self::mul_inv(subkeys[l + 1]);
-            subkeys_inv[j + 2] = Self::add_inv(subkeys[l + 2]);
-            subkeys_inv[j + 3] = Self::add_inv(subkeys[l + 3]);
+            self.subkeys_dec[j] = Self::mul_inv(self.subkeys_enc[l]);
+            self.subkeys_dec[j + 1] = Self::mul_inv(self.subkeys_enc[l + 1]);
+            self.subkeys_dec[j + 2] = Self::add_inv(self.subkeys_enc[l + 2]);
+            self.subkeys_dec[j + 3] = Self::add_inv(self.subkeys_enc[l + 3]);
         }
 
         k = (ROUNDS - 1) * 6;
         for i in 0..ROUNDS {
             let j = i * 6;
             let l = k - j;
-            subkeys_inv[j + 4] = subkeys[l + 4];
-            subkeys_inv[j + 5] = subkeys[l + 5];
+            self.subkeys_dec[j + 4] = self.subkeys_enc[l + 4];
+            self.subkeys_dec[j + 5] = self.subkeys_enc[l + 5];
         }
-
-        subkeys_inv
     }
 
     // Multiplication modulo 2^16+1, accomplished by swapping 0x0000 and 0xffff.
@@ -130,7 +137,7 @@ impl Idea {
         ((FUYI - (u32::from(a))) & ONE) as u16
     }
 
-    pub fn encrypt_block(&self, block: u64, keys: &[u16; N_SUBKEYS]) {
+    pub fn encrypt_block(&self, block: u64, keys: &[u16; N_SUBKEYS]) -> u64 {
         let mut x1 = (block >> 48) as u16;
         let mut x2 = (block >> 32) as u16;
         let mut x3 = (block >> 16) as u16;
@@ -142,7 +149,22 @@ impl Idea {
             x2 = Self::mul(x2, keys[j + 1]);
             x3 = Self::add(x3, keys[j + 2]);
             x4 = Self::add(x4, keys[j + 3]);
+            let kk = Self::mul(keys[j + 4], x1 ^ x3);
+            let t1 = Self::mul(keys[j + 5], Self::add(kk, x1 ^ x3));
+            let t2 = Self::add(kk, t1);
+            let a = x1 ^ t1;
+            x1 = x3 ^ t1;
+            x3 = a;
+            let a = x2 ^ t2;
+            x2 = x4 ^ t2;
+            x4 = a;
         }
+        x1 = Self::mul(x1, keys[48 + 0]);
+        x2 = Self::mul(x2, keys[48 + 1]);
+        x3 = Self::add(x3, keys[48 + 2]);
+        x4 = Self::add(x4, keys[48 + 3]);
+
+        (x1 as u64) << 48 | (x2 as u64) << 32 | (x3 as u64) << 16 | (x4 as u64)
     }
 
     pub fn decrypt_block(&self, block: u64, subkeys: &[u16; N_SUBKEYS]) {}
@@ -165,33 +187,26 @@ mod idea_tests {
 
     #[test]
     fn subkey_test() {
-        let cipher = Idea::default();
-        let subkeys = cipher.ksa(&[1, 2, 3, 4, 5, 6, 7, 8]);
+        let mut cipher = Idea::default();
+        cipher.ksa(&[1, 2, 3, 4, 5, 6, 7, 8]);
         assert_eq!(
-            [
+            &[
                 1, 2, 3, 4, 5, 6, 7, 8, 1024, 1536, 2048, 2560, 3072, 3584, 4096, 512, 16, 20, 24,
                 28, 32, 4, 8, 12, 10240, 12288, 14336, 16384, 2048, 4096, 6144, 8192, 112, 128, 16,
                 32, 48, 64, 80, 96, 0, 8192, 16384, 24576, 32768, 40960, 49152, 57345, 128, 192,
                 256, 320
             ],
-            subkeys
+            cipher.subkeys_enc()
         );
-    }
-
-    #[test]
-    fn subkey_inv_test() {
-        let cipher = Idea::default();
-        let subkeys = cipher.ksa(&[1, 2, 3, 4, 5, 6, 7, 8]);
-        let subkeys_inv = cipher.ksa_inv(&subkeys);
 
         assert_eq!(
-            [
+            &[
                 65025, 43350, 65280, 65216, 49152, 57345, 65533, 21843, 32768, 24576, 0, 8192,
                 42326, 64513, 65456, 65440, 16, 32, 21835, 65529, 65424, 65408, 2048, 4096, 13101,
                 43686, 51200, 49152, 8, 12, 19115, 53834, 65504, 65532, 16, 20, 43670, 28069,
                 61440, 65024, 2048, 2560, 18725, 57345, 64512, 64000, 5, 6, 1, 32769, 65533, 65532
             ],
-            subkeys_inv
+            cipher.subkeys_dec()
         );
     }
 }
