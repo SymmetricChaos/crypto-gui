@@ -137,13 +137,15 @@ impl Idea {
         ((FUYI - (u32::from(a))) & ONE) as u16
     }
 
-    pub fn encrypt_block(&self, block: u64, keys: &[u16; N_SUBKEYS]) -> u64 {
+    pub fn encrypt_block(&self, block: u64) -> u64 {
+        let keys = self.subkeys_enc();
         let mut x1 = (block >> 48) as u16;
         let mut x2 = (block >> 32) as u16;
         let mut x3 = (block >> 16) as u16;
         let mut x4 = (block >> 0) as u16;
 
         for r in 0..ROUNDS {
+            println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
             let j = r * 6;
             x1 = Self::mul(x1, keys[j]);
             x2 = Self::mul(x2, keys[j + 1]);
@@ -159,15 +161,49 @@ impl Idea {
             x2 = x4 ^ t2;
             x4 = a;
         }
-        x1 = Self::mul(x1, keys[48 + 0]);
-        x2 = Self::mul(x2, keys[48 + 1]);
-        x3 = Self::add(x3, keys[48 + 2]);
-        x4 = Self::add(x4, keys[48 + 3]);
+        println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
+        x1 = Self::mul(x1, keys[48]);
+        x2 = Self::mul(x2, keys[49]);
+        x3 = Self::add(x3, keys[50]);
+        x4 = Self::add(x4, keys[51]);
+        println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
 
         (x1 as u64) << 48 | (x2 as u64) << 32 | (x3 as u64) << 16 | (x4 as u64)
     }
 
-    pub fn decrypt_block(&self, block: u64, subkeys: &[u16; N_SUBKEYS]) {}
+    pub fn decrypt_block(&self, block: u64) -> u64 {
+        let keys = self.subkeys_dec();
+        let mut x1 = (block >> 48) as u16;
+        let mut x2 = (block >> 32) as u16;
+        let mut x3 = (block >> 16) as u16;
+        let mut x4 = (block >> 0) as u16;
+
+        for r in 0..ROUNDS {
+            println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
+            let j = r * 6;
+            x1 = Self::mul(x1, keys[j]);
+            x2 = Self::mul(x2, keys[j + 1]);
+            x3 = Self::add(x3, keys[j + 2]);
+            x4 = Self::add(x4, keys[j + 3]);
+            let kk = Self::mul(keys[j + 4], x1 ^ x3);
+            let t1 = Self::mul(keys[j + 5], Self::add(kk, x1 ^ x3));
+            let t2 = Self::add(kk, t1);
+            let a = x1 ^ t1;
+            x1 = x3 ^ t1;
+            x3 = a;
+            let a = x2 ^ t2;
+            x2 = x4 ^ t2;
+            x4 = a;
+        }
+        println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
+        x1 = Self::mul(x1, keys[48]);
+        x2 = Self::mul(x2, keys[49]);
+        x3 = Self::add(x3, keys[50]);
+        x4 = Self::add(x4, keys[51]);
+        println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
+
+        (x1 as u64) << 48 | (x2 as u64) << 32 | (x3 as u64) << 16 | (x4 as u64)
+    }
 }
 
 impl Cipher for Idea {
@@ -208,5 +244,14 @@ mod idea_tests {
             ],
             cipher.subkeys_dec()
         );
+    }
+
+    #[test]
+    fn encrypt_decrypt_test() {
+        let mut cipher = Idea::default();
+        cipher.ksa(&[1, 2, 3, 4, 5, 6, 7, 8]);
+        let p = 0x0000000100020003;
+        let e = cipher.encrypt_block(p);
+        assert_eq!(p, cipher.decrypt_block(e));
     }
 }
