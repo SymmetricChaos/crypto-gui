@@ -91,16 +91,33 @@ impl Idea {
 
     // Multiplication modulo 2^16+1, accomplished by swapping 0x0000 and 0xffff.
     fn mul(a: u16, b: u16) -> u16 {
-        let x = if a == 0 { ONE } else { u32::from(a) };
-        let y = if b == 0 { ONE } else { u32::from(b) };
+        // let x = if a == 0 { ONE } else { u32::from(a) };
+        // let y = if b == 0 { ONE } else { u32::from(b) };
 
-        let t = (x * y) % MAXIM;
+        // let t = (x * y) % MAXIM;
 
-        if t == ONE {
-            0
+        // if t == ONE {
+        //     0
+        // } else {
+        //     t as u16
+        // }
+        let x = u32::from(a);
+        let y = u32::from(b);
+        let mut r: i32;
+
+        if x == 0 {
+            r = (MAXIM - y) as i32;
+        } else if y == 0 {
+            r = (MAXIM - x) as i32;
         } else {
-            t as u16
+            let c: u32 = x * y;
+            r = ((c & ONE) as i32) - ((c >> 16) as i32);
+            if r < 0 {
+                r += MAXIM as i32;
+            }
         }
+
+        (r & (ONE as i32)) as u16
     }
 
     // Multiplicative inverse modulo 2^16+1
