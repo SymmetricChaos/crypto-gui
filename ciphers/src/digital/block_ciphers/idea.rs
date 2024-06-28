@@ -1,8 +1,6 @@
+use super::{bit_padding, none_padding, strip_bit_padding, BlockCipherMode, BlockCipherPadding};
+use crate::{Cipher, CipherError};
 use utils::byte_formatting::ByteFormat;
-
-use crate::Cipher;
-
-use super::{BlockCipherMode, BlockCipherPadding};
 
 pub const ONE: u32 = 0xffff;
 pub const FUYI: u32 = 0x10000;
@@ -48,8 +46,6 @@ impl Idea {
     }
 
     pub fn ksa(&mut self, key: &[u16; 8]) {
-        // There are six subkeys used in each of the eight rounds and then four additional subkeys
-
         for (i, k) in key.iter().enumerate() {
             self.subkeys_enc[i] = *k;
         }
@@ -89,18 +85,8 @@ impl Idea {
         }
     }
 
-    // Multiplication modulo 2^16+1, accomplished by swapping 0x0000 and 0xffff.
+    // Multiplication modulo 2^16+1 (sort of)
     fn mul(a: u16, b: u16) -> u16 {
-        // let x = if a == 0 { ONE } else { u32::from(a) };
-        // let y = if b == 0 { ONE } else { u32::from(b) };
-
-        // let t = (x * y) % MAXIM;
-
-        // if t == ONE {
-        //     0
-        // } else {
-        //     t as u16
-        // }
         let x = u32::from(a);
         let y = u32::from(b);
         let mut r: i32;
@@ -120,7 +106,7 @@ impl Idea {
         (r & (ONE as i32)) as u16
     }
 
-    // Multiplicative inverse modulo 2^16+1
+    // Multiplicative inverse modulo 2^16+1 (sort of)
     fn mul_inv(a: u16) -> u16 {
         if a <= 1 {
             a
@@ -145,12 +131,14 @@ impl Idea {
     }
 
     // Addition modulo 2^16
+    // Exhastive test shows that both versions below are identical
     fn add(a: u16, b: u16) -> u16 {
         // ((u32::from(a) + u32::from(b)) & ONE) as u16
         a.wrapping_add(b)
     }
 
     // Additive inverse modulo 2^16
+    // Exhastive test shows that both versions below are identical
     fn add_inv(a: u16) -> u16 {
         // ((FUYI - (u32::from(a))) & ONE) as u16
         (u16::MAX - a).wrapping_add(1)
@@ -168,7 +156,7 @@ impl Idea {
         let mut a: u16;
 
         for r in 0..ROUNDS {
-            println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
+            // println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
             let j = r * 6;
             x1 = Self::mul(x1, keys[j + 0]);
             x2 = Self::mul(x2, keys[j + 1]);
@@ -184,12 +172,12 @@ impl Idea {
             x2 = x4 ^ t2;
             x4 = a;
         }
-        println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
+        // println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
         x1 = Self::mul(x1, keys[48]);
         x2 = Self::mul(x2, keys[49]);
         x3 = Self::add(x3, keys[50]);
         x4 = Self::add(x4, keys[51]);
-        println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
+        // println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
 
         (x1 as u64) << 48 | (x2 as u64) << 32 | (x3 as u64) << 16 | (x4 as u64)
     }
@@ -201,15 +189,105 @@ impl Idea {
     pub fn decrypt_block(&self, block: u64) -> u64 {
         Self::block_function(block, self.subkeys_dec())
     }
+
+    pub fn encrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
+        assert!(bytes.len() % 8 == 0);
+        let mut out = Vec::with_capacity(bytes.len());
+
+        // Take 8 byte chunks
+        for block in bytes.chunks_exact(8) {
+            // Turn each chunk into a u64
+            let x = u64::from_be_bytes(block.try_into().unwrap());
+
+            // Push bytes to the output
+            out.extend_from_slice(&self.encrypt_block(x).to_be_bytes());
+        }
+
+        Ok(out)
+    }
+
+    pub fn decrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
+        assert!(bytes.len() % 8 == 0);
+        let mut out = Vec::with_capacity(bytes.len());
+
+        // Take 8 byte chunks
+        for block in bytes.chunks_exact(8) {
+            // Turn each chunk into a u64
+            let x = u64::from_be_bytes(block.try_into().unwrap());
+
+            // Push bytes to the output
+            out.extend_from_slice(&self.decrypt_block(x).to_be_bytes());
+        }
+
+        Ok(out)
+    }
+
+    pub fn encrypt_ctr(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
+        let mut ctr = self.ctr;
+        let mut out = Vec::with_capacity(bytes.len());
+
+        // Take 8 byte chunks
+        for block in bytes.chunks_exact(8) {
+            let mask = self.encrypt_block(ctr).to_be_bytes();
+
+            for (byte, m) in block.iter().zip(mask.iter()) {
+                out.push(byte ^ m)
+            }
+
+            ctr = ctr.wrapping_add(1);
+        }
+
+        Ok(out)
+    }
+
+    pub fn decrypt_ctr(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
+        self.encrypt_ctr(bytes)
+    }
 }
 
 impl Cipher for Idea {
-    fn encrypt(&self, text: &str) -> Result<String, crate::CipherError> {
-        todo!()
+    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+        let mut bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| CipherError::input("byte format error"))?;
+
+        match self.padding {
+            BlockCipherPadding::None => none_padding(&mut bytes, 8)?,
+            BlockCipherPadding::Bit => bit_padding(&mut bytes, 8),
+        };
+
+        let out = match self.mode {
+            BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes)?,
+            BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes)?,
+            BlockCipherMode::Cbc => return Err(CipherError::state("CBC mode not implemented")),
+        };
+
+        Ok(self.output_format.byte_slice_to_text(&out))
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, crate::CipherError> {
-        todo!()
+    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+        let mut bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| CipherError::input("byte format error"))?;
+
+        if self.padding == BlockCipherPadding::None {
+            none_padding(&mut bytes, 8)?
+        };
+
+        let out = match self.mode {
+            BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes)?,
+            BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes)?,
+            BlockCipherMode::Cbc => return Err(CipherError::state("CBC mode not implemented")),
+        };
+
+        match self.padding {
+            BlockCipherPadding::None => none_padding(&mut bytes, 8)?,
+            BlockCipherPadding::Bit => strip_bit_padding(&mut bytes)?,
+        };
+
+        Ok(self.output_format.byte_slice_to_text(&out))
     }
 }
 
