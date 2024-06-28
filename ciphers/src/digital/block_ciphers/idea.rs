@@ -7,7 +7,7 @@ use super::{BlockCipherMode, BlockCipherPadding};
 pub const ONE: u32 = 0xffff;
 pub const FUYI: u32 = 0x10000;
 pub const MAXIM: u32 = 0x10001;
-pub const N_SUBKEYS: usize = 52;
+pub const N_SUBKEYS: usize = ROUNDS * 6 + 4; // there are six keys used in each of eight rounds, then four keys used in the finalization round
 pub const ROUNDS: usize = 8;
 
 // Original paper
@@ -74,7 +74,7 @@ impl Idea {
             let l = k - j;
 
             // Not sure why the Rust implementation I checked had this not matching the paper
-            self.subkeys_dec[j] = Self::mul_inv(self.subkeys_enc[l]);
+            self.subkeys_dec[j + 0] = Self::mul_inv(self.subkeys_enc[l + 0]);
             self.subkeys_dec[j + 1] = Self::mul_inv(self.subkeys_enc[l + 1]);
             self.subkeys_dec[j + 2] = Self::add_inv(self.subkeys_enc[l + 2]);
             self.subkeys_dec[j + 3] = Self::add_inv(self.subkeys_enc[l + 3]);
@@ -129,80 +129,60 @@ impl Idea {
 
     // Addition modulo 2^16
     fn add(a: u16, b: u16) -> u16 {
+        // ((u32::from(a) + u32::from(b)) & ONE) as u16
         a.wrapping_add(b)
     }
 
     // Additive inverse modulo 2^16
     fn add_inv(a: u16) -> u16 {
-        ((FUYI - (u32::from(a))) & ONE) as u16
+        // ((FUYI - (u32::from(a))) & ONE) as u16
+        (u16::MAX - a).wrapping_add(1)
+    }
+
+    fn block_function(block: u64, keys: &[u16; N_SUBKEYS]) -> u64 {
+        let mut x1 = (block >> 48) as u16;
+        let mut x2 = (block >> 32) as u16;
+        let mut x3 = (block >> 16) as u16;
+        let mut x4 = (block >> 0) as u16;
+
+        let mut kk: u16;
+        let mut t1: u16;
+        let mut t2: u16;
+        let mut a: u16;
+
+        for r in 0..ROUNDS {
+            println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
+            let j = r * 6;
+            x1 = Self::mul(x1, keys[j + 0]);
+            x2 = Self::mul(x2, keys[j + 1]);
+            x3 = Self::add(x3, keys[j + 2]);
+            x4 = Self::add(x4, keys[j + 3]);
+            kk = Self::mul(keys[j + 4], x1 ^ x3);
+            t1 = Self::mul(keys[j + 5], Self::add(kk, x2 ^ x4));
+            t2 = Self::add(kk, t1);
+            a = x1 ^ t1;
+            x1 = x3 ^ t1;
+            x3 = a;
+            a = x2 ^ t2;
+            x2 = x4 ^ t2;
+            x4 = a;
+        }
+        println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
+        x1 = Self::mul(x1, keys[48]);
+        x2 = Self::mul(x2, keys[49]);
+        x3 = Self::add(x3, keys[50]);
+        x4 = Self::add(x4, keys[51]);
+        println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
+
+        (x1 as u64) << 48 | (x2 as u64) << 32 | (x3 as u64) << 16 | (x4 as u64)
     }
 
     pub fn encrypt_block(&self, block: u64) -> u64 {
-        let keys = self.subkeys_enc();
-        let mut x1 = (block >> 48) as u16;
-        let mut x2 = (block >> 32) as u16;
-        let mut x3 = (block >> 16) as u16;
-        let mut x4 = (block >> 0) as u16;
-
-        for r in 0..ROUNDS {
-            println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
-            let j = r * 6;
-            x1 = Self::mul(x1, keys[j]);
-            x2 = Self::mul(x2, keys[j + 1]);
-            x3 = Self::add(x3, keys[j + 2]);
-            x4 = Self::add(x4, keys[j + 3]);
-            let kk = Self::mul(keys[j + 4], x1 ^ x3);
-            let t1 = Self::mul(keys[j + 5], Self::add(kk, x1 ^ x3));
-            let t2 = Self::add(kk, t1);
-            let a = x1 ^ t1;
-            x1 = x3 ^ t1;
-            x3 = a;
-            let a = x2 ^ t2;
-            x2 = x4 ^ t2;
-            x4 = a;
-        }
-        println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
-        x1 = Self::mul(x1, keys[48]);
-        x2 = Self::mul(x2, keys[49]);
-        x3 = Self::add(x3, keys[50]);
-        x4 = Self::add(x4, keys[51]);
-        println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
-
-        (x1 as u64) << 48 | (x2 as u64) << 32 | (x3 as u64) << 16 | (x4 as u64)
+        Self::block_function(block, self.subkeys_enc())
     }
 
     pub fn decrypt_block(&self, block: u64) -> u64 {
-        let keys = self.subkeys_dec();
-        let mut x1 = (block >> 48) as u16;
-        let mut x2 = (block >> 32) as u16;
-        let mut x3 = (block >> 16) as u16;
-        let mut x4 = (block >> 0) as u16;
-
-        for r in 0..ROUNDS {
-            println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
-            let j = r * 6;
-            x1 = Self::mul(x1, keys[j]);
-            x2 = Self::mul(x2, keys[j + 1]);
-            x3 = Self::add(x3, keys[j + 2]);
-            x4 = Self::add(x4, keys[j + 3]);
-            let kk = Self::mul(keys[j + 4], x1 ^ x3);
-            let t1 = Self::mul(keys[j + 5], Self::add(kk, x1 ^ x3));
-            let t2 = Self::add(kk, t1);
-            let a = x1 ^ t1;
-            x1 = x3 ^ t1;
-            x3 = a;
-            let a = x2 ^ t2;
-            x2 = x4 ^ t2;
-            x4 = a;
-        }
-        println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
-        x1 = Self::mul(x1, keys[48]);
-        x2 = Self::mul(x2, keys[49]);
-        x3 = Self::add(x3, keys[50]);
-        x4 = Self::add(x4, keys[51]);
-        println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
-
-        (x1 as u64) << 48 | (x2 as u64) << 32 | (x3 as u64) << 16 | (x4 as u64)
+        Self::block_function(block, self.subkeys_dec())
     }
 }
 
@@ -250,8 +230,9 @@ mod idea_tests {
     fn encrypt_decrypt_test() {
         let mut cipher = Idea::default();
         cipher.ksa(&[1, 2, 3, 4, 5, 6, 7, 8]);
-        let p = 0x0000000100020003;
+        let p = 0x0000_0001_0002_0003;
         let e = cipher.encrypt_block(p);
+        println!("");
         assert_eq!(p, cipher.decrypt_block(e));
     }
 }
