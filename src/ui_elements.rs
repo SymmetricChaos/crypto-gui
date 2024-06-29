@@ -43,6 +43,7 @@ pub trait UiElements {
     fn binary_to_text_input_mode(&mut self, current_value: &mut ByteFormat);
     fn byte_io_mode(&mut self, input: &mut ByteFormat, output: &mut ByteFormat);
     fn u8_drag_value(&mut self, n: &mut u8);
+    fn u16_drag_value(&mut self, n: &mut u16);
     fn u32_drag_value(&mut self, n: &mut u32);
     fn u64_drag_value(&mut self, n: &mut u64);
 }
@@ -236,6 +237,10 @@ impl UiElements for Ui {
         self.add(DragValue::new(n).hexadecimal(2, false, true));
     }
 
+    fn u16_drag_value(&mut self, n: &mut u16) {
+        self.add(DragValue::new(n).hexadecimal(4, false, true));
+    }
+
     fn u32_drag_value(&mut self, n: &mut u32) {
         self.add(DragValue::new(n).speed(100).hexadecimal(8, false, true));
     }
@@ -277,6 +282,10 @@ pub fn control_string(ui: &mut egui::Ui, string: &mut String, enabled: bool) -> 
 // fn u32_drag_value(&mut self, n: &mut u32);
 pub fn u64_drag_value(ui: &mut egui::Ui, n: &mut u64) -> Response {
     ui.add(DragValue::new(n).speed(100).hexadecimal(16, false, true))
+}
+
+pub fn u16_drag_value(ui: &mut egui::Ui, n: &mut u16) -> Response {
+    ui.add(DragValue::new(n).speed(25).hexadecimal(4, false, true))
 }
 
 pub fn randomize_reset(ui: &mut egui::Ui, cipher_frame: &mut dyn CipherFrame) {

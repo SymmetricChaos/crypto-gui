@@ -6,6 +6,7 @@ use ciphers::{
 };
 use des_controls::DesFrame;
 use egui::Ui;
+use idea_controls::IdeaFrame;
 use triple_des_controls::TripleDesFrame;
 
 use self::{
@@ -61,6 +62,7 @@ mod general_sub_controls;
 mod grille_controls;
 mod hebern_controls;
 mod hutton_controls;
+mod idea_controls;
 mod m209_controls;
 mod m94_controls;
 mod nihilist_controls;
@@ -190,6 +192,7 @@ pub struct CipherInterface {
     chacha: ChaChaFrame,
     chacha20poly1305: ChaCha20Poly1305Frame,
     des: DesFrame,
+    idea: IdeaFrame,
     rc4: Rc4Frame,
     rc5: Rc5Frame,
     rsa: RsaFrame,
@@ -305,6 +308,7 @@ impl CipherInterface {
                 CipherId::ChaCha,
                 CipherId::ChaCha20Poly1305,
                 CipherId::Des,
+                CipherId::Idea,
                 CipherId::Rc4,
                 CipherId::Rc5,
                 CipherId::Rsa,
@@ -353,6 +357,7 @@ impl CipherInterface {
             CipherId::Grille => &mut self.grille,
             CipherId::Hebern => &mut self.hebern,
             CipherId::Hutton => &mut self.hutton,
+            CipherId::Idea => &mut self.idea,
             CipherId::M209 => &mut self.m209,
             CipherId::M94 => &mut self.m94,
             CipherId::Nihilist => &mut self.nihilist,

@@ -7,6 +7,7 @@ pub const FUYI: u32 = 0x10000;
 pub const MAXIM: u32 = 0x10001;
 pub const N_SUBKEYS: usize = ROUNDS * 6 + 4; // there are six keys used in each of eight rounds, then four keys used in the finalization round
 pub const ROUNDS: usize = 8;
+pub const BLOCK_SIZE: usize = 8;
 
 // Original paper
 // https://link.springer.com/chapter/10.1007/3-540-46877-3_35
@@ -191,11 +192,11 @@ impl Idea {
     }
 
     pub fn encrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        assert!(bytes.len() % 8 == 0);
+        assert!(bytes.len() % BLOCK_SIZE == 0);
         let mut out = Vec::with_capacity(bytes.len());
 
         // Take 8 byte chunks
-        for block in bytes.chunks_exact(8) {
+        for block in bytes.chunks_exact(BLOCK_SIZE) {
             // Turn each chunk into a u64
             let x = u64::from_be_bytes(block.try_into().unwrap());
 
@@ -211,7 +212,7 @@ impl Idea {
         let mut out = Vec::with_capacity(bytes.len());
 
         // Take 8 byte chunks
-        for block in bytes.chunks_exact(8) {
+        for block in bytes.chunks_exact(BLOCK_SIZE) {
             // Turn each chunk into a u64
             let x = u64::from_be_bytes(block.try_into().unwrap());
 
@@ -227,7 +228,7 @@ impl Idea {
         let mut out = Vec::with_capacity(bytes.len());
 
         // Take 8 byte chunks
-        for block in bytes.chunks_exact(8) {
+        for block in bytes.chunks_exact(BLOCK_SIZE) {
             let mask = self.encrypt_block(ctr).to_be_bytes();
 
             for (byte, m) in block.iter().zip(mask.iter()) {
@@ -253,8 +254,8 @@ impl Cipher for Idea {
             .map_err(|_| CipherError::input("byte format error"))?;
 
         match self.padding {
-            BlockCipherPadding::None => none_padding(&mut bytes, 8)?,
-            BlockCipherPadding::Bit => bit_padding(&mut bytes, 8),
+            BlockCipherPadding::None => none_padding(&mut bytes, BLOCK_SIZE as u32)?,
+            BlockCipherPadding::Bit => bit_padding(&mut bytes, BLOCK_SIZE as u32),
         };
 
         let out = match self.mode {
@@ -273,7 +274,7 @@ impl Cipher for Idea {
             .map_err(|_| CipherError::input("byte format error"))?;
 
         if self.padding == BlockCipherPadding::None {
-            none_padding(&mut bytes, 8)?
+            none_padding(&mut bytes, BLOCK_SIZE as u32)?
         };
 
         let out = match self.mode {
@@ -283,7 +284,7 @@ impl Cipher for Idea {
         };
 
         match self.padding {
-            BlockCipherPadding::None => none_padding(&mut bytes, 8)?,
+            BlockCipherPadding::None => none_padding(&mut bytes, BLOCK_SIZE as u32)?,
             BlockCipherPadding::Bit => strip_bit_padding(&mut bytes)?,
         };
 
@@ -325,9 +326,10 @@ mod idea_tests {
     fn encrypt_decrypt_test() {
         let mut cipher = Idea::default();
         cipher.ksa(&[1, 2, 3, 4, 5, 6, 7, 8]);
-        let p = 0x0000_0001_0002_0003;
-        let e = cipher.encrypt_block(p);
-        println!("");
-        assert_eq!(p, cipher.decrypt_block(e));
+        let ptext = 0x0000_0001_0002_0003; // from 0 1 2 3
+        let ctext = 0x3ffb311b0a44067b; // from 16379 12571 2628 1659
+        let etext: u64 = cipher.encrypt_block(ptext);
+        assert_eq!(ctext, etext);
+        assert_eq!(ptext, cipher.decrypt_block(etext));
     }
 }
