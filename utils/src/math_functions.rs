@@ -239,3 +239,29 @@ pub fn is_prime64<N: Into<u64>>(n: N) -> bool {
     }
     true
 }
+
+pub fn modular_pow(pow: u32, base: u32, modulus: u32) -> u32 {
+    let mut out = 1;
+
+    for _ in 0..pow {
+        out *= u64::from(base);
+        out %= u64::from(modulus);
+    }
+
+    // This truncation is always valid because it has been reduced by the modulus which starts as u32
+    out as u32
+}
+
+#[cfg(test)]
+mod math_tests {
+
+    use super::*;
+
+    #[test]
+    fn test_mod_pow() {
+        let x = modular_pow(4, 5, 23);
+        assert_eq!(4, x);
+        let x = modular_pow(3, 5, 23);
+        assert_eq!(10, x);
+    }
+}
