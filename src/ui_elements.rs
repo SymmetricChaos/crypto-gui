@@ -42,10 +42,14 @@ pub trait UiElements {
     );
     fn binary_to_text_input_mode(&mut self, current_value: &mut ByteFormat);
     fn byte_io_mode(&mut self, input: &mut ByteFormat, output: &mut ByteFormat);
-    fn u8_drag_value(&mut self, n: &mut u8);
-    fn u16_drag_value(&mut self, n: &mut u16);
-    fn u32_drag_value(&mut self, n: &mut u32);
-    fn u64_drag_value(&mut self, n: &mut u64);
+    fn u8_drag_value_hex(&mut self, n: &mut u8) -> Response;
+    fn u16_drag_value_hex(&mut self, n: &mut u16) -> Response;
+    fn u32_drag_value_hex(&mut self, n: &mut u32) -> Response;
+    fn u64_drag_value_hex(&mut self, n: &mut u64) -> Response;
+    fn u8_drag_value_dec(&mut self, n: &mut u8) -> Response;
+    fn u16_drag_value_dec(&mut self, n: &mut u16) -> Response;
+    fn u32_drag_value_dec(&mut self, n: &mut u32) -> Response;
+    fn u64_drag_value_dec(&mut self, n: &mut u64) -> Response;
 }
 
 impl UiElements for Ui {
@@ -233,20 +237,36 @@ impl UiElements for Ui {
             });
     }
 
-    fn u8_drag_value(&mut self, n: &mut u8) {
-        self.add(DragValue::new(n).hexadecimal(2, false, true));
+    fn u8_drag_value_hex(&mut self, n: &mut u8) -> Response {
+        self.add(DragValue::new(n).hexadecimal(2, false, true))
     }
 
-    fn u16_drag_value(&mut self, n: &mut u16) {
-        self.add(DragValue::new(n).hexadecimal(4, false, true));
+    fn u16_drag_value_hex(&mut self, n: &mut u16) -> Response {
+        self.add(DragValue::new(n).hexadecimal(4, false, true))
     }
 
-    fn u32_drag_value(&mut self, n: &mut u32) {
-        self.add(DragValue::new(n).speed(100).hexadecimal(8, false, true));
+    fn u32_drag_value_hex(&mut self, n: &mut u32) -> Response {
+        self.add(DragValue::new(n).speed(50).hexadecimal(8, false, true))
     }
 
-    fn u64_drag_value(&mut self, n: &mut u64) {
-        self.add(DragValue::new(n).speed(100).hexadecimal(16, false, true));
+    fn u64_drag_value_hex(&mut self, n: &mut u64) -> Response {
+        self.add(DragValue::new(n).speed(100).hexadecimal(16, false, true))
+    }
+
+    fn u8_drag_value_dec(&mut self, n: &mut u8) -> Response {
+        self.add(DragValue::new(n))
+    }
+
+    fn u16_drag_value_dec(&mut self, n: &mut u16) -> Response {
+        self.add(DragValue::new(n))
+    }
+
+    fn u32_drag_value_dec(&mut self, n: &mut u32) -> Response {
+        self.add(DragValue::new(n))
+    }
+
+    fn u64_drag_value_dec(&mut self, n: &mut u64) -> Response {
+        self.add(DragValue::new(n))
     }
 }
 
@@ -279,7 +299,10 @@ pub fn control_string(ui: &mut egui::Ui, string: &mut String, enabled: bool) -> 
 }
 
 // fn u8_drag_value(&mut self, n: &mut u8);
-// fn u32_drag_value(&mut self, n: &mut u32);
+pub fn u32_drag_value(ui: &mut egui::Ui, n: &mut u32) -> Response {
+    ui.add(DragValue::new(n).speed(50).hexadecimal(8, false, true))
+}
+
 pub fn u64_drag_value(ui: &mut egui::Ui, n: &mut u64) -> Response {
     ui.add(DragValue::new(n).speed(100).hexadecimal(16, false, true))
 }

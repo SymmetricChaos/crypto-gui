@@ -67,7 +67,7 @@ impl CipherFrame for DesFrame {
         ui.add_enabled_ui(self.cipher.mode == BlockCipherMode::Ctr, |ui| {
             ui.subheading("Counter");
             ui.label("In CTR mode the cipher must have a 64-bit counter value provided.");
-            ui.u64_drag_value(&mut self.cipher.ctr);
+            ui.u64_drag_value_hex(&mut self.cipher.ctr);
         });
 
         ui.add_space(16.0);

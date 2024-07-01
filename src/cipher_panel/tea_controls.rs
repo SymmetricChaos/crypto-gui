@@ -45,7 +45,7 @@ impl CipherFrame for TeaFrame {
         ui.subheading("Key");
         ui.label("TEA uses four 32-bit keys or, equivalently, a single 128-bit key.");
         for i in 0..4 {
-            ui.u32_drag_value(&mut self.cipher.key[i])
+            ui.u32_drag_value_hex(&mut self.cipher.key[i]);
         }
 
         ui.add_space(8.0);
@@ -53,7 +53,7 @@ impl CipherFrame for TeaFrame {
         ui.add_enabled_ui(self.cipher.mode == BlockCipherMode::Ctr, |ui| {
             ui.subheading("Counter");
             ui.label("In CTR mode the cipher must have a 64-bit counter value provided.");
-            ui.u64_drag_value(&mut self.cipher.ctr);
+            ui.u64_drag_value_hex(&mut self.cipher.ctr);
         });
 
         ui.add_space(16.0);

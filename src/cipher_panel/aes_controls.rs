@@ -49,10 +49,10 @@ impl CipherFrame for AesFrame {
 
         ui.subheading("Key");
         ui.label("AES128 uses four 32-bit keys or, equivalently, a single 128-bit key.");
-        ui.u32_drag_value(&mut self.cipher.key[0]);
-        ui.u32_drag_value(&mut self.cipher.key[1]);
-        ui.u32_drag_value(&mut self.cipher.key[2]);
-        ui.u32_drag_value(&mut self.cipher.key[3]);
+        ui.u32_drag_value_hex(&mut self.cipher.key[0]);
+        ui.u32_drag_value_hex(&mut self.cipher.key[1]);
+        ui.u32_drag_value_hex(&mut self.cipher.key[2]);
+        ui.u32_drag_value_hex(&mut self.cipher.key[3]);
 
         ui.add_space(8.0);
 

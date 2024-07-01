@@ -62,11 +62,11 @@ impl CipherFrame for ChaChaFrame {
         ui.subheading("Key");
         if self.ex {
             for i in 0..4 {
-                ui.u32_drag_value(&mut self.extended.key[i]);
+                ui.u32_drag_value_hex(&mut self.extended.key[i]);
             }
         } else {
             for i in 0..4 {
-                ui.u32_drag_value(&mut self.regular.key[i]);
+                ui.u32_drag_value_hex(&mut self.regular.key[i]);
             }
         }
 
@@ -75,20 +75,20 @@ impl CipherFrame for ChaChaFrame {
         ui.label("A nonce should never be reused with the same key.");
         if self.ex {
             for i in 0..3 {
-                ui.u32_drag_value(&mut self.extended.nonce[i]);
+                ui.u32_drag_value_hex(&mut self.extended.nonce[i]);
             }
         } else {
             for i in 0..2 {
-                ui.u32_drag_value(&mut self.regular.nonce[i]);
+                ui.u32_drag_value_hex(&mut self.regular.nonce[i]);
             }
         }
         ui.add_space(8.0);
         ui.subheading("Counter");
         ui.label("The counter ensures that each block of the keystream is different. It can usually be left to start at zero.");
         if self.ex {
-            ui.u32_drag_value(&mut self.extended.ctr);
+            ui.u32_drag_value_hex(&mut self.extended.ctr);
         } else {
-            ui.u64_drag_value(&mut self.regular.ctr);
+            ui.u64_drag_value_hex(&mut self.regular.ctr);
         }
 
         ui.add_space(8.0);

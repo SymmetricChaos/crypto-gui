@@ -55,7 +55,7 @@ impl CipherFrame for BlowfishFrame {
             }
         });
         for i in self.cipher.key.iter_mut() {
-            ui.u8_drag_value(i)
+            ui.u8_drag_value_hex(i);
         }
 
         ui.add_space(8.0);
@@ -73,7 +73,7 @@ impl CipherFrame for BlowfishFrame {
         ui.add_enabled_ui(self.cipher.mode == BlockCipherMode::Ctr, |ui| {
             ui.subheading("Counter");
             ui.label("In CTR mode the cipher must have a 64-bit counter provided.");
-            ui.u64_drag_value(&mut self.cipher.ctr);
+            ui.u64_drag_value_hex(&mut self.cipher.ctr);
         });
 
         ui.add_space(16.0);

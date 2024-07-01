@@ -31,12 +31,12 @@ impl CipherFrame for Salsa20Frame {
 
         ui.subheading("Key");
         for i in 0..4 {
-            ui.u32_drag_value(&mut self.cipher.key[i]);
+            ui.u32_drag_value_hex(&mut self.cipher.key[i]);
         }
         ui.add_space(8.0);
         ui.subheading("Nonce");
         for i in 0..2 {
-            ui.u32_drag_value(&mut self.cipher.nonce[i]);
+            ui.u32_drag_value_hex(&mut self.cipher.nonce[i]);
         }
         ui.add_space(8.0);
         ui.horizontal(|ui| {
