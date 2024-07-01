@@ -54,6 +54,7 @@ mod columnar_controls;
 mod decoder_ring_controls;
 mod des_controls;
 mod diagonal_columnar_controls;
+mod diffie_hellman_controls;
 mod dryad_controls;
 mod elgamal_controls;
 mod enigma_controls;

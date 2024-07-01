@@ -4,9 +4,9 @@ use utils::math_functions::modular_pow;
 use crate::Cipher;
 
 pub struct DiffieHellman {
-    private_keys: Vec<u32>,
-    generator: u32,
-    modulus: u32,
+    pub private_keys: Vec<u32>,
+    pub generator: u32,
+    pub modulus: u32,
 }
 
 impl Default for DiffieHellman {
