@@ -5,6 +5,7 @@ use ciphers::{
     traits::Cipher,
 };
 use des_controls::DesFrame;
+use diffie_hellman_controls::DiffieHellmanFrame;
 use egui::Ui;
 use idea_controls::IdeaFrame;
 use triple_des_controls::TripleDesFrame;
@@ -193,6 +194,7 @@ pub struct CipherInterface {
     chacha: ChaChaFrame,
     chacha20poly1305: ChaCha20Poly1305Frame,
     des: DesFrame,
+    diffie_hellman: DiffieHellmanFrame,
     idea: IdeaFrame,
     rc4: Rc4Frame,
     rc5: Rc5Frame,
@@ -309,6 +311,7 @@ impl CipherInterface {
                 CipherId::ChaCha,
                 CipherId::ChaCha20Poly1305,
                 CipherId::Des,
+                CipherId::DiffieHellman,
                 CipherId::Idea,
                 CipherId::Rc4,
                 CipherId::Rc5,
@@ -352,6 +355,7 @@ impl CipherInterface {
             CipherId::Decoder => &mut self.decoder_ring,
             CipherId::Des => &mut self.des,
             CipherId::DiagonalColumnar => &mut self.diagonal_columnar,
+            CipherId::DiffieHellman => &mut self.diffie_hellman,
             CipherId::Dryad => &mut self.dryad,
             CipherId::Enigma => &mut self.enigma,
             CipherId::FourSquare => &mut self.four_square,

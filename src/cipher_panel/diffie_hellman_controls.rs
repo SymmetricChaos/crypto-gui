@@ -44,6 +44,7 @@ impl CipherFrame for DiffieHellmanFrame {
             ui.error_text("");
         }
 
+        ui.add_space(8.0);
         ui.subheading("Base");
         if ui.u32_drag_value_dec(&mut self.cipher.generator).changed() {
             self.cipher.generator = self.cipher.generator.clamp(2, self.cipher.modulus - 1);
@@ -51,13 +52,14 @@ impl CipherFrame for DiffieHellmanFrame {
         }
         if !self.g_is_valid {
             ui.error_text(
-                "Base must be a generator of the multiplicative group defined by the modulus",
+                "Base must be coprime to the modulus so that it is a generator of the multiplicative group",
             );
         } else {
             ui.error_text("");
         }
 
-        ui.subheading("Private Keys");
+        ui.add_space(8.0);
+        ui.subheading("Private Keys with Corresponding Public Keys");
         ui.horizontal(|ui| {
             if ui.button("-").clicked() {
                 if self.cipher.private_keys.len() > 2 {
@@ -67,15 +69,19 @@ impl CipherFrame for DiffieHellmanFrame {
             ui.label(format!("{}", self.cipher.private_keys.len()));
             if ui.button("+").clicked() {
                 if self.cipher.private_keys.len() < 10 {
-                    self.cipher.private_keys.pop();
+                    self.cipher.private_keys.push(2);
                 }
             };
         });
-        for i in 0..self.cipher.private_keys.len() {
-            ui.u32_drag_value_dec(&mut self.cipher.private_keys[i]);
+        for (i, p) in self.cipher.public_keys().iter().enumerate() {
+            ui.horizontal(|ui| {
+                ui.u32_drag_value_dec(&mut self.cipher.private_keys[i]);
+                ui.label(p.to_string());
+            });
         }
 
-        ui.subheading("Secret Key");
+        ui.add_space(8.0);
+        ui.subheading("Shared Secret Key");
         ui.label(self.cipher.shared_key().to_string());
 
         ui.add_space(8.0);
