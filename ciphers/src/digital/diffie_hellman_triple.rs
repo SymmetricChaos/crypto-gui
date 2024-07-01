@@ -4,17 +4,19 @@ use utils::math_functions::modular_pow;
 use crate::Cipher;
 
 pub struct DiffieHellman {
-    private_keys: Vec<u32>,
-    generator: u32,
-    modulus: u32,
+    a: u32,
+    b: u32,
+    g: u32,
+    m: u32,
 }
 
 impl Default for DiffieHellman {
     fn default() -> Self {
         Self {
-            private_keys: vec![4, 3],
-            generator: 5,
-            modulus: 23,
+            a: 4,
+            b: 3,
+            g: 5,
+            m: 23,
         }
     }
 }
@@ -22,23 +24,18 @@ impl Default for DiffieHellman {
 impl DiffieHellman {
     // Check if g is a generator in the multiplicative group
     pub fn g_is_valid(&self) -> bool {
-        gcd(self.generator, self.modulus) == 1
+        gcd(self.g, self.m) == 1
     }
 
-    pub fn public_keys(&self) -> Vec<u32> {
-        Vec::from_iter(
-            self.private_keys
-                .iter()
-                .map(|p| modular_pow(self.generator, *p, self.modulus)),
-        )
+    pub fn public_keys(&self) -> (u32, u32) {
+        let pa = modular_pow(self.a, self.g, self.m);
+        let pb = modular_pow(self.b, self.g, self.m);
+        (pa, pb)
     }
 
-    pub fn shared_key(&self) -> u32 {
-        let mut b = self.generator;
-        for k in self.private_keys.iter() {
-            b = modular_pow(b, *k, self.modulus);
-        }
-        b
+    pub fn private_key(&self) -> u32 {
+        let pa = modular_pow(self.a, self.g, self.m);
+        modular_pow(self.b, pa, self.m)
     }
 }
 
@@ -61,7 +58,7 @@ mod diffie_hellman_tests {
     #[test]
     fn test_keys() {
         let cipher = DiffieHellman::default();
-        assert_eq!(vec![4, 10], cipher.public_keys());
-        assert_eq!(18, cipher.shared_key());
+        assert_eq!((4, 10), cipher.public_keys());
+        assert_eq!(18, cipher.private_key());
     }
 }

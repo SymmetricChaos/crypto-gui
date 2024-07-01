@@ -240,7 +240,7 @@ pub fn is_prime64<N: Into<u64>>(n: N) -> bool {
     true
 }
 
-pub fn modular_pow(pow: u32, base: u32, modulus: u32) -> u32 {
+pub fn modular_pow(base: u32, pow: u32, modulus: u32) -> u32 {
     let mut out = 1;
 
     for _ in 0..pow {
