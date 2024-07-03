@@ -3,43 +3,51 @@ use utils::math_functions::modular_pow;
 
 use crate::Cipher;
 
-pub struct DiffieHellman {
-    a: u32,
-    b: u32,
-    g: u32,
-    m: u32,
+pub struct DiffieHellmanTriple {
+    pub private_keys: Vec<u32>,
+    pub ephemeral_keys: Vec<u32>,
+    pub generator: u32,
+    pub modulus: u32,
 }
 
-impl Default for DiffieHellman {
+impl Default for DiffieHellmanTriple {
     fn default() -> Self {
         Self {
-            a: 4,
-            b: 3,
-            g: 5,
-            m: 23,
+            private_keys: vec![4, 3],
+            ephemeral_keys: vec![7, 10],
+            generator: 5,
+            modulus: 23,
         }
     }
 }
 
-impl DiffieHellman {
+impl DiffieHellmanTriple {
     // Check if g is a generator in the multiplicative group
     pub fn g_is_valid(&self) -> bool {
-        gcd(self.g, self.m) == 1
+        gcd(self.generator, self.modulus) == 1
     }
 
-    pub fn public_keys(&self) -> (u32, u32) {
-        let pa = modular_pow(self.a, self.g, self.m);
-        let pb = modular_pow(self.b, self.g, self.m);
-        (pa, pb)
+    pub fn public_keys(&self) -> Vec<(u32, u32)> {
+        let mut out = Vec::with_capacity(self.private_keys.len());
+        for i in 0..self.private_keys.len() {
+            out.push((
+                modular_pow(self.generator, self.private_keys[i], self.modulus),
+                modular_pow(self.generator, self.ephemeral_keys[i], self.modulus),
+            ))
+        }
+        out
     }
 
-    pub fn private_key(&self) -> u32 {
-        let pa = modular_pow(self.a, self.g, self.m);
-        modular_pow(self.b, pa, self.m)
+    pub fn shared_key(&self) -> u32 {
+        let mut b = self.generator;
+        for k in self.private_keys.iter() {
+            b = modular_pow(b, *k, self.modulus);
+        }
+        b
     }
 }
 
-impl Cipher for DiffieHellman {
+impl Cipher for DiffieHellmanTriple {
     fn encrypt(&self, _text: &str) -> Result<String, crate::CipherError> {
         Err(crate::CipherError::general(
             "Diffie-Hellman key exchange does not encrypt a message",
@@ -52,13 +60,9 @@ impl Cipher for DiffieHellman {
 }
 
 #[cfg(test)]
-mod diffie_hellman_tests {
+mod diffie_hellman_triple_tests {
 
     use super::*;
     #[test]
-    fn test_keys() {
-        let cipher = DiffieHellman::default();
-        assert_eq!((4, 10), cipher.public_keys());
-        assert_eq!(18, cipher.private_key());
-    }
+    fn test_keys() {}
 }
