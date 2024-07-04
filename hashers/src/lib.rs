@@ -9,6 +9,7 @@ pub mod fxhash;
 pub mod hmac;
 pub mod ids;
 pub mod keccak;
+pub mod lm;
 pub mod md4;
 pub mod md5;
 pub mod mgf1;
