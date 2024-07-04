@@ -1,6 +1,6 @@
 use std::ops::Shr;
 
-use crate::CipherError;
+use crate::errors::HasherError;
 
 use super::des_arrays::{KEYSHIFT, SBOXES};
 
@@ -133,7 +133,7 @@ pub fn round(input: u64, key: u64) -> u64 {
     r | ((f(r, key) ^ l) >> 32)
 }
 
-pub fn des_ksa(key: u64) -> Result<[u64; 16], CipherError> {
+pub fn des_ksa(key: u64) -> Result<[u64; 16], HasherError> {
     // test_des_key(key)?;
     let mut subkeys = [0; 16];
     let key = pc1(key) >> 8;
@@ -148,10 +148,10 @@ pub fn des_ksa(key: u64) -> Result<[u64; 16], CipherError> {
     Ok(subkeys)
 }
 
-pub fn test_des_key(key: u64) -> Result<(), CipherError> {
+pub fn test_des_key(key: u64) -> Result<(), HasherError> {
     for byte in key.to_le_bytes() {
         if byte.count_ones() % 2 == 0 {
-            return Err(CipherError::key(
+            return Err(HasherError::key(
                 "all bytes of a DES key must have odd parity, the eighth bit is the parity bit",
             ));
         }
