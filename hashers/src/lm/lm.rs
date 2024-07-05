@@ -1,6 +1,4 @@
 use core::panic;
-
-use num::traits::ToBytes;
 use utils::byte_formatting::ByteFormat;
 
 use crate::{
@@ -10,7 +8,7 @@ use crate::{
 };
 
 // derived from the ASCII string "KGS!@#$%"
-const WORD: u64 = 0x4B47532140232425;
+pub const LM_WORD: u64 = 0x4B47532140232425;
 
 pub struct Lm {
     pub output_format: ByteFormat,
@@ -41,9 +39,9 @@ impl ClassicHasher for Lm {
         let k2 = expand_56_to_64(bytes[7..14].try_into().unwrap());
 
         cipher.ksa(k1).unwrap();
-        out.extend_from_slice(&cipher.encrypt_block(WORD).to_be_bytes());
+        out.extend_from_slice(&cipher.encrypt_block(LM_WORD).to_be_bytes());
         cipher.ksa(k2).unwrap();
-        out.extend_from_slice(&cipher.encrypt_block(WORD).to_be_bytes());
+        out.extend_from_slice(&cipher.encrypt_block(LM_WORD).to_be_bytes());
 
         out
     }

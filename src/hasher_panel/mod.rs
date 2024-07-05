@@ -3,10 +3,11 @@ mod blake3_controls;
 mod blake_controls;
 mod fnv_controls;
 mod hmac_controls;
+mod lm_controls;
 mod md4_controls;
 mod md5_controls;
 mod mgf1_controls;
-pub mod pbkdf2_controls;
+mod pbkdf2_controls;
 mod pearson_controls;
 mod poly1305_controls;
 mod radio_gatun;
@@ -21,6 +22,7 @@ use hashers::{
     errors::HasherError,
     ids::{hasher_categories::HasherCategory, HasherId},
 };
+use lm_controls::LmFrame;
 use pbkdf2_controls::Pbkdf2Frame;
 
 use self::{
@@ -64,6 +66,7 @@ pub struct HasherInterface {
     blake3: Blake3Frame,
     fnv: FnvFrame,
     hmac: HmacFrame,
+    lm: LmFrame,
     md4: Md4Frame,
     md5: Md5Frame,
     mgf1: Mgf1Frame,
@@ -101,7 +104,12 @@ impl HasherInterface {
         );
 
         combox_box(
-            &[HasherId::Pearson, HasherId::SipHash, HasherId::Fnv],
+            &[
+                HasherId::Fnv,
+                HasherId::Lm,
+                HasherId::Pearson,
+                HasherId::SipHash,
+            ],
             active_hasher,
             HasherCategory::NonCryptographic,
             ui,
@@ -116,6 +124,7 @@ impl HasherInterface {
             HasherId::Blake3 => &mut self.blake3,
             HasherId::Fnv => &mut self.fnv,
             HasherId::Hmac => &mut self.hmac,
+            HasherId::Lm => &mut self.lm,
             HasherId::Md4 => &mut self.md4,
             HasherId::Md5 => &mut self.md5,
             HasherId::Mgf1 => &mut self.mgf1,
