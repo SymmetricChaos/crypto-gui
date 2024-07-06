@@ -48,7 +48,7 @@ impl ClassicHasher for Sha1 {
         let mut d = 0x10325476_u32;
         let mut e = 0xc3d2e1f0_u32;
 
-        // Step 4. Process message in 16-word blocks
+        // Step 4. Process message in 64-byte (512-bit) blocks
         for block in input.chunks_exact(64) {
             let mut ta = a;
             let mut tb = b;
@@ -56,6 +56,7 @@ impl ClassicHasher for Sha1 {
             let mut td = d;
             let mut te = e;
 
+            // Extract 16 words from the block and make them the first 16 values of the array
             let mut x = [0u32; 80];
             for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)).take(16) {
                 *elem = u32::from_be_bytes(chunk.try_into().unwrap());
@@ -63,12 +64,15 @@ impl ClassicHasher for Sha1 {
 
             // Extend the 16 words to 80 words
             for i in 16..80 {
+                // the only difference from sha0 is the .rotate_left(1)
                 x[i] = (x[i - 3] ^ x[i - 8] ^ x[i - 14] ^ x[i - 16]).rotate_left(1)
             }
 
+            // Apply 80 rounds of mixing
             for i in 0..80 {
                 let mut f = 0;
                 let mut g = 0;
+                // Round functions and round constant are changed every 20 rounds
                 if i < 20 {
                     f = (tb & tc) | (!tb & td);
                     g = 0x5a827999;
@@ -91,7 +95,7 @@ impl ClassicHasher for Sha1 {
                     .wrapping_add(f)
                     .wrapping_add(te)
                     .wrapping_add(g)
-                    .wrapping_add(x[i]);
+                    .wrapping_add(x[i]); // Each round a new word from the array x is added here
                 te = td;
                 td = tc;
                 tc = tb.rotate_left(30);
