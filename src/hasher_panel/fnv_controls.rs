@@ -45,7 +45,7 @@ impl HasherFrame for FnvFrame {
         );
 
         ui.add_space(16.0);
-        ui.label("The initialization value is for FNV-1 and (FNV-1a) was created by hashing the ASCII string \"chongo <Landon Curt Noll> /\\../\\\" with the zero basis version FNV-1, that is starting with a value of zero. These zero basis version are called FNV-0.");
+        ui.label("Zero basis mode initializes the hash with all zeroes and when used this way the hasher is called FNV-0. The usual initialization value for FNV-1 and (FNV-1a) was created by hashing the ASCII string \"chongo <Landon Curt Noll> /\\../\\\" in zero basis mode.");
         ui.checkbox(
             &mut self.hasher.zero_basis,
             "Use Zero Basis Mode (not recommended)",
@@ -53,24 +53,24 @@ impl HasherFrame for FnvFrame {
 
         ui.add_space(16.0);
         ui.subheading("Hash Size");
-        ui.label("The FNV primes are of a specific form, close to a power of 256, which the developers found to be highly effective at dispersing the bits of the input throughout the state. Four FNV variants are provided here but the original FNV paper also defines constants for 512 and 1024 versions of the algorithm. However these run much more slowly, take more space to store, and offer no practical increase in collision resistance.");
+        ui.label("The FNV primes are of a specific form, close to a power of 256, which the developers found to be highly effective at dispersing the bits of the input throughout the state. Four FNV variants are provided here but the original FNV paper also defines constants for 512 and 1024 versions of the algorithm. However these run more slowly, take more space to store, and offer no practical increase in collision resistance.");
         match self.hasher.size {
             FnvSize::P32 => ui.label(format!(
-                "The 32-bit FNV-1 prime is {} and the initialization value is {}",
+                "The 32-bit FNV prime is {} and the initialization value is {}",
                 P32, O32,
             )),
             FnvSize::P64 => ui.label(format!(
-                "The 64-bit FNV-1 prime is {} and the initialization value is {}",
+                "The 64-bit FNV prime is {} and the initialization value is {}",
                 P64, O64,
             )),
             FnvSize::P128 => ui.label(format!(
-                "The 128-bit FNV-1 prime is {} and the initialization value is {}",
+                "The 128-bit FNV prime is {} and the initialization value is {}",
                 P128, O128,
             )),
-            FnvSize::P256 => ui.label(format!(
-                "The 256-bit FNV-1 prime is {} and the initialization value is {}",
-                P256, O256,
-            )),
+            // The P256 constants don't format nicely so they are hard-coded here.
+            FnvSize::P256 => ui.label(
+                "The 256-bit FNV prime is 374144419156711147060143317175368453031918731002211 and the initialization value is 100029257958052580907070968620625704837092796014241193945225284501741471925557", 
+            ),
         };
 
         ui.add_space(16.0);
