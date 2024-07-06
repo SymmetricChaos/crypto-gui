@@ -24,7 +24,7 @@ impl Default for Pbkdf2Frame {
 
 impl HasherFrame for Pbkdf2Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        ui.byte_io_mode(
+        ui.byte_io_mode_hasher(
             &mut self.hasher.input_format,
             &mut self.hasher.output_format,
         );

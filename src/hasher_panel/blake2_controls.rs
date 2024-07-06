@@ -155,11 +155,11 @@ impl HasherFrame for Blake2Frame {
 
         ui.add_space(16.0);
         match self.variant {
-            Blake2Variant::Big => ui.byte_io_mode(
+            Blake2Variant::Big => ui.byte_io_mode_hasher(
                 &mut self.hasher_b.input_format,
                 &mut self.hasher_b.output_format,
             ),
-            Blake2Variant::Small => ui.byte_io_mode(
+            Blake2Variant::Small => ui.byte_io_mode_hasher(
                 &mut self.hasher_s.input_format,
                 &mut self.hasher_s.output_format,
             ),

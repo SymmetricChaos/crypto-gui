@@ -42,6 +42,7 @@ pub trait UiElements {
     );
     fn binary_to_text_input_mode(&mut self, current_value: &mut ByteFormat);
     fn byte_io_mode(&mut self, input: &mut ByteFormat, output: &mut ByteFormat);
+    fn byte_io_mode_hasher(&mut self, input: &mut ByteFormat, output: &mut ByteFormat);
     fn u8_drag_value_hex(&mut self, n: &mut u8) -> Response;
     fn u16_drag_value_hex(&mut self, n: &mut u16) -> Response;
     fn u32_drag_value_hex(&mut self, n: &mut u32) -> Response;
@@ -189,6 +190,35 @@ impl UiElements for Ui {
         });
     }
 
+    fn byte_io_mode_hasher(&mut self, input: &mut ByteFormat, output: &mut ByteFormat) {
+        self.collapsing("Input Format", |ui| {
+            ui.label("Input can be text (interpreted as UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
+            ui.horizontal(|ui| {
+                ui.selectable_value(
+                    input,
+                    ByteFormat::Utf8,
+                    "Text (UTF-8)",
+                );
+                ui.selectable_value(
+                    input,
+                    ByteFormat::Hex,
+                    "Hexadecimal",
+                );
+                ui.selectable_value(input, ByteFormat::Base64, "Base64");
+            });
+        });
+
+        self.add_space(8.0);
+
+        self.collapsing("Output Format", |ui| {
+            ui.label("Output can be hexadecimal representing bytes or Base64 representing bytes.");
+            ui.horizontal(|ui| {
+                ui.selectable_value(output, ByteFormat::Hex, "Hexadecimal");
+                ui.selectable_value(output, ByteFormat::Base64, "Base64");
+            });
+        });
+    }
+
     fn copy_to_clipboard<S: ToString>(&mut self, text: S) {
         if self
             .button("📋")
@@ -246,11 +276,11 @@ impl UiElements for Ui {
     }
 
     fn u32_drag_value_hex(&mut self, n: &mut u32) -> Response {
-        self.add(DragValue::new(n).speed(50).hexadecimal(8, false, true))
+        self.add(DragValue::new(n).hexadecimal(8, false, true))
     }
 
     fn u64_drag_value_hex(&mut self, n: &mut u64) -> Response {
-        self.add(DragValue::new(n).speed(100).hexadecimal(16, false, true))
+        self.add(DragValue::new(n).hexadecimal(16, false, true))
     }
 
     fn u8_drag_value_dec(&mut self, n: &mut u8) -> Response {

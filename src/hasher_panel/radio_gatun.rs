@@ -25,7 +25,7 @@ impl Default for RadioGatunFrame {
 
 impl RadioGatunFrame {
     fn byte_formatting(&mut self, ui: &mut egui::Ui) {
-        ui.byte_io_mode(
+        ui.byte_io_mode_hasher(
             &mut self.hasher32.input_format,
             &mut self.hasher32.output_format,
         );

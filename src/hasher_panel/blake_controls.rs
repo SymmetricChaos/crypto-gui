@@ -113,19 +113,19 @@ impl HasherFrame for BlakeFrame {
         ui.add_space(16.0);
 
         match self.variant {
-            BlakeVariant::B224 => ui.byte_io_mode(
+            BlakeVariant::B224 => ui.byte_io_mode_hasher(
                 &mut self.hasher_224.input_format,
                 &mut self.hasher_224.output_format,
             ),
-            BlakeVariant::B256 => ui.byte_io_mode(
+            BlakeVariant::B256 => ui.byte_io_mode_hasher(
                 &mut self.hasher_256.input_format,
                 &mut self.hasher_256.output_format,
             ),
-            BlakeVariant::B384 => ui.byte_io_mode(
+            BlakeVariant::B384 => ui.byte_io_mode_hasher(
                 &mut self.hasher_384.input_format,
                 &mut self.hasher_384.output_format,
             ),
-            BlakeVariant::B512 => ui.byte_io_mode(
+            BlakeVariant::B512 => ui.byte_io_mode_hasher(
                 &mut self.hasher_512.input_format,
                 &mut self.hasher_512.output_format,
             ),
