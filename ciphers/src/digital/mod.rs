@@ -13,3 +13,4 @@ pub mod seal;
 pub mod shamir_secret_sharing;
 
 pub mod block_ciphers;
+pub mod secret_splitting;
