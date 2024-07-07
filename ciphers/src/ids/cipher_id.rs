@@ -64,6 +64,7 @@ pub enum CipherId {
     TwoSquare,
     Vic,
     Vigenere,
+    XorSplitting,
     Xtea,
 }
 
@@ -146,6 +147,7 @@ impl Display for CipherId {
             CipherId::TwoSquare => "Two-Square",
             CipherId::Vic => "VIC",
             CipherId::Vigenere => "Vigenère",
+            CipherId::XorSplitting => "XOR Secret Splitting",
             CipherId::Xtea => "XTEA",
         };
         write!(f, "{}", name)

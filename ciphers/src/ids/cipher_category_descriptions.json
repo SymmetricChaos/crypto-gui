@@ -7,5 +7,6 @@
   "Tactical": "Tactical ciphers exist to encrypt military information that will quickly become irrelevant. As a result they provide only a little security.",
   "Polybius": "These ciphers are based on the the Polybius square which converts characters into a pair of numbers.",
   "Digital": "Digital ciphers are created to work on modern digital computers and operates on bytes of data rather than on characters of text.",
-  "Other": "I couldn't think of a category to put these ciphers into. Feel free to make a suggestion!"
+  "Secret Sharing": "Several forms of encryption exist that split a secret into multiple pieces so that each individually gives no information about the secret.",
+  "Composite": "Composite ciphers are made by combining multiple ciphers of different kinds."
 }

@@ -9,6 +9,7 @@ use diffie_hellman_controls::DiffieHellmanFrame;
 use egui::Ui;
 use idea_controls::IdeaFrame;
 use triple_des_controls::TripleDesFrame;
+use xor_splitting_controls::XorSecretSplittingFrame;
 
 use self::{
     adfgvx_controls::AdfgvxFrame, aes_controls::AesFrame, affine_controls::AffineFrame,
@@ -93,6 +94,7 @@ mod turning_grille_controls;
 mod two_square_controls;
 mod vic_controls;
 mod vigenere_controls;
+mod xor_splitting_controls;
 
 pub trait CipherFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
@@ -206,6 +208,7 @@ pub struct CipherInterface {
     // Other
     shamir: ShamirSecretSharingFrame,
     vic: VicFrame,
+    xor_splitting: XorSecretSplittingFrame,
 }
 
 impl CipherInterface {
@@ -326,9 +329,22 @@ impl CipherInterface {
         );
 
         combox_box(
-            &[CipherId::Shamir, CipherId::Vic],
+            &[CipherId::Shamir, CipherId::XorSplitting],
             active_cipher,
-            CipherCategory::Other,
+            CipherCategory::Sharing,
+            ui,
+        );
+
+        combox_box(
+            &[
+                CipherId::Vic,
+                CipherId::Adfgvx,
+                CipherId::B64,
+                CipherId::Bifid,
+                CipherId::Trifid,
+            ],
+            active_cipher,
+            CipherCategory::Composite,
             ui,
         );
     }
@@ -392,6 +408,7 @@ impl CipherInterface {
             CipherId::TwoSquare => &mut self.two_square,
             CipherId::Vic => &mut self.vic,
             CipherId::Vigenere => &mut self.vigenere,
+            CipherId::XorSplitting => &mut self.xor_splitting,
             _ => todo!("<<<CIPHER NOT FOUND>>>"),
         }
     }

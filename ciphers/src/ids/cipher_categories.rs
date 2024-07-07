@@ -13,7 +13,8 @@ pub enum CipherCategory {
     Tactical,
     Polybius,
     Digital,
-    Other,
+    Sharing,
+    Composite,
 }
 
 impl Default for CipherCategory {
@@ -42,7 +43,8 @@ impl Display for CipherCategory {
             CipherCategory::Tactical => "Tactical",
             CipherCategory::Polybius => "Polybius",
             CipherCategory::Digital => "Digital",
-            CipherCategory::Other => "Other",
+            CipherCategory::Sharing => "Secret Sharing",
+            CipherCategory::Composite => "Composite",
         };
         write!(f, "{}", name)
     }
