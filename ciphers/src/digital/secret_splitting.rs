@@ -4,14 +4,14 @@ use utils::byte_formatting::ByteFormat;
 
 use crate::{Cipher, CipherError};
 
-pub struct SecretSplitting {
+pub struct XorSecretSplitting {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
     pub n_splits: u32,
     pub sep: String,
 }
 
-impl Default for SecretSplitting {
+impl Default for XorSecretSplitting {
     fn default() -> Self {
         Self {
             output_format: ByteFormat::Hex,
@@ -22,12 +22,12 @@ impl Default for SecretSplitting {
     }
 }
 
-impl SecretSplitting {
+impl XorSecretSplitting {
     fn encrypt_bytes(&self, bytes: &[u8]) -> Vec<Vec<u8>> {
         assert!(self.n_splits >= 2);
 
         let mut rng = thread_rng();
-        let mut splits = vec![vec![0; self.n_splits as usize]; bytes.len()];
+        let mut splits = vec![vec![0; bytes.len()]; self.n_splits as usize];
 
         // The secret is placed arbitrarily
         splits[0] = bytes.to_vec();
@@ -39,22 +39,22 @@ impl SecretSplitting {
 
         // Each other split is XORed into the secret
         for i in 1..self.n_splits {
-            for j in 0..self.n_splits {
-                splits[0][j as usize] ^= splits[i as usize][j as usize]
+            for j in 0..bytes.len() {
+                splits[0][j] ^= splits[i as usize][j]
             }
         }
 
         splits
     }
 
-    fn decrypt_bytes(&self, bytes: &Vec<Vec<u8>>) -> Vec<u8> {
-        for b in bytes.iter() {
-            assert_eq!(b.len(), bytes[0].len())
+    fn decrypt_splits(&self, splits: &Vec<Vec<u8>>) -> Vec<u8> {
+        for b in splits.iter() {
+            assert_eq!(b.len(), splits[0].len())
         }
 
-        let mut out = vec![0; bytes[0].len()];
+        let mut out = vec![0; splits[0].len()];
 
-        for split in bytes {
+        for split in splits {
             for (i, byte) in split.iter().enumerate() {
                 out[i] ^= *byte
             }
@@ -64,7 +64,7 @@ impl SecretSplitting {
     }
 }
 
-impl Cipher for SecretSplitting {
+impl Cipher for XorSecretSplitting {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         if self.n_splits < 2 {
             return Err(CipherError::state(
@@ -98,8 +98,23 @@ impl Cipher for SecretSplitting {
                 return Err(CipherError::input("all splits must be of equal length"));
             }
         }
-        let out = self.decrypt_bytes(&split_bytes);
+        let out = self.decrypt_splits(&split_bytes);
 
         Ok(self.output_format.byte_slice_to_text(&out))
+    }
+}
+
+#[cfg(test)]
+mod secret_splitting_tests {
+
+    use super::*;
+
+    #[test]
+    fn test_split_unsplit() {
+        let cipher = XorSecretSplitting::default();
+        let ptext = "0a1b2c3d4e5f";
+        let ctext = cipher.encrypt(&ptext).unwrap();
+        let dtext = cipher.decrypt(&ctext).unwrap();
+        assert_eq!(ptext, dtext);
     }
 }
