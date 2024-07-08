@@ -8,6 +8,7 @@ pub struct Xtea {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
     pub key: [u32; 4],
+    pub ctr: u64,
     pub mode: BlockCipherMode,
     pub padding: BlockCipherPadding,
 }
@@ -16,6 +17,7 @@ impl Default for Xtea {
     fn default() -> Self {
         Self {
             key: [0, 1, 2, 3],
+            ctr: 0,
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
             mode: BlockCipherMode::default(),

@@ -39,6 +39,8 @@ impl Default for Blowfish {
 }
 
 impl Blowfish {
+    const BLOCKSIZE: u32 = 8;
+
     pub fn parray_string(&self) -> String {
         format!("{:08x?}", self.parray)
     }
@@ -137,7 +139,7 @@ impl Blowfish {
     pub fn encrypt_ctr(&self, bytes: &mut [u8]) {
         let mut ctr = self.ctr;
 
-        for plaintext in bytes.chunks_mut(8) {
+        for plaintext in bytes.chunks_mut(Self::BLOCKSIZE as usize) {
             // Encrypt the counter to create a mask
             let mut mask = u64_to_u32_pair(ctr);
             self.encrypt_u32_pair(&mut mask);
@@ -165,7 +167,7 @@ impl Blowfish {
         // Start chain with an IV
         let mut chain = self.iv.to_le_bytes();
 
-        for source in bytes.chunks_mut(8) {
+        for source in bytes.chunks_mut(Self::BLOCKSIZE as usize) {
             println!("\n\nencrypt");
             println!("chain {:?}", chain);
             // XOR the plaintext into the chain, creating a mixed array
@@ -202,7 +204,7 @@ impl Blowfish {
         // Start chain with an IV
         let mut chain = self.iv.to_le_bytes();
 
-        for source in bytes.chunks_mut(8) {
+        for source in bytes.chunks_mut(Self::BLOCKSIZE as usize) {
             println!("\n\ndecrypt");
             println!("chain {:?}", chain);
 
@@ -269,12 +271,12 @@ impl Cipher for Blowfish {
             .map_err(|_| CipherError::input("byte format error"))?;
 
         match self.padding {
-            BlockCipherPadding::None => none_padding(&mut bytes, 8)?,
-            BlockCipherPadding::Bit => bit_padding(&mut bytes, 8),
+            BlockCipherPadding::None => none_padding(&mut bytes, Self::BLOCKSIZE)?,
+            BlockCipherPadding::Bit => bit_padding(&mut bytes, Self::BLOCKSIZE),
         };
 
         match self.mode {
-            BlockCipherMode::Ecb => ecb_encrypt(self, &mut bytes, 8),
+            BlockCipherMode::Ecb => ecb_encrypt(self, &mut bytes, Self::BLOCKSIZE),
             BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes),
             BlockCipherMode::Cbc => self.encrypt_cbc(&mut bytes),
         };
@@ -292,13 +294,13 @@ impl Cipher for Blowfish {
         };
 
         match self.mode {
-            BlockCipherMode::Ecb => ecb_decrypt(self, &mut bytes, 8),
+            BlockCipherMode::Ecb => ecb_decrypt(self, &mut bytes, Self::BLOCKSIZE),
             BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes),
             BlockCipherMode::Cbc => self.decrypt_cbc(&mut bytes),
         };
 
         match self.padding {
-            BlockCipherPadding::None => none_padding(&mut bytes, 8)?,
+            BlockCipherPadding::None => none_padding(&mut bytes, Self::BLOCKSIZE)?,
             BlockCipherPadding::Bit => strip_bit_padding(&mut bytes)?,
         };
 

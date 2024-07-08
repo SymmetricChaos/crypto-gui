@@ -23,7 +23,7 @@ impl Default for XorSecretSplitting {
 }
 
 impl XorSecretSplitting {
-    fn encrypt_bytes(&self, bytes: &[u8]) -> Vec<Vec<u8>> {
+    pub fn encrypt_bytes(&self, bytes: &[u8]) -> Vec<Vec<u8>> {
         assert!(self.n_splits >= 2);
 
         let mut rng = thread_rng();
@@ -47,7 +47,7 @@ impl XorSecretSplitting {
         splits
     }
 
-    fn decrypt_splits(&self, splits: &Vec<Vec<u8>>) -> Vec<u8> {
+    pub fn decrypt_splits(&self, splits: &Vec<Vec<u8>>) -> Vec<u8> {
         for b in splits.iter() {
             assert_eq!(b.len(), splits[0].len())
         }

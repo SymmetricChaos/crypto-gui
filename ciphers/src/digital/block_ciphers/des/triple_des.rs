@@ -2,7 +2,8 @@ use utils::byte_formatting::ByteFormat;
 
 use crate::{
     digital::block_ciphers::{
-        bit_padding, none_padding, strip_bit_padding, BlockCipherMode, BlockCipherPadding,
+        bit_padding, des::des::Des, none_padding, strip_bit_padding, BlockCipherMode,
+        BlockCipherPadding,
     },
     Cipher, CipherError,
 };
@@ -70,10 +71,10 @@ impl TripleDes {
     }
 
     pub fn encrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        assert!(bytes.len() % 8 == 0);
+        assert!(bytes.len() % Des::BLOCKSIZE as usize == 0);
         let mut out = Vec::with_capacity(bytes.len());
 
-        for plaintext in bytes.chunks_exact(8) {
+        for plaintext in bytes.chunks_exact(Des::BLOCKSIZE as usize) {
             let ciphertext = self.encrypt_block(u64::from_be_bytes(plaintext.try_into().unwrap()));
             out.extend_from_slice(&ciphertext.to_be_bytes());
         }
@@ -82,10 +83,10 @@ impl TripleDes {
     }
 
     pub fn decrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        assert!(bytes.len() % 8 == 0);
+        assert!(bytes.len() % Des::BLOCKSIZE as usize == 0);
         let mut out = Vec::with_capacity(bytes.len());
 
-        for ciphertext in bytes.chunks_exact(8) {
+        for ciphertext in bytes.chunks_exact(Des::BLOCKSIZE as usize) {
             let plaintext = self.decrypt_block(u64::from_be_bytes(ciphertext.try_into().unwrap()));
             out.extend_from_slice(&plaintext.to_be_bytes());
         }
@@ -97,7 +98,7 @@ impl TripleDes {
         let mut ctr = self.ctr;
         let mut out = Vec::with_capacity(bytes.len());
 
-        for plaintext in bytes.chunks_exact(8) {
+        for plaintext in bytes.chunks_exact(Des::BLOCKSIZE as usize) {
             let keytext = self.encrypt_block(ctr).to_le_bytes();
 
             for (k, p) in keytext.into_iter().zip(plaintext.iter()) {
@@ -123,8 +124,8 @@ impl Cipher for TripleDes {
             .map_err(|_| CipherError::input("byte format error"))?;
 
         match self.padding {
-            BlockCipherPadding::None => none_padding(&mut bytes, 8)?,
-            BlockCipherPadding::Bit => bit_padding(&mut bytes, 8),
+            BlockCipherPadding::None => none_padding(&mut bytes, Des::BLOCKSIZE)?,
+            BlockCipherPadding::Bit => bit_padding(&mut bytes, Des::BLOCKSIZE),
         };
 
         let out = match self.mode {
@@ -153,7 +154,7 @@ impl Cipher for TripleDes {
         };
 
         match self.padding {
-            BlockCipherPadding::None => none_padding(&mut out, 8)?,
+            BlockCipherPadding::None => none_padding(&mut out, Des::BLOCKSIZE)?,
             BlockCipherPadding::Bit => strip_bit_padding(&mut out)?,
         };
 

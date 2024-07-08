@@ -30,6 +30,8 @@ impl Default for Des {
 }
 
 impl Des {
+    pub const BLOCKSIZE: u32 = 8;
+
     // Key Scheduling Algorithm (key generation)
     pub fn ksa(&mut self, key: u64) -> Result<(), CipherError> {
         self.subkeys = des_ksa(key)?;
@@ -53,10 +55,10 @@ impl Des {
     }
 
     pub fn encrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        assert!(bytes.len() % 8 == 0);
+        assert!(bytes.len() % Self::BLOCKSIZE as usize == 0);
         let mut out = Vec::with_capacity(bytes.len());
 
-        for plaintext in bytes.chunks_exact(8) {
+        for plaintext in bytes.chunks_exact(Self::BLOCKSIZE as usize) {
             let ciphertext = self.encrypt_block(u64::from_be_bytes(plaintext.try_into().unwrap()));
             out.extend_from_slice(&ciphertext.to_be_bytes());
         }
@@ -65,10 +67,10 @@ impl Des {
     }
 
     pub fn decrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        assert!(bytes.len() % 8 == 0);
+        assert!(bytes.len() % Self::BLOCKSIZE as usize == 0);
         let mut out = Vec::with_capacity(bytes.len());
 
-        for ciphertext in bytes.chunks_exact(8) {
+        for ciphertext in bytes.chunks_exact(Self::BLOCKSIZE as usize) {
             let plaintext = self.decrypt_block(u64::from_be_bytes(ciphertext.try_into().unwrap()));
             out.extend_from_slice(&plaintext.to_be_bytes());
         }
@@ -80,7 +82,7 @@ impl Des {
         let mut ctr = self.ctr;
         let mut out = Vec::with_capacity(bytes.len());
 
-        for plaintext in bytes.chunks_exact(8) {
+        for plaintext in bytes.chunks_exact(Self::BLOCKSIZE as usize) {
             let keytext = self.encrypt_block(ctr).to_le_bytes();
 
             for (k, p) in keytext.into_iter().zip(plaintext.iter()) {
@@ -106,8 +108,8 @@ impl Cipher for Des {
             .map_err(|_| CipherError::input("byte format error"))?;
 
         match self.padding {
-            BlockCipherPadding::None => none_padding(&mut bytes, 8)?,
-            BlockCipherPadding::Bit => bit_padding(&mut bytes, 8),
+            BlockCipherPadding::None => none_padding(&mut bytes, Self::BLOCKSIZE)?,
+            BlockCipherPadding::Bit => bit_padding(&mut bytes, Self::BLOCKSIZE),
         };
 
         let out = match self.mode {
@@ -126,7 +128,7 @@ impl Cipher for Des {
             .map_err(|_| CipherError::input("byte format error"))?;
 
         if self.padding == BlockCipherPadding::None {
-            none_padding(&mut bytes, 8)?
+            none_padding(&mut bytes, Self::BLOCKSIZE)?
         };
 
         let mut out = match self.mode {
@@ -135,10 +137,12 @@ impl Cipher for Des {
             BlockCipherMode::Cbc => return Err(CipherError::state("CBC mode not implemented")),
         };
 
-        match self.padding {
-            BlockCipherPadding::None => none_padding(&mut out, 8)?,
-            BlockCipherPadding::Bit => strip_bit_padding(&mut out)?,
-        };
+        if self.mode.padded() {
+            match self.padding {
+                BlockCipherPadding::None => none_padding(&mut out, Self::BLOCKSIZE)?,
+                BlockCipherPadding::Bit => strip_bit_padding(&mut out)?,
+            };
+        }
 
         Ok(self.output_format.byte_slice_to_text(&out))
     }
@@ -150,7 +154,7 @@ mod des_tests {
     use super::*;
 
     #[test]
-    fn test_encypt_block() {
+    fn test_encrypt_decrypt_block() {
         let mut cipher = Des::default();
         cipher.ksa(0x0123456789ABCDEF).unwrap();
 
@@ -162,7 +166,7 @@ mod des_tests {
     }
 
     #[test]
-    fn test_encypt_ecb() {
+    fn test_encrypt_decrypt_ecb() {
         let mut cipher = Des::default();
         cipher.ksa(0x0123456789ABCDEF).unwrap();
         cipher.mode = BlockCipherMode::Ecb;

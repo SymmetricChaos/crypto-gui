@@ -24,8 +24,7 @@ impl CipherFrame for XorSecretSplittingFrame {
         );
         ui.add_space(8.0);
 
-        // Not a hash function but the modes here are better fitting
-        ui.byte_io_mode_hasher(
+        ui.byte_io_mode(
             &mut self.cipher.input_format,
             &mut self.cipher.output_format,
         );
