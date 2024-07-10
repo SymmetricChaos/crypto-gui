@@ -1,4 +1,4 @@
-use super::{bit_padding, none_padding, strip_bit_padding, BlockCipherMode, BlockCipherPadding};
+use super::{none_padding, BlockCipherMode, BlockCipherPadding};
 use crate::{Cipher, CipherError};
 use utils::byte_formatting::ByteFormat;
 
@@ -253,10 +253,9 @@ impl Cipher for Idea {
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
 
-        match self.padding {
-            BlockCipherPadding::None => none_padding(&mut bytes, BLOCK_SIZE as u32)?,
-            BlockCipherPadding::Bit => bit_padding(&mut bytes, BLOCK_SIZE as u32),
-        };
+        if self.mode.padded() {
+            self.padding.add_padding(&mut bytes, BLOCK_SIZE as u32)?;
+        }
 
         let out = match self.mode {
             BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes)?,
@@ -283,10 +282,9 @@ impl Cipher for Idea {
             BlockCipherMode::Cbc => return Err(CipherError::state("CBC mode not implemented")),
         };
 
-        match self.padding {
-            BlockCipherPadding::None => none_padding(&mut bytes, BLOCK_SIZE as u32)?,
-            BlockCipherPadding::Bit => strip_bit_padding(&mut bytes)?,
-        };
+        if self.mode.padded() {
+            self.padding.strip_padding(&mut bytes, BLOCK_SIZE as u32)?;
+        }
 
         Ok(self.output_format.byte_slice_to_text(&out))
     }

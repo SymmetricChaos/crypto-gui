@@ -1,7 +1,7 @@
 use crate::{Cipher, CipherError};
 use utils::byte_formatting::ByteFormat;
 
-use super::{bit_padding, none_padding, strip_bit_padding, BlockCipherMode, BlockCipherPadding};
+use super::{none_padding, BlockCipherMode, BlockCipherPadding};
 
 pub struct Tea {
     pub output_format: ByteFormat,
@@ -27,6 +27,7 @@ impl Default for Tea {
 
 impl Tea {
     const DELTA: u32 = 0x9e3779b9;
+    const BLOCKSIZE: u32 = 8;
 
     // Encrypt a block.
     pub fn encrypt_block(&self, v: &mut [u32; 2]) {
@@ -52,7 +53,7 @@ impl Tea {
         let mut ctr = self.ctr;
 
         // Take 8 byte chunks
-        for block in bytes.chunks(8) {
+        for block in bytes.chunks(Self::BLOCKSIZE as usize) {
             // Encrypt the counter
             let mut b = [(ctr >> 32) as u32, ctr as u32];
             self.encrypt_block(&mut b);
@@ -80,7 +81,7 @@ impl Tea {
         let mut out = Vec::with_capacity(bytes.len());
 
         // Take 8 byte chunks
-        for block in bytes.chunks_exact(8) {
+        for block in bytes.chunks_exact(Self::BLOCKSIZE as usize) {
             // Turn each chunk into a pair of u32
             let mut x = [0u32; 2];
             for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)) {
@@ -149,10 +150,9 @@ impl Cipher for Tea {
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
 
-        match self.padding {
-            BlockCipherPadding::None => none_padding(&mut bytes, 8)?,
-            BlockCipherPadding::Bit => bit_padding(&mut bytes, 8),
-        };
+        if self.mode.padded() {
+            self.padding.add_padding(&mut bytes, Self::BLOCKSIZE)?;
+        }
 
         let out = match self.mode {
             BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes)?,
@@ -173,16 +173,15 @@ impl Cipher for Tea {
             none_padding(&mut bytes, 8)?
         };
 
-        let out = match self.mode {
+        let mut out = match self.mode {
             BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes)?,
             BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes)?,
             BlockCipherMode::Cbc => return Err(CipherError::state("CBC mode not implemented")),
         };
 
-        match self.padding {
-            BlockCipherPadding::None => none_padding(&mut bytes, 8)?,
-            BlockCipherPadding::Bit => strip_bit_padding(&mut bytes)?,
-        };
+        if self.mode.padded() {
+            self.padding.strip_padding(&mut out, Self::BLOCKSIZE)?;
+        }
 
         Ok(self.output_format.byte_slice_to_text(&out))
     }

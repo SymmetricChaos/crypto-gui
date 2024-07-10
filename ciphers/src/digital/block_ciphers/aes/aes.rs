@@ -2,9 +2,7 @@ use itertools::Itertools;
 use utils::byte_formatting::ByteFormat;
 
 use crate::{
-    digital::block_ciphers::{
-        bit_padding, none_padding, strip_bit_padding, BlockCipherMode, BlockCipherPadding,
-    },
+    digital::block_ciphers::{none_padding, BlockCipherMode, BlockCipherPadding},
     Cipher, CipherError,
 };
 
@@ -186,10 +184,7 @@ impl Cipher for Aes128 {
 
         // Add padding if needed
         if self.mode.padded() {
-            match self.padding {
-                BlockCipherPadding::None => none_padding(&mut bytes, Self::BLOCKSIZE)?,
-                BlockCipherPadding::Bit => bit_padding(&mut bytes, Self::BLOCKSIZE),
-            };
+            self.padding.add_padding(&mut bytes, Self::BLOCKSIZE)?;
         }
 
         let out = match self.mode {
@@ -221,10 +216,7 @@ impl Cipher for Aes128 {
 
         // Remove padding if needed
         if self.mode.padded() {
-            match self.padding {
-                BlockCipherPadding::None => none_padding(&mut out, Self::BLOCKSIZE)?,
-                BlockCipherPadding::Bit => strip_bit_padding(&mut out)?,
-            };
+            self.padding.strip_padding(&mut out, Self::BLOCKSIZE)?;
         }
 
         Ok(self.output_format.byte_slice_to_text(&out))

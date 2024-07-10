@@ -3,7 +3,7 @@ use utils::byte_formatting::{u32_pair_to_u64, u64_to_u32_pair, ByteFormat};
 use crate::{Cipher, CipherError};
 use std::{cmp::max, ops::Shl};
 
-use super::{bit_padding, none_padding, strip_bit_padding, BlockCipherMode, BlockCipherPadding};
+use super::{none_padding, BlockCipherMode, BlockCipherPadding};
 
 const P32: u32 = 0xb7e15163;
 const Q32: u32 = 0x9e3779b9;
@@ -35,6 +35,8 @@ impl Default for Rc5 {
 }
 
 impl Rc5 {
+    const BLOCKSIZE: u32 = 8;
+
     pub fn state_size(&self) -> usize {
         2 * (self.rounds + 1)
     }
@@ -158,7 +160,7 @@ impl Rc5 {
         assert!(bytes.len() % 8 == 0);
         let mut out = Vec::with_capacity(bytes.len());
 
-        for block in bytes.chunks_exact(8).rev() {
+        for block in bytes.chunks_exact(Self::BLOCKSIZE as usize).rev() {
             let mut x = [0u32; 2];
             for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)) {
                 *elem = u32::from_le_bytes(chunk.try_into().unwrap());
@@ -176,7 +178,7 @@ impl Rc5 {
         let mut out = Vec::with_capacity(bytes.len());
         let mut ctr = self.ctr;
 
-        for block in bytes.chunks_exact(8) {
+        for block in bytes.chunks_exact(Self::BLOCKSIZE as usize) {
             let mut p = u64_to_u32_pair(ctr);
             self.encrypt_block_32(&mut p);
             let keystream = u32_pair_to_u64(p).to_le_bytes();
@@ -205,10 +207,9 @@ impl Cipher for Rc5 {
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
 
-        match self.padding {
-            BlockCipherPadding::None => none_padding(&mut bytes, 8)?,
-            BlockCipherPadding::Bit => bit_padding(&mut bytes, 8),
-        };
+        if self.mode.padded() {
+            self.padding.add_padding(&mut bytes, Self::BLOCKSIZE)?;
+        }
 
         let out = match self.mode {
             BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes)?,
@@ -234,10 +235,9 @@ impl Cipher for Rc5 {
             BlockCipherMode::Cbc => return Err(CipherError::general("CBC mode not implemented")),
         };
 
-        match self.padding {
-            BlockCipherPadding::None => none_padding(&mut out, 8)?,
-            BlockCipherPadding::Bit => strip_bit_padding(&mut out)?,
-        };
+        if self.mode.padded() {
+            self.padding.strip_padding(&mut out, Self::BLOCKSIZE)?;
+        }
 
         Ok(self.output_format.byte_slice_to_text(&out))
     }

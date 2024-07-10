@@ -1,7 +1,6 @@
 use crate::{
     digital::block_ciphers::{
-        bit_padding, des::des_functions::*, none_padding, strip_bit_padding, BlockCipherMode,
-        BlockCipherPadding,
+        des::des_functions::*, none_padding, BlockCipherMode, BlockCipherPadding,
     },
     Cipher, CipherError,
 };
@@ -107,10 +106,9 @@ impl Cipher for Des {
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
 
-        match self.padding {
-            BlockCipherPadding::None => none_padding(&mut bytes, Self::BLOCKSIZE)?,
-            BlockCipherPadding::Bit => bit_padding(&mut bytes, Self::BLOCKSIZE),
-        };
+        if self.mode.padded() {
+            self.padding.add_padding(&mut bytes, Self::BLOCKSIZE)?;
+        }
 
         let out = match self.mode {
             BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes)?,
@@ -138,10 +136,9 @@ impl Cipher for Des {
         };
 
         if self.mode.padded() {
-            match self.padding {
-                BlockCipherPadding::None => none_padding(&mut out, Self::BLOCKSIZE)?,
-                BlockCipherPadding::Bit => strip_bit_padding(&mut out)?,
-            };
+            if self.mode.padded() {
+                self.padding.strip_padding(&mut out, Self::BLOCKSIZE)?;
+            }
         }
 
         Ok(self.output_format.byte_slice_to_text(&out))
@@ -177,6 +174,20 @@ mod des_tests {
 
         let ctext = cipher.encrypt(PTEXT).unwrap();
         assert_eq!(CTEXT, ctext);
+
+        let dtext = cipher.decrypt(&ctext).unwrap();
+        assert_eq!(PTEXT, dtext);
+    }
+
+    #[test]
+    fn test_encrypt_decrypt_ctr() {
+        let mut cipher = Des::default();
+        cipher.ksa(0x0123456789ABCDEF).unwrap();
+        cipher.mode = BlockCipherMode::Ctr;
+
+        const PTEXT: &'static str = "4e6f772069732074";
+
+        let ctext = cipher.encrypt(PTEXT).unwrap();
 
         let dtext = cipher.decrypt(&ctext).unwrap();
         assert_eq!(PTEXT, dtext);

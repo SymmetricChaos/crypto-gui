@@ -3,10 +3,8 @@ use utils::byte_formatting::{
 };
 
 use super::{
-    bit_padding,
     blowfish_arrays::{PARRAY, SBOXES},
-    ecb_decrypt, ecb_encrypt, none_padding, strip_bit_padding, BlockCipher, BlockCipherMode,
-    BlockCipherPadding,
+    ecb_decrypt, ecb_encrypt, none_padding, BlockCipher, BlockCipherMode, BlockCipherPadding,
 };
 use crate::{Cipher, CipherError};
 
@@ -163,14 +161,14 @@ impl Blowfish {
 
     pub fn encrypt_cbc(&self, bytes: &mut [u8]) {
         assert!(bytes.len() % 8 == 0);
-        println!("bytes {:?}", bytes);
+
         // Start chain with an IV
-        let mut chain = self.iv.to_le_bytes();
+        let mut chain = self.iv.to_be_bytes();
 
         for source in bytes.chunks_mut(Self::BLOCKSIZE as usize) {
             println!("\n\nencrypt");
             println!("chain {:?}", chain);
-            // XOR the plaintext into the chain, creating a mixed array
+            // XOR the plaintext into the previous ciphertext (or the IV), creating a mixed array
             for (c, b) in chain.iter_mut().zip(source.iter()) {
                 *c ^= b;
             }
@@ -202,7 +200,7 @@ impl Blowfish {
         assert!(bytes.len() % 8 == 0);
 
         // Start chain with an IV
-        let mut chain = self.iv.to_le_bytes();
+        let mut chain = self.iv.to_be_bytes();
 
         for source in bytes.chunks_mut(Self::BLOCKSIZE as usize) {
             println!("\n\ndecrypt");
@@ -270,10 +268,9 @@ impl Cipher for Blowfish {
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
 
-        match self.padding {
-            BlockCipherPadding::None => none_padding(&mut bytes, Self::BLOCKSIZE)?,
-            BlockCipherPadding::Bit => bit_padding(&mut bytes, Self::BLOCKSIZE),
-        };
+        if self.mode.padded() {
+            self.padding.add_padding(&mut bytes, Self::BLOCKSIZE)?;
+        }
 
         match self.mode {
             BlockCipherMode::Ecb => ecb_encrypt(self, &mut bytes, Self::BLOCKSIZE),
@@ -299,10 +296,9 @@ impl Cipher for Blowfish {
             BlockCipherMode::Cbc => self.decrypt_cbc(&mut bytes),
         };
 
-        match self.padding {
-            BlockCipherPadding::None => none_padding(&mut bytes, Self::BLOCKSIZE)?,
-            BlockCipherPadding::Bit => strip_bit_padding(&mut bytes)?,
-        };
+        if self.mode.padded() {
+            self.padding.strip_padding(&mut bytes, Self::BLOCKSIZE)?;
+        }
 
         Ok(self.output_format.byte_slice_to_text(&bytes))
     }
@@ -350,18 +346,25 @@ mod blowfish_tests {
         assert_eq!(ptext, dtext);
     }
 
-    // #[test]
-    // fn encrypt_decrypt_cbc() {
-    //     let mut cipher = Blowfish::default();
-    //     cipher.mode = BlockCipherMode::Cbc;
-    //     cipher.iv = 0x0123456789;
-    //     cipher.key = 0x9078563412_u64.to_be_bytes().to_vec();
-    //     cipher.key_schedule();
-    //     let ptext = "abcdef123456abcdef123456abcdef123456abcdef123456";
-    //     let ctext = cipher.encrypt(ptext).unwrap();
-    //     let dtext = cipher.decrypt(&ctext).unwrap();
-    //     assert_eq!(ptext, dtext);
-    // }
+    #[test]
+    fn encrypt_decrypt_cbc() {
+        let mut cipher = Blowfish::default();
+        cipher.mode = BlockCipherMode::Cbc;
+        cipher.padding = BlockCipherPadding::Pkcs;
+        cipher.iv = 0xfedcba9876543210;
+        cipher.key = ByteFormat::Hex
+            .text_to_bytes("0123456789abcdeff0e1d2c3b4a59687")
+            .unwrap();
+        cipher.key_schedule();
+        let ptext = "37363534333231204e6f77206973207468652074696d6520666f722000";
+        let ctext = cipher.encrypt(ptext).unwrap();
+        // assert_eq!(
+        //     "6b77b4d63006dee605b156e27403979358deb9e7154616d959f1652bd5ff92cc",
+        //     ctext
+        // );
+        let dtext = cipher.decrypt(&ctext).unwrap();
+        assert_eq!(ptext, dtext);
+    }
 
     #[test]
     fn test_vector() {

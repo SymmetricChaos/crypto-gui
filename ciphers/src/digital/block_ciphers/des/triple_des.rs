@@ -1,10 +1,7 @@
 use utils::byte_formatting::ByteFormat;
 
 use crate::{
-    digital::block_ciphers::{
-        bit_padding, des::des::Des, none_padding, strip_bit_padding, BlockCipherMode,
-        BlockCipherPadding,
-    },
+    digital::block_ciphers::{des::des::Des, none_padding, BlockCipherMode, BlockCipherPadding},
     Cipher, CipherError,
 };
 
@@ -123,10 +120,9 @@ impl Cipher for TripleDes {
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
 
-        match self.padding {
-            BlockCipherPadding::None => none_padding(&mut bytes, Des::BLOCKSIZE)?,
-            BlockCipherPadding::Bit => bit_padding(&mut bytes, Des::BLOCKSIZE),
-        };
+        if self.mode.padded() {
+            self.padding.add_padding(&mut bytes, Des::BLOCKSIZE)?;
+        }
 
         let out = match self.mode {
             BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes)?,
@@ -153,10 +149,9 @@ impl Cipher for TripleDes {
             BlockCipherMode::Cbc => return Err(CipherError::state("CBC mode not implemented")),
         };
 
-        match self.padding {
-            BlockCipherPadding::None => none_padding(&mut out, Des::BLOCKSIZE)?,
-            BlockCipherPadding::Bit => strip_bit_padding(&mut out)?,
-        };
+        if self.mode.padded() {
+            self.padding.strip_padding(&mut out, Des::BLOCKSIZE)?;
+        }
 
         Ok(self.output_format.byte_slice_to_text(&out))
     }
