@@ -42,12 +42,7 @@ pub trait BlockCipher<const N: usize> {
             let mut mask = ctr;
             self.encrypt_block(&mut mask);
             // XOR the mask into the plaintext at the source, creating ciphertext
-            for (key_byte, ptext) in mask
-                .iter()
-                .map(|w| w.to_be_bytes())
-                .flatten()
-                .zip(plaintext.iter_mut())
-            {
+            for (key_byte, ptext) in mask.iter().zip(plaintext.iter_mut()) {
                 *ptext ^= key_byte
             }
             incr_array_ctr(&mut ctr);
@@ -62,12 +57,7 @@ pub trait BlockCipher<const N: usize> {
             let mut mask = ctr;
             self.encrypt_block(&mut mask);
             // XOR the mask into the plaintext at the source, creating ciphertext
-            for (key_byte, ptext) in mask
-                .iter()
-                .map(|w| w.to_be_bytes())
-                .flatten()
-                .zip(plaintext.iter_mut())
-            {
+            for (key_byte, ptext) in mask.iter().zip(plaintext.iter_mut()) {
                 *ptext ^= key_byte
             }
             incr_array_ctr(&mut ctr);

@@ -1,6 +1,4 @@
-use utils::byte_formatting::{
-    u32_pair_to_u8_array, u64_to_u32_pair, u8_slice_to_u32_pair, ByteFormat,
-};
+use utils::byte_formatting::{u32_pair_to_u8_array, u8_slice_to_u32_pair, ByteFormat};
 
 use super::{
     blowfish_arrays::{PARRAY, SBOXES},
@@ -133,44 +131,13 @@ impl Blowfish {
         lr[1] ^= self.parray[1];
         lr[0] ^= self.parray[0];
     }
-
-    // pub fn encrypt_ctr(&self, bytes: &mut [u8]) {
-    //     let mut ctr = self.ctr;
-
-    //     for plaintext in bytes.chunks_mut(Self::BLOCKSIZE as usize) {
-    //         // Encrypt the counter to create a mask
-    //         let mut mask = u64_to_u32_pair(ctr);
-    //         self.encrypt_u32_pair(&mut mask);
-    //         // XOR the mask into the plaintext at the source, creating ciphertext
-    //         for (key_byte, ptext) in mask
-    //             .iter()
-    //             .map(|w| w.to_be_bytes())
-    //             .flatten()
-    //             .zip(plaintext.iter_mut())
-    //         {
-    //             *ptext ^= key_byte
-    //         }
-    //         ctr = ctr.wrapping_add(1);
-    //     }
-    // }
-
-    // // CTR mode is reciprocal
-    // pub fn decrypt_ctr(&self, bytes: &mut [u8]) {
-    //     self.encrypt_ctr(bytes)
-    // }
 }
 
 impl BlockCipher<8> for Blowfish {
     fn encrypt_block(&self, bytes: &mut [u8]) {
         let mut lr = u8_slice_to_u32_pair(&bytes);
-        for i in 0..16 {
-            lr[0] ^= self.parray[i];
-            lr[1] ^= self.f(lr[0]);
-            lr.swap(0, 1);
-        }
-        lr.swap(0, 1);
-        lr[1] ^= self.parray[16];
-        lr[0] ^= self.parray[17];
+        self.encrypt_u32_pair(&mut lr);
+
         for (plaintext, ciphertext) in bytes.iter_mut().zip(u32_pair_to_u8_array(lr).iter()) {
             *plaintext = *ciphertext
         }
@@ -178,14 +145,7 @@ impl BlockCipher<8> for Blowfish {
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
         let mut lr = u8_slice_to_u32_pair(&bytes);
-        for i in (2..18).rev() {
-            lr[0] ^= self.parray[i];
-            lr[1] ^= self.f(lr[0]);
-            lr.swap(0, 1);
-        }
-        lr.swap(0, 1);
-        lr[1] ^= self.parray[1];
-        lr[0] ^= self.parray[0];
+        self.decrypt_u32_pair(&mut lr);
         for (plaintext, ciphertext) in bytes.iter_mut().zip(u32_pair_to_u8_array(lr).iter()) {
             *plaintext = *ciphertext
         }
