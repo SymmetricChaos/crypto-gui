@@ -4,7 +4,7 @@ use utils::byte_formatting::{
 
 use super::{
     blowfish_arrays::{PARRAY, SBOXES},
-    ecb_decrypt, ecb_encrypt, none_padding, BlockCipher, BlockCipherMode, BlockCipherPadding,
+    none_padding, BlockCipher, BlockCipherMode, BlockCipherPadding,
 };
 use crate::{Cipher, CipherError};
 
@@ -134,102 +134,33 @@ impl Blowfish {
         lr[0] ^= self.parray[0];
     }
 
-    pub fn encrypt_ctr(&self, bytes: &mut [u8]) {
-        let mut ctr = self.ctr;
+    // pub fn encrypt_ctr(&self, bytes: &mut [u8]) {
+    //     let mut ctr = self.ctr;
 
-        for plaintext in bytes.chunks_mut(Self::BLOCKSIZE as usize) {
-            // Encrypt the counter to create a mask
-            let mut mask = u64_to_u32_pair(ctr);
-            self.encrypt_u32_pair(&mut mask);
-            // XOR the mask into the plaintext at the source, creating ciphertext
-            for (key_byte, ptext) in mask
-                .iter()
-                .map(|w| w.to_be_bytes())
-                .flatten()
-                .zip(plaintext.iter_mut())
-            {
-                *ptext ^= key_byte
-            }
-            ctr = ctr.wrapping_add(1);
-        }
-    }
+    //     for plaintext in bytes.chunks_mut(Self::BLOCKSIZE as usize) {
+    //         // Encrypt the counter to create a mask
+    //         let mut mask = u64_to_u32_pair(ctr);
+    //         self.encrypt_u32_pair(&mut mask);
+    //         // XOR the mask into the plaintext at the source, creating ciphertext
+    //         for (key_byte, ptext) in mask
+    //             .iter()
+    //             .map(|w| w.to_be_bytes())
+    //             .flatten()
+    //             .zip(plaintext.iter_mut())
+    //         {
+    //             *ptext ^= key_byte
+    //         }
+    //         ctr = ctr.wrapping_add(1);
+    //     }
+    // }
 
-    // CTR mode is reciprocal
-    pub fn decrypt_ctr(&self, bytes: &mut [u8]) {
-        self.encrypt_ctr(bytes)
-    }
-
-    pub fn encrypt_cbc(&self, bytes: &mut [u8]) {
-        assert!(bytes.len() % 8 == 0);
-
-        // Start chain with an IV
-        let mut chain = self.iv.to_be_bytes();
-
-        for source in bytes.chunks_mut(Self::BLOCKSIZE as usize) {
-            println!("\n\nencrypt");
-            println!("chain {:?}", chain);
-            // XOR the plaintext into the previous ciphertext (or the IV), creating a mixed array
-            for (c, b) in chain.iter_mut().zip(source.iter()) {
-                *c ^= b;
-            }
-
-            println!("mixed {:?}", chain);
-
-            // Encrypt the mixed value, producing ciphertext
-            let mut ciphertext: [u32; 2] = u8_slice_to_u32_pair(&chain);
-            self.encrypt_u32_pair(&mut ciphertext);
-
-            // Store the ciphertext as the next chain value
-            chain = u32_pair_to_u8_array(ciphertext);
-
-            println!("ctext {:?}", chain);
-
-            // Overwrite plaintext at source with the ciphertext
-            for (ctext, source) in ciphertext
-                .iter()
-                .map(|w| w.to_be_bytes())
-                .flatten()
-                .zip(source.iter_mut())
-            {
-                *source = ctext
-            }
-        }
-    }
-
-    pub fn decrypt_cbc(&self, bytes: &mut [u8]) {
-        assert!(bytes.len() % 8 == 0);
-
-        // Start chain with an IV
-        let mut chain = self.iv.to_be_bytes();
-
-        for source in bytes.chunks_mut(Self::BLOCKSIZE as usize) {
-            println!("\n\ndecrypt");
-            println!("chain {:?}", chain);
-
-            // Decrypt the ciphertext at the source to get the plaintext XORed with the previous chain value
-            let mut temp = u8_slice_to_u32_pair(&source);
-            self.decrypt_u32_pair(&mut temp);
-            let mut mixed = u32_pair_to_u8_array(temp);
-            println!("mixed {:?}", mixed);
-
-            println!("ciphertext {:?}", source);
-
-            // XOR the current chain value into the mixed text
-            for (c, b) in mixed.iter_mut().zip(chain.iter()) {
-                *c ^= b;
-            }
-
-            // The overwrite ciphertext at source with the plaintext
-            for (ptext, source) in mixed.into_iter().zip(source.iter_mut()) {
-                *source = ptext
-            }
-            // Store the ciphertext as the next chain value
-            chain = source.try_into().unwrap();
-        }
-    }
+    // // CTR mode is reciprocal
+    // pub fn decrypt_ctr(&self, bytes: &mut [u8]) {
+    //     self.encrypt_ctr(bytes)
+    // }
 }
 
-impl BlockCipher for Blowfish {
+impl BlockCipher<8> for Blowfish {
     fn encrypt_block(&self, bytes: &mut [u8]) {
         let mut lr = u8_slice_to_u32_pair(&bytes);
         for i in 0..16 {
@@ -259,6 +190,14 @@ impl BlockCipher for Blowfish {
             *plaintext = *ciphertext
         }
     }
+
+    fn set_mode(&mut self, mode: BlockCipherMode) {
+        self.mode = mode
+    }
+
+    fn set_padding(&mut self, padding: BlockCipherPadding) {
+        self.padding = padding
+    }
 }
 
 impl Cipher for Blowfish {
@@ -273,9 +212,9 @@ impl Cipher for Blowfish {
         }
 
         match self.mode {
-            BlockCipherMode::Ecb => ecb_encrypt(self, &mut bytes, Self::BLOCKSIZE),
-            BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes),
-            BlockCipherMode::Cbc => self.encrypt_cbc(&mut bytes),
+            BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes),
+            BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
+            BlockCipherMode::Cbc => self.encrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
         };
         Ok(self.output_format.byte_slice_to_text(&bytes))
     }
@@ -286,14 +225,16 @@ impl Cipher for Blowfish {
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
 
-        if self.padding == BlockCipherPadding::None {
-            none_padding(&mut bytes, 8)?
-        };
+        if self.mode.padded() {
+            if self.padding == BlockCipherPadding::None {
+                none_padding(&mut bytes, Self::BLOCKSIZE)?
+            };
+        }
 
         match self.mode {
-            BlockCipherMode::Ecb => ecb_decrypt(self, &mut bytes, Self::BLOCKSIZE),
-            BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes),
-            BlockCipherMode::Cbc => self.decrypt_cbc(&mut bytes),
+            BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes),
+            BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
+            BlockCipherMode::Cbc => self.decrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
         };
 
         if self.mode.padded() {
@@ -358,6 +299,7 @@ mod blowfish_tests {
         cipher.key_schedule();
         let ptext = "37363534333231204e6f77206973207468652074696d6520666f722000";
         let ctext = cipher.encrypt(ptext).unwrap();
+        // This matches except for the padding at the end, not sure what padding was used
         // assert_eq!(
         //     "6b77b4d63006dee605b156e27403979358deb9e7154616d959f1652bd5ff92cc",
         //     ctext

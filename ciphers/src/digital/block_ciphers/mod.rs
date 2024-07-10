@@ -8,14 +8,127 @@ pub mod rc5;
 pub mod tea;
 pub mod xtea;
 
+use crypto_bigint::generic_array::GenericArray;
+use num::{BigUint, One};
+use utils::math_functions::incr_array_ctr;
+
 use crate::CipherError;
 
-pub trait BlockCipher {
+pub trait BlockCipher<const N: usize> {
     fn encrypt_block(&self, bytes: &mut [u8]);
     fn decrypt_block(&self, bytes: &mut [u8]);
+    fn set_mode(&mut self, mode: BlockCipherMode);
+    fn set_padding(&mut self, padding: BlockCipherPadding);
+    fn encrypt_ecb(&self, bytes: &mut [u8]) {
+        assert!(bytes.len() % N == 0);
+
+        for plaintext in bytes.chunks_mut(N) {
+            self.encrypt_block(plaintext);
+        }
+    }
+    fn decrypt_ecb(&self, bytes: &mut [u8]) {
+        assert!(bytes.len() % N == 0);
+
+        for plaintext in bytes.chunks_mut(N) {
+            self.decrypt_block(plaintext);
+        }
+    }
+
+    fn encrypt_ctr(&self, bytes: &mut [u8], ctr: [u8; N]) {
+        let mut ctr = ctr;
+
+        for plaintext in bytes.chunks_mut(N) {
+            // Encrypt the counter to create a mask
+            let mut mask = ctr;
+            self.encrypt_block(&mut mask);
+            // XOR the mask into the plaintext at the source, creating ciphertext
+            for (key_byte, ptext) in mask
+                .iter()
+                .map(|w| w.to_be_bytes())
+                .flatten()
+                .zip(plaintext.iter_mut())
+            {
+                *ptext ^= key_byte
+            }
+            incr_array_ctr(&mut ctr);
+        }
+    }
+
+    fn decrypt_ctr(&self, bytes: &mut [u8], ctr: [u8; N]) {
+        let mut ctr = ctr;
+
+        for plaintext in bytes.chunks_mut(N) {
+            // Encrypt the counter to create a mask
+            let mut mask = ctr;
+            self.encrypt_block(&mut mask);
+            // XOR the mask into the plaintext at the source, creating ciphertext
+            for (key_byte, ptext) in mask
+                .iter()
+                .map(|w| w.to_be_bytes())
+                .flatten()
+                .zip(plaintext.iter_mut())
+            {
+                *ptext ^= key_byte
+            }
+            incr_array_ctr(&mut ctr);
+        }
+    }
+
+    fn encrypt_cbc(&self, bytes: &mut [u8], iv: [u8; N]) {
+        assert!(bytes.len() % N == 0);
+
+        // Start chain with an IV
+        let mut chain = iv;
+
+        for source in bytes.chunks_mut(N) {
+            // XOR the plaintext into the previous ciphertext (or the IV), creating a mixed array
+            for (c, b) in chain.iter_mut().zip(source.iter()) {
+                *c ^= b;
+            }
+
+            // Encrypt the mixed value, producing ciphertext
+            self.encrypt_block(&mut chain);
+
+            // Overwrite plaintext at source with the ciphertext
+            for (ctext, source) in chain
+                .iter()
+                .map(|w| w.to_be_bytes())
+                .flatten()
+                .zip(source.iter_mut())
+            {
+                *source = ctext
+            }
+        }
+    }
+
+    fn decrypt_cbc(&self, bytes: &mut [u8], iv: [u8; N]) {
+        assert!(bytes.len() % N == 0);
+
+        // Start chain with an IV
+        let mut chain = iv;
+
+        for source in bytes.chunks_mut(N) {
+            // Decrypt the ciphertext at the source to get the plaintext XORed with the previous chain value
+            let mut mixed = source.to_vec();
+            self.decrypt_block(&mut mixed);
+
+            // XOR the current chain value into the mixed text
+            for (c, b) in mixed.iter_mut().zip(chain.iter()) {
+                *c ^= b;
+            }
+
+            // Store the ciphertext as the next chain value before it gets overwritten
+            chain = source.try_into().unwrap();
+
+            // The overwrite ciphertext at source with the plaintext
+            for (ptext, source) in mixed.into_iter().zip(source.iter_mut()) {
+                *source = ptext
+            }
+        }
+    }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum BlockCipherMode {
     Ecb,
     Ctr,
@@ -36,24 +149,6 @@ impl BlockCipherMode {
 impl Default for BlockCipherMode {
     fn default() -> Self {
         BlockCipherMode::Ecb
-    }
-}
-
-pub fn ecb_encrypt(cipher: &dyn BlockCipher, bytes: &mut Vec<u8>, block_size: u32) {
-    // Padding should have been used before bytes are given or an error thrown to the user
-    assert!(bytes.len() % (block_size as usize) == 0);
-
-    for plaintext in bytes.chunks_mut(block_size as usize) {
-        cipher.encrypt_block(plaintext);
-    }
-}
-
-pub fn ecb_decrypt(cipher: &dyn BlockCipher, bytes: &mut Vec<u8>, block_size: u32) {
-    // Padding should have been used before bytes are given or an error thrown to the user
-    assert!(bytes.len() % (block_size as usize) == 0);
-
-    for ciphertext in bytes.chunks_mut(block_size as usize) {
-        cipher.decrypt_block(ciphertext);
     }
 }
 

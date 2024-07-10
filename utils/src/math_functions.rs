@@ -252,6 +252,21 @@ pub fn modular_pow(base: u32, pow: u32, modulus: u32) -> u32 {
     out as u32
 }
 
+pub fn incr_array_ctr(ctr: &mut [u8]) {
+    for byte in ctr.iter_mut().rev() {
+        match byte.checked_add(1) {
+            Some(n) => {
+                *byte = n;
+                return ();
+            }
+
+            None => {
+                *byte = 0;
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod math_tests {
 
@@ -263,5 +278,14 @@ mod math_tests {
         assert_eq!(4, x);
         let x = modular_pow(3, 5, 23);
         assert_eq!(10, x);
+    }
+
+    #[test]
+    fn test_incr_array_ctr() {
+        let mut ctr = [0x00, 0x00, 0xfe, 0xff, 0xff];
+        incr_array_ctr(&mut ctr);
+        assert_eq!([0x00, 0x00, 0xff, 0x00, 0x00], ctr);
+        incr_array_ctr(&mut ctr);
+        assert_eq!([0x00, 0x00, 0xff, 0x00, 0x01], ctr);
     }
 }
