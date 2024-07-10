@@ -1,4 +1,4 @@
-use super::{none_padding, BlockCipherMode, BlockCipherPadding};
+use super::{none_padding, BlockCipher, BlockCipherMode, BlockCipherPadding};
 use crate::{Cipher, CipherError};
 use utils::byte_formatting::ByteFormat;
 
@@ -17,6 +17,7 @@ pub struct Idea {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
     pub ctr: u64,
+    pub iv: u64,
     subkeys_enc: [u16; N_SUBKEYS],
     subkeys_dec: [u16; N_SUBKEYS],
     pub mode: BlockCipherMode,
@@ -29,6 +30,7 @@ impl Default for Idea {
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
             ctr: 0,
+            iv: 0,
             subkeys_enc: [0u16; N_SUBKEYS],
             subkeys_dec: [0u16; N_SUBKEYS],
             mode: Default::default(),
@@ -38,6 +40,8 @@ impl Default for Idea {
 }
 
 impl Idea {
+    const BLOCKSIZE: u32 = 8;
+
     pub fn subkeys_enc(&self) -> &[u16; N_SUBKEYS] {
         &self.subkeys_enc
     }
@@ -182,67 +186,31 @@ impl Idea {
 
         (x1 as u64) << 48 | (x2 as u64) << 32 | (x3 as u64) << 16 | (x4 as u64)
     }
+}
 
-    pub fn encrypt_block(&self, block: u64) -> u64 {
-        Self::block_function(block, self.subkeys_enc())
-    }
-
-    pub fn decrypt_block(&self, block: u64) -> u64 {
-        Self::block_function(block, self.subkeys_dec())
-    }
-
-    pub fn encrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        assert!(bytes.len() % BLOCK_SIZE == 0);
-        let mut out = Vec::with_capacity(bytes.len());
-
-        // Take 8 byte chunks
-        for block in bytes.chunks_exact(BLOCK_SIZE) {
-            // Turn each chunk into a u64
-            let x = u64::from_be_bytes(block.try_into().unwrap());
-
-            // Push bytes to the output
-            out.extend_from_slice(&self.encrypt_block(x).to_be_bytes());
+impl BlockCipher<8> for Idea {
+    fn encrypt_block(&self, bytes: &mut [u8]) {
+        let block = u64::from_be_bytes(bytes.try_into().unwrap());
+        let b = Self::block_function(block, self.subkeys_enc());
+        for (plaintext, ciphertext) in bytes.iter_mut().zip(b.to_be_bytes().iter()) {
+            *plaintext = *ciphertext
         }
-
-        Ok(out)
     }
 
-    pub fn decrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        assert!(bytes.len() % 8 == 0);
-        let mut out = Vec::with_capacity(bytes.len());
-
-        // Take 8 byte chunks
-        for block in bytes.chunks_exact(BLOCK_SIZE) {
-            // Turn each chunk into a u64
-            let x = u64::from_be_bytes(block.try_into().unwrap());
-
-            // Push bytes to the output
-            out.extend_from_slice(&self.decrypt_block(x).to_be_bytes());
+    fn decrypt_block(&self, bytes: &mut [u8]) {
+        let block = u64::from_be_bytes(bytes.try_into().unwrap());
+        let b = Self::block_function(block, self.subkeys_dec());
+        for (ciphertext, plaintext) in bytes.iter_mut().zip(b.to_be_bytes().iter()) {
+            *ciphertext = *plaintext
         }
-
-        Ok(out)
     }
 
-    pub fn encrypt_ctr(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        let mut ctr = self.ctr;
-        let mut out = Vec::with_capacity(bytes.len());
-
-        // Take 8 byte chunks
-        for block in bytes.chunks_exact(BLOCK_SIZE) {
-            let mask = self.encrypt_block(ctr).to_be_bytes();
-
-            for (byte, m) in block.iter().zip(mask.iter()) {
-                out.push(byte ^ m)
-            }
-
-            ctr = ctr.wrapping_add(1);
-        }
-
-        Ok(out)
+    fn set_mode(&mut self, mode: BlockCipherMode) {
+        self.mode = mode;
     }
 
-    pub fn decrypt_ctr(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        self.encrypt_ctr(bytes)
+    fn set_padding(&mut self, padding: BlockCipherPadding) {
+        self.padding = padding;
     }
 }
 
@@ -254,16 +222,15 @@ impl Cipher for Idea {
             .map_err(|_| CipherError::input("byte format error"))?;
 
         if self.mode.padded() {
-            self.padding.add_padding(&mut bytes, BLOCK_SIZE as u32)?;
+            self.padding.add_padding(&mut bytes, Self::BLOCKSIZE)?;
         }
 
-        let out = match self.mode {
-            BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes)?,
-            BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes)?,
-            BlockCipherMode::Cbc => return Err(CipherError::state("CBC mode not implemented")),
+        match self.mode {
+            BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes),
+            BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
+            BlockCipherMode::Cbc => self.encrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
         };
-
-        Ok(self.output_format.byte_slice_to_text(&out))
+        Ok(self.output_format.byte_slice_to_text(&bytes))
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
@@ -272,21 +239,23 @@ impl Cipher for Idea {
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
 
-        if self.padding == BlockCipherPadding::None {
-            none_padding(&mut bytes, BLOCK_SIZE as u32)?
-        };
+        if self.mode.padded() {
+            if self.padding == BlockCipherPadding::None {
+                none_padding(&mut bytes, Self::BLOCKSIZE)?
+            };
+        }
 
-        let out = match self.mode {
-            BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes)?,
-            BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes)?,
-            BlockCipherMode::Cbc => return Err(CipherError::state("CBC mode not implemented")),
+        match self.mode {
+            BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes),
+            BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
+            BlockCipherMode::Cbc => self.decrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
         };
 
         if self.mode.padded() {
-            self.padding.strip_padding(&mut bytes, BLOCK_SIZE as u32)?;
+            self.padding.strip_padding(&mut bytes, Self::BLOCKSIZE)?;
         }
 
-        Ok(self.output_format.byte_slice_to_text(&out))
+        Ok(self.output_format.byte_slice_to_text(&bytes))
     }
 }
 
@@ -324,10 +293,10 @@ mod idea_tests {
     fn encrypt_decrypt_test() {
         let mut cipher = Idea::default();
         cipher.ksa(&[1, 2, 3, 4, 5, 6, 7, 8]);
-        let ptext = 0x0000_0001_0002_0003; // from 0 1 2 3
-        let ctext = 0x3ffb311b0a44067b; // from 16379 12571 2628 1659
-        let etext: u64 = cipher.encrypt_block(ptext);
-        assert_eq!(ctext, etext);
-        assert_eq!(ptext, cipher.decrypt_block(etext));
+        cipher.padding = BlockCipherPadding::None;
+        let ptext = "0000000100020003"; // from 0 1 2 3
+        let ctext = "3ffb311b0a44067b"; // from 16379 12571 2628 1659
+        assert_eq!(ctext, &cipher.encrypt(ptext).unwrap());
+        assert_eq!(ptext, &cipher.decrypt(ctext).unwrap());
     }
 }

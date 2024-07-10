@@ -137,7 +137,6 @@ impl BlockCipher<8> for Blowfish {
     fn encrypt_block(&self, bytes: &mut [u8]) {
         let mut lr = u8_slice_to_u32_pair(&bytes);
         self.encrypt_u32_pair(&mut lr);
-
         for (plaintext, ciphertext) in bytes.iter_mut().zip(u32_pair_to_u8_array(lr).iter()) {
             *plaintext = *ciphertext
         }
@@ -146,8 +145,8 @@ impl BlockCipher<8> for Blowfish {
     fn decrypt_block(&self, bytes: &mut [u8]) {
         let mut lr = u8_slice_to_u32_pair(&bytes);
         self.decrypt_u32_pair(&mut lr);
-        for (plaintext, ciphertext) in bytes.iter_mut().zip(u32_pair_to_u8_array(lr).iter()) {
-            *plaintext = *ciphertext
+        for (ciphertext, plaintext) in bytes.iter_mut().zip(u32_pair_to_u8_array(lr).iter()) {
+            *ciphertext = *plaintext
         }
     }
 
