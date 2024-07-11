@@ -1,5 +1,5 @@
 use crate::{Cipher, CipherError};
-use utils::byte_formatting::ByteFormat;
+use utils::byte_formatting::{u32_pair_to_u8_array, ByteFormat};
 
 use super::block_cipher::{none_padding, BlockCipher, BlockCipherMode, BlockCipherPadding};
 
@@ -8,6 +8,7 @@ pub struct Tea {
     pub input_format: ByteFormat,
     pub key: [u32; 4],
     pub ctr: u64,
+    pub iv: u64,
     pub mode: BlockCipherMode,
     pub padding: BlockCipherPadding,
 }
@@ -19,6 +20,7 @@ impl Default for Tea {
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
             ctr: 0,
+            iv: 0,
             mode: BlockCipherMode::default(),
             padding: BlockCipherPadding::default(),
         }
@@ -28,9 +30,14 @@ impl Default for Tea {
 impl Tea {
     const DELTA: u32 = 0x9e3779b9;
     const BLOCKSIZE: u32 = 8;
+}
 
-    // Encrypt a block.
-    pub fn encrypt_block(&self, v: &mut [u32; 2]) {
+impl BlockCipher<8> for Tea {
+    fn encrypt_block(&self, bytes: &mut [u8]) {
+        let mut v = [0u32; 2];
+        for (elem, chunk) in v.iter_mut().zip(bytes.chunks_exact(4)) {
+            *elem = u32::from_be_bytes(chunk.try_into().unwrap());
+        }
         let mut sum: u32 = 0;
         for _ in 0..32 {
             sum = sum.wrapping_add(Self::DELTA);
@@ -45,62 +52,16 @@ impl Tea {
                     ^ ((v[0] >> 5).wrapping_add(self.key[3])),
             );
         }
-    }
-
-    // Encrypt in CTR mode.
-    pub fn encrypt_ctr(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        let mut out = Vec::new();
-        let mut ctr = self.ctr;
-
-        // Take 8 byte chunks
-        for block in bytes.chunks(Self::BLOCKSIZE as usize) {
-            // Encrypt the counter
-            let mut b = [(ctr >> 32) as u32, ctr as u32];
-            self.encrypt_block(&mut b);
-
-            // Save the values
-            let mut mask = Vec::with_capacity(8);
-            mask.extend_from_slice(&b[0].to_be_bytes());
-            mask.extend_from_slice(&b[1].to_be_bytes());
-
-            // XOR the bytes of the plaintext with the masking bytes
-            for (byte, m) in block.iter().zip(mask.iter()) {
-                out.push(byte ^ m)
-            }
-
-            // Increment
-            ctr = ctr.wrapping_add(1);
+        for (plaintext, ciphertext) in bytes.iter_mut().zip(u32_pair_to_u8_array(v).iter()) {
+            *plaintext = *ciphertext
         }
-
-        Ok(out)
     }
 
-    // Encrypt in ECB mode.
-    pub fn encrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        assert!(bytes.len() % 8 == 0);
-        let mut out = Vec::with_capacity(bytes.len());
-
-        // Take 8 byte chunks
-        for block in bytes.chunks_exact(Self::BLOCKSIZE as usize) {
-            // Turn each chunk into a pair of u32
-            let mut x = [0u32; 2];
-            for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)) {
-                *elem = u32::from_be_bytes(chunk.try_into().unwrap());
-            }
-
-            // Encrypt that pair
-            self.encrypt_block(&mut x);
-
-            // Push bytes to the output
-            out.extend_from_slice(&x[0].to_be_bytes());
-            out.extend_from_slice(&x[1].to_be_bytes());
+    fn decrypt_block(&self, bytes: &mut [u8]) {
+        let mut v = [0u32; 2];
+        for (elem, chunk) in v.iter_mut().zip(bytes.chunks_exact(4)) {
+            *elem = u32::from_be_bytes(chunk.try_into().unwrap());
         }
-
-        Ok(out)
-    }
-
-    // Decrypt a block
-    pub fn decrypt_block(&self, v: &mut [u32; 2]) {
         let mut sum: u32 = 0xC6EF3720;
         for _ in 0..32 {
             v[1] = v[1].wrapping_sub(
@@ -115,49 +76,17 @@ impl Tea {
             );
             sum = sum.wrapping_sub(Self::DELTA);
         }
-    }
-
-    // Decrypt in CTR mode. Identical to encrypt as CTR mode operates as a stream cipher
-    pub fn decrypt_ctr(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        self.encrypt_ctr(bytes)
-    }
-
-    // Decrypt in ECB mode.
-    pub fn decrypt_ecb(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        assert!(bytes.len() % 8 == 0);
-        let mut out = Vec::with_capacity(bytes.len());
-
-        for block in bytes.chunks_exact(8) {
-            let mut x = [0u32; 2];
-            for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)) {
-                *elem = u32::from_be_bytes(chunk.try_into().unwrap());
-            }
-
-            self.decrypt_block(&mut x);
-
-            out.extend_from_slice(&x[0].to_be_bytes());
-            out.extend_from_slice(&x[1].to_be_bytes());
+        for (ciphertext, plaintext) in bytes.iter_mut().zip(u32_pair_to_u8_array(v).iter()) {
+            *ciphertext = *plaintext
         }
-
-        Ok(out)
-    }
-}
-
-impl BlockCipher<8> for Tea {
-    fn encrypt_block(&self, bytes: &mut [u8]) {
-        todo!()
     }
 
-    fn decrypt_block(&self, bytes: &mut [u8]) {
-        todo!()
+    fn set_mode(&mut self, mode: BlockCipherMode) {
+        self.mode = mode
     }
 
-    fn set_mode(&mut self, mode: super::block_cipher::BlockCipherMode) {
-        todo!()
-    }
-
-    fn set_padding(&mut self, padding: super::block_cipher::BlockCipherPadding) {
-        todo!()
+    fn set_padding(&mut self, padding: BlockCipherPadding) {
+        self.padding = padding
     }
 }
 
@@ -172,13 +101,12 @@ impl Cipher for Tea {
             self.padding.add_padding(&mut bytes, Self::BLOCKSIZE)?;
         }
 
-        let out = match self.mode {
-            BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes)?,
-            BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes)?,
-            BlockCipherMode::Cbc => return Err(CipherError::state("CBC mode not implemented")),
+        match self.mode {
+            BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes),
+            BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
+            BlockCipherMode::Cbc => self.encrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
         };
-
-        Ok(self.output_format.byte_slice_to_text(&out))
+        Ok(self.output_format.byte_slice_to_text(&bytes))
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
@@ -187,21 +115,23 @@ impl Cipher for Tea {
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
 
-        if self.padding == BlockCipherPadding::None {
-            none_padding(&mut bytes, 8)?
-        };
+        if self.mode.padded() {
+            if self.padding == BlockCipherPadding::None {
+                none_padding(&mut bytes, Self::BLOCKSIZE)?
+            };
+        }
 
-        let mut out = match self.mode {
-            BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes)?,
-            BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes)?,
-            BlockCipherMode::Cbc => return Err(CipherError::state("CBC mode not implemented")),
+        match self.mode {
+            BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes),
+            BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
+            BlockCipherMode::Cbc => self.decrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
         };
 
         if self.mode.padded() {
-            self.padding.strip_padding(&mut out, Self::BLOCKSIZE)?;
+            self.padding.strip_padding(&mut bytes, Self::BLOCKSIZE)?;
         }
 
-        Ok(self.output_format.byte_slice_to_text(&out))
+        Ok(self.output_format.byte_slice_to_text(&bytes))
     }
 }
 

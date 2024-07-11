@@ -1,5 +1,3 @@
-use crypto_bigint::generic_array::GenericArray;
-use num::{BigUint, One};
 use utils::math_functions::incr_array_ctr;
 
 use crate::CipherError;
@@ -132,7 +130,7 @@ impl Default for BlockCipherMode {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum BlockCipherPadding {
     None,
     Bit, // add the byte 0x80, then add 0x00 bytes until the block size (in bytes) is reached

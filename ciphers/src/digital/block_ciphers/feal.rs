@@ -43,11 +43,11 @@ impl BlockCipher<8> for Feal {
     }
 
     fn set_mode(&mut self, mode: BlockCipherMode) {
-        todo!()
+        self.mode = mode
     }
 
     fn set_padding(&mut self, padding: BlockCipherPadding) {
-        todo!()
+        self.padding = padding
     }
 }
 
