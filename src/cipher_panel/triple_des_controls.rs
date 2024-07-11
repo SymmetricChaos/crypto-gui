@@ -2,8 +2,8 @@ use super::CipherFrame;
 use crate::ui_elements::{block_cipher_mode, u64_drag_value, UiElements};
 use ciphers::{
     digital::block_ciphers::{
+        block_cipher::BlockCipherMode,
         des::{des_functions::set_des_key_parity, triple_des::TripleDes},
-        BlockCipherMode,
     },
     Cipher,
 };

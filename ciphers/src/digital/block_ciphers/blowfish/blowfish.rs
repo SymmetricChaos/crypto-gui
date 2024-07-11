@@ -1,10 +1,12 @@
 use utils::byte_formatting::{u32_pair_to_u8_array, u8_slice_to_u32_pair, ByteFormat};
 
-use super::{
-    blowfish_arrays::{PARRAY, SBOXES},
-    none_padding, BlockCipher, BlockCipherMode, BlockCipherPadding,
+use super::blowfish_arrays::{PARRAY, SBOXES};
+use crate::{
+    digital::block_ciphers::block_cipher::{
+        none_padding, BlockCipher, BlockCipherMode, BlockCipherPadding,
+    },
+    Cipher, CipherError,
 };
-use crate::{Cipher, CipherError};
 
 pub struct Blowfish {
     pub output_format: ByteFormat,

@@ -2,7 +2,7 @@ use super::CipherFrame;
 use crate::ui_elements::{block_cipher_mode, UiElements};
 
 use ciphers::{
-    digital::block_ciphers::{aes::aes::Aes128, BlockCipherMode},
+    digital::block_ciphers::{aes::aes::Aes128, block_cipher::BlockCipherMode},
     Cipher,
 };
 use egui::{DragValue, Ui};
