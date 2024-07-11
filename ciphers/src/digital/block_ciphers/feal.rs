@@ -1,6 +1,8 @@
 use utils::byte_formatting::ByteFormat;
 
-use super::{BlockCipherMode, BlockCipherPadding};
+use crate::Cipher;
+
+use super::block_cipher::{BlockCipher, BlockCipherMode, BlockCipherPadding};
 
 pub struct Feal {
     pub output_format: ByteFormat,
@@ -29,4 +31,32 @@ impl Feal {
 
     pub fn encrypt_block(&self, block: u64) {}
     pub fn decrypt_block(&self, block: u64) {}
+}
+
+impl BlockCipher<8> for Feal {
+    fn encrypt_block(&self, bytes: &mut [u8]) {
+        todo!()
+    }
+
+    fn decrypt_block(&self, bytes: &mut [u8]) {
+        todo!()
+    }
+
+    fn set_mode(&mut self, mode: BlockCipherMode) {
+        todo!()
+    }
+
+    fn set_padding(&mut self, padding: BlockCipherPadding) {
+        todo!()
+    }
+}
+
+impl Cipher for Feal {
+    fn encrypt(&self, text: &str) -> Result<String, crate::CipherError> {
+        todo!()
+    }
+
+    fn decrypt(&self, text: &str) -> Result<String, crate::CipherError> {
+        todo!()
+    }
 }

@@ -2,7 +2,7 @@ use utils::byte_formatting::ByteFormat;
 
 use crate::{Cipher, CipherError};
 
-use super::{BlockCipherMode, BlockCipherPadding};
+use super::block_cipher::{BlockCipherMode, BlockCipherPadding};
 
 pub struct Xtea {
     pub output_format: ByteFormat,

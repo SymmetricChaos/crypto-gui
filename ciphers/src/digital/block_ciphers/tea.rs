@@ -1,7 +1,7 @@
 use crate::{Cipher, CipherError};
 use utils::byte_formatting::ByteFormat;
 
-use super::{none_padding, BlockCipherMode, BlockCipherPadding};
+use super::block_cipher::{none_padding, BlockCipher, BlockCipherMode, BlockCipherPadding};
 
 pub struct Tea {
     pub output_format: ByteFormat,
@@ -140,6 +140,24 @@ impl Tea {
         }
 
         Ok(out)
+    }
+}
+
+impl BlockCipher<8> for Tea {
+    fn encrypt_block(&self, bytes: &mut [u8]) {
+        todo!()
+    }
+
+    fn decrypt_block(&self, bytes: &mut [u8]) {
+        todo!()
+    }
+
+    fn set_mode(&mut self, mode: super::block_cipher::BlockCipherMode) {
+        todo!()
+    }
+
+    fn set_padding(&mut self, padding: super::block_cipher::BlockCipherPadding) {
+        todo!()
     }
 }
 

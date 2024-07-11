@@ -1,7 +1,10 @@
 use utils::byte_formatting::ByteFormat;
 
 use crate::{
-    digital::block_ciphers::{des::des::Des, none_padding, BlockCipherMode, BlockCipherPadding},
+    digital::block_ciphers::{
+        block_cipher::{none_padding, BlockCipher, BlockCipherMode, BlockCipherPadding},
+        des::des::Des,
+    },
     Cipher, CipherError,
 };
 
@@ -110,6 +113,24 @@ impl TripleDes {
 
     pub fn decrypt_ctr(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
         self.encrypt_ctr(bytes)
+    }
+}
+
+impl BlockCipher<8> for TripleDes {
+    fn encrypt_block(&self, bytes: &mut [u8]) {
+        todo!()
+    }
+
+    fn decrypt_block(&self, bytes: &mut [u8]) {
+        todo!()
+    }
+
+    fn set_mode(&mut self, mode: BlockCipherMode) {
+        todo!()
+    }
+
+    fn set_padding(&mut self, padding: BlockCipherPadding) {
+        todo!()
     }
 }
 

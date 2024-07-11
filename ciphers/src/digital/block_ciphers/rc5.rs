@@ -3,7 +3,7 @@ use utils::byte_formatting::{u32_pair_to_u8_array, u8_slice_to_u32_pair, ByteFor
 use crate::{Cipher, CipherError};
 use std::{cmp::max, ops::Shl};
 
-use super::{none_padding, BlockCipher, BlockCipherMode, BlockCipherPadding};
+use super::block_cipher::{none_padding, BlockCipher, BlockCipherMode, BlockCipherPadding};
 
 const P32: u32 = 0xb7e15163;
 const Q32: u32 = 0x9e3779b9;

@@ -2,7 +2,9 @@ use itertools::Itertools;
 use utils::byte_formatting::ByteFormat;
 
 use crate::{
-    digital::block_ciphers::{none_padding, BlockCipher, BlockCipherMode, BlockCipherPadding},
+    digital::block_ciphers::block_cipher::{
+        none_padding, BlockCipher, BlockCipherMode, BlockCipherPadding,
+    },
     Cipher, CipherError,
 };
 
