@@ -1,6 +1,9 @@
 use super::CipherFrame;
 use crate::ui_elements::{u16_drag_value, UiElements};
-use ciphers::{digital::block_ciphers::idea::Idea, Cipher};
+use ciphers::{
+    digital::block_ciphers::{block_cipher::BlockCipherMode, idea::Idea},
+    Cipher,
+};
 use egui::{FontId, RichText, Ui};
 use rand::{thread_rng, Rng};
 
@@ -96,6 +99,20 @@ impl CipherFrame for IdeaFrame {
                         );
                     }
                 });
+        });
+
+        ui.add_space(16.0);
+
+        ui.add_enabled_ui(self.cipher.mode == BlockCipherMode::Ctr, |ui| {
+            ui.subheading("Counter");
+            ui.label("In CTR mode the cipher must have a 64-bit counter value provided.");
+            ui.u64_drag_value_hex(&mut self.cipher.ctr);
+        });
+
+        ui.add_enabled_ui(self.cipher.mode == BlockCipherMode::Cbc, |ui| {
+            ui.subheading("Initialization Vector");
+            ui.label("In CBC mode the cipher must have a 64-bit initialization vector provided.");
+            ui.u64_drag_value_hex(&mut self.cipher.iv);
         });
 
         ui.add_space(16.0);

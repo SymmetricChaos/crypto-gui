@@ -75,6 +75,12 @@ impl CipherFrame for TripleDesFrame {
             ui.u64_drag_value_hex(&mut self.cipher.ctr);
         });
 
+        ui.add_enabled_ui(self.cipher.mode == BlockCipherMode::Cbc, |ui| {
+            ui.subheading("Initialization Vector");
+            ui.label("In CBC mode the cipher must have a 64-bit initialization vector provided.");
+            ui.u64_drag_value_hex(&mut self.cipher.iv);
+        });
+
         ui.add_space(16.0);
     }
 

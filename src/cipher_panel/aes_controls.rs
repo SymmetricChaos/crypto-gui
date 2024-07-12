@@ -12,6 +12,8 @@ pub struct AesFrame {
     cipher: Aes128,
     ctr_upper: u64,
     ctr_lower: u64,
+    iv_upper: u64,
+    iv_lower: u64,
 }
 
 impl Default for AesFrame {
@@ -20,6 +22,8 @@ impl Default for AesFrame {
             cipher: Default::default(),
             ctr_upper: 0,
             ctr_lower: 0,
+            iv_upper: 0,
+            iv_lower: 0,
         }
     }
 }
@@ -68,6 +72,20 @@ impl CipherFrame for AesFrame {
                 self.cipher.ctr |= self.ctr_lower as u128;
             }
             ui.label(format!("{:032x?}",self.cipher.ctr))
+        });
+
+        ui.add_enabled_ui(self.cipher.mode == BlockCipherMode::Cbc, |ui| {
+            ui.subheading("Initialization Vector");
+            ui.label("In CBC mode the cipher must have a 128-bit initialization vector provided. The selectors below control the upper and lower 64-bits respectively.");
+            if ui.add(DragValue::new(&mut self.iv_upper).hexadecimal(16, false, true)) .changed() {
+                self.cipher.iv &= 0x0000000000000000FFFFFFFFFFFFFFFF;
+                self.cipher.iv |= (self.iv_upper as u128) << 64;
+            }
+            if ui.add(DragValue::new(&mut self.iv_lower).hexadecimal(16, false, true)) .changed() {
+                self.cipher.iv &= 0xFFFFFFFFFFFFFFFF0000000000000000;
+                self.cipher.iv |= self.iv_lower as u128;
+            }
+            ui.label(format!("{:032x?}",self.cipher.iv))
         });
 
         ui.add_space(16.0);

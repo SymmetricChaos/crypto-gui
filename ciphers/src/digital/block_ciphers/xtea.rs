@@ -1,14 +1,15 @@
-use utils::byte_formatting::ByteFormat;
+use utils::byte_formatting::{u32_pair_to_u8_array, ByteFormat};
 
 use crate::{Cipher, CipherError};
 
-use super::block_cipher::{BlockCipherMode, BlockCipherPadding};
+use super::block_cipher::{none_padding, BlockCipher, BlockCipherMode, BlockCipherPadding};
 
 pub struct Xtea {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
     pub key: [u32; 4],
     pub ctr: u64,
+    pub iv: u64,
     pub mode: BlockCipherMode,
     pub padding: BlockCipherPadding,
 }
@@ -18,6 +19,7 @@ impl Default for Xtea {
         Self {
             key: [0, 1, 2, 3],
             ctr: 0,
+            iv: 0,
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
             mode: BlockCipherMode::default(),
@@ -29,8 +31,14 @@ impl Default for Xtea {
 impl Xtea {
     const DELTA: u32 = 0x9e3779b9;
     const BLOCKSIZE: u32 = 8;
+}
 
-    pub fn encrypt_block(&self, v: &mut [u32; 2]) {
+impl BlockCipher<8> for Xtea {
+    fn encrypt_block(&self, bytes: &mut [u8]) {
+        let mut v = [0u32; 2];
+        for (elem, chunk) in v.iter_mut().zip(bytes.chunks_exact(4)) {
+            *elem = u32::from_be_bytes(chunk.try_into().unwrap());
+        }
         let mut sum: u32 = 0;
         for _ in 0..32 {
             v[0] = v[0].wrapping_add(
@@ -45,33 +53,16 @@ impl Xtea {
                     ^ sum.wrapping_add(self.key[((sum >> 11) % 4) as usize]),
             );
         }
-    }
-
-    pub fn encrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        let input = bytes.to_vec();
-
-        let mut out = Vec::new();
-
-        // Take 8 byte chunks
-        for block in input.chunks_exact(Self::BLOCKSIZE as usize) {
-            // Turn each chunk into a pair of u32
-            let mut x = [0u32; 2];
-            for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)) {
-                *elem = u32::from_be_bytes(chunk.try_into().unwrap());
-            }
-
-            // Encrypt that pair
-            self.encrypt_block(&mut x);
-
-            // Push bytes to the output
-            out.extend_from_slice(&x[0].to_be_bytes());
-            out.extend_from_slice(&x[1].to_be_bytes());
+        for (plaintext, ciphertext) in bytes.iter_mut().zip(u32_pair_to_u8_array(v).iter()) {
+            *plaintext = *ciphertext
         }
-
-        Ok(out)
     }
 
-    pub fn decrypt_block(&self, v: &mut [u32; 2]) {
+    fn decrypt_block(&self, bytes: &mut [u8]) {
+        let mut v = [0u32; 2];
+        for (elem, chunk) in v.iter_mut().zip(bytes.chunks_exact(4)) {
+            *elem = u32::from_be_bytes(chunk.try_into().unwrap());
+        }
         let mut sum: u32 = 0xC6EF3720;
         for _ in 0..32 {
             v[1] = v[1].wrapping_sub(
@@ -86,24 +77,17 @@ impl Xtea {
                     ^ sum.wrapping_add(self.key[(sum % 4) as usize]),
             );
         }
+        for (ciphertext, plaintext) in bytes.iter_mut().zip(u32_pair_to_u8_array(v).iter()) {
+            *ciphertext = *plaintext
+        }
     }
 
-    pub fn decrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        let mut out = Vec::new();
+    fn set_mode(&mut self, mode: BlockCipherMode) {
+        self.mode = mode
+    }
 
-        for block in bytes.chunks_exact(Self::BLOCKSIZE as usize) {
-            let mut x = [0u32; 2];
-            for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)) {
-                *elem = u32::from_be_bytes(chunk.try_into().unwrap());
-            }
-
-            self.decrypt_block(&mut x);
-
-            out.extend_from_slice(&x[0].to_be_bytes());
-            out.extend_from_slice(&x[1].to_be_bytes());
-        }
-
-        Ok(out)
+    fn set_padding(&mut self, padding: BlockCipherPadding) {
+        self.padding = padding
     }
 }
 
@@ -113,11 +97,17 @@ impl Cipher for Xtea {
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
+
         if self.mode.padded() {
             self.padding.add_padding(&mut bytes, Self::BLOCKSIZE)?;
         }
-        let out = self.encrypt_bytes(&mut bytes)?;
-        Ok(self.output_format.byte_slice_to_text(&out))
+
+        match self.mode {
+            BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes),
+            BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
+            BlockCipherMode::Cbc => self.encrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
+        };
+        Ok(self.output_format.byte_slice_to_text(&bytes))
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
@@ -125,8 +115,24 @@ impl Cipher for Xtea {
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
-        let out = self.decrypt_bytes(&mut bytes)?;
-        Ok(self.output_format.byte_slice_to_text(&out))
+
+        if self.mode.padded() {
+            if self.padding == BlockCipherPadding::None {
+                none_padding(&mut bytes, Self::BLOCKSIZE)?
+            };
+        }
+
+        match self.mode {
+            BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes),
+            BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
+            BlockCipherMode::Cbc => self.decrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
+        };
+
+        if self.mode.padded() {
+            self.padding.strip_padding(&mut bytes, Self::BLOCKSIZE)?;
+        }
+
+        Ok(self.output_format.byte_slice_to_text(&bytes))
     }
 }
 
