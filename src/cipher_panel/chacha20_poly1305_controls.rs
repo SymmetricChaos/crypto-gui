@@ -45,17 +45,28 @@ impl CipherFrame for ChaCha20Poly1305Frame {
         ui.randomize_reset(self);
         ui.add_space(16.0);
 
+        ui.byte_io_mode(
+            &mut self.cipher.cipher.input_format,
+            &mut self.cipher.cipher.output_format,
+        );
+
+        ui.add_space(16.0);
+
         ui.subheading("Key");
-        for i in 0..4 {
-            ui.u32_drag_value_hex(&mut self.cipher.cipher.key[i]);
-        }
+        ui.horizontal(|ui| {
+            for i in 0..4 {
+                ui.u32_drag_value_hex(&mut self.cipher.cipher.key[i]);
+            }
+        });
         ui.add_space(8.0);
+
         ui.subheading("Nonce");
-        ui.label("The variant of ChaCha20-Poly1305 presented here uses a 96-bit nonce, consisting of three 32-bit words. The internal counter is thus only 32-bits.");
         ui.label("It is suggested that two of words of the nonce be chosen randomly for each message and the third be chosen to separate multiple streams of data.");
-        for i in 0..3 {
-            ui.u32_drag_value_hex(&mut self.cipher.cipher.nonce[i]);
-        }
+        ui.horizontal(|ui| {
+            for i in 0..3 {
+                ui.u32_drag_value_hex(&mut self.cipher.cipher.nonce[i]);
+            }
+        });
 
         ui.add_space(8.0);
         ui.subheading("Counter");

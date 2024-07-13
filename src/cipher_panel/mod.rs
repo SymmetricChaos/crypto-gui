@@ -1,4 +1,5 @@
 use blowfish_controls::BlowfishFrame;
+use chacha_ex_controls::ChaChaExNonceFrame;
 use ciphers::{
     errors::CipherError,
     ids::{cipher_categories::CipherCategory, CipherId},
@@ -50,6 +51,7 @@ mod blowfish_controls;
 mod caesar_controls;
 mod chacha20_poly1305_controls;
 mod chacha_controls;
+pub mod chacha_ex_controls;
 mod chaocipher_controls;
 mod checkerboard_controls;
 mod columnar_controls;
@@ -194,6 +196,7 @@ pub struct CipherInterface {
     aes: AesFrame,
     blowfish: BlowfishFrame,
     chacha: ChaChaFrame,
+    chachaexnonce: ChaChaExNonceFrame,
     chacha20poly1305: ChaCha20Poly1305Frame,
     des: DesFrame,
     diffie_hellman: DiffieHellmanFrame,
@@ -312,6 +315,7 @@ impl CipherInterface {
                 CipherId::Aes,
                 CipherId::Blowfish,
                 CipherId::ChaCha,
+                CipherId::ChaChaExtendedNonce,
                 CipherId::ChaCha20Poly1305,
                 CipherId::Des,
                 CipherId::DiffieHellman,
@@ -364,6 +368,7 @@ impl CipherInterface {
             CipherId::Blowfish => &mut self.blowfish,
             CipherId::Caesar => &mut self.caesar,
             CipherId::ChaCha => &mut self.chacha,
+            CipherId::ChaChaExtendedNonce => &mut self.chachaexnonce,
             CipherId::ChaCha20Poly1305 => &mut self.chacha20poly1305,
             CipherId::Chaocipher => &mut self.chaocipher,
             CipherId::Checkerboard => &mut self.checkerboard,

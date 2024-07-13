@@ -1,4 +1,4 @@
-use ciphers::digital::chacha::ChaCha;
+use ciphers::digital::chacha_extended_nonce::ChaChaExtendedNonce;
 use egui::Slider;
 use rand::{thread_rng, Rng};
 
@@ -6,11 +6,11 @@ use crate::ui_elements::UiElements;
 
 use super::CipherFrame;
 
-pub struct ChaChaFrame {
-    cipher: ChaCha,
+pub struct ChaChaExNonceFrame {
+    cipher: ChaChaExtendedNonce,
 }
 
-impl Default for ChaChaFrame {
+impl Default for ChaChaExNonceFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
@@ -18,7 +18,7 @@ impl Default for ChaChaFrame {
     }
 }
 
-impl ChaChaFrame {
+impl ChaChaExNonceFrame {
     fn start_state(&self) -> String {
         let mut out = String::new();
 
@@ -35,11 +35,11 @@ impl ChaChaFrame {
     }
 }
 
-impl CipherFrame for ChaChaFrame {
+impl CipherFrame for ChaChaExNonceFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
-            "https://github.com/SymmetricChaos/crypto-gui/blob/master/ciphers/src/digital/chacha.rs",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/ciphers/src/digital/chacha_extended_nonce.rs",
         );
         ui.add_space(8.0);
 
@@ -60,18 +60,18 @@ impl CipherFrame for ChaChaFrame {
         });
 
         ui.add_space(8.0);
-        ui.subheading("Nonce (64-bits)");
+        ui.subheading("Nonce (96-bits)");
         ui.label("A nonce (number used once) ensures that the cipher state is always different from message to message.");
         ui.horizontal(|ui| {
-            for i in 0..2 {
+            for i in 0..3 {
                 ui.u32_drag_value_hex(&mut self.cipher.nonce[i]);
             }
         });
 
         ui.add_space(8.0);
-        ui.subheading("Counter (64-bits)");
+        ui.subheading("Counter (32-bits)");
         ui.label("The counter ensures that each block of the keystream is different.");
-        ui.u64_drag_value_hex(&mut self.cipher.ctr);
+        ui.u32_drag_value_hex(&mut self.cipher.ctr);
 
         ui.add_space(8.0);
         ui.subheading("Number of Rounds");

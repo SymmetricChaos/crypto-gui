@@ -142,19 +142,15 @@ impl UiElements for Ui {
 
     fn binary_to_text_input_mode(&mut self, current_value: &mut ByteFormat) {
         self.label("Encoding Mode");
-        self.selectable_value(current_value, ByteFormat::Hex, "Hex")
-            .on_hover_text("interpret input as hexcode");
-        self.selectable_value(current_value, ByteFormat::Utf8, "UTF-8")
-            .on_hover_text("interpret intput text (UTF-8) as raw bytes");
-        self.selectable_value(current_value, ByteFormat::Base64, "Base64")
-            .on_hover_text("interpret input as Base64");
-        self.selectable_value(current_value, ByteFormat::Bit, "Binary")
-            .on_hover_text("interpret input as binary");
+        self.selectable_value(current_value, ByteFormat::Hex, "Hex");
+        self.selectable_value(current_value, ByteFormat::Utf8, "Text (UTF-8)");
+        self.selectable_value(current_value, ByteFormat::Base64, "Base64");
+        self.selectable_value(current_value, ByteFormat::Bit, "Binary");
     }
 
     fn byte_io_mode(&mut self, input: &mut ByteFormat, output: &mut ByteFormat) {
-        self.collapsing("Input Format", |ui| {
-            ui.label("Input can be text (interpreted as UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
+        egui::CollapsingHeader::new("Input Format").default_open(true).show(self, |ui| {
+            ui.label("Input can be text, hexadecimal representing bytes, or Base64 representing bytes.");
             ui.horizontal(|ui| {
                 ui.selectable_value(
                     input,
@@ -172,8 +168,8 @@ impl UiElements for Ui {
 
         self.add_space(8.0);
 
-        self.collapsing("Output Format", |ui| {
-            ui.label("Output can be text (but information will be lost if the bytes are not valid UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
+        egui::CollapsingHeader::new("Output Format").default_open(true).show(self, |ui| {
+            ui.label("Output can be text, hexadecimal representing bytes, or Base64 representing bytes.");
             ui.horizontal(|ui| {
                 ui.selectable_value(
                     output,
