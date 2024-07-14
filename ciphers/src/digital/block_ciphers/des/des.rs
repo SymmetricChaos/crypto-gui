@@ -151,16 +151,8 @@ mod des_tests {
             Ok(_) => (),
             Err(_) => panic!("error with ksa for key: {}", k),
         }
-        for mode in [
-            BlockCipherMode::Cbc,
-            BlockCipherMode::Ctr,
-            BlockCipherMode::Ecb,
-        ] {
-            for padding in [
-                BlockCipherPadding::Pkcs,
-                BlockCipherPadding::Bit,
-                BlockCipherPadding::None,
-            ] {
+        for mode in BlockCipherMode::variants() {
+            for padding in BlockCipherPadding::variants() {
                 cipher.mode = mode;
                 cipher.padding = padding;
 

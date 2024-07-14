@@ -13,7 +13,7 @@ pub struct DesX {
     pub extra_keys: [u64; 2],
     subkeys: [u64; 16],
     pub ctr: u64,
-    pub iv: u64,
+    pub cbc: u64,
     pub mode: BlockCipherMode,
     pub padding: BlockCipherPadding,
 }
@@ -26,7 +26,7 @@ impl Default for DesX {
             extra_keys: [0, 0],
             subkeys: [0; 16],
             ctr: 0,
-            iv: 0,
+            cbc: 0,
             mode: BlockCipherMode::default(),
             padding: BlockCipherPadding::default(),
         }
@@ -95,7 +95,7 @@ impl Cipher for DesX {
         match self.mode {
             BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes),
             BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BlockCipherMode::Cbc => self.encrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
+            BlockCipherMode::Cbc => self.encrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
         };
         Ok(self.output_format.byte_slice_to_text(&bytes))
     }
@@ -115,7 +115,7 @@ impl Cipher for DesX {
         match self.mode {
             BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes),
             BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BlockCipherMode::Cbc => self.decrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
+            BlockCipherMode::Cbc => self.decrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
         };
 
         if self.mode.padded() {
@@ -180,12 +180,8 @@ mod desx_tests {
             Ok(_) => (),
             Err(_) => panic!("error with ksa for key: {}", k),
         }
-        for mode in [
-            BlockCipherMode::Cbc,
-            BlockCipherMode::Ctr,
-            BlockCipherMode::Ecb,
-        ] {
-            for padding in [BlockCipherPadding::Bit, BlockCipherPadding::Pkcs] {
+        for mode in BlockCipherMode::variants() {
+            for padding in BlockCipherPadding::variants() {
                 cipher.mode = mode;
                 cipher.padding = padding;
 

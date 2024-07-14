@@ -108,9 +108,9 @@ pub trait BlockCipher<const N: usize> {
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum BlockCipherMode {
-    Ecb,
-    Ctr,
     Cbc,
+    Ctr,
+    Ecb,
 }
 
 impl BlockCipherMode {
@@ -121,6 +121,10 @@ impl BlockCipherMode {
             BlockCipherMode::Ctr => false,
             BlockCipherMode::Cbc => true,
         }
+    }
+
+    pub fn variants() -> [Self; 3] {
+        [Self::Cbc, Self::Ctr, Self::Ecb]
     }
 }
 
@@ -159,6 +163,10 @@ impl BlockCipherPadding {
             BlockCipherPadding::Bit => strip_bit_padding(bytes),
             BlockCipherPadding::Pkcs => strip_pkcs_padding(bytes),
         }
+    }
+
+    pub fn variants() -> [Self; 3] {
+        [Self::None, Self::Bit, Self::Pkcs]
     }
 }
 

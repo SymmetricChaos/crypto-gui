@@ -6,6 +6,7 @@ use ciphers::{
     traits::Cipher,
 };
 use des_controls::DesFrame;
+use desx_controls::DesXFrame;
 use diffie_hellman_controls::DiffieHellmanFrame;
 use egui::Ui;
 use idea_controls::IdeaFrame;
@@ -51,12 +52,13 @@ mod blowfish_controls;
 mod caesar_controls;
 mod chacha20_poly1305_controls;
 mod chacha_controls;
-pub mod chacha_ex_controls;
+mod chacha_ex_controls;
 mod chaocipher_controls;
 mod checkerboard_controls;
 mod columnar_controls;
 mod decoder_ring_controls;
 mod des_controls;
+mod desx_controls;
 mod diagonal_columnar_controls;
 mod diffie_hellman_controls;
 mod dryad_controls;
@@ -199,6 +201,7 @@ pub struct CipherInterface {
     chachaexnonce: ChaChaExNonceFrame,
     chacha20poly1305: ChaCha20Poly1305Frame,
     des: DesFrame,
+    desx: DesXFrame,
     diffie_hellman: DiffieHellmanFrame,
     idea: IdeaFrame,
     rc4: Rc4Frame,
@@ -318,6 +321,7 @@ impl CipherInterface {
                 CipherId::ChaChaExtendedNonce,
                 CipherId::ChaCha20Poly1305,
                 CipherId::Des,
+                CipherId::DesX,
                 CipherId::DiffieHellman,
                 CipherId::Idea,
                 CipherId::Rc4,
@@ -375,6 +379,7 @@ impl CipherInterface {
             CipherId::Columnar => &mut self.columnar,
             CipherId::Decoder => &mut self.decoder_ring,
             CipherId::Des => &mut self.des,
+            CipherId::DesX => &mut self.desx,
             CipherId::DiagonalColumnar => &mut self.diagonal_columnar,
             CipherId::DiffieHellman => &mut self.diffie_hellman,
             CipherId::Dryad => &mut self.dryad,
