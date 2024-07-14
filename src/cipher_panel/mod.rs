@@ -345,11 +345,11 @@ impl CipherInterface {
 
         combox_box(
             &[
-                CipherId::Vic,
                 CipherId::Adfgvx,
                 CipherId::B64,
                 CipherId::Bifid,
                 CipherId::Trifid,
+                CipherId::Vic,
             ],
             active_cipher,
             CipherCategory::Composite,

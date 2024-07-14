@@ -1,7 +1,7 @@
 use crate::{Cipher, CipherError};
 use utils::byte_formatting::{u32_pair_to_u8_array, ByteFormat};
 
-use super::block_cipher::{none_padding, BlockCipher, BlockCipherMode, BlockCipherPadding};
+use super::block_cipher::{none_padding, BlockCipher, BCMode, BCPadding};
 
 pub struct Tea {
     pub output_format: ByteFormat,
@@ -9,8 +9,8 @@ pub struct Tea {
     pub key: [u32; 4],
     pub ctr: u64,
     pub iv: u64,
-    pub mode: BlockCipherMode,
-    pub padding: BlockCipherPadding,
+    pub mode: BCMode,
+    pub padding: BCPadding,
 }
 
 impl Default for Tea {
@@ -21,8 +21,8 @@ impl Default for Tea {
             input_format: ByteFormat::Hex,
             ctr: 0,
             iv: 0,
-            mode: BlockCipherMode::default(),
-            padding: BlockCipherPadding::default(),
+            mode: BCMode::default(),
+            padding: BCPadding::default(),
         }
     }
 }
@@ -81,11 +81,11 @@ impl BlockCipher<8> for Tea {
         }
     }
 
-    fn set_mode(&mut self, mode: BlockCipherMode) {
+    fn set_mode(&mut self, mode: BCMode) {
         self.mode = mode
     }
 
-    fn set_padding(&mut self, padding: BlockCipherPadding) {
+    fn set_padding(&mut self, padding: BCPadding) {
         self.padding = padding
     }
 }
@@ -102,9 +102,9 @@ impl Cipher for Tea {
         }
 
         match self.mode {
-            BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes),
-            BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BlockCipherMode::Cbc => self.encrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
+            BCMode::Ecb => self.encrypt_ecb(&mut bytes),
+            BCMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
+            BCMode::Cbc => self.encrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
         };
         Ok(self.output_format.byte_slice_to_text(&bytes))
     }
@@ -116,15 +116,15 @@ impl Cipher for Tea {
             .map_err(|_| CipherError::input("byte format error"))?;
 
         if self.mode.padded() {
-            if self.padding == BlockCipherPadding::None {
+            if self.padding == BCPadding::None {
                 none_padding(&mut bytes, Self::BLOCKSIZE)?
             };
         }
 
         match self.mode {
-            BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes),
-            BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BlockCipherMode::Cbc => self.decrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
+            BCMode::Ecb => self.decrypt_ecb(&mut bytes),
+            BCMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
+            BCMode::Cbc => self.decrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
         };
 
         if self.mode.padded() {
@@ -144,7 +144,7 @@ mod tea_tests {
     fn encrypt_decrypt_ecb() {
         let ptext = "01020304050607080102030405060708";
         let mut cipher = Tea::default();
-        cipher.mode = BlockCipherMode::Ecb;
+        cipher.mode = BCMode::Ecb;
         let ctext = cipher.encrypt(ptext).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), ptext);
     }
@@ -153,7 +153,7 @@ mod tea_tests {
     fn encrypt_decrypt_ctr() {
         let ptext = "01020304050607080102030405060708";
         let mut cipher = Tea::default();
-        cipher.mode = BlockCipherMode::Ctr;
+        cipher.mode = BCMode::Ctr;
         let ctext = cipher.encrypt(ptext).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), ptext);
     }

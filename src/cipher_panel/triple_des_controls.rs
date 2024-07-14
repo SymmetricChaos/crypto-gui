@@ -2,7 +2,7 @@ use super::CipherFrame;
 use crate::ui_elements::{block_cipher_mode, u64_drag_value, UiElements};
 use ciphers::{
     digital::block_ciphers::{
-        block_cipher::BlockCipherMode,
+        block_cipher::BCMode,
         des::{des_functions::set_des_key_parity, triple_des::TripleDes},
     },
     Cipher,
@@ -69,13 +69,13 @@ impl CipherFrame for TripleDesFrame {
 
         ui.add_space(8.0);
 
-        ui.add_enabled_ui(self.cipher.mode == BlockCipherMode::Ctr, |ui| {
+        ui.add_enabled_ui(self.cipher.mode == BCMode::Ctr, |ui| {
             ui.subheading("Counter");
             ui.label("In CTR mode the cipher must have a 64-bit counter value provided.");
             ui.u64_drag_value_hex(&mut self.cipher.ctr);
         });
 
-        ui.add_enabled_ui(self.cipher.mode == BlockCipherMode::Cbc, |ui| {
+        ui.add_enabled_ui(self.cipher.mode == BCMode::Cbc, |ui| {
             ui.subheading("Initialization Vector");
             ui.label("In CBC mode the cipher must have a 64-bit initialization vector provided.");
             ui.u64_drag_value_hex(&mut self.cipher.iv);
@@ -99,7 +99,7 @@ impl CipherFrame for TripleDesFrame {
             Err(e) => self.ksa_error = e.to_string(),
         }
 
-        if self.cipher.mode == BlockCipherMode::Ctr {
+        if self.cipher.mode == BCMode::Ctr {
             self.cipher.ctr = rng.gen();
         }
     }

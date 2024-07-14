@@ -1,7 +1,7 @@
 use crate::{Cipher, CipherError};
 use utils::byte_formatting::ByteFormat;
 
-use super::block_cipher::{none_padding, BlockCipher, BlockCipherMode, BlockCipherPadding};
+use super::block_cipher::{none_padding, BlockCipher, BCMode, BCPadding};
 
 pub const ONE: u32 = 0xffff;
 pub const FUYI: u32 = 0x10000;
@@ -21,8 +21,8 @@ pub struct Idea {
     pub iv: u64,
     subkeys_enc: [u16; N_SUBKEYS],
     subkeys_dec: [u16; N_SUBKEYS],
-    pub mode: BlockCipherMode,
-    pub padding: BlockCipherPadding,
+    pub mode: BCMode,
+    pub padding: BCPadding,
 }
 
 impl Default for Idea {
@@ -206,11 +206,11 @@ impl BlockCipher<8> for Idea {
         }
     }
 
-    fn set_mode(&mut self, mode: BlockCipherMode) {
+    fn set_mode(&mut self, mode: BCMode) {
         self.mode = mode;
     }
 
-    fn set_padding(&mut self, padding: BlockCipherPadding) {
+    fn set_padding(&mut self, padding: BCPadding) {
         self.padding = padding;
     }
 }
@@ -227,9 +227,9 @@ impl Cipher for Idea {
         }
 
         match self.mode {
-            BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes),
-            BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BlockCipherMode::Cbc => self.encrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
+            BCMode::Ecb => self.encrypt_ecb(&mut bytes),
+            BCMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
+            BCMode::Cbc => self.encrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
         };
         Ok(self.output_format.byte_slice_to_text(&bytes))
     }
@@ -241,15 +241,15 @@ impl Cipher for Idea {
             .map_err(|_| CipherError::input("byte format error"))?;
 
         if self.mode.padded() {
-            if self.padding == BlockCipherPadding::None {
+            if self.padding == BCPadding::None {
                 none_padding(&mut bytes, Self::BLOCKSIZE)?
             };
         }
 
         match self.mode {
-            BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes),
-            BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BlockCipherMode::Cbc => self.decrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
+            BCMode::Ecb => self.decrypt_ecb(&mut bytes),
+            BCMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
+            BCMode::Cbc => self.decrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
         };
 
         if self.mode.padded() {
@@ -294,7 +294,7 @@ mod idea_tests {
     fn encrypt_decrypt_test() {
         let mut cipher = Idea::default();
         cipher.ksa(&[1, 2, 3, 4, 5, 6, 7, 8]);
-        cipher.padding = BlockCipherPadding::None;
+        cipher.padding = BCPadding::None;
         let ptext = "0000000100020003"; // from 0 1 2 3
         let ctext = "3ffb311b0a44067b"; // from 16379 12571 2628 1659
         assert_eq!(ctext, &cipher.encrypt(ptext).unwrap());

@@ -2,7 +2,7 @@ use super::CipherFrame;
 use crate::ui_elements::{block_cipher_mode, UiElements};
 
 use ciphers::{
-    digital::block_ciphers::{aes::aes::Aes128, block_cipher::BlockCipherMode},
+    digital::block_ciphers::{aes::aes::Aes128, block_cipher::BCMode},
     Cipher,
 };
 use egui::{DragValue, Ui};
@@ -60,7 +60,7 @@ impl CipherFrame for AesFrame {
 
         ui.add_space(8.0);
 
-        ui.add_enabled_ui(self.cipher.mode == BlockCipherMode::Ctr, |ui| {
+        ui.add_enabled_ui(self.cipher.mode == BCMode::Ctr, |ui| {
             ui.subheading("Counter");
             ui.label("In CTR mode the cipher must have a 128-bit counter value provided. The selectors below control the upper and lower 64-bits respectively.");
             if ui.add(DragValue::new(&mut self.ctr_upper).hexadecimal(16, false, false)) .changed() {
@@ -74,7 +74,7 @@ impl CipherFrame for AesFrame {
             ui.label(format!("{:032x?}",self.cipher.ctr))
         });
 
-        ui.add_enabled_ui(self.cipher.mode == BlockCipherMode::Cbc, |ui| {
+        ui.add_enabled_ui(self.cipher.mode == BCMode::Cbc, |ui| {
             ui.subheading("Initialization Vector");
             ui.label("In CBC mode the cipher must have a 128-bit initialization vector provided. The selectors below control the upper and lower 64-bits respectively.");
             if ui.add(DragValue::new(&mut self.iv_upper).hexadecimal(16, false, false)) .changed() {
@@ -102,7 +102,7 @@ impl CipherFrame for AesFrame {
         self.cipher.key[2] = rng.gen();
         self.cipher.key[3] = rng.gen();
 
-        if self.cipher.mode == BlockCipherMode::Ctr {
+        if self.cipher.mode == BCMode::Ctr {
             self.cipher.ctr = rng.gen();
         }
     }

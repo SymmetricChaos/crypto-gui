@@ -4,36 +4,33 @@ use crate::Cipher;
 
 use super::block_cipher::{BlockCipher, BCMode, BCPadding};
 
-pub struct Feal {
+struct Rc6 {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
-    subkeys: [u16; 16],
+    pub rounds: usize,
+    pub state: Vec<u32>,
     pub ctr: u64,
+    pub iv: u64,
     pub mode: BCMode,
     pub padding: BCPadding,
 }
 
-impl Default for Feal {
+impl Default for Rc6 {
     fn default() -> Self {
         Self {
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
-            subkeys: Default::default(),
-            ctr: 0,
+            rounds: 20,
+            state: Default::default(),
+            ctr: Default::default(),
+            iv: Default::default(),
             mode: Default::default(),
             padding: Default::default(),
         }
     }
 }
 
-impl Feal {
-    pub fn ksa(&mut self, key: u64) {}
-
-    pub fn encrypt_block(&self, block: u64) {}
-    pub fn decrypt_block(&self, block: u64) {}
-}
-
-impl BlockCipher<8> for Feal {
+impl BlockCipher<16> for Rc6 {
     fn encrypt_block(&self, bytes: &mut [u8]) {
         todo!()
     }
@@ -51,7 +48,7 @@ impl BlockCipher<8> for Feal {
     }
 }
 
-impl Cipher for Feal {
+impl Cipher for Rc6 {
     fn encrypt(&self, text: &str) -> Result<String, crate::CipherError> {
         todo!()
     }

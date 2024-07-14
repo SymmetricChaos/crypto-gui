@@ -1,5 +1,5 @@
 use crate::cipher_panel::CipherFrame;
-use ciphers::digital::block_ciphers::block_cipher::BlockCipherMode;
+use ciphers::digital::block_ciphers::block_cipher::{BCMode, BCPadding};
 use eframe::egui::RichText;
 use egui::{Color32, DragValue, Response, TextStyle, Ui};
 use egui_extras::{Column, TableBuilder};
@@ -473,13 +473,13 @@ pub fn text_manip_menu(ui: &mut Ui, text: &mut String) {
     });
 }
 
-pub fn block_cipher_mode(ui: &mut Ui, mode: &mut BlockCipherMode) {
+pub fn block_cipher_mode(ui: &mut Ui, mode: &mut BCMode) {
     ui.collapsing("Block Cipher Mode", |ui| {
         ui.label("Block ciphers have several possible modes of operation.");
         ui.horizontal(|ui| {
             ui.selectable_value(
                 mode,
-                BlockCipherMode::Ecb,
+                BCMode::Ecb,
                 "ECB (Electronic Code Book)",
             );
             ui.collapsing("ECB info", |ui| {
@@ -489,7 +489,7 @@ pub fn block_cipher_mode(ui: &mut Ui, mode: &mut BlockCipherMode) {
         ui.horizontal(|ui| {
             ui.selectable_value(
                 mode,
-                BlockCipherMode::Ctr,
+                BCMode::Ctr,
                 "CTR (Counter)",
             );
             ui.collapsing("CTR info", |ui| {
@@ -499,13 +499,32 @@ pub fn block_cipher_mode(ui: &mut Ui, mode: &mut BlockCipherMode) {
         ui.horizontal(|ui| {
             ui.selectable_value(
                 mode,
-                BlockCipherMode::Cbc,
+                BCMode::Cbc,
                 "CBC (Cipher Block Chaining)",
             );
             ui.collapsing("CBC info", |ui| {
                 ui.label("CBC mixes information from the ciphertext into the plaintext of the block that comes after it. This ensures that identical blocks of plaintext are encrypted differently. The first block requires an initialization vector that should not be repeated for different messages with the same key. Encryption in inherently sequential but decryption can be performed independently and in parallel for any blocks.");
             });
         });
+    });
+}
+
+pub fn block_cipher_padding(ui: &mut Ui, padding: &mut BCPadding) {
+    ui.collapsing("Block Cipher Padding", |ui| {
+        ui.label("Block ciphers can be padded in various ways.");
+        for variant in BCPadding::variants() {
+            ui.horizontal(|ui| {
+                ui.selectable_value(
+                    padding,
+                    variant,
+                    "ECB (Electronic Code Book)",
+                );
+                ui.collapsing("ECB info", |ui| {
+                    ui.label("ECB mode encrypts each block of plaintext directly with the cipher. This is the simplest but way to use a block cipher least secure way to operate a block cipher and not recommended for use in any circumstance. If two blocks are the same they will be encrypted exactly the same way, exposing information about the plaintext. Encryption and decryption can be performed independently and in parallel for any blocks.");
+                });
+            });
+        }
+
     });
 }
 

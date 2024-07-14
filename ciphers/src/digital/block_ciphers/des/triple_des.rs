@@ -2,7 +2,7 @@ use utils::byte_formatting::ByteFormat;
 
 use crate::{
     digital::block_ciphers::{
-        block_cipher::{none_padding, BlockCipher, BlockCipherMode, BlockCipherPadding},
+        block_cipher::{none_padding, BlockCipher, BCMode, BCPadding},
         des::des::Des,
     },
     Cipher, CipherError,
@@ -16,8 +16,8 @@ pub struct TripleDes {
     subkeys: [[u64; 16]; 3],
     pub ctr: u64,
     pub iv: u64,
-    pub mode: BlockCipherMode,
-    pub padding: BlockCipherPadding,
+    pub mode: BCMode,
+    pub padding: BCPadding,
 }
 
 impl Default for TripleDes {
@@ -28,8 +28,8 @@ impl Default for TripleDes {
             subkeys: [[0; 16]; 3],
             ctr: 0,
             iv: 0,
-            mode: BlockCipherMode::default(),
-            padding: BlockCipherPadding::default(),
+            mode: BCMode::default(),
+            padding: BCPadding::default(),
         }
     }
 }
@@ -82,11 +82,11 @@ impl BlockCipher<8> for TripleDes {
         }
     }
 
-    fn set_mode(&mut self, mode: BlockCipherMode) {
+    fn set_mode(&mut self, mode: BCMode) {
         self.mode = mode
     }
 
-    fn set_padding(&mut self, padding: BlockCipherPadding) {
+    fn set_padding(&mut self, padding: BCPadding) {
         self.padding = padding
     }
 }
@@ -103,9 +103,9 @@ impl Cipher for TripleDes {
         }
 
         match self.mode {
-            BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes),
-            BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BlockCipherMode::Cbc => self.encrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
+            BCMode::Ecb => self.encrypt_ecb(&mut bytes),
+            BCMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
+            BCMode::Cbc => self.encrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
         };
         Ok(self.output_format.byte_slice_to_text(&bytes))
     }
@@ -117,15 +117,15 @@ impl Cipher for TripleDes {
             .map_err(|_| CipherError::input("byte format error"))?;
 
         if self.mode.padded() {
-            if self.padding == BlockCipherPadding::None {
+            if self.padding == BCPadding::None {
                 none_padding(&mut bytes, Des::BLOCKSIZE)?
             };
         }
 
         match self.mode {
-            BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes),
-            BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BlockCipherMode::Cbc => self.decrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
+            BCMode::Ecb => self.decrypt_ecb(&mut bytes),
+            BCMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
+            BCMode::Cbc => self.decrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
         };
 
         if self.mode.padded() {
@@ -184,8 +184,8 @@ mod des_tests {
             Ok(_) => (),
             Err(_) => panic!("error with ksa for key: {:?}", k),
         }
-        for mode in BlockCipherMode::variants() {
-            for padding in BlockCipherPadding::variants() {
+        for mode in BCMode::variants() {
+            for padding in BCPadding::variants() {
                 cipher.mode = mode;
                 cipher.padding = padding;
 

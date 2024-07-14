@@ -2,7 +2,7 @@ use utils::byte_formatting::{u32_pair_to_u8_array, ByteFormat};
 
 use crate::{Cipher, CipherError};
 
-use super::block_cipher::{none_padding, BlockCipher, BlockCipherMode, BlockCipherPadding};
+use super::block_cipher::{none_padding, BlockCipher, BCMode, BCPadding};
 
 pub struct Xtea {
     pub output_format: ByteFormat,
@@ -10,8 +10,8 @@ pub struct Xtea {
     pub key: [u32; 4],
     pub ctr: u64,
     pub iv: u64,
-    pub mode: BlockCipherMode,
-    pub padding: BlockCipherPadding,
+    pub mode: BCMode,
+    pub padding: BCPadding,
 }
 
 impl Default for Xtea {
@@ -22,8 +22,8 @@ impl Default for Xtea {
             iv: 0,
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
-            mode: BlockCipherMode::default(),
-            padding: BlockCipherPadding::default(),
+            mode: BCMode::default(),
+            padding: BCPadding::default(),
         }
     }
 }
@@ -82,11 +82,11 @@ impl BlockCipher<8> for Xtea {
         }
     }
 
-    fn set_mode(&mut self, mode: BlockCipherMode) {
+    fn set_mode(&mut self, mode: BCMode) {
         self.mode = mode
     }
 
-    fn set_padding(&mut self, padding: BlockCipherPadding) {
+    fn set_padding(&mut self, padding: BCPadding) {
         self.padding = padding
     }
 }
@@ -103,9 +103,9 @@ impl Cipher for Xtea {
         }
 
         match self.mode {
-            BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes),
-            BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BlockCipherMode::Cbc => self.encrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
+            BCMode::Ecb => self.encrypt_ecb(&mut bytes),
+            BCMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
+            BCMode::Cbc => self.encrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
         };
         Ok(self.output_format.byte_slice_to_text(&bytes))
     }
@@ -117,15 +117,15 @@ impl Cipher for Xtea {
             .map_err(|_| CipherError::input("byte format error"))?;
 
         if self.mode.padded() {
-            if self.padding == BlockCipherPadding::None {
+            if self.padding == BCPadding::None {
                 none_padding(&mut bytes, Self::BLOCKSIZE)?
             };
         }
 
         match self.mode {
-            BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes),
-            BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BlockCipherMode::Cbc => self.decrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
+            BCMode::Ecb => self.decrypt_ecb(&mut bytes),
+            BCMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
+            BCMode::Cbc => self.decrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
         };
 
         if self.mode.padded() {

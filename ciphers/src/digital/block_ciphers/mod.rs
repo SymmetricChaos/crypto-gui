@@ -5,5 +5,6 @@ pub mod des;
 pub mod feal;
 pub mod idea;
 pub mod rc5;
+pub mod rc6;
 pub mod tea;
 pub mod xtea;
