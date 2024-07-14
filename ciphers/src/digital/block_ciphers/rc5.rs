@@ -1,7 +1,10 @@
-use utils::byte_formatting::{u32_pair_to_u8_array, u8_slice_to_u32_pair, ByteFormat};
+use utils::byte_formatting::{overwrite_bytes, ByteFormat};
 
 use crate::{Cipher, CipherError};
-use std::{cmp::max, ops::Shl};
+use std::{
+    cmp::max,
+    ops::{BitXor, Shl},
+};
 
 use super::block_cipher::{none_padding, BCMode, BCPadding, BlockCipher};
 
@@ -9,6 +12,21 @@ const P32: u32 = 0xb7e15163;
 const Q32: u32 = 0x9e3779b9;
 // const P64: u64 = 0xb7e151628aed2a6b;
 // const Q64: u64 = 0x9e3779b97f4a7c15;
+
+pub fn bytes_to_words(s: &[u8]) -> [u32; 2] {
+    [
+        u32::from_le_bytes(s[..4].try_into().unwrap()),
+        u32::from_le_bytes(s[4..8].try_into().unwrap()),
+    ]
+}
+
+pub fn words_to_bytes(s: &[u32]) -> [u8; 8] {
+    let mut out = [0; 8];
+    let (left, right) = out.split_at_mut(4);
+    left.copy_from_slice(&s[0].to_le_bytes());
+    right.copy_from_slice(&s[1].to_le_bytes());
+    out
+}
 
 pub struct Rc5 {
     pub output_format: ByteFormat,
@@ -49,15 +67,15 @@ impl Rc5 {
             "RC5 key is limited to 255 bytes, which is enough for anybody"
         );
 
-        let u = 4; // Bytes in a word
-        let b = key.len(); // Bytes in the key
-        let c = max(b.div_ceil(u), 1); // number of words in the key
+        let u = 4; // bytes in a word
+        let b = key.len(); // bytes in the key
+        let c = max(b.div_ceil(u), 1); // words in the key
+        let t = self.state_size(); // words in the state
         let mut l = vec![0_u32; c];
         for i in (0..b).rev() {
             l[i / u] = (l[i / u].shl(8_u32)).wrapping_add(key[i] as u32)
         }
 
-        let t = self.state_size();
         let mut s = vec![0; t];
         s[0] = P32;
         for i in 1..t {
@@ -83,41 +101,39 @@ impl Rc5 {
 
 impl BlockCipher<8> for Rc5 {
     fn encrypt_block(&self, bytes: &mut [u8]) {
-        let mut block = u8_slice_to_u32_pair(bytes);
+        let mut block = bytes_to_words(bytes);
         block[0] = block[0].wrapping_add(self.state[0]);
         block[1] = block[1].wrapping_add(self.state[1]);
 
         for i in 1..=self.rounds {
-            block[0] = (block[0] ^ block[1])
+            block[0] = block[0]
+                .bitxor(block[1])
                 .rotate_left(block[1])
                 .wrapping_add(self.state[2 * i]);
-            block[1] = (block[1] ^ block[0])
+            block[1] = block[1]
+                .bitxor(block[0])
                 .rotate_left(block[0])
                 .wrapping_add(self.state[(2 * i) + 1])
         }
-        for (plaintext, ciphertext) in bytes.iter_mut().zip(u32_pair_to_u8_array(block).iter()) {
-            *plaintext = *ciphertext
-        }
+        overwrite_bytes(bytes, &words_to_bytes(&block));
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
-        let mut block = u8_slice_to_u32_pair(bytes);
+        let mut block = bytes_to_words(bytes);
         for i in (1..=self.rounds).rev() {
             block[1] = block[1]
                 .wrapping_sub(self.state[(2 * i) + 1])
                 .rotate_right(block[0])
-                ^ block[0];
+                .bitxor(block[0]);
             block[0] = block[0]
                 .wrapping_sub(self.state[2 * i])
                 .rotate_right(block[1])
-                ^ block[1];
+                .bitxor(block[1]);
         }
 
         block[0] = block[0].wrapping_sub(self.state[0]);
         block[1] = block[1].wrapping_sub(self.state[1]);
-        for (ciphertext, plaintext) in bytes.iter_mut().zip(u32_pair_to_u8_array(block).iter()) {
-            *ciphertext = *plaintext
-        }
+        overwrite_bytes(bytes, &words_to_bytes(&block));
     }
 
     fn set_mode(&mut self, mode: BCMode) {
@@ -180,7 +196,8 @@ mod rc5_tests {
     use utils::byte_formatting::hex_to_bytes_ltr;
 
     use super::*;
-
+    // Test vectors from
+    // https://citeseerx.ist.psu.edu/document?repid=rep1&type=pdf&doi=fe22353a2b9b557d1130bf9ba9f1f73fe26359cd
     #[test]
     fn encrypt_test() {
         const PTEXT: &'static str = "0000000000000000";
@@ -206,7 +223,7 @@ mod rc5_tests {
     }
 
     #[test]
-    fn encrypt_decrypt_test() {
+    fn basic_encrypt_decrypt_test() {
         const PTEXT: &'static str = "0000000000000000";
         const KEY: &'static str = "00000000000000000000000000000000";
         let mut cipher = Rc5::default();
@@ -242,7 +259,7 @@ mod rc5_tests {
     }
 
     #[test]
-    fn encrypt_decrypt_test_2() {
+    fn basic_encrypt_decrypt_test_2() {
         const PTEXT: &'static str = "21a5dbee154b8f6d";
         const KEY: &'static str = "915f4619be41b2516355a50110a9ce91";
         let mut cipher = Rc5::default();

@@ -1,4 +1,6 @@
-use utils::byte_formatting::{u32_pair_to_u8_array, u8_slice_to_u32_pair, ByteFormat};
+use utils::byte_formatting::{
+    overwrite_bytes, u32_pair_to_u8_array, u8_slice_to_u32_pair, ByteFormat,
+};
 
 use super::blowfish_arrays::{PARRAY, SBOXES};
 use crate::{
@@ -137,17 +139,13 @@ impl BlockCipher<8> for Blowfish {
     fn encrypt_block(&self, bytes: &mut [u8]) {
         let mut lr = u8_slice_to_u32_pair(&bytes);
         self.encrypt_u32_pair(&mut lr);
-        for (plaintext, ciphertext) in bytes.iter_mut().zip(u32_pair_to_u8_array(lr).iter()) {
-            *plaintext = *ciphertext
-        }
+        overwrite_bytes(bytes, &u32_pair_to_u8_array(lr));
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
         let mut lr = u8_slice_to_u32_pair(&bytes);
         self.decrypt_u32_pair(&mut lr);
-        for (ciphertext, plaintext) in bytes.iter_mut().zip(u32_pair_to_u8_array(lr).iter()) {
-            *ciphertext = *plaintext
-        }
+        overwrite_bytes(bytes, &u32_pair_to_u8_array(lr));
     }
 
     fn set_mode(&mut self, mode: BCMode) {

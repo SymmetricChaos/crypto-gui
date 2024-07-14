@@ -1,5 +1,5 @@
 use crate::{Cipher, CipherError};
-use utils::byte_formatting::{u32_pair_to_u8_array, ByteFormat};
+use utils::byte_formatting::{overwrite_bytes, u32_pair_to_u8_array, ByteFormat};
 
 use super::block_cipher::{none_padding, BCMode, BCPadding, BlockCipher};
 
@@ -52,9 +52,7 @@ impl BlockCipher<8> for Tea {
                     ^ ((v[0] >> 5).wrapping_add(self.key[3])),
             );
         }
-        for (plaintext, ciphertext) in bytes.iter_mut().zip(u32_pair_to_u8_array(v).iter()) {
-            *plaintext = *ciphertext
-        }
+        overwrite_bytes(bytes, &u32_pair_to_u8_array(v));
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
@@ -76,9 +74,7 @@ impl BlockCipher<8> for Tea {
             );
             sum = sum.wrapping_sub(DELTA);
         }
-        for (ciphertext, plaintext) in bytes.iter_mut().zip(u32_pair_to_u8_array(v).iter()) {
-            *ciphertext = *plaintext
-        }
+        overwrite_bytes(bytes, &u32_pair_to_u8_array(v));
     }
 
     fn set_mode(&mut self, mode: BCMode) {

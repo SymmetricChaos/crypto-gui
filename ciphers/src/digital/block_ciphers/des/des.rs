@@ -5,7 +5,7 @@ use crate::{
     },
     Cipher, CipherError,
 };
-use utils::byte_formatting::ByteFormat;
+use utils::byte_formatting::{overwrite_bytes, ByteFormat};
 
 pub struct Des {
     pub output_format: ByteFormat,
@@ -49,9 +49,7 @@ impl BlockCipher<8> for Des {
             b = round(b, *key);
         }
         let f = final_permutation((b << 32) | (b >> 32));
-        for (plaintext, ciphertext) in bytes.iter_mut().zip(f.to_be_bytes().iter()) {
-            *plaintext = *ciphertext
-        }
+        overwrite_bytes(bytes, &f.to_be_bytes());
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
@@ -61,9 +59,7 @@ impl BlockCipher<8> for Des {
             b = round(b, *key);
         }
         let f = final_permutation((b << 32) | (b >> 32));
-        for (ciphertext, plaintext) in bytes.iter_mut().zip(f.to_be_bytes().iter()) {
-            *ciphertext = *plaintext
-        }
+        overwrite_bytes(bytes, &f.to_be_bytes());
     }
 
     fn set_mode(&mut self, mode: BCMode) {
@@ -111,8 +107,6 @@ impl Cipher for Des {
             BCMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
             BCMode::Cbc => self.decrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
         };
-
-        println!("{}", self.output_format.byte_slice_to_text(&bytes));
 
         if self.mode.padded() {
             self.padding.strip_padding(&mut bytes, Self::BLOCKSIZE)?;

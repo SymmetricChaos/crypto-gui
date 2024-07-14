@@ -5,7 +5,7 @@ use crate::{
     },
     Cipher, CipherError,
 };
-use utils::byte_formatting::ByteFormat;
+use utils::byte_formatting::{overwrite_bytes, ByteFormat};
 
 pub struct DesX {
     pub output_format: ByteFormat,
@@ -53,9 +53,7 @@ impl BlockCipher<8> for DesX {
         }
         let mut f = final_permutation((b << 32) | (b >> 32));
         f ^= self.extra_keys[1];
-        for (plaintext, ciphertext) in bytes.iter_mut().zip(f.to_be_bytes().iter()) {
-            *plaintext = *ciphertext
-        }
+        overwrite_bytes(bytes, &f.to_be_bytes());
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
@@ -67,9 +65,7 @@ impl BlockCipher<8> for DesX {
         }
         let mut f = final_permutation((b << 32) | (b >> 32));
         f ^= self.extra_keys[0];
-        for (ciphertext, plaintext) in bytes.iter_mut().zip(f.to_be_bytes().iter()) {
-            *ciphertext = *plaintext
-        }
+        overwrite_bytes(bytes, &f.to_be_bytes());
     }
 
     fn set_mode(&mut self, mode: BCMode) {

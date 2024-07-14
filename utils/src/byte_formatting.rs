@@ -249,15 +249,21 @@ pub fn u32_pair_to_u64(n: [u32; 2]) -> u64 {
 }
 
 pub fn u8_slice_to_u32_pair(s: &[u8]) -> [u32; 2] {
-    let mut a = 0;
-    let mut b = 0;
+    [
+        u32::from_be_bytes(s[..4].try_into().unwrap()),
+        u32::from_be_bytes(s[4..8].try_into().unwrap()),
+    ]
+}
+
+pub fn u8_slice_to_u32_4(s: &[u8]) -> [u32; 4] {
+    let mut out = [0; 4];
     for i in 0..4 {
-        a <<= 8;
-        a |= s[i] as u32;
-        b <<= 8;
-        b |= s[i + 4] as u32;
+        for offset in [0, 4, 8, 12] {
+            out[i] <<= 8;
+            out[i] |= s[i + offset] as u32;
+        }
     }
-    [a, b]
+    out
 }
 
 pub fn u32_pair_to_u8_array(s: [u32; 2]) -> [u8; 8] {
@@ -270,4 +276,25 @@ pub fn u32_pair_to_u8_array(s: [u32; 2]) -> [u8; 8] {
     }
 
     out
+}
+
+pub fn u32_4_to_u8_16(s: [u32; 4]) -> [u8; 16] {
+    let a = s[0].to_be_bytes();
+    let b = s[1].to_be_bytes();
+    let c = s[2].to_be_bytes();
+    let d = s[3].to_be_bytes();
+    let mut out = [0; 16];
+    for i in 0..4 {
+        out[i] = a[i];
+        out[i + 4] = b[i];
+        out[i + 8] = c[i];
+        out[i + 12] = d[i];
+    }
+    out
+}
+
+pub fn overwrite_bytes(target: &mut [u8], source: &[u8]) {
+    for (src, ciphertext) in target.iter_mut().zip(source.iter()) {
+        *src = *ciphertext
+    }
 }

@@ -1,4 +1,4 @@
-use utils::byte_formatting::ByteFormat;
+use utils::byte_formatting::{overwrite_bytes, ByteFormat};
 
 use crate::{
     digital::block_ciphers::{
@@ -67,9 +67,7 @@ impl BlockCipher<8> for TripleDes {
         let b = self.encrypt_with_subkey(block, 2);
         let b = self.decrypt_with_subkey(b, 1);
         let b = self.encrypt_with_subkey(b, 0);
-        for (plaintext, ciphertext) in bytes.iter_mut().zip(b.to_be_bytes().iter()) {
-            *plaintext = *ciphertext
-        }
+        overwrite_bytes(bytes, &b.to_be_bytes());
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
@@ -77,9 +75,7 @@ impl BlockCipher<8> for TripleDes {
         let b = self.decrypt_with_subkey(block, 0);
         let b = self.encrypt_with_subkey(b, 1);
         let b = self.decrypt_with_subkey(b, 2);
-        for (ciphertext, plaintext) in bytes.iter_mut().zip(b.to_be_bytes().iter()) {
-            *ciphertext = *plaintext
-        }
+        overwrite_bytes(bytes, &b.to_be_bytes());
     }
 
     fn set_mode(&mut self, mode: BCMode) {
@@ -172,7 +168,6 @@ mod des_tests {
     //     assert_eq!(PTEXT, dtext);
     // }
 
-    // use rand::{thread_rng, Rng};
     use rand::{thread_rng, Rng};
     #[test]
     fn basic_test_encrypt_decrypt() {
