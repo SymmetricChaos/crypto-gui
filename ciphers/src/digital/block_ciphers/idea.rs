@@ -1,7 +1,7 @@
 use crate::{Cipher, CipherError};
 use utils::byte_formatting::ByteFormat;
 
-use super::block_cipher::{none_padding, BlockCipher, BCMode, BCPadding};
+use super::block_cipher::{none_padding, BCMode, BCPadding, BlockCipher};
 
 pub const ONE: u32 = 0xffff;
 pub const FUYI: u32 = 0x10000;
@@ -18,7 +18,7 @@ pub struct Idea {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
     pub ctr: u64,
-    pub iv: u64,
+    pub cbc: u64,
     subkeys_enc: [u16; N_SUBKEYS],
     subkeys_dec: [u16; N_SUBKEYS],
     pub mode: BCMode,
@@ -31,7 +31,7 @@ impl Default for Idea {
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
             ctr: 0,
-            iv: 0,
+            cbc: 0,
             subkeys_enc: [0u16; N_SUBKEYS],
             subkeys_dec: [0u16; N_SUBKEYS],
             mode: Default::default(),
@@ -229,7 +229,7 @@ impl Cipher for Idea {
         match self.mode {
             BCMode::Ecb => self.encrypt_ecb(&mut bytes),
             BCMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BCMode::Cbc => self.encrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
+            BCMode::Cbc => self.encrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
         };
         Ok(self.output_format.byte_slice_to_text(&bytes))
     }
@@ -249,7 +249,7 @@ impl Cipher for Idea {
         match self.mode {
             BCMode::Ecb => self.decrypt_ecb(&mut bytes),
             BCMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BCMode::Cbc => self.decrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
+            BCMode::Cbc => self.decrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
         };
 
         if self.mode.padded() {

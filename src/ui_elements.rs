@@ -482,8 +482,8 @@ pub fn block_cipher_mode(ui: &mut Ui, mode: &mut BCMode) {
                 BCMode::Ecb,
                 "ECB (Electronic Code Book)",
             );
-            ui.collapsing("ECB info", |ui| {
-                ui.label("ECB mode encrypts each block of plaintext directly with the cipher. This is the simplest but way to use a block cipher least secure way to operate a block cipher and not recommended for use in any circumstance. If two blocks are the same they will be encrypted exactly the same way, exposing information about the plaintext. Encryption and decryption can be performed independently and in parallel for any blocks.");
+            ui.collapsing("info", |ui| {
+                ui.label("ECB mode encrypts each block of plaintext directly with the cipher. This is the simplest but least secure way to operate a block cipher and not recommended for use in any circumstance. If two blocks are the same they will be encrypted exactly the same way, exposing information about the plaintext. Encryption and decryption can be performed independently and in parallel for any blocks.");
             });
         });
         ui.horizontal(|ui| {
@@ -492,7 +492,7 @@ pub fn block_cipher_mode(ui: &mut Ui, mode: &mut BCMode) {
                 BCMode::Ctr,
                 "CTR (Counter)",
             );
-            ui.collapsing("CTR info", |ui| {
+            ui.collapsing("info", |ui| {
                 ui.label("CTR mode operates the block cipher as if it were a stream cipher or secure PRNG. Rather than encrypting the plaintext directly the cipher is used to encrypt a sequence of numbers and the result is XORed with the plaintext. The it is important that the counter never repeat for two messages with the same key so steps must be taken to carefully select its initial value. Encryption and decryption can be performed independently and in parallel for any blocks.");
             });
         });
@@ -502,7 +502,7 @@ pub fn block_cipher_mode(ui: &mut Ui, mode: &mut BCMode) {
                 BCMode::Cbc,
                 "CBC (Cipher Block Chaining)",
             );
-            ui.collapsing("CBC info", |ui| {
+            ui.collapsing("info", |ui| {
                 ui.label("CBC mixes information from the ciphertext into the plaintext of the block that comes after it. This ensures that identical blocks of plaintext are encrypted differently. The first block requires an initialization vector that should not be repeated for different messages with the same key. Encryption in inherently sequential but decryption can be performed independently and in parallel for any blocks.");
             });
         });
@@ -514,17 +514,12 @@ pub fn block_cipher_padding(ui: &mut Ui, padding: &mut BCPadding) {
         ui.label("Block ciphers can be padded in various ways.");
         for variant in BCPadding::variants() {
             ui.horizontal(|ui| {
-                ui.selectable_value(
-                    padding,
-                    variant,
-                    "ECB (Electronic Code Book)",
-                );
-                ui.collapsing("ECB info", |ui| {
-                    ui.label("ECB mode encrypts each block of plaintext directly with the cipher. This is the simplest but way to use a block cipher least secure way to operate a block cipher and not recommended for use in any circumstance. If two blocks are the same they will be encrypted exactly the same way, exposing information about the plaintext. Encryption and decryption can be performed independently and in parallel for any blocks.");
+                ui.selectable_value(padding, variant, variant.to_string());
+                ui.collapsing("info", |ui| {
+                    ui.label("<<<DESCRIPTION>>>");
                 });
             });
         }
-
     });
 }
 

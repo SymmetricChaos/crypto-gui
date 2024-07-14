@@ -129,17 +129,19 @@ mod des_tests {
 
     use super::*;
 
-    // #[test]
-    // fn test_encrypt_decrypt_block() {
-    //     let mut cipher = Des::default();
-    //     cipher.ksa(0x0123456789ABCDEF).unwrap();
+    #[test]
+    fn test_encrypt_decrypt_block() {
+        let mut cipher = Des::default();
+        cipher.ksa(0x0123456789ABCDEF).unwrap();
 
-    //     let cblock = cipher.encrypt_block(0x4E6F772069732074);
-    //     assert_eq!(cblock, 0x3FA40E8A984D4815);
+        let mut bytes = 0x4E6F772069732074_u64.to_be_bytes();
 
-    //     let dblock = cipher.decrypt_block(0x3FA40E8A984D4815);
-    //     assert_eq!(dblock, 0x4E6F772069732074);
-    // }
+        cipher.encrypt_block(&mut bytes);
+        assert_eq!(bytes, 0x3FA40E8A984D4815_u64.to_be_bytes());
+
+        cipher.decrypt_block(&mut bytes);
+        assert_eq!(bytes, 0x4E6F772069732074_u64.to_be_bytes());
+    }
 
     #[test]
     fn basic_test_encrypt_decrypt() {

@@ -2,9 +2,7 @@ use itertools::Itertools;
 use utils::byte_formatting::ByteFormat;
 
 use crate::{
-    digital::block_ciphers::block_cipher::{
-        none_padding, BlockCipher, BCMode, BCPadding,
-    },
+    digital::block_ciphers::block_cipher::{none_padding, BCMode, BCPadding, BlockCipher},
     Cipher, CipherError,
 };
 
@@ -15,14 +13,17 @@ use super::{
     },
     sbox::sub_word,
 };
+pub const BLOCKSIZE: u32 = 16;
+pub const ROUNDS: usize = 11;
+pub const KEY_WORDS: usize = 4;
 
 pub struct Aes128 {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
-    pub key: [u32; Self::KEY_WORDS],
-    round_keys: [[u8; 16]; Self::ROUNDS],
+    pub key: [u32; KEY_WORDS],
+    round_keys: [[u8; 16]; ROUNDS],
     pub ctr: u128,
-    pub iv: u128,
+    pub cbc: u128,
     pub mode: BCMode,
     pub padding: BCPadding,
 }
@@ -32,10 +33,10 @@ impl Default for Aes128 {
         Self {
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
-            key: [0; Self::KEY_WORDS],
-            round_keys: [[0u8; 16]; Self::ROUNDS],
+            key: [0; KEY_WORDS],
+            round_keys: [[0u8; 16]; ROUNDS],
             ctr: 0,
-            iv: 0,
+            cbc: 0,
             mode: BCMode::default(),
             padding: BCPadding::default(),
         }
@@ -43,10 +44,6 @@ impl Default for Aes128 {
 }
 
 impl Aes128 {
-    pub const BLOCKSIZE: u32 = 16;
-    pub const ROUNDS: usize = 11;
-    pub const KEY_WORDS: usize = 4;
-
     // Create the round keys
     pub fn ksa(&mut self) {
         let rc: [u32; 10] = [
@@ -55,12 +52,12 @@ impl Aes128 {
         ];
 
         // During expansion actions are on words of 32-bits
-        let mut round_keys: Vec<[u32; 4]> = Vec::with_capacity(Self::ROUNDS);
+        let mut round_keys: Vec<[u32; 4]> = Vec::with_capacity(ROUNDS);
 
         // First subkey is the user supplied key
         round_keys.push(self.key);
 
-        for round in 1..Self::ROUNDS {
+        for round in 1..ROUNDS {
             let mut k = [0_u32; 4];
 
             let rotated = rot_word(round_keys[round - 1][3]);
@@ -90,7 +87,7 @@ impl BlockCipher<16> for Aes128 {
         add_round_key(bytes, &self.round_keys[0]);
 
         // Main rounds
-        for i in 1..(Self::ROUNDS - 1) {
+        for i in 1..(ROUNDS - 1) {
             sub_bytes(bytes);
             shift_rows(bytes);
             mix_columns(bytes);
@@ -100,17 +97,17 @@ impl BlockCipher<16> for Aes128 {
         // Finalization round
         sub_bytes(bytes);
         shift_rows(bytes);
-        add_round_key(bytes, &self.round_keys[Self::ROUNDS - 1]);
+        add_round_key(bytes, &self.round_keys[ROUNDS - 1]);
         transpose_state(bytes);
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
         transpose_state(bytes);
         // Initial round key
-        add_round_key(bytes, &self.round_keys[Self::ROUNDS - 1]);
+        add_round_key(bytes, &self.round_keys[ROUNDS - 1]);
 
         // Main rounds
-        for i in (1..(Self::ROUNDS - 1)).rev() {
+        for i in (1..(ROUNDS - 1)).rev() {
             inv_shift_rows(bytes);
             inv_sub_bytes(bytes);
             add_round_key(bytes, &self.round_keys[i]);
@@ -141,13 +138,13 @@ impl Cipher for Aes128 {
             .map_err(|_| CipherError::input("byte format error"))?;
 
         if self.mode.padded() {
-            self.padding.add_padding(&mut bytes, Self::BLOCKSIZE)?;
+            self.padding.add_padding(&mut bytes, BLOCKSIZE)?;
         }
 
         match self.mode {
             BCMode::Ecb => self.encrypt_ecb(&mut bytes),
             BCMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BCMode::Cbc => self.encrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
+            BCMode::Cbc => self.encrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
         };
         Ok(self.output_format.byte_slice_to_text(&bytes))
     }
@@ -160,18 +157,18 @@ impl Cipher for Aes128 {
 
         if self.mode.padded() {
             if self.padding == BCPadding::None {
-                none_padding(&mut bytes, Self::BLOCKSIZE)?
+                none_padding(&mut bytes, BLOCKSIZE)?
             };
         }
 
         match self.mode {
             BCMode::Ecb => self.decrypt_ecb(&mut bytes),
             BCMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BCMode::Cbc => self.decrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
+            BCMode::Cbc => self.decrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
         };
 
         if self.mode.padded() {
-            self.padding.strip_padding(&mut bytes, Self::BLOCKSIZE)?;
+            self.padding.strip_padding(&mut bytes, BLOCKSIZE)?;
         }
 
         Ok(self.output_format.byte_slice_to_text(&bytes))

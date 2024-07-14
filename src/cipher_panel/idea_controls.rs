@@ -112,7 +112,7 @@ impl CipherFrame for IdeaFrame {
         ui.add_enabled_ui(self.cipher.mode == BCMode::Cbc, |ui| {
             ui.subheading("Initialization Vector");
             ui.label("In CBC mode the cipher must have a 64-bit initialization vector provided.");
-            ui.u64_drag_value_hex(&mut self.cipher.iv);
+            ui.u64_drag_value_hex(&mut self.cipher.cbc);
         });
 
         ui.add_space(16.0);

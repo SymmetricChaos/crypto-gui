@@ -103,7 +103,7 @@ impl Display for CipherId {
             CipherId::Caesar => "Caesar",
             CipherId::ChaCha => "ChaCha",
             CipherId::ChaCha20Poly1305 => "ChaCha20-Poly1305",
-            CipherId::ChaChaExtendedNonce => "ChaCha",
+            CipherId::ChaChaExtendedNonce => "ChaCha (IETF)",
             CipherId::Chaocipher => "Chaocipher",
             CipherId::Checkerboard => "Straddling Checkerboard",
             CipherId::Columnar => "Columnar Transposition",

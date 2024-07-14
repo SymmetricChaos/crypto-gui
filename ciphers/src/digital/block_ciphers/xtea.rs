@@ -2,14 +2,17 @@ use utils::byte_formatting::{u32_pair_to_u8_array, ByteFormat};
 
 use crate::{Cipher, CipherError};
 
-use super::block_cipher::{none_padding, BlockCipher, BCMode, BCPadding};
+use super::block_cipher::{none_padding, BCMode, BCPadding, BlockCipher};
+
+const DELTA: u32 = 0x9e3779b9;
+const BLOCKSIZE: u32 = 8;
 
 pub struct Xtea {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
     pub key: [u32; 4],
     pub ctr: u64,
-    pub iv: u64,
+    pub cbc: u64,
     pub mode: BCMode,
     pub padding: BCPadding,
 }
@@ -19,7 +22,7 @@ impl Default for Xtea {
         Self {
             key: [0, 1, 2, 3],
             ctr: 0,
-            iv: 0,
+            cbc: 0,
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
             mode: BCMode::default(),
@@ -28,10 +31,7 @@ impl Default for Xtea {
     }
 }
 
-impl Xtea {
-    const DELTA: u32 = 0x9e3779b9;
-    const BLOCKSIZE: u32 = 8;
-}
+impl Xtea {}
 
 impl BlockCipher<8> for Xtea {
     fn encrypt_block(&self, bytes: &mut [u8]) {
@@ -46,7 +46,7 @@ impl BlockCipher<8> for Xtea {
                     ^ (v[1] >> 5).wrapping_add(v[1])
                     ^ sum.wrapping_add(self.key[(sum % 4) as usize]),
             );
-            sum = sum.wrapping_add(Self::DELTA);
+            sum = sum.wrapping_add(DELTA);
             v[1] = v[1].wrapping_add(
                 (v[0] << 4)
                     ^ (v[0] >> 5).wrapping_add(v[0])
@@ -70,7 +70,7 @@ impl BlockCipher<8> for Xtea {
                     ^ (v[0] >> 5).wrapping_add(v[0])
                     ^ sum.wrapping_add(self.key[((sum >> 11) % 4) as usize]),
             );
-            sum = sum.wrapping_sub(Self::DELTA);
+            sum = sum.wrapping_sub(DELTA);
             v[0] = v[0].wrapping_sub(
                 (v[1] << 4)
                     ^ (v[1] >> 5).wrapping_add(v[1])
@@ -99,13 +99,13 @@ impl Cipher for Xtea {
             .map_err(|_| CipherError::input("byte format error"))?;
 
         if self.mode.padded() {
-            self.padding.add_padding(&mut bytes, Self::BLOCKSIZE)?;
+            self.padding.add_padding(&mut bytes, BLOCKSIZE)?;
         }
 
         match self.mode {
             BCMode::Ecb => self.encrypt_ecb(&mut bytes),
             BCMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BCMode::Cbc => self.encrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
+            BCMode::Cbc => self.encrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
         };
         Ok(self.output_format.byte_slice_to_text(&bytes))
     }
@@ -118,18 +118,18 @@ impl Cipher for Xtea {
 
         if self.mode.padded() {
             if self.padding == BCPadding::None {
-                none_padding(&mut bytes, Self::BLOCKSIZE)?
+                none_padding(&mut bytes, BLOCKSIZE)?
             };
         }
 
         match self.mode {
             BCMode::Ecb => self.decrypt_ecb(&mut bytes),
             BCMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BCMode::Cbc => self.decrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
+            BCMode::Cbc => self.decrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
         };
 
         if self.mode.padded() {
-            self.padding.strip_padding(&mut bytes, Self::BLOCKSIZE)?;
+            self.padding.strip_padding(&mut bytes, BLOCKSIZE)?;
         }
 
         Ok(self.output_format.byte_slice_to_text(&bytes))

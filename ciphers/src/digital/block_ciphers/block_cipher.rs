@@ -165,7 +165,7 @@ impl BCPadding {
         match self {
             BCPadding::None => none_padding(bytes, block_size),
             BCPadding::Bit => bit_padding(bytes, block_size),
-            BCPadding::Pkcs => pkcs_padding(bytes, block_size),
+            BCPadding::Pkcs => pkcs5_padding(bytes, block_size),
             BCPadding::Ansi923 => ansi923_padding(bytes, block_size),
         }
     }
@@ -174,7 +174,7 @@ impl BCPadding {
         match self {
             BCPadding::None => strip_none_padding(bytes, block_size),
             BCPadding::Bit => strip_bit_padding(bytes),
-            BCPadding::Pkcs => strip_pkcs_padding(bytes),
+            BCPadding::Pkcs => strip_pkcs5_padding(bytes),
             BCPadding::Ansi923 => strip_ansi923_padding(bytes),
         }
     }
@@ -189,7 +189,7 @@ impl Display for BCPadding {
         match self {
             Self::None => write!(f, "None"),
             Self::Bit => write!(f, "Bit"),
-            Self::Pkcs => write!(f, "PKCS"),
+            Self::Pkcs => write!(f, "PKCS5"),
             Self::Ansi923 => write!(f, "ANSI X9.23"),
         }
     }
@@ -241,7 +241,7 @@ pub fn strip_bit_padding(bytes: &mut Vec<u8>) -> Result<(), CipherError> {
     }
 }
 
-pub fn pkcs_padding(bytes: &mut Vec<u8>, block_size: u32) -> Result<(), CipherError> {
+pub fn pkcs5_padding(bytes: &mut Vec<u8>, block_size: u32) -> Result<(), CipherError> {
     let n_padding = (block_size as usize - (bytes.len() % block_size as usize))
         .try_into()
         .unwrap();
@@ -251,7 +251,7 @@ pub fn pkcs_padding(bytes: &mut Vec<u8>, block_size: u32) -> Result<(), CipherEr
     Ok(())
 }
 
-pub fn strip_pkcs_padding(bytes: &mut Vec<u8>) -> Result<(), CipherError> {
+pub fn strip_pkcs5_padding(bytes: &mut Vec<u8>) -> Result<(), CipherError> {
     let n_padding = *bytes.iter().last().ok_or(CipherError::input(
         "PKCS padded ciphertext cannot have zero length",
     ))?;
@@ -324,9 +324,9 @@ mod padding_tests {
     #[test]
     fn test_pkcs_padding() {
         let mut bytes = vec![0x01, 0x02, 0xff, 0x80];
-        pkcs_padding(&mut bytes, 8).unwrap();
+        pkcs5_padding(&mut bytes, 8).unwrap();
         assert_eq!(vec![0x01, 0x02, 0xff, 0x80, 0x04, 0x04, 0x04, 0x04], bytes);
-        strip_ansi923_padding(&mut bytes).unwrap();
+        strip_pkcs5_padding(&mut bytes).unwrap();
         assert_eq!(vec![0x01, 0x02, 0xff, 0x80], bytes);
     }
 

@@ -78,14 +78,14 @@ impl CipherFrame for AesFrame {
             ui.subheading("Initialization Vector");
             ui.label("In CBC mode the cipher must have a 128-bit initialization vector provided. The selectors below control the upper and lower 64-bits respectively.");
             if ui.add(DragValue::new(&mut self.iv_upper).hexadecimal(16, false, false)) .changed() {
-                self.cipher.iv &= 0x0000000000000000FFFFFFFFFFFFFFFF;
-                self.cipher.iv |= (self.iv_upper as u128) << 64;
+                self.cipher.cbc &= 0x0000000000000000FFFFFFFFFFFFFFFF;
+                self.cipher.cbc |= (self.iv_upper as u128) << 64;
             }
             if ui.add(DragValue::new(&mut self.iv_lower).hexadecimal(16, false, false)) .changed() {
-                self.cipher.iv &= 0xFFFFFFFFFFFFFFFF0000000000000000;
-                self.cipher.iv |= self.iv_lower as u128;
+                self.cipher.cbc &= 0xFFFFFFFFFFFFFFFF0000000000000000;
+                self.cipher.cbc |= self.iv_lower as u128;
             }
-            ui.label(format!("{:032x?}",self.cipher.iv))
+            ui.label(format!("{:032x?}",self.cipher.cbc))
         });
 
         ui.add_space(16.0);
