@@ -58,11 +58,3 @@ impl Cipher for DiffieHellmanTriple {
         self.encrypt(text)
     }
 }
-
-#[cfg(test)]
-mod diffie_hellman_triple_tests {
-
-    use super::*;
-    #[test]
-    fn test_keys() {}
-}

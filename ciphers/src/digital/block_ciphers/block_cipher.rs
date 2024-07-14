@@ -212,17 +212,16 @@ pub fn pkcs_padding(bytes: &mut Vec<u8>, block_size: u32) -> Result<(), CipherEr
     let n_padding = (block_size as usize - (bytes.len() % block_size as usize))
         .try_into()
         .unwrap();
-    while bytes.len() % block_size as usize != 0 {
+    for _ in 0..n_padding {
         bytes.push(n_padding)
     }
     Ok(())
 }
 
 pub fn strip_pkcs_padding(bytes: &mut Vec<u8>) -> Result<(), CipherError> {
-    let n_padding = *bytes
-        .iter()
-        .last()
-        .ok_or(CipherError::input("ciphertext has zero length"))?;
+    let n_padding = *bytes.iter().last().ok_or(CipherError::input(
+        "PKCS ciphertext cannot have zero length",
+    ))?;
     for _ in 0..n_padding {
         let p = bytes.pop();
         if p == Some(n_padding) {

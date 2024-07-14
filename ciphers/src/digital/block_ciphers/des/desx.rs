@@ -7,31 +7,33 @@ use crate::{
 };
 use utils::byte_formatting::ByteFormat;
 
-pub struct Des {
+pub struct DesX {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
+    pub extra_keys: [u64; 2],
     subkeys: [u64; 16],
     pub ctr: u64,
-    pub cbc: u64,
+    pub iv: u64,
     pub mode: BlockCipherMode,
     pub padding: BlockCipherPadding,
 }
 
-impl Default for Des {
+impl Default for DesX {
     fn default() -> Self {
         Self {
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
+            extra_keys: [0, 0],
             subkeys: [0; 16],
             ctr: 0,
-            cbc: 0,
+            iv: 0,
             mode: BlockCipherMode::default(),
             padding: BlockCipherPadding::default(),
         }
     }
 }
 
-impl Des {
+impl DesX {
     pub const BLOCKSIZE: u32 = 8;
 
     // Key Scheduling Algorithm (key generation)
@@ -41,26 +43,30 @@ impl Des {
     }
 }
 
-impl BlockCipher<8> for Des {
+impl BlockCipher<8> for DesX {
     fn encrypt_block(&self, bytes: &mut [u8]) {
-        let block = u64::from_be_bytes(bytes.try_into().unwrap());
+        let mut block = u64::from_be_bytes(bytes.try_into().unwrap());
+        block ^= self.extra_keys[0];
         let mut b = initial_permutation(block);
         for key in self.subkeys.iter() {
             b = round(b, *key);
         }
-        let f = final_permutation((b << 32) | (b >> 32));
+        let mut f = final_permutation((b << 32) | (b >> 32));
+        f ^= self.extra_keys[1];
         for (plaintext, ciphertext) in bytes.iter_mut().zip(f.to_be_bytes().iter()) {
             *plaintext = *ciphertext
         }
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
-        let block = u64::from_be_bytes(bytes.try_into().unwrap());
+        let mut block = u64::from_be_bytes(bytes.try_into().unwrap());
+        block ^= self.extra_keys[1];
         let mut b = initial_permutation(block);
         for key in self.subkeys.iter().rev() {
             b = round(b, *key);
         }
-        let f = final_permutation((b << 32) | (b >> 32));
+        let mut f = final_permutation((b << 32) | (b >> 32));
+        f ^= self.extra_keys[0];
         for (ciphertext, plaintext) in bytes.iter_mut().zip(f.to_be_bytes().iter()) {
             *ciphertext = *plaintext
         }
@@ -75,7 +81,7 @@ impl BlockCipher<8> for Des {
     }
 }
 
-impl Cipher for Des {
+impl Cipher for DesX {
     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         let mut bytes = self
             .input_format
@@ -89,7 +95,7 @@ impl Cipher for Des {
         match self.mode {
             BlockCipherMode::Ecb => self.encrypt_ecb(&mut bytes),
             BlockCipherMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BlockCipherMode::Cbc => self.encrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
+            BlockCipherMode::Cbc => self.encrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
         };
         Ok(self.output_format.byte_slice_to_text(&bytes))
     }
@@ -109,10 +115,8 @@ impl Cipher for Des {
         match self.mode {
             BlockCipherMode::Ecb => self.decrypt_ecb(&mut bytes),
             BlockCipherMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BlockCipherMode::Cbc => self.decrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
+            BlockCipherMode::Cbc => self.decrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
         };
-
-        println!("{}", self.output_format.byte_slice_to_text(&bytes));
 
         if self.mode.padded() {
             self.padding.strip_padding(&mut bytes, Self::BLOCKSIZE)?;
@@ -125,57 +129,11 @@ impl Cipher for Des {
 #[cfg(test)]
 mod des_tests {
 
-    use rand::{thread_rng, Rng};
-
     use super::*;
-
-    // #[test]
-    // fn test_encrypt_decrypt_block() {
-    //     let mut cipher = Des::default();
-    //     cipher.ksa(0x0123456789ABCDEF).unwrap();
-
-    //     let cblock = cipher.encrypt_block(0x4E6F772069732074);
-    //     assert_eq!(cblock, 0x3FA40E8A984D4815);
-
-    //     let dblock = cipher.decrypt_block(0x3FA40E8A984D4815);
-    //     assert_eq!(dblock, 0x4E6F772069732074);
-    // }
-
-    #[test]
-    fn basic_test_encrypt_decrypt() {
-        let mut cipher = Des::default();
-        let mut rng = thread_rng();
-
-        let k = rng.gen();
-        match cipher.ksa(k) {
-            Ok(_) => (),
-            Err(_) => panic!("error with ksa for key: {}", k),
-        }
-        for mode in [
-            BlockCipherMode::Cbc,
-            BlockCipherMode::Ctr,
-            BlockCipherMode::Ecb,
-        ] {
-            for padding in [
-                BlockCipherPadding::Pkcs,
-                BlockCipherPadding::Bit,
-                BlockCipherPadding::None,
-            ] {
-                cipher.mode = mode;
-                cipher.padding = padding;
-
-                const PTEXT: &'static str = "4e6f772069732074";
-
-                let ctext = cipher.encrypt(PTEXT).unwrap();
-                let dtext = cipher.decrypt(&ctext).unwrap();
-                assert_eq!(PTEXT, dtext, "{:?} {:?}", padding, mode);
-            }
-        }
-    }
 
     #[test]
     fn test_encrypt_decrypt_ecb() {
-        let mut cipher = Des::default();
+        let mut cipher = DesX::default();
         cipher.ksa(0x0123456789ABCDEF).unwrap();
         cipher.mode = BlockCipherMode::Ecb;
         cipher.padding = BlockCipherPadding::None;
@@ -192,7 +150,7 @@ mod des_tests {
 
     #[test]
     fn test_encrypt_decrypt_ctr() {
-        let mut cipher = Des::default();
+        let mut cipher = DesX::default();
         cipher.ksa(0x0123456789ABCDEF).unwrap();
         cipher.mode = BlockCipherMode::Ctr;
 
@@ -202,5 +160,41 @@ mod des_tests {
 
         let dtext = cipher.decrypt(&ctext).unwrap();
         assert_eq!(PTEXT, dtext);
+    }
+}
+
+#[cfg(test)]
+mod desx_tests {
+
+    use rand::{thread_rng, Rng};
+
+    use super::*;
+
+    #[test]
+    fn basic_test_encrypt_decrypt() {
+        let mut cipher = DesX::default();
+        let mut rng = thread_rng();
+
+        let k = rng.gen();
+        match cipher.ksa(k) {
+            Ok(_) => (),
+            Err(_) => panic!("error with ksa for key: {}", k),
+        }
+        for mode in [
+            BlockCipherMode::Cbc,
+            BlockCipherMode::Ctr,
+            BlockCipherMode::Ecb,
+        ] {
+            for padding in [BlockCipherPadding::Bit, BlockCipherPadding::Pkcs] {
+                cipher.mode = mode;
+                cipher.padding = padding;
+
+                const PTEXT: &'static str = "4e6f772069732074";
+
+                let ctext = cipher.encrypt(PTEXT).unwrap();
+                let dtext = cipher.decrypt(&ctext).unwrap();
+                assert_eq!(PTEXT, dtext, "{:?} {:?}", padding, mode);
+            }
+        }
     }
 }
