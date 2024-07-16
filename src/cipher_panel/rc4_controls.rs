@@ -30,7 +30,7 @@ impl CipherFrame for Rc4Frame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
-            "https://github.com/SymmetricChaos/crypto-gui/blob/master/ciphers/src/digital/rc4.rs",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/ciphers/src/digital/stream_ciphers/rc4.rs",
         );
         ui.add_space(8.0);
 
