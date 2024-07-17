@@ -14,6 +14,7 @@ pub mod mt19937_32;
 pub mod mt19937_64;
 pub mod pcg;
 pub mod rc4;
+pub mod shrinking_generator;
 pub mod splitmix;
 pub mod traits;
 pub mod vmpcr;
