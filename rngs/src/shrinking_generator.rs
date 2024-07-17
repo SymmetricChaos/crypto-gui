@@ -3,16 +3,16 @@ use utils::bits::{bits_to_u32_ltr, bits_to_u32_rtl, Bit};
 use crate::{lfsr::Lfsr, ClassicRng};
 
 pub struct ShrinkingGenerator {
-    a: Lfsr,
-    s: Lfsr,
-    big_endian: bool,
+    pub a: Lfsr,
+    pub s: Lfsr,
+    pub big_endian: bool,
 }
 
 impl Default for ShrinkingGenerator {
     fn default() -> Self {
         Self {
-            a: Lfsr::from_tap_positions(vec![31, 13, 0]),
-            s: Lfsr::from_tap_positions(vec![24, 4, 3, 1, 0]),
+            a: Lfsr::from_tap_positions(vec![31, 13]),
+            s: Lfsr::from_tap_positions(vec![24, 4, 3, 1]),
             big_endian: true,
         }
     }

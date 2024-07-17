@@ -38,6 +38,7 @@ impl Lfsr {
     }
 
     /// Construct from a vector of tap positions. The bits will be set to have Bit::One at index 0 and Bit::Zero elsewhere
+    /// Tuples derived from a polynomial often include a 0, this should not be included as it is not a tap positions.
     pub fn from_tap_positions(taps: Vec<usize>) -> Self {
         let l = taps.iter().max().unwrap() + 1;
         let mut tap_vec = vec![false; l];

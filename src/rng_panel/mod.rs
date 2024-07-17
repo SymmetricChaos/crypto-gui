@@ -11,6 +11,8 @@ mod middle_square_binary_controls;
 mod middle_square_controls;
 mod pcg_controls;
 mod rc4_controls;
+mod self_shrinking_generator;
+mod shrinking_generator;
 mod splitmix_controls;
 mod vmpcr_controls;
 mod weyl_controls;
@@ -27,6 +29,8 @@ use rngs::{
     ids::{rng_categories::RngCategory, RngId},
     ClassicRng,
 };
+use self_shrinking_generator::SelfShrinkingGeneratorFrame;
+use shrinking_generator::ShrinkingGeneratorFrame;
 
 use self::{
     blumblumshub_controls::BlumBlumShubFrame, halton_controls::HaltonFrame, jsf_controls::JsfFrame,
@@ -79,6 +83,8 @@ pub struct RngInterface {
     middle_square_binary: MiddleSquareBinaryFrame,
     pcg: PcgFrame,
     rc4: Rc4Frame,
+    self_shrinking_generator: SelfShrinkingGeneratorFrame,
+    shrinking_generator: ShrinkingGeneratorFrame,
     splitmix: SplitmixFrame,
     vmpcr: VmpcrFrame,
     weyl: WeylSequenceFrame,
@@ -134,7 +140,14 @@ impl RngInterface {
         );
 
         combox_box(
-            &[RngId::BlumBlumShub, RngId::ChaCha, RngId::Geffe, RngId::Pcg],
+            &[
+                RngId::BlumBlumShub,
+                RngId::ChaCha,
+                RngId::Geffe,
+                RngId::Pcg,
+                RngId::SelfShrinkingGenerator,
+                RngId::ShrinkingGenerator,
+            ],
             active_rng,
             RngCategory::CSPRNG,
             ui,
@@ -158,6 +171,8 @@ impl RngInterface {
             RngId::MiddleSquareBinary => &mut self.middle_square_binary,
             RngId::Pcg => &mut self.pcg,
             RngId::Rc4 => &mut self.rc4,
+            RngId::SelfShrinkingGenerator => &mut self.self_shrinking_generator,
+            RngId::ShrinkingGenerator => &mut self.shrinking_generator,
             RngId::Splitmix => &mut self.splitmix,
             RngId::Vmpcr => &mut self.vmpcr,
             RngId::Weyl => &mut self.weyl,

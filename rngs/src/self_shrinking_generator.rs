@@ -6,9 +6,9 @@ use utils::bits::{
 use crate::{lfsr::Lfsr, ClassicRng};
 
 pub struct SelfShrinkingGenerator {
-    a: Lfsr,
-    big_endian: bool,
-    outputs: [Option<Bit>; 4],
+    pub a: Lfsr,
+    pub big_endian: bool,
+    pub outputs: [Option<Bit>; 4],
 }
 
 impl Default for SelfShrinkingGenerator {
