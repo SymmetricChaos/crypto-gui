@@ -21,4 +21,5 @@ pub mod vmpcr;
 pub mod weyl;
 pub mod xorshift;
 pub mod xoshiro;
+pub mod self_shrinking_generator;
 pub use traits::ClassicRng;
