@@ -1,5 +1,5 @@
 use crate::{lfsr::Lfsr, ClassicRng};
-use utils::bits::{bits_to_u32_be, bits_to_u32_le, Bit};
+use utils::bits::{bits_to_u32_ltr, bits_to_u32_rtl, Bit};
 
 pub struct Geffe {
     pub rngs: [Lfsr; 3],
@@ -43,8 +43,8 @@ impl ClassicRng for Geffe {
         }
 
         match self.big_endian {
-            true => bits_to_u32_be(&output_bits),
-            false => bits_to_u32_le(&output_bits),
+            true => bits_to_u32_ltr(&output_bits),
+            false => bits_to_u32_rtl(&output_bits),
         }
     }
 }

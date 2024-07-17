@@ -34,6 +34,17 @@ pub fn bits_from_str(text: &str) -> Result<impl Iterator<Item = Bit> + '_, CharT
     }
 }
 
+pub fn bools_from_str(text: &str) -> Result<impl Iterator<Item = bool> + '_, CharToBitError> {
+    if !IS_BITS.is_match(text) {
+        Err(CharToBitError)
+    } else {
+        Ok(text
+            .chars()
+            .filter(|c| !c.is_whitespace())
+            .map(|c| bool::from(Bit::try_from(c).unwrap())))
+    }
+}
+
 pub fn byte_to_bits_ltr(byte: u8) -> [Bit; 8] {
     let mut out = [Bit::Zero; 8];
     for idx in 0..8_u8 {
@@ -72,7 +83,8 @@ pub fn bit_vec_from_bytes_rtl(bytes: &[u8]) -> Vec<Bit> {
         .collect()
 }
 
-pub fn bits_to_u32_le(bits: &[Bit]) -> u32 {
+/// Panics if bits.len() > 32
+pub fn bits_to_u32_rtl(bits: &[Bit]) -> u32 {
     let mut it = bits.iter().rev();
     let mut out = *it.next().unwrap() as u32;
     let mut p = 1;
@@ -86,7 +98,7 @@ pub fn bits_to_u32_le(bits: &[Bit]) -> u32 {
 }
 
 /// Panics if bits.len() > 32
-pub fn bits_to_u32_be(bits: &[Bit]) -> u32 {
+pub fn bits_to_u32_ltr(bits: &[Bit]) -> u32 {
     let mut out = bits[0] as u32;
     let mut p = 1;
     for b in bits.iter().skip(1) {
@@ -602,8 +614,8 @@ mod bit_function_tests {
 
     #[test]
     fn bits_to_int() {
-        assert_eq!(5, bits_to_u32_le(&to_bit_array([0, 0, 1, 0, 1]).unwrap()));
-        assert_eq!(20, bits_to_u32_be(&to_bit_array([0, 0, 1, 0, 1]).unwrap()));
+        assert_eq!(5, bits_to_u32_rtl(&to_bit_array([0, 0, 1, 0, 1]).unwrap()));
+        assert_eq!(20, bits_to_u32_ltr(&to_bit_array([0, 0, 1, 0, 1]).unwrap()));
     }
 
     #[test]
