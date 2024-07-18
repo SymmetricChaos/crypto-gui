@@ -19,12 +19,20 @@ impl Default for ShrinkingGenerator {
 }
 
 impl ShrinkingGenerator {
+    pub fn step(&mut self) -> Option<Bit> {
+        let a_bit = self.a.next_bit();
+        let s_bit = self.s.next_bit();
+        if s_bit == Bit::One {
+            Some(a_bit)
+        } else {
+            None
+        }
+    }
+
     pub fn next_bit(&mut self) -> Bit {
         loop {
-            let a_bit = self.a.next_bit();
-            let s_bit = self.s.next_bit();
-            if s_bit == Bit::One {
-                return a_bit;
+            if let Some(bit) = self.step() {
+                return bit;
             }
         }
     }

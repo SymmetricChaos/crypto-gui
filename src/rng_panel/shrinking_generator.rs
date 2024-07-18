@@ -137,11 +137,11 @@ impl ClassicRngFrame for ShrinkingGeneratorFrame {
             });
 
         ui.add_space(8.0);
-        if ui.button("step (32 bits)").clicked() {
-            self.rng.next_u32();
-        }
-        if ui.button("step (1 bit)").clicked() {
+        if ui.button("next bit").clicked() {
             self.rng.next_bit();
+        }
+        if ui.button("step").clicked() {
+            self.rng.step();
         }
 
         ui.add_space(16.0);

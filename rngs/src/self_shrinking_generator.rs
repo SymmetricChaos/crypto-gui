@@ -22,19 +22,20 @@ impl Default for SelfShrinkingGenerator {
 }
 
 impl SelfShrinkingGenerator {
+    pub fn step(&mut self) -> Option<Bit> {
+        let pair = (self.a.next_bit(), self.a.next_bit());
+        match pair {
+            (Zero, Zero) => self.outputs[0],
+            (Zero, One) => self.outputs[1],
+            (One, Zero) => self.outputs[2],
+            (One, One) => self.outputs[3],
+        }
+    }
+
     pub fn next_bit(&mut self) -> Bit {
         loop {
-            let pair = (self.a.next_bit(), self.a.next_bit());
-            let o = match pair {
-                (Zero, Zero) => self.outputs[0],
-                (Zero, One) => self.outputs[1],
-                (One, Zero) => self.outputs[2],
-                (One, One) => self.outputs[3],
-            };
-            if o.is_none() {
-                continue;
-            } else {
-                return o.unwrap();
+            if let Some(bit) = self.step() {
+                return bit;
             }
         }
     }
