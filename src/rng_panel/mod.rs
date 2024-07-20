@@ -1,3 +1,4 @@
+mod alternating_step_controls;
 mod blumblumshub_controls;
 mod chacha_controls;
 mod geffe_controls;
@@ -18,6 +19,7 @@ mod vmpcr_controls;
 mod weyl_controls;
 mod xorshift_controls;
 mod xoshiro_controls;
+use alternating_step_controls::AlternatingStepFrame;
 use chacha_controls::ChaChaFrame;
 use geffe_controls::GeffeFrame;
 use lfg_controls::LfgFrame;
@@ -70,6 +72,7 @@ fn combox_box(
 
 #[derive(Default)]
 pub struct RngInterface {
+    alternating_step: AlternatingStepFrame,
     blumblumshub: BlumBlumShubFrame,
     chacha: ChaChaFrame,
     geffe: GeffeFrame,
@@ -141,6 +144,7 @@ impl RngInterface {
 
         combox_box(
             &[
+                RngId::AlternatingStep,
                 RngId::BlumBlumShub,
                 RngId::ChaCha,
                 RngId::Geffe,
@@ -158,6 +162,7 @@ impl RngInterface {
 
     pub fn get_active_rng(&mut self, active_rng: &RngId) -> &mut dyn ClassicRngFrame {
         match active_rng {
+            RngId::AlternatingStep => &mut self.alternating_step,
             RngId::BlumBlumShub => &mut self.blumblumshub,
             RngId::ChaCha => &mut self.chacha,
             RngId::Geffe => &mut self.geffe,

@@ -1,4 +1,5 @@
 ﻿{
+  "Alternating Step Generator": "An alternating step generator uses three LFSRs to produce a more secure stream of bits. The first LFSR is stepped and its output selects one of the others to be stepped. Then the last output bit from each of the other LSFRs are XORed together.",
   "Blum-Blum-Shub": "The Blum-Blum-Shub algorithm uses a simple recurrence to produce cryptographic quality pseudorandom numbers if the modulus is sufficiently large. The state is advanced by squaring it and reducing the result modulo a large semiprime. The parity of the state is used to produce a single bit, as a result the algorithm runs much more slowly than other PRNGs. Speed can be increased by using other techniques to extract more bits but at the cost of making it easier to determine the state.",
   "ChaCha": "The ChaCha family of stream ciphers are, by definition, also cryptographically secure PRNGs.",
   "Geffe": "The Geffe generator is a (now broken) cryptographic PRNG that works by linking three LFSRs together via a multiplexer circut. LFSR-1 selects which of the other two will give the output bit at each step.",

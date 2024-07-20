@@ -1,3 +1,4 @@
+pub mod alternating_step;
 pub mod blumblumshub;
 pub mod chacha;
 pub mod errors;
@@ -14,6 +15,7 @@ pub mod mt19937_32;
 pub mod mt19937_64;
 pub mod pcg;
 pub mod rc4;
+pub mod self_shrinking_generator;
 pub mod shrinking_generator;
 pub mod splitmix;
 pub mod traits;
@@ -21,5 +23,4 @@ pub mod vmpcr;
 pub mod weyl;
 pub mod xorshift;
 pub mod xoshiro;
-pub mod self_shrinking_generator;
 pub use traits::ClassicRng;

@@ -4,6 +4,7 @@ use std::fmt::Display;
 
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub enum RngId {
+    AlternatingStep,
     BlumBlumShub,
     ChaCha,
     Geffe,
@@ -45,6 +46,7 @@ impl RngId {
 impl Display for RngId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let name = match self {
+            RngId::AlternatingStep => "Alternating Step Generator",
             RngId::BlumBlumShub => "Blum-Blum-Shub",
             RngId::ChaCha => "ChaCha",
             RngId::Geffe => "Geffe",
