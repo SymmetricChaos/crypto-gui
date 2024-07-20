@@ -4,7 +4,10 @@ use eframe::egui::RichText;
 use egui::{Color32, DragValue, Response, TextStyle, Ui};
 use egui_extras::{Column, TableBuilder};
 use num::ToPrimitive;
-use rngs::ClassicRng;
+use rngs::{
+    lfsr::{Lfsr, LfsrMode},
+    ClassicRng,
+};
 use std::fmt::Display;
 use utils::{byte_formatting::ByteFormat, text_functions::filter_string};
 
@@ -521,6 +524,77 @@ pub fn block_cipher_padding(ui: &mut Ui, padding: &mut BCPadding) {
             });
         }
     });
+}
+
+pub fn lfsr_grid_controls(ui: &mut Ui, lfsr: &mut Lfsr, len: &mut usize, name: &str) {
+    ui.subheading("Number of Bits");
+    if ui.add(DragValue::new(len).clamp_range(4..=32)).changed() {
+        lfsr.bits.truncate(*len);
+        while lfsr.bits.len() < *len {
+            lfsr.bits.push(utils::bits::Bit::Zero)
+        }
+        lfsr.taps.truncate(*len);
+        while lfsr.taps.len() < *len {
+            lfsr.taps.push(false)
+        }
+    };
+    ui.add_space(8.0);
+
+    ui.subheading("Mode");
+    ui.selectable_value(&mut lfsr.mode, LfsrMode::Fibonncci, "Fibonacci");
+    ui.selectable_value(&mut lfsr.mode, LfsrMode::Galois, "Galois");
+    ui.add_space(8.0);
+
+    ui.subheading("Bit Order");
+    ui.horizontal(|ui| {
+        ui.selectable_value(&mut lfsr.ltr, true, "Left-to-Right");
+        ui.selectable_value(&mut lfsr.ltr, false, "Right-to-Left");
+    });
+    ui.add_space(8.0);
+
+    ui.subheading("Internal State");
+    ui.label("Bits of state with the tagged bits marked on the second row. New bits are pushed in from the left.");
+    ui.add_space(8.0);
+    if ui.button("step (1-bits)").clicked() {
+        lfsr.next_bit();
+    }
+    if ui.button("step (32-bits)").clicked() {
+        lfsr.next_u32();
+    }
+
+    egui::Grid::new(name)
+        .num_columns(*len)
+        .max_col_width(5.0)
+        .min_col_width(5.0)
+        .show(ui, |ui| {
+            for b in lfsr.bits.iter_mut() {
+                let x = RichText::from(b.to_string()).monospace().size(12.0);
+                if ui.button(x).clicked() {
+                    b.flip()
+                }
+            }
+            ui.end_row();
+            for t in lfsr.taps.iter_mut() {
+                match t {
+                    true => {
+                        if ui
+                            .button(RichText::from("^").monospace().size(12.0))
+                            .clicked()
+                        {
+                            *t = false
+                        }
+                    }
+                    false => {
+                        if ui
+                            .button(RichText::from("_").monospace().size(12.0))
+                            .clicked()
+                        {
+                            *t = true
+                        }
+                    }
+                }
+            }
+        });
 }
 
 // pub fn letter_grid(ui: &mut egui::Ui, n_rows: usize, n_cols: usize, text: &String) {

@@ -5,7 +5,7 @@ pub struct AlternatingStep {
     pub lfsrs: [Lfsr; 3],
     pub lb0: Bit,
     pub lb1: Bit,
-    pub big_endian: bool,
+    pub ltr: bool,
 }
 
 impl Default for AlternatingStep {
@@ -14,7 +14,7 @@ impl Default for AlternatingStep {
             lfsrs: [Default::default(), Default::default(), Default::default()],
             lb0: Bit::Zero,
             lb1: Bit::Zero,
-            big_endian: true,
+            ltr: true,
         }
     }
 }
@@ -36,7 +36,7 @@ impl ClassicRng for AlternatingStep {
             output_bits.push(self.next_bit())
         }
 
-        match self.big_endian {
+        match self.ltr {
             true => bits_to_u32_ltr(&output_bits),
             false => bits_to_u32_rtl(&output_bits),
         }

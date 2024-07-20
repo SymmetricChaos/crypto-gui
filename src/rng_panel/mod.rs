@@ -166,7 +166,6 @@ impl RngInterface {
             RngId::BlumBlumShub => &mut self.blumblumshub,
             RngId::ChaCha => &mut self.chacha,
             RngId::Geffe => &mut self.geffe,
-            RngId::Glfsr => todo!(),
             RngId::Halton => &mut self.halton,
             RngId::Jsf => &mut self.jsf,
             RngId::Lcg => &mut self.lcg,

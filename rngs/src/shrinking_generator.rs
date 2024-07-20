@@ -11,8 +11,8 @@ pub struct ShrinkingGenerator {
 impl Default for ShrinkingGenerator {
     fn default() -> Self {
         Self {
-            a: Lfsr::from_tap_positions(vec![31, 13], 32),
-            s: Lfsr::from_tap_positions(vec![24, 4, 3, 1], 25),
+            a: Lfsr::from_tap_positions(&[32, 30, 26, 25]),
+            s: Lfsr::from_tap_positions(&[29, 28, 27, 25]),
             big_endian: true,
         }
     }

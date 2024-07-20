@@ -1,6 +1,5 @@
 use super::ClassicRngFrame;
-use crate::ui_elements::{generate_random_u32s_box, UiElements};
-use egui::{DragValue, RichText};
+use crate::ui_elements::{generate_random_u32s_box, lfsr_grid_controls, UiElements};
 use rand::{thread_rng, Rng};
 use rngs::geffe::Geffe;
 use utils::bits::Bit;
@@ -27,67 +26,16 @@ impl GeffeFrame {}
 
 impl ClassicRngFrame for GeffeFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.rng.big_endian, true, "Big Endian");
-            ui.selectable_value(&mut self.rng.big_endian, false, "Little Endian");
-        });
-        ui.add_space(16.0);
-
         for i in 0..3 {
             let lfsr = &mut self.rng.rngs[i];
 
-            ui.subheading("Number of Bits");
-            if ui
-                .add(DragValue::new(&mut self.vector_lengths[i]).clamp_range(4..=32))
-                .changed()
-            {
-                lfsr.bits.truncate(self.vector_lengths[i]);
-                while lfsr.bits.len() < self.vector_lengths[i] {
-                    lfsr.bits.push(utils::bits::Bit::Zero)
-                }
-                lfsr.taps.truncate(self.vector_lengths[i]);
-                while lfsr.taps.len() < self.vector_lengths[i] {
-                    lfsr.taps.push(false)
-                }
-            };
-            ui.add_space(4.0);
+            lfsr_grid_controls(
+                ui,
+                lfsr,
+                &mut self.vector_lengths[i],
+                &format!("lfsr_grid{}", i),
+            );
 
-            ui.subheading("Internal State");
-            ui.add_space(8.0);
-            egui::Grid::new(format!("lfsr_state{}", i))
-                .num_columns(self.vector_lengths[i])
-                .max_col_width(5.0)
-                .min_col_width(5.0)
-                .show(ui, |ui| {
-                    for b in lfsr.bits.iter_mut() {
-                        let x = RichText::from(b.to_string()).monospace().size(12.0);
-                        if ui.button(x).clicked() {
-                            b.flip()
-                        }
-                    }
-                    ui.end_row();
-                    for t in lfsr.taps.iter_mut() {
-                        match t {
-                            true => {
-                                if ui
-                                    .button(RichText::from("^").monospace().size(12.0))
-                                    .clicked()
-                                {
-                                    *t = false
-                                }
-                            }
-                            false => {
-                                if ui
-                                    .button(RichText::from("_").monospace().size(12.0))
-                                    .clicked()
-                                {
-                                    *t = true
-                                }
-                            }
-                        }
-                    }
-                });
-            ui.subheading(format!("Next Bit: {}", self.rng.peek_next_bit()));
             ui.add_space(8.0);
         }
 

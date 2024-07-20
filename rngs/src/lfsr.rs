@@ -4,10 +4,17 @@ use utils::bits::{bits_from_str, bits_to_u32_ltr, bits_to_u32_rtl, bools_from_st
 
 use crate::traits::ClassicRng;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LfsrMode {
+    Fibonncci,
+    Galois,
+}
+
 pub struct Lfsr {
     pub bits: Vec<Bit>,
     pub taps: Vec<bool>,
-    pub big_endian: bool,
+    pub ltr: bool,
+    pub mode: LfsrMode,
 }
 
 impl Default for Lfsr {
@@ -33,45 +40,70 @@ impl Lfsr {
         Self {
             bits: bit_vec,
             taps: tap_vec,
-            big_endian: true,
+            ltr: true,
+            mode: LfsrMode::Fibonncci,
         }
     }
 
-    /// Construct from a vector of tap positions. The bits will be set to have Bit::One at index 0 and Bit::Zero elsewhere
-    pub fn from_tap_positions(taps: Vec<usize>, len: usize) -> Self {
+    /// Construct from a vector of tap positions. The bits will be set to 00...01
+    /// Taps are given by the usual (1-indexed) ordering. So a vector of [9, 11] taps the 9th and 11th bits counted from the left.
+    pub fn from_tap_positions(taps: &[usize]) -> Self {
+        assert!(!taps.contains(&0));
+        let len = *taps.iter().max().unwrap();
         let mut tap_vec = vec![false; len];
         for t in taps {
-            tap_vec[t] = true
+            tap_vec[t - 1] = true
         }
         let mut bit_vec = vec![Bit::Zero; len];
         bit_vec[len - 1] = Bit::One;
         Self {
             bits: bit_vec,
             taps: tap_vec,
-            big_endian: true,
+            ltr: true,
+            mode: LfsrMode::Fibonncci,
         }
     }
 
     pub fn next_bit(&mut self) -> Bit {
-        let mut next_bit = Bit::zero();
-        for (bit, tap) in self.bits.iter().zip(self.taps.iter()) {
-            if *tap {
-                next_bit ^= *bit;
+        match self.mode {
+            LfsrMode::Fibonncci => {
+                let mut next_bit = Bit::zero();
+                for (bit, tap) in self.bits.iter().zip(self.taps.iter()) {
+                    if *tap {
+                        next_bit ^= *bit;
+                    }
+                }
+                self.bits.pop();
+                self.bits.insert(0, next_bit);
+                next_bit
+            }
+            LfsrMode::Galois => {
+                let next_bit = *self.bits.last().unwrap();
+                for (bit, tap) in self.bits.iter_mut().zip(self.taps.iter()) {
+                    if *tap {
+                        *bit ^= next_bit;
+                    }
+                }
+                self.bits.pop();
+                self.bits.insert(0, next_bit);
+                next_bit
             }
         }
-        self.bits.pop();
-        self.bits.insert(0, next_bit);
-        next_bit
     }
 
     pub fn peek_next_bit(&self) -> Bit {
-        let mut next_bit = Bit::zero();
-        for (bit, tap) in self.bits.iter().zip(self.taps.iter()) {
-            if *tap {
-                next_bit ^= *bit;
+        match self.mode {
+            LfsrMode::Fibonncci => {
+                let mut next_bit = Bit::zero();
+                for (bit, tap) in self.bits.iter().zip(self.taps.iter()) {
+                    if *tap {
+                        next_bit ^= *bit;
+                    }
+                }
+                next_bit
             }
+            LfsrMode::Galois => *self.bits.last().unwrap(),
         }
-        next_bit
     }
 }
 
@@ -82,7 +114,7 @@ impl ClassicRng for Lfsr {
             output_bits.push(self.next_bit())
         }
 
-        match self.big_endian {
+        match self.ltr {
             true => bits_to_u32_ltr(&output_bits),
             false => bits_to_u32_rtl(&output_bits),
         }
@@ -110,7 +142,7 @@ mod lfsr_tests {
 
     #[test]
     fn small_test_alt_positions() {
-        let mut rng = Lfsr::from_tap_positions(vec![2, 4], 5);
+        let mut rng = Lfsr::from_tap_positions(&[3, 5]);
         rng.set_bits_from_str("00001");
         for (i, test) in [
             "00001", "10000", "01000", "00100", "10010", "01001", "10100", "11010", "01101",
@@ -121,6 +153,53 @@ mod lfsr_tests {
         {
             assert_eq!(test, bit_string(&rng.bits), "{}", i);
             rng.next_bit();
+        }
+    }
+
+    #[test]
+    fn cycle_length_tests() {
+        let mut rng = Lfsr::from_strings("00001", "01111");
+        let mut states = Vec::new();
+        while !states.contains(&bit_string(&rng.bits)) {
+            states.push(bit_string(&rng.bits));
+            rng.next_bit();
+        }
+        // Five bits should give (2^5)-1 = 31 states
+        assert_eq!(31, states.len());
+
+        let mut rng = Lfsr::from_tap_positions(&[9, 11]);
+        let mut states = Vec::new();
+        while !states.contains(&bit_string(&rng.bits)) {
+            states.push(bit_string(&rng.bits));
+            rng.next_bit();
+        }
+        // Eleven bits should give (2^11)-1 = 2047 states
+        assert_eq!(2047, states.len())
+    }
+
+    #[test]
+    fn galois_test() {
+        let mut rng = Lfsr::from_strings(
+            "00000000000000000000000000000001",
+            "01000110000000000000000000000000",
+        );
+        rng.mode = LfsrMode::Galois;
+
+        rng.set_bits_from_str("00000000000000000000000010100011");
+        for (i, test) in [
+            "10100011000000000000000001010001",
+            "11110010100000000000000000101000",
+            "01111001010000000000000000010100",
+            "00111100101000000000000000001010",
+            "00011110010100000000000000000101",
+            "10101100001010000000000000000010",
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            rng.next_bit();
+            // println!("{}", bit_string(&rng.bits));
+            assert_eq!(test, bit_string(&rng.bits), "{}", i);
         }
     }
 }
