@@ -1,6 +1,6 @@
 use egui::{DragValue, RichText};
 use rand::{thread_rng, Rng};
-use rngs::{lfsr::Lfsr, shrinking_generator::ShrinkingGenerator, ClassicRng};
+use rngs::shrinking_generator::ShrinkingGenerator;
 use utils::bits::Bit::{self, Zero};
 
 use crate::ui_elements::{generate_random_u32s_box, UiElements};
@@ -154,10 +154,16 @@ impl ClassicRngFrame for ShrinkingGeneratorFrame {
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        for b in self.rng.bits.iter_mut() {
+        for b in self.rng.a.bits.iter_mut() {
             *b = Bit::from(rng.gen_bool(0.5));
         }
-        for t in self.rng.taps.iter_mut() {
+        for t in self.rng.a.taps.iter_mut() {
+            *t = rng.gen_bool(0.15);
+        }
+        for b in self.rng.s.bits.iter_mut() {
+            *b = Bit::from(rng.gen_bool(0.5));
+        }
+        for t in self.rng.s.taps.iter_mut() {
             *t = rng.gen_bool(0.15);
         }
     }

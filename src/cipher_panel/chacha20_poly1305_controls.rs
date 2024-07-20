@@ -1,4 +1,4 @@
-use ciphers::digital::chacha20poly1305::ChaCha20Poly1305;
+use ciphers::digital::stream_ciphers::chacha::chacha20poly1305::ChaCha20Poly1305;
 use rand::{thread_rng, Rng};
 
 use crate::ui_elements::UiElements;

@@ -87,7 +87,7 @@ impl ClassicRngFrame for AlternatingStepFrame {
                         }
                     }
                 });
-            ui.subheading(format!("Next Bit: {}", self.rng.peek_next_bit()));
+            // ui.subheading(format!("Next Bit: {}", self.rng.peek_next_bit()));
             ui.add_space(8.0);
         }
 
@@ -100,7 +100,7 @@ impl ClassicRngFrame for AlternatingStepFrame {
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        for lfsr in self.rng.rngs.iter_mut() {
+        for lfsr in self.rng.lfsrs.iter_mut() {
             for b in lfsr.bits.iter_mut() {
                 *b = Bit::from(rng.gen_bool(0.5));
             }

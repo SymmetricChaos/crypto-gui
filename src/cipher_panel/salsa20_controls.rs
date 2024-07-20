@@ -1,10 +1,8 @@
-use ciphers::digital::salsa20::Salsa20;
+use super::CipherFrame;
+use crate::ui_elements::UiElements;
+use ciphers::digital::stream_ciphers::salsa20::Salsa20;
 use egui::Slider;
 use rand::{thread_rng, Rng};
-
-use crate::ui_elements::UiElements;
-
-use super::CipherFrame;
 
 pub struct Salsa20Frame {
     cipher: Salsa20,

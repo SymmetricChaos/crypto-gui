@@ -1,4 +1,4 @@
-use ciphers::digital::chacha_extended_nonce::ChaChaExtendedNonce;
+use ciphers::digital::stream_ciphers::chacha::chacha_extended_nonce::ChaChaExtendedNonce;
 use egui::Slider;
 use rand::{thread_rng, Rng};
 

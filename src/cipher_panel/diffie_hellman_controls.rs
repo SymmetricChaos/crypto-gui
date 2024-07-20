@@ -1,8 +1,7 @@
 use super::CipherFrame;
 
 use crate::ui_elements::UiElements;
-use ciphers::digital::diffie_hellman::DiffieHellman;
-use ciphers::traits::Cipher;
+use ciphers::{digital::public_key_ciphers::diffie_hellman::DiffieHellman, traits::Cipher};
 use eframe::egui::Ui;
 use rand::{thread_rng, Rng};
 use utils::math_functions::is_prime32;

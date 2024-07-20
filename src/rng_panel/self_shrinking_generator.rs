@@ -1,6 +1,6 @@
 use egui::{DragValue, RichText};
 use rand::{thread_rng, Rng};
-use rngs::{lfsr::Lfsr, self_shrinking_generator::SelfShrinkingGenerator, ClassicRng};
+use rngs::self_shrinking_generator::SelfShrinkingGenerator;
 use utils::bits::Bit::{self, Zero};
 
 use crate::ui_elements::{generate_random_u32s_box, UiElements};

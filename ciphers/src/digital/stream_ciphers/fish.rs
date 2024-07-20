@@ -39,7 +39,7 @@ impl Fish {
     pub fn next_pair(&mut self) -> (u32, u32) {
         loop {
             if let Some(pair) = self.step() {
-                pair
+                return pair;
             }
         }
     }
