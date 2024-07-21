@@ -28,7 +28,7 @@ impl CipherFrame for DiffieHellmanFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
-            "https://github.com/SymmetricChaos/crypto-gui/blob/master/ciphers/src/digital/diffie_hellman.rs",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/ciphers/src/digital/public_key_ciphers/diffie_hellman.rs",
         );
 
         ui.subheading("Modulus");

@@ -1,12 +1,18 @@
 use bimap::BiMap;
 use itertools::Itertools;
+use lazy_static::lazy_static;
 use num::Integer;
 use rand::{
     prelude::{IteratorRandom, SliceRandom},
     Rng,
 };
-use std::hash::Hash;
+use regex::Regex;
+use std::{hash::Hash, num::ParseIntError};
 use strsim::damerau_levenshtein;
+
+lazy_static! {
+    static ref DIGITS: Regex = Regex::new(r"\d+").unwrap();
+}
 
 // Mutate a string so that it contains only characters in a provided alphabet
 pub fn filter_string<S: AsRef<str>>(string: &mut String, alphabet: &S) {
@@ -313,6 +319,22 @@ pub fn closest_match<T: AsRef<str>>(word: T, corpus: &[T]) -> (usize, usize) {
         }
     }
     (idx, best_distance)
+}
+
+pub fn extract_u32s(text: &str) -> Result<Vec<u32>, ParseIntError> {
+    let mut out = Vec::new();
+    for m in DIGITS.find_iter(text) {
+        out.push(u32::from_str_radix(m.as_str(), 10)?)
+    }
+    Ok(out)
+}
+
+pub fn extract_u64s(text: &str) -> Result<Vec<u64>, ParseIntError> {
+    let mut out = Vec::new();
+    for m in DIGITS.find_iter(text) {
+        out.push(u64::from_str_radix(m.as_str(), 10)?)
+    }
+    Ok(out)
 }
 
 // pub fn dedup_alphabet(s: &str) -> String {

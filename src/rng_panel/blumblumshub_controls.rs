@@ -1,7 +1,6 @@
 use super::ClassicRngFrame;
 use crate::ui_elements::{generate_random_u32s_box, UiElements};
 use egui::DragValue;
-
 use num::{BigUint, FromPrimitive};
 use num_prime::RandPrime;
 use rand::thread_rng;

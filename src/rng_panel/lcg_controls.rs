@@ -1,11 +1,9 @@
+use super::ClassicRngFrame;
+use crate::ui_elements::{filter_and_parse_u32, generate_random_u32s_box, UiElements};
 use egui::TextStyle;
 use num::Integer;
 use rand::{thread_rng, Rng};
 use rngs::{lcg::Lcg, ClassicRng};
-
-use crate::ui_elements::{filter_and_parse_u32, generate_random_u32s_box, UiElements};
-
-use super::ClassicRngFrame;
 
 pub struct LcgFrame {
     rng: Lcg,

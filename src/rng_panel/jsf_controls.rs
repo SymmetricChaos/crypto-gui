@@ -1,6 +1,5 @@
-use crate::ui_elements::{generate_random_u32s_box, UiElements};
-
 use super::ClassicRngFrame;
+use crate::ui_elements::{generate_random_u32s_box, UiElements};
 use egui::DragValue;
 use rand::{thread_rng, Rng};
 use rngs::jsf::{Jsf32, Jsf64};
