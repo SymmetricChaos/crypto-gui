@@ -12,6 +12,7 @@ use egui::Ui;
 use idea_controls::IdeaFrame;
 use triple_des_controls::TripleDesFrame;
 use xor_splitting_controls::XorSecretSplittingFrame;
+use xtea_controls::XteaFrame;
 
 use self::{
     adfgvx_controls::AdfgvxFrame, aes_controls::AesFrame, affine_controls::AffineFrame,
@@ -211,6 +212,7 @@ pub struct CipherInterface {
     tea: TeaFrame,
     triple_des: TripleDesFrame,
     salsa20: Salsa20Frame,
+    xtea: XteaFrame,
 
     // Other
     shamir: ShamirSecretSharingFrame,
