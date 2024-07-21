@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{block_cipher_mode, UiElements};
+use crate::ui_elements::{block_cipher_mode, block_cipher_padding, UiElements};
 
 use ciphers::{
     digital::block_ciphers::{aes::aes::Aes128, block_cipher::BCMode},
@@ -49,6 +49,8 @@ impl CipherFrame for AesFrame {
         ui.add_space(16.0);
 
         block_cipher_mode(ui, &mut self.cipher.mode);
+        ui.add_space(4.0);
+        block_cipher_padding(ui, &mut self.cipher.padding);
         ui.add_space(8.0);
 
         ui.subheading("Key");

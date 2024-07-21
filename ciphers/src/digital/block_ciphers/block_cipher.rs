@@ -127,6 +127,14 @@ impl BCMode {
     pub fn variants() -> [Self; 3] {
         [Self::Cbc, Self::Ctr, Self::Ecb]
     }
+
+    pub fn info(&self) -> &'static str {
+        match self {
+            BCMode::Cbc => "Cipher Block Chaining mixes information from the ciphertext into the plaintext of the block that comes after it. This ensures that identical blocks of plaintext are encrypted differently. The first block requires an initialization vector that should not be repeated for different messages with the same key. Encryption in inherently sequential but decryption can be performed independently and in parallel for any blocks.",
+            BCMode::Ctr => "Counter mode operates the block cipher as if it were a stream cipher or secure PRNG. Rather than encrypting the plaintext directly the cipher is used to encrypt a sequence of numbers and the result is XORed with the plaintext. The it is important that the counter never repeat for two messages with the same key so steps must be taken to carefully select its initial value. Encryption and decryption can be performed independently and in parallel for any blocks.",
+            BCMode::Ecb => "Eelectronic Code Book mode encrypts each block of plaintext directly with the cipher. This is the simplest but least secure way to operate a block cipher and not recommended for use in any circumstance. If two blocks are the same they will be encrypted exactly the same way, exposing information about the plaintext. Encryption and decryption can be performed independently and in parallel for any blocks.",
+        }
+    }
 }
 
 impl Default for BCMode {
@@ -181,6 +189,15 @@ impl BCPadding {
 
     pub fn variants() -> [Self; 4] {
         [Self::None, Self::Bit, Self::Pkcs, Self::Ansi923]
+    }
+
+    pub fn info(&self) -> &'static str {
+        match self {
+            BCPadding::None => "If no padding is used the length of the input to the cipher must be a multiple of the block size.",
+            BCPadding::Bit => "Bit padding adds the byte 0b10000000 (or 0x80) to the end of the input and then fills the rest with null bytes to reach a multiple of the block size.",
+            BCPadding::Pkcs => "PKCS5 padding adds n bytes each with value n to reach a multiple of the block size.",
+            BCPadding::Ansi923 => "ANSI X9.23 padding adds n-1 null bytes and then a final byte with a value of n to reach a multiple of the block size.",
+        }
     }
 }
 

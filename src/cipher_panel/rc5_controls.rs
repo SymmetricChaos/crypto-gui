@@ -1,7 +1,7 @@
 use std::num::ParseIntError;
 
 use super::CipherFrame;
-use crate::ui_elements::UiElements;
+use crate::ui_elements::{block_cipher_mode, block_cipher_padding, UiElements};
 use ciphers::{digital::block_ciphers::rc5::Rc5, Cipher};
 use egui::{FontId, RichText, Ui};
 use rand::{thread_rng, Rng};
@@ -41,6 +41,11 @@ impl CipherFrame for Rc5Frame {
             &mut self.cipher.input_format,
             &mut self.cipher.output_format,
         );
+
+        block_cipher_mode(ui, &mut self.cipher.mode);
+        ui.add_space(4.0);
+        block_cipher_padding(ui, &mut self.cipher.padding);
+        ui.add_space(8.0);
 
         ui.add_space(16.0);
 
