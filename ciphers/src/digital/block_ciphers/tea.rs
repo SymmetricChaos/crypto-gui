@@ -1,7 +1,7 @@
 use crate::{impl_block_cipher, Cipher, CipherError};
 use utils::byte_formatting::{overwrite_bytes, u32_pair_to_u8_array, ByteFormat};
 
-use super::block_cipher::{none_padding, BCMode, BCPadding, BlockCipher};
+use super::block_cipher::{BCMode, BCPadding, BlockCipher};
 
 const DELTA: u32 = 0x9e3779b9;
 const BLOCKSIZE: u32 = 8;

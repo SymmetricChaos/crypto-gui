@@ -1,6 +1,6 @@
 use crate::{
     digital::block_ciphers::{
-        block_cipher::{none_padding, BCMode, BCPadding, BlockCipher},
+        block_cipher::{BCMode, BCPadding, BlockCipher},
         des::des_functions::*,
     },
     impl_block_cipher, Cipher, CipherError,

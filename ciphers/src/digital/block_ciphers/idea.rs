@@ -1,7 +1,7 @@
 use crate::{impl_block_cipher, Cipher, CipherError};
 use utils::byte_formatting::ByteFormat;
 
-use super::block_cipher::{none_padding, BCMode, BCPadding, BlockCipher};
+use super::block_cipher::{BCMode, BCPadding, BlockCipher};
 
 pub const ONE: u32 = 0xffff;
 pub const FUYI: u32 = 0x10000;

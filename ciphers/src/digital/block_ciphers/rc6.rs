@@ -1,4 +1,4 @@
-use super::block_cipher::{none_padding, BCMode, BCPadding, BlockCipher};
+use super::block_cipher::{BCMode, BCPadding, BlockCipher};
 use crate::{impl_block_cipher, Cipher, CipherError};
 use std::{cmp::max, ops::Shl};
 use utils::byte_formatting::{u8_slice_to_u32_4, ByteFormat};

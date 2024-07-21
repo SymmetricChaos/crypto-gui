@@ -4,7 +4,7 @@ use utils::byte_formatting::{
 
 use super::blowfish_arrays::{PARRAY, SBOXES};
 use crate::{
-    digital::block_ciphers::block_cipher::{none_padding, BCMode, BCPadding, BlockCipher},
+    digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher},
     impl_block_cipher, Cipher, CipherError,
 };
 

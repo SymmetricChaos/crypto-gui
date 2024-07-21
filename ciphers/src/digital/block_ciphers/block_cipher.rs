@@ -119,6 +119,9 @@ pub trait BlockCipher<const N: usize> {
         let mut chain = iv;
 
         for ctext in bytes.chunks_mut(N) {
+            // Save the ciphertext
+            let saved_ctext = ctext.to_vec();
+
             // Decrypt the ciphertext at the source to get the plaintext XORed with the previous chain value
             let mut mixed = ctext.to_vec();
             self.decrypt_block(&mut mixed);
@@ -131,6 +134,9 @@ pub trait BlockCipher<const N: usize> {
 
             // The overwrite ciphertext at source with the plaintext
             overwrite_bytes(ctext, &mixed);
+
+            // XOR the plaintext into the chain
+            xor_into_bytes(&mut chain, &saved_ctext);
         }
     }
 
@@ -141,6 +147,8 @@ pub trait BlockCipher<const N: usize> {
 #[macro_export]
 macro_rules! impl_block_cipher {
     ($cipher: ty) => {
+        use crate::digital::block_ciphers::block_cipher::none_padding;
+
         impl Cipher for $cipher {
             fn encrypt(&self, text: &str) -> Result<String, CipherError> {
                 let mut bytes = self
@@ -156,7 +164,7 @@ macro_rules! impl_block_cipher {
                     BCMode::Ecb => self.encrypt_ecb(&mut bytes),
                     BCMode::Ctr => self.encrypt_ctr(&mut bytes, self.iv.to_be_bytes()),
                     BCMode::Cbc => self.encrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
-                    // BCMode::Pcbc => self.encrypt_pcbc(&mut bytes, self.iv.to_be_bytes()),
+                    BCMode::Pcbc => self.encrypt_pcbc(&mut bytes, self.iv.to_be_bytes()),
                 };
                 Ok(self.output_format.byte_slice_to_text(&bytes))
             }
@@ -177,7 +185,7 @@ macro_rules! impl_block_cipher {
                     BCMode::Ecb => self.decrypt_ecb(&mut bytes),
                     BCMode::Ctr => self.decrypt_ctr(&mut bytes, self.iv.to_be_bytes()),
                     BCMode::Cbc => self.decrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
-                    // BCMode::Pcbc => self.decrypt_pcbc(&mut bytes, self.iv.to_be_bytes()),
+                    BCMode::Pcbc => self.decrypt_pcbc(&mut bytes, self.iv.to_be_bytes()),
                 };
 
                 if self.mode.padded() {
@@ -195,7 +203,7 @@ pub enum BCMode {
     Cbc,
     Ctr,
     Ecb,
-    // Pcbc,
+    Pcbc,
 }
 
 impl BCMode {
@@ -205,7 +213,7 @@ impl BCMode {
             BCMode::Ecb => true,
             BCMode::Ctr => false,
             BCMode::Cbc => true,
-            // BCMode::Pcbc => true,
+            BCMode::Pcbc => true,
         }
     }
 
@@ -214,7 +222,7 @@ impl BCMode {
             BCMode::Ecb => false,
             BCMode::Ctr => true,
             BCMode::Cbc => true,
-            // BCMode::Pcbc => true,
+            BCMode::Pcbc => true,
         }
     }
 
@@ -224,10 +232,10 @@ impl BCMode {
 
     pub fn info(&self) -> &'static str {
         match self {
-            BCMode::Cbc => "Cipher Block Chaining mixes information from the ciphertext into the plaintext of the block that comes after it. This ensures that identical blocks of plaintext are encrypted differently. The first block requires an initialization vector that should not be repeated for different messages with the same key. Encryption in inherently sequential but decryption can be performed independently and in parallel for any blocks.",
-            BCMode::Ctr => "Counter mode operates the block cipher as if it were a stream cipher or secure PRNG. Rather than encrypting the plaintext directly the cipher is used to encrypt a sequence of numbers and the result is XORed with the plaintext. The it is important that the counter never repeat for two messages with the same key so steps must be taken to carefully select its initial value. Encryption and decryption can be performed independently and in parallel for any blocks.",
-            BCMode::Ecb => "Eelectronic Code Book mode encrypts each block of plaintext directly with the cipher. This is the simplest but least secure way to operate a block cipher and not recommended for use in any circumstance. If two blocks are the same they will be encrypted exactly the same way, exposing information about the plaintext. Encryption and decryption can be performed independently and in parallel for any blocks.",
-            // BCMode::Pcbc => "Propogating Cipher Block Chaining",
+            BCMode::Cbc => "Cipher Block Chaining XORs information from the ciphertext into the plaintext of the block that comes after it before encryption with the block function. This ensures that even identical blocks of plaintext are encrypted differently. The first block requires an initialization vector that should not be repeated for different messages with the same key. Encryption in inherently sequential but decryption can be performed parallel.",
+            BCMode::Ctr => "Counter mode operates the block cipher as if it were a stream cipher or secure PRNG. Rather than encrypting the plaintext directly the cipher is used to encrypt a sequence of numbers and the result is XORed with the plaintext. The it is important that the counter never repeat for two messages with the same key so steps must be taken to carefully select its initial value. Encryption and decryption can be performed in parallel.",
+            BCMode::Ecb => "Eelectronic Code Book mode encrypts each block of plaintext directly with the cipher. This is the simplest but least secure way to operate a block cipher and not recommended for use in any circumstance. If two blocks are the same they will be encrypted exactly the same way, exposing information about the plaintext. Encryption and decryption can be performed in parallel.",
+            BCMode::Pcbc => "Propogating Cipher Block Chaining is similar to CBC but XORs the plaintext into the chain value both before and after encryption. This means that both encryption and decryption are inherently serial and that corruption in any block corrupts all following blocks.",
         }
     }
 }
@@ -244,7 +252,7 @@ impl Display for BCMode {
             BCMode::Cbc => write!(f, "CBC"),
             BCMode::Ctr => write!(f, "CTR"),
             BCMode::Ecb => write!(f, "ECB"),
-            // BCMode::Pcbc => write!(f, "PCBC"),
+            BCMode::Pcbc => write!(f, "PCBC"),
         }
     }
 }

@@ -6,7 +6,7 @@ use std::{
     ops::{BitXor, Shl},
 };
 
-use super::block_cipher::{none_padding, BCMode, BCPadding, BlockCipher};
+use super::block_cipher::{BCMode, BCPadding, BlockCipher};
 
 const P32: u32 = 0xb7e15163;
 const Q32: u32 = 0x9e3779b9;

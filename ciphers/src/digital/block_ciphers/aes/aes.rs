@@ -1,5 +1,5 @@
 use crate::{
-    digital::block_ciphers::block_cipher::{none_padding, BCMode, BCPadding, BlockCipher},
+    digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher},
     impl_block_cipher, Cipher, CipherError,
 };
 use itertools::Itertools;
@@ -128,52 +128,6 @@ impl BlockCipher<16> for Aes128 {
 }
 
 impl_block_cipher!(Aes128);
-// impl Cipher for Aes128 {
-//     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-//         let mut bytes = self
-//             .input_format
-//             .text_to_bytes(text)
-//             .map_err(|_| CipherError::input("byte format error"))?;
-
-//         if self.mode.padded() {
-//             self.padding.add_padding(&mut bytes, BLOCKSIZE)?;
-//         }
-
-//         match self.mode {
-//             BCMode::Ecb => self.encrypt_ecb(&mut bytes),
-//             BCMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-//             BCMode::Cbc => self.encrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
-//             BCMode::Pcbc => self.encrypt_pcbc(&mut bytes, self.cbc.to_be_bytes()),
-//         };
-//         Ok(self.output_format.byte_slice_to_text(&bytes))
-//     }
-
-//     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-//         let mut bytes = self
-//             .input_format
-//             .text_to_bytes(text)
-//             .map_err(|_| CipherError::input("byte format error"))?;
-
-//         if self.mode.padded() {
-//             if self.padding == BCPadding::None {
-//                 none_padding(&mut bytes, BLOCKSIZE)?
-//             };
-//         }
-
-//         match self.mode {
-//             BCMode::Ecb => self.decrypt_ecb(&mut bytes),
-//             BCMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-//             BCMode::Cbc => self.decrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
-//             BCMode::Pcbc => self.decrypt_pcbc(&mut bytes, self.cbc.to_be_bytes()),
-//         };
-
-//         if self.mode.padded() {
-//             self.padding.strip_padding(&mut bytes, BLOCKSIZE)?;
-//         }
-
-//         Ok(self.output_format.byte_slice_to_text(&bytes))
-//     }
-// }
 
 #[cfg(test)]
 mod aes_tests {
