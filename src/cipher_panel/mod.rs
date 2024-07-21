@@ -99,6 +99,7 @@ mod two_square_controls;
 mod vic_controls;
 mod vigenere_controls;
 mod xor_splitting_controls;
+mod xtea_controls;
 
 pub trait CipherFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
@@ -330,6 +331,7 @@ impl CipherInterface {
                 CipherId::Salsa20,
                 CipherId::Tea,
                 CipherId::TripleDes,
+                CipherId::Xtea,
             ],
             active_cipher,
             CipherCategory::Digital,
@@ -419,6 +421,7 @@ impl CipherInterface {
             CipherId::Vic => &mut self.vic,
             CipherId::Vigenere => &mut self.vigenere,
             CipherId::XorSplitting => &mut self.xor_splitting,
+            CipherId::Xtea => &mut self.xtea,
             _ => todo!("<<<CIPHER NOT FOUND>>>"),
         }
     }

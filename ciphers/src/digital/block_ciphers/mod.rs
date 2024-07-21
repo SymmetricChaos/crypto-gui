@@ -1,4 +1,3 @@
-#[macro_use]
 pub mod aes;
 pub mod block_cipher;
 pub mod blowfish;

@@ -1,14 +1,14 @@
 use utils::byte_formatting::ByteFormat;
 
-use crate::Cipher;
+use crate::{Cipher, CipherError};
 
-use super::block_cipher::{BlockCipher, BCMode, BCPadding};
+use super::block_cipher::{BCMode, BCPadding, BlockCipher};
 
 pub struct Feal {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
     subkeys: [u16; 16],
-    pub ctr: u64,
+    pub iv: u64,
     pub mode: BCMode,
     pub padding: BCPadding,
 }
@@ -19,7 +19,7 @@ impl Default for Feal {
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
             subkeys: Default::default(),
-            ctr: 0,
+            iv: 0,
             mode: Default::default(),
             padding: Default::default(),
         }
@@ -52,11 +52,11 @@ impl BlockCipher<8> for Feal {
 }
 
 impl Cipher for Feal {
-    fn encrypt(&self, text: &str) -> Result<String, crate::CipherError> {
+    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
         todo!()
     }
 
-    fn decrypt(&self, text: &str) -> Result<String, crate::CipherError> {
+    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         todo!()
     }
 }

@@ -7,10 +7,10 @@ pub mod substitution;
 pub mod tactical;
 pub mod transposition;
 
+pub mod hill;
 pub mod vic;
 
 pub mod errors;
-pub mod hill;
 pub use errors::CipherError;
 pub mod ids;
 pub mod rotors;

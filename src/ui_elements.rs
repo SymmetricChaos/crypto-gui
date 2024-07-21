@@ -519,12 +519,12 @@ pub fn lfsr_grid_controls(ui: &mut Ui, lfsr: &mut Lfsr, len: &mut usize, name: &
             lfsr.taps.push(false)
         }
     };
-    ui.add_space(8.0);
+    ui.add_space(4.0);
 
     ui.subheading("Mode");
     ui.selectable_value(&mut lfsr.mode, LfsrMode::Fibonncci, "Fibonacci");
     ui.selectable_value(&mut lfsr.mode, LfsrMode::Galois, "Galois");
-    ui.add_space(8.0);
+    ui.add_space(4.0);
 
     // Name here is confusing.
     // ui.subheading("Bit Order");
@@ -541,7 +541,7 @@ pub fn lfsr_grid_controls(ui: &mut Ui, lfsr: &mut Lfsr, len: &mut usize, name: &
     if ui.button("step").clicked() {
         lfsr.next_bit();
     }
-    ui.add_space(8.0);
+    ui.add_space(4.0);
 
     egui::Grid::new(name)
         .num_columns(*len)

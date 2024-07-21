@@ -10,8 +10,6 @@ use rand::{thread_rng, Rng};
 
 pub struct AesFrame {
     cipher: Aes128,
-    ctr_upper: u64,
-    ctr_lower: u64,
     iv_upper: u64,
     iv_lower: u64,
 }
@@ -20,8 +18,6 @@ impl Default for AesFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
-            ctr_upper: 0,
-            ctr_lower: 0,
             iv_upper: 0,
             iv_lower: 0,
         }
@@ -65,13 +61,13 @@ impl CipherFrame for AesFrame {
         ui.add_enabled_ui(self.cipher.mode == BCMode::Ctr, |ui| {
             ui.subheading("Counter");
             ui.label("In CTR mode the cipher must have a 128-bit counter value provided. The selectors below control the upper and lower 64-bits respectively.");
-            if ui.add(DragValue::new(&mut self.ctr_upper).hexadecimal(16, false, false)) .changed() {
+            if ui.add(DragValue::new(&mut self.iv_upper).hexadecimal(16, false, false)) .changed() {
                 self.cipher.iv &= 0x0000000000000000FFFFFFFFFFFFFFFF;
-                self.cipher.iv |= (self.ctr_upper as u128) << 64;
+                self.cipher.iv |= (self.iv_upper as u128) << 64;
             }
-            if ui.add(DragValue::new(&mut self.ctr_lower).hexadecimal(16, false, false)) .changed() {
+            if ui.add(DragValue::new(&mut self.iv_lower).hexadecimal(16, false, false)) .changed() {
                 self.cipher.iv &= 0xFFFFFFFFFFFFFFFF0000000000000000;
-                self.cipher.iv |= self.ctr_lower as u128;
+                self.cipher.iv |= self.iv_lower as u128;
             }
             ui.label(format!("{:032x?}",self.cipher.iv))
         });

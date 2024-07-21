@@ -140,11 +140,26 @@ pub trait BlockCipher<const N: usize> {
         }
     }
 
-    // fn encrypt_cfb(&self, bytes: &mut [u8], iv: [u8; N]) {}
-    // fn decrypt_cfb(&self, bytes: &mut [u8], iv: [u8; N]) {}
+    fn encrypt_ofb(&self, bytes: &mut [u8], iv: [u8; N]) {
+        let mut chain = iv;
 
-    // fn encrypt_ofb(&self, bytes: &mut [u8], iv: [u8; N]) {}
-    // fn decrypt_ofb(&self, bytes: &mut [u8], iv: [u8; N]) {}
+        for ptext in bytes.chunks_mut(N) {
+            // Encrypt the chain to create a mask
+            self.encrypt_block(&mut chain);
+
+            // XOR the mask into the plaintext at the source, creating ciphertext
+            xor_into_bytes(ptext, &chain);
+        }
+    }
+
+    // OFB is reciprocal
+    fn decrypt_ofb(&self, bytes: &mut [u8], iv: [u8; N]) {
+        self.encrypt_ofb(bytes, iv)
+    }
+
+    // fn encrypt_cfb(&self, bytes: &mut [u8], iv: [u8; N]) {}
+
+    // fn decrypt_cfb(&self, bytes: &mut [u8], iv: [u8; N]) {}
 }
 
 #[macro_export]
@@ -168,6 +183,7 @@ macro_rules! impl_block_cipher {
                     BCMode::Ctr => self.encrypt_ctr(&mut bytes, self.iv.to_be_bytes()),
                     BCMode::Cbc => self.encrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
                     BCMode::Pcbc => self.encrypt_pcbc(&mut bytes, self.iv.to_be_bytes()),
+                    BCMode::Ofb => self.encrypt_ofb(&mut bytes, self.iv.to_be_bytes()),
                 };
                 Ok(self.output_format.byte_slice_to_text(&bytes))
             }
@@ -189,6 +205,7 @@ macro_rules! impl_block_cipher {
                     BCMode::Ctr => self.decrypt_ctr(&mut bytes, self.iv.to_be_bytes()),
                     BCMode::Cbc => self.decrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
                     BCMode::Pcbc => self.decrypt_pcbc(&mut bytes, self.iv.to_be_bytes()),
+                    BCMode::Ofb => self.decrypt_ofb(&mut bytes, self.iv.to_be_bytes()),
                 };
 
                 if self.mode.padded() {
@@ -207,7 +224,7 @@ pub enum BCMode {
     Ctr,
     Ecb,
     Pcbc,
-    // Ofb,
+    Ofb,
 }
 
 impl BCMode {
@@ -218,7 +235,7 @@ impl BCMode {
             BCMode::Ctr => false,
             BCMode::Cbc => true,
             BCMode::Pcbc => true,
-            // BCMode::Ofb => false,
+            BCMode::Ofb => false,
         }
     }
 
@@ -228,12 +245,12 @@ impl BCMode {
             BCMode::Ctr => true,
             BCMode::Cbc => true,
             BCMode::Pcbc => true,
-            // BCMode::Ofb => true,
+            BCMode::Ofb => true,
         }
     }
 
-    pub fn variants() -> [Self; 4] {
-        [Self::Cbc, Self::Ctr, Self::Ecb, Self::Pcbc]
+    pub fn variants() -> [Self; 5] {
+        [Self::Cbc, Self::Ctr, Self::Ecb, Self::Pcbc, Self::Ofb]
     }
 
     pub fn info(&self) -> &'static str {
@@ -242,6 +259,7 @@ impl BCMode {
             BCMode::Ctr => "Counter mode operates the block cipher as if it were a stream cipher or secure PRNG. Rather than encrypting the plaintext directly the cipher is used to encrypt a sequence of numbers and the result is XORed with the plaintext. The it is important that the counter never repeat for two messages with the same key so steps must be taken to carefully select its initial value. Encryption and decryption can be performed in parallel.",
             BCMode::Ecb => "Eelectronic Code Book mode encrypts each block of plaintext directly with the cipher. This is the simplest but least secure way to operate a block cipher and not recommended for use in any circumstance. If two blocks are the same they will be encrypted exactly the same way, exposing information about the plaintext. Encryption and decryption can be performed in parallel.",
             BCMode::Pcbc => "Propogating Cipher Block Chaining is similar to CBC but XORs the plaintext into the chain value both before and after encryption. This means that both encryption and decryption are inherently serial and that corruption in any block corrupts all following blocks.",
+            BCMode::Ofb => "Output Feedback mode iteratively encrypts the initialization vector and XORs the chain of blocks created into the plaintext. This is similar to CTR mode but cannot be encrypted or decrypted in parallel.",
         }
     }
 }
@@ -259,6 +277,7 @@ impl Display for BCMode {
             BCMode::Ctr => write!(f, "CTR"),
             BCMode::Ecb => write!(f, "ECB"),
             BCMode::Pcbc => write!(f, "PCBC"),
+            BCMode::Ofb => write!(f, "OFB"),
         }
     }
 }
@@ -266,8 +285,7 @@ impl Display for BCMode {
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum BCPadding {
     None,
-    Bit, // add the byte 0x80, then add 0x00 bytes until the block size (in bytes) is reached
-    // equivalently add a single 1 bit then append 0 bits until the block size (in bytes) is reached
+    Bit,
     Pkcs,
     Ansi923,
 }
