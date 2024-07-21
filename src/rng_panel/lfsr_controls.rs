@@ -26,6 +26,11 @@ impl LfsrFrame {}
 
 impl ClassicRngFrame for LfsrFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+        match self.rng.mode {
+            rngs::lfsr::LfsrMode::Fibonncci => ui.label("In Fibonacci mode the LFSR outputs the XOR of each tapped bit then shifts the register left, inserting the output bit on the right."),
+            rngs::lfsr::LfsrMode::Galois => ui.label("In Galois mode the LFSR outputs the leftmost bit, XORs it into each tap, then shifts the register left, inserting the output bit on the right."),
+        };
+
         lfsr_grid_controls(ui, &mut self.rng, &mut self.vector_length, "lfsr_grid");
 
         ui.add_space(16.0);

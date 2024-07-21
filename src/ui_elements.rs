@@ -545,21 +545,19 @@ pub fn lfsr_grid_controls(ui: &mut Ui, lfsr: &mut Lfsr, len: &mut usize, name: &
     ui.selectable_value(&mut lfsr.mode, LfsrMode::Galois, "Galois");
     ui.add_space(8.0);
 
-    ui.subheading("Bit Order");
-    ui.horizontal(|ui| {
-        ui.selectable_value(&mut lfsr.ltr, true, "Left-to-Right");
-        ui.selectable_value(&mut lfsr.ltr, false, "Right-to-Left");
-    });
-    ui.add_space(8.0);
+    // Name here is confusing.
+    // ui.subheading("Bit Order");
+    // ui.horizontal(|ui| {
+    //     ui.selectable_value(&mut lfsr.ltr, true, "Left-to-Right");
+    //     ui.selectable_value(&mut lfsr.ltr, false, "Right-to-Left");
+    // });
+    // ui.add_space(8.0);
 
     ui.subheading("Internal State");
     ui.label("Bits of state with the tagged bits marked on the second row. New bits are pushed in from the left.");
     ui.add_space(8.0);
-    if ui.button("step (1-bits)").clicked() {
+    if ui.button("step").clicked() {
         lfsr.next_bit();
-    }
-    if ui.button("step (32-bits)").clicked() {
-        lfsr.next_u32();
     }
 
     egui::Grid::new(name)

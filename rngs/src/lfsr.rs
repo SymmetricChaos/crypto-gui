@@ -37,6 +37,7 @@ impl Lfsr {
         let bit_vec = bits_from_str(bits).unwrap().collect_vec();
         let tap_vec = bools_from_str(taps).unwrap().collect_vec();
         assert_eq!(bit_vec.len(), tap_vec.len());
+        assert!(bits.len() != 0);
         Self {
             bits: bit_vec,
             taps: tap_vec,
@@ -65,7 +66,7 @@ impl Lfsr {
     }
 
     pub fn next_bit(&mut self) -> Bit {
-        match self.mode {
+        let next_bit = match self.mode {
             LfsrMode::Fibonncci => {
                 let mut next_bit = Bit::zero();
                 for (bit, tap) in self.bits.iter().zip(self.taps.iter()) {
@@ -73,8 +74,6 @@ impl Lfsr {
                         next_bit ^= *bit;
                     }
                 }
-                self.bits.pop();
-                self.bits.insert(0, next_bit);
                 next_bit
             }
             LfsrMode::Galois => {
@@ -84,11 +83,12 @@ impl Lfsr {
                         *bit ^= next_bit;
                     }
                 }
-                self.bits.pop();
-                self.bits.insert(0, next_bit);
                 next_bit
             }
-        }
+        };
+        self.bits.pop();
+        self.bits.insert(0, next_bit);
+        next_bit
     }
 
     pub fn peek_next_bit(&self) -> Bit {
