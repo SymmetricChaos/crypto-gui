@@ -75,13 +75,13 @@ impl CipherFrame for DesXFrame {
         ui.add_enabled_ui(self.cipher.mode == BCMode::Ctr, |ui| {
             ui.subheading("Counter");
             ui.label("In CTR mode the cipher must have a 64-bit counter value provided.");
-            ui.u64_drag_value_hex(&mut self.cipher.ctr);
+            ui.u64_drag_value_hex(&mut self.cipher.iv);
         });
 
         ui.add_enabled_ui(self.cipher.mode == BCMode::Cbc, |ui| {
             ui.subheading("Initialization Vector");
             ui.label("In CBC mode the cipher must have a 64-bit initialization vector provided.");
-            ui.u64_drag_value_hex(&mut self.cipher.cbc);
+            ui.u64_drag_value_hex(&mut self.cipher.iv);
         });
 
         ui.add_space(16.0);
@@ -100,7 +100,7 @@ impl CipherFrame for DesXFrame {
         }
 
         if self.cipher.mode == BCMode::Ctr {
-            self.cipher.ctr = rng.gen();
+            self.cipher.iv = rng.gen();
         }
     }
 

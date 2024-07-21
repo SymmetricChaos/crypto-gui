@@ -1,56 +1,51 @@
 use std::fmt::Display;
-use utils::math_functions::incr_array_ctr;
+use utils::{
+    byte_formatting::{overwrite_bytes, xor_into_bytes},
+    math_functions::incr_array_ctr,
+};
 
 use crate::CipherError;
 
 pub trait BlockCipher<const N: usize> {
     fn encrypt_block(&self, bytes: &mut [u8]);
     fn decrypt_block(&self, bytes: &mut [u8]);
+
     fn set_mode(&mut self, mode: BCMode);
     fn set_padding(&mut self, padding: BCPadding);
+
     fn encrypt_ecb(&self, bytes: &mut [u8]) {
         assert!(bytes.len() % N == 0);
 
-        for plaintext in bytes.chunks_mut(N) {
-            self.encrypt_block(plaintext);
+        for ptext in bytes.chunks_mut(N) {
+            self.encrypt_block(ptext);
         }
     }
     fn decrypt_ecb(&self, bytes: &mut [u8]) {
         assert!(bytes.len() % N == 0);
 
-        for plaintext in bytes.chunks_mut(N) {
-            self.decrypt_block(plaintext);
+        for ctext in bytes.chunks_mut(N) {
+            self.decrypt_block(ctext);
         }
     }
 
     fn encrypt_ctr(&self, bytes: &mut [u8], ctr: [u8; N]) {
         let mut ctr = ctr;
 
-        for plaintext in bytes.chunks_mut(N) {
+        for ptext in bytes.chunks_mut(N) {
             // Encrypt the counter to create a mask
             let mut mask = ctr;
             self.encrypt_block(&mut mask);
+
             // XOR the mask into the plaintext at the source, creating ciphertext
-            for (key_byte, ptext) in mask.iter().zip(plaintext.iter_mut()) {
-                *ptext ^= key_byte
-            }
+            xor_into_bytes(ptext, &mask);
+
             incr_array_ctr(&mut ctr);
         }
     }
 
+    // CTR mode is reciprocal
     fn decrypt_ctr(&self, bytes: &mut [u8], ctr: [u8; N]) {
-        let mut ctr = ctr;
-
-        for plaintext in bytes.chunks_mut(N) {
-            // Encrypt the counter to create a mask
-            let mut mask = ctr;
-            self.encrypt_block(&mut mask);
-            // XOR the mask into the plaintext at the source, creating ciphertext
-            for (key_byte, ptext) in mask.iter().zip(plaintext.iter_mut()) {
-                *ptext ^= key_byte
-            }
-            incr_array_ctr(&mut ctr);
-        }
+        self.encrypt_ctr(bytes, ctr)
     }
 
     fn encrypt_cbc(&self, bytes: &mut [u8], iv: [u8; N]) {
@@ -59,24 +54,15 @@ pub trait BlockCipher<const N: usize> {
         // Start chain with an IV
         let mut chain = iv;
 
-        for source in bytes.chunks_mut(N) {
+        for ptext in bytes.chunks_mut(N) {
             // XOR the plaintext into the previous ciphertext (or the IV), creating a mixed array
-            for (c, b) in chain.iter_mut().zip(source.iter()) {
-                *c ^= b;
-            }
+            xor_into_bytes(&mut chain, &ptext);
 
             // Encrypt the mixed value, producing ciphertext
             self.encrypt_block(&mut chain);
 
             // Overwrite plaintext at source with the ciphertext
-            for (ctext, source) in chain
-                .iter()
-                .map(|w| w.to_be_bytes())
-                .flatten()
-                .zip(source.iter_mut())
-            {
-                *source = ctext
-            }
+            overwrite_bytes(ptext, &chain);
         }
     }
 
@@ -86,25 +72,122 @@ pub trait BlockCipher<const N: usize> {
         // Start chain with an IV
         let mut chain = iv;
 
-        for source in bytes.chunks_mut(N) {
+        for ctext in bytes.chunks_mut(N) {
             // Decrypt the ciphertext at the source to get the plaintext XORed with the previous chain value
-            let mut mixed = source.to_vec();
+            let mut mixed = ctext.to_vec();
             self.decrypt_block(&mut mixed);
 
             // XOR the current chain value into the mixed text
-            for (c, b) in mixed.iter_mut().zip(chain.iter()) {
-                *c ^= b;
-            }
+            xor_into_bytes(&mut mixed, &chain);
 
             // Store the ciphertext as the next chain value before it gets overwritten
-            chain = source.try_into().unwrap();
+            chain = ctext.try_into().unwrap();
 
             // The overwrite ciphertext at source with the plaintext
-            for (ptext, source) in mixed.into_iter().zip(source.iter_mut()) {
-                *source = ptext
-            }
+            overwrite_bytes(ctext, &mixed);
         }
     }
+
+    fn encrypt_pcbc(&self, bytes: &mut [u8], iv: [u8; N]) {
+        assert!(bytes.len() % N == 0);
+
+        // Start chain with an IV
+        let mut chain = iv;
+
+        for ptext in bytes.chunks_mut(N) {
+            // Save the plaintext
+            let saved_ptext = ptext.to_vec();
+
+            // XOR the plaintext into the previous ciphertext (or the IV), creating a mixed array
+            xor_into_bytes(&mut chain, &saved_ptext);
+
+            // Encrypt the mixed value, producing ciphertext
+            self.encrypt_block(&mut chain);
+
+            // Overwrite plaintext at source with the ciphertext
+            overwrite_bytes(ptext, &chain);
+
+            // XOR the plaintext into the chain (yes, again)
+            xor_into_bytes(&mut chain, &saved_ptext);
+        }
+    }
+
+    fn decrypt_pcbc(&self, bytes: &mut [u8], iv: [u8; N]) {
+        assert!(bytes.len() % N == 0);
+
+        // Start chain with an IV
+        let mut chain = iv;
+
+        for ctext in bytes.chunks_mut(N) {
+            // Decrypt the ciphertext at the source to get the plaintext XORed with the previous chain value
+            let mut mixed = ctext.to_vec();
+            self.decrypt_block(&mut mixed);
+
+            // XOR the current chain value into the mixed text
+            xor_into_bytes(&mut mixed, &chain);
+
+            // Store the ciphertext as the next chain value before it gets overwritten
+            chain = ctext.try_into().unwrap();
+
+            // The overwrite ciphertext at source with the plaintext
+            overwrite_bytes(ctext, &mixed);
+        }
+    }
+
+    // fn encrypt_cfb(&self, bytes: &mut [u8], iv: [u8; N]) {}
+    // fn decrypt_cfb(&self, bytes: &mut [u8], iv: [u8; N]) {}
+}
+
+#[macro_export]
+macro_rules! impl_block_cipher {
+    ($cipher: ty) => {
+        impl Cipher for $cipher {
+            fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+                let mut bytes = self
+                    .input_format
+                    .text_to_bytes(text)
+                    .map_err(|_| CipherError::input("byte format error"))?;
+
+                if self.mode.padded() {
+                    self.padding.add_padding(&mut bytes, BLOCKSIZE)?;
+                }
+
+                match self.mode {
+                    BCMode::Ecb => self.encrypt_ecb(&mut bytes),
+                    BCMode::Ctr => self.encrypt_ctr(&mut bytes, self.iv.to_be_bytes()),
+                    BCMode::Cbc => self.encrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
+                    // BCMode::Pcbc => self.encrypt_pcbc(&mut bytes, self.iv.to_be_bytes()),
+                };
+                Ok(self.output_format.byte_slice_to_text(&bytes))
+            }
+
+            fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+                let mut bytes = self
+                    .input_format
+                    .text_to_bytes(text)
+                    .map_err(|_| CipherError::input("byte format error"))?;
+
+                if self.mode.padded() {
+                    if self.padding == BCPadding::None {
+                        none_padding(&mut bytes, BLOCKSIZE)?
+                    };
+                }
+
+                match self.mode {
+                    BCMode::Ecb => self.decrypt_ecb(&mut bytes),
+                    BCMode::Ctr => self.decrypt_ctr(&mut bytes, self.iv.to_be_bytes()),
+                    BCMode::Cbc => self.decrypt_cbc(&mut bytes, self.iv.to_be_bytes()),
+                    // BCMode::Pcbc => self.decrypt_pcbc(&mut bytes, self.iv.to_be_bytes()),
+                };
+
+                if self.mode.padded() {
+                    self.padding.strip_padding(&mut bytes, BLOCKSIZE)?;
+                }
+
+                Ok(self.output_format.byte_slice_to_text(&bytes))
+            }
+        }
+    };
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -112,6 +195,7 @@ pub enum BCMode {
     Cbc,
     Ctr,
     Ecb,
+    // Pcbc,
 }
 
 impl BCMode {
@@ -121,6 +205,16 @@ impl BCMode {
             BCMode::Ecb => true,
             BCMode::Ctr => false,
             BCMode::Cbc => true,
+            // BCMode::Pcbc => true,
+        }
+    }
+
+    pub fn iv_needed(&self) -> bool {
+        match self {
+            BCMode::Ecb => false,
+            BCMode::Ctr => true,
+            BCMode::Cbc => true,
+            // BCMode::Pcbc => true,
         }
     }
 
@@ -133,6 +227,7 @@ impl BCMode {
             BCMode::Cbc => "Cipher Block Chaining mixes information from the ciphertext into the plaintext of the block that comes after it. This ensures that identical blocks of plaintext are encrypted differently. The first block requires an initialization vector that should not be repeated for different messages with the same key. Encryption in inherently sequential but decryption can be performed independently and in parallel for any blocks.",
             BCMode::Ctr => "Counter mode operates the block cipher as if it were a stream cipher or secure PRNG. Rather than encrypting the plaintext directly the cipher is used to encrypt a sequence of numbers and the result is XORed with the plaintext. The it is important that the counter never repeat for two messages with the same key so steps must be taken to carefully select its initial value. Encryption and decryption can be performed independently and in parallel for any blocks.",
             BCMode::Ecb => "Eelectronic Code Book mode encrypts each block of plaintext directly with the cipher. This is the simplest but least secure way to operate a block cipher and not recommended for use in any circumstance. If two blocks are the same they will be encrypted exactly the same way, exposing information about the plaintext. Encryption and decryption can be performed independently and in parallel for any blocks.",
+            // BCMode::Pcbc => "Propogating Cipher Block Chaining",
         }
     }
 }
@@ -149,6 +244,7 @@ impl Display for BCMode {
             BCMode::Cbc => write!(f, "CBC"),
             BCMode::Ctr => write!(f, "CTR"),
             BCMode::Ecb => write!(f, "ECB"),
+            // BCMode::Pcbc => write!(f, "PCBC"),
         }
     }
 }

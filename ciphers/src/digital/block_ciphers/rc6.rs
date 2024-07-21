@@ -1,17 +1,17 @@
-use super::block_cipher::{BCMode, BCPadding, BlockCipher};
-use crate::Cipher;
+use super::block_cipher::{none_padding, BCMode, BCPadding, BlockCipher};
+use crate::{impl_block_cipher, Cipher, CipherError};
 use std::{cmp::max, ops::Shl};
 use utils::byte_formatting::{u8_slice_to_u32_4, ByteFormat};
 
 const P32: u32 = 0xb7e15163;
 const Q32: u32 = 0x9e3779b9;
+const BLOCKSIZE: u32 = 16;
 struct Rc6 {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
     pub rounds: usize,
     pub state: Vec<u32>,
-    pub ctr: u64,
-    pub cbc: u64,
+    pub iv: u128,
     pub mode: BCMode,
     pub padding: BCPadding,
 }
@@ -23,8 +23,7 @@ impl Default for Rc6 {
             input_format: ByteFormat::Hex,
             rounds: 20,
             state: Default::default(),
-            ctr: 0,
-            cbc: 0,
+            iv: 0,
             mode: BCMode::default(),
             padding: BCPadding::default(),
         }
@@ -92,12 +91,4 @@ impl BlockCipher<16> for Rc6 {
     }
 }
 
-impl Cipher for Rc6 {
-    fn encrypt(&self, text: &str) -> Result<String, crate::CipherError> {
-        todo!()
-    }
-
-    fn decrypt(&self, text: &str) -> Result<String, crate::CipherError> {
-        todo!()
-    }
-}
+impl_block_cipher!(Rc6);

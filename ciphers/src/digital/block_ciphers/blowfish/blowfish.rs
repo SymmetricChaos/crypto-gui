@@ -5,8 +5,10 @@ use utils::byte_formatting::{
 use super::blowfish_arrays::{PARRAY, SBOXES};
 use crate::{
     digital::block_ciphers::block_cipher::{none_padding, BCMode, BCPadding, BlockCipher},
-    Cipher, CipherError,
+    impl_block_cipher, Cipher, CipherError,
 };
+
+const BLOCKSIZE: u32 = 8;
 
 pub struct Blowfish {
     pub output_format: ByteFormat,
@@ -14,8 +16,7 @@ pub struct Blowfish {
     pub key: Vec<u8>,
     parray: [u32; 18],
     sboxes: [[u32; 256]; 4],
-    pub ctr: u64,
-    pub cbc: u64,
+    pub iv: u64,
     pub mode: BCMode,
     pub padding: BCPadding,
 }
@@ -28,8 +29,7 @@ impl Default for Blowfish {
             key: vec![0; 4],
             parray: PARRAY,
             sboxes: SBOXES,
-            ctr: 0,
-            cbc: 0,
+            iv: 0,
             mode: BCMode::default(),
             padding: BCPadding::default(),
         }
@@ -37,8 +37,6 @@ impl Default for Blowfish {
 }
 
 impl Blowfish {
-    const BLOCKSIZE: u32 = 8;
-
     pub fn parray_string(&self) -> String {
         format!("{:08x?}", self.parray)
     }
@@ -157,50 +155,53 @@ impl BlockCipher<8> for Blowfish {
     }
 }
 
-impl Cipher for Blowfish {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
+impl_block_cipher!(Blowfish);
+// impl Cipher for Blowfish {
+//     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+//         let mut bytes = self
+//             .input_format
+//             .text_to_bytes(text)
+//             .map_err(|_| CipherError::input("byte format error"))?;
 
-        if self.mode.padded() {
-            self.padding.add_padding(&mut bytes, Self::BLOCKSIZE)?;
-        }
+//         if self.mode.padded() {
+//             self.padding.add_padding(&mut bytes, BLOCKSIZE)?;
+//         }
 
-        match self.mode {
-            BCMode::Ecb => self.encrypt_ecb(&mut bytes),
-            BCMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BCMode::Cbc => self.encrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
-        };
-        Ok(self.output_format.byte_slice_to_text(&bytes))
-    }
+//         match self.mode {
+//             BCMode::Ecb => self.encrypt_ecb(&mut bytes),
+//             BCMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
+//             BCMode::Cbc => self.encrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
+//             BCMode::Pcbc => self.encrypt_pcbc(&mut bytes, self.cbc.to_be_bytes()),
+//         };
+//         Ok(self.output_format.byte_slice_to_text(&bytes))
+//     }
 
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
+//     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+//         let mut bytes = self
+//             .input_format
+//             .text_to_bytes(text)
+//             .map_err(|_| CipherError::input("byte format error"))?;
 
-        if self.mode.padded() {
-            if self.padding == BCPadding::None {
-                none_padding(&mut bytes, Self::BLOCKSIZE)?
-            };
-        }
+//         if self.mode.padded() {
+//             if self.padding == BCPadding::None {
+//                 none_padding(&mut bytes, BLOCKSIZE)?
+//             };
+//         }
 
-        match self.mode {
-            BCMode::Ecb => self.decrypt_ecb(&mut bytes),
-            BCMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BCMode::Cbc => self.decrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
-        };
+//         match self.mode {
+//             BCMode::Ecb => self.decrypt_ecb(&mut bytes),
+//             BCMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
+//             BCMode::Cbc => self.decrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
+//             BCMode::Pcbc => self.decrypt_pcbc(&mut bytes, self.cbc.to_be_bytes()),
+//         };
 
-        if self.mode.padded() {
-            self.padding.strip_padding(&mut bytes, Self::BLOCKSIZE)?;
-        }
+//         if self.mode.padded() {
+//             self.padding.strip_padding(&mut bytes, BLOCKSIZE)?;
+//         }
 
-        Ok(self.output_format.byte_slice_to_text(&bytes))
-    }
-}
+//         Ok(self.output_format.byte_slice_to_text(&bytes))
+//     }
+// }
 
 #[cfg(test)]
 mod blowfish_tests {
@@ -223,7 +224,7 @@ mod blowfish_tests {
     fn encrypt_decrypt_ctr() {
         let mut cipher = Blowfish::default();
         cipher.mode = BCMode::Ctr;
-        cipher.ctr = 0xAB12CD34;
+        cipher.iv = 0xAB12CD34;
         cipher.key = 0x9078563412_u64.to_be_bytes().to_vec();
         cipher.key_schedule();
         let ptext = "abcdef123456abcdef123456abcdef123456abcdef123456";
@@ -249,7 +250,7 @@ mod blowfish_tests {
         let mut cipher = Blowfish::default();
         cipher.mode = BCMode::Cbc;
         cipher.padding = BCPadding::Pkcs;
-        cipher.cbc = 0xfedcba9876543210;
+        cipher.iv = 0xfedcba9876543210;
         cipher.key = ByteFormat::Hex
             .text_to_bytes("0123456789abcdeff0e1d2c3b4a59687")
             .unwrap();

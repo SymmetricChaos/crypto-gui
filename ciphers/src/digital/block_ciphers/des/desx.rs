@@ -3,17 +3,18 @@ use crate::{
         block_cipher::{none_padding, BCMode, BCPadding, BlockCipher},
         des::des_functions::*,
     },
-    Cipher, CipherError,
+    impl_block_cipher, Cipher, CipherError,
 };
 use utils::byte_formatting::{overwrite_bytes, ByteFormat};
+
+pub const BLOCKSIZE: u32 = 8;
 
 pub struct DesX {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
     pub extra_keys: [u64; 2],
     subkeys: [u64; 16],
-    pub ctr: u64,
-    pub cbc: u64,
+    pub iv: u64,
     pub mode: BCMode,
     pub padding: BCPadding,
 }
@@ -25,8 +26,7 @@ impl Default for DesX {
             input_format: ByteFormat::Hex,
             extra_keys: [0, 0],
             subkeys: [0; 16],
-            ctr: 0,
-            cbc: 0,
+            iv: 0,
             mode: BCMode::default(),
             padding: BCPadding::default(),
         }
@@ -34,8 +34,6 @@ impl Default for DesX {
 }
 
 impl DesX {
-    pub const BLOCKSIZE: u32 = 8;
-
     // Key Scheduling Algorithm (key generation)
     pub fn ksa(&mut self, key: u64) -> Result<(), CipherError> {
         self.subkeys = des_ksa(key)?;
@@ -77,50 +75,7 @@ impl BlockCipher<8> for DesX {
     }
 }
 
-impl Cipher for DesX {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
-
-        if self.mode.padded() {
-            self.padding.add_padding(&mut bytes, Self::BLOCKSIZE)?;
-        }
-
-        match self.mode {
-            BCMode::Ecb => self.encrypt_ecb(&mut bytes),
-            BCMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BCMode::Cbc => self.encrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
-        };
-        Ok(self.output_format.byte_slice_to_text(&bytes))
-    }
-
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
-
-        if self.mode.padded() {
-            if self.padding == BCPadding::None {
-                none_padding(&mut bytes, Self::BLOCKSIZE)?
-            };
-        }
-
-        match self.mode {
-            BCMode::Ecb => self.decrypt_ecb(&mut bytes),
-            BCMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BCMode::Cbc => self.decrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
-        };
-
-        if self.mode.padded() {
-            self.padding.strip_padding(&mut bytes, Self::BLOCKSIZE)?;
-        }
-
-        Ok(self.output_format.byte_slice_to_text(&bytes))
-    }
-}
+impl_block_cipher!(DesX);
 
 #[cfg(test)]
 mod des_tests {

@@ -1,4 +1,4 @@
-use crate::{Cipher, CipherError};
+use crate::{impl_block_cipher, Cipher, CipherError};
 use utils::byte_formatting::ByteFormat;
 
 use super::block_cipher::{none_padding, BCMode, BCPadding, BlockCipher};
@@ -10,6 +10,7 @@ pub const N_SUBKEYS: usize = ROUNDS * 6 + 4; // there are six keys used in each 
 pub const ROUNDS: usize = 8;
 pub const BLOCK_SIZE: usize = 8;
 
+const BLOCKSIZE: u32 = 8;
 // Original paper
 // https://link.springer.com/chapter/10.1007/3-540-46877-3_35
 // Implementation in Rust
@@ -17,8 +18,7 @@ pub const BLOCK_SIZE: usize = 8;
 pub struct Idea {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
-    pub ctr: u64,
-    pub cbc: u64,
+    pub iv: u64,
     subkeys_enc: [u16; N_SUBKEYS],
     subkeys_dec: [u16; N_SUBKEYS],
     pub mode: BCMode,
@@ -30,8 +30,7 @@ impl Default for Idea {
         Self {
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
-            ctr: 0,
-            cbc: 0,
+            iv: 0,
             subkeys_enc: [0u16; N_SUBKEYS],
             subkeys_dec: [0u16; N_SUBKEYS],
             mode: Default::default(),
@@ -41,8 +40,6 @@ impl Default for Idea {
 }
 
 impl Idea {
-    const BLOCKSIZE: u32 = 8;
-
     pub fn subkeys_enc(&self) -> &[u16; N_SUBKEYS] {
         &self.subkeys_enc
     }
@@ -215,50 +212,7 @@ impl BlockCipher<8> for Idea {
     }
 }
 
-impl Cipher for Idea {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
-
-        if self.mode.padded() {
-            self.padding.add_padding(&mut bytes, Self::BLOCKSIZE)?;
-        }
-
-        match self.mode {
-            BCMode::Ecb => self.encrypt_ecb(&mut bytes),
-            BCMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BCMode::Cbc => self.encrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
-        };
-        Ok(self.output_format.byte_slice_to_text(&bytes))
-    }
-
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
-
-        if self.mode.padded() {
-            if self.padding == BCPadding::None {
-                none_padding(&mut bytes, Self::BLOCKSIZE)?
-            };
-        }
-
-        match self.mode {
-            BCMode::Ecb => self.decrypt_ecb(&mut bytes),
-            BCMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BCMode::Cbc => self.decrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
-        };
-
-        if self.mode.padded() {
-            self.padding.strip_padding(&mut bytes, Self::BLOCKSIZE)?;
-        }
-
-        Ok(self.output_format.byte_slice_to_text(&bytes))
-    }
-}
+impl_block_cipher!(Idea);
 
 #[cfg(test)]
 mod idea_tests {

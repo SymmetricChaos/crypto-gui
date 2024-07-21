@@ -1,4 +1,4 @@
-use crate::{Cipher, CipherError};
+use crate::{impl_block_cipher, Cipher, CipherError};
 use utils::byte_formatting::{overwrite_bytes, u32_pair_to_u8_array, ByteFormat};
 
 use super::block_cipher::{none_padding, BCMode, BCPadding, BlockCipher};
@@ -10,8 +10,7 @@ pub struct Tea {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
     pub key: [u32; 4],
-    pub ctr: u64,
-    pub cbc: u64,
+    pub iv: u64,
     pub mode: BCMode,
     pub padding: BCPadding,
 }
@@ -22,8 +21,7 @@ impl Default for Tea {
             key: [0, 1, 2, 3],
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
-            ctr: 0,
-            cbc: 0,
+            iv: 0,
             mode: BCMode::default(),
             padding: BCPadding::default(),
         }
@@ -86,50 +84,7 @@ impl BlockCipher<8> for Tea {
     }
 }
 
-impl Cipher for Tea {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
-
-        if self.mode.padded() {
-            self.padding.add_padding(&mut bytes, BLOCKSIZE)?;
-        }
-
-        match self.mode {
-            BCMode::Ecb => self.encrypt_ecb(&mut bytes),
-            BCMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BCMode::Cbc => self.encrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
-        };
-        Ok(self.output_format.byte_slice_to_text(&bytes))
-    }
-
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
-
-        if self.mode.padded() {
-            if self.padding == BCPadding::None {
-                none_padding(&mut bytes, BLOCKSIZE)?
-            };
-        }
-
-        match self.mode {
-            BCMode::Ecb => self.decrypt_ecb(&mut bytes),
-            BCMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-            BCMode::Cbc => self.decrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
-        };
-
-        if self.mode.padded() {
-            self.padding.strip_padding(&mut bytes, BLOCKSIZE)?;
-        }
-
-        Ok(self.output_format.byte_slice_to_text(&bytes))
-    }
-}
+impl_block_cipher!(Tea);
 
 #[cfg(test)]
 mod tea_tests {

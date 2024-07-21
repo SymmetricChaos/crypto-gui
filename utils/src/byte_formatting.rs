@@ -298,3 +298,9 @@ pub fn overwrite_bytes(target: &mut [u8], source: &[u8]) {
         *src = *ciphertext
     }
 }
+
+pub fn xor_into_bytes(target: &mut [u8], source: &[u8]) {
+    for (src, ciphertext) in target.iter_mut().zip(source.iter()) {
+        *src ^= *ciphertext
+    }
+}

@@ -52,16 +52,18 @@ impl CipherFrame for TeaFrame {
 
         ui.add_space(8.0);
 
-        ui.add_enabled_ui(self.cipher.mode == BCMode::Ctr, |ui| {
-            ui.subheading("Counter");
-            ui.label("In CTR mode the cipher must have a 64-bit counter value provided.");
-            ui.u64_drag_value_hex(&mut self.cipher.ctr);
-        });
+        if self.cipher.mode.iv_needed() {
+            if self.cipher.mode == BCMode::Ctr {
+                ui.subheading("Counter");
+            } else {
+                ui.subheading("Initialization Vector");
+            }
+        } else {
+            ui.subheading("Counter/IV Not Needed");
+        }
 
-        ui.add_enabled_ui(self.cipher.mode == BCMode::Cbc, |ui| {
-            ui.subheading("Initialization Vector");
-            ui.label("In CBC mode the cipher must have a 64-bit initialization vector provided.");
-            ui.u64_drag_value_hex(&mut self.cipher.cbc);
+        ui.add_enabled_ui(self.cipher.mode.iv_needed(), |ui| {
+            ui.u64_drag_value_hex(&mut self.cipher.iv);
         });
 
         ui.add_space(16.0);
@@ -77,6 +79,10 @@ impl CipherFrame for TeaFrame {
         self.cipher.key[1] = rng.gen();
         self.cipher.key[2] = rng.gen();
         self.cipher.key[3] = rng.gen();
+
+        if self.cipher.mode.iv_needed() {
+            self.cipher.iv = rng.gen();
+        }
     }
 
     fn reset(&mut self) {
