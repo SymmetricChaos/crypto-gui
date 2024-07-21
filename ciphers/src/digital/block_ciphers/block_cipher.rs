@@ -126,11 +126,11 @@ pub trait BlockCipher<const N: usize> {
             let mut mixed = ctext.to_vec();
             self.decrypt_block(&mut mixed);
 
-            // XOR the current chain value into the mixed text
+            // XOR the current chain value into the mixed text, making it plaintext
             xor_into_bytes(&mut mixed, &chain);
 
-            // Store the ciphertext as the next chain value before it gets overwritten
-            chain = ctext.try_into().unwrap();
+            // XOR the mixed text (now plaintext) with the chain
+            xor_into_bytes(&mut chain, &mixed);
 
             // The overwrite ciphertext at source with the plaintext
             overwrite_bytes(ctext, &mixed);
@@ -142,6 +142,9 @@ pub trait BlockCipher<const N: usize> {
 
     // fn encrypt_cfb(&self, bytes: &mut [u8], iv: [u8; N]) {}
     // fn decrypt_cfb(&self, bytes: &mut [u8], iv: [u8; N]) {}
+
+    // fn encrypt_ofb(&self, bytes: &mut [u8], iv: [u8; N]) {}
+    // fn decrypt_ofb(&self, bytes: &mut [u8], iv: [u8; N]) {}
 }
 
 #[macro_export]
@@ -204,6 +207,7 @@ pub enum BCMode {
     Ctr,
     Ecb,
     Pcbc,
+    // Ofb,
 }
 
 impl BCMode {
@@ -214,6 +218,7 @@ impl BCMode {
             BCMode::Ctr => false,
             BCMode::Cbc => true,
             BCMode::Pcbc => true,
+            // BCMode::Ofb => false,
         }
     }
 
@@ -223,11 +228,12 @@ impl BCMode {
             BCMode::Ctr => true,
             BCMode::Cbc => true,
             BCMode::Pcbc => true,
+            // BCMode::Ofb => true,
         }
     }
 
-    pub fn variants() -> [Self; 3] {
-        [Self::Cbc, Self::Ctr, Self::Ecb]
+    pub fn variants() -> [Self; 4] {
+        [Self::Cbc, Self::Ctr, Self::Ecb, Self::Pcbc]
     }
 
     pub fn info(&self) -> &'static str {
