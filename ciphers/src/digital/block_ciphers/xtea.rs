@@ -1,11 +1,8 @@
+use super::block_cipher::{BCMode, BCPadding, BlockCipher};
+use crate::impl_block_cipher;
 use utils::byte_formatting::{u32_pair_to_u8_array, ByteFormat};
 
-use crate::{impl_block_cipher, Cipher, CipherError};
-
-use super::block_cipher::{BCMode, BCPadding, BlockCipher};
-
 const DELTA: u32 = 0x9e3779b9;
-const BLOCKSIZE: u32 = 8;
 
 pub struct Xtea {
     pub output_format: ByteFormat,
@@ -79,20 +76,14 @@ impl BlockCipher<8> for Xtea {
             *ciphertext = *plaintext
         }
     }
-
-    fn set_mode(&mut self, mode: BCMode) {
-        self.mode = mode
-    }
-
-    fn set_padding(&mut self, padding: BCPadding) {
-        self.padding = padding
-    }
 }
 
-impl_block_cipher!(Xtea);
+impl_block_cipher!(Xtea, 8);
 
 #[cfg(test)]
 mod xtea_tests {
+
+    use crate::Cipher;
 
     use super::*;
 

@@ -3,7 +3,7 @@ use crate::{
         block_cipher::{BCMode, BCPadding, BlockCipher},
         des::des_functions::*,
     },
-    impl_block_cipher, Cipher, CipherError,
+    impl_block_cipher, CipherError,
 };
 use utils::byte_formatting::{overwrite_bytes, ByteFormat};
 
@@ -65,20 +65,14 @@ impl BlockCipher<8> for DesX {
         f ^= self.extra_keys[0];
         overwrite_bytes(bytes, &f.to_be_bytes());
     }
-
-    fn set_mode(&mut self, mode: BCMode) {
-        self.mode = mode
-    }
-
-    fn set_padding(&mut self, padding: BCPadding) {
-        self.padding = padding
-    }
 }
 
-impl_block_cipher!(DesX);
+impl_block_cipher!(DesX, 8);
 
 #[cfg(test)]
-mod des_tests {
+mod desx_tests {
+
+    use crate::Cipher;
 
     use super::*;
 
@@ -111,37 +105,5 @@ mod des_tests {
 
         let dtext = cipher.decrypt(&ctext).unwrap();
         assert_eq!(PTEXT, dtext);
-    }
-}
-
-#[cfg(test)]
-mod desx_tests {
-
-    use rand::{thread_rng, Rng};
-
-    use super::*;
-
-    #[test]
-    fn basic_test_encrypt_decrypt() {
-        let mut cipher = DesX::default();
-        let mut rng = thread_rng();
-
-        let k = rng.gen();
-        match cipher.ksa(k) {
-            Ok(_) => (),
-            Err(_) => panic!("error with ksa for key: {}", k),
-        }
-        for mode in BCMode::variants() {
-            for padding in BCPadding::variants() {
-                cipher.mode = mode;
-                cipher.padding = padding;
-
-                const PTEXT: &'static str = "4e6f772069732074";
-
-                let ctext = cipher.encrypt(PTEXT).unwrap();
-                let dtext = cipher.decrypt(&ctext).unwrap();
-                assert_eq!(PTEXT, dtext, "{:?} {:?}", padding, mode);
-            }
-        }
     }
 }

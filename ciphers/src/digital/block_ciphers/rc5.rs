@@ -1,6 +1,6 @@
 use utils::byte_formatting::{overwrite_bytes, ByteFormat};
 
-use crate::{impl_block_cipher, Cipher, CipherError};
+use crate::impl_block_cipher;
 use std::{
     cmp::max,
     ops::{BitXor, Shl},
@@ -27,8 +27,6 @@ pub fn words_to_bytes(s: &[u32]) -> [u8; 8] {
     right.copy_from_slice(&s[1].to_le_bytes());
     out
 }
-
-const BLOCKSIZE: u32 = 8;
 
 pub struct Rc5 {
     pub output_format: ByteFormat,
@@ -133,22 +131,16 @@ impl BlockCipher<8> for Rc5 {
         block[1] = block[1].wrapping_sub(self.state[1]);
         overwrite_bytes(bytes, &words_to_bytes(&block));
     }
-
-    fn set_mode(&mut self, mode: BCMode) {
-        self.mode = mode
-    }
-
-    fn set_padding(&mut self, padding: BCPadding) {
-        self.padding = padding
-    }
 }
 
-impl_block_cipher!(Rc5);
+impl_block_cipher!(Rc5, 8);
 
 #[cfg(test)]
 mod rc5_tests {
 
     use utils::byte_formatting::hex_to_bytes_ltr;
+
+    use crate::Cipher;
 
     use super::*;
     // Test vectors from

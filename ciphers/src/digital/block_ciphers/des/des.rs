@@ -3,11 +3,9 @@ use crate::{
         block_cipher::{BCMode, BCPadding, BlockCipher},
         des::des_functions::*,
     },
-    impl_block_cipher, Cipher, CipherError,
+    impl_block_cipher, CipherError,
 };
 use utils::byte_formatting::{overwrite_bytes, ByteFormat};
-
-pub const BLOCKSIZE: u32 = 8;
 
 pub struct Des {
     pub output_format: ByteFormat,
@@ -59,22 +57,16 @@ impl BlockCipher<8> for Des {
         let f = final_permutation((b << 32) | (b >> 32));
         overwrite_bytes(bytes, &f.to_be_bytes());
     }
-
-    fn set_mode(&mut self, mode: BCMode) {
-        self.mode = mode
-    }
-
-    fn set_padding(&mut self, padding: BCPadding) {
-        self.padding = padding
-    }
 }
 
-impl_block_cipher!(Des);
+impl_block_cipher!(Des, 8);
 
 #[cfg(test)]
 mod des_tests {
 
     use rand::{thread_rng, Rng};
+
+    use crate::Cipher;
 
     use super::*;
 

@@ -1,8 +1,6 @@
-use std::collections::VecDeque;
-
-use num::Integer;
-
 use crate::{Cipher, CipherError};
+use num::Integer;
+use std::collections::VecDeque;
 
 pub struct Fish {
     lfg_a: VecDeque<u32>,

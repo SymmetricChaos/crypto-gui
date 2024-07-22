@@ -5,10 +5,8 @@ use utils::byte_formatting::{
 use super::blowfish_arrays::{PARRAY, SBOXES};
 use crate::{
     digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher},
-    impl_block_cipher, Cipher, CipherError,
+    impl_block_cipher, CipherError,
 };
-
-const BLOCKSIZE: u32 = 8;
 
 pub struct Blowfish {
     pub output_format: ByteFormat,
@@ -145,66 +143,14 @@ impl BlockCipher<8> for Blowfish {
         self.decrypt_u32_pair(&mut lr);
         overwrite_bytes(bytes, &u32_pair_to_u8_array(lr));
     }
-
-    fn set_mode(&mut self, mode: BCMode) {
-        self.mode = mode
-    }
-
-    fn set_padding(&mut self, padding: BCPadding) {
-        self.padding = padding
-    }
 }
 
-impl_block_cipher!(Blowfish);
-// impl Cipher for Blowfish {
-//     fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-//         let mut bytes = self
-//             .input_format
-//             .text_to_bytes(text)
-//             .map_err(|_| CipherError::input("byte format error"))?;
-
-//         if self.mode.padded() {
-//             self.padding.add_padding(&mut bytes, BLOCKSIZE)?;
-//         }
-
-//         match self.mode {
-//             BCMode::Ecb => self.encrypt_ecb(&mut bytes),
-//             BCMode::Ctr => self.encrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-//             BCMode::Cbc => self.encrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
-//             BCMode::Pcbc => self.encrypt_pcbc(&mut bytes, self.cbc.to_be_bytes()),
-//         };
-//         Ok(self.output_format.byte_slice_to_text(&bytes))
-//     }
-
-//     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-//         let mut bytes = self
-//             .input_format
-//             .text_to_bytes(text)
-//             .map_err(|_| CipherError::input("byte format error"))?;
-
-//         if self.mode.padded() {
-//             if self.padding == BCPadding::None {
-//                 none_padding(&mut bytes, BLOCKSIZE)?
-//             };
-//         }
-
-//         match self.mode {
-//             BCMode::Ecb => self.decrypt_ecb(&mut bytes),
-//             BCMode::Ctr => self.decrypt_ctr(&mut bytes, self.ctr.to_be_bytes()),
-//             BCMode::Cbc => self.decrypt_cbc(&mut bytes, self.cbc.to_be_bytes()),
-//             BCMode::Pcbc => self.decrypt_pcbc(&mut bytes, self.cbc.to_be_bytes()),
-//         };
-
-//         if self.mode.padded() {
-//             self.padding.strip_padding(&mut bytes, BLOCKSIZE)?;
-//         }
-
-//         Ok(self.output_format.byte_slice_to_text(&bytes))
-//     }
-// }
+impl_block_cipher!(Blowfish, 8);
 
 #[cfg(test)]
 mod blowfish_tests {
+
+    use crate::Cipher;
 
     use super::*;
 

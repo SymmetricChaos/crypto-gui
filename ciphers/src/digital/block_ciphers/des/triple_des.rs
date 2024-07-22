@@ -2,10 +2,10 @@ use utils::byte_formatting::{overwrite_bytes, ByteFormat};
 
 use crate::{
     digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher},
-    impl_block_cipher, Cipher, CipherError,
+    impl_block_cipher, CipherError,
 };
 
-use super::{des::BLOCKSIZE, des_functions::*};
+use super::des_functions::*;
 
 pub struct TripleDes {
     pub output_format: ByteFormat,
@@ -72,20 +72,14 @@ impl BlockCipher<8> for TripleDes {
         let b = self.decrypt_with_subkey(b, 2);
         overwrite_bytes(bytes, &b.to_be_bytes());
     }
-
-    fn set_mode(&mut self, mode: BCMode) {
-        self.mode = mode
-    }
-
-    fn set_padding(&mut self, padding: BCPadding) {
-        self.padding = padding
-    }
 }
 
-impl_block_cipher!(TripleDes);
+impl_block_cipher!(TripleDes, 8);
 
 #[cfg(test)]
 mod des_tests {
+
+    use crate::Cipher;
 
     use super::*;
 

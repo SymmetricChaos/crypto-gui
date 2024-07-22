@@ -1,6 +1,6 @@
 use crate::{
     digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher},
-    impl_block_cipher, Cipher, CipherError,
+    impl_block_cipher,
 };
 use itertools::Itertools;
 use utils::byte_formatting::ByteFormat;
@@ -117,20 +117,14 @@ impl BlockCipher<16> for Aes128 {
         add_round_key(bytes, &self.round_keys[0]);
         transpose_state(bytes);
     }
-
-    fn set_mode(&mut self, mode: BCMode) {
-        self.mode = mode
-    }
-
-    fn set_padding(&mut self, padding: BCPadding) {
-        self.padding = padding
-    }
 }
 
-impl_block_cipher!(Aes128);
+impl_block_cipher!(Aes128, 16);
 
 #[cfg(test)]
 mod aes_tests {
+
+    use crate::Cipher;
 
     use super::*;
 

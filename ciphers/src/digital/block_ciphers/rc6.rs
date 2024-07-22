@@ -1,5 +1,5 @@
 use super::block_cipher::{BCMode, BCPadding, BlockCipher};
-use crate::{impl_block_cipher, Cipher, CipherError};
+use crate::impl_block_cipher;
 use std::{cmp::max, ops::Shl};
 use utils::byte_formatting::{u8_slice_to_u32_4, ByteFormat};
 
@@ -81,14 +81,6 @@ impl BlockCipher<16> for Rc6 {
     fn decrypt_block(&self, bytes: &mut [u8]) {
         let mut block = u8_slice_to_u32_4(bytes);
     }
-
-    fn set_mode(&mut self, mode: BCMode) {
-        self.mode = mode
-    }
-
-    fn set_padding(&mut self, padding: BCPadding) {
-        self.padding = padding
-    }
 }
 
-impl_block_cipher!(Rc6);
+impl_block_cipher!(Rc6, 8);

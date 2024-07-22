@@ -1,7 +1,6 @@
-use crate::{impl_block_cipher, Cipher, CipherError};
-use utils::byte_formatting::ByteFormat;
-
 use super::block_cipher::{BCMode, BCPadding, BlockCipher};
+use crate::impl_block_cipher;
+use utils::byte_formatting::ByteFormat;
 
 pub const ONE: u32 = 0xffff;
 pub const FUYI: u32 = 0x10000;
@@ -10,7 +9,6 @@ pub const N_SUBKEYS: usize = ROUNDS * 6 + 4; // there are six keys used in each 
 pub const ROUNDS: usize = 8;
 pub const BLOCK_SIZE: usize = 8;
 
-const BLOCKSIZE: u32 = 8;
 // Original paper
 // https://link.springer.com/chapter/10.1007/3-540-46877-3_35
 // Implementation in Rust
@@ -202,20 +200,14 @@ impl BlockCipher<8> for Idea {
             *ciphertext = *plaintext
         }
     }
-
-    fn set_mode(&mut self, mode: BCMode) {
-        self.mode = mode;
-    }
-
-    fn set_padding(&mut self, padding: BCPadding) {
-        self.padding = padding;
-    }
 }
 
-impl_block_cipher!(Idea);
+impl_block_cipher!(Idea, 8);
 
 #[cfg(test)]
 mod idea_tests {
+
+    use crate::Cipher;
 
     use super::*;
 
