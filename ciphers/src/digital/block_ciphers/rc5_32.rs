@@ -51,11 +51,13 @@ impl Default for Rc5_32 {
 }
 
 impl Rc5_32 {
+    const WORD_SIZE: u32 = 32; // w parameter from specification, word size in bits, half the block size
+
     pub fn state_size(&self) -> usize {
         2 * (self.rounds + 1)
     }
 
-    pub fn ksa_32(&mut self, key: &[u8]) {
+    pub fn ksa(&mut self, key: &[u8]) {
         assert!(
             key.len() < 256,
             "RC5 key is limited to 255 bytes, which is enough for anybody"
@@ -83,7 +85,8 @@ impl Rc5_32 {
         for _ in 0..(3 * max(t, c)) {
             s[i] = (s[i].wrapping_add(a).wrapping_add(b)).rotate_left(3);
             a = s[i];
-            l[j] = (l[j].wrapping_add(a).wrapping_add(b)).rotate_left(a.wrapping_add(b));
+            l[j] = (l[j].wrapping_add(a).wrapping_add(b))
+                .rotate_left(a.wrapping_add(b) % Self::WORD_SIZE);
             b = l[j];
             i = (i + 1) % t;
             j = (j + 1) % c;
@@ -102,11 +105,11 @@ impl BlockCipher<8> for Rc5_32 {
         for i in 1..=self.rounds {
             block[0] = block[0]
                 .bitxor(block[1])
-                .rotate_left(block[1])
+                .rotate_left(block[1] % Self::WORD_SIZE)
                 .wrapping_add(self.state[2 * i]);
             block[1] = block[1]
                 .bitxor(block[0])
-                .rotate_left(block[0])
+                .rotate_left(block[0] % Self::WORD_SIZE)
                 .wrapping_add(self.state[(2 * i) + 1])
         }
         overwrite_bytes(bytes, &words_to_bytes(&block));
@@ -117,11 +120,11 @@ impl BlockCipher<8> for Rc5_32 {
         for i in (1..=self.rounds).rev() {
             block[1] = block[1]
                 .wrapping_sub(self.state[(2 * i) + 1])
-                .rotate_right(block[0])
+                .rotate_right(block[0] % Self::WORD_SIZE)
                 .bitxor(block[0]);
             block[0] = block[0]
                 .wrapping_sub(self.state[2 * i])
-                .rotate_right(block[1])
+                .rotate_right(block[1] % Self::WORD_SIZE)
                 .bitxor(block[1]);
         }
 
@@ -151,7 +154,7 @@ mod rc5_tests {
         let mut cipher = Rc5_32::default();
         cipher.mode = BCMode::Ecb;
         cipher.padding = BCPadding::None;
-        cipher.ksa_32(&hex_to_bytes_ltr(KEY).unwrap());
+        cipher.ksa(&hex_to_bytes_ltr(KEY).unwrap());
         assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
@@ -163,7 +166,7 @@ mod rc5_tests {
         let mut cipher = Rc5_32::default();
         cipher.mode = BCMode::Ecb;
         cipher.padding = BCPadding::None;
-        cipher.ksa_32(&hex_to_bytes_ltr(KEY).unwrap());
+        cipher.ksa(&hex_to_bytes_ltr(KEY).unwrap());
         assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 
@@ -174,7 +177,7 @@ mod rc5_tests {
         let mut cipher = Rc5_32::default();
         cipher.mode = BCMode::Ecb;
         cipher.padding = BCPadding::None;
-        cipher.ksa_32(&hex_to_bytes_ltr(KEY).unwrap());
+        cipher.ksa(&hex_to_bytes_ltr(KEY).unwrap());
         let ctext = cipher.encrypt(PTEXT).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), PTEXT);
     }
@@ -187,7 +190,7 @@ mod rc5_tests {
         let mut cipher = Rc5_32::default();
         cipher.mode = BCMode::Ecb;
         cipher.padding = BCPadding::None;
-        cipher.ksa_32(&hex_to_bytes_ltr(KEY).unwrap());
+        cipher.ksa(&hex_to_bytes_ltr(KEY).unwrap());
         assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
@@ -199,7 +202,7 @@ mod rc5_tests {
         let mut cipher = Rc5_32::default();
         cipher.mode = BCMode::Ecb;
         cipher.padding = BCPadding::None;
-        cipher.ksa_32(&hex_to_bytes_ltr(KEY).unwrap());
+        cipher.ksa(&hex_to_bytes_ltr(KEY).unwrap());
         assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 
@@ -210,7 +213,7 @@ mod rc5_tests {
         let mut cipher = Rc5_32::default();
         cipher.mode = BCMode::Ecb;
         cipher.padding = BCPadding::None;
-        cipher.ksa_32(&hex_to_bytes_ltr(KEY).unwrap());
+        cipher.ksa(&hex_to_bytes_ltr(KEY).unwrap());
         let ctext = cipher.encrypt(PTEXT).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), PTEXT);
     }

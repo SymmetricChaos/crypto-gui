@@ -2,7 +2,7 @@ use std::num::ParseIntError;
 
 use super::CipherFrame;
 use crate::ui_elements::{block_cipher_mode, block_cipher_padding, UiElements};
-use ciphers::{digital::block_ciphers::rc5::Rc5_32, Cipher};
+use ciphers::{digital::block_ciphers::rc5_32::Rc5_32, Cipher};
 use egui::{FontId, RichText, Ui};
 use rand::{thread_rng, Rng};
 
@@ -19,7 +19,7 @@ impl Rc5Frame {
             .map(|i| u8::from_str_radix(&self.key[i..i + 2], 16))
             .collect();
         if let Ok(vec) = key_vec {
-            self.cipher.ksa_32(&vec)
+            self.cipher.ksa(&vec)
         } else {
             unreachable!("RC5 key should be forced to valid hex digits by filtering")
         }
