@@ -154,9 +154,25 @@ pub trait BlockCipher<const N: usize> {
         self.encrypt_ofb(bytes, iv)
     }
 
-    // fn encrypt_cfb(&self, bytes: &mut [u8], iv: [u8; N]) {}
+    fn encrypt_cfb(&self, bytes: &mut [u8], iv: [u8; N]) {
+        let mut chain = iv;
 
-    // fn decrypt_cfb(&self, bytes: &mut [u8], iv: [u8; N]) {}
+        for ptext in bytes.chunks_mut(N) {
+            // Encrypt the chain to create a mask
+            self.encrypt_block(&mut chain);
+
+            // XOR the mask into the plaintext at the source, creating ciphertext
+            xor_into_bytes(ptext, &chain);
+
+            // The ptext has had the keystream XORed into it and is now the ciphertext
+            overwrite_bytes(&mut chain, &ptext)
+        }
+    }
+
+    // CFB is reciprocal
+    fn decrypt_cfb(&self, bytes: &mut [u8], iv: [u8; N]) {
+        self.encrypt_cfb(bytes, iv)
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -166,6 +182,7 @@ pub enum BCMode {
     Ecb,
     Pcbc,
     Ofb,
+    Cfb,
 }
 
 impl BCMode {
@@ -177,6 +194,7 @@ impl BCMode {
             BCMode::Cbc => true,
             BCMode::Pcbc => true,
             BCMode::Ofb => false,
+            BCMode::Cfb => false,
         }
     }
 
@@ -187,11 +205,19 @@ impl BCMode {
             BCMode::Cbc => true,
             BCMode::Pcbc => true,
             BCMode::Ofb => true,
+            BCMode::Cfb => true,
         }
     }
 
-    pub fn variants() -> [Self; 5] {
-        [Self::Cbc, Self::Ctr, Self::Ecb, Self::Pcbc, Self::Ofb]
+    pub fn variants() -> [Self; 6] {
+        [
+            Self::Cbc,
+            Self::Ctr,
+            Self::Ecb,
+            Self::Pcbc,
+            Self::Ofb,
+            Self::Cfb,
+        ]
     }
 
     pub fn info(&self) -> &'static str {
@@ -201,6 +227,7 @@ impl BCMode {
             BCMode::Ecb => "Eelectronic Code Book mode encrypts each block of plaintext directly with the cipher. This is the simplest but least secure way to operate a block cipher and not recommended for use in any circumstance. If two blocks are the same they will be encrypted exactly the same way, exposing information about the plaintext. Encryption and decryption can be performed in parallel.",
             BCMode::Pcbc => "Propogating Cipher Block Chaining is similar to CBC but XORs the plaintext into the chain value both before and after encryption. This means that both encryption and decryption are inherently serial and that corruption in any block corrupts all following blocks.",
             BCMode::Ofb => "Output Feedback mode iteratively encrypts the initialization vector and XORs the chain of blocks created into the plaintext. This is similar to CTR mode but cannot be encrypted or decrypted in parallel.",
+            BCMode::Cfb => "Cipher Feedback mode encrypts the previous ciphertext block and XORs that into the plaintext. Encryption cannot be parallelized but decryption can be.",
         }
     }
 }
@@ -219,6 +246,7 @@ impl Display for BCMode {
             BCMode::Ecb => write!(f, "ECB"),
             BCMode::Pcbc => write!(f, "PCBC"),
             BCMode::Ofb => write!(f, "OFB"),
+            BCMode::Cfb => write!(f, "CFB"),
         }
     }
 }

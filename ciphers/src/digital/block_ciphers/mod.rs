@@ -39,6 +39,9 @@ macro_rules! impl_block_cipher {
                     crate::digital::block_ciphers::block_cipher::BCMode::Ofb => {
                         self.encrypt_ofb(&mut bytes, self.iv.to_be_bytes())
                     }
+                    crate::digital::block_ciphers::block_cipher::BCMode::Cfb => {
+                        self.encrypt_cfb(&mut bytes, self.iv.to_be_bytes())
+                    }
                 };
                 Ok(self.output_format.byte_slice_to_text(&bytes))
             }
@@ -73,6 +76,9 @@ macro_rules! impl_block_cipher {
                     }
                     crate::digital::block_ciphers::block_cipher::BCMode::Ofb => {
                         self.decrypt_ofb(&mut bytes, self.iv.to_be_bytes())
+                    }
+                    crate::digital::block_ciphers::block_cipher::BCMode::Cfb => {
+                        self.decrypt_cfb(&mut bytes, self.iv.to_be_bytes())
                     }
                 };
 
