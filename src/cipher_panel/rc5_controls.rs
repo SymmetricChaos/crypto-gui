@@ -6,7 +6,7 @@ use ciphers::{
 };
 use egui::{FontId, RichText, Ui};
 use rand::{thread_rng, Rng};
-use std::num::ParseIntError;
+use utils::byte_formatting::ByteFormat;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SizeSelector {
@@ -32,10 +32,7 @@ pub struct Rc5Frame {
 
 impl Rc5Frame {
     fn run_ksa(&mut self) {
-        let key_vec: Result<Vec<u8>, ParseIntError> = (0..self.key.len())
-            .step_by(2)
-            .map(|i| u8::from_str_radix(&self.key[i..i + 2], 16))
-            .collect();
+        let key_vec = ByteFormat::Hex.text_to_bytes(&self.key);
 
         if let Ok(vec) = key_vec {
             match self.selector {
@@ -53,7 +50,7 @@ impl CipherFrame for Rc5Frame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
-            "https://github.com/SymmetricChaos/crypto-gui/blob/master/ciphers/src/digital/block_ciphers/rc5.rs",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/ciphers/src/digital/block_ciphers/rc5",
         );
         ui.add_space(8.0);
 
