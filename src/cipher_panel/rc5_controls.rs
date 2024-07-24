@@ -1,13 +1,32 @@
 use super::CipherFrame;
 use crate::ui_elements::{block_cipher_mode, block_cipher_padding, UiElements};
-use ciphers::{digital::block_ciphers::rc5::rc5_32::Rc5_32, Cipher};
+use ciphers::{
+    digital::block_ciphers::rc5::{rc5_16::Rc5_16, rc5_32::Rc5_32, rc5_64::Rc5_64},
+    Cipher,
+};
 use egui::{FontId, RichText, Ui};
 use rand::{thread_rng, Rng};
 use std::num::ParseIntError;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SizeSelector {
+    R16,
+    R32,
+    R64,
+}
+
+impl Default for SizeSelector {
+    fn default() -> Self {
+        Self::R64
+    }
+}
+
 #[derive(Default)]
 pub struct Rc5Frame {
-    cipher: Rc5_32,
+    cipher_16: Rc5_16,
+    cipher_32: Rc5_32,
+    cipher_64: Rc5_64,
+    selector: SizeSelector,
     key: String,
 }
 
@@ -17,8 +36,13 @@ impl Rc5Frame {
             .step_by(2)
             .map(|i| u8::from_str_radix(&self.key[i..i + 2], 16))
             .collect();
+
         if let Ok(vec) = key_vec {
-            self.cipher.ksa(&vec)
+            match self.selector {
+                SizeSelector::R16 => self.cipher_16.ksa(&vec),
+                SizeSelector::R32 => self.cipher_32.ksa(&vec),
+                SizeSelector::R64 => self.cipher_64.ksa(&vec),
+            }
         } else {
             unreachable!("RC5 key should be forced to valid hex digits by filtering")
         }
@@ -36,14 +60,31 @@ impl CipherFrame for Rc5Frame {
         ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.byte_io_mode(
-            &mut self.cipher.input_format,
-            &mut self.cipher.output_format,
-        );
+        ui.selectable_value(&mut self.selector, SizeSelector::R16, "16-bit");
+        ui.selectable_value(&mut self.selector, SizeSelector::R32, "32-bit");
+        ui.selectable_value(&mut self.selector, SizeSelector::R64, "64-bit");
 
-        block_cipher_mode(ui, &mut self.cipher.mode);
+        ui.add_space(16.0);
+
+        match self.selector {
+            SizeSelector::R16 => ui.byte_io_mode(
+                &mut self.cipher_16.input_format,
+                &mut self.cipher_16.output_format,
+            ),
+            SizeSelector::R32 => ui.byte_io_mode(
+                &mut self.cipher_32.input_format,
+                &mut self.cipher_32.output_format,
+            ),
+            SizeSelector::R64 => ui.byte_io_mode(
+                &mut self.cipher_64.input_format,
+                &mut self.cipher_64.output_format,
+            ),
+        };
         ui.add_space(4.0);
-        block_cipher_padding(ui, &mut self.cipher.padding);
+
+        block_cipher_mode(ui, &mut self.cipher_32.mode);
+        ui.add_space(4.0);
+        block_cipher_padding(ui, &mut self.cipher_32.padding);
         ui.add_space(8.0);
 
         ui.add_space(16.0);
@@ -66,27 +107,63 @@ impl CipherFrame for Rc5Frame {
 
         ui.subheading("Internal State");
 
-        ui.collapsing("Array of 32-bit Words", |ui| {
-            egui::Grid::new("rc4_array")
-                .num_columns(16)
-                .striped(true)
-                .show(ui, |ui| {
-                    for (n, b) in self.cipher.state.iter().enumerate() {
-                        if n % 16 == 0 && n != 0 {
-                            ui.end_row()
+        match self.selector {
+            SizeSelector::R16 => ui.collapsing("Array of 16-bit Words", |ui| {
+                egui::Grid::new("rc4_16_array")
+                    .num_columns(16)
+                    .striped(true)
+                    .show(ui, |ui| {
+                        for (n, b) in self.cipher_16.state.iter().enumerate() {
+                            if n % 16 == 0 && n != 0 {
+                                ui.end_row()
+                            }
+                            ui.label(
+                                RichText::from(format!("{:04X}", b)).font(FontId::monospace(15.0)),
+                            );
                         }
-                        ui.label(
-                            RichText::from(format!("{:08X}", b)).font(FontId::monospace(15.0)),
-                        );
-                    }
-                });
-        });
+                    });
+            }),
+            SizeSelector::R32 => ui.collapsing("Array of 32-bit Words", |ui| {
+                egui::Grid::new("rc4_32_array")
+                    .num_columns(16)
+                    .striped(true)
+                    .show(ui, |ui| {
+                        for (n, b) in self.cipher_32.state.iter().enumerate() {
+                            if n % 16 == 0 && n != 0 {
+                                ui.end_row()
+                            }
+                            ui.label(
+                                RichText::from(format!("{:08X}", b)).font(FontId::monospace(15.0)),
+                            );
+                        }
+                    });
+            }),
+            SizeSelector::R64 => ui.collapsing("Array of 64-bit Words", |ui| {
+                egui::Grid::new("rc4_64_array")
+                    .num_columns(16)
+                    .striped(true)
+                    .show(ui, |ui| {
+                        for (n, b) in self.cipher_64.state.iter().enumerate() {
+                            if n % 16 == 0 && n != 0 {
+                                ui.end_row()
+                            }
+                            ui.label(
+                                RichText::from(format!("{:016X}", b)).font(FontId::monospace(15.0)),
+                            );
+                        }
+                    });
+            }),
+        };
 
         ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
+        match self.selector {
+            SizeSelector::R16 => &self.cipher_16,
+            SizeSelector::R32 => &self.cipher_32,
+            SizeSelector::R64 => &self.cipher_64,
+        }
     }
 
     fn randomize(&mut self) {
