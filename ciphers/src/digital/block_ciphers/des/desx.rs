@@ -7,8 +7,6 @@ use crate::{
 };
 use utils::byte_formatting::{overwrite_bytes, ByteFormat};
 
-pub const BLOCKSIZE: u32 = 8;
-
 pub struct DesX {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,

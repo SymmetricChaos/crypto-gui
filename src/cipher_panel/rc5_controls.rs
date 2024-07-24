@@ -2,13 +2,13 @@ use std::num::ParseIntError;
 
 use super::CipherFrame;
 use crate::ui_elements::{block_cipher_mode, block_cipher_padding, UiElements};
-use ciphers::{digital::block_ciphers::rc5::Rc5, Cipher};
+use ciphers::{digital::block_ciphers::rc5::Rc5_32, Cipher};
 use egui::{FontId, RichText, Ui};
 use rand::{thread_rng, Rng};
 
 #[derive(Default)]
 pub struct Rc5Frame {
-    cipher: Rc5,
+    cipher: Rc5_32,
     key: String,
 }
 

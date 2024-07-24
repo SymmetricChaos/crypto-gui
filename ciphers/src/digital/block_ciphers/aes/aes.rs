@@ -12,7 +12,7 @@ use super::{
     },
     sbox::sub_word,
 };
-pub const BLOCKSIZE: u32 = 16;
+
 pub const ROUNDS: usize = 11;
 pub const KEY_WORDS: usize = 4;
 

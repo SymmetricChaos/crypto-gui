@@ -1,12 +1,10 @@
-use utils::byte_formatting::{overwrite_bytes, ByteFormat};
-
+use super::block_cipher::{BCMode, BCPadding, BlockCipher};
 use crate::impl_block_cipher;
 use std::{
     cmp::max,
     ops::{BitXor, Shl},
 };
-
-use super::block_cipher::{BCMode, BCPadding, BlockCipher};
+use utils::byte_formatting::{overwrite_bytes, ByteFormat};
 
 const P32: u32 = 0xb7e15163;
 const Q32: u32 = 0x9e3779b9;
@@ -28,7 +26,7 @@ pub fn words_to_bytes(s: &[u32]) -> [u8; 8] {
     out
 }
 
-pub struct Rc5 {
+pub struct Rc5_32 {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
     pub rounds: usize,
@@ -38,7 +36,7 @@ pub struct Rc5 {
     pub padding: BCPadding,
 }
 
-impl Default for Rc5 {
+impl Default for Rc5_32 {
     fn default() -> Self {
         Self {
             rounds: 12,
@@ -52,7 +50,7 @@ impl Default for Rc5 {
     }
 }
 
-impl Rc5 {
+impl Rc5_32 {
     pub fn state_size(&self) -> usize {
         2 * (self.rounds + 1)
     }
@@ -95,7 +93,7 @@ impl Rc5 {
     }
 }
 
-impl BlockCipher<8> for Rc5 {
+impl BlockCipher<8> for Rc5_32 {
     fn encrypt_block(&self, bytes: &mut [u8]) {
         let mut block = bytes_to_words(bytes);
         block[0] = block[0].wrapping_add(self.state[0]);
@@ -133,7 +131,7 @@ impl BlockCipher<8> for Rc5 {
     }
 }
 
-impl_block_cipher!(Rc5, 8);
+impl_block_cipher!(Rc5_32, 8);
 
 #[cfg(test)]
 mod rc5_tests {
@@ -150,7 +148,7 @@ mod rc5_tests {
         const PTEXT: &'static str = "0000000000000000";
         const CTEXT: &'static str = "21a5dbee154b8f6d";
         const KEY: &'static str = "00000000000000000000000000000000";
-        let mut cipher = Rc5::default();
+        let mut cipher = Rc5_32::default();
         cipher.mode = BCMode::Ecb;
         cipher.padding = BCPadding::None;
         cipher.ksa_32(&hex_to_bytes_ltr(KEY).unwrap());
@@ -162,7 +160,7 @@ mod rc5_tests {
         const PTEXT: &'static str = "0000000000000000";
         const CTEXT: &'static str = "21a5dbee154b8f6d";
         const KEY: &'static str = "00000000000000000000000000000000";
-        let mut cipher = Rc5::default();
+        let mut cipher = Rc5_32::default();
         cipher.mode = BCMode::Ecb;
         cipher.padding = BCPadding::None;
         cipher.ksa_32(&hex_to_bytes_ltr(KEY).unwrap());
@@ -173,7 +171,7 @@ mod rc5_tests {
     fn basic_encrypt_decrypt_test() {
         const PTEXT: &'static str = "0000000000000000";
         const KEY: &'static str = "00000000000000000000000000000000";
-        let mut cipher = Rc5::default();
+        let mut cipher = Rc5_32::default();
         cipher.mode = BCMode::Ecb;
         cipher.padding = BCPadding::None;
         cipher.ksa_32(&hex_to_bytes_ltr(KEY).unwrap());
@@ -186,7 +184,7 @@ mod rc5_tests {
         const PTEXT: &'static str = "21a5dbee154b8f6d";
         const CTEXT: &'static str = "f7c013ac5b2b8952";
         const KEY: &'static str = "915f4619be41b2516355a50110a9ce91";
-        let mut cipher = Rc5::default();
+        let mut cipher = Rc5_32::default();
         cipher.mode = BCMode::Ecb;
         cipher.padding = BCPadding::None;
         cipher.ksa_32(&hex_to_bytes_ltr(KEY).unwrap());
@@ -198,7 +196,7 @@ mod rc5_tests {
         const PTEXT: &'static str = "21a5dbee154b8f6d";
         const CTEXT: &'static str = "f7c013ac5b2b8952";
         const KEY: &'static str = "915f4619be41b2516355a50110a9ce91";
-        let mut cipher = Rc5::default();
+        let mut cipher = Rc5_32::default();
         cipher.mode = BCMode::Ecb;
         cipher.padding = BCPadding::None;
         cipher.ksa_32(&hex_to_bytes_ltr(KEY).unwrap());
@@ -209,7 +207,7 @@ mod rc5_tests {
     fn basic_encrypt_decrypt_test_2() {
         const PTEXT: &'static str = "21a5dbee154b8f6d";
         const KEY: &'static str = "915f4619be41b2516355a50110a9ce91";
-        let mut cipher = Rc5::default();
+        let mut cipher = Rc5_32::default();
         cipher.mode = BCMode::Ecb;
         cipher.padding = BCPadding::None;
         cipher.ksa_32(&hex_to_bytes_ltr(KEY).unwrap());
