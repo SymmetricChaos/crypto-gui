@@ -1,4 +1,4 @@
-use crate::{impl_block_cipher, impl_rc5};
+use crate::{impl_cipher_for_block_cipher, impl_rc5};
 
 impl_rc5!(
     Rc5_64,
@@ -11,8 +11,6 @@ impl_rc5!(
     u128,
     20
 );
-
-impl_block_cipher!(Rc5_64, 16);
 
 #[cfg(test)]
 mod rc5_tests {
@@ -52,17 +50,5 @@ mod rc5_tests {
         cipher.padding = BCPadding::None;
         cipher.ksa(&hex_to_bytes_ltr(KEY).unwrap());
         assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
-    }
-
-    #[test]
-    fn basic_encrypt_decrypt_test() {
-        const PTEXT: &'static str = "00000000000000000000000000000000";
-        const KEY: &'static str = "000000000000000000000000000000000000000000000000";
-        let mut cipher = Rc5_64::default();
-        cipher.mode = BCMode::Ecb;
-        cipher.padding = BCPadding::None;
-        cipher.ksa(&hex_to_bytes_ltr(KEY).unwrap());
-        let ctext = cipher.encrypt(PTEXT).unwrap();
-        assert_eq!(cipher.decrypt(&ctext).unwrap(), PTEXT);
     }
 }

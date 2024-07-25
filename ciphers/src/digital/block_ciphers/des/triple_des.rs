@@ -2,7 +2,7 @@ use utils::byte_formatting::{overwrite_bytes, ByteFormat};
 
 use crate::{
     digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher},
-    impl_block_cipher, CipherError,
+    impl_cipher_for_block_cipher, CipherError,
 };
 
 use super::des_functions::*;
@@ -74,7 +74,7 @@ impl BlockCipher<8> for TripleDes {
     }
 }
 
-impl_block_cipher!(TripleDes, 8);
+impl_cipher_for_block_cipher!(TripleDes, 8);
 
 #[cfg(test)]
 mod des_tests {

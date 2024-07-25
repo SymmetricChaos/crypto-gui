@@ -1,5 +1,5 @@
 use super::block_cipher::{BCMode, BCPadding, BlockCipher};
-use crate::impl_block_cipher;
+use crate::impl_cipher_for_block_cipher;
 use utils::byte_formatting::ByteFormat;
 
 pub struct Feal {
@@ -41,4 +41,4 @@ impl BlockCipher<8> for Feal {
     }
 }
 
-impl_block_cipher!(Feal, 8);
+impl_cipher_for_block_cipher!(Feal, 8);

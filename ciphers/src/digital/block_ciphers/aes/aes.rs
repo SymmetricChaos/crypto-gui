@@ -1,6 +1,6 @@
 use crate::{
     digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher},
-    impl_block_cipher,
+    impl_cipher_for_block_cipher,
 };
 use itertools::Itertools;
 use utils::byte_formatting::ByteFormat;
@@ -119,7 +119,7 @@ impl BlockCipher<16> for Aes128 {
     }
 }
 
-impl_block_cipher!(Aes128, 16);
+impl_cipher_for_block_cipher!(Aes128, 16);
 
 #[cfg(test)]
 mod aes_tests {

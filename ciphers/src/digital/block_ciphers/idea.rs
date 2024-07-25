@@ -1,5 +1,5 @@
 use super::block_cipher::{BCMode, BCPadding, BlockCipher};
-use crate::impl_block_cipher;
+use crate::impl_cipher_for_block_cipher;
 use utils::byte_formatting::ByteFormat;
 
 pub const ONE: u32 = 0xffff;
@@ -202,7 +202,7 @@ impl BlockCipher<8> for Idea {
     }
 }
 
-impl_block_cipher!(Idea, 8);
+impl_cipher_for_block_cipher!(Idea, 8);
 
 #[cfg(test)]
 mod idea_tests {

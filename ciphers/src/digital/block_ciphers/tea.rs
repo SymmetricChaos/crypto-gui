@@ -1,4 +1,4 @@
-use crate::impl_block_cipher;
+use crate::impl_cipher_for_block_cipher;
 use utils::byte_formatting::{overwrite_bytes, u32_pair_to_u8_array, ByteFormat};
 
 use super::block_cipher::{BCMode, BCPadding, BlockCipher};
@@ -75,7 +75,7 @@ impl BlockCipher<8> for Tea {
     }
 }
 
-impl_block_cipher!(Tea, 8);
+impl_cipher_for_block_cipher!(Tea, 8);
 
 #[cfg(test)]
 mod tea_tests {

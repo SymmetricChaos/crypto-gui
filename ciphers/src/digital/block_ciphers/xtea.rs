@@ -1,5 +1,5 @@
 use super::block_cipher::{BCMode, BCPadding, BlockCipher};
-use crate::impl_block_cipher;
+use crate::impl_cipher_for_block_cipher;
 use utils::byte_formatting::{u32_pair_to_u8_array, ByteFormat};
 
 const DELTA: u32 = 0x9e3779b9;
@@ -78,7 +78,7 @@ impl BlockCipher<8> for Xtea {
     }
 }
 
-impl_block_cipher!(Xtea, 8);
+impl_cipher_for_block_cipher!(Xtea, 8);
 
 #[cfg(test)]
 mod xtea_tests {

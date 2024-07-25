@@ -132,5 +132,7 @@ macro_rules! impl_rc5 {
                 overwrite_bytes(bytes, &words_to_bytes(&block));
             }
         }
+
+        impl_cipher_for_block_cipher!($name, $bytes_in_block);
     };
 }

@@ -5,7 +5,7 @@ use utils::byte_formatting::{
 use super::blowfish_arrays::{PARRAY, SBOXES};
 use crate::{
     digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher},
-    impl_block_cipher, CipherError,
+    impl_cipher_for_block_cipher, CipherError,
 };
 
 pub struct Blowfish {
@@ -145,7 +145,7 @@ impl BlockCipher<8> for Blowfish {
     }
 }
 
-impl_block_cipher!(Blowfish, 8);
+impl_cipher_for_block_cipher!(Blowfish, 8);
 
 #[cfg(test)]
 mod blowfish_tests {

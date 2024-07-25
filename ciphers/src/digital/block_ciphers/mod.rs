@@ -10,7 +10,7 @@ pub mod tea;
 pub mod xtea;
 
 #[macro_export]
-macro_rules! impl_block_cipher {
+macro_rules! impl_cipher_for_block_cipher {
     ($cipher: ty, $blocksize: literal) => {
         impl crate::traits::Cipher for $cipher {
             fn encrypt(&self, text: &str) -> Result<String, crate::errors::CipherError> {

@@ -3,7 +3,7 @@ use crate::{
         block_cipher::{BCMode, BCPadding, BlockCipher},
         des::des_functions::*,
     },
-    impl_block_cipher, CipherError,
+    impl_cipher_for_block_cipher, CipherError,
 };
 use utils::byte_formatting::{overwrite_bytes, ByteFormat};
 
@@ -59,7 +59,7 @@ impl BlockCipher<8> for Des {
     }
 }
 
-impl_block_cipher!(Des, 8);
+impl_cipher_for_block_cipher!(Des, 8);
 
 #[cfg(test)]
 mod des_tests {

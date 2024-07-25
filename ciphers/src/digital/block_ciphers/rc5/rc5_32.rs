@@ -1,8 +1,6 @@
-use crate::{impl_block_cipher, impl_rc5};
+use crate::{impl_cipher_for_block_cipher, impl_rc5};
 
 impl_rc5!(Rc5_32, u32, 4, 32, 8, 0xb7e15163, 0x9e3779b9, u64, 12);
-
-impl_block_cipher!(Rc5_32, 8);
 
 #[cfg(test)]
 mod rc5_tests {
