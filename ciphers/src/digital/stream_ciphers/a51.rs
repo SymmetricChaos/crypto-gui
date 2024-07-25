@@ -1,55 +1,61 @@
-// use utils::bits::Bit;
+use utils::bits::Bit;
 
-// use crate::Cipher;
+use super::lfsr_copy::Lfsr;
+use crate::Cipher;
 
-// pub struct Lfsr {
-//     pub bits: Vec<Bit>,
-//     pub taps: Vec<bool>,
-// }
+pub struct A51 {
+    pub lfsrs: [Lfsr; 3],
+}
 
-// impl Lfsr {
-//     pub fn new(taps: Vec<bool>) -> Self {
-//         Self {
-//             bits: vec![Bit::Zero; taps.len()],
-//             taps,
-//         }
-//     }
+impl Default for A51 {
+    fn default() -> Self {
+        Self {
+            // These are one off from wikipedia example due to indexing difference
+            lfsrs: [
+                Lfsr::from_tap_positions(&[14, 17, 18, 19]),
+                Lfsr::from_tap_positions(&[21, 22]),
+                Lfsr::from_tap_positions(&[8, 21, 22, 23]),
+            ],
+        }
+    }
+}
 
-//     pub fn next_bit(&mut self) -> Bit {
-//         let mut next_bit = Bit::Zero;
-//         for (bit, tap) in self.bits.iter().zip(self.taps.iter()) {
-//             if *tap {
-//                 next_bit ^= *bit;
-//             }
-//         }
-//         self.bits.pop();
-//         self.bits.insert(0, next_bit);
-//         next_bit
-//     }
-// }
+impl A51 {
+    fn step(&mut self) {
+        let clock_bits = [
+            self.lfsrs[0].bits[9],
+            self.lfsrs[1].bits[11],
+            self.lfsrs[2].bits[11],
+        ];
+        // Hilariously long winded way to find majority bit
+        // If the sum is 2 or 3 then 1 is the majority
+        // If the sum is 0 or 1 then 0 is the majority
+        let n = clock_bits.into_iter().fold(0u8, |acc, b| acc + b);
 
-// pub struct A51 {
-//     lfsr1: Lfsr,
-//     lfsr2: Lfsr,
-//     lfsr3: Lfsr,
-// }
+        if n < 2 {
+            // Majority 0
+            for (i, b) in clock_bits.into_iter().enumerate() {
+                if b == Bit::Zero {
+                    self.lfsrs[i].next_bit();
+                }
+            }
+        } else {
+            // Majority 1
+            for (i, b) in clock_bits.into_iter().enumerate() {
+                if b == Bit::One {
+                    self.lfsrs[i].next_bit();
+                }
+            }
+        }
+    }
+}
 
-// impl Default for A51 {
-//     fn default() -> Self {
-//         Self {
-//             lfsr1: Default::default(),
-//             lfsr2: Default::default(),
-//             lfsr3: Default::default(),
-//         }
-//     }
-// }
+impl Cipher for A51 {
+    fn encrypt(&self, text: &str) -> Result<String, crate::CipherError> {
+        todo!()
+    }
 
-// impl Cipher for A51 {
-//     fn encrypt(&self, text: &str) -> Result<String, crate::CipherError> {
-//         todo!()
-//     }
-
-//     fn decrypt(&self, text: &str) -> Result<String, crate::CipherError> {
-//         todo!()
-//     }
-// }
+    fn decrypt(&self, text: &str) -> Result<String, crate::CipherError> {
+        todo!()
+    }
+}
