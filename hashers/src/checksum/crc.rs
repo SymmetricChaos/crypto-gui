@@ -54,7 +54,7 @@ impl CyclicRedundancyCheckHash {}
 impl ClassicHasher for CyclicRedundancyCheckHash {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         // Convert the bytes to a vector of Bits and treat it as a polynomial
-        let data = BitPolynomial::from_bytes_ltr(bytes).coef;
+        let data = BitPolynomial::from_bytes(bytes).coef;
         let mut state = vec![Bit::zero(); 32];
 
         println!("data: {:?}", bit_string(&data));

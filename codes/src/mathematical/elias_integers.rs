@@ -1,7 +1,7 @@
 use crate::errors::CodeError;
 use num::Zero;
 use std::collections::BTreeMap;
-use utils::bits::{bits_from_str, bits_to_u32_rtl, Bit};
+use utils::bits::{bits_from_str, bits_to_u32, Bit};
 
 // https://en.wikipedia.org/wiki/Elias_delta_coding
 // https://en.wikipedia.org/wiki/Elias_gamma_coding
@@ -157,7 +157,7 @@ impl EliasCodeIntegers {
                         }
                     }
                     // Convert the bits into an integer
-                    let t = bits_to_u32_rtl(&buffer) - 1;
+                    let t = bits_to_u32(&buffer) - 1;
 
                     // Take that many more bits
                     buffer.clear();
@@ -169,7 +169,7 @@ impl EliasCodeIntegers {
                         }
                     }
 
-                    let f = bits_to_u32_rtl(&buffer);
+                    let f = bits_to_u32(&buffer);
 
                     out.push(2_u32.pow(t) + f);
                     // Clear buffer and counter
@@ -210,7 +210,7 @@ impl EliasCodeIntegers {
                     }
                     // Convert the bits into an integer
 
-                    out.push(bits_to_u32_rtl(&buffer));
+                    out.push(bits_to_u32(&buffer));
                     // Clear buffer and counter
                     buffer.clear();
                     zero_ctr = 0;
@@ -246,7 +246,7 @@ impl EliasCodeIntegers {
                             return Err(CodeError::input("partial or malformed input"));
                         }
                     }
-                    n = bits_to_u32_rtl(&buffer);
+                    n = bits_to_u32(&buffer);
                     buffer.clear();
                 }
             } else {

@@ -1,5 +1,5 @@
 use crate::{lfsr::Lfsr, ClassicRng};
-use utils::bits::{bits_to_u32_ltr, bits_to_u32_rtl, Bit};
+use utils::bits::{bits_to_u32, Bit};
 
 pub struct Geffe {
     pub rngs: [Lfsr; 3],
@@ -41,10 +41,9 @@ impl ClassicRng for Geffe {
         for _ in 0..32 {
             output_bits.push(self.next_bit())
         }
-
-        match self.ltr {
-            true => bits_to_u32_ltr(&output_bits),
-            false => bits_to_u32_rtl(&output_bits),
+        if !self.ltr {
+            output_bits.reverse();
         }
+        bits_to_u32(&output_bits)
     }
 }

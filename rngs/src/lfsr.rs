@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use num::Zero;
-use utils::bits::{bits_from_str, bits_to_u32_ltr, bits_to_u32_rtl, bools_from_str, Bit};
+use utils::bits::{bits_from_str, bits_to_u32, bools_from_str, Bit};
 
 use crate::traits::ClassicRng;
 
@@ -13,7 +13,7 @@ pub enum LfsrMode {
 pub struct Lfsr {
     pub bits: Vec<Bit>,
     pub taps: Vec<bool>,
-    pub ltr: bool,
+    pub ltr: bool, // disabled
     pub mode: LfsrMode,
 }
 
@@ -113,11 +113,10 @@ impl ClassicRng for Lfsr {
         for _ in 0..32 {
             output_bits.push(self.next_bit())
         }
-
-        match self.ltr {
-            true => bits_to_u32_ltr(&output_bits),
-            false => bits_to_u32_rtl(&output_bits),
+        if !self.ltr {
+            output_bits.reverse();
         }
+        bits_to_u32(&output_bits)
     }
 }
 #[cfg(test)]

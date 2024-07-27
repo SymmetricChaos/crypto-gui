@@ -45,77 +45,46 @@ pub fn bools_from_str(text: &str) -> Result<impl Iterator<Item = bool> + '_, Cha
     }
 }
 
-pub fn byte_to_bits_ltr(byte: u8) -> [Bit; 8] {
-    let mut out = [Bit::Zero; 8];
-    for idx in 0..8_u8 {
-        if (1 << idx) & byte != 0 {
-            out[(7 - idx) as usize] = Bit::One
+// Take bytes in sequence, each is turned into an array of bits starting with the MSB and then flattened into a vector
+pub fn bit_vec_from_bytes(bytes: &[u8]) -> Vec<Bit> {
+    bytes.iter().map(|c| u8_to_bits(*c)).flatten().collect()
+}
+
+macro_rules! bits_to_int {
+    ($name1: ident, $name2: ident, $name3: ident,$type: ty, $width: literal) => {
+        /// Convert bits in to integer type such that the bit a index 0 becomes the MSB
+        /// Panics if bits is too long to fit the type
+        /// bits_to_u8(&\[Bit::Zero, Bit::One, Bit::One\]) == 0b011
+        pub fn $name1(bits: &[Bit]) -> $type {
+            assert!(bits.len() <= $width);
+            let mut out = 0 as $type;
+            for b in bits {
+                out <<= 1;
+                out += *b;
+            }
+            out
         }
-    }
-    out
-}
 
-pub fn byte_to_bits_rtl(byte: u8) -> [Bit; 8] {
-    let mut out = [Bit::Zero; 8];
-    for idx in 0..8_u8 {
-        if (1 << idx) & byte != 0 {
-            out[idx as usize] = Bit::One
+        /// Convert an integer to an array of bits of equal width with the MSB at index 0
+        /// u8_to_bits(0b011) == \[Bit::Zero, Bit::One, Bit::One, Bit::Zero, Bit::Zero, Bit::Zero, Bit::Zero, Bit::Zero\])
+        pub fn $name2(num: $type) -> [Bit; $width] {
+            let mut bits = [Bit::Zero; $width];
+            for i in 0..$width {
+                let shifted_num = num >> i;
+                // Get the rightmost bit by masking
+                let cur_bit = shifted_num & 1;
+                if cur_bit == 1 {
+                    bits[($width - 1) - i] = Bit::One;
+                } else {
+                    bits[($width - 1) - i] = Bit::Zero;
+                }
+            }
+            bits
         }
-    }
-    out
-}
 
-// Take bytes in sequence and read their bits from left to right
-pub fn bit_vec_from_bytes_ltr(bytes: &[u8]) -> Vec<Bit> {
-    bytes
-        .iter()
-        .map(|c| byte_to_bits_ltr(*c))
-        .flatten()
-        .collect()
-}
-
-// Take bytes in sequence and read their bits from right to left
-pub fn bit_vec_from_bytes_rtl(bytes: &[u8]) -> Vec<Bit> {
-    bytes
-        .iter()
-        .map(|c| byte_to_bits_rtl(*c))
-        .flatten()
-        .collect()
-}
-
-/// Panics if bits.len() > 32
-pub fn bits_to_u32_rtl(bits: &[Bit]) -> u32 {
-    let mut it = bits.iter().rev();
-    let mut out = *it.next().unwrap() as u32;
-    let mut p = 1;
-    for b in it {
-        p *= 2;
-        if b.is_one() {
-            out += p;
-        }
-    }
-    out
-}
-
-/// Panics if bits.len() > 32
-pub fn bits_to_u32_ltr(bits: &[Bit]) -> u32 {
-    let mut out = bits[0] as u32;
-    let mut p = 1;
-    for b in bits.iter().skip(1) {
-        p *= 2;
-        if b.is_one() {
-            out += p;
-        }
-    }
-    out
-}
-
-macro_rules! num_to_bit_vec {
-    ($name: ident, $type: ty) => {
         /// Convert an integer to a vector of bits with LSB at index 0 and high null bits ignored
-        /// example: u8_to_bit_vec(0x2f) == vec![1,1,1,1,0,1]
-        /// If the integer == 0 the vector is empty
-        pub fn $name(num: $type) -> Vec<Bit> {
+        /// example: u8_to_bit_vec(0b011) == vec!\[Bit::One, Bit::One, Bit::Zero\]
+        pub fn $name3(num: $type) -> Vec<Bit> {
             let mut bits = Vec::new();
             let mut n = num;
             while !n.is_zero() {
@@ -132,35 +101,10 @@ macro_rules! num_to_bit_vec {
     };
 }
 
-macro_rules! num_to_bits {
-    ($name: ident, $type: ty, $width: literal) => {
-        /// Convert an integer to an array of bits of equal width with the MSB at index 0
-        pub fn $name(num: $type) -> [Bit; $width] {
-            let mut bits = [Bit::Zero; $width];
-            for i in 0..$width {
-                let shifted_num = num >> i;
-                // Get the rightmost bit by masking
-                let cur_bit = shifted_num & 1;
-                if cur_bit == 1 {
-                    bits[($width - 1) - i] = Bit::One;
-                } else {
-                    bits[($width - 1) - i] = Bit::Zero;
-                }
-            }
-            bits
-        }
-    };
-}
-
-num_to_bits!(u8_to_bits, u8, 8);
-num_to_bits!(u16_to_bits, u16, 16);
-num_to_bits!(u32_to_bits, u32, 32);
-num_to_bits!(u64_to_bits, u64, 64);
-
-num_to_bit_vec!(u8_to_bit_vec, u8);
-num_to_bit_vec!(u16_to_bit_vec, u16);
-num_to_bit_vec!(u32_to_bit_vec, u32);
-num_to_bit_vec!(u64_to_bit_vec, u64);
+bits_to_int!(bits_to_u8, u8_to_bits, u8_to_bit_vec, u8, 8);
+bits_to_int!(bits_to_u16, u16_to_bits, u16_to_bit_vec, u16, 16);
+bits_to_int!(bits_to_u32, u32_to_bits, u32_to_bit_vec, u32, 32);
+bits_to_int!(bits_to_u64, u64_to_bits, u64_to_bit_vec, u64, 64);
 
 pub fn to_bit_array<T: Copy, const N: usize>(arr: [T; N]) -> Result<[Bit; N], IntToBitError>
 where
@@ -650,15 +594,35 @@ mod bit_function_tests {
     use super::*;
 
     #[test]
-    fn bits_to_int() {
-        assert_eq!(5, bits_to_u32_rtl(&to_bit_array([0, 0, 1, 0, 1]).unwrap()));
-        assert_eq!(20, bits_to_u32_ltr(&to_bit_array([0, 0, 1, 0, 1]).unwrap()));
+    fn bits_to_u8_test() {
+        assert_eq!(
+            bits_to_u8(&[Bit::One, Bit::Zero, Bit::One, Bit::One]),
+            0b1011
+        );
     }
 
     #[test]
-    fn byte_to_bits() {
-        let byte = 0b11000001_u8;
-        println!("{:?}", byte_to_bits_ltr(byte));
-        println!("{:?}", byte_to_bits_rtl(byte));
+    fn u8_to_bit_vec_test() {
+        assert_eq!(
+            u8_to_bit_vec(0x2f),
+            vec![Bit::One, Bit::One, Bit::One, Bit::One, Bit::Zero, Bit::One]
+        )
+    }
+
+    #[test]
+    fn u8_to_bits_test() {
+        assert_eq!(
+            u8_to_bits(0b1011),
+            [
+                Bit::Zero,
+                Bit::Zero,
+                Bit::Zero,
+                Bit::Zero,
+                Bit::One,
+                Bit::Zero,
+                Bit::One,
+                Bit::One,
+            ]
+        )
     }
 }

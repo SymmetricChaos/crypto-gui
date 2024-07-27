@@ -1,11 +1,11 @@
-use utils::bits::{bits_to_u32_ltr, bits_to_u32_rtl, Bit};
+use utils::bits::{bits_to_u32, Bit};
 
 use crate::{lfsr::Lfsr, ClassicRng};
 
 pub struct ShrinkingGenerator {
     pub a: Lfsr,
     pub s: Lfsr,
-    pub big_endian: bool,
+    pub ltr: bool,
 }
 
 impl Default for ShrinkingGenerator {
@@ -13,7 +13,7 @@ impl Default for ShrinkingGenerator {
         Self {
             a: Lfsr::from_tap_positions(&[32, 30, 26, 25]),
             s: Lfsr::from_tap_positions(&[29, 28, 27, 25]),
-            big_endian: true,
+            ltr: true,
         }
     }
 }
@@ -44,10 +44,9 @@ impl ClassicRng for ShrinkingGenerator {
         for _ in 0..32 {
             output_bits.push(self.next_bit())
         }
-
-        match self.big_endian {
-            true => bits_to_u32_ltr(&output_bits),
-            false => bits_to_u32_rtl(&output_bits),
+        if !self.ltr {
+            output_bits.reverse();
         }
+        bits_to_u32(&output_bits)
     }
 }

@@ -66,13 +66,14 @@ impl A51 {
 
         // Calculate majority bit
         let n = (clock_bits[0] & clock_bits[1])
-            | (clock_bits[0] & clock_bits[2])
-            | (clock_bits[1] & clock_bits[2]);
+            ^ (clock_bits[0] & clock_bits[2])
+            ^ (clock_bits[1] & clock_bits[2]);
 
         let mut out = Bit::Zero;
         for (i, b) in clock_bits.into_iter().enumerate() {
             if b == n {
                 self.lfsrs[i].next_bit();
+                // XIR together the most significant bits
                 out ^= *self.lfsrs[i].bits.last().unwrap();
             }
         }
@@ -87,6 +88,18 @@ impl A51 {
             arr[i] = self.next_bit();
         }
         arr
+    }
+
+    // Produce 15 bytes of keystream but with the last six bits always 0
+    pub fn burst_bytes(&mut self) -> [u8; 15] {
+        let mut bytes = [0u8; 15];
+        let bits = self.burst();
+
+        for (i, byte) in bytes.iter_mut().enumerate() {
+            
+        }
+
+        bytes
     }
 }
 
@@ -109,6 +122,7 @@ mod a51_tests {
 
     #[test]
     fn test_ksa() {
+        // expected output is 0x534EAA582FE8151AB6E1855A728C00
         let mut cipher = A51::default();
         cipher.ksa(0x1223456789ABCDEF, 0x134);
         println!("{}", bit_string(&cipher.burst()));

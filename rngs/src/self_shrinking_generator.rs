@@ -1,5 +1,5 @@
 use utils::bits::{
-    bits_to_u32_ltr, bits_to_u32_rtl,
+    bits_to_u32,
     Bit::{self, One, Zero},
 };
 
@@ -7,7 +7,7 @@ use crate::{lfsr::Lfsr, ClassicRng};
 
 pub struct SelfShrinkingGenerator {
     pub a: Lfsr,
-    pub big_endian: bool,
+    pub ltr: bool,
     pub outputs: [Option<Bit>; 4],
 }
 
@@ -15,7 +15,7 @@ impl Default for SelfShrinkingGenerator {
     fn default() -> Self {
         Self {
             a: Lfsr::default(),
-            big_endian: true,
+            ltr: true,
             outputs: [None, None, Some(One), Some(Zero)],
         }
     }
@@ -47,10 +47,9 @@ impl ClassicRng for SelfShrinkingGenerator {
         for _ in 0..32 {
             output_bits.push(self.next_bit())
         }
-
-        match self.big_endian {
-            true => bits_to_u32_ltr(&output_bits),
-            false => bits_to_u32_rtl(&output_bits),
+        if !self.ltr {
+            output_bits.reverse();
         }
+        bits_to_u32(&output_bits)
     }
 }
