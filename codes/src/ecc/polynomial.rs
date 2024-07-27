@@ -2,7 +2,7 @@ use itertools::Itertools;
 use num::Zero;
 use utils::{
     bit_polynomial::BitPolynomial,
-    bits::{bits_from_str, int_to_bits, Bit},
+    bits::{bits_from_str, u32_to_bits, Bit},
 };
 
 use crate::{errors::CodeError, traits::Code};
@@ -23,7 +23,9 @@ impl Default for PolynomialCode {
 
 impl PolynomialCode {
     pub fn int_to_code(&self, n: u32) -> BitPolynomial {
-        BitPolynomial::from(int_to_bits(n)) * &self.generator
+        let mut bits = u32_to_bits(n);
+        bits.reverse();
+        BitPolynomial::from(bits) * &self.generator
     }
 
     pub fn data_size(&self) -> usize {
@@ -87,7 +89,7 @@ impl Code for PolynomialCode {
 }
 
 #[cfg(test)]
-mod polynomial_tests {
+mod polynomial_ecc_tests {
     use super::*;
 
     #[test]
@@ -99,15 +101,12 @@ mod polynomial_tests {
     #[test]
     fn test_decode() {
         let code = PolynomialCode::default();
-        assert_eq!(code.decode("").unwrap(), "");
+        assert_eq!(code.decode("00111").unwrap(), "001");
     }
 
     #[test]
     fn test_decode_with_err() {
         let code = PolynomialCode::default();
-        assert_eq!(
-            code.decode("").unwrap_err(),
-            CodeError::input("invalid check digit")
-        );
+        assert_eq!(code.decode("00110").unwrap(), "???");
     }
 }

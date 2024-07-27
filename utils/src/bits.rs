@@ -110,20 +110,57 @@ pub fn bits_to_u32_ltr(bits: &[Bit]) -> u32 {
     out
 }
 
-pub fn int_to_bits(int: u32) -> Vec<Bit> {
-    let mut bits = Vec::new();
-    let mut n = int;
-    while !n.is_zero() {
-        let (q, r) = n.div_rem(&2);
-        if r.is_zero() {
-            bits.push(Bit::Zero)
-        } else {
-            bits.push(Bit::One)
+macro_rules! num_to_bit_vec {
+    ($name: ident, $type: ty) => {
+        /// Convert an integer to a vector of bits with LSB at index 0 and high null bits ignored
+        /// example: u8_to_bit_vec(0x2f) == vec![1,1,1,1,0,1]
+        /// If the integer == 0 the vector is empty
+        pub fn $name(num: $type) -> Vec<Bit> {
+            let mut bits = Vec::new();
+            let mut n = num;
+            while !n.is_zero() {
+                let (q, r) = n.div_rem(&2);
+                if r.is_zero() {
+                    bits.push(Bit::Zero)
+                } else {
+                    bits.push(Bit::One)
+                }
+                n = q;
+            }
+            bits
         }
-        n = q;
-    }
-    bits
+    };
 }
+
+macro_rules! num_to_bits {
+    ($name: ident, $type: ty, $width: literal) => {
+        /// Convert an integer to an array of bits of equal width with the MSB at index 0
+        pub fn $name(num: $type) -> [Bit; $width] {
+            let mut bits = [Bit::Zero; $width];
+            for i in 0..$width {
+                let shifted_num = num >> i;
+                // Get the rightmost bit by masking
+                let cur_bit = shifted_num & 1;
+                if cur_bit == 1 {
+                    bits[($width - 1) - i] = Bit::One;
+                } else {
+                    bits[($width - 1) - i] = Bit::Zero;
+                }
+            }
+            bits
+        }
+    };
+}
+
+num_to_bits!(u8_to_bits, u8, 8);
+num_to_bits!(u16_to_bits, u16, 16);
+num_to_bits!(u32_to_bits, u32, 32);
+num_to_bits!(u64_to_bits, u64, 64);
+
+num_to_bit_vec!(u8_to_bit_vec, u8);
+num_to_bit_vec!(u16_to_bit_vec, u16);
+num_to_bit_vec!(u32_to_bit_vec, u32);
+num_to_bit_vec!(u64_to_bit_vec, u64);
 
 pub fn to_bit_array<T: Copy, const N: usize>(arr: [T; N]) -> Result<[Bit; N], IntToBitError>
 where
