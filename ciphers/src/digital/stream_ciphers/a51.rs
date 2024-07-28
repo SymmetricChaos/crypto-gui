@@ -29,7 +29,7 @@ impl A51 {
 
         // Mix in the key bits
         let key_bits = u64_to_bits(key);
-        for key_bit in key_bits.into_iter().rev() {
+        for key_bit in key_bits.into_iter() {
             self.step_all();
             self.lfsrs[0].bits[0] = key_bit;
             self.lfsrs[1].bits[0] = key_bit;
@@ -57,20 +57,19 @@ impl A51 {
         }
     }
 
+    // https://cryptome.org/jya/a51-pi.htm
     pub fn next_bit(&mut self) -> Bit {
-        let clock_bits = [
+        let (a, b, c) = (
             self.lfsrs[0].bits[8],
             self.lfsrs[1].bits[10],
             self.lfsrs[2].bits[10],
-        ];
+        );
 
         // Calculate majority bit
-        let n = (clock_bits[0] & clock_bits[1])
-            ^ (clock_bits[0] & clock_bits[2])
-            ^ (clock_bits[1] & clock_bits[2]);
+        let n = (a & b) | (a & c) | (b & c);
 
         let mut out = Bit::Zero;
-        for (i, b) in clock_bits.into_iter().enumerate() {
+        for (i, b) in [a, b, c].into_iter().enumerate() {
             if b == n {
                 self.lfsrs[i].next_bit();
                 // XIR together the most significant bits
@@ -93,9 +92,10 @@ impl A51 {
     // Produce 15 bytes of keystream but with the last six bits always 0 because only 114 bits are produced
     pub fn burst_bytes(&mut self) -> [u8; 15] {
         let mut bytes = [0u8; 15];
-        let bits = self.burst();
+        let mut bits = self.burst();
 
-        for (i, seq) in bits.chunks(8).enumerate() {
+        for (i, seq) in bits.chunks_mut(8).enumerate() {
+            // seq.reverse();
             bytes[i] = bits_to_u8(seq)
         }
 
@@ -116,15 +116,30 @@ impl Cipher for A51 {
 #[cfg(test)]
 mod a51_tests {
 
-    use utils::bits::bit_string;
-
     use super::*;
 
     #[test]
     fn test_ksa() {
-        // expected output is 0x534EAA582FE8151AB6E1855A728C00
         let mut cipher = A51::default();
         cipher.ksa(0x1223456789ABCDEF, 0x134);
-        println!("{:02x?}", cipher.burst_bytes());
+        let correct_bytes: [u8; 15] = [
+            0x53, 0x4E, 0xAA, 0x58, 0x2F, 0xE8, 0x15, 0x1A, 0xB6, 0xE1, 0x85, 0x5A, 0x72, 0x8C,
+            0x00,
+        ];
+        let bytes = cipher.burst_bytes();
+        println!("{:02x?}", correct_bytes);
+        println!("{:02x?}", bytes);
+        // assert_eq!(correct_bytes, bytes);
+    }
+
+    #[test]
+    fn test_majority() {
+        for a in [Bit::Zero, Bit::One] {
+            for b in [Bit::Zero, Bit::One] {
+                for c in [Bit::Zero, Bit::One] {
+                    println!("{} {} {}: {}", a, b, c, (a & b) | (a & c) | (b & c))
+                }
+            }
+        }
     }
 }
