@@ -119,6 +119,7 @@ impl ClassicRng for Lfsr {
         bits_to_u32(&output_bits)
     }
 }
+
 #[cfg(test)]
 mod lfsr_tests {
 

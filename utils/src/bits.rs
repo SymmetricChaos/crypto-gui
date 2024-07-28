@@ -52,13 +52,14 @@ pub fn bit_vec_from_bytes(bytes: &[u8]) -> Vec<Bit> {
 
 macro_rules! bits_to_int {
     ($name1: ident, $name2: ident, $name3: ident,$type: ty, $width: literal) => {
-        /// Convert bits in to integer type such that the bit a index 0 becomes the MSB
-        /// Panics if bits is too long to fit the type
-        /// bits_to_u8(&\[Bit::Zero, Bit::One, Bit::One\]) == 0b011
-        pub fn $name1(bits: &[Bit]) -> $type {
-            assert!(bits.len() <= $width);
+        /// Convert bits in to integer type such that the rightmost bit of the array is the LSB of the integer
+        /// Panics if the bits argument is too long to fit the type
+        /// Inverse of the <int>_to_bits() functions.
+        /// bits_to_u8(\[Bit::Zero, Bit::One, Bit::One\]) == 0b011
+        pub fn $name1<T: AsRef<[Bit]>>(bits: T) -> $type {
+            assert!(bits.as_ref().len() <= $width);
             let mut out = 0 as $type;
-            for b in bits {
+            for b in bits.as_ref() {
                 out <<= 1;
                 out += *b;
             }
@@ -66,11 +67,12 @@ macro_rules! bits_to_int {
         }
 
         /// Convert an integer to an array of bits of equal width with the MSB at index 0
+        /// Inverse of bits_to<int>() functions.
         /// u8_to_bits(0b011) == \[Bit::Zero, Bit::One, Bit::One, Bit::Zero, Bit::Zero, Bit::Zero, Bit::Zero, Bit::Zero\])
-        pub fn $name2(num: $type) -> [Bit; $width] {
+        pub fn $name2(n: $type) -> [Bit; $width] {
             let mut bits = [Bit::Zero; $width];
             for i in 0..$width {
-                let shifted_num = num >> i;
+                let shifted_num = n >> i;
                 // Get the rightmost bit by masking
                 let cur_bit = shifted_num & 1;
                 if cur_bit == 1 {
@@ -597,22 +599,14 @@ mod bit_function_tests {
     fn bits_to_u8_test() {
         assert_eq!(
             bits_to_u8(&[Bit::One, Bit::Zero, Bit::One, Bit::One]),
-            0b1011
+            0b00001011
         );
-    }
-
-    #[test]
-    fn u8_to_bit_vec_test() {
-        assert_eq!(
-            u8_to_bit_vec(0x2f),
-            vec![Bit::One, Bit::One, Bit::One, Bit::One, Bit::Zero, Bit::One]
-        )
     }
 
     #[test]
     fn u8_to_bits_test() {
         assert_eq!(
-            u8_to_bits(0b1011),
+            u8_to_bits(0b00001011),
             [
                 Bit::Zero,
                 Bit::Zero,
@@ -623,6 +617,21 @@ mod bit_function_tests {
                 Bit::One,
                 Bit::One,
             ]
+        )
+    }
+
+    #[test]
+    fn bits_to_u8_and_back_test() {
+        let n = 0b00001011;
+        let bits = u8_to_bits(n);
+        assert_eq!(n, bits_to_u8(&bits));
+    }
+
+    #[test]
+    fn u8_to_bit_vec_test() {
+        assert_eq!(
+            u8_to_bit_vec(0x2f),
+            vec![Bit::One, Bit::One, Bit::One, Bit::One, Bit::Zero, Bit::One]
         )
     }
 }

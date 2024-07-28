@@ -1,4 +1,4 @@
-use utils::bits::{u32_to_bits, u64_to_bits, Bit};
+use utils::bits::{bits_to_u8, u32_to_bits, u64_to_bits, Bit};
 
 use super::lfsr_copy::Lfsr;
 use crate::Cipher;
@@ -90,13 +90,13 @@ impl A51 {
         arr
     }
 
-    // Produce 15 bytes of keystream but with the last six bits always 0
+    // Produce 15 bytes of keystream but with the last six bits always 0 because only 114 bits are produced
     pub fn burst_bytes(&mut self) -> [u8; 15] {
         let mut bytes = [0u8; 15];
         let bits = self.burst();
 
-        for (i, byte) in bytes.iter_mut().enumerate() {
-            
+        for (i, seq) in bits.chunks(8).enumerate() {
+            bytes[i] = bits_to_u8(seq)
         }
 
         bytes
@@ -125,6 +125,6 @@ mod a51_tests {
         // expected output is 0x534EAA582FE8151AB6E1855A728C00
         let mut cipher = A51::default();
         cipher.ksa(0x1223456789ABCDEF, 0x134);
-        println!("{}", bit_string(&cipher.burst()));
+        println!("{:02x?}", cipher.burst_bytes());
     }
 }
