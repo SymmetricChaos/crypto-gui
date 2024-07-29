@@ -1,3 +1,14 @@
+// Parity of a 32-bit integer
+pub fn parity_32(n: u32) -> u32 {
+    let mut x = n;
+    x ^= x >> 16;
+    x ^= x >> 8;
+    x ^= x >> 4;
+    x ^= x >> 2;
+    x ^= x >> 1;
+    x & 1
+}
+
 pub struct Lfsr32 {
     pub register: u32,
     pub taps: u32,
@@ -41,13 +52,22 @@ impl Lfsr32 {
     }
 
     pub fn next_bit(&mut self) -> u32 {
-        // Mask off everything except the taps, count the one bits, take the parity
-        let bit = (self.register & self.taps).count_ones() & 1;
+        // Mask off everything except the taps, take the parity
+        let bit = parity_32(self.register & self.taps);
         // Shift the register, mask off the high bits, OR the bit into the register
         self.register <<= 1;
         self.register &= self.mask;
         self.register |= bit;
         bit
+    }
+
+    pub fn step(&mut self) {
+        // Mask off everything except the taps, take the parity
+        let bit = parity_32(self.register & self.taps);
+        // Shift the register, mask off the high bits, OR the bit into the register
+        self.register <<= 1;
+        self.register &= self.mask;
+        self.register |= bit;
     }
 
     // Fill a byte MSB first
