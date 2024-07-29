@@ -1,4 +1,4 @@
-use utils::bits::{bits_to_u8, u32_to_bits, u64_to_bits, Bit};
+use utils::bits::{bits_to_u8, u32_to_bits, u8_to_bits, Bit};
 
 use super::lfsr_copy::Lfsr;
 use crate::Cipher;
@@ -21,22 +21,27 @@ impl Default for A51 {
 }
 
 impl A51 {
-    pub fn ksa(&mut self, key: u64, frame_number: u32) {
+    pub fn ksa(&mut self, key: [u8; 8], frame_number: u32) {
         // Frame number must be limited to 22 bits
         assert!(frame_number < 0x003fffff);
 
         // TODO: Need to check the exact order the bits are used
 
-        // Mix in the key bits
-        let key_bits = u64_to_bits(key);
-        for key_bit in key_bits.into_iter() {
-            self.step_all();
-            self.lfsrs[0].bits[0] = key_bit;
-            self.lfsrs[1].bits[0] = key_bit;
-            self.lfsrs[2].bits[0] = key_bit;
+        // Mix in the key bits one byte at a time, LSB first
+        for key_byte in key.into_iter() {
+            // println!("{:08b}", key_byte);
+            let key_bits = u8_to_bits(key_byte);
+            // println!("{:?}", key_bits);
+            for key_bit in key_bits.into_iter().rev() {
+                // println!("{:?}", key_bit);
+                self.step_all();
+                self.lfsrs[0].bits[0] = key_bit;
+                self.lfsrs[1].bits[0] = key_bit;
+                self.lfsrs[2].bits[0] = key_bit;
+            }
         }
 
-        // Mix in the frame bits, this is essentially a nonce
+        // Mix in the frame bits LSB first, this is essentially a nonce
         let frame_bits = u32_to_bits(frame_number);
         for frame_bit in frame_bits.into_iter().rev().take(22) {
             self.step_all();
@@ -72,7 +77,7 @@ impl A51 {
         for (i, b) in [a, b, c].into_iter().enumerate() {
             if b == n {
                 self.lfsrs[i].next_bit();
-                // XIR together the most significant bits
+                // XOR together the most significant bits of each LFSR
                 out ^= *self.lfsrs[i].bits.last().unwrap();
             }
         }
@@ -121,7 +126,7 @@ mod a51_tests {
     #[test]
     fn test_ksa() {
         let mut cipher = A51::default();
-        cipher.ksa(0x1223456789ABCDEF, 0x134);
+        cipher.ksa([0x12, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF], 0x134);
         let correct_bytes: [u8; 15] = [
             0x53, 0x4E, 0xAA, 0x58, 0x2F, 0xE8, 0x15, 0x1A, 0xB6, 0xE1, 0x85, 0x5A, 0x72, 0x8C,
             0x00,
