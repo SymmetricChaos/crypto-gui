@@ -55,8 +55,8 @@ impl Lfsr {
         for t in taps {
             tap_vec[t - 1] = true
         }
-        let mut bit_vec = vec![Bit::Zero; len];
-        bit_vec[len - 1] = Bit::One;
+        let bit_vec = vec![Bit::Zero; len];
+
         Self {
             bits: bit_vec,
             taps: tap_vec,
@@ -168,6 +168,7 @@ mod lfsr_tests {
         assert_eq!(31, states.len());
 
         let mut rng = Lfsr::from_tap_positions(&[9, 11]);
+        rng.set_bits_from_str("00000000001");
         let mut states = Vec::new();
         while !states.contains(&bit_string(&rng.bits)) {
             states.push(bit_string(&rng.bits));

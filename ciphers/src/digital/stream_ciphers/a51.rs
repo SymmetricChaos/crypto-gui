@@ -1,10 +1,8 @@
-use utils::bits::{bits_to_u8, u32_to_bits, u8_to_bits, Bit};
-
-use super::lfsr_copy::Lfsr;
+use super::lfsr_copy::Lfsr32;
 use crate::Cipher;
 
 pub struct A51 {
-    pub lfsrs: [Lfsr; 3],
+    pub lfsrs: [Lfsr32; 3],
 }
 
 impl Default for A51 {
@@ -12,9 +10,9 @@ impl Default for A51 {
         Self {
             // These are one off from wikipedia example due to indexing difference
             lfsrs: [
-                Lfsr::from_tap_positions(&[14, 17, 18, 19]),
-                Lfsr::from_tap_positions(&[21, 22]),
-                Lfsr::from_tap_positions(&[8, 21, 22, 23]),
+                Lfsr32::from_taps(0x072000),
+                Lfsr32::from_taps(0x300000),
+                Lfsr32::from_taps(0x700080),
             ],
         }
     }
@@ -28,26 +26,19 @@ impl A51 {
         // TODO: Need to check the exact order the bits are used
 
         // Mix in the key bits one byte at a time, LSB first
-        for key_byte in key.into_iter() {
-            // println!("{:08b}", key_byte);
-            let key_bits = u8_to_bits(key_byte);
-            // println!("{:?}", key_bits);
-            for key_bit in key_bits.into_iter().rev() {
-                // println!("{:?}", key_bit);
-                self.step_all();
-                self.lfsrs[0].bits[0] = key_bit;
-                self.lfsrs[1].bits[0] = key_bit;
-                self.lfsrs[2].bits[0] = key_bit;
-            }
+        for i in 0..64 {
+            self.step_all();
+            self.lfsrs[0].register ^= ((key[i / 8] >> (i & 7)) & 1) as u32;
+            self.lfsrs[1].register ^= ((key[i / 8] >> (i & 7)) & 1) as u32;
+            self.lfsrs[2].register ^= ((key[i / 8] >> (i & 7)) & 1) as u32;
         }
 
         // Mix in the frame bits LSB first, this is essentially a nonce
-        let frame_bits = u32_to_bits(frame_number);
-        for frame_bit in frame_bits.into_iter().rev().take(22) {
+        for i in 0..22 {
             self.step_all();
-            self.lfsrs[0].bits[0] = frame_bit;
-            self.lfsrs[1].bits[0] = frame_bit;
-            self.lfsrs[2].bits[0] = frame_bit;
+            self.lfsrs[0].register ^= (frame_number >> i) & 1;
+            self.lfsrs[1].register ^= (frame_number >> i) & 1;
+            self.lfsrs[2].register ^= (frame_number >> i) & 1;
         }
 
         // Mix for 100 steps with normal clocking
@@ -63,45 +54,39 @@ impl A51 {
     }
 
     // https://cryptome.org/jya/a51-pi.htm
-    pub fn next_bit(&mut self) -> Bit {
+    pub fn next_bit(&mut self) -> u32 {
         let (a, b, c) = (
-            self.lfsrs[0].bits[8],
-            self.lfsrs[1].bits[10],
-            self.lfsrs[2].bits[10],
+            self.lfsrs[0].get_bit(8),
+            self.lfsrs[1].get_bit(10),
+            self.lfsrs[2].get_bit(10),
         );
 
         // Calculate majority bit
         let n = (a & b) | (a & c) | (b & c);
 
-        let mut out = Bit::Zero;
-        for (i, b) in [a, b, c].into_iter().enumerate() {
-            if b == n {
-                self.lfsrs[i].next_bit();
-                // XOR together the most significant bits of each LFSR
-                out ^= *self.lfsrs[i].bits.last().unwrap();
-            }
+        let mut out = 0;
+        if a == n {
+            self.lfsrs[0].next_bit();
+            out ^= self.lfsrs[0].get_bit(18);
+        }
+        if b == n {
+            self.lfsrs[1].next_bit();
+            out ^= self.lfsrs[1].get_bit(21);
+        }
+        if c == n {
+            self.lfsrs[2].next_bit();
+            out ^= self.lfsrs[2].get_bit(22);
         }
 
         out
     }
 
-    // Produce 114 bits of keystream
-    pub fn burst(&mut self) -> [Bit; 114] {
-        let mut arr = [Bit::Zero; 114];
-        for i in 0..114 {
-            arr[i] = self.next_bit();
-        }
-        arr
-    }
-
     // Produce 15 bytes of keystream but with the last six bits always 0 because only 114 bits are produced
     pub fn burst_bytes(&mut self) -> [u8; 15] {
         let mut bytes = [0u8; 15];
-        let mut bits = self.burst();
 
-        for (i, seq) in bits.chunks_mut(8).enumerate() {
-            // seq.reverse();
-            bytes[i] = bits_to_u8(seq)
+        for i in 0..114 {
+            bytes[i / 8] |= (self.next_bit() << (7 - (i & 7))) as u8;
         }
 
         bytes
@@ -138,13 +123,21 @@ mod a51_tests {
     }
 
     #[test]
-    fn test_majority() {
-        for a in [Bit::Zero, Bit::One] {
-            for b in [Bit::Zero, Bit::One] {
-                for c in [Bit::Zero, Bit::One] {
-                    println!("{} {} {}: {}", a, b, c, (a & b) | (a & c) | (b & c))
-                }
-            }
-        }
+    fn test_masks() {
+        let rng = A51::default();
+        assert_eq!(rng.lfsrs[0].mask, 0x07FFFF);
+        assert_eq!(rng.lfsrs[1].mask, 0x3FFFFF);
+        assert_eq!(rng.lfsrs[2].mask, 0x7FFFFF);
     }
+
+    // #[test]
+    // fn test_majority() {
+    //     for a in [0_u32, 1] {
+    //         for b in [0_u32, 1] {
+    //             for c in [0_u32, 1] {
+    //                 println!("{} {} {}: {}", a, b, c, (a & b) | (a & c) | (b & c))
+    //             }
+    //         }
+    //     }
+    // }
 }

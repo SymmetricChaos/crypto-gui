@@ -19,7 +19,7 @@ impl Lfsr32 {
         let n = 32 - taps.leading_zeros();
         let mask = 2_u32.pow(n) - 1;
         Self {
-            register: 1_u32,
+            register: 0_u32,
             taps,
             mask,
         }
@@ -52,6 +52,7 @@ impl Lfsr32 {
         bit
     }
 
+    // Fill a byte MSB first
     pub fn next_byte(&mut self) -> u8 {
         let mut out = 0;
         for _ in 0..8 {
@@ -83,5 +84,12 @@ mod lfsr32_tests {
         assert_eq!(0b00000000000000001111111111111111, rng.mask);
         assert_eq!(0b00000000000000001011010000000000, rng.taps);
         assert_eq!(0b00000000000000000000000000000001, rng.register);
+    }
+
+    #[test]
+    fn test_get_bit() {
+        let rng = Lfsr32::default();
+        assert_eq!(rng.get_bit(0), 1);
+        assert_eq!(rng.get_bit(1), 0);
     }
 }
