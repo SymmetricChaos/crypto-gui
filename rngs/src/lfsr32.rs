@@ -15,7 +15,7 @@ impl Default for Lfsr32 {
 impl Lfsr32 {
     pub fn from_taps(taps: u32) -> Self {
         // Only 31 bits are usable
-        assert!(taps < 0xefffff);
+        assert!(taps < 0x80000000);
         let n = 32 - taps.leading_zeros();
         let mask = 2_u32.pow(n) - 1;
         Self {
@@ -27,7 +27,7 @@ impl Lfsr32 {
 
     pub fn from_taps_and_register(taps: u32, register: u32) -> Self {
         // Only 31 bits are usable
-        assert!(taps < 0xefffff);
+        assert!(taps < 0x80000000);
         let n = 32 - taps.leading_zeros();
         let mask = n.pow(2) - 1;
         Self {

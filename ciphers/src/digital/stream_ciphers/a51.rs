@@ -8,11 +8,10 @@ pub struct A51 {
 impl Default for A51 {
     fn default() -> Self {
         Self {
-            // These are one off from wikipedia example due to indexing difference
             lfsrs: [
-                Lfsr32::from_taps(0x072000),
-                Lfsr32::from_taps(0x300000),
-                Lfsr32::from_taps(0x700080),
+                Lfsr32::from_taps(0x072000), // 18, 17, 16, 13
+                Lfsr32::from_taps(0x300000), // 21, 20
+                Lfsr32::from_taps(0x700080), // 22, 21, 20, 7
             ],
         }
     }
@@ -20,8 +19,8 @@ impl Default for A51 {
 
 impl A51 {
     pub fn ksa(&mut self, key: [u8; 8], frame_number: u32) {
-        // Frame number must be limited to 22 bits
-        assert!(frame_number < 0x003fffff);
+        // Frame number limited to 22 bits
+        assert!(frame_number < 0x00400000);
 
         // Zero out the registers
         for rng in self.lfsrs.iter_mut() {
@@ -37,7 +36,7 @@ impl A51 {
             self.lfsrs[2].register ^= b;
         }
 
-        // Mix in the frame bits LSB first, this is essentially a nonce
+        // Mix in the frame bits LSB first
         for i in 0..22 {
             self.step_all();
             let b = (frame_number >> i) & 1;
@@ -80,7 +79,7 @@ impl A51 {
         out
     }
 
-    // Produce 15 bytes of keystream but with the last six bits always 0 because only 114 bits are produced
+    // Produce the up and down keystreams. Each is 114 bits, stored in 15 bytes (with the lower 6 bits of the last byte always zero)
     pub fn burst_bytes(&mut self) -> ([u8; 15], [u8; 15]) {
         let mut bytes_ab = [0u8; 15];
         let mut bytes_ba = [0u8; 15];
