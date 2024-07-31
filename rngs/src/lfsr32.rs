@@ -1,5 +1,6 @@
 use crate::traits::ClassicRng;
 
+#[derive(Debug, Clone)]
 pub struct Lfsr32 {
     pub register: u32,
     pub taps: u32,

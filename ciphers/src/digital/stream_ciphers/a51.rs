@@ -1,11 +1,14 @@
 use super::lfsr_copy::Lfsr32;
-use crate::Cipher;
+use crate::{Cipher, CipherError};
+use num::traits::ops::bytes;
+use utils::byte_formatting::{xor_into_bytes, ByteFormat};
 
-pub struct A51 {
+#[derive(Debug, Clone)]
+pub struct A51Rng {
     pub lfsrs: [Lfsr32; 3],
 }
 
-impl Default for A51 {
+impl Default for A51Rng {
     fn default() -> Self {
         Self {
             lfsrs: [
@@ -17,7 +20,7 @@ impl Default for A51 {
     }
 }
 
-impl A51 {
+impl A51Rng {
     pub fn ksa(&mut self, key: [u8; 8], frame_number: u32) {
         // Frame number limited to 22 bits
         assert!(frame_number < 0x00400000);
@@ -96,17 +99,64 @@ impl A51 {
 
         (bytes_ab, bytes_ba)
     }
+
+    pub fn bytes(&mut self, n_bytes: usize, key: [u8; 8], frame_number: u32) -> Vec<u8> {
+        let mut bytes = vec![0; n_bytes];
+        let mut f = frame_number;
+        for i in 0..(n_bytes * 8) {
+            if i % 114 == 0 {
+                self.ksa(key, f);
+                f += 1;
+            }
+            let b = self.next_bit();
+            bytes[i / 8] |= (b << (7 - (i & 7))) as u8;
+        }
+        bytes
+    }
 }
 
-// impl Cipher for A51 {
-//     fn encrypt(&self, text: &str) -> Result<String, crate::CipherError> {
-//         todo!()
-//     }
+pub struct A51 {
+    pub output_format: ByteFormat,
+    pub input_format: ByteFormat,
+    pub rng: A51Rng,
+    key: [u8; 8],
+    frame_number: u32,
+}
 
-//     fn decrypt(&self, text: &str) -> Result<String, crate::CipherError> {
-//         todo!()
-//     }
-// }
+impl Default for A51 {
+    fn default() -> Self {
+        Self {
+            output_format: ByteFormat::Hex,
+            input_format: ByteFormat::Hex,
+            rng: Default::default(),
+            key: [0u8; 8],
+            frame_number: 0u32,
+        }
+    }
+}
+
+impl A51 {
+    pub fn encrypt_bytes_cloned(&self, bytes: &mut [u8]) {
+        let mut rng = self.rng.clone();
+        let keystream = rng.bytes(bytes.len(), self.key, self.frame_number);
+        xor_into_bytes(bytes, &keystream);
+    }
+}
+
+impl Cipher for A51 {
+    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+        let mut bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| CipherError::input("byte format error"))?;
+        self.encrypt_bytes_cloned(&mut bytes);
+        Ok(self.output_format.byte_slice_to_text(&bytes))
+    }
+
+    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+        self.encrypt(text)
+    }
+}
 
 #[cfg(test)]
 mod a51_tests {
@@ -115,7 +165,7 @@ mod a51_tests {
 
     #[test]
     fn test_ksa() {
-        let mut cipher = A51::default();
+        let mut cipher = A51Rng::default();
         cipher.ksa([0x12, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF], 0x134);
         let correct_bytes_ab: [u8; 15] = [
             0x53, 0x4E, 0xAA, 0x58, 0x2F, 0xE8, 0x15, 0x1A, 0xB6, 0xE1, 0x85, 0x5A, 0x72, 0x8C,
@@ -143,7 +193,7 @@ mod a51_tests {
 
     #[test]
     fn test_masks() {
-        let rng = A51::default();
+        let rng = A51Rng::default();
         assert_eq!(rng.lfsrs[0].mask, 0x07FFFF);
         assert_eq!(rng.lfsrs[1].mask, 0x3FFFFF);
         assert_eq!(rng.lfsrs[2].mask, 0x7FFFFF);

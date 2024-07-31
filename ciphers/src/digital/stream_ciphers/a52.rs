@@ -1,11 +1,14 @@
 use super::lfsr_copy::Lfsr32;
 use crate::Cipher;
+use utils::byte_formatting::ByteFormat;
 
 fn majority(a: u32, b: u32, c: u32) -> u32 {
     (a & b) | (a & c) | (b & c)
 }
 
 pub struct A52 {
+    pub output_format: ByteFormat,
+    pub input_format: ByteFormat,
     pub lfsrs: [Lfsr32; 4],
 }
 
@@ -18,6 +21,8 @@ impl Default for A52 {
                 Lfsr32::from_taps(0x700080), // 22, 21, 20, 7
                 Lfsr32::from_taps(0x010800), // 16, 11
             ],
+            output_format: ByteFormat::Hex,
+            input_format: ByteFormat::Hex,
         }
     }
 }
@@ -25,7 +30,6 @@ impl Default for A52 {
 impl A52 {
     const LOADED: [u32; 4] = [15, 16, 18, 10];
     const MSB: [u32; 4] = [18, 21, 22, 16];
-    const CHECK: [(u32, u32, u32); 3] = [(15, 14, 12), (16, 13, 9), (18, 16, 13)];
 
     pub fn ksa(&mut self, key: [u8; 8], frame_number: u32) {
         // Frame number limited to 22 bits
@@ -96,27 +100,24 @@ impl A52 {
         // XOR in the MSB
         out ^= self.lfsrs[0].get_bit(Self::MSB[0]);
         // XOR in the majority of three chosen bits, with one inverted
-        let (x, y, z) = Self::CHECK[0];
         out ^= majority(
-            self.lfsrs[0].get_bit(x),
-            self.lfsrs[0].get_bit(y) ^ 1,
-            self.lfsrs[0].get_bit(z),
+            self.lfsrs[0].get_bit(15),
+            self.lfsrs[0].get_bit(14) ^ 1,
+            self.lfsrs[0].get_bit(12),
         );
 
         out ^= self.lfsrs[1].get_bit(Self::MSB[1]);
-        let (x, y, z) = Self::CHECK[1];
         out ^= majority(
-            self.lfsrs[1].get_bit(x) ^ 1,
-            self.lfsrs[1].get_bit(y),
-            self.lfsrs[1].get_bit(z),
+            self.lfsrs[1].get_bit(16) ^ 1,
+            self.lfsrs[1].get_bit(13),
+            self.lfsrs[1].get_bit(9),
         );
 
         out ^= self.lfsrs[2].get_bit(Self::MSB[2]);
-        let (x, y, z) = Self::CHECK[2];
         out ^= majority(
-            self.lfsrs[2].get_bit(x),
-            self.lfsrs[2].get_bit(y),
-            self.lfsrs[2].get_bit(z) ^ 1,
+            self.lfsrs[2].get_bit(18),
+            self.lfsrs[2].get_bit(16),
+            self.lfsrs[2].get_bit(13) ^ 1,
         );
 
         out

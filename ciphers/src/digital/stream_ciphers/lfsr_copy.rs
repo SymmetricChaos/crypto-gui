@@ -9,6 +9,7 @@ pub fn parity_32(n: u32) -> u32 {
     x & 1
 }
 
+#[derive(Debug, Clone)]
 pub struct Lfsr32 {
     pub register: u32,
     pub taps: u32,
