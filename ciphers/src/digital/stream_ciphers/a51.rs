@@ -1,6 +1,5 @@
 use super::lfsr_copy::Lfsr32;
 use crate::{Cipher, CipherError};
-use num::traits::ops::bytes;
 use utils::byte_formatting::{xor_into_bytes, ByteFormat};
 
 #[derive(Debug, Clone)]
@@ -100,7 +99,7 @@ impl A51Rng {
         (bytes_ab, bytes_ba)
     }
 
-    pub fn bytes(&mut self, n_bytes: usize, key: [u8; 8], frame_number: u32) -> Vec<u8> {
+    pub fn keystream(&mut self, n_bytes: usize, key: [u8; 8], frame_number: u32) -> Vec<u8> {
         let mut bytes = vec![0; n_bytes];
         let mut f = frame_number;
         for i in 0..(n_bytes * 8) {
@@ -119,8 +118,8 @@ pub struct A51 {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
     pub rng: A51Rng,
-    key: [u8; 8],
-    frame_number: u32,
+    pub key: [u8; 8],
+    pub frame_number: u32,
 }
 
 impl Default for A51 {
@@ -138,7 +137,7 @@ impl Default for A51 {
 impl A51 {
     pub fn encrypt_bytes_cloned(&self, bytes: &mut [u8]) {
         let mut rng = self.rng.clone();
-        let keystream = rng.bytes(bytes.len(), self.key, self.frame_number);
+        let keystream = rng.keystream(bytes.len(), self.key, self.frame_number);
         xor_into_bytes(bytes, &keystream);
     }
 }

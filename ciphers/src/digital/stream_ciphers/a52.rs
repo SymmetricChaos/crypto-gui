@@ -1,18 +1,17 @@
 use super::lfsr_copy::Lfsr32;
-use crate::Cipher;
-use utils::byte_formatting::ByteFormat;
+use crate::{Cipher, CipherError};
+use utils::byte_formatting::{xor_into_bytes, ByteFormat};
 
 fn majority(a: u32, b: u32, c: u32) -> u32 {
     (a & b) | (a & c) | (b & c)
 }
 
-pub struct A52 {
-    pub output_format: ByteFormat,
-    pub input_format: ByteFormat,
+#[derive(Debug, Clone)]
+pub struct A52Rng {
     pub lfsrs: [Lfsr32; 4],
 }
 
-impl Default for A52 {
+impl Default for A52Rng {
     fn default() -> Self {
         Self {
             lfsrs: [
@@ -21,13 +20,11 @@ impl Default for A52 {
                 Lfsr32::from_taps(0x700080), // 22, 21, 20, 7
                 Lfsr32::from_taps(0x010800), // 16, 11
             ],
-            output_format: ByteFormat::Hex,
-            input_format: ByteFormat::Hex,
         }
     }
 }
 
-impl A52 {
+impl A52Rng {
     const LOADED: [u32; 4] = [15, 16, 18, 10];
     const MSB: [u32; 4] = [18, 21, 22, 16];
 
@@ -140,17 +137,64 @@ impl A52 {
 
         (bytes_ab, bytes_ba)
     }
+
+    pub fn keystream(&mut self, n_bytes: usize, key: [u8; 8], frame_number: u32) -> Vec<u8> {
+        let mut bytes = vec![0; n_bytes];
+        let mut f = frame_number;
+        for i in 0..(n_bytes * 8) {
+            if i % 114 == 0 {
+                self.ksa(key, f);
+                f += 1;
+            }
+            let b = self.next_bit();
+            bytes[i / 8] |= (b << (7 - (i & 7))) as u8;
+        }
+        bytes
+    }
 }
 
-// impl Cipher for A52 {
-//     fn encrypt(&self, text: &str) -> Result<String, crate::CipherError> {
-//         todo!()
-//     }
+pub struct A52 {
+    pub output_format: ByteFormat,
+    pub input_format: ByteFormat,
+    pub rng: A52Rng,
+    pub key: [u8; 8],
+    pub frame_number: u32,
+}
 
-//     fn decrypt(&self, text: &str) -> Result<String, crate::CipherError> {
-//         todo!()
-//     }
-// }
+impl Default for A52 {
+    fn default() -> Self {
+        Self {
+            output_format: ByteFormat::Hex,
+            input_format: ByteFormat::Hex,
+            rng: Default::default(),
+            key: [0u8; 8],
+            frame_number: 0u32,
+        }
+    }
+}
+
+impl A52 {
+    pub fn encrypt_bytes_cloned(&self, bytes: &mut [u8]) {
+        let mut rng = self.rng.clone();
+        let keystream = rng.keystream(bytes.len(), self.key, self.frame_number);
+        xor_into_bytes(bytes, &keystream);
+    }
+}
+
+impl Cipher for A52 {
+    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
+        let mut bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| CipherError::input("byte format error"))?;
+        self.encrypt_bytes_cloned(&mut bytes);
+        Ok(self.output_format.byte_slice_to_text(&bytes))
+    }
+
+    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
+        self.encrypt(text)
+    }
+}
 
 #[cfg(test)]
 mod a52_tests {
@@ -159,7 +203,7 @@ mod a52_tests {
 
     #[test]
     fn test_ksa() {
-        let mut cipher = A52::default();
+        let mut cipher = A52Rng::default();
         cipher.ksa([0x00, 0xfc, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff], 0x21);
         let correct_bytes_ab: [u8; 15] = [
             0xf4, 0x51, 0x2c, 0xac, 0x13, 0x59, 0x37, 0x64, 0x46, 0x0b, 0x72, 0x2d, 0xad, 0xd5,

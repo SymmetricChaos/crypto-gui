@@ -20,7 +20,7 @@ impl Lfsr32 {
         let n = 32 - taps.leading_zeros();
         let mask = 2_u32.pow(n) - 1;
         Self {
-            register: 0_u32,
+            register: 0,
             taps,
             mask,
         }
@@ -43,10 +43,21 @@ impl Lfsr32 {
         (self.register & (1 << idx)).count_ones()
     }
 
-    pub fn next_bit(&mut self) -> u32 {
+    pub fn bit_from_taps(&self) -> u32 {
         // Mask off everything except the taps, count the one bits, take the parity
-        let bit = (self.register & self.taps).count_ones() & 1;
+        (self.register & self.taps).count_ones() & 1
+    }
+
+    pub fn step(&mut self) {
+        let bit = self.bit_from_taps();
         // Shift the register, mask off the high bits, OR the bit into the register
+        self.register <<= 1;
+        self.register &= self.mask;
+        self.register |= bit;
+    }
+
+    pub fn next_bit(&mut self) -> u32 {
+        let bit = self.bit_from_taps();
         self.register <<= 1;
         self.register &= self.mask;
         self.register |= bit;
