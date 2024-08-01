@@ -39,7 +39,7 @@ impl A52Rng {
 
         // Mix in the key bits one byte at a time, LSB first
         for i in 0..64 {
-            self.step_all();
+            self.step_all(false);
             let b = ((key[i / 8] >> (i & 7)) & 1) as u32;
             self.lfsrs[0].register ^= b;
             self.lfsrs[1].register ^= b;
@@ -49,7 +49,8 @@ impl A52Rng {
 
         // Mix in the frame bits LSB first
         for i in 0..22 {
-            self.step_all();
+            // For the last bit of the frame number several bits are loaded when the LFSRs are stepped
+            self.step_all(i == 21);
             let b = (frame_number >> i) & 1;
             self.lfsrs[0].register ^= b;
             self.lfsrs[1].register ^= b;
@@ -57,15 +58,18 @@ impl A52Rng {
             self.lfsrs[3].register ^= b;
         }
 
-        // Mix for 100 steps with normal clocking
-        for _ in 0..100 {
+        // Mix for 99 steps with normal clocking
+        for _ in 0..99 {
             self.next_bit();
         }
     }
 
-    pub fn step_all(&mut self) {
-        for lfsr in self.lfsrs.iter_mut() {
+    pub fn step_all(&mut self, load: bool) {
+        for (i, lfsr) in self.lfsrs.iter_mut().enumerate() {
             lfsr.next_bit();
+            if load {
+                lfsr.register |= 1 << Self::LOADED[i];
+            }
         }
     }
 
@@ -85,11 +89,9 @@ impl A52Rng {
         for (clock, idx) in [(a, 0), (b, 1), (c, 2)] {
             if clock == m {
                 self.lfsrs[idx].next_bit();
-                self.lfsrs[idx].register |= 1 << Self::LOADED[idx]; // Forcibly set the loaded bit
             }
         }
         self.lfsrs[3].next_bit();
-        self.lfsrs[3].register |= 1 << 10;
 
         // Determine the output bit
         let mut out = 0;
@@ -216,16 +218,16 @@ mod a52_tests {
 
         let (bytes_ab, bytes_ba) = cipher.burst_bytes();
 
-        println!("\nA -> B");
-        for (a, b) in correct_bytes_ab.into_iter().zip(bytes_ab.into_iter()) {
-            println!("{:08b} {:02x} {:08b} {:02x}", a, a, b, b)
-        }
-        println!("\nB -> A");
-        for (a, b) in correct_bytes_ba.into_iter().zip(bytes_ba.into_iter()) {
-            println!("{:08b} {:02x} {:08b} {:02x}", a, a, b, b)
-        }
+        // println!("\nA -> B");
+        // for (a, b) in correct_bytes_ab.into_iter().zip(bytes_ab.into_iter()) {
+        //     println!("{:08b} {:02x} {:08b} {:02x}", a, a, b, b)
+        // }
+        // println!("\nB -> A");
+        // for (a, b) in correct_bytes_ba.into_iter().zip(bytes_ba.into_iter()) {
+        //     println!("{:08b} {:02x} {:08b} {:02x}", a, a, b, b)
+        // }
 
-        // assert_eq!(correct_bytes_ab, bytes_ab);
-        // assert_eq!(correct_bytes_ba, bytes_ba);
+        assert_eq!(correct_bytes_ab, bytes_ab);
+        assert_eq!(correct_bytes_ba, bytes_ba);
     }
 }
