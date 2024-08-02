@@ -39,6 +39,8 @@ use self::{
     vic_controls::VicFrame, vigenere_controls::VigenereFrame,
 };
 
+mod a51_controls;
+mod a52_controls;
 mod adfgvx_controls;
 mod aes_controls;
 mod affine_controls;
