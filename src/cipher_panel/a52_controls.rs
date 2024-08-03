@@ -23,13 +23,29 @@ impl Default for A52Frame {
 
 impl CipherFrame for A52Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        ui.subheading("Main LFSRs");
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/ciphers/src/digital/stream_ciphers/a52.rs",
+        );
+        ui.add_space(8.0);
+
+        ui.randomize_reset(self);
+        ui.add_space(16.0);
+
+        ui.byte_io_mode(
+            &mut self.cipher.input_format,
+            &mut self.cipher.output_format,
+        );
+        ui.add_space(16.0);
+
+        ui.subheading("Main LFSRs (Starting States)");
         ui.label(format!("{:#019b}", self.cipher.rng.lfsrs[0].register));
         ui.label(format!("{:#022b}", self.cipher.rng.lfsrs[1].register));
         ui.label(format!("{:#023b}", self.cipher.rng.lfsrs[2].register));
-
-        ui.subheading("Clock Control LFSR");
+        ui.add_space(4.0);
+        ui.subheading("Clock Control LFSR (Starting State)");
         ui.label(format!("{:#017b}", self.cipher.rng.lfsrs[2].register));
+        ui.add_space(8.0);
 
         ui.subheading("Key (Taken in Big-endian Order)");
         if ui.u64_drag_value_hex(&mut self.key).changed() {
@@ -37,6 +53,7 @@ impl CipherFrame for A52Frame {
                 .rng
                 .ksa(self.key.to_be_bytes(), self.frame_number)
         }
+        ui.add_space(8.0);
 
         ui.subheading("Frame Number (Limited to 22 Bits)");
         if ui.u32_drag_value_hex(&mut self.frame_number).changed() {
