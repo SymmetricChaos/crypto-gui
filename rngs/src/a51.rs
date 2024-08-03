@@ -1,10 +1,10 @@
-use super::lfsr_copy::Lfsr32;
-use crate::{Cipher, CipherError};
-use utils::byte_formatting::{xor_into_bytes, ByteFormat};
+use crate::{lfsr32::Lfsr32, ClassicRng};
 
 #[derive(Debug, Clone)]
 pub struct A51Rng {
     pub lfsrs: [Lfsr32; 3],
+    pub key: [u8; 8],
+    pub frame_number: u32,
 }
 
 impl Default for A51Rng {
@@ -15,14 +15,16 @@ impl Default for A51Rng {
                 Lfsr32::from_taps(0x300000), // 21, 20
                 Lfsr32::from_taps(0x700080), // 22, 21, 20, 7
             ],
+            key: [0; 8],
+            frame_number: 0,
         }
     }
 }
 
 impl A51Rng {
-    pub fn ksa(&mut self, key: [u8; 8], frame_number: u32) {
+    pub fn ksa(&mut self) {
         // Frame number limited to 22 bits
-        assert!(frame_number < 0x00400000);
+        assert!(self.frame_number < 0x00400000);
 
         // Zero out the registers
         for rng in self.lfsrs.iter_mut() {
@@ -32,7 +34,7 @@ impl A51Rng {
         // Mix in the key bits one byte at a time, LSB first
         for i in 0..64 {
             self.step_all();
-            let b = ((key[i / 8] >> (i & 7)) & 1) as u32;
+            let b = ((self.key[i / 8] >> (i & 7)) & 1) as u32;
             self.lfsrs[0].register ^= b;
             self.lfsrs[1].register ^= b;
             self.lfsrs[2].register ^= b;
@@ -41,7 +43,7 @@ impl A51Rng {
         // Mix in the frame bits LSB first
         for i in 0..22 {
             self.step_all();
-            let b = (frame_number >> i) & 1;
+            let b = (self.frame_number >> i) & 1;
             self.lfsrs[0].register ^= b;
             self.lfsrs[1].register ^= b;
             self.lfsrs[2].register ^= b;
@@ -99,14 +101,13 @@ impl A51Rng {
         (bytes_ab, bytes_ba)
     }
 
-    pub fn keystream(&mut self, n_bytes: usize, key: [u8; 8], frame_number: u32) -> Vec<u8> {
+    pub fn keystream(&mut self, n_bytes: usize) -> Vec<u8> {
         let mut bytes = vec![0; n_bytes];
-        let mut f = frame_number;
         for i in 0..(n_bytes * 8) {
             if i % 114 == 0 {
-                self.ksa(key, f);
-                f += 1;
-                f %= 0x00400000;
+                self.ksa();
+                self.frame_number += 1;
+                self.frame_number %= 0x00400000;
             }
             let b = self.next_bit();
             bytes[i / 8] |= (b << (7 - (i & 7))) as u8;
@@ -115,58 +116,23 @@ impl A51Rng {
     }
 }
 
-pub struct A51 {
-    pub output_format: ByteFormat,
-    pub input_format: ByteFormat,
-    pub rng: A51Rng,
-    pub key: [u8; 8],
-    pub frame_number: u32,
-}
-
-impl Default for A51 {
-    fn default() -> Self {
-        Self {
-            output_format: ByteFormat::Hex,
-            input_format: ByteFormat::Hex,
-            rng: Default::default(),
-            key: [0u8; 8],
-            frame_number: 0u32,
-        }
-    }
-}
-
-impl A51 {
-    pub fn encrypt_bytes_cloned(&self, bytes: &mut [u8]) {
-        let mut rng = self.rng.clone();
-        let keystream = rng.keystream(bytes.len(), self.key, self.frame_number);
-        xor_into_bytes(bytes, &keystream);
-    }
-}
-
-impl Cipher for A51 {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
-        self.encrypt_bytes_cloned(&mut bytes);
-        Ok(self.output_format.byte_slice_to_text(&bytes))
-    }
-
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        self.encrypt(text)
+impl ClassicRng for A51Rng {
+    fn next_u32(&mut self) -> u32 {
+        u32::from_be_bytes(self.keystream(4).try_into().unwrap())
     }
 }
 
 #[cfg(test)]
-mod a51_tests {
+mod a51rng_tests {
 
     use super::*;
 
     #[test]
     fn test_ksa() {
         let mut cipher = A51Rng::default();
-        cipher.ksa([0x12, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF], 0x134);
+        cipher.key = [0x12, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF];
+        cipher.frame_number = 0x134;
+        cipher.ksa();
         let correct_bytes_ab: [u8; 15] = [
             0x53, 0x4E, 0xAA, 0x58, 0x2F, 0xE8, 0x15, 0x1A, 0xB6, 0xE1, 0x85, 0x5A, 0x72, 0x8C,
             0x00,

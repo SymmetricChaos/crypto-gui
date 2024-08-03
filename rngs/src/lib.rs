@@ -1,3 +1,5 @@
+pub mod a51;
+pub mod a52;
 pub mod alternating_step;
 pub mod blumblumshub;
 pub mod chacha;

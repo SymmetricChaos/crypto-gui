@@ -36,13 +36,18 @@ impl CipherFrame for A51Frame {
             &mut self.cipher.input_format,
             &mut self.cipher.output_format,
         );
-        ui.add_space(8.0);
+        ui.add_space(16.0);
 
-        ui.subheading("LFSRs");
-        ui.label(format!("{:#019b}", self.cipher.rng.lfsrs[0].register));
-        ui.label(format!("{:#022b}", self.cipher.rng.lfsrs[1].register));
-        ui.label(format!("{:#023b}", self.cipher.rng.lfsrs[2].register));
-        ui.add_space(8.0);
+        ui.subheading("LFSRs (Starting States)");
+        ui.monospace(format!("{:019b}", self.cipher.rng.lfsrs[0].register));
+        ui.monospace("^^^  ^             ");
+        ui.add_space(4.0);
+        ui.monospace(format!("{:022b}", self.cipher.rng.lfsrs[1].register));
+        ui.monospace("^^                    ");
+        ui.add_space(4.0);
+        ui.monospace(format!("{:023b}", self.cipher.rng.lfsrs[2].register));
+        ui.monospace("^^^            ^       ");
+        ui.add_space(16.0);
 
         ui.subheading("Key (Taken in Big-endian Order)");
         if ui.u64_drag_value_hex(&mut self.key).changed() {
