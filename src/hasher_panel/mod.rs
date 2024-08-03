@@ -1,3 +1,9 @@
+use egui::Ui;
+use hashers::{
+    errors::HasherError,
+    ids::{hasher_categories::HasherCategory, HasherId},
+};
+
 mod blake2_controls;
 mod blake3_controls;
 mod blake_controls;
@@ -16,22 +22,6 @@ mod sha1_controls;
 mod sha2_controls;
 mod sha3_controls;
 mod siphash_controls;
-
-use egui::Ui;
-use hashers::{
-    errors::HasherError,
-    ids::{hasher_categories::HasherCategory, HasherId},
-};
-use lm_controls::LmFrame;
-use pbkdf2_controls::Pbkdf2Frame;
-
-use self::{
-    blake2_controls::Blake2Frame, blake3_controls::Blake3Frame, blake_controls::BlakeFrame,
-    fnv_controls::FnvFrame, hmac_controls::HmacFrame, md4_controls::Md4Frame,
-    md5_controls::Md5Frame, mgf1_controls::Mgf1Frame, pearson_controls::PearsonFrame,
-    poly1305_controls::Poly1305Frame, sha0_controls::Sha0Frame, sha1_controls::Sha1Frame,
-    sha2_controls::Sha2Frame, sha3_controls::Sha3Frame, siphash_controls::SipHashFrame,
-};
 
 pub trait HasherFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
@@ -61,23 +51,23 @@ fn combox_box(
 
 #[derive(Default)]
 pub struct HasherInterface {
-    blake: BlakeFrame,
-    blake2: Blake2Frame,
-    blake3: Blake3Frame,
-    fnv: FnvFrame,
-    hmac: HmacFrame,
-    lm: LmFrame,
-    md4: Md4Frame,
-    md5: Md5Frame,
-    mgf1: Mgf1Frame,
-    pbkdf2: Pbkdf2Frame,
-    pearson: PearsonFrame,
-    poly1305: Poly1305Frame,
-    siphash: SipHashFrame,
-    sha0: Sha0Frame,
-    sha1: Sha1Frame,
-    sha2: Sha2Frame,
-    sha3: Sha3Frame,
+    blake: blake_controls::BlakeFrame,
+    blake2: blake2_controls::Blake2Frame,
+    blake3: blake3_controls::Blake3Frame,
+    fnv: fnv_controls::FnvFrame,
+    hmac: hmac_controls::HmacFrame,
+    lm: lm_controls::LmFrame,
+    md4: md4_controls::Md4Frame,
+    md5: md5_controls::Md5Frame,
+    mgf1: mgf1_controls::Mgf1Frame,
+    pbkdf2: pbkdf2_controls::Pbkdf2Frame,
+    pearson: pearson_controls::PearsonFrame,
+    poly1305: poly1305_controls::Poly1305Frame,
+    siphash: siphash_controls::SipHashFrame,
+    sha0: sha0_controls::Sha0Frame,
+    sha1: sha1_controls::Sha1Frame,
+    sha2: sha2_controls::Sha2Frame,
+    sha3: sha3_controls::Sha3Frame,
 }
 
 impl HasherInterface {
