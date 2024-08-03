@@ -1,45 +1,9 @@
-use a51_controls::A51Frame;
-use a52_controls::A52Frame;
-use blowfish_controls::BlowfishFrame;
-use chacha_ex_controls::ChaChaExNonceFrame;
 use ciphers::{
     errors::CipherError,
     ids::{cipher_categories::CipherCategory, CipherId},
     traits::Cipher,
 };
-use des_controls::DesFrame;
-use desx_controls::DesXFrame;
-use diffie_hellman_controls::DiffieHellmanFrame;
 use egui::Ui;
-use idea_controls::IdeaFrame;
-use triple_des_controls::TripleDesFrame;
-use xor_splitting_controls::XorSecretSplittingFrame;
-use xtea_controls::XteaFrame;
-
-use self::{
-    adfgvx_controls::AdfgvxFrame, aes_controls::AesFrame, affine_controls::AffineFrame,
-    alberti_controls::AlbertiFrame, amsco_controls::AmscoFrame, b64_controls::B64Frame,
-    batco_controls::BatcoFrame, bazeries_controls::BazeriesFrame, beaufort_controls::BeaufortFrame,
-    bifid_controls::BifidFrame, caesar_controls::CaesarFrame,
-    chacha20_poly1305_controls::ChaCha20Poly1305Frame, chacha_controls::ChaChaFrame,
-    chaocipher_controls::ChaocipherFrame, checkerboard_controls::StraddlingCheckerboardFrame,
-    columnar_controls::ColumnarFrame, decoder_ring_controls::DecoderRingFrame,
-    diagonal_columnar_controls::DiagonalColumnarFrame, dryad_controls::DryadFrame,
-    enigma_controls::EnigmaM3Frame, four_square_controls::FourSquareFrame,
-    general_sub_controls::GeneralSubstitutionFrame, grille_controls::GrilleFrame,
-    hebern_controls::HebernFrame, hutton_controls::HuttonFrame, m209_controls::M209Frame,
-    m94_controls::M94Frame, nihilist_controls::NihilistFrame, playfair_controls::PlayfairFrame,
-    plugboard_controls::PlugboardFrame, polybius_cube_controls::PolybiusCubeFrame,
-    polybius_square_controls::PolybiusSquareFrame, porta_controls::PortaFrame,
-    purple_controls::PurpleFrame, quagmire_controls::QuagmireFrame,
-    rail_fence_controls::RailFenceFrame, rc4_controls::Rc4Frame, rc5_controls::Rc5Frame,
-    rs44_controls::Rs44Frame, rsa_controls::RsaFrame, salsa20_controls::Salsa20Frame,
-    scytale_controls::ScytaleFrame, seriated_playfair_controls::SeriatedPlayfairFrame,
-    shamir_controls::ShamirSecretSharingFrame, sigaba_controls::SigabaFrame,
-    slidefair_controls::SlidefairFrame, tea_controls::TeaFrame, trifid_controls::TrifidFrame,
-    turning_grille_controls::TurningGrilleFrame, two_square_controls::TwoSquareFrame,
-    vic_controls::VicFrame, vigenere_controls::VigenereFrame,
-};
 
 mod a51_controls;
 mod a52_controls;
@@ -145,85 +109,91 @@ fn combox_box(
 #[derive(Default)]
 pub struct CipherInterface {
     // Simple Substitution
-    affine: AffineFrame,
-    caesar: CaesarFrame,
-    decoder_ring: DecoderRingFrame,
-    gen_sub: GeneralSubstitutionFrame,
-    plugboard: PlugboardFrame,
+    affine: affine_controls::AffineFrame,
+    caesar: caesar_controls::CaesarFrame,
+    decoder_ring: decoder_ring_controls::DecoderRingFrame,
+    gen_sub: general_sub_controls::GeneralSubstitutionFrame,
+    plugboard: plugboard_controls::PlugboardFrame,
 
     // Electromechanical
-    enigma: EnigmaM3Frame,
-    hebern: HebernFrame,
-    m209: M209Frame,
-    sigaba: SigabaFrame,
-    purple: PurpleFrame,
+    enigma: enigma_controls::EnigmaM3Frame,
+    hebern: hebern_controls::HebernFrame,
+    m209: m209_controls::M209Frame,
+    sigaba: sigaba_controls::SigabaFrame,
+    purple: purple_controls::PurpleFrame,
 
     // Polyalphabetic
-    alberti: AlbertiFrame,
-    bazeries: BazeriesFrame,
-    beaufort: BeaufortFrame,
-    chaocipher: ChaocipherFrame,
-    hutton: HuttonFrame,
-    m94: M94Frame,
-    porta: PortaFrame,
-    quagmire: QuagmireFrame,
-    vigenere: VigenereFrame,
+    alberti: alberti_controls::AlbertiFrame,
+    bazeries: bazeries_controls::BazeriesFrame,
+    beaufort: beaufort_controls::BeaufortFrame,
+    chaocipher: chaocipher_controls::ChaocipherFrame,
+    hutton: hutton_controls::HuttonFrame,
+    m94: m94_controls::M94Frame,
+    porta: porta_controls::PortaFrame,
+    quagmire: quagmire_controls::QuagmireFrame,
+    vigenere: vigenere_controls::VigenereFrame,
 
     // Playfair Based
-    playfair: PlayfairFrame,
-    seriated: SeriatedPlayfairFrame,
-    slidefair: SlidefairFrame,
-    two_square: TwoSquareFrame,
-    four_square: FourSquareFrame,
+    playfair: playfair_controls::PlayfairFrame,
+    seriated: seriated_playfair_controls::SeriatedPlayfairFrame,
+    slidefair: slidefair_controls::SlidefairFrame,
+    two_square: two_square_controls::TwoSquareFrame,
+    four_square: four_square_controls::FourSquareFrame,
 
     // Transposition
-    amsco: AmscoFrame,
-    columnar: ColumnarFrame,
-    diagonal_columnar: DiagonalColumnarFrame,
-    grille: GrilleFrame,
-    rail_fence: RailFenceFrame,
-    scytale: ScytaleFrame,
-    turning_grille: TurningGrilleFrame,
+    amsco: amsco_controls::AmscoFrame,
+    columnar: columnar_controls::ColumnarFrame,
+    diagonal_columnar: diagonal_columnar_controls::DiagonalColumnarFrame,
+    grille: grille_controls::GrilleFrame,
+    rail_fence: rail_fence_controls::RailFenceFrame,
+    scytale: scytale_controls::ScytaleFrame,
+    turning_grille: turning_grille_controls::TurningGrilleFrame,
 
     // Polybius Based
-    adfgvx: AdfgvxFrame,
-    b64: B64Frame,
-    bifid: BifidFrame,
-    nihilist: NihilistFrame,
-    polybius: PolybiusSquareFrame,
-    polybius_cube: PolybiusCubeFrame,
-    trifid: TrifidFrame,
+    adfgvx: adfgvx_controls::AdfgvxFrame,
+    b64: b64_controls::B64Frame,
+    bifid: bifid_controls::BifidFrame,
+    nihilist: nihilist_controls::NihilistFrame,
+    polybius: polybius_square_controls::PolybiusSquareFrame,
+    polybius_cube: polybius_cube_controls::PolybiusCubeFrame,
+    trifid: trifid_controls::TrifidFrame,
 
     // Tactical
-    batco: BatcoFrame,
-    checkerboard: StraddlingCheckerboardFrame,
-    dryad: DryadFrame,
-    rs44: Rs44Frame,
+    batco: batco_controls::BatcoFrame,
+    checkerboard: checkerboard_controls::StraddlingCheckerboardFrame,
+    dryad: dryad_controls::DryadFrame,
+    rs44: rs44_controls::Rs44Frame,
 
-    // Digital
-    a51: A51Frame,
-    a52: A52Frame,
-    aes: AesFrame,
-    blowfish: BlowfishFrame,
-    chacha: ChaChaFrame,
-    chachaexnonce: ChaChaExNonceFrame,
-    chacha20poly1305: ChaCha20Poly1305Frame,
-    des: DesFrame,
-    desx: DesXFrame,
-    diffie_hellman: DiffieHellmanFrame,
-    idea: IdeaFrame,
-    rc4: Rc4Frame,
-    rc5: Rc5Frame,
-    rsa: RsaFrame,
-    tea: TeaFrame,
-    triple_des: TripleDesFrame,
-    salsa20: Salsa20Frame,
-    xtea: XteaFrame,
+    // Block
+    aes: aes_controls::AesFrame,
+    blowfish: blowfish_controls::BlowfishFrame,
+    des: des_controls::DesFrame,
+    desx: desx_controls::DesXFrame,
+    idea: idea_controls::IdeaFrame,
+    rc5: rc5_controls::Rc5Frame,
+    tea: tea_controls::TeaFrame,
+    triple_des: triple_des_controls::TripleDesFrame,
+    xtea: xtea_controls::XteaFrame,
 
-    // Other
-    shamir: ShamirSecretSharingFrame,
-    vic: VicFrame,
-    xor_splitting: XorSecretSplittingFrame,
+    // Stream
+    a51: a51_controls::A51Frame,
+    a52: a52_controls::A52Frame,
+    chacha: chacha_controls::ChaChaFrame,
+    chachaexnonce: chacha_ex_controls::ChaChaExNonceFrame,
+    chacha20poly1305: chacha20_poly1305_controls::ChaCha20Poly1305Frame,
+    rc4: rc4_controls::Rc4Frame,
+    salsa20: salsa20_controls::Salsa20Frame,
+
+    // Public Key
+    diffie_hellman: diffie_hellman_controls::DiffieHellmanFrame,
+    rsa: rsa_controls::RsaFrame,
+
+    // Composite
+    vic: vic_controls::VicFrame,
+
+    // Secret ShARING
+    shamir: shamir_controls::ShamirSecretSharingFrame,
+    xor_splitting: xor_splitting_controls::XorSecretSplittingFrame,
 }
 
 impl CipherInterface {

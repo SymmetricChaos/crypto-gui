@@ -21,29 +21,12 @@ mod vmpcr_controls;
 mod weyl_controls;
 mod xorshift_controls;
 mod xoshiro_controls;
-use a51_controls::A51Frame;
-use a52_controls::A52Frame;
-use alternating_step_controls::AlternatingStepFrame;
-use chacha_controls::ChaChaFrame;
-use geffe_controls::GeffeFrame;
-use lfg_controls::LfgFrame;
-use middle_square_binary_controls::MiddleSquareBinaryFrame;
 
 use egui::Ui;
 
 use rngs::{
     ids::{rng_categories::RngCategory, RngId},
     ClassicRng,
-};
-use self_shrinking_generator::SelfShrinkingGeneratorFrame;
-use shrinking_generator::ShrinkingGeneratorFrame;
-
-use self::{
-    blumblumshub_controls::BlumBlumShubFrame, halton_controls::HaltonFrame, jsf_controls::JsfFrame,
-    lcg_controls::LcgFrame, lfsr_controls::LfsrFrame, mersenne_twister_controls::MTFrame,
-    middle_square_controls::MiddleSquareFrame, pcg_controls::PcgFrame, rc4_controls::Rc4Frame,
-    splitmix_controls::SplitmixFrame, vmpcr_controls::VmpcrFrame, weyl_controls::WeylSequenceFrame,
-    xorshift_controls::XorshiftFrame, xoshiro_controls::XoshiroFrame,
 };
 
 pub trait ClassicRngFrame {
@@ -76,47 +59,29 @@ fn combox_box(
 
 #[derive(Default)]
 pub struct RngInterface {
-    a51: A51Frame,
-    a52: A52Frame,
-    alternating_step: AlternatingStepFrame,
-    blumblumshub: BlumBlumShubFrame,
-    chacha: ChaChaFrame,
-    geffe: GeffeFrame,
-    halton: HaltonFrame,
-    jsf: JsfFrame,
-    lcg: LcgFrame,
-    lfg: LfgFrame,
-    lfsr: LfsrFrame,
-    mersenne_twister: MTFrame,
-    middle_square: MiddleSquareFrame,
-    middle_square_binary: MiddleSquareBinaryFrame,
-    pcg: PcgFrame,
-    rc4: Rc4Frame,
-    self_shrinking_generator: SelfShrinkingGeneratorFrame,
-    shrinking_generator: ShrinkingGeneratorFrame,
-    splitmix: SplitmixFrame,
-    vmpcr: VmpcrFrame,
-    weyl: WeylSequenceFrame,
-    xorshift: XorshiftFrame,
-    xoshiro: XoshiroFrame,
-}
-
-impl ClassicRngFrame for RngInterface {
-    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        <JsfFrame as ClassicRngFrame>::ui(&mut self.jsf, ui, _errors)
-    }
-
-    fn rng(&self) -> &dyn rngs::ClassicRng {
-        <JsfFrame as ClassicRngFrame>::rng(&self.jsf)
-    }
-
-    fn randomize(&mut self) {
-        <JsfFrame as ClassicRngFrame>::randomize(&mut self.jsf)
-    }
-
-    fn reset(&mut self) {
-        <JsfFrame as ClassicRngFrame>::reset(&mut self.jsf)
-    }
+    a51: a51_controls::A51Frame,
+    a52: a52_controls::A52Frame,
+    alternating_step: alternating_step_controls::AlternatingStepFrame,
+    blumblumshub: blumblumshub_controls::BlumBlumShubFrame,
+    chacha: chacha_controls::ChaChaFrame,
+    geffe: geffe_controls::GeffeFrame,
+    halton: halton_controls::HaltonFrame,
+    jsf: jsf_controls::JsfFrame,
+    lcg: lcg_controls::LcgFrame,
+    lfg: lfg_controls::LfgFrame,
+    lfsr: lfsr_controls::LfsrFrame,
+    mersenne_twister: mersenne_twister_controls::MTFrame,
+    middle_square: middle_square_controls::MiddleSquareFrame,
+    middle_square_binary: middle_square_binary_controls::MiddleSquareBinaryFrame,
+    pcg: pcg_controls::PcgFrame,
+    rc4: rc4_controls::Rc4Frame,
+    self_shrinking_generator: self_shrinking_generator::SelfShrinkingGeneratorFrame,
+    shrinking_generator: shrinking_generator::ShrinkingGeneratorFrame,
+    splitmix: splitmix_controls::SplitmixFrame,
+    vmpcr: vmpcr_controls::VmpcrFrame,
+    weyl: weyl_controls::WeylSequenceFrame,
+    xorshift: xorshift_controls::XorshiftFrame,
+    xoshiro: xoshiro_controls::XoshiroFrame,
 }
 
 impl RngInterface {
