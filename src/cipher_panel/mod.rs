@@ -1,3 +1,5 @@
+use a51_controls::A51Frame;
+use a52_controls::A52Frame;
 use blowfish_controls::BlowfishFrame;
 use chacha_ex_controls::ChaChaExNonceFrame;
 use ciphers::{
@@ -199,6 +201,8 @@ pub struct CipherInterface {
     rs44: Rs44Frame,
 
     // Digital
+    a51: A51Frame,
+    a52: A52Frame,
     aes: AesFrame,
     blowfish: BlowfishFrame,
     chacha: ChaChaFrame,
@@ -320,25 +324,46 @@ impl CipherInterface {
 
         combox_box(
             &[
+                CipherId::Adfgvx,
+                CipherId::B64,
+                CipherId::Bifid,
+                CipherId::Trifid,
+                CipherId::Vic,
+            ],
+            active_cipher,
+            CipherCategory::Composite,
+            ui,
+        );
+
+        combox_box(
+            &[
                 CipherId::Aes,
                 CipherId::Blowfish,
-                CipherId::ChaCha,
-                CipherId::ChaChaExtendedNonce,
-                CipherId::ChaCha20Poly1305,
                 CipherId::Des,
                 CipherId::DesX,
-                CipherId::DiffieHellman,
                 CipherId::Idea,
-                CipherId::Rc4,
                 CipherId::Rc5,
-                CipherId::Rsa,
-                CipherId::Salsa20,
                 CipherId::Tea,
                 CipherId::TripleDes,
                 CipherId::Xtea,
             ],
             active_cipher,
-            CipherCategory::Digital,
+            CipherCategory::DigitalBlock,
+            ui,
+        );
+
+        combox_box(
+            &[
+                CipherId::A51,
+                CipherId::A52,
+                CipherId::ChaCha,
+                CipherId::ChaChaExtendedNonce,
+                CipherId::ChaCha20Poly1305,
+                CipherId::Rc4,
+                CipherId::Salsa20,
+            ],
+            active_cipher,
+            CipherCategory::DigitalStream,
             ui,
         );
 
@@ -350,21 +375,17 @@ impl CipherInterface {
         );
 
         combox_box(
-            &[
-                CipherId::Adfgvx,
-                CipherId::B64,
-                CipherId::Bifid,
-                CipherId::Trifid,
-                CipherId::Vic,
-            ],
+            &[CipherId::Rsa, CipherId::DiffieHellman],
             active_cipher,
-            CipherCategory::Composite,
+            CipherCategory::PublicKey,
             ui,
         );
     }
 
     pub fn get_active_cipher(&mut self, active_cipher: &CipherId) -> &mut dyn CipherFrame {
         match active_cipher {
+            CipherId::A51 => &mut self.a51,
+            CipherId::A52 => &mut self.a52,
             CipherId::Aes => &mut self.aes,
             CipherId::Adfgvx => &mut self.adfgvx,
             CipherId::Affine => &mut self.affine,

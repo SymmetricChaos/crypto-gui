@@ -12,9 +12,11 @@ pub enum CipherCategory {
     Playfair,
     Tactical,
     Polybius,
-    Digital,
+    DigitalBlock,
+    DigitalStream,
     Sharing,
     Composite,
+    PublicKey,
 }
 
 impl Default for CipherCategory {
@@ -35,16 +37,18 @@ impl CipherCategory {
 impl Display for CipherCategory {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let name = match self {
-            CipherCategory::Substituion => "Substitution",
-            CipherCategory::Polyalphabetic => "Polyalphabetic",
-            CipherCategory::Electromechanical => "Electromechanical",
-            CipherCategory::Transposition => "Transposition",
-            CipherCategory::Playfair => "Playfair",
-            CipherCategory::Tactical => "Tactical",
-            CipherCategory::Polybius => "Polybius",
-            CipherCategory::Digital => "Digital",
-            CipherCategory::Sharing => "Secret Sharing",
             CipherCategory::Composite => "Composite",
+            CipherCategory::DigitalBlock => "Digital (Block)",
+            CipherCategory::DigitalStream => "Digital (Stream)",
+            CipherCategory::Electromechanical => "Electromechanical",
+            CipherCategory::Playfair => "Playfair",
+            CipherCategory::Polyalphabetic => "Polyalphabetic",
+            CipherCategory::Polybius => "Polybius",
+            CipherCategory::PublicKey => "Public Key",
+            CipherCategory::Sharing => "Secret Sharing",
+            CipherCategory::Substituion => "Substitution",
+            CipherCategory::Tactical => "Tactical",
+            CipherCategory::Transposition => "Transposition",
         };
         write!(f, "{}", name)
     }
