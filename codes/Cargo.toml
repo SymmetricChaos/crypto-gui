@@ -25,3 +25,4 @@ nalgebra = "0.32.2"
 pest = "2.7.5"
 pest_derive = "2.7.5"
 crc = "3.0.1"
+strum = { version = "0.26", features = ["derive"] }

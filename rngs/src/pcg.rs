@@ -1,23 +1,20 @@
+use strum::{Display, EnumIter};
+
 use crate::traits::ClassicRng;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, EnumIter, Display, Clone, Copy)]
 pub enum PcgTransform {
+    #[strum(to_string = "Random Shift")]
     Rs,
+    #[strum(to_string = "Random Rotation")]
     Rr,
+    #[strum(to_string = "Xorshift w/ Random Rotation")]
     XshRr,
+    #[strum(to_string = "Xorshift w/ Random Shift")]
     XshRs,
 }
 
 impl PcgTransform {
-    pub fn name(&self) -> &'static str {
-        match self {
-            Self::Rs => "Random Shift",
-            Self::Rr => "Random Rotation",
-            Self::XshRr => "Xorshift w/ Random Rotation",
-            Self::XshRs => "Xorshift w/ Random Shift",
-        }
-    }
-
     pub fn description(&self) -> &'static str {
         match self {
             Self::Rs => {

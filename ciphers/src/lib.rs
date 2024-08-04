@@ -6,8 +6,6 @@ pub mod polybius;
 pub mod substitution;
 pub mod tactical;
 pub mod transposition;
-
-pub mod hill;
 pub mod vic;
 
 pub mod errors;

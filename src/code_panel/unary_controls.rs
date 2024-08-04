@@ -2,6 +2,7 @@ use super::CodeFrame;
 use crate::ui_elements::UiElements;
 use codes::{letter_word_code::IOMode, mathematical::unary::UnaryCode};
 use egui::TextEdit;
+use strum::IntoEnumIterator;
 use utils::text_functions::unique_string;
 
 pub struct UnaryCodeFrame {
@@ -38,9 +39,9 @@ impl CodeFrame for UnaryCodeFrame {
 
         ui.group(|ui| {
             ui.subheading("Mode");
-            ui.selectable_value(&mut self.code.mode, IOMode::Integer, "Integer");
-            ui.selectable_value(&mut self.code.mode, IOMode::Letter, "Letter");
-            ui.selectable_value(&mut self.code.mode, IOMode::Word, "Word");
+            for variant in IOMode::iter() {
+                ui.selectable_value(&mut self.code.mode, variant, variant.to_string());
+            }
         });
 
         ui.add_space(8.0);

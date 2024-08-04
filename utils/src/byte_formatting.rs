@@ -2,6 +2,7 @@ use base64::prelude::*;
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use regex::Regex;
+use strum::{Display, EnumIter};
 
 lazy_static! {
     pub static ref IS_HEX_BYTES: Regex = Regex::new(r"^(?:[0-9a-fA-F]{2})+$").unwrap();
@@ -76,12 +77,14 @@ pub fn bytes_to_bitstring<T: AsRef<[u8]>>(bytes: T) -> String {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct ByteFormatError;
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, EnumIter, Display)]
 pub enum ByteFormat {
+    #[strum(to_string = "Hexadecimal")]
     Hex,
+    #[strum(to_string = "Text (UTF-8)")]
     Utf8,
     Base64,
-    Bit,
+    Binary,
 }
 
 impl ByteFormat {
@@ -93,7 +96,7 @@ impl ByteFormat {
             ByteFormat::Hex => hex_to_bytes_ltr(text).map_err(|_| ByteFormatError),
             ByteFormat::Utf8 => Ok(text.as_bytes().to_owned()),
             ByteFormat::Base64 => BASE64_STANDARD.decode(text).map_err(|_| ByteFormatError),
-            ByteFormat::Bit => bitstring_to_bytes(text).map_err(|_| ByteFormatError),
+            ByteFormat::Binary => bitstring_to_bytes(text).map_err(|_| ByteFormatError),
         }
     }
 
@@ -141,7 +144,7 @@ impl ByteFormat {
             ByteFormat::Hex => bytes_to_hex(bytes),
             ByteFormat::Utf8 => String::from_utf8_lossy(bytes.as_ref()).to_string(),
             ByteFormat::Base64 => BASE64_STANDARD.encode(bytes),
-            ByteFormat::Bit => bytes
+            ByteFormat::Binary => bytes
                 .as_ref()
                 .iter()
                 .map(|byte| format!("{:08b}", byte))
@@ -154,7 +157,7 @@ impl ByteFormat {
             ByteFormat::Hex => bytes.map(|byte| format!("{:02x}", byte)).collect(),
             ByteFormat::Utf8 => String::from_utf8_lossy(&bytes.collect_vec()).to_string(),
             ByteFormat::Base64 => BASE64_STANDARD.encode(&bytes.collect_vec()),
-            ByteFormat::Bit => bytes.map(|byte| format!("{:08b}", byte)).collect(),
+            ByteFormat::Binary => bytes.map(|byte| format!("{:08b}", byte)).collect(),
         }
     }
 

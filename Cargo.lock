@@ -812,6 +812,7 @@ dependencies = [
  "rand",
  "regex",
  "rfd",
+ "strum",
  "unicode-normalization",
  "unicode-segmentation",
  "utils",
@@ -3212,6 +3213,7 @@ dependencies = [
  "rand",
  "regex",
  "rfd",
+ "strum",
  "unicode-normalization",
  "unicode-segmentation",
  "utils",
@@ -4066,6 +4068,7 @@ dependencies = [
  "regex",
  "rfd",
  "strsim",
+ "strum",
  "unicode-normalization",
  "unicode-segmentation",
 ]

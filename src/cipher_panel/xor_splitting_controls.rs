@@ -24,7 +24,7 @@ impl CipherFrame for XorSecretSplittingFrame {
         );
         ui.add_space(8.0);
 
-        ui.byte_io_mode(
+        ui.byte_io_mode_cipher(
             &mut self.cipher.input_format,
             &mut self.cipher.output_format,
         );

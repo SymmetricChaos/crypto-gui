@@ -45,7 +45,7 @@ impl CipherFrame for ChaCha20Poly1305Frame {
         ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.byte_io_mode(
+        ui.byte_io_mode_cipher(
             &mut self.cipher.cipher.input_format,
             &mut self.cipher.cipher.output_format,
         );

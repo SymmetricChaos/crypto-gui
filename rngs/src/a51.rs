@@ -1,9 +1,14 @@
+use strum::{Display, EnumIter};
+
 use crate::{lfsr32::Lfsr32, ClassicRng};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, Display)]
 pub enum ReKeyRule {
+    #[strum(to_string = "114-bits")]
     K114,
+    #[strum(to_string = "228-bits")]
     K228,
+    #[strum(to_string = "Never")]
     KNever,
 }
 

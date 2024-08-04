@@ -131,7 +131,7 @@ impl Ccsid {
                 String::from_utf8(out).map_err(|e| CodeError::Input(e.to_string()))
             }
             Some(ByteFormat::Base64) => todo!(),
-            Some(ByteFormat::Bit) => todo!(),
+            Some(ByteFormat::Binary) => todo!(),
             None => Err(CodeError::state("Binary to Text Mode is not set")),
         }
     }

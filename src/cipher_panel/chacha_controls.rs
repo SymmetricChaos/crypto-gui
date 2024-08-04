@@ -46,7 +46,7 @@ impl CipherFrame for ChaChaFrame {
         ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.byte_io_mode(
+        ui.byte_io_mode_cipher(
             &mut self.cipher.input_format,
             &mut self.cipher.output_format,
         );

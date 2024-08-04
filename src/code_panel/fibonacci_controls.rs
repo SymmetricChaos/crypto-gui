@@ -3,6 +3,7 @@ use crate::ui_elements::UiElements;
 use super::CodeFrame;
 use codes::{letter_word_code::IOMode, mathematical::fibonacci::FibonacciCode};
 use egui::TextEdit;
+use strum::IntoEnumIterator;
 use utils::text_functions::unique_string;
 
 pub struct FibonacciCodeFrame {
@@ -29,9 +30,9 @@ impl CodeFrame for FibonacciCodeFrame {
 
         ui.group(|ui| {
             ui.subheading("Mode");
-            ui.selectable_value(&mut self.code.mode, IOMode::Integer, "Integer");
-            ui.selectable_value(&mut self.code.mode, IOMode::Letter, "Letter");
-            ui.selectable_value(&mut self.code.mode, IOMode::Word, "Word");
+            for variant in IOMode::iter() {
+                ui.selectable_value(&mut self.code.mode, variant, variant.to_string());
+            }
         });
         ui.add_space(8.0);
         ui.checkbox(&mut self.code.spaced, "Use Spaces");

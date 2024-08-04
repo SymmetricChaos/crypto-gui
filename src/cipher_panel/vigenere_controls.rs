@@ -6,6 +6,7 @@ use ciphers::{
 };
 use egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
+use strum::IntoEnumIterator;
 use utils::{
     preset_alphabet::Alphabet,
     text_functions::{filter_string, random_string_sample_replace},
@@ -67,9 +68,9 @@ impl CipherFrame for VigenereFrame {
         ui.group(|ui| {
             ui.subheading("Mode");
             ui.horizontal(|ui| {
-                ui.selectable_value(&mut self.cipher.mode, PolyMode::CylicKey, "Cyclic");
-                ui.selectable_value(&mut self.cipher.mode, PolyMode::Autokey, "Autokey");
-                ui.selectable_value(&mut self.cipher.mode, PolyMode::ProgKey, "Progressive");
+                for variant in PolyMode::iter() {
+                    ui.selectable_value(&mut self.cipher.mode, variant, variant.to_string());
+                }
             });
         });
 

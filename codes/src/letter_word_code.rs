@@ -1,8 +1,9 @@
 use itertools::Itertools;
+use strum::{Display, EnumIter};
 
 use crate::errors::CodeError;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, EnumIter, Display)]
 pub enum IOMode {
     Letter,
     Word,

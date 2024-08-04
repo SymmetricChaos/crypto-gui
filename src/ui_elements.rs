@@ -45,7 +45,7 @@ pub trait UiElements {
         iter: Box<dyn Iterator<Item = (S, T)> + '_>,
     );
     fn binary_to_text_input_mode(&mut self, current_value: &mut ByteFormat);
-    fn byte_io_mode(&mut self, input: &mut ByteFormat, output: &mut ByteFormat);
+    fn byte_io_mode_cipher(&mut self, input: &mut ByteFormat, output: &mut ByteFormat);
     fn byte_io_mode_hasher(&mut self, input: &mut ByteFormat, output: &mut ByteFormat);
     fn u8_drag_value_hex(&mut self, n: &mut u8) -> Response;
     fn u16_drag_value_hex(&mut self, n: &mut u16) -> Response;
@@ -146,75 +146,61 @@ impl UiElements for Ui {
 
     fn binary_to_text_input_mode(&mut self, current_value: &mut ByteFormat) {
         self.label("Encoding Mode");
-        self.selectable_value(current_value, ByteFormat::Hex, "Hex");
-        self.selectable_value(current_value, ByteFormat::Utf8, "Text (UTF-8)");
-        self.selectable_value(current_value, ByteFormat::Base64, "Base64");
-        self.selectable_value(current_value, ByteFormat::Bit, "Binary");
+        for variant in ByteFormat::iter() {
+            self.selectable_value(current_value, variant, variant.to_string());
+        }
     }
 
-    fn byte_io_mode(&mut self, input: &mut ByteFormat, output: &mut ByteFormat) {
-        egui::CollapsingHeader::new("Input Format").default_open(true).show(self, |ui| {
-            ui.label("Input can be text, hexadecimal representing bytes, or Base64 representing bytes.");
-            ui.horizontal(|ui| {
-                ui.selectable_value(
-                    input,
-                    ByteFormat::Utf8,
-                    "Text (UTF-8)",
+    fn byte_io_mode_cipher(&mut self, input: &mut ByteFormat, output: &mut ByteFormat) {
+        egui::CollapsingHeader::new("Input Format")
+            .default_open(true)
+            .show(self, |ui| {
+                ui.label(
+                    "Input can be text, hexadecimal, Base64, or binary. All interpreted as bytes.",
                 );
-                ui.selectable_value(
-                    input,
-                    ByteFormat::Hex,
-                    "Hexadecimal",
-                );
-                ui.selectable_value(input, ByteFormat::Base64, "Base64");
+                ui.horizontal(|ui| {
+                    for variant in ByteFormat::iter() {
+                        ui.selectable_value(input, variant, variant.to_string());
+                    }
+                });
             });
-        });
 
         self.add_space(8.0);
 
-        egui::CollapsingHeader::new("Output Format").default_open(true).show(self, |ui| {
-            ui.label("Output can be text, hexadecimal representing bytes, or Base64 representing bytes.");
-            ui.horizontal(|ui| {
-                ui.selectable_value(
-                    output,
-                    ByteFormat::Utf8,
-                    "Text (UTF-8)",
+        egui::CollapsingHeader::new("Output Format")
+            .default_open(true)
+            .show(self, |ui| {
+                ui.label(
+                    "Output can be text, hexadecimal, Base64, or binary. All interpreted as bytes.",
                 );
-                ui.selectable_value(
-                    output,
-                    ByteFormat::Hex,
-                    "Hexadecimal",
-                );
-                ui.selectable_value(output, ByteFormat::Base64, "Base64");
+                ui.horizontal(|ui| {
+                    for variant in ByteFormat::iter() {
+                        ui.selectable_value(output, variant, variant.to_string());
+                    }
+                });
             });
-        });
     }
 
     fn byte_io_mode_hasher(&mut self, input: &mut ByteFormat, output: &mut ByteFormat) {
         self.collapsing("Input Format", |ui| {
-            ui.label("Input can be text (interpreted as UTF-8), hexadecimal representing bytes, or Base64 representing bytes.");
+            ui.label(
+                "Input can be text, hexadecimal, Base64, or binary. All interpreted as bytes.",
+            );
             ui.horizontal(|ui| {
-                ui.selectable_value(
-                    input,
-                    ByteFormat::Utf8,
-                    "Text (UTF-8)",
-                );
-                ui.selectable_value(
-                    input,
-                    ByteFormat::Hex,
-                    "Hexadecimal",
-                );
-                ui.selectable_value(input, ByteFormat::Base64, "Base64");
+                for variant in ByteFormat::iter() {
+                    ui.selectable_value(input, variant, variant.to_string());
+                }
             });
         });
 
         self.add_space(8.0);
 
         self.collapsing("Output Format", |ui| {
-            ui.label("Output can be hexadecimal representing bytes or Base64 representing bytes.");
+            ui.label("Output can be hexadecimal, Base64, or binary. All interpreted as bytes. Text formats do not allow all bytes and cannot be used for output.");
             ui.horizontal(|ui| {
                 ui.selectable_value(output, ByteFormat::Hex, "Hexadecimal");
                 ui.selectable_value(output, ByteFormat::Base64, "Base64");
+                ui.selectable_value(output, ByteFormat::Binary, "Binary");
             });
         });
     }

@@ -22,3 +22,4 @@ bimap = "0.6.3"
 regex = "1"
 rfd = "0.11.3"
 num-prime = "0.4.3"
+strum = { version = "0.26", features = ["derive"] }

@@ -22,3 +22,4 @@ rfd = "0.11.3"
 mod_exp = "1.0.1"
 base64 = "0.21.7"
 strsim = "0.11.0"
+strum = { version = "0.26", features = ["derive"] }

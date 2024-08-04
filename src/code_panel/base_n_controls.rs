@@ -2,6 +2,7 @@ use super::CodeFrame;
 use crate::ui_elements::UiElements;
 use codes::{letter_word_code::IOMode, mathematical::base_n::BaseN};
 use egui::{Slider, TextEdit};
+use strum::IntoEnumIterator;
 use utils::text_functions::unique_string;
 
 pub struct BaseNFrame {
@@ -28,9 +29,9 @@ impl CodeFrame for BaseNFrame {
 
         ui.group(|ui| {
             ui.subheading("Mode");
-            ui.selectable_value(&mut self.code.mode, IOMode::Integer, "Integer");
-            ui.selectable_value(&mut self.code.mode, IOMode::Letter, "Letter");
-            ui.selectable_value(&mut self.code.mode, IOMode::Word, "Word");
+            for variant in IOMode::iter() {
+                ui.selectable_value(&mut self.code.mode, variant, variant.to_string());
+            }
         });
         ui.add_space(16.0);
 

@@ -38,7 +38,7 @@ pub trait BinaryToText {
 
     // Encode some string of characters representing bits
     fn encode_bits(&self, text: &str) -> Result<String, CodeError> {
-        let bytes = ByteFormat::Bit
+        let bytes = ByteFormat::Binary
             .text_to_bytes(text)
             .map_err(|_| CodeError::input("not valid binary"))?;
         self.encode_bytes(&bytes)

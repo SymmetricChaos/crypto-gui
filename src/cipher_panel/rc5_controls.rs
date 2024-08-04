@@ -64,15 +64,15 @@ impl CipherFrame for Rc5Frame {
         ui.add_space(16.0);
 
         match self.selector {
-            SizeSelector::R16 => ui.byte_io_mode(
+            SizeSelector::R16 => ui.byte_io_mode_cipher(
                 &mut self.cipher_16.input_format,
                 &mut self.cipher_16.output_format,
             ),
-            SizeSelector::R32 => ui.byte_io_mode(
+            SizeSelector::R32 => ui.byte_io_mode_cipher(
                 &mut self.cipher_32.input_format,
                 &mut self.cipher_32.output_format,
             ),
-            SizeSelector::R64 => ui.byte_io_mode(
+            SizeSelector::R64 => ui.byte_io_mode_cipher(
                 &mut self.cipher_64.input_format,
                 &mut self.cipher_64.output_format,
             ),

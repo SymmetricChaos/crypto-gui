@@ -2,6 +2,7 @@ use super::ClassicRngFrame;
 use crate::ui_elements::{generate_random_u32s_box, UiElements};
 use rand::{thread_rng, Rng};
 use rngs::a52::A52Rng;
+use strum::IntoEnumIterator;
 
 pub struct A52Frame {
     rng: A52Rng,
@@ -43,9 +44,9 @@ impl ClassicRngFrame for A52Frame {
 
         ui.subheading("Rekeying Rule");
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.rng.rekey, rngs::a52::ReKeyRule::K114, "114-bits");
-            ui.selectable_value(&mut self.rng.rekey, rngs::a52::ReKeyRule::K228, "228-bits");
-            ui.selectable_value(&mut self.rng.rekey, rngs::a52::ReKeyRule::KNever, "Never")
+            for rule in rngs::a52::ReKeyRule::iter() {
+                ui.selectable_value(&mut self.rng.rekey, rule, rule.to_string());
+            }
         });
 
         ui.subheading("LFSRs");

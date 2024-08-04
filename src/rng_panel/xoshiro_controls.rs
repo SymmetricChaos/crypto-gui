@@ -2,6 +2,7 @@ use super::ClassicRngFrame;
 use crate::ui_elements::{generate_random_u32s_box, UiElements};
 use rand::{thread_rng, Rng};
 use rngs::xoshiro::{Scrambler, Xoshiro256};
+use strum::IntoEnumIterator;
 
 pub struct XoshiroFrame {
     rng: Xoshiro256,
@@ -65,8 +66,9 @@ impl ClassicRngFrame for XoshiroFrame {
 
         ui.add_space(16.0);
         ui.subheading("Scrambler");
-        ui.selectable_value(&mut self.rng.scrambler, Scrambler::PlusPlus, "PlusPlus");
-        ui.selectable_value(&mut self.rng.scrambler, Scrambler::StarStar, "StarStar");
+        for variant in Scrambler::iter() {
+            ui.selectable_value(&mut self.rng.scrambler, variant, variant.to_string());
+        }
 
         ui.collapsing("scrambler function", |ui| match self.rng.scrambler {
             Scrambler::PlusPlus => ui.label("rotate_left_23(state[0] + state[3]) + state[0]"),

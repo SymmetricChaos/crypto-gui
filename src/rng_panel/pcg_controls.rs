@@ -4,6 +4,7 @@ use rngs::{
     pcg::{Pcg, PcgTransform},
     ClassicRng,
 };
+use strum::IntoEnumIterator;
 
 use crate::ui_elements::{filter_and_parse_u64, generate_random_u32s_box, UiElements};
 
@@ -87,29 +88,11 @@ impl ClassicRngFrame for PcgFrame {
         ui.add_space(16.0);
 
         ui.subheading("Permutation Function");
+
         ui.horizontal(|ui| {
-            ui.selectable_value(
-                &mut self.rng.transform,
-                PcgTransform::Rs,
-                PcgTransform::Rs.name(),
-            );
-            ui.selectable_value(
-                &mut self.rng.transform,
-                PcgTransform::Rr,
-                PcgTransform::Rr.name(),
-            );
-        });
-        ui.horizontal(|ui| {
-            ui.selectable_value(
-                &mut self.rng.transform,
-                PcgTransform::XshRs,
-                PcgTransform::XshRs.name(),
-            );
-            ui.selectable_value(
-                &mut self.rng.transform,
-                PcgTransform::XshRr,
-                PcgTransform::XshRr.name(),
-            );
+            for variant in PcgTransform::iter() {
+                ui.selectable_value(&mut self.rng.transform, variant, variant.to_string());
+            }
         });
 
         ui.add_space(16.0);
