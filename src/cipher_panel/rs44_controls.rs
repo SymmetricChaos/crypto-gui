@@ -39,7 +39,7 @@ impl CipherFrame for Rs44Frame {
         ui.label("Start Column")
             .on_hover_text_at_pointer("the index of the column that is read first when encrypting");
         if ui
-            .add(DragValue::new(&mut self.cipher.start_column).clamp_range(0..=24))
+            .add(DragValue::new(&mut self.cipher.start_column).range(0..=24))
             .changed()
         {
             self.cipher.set_full_message_key();
@@ -56,7 +56,7 @@ impl CipherFrame for Rs44Frame {
                 .add(
                     DragValue::new(&mut self.cipher.start_cell.1)
                         .prefix("x: ")
-                        .clamp_range(0..=24),
+                        .range(0..=24),
                 )
                 .changed()
             {
@@ -66,7 +66,7 @@ impl CipherFrame for Rs44Frame {
                 .add(
                     DragValue::new(&mut self.cipher.start_cell.0)
                         .prefix("y: ")
-                        .clamp_range(0..=23),
+                        .range(0..=23),
                 )
                 .changed()
             {

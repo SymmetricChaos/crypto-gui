@@ -45,7 +45,7 @@ impl HasherFrame for RadioGatunFrame {
         ui.add_space(8.0);
         ui.subheading("Hash Length (bytes)");
         if ui
-            .add(DragValue::new(&mut self.hasher32.hash_len).clamp_range(1..=512))
+            .add(DragValue::new(&mut self.hasher32.hash_len).range(1..=512))
             .changed()
         {
             self.hasher64.hash_len = self.hasher32.hash_len as u64;

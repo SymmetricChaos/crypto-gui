@@ -41,7 +41,7 @@ impl HasherFrame for Pbkdf2Frame {
         });
 
         ui.subheading("Select Number of Iterations");
-        ui.add(DragValue::new(&mut self.hasher.iterations).clamp_range(1..=32768));
+        ui.add(DragValue::new(&mut self.hasher.iterations).range(1..=32768));
 
         ui.horizontal(|ui| {
             ui.subheading("Provide Salt (Hexadecimal)");
@@ -60,7 +60,7 @@ impl HasherFrame for Pbkdf2Frame {
         }
 
         ui.subheading("Output Length (Bytes)");
-        ui.add(DragValue::new(&mut self.hasher.output_length).clamp_range(4..=512));
+        ui.add(DragValue::new(&mut self.hasher.output_length).range(4..=512));
     }
 
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {

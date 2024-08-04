@@ -121,7 +121,7 @@ impl HasherFrame for Blake3Frame {
 
         ui.subheading("Hash Length");
         ui.label("BLAKE3 allows a variety of output lengths, with a default of 32 bytes (256 bits). While up to 2^64 bytes can be returned this interface limits output to 256 bytes (2048 bits). Unlike BLAKE2 there is no domain seperation for different lengths so short outputs are prefixes of long ones.");
-        ui.add(egui::DragValue::new(&mut self.hasher.hash_len).clamp_range(1..=256));
+        ui.add(egui::DragValue::new(&mut self.hasher.hash_len).range(1..=256));
     }
 
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {

@@ -48,12 +48,12 @@ impl CipherFrame for StraddlingCheckerboardFrame {
 
         ui.horizontal(|ui| {
             ui.mono("First Gap");
-            ui.add(DragValue::new(&mut self.cipher.gaps.0).clamp_range(gap0));
+            ui.add(DragValue::new(&mut self.cipher.gaps.0).range(gap0));
         });
         ui.add_space(4.0);
         ui.horizontal(|ui| {
             ui.mono("Second Gap");
-            ui.add(DragValue::new(&mut self.cipher.gaps.1).clamp_range(gap1));
+            ui.add(DragValue::new(&mut self.cipher.gaps.1).range(gap1));
         });
 
         ui.add_space(16.0);

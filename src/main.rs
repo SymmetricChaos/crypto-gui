@@ -16,7 +16,7 @@ fn main() -> eframe::Result<()> {
     eframe::run_native(
         "Classic Cryptography",
         native_options,
-        Box::new(|cc| Box::new(app::ClassicCrypto::build_with_context(cc))),
+        Box::new(|cc| Ok(Box::new(app::ClassicCrypto::build_with_context(cc)))),
     )
 }
 

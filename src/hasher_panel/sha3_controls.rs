@@ -98,7 +98,7 @@ impl HasherFrame for Sha3Frame {
         ui.subheading("SHAKE Output Length (in bytes)");
         ui.add_enabled(
             self.variant == Sha3Variant::Shake128 || self.variant == Sha3Variant::Shake256,
-            DragValue::new(&mut self.shake_output_len).clamp_range(1..=512),
+            DragValue::new(&mut self.shake_output_len).range(1..=512),
         );
 
         ui.add_space(16.0);
@@ -126,7 +126,7 @@ impl HasherFrame for Sha3Frame {
             }
             ui.add_space(8.0);
             ui.subheading("Round Number (only alters the iota step)");
-            ui.add(DragValue::new(&mut self.example_round).clamp_range(0..=23));
+            ui.add(DragValue::new(&mut self.example_round).range(0..=23));
             ui.add_space(8.0);
             ui.subheading("Steps");
             ui.group(|ui| {

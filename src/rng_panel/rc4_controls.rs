@@ -71,11 +71,11 @@ impl ClassicRngFrame for Rc4Frame {
             ui.label("Pointers into the Array");
             ui.horizontal(|ui| {
                 ui.label("i");
-                ui.add(DragValue::new(&mut self.rng.i).clamp_range(0..=255));
+                ui.add(DragValue::new(&mut self.rng.i).range(0..=255));
             });
             ui.horizontal(|ui| {
                 ui.label("j");
-                ui.add(DragValue::new(&mut self.rng.j).clamp_range(0..=255));
+                ui.add(DragValue::new(&mut self.rng.j).range(0..=255));
             });
         });
         ui.collapsing("Array of Bytes", |ui| {
@@ -121,7 +121,7 @@ impl ClassicRngFrame for Rc4Frame {
                         .push_str(&format!("{:02X}", self.rng.next_byte()));
                 }
             }
-            ui.add(DragValue::new(&mut self.n_random_bytes).clamp_range(1..=10))
+            ui.add(DragValue::new(&mut self.n_random_bytes).range(1..=10))
         });
         ui.text_edit_multiline(&mut self.random_bytes);
 

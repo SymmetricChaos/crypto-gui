@@ -29,7 +29,7 @@ impl ClassicRngFrame for HaltonFrame {
         ui.horizontal(|ui| {
             ui.subheading("Number of Dimensions");
             if ui
-                .add(DragValue::new(&mut self.vector_length).clamp_range(1..=4))
+                .add(DragValue::new(&mut self.vector_length).range(1..=4))
                 .changed()
             {
                 if self.vector_length > self.rng.bases.len() {
@@ -45,7 +45,7 @@ impl ClassicRngFrame for HaltonFrame {
             };
         });
         for b in self.rng.bases.iter_mut() {
-            ui.add(DragValue::new(b).clamp_range(2..=32));
+            ui.add(DragValue::new(b).range(2..=32));
             ui.end_row();
         }
 

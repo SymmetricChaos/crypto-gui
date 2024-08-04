@@ -1,10 +1,10 @@
+use crate::CipherError;
 use std::fmt::Display;
+use strum::EnumIter;
 use utils::{
     byte_formatting::{overwrite_bytes, xor_into_bytes},
     math_functions::incr_array_ctr,
 };
-
-use crate::CipherError;
 
 pub trait BlockCipher<const N: usize> {
     fn encrypt_block(&self, bytes: &mut [u8]);
@@ -175,7 +175,7 @@ pub trait BlockCipher<const N: usize> {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, EnumIter)]
 pub enum BCMode {
     Cbc,
     Ctr,
@@ -209,17 +209,6 @@ impl BCMode {
         }
     }
 
-    pub fn variants() -> [Self; 6] {
-        [
-            Self::Cbc,
-            Self::Ctr,
-            Self::Ecb,
-            Self::Pcbc,
-            Self::Ofb,
-            Self::Cfb,
-        ]
-    }
-
     pub fn info(&self) -> &'static str {
         match self {
             BCMode::Cbc => "Cipher Block Chaining XORs information from the ciphertext into the plaintext of the block that comes after it before encryption with the block function. This ensures that even identical blocks of plaintext are encrypted differently. The first block requires an initialization vector that should not be repeated for different messages with the same key. Encryption in inherently sequential but decryption can be performed parallel.",
@@ -251,7 +240,7 @@ impl Display for BCMode {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+#[derive(Debug, PartialEq, Eq, Copy, Clone, EnumIter)]
 pub enum BCPadding {
     None,
     Bit,
@@ -282,10 +271,6 @@ impl BCPadding {
             BCPadding::Pkcs => strip_pkcs5_padding(bytes),
             BCPadding::Ansi923 => strip_ansi923_padding(bytes),
         }
-    }
-
-    pub fn variants() -> [Self; 4] {
-        [Self::None, Self::Bit, Self::Pkcs, Self::Ansi923]
     }
 
     pub fn info(&self) -> &'static str {

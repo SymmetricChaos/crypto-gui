@@ -51,7 +51,7 @@ impl ClassicRngFrame for MiddleSquareBinaryFrame {
                 if ui
                     .add(
                         DragValue::new(&mut self.rng.state)
-                            .clamp_range(0..=u32::MAX)
+                            .range(0..=u32::MAX)
                             .hexadecimal(8, false, false),
                     )
                     .changed()
@@ -63,7 +63,7 @@ impl ClassicRngFrame for MiddleSquareBinaryFrame {
                 if ui
                     .add(
                         DragValue::new(&mut self.rng.state)
-                            .clamp_range(0..=u16::MAX)
+                            .range(0..=u16::MAX)
                             .hexadecimal(4, false, false),
                     )
                     .changed()
@@ -75,7 +75,7 @@ impl ClassicRngFrame for MiddleSquareBinaryFrame {
                 if ui
                     .add(
                         DragValue::new(&mut self.rng.state)
-                            .clamp_range(0..=u8::MAX)
+                            .range(0..=u8::MAX)
                             .hexadecimal(2, false, false),
                     )
                     .changed()

@@ -1,5 +1,10 @@
 use crate::traits::ClassicRng;
 
+// macro_rules! lfsr {
+//     ($name: ident, $integer: ty, $width: literal) => {
+
+//     };
+
 #[derive(Debug, Clone)]
 pub struct Lfsr32 {
     pub register: u32,
@@ -14,11 +19,12 @@ impl Default for Lfsr32 {
 }
 
 impl Lfsr32 {
+    /// Create an LFSR with the provided taps and the register set to zero
     pub fn from_taps(taps: u32) -> Self {
         // Only 31 bits are usable
         assert!(taps < 0x80000000);
         let n = 32 - taps.leading_zeros();
-        let mask = 2_u32.pow(n) - 1;
+        let mask = (2 << n - 1) - 1;
         Self {
             register: 0,
             taps,
@@ -26,11 +32,12 @@ impl Lfsr32 {
         }
     }
 
+    /// Create an LFSR with the provided taps and register
     pub fn from_taps_and_register(taps: u32, register: u32) -> Self {
         // Only 31 bits are usable
         assert!(taps < 0x80000000);
         let n = 32 - taps.leading_zeros();
-        let mask = n.pow(2) - 1;
+        let mask = (2 << n - 1) - 1;
         Self {
             register: register & mask,
             taps,
@@ -48,6 +55,7 @@ impl Lfsr32 {
         (self.register & self.taps).count_ones() & 1
     }
 
+    /// Step the LFSR without outputting
     pub fn step(&mut self) {
         let bit = self.bit_from_taps();
         // Shift the register, mask off the high bits, OR the bit into the register
@@ -56,6 +64,7 @@ impl Lfsr32 {
         self.register |= bit;
     }
 
+    /// Step the LFSR and output the bit
     pub fn next_bit(&mut self) -> u32 {
         let bit = self.bit_from_taps();
         self.register <<= 1;
@@ -64,7 +73,7 @@ impl Lfsr32 {
         bit
     }
 
-    // Fill a byte MSB first
+    /// Fill a byte MSB first
     pub fn next_byte(&mut self) -> u8 {
         let mut out = 0;
         for _ in 0..8 {
@@ -95,13 +104,6 @@ mod lfsr32_tests {
         let rng = Lfsr32::default();
         assert_eq!(0b00000000000000001111111111111111, rng.mask);
         assert_eq!(0b00000000000000001011010000000000, rng.taps);
-        assert_eq!(0b00000000000000000000000000000001, rng.register);
-    }
-
-    #[test]
-    fn test_get_bit() {
-        let rng = Lfsr32::default();
-        assert_eq!(rng.get_bit(0), 1);
-        assert_eq!(rng.get_bit(1), 0);
+        assert_eq!(0b00000000000000000000000000000000, rng.register);
     }
 }

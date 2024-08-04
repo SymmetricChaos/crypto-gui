@@ -84,7 +84,7 @@ impl CipherFrame for VicFrame {
 
         ui.subheading("Personal Number");
         ui.label("A number is assigned to each spy.");
-        ui.add(DragValue::new(&mut self.cipher.pin).clamp_range(1..=20));
+        ui.add(DragValue::new(&mut self.cipher.pin).range(1..=20));
 
         ui.add_space(16.0);
 

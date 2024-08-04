@@ -55,7 +55,7 @@ impl ClassicRngFrame for MiddleSquareFrame {
         if ui
             .add(
                 DragValue::new(&mut self.position)
-                    .clamp_range(1..=4)
+                    .range(1..=4)
                     .custom_formatter(|n, _| (2.0 * n).to_string())
                     .speed(0.2),
             )

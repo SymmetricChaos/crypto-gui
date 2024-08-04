@@ -4,25 +4,46 @@ fn majority(a: u32, b: u32, c: u32) -> u32 {
     (a & b) | (a & c) | (b & c)
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ReKeyRule {
+    K114,
+    K228,
+    KNever,
+}
+
+impl ReKeyRule {
+    pub fn rekey(&self, n: usize) -> bool {
+        match self {
+            ReKeyRule::K114 => n % 114 == 0,
+            ReKeyRule::K228 => n % 228 == 0,
+            ReKeyRule::KNever => false,
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct A52Rng {
     pub lfsrs: [Lfsr32; 4],
     pub key: [u8; 8],
     pub frame_number: u32,
+    pub rekey: ReKeyRule,
 }
 
 impl Default for A52Rng {
     fn default() -> Self {
-        Self {
+        let mut out = Self {
             lfsrs: [
                 Lfsr32::from_taps(0x072000), // 18, 17, 16, 13
                 Lfsr32::from_taps(0x300000), // 21, 20
                 Lfsr32::from_taps(0x700080), // 22, 21, 20, 7
                 Lfsr32::from_taps(0x010800), // 16, 11
             ],
-            key: [0; 8],
+            key: [0, 0, 0, 0, 0, 0, 0, 1], // avoid starting with an empty array
             frame_number: 0,
-        }
+            rekey: ReKeyRule::K114,
+        };
+        out.ksa();
+        out
     }
 }
 
@@ -145,7 +166,7 @@ impl A52Rng {
     pub fn keystream(&mut self, n_bytes: usize) -> Vec<u8> {
         let mut bytes = vec![0; n_bytes];
         for i in 0..(n_bytes * 8) {
-            if i % 114 == 0 {
+            if self.rekey.rekey(i) {
                 self.ksa();
                 self.frame_number += 1;
                 self.frame_number %= 0x00400000;

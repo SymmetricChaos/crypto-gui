@@ -65,11 +65,11 @@ impl HasherFrame for SipHashFrame {
 
         ui.add_space(16.0);
         ui.subheading("Compression Rounds");
-        ui.add(DragValue::new(&mut self.hasher.compression_rounds).clamp_range(0..=8));
+        ui.add(DragValue::new(&mut self.hasher.compression_rounds).range(0..=8));
 
         ui.add_space(8.0);
         ui.subheading("Finalization Rounds");
-        ui.add(DragValue::new(&mut self.hasher.finalization_rounds).clamp_range(1..=10));
+        ui.add(DragValue::new(&mut self.hasher.finalization_rounds).range(1..=10));
 
         ui.add_space(16.0);
     }

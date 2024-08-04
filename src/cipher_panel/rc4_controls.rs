@@ -58,7 +58,7 @@ impl CipherFrame for Rc4Frame {
         ui.add_space(16.0);
         ui.subheading("Drop Bytes");
         ui.label("The early bytes of RC4 can leak information about the key so some implementations drop the first few hundred bytes.");
-        ui.add(DragValue::new(&mut self.cipher.drop).clamp_range(0..=1024));
+        ui.add(DragValue::new(&mut self.cipher.drop).range(0..=1024));
         ui.add_space(16.0);
 
         ui.subheading("Internal State");
@@ -66,11 +66,11 @@ impl CipherFrame for Rc4Frame {
             ui.label("Pointers into the array. These always start at zero.");
             ui.horizontal(|ui| {
                 ui.label("i");
-                ui.add(DragValue::new(&mut self.cipher.i).clamp_range(0..=255));
+                ui.add(DragValue::new(&mut self.cipher.i).range(0..=255));
             });
             ui.horizontal(|ui| {
                 ui.label("j");
-                ui.add(DragValue::new(&mut self.cipher.j).clamp_range(0..=255));
+                ui.add(DragValue::new(&mut self.cipher.j).range(0..=255));
             });
         });
         ui.collapsing("Array of Bytes", |ui| {

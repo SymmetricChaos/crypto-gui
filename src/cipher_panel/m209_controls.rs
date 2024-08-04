@@ -14,12 +14,12 @@ use utils::{
 fn lug_pair(ui: &mut egui::Ui, pair: &mut (usize, usize)) {
     ui.add(
         egui::DragValue::new(&mut pair.0)
-            .clamp_range(0usize..=6)
+            .range(0usize..=6)
             .speed(0.1),
     );
     ui.add(
         egui::DragValue::new(&mut pair.1)
-            .clamp_range(0usize..=6)
+            .range(0usize..=6)
             .speed(0.1),
     );
 }

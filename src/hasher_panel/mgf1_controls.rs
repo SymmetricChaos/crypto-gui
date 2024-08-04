@@ -66,7 +66,7 @@ impl HasherFrame for Mgf1Frame {
 
         ui.subheading("Output Length (number of bytes)");
         ui.label("While MGF1 can output several gigabytes its limited 1024 bytes here.");
-        ui.add(egui::DragValue::new(&mut self.hasher.output_length).clamp_range(1..=1024));
+        ui.add(egui::DragValue::new(&mut self.hasher.output_length).range(1..=1024));
 
         ui.add_space(16.0);
 

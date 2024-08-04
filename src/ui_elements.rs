@@ -9,6 +9,7 @@ use rngs::{
     ClassicRng,
 };
 use std::fmt::Display;
+use strum::IntoEnumIterator;
 use utils::{byte_formatting::ByteFormat, text_functions::filter_string};
 
 pub trait UiElements {
@@ -106,7 +107,7 @@ impl UiElements for Ui {
     fn string_slider(&mut self, string: &str, position: &mut usize) -> Response {
         self.add(
             DragValue::new(position)
-                .clamp_range(0..=string.chars().count() - 1)
+                .range(0..=string.chars().count() - 1)
                 .custom_formatter(|n, _| {
                     let n = n as usize;
                     string.chars().nth(n).unwrap().to_string()
@@ -352,7 +353,7 @@ pub fn randomize_reset(ui: &mut egui::Ui, cipher_frame: &mut dyn CipherFrame) {
 pub fn string_slider(ui: &mut Ui, string: &str, position: &mut usize) -> Response {
     ui.add(
         DragValue::new(position)
-            .clamp_range(0..=string.chars().count() - 1)
+            .range(0..=string.chars().count() - 1)
             .custom_formatter(|n, _| {
                 let n = n as usize;
                 string.chars().nth(n).unwrap().to_string()
@@ -406,7 +407,7 @@ pub fn generate_random_u32s_box(
                 randoms.push_str(&rng.next_u32().to_string());
             }
         }
-        ui.add(DragValue::new(n_random).clamp_range(1..=100))
+        ui.add(DragValue::new(n_random).range(1..=100))
     });
 
     ui.text_edit_multiline(randoms);
@@ -428,7 +429,7 @@ pub fn generate_random_f32s_box(
                 randoms.push_str(&next_float.to_string());
             }
         }
-        ui.add(DragValue::new(n_random).clamp_range(1..=100))
+        ui.add(DragValue::new(n_random).range(1..=100))
     });
 
     ui.text_edit_multiline(randoms);
@@ -478,7 +479,7 @@ pub fn text_manip_menu(ui: &mut Ui, text: &mut String) {
 
 pub fn block_cipher_mode(ui: &mut Ui, mode: &mut BCMode) {
     ui.collapsing("Block Cipher Mode", |ui| {
-        for (i, variant) in BCMode::variants().into_iter().enumerate() {
+        for (i, variant) in BCMode::iter().enumerate() {
             ui.horizontal(|ui| {
                 ui.selectable_value(mode, variant, variant.to_string());
                 ui.push_id(i, |ui| {
@@ -494,7 +495,7 @@ pub fn block_cipher_mode(ui: &mut Ui, mode: &mut BCMode) {
 pub fn block_cipher_padding(ui: &mut Ui, padding: &mut BCPadding) {
     ui.collapsing("Block Cipher Padding", |ui| {
         ui.label("Block ciphers can be padded in various ways.");
-        for (i, variant) in BCPadding::variants().into_iter().enumerate() {
+        for (i, variant) in BCPadding::iter().enumerate() {
             ui.horizontal(|ui| {
                 ui.selectable_value(padding, variant, variant.to_string());
                 ui.push_id(i, |ui| {
@@ -509,7 +510,7 @@ pub fn block_cipher_padding(ui: &mut Ui, padding: &mut BCPadding) {
 
 pub fn lfsr_grid_controls(ui: &mut Ui, lfsr: &mut Lfsr, len: &mut usize, name: &str) {
     ui.subheading("Number of Bits");
-    if ui.add(DragValue::new(len).clamp_range(4..=32)).changed() {
+    if ui.add(DragValue::new(len).range(4..=32)).changed() {
         lfsr.bits.truncate(*len);
         while lfsr.bits.len() < *len {
             lfsr.bits.push(utils::bits::Bit::Zero)

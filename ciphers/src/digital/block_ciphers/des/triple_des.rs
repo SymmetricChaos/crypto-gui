@@ -115,6 +115,7 @@ mod des_tests {
     // }
 
     use rand::{thread_rng, Rng};
+    use strum::IntoEnumIterator;
     #[test]
     fn basic_test_encrypt_decrypt() {
         let mut cipher = TripleDes::default();
@@ -125,8 +126,8 @@ mod des_tests {
             Ok(_) => (),
             Err(_) => panic!("error with ksa for key: {:?}", k),
         }
-        for mode in BCMode::variants() {
-            for padding in BCPadding::variants() {
+        for mode in BCMode::iter() {
+            for padding in BCPadding::iter() {
                 cipher.mode = mode;
                 cipher.padding = padding;
 

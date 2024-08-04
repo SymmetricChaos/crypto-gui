@@ -149,7 +149,7 @@ impl ClassicRngFrame for VmpcrFrame {
                         .push_str(&format!("{:02X}", self.rng.next_byte()));
                 }
             }
-            ui.add(DragValue::new(&mut self.n_random_bytes).clamp_range(1..=10))
+            ui.add(DragValue::new(&mut self.n_random_bytes).range(1..=10))
         });
         ui.text_edit_multiline(&mut self.random_bytes);
 

@@ -57,7 +57,7 @@ impl LfgFrame {
 impl ClassicRngFrame for LfgFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.subheading("Tap Location");
-        ui.add(DragValue::new(&mut self.rng.tap).clamp_range(1..=(self.vector_length - 1)));
+        ui.add(DragValue::new(&mut self.rng.tap).range(1..=(self.vector_length - 1)));
 
         ui.add_space(8.0);
         ui.subheading("Modulus");
@@ -67,7 +67,7 @@ impl ClassicRngFrame for LfgFrame {
         ui.horizontal(|ui| {
             ui.subheading("State");
             if ui
-                .add(DragValue::new(&mut self.vector_length).clamp_range(2..=20))
+                .add(DragValue::new(&mut self.vector_length).range(2..=20))
                 .changed()
             {
                 self.rng.state.truncate(self.vector_length);
