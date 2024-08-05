@@ -5,7 +5,7 @@ use regex::Regex;
 
 use crate::{
     errors::CodeError,
-    letter_word_code::{IOMode, LetterWordIntCode},
+    letter_word_code::{IOMode, IntegerCodeMaps},
     traits::Code,
 };
 
@@ -14,13 +14,13 @@ lazy_static! {
 }
 
 pub struct Factoradic {
-    pub maps: LetterWordIntCode,
+    pub maps: IntegerCodeMaps,
     pub mode: IOMode,
 }
 
 impl Default for Factoradic {
     fn default() -> Self {
-        let mut maps = LetterWordIntCode::new();
+        let mut maps = IntegerCodeMaps::new();
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
         Factoradic {
             maps,

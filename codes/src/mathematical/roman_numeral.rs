@@ -1,6 +1,6 @@
 use crate::{
     errors::CodeError,
-    letter_word_code::{IOMode, LetterWordIntCode},
+    letter_word_code::{IOMode, IntegerCodeMaps},
     traits::Code,
 };
 use itertools::Itertools;
@@ -20,14 +20,14 @@ lazy_static! {
 }
 
 pub struct RomanNumeral {
-    pub maps: LetterWordIntCode,
+    pub maps: IntegerCodeMaps,
     pub mode: IOMode,
     // pub apostrophus: bool,
 }
 
 impl Default for RomanNumeral {
     fn default() -> Self {
-        let mut maps = LetterWordIntCode::new();
+        let mut maps = IntegerCodeMaps::new();
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
 
         Self {

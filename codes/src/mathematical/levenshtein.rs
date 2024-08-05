@@ -2,7 +2,7 @@ use itertools::Itertools;
 
 use crate::{
     errors::CodeError,
-    letter_word_code::{IOMode, LetterWordIntCode},
+    letter_word_code::{IOMode, IntegerCodeMaps},
     traits::Code,
 };
 
@@ -11,7 +11,7 @@ use super::levenshtein_integers::LevenshteinCodeIntegers;
 // https://en.wikipedia.org/wiki/Levenshtein_coding
 
 pub struct LevenshteinCode {
-    pub maps: LetterWordIntCode,
+    pub maps: IntegerCodeMaps,
     pub mode: IOMode,
     pub integer_code: LevenshteinCodeIntegers,
     pub spaced: bool,
@@ -20,7 +20,7 @@ pub struct LevenshteinCode {
 impl Default for LevenshteinCode {
     fn default() -> Self {
         let codes = LevenshteinCodeIntegers::default();
-        let mut maps = LetterWordIntCode::new();
+        let mut maps = IntegerCodeMaps::new();
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
         LevenshteinCode {
             mode: IOMode::Integer,
@@ -30,6 +30,15 @@ impl Default for LevenshteinCode {
         }
     }
 }
+
+// impl IntegerCode for LevenshteinCode {
+//     fn code_controls(&mut self) -> &mut IntegerCodeMaps {
+//         &mut self.maps
+//     }
+//     fn encode_u32(&self, n: u32) -> String {
+//         self.integer_code.encode_u32(n)
+//     }
+// }
 
 impl Code for LevenshteinCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {

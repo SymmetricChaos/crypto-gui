@@ -1,9 +1,8 @@
 use super::CodeFrame;
-use crate::ui_elements::UiElements;
+use crate::ui_elements::{integer_letter_code_controls, integer_word_code_controls, UiElements};
 use codes::{letter_word_code::IOMode, mathematical::base_n_bijective::BaseNBijective};
-use egui::{Slider, TextEdit};
+use egui::Slider;
 use strum::IntoEnumIterator;
-use utils::text_functions::unique_string;
 
 pub struct BaseNBijectiveFrame {
     code: BaseNBijective,
@@ -44,21 +43,11 @@ impl CodeFrame for BaseNBijectiveFrame {
 
         match self.code.mode {
             IOMode::Letter => {
-                ui.label("Provide an alphabet. Numerical codes, starting with zero, will be created in ascending order will be assigned to each character.");
-                if ui.control_string(&mut self.code.maps.alphabet).changed() {
-                    unique_string(&mut self.code.maps.alphabet);
-                    self.code.maps.alphabet.retain(|x| x != '�');
-                };
+                integer_letter_code_controls(ui, &mut self.code.maps.alphabet);
                 // ui.fill_code_columns(16, 5, Box::new(self.code.maps.chars_codes()));
             }
             IOMode::Word => {
-                ui.label("Provide any number of words or phrases separated by commas. Numerical codes, starting with zero, will be created in ascending order will be assigned to each character.");
-                if ui
-                    .add(TextEdit::multiline(&mut self.words_string))
-                    .changed()
-                {
-                    self.code.maps.set_words(&self.words_string)
-                };
+                integer_word_code_controls(ui, &mut self.words_string, &mut self.code.maps);
                 // ui.fill_code_columns(16, 5, Box::new(self.code.maps.words_codes()));
             }
             IOMode::Integer => {

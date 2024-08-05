@@ -4,21 +4,21 @@ use primal::Primes;
 
 use crate::{
     errors::CodeError,
-    letter_word_code::{IOMode, LetterWordIntCode},
+    letter_word_code::{IOMode, IntegerCodeMaps},
     traits::Code,
 };
 
 const MESSAGE_LIMIT: usize = 50;
 
 pub struct Godel {
-    pub maps: LetterWordIntCode,
+    pub maps: IntegerCodeMaps,
     primes: Vec<usize>,
     pub mode: IOMode,
 }
 
 impl Default for Godel {
     fn default() -> Self {
-        let mut maps = LetterWordIntCode::new();
+        let mut maps = IntegerCodeMaps::new();
         maps.set_words(
             "0, s, +, ×, =, (, ), implies, not, forall, exists, and, or, x1, P1, x2, P2, x3, P3, x4, P4, x5, P5",
         );

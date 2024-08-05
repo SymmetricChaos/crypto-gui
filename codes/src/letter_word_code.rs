@@ -3,6 +3,12 @@ use strum::{Display, EnumIter};
 
 use crate::errors::CodeError;
 
+pub trait IntegerCode {
+    fn code_controls(&mut self) -> &mut IntegerCodeMaps;
+    fn encode_u32(&self, n: u32) -> String;
+    fn decode_u32(&self, s: String) -> u32;
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, EnumIter, Display)]
 pub enum IOMode {
     Letter,
@@ -11,12 +17,12 @@ pub enum IOMode {
 }
 
 // For relating characters and words to their positions in the list
-pub struct LetterWordIntCode {
+pub struct IntegerCodeMaps {
     pub alphabet: String,
     pub words: Vec<String>,
 }
 
-impl LetterWordIntCode {
+impl IntegerCodeMaps {
     pub fn new() -> Self {
         Self {
             alphabet: String::new(),
@@ -25,7 +31,7 @@ impl LetterWordIntCode {
     }
 }
 
-impl LetterWordIntCode {
+impl IntegerCodeMaps {
     pub fn char_to_int(&self, c: char) -> Result<usize, CodeError> {
         self.alphabet
             .find(|x| x == c)

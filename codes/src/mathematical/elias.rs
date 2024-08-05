@@ -1,14 +1,14 @@
 use super::elias_integers::EliasCodeIntegers;
 use crate::{
     errors::CodeError,
-    letter_word_code::{IOMode, LetterWordIntCode},
+    letter_word_code::{IOMode, IntegerCodeMaps},
     traits::Code,
 };
 use itertools::Itertools;
 use std::cell::RefCell;
 
 pub struct EliasCode {
-    pub maps: LetterWordIntCode,
+    pub maps: IntegerCodeMaps,
     pub integer_code: RefCell<EliasCodeIntegers>,
     pub mode: IOMode,
     pub spaced: bool,
@@ -47,7 +47,7 @@ impl Default for EliasCode {
         let mut codes = EliasCodeIntegers::default();
         codes.extend_all(33);
 
-        let mut maps = LetterWordIntCode::new();
+        let mut maps = IntegerCodeMaps::new();
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
 
         Self {

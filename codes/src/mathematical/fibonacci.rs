@@ -4,7 +4,7 @@ use itertools::Itertools;
 
 use crate::{
     errors::CodeError,
-    letter_word_code::{IOMode, LetterWordIntCode},
+    letter_word_code::{IOMode, IntegerCodeMaps},
     traits::Code,
 };
 
@@ -13,7 +13,7 @@ use super::fibonacci_integers::FibonacciCodeIntegers;
 // https://en.wikipedia.org/wiki/Fibonacci_coding
 
 pub struct FibonacciCode {
-    pub maps: LetterWordIntCode,
+    pub maps: IntegerCodeMaps,
     pub mode: IOMode,
     pub integer_code: RefCell<FibonacciCodeIntegers>,
     pub spaced: bool,
@@ -23,7 +23,7 @@ impl Default for FibonacciCode {
     fn default() -> Self {
         let codes = FibonacciCodeIntegers::default();
 
-        let mut maps = LetterWordIntCode::new();
+        let mut maps = IntegerCodeMaps::new();
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
         FibonacciCode {
             mode: IOMode::Integer,

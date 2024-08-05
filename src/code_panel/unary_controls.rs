@@ -1,9 +1,7 @@
 use super::CodeFrame;
-use crate::ui_elements::UiElements;
+use crate::ui_elements::{integer_letter_code_controls, integer_word_code_controls, UiElements};
 use codes::{letter_word_code::IOMode, mathematical::unary::UnaryCode};
-use egui::TextEdit;
 use strum::IntoEnumIterator;
-use utils::text_functions::unique_string;
 
 pub struct UnaryCodeFrame {
     code: UnaryCode,
@@ -55,11 +53,7 @@ impl CodeFrame for UnaryCodeFrame {
 
         match self.code.mode {
             IOMode::Letter => {
-                ui.label("Provide an alphabet. Codes will be assigned to each character of the alphabet in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
-                if ui.control_string(&mut self.code.maps.alphabet).changed() {
-                    unique_string(&mut self.code.maps.alphabet);
-                    self.code.maps.alphabet.retain(|x| x != '�');
-                };
+                integer_letter_code_controls(ui, &mut self.code.maps.alphabet);
                 ui.add_space(16.0);
                 ui.two_column_table(
                     "Character",
@@ -73,15 +67,7 @@ impl CodeFrame for UnaryCodeFrame {
                 );
             }
             IOMode::Word => {
-                ui.label("Provide any number of words or phrases separated by commas. Codes will be assigned to each word or phrase in ascending order. When decoding the '�' symbol appears when a code without a known meaning is assigned.");
-                if ui
-                    .add(TextEdit::singleline(&mut self.words_string))
-                    .changed()
-                {
-                    self.code.maps.set_words(&self.words_string);
-                };
-                ui.add_space(16.0);
-
+                integer_word_code_controls(ui, &mut self.words_string, &mut self.code.maps);
                 ui.two_column_table(
                     "Word",
                     "Code",
@@ -94,7 +80,7 @@ impl CodeFrame for UnaryCodeFrame {
                 );
             }
             IOMode::Integer => {
-                ui.label("Convert between numbers and their unary encodings. When decoding the '�' symbol appears when an invalid code is encoutered.");
+                ui.label("Convert between numbers and their unary encodings. When decoding the '�' symbol appears when an invalid code is encountered.");
                 ui.add_space(16.0);
                 ui.two_column_table(
                     "Integer",

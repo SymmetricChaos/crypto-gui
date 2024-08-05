@@ -1,13 +1,13 @@
 use crate::{
     errors::CodeError,
-    letter_word_code::{IOMode, LetterWordIntCode},
+    letter_word_code::{IOMode, IntegerCodeMaps},
     traits::Code,
 };
 use itertools::Itertools;
 use utils::text_functions::num_to_digit;
 
 pub struct BaseNBijective {
-    pub maps: LetterWordIntCode,
+    pub maps: IntegerCodeMaps,
     pub radix: u32,
     pub mode: IOMode,
     pub little_endian: bool,
@@ -15,7 +15,7 @@ pub struct BaseNBijective {
 
 impl Default for BaseNBijective {
     fn default() -> Self {
-        let mut maps = LetterWordIntCode::new();
+        let mut maps = IntegerCodeMaps::new();
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
 
         Self {

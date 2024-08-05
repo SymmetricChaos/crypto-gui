@@ -3,12 +3,12 @@ use utils::{bits::IS_BITS, text_functions::string_chunks};
 
 use crate::{
     errors::CodeError,
-    letter_word_code::{IOMode, LetterWordIntCode},
+    letter_word_code::{IOMode, IntegerCodeMaps},
     traits::Code,
 };
 
 pub struct GrayCode {
-    pub maps: LetterWordIntCode,
+    pub maps: IntegerCodeMaps,
     pub mode: IOMode,
     pub width: usize,
     pub fixed_width: bool,
@@ -17,7 +17,7 @@ pub struct GrayCode {
 
 impl Default for GrayCode {
     fn default() -> Self {
-        let mut maps = LetterWordIntCode::new();
+        let mut maps = IntegerCodeMaps::new();
         maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
         Self {
             width: 5,
