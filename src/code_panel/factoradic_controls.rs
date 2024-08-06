@@ -54,7 +54,6 @@ impl CodeFrame for FactoradicFrame {
             }
             IOMode::Word => {
                 integer_word_code_controls(ui, &mut self.words_string, &mut self.code.maps);
-
                 ui.two_column_table(
                     "Word",
                     "Code",

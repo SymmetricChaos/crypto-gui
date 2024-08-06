@@ -4,9 +4,16 @@ use strum::{Display, EnumIter};
 use crate::errors::CodeError;
 
 pub trait IntegerCode {
-    fn code_controls(&mut self) -> &mut IntegerCodeMaps;
+    fn maps(&mut self) -> &mut IntegerCodeMaps;
     fn encode_u32(&self, n: u32) -> String;
-    fn decode_u32(&self, s: String) -> u32;
+    fn decode_u32(&self, s: &str) -> Vec<Option<u32>>;
+}
+
+pub fn decode_or_err_char(code: Option<u32>) -> String {
+    match code {
+        Some(n) => n.to_string(),
+        None => String::from("�"),
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, EnumIter, Display)]
@@ -75,4 +82,89 @@ impl IntegerCodeMaps {
     pub fn ints_words(&self) -> impl Iterator<Item = (usize, &String)> + '_ {
         self.words.iter().enumerate()
     }
+}
+
+#[macro_export]
+macro_rules! impl_code_for_integer_code {
+    ($name: ident) => {
+        impl Code for $name {
+            fn encode(&self, text: &str) -> Result<String, CodeError> {
+                let mut output = String::new();
+                match self.mode {
+                    IOMode::Letter => {
+                        for c in text.chars() {
+                            let code = self.maps.char_to_int(c)? as u32;
+                            output.push_str(&self.integer_code.encode_u32(code));
+                            if self.spaced {
+                                output.push(' ');
+                            }
+                        }
+                    }
+                    IOMode::Word => {
+                        for w in text.split(" ") {
+                            let code = self.maps.word_to_int(w)? as u32;
+                            output.push_str(&self.integer_code.encode_u32(code));
+                            if self.spaced {
+                                output.push(' ');
+                            }
+                        }
+                    }
+                    IOMode::Integer => {
+                        for s in text.split(" ") {
+                            let n = u32::from_str_radix(s, 10)
+                                .map_err(|_| CodeError::invalid_input_group(s))?;
+                            output.push_str(&self.integer_code.encode_u32(n));
+                            if self.spaced {
+                                output.push(' ');
+                            }
+                        }
+                    }
+                }
+
+                if self.spaced {
+                    output.pop();
+                }
+
+                Ok(output)
+            }
+
+            fn decode(&self, text: &str) -> Result<String, CodeError> {
+                let text = &text.replace(" ", "");
+                let mut output = String::new();
+                let maybe_codes = self.integer_code.decode_to_u32(text).into_iter();
+                match self.mode {
+                    IOMode::Letter => {
+                        for n in maybe_codes {
+                            if let Some(val) = n {
+                                match self.maps.alphabet.chars().nth(val as usize) {
+                                    Some(w) => output.push(w),
+                                    None => output.push('�'),
+                                }
+                            } else {
+                                output.push('�')
+                            }
+                        }
+                    }
+                    IOMode::Word => {
+                        for n in maybe_codes {
+                            if let Some(val) = n {
+                                match self.maps.words.get(val as usize) {
+                                    Some(w) => output.push_str(w),
+                                    None => output.push('�'),
+                                }
+                            } else {
+                                output.push('�')
+                            }
+                        }
+                    }
+                    IOMode::Integer => {
+                        for n in maybe_codes {
+                            output.push_str(&decode_or_err_char(n))
+                        }
+                    }
+                }
+                Ok(output)
+            }
+        }
+    };
 }
