@@ -110,38 +110,27 @@ impl Code for GrayCode {
             true => string_chunks(&text.replace(" ", ""), self.width),
             false => text.split(" ").map(|st| st.to_string()).collect_vec(),
         };
-        if self.mode == IOMode::Letter {
-            for s in chunks {
-                if !IS_BITS.is_match(&s) || (self.fixed_width && s.chars().count() != self.width) {
-                    return Err(CodeError::invalid_input_group(&s));
-                }
-                let n =
-                    u32::from_str_radix(&s, 2).map_err(|_| CodeError::invalid_input_group(&s))?;
-                let code = self.decode_to_u32(n);
-                out.push(self.maps.int_to_char(code as usize)?);
+        for s in chunks {
+            if !IS_BITS.is_match(&s) || (self.fixed_width && s.chars().count() != self.width) {
+                return Err(CodeError::invalid_input_group(&s));
             }
-        } else if self.mode == IOMode::Word {
-            for s in chunks {
-                if !IS_BITS.is_match(&s) || (self.fixed_width && s.chars().count() != self.width) {
-                    return Err(CodeError::invalid_input_group(&s));
+            let n = u32::from_str_radix(&s, 2).map_err(|_| CodeError::invalid_input_group(&s))?;
+            let code = self.decode_to_u32(n);
+            match self.mode {
+                IOMode::Letter => {
+                    out.push(self.maps.int_to_char(code as usize)?);
                 }
-                let n =
-                    u32::from_str_radix(&s, 2).map_err(|_| CodeError::invalid_input_group(&s))?;
-                let code = self.decode_to_u32(n);
-                out.push_str(self.maps.int_to_word(code as usize)?);
-                out.push(' ');
-            }
-            out.pop();
-        } else {
-            for s in chunks {
-                if !IS_BITS.is_match(&s) || (self.fixed_width && s.chars().count() != self.width) {
-                    return Err(CodeError::invalid_input_group(&s));
+                IOMode::Word => {
+                    out.push_str(self.maps.int_to_word(code as usize)?);
+                    out.push(' ');
                 }
-                let n =
-                    u32::from_str_radix(&s, 2).map_err(|_| CodeError::invalid_input_group(&s))?;
-                out.push_str(&self.decode_to_u32(n).to_string());
-                out.push(' ');
+                IOMode::Integer => {
+                    out.push_str(&code.to_string());
+                    out.push(' ');
+                }
             }
+        }
+        if out.chars().last() == Some(' ') {
             out.pop();
         }
 

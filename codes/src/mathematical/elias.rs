@@ -110,7 +110,7 @@ impl Code for EliasCode {
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::new();
         let text = text.replace(" ", "");
-        let nums = self.integer_code.borrow().decode_to_u32(&text)?;
+        let nums = self.integer_code.borrow().decode_u32(&text)?;
 
         if self.mode == IOMode::Integer {
             Ok(nums.into_iter().join(" "))
@@ -129,6 +129,8 @@ impl Code for EliasCode {
         }
     }
 }
+
+// impl_code_for_integer_code!(EliasCode);
 
 #[cfg(test)]
 mod elias_tests {

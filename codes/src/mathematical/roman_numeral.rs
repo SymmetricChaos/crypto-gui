@@ -99,7 +99,7 @@ impl RomanNumeral {
 }
 
 impl Code for RomanNumeral {
-    fn encode(&self, text: &str) -> Result<String, crate::errors::CodeError> {
+    fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut output = String::new();
         if self.mode == IOMode::Integer {
             for group in text.split(" ") {
@@ -131,7 +131,7 @@ impl Code for RomanNumeral {
         Ok(output)
     }
 
-    fn decode(&self, text: &str) -> Result<String, crate::errors::CodeError> {
+    fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut output = String::new();
         if self.mode == IOMode::Integer {
             for s in text.split(" ") {

@@ -51,13 +51,12 @@ impl Code for Godel {
         let mut out = BigUint::one();
 
         if self.mode == IOMode::Letter {
-            for (s, prime) in text.chars().zip(self.primes.iter()) {
-                match self.maps.char_to_int(s) {
+            for (c, prime) in text.chars().zip(self.primes.iter()) {
+                match self.maps.char_to_int(c) {
                     Ok(v) => out *= BigUint::from(*prime).pow((v + 1) as u32),
                     Err(e) => return Err(e),
                 }
             }
-            return Ok(out.to_str_radix(10));
         } else if self.mode == IOMode::Word {
             for (s, prime) in text.split(" ").zip(self.primes.iter()) {
                 match self.maps.word_to_int(s) {
@@ -65,12 +64,12 @@ impl Code for Godel {
                     Err(e) => return Err(e),
                 }
             }
-            return Ok(out.to_str_radix(10));
         } else {
-            Err(CodeError::state(
+            return Err(CodeError::state(
                 "Godel encoding is not currently defined for IOMode::Integer",
-            ))
+            ));
         }
+        return Ok(out.to_str_radix(10));
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
@@ -91,12 +90,12 @@ impl Code for Godel {
                 if ctr != 0 {
                     let c = match self.maps.int_to_word(ctr - 1) {
                         Ok(c) => c,
-                        Err(_) => "?",
+                        Err(_) => "�",
                     };
                     words.push(c);
                 }
                 if ctr == 0 {
-                    words.push("?")
+                    words.push("�")
                 }
                 if num.is_one() {
                     break;
@@ -104,7 +103,7 @@ impl Code for Godel {
             }
             Ok(words.iter().join(" "))
         } else if self.mode == IOMode::Letter {
-            let mut words = Vec::with_capacity(MESSAGE_LIMIT);
+            let mut letters = Vec::with_capacity(MESSAGE_LIMIT);
             for p in self.primes.iter() {
                 let mut ctr = 0;
                 let big_p = BigUint::from(*p);
@@ -115,18 +114,18 @@ impl Code for Godel {
                 if ctr != 0 {
                     let c = match self.maps.int_to_char(ctr - 1) {
                         Ok(c) => c,
-                        Err(_) => '?',
+                        Err(_) => '�',
                     };
-                    words.push(c);
+                    letters.push(c);
                 }
                 if ctr == 0 {
-                    words.push('?')
+                    letters.push('�')
                 }
                 if num.is_one() {
                     break;
                 }
             }
-            Ok(words.iter().collect())
+            Ok(letters.iter().collect())
         } else {
             Err(CodeError::state(
                 "Godel encoding is not currently defined for IOMode::Integer",

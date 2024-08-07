@@ -257,7 +257,7 @@ impl EliasCodeIntegers {
     }
 
     // Operates on a single codegroup
-    pub fn decode_to_u32(&self, text: &str) -> Result<Vec<u32>, CodeError> {
+    pub fn decode_u32(&self, text: &str) -> Result<Vec<u32>, CodeError> {
         let mut filtered = bits_from_str(text).map_err(|e| CodeError::input(&e.to_string()))?;
         match self.variant {
             EliasVariant::Delta => self.decode_to_u32_delta(&mut filtered),
@@ -322,7 +322,7 @@ mod elias_int_tests {
         let codes = "101000101011000110101110011110010000000100001";
         assert_eq!(
             vec![1, 2, 3, 4, 5, 6, 7, 8, 9],
-            code.decode_to_u32(codes).unwrap()
+            code.decode_u32(codes).unwrap()
         );
     }
 
@@ -333,7 +333,7 @@ mod elias_int_tests {
         let codes = "10100110010000101001100011100010000001001";
         assert_eq!(
             vec![1, 2, 3, 4, 5, 6, 7, 8, 9],
-            code.decode_to_u32(codes).unwrap()
+            code.decode_u32(codes).unwrap()
         );
     }
 
@@ -344,7 +344,7 @@ mod elias_int_tests {
         let codes = "010011010100010101010110010111011100001110010";
         assert_eq!(
             vec![1, 2, 3, 4, 5, 6, 7, 8, 9],
-            code.decode_to_u32(codes).unwrap()
+            code.decode_u32(codes).unwrap()
         );
     }
 }
