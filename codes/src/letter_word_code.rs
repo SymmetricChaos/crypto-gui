@@ -3,19 +3,6 @@ use strum::{Display, EnumIter};
 
 use crate::errors::CodeError;
 
-pub trait IntegerCode {
-    fn maps(&mut self) -> &mut IntegerCodeMaps;
-    fn nums_to_codes(&self, n: Vec<u32>) -> Vec<Option<String>>;
-    fn codes_to_nums(&self, s: &str) -> Vec<Option<u32>>;
-}
-
-// pub fn decode_or_err_char(code: Option<u32>) -> String {
-//     match code {
-//         Some(n) => n.to_string(),
-//         None => String::from("�"),
-//     }
-// }
-
 #[derive(Debug, Clone, Copy, PartialEq, EnumIter, Display)]
 pub enum IOMode {
     Letter,

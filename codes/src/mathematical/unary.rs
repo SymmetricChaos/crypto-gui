@@ -105,6 +105,7 @@ impl Code for UnaryCode {
         } else {
             text.replace(" ", "")
         };
+
         if self.mode == IOMode::Letter {
             for section in self.recognize_code(&text) {
                 if let Some(code) = section {
