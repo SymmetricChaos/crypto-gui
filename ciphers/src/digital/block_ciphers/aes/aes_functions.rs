@@ -20,6 +20,15 @@ pub fn sub_key_to_bytes(key: [u32; 4]) -> [u8; 16] {
         .unwrap()
 }
 
+pub fn sub_key_slice_to_bytes(key: &[u32]) -> [u8; 16] {
+    key.into_iter()
+        .map(|w| w.to_be_bytes())
+        .flatten()
+        .collect_vec()
+        .try_into()
+        .unwrap()
+}
+
 // The internal state of AES is shown as a grid of bytes in column major order.
 // This swaps array positions to transpose the bytes and put them in this order
 // A (faster?) alternative would be to change the block transformation instead

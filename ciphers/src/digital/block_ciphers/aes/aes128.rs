@@ -2,25 +2,25 @@ use crate::{
     digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher},
     impl_cipher_for_block_cipher,
 };
-use itertools::Itertools;
 use utils::byte_formatting::ByteFormat;
 
 use super::{
     aes_functions::{
         add_round_key, inv_mix_columns, inv_shift_rows, inv_sub_bytes, mix_columns, rot_word,
-        shift_rows, sub_bytes, sub_key_to_bytes, transpose_state,
+        shift_rows, sub_bytes, sub_key_slice_to_bytes, transpose_state,
     },
     sbox::sub_word,
 };
 
-pub const ROUNDS: usize = 11;
-pub const KEY_WORDS: usize = 4;
+pub const ROUNDS: usize = 10; // Nr
+pub const KEY_WORDS: usize = 4; // Nk
+pub const COLUMNS: usize = 4; // Nb
 
 pub struct Aes128 {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
     pub key: [u32; KEY_WORDS],
-    round_keys: [[u8; 16]; ROUNDS],
+    round_keys: [[u8; 16]; ROUNDS + 1],
     pub iv: u128,
     pub mode: BCMode,
     pub padding: BCPadding,
@@ -32,7 +32,7 @@ impl Default for Aes128 {
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
             key: [0; KEY_WORDS],
-            round_keys: [[0u8; 16]; ROUNDS],
+            round_keys: [[0u8; 16]; ROUNDS + 1],
             iv: 0,
             mode: BCMode::default(),
             padding: BCPadding::default(),
@@ -49,31 +49,23 @@ impl Aes128 {
         ];
 
         // During expansion actions are on words of 32-bits
-        let mut round_keys: Vec<[u32; 4]> = Vec::with_capacity(ROUNDS);
+        let mut round_keys: Vec<u32> = Vec::new();
 
-        // First subkey is the user supplied key
-        round_keys.push(self.key);
+        round_keys.extend_from_slice(&self.key);
 
-        for round in 1..ROUNDS {
-            let mut k = [0_u32; 4];
-
-            let rotated = rot_word(round_keys[round - 1][3]);
-            let subbed = sub_word(rotated);
-            let xored = subbed ^ rc[round - 1];
-
-            k[0] = xored ^ round_keys[round - 1][0];
-            k[1] = k[0] ^ round_keys[round - 1][1];
-            k[2] = k[1] ^ round_keys[round - 1][2];
-            k[3] = k[2] ^ round_keys[round - 1][3];
-
-            round_keys.push(k)
+        for i in KEY_WORDS..((ROUNDS + 1) * COLUMNS) {
+            let mut t = round_keys[i - 1];
+            if i % KEY_WORDS == 0 {
+                t = sub_word(rot_word(t)) ^ rc[(i / KEY_WORDS) - 1];
+            } else if KEY_WORDS > 6 && i % KEY_WORDS == 4 {
+                t = sub_word(t);
+            }
+            round_keys.push(round_keys[i - KEY_WORDS] ^ t);
         }
-        self.round_keys = round_keys
-            .into_iter()
-            .map(|k| sub_key_to_bytes(k))
-            .collect_vec()
-            .try_into()
-            .unwrap();
+
+        for (i, chunk) in round_keys.chunks(4).enumerate() {
+            self.round_keys[i] = sub_key_slice_to_bytes(chunk)
+        }
     }
 }
 
@@ -84,7 +76,7 @@ impl BlockCipher<16> for Aes128 {
         add_round_key(bytes, &self.round_keys[0]);
 
         // Main rounds
-        for i in 1..(ROUNDS - 1) {
+        for i in 1..ROUNDS {
             sub_bytes(bytes);
             shift_rows(bytes);
             mix_columns(bytes);
@@ -94,17 +86,17 @@ impl BlockCipher<16> for Aes128 {
         // Finalization round
         sub_bytes(bytes);
         shift_rows(bytes);
-        add_round_key(bytes, &self.round_keys[ROUNDS - 1]);
+        add_round_key(bytes, &self.round_keys[ROUNDS]);
         transpose_state(bytes);
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
         transpose_state(bytes);
         // Initial round key
-        add_round_key(bytes, &self.round_keys[ROUNDS - 1]);
+        add_round_key(bytes, &self.round_keys[ROUNDS]);
 
         // Main rounds
-        for i in (1..(ROUNDS - 1)).rev() {
+        for i in (1..ROUNDS).rev() {
             inv_shift_rows(bytes);
             inv_sub_bytes(bytes);
             add_round_key(bytes, &self.round_keys[i]);
@@ -122,7 +114,7 @@ impl BlockCipher<16> for Aes128 {
 impl_cipher_for_block_cipher!(Aes128, 16);
 
 #[cfg(test)]
-mod aes_tests {
+mod aes128_tests {
 
     use crate::Cipher;
 
@@ -158,43 +150,45 @@ mod aes_tests {
         assert_eq!(state, original_state);
     }
 
-    // #[test]
-    // fn test_key_schedule_1() {
-    //     let mut cipher = Aes128::default();
+    #[test]
+    #[ignore]
+    fn test_key_schedule_1() {
+        let mut cipher = Aes128::default();
 
-    //     // https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf
-    //     cipher.key = [0x2b7e1516, 0x28aed2a6, 0xabf71588, 0x09cf4f3c];
-    //     let test_sub_keys: [[u32; 4]; 3] = [
-    //         [0x2b7e1516, 0x28aed2a6, 0xabf71588, 0x09cf4f3c],
-    //         [0xa0fafe17, 0x88542cb1, 0x23a33939, 0x2a6c7605],
-    //         [0xf2c295f2, 0x7a96b943, 0x5935807a, 0x7359f67f],
-    //     ];
-    //     cipher.key_schedule();
-    //     let sub_keys = cipher.round_keys;
+        // https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf
+        cipher.key = [0x2b7e1516, 0x28aed2a6, 0xabf71588, 0x09cf4f3c];
+        let test_sub_keys: [[u32; 4]; 3] = [
+            [0x2b7e1516, 0x28aed2a6, 0xabf71588, 0x09cf4f3c],
+            [0xa0fafe17, 0x88542cb1, 0x23a33939, 0x2a6c7605],
+            [0xf2c295f2, 0x7a96b943, 0x5935807a, 0x7359f67f],
+        ];
+        cipher.ksa();
+        let sub_keys = cipher.round_keys;
 
-    //     println!("{:08x?} {:02x?}", test_sub_keys[0], sub_keys[0]);
-    //     println!("{:08x?} {:02x?}", test_sub_keys[1], sub_keys[1]);
-    //     println!("{:08x?} {:02x?}", test_sub_keys[2], sub_keys[2]);
-    // }
+        println!("{:08x?} {:02x?}", test_sub_keys[0], sub_keys[0]);
+        println!("{:08x?} {:02x?}", test_sub_keys[1], sub_keys[1]);
+        println!("{:08x?} {:02x?}", test_sub_keys[2], sub_keys[2]);
+    }
 
-    // #[test]
-    // fn test_key_schedule_2() {
-    //     let mut cipher = Aes128::default();
+    #[test]
+    #[ignore]
+    fn test_key_schedule_2() {
+        let mut cipher = Aes128::default();
 
-    //     // https://github.com/kaapomoi/key-expander/blob/master/src/lib.rs
-    //     cipher.key = [0x0, 0x0, 0x0, 0x1];
-    //     let test_sub_keys: [[u32; 4]; 3] = [
-    //         [0x0, 0x0, 0x0, 0x1],
-    //         [0x62637c63, 0x62637c63, 0x62637c63, 0x62637c62],
-    //         [0x9b73d6c9, 0xf910aaaa, 0x9b73d6c9, 0xf910aaab],
-    //     ];
-    //     cipher.key_schedule();
-    //     let sub_keys = cipher.round_keys;
+        // https://github.com/kaapomoi/key-expander/blob/master/src/lib.rs
+        cipher.key = [0x0, 0x0, 0x0, 0x1];
+        let test_sub_keys: [[u32; 4]; 3] = [
+            [0x0, 0x0, 0x0, 0x1],
+            [0x62637c63, 0x62637c63, 0x62637c63, 0x62637c62],
+            [0x9b73d6c9, 0xf910aaaa, 0x9b73d6c9, 0xf910aaab],
+        ];
+        cipher.ksa();
+        let sub_keys = cipher.round_keys;
 
-    //     println!("{:08x?} {:02x?}", test_sub_keys[0], sub_keys[0]);
-    //     println!("{:08x?} {:02x?}", test_sub_keys[1], sub_keys[1]);
-    //     println!("{:08x?} {:02x?}", test_sub_keys[2], sub_keys[2]);
-    // }
+        println!("{:08x?} {:02x?}", test_sub_keys[0], sub_keys[0]);
+        println!("{:08x?} {:02x?}", test_sub_keys[1], sub_keys[1]);
+        println!("{:08x?} {:02x?}", test_sub_keys[2], sub_keys[2]);
+    }
 
     #[test]
     fn test_encypt_decrypt_ctr() {

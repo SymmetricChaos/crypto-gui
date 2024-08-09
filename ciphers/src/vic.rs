@@ -318,39 +318,40 @@ mod vic_tests {
     const PLAINTEXT: &'static str = "WHENINTHECOURSEOFHUMANEVENTSITBECOMESNECESSARYFORONEPEOPLETODISSOLVETHEPOLITICALBANDSWHICHHAVECONNECTEDTHEMWITHANOTHERANDTOASSUMEAMONGTHEPOWERSOFTHEEARTHTHESEPARATEANDEQUALSTATIONTOWHICHTHELAWSOFNATUREANDOFNATURESGODENTITLETHEMADECENTRESPECTTOTHEOPINIONSOFMANKINDREQUIRESTHATTHEYSHOULDDECLARETHECAUSESWHICHIMPELTHEMTOTHESEPARATION";
     const CIPHERTEXT: &'static str = "8586132809363526687665008866982888298850266223382286868665466166203616868868086568968538586769952238982568006556248636598868260688555828852826563882556391218566168076288385060638455208156958912852806652936668104041946288608038328658856362095862294586859365585206248860823696664395586825988282856862062016659628988286502886228666846926208656095018586163622668462963006665968385468408256286125691058035910615656895486566591252276602628262060861582926668666508168928568062915829662958212322808622366918998451818262900253158269";
 
-    // #[test]
-    // fn derivation_test() {
-    //     let cipher = Vic::default();
-    // assert_eq!(
-    //     "A: 72401\nB: 13919\nC: 69592\nD: TWASTHENIG HTBEFORECH\nE: 8017942653 6013589427\nF: 6959254417 1234567890\nG: 4966196060\nH: 3288628787\nJ: 3178429506\nK: 5064805552\nL: 5602850077\nM: 1620350748\nN: 7823857125\nP: 5051328370\n\nThe last two unequal digits are 7 and 0, since the personal number is 6 the key lengths will be 13 and 6\n\nQ: 0668005552551\nR: 758838\nS: 5961328470",
-    //     cipher
-    //         .key_derivation_string()
-    //         .unwrap()
-    // );
-    // println!("{}", cipher.key_derivation_string().unwrap());
-    /* The key derivation page looks like this
-    A: 72401
-    B: 13919
-    C: 69592
-    D: TWASTHENIG HTBEFORECH
-    E: 8017942653 6013589427
-    F: 6959254417 1234567890
-    G: 4966196060
-    H: 3288628787
-    J: 3178429506
-    K: 5064805552
-    L: 5602850077
-    M: 1620350748
-    N: 7823857125
-    P: 5051328370
+    #[test]
+    #[ignore]
+    fn derivation_test() {
+        let cipher = Vic::default();
+        assert_eq!(
+        "A: 72401\nB: 13919\nC: 69592\nD: TWASTHENIG HTBEFORECH\nE: 8017942653 6013589427\nF: 6959254417 1234567890\nG: 4966196060\nH: 3288628787\nJ: 3178429506\nK: 5064805552\nL: 5602850077\nM: 1620350748\nN: 7823857125\nP: 5051328370\n\nThe last two unequal digits are 7 and 0, since the personal number is 6 the key lengths will be 13 and 6\n\nQ: 0668005552551\nR: 758838\nS: 5961328470",
+        cipher
+            .key_derivation_string()
+            .unwrap()
+    );
+        println!("{}", cipher.key_derivation_string().unwrap());
+        /* The key derivation page looks like this
+        A: 72401
+        B: 13919
+        C: 69592
+        D: TWASTHENIG HTBEFORECH
+        E: 8017942653 6013589427
+        F: 6959254417 1234567890
+        G: 4966196060
+        H: 3288628787
+        J: 3178429506
+        K: 5064805552
+        L: 5602850077
+        M: 1620350748
+        N: 7823857125
+        P: 5051328370
 
-    The last two unequal digits are 7 and 0, since the personal number is 6 the key lengths will be 13 and 6
+        The last two unequal digits are 7 and 0, since the personal number is 6 the key lengths will be 13 and 6
 
-    Q: 0668005552551
-    R: 758838
-    S: 5961328470
-    */
-    // }
+        Q: 0668005552551
+        R: 758838
+        S: 5961328470
+        */
+    }
 
     #[test]
     fn encrypt_test() {
