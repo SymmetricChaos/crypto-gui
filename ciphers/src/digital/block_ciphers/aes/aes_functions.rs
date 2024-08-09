@@ -154,9 +154,12 @@ macro_rules! aes_methods {
         }
 
         impl $name {
-            const NK: usize = $nk; // Number of 32-bit words in key
-            const NR: usize = $nr; // Number of round
-            const NB: usize = 4; // Number of columns in the state
+            /// Number of 32-bit words in key.
+            const NK: usize = $nk;
+            /// Number of rounds.
+            const NR: usize = $nr;
+            /// Number of columns in the state. Fixed at 4 for all NIST versions.
+            const NB: usize = 4;
 
             // Create the round keys
             pub fn ksa(&mut self) {
