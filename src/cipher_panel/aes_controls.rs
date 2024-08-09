@@ -104,7 +104,7 @@ impl CipherFrame for AesFrame {
                 ui.add_space(8.0);
 
                 ui.subheading("Key");
-                ui.label("AES128 uses four 32-bit keys or, equivalently, a single 128-bit key.");
+                ui.label("AES192 uses siz 32-bit keys or, equivalently, a single 192-bit key.");
                 for k in self.cipher192.key.iter_mut() {
                     ui.u32_drag_value_hex(k);
                 }
@@ -139,7 +139,7 @@ impl CipherFrame for AesFrame {
                 ui.add_space(8.0);
 
                 ui.subheading("Key");
-                ui.label("AES128 uses four 32-bit keys or, equivalently, a single 128-bit key.");
+                ui.label("AES256 uses eight 32-bit keys or, equivalently, a single 256-bit key.");
                 for k in self.cipher256.key.iter_mut() {
                     ui.u32_drag_value_hex(k);
                 }
