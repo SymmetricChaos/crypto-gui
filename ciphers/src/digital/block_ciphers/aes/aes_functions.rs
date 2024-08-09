@@ -125,3 +125,107 @@ pub fn print_aes_state(state: &[u8]) {
         println!("{:02x?}", line)
     }
 }
+
+#[macro_export]
+macro_rules! aes_methods {
+    ($name: ident, $nk: literal, $nr: literal) => {
+        pub struct $name {
+            pub output_format: ByteFormat,
+            pub input_format: ByteFormat,
+            pub key: [u32; Self::NK],
+            round_keys: [[u8; 16]; Self::NR + 1],
+            pub iv: u128,
+            pub mode: BCMode,
+            pub padding: BCPadding,
+        }
+
+        impl Default for $name {
+            fn default() -> Self {
+                Self {
+                    output_format: ByteFormat::Hex,
+                    input_format: ByteFormat::Hex,
+                    key: [0; Self::NK],
+                    round_keys: [[0u8; 16]; Self::NR + 1],
+                    iv: 0,
+                    mode: BCMode::default(),
+                    padding: BCPadding::default(),
+                }
+            }
+        }
+
+        impl $name {
+            const NK: usize = $nk; // Number of 32-bit words in key
+            const NR: usize = $nr; // Number of round
+            const NB: usize = 4; // Number of columns in the state
+
+            // Create the round keys
+            pub fn ksa(&mut self) {
+                let rc: [u32; 10] = [
+                    0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000, 0x20000000,
+                    0x40000000, 0x80000000, 0x1b000000, 0x36000000,
+                ];
+
+                // During expansion actions are on words of 32-bits
+                let mut round_keys: Vec<u32> = Vec::new();
+
+                round_keys.extend_from_slice(&self.key);
+
+                for i in Self::NK..((Self::NR + 1) * Self::NB) {
+                    let mut t = round_keys[i - 1];
+                    if i % Self::NK == 0 {
+                        t = sub_word(rot_word(t)) ^ rc[(i / Self::NK) - 1];
+                    } else if Self::NK > 6 && i % Self::NK == 4 {
+                        t = sub_word(t);
+                    }
+                    round_keys.push(round_keys[i - Self::NK] ^ t);
+                }
+
+                for (i, chunk) in round_keys.chunks(4).enumerate() {
+                    self.round_keys[i] = sub_key_slice_to_bytes(chunk)
+                }
+            }
+        }
+
+        impl BlockCipher<16> for $name {
+            fn encrypt_block(&self, bytes: &mut [u8]) {
+                transpose_state(bytes);
+                // Initial round key
+                add_round_key(bytes, &self.round_keys[0]);
+
+                // Main NR
+                for i in 1..Self::NR {
+                    sub_bytes(bytes);
+                    shift_rows(bytes);
+                    mix_columns(bytes);
+                    add_round_key(bytes, &self.round_keys[i]);
+                }
+
+                // Finalization round
+                sub_bytes(bytes);
+                shift_rows(bytes);
+                add_round_key(bytes, &self.round_keys[Self::NR]);
+                transpose_state(bytes);
+            }
+
+            fn decrypt_block(&self, bytes: &mut [u8]) {
+                transpose_state(bytes);
+                // Initial round key
+                add_round_key(bytes, &self.round_keys[Self::NR]);
+
+                // Main NR
+                for i in (1..Self::NR).rev() {
+                    inv_shift_rows(bytes);
+                    inv_sub_bytes(bytes);
+                    add_round_key(bytes, &self.round_keys[i]);
+                    inv_mix_columns(bytes);
+                }
+
+                // Finalization round
+                inv_shift_rows(bytes);
+                inv_sub_bytes(bytes);
+                add_round_key(bytes, &self.round_keys[0]);
+                transpose_state(bytes);
+            }
+        }
+    };
+}
