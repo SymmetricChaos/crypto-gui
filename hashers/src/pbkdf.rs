@@ -78,14 +78,7 @@ impl ClassicHasher for Pbkdf2 {
         out
     }
 
-    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        let mut bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| HasherError::general("byte format error"))?;
-        let out = self.hash(&mut bytes);
-        Ok(self.output_format.byte_slice_to_text(&out))
-    }
+    crate::hash_bytes_from_string! {}
 }
 
 #[cfg(test)]
