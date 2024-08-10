@@ -1,6 +1,5 @@
-use utils::{byte_formatting::ByteFormat, padding::pkcs5_padding};
-
 use crate::{errors::HasherError, traits::ClassicHasher};
+use utils::{byte_formatting::ByteFormat, padding::pkcs5_padding};
 
 const MD2_S_TABLE: [u8; 256] = [
     0x29, 0x2E, 0x43, 0xC9, 0xA2, 0xD8, 0x7C, 0x01, 0x3D, 0x36, 0x54, 0xA1, 0xEC, 0xF0, 0x06, 0x13,
@@ -40,11 +39,45 @@ impl Md2 {}
 
 impl ClassicHasher for Md2 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut output = bytes.to_vec();
-        pkcs5_padding(&mut output, 16).unwrap();
+        let mut input = bytes.to_vec();
+        pkcs5_padding(&mut input, 16).unwrap();
 
-        let mut out = vec![0u8; 16];
-        todo!()
+        // Calculate a checksum and append it to the padded input
+        let mut c = [0u8; 16];
+        let mut l = 0u8;
+        let mut i = 0;
+
+        for byte in input.iter() {
+            c[i] ^= MD2_S_TABLE[(byte ^ l) as usize];
+            l = c[i];
+            i = (i + 1) % 16;
+        }
+
+        input.extend_from_slice(&c);
+
+        // Compute the hash value
+        let mut d = [0u8; 48];
+        let mut i = 0;
+
+        for byte in input.into_iter() {
+            d[16 + i] = byte;
+            d[32 + i] = byte ^ d[i];
+
+            i = (i + 1) % 16;
+            if i == 0 {
+                let mut t = 0u8;
+                for j in 0..18 {
+                    for k in 0..48 {
+                        t = d[k] ^ MD2_S_TABLE[t as usize];
+                        d[k] = t;
+                    }
+                    t = t.wrapping_add(j);
+                }
+            }
+        }
+
+        // Take just the first 16 bytes
+        d[0..16].to_vec()
     }
 
     crate::hash_bytes_from_string! {}
@@ -59,7 +92,15 @@ mod md2_tests {
         let mut hasher = Md2::default();
         hasher.input_format = ByteFormat::Utf8;
         hasher.output_format = ByteFormat::Hex;
-        assert_eq!("", hasher.hash_bytes_from_string("").unwrap());
-        assert_eq!("", hasher.hash_bytes_from_string("a").unwrap());
+        assert_eq!(
+            "8350e5a3e24c153df2275c9f80692773",
+            hasher.hash_bytes_from_string("").unwrap()
+        );
+        assert_eq!(
+            "03d85a0d629d2c442e987525319fc471",
+            hasher
+                .hash_bytes_from_string("The quick brown fox jumps over the lazy dog")
+                .unwrap()
+        );
     }
 }
