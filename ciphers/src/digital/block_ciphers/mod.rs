@@ -55,9 +55,8 @@ macro_rules! impl_cipher_for_block_cipher {
                 if self.mode.padded() {
                     if self.padding == crate::digital::block_ciphers::block_cipher::BCPadding::None
                     {
-                        crate::digital::block_ciphers::block_cipher::none_padding(
-                            &mut bytes, $blocksize,
-                        )?
+                        utils::padding::none_padding(&mut bytes, $blocksize)
+                            .map_err(|e| crate::errors::CipherError::General(e.to_string()))?
                     };
                 }
 

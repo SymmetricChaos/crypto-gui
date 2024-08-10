@@ -1,5 +1,14 @@
+use std::fmt::Display;
+
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct PaddingError(String);
+
+impl Display for PaddingError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let e = format!("Padding Error: {}", self.0);
+        write!(f, "{e}")
+    }
+}
 
 /// Do nothing. Included for compatibility.
 pub fn none_padding(bytes: &mut Vec<u8>, block_size: u32) -> Result<(), PaddingError> {

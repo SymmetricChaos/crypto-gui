@@ -4,6 +4,10 @@ use strum::EnumIter;
 use utils::{
     byte_formatting::{overwrite_bytes, xor_into_bytes},
     math_functions::incr_array_ctr,
+    padding::{
+        ansi923_padding, bit_padding, none_padding, pkcs5_padding, strip_ansi923_padding,
+        strip_bit_padding, strip_none_padding, strip_pkcs5_padding,
+    },
 };
 
 pub trait BlockCipher<const N: usize> {
@@ -262,6 +266,7 @@ impl BCPadding {
             BCPadding::Pkcs => pkcs5_padding(bytes, block_size),
             BCPadding::Ansi923 => ansi923_padding(bytes, block_size),
         }
+        .map_err(|e| CipherError::General(e.to_string()))
     }
 
     pub fn strip_padding(&self, bytes: &mut Vec<u8>, block_size: u32) -> Result<(), CipherError> {
@@ -271,6 +276,7 @@ impl BCPadding {
             BCPadding::Pkcs => strip_pkcs5_padding(bytes),
             BCPadding::Ansi923 => strip_ansi923_padding(bytes),
         }
+        .map_err(|e| CipherError::General(e.to_string()))
     }
 
     pub fn info(&self) -> &'static str {
@@ -291,195 +297,5 @@ impl Display for BCPadding {
             Self::Pkcs => write!(f, "PKCS5"),
             Self::Ansi923 => write!(f, "ANSI X9.23"),
         }
-    }
-}
-
-pub fn none_padding(bytes: &mut Vec<u8>, block_size: u32) -> Result<(), CipherError> {
-    if bytes.len() % block_size as usize != 0 {
-        Err(CipherError::Input(format!(
-            "encrypted data must be in chunks of {} bytes",
-            block_size
-        )))
-    } else {
-        Ok(())
-    }
-}
-
-pub fn strip_none_padding(bytes: &mut Vec<u8>, block_size: u32) -> Result<(), CipherError> {
-    if bytes.len() % block_size as usize != 0 {
-        Err(CipherError::Input(format!(
-            "encrypted data must be in chunks of {} bytes",
-            block_size
-        )))
-    } else {
-        Ok(())
-    }
-}
-
-pub fn bit_padding(bytes: &mut Vec<u8>, block_size: u32) -> Result<(), CipherError> {
-    bytes.push(0x80);
-    while bytes.len() % block_size as usize != 0 {
-        bytes.push(0x00)
-    }
-    Ok(())
-}
-
-pub fn strip_bit_padding(bytes: &mut Vec<u8>) -> Result<(), CipherError> {
-    loop {
-        let p = bytes.pop();
-        if p == Some(0x00) {
-            continue;
-        } else if p == Some(0x80) || p == None {
-            return Ok(());
-        } else {
-            return Err(CipherError::Input(format!(
-                "invalid bit padding, found byte {:02x}",
-                p.unwrap()
-            )));
-        }
-    }
-}
-
-pub fn pkcs5_padding(bytes: &mut Vec<u8>, block_size: u32) -> Result<(), CipherError> {
-    let n_padding = (block_size as usize - (bytes.len() % block_size as usize))
-        .try_into()
-        .unwrap();
-    for _ in 0..n_padding {
-        bytes.push(n_padding)
-    }
-    Ok(())
-}
-
-pub fn strip_pkcs5_padding(bytes: &mut Vec<u8>) -> Result<(), CipherError> {
-    let n_padding = *bytes.iter().last().ok_or(CipherError::input(
-        "PKCS padded ciphertext cannot have zero length",
-    ))?;
-    for _ in 0..n_padding {
-        let p = bytes.pop();
-        if p == Some(n_padding) {
-            continue;
-        } else if p == None {
-            return Err(CipherError::input(
-                "invalid PKCS padding, ran out of ciphertext",
-            ));
-        } else {
-            return Err(CipherError::Input(format!(
-                "invalid PKCS padding, found byte {:02x} for ",
-                p.unwrap()
-            )));
-        }
-    }
-    Ok(())
-}
-
-pub fn ansi923_padding(bytes: &mut Vec<u8>, block_size: u32) -> Result<(), CipherError> {
-    let n_padding = (block_size as usize - (bytes.len() % block_size as usize))
-        .try_into()
-        .unwrap();
-    for _ in 0..(n_padding - 1) {
-        bytes.push(0)
-    }
-    bytes.push(n_padding);
-    Ok(())
-}
-
-pub fn strip_ansi923_padding(bytes: &mut Vec<u8>) -> Result<(), CipherError> {
-    let n_padding = bytes.pop().ok_or(CipherError::input(
-        "ANSI X9.23 padded ciphertext cannot have zero length",
-    ))?;
-
-    for _ in 0..(n_padding - 1) {
-        let p = bytes.pop();
-        if p == Some(0) {
-            continue;
-        } else if p == None {
-            return Err(CipherError::input(
-                "invalid ANSI X9.23 padding, ran out of ciphertext",
-            ));
-        } else {
-            return Err(CipherError::Input(format!(
-                "invalid ANSI X9.23 padding, found byte {:02x}",
-                p.unwrap()
-            )));
-        }
-    }
-    Ok(())
-}
-
-#[cfg(test)]
-mod padding_tests {
-
-    use super::*;
-
-    #[test]
-    fn test_bit_padding() {
-        let mut bytes = vec![0x01, 0x02, 0xff, 0x80];
-        bit_padding(&mut bytes, 8).unwrap();
-        assert_eq!(vec![0x01, 0x02, 0xff, 0x80, 0x80, 0x00, 0x00, 0x00], bytes);
-        strip_bit_padding(&mut bytes).unwrap();
-        assert_eq!(vec![0x01, 0x02, 0xff, 0x80], bytes);
-    }
-
-    #[test]
-    fn test_bit_padding_full_block() {
-        let mut bytes = vec![0x01, 0x02, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80];
-        bit_padding(&mut bytes, 8).unwrap();
-        assert_eq!(
-            vec![
-                0x01, 0x02, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00
-            ],
-            bytes
-        );
-        strip_bit_padding(&mut bytes).unwrap();
-        assert_eq!(vec![0x01, 0x02, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80], bytes);
-    }
-
-    #[test]
-    fn test_pkcs_padding() {
-        let mut bytes = vec![0x01, 0x02, 0xff, 0x80];
-        pkcs5_padding(&mut bytes, 8).unwrap();
-        assert_eq!(vec![0x01, 0x02, 0xff, 0x80, 0x04, 0x04, 0x04, 0x04], bytes);
-        strip_pkcs5_padding(&mut bytes).unwrap();
-        assert_eq!(vec![0x01, 0x02, 0xff, 0x80], bytes);
-    }
-
-    #[test]
-    fn test_pkcs_padding_full_blocks() {
-        let mut bytes = vec![0x01, 0x02, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80];
-        pkcs5_padding(&mut bytes, 8).unwrap();
-        assert_eq!(
-            vec![
-                0x01, 0x02, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08,
-                0x08, 0x08
-            ],
-            bytes
-        );
-        strip_pkcs5_padding(&mut bytes).unwrap();
-        assert_eq!(vec![0x01, 0x02, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80], bytes);
-    }
-
-    #[test]
-    fn test_ansi_padding() {
-        let mut bytes = vec![0x01, 0x02, 0xff, 0x80];
-        ansi923_padding(&mut bytes, 8).unwrap();
-        assert_eq!(vec![0x01, 0x02, 0xff, 0x80, 0x00, 0x00, 0x00, 0x04], bytes);
-        strip_ansi923_padding(&mut bytes).unwrap();
-        assert_eq!(vec![0x01, 0x02, 0xff, 0x80], bytes);
-    }
-
-    #[test]
-    fn test_ansi_padding_full_block() {
-        let mut bytes = vec![0x01, 0x02, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80];
-        ansi923_padding(&mut bytes, 8).unwrap();
-        assert_eq!(
-            vec![
-                0x01, 0x02, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x08
-            ],
-            bytes
-        );
-        strip_ansi923_padding(&mut bytes).unwrap();
-        assert_eq!(vec![0x01, 0x02, 0xff, 0xff, 0xff, 0xff, 0xff, 0x80], bytes);
     }
 }
