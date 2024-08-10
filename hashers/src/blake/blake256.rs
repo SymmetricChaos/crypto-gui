@@ -24,7 +24,7 @@ pub struct Blake256 {
 impl Default for Blake256 {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
+            input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             salt: [0, 0, 0, 0],
             truncated: false,

@@ -19,7 +19,7 @@ pub struct Blake2b {
 impl Default for Blake2b {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
+            input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             key: Vec::new(),
             hash_len: 32, // default to 256 bits

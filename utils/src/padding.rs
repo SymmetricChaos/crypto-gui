@@ -130,8 +130,8 @@ pub fn strip_ansi923_padding(bytes: &mut Vec<u8>) -> Result<(), PaddingError> {
     Ok(())
 }
 
-/// Merkele-Damagard strengthening pads the input with zeroes then appends the length of the original input. Length is appended at a 64-bit little endian value. This form of padding is intended for hash functions so no inverse is provided.
-pub fn md_strengthening_64(bytes: &mut Vec<u8>, block_size: u32) {
+/// Merkele-Damagard strengthening pads the input 0x80, then with zeroes, and then appends the length of the original input. Length is appended at a 64-bit little endian value. This form of padding is intended for hash functions so no inverse is provided.
+pub fn md_strengthening_64_le(bytes: &mut Vec<u8>, block_size: u32) {
     // Length in bits before padding
     let b_len = (bytes.len().wrapping_mul(8)) as u64;
     // push a byte with a leading 1 to the bytes
@@ -146,18 +146,18 @@ pub fn md_strengthening_64(bytes: &mut Vec<u8>, block_size: u32) {
     }
 }
 
-/// Merkele-Damagard strengthening pads the input with zeroes then appends the length of the original input. Length is appended at a 128-bit little endian value. This form of padding is intended for hash functions so no inverse is provided.
-pub fn md_strengthening_128(bytes: &mut Vec<u8>, block_size: u32) {
+/// Merkele-Damagard strengthening pads the input 0x80, then with zeroes, and then appends the length of the original input. Length is appended at a 64-bit big endian value. This form of padding is intended for hash functions so no inverse is provided.
+pub fn md_strengthening_64_be(bytes: &mut Vec<u8>, block_size: u32) {
     // Length in bits before padding
-    let b_len = (bytes.len().wrapping_mul(8)) as u128;
+    let b_len = (bytes.len().wrapping_mul(8)) as u64;
     // push a byte with a leading 1 to the bytes
     bytes.push(0x80);
-    // push zeros until the length is sixteen bytes less than the block size.
-    while (bytes.len() % block_size as usize) != (block_size - 16) as usize {
+    // push zeros until the length is eight bytes less than the block size.
+    while (bytes.len() % block_size as usize) != (block_size - 8) as usize {
         bytes.push(0)
     }
-    // Append the sixteen bytes of length
-    for b in b_len.to_le_bytes() {
+    // Append the eight bytes of length
+    for b in b_len.to_be_bytes() {
         bytes.push(b)
     }
 }

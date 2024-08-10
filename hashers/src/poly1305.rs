@@ -13,7 +13,7 @@ pub struct Poly1305 {
 impl Default for Poly1305 {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
+            input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             key_r: [0; 16],
             key_s: [0; 16],

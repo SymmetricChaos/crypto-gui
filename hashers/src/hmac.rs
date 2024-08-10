@@ -25,7 +25,7 @@ macro_rules! hmac {
         impl Default for $name {
             fn default() -> Self {
                 Self {
-                    input_format: ByteFormat::Hex,
+                    input_format: ByteFormat::Utf8,
                     output_format: ByteFormat::Hex,
                     key_format: ByteFormat::Hex,
                     key: Vec::new(),

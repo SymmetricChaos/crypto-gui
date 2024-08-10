@@ -64,7 +64,7 @@ macro_rules! sha512 {
         impl Default for $name {
             fn default() -> Self {
                 Self {
-                    input_format: ByteFormat::Hex,
+                    input_format: ByteFormat::Utf8,
                     output_format: ByteFormat::Hex,
                 }
             }

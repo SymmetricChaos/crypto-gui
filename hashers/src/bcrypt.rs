@@ -18,7 +18,7 @@ pub struct Bcrypt {
 impl Default for Bcrypt {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
+            input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             // parray: PARRAY,
             // sboxes: SBOXES,

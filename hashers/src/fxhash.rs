@@ -17,7 +17,7 @@ pub struct FxHash {
 impl Default for FxHash {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
+            input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             word_size: WordSize::W64,
         }

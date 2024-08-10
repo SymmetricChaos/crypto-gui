@@ -390,7 +390,7 @@ pub struct Blake3 {
 impl Default for Blake3 {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
+            input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             key: [0; 32],
             key_context: String::new(),

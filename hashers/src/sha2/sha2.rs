@@ -31,7 +31,7 @@ pub struct Sha2 {
 impl Default for Sha2 {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
+            input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             variant: Sha2Variant::Sha256,
             sha224: Sha2_224::default(),

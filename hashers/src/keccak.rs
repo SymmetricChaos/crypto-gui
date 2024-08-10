@@ -258,7 +258,7 @@ impl Keccak {
     // For ease of comparing to sepcification their they are shown as the length in bits divided by eight
     pub fn sha3_224() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
+            input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             rate: 1152 / 8,
             // capacity: 448 / 8,
@@ -269,7 +269,7 @@ impl Keccak {
 
     pub fn sha3_256() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
+            input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             rate: 1088 / 8,
             // capacity: 512 / 8,
@@ -280,7 +280,7 @@ impl Keccak {
 
     pub fn sha3_384() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
+            input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             rate: 832 / 8,
             // capacity: 768 / 8,
@@ -291,7 +291,7 @@ impl Keccak {
 
     pub fn sha3_512() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
+            input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             rate: 576 / 8,
             // capacity: 1024 / 8,
@@ -302,7 +302,7 @@ impl Keccak {
 
     pub fn shake_128(output_size: usize) -> Self {
         Self {
-            input_format: ByteFormat::Hex,
+            input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             rate: 1344 / 8,
             // capacity: 256 / 8,
@@ -313,7 +313,7 @@ impl Keccak {
 
     pub fn shake_256(output_size: usize) -> Self {
         Self {
-            input_format: ByteFormat::Hex,
+            input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             rate: 1088 / 8,
             // capacity: 512 / 8,

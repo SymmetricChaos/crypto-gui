@@ -19,7 +19,7 @@ pub struct Pbkdf2 {
 impl Default for Pbkdf2 {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
+            input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             hmac: SelectHmac::Sha1,
             salt: Vec::new(),

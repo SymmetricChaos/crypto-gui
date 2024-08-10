@@ -11,7 +11,7 @@ pub struct Md6 {
 impl Default for Md6 {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
+            input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
         }
     }

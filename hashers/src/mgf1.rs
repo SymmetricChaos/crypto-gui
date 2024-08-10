@@ -13,7 +13,7 @@ pub struct Mgf1 {
 impl Default for Mgf1 {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
+            input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             output_length: 32,
             hasher: Sha2::default(),

@@ -33,7 +33,7 @@ pub struct Fnv {
 impl Default for Fnv {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
+            input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             size: FnvSize::P64,
             alternate: true,

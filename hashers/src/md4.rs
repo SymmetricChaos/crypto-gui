@@ -1,4 +1,4 @@
-use utils::{byte_formatting::ByteFormat, padding::md_strengthening_64};
+use utils::{byte_formatting::ByteFormat, padding::md_strengthening_64_le};
 
 use crate::{errors::HasherError, traits::ClassicHasher};
 
@@ -11,7 +11,7 @@ pub struct Md4 {
 impl Default for Md4 {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
+            input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
         }
     }
@@ -54,7 +54,7 @@ impl Md4 {
 impl ClassicHasher for Md4 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut input = bytes.to_vec();
-        md_strengthening_64(&mut input, 64);
+        md_strengthening_64_le(&mut input, 64);
 
         // Step 3. Initialize MD buffer
         let mut a = 0x67452301_u32;
