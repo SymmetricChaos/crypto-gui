@@ -10,6 +10,7 @@ mod blake_controls;
 mod fnv_controls;
 mod hmac_controls;
 mod lm_controls;
+mod md2_controls;
 mod md4_controls;
 mod md5_controls;
 mod mgf1_controls;
@@ -57,6 +58,7 @@ pub struct HasherInterface {
     fnv: fnv_controls::FnvFrame,
     hmac: hmac_controls::HmacFrame,
     lm: lm_controls::LmFrame,
+    md2: md2_controls::Md2Frame,
     md4: md4_controls::Md4Frame,
     md5: md5_controls::Md5Frame,
     mgf1: mgf1_controls::Mgf1Frame,
@@ -78,6 +80,7 @@ impl HasherInterface {
                 HasherId::Blake2,
                 HasherId::Blake3,
                 HasherId::Hmac,
+                HasherId::Md2,
                 HasherId::Md4,
                 HasherId::Md5,
                 HasherId::Mgf1,
@@ -115,8 +118,10 @@ impl HasherInterface {
             HasherId::Fnv => &mut self.fnv,
             HasherId::Hmac => &mut self.hmac,
             HasherId::Lm => &mut self.lm,
+            HasherId::Md2 => &mut self.md2,
             HasherId::Md4 => &mut self.md4,
             HasherId::Md5 => &mut self.md5,
+            HasherId::Md6 => todo!(),
             HasherId::Mgf1 => &mut self.mgf1,
             HasherId::Sha0 => &mut self.sha0,
             HasherId::Sha1 => &mut self.sha1,
