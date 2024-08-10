@@ -1,4 +1,4 @@
-use utils::byte_formatting::ByteFormat;
+use utils::{byte_formatting::ByteFormat, padding::pkcs5_padding};
 
 use crate::{errors::HasherError, traits::ClassicHasher};
 
@@ -40,6 +40,10 @@ impl Md2 {}
 
 impl ClassicHasher for Md2 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
+        let mut output = bytes.to_vec();
+        pkcs5_padding(&mut output, 16).unwrap();
+
+        let mut out = vec![0u8; 16];
         todo!()
     }
 

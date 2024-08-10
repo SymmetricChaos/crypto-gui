@@ -4,6 +4,7 @@ pub mod byte_formatting;
 pub mod elliptic_curves;
 pub mod grid;
 pub mod math_functions;
+pub mod padding;
 pub mod polynomial_interpolation;
 pub mod preset_alphabet;
 pub mod text_functions;

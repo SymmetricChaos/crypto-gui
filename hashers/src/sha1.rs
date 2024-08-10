@@ -1,4 +1,4 @@
-use utils::byte_formatting::ByteFormat;
+use utils::{byte_formatting::ByteFormat, padding::md_strengthening_64};
 
 use crate::{errors::HasherError, traits::ClassicHasher};
 
@@ -23,23 +23,7 @@ impl ClassicHasher for Sha1 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut input = bytes.to_vec();
 
-        // Padding and appending length is identical to MD4 and MD5
-        // Length in bits before padding
-        let b_len = (input.len().wrapping_mul(8)) as u64;
-
-        // Step 1.Padding
-        // push a byte with a leading 1 to the bytes
-        input.push(0x80);
-        // push zeros until the length in bits is 448 mod 512
-        // equivalently until the length in bytes is 56 mod 64
-        while (input.len() % 64) != 56 {
-            input.push(0)
-        }
-
-        // Step 2. Append length
-        for b in b_len.to_be_bytes() {
-            input.push(b)
-        }
+        md_strengthening_64(&mut input, 64);
 
         // Step 3. Initialize variables
         let mut a = 0x67452301_u32;
