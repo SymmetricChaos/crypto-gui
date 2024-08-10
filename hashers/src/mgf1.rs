@@ -1,6 +1,6 @@
 use utils::byte_formatting::ByteFormat;
 
-use crate::{errors::HasherError, sha2::Sha2, traits::ClassicHasher};
+use crate::{errors::HasherError, sha::Sha2, traits::ClassicHasher};
 
 #[derive(Debug, Clone)]
 pub struct Mgf1 {

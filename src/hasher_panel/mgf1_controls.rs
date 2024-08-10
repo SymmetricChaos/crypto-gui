@@ -1,7 +1,7 @@
 use crate::ui_elements::UiElements;
 
 use super::HasherFrame;
-use hashers::{errors::HasherError, mgf1::Mgf1, sha2::Sha2Variant, traits::ClassicHasher};
+use hashers::{errors::HasherError, mgf1::Mgf1, sha::Sha2Variant, traits::ClassicHasher};
 
 pub struct Mgf1Frame {
     hasher: Mgf1,

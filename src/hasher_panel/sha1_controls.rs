@@ -1,4 +1,4 @@
-use hashers::{errors::HasherError, sha1::Sha1, traits::ClassicHasher};
+use hashers::{errors::HasherError, sha::Sha1, traits::ClassicHasher};
 use utils::byte_formatting::ByteFormat;
 
 use crate::ui_elements::UiElements;

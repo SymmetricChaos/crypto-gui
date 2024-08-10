@@ -238,7 +238,7 @@ pub enum Domain {
 }
 
 // https://chemejon.wordpress.com/2021/12/06/sha-3-explained-in-plain-english/
-pub struct Keccak {
+pub struct Sha3 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
     rate: usize, // rate in bytes, block size
@@ -247,13 +247,13 @@ pub struct Keccak {
     domain: Domain,
 }
 
-impl Default for Keccak {
+impl Default for Sha3 {
     fn default() -> Self {
         Self::sha3_256()
     }
 }
 
-impl Keccak {
+impl Sha3 {
     // For ease of use rate, capacity, and output size are in bytes
     // For ease of comparing to sepcification their they are shown as the length in bits divided by eight
     pub fn sha3_224() -> Self {
@@ -323,7 +323,7 @@ impl Keccak {
     }
 }
 
-impl ClassicHasher for Keccak {
+impl ClassicHasher for Sha3 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut input = bytes.to_vec();
 
@@ -400,42 +400,42 @@ mod keccak_tests {
 
     #[test]
     fn test_empty_input_all() {
-        let hasher = Keccak::sha3_224();
+        let hasher = Sha3::sha3_224();
         let output = hasher.hash_bytes_from_string("").unwrap();
         assert_eq!(
             "6b4e03423667dbb73b6e15454f0eb1abd4597f9a1b078e3f5b5a6bc7",
             output
         );
 
-        let hasher = Keccak::sha3_256();
+        let hasher = Sha3::sha3_256();
         let output = hasher.hash_bytes_from_string("").unwrap();
         assert_eq!(
             "a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a",
             output
         );
 
-        let hasher = Keccak::sha3_384();
+        let hasher = Sha3::sha3_384();
         let output = hasher.hash_bytes_from_string("").unwrap();
         assert_eq!(
             "0c63a75b845e4f7d01107d852e4c2485c51a50aaaa94fc61995e71bbee983a2ac3713831264adb47fb6bd1e058d5f004",
             output
         );
 
-        let hasher = Keccak::sha3_512();
+        let hasher = Sha3::sha3_512();
         let output = hasher.hash_bytes_from_string("").unwrap();
         assert_eq!(
             "a69f73cca23a9ac5c8b567dc185a756e97c982164fe25859e0d1dcc1475c80a615b2123af1f5f94c11e3e9402c3ac558f500199d95b6d3e301758586281dcd26",
             output
         );
 
-        let hasher = Keccak::shake_128(200);
+        let hasher = Sha3::shake_128(200);
         let output = hasher.hash_bytes_from_string("").unwrap();
         assert_eq!(
             "7f9c2ba4e88f827d616045507605853ed73b8093f6efbc88eb1a6eacfa66ef263cb1eea988004b93103cfb0aeefd2a686e01fa4a58e8a3639ca8a1e3f9ae57e235b8cc873c23dc62b8d260169afa2f75ab916a58d974918835d25e6a435085b2badfd6dfaac359a5efbb7bcc4b59d538df9a04302e10c8bc1cbf1a0b3a5120ea17cda7cfad765f5623474d368ccca8af0007cd9f5e4c849f167a580b14aabdefaee7eef47cb0fca9767be1fda69419dfb927e9df07348b196691abaeb580b32def58538b8d23f877",
             output
         );
 
-        let hasher = Keccak::shake_256(200);
+        let hasher = Sha3::shake_256(200);
         let output = hasher.hash_bytes_from_string("").unwrap();
         assert_eq!(
             "46b9dd2b0ba88d13233b3feb743eeb243fcd52ea62b81b82b50c27646ed5762fd75dc4ddd8c0f200cb05019d67b592f6fc821c49479ab48640292eacb3b7c4be141e96616fb13957692cc7edd0b45ae3dc07223c8e92937bef84bc0eab862853349ec75546f58fb7c2775c38462c5010d846c185c15111e595522a6bcd16cf86f3d122109e3b1fdd943b6aec468a2d621a7c06c6a957c62b54dafc3be87567d677231395f6147293b68ceab7a9e0c58d864e8efde4e1b9a46cbe854713672f5caaae314ed9083dab",
@@ -445,7 +445,7 @@ mod keccak_tests {
 
     #[test]
     fn test_multiblock_input() {
-        let hasher = Keccak::sha3_256();
+        let hasher = Sha3::sha3_256();
         let output = hasher.hash_bytes_from_string("a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3").unwrap();
         assert_eq!(
             "79f38adec5c20307a98ef76e8324afbfd46cfd81b22e3973c65fa1bd9de31787",

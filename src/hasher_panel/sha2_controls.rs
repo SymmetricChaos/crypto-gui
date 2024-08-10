@@ -1,6 +1,6 @@
 use hashers::{
     errors::HasherError,
-    sha2::{Sha2, Sha2Variant},
+    sha::{Sha2, Sha2Variant},
     traits::ClassicHasher,
 };
 

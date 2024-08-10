@@ -2,8 +2,8 @@ use crate::{
     errors::HasherError,
     md4::Md4,
     md5::Md5,
-    sha1::Sha1,
-    sha2::{
+    sha::{
+        sha1::Sha1,
         sha256::{Sha2_224, Sha2_256},
         sha512::{Sha2_384, Sha2_512},
     },
