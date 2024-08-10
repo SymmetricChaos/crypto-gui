@@ -203,7 +203,7 @@ impl ChunkState {
                     &block_words,
                     self.chunk_counter,
                     BLOCK_LEN as u32,
-                    self.flags | self.start_flag(),
+                    self.flags | self.start_flag(), // if this is the first block the start flag if set for compress
                 ));
                 self.blocks_compressed += 1;
                 self.block = [0; BLOCK_LEN];
@@ -260,7 +260,7 @@ fn parent_cv(
 }
 
 /// An incremental hasher that can accept any number of writes.
-pub struct Hasher {
+pub struct KeccakHasher {
     chunk_state: ChunkState,
     key_words: [u32; 8],
     cv_stack: [[u32; 8]; 54], // Space for 54 subtree chaining values:
@@ -268,7 +268,7 @@ pub struct Hasher {
     flags: u32,
 }
 
-impl Hasher {
+impl KeccakHasher {
     fn new_internal(key_words: [u32; 8], flags: u32) -> Self {
         Self {
             chunk_state: ChunkState::new(key_words, 0, flags),
@@ -404,23 +404,16 @@ impl ClassicHasher for Blake3 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut out = vec![0; self.hash_len as usize];
         let mut h = match self.mode {
-            Blake3Mode::Unkeyed => Hasher::new(),
-            Blake3Mode::Keyed => Hasher::new_keyed(&self.key),
-            Blake3Mode::KeyDerivation => Hasher::new_derive_key(&self.key_context),
+            Blake3Mode::Unkeyed => KeccakHasher::new(),
+            Blake3Mode::Keyed => KeccakHasher::new_keyed(&self.key),
+            Blake3Mode::KeyDerivation => KeccakHasher::new_derive_key(&self.key_context),
         };
         h.update(bytes);
         h.finalize(&mut out);
         out
     }
 
-    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        let mut bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| HasherError::general("byte format error"))?;
-        let out = self.hash(&mut bytes);
-        Ok(self.output_format.byte_slice_to_text(&out))
-    }
+    crate::hash_bytes_from_string! {}
 }
 
 #[cfg(test)]

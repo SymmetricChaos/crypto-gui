@@ -130,7 +130,7 @@ pub fn strip_ansi923_padding(bytes: &mut Vec<u8>) -> Result<(), PaddingError> {
     Ok(())
 }
 
-/// Merkele-Damagard strengthening pads the input 0x80, then with zeroes, and then appends the length of the original input. Length is appended at a 64-bit little endian value. This form of padding is intended for hash functions so no inverse is provided.
+/// Merkele-Damgård strengthening pads the input with 0x80, then with zeroes, and then appends the length of the original input. Length is appended as a 64-bit little endian value. This form of padding is intended for hash functions so no inverse is provided.
 pub fn md_strengthening_64_le(bytes: &mut Vec<u8>, block_size: u32) {
     // Length in bits before padding
     let b_len = (bytes.len().wrapping_mul(8)) as u64;
@@ -146,7 +146,7 @@ pub fn md_strengthening_64_le(bytes: &mut Vec<u8>, block_size: u32) {
     }
 }
 
-/// Merkele-Damagard strengthening pads the input 0x80, then with zeroes, and then appends the length of the original input. Length is appended at a 64-bit big endian value. This form of padding is intended for hash functions so no inverse is provided.
+/// Merkele-Damgård strengthening pads the input with 0x80, then with zeroes, and then appends the length of the original input. Length is appended as a 64-bit big endian value. This form of padding is intended for hash functions so no inverse is provided.
 pub fn md_strengthening_64_be(bytes: &mut Vec<u8>, block_size: u32) {
     // Length in bits before padding
     let b_len = (bytes.len().wrapping_mul(8)) as u64;
