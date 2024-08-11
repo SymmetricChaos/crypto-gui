@@ -24,7 +24,7 @@ fn load_font(name: &str, family: &FontFamily, font_data: FontData, font_def: &mu
     font_def.families.get_mut(family).unwrap().push(name.into());
 }
 
-pub struct ClassicCrypto {
+pub struct ClassicCryptoApp {
     cipher_interface: CipherInterface,
     code_interface: CodeInterface,
     rng_interface: RngInterface,
@@ -44,7 +44,7 @@ pub struct ClassicCrypto {
     text_prep_page: TextPrepPage,
 }
 
-impl Default for ClassicCrypto {
+impl Default for ClassicCryptoApp {
     fn default() -> Self {
         Self {
             // Input, output, and error shared by all Ciphers and Codes
@@ -76,9 +76,9 @@ impl Default for ClassicCrypto {
     }
 }
 
-impl ClassicCrypto {
+impl ClassicCryptoApp {
     // Configure the CreationContext and also build the app
-    pub fn build_with_context(cc: &eframe::CreationContext<'_>) -> Self {
+    pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         let mut font_def = FontDefinitions::default();
 
         // Noto fonts to get wide coverage, more can be added if needed
@@ -445,7 +445,17 @@ impl ClassicCrypto {
                     "https://github.com/SymmetricChaos/crypto-gui",
                 );
                 ui.add_space(10.0);
-                ui.hyperlink_to("powered by egui", "https://github.com/emilk/egui");
+                ui.horizontal(|ui| {
+                    ui.spacing_mut().item_spacing.x = 0.0;
+                    ui.label("Powered by ");
+                    ui.hyperlink_to("egui", "https://github.com/emilk/egui");
+                    ui.label(" and ");
+                    ui.hyperlink_to(
+                        "eframe",
+                        "https://github.com/emilk/egui/tree/master/crates/eframe",
+                    );
+                    ui.label(".");
+                });
             });
         CentralPanel::default().show(ctx, |ui| {
             ui.label( RichText::new("Classical Cryptography").heading().strong());
@@ -460,7 +470,7 @@ impl ClassicCrypto {
     }
 }
 
-impl App for ClassicCrypto {
+impl App for ClassicCryptoApp {
     fn update(&mut self, ctx: &Context, _frame: &mut eframe::Frame) {
         egui_extras::install_image_loaders(ctx);
 
