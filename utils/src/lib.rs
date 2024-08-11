@@ -1,7 +1,6 @@
 pub mod bit_polynomial;
 pub mod bits;
 pub mod byte_formatting;
-pub mod elliptic_curves;
 pub mod grid;
 pub mod math_functions;
 pub mod padding;
