@@ -1,16 +1,19 @@
+use std::cell::RefCell;
+
 use itertools::Itertools;
 use utils::byte_formatting::ByteFormat;
 
 use crate::{
     errors::HasherError,
-    hmac::SelectHmac,
+    hmac::Hmac,
+    sha::Sha1,
     traits::{ClassicHasher, KeyedHasher},
 };
 
 pub struct Pbkdf2 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    pub hmac: SelectHmac,
+    pub hmac: RefCell<Hmac>,
     pub salt: Vec<u8>,
     pub iterations: u32,
     pub output_length: u32, // size of the output in bytes
@@ -18,10 +21,12 @@ pub struct Pbkdf2 {
 
 impl Default for Pbkdf2 {
     fn default() -> Self {
+        let mut hmac = Hmac::default();
+        hmac.hasher = Box::new(Sha1::default());
         Self {
             input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
-            hmac: SelectHmac::Sha1,
+            hmac: RefCell::new(hmac),
             salt: Vec::new(),
             iterations: 4096,
             output_length: 32,
@@ -30,7 +35,7 @@ impl Default for Pbkdf2 {
 }
 
 impl Pbkdf2 {
-    pub fn hash_block(&self, hmac: &Box<dyn KeyedHasher>, block_num: u32) -> Vec<u8> {
+    pub fn hash_block(&self, hmac: &Hmac, block_num: u32) -> Vec<u8> {
         // The salt followed by the block nunber are the initial input
         let mut s = self.salt.clone();
         s.extend(block_num.to_be_bytes());
@@ -64,14 +69,12 @@ impl ClassicHasher for Pbkdf2 {
         assert!(self.iterations != 0);
 
         let mut out = Vec::new();
-        let mut hmac = self.hmac.new();
-
-        hmac.set_key(bytes);
+        self.hmac.borrow_mut().set_key(bytes);
 
         let mut block_num = 0;
         while out.len() < self.output_length as usize {
             block_num += 1;
-            out.extend(self.hash_block(&hmac, block_num));
+            out.extend(self.hash_block(&self.hmac.borrow(), block_num));
         }
 
         out.truncate(self.output_length as usize);

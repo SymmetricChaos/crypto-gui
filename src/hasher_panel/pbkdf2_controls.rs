@@ -1,5 +1,6 @@
 use egui::DragValue;
 use hashers::{errors::HasherError, hmac::SelectHmac, pbkdf::Pbkdf2, traits::ClassicHasher};
+use strum::IntoEnumIterator;
 use utils::byte_formatting::ByteFormat;
 
 use crate::ui_elements::UiElements;
@@ -10,6 +11,7 @@ pub struct Pbkdf2Frame {
     hasher: Pbkdf2,
     salt: String,
     valid_salt: bool,
+    select_inner: SelectHmac,
 }
 
 impl Default for Pbkdf2Frame {
@@ -18,6 +20,7 @@ impl Default for Pbkdf2Frame {
             hasher: Default::default(),
             salt: String::from("BEEF"),
             valid_salt: true,
+            select_inner: SelectHmac::Sha1,
         }
     }
 }
@@ -31,13 +34,14 @@ impl HasherFrame for Pbkdf2Frame {
 
         ui.subheading("Select HMAC");
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.hasher.hmac, SelectHmac::Md4, "MD4");
-            ui.selectable_value(&mut self.hasher.hmac, SelectHmac::Md5, "MD5");
-            ui.selectable_value(&mut self.hasher.hmac, SelectHmac::Sha1, "SHA1");
-            ui.selectable_value(&mut self.hasher.hmac, SelectHmac::Sha224, "SHA2-224");
-            ui.selectable_value(&mut self.hasher.hmac, SelectHmac::Sha256, "SHA2-256");
-            ui.selectable_value(&mut self.hasher.hmac, SelectHmac::Sha384, "SHA2-384");
-            ui.selectable_value(&mut self.hasher.hmac, SelectHmac::Sha512, "SHA2-512");
+            for variant in SelectHmac::iter() {
+                if ui
+                    .selectable_value(&mut self.select_inner, variant, variant.to_string())
+                    .clicked()
+                {
+                    self.hasher.hmac.borrow_mut().hasher = variant.new()
+                }
+            }
         });
 
         ui.subheading("Select Number of Iterations");
