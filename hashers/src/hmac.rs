@@ -6,9 +6,11 @@ use crate::{
         sha1::Sha1,
         sha256::{Sha2_224, Sha2_256},
         sha512::{Sha2_384, Sha2_512},
+        Sha0,
     },
     traits::{ClassicHasher, KeyedHasher},
 };
+use strum::{Display, EnumIter, VariantNames};
 use utils::byte_formatting::ByteFormat;
 
 macro_rules! hmac {
@@ -92,6 +94,7 @@ macro_rules! hmac {
     };
 }
 
+hmac!(HmacSha0, Sha0, 64);
 hmac!(HmacSha1, Sha1, 64);
 hmac!(HmacMd4, Md4, 64);
 hmac!(HmacMd5, Md5, 64);
@@ -100,8 +103,10 @@ hmac!(HmacSha256, Sha2_256, 64);
 hmac!(HmacSha384, Sha2_384, 128);
 hmac!(HmacSha512, Sha2_512, 128);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, Display, VariantNames)]
+#[strum(serialize_all = "UPPERCASE")]
 pub enum SelectHmac {
+    Sha0,
     Sha1,
     Md4,
     Md5,
@@ -114,6 +119,7 @@ pub enum SelectHmac {
 impl SelectHmac {
     pub fn new(&self) -> Box<dyn KeyedHasher> {
         match self {
+            SelectHmac::Sha0 => Box::new(HmacSha0::default()),
             SelectHmac::Sha1 => Box::new(HmacSha1::default()),
             SelectHmac::Md5 => Box::new(HmacMd5::default()),
             SelectHmac::Md4 => Box::new(HmacMd4::default()),

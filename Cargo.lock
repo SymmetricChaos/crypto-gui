@@ -1731,6 +1731,7 @@ dependencies = [
  "json",
  "lazy_static",
  "num 0.4.3",
+ "strum",
  "utils",
 ]
 

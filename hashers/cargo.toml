@@ -14,3 +14,4 @@ itertools = "0.10.0"
 json = "0.12.4"
 csv = "1.2.1"
 crypto-bigint = { version = "0.5.5", features = ["generic-array"] } 
+strum = { version = "0.26", features = ["derive"] }

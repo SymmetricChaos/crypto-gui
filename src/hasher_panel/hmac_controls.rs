@@ -1,13 +1,19 @@
 use crate::ui_elements::UiElements;
 
 use super::HasherFrame;
-use hashers::{errors::HasherError, hmac::HmacSha256, traits::ClassicHasher};
+use hashers::{
+    errors::HasherError,
+    hmac::{HmacSha256, SelectHmac},
+    traits::{ClassicHasher, KeyedHasher},
+};
 use rand::{thread_rng, RngCore};
+use strum::IntoEnumIterator;
 use utils::byte_formatting::ByteFormat;
 
 pub struct HmacFrame {
     hasher: HmacSha256,
-    // select_hasher: HmacHasher,
+    select_hasher: SelectHmac,
+    hmac: Box<dyn KeyedHasher>,
     key_string: String,
     valid_key: bool,
 }
@@ -16,7 +22,8 @@ impl Default for HmacFrame {
     fn default() -> Self {
         Self {
             hasher: HmacSha256::default(),
-            // select_hasher: HmacHasher::Sha2_256,
+            select_hasher: SelectHmac::Sha256,
+            hmac: Box::new(HmacSha256::default()),
             key_string: String::new(),
             valid_key: false,
         }
@@ -68,27 +75,13 @@ impl HasherFrame for HmacFrame {
         ui.add_space(16.0);
 
         // ui.horizontal(|ui| {
-        //     if ui
-        //         .selectable_value(&mut self.inner_hasher, HmacHasher::Md4, "MD4")
-        //         .clicked()
-        //         || ui
-        //             .selectable_value(&mut self.inner_hasher, HmacHasher::Md5, "MD5")
+        //     for variant in SelectHmac::iter() {
+        //         if ui
+        //             .selectable_value(&mut self.select_hasher, variant, variant.to_string())
         //             .clicked()
-        //         || ui
-        //             .selectable_value(&mut self.inner_hasher, HmacHasher::Sha2_224, "SHA224")
-        //             .clicked()
-        //         || ui
-        //             .selectable_value(&mut self.inner_hasher, HmacHasher::Sha2_256, "SHA256")
-        //             .clicked()
-        //         || ui
-        //             .selectable_value(&mut self.inner_hasher, HmacHasher::Sha2_384, "SHA384")
-        //             .clicked()
-        //         || ui
-        //             .selectable_value(&mut self.inner_hasher, HmacHasher::Sha2_512, "SHA512")
-        //             .clicked()
-        //     {
-        //         self.hasher.block_size = self.inner_hasher.block_size();
-        //         self.hasher.hasher = self.inner_hasher.hasher();
+        //         {
+        //             self.hmac = variant.new()
+        //         }
         //     }
         // });
 

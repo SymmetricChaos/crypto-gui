@@ -97,7 +97,27 @@ impl Md6 {
         out
     }
 
-    pub fn compress(&self, input: &mut [u64; 89]) {}
+    pub fn next_round_key(round_key: u64) -> u64 {
+        round_key.rotate_left(1) ^ (0x7311c2812425cfa0 & round_key)
+    }
+
+    pub fn par(m: &[u8], k: &[u64; 8]) {}
+
+    pub fn seq(m: &[u8], k: &[u64; 8]) {}
+
+    pub fn compress(&self, input: &[u64; 89]) -> [u64; 16] {
+        let tap0 = 17;
+        let tap1 = 18;
+        let tap2 = 21;
+        let tap3 = 31;
+        let tap4 = 67;
+        let tap5 = 89;
+
+        let t = self.n_rounds() * 16;
+        let mut a = input.clone();
+
+        todo!()
+    }
 }
 
 impl ClassicHasher for Md6 {
@@ -105,6 +125,11 @@ impl ClassicHasher for Md6 {
         assert!(self.output_length <= 512);
         assert!(self.key.len() <= 64);
         assert!(self.mode <= 64);
+
+        let k = self.key();
+        let level = 0;
+        let round_key: u64 = 0x0123456789abcdef;
+
         todo!()
     }
 
@@ -125,6 +150,29 @@ mod md6_tests {
             [0x0a0b0c0d0e0f1a1b, 0x1c1d1e0000000000, 0, 0, 0, 0, 0, 0],
             hasher.key()
         );
+    }
+
+    #[test]
+    fn test_round_keys() {
+        let mut n = 0x0123456789abcdef;
+
+        let first_ten = [
+            0x0123456789abcdef,
+            0x0347cace1376567e,
+            0x058e571c26c8eadc,
+            0x0a1cec3869911f38,
+            0x16291870f3233150,
+            0x3e5330e1c66763a0,
+            0x4eb7614288eb84e0,
+            0xdf7f828511f68d60,
+            0xedee878b23c997e1,
+            0xbadd8d976792a863,
+        ];
+
+        for i in 0..10 {
+            assert_eq!(first_ten[i], n);
+            n = Md6::next_round_key(n);
+        }
     }
 
     #[test]
