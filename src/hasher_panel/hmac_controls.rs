@@ -3,17 +3,16 @@ use crate::ui_elements::UiElements;
 use super::HasherFrame;
 use hashers::{
     errors::HasherError,
-    hmac::{HmacSha256, SelectHmac},
-    traits::{ClassicHasher, KeyedHasher},
+    hmac::{Hmac, SelectHmac},
+    traits::ClassicHasher,
 };
 use rand::{thread_rng, RngCore};
 use strum::IntoEnumIterator;
 use utils::byte_formatting::ByteFormat;
 
 pub struct HmacFrame {
-    hasher: HmacSha256,
+    hasher: Hmac,
     select_hasher: SelectHmac,
-    hmac: Box<dyn KeyedHasher>,
     key_string: String,
     valid_key: bool,
 }
@@ -21,9 +20,8 @@ pub struct HmacFrame {
 impl Default for HmacFrame {
     fn default() -> Self {
         Self {
-            hasher: HmacSha256::default(),
+            hasher: Hmac::default(),
             select_hasher: SelectHmac::Sha256,
-            hmac: Box::new(HmacSha256::default()),
             key_string: String::new(),
             valid_key: false,
         }
@@ -44,7 +42,7 @@ impl HmacFrame {
             };
             if ui.button("🎲").on_hover_text("randomize").clicked() {
                 let mut rng = thread_rng();
-                self.hasher.key = vec![0; self.hasher.block_size() / 4];
+                self.hasher.key = vec![0; Hmac::BLOCK_SIZE / 4];
                 rng.fill_bytes(&mut self.hasher.key);
                 self.key_string = self
                     .hasher
@@ -74,16 +72,16 @@ impl HasherFrame for HmacFrame {
         );
         ui.add_space(16.0);
 
-        // ui.horizontal(|ui| {
-        //     for variant in SelectHmac::iter() {
-        //         if ui
-        //             .selectable_value(&mut self.select_hasher, variant, variant.to_string())
-        //             .clicked()
-        //         {
-        //             self.hmac = variant.new()
-        //         }
-        //     }
-        // });
+        ui.horizontal(|ui| {
+            for variant in SelectHmac::iter() {
+                if ui
+                    .selectable_value(&mut self.select_hasher, variant, variant.to_string())
+                    .clicked()
+                {
+                    self.hasher.hasher = variant.new()
+                }
+            }
+        });
 
         ui.add_space(16.0);
         ui.collapsing("Key Format", |ui| {
