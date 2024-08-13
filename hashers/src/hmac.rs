@@ -32,7 +32,7 @@ impl Default for Hmac {
     }
 }
 impl Hmac {
-    pub const BLOCK_SIZE: usize = 64;
+    pub const BLOCK_SIZE: usize = 64; // Only hashers with a block size of 64 are allowed
 
     pub fn key_from_str(&mut self, key_str: &str) -> Result<(), HasherError> {
         let bytes = self

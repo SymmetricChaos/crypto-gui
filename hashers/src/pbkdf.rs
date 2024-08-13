@@ -13,7 +13,7 @@ use crate::{
 pub struct Pbkdf2 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    pub hmac: RefCell<Hmac>,
+    pub hmac: RefCell<Hmac>, // RefCell needed because the HMAC is rekeyed in .hash() which is not does not allow mutation
     pub salt: Vec<u8>,
     pub iterations: u32,
     pub output_length: u32, // size of the output in bytes
@@ -21,8 +21,10 @@ pub struct Pbkdf2 {
 
 impl Default for Pbkdf2 {
     fn default() -> Self {
-        let mut hmac = Hmac::default();
-        hmac.hasher = Box::new(Sha1::default());
+        let hmac = Hmac {
+            hasher: Box::new(Sha1::default()),
+            ..Default::default()
+        };
         Self {
             input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,

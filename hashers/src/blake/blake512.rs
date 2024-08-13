@@ -37,12 +37,7 @@ pub struct Blake512 {
 
 impl Default for Blake512 {
     fn default() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-            salt: [0, 0, 0, 0],
-            truncated: false,
-        }
+        Blake512::blake512()
     }
 }
 
@@ -87,7 +82,12 @@ impl Blake512 {
     }
 
     pub fn blake512() -> Self {
-        Self::default()
+        Self {
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
+            salt: [0, 0, 0, 0],
+            truncated: false,
+        }
     }
 
     pub fn blake384() -> Self {
@@ -115,7 +115,7 @@ impl Blake512 {
 
     // https://decred.org/research/aumasson2010.pdf
     pub fn compress(state: &mut [u64; 8], chunk: &[u64; 16], counter: u128, salt: &[u64; 4]) {
-        // create a working vector starting with the current state and then following it with the IV xored with the salt, then the IV xored with the counter
+        // create a working vector starting with the current state and then following it with C xored with the salt, then C xored with the counter
         // println!("chunk: {:016x?}\n", chunk);
         let mut work = [0_u64; 16];
         for i in 0..8 {
@@ -238,7 +238,6 @@ mod blake512_tests {
         let mut hasher = Blake512::default();
         hasher.input_format = ByteFormat::Hex;
         hasher.output_format = ByteFormat::Hex;
-        // hasher.hash_bytes_from_string("00");
         assert_eq!("97961587f6d970faba6d2478045de6d1fabd09b61ae50932054d52bc29d31be4ff9102b9f69e2bbdb83be13d4b9c06091e5fa0b48bd081b634058be0ec49beb3", hasher.hash_bytes_from_string("00").unwrap());
     }
 }
