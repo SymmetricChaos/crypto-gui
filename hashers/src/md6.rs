@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use utils::byte_formatting::ByteFormat;
 
 use crate::{errors::HasherError, traits::ClassicHasher};
@@ -20,6 +22,11 @@ const MD6_Q: [u64; 15] = [
     0x3b72066c7a1552ac,
     0x0d6f3522631effcb,
 ];
+
+const TAPS: [usize; 6] = [17, 18, 21, 31, 67, 89];
+
+const RSHIFT: [u32; 16] = [10, 5, 13, 10, 11, 12, 2, 7, 14, 15, 7, 13, 11, 7, 6, 12];
+const LSHIFT: [u32; 16] = [11, 24, 9, 16, 15, 9, 27, 15, 6, 2, 29, 8, 15, 5, 31, 9];
 
 #[derive(Debug, Clone)]
 pub struct Md6 {
@@ -106,15 +113,22 @@ impl Md6 {
     pub fn seq(m: &[u8], k: &[u64; 8]) {}
 
     pub fn compress(&self, input: &[u64; 89]) -> [u64; 16] {
-        let tap0 = 17;
-        let tap1 = 18;
-        let tap2 = 21;
-        let tap3 = 31;
-        let tap4 = 67;
-        let tap5 = 89;
+        let [t0, t1, t2, t3, t4, t5] = TAPS;
 
-        let t = self.n_rounds() * 16;
-        let mut a = input.clone();
+        let t = (self.n_rounds() * 16) as usize;
+        let mut a = VecDeque::from(input.to_vec());
+        let mut round_key: u64 = 0x0123456789abcdef;
+
+        for i in 89..t + 89 {
+            let mut x = round_key ^ a[i - 89] ^ a[i - t0];
+            x ^= (a[i - t1] & a[i - t2]) ^ (a[i - t3] & a[i - t4]);
+            x ^= x >> RSHIFT[(i - 89) % 16];
+            x ^= x << LSHIFT[(i - 89) % 16];
+            println!("{:016x?}", x);
+            a.push_back(x);
+            // a.pop_front();
+            round_key = Md6::next_round_key(round_key);
+        }
 
         todo!()
     }
@@ -173,6 +187,106 @@ mod md6_tests {
             assert_eq!(first_ten[i], n);
             n = Md6::next_round_key(n);
         }
+    }
+
+    #[test]
+    fn test_abc_compression() {
+        let mut hasher = Md6::default();
+        hasher.input_format = ByteFormat::Utf8;
+        hasher.output_format = ByteFormat::Hex;
+        hasher.rounds = Some(5);
+        let input: [u64; 89] = [
+            0x7311c2812425cfa0,
+            0x6432286434aac8e7,
+            0xb60450e9ef68b7c1,
+            0xe8fb23908d9f06f1,
+            0xdd2e76cba691e5bf,
+            0x0cd0d63b2c30bc41,
+            0x1f8ccf6823058f8a,
+            0x54e5ed5b88e3775d,
+            0x4ad12aae0a6d6031,
+            0x3e7f16bb88222e0d,
+            0x8af8671d3fb50c2c,
+            0x995ad1178bd25c31,
+            0xc878c1dd04c4b633,
+            0x3b72066c7a1552ac,
+            0x0d6f3522631effcb,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0x0100000000000000,
+            0x00054010fe800100,
+            0x6162630000000000,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ];
+        hasher.compress(&input);
     }
 
     #[test]
