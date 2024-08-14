@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use crate::{errors::HasherError, traits::ClassicHasher};
 use utils::byte_formatting::ByteFormat;
 
@@ -112,30 +114,24 @@ impl Md6 {
     pub fn compress(&self, input: &[u64; 89]) -> [u64; 16] {
         let [t0, t1, t2, t3, t4] = TAPS;
         let n = 89;
-        let c = 16;
-        let t = (self.n_rounds() * c) as usize;
-        let mut a = input.to_vec();
-        a.reserve_exact(t);
+        let mut a = VecDeque::from(input.to_vec());
+        a.reserve_exact(1);
         let mut round_key: u64 = 0x0123456789abcdef;
 
-        for round in 0..self.n_rounds() {
+        for _round in 0..self.n_rounds() {
             for step in 0..16 {
-                let i = (round as usize) * 16 + step + n;
-                let mut x = round_key ^ a[i - n] ^ a[i - t0];
-                x ^= (a[i - t1] & a[i - t2]) ^ (a[i - t3] & a[i - t4]);
+                let mut x = round_key ^ a[0] ^ a[n - t0];
+                x ^= (a[n - t1] & a[n - t2]) ^ (a[n - t3] & a[n - t4]);
                 x ^= x >> RSHIFT[step];
                 x ^= x << LSHIFT[step];
 
-                a.push(x);
+                a.push_back(x);
+                a.pop_front();
             }
             round_key = Md6::next_round_key(round_key);
         }
 
-        // for (i, word) in a.iter().enumerate() {
-        //     println!("{i} {word:016x?}")
-        // }
-
-        a[(a.len() - 16)..].try_into().unwrap()
+        a.make_contiguous()[73..].try_into().unwrap()
     }
 }
 
@@ -309,10 +305,7 @@ mod md6_tests {
             0xe189633e48c797a5,
             0x5121a746be48cec8,
         ];
-        // let compressed = hasher.compress(&input);
-        // for (a, b) in output.iter().zip(compressed.iter()) {
-        //     println!("{a:016x?} {b:016x?} {}", a == b)
-        // }
+
         assert_eq!(output, hasher.compress(&input));
     }
 
