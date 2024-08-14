@@ -115,7 +115,6 @@ impl Md6 {
         let [t0, t1, t2, t3, t4] = TAPS;
         let n = 89;
         let mut a = VecDeque::from(input.to_vec());
-        a.reserve_exact(1);
         let mut round_key: u64 = 0x0123456789abcdef;
 
         for _round in 0..self.n_rounds() {
@@ -125,8 +124,8 @@ impl Md6 {
                 x ^= x >> RSHIFT[step];
                 x ^= x << LSHIFT[step];
 
-                a.push_back(x);
                 a.pop_front();
+                a.push_back(x);
             }
             round_key = Md6::next_round_key(round_key);
         }
@@ -193,8 +192,6 @@ mod md6_tests {
     #[test]
     fn test_abc_compression() {
         let mut hasher = Md6::default();
-        hasher.input_format = ByteFormat::Utf8;
-        hasher.output_format = ByteFormat::Hex;
         hasher.rounds = Some(5);
         let input: [u64; 89] = [
             0x7311c2812425cfa0,
