@@ -1,8 +1,5 @@
-use std::collections::VecDeque;
-
-use utils::byte_formatting::ByteFormat;
-
 use crate::{errors::HasherError, traits::ClassicHasher};
+use utils::byte_formatting::ByteFormat;
 
 /// 960 bits of √6
 const MD6_Q: [u64; 15] = [
@@ -23,7 +20,7 @@ const MD6_Q: [u64; 15] = [
     0x0d6f3522631effcb,
 ];
 
-const TAPS: [usize; 6] = [17, 18, 21, 31, 67, 89];
+const TAPS: [usize; 5] = [17, 18, 21, 31, 67];
 
 const RSHIFT: [u32; 16] = [10, 5, 13, 10, 11, 12, 2, 7, 14, 15, 7, 13, 11, 7, 6, 12];
 const LSHIFT: [u32; 16] = [11, 24, 9, 16, 15, 9, 27, 15, 6, 2, 29, 8, 15, 5, 31, 9];
@@ -113,24 +110,31 @@ impl Md6 {
     pub fn seq(m: &[u8], k: &[u64; 8]) {}
 
     pub fn compress(&self, input: &[u64; 89]) -> [u64; 16] {
-        let [t0, t1, t2, t3, t4, t5] = TAPS;
-
+        let [t0, t1, t2, t3, t4] = TAPS;
+        let n = 89;
         let t = (self.n_rounds() * 16) as usize;
-        let mut a = VecDeque::from(input.to_vec());
+        let mut a = input.to_vec();
+        a.reserve_exact(t);
         let mut round_key: u64 = 0x0123456789abcdef;
 
-        for i in 89..t + 89 {
-            let mut x = round_key ^ a[i - 89] ^ a[i - t0];
+        for i in n..t + n {
+            let step = (i - n) % 16;
+            let mut x = round_key ^ a[i - n] ^ a[i - t0];
             x ^= (a[i - t1] & a[i - t2]) ^ (a[i - t3] & a[i - t4]);
-            x ^= x >> RSHIFT[(i - 89) % 16];
-            x ^= x << LSHIFT[(i - 89) % 16];
-            println!("{:016x?}", x);
-            a.push_back(x);
-            // a.pop_front();
-            round_key = Md6::next_round_key(round_key);
+            x ^= x >> RSHIFT[step];
+            x ^= x << LSHIFT[step];
+
+            a.push(x);
+            if (i - n) > 0 && step % 16 == 0 {
+                round_key = Md6::next_round_key(round_key);
+            }
         }
 
-        todo!()
+        for (i, word) in a.iter().enumerate() {
+            println!("{i} {word:016x?}")
+        }
+
+        a[(a.len() - 16)..].try_into().unwrap()
     }
 }
 
@@ -286,7 +290,29 @@ mod md6_tests {
             0,
             0,
         ];
-        hasher.compress(&input);
+        let output: [u64; 16] = [
+            0x2d1abe0601b2e6b0,
+            0x61d59fd2b7310353,
+            0xea7da28dec708ec7,
+            0xa63a99a574e40155,
+            0x290b4fabe80104c4,
+            0x8c6a3503cf881a99,
+            0xe370e23d1b700cc5,
+            0x4492e78e3fe42f13,
+            0xdf6c91b7eaf3f088,
+            0xaab3e19a8f63b80a,
+            0xd987bdcbda2e934f,
+            0xaeae805de12b0d24,
+            0x8854c14dc284f840,
+            0xed71ad7ba542855c,
+            0xe189633e48c797a5,
+            0x5121a746be48cec8,
+        ];
+        let compressed = hasher.compress(&input);
+        for (a, b) in output.iter().zip(compressed.iter()) {
+            println!("{a:016x?} {b:016x?} {}", a == b)
+        }
+        assert_eq!(output, hasher.compress(&input));
     }
 
     #[test]
