@@ -130,6 +130,13 @@ pub fn strip_ansi923_padding(bytes: &mut Vec<u8>) -> Result<(), PaddingError> {
     Ok(())
 }
 
+/// Pad with the 0x00 byte until the block size is reached. If the input already has a length equal to the block size no padding is added. Zero padding is not reversible.
+pub fn zero_padding(bytes: &mut Vec<u8>, block_size: u32) {
+    while bytes.len() % block_size as usize != 0 {
+        bytes.push(0)
+    }
+}
+
 /// Merkele-Damgård strengthening pads the input with 0x80, then with zeroes, and then appends the length of the original input. Length is appended as a 64-bit little endian value. This form of padding is intended for hash functions so no inverse is provided.
 pub fn md_strengthening_64_le(bytes: &mut Vec<u8>, block_size: u32) {
     // Length in bits before padding

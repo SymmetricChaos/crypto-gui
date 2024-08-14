@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::{errors::HasherError, traits::ClassicHasher};
-use utils::byte_formatting::ByteFormat;
+use utils::{byte_formatting::ByteFormat, padding::zero_padding};
 
 /// 960 bits of √6
 const MD6_Q: [u64; 15] = [
@@ -109,7 +109,11 @@ impl Md6 {
 
     pub fn par(m: &[u8], k: &[u64; 8]) {}
 
-    pub fn seq(m: &[u8], k: &[u64; 8]) {}
+    pub fn seq(m: &[u8], k: &[u64; 8]) -> [u64; 16] {
+        let mut c = [0_u64; 16];
+
+        c
+    }
 
     pub fn compress(&self, input: &[u64; 89]) -> [u64; 16] {
         let [t0, t1, t2, t3, t4] = TAPS;
@@ -142,7 +146,8 @@ impl ClassicHasher for Md6 {
 
         let k = self.key();
         let level = 0;
-        let round_key: u64 = 0x0123456789abcdef;
+        let mut input = bytes.to_vec();
+        zero_padding(&mut input, 512);
 
         todo!()
     }
