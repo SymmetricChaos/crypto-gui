@@ -3,6 +3,7 @@ pub mod block_cipher;
 pub mod blowfish;
 pub mod des;
 pub mod feal;
+pub mod gost;
 pub mod idea;
 pub mod rc5;
 pub mod rc6;
