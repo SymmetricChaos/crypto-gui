@@ -86,7 +86,22 @@ impl BlockCipher<8> for Gost {
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
-        self.encrypt_block(bytes)
+        let mut v = [0u32; 2];
+        for (elem, chunk) in v.iter_mut().zip(bytes.chunks_exact(4)) {
+            *elem = u32::from_be_bytes(chunk.try_into().unwrap());
+        }
+
+        for idx in Gost::ROUND_KEY_IDX.into_iter().rev() {
+            let t = v[0];
+            // L_i+1 = R_i
+            v[0] = v[1];
+
+            // R_i+1 = L_i xor f(R_i)
+            v[1] = t ^ self.f(v[1], self.key[idx]);
+        }
+        v.swap(0, 1);
+
+        overwrite_bytes(bytes, &u32_pair_to_u8_array(v));
     }
 }
 
@@ -94,6 +109,8 @@ impl_cipher_for_block_cipher!(Gost, 8);
 
 #[cfg(test)]
 mod gost_tests {
+
+    use rand::{thread_rng, Rng};
 
     use crate::Cipher;
 
@@ -130,6 +147,7 @@ mod gost_tests {
     fn encrypt_decrypt_ecb() {
         let ptext = "01020304050607080102030405060708";
         let mut cipher = Gost::default();
+        thread_rng().fill(&mut cipher.key);
         cipher.mode = BCMode::Ecb;
         let ctext = cipher.encrypt(ptext).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), ptext);
