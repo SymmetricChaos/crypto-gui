@@ -1,10 +1,7 @@
 use super::CipherFrame;
 use crate::ui_elements::{block_cipher_mode, block_cipher_padding, u64_drag_value, UiElements};
 use ciphers::{
-    digital::block_ciphers::{
-        block_cipher::BCMode,
-        des::{des_functions::set_des_key_parity, desx::DesX},
-    },
+    digital::block_ciphers::des::{des_functions::set_des_key_parity, desx::DesX},
     Cipher,
 };
 use egui::Ui;
@@ -72,15 +69,9 @@ impl CipherFrame for DesXFrame {
 
         ui.add_space(8.0);
 
-        ui.add_enabled_ui(self.cipher.mode == BCMode::Ctr, |ui| {
-            ui.subheading("Counter");
-            ui.label("In CTR mode the cipher must have a 64-bit counter value provided.");
-            ui.u64_drag_value_hex(&mut self.cipher.iv);
-        });
-
-        ui.add_enabled_ui(self.cipher.mode == BCMode::Cbc, |ui| {
-            ui.subheading("Initialization Vector");
-            ui.label("In CBC mode the cipher must have a 64-bit initialization vector provided.");
+        ui.add_enabled_ui(self.cipher.mode.iv_needed(), |ui| {
+            ui.subheading("IV/Counter");
+            ui.label("In the selected mode the cipher must have a 64-bit initial value provided.");
             ui.u64_drag_value_hex(&mut self.cipher.iv);
         });
 
@@ -99,7 +90,7 @@ impl CipherFrame for DesXFrame {
             Err(e) => self.ksa_error = e.to_string(),
         }
 
-        if self.cipher.mode == BCMode::Ctr {
+        if self.cipher.mode.iv_needed() {
             self.cipher.iv = rng.gen();
         }
     }

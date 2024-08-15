@@ -178,15 +178,24 @@ impl CipherFrame for AesFrame {
                 for k in self.cipher128.key.iter_mut() {
                     *k = rng.gen()
                 }
+                if self.cipher128.mode.iv_needed() {
+                    self.cipher128.iv = rng.gen();
+                }
             }
             AesSelect::Aes192 => {
                 for k in self.cipher192.key.iter_mut() {
                     *k = rng.gen()
                 }
+                if self.cipher192.mode.iv_needed() {
+                    self.cipher192.iv = rng.gen();
+                }
             }
             AesSelect::Aes256 => {
                 for k in self.cipher256.key.iter_mut() {
                     *k = rng.gen()
+                }
+                if self.cipher256.mode.iv_needed() {
+                    self.cipher256.iv = rng.gen();
                 }
             }
         }

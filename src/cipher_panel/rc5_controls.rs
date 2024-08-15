@@ -102,6 +102,31 @@ impl CipherFrame for Rc5Frame {
         }
         ui.add_space(16.0);
 
+        match self.selector {
+            SizeSelector::R16 => {
+                ui.add_enabled_ui(self.cipher_16.mode.iv_needed(), |ui| {
+                ui.subheading("IV/Counter");
+                ui.label("In the selected mode the cipher must have a 32-bit initial value provided.");
+                ui.u32_drag_value_hex(&mut self.cipher_16.iv);
+            });
+            }
+            SizeSelector::R32 => {
+                ui.add_enabled_ui(self.cipher_32.mode.iv_needed(), |ui| {
+                ui.subheading("IV/Counter");
+                ui.label("In the selected mode the cipher must have a 64-bit initial value provided.");
+                ui.u64_drag_value_hex(&mut self.cipher_32.iv);
+            });
+            }
+            SizeSelector::R64 => {
+                ui.add_enabled_ui(self.cipher_64.mode.iv_needed(), |ui| {
+                ui.subheading("IV/Counter");
+                ui.label("In the selected mode the cipher must have a 128-bit initial value provided.");
+                ui.label("<<<NOT IMPLEMENTED>>>");
+                // ui.u64_drag_value_hex(&mut self.cipher_64.iv);
+            });
+            }
+        }
+
         ui.subheading("Internal State");
 
         match self.selector {

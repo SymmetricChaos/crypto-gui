@@ -1,9 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::{block_cipher_mode, block_cipher_padding, u16_drag_value, UiElements};
-use ciphers::{
-    digital::block_ciphers::{block_cipher::BCMode, idea::Idea},
-    Cipher,
-};
+use ciphers::{digital::block_ciphers::idea::Idea, Cipher};
 use egui::{FontId, RichText, Ui};
 use rand::{thread_rng, Rng};
 
@@ -107,17 +104,9 @@ impl CipherFrame for IdeaFrame {
 
         ui.add_space(16.0);
 
-        if self.cipher.mode.iv_needed() {
-            if self.cipher.mode == BCMode::Ctr {
-                ui.subheading("Counter");
-            } else {
-                ui.subheading("Initialization Vector");
-            }
-        } else {
-            ui.subheading("Counter/IV Not Needed");
-        }
-
         ui.add_enabled_ui(self.cipher.mode.iv_needed(), |ui| {
+            ui.subheading("IV/Counter");
+            ui.label("In the selected mode the cipher must have a 64-bit initial value provided.");
             ui.u64_drag_value_hex(&mut self.cipher.iv);
         });
 

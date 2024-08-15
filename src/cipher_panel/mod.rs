@@ -35,6 +35,7 @@ mod elgamal_controls;
 mod enigma_controls;
 mod four_square_controls;
 mod general_sub_controls;
+mod gost_controls;
 mod grille_controls;
 mod hebern_controls;
 mod hutton_controls;

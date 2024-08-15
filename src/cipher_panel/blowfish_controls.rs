@@ -1,9 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::{block_cipher_mode, UiElements};
-use ciphers::{
-    digital::block_ciphers::{block_cipher::BCMode, blowfish::blowfish::Blowfish},
-    Cipher,
-};
+use ciphers::{digital::block_ciphers::blowfish::blowfish::Blowfish, Cipher};
 use rand::{thread_rng, Rng};
 
 pub struct BlowfishFrame {
@@ -70,15 +67,9 @@ impl CipherFrame for BlowfishFrame {
 
         ui.add_space(8.0);
 
-        ui.add_enabled_ui(self.cipher.mode == BCMode::Ctr, |ui| {
-            ui.subheading("Counter");
-            ui.label("In CTR mode the cipher must have a 64-bit counter provided.");
-            ui.u64_drag_value_hex(&mut self.cipher.iv);
-        });
-
-        ui.add_enabled_ui(self.cipher.mode == BCMode::Cbc, |ui| {
-            ui.subheading("Counter");
-            ui.label("In CBC mode the cipher must have a 64-bit initialization vector provided.");
+        ui.add_enabled_ui(self.cipher.mode.iv_needed(), |ui| {
+            ui.subheading("IV/Counter");
+            ui.label("In the selected mode the cipher must have a 64-bit initial value provided.");
             ui.u64_drag_value_hex(&mut self.cipher.iv);
         });
 
@@ -96,7 +87,7 @@ impl CipherFrame for BlowfishFrame {
             self.cipher.key.push(rng.gen());
         }
 
-        if self.cipher.mode == BCMode::Ctr {
+        if self.cipher.mode.iv_needed() {
             self.cipher.iv = rng.gen();
         }
     }

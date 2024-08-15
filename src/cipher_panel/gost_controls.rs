@@ -1,35 +1,26 @@
 use super::CipherFrame;
-use crate::ui_elements::{block_cipher_mode, block_cipher_padding, u64_drag_value, UiElements};
-use ciphers::{
-    digital::block_ciphers::des::{des::Des, des_functions::set_des_key_parity},
-    Cipher,
-};
+use crate::ui_elements::{block_cipher_mode, block_cipher_padding, UiElements};
+use ciphers::{digital::block_ciphers::gost::Gost, Cipher};
 use egui::Ui;
 use rand::{thread_rng, Rng};
 
-pub struct DesFrame {
-    cipher: Des,
-    key: u64,
-    ksa_error: String,
+pub struct GostFrame {
+    cipher: Gost,
 }
 
-impl Default for DesFrame {
+impl Default for GostFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
-            key: 0x0101010101010101,
-            ksa_error: String::new(),
         }
     }
 }
 
-impl DesFrame {}
-
-impl CipherFrame for DesFrame {
+impl CipherFrame for GostFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
-            "https://github.com/SymmetricChaos/crypto-gui/tree/master/ciphers/src/digital/block_ciphers/des",
+            "https://github.com/SymmetricChaos/crypto-gui/tree/master/ciphers/src/digital/block_ciphers/gost.rs",
         );
         ui.add_space(8.0);
 
@@ -49,17 +40,14 @@ impl CipherFrame for DesFrame {
         ui.add_space(8.0);
 
         ui.subheading("Key");
-        ui.label("DES uses a 64-bit key but the eighth bit of each byte is used for parity, reducing the actual key size to 56-bits.\nFor simplicity the parity bits are ignored for this implementation rather than causing an error if they are incorrect.");
-        if ui.small_button("set parity").clicked() {
-            self.key = set_des_key_parity(self.key)
+        for k in self.cipher.key.iter_mut() {
+            ui.u32_drag_value_hex(k);
         }
-        if u64_drag_value(ui, &mut self.key).changed() {
-            match self.cipher.ksa(self.key) {
-                Ok(_) => self.ksa_error.clear(),
-                Err(e) => self.ksa_error = e.to_string(),
-            }
+        ui.add_space(8.0);
+        ui.subheading("Sboxes");
+        for s in self.cipher.sboxes.iter_mut() {
+            ui.u64_drag_value_hex(s);
         }
-        ui.error_text(&self.ksa_error);
 
         ui.add_space(8.0);
 
@@ -78,11 +66,8 @@ impl CipherFrame for DesFrame {
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        self.key = rng.gen();
-        match self.cipher.ksa(self.key) {
-            Ok(_) => self.ksa_error.clear(),
-            Err(e) => self.ksa_error = e.to_string(),
-        }
+        rng.fill(&mut self.cipher.key);
+        rng.fill(&mut self.cipher.sboxes);
 
         if self.cipher.mode.iv_needed() {
             self.cipher.iv = rng.gen();
