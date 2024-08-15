@@ -1,4 +1,4 @@
-use utils::byte_formatting::ByteFormat;
+use utils::byte_formatting::{overwrite_bytes, u32_pair_to_u8_array, ByteFormat};
 
 use crate::impl_cipher_for_block_cipher;
 
@@ -57,19 +57,36 @@ impl Gost {
 
         out
     }
+
+    pub fn f(&self, n: u32, subkey: u32) -> u32 {
+        let x = n.wrapping_add(subkey);
+        let x = self.sbox(x);
+        x.rotate_left(11)
+    }
 }
 
 impl BlockCipher<8> for Gost {
     fn encrypt_block(&self, bytes: &mut [u8]) {
-        for round in 0..32 {
-            let subkey = self.key[Gost::ROUND_KEY_IDX[round]];
+        let mut v = [0u32; 2];
+        for (elem, chunk) in v.iter_mut().zip(bytes.chunks_exact(4)) {
+            *elem = u32::from_be_bytes(chunk.try_into().unwrap());
         }
 
-        todo!()
+        for idx in Gost::ROUND_KEY_IDX {
+            let t = v[0];
+            // L_i+1 = R_i
+            v[0] = v[1];
+
+            // R_i+1 = L_i xor f(R_i)
+            v[1] = t ^ self.f(v[1], self.key[idx]);
+        }
+        v.swap(0, 1);
+
+        overwrite_bytes(bytes, &u32_pair_to_u8_array(v));
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
-        todo!()
+        self.encrypt_block(bytes)
     }
 }
 
@@ -82,10 +99,31 @@ mod gost_tests {
 
     use super::*;
 
+    const TEST_SBOX: [u64; 8] = [
+        0x4a92d80e6b1c7f53,
+        0xeb4c6dfa23810759,
+        0x581da342efc7609b,
+        0x7da1089fe46cb253,
+        0x6c715fd84a9e03b2,
+        0x4ba0721d36859cfe,
+        0xdb413f590ae7682c,
+        0x1fd057a4923e6b8c,
+    ];
+
     #[test]
     fn gost_sboxes() {
-        let mut cipher = Gost::default();
+        let cipher = Gost::default();
         assert_eq!(0xC6BC7581, cipher.sbox(0x00000000_u32));
+    }
+
+    #[test]
+    fn encrypt_block() {
+        let mut cipher = Gost::default();
+        cipher.sboxes = TEST_SBOX;
+        let mut input = [0, 0, 0, 0, 0, 0, 0, 0];
+        let output = [0x0e, 0xca, 0x1a, 0x54, 0x4d, 0x33, 0x07, 0x0b];
+        cipher.encrypt_block(&mut input);
+        assert_eq!(input, output)
     }
 
     #[test]
