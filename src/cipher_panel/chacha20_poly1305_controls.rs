@@ -52,7 +52,10 @@ impl CipherFrame for ChaCha20Poly1305Frame {
 
         ui.add_space(16.0);
 
-        ui.subheading("Key");
+        ui.horizontal(|ui| {
+            ui.subheading("Key (128-bits)");
+            ui.fill_random_bytes_button(&mut self.cipher.cipher.key);
+        });
         ui.horizontal(|ui| {
             for i in 0..4 {
                 ui.u32_drag_value_hex(&mut self.cipher.cipher.key[i]);
@@ -60,7 +63,10 @@ impl CipherFrame for ChaCha20Poly1305Frame {
         });
         ui.add_space(8.0);
 
-        ui.subheading("Nonce");
+        ui.horizontal(|ui| {
+            ui.subheading("Nonce (96-bits)");
+            ui.fill_random_bytes_button(&mut self.cipher.cipher.nonce);
+        });
         ui.label("It is suggested that two of words of the nonce be chosen randomly for each message and the third be chosen to separate multiple streams of data.");
         ui.horizontal(|ui| {
             for i in 0..3 {

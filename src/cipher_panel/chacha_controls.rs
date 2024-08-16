@@ -52,7 +52,10 @@ impl CipherFrame for ChaChaFrame {
         );
 
         ui.add_space(8.0);
-        ui.subheading("Key (128-bits)");
+        ui.horizontal(|ui| {
+            ui.subheading("Key (128-bits)");
+            ui.fill_random_bytes_button(&mut self.cipher.key);
+        });
         ui.horizontal(|ui| {
             for i in 0..4 {
                 ui.u32_drag_value_hex(&mut self.cipher.key[i]);
@@ -60,7 +63,10 @@ impl CipherFrame for ChaChaFrame {
         });
 
         ui.add_space(8.0);
-        ui.subheading("Nonce (64-bits)");
+        ui.horizontal(|ui| {
+            ui.subheading("Nonce (64-bits)");
+            ui.fill_random_bytes_button(&mut self.cipher.nonce);
+        });
         ui.label("A nonce (number used once) ensures that the cipher state is always different from message to message.");
         ui.horizontal(|ui| {
             for i in 0..2 {

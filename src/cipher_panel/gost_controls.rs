@@ -39,12 +39,18 @@ impl CipherFrame for GostFrame {
         block_cipher_padding(ui, &mut self.cipher.padding);
         ui.add_space(8.0);
 
-        ui.subheading("Key");
+        ui.horizontal(|ui| {
+            ui.subheading("Key");
+            ui.fill_random_bytes_button(&mut self.cipher.key);
+        });
         for k in self.cipher.key.iter_mut() {
             ui.u32_drag_value_hex(k);
         }
         ui.add_space(8.0);
-        ui.subheading("Sboxes");
+        ui.horizontal(|ui| {
+            ui.subheading("Sboxes");
+            ui.fill_random_bytes_button(&mut self.cipher.sboxes);
+        });
         for s in self.cipher.sboxes.iter_mut() {
             ui.u64_drag_value_hex(s);
         }

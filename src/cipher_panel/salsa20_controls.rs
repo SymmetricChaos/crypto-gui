@@ -27,12 +27,18 @@ impl CipherFrame for Salsa20Frame {
         ui.randomize_reset(self);
         ui.add_space(16.0);
 
-        ui.subheading("Key");
+        ui.horizontal(|ui| {
+            ui.subheading("Key");
+            ui.fill_random_bytes_button(&mut self.cipher.key);
+        });
         for i in 0..4 {
             ui.u32_drag_value_hex(&mut self.cipher.key[i]);
         }
         ui.add_space(8.0);
-        ui.subheading("Nonce");
+        ui.horizontal(|ui| {
+            ui.subheading("Nonce");
+            ui.fill_random_bytes_button(&mut self.cipher.nonce);
+        });
         for i in 0..2 {
             ui.u32_drag_value_hex(&mut self.cipher.nonce[i]);
         }

@@ -66,7 +66,10 @@ impl CipherFrame for AesFrame {
                 block_cipher_padding(ui, &mut self.cipher128.padding);
                 ui.add_space(8.0);
 
-                ui.subheading("Key");
+                ui.horizontal(|ui| {
+                    ui.subheading("Key");
+                    ui.fill_random_bytes_button(&mut self.cipher128.key);
+                });
                 ui.label("AES128 uses four 32-bit keys or, equivalently, a single 128-bit key.");
                 for k in self.cipher128.key.iter_mut() {
                     ui.u32_drag_value_hex(k);
@@ -95,8 +98,11 @@ impl CipherFrame for AesFrame {
                 block_cipher_padding(ui, &mut self.cipher192.padding);
                 ui.add_space(8.0);
 
-                ui.subheading("Key");
-                ui.label("AES192 uses siz 32-bit keys or, equivalently, a single 192-bit key.");
+                ui.horizontal(|ui| {
+                    ui.subheading("Key");
+                    ui.fill_random_bytes_button(&mut self.cipher192.key);
+                });
+                ui.label("AES192 uses six 32-bit keys or, equivalently, a single 192-bit key.");
                 for k in self.cipher192.key.iter_mut() {
                     ui.u32_drag_value_hex(k);
                 }
@@ -122,7 +128,10 @@ impl CipherFrame for AesFrame {
                 block_cipher_padding(ui, &mut self.cipher256.padding);
                 ui.add_space(8.0);
 
-                ui.subheading("Key");
+                ui.horizontal(|ui| {
+                    ui.subheading("Key");
+                    ui.fill_random_bytes_button(&mut self.cipher256.key);
+                });
                 ui.label("AES256 uses eight 32-bit keys or, equivalently, a single 256-bit key.");
                 for k in self.cipher256.key.iter_mut() {
                     ui.u32_drag_value_hex(k);
