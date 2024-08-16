@@ -42,10 +42,10 @@ impl CipherFrame for Salsa20Frame {
                 self.cipher.rounds = 8;
             }
             if ui.small_button("Salsa20/12").clicked() {
-                self.cipher.rounds = 8;
+                self.cipher.rounds = 12;
             }
             if ui.small_button("Salsa20/20").clicked() {
-                self.cipher.rounds = 8;
+                self.cipher.rounds = 20;
             }
         });
         ui.add(Slider::new(&mut self.cipher.rounds, 2..=20));

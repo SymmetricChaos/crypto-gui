@@ -5,6 +5,7 @@ use eframe::egui::RichText;
 use egui::{Color32, DragValue, Response, TextEdit, TextStyle, Ui};
 use egui_extras::{Column, TableBuilder};
 use num::ToPrimitive;
+use rand::{thread_rng, Fill, Rng};
 use rngs::{
     lfsr::{Lfsr, LfsrMode},
     ClassicRng,
@@ -55,10 +56,15 @@ pub trait UiElements {
     fn u16_drag_value_hex(&mut self, n: &mut u16) -> Response;
     fn u32_drag_value_hex(&mut self, n: &mut u32) -> Response;
     fn u64_drag_value_hex(&mut self, n: &mut u64) -> Response;
+    fn u128_drag_value_hex(&mut self, n: &mut u128) -> Response;
+    fn u128_hi_lo_drag_value_hex(&mut self, n: &mut u128, hi: &mut u64, lo: &mut u64) -> Response;
     fn u8_drag_value_dec(&mut self, n: &mut u8) -> Response;
     fn u16_drag_value_dec(&mut self, n: &mut u16) -> Response;
     fn u32_drag_value_dec(&mut self, n: &mut u32) -> Response;
     fn u64_drag_value_dec(&mut self, n: &mut u64) -> Response;
+    fn u128_drag_value_dec(&mut self, n: &mut u128) -> Response;
+    fn u128_hi_lo_drag_value_dec(&mut self, n: &mut u128, hi: &mut u64, lo: &mut u64) -> Response;
+    fn fill_random_bytes_button<T: Fill>(&mut self, item: &mut T);
 }
 
 impl UiElements for Ui {
@@ -273,6 +279,28 @@ impl UiElements for Ui {
         self.add(DragValue::new(n).hexadecimal(16, false, true))
     }
 
+    /// NOT IMPLEMENTED
+    fn u128_drag_value_hex(&mut self, _n: &mut u128) -> Response {
+        todo!("u128 DragValue is not supported by egui")
+    }
+    fn u128_hi_lo_drag_value_hex(&mut self, n: &mut u128, hi: &mut u64, lo: &mut u64) -> Response {
+        if self
+            .add(DragValue::new(hi).hexadecimal(16, false, false))
+            .changed()
+        {
+            *n &= 0x0000000000000000FFFFFFFFFFFFFFFF;
+            *n |= (*hi as u128) << 64;
+        }
+        if self
+            .add(DragValue::new(lo).hexadecimal(16, false, false))
+            .changed()
+        {
+            *n &= 0xFFFFFFFFFFFFFFFF0000000000000000;
+            *n |= *lo as u128;
+        }
+        self.label(format!("{:032x?}", n))
+    }
+
     fn u8_drag_value_dec(&mut self, n: &mut u8) -> Response {
         self.add(DragValue::new(n))
     }
@@ -288,26 +316,30 @@ impl UiElements for Ui {
     fn u64_drag_value_dec(&mut self, n: &mut u64) -> Response {
         self.add(DragValue::new(n))
     }
+
+    /// NOT IMPLEMENTED
+    fn u128_drag_value_dec(&mut self, _n: &mut u128) -> Response {
+        todo!("u128 DragValue is not supported by egui")
+    }
+
+    fn u128_hi_lo_drag_value_dec(&mut self, n: &mut u128, hi: &mut u64, lo: &mut u64) -> Response {
+        if self.add(DragValue::new(hi)).changed() {
+            *n &= 0x0000000000000000FFFFFFFFFFFFFFFF;
+            *n |= (*hi as u128) << 64;
+        }
+        if self.add(DragValue::new(lo)).changed() {
+            *n &= 0xFFFFFFFFFFFFFFFF0000000000000000;
+            *n |= *lo as u128;
+        }
+        self.label(format!("{:032x?}", n))
+    }
+
+    fn fill_random_bytes_button<T: Fill>(&mut self, item: &mut T) {
+        if self.button("🎲").on_hover_text("randomize").clicked() {
+            thread_rng().fill(item)
+        }
+    }
 }
-
-// pub fn subheading<T: ToString>(text: T) -> RichText {
-//     RichText::from(text.to_string()).size(16.0)
-// }
-
-// pub fn mono<T: ToString>(text: T) -> RichText {
-//     RichText::from(text.to_string()).monospace()
-// }
-
-// pub fn mono_strong<T: ToString>(text: T) -> RichText {
-//     RichText::from(text.to_string()).monospace().strong()
-// }
-
-// pub fn error_text<T: ToString>(text: T) -> RichText {
-//     RichText::from(text.to_string())
-//         .color(Color32::RED)
-//         .background_color(Color32::BLACK)
-//         .monospace()
-// }
 
 pub fn control_string(ui: &mut egui::Ui, string: &mut String, enabled: bool) -> Response {
     ui.add_enabled(
@@ -316,19 +348,6 @@ pub fn control_string(ui: &mut egui::Ui, string: &mut String, enabled: bool) -> 
             .font(TextStyle::Monospace)
             .clip_text(false),
     )
-}
-
-// fn u8_drag_value(&mut self, n: &mut u8);
-pub fn u32_drag_value(ui: &mut egui::Ui, n: &mut u32) -> Response {
-    ui.add(DragValue::new(n).speed(50).hexadecimal(8, false, true))
-}
-
-pub fn u64_drag_value(ui: &mut egui::Ui, n: &mut u64) -> Response {
-    ui.add(DragValue::new(n).speed(100).hexadecimal(16, false, true))
-}
-
-pub fn u16_drag_value(ui: &mut egui::Ui, n: &mut u16) -> Response {
-    ui.add(DragValue::new(n).speed(25).hexadecimal(4, false, true))
 }
 
 pub fn randomize_reset(ui: &mut egui::Ui, cipher_frame: &mut dyn CipherFrame) {

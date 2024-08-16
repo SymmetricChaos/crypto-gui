@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{block_cipher_mode, block_cipher_padding, u64_drag_value, UiElements};
+use crate::ui_elements::{block_cipher_mode, block_cipher_padding, UiElements};
 use ciphers::{
     digital::block_ciphers::des::{des::Des, des_functions::set_des_key_parity},
     Cipher,
@@ -53,7 +53,7 @@ impl CipherFrame for DesFrame {
         if ui.small_button("set parity").clicked() {
             self.key = set_des_key_parity(self.key)
         }
-        if u64_drag_value(ui, &mut self.key).changed() {
+        if ui.u64_drag_value_hex(&mut self.key).changed() {
             match self.cipher.ksa(self.key) {
                 Ok(_) => self.ksa_error.clear(),
                 Err(e) => self.ksa_error = e.to_string(),

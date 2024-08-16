@@ -28,6 +28,8 @@ pub struct Rc5Frame {
     cipher_64: Rc5_64,
     selector: SizeSelector,
     key: String,
+    iv_upper: u64,
+    iv_lower: u64,
 }
 
 impl Rc5Frame {
@@ -120,9 +122,8 @@ impl CipherFrame for Rc5Frame {
             SizeSelector::R64 => {
                 ui.add_enabled_ui(self.cipher_64.mode.iv_needed(), |ui| {
                 ui.subheading("IV/Counter");
-                ui.label("In the selected mode the cipher must have a 128-bit initial value provided.");
-                ui.label("<<<NOT IMPLEMENTED>>>");
-                // ui.u64_drag_value_hex(&mut self.cipher_64.iv);
+                ui.label("In the selected mode the cipher must have a 128-bit initial value provided. The upper and lower 64 bits are controlled below.");
+                ui.u128_hi_lo_drag_value_hex(&mut self.cipher_64.iv, &mut self.iv_upper, &mut self.iv_lower);
             });
             }
         }

@@ -5,7 +5,7 @@ use ciphers::{
     digital::block_ciphers::aes::aes::{Aes128, Aes192, Aes256},
     Cipher,
 };
-use egui::{DragValue, Ui};
+use egui::Ui;
 use rand::{thread_rng, Rng};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -77,15 +77,7 @@ impl CipherFrame for AesFrame {
                 ui.add_enabled_ui(self.cipher128.mode.iv_needed(), |ui| {
                     ui.subheading("Initialization Vector");
                     ui.label(format!("In {} mode the cipher must have a 128-bit initialization vector provided. The selectors below control the upper and lower 64-bits respectively.",self.cipher128.mode));
-                    if ui.add(DragValue::new(&mut self.iv_upper).hexadecimal(16, false, false)) .changed() {
-                        self.cipher128.iv &= 0x0000000000000000FFFFFFFFFFFFFFFF;
-                        self.cipher128.iv |= (self.iv_upper as u128) << 64;
-                    }
-                    if ui.add(DragValue::new(&mut self.iv_lower).hexadecimal(16, false, false)) .changed() {
-                        self.cipher128.iv &= 0xFFFFFFFFFFFFFFFF0000000000000000;
-                        self.cipher128.iv |= self.iv_lower as u128;
-                    }
-                    ui.label(format!("{:032x?}",self.cipher128.iv))
+                    ui.u128_hi_lo_drag_value_hex(&mut self.cipher128.iv, &mut self.iv_upper, &mut self.iv_lower);
                 });
 
                 ui.add_space(16.0);
@@ -114,15 +106,7 @@ impl CipherFrame for AesFrame {
                 ui.add_enabled_ui(self.cipher192.mode.iv_needed(), |ui| {
                     ui.subheading("Initialization Vector");
                     ui.label(format!("In {} mode the cipher must have a 128-bit initialization vector provided. The selectors below control the upper and lower 64-bits respectively.",self.cipher192.mode));
-                    if ui.add(DragValue::new(&mut self.iv_upper).hexadecimal(16, false, false)) .changed() {
-                        self.cipher192.iv &= 0x0000000000000000FFFFFFFFFFFFFFFF;
-                        self.cipher192.iv |= (self.iv_upper as u128) << 64;
-                    }
-                    if ui.add(DragValue::new(&mut self.iv_lower).hexadecimal(16, false, false)) .changed() {
-                        self.cipher192.iv &= 0xFFFFFFFFFFFFFFFF0000000000000000;
-                        self.cipher192.iv |= self.iv_lower as u128;
-                    }
-                    ui.label(format!("{:032x?}",self.cipher192.iv))
+                    ui.u128_hi_lo_drag_value_hex(&mut self.cipher192.iv, &mut self.iv_upper, &mut self.iv_lower);
                 });
             }
             AesSelect::Aes256 => {
@@ -149,15 +133,7 @@ impl CipherFrame for AesFrame {
                 ui.add_enabled_ui(self.cipher256.mode.iv_needed(), |ui| {
                     ui.subheading("Initialization Vector");
                     ui.label(format!("In {} mode the cipher must have a 128-bit initialization vector provided. The selectors below control the upper and lower 64-bits respectively.",self.cipher256.mode));
-                    if ui.add(DragValue::new(&mut self.iv_upper).hexadecimal(16, false, false)) .changed() {
-                        self.cipher256.iv &= 0x0000000000000000FFFFFFFFFFFFFFFF;
-                        self.cipher256.iv |= (self.iv_upper as u128) << 64;
-                    }
-                    if ui.add(DragValue::new(&mut self.iv_lower).hexadecimal(16, false, false)) .changed() {
-                        self.cipher256.iv &= 0xFFFFFFFFFFFFFFFF0000000000000000;
-                        self.cipher256.iv |= self.iv_lower as u128;
-                    }
-                    ui.label(format!("{:032x?}",self.cipher256.iv))
+                    ui.u128_hi_lo_drag_value_hex(&mut self.cipher256.iv, &mut self.iv_upper, &mut self.iv_lower);
                 });
             }
         }

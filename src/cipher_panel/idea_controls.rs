@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{block_cipher_mode, block_cipher_padding, u16_drag_value, UiElements};
+use crate::ui_elements::{block_cipher_mode, block_cipher_padding, UiElements};
 use ciphers::{digital::block_ciphers::idea::Idea, Cipher};
 use egui::{FontId, RichText, Ui};
 use rand::{thread_rng, Rng};
@@ -60,7 +60,7 @@ impl CipherFrame for IdeaFrame {
         ui.label("They key consists of eight 16-bit words.");
         ui.horizontal(|ui| {
             for w in self.key.iter_mut() {
-                if u16_drag_value(ui, w).changed() {
+                if ui.u16_drag_value_hex(w).changed() {
                     self.valid_key = false;
                 }
             }
