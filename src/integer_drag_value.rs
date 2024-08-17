@@ -27,9 +27,9 @@ fn set(get_set_value: &mut GetSetValue<'_>, value: u64) {
 }
 
 #[must_use = "You should put this widget in an ui with `ui.add(widget);`"]
-pub struct DragValue<'a> {
+pub struct DragValueU64<'a> {
     get_set_value: GetSetValue<'a>,
-    speed: u64,
+    // speed: u64,
     prefix: String,
     suffix: String,
     range: RangeInclusive<u64>,
@@ -39,7 +39,7 @@ pub struct DragValue<'a> {
     update_while_editing: bool,
 }
 
-impl<'a> DragValue<'a> {
+impl<'a> DragValueU64<'a> {
     pub fn new(value: &'a mut u64) -> Self {
         let slf = Self::from_get_set(move |v: Option<u64>| *value);
 
@@ -49,7 +49,7 @@ impl<'a> DragValue<'a> {
     pub fn from_get_set(get_set_value: impl 'a + FnMut(Option<u64>) -> u64) -> Self {
         Self {
             get_set_value: Box::new(get_set_value),
-            speed: 1,
+            // speed: 1,
             prefix: Default::default(),
             suffix: Default::default(),
             range: u64::MIN..=u64::MAX,
@@ -65,11 +65,11 @@ impl<'a> DragValue<'a> {
     /// How much the value changes when dragged one point (logical pixel).
     ///
     /// Should be finite and greater than zero.
-    #[inline]
-    pub fn speed(mut self, speed: impl Into<u64>) -> Self {
-        self.speed = speed.into();
-        self
-    }
+    // #[inline]
+    // pub fn speed(mut self, speed: impl Into<u64>) -> Self {
+    //     self.speed = speed.into();
+    //     self
+    // }
 
     /// Sets valid range for the value.
     ///
@@ -341,11 +341,11 @@ impl<'a> DragValue<'a> {
     }
 }
 
-impl<'a> Widget for DragValue<'a> {
+impl<'a> Widget for DragValueU64<'a> {
     fn ui(self, ui: &mut Ui) -> Response {
         let Self {
             mut get_set_value,
-            speed,
+            // speed,
             range,
             clamp_to_range,
             prefix,
@@ -371,9 +371,10 @@ impl<'a> Widget for DragValue<'a> {
             mem.has_focus(id)
         });
 
-        if ui.memory_mut(|mem| mem.gained_focus(id)) {
-            ui.data_mut(|data| data.remove::<String>(id));
-        }
+        // This require access to a private egui method
+        // if ui.memory_mut(|mem| mem.gained_focus(id)) {
+        //     ui.data_mut(|data| data.remove::<String>(id));
+        // }
 
         let old_value = get(&mut get_set_value);
         let mut value = old_value;
@@ -429,10 +430,10 @@ impl<'a> Widget for DragValue<'a> {
             value = clamp_value_to_range(value, range.clone());
         }
 
-        if change != 0 {
-            value += speed * change;
-            // value = emath::round_to_decimals(value, auto_decimals);
-        }
+        // if change != 0 {
+        //     value += speed * change;
+        //     value = emath::round_to_decimals(value, auto_decimals);
+        // }
 
         if old_value != value {
             set(&mut get_set_value, value);
@@ -440,11 +441,8 @@ impl<'a> Widget for DragValue<'a> {
         }
 
         let value_text = match custom_formatter {
-            Some(custom_formatter) => custom_formatter(value, auto_decimals..=max_decimals),
-            None => ui
-                .style()
-                .number_formatter
-                .format(value, auto_decimals..=max_decimals),
+            Some(custom_formatter) => custom_formatter(value, 0..=0),
+            None => ui.style().number_formatter.format(value, 0..=0),
         };
 
         let text_style = ui.style().drag_value_text_style.clone();
@@ -549,7 +547,7 @@ impl<'a> Widget for DragValue<'a> {
                 let mdelta = response.drag_delta();
                 let delta_points = mdelta.x - mdelta.y; // Increase to the right and up
 
-                let speed = if is_slow_speed { speed / 10.0 } else { speed };
+                // let speed = if is_slow_speed { speed / 10 } else { speed };
 
                 let delta_value = delta_points as f64 * speed;
 

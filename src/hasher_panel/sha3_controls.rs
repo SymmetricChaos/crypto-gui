@@ -5,7 +5,10 @@ use hashers::{
     traits::ClassicHasher,
 };
 
-use crate::ui_elements::UiElements;
+use crate::{
+    hex_display::{control_hex_u64, u64_zeroes},
+    ui_elements::UiElements,
+};
 
 use super::HasherFrame;
 
@@ -23,6 +26,7 @@ pub struct Sha3Frame {
     hasher: Sha3,
     variant: Sha3Variant,
     shake_output_len: usize,
+    example_state_strings: [[String; 5]; 5],
     example_state: KeccackState,
     example_round: usize,
 }
@@ -33,6 +37,43 @@ impl Default for Sha3Frame {
             hasher: Default::default(),
             variant: Sha3Variant::Sha3_256,
             shake_output_len: 128,
+            example_state_strings: [
+                [
+                    u64_zeroes(),
+                    u64_zeroes(),
+                    u64_zeroes(),
+                    u64_zeroes(),
+                    u64_zeroes(),
+                ],
+                [
+                    u64_zeroes(),
+                    u64_zeroes(),
+                    u64_zeroes(),
+                    u64_zeroes(),
+                    u64_zeroes(),
+                ],
+                [
+                    u64_zeroes(),
+                    u64_zeroes(),
+                    u64_zeroes(),
+                    u64_zeroes(),
+                    u64_zeroes(),
+                ],
+                [
+                    u64_zeroes(),
+                    u64_zeroes(),
+                    u64_zeroes(),
+                    u64_zeroes(),
+                    u64_zeroes(),
+                ],
+                [
+                    u64_zeroes(),
+                    u64_zeroes(),
+                    u64_zeroes(),
+                    u64_zeroes(),
+                    u64_zeroes(),
+                ],
+            ],
             example_state: KeccackState::new(),
             example_round: 0,
         }
@@ -114,13 +155,22 @@ impl HasherFrame for Sha3Frame {
 
         ui.add_space(16.0);
         ui.collapsing("Interactive State", |ui| {
+            if ui.button("Reset").clicked() {
+                self.example_state = KeccackState::new();
+            };
             for y in 0..5 {
                 ui.horizontal(|ui| {
                     for x in 0..5 {
-                        ui.add(
-                            DragValue::new(&mut self.example_state[x][y])
-                                .hexadecimal(16, false, false),
+                        // ui.add(
+                        //     DragValue::new(&mut self.example_state[x][y])
+                        //         .hexadecimal(16, false, false),
+                        // );
+                        control_hex_u64(
+                            ui,
+                            &mut self.example_state_strings[x][y],
+                            &mut self.example_state[x][y],
                         );
+                        // ui.monospace(format!("{:016x?}", &self.example_state[x][y]));
                     }
                 });
             }

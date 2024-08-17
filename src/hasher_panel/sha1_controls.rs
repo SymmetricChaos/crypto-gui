@@ -1,5 +1,5 @@
 use hashers::{errors::HasherError, sha::Sha1, traits::ClassicHasher};
-use utils::byte_formatting::ByteFormat;
+use utils::{byte_formatting::ByteFormat, padding::md_strengthening_64_be};
 
 use crate::ui_elements::UiElements;
 
@@ -25,21 +25,7 @@ impl Sha1Frame {
     fn padding(&mut self) {
         let mut bytes = self.example.as_bytes().to_vec();
 
-        let b_len = (bytes.len().wrapping_mul(8)) as u64;
-
-        // Step 1.Padding
-        // push a byte with a leading 1 to the bytes
-        bytes.push(0x80);
-        // push zeros until the length in bits is 448 mod 512
-        // equivalently until the length in bytes is 56 mod 64
-        while (bytes.len() % 64) != 56 {
-            bytes.push(0)
-        }
-
-        // Step 2. Append length
-        for b in b_len.to_be_bytes() {
-            bytes.push(b)
-        }
+        md_strengthening_64_be(&mut bytes, 64);
 
         self.example_padded = ByteFormat::Hex.byte_slice_to_text(bytes)
     }
@@ -61,8 +47,8 @@ impl HasherFrame for Sha1Frame {
         if ui.control_string(&mut self.example).changed() {
             self.padding()
         }
-        ui.add_space(4.0);
-        ui.mono_strong(&self.example_padded);
+        ui.add_space(8.0);
+        ui.monospace(&self.example_padded);
 
         ui.add_space(16.0);
     }
