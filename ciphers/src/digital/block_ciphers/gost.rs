@@ -33,7 +33,7 @@ impl Default for Gost {
             mode: BCMode::default(),
             padding: BCPadding::default(),
             iv: 0,
-            sboxes: GOST_R_34_12_2015,
+            sboxes: GOST_R_34_12_2015.clone(),
             key: [0; 8],
         }
     }

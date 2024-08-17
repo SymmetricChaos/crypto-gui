@@ -5,7 +5,7 @@ use eframe::egui::RichText;
 use egui::{Color32, DragValue, Response, TextEdit, TextStyle, Ui};
 use egui_extras::{Column, TableBuilder};
 use num::ToPrimitive;
-use rand::{thread_rng, Fill, Rng};
+use rand::{distributions::Standard, prelude::Distribution, thread_rng, Fill, Rng};
 use rngs::{
     lfsr::{Lfsr, LfsrMode},
     ClassicRng,
@@ -64,7 +64,10 @@ pub trait UiElements {
     fn u64_drag_value_dec(&mut self, n: &mut u64) -> Response;
     fn u128_drag_value_dec(&mut self, n: &mut u128) -> Response;
     fn u128_hi_lo_drag_value_dec(&mut self, n: &mut u128, hi: &mut u64, lo: &mut u64) -> Response;
-    fn fill_random_bytes_button<T: Fill>(&mut self, item: &mut T);
+    fn random_bytes_button<T: Fill>(&mut self, item: &mut T);
+    fn random_num_button<T>(&mut self, item: &mut T)
+    where
+        Standard: Distribution<T>;
 }
 
 impl UiElements for Ui {
@@ -334,9 +337,18 @@ impl UiElements for Ui {
         self.label(format!("{:032x?}", n))
     }
 
-    fn fill_random_bytes_button<T: Fill>(&mut self, item: &mut T) {
+    fn random_bytes_button<T: Fill>(&mut self, item: &mut T) {
         if self.button("🎲").on_hover_text("randomize").clicked() {
             thread_rng().fill(item)
+        }
+    }
+
+    fn random_num_button<T>(&mut self, item: &mut T)
+    where
+        Standard: Distribution<T>,
+    {
+        if self.button("🎲").on_hover_text("randomize").clicked() {
+            *item = thread_rng().gen();
         }
     }
 }
@@ -400,6 +412,74 @@ macro_rules! filter_and_parse_int {
 
 filter_and_parse_int!(filter_and_parse_u32, u32);
 filter_and_parse_int!(filter_and_parse_u64, u64);
+
+macro_rules! control_int_hex {
+    ($name: ident, $num: ty, $width: literal) => {
+        pub fn $name(number: &mut $num, string: &mut String) {
+            filter_string(string, &"0123456789ABCDEF");
+            if string.is_empty() {
+                *string = String::from("0".repeat($width));
+                *number = 0;
+            }
+            while string.len() > $width {
+                string.remove(0);
+            }
+            while string.len() < $width {
+                string.insert(0, '0')
+            }
+            *number = match <$num>::from_str_radix(&string, 16) {
+                Ok(n) => n,
+                Err(_) => {
+                    *string = <$num>::MAX.to_string();
+                    <$num>::MAX
+                }
+            }
+        }
+    };
+}
+
+control_int_hex!(control_u32_hex, u32, 8);
+control_int_hex!(control_u64_hex, u64, 16);
+control_int_hex!(control_u128_hex, u128, 32);
+
+pub fn block_cipher_iv_u32(ui: &mut Ui, iv_string: &mut String, iv: &mut u32, enabled: bool) {
+    ui.add_enabled_ui(enabled, |ui| {
+        ui.horizontal(|ui| {
+            ui.subheading("IV/Counter");
+            ui.random_num_button(iv)
+        });
+        ui.label("In the selected mode the cipher must have a 32-bit initial value provided.");
+        if ui.control_string(iv_string).changed() {
+            control_u32_hex(iv, iv_string);
+        }
+    });
+}
+
+pub fn block_cipher_iv_u64(ui: &mut Ui, iv_string: &mut String, iv: &mut u64, enabled: bool) {
+    ui.add_enabled_ui(enabled, |ui| {
+        ui.horizontal(|ui| {
+            ui.subheading("IV/Counter");
+            ui.random_num_button(iv)
+        });
+        ui.label("In the selected mode the cipher must have a 64-bit initial value provided.");
+        if ui.control_string(iv_string).changed() {
+            control_u64_hex(iv, iv_string);
+        }
+    });
+}
+
+pub fn block_cipher_iv_u128(ui: &mut Ui, iv_string: &mut String, iv: &mut u128, enabled: bool) {
+    ui.add_enabled_ui(enabled, |ui| {
+        ui.horizontal(|ui| {
+            ui.subheading("IV/Counter");
+            ui.random_num_button(iv)
+        });
+        ui.label("In the selected mode the cipher must have a 32-bit initial value provided.");
+        if ui.control_string(iv_string).changed() {
+            control_u128_hex(iv, iv_string);
+        }
+    });
+}
 
 pub fn generate_random_u32s_box(
     ui: &mut Ui,

@@ -64,7 +64,10 @@ impl CipherFrame for DesFrame {
         ui.add_space(8.0);
 
         ui.add_enabled_ui(self.cipher.mode.iv_needed(), |ui| {
-            ui.subheading("IV/Counter");
+            ui.horizontal(|ui| {
+                ui.subheading("IV/Counter");
+                ui.random_num_button(&mut self.cipher.iv)
+            });
             ui.label("In the selected mode the cipher must have a 64-bit initial value provided.");
             ui.u64_drag_value_hex(&mut self.cipher.iv);
         });
