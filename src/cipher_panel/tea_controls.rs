@@ -43,7 +43,7 @@ impl CipherFrame for TeaFrame {
 
         ui.horizontal(|ui| {
             ui.subheading("Key");
-            ui.fill_random_bytes_button(&mut self.cipher.key);
+            ui.random_bytes_button(&mut self.cipher.key);
         });
         ui.label("TEA uses four 32-bit keys or, equivalently, a single 128-bit key.");
         for i in 0..4 {
