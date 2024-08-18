@@ -1,4 +1,4 @@
-use hashers::{errors::HasherError, sha::Sha1, traits::ClassicHasher};
+use hashers::sha::Sha1;
 use utils::{byte_formatting::ByteFormat, padding::md_strengthening_64_be};
 
 use crate::ui_elements::UiElements;
@@ -24,9 +24,7 @@ impl Default for Sha1Frame {
 impl Sha1Frame {
     fn padding(&mut self) {
         let mut bytes = self.example.as_bytes().to_vec();
-
         md_strengthening_64_be(&mut bytes, 64);
-
         self.example_padded = ByteFormat::Hex.byte_slice_to_text(bytes)
     }
 }
@@ -42,7 +40,7 @@ impl HasherFrame for Sha1Frame {
         ui.add_space(16.0);
 
         ui.subheading("Demonstration of Padding");
-        ui.label("Notice that that message is padded out to a multiple of 64-bytes with two special features. First the byte 0x80 (0b10000000) is always included after the message and the message length in bits is appended to the end.");
+        ui.label("Notice that that message is padded out to a multiple of 64-bytes with two special features. First the byte 0x80 (0b10000000) is always included after the message. Then zeroes are added as needed. Finally the original message length in bits is appended to the end, reaching the block size.");
         ui.add_space(2.0);
         if ui.control_string(&mut self.example).changed() {
             self.padding()
@@ -52,8 +50,5 @@ impl HasherFrame for Sha1Frame {
 
         ui.add_space(16.0);
     }
-
-    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        self.hasher.hash_bytes_from_string(text)
-    }
+    crate::hash_string! {}
 }

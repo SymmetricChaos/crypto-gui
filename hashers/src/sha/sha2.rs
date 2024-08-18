@@ -1,4 +1,4 @@
-use crate::{errors::HasherError, traits::ClassicHasher};
+use crate::traits::ClassicHasher;
 use utils::byte_formatting::ByteFormat;
 
 use super::sha256::Sha2_224;

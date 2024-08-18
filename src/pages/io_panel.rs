@@ -88,7 +88,7 @@ pub fn hash(
             .clicked()
         {
             errors.clear();
-            match hasher.hash_bytes_from_string(input) {
+            match hasher.hash_string(input) {
                 Ok(text) => *output = text,
                 Err(e) => *errors = e.to_string(),
             }

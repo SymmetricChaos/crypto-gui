@@ -4,7 +4,6 @@ use itertools::Itertools;
 use utils::byte_formatting::ByteFormat;
 
 use crate::{
-    errors::HasherError,
     hmac::Hmac,
     sha::Sha1,
     traits::{ClassicHasher, KeyedHasher},

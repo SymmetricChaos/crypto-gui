@@ -1,11 +1,7 @@
 use crate::ui_elements::UiElements;
 
 use super::HasherFrame;
-use hashers::{
-    errors::HasherError,
-    hmac::{Hmac, SelectHmac},
-    traits::ClassicHasher,
-};
+use hashers::hmac::{Hmac, SelectHmac};
 use rand::{thread_rng, RngCore};
 use strum::IntoEnumIterator;
 use utils::byte_formatting::ByteFormat;
@@ -101,8 +97,5 @@ impl HasherFrame for HmacFrame {
 
         ui.add_space(16.0);
     }
-
-    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        self.hasher.hash_bytes_from_string(text)
-    }
+    crate::hash_string! {}
 }

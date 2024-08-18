@@ -1,4 +1,4 @@
-use crate::{errors::HasherError, traits::ClassicHasher};
+use crate::traits::ClassicHasher;
 use std::ops::BitXor;
 use utils::byte_formatting::ByteFormat;
 

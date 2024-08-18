@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use crate::{errors::HasherError, traits::ClassicHasher};
+use crate::traits::ClassicHasher;
 use utils::{byte_formatting::ByteFormat, padding::zero_padding};
 
 /// 960 bits of √6

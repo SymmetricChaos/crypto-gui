@@ -124,7 +124,7 @@ impl HasherFrame for Blake3Frame {
         ui.add(egui::DragValue::new(&mut self.hasher.hash_len).range(1..=256));
     }
 
-    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
+    fn hash_string(&self, text: &str) -> Result<String, HasherError> {
         if self.hasher.mode == Blake3Mode::Keyed && !self.valid_key {
             Err(HasherError::key("BLAKE3 keyed hash can only be called when exactly 64 hexadecimal digits (256 bits) of key are given"))
         } else {

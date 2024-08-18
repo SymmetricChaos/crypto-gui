@@ -3,7 +3,7 @@ use std::ops::Shr;
 use itertools::Itertools;
 use utils::byte_formatting::ByteFormat;
 
-use crate::{errors::HasherError, traits::ClassicHasher};
+use crate::traits::ClassicHasher;
 
 pub fn sigma_0(a: u64) -> u64 {
     (a.rotate_right(1)) ^ (a.rotate_right(8)) ^ (a.shr(7))
@@ -155,14 +155,7 @@ macro_rules! sha512 {
                 out
             }
 
-            fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-                let mut bytes = self
-                    .input_format
-                    .text_to_bytes(text)
-                    .map_err(|_| HasherError::general("byte format error"))?;
-                let out = self.hash(&mut bytes);
-                Ok(self.output_format.byte_slice_to_text(&out))
-            }
+            crate::hash_bytes_from_string! {}
         }
     };
 }

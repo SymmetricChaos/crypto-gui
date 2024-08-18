@@ -1,5 +1,5 @@
 use egui::DragValue;
-use hashers::{errors::HasherError, hmac::SelectHmac, pbkdf::Pbkdf2, traits::ClassicHasher};
+use hashers::{hmac::SelectHmac, pbkdf::Pbkdf2};
 use strum::IntoEnumIterator;
 use utils::byte_formatting::ByteFormat;
 
@@ -66,8 +66,5 @@ impl HasherFrame for Pbkdf2Frame {
         ui.subheading("Output Length (Bytes)");
         ui.add(DragValue::new(&mut self.hasher.output_length).range(4..=512));
     }
-
-    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        self.hasher.hash_bytes_from_string(text)
-    }
+    crate::hash_string! {}
 }

@@ -1,6 +1,6 @@
 use utils::{byte_formatting::ByteFormat, padding::md_strengthening_64_be};
 
-use crate::{errors::HasherError, traits::ClassicHasher};
+use crate::traits::ClassicHasher;
 
 #[derive(Debug, Clone)]
 pub struct Sha0 {

@@ -1,11 +1,7 @@
 use crate::ui_elements::UiElements;
 
 use super::HasherFrame;
-use hashers::{
-    errors::HasherError,
-    fnv::{Fnv, FnvSize, O128, O32, O64, P128, P32, P64},
-    traits::ClassicHasher,
-};
+use hashers::fnv::{Fnv, FnvSize, O128, O32, O64, P128, P32, P64};
 
 pub struct FnvFrame {
     hasher: Fnv,
@@ -76,8 +72,5 @@ impl HasherFrame for FnvFrame {
 
         ui.add_space(16.0);
     }
-
-    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        self.hasher.hash_bytes_from_string(text)
-    }
+    crate::hash_string! {}
 }

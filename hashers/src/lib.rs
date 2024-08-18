@@ -6,6 +6,7 @@ pub mod checksum;
 pub mod errors;
 pub mod fnv;
 pub mod fxhash;
+pub mod gost;
 pub mod hmac;
 pub mod ids;
 pub mod lm;

@@ -1,11 +1,7 @@
 use crate::ui_elements::UiElements;
 
 use super::HasherFrame;
-use hashers::{
-    errors::HasherError,
-    lm::{des::Des, des_functions::expand_56_to_64, lm::LM_WORD, Lm},
-    traits::ClassicHasher,
-};
+use hashers::lm::{des::Des, des_functions::expand_56_to_64, lm::LM_WORD, Lm};
 use utils::{
     byte_formatting::ByteFormat, preset_alphabet::Alphabet, text_functions::filter_string,
 };
@@ -106,8 +102,5 @@ impl HasherFrame for LmFrame {
 
         ui.add_space(16.0);
     }
-
-    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        self.hasher.hash_bytes_from_string(text)
-    }
+    crate::hash_string! {}
 }

@@ -54,7 +54,7 @@ impl HasherFrame for RadioGatunFrame {
         ui.add_space(16.0);
     }
 
-    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
+    fn hash_string(&self, text: &str) -> Result<String, HasherError> {
         if self.wide {
             self.hasher64.hash_bytes_from_string(text)
         } else {

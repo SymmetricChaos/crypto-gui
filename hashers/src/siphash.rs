@@ -1,9 +1,6 @@
 use utils::byte_formatting::ByteFormat;
 
-use crate::{
-    errors::HasherError,
-    traits::{ClassicHasher, KeyedHasher},
-};
+use crate::traits::{ClassicHasher, KeyedHasher};
 
 // https://eprint.iacr.org/2012/351.pdf
 

@@ -26,7 +26,16 @@ mod siphash_controls;
 
 pub trait HasherFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
-    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError>;
+    fn hash_string(&self, text: &str) -> Result<String, HasherError>;
+}
+
+#[macro_export]
+macro_rules! hash_string {
+    () => {
+        fn hash_string(&self, text: &str) -> Result<String, hashers::errors::HasherError> {
+            hashers::traits::ClassicHasher::hash_bytes_from_string(&self.hasher, text)
+        }
+    };
 }
 
 // Quick simple combo box builder
@@ -131,6 +140,7 @@ impl HasherInterface {
             HasherId::Pearson => &mut self.pearson,
             HasherId::Poly1305 => &mut self.poly1305,
             HasherId::SipHash => &mut self.siphash,
+            _ => todo!("<<<NOT IMPLEMENTED>>>"),
         }
     }
 }

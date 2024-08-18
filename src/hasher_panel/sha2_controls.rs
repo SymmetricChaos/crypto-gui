@@ -1,8 +1,4 @@
-use hashers::{
-    errors::HasherError,
-    sha::{Sha2, Sha2Variant},
-    traits::ClassicHasher,
-};
+use hashers::sha::{Sha2, Sha2Variant};
 
 use crate::ui_elements::UiElements;
 
@@ -69,8 +65,5 @@ impl HasherFrame for Sha2Frame {
 
         ui.add_space(16.0);
     }
-
-    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        self.hasher.hash_bytes_from_string(text)
-    }
+    crate::hash_string! {}
 }

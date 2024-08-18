@@ -3,7 +3,7 @@ use std::ops::Shr;
 use itertools::Itertools;
 use utils::byte_formatting::ByteFormat;
 
-use crate::{errors::HasherError, traits::ClassicHasher};
+use crate::traits::ClassicHasher;
 
 pub const K: [u32; 64] = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -144,14 +144,7 @@ macro_rules! sha2_256 {
                 out
             }
 
-            fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-                let mut bytes = self
-                    .input_format
-                    .text_to_bytes(text)
-                    .map_err(|_| HasherError::general("byte format error"))?;
-                let out = self.hash(&mut bytes);
-                Ok(self.output_format.byte_slice_to_text(&out))
-            }
+            crate::hash_bytes_from_string! {}
         }
     };
 }

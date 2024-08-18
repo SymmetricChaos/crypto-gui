@@ -1,9 +1,5 @@
 use egui::DragValue;
-use hashers::{
-    errors::HasherError,
-    sha::{KeccackState, Sha3},
-    traits::ClassicHasher,
-};
+use hashers::sha::{KeccackState, Sha3};
 
 use crate::{
     hex_display::{control_hex_u64, u64_zeroes},
@@ -137,10 +133,15 @@ impl HasherFrame for Sha3Frame {
 
         ui.add_space(8.0);
         ui.subheading("SHAKE Output Length (in bytes)");
-        ui.add_enabled(
-            self.variant == Sha3Variant::Shake128 || self.variant == Sha3Variant::Shake256,
-            DragValue::new(&mut self.shake_output_len).range(1..=512),
-        );
+        if ui
+            .add_enabled(
+                self.variant == Sha3Variant::Shake128 || self.variant == Sha3Variant::Shake256,
+                DragValue::new(&mut self.shake_output_len).range(1..=512),
+            )
+            .changed()
+        {
+            self.hasher.output_size = self.shake_output_len;
+        }
 
         ui.add_space(16.0);
         ui.subheading("Discussion");
@@ -161,16 +162,11 @@ impl HasherFrame for Sha3Frame {
             for y in 0..5 {
                 ui.horizontal(|ui| {
                     for x in 0..5 {
-                        // ui.add(
-                        //     DragValue::new(&mut self.example_state[x][y])
-                        //         .hexadecimal(16, false, false),
-                        // );
                         control_hex_u64(
                             ui,
                             &mut self.example_state_strings[x][y],
                             &mut self.example_state[x][y],
                         );
-                        // ui.monospace(format!("{:016x?}", &self.example_state[x][y]));
                     }
                 });
             }
@@ -209,8 +205,5 @@ impl HasherFrame for Sha3Frame {
 
         ui.add_space(16.0);
     }
-
-    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        self.hasher.hash_bytes_from_string(text)
-    }
+    crate::hash_string! {}
 }

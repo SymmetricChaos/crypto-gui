@@ -1,4 +1,4 @@
-use crate::{errors::HasherError, traits::ClassicHasher};
+use crate::traits::ClassicHasher;
 use crypto_bigint::{ArrayEncoding, U256};
 use utils::byte_formatting::ByteFormat;
 

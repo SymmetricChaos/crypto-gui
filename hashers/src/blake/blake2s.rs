@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use utils::byte_formatting::ByteFormat;
 
-use crate::{errors::HasherError, traits::ClassicHasher};
+use crate::traits::ClassicHasher;
 
 use super::SIGMA;
 

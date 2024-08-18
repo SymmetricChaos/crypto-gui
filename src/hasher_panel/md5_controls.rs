@@ -1,7 +1,7 @@
 use crate::ui_elements::UiElements;
 
 use super::HasherFrame;
-use hashers::{errors::HasherError, md5::Md5, traits::ClassicHasher};
+use hashers::md5::Md5;
 
 pub struct Md5Frame {
     hasher: Md5,
@@ -30,8 +30,5 @@ impl HasherFrame for Md5Frame {
 
         ui.add_space(16.0);
     }
-
-    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        self.hasher.hash_bytes_from_string(text)
-    }
+    crate::hash_string! {}
 }

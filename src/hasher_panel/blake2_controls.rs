@@ -197,7 +197,7 @@ impl HasherFrame for Blake2Frame {
         ui.add_space(16.0);
     }
 
-    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
+    fn hash_string(&self, text: &str) -> Result<String, HasherError> {
         match self.variant {
             Blake2Variant::Big => self.hasher_b.hash_bytes_from_string(text),
             Blake2Variant::Small => self.hasher_s.hash_bytes_from_string(text),

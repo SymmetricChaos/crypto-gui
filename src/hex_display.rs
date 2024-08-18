@@ -13,20 +13,12 @@ pub fn control_hex_u64(ui: &mut egui::Ui, string: &mut String, value: &mut u64) 
             .min_size(ui.spacing().interact_size)
             .desired_width(ui.spacing().interact_size.x),
     );
-    if resp.changed() {
-        if string.is_empty() {
-            *string = u64_zeroes();
-        }
+    // After clicking off immediately recalculate the value from the text
+    if resp.lost_focus() {
         filter_string(string, &"0123456789ABCDEFabcdef");
         if string.is_empty() {
             *string = u64_zeroes();
             *value = 0;
-        }
-        while string.len() > 16 {
-            string.remove(0);
-        }
-        while string.len() < 16 {
-            string.insert(0, '0')
         }
         match u64::from_str_radix(string, 16) {
             Ok(b) => *value = b,
@@ -35,7 +27,9 @@ pub fn control_hex_u64(ui: &mut egui::Ui, string: &mut String, value: &mut u64) 
                 *string = String::from("ffffffffffffffff")
             }
         };
-    } else {
+    }
+    // Whenever we don't have focus rewrite the text from the value
+    if !resp.has_focus() {
         *string = format!("{:016x?}", value)
     }
     resp

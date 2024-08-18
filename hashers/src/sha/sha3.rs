@@ -1,6 +1,6 @@
 use std::ops::{Index, IndexMut};
 
-use crate::{errors::HasherError, traits::ClassicHasher};
+use crate::traits::ClassicHasher;
 use utils::byte_formatting::ByteFormat;
 
 fn bytes_to_u64_le(bytes: &[u8]) -> Vec<u64> {
@@ -241,10 +241,10 @@ pub enum Domain {
 pub struct Sha3 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    rate: usize, // rate in bytes, block size
+    pub rate: usize, // rate in bytes, block size
     // capacity: usize,    // reserved portion of state in bytes,
-    output_size: usize, // output length in bytes, recommended to be half the capacity
-    domain: Domain,
+    pub output_size: usize, // output length in bytes, recommended to be half the capacity
+    pub domain: Domain,
 }
 
 impl Default for Sha3 {

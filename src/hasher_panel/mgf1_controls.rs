@@ -1,7 +1,7 @@
 use crate::ui_elements::UiElements;
 
 use super::HasherFrame;
-use hashers::{errors::HasherError, mgf1::Mgf1, sha::Sha2Variant, traits::ClassicHasher};
+use hashers::{mgf1::Mgf1, sha::Sha2Variant};
 
 pub struct Mgf1Frame {
     hasher: Mgf1,
@@ -72,8 +72,5 @@ impl HasherFrame for Mgf1Frame {
 
         ui.add_space(16.0);
     }
-
-    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        self.hasher.hash_bytes_from_string(text)
-    }
+    crate::hash_string! {}
 }

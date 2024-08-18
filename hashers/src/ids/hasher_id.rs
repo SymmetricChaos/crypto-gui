@@ -9,6 +9,7 @@ pub enum HasherId {
     Blake2,
     Blake3,
     Fnv,
+    Gost,
     Hmac,
     Lm,
     Md2,
@@ -24,6 +25,7 @@ pub enum HasherId {
     Sha2,
     Sha3,
     SipHash,
+    Streebog,
 }
 
 impl Default for HasherId {
@@ -50,6 +52,7 @@ impl Display for HasherId {
             Self::Blake2 => "BLAKE2",
             Self::Blake3 => "BLAKE3",
             Self::Fnv => "FNV Hash",
+            Self::Gost => "GOST R 34.11-94",
             Self::Hmac => "HMAC",
             Self::Lm => "LM",
             Self::Md2 => "MD2",
@@ -65,6 +68,7 @@ impl Display for HasherId {
             Self::Sha2 => "SHA-2",
             Self::Sha3 => "SHA-3 (Keccak)",
             Self::SipHash => "SipHash",
+            Self::Streebog => "Streebog",
         };
         write!(f, "{}", name)
     }

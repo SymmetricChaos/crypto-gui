@@ -2,7 +2,7 @@ use crate::ui_elements::UiElements;
 
 use super::HasherFrame;
 use egui::{FontId, RichText};
-use hashers::{errors::HasherError, pearson::Pearson, traits::ClassicHasher};
+use hashers::pearson::Pearson;
 use rand::{seq::SliceRandom, thread_rng};
 
 pub struct PearsonFrame {
@@ -51,8 +51,5 @@ impl HasherFrame for PearsonFrame {
         }
         ui.add_space(16.0);
     }
-
-    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        self.hasher.hash_bytes_from_string(text)
-    }
+    crate::hash_string! {}
 }

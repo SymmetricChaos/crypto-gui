@@ -1,4 +1,4 @@
-use crate::{errors::HasherError, traits::ClassicHasher};
+use crate::traits::ClassicHasher;
 use utils::{byte_formatting::ByteFormat, padding::pkcs5_padding};
 
 const MD2_S_TABLE: [u8; 256] = [

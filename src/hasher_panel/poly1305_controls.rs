@@ -1,6 +1,6 @@
 use super::HasherFrame;
 use crate::ui_elements::UiElements;
-use hashers::{errors::HasherError, poly1305::Poly1305, traits::ClassicHasher};
+use hashers::poly1305::Poly1305;
 use rand::{thread_rng, RngCore};
 
 pub struct Poly1305Frame {
@@ -92,8 +92,5 @@ impl HasherFrame for Poly1305Frame {
 
         ui.add_space(16.0);
     }
-
-    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        self.hasher.hash_bytes_from_string(text)
-    }
+    crate::hash_string! {}
 }
