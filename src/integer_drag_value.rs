@@ -58,8 +58,6 @@ impl<'a> EditU64<'a> {
             suffix: Default::default(),
             range: u64::MIN..=u64::MAX,
             clamp_to_range: true,
-            // min_decimals: 0,
-            // max_decimals: None,
             // custom_formatter: None,
             // custom_parser: None,
             update_while_editing: true,
@@ -328,31 +326,9 @@ impl<'a> Widget for EditU64<'a> {
     }
 }
 
-// fn parse(custom_parser: &Option<NumParser<'_>>, value_text: &str) -> Option<u64> {
-//     match &custom_parser {
-//         Some(parser) => parser(value_text),
-//         None => default_parser(value_text),
-//     }
-// }
-
 fn parse(value_text: &str) -> Option<u64> {
     u64::from_str_radix(value_text, 16).ok()
 }
-
-/// The default egui parser of numbers.
-///
-/// It ignored whitespaces anywhere in the input, and treats the special minus character (U+2212) as a normal minus.
-// fn default_parser(text: &str) -> Option<u64> {
-//     let text: String = text
-//         .chars()
-//         // Ignore whitespace (trailing, leading, and thousands separators):
-//         .filter(|c| !c.is_whitespace())
-//         // Replace special minus character with normal minus (hyphen):
-//         .map(|c| if c == '−' { '-' } else { c })
-//         .collect();
-
-//     text.parse().ok()
-// }
 
 fn clamp_value_to_range(x: u64, range: RangeInclusive<u64>) -> u64 {
     let (mut min, mut max) = (*range.start(), *range.end());
