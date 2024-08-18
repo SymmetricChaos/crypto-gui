@@ -1,4 +1,4 @@
-use crate::cipher_panel::CipherFrame;
+use crate::{cipher_panel::CipherFrame, integer_drag_value::EditU64};
 use ciphers::digital::block_ciphers::block_cipher::{BCMode, BCPadding};
 use codes::letter_word_code::IntegerCodeMaps;
 use eframe::egui::RichText;
@@ -279,7 +279,7 @@ impl UiElements for Ui {
     }
 
     fn u64_drag_value_hex(&mut self, n: &mut u64) -> Response {
-        self.add(DragValue::new(n).hexadecimal(16, false, true))
+        self.add(EditU64::new(n))
     }
 
     /// NOT IMPLEMENTED

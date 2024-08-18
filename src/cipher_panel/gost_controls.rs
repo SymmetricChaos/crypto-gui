@@ -51,7 +51,7 @@ impl CipherFrame for GostFrame {
             ui.subheading("Sboxes");
             ui.random_bytes_button(&mut self.cipher.sboxes);
         });
-        for s in self.cipher.sboxes.iter_mut() {
+        for (i, s) in self.cipher.sboxes.iter_mut().enumerate() {
             ui.u64_drag_value_hex(s);
         }
 

@@ -19,7 +19,15 @@ impl Default for Gost {
 
 impl ClassicHasher for Gost {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        todo!()
+        let mut input = bytes.to_vec();
+
+        // md_strengthening_64_be(&mut input, 32);
+
+        for block in input.chunks_exact(32) {}
+
+        let mut out = vec![0; 32];
+
+        out
     }
 
     crate::hash_bytes_from_string! {}
