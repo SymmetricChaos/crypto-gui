@@ -3,14 +3,13 @@
 use std::{cmp::Ordering, ops::RangeInclusive};
 
 use egui::{
-    text, Button, CursorIcon, Key, Modifiers, Response, RichText, Sense, TextEdit, TextWrapMode,
-    Ui, Widget, WidgetInfo,
+    text, Button, CursorIcon, Key, Response, RichText, Sense, TextEdit, TextWrapMode, Ui, Widget,
 };
 
 // ----------------------------------------------------------------------------
 
-type NumFormatter<'a> = Box<dyn 'a + Fn(u64, RangeInclusive<usize>) -> String>;
-type NumParser<'a> = Box<dyn 'a + Fn(&str) -> Option<u64>>;
+// type NumFormatter<'a> = Box<dyn 'a + Fn(u64, RangeInclusive<usize>) -> String>;
+// type NumParser<'a> = Box<dyn 'a + Fn(&str) -> Option<u64>>;
 
 // ----------------------------------------------------------------------------
 

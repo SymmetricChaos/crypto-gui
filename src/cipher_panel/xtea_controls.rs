@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::{block_cipher_mode, block_cipher_padding, UiElements};
-use ciphers::{digital::block_ciphers::xtea::Xtea, Cipher};
+use ciphers::{digital::block_ciphers::tea::xtea::Xtea, Cipher};
 use egui::Ui;
 use rand::{thread_rng, Rng};
 
@@ -16,13 +16,11 @@ impl Default for XteaFrame {
     }
 }
 
-impl XteaFrame {}
-
 impl CipherFrame for XteaFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
-            "https://github.com/SymmetricChaos/crypto-gui/blob/master/ciphers/src/digital/block_ciphers/xtea.rs",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/ciphers/src/digital/block_ciphers/tea/xtea.rs",
         );
         ui.add_space(8.0);
 

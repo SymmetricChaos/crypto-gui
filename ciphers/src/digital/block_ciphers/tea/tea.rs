@@ -1,9 +1,7 @@
 use crate::impl_cipher_for_block_cipher;
 use utils::byte_formatting::{overwrite_bytes, u32_pair_to_u8_array, ByteFormat};
 
-use super::block_cipher::{BCMode, BCPadding, BlockCipher};
-
-const DELTA: u32 = 0x9e3779b9;
+use crate::digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher};
 
 pub struct Tea {
     pub output_format: ByteFormat,
@@ -27,7 +25,12 @@ impl Default for Tea {
     }
 }
 
-impl Tea {}
+pub fn mx_e(a: u32, b: u32, sum: u32, k1: u32, k2: u32) -> u32 {
+    b.wrapping_add((a << 4).wrapping_add(k1) ^ (a.wrapping_add(sum)) ^ (a >> 5).wrapping_add(k2))
+}
+pub fn mx_d(a: u32, b: u32, sum: u32, k1: u32, k2: u32) -> u32 {
+    b.wrapping_sub((a << 4).wrapping_add(k1) ^ (a.wrapping_add(sum)) ^ (a >> 5).wrapping_add(k2))
+}
 
 impl BlockCipher<8> for Tea {
     fn encrypt_block(&self, bytes: &mut [u8]) {
@@ -37,17 +40,9 @@ impl BlockCipher<8> for Tea {
         }
         let mut sum: u32 = 0;
         for _ in 0..32 {
-            sum = sum.wrapping_add(DELTA);
-            v[0] = v[0].wrapping_add(
-                ((v[1] << 4).wrapping_add(self.key[0]))
-                    ^ (v[1].wrapping_add(sum))
-                    ^ ((v[1] >> 5).wrapping_add(self.key[1])),
-            );
-            v[1] = v[1].wrapping_add(
-                ((v[0] << 4).wrapping_add(self.key[2]))
-                    ^ (v[0].wrapping_add(sum))
-                    ^ ((v[0] >> 5).wrapping_add(self.key[3])),
-            );
+            sum = sum.wrapping_add(super::DELTA);
+            v[0] = mx_e(v[1], v[0], sum, self.key[0], self.key[1]);
+            v[1] = mx_e(v[0], v[1], sum, self.key[2], self.key[3]);
         }
         overwrite_bytes(bytes, &u32_pair_to_u8_array(v));
     }
@@ -59,17 +54,9 @@ impl BlockCipher<8> for Tea {
         }
         let mut sum: u32 = 0xC6EF3720;
         for _ in 0..32 {
-            v[1] = v[1].wrapping_sub(
-                ((v[0] << 4).wrapping_add(self.key[2]))
-                    ^ (v[0].wrapping_add(sum))
-                    ^ ((v[0] >> 5).wrapping_add(self.key[3])),
-            );
-            v[0] = v[0].wrapping_sub(
-                ((v[1] << 4).wrapping_add(self.key[0]))
-                    ^ (v[1].wrapping_add(sum))
-                    ^ ((v[1] >> 5).wrapping_add(self.key[1])),
-            );
-            sum = sum.wrapping_sub(DELTA);
+            v[1] = mx_d(v[0], v[1], sum, self.key[2], self.key[3]);
+            v[0] = mx_d(v[1], v[0], sum, self.key[0], self.key[1]);
+            sum = sum.wrapping_sub(super::DELTA);
         }
         overwrite_bytes(bytes, &u32_pair_to_u8_array(v));
     }

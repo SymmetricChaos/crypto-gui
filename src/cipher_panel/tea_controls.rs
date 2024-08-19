@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::{block_cipher_mode, block_cipher_padding, UiElements};
-use ciphers::{digital::block_ciphers::tea::Tea, Cipher};
+use ciphers::{digital::block_ciphers::tea::tea::Tea, Cipher};
 use egui::Ui;
 use rand::{thread_rng, Rng};
 
@@ -16,13 +16,11 @@ impl Default for TeaFrame {
     }
 }
 
-impl TeaFrame {}
-
 impl CipherFrame for TeaFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
-            "https://github.com/SymmetricChaos/crypto-gui/blob/master/ciphers/src/digital/block_ciphers/tea.rs",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/ciphers/src/digital/block_ciphers/tea/tea.rs",
         );
         ui.add_space(8.0);
 

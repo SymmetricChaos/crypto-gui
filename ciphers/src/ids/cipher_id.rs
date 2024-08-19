@@ -72,6 +72,7 @@ pub enum CipherId {
     Vigenere,
     XorSplitting,
     Xtea,
+    Xxtea,
 }
 
 impl Default for CipherId {
@@ -161,6 +162,7 @@ impl Display for CipherId {
             CipherId::Vigenere => "Vigenère",
             CipherId::XorSplitting => "XOR Secret Splitting",
             CipherId::Xtea => "XTEA",
+            CipherId::Xxtea => "XXTEA",
         };
         write!(f, "{}", name)
     }

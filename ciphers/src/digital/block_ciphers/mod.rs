@@ -8,7 +8,6 @@ pub mod idea;
 pub mod rc5;
 pub mod rc6;
 pub mod tea;
-pub mod xtea;
 
 #[macro_export]
 macro_rules! impl_cipher_for_block_cipher {
