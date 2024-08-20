@@ -22,4 +22,6 @@ pub mod radio_gatun;
 pub mod scrypt;
 pub mod sha;
 pub mod siphash;
+pub mod tiger;
+pub mod tiger_arrays;
 pub mod traits;

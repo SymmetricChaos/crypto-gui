@@ -18,7 +18,7 @@ pub struct SipHash {
 impl Default for SipHash {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
+            input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             k0: 0,
             k1: 0,

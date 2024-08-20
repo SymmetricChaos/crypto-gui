@@ -1,11 +1,13 @@
-use crate::digital::block_ciphers::block_cipher::{BCPadding, BlockCipher};
+use crate::digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher};
 use utils::byte_formatting::{u32_pair_to_u8_array, ByteFormat};
 
 pub struct Xxtea {
     pub output_format: ByteFormat,
     pub input_format: ByteFormat,
     pub key: [u32; 4],
-    pub iv: u64,
+    pub iv: Vec<u32>,
+    pub block_words: u32,
+    pub mode: BCMode,
     pub padding: BCPadding,
 }
 
@@ -13,9 +15,11 @@ impl Default for Xxtea {
     fn default() -> Self {
         Self {
             key: [0, 1, 2, 3],
-            iv: 0,
+            iv: vec![0, 0],
+            block_words: 2,
             output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
+            mode: BCMode::default(),
             padding: BCPadding::default(),
         }
     }
