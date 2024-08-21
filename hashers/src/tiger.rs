@@ -1,7 +1,6 @@
-use std::num::Wrapping;
-
 use super::tiger_arrays::{T1, T2, T3, T4};
 use crate::traits::ClassicHasher;
+use std::num::Wrapping;
 use utils::byte_formatting::ByteFormat;
 
 pub enum TigerVersion {
@@ -33,25 +32,11 @@ impl Tiger {
         x: &Wrapping<u64>,
         mul: Wrapping<u64>,
     ) {
-        let idxs = [
-            (c.0 >> 0 * 8) & 0xff,
-            (c.0 >> 2 * 8) & 0xff,
-            (c.0 >> 4 * 8) & 0xff,
-            (c.0 >> 6 * 8) & 0xff,
-            (c.0 >> 1 * 8) & 0xff,
-            (c.0 >> 3 * 8) & 0xff,
-            (c.0 >> 5 * 8) & 0xff,
-            (c.0 >> 7 * 8) & 0xff,
-        ];
-        *c ^= x;
-        *a -= T1[idxs[0] as usize]
-            ^ T2[idxs[1] as usize]
-            ^ T3[idxs[2] as usize]
-            ^ T4[idxs[3] as usize];
-        *b += T4[idxs[4] as usize]
-            ^ T3[idxs[5] as usize]
-            ^ T2[idxs[6] as usize]
-            ^ T1[idxs[7] as usize];
+        *c ^= *x;
+        // c.0 refers to the u64 inside the Wrapping<u64>
+        let idxs = c.0.to_le_bytes().map(|b| b as usize);
+        *a -= T1[idxs[0]] ^ T2[idxs[2]] ^ T3[idxs[4]] ^ T4[idxs[6]];
+        *b += T4[idxs[1]] ^ T3[idxs[3]] ^ T2[idxs[5]] ^ T1[idxs[7]];
         *b *= mul;
     }
 
@@ -76,16 +61,16 @@ impl Tiger {
         x[0] -= x[7] ^ Wrapping(0xA5A5A5A5A5A5A5A5);
         x[1] ^= x[0];
         x[2] += x[1];
-        x[3] -= x[2] ^ (!x[1] << 19);
+        x[3] -= x[2] ^ ((!x[1]) << 19);
         x[4] ^= x[3];
         x[5] += x[4];
-        x[6] -= x[5] ^ (!x[4] >> 23);
+        x[6] -= x[5] ^ ((!x[4]) >> 23);
         x[7] ^= x[6];
         x[0] += x[7];
-        x[1] -= x[0] ^ (!x[7] << 19);
+        x[1] -= x[0] ^ ((!x[7]) << 19);
         x[2] ^= x[1];
         x[3] += x[2];
-        x[4] -= x[3] ^ (!x[2] >> 23);
+        x[4] -= x[3] ^ ((!x[2]) >> 23);
         x[5] ^= x[4];
         x[6] += x[5];
         x[7] -= x[6] ^ Wrapping(0x0123456789ABCDEF);
@@ -116,14 +101,15 @@ impl ClassicHasher for Tiger {
         let mut input = bytes.to_vec();
 
         // First padding byte is the only difference between V1 and V2
-        let b_len = (input.len().wrapping_mul(8)) as u64;
         match self.version {
             TigerVersion::One => input.push(0x01),
             TigerVersion::Two => input.push(0x80),
         }
+        let b_len = (input.len() as u64).wrapping_mul(8);
         while (input.len() % 64 as usize) != 56 {
             input.push(0)
         }
+        // Confirmed that this is little endian from reference implementations
         for b in b_len.to_le_bytes() {
             input.push(b)
         }
@@ -135,17 +121,21 @@ impl ClassicHasher for Tiger {
         for block in input.chunks_exact(64) {
             let mut x = [Wrapping(0u64); 8];
             for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(8)) {
+                // Confirmed that this is little endian from reference implementations
                 *elem = Wrapping(u64::from_le_bytes(chunk.try_into().unwrap()));
             }
             Tiger::compress(&mut a, &mut b, &mut c, &mut x)
         }
 
         let mut out = vec![0; 24];
+
         for (offset, word) in [a, b, c].iter().enumerate() {
+            // Confirmed that this is little endian from reference implementations
             for (i, byte) in word.0.to_le_bytes().iter().enumerate() {
                 out[i + offset * 8] = *byte
             }
         }
+
         out
     }
 
@@ -169,6 +159,10 @@ mod tiger_tests {
             "3293ac630c13f0245f92bbb1766e16167a4e58492dde73f3",
             hasher.hash_bytes_from_string("").unwrap()
         );
+        // assert_eq!(
+        //     "77befbef2e7ef8ab2ec8f93bf587a7fc613e247f5f247809",
+        //     hasher.hash_bytes_from_string("a").unwrap()
+        // );
 
         // hasher.version = TigerVersion::Two;
         // assert_eq!(
