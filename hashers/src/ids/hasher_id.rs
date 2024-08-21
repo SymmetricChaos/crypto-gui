@@ -26,6 +26,7 @@ pub enum HasherId {
     Sha3,
     SipHash,
     Streebog,
+    Tiger,
 }
 
 impl Default for HasherId {
@@ -69,6 +70,7 @@ impl Display for HasherId {
             Self::Sha3 => "SHA-3 (Keccak)",
             Self::SipHash => "SipHash",
             Self::Streebog => "Streebog",
+            Self::Tiger => "Tiger",
         };
         write!(f, "{}", name)
     }
