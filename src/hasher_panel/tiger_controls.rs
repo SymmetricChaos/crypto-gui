@@ -16,13 +16,14 @@ pub struct TigerFrame {
 impl HasherFrame for TigerFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.subheading("Version");
-        ui.label("In V1 the first padding byte is 0x01 and in V2 the first padding byte is 0x80.");
+        ui.label("In V1 the first padding byte is 0x01 and in V2 the first padding byte is 0x80. There is no other difference.");
         ui.selectable_value(&mut self.hasher.version, TigerVersion::One, "V1");
         ui.selectable_value(&mut self.hasher.version, TigerVersion::Two, "V2");
+        ui.add_space(16.0);
 
-        ui.collapsing("Tiger SBOXes (very large)", |ui| {
-            for (i, sbox) in [T1, T2, T3, T4].iter().enumerate() {
-                ui.label(format!("T{}:", i + 1));
+        ui.subheading("Tiger SBOXes (very large)");
+        for (i, sbox) in [T1, T2, T3, T4].iter().enumerate() {
+            ui.collapsing(format!("T{}", i + 1), |ui| {
                 egui::Grid::new(format!("tiger_array{i}"))
                     .num_columns(4)
                     .striped(true)
@@ -36,9 +37,9 @@ impl HasherFrame for TigerFrame {
                             );
                         }
                     });
-                ui.add_space(8.0);
-            }
-        });
+            });
+            ui.add_space(8.0);
+        }
     }
 
     crate::hash_string! {}
