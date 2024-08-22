@@ -3,6 +3,7 @@ use crate::traits::ClassicHasher;
 use std::num::Wrapping;
 use utils::byte_formatting::ByteFormat;
 
+#[derive(Debug, PartialEq, Eq)]
 pub enum TigerVersion {
     One,
     Two,
@@ -100,12 +101,13 @@ impl ClassicHasher for Tiger {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut input = bytes.to_vec();
 
-        // First padding byte is the only difference between V1 and V2
+        let b_len = (input.len() as u64).wrapping_mul(8);
+        // This first padding byte is the only difference between V1 and V2
         match self.version {
             TigerVersion::One => input.push(0x01),
             TigerVersion::Two => input.push(0x80),
         }
-        let b_len = (input.len() as u64).wrapping_mul(8);
+
         while (input.len() % 64 as usize) != 56 {
             input.push(0)
         }
@@ -149,31 +151,31 @@ mod tiger_tests {
     #[test]
     fn test_suite() {
         let mut hasher = Tiger::default();
-        // assert_eq!(
-        //     "6d12a41e72e644f017b6f0e2f7b44c6285f06dd5d2c5b075",
-        //     hasher
-        //         .hash_bytes_from_string("The quick brown fox jumps over the lazy dog")
-        //         .unwrap()
-        // );
+        assert_eq!(
+            "6d12a41e72e644f017b6f0e2f7b44c6285f06dd5d2c5b075",
+            hasher
+                .hash_bytes_from_string("The quick brown fox jumps over the lazy dog")
+                .unwrap()
+        );
         assert_eq!(
             "3293ac630c13f0245f92bbb1766e16167a4e58492dde73f3",
             hasher.hash_bytes_from_string("").unwrap()
         );
-        // assert_eq!(
-        //     "77befbef2e7ef8ab2ec8f93bf587a7fc613e247f5f247809",
-        //     hasher.hash_bytes_from_string("a").unwrap()
-        // );
+        assert_eq!(
+            "77befbef2e7ef8ab2ec8f93bf587a7fc613e247f5f247809",
+            hasher.hash_bytes_from_string("a").unwrap()
+        );
 
-        // hasher.version = TigerVersion::Two;
-        // assert_eq!(
-        //     "976abff8062a2e9dcea3a1ace966ed9c19cb85558b4976d8",
-        //     hasher
-        //         .hash_bytes_from_string("The quick brown fox jumps over the lazy dog")
-        //         .unwrap()
-        // );
-        // assert_eq!(
-        //     "4441be75f6018773c206c22745374b924aa8313fef919f41",
-        //     hasher.hash_bytes_from_string("").unwrap()
-        // );
+        hasher.version = TigerVersion::Two;
+        assert_eq!(
+            "976abff8062a2e9dcea3a1ace966ed9c19cb85558b4976d8",
+            hasher
+                .hash_bytes_from_string("The quick brown fox jumps over the lazy dog")
+                .unwrap()
+        );
+        assert_eq!(
+            "4441be75f6018773c206c22745374b924aa8313fef919f41",
+            hasher.hash_bytes_from_string("").unwrap()
+        );
     }
 }

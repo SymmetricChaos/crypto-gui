@@ -23,6 +23,7 @@ mod sha1_controls;
 mod sha2_controls;
 mod sha3_controls;
 mod siphash_controls;
+mod tiger_controls;
 
 pub trait HasherFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
@@ -63,7 +64,7 @@ fn combox_box(
 pub struct HasherInterface {
     blake: blake_controls::BlakeFrame,
     blake2: blake2_controls::Blake2Frame,
-    blake3: blake3_controls::Blake3Frame,
+    // blake3: blake3_controls::Blake3Frame,
     fnv: fnv_controls::FnvFrame,
     hmac: hmac_controls::HmacFrame,
     lm: lm_controls::LmFrame,
@@ -79,6 +80,7 @@ pub struct HasherInterface {
     sha1: sha1_controls::Sha1Frame,
     sha2: sha2_controls::Sha2Frame,
     sha3: sha3_controls::Sha3Frame,
+    tiger: tiger_controls::TigerFrame,
 }
 
 impl HasherInterface {
@@ -87,7 +89,7 @@ impl HasherInterface {
             &[
                 HasherId::Blake,
                 HasherId::Blake2,
-                HasherId::Blake3,
+                // HasherId::Blake3,
                 HasherId::Hmac,
                 HasherId::Md2,
                 HasherId::Md4,
@@ -99,6 +101,7 @@ impl HasherInterface {
                 HasherId::Sha1,
                 HasherId::Sha2,
                 HasherId::Sha3,
+                HasherId::Tiger,
             ],
             active_hasher,
             HasherCategory::Cryptographic,
@@ -123,23 +126,23 @@ impl HasherInterface {
             HasherId::Argon2 => todo!(),
             HasherId::Blake => &mut self.blake,
             HasherId::Blake2 => &mut self.blake2,
-            HasherId::Blake3 => &mut self.blake3,
+            // HasherId::Blake3 => &mut self.blake3,
             HasherId::Fnv => &mut self.fnv,
             HasherId::Hmac => &mut self.hmac,
             HasherId::Lm => &mut self.lm,
             HasherId::Md2 => &mut self.md2,
             HasherId::Md4 => &mut self.md4,
             HasherId::Md5 => &mut self.md5,
-            HasherId::Md6 => todo!(),
             HasherId::Mgf1 => &mut self.mgf1,
+            HasherId::Pbkdf2 => &mut self.pbkdf2,
+            HasherId::Pearson => &mut self.pearson,
+            HasherId::Poly1305 => &mut self.poly1305,
             HasherId::Sha0 => &mut self.sha0,
             HasherId::Sha1 => &mut self.sha1,
             HasherId::Sha2 => &mut self.sha2,
             HasherId::Sha3 => &mut self.sha3,
-            HasherId::Pbkdf2 => &mut self.pbkdf2,
-            HasherId::Pearson => &mut self.pearson,
-            HasherId::Poly1305 => &mut self.poly1305,
             HasherId::SipHash => &mut self.siphash,
+            HasherId::Tiger => &mut self.tiger,
             _ => todo!("<<<NOT IMPLEMENTED>>>"),
         }
     }

@@ -166,5 +166,6 @@ impl HasherFrame for Sha3Frame {
 
         ui.add_space(16.0);
     }
+
     crate::hash_string! {}
 }

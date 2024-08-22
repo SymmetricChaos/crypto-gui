@@ -73,5 +73,6 @@ impl HasherFrame for SipHashFrame {
 
         ui.add_space(16.0);
     }
+
     crate::hash_string! {}
 }
