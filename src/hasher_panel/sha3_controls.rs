@@ -13,6 +13,12 @@ pub enum Sha3Variant {
     Sha3_512,
     Shake128,
     Shake256,
+    // CShake_128,
+    // CShake_256,
+    // Kmac_128,
+    // Kmac_256,
+    // TupleHash_128,
+    // TupleHash_256,
 }
 
 pub struct Sha3Frame {

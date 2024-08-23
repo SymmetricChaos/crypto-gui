@@ -244,6 +244,8 @@ pub struct Sha3 {
     pub rate: usize, // rate in bytes, block size
     // capacity: usize,    // reserved portion of state in bytes,
     pub output_size: usize, // output length in bytes, recommended to be half the capacity
+    // pub function_name: Vec<u8>,
+    // pub customization: Vec<u8>,
     pub domain: Domain,
 }
 
@@ -340,7 +342,7 @@ impl ClassicHasher for Sha3 {
         } else {
             match self.domain {
                 Domain::Sha3 => input.push(0x06),
-                Domain::Shake => input.push(0x1F),
+                Domain::Shake => input.push(0x1f),
             }
             input.extend(vec![0x00; padding_len - 2]);
             input.push(0x80)
