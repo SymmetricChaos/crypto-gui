@@ -1,5 +1,7 @@
-use super::blowfish_arrays::{PARRAY, SBOXES};
-use crate::traits::ClassicHasher;
+use crate::{
+    auxiliary::blowfish_arrays::{PARRAY, SBOXES},
+    traits::ClassicHasher,
+};
 use utils::byte_formatting::ByteFormat;
 
 pub struct Bcrypt {

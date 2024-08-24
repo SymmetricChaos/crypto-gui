@@ -1,4 +1,4 @@
-use super::tiger_arrays::{T1, T2, T3, T4};
+use super::auxiliary::tiger_arrays::{T1, T2, T3, T4};
 use crate::traits::ClassicHasher;
 use std::num::Wrapping;
 use utils::byte_formatting::ByteFormat;

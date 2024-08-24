@@ -2,8 +2,8 @@ use core::panic;
 use utils::byte_formatting::ByteFormat;
 
 use crate::{
+    auxiliary::des::{expand_56_to_64, Des},
     errors::HasherError,
-    lm::{des::Des, des_functions::expand_56_to_64},
     traits::ClassicHasher,
 };
 

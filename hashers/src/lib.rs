@@ -1,4 +1,5 @@
 pub mod argon2;
+pub mod auxiliary;
 pub mod blake;
 pub mod checksum;
 pub mod crypt;
@@ -21,5 +22,4 @@ pub mod radio_gatun;
 pub mod sha;
 pub mod siphash;
 pub mod tiger;
-pub mod tiger_arrays;
 pub mod traits;

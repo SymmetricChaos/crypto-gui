@@ -1,6 +1,8 @@
 use crate::errors::HasherError;
 
 pub trait ClassicHasher {
+    // const PUBLICATION_DATE: &'static str;
+    // const AUTHORS: &'static str;
     fn hash(&self, bytes: &[u8]) -> Vec<u8>;
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError>;
 }
