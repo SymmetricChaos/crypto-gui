@@ -19,7 +19,7 @@ eframe = { version = "0.28", default-features = false, features = [
     "accesskit",     # Make egui compatible with screen readers. NOTE: adds a lot of dependencies.
     "default_fonts", # Embed the default egui fonts.
     "glow",          # Use the glow rendering backend. Alternative: "wgpu".
-    "persistence",   # Enable restoring app state when restarting the app.
+    #"persistence",   # Enable restoring app state when restarting the app.
 ] }
 log = "0.4"
 
@@ -51,7 +51,7 @@ strsim = "0.11.0"
 strum = { version = "0.26", features = ["derive"] }
 
 # You only need serde if you want app persistence:
-serde = { version = "1", features = ["derive"] }
+# serde = { version = "1", features = ["derive"] }
 
 # native:
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
