@@ -1,8 +1,7 @@
 pub mod argon2;
-pub mod bcrypt;
 pub mod blake;
-pub mod blowfish_arrays;
 pub mod checksum;
+pub mod crypt;
 pub mod errors;
 pub mod fnv;
 pub mod fxhash;
@@ -19,7 +18,6 @@ pub mod pbkdf;
 pub mod pearson;
 pub mod poly1305;
 pub mod radio_gatun;
-pub mod scrypt;
 pub mod sha;
 pub mod siphash;
 pub mod tiger;
