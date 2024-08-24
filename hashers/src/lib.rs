@@ -24,3 +24,4 @@ pub mod sha;
 pub mod siphash;
 pub mod tiger;
 pub mod traits;
+pub mod one_at_a_time;

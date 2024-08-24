@@ -39,6 +39,11 @@
     "Authors": "Krawczyk, Bellare, and Canetti",
     "Publication": "1997"
   },
+  "OneAtATime": {
+    "Description": "The \"one_at_a_time\" hash function is an extremely simple hash function that processes an input one byte at a time using just addition, XOR, and shifts. It operates on a 32-bit state that is returned as the hash.",
+    "Authors": "Jenkins",
+    "Publication": "1997"
+  },
   "MD2": {
     "Description": "The MD2 hash function is an obsolete hash algorithm. Although MD2 has never been publicly broken it is much slower than other algorithms and attacks on it are known. Unusually MD2 appends a checksum after the padded input, without which its main compression function is insecure.",
     "Authors": "Rivest",

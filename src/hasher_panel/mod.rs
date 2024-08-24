@@ -14,6 +14,7 @@ mod md2_controls;
 mod md4_controls;
 mod md5_controls;
 mod mgf1_controls;
+mod one_at_a_time_controls;
 mod pbkdf2_controls;
 mod pearson_controls;
 mod poly1305_controls;
@@ -72,6 +73,7 @@ pub struct HasherInterface {
     md4: md4_controls::Md4Frame,
     md5: md5_controls::Md5Frame,
     mgf1: mgf1_controls::Mgf1Frame,
+    one_at_a_time: one_at_a_time_controls::OaatFrame,
     pbkdf2: pbkdf2_controls::Pbkdf2Frame,
     pearson: pearson_controls::PearsonFrame,
     poly1305: poly1305_controls::Poly1305Frame,
@@ -112,6 +114,7 @@ impl HasherInterface {
             &[
                 HasherId::Fnv,
                 HasherId::Lm,
+                HasherId::OneAtATime,
                 HasherId::Pearson,
                 HasherId::SipHash,
             ],
@@ -134,6 +137,7 @@ impl HasherInterface {
             HasherId::Md4 => &mut self.md4,
             HasherId::Md5 => &mut self.md5,
             HasherId::Mgf1 => &mut self.mgf1,
+            HasherId::OneAtATime => &mut self.one_at_a_time,
             HasherId::Pbkdf2 => &mut self.pbkdf2,
             HasherId::Pearson => &mut self.pearson,
             HasherId::Poly1305 => &mut self.poly1305,
