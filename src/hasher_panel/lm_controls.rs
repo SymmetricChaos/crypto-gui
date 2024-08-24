@@ -1,7 +1,11 @@
 use crate::ui_elements::UiElements;
 
 use super::HasherFrame;
-use hashers::lm::{des::Des, des_functions::expand_56_to_64, lm::LM_WORD, Lm};
+
+use hashers::{
+    auxiliary::des::{expand_56_to_64, Des},
+    lm::{Lm, LM_WORD},
+};
 use utils::{
     byte_formatting::ByteFormat, preset_alphabet::Alphabet, text_functions::filter_string,
 };

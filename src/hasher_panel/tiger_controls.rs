@@ -1,7 +1,7 @@
 use egui::{FontId, RichText};
 use hashers::{
+    auxiliary::tiger_arrays::*,
     tiger::{Tiger, TigerVersion},
-    tiger_arrays::*,
 };
 
 use crate::ui_elements::UiElements;
