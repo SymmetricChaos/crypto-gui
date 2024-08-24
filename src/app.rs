@@ -400,7 +400,9 @@ impl ClassicCryptoApp {
                     match self.active_hasher {
                         Some(hasher) => {
                             ui.label(RichText::from(hasher.to_string()).heading());
-                            ui.label(RichText::new(hasher.description()).size(12.0));
+                            ui.label(RichText::new(hasher.description()).size(14.0));
+                            ui.label(RichText::new(format!("Authors: {}", hasher.authors())).size(12.0));
+                            ui.label(RichText::new(format!("Published: {}", hasher.publication_date())).size(12.0));
                             ui.add_space(16.0);
                             ui.separator();
                             ui.add_space(16.0);

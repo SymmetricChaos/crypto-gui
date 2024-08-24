@@ -1,3 +1,5 @@
+use crate::traits::ClassicHasher;
+
 use super::auxiliary::haval_arrays::{D, K2, K3, K4, K5};
 use utils::byte_formatting::ByteFormat;
 
@@ -17,4 +19,12 @@ impl Default for Haval {
             output_length: 16,
         }
     }
+}
+
+impl ClassicHasher for Haval {
+    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
+        todo!()
+    }
+
+    crate::hash_bytes_from_string! {}
 }

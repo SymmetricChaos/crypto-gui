@@ -169,7 +169,7 @@ impl HasherFrame for BlakeFrame {
                     )
                 }
                 BlakeVariant::B256 => {
-                    ui.label("BLAKE-256 has a salt with four 34-bit words (256 bits).");
+                    ui.label("BLAKE-256 has a salt with four 32-bit words (256 bits).");
                     Self::salt_control_32(
                         ui,
                         &mut self.salt_256,
