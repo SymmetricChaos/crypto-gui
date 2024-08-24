@@ -31,6 +31,11 @@ impl CodeFrame for Base64Frame {
                     B64Variant::UrlSafe,
                     "URL and Filename Safe",
                 );
+                ui.selectable_value(
+                    &mut self.code.variant,
+                    B64Variant::Crypt,
+                    "crypt",
+                );
             });
         });
 
@@ -40,6 +45,7 @@ impl CodeFrame for Base64Frame {
                 ui.label("The most commonly used Base64 variant is defined by RFC 4684 section 4.")
             }
             B64Variant::UrlSafe => ui.label("URL and Filename Safe variant is defined in RFC 4684 section 5 to be used in situations where the + and / characters might have special use defined for them. They are replaced by - and _."),
+            B64Variant::Crypt => ui.label("The crypt variant is used to store hashes and salts created with the crypt password hashing function and its descendants like md5crypt, bcrypt, and scrypt."),
         };
         ui.add_space(16.0);
         ui.binary_to_text_input_mode(&mut self.code.mode);

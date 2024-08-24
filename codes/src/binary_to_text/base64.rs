@@ -16,6 +16,7 @@ const PAD: u8 = '=' as u8;
 pub enum B64Variant {
     Standard,
     UrlSafe,
+    Crypt,
 }
 
 lazy_static! {
@@ -27,6 +28,12 @@ lazy_static! {
     );
     pub static ref B64_URLSAFE_MAP: BiMap<u8, u8> = bimap_from_iter(
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
+            .chars()
+            .enumerate()
+            .map(|(n, c)| (n as u8, c as u8))
+    );
+    pub static ref B64_CRYPT_MAP: BiMap<u8, u8> = bimap_from_iter(
+        "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
             .chars()
             .enumerate()
             .map(|(n, c)| (n as u8, c as u8))
@@ -56,6 +63,7 @@ impl Base64 {
         match self.variant {
             B64Variant::Standard => &B64_MAP,
             B64Variant::UrlSafe => &B64_URLSAFE_MAP,
+            B64Variant::Crypt => &B64_CRYPT_MAP,
         }
     }
 
