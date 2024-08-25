@@ -120,49 +120,14 @@ impl ClassicHasher for Sha1 {
 mod sha1_tests {
     use super::*;
 
-    #[test]
-    fn test_1() {
-        let mut hasher = Sha1::default();
-        hasher.input_format = ByteFormat::Utf8;
-        hasher.output_format = ByteFormat::Hex;
-        assert_eq!(
-            "da39a3ee5e6b4b0d3255bfef95601890afd80709",
-            hasher.hash_bytes_from_string("").unwrap()
-        );
-    }
-
-    #[test]
-    fn test_2() {
-        let mut hasher = Sha1::default();
-        hasher.input_format = ByteFormat::Utf8;
-        hasher.output_format = ByteFormat::Hex;
-        assert_eq!(
-            "a9993e364706816aba3e25717850c26c9cd0d89d",
-            hasher.hash_bytes_from_string("abc").unwrap()
-        );
-    }
-    #[test]
-    fn test_3() {
-        let mut hasher = Sha1::default();
-        hasher.input_format = ByteFormat::Utf8;
-        hasher.output_format = ByteFormat::Hex;
-        assert_eq!(
-            "84983e441c3bd26ebaae4aa1f95129e5e54670f1",
-            hasher
-                .hash_bytes_from_string("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq")
-                .unwrap()
-        );
-    }
-    #[test]
-    fn test_4() {
-        let mut hasher = Sha1::default();
-        hasher.input_format = ByteFormat::Utf8;
-        hasher.output_format = ByteFormat::Hex;
-        assert_eq!(
-            "a49b2446a02c645bf419f995b67091253a04a259",
-            hasher
-                .hash_bytes_from_string("abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu")
-                .unwrap()
-        );
-    }
+    crate::basic_hash_tests!(
+        Sha1::default(), test1, "",
+        "da39a3ee5e6b4b0d3255bfef95601890afd80709";
+        Sha1::default(), test2, "abc",
+        "a9993e364706816aba3e25717850c26c9cd0d89d";
+        Sha1::default(), test3, "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
+        "84983e441c3bd26ebaae4aa1f95129e5e54670f1";
+        Sha1::default(), test4, "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
+        "a49b2446a02c645bf419f995b67091253a04a259";
+    );
 }

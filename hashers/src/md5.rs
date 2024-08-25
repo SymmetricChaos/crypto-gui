@@ -111,26 +111,9 @@ impl ClassicHasher for Md5 {
 mod md5_tests {
     use super::*;
 
-    #[test]
-    fn test_suite() {
-        let mut hasher = Md5::default();
-        hasher.input_format = ByteFormat::Utf8;
-        hasher.output_format = ByteFormat::Hex;
-        assert_eq!(
-            "d41d8cd98f00b204e9800998ecf8427e",
-            hasher.hash_bytes_from_string("").unwrap()
-        );
-        assert_eq!(
-            "9e107d9d372bb6826bd81d3542a419d6",
-            hasher
-                .hash_bytes_from_string("The quick brown fox jumps over the lazy dog")
-                .unwrap()
-        );
-        assert_eq!(
-            "e4d909c290d0fb1ca068ffaddf22cbd0",
-            hasher
-                .hash_bytes_from_string("The quick brown fox jumps over the lazy dog.")
-                .unwrap()
-        );
-    }
+    crate::basic_hash_tests!(
+        Md5::default(), test1, "",                                             "d41d8cd98f00b204e9800998ecf8427e";
+        Md5::default(), test2, "The quick brown fox jumps over the lazy dog",  "9e107d9d372bb6826bd81d3542a419d6";
+        Md5::default(), test3, "The quick brown fox jumps over the lazy dog.", "e4d909c290d0fb1ca068ffaddf22cbd0";
+    );
 }

@@ -26,9 +26,14 @@ macro_rules! hash_bytes_from_string {
     };
 }
 
-// #[macro_export]
-// macro_rules! hash_test {
-//     ($hasher: ) => {
-
-//     };
-// }
+#[macro_export]
+macro_rules! basic_hash_tests {
+    ($($hasher: expr, $name: ident, $input: literal, $output: literal);+ $(;)?) => {
+        $(
+            #[test]
+            fn $name() {
+                assert_eq!($output, $hasher.hash_bytes_from_string($input).unwrap());
+            }
+        )+
+    };
+}

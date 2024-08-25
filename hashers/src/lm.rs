@@ -76,13 +76,7 @@ impl ClassicHasher for Lm {
 mod lm_tests {
     use super::*;
 
-    #[test]
-    fn test_suite() {
-        let hasher = Lm::default();
-        let pass = "PassWord";
-        assert_eq!(
-            "e52cac67419a9a224a3b108f3fa6cb6d",
-            hasher.hash_bytes_from_string(&pass).unwrap()
-        );
-    }
+    crate::basic_hash_tests!(
+        Lm::default(), test1, "PassWord", "e52cac67419a9a224a3b108f3fa6cb6d";
+    );
 }

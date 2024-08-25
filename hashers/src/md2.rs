@@ -90,20 +90,8 @@ impl ClassicHasher for Md2 {
 mod md2_tests {
     use super::*;
 
-    #[test]
-    fn test_suite() {
-        let mut hasher = Md2::default();
-        hasher.input_format = ByteFormat::Utf8;
-        hasher.output_format = ByteFormat::Hex;
-        assert_eq!(
-            "8350e5a3e24c153df2275c9f80692773",
-            hasher.hash_bytes_from_string("").unwrap()
-        );
-        assert_eq!(
-            "03d85a0d629d2c442e987525319fc471",
-            hasher
-                .hash_bytes_from_string("The quick brown fox jumps over the lazy dog")
-                .unwrap()
-        );
-    }
+    crate::basic_hash_tests!(
+        Md2::default(), test1, "",                                           "8350e5a3e24c153df2275c9f80692773";
+        Md2::default(), test2, "The quick brown fox jumps over the lazy dog", "03d85a0d629d2c442e987525319fc471";
+    );
 }
