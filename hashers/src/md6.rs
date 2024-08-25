@@ -51,6 +51,21 @@ impl Default for Md6 {
 }
 
 impl Md6 {
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+
+    pub fn output_length(mut self, output_length: u32) -> Self {
+        self.output_length = output_length;
+        self
+    }
+
     pub fn md6_224() -> Self {
         Self {
             output_length: 224,

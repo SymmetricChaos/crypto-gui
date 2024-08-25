@@ -38,6 +38,16 @@ impl Tiger {
         }
     }
 
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+
     pub fn round(
         a: &mut Wrapping<u64>,
         b: &mut Wrapping<u64>,

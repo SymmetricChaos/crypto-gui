@@ -28,6 +28,21 @@ macro_rules! radio_gatun {
             const ROTATION: [u32; 19] = $rotations;
             const BYTES_PER_WORD: usize = (<$word_size>::BITS / 8) as usize;
 
+            pub fn input(mut self, input: ByteFormat) -> Self {
+                self.input_format = input;
+                self
+            }
+
+            pub fn output(mut self, output: ByteFormat) -> Self {
+                self.output_format = output;
+                self
+            }
+
+            pub fn hash_len(mut self, hash_len: $word_size) -> Self {
+                self.hash_len = hash_len;
+                self
+            }
+
             // XOR words from the mill into the belt
             fn belt_to_mill_feedforward(belt_words: &mut [$word_size], mill_words: &[$word_size]) {
                 for i in 0..12 {

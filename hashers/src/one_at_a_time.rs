@@ -17,6 +17,18 @@ impl Default for OneAtATime {
     }
 }
 
+impl OneAtATime {
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+}
+
 impl ClassicHasher for OneAtATime {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut hash = Wrapping(0_u32);

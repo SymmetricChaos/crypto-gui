@@ -21,6 +21,23 @@ impl Default for Mgf1 {
     }
 }
 
+impl Mgf1 {
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+
+    pub fn output_length(mut self, output_length: u32) -> Self {
+        self.output_length = output_length;
+        self
+    }
+}
+
 impl ClassicHasher for Mgf1 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut out = Vec::with_capacity(self.output_length as usize);
@@ -43,14 +60,12 @@ impl ClassicHasher for Mgf1 {
 }
 
 #[cfg(test)]
-mod md5_tests {
+mod mgf1_tests {
     use super::*;
 
     #[test]
     fn test_suite() {
         let mut hasher = Mgf1::default();
-        hasher.input_format = ByteFormat::Utf8;
-        hasher.output_format = ByteFormat::Hex;
         hasher.output_length = 50;
         assert_eq!("382576a7841021cc28fc4c0948753fb8312090cea942ea4c4e735d10dc724b155f9f6069f289d61daca0cb814502ef04eae1", hasher.hash_bytes_from_string("bar").unwrap());
     }

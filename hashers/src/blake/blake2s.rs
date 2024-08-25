@@ -34,6 +34,28 @@ impl Blake2s {
         0x5be0cd19,
     ];
 
+    pub fn hash_len(mut self, hash_len: usize) -> Self {
+        assert!(hash_len > 1 && hash_len <= 32);
+        self.hash_len = hash_len;
+        self
+    }
+
+    pub fn key(mut self, key: Vec<u8>) -> Self {
+        assert!(key.len() <= 32);
+        self.key = key;
+        self
+    }
+
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+
     pub fn mix(v: &mut [u32; 16], a: usize, b: usize, c: usize, d: usize, x: u32, y: u32) {
         v[a] = v[a].wrapping_add(v[b]).wrapping_add(x);
         v[d] = (v[d] ^ v[a]).rotate_right(16);
@@ -99,17 +121,14 @@ impl Blake2s {
 
 impl ClassicHasher for Blake2s {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        if self.hash_len > 32 {
-            panic!("hash_len cannot be greater than 32 as there are only 32 bytes of state")
-        }
-
-        if self.hash_len == 0 {
-            panic!("hash_len cannot be zero, obviously")
-        }
-
-        if self.key.len() > 32 {
-            panic!("the length of the key cannot be more than 32 bytes")
-        }
+        assert!(
+            self.hash_len > 1 && self.hash_len <= 32,
+            "hash_len cannot be 0 bytes and cannot be greater than 32 bytes"
+        );
+        assert!(
+            self.key.len() <= 32,
+            "the length of the key cannot be more than 32 bytes"
+        );
 
         let mut state = Self::IV.clone();
 

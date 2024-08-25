@@ -43,6 +43,31 @@ impl Default for Fnv {
 }
 
 impl Fnv {
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+
+    pub fn size(mut self, size: FnvSize) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn alternate(mut self, alternate: bool) -> Self {
+        self.alternate = alternate;
+        self
+    }
+
+    pub fn zero_basis(mut self, zero_basis: bool) -> Self {
+        self.zero_basis = zero_basis;
+        self
+    }
+
     pub fn hash_byte_32(&self, state: &mut u32, byte: u8) {
         if self.alternate {
             *state ^= byte as u32;

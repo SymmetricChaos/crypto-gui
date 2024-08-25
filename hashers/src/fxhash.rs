@@ -25,6 +25,21 @@ impl Default for FxHash {
 }
 
 impl FxHash {
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+
+    pub fn word_size(mut self, word_size: WordSize) -> Self {
+        self.word_size = word_size;
+        self
+    }
+
     pub fn hash_word_64(state: &mut u64, word: u64) {
         *state = state
             .rotate_left(5)

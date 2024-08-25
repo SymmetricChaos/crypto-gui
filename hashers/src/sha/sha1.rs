@@ -11,11 +11,7 @@ pub struct Sha1 {
 
 impl Default for Sha1 {
     fn default() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-            rot: true,
-        }
+        Self::sha1()
     }
 }
 
@@ -26,6 +22,24 @@ impl Sha1 {
             output_format: ByteFormat::Hex,
             rot: false,
         }
+    }
+
+    pub fn sha1() -> Self {
+        Self {
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
+            rot: true,
+        }
+    }
+
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
     }
 }
 

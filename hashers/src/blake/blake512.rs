@@ -65,6 +65,21 @@ impl Blake512 {
         0x47b5481dbefa4fa4,
     ];
 
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+
+    pub fn salt(mut self, salt: [u64; 4]) -> Self {
+        self.salt = salt;
+        self
+    }
+
     pub fn salt_from_string(&mut self, text: &str) -> Result<(), HasherError> {
         if text.len() != 64 {
             return Err(HasherError::key(
@@ -92,7 +107,7 @@ impl Blake512 {
 
     pub fn blake384() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
+            input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             salt: [0, 0, 0, 0],
             truncated: true,

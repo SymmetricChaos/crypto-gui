@@ -29,6 +29,36 @@ impl Default for SipHash {
 }
 
 impl SipHash {
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+
+    pub fn compression(mut self, compression_rounds: usize) -> Self {
+        self.compression_rounds = compression_rounds;
+        self
+    }
+
+    pub fn finalization(mut self, finalization_rounds: usize) -> Self {
+        self.finalization_rounds = finalization_rounds;
+        self
+    }
+
+    pub fn k0(mut self, k0: u64) -> Self {
+        self.k0 = k0.to_be();
+        self
+    }
+
+    pub fn k1(mut self, k1: u64) -> Self {
+        self.k1 = k1.to_be();
+        self
+    }
+
     pub fn set_keys(&mut self, k0: u64, k1: u64) {
         self.k0 = k0.to_be();
         self.k1 = k1.to_be();

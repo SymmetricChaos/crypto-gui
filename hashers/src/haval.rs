@@ -27,43 +27,31 @@ impl Default for Haval {
 }
 
 impl Haval {
-    pub fn r3(mut self) -> Self {
-        self.rounds = 3;
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
         self
     }
 
-    pub fn r4(mut self) -> Self {
-        self.rounds = 4;
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
         self
     }
 
-    pub fn r5(mut self) -> Self {
-        self.rounds = 5;
+    pub fn rounds(mut self, rounds: u32) -> Self {
+        assert!(
+            rounds == 3 || rounds == 4 || rounds == 5,
+            "rounds must be 3, 4, or 5"
+        );
+        self.rounds = rounds;
         self
     }
 
-    pub fn l128(mut self) -> Self {
-        self.output_length = 16;
-        self
-    }
-
-    pub fn l160(mut self) -> Self {
-        self.output_length = 20;
-        self
-    }
-
-    pub fn l192(mut self) -> Self {
-        self.output_length = 24;
-        self
-    }
-
-    pub fn l224(mut self) -> Self {
-        self.output_length = 28;
-        self
-    }
-
-    pub fn l256(mut self) -> Self {
-        self.output_length = 32;
+    pub fn output_length(mut self, output_length: u32) -> Self {
+        assert!(
+            self.output_length % 4 == 0 && self.output_length >= 16 && self.output_length <= 32,
+            "output length is in bytes and must be 16, 20, 24, 28, or 32"
+        );
+        self.output_length = output_length;
         self
     }
 
@@ -149,7 +137,7 @@ mod haval_tests {
 
     #[test]
     fn test_haval_256_5() {
-        let hasher = Haval::default().r3().l256();
+        let hasher = Haval::default().rounds(3).output_length(32);
         assert_eq!(
             "be417bb4dd5cfb76c7126f4f8eeb1553a449039307b1a3cd451dbfdc0fbbe330",
             hasher.hash_bytes_from_string("").unwrap()

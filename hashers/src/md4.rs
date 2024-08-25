@@ -18,6 +18,16 @@ impl Default for Md4 {
 }
 
 impl Md4 {
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+
     pub fn f(x: u32, y: u32, z: u32) -> u32 {
         (x & y) | (!x & z)
     }

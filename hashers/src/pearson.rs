@@ -35,7 +35,22 @@ impl Default for Pearson {
     }
 }
 
-impl Pearson {}
+impl Pearson {
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+
+    pub fn array(mut self, array: [u8; 256]) -> Self {
+        self.array = array;
+        self
+    }
+}
 
 impl ClassicHasher for Pearson {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {

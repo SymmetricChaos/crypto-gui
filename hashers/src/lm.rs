@@ -22,6 +22,13 @@ impl Default for Lm {
     }
 }
 
+impl Lm {
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+}
+
 impl ClassicHasher for Lm {
     /// This should not be called directly as LM is not meant to encrypt arbitrary bytes
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {

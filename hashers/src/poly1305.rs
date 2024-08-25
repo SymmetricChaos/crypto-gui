@@ -22,6 +22,26 @@ impl Default for Poly1305 {
 }
 
 impl Poly1305 {
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+
+    pub fn key_r(mut self, key_r: [u8; 16]) -> Self {
+        self.key_r = key_r;
+        self
+    }
+
+    pub fn key_s(mut self, key_s: [u8; 16]) -> Self {
+        self.key_s = key_s;
+        self
+    }
+
     pub fn restrict_key_r(&mut self) {
         for i in [3, 7, 11, 15] {
             // The top four bits must be 0

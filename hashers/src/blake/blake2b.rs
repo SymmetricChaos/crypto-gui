@@ -40,6 +40,28 @@ impl Blake2b {
         0x5be0cd19137e2179,
     ];
 
+    pub fn hash_len(mut self, hash_len: usize) -> Self {
+        assert!(hash_len > 1 && hash_len <= 64);
+        self.hash_len = hash_len;
+        self
+    }
+
+    pub fn key(mut self, key: Vec<u8>) -> Self {
+        assert!(key.len() <= 64);
+        self.key = key;
+        self
+    }
+
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+
     pub fn mix(v: &mut [u64; 16], a: usize, b: usize, c: usize, d: usize, x: u64, y: u64) {
         v[a] = v[a].wrapping_add(v[b]).wrapping_add(x);
         v[d] = (v[d] ^ v[a]).rotate_right(32);
@@ -105,17 +127,14 @@ impl Blake2b {
 
 impl ClassicHasher for Blake2b {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        if self.hash_len > 64 {
-            panic!("hash_len cannot be greater than 64 as there are only 64 bytes of state")
-        }
-
-        if self.hash_len == 0 {
-            panic!("hash_len cannot be zero, obviously")
-        }
-
-        if self.key.len() > 64 {
-            panic!("the length of the key cannot be more than 64 bytes")
-        }
+        assert!(
+            self.hash_len > 1 && self.hash_len <= 64,
+            "hash_len cannot be 0 bytes and cannot be greater than 64 bytes"
+        );
+        assert!(
+            self.key.len() <= 64,
+            "the length of the key cannot be more than 64 bytes"
+        );
 
         let mut state = Self::IV.clone();
 
@@ -165,45 +184,16 @@ impl ClassicHasher for Blake2b {
     crate::hash_bytes_from_string! {}
 }
 
-#[cfg(test)]
-mod blake2b_tests {
-    use super::*;
-
-    #[test]
-    fn test_empty() {
-        let mut hasher = Blake2b::default();
-        hasher.input_format = ByteFormat::Utf8;
-        hasher.output_format = ByteFormat::Hex;
-        hasher.hash_len = 64;
-        assert_eq!(
-            "786a02f742015903c6c6fd852552d272912f4740e15847618a86e217f71f5419d25e1031afee585313896444934eb04b903a685b1448b755d56f701afe9be2ce",
-            hasher.hash_bytes_from_string("").unwrap()
-        );
-    }
-
-    #[test]
-    fn test_abc() {
-        let mut hasher = Blake2b::default();
-        hasher.input_format = ByteFormat::Utf8;
-        hasher.output_format = ByteFormat::Hex;
-
-        hasher.hash_len = 64;
-        assert_eq!(
-            "ba80a53f981c4d0d6a2797b69f12f6e94c212f14685ac4b74b12bb6fdbffa2d17d87c5392aab792dc252d5de4533cc9518d38aa8dbf1925ab92386edd4009923",
-            hasher.hash_bytes_from_string("abc").unwrap()
-        );
-    }
-
-    #[test]
-    fn test_keyed() {
-        let mut hasher = Blake2b::default();
-        hasher.input_format = ByteFormat::Hex;
-        hasher.output_format = ByteFormat::Hex;
-        hasher.hash_len = 64;
-        hasher.key = ByteFormat::Hex.text_to_bytes("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f").unwrap();
-        assert_eq!(
-            "142709d62e28fcccd0af97fad0f8465b971e82201dc51070faa0372aa43e92484be1c1e73ba10906d5d1853db6a4106e0a7bf9800d373d6dee2d46d62ef2a461",
-            hasher.hash_bytes_from_string("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfe").unwrap()
-        );
-    }
-}
+crate::basic_hash_tests!(
+    Blake2b::default().hash_len(64), empty_hash_len_64, "",
+    "786a02f742015903c6c6fd852552d272912f4740e15847618a86e217f71f5419d25e1031afee585313896444934eb04b903a685b1448b755d56f701afe9be2ce";
+    Blake2b::default().hash_len(64), abc_hash_len_64, "abc",
+    "ba80a53f981c4d0d6a2797b69f12f6e94c212f14685ac4b74b12bb6fdbffa2d17d87c5392aab792dc252d5de4533cc9518d38aa8dbf1925ab92386edd4009923";
+    Blake2b::default()
+        .input(ByteFormat::Hex)
+        .hash_len(64)
+        .key(ByteFormat::Hex.text_to_bytes("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f").unwrap()),
+        keyed_hash_len_64,
+        "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfe",
+    "142709d62e28fcccd0af97fad0f8465b971e82201dc51070faa0372aa43e92484be1c1e73ba10906d5d1853db6a4106e0a7bf9800d373d6dee2d46d62ef2a461";
+);

@@ -49,6 +49,16 @@ impl Sha2 {
         self.variant = variant;
         self
     }
+
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
 }
 
 impl ClassicHasher for Sha2 {

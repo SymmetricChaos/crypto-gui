@@ -39,6 +39,39 @@ impl Blake256 {
         0xbefa4fa4,
     ];
 
+    pub fn blake256() -> Self {
+        Self {
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
+            salt: [0, 0, 0, 0],
+            truncated: false,
+        }
+    }
+
+    pub fn blake224() -> Self {
+        Self {
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
+            salt: [0, 0, 0, 0],
+            truncated: true,
+        }
+    }
+
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+
+    pub fn salt(mut self, salt: [u32; 4]) -> Self {
+        self.salt = salt;
+        self
+    }
+
     pub fn salt_from_string(&mut self, text: &str) -> Result<(), HasherError> {
         if text.len() != 32 {
             return Err(HasherError::key(
@@ -53,24 +86,6 @@ impl Blake256 {
             .expect("failed to convert Vec<u32> to [u32; 4]");
 
         Ok(())
-    }
-
-    pub fn blake256() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-            salt: [0, 0, 0, 0],
-            truncated: false,
-        }
-    }
-
-    pub fn blake224() -> Self {
-        Self {
-            input_format: ByteFormat::Hex,
-            output_format: ByteFormat::Hex,
-            salt: [0, 0, 0, 0],
-            truncated: true,
-        }
     }
 
     pub fn mix(v: &mut [u32; 16], a: usize, b: usize, c: usize, d: usize, x: u32, y: u32) {
@@ -203,23 +218,9 @@ impl ClassicHasher for Blake256 {
     crate::hash_bytes_from_string! {}
 }
 
-#[cfg(test)]
-mod blake256_tests {
-    use super::*;
-
-    #[test]
-    fn test_empty() {
-        let mut hasher = Blake256::default();
-        hasher.input_format = ByteFormat::Hex;
-        hasher.output_format = ByteFormat::Hex;
-
-        assert_eq!(
-            "0ce8d4ef4dd7cd8d62dfded9d4edb0a774ae6a41929a74da23109e8f11139c87",
-            hasher.hash_bytes_from_string("00").unwrap()
-        );
-        assert_eq!(
-            "d419bad32d504fb7d44d460c42c5593fe544fa4c135dec31e21bd9abdcc22d41",
-            hasher.hash_bytes_from_string("000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000").unwrap()
-        );
-    }
-}
+crate::basic_hash_tests!(
+    Blake256::blake256().input(ByteFormat::Hex), empty_1_byte, "00",
+    "0ce8d4ef4dd7cd8d62dfded9d4edb0a774ae6a41929a74da23109e8f11139c87";
+    Blake256::blake256().input(ByteFormat::Hex), empty_72_byte, "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "d419bad32d504fb7d44d460c42c5593fe544fa4c135dec31e21bd9abdcc22d41";
+);

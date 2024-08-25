@@ -36,6 +36,16 @@ impl Default for Pbkdf2 {
 }
 
 impl Pbkdf2 {
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+
     pub fn hash_block(&self, hmac: &Hmac, block_num: u32) -> Vec<u8> {
         // The salt followed by the block nunber are the initial input
         let mut s = self.salt.clone();

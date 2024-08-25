@@ -35,7 +35,17 @@ impl Default for Md2 {
     }
 }
 
-impl Md2 {}
+impl Md2 {
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+}
 
 impl ClassicHasher for Md2 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
