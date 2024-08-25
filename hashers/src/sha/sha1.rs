@@ -6,6 +6,7 @@ use crate::traits::ClassicHasher;
 pub struct Sha1 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
+    pub rot: bool,
 }
 
 impl Default for Sha1 {
@@ -13,11 +14,20 @@ impl Default for Sha1 {
         Self {
             input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
+            rot: true,
         }
     }
 }
 
-impl Sha1 {}
+impl Sha1 {
+    pub fn sha0() -> Self {
+        Self {
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
+            rot: false,
+        }
+    }
+}
 
 impl ClassicHasher for Sha1 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
@@ -48,8 +58,11 @@ impl ClassicHasher for Sha1 {
 
             // Extend the 16 words to 80 words
             for i in 16..80 {
-                // the only difference from sha0 is the .rotate_left(1)
-                x[i] = (x[i - 3] ^ x[i - 8] ^ x[i - 14] ^ x[i - 16]).rotate_left(1)
+                if self.rot {
+                    x[i] = (x[i - 3] ^ x[i - 8] ^ x[i - 14] ^ x[i - 16]).rotate_left(1)
+                } else {
+                    x[i] = x[i - 3] ^ x[i - 8] ^ x[i - 14] ^ x[i - 16]
+                }
             }
 
             // Apply 80 rounds of mixing
@@ -93,11 +106,9 @@ impl ClassicHasher for Sha1 {
             h4 = h4.wrapping_add(e);
         }
 
-        let mut out = vec![0; 20];
-        for (offset, word) in [h0, h1, h2, h3, h4].iter().enumerate() {
-            for (i, byte) in word.to_be_bytes().iter().enumerate() {
-                out[i + offset * 4] = *byte
-            }
+        let mut out = Vec::with_capacity(20);
+        for word in [h0, h1, h2, h3, h4] {
+            out.extend(word.to_be_bytes())
         }
         out
     }

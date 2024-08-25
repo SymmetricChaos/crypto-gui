@@ -5,7 +5,6 @@ use crate::{
     sha::{
         sha256::{Sha2_224, Sha2_256},
         // sha512::{Sha2_384, Sha2_512},
-        Sha0,
         Sha1,
     },
     traits::{ClassicHasher, KeyedHasher},
@@ -88,7 +87,7 @@ pub enum SelectHmac {
 impl SelectHmac {
     pub fn new(&self) -> Box<dyn ClassicHasher> {
         match self {
-            SelectHmac::Sha0 => Box::new(Sha0::default()),
+            SelectHmac::Sha0 => Box::new(Sha1::sha0()), // SHA0 is treated as a variant of SHA1 as they are nearly identical
             SelectHmac::Sha1 => Box::new(Sha1::default()),
             SelectHmac::Md4 => Box::new(Md4::default()),
             SelectHmac::Md5 => Box::new(Md5::default()),

@@ -103,11 +103,9 @@ impl ClassicHasher for Md4 {
             d = d.wrapping_add(td);
         }
 
-        let mut out = vec![0; 16];
-        for (offset, word) in [a, b, c, d].iter().enumerate() {
-            for (i, byte) in word.to_le_bytes().iter().enumerate() {
-                out[i + offset * 4] = *byte
-            }
+        let mut out = Vec::with_capacity(16);
+        for word in [a, b, c, d] {
+            out.extend(word.to_le_bytes())
         }
         out
     }

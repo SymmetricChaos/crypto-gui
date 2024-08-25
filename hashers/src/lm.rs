@@ -39,9 +39,9 @@ impl ClassicHasher for Lm {
         let k2 = expand_56_to_64(bytes[7..14].try_into().unwrap());
 
         cipher.ksa(k1).unwrap();
-        out.extend_from_slice(&cipher.encrypt_block(LM_WORD).to_be_bytes());
+        out.extend(cipher.encrypt_block(LM_WORD).to_be_bytes());
         cipher.ksa(k2).unwrap();
-        out.extend_from_slice(&cipher.encrypt_block(LM_WORD).to_be_bytes());
+        out.extend(cipher.encrypt_block(LM_WORD).to_be_bytes());
 
         out
     }

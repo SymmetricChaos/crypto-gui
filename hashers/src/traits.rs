@@ -25,3 +25,10 @@ macro_rules! hash_bytes_from_string {
         }
     };
 }
+
+// #[macro_export]
+// macro_rules! hash_test {
+//     ($hasher: ) => {
+
+//     };
+// }

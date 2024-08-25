@@ -39,6 +39,13 @@ impl HasherFrame for Sha1Frame {
         );
         ui.add_space(16.0);
 
+        ui.subheading(
+            "SHA0 is nearly identical to SHA1, differing in a one bit rotation during each round.",
+        );
+        ui.checkbox(&mut self.hasher.rot, "SHA0");
+
+        ui.add_space(16.0);
+
         ui.subheading("Demonstration of Padding");
         ui.label("Notice that that message is padded out to a multiple of 64-bytes with two special features. First the byte 0x80 (0b10000000) is always included after the message. Then zeroes are added as needed. Finally the original message length in bits is appended to the end, reaching the block size.");
         ui.add_space(2.0);

@@ -19,7 +19,6 @@ mod pbkdf2_controls;
 mod pearson_controls;
 mod poly1305_controls;
 mod radio_gatun;
-mod sha0_controls;
 mod sha1_controls;
 mod sha2_controls;
 mod sha3_controls;
@@ -78,7 +77,6 @@ pub struct HasherInterface {
     pearson: pearson_controls::PearsonFrame,
     poly1305: poly1305_controls::Poly1305Frame,
     siphash: siphash_controls::SipHashFrame,
-    sha0: sha0_controls::Sha0Frame,
     sha1: sha1_controls::Sha1Frame,
     sha2: sha2_controls::Sha2Frame,
     sha3: sha3_controls::Sha3Frame,
@@ -99,7 +97,6 @@ impl HasherInterface {
                 HasherId::Mgf1,
                 HasherId::Pbkdf2,
                 HasherId::Poly1305,
-                HasherId::Sha0,
                 HasherId::Sha1,
                 HasherId::Sha2,
                 HasherId::Sha3,
@@ -141,7 +138,6 @@ impl HasherInterface {
             HasherId::Pbkdf2 => &mut self.pbkdf2,
             HasherId::Pearson => &mut self.pearson,
             HasherId::Poly1305 => &mut self.poly1305,
-            HasherId::Sha0 => &mut self.sha0,
             HasherId::Sha1 => &mut self.sha1,
             HasherId::Sha2 => &mut self.sha2,
             HasherId::Sha3 => &mut self.sha3,
