@@ -17,15 +17,27 @@ pub struct Tiger {
 
 impl Default for Tiger {
     fn default() -> Self {
+        Self::v1()
+    }
+}
+
+impl Tiger {
+    pub fn v1() -> Self {
         Self {
             input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             version: TigerVersion::One,
         }
     }
-}
 
-impl Tiger {
+    pub fn v2() -> Self {
+        Self {
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
+            version: TigerVersion::Two,
+        }
+    }
+
     pub fn round(
         a: &mut Wrapping<u64>,
         b: &mut Wrapping<u64>,
@@ -144,38 +156,15 @@ impl ClassicHasher for Tiger {
     crate::hash_bytes_from_string! {}
 }
 
-#[cfg(test)]
-mod tiger_tests {
-    use super::*;
-
-    #[test]
-    fn test_suite() {
-        let mut hasher = Tiger::default();
-        assert_eq!(
-            "6d12a41e72e644f017b6f0e2f7b44c6285f06dd5d2c5b075",
-            hasher
-                .hash_bytes_from_string("The quick brown fox jumps over the lazy dog")
-                .unwrap()
-        );
-        assert_eq!(
-            "3293ac630c13f0245f92bbb1766e16167a4e58492dde73f3",
-            hasher.hash_bytes_from_string("").unwrap()
-        );
-        assert_eq!(
-            "77befbef2e7ef8ab2ec8f93bf587a7fc613e247f5f247809",
-            hasher.hash_bytes_from_string("a").unwrap()
-        );
-
-        hasher.version = TigerVersion::Two;
-        assert_eq!(
-            "976abff8062a2e9dcea3a1ace966ed9c19cb85558b4976d8",
-            hasher
-                .hash_bytes_from_string("The quick brown fox jumps over the lazy dog")
-                .unwrap()
-        );
-        assert_eq!(
-            "4441be75f6018773c206c22745374b924aa8313fef919f41",
-            hasher.hash_bytes_from_string("").unwrap()
-        );
-    }
-}
+crate::basic_hash_tests!(
+    Tiger::v1(), test_v1_1, "The quick brown fox jumps over the lazy dog",
+    "6d12a41e72e644f017b6f0e2f7b44c6285f06dd5d2c5b075";
+    Tiger::v1(), test_v1_2, "",
+    "3293ac630c13f0245f92bbb1766e16167a4e58492dde73f3";
+    Tiger::v1(), test_v1_3, "a",
+    "77befbef2e7ef8ab2ec8f93bf587a7fc613e247f5f247809";
+    Tiger::v2(), test_v2_1, "The quick brown fox jumps over the lazy dog",
+    "976abff8062a2e9dcea3a1ace966ed9c19cb85558b4976d8";
+    Tiger::v2(), test_v2_2, "",
+    "4441be75f6018773c206c22745374b924aa8313fef919f41";
+);

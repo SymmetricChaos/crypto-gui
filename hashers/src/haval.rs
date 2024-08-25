@@ -5,7 +5,7 @@ use crate::{
     traits::ClassicHasher,
 };
 
-use super::auxiliary::haval_arrays::{D, K2, K3, K4, K5};
+use super::auxiliary::haval_arrays::D;
 use utils::byte_formatting::ByteFormat;
 
 pub struct Haval {

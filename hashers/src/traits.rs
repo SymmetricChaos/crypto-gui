@@ -1,8 +1,6 @@
 use crate::errors::HasherError;
 
 pub trait ClassicHasher {
-    // const PUBLICATION_DATE: &'static str;
-    // const AUTHORS: &'static str;
     fn hash(&self, bytes: &[u8]) -> Vec<u8>;
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError>;
 }
@@ -29,11 +27,15 @@ macro_rules! hash_bytes_from_string {
 #[macro_export]
 macro_rules! basic_hash_tests {
     ($($hasher: expr, $name: ident, $input: literal, $output: literal);+ $(;)?) => {
+        #[cfg(test)]
+        mod basic_tests {
+        use super::*;
         $(
             #[test]
             fn $name() {
                 assert_eq!($output, $hasher.hash_bytes_from_string($input).unwrap());
             }
         )+
-    };
+        }
+    }
 }

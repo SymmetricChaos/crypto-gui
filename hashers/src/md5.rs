@@ -107,13 +107,8 @@ impl ClassicHasher for Md5 {
     crate::hash_bytes_from_string! {}
 }
 
-#[cfg(test)]
-mod md5_tests {
-    use super::*;
-
-    crate::basic_hash_tests!(
-        Md5::default(), test1, "",                                             "d41d8cd98f00b204e9800998ecf8427e";
-        Md5::default(), test2, "The quick brown fox jumps over the lazy dog",  "9e107d9d372bb6826bd81d3542a419d6";
-        Md5::default(), test3, "The quick brown fox jumps over the lazy dog.", "e4d909c290d0fb1ca068ffaddf22cbd0";
-    );
-}
+crate::basic_hash_tests!(
+    Md5::default(), test1, "",                                             "d41d8cd98f00b204e9800998ecf8427e";
+    Md5::default(), test2, "The quick brown fox jumps over the lazy dog",  "9e107d9d372bb6826bd81d3542a419d6";
+    Md5::default(), test3, "The quick brown fox jumps over the lazy dog.", "e4d909c290d0fb1ca068ffaddf22cbd0";
+);

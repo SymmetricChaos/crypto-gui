@@ -17,7 +17,7 @@ macro_rules! radio_gatun {
         impl Default for $name {
             fn default() -> Self {
                 Self {
-                    input_format: ByteFormat::Hex,
+                    input_format: ByteFormat::Utf8,
                     output_format: ByteFormat::Hex,
                     hash_len: 32,
                 }
@@ -159,29 +159,7 @@ radio_gatun!(
     [0, 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 2, 14, 27, 41, 56, 8, 25, 43,]
 );
 
-#[cfg(test)]
-mod radio_gatun_tests {
-    use super::*;
-
-    #[test]
-    fn test_suite_32() {
-        let mut hasher = RadioGatun32::default();
-        hasher.input_format = ByteFormat::Utf8;
-        hasher.output_format = ByteFormat::Hex;
-        assert_eq!(
-            "9ebdd24f469993796c4aac6a821735a65a3cdef8a359944ce71f34e7a08e1182",
-            hasher.hash_bytes_from_string("1234").unwrap()
-        );
-    }
-
-    #[test]
-    fn test_suite_64() {
-        let mut hasher = RadioGatun64::default();
-        hasher.input_format = ByteFormat::Utf8;
-        hasher.output_format = ByteFormat::Hex;
-        assert_eq!(
-            "733e2b49a53fb166b6f3bd341919578b8c931880f8b8bd7c0fbbee1a538e7307",
-            hasher.hash_bytes_from_string("1234").unwrap()
-        );
-    }
-}
+crate::basic_hash_tests!(
+    RadioGatun32::default(), test1, "1234", "9ebdd24f469993796c4aac6a821735a65a3cdef8a359944ce71f34e7a08e1182";
+    RadioGatun64::default(), test2, "1234", "733e2b49a53fb166b6f3bd341919578b8c931880f8b8bd7c0fbbee1a538e7307";
+);
