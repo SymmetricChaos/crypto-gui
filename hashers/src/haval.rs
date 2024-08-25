@@ -1,4 +1,9 @@
-use crate::traits::ClassicHasher;
+use crate::{
+    auxiliary::haval_functions::{
+        finalize_128, finalize_160, finalize_192, finalize_224, finalize_256, h1, h2, h3, h4, h5,
+    },
+    traits::ClassicHasher,
+};
 
 use super::auxiliary::haval_arrays::{D, K2, K3, K4, K5};
 use utils::byte_formatting::ByteFormat;
@@ -15,16 +20,139 @@ impl Default for Haval {
         Self {
             input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
-            rounds: 3,
-            output_length: 16,
+            rounds: 5,
+            output_length: 32,
+        }
+    }
+}
+
+impl Haval {
+    pub fn r3(mut self) -> Self {
+        self.rounds = 3;
+        self
+    }
+
+    pub fn r4(mut self) -> Self {
+        self.rounds = 4;
+        self
+    }
+
+    pub fn r5(mut self) -> Self {
+        self.rounds = 5;
+        self
+    }
+
+    pub fn l128(mut self) -> Self {
+        self.output_length = 16;
+        self
+    }
+
+    pub fn l160(mut self) -> Self {
+        self.output_length = 20;
+        self
+    }
+
+    pub fn l192(mut self) -> Self {
+        self.output_length = 24;
+        self
+    }
+
+    pub fn l224(mut self) -> Self {
+        self.output_length = 28;
+        self
+    }
+
+    pub fn l256(mut self) -> Self {
+        self.output_length = 32;
+        self
+    }
+
+    pub fn compress(&self, state: &mut [u32; 8], block: &[u32; 32]) {
+        // Save the state before compressing
+        let saved_state = state.clone();
+        // Mix for the specified number of rounds
+        h1(state, block, self.rounds);
+        h2(state, block, self.rounds);
+        h3(state, block, self.rounds);
+        if self.rounds > 3 {
+            h4(state, block, self.rounds);
+        }
+        if self.rounds > 4 {
+            h5(state, block, self.rounds);
+        }
+        // Add the saved state to the current state
+        for (current_word, saved_word) in state.iter_mut().zip(saved_state.iter()) {
+            *current_word = current_word.wrapping_add(*saved_word)
         }
     }
 }
 
 impl ClassicHasher for Haval {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        todo!()
+        assert!(
+            self.rounds == 3 || self.rounds == 4 || self.rounds == 5,
+            "rounds must be 3, 4, or 5"
+        );
+        assert!(
+            self.output_length % 4 == 0 && self.output_length >= 16 && self.output_length <= 32,
+            "output length is in bytes and must be 16, 20, 24, 28, or 32"
+        );
+
+        let mut input = bytes.to_vec();
+        // TODO: some kind of padding
+
+        let mut state = D;
+
+        for block in input.chunks_exact(128) {
+            let mut x = [0u32; 32];
+            for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)) {
+                *elem = u32::from_le_bytes(chunk.try_into().unwrap());
+            }
+            self.compress(&mut state, &x)
+        }
+
+        if self.output_length == 32 {
+            finalize_256(&state)
+        } else if self.output_length == 28 {
+            finalize_224(&state)
+        } else if self.output_length == 24 {
+            finalize_192(&state)
+        } else if self.output_length == 20 {
+            finalize_160(&state)
+        } else if self.output_length == 16 {
+            finalize_128(&state)
+        } else {
+            unreachable!("output length is in bytes and must be 16, 20, 24, 28, or 32")
+        }
     }
 
     crate::hash_bytes_from_string! {}
+}
+
+#[cfg(test)]
+mod haval_tests {
+    use super::*;
+
+    // Make sure this unwieldy thing doesn't crash at runtime
+    #[test]
+    fn test_runtime() {
+        let mut hasher = Haval::default();
+        let input = "0".repeat(128);
+        for r in [3, 4, 5] {
+            hasher.rounds = r;
+            for l in [16, 20, 24, 28, 32] {
+                hasher.output_length = l;
+                hasher.hash_bytes_from_string(&input).unwrap();
+            }
+        }
+    }
+
+    #[test]
+    fn test_haval_256_5() {
+        let hasher = Haval::default().r3().l256();
+        assert_eq!(
+            "be417bb4dd5cfb76c7126f4f8eeb1553a449039307b1a3cd451dbfdc0fbbe330",
+            hasher.hash_bytes_from_string("").unwrap()
+        );
+    }
 }
