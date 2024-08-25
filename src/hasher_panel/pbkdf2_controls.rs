@@ -1,5 +1,5 @@
 use egui::DragValue;
-use hashers::{hmac::SelectHmac, pbkdf::Pbkdf2};
+use hashers::{hmac::HmacVariant, pbkdf::Pbkdf2};
 use strum::IntoEnumIterator;
 use utils::byte_formatting::ByteFormat;
 
@@ -11,7 +11,7 @@ pub struct Pbkdf2Frame {
     hasher: Pbkdf2,
     salt: String,
     valid_salt: bool,
-    select_inner: SelectHmac,
+    select_inner: HmacVariant,
 }
 
 impl Default for Pbkdf2Frame {
@@ -20,7 +20,7 @@ impl Default for Pbkdf2Frame {
             hasher: Default::default(),
             salt: String::from("BEEF"),
             valid_salt: true,
-            select_inner: SelectHmac::Sha1,
+            select_inner: HmacVariant::Sha1,
         }
     }
 }
@@ -34,13 +34,8 @@ impl HasherFrame for Pbkdf2Frame {
 
         ui.subheading("Select HMAC");
         ui.horizontal(|ui| {
-            for variant in SelectHmac::iter() {
-                if ui
-                    .selectable_value(&mut self.select_inner, variant, variant.to_string())
-                    .clicked()
-                {
-                    self.hasher.hmac.borrow_mut().hasher = variant.new()
-                }
+            for variant in HmacVariant::iter() {
+                ui.selectable_value(&mut self.select_inner, variant, variant.to_string());
             }
         });
 
@@ -64,7 +59,7 @@ impl HasherFrame for Pbkdf2Frame {
         }
 
         ui.subheading("Output Length (Bytes)");
-        ui.add(DragValue::new(&mut self.hasher.output_length).range(4..=512));
+        ui.add(DragValue::new(&mut self.hasher.hash_len).range(4..=512));
     }
     crate::hash_string! {}
 }

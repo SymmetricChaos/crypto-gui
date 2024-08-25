@@ -5,10 +5,10 @@ pub trait ClassicHasher {
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError>;
 }
 
-pub trait KeyedHasher: ClassicHasher {
-    fn set_salt(&mut self, bytes: &[u8]);
-    fn set_key(&mut self, bytes: &[u8]);
-}
+// pub trait KeyedHasher: ClassicHasher {
+//     fn set_salt(&mut self, bytes: &[u8]);
+//     fn set_key(&mut self, bytes: &[u8]);
+// }
 
 #[macro_export]
 macro_rules! hash_bytes_from_string {

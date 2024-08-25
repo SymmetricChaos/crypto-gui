@@ -1,36 +1,30 @@
-use std::cell::RefCell;
-
 use itertools::Itertools;
 use utils::byte_formatting::ByteFormat;
 
 use crate::{
-    hmac::Hmac,
-    sha::Sha1,
-    traits::{ClassicHasher, KeyedHasher},
+    errors::HasherError,
+    hmac::{Hmac, HmacVariant},
+    traits::ClassicHasher,
 };
 
 pub struct Pbkdf2 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    pub hmac: RefCell<Hmac>, // RefCell needed because the HMAC is rekeyed in .hash() which is not does not allow mutation
+    pub variant: HmacVariant,
     pub salt: Vec<u8>,
     pub iterations: u32,
-    pub output_length: u32, // size of the output in bytes
+    pub hash_len: u32, // size of the output in bytes
 }
 
 impl Default for Pbkdf2 {
     fn default() -> Self {
-        let hmac = Hmac {
-            hasher: Box::new(Sha1::default()),
-            ..Default::default()
-        };
         Self {
             input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
-            hmac: RefCell::new(hmac),
             salt: Vec::new(),
+            variant: HmacVariant::Sha256,
             iterations: 4096,
-            output_length: 32,
+            hash_len: 32,
         }
     }
 }
@@ -44,6 +38,52 @@ impl Pbkdf2 {
     pub fn output(mut self, output: ByteFormat) -> Self {
         self.output_format = output;
         self
+    }
+
+    pub fn variant(mut self, variant: HmacVariant) -> Self {
+        self.variant = variant;
+        self
+    }
+
+    pub fn salt(mut self, salt: Vec<u8>) -> Self {
+        self.salt = salt;
+        self
+    }
+
+    pub fn iterations(mut self, iterations: u32) -> Self {
+        assert!(self.iterations > 0);
+        self.iterations = iterations;
+        self
+    }
+
+    pub fn hash_len(mut self, hash_len: u32) -> Self {
+        assert!(hash_len > 0);
+        self.hash_len = hash_len;
+        self
+    }
+
+    pub fn salt_from_str(mut self, format: ByteFormat, salt_str: &str) -> Self {
+        let bytes = format.text_to_bytes(salt_str).expect("invalid key string");
+        self.salt = bytes;
+        self
+    }
+
+    // For changing the key interactively
+    pub fn set_salt(&mut self, salt: &[u8]) {
+        self.salt = salt.to_vec();
+    }
+
+    // Falliable method for changing the salt from a string interactively
+    pub fn set_salt_from_str(
+        &mut self,
+        format: ByteFormat,
+        salt_str: &str,
+    ) -> Result<(), HasherError> {
+        let bytes = format
+            .text_to_bytes(salt_str)
+            .map_err(|_| HasherError::general("byte format error"))?;
+        self.salt = bytes;
+        Ok(())
     }
 
     pub fn hash_block(&self, hmac: &Hmac, block_num: u32) -> Vec<u8> {
@@ -80,94 +120,25 @@ impl ClassicHasher for Pbkdf2 {
         assert!(self.iterations != 0);
 
         let mut out = Vec::new();
-        self.hmac.borrow_mut().set_key(bytes);
+        let hmac = Hmac::default().variant(self.variant).key(bytes.to_vec());
 
         let mut block_num = 0;
-        while out.len() < self.output_length as usize {
+        while out.len() < self.hash_len as usize {
             block_num += 1;
-            out.extend(self.hash_block(&self.hmac.borrow(), block_num));
+            out.extend(self.hash_block(&hmac, block_num));
         }
 
-        out.truncate(self.output_length as usize);
+        out.truncate(self.hash_len as usize);
         out
     }
 
     crate::hash_bytes_from_string! {}
 }
 
-#[cfg(test)]
-mod pbkdf2_tests {
-    use super::*;
-
-    #[test]
-    fn test1() {
-        let mut hasher = Pbkdf2::default();
-        hasher.input_format = ByteFormat::Utf8;
-        hasher.output_format = ByteFormat::Hex;
-        hasher.salt = "salt".as_bytes().to_vec();
-        hasher.iterations = 1;
-        hasher.output_length = 20;
-        assert_eq!(
-            "0c60c80f961f0e71f3a9b524af6012062fe037a6",
-            hasher.hash_bytes_from_string("password").unwrap()
-        );
-    }
-
-    #[test]
-    fn test2() {
-        let mut hasher = Pbkdf2::default();
-        hasher.input_format = ByteFormat::Utf8;
-        hasher.output_format = ByteFormat::Hex;
-        hasher.salt = "salt".as_bytes().to_vec();
-        hasher.iterations = 2;
-        hasher.output_length = 20;
-        assert_eq!(
-            "ea6c014dc72d6f8ccd1ed92ace1d41f0d8de8957",
-            hasher.hash_bytes_from_string("password").unwrap()
-        );
-    }
-
-    #[test]
-    fn test3() {
-        let mut hasher = Pbkdf2::default();
-        hasher.input_format = ByteFormat::Utf8;
-        hasher.output_format = ByteFormat::Hex;
-        hasher.salt = "salt".as_bytes().to_vec();
-        hasher.iterations = 4096;
-        hasher.output_length = 20;
-        assert_eq!(
-            "4b007901b765489abead49d926f721d065a429c1",
-            hasher.hash_bytes_from_string("password").unwrap()
-        );
-    }
-
-    #[test]
-    fn test4() {
-        let mut hasher = Pbkdf2::default();
-        hasher.input_format = ByteFormat::Utf8;
-        hasher.output_format = ByteFormat::Hex;
-        hasher.salt = "saltSALTsaltSALTsaltSALTsaltSALTsalt".as_bytes().to_vec();
-        hasher.iterations = 4096;
-        hasher.output_length = 25;
-        assert_eq!(
-            "3d2eec4fe41c849b80c8d83662c0e44a8b291a964cf2f07038",
-            hasher
-                .hash_bytes_from_string("passwordPASSWORDpassword")
-                .unwrap()
-        );
-    }
-
-    #[test]
-    fn test5() {
-        let mut hasher = Pbkdf2::default();
-        hasher.input_format = ByteFormat::Utf8;
-        hasher.output_format = ByteFormat::Hex;
-        hasher.salt = "sa\0lt".as_bytes().to_vec();
-        hasher.iterations = 4096;
-        hasher.output_length = 16;
-        assert_eq!(
-            "56fa6aa75548099dcc37d7f03425e0c3",
-            hasher.hash_bytes_from_string("pass\0word").unwrap()
-        );
-    }
-}
+crate::basic_hash_tests!(
+    Pbkdf2::default().variant(HmacVariant::Sha1).iterations(1).hash_len(20).salt_from_str(ByteFormat::Utf8, "salt"), test1, "password", "0c60c80f961f0e71f3a9b524af6012062fe037a6";
+    Pbkdf2::default().variant(HmacVariant::Sha1).iterations(2).hash_len(20).salt_from_str(ByteFormat::Utf8, "salt"), test2, "password", "ea6c014dc72d6f8ccd1ed92ace1d41f0d8de8957";
+    Pbkdf2::default().variant(HmacVariant::Sha1).iterations(4096).hash_len(20).salt_from_str(ByteFormat::Utf8, "salt"), test3, "password", "4b007901b765489abead49d926f721d065a429c1";
+    Pbkdf2::default().variant(HmacVariant::Sha1).iterations(4096).hash_len(25).salt_from_str(ByteFormat::Utf8, "saltSALTsaltSALTsaltSALTsaltSALTsalt"), test4, "passwordPASSWORDpassword", "3d2eec4fe41c849b80c8d83662c0e44a8b291a964cf2f07038";
+    Pbkdf2::default().variant(HmacVariant::Sha1).iterations(4096).hash_len(16).salt_from_str(ByteFormat::Utf8, "sa\0lt"), test5, "pass\0word", "56fa6aa75548099dcc37d7f03425e0c3";
+);

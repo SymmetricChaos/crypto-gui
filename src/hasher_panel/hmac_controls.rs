@@ -1,15 +1,16 @@
 use crate::ui_elements::UiElements;
 
 use super::HasherFrame;
-use hashers::hmac::{Hmac, SelectHmac};
+use hashers::hmac::{Hmac, HmacVariant};
 use rand::{thread_rng, RngCore};
 use strum::IntoEnumIterator;
 use utils::byte_formatting::ByteFormat;
 
 pub struct HmacFrame {
     hasher: Hmac,
-    select_hasher: SelectHmac,
+    select_hasher: HmacVariant,
     key_string: String,
+    key_format: ByteFormat,
     valid_key: bool,
 }
 
@@ -17,8 +18,9 @@ impl Default for HmacFrame {
     fn default() -> Self {
         Self {
             hasher: Hmac::default(),
-            select_hasher: SelectHmac::Sha256,
+            select_hasher: HmacVariant::Sha256,
             key_string: String::new(),
+            key_format: ByteFormat::Utf8,
             valid_key: false,
         }
     }
@@ -30,7 +32,11 @@ impl HmacFrame {
         ui.label("Any number of bytes.");
         ui.horizontal(|ui| {
             if ui.control_string(&mut self.key_string).changed() {
-                if self.hasher.key_from_str(&self.key_string).is_err() {
+                if self
+                    .hasher
+                    .set_key_from_str(ByteFormat::Hex, &self.key_string)
+                    .is_err()
+                {
                     self.valid_key = false
                 } else {
                     self.valid_key = true
@@ -40,10 +46,7 @@ impl HmacFrame {
                 let mut rng = thread_rng();
                 self.hasher.key = vec![0; Hmac::BLOCK_SIZE / 4];
                 rng.fill_bytes(&mut self.hasher.key);
-                self.key_string = self
-                    .hasher
-                    .key_format
-                    .byte_slice_to_text(&mut self.hasher.key)
+                self.key_string = self.key_format.byte_slice_to_text(&mut self.hasher.key)
             }
         });
 
@@ -69,13 +72,8 @@ impl HasherFrame for HmacFrame {
         ui.add_space(16.0);
 
         ui.horizontal(|ui| {
-            for variant in SelectHmac::iter() {
-                if ui
-                    .selectable_value(&mut self.select_hasher, variant, variant.to_string())
-                    .clicked()
-                {
-                    self.hasher.hasher = variant.new()
-                }
+            for variant in HmacVariant::iter() {
+                ui.selectable_value(&mut self.select_hasher, variant, variant.to_string());
             }
         });
 
@@ -83,13 +81,9 @@ impl HasherFrame for HmacFrame {
         ui.collapsing("Key Format", |ui| {
             ui.label("Key can be given as text, hexadecimal, or Base64.");
             ui.horizontal(|ui| {
-                ui.selectable_value(
-                    &mut self.hasher.key_format,
-                    ByteFormat::Utf8,
-                    "Text (UTF-8)",
-                );
-                ui.selectable_value(&mut self.hasher.key_format, ByteFormat::Hex, "Hexadecimal");
-                ui.selectable_value(&mut self.hasher.key_format, ByteFormat::Base64, "Base64");
+                ui.selectable_value(&mut self.key_format, ByteFormat::Utf8, "Text (UTF-8)");
+                ui.selectable_value(&mut self.key_format, ByteFormat::Hex, "Hexadecimal");
+                ui.selectable_value(&mut self.key_format, ByteFormat::Base64, "Base64");
             });
         });
         ui.add_space(8.0);
@@ -97,5 +91,6 @@ impl HasherFrame for HmacFrame {
 
         ui.add_space(16.0);
     }
+
     crate::hash_string! {}
 }

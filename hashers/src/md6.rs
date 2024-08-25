@@ -31,7 +31,7 @@ const LSHIFT: [u32; 16] = [11, 24, 9, 16, 15, 9, 27, 15, 6, 2, 29, 8, 15, 5, 31,
 pub struct Md6 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    pub output_length: u32,  // output length in bits
+    pub hash_len: u32,       // output length in bits
     pub key: Vec<u8>,        // key of up to 64 bytes
     pub mode: u32, // mode of operation parameter, if less than 27 some processing is done sequentially with lower memory overhead
     pub rounds: Option<u32>, // Rounds can be specified manually or derived from the output length
@@ -42,7 +42,7 @@ impl Default for Md6 {
         Self {
             input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
-            output_length: 256,
+            hash_len: 256,
             key: Vec::new(),
             mode: 64,
             rounds: None,
@@ -61,35 +61,35 @@ impl Md6 {
         self
     }
 
-    pub fn output_length(mut self, output_length: u32) -> Self {
-        self.output_length = output_length;
+    pub fn hash_len(mut self, hash_len: u32) -> Self {
+        self.hash_len = hash_len;
         self
     }
 
     pub fn md6_224() -> Self {
         Self {
-            output_length: 224,
+            hash_len: 224,
             ..Default::default()
         }
     }
 
     pub fn md6_256() -> Self {
         Self {
-            output_length: 256,
+            hash_len: 256,
             ..Default::default()
         }
     }
 
     pub fn md6_384() -> Self {
         Self {
-            output_length: 384,
+            hash_len: 384,
             ..Default::default()
         }
     }
 
     pub fn md6_512() -> Self {
         Self {
-            output_length: 512,
+            hash_len: 512,
             ..Default::default()
         }
     }
@@ -100,10 +100,10 @@ impl Md6 {
             return n;
         }
         if self.key.is_empty() {
-            40 + self.output_length / 4
+            40 + self.hash_len / 4
         } else {
             // If a key is given the minimum number of rounds is 80
-            80.max(40 + self.output_length / 4)
+            80.max(40 + self.hash_len / 4)
         }
     }
 
@@ -155,7 +155,7 @@ impl Md6 {
 
 impl ClassicHasher for Md6 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        assert!(self.output_length <= 512);
+        assert!(self.hash_len <= 512);
         assert!(self.key.len() <= 64);
         assert!(self.mode <= 64);
 

@@ -184,16 +184,16 @@ impl KeccackState {
         }
     }
 
-    pub fn squeeze(&mut self, rate: usize, output_size: usize) -> Vec<u8> {
-        let mut output = Vec::with_capacity(output_size);
+    pub fn squeeze(&mut self, rate: usize, hash_len: usize) -> Vec<u8> {
+        let mut output = Vec::with_capacity(hash_len);
 
         loop {
             let mut ctr = 0;
             'y_loop: for y in 0..5 {
                 for x in 0..5 {
                     output.extend_from_slice(&self[x][y].to_le_bytes());
-                    if output.len() >= output_size {
-                        output.truncate(output_size);
+                    if output.len() >= hash_len {
+                        output.truncate(hash_len);
                         return output;
                     }
                     ctr += 8;
@@ -264,8 +264,8 @@ impl Domain {
 pub struct Sha3 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    pub rate: usize,        // rate in bytes, block size
-    pub output_size: usize, // output length in bytes, recommended to be half the capacity
+    pub rate: usize,     // rate in bytes, block size
+    pub hash_len: usize, // output length in bytes, recommended to be half the capacity
     // pub function_name: Vec<u8>,
     // pub customization: Vec<u8>,
     pub domain: Domain,
@@ -278,20 +278,30 @@ impl Default for Sha3 {
             input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             rate: 1152 / 8,
-            output_size: 224 / 8,
+            hash_len: 224 / 8,
             domain: Domain::Sha3,
         }
     }
 }
 
 impl Sha3 {
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+
     pub fn rate(mut self, rate: usize) -> Self {
         self.rate = rate;
         self
     }
 
-    pub fn output_size(mut self, output_size: usize) -> Self {
-        self.output_size = output_size;
+    pub fn hash_len(mut self, hash_len: usize) -> Self {
+        self.hash_len = hash_len;
         self
     }
 
@@ -300,7 +310,7 @@ impl Sha3 {
             input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             rate: 0,
-            output_size: 0,
+            hash_len: 0,
             domain: Domain::Sha3,
         }
     }
@@ -310,7 +320,7 @@ impl Sha3 {
             input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             rate: 0,
-            output_size: 0,
+            hash_len: 0,
             domain: Domain::Shake,
         }
     }
@@ -320,7 +330,7 @@ impl Sha3 {
             input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             rate: 0,
-            output_size: 0,
+            hash_len: 0,
             domain: Domain::Cshake,
         }
     }
@@ -330,40 +340,35 @@ impl Sha3 {
             input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             rate: 0,
-            output_size: 0,
+            hash_len: 0,
             domain: Domain::Keccak,
         }
-    }
-
-    pub fn hex_input(mut self) -> Self {
-        self.input_format = ByteFormat::Hex;
-        self
     }
 
     // For ease of use rate, capacity, and output size are in bytes
     // For ease of comparing to sepcification their they are shown as the length in bits divided by eight
     pub fn sha3_224() -> Self {
-        Sha3::sha3().rate(1152 / 8).output_size(224 / 8)
+        Sha3::sha3().rate(1152 / 8).hash_len(224 / 8)
     }
 
     pub fn sha3_256() -> Self {
-        Sha3::sha3().rate(1088 / 8).output_size(256 / 8)
+        Sha3::sha3().rate(1088 / 8).hash_len(256 / 8)
     }
 
     pub fn sha3_384() -> Self {
-        Sha3::sha3().rate(832 / 8).output_size(384 / 8)
+        Sha3::sha3().rate(832 / 8).hash_len(384 / 8)
     }
 
     pub fn sha3_512() -> Self {
-        Sha3::sha3().rate(576 / 8).output_size(512 / 8)
+        Sha3::sha3().rate(576 / 8).hash_len(512 / 8)
     }
 
-    pub fn shake_128(output_size: usize) -> Self {
-        Sha3::shake().rate(1344 / 8).output_size(output_size)
+    pub fn shake_128(hash_len: usize) -> Self {
+        Sha3::shake().rate(1344 / 8).hash_len(hash_len)
     }
 
-    pub fn shake_256(output_size: usize) -> Self {
-        Sha3::shake().rate(1088 / 8).output_size(output_size)
+    pub fn shake_256(hash_len: usize) -> Self {
+        Sha3::shake().rate(1088 / 8).hash_len(hash_len)
     }
 }
 
@@ -388,7 +393,7 @@ impl ClassicHasher for Sha3 {
 
         let mut state = KeccackState::new();
         state.absorb(&input, self.rate);
-        state.squeeze(self.rate, self.output_size)
+        state.squeeze(self.rate, self.hash_len)
     }
 
     crate::hash_bytes_from_string! {}
@@ -452,12 +457,12 @@ crate::basic_hash_tests!(
     "7f9c2ba4e88f827d616045507605853ed73b8093f6efbc88eb1a6eacfa66ef263cb1eea988004b93103cfb0aeefd2a686e01fa4a58e8a3639ca8a1e3f9ae57e235b8cc873c23dc62b8d260169afa2f75ab916a58d974918835d25e6a435085b2badfd6dfaac359a5efbb7bcc4b59d538df9a04302e10c8bc1cbf1a0b3a5120ea17cda7cfad765f5623474d368ccca8af0007cd9f5e4c849f167a580b14aabdefaee7eef47cb0fca9767be1fda69419dfb927e9df07348b196691abaeb580b32def58538b8d23f877";
     Sha3::shake_256(200), empty_shake256, "",
     "46b9dd2b0ba88d13233b3feb743eeb243fcd52ea62b81b82b50c27646ed5762fd75dc4ddd8c0f200cb05019d67b592f6fc821c49479ab48640292eacb3b7c4be141e96616fb13957692cc7edd0b45ae3dc07223c8e92937bef84bc0eab862853349ec75546f58fb7c2775c38462c5010d846c185c15111e595522a6bcd16cf86f3d122109e3b1fdd943b6aec468a2d621a7c06c6a957c62b54dafc3be87567d677231395f6147293b68ceab7a9e0c58d864e8efde4e1b9a46cbe854713672f5caaae314ed9083dab";
-    Sha3::sha3_224().hex_input(), abc_sha3_224, "616263",
+    Sha3::sha3_224().input(ByteFormat::Hex), abc_sha3_224, "616263",
     "e642824c3f8cf24ad09234ee7d3c766fc9a3a5168d0c94ad73b46fdf";
     Sha3::sha3_256(), abc_sha3_256, "abc",
     "3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532";
-    Sha3::sha3_256().hex_input(), sha3_256_1600_bits, "a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3",
+    Sha3::sha3_256().input(ByteFormat::Hex), sha3_256_1600_bits, "a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3",
     "79f38adec5c20307a98ef76e8324afbfd46cfd81b22e3973c65fa1bd9de31787";
-    Sha3::sha3_256().hex_input(), sha3_256_2008_bits, "83af34279ccb5430febec07a81950d30f4b66f484826afee7456f0071a51e1bbc55570b5cc7ec6f9309c17bf5befdd7c6ba6e968cf218a2b34bd5cf927ab846e38a40bbd81759e9e33381016a755f699df35d660007b5eadf292feefb735207ebf70b5bd17834f7bfa0e16cb219ad4af524ab1ea37334aa66435e5d397fc0a065c411ebbce32c240b90476d307ce802ec82c1c49bc1bec48c0675ec2a6c6f3ed3e5b741d13437095707c565e10d8a20b8c20468ff9514fcf31b4249cd82dcee58c0a2af538b291a87e3390d737191a07484a5d3f3fb8c8f15ce056e5e5f8febe5e1fb59d6740980aa06ca8a0c20f5712b4cde5d032e92ab89f0ae1",
+    Sha3::sha3_256().input(ByteFormat::Hex), sha3_256_2008_bits, "83af34279ccb5430febec07a81950d30f4b66f484826afee7456f0071a51e1bbc55570b5cc7ec6f9309c17bf5befdd7c6ba6e968cf218a2b34bd5cf927ab846e38a40bbd81759e9e33381016a755f699df35d660007b5eadf292feefb735207ebf70b5bd17834f7bfa0e16cb219ad4af524ab1ea37334aa66435e5d397fc0a065c411ebbce32c240b90476d307ce802ec82c1c49bc1bec48c0675ec2a6c6f3ed3e5b741d13437095707c565e10d8a20b8c20468ff9514fcf31b4249cd82dcee58c0a2af538b291a87e3390d737191a07484a5d3f3fb8c8f15ce056e5e5f8febe5e1fb59d6740980aa06ca8a0c20f5712b4cde5d032e92ab89f0ae1",
     "3298a95cfe59b9d6cab99c36dc1324194c09f97f08944a02d9574bbca3186b41";
 );

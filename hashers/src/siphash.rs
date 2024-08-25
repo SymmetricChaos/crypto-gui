@@ -1,6 +1,6 @@
 use utils::byte_formatting::ByteFormat;
 
-use crate::traits::{ClassicHasher, KeyedHasher};
+use crate::traits::ClassicHasher;
 
 // https://eprint.iacr.org/2012/351.pdf
 
@@ -46,6 +46,12 @@ impl SipHash {
 
     pub fn finalization(mut self, finalization_rounds: usize) -> Self {
         self.finalization_rounds = finalization_rounds;
+        self
+    }
+
+    pub fn keys(mut self, k0: u64, k1: u64) -> Self {
+        self.k0 = k0.to_be();
+        self.k1 = k1.to_be();
         self
     }
 
@@ -131,20 +137,20 @@ impl ClassicHasher for SipHash {
     crate::hash_bytes_from_string! {}
 }
 
-impl KeyedHasher for SipHash {
-    fn set_salt(&mut self, _bytes: &[u8]) {
-        unimplemented!("SipHash does not accept a salt argument")
-    }
+// impl KeyedHasher for SipHash {
+//     fn set_salt(&mut self, _bytes: &[u8]) {
+//         unimplemented!("SipHash does not accept a salt argument")
+//     }
 
-    fn set_key(&mut self, bytes: &[u8]) {
-        if bytes.len() == 16 {
-            self.k0 = u64::from_be_bytes(bytes[0..8].try_into().unwrap());
-            self.k1 = u64::from_be_bytes(bytes[8..16].try_into().unwrap());
-        } else {
-            panic!("SipHash key must be exactly 16 bytes")
-        }
-    }
-}
+//     fn set_key(&mut self, bytes: &[u8]) {
+//         if bytes.len() == 16 {
+//             self.k0 = u64::from_be_bytes(bytes[0..8].try_into().unwrap());
+//             self.k1 = u64::from_be_bytes(bytes[8..16].try_into().unwrap());
+//         } else {
+//             panic!("SipHash key must be exactly 16 bytes")
+//         }
+//     }
+// }
 
 #[cfg(test)]
 mod siphash_tests {
@@ -152,10 +158,9 @@ mod siphash_tests {
 
     #[test]
     fn test_suite() {
-        let mut hasher = SipHash::default();
-        hasher.set_keys(0x0001020304050607, 0x08090a0b0c0d0e0f);
-        hasher.input_format = ByteFormat::Hex;
-        hasher.output_format = ByteFormat::Hex;
+        let hasher = SipHash::default()
+            .input(ByteFormat::Hex)
+            .keys(0x0001020304050607, 0x08090a0b0c0d0e0f);
         assert_eq!(
             "a129ca6149be45e5",
             hasher

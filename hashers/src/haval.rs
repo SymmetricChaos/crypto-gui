@@ -12,7 +12,7 @@ pub struct Haval {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
     pub rounds: u32,
-    pub output_length: u32,
+    pub hash_len: u32,
 }
 
 impl Default for Haval {
@@ -21,7 +21,7 @@ impl Default for Haval {
             input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             rounds: 5,
-            output_length: 32,
+            hash_len: 32,
         }
     }
 }
@@ -46,12 +46,12 @@ impl Haval {
         self
     }
 
-    pub fn output_length(mut self, output_length: u32) -> Self {
+    pub fn hash_len(mut self, hash_len: u32) -> Self {
         assert!(
-            self.output_length % 4 == 0 && self.output_length >= 16 && self.output_length <= 32,
+            self.hash_len % 4 == 0 && self.hash_len >= 16 && self.hash_len <= 32,
             "output length is in bytes and must be 16, 20, 24, 28, or 32"
         );
-        self.output_length = output_length;
+        self.hash_len = hash_len;
         self
     }
 
@@ -82,7 +82,7 @@ impl ClassicHasher for Haval {
             "rounds must be 3, 4, or 5"
         );
         assert!(
-            self.output_length % 4 == 0 && self.output_length >= 16 && self.output_length <= 32,
+            self.hash_len % 4 == 0 && self.hash_len >= 16 && self.hash_len <= 32,
             "output length is in bytes and must be 16, 20, 24, 28, or 32"
         );
 
@@ -99,15 +99,15 @@ impl ClassicHasher for Haval {
             self.compress(&mut state, &x)
         }
 
-        if self.output_length == 32 {
+        if self.hash_len == 32 {
             finalize_256(&state)
-        } else if self.output_length == 28 {
+        } else if self.hash_len == 28 {
             finalize_224(&state)
-        } else if self.output_length == 24 {
+        } else if self.hash_len == 24 {
             finalize_192(&state)
-        } else if self.output_length == 20 {
+        } else if self.hash_len == 20 {
             finalize_160(&state)
-        } else if self.output_length == 16 {
+        } else if self.hash_len == 16 {
             finalize_128(&state)
         } else {
             unreachable!("output length is in bytes and must be 16, 20, 24, 28, or 32")
@@ -129,7 +129,7 @@ mod haval_tests {
         for r in [3, 4, 5] {
             hasher.rounds = r;
             for l in [16, 20, 24, 28, 32] {
-                hasher.output_length = l;
+                hasher.hash_len = l;
                 hasher.hash_bytes_from_string(&input).unwrap();
             }
         }
@@ -137,7 +137,7 @@ mod haval_tests {
 
     #[test]
     fn test_haval_256_5() {
-        let hasher = Haval::default().rounds(3).output_length(32);
+        let hasher = Haval::default().rounds(3).hash_len(32);
         assert_eq!(
             "be417bb4dd5cfb76c7126f4f8eeb1553a449039307b1a3cd451dbfdc0fbbe330",
             hasher.hash_bytes_from_string("").unwrap()

@@ -46,19 +46,8 @@ impl ClassicHasher for OneAtATime {
     crate::hash_bytes_from_string! {}
 }
 
-#[cfg(test)]
-mod jenkins_tests {
-    use super::*;
+crate::basic_hash_tests!(
+    OneAtATime::default(), test1, "a", "ca2e9442";
+    OneAtATime::default(), test2, "The quick brown fox jumps over the lazy dog", "519e91f5";
 
-    #[test]
-    fn test_suite() {
-        let hasher = OneAtATime::default();
-        assert_eq!("ca2e9442", hasher.hash_bytes_from_string("a").unwrap());
-        assert_eq!(
-            "519e91f5",
-            hasher
-                .hash_bytes_from_string("The quick brown fox jumps over the lazy dog")
-                .unwrap()
-        );
-    }
-}
+);

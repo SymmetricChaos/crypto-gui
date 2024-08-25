@@ -24,7 +24,7 @@ pub enum Sha3Variant {
 pub struct Sha3Frame {
     hasher: Sha3,
     variant: Sha3Variant,
-    shake_output_len: usize,
+    shake_hash_len: usize,
     example_state: KeccackState,
     example_round: usize,
 }
@@ -34,7 +34,7 @@ impl Default for Sha3Frame {
         Self {
             hasher: Default::default(),
             variant: Sha3Variant::Sha3_256,
-            shake_output_len: 128,
+            shake_hash_len: 128,
 
             example_state: KeccackState::new(),
             example_round: 0,
@@ -49,8 +49,8 @@ impl Sha3Frame {
             Sha3Variant::Sha3_256 => self.hasher = Sha3::sha3_256(),
             Sha3Variant::Sha3_384 => self.hasher = Sha3::sha3_384(),
             Sha3Variant::Sha3_512 => self.hasher = Sha3::sha3_512(),
-            Sha3Variant::Shake128 => self.hasher = Sha3::shake_128(self.shake_output_len),
-            Sha3Variant::Shake256 => self.hasher = Sha3::shake_256(self.shake_output_len),
+            Sha3Variant::Shake128 => self.hasher = Sha3::shake_128(self.shake_hash_len),
+            Sha3Variant::Shake256 => self.hasher = Sha3::shake_256(self.shake_hash_len),
         }
     }
 }
@@ -102,11 +102,11 @@ impl HasherFrame for Sha3Frame {
         if ui
             .add_enabled(
                 self.variant == Sha3Variant::Shake128 || self.variant == Sha3Variant::Shake256,
-                DragValue::new(&mut self.shake_output_len).range(1..=512),
+                DragValue::new(&mut self.shake_hash_len).range(1..=512),
             )
             .changed()
         {
-            self.hasher.output_size = self.shake_output_len;
+            self.hasher.hash_len = self.shake_hash_len;
         }
 
         ui.add_space(16.0);
