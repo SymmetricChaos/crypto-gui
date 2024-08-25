@@ -1,5 +1,5 @@
 pub mod sha3;
-pub use sha3::{KeccackState, Sha3};
+pub use sha3::{KeccackState, Keccack};
 pub mod sha1;
 pub use sha1::Sha1;
 pub mod sha2;

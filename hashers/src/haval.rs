@@ -1,6 +1,7 @@
 use crate::{
     auxiliary::haval_functions::{
         finalize_128, finalize_160, finalize_192, finalize_224, finalize_256, h1, h2, h3, h4, h5,
+        haval_padding,
     },
     traits::ClassicHasher,
 };
@@ -87,7 +88,7 @@ impl ClassicHasher for Haval {
         );
 
         let mut input = bytes.to_vec();
-        // TODO: some kind of padding
+        haval_padding(&mut input, self.hash_len as u8, self.rounds as u8);
 
         let mut state = D;
 
@@ -121,25 +122,20 @@ impl ClassicHasher for Haval {
 mod haval_tests {
     use super::*;
 
-    // Make sure this unwieldy thing doesn't crash at runtime
     #[test]
-    fn test_runtime() {
-        let mut hasher = Haval::default();
-        let input = "0".repeat(128);
-        for r in [3, 4, 5] {
-            hasher.rounds = r;
-            for l in [16, 20, 24, 28, 32] {
-                hasher.hash_len = l;
-                hasher.hash_bytes_from_string(&input).unwrap();
-            }
-        }
+    fn test_haval_256_5() {
+        let hasher = Haval::default().rounds(5).hash_len(32);
+        assert_eq!(
+            "be417bb4dd5cfb76c7126f4f8eeb1553a449039307b1a3cd451dbfdc0fbbe330",
+            hasher.hash_bytes_from_string("").unwrap()
+        );
     }
 
     #[test]
-    fn test_haval_256_5() {
-        let hasher = Haval::default().rounds(3).hash_len(32);
+    fn test_haval_128_3() {
+        let hasher = Haval::default().rounds(3).hash_len(16);
         assert_eq!(
-            "be417bb4dd5cfb76c7126f4f8eeb1553a449039307b1a3cd451dbfdc0fbbe330",
+            "c68f39913f901f3ddf44c707357a7d70",
             hasher.hash_bytes_from_string("").unwrap()
         );
     }

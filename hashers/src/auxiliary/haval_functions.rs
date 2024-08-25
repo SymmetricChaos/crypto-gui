@@ -224,3 +224,24 @@ pub fn finalize_256(s: &[u32; 8]) -> Vec<u8> {
     }
     out
 }
+
+// Padding function
+pub fn haval_padding(bytes: &mut Vec<u8>, hash_len: u8, rounds: u8) {
+    // Length in bits before padding
+    let b_len = (bytes.len() as u64).wrapping_mul(8);
+    // push a byte with a leading 1 to the bytes
+    bytes.push(0x80);
+    // push zeros until the length is ten bytes less than the block size.
+    while (bytes.len() % 128 as usize) != (128 - 10) as usize {
+        bytes.push(0)
+    }
+
+    // 0x001 is the version number
+    bytes.push(0x001 | rounds << 3 | (hash_len & 0x7) << 6);
+    bytes.push(hash_len >> 2);
+
+    // Append the eight bytes of length
+    for b in b_len.to_le_bytes() {
+        bytes.push(b)
+    }
+}

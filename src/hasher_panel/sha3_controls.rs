@@ -1,5 +1,5 @@
 use egui::DragValue;
-use hashers::sha::{KeccackState, Sha3};
+use hashers::sha::{Keccack, KeccackState};
 
 use crate::ui_elements::UiElements;
 
@@ -22,7 +22,7 @@ pub enum Sha3Variant {
 }
 
 pub struct Sha3Frame {
-    hasher: Sha3,
+    hasher: Keccack,
     variant: Sha3Variant,
     shake_hash_len: usize,
     example_state: KeccackState,
@@ -45,12 +45,12 @@ impl Default for Sha3Frame {
 impl Sha3Frame {
     fn set_hasher(&mut self) {
         match self.variant {
-            Sha3Variant::Sha3_224 => self.hasher = Sha3::sha3_224(),
-            Sha3Variant::Sha3_256 => self.hasher = Sha3::sha3_256(),
-            Sha3Variant::Sha3_384 => self.hasher = Sha3::sha3_384(),
-            Sha3Variant::Sha3_512 => self.hasher = Sha3::sha3_512(),
-            Sha3Variant::Shake128 => self.hasher = Sha3::shake_128(self.shake_hash_len),
-            Sha3Variant::Shake256 => self.hasher = Sha3::shake_256(self.shake_hash_len),
+            Sha3Variant::Sha3_224 => self.hasher = Keccack::sha3_224(),
+            Sha3Variant::Sha3_256 => self.hasher = Keccack::sha3_256(),
+            Sha3Variant::Sha3_384 => self.hasher = Keccack::sha3_384(),
+            Sha3Variant::Sha3_512 => self.hasher = Keccack::sha3_512(),
+            Sha3Variant::Shake128 => self.hasher = Keccack::shake_128(self.shake_hash_len),
+            Sha3Variant::Shake256 => self.hasher = Keccack::shake_256(self.shake_hash_len),
         }
     }
 }
