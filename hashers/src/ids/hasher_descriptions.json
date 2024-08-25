@@ -31,7 +31,7 @@
   },
   "HAVAL": {
     "Description": "Haval (Hash Algorithm VArial Length)",
-    "Authors": "Zheng et al.",
+    "Authors": "Zheng, Pieprzyk, Seberry",
     "Publication": "1993"
   },
   "HMAC": {

@@ -3,7 +3,7 @@ use crate::ui_elements::UiElements;
 use super::HasherFrame;
 
 use hashers::{
-    auxiliary::des::{expand_56_to_64, Des},
+    auxiliary::des_functions::{expand_56_to_64, Des},
     lm::{Lm, LM_WORD},
 };
 use utils::{
