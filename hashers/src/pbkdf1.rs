@@ -1,6 +1,9 @@
 use crate::{errors::HasherError, md2::Md2, md5::Md5, sha::Sha1, traits::ClassicHasher};
+use strum::{Display, EnumIter, VariantNames};
 use utils::byte_formatting::ByteFormat;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, Display, VariantNames)]
+#[strum(serialize_all = "UPPERCASE")]
 pub enum Pbkdf1Variant {
     Md2,
     Md5,

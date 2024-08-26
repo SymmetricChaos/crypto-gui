@@ -19,6 +19,7 @@ pub enum HasherId {
     Md6,
     Mgf1,
     OneAtATime,
+    Pbkdf1,
     Pbkdf2,
     Pearson,
     Poly1305,
@@ -71,7 +72,6 @@ impl Display for HasherId {
             Self::Gost => "GOST R 34.11-94",
             Self::Haval => "HAVAL",
             Self::Hmac => "HMAC",
-
             Self::Lm => "LM",
             Self::Md2 => "MD2",
             Self::Md4 => "MD4",
@@ -79,6 +79,7 @@ impl Display for HasherId {
             Self::Md6 => "MD6",
             Self::Mgf1 => "MGF1",
             Self::OneAtATime => "OneAtATime",
+            Self::Pbkdf1 => "PBKDF1",
             Self::Pbkdf2 => "PBKDF2",
             Self::Pearson => "Pearson",
             Self::Poly1305 => "Poly1305",

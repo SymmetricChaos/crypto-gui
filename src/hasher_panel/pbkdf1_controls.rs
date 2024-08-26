@@ -1,38 +1,36 @@
+use super::HasherFrame;
+use crate::ui_elements::UiElements;
 use egui::DragValue;
-use hashers::{hmac::HmacVariant, pbkdf2::Pbkdf2};
+use hashers::pbkdf1::{Pbkdf1, Pbkdf1Variant};
 use strum::IntoEnumIterator;
 use utils::byte_formatting::ByteFormat;
 
-use crate::ui_elements::UiElements;
-
-use super::HasherFrame;
-
-pub struct Pbkdf2Frame {
-    hasher: Pbkdf2,
+pub struct Pbkdf1Frame {
+    hasher: Pbkdf1,
     salt: String,
     valid_salt: bool,
 }
 
-impl Default for Pbkdf2Frame {
+impl Default for Pbkdf1Frame {
     fn default() -> Self {
         Self {
             hasher: Default::default(),
-            salt: String::from("BEEF"),
+            salt: String::from("DEADBEEF"),
             valid_salt: true,
         }
     }
 }
 
-impl HasherFrame for Pbkdf2Frame {
+impl HasherFrame for Pbkdf1Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.byte_io_mode_hasher(
             &mut self.hasher.input_format,
             &mut self.hasher.output_format,
         );
 
-        ui.subheading("Select Inner HMAC");
+        ui.subheading("Select Inner Hasher");
         ui.horizontal(|ui| {
-            for variant in HmacVariant::iter() {
+            for variant in Pbkdf1Variant::iter() {
                 ui.selectable_value(&mut self.hasher.variant, variant, variant.to_string());
             }
         });
@@ -47,17 +45,18 @@ impl HasherFrame for Pbkdf2Frame {
             }
         });
         if ui.control_string(&mut self.salt).changed() {
-            if let Ok(bytes) = ByteFormat::Hex.text_to_bytes(&self.salt) {
-                self.valid_salt = true;
-                self.hasher.salt = bytes;
-            } else {
-                self.valid_salt = false;
-                self.hasher.salt.clear();
+            match self.hasher.set_salt_from_str(ByteFormat::Hex, &self.salt) {
+                Ok(_) => self.valid_salt = true,
+                Err(_) => {
+                    self.valid_salt = false;
+                    self.hasher.salt = [0; 8];
+                }
             }
         }
 
         ui.subheading("Output Length (Bytes)");
         ui.add(DragValue::new(&mut self.hasher.hash_len).range(4..=512));
     }
+
     crate::hash_string! {}
 }

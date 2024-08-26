@@ -74,8 +74,13 @@
     "Authors": "Microsoft",
     "Publication": "1987"
   },
+  "PBKDF1": {
+    "Description": "PBKDF1 (Password Based Key Derivation Function 1) is a now obsolete key derivation function with an adjustable work factor. It operates simply by applying a chosen hash function (MD2, MD5, or SHA-1) numerous times.",
+    "Authors": "<<<MISSING>>>",
+    "Publication": "<<<MISSING>>>"
+  },
   "PBKDF2": {
-    "Description": "PBKDF2 (Password Based Key Derivation Function 2) is an adjustable key derivation function. It uses an HMAC iternally and applies is numerous times to increase the computation cost of calculating the key.",
+    "Description": "PBKDF2 (Password Based Key Derivation Function 2) is a key derivation function with an adjustable work factor. It uses an HMAC iternally and applies it numerous times to increase the computation cost of calculating the key.",
     "Authors": "<<<MISSING>>>",
     "Publication": "<<<MISSING>>>"
   },
