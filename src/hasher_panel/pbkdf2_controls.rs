@@ -1,5 +1,5 @@
 use egui::DragValue;
-use hashers::{hmac::HmacVariant, pbkdf::Pbkdf2};
+use hashers::{hmac::HmacVariant, pbkdf2::Pbkdf2};
 use strum::IntoEnumIterator;
 use utils::byte_formatting::ByteFormat;
 

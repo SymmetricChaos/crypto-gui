@@ -44,7 +44,7 @@ impl HmacFrame {
             };
             if ui.button("🎲").on_hover_text("randomize").clicked() {
                 let mut rng = thread_rng();
-                self.hasher.key = vec![0; Hmac::BLOCK_SIZE / 4];
+                self.hasher.key = vec![0; self.hasher.variant.block_size() / 4];
                 rng.fill_bytes(&mut self.hasher.key);
                 self.key_string = self.key_format.byte_slice_to_text(&mut self.hasher.key)
             }

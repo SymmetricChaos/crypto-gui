@@ -6,6 +6,8 @@ use crate::{
         sha256::{Sha2_224, Sha2_256},
         // sha512::{Sha2_384, Sha2_512},
         Sha1,
+        Sha2_384,
+        Sha2_512,
     },
     traits::ClassicHasher,
 };
@@ -21,8 +23,36 @@ pub enum HmacVariant {
     Md5,
     Sha224,
     Sha256,
-    // Sha384,
-    // Sha512,
+    Sha384,
+    Sha512,
+}
+
+impl HmacVariant {
+    pub fn block_size(&self) -> usize {
+        match self {
+            Self::Sha0 => 64,
+            Self::Sha1 => 64,
+            Self::Md4 => 64,
+            Self::Md5 => 64,
+            Self::Sha224 => 64,
+            Self::Sha256 => 64,
+            Self::Sha384 => 128,
+            Self::Sha512 => 128,
+        }
+    }
+
+    pub fn hasher(&self) -> Box<dyn ClassicHasher> {
+        match self {
+            Self::Sha0 => Box::new(Sha1::sha0()),
+            Self::Sha1 => Box::new(Sha1::sha1()),
+            Self::Md4 => Box::new(Md4::default()),
+            Self::Md5 => Box::new(Md5::default()),
+            Self::Sha224 => Box::new(Sha2_224::default()),
+            Self::Sha256 => Box::new(Sha2_256::default()),
+            Self::Sha384 => Box::new(Sha2_384::default()),
+            Self::Sha512 => Box::new(Sha2_512::default()),
+        }
+    }
 }
 
 pub struct Hmac {
@@ -42,8 +72,6 @@ impl Default for Hmac {
     }
 }
 impl Hmac {
-    pub const BLOCK_SIZE: usize = 64; // Only hashers with a block size of 64 are allowed
-
     pub fn input(mut self, input: ByteFormat) -> Self {
         self.input_format = input;
         self
@@ -87,55 +115,29 @@ impl Hmac {
         self.key = bytes;
         Ok(())
     }
-
-    // Construct the hash function as needed to avoid complicated storage
-    pub fn inner_hash(&self, bytes: &[u8]) -> Vec<u8> {
-        match self.variant {
-            HmacVariant::Sha0 => Sha1::sha0()
-                .input(self.input_format)
-                .output(self.output_format)
-                .hash(bytes),
-            HmacVariant::Sha1 => Sha1::sha1()
-                .input(self.input_format)
-                .output(self.output_format)
-                .hash(bytes),
-            HmacVariant::Md4 => Md4::default()
-                .input(self.input_format)
-                .output(self.output_format)
-                .hash(bytes),
-            HmacVariant::Md5 => Md5::default()
-                .input(self.input_format)
-                .output(self.output_format)
-                .hash(bytes),
-            HmacVariant::Sha224 => Sha2_224::default()
-                .input(self.input_format)
-                .output(self.output_format)
-                .hash(bytes),
-            HmacVariant::Sha256 => Sha2_256::default()
-                .input(self.input_format)
-                .output(self.output_format)
-                .hash(bytes),
-        }
-    }
 }
 
 impl ClassicHasher for Hmac {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let k = if self.key.len() > Self::BLOCK_SIZE {
-            let mut k = self.inner_hash(&self.key);
-            k.truncate(Self::BLOCK_SIZE);
+        let hasher = self.variant.hasher();
+        let block_size = self.variant.block_size();
+
+        let k = if self.key.len() > block_size {
+            let mut k = hasher.hash(&self.key);
+            k.truncate(block_size);
             k
         } else {
             self.key.clone()
         };
-        let mut o_key: Vec<u8> = vec![0x5c; Self::BLOCK_SIZE];
+
+        let mut o_key: Vec<u8> = vec![0x5c; block_size];
         utils::byte_formatting::xor_into_bytes(&mut o_key, &k);
-        let mut i_key: Vec<u8> = vec![0x36; Self::BLOCK_SIZE];
+        let mut i_key: Vec<u8> = vec![0x36; block_size];
         utils::byte_formatting::xor_into_bytes(&mut i_key, &k);
         i_key.extend_from_slice(bytes);
-        let inner = self.inner_hash(&i_key);
+        let inner = hasher.hash(&i_key);
         o_key.extend_from_slice(&inner);
-        self.inner_hash(&o_key)
+        hasher.hash(&o_key)
     }
 
     crate::hash_bytes_from_string! {}
