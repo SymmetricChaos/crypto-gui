@@ -22,6 +22,7 @@ pub mod pbkdf2;
 pub mod pearson;
 pub mod poly1305;
 pub mod radio_gatun;
+pub mod ripemd;
 pub mod sha;
 pub mod siphash;
 pub mod tiger;
