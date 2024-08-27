@@ -1,0 +1,117 @@
+use crate::traits::ClassicHasher;
+use utils::{byte_formatting::ByteFormat, padding::md_strengthening_64_le};
+
+use super::{f, PERM, PERM_PRIME, ROL, ROL_PRIME};
+
+#[derive(Clone)]
+pub struct RipeMd256 {
+    pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
+}
+
+impl Default for RipeMd256 {
+    fn default() -> Self {
+        Self {
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
+        }
+    }
+}
+
+impl RipeMd256 {
+    pub const K: [u32; 4] = [0x00000000, 0x5a827999, 0x6ed9eba1, 0x8f1bbcdc];
+
+    pub const K_PRIME: [u32; 4] = [0x50a28be6, 0x5c4dd124, 0x6d703ef3, 0x00000000];
+
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+
+    fn left_chain(j: usize, s: &mut [u32; 4], block: [u32; 16]) {
+        let t = (s[0]
+            .wrapping_add(f(j, s[1], s[2], s[3]))
+            .wrapping_add(block[PERM[j]])
+            .wrapping_add(Self::K[j / 16]))
+        .rotate_left(ROL[j]);
+        s[0] = s[3];
+        s[3] = s[2];
+        s[2] = s[1];
+        s[1] = t;
+    }
+
+    fn right_chain(j: usize, s: &mut [u32; 4], block: [u32; 16]) {
+        let t = (s[0]
+            .wrapping_add(f(63 - j, s[1], s[2], s[3]))
+            .wrapping_add(block[PERM_PRIME[j]])
+            .wrapping_add(Self::K_PRIME[j / 16]))
+        .rotate_left(ROL_PRIME[j]);
+        s[0] = s[3];
+        s[3] = s[2];
+        s[2] = s[1];
+        s[1] = t;
+    }
+
+    pub fn compress(state_l: &mut [u32; 4], state_r: &mut [u32; 4], block: [u32; 16]) {
+        let mut l = state_l.clone();
+        let mut r = state_r.clone();
+        for i in 0..4 {
+            for j in 0..16 {
+                Self::left_chain(16 * i + j, &mut l, block);
+                Self::right_chain(16 * i + j, &mut r, block);
+            }
+            std::mem::swap(&mut l[i], &mut r[i])
+        }
+        for i in 0..4 {
+            state_l[i] = state_l[i].wrapping_add(l[i]);
+            state_r[i] = state_r[i].wrapping_add(r[i]);
+        }
+    }
+}
+
+impl ClassicHasher for RipeMd256 {
+    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
+        let mut input = bytes.to_vec();
+
+        md_strengthening_64_le(&mut input, 64);
+
+        let mut state_l: [u32; 4] = [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476];
+        let mut state_r: [u32; 4] = [0x76543210, 0xfedcba98, 0x89abcdef, 0x01234567];
+
+        for chunk in input.chunks_exact(64) {
+            let mut block = [0u32; 16];
+            for (elem, b) in block.iter_mut().zip(chunk.chunks_exact(4)) {
+                *elem = u32::from_le_bytes(b.try_into().unwrap());
+            }
+            Self::compress(&mut state_l, &mut state_r, block)
+        }
+
+        let mut out = Vec::with_capacity(32);
+        for word in state_l {
+            out.extend(word.to_le_bytes())
+        }
+        for word in state_r {
+            out.extend(word.to_le_bytes())
+        }
+        out
+    }
+
+    crate::hash_bytes_from_string! {}
+}
+
+crate::basic_hash_tests!(
+
+    RipeMd256::default(), test_256_1, "",
+    "02ba4c4e5f8ecd1877fc52d64d30e37a2d9774fb1e5d026380ae0168e3c5522d";
+    RipeMd256::default(), test_256_2, "a",
+    "f9333e45d857f5d90a91bab70a1eba0cfb1be4b0783c9acfcd883a9134692925";
+    RipeMd256::default(), test_256_3, "abc",
+    "afbd6e228b9d8cbbcef5ca2d03e6dba10ac0bc7dcbe4680e1e42d2e975459b65";
+    RipeMd256::default(), test_256_4, "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
+    "06fdcc7a409548aaf91368c06a6275b553e3f099bf0ea4edfd6778df89a890dd";
+);
