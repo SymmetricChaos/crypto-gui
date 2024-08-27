@@ -1,7 +1,6 @@
+use super::ripemd160::RipeMd160;
 use crate::traits::ClassicHasher;
 use utils::{byte_formatting::ByteFormat, padding::md_strengthening_64_le};
-
-use super::{f, PERM, PERM_PRIME, ROL, ROL_PRIME};
 
 #[derive(Clone)]
 pub struct RipeMd320 {
@@ -19,10 +18,6 @@ impl Default for RipeMd320 {
 }
 
 impl RipeMd320 {
-    pub const K: [u32; 5] = [0x00000000, 0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xa953fd4e];
-
-    pub const K_PRIME: [u32; 5] = [0x50a28be6, 0x5c4dd124, 0x6d703ef3, 0x7a6d76e9, 0x00000000];
-
     pub fn input(mut self, input: ByteFormat) -> Self {
         self.input_format = input;
         self
@@ -33,44 +28,35 @@ impl RipeMd320 {
         self
     }
 
-    fn left_chain(j: usize, s: &mut [u32; 5], block: [u32; 16]) {
-        let t = (s[0]
-            .wrapping_add(f(j, s[1], s[2], s[3]))
-            .wrapping_add(block[PERM[j]])
-            .wrapping_add(Self::K[j / 16]))
-        .rotate_left(ROL[j])
-        .wrapping_add(s[4]);
-        s[0] = s[4];
-        s[4] = s[3];
-        s[3] = s[2].rotate_left(10);
-        s[2] = s[1];
-        s[1] = t;
-    }
-
-    fn right_chain(j: usize, s: &mut [u32; 5], block: [u32; 16]) {
-        let t = (s[0]
-            .wrapping_add(f(79 - j, s[1], s[2], s[3]))
-            .wrapping_add(block[PERM_PRIME[j]])
-            .wrapping_add(Self::K_PRIME[j / 16]))
-        .rotate_left(ROL_PRIME[j])
-        .wrapping_add(s[4]);
-        s[0] = s[4];
-        s[4] = s[3];
-        s[3] = s[2].rotate_left(10);
-        s[2] = s[1];
-        s[1] = t;
-    }
-
     pub fn compress(state_l: &mut [u32; 5], state_r: &mut [u32; 5], block: [u32; 16]) {
         let mut l = state_l.clone();
         let mut r = state_r.clone();
-        for i in 0..5 {
-            for j in 0..16 {
-                Self::left_chain(16 * i + j, &mut l, block);
-                Self::right_chain(16 * i + j, &mut r, block);
+
+        for j in 0..80 {
+            // Exact same round functions as RIPEMD-160
+            RipeMd160::left_chain(j, &mut l, block);
+            RipeMd160::right_chain(j, &mut r, block);
+            // While in RIPEMD-160 the l and r arrays and mixed together
+            // at the end of the compression function that is not possible
+            // here since both are needed for output. Instead at the end of
+            // each 16 step round a word is swapped between them.
+            if j == 15 {
+                std::mem::swap(&mut l[1], &mut r[1])
             }
-            std::mem::swap(&mut l[i], &mut r[i])
+            if j == 31 {
+                std::mem::swap(&mut l[3], &mut r[3])
+            }
+            if j == 47 {
+                std::mem::swap(&mut l[0], &mut r[0])
+            }
+            if j == 63 {
+                std::mem::swap(&mut l[2], &mut r[2])
+            }
+            if j == 79 {
+                std::mem::swap(&mut l[4], &mut r[4])
+            }
         }
+
         for i in 0..5 {
             state_l[i] = state_l[i].wrapping_add(l[i]);
             state_r[i] = state_r[i].wrapping_add(r[i]);
@@ -95,7 +81,7 @@ impl ClassicHasher for RipeMd320 {
             Self::compress(&mut state_l, &mut state_r, block)
         }
 
-        let mut out = Vec::with_capacity(32);
+        let mut out = Vec::with_capacity(40);
         for word in state_l {
             out.extend(word.to_le_bytes())
         }

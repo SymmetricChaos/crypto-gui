@@ -99,9 +99,13 @@
     "Authors": "Bertoni et al.",
     "Publication": "2006"
   },
-  "SHA-0": "SHA-0 (NSA 1993) was the original cryptographic hash function designed by the US National Security Agency, first specified is 1992. It produces a 160 bit (20 byte) hash. In 1995, shortly after being official published, it was withdrawn and replaced with SHA-1, which differs only in the addition of a one bit rotation during the expansion step of the compression function, to correct an unspecified security flaw. Practical attacks on SHA-0 have been publicly known since 2004.",
+  "RIPEMD": {
+    "Description": "RIPEMD is a family of five hash functions. The original RIPEMD is 128-bit hash function with three rounds which was found to have a low security margin. Four improved versions were proposed. RIPEMD-128 and the extended RIPEMD-256 have four rounds. RIPEMD-160 and the extended RIPEMD-320 have five rounds. The extended versions do not claim any increased security.",
+    "Authors": "Dobbertin, Bosselaers, and Preneel",
+    "Publication": "1996"
+  },
   "SHA-1": {
-    "Description": "SHA-1 is a cryptographic hash function designed by the US National Security Agency, first released is 1995. It produces a 160 bit (20 byte) hash. Practical attacks on SHA-1 have been publicly known since 2017",
+    "Description": "SHA-1 is a cryptographic hash function designed by the US National Security Agency, first released is 1995. It produces a 160 bit (20 byte) hash. Practical attacks on SHA-1 have been publicly known since 2017. It it based on the similar SHA-0, released in 1993, which different only in lacking a one bit rotation during the expansion step. Practical attacks on SHA-0 have been publicly known since 2004.",
     "Authors": "NSA",
     "Publication": "1995"
   },

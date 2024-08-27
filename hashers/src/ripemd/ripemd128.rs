@@ -33,7 +33,7 @@ impl RipeMd128 {
         self
     }
 
-    fn left_chain(j: usize, s: &mut [u32; 4], block: [u32; 16]) {
+    pub(super) fn left_chain(j: usize, s: &mut [u32; 4], block: [u32; 16]) {
         let t = (s[0]
             .wrapping_add(f(j, s[1], s[2], s[3]))
             .wrapping_add(block[PERM[j]])
@@ -45,7 +45,7 @@ impl RipeMd128 {
         s[1] = t;
     }
 
-    fn right_chain(j: usize, s: &mut [u32; 4], block: [u32; 16]) {
+    pub(super) fn right_chain(j: usize, s: &mut [u32; 4], block: [u32; 16]) {
         let t = (s[0]
             .wrapping_add(f(63 - j, s[1], s[2], s[3]))
             .wrapping_add(block[PERM_PRIME[j]])
