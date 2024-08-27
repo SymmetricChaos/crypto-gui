@@ -1,57 +1,332 @@
 ﻿{
-  "ASCII": "The American Standard Code for Information Interchange (ASCII) was created in the 1960s and consists of 128 characters sufficient to write essentially all English text and to control the printing device. Originally a 7-bit code it is now most often seen as an 8-bit code with the leading bit always set to zero. Although it became a defacto standard the limited character set eventually lead to its replacement by Unicode, indeed the common UTF-8 standard contains the 8-bit ASCII codes.\nThere are 34 ASCII control codes. This page accepts both literal control characters and their Unicode control pictures.",
-  "Ascii85": "Ascii85 is binary-to-text encoding that uses 85 ASCII characters. It works by taking a 32 bit chunk of data and dividing it by 85 until zero is reached, keeping track of remainders. The remainders are then encoded as ASCII characters.",
-  "Bacon": "Fancis Bacon developed this fixed width code (though he called it a cipher) in 1605, assigning each letter of the classical Latin alphabet a five bit code. The intended use was to hide one text in another by writing letters of the larger text in two different ways to represent the bits of the hidden message.",
-  "Balanced Ternary": "The balanced ternary representation of integers uses three digits with the values +1, 0, and -1. In this representation the additive inverse of a number is produced by inverting each digit. Some early computers, such as the Soviet Setun, used balanced ternary interally instead of binary bits. In fact a mechanical calculator produced by Thomas Fowler in 1840 as built using this system to simplify its design.",
-  "Barbier": "The Barbier Code is a predecessor to the Braille writing system, originally created as a method for reading and writing in the dark. 36 common sounds in French are assigned positions in a grid and they are indicated by two sets of dots that give the row and column, much as in a tap code. Here the dots are written out horizontally but Barbier intended them to be written in vertical pairs. While Braille would retained the use of dots his system was much more compact so a character could be read in a single motion.\n\nNOTE: Syllables must be separated by spaces when written for this page, otherwise the encoding is ambiguous.",
-  "Base-N": "In an important sense every code can be thought of as simply assigning a number to each value. Arguably the simplest way to do this is to directly assign numbers to values using the ordinary number system. This has signigicant inefficiencies and limitations, however. Here a code may be created that assigns values a numnber in any base from 2 to 36.",
-  "Bijective Base-N": "In bijective notation every sequence of digits corresponds to exactly one integer. Conversely, in the ordinary representation numbers may have the digit 0 added any number of times on the left without changing the value. Bijective numerals remove the digit 0 entirely, adds an additional numeral with value equal to the base, and keeps the same system for positional values. So in bijective base-10 the number the smallest digit is 1 and the largest digit is A, which has a value of 10. The bijective base-10 number 5A3 thus represents: 5 × 10^2 + A × 10^1 + 3 × 10^0 = 500 + 100 + 3 = 603\n\nThe simple tally or unary representation of numbers (where 1 = 1, 2 = 11, 3 = 111, etc) is the simplest bijective numeral system. Bujective numerals take slightly fewer symbols to write than the ordinary counterparts but cannot represent the number zero at all as it must be a blank space.",
-  "BaseX": "Originally created as Base58 for usage in Bitcoin this binary-to-text standard encodes data as text characters without padding. The reduced alphabet is used to avoid characters that might be confused while read or transcribed by a human but this variation allows arbitrary characters and alphabet sizes. Although similar to Base64 and Base32 the BaseX encodings are not identical to them even when an identical alphabet.",
-  "Base16/Hexcode": "Hexcode (also called Base16) is one of the most common ways to display bytes of binary data using the digits 0 through 9 and the letters A through F, ignoring case, to convert them to hexadecimal numbers. Each byte is encoded as exactly two hexadecimal digits. This is inefficient for storage and transmission but is easy for a human reader to interpret. Because of how ubiqutous it is there are no variation on hexcode like there are for its relatives Base32 and Base64. Some software or hardware will use a phrase in hexcode to mark it as important, most famously when early IBM computers freed a region of memory it would be overwritten with DEADBEEF to indicate to a programmer observing the memory that whatever had been there was gone.",
-  "Base32": "Base32 works similarly to the more popular Base64 encoding but operates on groups of five bits. This introduces more overhead than Base64 but the smaller character set makes it possible to remove characters that might be confused, important if the string must be copied by a person, or even to make forming words impossible, which may be a requirement if stored on a system that forbids profanity or other kinds of text.",
-  "Base64": "Base64 is a popular form of binary-to-text encoding that converts arbitary data into a sequence of characters. The original goal of this was to ensure that systems that handled bytes of data in different ways but all recognized certain characters could handle the data without corrupting it. Today it is more common as a method to obscure the data. Each possible six bit group is encoded as an eight bit ASCII character for about 33% overhead.",
-  "Baudot": "The Baudot Code is a five bit telegraphy code developed by Emile Baudot of France that extended its character set by being able to switch modes from letters to figures. The original ITA1 code included several undefined characters to be selected my national telegraph authorities and lead to various divergent standards. It was succeeded by a variant, called ITA2, created by Donald Murray of New Zealand would become the major international standard for text communication until the rise of ASCII (which was itself adopted as ITA5). The data rate 'baud' which measures symbols per second is named after the Baudot code.\n\nAn important part of the Baudot codes is control characters. These are represented here by Unicode control pictures.\n␀: The null character, nothing transmitted.\n␍: Carriage Return, place the printing head at the start of a line.\n␊: Line Feed, move to the next line\n␎: Figure Shift (Shift Out), change to the number and symbols mode\n␏: Letter Shift (Shift In), change to the letter mode\n␅: Enqiry, test for an automatic response from the receiving station\n␇: Bell, ring a bell at the receiving station",
-  "Biquinary Coded Decimal": "Biquinary coded decimal is a method frequently used to represent number on an abacus. The top two values represent a bead in one of two positions, standing for 0 or 5. The lower five bits represent beads that count the ones digits.",
-  "Braille Encodings": "There are several one-to-one encodings used to describe the 64 possible Braille cells when the characters themselved cannot be used.",
-  "Bytewords": "Bytewords is a method for encoding binary data as common English words. Several design features were chosen: words are all four letters, have unique starting and ending letters, require at least two substitutions or transpositions to change one into another, the first three and last three letters are also all unique. The uniquness of the starting and ending letters allows a compressed representation that is an efficient as hexadecimal.",
-  "CCSID": "Coded Character Set Identifiers are the numeric designations given to various encodings over various code pages. A code page consists of a set of characters to represent and its encoding is the values assigned to each character. Code pages were an early method for expanding the characters that could be represented on computers by allowing the character and encoding to be specified. The disadvantage of this system was that if text were present without its identifier or if a device did not have the necessary information for that page and encoding the result was gibberish (often called mojibake). Here control characters are represented by their picture so that they appear as printed characters. Eventually Unicode emerged as a widespread replacement for code pages.",
-  "Convolutional Code": "Convolutional codes are error correcting codes that take a sliding window of the data, produce parity bits and then transmit those parity bits instead of the data. The message is then reconstructed by the reciever using statistics, specifically maximum-likelihood estimation. Generation of the parity bits is straightfoward. A window is slid across the data bits looking at only a portion of them, then two or more times some bits are masked out and the are XORed together. The window is then moved one bit and the process repeated. The rate of the code is given as the size of the number of masks divided by the size of the window.",
-  "Cyclic Redundancy Check": "A cyclic redundancy check is a form of error detecting code. It treats the data as a polynomial and divides it by a chosen generator polynomial. The remainder of the division is then appended to the data as a series of check bits. Although it cannot correct errors CRCs are fast to compute, take a small amount of space, and are able to burst errors (in which multiple bits in a row are incorrect) so they are popular when it is easy to resend blocks of data. Among other applications CRCs are used for telecommunications such as mobile phones and Ethernet connections, when sending data via USB, to identify corruption in PNG images and MPEG-2 videos, as well as communication between computer components.",
-  "Damm": "The Damm algorithm is a check digit algorithm similar to the Verhoeff algorithm but with a simpler implementation. A sigle table (a Cayley table with the Latin Square property) is sufficient to catch any change of a single digit as well as any transposition of adjacent elements. The table chosen by Damm also catches common English phonetic errors such as saying 14 and 40 similarly.",
-  "Elias": "The Elias codes are a family of universal codes meaning they are prefix codes which share the property that so long as large numbers are less probable than small ones the code is within a constant multiple of the best possible prefix code for the real distribution. Elias codes cover only the positive integers.",
-  "Factoradic": "The factoradic numeral system represents non-negative integers using positional notation where each digit must be less than its index and its value is the factorial of its index. This encoding allows straightfoward calculation of permutations.",
-  "Fibonacci": "The Fibonacci code is a prefix code that assigns a binary sequence to each positive integer. So long as larger integers appear less frequently than smaller ones this encoding is within a constant factor of an optimal encoding. More importantly the Fibonacci code is self-synchronizing. Alterting a single bit will either incorrectly split a single code or incorrectly merge two codes but following codes will not be affected.",
-  "Fixed-Width": "In fixed-width codes every code group contains the same number of symbols. Because codes are the same length they can never appear inside of each other and thus are always prefix codes. Specific block codes include: ASCCI, UTF-32, M-of-N codes, and Baudot.",
-  "Gödel": "Gödel's encoding was designed to allow statements of mathematical logic to be encoded as numbers so that mathematical logic could be applied to itself. The technique is simple: A positive integer is assigned to each word or symbol, then a finite sequence of integers is encoded as the sequence of primes raised to the power of each value and that is multiplied together. The original sequence is recovered by factoring. For example: the sequence of numbers (1, 2, 3) would be encoded as 2^1 × 3^2 × 5^3 = 2 × 9 × 125 = 2250.",
-  "Gray Code": "The Gray code or reflected binary code that represents non-negative integers so that in order they differ only in a single bit. Originally this kind of ordering was useful for mechanical switches as they can be moved through every possible setting while avoiding the issue of switches not moving with perfect synchronization.",
-  "Hamming Code": "The family of Hamming Codes are widely used for detecting and correcting errors. They automatically correct single bit errors, with an extra parity bit two bit errors can be detected. No code that corrects single bit errors can do so using fewer check bits than a Hamming code. The Hamming(4,7) code is about 57% efficient using three bits check digits for four data bits. Additional check digits become very efficient, 8 check bits are sufficient to cover 247 data bits for 97% efficiency. Despite this the higher efficiency sending a larger number of bits at a time increases probability of errors.",
-  "ICS Flags": "The International Code of Signals (ICS) defines a set of maritime signal flags that represent letters of the alphabet. These flags can be described by their heraldic blazon. The names of the flags are given using the NATO phonetic alphabet when spoken aloud.",
-  "ISBN": "The International Standard Book Number (ISBN) is a standard identifier assigned to each edition and variant of a registered publication. From 1953 to 2007 the standard was ten digits until it was updated to match the 13-digit EAN product standard. To catch simple transcrption errors a check digit is calculated and included at the end.",
-  "ITF": "The Interleaved Two-of-Five (ITF) code is a barcode encoding for pairs of digits. Information is represented by wide and narrow sections. For even digits the sections are five bars and two spaces while for odd digits there are are five spaces and two bars. The use of a 2-of-5 code catches some errors.",
-  "Levenshtein": "The Levenshtein coding is a prefix code that assigns a binary sequence to each non-negative intger. The encoding a universal code, meaning so long as large numbers are less probable than small ones the code is within a constant multiple of the best possible prefix code represent the numbers.",
-  "Linotype": "The internal sorting mechanism of the Linotype machine used a seven-bit code to mechnically identify the characters. Each matrix, a small brass unit with an inscribed character, has seven teeth which engage with seven rails in the distributor system. Gaps in the rails at each channel were the complement of the teeth on the matrix for that letter. This automatic reloading ability, enabled by the code, was a major factor in the machine's success. Note that ligatures may not render correctly on all systems.\n\nFor ease of use on modern computers the ordinary space character may be entered in place of the em-space (0100010) when encoding.",
-  "Luhn's Algorithm": "Luhn's Algorithm is a technique for calculating a checksum developed by Hans Luhn in 1960. Digits are taken right to left, the value of every even digit doubled, and then all summed together. That check digit is the smallest number, if added to the total, would make a multiple of 10 (or whatever modulus is chosen).",
-  "M-of-N": "An M-of-N code is an error detecting code detects single bit errors but cannot correct errors. Each code word has a specified length (number of bits) and weight (number of bits set to 1). Binary data is re-encoded by reading (length - weight) bits then appending 1 bits until the require weight it reached and then 0 bits until the required length is reached. When decoding a code block with the wrong weight is detected as an error. Here a decoding error is replaced by the � symbol.",
-  "Morse": "The best known version of Morse Code is the ITU Standard. It uses two kind of signals the 'dit' and 'dah' with the dah defined as three times the length of the dit. Morse code also requires periods with no signal, called spaces, in order to differentiate characters. The subset of ITU Morse below covers all the printing characters. Additional control signals and prosigns are not yet supported. The space between dits and dahs is the same length as a dit, between characters is a space of three dits. The older American Morse standard is slightly different, still using dits and dahs of the same size but also including a double length space within come characters.",
-  "MTK2": "MTK2 is the Russian variant of the ITA2 Baudot Code. Due to the larger Cyrillic alphabet additional space was needed to transmit all characters. To this end MTK2 has an extra control character that shifts to Cyrillic Mode.",
-  "Needle": "The needle code is the coding method using by the earliest electrical telegraph system created by Cooke and Wheatstone. Letters were arranged in a diamond shaped grid with five needles across the middle. Letters were indicated by turning two of the needles so that they pointed to a specific letter. Although it required no training to use the complexity and unreliability of this system was a problem. Later needle codes were created that used just one or two needles and did not operate by pointing.",
-  "Parity Bit": "A parity bit is a very simple way of efficiently detecting single bit errors. The bits of some segment are added up and a bit is appended indicating if the value is odd or even. Equivalently the bits are XORed together and the value is appended. In this example the check bit is added immediately after the block though it can be placed anywhere.",
-  "PGP Words": "The PGP Words converts a sequence of bytes into a sequence of words. To prevent errors this is done using two list which alternate back and forth. To keep synchronization the even list uses words with two syllables and the odd list uses words with three syllables.",
-  "Punycode": "Punycode is a method for re-encoding short Unicode strings using only ASCII characters, originally created for use with Internationalized Domain Names. The characters which are not ASCII are stripped out of the string, a delimeter character is placed after the remaining characters, then the non-ASCII characters are encoded onto the end using a method that records their position and Unicode codepoint. For example the sentence \"TạisaohọkhôngthểchỉnóitiếngViệt\" is encoded as \"TisaohkhngthchnitingVit-kjcr8268qyxafd2f1b9g\".",
-  "Repetition": "The simplest form of error correcting code is Repetition in which every bit is encoded as that bit repeated several times. When decoding each bit in the block 'votes' for  what the block should decode as with the majority winning. Only odd numbered block sizes are always unambigious. This form of encoding is extremely space inefficient and more sophisticated codes are often used in practice.",
-  "Romaji": "It is often convient or necessary for Japanese text to be rendered in Latin characters. To accomplish this an encoding known as romaji (roman characters) is used. Several version are available: Kunrei-shiki is endorsed by the government of Japan, Hebern-shiki is widely used in the West, Nihon-shiki is a highly regular encoding no longer in common use.\nNotes on decoding: Decoding romaji back to kana is an imperfect process. The system used here does not vary with the variant chosen and should provide a decoding of any valid romaji. Because information is lost when encoding this decoding may not be perfectly accurate. For instance the を (wo) and お (o) kana are both transliterated as 'o' in Kunrei and Hebern. Likewise っに and んに are both rendered as `nni` in all encodings used. Decoding is consistent, so 'o' always becomes お while 'nni' always becomes んに but these many not reflect the original kana.",
-  "Roman Numeral": "Roman Numerals are a now obsolete numeral system derived from an older Etruscan system. Their familiar form was arrived at about 2000 years ago. The symbols I, V, X, L, C, D, M stand for values of 1, 5, 10, 50, 100, 500, and 1000. The simplest use of these symbols is to just add up the values, for readability they are written from largest to smallest going left to right. However this can result is very long representations for numbers that are just under the value of a symbol. To correct for this a symbol with a small value may be placed to the left of one with a large value to indicate the small value should be subtracted. Thus 9 is written IX rather than VIIII. The Romans were not consistent about the use of this rule but modern standardized Roman numerals enforce it by allowed no more than three of a symbol to appear consecutively which also limnits them to numbers less than 4000.",
-  "S\/KEY": "The S\/KEY standard covers a system for human readable use of one time passwords. Here is recreated just the binary-to-text encoding used for the 64-bit passwords. Each password is converted into six words representing 11 bits each for a total of 66 bits, the bits of the password followed by a two bit error check.",
-  "Flag Semaphore": "In flag semaphore information is transmitted using the positions of the arms, usually while holding flags to make their positions more apparent. Flags are held away from the body in five positions, ordered from lowest to highest: down, low, out, high, up. Any of the positions may be held across the body instead to put two flags on the same side. Flag semaphore positions are named as a pair that give the left arm and right arm from the perspective of the flag holder.",
-  "Simplified Braille": "Braille is a tactile writing system in which each character consists of six raised dots arranged in two columns of three, known as a cell. Early Braille simply encoded the letters of the French alphabet on a one-to-one basis but it has diverged since then with abbreviations becoming common almost immediately. Modern versions of Braille cover numerous languages and have developed their own syntax with some languages extending the dots to eight instead of six. Here only simple early mappings between letters and Braille cells are provided.",
-  "Spelling Alphabet": "Spelling Alphabets are designed to spell short sequences of letters over voice channels where noise might cause ambiguity. Written specifications for these systems appeared in the early 20th century with several focusing only on the most easily confused letters.",
-  "Symmetric Unary": "The symmetric unary code is a variation on the unary encoding that can be read either in either direction with exactly the same efficiency as the regular version. The number n is encoded as '0' followed by n-2 '1's followed by and additional '0'. An exception is 0 which is encoded as just the symbol '1'.",
-  "Tap": "Tap codes work on the same principle as the Polybius square cipher but simplified for ease of use. Characters are specified by pairs of tap sequences. The first sequence of taps selects a row and the second sequence of taps a column in that row. This very slow way of encoding text is said to be common among prisoners as it is easy to learn and requires no special tools.",
-  "Two's Complement": "Two's complement is a way of encoding positive and negative integers as bits that is widely used in computers. Non-negative integers are encoded in the usual way except that the highest bit is always left as zero. The negative (or additive inverse) of each positive integer is found by inverting all the bits and then adding one. When using two's complement addition, subtraction, and multiplication can be implemented using the same procedure as for standard binary integers but extended to negatives.",
-  "Unary": "The unary encoding is the simplest useful encoding of the non-negative integers. The number n is encoded as n '1's followed by a single '0', though any two distinct symbols can be used. Representing numbers this way creates a prefix code and so allows a sequence to be represented without spaces. In practice unary codes are extremely inefficient.",
-  "Unicode": "Unicode is the dominant international standard for encoding of text using in most of the world's writing systems with over 100,000 code points defined. There are three major encodings used called UTF-8, UTF-16, and UTF-32.",
-  "Unified English Braille": "Unified English Braille the form of Braille used internationally for writing in English, though it is not the only form of English Braille in usage. Unlike early Braille UEB is a complete writing system with unique syntax. Most commonly UEB is written in Grade 2 with extensive use of contractions and abbreviations. Here only Grade 1 UEB without those is presented as correct transliteration of Grade 2 UEB is much more complex.",
-  "UPC": "The Universal Product Code is a widely used encoding for barcodes. It has twelve digits, including the check digit. It is divided into two sections. The six left digits use a seven bit code while the six right digits use the bitwise inverse of that the same code. The start and end are padded with a guard pattern while the left and right are separated by another pattern.",
-  "Verhoeff": "The Verhoeff algorithm was the first checksum algorithm using only decimal digits able to both detect all single digit errors and all adjacent transposition errors. Rather than using standard arithmetic operations calculation is done using a dihedrial group and permutation.",
-  "Wabun": "The Wabun (和文 meaning 'Japanese Text') code is a variation on Morse Code used for Japanese. Each kana is assigned a code point as are the two Japanese diacritical marks and several punctuation symbols. When mixed with ITU Morse code the prosigns DO and SN used to indicate the start and end of Wabun encoding.\n\nThe small yōon and sokuon kana use the same code as their larger versions. When decoding this site will create the yōon after an 'i' kana but does not create sokuon at all."
+  "ASCII": {
+    "Description": "The American Standard Code for Information Interchange (ASCII) was created in the 1960s and consists of 128 characters sufficient to write essentially all English text and to control the printing device. Originally a 7-bit code it is now most often seen as an 8-bit code with the leading bit always set to zero. Although it became a defacto standard the limited character set eventually lead to its replacement by Unicode, indeed the common UTF-8 standard contains the 8-bit ASCII codes.\nThere are 34 ASCII control codes. This page accepts both literal control characters and their Unicode control pictures.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Ascii85": {
+    "Description": "Ascii85 is binary-to-text encoding that uses 85 ASCII characters. It works by taking a 32 bit chunk of data and dividing it by 85 until zero is reached, keeping track of remainders. The remainders are then encoded as ASCII characters.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Bacon": {
+    "Description": "Fancis Bacon developed this fixed width code (though he called it a cipher) in 1605, assigning each letter of the classical Latin alphabet a five bit code. The intended use was to hide one text in another by writing letters of the larger text in two different ways to represent the bits of the hidden message.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Balanced Ternary": {
+    "Description": "The balanced ternary representation of integers uses three digits with the values +1, 0, and -1. In this representation the additive inverse of a number is produced by inverting each digit. Some early computers, such as the Soviet Setun, used balanced ternary interally instead of binary bits. In fact a mechanical calculator produced by Thomas Fowler in 1840 as built using this system to simplify its design.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Barbier": {
+    "Description": "The Barbier Code is a predecessor to the Braille writing system, originally created as a method for reading and writing in the dark. 36 common sounds in French are assigned positions in a grid and they are indicated by two sets of dots that give the row and column, much as in a tap code. Here the dots are written out horizontally but Barbier intended them to be written in vertical pairs. While Braille would retained the use of dots his system was much more compact so a character could be read in a single motion.\n\nNOTE: Syllables must be separated by spaces when written for this page, otherwise the encoding is ambiguous.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Base-N": {
+    "Description": "In an important sense every code can be thought of as simply assigning a number to each value. Arguably the simplest way to do this is to directly assign numbers to values using the ordinary number system. This has signigicant inefficiencies and limitations, however. Here a code may be created that assigns values a numnber in any base from 2 to 36.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Bijective Base-N": {
+    "Description": "In bijective notation every sequence of digits corresponds to exactly one integer. Conversely, in the ordinary representation numbers may have the digit 0 added any number of times on the left without changing the value. Bijective numerals remove the digit 0 entirely, adds an additional numeral with value equal to the base, and keeps the same system for positional values. So in bijective base-10 the number the smallest digit is 1 and the largest digit is A, which has a value of 10. The bijective base-10 number 5A3 thus represents: 5 × 10^2 + A × 10^1 + 3 × 10^0 = 500 + 100 + 3 = 603\n\nThe simple tally or unary representation of numbers (where 1 = 1, 2 = 11, 3 = 111, etc) is the simplest bijective numeral system. Bujective numerals take slightly fewer symbols to write than the ordinary counterparts but cannot represent the number zero at all as it must be a blank space.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "BaseX": {
+    "Description": "Originally created as Base58 for usage in Bitcoin this binary-to-text standard encodes data as text characters without padding. The reduced alphabet is used to avoid characters that might be confused while read or transcribed by a human but this variation allows arbitrary characters and alphabet sizes. Although similar to Base64 and Base32 the BaseX encodings are not identical to them even when an identical alphabet.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Base16/Hexcode": {
+    "Description": "Hexcode (also called Base16) is one of the most common ways to display bytes of binary data using the digits 0 through 9 and the letters A through F, ignoring case, to convert them to hexadecimal numbers. Each byte is encoded as exactly two hexadecimal digits. This is inefficient for storage and transmission but is easy for a human reader to interpret. Because of how ubiqutous it is there are no variation on hexcode like there are for its relatives Base32 and Base64. Some software or hardware will use a phrase in hexcode to mark it as important, most famously when early IBM computers freed a region of memory it would be overwritten with DEADBEEF to indicate to a programmer observing the memory that whatever had been there was gone.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Base32": {
+    "Description": "Base32 works similarly to the more popular Base64 encoding but operates on groups of five bits. This introduces more overhead than Base64 but the smaller character set makes it possible to remove characters that might be confused, important if the string must be copied by a person, or even to make forming words impossible, which may be a requirement if stored on a system that forbids profanity or other kinds of text.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Base64": {
+    "Description": "Base64 is a popular form of binary-to-text encoding that converts arbitary data into a sequence of characters. The original goal of this was to ensure that systems that handled bytes of data in different ways but all recognized certain characters could handle the data without corrupting it. Today it is more common as a method to obscure the data. Each possible six bit group is encoded as an eight bit ASCII character for about 33% overhead.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Baudot": {
+    "Description": "The Baudot Code is a five bit telegraphy code developed by Emile Baudot of France that extended its character set by being able to switch modes from letters to figures. The original ITA1 code included several undefined characters to be selected my national telegraph authorities and lead to various divergent standards. It was succeeded by a variant, called ITA2, created by Donald Murray of New Zealand would become the major international standard for text communication until the rise of ASCII (which was itself adopted as ITA5). The data rate 'baud' which measures symbols per second is named after the Baudot code.\n\nAn important part of the Baudot codes is control characters. These are represented here by Unicode control pictures.\n␀: The null character, nothing transmitted.\n␍: Carriage Return, place the printing head at the start of a line.\n␊: Line Feed, move to the next line\n␎: Figure Shift (Shift Out), change to the number and symbols mode\n␏: Letter Shift (Shift In), change to the letter mode\n␅: Enqiry, test for an automatic response from the receiving station\n␇: Bell, ring a bell at the receiving station",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Biquinary Coded Decimal": {
+    "Description": "Biquinary coded decimal is a method frequently used to represent number on an abacus. The top two values represent a bead in one of two positions, standing for 0 or 5. The lower five bits represent beads that count the ones digits.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Braille Encodings": {
+    "Description": "There are several one-to-one encodings used to describe the 64 possible Braille cells when the characters themselved cannot be used.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Bytewords": {
+    "Description": "Bytewords is a method for encoding binary data as common English words. Several design features were chosen: words are all four letters, have unique starting and ending letters, require at least two substitutions or transpositions to change one into another, the first three and last three letters are also all unique. The uniquness of the starting and ending letters allows a compressed representation that is an efficient as hexadecimal.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "CCSID": {
+    "Description": "Coded Character Set Identifiers are the numeric designations given to various encodings over various code pages. A code page consists of a set of characters to represent and its encoding is the values assigned to each character. Code pages were an early method for expanding the characters that could be represented on computers by allowing the character and encoding to be specified. The disadvantage of this system was that if text were present without its identifier or if a device did not have the necessary information for that page and encoding the result was gibberish (often called mojibake). Here control characters are represented by their picture so that they appear as printed characters. Eventually Unicode emerged as a widespread replacement for code pages.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Convolutional Code": {
+    "Description": "Convolutional codes are error correcting codes that take a sliding window of the data, produce parity bits and then transmit those parity bits instead of the data. The message is then reconstructed by the reciever using statistics, specifically maximum-likelihood estimation. Generation of the parity bits is straightfoward. A window is slid across the data bits looking at only a portion of them, then two or more times some bits are masked out and the are XORed together. The window is then moved one bit and the process repeated. The rate of the code is given as the size of the number of masks divided by the size of the window.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Cyclic Redundancy Check": {
+    "Description": "A cyclic redundancy check is a form of error detecting code. It treats the data as a polynomial and divides it by a chosen generator polynomial. The remainder of the division is then appended to the data as a series of check bits. Although it cannot correct errors CRCs are fast to compute, take a small amount of space, and are able to burst errors (in which multiple bits in a row are incorrect) so they are popular when it is easy to resend blocks of data. Among other applications CRCs are used for telecommunications such as mobile phones and Ethernet connections, when sending data via USB, to identify corruption in PNG images and MPEG-2 videos, as well as communication between computer components.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Damm": {
+    "Description": "The Damm algorithm is a check digit algorithm similar to the Verhoeff algorithm but with a simpler implementation. A sigle table (a Cayley table with the Latin Square property) is sufficient to catch any change of a single digit as well as any transposition of adjacent elements. The table chosen by Damm also catches common English phonetic errors such as saying 14 and 40 similarly.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Elias": {
+    "Description": "The Elias codes are a family of universal codes meaning they are prefix codes which share the property that so long as large numbers are less probable than small ones the code is within a constant multiple of the best possible prefix code for the real distribution. Elias codes cover only the positive integers.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Factoradic": {
+    "Description": "The factoradic numeral system represents non-negative integers using positional notation where each digit must be less than its index and its value is the factorial of its index. This encoding allows straightfoward calculation of permutations.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Fibonacci": {
+    "Description": "The Fibonacci code is a prefix code that assigns a binary sequence to each positive integer. So long as larger integers appear less frequently than smaller ones this encoding is within a constant factor of an optimal encoding. More importantly the Fibonacci code is self-synchronizing. Alterting a single bit will either incorrectly split a single code or incorrectly merge two codes but following codes will not be affected.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Fixed-Width": {
+    "Description": "In fixed-width codes every code group contains the same number of symbols. Because codes are the same length they can never appear inside of each other and thus are always prefix codes. Specific block codes include: ASCCI, UTF-32, M-of-N codes, and Baudot.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Gödel": {
+    "Description": "Gödel's encoding was designed to allow statements of mathematical logic to be encoded as numbers so that mathematical logic could be applied to itself. The technique is simple: A positive integer is assigned to each word or symbol, then a finite sequence of integers is encoded as the sequence of primes raised to the power of each value and that is multiplied together. The original sequence is recovered by factoring. For example: the sequence of numbers (1, 2, 3) would be encoded as 2^1 × 3^2 × 5^3 = 2 × 9 × 125 = 2250.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Gray Code": {
+    "Description": "The Gray code or reflected binary code that represents non-negative integers so that in order they differ only in a single bit. Originally this kind of ordering was useful for mechanical switches as they can be moved through every possible setting while avoiding the issue of switches not moving with perfect synchronization.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Hamming Code": {
+    "Description": "The family of Hamming Codes are widely used for detecting and correcting errors. They automatically correct single bit errors, with an extra parity bit two bit errors can be detected. No code that corrects single bit errors can do so using fewer check bits than a Hamming code. The Hamming(4,7) code is about 57% efficient using three bits check digits for four data bits. Additional check digits become very efficient, 8 check bits are sufficient to cover 247 data bits for 97% efficiency. Despite this the higher efficiency sending a larger number of bits at a time increases probability of errors.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "ICS Flags": {
+    "Description": "The International Code of Signals (ICS) defines a set of maritime signal flags that represent letters of the alphabet. These flags can be described by their heraldic blazon. The names of the flags are given using the NATO phonetic alphabet when spoken aloud.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "ISBN": {
+    "Description": "The International Standard Book Number (ISBN) is a standard identifier assigned to each edition and variant of a registered publication. From 1953 to 2007 the standard was ten digits until it was updated to match the 13-digit EAN product standard. To catch simple transcrption errors a check digit is calculated and included at the end.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "ITF": {
+    "Description": "The Interleaved Two-of-Five (ITF) code is a barcode encoding for pairs of digits. Information is represented by wide and narrow sections. For even digits the sections are five bars and two spaces while for odd digits there are are five spaces and two bars. The use of a 2-of-5 code catches some errors.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Levenshtein": {
+    "Description": "The Levenshtein coding is a prefix code that assigns a binary sequence to each non-negative intger. The encoding a universal code, meaning so long as large numbers are less probable than small ones the code is within a constant multiple of the best possible prefix code represent the numbers.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Linotype": {
+    "Description": "The internal sorting mechanism of the Linotype machine used a seven-bit code to mechnically identify the characters. Each matrix, a small brass unit with an inscribed character, has seven teeth which engage with seven rails in the distributor system. Gaps in the rails at each channel were the complement of the teeth on the matrix for that letter. This automatic reloading ability, enabled by the code, was a major factor in the machine's success. Note that ligatures may not render correctly on all systems.\n\nFor ease of use on modern computers the ordinary space character may be entered in place of the em-space (0100010) when encoding.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Luhn's Algorithm": {
+    "Description": "Luhn's Algorithm is a technique for calculating a checksum developed by Hans Luhn in 1960. Digits are taken right to left, the value of every even digit doubled, and then all summed together. That check digit is the smallest number, if added to the total, would make a multiple of 10 (or whatever modulus is chosen).",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "M-of-N": {
+    "Description": "An M-of-N code is an error detecting code detects single bit errors but cannot correct errors. Each code word has a specified length (number of bits) and weight (number of bits set to 1). Binary data is re-encoded by reading (length - weight) bits then appending 1 bits until the require weight it reached and then 0 bits until the required length is reached. When decoding a code block with the wrong weight is detected as an error. Here a decoding error is replaced by the � symbol.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Morse": {
+    "Description": "The best known version of Morse Code is the ITU Standard. It uses two kind of signals the 'dit' and 'dah' with the dah defined as three times the length of the dit. Morse code also requires periods with no signal, called spaces, in order to differentiate characters. The subset of ITU Morse below covers all the printing characters. Additional control signals and prosigns are not yet supported. The space between dits and dahs is the same length as a dit, between characters is a space of three dits. The older American Morse standard is slightly different, still using dits and dahs of the same size but also including a double length space within come characters.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "MTK2": {
+    "Description": "MTK2 is the Russian variant of the ITA2 Baudot Code. Due to the larger Cyrillic alphabet additional space was needed to transmit all characters. To this end MTK2 has an extra control character that shifts to Cyrillic Mode.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Needle": {
+    "Description": "The needle code is the coding method using by the earliest electrical telegraph system created by Cooke and Wheatstone. Letters were arranged in a diamond shaped grid with five needles across the middle. Letters were indicated by turning two of the needles so that they pointed to a specific letter. Although it required no training to use the complexity and unreliability of this system was a problem. Later needle codes were created that used just one or two needles and did not operate by pointing.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Parity Bit": {
+    "Description": "A parity bit is a very simple way of efficiently detecting single bit errors. The bits of some segment are added up and a bit is appended indicating if the value is odd or even. Equivalently the bits are XORed together and the value is appended. In this example the check bit is added immediately after the block though it can be placed anywhere.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "PGP Words": {
+    "Description": "The PGP Words converts a sequence of bytes into a sequence of words. To prevent errors this is done using two list which alternate back and forth. To keep synchronization the even list uses words with two syllables and the odd list uses words with three syllables.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Punycode": {
+    "Description": "Punycode is a method for re-encoding short Unicode strings using only ASCII characters, originally created for use with Internationalized Domain Names. The characters which are not ASCII are stripped out of the string, a delimeter character is placed after the remaining characters, then the non-ASCII characters are encoded onto the end using a method that records their position and Unicode codepoint. For example the sentence \"TạisaohọkhôngthểchỉnóitiếngViệt\" is encoded as \"TisaohkhngthchnitingVit-kjcr8268qyxafd2f1b9g\".",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Repetition": {
+    "Description": "The simplest form of error correcting code is Repetition in which every bit is encoded as that bit repeated several times. When decoding each bit in the block 'votes' for  what the block should decode as with the majority winning. Only odd numbered block sizes are always unambigious. This form of encoding is extremely space inefficient and more sophisticated codes are often used in practice.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Romaji": {
+    "Description": "It is often convient or necessary for Japanese text to be rendered in Latin characters. To accomplish this an encoding known as romaji (roman characters) is used. Several version are available: Kunrei-shiki is endorsed by the government of Japan, Hebern-shiki is widely used in the West, Nihon-shiki is a highly regular encoding no longer in common use.\nNotes on decoding: Decoding romaji back to kana is an imperfect process. The system used here does not vary with the variant chosen and should provide a decoding of any valid romaji. Because information is lost when encoding this decoding may not be perfectly accurate. For instance the を (wo) and お (o) kana are both transliterated as 'o' in Kunrei and Hebern. Likewise っに and んに are both rendered as `nni` in all encodings used. Decoding is consistent, so 'o' always becomes お while 'nni' always becomes んに but these many not reflect the original kana.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Roman Numeral": {
+    "Description": "Roman Numerals are a now obsolete numeral system derived from an older Etruscan system. Their familiar form was arrived at about 2000 years ago. The symbols I, V, X, L, C, D, M stand for values of 1, 5, 10, 50, 100, 500, and 1000. The simplest use of these symbols is to just add up the values, for readability they are written from largest to smallest going left to right. However this can result is very long representations for numbers that are just under the value of a symbol. To correct for this a symbol with a small value may be placed to the left of one with a large value to indicate the small value should be subtracted. Thus 9 is written IX rather than VIIII. The Romans were not consistent about the use of this rule but modern standardized Roman numerals enforce it by allowed no more than three of a symbol to appear consecutively which also limnits them to numbers less than 4000.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "S\/KEY": {
+    "Description": "The S\/KEY standard covers a system for human readable use of one time passwords. Here is recreated just the binary-to-text encoding used for the 64-bit passwords. Each password is converted into six words representing 11 bits each for a total of 66 bits, the bits of the password followed by a two bit error check.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Flag Semaphore": {
+    "Description": "In flag semaphore information is transmitted using the positions of the arms, usually while holding flags to make their positions more apparent. Flags are held away from the body in five positions, ordered from lowest to highest: down, low, out, high, up. Any of the positions may be held across the body instead to put two flags on the same side. Flag semaphore positions are named as a pair that give the left arm and right arm from the perspective of the flag holder.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Simplified Braille": {
+    "Description": "Braille is a tactile writing system in which each character consists of six raised dots arranged in two columns of three, known as a cell. Early Braille simply encoded the letters of the French alphabet on a one-to-one basis but it has diverged since then with abbreviations becoming common almost immediately. Modern versions of Braille cover numerous languages and have developed their own syntax with some languages extending the dots to eight instead of six. Here only simple early mappings between letters and Braille cells are provided.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Spelling Alphabet": {
+    "Description": "Spelling Alphabets are designed to spell short sequences of letters over voice channels where noise might cause ambiguity. Written specifications for these systems appeared in the early 20th century with several focusing only on the most easily confused letters.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Symmetric Unary": {
+    "Description": "The symmetric unary code is a variation on the unary encoding that can be read either in either direction with exactly the same efficiency as the regular version. The number n is encoded as '0' followed by n-2 '1's followed by and additional '0'. An exception is 0 which is encoded as just the symbol '1'.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Tap": {
+    "Description": "Tap codes work on the same principle as the Polybius square cipher but simplified for ease of use. Characters are specified by pairs of tap sequences. The first sequence of taps selects a row and the second sequence of taps a column in that row. This very slow way of encoding text is said to be common among prisoners as it is easy to learn and requires no special tools.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Two's Complement": {
+    "Description": "Two's complement is a way of encoding positive and negative integers as bits that is widely used in computers. Non-negative integers are encoded in the usual way except that the highest bit is always left as zero. The negative (or additive inverse) of each positive integer is found by inverting all the bits and then adding one. When using two's complement addition, subtraction, and multiplication can be implemented using the same procedure as for standard binary integers but extended to negatives.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Unary": {
+    "Description": "The unary encoding is the simplest useful encoding of the non-negative integers. The number n is encoded as n '1's followed by a single '0', though any two distinct symbols can be used. Representing numbers this way creates a prefix code and so allows a sequence to be represented without spaces. In practice unary codes are extremely inefficient.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Unicode": {
+    "Description": "Unicode is the dominant international standard for encoding of text using in most of the world's writing systems with over 100,000 code points defined. There are three major encodings used called UTF-8, UTF-16, and UTF-32.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Unified English Braille": {
+    "Description": "Unified English Braille the form of Braille used internationally for writing in English, though it is not the only form of English Braille in usage. Unlike early Braille UEB is a complete writing system with unique syntax. Most commonly UEB is written in Grade 2 with extensive use of contractions and abbreviations. Here only Grade 1 UEB without those is presented as correct transliteration of Grade 2 UEB is much more complex.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "UPC": {
+    "Description": "The Universal Product Code is a widely used encoding for barcodes. It has twelve digits, including the check digit. It is divided into two sections. The six left digits use a seven bit code while the six right digits use the bitwise inverse of that the same code. The start and end are padded with a guard pattern while the left and right are separated by another pattern.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Verhoeff": {
+    "Description": "The Verhoeff algorithm was the first checksum algorithm using only decimal digits able to both detect all single digit errors and all adjacent transposition errors. Rather than using standard arithmetic operations calculation is done using a dihedrial group and permutation.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Wabun": {
+    "Description": "The Wabun (和文 meaning 'Japanese Text') code is a variation on Morse Code used for Japanese. Each kana is assigned a code point as are the two Japanese diacritical marks and several punctuation symbols. When mixed with ITU Morse code the prosigns DO and SN used to indicate the start and end of Wabun encoding.\n\nThe small yōon and sokuon kana use the same code as their larger versions. When decoding this site will create the yōon after an 'i' kana but does not create sokuon at all.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  }
 }

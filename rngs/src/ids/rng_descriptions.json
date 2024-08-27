@@ -1,26 +1,146 @@
 ﻿{
-  "A5/1": "The A5/1 stream cipher was created in the late 1980s for cellular telephones. The algorithm works be using three LFSRs that mutually control their stepping by majority vote of their middle bits. Although originally a secret algorithm A5/1 was reverse engineered and found to be quite weak. The output is produced in bursts of 228 bits though only the first 114 are used for encryption.",
-  "A5/2": "The A5/2 stream cipher was created in the early 1990s as a \"export grade\" version of the A5/1 cipher. It is interally similar to A5/1 but with modifications that drastically weaken it. When the algorithm was reverse engineered and analyzed it proved so weak that A5/2 was banned. The output is produced in bursts of 228 bits though only the first 114 are used for encryption.",
-  "Alternating Step Generator": "An alternating step generator uses three LFSRs to produce a more secure stream of bits. The first LFSR is stepped and its output selects one of the others to be stepped. Then the last output bit from each of the other LSFRs are XORed together.",
-  "Blum-Blum-Shub": "The Blum-Blum-Shub algorithm uses a simple recurrence to produce cryptographic quality pseudorandom numbers if the modulus is sufficiently large. The state is advanced by squaring it and reducing the result modulo a large semiprime. The parity of the state is used to produce a single bit, as a result the algorithm runs much more slowly than other PRNGs. Speed can be increased by using other techniques to extract more bits but at the cost of making it easier to determine the state.",
-  "ChaCha": "The ChaCha family of stream ciphers are, by definition, also cryptographically secure PRNGs.",
-  "Geffe": "The Geffe generator is a (now broken) cryptographic PRNG that works by linking three LFSRs together via a multiplexer. All three are stepped together, and thus should be a coprime lengths, then the output bit of LFSR-1 selects which of the other two will give the output.",
-  "Galois Linear Feedback Shift Register": "A GLFSR works on the same principle as an LFSR but rather than XORing the taps together to create a new bit instead the last bit of the register is XORed into each tap before the shift.",
-  "Halton Sequence": "The Halton sequence produces tuples of rational numbers between 0 and 1 distributed across any number of dimensions.",
-  "JSF": "The Jenkins Small Fast PRNG is a small, simple, and fast running algorithm that performs well on statistical tests of randomness but is not believed to be secure.",
-  "Lagged Fibonacci Generator": "An LFG uses a generalized Fibonacci sequence to generate pseudorandom numbers. They are similar to a Linear Feedback Shift Register operating on number rather than bits and like LFSRs selection of parameters has a very strong influence on the quality of the output. A particular kind of LFG is used as part of the VIC cipher from the Cold War.",
-  "Linear Congruential Generator": "LCGs are among the simplest forms of pseduorandom number generators using the well known arithmetic operations of multiplication, addition, and division. At each step the current state is multiplied by a constant, then has a constant added, and finally is divided by a constant and the remainder taken. The increment must be coprime to the modulus and the multiplier must be greater than one. LCGs and their generalizations, the Polynomial Congruential Generators, are all known to be insecure.",
-  "Linear Feedback Shift Register": "LFRSs are simple pseudorandom number generators that can be implented very easily and efficiently in hardware. It consists of a register of bits and several \"taps\" that check the state of certain bits. The values of those taps are combined to determine a new bit. The rest of the bits are then shifted to accomodate the new bit and the oldest bit is discarded. The maximum period of an LFSR is achieved only when the taps correspond to a primitive polynomial.",
-  "Mersenne Twister": "The Mersenne Twister (MT19937) algorithm was created in 1997 by Makoto Matsumoto and Takuji Nishimura with the goal of correcting the shortcomings of then popular PRNGs and was quickly achieved widespread adoption. In particular it is equidistributed in 623 dimensions and has a period of 2^19937-1. The major limitation of MT19937 is its enormous state of 8448 bits, modern PRNGs of comprable quality commonly use 256 bits or less of state. This huge state means that MT19937 cannot be run on small devices and is more difficult to run in parallel. The state size also makes initialization difficult, requiring either a complex key scheduling algorithm to make a key from a single word or a few words or providing 8448 bits. Because the tempering function applied on output (used to achieve equidistribution in high dimensions) is invertible and fixed it is trivial to recover the entire state, making MT19937 inappropriate for cryptographic purposes. A variant MT19937-64 was created for 64-bit computers, it uses the same structure but with slightly different constants.",
-  "Middle Square": "The middle square method produces random numbers of a given width, padded on the left with zeroes, by squaring a value and then taking the middle digits as the next value. The quality of these sequences is very low and often falls quickly into short repeating sequences.",
-  "Middle Square Binary": "While the middle square method can be calculated by hand it is also a possible computer PRNG. When doing this on on modern computer hardware performance is much increased by specifiying the state size in bits (as this allows the middle bits to be extracted with a shift and mask) and to choose a state not more than half the size of the CPU register (as this prevents overflow when squaring). Mathematically these is no difference between these PRNGs and the other middle square PRNG defined on this site so quality is low and depends almost entirely on the size of the state space.",
-  "Permuted Congruential Generator": "A PCG is a linear congruential generator combined with some non-linear transformation of the state before it is output. In principle many LCGs and transformations are possible but the ones here are suggested by the original PCG paper. For the same reason the state is always 64 bits and the output is always 32 bits, consequently the increment of the underyling LCG must always be odd.",
-  "RC4": "The RC4 (Rivest Cipher 4) is a relatively simple stream cipher (and thus PRNG) from 1987, now considered too weak to use. Internally it contains a list of every possible byte and as it runs the list is permuted by swapping positions of bytes. The key is a sequence from 1 to 256 bytes that used to permute the list initially.",
-  "Self Shrinking Generator": "A self shrinking generator uses a single LFSR to produce an output that is much harder to predict than its normal usage. To produce a bit the generator is stepped twice. If the bits are (1,0) a 0 bit is output, it the pair is (1,1) a 1 bit is output. Otherwise the process is repeated until an output does occur. Other bit patterns can be chosen to give the output but it is necessary",
-  "Shrinking Generator": "A shrinking generator uses two LFSRs (called A and S) to produce an output that is much harder to predict than a single LFSR. The two of them are stepped forward synchronously. If the S bit is 1 then the A bit is output, whatever it is. If the S bit it 0 then the A bit is discarded and the process repeated until the S bit is 1. If precise and accurate timing for the rate at which bits are output is available then information about the S generator can be determined by an attacker, though because the generators are used to produce sequences of bits it generally is not possible to trivially reconstruct S based on the timing between individual bits of output.",
-  "Splitmix64": "Splitmix64 is the default PRNG for the Java programming language. It is simple and passes many statistical test but is not considered a strong PRNG in and of itself. It is commonly used as a keying function for other PRNGS when they are likely to be given a seed with low entropy such as a single 64 bit integer. In particular splitmix64 can accept a seed of zero, whereas certain high speed PRNGs cannot.",
-  "VMPC-R": "The Variably Modified Permutation Composition RNG is based on RC4 cipher but with a more complex key schedule and an output based on the permutation composition function it is named for.",
-  "Weyl Sequence": "The original Weyl squence produces real numbers distributed between 0 and 1 by repeatedly adding an irrational number to the current state and taking the fractional part. For computer purposes Marsaglia defined Weyl sequences as incrementing the state by some value and then taking the remainder when divided by some value coprime to the increment.",
-  "Xorshift": "The xorshift family of PRNGs are among the simplest and fastest useful random number generators. They use only the operations of bitwise XOR and bitshifting which are fundamental operations in computer hardware, aiding the speed of execution. The model xorshift here has just 64 bits of state which makes it much easier to examine but practical versions require additional state. Because it uses only shifts and XOR operations if the state of an xorshift generator is zero it will produce only zeroes.",
-  "Xoshiro": "The xoshiro family of PRNGs are inspired by the xorshift family but add an improving step to the output. Calculation by the authors also allows these generators to be jumped ahead in order to get another sequence that doesn't overlap."
+  "A5/1": {
+    "Description": "The A5/1 stream cipher was created in the late 1980s for cellular telephones. The algorithm works be using three LFSRs that mutually control their stepping by majority vote of their middle bits. Although originally a secret algorithm A5/1 was reverse engineered and found to be quite weak. The output is produced in bursts of 228 bits though only the first 114 are used for encryption.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "A5/2": {
+    "Description": "The A5/2 stream cipher was created in the early 1990s as a \"export grade\" version of the A5/1 cipher. It is interally similar to A5/1 but with modifications that drastically weaken it. When the algorithm was reverse engineered and analyzed it proved so weak that A5/2 was banned. The output is produced in bursts of 228 bits though only the first 114 are used for encryption.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Alternating Step Generator": {
+    "Description": "An alternating step generator uses three LFSRs to produce a more secure stream of bits. The first LFSR is stepped and its output selects one of the others to be stepped. Then the last output bit from each of the other LSFRs are XORed together.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Blum-Blum-Shub": {
+    "Description": "The Blum-Blum-Shub algorithm uses a simple recurrence to produce cryptographic quality pseudorandom numbers if the modulus is sufficiently large. The state is advanced by squaring it and reducing the result modulo a large semiprime. The parity of the state is used to produce a single bit, as a result the algorithm runs much more slowly than other PRNGs. Speed can be increased by using other techniques to extract more bits but at the cost of making it easier to determine the state.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "ChaCha": {
+    "Description": "The ChaCha family of stream ciphers are, by definition, also cryptographically secure PRNGs.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Geffe": {
+    "Description": "The Geffe generator is a (now broken) cryptographic PRNG that works by linking three LFSRs together via a multiplexer. All three are stepped together, and thus should be a coprime lengths, then the output bit of LFSR-1 selects which of the other two will give the output.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Galois Linear Feedback Shift Register": {
+    "Description": "A GLFSR works on the same principle as an LFSR but rather than XORing the taps together to create a new bit instead the last bit of the register is XORed into each tap before the shift.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Halton Sequence": {
+    "Description": "The Halton sequence produces tuples of rational numbers between 0 and 1 distributed across any number of dimensions.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "JSF": {
+    "Description": "The Jenkins Small Fast PRNG is a small, simple, and fast running algorithm that performs well on statistical tests of randomness but is not believed to be secure.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Lagged Fibonacci Generator": {
+    "Description": "An LFG uses a generalized Fibonacci sequence to generate pseudorandom numbers. They are similar to a Linear Feedback Shift Register operating on number rather than bits and like LFSRs selection of parameters has a very strong influence on the quality of the output. A particular kind of LFG is used as part of the VIC cipher from the Cold War.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Linear Congruential Generator": {
+    "Description": "LCGs are among the simplest forms of pseduorandom number generators using the well known arithmetic operations of multiplication, addition, and division. At each step the current state is multiplied by a constant, then has a constant added, and finally is divided by a constant and the remainder taken. The increment must be coprime to the modulus and the multiplier must be greater than one. LCGs and their generalizations, the Polynomial Congruential Generators, are all known to be insecure.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Linear Feedback Shift Register": {
+    "Description": "LFRSs are simple pseudorandom number generators that can be implented very easily and efficiently in hardware. It consists of a register of bits and several \"taps\" that check the state of certain bits. The values of those taps are combined to determine a new bit. The rest of the bits are then shifted to accomodate the new bit and the oldest bit is discarded. The maximum period of an LFSR is achieved only when the taps correspond to a primitive polynomial.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Mersenne Twister": {
+    "Description": "The Mersenne Twister (MT19937) algorithm was created in 1997 by Makoto Matsumoto and Takuji Nishimura with the goal of correcting the shortcomings of then popular PRNGs and was quickly achieved widespread adoption. In particular it is equidistributed in 623 dimensions and has a period of 2^19937-1. The major limitation of MT19937 is its enormous state of 8448 bits, modern PRNGs of comprable quality commonly use 256 bits or less of state. This huge state means that MT19937 cannot be run on small devices and is more difficult to run in parallel. The state size also makes initialization difficult, requiring either a complex key scheduling algorithm to make a key from a single word or a few words or providing 8448 bits. Because the tempering function applied on output (used to achieve equidistribution in high dimensions) is invertible and fixed it is trivial to recover the entire state, making MT19937 inappropriate for cryptographic purposes. A variant MT19937-64 was created for 64-bit computers, it uses the same structure but with slightly different constants.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Middle Square": {
+    "Description": "The middle square method produces random numbers of a given width, padded on the left with zeroes, by squaring a value and then taking the middle digits as the next value. The quality of these sequences is very low and often falls quickly into short repeating sequences.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Middle Square Binary": {
+    "Description": "While the middle square method can be calculated by hand it is also a possible computer PRNG. When doing this on on modern computer hardware performance is much increased by specifiying the state size in bits (as this allows the middle bits to be extracted with a shift and mask) and to choose a state not more than half the size of the CPU register (as this prevents overflow when squaring). Mathematically these is no difference between these PRNGs and the other middle square PRNG defined on this site so quality is low and depends almost entirely on the size of the state space.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Permuted Congruential Generator": {
+    "Description": "A PCG is a linear congruential generator combined with some non-linear transformation of the state before it is output. In principle many LCGs and transformations are possible but the ones here are suggested by the original PCG paper. For the same reason the state is always 64 bits and the output is always 32 bits, consequently the increment of the underyling LCG must always be odd.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "RC4": {
+    "Description": "The RC4 (Rivest Cipher 4) is a relatively simple stream cipher (and thus PRNG) from 1987, now considered too weak to use. Internally it contains a list of every possible byte and as it runs the list is permuted by swapping positions of bytes. The key is a sequence from 1 to 256 bytes that used to permute the list initially.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Self Shrinking Generator": {
+    "Description": "A self shrinking generator uses a single LFSR to produce an output that is much harder to predict than its normal usage. To produce a bit the generator is stepped twice. If the bits are (1,0) a 0 bit is output, it the pair is (1,1) a 1 bit is output. Otherwise the process is repeated until an output does occur. Other bit patterns can be chosen to give the output but it is necessary",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Shrinking Generator": {
+    "Description": "A shrinking generator uses two LFSRs (called A and S) to produce an output that is much harder to predict than a single LFSR. The two of them are stepped forward synchronously. If the S bit is 1 then the A bit is output, whatever it is. If the S bit it 0 then the A bit is discarded and the process repeated until the S bit is 1. If precise and accurate timing for the rate at which bits are output is available then information about the S generator can be determined by an attacker, though because the generators are used to produce sequences of bits it generally is not possible to trivially reconstruct S based on the timing between individual bits of output.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Splitmix64": {
+    "Description": "Splitmix64 is the default PRNG for the Java programming language. It is simple and passes many statistical test but is not considered a strong PRNG in and of itself. It is commonly used as a keying function for other PRNGS when they are likely to be given a seed with low entropy such as a single 64 bit integer. In particular splitmix64 can accept a seed of zero, whereas certain high speed PRNGs cannot.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "VMPC-R": {
+    "Description": "The Variably Modified Permutation Composition RNG is based on RC4 cipher but with a more complex key schedule and an output based on the permutation composition function it is named for.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Weyl Sequence": {
+    "Description": "The original Weyl squence produces real numbers distributed between 0 and 1 by repeatedly adding an irrational number to the current state and taking the fractional part. For computer purposes Marsaglia defined Weyl sequences as incrementing the state by some value and then taking the remainder when divided by some value coprime to the increment.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Xorshift": {
+    "Description": "The xorshift family of PRNGs are among the simplest and fastest useful random number generators. They use only the operations of bitwise XOR and bitshifting which are fundamental operations in computer hardware, aiding the speed of execution. The model xorshift here has just 64 bits of state which makes it much easier to examine but practical versions require additional state. Because it uses only shifts and XOR operations if the state of an xorshift generator is zero it will produce only zeroes.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  },
+  "Xoshiro": {
+    "Description": "The xoshiro family of PRNGs are inspired by the xorshift family but add an improving step to the output. Calculation by the authors also allows these generators to be jumped ahead in order to get another sequence that doesn't overlap.",
+    "Authors": "",
+    "Publication": "",
+    "Traits": ""
+  }
 }
