@@ -1,17 +1,17 @@
 ﻿{
   "BLAKE": {
     "Description": "BLAKE was a competitor and finalist for the SHA-3 competition. It uses many of the same constants as SHA-2 but a different internal structure, a hash iterative framework, that eliminates SHA-2's vulernability to length extension attacks. The mixing round of BLAKE is a modified version of the ChaCha cipher.",
-    "Authors": "Aumasson et al.",
+    "Authors": "Aumasson, Henzen, Meier, and Phan",
     "Publication": "2008"
   },
   "BLAKE2": {
     "Description": "The BLAKE2 family of hash functions are closely related to the original BLAKE family of hash functions which were finalists for the SHA-3 competition. To improve speed the BLAKE2 hashers have fewer compression rounds and pad the input in a simpler way. They are designed to work as drop in replacements to broken hash functions such as SHA-1 and MD5, offering both superior security and supere speed.",
-    "Authors": "Aumasson et al.",
+    "Authors": "Aumasson, Neves, Wilcox-O'Hearn, and Winnerlein",
     "Publication": "2012"
   },
   "BLAKE3": {
     "Description": "BLAKE3 is a hash function based on the BLAKE2 family. Rather than have numerous variants BLAKE3 is a single algorithm with different functionality provided by input parameters. It uses a tree construction to allow effectively unlimited parallelism for hashing large inputs. The three operation modes are an ordinary hash, a keyed hash mode with a 256 bit key that allows it to work has an HMAC, and a key derivation mode that takes a globally unique context of any length for creating subkeys.",
-    "Authors": "O'Connor et al.",
+    "Authors": "O'Connor, Neves, Aumasson, and Wilcox-O'Hearn",
     "Publication": "2020"
   },
   "FNV Hash": {
@@ -21,7 +21,7 @@
   },
   "FxHash": {
     "Description": "FxHash is inspired by the FNV family of hash functions in its goal of extreme speed. Unlike FNV it takes the message in larger chunks rather than one byte at a time and uses a rotation rather than an XOR.",
-    "Authors": "FireFox",
+    "Authors": "Mozilla Foundation",
     "Publication": "Unknown"
   },
   "GOST R 34.11-94": {
@@ -31,7 +31,7 @@
   },
   "HAVAL": {
     "Description": "Haval (Hash Algorithm VAriable Length)",
-    "Authors": "Zheng, Pieprzyk, Seberry",
+    "Authors": "Zheng, Pieprzyk, and Seberry",
     "Publication": "1993"
   },
   "HMAC": {
@@ -96,7 +96,7 @@
   },
   "RadioGatún": {
     "Description": "The RadioGatún hash function was created by the same team that would eventually develop Keccak used a heavily revised version of RadioGatún. The output length is variable, here limited to 512 bits. It is authors advise against directly using it as a cryptographic hash function.",
-    "Authors": "Bertoni et al.",
+    "Authors": "Bertoni, Daemen, Peeters, Van Assche",
     "Publication": "2006"
   },
   "RIPEMD": {

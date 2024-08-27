@@ -82,11 +82,31 @@ impl Default for CipherId {
 }
 
 impl CipherId {
-    // Describe the history of the cipher
     pub fn description(&self) -> &'static str {
-        match CIPHER_INFORMATION[self.to_string()].as_str() {
+        match CIPHER_INFORMATION[self.to_string()]["Description"].as_str() {
             Some(s) => s,
             None => "<<<MISSING DESCRIPTION>>>",
+        }
+    }
+
+    pub fn authors(&self) -> &'static str {
+        match CIPHER_INFORMATION[self.to_string()]["Authors"].as_str() {
+            Some(s) => s,
+            None => "<<<MISSING AUTHORS>>>",
+        }
+    }
+
+    pub fn publication_date(&self) -> &'static str {
+        match CIPHER_INFORMATION[self.to_string()]["Publication"].as_str() {
+            Some(s) => s,
+            None => "<<<MISSING PUBLICATION DATE>>>",
+        }
+    }
+
+    pub fn traits(&self) -> &'static str {
+        match CIPHER_INFORMATION[self.to_string()]["Traits"].as_str() {
+            Some(s) => s,
+            None => "<<<MISSING TRAITS>>>",
         }
     }
 }
