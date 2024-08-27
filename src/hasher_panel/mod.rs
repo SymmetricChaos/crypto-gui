@@ -20,6 +20,7 @@ mod pbkdf2_controls;
 mod pearson_controls;
 mod poly1305_controls;
 mod radio_gatun;
+mod ripemd_controls;
 mod sha1_controls;
 mod sha2_controls;
 mod sha3_controls;
@@ -100,6 +101,7 @@ impl HasherInterface {
                 HasherId::Pbkdf1,
                 HasherId::Pbkdf2,
                 HasherId::Poly1305,
+                HasherId::RipeMd,
                 HasherId::Sha1,
                 HasherId::Sha2,
                 HasherId::Sha3,

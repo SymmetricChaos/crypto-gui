@@ -31,7 +31,9 @@ fn ff(j: usize, s: &mut [u32; 4], block: [u32; 16], k: u32) {
     s.rotate_right(1);
 }
 
-#[derive(Clone)]
+// The name RIPEMD-0 is not used in the literature
+// It is just convenient to distinguish it from the
+// selectable RIPEMD function
 pub struct RipeMd0 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
