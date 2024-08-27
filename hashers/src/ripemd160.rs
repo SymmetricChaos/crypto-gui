@@ -1,32 +1,24 @@
 use crate::traits::ClassicHasher;
 use utils::{byte_formatting::ByteFormat, padding::md_strengthening_64_le};
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum RipeMdVariant {
-    Md128,
-    Md160,
-    Md256,
-    Md320,
-}
-
 #[derive(Clone)]
-pub struct RipeMd {
+pub struct RipeMd160 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    pub variant: RipeMdVariant,
+    pub extended: bool,
 }
 
-impl Default for RipeMd {
+impl Default for RipeMd160 {
     fn default() -> Self {
         Self {
             input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
-            variant: RipeMdVariant::Md160,
+            extended: false,
         }
     }
 }
 
-impl RipeMd {
+impl RipeMd160 {
     pub const K: [u32; 5] = [0x00000000, 0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xA953FD4E];
 
     pub const K_PRIME: [u32; 5] = [0x50A28BE6, 0x5C4DD124, 0x6D703EF3, 0x7A6D76E9, 0x00000000];
@@ -64,11 +56,6 @@ impl RipeMd {
 
     pub fn output(mut self, output: ByteFormat) -> Self {
         self.output_format = output;
-        self
-    }
-
-    pub fn variant(mut self, variant: RipeMdVariant) -> Self {
-        self.variant = variant;
         self
     }
 
@@ -111,7 +98,7 @@ impl RipeMd {
         s[1] = t;
     }
 
-    pub fn compress_160(state: &mut [u32; 5], block: [u32; 16]) {
+    pub fn compress(state: &mut [u32; 5], block: [u32; 16]) {
         let mut l = state.clone();
         let mut r = state.clone();
 
@@ -129,7 +116,7 @@ impl RipeMd {
     }
 }
 
-impl ClassicHasher for RipeMd {
+impl ClassicHasher for RipeMd160 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut input = bytes.to_vec();
 
@@ -142,7 +129,7 @@ impl ClassicHasher for RipeMd {
             for (elem, b) in block.iter_mut().zip(chunk.chunks_exact(4)) {
                 *elem = u32::from_le_bytes(b.try_into().unwrap());
             }
-            Self::compress_160(&mut state, block)
+            Self::compress(&mut state, block)
         }
 
         let mut out = Vec::with_capacity(20);
@@ -156,39 +143,21 @@ impl ClassicHasher for RipeMd {
 }
 
 crate::basic_hash_tests!(
-    // RipeMd::default().variant(RipeMdVariant::Md128), test_128_1, "",
-    // "cdf26213a150dc3ecb610f18f6b38b46";
-    // RipeMd::default().variant(RipeMdVariant::Md128), test_128_2, "a",
-    // "86be7afa339d0fc7cfc785e72f578d33";
-    // RipeMd::default().variant(RipeMdVariant::Md128), test_128_3, "abc",
-    // "c14a12199c66e4ba84636b0f69144c77";
-    // RipeMd::default().variant(RipeMdVariant::Md128), test_128_4, "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
-    // "3f45ef194732c2dbb2c4a2c769795fa3";
-
-    RipeMd::default().variant(RipeMdVariant::Md160), test_160_1, "",
+    RipeMd160::default(), test_160_1, "",
     "9c1185a5c5e9fc54612808977ee8f548b2258d31";
-    RipeMd::default().variant(RipeMdVariant::Md160), test_160_2, "a",
+    RipeMd160::default(), test_160_2, "a",
     "0bdc9d2d256b3ee9daae347be6f4dc835a467ffe";
-    RipeMd::default().variant(RipeMdVariant::Md160), test_160_3, "abc",
+    RipeMd160::default(), test_160_3, "abc",
     "8eb208f7e05d987a9b044a8e98c6b087f15a0bfc";
-    RipeMd::default().variant(RipeMdVariant::Md160), test_160_4, "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
+    RipeMd160::default(), test_160_4, "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
     "9b752e45573d4b39f4dbd3323cab82bf63326bfb";
 
-    // RipeMd::default().variant(RipeMdVariant::Md256), test_256_1, "",
-    // "02ba4c4e5f8ecd1877fc52d64d30e37a2d9774fb1e5d026380ae0168e3c5522d";
-    // RipeMd::default().variant(RipeMdVariant::Md256), test_256_2, "a",
-    // "f9333e45d857f5d90a91bab70a1eba0cfb1be4b0783c9acfcd883a9134692925";
-    // RipeMd::default().variant(RipeMdVariant::Md256), test_256_3, "abc",
-    // "afbd6e228b9d8cbbcef5ca2d03e6dba10ac0bc7dcbe4680e1e42d2e975459b65";
-    // RipeMd::default().variant(RipeMdVariant::Md256), test_256_4, "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
-    // "06fdcc7a409548aaf91368c06a6275b553e3f099bf0ea4edfd6778df89a890dd";
-
-    // RipeMd::default().variant(RipeMdVariant::Md320), test_320_1, "",
+    // RipeMd::default(), test_320_1, "",
     // "22d65d5661536cdc75c1fdf5c6de7b41b9f27325ebc61e8557177d705a0ec880151c3a32a00899b8";
-    // RipeMd::default().variant(RipeMdVariant::Md320), test_320_2, "a",
+    // RipeMd::default(), test_320_2, "a",
     // "ce78850638f92658a5a585097579926dda667a5716562cfcf6fbe77f63542f99b04705d6970dff5d";
-    // RipeMd::default().variant(RipeMdVariant::Md320), test_320_3, "abc",
+    // RipeMd::default(), test_320_3, "abc",
     // "de4c01b3054f8930a79d09ae738e92301e5a17085beffdc1b8d116713e74f82fa942d64cdbc4682d";
-    // RipeMd::default().variant(RipeMdVariant::Md320), test_320_4, "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
+    // RipeMd::default(), test_320_4, "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
     // "557888af5f6d8ed62ab66945c6d2a0a47ecd5341e915eb8fea1d0524955f825dc717e4a008ab2d42";
 );
