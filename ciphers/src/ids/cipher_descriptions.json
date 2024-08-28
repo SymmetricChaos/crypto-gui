@@ -107,7 +107,8 @@
     "Authors": "",
     "Publication": "",
     "Traits": [
-      "Block Cipher"
+      "Block Cipher",
+      "Feistel"
     ]
   },
   "Blowfish": {
@@ -418,6 +419,15 @@
     "Publication": "Ancient",
     "Traits": [
       "Transposition"
+    ]
+  },
+  "SEED": {
+    "Description": "SEED is South Korean block cipher developed in the late 1990s. It has a 128-bit key and operates on 128-bit blocks.",
+    "Authors": "KISA",
+    "Publication": "1998",
+    "Traits": [
+      "Block Cipher",
+      "Feistel"
     ]
   },
   "Seriated Playfair": {

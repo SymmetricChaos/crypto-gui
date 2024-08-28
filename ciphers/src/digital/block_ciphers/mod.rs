@@ -7,6 +7,7 @@ pub mod gost;
 pub mod idea;
 pub mod rc5;
 pub mod rc6;
+pub mod seed;
 pub mod tea;
 
 #[macro_export]

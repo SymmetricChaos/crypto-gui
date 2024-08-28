@@ -281,6 +281,18 @@ pub fn u32_pair_to_u8_array(s: [u32; 2]) -> [u8; 8] {
     out
 }
 
+pub fn u64_pair_to_u8_array(s: [u64; 2]) -> [u8; 16] {
+    let a = s[0].to_be_bytes();
+    let b = s[1].to_be_bytes();
+    let mut out = [0; 16];
+    for i in 0..8 {
+        out[i] = a[i];
+        out[i + 8] = b[i];
+    }
+
+    out
+}
+
 pub fn u32_4_to_u8_16(s: [u32; 4]) -> [u8; 16] {
     let a = s[0].to_be_bytes();
     let b = s[1].to_be_bytes();
