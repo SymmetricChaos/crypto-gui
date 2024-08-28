@@ -2,131 +2,250 @@
   "BLAKE": {
     "Description": "BLAKE was a competitor and finalist for the SHA-3 competition. It uses many of the same constants as SHA-2 but a different internal structure, a hash iterative framework, that eliminates SHA-2's vulernability to length extension attacks. The mixing round of BLAKE is a modified version of the ChaCha cipher.",
     "Authors": "Aumasson, Henzen, Meier, and Phan",
-    "Publication": "2008"
+    "Publication": "2008",
+    "Hash Length": [
+      224,
+      256,
+      384,
+      512
+    ],
+    "Traits": []
   },
   "BLAKE2": {
     "Description": "The BLAKE2 family of hash functions are closely related to the original BLAKE family of hash functions which were finalists for the SHA-3 competition. To improve speed the BLAKE2 hashers have fewer compression rounds and pad the input in a simpler way. They are designed to work as drop in replacements to broken hash functions such as SHA-1 and MD5, offering both superior security and supere speed.",
     "Authors": "Aumasson, Neves, Wilcox-O'Hearn, and Winnerlein",
-    "Publication": "2012"
+    "Publication": "2012",
+    "Hash Length": [
+      224,
+      256,
+      384,
+      512
+    ],
+    "Traits": [
+      "XOF"
+    ]
   },
   "BLAKE3": {
     "Description": "BLAKE3 is a hash function based on the BLAKE2 family. Rather than have numerous variants BLAKE3 is a single algorithm with different functionality provided by input parameters. It uses a tree construction to allow effectively unlimited parallelism for hashing large inputs. The three operation modes are an ordinary hash, a keyed hash mode with a 256 bit key that allows it to work has an HMAC, and a key derivation mode that takes a globally unique context of any length for creating subkeys.",
     "Authors": "O'Connor, Neves, Aumasson, and Wilcox-O'Hearn",
-    "Publication": "2020"
+    "Publication": "2020",
+    "Hash Length": [],
+    "Traits": [
+      "XOF"
+    ]
   },
   "FNV Hash": {
     "Description": "The FNV hash family is meant to run very quickly while avoiding collisions but not to provide cryptographic security. Its compression function consits of a single multiplication and a single XOR operation for each byte. ",
     "Authors": "Fowler, Noll, and Vo",
-    "Publication": "1991"
+    "Publication": "1991",
+    "Hash Length": [
+      32,
+      64,
+      128,
+      256,
+      512,
+      1024
+    ],
+    "Traits": []
   },
   "FxHash": {
     "Description": "FxHash is inspired by the FNV family of hash functions in its goal of extreme speed. Unlike FNV it takes the message in larger chunks rather than one byte at a time and uses a rotation rather than an XOR.",
     "Authors": "Mozilla Foundation",
-    "Publication": "Unknown"
+    "Publication": "Unknown",
+    "Hash Length": [
+      32,
+      64
+    ],
+    "Traits": []
   },
   "GOST R 34.11-94": {
     "Description": "GOST R 34.11-94 is a Russian hash function based on the Soviet era GOST 28147-89 block cipher. The related standard GOST 34.311-95 is used by the Commonwealth of Independent States.",
     "Authors": "FAPSI",
-    "Publication": "1994"
+    "Publication": "1994",
+    "Hash Length": [],
+    "Traits": []
   },
   "HAVAL": {
     "Description": "Haval (Hash Algorithm VAriable Length)",
     "Authors": "Zheng, Pieprzyk, and Seberry",
-    "Publication": "1993"
+    "Publication": "1993",
+    "Hash Length": [],
+    "Traits": []
   },
   "HMAC": {
     "Description": "HMAC (Hash-based Message Authentication Code) is a technique for created a keyed hash function from any hash function. Once a shared secret is established a keyed hash function allows the reciever to determine that a message has not been altered or replaced in transit. HMAC specifially addresses the length extension weakness of Merkle-Damgård based hash functions but can be used with any hash function. Some unkeyed hash functions such as SHA3 can be used as keyed hash functions without HMAC simply by making the key part of the message.",
     "Authors": "Krawczyk, Bellare, and Canetti",
-    "Publication": "1997"
+    "Publication": "1997",
+    "Hash Length": [],
+    "Traits": []
   },
   "OneAtATime": {
     "Description": "The \"one_at_a_time\" hash function is an extremely simple hash function that processes an input one byte at a time using just addition, XOR, and shifts. It operates on a 32-bit state that is returned as the hash.",
     "Authors": "Jenkins",
-    "Publication": "1997"
+    "Publication": "1997",
+    "Hash Length": [
+      32
+    ],
+    "Traits": []
   },
   "MD2": {
     "Description": "The MD2 hash function is an obsolete hash algorithm. Although MD2 has never been publicly broken it is much slower than other algorithms and attacks on it are known. Unusually MD2 appends a checksum after the padded input, without which its main compression function is insecure.",
     "Authors": "Rivest",
-    "Publication": "1989"
+    "Publication": "1989",
+    "Hash Length": [
+      128
+    ],
+    "Traits": []
   },
   "MD4": {
     "Description": "The MD4 hash function is an obsolete hash algorithm that influenced the design of later hash functions. It produces a 128 bit hash.",
     "Authors": "Rivest",
-    "Publication": "1990"
+    "Publication": "1990",
+    "Hash Length": [
+      128
+    ],
+    "Traits": []
   },
   "MD5": {
     "Description": "The MD5 hash function is among the best known and most widely used in history. It produces a 128 bit hash. Weaknesses were discovered in the algorithm within a few years that resulted in its deprecation for secure purposes. It wasn't until 2004, however, that collisions were discovered. Today MD5 is used to verify message integrity against accidental changes.",
     "Authors": "Rivest",
-    "Publication": "1991"
+    "Publication": "1991",
+    "Hash Length": [
+      128
+    ],
+    "Traits": []
   },
   "MD6": {
     "Description": "The MD6 hash function was a competitor in the SHA-3 compeition. A tree structure was chosen to allow highly parallel computation.",
     "Authors": "Rivest et al.",
-    "Publication": "2008"
+    "Publication": "2008",
+    "Hash Length": [
+      512
+    ],
+    "Traits": []
   },
   "MGF1": {
     "Description": "MGF1 (Mask Generating Fuction 1) is a function designed to use a hash function to generate a pseudorandom sequence of bytes with length of up to 2^32. It simply appends a 32-bit counter to a key and hashes that input, counting up by one each time. It is defined as part of the RSA standard for use in generating padding. While any hash function can be used as the basis for MGF1 here just the family of SHA-2 hash functions are provided.",
-    "Authors": "<<<MISSING>>>",
-    "Publication": "<<<MISSING>>>"
+    "Authors": "",
+    "Publication": "",
+    "Hash Length": [],
+    "Traits": []
   },
   "LM": {
     "Description": "LM is a legacy password hashing function sometimes used by the Windows operating system. The password can be no more than 14 characters and converts letters to upper case before hashing. It is considered extremely vulnerable to attack has been disabled by default on versions of Windows released since around 2008. LM has been replaced by the NT hash function which is MD4.",
     "Authors": "Microsoft",
-    "Publication": "1987"
+    "Publication": "1987",
+    "Hash Length": [],
+    "Traits": []
   },
   "PBKDF1": {
     "Description": "PBKDF1 (Password Based Key Derivation Function 1) is a now obsolete key derivation function with an adjustable work factor. It operates simply by applying a chosen hash function (MD2, MD5, or SHA-1) numerous times.",
-    "Authors": "<<<MISSING>>>",
-    "Publication": "<<<MISSING>>>"
+    "Authors": "",
+    "Publication": "",
+    "Hash Length": [],
+    "Traits": []
   },
   "PBKDF2": {
     "Description": "PBKDF2 (Password Based Key Derivation Function 2) is a key derivation function with an adjustable work factor. It uses an HMAC iternally and applies it numerous times to increase the computation cost of calculating the key.",
-    "Authors": "<<<MISSING>>>",
-    "Publication": "<<<MISSING>>>"
+    "Authors": "",
+    "Publication": "",
+    "Hash Length": [],
+    "Traits": []
   },
   "Pearson": {
     "Description": "The Pearson hash function is one of the simplest hashing algorithms. It produces an 8 bit hash. While it runs quickly it has almost no collision resistance and was designed to create hashes for small numbers of short inputs.",
     "Authors": "Pearson",
-    "Publication": "1990"
+    "Publication": "1990",
+    "Hash Length": [
+      8
+    ],
+    "Traits": []
   },
   "Poly1305": {
     "Description": "Poly1305 is a universal family of hash functions based on evaluating a polynomial modulo the prime 2^130 - 5. The message is divided into 16 byte blocks which are used to create the coefficients of the polynomial which is evaluated at the point 'r' which serves as the key for the hash. Poly1305 accepts a second key when used a message authenticator. The special value of Poly1305 lies in the fact that a proof exists that when used as an authenticator the security of the system relies only on the security of the cipher (usually AES) used to generate the secondary key.",
     "Authors": "Bernstein",
-    "Publication": "2005"
+    "Publication": "2005",
+    "Hash Length": [
+      128
+    ],
+    "Traits": []
   },
   "RadioGatún": {
     "Description": "The RadioGatún hash function was created by the same team that would eventually develop Keccak used a heavily revised version of RadioGatún. The output length is variable, here limited to 512 bits. It is authors advise against directly using it as a cryptographic hash function.",
     "Authors": "Bertoni, Daemen, Peeters, Van Assche",
-    "Publication": "2006"
+    "Publication": "2006",
+    "Hash Length": [],
+    "Traits": []
   },
   "RIPEMD": {
     "Description": "RIPEMD is a family of five hash functions. The original RIPEMD is 128-bit hash function with three rounds which was found to have a low security margin. Four improved versions were proposed. RIPEMD-128 and the extended RIPEMD-256 have four rounds. RIPEMD-160 and the extended RIPEMD-320 have five rounds. The extended versions do not claim any increased security.",
     "Authors": "Dobbertin, Bosselaers, and Preneel",
-    "Publication": "1996"
+    "Publication": "1996",
+    "Hash Length": [
+      128,
+      160,
+      256,
+      320
+    ],
+    "Traits": []
   },
   "SHA-1": {
     "Description": "SHA-1 is a cryptographic hash function designed by the US National Security Agency. It produces a 160 bit hash. Practical attacks on SHA-1 have been publicly known since 2017. It it based on the similar SHA-0, released in 1993, which different only in lacking a one bit rotation during the expansion step. Practical attacks on SHA-0 have been publicly known since 2004.",
     "Authors": "NSA",
-    "Publication": "1995"
+    "Publication": "1995",
+    "Hash Length": [
+      160
+    ],
+    "Traits": [
+      "Merkle-Damgård"
+    ]
   },
   "SHA-2": {
     "Description": "SHA-2 is a family of cryptographic hash funtions designed by the US National Security Agency, each named for the size of the hash they produce in bits. The family is based on two closely related algorithms SHA-256 and SHA-512 with variants of each designed to resist length extension attacks by omitting part of the hash function's state from the output.",
     "Authors": "NSA",
-    "Publication": "2001"
+    "Publication": "2001",
+    "Hash Length": [
+      224,
+      256,
+      384,
+      512
+    ],
+    "Traits": [
+      "Merkle-Damgård"
+    ]
   },
   "SHA-3 (Keccak)": {
     "Description": "The winner of the SHA-3 competition by the Amerian NIST was Keccak, pronounced \"ketchak\", a hash algorithm using a sponge construction. NIST certification includes a variety of modes including as a cryptographic hash functions of various standard lengths, an extensible output function (SHAKE and cSHAKE), a message authentication code (KMAC), a tuple hasher (TupleHash), and a tree based cryptographic hash function (ParallelHash). Variants known as  KangarooTwelve and MarsupilamiFourteen exist and run much faster due to having fewer rounds (and thus a lower security margin) but are not NIST standards.",
     "Authors": "Bertoni, Daemen, Peeters, Van Assche",
-    "Publication": "2006"
+    "Publication": "2006",
+    "Hash Length": [
+      224,
+      256,
+      384,
+      512
+    ],
+    "Traits": [
+      "XOF"
+    ]
   },
   "SipHash": {
     "Description": "SipHash is a family of keyed hash functions all of which take a 128 bit key and produce a 64 bit hash. The small hash size is appropriate for use in hash tables but, as a result, carries a higher risk of collisions. While these collisions are unlikely to occur randomly malicious inputs could feasibly produce hundreds of collisions which would cause the hashmap to have severely degraded performance, causing a denial of service attack. The key prevents an attacker from being able to know what the hashes will be making this kind of attack impractical. Each SipHash version is referred to has SipHash-c-d where c is the number of compression rounds and d is the number of finalization rounds. SipHash-2-4 is very common while the slower SipHash-4-8 is more secure. The faster SipHash-1-3 is not kown to be broken but provides little security margin.",
     "Authors": "Aumasson and Bernstein",
-    "Publication": "2012"
+    "Publication": "2012",
+    "Hash Length": [
+      64
+    ],
+    "Traits": []
   },
   "Tiger": {
     "Description": "Tiger is a hash function best known for its use in Merkel trees and for its very large sboxes that require 8 kilobytes of storage.",
     "Authors": "Anderson and Biham",
-    "Publication": "1996"
+    "Publication": "1996",
+    "Hash Length": [
+      192,
+      128,
+      160
+    ],
+    "Traits": []
   }
 }
