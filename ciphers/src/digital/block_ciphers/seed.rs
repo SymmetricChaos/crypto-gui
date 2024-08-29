@@ -1,6 +1,7 @@
 use std::num::Wrapping;
 
 use super::block_cipher::{BCMode, BCPadding, BlockCipher};
+use num::Integer;
 use utils::byte_formatting::{overwrite_bytes, u64_pair_to_u8_array, ByteFormat};
 
 const SS0: [u32; 256] = [
@@ -194,12 +195,13 @@ impl Seed {
             let k0 = g(key[0] + (key[2]) - Wrapping(KC[i]));
             let k1 = g(key[1] - (key[3]) + Wrapping(KC[i]));
             self.subkeys[i] = (k0.0, k1.0);
-            if i % 2 == 1 {
-                let t = ((key[0].0 as u64) << 32) | (key[1].0 as u64) >> 8;
+            // specification reverses these mixing steps because it counts from 1, not from 0
+            if i.is_even() {
+                let t = (((key[0].0 as u64) << 32) | (key[1].0 as u64)).rotate_right(8);
                 key[0].0 = (t >> 32) as u32;
                 key[1].0 = t as u32;
             } else {
-                let t = ((key[2].0 as u64) << 32) | (key[3].0 as u64) << 8;
+                let t = (((key[2].0 as u64) << 32) | (key[3].0 as u64)).rotate_left(8);
                 key[2].0 = (t >> 32) as u32;
                 key[3].0 = t as u32;
             }
@@ -254,8 +256,6 @@ crate::impl_cipher_for_block_cipher!(Seed, 16);
 #[cfg(test)]
 mod seed_tests {
 
-    use crate::Cipher;
-
     use super::*;
 
     #[test]
@@ -291,9 +291,51 @@ mod seed_tests {
     fn test_1() {
         let mut cipher = Seed::default();
         cipher.ksa([0, 0, 0, 0]);
-        let ptext = "000102030405060708090a0b0c0d0e0f";
-        let ctext = "5ebac6e0054e166819aff1cc6d346cdb";
-        println!("{}", cipher.encrypt(ptext).unwrap());
-        println!("{ctext}");
+        let mut msg = [
+            0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
+            0x0E, 0x0F,
+        ];
+        cipher.encrypt_block(&mut msg);
+        assert_eq!(
+            msg,
+            [
+                0x5E, 0xBA, 0xC6, 0xE0, 0x05, 0x4E, 0x16, 0x68, 0x19, 0xAF, 0xF1, 0xCC, 0x6D, 0x34,
+                0x6C, 0xDB,
+            ]
+        );
+        cipher.decrypt_block(&mut msg);
+        assert_eq!(
+            msg,
+            [
+                0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
+                0x0E, 0x0F,
+            ]
+        );
+    }
+
+    #[test]
+    fn test_2() {
+        let mut cipher = Seed::default();
+        cipher.ksa([0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f]);
+        let mut msg = [
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00,
+        ];
+        cipher.encrypt_block(&mut msg);
+        assert_eq!(
+            msg,
+            [
+                0xC1, 0x1F, 0x22, 0xF2, 0x01, 0x40, 0x50, 0x50, 0x84, 0x48, 0x35, 0x97, 0xE4, 0x37,
+                0x0F, 0x43,
+            ]
+        );
+        cipher.decrypt_block(&mut msg);
+        assert_eq!(
+            msg,
+            [
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00,
+            ]
+        );
     }
 }
