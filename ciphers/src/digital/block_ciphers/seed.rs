@@ -1,3 +1,5 @@
+use std::num::Wrapping;
+
 use super::block_cipher::{BCMode, BCPadding, BlockCipher};
 use utils::byte_formatting::{overwrite_bytes, u64_pair_to_u8_array, ByteFormat};
 
@@ -146,6 +148,23 @@ const KC: [u32; 16] = [
     0x3779b99e, 0x6ef3733c, 0xdde6e678, 0xbbcdccf1, 0x779b99e3, 0xef3733c6, 0xde6e678d, 0xbcdccf1b,
 ];
 
+pub fn g(n: Wrapping<u32>) -> Wrapping<u32> {
+    let x = n.0.to_le_bytes();
+    Wrapping(SS0[x[0] as usize] ^ SS1[x[1] as usize] ^ SS2[x[2] as usize] ^ SS3[x[3] as usize])
+}
+
+pub fn round(v: u64, subkey: (u32, u32)) -> u64 {
+    let r0 = Wrapping((v >> 32) as u32);
+    let r1 = Wrapping(v as u32);
+    let k0 = Wrapping(subkey.0);
+    let k1 = Wrapping(subkey.1);
+
+    let out0 = g(g(g((r0 ^ k0) ^ (r1 ^ k1)) + (r0 ^ k0)) + g((r0 ^ k0) ^ (r1 ^ k1)))
+        + g(g((r0 ^ k0) ^ (r1 ^ k1)) + (r0 ^ k0));
+    let out1 = g(g(g((r0 ^ k0) ^ (r1 ^ k1)) + (r0 ^ k0)) + g((r0 ^ k0) ^ (r1 ^ k1)));
+    (out0.0 as u64) << 32 | out1.0 as u64
+}
+
 pub struct Seed {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
@@ -170,48 +189,39 @@ impl Default for Seed {
 
 impl Seed {
     pub fn ksa(&mut self, key: [u32; 4]) {
-        let mut key = key;
+        let mut key = key.map(|n| Wrapping(n));
         for i in 0..16 {
-            let k0 = Self::g(key[0].wrapping_add(key[2]).wrapping_sub(KC[i]));
-            let k1 = Self::g(key[1].wrapping_sub(key[3]).wrapping_add(KC[i]));
-            self.subkeys[i] = (k0, k1);
+            let k0 = g(key[0] + (key[2]) - Wrapping(KC[i]));
+            let k1 = g(key[1] - (key[3]) + Wrapping(KC[i]));
+            self.subkeys[i] = (k0.0, k1.0);
             if i % 2 == 1 {
-                let t = ((key[0] as u64) << 32) | (key[1] as u64) >> 8;
-                key[0] = (t >> 32) as u32;
-                key[1] = t as u32;
+                let t = ((key[0].0 as u64) << 32) | (key[1].0 as u64) >> 8;
+                key[0].0 = (t >> 32) as u32;
+                key[1].0 = t as u32;
             } else {
-                let t = ((key[2] as u64) << 32) | (key[3] as u64) << 8;
-                key[2] = (t >> 32) as u32;
-                key[3] = t as u32;
+                let t = ((key[2].0 as u64) << 32) | (key[3].0 as u64) << 8;
+                key[2].0 = (t >> 32) as u32;
+                key[3].0 = t as u32;
             }
         }
-    }
-
-    pub fn g(n: u32) -> u32 {
-        let x = n.to_le_bytes();
-        SS0[x[0] as usize] ^ SS1[x[1] as usize] ^ SS2[x[2] as usize] ^ SS3[x[3] as usize]
-    }
-
-    pub fn f(&self, v: u64, subkey: (u32, u32)) -> u64 {
-        todo!()
     }
 }
 
 impl BlockCipher<16> for Seed {
     fn encrypt_block(&self, bytes: &mut [u8]) {
         let mut v = [0u64; 2];
-        for (elem, chunk) in v.iter_mut().zip(bytes.chunks_exact(4)) {
+        for (elem, chunk) in v.iter_mut().zip(bytes.chunks_exact(8)) {
             *elem = u64::from_be_bytes(chunk.try_into().unwrap());
         }
 
         // Feistel network
-        for key in self.subkeys {
+        for subkey in self.subkeys {
             let t = v[0];
             // L_i+1 = R_i
             v[0] = v[1];
 
             // R_i+1 = L_i xor f(R_i)
-            v[1] = t ^ self.f(v[1], key);
+            v[1] = t ^ round(v[1], subkey);
         }
         v.swap(0, 1);
 
@@ -220,18 +230,18 @@ impl BlockCipher<16> for Seed {
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
         let mut v = [0u64; 2];
-        for (elem, chunk) in v.iter_mut().zip(bytes.chunks_exact(4)) {
+        for (elem, chunk) in v.iter_mut().zip(bytes.chunks_exact(8)) {
             *elem = u64::from_be_bytes(chunk.try_into().unwrap());
         }
 
         // Feistel network
-        for key in self.subkeys.into_iter().rev() {
+        for subkey in self.subkeys.into_iter().rev() {
             let t = v[0];
             // L_i+1 = R_i
             v[0] = v[1];
 
             // R_i+1 = L_i xor f(R_i)
-            v[1] = t ^ self.f(v[1], key);
+            v[1] = t ^ round(v[1], subkey);
         }
         v.swap(0, 1);
 
@@ -243,6 +253,8 @@ crate::impl_cipher_for_block_cipher!(Seed, 16);
 
 #[cfg(test)]
 mod seed_tests {
+
+    use crate::Cipher;
 
     use super::*;
 
@@ -273,5 +285,15 @@ mod seed_tests {
         {
             assert_eq!(correct_subkey, generated_subkey)
         }
+    }
+
+    #[test]
+    fn test_1() {
+        let mut cipher = Seed::default();
+        cipher.ksa([0, 0, 0, 0]);
+        let ptext = "000102030405060708090a0b0c0d0e0f";
+        let ctext = "5ebac6e0054e166819aff1cc6d346cdb";
+        println!("{}", cipher.encrypt(ptext).unwrap());
+        println!("{ctext}");
     }
 }
