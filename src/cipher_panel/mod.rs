@@ -57,6 +57,7 @@ mod rs44_controls;
 mod rsa_controls;
 mod salsa20_controls;
 mod scytale_controls;
+mod seed_controls;
 mod seriated_playfair_controls;
 mod shamir_controls;
 mod sigaba_controls;
@@ -173,6 +174,7 @@ pub struct CipherInterface {
     gost: gost_controls::GostFrame,
     idea: idea_controls::IdeaFrame,
     rc5: rc5_controls::Rc5Frame,
+    seed: seed_controls::SeedFrame,
     tea: tea_controls::TeaFrame,
     triple_des: triple_des_controls::TripleDesFrame,
     xtea: xtea_controls::XteaFrame,
@@ -316,6 +318,7 @@ impl CipherInterface {
                 CipherId::Gost,
                 CipherId::Idea,
                 CipherId::Rc5,
+                CipherId::Seed,
                 CipherId::Tea,
                 CipherId::TripleDes,
                 CipherId::Xtea,
@@ -407,6 +410,7 @@ impl CipherInterface {
             CipherId::Rs44 => &mut self.rs44,
             CipherId::Salsa20 => &mut self.salsa20,
             CipherId::Scytale => &mut self.scytale,
+            CipherId::Seed => &mut self.seed,
             CipherId::SeriatedPlayfair => &mut self.seriated,
             CipherId::Shamir => &mut self.shamir,
             CipherId::Sigaba => &mut self.sigaba,
