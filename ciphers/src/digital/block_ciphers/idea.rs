@@ -14,8 +14,8 @@ pub const BLOCK_SIZE: usize = 8;
 // Implementation in Rust
 // https://docs.rs/idea/latest/src/idea/lib.rs.html
 pub struct Idea {
-    pub output_format: ByteFormat,
     pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
     pub iv: u64,
     subkeys_enc: [u16; N_SUBKEYS],
     subkeys_dec: [u16; N_SUBKEYS],
@@ -26,8 +26,8 @@ pub struct Idea {
 impl Default for Idea {
     fn default() -> Self {
         Self {
-            output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
             iv: 0,
             subkeys_enc: [0u16; N_SUBKEYS],
             subkeys_dec: [0u16; N_SUBKEYS],

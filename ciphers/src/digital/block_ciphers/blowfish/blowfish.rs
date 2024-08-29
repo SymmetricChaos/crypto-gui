@@ -9,8 +9,8 @@ use crate::{
 };
 
 pub struct Blowfish {
-    pub output_format: ByteFormat,
     pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
     pub key: Vec<u8>,
     parray: [u32; 18],
     sboxes: [[u32; 256]; 4],
@@ -22,8 +22,8 @@ pub struct Blowfish {
 impl Default for Blowfish {
     fn default() -> Self {
         Self {
-            output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
             key: vec![0; 4],
             parray: PARRAY,
             sboxes: SBOXES,

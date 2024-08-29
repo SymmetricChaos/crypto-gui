@@ -16,8 +16,8 @@ const GOST_R_34_12_2015: [u64; 8] = [
 ];
 
 pub struct Gost {
-    pub output_format: ByteFormat,
     pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
     pub mode: BCMode,
     pub padding: BCPadding,
     pub iv: u64,
@@ -28,8 +28,8 @@ pub struct Gost {
 impl Default for Gost {
     fn default() -> Self {
         Self {
-            output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
             mode: BCMode::default(),
             padding: BCPadding::default(),
             iv: 0,

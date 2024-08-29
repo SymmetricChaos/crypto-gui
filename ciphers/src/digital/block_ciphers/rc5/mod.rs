@@ -28,8 +28,8 @@ macro_rules! impl_rc5 {
         }
 
         pub struct $name {
-            pub output_format: ByteFormat,
             pub input_format: ByteFormat,
+            pub output_format: ByteFormat,
             pub rounds: usize,
             pub state: Vec<$word>,
             pub iv: $iv_word,
@@ -42,8 +42,8 @@ macro_rules! impl_rc5 {
                 Self {
                     rounds: $rounds,
                     state: Vec::new(),
-                    output_format: ByteFormat::Hex,
                     input_format: ByteFormat::Hex,
+                    output_format: ByteFormat::Hex,
                     iv: 0,
                     mode: BCMode::default(),
                     padding: BCPadding::default(),

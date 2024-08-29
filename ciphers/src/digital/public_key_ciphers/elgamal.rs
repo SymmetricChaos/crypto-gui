@@ -4,8 +4,9 @@ use utils::byte_formatting::ByteFormat;
 use crate::{Cipher, CipherError};
 
 pub struct ElGamal {
-    pub output_format: ByteFormat,
     pub input_format: ByteFormat,
+	pub output_format: ByteFormat,
+
     pub group_size: BigUint,
     pub generator: BigUint,
     pub private_key: BigUint,
@@ -16,8 +17,9 @@ pub struct ElGamal {
 impl Default for ElGamal {
     fn default() -> Self {
         Self {
-            output_format: ByteFormat::Hex,
-            input_format: ByteFormat::Hex,
+			input_format: ByteFormat::Hex,
+			output_format: ByteFormat::Hex,
+
             group_size: BigUint::default(),
             generator: BigUint::default(),
             private_key: BigUint::default(),
@@ -104,8 +106,9 @@ mod elgamal_tests {
     #[test]
     fn encrypt_decrypt() {
         let cipher = ElGamal {
-            output_format: ByteFormat::Hex,
-            input_format: ByteFormat::Hex,
+			input_format: ByteFormat::Hex,
+			output_format: ByteFormat::Hex,
+
             group_size: BigUint::from(2357_u32),
             generator: BigUint::from(2_u32),
             private_key: BigUint::from(1751_u32),
@@ -120,8 +123,9 @@ mod elgamal_tests {
     #[test]
     fn encrypt() {
         let cipher = ElGamal {
-            output_format: ByteFormat::Hex,
-            input_format: ByteFormat::Hex,
+			input_format: ByteFormat::Hex,
+			output_format: ByteFormat::Hex,
+
             group_size: BigUint::from(2357_u32),
             generator: BigUint::from(2_u32),
             private_key: BigUint::from(1751_u32),

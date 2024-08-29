@@ -8,8 +8,8 @@ use crate::{
 use utils::byte_formatting::{overwrite_bytes, ByteFormat};
 
 pub struct Des {
-    pub output_format: ByteFormat,
     pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
     subkeys: [u64; 16],
     pub iv: u64,
     pub mode: BCMode,
@@ -19,8 +19,8 @@ pub struct Des {
 impl Default for Des {
     fn default() -> Self {
         Self {
-            output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
             subkeys: [0; 16],
             iv: 0,
             mode: BCMode::default(),

@@ -8,8 +8,8 @@ const Q32: u32 = 0x9e3779b9;
 const BLOCKSIZE: u32 = 16;
 
 struct Rc6 {
-    pub output_format: ByteFormat,
     pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
     pub rounds: usize,
     pub state: Vec<u32>,
     pub iv: u128,
@@ -20,8 +20,8 @@ struct Rc6 {
 impl Default for Rc6 {
     fn default() -> Self {
         Self {
-            output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
             rounds: 20,
             state: Default::default(),
             iv: 0,

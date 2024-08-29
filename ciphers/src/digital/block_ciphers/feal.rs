@@ -3,8 +3,8 @@ use crate::impl_cipher_for_block_cipher;
 use utils::byte_formatting::ByteFormat;
 
 pub struct Feal {
-    pub output_format: ByteFormat,
     pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
     subkeys: [u16; 16],
     pub iv: u64,
     pub mode: BCMode,
@@ -14,8 +14,8 @@ pub struct Feal {
 impl Default for Feal {
     fn default() -> Self {
         Self {
-            output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
             subkeys: Default::default(),
             iv: 0,
             mode: Default::default(),

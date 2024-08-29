@@ -5,8 +5,9 @@ use utils::byte_formatting::ByteFormat;
 use crate::{Cipher, CipherError};
 
 pub struct XorSecretSplitting {
-    pub output_format: ByteFormat,
     pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
+
     pub n_splits: u32,
     pub sep: String,
 }
@@ -14,8 +15,9 @@ pub struct XorSecretSplitting {
 impl Default for XorSecretSplitting {
     fn default() -> Self {
         Self {
-            output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
+
             n_splits: 3,
             sep: String::from(","),
         }

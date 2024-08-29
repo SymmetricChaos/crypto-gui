@@ -4,8 +4,9 @@ use utils::{byte_formatting::ByteFormat, math_functions::mul_inv};
 use crate::{Cipher, CipherError};
 
 pub struct Rsa {
-    pub output_format: ByteFormat,
     pub input_format: ByteFormat,
+	pub output_format: ByteFormat,
+
     pub n: BigUint,
     pub d: BigUint,
     pub e: BigUint,
@@ -15,8 +16,9 @@ pub struct Rsa {
 impl Default for Rsa {
     fn default() -> Self {
         Self {
-            output_format: ByteFormat::Hex,
-            input_format: ByteFormat::Hex,
+			input_format: ByteFormat::Hex,
+			output_format: ByteFormat::Hex,
+
             n: BigUint::default(),
             d: BigUint::default(),
             e: BigUint::from(65537_u32), // a small prime constant

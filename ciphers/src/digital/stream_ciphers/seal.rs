@@ -5,8 +5,9 @@ use crate::{Cipher, CipherError};
 
 // https://www.cs.ucdavis.edu/~rogaway/papers/seal.pdf
 pub struct Seal3 {
-    pub output_format: ByteFormat,
     pub input_format: ByteFormat,
+	pub output_format: ByteFormat,
+
     pub key: [u32; 5], // 160-bit key
     pub n: u32,
     pub l: u32, // number of output bits, limited to 524288 (64 * 1024 * 8)
@@ -20,8 +21,9 @@ pub struct Seal3 {
 impl Default for Seal3 {
     fn default() -> Self {
         Self {
-            output_format: ByteFormat::Hex,
-            input_format: ByteFormat::Hex,
+			input_format: ByteFormat::Hex,
+			output_format: ByteFormat::Hex,
+
             key: [0; 5],
             n: 0,
             l: 524288,

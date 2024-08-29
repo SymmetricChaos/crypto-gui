@@ -3,8 +3,9 @@ use std::num::Wrapping;
 use utils::byte_formatting::ByteFormat;
 
 pub struct ChaCha {
-    pub output_format: ByteFormat,
     pub input_format: ByteFormat,
+	pub output_format: ByteFormat,
+
     pub key: [u32; 8],
     pub nonce: [u32; 2],
     pub rounds: u8,
@@ -14,8 +15,9 @@ pub struct ChaCha {
 impl Default for ChaCha {
     fn default() -> Self {
         Self {
-            output_format: ByteFormat::Hex,
-            input_format: ByteFormat::Hex,
+			input_format: ByteFormat::Hex,
+			output_format: ByteFormat::Hex,
+
             // default for key and nonce taken from test vector here: https://datatracker.ietf.org/doc/html/draft-agl-tls-chacha20poly1305-04#section-7
             key: [
                 0x03020100, 0x07060504, 0x0b0a0908, 0x0f0e0d0c, 0x13121110, 0x17161514, 0x1b1a1918,

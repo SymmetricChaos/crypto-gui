@@ -7,8 +7,9 @@ pub struct Rc4 {
     pub i: u8,
     pub j: u8,
     pub drop: u32,
-    pub output_format: ByteFormat,
     pub input_format: ByteFormat,
+	pub output_format: ByteFormat,
+
 }
 
 impl Default for Rc4 {
@@ -22,8 +23,9 @@ impl Default for Rc4 {
             i: 0,
             j: 0,
             drop: 0,
-            output_format: ByteFormat::Hex,
-            input_format: ByteFormat::Hex,
+			input_format: ByteFormat::Hex,
+			output_format: ByteFormat::Hex,
+
         }
     }
 }

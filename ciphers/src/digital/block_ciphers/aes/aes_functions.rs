@@ -130,8 +130,8 @@ pub fn print_aes_state(state: &[u8]) {
 macro_rules! aes_methods {
     ($name: ident, $nk: literal, $nr: literal) => {
         pub struct $name {
-            pub output_format: ByteFormat,
             pub input_format: ByteFormat,
+            pub output_format: ByteFormat,
             pub key: [u32; Self::NK],
             round_keys: [[u8; 16]; Self::NR + 1],
             pub iv: u128,
@@ -142,8 +142,8 @@ macro_rules! aes_methods {
         impl Default for $name {
             fn default() -> Self {
                 Self {
-                    output_format: ByteFormat::Hex,
                     input_format: ByteFormat::Hex,
+                    output_format: ByteFormat::Hex,
                     key: [0; Self::NK],
                     round_keys: [[0u8; 16]; Self::NR + 1],
                     iv: 0,

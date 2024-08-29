@@ -5,8 +5,8 @@ use crate::{
 use utils::byte_formatting::{u32_pair_to_u8_array, ByteFormat};
 
 pub struct Xtea {
-    pub output_format: ByteFormat,
     pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
     pub key: [u32; 4],
     pub iv: u64,
     pub mode: BCMode,
@@ -18,8 +18,8 @@ impl Default for Xtea {
         Self {
             key: [0, 1, 2, 3],
             iv: 0,
-            output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
             mode: BCMode::default(),
             padding: BCPadding::default(),
         }

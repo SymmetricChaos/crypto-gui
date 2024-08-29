@@ -4,8 +4,8 @@ use utils::byte_formatting::{overwrite_bytes, u32_pair_to_u8_array, ByteFormat};
 use crate::digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher};
 
 pub struct Tea {
-    pub output_format: ByteFormat,
     pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
     pub key: [u32; 4],
     pub iv: u64,
     pub mode: BCMode,
@@ -16,8 +16,8 @@ impl Default for Tea {
     fn default() -> Self {
         Self {
             key: [0, 1, 2, 3],
-            output_format: ByteFormat::Hex,
             input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
             iv: 0,
             mode: BCMode::default(),
             padding: BCPadding::default(),
