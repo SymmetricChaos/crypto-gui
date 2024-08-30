@@ -4,7 +4,7 @@ use crate::impl_cipher_for_block_cipher;
 
 use super::block_cipher::{BCMode, BCPadding, BlockCipher};
 
-const GOST_R_34_12_2015: [u64; 8] = [
+pub const GOST_R_34_12_2015: [u64; 8] = [
     0xC462A5B9E8D703F1,
     0x68239A5C1E47BD0F,
     0xB3582FADE174C960,
@@ -13,6 +13,17 @@ const GOST_R_34_12_2015: [u64; 8] = [
     0x5DF692CAB78143E0,
     0x8E25691CF4B0DA37,
     0x17ED05834FA69CB2,
+];
+
+pub const TEST_SBOX: [u64; 8] = [
+    0x4a92d80e6b1c7f53,
+    0xeb4c6dfa23810759,
+    0x581da342efc7609b,
+    0x7da1089fe46cb253,
+    0x6c715fd84a9e03b2,
+    0x4ba0721d36859cfe,
+    0xdb413f590ae7682c,
+    0x1fd057a4923e6b8c,
 ];
 
 pub struct Gost {
@@ -62,6 +73,16 @@ impl Gost {
         let x = n.wrapping_add(subkey);
         let x = self.sbox(x);
         x.rotate_left(11)
+    }
+
+    pub fn with_sboxes(mut self, sboxes: [u64; 8]) -> Self {
+        self.sboxes = sboxes;
+        self
+    }
+
+    pub fn with_key(mut self, key: [u32; 8]) -> Self {
+        self.key = key;
+        self
     }
 }
 
@@ -116,31 +137,10 @@ mod gost_tests {
 
     use super::*;
 
-    const TEST_SBOX: [u64; 8] = [
-        0x4a92d80e6b1c7f53,
-        0xeb4c6dfa23810759,
-        0x581da342efc7609b,
-        0x7da1089fe46cb253,
-        0x6c715fd84a9e03b2,
-        0x4ba0721d36859cfe,
-        0xdb413f590ae7682c,
-        0x1fd057a4923e6b8c,
-    ];
-
     #[test]
     fn gost_sboxes() {
         let cipher = Gost::default();
         assert_eq!(0xC6BC7581, cipher.sbox(0x00000000_u32));
-    }
-
-    #[test]
-    fn encrypt_block() {
-        let mut cipher = Gost::default();
-        cipher.sboxes = TEST_SBOX;
-        let mut input = [0, 0, 0, 0, 0, 0, 0, 0];
-        let output = [0x0e, 0xca, 0x1a, 0x54, 0x4d, 0x33, 0x07, 0x0b];
-        cipher.encrypt_block(&mut input);
-        assert_eq!(input, output)
     }
 
     #[test]
@@ -162,3 +162,10 @@ mod gost_tests {
         assert_eq!(cipher.decrypt(&ctext).unwrap(), ptext);
     }
 }
+
+crate::test_block_cipher!(
+    Gost::default().with_sboxes(TEST_SBOX), test_1,
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0x0e, 0xca, 0x1a, 0x54, 0x4d, 0x33, 0x07, 0x0b];
+
+);

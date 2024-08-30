@@ -46,7 +46,7 @@ impl Idea {
         &self.subkeys_dec
     }
 
-    pub fn ksa(&mut self, key: &[u16; 8]) {
+    pub fn ksa(&mut self, key: [u16; 8]) {
         for (i, k) in key.iter().enumerate() {
             self.subkeys_enc[i] = *k;
         }
@@ -84,6 +84,11 @@ impl Idea {
             self.subkeys_dec[j + 4] = self.subkeys_enc[l + 4];
             self.subkeys_dec[j + 5] = self.subkeys_enc[l + 5];
         }
+    }
+
+    pub fn with_ksa(mut self, key: [u16; 8]) -> Self {
+        self.ksa(key);
+        self
     }
 
     // Multiplication modulo 2^16+1 (sort of)
@@ -207,14 +212,12 @@ impl_cipher_for_block_cipher!(Idea, 8);
 #[cfg(test)]
 mod idea_tests {
 
-    use crate::Cipher;
-
     use super::*;
 
     #[test]
     fn subkey_test() {
         let mut cipher = Idea::default();
-        cipher.ksa(&[1, 2, 3, 4, 5, 6, 7, 8]);
+        cipher.ksa([1, 2, 3, 4, 5, 6, 7, 8]);
         assert_eq!(
             &[
                 1, 2, 3, 4, 5, 6, 7, 8, 1024, 1536, 2048, 2560, 3072, 3584, 4096, 512, 16, 20, 24,
@@ -235,15 +238,11 @@ mod idea_tests {
             cipher.subkeys_dec()
         );
     }
-
-    #[test]
-    fn encrypt_decrypt_test() {
-        let mut cipher = Idea::default();
-        cipher.ksa(&[1, 2, 3, 4, 5, 6, 7, 8]);
-        cipher.padding = BCPadding::None;
-        let ptext = "0000000100020003"; // from 0 1 2 3
-        let ctext = "3ffb311b0a44067b"; // from 16379 12571 2628 1659
-        assert_eq!(ctext, &cipher.encrypt(ptext).unwrap());
-        assert_eq!(ptext, &cipher.decrypt(ctext).unwrap());
-    }
 }
+
+crate::test_block_cipher!(
+    Idea::default().with_ksa([1, 2, 3, 4, 5, 6, 7, 8]), test_1,
+    [0x00, 0x00, 0x00, 0x01, 0x00, 0x02, 0x00, 0x03,],
+    [0x3f, 0xfb, 0x31, 0x1b, 0x0a, 0x44, 0x06, 0x7b,];
+
+);

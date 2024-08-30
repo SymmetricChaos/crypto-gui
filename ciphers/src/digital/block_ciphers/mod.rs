@@ -5,6 +5,7 @@ pub mod des;
 pub mod feal;
 pub mod gost;
 pub mod idea;
+pub mod lea;
 pub mod rc5;
 pub mod rc6;
 pub mod seed;
@@ -90,4 +91,24 @@ macro_rules! impl_cipher_for_block_cipher {
             }
         }
     };
+}
+
+#[macro_export]
+macro_rules! test_block_cipher {
+    ($($cipher: expr, $name: ident, $ptext: expr, $ctext: expr);+ $(;)?) => {
+        #[cfg(test)]
+        mod block_cipher_tests {
+            use super::*;
+            $(
+                #[test]
+                fn $name() {
+                    let mut msg = $ptext;
+                    $cipher.encrypt_block(&mut msg);
+                    assert_eq!($ctext, msg);
+                    $cipher.decrypt_block(&mut msg);
+                    assert_eq!($ptext, msg);
+                }
+            )+
+        }
+    }
 }
