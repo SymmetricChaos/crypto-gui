@@ -104,9 +104,9 @@ macro_rules! test_block_cipher {
                 fn $name() {
                     let mut msg = $ptext;
                     $cipher.encrypt_block(&mut msg);
-                    assert_eq!($ctext, msg);
+                    assert_eq!($ctext, msg, "encrypt failed");
                     $cipher.decrypt_block(&mut msg);
-                    assert_eq!($ptext, msg);
+                    assert_eq!($ptext, msg, "decrypt failed");
                 }
             )+
         }
