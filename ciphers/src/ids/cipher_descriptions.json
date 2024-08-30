@@ -54,7 +54,9 @@
     "Description": "Alberti's cipher disk.",
     "Authors": "",
     "Publication": "",
-    "Traits": []
+    "Traits": [
+      "Substitution"
+    ]
   },
   "B64": {
     "Description": "The B64 Cipher is not a historical cipher. It is a simple modernization of the ADFGVX ciphers. Only symbols from the MIME Base64 alphabet are used, ensuring the message can be sent without risk of corruption over most digital systems and will appear as ordinary Base64 encoded data. First a Polybius square is used to change the text into pairs of digits, then these pairs are shuffled by applying two columnar transpositions, and finally they Polybius square is applied in reverse to convert the results back to the Base64 alphabet to reduce the message size.",
@@ -120,7 +122,7 @@
     ]
   },
   "Caesar": {
-    "Description": "The Caesar cipher is perhaps the simplest of ciphers, supposedly used by Julius Caesar to send messages to his troops. Each letter in the alphabet is just shifted some number of positions, wrapping around if needed. For example with the standard English alphabet a shift of 2 turns A in C and Y into A. The practical security of the cipher probably relied on low literacy in the era and lack of knowledge of the method of encryption. Since there are only as many possible keys as letters in the alphabet it is trivial to check all of them even if working by hand.",
+    "Description": "The Caesar cipher, named for Julius Caesar who is purported to have used it is perhaps the simplest of ciphers and certainly predates its namesake. Each letter in the alphabet is just shifted some number of positions, wrapping around if needed. For example with the standard English alphabet a shift of 2 turns A in C and Y into A. The practical security of the cipher probably relied on low literacy in the era and lack of knowledge of the method of encryption. Since there are only as many possible keys as letters in the alphabet it is trivial to check all of them even if working by hand. In modern terms Caesar ciphers generally have a keyspace of less than six bits. Increasing the keyspace does not provide additional security for a Caesar cipher, however, as it can be attacked the same way as any simple substitution cipher.",
     "Authors": "",
     "Publication": "Ancient",
     "Traits": [
@@ -155,7 +157,9 @@
     "Description": "The chaocipher was developed by Irish journalist John Francis Byrne who belived it to be unbreakable. Each letter is encrypted by a simple substitution. Between encrypting letters the arrangement of the alphabets on the two cipher wheels are permuted. In effect it is a more complex autokey cipher.",
     "Authors": "John Francis Byrne",
     "Publication": "",
-    "Traits": []
+    "Traits": [
+      "Substitution"
+    ]
   },
   "Columnar Transposition": {
     "Description": "The columnar transposition cipher encrypts information by writing the text into a grid row by row and then reading it off column by column in the order decided by a keyword. To decrypt the text is simply written back into the grid column by column in the required order. The cipher is somewhat easier to use if the text fills all of the rows but this creates a serious weakness in that the key size can be guessed by factoring the length of the message. Though insecure on its own columnar transposition is a strong cipher if applied twice or combined with another layer of encryption.",
@@ -211,7 +215,9 @@
     "Description": "Diffie-Hellman key exchange allows two or more people to agree on a secret key by a publically exchanging a few pieces of information. To be secure against a modern attacker the field size must be at least 1000-bits but the example here is limited to 32-bits.",
     "Authors": "",
     "Publication": "",
-    "Traits": []
+    "Traits": [
+      "Key Exchange"
+    ]
   },
   "E0": {
     "Description": "The E0 stream cipher used by Bluetooth produces a keystream from four LFSRs.",
@@ -225,26 +231,31 @@
     "Description": "ElGamal is a public key encryption algorithm created by Taher Elgamal in 1985. An message key is used to encrypt a message and then a Diffie-Hellman public key is used to encrypt the message key, note that about twice as much data must be sent as is in the message. To decrypt the reciever uses their private key to decrypt the message key and then uses that to decrypt the message. While ElGamal can be performed using any cyclic group this page allows only multiplicative groups of prime order as this allows the generator to be any integer from 2 to the size of the group.",
     "Authors": "",
     "Publication": "",
-    "Traits": []
+    "Traits": [
+      "Public Key"
+    ]
   },
   "Enigma": {
     "Description": "The Enigma machine is probably the most famous rotor machine from the brief era in which they dominated encryption. It was remarkable for its simplicity and compact size. Although it contained critical flaws ultimately the failure of Engima was caused by operational mistakes in the Nazi military that leaked information to the Allies.",
     "Authors": "",
     "Publication": "",
-    "Traits": []
+    "Traits": [
+      "Electromechanical"
+    ]
   },
   "Four-Square": {
     "Description": "The four-square cipher developed by Felix Delastelle is a signifcantly stronger version of the Playfair cipher. By using two keys there are no transparencies or simple reversals.",
     "Authors": "",
     "Publication": "",
     "Traits": [
-      "Playfair"
+      "Playfair",
+      "Substitution"
     ]
   },
   "GOST 28147-89": {
     "Description": "GOST 28147-89 is a Soviet block cipher standardized in 1989 and declassified in 1994. The 256-bit key size was quite large for its era but weaknesses were found after declassification. Unusually the substitution box of the cipher were originally left undefined. The default substitution box here is based on a 2015 standard.",
     "Authors": "",
-    "Publication": "",
+    "Publication": "1989",
     "Traits": [
       "Block Cipher",
       "Feistel"
@@ -262,18 +273,30 @@
     "Description": "The Hebern machine was one of the first rotor machines. It is known to have served as the basis for SIGABA and likely inspired other machines. The simplicity of Hebern's design made the machine uselessly weak for his hoped for military applications, though it was purchased by several governments.",
     "Authors": "",
     "Publication": "",
-    "Traits": []
+    "Traits": [
+      "Electromechanical"
+    ]
   },
   "Hutton": {
     "Description": "Hutton is a mutating key cipher created by Eric Hutton in 2018 that can be implemented using pen and paper.",
     "Authors": "Eric Hutton",
     "Publication": "2018",
-    "Traits": []
+    "Traits": [
+      "Substitution"
+    ]
   },
   "IDEA": {
     "Description": "The International Data Encryption Algorithm is a proposed block cipher from 1991 with a 64-bit block size. It works on words of 16-bits with the operations of XOR, addition modulo 2^16, and the much more unusual multiplication modulo 2^16+1. These operations are not distributive or associative with each other and the block function ensures that no operation is used to directly produce an input to itself. ",
     "Authors": "",
-    "Publication": "",
+    "Publication": "1991",
+    "Traits": [
+      "Block Cipher"
+    ]
+  },
+  "LEA": {
+    "Description": "LEA is South Korean block cipher .",
+    "Authors": "Hong, Lee, Kim, Kwon, Ryu, and Lee",
+    "Publication": "2013",
     "Traits": [
       "Block Cipher"
     ]
@@ -299,14 +322,20 @@
     "Description": "The nihilist cipher, used by the anti-monarchist Russian Nihilists in the late 19th century, combines a Polybius square with a variation on the Vigenere cipher. First the letters of the message are turned into two digit numbers by the Polybius square, then another keyword is turned into numbers the same way and those numbers are added to the the sequence, repeating as needed.",
     "Authors": "",
     "Publication": "",
-    "Traits": []
+    "Traits": [
+      "Polybius",
+      "Composite",
+      "Substitution",
+      "Polyalphabetic"
+    ]
   },
   "Playfair": {
     "Description": "The Playfair Cipher swaps letters on a grid to encrypt letters pair by pair. Developed by Charles Wheatstone and promoted by Lord Playfair it was advertised as strong enough for tactical use and simple enough to teach to schoolchildren.",
     "Authors": "",
     "Publication": "",
     "Traits": [
-      "Playfair"
+      "Playfair",
+      "Substitution"
     ]
   },
   "Plugboard": {
@@ -322,7 +351,8 @@
     "Authors": "",
     "Publication": "",
     "Traits": [
-      "Polybius"
+      "Polybius",
+      "Substitution"
     ]
   },
   "Polybius Square": {
@@ -330,7 +360,8 @@
     "Authors": "",
     "Publication": "",
     "Traits": [
-      "Polybius"
+      "Polybius",
+      "Substitution"
     ]
   },
   "Porta": {
@@ -346,13 +377,18 @@
     "Description": "The Japanese Type-97 cipher machine (known as Purple by the United States) was similar to contemporary rotor machines but worked using stepping switches instead. The security of the system was significantly undermined by the decision to make messages sent using it quicker and easier to transmit by Morse Code. The inputs are written romanized kana, by then mapping vowels to vowels and consonants to consonants the output would consist mostly of text the could be pronounced as Japanese syllables.",
     "Authors": "",
     "Publication": "",
-    "Traits": []
+    "Traits": [
+      "Electromechanical"
+    ]
   },
   "Quagmire": {
     "Description": "The quagmire cipher family is based on the Vigenère cipher but with multiple alphabets used to select encrypt letters. QuagmireV1. QuagmireV3 uses two different alphabets. QuagmireV4 uses another alphabet to encrypt the position of the indicator.",
     "Authors": "",
     "Publication": "",
-    "Traits": []
+    "Traits": [
+      "Substitution",
+      "Polyalphabetic"
+    ]
   },
   "RC4": {
     "Description": "The RC4 (Rivest Cipher 4) is an early digital stream cipher created by Ronald Rivest in 1987 that is now considered insecure. Internally it contains a list of every possible byte and as it runs the list is permuted by swapping positions of bytes. The key is a sequence of between 1 and 256 bytes that used to permute the list initially.",
@@ -383,7 +419,9 @@
     "Description": "The RSA algorithm (Rivest-Shamir-Adleman) is one of the most widely used public-key encryption systems in the world. It was invented in secret by the British GCHQ in 1973 and independently discovered by MIT researchers in 1977. The core of the algorithm relies on it being easy to multiply prime numbers together but much more difficult to factor their product. For very large prime numbers (thousands of bits in length) there is in fact no known feasible way to factor them even with the aid of supercomputers and advanced mathematics. The version of RSA presented here is a naive implementation that is vulnerable to chosen-plaintext attacks as it does not have padding or a nonce. It is also possible to select prime numbers p and q that product a number which is easy to factor by certain techniques (while this would not be obvious by looking at the public key it would be tested by an competent attacker) so secure versions of RSA must not allow arbitrary primes to be used.",
     "Authors": "",
     "Publication": "",
-    "Traits": []
+    "Traits": [
+      "Public Key"
+    ]
   },
   "Rail Fence": {
     "Description": "The rail fence cipher is a simple but very weak transposition cipher. Text is written in a zig-zag pattern up and down several horizontal lines (the like rails of a fence) then each line is read off in order.",
@@ -403,7 +441,9 @@
     "Description": "SIGABA was likely the most complex rotor machine of its era and is not known to have been successfully attacked during its use. Despite its complexity the United States was extremely paranoid about the device and did not allow allies direct access to it.",
     "Authors": "",
     "Publication": "",
-    "Traits": []
+    "Traits": [
+      "Electromechanical"
+    ]
   },
   "Salsa20": {
     "Description": "Salsa20 is a stream cipher. The recommended variant is Salsa20/20 which uses 20 rounds, though Salsa20/12 and Salsa20/8 using fewer rounds are also believed to be secure while running much faster. This implementation allows Salsa20 to be run with other round counts as well.",
@@ -435,21 +475,25 @@
     "Authors": "",
     "Publication": "",
     "Traits": [
-      "Playfair"
+      "Playfair",
+      "Substitution"
     ]
   },
   "Shamir's Secret Sharing": {
     "Description": "Shamir's Secret Sharing encrypts a secret as a set of pieces (actually pairs of numbers) such that the original value can be determined only by having a some portion of the pieces. Consider a very simple example: Choose a line so that it passes through the y-axis at a certain value (the secret number to be shared), now pick various points on the line, a person with only a single point has no information but a person with any two of the point can determine the line and thus the secret. Polynomials allow this to be extended so that any number of points are needed to determine the curve and extract the secret value. Shamir's algorithm uses a polynomial over a finite field to ensure that anyone with fewer shares than the needed threshold has no information.",
     "Authors": "",
     "Publication": "",
-    "Traits": []
+    "Traits": [
+      "Secret Sharing"
+    ]
   },
   "Slidefair": {
     "Description": "The slidefair cipher is a stronger but more complex variation on the Playfair Cipher. The grid is a tabula-recta of every shift of the alphabet.",
     "Authors": "Helen Gaines",
     "Publication": "",
     "Traits": [
-      "Playfair"
+      "Playfair",
+      "Substitution"
     ]
   },
   "Straddling Checkerboard": {
@@ -457,7 +501,8 @@
     "Authors": "",
     "Publication": "",
     "Traits": [
-      "Polybius"
+      "Polybius",
+      "Substitution"
     ]
   },
   "Substitution": {
@@ -483,6 +528,7 @@
     "Publication": "",
     "Traits": [
       "Polybius",
+      "Substitution",
       "Transposition",
       "Composite"
     ]
@@ -509,14 +555,17 @@
     "Authors": "",
     "Publication": "",
     "Traits": [
-      "Playfair"
+      "Playfair",
+      "Substitution"
     ]
   },
   "VIC": {
     "Description": "The VIC cipher (short for VICTOR, the code name given to spy Reino Häyhänen) is among the most sophisticated pen-and-paper ciphers ever devised, though its instructions were hidden entirely within a hollow nickel. Encryption and decryption first involves a lengthy key derivation process to ensure that small key changes will result in very different results. This key derivation creates three sub-keys which are used to configure a straddling checkerboard, a columnar transposition, and a disrupted columnar transposition. The two changeable parts of the key were the date, which was simply the date on the message, and the key group which was random and inserted into the message itself.",
     "Authors": "",
     "Publication": "",
-    "Traits": []
+    "Traits": [
+      "Composite"
+    ]
   },
   "Vigenère": {
     "Description": "The Vigenère cipher is named for Blaise de Vigenère though it has been developed earlier by Giovan Battista Bellaso in 1553. It was once known as 'le chifre indéchiffrable' (the unsolvable cipher) as it was among the first ciphers to provide more security than a simple substitution cipher. The keyword is used as if it were a series of Caesar ciphers. Although Babbage and Kasiski independetly developed methods to break the cipher in the mid 1800s its popular reputation as unbreakable persisted into the early 1900s.\nSeveral variants exist:\n  Autokey - patterns of repetition in the key can be removed by using the text of the message itself once the original key runs out.\n  Mulitkey - By encrypting a message several times the security of a Vigenere cipher can be increased dramatically. The effective key length is no greater than the least common multiple of all the keys used. The pair of key words 'VIGENERE' and 'CIPHER' would have a key with a length of 24. Further it is hard to seperate out the overlapping keys meaning that even if attacker has a large amount of text and knows the period of the key they cannot easily guess it.\n If used with high quality pseudorandom data decryption is nearly impossible as any ciphertext can be produced by any plaintext and a version is still common in modern digital encryption.\n  Progressive Key - An additional shift is added each time the key repeats in order to stretch out the key.",
@@ -531,7 +580,9 @@
     "Description": "Any secret can be easily \"split\" into n pieces by first creating n-1 strings of random data of the same size. Each of those is XORed into the original secret, creating the last piece. The secret can then be recovered only by XORing all of the pieces together. Messages encrypted this way should be padded to avoid exposing information about their length. Unlike secret thresholding based sharing algorithms this splitting algorithm cannot be set up to use only a portion of the pieces, making it less felxible and significantly more fragile.",
     "Authors": "",
     "Publication": "",
-    "Traits": []
+    "Traits": [
+      "Secret Sharing"
+    ]
   },
   "XTEA": {
     "Description": "The Extended Tiny Encryption Algorithm (XTEA) is a block cipher designed to improve on TEA.",
