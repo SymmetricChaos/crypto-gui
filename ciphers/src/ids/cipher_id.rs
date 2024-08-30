@@ -84,32 +84,20 @@ impl Default for CipherId {
 }
 
 impl CipherId {
-    pub fn description(&self) -> &'static str {
-        match CIPHER_INFORMATION[self.to_string()]["Description"].as_str() {
-            Some(s) => s,
-            None => "<<<MISSING DESCRIPTION>>>",
-        }
+    pub fn description(&self) -> Option<&'static str> {
+        CIPHER_INFORMATION[self.to_string()]["Description"].as_str()
     }
 
-    pub fn authors(&self) -> &'static str {
-        match CIPHER_INFORMATION[self.to_string()]["Authors"].as_str() {
-            Some(s) => s,
-            None => "<<<MISSING AUTHORS>>>",
-        }
+    pub fn authors(&self) -> Option<&'static str> {
+        CIPHER_INFORMATION[self.to_string()]["Authors"].as_str()
     }
 
-    pub fn publication_date(&self) -> &'static str {
-        match CIPHER_INFORMATION[self.to_string()]["Publication"].as_str() {
-            Some(s) => s,
-            None => "<<<MISSING PUBLICATION DATE>>>",
-        }
+    pub fn publication_date(&self) -> Option<&'static str> {
+        CIPHER_INFORMATION[self.to_string()]["Publication"].as_str()
     }
 
-    pub fn traits(&self) -> &'static str {
-        match CIPHER_INFORMATION[self.to_string()]["Traits"].as_str() {
-            Some(s) => s,
-            None => "<<<MISSING TRAITS>>>",
-        }
+    pub fn traits(&self) -> Option<&'static str> {
+        CIPHER_INFORMATION[self.to_string()]["Traits"].as_str()
     }
 }
 

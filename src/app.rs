@@ -191,7 +191,16 @@ impl ClassicCryptoApp {
                     match self.active_code {
                         Some(code) => {
                             ui.label(RichText::from(code.to_string()).heading());
-                            ui.label(RichText::new(code.description()).size(12.0));
+                            match code.description() {
+                                Some(s) => ui.label(RichText::new(s).size(12.0)),
+                                None => ui.label(RichText::new("<<<MISSING DESCRIPTION>>>").size(12.0)),
+                            };
+                            if let Some(s) = code.authors() {
+                                ui.label(RichText::new(format!("Authors: {}", s)).size(12.0));
+                            };
+                            if let Some(s) = code.publication_date() {
+                                ui.label(RichText::new(format!("Published: {}", s)).size(12.0));
+                            };
                             ui.add_space(16.0);
                             ui.separator();
                             ui.add_space(16.0);
@@ -260,7 +269,16 @@ impl ClassicCryptoApp {
                     match self.active_cipher {
                         Some(cipher) => {
                             ui.label(RichText::from(cipher.to_string()).heading());
-                            ui.label(RichText::new(cipher.description()).size(12.0));
+                            match cipher.description() {
+                                Some(s) => ui.label(RichText::new(s).size(12.0)),
+                                None => ui.label(RichText::new("<<<MISSING DESCRIPTION>>>").size(12.0)),
+                            };
+                            if let Some(s) = cipher.authors() {
+                                ui.label(RichText::new(format!("Authors: {}", s)).size(12.0));
+                            };
+                            if let Some(s) = cipher.publication_date() {
+                                ui.label(RichText::new(format!("Published: {}", s)).size(12.0));
+                            };
                             ui.add_space(16.0);
                             ui.separator();
                             ui.add_space(16.0);
@@ -331,7 +349,16 @@ impl ClassicCryptoApp {
                     match self.active_rng {
                         Some(rng) => {
                             ui.label(RichText::from(rng.to_string()).heading());
-                            ui.label(RichText::new(rng.description()).size(12.0));
+                            match rng.description() {
+                                Some(s) => ui.label(RichText::new(s).size(12.0)),
+                                None => ui.label(RichText::new("<<<MISSING DESCRIPTION>>>").size(12.0)),
+                            };
+                            if let Some(s) = rng.authors() {
+                                ui.label(RichText::new(format!("Authors: {}", s)).size(12.0));
+                            };
+                            if let Some(s) = rng.publication_date() {
+                                ui.label(RichText::new(format!("Published: {}", s)).size(12.0));
+                            };
                             ui.add_space(16.0);
                             ui.separator();
                             ui.add_space(16.0);
@@ -400,9 +427,16 @@ impl ClassicCryptoApp {
                     match self.active_hasher {
                         Some(hasher) => {
                             ui.label(RichText::from(hasher.to_string()).heading());
-                            ui.label(RichText::new(hasher.description()).size(14.0));
-                            ui.label(RichText::new(format!("Authors: {}", hasher.authors())).size(12.0));
-                            ui.label(RichText::new(format!("Published: {}", hasher.publication_date())).size(12.0));
+                            match hasher.description() {
+                                Some(s) => ui.label(RichText::new(s).size(12.0)),
+                                None => ui.label(RichText::new("<<<MISSING DESCRIPTION>>>").size(12.0)),
+                            };
+                            if let Some(s) = hasher.authors() {
+                                ui.label(RichText::new(format!("Authors: {}", s)).size(12.0));
+                            };
+                            if let Some(s) = hasher.publication_date() {
+                                ui.label(RichText::new(format!("Published: {}", s)).size(12.0));
+                            };
                             ui.add_space(16.0);
                             ui.separator();
                             ui.add_space(16.0);

@@ -40,25 +40,16 @@ impl Default for HasherId {
 }
 
 impl HasherId {
-    pub fn description(&self) -> &'static str {
-        match HASHER_INFORMATION[self.to_string()]["Description"].as_str() {
-            Some(s) => s,
-            None => "<<<MISSING DESCRIPTION>>>",
-        }
+    pub fn description(&self) -> Option<&'static str> {
+        HASHER_INFORMATION[self.to_string()]["Description"].as_str()
     }
 
-    pub fn authors(&self) -> &'static str {
-        match HASHER_INFORMATION[self.to_string()]["Authors"].as_str() {
-            Some(s) => s,
-            None => "<<<MISSING AUTHORS>>>",
-        }
+    pub fn authors(&self) -> Option<&'static str> {
+        HASHER_INFORMATION[self.to_string()]["Authors"].as_str()
     }
 
-    pub fn publication_date(&self) -> &'static str {
-        match HASHER_INFORMATION[self.to_string()]["Publication"].as_str() {
-            Some(s) => s,
-            None => "<<<MISSING AUTHORS>>>",
-        }
+    pub fn publication_date(&self) -> Option<&'static str> {
+        HASHER_INFORMATION[self.to_string()]["Publication"].as_str()
     }
 }
 

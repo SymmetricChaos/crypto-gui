@@ -36,32 +36,20 @@ impl Default for RngId {
 }
 
 impl RngId {
-    pub fn description(&self) -> &'static str {
-        match RNG_INFORMATION[self.to_string()]["Description"].as_str() {
-            Some(s) => s,
-            None => "<<<MISSING DESCRIPTION>>>",
-        }
+    pub fn description(&self) -> Option<&'static str> {
+        RNG_INFORMATION[self.to_string()]["Description"].as_str()
     }
 
-    pub fn authors(&self) -> &'static str {
-        match RNG_INFORMATION[self.to_string()]["Authors"].as_str() {
-            Some(s) => s,
-            None => "<<<MISSING AUTHORS>>>",
-        }
+    pub fn authors(&self) -> Option<&'static str> {
+        RNG_INFORMATION[self.to_string()]["Authors"].as_str()
     }
 
-    pub fn publication_date(&self) -> &'static str {
-        match RNG_INFORMATION[self.to_string()]["Publication"].as_str() {
-            Some(s) => s,
-            None => "<<<MISSING PUBLICATION DATE>>>",
-        }
+    pub fn publication_date(&self) -> Option<&'static str> {
+        RNG_INFORMATION[self.to_string()]["Publication"].as_str()
     }
 
-    pub fn traits(&self) -> &'static str {
-        match RNG_INFORMATION[self.to_string()]["Traits"].as_str() {
-            Some(s) => s,
-            None => "<<<MISSING TRAITS>>>",
-        }
+    pub fn traits(&self) -> Option<&'static str> {
+        RNG_INFORMATION[self.to_string()]["Traits"].as_str()
     }
 }
 
