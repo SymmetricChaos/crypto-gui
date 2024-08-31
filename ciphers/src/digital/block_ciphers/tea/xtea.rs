@@ -1,7 +1,4 @@
-use crate::{
-    digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher},
-    impl_cipher_for_block_cipher,
-};
+use crate::digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher};
 use utils::byte_formatting::{fill_u32s_be, u32s_to_bytes_be, ByteFormat};
 
 pub fn mx_e(a: u32, b: u32, sum: u32, k: u32) -> u32 {
@@ -34,6 +31,26 @@ impl Default for Xtea {
 }
 
 impl Xtea {
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+
+    pub fn padding(mut self, padding: BCPadding) -> Self {
+        self.padding = padding;
+        self
+    }
+
+    pub fn mode(mut self, mode: BCMode) -> Self {
+        self.mode = mode;
+        self
+    }
+
     pub fn ksa(&mut self, bytes: [u8; 16]) {
         fill_u32s_be(&mut self.key, &bytes);
     }
@@ -70,7 +87,7 @@ impl BlockCipher<8> for Xtea {
     }
 }
 
-impl_cipher_for_block_cipher!(Xtea, 8);
+crate::impl_cipher_for_block_cipher!(Xtea, 8);
 
 #[cfg(test)]
 mod xtea_tests {
