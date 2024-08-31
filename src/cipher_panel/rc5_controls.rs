@@ -1,5 +1,8 @@
 use super::CipherFrame;
-use crate::ui_elements::{block_cipher_mode, block_cipher_padding, UiElements};
+use crate::ui_elements::{
+    block_cipher_iv_128, block_cipher_iv_32, block_cipher_iv_64, block_cipher_mode,
+    block_cipher_padding, UiElements,
+};
 use ciphers::{
     digital::block_ciphers::rc5::{rc5_16::Rc5_16, rc5_32::Rc5_32, rc5_64::Rc5_64},
     Cipher,
@@ -28,8 +31,6 @@ pub struct Rc5Frame {
     cipher_64: Rc5_64,
     selector: SizeSelector,
     key: String,
-    iv_upper: u64,
-    iv_lower: u64,
 }
 
 impl Rc5Frame {
@@ -106,25 +107,13 @@ impl CipherFrame for Rc5Frame {
 
         match self.selector {
             SizeSelector::R16 => {
-                ui.add_enabled_ui(self.cipher_16.mode.iv_needed(), |ui| {
-                ui.subheading("IV/Counter");
-                ui.label("In the selected mode the cipher must have a 32-bit initial value provided.");
-                ui.u32_drag_value_hex(&mut self.cipher_16.iv);
-            });
+                block_cipher_iv_32(ui, &mut self.cipher_16.iv, self.cipher_16.mode);
             }
             SizeSelector::R32 => {
-                ui.add_enabled_ui(self.cipher_32.mode.iv_needed(), |ui| {
-                ui.subheading("IV/Counter");
-                ui.label("In the selected mode the cipher must have a 64-bit initial value provided.");
-                ui.u64_drag_value_hex(&mut self.cipher_32.iv);
-            });
+                block_cipher_iv_64(ui, &mut self.cipher_32.iv, self.cipher_32.mode);
             }
             SizeSelector::R64 => {
-                ui.add_enabled_ui(self.cipher_64.mode.iv_needed(), |ui| {
-                ui.subheading("IV/Counter");
-                ui.label("In the selected mode the cipher must have a 128-bit initial value provided. The upper and lower 64 bits are controlled below.");
-                ui.u128_hi_lo_drag_value_hex(&mut self.cipher_64.iv, &mut self.iv_upper, &mut self.iv_lower);
-            });
+                block_cipher_iv_128(ui, &mut self.cipher_64.iv, self.cipher_64.mode);
             }
         }
 

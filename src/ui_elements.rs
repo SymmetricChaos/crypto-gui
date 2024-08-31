@@ -1,4 +1,7 @@
-use crate::{cipher_panel::CipherFrame, integer_drag_value::EditU64};
+use crate::{
+    cipher_panel::CipherFrame,
+    integer_drag_value::{EditU128, EditU64},
+};
 use ciphers::digital::block_ciphers::block_cipher::{BCMode, BCPadding};
 use codes::letter_word_code::IntegerCodeMaps;
 use eframe::egui::RichText;
@@ -57,15 +60,12 @@ pub trait UiElements {
     fn u32_drag_value_hex(&mut self, n: &mut u32) -> Response;
     fn u64_drag_value_hex(&mut self, n: &mut u64) -> Response;
     fn u128_drag_value_hex(&mut self, n: &mut u128) -> Response;
-    fn u128_hi_lo_drag_value_hex(&mut self, n: &mut u128, hi: &mut u64, lo: &mut u64) -> Response;
     fn u8_drag_value_dec(&mut self, n: &mut u8) -> Response;
     fn u16_drag_value_dec(&mut self, n: &mut u16) -> Response;
     fn u32_drag_value_dec(&mut self, n: &mut u32) -> Response;
     fn u64_drag_value_dec(&mut self, n: &mut u64) -> Response;
-    fn u128_drag_value_dec(&mut self, n: &mut u128) -> Response;
-    fn u128_hi_lo_drag_value_dec(&mut self, n: &mut u128, hi: &mut u64, lo: &mut u64) -> Response;
     fn random_bytes_button<T: Fill>(&mut self, item: &mut T) -> Response;
-    fn random_num_button<T>(&mut self, item: &mut T)
+    fn random_num_button<T>(&mut self, item: &mut T) -> Response
     where
         Standard: Distribution<T>;
 }
@@ -282,26 +282,8 @@ impl UiElements for Ui {
         self.add(EditU64::new(n))
     }
 
-    /// NOT IMPLEMENTED
-    fn u128_drag_value_hex(&mut self, _n: &mut u128) -> Response {
-        todo!("u128 DragValue is not supported by egui")
-    }
-    fn u128_hi_lo_drag_value_hex(&mut self, n: &mut u128, hi: &mut u64, lo: &mut u64) -> Response {
-        if self
-            .add(DragValue::new(hi).hexadecimal(16, false, false))
-            .changed()
-        {
-            *n &= 0x0000000000000000FFFFFFFFFFFFFFFF;
-            *n |= (*hi as u128) << 64;
-        }
-        if self
-            .add(DragValue::new(lo).hexadecimal(16, false, false))
-            .changed()
-        {
-            *n &= 0xFFFFFFFFFFFFFFFF0000000000000000;
-            *n |= *lo as u128;
-        }
-        self.label(format!("{:032x?}", n))
+    fn u128_drag_value_hex(&mut self, n: &mut u128) -> Response {
+        self.add(EditU128::new(n))
     }
 
     fn u8_drag_value_dec(&mut self, n: &mut u8) -> Response {
@@ -320,23 +302,6 @@ impl UiElements for Ui {
         self.add(DragValue::new(n))
     }
 
-    /// NOT IMPLEMENTED
-    fn u128_drag_value_dec(&mut self, _n: &mut u128) -> Response {
-        todo!("u128 DragValue is not supported by egui")
-    }
-
-    fn u128_hi_lo_drag_value_dec(&mut self, n: &mut u128, hi: &mut u64, lo: &mut u64) -> Response {
-        if self.add(DragValue::new(hi)).changed() {
-            *n &= 0x0000000000000000FFFFFFFFFFFFFFFF;
-            *n |= (*hi as u128) << 64;
-        }
-        if self.add(DragValue::new(lo)).changed() {
-            *n &= 0xFFFFFFFFFFFFFFFF0000000000000000;
-            *n |= *lo as u128;
-        }
-        self.label(format!("{:032x?}", n))
-    }
-
     fn random_bytes_button<T: Fill>(&mut self, item: &mut T) -> Response {
         let b = self.button("🎲").on_hover_text("randomize");
         if b.clicked() {
@@ -345,13 +310,15 @@ impl UiElements for Ui {
         b
     }
 
-    fn random_num_button<T>(&mut self, item: &mut T)
+    fn random_num_button<T>(&mut self, item: &mut T) -> Response
     where
         Standard: Distribution<T>,
     {
-        if self.button("🎲").on_hover_text("randomize").clicked() {
+        let b = self.button("🎲").on_hover_text("randomize");
+        if b.clicked() {
             *item = thread_rng().gen();
         }
+        b
     }
 }
 
@@ -414,74 +381,6 @@ macro_rules! filter_and_parse_int {
 
 filter_and_parse_int!(filter_and_parse_u32, u32);
 filter_and_parse_int!(filter_and_parse_u64, u64);
-
-macro_rules! control_int_hex {
-    ($name: ident, $num: ty, $width: literal) => {
-        pub fn $name(number: &mut $num, string: &mut String) {
-            filter_string(string, &"0123456789ABCDEF");
-            if string.is_empty() {
-                *string = String::from("0".repeat($width));
-                *number = 0;
-            }
-            while string.len() > $width {
-                string.remove(0);
-            }
-            while string.len() < $width {
-                string.insert(0, '0')
-            }
-            *number = match <$num>::from_str_radix(&string, 16) {
-                Ok(n) => n,
-                Err(_) => {
-                    *string = <$num>::MAX.to_string();
-                    <$num>::MAX
-                }
-            }
-        }
-    };
-}
-
-control_int_hex!(control_u32_hex, u32, 8);
-control_int_hex!(control_u64_hex, u64, 16);
-control_int_hex!(control_u128_hex, u128, 32);
-
-pub fn block_cipher_iv_u32(ui: &mut Ui, iv_string: &mut String, iv: &mut u32, enabled: bool) {
-    ui.add_enabled_ui(enabled, |ui| {
-        ui.horizontal(|ui| {
-            ui.subheading("IV/Counter");
-            ui.random_num_button(iv)
-        });
-        ui.label("In the selected mode the cipher must have a 32-bit initial value provided.");
-        if ui.control_string(iv_string).changed() {
-            control_u32_hex(iv, iv_string);
-        }
-    });
-}
-
-pub fn block_cipher_iv_u64(ui: &mut Ui, iv_string: &mut String, iv: &mut u64, enabled: bool) {
-    ui.add_enabled_ui(enabled, |ui| {
-        ui.horizontal(|ui| {
-            ui.subheading("IV/Counter");
-            ui.random_num_button(iv)
-        });
-        ui.label("In the selected mode the cipher must have a 64-bit initial value provided.");
-        if ui.control_string(iv_string).changed() {
-            control_u64_hex(iv, iv_string);
-        }
-    });
-}
-
-pub fn block_cipher_iv_u128(ui: &mut Ui, iv_string: &mut String, iv: &mut u128, enabled: bool) {
-    ui.add_enabled_ui(enabled, |ui| {
-        ui.horizontal(|ui| {
-            ui.subheading("IV/Counter");
-            ui.random_num_button(iv)
-        });
-        ui.label("In the selected mode the cipher must have a 32-bit initial value provided.");
-        if ui.control_string(iv_string).changed() {
-            control_u128_hex(iv, iv_string);
-        }
-    });
-}
 
 pub fn generate_random_u32s_box(
     ui: &mut Ui,
@@ -691,73 +590,35 @@ pub fn integer_word_code_controls(
     ui.add_space(16.0);
 }
 
-// pub fn letter_grid(ui: &mut egui::Ui, n_rows: usize, n_cols: usize, text: &String) {
-//     let symbols = str_to_char_grid(text, '\0', '\0');
-//     let grid = Grid::from_cols(symbols, n_rows, n_cols);
-//     egui::Grid::new("letter_grid").show(ui, |ui| {
-//         for n in 0..grid.num_rows() {
-//             ui.spacing_mut().item_spacing.x = 0.0;
-//             let row = grid.get_row(n);
-//             for c in row {
-//                 let character = mono(*c.contents().unwrap()); // RichText::from(String::from(*c.contents().unwrap())).monospace();
-//                 ui.add_sized([0.0, 0.0], Label::new(character));
-//             }
-//             ui.end_row()
-//         }
-//     });
-// }
+pub fn block_cipher_iv_32(ui: &mut Ui, iv: &mut u32, mode: BCMode) {
+    ui.add_enabled_ui(mode.iv_needed(), |ui| {
+        ui.horizontal(|ui| {
+            ui.subheading("IV/Counter");
+            ui.random_num_button(iv).clicked();
+        });
+        ui.label("In the selected mode the cipher must have a 32-bit initial value provided.");
+        ui.u32_drag_value_hex(iv);
+    });
+}
 
-// pub fn code_button_columns(
-//     nrows: usize,
-//     ncols: usize,
-//     ui: &mut egui::Ui,
-//     target: &mut String,
-//     space: &str,
-//     iter: Box<dyn Iterator<Item = (char, &str)> + '_>,
-// ) {
-//     ui.columns(ncols, |columns| {
-//         let mut ctr = 0;
-//         let mut col = 0;
-//         for (c, code) in iter {
-//             let pair = format!("{}  {} ", c, code);
-//             if columns[col].button(&pair).clicked() {
-//                 if !target.is_empty() {
-//                     target.push_str(space);
-//                 }
-//                 target.push_str(code)
-//             }
-//             ctr += 1;
-//             if ctr % nrows == 0 {
-//                 col += 1
-//             }
-//         }
-//     });
-// }
+pub fn block_cipher_iv_64(ui: &mut Ui, iv: &mut u64, mode: BCMode) {
+    ui.add_enabled_ui(mode.iv_needed(), |ui| {
+        ui.horizontal(|ui| {
+            ui.subheading("IV/Counter");
+            ui.random_num_button(iv).clicked();
+        });
+        ui.label("In the selected mode the cipher must have a 64-bit initial value provided.");
+        ui.u64_drag_value_hex(iv);
+    });
+}
 
-// use std::path::PathBuf;
-// use rfd::FileDialog;
-// #[cfg(not(target_arch = "wasm32"))]
-// pub fn upload_file(ui: &mut egui::Ui, file: &mut Option<PathBuf>) {
-//     if ui.button("Upload File").clicked() {
-//         *file = FileDialog::new().pick_file();
-//     }
-//     let file_name = file.as_ref().unwrap().file_name().unwrap().to_str();
-//     ui.add_space(10.0);
-//     ui.label(format!("{}", file_name.unwrap()));
-// }
-// #[cfg(target_arch = "wasm32")]
-// pub fn upload_file(ui: &mut egui::Ui, file: &mut Option<PathBuf>) {}
-
-// #[cfg(not(target_arch = "wasm32"))]
-// pub fn encode_file_and_save(
-//     ui: &mut egui::Ui,
-//     code: &dyn BinaryToText,
-//     source_file: Option<PathBuf>,
-// ) {
-//     if ui.button("Download Encoded File").clicked() {
-//         let target_file = FileDialog::new().add_filter("", &[".txt"]).save_file();
-//         if let Some(file) = target_file {
-//             std::fs::write(file, code.encode_file(source_file).unwrap()).unwrap()
-//         }
-//     }
-// }
+pub fn block_cipher_iv_128(ui: &mut Ui, iv: &mut u128, mode: BCMode) {
+    ui.add_enabled_ui(mode.iv_needed(), |ui| {
+        ui.horizontal(|ui| {
+            ui.subheading("IV/Counter");
+            ui.random_num_button(iv).clicked();
+        });
+        ui.label("In the selected mode the cipher must have a 128-bit initial value provided.");
+        ui.u128_drag_value_hex(iv);
+    });
+}

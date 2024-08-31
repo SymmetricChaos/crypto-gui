@@ -1,4 +1,6 @@
-use crate::ui_elements::{block_cipher_mode, block_cipher_padding, UiElements};
+use crate::ui_elements::{
+    block_cipher_iv_128, block_cipher_mode, block_cipher_padding, UiElements,
+};
 use ciphers::digital::block_ciphers::seed::Seed;
 use utils::byte_formatting::u32s_to_bytes_le;
 
@@ -49,6 +51,8 @@ impl CipherFrame for SeedFrame {
                 self.cipher.ksa(self.key_bytes);
             }
         }
+
+        block_cipher_iv_128(ui, &mut self.cipher.iv, self.cipher.mode);
     }
 
     fn cipher(&self) -> &dyn ciphers::Cipher {

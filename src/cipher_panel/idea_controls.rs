@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{block_cipher_mode, block_cipher_padding, UiElements};
+use crate::ui_elements::{block_cipher_iv_64, block_cipher_mode, block_cipher_padding, UiElements};
 use ciphers::{digital::block_ciphers::idea::Idea, Cipher};
 use egui::{FontId, RichText, Ui};
 use rand::{thread_rng, Rng};
@@ -18,20 +18,6 @@ impl Default for IdeaFrame {
             valid_key: false,
         }
     }
-}
-
-impl IdeaFrame {
-    // fn run_ksa(&mut self) {
-    //     let key_vec: Result<Vec<u8>, ParseIntError> = (0..self.key.len())
-    //         .step_by(2)
-    //         .map(|i| u8::from_str_radix(&self.key[i..i + 2], 16))
-    //         .collect();
-    //     if let Ok(vec) = key_vec {
-    //         self.cipher.ksa(&vec)
-    //     } else {
-    //         unreachable!("RC4 key should be forced to valid hex digits by filtering")
-    //     }
-    // }
 }
 
 impl CipherFrame for IdeaFrame {
@@ -57,7 +43,7 @@ impl CipherFrame for IdeaFrame {
         ui.add_space(8.0);
 
         ui.subheading("Key");
-        ui.label("They key consists of eight 16-bit words.");
+        ui.label("IDEA uses a 128-bit key which is treated as eight 16-bit words.");
         ui.horizontal(|ui| {
             for w in self.key.iter_mut() {
                 if ui.u16_drag_value_hex(w).changed() {
@@ -104,11 +90,7 @@ impl CipherFrame for IdeaFrame {
 
         ui.add_space(16.0);
 
-        ui.add_enabled_ui(self.cipher.mode.iv_needed(), |ui| {
-            ui.subheading("IV/Counter");
-            ui.label("In the selected mode the cipher must have a 64-bit initial value provided.");
-            ui.u64_drag_value_hex(&mut self.cipher.iv);
-        });
+        block_cipher_iv_64(ui, &mut self.cipher.iv, self.cipher.mode);
 
         ui.add_space(16.0);
     }

@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{block_cipher_mode, block_cipher_padding, UiElements};
+use crate::ui_elements::{block_cipher_iv_64, block_cipher_mode, block_cipher_padding, UiElements};
 use ciphers::{digital::block_ciphers::tea::xtea::Xtea, Cipher};
 use egui::Ui;
 use rand::{thread_rng, Rng};
@@ -50,11 +50,7 @@ impl CipherFrame for XteaFrame {
 
         ui.add_space(8.0);
 
-        ui.add_enabled_ui(self.cipher.mode.iv_needed(), |ui| {
-            ui.subheading("IV/Counter");
-            ui.label("In the selected mode the cipher must have a 64-bit initial value provided.");
-            ui.u64_drag_value_hex(&mut self.cipher.iv);
-        });
+        block_cipher_iv_64(ui, &mut self.cipher.iv, self.cipher.mode);
 
         ui.add_space(16.0);
     }
