@@ -67,13 +67,12 @@ mod aes128_tests {
         let mut cipher = Aes128::default();
 
         // https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf
-        cipher.key = [0x2b7e1516, 0x28aed2a6, 0xabf71588, 0x09cf4f3c];
+        cipher.ksa_u32([0x2b7e1516, 0x28aed2a6, 0xabf71588, 0x09cf4f3c]);
         let test_sub_keys: [[u32; 4]; 3] = [
             [0x2b7e1516, 0x28aed2a6, 0xabf71588, 0x09cf4f3c],
             [0xa0fafe17, 0x88542cb1, 0x23a33939, 0x2a6c7605],
             [0xf2c295f2, 0x7a96b943, 0x5935807a, 0x7359f67f],
         ];
-        cipher.ksa();
         let sub_keys = cipher.round_keys;
 
         println!("{:08x?} {:02x?}", test_sub_keys[0], sub_keys[0]);
@@ -87,13 +86,12 @@ mod aes128_tests {
         let mut cipher = Aes128::default();
 
         // https://github.com/kaapomoi/key-expander/blob/master/src/lib.rs
-        cipher.key = [0x0, 0x0, 0x0, 0x1];
+        cipher.ksa_u32([0x0, 0x0, 0x0, 0x1]);
         let test_sub_keys: [[u32; 4]; 3] = [
             [0x0, 0x0, 0x0, 0x1],
             [0x62637c63, 0x62637c63, 0x62637c63, 0x62637c62],
             [0x9b73d6c9, 0xf910aaaa, 0x9b73d6c9, 0xf910aaab],
         ];
-        cipher.ksa();
         let sub_keys = cipher.round_keys;
 
         println!("{:08x?} {:02x?}", test_sub_keys[0], sub_keys[0]);
@@ -107,15 +105,14 @@ mod aes128_tests {
         let mut cipher = Aes192::default();
 
         // https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf
-        cipher.key = [
+        cipher.ksa_u32([
             0x8e73b0f7, 0xda0e6452, 0xc810f32b, 0x809079e5, 0x62f8ead2, 0x522c6b7b,
-        ];
+        ]);
         let test_sub_keys: [[u32; 4]; 3] = [
             [0x8e73b0f7, 0xda0e6452, 0xc810f32b, 0x809079e5],
             [0x62f8ead2, 0x522c6b7b, 0xfe0c91f7, 0x2402f5a5],
             [0xec12068e, 0x6c827f6b, 0x0e7a95b9, 0x5c56fec2],
         ];
-        cipher.ksa();
         let sub_keys = cipher.round_keys;
 
         println!("{:08x?} {:02x?}", test_sub_keys[0], sub_keys[0]);
@@ -129,16 +126,15 @@ mod aes128_tests {
         let mut cipher = Aes256::default();
 
         // https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf
-        cipher.key = [
+        cipher.ksa_u32([
             0x603deb10, 0x15ca71be, 0x2b73aef0, 0x857d7781, 0x1f352c07, 0x3b6108d7, 0x2d9810a3,
             0x0914dff4,
-        ];
+        ]);
         let test_sub_keys: [[u32; 4]; 3] = [
             [0x603deb10, 0x15ca71be, 0x2b73aef0, 0x857d7781],
             [0x1f352c07, 0x3b6108d7, 0x2d9810a3, 0x0914dff4],
             [0x9ba35411, 0x8e6925af, 0xa51a8b5f, 0x2067fcde],
         ];
-        cipher.ksa();
         let sub_keys = cipher.round_keys;
 
         println!("{:08x?} {:02x?}", test_sub_keys[0], sub_keys[0]);
@@ -179,9 +175,30 @@ mod aes128_tests {
     #[test]
     fn test_encypt() {
         // https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf
-        let mut cipher = Aes128::default();
-        cipher.key = [0x2b7e1516, 0x28aed2a6, 0xabf71588, 0x09cf4f3c];
-        cipher.ksa();
+        let cipher =
+            Aes128::default().with_key_u32([0x2b7e1516, 0x28aed2a6, 0xabf71588, 0x09cf4f3c]);
+        let mut state = [
+            0x32, 0x43, 0xf6, 0xa8, 0x88, 0x5a, 0x30, 0x8d, 0x31, 0x31, 0x98, 0xa2, 0xe0, 0x37,
+            0x07, 0x34,
+        ];
+        cipher.encrypt_block(&mut state);
+        transpose_state(&mut state);
+        assert_eq!(
+            [
+                0x39, 0x02, 0xdc, 0x19, 0x25, 0xdc, 0x11, 0x6a, 0x84, 0x09, 0x85, 0x0b, 0x1d, 0xfb,
+                0x97, 0x32
+            ],
+            state
+        );
+    }
+
+    #[test]
+    fn test_encypt_key_from_bytes() {
+        // https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf
+        let cipher = Aes128::default().with_key([
+            0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf,
+            0x4f, 0x3c,
+        ]);
         let mut state = [
             0x32, 0x43, 0xf6, 0xa8, 0x88, 0x5a, 0x30, 0x8d, 0x31, 0x31, 0x98, 0xa2, 0xe0, 0x37,
             0x07, 0x34,
@@ -207,8 +224,7 @@ mod aes128_tests {
             .unwrap();
         let mut cipher = Aes128::default();
         cipher.iv = 0xf0f1f2f3f4f5f6f7f8f9fafbfcfdfeff;
-        cipher.key = [0x2b7e1516, 0x28aed2a6, 0xabf71588, 0x09cf4f3c];
-        cipher.ksa();
+        cipher.ksa_u32([0x2b7e1516, 0x28aed2a6, 0xabf71588, 0x09cf4f3c]);
         cipher.encrypt_ctr(&mut ptext, cipher.iv.to_be_bytes());
         assert_eq!(ctext, ptext);
     }

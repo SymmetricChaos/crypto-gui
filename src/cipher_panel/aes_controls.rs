@@ -19,6 +19,9 @@ pub struct AesFrame {
     cipher128: Aes128,
     cipher192: Aes192,
     cipher256: Aes256,
+    key128: [u32; 4],
+    key192: [u32; 6],
+    key256: [u32; 8],
     iv_upper: u64,
     iv_lower: u64,
     selector: AesSelect,
@@ -30,6 +33,9 @@ impl Default for AesFrame {
             cipher128: Default::default(),
             cipher192: Default::default(),
             cipher256: Default::default(),
+            key128: Default::default(),
+            key192: Default::default(),
+            key256: Default::default(),
             iv_upper: 0,
             iv_lower: 0,
             selector: AesSelect::Aes128,
@@ -68,11 +74,15 @@ impl CipherFrame for AesFrame {
 
                 ui.horizontal(|ui| {
                     ui.subheading("Key");
-                    ui.random_bytes_button(&mut self.cipher128.key);
+                    if ui.random_bytes_button(&mut self.key128).clicked() {
+                        self.cipher128.ksa_u32(self.key128);
+                    }
                 });
-                ui.label("AES128 uses four 32-bit keys or, equivalently, a single 128-bit key.");
-                for k in self.cipher128.key.iter_mut() {
-                    ui.u32_drag_value_hex(k);
+                ui.label("AES128 uses a 128-bit key presented here as four 32-bit words.");
+                for i in 0..4 {
+                    if ui.u32_drag_value_hex(&mut self.key128[i]).changed() {
+                        self.cipher128.ksa_u32(self.key128);
+                    }
                 }
 
                 ui.add_space(8.0);
@@ -100,11 +110,15 @@ impl CipherFrame for AesFrame {
 
                 ui.horizontal(|ui| {
                     ui.subheading("Key");
-                    ui.random_bytes_button(&mut self.cipher192.key);
+                    if ui.random_bytes_button(&mut self.key192).clicked() {
+                        self.cipher192.ksa_u32(self.key192);
+                    }
                 });
-                ui.label("AES192 uses six 32-bit keys or, equivalently, a single 192-bit key.");
-                for k in self.cipher192.key.iter_mut() {
-                    ui.u32_drag_value_hex(k);
+                ui.label("AES192 uses a 192-bit key presented here as six 32-bit words.");
+                for i in 0..6 {
+                    if ui.u32_drag_value_hex(&mut self.key192[i]).changed() {
+                        self.cipher192.ksa_u32(self.key192);
+                    }
                 }
 
                 ui.add_space(8.0);
@@ -130,11 +144,15 @@ impl CipherFrame for AesFrame {
 
                 ui.horizontal(|ui| {
                     ui.subheading("Key");
-                    ui.random_bytes_button(&mut self.cipher256.key);
+                    if ui.random_bytes_button(&mut self.key256).clicked() {
+                        self.cipher256.ksa_u32(self.key256);
+                    }
                 });
-                ui.label("AES256 uses eight 32-bit keys or, equivalently, a single 256-bit key.");
-                for k in self.cipher256.key.iter_mut() {
-                    ui.u32_drag_value_hex(k);
+                ui.label("AES256 uses a 256-bit key presented here as eight 32-bit words.");
+                for i in 0..8 {
+                    if ui.u32_drag_value_hex(&mut self.key256[i]).changed() {
+                        self.cipher256.ksa_u32(self.key256);
+                    }
                 }
 
                 ui.add_space(8.0);
@@ -160,25 +178,28 @@ impl CipherFrame for AesFrame {
         let mut rng = thread_rng();
         match self.selector {
             AesSelect::Aes128 => {
-                for k in self.cipher128.key.iter_mut() {
+                for k in self.key128.iter_mut() {
                     *k = rng.gen()
                 }
+                self.cipher128.ksa_u32(self.key128);
                 if self.cipher128.mode.iv_needed() {
                     self.cipher128.iv = rng.gen();
                 }
             }
             AesSelect::Aes192 => {
-                for k in self.cipher192.key.iter_mut() {
+                for k in self.key192.iter_mut() {
                     *k = rng.gen()
                 }
+                self.cipher192.ksa_u32(self.key192);
                 if self.cipher192.mode.iv_needed() {
                     self.cipher192.iv = rng.gen();
                 }
             }
             AesSelect::Aes256 => {
-                for k in self.cipher256.key.iter_mut() {
+                for k in self.key256.iter_mut() {
                     *k = rng.gen()
                 }
+                self.cipher256.ksa_u32(self.key256);
                 if self.cipher256.mode.iv_needed() {
                     self.cipher256.iv = rng.gen();
                 }

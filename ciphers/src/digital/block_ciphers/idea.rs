@@ -1,6 +1,5 @@
 use super::block_cipher::{BCMode, BCPadding, BlockCipher};
-use crate::impl_cipher_for_block_cipher;
-use utils::byte_formatting::ByteFormat;
+use utils::byte_formatting::{fill_u16s_be, ByteFormat};
 
 pub const ONE: u32 = 0xffff;
 pub const FUYI: u32 = 0x10000;
@@ -38,6 +37,26 @@ impl Default for Idea {
 }
 
 impl Idea {
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+
+    pub fn padding(mut self, padding: BCPadding) -> Self {
+        self.padding = padding;
+        self
+    }
+
+    pub fn mode(mut self, mode: BCMode) -> Self {
+        self.mode = mode;
+        self
+    }
+
     pub fn subkeys_enc(&self) -> &[u16; N_SUBKEYS] {
         &self.subkeys_enc
     }
@@ -46,7 +65,7 @@ impl Idea {
         &self.subkeys_dec
     }
 
-    pub fn ksa(&mut self, key: [u16; 8]) {
+    pub fn ksa_u16(&mut self, key: [u16; 8]) {
         for (i, k) in key.iter().enumerate() {
             self.subkeys_enc[i] = *k;
         }
@@ -86,8 +105,19 @@ impl Idea {
         }
     }
 
-    pub fn with_ksa(mut self, key: [u16; 8]) -> Self {
-        self.ksa(key);
+    pub fn with_key_u16(mut self, key: [u16; 8]) -> Self {
+        self.ksa_u16(key);
+        self
+    }
+
+    pub fn ksa(&mut self, bytes: [u8; 16]) {
+        let mut key = [0u16; 8];
+        fill_u16s_be(&mut key, &bytes);
+        self.ksa_u16(key);
+    }
+
+    pub fn with_key(mut self, bytes: [u8; 16]) -> Self {
+        self.ksa(bytes);
         self
     }
 
@@ -162,7 +192,6 @@ impl Idea {
         let mut a: u16;
 
         for r in 0..ROUNDS {
-            // println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
             let j = r * 6;
             x1 = Self::mul(x1, keys[j + 0]);
             x2 = Self::mul(x2, keys[j + 1]);
@@ -178,12 +207,11 @@ impl Idea {
             x2 = x4 ^ t2;
             x4 = a;
         }
-        // println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
+
         x1 = Self::mul(x1, keys[48]);
         x2 = Self::mul(x2, keys[49]);
         x3 = Self::add(x3, keys[50]);
         x4 = Self::add(x4, keys[51]);
-        // println!("{x1:5?} {x2:5?} {x3:5?} {x4:5?}");
 
         (x1 as u64) << 48 | (x2 as u64) << 32 | (x3 as u64) << 16 | (x4 as u64)
     }
@@ -207,7 +235,7 @@ impl BlockCipher<8> for Idea {
     }
 }
 
-impl_cipher_for_block_cipher!(Idea, 8);
+crate::impl_cipher_for_block_cipher!(Idea, 8);
 
 #[cfg(test)]
 mod idea_tests {
@@ -217,7 +245,7 @@ mod idea_tests {
     #[test]
     fn subkey_test() {
         let mut cipher = Idea::default();
-        cipher.ksa([1, 2, 3, 4, 5, 6, 7, 8]);
+        cipher.ksa_u16([1_u16, 2, 3, 4, 5, 6, 7, 8]);
         assert_eq!(
             &[
                 1, 2, 3, 4, 5, 6, 7, 8, 1024, 1536, 2048, 2560, 3072, 3584, 4096, 512, 16, 20, 24,
@@ -241,8 +269,7 @@ mod idea_tests {
 }
 
 crate::test_block_cipher!(
-    Idea::default().with_ksa([1, 2, 3, 4, 5, 6, 7, 8]), test_1,
+    Idea::default().with_key_u16([1, 2, 3, 4, 5, 6, 7, 8]), test_1,
     [0x00, 0x00, 0x00, 0x01, 0x00, 0x02, 0x00, 0x03,],
     [0x3f, 0xfb, 0x31, 0x1b, 0x0a, 0x44, 0x06, 0x7b,];
-
 );

@@ -66,7 +66,7 @@ impl CipherFrame for IdeaFrame {
             }
         });
         if !self.valid_key {
-            self.cipher.ksa(self.key);
+            self.cipher.ksa_u16(self.key);
             self.valid_key = true;
         }
 
@@ -120,7 +120,7 @@ impl CipherFrame for IdeaFrame {
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         rng.fill(&mut self.key);
-        self.cipher.ksa(self.key);
+        self.cipher.ksa_u16(self.key);
         self.valid_key = true;
     }
 

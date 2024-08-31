@@ -136,7 +136,7 @@ macro_rules! aes_methods {
         pub struct $name {
             pub input_format: ByteFormat,
             pub output_format: ByteFormat,
-            pub key: [u32; Self::NK],
+            // pub key: [u32; Self::NK],
             round_keys: [[u8; 16]; Self::NR + 1],
             pub iv: u128,
             pub mode: BCMode,
@@ -148,7 +148,7 @@ macro_rules! aes_methods {
                 Self {
                     input_format: ByteFormat::Hex,
                     output_format: ByteFormat::Hex,
-                    key: [0; Self::NK],
+                    // key: [0; Self::NK],
                     round_keys: [[0u8; 16]; Self::NR + 1],
                     iv: 0,
                     mode: BCMode::default(),
@@ -165,12 +165,38 @@ macro_rules! aes_methods {
             /// Number of columns in the state. Fixed at 4 for all NIST versions.
             const NB: usize = 4;
 
+            pub fn input(mut self, input: utils::byte_formatting::ByteFormat) -> Self {
+                self.input_format = input;
+                self
+            }
+
+            pub fn output(mut self, output: utils::byte_formatting::ByteFormat) -> Self {
+                self.output_format = output;
+                self
+            }
+
+            pub fn padding(
+                mut self,
+                padding: crate::digital::block_ciphers::block_cipher::BCPadding,
+            ) -> Self {
+                self.padding = padding;
+                self
+            }
+
+            pub fn mode(
+                mut self,
+                mode: crate::digital::block_ciphers::block_cipher::BCMode,
+            ) -> Self {
+                self.mode = mode;
+                self
+            }
+
             // Create the round keys
-            pub fn ksa(&mut self) {
+            pub fn ksa_u32(&mut self, key: [u32; Self::NK]) {
                 // During expansion actions are on words of 32-bits
                 let mut round_keys: Vec<u32> = Vec::new();
 
-                round_keys.extend_from_slice(&self.key);
+                round_keys.extend_from_slice(&key);
 
                 for i in Self::NK..((Self::NR + 1) * Self::NB) {
                     let mut t = round_keys[i - 1];
@@ -187,6 +213,22 @@ macro_rules! aes_methods {
                 for (i, chunk) in round_keys.chunks(4).enumerate() {
                     self.round_keys[i] = sub_key_slice_to_bytes(chunk)
                 }
+            }
+
+            pub fn with_key_u32(mut self, key: [u32; Self::NK]) -> Self {
+                self.ksa_u32(key);
+                self
+            }
+
+            pub fn ksa(&mut self, bytes: [u8; Self::NK * 4]) {
+                let mut key = [0u32; Self::NK];
+                utils::byte_formatting::fill_u32s_be(&mut key, &bytes);
+                self.ksa_u32(key)
+            }
+
+            pub fn with_key(mut self, bytes: [u8; Self::NK * 4]) -> Self {
+                self.ksa(bytes);
+                self
             }
         }
 

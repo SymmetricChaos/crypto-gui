@@ -64,7 +64,7 @@ pub trait UiElements {
     fn u64_drag_value_dec(&mut self, n: &mut u64) -> Response;
     fn u128_drag_value_dec(&mut self, n: &mut u128) -> Response;
     fn u128_hi_lo_drag_value_dec(&mut self, n: &mut u128, hi: &mut u64, lo: &mut u64) -> Response;
-    fn random_bytes_button<T: Fill>(&mut self, item: &mut T);
+    fn random_bytes_button<T: Fill>(&mut self, item: &mut T) -> Response;
     fn random_num_button<T>(&mut self, item: &mut T)
     where
         Standard: Distribution<T>;
@@ -337,10 +337,12 @@ impl UiElements for Ui {
         self.label(format!("{:032x?}", n))
     }
 
-    fn random_bytes_button<T: Fill>(&mut self, item: &mut T) {
-        if self.button("🎲").on_hover_text("randomize").clicked() {
+    fn random_bytes_button<T: Fill>(&mut self, item: &mut T) -> Response {
+        let b = self.button("🎲").on_hover_text("randomize");
+        if b.clicked() {
             thread_rng().fill(item)
         }
+        b
     }
 
     fn random_num_button<T>(&mut self, item: &mut T)
