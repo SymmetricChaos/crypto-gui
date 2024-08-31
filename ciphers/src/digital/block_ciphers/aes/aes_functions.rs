@@ -126,6 +126,11 @@ pub fn print_aes_state(state: &[u8]) {
     }
 }
 
+pub const RC: [u32; 10] = [
+    0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000, 0x20000000, 0x40000000, 0x80000000,
+    0x1b000000, 0x36000000,
+];
+
 #[macro_export]
 macro_rules! aes_methods {
     ($name: ident, $nk: literal, $nr: literal) => {
@@ -163,11 +168,6 @@ macro_rules! aes_methods {
 
             // Create the round keys
             pub fn ksa(&mut self) {
-                let rc: [u32; 10] = [
-                    0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000, 0x20000000,
-                    0x40000000, 0x80000000, 0x1b000000, 0x36000000,
-                ];
-
                 // During expansion actions are on words of 32-bits
                 let mut round_keys: Vec<u32> = Vec::new();
 
@@ -176,7 +176,9 @@ macro_rules! aes_methods {
                 for i in Self::NK..((Self::NR + 1) * Self::NB) {
                     let mut t = round_keys[i - 1];
                     if i % Self::NK == 0 {
-                        t = sub_word(rot_word(t)) ^ rc[(i / Self::NK) - 1];
+                        t = sub_word(rot_word(t))
+                            ^ crate::digital::block_ciphers::aes::aes_functions::RC
+                                [(i / Self::NK) - 1];
                     } else if Self::NK > 6 && i % Self::NK == 4 {
                         t = sub_word(t);
                     }

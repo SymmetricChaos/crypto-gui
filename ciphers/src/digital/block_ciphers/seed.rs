@@ -190,7 +190,7 @@ impl Default for Seed {
 
 impl Seed {
     pub fn ksa(&mut self, key: [u32; 4]) {
-        let mut key = key.map(|n| Wrapping(n));
+        let mut key = key.map(|n| Wrapping(n.to_le()));
         for i in 0..16 {
             let k0 = g(key[0] + (key[2]) - Wrapping(KC[i]));
             let k1 = g(key[1] - (key[3]) + Wrapping(KC[i]));
