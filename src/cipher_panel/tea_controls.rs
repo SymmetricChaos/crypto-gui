@@ -41,11 +41,11 @@ impl CipherFrame for TeaFrame {
 
         ui.horizontal(|ui| {
             ui.subheading("Key");
-            ui.random_bytes_button(&mut self.cipher.key);
+            ui.random_bytes_button(&mut self.cipher.subkeys);
         });
-        ui.label("TEA uses four 32-bit keys or, equivalently, a single 128-bit key.");
+        ui.label("TEA uses a 128-bit key, here controlled as four 32-bit keys.");
         for i in 0..4 {
-            ui.u32_drag_value_hex(&mut self.cipher.key[i]);
+            ui.u32_drag_value_hex(&mut self.cipher.subkeys[i]);
         }
 
         ui.add_space(8.0);
@@ -65,10 +65,10 @@ impl CipherFrame for TeaFrame {
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        self.cipher.key[0] = rng.gen();
-        self.cipher.key[1] = rng.gen();
-        self.cipher.key[2] = rng.gen();
-        self.cipher.key[3] = rng.gen();
+        self.cipher.subkeys[0] = rng.gen();
+        self.cipher.subkeys[1] = rng.gen();
+        self.cipher.subkeys[2] = rng.gen();
+        self.cipher.subkeys[3] = rng.gen();
 
         if self.cipher.mode.iv_needed() {
             self.cipher.iv = rng.gen();

@@ -1,7 +1,5 @@
-use crate::impl_cipher_for_block_cipher;
-use utils::byte_formatting::{fill_u32s_be, u32s_to_bytes_be, ByteFormat};
-
 use crate::digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher};
+use utils::byte_formatting::{fill_u32s_be, u32s_to_bytes_be, ByteFormat};
 
 pub fn mx_e(a: u32, b: u32, sum: u32, k1: u32, k2: u32) -> u32 {
     b.wrapping_add((a << 4).wrapping_add(k1) ^ (a.wrapping_add(sum)) ^ (a >> 5).wrapping_add(k2))
@@ -13,7 +11,7 @@ pub fn mx_d(a: u32, b: u32, sum: u32, k1: u32, k2: u32) -> u32 {
 pub struct Tea {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    pub key: [u32; 4],
+    pub subkeys: [u32; 4],
     pub iv: u64,
     pub mode: BCMode,
     pub padding: BCPadding,
@@ -22,7 +20,7 @@ pub struct Tea {
 impl Default for Tea {
     fn default() -> Self {
         Self {
-            key: [0, 0, 0, 0],
+            subkeys: [0, 0, 0, 0],
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
             iv: 0,
@@ -33,8 +31,28 @@ impl Default for Tea {
 }
 
 impl Tea {
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+
+    pub fn padding(mut self, padding: BCPadding) -> Self {
+        self.padding = padding;
+        self
+    }
+
+    pub fn mode(mut self, mode: BCMode) -> Self {
+        self.mode = mode;
+        self
+    }
+
     pub fn ksa(&mut self, bytes: [u8; 16]) {
-        fill_u32s_be(&mut self.key, &bytes);
+        fill_u32s_be(&mut self.subkeys, &bytes);
     }
 
     pub fn with_key(mut self, bytes: [u8; 16]) -> Self {
@@ -50,8 +68,8 @@ impl BlockCipher<8> for Tea {
         let mut sum: u32 = 0;
         for _ in 0..32 {
             sum = sum.wrapping_add(super::DELTA);
-            v[0] = mx_e(v[1], v[0], sum, self.key[0], self.key[1]);
-            v[1] = mx_e(v[0], v[1], sum, self.key[2], self.key[3]);
+            v[0] = mx_e(v[1], v[0], sum, self.subkeys[0], self.subkeys[1]);
+            v[1] = mx_e(v[0], v[1], sum, self.subkeys[2], self.subkeys[3]);
         }
         u32s_to_bytes_be(bytes, &v);
     }
@@ -62,15 +80,15 @@ impl BlockCipher<8> for Tea {
         let mut sum: u32 = 0xC6EF3720;
 
         for _ in 0..32 {
-            v[1] = mx_d(v[0], v[1], sum, self.key[2], self.key[3]);
-            v[0] = mx_d(v[1], v[0], sum, self.key[0], self.key[1]);
+            v[1] = mx_d(v[0], v[1], sum, self.subkeys[2], self.subkeys[3]);
+            v[0] = mx_d(v[1], v[0], sum, self.subkeys[0], self.subkeys[1]);
             sum = sum.wrapping_sub(super::DELTA);
         }
         u32s_to_bytes_be(bytes, &v);
     }
 }
 
-impl_cipher_for_block_cipher!(Tea, 8);
+crate::impl_cipher_for_block_cipher!(Tea, 8);
 
 #[cfg(test)]
 mod tea_tests {
