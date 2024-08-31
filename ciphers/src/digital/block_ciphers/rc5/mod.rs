@@ -5,12 +5,7 @@ pub mod rc5_64;
 #[macro_export]
 macro_rules! impl_rc5 {
     ($name: ident, $word: ty, $bytes_in_word: literal, $bits_in_word: literal, $bytes_in_block: literal, $p: literal, $q: literal, $iv_word: ty, $rounds: literal) => {
-        use crate::digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher};
-        use std::{
-            cmp::max,
-            ops::{BitXor, Shl},
-        };
-        use utils::byte_formatting::{overwrite_bytes, ByteFormat};
+        use std::ops::{BitXor, Shl};
 
         pub fn bytes_to_words(s: &[u8]) -> [$word; 2] {
             [
@@ -28,13 +23,13 @@ macro_rules! impl_rc5 {
         }
 
         pub struct $name {
-            pub input_format: ByteFormat,
-            pub output_format: ByteFormat,
+            pub input_format: utils::byte_formatting::ByteFormat,
+            pub output_format: utils::byte_formatting::ByteFormat,
             pub rounds: usize,
             pub state: Vec<$word>,
             pub iv: $iv_word,
-            pub mode: BCMode,
-            pub padding: BCPadding,
+            pub mode: crate::digital::block_ciphers::block_cipher::BCMode,
+            pub padding: crate::digital::block_ciphers::block_cipher::BCPadding,
         }
 
         impl Default for $name {
@@ -42,11 +37,11 @@ macro_rules! impl_rc5 {
                 Self {
                     rounds: $rounds,
                     state: Vec::new(),
-                    input_format: ByteFormat::Hex,
-                    output_format: ByteFormat::Hex,
+                    input_format: utils::byte_formatting::ByteFormat::Hex,
+                    output_format: utils::byte_formatting::ByteFormat::Hex,
                     iv: 0,
-                    mode: BCMode::default(),
-                    padding: BCPadding::default(),
+                    mode: crate::digital::block_ciphers::block_cipher::BCMode::default(),
+                    padding: crate::digital::block_ciphers::block_cipher::BCPadding::default(),
                 }
             }
         }
@@ -64,7 +59,7 @@ macro_rules! impl_rc5 {
 
                 let u = $bytes_in_word; // bytes in a word
                 let b = key.len(); // bytes in the key
-                let c = max(b.div_ceil(u), 1); // words in the key
+                let c = std::cmp::max(b.div_ceil(u), 1); // words in the key
                 let t = self.state_size(); // words in the state
                 let mut l = vec![0 as $word; c];
                 for i in (0..b).rev() {
@@ -81,7 +76,7 @@ macro_rules! impl_rc5 {
                 let mut j = 0;
                 let mut a = 0;
                 let mut b = 0;
-                for _ in 0..(3 * max(t, c)) {
+                for _ in 0..(3 * std::cmp::max(t, c)) {
                     s[i] = (s[i].wrapping_add(a).wrapping_add(b)).rotate_left(3);
                     a = s[i];
                     l[j] = (l[j].wrapping_add(a).wrapping_add(b))
@@ -111,7 +106,7 @@ macro_rules! impl_rc5 {
                         .rotate_left(block[0] as u32 % $bits_in_word)
                         .wrapping_add(self.state[(2 * i) + 1])
                 }
-                overwrite_bytes(bytes, &words_to_bytes(&block));
+                utils::byte_formatting::overwrite_bytes(bytes, &words_to_bytes(&block));
             }
 
             fn decrypt_block(&self, bytes: &mut [u8]) {
@@ -129,10 +124,10 @@ macro_rules! impl_rc5 {
 
                 block[0] = block[0].wrapping_sub(self.state[0]);
                 block[1] = block[1].wrapping_sub(self.state[1]);
-                overwrite_bytes(bytes, &words_to_bytes(&block));
+                utils::byte_formatting::overwrite_bytes(bytes, &words_to_bytes(&block));
             }
         }
 
-        impl_cipher_for_block_cipher!($name, $bytes_in_block);
+        crate::impl_cipher_for_block_cipher!($name, $bytes_in_block);
     };
 }

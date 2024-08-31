@@ -1,4 +1,4 @@
-use utils::byte_formatting::{overwrite_bytes, u32_pair_to_u8_array, ByteFormat};
+use utils::byte_formatting::{overwrite_bytes, u32_pair_to_u8_array, u32s_to_bytes_be, ByteFormat};
 
 use crate::impl_cipher_for_block_cipher;
 
@@ -100,8 +100,7 @@ impl BlockCipher<8> for Gost {
             v[1] = t ^ self.f(v[1], self.key[idx]);
         }
         v.swap(0, 1);
-
-        overwrite_bytes(bytes, &u32_pair_to_u8_array(v));
+        u32s_to_bytes_be(bytes, &v);
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
@@ -118,7 +117,7 @@ impl BlockCipher<8> for Gost {
         }
         v.swap(0, 1);
 
-        overwrite_bytes(bytes, &u32_pair_to_u8_array(v));
+        u32s_to_bytes_be(bytes, &v);
     }
 }
 

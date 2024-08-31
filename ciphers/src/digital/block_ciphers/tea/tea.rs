@@ -1,5 +1,5 @@
 use crate::impl_cipher_for_block_cipher;
-use utils::byte_formatting::{overwrite_bytes, u32_pair_to_u8_array, ByteFormat};
+use utils::byte_formatting::{fill_u32s_be, u32s_to_bytes_be, ByteFormat};
 
 use crate::digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher};
 
@@ -34,7 +34,7 @@ impl Default for Tea {
 
 impl Tea {
     pub fn ksa(&mut self, bytes: [u8; 16]) {
-        utils::byte_formatting::fill_u32s_be(&mut self.key, &bytes);
+        fill_u32s_be(&mut self.key, &bytes);
     }
 
     pub fn with_key(mut self, bytes: [u8; 16]) -> Self {
@@ -46,26 +46,27 @@ impl Tea {
 impl BlockCipher<8> for Tea {
     fn encrypt_block(&self, bytes: &mut [u8]) {
         let mut v = [0u32; 2];
-        utils::byte_formatting::fill_u32s_be(&mut v, bytes);
+        fill_u32s_be(&mut v, bytes);
         let mut sum: u32 = 0;
         for _ in 0..32 {
             sum = sum.wrapping_add(super::DELTA);
             v[0] = mx_e(v[1], v[0], sum, self.key[0], self.key[1]);
             v[1] = mx_e(v[0], v[1], sum, self.key[2], self.key[3]);
         }
-        overwrite_bytes(bytes, &u32_pair_to_u8_array(v));
+        u32s_to_bytes_be(bytes, &v);
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
         let mut v = [0u32; 2];
-        utils::byte_formatting::fill_u32s_be(&mut v, bytes);
+        fill_u32s_be(&mut v, bytes);
         let mut sum: u32 = 0xC6EF3720;
+
         for _ in 0..32 {
             v[1] = mx_d(v[0], v[1], sum, self.key[2], self.key[3]);
             v[0] = mx_d(v[1], v[0], sum, self.key[0], self.key[1]);
             sum = sum.wrapping_sub(super::DELTA);
         }
-        overwrite_bytes(bytes, &u32_pair_to_u8_array(v));
+        u32s_to_bytes_be(bytes, &v);
     }
 }
 

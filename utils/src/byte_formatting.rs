@@ -1,5 +1,3 @@
-use std::borrow::Borrow;
-
 use base64::prelude::*;
 use itertools::Itertools;
 use lazy_static::lazy_static;
@@ -368,32 +366,50 @@ pub fn fill_u64s_le(target: &mut [u64], bytes: &[u8]) {
     }
 }
 
-pub fn words_to_bytes_be<T: ToBytes>(target: &mut [u8], words: &[T]) {
+pub fn u32s_to_bytes_be(target: &mut [u8], words: &[u32]) {
     for i in 0..words.len() {
         let bytes = words[i].to_be_bytes();
-        for j in 0..8 {
-            target[(i * 8) + j] = bytes.as_ref()[j];
+        for j in 0..4 {
+            target[(i * 4) + j] = bytes[j];
         }
     }
 }
 
-pub fn words_to_bytes_le<T: ToBytes>(target: &mut [u8], words: &[T]) {
+pub fn u32s_to_bytes_le(target: &mut [u8], words: &[u32]) {
+    for i in 0..words.len() {
+        let bytes = words[i].to_le_bytes();
+        for j in 0..4 {
+            target[(i * 4) + j] = bytes[j];
+        }
+    }
+}
+
+pub fn u64s_to_bytes_be(target: &mut [u8], words: &[u64]) {
+    for i in 0..words.len() {
+        let bytes = words[i].to_be_bytes();
+        for j in 0..8 {
+            target[(i * 8) + j] = bytes[j];
+        }
+    }
+}
+
+pub fn u64s_to_bytes_le(target: &mut [u8], words: &[u64]) {
     for i in 0..words.len() {
         let bytes = words[i].to_le_bytes();
         for j in 0..8 {
-            target[(i * 8) + j] = bytes.as_ref()[j];
+            target[(i * 8) + j] = bytes[j];
         }
     }
 }
 
 pub fn overwrite_bytes(target: &mut [u8], source: &[u8]) {
-    for (src, ciphertext) in target.iter_mut().zip_eq(source.iter()) {
-        *src = *ciphertext
+    for (t, s) in target.iter_mut().zip_eq(source.iter()) {
+        *t = *s
     }
 }
 
 pub fn xor_into_bytes(target: &mut [u8], source: &[u8]) {
-    for (src, ciphertext) in target.iter_mut().zip_eq(source.iter()) {
-        *src ^= *ciphertext
+    for (t, s) in target.iter_mut().zip_eq(source.iter()) {
+        *t ^= *s
     }
 }

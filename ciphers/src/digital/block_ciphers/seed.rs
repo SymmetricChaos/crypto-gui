@@ -2,7 +2,7 @@ use std::num::Wrapping;
 
 use super::block_cipher::{BCMode, BCPadding, BlockCipher};
 use num::Integer;
-use utils::byte_formatting::{overwrite_bytes, u64_pair_to_u8_array, ByteFormat};
+use utils::byte_formatting::{fill_u64s_be, u64s_to_bytes_be, ByteFormat};
 
 const SS0: [u32; 256] = [
     0x2989a1a8, 0x05858184, 0x16c6d2d4, 0x13c3d3d0, 0x14445054, 0x1d0d111c, 0x2c8ca0ac, 0x25052124,
@@ -220,7 +220,7 @@ impl Seed {
 impl BlockCipher<16> for Seed {
     fn encrypt_block(&self, bytes: &mut [u8]) {
         let mut v = [0u64; 2];
-        utils::byte_formatting::fill_u64s_be(&mut v, bytes);
+        fill_u64s_be(&mut v, bytes);
 
         // Feistel network
         for subkey in self.subkeys {
@@ -233,12 +233,12 @@ impl BlockCipher<16> for Seed {
         }
         v.swap(0, 1);
 
-        overwrite_bytes(bytes, &u64_pair_to_u8_array(v));
+        u64s_to_bytes_be(bytes, &v);
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
         let mut v = [0u64; 2];
-        utils::byte_formatting::fill_u64s_be(&mut v, bytes);
+        fill_u64s_be(&mut v, bytes);
 
         // Feistel network
         for subkey in self.subkeys.into_iter().rev() {
@@ -251,7 +251,7 @@ impl BlockCipher<16> for Seed {
         }
         v.swap(0, 1);
 
-        overwrite_bytes(bytes, &u64_pair_to_u8_array(v));
+        u64s_to_bytes_be(bytes, &v);
     }
 }
 

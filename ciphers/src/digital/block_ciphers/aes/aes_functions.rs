@@ -1,9 +1,8 @@
-use itertools::Itertools;
-
 use super::{
     multiplication::{mul11, mul13, mul14, mul2, mul3, mul9},
     sbox::{inv_sbox, sbox},
 };
+use itertools::Itertools;
 
 // Rotate a 32-bit word by 8-bits
 pub fn rot_word(n: u32) -> u32 {

@@ -1,4 +1,4 @@
-use crate::{impl_cipher_for_block_cipher, impl_rc5};
+use crate::{digital::block_ciphers::block_cipher::BlockCipher, impl_rc5};
 
 impl_rc5!(
     Rc5_64,

@@ -2,7 +2,7 @@ use crate::{
     digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher},
     impl_cipher_for_block_cipher,
 };
-use utils::byte_formatting::{u32_pair_to_u8_array, ByteFormat};
+use utils::byte_formatting::{fill_u32s_be, u32s_to_bytes_be, ByteFormat};
 
 pub fn mx_e(a: u32, b: u32, sum: u32, k: u32) -> u32 {
     b.wrapping_add((((a << 4) ^ (a >> 5)).wrapping_add(a) & sum).wrapping_add(k))
@@ -35,7 +35,7 @@ impl Default for Xtea {
 
 impl Xtea {
     pub fn ksa(&mut self, bytes: [u8; 16]) {
-        utils::byte_formatting::fill_u32s_be(&mut self.key, &bytes);
+        fill_u32s_be(&mut self.key, &bytes);
     }
 
     pub fn with_key(mut self, bytes: [u8; 16]) -> Self {
@@ -47,30 +47,26 @@ impl Xtea {
 impl BlockCipher<8> for Xtea {
     fn encrypt_block(&self, bytes: &mut [u8]) {
         let mut v = [0u32; 2];
-        utils::byte_formatting::fill_u32s_be(&mut v, bytes);
+        fill_u32s_be(&mut v, bytes);
         let mut sum: u32 = 0;
         for _ in 0..32 {
             v[0] = mx_e(v[1], v[0], sum, self.key[(sum & 3) as usize]);
             sum = sum.wrapping_add(super::DELTA);
             v[1] = mx_e(v[0], v[1], sum, self.key[(sum >> 11 & 3) as usize]);
         }
-        for (plaintext, ciphertext) in bytes.iter_mut().zip(u32_pair_to_u8_array(v).iter()) {
-            *plaintext = *ciphertext
-        }
+        u32s_to_bytes_be(bytes, &v);
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
         let mut v = [0u32; 2];
-        utils::byte_formatting::fill_u32s_be(&mut v, bytes);
+        fill_u32s_be(&mut v, bytes);
         let mut sum: u32 = 0xC6EF3720;
         for _ in 0..32 {
             v[1] = mx_d(v[0], v[1], sum, self.key[(sum >> 11 & 3) as usize]);
             sum = sum.wrapping_sub(super::DELTA);
             v[0] = mx_d(v[1], v[0], sum, self.key[(sum & 3) as usize]);
         }
-        for (ciphertext, plaintext) in bytes.iter_mut().zip(u32_pair_to_u8_array(v).iter()) {
-            *ciphertext = *plaintext
-        }
+        u32s_to_bytes_be(bytes, &v);
     }
 }
 

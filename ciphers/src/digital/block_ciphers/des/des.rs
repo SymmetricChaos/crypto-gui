@@ -45,6 +45,7 @@ impl BlockCipher<8> for Des {
             b = round(b, *key);
         }
         let f = final_permutation((b << 32) | (b >> 32));
+
         overwrite_bytes(bytes, &f.to_be_bytes());
     }
 
