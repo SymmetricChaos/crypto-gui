@@ -1,6 +1,7 @@
 use base64::prelude::*;
 use itertools::Itertools;
 use lazy_static::lazy_static;
+use num::traits::ToBytes;
 use regex::Regex;
 use strum::{Display, EnumIter};
 
@@ -100,7 +101,7 @@ impl ByteFormat {
         }
     }
 
-    pub fn text_to_u16(&self, text: &str) -> Result<Vec<u16>, ByteFormatError> {
+    pub fn text_to_u16_be(&self, text: &str) -> Result<Vec<u16>, ByteFormatError> {
         let bytes = self.text_to_bytes(text)?;
 
         if bytes.len() % 2 != 0 {
@@ -113,7 +114,20 @@ impl ByteFormat {
         }
     }
 
-    pub fn text_to_u32(&self, text: &str) -> Result<Vec<u32>, ByteFormatError> {
+    pub fn text_to_u16_le(&self, text: &str) -> Result<Vec<u16>, ByteFormatError> {
+        let bytes = self.text_to_bytes(text)?;
+
+        if bytes.len() % 2 != 0 {
+            Err(ByteFormatError)
+        } else {
+            Ok(bytes
+                .chunks_exact(2)
+                .map(|p| u16::from_le_bytes(p.try_into().unwrap()))
+                .collect_vec())
+        }
+    }
+
+    pub fn text_to_u32_be(&self, text: &str) -> Result<Vec<u32>, ByteFormatError> {
         let bytes = self.text_to_bytes(text)?;
 
         if bytes.len() % 4 != 0 {
@@ -126,7 +140,20 @@ impl ByteFormat {
         }
     }
 
-    pub fn text_to_u64(&self, text: &str) -> Result<Vec<u64>, ByteFormatError> {
+    pub fn text_to_u32_le(&self, text: &str) -> Result<Vec<u32>, ByteFormatError> {
+        let bytes = self.text_to_bytes(text)?;
+
+        if bytes.len() % 4 != 0 {
+            Err(ByteFormatError)
+        } else {
+            Ok(bytes
+                .chunks_exact(4)
+                .map(|p| u32::from_le_bytes(p.try_into().unwrap()))
+                .collect_vec())
+        }
+    }
+
+    pub fn text_to_u64_be(&self, text: &str) -> Result<Vec<u64>, ByteFormatError> {
         let bytes = self.text_to_bytes(text)?;
 
         if bytes.len() % 8 != 0 {
@@ -135,6 +162,19 @@ impl ByteFormat {
             Ok(bytes
                 .chunks_exact(8)
                 .map(|p| u64::from_be_bytes(p.try_into().unwrap()))
+                .collect_vec())
+        }
+    }
+
+    pub fn text_to_u64_le(&self, text: &str) -> Result<Vec<u64>, ByteFormatError> {
+        let bytes = self.text_to_bytes(text)?;
+
+        if bytes.len() % 8 != 0 {
+            Err(ByteFormatError)
+        } else {
+            Ok(bytes
+                .chunks_exact(8)
+                .map(|p| u64::from_le_bytes(p.try_into().unwrap()))
                 .collect_vec())
         }
     }
@@ -251,24 +291,6 @@ pub fn u32_pair_to_u64(n: [u32; 2]) -> u64 {
     (n[0] as u64) << 32 | n[1] as u64
 }
 
-pub fn u8_slice_to_u32_pair(s: &[u8]) -> [u32; 2] {
-    [
-        u32::from_be_bytes(s[..4].try_into().unwrap()),
-        u32::from_be_bytes(s[4..8].try_into().unwrap()),
-    ]
-}
-
-pub fn u8_slice_to_u32_4(s: &[u8]) -> [u32; 4] {
-    let mut out = [0; 4];
-    for i in 0..4 {
-        for offset in [0, 4, 8, 12] {
-            out[i] <<= 8;
-            out[i] |= s[i + offset] as u32;
-        }
-    }
-    out
-}
-
 pub fn u32_pair_to_u8_array(s: [u32; 2]) -> [u8; 8] {
     let a = s[0].to_be_bytes();
     let b = s[1].to_be_bytes();
@@ -308,14 +330,86 @@ pub fn u32_4_to_u8_16(s: [u32; 4]) -> [u8; 16] {
     out
 }
 
+pub fn fill_u16s_be(target: &mut [u16], bytes: &[u8]) {
+    for (elem, chunk) in target.iter_mut().zip_eq(bytes.chunks_exact(2)) {
+        *elem = u16::from_be_bytes(chunk.try_into().unwrap());
+    }
+}
+
+pub fn fill_u16s_le(target: &mut [u16], bytes: &[u8]) {
+    for (elem, chunk) in target.iter_mut().zip_eq(bytes.chunks_exact(2)) {
+        *elem = u16::from_le_bytes(chunk.try_into().unwrap());
+    }
+}
+
+pub fn fill_u32s_be(target: &mut [u32], bytes: &[u8]) {
+    for (elem, chunk) in target.iter_mut().zip_eq(bytes.chunks_exact(4)) {
+        *elem = u32::from_be_bytes(chunk.try_into().unwrap());
+    }
+}
+
+pub fn fill_u32s_le(target: &mut [u32], bytes: &[u8]) {
+    for (elem, chunk) in target.iter_mut().zip_eq(bytes.chunks_exact(4)) {
+        *elem = u32::from_le_bytes(chunk.try_into().unwrap());
+    }
+}
+
+pub fn fill_u64s_be(target: &mut [u64], bytes: &[u8]) {
+    for (elem, chunk) in target.iter_mut().zip_eq(bytes.chunks_exact(8)) {
+        *elem = u64::from_be_bytes(chunk.try_into().unwrap());
+    }
+}
+
+pub fn fill_u64s_le(target: &mut [u64], bytes: &[u8]) {
+    for (elem, chunk) in target.iter_mut().zip_eq(bytes.chunks_exact(8)) {
+        *elem = u64::from_le_bytes(chunk.try_into().unwrap());
+    }
+}
+
+pub fn u64s_to_bytes_be(target: &mut [u8], words: &[u64]) {
+    for i in 0..words.len() {
+        let bytes = words[i].to_be_bytes();
+        for j in 0..8 {
+            target[(i * 8) + j] = bytes[j];
+        }
+    }
+}
+
+pub fn u64s_to_bytes_le(target: &mut [u8], words: &[u64]) {
+    for i in 0..words.len() {
+        let bytes = words[i].to_le_bytes();
+        for j in 0..8 {
+            target[(i * 8) + j] = bytes[j];
+        }
+    }
+}
+
+pub fn u32s_to_bytes_be(target: &mut [u8], words: &[u32]) {
+    for i in 0..words.len() {
+        let bytes = words[i].to_be_bytes();
+        for j in 0..4 {
+            target[(i * 4) + j] = bytes[j];
+        }
+    }
+}
+
+pub fn u32s_to_bytes_le(target: &mut [u8], words: &[u32]) {
+    for i in 0..words.len() {
+        let bytes = words[i].to_le_bytes();
+        for j in 0..4 {
+            target[(i * 4) + j] = bytes[j];
+        }
+    }
+}
+
 pub fn overwrite_bytes(target: &mut [u8], source: &[u8]) {
-    for (src, ciphertext) in target.iter_mut().zip(source.iter()) {
+    for (src, ciphertext) in target.iter_mut().zip_eq(source.iter()) {
         *src = *ciphertext
     }
 }
 
 pub fn xor_into_bytes(target: &mut [u8], source: &[u8]) {
-    for (src, ciphertext) in target.iter_mut().zip(source.iter()) {
+    for (src, ciphertext) in target.iter_mut().zip_eq(source.iter()) {
         *src ^= *ciphertext
     }
 }

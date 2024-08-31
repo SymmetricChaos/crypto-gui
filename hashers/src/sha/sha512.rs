@@ -123,9 +123,7 @@ macro_rules! sha512 {
 
                     // Copy the first words into the array
                     // Each word is 8 bytes and 16 are taken in total
-                    for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(8)).take(16) {
-                        *elem = u64::from_be_bytes(chunk.try_into().unwrap());
-                    }
+                    utils::byte_formatting::fill_u64s_be(&mut x[0..16], &block);
 
                     // Extend the 16 words already in the array into a total of 64 words
                     for i in 16..80 {

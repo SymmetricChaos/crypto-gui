@@ -1,4 +1,7 @@
-use utils::{byte_formatting::ByteFormat, padding::md_strengthening_64_le};
+use utils::{
+    byte_formatting::{fill_u32s_le, ByteFormat},
+    padding::md_strengthening_64_le,
+};
 
 use crate::traits::ClassicHasher;
 
@@ -68,9 +71,7 @@ impl ClassicHasher for Md5 {
             let mut td = d;
 
             let mut x = [0u32; 16];
-            for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)) {
-                *elem = u32::from_le_bytes(chunk.try_into().unwrap());
-            }
+            fill_u32s_le(&mut x, &block);
 
             for i in 0..64 {
                 let mut f = 0;

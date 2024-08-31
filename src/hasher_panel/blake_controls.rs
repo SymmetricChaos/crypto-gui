@@ -62,7 +62,7 @@ impl BlakeFrame {
                     rng.fill(salt);
                     *string = ByteFormat::Hex.u32_slice_to_text_be(&salt);
                 }
-                match ByteFormat::Hex.text_to_u32(string) {
+                match ByteFormat::Hex.text_to_u32_be(string) {
                     Ok(mut new) => {
                         while new.len() < 4 {
                             new.push(0)
@@ -91,7 +91,7 @@ impl BlakeFrame {
                     rng.fill(salt);
                     *string = ByteFormat::Hex.u64_slice_to_text_be(&salt);
                 }
-                match ByteFormat::Hex.text_to_u64(string) {
+                match ByteFormat::Hex.text_to_u64_be(string) {
                     Ok(mut new) => {
                         while new.len() < 4 {
                             new.push(0)

@@ -89,9 +89,7 @@ impl Gost {
 impl BlockCipher<8> for Gost {
     fn encrypt_block(&self, bytes: &mut [u8]) {
         let mut v = [0u32; 2];
-        for (elem, chunk) in v.iter_mut().zip(bytes.chunks_exact(4)) {
-            *elem = u32::from_be_bytes(chunk.try_into().unwrap());
-        }
+        utils::byte_formatting::fill_u32s_be(&mut v, bytes);
 
         for idx in Gost::ROUND_KEY_IDX {
             let t = v[0];
@@ -108,9 +106,7 @@ impl BlockCipher<8> for Gost {
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
         let mut v = [0u32; 2];
-        for (elem, chunk) in v.iter_mut().zip(bytes.chunks_exact(4)) {
-            *elem = u32::from_be_bytes(chunk.try_into().unwrap());
-        }
+        utils::byte_formatting::fill_u32s_be(&mut v, bytes);
 
         for idx in Gost::ROUND_KEY_IDX.into_iter().rev() {
             let t = v[0];

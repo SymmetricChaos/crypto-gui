@@ -75,9 +75,7 @@ impl ClassicHasher for RipeMd320 {
 
         for chunk in input.chunks_exact(64) {
             let mut block = [0u32; 16];
-            for (elem, b) in block.iter_mut().zip(chunk.chunks_exact(4)) {
-                *elem = u32::from_le_bytes(b.try_into().unwrap());
-            }
+            utils::byte_formatting::fill_u32s_le(&mut block, &chunk);
             Self::compress(&mut state_l, &mut state_r, block)
         }
 

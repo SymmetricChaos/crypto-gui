@@ -1,4 +1,7 @@
-use utils::{byte_formatting::ByteFormat, padding::md_strengthening_64_be};
+use utils::{
+    byte_formatting::{fill_u32s_be, ByteFormat},
+    padding::md_strengthening_64_be,
+};
 
 use crate::traits::ClassicHasher;
 
@@ -66,9 +69,7 @@ impl ClassicHasher for Sha1 {
 
             // Extract 16 words from the block and make them the first 16 values of the array
             let mut x = [0u32; 80];
-            for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)).take(16) {
-                *elem = u32::from_be_bytes(chunk.try_into().unwrap());
-            }
+            fill_u32s_be(&mut x[0..16], &block);
 
             // Extend the 16 words to 80 words
             for i in 16..80 {
@@ -130,18 +131,13 @@ impl ClassicHasher for Sha1 {
     crate::hash_bytes_from_string! {}
 }
 
-#[cfg(test)]
-mod sha1_tests {
-    use super::*;
-
-    crate::basic_hash_tests!(
-        Sha1::default(), test1, "",
-        "da39a3ee5e6b4b0d3255bfef95601890afd80709";
-        Sha1::default(), test2, "abc",
-        "a9993e364706816aba3e25717850c26c9cd0d89d";
-        Sha1::default(), test3, "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
-        "84983e441c3bd26ebaae4aa1f95129e5e54670f1";
-        Sha1::default(), test4, "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
-        "a49b2446a02c645bf419f995b67091253a04a259";
-    );
-}
+crate::basic_hash_tests!(
+    Sha1::default(), test1, "",
+    "da39a3ee5e6b4b0d3255bfef95601890afd80709";
+    Sha1::default(), test2, "abc",
+    "a9993e364706816aba3e25717850c26c9cd0d89d";
+    Sha1::default(), test3, "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
+    "84983e441c3bd26ebaae4aa1f95129e5e54670f1";
+    Sha1::default(), test4, "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
+    "a49b2446a02c645bf419f995b67091253a04a259";
+);

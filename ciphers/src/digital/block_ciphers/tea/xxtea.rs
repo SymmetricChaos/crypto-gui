@@ -26,6 +26,15 @@ impl Default for Xxtea {
 }
 
 impl Xxtea {
+    pub fn ksa(&mut self, bytes: [u8; 16]) {
+        utils::byte_formatting::fill_u32s_be(&mut self.key, &bytes);
+    }
+
+    pub fn with_key(mut self, bytes: [u8; 16]) -> Self {
+        self.ksa(bytes);
+        self
+    }
+
     pub fn mx(y: u32, z: u32, sum: u32, p: u32, e: u32, k: &[u32; 4]) -> u32 {
         (z >> 5 ^ y << 2) + (y >> 3 ^ z << 4) ^ (sum ^ y) + (k[(p & 3 ^ e) as usize] ^ z)
     }

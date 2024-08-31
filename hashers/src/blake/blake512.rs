@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use utils::byte_formatting::ByteFormat;
+use utils::byte_formatting::{fill_u64s_be, ByteFormat};
 
 use crate::{errors::HasherError, traits::ClassicHasher};
 
@@ -87,7 +87,7 @@ impl Blake512 {
             ));
         }
         let v = ByteFormat::Hex
-            .text_to_u64(text)
+            .text_to_u64_be(text)
             .expect("salt text did not have exactly 64 digits");
         self.salt = v
             .try_into()
@@ -171,9 +171,7 @@ impl Blake512 {
 
     fn create_chunk(bytes: &[u8]) -> [u64; 16] {
         let mut k = [0u64; 16];
-        for (elem, chunk) in k.iter_mut().zip(bytes.chunks_exact(8)).take(16) {
-            *elem = u64::from_be_bytes(chunk.try_into().unwrap());
-        }
+        fill_u64s_be(&mut k, &bytes);
         k
     }
 }

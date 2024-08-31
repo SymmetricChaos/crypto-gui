@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use utils::byte_formatting::ByteFormat;
+use utils::byte_formatting::{fill_u32s_be, ByteFormat};
 
 use crate::{errors::HasherError, traits::ClassicHasher};
 
@@ -79,7 +79,7 @@ impl Blake256 {
             ));
         }
         let v = ByteFormat::Hex
-            .text_to_u32(text)
+            .text_to_u32_be(text)
             .expect("salt text did not have exactly 32 digits");
         self.salt = v
             .try_into()
@@ -145,9 +145,7 @@ impl Blake256 {
 
     fn create_chunk(bytes: &[u8]) -> [u32; 16] {
         let mut k = [0u32; 16];
-        for (elem, chunk) in k.iter_mut().zip(bytes.chunks_exact(4)).take(16) {
-            *elem = u32::from_be_bytes(chunk.try_into().unwrap());
-        }
+        fill_u32s_be(&mut k, &bytes);
         k
     }
 }

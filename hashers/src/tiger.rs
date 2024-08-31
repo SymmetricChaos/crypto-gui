@@ -1,7 +1,7 @@
 use super::auxiliary::tiger_arrays::{T1, T2, T3, T4};
 use crate::traits::ClassicHasher;
 use std::num::Wrapping;
-use utils::byte_formatting::ByteFormat;
+use utils::byte_formatting::{fill_u64s_le, ByteFormat};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum TigerVersion {
@@ -143,11 +143,10 @@ impl ClassicHasher for Tiger {
         let mut c = Wrapping(0xF096A5B4C3B2E187);
 
         for block in input.chunks_exact(64) {
-            let mut x = [Wrapping(0u64); 8];
-            for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(8)) {
-                // Confirmed that this is little endian from reference implementations
-                *elem = Wrapping(u64::from_le_bytes(chunk.try_into().unwrap()));
-            }
+            let mut x = [0; 8];
+            fill_u64s_le(&mut x, &block);
+            let mut x = x.map(|n| Wrapping(n));
+
             Tiger::compress(&mut a, &mut b, &mut c, &mut x)
         }
 

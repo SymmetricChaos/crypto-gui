@@ -3,6 +3,13 @@ use utils::byte_formatting::{overwrite_bytes, u32_pair_to_u8_array, ByteFormat};
 
 use crate::digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher};
 
+pub fn mx_e(a: u32, b: u32, sum: u32, k1: u32, k2: u32) -> u32 {
+    b.wrapping_add((a << 4).wrapping_add(k1) ^ (a.wrapping_add(sum)) ^ (a >> 5).wrapping_add(k2))
+}
+pub fn mx_d(a: u32, b: u32, sum: u32, k1: u32, k2: u32) -> u32 {
+    b.wrapping_sub((a << 4).wrapping_add(k1) ^ (a.wrapping_add(sum)) ^ (a >> 5).wrapping_add(k2))
+}
+
 pub struct Tea {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
@@ -15,7 +22,7 @@ pub struct Tea {
 impl Default for Tea {
     fn default() -> Self {
         Self {
-            key: [0, 1, 2, 3],
+            key: [0, 0, 0, 0],
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
             iv: 0,
@@ -25,19 +32,21 @@ impl Default for Tea {
     }
 }
 
-pub fn mx_e(a: u32, b: u32, sum: u32, k1: u32, k2: u32) -> u32 {
-    b.wrapping_add((a << 4).wrapping_add(k1) ^ (a.wrapping_add(sum)) ^ (a >> 5).wrapping_add(k2))
-}
-pub fn mx_d(a: u32, b: u32, sum: u32, k1: u32, k2: u32) -> u32 {
-    b.wrapping_sub((a << 4).wrapping_add(k1) ^ (a.wrapping_add(sum)) ^ (a >> 5).wrapping_add(k2))
+impl Tea {
+    pub fn ksa(&mut self, bytes: [u8; 16]) {
+        utils::byte_formatting::fill_u32s_be(&mut self.key, &bytes);
+    }
+
+    pub fn with_key(mut self, bytes: [u8; 16]) -> Self {
+        self.ksa(bytes);
+        self
+    }
 }
 
 impl BlockCipher<8> for Tea {
     fn encrypt_block(&self, bytes: &mut [u8]) {
         let mut v = [0u32; 2];
-        for (elem, chunk) in v.iter_mut().zip(bytes.chunks_exact(4)) {
-            *elem = u32::from_be_bytes(chunk.try_into().unwrap());
-        }
+        utils::byte_formatting::fill_u32s_be(&mut v, bytes);
         let mut sum: u32 = 0;
         for _ in 0..32 {
             sum = sum.wrapping_add(super::DELTA);
@@ -49,9 +58,7 @@ impl BlockCipher<8> for Tea {
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
         let mut v = [0u32; 2];
-        for (elem, chunk) in v.iter_mut().zip(bytes.chunks_exact(4)) {
-            *elem = u32::from_be_bytes(chunk.try_into().unwrap());
-        }
+        utils::byte_formatting::fill_u32s_be(&mut v, bytes);
         let mut sum: u32 = 0xC6EF3720;
         for _ in 0..32 {
             v[1] = mx_d(v[0], v[1], sum, self.key[2], self.key[3]);
@@ -74,7 +81,7 @@ mod tea_tests {
     #[test]
     fn encrypt_decrypt_ecb() {
         let ptext = "01020304050607080102030405060708";
-        let mut cipher = Tea::default();
+        let mut cipher = Tea::default().with_key([0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4]);
         cipher.mode = BCMode::Ecb;
         let ctext = cipher.encrypt(ptext).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), ptext);
@@ -83,7 +90,7 @@ mod tea_tests {
     #[test]
     fn encrypt_decrypt_ctr() {
         let ptext = "01020304050607080102030405060708";
-        let mut cipher = Tea::default();
+        let mut cipher = Tea::default().with_key([0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4]);
         cipher.mode = BCMode::Ctr;
         let ctext = cipher.encrypt(ptext).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), ptext);

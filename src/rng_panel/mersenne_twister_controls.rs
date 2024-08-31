@@ -75,7 +75,7 @@ impl MTFrame {
             self.key_32.push('0')
         }
 
-        let key_vec = ByteFormat::Hex.text_to_u32(&self.key_32);
+        let key_vec = ByteFormat::Hex.text_to_u32_be(&self.key_32);
 
         if let Ok(vec) = key_vec {
             self.rng_32.ksa_from_array(&vec)
@@ -88,7 +88,7 @@ impl MTFrame {
         while self.key_64.len() % 16 != 0 {
             self.key_64.push('0')
         }
-        let key_vec = ByteFormat::Hex.text_to_u64(&self.key_64);
+        let key_vec = ByteFormat::Hex.text_to_u64_be(&self.key_64);
         if let Ok(vec) = key_vec {
             self.rng_64.ksa_from_array(&vec)
         } else {

@@ -189,8 +189,11 @@ impl Default for Seed {
 }
 
 impl Seed {
-    pub fn ksa(&mut self, key: [u32; 4]) {
-        let mut key = key.map(|n| Wrapping(n.to_le()));
+    pub fn ksa(&mut self, bytes: [u8; 16]) {
+        let mut key = [0_u32; 4];
+        utils::byte_formatting::fill_u32s_be(&mut key, &bytes);
+        let mut key = key.map(|n| Wrapping(n));
+
         for i in 0..16 {
             let k0 = g(key[0] + (key[2]) - Wrapping(KC[i]));
             let k1 = g(key[1] - (key[3]) + Wrapping(KC[i]));
@@ -208,7 +211,7 @@ impl Seed {
         }
     }
 
-    pub fn with_ksa(mut self, key: [u32; 4]) -> Self {
+    pub fn with_key(mut self, key: [u8; 16]) -> Self {
         self.ksa(key);
         self
     }
@@ -217,9 +220,7 @@ impl Seed {
 impl BlockCipher<16> for Seed {
     fn encrypt_block(&self, bytes: &mut [u8]) {
         let mut v = [0u64; 2];
-        for (elem, chunk) in v.iter_mut().zip(bytes.chunks_exact(8)) {
-            *elem = u64::from_be_bytes(chunk.try_into().unwrap());
-        }
+        utils::byte_formatting::fill_u64s_be(&mut v, bytes);
 
         // Feistel network
         for subkey in self.subkeys {
@@ -237,9 +238,7 @@ impl BlockCipher<16> for Seed {
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
         let mut v = [0u64; 2];
-        for (elem, chunk) in v.iter_mut().zip(bytes.chunks_exact(8)) {
-            *elem = u64::from_be_bytes(chunk.try_into().unwrap());
-        }
+        utils::byte_formatting::fill_u64s_be(&mut v, bytes);
 
         // Feistel network
         for subkey in self.subkeys.into_iter().rev() {
@@ -266,7 +265,7 @@ mod seed_tests {
     #[test]
     fn ksa() {
         let mut cipher = Seed::default();
-        cipher.ksa([0, 0, 0, 0]);
+        cipher.ksa([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
         let test_subkeys: [(u32, u32); 16] = [
             (0x7C8F8C7E, 0xC737A22C),
             (0xFF276CDB, 0xA7CA684A),
@@ -294,11 +293,11 @@ mod seed_tests {
 }
 
 crate::test_block_cipher!(
-    Seed::default().with_ksa([0, 0, 0, 0]), test_1,
+    Seed::default().with_key([0, 0, 0, 0, 0, 0, 0, 0,0, 0, 0, 0, 0, 0, 0, 0]), test_1,
     [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,],
     [0x5E, 0xBA, 0xC6, 0xE0, 0x05, 0x4E, 0x16, 0x68, 0x19, 0xAF, 0xF1, 0xCC, 0x6D, 0x34, 0x6C, 0xDB,];
 
-    Seed::default().with_ksa([0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f]), test_2,
+    Seed::default().with_key([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]), test_2,
     [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,],
     [0xC1, 0x1F, 0x22, 0xF2, 0x01, 0x40, 0x50, 0x50, 0x84, 0x48, 0x35, 0x97, 0xE4, 0x37, 0x0F, 0x43,];
 );

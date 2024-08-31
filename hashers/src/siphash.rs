@@ -137,21 +137,6 @@ impl ClassicHasher for SipHash {
     crate::hash_bytes_from_string! {}
 }
 
-// impl KeyedHasher for SipHash {
-//     fn set_salt(&mut self, _bytes: &[u8]) {
-//         unimplemented!("SipHash does not accept a salt argument")
-//     }
-
-//     fn set_key(&mut self, bytes: &[u8]) {
-//         if bytes.len() == 16 {
-//             self.k0 = u64::from_be_bytes(bytes[0..8].try_into().unwrap());
-//             self.k1 = u64::from_be_bytes(bytes[8..16].try_into().unwrap());
-//         } else {
-//             panic!("SipHash key must be exactly 16 bytes")
-//         }
-//     }
-// }
-
 #[cfg(test)]
 mod siphash_tests {
     use super::*;
