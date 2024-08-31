@@ -75,6 +75,15 @@ macro_rules! lea_struct {
             pub fn ksa(&mut self, bytes: [u8; $key_words * 4]) {
                 let mut key = [0_u32; $key_words];
                 utils::byte_formatting::fill_u32s_le(&mut key, &bytes);
+                self.ksa_u32(key);
+            }
+
+            pub fn with_key(mut self, key: [u8; $key_words * 4]) -> Self {
+                self.ksa(key);
+                self
+            }
+
+            pub fn ksa_u32(&mut self, mut key: [u32; $key_words]) {
                 if $key_words == 4 {
                     for i in 0..$num_rounds {
                         key[0] = key[0]
@@ -147,8 +156,8 @@ macro_rules! lea_struct {
                 }
             }
 
-            pub fn with_key(mut self, key: [u8; $key_words * 4]) -> Self {
-                self.ksa(key);
+            pub fn with_key_u32(mut self, key: [u32; $key_words]) -> Self {
+                self.ksa_u32(key);
                 self
             }
         }

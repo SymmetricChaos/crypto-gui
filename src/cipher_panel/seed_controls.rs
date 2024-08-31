@@ -46,7 +46,7 @@ impl CipherFrame for SeedFrame {
         ui.add_space(8.0);
 
         for i in 0..4 {
-            if ui.u32_drag_value_hex(&mut self.key[i]).changed() {
+            if ui.u32_hex_edit(&mut self.key[i]).changed() {
                 u32s_to_bytes_le(&mut self.key_bytes, &self.key);
                 self.cipher.ksa(self.key_bytes);
             }

@@ -46,7 +46,7 @@ impl CipherFrame for IdeaFrame {
         ui.label("IDEA uses a 128-bit key which is treated as eight 16-bit words.");
         ui.horizontal(|ui| {
             for w in self.key.iter_mut() {
-                if ui.u16_drag_value_hex(w).changed() {
+                if ui.u16_hex_edit(w).changed() {
                     self.valid_key = false;
                 }
             }

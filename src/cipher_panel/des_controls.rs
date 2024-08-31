@@ -53,7 +53,7 @@ impl CipherFrame for DesFrame {
         if ui.small_button("set parity").clicked() {
             self.key = set_des_key_parity(self.key)
         }
-        if ui.u64_drag_value_hex(&mut self.key).changed() {
+        if ui.u64_hex_edit(&mut self.key).changed() {
             match self.cipher.ksa(self.key) {
                 Ok(_) => self.ksa_error.clear(),
                 Err(e) => self.ksa_error = e.to_string(),

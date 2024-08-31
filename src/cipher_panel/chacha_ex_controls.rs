@@ -59,7 +59,7 @@ impl CipherFrame for ChaChaExNonceFrame {
         });
         ui.horizontal(|ui| {
             for i in 0..4 {
-                ui.u32_drag_value_hex(&mut self.cipher.key[i]);
+                ui.u32_hex_edit(&mut self.cipher.key[i]);
             }
         });
 
@@ -71,7 +71,7 @@ impl CipherFrame for ChaChaExNonceFrame {
         ui.label("A nonce (number used once) ensures that the cipher state is always different from message to message.");
         ui.horizontal(|ui| {
             for i in 0..3 {
-                ui.u32_drag_value_hex(&mut self.cipher.nonce[i]);
+                ui.u32_hex_edit(&mut self.cipher.nonce[i]);
             }
         });
 
@@ -81,7 +81,7 @@ impl CipherFrame for ChaChaExNonceFrame {
             ui.random_num_button(&mut self.cipher.ctr);
         });
         ui.label("The counter ensures that each block of the keystream is different.");
-        ui.u32_drag_value_hex(&mut self.cipher.ctr);
+        ui.u32_hex_edit(&mut self.cipher.ctr);
 
         ui.add_space(8.0);
         ui.subheading("Number of Rounds");
@@ -101,7 +101,7 @@ impl CipherFrame for ChaChaExNonceFrame {
         ui.add_space(8.0);
 
         ui.subheading("Initial State");
-        ui.label(self.start_state());
+        ui.mono(self.start_state());
     }
 
     fn cipher(&self) -> &dyn ciphers::Cipher {

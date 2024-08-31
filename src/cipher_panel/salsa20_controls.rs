@@ -32,7 +32,7 @@ impl CipherFrame for Salsa20Frame {
             ui.random_bytes_button(&mut self.cipher.key);
         });
         for i in 0..4 {
-            ui.u32_drag_value_hex(&mut self.cipher.key[i]);
+            ui.u32_hex_edit(&mut self.cipher.key[i]);
         }
         ui.add_space(8.0);
         ui.horizontal(|ui| {
@@ -40,7 +40,7 @@ impl CipherFrame for Salsa20Frame {
             ui.random_bytes_button(&mut self.cipher.nonce);
         });
         for i in 0..2 {
-            ui.u32_drag_value_hex(&mut self.cipher.nonce[i]);
+            ui.u32_hex_edit(&mut self.cipher.nonce[i]);
         }
         ui.add_space(8.0);
         ui.horizontal(|ui| {

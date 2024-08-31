@@ -52,7 +52,7 @@ impl CipherFrame for BlowfishFrame {
             }
         });
         for i in self.cipher.key.iter_mut() {
-            ui.u8_drag_value_hex(i);
+            ui.u8_hex_edit(i);
         }
 
         ui.add_space(8.0);

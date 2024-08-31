@@ -294,7 +294,7 @@
     ]
   },
   "LEA": {
-    "Description": "LEA is South Korean block cipher .",
+    "Description": "LEA (Lightweight Encryption Algorithm) is an ARX based South Korean block cipher. It is designed to be faster in software than AES while offering the same level of security.",
     "Authors": "Hong, Lee, Kim, Kwon, Ryu, and Lee",
     "Publication": "2013",
     "Traits": [

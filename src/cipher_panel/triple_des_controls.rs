@@ -57,7 +57,7 @@ impl CipherFrame for TripleDesFrame {
         }
 
         for i in 0..3 {
-            if ui.u64_drag_value_hex(&mut self.keys[i]).changed() {
+            if ui.u64_hex_edit(&mut self.keys[i]).changed() {
                 match self.cipher.ksa(self.keys) {
                     Ok(_) => self.ksa_error.clear(),
                     Err(e) => self.ksa_error = e.to_string(),

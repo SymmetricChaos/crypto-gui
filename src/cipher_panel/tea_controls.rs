@@ -45,7 +45,7 @@ impl CipherFrame for TeaFrame {
         });
         ui.label("TEA uses a 128-bit key, here controlled as four 32-bit keys.");
         for i in 0..4 {
-            ui.u32_drag_value_hex(&mut self.cipher.subkeys[i]);
+            ui.u32_hex_edit(&mut self.cipher.subkeys[i]);
         }
 
         ui.add_space(8.0);

@@ -1,6 +1,6 @@
 use crate::{
     cipher_panel::CipherFrame,
-    integer_drag_value::{EditU128, EditU64},
+    integer_drag_value::{EditU128, EditU16, EditU32, EditU64, EditU8},
 };
 use ciphers::digital::block_ciphers::block_cipher::{BCMode, BCPadding};
 use codes::letter_word_code::IntegerCodeMaps;
@@ -55,15 +55,14 @@ pub trait UiElements {
     fn binary_to_text_input_mode(&mut self, current_value: &mut ByteFormat);
     fn byte_io_mode_cipher(&mut self, input: &mut ByteFormat, output: &mut ByteFormat);
     fn byte_io_mode_hasher(&mut self, input: &mut ByteFormat, output: &mut ByteFormat);
-    fn u8_drag_value_hex(&mut self, n: &mut u8) -> Response;
-    fn u16_drag_value_hex(&mut self, n: &mut u16) -> Response;
-    fn u32_drag_value_hex(&mut self, n: &mut u32) -> Response;
-    fn u64_drag_value_hex(&mut self, n: &mut u64) -> Response;
-    fn u128_drag_value_hex(&mut self, n: &mut u128) -> Response;
+    fn u8_hex_edit(&mut self, n: &mut u8) -> Response;
+    fn u16_hex_edit(&mut self, n: &mut u16) -> Response;
+    fn u32_hex_edit(&mut self, n: &mut u32) -> Response;
+    fn u64_hex_edit(&mut self, n: &mut u64) -> Response;
+    fn u128_hex_edit(&mut self, n: &mut u128) -> Response;
     fn u8_drag_value_dec(&mut self, n: &mut u8) -> Response;
     fn u16_drag_value_dec(&mut self, n: &mut u16) -> Response;
     fn u32_drag_value_dec(&mut self, n: &mut u32) -> Response;
-    fn u64_drag_value_dec(&mut self, n: &mut u64) -> Response;
     fn random_bytes_button<T: Fill>(&mut self, item: &mut T) -> Response;
     fn random_num_button<T>(&mut self, item: &mut T) -> Response
     where
@@ -266,23 +265,23 @@ impl UiElements for Ui {
             });
     }
 
-    fn u8_drag_value_hex(&mut self, n: &mut u8) -> Response {
-        self.add(DragValue::new(n).hexadecimal(2, false, true))
+    fn u8_hex_edit(&mut self, n: &mut u8) -> Response {
+        self.add(EditU8::new(n))
     }
 
-    fn u16_drag_value_hex(&mut self, n: &mut u16) -> Response {
-        self.add(DragValue::new(n).hexadecimal(4, false, true))
+    fn u16_hex_edit(&mut self, n: &mut u16) -> Response {
+        self.add(EditU16::new(n))
     }
 
-    fn u32_drag_value_hex(&mut self, n: &mut u32) -> Response {
-        self.add(DragValue::new(n).hexadecimal(8, false, true))
+    fn u32_hex_edit(&mut self, n: &mut u32) -> Response {
+        self.add(EditU32::new(n))
     }
 
-    fn u64_drag_value_hex(&mut self, n: &mut u64) -> Response {
+    fn u64_hex_edit(&mut self, n: &mut u64) -> Response {
         self.add(EditU64::new(n))
     }
 
-    fn u128_drag_value_hex(&mut self, n: &mut u128) -> Response {
+    fn u128_hex_edit(&mut self, n: &mut u128) -> Response {
         self.add(EditU128::new(n))
     }
 
@@ -298,9 +297,10 @@ impl UiElements for Ui {
         self.add(DragValue::new(n))
     }
 
-    fn u64_drag_value_dec(&mut self, n: &mut u64) -> Response {
-        self.add(DragValue::new(n))
-    }
+    // This won't work with the normal DragValue
+    // fn u64_drag_value_dec(&mut self, n: &mut u64) -> Response {
+    //     self.add(DragValue::new(n))
+    // }
 
     fn random_bytes_button<T: Fill>(&mut self, item: &mut T) -> Response {
         let b = self.button("🎲").on_hover_text("randomize");
@@ -597,7 +597,7 @@ pub fn block_cipher_iv_32(ui: &mut Ui, iv: &mut u32, mode: BCMode) {
             ui.random_num_button(iv).clicked();
         });
         ui.label("In the selected mode the cipher must have a 32-bit initial value provided.");
-        ui.u32_drag_value_hex(iv);
+        ui.u32_hex_edit(iv);
     });
 }
 
@@ -608,7 +608,7 @@ pub fn block_cipher_iv_64(ui: &mut Ui, iv: &mut u64, mode: BCMode) {
             ui.random_num_button(iv).clicked();
         });
         ui.label("In the selected mode the cipher must have a 64-bit initial value provided.");
-        ui.u64_drag_value_hex(iv);
+        ui.u64_hex_edit(iv);
     });
 }
 
@@ -619,6 +619,6 @@ pub fn block_cipher_iv_128(ui: &mut Ui, iv: &mut u128, mode: BCMode) {
             ui.random_num_button(iv).clicked();
         });
         ui.label("In the selected mode the cipher must have a 128-bit initial value provided.");
-        ui.u128_drag_value_hex(iv);
+        ui.u128_hex_edit(iv);
     });
 }

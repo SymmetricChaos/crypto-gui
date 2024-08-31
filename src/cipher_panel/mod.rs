@@ -40,6 +40,7 @@ mod grille_controls;
 mod hebern_controls;
 mod hutton_controls;
 mod idea_controls;
+mod lea_controls;
 mod m209_controls;
 mod m94_controls;
 mod nihilist_controls;
@@ -173,6 +174,7 @@ pub struct CipherInterface {
     desx: desx_controls::DesXFrame,
     gost: gost_controls::GostFrame,
     idea: idea_controls::IdeaFrame,
+    lea: lea_controls::LeaFrame,
     rc5: rc5_controls::Rc5Frame,
     seed: seed_controls::SeedFrame,
     tea: tea_controls::TeaFrame,
@@ -317,6 +319,7 @@ impl CipherInterface {
                 CipherId::DesX,
                 CipherId::Gost,
                 CipherId::Idea,
+                CipherId::Lea,
                 CipherId::Rc5,
                 CipherId::Seed,
                 CipherId::Tea,
@@ -393,6 +396,7 @@ impl CipherInterface {
             CipherId::Hebern => &mut self.hebern,
             CipherId::Hutton => &mut self.hutton,
             CipherId::Idea => &mut self.idea,
+            CipherId::Lea => &mut self.lea,
             CipherId::M209 => &mut self.m209,
             CipherId::M94 => &mut self.m94,
             CipherId::Nihilist => &mut self.nihilist,

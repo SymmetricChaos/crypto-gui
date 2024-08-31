@@ -29,14 +29,14 @@ impl A51Frame {}
 impl ClassicRngFrame for A51Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.subheading("Key (Taken in Big-endian Order)");
-        if ui.u64_drag_value_hex(&mut self.key).changed() {
+        if ui.u64_hex_edit(&mut self.key).changed() {
             self.rng.key = self.key.to_be_bytes();
             self.rng.ksa()
         }
         ui.add_space(8.0);
 
         ui.subheading("Frame Number (Limited to 22 Bits)");
-        if ui.u32_drag_value_hex(&mut self.rng.frame_number).changed() {
+        if ui.u32_hex_edit(&mut self.rng.frame_number).changed() {
             self.rng.frame_number &= 0x3fffff; // mask off the high bits
             self.rng.ksa()
         }

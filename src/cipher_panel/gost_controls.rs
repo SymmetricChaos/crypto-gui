@@ -44,7 +44,7 @@ impl CipherFrame for GostFrame {
             ui.random_bytes_button(&mut self.cipher.subkeys);
         });
         for k in self.cipher.subkeys.iter_mut() {
-            ui.u32_drag_value_hex(k);
+            ui.u32_hex_edit(k);
         }
         ui.add_space(8.0);
         ui.horizontal(|ui| {
@@ -52,7 +52,7 @@ impl CipherFrame for GostFrame {
             ui.random_bytes_button(&mut self.cipher.sboxes);
         });
         for s in self.cipher.sboxes.iter_mut() {
-            ui.u64_drag_value_hex(s);
+            ui.u64_hex_edit(s);
         }
 
         ui.add_space(8.0);

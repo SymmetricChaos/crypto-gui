@@ -51,7 +51,7 @@ impl ClassicRngFrame for ChaChaFrame {
         ui.subheading("Key");
 
         for i in 0..4 {
-            ui.u32_drag_value_hex(&mut self.rng.key[i]);
+            ui.u32_hex_edit(&mut self.rng.key[i]);
         }
 
         ui.add_space(8.0);
@@ -59,13 +59,13 @@ impl ClassicRngFrame for ChaChaFrame {
         ui.label("A nonce should never be reused with the same key.");
 
         for i in 0..2 {
-            ui.u32_drag_value_hex(&mut self.rng.nonce[i]);
+            ui.u32_hex_edit(&mut self.rng.nonce[i]);
         }
 
         ui.add_space(8.0);
         ui.subheading("Counter");
         ui.label("The counter ensures that each block of the keystream is different. It can usually be left to start at zero.");
-        ui.u64_drag_value_hex(&mut self.rng.ctr);
+        ui.u64_hex_edit(&mut self.rng.ctr);
 
         ui.add_space(8.0);
         ui.subheading("Number of Rounds");

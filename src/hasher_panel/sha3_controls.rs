@@ -128,7 +128,7 @@ impl HasherFrame for Sha3Frame {
             for y in 0..5 {
                 ui.horizontal(|ui| {
                     for x in 0..5 {
-                        ui.u64_drag_value_hex(&mut self.example_state[x][y]);
+                        ui.u64_hex_edit(&mut self.example_state[x][y]);
                         // control_hex_u64(
                         //     ui,
                         //     &mut self.example_state_strings[x][y],

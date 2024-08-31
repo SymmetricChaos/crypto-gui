@@ -58,7 +58,7 @@ impl CipherFrame for ChaCha20Poly1305Frame {
         });
         ui.horizontal(|ui| {
             for i in 0..4 {
-                ui.u32_drag_value_hex(&mut self.cipher.cipher.key[i]);
+                ui.u32_hex_edit(&mut self.cipher.cipher.key[i]);
             }
         });
         ui.add_space(8.0);
@@ -70,13 +70,13 @@ impl CipherFrame for ChaCha20Poly1305Frame {
         ui.label("It is suggested that two of words of the nonce be chosen randomly for each message and the third be chosen to separate multiple streams of data.");
         ui.horizontal(|ui| {
             for i in 0..3 {
-                ui.u32_drag_value_hex(&mut self.cipher.cipher.nonce[i]);
+                ui.u32_hex_edit(&mut self.cipher.cipher.nonce[i]);
             }
         });
 
         ui.add_space(8.0);
         ui.subheading("Counter");
-        ui.u32_drag_value_hex(&mut self.cipher.cipher.ctr);
+        ui.u32_hex_edit(&mut self.cipher.cipher.ctr);
 
         ui.add_space(8.0);
         ui.subheading("Number of Rounds");
@@ -84,7 +84,7 @@ impl CipherFrame for ChaCha20Poly1305Frame {
 
         ui.add_space(8.0);
         ui.subheading("Starting State");
-        ui.label(self.start_state());
+        ui.mono(self.start_state());
     }
 
     fn cipher(&self) -> &dyn ciphers::Cipher {
