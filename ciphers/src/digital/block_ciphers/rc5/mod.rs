@@ -7,21 +7,6 @@ macro_rules! impl_rc5 {
     ($name: ident, $word: ty, $bytes_in_word: literal, $bits_in_word: literal, $bytes_in_block: literal, $p: literal, $q: literal, $iv_word: ty, $rounds: literal) => {
         use std::ops::{BitXor, Shl};
 
-        pub fn bytes_to_words(s: &[u8]) -> [$word; 2] {
-            [
-                <$word>::from_le_bytes(s[..$bytes_in_word].try_into().unwrap()),
-                <$word>::from_le_bytes(s[$bytes_in_word..$bytes_in_block].try_into().unwrap()),
-            ]
-        }
-
-        pub fn words_to_bytes(s: &[$word]) -> [u8; $bytes_in_block] {
-            let mut out = [0; $bytes_in_block];
-            let (left, right) = out.split_at_mut($bytes_in_word);
-            left.copy_from_slice(&s[0].to_le_bytes());
-            right.copy_from_slice(&s[1].to_le_bytes());
-            out
-        }
-
         pub struct $name {
             pub input_format: utils::byte_formatting::ByteFormat,
             pub output_format: utils::byte_formatting::ByteFormat,
@@ -47,6 +32,47 @@ macro_rules! impl_rc5 {
         }
 
         impl $name {
+            pub fn input(mut self, input: utils::byte_formatting::ByteFormat) -> Self {
+                self.input_format = input;
+                self
+            }
+
+            pub fn output(mut self, output: utils::byte_formatting::ByteFormat) -> Self {
+                self.output_format = output;
+                self
+            }
+
+            pub fn padding(
+                mut self,
+                padding: crate::digital::block_ciphers::block_cipher::BCPadding,
+            ) -> Self {
+                self.padding = padding;
+                self
+            }
+
+            pub fn mode(
+                mut self,
+                mode: crate::digital::block_ciphers::block_cipher::BCMode,
+            ) -> Self {
+                self.mode = mode;
+                self
+            }
+
+            pub fn bytes_to_words(s: &[u8]) -> [$word; 2] {
+                [
+                    <$word>::from_le_bytes(s[..$bytes_in_word].try_into().unwrap()),
+                    <$word>::from_le_bytes(s[$bytes_in_word..$bytes_in_block].try_into().unwrap()),
+                ]
+            }
+
+            pub fn words_to_bytes(s: &[$word]) -> [u8; $bytes_in_block] {
+                let mut out = [0; $bytes_in_block];
+                let (left, right) = out.split_at_mut($bytes_in_word);
+                left.copy_from_slice(&s[0].to_le_bytes());
+                right.copy_from_slice(&s[1].to_le_bytes());
+                out
+            }
+
             pub fn state_size(&self) -> usize {
                 2 * (self.rounds + 1)
             }
@@ -90,9 +116,9 @@ macro_rules! impl_rc5 {
             }
         }
 
-        impl BlockCipher<$bytes_in_block> for $name {
+        impl crate::digital::block_ciphers::block_cipher::BlockCipher<$bytes_in_block> for $name {
             fn encrypt_block(&self, bytes: &mut [u8]) {
-                let mut block = bytes_to_words(bytes);
+                let mut block = Self::bytes_to_words(bytes);
                 block[0] = block[0].wrapping_add(self.state[0]);
                 block[1] = block[1].wrapping_add(self.state[1]);
 
@@ -106,11 +132,11 @@ macro_rules! impl_rc5 {
                         .rotate_left(block[0] as u32 % $bits_in_word)
                         .wrapping_add(self.state[(2 * i) + 1])
                 }
-                utils::byte_formatting::overwrite_bytes(bytes, &words_to_bytes(&block));
+                utils::byte_formatting::overwrite_bytes(bytes, &Self::words_to_bytes(&block));
             }
 
             fn decrypt_block(&self, bytes: &mut [u8]) {
-                let mut block = bytes_to_words(bytes);
+                let mut block = Self::bytes_to_words(bytes);
                 for i in (1..=self.rounds).rev() {
                     block[1] = block[1]
                         .wrapping_sub(self.state[(2 * i) + 1])
@@ -124,7 +150,7 @@ macro_rules! impl_rc5 {
 
                 block[0] = block[0].wrapping_sub(self.state[0]);
                 block[1] = block[1].wrapping_sub(self.state[1]);
-                utils::byte_formatting::overwrite_bytes(bytes, &words_to_bytes(&block));
+                utils::byte_formatting::overwrite_bytes(bytes, &Self::words_to_bytes(&block));
             }
         }
 

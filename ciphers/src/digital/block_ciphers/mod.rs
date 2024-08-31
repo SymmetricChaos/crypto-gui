@@ -11,20 +11,29 @@ pub mod rc6;
 pub mod seed;
 pub mod tea;
 
+// This Big Scary Macro is just avoiding a lot of boilerplate since all block ciphers have essentially the same
+// implementation for the Cipher trait. Fully qualified names are used to avoid import conflicts.
 #[macro_export]
 macro_rules! impl_cipher_for_block_cipher {
     ($cipher: ty, $blocksize: literal) => {
         impl crate::traits::Cipher for $cipher {
             fn encrypt(&self, text: &str) -> Result<String, crate::errors::CipherError> {
+                // Interpret the input
                 let mut bytes = self
                     .input_format
                     .text_to_bytes(text)
                     .map_err(|_| crate::errors::CipherError::input("byte format error"))?;
 
+                // Provide the necessary kind and amount of padding
                 if self.mode.padded() {
                     self.padding.add_padding(&mut bytes, $blocksize)?;
                 }
 
+                // Select the correct mode. Since block ciphers all implement the BlockCipher
+                // trait these are available for free. The fully qualified names for each of
+                // the encrypt and decrypt functions are too messy and avoiding them is a pain
+                // so when this macro is called the file must have the BlockCipher trait
+                // imported.
                 match self.mode {
                     crate::digital::block_ciphers::block_cipher::BCMode::Ecb => {
                         self.encrypt_ecb(&mut bytes)
@@ -45,15 +54,18 @@ macro_rules! impl_cipher_for_block_cipher {
                         self.encrypt_cfb(&mut bytes, self.iv.to_be_bytes())
                     }
                 };
+
                 Ok(self.output_format.byte_slice_to_text(&bytes))
             }
 
             fn decrypt(&self, text: &str) -> Result<String, crate::errors::CipherError> {
+                // Interpret the input
                 let mut bytes = self
                     .input_format
                     .text_to_bytes(text)
                     .map_err(|_| crate::errors::CipherError::input("byte format error"))?;
 
+                // If no padding is used check for an error
                 if self.mode.padded() {
                     if self.padding == crate::digital::block_ciphers::block_cipher::BCPadding::None
                     {
@@ -62,6 +74,11 @@ macro_rules! impl_cipher_for_block_cipher {
                     };
                 }
 
+                // Select the correct mode. Since block ciphers all implement the BlockCipher
+                // trait these are available for free. The fully qualified names for each of
+                // the encrypt and decrypt functions are too messy and avoiding them is a pain
+                // so when this macro is called the file must have the BlockCipher trait
+                // imported.
                 match self.mode {
                     crate::digital::block_ciphers::block_cipher::BCMode::Ecb => {
                         self.decrypt_ecb(&mut bytes)
@@ -83,6 +100,7 @@ macro_rules! impl_cipher_for_block_cipher {
                     }
                 };
 
+                // Remove the appropriate kind and amount of padding
                 if self.mode.padded() {
                     self.padding.strip_padding(&mut bytes, $blocksize)?;
                 }

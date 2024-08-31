@@ -1,6 +1,6 @@
-use crate::{digital::block_ciphers::block_cipher::BlockCipher, impl_rc5};
+use crate::digital::block_ciphers::block_cipher::BlockCipher;
 
-impl_rc5!(
+crate::impl_rc5!(
     Rc5_64,
     u64,
     8,
