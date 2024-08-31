@@ -1,8 +1,5 @@
-use utils::byte_formatting::{overwrite_bytes, u32_pair_to_u8_array, u32s_to_bytes_be, ByteFormat};
-
-use crate::impl_cipher_for_block_cipher;
-
 use super::block_cipher::{BCMode, BCPadding, BlockCipher};
+use utils::byte_formatting::{fill_u32s_be, u32s_to_bytes_be, ByteFormat};
 
 pub const GOST_R_34_12_2015: [u64; 8] = [
     0xC462A5B9E8D703F1,
@@ -33,7 +30,7 @@ pub struct Gost {
     pub padding: BCPadding,
     pub iv: u64,
     pub sboxes: [u64; 8],
-    pub key: [u32; 8],
+    pub subkeys: [u32; 8],
 }
 
 impl Default for Gost {
@@ -45,7 +42,7 @@ impl Default for Gost {
             padding: BCPadding::default(),
             iv: 0,
             sboxes: GOST_R_34_12_2015.clone(),
-            key: [0; 8],
+            subkeys: [0; 8],
         }
     }
 }
@@ -80,8 +77,12 @@ impl Gost {
         self
     }
 
-    pub fn with_key(mut self, key: [u32; 8]) -> Self {
-        self.key = key;
+    pub fn ksa(&mut self, bytes: [u8; 32]) {
+        fill_u32s_be(&mut self.subkeys, &bytes);
+    }
+
+    pub fn with_key(mut self, bytes: [u8; 32]) -> Self {
+        self.ksa(bytes);
         self
     }
 }
@@ -97,7 +98,7 @@ impl BlockCipher<8> for Gost {
             v[0] = v[1];
 
             // R_i+1 = L_i xor f(R_i)
-            v[1] = t ^ self.f(v[1], self.key[idx]);
+            v[1] = t ^ self.f(v[1], self.subkeys[idx]);
         }
         v.swap(0, 1);
         u32s_to_bytes_be(bytes, &v);
@@ -113,7 +114,7 @@ impl BlockCipher<8> for Gost {
             v[0] = v[1];
 
             // R_i+1 = L_i xor f(R_i)
-            v[1] = t ^ self.f(v[1], self.key[idx]);
+            v[1] = t ^ self.f(v[1], self.subkeys[idx]);
         }
         v.swap(0, 1);
 
@@ -121,7 +122,7 @@ impl BlockCipher<8> for Gost {
     }
 }
 
-impl_cipher_for_block_cipher!(Gost, 8);
+crate::impl_cipher_for_block_cipher!(Gost, 8);
 
 #[cfg(test)]
 mod gost_tests {
@@ -142,7 +143,7 @@ mod gost_tests {
     fn encrypt_decrypt_ecb() {
         let ptext = "01020304050607080102030405060708";
         let mut cipher = Gost::default();
-        thread_rng().fill(&mut cipher.key);
+        thread_rng().fill(&mut cipher.subkeys);
         cipher.mode = BCMode::Ecb;
         let ctext = cipher.encrypt(ptext).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), ptext);

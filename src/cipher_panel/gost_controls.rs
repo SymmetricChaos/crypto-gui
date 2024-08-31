@@ -41,9 +41,9 @@ impl CipherFrame for GostFrame {
 
         ui.horizontal(|ui| {
             ui.subheading("Key");
-            ui.random_bytes_button(&mut self.cipher.key);
+            ui.random_bytes_button(&mut self.cipher.subkeys);
         });
-        for k in self.cipher.key.iter_mut() {
+        for k in self.cipher.subkeys.iter_mut() {
             ui.u32_drag_value_hex(k);
         }
         ui.add_space(8.0);
@@ -75,7 +75,7 @@ impl CipherFrame for GostFrame {
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        rng.fill(&mut self.cipher.key);
+        rng.fill(&mut self.cipher.subkeys);
         rng.fill(&mut self.cipher.sboxes);
 
         if self.cipher.mode.iv_needed() {

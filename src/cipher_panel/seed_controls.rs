@@ -1,11 +1,13 @@
 use crate::ui_elements::{block_cipher_mode, block_cipher_padding, UiElements};
 use ciphers::digital::block_ciphers::seed::Seed;
+use utils::byte_formatting::u32s_to_bytes_le;
 
 use super::CipherFrame;
 
 pub struct SeedFrame {
     cipher: Seed,
     key: [u32; 4],
+    key_bytes: [u8; 16],
 }
 
 impl Default for SeedFrame {
@@ -13,6 +15,7 @@ impl Default for SeedFrame {
         Self {
             cipher: Default::default(),
             key: Default::default(),
+            key_bytes: Default::default(),
         }
     }
 }
@@ -39,6 +42,13 @@ impl CipherFrame for SeedFrame {
         ui.add_space(4.0);
         block_cipher_padding(ui, &mut self.cipher.padding);
         ui.add_space(8.0);
+
+        for i in 0..4 {
+            if ui.u32_drag_value_hex(&mut self.key[i]).changed() {
+                u32s_to_bytes_le(&mut self.key_bytes, &self.key);
+                self.cipher.ksa(self.key_bytes);
+            }
+        }
     }
 
     fn cipher(&self) -> &dyn ciphers::Cipher {
