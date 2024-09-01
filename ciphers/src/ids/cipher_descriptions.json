@@ -431,20 +431,6 @@
       "Transposition"
     ]
   },
-  "SEAL 3.0": {
-    "Description": "SEAL (Software Optimized Encryption Algorithm) is a pseduorandom function family.",
-    "Authors": null,
-    "Publication": null,
-    "Traits": []
-  },
-  "SIGABA": {
-    "Description": "SIGABA was likely the most complex rotor machine of its era and is not known to have been successfully attacked during its use. Despite its complexity the United States was extremely paranoid about the device and did not allow allies direct access to it.",
-    "Authors": null,
-    "Publication": null,
-    "Traits": [
-      "Electromechanical"
-    ]
-  },
   "Salsa20": {
     "Description": "Salsa20 is a stream cipher. The recommended variant is Salsa20/20 which uses 20 rounds, though Salsa20/12 and Salsa20/8 using fewer rounds are also believed to be secure while running much faster. This implementation allows Salsa20 to be run with other round counts as well.",
     "Authors": null,
@@ -460,6 +446,12 @@
     "Traits": [
       "Transposition"
     ]
+  },
+  "SEAL 3.0": {
+    "Description": "SEAL (Software Optimized Encryption Algorithm) is a pseduorandom function family.",
+    "Authors": null,
+    "Publication": null,
+    "Traits": []
   },
   "SEED": {
     "Description": "SEED is South Korean block cipher developed in the late 1990s. It has a 128-bit key and operates on 128-bit blocks.",
@@ -487,6 +479,23 @@
       "Secret Sharing"
     ]
   },
+  "SIGABA": {
+    "Description": "SIGABA was likely the most complex rotor machine of its era and is not known to have been successfully attacked during its use. Despite its complexity the United States was extremely paranoid about the device and did not allow allies direct access to it.",
+    "Authors": null,
+    "Publication": null,
+    "Traits": [
+      "Electromechanical"
+    ]
+  },
+  "Siom": {
+    "Description": "Simon is a family of lightweight ciphers optimized for speed in hardware implementations that was released by the NSA along with Speck in 2013. Although no severe weaknesses are known in the design the NSA has never revealed a full justification for its design and it has struggled to be accepted for standardization outside the United States.",
+    "Authors": "NSA",
+    "Publication": "2013",
+    "Traits": [
+      "Block Cipher",
+      "ARX"
+    ]
+  },
   "Slidefair": {
     "Description": "The slidefair cipher is a stronger but more complex variation on the Playfair Cipher. The grid is a tabula-recta of every shift of the alphabet.",
     "Authors": "Helen Gaines",
@@ -494,6 +503,15 @@
     "Traits": [
       "Playfair",
       "Substitution"
+    ]
+  },
+  "Speck": {
+    "Description": "Speck is a family of lightweight ciphers optimized for speed in software implementations that was released by the NSA along with Simon. Although no severe weaknesses are known in the design the NSA has never revealed a full justification for its design and it has struggled to be accepted for standardization outside the United States.",
+    "Authors": "NSA",
+    "Publication": "2013",
+    "Traits": [
+      "Block Cipher",
+      "ARX"
     ]
   },
   "Straddling Checkerboard": {

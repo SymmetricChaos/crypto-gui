@@ -9,6 +9,8 @@ pub mod lea;
 pub mod rc5;
 pub mod rc6;
 pub mod seed;
+pub mod simon;
+pub mod speck;
 pub mod tea;
 
 // This Big Scary Macro is just avoiding a lot of boilerplate since all block ciphers have essentially the same
@@ -115,18 +117,32 @@ macro_rules! impl_cipher_for_block_cipher {
 macro_rules! test_block_cipher {
     ($($cipher: expr, $name: ident, $ptext: expr, $ctext: expr);+ $(;)?) => {
         #[cfg(test)]
-        mod block_cipher_tests {
+        mod tests {
             use super::*;
-            $(
-                #[test]
-                fn $name() {
-                    let mut msg = $ptext;
-                    $cipher.encrypt_block(&mut msg);
-                    assert_eq!($ctext, msg, "encrypt failed");
-                    $cipher.decrypt_block(&mut msg);
-                    assert_eq!($ptext, msg, "decrypt failed");
-                }
-            )+
+            mod encrypt {
+                use super::*;
+                $(
+                    #[test]
+                    fn $name() {
+                        let mut msg = $ptext;
+                        $cipher.encrypt_block(&mut msg);
+                        assert!($ctext == msg, "encrypt failed:\n correct: {:02x?}\n   ctext: {:02x?}", $ctext, msg);
+                    }
+                )+
+            }
+
+            mod decrypt {
+                use super::*;
+                $(
+                    #[test]
+                    fn $name() {
+                        let mut msg = $ctext;
+                        $cipher.decrypt_block(&mut msg);
+                        assert!($ptext == msg, "decrypt failed:\n correct: {:02x?}\n   ptext: {:02x?}", $ptext, msg);
+                    }
+                )+
+            }
         }
+
     }
 }

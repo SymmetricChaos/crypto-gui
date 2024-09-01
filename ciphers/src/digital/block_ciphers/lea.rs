@@ -175,7 +175,7 @@ macro_rules! lea_struct {
                     v[2] = (t[2] ^ s[4]).wrapping_add(t[3] ^ s[5]).rotate_right(3);
                     v[3] = t[0];
                 }
-                utils::byte_formatting::u32s_to_bytes_be(bytes, &v);
+                utils::byte_formatting::u32s_to_bytes_le(bytes, &v);
             }
 
             fn decrypt_block(&self, bytes: &mut [u8]) {
@@ -189,7 +189,7 @@ macro_rules! lea_struct {
                     v[2] = t[1].rotate_left(5).wrapping_sub(v[1] ^ s[2]) ^ s[3];
                     v[3] = t[2].rotate_left(3).wrapping_sub(v[2] ^ s[4]) ^ s[5];
                 }
-                utils::byte_formatting::u32s_to_bytes_be(bytes, &v);
+                utils::byte_formatting::u32s_to_bytes_le(bytes, &v);
             }
         }
     };
