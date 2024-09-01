@@ -487,13 +487,13 @@
       "Electromechanical"
     ]
   },
-  "Siom": {
+  "Simon": {
     "Description": "Simon is a family of lightweight ciphers optimized for speed in hardware implementations that was released by the NSA along with Speck in 2013. Although no severe weaknesses are known in the design the NSA has never revealed a full justification for its design and it has struggled to be accepted for standardization outside the United States.",
     "Authors": "NSA",
     "Publication": "2013",
     "Traits": [
       "Block Cipher",
-      "ARX"
+      "Feistel"
     ]
   },
   "Slidefair": {
