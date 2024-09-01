@@ -54,7 +54,7 @@ macro_rules! speck64 {
                     subkeys[i as usize] = k[$key_words - 1];
                     let mut tc = k[$key_words - 2];
                     let mut td = k[$key_words - 1];
-                    crate::enc!(tc, td, i, 8, 3);
+                    super::enc!(tc, td, i, 8, 3);
                     k[0..$key_words - 1].rotate_right(1);
                     k[0] = tc;
                     k[$key_words - 1] = td;
@@ -73,7 +73,7 @@ macro_rules! speck64 {
                 let subkeys = self.generate_subkeys();
 
                 for k in subkeys {
-                    crate::enc!(x, y, k, 8, 3);
+                    super::enc!(x, y, k, 8, 3);
                 }
 
                 u32s_to_bytes_be(bytes, &[x, y]);
@@ -88,7 +88,7 @@ macro_rules! speck64 {
                 let subkeys = self.generate_subkeys();
 
                 for k in subkeys.into_iter().rev() {
-                    crate::dec!(x, y, k, 8, 3);
+                    super::dec!(x, y, k, 8, 3);
                 }
 
                 u32s_to_bytes_be(bytes, &[x, y]);

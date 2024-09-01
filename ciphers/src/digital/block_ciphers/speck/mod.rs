@@ -3,7 +3,7 @@ pub mod speck32;
 pub mod speck64;
 
 // These macros make it straightforward to implement speck for the various word sizes
-#[macro_export]
+// The name are short and generic so `pub(crate) use foo;` is used to make them only accessible in this module
 macro_rules! enc {
     ($x:ident, $y:ident, $k:ident, $alpha:literal, $beta:literal) => {
         $x = $x.rotate_right($alpha);
@@ -13,8 +13,8 @@ macro_rules! enc {
         $y ^= $x;
     };
 }
+pub(crate) use enc;
 
-#[macro_export]
 macro_rules! dec {
     ($x:ident, $y:ident, $k:ident, $alpha:literal, $beta:literal) => {
         $y ^= $x;
@@ -24,3 +24,4 @@ macro_rules! dec {
         $x = $x.rotate_left($alpha);
     };
 }
+pub(crate) use dec;

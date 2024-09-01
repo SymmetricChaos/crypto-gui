@@ -52,7 +52,7 @@ impl Speck32_64 {
         for i in 0..Self::ROUNDS {
             subkeys[i as usize] = d;
             let mut t = c;
-            crate::enc!(t, d, i, 7, 2);
+            super::enc!(t, d, i, 7, 2);
             c = b;
             b = a;
             a = t;
@@ -71,7 +71,7 @@ impl BlockCipher<4> for Speck32_64 {
         let subkeys = self.generate_subkeys();
 
         for k in subkeys {
-            crate::enc!(x, y, k, 7, 2);
+            super::enc!(x, y, k, 7, 2);
         }
 
         u16s_to_bytes_be(bytes, &[x, y]);
@@ -86,7 +86,7 @@ impl BlockCipher<4> for Speck32_64 {
         let subkeys = self.generate_subkeys();
 
         for k in subkeys.into_iter().rev() {
-            crate::dec!(x, y, k, 7, 2);
+            super::dec!(x, y, k, 7, 2);
         }
 
         u16s_to_bytes_be(bytes, &[x, y]);

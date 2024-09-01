@@ -54,7 +54,7 @@ macro_rules! speck128 {
                     subkeys[i as usize] = k[$key_words - 1];
                     let mut tc = k[$key_words - 2];
                     let mut td = k[$key_words - 1];
-                    crate::enc!(tc, td, i, 8, 3);
+                    super::enc!(tc, td, i, 8, 3);
                     k[0..$key_words - 1].rotate_right(1);
                     k[0] = tc;
                     k[$key_words - 1] = td;
@@ -73,7 +73,7 @@ macro_rules! speck128 {
                 let subkeys = self.generate_subkeys();
 
                 for k in subkeys {
-                    crate::enc!(x, y, k, 8, 3);
+                    super::enc!(x, y, k, 8, 3);
                 }
 
                 u64s_to_bytes_be(bytes, &[x, y]);
@@ -88,7 +88,7 @@ macro_rules! speck128 {
                 let subkeys = self.generate_subkeys();
 
                 for k in subkeys.into_iter().rev() {
-                    crate::dec!(x, y, k, 8, 3);
+                    super::dec!(x, y, k, 8, 3);
                 }
 
                 u64s_to_bytes_be(bytes, &[x, y]);
@@ -96,93 +96,6 @@ macro_rules! speck128 {
         }
     };
 }
-
-// pub struct Speck128_128 {
-//     pub input_format: ByteFormat,
-//     pub output_format: ByteFormat,
-//     pub mode: BCMode,
-//     pub padding: BCPadding,
-//     pub iv: u128,
-//     key: [u64; 2],
-// }
-
-// impl Default for Speck128_128 {
-//     fn default() -> Self {
-//         Self {
-//             input_format: ByteFormat::Hex,
-//             output_format: ByteFormat::Hex,
-//             mode: Default::default(),
-//             padding: Default::default(),
-//             iv: Default::default(),
-//             key: [0; 2],
-//         }
-//     }
-// }
-
-// impl Speck128_128 {
-//     const ROUNDS: u64 = 32;
-
-//     pub fn ksa(&mut self, bytes: [u8; 16]) {
-//         fill_u64s_be(&mut self.key, &bytes);
-//     }
-
-//     pub fn with_key(mut self, bytes: [u8; 16]) -> Self {
-//         self.ksa(bytes);
-//         self
-//     }
-
-//     pub fn ksa_64(&mut self, key: [u64; 2]) {
-//         self.key = key;
-//     }
-
-//     pub fn with_key_64(mut self, key: [u64; 2]) -> Self {
-//         self.ksa_64(key);
-//         self
-//     }
-
-//     // For encryption this can be done on the fly for each round
-//     pub fn generate_subkeys(&self) -> [u64; Self::ROUNDS as usize] {
-//         let mut subkeys = [0; Self::ROUNDS as usize];
-//         let [mut a, mut b] = self.key;
-//         for i in 0..Self::ROUNDS {
-//             subkeys[i as usize] = b;
-//             crate::enc!(a, b, i, 8, 3);
-//         }
-//         subkeys
-//     }
-// }
-
-// impl BlockCipher<16> for Speck128_128 {
-//     fn encrypt_block(&self, bytes: &mut [u8]) {
-//         // Make mutable variables from the working vector
-//         let mut v = [0u64; 2];
-//         fill_u64s_be(&mut v, bytes);
-//         let [mut x, mut y] = v;
-
-//         let subkeys = self.generate_subkeys();
-
-//         for k in subkeys {
-//             crate::enc!(x, y, k, 8, 3);
-//         }
-
-//         u64s_to_bytes_be(bytes, &[x, y]);
-//     }
-
-//     fn decrypt_block(&self, bytes: &mut [u8]) {
-//         // Make mutable variables from the working vector
-//         let mut v = [0u64; 2];
-//         fill_u64s_be(&mut v, bytes);
-//         let [mut x, mut y] = v;
-
-//         let subkeys = self.generate_subkeys();
-
-//         for k in subkeys.into_iter().rev() {
-//             crate::dec!(x, y, k, 8, 3);
-//         }
-
-//         u64s_to_bytes_be(bytes, &[x, y]);
-//     }
-// }
 
 speck128!(Speck128_128, 2, 32);
 crate::impl_cipher_for_block_cipher!(Speck128_128, 16);
