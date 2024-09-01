@@ -119,30 +119,16 @@ macro_rules! test_block_cipher {
         #[cfg(test)]
         mod tests {
             use super::*;
-            mod encrypt {
-                use super::*;
-                $(
-                    #[test]
-                    fn $name() {
-                        let mut msg = $ptext;
-                        $cipher.encrypt_block(&mut msg);
-                        assert!($ctext == msg, "encrypt failed:\n correct: {:02x?}\n   ctext: {:02x?}", $ctext, msg);
-                    }
-                )+
-            }
-
-            mod decrypt {
-                use super::*;
-                $(
-                    #[test]
-                    fn $name() {
-                        let mut msg = $ctext;
-                        $cipher.decrypt_block(&mut msg);
-                        assert!($ptext == msg, "decrypt failed:\n correct: {:02x?}\n   ptext: {:02x?}", $ptext, msg);
-                    }
-                )+
-            }
+            $(
+                #[test]
+                fn $name() {
+                    let mut msg = $ptext;
+                    $cipher.encrypt_block(&mut msg);
+                    assert!($ctext == msg, "encrypt failed:\n correct: {:02x?}\n   ctext: {:02x?}", $ctext, msg);
+                    $cipher.decrypt_block(&mut msg);
+                    assert!($ptext == msg, "decrypt failed:\n correct: {:02x?}\n   ptext: {:02x?}", $ptext, msg);
+                }
+            )+
         }
-
     }
 }
