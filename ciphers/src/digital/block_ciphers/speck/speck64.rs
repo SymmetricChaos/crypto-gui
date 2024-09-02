@@ -45,6 +45,31 @@ macro_rules! speck64 {
                 self
             }
 
+            pub fn input(mut self, input: ByteFormat) -> Self {
+                self.input_format = input;
+                self
+            }
+
+            pub fn output(mut self, output: ByteFormat) -> Self {
+                self.output_format = output;
+                self
+            }
+
+            pub fn padding(mut self, padding: BCPadding) -> Self {
+                self.padding = padding;
+                self
+            }
+
+            pub fn mode(mut self, mode: BCMode) -> Self {
+                self.mode = mode;
+                self
+            }
+
+            pub fn iv(mut self, iv: u64) -> Self {
+                self.iv = iv;
+                self
+            }
+
             // For encryption this can be done on the fly for each round
             pub fn generate_subkeys(&self) -> [u32; $rounds as usize] {
                 let mut subkeys = [0; $rounds as usize];
