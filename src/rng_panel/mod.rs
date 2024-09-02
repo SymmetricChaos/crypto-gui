@@ -154,6 +154,7 @@ impl RngInterface {
             RngId::MiddleSquareBinary => &mut self.middle_square_binary,
             RngId::Pcg => &mut self.pcg,
             RngId::Rc4 => &mut self.rc4,
+            RngId::Salsa20 => &mut self.salsa20,
             RngId::SelfShrinkingGenerator => &mut self.self_shrinking_generator,
             RngId::ShrinkingGenerator => &mut self.shrinking_generator,
             RngId::Splitmix => &mut self.splitmix,

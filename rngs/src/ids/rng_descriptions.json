@@ -3,13 +3,17 @@
     "Description": "The A5/1 stream cipher was created in the late 1980s for cellular telephones. The algorithm works be using three LFSRs that mutually control their stepping by majority vote of their middle bits. Although originally a secret algorithm A5/1 was reverse engineered and found to be quite weak. The output is produced in bursts of 228 bits though only the first 114 are used for encryption.",
     "Authors": null,
     "Publication": "1987",
-    "Traits": null
+    "Traits": [
+      "Stream Cipher"
+    ]
   },
   "A5/2": {
     "Description": "The A5/2 stream cipher was created as a \"export grade\" version of the A5/1 cipher. It is interally similar to A5/1 but with modifications that drastically weaken it. When the algorithm was reverse engineered and analyzed it proved so weak that A5/2 was banned. The output is produced in bursts of 228 bits though only the first 114 are used for encryption.",
     "Authors": null,
     "Publication": "1989",
-    "Traits": null
+    "Traits": [
+      "Stream Cipher"
+    ]
   },
   "Alternating Step Generator": {
     "Description": "An alternating step generator uses three LFSRs to produce a more secure stream of bits. The first LFSR is stepped and its output selects one of the others to be stepped. Then the last output bit from each of the other LSFRs are XORed together.",
@@ -27,7 +31,9 @@
     "Description": "The ChaCha family of stream ciphers are, by definition, also cryptographically secure PRNGs.",
     "Authors": "Bernstein",
     "Publication": "2005",
-    "Traits": null
+    "Traits": [
+      "Stream Cipher"
+    ]
   },
   "Geffe": {
     "Description": "The Geffe generator is a (now broken) cryptographic PRNG that works by linking three LFSRs together via a multiplexer. All three are stepped together, and thus should be a coprime lengths, then the output bit of LFSR-1 selects which of the other two will give the output.",
@@ -99,11 +105,13 @@
     "Description": "The RC4 (Rivest Cipher 4) is a relatively simple stream cipher (and thus PRNG) from 1987, now considered too weak to use. Internally it contains a list of every possible byte and as it runs the list is permuted by swapping positions of bytes. The key is a sequence from 1 to 256 bytes that used to permute the list initially.",
     "Authors": "Rivest",
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Stream Cipher"
+    ]
   },
   "Salsa20": {
     "Description": "Salsa20 is a family of stream ciphers. The recommended variant is Salsa20/20 which uses 20 rounds, though Salsa20/12 and Salsa20/8 using fewer rounds are also believed to be secure while running much faster. This implementation allows Salsa20 to be run with other round counts as well. Currently Salsa20 has been obsoleted by the ChaCha family of stream ciphers.",
-    "Authors": null,
+    "Authors": "Bernstein",
     "Publication": null,
     "Traits": [
       "Stream Cipher"
