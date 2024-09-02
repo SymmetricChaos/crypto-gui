@@ -4,7 +4,7 @@ use utils::byte_formatting::ByteFormat;
 
 pub struct ChaChaExtendedNonce {
     pub input_format: ByteFormat,
-	pub output_format: ByteFormat,
+    pub output_format: ByteFormat,
 
     pub key: [u32; 8],
     pub nonce: [u32; 3],
@@ -15,8 +15,8 @@ pub struct ChaChaExtendedNonce {
 impl Default for ChaChaExtendedNonce {
     fn default() -> Self {
         Self {
-			input_format: ByteFormat::Hex,
-			output_format: ByteFormat::Hex,
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
 
             // default for key and nonce taken from test vector here: https://datatracker.ietf.org/doc/html/rfc8439#section-2.3.2
             key: [
@@ -196,21 +196,7 @@ impl ChaChaExtendedNonce {
     }
 }
 
-impl Cipher for ChaChaExtendedNonce {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
-        let out = self.encrypt_bytes(&bytes);
-        Ok(self.output_format.byte_slice_to_text(&out))
-    }
-
-    // Decryption is identical
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        self.encrypt(text)
-    }
-}
+crate::impl_cipher_for_stream_cipher!(ChaChaExtendedNonce);
 
 #[cfg(test)]
 mod chacha_tests {

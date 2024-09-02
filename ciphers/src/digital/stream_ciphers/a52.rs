@@ -158,7 +158,7 @@ impl A52Rng {
 
 pub struct A52 {
     pub input_format: ByteFormat,
-	pub output_format: ByteFormat,
+    pub output_format: ByteFormat,
 
     pub rng: A52Rng,
     pub key: [u8; 8],
@@ -168,8 +168,8 @@ pub struct A52 {
 impl Default for A52 {
     fn default() -> Self {
         Self {
-			input_format: ByteFormat::Hex,
-			output_format: ByteFormat::Hex,
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
 
             rng: Default::default(),
             key: [0u8; 8],
@@ -179,27 +179,14 @@ impl Default for A52 {
 }
 
 impl A52 {
-    pub fn encrypt_bytes_cloned(&self, bytes: &mut [u8]) {
+    pub fn encrypt_bytes(&self, bytes: &mut [u8]) {
         let mut rng = self.rng.clone();
         let keystream = rng.keystream(bytes.len(), self.key, self.frame_number);
         xor_into_bytes(bytes, &keystream);
     }
 }
 
-impl Cipher for A52 {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
-        self.encrypt_bytes_cloned(&mut bytes);
-        Ok(self.output_format.byte_slice_to_text(&bytes))
-    }
-
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        self.encrypt(text)
-    }
-}
+crate::impl_cipher_for_stream_cipher!(A52);
 
 #[cfg(test)]
 mod a52_tests {

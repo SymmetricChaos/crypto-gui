@@ -8,8 +8,7 @@ pub struct Rc4 {
     pub j: u8,
     pub drop: u32,
     pub input_format: ByteFormat,
-	pub output_format: ByteFormat,
-
+    pub output_format: ByteFormat,
 }
 
 impl Default for Rc4 {
@@ -23,9 +22,8 @@ impl Default for Rc4 {
             i: 0,
             j: 0,
             drop: 0,
-			input_format: ByteFormat::Hex,
-			output_format: ByteFormat::Hex,
-
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
         }
     }
 }
@@ -54,7 +52,7 @@ impl Rc4 {
         self.arr[t as usize]
     }
 
-    pub fn encrypt_bytes_cloned(&self, bytes: &mut [u8]) {
+    pub fn encrypt_bytes(&self, bytes: &mut [u8]) {
         let mut arr = self.arr;
         let mut i = self.i;
         let mut j = self.j;
@@ -74,7 +72,7 @@ impl Rc4 {
         }
     }
 
-    pub fn encrypt_bytes(&mut self, bytes: &mut [u8]) {
+    pub fn encrypt_bytes_mut(&mut self, bytes: &mut [u8]) {
         for _ in 0..self.drop {
             self.next_byte();
         }
@@ -84,20 +82,7 @@ impl Rc4 {
     }
 }
 
-impl Cipher for Rc4 {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
-        self.encrypt_bytes_cloned(&mut bytes);
-        Ok(self.output_format.byte_slice_to_text(&bytes))
-    }
-
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        self.encrypt(text)
-    }
-}
+crate::impl_cipher_for_stream_cipher!(Rc4);
 
 #[cfg(test)]
 mod rc4_tests {
@@ -111,6 +96,9 @@ mod rc4_tests {
     fn encrypt_test() {
         let mut cipher = Rc4::default();
         cipher.ksa("Secret".as_bytes());
+        cipher.input_format = ByteFormat::Utf8;
+        cipher.output_format = ByteFormat::Hex;
+
         assert_eq!(cipher.encrypt(PLAINTEXT).unwrap(), CIPHERTEXT)
     }
 

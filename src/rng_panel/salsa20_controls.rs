@@ -2,15 +2,15 @@ use super::ClassicRngFrame;
 use crate::ui_elements::{generate_random_u32s_box, UiElements};
 use egui::Slider;
 use rand::{thread_rng, Rng};
-use rngs::chacha::ChaCha;
+use rngs::salsa20::Salsa20;
 
-pub struct ChaChaFrame {
-    rng: ChaCha,
+pub struct Salsa20Frame {
+    rng: Salsa20,
     n_random: usize,
     randoms: String,
 }
 
-impl Default for ChaChaFrame {
+impl Default for Salsa20Frame {
     fn default() -> Self {
         Self {
             rng: Default::default(),
@@ -20,7 +20,7 @@ impl Default for ChaChaFrame {
     }
 }
 
-impl ChaChaFrame {
+impl Salsa20Frame {
     fn start_state(&self) -> String {
         let mut out = String::new();
 
@@ -37,7 +37,7 @@ impl ChaChaFrame {
     }
 }
 
-impl ClassicRngFrame for ChaChaFrame {
+impl ClassicRngFrame for Salsa20Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         // ui.hyperlink_to(
         //     "see the code",
@@ -76,15 +76,15 @@ impl ClassicRngFrame for ChaChaFrame {
         ui.add_space(8.0);
         ui.subheading("Number of Rounds");
         ui.horizontal(|ui| {
-            if ui.small_button("ChaCha8").clicked() {
+            if ui.small_button("Salsa20/8").clicked() {
                 self.rng.rounds = 8;
                 self.rng.saved_keystream.clear();
             }
-            if ui.small_button("ChaCha12").clicked() {
+            if ui.small_button("Salsa20/12").clicked() {
                 self.rng.rounds = 12;
                 self.rng.saved_keystream.clear();
             }
-            if ui.small_button("ChaCha20").clicked() {
+            if ui.small_button("Salsa20/20").clicked() {
                 self.rng.rounds = 20;
                 self.rng.saved_keystream.clear();
             }

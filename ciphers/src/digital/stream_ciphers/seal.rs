@@ -6,7 +6,7 @@ use crate::{Cipher, CipherError};
 // https://www.cs.ucdavis.edu/~rogaway/papers/seal.pdf
 pub struct Seal3 {
     pub input_format: ByteFormat,
-	pub output_format: ByteFormat,
+    pub output_format: ByteFormat,
 
     pub key: [u32; 5], // 160-bit key
     pub n: u32,
@@ -21,8 +21,8 @@ pub struct Seal3 {
 impl Default for Seal3 {
     fn default() -> Self {
         Self {
-			input_format: ByteFormat::Hex,
-			output_format: ByteFormat::Hex,
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
 
             key: [0; 5],
             n: 0,
@@ -166,21 +166,8 @@ impl Seal3 {
     }
 }
 
-impl Cipher for Seal3 {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
-        self.encrypt_bytes(&mut bytes);
-        Ok(self.output_format.byte_slice_to_text(&bytes))
-    }
+crate::impl_cipher_for_stream_cipher!(Seal3);
 
-    // Decryption is identical
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        self.encrypt(text)
-    }
-}
 #[cfg(test)]
 mod seal_tests {
 

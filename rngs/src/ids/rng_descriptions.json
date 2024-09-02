@@ -101,6 +101,14 @@
     "Publication": null,
     "Traits": null
   },
+  "Salsa20": {
+    "Description": "Salsa20 is a family of stream ciphers. The recommended variant is Salsa20/20 which uses 20 rounds, though Salsa20/12 and Salsa20/8 using fewer rounds are also believed to be secure while running much faster. This implementation allows Salsa20 to be run with other round counts as well. Currently Salsa20 has been obsoleted by the ChaCha family of stream ciphers.",
+    "Authors": null,
+    "Publication": null,
+    "Traits": [
+      "Stream Cipher"
+    ]
+  },
   "Self Shrinking Generator": {
     "Description": "A self shrinking generator uses a single LFSR to produce an output that is much harder to predict than its normal usage. To produce a bit the generator is stepped twice. If the bits are (1,0) a 0 bit is output, it the pair is (1,1) a 1 bit is output. Otherwise the process is repeated until an output does occur. Other bit patterns can be chosen to give the output but it is necessary",
     "Authors": null,

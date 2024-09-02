@@ -16,6 +16,23 @@ impl Default for Salsa20Frame {
     }
 }
 
+impl Salsa20Frame {
+    fn start_state(&self) -> String {
+        let mut out = String::new();
+
+        let state = self.cipher.create_state(0);
+
+        for line in state.chunks_exact(4) {
+            for word in line {
+                out.push_str(&format!("{:08x?}  ", word))
+            }
+            out.push('\n')
+        }
+
+        out
+    }
+}
+
 impl CipherFrame for Salsa20Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.hyperlink_to(
@@ -55,6 +72,10 @@ impl CipherFrame for Salsa20Frame {
             }
         });
         ui.add(Slider::new(&mut self.cipher.rounds, 2..=20));
+        ui.add_space(8.0);
+
+        ui.subheading("Initial State");
+        ui.mono(self.start_state());
     }
 
     fn cipher(&self) -> &dyn ciphers::Cipher {

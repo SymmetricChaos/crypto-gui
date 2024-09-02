@@ -86,24 +86,7 @@ impl ChaCha {
     }
 
     pub fn next_block(&mut self) -> Vec<u32> {
-        let state = [
-            Wrapping(0x61707865),
-            Wrapping(0x3320646e),
-            Wrapping(0x79622d32),
-            Wrapping(0x6b206574),
-            Wrapping(self.key[0]),
-            Wrapping(self.key[1]),
-            Wrapping(self.key[2]),
-            Wrapping(self.key[3]),
-            Wrapping(self.key[4]),
-            Wrapping(self.key[5]),
-            Wrapping(self.key[6]),
-            Wrapping(self.key[7]),
-            Wrapping(self.ctr as u32),
-            Wrapping((self.ctr >> 32) as u32),
-            Wrapping(self.nonce[0]),
-            Wrapping(self.nonce[1]),
-        ];
+        let state = self.create_state().map(|w| Wrapping(w));
         self.ctr += 1;
 
         // Temporary state

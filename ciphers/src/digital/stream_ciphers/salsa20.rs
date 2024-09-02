@@ -4,8 +4,7 @@ use utils::byte_formatting::ByteFormat;
 // https://cr.yp.to/snuffle/salsafamily-20071225.pdf
 pub struct Salsa20 {
     pub input_format: ByteFormat,
-	pub output_format: ByteFormat,
-
+    pub output_format: ByteFormat,
     pub key: [u32; 8],
     pub nonce: [u32; 2],
     pub rounds: u8,
@@ -14,8 +13,8 @@ pub struct Salsa20 {
 impl Default for Salsa20 {
     fn default() -> Self {
         Self {
-			input_format: ByteFormat::Hex,
-			output_format: ByteFormat::Hex,
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
 
             key: [
                 0x04030201, 0x08070605, 0x0c0b0a09, 0x100f0e0d, 0x14131211, 0x18171615, 0x1c1b1a19,
@@ -134,21 +133,7 @@ impl Salsa20 {
     }
 }
 
-impl Cipher for Salsa20 {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
-        let out = self.encrypt_bytes(&bytes);
-        Ok(self.output_format.byte_slice_to_text(&out))
-    }
-
-    // Decryption is identical
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        self.encrypt(text)
-    }
-}
+crate::impl_cipher_for_stream_cipher!(Salsa20);
 
 #[cfg(test)]
 mod salsa20_tests {
