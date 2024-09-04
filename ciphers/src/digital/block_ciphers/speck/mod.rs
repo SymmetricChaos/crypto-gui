@@ -26,7 +26,8 @@ macro_rules! dec {
 }
 pub(self) use dec;
 
-pub enum Speck {
+#[derive(Debug, PartialEq, Eq, Clone, Copy, strum::EnumIter)]
+pub enum SpeckVariant {
     Speck32_64,
     Speck64_96,
     Speck64_128,
@@ -35,16 +36,39 @@ pub enum Speck {
     Speck128_256,
 }
 
-use std::fmt::Display;
-impl Display for Speck {
+impl SpeckVariant {
+    pub fn block_size(&self) -> u32 {
+        match self {
+            Self::Speck32_64 => 32,
+            Self::Speck64_96 => 64,
+            Self::Speck64_128 => 64,
+            Self::Speck128_128 => 128,
+            Self::Speck128_192 => 128,
+            Self::Speck128_256 => 128,
+        }
+    }
+
+    pub fn key_size(&self) -> u32 {
+        match self {
+            Self::Speck32_64 => 64,
+            Self::Speck64_96 => 96,
+            Self::Speck64_128 => 128,
+            Self::Speck128_128 => 128,
+            Self::Speck128_192 => 192,
+            Self::Speck128_256 => 256,
+        }
+    }
+}
+
+impl std::fmt::Display for SpeckVariant {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Speck::Speck32_64 => write!(f, "Speck32/64"),
-            Speck::Speck64_96 => write!(f, "Speck64/96"),
-            Speck::Speck64_128 => write!(f, "Speck64/128"),
-            Speck::Speck128_128 => write!(f, "Speck128/128"),
-            Speck::Speck128_192 => write!(f, "Speck128/192"),
-            Speck::Speck128_256 => write!(f, "Speck128/256"),
+            Self::Speck32_64 => write!(f, "Speck32/64"),
+            Self::Speck64_96 => write!(f, "Speck64/96"),
+            Self::Speck64_128 => write!(f, "Speck64/128"),
+            Self::Speck128_128 => write!(f, "Speck128/128"),
+            Self::Speck128_192 => write!(f, "Speck128/192"),
+            Self::Speck128_256 => write!(f, "Speck128/256"),
         }
     }
 }

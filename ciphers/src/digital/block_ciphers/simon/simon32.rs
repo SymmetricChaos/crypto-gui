@@ -74,7 +74,6 @@ impl Simon32_64 {
         self
     }
 
-    // For encryption this can be done on the fly for each round
     pub fn generate_subkeys(&self) -> [u16; ROUNDS as usize] {
         let mut subkeys = [0; ROUNDS as usize];
 

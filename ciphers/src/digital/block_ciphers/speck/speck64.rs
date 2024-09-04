@@ -10,7 +10,7 @@ macro_rules! speck64 {
             pub mode: BCMode,
             pub padding: BCPadding,
             pub iv: u64,
-            key: [u32; $key_words],
+            subkeys: [u32; $rounds],
         }
 
         impl Default for $name {
@@ -21,14 +21,16 @@ macro_rules! speck64 {
                     mode: Default::default(),
                     padding: Default::default(),
                     iv: Default::default(),
-                    key: [0; $key_words],
+                    subkeys: [0; $rounds],
                 }
             }
         }
 
         impl $name {
             pub fn ksa(&mut self, bytes: [u8; $key_words * 4]) {
-                fill_u32s_be(&mut self.key, &bytes);
+                let mut key = [0u32; $key_words];
+                fill_u32s_be(&mut key, &bytes);
+                self.generate_subkeys(key)
             }
 
             pub fn with_key(mut self, bytes: [u8; $key_words * 4]) -> Self {
@@ -37,7 +39,7 @@ macro_rules! speck64 {
             }
 
             pub fn ksa_32(&mut self, key: [u32; $key_words]) {
-                self.key = key;
+                self.generate_subkeys(key)
             }
 
             pub fn with_key_32(mut self, key: [u32; $key_words]) -> Self {
@@ -71,9 +73,9 @@ macro_rules! speck64 {
             }
 
             // For encryption this can be done on the fly for each round
-            pub fn generate_subkeys(&self) -> [u32; $rounds as usize] {
+            pub fn generate_subkeys(&mut self, key: [u32; $key_words]) {
                 let mut subkeys = [0; $rounds as usize];
-                let mut k = self.key;
+                let mut k = key;
                 // let [mut a, mut b, mut c, mut d] = self.key;
                 for i in 0..$rounds {
                     subkeys[i as usize] = k[$key_words - 1];
@@ -84,7 +86,7 @@ macro_rules! speck64 {
                     k[0] = tc;
                     k[$key_words - 1] = td;
                 }
-                subkeys
+                self.subkeys = subkeys;
             }
         }
 
@@ -95,9 +97,7 @@ macro_rules! speck64 {
                 fill_u32s_be(&mut v, bytes);
                 let [mut x, mut y] = v;
 
-                let subkeys = self.generate_subkeys();
-
-                for k in subkeys {
+                for k in self.subkeys {
                     super::enc!(x, y, k, 8, 3);
                 }
 
@@ -110,9 +110,7 @@ macro_rules! speck64 {
                 fill_u32s_be(&mut v, bytes);
                 let [mut x, mut y] = v;
 
-                let subkeys = self.generate_subkeys();
-
-                for k in subkeys.into_iter().rev() {
+                for k in self.subkeys.into_iter().rev() {
                     super::dec!(x, y, k, 8, 3);
                 }
 

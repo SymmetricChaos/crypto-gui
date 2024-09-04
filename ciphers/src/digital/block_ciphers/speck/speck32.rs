@@ -8,7 +8,7 @@ pub struct Speck32_64 {
     pub mode: BCMode,
     pub padding: BCPadding,
     pub iv: u32,
-    key: [u16; 4],
+    subkeys: [u16; Self::ROUNDS as usize],
 }
 
 impl Default for Speck32_64 {
@@ -19,7 +19,7 @@ impl Default for Speck32_64 {
             mode: Default::default(),
             padding: Default::default(),
             iv: Default::default(),
-            key: [0; 4],
+            subkeys: [0; Self::ROUNDS as usize],
         }
     }
 }
@@ -28,7 +28,9 @@ impl Speck32_64 {
     const ROUNDS: u16 = 22;
 
     pub fn ksa(&mut self, bytes: [u8; 8]) {
-        fill_u16s_be(&mut self.key, &bytes);
+        let mut key = [0u16; 4];
+        fill_u16s_be(&mut key, &bytes);
+        self.generate_subkeys(key)
     }
 
     pub fn with_key(mut self, bytes: [u8; 8]) -> Self {
@@ -37,7 +39,7 @@ impl Speck32_64 {
     }
 
     pub fn ksa_16(&mut self, key: [u16; 4]) {
-        self.key = key;
+        self.generate_subkeys(key)
     }
 
     pub fn with_key_16(mut self, key: [u16; 4]) -> Self {
@@ -70,10 +72,10 @@ impl Speck32_64 {
         self
     }
 
-    // For encryption this can be done on the fly for each round
-    pub fn generate_subkeys(&self) -> [u16; Self::ROUNDS as usize] {
+    // For encryption this could be done on the fly for each round
+    pub fn generate_subkeys(&mut self, key: [u16; 4]) {
         let mut subkeys = [0; Self::ROUNDS as usize];
-        let [mut a, mut b, mut c, mut d] = self.key;
+        let [mut a, mut b, mut c, mut d] = key;
         for i in 0..Self::ROUNDS {
             subkeys[i as usize] = d;
             let mut t = c;
@@ -82,7 +84,7 @@ impl Speck32_64 {
             b = a;
             a = t;
         }
-        subkeys
+        self.subkeys = subkeys;
     }
 }
 
@@ -93,9 +95,7 @@ impl BlockCipher<4> for Speck32_64 {
         fill_u16s_be(&mut v, bytes);
         let [mut x, mut y] = v;
 
-        let subkeys = self.generate_subkeys();
-
-        for k in subkeys {
+        for k in self.subkeys {
             super::enc!(x, y, k, 7, 2);
         }
 
@@ -108,9 +108,7 @@ impl BlockCipher<4> for Speck32_64 {
         fill_u16s_be(&mut v, bytes);
         let [mut x, mut y] = v;
 
-        let subkeys = self.generate_subkeys();
-
-        for k in subkeys.into_iter().rev() {
+        for k in self.subkeys.into_iter().rev() {
             super::dec!(x, y, k, 7, 2);
         }
 

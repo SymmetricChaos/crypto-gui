@@ -33,7 +33,8 @@ macro_rules! round {
 }
 pub(self) use round;
 
-pub enum Simon {
+#[derive(Debug, PartialEq, Eq, Clone, Copy, strum::EnumIter)]
+pub enum SimonVariant {
     Simon32_64,
     Simon64_96,
     Simon64_128,
@@ -42,16 +43,39 @@ pub enum Simon {
     Simon128_256,
 }
 
-use std::fmt::Display;
-impl Display for Simon {
+impl SimonVariant {
+    pub fn block_size(&self) -> u32 {
+        match self {
+            Self::Simon32_64 => 32,
+            Self::Simon64_96 => 64,
+            Self::Simon64_128 => 64,
+            Self::Simon128_128 => 128,
+            Self::Simon128_192 => 128,
+            Self::Simon128_256 => 128,
+        }
+    }
+
+    pub fn key_size(&self) -> u32 {
+        match self {
+            Self::Simon32_64 => 64,
+            Self::Simon64_96 => 96,
+            Self::Simon64_128 => 128,
+            Self::Simon128_128 => 128,
+            Self::Simon128_192 => 192,
+            Self::Simon128_256 => 256,
+        }
+    }
+}
+
+impl std::fmt::Display for SimonVariant {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Simon::Simon32_64 => write!(f, "Simon32/64"),
-            Simon::Simon64_96 => write!(f, "Simon64/96"),
-            Simon::Simon64_128 => write!(f, "Simon64/128"),
-            Simon::Simon128_128 => write!(f, "Simon128/128"),
-            Simon::Simon128_192 => write!(f, "Simon128/192"),
-            Simon::Simon128_256 => write!(f, "Simon128/256"),
+            Self::Simon32_64 => write!(f, "Simon32/64"),
+            Self::Simon64_96 => write!(f, "Simon64/96"),
+            Self::Simon64_128 => write!(f, "Simon64/128"),
+            Self::Simon128_128 => write!(f, "Simon128/128"),
+            Self::Simon128_192 => write!(f, "Simon128/192"),
+            Self::Simon128_256 => write!(f, "Simon128/256"),
         }
     }
 }
