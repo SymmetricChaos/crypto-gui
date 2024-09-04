@@ -5,8 +5,8 @@ use crate::digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher
 use super::select_z_bit;
 
 const J: usize = 0;
-const M: usize = 4;
-const ROUNDS: u16 = 32;
+const KEY_WORDS: usize = 4; // number of key words
+const ROUNDS: usize = 32;
 
 pub struct Simon32_64 {
     pub input_format: ByteFormat,
@@ -14,7 +14,7 @@ pub struct Simon32_64 {
     pub mode: BCMode,
     pub padding: BCPadding,
     pub iv: u32,
-    key: [u16; M],
+    pub subkeys: [u16; ROUNDS],
 }
 
 impl Default for Simon32_64 {
@@ -25,26 +25,28 @@ impl Default for Simon32_64 {
             mode: Default::default(),
             padding: Default::default(),
             iv: Default::default(),
-            key: [0; M],
+            subkeys: [0; ROUNDS],
         }
     }
 }
 
 impl Simon32_64 {
-    pub fn ksa(&mut self, bytes: [u8; 8]) {
-        fill_u16s_be(&mut self.key, &bytes);
+    pub fn ksa(&mut self, bytes: [u8; KEY_WORDS * 2]) {
+        let mut key = [0; KEY_WORDS];
+        fill_u16s_be(&mut key, &bytes);
+        self.generate_subkeys(key);
     }
 
-    pub fn with_key(mut self, bytes: [u8; 8]) -> Self {
+    pub fn with_key(mut self, bytes: [u8; KEY_WORDS * 2]) -> Self {
         self.ksa(bytes);
         self
     }
 
-    pub fn ksa_16(&mut self, key: [u16; 4]) {
-        self.key = key;
+    pub fn ksa_16(&mut self, key: [u16; KEY_WORDS]) {
+        self.generate_subkeys(key);
     }
 
-    pub fn with_key_16(mut self, key: [u16; 4]) -> Self {
+    pub fn with_key_16(mut self, key: [u16; KEY_WORDS]) -> Self {
         self.ksa_16(key);
         self
     }
@@ -74,26 +76,28 @@ impl Simon32_64 {
         self
     }
 
-    pub fn generate_subkeys(&self) -> [u16; ROUNDS as usize] {
+    pub fn generate_subkeys(&mut self, key: [u16; KEY_WORDS]) {
         let mut subkeys = [0; ROUNDS as usize];
 
         // First four subkeys are just the key itself
-        for i in 0..M {
-            subkeys[i] = self.key[i]
+        for i in 0..KEY_WORDS {
+            subkeys[KEY_WORDS - i - 1] = key[i]
         }
 
-        for i in M..ROUNDS as usize {
+        // println!("{:04x?}", subkeys);
+
+        for i in KEY_WORDS..ROUNDS as usize {
             let mut t = subkeys[i - 1].rotate_right(3);
-            if M == 4 {
+            if KEY_WORDS == 4 {
                 t ^= subkeys[i - 3];
             }
             t ^= t.rotate_right(1);
-            let bit_idx = (i - M) % 62;
+            let bit_idx = (i - KEY_WORDS) % 62;
 
-            subkeys[i] = !(subkeys[i - M]) ^ t ^ (select_z_bit(J, bit_idx) as u16) ^ 3
+            subkeys[i] = !(subkeys[i - KEY_WORDS]) ^ 3 ^ t ^ (select_z_bit(J, bit_idx) as u16);
         }
 
-        subkeys
+        self.subkeys = subkeys;
     }
 }
 
@@ -104,15 +108,13 @@ impl BlockCipher<4> for Simon32_64 {
         fill_u16s_be(&mut v, bytes);
         let [mut x, mut y] = v;
 
-        let subkeys = self.generate_subkeys();
-
-        for k in subkeys {
-            let t = x;
+        for k in self.subkeys {
+            let t = y;
             // L_i+1 = R_i
-            x = y;
+            y = x;
 
             // R_i+1 = L_i xor f(R_i)
-            y = t ^ super::round!(y, k);
+            x = t ^ super::round!(x, k);
         }
 
         u16s_to_bytes_be(bytes, &[x, y]);
@@ -124,9 +126,7 @@ impl BlockCipher<4> for Simon32_64 {
         fill_u16s_be(&mut v, bytes);
         let [mut x, mut y] = v;
 
-        let subkeys = self.generate_subkeys();
-
-        for k in subkeys.into_iter().rev() {
+        for k in self.subkeys.into_iter().rev() {
             let t = x;
             // L_i+1 = R_i
             x = y;
@@ -141,8 +141,25 @@ impl BlockCipher<4> for Simon32_64 {
 
 crate::impl_cipher_for_block_cipher!(Simon32_64, 4);
 
+#[cfg(test)]
+mod simon_tests {
+
+    use super::*;
+
+    #[test]
+    fn simon_key_expansion() {
+        let cipher =
+            Simon32_64::default().with_key([0x19, 0x18, 0x11, 0x10, 0x09, 0x08, 0x01, 0x00]);
+        assert_eq!(
+            [0x0100, 0x0908, 0x1110, 0x1918, 0x71C3, 0xB649, 0x56D4, 0xE070, 0xF15A, 0xC535],
+            &cipher.subkeys[0..10]
+        );
+    }
+}
+
 crate::test_block_cipher!(
     Simon32_64::default().with_key([0x19, 0x18, 0x11, 0x10, 0x09, 0x08, 0x01, 0x00]), test_32_64,
     [0x65, 0x65, 0x68, 0x77],
     [0xc6, 0x9b, 0xe9, 0xbb];
+
 );

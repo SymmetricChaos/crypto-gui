@@ -1,0 +1,159 @@
+use utils::byte_formatting::{fill_u64s_be, u64s_to_bytes_be, ByteFormat};
+
+use crate::digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher};
+
+use super::select_z_bit;
+
+macro_rules! simon128 {
+    ($name:ident, $key_words:literal, $rounds:literal, $z_string:literal) => {
+        pub struct $name {
+            pub input_format: ByteFormat,
+            pub output_format: ByteFormat,
+            pub mode: BCMode,
+            pub padding: BCPadding,
+            pub iv: u128,
+            pub subkeys: [u64; $rounds],
+        }
+
+        impl Default for $name {
+            fn default() -> Self {
+                Self {
+                    input_format: ByteFormat::Hex,
+                    output_format: ByteFormat::Hex,
+                    mode: Default::default(),
+                    padding: Default::default(),
+                    iv: Default::default(),
+                    subkeys: [0; $rounds],
+                }
+            }
+        }
+
+        impl $name {
+            pub fn ksa(&mut self, bytes: [u8; $key_words * 8]) {
+                let mut key = [0; $key_words];
+                fill_u64s_be(&mut key, &bytes);
+                self.generate_subkeys(key);
+            }
+
+            pub fn with_key(mut self, bytes: [u8; $key_words * 8]) -> Self {
+                self.ksa(bytes);
+                self
+            }
+
+            pub fn ksa_64(&mut self, key: [u64; $key_words]) {
+                self.generate_subkeys(key);
+            }
+
+            pub fn with_key_64(mut self, key: [u64; $key_words]) -> Self {
+                self.ksa_64(key);
+                self
+            }
+
+            pub fn input(mut self, input: ByteFormat) -> Self {
+                self.input_format = input;
+                self
+            }
+
+            pub fn output(mut self, output: ByteFormat) -> Self {
+                self.output_format = output;
+                self
+            }
+
+            pub fn padding(mut self, padding: BCPadding) -> Self {
+                self.padding = padding;
+                self
+            }
+
+            pub fn mode(mut self, mode: BCMode) -> Self {
+                self.mode = mode;
+                self
+            }
+
+            pub fn iv(mut self, iv: u128) -> Self {
+                self.iv = iv;
+                self
+            }
+
+            pub fn generate_subkeys(&mut self, key: [u64; $key_words]) {
+                let mut subkeys = [0; $rounds as usize];
+
+                // First four subkeys are just the key itself
+                for i in 0..$key_words {
+                    subkeys[$key_words - i - 1] = key[i]
+                }
+
+                // println!("{:04x?}", subkeys);
+
+                for i in $key_words..$rounds as usize {
+                    let mut t = subkeys[i - 1].rotate_right(3);
+                    if $key_words == 4 {
+                        t ^= subkeys[i - 3];
+                    }
+                    t ^= t.rotate_right(1);
+                    let bit_idx = (i - $key_words) % 62;
+
+                    subkeys[i] = !(subkeys[i - $key_words])
+                        ^ 3
+                        ^ t
+                        ^ (select_z_bit($z_string, bit_idx) as u64);
+                }
+
+                self.subkeys = subkeys;
+            }
+        }
+
+        impl BlockCipher<16> for $name {
+            fn encrypt_block(&self, bytes: &mut [u8]) {
+                // Make mutable variables from the working vector
+                let mut v = [0u64; 2];
+                fill_u64s_be(&mut v, bytes);
+                let [mut x, mut y] = v;
+
+                for k in self.subkeys {
+                    let t = y;
+                    // L_i+1 = R_i
+                    y = x;
+
+                    // R_i+1 = L_i xor f(R_i)
+                    x = t ^ super::round!(x, k);
+                }
+
+                u64s_to_bytes_be(bytes, &[x, y]);
+            }
+
+            fn decrypt_block(&self, bytes: &mut [u8]) {
+                // Make mutable variables from the working vector
+                let mut v = [0u64; 2];
+                fill_u64s_be(&mut v, bytes);
+                let [mut x, mut y] = v;
+
+                for k in self.subkeys.into_iter().rev() {
+                    let t = x;
+                    // L_i+1 = R_i
+                    x = y;
+
+                    // R_i+1 = L_i xor f(R_i)
+                    y = t ^ super::round!(y, k);
+                }
+
+                u64s_to_bytes_be(bytes, &[x, y]);
+            }
+        }
+    };
+}
+
+simon128!(Simon128_128, 2, 68, 2);
+crate::impl_cipher_for_block_cipher!(Simon128_128, 16);
+simon128!(Simon128_192, 3, 69, 3);
+crate::impl_cipher_for_block_cipher!(Simon128_192, 16);
+simon128!(Simon128_256, 4, 72, 4);
+crate::impl_cipher_for_block_cipher!(Simon128_256, 16);
+
+// crate::test_block_cipher!(
+//     Simon128_96::default().with_key([0x19, 0x18, 0x11, 0x10, 0x09, 0x08, 0x01, 0x00]), test_32_128,
+//     [],
+//     [];
+//     Simon128_128::default().with_key([0x19, 0x18, 0x11, 0x10, 0x09, 0x08, 0x01, 0x00]), test_32_128,
+//     [],
+//     [];
+// );

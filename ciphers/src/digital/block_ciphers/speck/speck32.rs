@@ -8,7 +8,7 @@ pub struct Speck32_64 {
     pub mode: BCMode,
     pub padding: BCPadding,
     pub iv: u32,
-    subkeys: [u16; Self::ROUNDS as usize],
+    pub subkeys: [u16; Self::ROUNDS as usize],
 }
 
 impl Default for Speck32_64 {

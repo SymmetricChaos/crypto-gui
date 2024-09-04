@@ -1,5 +1,7 @@
 // pub mod simon128;
+pub mod simon128;
 pub mod simon32;
+pub mod simon64;
 // pub mod simon64;
 
 // These are the five Z sequences as u64s
