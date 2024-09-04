@@ -124,13 +124,13 @@ impl BlockCipher<4> for Simon32_64 {
         fill_u16s_be(&mut v, bytes);
         let [mut x, mut y] = v;
 
-        for k in self.subkeys {
-            let t = y;
+        for k in self.subkeys.into_iter().rev() {
+            let t = x;
             // L_i+1 = R_i
-            y = x;
+            x = y;
 
             // R_i+1 = L_i xor f(R_i)
-            x = t ^ super::round!(x, k);
+            y = t ^ super::round!(y, k);
         }
 
         u16s_to_bytes_be(bytes, &[x, y]);
@@ -152,7 +152,6 @@ mod simon_tests {
             [0x0100, 0x0908, 0x1110, 0x1918, 0x71C3, 0xB649, 0x56D4, 0xE070, 0xF15A, 0xC535],
             &cipher.subkeys[0..10]
         );
-        println!("{:04x?}", cipher.subkeys);
     }
 }
 

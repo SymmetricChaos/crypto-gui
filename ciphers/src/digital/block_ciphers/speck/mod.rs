@@ -54,7 +54,7 @@ impl SpeckVariant {
             Self::Speck64_96 => 12,
             Self::Speck64_128 => 16,
             Self::Speck128_128 => 16,
-            Self::Speck128_192 => 20,
+            Self::Speck128_192 => 24,
             Self::Speck128_256 => 32,
         }
     }
