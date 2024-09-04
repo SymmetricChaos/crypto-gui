@@ -10,7 +10,7 @@ macro_rules! speck128 {
             pub mode: BCMode,
             pub padding: BCPadding,
             pub iv: u128,
-            subkeys: [u64; $rounds],
+            pub subkeys: [u64; $rounds],
         }
 
         impl Default for $name {

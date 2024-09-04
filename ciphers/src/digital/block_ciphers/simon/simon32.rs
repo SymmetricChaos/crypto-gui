@@ -5,7 +5,7 @@ use crate::digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher
 use super::select_z_bit;
 
 const J: usize = 0;
-const KEY_WORDS: usize = 4; // number of key words
+const KEY_WORDS: usize = 4;
 const ROUNDS: usize = 32;
 
 pub struct Simon32_64 {
@@ -84,8 +84,6 @@ impl Simon32_64 {
             subkeys[KEY_WORDS - i - 1] = key[i]
         }
 
-        // println!("{:04x?}", subkeys);
-
         for i in KEY_WORDS..ROUNDS as usize {
             let mut t = subkeys[i - 1].rotate_right(3);
             if KEY_WORDS == 4 {
@@ -126,13 +124,13 @@ impl BlockCipher<4> for Simon32_64 {
         fill_u16s_be(&mut v, bytes);
         let [mut x, mut y] = v;
 
-        for k in self.subkeys.into_iter().rev() {
-            let t = x;
+        for k in self.subkeys {
+            let t = y;
             // L_i+1 = R_i
-            x = y;
+            y = x;
 
             // R_i+1 = L_i xor f(R_i)
-            y = t ^ super::round!(y, k);
+            x = t ^ super::round!(x, k);
         }
 
         u16s_to_bytes_be(bytes, &[x, y]);
@@ -154,6 +152,7 @@ mod simon_tests {
             [0x0100, 0x0908, 0x1110, 0x1918, 0x71C3, 0xB649, 0x56D4, 0xE070, 0xF15A, 0xC535],
             &cipher.subkeys[0..10]
         );
+        println!("{:04x?}", cipher.subkeys);
     }
 }
 
