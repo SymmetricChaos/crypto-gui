@@ -33,13 +33,15 @@ macro_rules! round {
         ($a.rotate_left(1) & $a.rotate_left(8)) ^ $a.rotate_left(2) ^ $k
     };
 }
+
 pub(self) use round;
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy, strum::EnumIter)]
+#[derive(Default, Debug, PartialEq, Eq, Clone, Copy, strum::EnumIter)]
 pub enum SimonVariant {
     Simon32_64,
     Simon64_96,
     Simon64_128,
+    #[default]
     Simon128_128,
     Simon128_192,
     Simon128_256,

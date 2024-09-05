@@ -26,11 +26,12 @@ macro_rules! dec {
 }
 pub(self) use dec;
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy, strum::EnumIter)]
+#[derive(Default, Debug, PartialEq, Eq, Clone, Copy, strum::EnumIter)]
 pub enum SpeckVariant {
     Speck32_64,
     Speck64_96,
     Speck64_128,
+    #[default]
     Speck128_128,
     Speck128_192,
     Speck128_256,
