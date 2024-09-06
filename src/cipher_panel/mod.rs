@@ -62,6 +62,7 @@ mod seed_controls;
 mod seriated_playfair_controls;
 mod shamir_controls;
 mod sigaba_controls;
+mod simon_controls;
 mod slidefair_controls;
 mod speck_controls;
 mod tea_controls;
@@ -178,6 +179,7 @@ pub struct CipherInterface {
     lea: lea_controls::LeaFrame,
     rc5: rc5_controls::Rc5Frame,
     seed: seed_controls::SeedFrame,
+    simon: simon_controls::SimonFrame,
     speck: speck_controls::SpeckFrame,
     tea: tea_controls::TeaFrame,
     triple_des: triple_des_controls::TripleDesFrame,
@@ -324,6 +326,7 @@ impl CipherInterface {
                 CipherId::Lea,
                 CipherId::Rc5,
                 CipherId::Seed,
+                CipherId::Simon,
                 CipherId::Speck,
                 CipherId::Tea,
                 CipherId::TripleDes,
@@ -421,6 +424,7 @@ impl CipherInterface {
             CipherId::SeriatedPlayfair => &mut self.seriated,
             CipherId::Shamir => &mut self.shamir,
             CipherId::Sigaba => &mut self.sigaba,
+            CipherId::Simon => &mut self.simon,
             CipherId::Slidefair => &mut self.slidefair,
             CipherId::Speck => &mut self.speck,
             CipherId::Substitution => &mut self.gen_sub,
