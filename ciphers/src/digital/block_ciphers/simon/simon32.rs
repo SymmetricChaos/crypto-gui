@@ -92,7 +92,7 @@ impl Simon32_64 {
             t ^= t.rotate_right(1);
             let bit_idx = (i - KEY_WORDS) % 62;
 
-            subkeys[i] = !(subkeys[i - KEY_WORDS]) ^ 3 ^ t ^ (select_z_bit(J, bit_idx) as u16);
+            subkeys[i] = (subkeys[i - KEY_WORDS]) ^ !3 ^ t ^ (select_z_bit(J, bit_idx) as u16);
         }
 
         self.subkeys = subkeys;

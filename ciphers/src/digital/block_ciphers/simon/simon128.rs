@@ -90,8 +90,8 @@ macro_rules! simon128 {
                     t ^= t.rotate_right(1);
                     let bit_idx = (i - $key_words) % 62;
 
-                    subkeys[i] = !(subkeys[i - $key_words])
-                        ^ 3
+                    subkeys[i] = (subkeys[i - $key_words])
+                        ^ !3
                         ^ t
                         ^ (select_z_bit($z_string, bit_idx) as u64);
                 }
