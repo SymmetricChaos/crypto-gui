@@ -48,6 +48,7 @@ pub enum SimonVariant {
 }
 
 impl SimonVariant {
+    /// Block size in bytes
     pub fn block_size(&self) -> u32 {
         match self {
             Self::Simon32_64 => 4,
@@ -59,6 +60,7 @@ impl SimonVariant {
         }
     }
 
+    /// Key size in bytes
     pub fn key_size(&self) -> u32 {
         match self {
             Self::Simon32_64 => 8,
@@ -67,6 +69,18 @@ impl SimonVariant {
             Self::Simon128_128 => 16,
             Self::Simon128_192 => 24,
             Self::Simon128_256 => 32,
+        }
+    }
+
+    /// Number of rounds
+    pub fn rounds(&self) -> u32 {
+        match self {
+            Self::Simon32_64 => 32,
+            Self::Simon64_96 => 42,
+            Self::Simon64_128 => 44,
+            Self::Simon128_128 => 68,
+            Self::Simon128_192 => 69,
+            Self::Simon128_256 => 72,
         }
     }
 }

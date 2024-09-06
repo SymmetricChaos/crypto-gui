@@ -67,13 +67,14 @@ macro_rules! impl_cipher_for_block_cipher {
                     .text_to_bytes(text)
                     .map_err(|_| crate::errors::CipherError::input("byte format error"))?;
 
-                // If no padding is used check for an error
+                // If padding is needed return an error if the input for decryption is the wrong size
                 if self.mode.padded() {
-                    if self.padding == crate::digital::block_ciphers::block_cipher::BCPadding::None
-                    {
-                        utils::padding::none_padding(&mut bytes, $blocksize)
-                            .map_err(|e| crate::errors::CipherError::General(e.to_string()))?
-                    };
+                    if bytes.len() % $blocksize != 0 {
+                        return Err(crate::errors::CipherError::General(format!(
+                            "decryption requires blocks of exactly {} bytes",
+                            $blocksize
+                        )));
+                    }
                 }
 
                 // Select the correct mode. Since block ciphers all implement the BlockCipher

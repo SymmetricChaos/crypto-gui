@@ -12,12 +12,11 @@ use ciphers::{
     },
     Cipher,
 };
-use egui::Ui;
+use egui::{FontId, RichText, Ui};
 use rand::{thread_rng, Rng};
 use strum::IntoEnumIterator;
 use utils::byte_formatting::ByteFormat;
 
-#[derive(Default)]
 pub struct SpeckFrame {
     cipher_32_64: Speck32_64,
     cipher_64_96: Speck64_96,
@@ -27,6 +26,25 @@ pub struct SpeckFrame {
     cipher_128_256: Speck128_256,
     selector: SpeckVariant,
     key: String,
+    input_format: ByteFormat,
+    output_format: ByteFormat,
+}
+
+impl Default for SpeckFrame {
+    fn default() -> Self {
+        Self {
+            cipher_32_64: Default::default(),
+            cipher_64_96: Default::default(),
+            cipher_64_128: Default::default(),
+            cipher_128_128: Default::default(),
+            cipher_128_192: Default::default(),
+            cipher_128_256: Default::default(),
+            selector: Default::default(),
+            key: Default::default(),
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
+        }
+    }
 }
 
 impl SpeckFrame {
@@ -77,32 +95,26 @@ impl CipherFrame for SpeckFrame {
 
         ui.add_space(16.0);
 
-        match self.selector {
-            SpeckVariant::Speck32_64 => ui.byte_io_mode_cipher(
-                &mut self.cipher_32_64.input_format,
-                &mut self.cipher_32_64.output_format,
-            ),
-            SpeckVariant::Speck64_96 => ui.byte_io_mode_cipher(
-                &mut self.cipher_64_96.input_format,
-                &mut self.cipher_64_96.output_format,
-            ),
-            SpeckVariant::Speck64_128 => ui.byte_io_mode_cipher(
-                &mut self.cipher_64_128.input_format,
-                &mut self.cipher_64_128.output_format,
-            ),
-            SpeckVariant::Speck128_128 => ui.byte_io_mode_cipher(
-                &mut self.cipher_128_128.input_format,
-                &mut self.cipher_128_128.output_format,
-            ),
-            SpeckVariant::Speck128_192 => ui.byte_io_mode_cipher(
-                &mut self.cipher_128_192.input_format,
-                &mut self.cipher_128_192.output_format,
-            ),
-            SpeckVariant::Speck128_256 => ui.byte_io_mode_cipher(
-                &mut self.cipher_128_256.input_format,
-                &mut self.cipher_128_256.output_format,
-            ),
-        };
+        if ui.byte_io_mode_cipher(&mut self.input_format, &mut self.output_format) {
+            self.cipher_32_64.input_format = self.input_format;
+            self.cipher_32_64.output_format = self.output_format;
+
+            self.cipher_64_96.input_format = self.input_format;
+            self.cipher_64_96.output_format = self.output_format;
+
+            self.cipher_64_128.input_format = self.input_format;
+            self.cipher_64_128.output_format = self.output_format;
+
+            self.cipher_128_128.input_format = self.input_format;
+            self.cipher_128_128.output_format = self.output_format;
+
+            self.cipher_128_192.input_format = self.input_format;
+            self.cipher_128_192.output_format = self.output_format;
+
+            self.cipher_128_256.input_format = self.input_format;
+            self.cipher_128_256.output_format = self.output_format;
+        }
+
         ui.add_space(4.0);
         match self.selector {
             SpeckVariant::Speck32_64 => block_cipher_mode(ui, &mut self.cipher_32_64.mode),
@@ -132,23 +144,119 @@ impl CipherFrame for SpeckFrame {
 
         ui.subheading("Key");
         ui.label(format!(
-            "{} takes a key of exactly {} bytes ({} hexadecimal digits)",
+            "{} takes a key of exactly {} bytes ({} hexadecimal digits). This key is used to create {} subkeys, one for each round of encryption. The subkeys are not updated until the button below is pressed.",
             self.selector,
             self.selector.key_size(),
-            self.selector.key_size() / 4,
+            self.selector.key_size() * 2,
+            self.selector.rounds(),
         ));
         if ui.text_edit_multiline(&mut self.key).changed() {
             self.key = self.key.chars().filter(|c| c.is_ascii_hexdigit()).collect();
         }
         if ui.button("Generate Subkeys").clicked() {
-            if self.key.len() > (self.selector.key_size() as usize / 4) {
-                self.key.truncate(self.selector.key_size() as usize / 4)
+            if self.key.len() > (self.selector.key_size() as usize * 2) {
+                self.key.truncate(self.selector.key_size() as usize * 2)
             }
-            if self.key.len() % 2 == 1 {
+            while self.key.len() < (self.selector.key_size() as usize * 2) {
                 self.key.push('0')
             }
             self.run_ksa()
         }
+        ui.add_space(8.0);
+
+        ui.collapsing("Subkeys", |ui| match self.selector {
+            SpeckVariant::Speck32_64 => {
+                egui::Grid::new("Speck32_64_array")
+                    .num_columns(4)
+                    .striped(true)
+                    .show(ui, |ui| {
+                        for (n, b) in self.cipher_32_64.subkeys.iter().enumerate() {
+                            if n % 4 == 0 && n != 0 {
+                                ui.end_row()
+                            }
+                            ui.label(
+                                RichText::from(format!("{:04X}", b)).font(FontId::monospace(15.0)),
+                            );
+                        }
+                    });
+            }
+            SpeckVariant::Speck64_96 => {
+                egui::Grid::new("Speck64_96_array")
+                    .num_columns(4)
+                    .striped(true)
+                    .show(ui, |ui| {
+                        for (n, b) in self.cipher_64_96.subkeys.iter().enumerate() {
+                            if n % 4 == 0 && n != 0 {
+                                ui.end_row()
+                            }
+                            ui.label(
+                                RichText::from(format!("{:08X}", b)).font(FontId::monospace(15.0)),
+                            );
+                        }
+                    });
+            }
+            SpeckVariant::Speck64_128 => {
+                egui::Grid::new("Speck64_128_array")
+                    .num_columns(4)
+                    .striped(true)
+                    .show(ui, |ui| {
+                        for (n, b) in self.cipher_64_128.subkeys.iter().enumerate() {
+                            if n % 4 == 0 && n != 0 {
+                                ui.end_row()
+                            }
+                            ui.label(
+                                RichText::from(format!("{:08X}", b)).font(FontId::monospace(15.0)),
+                            );
+                        }
+                    });
+            }
+            SpeckVariant::Speck128_128 => {
+                egui::Grid::new("Speck128_128_array")
+                    .num_columns(4)
+                    .striped(true)
+                    .show(ui, |ui| {
+                        for (n, b) in self.cipher_128_128.subkeys.iter().enumerate() {
+                            if n % 4 == 0 && n != 0 {
+                                ui.end_row()
+                            }
+                            ui.label(
+                                RichText::from(format!("{:016X}", b)).font(FontId::monospace(15.0)),
+                            );
+                        }
+                    });
+            }
+            SpeckVariant::Speck128_192 => {
+                egui::Grid::new("Speck128_192_array")
+                    .num_columns(4)
+                    .striped(true)
+                    .show(ui, |ui| {
+                        for (n, b) in self.cipher_128_192.subkeys.iter().enumerate() {
+                            if n % 4 == 0 && n != 0 {
+                                ui.end_row()
+                            }
+                            ui.label(
+                                RichText::from(format!("{:016X}", b)).font(FontId::monospace(15.0)),
+                            );
+                        }
+                    });
+            }
+            SpeckVariant::Speck128_256 => {
+                egui::Grid::new("Speck128_256_array")
+                    .num_columns(4)
+                    .striped(true)
+                    .show(ui, |ui| {
+                        for (n, b) in self.cipher_128_256.subkeys.iter().enumerate() {
+                            if n % 4 == 0 && n != 0 {
+                                ui.end_row()
+                            }
+                            ui.label(
+                                RichText::from(format!("{:016X}", b)).font(FontId::monospace(15.0)),
+                            );
+                        }
+                    });
+            }
+        });
+
         ui.add_space(16.0);
 
         match self.selector {

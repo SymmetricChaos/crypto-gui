@@ -53,7 +53,7 @@ pub trait UiElements {
         iter: Box<dyn Iterator<Item = (S, T)> + '_>,
     );
     fn binary_to_text_input_mode(&mut self, current_value: &mut ByteFormat);
-    fn byte_io_mode_cipher(&mut self, input: &mut ByteFormat, output: &mut ByteFormat);
+    fn byte_io_mode_cipher(&mut self, input: &mut ByteFormat, output: &mut ByteFormat) -> bool;
     fn byte_io_mode_hasher(&mut self, input: &mut ByteFormat, output: &mut ByteFormat);
     fn u8_hex_edit(&mut self, n: &mut u8) -> Response;
     fn u16_hex_edit(&mut self, n: &mut u16) -> Response;
@@ -163,7 +163,8 @@ impl UiElements for Ui {
         }
     }
 
-    fn byte_io_mode_cipher(&mut self, input: &mut ByteFormat, output: &mut ByteFormat) {
+    fn byte_io_mode_cipher(&mut self, input: &mut ByteFormat, output: &mut ByteFormat) -> bool {
+        let mut changed = false;
         egui::CollapsingHeader::new("Input Format")
             .default_open(true)
             .show(self, |ui| {
@@ -172,7 +173,12 @@ impl UiElements for Ui {
                 );
                 ui.horizontal(|ui| {
                     for variant in ByteFormat::iter() {
-                        ui.selectable_value(input, variant, variant.to_string());
+                        if ui
+                            .selectable_value(input, variant, variant.to_string())
+                            .clicked()
+                        {
+                            changed = true;
+                        }
                     }
                 });
             });
@@ -187,10 +193,16 @@ impl UiElements for Ui {
                 );
                 ui.horizontal(|ui| {
                     for variant in ByteFormat::iter() {
-                        ui.selectable_value(output, variant, variant.to_string());
+                        if ui
+                            .selectable_value(output, variant, variant.to_string())
+                            .clicked()
+                        {
+                            changed = true;
+                        }
                     }
                 });
             });
+        changed
     }
 
     fn byte_io_mode_hasher(&mut self, input: &mut ByteFormat, output: &mut ByteFormat) {

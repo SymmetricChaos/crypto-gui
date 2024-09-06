@@ -38,6 +38,7 @@ pub enum SpeckVariant {
 }
 
 impl SpeckVariant {
+    /// Block size in bytes
     pub fn block_size(&self) -> u32 {
         match self {
             Self::Speck32_64 => 4,
@@ -49,6 +50,7 @@ impl SpeckVariant {
         }
     }
 
+    // Key size in bytes
     pub fn key_size(&self) -> u32 {
         match self {
             Self::Speck32_64 => 8,
@@ -57,6 +59,18 @@ impl SpeckVariant {
             Self::Speck128_128 => 16,
             Self::Speck128_192 => 24,
             Self::Speck128_256 => 32,
+        }
+    }
+
+    /// Number of rounds
+    pub fn rounds(&self) -> u32 {
+        match self {
+            Self::Speck32_64 => 22,
+            Self::Speck64_96 => 26,
+            Self::Speck64_128 => 27,
+            Self::Speck128_128 => 32,
+            Self::Speck128_192 => 33,
+            Self::Speck128_256 => 34,
         }
     }
 }
