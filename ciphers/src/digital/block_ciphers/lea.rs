@@ -168,7 +168,6 @@ macro_rules! lea_struct {
                 utils::byte_formatting::fill_u32s_le(&mut v, bytes);
 
                 for s in self.subkeys {
-                    // println!("{:08x?}", v);
                     let t = v;
                     v[0] = (t[0] ^ s[0]).wrapping_add(t[1] ^ s[1]).rotate_left(9);
                     v[1] = (t[1] ^ s[2]).wrapping_add(t[2] ^ s[3]).rotate_right(5);
