@@ -16,7 +16,6 @@ fn bytes_to_u64_le(bytes: &[u8]) -> Vec<u64> {
         word_bits.copy_from_slice(&bytes[(i * 8)..(i * 8 + 8)]);
         out.push(u64::from_le_bytes(word_bits));
     }
-    // println!("{:016x?} {}", out, out.len());
     out
 }
 
@@ -177,10 +176,8 @@ impl KeccackState {
                     x = 0;
                 }
             }
-            // println!("{}", self);
             // At the end of each chunk the state is fully permuted
             self.keccak_f();
-            // println!("{}", self);
         }
     }
 

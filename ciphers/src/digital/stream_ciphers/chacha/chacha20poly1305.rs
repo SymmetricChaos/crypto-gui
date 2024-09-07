@@ -116,8 +116,6 @@ impl ChaCha20Poly1305 {
             out.push(0x00);
         }
 
-        // println!("{:02x?}", &out[0..16]);
-
         out[0..16].to_vec()
     }
 }

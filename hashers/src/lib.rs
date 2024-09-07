@@ -1,4 +1,5 @@
 pub mod argon2;
+pub mod ascon;
 pub mod auxiliary;
 pub mod blake;
 pub mod checksum;
@@ -22,8 +23,8 @@ pub mod pbkdf2;
 pub mod pearson;
 pub mod poly1305;
 pub mod radio_gatun;
+pub mod ripemd;
 pub mod sha;
 pub mod siphash;
 pub mod tiger;
 pub mod traits;
-pub mod ripemd;
