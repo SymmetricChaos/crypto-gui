@@ -5,6 +5,7 @@ use std::fmt::Display;
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub enum HasherId {
     Argon2,
+    Ascon,
     Blake,
     Blake2,
     Blake3,
@@ -57,6 +58,7 @@ impl Display for HasherId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let name = match self {
             Self::Argon2 => "Argon2",
+            Self::Ascon => "Ascon",
             Self::Blake => "BLAKE",
             Self::Blake2 => "BLAKE2",
             Self::Blake3 => "BLAKE3",

@@ -1,4 +1,14 @@
 ﻿{
+  "Ascon": {
+    "Description": "Ascon-Hash and Ascon-XOF are a hash functions derived from the Ascon sponge function. They uses a sponge construction similar to Keccak, though with a smaller state and simpler round function.",
+    "Authors": "Dobraunig, Eichlseder, Mendel and Schläffer",
+    "Publication": "2014",
+    "Hash Length": null,
+    "Traits": [
+      "Sponge",
+      "XOF"
+    ]
+  },
   "BLAKE": {
     "Description": "BLAKE was a competitor and finalist for the SHA-3 competition. It uses many of the same constants as SHA-2 but a different internal structure, a hash iterative framework, that eliminates SHA-2's vulernability to length extension attacks. The mixing round of BLAKE is a modified version of the ChaCha cipher.",
     "Authors": "Aumasson, Henzen, Meier, and Phan",
@@ -135,7 +145,9 @@
     "Description": "LM is a legacy password hashing function sometimes used by the Windows operating system. The password can be no more than 14 characters and converts letters to upper case before hashing. It is considered extremely vulnerable to attack has been disabled by default on versions of Windows released since around 2008. LM has been replaced by the NT hash function which is MD4.",
     "Authors": "Microsoft",
     "Publication": "1987",
-    "Hash Length": null,
+    "Hash Length": [
+      112
+    ],
     "Traits": null
   },
   "PBKDF1": {
@@ -225,7 +237,8 @@
       512
     ],
     "Traits": [
-      "XOF"
+      "XOF",
+      "Sponge"
     ]
   },
   "SipHash": {

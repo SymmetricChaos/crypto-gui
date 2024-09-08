@@ -1,7 +1,5 @@
-use utils::{
-    byte_formatting::{u64s_to_bytes_be, ByteFormat},
-    padding::bit_padding,
-};
+use crate::traits::ClassicHasher;
+use utils::{byte_formatting::ByteFormat, padding::bit_padding};
 
 fn bytes_to_u64_be(bytes: &[u8]) -> Vec<u64> {
     assert!(
@@ -19,8 +17,6 @@ fn bytes_to_u64_be(bytes: &[u8]) -> Vec<u64> {
     out
 }
 
-use crate::traits::ClassicHasher;
-
 const C: [u64; 12] = [
     0xf0, 0xe1, 0xd2, 0xc3, 0xb4, 0xa5, 0x96, 0x87, 0x78, 0x69, 0x5a, 0x4b,
 ];
@@ -28,43 +24,48 @@ const C: [u64; 12] = [
 const ROTS: [(u32, u32); 5] = [(19, 28), (61, 39), (1, 6), (10, 17), (7, 41)];
 
 #[derive(Debug, Clone)]
-pub struct AsconHashState {
-    state: [u64; 5],
-}
+pub struct AsconHashState([u64; 5]);
 
 // Shortcut indexing
 impl std::ops::Index<usize> for AsconHashState {
     type Output = u64;
 
     fn index(&self, index: usize) -> &Self::Output {
-        &self.state[index]
+        &self.0[index]
     }
 }
 
 impl std::ops::IndexMut<usize> for AsconHashState {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        &mut self.state[index]
-    }
-}
-
-// Default to precomputed state
-impl Default for AsconHashState {
-    fn default() -> Self {
-        Self {
-            state: [
-                0xee9398aadb67f03d,
-                0x8bb21831c60f1002,
-                0xb48a92db98d5da62,
-                0x43189921b8f8e3e8,
-                0x348fa5c9d525e140,
-            ],
-        }
+        &mut self.0[index]
     }
 }
 
 impl AsconHashState {
     const A: usize = 12; // initialization rounds
     const RATE: usize = 8; // number of bytes absorbed at a time
+
+    // Initial state for Ascon-Hash
+    pub fn ascon_hash() -> Self {
+        Self([
+            0xee9398aadb67f03d,
+            0x8bb21831c60f1002,
+            0xb48a92db98d5da62,
+            0x43189921b8f8e3e8,
+            0x348fa5c9d525e140,
+        ])
+    }
+
+    // Initial state for Ascon-XOF
+    pub fn ascon_xof() -> Self {
+        Self([
+            0xb57e273b814cd416,
+            0x2b51042562ae2420,
+            0x66a3a7768ddf2218,
+            0x5aad0a7a8153650c,
+            0x4f3e0e32539493b6,
+        ])
+    }
 
     pub fn rounds_a(&mut self) {
         for i in 0..Self::A {
@@ -88,7 +89,7 @@ impl AsconHashState {
         self[4] ^= self[3];
         self[2] ^= self[1];
 
-        let mut t = self.state.clone();
+        let mut t = self.clone();
         for i in 0..5 {
             t[i] ^= !self[(i + 1) % 5] & self[(i + 2) % 5];
         }
@@ -98,7 +99,7 @@ impl AsconHashState {
         t[3] ^= t[2];
         t[2] = !t[2];
 
-        self.state = t;
+        *self = t;
     }
 
     // This diffuses bits within each word of state
@@ -139,6 +140,7 @@ pub struct AsconHash {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
     pub hash_len: usize,
+    pub xof: bool,
 }
 
 impl Default for AsconHash {
@@ -147,6 +149,7 @@ impl Default for AsconHash {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
             hash_len: 32,
+            xof: false,
         }
     }
 }
@@ -155,9 +158,12 @@ impl ClassicHasher for AsconHash {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut input = bytes.to_vec();
         bit_padding(&mut input, 8).expect("somehow padding failed");
-        // println!("{:02x?}", input);
 
-        let mut state = AsconHashState::default();
+        // The initial state is the only difference between the hash function and the XOF to provide domain separation
+        let mut state = match self.xof {
+            true => AsconHashState::ascon_xof(),
+            false => AsconHashState::ascon_hash(),
+        };
         state.absorb(&input);
         state.squeeze(self.hash_len)
     }
@@ -170,9 +176,10 @@ mod ascon_tests {
     use super::*;
 
     #[test]
-    fn test_initialization() {
-        let mut state = AsconHashState::default();
-        state.state = [0x00400c0000000100, 0, 0, 0, 0];
+    fn test_initialization_hash() {
+        // Replace the state with the initial word and compute the full IV
+        let mut state = AsconHashState::ascon_hash();
+        state.0 = [0x00400c0000000100, 0, 0, 0, 0];
         state.rounds_a();
         assert_eq!(
             [
@@ -182,7 +189,25 @@ mod ascon_tests {
                 0x43189921b8f8e3e8,
                 0x348fa5c9d525e140
             ],
-            state.state
+            state.0
+        )
+    }
+
+    #[test]
+    fn test_initialization_xof() {
+        // Replace the state with the initial word and compute the full IV
+        let mut state = AsconHashState::ascon_xof();
+        state.0 = [0x00400c0000000000, 0, 0, 0, 0];
+        state.rounds_a();
+        assert_eq!(
+            [
+                0xb57e273b814cd416,
+                0x2b51042562ae2420,
+                0x66a3a7768ddf2218,
+                0x5aad0a7a8153650c,
+                0x4f3e0e32539493b6,
+            ],
+            state.0
         )
     }
 }
