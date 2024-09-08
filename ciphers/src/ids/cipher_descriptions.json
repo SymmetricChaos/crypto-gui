@@ -58,6 +58,15 @@
       "Substitution"
     ]
   },
+  "Ascon": {
+    "Description": "Ascon-128 and Ascon-128a are block ciphers derived from the Ascon sponge function. This sponge function is similar to Keccak, though with a smaller state and simpler round. Ascon is also used to create the Ascon-Hash and Ascon-XOF hash functions.",
+    "Authors": "Dobraunig, Eichlseder, Mendel, and Schläffer",
+    "Publication": 2014,
+    "Traits": [
+      "Block Cipher",
+      "Sponge"
+    ]
+  },
   "B64": {
     "Description": "The B64 Cipher is not a historical cipher. It is a simple modernization of the ADFGVX ciphers. Only symbols from the MIME Base64 alphabet are used, ensuring the message can be sent without risk of corruption over most digital systems and will appear as ordinary Base64 encoded data. First a Polybius square is used to change the text into pairs of digits, then these pairs are shuffled by applying two columnar transpositions, and finally they Polybius square is applied in reverse to convert the results back to the Base64 alphabet to reduce the message size.",
     "Authors": null,

@@ -1,6 +1,6 @@
 ﻿{
   "Ascon": {
-    "Description": "Ascon-Hash and Ascon-XOF are a hash functions derived from the Ascon sponge function. They uses a sponge construction similar to Keccak, though with a smaller state and simpler round function.",
+    "Description": "Ascon-Hash and Ascon-XOF are a hash functions derived from the Ascon sponge function. The sponge construction is similar to Keccak, though with a smaller state and simpler round. Ascon is also used for the Ascon-128 and Ascon-128a ciphers.",
     "Authors": "Dobraunig, Eichlseder, Mendel, and Schläffer",
     "Publication": "2014",
     "Hash Length": null,
