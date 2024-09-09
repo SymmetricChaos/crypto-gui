@@ -22,7 +22,7 @@
     "Traits": null
   },
   "BLAKE2": {
-    "Description": "The BLAKE2 family of hash functions are closely related to the original BLAKE family of hash functions which were finalists for the SHA-3 competition. To improve speed the BLAKE2 hashers have fewer compression rounds and pad the input in a simpler way. They are designed to work as drop in replacements to broken hash functions such as SHA-1 and MD5, offering both superior security and supere speed.",
+    "Description": "The BLAKE2 family of hash functions are closely related to the original BLAKE family of hash functions. To improve speed the BLAKE2 hashers have fewer compression rounds and pad the input in a simpler way. They are designed to work as drop in replacements to broken hash functions such as SHA-1 and MD5, offering both superior security and supere speed.",
     "Authors": "Aumasson, Neves, Wilcox-O'Hearn, and Winnerlein",
     "Publication": "2012",
     "Hash Length": [
