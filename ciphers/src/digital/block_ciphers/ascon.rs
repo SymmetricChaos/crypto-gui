@@ -1,21 +1,5 @@
 use crate::{digital::block_ciphers::block_cipher::BCMode, errors::CipherError, Cipher};
-use utils::{byte_formatting::ByteFormat, padding::bit_padding};
-
-fn bytes_to_u64_be(bytes: &[u8]) -> Vec<u64> {
-    assert!(
-        bytes.len() % 8 == 0,
-        "must have a length that is a multiple of eight bytes"
-    );
-    let output_len = bytes.len() / 8;
-    let mut out = Vec::with_capacity(output_len);
-
-    for i in 0..output_len {
-        let mut word_bits: [u8; 8] = Default::default();
-        word_bits.copy_from_slice(&bytes[(i * 8)..(i * 8 + 8)]);
-        out.push(u64::from_be_bytes(word_bits));
-    }
-    out
-}
+use utils::byte_formatting::ByteFormat;
 
 fn padded_bytes_to_u64_be(bytes: &[u8]) -> u64 {
     if bytes.len() > 8 {
@@ -243,13 +227,74 @@ impl Ascon128 {
         state[1] ^= self.subkeys[0];
         state[2] ^= self.subkeys[1];
         state.rounds_a();
-        ctext.extend((state[3] ^ self.subkeys[0]).to_be_bytes());
-        ctext.extend((state[4] ^ self.subkeys[1]).to_be_bytes());
+        state[3] ^= self.subkeys[0];
+        state[4] ^= self.subkeys[1];
+        ctext.extend(state[3].to_be_bytes());
+        ctext.extend(state[4].to_be_bytes());
 
         ctext
     }
 
-    // pub fn decrypt_bytes(&self, bytes: &[u8]) {}
+    pub fn decrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
+        let mut state = AsconState::ascon_128(self.subkeys, self.nonce);
+
+        let (message, tag) = bytes.split_at(bytes.len() - 16);
+
+        // Absorb associated data if it is provided
+        if !self.associated_data.is_empty() {
+            for chunk in self.associated_data.chunks(8) {
+                state[0] ^= padded_bytes_to_u64_be(chunk);
+                state.rounds_b();
+            }
+        }
+        // Flip the last bit, this is described as domain separation
+        state[4] ^= 1;
+
+        // Decrypt the plaintext except the last block
+        let mut ptext = Vec::new();
+        let chunks = message.chunks(8);
+        let n_chunks = chunks.len();
+        if n_chunks == 0 {
+            state[0] ^= padded_bytes_to_u64_be(&[]);
+        } else {
+            for chunk in chunks.clone().take(n_chunks - 1) {
+                state[0] ^= padded_bytes_to_u64_be(chunk);
+                ptext.extend(state[0].to_be_bytes());
+                state.rounds_b();
+            }
+
+            // Decrypt the last block then truncate it to the length of the input
+            let last_chunk = chunks.last().expect("there is always at least one block");
+            let last_chunk_len = last_chunk.len();
+            state[0] ^= padded_bytes_to_u64_be(last_chunk);
+            ptext.extend_from_slice(&state[0].to_be_bytes()[0..last_chunk_len]);
+        }
+
+        // Finalize, check, and remove the authentication tag
+        state[1] ^= self.subkeys[0];
+        state[2] ^= self.subkeys[1];
+        state.rounds_a();
+        state[3] ^= self.subkeys[0];
+        state[4] ^= self.subkeys[1];
+
+        let mut t: [u8; 16] = [0; 16];
+
+        for (i, (a, b)) in state[3]
+            .to_be_bytes()
+            .into_iter()
+            .zip(state[4].to_be_bytes().into_iter())
+            .enumerate()
+        {
+            t[i] = a;
+            t[i + 8] = b;
+        }
+
+        if t == tag {
+            Ok(message.to_vec())
+        } else {
+            Err(CipherError::general("authentication failed"))
+        }
+    }
 }
 
 impl Cipher for Ascon128 {
@@ -265,52 +310,14 @@ impl Cipher for Ascon128 {
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        let mut bytes = self
+        let bytes = self
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
 
-        let mut state = AsconState::ascon_128(self.subkeys, self.nonce);
-
-        // Absorb associated data if it is provided
-        if !self.associated_data.is_empty() {
-            for chunk in self.associated_data.chunks(8) {
-                state[0] ^= padded_bytes_to_u64_be(chunk);
-                state.rounds_b();
-            }
-        }
-        // Flip the last bit, this is described as domain separation
-        state[4] ^= 1;
-
-        // Decrypt the plaintext except the last block
-        let last_block_len = bytes.len() % 8;
-        bit_padding(&mut bytes, 8).map_err(|e| CipherError::General(e.to_string()))?;
-
-        let mut ptext = Vec::new();
-        let ctext = bytes_to_u64_be(&bytes);
-        for chunk in ctext.iter().take(ctext.len() - 1) {
-            state[0] ^= chunk;
-            ptext.extend(state[0].to_be_bytes());
-            state.rounds_b();
-        }
-        // Decrypt the last block then truncate it to the length of the input
-        state[0] ^= ctext.last().expect("there is always at least one chunk");
-        ptext.extend_from_slice(&state[0].to_be_bytes()[0..last_block_len]);
-
-        // Finalize, check, and remove the authentication tag
-        let (message, tag) = ptext.split_at(ptext.len() - 16);
-        state[1] ^= self.subkeys[0];
-        state[2] ^= self.subkeys[1];
-        state.rounds_a();
-
-        let x = (state[3] ^ self.subkeys[0]).to_be_bytes();
-        let y = (state[4] ^ self.subkeys[1]).to_be_bytes();
-        println!("{:02x?} {:02x?}", x, y);
-        println!("{:02x?}", tag);
-        // TODO
-
-        // Output as text
-        Ok(self.output_format.byte_slice_to_text(message))
+        Ok(self
+            .output_format
+            .byte_slice_to_text(&self.decrypt_bytes(&bytes)?))
     }
 }
 
@@ -402,21 +409,21 @@ mod ascon_tests {
         );
     }
 
-    // #[test]
-    // fn ascon128_decrypt_0_0() {
-    //     let cipher = Ascon128::default()
-    //         .with_key([
-    //             0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
-    //             0x0E, 0x0F,
-    //         ])
-    //         .with_nonce([
-    //             0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
-    //             0x0E, 0x0F,
-    //         ]);
-    //     let ctext = "e355159f292911f794cb1432a0103a8a";
-    //     let ptext = cipher.decrypt(ctext).unwrap();
-    //     assert_eq!("", ptext);
-    // }
+    #[test]
+    fn ascon128_decrypt_0_0() {
+        let cipher = Ascon128::default()
+            .with_key([
+                0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
+                0x0E, 0x0F,
+            ])
+            .with_nonce([
+                0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
+                0x0E, 0x0F,
+            ]);
+        let ctext = "e355159f292911f794cb1432a0103a8a";
+        let ptext = cipher.decrypt(ctext).unwrap();
+        assert_eq!("", ptext);
+    }
 
     // #[test]
     // fn ascon128_encrypt_0_1() {
