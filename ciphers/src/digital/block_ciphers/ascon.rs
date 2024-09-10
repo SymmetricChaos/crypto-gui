@@ -1,4 +1,5 @@
 use crate::{digital::block_ciphers::block_cipher::BCMode, errors::CipherError, Cipher};
+use num::traits::ToBytes;
 use utils::{byte_formatting::ByteFormat, padding::bit_padding};
 
 fn padded_bytes_to_u64_be(bytes: &[u8]) -> u64 {
@@ -224,7 +225,6 @@ impl Ascon128 {
         }
 
         // Encrypt the last block then truncate it to the length of the input
-
         let last_chunk = chunks.last().expect("there is always at least one block");
         state[0] ^= u64::from_be_bytes(last_chunk.try_into().unwrap());
         ctext.extend_from_slice(&state[0].to_be_bytes());
@@ -243,50 +243,56 @@ impl Ascon128 {
     }
 
     pub fn decrypt_bytes(&self, bytes: &[u8]) -> Result<Vec<u8>, CipherError> {
-        let mut state = AsconState::ascon_128(self.subkeys, self.nonce);
+        if bytes.len() < 16 {
+            return Err(CipherError::general(
+                "authentication failed, message too short",
+            ));
+        }
 
-        let (message, tag) = bytes.split_at(bytes.len() - 16);
+        let mut state = AsconState::ascon_128(self.subkeys, self.nonce);
 
         // Absorb associated data if it is provided
         if !self.associated_data.is_empty() {
-            for chunk in self.associated_data.chunks(8) {
-                state[0] ^= padded_bytes_to_u64_be(chunk);
+            let mut adlen = self.associated_data.len();
+            let mut ptr = 0;
+            // Absorb full blocks
+            while adlen >= 8 {
+                state[0] ^=
+                    u64::from_be_bytes(self.associated_data[ptr..ptr + 8].try_into().unwrap());
+                ptr += 8;
+                adlen -= 8;
                 state.rounds_b();
             }
+            // Absorb the last padded blcok
+            state[0] ^= padded_bytes_to_u64_be(&self.associated_data[ptr..]);
+            state.rounds_b();
         }
         // Flip the last bit, this is described as domain separation
         state[4] ^= 1;
 
-        // Decrypt the plaintext
+        // Split off the tag then decrypt the ciphertext
+        let (message, tag) = bytes.split_at(bytes.len() - 16);
         let mut ptext = Vec::new();
-        let chunks = message.chunks(8);
-        let n_chunks = chunks.len();
-        if n_chunks == 0 {
-            state[0] ^= 0x8000000000000000; // padded empty block
-            println!("no blocks {:02x?}", ptext);
-        } else {
-            for chunk in chunks.clone().take(n_chunks - 1) {
-                for (cbyte, &s) in state[0].to_be_bytes().into_iter().zip(chunk.into_iter()) {
-                    ptext.push(cbyte ^ s);
-                }
-                state[0] = u64::from_be_bytes(chunk.try_into().unwrap());
-                state.rounds_b();
-                println!("medial block taken {:02x?}", ptext);
-            }
-
-            // Decrypt the last block
-            let last_chunk = chunks.last().expect("there is always at least one block");
-            let last_chunk_len = last_chunk.len();
-            let mut p = state[0].to_be_bytes();
-            for (sbyte, &cbyte) in p.iter_mut().zip(last_chunk.into_iter()) {
-                *sbyte ^= cbyte
-            }
-            ptext.extend_from_slice(&p[0..last_chunk_len]);
-            state[0] ^= padded_bytes_to_u64_be(&p[0..last_chunk_len]);
-            println!("last block taken {:02x?}", ptext);
+        let mut mlen = message.len();
+        let mut ptr = 0;
+        // Absorb full blocks
+        while mlen >= 8 {
+            let c = u64::from_be_bytes(message[ptr..ptr + 8].try_into().unwrap());
+            let p = state[0] ^ c;
+            ptext.extend(p.to_be_bytes());
+            state[0] = c;
+            ptr += 8;
+            mlen -= 8;
+            state.rounds_b();
         }
+        // Absorb the last padded block
+        let c = padded_bytes_to_u64_be(&message[ptr..]);
+        let p = state[0] ^ c;
+        ptext.extend(p.to_be_bytes());
+        ptext.truncate(bytes.len() - 16);
+        state[0] ^= padded_bytes_to_u64_be(&p.to_be_bytes()[0..mlen]);
 
-        // Finalize, check, and remove the authentication tag
+        // Finalize and check tag
         state[1] ^= self.subkeys[0];
         state[2] ^= self.subkeys[1];
         state.rounds_a();
@@ -294,16 +300,8 @@ impl Ascon128 {
         state[4] ^= self.subkeys[1];
 
         let mut t: [u8; 16] = [0; 16];
-
-        for (i, (a, b)) in state[3]
-            .to_be_bytes()
-            .into_iter()
-            .zip(state[4].to_be_bytes().into_iter())
-            .enumerate()
-        {
-            t[i] = a;
-            t[i + 8] = b;
-        }
+        t[0..8].copy_from_slice(&state[3].to_be_bytes());
+        t[8..16].copy_from_slice(&state[4].to_be_bytes());
 
         if t == tag {
             Ok(ptext)
@@ -503,7 +501,7 @@ mod ascon_tests {
             ]);
         let ctext = "bc820dbdf7a4631c5b29884a7d1c07dc8d0d5ed48e64d7dcb25c325f";
         let ptext = cipher.decrypt(ctext).unwrap();
-        assert_eq!("000102030405060708090A0B", ptext);
+        assert_eq!("000102030405060708090a0b", ptext);
     }
 
     #[test]
