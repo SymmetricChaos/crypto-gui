@@ -177,8 +177,25 @@ impl Ascon128 {
         self
     }
 
+    pub fn ad(&mut self, ad: &[u8]) {
+        self.associated_data = ad.to_owned();
+    }
+
     pub fn with_ad(mut self, ad: &[u8]) -> Self {
         self.associated_data = ad.to_owned();
+        self
+    }
+
+    pub fn ad_str(&mut self, ad: &str) {
+        self.associated_data = ByteFormat::Hex
+            .text_to_bytes(ad)
+            .expect("bytes must be given as hex");
+    }
+
+    pub fn with_ad_str(mut self, ad: &str) -> Self {
+        self.associated_data = ByteFormat::Hex
+            .text_to_bytes(ad)
+            .expect("bytes must be given as hex");
         self
     }
 
@@ -193,9 +210,9 @@ impl Ascon128 {
             while adlen >= 8 {
                 state[0] ^=
                     u64::from_be_bytes(self.associated_data[ptr..ptr + 8].try_into().unwrap());
+                state.rounds_6();
                 ptr += 8;
                 adlen -= 8;
-                state.rounds_6();
             }
             // Absorb the last padded blcok
             state[0] ^= padded_bytes_to_u64_be(&self.associated_data[ptr..]);
@@ -334,7 +351,7 @@ mod ascon_tests {
 
     use super::*;
 
-    fn ascon_test(ptext: &str, ctext: &str, ad: &[u8]) {
+    fn ascon_test(ptext: &str, ctext: &str, ad: &str) {
         let cipher = Ascon128::default()
             .with_key([
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
@@ -344,7 +361,7 @@ mod ascon_tests {
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
                 0x0E, 0x0F,
             ])
-            .with_ad(ad);
+            .with_ad_str(ad);
         let otext = cipher.encrypt(ptext).unwrap();
         assert_eq!(ctext, otext);
         let otext = cipher.decrypt(ctext).unwrap();
@@ -353,12 +370,12 @@ mod ascon_tests {
 
     #[test]
     fn ascon128_0_0() {
-        ascon_test("", "e355159f292911f794cb1432a0103a8a", &[])
+        ascon_test("", "e355159f292911f794cb1432a0103a8a", "")
     }
 
     #[test]
     fn ascon128_2_0() {
-        ascon_test("0001", "bc82d5bde868f7494f57d81e06facbf70ce1", &[])
+        ascon_test("0001", "bc82d5bde868f7494f57d81e06facbf70ce1", "")
     }
 
     #[test]
@@ -366,7 +383,7 @@ mod ascon_tests {
         ascon_test(
             "00010203040506",
             "bc820dbdf7a463ce9985966c40bc56a9c5180e23f7086c",
-            &[],
+            "",
         )
     }
 
@@ -375,7 +392,7 @@ mod ascon_tests {
         ascon_test(
             "0001020304050607",
             "bc820dbdf7a4631c01a8807a44254b42ac6bb490da1e000a",
-            &[],
+            "",
         )
     }
 
@@ -384,31 +401,23 @@ mod ascon_tests {
         ascon_test(
             "000102030405060708090a0b",
             "bc820dbdf7a4631c5b29884a7d1c07dc8d0d5ed48e64d7dcb25c325f",
-            &[],
+            "",
         )
     }
 
     #[test]
     fn ascon128_encrypt_0_1() {
-        ascon_test("", "944df887cd4901614c5dedbc42fc0da0", &[0x00])
+        ascon_test("", "944df887cd4901614c5dedbc42fc0da0", "00")
     }
 
     #[test]
     fn ascon128_encrypt_0_8() {
-        ascon_test(
-            "",
-            "e3dcf95f869752f61cd7a2db895f918e",
-            &[0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07],
-        )
+        ascon_test("", "e3dcf95f869752f61cd7a2db895f918e", "0001020304050607")
     }
 
     #[test]
     fn ascon128_encrypt_2_2() {
-        ascon_test(
-            "0001",
-            "6e9f373c0b74264c1ce4d705d995915fcccd",
-            &[0x00, 0x01],
-        )
+        ascon_test("0001", "6e9f373c0b74264c1ce4d705d995915fcccd", "0001")
     }
 
     #[test]
@@ -416,10 +425,7 @@ mod ascon_tests {
         ascon_test(
             "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
             "b96c78651b6246b0c3b1a5d373b0d5168dca4a96734cf0ddf5f92f8d15e30270279bf6a6cc3f2fc9350b915c292bdb8d",
-            &[
-            0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
-            0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B,
-            0x1C, 0x1D, 0x1E, 0x1F],
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
         )
     }
 }
