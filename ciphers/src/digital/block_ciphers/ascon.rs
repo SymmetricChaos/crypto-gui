@@ -1,5 +1,5 @@
 use crate::{digital::block_ciphers::block_cipher::BCMode, errors::CipherError, Cipher};
-use utils::{byte_formatting::ByteFormat, padding::bit_padding};
+use utils::byte_formatting::ByteFormat;
 
 fn padded_bytes_to_u64_be(bytes: &[u8]) -> u64 {
     if bytes.len() > 8 {
@@ -16,6 +16,22 @@ fn padded_bytes_to_u64_be(bytes: &[u8]) -> u64 {
     }
 }
 
+fn padded_bytes_to_u64s_be(bytes: &[u8]) -> [u64; 2] {
+    if bytes.len() > 16 {
+        panic!("input block was too large")
+    } else if bytes.len() == 16 {
+        [
+            u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
+            u64::from_be_bytes(bytes[8..16].try_into().unwrap()),
+        ]
+    } else if bytes.len() >= 8 {
+        let word_0 = u64::from_be_bytes(bytes[0..8].try_into().unwrap());
+        [word_0, padded_bytes_to_u64_be(&bytes[8..])]
+    } else {
+        [padded_bytes_to_u64_be(&bytes[0..]), 0x0000000000000000_u64]
+    }
+}
+
 const C: [u64; 12] = [
     0xf0, 0xe1, 0xd2, 0xc3, 0xb4, 0xa5, 0x96, 0x87, 0x78, 0x69, 0x5a, 0x4b,
 ];
@@ -23,31 +39,27 @@ const C: [u64; 12] = [
 const ROTS: [(u32, u32); 5] = [(19, 28), (61, 39), (1, 6), (10, 17), (7, 41)];
 
 #[derive(Debug, Clone, Default)]
-pub struct AsconState {
-    state: [u64; 5],
-}
+pub struct AsconState([u64; 5]);
 
 // Shortcut indexing
 impl std::ops::Index<usize> for AsconState {
     type Output = u64;
 
     fn index(&self, index: usize) -> &Self::Output {
-        &self.state[index]
+        &self.0[index]
     }
 }
 
 impl std::ops::IndexMut<usize> for AsconState {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        &mut self.state[index]
+        &mut self.0[index]
     }
 }
 
 impl AsconState {
     // Initializae Ascon-128 with a key and nonce
     pub fn ascon_128(key: [u64; 2], nonce: [u64; 2]) -> Self {
-        let mut out = Self {
-            state: [0x80400c0600000000, key[0], key[1], nonce[0], nonce[1]],
-        };
+        let mut out = Self([0x80400c0600000000, key[0], key[1], nonce[0], nonce[1]]);
         out.rounds_12();
         out[3] ^= key[0];
         out[4] ^= key[1];
@@ -56,9 +68,7 @@ impl AsconState {
 
     // Initializae Ascon-128a with a key and nonce
     pub fn ascon_128a(key: [u64; 2], nonce: [u64; 2]) -> Self {
-        let mut out = Self {
-            state: [0x80800c0800000000, key[0], key[1], nonce[0], nonce[1]],
-        };
+        let mut out = Self([0x80800c0800000000, key[0], key[1], nonce[0], nonce[1]]);
         out.rounds_12();
         out[3] ^= key[0];
         out[4] ^= key[1];
@@ -120,6 +130,36 @@ impl AsconState {
     }
 }
 
+pub enum AsconVariant {
+    Ascon128,
+    Ascon128a,
+    // Ascon80pq,
+}
+
+impl AsconVariant {
+    pub fn initialize(&self, key: [u64; 2], nonce: [u64; 2]) -> AsconState {
+        let mut out = match self {
+            AsconVariant::Ascon128 => {
+                AsconState([0x80400c0600000000, key[0], key[1], nonce[0], nonce[1]])
+            }
+            AsconVariant::Ascon128a => {
+                AsconState([0x80800c0800000000, key[0], key[1], nonce[0], nonce[1]])
+            }
+        };
+        out.rounds_12();
+        out[3] ^= key[0];
+        out[4] ^= key[1];
+        out
+    }
+
+    pub fn rate(&self) -> usize {
+        match self {
+            AsconVariant::Ascon128 => 8,
+            AsconVariant::Ascon128a => 16,
+        }
+    }
+}
+
 pub struct Ascon128 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
@@ -128,6 +168,7 @@ pub struct Ascon128 {
     pub associated_data: Vec<u8>,
     pub subkeys: [u64; 2],
     pub nonce: [u64; 2],
+    pub variant: AsconVariant,
 }
 
 impl Default for Ascon128 {
@@ -139,6 +180,7 @@ impl Default for Ascon128 {
             associated_data: Default::default(),
             subkeys: Default::default(),
             nonce: Default::default(),
+            variant: AsconVariant::Ascon128,
         }
     }
 }
@@ -199,45 +241,105 @@ impl Ascon128 {
         self
     }
 
-    pub fn encrypt_bytes(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut state = AsconState::ascon_128(self.subkeys, self.nonce);
+    fn b_round(&self, state: &mut AsconState) {
+        match self.variant {
+            AsconVariant::Ascon128 => state.rounds_6(),
+            AsconVariant::Ascon128a => state.rounds_8(),
+        }
+    }
 
-        // Absorb associated data if it is provided
+    fn xor_into_state(&self, state: &mut AsconState, bytes: &[u8]) {
+        match self.variant {
+            AsconVariant::Ascon128 => {
+                state[0] ^= padded_bytes_to_u64_be(bytes);
+            }
+            AsconVariant::Ascon128a => {
+                let [a, b] = padded_bytes_to_u64s_be(bytes);
+                state[0] ^= a;
+                state[1] ^= b;
+            }
+        }
+    }
+
+    fn absorb_ad(&self, state: &mut AsconState, rate: usize) {
         if !self.associated_data.is_empty() {
             let mut adlen = self.associated_data.len();
             let mut ptr = 0;
             // Absorb full blocks
-            while adlen >= 8 {
-                state[0] ^=
-                    u64::from_be_bytes(self.associated_data[ptr..ptr + 8].try_into().unwrap());
-                state.rounds_6();
-                ptr += 8;
-                adlen -= 8;
+            while adlen >= rate {
+                self.xor_into_state(state, &self.associated_data[ptr..ptr + rate]);
+                self.b_round(state);
+                ptr += rate;
+                adlen -= rate;
             }
             // Absorb the last padded blcok
-            state[0] ^= padded_bytes_to_u64_be(&self.associated_data[ptr..]);
-            state.rounds_6();
+            self.xor_into_state(state, &self.associated_data[ptr..]);
+            self.b_round(state)
         }
+    }
+
+    fn encrypt_block(&self, state: &mut AsconState, ctext: &mut Vec<u8>) {
+        match self.variant {
+            AsconVariant::Ascon128 => ctext.extend(state[0].to_be_bytes()),
+            AsconVariant::Ascon128a => {
+                ctext.extend(state[0].to_be_bytes());
+                ctext.extend(state[1].to_be_bytes());
+            }
+        }
+    }
+
+    fn decrypt_block(
+        &self,
+        state: &mut AsconState,
+        message: &[u8],
+        ptext: &mut Vec<u8>,
+        ptr: usize,
+    ) {
+        match self.variant {
+            AsconVariant::Ascon128 => {
+                let c = u64::from_be_bytes(message[ptr..ptr + 8].try_into().unwrap());
+                let p = state[0] ^ c;
+                ptext.extend(p.to_be_bytes());
+                state[0] = c;
+            }
+            AsconVariant::Ascon128a => {
+                let c0 = u64::from_be_bytes(message[ptr..ptr + 8].try_into().unwrap());
+                let c1 = u64::from_be_bytes(message[ptr + 8..ptr + 16].try_into().unwrap());
+                let p0 = state[0] ^ c0;
+                let p1 = state[1] ^ c1;
+                ptext.extend(p0.to_be_bytes());
+                ptext.extend(p1.to_be_bytes());
+                state[0] = c0;
+                state[1] = c1;
+            }
+        }
+    }
+
+    pub fn encrypt_bytes(&self, bytes: &[u8]) -> Vec<u8> {
+        let mut state = self.variant.initialize(self.subkeys, self.nonce);
+        let rate = self.variant.rate();
+
+        // Absorb associated data if it is provided
+        self.absorb_ad(&mut state, rate);
+
         // Flip the last bit, this is described as domain separation
         state[4] ^= 1;
 
         // Encrypt the plaintext treating the last block specially
-        let mut input = bytes.to_vec();
-        bit_padding(&mut input, 8).unwrap();
+        let mut mlen = bytes.len();
+        let mut ptr = 0;
         let mut ctext = Vec::new();
-        let chunks = input.chunks(8);
-        let n_chunks = chunks.len(); // because of the padding to input this is always >= 1
-
-        for chunk in chunks.clone().take(n_chunks - 1) {
-            state[0] ^= u64::from_be_bytes(chunk.try_into().unwrap());
-            ctext.extend(state[0].to_be_bytes());
-            state.rounds_6();
+        // Absorb full blocks
+        while mlen >= rate {
+            self.xor_into_state(&mut state, &bytes[ptr..ptr + rate]);
+            self.encrypt_block(&mut state, &mut ctext);
+            ptr += rate;
+            mlen -= rate;
+            self.b_round(&mut state)
         }
-
-        // Encrypt the last block then truncate it to the length of the input
-        let last_chunk = chunks.last().expect("there is always at least one block");
-        state[0] ^= u64::from_be_bytes(last_chunk.try_into().unwrap());
-        ctext.extend_from_slice(&state[0].to_be_bytes());
+        // Absorb the last padded block
+        self.xor_into_state(&mut state, &bytes[ptr..]);
+        self.encrypt_block(&mut state, &mut ctext);
         ctext.truncate(bytes.len());
 
         // Finalize and create the authentication tag
@@ -259,24 +361,12 @@ impl Ascon128 {
             ));
         }
 
-        let mut state = AsconState::ascon_128(self.subkeys, self.nonce);
+        let mut state = self.variant.initialize(self.subkeys, self.nonce);
+        let rate = self.variant.rate();
 
         // Absorb associated data if it is provided
-        if !self.associated_data.is_empty() {
-            let mut adlen = self.associated_data.len();
-            let mut ptr = 0;
-            // Absorb full blocks
-            while adlen >= 8 {
-                state[0] ^=
-                    u64::from_be_bytes(self.associated_data[ptr..ptr + 8].try_into().unwrap());
-                ptr += 8;
-                adlen -= 8;
-                state.rounds_6();
-            }
-            // Absorb the last padded blcok
-            state[0] ^= padded_bytes_to_u64_be(&self.associated_data[ptr..]);
-            state.rounds_6();
-        }
+        self.absorb_ad(&mut state, rate);
+
         // Flip the last bit, this is described as domain separation
         state[4] ^= 1;
 
@@ -286,21 +376,33 @@ impl Ascon128 {
         let mut mlen = message.len();
         let mut ptr = 0;
         // Absorb full blocks
-        while mlen >= 8 {
-            let c = u64::from_be_bytes(message[ptr..ptr + 8].try_into().unwrap());
-            let p = state[0] ^ c;
-            ptext.extend(p.to_be_bytes());
-            state[0] = c;
-            ptr += 8;
-            mlen -= 8;
-            state.rounds_6();
+        while mlen >= rate {
+            self.decrypt_block(&mut state, message, &mut ptext, ptr);
+            ptr += rate;
+            mlen -= rate;
+            self.b_round(&mut state)
         }
-        // Absorb the last padded block
-        let c = padded_bytes_to_u64_be(&message[ptr..]);
-        let p = state[0] ^ c;
-        ptext.extend(p.to_be_bytes());
-        ptext.truncate(bytes.len() - 16);
-        state[0] ^= padded_bytes_to_u64_be(&p.to_be_bytes()[0..mlen]);
+        // Decrypt and absorb the last block. This is
+        match self.variant {
+            AsconVariant::Ascon128 => {
+                let c = padded_bytes_to_u64_be(&message[ptr..]);
+                let p = state[0] ^ c;
+                ptext.extend(p.to_be_bytes());
+                ptext.truncate(bytes.len() - 16);
+                self.xor_into_state(&mut state, &p.to_be_bytes()[0..mlen]);
+            }
+            AsconVariant::Ascon128a => {
+                let c0 = u64::from_be_bytes(message[ptr..ptr + 8].try_into().unwrap());
+                let c1 = u64::from_be_bytes(message[ptr + 8..ptr + 16].try_into().unwrap());
+                let p0 = state[0] ^ c0;
+                let p1 = state[1] ^ c1;
+                ptext.extend(p0.to_be_bytes());
+                ptext.extend(p1.to_be_bytes());
+                ptext.truncate(bytes.len() - 16);
+                state[0] ^= c0;
+                state[1] ^= c1;
+            }
+        }
 
         // Finalize and check tag
         state[1] ^= self.subkeys[0];
@@ -316,7 +418,7 @@ impl Ascon128 {
         if t == tag {
             Ok(ptext)
         } else {
-            println!("{:02x?}", ptext);
+            // println!("{:02x?}", ptext);
             Err(CipherError::general("authentication failed"))
         }
     }
