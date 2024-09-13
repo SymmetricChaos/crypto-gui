@@ -137,15 +137,20 @@ pub enum AsconVariant {
     // Ascon80pq,
 }
 
+impl std::fmt::Display for AsconVariant {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Ascon128 => write!(f, "Ascon-128"),
+            Self::Ascon128a => write!(f, "Ascon-128a"),
+        }
+    }
+}
+
 impl AsconVariant {
     pub fn initialize(&self, key: [u64; 2], nonce: [u64; 2]) -> AsconState {
         let mut out = match self {
-            AsconVariant::Ascon128 => {
-                AsconState([0x80400c0600000000, key[0], key[1], nonce[0], nonce[1]])
-            }
-            AsconVariant::Ascon128a => {
-                AsconState([0x80800c0800000000, key[0], key[1], nonce[0], nonce[1]])
-            }
+            Self::Ascon128 => AsconState([0x80400c0600000000, key[0], key[1], nonce[0], nonce[1]]),
+            Self::Ascon128a => AsconState([0x80800c0800000000, key[0], key[1], nonce[0], nonce[1]]),
         };
         out.rounds_12();
         out[3] ^= key[0];
