@@ -1,10 +1,10 @@
 use super::HasherFrame;
 use crate::ui_elements::UiElements;
-use hashers::ascon::AsconHash;
+use hashers::ascon::Ascon;
 
 #[derive(Default)]
 pub struct AsconFrame {
-    hasher: AsconHash,
+    hasher: Ascon,
 }
 
 impl HasherFrame for AsconFrame {
@@ -18,8 +18,8 @@ impl HasherFrame for AsconFrame {
 
         ui.add_space(4.0);
 
-        if ui.checkbox(&mut self.hasher.xof, "XOF Mode").changed() {
-            if !self.hasher.xof {
+        if ui.checkbox(&mut self.hasher.variant, "XOF Mode").changed() {
+            if !self.hasher.variant {
                 self.hasher.hash_len = self.hasher.hash_len.clamp(16, 32)
             }
         }
@@ -27,7 +27,7 @@ impl HasherFrame for AsconFrame {
         ui.add_space(4.0);
 
         ui.subheading("Hash Length");
-        match self.hasher.xof {
+        match self.hasher.variant {
             true => {
                 ui.label("Ascon-XOF can return an output of any length but here is limited to 256 bytes (2048 bits).\nIt is domain separated from Ascon-Hash but otherwise works identically.");
                 ui.add(egui::DragValue::new(&mut self.hasher.hash_len).range(1..=256));

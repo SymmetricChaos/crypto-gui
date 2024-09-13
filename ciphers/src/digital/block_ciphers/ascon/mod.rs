@@ -146,7 +146,7 @@ impl AsconState {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum Ascon128Variant {
     Ascon128,
     Ascon128a,
