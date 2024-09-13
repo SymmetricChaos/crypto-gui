@@ -59,7 +59,7 @@
     ]
   },
   "Ascon": {
-    "Description": "Ascon-128 and Ascon-128a are block ciphers derived from the Ascon sponge function. This sponge function is similar to Keccak, though with a smaller state and simpler round. Ascon is also used to create the Ascon-Hash and Ascon-XOF hash functions.",
+    "Description": "Ascon-128 and Ascon-128a are AEAD (authenticated encryption with additional data) block ciphers derived from the Ascon sponge function. This sponge function is similar to Keccak, though with a smaller 320-bit state and a simpler round. Both ciphers create a 128-bit tag to autheticate the message and the additional unencrypted data. Ascon-128 has a 64-bit block size while Ascon-128a has a 128-bit block size. Ascon is also used to create the Ascon-Hash and Ascon-XOF hash functions.",
     "Authors": "Dobraunig, Eichlseder, Mendel, and Schläffer",
     "Publication": 2014,
     "Traits": [

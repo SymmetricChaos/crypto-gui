@@ -1,5 +1,5 @@
 use ciphers::{
-    digital::block_ciphers::ascon::{Ascon128, AsconVariant},
+    digital::block_ciphers::ascon::{ascon::Ascon128, AsconVariant},
     Cipher,
 };
 use rand::{thread_rng, Rng};
@@ -30,7 +30,7 @@ impl CipherFrame for AsconFrame {
     fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
-            "https://github.com/SymmetricChaos/crypto-gui/tree/master/ciphers/src/digital/block_ciphers/ascon.rs",
+            "https://github.com/SymmetricChaos/crypto-gui/tree/master/ciphers/src/digital/block_ciphers/ascon",
         );
         ui.add_space(8.0);
 
