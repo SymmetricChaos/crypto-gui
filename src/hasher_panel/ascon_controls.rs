@@ -1,10 +1,20 @@
 use super::HasherFrame;
 use crate::ui_elements::UiElements;
-use hashers::ascon::Ascon;
+use hashers::ascon::{Ascon, Variant};
+use strum::IntoEnumIterator;
 
-#[derive(Default)]
 pub struct AsconFrame {
     hasher: Ascon,
+    key_string: String,
+}
+
+impl Default for AsconFrame {
+    fn default() -> Self {
+        Self {
+            hasher: Ascon::default(),
+            key_string: Default::default(),
+        }
+    }
 }
 
 impl HasherFrame for AsconFrame {
@@ -15,28 +25,39 @@ impl HasherFrame for AsconFrame {
             &mut self.hasher.input_format,
             &mut self.hasher.output_format,
         );
-
         ui.add_space(4.0);
 
-        if ui.checkbox(&mut self.hasher.variant, "XOF Mode").changed() {
-            if !self.hasher.variant {
-                self.hasher.hash_len = self.hasher.hash_len.clamp(16, 32)
-            }
+        for variant in Variant::iter() {
+            ui.selectable_value(&mut self.hasher.variant, variant, variant.to_string());
         }
-
         ui.add_space(4.0);
 
         ui.subheading("Hash Length");
         match self.hasher.variant {
-            true => {
-                ui.label("Ascon-XOF can return an output of any length but here is limited to 256 bytes (2048 bits).\nIt is domain separated from Ascon-Hash but otherwise works identically.");
-                ui.add(egui::DragValue::new(&mut self.hasher.hash_len).range(1..=256));
-            }
-            false => {
-                ui.label("Ascon-Hash can return a hash of any length from 16 bytes to 32 bytes (128 bits to 256 bits).");
+            Variant::AsconHash => {
+                ui.label("Ascon-Hash can return a hash of any length from 16 bytes to 32 bytes (128 bits to 256 bits). There are 12 rounds for all steps.");
                 ui.add(egui::DragValue::new(&mut self.hasher.hash_len).range(16..=32));
             }
+            Variant::AsconHasha => {
+                ui.label("Ascon-Hasha can return a hash of any length from 16 bytes to 32 bytes (128 bits to 256 bits). There are 12 initialization round and 8 rounds for all other steps.");
+                ui.add(egui::DragValue::new(&mut self.hasher.hash_len).range(16..=32));
+            }
+            Variant::AsconXof => {
+                ui.label("Ascon-XOF can return an output of any length but here is limited to 512 bytes (4096 bits). There are 12 rounds for all steps.");
+                ui.add(egui::DragValue::new(&mut self.hasher.hash_len).range(1..=512));
+            }
+            Variant::AsconXofa => {
+                ui.label("Ascon-XOFa can return an output of any length but here is limited to 512 bytes (4096 bits). There are 12 initialization round and 8 rounds for all other steps.");
+                ui.add(egui::DragValue::new(&mut self.hasher.hash_len).range(1..=512));
+            } // Variant::AsconMac => {
+              //     ui.label("Ascon-MAC can return an output of any length but here is limited to 256 bytes (2048 bits). There are 12 rounds for all steps.");
+              //     ui.add(egui::DragValue::new(&mut self.hasher.hash_len).range(1..=256));
+              //     ui.add(egui::DragValue::new(&mut self.hasher.num_rounds).range(1..=256));
+              //     ui.add(egui::DragValue::new(&mut self.hasher.output_rate).range(1..=256));
+              //     if ui.control_string(&mut self.key_string).changed() {}
+              // }
         }
+
         ui.add_space(16.0);
     }
 
