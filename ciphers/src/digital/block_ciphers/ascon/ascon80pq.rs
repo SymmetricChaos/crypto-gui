@@ -42,7 +42,13 @@ impl Ascon80pq {
     }
 
     pub fn ksa(&mut self, bytes: [u8; 20]) {
-        utils::byte_formatting::fill_u64s_be(&mut self.subkeys, &bytes);
+        self.subkeys[0] = 0;
+        self.subkeys[0] |= (bytes[0] as u64) << 24;
+        self.subkeys[0] |= (bytes[1] as u64) << 16;
+        self.subkeys[0] |= (bytes[2] as u64) << 8;
+        self.subkeys[0] |= (bytes[3] as u64) << 0;
+
+        utils::byte_formatting::fill_u64s_be(&mut self.subkeys[1..], &bytes[4..]);
     }
 
     pub fn with_key(mut self, key: [u8; 20]) -> Self {
@@ -107,37 +113,12 @@ impl Ascon80pq {
     }
 
     fn finalize(&self, state: &mut AsconState) {
-        // s.x[1] ^= K0 << 32 | K1 >> 32;
-        // s.x[2] ^= K1 << 32 | K2 >> 32;
-        // s.x[3] ^= K2 << 32;
-        // printstate("final 1st key xor", &s);
-        // P12(&s);
-        // s.x[3] ^= K1;
-        // s.x[4] ^= K2;
-
         state[1] ^= (self.subkeys[0] << 32) | (self.subkeys[1] >> 32);
         state[2] ^= (self.subkeys[1] << 32) | (self.subkeys[2] >> 32);
         state[3] ^= self.subkeys[2] << 32;
         state.rounds_12();
         state[3] ^= self.subkeys[1];
         state[4] ^= self.subkeys[2];
-    }
-
-    fn encrypt_block(&self, state: &mut AsconState, ctext: &mut Vec<u8>) {
-        ctext.extend(state[0].to_be_bytes())
-    }
-
-    fn decrypt_block(
-        &self,
-        state: &mut AsconState,
-        message: &[u8],
-        ptext: &mut Vec<u8>,
-        ptr: usize,
-    ) {
-        let c = u64::from_be_bytes(message[ptr..ptr + 8].try_into().unwrap());
-        let p = state[0] ^ c;
-        ptext.extend(p.to_be_bytes());
-        state[0] = c;
     }
 
     pub fn encrypt_bytes(&self, bytes: &[u8]) -> Vec<u8> {
@@ -157,14 +138,14 @@ impl Ascon80pq {
         // Absorb full blocks
         while mlen >= rate {
             self.xor_into_state(&mut state, &bytes[ptr..ptr + rate]);
-            self.encrypt_block(&mut state, &mut ctext);
+            ctext.extend(state[0].to_be_bytes());
             ptr += rate;
             mlen -= rate;
             self.b_round(&mut state)
         }
         // Absorb the last padded block
         self.xor_into_state(&mut state, &bytes[ptr..]);
-        self.encrypt_block(&mut state, &mut ctext);
+        ctext.extend(state[0].to_be_bytes());
         ctext.truncate(bytes.len());
 
         // Finalize and create the authentication tag
@@ -198,13 +179,15 @@ impl Ascon80pq {
         let mut ptr = 0;
         // Absorb full blocks
         while mlen >= rate {
-            self.decrypt_block(&mut state, message, &mut ptext, ptr);
+            let c = u64::from_be_bytes(message[ptr..ptr + rate].try_into().unwrap());
+            let p = state[0] ^ c;
+            ptext.extend(p.to_be_bytes());
+            state[0] = c;
             ptr += rate;
             mlen -= rate;
             self.b_round(&mut state)
         }
         // Decrypt and absorb the last block. This is
-
         let c = padded_bytes_to_u64_be(&message[ptr..]);
         let p = state[0] ^ c;
         ptext.extend(p.to_be_bytes());
@@ -251,147 +234,62 @@ impl Cipher for Ascon80pq {
     }
 }
 
-// #[cfg(test)]
-// mod ascon_tests {
+#[cfg(test)]
+mod ascon_tests {
 
-//     use super::*;
+    use super::*;
 
-//     fn ascon80pq_test(ptext: &str, ctext: &str, ad: &str) {
-//         let cipher = Ascon80pq::default()
-//             .with_key([
-//                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
-//                 0x0E, 0x0F,
-//             ])
-//             .with_nonce([
-//                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
-//                 0x0E, 0x0F,
-//             ])
-//             .with_ad_str(ad);
-//         let otext = cipher.encrypt(ptext).unwrap();
-//         assert_eq!(ctext, otext, "encrypt failed");
-//         let otext = cipher.decrypt(ctext).unwrap();
-//         assert_eq!(ptext, otext, "decrypt failed");
-//     }
+    fn ascon80pq_test(ptext: &str, ad: &str, ctext: &str) {
+        let cipher = Ascon80pq::default()
+            .with_key([
+                0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
+                0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13,
+            ])
+            .with_nonce([
+                0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
+                0x0E, 0x0F,
+            ])
+            .with_ad_str(ad);
+        let otext = cipher.encrypt(ptext).unwrap();
+        assert_eq!(ctext, otext, "encrypt failed");
+        let otext = cipher.decrypt(ctext).unwrap();
+        assert_eq!(ptext, otext, "decrypt failed");
+    }
 
-//     #[test]
-//     fn ascon128_0_0() {
-//         ascon80pq_test("", "e355159f292911f794cb1432a0103a8a", "")
-//     }
+    #[test]
+    fn ascon80pd_0_0() {
+        ascon80pq_test("", "", "abb688efa0b9d56b33277a2c97d2146b")
+    }
 
-//     #[test]
-//     fn ascon128_2_0() {
-//         ascon80pq_test("0001", "bc82d5bde868f7494f57d81e06facbf70ce1", "")
-//     }
+    #[test]
+    fn ascon80pd_2_0() {
+        ascon80pq_test("0001", "", "2846798d04b1e591cbcdf30dbf58d268a69a")
+    }
 
-//     #[test]
-//     fn ascon128_7_0() {
-//         ascon80pq_test(
-//             "00010203040506",
-//             "bc820dbdf7a463ce9985966c40bc56a9c5180e23f7086c",
-//             "",
-//         )
-//     }
+    #[test]
+    fn ascon80pd_8_0() {
+        ascon80pq_test(
+            "0001020304050607",
+            "",
+            "2846418067ce93861a484e22565f161146fb6f47913803f9",
+        )
+    }
 
-//     #[test]
-//     fn ascon128_8_0() {
-//         ascon80pq_test(
-//             "0001020304050607",
-//             "bc820dbdf7a4631c01a8807a44254b42ac6bb490da1e000a",
-//             "",
-//         )
-//     }
+    #[test]
+    fn ascon80pd_0_8() {
+        ascon80pq_test("", "0001020304050607", "d80b5c5c8fa97ee33d916c61772b2e23")
+    }
 
-//     #[test]
-//     fn ascon128_12_0() {
-//         ascon80pq_test(
-//             "000102030405060708090a0b",
-//             "bc820dbdf7a4631c5b29884a7d1c07dc8d0d5ed48e64d7dcb25c325f",
-//             "",
-//         )
-//     }
+    #[test]
+    fn ascon80pd_2_2() {
+        ascon80pq_test("0001", "0001", "623fff2c0fb416236e91c36d37e4f0a8f2bc")
+    }
 
-//     #[test]
-//     fn ascon128_0_1() {
-//         ascon80pq_test("", "944df887cd4901614c5dedbc42fc0da0", "00")
-//     }
-
-//     #[test]
-//     fn ascon128_0_8() {
-//         ascon80pq_test("", "e3dcf95f869752f61cd7a2db895f918e", "0001020304050607")
-//     }
-
-//     #[test]
-//     fn ascon128_2_2() {
-//         ascon80pq_test("0001", "6e9f373c0b74264c1ce4d705d995915fcccd", "0001")
-//     }
-
-//     #[test]
-//     fn ascon128_64_64() {
-//         ascon80pq_test(
-//             "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
-//             "b96c78651b6246b0c3b1a5d373b0d5168dca4a96734cf0ddf5f92f8d15e30270279bf6a6cc3f2fc9350b915c292bdb8d",
-//             "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
-//         )
-//     }
-
-//     #[test]
-//     fn ascon128a_0_0() {
-//         ascon128a_test("", "7a834e6f09210957067b10fd831f0078", "")
-//     }
-
-//     #[test]
-//     fn ascon128a_2_0() {
-//         ascon128a_test("0001", "6e490868e32cb041a71ca5e41b615ce11c4e", "")
-//     }
-
-//     #[test]
-//     fn ascon128a_7_0() {
-//         ascon128a_test(
-//             "00010203040506",
-//             "6e490cfed5b35449f1bd8ab58546aa5ffa2fee5afe13a4",
-//             "",
-//         )
-//     }
-
-//     #[test]
-//     fn ascon128a_8_0() {
-//         ascon128a_test(
-//             "0001020304050607",
-//             "6e490cfed5b35467b89c7e12863ce5f76afc808fff786b9e",
-//             "",
-//         )
-//     }
-
-//     #[test]
-//     fn ascon128a_12_0() {
-//         ascon128a_test(
-//             "000102030405060708090a0b",
-//             "6e490cfed5b3546767350cd83e9b1bfeb72dd5bacf71810b946fbe03",
-//             "",
-//         )
-//     }
-
-//     #[test]
-//     fn ascon128a_0_1() {
-//         ascon128a_test("", "af3031b07b129ec84153373ddcaba528", "00")
-//     }
-
-//     #[test]
-//     fn ascon128a_0_8() {
-//         ascon128a_test("", "d60e199ffd3f9b694713dabc6d89f46f", "0001020304050607")
-//     }
-
-//     #[test]
-//     fn ascon128a_2_2() {
-//         ascon128a_test("0001", "abe4c55426e24a56bb77f8e0bd9212fe8d29", "0001")
-//     }
-
-//     #[test]
-//     fn ascon128a_64_64() {
-//         ascon128a_test(
-//             "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
-//             "a55236ac020dbda74ce6ccd10c68c4d8514450a382bc87c68946d86a921dd88e2adddfbbe77d4112830e01960b9d38d5",
-//             "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
-//         )
-//     }
-// }
+    #[test]
+    fn ascon80pd_64_64() {
+        ascon80pq_test(
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f", "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+            "cc4e07e5fb13426effd17b0f51a6a830bf484c9651d77679971e8eb4a8edb5a00782a94c72b2b02d87dcf4af75db6996"
+        )
+    }
+}

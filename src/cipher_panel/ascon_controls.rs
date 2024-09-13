@@ -1,5 +1,5 @@
 use ciphers::{
-    digital::block_ciphers::ascon::{ascon::Ascon128, AsconVariant},
+    digital::block_ciphers::ascon::{ascon128::Ascon128, Ascon128Variant},
     Cipher,
 };
 use rand::{thread_rng, Rng};
@@ -42,12 +42,12 @@ impl CipherFrame for AsconFrame {
 
         ui.selectable_value(
             &mut self.cipher.variant,
-            AsconVariant::Ascon128,
+            Ascon128Variant::Ascon128,
             "Ascon-128",
         );
         ui.selectable_value(
             &mut self.cipher.variant,
-            AsconVariant::Ascon128a,
+            Ascon128Variant::Ascon128a,
             "Ascon-128a",
         );
 

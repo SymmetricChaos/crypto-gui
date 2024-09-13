@@ -1,4 +1,4 @@
-pub mod ascon;
+pub mod ascon128;
 pub mod ascon80pq;
 
 const C: [u64; 12] = [
@@ -147,12 +147,12 @@ impl AsconState {
 }
 
 #[derive(Debug, PartialEq, Eq)]
-pub enum AsconVariant {
+pub enum Ascon128Variant {
     Ascon128,
     Ascon128a,
 }
 
-impl std::fmt::Display for AsconVariant {
+impl std::fmt::Display for Ascon128Variant {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Ascon128 => write!(f, "Ascon-128"),
@@ -161,29 +161,25 @@ impl std::fmt::Display for AsconVariant {
     }
 }
 
-impl AsconVariant {
+impl Ascon128Variant {
     pub fn initialize(&self, key: [u64; 2], nonce: [u64; 2]) -> AsconState {
-        let mut out = match self {
+        match self {
             Self::Ascon128 => AsconState::ascon_128(key, nonce),
             Self::Ascon128a => AsconState::ascon_128a(key, nonce),
-        };
-        out.rounds_12();
-        out[3] ^= key[0];
-        out[4] ^= key[1];
-        out
+        }
     }
 
     pub fn rate(&self) -> usize {
         match self {
-            AsconVariant::Ascon128 => 8,
-            AsconVariant::Ascon128a => 16,
+            Ascon128Variant::Ascon128 => 8,
+            Ascon128Variant::Ascon128a => 16,
         }
     }
 
     pub fn key_size(&self) -> usize {
         match self {
-            AsconVariant::Ascon128 => 16,
-            AsconVariant::Ascon128a => 16,
+            Ascon128Variant::Ascon128 => 16,
+            Ascon128Variant::Ascon128a => 16,
         }
     }
 }

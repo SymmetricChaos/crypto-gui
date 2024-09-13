@@ -1,7 +1,7 @@
 use crate::{digital::block_ciphers::block_cipher::BCMode, errors::CipherError, Cipher};
 use utils::byte_formatting::ByteFormat;
 
-use super::{padded_bytes_to_u64_be, padded_bytes_to_u64s_be, AsconState, AsconVariant};
+use super::{padded_bytes_to_u64_be, padded_bytes_to_u64s_be, Ascon128Variant, AsconState};
 
 pub struct Ascon128 {
     pub input_format: ByteFormat,
@@ -11,7 +11,7 @@ pub struct Ascon128 {
     pub associated_data: Vec<u8>,
     pub subkeys: [u64; 2],
     pub nonce: [u64; 2],
-    pub variant: AsconVariant,
+    pub variant: Ascon128Variant,
 }
 
 impl Default for Ascon128 {
@@ -23,7 +23,7 @@ impl Default for Ascon128 {
             associated_data: Default::default(),
             subkeys: Default::default(),
             nonce: Default::default(),
-            variant: AsconVariant::Ascon128,
+            variant: Ascon128Variant::Ascon128,
         }
     }
 }
@@ -52,7 +52,7 @@ impl Ascon128 {
             associated_data: Default::default(),
             subkeys: Default::default(),
             nonce: Default::default(),
-            variant: AsconVariant::Ascon128,
+            variant: Ascon128Variant::Ascon128,
         }
     }
 
@@ -64,7 +64,7 @@ impl Ascon128 {
             associated_data: Default::default(),
             subkeys: Default::default(),
             nonce: Default::default(),
-            variant: AsconVariant::Ascon128a,
+            variant: Ascon128Variant::Ascon128a,
         }
     }
 
@@ -110,17 +110,17 @@ impl Ascon128 {
 
     fn b_round(&self, state: &mut AsconState) {
         match self.variant {
-            AsconVariant::Ascon128 => state.rounds_6(),
-            AsconVariant::Ascon128a => state.rounds_8(),
+            Ascon128Variant::Ascon128 => state.rounds_6(),
+            Ascon128Variant::Ascon128a => state.rounds_8(),
         }
     }
 
     fn xor_into_state(&self, state: &mut AsconState, bytes: &[u8]) {
         match self.variant {
-            AsconVariant::Ascon128 => {
+            Ascon128Variant::Ascon128 => {
                 state[0] ^= padded_bytes_to_u64_be(bytes);
             }
-            AsconVariant::Ascon128a => {
+            Ascon128Variant::Ascon128a => {
                 let [a, b] = padded_bytes_to_u64s_be(bytes);
                 state[0] ^= a;
                 state[1] ^= b;
@@ -147,11 +147,11 @@ impl Ascon128 {
 
     fn finalize(&self, state: &mut AsconState) {
         match self.variant {
-            AsconVariant::Ascon128 => {
+            Ascon128Variant::Ascon128 => {
                 state[1] ^= self.subkeys[0];
                 state[2] ^= self.subkeys[1];
             }
-            AsconVariant::Ascon128a => {
+            Ascon128Variant::Ascon128a => {
                 state[2] ^= self.subkeys[0];
                 state[3] ^= self.subkeys[1];
             }
@@ -163,8 +163,8 @@ impl Ascon128 {
 
     fn encrypt_block(&self, state: &mut AsconState, ctext: &mut Vec<u8>) {
         match self.variant {
-            AsconVariant::Ascon128 => ctext.extend(state[0].to_be_bytes()),
-            AsconVariant::Ascon128a => {
+            Ascon128Variant::Ascon128 => ctext.extend(state[0].to_be_bytes()),
+            Ascon128Variant::Ascon128a => {
                 ctext.extend(state[0].to_be_bytes());
                 ctext.extend(state[1].to_be_bytes());
             }
@@ -179,13 +179,13 @@ impl Ascon128 {
         ptr: usize,
     ) {
         match self.variant {
-            AsconVariant::Ascon128 => {
+            Ascon128Variant::Ascon128 => {
                 let c = u64::from_be_bytes(message[ptr..ptr + 8].try_into().unwrap());
                 let p = state[0] ^ c;
                 ptext.extend(p.to_be_bytes());
                 state[0] = c;
             }
-            AsconVariant::Ascon128a => {
+            Ascon128Variant::Ascon128a => {
                 let c0 = u64::from_be_bytes(message[ptr..ptr + 8].try_into().unwrap());
                 let c1 = u64::from_be_bytes(message[ptr + 8..ptr + 16].try_into().unwrap());
                 let p0 = state[0] ^ c0;
@@ -261,19 +261,17 @@ impl Ascon128 {
             mlen -= rate;
             self.b_round(&mut state)
         }
-        // Decrypt and absorb the last block. This is
+        // Decrypt and absorb the last block.
         match self.variant {
-            AsconVariant::Ascon128 => {
+            Ascon128Variant::Ascon128 => {
                 let c = padded_bytes_to_u64_be(&message[ptr..]);
                 let p = state[0] ^ c;
                 ptext.extend(p.to_be_bytes());
                 ptext.truncate(bytes.len() - 16);
                 self.xor_into_state(&mut state, &p.to_be_bytes()[0..mlen]);
             }
-            AsconVariant::Ascon128a => {
+            Ascon128Variant::Ascon128a => {
                 let [c0, c1] = padded_bytes_to_u64s_be(&message[ptr..]);
-                // let c0 = u64::from_be_bytes(message[ptr..ptr + 8].try_into().unwrap());
-                // let c1 = u64::from_be_bytes(message[ptr + 8..ptr + 16].try_into().unwrap());
                 let p0 = state[0] ^ c0;
                 let p1 = state[1] ^ c1;
                 ptext.extend(p0.to_be_bytes());
@@ -332,7 +330,7 @@ mod ascon_tests {
 
     use super::*;
 
-    fn ascon128_test(ptext: &str, ctext: &str, ad: &str) {
+    fn ascon128_test(ptext: &str, ad: &str, ctext: &str) {
         let cipher = Ascon128::ascon128()
             .with_key([
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
@@ -349,7 +347,7 @@ mod ascon_tests {
         assert_eq!(ptext, otext, "decrypt failed");
     }
 
-    fn ascon128a_test(ptext: &str, ctext: &str, ad: &str) {
+    fn ascon128a_test(ptext: &str, ad: &str, ctext: &str) {
         let cipher = Ascon128::ascon128a()
             .with_key([
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
@@ -365,22 +363,23 @@ mod ascon_tests {
         let otext = cipher.decrypt(ctext).unwrap();
         assert_eq!(ptext, otext, "decrypt failed");
     }
+
     #[test]
     fn ascon128_0_0() {
-        ascon128_test("", "e355159f292911f794cb1432a0103a8a", "")
+        ascon128_test("", "", "e355159f292911f794cb1432a0103a8a")
     }
 
     #[test]
     fn ascon128_2_0() {
-        ascon128_test("0001", "bc82d5bde868f7494f57d81e06facbf70ce1", "")
+        ascon128_test("0001", "", "bc82d5bde868f7494f57d81e06facbf70ce1")
     }
 
     #[test]
     fn ascon128_7_0() {
         ascon128_test(
             "00010203040506",
-            "bc820dbdf7a463ce9985966c40bc56a9c5180e23f7086c",
             "",
+            "bc820dbdf7a463ce9985966c40bc56a9c5180e23f7086c",
         )
     }
 
@@ -388,8 +387,8 @@ mod ascon_tests {
     fn ascon128_8_0() {
         ascon128_test(
             "0001020304050607",
-            "bc820dbdf7a4631c01a8807a44254b42ac6bb490da1e000a",
             "",
+            "bc820dbdf7a4631c01a8807a44254b42ac6bb490da1e000a",
         )
     }
 
@@ -397,51 +396,49 @@ mod ascon_tests {
     fn ascon128_12_0() {
         ascon128_test(
             "000102030405060708090a0b",
-            "bc820dbdf7a4631c5b29884a7d1c07dc8d0d5ed48e64d7dcb25c325f",
             "",
+            "bc820dbdf7a4631c5b29884a7d1c07dc8d0d5ed48e64d7dcb25c325f",
         )
     }
 
     #[test]
     fn ascon128_0_1() {
-        ascon128_test("", "944df887cd4901614c5dedbc42fc0da0", "00")
+        ascon128_test("", "00", "944df887cd4901614c5dedbc42fc0da0")
     }
 
     #[test]
     fn ascon128_0_8() {
-        ascon128_test("", "e3dcf95f869752f61cd7a2db895f918e", "0001020304050607")
+        ascon128_test("", "0001020304050607", "e3dcf95f869752f61cd7a2db895f918e")
     }
 
     #[test]
     fn ascon128_2_2() {
-        ascon128_test("0001", "6e9f373c0b74264c1ce4d705d995915fcccd", "0001")
+        ascon128_test("0001", "0001", "6e9f373c0b74264c1ce4d705d995915fcccd")
     }
 
     #[test]
     fn ascon128_64_64() {
         ascon128_test(
-            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
-            "b96c78651b6246b0c3b1a5d373b0d5168dca4a96734cf0ddf5f92f8d15e30270279bf6a6cc3f2fc9350b915c292bdb8d",
-            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f", "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f", "b96c78651b6246b0c3b1a5d373b0d5168dca4a96734cf0ddf5f92f8d15e30270279bf6a6cc3f2fc9350b915c292bdb8d"
         )
     }
 
     #[test]
     fn ascon128a_0_0() {
-        ascon128a_test("", "7a834e6f09210957067b10fd831f0078", "")
+        ascon128a_test("", "", "7a834e6f09210957067b10fd831f0078")
     }
 
     #[test]
     fn ascon128a_2_0() {
-        ascon128a_test("0001", "6e490868e32cb041a71ca5e41b615ce11c4e", "")
+        ascon128a_test("0001", "", "6e490868e32cb041a71ca5e41b615ce11c4e")
     }
 
     #[test]
     fn ascon128a_7_0() {
         ascon128a_test(
             "00010203040506",
-            "6e490cfed5b35449f1bd8ab58546aa5ffa2fee5afe13a4",
             "",
+            "6e490cfed5b35449f1bd8ab58546aa5ffa2fee5afe13a4",
         )
     }
 
@@ -449,8 +446,8 @@ mod ascon_tests {
     fn ascon128a_8_0() {
         ascon128a_test(
             "0001020304050607",
-            "6e490cfed5b35467b89c7e12863ce5f76afc808fff786b9e",
             "",
+            "6e490cfed5b35467b89c7e12863ce5f76afc808fff786b9e",
         )
     }
 
@@ -458,32 +455,30 @@ mod ascon_tests {
     fn ascon128a_12_0() {
         ascon128a_test(
             "000102030405060708090a0b",
-            "6e490cfed5b3546767350cd83e9b1bfeb72dd5bacf71810b946fbe03",
             "",
+            "6e490cfed5b3546767350cd83e9b1bfeb72dd5bacf71810b946fbe03",
         )
     }
 
     #[test]
     fn ascon128a_0_1() {
-        ascon128a_test("", "af3031b07b129ec84153373ddcaba528", "00")
+        ascon128a_test("", "00", "af3031b07b129ec84153373ddcaba528")
     }
 
     #[test]
     fn ascon128a_0_8() {
-        ascon128a_test("", "d60e199ffd3f9b694713dabc6d89f46f", "0001020304050607")
+        ascon128a_test("", "0001020304050607", "d60e199ffd3f9b694713dabc6d89f46f")
     }
 
     #[test]
     fn ascon128a_2_2() {
-        ascon128a_test("0001", "abe4c55426e24a56bb77f8e0bd9212fe8d29", "0001")
+        ascon128a_test("0001", "0001", "abe4c55426e24a56bb77f8e0bd9212fe8d29")
     }
 
     #[test]
     fn ascon128a_64_64() {
         ascon128a_test(
-            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
-            "a55236ac020dbda74ce6ccd10c68c4d8514450a382bc87c68946d86a921dd88e2adddfbbe77d4112830e01960b9d38d5",
-            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f", "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f", "a55236ac020dbda74ce6ccd10c68c4d8514450a382bc87c68946d86a921dd88e2adddfbbe77d4112830e01960b9d38d5",
         )
     }
 }
