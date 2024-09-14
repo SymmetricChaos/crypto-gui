@@ -10,13 +10,13 @@ use crate::ui_elements::UiElements;
 
 use super::CipherFrame;
 
-pub struct AsconFrame {
+pub struct Ascon128Frame {
     cipher: Ascon128,
     ad: String,
     ad_mode: ByteFormat,
 }
 
-impl Default for AsconFrame {
+impl Default for Ascon128Frame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
@@ -26,17 +26,11 @@ impl Default for AsconFrame {
     }
 }
 
-impl CipherFrame for AsconFrame {
+impl CipherFrame for Ascon128Frame {
     fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
             "https://github.com/SymmetricChaos/crypto-gui/tree/master/ciphers/src/digital/block_ciphers/ascon",
-        );
-        ui.add_space(8.0);
-
-        ui.byte_io_mode_cipher(
-            &mut self.cipher.input_format,
-            &mut self.cipher.output_format,
         );
         ui.add_space(8.0);
 
@@ -50,6 +44,13 @@ impl CipherFrame for AsconFrame {
             Ascon128Variant::Ascon128a,
             "Ascon-128a",
         );
+        ui.add_space(8.0);
+
+        ui.byte_io_mode_cipher(
+            &mut self.cipher.input_format,
+            &mut self.cipher.output_format,
+        );
+        ui.add_space(8.0);
 
         ui.randomize_reset(self);
         ui.add_space(16.0);

@@ -12,7 +12,8 @@ mod aes_controls;
 mod affine_controls;
 mod alberti_controls;
 mod amsco_controls;
-mod ascon_controls;
+mod ascon128_controls;
+mod ascon80pq_controls;
 mod b64_controls;
 mod batco_controls;
 mod bazeries_controls;
@@ -172,7 +173,8 @@ pub struct CipherInterface {
 
     // Block
     aes: aes_controls::AesFrame,
-    ascon: ascon_controls::AsconFrame,
+    ascon128: ascon128_controls::Ascon128Frame,
+    ascon80pq: ascon80pq_controls::Ascon80pqFrame,
     blowfish: blowfish_controls::BlowfishFrame,
     des: des_controls::DesFrame,
     desx: desx_controls::DesXFrame,
@@ -320,7 +322,8 @@ impl CipherInterface {
         combox_box(
             &[
                 CipherId::Aes,
-                CipherId::Ascon,
+                CipherId::Ascon128,
+                CipherId::Ascon80pq,
                 CipherId::Blowfish,
                 CipherId::Des,
                 CipherId::DesX,
@@ -379,7 +382,8 @@ impl CipherInterface {
             CipherId::Affine => &mut self.affine,
             CipherId::Alberti => &mut self.alberti,
             CipherId::Amsco => &mut self.amsco,
-            CipherId::Ascon => &mut self.ascon,
+            CipherId::Ascon128 => &mut self.ascon128,
+            CipherId::Ascon80pq => &mut self.ascon80pq,
             CipherId::B64 => &mut self.b64,
             CipherId::Batco => &mut self.batco,
             CipherId::Bazeries => &mut self.bazeries,
