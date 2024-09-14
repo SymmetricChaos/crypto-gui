@@ -9,12 +9,18 @@ use egui::{
 
 // This is basically just the DragValue code with everything ripped out until I got just what I wanted
 macro_rules! hex_edit_box {
-    ($name: ident, $gsname: ident, $gname: ident, $sname: ident, $pname: ident, $cname: ident,$t: ty, $formatter: expr) => {
-        fn $pname(value_text: &str) -> Option<$t> {
-            <$t>::from_str_radix(value_text, 16).ok()
+    ($name: ident, $getter_setter: ident, $getter: ident, $setter: ident, $parser: ident, $clamp: ident, $t: ty, $formatter: expr) => {
+        fn $parser(text: &str) -> Option<$t> {
+            let text: String = text
+                .chars()
+                // Ignore whitespace (trailing, leading, and thousands separators):
+                .filter(|c| !c.is_whitespace())
+                .collect();
+
+            text.parse().ok()
         }
 
-        fn $cname(x: $t, range: RangeInclusive<$t>) -> $t {
+        fn $clamp(x: $t, range: RangeInclusive<$t>) -> $t {
             let (mut min, mut max) = (*range.start(), *range.end());
 
             if min.cmp(&max) == Ordering::Greater {
@@ -30,19 +36,20 @@ macro_rules! hex_edit_box {
             }
         }
 
-        type $gsname<'a> = Box<dyn 'a + FnMut(Option<$t>) -> $t>;
+        type $getter_setter<'a> = Box<dyn 'a + FnMut(Option<$t>) -> $t>;
 
-        fn $gname(get_set_value: &mut $gsname<'_>) -> $t {
+        fn $getter(get_set_value: &mut $getter_setter<'_>) -> $t {
             (get_set_value)(None)
         }
 
-        fn $sname(get_set_value: &mut $gsname<'_>, value: $t) {
+        fn $setter(get_set_value: &mut $getter_setter<'_>, value: $t) {
             (get_set_value)(Some(value));
         }
 
         #[must_use = "You should put this widget in an ui with `ui.add(widget);`"]
         pub struct $name<'a> {
-            get_set_value: $gsname<'a>,
+            get_set_value: $getter_setter<'a>,
+            speed: $t,
             prefix: String,
             suffix: String,
             range: RangeInclusive<$t>,
@@ -65,11 +72,12 @@ macro_rules! hex_edit_box {
             pub fn from_get_set(get_set_value: impl 'a + FnMut(Option<$t>) -> $t) -> Self {
                 Self {
                     get_set_value: Box::new(get_set_value),
+                    speed: 1,
                     prefix: Default::default(),
                     suffix: Default::default(),
                     range: <$t>::MIN..=<$t>::MAX,
                     clamp_to_range: true,
-                    update_while_editing: true,
+                    update_while_editing: false,
                 }
             }
 
@@ -99,9 +107,6 @@ macro_rules! hex_edit_box {
                 self
             }
 
-            /// Update the value on each key press when text-editing the value.
-            ///
-            /// Default: `true`.
             /// If `false`, the value will only be updated when user presses enter or deselects the value.
             #[inline]
             pub fn update_while_editing(mut self, update: bool) -> Self {
@@ -114,6 +119,7 @@ macro_rules! hex_edit_box {
             fn ui(self, ui: &mut Ui) -> Response {
                 let Self {
                     mut get_set_value,
+                    speed,
                     range,
                     clamp_to_range,
                     prefix,
@@ -138,8 +144,55 @@ macro_rules! hex_edit_box {
                     ui.data_mut(|data| data.remove::<String>(id));
                 }
 
-                let old_value = $gname(&mut get_set_value);
+                let old_value = $getter(&mut get_set_value);
                 let mut value = old_value;
+
+                let change = ui.input_mut(|input| {
+                    let mut change = 0 as $t;
+
+                    if is_kb_editing {
+                        // This deliberately doesn't listen for left and right arrow keys,
+                        // because when editing, these are used to move the caret.
+                        // This behavior is consistent with other editable spinner/stepper
+                        // implementations, such as Chromium's (for HTML5 number input).
+                        // It is also normal for such controls to go directly into edit mode
+                        // when they receive keyboard focus, and some screen readers
+                        // assume this behavior, so having a separate mode for incrementing
+                        // and decrementing, that supports all arrow keys, would be
+                        // problematic.
+                        change = change.wrapping_add(
+                            input.count_and_consume_key(Modifiers::NONE, Key::ArrowUp) as $t,
+                        );
+                        change = change.wrapping_sub(
+                            input.count_and_consume_key(Modifiers::NONE, Key::ArrowDown) as $t,
+                        );
+                    }
+
+                    #[cfg(feature = "accesskit")]
+                    {
+                        use accesskit::Action;
+                        change = change.wrapping_add(
+                            input.num_accesskit_action_requests(id, Action::Increment) as $t,
+                        );
+                        change = change.wrapping_add(
+                            input.num_accesskit_action_requests(id, Action::Decrement) as $t,
+                        );
+                    }
+
+                    change
+                });
+
+                #[cfg(feature = "accesskit")]
+                {
+                    use accesskit::{Action, ActionData};
+                    ui.input(|input| {
+                        for request in input.accesskit_action_requests(id, Action::SetValue) {
+                            if let Some(ActionData::NumericValue(new_value)) = request.data {
+                                value = new_value;
+                            }
+                        }
+                    });
+                }
 
                 ui.input_mut(|input| {
                     if is_kb_editing {
@@ -154,11 +207,15 @@ macro_rules! hex_edit_box {
                 });
 
                 if clamp_to_range {
-                    value = $cname(value, range.clone());
+                    value = $clamp(value, range.clone());
+                }
+
+                if change != 0 {
+                    value = value.wrapping_add(change.wrapping_mul(speed));
                 }
 
                 if old_value != value {
-                    $sname(&mut get_set_value, value);
+                    $setter(&mut get_set_value, value);
                     ui.data_mut(|data| data.remove::<String>(id));
                 }
 
@@ -173,12 +230,12 @@ macro_rules! hex_edit_box {
                     if let Some(value_text) = value_text {
                         // We were editing the value as text last frame, but lost focus.
                         // Make sure we applied the last text value:
-                        let parsed_value = $pname(&value_text);
+                        let parsed_value = $parser(&value_text);
                         if let Some(mut parsed_value) = parsed_value {
                             if clamp_to_range {
-                                parsed_value = $cname(parsed_value, range.clone());
+                                parsed_value = $clamp(parsed_value, range.clone());
                             }
-                            $sname(&mut get_set_value, parsed_value);
+                            $setter(&mut get_set_value, parsed_value);
                         }
                     }
                 }
@@ -209,12 +266,12 @@ macro_rules! hex_edit_box {
                         response.lost_focus() && !ui.input(|i| i.key_pressed(Key::Escape))
                     };
                     if update {
-                        let parsed_value = $pname(&value_text);
+                        let parsed_value = $parser(&value_text);
                         if let Some(mut parsed_value) = parsed_value {
                             if clamp_to_range {
-                                parsed_value = $cname(parsed_value, range.clone());
+                                parsed_value = $clamp(parsed_value, range.clone());
                             }
-                            $sname(&mut get_set_value, parsed_value);
+                            $setter(&mut get_set_value, parsed_value);
                         }
                     }
                     ui.data_mut(|data| data.insert_temp(id, value_text));
@@ -251,7 +308,56 @@ macro_rules! hex_edit_box {
                     response
                 };
 
-                response.changed = $gname(&mut get_set_value) != old_value;
+                response.changed = $getter(&mut get_set_value) != old_value;
+
+                // response.widget_info(|| WidgetInfo::drag_value(ui.is_enabled(), value));
+
+                #[cfg(feature = "accesskit")]
+                ui.ctx().accesskit_node_builder(response.id, |builder| {
+                    use accesskit::Action;
+                    // If either end of the range is unbounded, it's better
+                    // to leave the corresponding AccessKit field set to None,
+                    // to allow for platform-specific default behavior.
+                    if range.start().is_finite() {
+                        builder.set_min_numeric_value(*range.start());
+                    }
+                    if range.end().is_finite() {
+                        builder.set_max_numeric_value(*range.end());
+                    }
+                    builder.set_numeric_value_step(speed);
+                    builder.add_action(Action::SetValue);
+                    if value < *range.end() {
+                        builder.add_action(Action::Increment);
+                    }
+                    if value > *range.start() {
+                        builder.add_action(Action::Decrement);
+                    }
+                    // The name field is set to the current value by the button,
+                    // but we don't want it set that way on this widget type.
+                    builder.clear_name();
+                    // Always expose the value as a string. This makes the widget
+                    // more stable to accessibility users as it switches
+                    // between edit and button modes. This is particularly important
+                    // for VoiceOver on macOS; if the value is not exposed as a string
+                    // when the widget is in button mode, then VoiceOver speaks
+                    // the value (or a percentage if the widget has a clamp range)
+                    // when the widget loses focus, overriding the announcement
+                    // of the newly focused widget. This is certainly a VoiceOver bug,
+                    // but it's good to make our software work as well as possible
+                    // with existing assistive technology. However, if the widget
+                    // has a prefix and/or suffix, expose those when in button mode,
+                    // just as they're exposed on the screen. This triggers the
+                    // VoiceOver bug just described, but exposing all information
+                    // is more important, and at least we can avoid the bug
+                    // for instances of the widget with no prefix or suffix.
+                    //
+                    // The value is exposed as a string by the text edit widget
+                    // when in edit mode.
+                    if !is_kb_editing {
+                        let value_text = format!("{prefix}{value_text}{suffix}");
+                        builder.set_value(value_text);
+                    }
+                });
 
                 response
             }
