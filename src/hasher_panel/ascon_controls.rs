@@ -1,18 +1,17 @@
-use super::HasherFrame;
-use crate::ui_elements::UiElements;
-use hashers::ascon::{Ascon, Variant};
+use hashers::ascon::ascon_hash::{AsconHash, Variant};
 use strum::IntoEnumIterator;
 
+use super::HasherFrame;
+use crate::ui_elements::UiElements;
+
 pub struct AsconFrame {
-    hasher: Ascon,
-    key_string: String,
+    hasher: AsconHash,
 }
 
 impl Default for AsconFrame {
     fn default() -> Self {
         Self {
-            hasher: Ascon::default(),
-            key_string: Default::default(),
+            hasher: AsconHash::default(),
         }
     }
 }
@@ -49,13 +48,7 @@ impl HasherFrame for AsconFrame {
             Variant::AsconXofa => {
                 ui.label("Ascon-XOFa can return an output of any length but here is limited to 512 bytes (4096 bits). There are 12 initialization round and 8 rounds for all other steps.");
                 ui.add(egui::DragValue::new(&mut self.hasher.hash_len).range(1..=512));
-            } // Variant::AsconMac => {
-              //     ui.label("Ascon-MAC can return an output of any length but here is limited to 256 bytes (2048 bits). There are 12 rounds for all steps.");
-              //     ui.add(egui::DragValue::new(&mut self.hasher.hash_len).range(1..=256));
-              //     ui.add(egui::DragValue::new(&mut self.hasher.num_rounds).range(1..=256));
-              //     ui.add(egui::DragValue::new(&mut self.hasher.output_rate).range(1..=256));
-              //     if ui.control_string(&mut self.key_string).changed() {}
-              // }
+            }
         }
 
         ui.add_space(16.0);

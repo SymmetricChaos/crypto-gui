@@ -16,6 +16,22 @@ fn padded_bytes_to_u64_be(bytes: &[u8]) -> u64 {
     }
 }
 
+fn padded_bytes_to_u64s_be(bytes: &[u8]) -> [u64; 2] {
+    if bytes.len() > 16 {
+        panic!("input block was too large")
+    } else if bytes.len() == 16 {
+        [
+            u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
+            u64::from_be_bytes(bytes[8..16].try_into().unwrap()),
+        ]
+    } else if bytes.len() >= 8 {
+        let word_0 = u64::from_be_bytes(bytes[0..8].try_into().unwrap());
+        [word_0, padded_bytes_to_u64_be(&bytes[8..])]
+    } else {
+        [padded_bytes_to_u64_be(&bytes[0..]), 0x0000000000000000_u64]
+    }
+}
+
 const C: [u64; 12] = [
     0xf0, 0xe1, 0xd2, 0xc3, 0xb4, 0xa5, 0x96, 0x87, 0x78, 0x69, 0x5a, 0x4b,
 ];
@@ -110,7 +126,7 @@ impl AsconState {
         }
     }
 
-    pub fn absorb_8(&mut self, message: &[u8]) {
+    pub fn absorb_8_128(&mut self, message: &[u8]) {
         let rate = Self::RATE;
 
         // Encrypt the plaintext treating the last block specially
@@ -128,7 +144,7 @@ impl AsconState {
         self.rounds_12();
     }
 
-    pub fn absorb_12(&mut self, message: &[u8]) {
+    pub fn absorb_12_128(&mut self, message: &[u8]) {
         let rate = Self::RATE;
 
         // Encrypt the plaintext treating the last block specially
@@ -143,6 +159,28 @@ impl AsconState {
         }
         // Absorb the last padded block
         self[0] ^= padded_bytes_to_u64_be(&message[ptr..]);
+        self.rounds_12();
+    }
+
+    pub fn absorb_12_256(&mut self, message: &[u8]) {
+        let rate = Self::RATE * 2;
+
+        // Encrypt the plaintext treating the last block specially
+        let mut mlen = message.len();
+        let mut ptr = 0;
+        // Absorb full blocks
+        while mlen >= rate {
+            let [a, b] = padded_bytes_to_u64s_be(&message[ptr..ptr + rate]);
+            self[0] ^= a;
+            self[1] ^= b;
+            ptr += rate;
+            mlen -= rate;
+            self.rounds_12()
+        }
+        // Absorb the last padded block
+        let [a, b] = padded_bytes_to_u64s_be(&message[ptr..]);
+        self[0] ^= a;
+        self[1] ^= b;
         self.rounds_12();
     }
 
