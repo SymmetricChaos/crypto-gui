@@ -1,4 +1,4 @@
-use crate::traits::ClassicHasher;
+use crate::{ascon::unpadded_bytes_128, traits::ClassicHasher};
 use strum::EnumIter;
 use utils::byte_formatting::ByteFormat;
 
@@ -26,18 +26,18 @@ impl std::fmt::Display for Variant {
 }
 
 impl Variant {
-    pub fn initialize(&self, key: [u64; 2], hash_len: u64) -> AsconState {
+    pub fn initialize(&self, key: [u64; 2], hash_bytes: u64, message: &[u8]) -> AsconState {
         match self {
             Variant::AsconMac => {
                 assert!(
-                    hash_len <= 16,
+                    hash_bytes <= 16,
                     "Ascon-MAC must have a hash length of 128 bits or less"
                 );
                 AsconState::initialize_full([0x80808c0000000080, key[0], key[1], 0, 0])
             }
             Variant::AsconMaca => {
                 assert!(
-                    hash_len <= 16,
+                    hash_bytes <= 16,
                     "Ascon-MAC must have a hash length of 128 bits or less"
                 );
                 AsconState::initialize_full([0x80808c0400000080, key[0], key[1], 0, 0])
@@ -50,16 +50,25 @@ impl Variant {
             }
             Variant::AsconPrfShort => {
                 assert!(
-                    hash_len <= 16,
+                    hash_bytes <= 16,
                     "Ascon-PRFshort must have a hash length of 128 bits or less"
                 );
-                AsconState::initialize_full([
-                    0x80808c0000000000 ^ hash_len * 8,
-                    key[0],
-                    key[1],
+                assert!(
+                    message.len() <= 16,
+                    "Ascon-PRFshort must have a message length of 128 bits or less"
+                );
+                let iv = u64::from_be_bytes([
+                    0x80,
+                    (message.len() * 8) as u8,
+                    0x4C,
+                    (hash_bytes * 8) as u8,
                     0,
                     0,
-                ])
+                    0,
+                    0,
+                ]);
+                let [a, b] = unpadded_bytes_128(&message);
+                AsconState::initialize_full([iv, key[0], key[1], a, b])
             }
         }
     }
@@ -147,7 +156,7 @@ impl ClassicHasher for AsconMac {
         if self.variant == Variant::AsconPrfShort && bytes.len() > 16 {
             panic!("Ascon-PRFshort should only be used to with 128-bit inputs or shorter")
         }
-        let mut state = self.variant.initialize(self.key, self.hash_len);
+        let mut state = self.variant.initialize(self.key, self.hash_len, bytes);
         match self.variant {
             Variant::AsconMac | Variant::AsconPrf => {
                 state.absorb_256_prf(&bytes, 12);
@@ -157,7 +166,9 @@ impl ClassicHasher for AsconMac {
                 state.absorb_320_prf(&bytes, 8);
                 state.squeeze_128_prf(self.hash_len as usize, 12)
             }
-            Variant::AsconPrfShort => todo!(),
+            Variant::AsconPrfShort => {
+                state.squeeze_128_prfshort(self.hash_len as usize, 12, self.key)
+            }
         }
     }
 
@@ -182,6 +193,7 @@ crate::basic_hash_tests!(
     AsconMac::ascon_prf().with_key(TEST_KEY), ascon_prf_1025, INPUT_1025,
     "3003aba5ab23b18d5ae5230b0c8d6af7";
 
+
     AsconMac::ascon_prfa().with_key(TEST_KEY), ascon_prfa_1, INPUT_1,
     "99fdc07ca98af6e6d282e84094cd79cf";
     AsconMac::ascon_prfa().with_key(TEST_KEY), ascon_prfa_2, INPUT_2,
@@ -191,6 +203,18 @@ crate::basic_hash_tests!(
     AsconMac::ascon_prfa().with_key(TEST_KEY), ascon_prfa_1025, INPUT_1025,
     "66edf17a4b66dec6176db0fc7c146b89";
 
+
+
+    AsconMac::ascon_prfshort(16).with_key(TEST_KEY), ascon_prfshort_2, "000102",
+    "7715cf195fb35817ba24a4806d1173af";
+    AsconMac::ascon_prfshort(16).with_key(TEST_KEY), ascon_prfshort_11, "00010203040506070809",
+    "ca339213302143e914dc5684104431d4";
+    AsconMac::ascon_prfshort(8).with_key(TEST_KEY), ascon_prfshort_2_8, "000102",
+    "00ff4b8f834f25e1";
+    AsconMac::ascon_prfshort(8).with_key(TEST_KEY), ascon_prfshort_11_8, "00010203040506070809",
+    "d8c736023a30d56e";
+
+
     AsconMac::ascon_mac().with_key(TEST_KEY), ascon_mac_1, INPUT_1,
     "eb1af688825d66bf2d53e135f9323315";
     AsconMac::ascon_mac().with_key(TEST_KEY), ascon_mac_2, INPUT_2,
@@ -199,6 +223,7 @@ crate::basic_hash_tests!(
     "e38a60a450275707bc69ddade9c2fb92";
     AsconMac::ascon_mac().with_key(TEST_KEY), ascon_mac_1025, INPUT_1025,
     "3f090d832d95322df4128e0e53a8ecbd";
+
 
     AsconMac::ascon_maca().with_key(TEST_KEY), ascon_maca_1, INPUT_1,
     "fddc38ec2e93f8b8524d88f6c5983d13";

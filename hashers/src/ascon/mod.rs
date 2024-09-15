@@ -1,7 +1,7 @@
 pub mod hash;
 pub mod mac;
 
-const DEBUG: bool = false;
+const DEBUG: bool = true;
 
 fn padded_bytes_64(bytes: &[u8]) -> u64 {
     if bytes.len() > 8 {
@@ -15,6 +15,38 @@ fn padded_bytes_64(bytes: &[u8]) -> u64 {
         }
         word_bytes[bytes.len()] = 0x80;
         u64::from_be_bytes(word_bytes)
+    }
+}
+
+fn unpadded_bytes_64(bytes: &[u8]) -> u64 {
+    if bytes.len() > 8 {
+        panic!("input block was too large")
+    } else if bytes.len() == 8 {
+        u64::from_be_bytes(bytes.try_into().unwrap())
+    } else {
+        let mut word_bytes: [u8; 8] = [0; 8];
+        for (word_byte, input_byte) in word_bytes.iter_mut().zip(bytes.iter()) {
+            *word_byte = *input_byte;
+        }
+        u64::from_be_bytes(word_bytes)
+    }
+}
+
+fn unpadded_bytes_128(bytes: &[u8]) -> [u64; 2] {
+    if bytes.len() > 16 {
+        panic!("input block was too large")
+    } else if bytes.len() == 16 {
+        [
+            u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
+            u64::from_be_bytes(bytes[8..16].try_into().unwrap()),
+        ]
+    } else if bytes.len() >= 8 {
+        [
+            u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
+            unpadded_bytes_64(&bytes[8..]),
+        ]
+    } else {
+        [unpadded_bytes_64(&bytes[0..]), 0]
     }
 }
 
@@ -362,6 +394,21 @@ impl AsconState {
             output.extend_from_slice(&self[0].to_be_bytes());
             output.extend_from_slice(&self[1].to_be_bytes());
         }
+
+        output.truncate(hash_len);
+        output
+    }
+
+    pub fn squeeze_128_prfshort(&mut self, hash_len: usize, a: usize, key: [u64; 2]) -> Vec<u8> {
+        let mut output = Vec::with_capacity(hash_len);
+
+        self[3] ^= key[0];
+        self[4] ^= key[1];
+        if DEBUG {
+            println!("squeeze_{}_128_prfshort: {:016x?}", a, self);
+        }
+        output.extend_from_slice(&self[3].to_be_bytes());
+        output.extend_from_slice(&self[4].to_be_bytes());
 
         output.truncate(hash_len);
         output
