@@ -1,5 +1,5 @@
-pub mod ascon_hash;
-pub mod ascon_prf;
+pub mod hash;
+pub mod prf;
 
 const DEBUG: bool = false;
 

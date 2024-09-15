@@ -5,11 +5,6 @@ pub trait ClassicHasher {
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError>;
 }
 
-// pub trait KeyedHasher: ClassicHasher {
-//     fn set_salt(&mut self, bytes: &[u8]);
-//     fn set_key(&mut self, bytes: &[u8]);
-// }
-
 #[macro_export]
 macro_rules! hash_bytes_from_string {
     () => {
@@ -26,9 +21,22 @@ macro_rules! hash_bytes_from_string {
 
 #[macro_export]
 macro_rules! basic_hash_tests {
-    ($($hasher: expr, $name: ident, $input: literal, $output: literal);+ $(;)?) => {
+    ($($hasher: expr, $test_name: ident, $input: expr, $output: expr);+ $(;)?) => {
         #[cfg(test)]
         mod basic_tests {
+        use super::*;
+        $(
+            #[test]
+            fn $test_name() {
+                assert_eq!($output, $hasher.hash_bytes_from_string($input).unwrap());
+            }
+        )+
+        }
+    };
+    // Optional variant with module name for seperation
+    (($mod_name: ident)?; $($hasher: expr, $name: ident, $input: expr, $output: expr);+ $(;)?) => {
+        #[cfg(test)]
+        mod $mod_name {
         use super::*;
         $(
             #[test]
@@ -38,16 +46,4 @@ macro_rules! basic_hash_tests {
         )+
         }
     };
-    ($($hasher: expr, $name: ident, $input: ident, $output: literal);+ $(;)?) => {
-        #[cfg(test)]
-        mod basic_tests {
-        use super::*;
-        $(
-            #[test]
-            fn $name() {
-                assert_eq!($output, $hasher.hash_bytes_from_string($input).unwrap());
-            }
-        )+
-        }
-    }
 }

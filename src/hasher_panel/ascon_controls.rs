@@ -1,4 +1,4 @@
-use hashers::ascon::ascon_hash::{AsconHash, Variant};
+use hashers::ascon::hash::{AsconHash, Variant};
 use strum::IntoEnumIterator;
 
 use super::HasherFrame;
