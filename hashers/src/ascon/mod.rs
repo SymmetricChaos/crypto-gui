@@ -1,7 +1,9 @@
 pub mod ascon_hash;
 pub mod ascon_prf;
 
-fn padded_bytes_to_u64_be(bytes: &[u8]) -> u64 {
+const DEBUG: bool = false;
+
+fn padded_bytes_64(bytes: &[u8]) -> u64 {
     if bytes.len() > 8 {
         panic!("input block was too large")
     } else if bytes.len() == 8 {
@@ -16,19 +18,103 @@ fn padded_bytes_to_u64_be(bytes: &[u8]) -> u64 {
     }
 }
 
-fn padded_bytes_to_u64s_be(bytes: &[u8]) -> [u64; 2] {
-    if bytes.len() > 16 {
+// fn padded_bytes_128(bytes: &[u8]) -> [u64; 2] {
+//     if bytes.len() > 16 {
+//         panic!("input block was too large")
+//     } else if bytes.len() == 16 {
+//         [
+//             u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
+//             u64::from_be_bytes(bytes[8..16].try_into().unwrap()),
+//         ]
+//     } else if bytes.len() >= 8 {
+//         let word_0 = u64::from_be_bytes(bytes[0..8].try_into().unwrap());
+//         [word_0, padded_bytes_64(&bytes[8..])]
+//     } else {
+//         [padded_bytes_64(&bytes[0..]), 0x0000000000000000_u64]
+//     }
+// }
+
+fn padded_bytes_256(bytes: &[u8]) -> [u64; 4] {
+    if bytes.len() > 32 {
         panic!("input block was too large")
-    } else if bytes.len() == 16 {
+    } else if bytes.len() == 32 {
         [
             u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
             u64::from_be_bytes(bytes[8..16].try_into().unwrap()),
+            u64::from_be_bytes(bytes[16..24].try_into().unwrap()),
+            u64::from_be_bytes(bytes[24..32].try_into().unwrap()),
+        ]
+    } else if bytes.len() >= 24 {
+        [
+            u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
+            u64::from_be_bytes(bytes[8..16].try_into().unwrap()),
+            u64::from_be_bytes(bytes[16..24].try_into().unwrap()),
+            padded_bytes_64(&bytes[24..]),
+        ]
+    } else if bytes.len() >= 16 {
+        [
+            u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
+            u64::from_be_bytes(bytes[8..16].try_into().unwrap()),
+            padded_bytes_64(&bytes[16..]),
+            0,
         ]
     } else if bytes.len() >= 8 {
-        let word_0 = u64::from_be_bytes(bytes[0..8].try_into().unwrap());
-        [word_0, padded_bytes_to_u64_be(&bytes[8..])]
+        [
+            u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
+            padded_bytes_64(&bytes[8..]),
+            0,
+            0,
+        ]
     } else {
-        [padded_bytes_to_u64_be(&bytes[0..]), 0x0000000000000000_u64]
+        [padded_bytes_64(&bytes[0..]), 0, 0, 0]
+    }
+}
+
+fn padded_bytes_320(bytes: &[u8]) -> [u64; 5] {
+    if bytes.len() > 40 {
+        panic!("input block was too large")
+    } else if bytes.len() == 40 {
+        [
+            u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
+            u64::from_be_bytes(bytes[8..16].try_into().unwrap()),
+            u64::from_be_bytes(bytes[16..24].try_into().unwrap()),
+            u64::from_be_bytes(bytes[24..32].try_into().unwrap()),
+            u64::from_be_bytes(bytes[32..40].try_into().unwrap()),
+        ]
+    } else if bytes.len() >= 32 {
+        [
+            u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
+            u64::from_be_bytes(bytes[8..16].try_into().unwrap()),
+            u64::from_be_bytes(bytes[16..24].try_into().unwrap()),
+            u64::from_be_bytes(bytes[24..32].try_into().unwrap()),
+            padded_bytes_64(&bytes[32..]),
+        ]
+    } else if bytes.len() >= 24 {
+        [
+            u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
+            u64::from_be_bytes(bytes[8..16].try_into().unwrap()),
+            u64::from_be_bytes(bytes[16..24].try_into().unwrap()),
+            padded_bytes_64(&bytes[24..]),
+            0,
+        ]
+    } else if bytes.len() >= 16 {
+        [
+            u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
+            u64::from_be_bytes(bytes[8..16].try_into().unwrap()),
+            padded_bytes_64(&bytes[16..]),
+            0,
+            0,
+        ]
+    } else if bytes.len() >= 8 {
+        [
+            u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
+            padded_bytes_64(&bytes[8..]),
+            0,
+            0,
+            0,
+        ]
+    } else {
+        [padded_bytes_64(&bytes[0..]), 0, 0, 0, 0]
     }
 }
 
@@ -62,13 +148,25 @@ impl AsconState {
     // Initial state for Ascon-Hash
     pub fn initialize(iv: u64) -> Self {
         let mut out = Self([iv, 0, 0, 0, 0]);
+        if DEBUG {
+            println!("initial val: {:016x?}", out);
+        }
         out.rounds_12();
+        if DEBUG {
+            println!("initialized: {:016x?}", out);
+        }
         out
     }
 
     pub fn initialize_full(state: [u64; 5]) -> Self {
         let mut out = Self(state);
+        if DEBUG {
+            println!("initial val: {:016x?}", out);
+        }
         out.rounds_12();
+        if DEBUG {
+            println!("initialized: {:016x?}", out);
+        }
         out
     }
 
@@ -87,6 +185,15 @@ impl AsconState {
     pub fn rounds_6(&mut self) {
         for i in 0..6 {
             self.transform((i + 6) as usize);
+        }
+    }
+
+    pub fn rounds(&mut self, n: usize) {
+        match n {
+            6 => self.rounds_6(),
+            8 => self.rounds_8(),
+            12 => self.rounds_12(),
+            _ => panic!("only round counts of 6, 8, and 12 are allowed"),
         }
     }
 
@@ -126,7 +233,7 @@ impl AsconState {
         }
     }
 
-    pub fn absorb_8_128(&mut self, message: &[u8]) {
+    pub fn absorb_64_hash(&mut self, message: &[u8], a: usize) {
         let rate = Self::RATE;
 
         // Encrypt the plaintext treating the last block specially
@@ -134,74 +241,126 @@ impl AsconState {
         let mut ptr = 0;
         // Absorb full blocks
         while mlen >= rate {
-            self[0] ^= padded_bytes_to_u64_be(&message[ptr..ptr + rate]);
+            self[0] ^= padded_bytes_64(&message[ptr..ptr + rate]);
             ptr += rate;
             mlen -= rate;
-            self.rounds_8()
+            self.rounds(a);
+
+            if DEBUG {
+                println!("medial_absorb_128:   {:016x?}", self);
+            }
         }
         // Absorb the last padded block
-        self[0] ^= padded_bytes_to_u64_be(&message[ptr..]);
+        self[0] ^= padded_bytes_64(&message[ptr..]);
         self.rounds_12();
+        if DEBUG {
+            println!("final_absorb_128: {:016x?}", self);
+        }
     }
 
-    pub fn absorb_12_128(&mut self, message: &[u8]) {
-        let rate = Self::RATE;
+    pub fn absorb_256_prf(&mut self, message: &[u8], a: usize) {
+        let rate = 32;
 
         // Encrypt the plaintext treating the last block specially
         let mut mlen = message.len();
         let mut ptr = 0;
         // Absorb full blocks
         while mlen >= rate {
-            self[0] ^= padded_bytes_to_u64_be(&message[ptr..ptr + rate]);
+            let [x0, x1, x2, x3] = padded_bytes_256(&message[ptr..ptr + rate]);
+            self[0] ^= x0;
+            self[1] ^= x1;
+            self[2] ^= x2;
+            self[3] ^= x3;
+            if DEBUG {
+                println!("msg xored in: {:016x?}", self);
+            }
             ptr += rate;
             mlen -= rate;
-            self.rounds_12()
+            self.rounds(a);
+            if DEBUG {
+                println!("medial_absorb_256:   {:016x?}", self);
+            }
         }
         // Absorb the last padded block
-        self[0] ^= padded_bytes_to_u64_be(&message[ptr..]);
-        self.rounds_12();
+        let [x0, x1, x2, x3] = padded_bytes_256(&message[ptr..]);
+        self[0] ^= x0;
+        self[1] ^= x1;
+        self[2] ^= x2;
+        self[3] ^= x3;
+        if DEBUG {
+            println!("msg xored in: {:016x?}", self);
+        }
+        self[4] ^= 1;
+        if DEBUG {
+            println!("final_absorb_256: {:016x?}", self);
+        }
     }
 
-    pub fn absorb_12_256(&mut self, message: &[u8]) {
-        let rate = Self::RATE * 2;
+    pub fn absorb_320_prf(&mut self, message: &[u8], a: usize) {
+        let rate = 40;
 
         // Encrypt the plaintext treating the last block specially
         let mut mlen = message.len();
         let mut ptr = 0;
         // Absorb full blocks
         while mlen >= rate {
-            let [a, b] = padded_bytes_to_u64s_be(&message[ptr..ptr + rate]);
-            self[0] ^= a;
-            self[1] ^= b;
+            let [x0, x1, x2, x3, x4] = padded_bytes_320(&message[ptr..ptr + rate]);
+            self[0] ^= x0;
+            self[1] ^= x1;
+            self[2] ^= x2;
+            self[3] ^= x3;
+            self[4] ^= x4;
+            if DEBUG {
+                println!("msg xored in: {:016x?}", self);
+            }
             ptr += rate;
             mlen -= rate;
-            self.rounds_12()
+            self.rounds(a);
+            if DEBUG {
+                println!("medial_absorb_{}_320:   {:016x?}", a, self);
+            }
         }
         // Absorb the last padded block
-        let [a, b] = padded_bytes_to_u64s_be(&message[ptr..]);
-        self[0] ^= a;
-        self[1] ^= b;
-        self.rounds_12();
+        let [x0, x1, x2, x3, x4] = padded_bytes_320(&message[ptr..]);
+        self[0] ^= x0;
+        self[1] ^= x1;
+        self[2] ^= x2;
+        self[3] ^= x3;
+        self[4] ^= x4;
+        if DEBUG {
+            println!("msg xored in: {:016x?}", self);
+        }
+        self[4] ^= 1;
+        if DEBUG {
+            println!("final_absorb_{}_320: {:016x?}", a, self);
+        }
     }
 
-    pub fn squeeze_8(&mut self, hash_len: usize) -> Vec<u8> {
+    pub fn squeeze_64_hash(&mut self, hash_len: usize, a: usize) -> Vec<u8> {
         let mut output = Vec::with_capacity(hash_len);
 
         while output.len() < hash_len {
             output.extend_from_slice(&self[0].to_be_bytes());
-            self.rounds_8();
+            self.rounds(a);
+            if DEBUG {
+                println!("medial_squeeze_64: {:016x?}", self);
+            }
         }
 
         output.truncate(hash_len);
         output
     }
 
-    pub fn squeeze_12(&mut self, hash_len: usize) -> Vec<u8> {
+    pub fn squeeze_128_prf(&mut self, hash_len: usize, a: usize) -> Vec<u8> {
         let mut output = Vec::with_capacity(hash_len);
 
         while output.len() < hash_len {
+            self.rounds(a);
+            if DEBUG {
+                println!("squeeze_{}_128: {:016x?}", a, self);
+            }
             output.extend_from_slice(&self[0].to_be_bytes());
-            self.rounds_12();
+            output.extend_from_slice(&self[1].to_be_bytes());
         }
 
         output.truncate(hash_len);

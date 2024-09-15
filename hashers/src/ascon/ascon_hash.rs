@@ -116,12 +116,12 @@ impl ClassicHasher for AsconHash {
         let mut state = self.variant.initialize();
         match self.variant {
             Variant::AsconHash | Variant::AsconXof => {
-                state.absorb_12_128(&bytes);
-                state.squeeze_12(self.hash_len)
+                state.absorb_64_hash(&bytes, 12);
+                state.squeeze_64_hash(self.hash_len, 12)
             }
             Variant::AsconHasha | Variant::AsconXofa => {
-                state.absorb_8_128(&bytes);
-                state.squeeze_8(self.hash_len)
+                state.absorb_64_hash(&bytes, 8);
+                state.squeeze_64_hash(self.hash_len, 8)
             }
         }
     }

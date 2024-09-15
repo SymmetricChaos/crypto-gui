@@ -37,5 +37,17 @@ macro_rules! basic_hash_tests {
             }
         )+
         }
+    };
+    ($($hasher: expr, $name: ident, $input: ident, $output: literal);+ $(;)?) => {
+        #[cfg(test)]
+        mod basic_tests {
+        use super::*;
+        $(
+            #[test]
+            fn $name() {
+                assert_eq!($output, $hasher.hash_bytes_from_string($input).unwrap());
+            }
+        )+
+        }
     }
 }
