@@ -1,6 +1,16 @@
 ﻿{
-  "Ascon": {
-    "Description": "Ascon-Hash and Ascon-XOF are a hash functions derived from the Ascon sponge function. The sponge construction is similar to Keccak, though with a smaller state and simpler round. Two faster variants, that use 8 rounds instead of 12 after initialization, are defined called Ascon-Hasha and Ascon-XOFa.  Ascon is also used for the Ascon-128 and Ascon-128a ciphers.",
+  "Ascon-Hash": {
+    "Description": "Ascon-Hash and Ascon-XOF are a hash functions derived from the Ascon sponge function. The sponge construction is similar to Keccak, though with a smaller state and simpler round. Two faster variants are also defined that use eight rounds during the absorbing steps.",
+    "Authors": "Dobraunig, Eichlseder, Mendel, and Schläffer",
+    "Publication": "2014",
+    "Hash Length": null,
+    "Traits": [
+      "Sponge",
+      "XOF"
+    ]
+  },
+  "Ascon-MAC": {
+    "Description": "Ascon-MAC and Ascon-PRF are secure pseudorandom function families derived from the Ascon sponge function. By using a 128-bit key these can create message authentication codes or simulate a true mathematical PRF. Two faster variants are also defined which absorb 320-bits at a time and use only eight rounds during the absorbing steps.",
     "Authors": "Dobraunig, Eichlseder, Mendel, and Schläffer",
     "Publication": "2014",
     "Hash Length": null,

@@ -27,7 +27,6 @@ impl std::fmt::Display for Variant {
 
 impl Variant {
     pub fn initialize(&self, key: [u64; 2], hash_len: u64) -> AsconState {
-        let h = hash_len * 8;
         match self {
             Variant::AsconMac => {
                 assert!(
@@ -54,13 +53,19 @@ impl Variant {
                     hash_len <= 16,
                     "Ascon-PRFshort must have a hash length of 128 bits or less"
                 );
-                AsconState::initialize_full([0x80808c0000000000 ^ h, key[0], key[1], 0, 0])
+                AsconState::initialize_full([
+                    0x80808c0000000000 ^ hash_len * 8,
+                    key[0],
+                    key[1],
+                    0,
+                    0,
+                ])
             }
         }
     }
 }
 
-pub struct AsconPrf {
+pub struct AsconMac {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
     pub hash_len: u64,
@@ -68,7 +73,7 @@ pub struct AsconPrf {
     pub variant: Variant,
 }
 
-impl Default for AsconPrf {
+impl Default for AsconMac {
     fn default() -> Self {
         Self {
             input_format: ByteFormat::Hex,
@@ -80,7 +85,7 @@ impl Default for AsconPrf {
     }
 }
 
-impl AsconPrf {
+impl AsconMac {
     pub fn ascon_prf() -> Self {
         Self {
             input_format: ByteFormat::Hex,
@@ -137,7 +142,7 @@ impl AsconPrf {
     }
 }
 
-impl ClassicHasher for AsconPrf {
+impl ClassicHasher for AsconMac {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         if self.variant == Variant::AsconPrfShort && bytes.len() > 16 {
             panic!("Ascon-PRFshort should only be used to with 128-bit inputs or shorter")
@@ -168,39 +173,39 @@ pub const INPUT_9: &'static str = "0001020304050607";
 pub const INPUT_1025: &'static str = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff";
 
 crate::basic_hash_tests!(
-    AsconPrf::ascon_prf().with_key(TEST_KEY), ascon_prf_1, INPUT_1,
+    AsconMac::ascon_prf().with_key(TEST_KEY), ascon_prf_1, INPUT_1,
     "2a766fe9a4894073bc811b19d54ac33d";
-    AsconPrf::ascon_prf().with_key(TEST_KEY), ascon_prf_2, INPUT_2,
+    AsconMac::ascon_prf().with_key(TEST_KEY), ascon_prf_2, INPUT_2,
     "62dcf5fd8253089b765e2cf1a0d1a4fa";
-    AsconPrf::ascon_prf().with_key(TEST_KEY), ascon_prf_9, INPUT_9,
+    AsconMac::ascon_prf().with_key(TEST_KEY), ascon_prf_9, INPUT_9,
     "25d813eea510ddef67d0152153c35bb8";
-    AsconPrf::ascon_prf().with_key(TEST_KEY), ascon_prf_1025, INPUT_1025,
+    AsconMac::ascon_prf().with_key(TEST_KEY), ascon_prf_1025, INPUT_1025,
     "3003aba5ab23b18d5ae5230b0c8d6af7";
 
-    AsconPrf::ascon_prfa().with_key(TEST_KEY), ascon_prfa_1, INPUT_1,
+    AsconMac::ascon_prfa().with_key(TEST_KEY), ascon_prfa_1, INPUT_1,
     "99fdc07ca98af6e6d282e84094cd79cf";
-    AsconPrf::ascon_prfa().with_key(TEST_KEY), ascon_prfa_2, INPUT_2,
+    AsconMac::ascon_prfa().with_key(TEST_KEY), ascon_prfa_2, INPUT_2,
     "08ae72db8e69d636b9964428dd5feb3f";
-    AsconPrf::ascon_prfa().with_key(TEST_KEY), ascon_prfa_9, INPUT_9,
+    AsconMac::ascon_prfa().with_key(TEST_KEY), ascon_prfa_9, INPUT_9,
     "55b7ed6b4eda680af96095156a8cdc87";
-    AsconPrf::ascon_prfa().with_key(TEST_KEY), ascon_prfa_1025, INPUT_1025,
+    AsconMac::ascon_prfa().with_key(TEST_KEY), ascon_prfa_1025, INPUT_1025,
     "66edf17a4b66dec6176db0fc7c146b89";
 
-    AsconPrf::ascon_mac().with_key(TEST_KEY), ascon_mac_1, INPUT_1,
+    AsconMac::ascon_mac().with_key(TEST_KEY), ascon_mac_1, INPUT_1,
     "eb1af688825d66bf2d53e135f9323315";
-    AsconPrf::ascon_mac().with_key(TEST_KEY), ascon_mac_2, INPUT_2,
+    AsconMac::ascon_mac().with_key(TEST_KEY), ascon_mac_2, INPUT_2,
     "81f3c3537c5595aaa0d5780b9f88a043";
-    AsconPrf::ascon_mac().with_key(TEST_KEY), ascon_mac_9, INPUT_9,
+    AsconMac::ascon_mac().with_key(TEST_KEY), ascon_mac_9, INPUT_9,
     "e38a60a450275707bc69ddade9c2fb92";
-    AsconPrf::ascon_mac().with_key(TEST_KEY), ascon_mac_1025, INPUT_1025,
+    AsconMac::ascon_mac().with_key(TEST_KEY), ascon_mac_1025, INPUT_1025,
     "3f090d832d95322df4128e0e53a8ecbd";
 
-    AsconPrf::ascon_maca().with_key(TEST_KEY), ascon_maca_1, INPUT_1,
+    AsconMac::ascon_maca().with_key(TEST_KEY), ascon_maca_1, INPUT_1,
     "fddc38ec2e93f8b8524d88f6c5983d13";
-    AsconPrf::ascon_maca().with_key(TEST_KEY), ascon_maca_2, INPUT_2,
+    AsconMac::ascon_maca().with_key(TEST_KEY), ascon_maca_2, INPUT_2,
     "628a3773caae20b059fe89280e674735";
-    AsconPrf::ascon_maca().with_key(TEST_KEY), ascon_maca_9, INPUT_9,
+    AsconMac::ascon_maca().with_key(TEST_KEY), ascon_maca_9, INPUT_9,
     "c932830ced1ce26ffb53c061b26372ec";
-    AsconPrf::ascon_maca().with_key(TEST_KEY), ascon_maca_1025, INPUT_1025,
+    AsconMac::ascon_maca().with_key(TEST_KEY), ascon_maca_1025, INPUT_1025,
     "40962a720050d59e3ac61641d98733b3";
 );

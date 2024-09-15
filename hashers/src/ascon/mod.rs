@@ -1,5 +1,5 @@
 pub mod hash;
-pub mod prf;
+pub mod mac;
 
 const DEBUG: bool = false;
 
