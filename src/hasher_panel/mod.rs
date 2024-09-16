@@ -4,7 +4,8 @@ use hashers::{
     ids::{hasher_categories::HasherCategory, HasherId},
 };
 
-mod ascon_controls;
+mod ascon_hash_controls;
+mod ascon_mac_controls;
 mod blake2_controls;
 mod blake3_controls;
 mod blake_controls;
@@ -65,7 +66,8 @@ fn combox_box(
 
 #[derive(Default)]
 pub struct HasherInterface {
-    ascon: ascon_controls::AsconFrame,
+    ascon_hash: ascon_hash_controls::AsconHashFrame,
+    ascon_mac: ascon_mac_controls::AsconMacFrame,
     blake: blake_controls::BlakeFrame,
     blake2: blake2_controls::Blake2Frame,
     // blake3: blake3_controls::Blake3Frame,
@@ -92,7 +94,8 @@ impl HasherInterface {
     pub fn combo_boxes(&mut self, ui: &mut Ui, active_hasher: &mut Option<HasherId>) {
         combox_box(
             &[
-                HasherId::Ascon,
+                HasherId::AsconHash,
+                HasherId::AsconMac,
                 HasherId::Blake,
                 HasherId::Blake2,
                 // HasherId::Blake3,
@@ -132,7 +135,8 @@ impl HasherInterface {
     pub fn get_active_hasher(&mut self, active_hasher: &HasherId) -> &mut dyn HasherFrame {
         match active_hasher {
             HasherId::Argon2 => todo!(),
-            HasherId::Ascon => &mut self.ascon,
+            HasherId::AsconHash => &mut self.ascon_hash,
+            HasherId::AsconMac => &mut self.ascon_mac,
             HasherId::Blake => &mut self.blake,
             HasherId::Blake2 => &mut self.blake2,
             // HasherId::Blake3 => &mut self.blake3,

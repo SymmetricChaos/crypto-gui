@@ -1,4 +1,4 @@
-use crate::{ascon::unpadded_bytes_128, traits::ClassicHasher};
+use crate::{ascon::unpadded_bytes_128, errors::HasherError, traits::ClassicHasher};
 use strum::EnumIter;
 use utils::byte_formatting::ByteFormat;
 
@@ -154,7 +154,7 @@ impl AsconMac {
 impl ClassicHasher for AsconMac {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         if self.variant == Variant::AsconPrfShort && bytes.len() > 16 {
-            panic!("Ascon-PRFshort should only be used to with 128-bit inputs or shorter")
+            panic!("Ascon-PRFshort can only be used with inputs of 128 bits or less")
         }
         let mut state = self.variant.initialize(self.key, self.hash_len, bytes);
         match self.variant {
@@ -166,13 +166,23 @@ impl ClassicHasher for AsconMac {
                 state.absorb_320_prf(&bytes, 8);
                 state.squeeze_128_prf(self.hash_len as usize, 12)
             }
-            Variant::AsconPrfShort => {
-                state.squeeze_128_prfshort(self.hash_len as usize, 12, self.key)
-            }
+            Variant::AsconPrfShort => state.squeeze_128_prfshort(self.hash_len as usize, self.key),
         }
     }
 
-    crate::hash_bytes_from_string! {}
+    fn hash_bytes_from_string(&self, text: &str) -> Result<String, crate::errors::HasherError> {
+        let mut bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| crate::errors::HasherError::general("byte format error"))?;
+        if self.variant == Variant::AsconPrfShort && bytes.len() > 16 {
+            return Err(HasherError::general(
+                "Ascon-PRFshort can only be used with inputs of 128 bits or less",
+            ));
+        }
+        let out = self.hash(&mut bytes);
+        Ok(self.output_format.byte_slice_to_text(&out))
+    }
 }
 
 pub const TEST_KEY: [u8; 16] = [

@@ -1,22 +1,22 @@
-use hashers::ascon::hash::{AsconHash, Variant};
+use hashers::ascon::hash::{AsconMac, Variant};
 use strum::IntoEnumIterator;
 
 use super::HasherFrame;
 use crate::ui_elements::UiElements;
 
-pub struct AsconFrame {
-    hasher: AsconHash,
+pub struct AsconHashFrame {
+    hasher: AsconMac,
 }
 
-impl Default for AsconFrame {
+impl Default for AsconHashFrame {
     fn default() -> Self {
         Self {
-            hasher: AsconHash::default(),
+            hasher: AsconMac::default(),
         }
     }
 }
 
-impl HasherFrame for AsconFrame {
+impl HasherFrame for AsconHashFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.add_space(16.0);
 

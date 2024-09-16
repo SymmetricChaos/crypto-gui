@@ -1,7 +1,7 @@
 pub mod hash;
 pub mod mac;
 
-const DEBUG: bool = true;
+const DEBUG: bool = false;
 
 fn padded_bytes_64(bytes: &[u8]) -> u64 {
     if bytes.len() > 8 {
@@ -399,13 +399,13 @@ impl AsconState {
         output
     }
 
-    pub fn squeeze_128_prfshort(&mut self, hash_len: usize, a: usize, key: [u64; 2]) -> Vec<u8> {
+    pub fn squeeze_128_prfshort(&mut self, hash_len: usize, key: [u64; 2]) -> Vec<u8> {
         let mut output = Vec::with_capacity(hash_len);
 
         self[3] ^= key[0];
         self[4] ^= key[1];
         if DEBUG {
-            println!("squeeze_{}_128_prfshort: {:016x?}", a, self);
+            println!("squeeze_128_prfshort: {:016x?}", self);
         }
         output.extend_from_slice(&self[3].to_be_bytes());
         output.extend_from_slice(&self[4].to_be_bytes());
