@@ -3,8 +3,6 @@ use utils::byte_formatting::ByteFormat;
 
 use crate::traits::ClassicHasher;
 
-use super::SIGMA;
-
 // https://eprint.iacr.org/2012/351.pdf
 
 #[derive(Debug, Clone)]
@@ -56,20 +54,6 @@ impl Blake2s {
         self
     }
 
-    pub fn mix(v: &mut [u32; 16], a: usize, b: usize, c: usize, d: usize, x: u32, y: u32) {
-        v[a] = v[a].wrapping_add(v[b]).wrapping_add(x);
-        v[d] = (v[d] ^ v[a]).rotate_right(16);
-
-        v[c] = v[c].wrapping_add(v[d]);
-        v[b] = (v[b] ^ v[c]).rotate_right(12);
-
-        v[a] = v[a].wrapping_add(v[b]).wrapping_add(y);
-        v[d] = (v[d] ^ v[a]).rotate_right(8);
-
-        v[c] = v[c].wrapping_add(v[d]);
-        v[b] = (v[b] ^ v[c]).rotate_right(7);
-    }
-
     // https://datatracker.ietf.org/doc/html/rfc7693.html#appendix-A
     pub fn compress(state: &mut [u32; 8], chunk: &[u32; 16], bytes_taken: u64, last_chunk: bool) {
         // println!("Original Chunk:\n{chunk:016x?}\n");
@@ -88,21 +72,8 @@ impl Blake2s {
         if last_chunk {
             work[14] ^= u32::MAX;
         }
-        // println!("Working Vector Before Compression:\n{work:016x?}\n");
-        for i in 0..10 {
-            let s = SIGMA[i];
 
-            Self::mix(&mut work, 0, 4, 8, 12, chunk[s[0]], chunk[s[1]]);
-            Self::mix(&mut work, 1, 5, 9, 13, chunk[s[2]], chunk[s[3]]);
-            Self::mix(&mut work, 2, 6, 10, 14, chunk[s[4]], chunk[s[5]]);
-            Self::mix(&mut work, 3, 7, 11, 15, chunk[s[6]], chunk[s[7]]);
-
-            Self::mix(&mut work, 0, 5, 10, 15, chunk[s[8]], chunk[s[9]]);
-            Self::mix(&mut work, 1, 6, 11, 12, chunk[s[10]], chunk[s[11]]);
-            Self::mix(&mut work, 2, 7, 8, 13, chunk[s[12]], chunk[s[13]]);
-            Self::mix(&mut work, 3, 4, 9, 14, chunk[s[14]], chunk[s[15]]);
-            // println!("Working Vector at [{i}]:\n{work:016x?}\n");
-        }
+        crate::blake_compress!(&mut work, chunk, [16, 12, 8, 7], 10);
 
         for i in 0..8 {
             state[i] ^= work[i];
@@ -178,19 +149,16 @@ impl ClassicHasher for Blake2s {
     crate::hash_bytes_from_string! {}
 }
 
-#[cfg(test)]
-mod blake2s_tests {
-    use super::*;
-
-    #[test]
-    fn test_empty() {
-        let mut hasher = Blake2s::default();
-        hasher.input_format = ByteFormat::Utf8;
-        hasher.output_format = ByteFormat::Hex;
-        hasher.hash_len = 32;
-        assert_eq!(
-            "69217a3079908094e11121d042354a7c1f55b6482ca1a51e1b250dfd1ed0eef9",
-            hasher.hash_bytes_from_string("").unwrap()
-        );
-    }
-}
+crate::basic_hash_tests!(
+    Blake2s::default().hash_len(32), empty_hash_len_32, "",
+    "69217a3079908094e11121d042354a7c1f55b6482ca1a51e1b250dfd1ed0eef9";
+    Blake2s::default().hash_len(32).input(ByteFormat::Hex), hash_8_len_32, "0001020304050607",
+    "c7e887b546623635e93e0495598f1726821996c2377705b93a1f636f872bfa2d";
+    Blake2s::default()
+        .input(ByteFormat::Hex)
+        .hash_len(32)
+        .key(ByteFormat::Hex.text_to_bytes("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f").unwrap()),
+        keyed_hash_len_32,
+        "000102030405060708090a0b0c0d0e0f",
+    "19ba234f0a4f38637d1839f9d9f76ad91c8522307143c97d5f93f69274cec9a7";
+);

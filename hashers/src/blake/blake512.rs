@@ -3,8 +3,6 @@ use utils::byte_formatting::{fill_u64s_be, ByteFormat};
 
 use crate::{errors::HasherError, traits::ClassicHasher};
 
-use super::SIGMA;
-
 // https://eprint.iacr.org/2012/351.pdf
 
 // Constants for compression function, beginning digits of pi
@@ -144,25 +142,8 @@ impl Blake512 {
         work[14] = C[6] ^ (counter >> 64) as u64; // Upper bits
         work[15] = C[7] ^ (counter >> 64) as u64;
 
-        // At this point the working vector is correct, I have triple checked
-        // println!("work: {:016x?}\n", work);
-        for i in 0..16 {
-            let s = SIGMA[i % 10];
+        crate::blake_compress!(&mut work, chunk, [32, 25, 16, 11], C, 16);
 
-            let a = [0, 1, 2, 3, 0, 1, 2, 3];
-            let b = [4, 5, 6, 7, 5, 6, 7, 4];
-            let c = [8, 9, 10, 11, 10, 11, 8, 9];
-            let d = [12, 13, 14, 15, 15, 12, 13, 14];
-
-            // Apply the mixing function eight times, xoring the constants with the chunks of message
-            for j in 0..8 {
-                let x = chunk[s[2 * j]] ^ C[s[2 * j + 1]];
-                let y = chunk[s[2 * j + 1]] ^ C[s[2 * j]];
-                Self::mix(&mut work, a[j], b[j], c[j], d[j], x, y);
-            }
-
-            // println!("work {}:\n{:016x?}\n", i + 1, work);
-        }
         for i in 0..8 {
             state[i] ^= salt[i % 4] ^ work[i] ^ work[i + 8];
         }

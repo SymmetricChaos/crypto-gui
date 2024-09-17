@@ -3,8 +3,6 @@ use utils::byte_formatting::ByteFormat;
 
 use crate::traits::ClassicHasher;
 
-use super::SIGMA;
-
 // https://eprint.iacr.org/2012/351.pdf
 
 #[derive(Debug, Clone)]
@@ -62,20 +60,6 @@ impl Blake2b {
         self
     }
 
-    pub fn mix(v: &mut [u64; 16], a: usize, b: usize, c: usize, d: usize, x: u64, y: u64) {
-        v[a] = v[a].wrapping_add(v[b]).wrapping_add(x);
-        v[d] = (v[d] ^ v[a]).rotate_right(32);
-
-        v[c] = v[c].wrapping_add(v[d]);
-        v[b] = (v[b] ^ v[c]).rotate_right(24);
-
-        v[a] = v[a].wrapping_add(v[b]).wrapping_add(y);
-        v[d] = (v[d] ^ v[a]).rotate_right(16);
-
-        v[c] = v[c].wrapping_add(v[d]);
-        v[b] = (v[b] ^ v[c]).rotate_right(63);
-    }
-
     // https://datatracker.ietf.org/doc/html/rfc7693.html#appendix-A
     pub fn compress(state: &mut [u64; 8], chunk: &[u64; 16], bytes_taken: u128, last_chunk: bool) {
         // println!("Original Chunk:\n{chunk:016x?}\n");
@@ -94,21 +78,8 @@ impl Blake2b {
         if last_chunk {
             work[14] ^= u64::MAX;
         }
-        // println!("Working Vector Before Compression:\n{work:016x?}\n");
-        for i in 0..12 {
-            let s = SIGMA[i % 10];
 
-            Self::mix(&mut work, 0, 4, 8, 12, chunk[s[0]], chunk[s[1]]);
-            Self::mix(&mut work, 1, 5, 9, 13, chunk[s[2]], chunk[s[3]]);
-            Self::mix(&mut work, 2, 6, 10, 14, chunk[s[4]], chunk[s[5]]);
-            Self::mix(&mut work, 3, 7, 11, 15, chunk[s[6]], chunk[s[7]]);
-
-            Self::mix(&mut work, 0, 5, 10, 15, chunk[s[8]], chunk[s[9]]);
-            Self::mix(&mut work, 1, 6, 11, 12, chunk[s[10]], chunk[s[11]]);
-            Self::mix(&mut work, 2, 7, 8, 13, chunk[s[12]], chunk[s[13]]);
-            Self::mix(&mut work, 3, 4, 9, 14, chunk[s[14]], chunk[s[15]]);
-            // println!("Working Vector at [{i}]:\n{work:016x?}\n");
-        }
+        crate::blake_compress!(&mut work, chunk, [32, 24, 16, 63], 12);
 
         for i in 0..8 {
             state[i] ^= work[i];

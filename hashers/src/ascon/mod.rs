@@ -4,9 +4,8 @@ pub mod mac;
 const DEBUG: bool = false;
 
 fn padded_bytes_64(bytes: &[u8]) -> u64 {
-    if bytes.len() > 8 {
-        panic!("input block was too large")
-    } else if bytes.len() == 8 {
+    assert!(bytes.len() <= 8);
+    if bytes.len() == 8 {
         u64::from_be_bytes(bytes.try_into().unwrap())
     } else {
         let mut word_bytes: [u8; 8] = [0; 8];
@@ -19,9 +18,8 @@ fn padded_bytes_64(bytes: &[u8]) -> u64 {
 }
 
 fn unpadded_bytes_64(bytes: &[u8]) -> u64 {
-    if bytes.len() > 8 {
-        panic!("input block was too large")
-    } else if bytes.len() == 8 {
+    assert!(bytes.len() <= 8);
+    if bytes.len() == 8 {
         u64::from_be_bytes(bytes.try_into().unwrap())
     } else {
         let mut word_bytes: [u8; 8] = [0; 8];
@@ -33,9 +31,8 @@ fn unpadded_bytes_64(bytes: &[u8]) -> u64 {
 }
 
 fn unpadded_bytes_128(bytes: &[u8]) -> [u64; 2] {
-    if bytes.len() > 16 {
-        panic!("input block was too large")
-    } else if bytes.len() == 16 {
+    assert!(bytes.len() <= 16);
+    if bytes.len() == 16 {
         [
             u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
             u64::from_be_bytes(bytes[8..16].try_into().unwrap()),
@@ -67,9 +64,8 @@ fn unpadded_bytes_128(bytes: &[u8]) -> [u64; 2] {
 // }
 
 fn padded_bytes_256(bytes: &[u8]) -> [u64; 4] {
-    if bytes.len() > 32 {
-        panic!("input block was too large")
-    } else if bytes.len() == 32 {
+    assert!(bytes.len() <= 32);
+    if bytes.len() == 32 {
         [
             u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
             u64::from_be_bytes(bytes[8..16].try_into().unwrap()),
@@ -103,9 +99,8 @@ fn padded_bytes_256(bytes: &[u8]) -> [u64; 4] {
 }
 
 fn padded_bytes_320(bytes: &[u8]) -> [u64; 5] {
-    if bytes.len() > 40 {
-        panic!("input block was too large")
-    } else if bytes.len() == 40 {
+    assert!(bytes.len() <= 40);
+    if bytes.len() == 40 {
         [
             u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
             u64::from_be_bytes(bytes[8..16].try_into().unwrap()),
