@@ -50,7 +50,6 @@ macro_rules! blake_mix {
 // The double round in type agnosic form.
 // Applies the quarter round eight times.
 // The second variant of the macro XORs in values from a constant as in the original BLAKE
-// The third variant
 #[macro_export]
 macro_rules! blake_double_round {
     ($v: expr, $chunk: expr, $r: expr, $s: ident) => {
