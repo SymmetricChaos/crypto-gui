@@ -1,4 +1,4 @@
-use crate::traits::ClassicHasher;
+use crate::{blake_double_round, traits::ClassicHasher};
 use std::cmp::min;
 use utils::byte_formatting::ByteFormat;
 
@@ -25,30 +25,8 @@ const IV: [u32; 8] = [
 
 const MSG_PERMUTATION: [usize; 16] = [2, 6, 3, 10, 7, 0, 4, 13, 1, 11, 12, 5, 9, 14, 15, 8];
 
-// The mixing function, G, which mixes either a column or a diagonal.
-fn g(state: &mut [u32; 16], a: usize, b: usize, c: usize, d: usize, mx: u32, my: u32) {
-    state[a] = state[a].wrapping_add(state[b]).wrapping_add(mx);
-    state[d] = (state[d] ^ state[a]).rotate_right(16);
-    state[c] = state[c].wrapping_add(state[d]);
-    state[b] = (state[b] ^ state[c]).rotate_right(12);
-    state[a] = state[a].wrapping_add(state[b]).wrapping_add(my);
-    state[d] = (state[d] ^ state[a]).rotate_right(8);
-    state[c] = state[c].wrapping_add(state[d]);
-    state[b] = (state[b] ^ state[c]).rotate_right(7);
-}
-
-fn round(state: &mut [u32; 16], m: &[u32; 16]) {
-    // Mix the columns.
-    g(state, 0, 4, 8, 12, m[0], m[1]);
-    g(state, 1, 5, 9, 13, m[2], m[3]);
-    g(state, 2, 6, 10, 14, m[4], m[5]);
-    g(state, 3, 7, 11, 15, m[6], m[7]);
-    // Mix the diagonals.
-    g(state, 0, 5, 10, 15, m[8], m[9]);
-    g(state, 1, 6, 11, 12, m[10], m[11]);
-    g(state, 2, 7, 8, 13, m[12], m[13]);
-    g(state, 3, 4, 9, 14, m[14], m[15]);
-}
+const ROTS: [u32; 4] = [16, 12, 8, 7];
+const WORD_ORDER: [usize; 16] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 
 fn permute(m: &mut [u32; 16]) {
     let mut permuted = [0; 16];
@@ -85,19 +63,19 @@ fn compress(
     ];
     let mut block = *block_words;
 
-    round(&mut state, &block); // round 1
+    blake_double_round!(&mut state, &block, ROTS, WORD_ORDER);
     permute(&mut block);
-    round(&mut state, &block); // round 2
+    blake_double_round!(&mut state, &block, ROTS, WORD_ORDER);
     permute(&mut block);
-    round(&mut state, &block); // round 3
+    blake_double_round!(&mut state, &block, ROTS, WORD_ORDER);
     permute(&mut block);
-    round(&mut state, &block); // round 4
+    blake_double_round!(&mut state, &block, ROTS, WORD_ORDER);
     permute(&mut block);
-    round(&mut state, &block); // round 5
+    blake_double_round!(&mut state, &block, ROTS, WORD_ORDER);
     permute(&mut block);
-    round(&mut state, &block); // round 6
+    blake_double_round!(&mut state, &block, ROTS, WORD_ORDER);
     permute(&mut block);
-    round(&mut state, &block); // round 7
+    blake_double_round!(&mut state, &block, ROTS, WORD_ORDER);
 
     for i in 0..8 {
         state[i] ^= state[i + 8];
