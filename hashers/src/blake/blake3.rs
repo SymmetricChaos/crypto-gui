@@ -238,7 +238,7 @@ fn parent_cv(
 }
 
 /// An incremental hasher that can accept any number of writes.
-pub struct KeccakHasher {
+pub struct Blake3Hasher {
     chunk_state: ChunkState,
     key_words: [u32; 8],
     cv_stack: [[u32; 8]; 54], // Space for 54 subtree chaining values:
@@ -246,7 +246,7 @@ pub struct KeccakHasher {
     flags: u32,
 }
 
-impl KeccakHasher {
+impl Blake3Hasher {
     fn new_internal(key_words: [u32; 8], flags: u32) -> Self {
         Self {
             chunk_state: ChunkState::new(key_words, 0, flags),
@@ -382,9 +382,9 @@ impl ClassicHasher for Blake3 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut out = vec![0; self.hash_len as usize];
         let mut h = match self.mode {
-            Blake3Mode::Unkeyed => KeccakHasher::new(),
-            Blake3Mode::Keyed => KeccakHasher::new_keyed(&self.key),
-            Blake3Mode::KeyDerivation => KeccakHasher::new_derive_key(&self.key_context),
+            Blake3Mode::Unkeyed => Blake3Hasher::new(),
+            Blake3Mode::Keyed => Blake3Hasher::new_keyed(&self.key),
+            Blake3Mode::KeyDerivation => Blake3Hasher::new_derive_key(&self.key_context),
         };
         h.update(bytes);
         h.finalize(&mut out);
