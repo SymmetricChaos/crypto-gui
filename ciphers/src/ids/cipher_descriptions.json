@@ -523,6 +523,15 @@
       "Substitution"
     ]
   },
+  "SM4": {
+    "Description": "The ShāngMì 4 (商密4) is a block cipher published by the Chinese Academy of Sciences which was approved as an ISO/IEC standard named SM4 in 2021. It uses a 32 Feistel network",
+    "Authors": "Chinese Academy of Sciences",
+    "Publication": 2006,
+    "Traits": [
+      "Block Cipher",
+      "Feistel"
+    ]
+  },
   "Speck": {
     "Description": "Speck is a family of lightweight ciphers optimized for speed in software implementations that was released by the NSA along with Simon. Although no severe weaknesses are known in the design the NSA has never revealed a full justification for its design and it has struggled to be accepted for standardization outside the United States.",
     "Authors": "NSA",
