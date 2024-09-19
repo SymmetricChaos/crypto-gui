@@ -24,10 +24,10 @@ const SM4_SBOX: [u8; 256] = [
 const FAMILY_KEY: [u32; 4] = [0xa3b1bac6, 0x56aa3350, 0x677d9197, 0xb27022dc];
 
 const C: [u32; 32] = [
-    0x00070E15, 0x1C232A31, 0x383F464D, 0x545B6269, 0x70777E85, 0x8C939AA1, 0xA8AFB6BD, 0xC4CBD2D9,
-    0xE0E7EEF5, 0xFC030A11, 0x181F262D, 0x343B4249, 0x50575E65, 0x6C737A81, 0x888F969D, 0xA4ABB2B9,
-    0xC0C7CED5, 0xDCE3EAF1, 0xF8FF060D, 0x141B2229, 0x30373E45, 0x4C535A61, 0x686F767D, 0x848B9299,
-    0xA0A7AEB5, 0xBCC3CAD1, 0xD8DFE6ED, 0xF4FB0209, 0x10171E25, 0x2C333A41, 0x484F565D, 0x646B7279,
+    0x00070e15, 0x1c232a31, 0x383f464d, 0x545b6269, 0x70777e85, 0x8c939aa1, 0xa8afb6bd, 0xc4cbd2d9,
+    0xe0e7eef5, 0xfc030a11, 0x181f262d, 0x343b4249, 0x50575e65, 0x6c737a81, 0x888f969d, 0xa4abb2b9,
+    0xc0c7ced5, 0xdce3eaf1, 0xf8ff060d, 0x141b2229, 0x30373e45, 0x4c535a61, 0x686f767d, 0x848b9299,
+    0xa0a7aeb5, 0xbcc3cad1, 0xd8dfe6ed, 0xf4fb0209, 0x10171e25, 0x2c333a41, 0x484f565d, 0x646b7279,
 ];
 
 fn tau(a: u32) -> u32 {
@@ -101,7 +101,7 @@ impl Sm4 {
         self
     }
 
-    pub fn ksa(&mut self, bytes: [u8; 32]) {
+    pub fn ksa(&mut self, bytes: [u8; 16]) {
         let mut k = [0; 4];
         fill_u32s_be(&mut k, &bytes);
         for i in 0..4 {
@@ -116,7 +116,7 @@ impl Sm4 {
         }
     }
 
-    pub fn with_key(mut self, bytes: [u8; 32]) -> Self {
+    pub fn with_key(mut self, bytes: [u8; 16]) -> Self {
         self.ksa(bytes);
         self
     }
@@ -132,6 +132,8 @@ impl BlockCipher<16> for Sm4 {
             block.rotate_left(1);
             block[3] = x;
         }
+        block.rotate_right(1);
+        block.swap(1, 3);
 
         u32s_to_bytes_be(bytes, &block);
     }
@@ -145,7 +147,17 @@ impl BlockCipher<16> for Sm4 {
             block.rotate_left(1);
             block[3] = x;
         }
+        block.rotate_right(1);
+        block.swap(1, 3);
 
         u32s_to_bytes_be(bytes, &block);
     }
 }
+
+crate::impl_cipher_for_block_cipher!(Sm4, 16);
+
+crate::test_block_cipher!(
+    Sm4::default().with_key([0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF, 0xFE, 0xDC, 0xBA, 0x98, 0x76, 0x54, 0x32, 0x10]), test_1,
+    [0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF, 0xFE, 0xDC, 0xBA, 0x98, 0x76, 0x54, 0x32, 0x10],
+    [0x68, 0x1E, 0xDF, 0x34, 0xD2, 0x06, 0x96, 0x5E, 0x86, 0xB3, 0xE9, 0x4F, 0x53, 0x6E, 0x42, 0x46];
+);
