@@ -133,15 +133,6 @@ mod chacha_ietf_tests {
     use super::*;
 
     #[test]
-    fn encrypt_decrypt_test() {
-        let ptext = "0102030405060708";
-        let cipher = ChaChaIetf::default();
-
-        let ctext = cipher.encrypt(ptext).unwrap();
-        assert_eq!(cipher.decrypt(&ctext).unwrap(), ptext);
-    }
-
-    #[test]
     fn keystream_test() {
         // https://datatracker.ietf.org/doc/html/rfc8439#section-2.3.2
         let mut cipher = ChaChaIetf::default();

@@ -1,5 +1,5 @@
 use crate::{Cipher, CipherError};
-use utils::byte_formatting::{fill_u32s_be, fill_u32s_le, ByteFormat};
+use utils::byte_formatting::{fill_u32s_le, ByteFormat};
 
 use super::ChaChaState;
 
@@ -17,15 +17,10 @@ impl Default for XChaCha {
         Self {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
-
-            // default for key and nonce taken from test vector here: https://datatracker.ietf.org/doc/html/draft-agl-tls-chacha20poly1305-04#section-7
-            key: [
-                0x03020100, 0x07060504, 0x0b0a0908, 0x0f0e0d0c, 0x13121110, 0x17161514, 0x1b1a1918,
-                0x1f1e1d1c,
-            ],
+            key: [0, 0, 0, 0, 0, 0, 0, 0],
             nonce: [0, 0, 0, 0, 0, 0],
             rounds: 20,
-            ctr: 0,
+            ctr: 1,
         }
     }
 }
@@ -42,7 +37,7 @@ impl XChaCha {
     }
 
     pub fn synthetic_key(&self) -> [u32; 8] {
-        let mut state = ChaChaState([
+        let mut state = ChaChaState::new([
             0x61707865,
             0x3320646e,
             0x79622d32,
@@ -68,7 +63,6 @@ impl XChaCha {
         [
             state[0], state[1], state[2], state[3], state[12], state[13], state[14], state[15],
         ]
-        .map(|w| w.swap_bytes())
     }
 
     pub fn create_state(&self, ctr: u32) -> [u32; 16] {
@@ -195,18 +189,15 @@ mod xchacha_tests {
             ],
         );
 
-        let key_stream = cipher.key_stream_with_ctr(2, 1);
+        let key_stream = cipher.key_stream_with_ctr(5, 1);
 
-        println!("{:02x?}", key_stream);
-
-        panic!("test only prints to inspect")
-        // assert_eq!(key_stream, ByteFormat::Hex.text_to_bytes("29624b4b1b140ace53740e405b2168540fd7d630c1f536fecd722fc3cddba7f4cca98cf9e47e5e64d115450f9b125b54449ff76141ca620a1f9cfcab2a1a8a255e766a5266b878846120ea64ad99aa479471e63befcbd37cd1c22a221fe462215cf32c74895bf505863ccddd48f62916dc6521f1ec50a5ae08903aa259d9bf607cd8026fba548604f1b6072d91bc91243a5b845f7fd171b02edc5a0a84cf28dd241146bc376e3f48df5e7fee1d11048c190a3d3deb0feb64b42d9c6fdeee290fa0e6ae2c26c0249ea8c181f7e2ffd100cbe5fd3c4f8271d62b15330cb8fdcf00b3df507ca8c924f7017b7e712d15a2eb5c50484451e54e1b4b995bd8fdd94597bb94d7af0b2c04df10ba0890899ed9293a0f55b8bafa999264035f1d4fbe7fe0aafa109a62372027e50e10cdfecca127").unwrap());
+        assert_eq!(key_stream[0..304], ByteFormat::Hex.text_to_bytes("29624b4b1b140ace53740e405b2168540fd7d630c1f536fecd722fc3cddba7f4cca98cf9e47e5e64d115450f9b125b54449ff76141ca620a1f9cfcab2a1a8a255e766a5266b878846120ea64ad99aa479471e63befcbd37cd1c22a221fe462215cf32c74895bf505863ccddd48f62916dc6521f1ec50a5ae08903aa259d9bf607cd8026fba548604f1b6072d91bc91243a5b845f7fd171b02edc5a0a84cf28dd241146bc376e3f48df5e7fee1d11048c190a3d3deb0feb64b42d9c6fdeee290fa0e6ae2c26c0249ea8c181f7e2ffd100cbe5fd3c4f8271d62b15330cb8fdcf00b3df507ca8c924f7017b7e712d15a2eb5c50484451e54e1b4b995bd8fdd94597bb94d7af0b2c04df10ba0890899ed9293a0f55b8bafa999264035f1d4fbe7fe0aafa109a62372027e50e10cdfecca127").unwrap());
     }
 
     #[test]
     fn encrypt_test() {
         // https://datatracker.ietf.org/doc/html/draft-agl-tls-chacha20poly1305-04#section-7
-        let ptext = b"The dhole (pronounced \"dole\") is also known as the Asiatic wilddog, red dog, and whistling dog. It is about the size of a German shepherd but looks more like a long-legged fox. This highly elusive and skilled jumper is classified with wolves, coyotes, jackals, and foxesin the taxonomic family Canidae.";
+
         let cipher = XChaCha::default().with_key_and_nonce(
             [
                 0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8a, 0x8b, 0x8c, 0x8d,
@@ -219,6 +210,7 @@ mod xchacha_tests {
             ],
         );
 
+        let ptext = b"The dhole (pronounced \"dole\") is also known as the Asiatic wild dog, red dog, and whistling dog. It is about the size of a German shepherd but looks more like a long-legged fox. This highly elusive and skilled jumper is classified with wolves, coyotes, jackals, and foxes in the taxonomic family Canidae.";
         let ctext = cipher.encrypt_bytes_with_ctr(ptext, 1);
 
         assert_eq!(ctext, ByteFormat::Hex.text_to_bytes("7d0a2e6b7f7c65a236542630294e063b7ab9b555a5d5149aa21e4ae1e4fbce87ecc8e08a8b5e350abe622b2ffa617b202cfad72032a3037e76ffdcdc4376ee053a190d7e46ca1de04144850381b9cb29f051915386b8a710b8ac4d027b8b050f7cba5854e028d564e453b8a968824173fc16488b8970cac828f11ae53cabd20112f87107df24ee6183d2274fe4c8b1485534ef2c5fbc1ec24bfc3663efaa08bc047d29d25043532db8391a8a3d776bf4372a6955827ccb0cdd4af403a7ce4c63d595c75a43e045f0cce1f29c8b93bd65afc5974922f214a40b7c402cdb91ae73c0b63615cdad0480680f16515a7ace9d39236464328a37743ffc28f4ddb324f4d0f5bbdc270c65b1749a6efff1fbaa09536175ccd29fb9e6057b307320d316838a9c71f70b5b5907a66f7ea49aadc409").unwrap());
