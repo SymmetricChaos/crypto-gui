@@ -420,14 +420,16 @@ pub fn u64s_to_bytes_le(target: &mut [u8], words: &[u64]) {
     }
 }
 
+/// If target is longer it is only partially overwritten. If target is shorter the extra source is ignored.
 pub fn overwrite_bytes(target: &mut [u8], source: &[u8]) {
-    for (t, s) in target.iter_mut().zip_eq(source.iter()) {
+    for (t, s) in target.iter_mut().zip(source.iter()) {
         *t = *s
     }
 }
 
+/// If target is longer it is only partially XORed. If target is shorter the extra source is ignored.
 pub fn xor_into_bytes(target: &mut [u8], source: &[u8]) {
-    for (t, s) in target.iter_mut().zip_eq(source.iter()) {
+    for (t, s) in target.iter_mut().zip(source.iter()) {
         *t ^= *s
     }
 }

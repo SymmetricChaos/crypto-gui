@@ -1,10 +1,10 @@
-use super::chacha_extended_nonce::ChaChaExtendedNonce;
+use super::chacha_ietf::ChaChaIetf;
 use crate::{Cipher, CipherError};
 use num::{BigUint, Zero};
 
 // https://datatracker.ietf.org/doc/html/rfc8439
 pub struct ChaCha20Poly1305 {
-    pub cipher: ChaChaExtendedNonce,
+    pub cipher: ChaChaIetf,
     pub associated_data: Vec<u8>,
     pub ctr: u32,
 }
@@ -12,7 +12,7 @@ pub struct ChaCha20Poly1305 {
 impl Default for ChaCha20Poly1305 {
     fn default() -> Self {
         Self {
-            cipher: ChaChaExtendedNonce::default(),
+            cipher: ChaChaIetf::default(),
             associated_data: Vec::new(),
             ctr: 0,
         }

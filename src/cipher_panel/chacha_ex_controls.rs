@@ -1,4 +1,4 @@
-use ciphers::digital::stream_ciphers::chacha::chacha_extended_nonce::ChaChaExtendedNonce;
+use ciphers::digital::stream_ciphers::chacha::chacha_ietf::ChaChaIetf;
 use egui::Slider;
 use rand::{thread_rng, Rng};
 
@@ -7,7 +7,7 @@ use crate::ui_elements::UiElements;
 use super::CipherFrame;
 
 pub struct ChaChaExNonceFrame {
-    cipher: ChaChaExtendedNonce,
+    cipher: ChaChaIetf,
 }
 
 impl Default for ChaChaExNonceFrame {
