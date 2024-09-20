@@ -36,12 +36,6 @@ impl ChaCha20Poly1305 {
         for i in [4, 8, 12] {
             keys.0[i] &= 0b11111100;
         }
-        // Reverse the bytes?
-        // keys.0.reverse();
-        // keys.1.reverse();
-
-        // println!("key r: {:02x?}", keys.0);
-        // println!("key s: {:02x?}", keys.1);
 
         let inputs = self.tag_input(encrypted_bytes);
         self.hash(&inputs, keys.0, keys.1)
@@ -59,10 +53,6 @@ impl ChaCha20Poly1305 {
         }
         input.extend_from_slice(&(self.associated_data.len() as u64).to_le_bytes());
         input.extend_from_slice(&(encrypted_bytes.len() as u64).to_le_bytes());
-
-        for line in input.chunks(16) {
-            println!("{:02x?}", line);
-        }
 
         input
     }
@@ -164,7 +154,7 @@ impl Cipher for ChaCha20Poly1305 {
 }
 
 #[cfg(test)]
-mod chacha_tests {
+mod chacha20_poly1305_tests {
 
     use itertools::Itertools;
     use utils::byte_formatting::ByteFormat;
@@ -185,38 +175,37 @@ mod chacha_tests {
         assert_eq!(cipher.decrypt(&ctext).unwrap(), ptext);
     }
 
-    // DISCOVERY: I forgot that the ctr inside of ChaCha won't count up in the offset way needed
-    #[test]
-    fn key_stream_test() {
-        let mut cipher = ChaCha20Poly1305::default();
-        cipher.cipher.input_format = ByteFormat::Utf8;
-        cipher.associated_data = AAD.to_vec();
-        cipher.cipher.key = [
-            0x80818283_u32,
-            0x84858687,
-            0x88898a8b,
-            0x8c8d8e8f,
-            0x90919293,
-            0x94959697,
-            0x98999a9b,
-            0x9c9d9e9f,
-        ]
-        .iter()
-        .map(|n| n.to_be())
-        .collect_vec()
-        .try_into()
-        .unwrap();
-        cipher.cipher.nonce = [0x07000000_u32, 0x40414243, 0x44454647]
-            .iter()
-            .map(|n| n.to_be())
-            .collect_vec()
-            .try_into()
-            .unwrap();
-        cipher.ctr = 0;
+    // #[test]
+    // fn key_stream_test() {
+    //     let mut cipher = ChaCha20Poly1305::default();
+    //     cipher.cipher.input_format = ByteFormat::Utf8;
+    //     cipher.associated_data = AAD.to_vec();
+    //     cipher.cipher.key = [
+    //         0x80818283_u32,
+    //         0x84858687,
+    //         0x88898a8b,
+    //         0x8c8d8e8f,
+    //         0x90919293,
+    //         0x94959697,
+    //         0x98999a9b,
+    //         0x9c9d9e9f,
+    //     ]
+    //     .iter()
+    //     .map(|n| n.to_be())
+    //     .collect_vec()
+    //     .try_into()
+    //     .unwrap();
+    //     cipher.cipher.nonce = [0x07000000_u32, 0x40414243, 0x44454647]
+    //         .iter()
+    //         .map(|n| n.to_be())
+    //         .collect_vec()
+    //         .try_into()
+    //         .unwrap();
+    //     cipher.ctr = 0;
 
-        let key_stream = cipher.cipher.key_stream_with_ctr(2, 0);
-        println!("key_stream: {:02x?}", key_stream);
-    }
+    //     let key_stream = cipher.cipher.key_stream_with_ctr(2, 0);
+    //     println!("key_stream: {:02x?}", key_stream);
+    // }
 
     #[test]
     fn encrypt_test() {

@@ -1,8 +1,8 @@
 use crate::{Cipher, CipherError};
-use std::num::Wrapping;
+
 use utils::byte_formatting::{fill_u32s_le, ByteFormat};
 
-use super::{column_round, double_round};
+use super::ChaChaState;
 
 pub struct ChaChaIetf {
     pub input_format: ByteFormat,
@@ -63,51 +63,40 @@ impl ChaChaIetf {
         ]
     }
 
+    pub fn block_function(&self, state: &mut ChaChaState, block: &mut [u8; 64]) {
+        // Temporary state
+        let mut t_state = state.clone();
+
+        // Only ChaCha20, ChaCha12, and ChaCha8 are official but any number is usable
+        for _round in 0..self.rounds / 2 {
+            t_state.double_round();
+        }
+        if self.rounds % 2 == 1 {
+            t_state.column_round();
+        }
+
+        // Add the current state into the temporary state
+        for (i, word) in t_state.0.iter_mut().enumerate() {
+            *word = word.wrapping_add(state[i])
+        }
+
+        // Create a byte stream
+        for (i, b) in t_state.0.iter().flat_map(|w| w.to_le_bytes()).enumerate() {
+            block[i] = b
+        }
+    }
+
     pub fn key_stream_with_ctr(&self, blocks: u64, ctr: u32) -> Vec<u8> {
         let mut out = Vec::with_capacity((blocks * 64) as usize);
-        let mut state = [
-            Wrapping(0x61707865),
-            Wrapping(0x3320646e),
-            Wrapping(0x79622d32),
-            Wrapping(0x6b206574),
-            Wrapping(self.key[0]),
-            Wrapping(self.key[1]),
-            Wrapping(self.key[2]),
-            Wrapping(self.key[3]),
-            Wrapping(self.key[4]),
-            Wrapping(self.key[5]),
-            Wrapping(self.key[6]),
-            Wrapping(self.key[7]),
-            Wrapping(ctr),
-            Wrapping(self.nonce[0]),
-            Wrapping(self.nonce[1]),
-            Wrapping(self.nonce[2]),
-        ];
+        let mut key_stream = [0; 64];
+        let mut state = ChaChaState(self.create_state(ctr));
 
-        for _block in 0..blocks {
-            // Temporary state
-            let mut t_state = state.clone();
-
-            // Only ChaCha20, ChaCha12, and ChaCha8 are official but any number is usable
-            for _round in 0..self.rounds / 2 {
-                double_round(&mut t_state);
-            }
-            if self.rounds % 2 == 1 {
-                column_round(&mut t_state)
-            }
-
-            // XOR the current state into the temporary state
-            for (i, word) in t_state.iter_mut().enumerate() {
-                *word += state[i]
-            }
-
-            // Create a byte stream
-            let key_stream = t_state.iter().flat_map(|w| w.0.to_le_bytes());
-
+        for _ in 0..blocks {
+            self.block_function(&mut state, &mut key_stream);
             out.extend(key_stream);
 
             // Increment
-            state[12] += 1;
+            state[12] = state[12].wrapping_add(1);
         }
 
         out
@@ -115,51 +104,17 @@ impl ChaChaIetf {
 
     pub fn encrypt_bytes_with_ctr(&self, bytes: &[u8], ctr: u32) -> Vec<u8> {
         let mut out = Vec::new();
-        let mut state = [
-            Wrapping(0x61707865),
-            Wrapping(0x3320646e),
-            Wrapping(0x79622d32),
-            Wrapping(0x6b206574),
-            Wrapping(self.key[0]),
-            Wrapping(self.key[1]),
-            Wrapping(self.key[2]),
-            Wrapping(self.key[3]),
-            Wrapping(self.key[4]),
-            Wrapping(self.key[5]),
-            Wrapping(self.key[6]),
-            Wrapping(self.key[7]),
-            Wrapping(ctr),
-            Wrapping(self.nonce[0]),
-            Wrapping(self.nonce[1]),
-            Wrapping(self.nonce[2]),
-        ];
+        let mut key_stream = [0; 64];
+        let mut state = ChaChaState(self.create_state(ctr));
 
         for block in bytes.chunks(64) {
-            // Temporary state
-            let mut t_state = state.clone();
-
-            // Only ChaCha20, ChaCha12, and ChaCha8 are official but any number is usable
-            for _round in 0..self.rounds / 2 {
-                double_round(&mut t_state);
-            }
-            if self.rounds % 2 == 1 {
-                column_round(&mut t_state)
-            }
-
-            // XOR the current state into the temporary state
-            for (i, word) in t_state.iter_mut().enumerate() {
-                *word += state[i]
-            }
-
-            // Create a byte stream
-            let key_steam = t_state.iter().flat_map(|w| w.0.to_le_bytes());
-
-            for (input_byte, key_byte) in block.iter().zip(key_steam) {
+            self.block_function(&mut state, &mut key_stream);
+            for (input_byte, key_byte) in block.iter().zip(key_stream) {
                 out.push(*input_byte ^ key_byte)
             }
 
             // Increment
-            state[12] += 1;
+            state[12] = state[12].wrapping_add(1);
         }
 
         out
@@ -173,7 +128,7 @@ impl ChaChaIetf {
 crate::impl_cipher_for_stream_cipher!(ChaChaIetf);
 
 #[cfg(test)]
-mod chacha_tests {
+mod chacha_ietf_tests {
 
     use super::*;
 

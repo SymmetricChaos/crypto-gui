@@ -1,16 +1,7 @@
-use crate::{
-    digital::stream_ciphers::chacha::{column_round, double_round},
-    Cipher, CipherError,
-};
-use std::num::Wrapping;
-use utils::byte_formatting::ByteFormat;
+use crate::{Cipher, CipherError};
+use utils::byte_formatting::{fill_u32s_be, fill_u32s_le, ByteFormat};
 
-pub struct HChaCha {
-    pub key: [u32; 8],
-    pub nonce: [u32; 4],
-}
-
-impl HChaCha {}
+use super::ChaChaState;
 
 pub struct XChaCha {
     pub input_format: ByteFormat,
@@ -18,7 +9,7 @@ pub struct XChaCha {
     pub key: [u32; 8],
     pub nonce: [u32; 6],
     pub rounds: u8,
-    pub ctr: u64,
+    pub ctr: u32,
 }
 
 impl Default for XChaCha {
@@ -40,8 +31,18 @@ impl Default for XChaCha {
 }
 
 impl XChaCha {
-    pub fn create_state(&self, ctr: u64) -> [u32; 16] {
-        [
+    pub fn key_and_nonce(&mut self, key: [u8; 32], nonce: [u8; 24]) {
+        fill_u32s_le(&mut self.key, &key);
+        fill_u32s_le(&mut self.nonce, &nonce);
+    }
+
+    pub fn with_key_and_nonce(mut self, key: [u8; 32], nonce: [u8; 24]) -> Self {
+        self.key_and_nonce(key, nonce);
+        self
+    }
+
+    pub fn synthetic_key(&self) -> [u32; 8] {
+        let mut state = ChaChaState([
             0x61707865,
             0x3320646e,
             0x79622d32,
@@ -54,123 +55,94 @@ impl XChaCha {
             self.key[5],
             self.key[6],
             self.key[7],
-            ctr as u32,
-            (ctr >> 32) as u32,
             self.nonce[0],
             self.nonce[1],
+            self.nonce[2],
+            self.nonce[3],
+        ]);
+
+        for _ in 0..10 {
+            state.double_round();
+        }
+
+        [
+            state[0], state[1], state[2], state[3], state[12], state[13], state[14], state[15],
+        ]
+        .map(|w| w.swap_bytes())
+    }
+
+    pub fn create_state(&self, ctr: u32) -> [u32; 16] {
+        let k = self.synthetic_key();
+        [
+            0x61707865,
+            0x3320646e,
+            0x79622d32,
+            0x6b206574,
+            k[0],
+            k[1],
+            k[2],
+            k[3],
+            k[4],
+            k[5],
+            k[6],
+            k[7],
+            ctr,
+            0x00000000,
+            self.nonce[4],
+            self.nonce[5],
         ]
     }
 
+    pub fn block_function(&self, state: &mut ChaChaState, block: &mut [u8; 64]) {
+        // Temporary state
+        let mut t_state = state.clone();
+
+        // Only ChaCha20, ChaCha12, and ChaCha8 are official but any number is usable
+        for _round in 0..self.rounds / 2 {
+            t_state.double_round();
+        }
+        if self.rounds % 2 == 1 {
+            t_state.column_round();
+        }
+
+        // Add the current state into the temporary state
+        for (i, word) in t_state.0.iter_mut().enumerate() {
+            *word = word.wrapping_add(state[i])
+        }
+
+        // Create a byte stream
+        for (i, b) in t_state.0.iter().flat_map(|w| w.to_le_bytes()).enumerate() {
+            block[i] = b
+        }
+    }
+
     // Create a key_stream with the specified number of blocks and with the counter started at a particular value
-    pub fn key_stream_with_ctr(&self, blocks: u64, ctr: u64) -> Vec<u8> {
-        let mut ctr = ctr;
+    pub fn key_stream_with_ctr(&self, blocks: u32, ctr: u32) -> Vec<u8> {
         let mut out = Vec::with_capacity((blocks * 64) as usize);
-        let mut state = [
-            Wrapping(0x61707865),
-            Wrapping(0x3320646e),
-            Wrapping(0x79622d32),
-            Wrapping(0x6b206574),
-            Wrapping(self.key[0]),
-            Wrapping(self.key[1]),
-            Wrapping(self.key[2]),
-            Wrapping(self.key[3]),
-            Wrapping(self.key[4]),
-            Wrapping(self.key[5]),
-            Wrapping(self.key[6]),
-            Wrapping(self.key[7]),
-            Wrapping(0x00000000),
-            Wrapping(0x00000000),
-            Wrapping(self.nonce[0]),
-            Wrapping(self.nonce[1]),
-        ];
+        let mut key_stream = [0; 64];
+        let mut state = ChaChaState::new(self.create_state(ctr));
 
-        for _block in 0..blocks {
-            // Mix the counter into the state
-            state[12] = Wrapping(ctr as u32); // low bits, "as" cast truncates
-            state[13] = Wrapping((ctr >> 32) as u32); // high bits
-
-            // println!("key_stream_state: {:08x?}", state);
-
-            // Temporary state
-            let mut t_state = state.clone();
-
-            // Only ChaCha20, ChaCha12, and ChaCha8 are official but any number is usable
-            for _round in 0..self.rounds / 2 {
-                double_round(&mut t_state);
-            }
-            if self.rounds % 2 == 1 {
-                column_round(&mut t_state)
-            }
-
-            // XOR the current state into the temporary state
-            for (i, word) in t_state.iter_mut().enumerate() {
-                *word += state[i]
-            }
-
-            // Create a byte stream
-            let key_stream = t_state.iter().flat_map(|w| w.0.to_le_bytes());
-
+        for _ in 0..blocks {
+            self.block_function(&mut state, &mut key_stream);
             out.extend(key_stream);
-
-            ctr = ctr.wrapping_add(1);
+            state[12] = state[12].wrapping_add(1);
         }
 
         out
     }
 
-    // Encrypt a message with the counter started at a particular value
-    pub fn encrypt_bytes_with_ctr(&self, bytes: &[u8], ctr: u64) -> Vec<u8> {
-        let mut ctr = ctr;
+    // // Encrypt a message with the counter started at a particular value
+    pub fn encrypt_bytes_with_ctr(&self, bytes: &[u8], ctr: u32) -> Vec<u8> {
         let mut out = Vec::new();
-        let mut state = [
-            Wrapping(0x61707865),
-            Wrapping(0x3320646e),
-            Wrapping(0x79622d32),
-            Wrapping(0x6b206574),
-            Wrapping(self.key[0]),
-            Wrapping(self.key[1]),
-            Wrapping(self.key[2]),
-            Wrapping(self.key[3]),
-            Wrapping(self.key[4]),
-            Wrapping(self.key[5]),
-            Wrapping(self.key[6]),
-            Wrapping(self.key[7]),
-            Wrapping(0x00000000),
-            Wrapping(0x00000000),
-            Wrapping(self.nonce[0]),
-            Wrapping(self.nonce[1]),
-        ];
+        let mut key_stream = [0; 64];
+        let mut state = ChaChaState(self.create_state(ctr));
 
         for block in bytes.chunks(64) {
-            // Insert the counter into the state
-            state[12] = Wrapping(ctr as u32); // low bits, "as" cast truncates
-            state[13] = Wrapping((ctr >> 32) as u32); // high bits
-
-            // Temporary state
-            let mut t_state = state.clone();
-
-            // Only ChaCha20, ChaCha12, and ChaCha8 are official but any number is usable
-            for _round in 0..self.rounds / 2 {
-                double_round(&mut t_state);
-            }
-            if self.rounds % 2 == 1 {
-                column_round(&mut t_state)
-            }
-
-            // XOR the current state into the temporary state
-            for (i, word) in t_state.iter_mut().enumerate() {
-                *word += state[i]
-            }
-
-            // Create a byte stream
-            let key_steam = t_state.iter().flat_map(|w| w.0.to_le_bytes());
-
-            // XOR the keystream into the message bytes
-            for (input_byte, key_byte) in block.iter().zip(key_steam) {
+            self.block_function(&mut state, &mut key_stream);
+            for (input_byte, key_byte) in block.iter().zip(key_stream) {
                 out.push(*input_byte ^ key_byte)
             }
-
-            ctr = ctr.wrapping_add(1);
+            state[12] = state[12].wrapping_add(1);
         }
 
         out
@@ -185,43 +157,70 @@ impl XChaCha {
 crate::impl_cipher_for_stream_cipher!(XChaCha);
 
 #[cfg(test)]
-mod chacha_tests {
+mod xchacha_tests {
 
     use super::*;
 
     #[test]
-    fn encrypt_decrypt_test() {
-        let ptext = "0102030405060708";
-        let cipher = XChaCha::default();
-
-        let ctext = cipher.encrypt(ptext).unwrap();
-        assert_eq!(cipher.decrypt(&ctext).unwrap(), ptext);
-    }
-
-    #[test]
-    fn state_test_empty() {
-        // https://datatracker.ietf.org/doc/html/draft-agl-tls-chacha20poly1305-04#section-7
+    fn synthetic_key() {
+        // https://datatracker.ietf.org/doc/html/draft-arciszewski-xchacha#section-2.2.1
         let mut cipher = XChaCha::default();
-        cipher.key = [0, 0, 0, 0, 0, 0, 0, 0];
-        cipher.nonce = [0, 0, 0, 0, 0, 0];
-
-        let key_stream = cipher.encrypt_bytes(&[0u8; 64]);
+        cipher.key = [
+            0x03020100, 0x07060504, 0x0b0a0908, 0x0f0e0d0c, 0x13121110, 0x17161514, 0x1b1a1918,
+            0x1f1e1d1c,
+        ];
+        cipher.nonce = [0x09000000, 0x4a000000, 0x00000000, 0x27594131, 0, 0];
 
         assert_eq!(
-            key_stream,
-            ByteFormat::Hex.text_to_bytes("76b8e0ada0f13d90405d6ae55386bd28bdd219b8a08ded1aa836efcc8b770dc7da41597c5157488d7724e03fb8d84a376a43b8f41518a11cc387b669b2ee6586").unwrap()
-        );
+            [
+                0x82413b42, 0x27b27bfe, 0xd30e4250, 0x8a877d73, 0xa0f9e4d5, 0x8a74a853, 0xc12ec413,
+                0x26d3ecdc
+            ],
+            cipher.synthetic_key()
+        )
     }
 
     #[test]
-    fn state_test() {
+    fn key_stream_test() {
         // https://datatracker.ietf.org/doc/html/draft-agl-tls-chacha20poly1305-04#section-7
-        let cipher = XChaCha::default();
-        let key_stream = cipher.encrypt_bytes(&[0u8; 256]);
-
-        assert_eq!(
-            key_stream,
-            ByteFormat::Hex.text_to_bytes("f798a189f195e66982105ffb640bb7757f579da31602fc93ec01ac56f85ac3c134a4547b733b46413042c9440049176905d3be59ea1c53f15916155c2be8241a38008b9a26bc35941e2444177c8ade6689de95264986d95889fb60e84629c9bd9a5acb1cc118be563eb9b3a4a472f82e09a7e778492b562ef7130e88dfe031c79db9d4f7c7a899151b9a475032b63fc385245fe054e3dd5a97a5f576fe064025d3ce042c566ab2c507b138db853e3d6959660996546cc9c4a6eafdc777c040d70eaf46f76dad3979e5c5360c3317166a1c894c94a371876a94df7628fe4eaaf2ccb27d5aaae0ad7ad0f9d4b6ad3b54098746d4524d38407a6deb3ab78fab78c9").unwrap()
+        let cipher = XChaCha::default().with_key_and_nonce(
+            [
+                0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8a, 0x8b, 0x8c, 0x8d,
+                0x8e, 0x8f, 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97, 0x98, 0x99, 0x9a, 0x9b,
+                0x9c, 0x9d, 0x9e, 0x9f,
+            ],
+            [
+                0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d,
+                0x4e, 0x4f, 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x58,
+            ],
         );
+
+        let key_stream = cipher.key_stream_with_ctr(2, 1);
+
+        println!("{:02x?}", key_stream);
+
+        panic!("test only prints to inspect")
+        // assert_eq!(key_stream, ByteFormat::Hex.text_to_bytes("29624b4b1b140ace53740e405b2168540fd7d630c1f536fecd722fc3cddba7f4cca98cf9e47e5e64d115450f9b125b54449ff76141ca620a1f9cfcab2a1a8a255e766a5266b878846120ea64ad99aa479471e63befcbd37cd1c22a221fe462215cf32c74895bf505863ccddd48f62916dc6521f1ec50a5ae08903aa259d9bf607cd8026fba548604f1b6072d91bc91243a5b845f7fd171b02edc5a0a84cf28dd241146bc376e3f48df5e7fee1d11048c190a3d3deb0feb64b42d9c6fdeee290fa0e6ae2c26c0249ea8c181f7e2ffd100cbe5fd3c4f8271d62b15330cb8fdcf00b3df507ca8c924f7017b7e712d15a2eb5c50484451e54e1b4b995bd8fdd94597bb94d7af0b2c04df10ba0890899ed9293a0f55b8bafa999264035f1d4fbe7fe0aafa109a62372027e50e10cdfecca127").unwrap());
+    }
+
+    #[test]
+    fn encrypt_test() {
+        // https://datatracker.ietf.org/doc/html/draft-agl-tls-chacha20poly1305-04#section-7
+        let ptext = b"The dhole (pronounced \"dole\") is also known as the Asiatic wilddog, red dog, and whistling dog. It is about the size of a German shepherd but looks more like a long-legged fox. This highly elusive and skilled jumper is classified with wolves, coyotes, jackals, and foxesin the taxonomic family Canidae.";
+        let cipher = XChaCha::default().with_key_and_nonce(
+            [
+                0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8a, 0x8b, 0x8c, 0x8d,
+                0x8e, 0x8f, 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97, 0x98, 0x99, 0x9a, 0x9b,
+                0x9c, 0x9d, 0x9e, 0x9f,
+            ],
+            [
+                0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d,
+                0x4e, 0x4f, 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x58,
+            ],
+        );
+
+        let ctext = cipher.encrypt_bytes_with_ctr(ptext, 1);
+
+        assert_eq!(ctext, ByteFormat::Hex.text_to_bytes("7d0a2e6b7f7c65a236542630294e063b7ab9b555a5d5149aa21e4ae1e4fbce87ecc8e08a8b5e350abe622b2ffa617b202cfad72032a3037e76ffdcdc4376ee053a190d7e46ca1de04144850381b9cb29f051915386b8a710b8ac4d027b8b050f7cba5854e028d564e453b8a968824173fc16488b8970cac828f11ae53cabd20112f87107df24ee6183d2274fe4c8b1485534ef2c5fbc1ec24bfc3663efaa08bc047d29d25043532db8391a8a3d776bf4372a6955827ccb0cdd4af403a7ce4c63d595c75a43e045f0cce1f29c8b93bd65afc5974922f214a40b7c402cdb91ae73c0b63615cdad0480680f16515a7ace9d39236464328a37743ffc28f4ddb324f4d0f5bbdc270c65b1749a6efff1fbaa09536175ccd29fb9e6057b307320d316838a9c71f70b5b5907a66f7ea49aadc409").unwrap());
     }
 }

@@ -1,9 +1,7 @@
-use crate::{
-    digital::stream_ciphers::chacha::{column_round, double_round},
-    Cipher, CipherError,
-};
-use std::num::Wrapping;
+use crate::{Cipher, CipherError};
 use utils::byte_formatting::{fill_u32s_le, ByteFormat};
+
+use super::ChaChaState;
 
 pub struct ChaCha {
     pub input_format: ByteFormat,
@@ -64,57 +62,43 @@ impl ChaCha {
         ]
     }
 
+    pub fn block_function(&self, state: &mut ChaChaState, block: &mut [u8; 64], ctr: u64) {
+        // Mix the counter into the state
+        state[12] = ctr as u32; // low bits, "as" cast truncates
+        state[13] = (ctr >> 32) as u32; // high bits
+
+        // Temporary state
+        let mut t_state = state.clone();
+
+        // Only ChaCha20, ChaCha12, and ChaCha8 are official but any number is usable
+        for _round in 0..self.rounds / 2 {
+            t_state.double_round();
+        }
+        if self.rounds % 2 == 1 {
+            t_state.column_round();
+        }
+
+        // Add the current state into the temporary state
+        for (i, word) in t_state.0.iter_mut().enumerate() {
+            *word = word.wrapping_add(state[i])
+        }
+
+        // Create a byte stream
+        for (i, b) in t_state.0.iter().flat_map(|w| w.to_le_bytes()).enumerate() {
+            block[i] = b
+        }
+    }
+
     // Create a key_stream with the specified number of blocks and with the counter started at a particular value
     pub fn key_stream_with_ctr(&self, blocks: u64, ctr: u64) -> Vec<u8> {
         let mut ctr = ctr;
         let mut out = Vec::with_capacity((blocks * 64) as usize);
-        let mut state = [
-            Wrapping(0x61707865),
-            Wrapping(0x3320646e),
-            Wrapping(0x79622d32),
-            Wrapping(0x6b206574),
-            Wrapping(self.key[0]),
-            Wrapping(self.key[1]),
-            Wrapping(self.key[2]),
-            Wrapping(self.key[3]),
-            Wrapping(self.key[4]),
-            Wrapping(self.key[5]),
-            Wrapping(self.key[6]),
-            Wrapping(self.key[7]),
-            Wrapping(0x00000000),
-            Wrapping(0x00000000),
-            Wrapping(self.nonce[0]),
-            Wrapping(self.nonce[1]),
-        ];
+        let mut key_stream = [0; 64];
+        let mut state = ChaChaState::new(self.create_state(ctr));
 
-        for _block in 0..blocks {
-            // Mix the counter into the state
-            state[12] = Wrapping(ctr as u32); // low bits, "as" cast truncates
-            state[13] = Wrapping((ctr >> 32) as u32); // high bits
-
-            // println!("key_stream_state: {:08x?}", state);
-
-            // Temporary state
-            let mut t_state = state.clone();
-
-            // Only ChaCha20, ChaCha12, and ChaCha8 are official but any number is usable
-            for _round in 0..self.rounds / 2 {
-                double_round(&mut t_state);
-            }
-            if self.rounds % 2 == 1 {
-                column_round(&mut t_state)
-            }
-
-            // XOR the current state into the temporary state
-            for (i, word) in t_state.iter_mut().enumerate() {
-                *word += state[i]
-            }
-
-            // Create a byte stream
-            let key_stream = t_state.iter().flat_map(|w| w.0.to_le_bytes());
-
+        for _ in 0..blocks {
+            self.block_function(&mut state, &mut key_stream, ctr);
             out.extend(key_stream);
-
             ctr = ctr.wrapping_add(1);
         }
 
@@ -125,55 +109,19 @@ impl ChaCha {
     pub fn encrypt_bytes_with_ctr(&self, bytes: &[u8], ctr: u64) -> Vec<u8> {
         let mut ctr = ctr;
         let mut out = Vec::new();
-        let mut state = [
-            Wrapping(0x61707865),
-            Wrapping(0x3320646e),
-            Wrapping(0x79622d32),
-            Wrapping(0x6b206574),
-            Wrapping(self.key[0]),
-            Wrapping(self.key[1]),
-            Wrapping(self.key[2]),
-            Wrapping(self.key[3]),
-            Wrapping(self.key[4]),
-            Wrapping(self.key[5]),
-            Wrapping(self.key[6]),
-            Wrapping(self.key[7]),
-            Wrapping(0x00000000),
-            Wrapping(0x00000000),
-            Wrapping(self.nonce[0]),
-            Wrapping(self.nonce[1]),
-        ];
+        let mut key_stream = [0; 64];
+        let mut state = ChaChaState::new(self.create_state(ctr));
 
         for block in bytes.chunks(64) {
             // Insert the counter into the state
-            state[12] = Wrapping(ctr as u32); // low bits, "as" cast truncates
-            state[13] = Wrapping((ctr >> 32) as u32); // high bits
-
-            // Temporary state
-            let mut t_state = state.clone();
-
-            // Only ChaCha20, ChaCha12, and ChaCha8 are official but any number is usable
-            for _round in 0..self.rounds / 2 {
-                double_round(&mut t_state);
-            }
-            if self.rounds % 2 == 1 {
-                column_round(&mut t_state)
-            }
-
-            // XOR the current state into the temporary state
-            for (i, word) in t_state.iter_mut().enumerate() {
-                *word += state[i]
-            }
-
-            // Create a byte stream
-            let key_steam = t_state.iter().flat_map(|w| w.0.to_le_bytes());
+            self.block_function(&mut state, &mut key_stream, ctr);
+            out.extend(key_stream);
+            ctr = ctr.wrapping_add(1);
 
             // XOR the keystream into the message bytes
-            for (input_byte, key_byte) in block.iter().zip(key_steam) {
+            for (input_byte, key_byte) in block.iter().zip(key_stream) {
                 out.push(*input_byte ^ key_byte)
             }
-
-            ctr = ctr.wrapping_add(1);
         }
 
         out
@@ -202,7 +150,7 @@ mod chacha_tests {
     }
 
     #[test]
-    fn state_test_empty() {
+    fn key_stream_test_empty() {
         // https://datatracker.ietf.org/doc/html/draft-agl-tls-chacha20poly1305-04#section-7
         let mut cipher = ChaCha::default();
         cipher.key = [0, 0, 0, 0, 0, 0, 0, 0];
@@ -217,7 +165,7 @@ mod chacha_tests {
     }
 
     #[test]
-    fn state_test() {
+    fn key_stream_test_default() {
         // https://datatracker.ietf.org/doc/html/draft-agl-tls-chacha20poly1305-04#section-7
         let cipher = ChaCha::default();
         let key_stream = cipher.encrypt_bytes(&[0u8; 256]);
