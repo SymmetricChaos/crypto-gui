@@ -3,7 +3,7 @@ use utils::byte_formatting::{fill_u32s_le, ByteFormat};
 
 use super::ChaChaState;
 
-pub struct XChaCha {
+pub struct XChaChaItef {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
     pub key: [u32; 8],
@@ -12,7 +12,7 @@ pub struct XChaCha {
     pub ctr: u32,
 }
 
-impl Default for XChaCha {
+impl Default for XChaChaItef {
     fn default() -> Self {
         Self {
             input_format: ByteFormat::Hex,
@@ -25,7 +25,7 @@ impl Default for XChaCha {
     }
 }
 
-impl XChaCha {
+impl XChaChaItef {
     pub fn key_and_nonce(&mut self, key: [u8; 32], nonce: [u8; 24]) {
         fill_u32s_le(&mut self.key, &key);
         fill_u32s_le(&mut self.nonce, &nonce);
@@ -148,7 +148,7 @@ impl XChaCha {
     }
 }
 
-crate::impl_cipher_for_stream_cipher!(XChaCha);
+crate::impl_cipher_for_stream_cipher!(XChaChaItef);
 
 #[cfg(test)]
 mod xchacha_tests {
@@ -158,7 +158,7 @@ mod xchacha_tests {
     #[test]
     fn synthetic_key() {
         // https://datatracker.ietf.org/doc/html/draft-arciszewski-xchacha#section-2.2.1
-        let mut cipher = XChaCha::default();
+        let mut cipher = XChaChaItef::default();
         cipher.key = [
             0x03020100, 0x07060504, 0x0b0a0908, 0x0f0e0d0c, 0x13121110, 0x17161514, 0x1b1a1918,
             0x1f1e1d1c,
@@ -177,7 +177,7 @@ mod xchacha_tests {
     #[test]
     fn key_stream_test() {
         // https://datatracker.ietf.org/doc/html/draft-agl-tls-chacha20poly1305-04#section-7
-        let cipher = XChaCha::default().with_key_and_nonce(
+        let cipher = XChaChaItef::default().with_key_and_nonce(
             [
                 0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8a, 0x8b, 0x8c, 0x8d,
                 0x8e, 0x8f, 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97, 0x98, 0x99, 0x9a, 0x9b,
@@ -198,7 +198,7 @@ mod xchacha_tests {
     fn encrypt_test() {
         // https://datatracker.ietf.org/doc/html/draft-agl-tls-chacha20poly1305-04#section-7
 
-        let cipher = XChaCha::default().with_key_and_nonce(
+        let cipher = XChaChaItef::default().with_key_and_nonce(
             [
                 0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8a, 0x8b, 0x8c, 0x8d,
                 0x8e, 0x8f, 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97, 0x98, 0x99, 0x9a, 0x9b,

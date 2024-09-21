@@ -1,6 +1,7 @@
 pub mod chacha;
 pub mod chacha20poly1305;
 pub mod chacha_ietf;
+pub mod xchacha;
 pub mod xchacha_itef;
 
 const DEBUG: bool = false;
