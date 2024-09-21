@@ -76,7 +76,13 @@ pub fn bytes_to_bitstring<T: AsRef<[u8]>>(bytes: T) -> String {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub struct ByteFormatError;
+pub struct ByteFormatError(&'static str);
+
+impl std::fmt::Display for ByteFormatError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, EnumIter, Display)]
 pub enum ByteFormat {
@@ -94,10 +100,16 @@ impl ByteFormat {
             return Ok(Vec::new());
         }
         match self {
-            ByteFormat::Hex => hex_to_bytes_ltr(text).map_err(|_| ByteFormatError),
+            ByteFormat::Hex => {
+                hex_to_bytes_ltr(text).map_err(|_| ByteFormatError("expected hexadecimal"))
+            }
             ByteFormat::Utf8 => Ok(text.as_bytes().to_owned()),
-            ByteFormat::Base64 => BASE64_STANDARD.decode(text).map_err(|_| ByteFormatError),
-            ByteFormat::Binary => bitstring_to_bytes(text).map_err(|_| ByteFormatError),
+            ByteFormat::Base64 => BASE64_STANDARD
+                .decode(text)
+                .map_err(|_| ByteFormatError("expected Base64")),
+            ByteFormat::Binary => {
+                bitstring_to_bytes(text).map_err(|_| ByteFormatError("expected binary"))
+            }
         }
     }
 
@@ -105,7 +117,7 @@ impl ByteFormat {
         let bytes = self.text_to_bytes(text)?;
 
         if bytes.len() % 2 != 0 {
-            Err(ByteFormatError)
+            Err(ByteFormatError("data must be in blocks of two bytes"))
         } else {
             Ok(bytes
                 .chunks_exact(2)
@@ -118,7 +130,7 @@ impl ByteFormat {
         let bytes = self.text_to_bytes(text)?;
 
         if bytes.len() % 2 != 0 {
-            Err(ByteFormatError)
+            Err(ByteFormatError("data must be in blocks of two bytes"))
         } else {
             Ok(bytes
                 .chunks_exact(2)
@@ -131,7 +143,7 @@ impl ByteFormat {
         let bytes = self.text_to_bytes(text)?;
 
         if bytes.len() % 4 != 0 {
-            Err(ByteFormatError)
+            Err(ByteFormatError("data must be in blocks of four bytes"))
         } else {
             Ok(bytes
                 .chunks_exact(4)
@@ -144,7 +156,7 @@ impl ByteFormat {
         let bytes = self.text_to_bytes(text)?;
 
         if bytes.len() % 4 != 0 {
-            Err(ByteFormatError)
+            Err(ByteFormatError("data must be in blocks of four bytes"))
         } else {
             Ok(bytes
                 .chunks_exact(4)
@@ -157,7 +169,7 @@ impl ByteFormat {
         let bytes = self.text_to_bytes(text)?;
 
         if bytes.len() % 8 != 0 {
-            Err(ByteFormatError)
+            Err(ByteFormatError("data must be in blocks of eight bytes"))
         } else {
             Ok(bytes
                 .chunks_exact(8)
@@ -170,7 +182,7 @@ impl ByteFormat {
         let bytes = self.text_to_bytes(text)?;
 
         if bytes.len() % 8 != 0 {
-            Err(ByteFormatError)
+            Err(ByteFormatError("data must be in blocks of eight bytes"))
         } else {
             Ok(bytes
                 .chunks_exact(8)

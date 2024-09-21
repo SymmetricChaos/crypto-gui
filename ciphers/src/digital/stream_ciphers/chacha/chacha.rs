@@ -127,9 +127,27 @@ impl ChaCha {
         out
     }
 
+    // Encrypt a message with the counter started at a particular value
+    pub fn encrypt_bytes_with_ctr_mut(&self, bytes: &mut [u8], ctr: u64) {
+        let mut ctr = ctr;
+        let mut key_stream = [0; 64];
+        let mut state = ChaChaState::new(self.create_state(ctr));
+
+        for block in bytes.chunks_mut(64) {
+            // Insert the counter into the state
+            self.block_function(&mut state, &mut key_stream, ctr);
+            ctr = ctr.wrapping_add(1);
+
+            // XOR the keystream into the message bytes
+            for (input_byte, key_byte) in block.iter_mut().zip(key_stream) {
+                *input_byte ^= key_byte
+            }
+        }
+    }
+
     // Encrypt a message with the counter started at the stored value
-    pub fn encrypt_bytes(&self, bytes: &[u8]) -> Vec<u8> {
-        self.encrypt_bytes_with_ctr(bytes, self.ctr)
+    pub fn encrypt_bytes(&self, bytes: &mut [u8]) {
+        self.encrypt_bytes_with_ctr_mut(bytes, self.ctr)
     }
 }
 
@@ -156,10 +174,11 @@ mod chacha_tests {
         cipher.key = [0, 0, 0, 0, 0, 0, 0, 0];
         cipher.nonce = [0, 0];
 
-        let key_stream = cipher.encrypt_bytes(&[0u8; 64]);
+        let mut key_stream = [0u8; 64];
+        cipher.encrypt_bytes(&mut key_stream);
 
         assert_eq!(
-            key_stream,
+            key_stream.to_vec(),
             ByteFormat::Hex.text_to_bytes("76b8e0ada0f13d90405d6ae55386bd28bdd219b8a08ded1aa836efcc8b770dc7da41597c5157488d7724e03fb8d84a376a43b8f41518a11cc387b669b2ee6586").unwrap()
         );
     }
@@ -168,10 +187,12 @@ mod chacha_tests {
     fn key_stream_test_default() {
         // https://datatracker.ietf.org/doc/html/draft-agl-tls-chacha20poly1305-04#section-7
         let cipher = ChaCha::default();
-        let key_stream = cipher.encrypt_bytes(&[0u8; 256]);
+
+        let mut key_stream = [0u8; 256];
+        cipher.encrypt_bytes(&mut key_stream);
 
         assert_eq!(
-            key_stream,
+            key_stream.to_vec(),
             ByteFormat::Hex.text_to_bytes("f798a189f195e66982105ffb640bb7757f579da31602fc93ec01ac56f85ac3c134a4547b733b46413042c9440049176905d3be59ea1c53f15916155c2be8241a38008b9a26bc35941e2444177c8ade6689de95264986d95889fb60e84629c9bd9a5acb1cc118be563eb9b3a4a472f82e09a7e778492b562ef7130e88dfe031c79db9d4f7c7a899151b9a475032b63fc385245fe054e3dd5a97a5f576fe064025d3ce042c566ab2c507b138db853e3d6959660996546cc9c4a6eafdc777c040d70eaf46f76dad3979e5c5360c3317166a1c894c94a371876a94df7628fe4eaaf2ccb27d5aaae0ad7ad0f9d4b6ad3b54098746d4524d38407a6deb3ab78fab78c9").unwrap()
         );
     }

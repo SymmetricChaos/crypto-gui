@@ -26,7 +26,7 @@ macro_rules! impl_cipher_for_block_cipher {
                 let mut bytes = self
                     .input_format
                     .text_to_bytes(text)
-                    .map_err(|_| crate::errors::CipherError::input("byte format error"))?;
+                    .map_err(|e| crate::errors::CipherError::Input(e.to_string()))?;
 
                 // Provide the necessary kind and amount of padding
                 if self.mode.padded() {
@@ -67,7 +67,7 @@ macro_rules! impl_cipher_for_block_cipher {
                 let mut bytes = self
                     .input_format
                     .text_to_bytes(text)
-                    .map_err(|_| crate::errors::CipherError::input("byte format error"))?;
+                    .map_err(|e| crate::errors::CipherError::Input(e.to_string()))?;
 
                 // If padding is needed return an error if the input for decryption is the wrong size
                 if self.mode.padded() {

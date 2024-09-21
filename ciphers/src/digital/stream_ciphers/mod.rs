@@ -15,7 +15,7 @@ macro_rules! impl_cipher_for_stream_cipher {
                 let mut bytes = self
                     .input_format
                     .text_to_bytes(text)
-                    .map_err(|_| CipherError::input("byte format error"))?;
+                    .map_err(|e| CipherError::Input(e.to_string()))?;
                 self.encrypt_bytes(&mut bytes);
                 Ok(self.output_format.byte_slice_to_text(&bytes))
             }

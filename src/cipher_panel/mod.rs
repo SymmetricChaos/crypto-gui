@@ -23,7 +23,6 @@ mod blowfish_controls;
 mod caesar_controls;
 mod chacha20_poly1305_controls;
 mod chacha_controls;
-mod chacha_ex_controls;
 mod chaocipher_controls;
 mod checkerboard_controls;
 mod columnar_controls;
@@ -75,6 +74,7 @@ mod turning_grille_controls;
 mod two_square_controls;
 mod vic_controls;
 mod vigenere_controls;
+mod xchacha_controls;
 mod xor_splitting_controls;
 mod xtea_controls;
 
@@ -195,10 +195,10 @@ pub struct CipherInterface {
     a51: a51_controls::A51Frame,
     a52: a52_controls::A52Frame,
     chacha: chacha_controls::ChaChaFrame,
-    chachaexnonce: chacha_ex_controls::ChaChaExNonceFrame,
     chacha20poly1305: chacha20_poly1305_controls::ChaCha20Poly1305Frame,
     rc4: rc4_controls::Rc4Frame,
     salsa20: salsa20_controls::Salsa20Frame,
+    xchacha: xchacha_controls::XChaChaFrame,
 
     // Public Key
     diffie_hellman: diffie_hellman_controls::DiffieHellmanFrame,
@@ -351,10 +351,10 @@ impl CipherInterface {
                 CipherId::A51,
                 CipherId::A52,
                 CipherId::ChaCha,
-                CipherId::ChaChaExtendedNonce,
                 CipherId::ChaCha20Poly1305,
                 CipherId::Rc4,
                 CipherId::Salsa20,
+                CipherId::XChaCha,
             ],
             active_cipher,
             CipherCategory::DigitalStream,
@@ -395,7 +395,6 @@ impl CipherInterface {
             CipherId::Blowfish => &mut self.blowfish,
             CipherId::Caesar => &mut self.caesar,
             CipherId::ChaCha => &mut self.chacha,
-            CipherId::ChaChaExtendedNonce => &mut self.chachaexnonce,
             CipherId::ChaCha20Poly1305 => &mut self.chacha20poly1305,
             CipherId::Chaocipher => &mut self.chaocipher,
             CipherId::Checkerboard => &mut self.checkerboard,
@@ -448,6 +447,7 @@ impl CipherInterface {
             CipherId::Vic => &mut self.vic,
             CipherId::Vigenere => &mut self.vigenere,
             CipherId::XorSplitting => &mut self.xor_splitting,
+            CipherId::XChaCha => &mut self.xchacha,
             CipherId::Xtea => &mut self.xtea,
             _ => todo!("<<<CIPHER NOT FOUND>>>"),
         }

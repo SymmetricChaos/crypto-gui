@@ -2,7 +2,7 @@ pub mod chacha;
 pub mod chacha20poly1305;
 pub mod chacha_ietf;
 pub mod xchacha;
-pub mod xchacha_itef;
+pub mod xchacha_ietf;
 
 const DEBUG: bool = false;
 
@@ -26,14 +26,14 @@ impl std::ops::IndexMut<usize> for ChaChaState {
 
 impl std::fmt::Display for ChaChaState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(
-            f,
-            "{:08x?}\n{:08x?}\n{:08x?}\n{:08x?}",
-            &self.0[0..4],
-            &self.0[4..8],
-            &self.0[8..12],
-            &self.0[12..16]
-        )
+        let mut out = String::with_capacity(148);
+        for line in self.0.chunks_exact(4) {
+            for word in line {
+                out.push_str(&format!("{:08x?} ", word))
+            }
+            out.push('\n')
+        }
+        writeln!(f, "{}", out)
     }
 }
 

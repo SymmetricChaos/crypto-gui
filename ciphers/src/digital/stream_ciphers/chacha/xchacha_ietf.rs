@@ -3,7 +3,7 @@ use utils::byte_formatting::{fill_u32s_le, ByteFormat};
 
 use super::ChaChaState;
 
-pub struct XChaChaItef {
+pub struct XChaChaIetf {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
     pub key: [u32; 8],
@@ -12,7 +12,7 @@ pub struct XChaChaItef {
     pub ctr: u32,
 }
 
-impl Default for XChaChaItef {
+impl Default for XChaChaIetf {
     fn default() -> Self {
         Self {
             input_format: ByteFormat::Hex,
@@ -25,7 +25,7 @@ impl Default for XChaChaItef {
     }
 }
 
-impl XChaChaItef {
+impl XChaChaIetf {
     pub fn key_and_nonce(&mut self, key: [u8; 32], nonce: [u8; 24]) {
         fill_u32s_le(&mut self.key, &key);
         fill_u32s_le(&mut self.nonce, &nonce);
@@ -142,13 +142,25 @@ impl XChaChaItef {
         out
     }
 
-    // Encrypt a message with the counter started at the stored value
-    pub fn encrypt_bytes(&self, bytes: &[u8]) -> Vec<u8> {
-        self.encrypt_bytes_with_ctr(bytes, self.ctr)
+    pub fn encrypt_bytes_with_ctr_mut(&self, bytes: &mut [u8], ctr: u32) {
+        let mut key_stream = [0; 64];
+        let mut state = ChaChaState::new(self.create_state(ctr));
+
+        for block in bytes.chunks_mut(64) {
+            self.block_function(&mut state, &mut key_stream);
+            for (input_byte, key_byte) in block.iter_mut().zip(key_stream) {
+                *input_byte ^= key_byte
+            }
+            state[12] = state[12].wrapping_add(1);
+        }
+    }
+
+    pub fn encrypt_bytes(&self, bytes: &mut [u8]) {
+        self.encrypt_bytes_with_ctr_mut(bytes, self.ctr)
     }
 }
 
-crate::impl_cipher_for_stream_cipher!(XChaChaItef);
+crate::impl_cipher_for_stream_cipher!(XChaChaIetf);
 
 #[cfg(test)]
 mod xchacha_tests {
@@ -158,18 +170,28 @@ mod xchacha_tests {
     #[test]
     fn synthetic_key() {
         // https://datatracker.ietf.org/doc/html/draft-arciszewski-xchacha#section-2.2.1
-        let mut cipher = XChaChaItef::default();
+        let mut cipher = XChaChaIetf::default();
         cipher.key = [
             0x03020100, 0x07060504, 0x0b0a0908, 0x0f0e0d0c, 0x13121110, 0x17161514, 0x1b1a1918,
             0x1f1e1d1c,
         ];
         cipher.nonce = [0x09000000, 0x4a000000, 0x00000000, 0x27594131, 0, 0];
 
+        // Something weird is going on. These literals should be correct as the XChaCha specification
+        // says to reverse the order of the bytes. However the test vectors only pass if the byte order
+        // is not reversed.
         assert_eq!(
             [
-                0x82413b42, 0x27b27bfe, 0xd30e4250, 0x8a877d73, 0xa0f9e4d5, 0x8a74a853, 0xc12ec413,
+                0x82413b42_u32,
+                0x27b27bfe,
+                0xd30e4250,
+                0x8a877d73,
+                0xa0f9e4d5,
+                0x8a74a853,
+                0xc12ec413,
                 0x26d3ecdc
-            ],
+            ]
+            .map(|n| n.swap_bytes()),
             cipher.synthetic_key()
         )
     }
@@ -177,7 +199,7 @@ mod xchacha_tests {
     #[test]
     fn key_stream_test() {
         // https://datatracker.ietf.org/doc/html/draft-agl-tls-chacha20poly1305-04#section-7
-        let cipher = XChaChaItef::default().with_key_and_nonce(
+        let cipher = XChaChaIetf::default().with_key_and_nonce(
             [
                 0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8a, 0x8b, 0x8c, 0x8d,
                 0x8e, 0x8f, 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97, 0x98, 0x99, 0x9a, 0x9b,
@@ -198,7 +220,7 @@ mod xchacha_tests {
     fn encrypt_test() {
         // https://datatracker.ietf.org/doc/html/draft-agl-tls-chacha20poly1305-04#section-7
 
-        let cipher = XChaChaItef::default().with_key_and_nonce(
+        let cipher = XChaChaIetf::default().with_key_and_nonce(
             [
                 0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8a, 0x8b, 0x8c, 0x8d,
                 0x8e, 0x8f, 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97, 0x98, 0x99, 0x9a, 0x9b,

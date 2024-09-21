@@ -118,7 +118,6 @@ impl A51Rng {
 pub struct A51 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-
     pub rng: A51Rng,
     pub key: [u8; 8],
     pub frame_number: u32,
@@ -129,7 +128,6 @@ impl Default for A51 {
         Self {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
-
             rng: Default::default(),
             key: [0u8; 8],
             frame_number: 0u32,

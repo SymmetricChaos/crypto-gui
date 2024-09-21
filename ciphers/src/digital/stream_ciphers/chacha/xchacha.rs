@@ -95,7 +95,7 @@ impl XChaCha {
         // Temporary state
         let mut t_state = state.clone();
 
-        // Only ChaCha20, ChaCha12, and ChaCha8 are official but any number is usable
+        // Only XChaCha20, XChaCha12, and XChaCha8 are official but any number is usable
         for _round in 0..self.rounds / 2 {
             t_state.double_round();
         }
@@ -152,9 +152,27 @@ impl XChaCha {
         out
     }
 
+    // Encrypt a message with the counter started at a particular value
+    pub fn encrypt_bytes_with_ctr_mut(&self, bytes: &mut [u8], ctr: u64) {
+        let mut ctr = ctr;
+        let mut key_stream = [0; 64];
+        let mut state = ChaChaState::new(self.create_state(ctr));
+
+        for block in bytes.chunks_mut(64) {
+            // Insert the counter into the state
+            self.block_function(&mut state, &mut key_stream, ctr);
+            ctr = ctr.wrapping_add(1);
+
+            // XOR the keystream into the message bytes
+            for (input_byte, key_byte) in block.iter_mut().zip(key_stream) {
+                *input_byte ^= key_byte
+            }
+        }
+    }
+
     // Encrypt a message with the counter started at the stored value
-    pub fn encrypt_bytes(&self, bytes: &[u8]) -> Vec<u8> {
-        self.encrypt_bytes_with_ctr(bytes, self.ctr)
+    pub fn encrypt_bytes(&self, bytes: &mut [u8]) {
+        self.encrypt_bytes_with_ctr_mut(bytes, self.ctr)
     }
 }
 

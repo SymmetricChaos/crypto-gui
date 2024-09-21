@@ -94,8 +94,6 @@ impl ChaChaIetf {
         for _ in 0..blocks {
             self.block_function(&mut state, &mut key_stream);
             out.extend(key_stream);
-
-            // Increment
             state[12] = state[12].wrapping_add(1);
         }
 
@@ -112,16 +110,27 @@ impl ChaChaIetf {
             for (input_byte, key_byte) in block.iter().zip(key_stream) {
                 out.push(*input_byte ^ key_byte)
             }
-
-            // Increment
             state[12] = state[12].wrapping_add(1);
         }
 
         out
     }
 
-    pub fn encrypt_bytes(&self, bytes: &[u8]) -> Vec<u8> {
-        self.encrypt_bytes_with_ctr(bytes, self.ctr)
+    pub fn encrypt_bytes_with_ctr_mut(&self, bytes: &mut [u8], ctr: u32) {
+        let mut key_stream = [0; 64];
+        let mut state = ChaChaState::new(self.create_state(ctr));
+
+        for block in bytes.chunks_mut(64) {
+            self.block_function(&mut state, &mut key_stream);
+            for (input_byte, key_byte) in block.iter_mut().zip(key_stream) {
+                *input_byte ^= key_byte
+            }
+            state[12] = state[12].wrapping_add(1);
+        }
+    }
+
+    pub fn encrypt_bytes(&self, bytes: &mut [u8]) {
+        self.encrypt_bytes_with_ctr_mut(bytes, self.ctr)
     }
 }
 
@@ -138,10 +147,11 @@ mod chacha_ietf_tests {
         let mut cipher = ChaChaIetf::default();
         cipher.ctr = 1;
 
-        let key_stream = cipher.encrypt_bytes(&[0u8; 64]);
+        let mut key_stream = [0u8; 64];
+        cipher.encrypt_bytes(&mut key_stream);
 
         assert_eq!(
-            key_stream,
+            key_stream.to_vec(),
             ByteFormat::Hex.text_to_bytes("10f1e7e4d13b5915500fdd1fa32071c4c7d1f4c733c068030422aa9ac3d46c4ed2826446079faa0914c2d705d98b02a2b5129cd1de164eb9cbd083e8a2503c4e").unwrap()
         );
     }
@@ -149,9 +159,9 @@ mod chacha_ietf_tests {
     #[test]
     fn encrypt_test() {
         // https://datatracker.ietf.org/doc/html/rfc8439#section-2.3.2
-        const PTEXT: &'static str = "Ladies and Gentlemen of the class of '99: If I could offer you only one tip for the future, sunscreen would be it.";
+        let mut text = ByteFormat::Utf8.text_to_bytes("Ladies and Gentlemen of the class of '99: If I could offer you only one tip for the future, sunscreen would be it.").unwrap();
         let mut cipher = ChaChaIetf::default();
-        cipher.input_format = ByteFormat::Utf8;
+
         cipher.key = [
             0x03020100, 0x07060504, 0x0b0a0908, 0x0f0e0d0c, 0x13121110, 0x17161514, 0x1b1a1918,
             0x1f1e1d1c,
@@ -159,9 +169,9 @@ mod chacha_ietf_tests {
         cipher.nonce = [0, 0x4a000000, 0];
         cipher.ctr = 1;
 
-        let ctext = cipher.encrypt_bytes(PTEXT.as_bytes());
+        cipher.encrypt_bytes(&mut text);
         assert_eq!(
-            ctext,
+            text,
             ByteFormat::Hex.text_to_bytes("6e2e359a2568f98041ba0728dd0d6981e97e7aec1d4360c20a27afccfd9fae0bf91b65c5524733ab8f593dabcd62b3571639d624e65152ab8f530c359f0861d807ca0dbf500d6a6156a38e088a22b65e52bc514d16ccf806818ce91ab77937365af90bbf74a35be6b40b8eedf2785e42874d").unwrap()
         );
     }

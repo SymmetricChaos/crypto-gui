@@ -1,4 +1,6 @@
-use ciphers::digital::stream_ciphers::chacha::{chacha::ChaCha, chacha_ietf::ChaChaIetf};
+use ciphers::digital::stream_ciphers::chacha::{
+    xchacha::XChaCha, xchacha_ietf::XChaChaIetf, ChaChaState,
+};
 use egui::Slider;
 use rand::{thread_rng, Rng};
 
@@ -6,13 +8,13 @@ use crate::ui_elements::UiElements;
 
 use super::CipherFrame;
 
-pub struct ChaChaFrame {
-    cipher: ChaCha,
-    cipher_ietf: ChaChaIetf,
+pub struct XChaChaFrame {
+    cipher: XChaCha,
+    cipher_ietf: XChaChaIetf,
     ietf: bool,
 }
 
-impl Default for ChaChaFrame {
+impl Default for XChaChaFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
@@ -22,7 +24,7 @@ impl Default for ChaChaFrame {
     }
 }
 
-impl ChaChaFrame {
+impl XChaChaFrame {
     fn start_state(&self) -> String {
         let mut out = String::new();
 
@@ -41,9 +43,71 @@ impl ChaChaFrame {
 
         out
     }
+
+    fn synthetic_key(&self) -> String {
+        let mut out = String::new();
+
+        let mut state = if self.ietf {
+            ChaChaState::new([
+                0x61707865,
+                0x3320646e,
+                0x79622d32,
+                0x6b206574,
+                self.cipher_ietf.key[0],
+                self.cipher_ietf.key[1],
+                self.cipher_ietf.key[2],
+                self.cipher_ietf.key[3],
+                self.cipher_ietf.key[4],
+                self.cipher_ietf.key[5],
+                self.cipher_ietf.key[6],
+                self.cipher_ietf.key[7],
+                self.cipher_ietf.nonce[0],
+                self.cipher_ietf.nonce[1],
+                self.cipher_ietf.nonce[2],
+                self.cipher_ietf.nonce[3],
+            ])
+        } else {
+            ChaChaState::new([
+                0x61707865,
+                0x3320646e,
+                0x79622d32,
+                0x6b206574,
+                self.cipher.key[0],
+                self.cipher.key[1],
+                self.cipher.key[2],
+                self.cipher.key[3],
+                self.cipher.key[4],
+                self.cipher.key[5],
+                self.cipher.key[6],
+                self.cipher.key[7],
+                self.cipher.nonce[0],
+                self.cipher.nonce[1],
+                self.cipher.nonce[2],
+                self.cipher.nonce[3],
+            ])
+        };
+
+        out.push_str("Input\n");
+        out.push_str(&state.to_string());
+
+        for _ in 0..10 {
+            state.double_round();
+        }
+
+        out.push_str("\nTransformation\n");
+        out.push_str(&state.to_string());
+
+        out.push_str("\nEncryption Key (Top and Bottom Rows)\n");
+        out.push_str(&format!(
+            "{:08x} {:08x} {:08x} {:08x} {:08x} {:08x} {:08x} {:08x}",
+            state[0], state[1], state[2], state[3], state[12], state[13], state[14], state[15]
+        ));
+
+        out
+    }
 }
 
-impl CipherFrame for ChaChaFrame {
+impl CipherFrame for XChaChaFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
@@ -57,7 +121,7 @@ impl CipherFrame for ChaChaFrame {
         ui.subheading("IETF Version");
         ui.checkbox(
             &mut self.ietf,
-            "The Internet Engineering Task Force version of XChaCha uses a 32-bit counter and a 96-bit nonce.",
+            "The Internet Engineering Task Force version of XChaCha uses a 32-bit counter. It does not change the size of the nonce.",
         );
         ui.add_space(8.0);
 
@@ -80,15 +144,17 @@ impl CipherFrame for ChaChaFrame {
 
             ui.add_space(8.0);
             ui.horizontal(|ui| {
-                ui.subheading("Nonce (92 bits)");
+                ui.subheading("Nonce (192 bits)");
                 ui.random_bytes_button(&mut self.cipher_ietf.nonce);
             });
             ui.label("A nonce (number used once) ensures that the cipher state is always different from message to message.");
             ui.horizontal(|ui| {
-                for i in 0..3 {
+                for i in 0..2 {
                     ui.u32_hex_edit(&mut self.cipher_ietf.nonce[i]);
                 }
             });
+
+            ui.collapsing("Synthetic Key", |ui| ui.mono(self.synthetic_key()));
 
             ui.add_space(8.0);
             ui.horizontal(|ui| {
@@ -101,13 +167,13 @@ impl CipherFrame for ChaChaFrame {
             ui.add_space(8.0);
             ui.subheading("Number of Rounds");
             ui.horizontal(|ui| {
-                if ui.small_button("ChaCha8").clicked() {
+                if ui.small_button("XChaCha8").clicked() {
                     self.cipher_ietf.rounds = 8;
                 }
-                if ui.small_button("ChaCha12").clicked() {
+                if ui.small_button("XChaCha12").clicked() {
                     self.cipher_ietf.rounds = 12;
                 }
-                if ui.small_button("ChaCha20").clicked() {
+                if ui.small_button("XChaCha20").clicked() {
                     self.cipher_ietf.rounds = 20;
                 }
             });
@@ -133,7 +199,7 @@ impl CipherFrame for ChaChaFrame {
 
             ui.add_space(8.0);
             ui.horizontal(|ui| {
-                ui.subheading("Nonce (64 bits)");
+                ui.subheading("Nonce (192 bits)");
                 ui.random_bytes_button(&mut self.cipher.nonce);
             });
             ui.label("A nonce (number used once) ensures that the cipher state is always different from message to message.");
@@ -142,6 +208,8 @@ impl CipherFrame for ChaChaFrame {
                     ui.u32_hex_edit(&mut self.cipher.nonce[i]);
                 }
             });
+            ui.add_space(4.0);
+            ui.collapsing("Synthetic Key", |ui| ui.label(self.synthetic_key()));
 
             ui.add_space(8.0);
             ui.horizontal(|ui| {
@@ -154,13 +222,13 @@ impl CipherFrame for ChaChaFrame {
             ui.add_space(8.0);
             ui.subheading("Number of Rounds");
             ui.horizontal(|ui| {
-                if ui.small_button("ChaCha8").clicked() {
+                if ui.small_button("XChaCha8").clicked() {
                     self.cipher.rounds = 8;
                 }
-                if ui.small_button("ChaCha12").clicked() {
+                if ui.small_button("XChaCha12").clicked() {
                     self.cipher.rounds = 12;
                 }
-                if ui.small_button("ChaCha20").clicked() {
+                if ui.small_button("XChaCha20").clicked() {
                     self.cipher.rounds = 20;
                 }
             });
@@ -174,7 +242,11 @@ impl CipherFrame for ChaChaFrame {
     }
 
     fn cipher(&self) -> &dyn ciphers::Cipher {
-        &self.cipher
+        if self.ietf {
+            &self.cipher_ietf
+        } else {
+            &self.cipher
+        }
     }
 
     fn randomize(&mut self) {

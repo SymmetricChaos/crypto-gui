@@ -179,10 +179,11 @@ impl Default for A52 {
 }
 
 impl A52 {
-    pub fn encrypt_bytes(&self, bytes: &mut [u8]) {
+    pub fn encrypt_bytes(&self, bytes: &[u8]) -> Vec<u8> {
         let mut rng = self.rng.clone();
-        let keystream = rng.keystream(bytes.len(), self.key, self.frame_number);
-        xor_into_bytes(bytes, &keystream);
+        let mut keystream = rng.keystream(bytes.len(), self.key, self.frame_number);
+        xor_into_bytes(&mut keystream, &bytes);
+        keystream
     }
 }
 
