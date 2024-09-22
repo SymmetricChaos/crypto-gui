@@ -2,6 +2,7 @@ pub mod aes;
 pub mod ascon;
 pub mod block_cipher;
 pub mod blowfish;
+pub mod camellia;
 pub mod des;
 pub mod fealnx;
 pub mod gost;

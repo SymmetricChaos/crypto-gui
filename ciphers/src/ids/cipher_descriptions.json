@@ -253,6 +253,15 @@
       "Electromechanical"
     ]
   },
+  "FEAL-NX": {
+    "Description": "FEAL-NX (Fast Data Encipherment Algorithm) is a block cipher based on the original FEAL but with a variable number of rounds and a 128-bit key. Along with N Feistel network rounds the cipher applies a pre-processing and post-processing step. At least 32 rounds are needed for security as variants with fewer rounds have been broken.",
+    "Authors": "Akihiro Shimizu and Shoji Miyaguchi",
+    "Publication": 1990,
+    "Traits": [
+      "Block Cipher",
+      "Feistel"
+    ]
+  },
   "Four-Square": {
     "Description": "The four-square cipher developed by Felix Delastelle is a signifcantly stronger version of the Playfair cipher. By using two keys there are no transparencies or simple reversals.",
     "Authors": null,
