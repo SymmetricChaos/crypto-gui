@@ -3,7 +3,7 @@ pub mod ascon;
 pub mod block_cipher;
 pub mod blowfish;
 pub mod des;
-pub mod feal;
+pub mod fealnx;
 pub mod gost;
 pub mod idea;
 pub mod lea;
