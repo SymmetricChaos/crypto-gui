@@ -163,5 +163,4 @@ crate::test_block_cipher!(
     Gost::default().with_sboxes(TEST_SBOX), test_1,
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0x0e, 0xca, 0x1a, 0x54, 0x4d, 0x33, 0x07, 0x0b];
-
 );

@@ -1,3 +1,5 @@
+use itertools::Itertools;
+
 pub mod chacha;
 pub mod chacha20poly1305;
 pub mod chacha_ietf;
@@ -5,6 +7,14 @@ pub mod xchacha;
 pub mod xchacha_ietf;
 
 const DEBUG: bool = false;
+macro_rules! debug_state {
+    ($s:literal, $v:ident) => {
+        if DEBUG {
+            print!($s);
+            println!("\n{}", $v);
+        }
+    };
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChaChaState([u32; 16]);
@@ -26,11 +36,9 @@ impl std::ops::IndexMut<usize> for ChaChaState {
 
 impl std::fmt::Display for ChaChaState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut out = String::with_capacity(148);
+        let mut out = String::with_capacity(144);
         for line in self.0.chunks_exact(4) {
-            for word in line {
-                out.push_str(&format!("{:08x?} ", word))
-            }
+            out.push_str(&line.iter().map(|word| format!("{:08x?}", word)).join(" "));
             out.push('\n')
         }
         writeln!(f, "{}", out)
@@ -39,13 +47,9 @@ impl std::fmt::Display for ChaChaState {
 
 impl ChaChaState {
     pub fn new(state: [u32; 16]) -> Self {
-        if DEBUG {
-            let s = Self(state);
-            println!("initial:\n{s}");
-            s
-        } else {
-            Self(state)
-        }
+        let s = Self(state);
+        debug_state!("initial", s);
+        s
     }
 
     pub fn quarter_round(&mut self, a: usize, b: usize, c: usize, d: usize) {
@@ -71,9 +75,7 @@ impl ChaChaState {
         self.quarter_round(1, 5, 9, 13);
         self.quarter_round(2, 6, 10, 14);
         self.quarter_round(3, 7, 11, 15);
-        if DEBUG {
-            println!("column:\n{self}")
-        }
+        debug_state!("column", self);
     }
 
     pub fn diag_round(&mut self) {
@@ -81,9 +83,7 @@ impl ChaChaState {
         self.quarter_round(1, 6, 11, 12);
         self.quarter_round(2, 7, 8, 13);
         self.quarter_round(3, 4, 9, 14);
-        if DEBUG {
-            println!("diagon:\n{self}")
-        }
+        debug_state!("diagonal", self);
     }
 
     pub fn double_round(&mut self) {
