@@ -71,18 +71,80 @@ const SBOXES: [[u8; 256]; 4] = [
     ],
 ];
 
-fn f() {
-    todo!()
+fn f(a: u64, k: u64) -> u64 {
+    p(s(a ^ k))
 }
 
-fn fl() {
-    todo!()
+fn fl(a: u64, k: u64) -> u64 {
+    let al = (a >> 32) as u32;
+    let ar = a as u32;
+    let kl = (k >> 32) as u32;
+    let kr = k as u32;
+    let yr = (al & kl).rotate_left(1) ^ ar;
+    let yl = (yr | kr) ^ al;
+    (yl as u64) << 32 | yr as u64
 }
 
-fn fl_inv() {
-    todo!()
+fn fl_inv(a: u64, k: u64) -> u64 {
+    let al = (a >> 32) as u32;
+    let ar = a as u32;
+    let kl = (k >> 32) as u32;
+    let kr = k as u32;
+    let xl = (ar | kr) ^ al;
+    let xr = (xl & kl).rotate_left(1) ^ ar;
+    (xl as u64) << 32 | xr as u64
 }
 
-fn s() {
-    todo!()
+fn sbox(a: u8, n: usize) -> u8 {
+    SBOXES[n][a as usize]
+}
+
+fn s(a: u64) -> u64 {
+    let b = a.to_be_bytes();
+    u64::from_be_bytes([
+        sbox(b[0], 0),
+        sbox(b[1], 1),
+        sbox(b[2], 2),
+        sbox(b[3], 3),
+        sbox(b[4], 1),
+        sbox(b[5], 2),
+        sbox(b[6], 3),
+        sbox(b[7], 0),
+    ])
+}
+
+fn p(a: u64) -> u64 {
+    let b = a.to_be_bytes();
+    u64::from_be_bytes([
+        b[0] ^ b[2] ^ b[3] ^ b[5] ^ b[6] ^ b[7],
+        b[0] ^ b[1] ^ b[3] ^ b[4] ^ b[6] ^ b[7],
+        b[0] ^ b[1] ^ b[2] ^ b[4] ^ b[5] ^ b[7],
+        b[1] ^ b[2] ^ b[3] ^ b[4] ^ b[5] ^ b[6],
+        b[0] ^ b[1] ^ b[5] ^ b[6] ^ b[7],
+        b[1] ^ b[2] ^ b[4] ^ b[6] ^ b[7],
+        b[2] ^ b[3] ^ b[4] ^ b[5] ^ b[7],
+        b[0] ^ b[3] ^ b[4] ^ b[5] ^ b[6],
+    ])
+}
+
+pub struct Camellia128 {
+    pub subkeys: [u64; 18],
+}
+
+impl Camellia128 {
+    pub fn ksa(&mut self, bytes: [u8; 16]) {
+        let kl = u128::from_be_bytes(bytes);
+        let ka = todo!();
+    }
+
+    pub fn with_key(mut self, bytes: [u8; 16]) -> Self {
+        self.ksa(bytes);
+        self
+    }
+}
+
+#[cfg(test)]
+mod camellia_tests {
+
+    use super::*;
 }
