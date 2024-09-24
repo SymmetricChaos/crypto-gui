@@ -1,3 +1,7 @@
+use utils::byte_formatting::ByteFormat;
+
+use super::block_cipher::{BCMode, BCPadding, BlockCipher};
+
 const SIGMA: [u64; 6] = [
     0xa09e667f3bcc908b,
     0xb67ae8584caa73b2,
@@ -128,7 +132,25 @@ fn p(a: u64) -> u64 {
 }
 
 pub struct Camellia128 {
+    pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
     pub subkeys: [u64; 18],
+    pub iv: u64,
+    pub mode: BCMode,
+    pub padding: BCPadding,
+}
+
+impl Default for Camellia128 {
+    fn default() -> Self {
+        Self {
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
+            subkeys: [0; 18],
+            iv: 0,
+            mode: Default::default(),
+            padding: Default::default(),
+        }
+    }
 }
 
 impl Camellia128 {
@@ -143,8 +165,26 @@ impl Camellia128 {
     }
 }
 
+impl BlockCipher<8> for Camellia128 {
+    fn encrypt_block(&self, bytes: &mut [u8]) {
+        todo!()
+    }
+
+    fn decrypt_block(&self, bytes: &mut [u8]) {
+        todo!()
+    }
+}
+
 #[cfg(test)]
 mod camellia_tests {
 
     use super::*;
 }
+
+crate::test_block_cipher!(
+    Camellia128::default().with_key(
+        [0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10]
+    ), test_1,
+    [0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10],
+    [0x67, 0x67, 0x31, 0x38, 0x54, 0x96, 0x69, 0x73, 0x08, 0x57, 0x06, 0x56, 0x48, 0xea, 0xbe, 0x43];
+);
