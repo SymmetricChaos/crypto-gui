@@ -131,10 +131,49 @@ fn p(a: u64) -> u64 {
     ])
 }
 
+fn create_ka(kl: (u64, u64), kr: (u64, u64)) -> (u64, u64) {
+    let mut t0 = kl.0 ^ kr.0;
+    let mut t1 = kl.1 ^ kr.1;
+    t1 ^= f(t0, SIGMA[0]);
+    t0 ^= f(t1, SIGMA[1]);
+    t0 ^= kl.0;
+    t1 ^= kl.1;
+    t1 ^= f(t0, SIGMA[2]);
+    t0 ^= f(t1, SIGMA[3]);
+    (t0, t1)
+}
+
+fn create_kb(kr: (u64, u64), ka: (u64, u64)) -> (u64, u64) {
+    let mut t0 = kr.0 ^ ka.0;
+    let mut t1 = kr.1 ^ ka.1;
+    t1 ^= f(t0, SIGMA[4]);
+    t0 ^= f(t1, SIGMA[5]);
+    (t0, t1)
+}
+
+// Taken from: https://docs.rs/camellia/latest/src/camellia/camellia.rs.html#350
+/// Performs rotate left and taking the higher-half of it.
+fn rotate_left_hi(val: (u64, u64), mut shift: u8) -> u64 {
+    if shift >= 64 {
+        shift -= 64;
+    }
+
+    (val.0 << shift) | (val.1 >> (64 - shift))
+}
+
+/// Performs rotate left and taking the lower-half of it.
+fn rotate_left_lo(val: (u64, u64), mut shift: u8) -> u64 {
+    if shift >= 64 {
+        shift -= 64;
+    }
+
+    (val.0 >> (64 - shift)) | (val.1 << shift)
+}
+
 pub struct Camellia128 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    pub subkeys: [u64; 18],
+    pub subkeys: [u64; 26],
     pub iv: u64,
     pub mode: BCMode,
     pub padding: BCPadding,
@@ -145,7 +184,7 @@ impl Default for Camellia128 {
         Self {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
-            subkeys: [0; 18],
+            subkeys: [0; 26],
             iv: 0,
             mode: Default::default(),
             padding: Default::default(),
@@ -155,8 +194,43 @@ impl Default for Camellia128 {
 
 impl Camellia128 {
     pub fn ksa(&mut self, bytes: [u8; 16]) {
-        let kl = u128::from_be_bytes(bytes);
-        let ka = todo!();
+        let kl = (
+            u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
+            u64::from_be_bytes(bytes[8..16].try_into().unwrap()),
+        );
+        let ka = create_ka(kl, (0, 0));
+
+        self.subkeys[0] = kl.0;
+        self.subkeys[1] = kl.1;
+        self.subkeys[2] = ka.0;
+        self.subkeys[3] = ka.1;
+        self.subkeys[4] = rotate_left_hi(kl, 15);
+        self.subkeys[5] = rotate_left_lo(kl, 15);
+        self.subkeys[6] = rotate_left_hi(ka, 15);
+        self.subkeys[7] = rotate_left_lo(ka, 15);
+
+        self.subkeys[8] = rotate_left_hi(ka, 30);
+        self.subkeys[9] = rotate_left_lo(ka, 30);
+
+        self.subkeys[10] = rotate_left_hi(kl, 45);
+        self.subkeys[11] = rotate_left_lo(kl, 45);
+        self.subkeys[12] = rotate_left_hi(ka, 45);
+        self.subkeys[13] = rotate_left_lo(kl, 60);
+        self.subkeys[14] = rotate_left_hi(ka, 60);
+        self.subkeys[15] = rotate_left_lo(ka, 60);
+
+        self.subkeys[16] = rotate_left_lo(kl, 77);
+        self.subkeys[17] = rotate_left_hi(kl, 77);
+
+        self.subkeys[18] = rotate_left_lo(kl, 94);
+        self.subkeys[19] = rotate_left_hi(kl, 94);
+        self.subkeys[20] = rotate_left_lo(ka, 94);
+        self.subkeys[21] = rotate_left_hi(ka, 94);
+        self.subkeys[22] = rotate_left_lo(kl, 111);
+        self.subkeys[23] = rotate_left_hi(kl, 111);
+
+        self.subkeys[24] = rotate_left_lo(ka, 111);
+        self.subkeys[25] = rotate_left_hi(ka, 111);
     }
 
     pub fn with_key(mut self, bytes: [u8; 16]) -> Self {
