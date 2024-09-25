@@ -11,7 +11,7 @@ macro_rules! debug_state {
     };
 }
 
-const N: usize = 32;
+const ROUNDS: usize = 32;
 
 fn s0(a: u8, b: u8) -> u8 {
     a.wrapping_add(b).rotate_left(2)
@@ -52,7 +52,7 @@ fn fk(a: u32, b: u32) -> u32 {
 pub struct FealNx {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    pub subkeys: [u16; N + 8],
+    pub subkeys: [u16; ROUNDS + 8],
     pub iv: u64,
     pub mode: BCMode,
     pub padding: BCPadding,
@@ -63,7 +63,7 @@ impl Default for FealNx {
         Self {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
-            subkeys: [0; N + 8],
+            subkeys: [0; ROUNDS + 8],
             iv: 0,
             mode: Default::default(),
             padding: Default::default(),
@@ -81,7 +81,7 @@ impl FealNx {
         let mut a = key[0];
         let mut b = key[1];
 
-        for i in 0..(N / 2 + 4) {
+        for i in 0..(ROUNDS / 2 + 4) {
             let t = d;
             d = a;
             a = b;
@@ -105,13 +105,13 @@ impl BlockCipher<8> for FealNx {
         debug_state!("e input:", v);
 
         // Preprocessing stage
-        v[0] ^= (self.subkeys[N] as u32) << 16 | self.subkeys[N + 1] as u32;
-        v[1] ^= (self.subkeys[N + 2] as u32) << 16 | self.subkeys[N + 3] as u32;
+        v[0] ^= (self.subkeys[ROUNDS] as u32) << 16 | self.subkeys[ROUNDS + 1] as u32;
+        v[1] ^= (self.subkeys[ROUNDS + 2] as u32) << 16 | self.subkeys[ROUNDS + 3] as u32;
         v[1] ^= v[0];
         debug_state!("e pre:", v);
 
         // Feistel network
-        for subkey in self.subkeys.into_iter().take(32) {
+        for subkey in self.subkeys.into_iter().take(ROUNDS) {
             let t = v[0];
             // L_i+1 = R_i
             v[0] = v[1];
@@ -124,8 +124,8 @@ impl BlockCipher<8> for FealNx {
         // Postprocessing
         v.swap(0, 1);
         v[1] ^= v[0];
-        v[0] ^= (self.subkeys[N + 4] as u32) << 16 | self.subkeys[N + 5] as u32;
-        v[1] ^= (self.subkeys[N + 6] as u32) << 16 | self.subkeys[N + 7] as u32;
+        v[0] ^= (self.subkeys[ROUNDS + 4] as u32) << 16 | self.subkeys[ROUNDS + 5] as u32;
+        v[1] ^= (self.subkeys[ROUNDS + 6] as u32) << 16 | self.subkeys[ROUNDS + 7] as u32;
         debug_state!("e post:", v);
 
         u32s_to_bytes_be(bytes, &v);
@@ -137,14 +137,14 @@ impl BlockCipher<8> for FealNx {
         debug_state!("d input:", v);
 
         // Preprocessing stage
-        v[0] ^= (self.subkeys[N + 4] as u32) << 16 | self.subkeys[N + 5] as u32;
-        v[1] ^= (self.subkeys[N + 6] as u32) << 16 | self.subkeys[N + 7] as u32;
+        v[0] ^= (self.subkeys[ROUNDS + 4] as u32) << 16 | self.subkeys[ROUNDS + 5] as u32;
+        v[1] ^= (self.subkeys[ROUNDS + 6] as u32) << 16 | self.subkeys[ROUNDS + 7] as u32;
         v[1] ^= v[0];
         v.swap(0, 1);
         debug_state!("d pre:", v);
 
         // Feistel network
-        for subkey in self.subkeys.into_iter().take(32).rev() {
+        for subkey in self.subkeys.into_iter().take(ROUNDS).rev() {
             let t = v[1];
             // L_i+1 = R_i
             v[1] = v[0];
@@ -156,8 +156,8 @@ impl BlockCipher<8> for FealNx {
 
         // Postprocessing
         v[1] ^= v[0];
-        v[0] ^= (self.subkeys[N] as u32) << 16 | self.subkeys[N + 1] as u32;
-        v[1] ^= (self.subkeys[N + 2] as u32) << 16 | self.subkeys[N + 3] as u32;
+        v[0] ^= (self.subkeys[ROUNDS] as u32) << 16 | self.subkeys[ROUNDS + 1] as u32;
+        v[1] ^= (self.subkeys[ROUNDS + 2] as u32) << 16 | self.subkeys[ROUNDS + 3] as u32;
         debug_state!("d post:", v);
 
         u32s_to_bytes_be(bytes, &v);
