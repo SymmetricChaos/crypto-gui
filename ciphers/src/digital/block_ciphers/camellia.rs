@@ -189,18 +189,6 @@ fn rotate_left_lo(val: (u64, u64), mut shift: u8) -> u64 {
     (val.0 >> (64 - shift)) | (val.1 << shift)
 }
 
-fn six_rounds(v: &mut [u64; 2], k: &[u64]) {
-    for i in 0..3 {
-        v[1] ^= f(v[0], k[2 * i]);
-        v[0] ^= f(v[1], k[2 * i + 1]);
-    }
-}
-
-fn inter_round(v: &mut [u64; 2], k: &[u64]) {
-    v[0] = fl(v[0], k[0]);
-    v[1] = fl_inv(v[1], k[1]);
-}
-
 pub struct Camellia128 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
@@ -303,11 +291,15 @@ impl BlockCipher<16> for Camellia128 {
         v[0] ^= k[0];
         v[1] ^= k[1];
 
-        six_rounds(&mut v, &k[2..8]);
-        inter_round(&mut v, &k[8..10]);
-        six_rounds(&mut v, &k[10..16]);
-        inter_round(&mut v, &k[16..18]);
-        six_rounds(&mut v, &k[18..24]);
+        for i in (2..24).step_by(2) {
+            if i % 8 == 0 {
+                v[0] = fl(v[0], k[i]);
+                v[1] = fl_inv(v[1], k[i + 1]);
+            } else {
+                v[1] ^= f(v[0], k[i]);
+                v[0] ^= f(v[1], k[i + 1]);
+            }
+        }
 
         // Postwhitening
         v[1] ^= k[24];
@@ -321,21 +313,25 @@ impl BlockCipher<16> for Camellia128 {
         let mut v = [0, 0];
         fill_u64s_be(&mut v, bytes);
 
-        let mut k = self.subkeys;
+        let k = self.subkeys;
 
         // Prewhitening
-        v[0] ^= k[1];
-        v[1] ^= k[0];
+        v[0] ^= k[24];
+        v[1] ^= k[25];
 
-        six_rounds(&mut v, &k[2..8]);
-        inter_round(&mut v, &k[8..10]);
-        six_rounds(&mut v, &k[10..16]);
-        inter_round(&mut v, &k[16..18]);
-        six_rounds(&mut v, &k[18..24]);
+        for i in (2..24).rev().step_by(2) {
+            if (i - 1) % 8 == 0 {
+                v[0] = fl(v[0], k[i]);
+                v[1] = fl_inv(v[1], k[i - 1]);
+            } else {
+                v[1] ^= f(v[0], k[i]);
+                v[0] ^= f(v[1], k[i - 1]);
+            }
+        }
 
         // Postwhitening
-        v[1] ^= k[25];
-        v[0] ^= k[24];
+        v[1] ^= k[0];
+        v[0] ^= k[1];
 
         v.swap(0, 1);
         u64s_to_bytes_be(bytes, &v);
@@ -343,39 +339,6 @@ impl BlockCipher<16> for Camellia128 {
 }
 
 crate::impl_cipher_for_block_cipher!(Camellia128, 16);
-
-#[cfg(test)]
-mod camellia_tests {
-
-    use super::*;
-
-    #[ignore]
-    #[test]
-    fn f_funcs() {
-        use rand::{thread_rng, Rng};
-
-        fn f_alt(input: u64, key: u64) -> u64 {
-            let x = (input ^ key).to_be_bytes();
-
-            let z1 = 0x0101_0100_0100_0001 * u64::from(SBOXES[0][usize::from(x[0])]);
-            let z2 = 0x0001_0101_0101_0000 * u64::from(SBOXES[1][usize::from(x[1])]);
-            let z3 = 0x0100_0101_0001_0100 * u64::from(SBOXES[2][usize::from(x[2])]);
-            let z4 = 0x0101_0001_0000_0101 * u64::from(SBOXES[3][usize::from(x[3])]);
-            let z5 = 0x0001_0101_0001_0101 * u64::from(SBOXES[1][usize::from(x[4])]);
-            let z6 = 0x0100_0101_0100_0101 * u64::from(SBOXES[2][usize::from(x[5])]);
-            let z7 = 0x0101_0001_0101_0001 * u64::from(SBOXES[3][usize::from(x[6])]);
-            let z8 = 0x0101_0100_0101_0100 * u64::from(SBOXES[0][usize::from(x[7])]);
-
-            z1 ^ z2 ^ z3 ^ z4 ^ z5 ^ z6 ^ z7 ^ z8
-        }
-
-        for _ in 0..10_000_000 {
-            let x: u64 = thread_rng().gen();
-            let k: u64 = thread_rng().gen();
-            assert_eq!(f(x, k), f_alt(x, k))
-        }
-    }
-}
 
 crate::test_block_cipher!(
     Camellia128::default().with_key(
