@@ -1,7 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{
-    block_cipher_iv_128, block_cipher_mode, block_cipher_padding, UiElements,
-};
+use crate::ui_elements::{block_cipher_iv_128, block_cipher_mode_and_padding, UiElements};
 
 use ciphers::{
     digital::block_ciphers::aes::aes::{Aes128, Aes192, Aes256},
@@ -65,9 +63,11 @@ impl CipherFrame for AesFrame {
 
                 ui.add_space(16.0);
 
-                block_cipher_mode(ui, &mut self.cipher128.mode);
-                ui.add_space(4.0);
-                block_cipher_padding(ui, &mut self.cipher128.padding);
+                block_cipher_mode_and_padding(
+                    ui,
+                    &mut self.cipher128.mode,
+                    &mut self.cipher128.padding,
+                );
                 ui.add_space(8.0);
 
                 ui.horizontal(|ui| {
@@ -96,9 +96,11 @@ impl CipherFrame for AesFrame {
 
                 ui.add_space(16.0);
 
-                block_cipher_mode(ui, &mut self.cipher192.mode);
-                ui.add_space(4.0);
-                block_cipher_padding(ui, &mut self.cipher192.padding);
+                block_cipher_mode_and_padding(
+                    ui,
+                    &mut self.cipher192.mode,
+                    &mut self.cipher192.padding,
+                );
                 ui.add_space(8.0);
 
                 ui.horizontal(|ui| {
@@ -126,9 +128,11 @@ impl CipherFrame for AesFrame {
 
                 ui.add_space(16.0);
 
-                block_cipher_mode(ui, &mut self.cipher256.mode);
-                ui.add_space(4.0);
-                block_cipher_padding(ui, &mut self.cipher256.padding);
+                block_cipher_mode_and_padding(
+                    ui,
+                    &mut self.cipher256.mode,
+                    &mut self.cipher256.padding,
+                );
                 ui.add_space(8.0);
 
                 ui.horizontal(|ui| {

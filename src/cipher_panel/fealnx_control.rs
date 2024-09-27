@@ -1,7 +1,7 @@
 use super::CipherFrame;
-use crate::ui_elements::{block_cipher_iv_64, block_cipher_mode, block_cipher_padding, UiElements};
+use crate::ui_elements::{block_cipher_iv_64, block_cipher_mode_and_padding, UiElements};
 use ciphers::{digital::block_ciphers::fealnx::FealNx, Cipher};
-use rand::thread_rng;
+use rand::{thread_rng, Rng};
 
 #[derive(Default)]
 pub struct FealNxFrame {
@@ -27,9 +27,7 @@ impl CipherFrame for FealNxFrame {
 
         ui.add_space(16.0);
 
-        block_cipher_mode(ui, &mut self.cipher.mode);
-        ui.add_space(4.0);
-        block_cipher_padding(ui, &mut self.cipher.padding);
+        block_cipher_mode_and_padding(ui, &mut self.cipher.mode, &mut self.cipher.padding);
         ui.add_space(8.0);
 
         ui.label("FEAL-NX uses a 128-bit key presented here as four 32-bit words.");
@@ -51,6 +49,11 @@ impl CipherFrame for FealNxFrame {
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
+        rng.fill(&mut self.key);
+        self.cipher.ksa_u32(self.key);
+        if self.cipher.mode.iv_needed() {
+            self.cipher.iv = rng.gen();
+        }
     }
 
     fn reset(&mut self) {

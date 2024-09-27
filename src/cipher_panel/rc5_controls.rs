@@ -1,7 +1,7 @@
 use super::CipherFrame;
 use crate::ui_elements::{
-    block_cipher_iv_128, block_cipher_iv_32, block_cipher_iv_64, block_cipher_mode,
-    block_cipher_padding, UiElements,
+    block_cipher_iv_128, block_cipher_iv_32, block_cipher_iv_64, block_cipher_mode_and_padding,
+    UiElements,
 };
 use ciphers::{
     digital::block_ciphers::rc5::{rc5_16::Rc5_16, rc5_32::Rc5_32, rc5_64::Rc5_64},
@@ -82,9 +82,24 @@ impl CipherFrame for Rc5Frame {
         };
         ui.add_space(4.0);
 
-        block_cipher_mode(ui, &mut self.cipher_32.mode);
-        ui.add_space(4.0);
-        block_cipher_padding(ui, &mut self.cipher_32.padding);
+        match self.selector {
+            SizeSelector::R16 => block_cipher_mode_and_padding(
+                ui,
+                &mut self.cipher_16.mode,
+                &mut self.cipher_16.padding,
+            ),
+            SizeSelector::R32 => block_cipher_mode_and_padding(
+                ui,
+                &mut self.cipher_32.mode,
+                &mut self.cipher_32.padding,
+            ),
+            SizeSelector::R64 => block_cipher_mode_and_padding(
+                ui,
+                &mut self.cipher_64.mode,
+                &mut self.cipher_64.padding,
+            ),
+        };
+
         ui.add_space(8.0);
 
         ui.add_space(16.0);

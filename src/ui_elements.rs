@@ -510,6 +510,18 @@ pub fn block_cipher_padding(ui: &mut Ui, padding: &mut BCPadding) {
     });
 }
 
+pub fn block_cipher_mode_and_padding(ui: &mut Ui, mode: &mut BCMode, padding: &mut BCPadding) {
+    block_cipher_mode(ui, mode);
+
+    ui.add_space(4.0);
+
+    if mode.padded() {
+        block_cipher_padding(ui, padding);
+    } else {
+        ui.label(format!("No padding is needed in {} mode", mode));
+    }
+}
+
 pub fn lfsr_grid_controls(ui: &mut Ui, lfsr: &mut Lfsr, len: &mut usize, name: &str) {
     ui.subheading("Number of Bits");
     if ui.add(DragValue::new(len).range(4..=32)).changed() {

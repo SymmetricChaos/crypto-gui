@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{block_cipher_iv_64, block_cipher_mode, UiElements};
+use crate::ui_elements::{block_cipher_iv_64, block_cipher_mode_and_padding, UiElements};
 use ciphers::{digital::block_ciphers::blowfish::blowfish::Blowfish, Cipher};
 use rand::{thread_rng, Rng};
 
@@ -33,7 +33,7 @@ impl CipherFrame for BlowfishFrame {
 
         ui.add_space(16.0);
 
-        block_cipher_mode(ui, &mut self.cipher.mode);
+        block_cipher_mode_and_padding(ui, &mut self.cipher.mode, &mut self.cipher.padding);
         ui.add_space(8.0);
 
         ui.subheading("Key");

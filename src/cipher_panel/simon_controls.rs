@@ -1,7 +1,7 @@
 use super::CipherFrame;
 use crate::ui_elements::{
-    block_cipher_iv_128, block_cipher_iv_32, block_cipher_iv_64, block_cipher_mode,
-    block_cipher_padding, UiElements,
+    block_cipher_iv_128, block_cipher_iv_32, block_cipher_iv_64, block_cipher_mode_and_padding,
+    UiElements,
 };
 use ciphers::{
     digital::block_ciphers::simon::{
@@ -117,27 +117,36 @@ impl CipherFrame for SimonFrame {
 
         ui.add_space(4.0);
         match self.selector {
-            SimonVariant::Simon32_64 => block_cipher_mode(ui, &mut self.cipher_32_64.mode),
-            SimonVariant::Simon64_96 => block_cipher_mode(ui, &mut self.cipher_64_96.mode),
-            SimonVariant::Simon64_128 => block_cipher_mode(ui, &mut self.cipher_64_128.mode),
-            SimonVariant::Simon128_128 => block_cipher_mode(ui, &mut self.cipher_128_128.mode),
-            SimonVariant::Simon128_192 => block_cipher_mode(ui, &mut self.cipher_128_192.mode),
-            SimonVariant::Simon128_256 => block_cipher_mode(ui, &mut self.cipher_128_256.mode),
-        };
-        ui.add_space(4.0);
-        match self.selector {
-            SimonVariant::Simon32_64 => block_cipher_padding(ui, &mut self.cipher_32_64.padding),
-            SimonVariant::Simon64_96 => block_cipher_padding(ui, &mut self.cipher_64_96.padding),
-            SimonVariant::Simon64_128 => block_cipher_padding(ui, &mut self.cipher_64_128.padding),
-            SimonVariant::Simon128_128 => {
-                block_cipher_padding(ui, &mut self.cipher_128_128.padding)
-            }
-            SimonVariant::Simon128_192 => {
-                block_cipher_padding(ui, &mut self.cipher_128_192.padding)
-            }
-            SimonVariant::Simon128_256 => {
-                block_cipher_padding(ui, &mut self.cipher_128_256.padding)
-            }
+            SimonVariant::Simon32_64 => block_cipher_mode_and_padding(
+                ui,
+                &mut self.cipher_32_64.mode,
+                &mut self.cipher_32_64.padding,
+            ),
+            SimonVariant::Simon64_96 => block_cipher_mode_and_padding(
+                ui,
+                &mut self.cipher_64_96.mode,
+                &mut self.cipher_64_96.padding,
+            ),
+            SimonVariant::Simon64_128 => block_cipher_mode_and_padding(
+                ui,
+                &mut self.cipher_64_128.mode,
+                &mut self.cipher_64_128.padding,
+            ),
+            SimonVariant::Simon128_128 => block_cipher_mode_and_padding(
+                ui,
+                &mut self.cipher_128_128.mode,
+                &mut self.cipher_128_128.padding,
+            ),
+            SimonVariant::Simon128_192 => block_cipher_mode_and_padding(
+                ui,
+                &mut self.cipher_128_192.mode,
+                &mut self.cipher_128_192.padding,
+            ),
+            SimonVariant::Simon128_256 => block_cipher_mode_and_padding(
+                ui,
+                &mut self.cipher_128_256.mode,
+                &mut self.cipher_128_256.padding,
+            ),
         };
 
         ui.add_space(16.0);

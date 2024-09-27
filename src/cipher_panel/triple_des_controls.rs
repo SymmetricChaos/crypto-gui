@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{block_cipher_iv_64, block_cipher_mode, block_cipher_padding, UiElements};
+use crate::ui_elements::{block_cipher_iv_64, block_cipher_mode_and_padding, UiElements};
 use ciphers::{
     digital::block_ciphers::des::{des_functions::set_des_key_parity, triple_des::TripleDes},
     Cipher,
@@ -43,9 +43,7 @@ impl CipherFrame for TripleDesFrame {
 
         ui.add_space(16.0);
 
-        block_cipher_mode(ui, &mut self.cipher.mode);
-        ui.add_space(4.0);
-        block_cipher_padding(ui, &mut self.cipher.padding);
+        block_cipher_mode_and_padding(ui, &mut self.cipher.mode, &mut self.cipher.padding);
         ui.add_space(8.0);
 
         ui.subheading("Key");
