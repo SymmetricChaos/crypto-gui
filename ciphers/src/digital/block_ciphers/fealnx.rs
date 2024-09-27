@@ -92,6 +92,24 @@ impl FealNx {
         }
     }
 
+    pub fn ksa_u32(&mut self, key: [u32; 4]) {
+        let q = [key[2] ^ key[3], key[2], key[3]];
+
+        let mut d = 0;
+        let mut a = key[0];
+        let mut b = key[1];
+
+        for i in 0..(ROUNDS / 2 + 4) {
+            let t = d;
+            d = a;
+            a = b;
+            b = fk(d, a ^ t ^ q[i % 3]);
+
+            self.subkeys[2 * i] = (b >> 16) as u16;
+            self.subkeys[2 * i + 1] = b as u16;
+        }
+    }
+
     pub fn with_key(mut self, bytes: [u8; 16]) -> Self {
         self.ksa(bytes);
         self

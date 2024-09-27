@@ -34,6 +34,7 @@ mod diffie_hellman_controls;
 mod dryad_controls;
 mod elgamal_controls;
 mod enigma_controls;
+mod fealnx_control;
 mod four_square_controls;
 mod general_sub_controls;
 mod gost_controls;
