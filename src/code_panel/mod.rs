@@ -81,7 +81,7 @@ fn combox_box(
     ui: &mut Ui,
 ) {
     ui.horizontal(|ui| {
-        egui::ComboBox::from_id_source(code_category.to_string())
+        egui::ComboBox::from_id_salt(code_category.to_string())
             .selected_text(code_category.to_string())
             .show_ui(ui, |ui| {
                 for id in code {

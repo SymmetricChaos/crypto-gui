@@ -60,9 +60,10 @@ impl CipherFrame for PurpleFrame {
 
         ui.subheading("Sixes Position");
         ui.horizontal(|ui| {
-            ui.add(
-                Slider::new(&mut self.cipher.switches.sixes.position, 0..=24).clamp_to_range(true),
-            );
+            ui.add(Slider::new(
+                &mut self.cipher.switches.sixes.position,
+                0..=24,
+            ));
             ui.label(self.cipher.switches.sixes.to_string());
         });
 
@@ -70,7 +71,7 @@ impl CipherFrame for PurpleFrame {
         ui.subheading("Twenties Positions");
         for switch in self.cipher.switches.twenties.iter_mut() {
             ui.horizontal(|ui| {
-                ui.add(Slider::new(&mut switch.position, 0..=24).clamp_to_range(true));
+                ui.add(Slider::new(&mut switch.position, 0..=24));
                 ui.label(switch.to_string());
             });
         }

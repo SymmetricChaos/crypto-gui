@@ -21,6 +21,7 @@ mod beaufort_controls;
 mod bifid_controls;
 mod blowfish_controls;
 mod caesar_controls;
+mod camellia_controls;
 mod chacha20_poly1305_controls;
 mod chacha_controls;
 mod chaocipher_controls;
@@ -100,7 +101,7 @@ fn combox_box(
     ui: &mut Ui,
 ) {
     ui.horizontal(|ui| {
-        egui::ComboBox::from_id_source(cipher_category.to_string())
+        egui::ComboBox::from_id_salt(cipher_category.to_string())
             .selected_text(cipher_category.to_string())
             .show_ui(ui, |ui| {
                 for id in code {

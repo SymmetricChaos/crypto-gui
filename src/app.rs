@@ -522,7 +522,7 @@ impl App for ClassicCryptoApp {
 
         TopBottomPanel::top("top_panel").show(ctx, |ui| {
             ui.horizontal_top(|ui| {
-                widgets::global_dark_light_mode_switch(ui);
+                widgets::global_theme_preference_switch(ui);
                 ui.separator();
 
                 if ui.button("About").clicked() {

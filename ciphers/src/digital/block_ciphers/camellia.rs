@@ -256,9 +256,9 @@ fn key_schedule_34(
     subkeys[18] = rotate_left_hi(kr, 60);
     subkeys[19] = rotate_left_lo(kr, 60);
     subkeys[20] = rotate_left_hi(kb, 60);
-    subkeys[21] = rotate_left_lo(kb, 60); // these two lines are correct according to the test vectors
-    subkeys[22] = rotate_left_lo(kl, 77); // however the specification shows the hi/lo pattern continue
-    subkeys[23] = rotate_left_hi(kl, 77);
+    subkeys[21] = rotate_left_lo(kb, 60);
+    subkeys[22] = rotate_left_lo(kl, 77); // this switch in order from hi/lo to lo/hi is not in the specification
+    subkeys[23] = rotate_left_hi(kl, 77); // but it does pass the test vectors and is used in reference implementations
 
     subkeys[24] = rotate_left_lo(ka, 77);
     subkeys[25] = rotate_left_hi(ka, 77);
@@ -395,6 +395,12 @@ impl Camellia128 {
         self.ksa(bytes);
         self
     }
+
+    pub fn ksa_u64(&mut self, bytes: [u64; 2]) {
+        let kl = (bytes[0], bytes[1]);
+        let ka = create_ka(kl, (0, 0));
+        key_schedule_26(&mut self.subkeys, kl, ka);
+    }
 }
 crate::impl_cipher_for_block_cipher!(Camellia128, 16);
 build_camellia!(Camellia192, 34);
@@ -414,6 +420,15 @@ impl Camellia192 {
     pub fn with_key(mut self, bytes: [u8; 24]) -> Self {
         self.ksa(bytes);
         self
+    }
+
+    pub fn ksa_u64(&mut self, bytes: [u64; 3]) {
+        let kl = (bytes[0], bytes[1]);
+        let r = bytes[2];
+        let kr = (r, !r);
+        let ka = create_ka(kl, kr);
+        let kb = create_kb(kr, ka);
+        key_schedule_34(&mut self.subkeys, kl, kr, ka, kb);
     }
 }
 crate::impl_cipher_for_block_cipher!(Camellia192, 16);
@@ -436,6 +451,14 @@ impl Camellia256 {
     pub fn with_key(mut self, bytes: [u8; 32]) -> Self {
         self.ksa(bytes);
         self
+    }
+
+    pub fn ksa_u64(&mut self, bytes: [u64; 4]) {
+        let kl = (bytes[0], bytes[1]);
+        let kr = (bytes[2], bytes[3]);
+        let ka = create_ka(kl, kr);
+        let kb = create_kb(kr, ka);
+        key_schedule_34(&mut self.subkeys, kl, kr, ka, kb);
     }
 }
 crate::impl_cipher_for_block_cipher!(Camellia256, 16);

@@ -51,7 +51,7 @@ fn combox_box(
     ui: &mut Ui,
 ) {
     ui.horizontal(|ui| {
-        egui::ComboBox::from_id_source(hasher_category.to_string())
+        egui::ComboBox::from_id_salt(hasher_category.to_string())
             .selected_text(hasher_category.to_string())
             .show_ui(ui, |ui| {
                 for id in hasher {

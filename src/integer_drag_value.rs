@@ -17,7 +17,7 @@ macro_rules! hex_edit_box {
                 .filter(|c| !c.is_whitespace())
                 .collect();
 
-            text.parse().ok()
+            <$t>::from_str_radix(&text, 16).ok()
         }
 
         fn $clamp(x: $t, range: RangeInclusive<$t>) -> $t {
@@ -139,8 +139,8 @@ macro_rules! hex_edit_box {
                 });
 
                 // Doing this correctly require access to a private egui method
-                // if ui.memory_mut(|mem| mem.gained_focus(id)) {
-                if ui.memory_mut(|mem: &mut egui::Memory| mem.has_focus(id)) {
+                if ui.memory_mut(|mem| !mem.had_focus_last_frame(id) && mem.has_focus(id)) {
+                    // if ui.memory_mut(|mem: &mut egui::Memory| mem.has_focus(id)) {
                     ui.data_mut(|data| data.remove::<String>(id));
                 }
 
@@ -223,9 +223,11 @@ macro_rules! hex_edit_box {
 
                 let text_style = egui::TextStyle::Monospace;
 
-                // if ui.memory(|mem| mem.lost_focus(id)) && !ui.input(|i| i.key_pressed(Key::Escape)) {
-                if ui.memory(|mem| !mem.has_focus(id)) && !ui.input(|i| i.key_pressed(Key::Escape))
+                if ui.memory(|mem| mem.had_focus_last_frame(id) && !mem.has_focus(id))
+                    && !ui.input(|i| i.key_pressed(Key::Escape))
                 {
+                    // if ui.memory(|mem| !mem.has_focus(id)) && !ui.input(|i| i.key_pressed(Key::Escape))
+                    // {
                     let value_text = ui.data_mut(|data| data.remove_temp::<String>(id));
                     if let Some(value_text) = value_text {
                         // We were editing the value as text last frame, but lost focus.

@@ -1,7 +1,7 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
 use ciphers::{tactical::Batco, Cipher};
-use egui::{Slider, Ui};
+use egui::{Slider, SliderClamping::Always, Ui};
 use rand::{rngs::StdRng, SeedableRng};
 use utils::{preset_alphabet::Alphabet, text_functions::shuffled_str};
 
@@ -26,7 +26,7 @@ impl CipherFrame for BatcoFrame {
             ui.mono(&self.cipher.message_number_to_char());
             ui.add(
                 Slider::new(&mut self.cipher.message_number, 0..=5)
-                    .clamp_to_range(true)
+                    .clamping(Always)
                     .show_value(false),
             );
         });
@@ -36,7 +36,7 @@ impl CipherFrame for BatcoFrame {
 
             ui.add(
                 Slider::new(&mut self.cipher.message_letter, 0..=25)
-                    .clamp_to_range(true)
+                    .clamping(Always)
                     .show_value(false),
             );
         });

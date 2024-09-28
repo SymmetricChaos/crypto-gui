@@ -19,11 +19,7 @@ fn rotor_display<const N: usize>(ui: &mut eframe::egui::Ui, rotors: &mut [Rotor<
             let characters = RichText::new(&rotor.to_string()).monospace();
             ui.label(characters);
             let range = 0..=N;
-            ui.add(
-                Slider::new(&mut rotor.position, range)
-                    .clamp_to_range(true)
-                    .show_value(false),
-            );
+            ui.add(Slider::new(&mut rotor.position, range).show_value(false));
         });
     }
 }
@@ -49,7 +45,7 @@ impl CipherFrame for SigabaFrame {
         ).on_hover_text("Message passes through these rotors during operation. Their pseudorandom movement is decided by the Control Rotors and Index Rotors.");
         for i in 0..5 {
             ui.horizontal(|ui| {
-                ComboBox::from_id_source(format!("Cipher Rotor {}", i + 1))
+                ComboBox::from_id_salt(format!("Cipher Rotor {}", i + 1))
                     .selected_text(cipher_rotors[i].name)
                     .show_ui(ui, |ui| {
                         for rtr in BIG_ROTOR_VEC.iter() {
@@ -76,7 +72,7 @@ impl CipherFrame for SigabaFrame {
         ).on_hover_text("These rotors move in a simple pattern during operation to produce control signals and send that to the Index Rotors.");
         for i in 0..5 {
             ui.horizontal(|ui| {
-                ComboBox::from_id_source(format!("Control Rotor {}", i + 1))
+                ComboBox::from_id_salt(format!("Control Rotor {}", i + 1))
                     .selected_text(control_rotors[i].name)
                     .show_ui(ui, |ui| {
                         for rtr in BIG_ROTOR_VEC.iter() {
@@ -108,7 +104,6 @@ impl CipherFrame for SigabaFrame {
                 let range = 0..=9;
                 ui.add(
                     Slider::new(&mut rotor.position, range)
-                        .clamp_to_range(true)
                         .show_value(false)
                         .vertical()
                         .text(val),

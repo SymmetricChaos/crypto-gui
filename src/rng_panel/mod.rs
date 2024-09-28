@@ -45,7 +45,7 @@ fn combox_box(
     ui: &mut Ui,
 ) {
     ui.horizontal(|ui| {
-        egui::ComboBox::from_id_source(rng_category.to_string())
+        egui::ComboBox::from_id_salt(rng_category.to_string())
             .selected_text(rng_category.to_string())
             .show_ui(ui, |ui| {
                 for id in rng {

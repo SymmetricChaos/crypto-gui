@@ -4,7 +4,7 @@ use ciphers::{
     machines::enigma::{rotors::REFLECTOR_VEC, EnigmaM3, REFLECTOR_MAP, ROTOR_VEC},
     Cipher,
 };
-use egui::{ComboBox, Slider, Ui};
+use egui::{ComboBox, Slider, SliderClamping::Always, Ui};
 use rand::{thread_rng, Rng};
 use utils::{preset_alphabet::Alphabet, text_functions::shuffled_str};
 
@@ -76,7 +76,7 @@ impl CipherFrame for EnigmaM3Frame {
         });
         ui.label("Changed for every message");
         for rotor in &mut self.cipher.state.rotors {
-            ui.add(Slider::new(&mut rotor.position, 0..=26).clamp_to_range(true));
+            ui.add(Slider::new(&mut rotor.position, 0..=26).clamping(Always));
         }
 
         ui.add_space(16.0);
@@ -88,7 +88,7 @@ impl CipherFrame for EnigmaM3Frame {
         });
         ui.label("Changed daily.");
         for rotor in &mut self.cipher.state.rotors {
-            ui.add(Slider::new(&mut rotor.ring, 0..=26).clamp_to_range(true));
+            ui.add(Slider::new(&mut rotor.ring, 0..=26).clamping(Always));
         }
 
         ui.add_space(16.0);
@@ -101,7 +101,7 @@ impl CipherFrame for EnigmaM3Frame {
         ui.label("Changed daily.");
         for i in 0..3 {
             ui.horizontal(|ui| {
-                ComboBox::from_id_source(format!("Rotor {}", i + 1))
+                ComboBox::from_id_salt(format!("Rotor{}", i + 1))
                     .selected_text(self.cipher.state.rotors[i].name)
                     .show_ui(ui, |ui| {
                         for rtr in ROTOR_VEC.iter() {
@@ -124,7 +124,7 @@ impl CipherFrame for EnigmaM3Frame {
             }
         });
         ui.horizontal(|ui| {
-            ComboBox::from_id_source("Reflector")
+            ComboBox::from_id_salt("Reflector")
                 .selected_text(self.cipher.state.reflector.name)
                 .show_ui(ui, |ui| {
                     for rfl in REFLECTOR_MAP.values() {
