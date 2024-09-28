@@ -169,7 +169,7 @@ fn create_kb(kr: (u64, u64), ka: (u64, u64)) -> (u64, u64) {
 }
 
 // Taken from: https://docs.rs/camellia/latest/src/camellia/camellia.rs.html#350
-/// Performs rotate left and taking the higher-half of it.
+/// Performs rotate left and taking the higher-half of val as if it were a 128 bit value.
 fn rotate_left_hi(val: (u64, u64), mut shift: u8) -> u64 {
     if shift >= 64 {
         shift -= 64;
@@ -178,7 +178,7 @@ fn rotate_left_hi(val: (u64, u64), mut shift: u8) -> u64 {
     (val.0 << shift) | (val.1 >> (64 - shift))
 }
 
-/// Performs rotate left and taking the lower-half of it.
+/// Performs rotate left and taking the lower-half of val as if it were a 128 bit value.
 fn rotate_left_lo(val: (u64, u64), mut shift: u8) -> u64 {
     if shift >= 64 {
         shift -= 64;
@@ -232,9 +232,9 @@ fn key_schedule_34(
 ) {
     subkeys[0] = kl.0;
     subkeys[1] = kl.1;
+
     subkeys[2] = kb.0;
     subkeys[3] = kb.1;
-
     subkeys[4] = rotate_left_hi(kr, 15);
     subkeys[5] = rotate_left_lo(kr, 15);
     subkeys[6] = rotate_left_hi(ka, 15);
@@ -242,23 +242,24 @@ fn key_schedule_34(
 
     subkeys[8] = rotate_left_hi(kr, 30);
     subkeys[9] = rotate_left_lo(kr, 30);
+
     subkeys[10] = rotate_left_hi(kb, 30);
     subkeys[11] = rotate_left_lo(kb, 30);
-
     subkeys[12] = rotate_left_hi(kl, 45);
     subkeys[13] = rotate_left_lo(kl, 45);
     subkeys[14] = rotate_left_hi(ka, 45);
     subkeys[15] = rotate_left_lo(ka, 45);
 
-    subkeys[16] = rotate_left_lo(kl, 60);
-    subkeys[17] = rotate_left_hi(kl, 60);
-    subkeys[18] = rotate_left_lo(kr, 60);
-    subkeys[19] = rotate_left_hi(kr, 60);
-    subkeys[20] = rotate_left_lo(kb, 60);
-    subkeys[21] = rotate_left_hi(kb, 60);
+    subkeys[16] = rotate_left_hi(kl, 60);
+    subkeys[17] = rotate_left_lo(kl, 60);
 
-    subkeys[22] = rotate_left_lo(kl, 77);
+    subkeys[18] = rotate_left_hi(kr, 60);
+    subkeys[19] = rotate_left_lo(kr, 60);
+    subkeys[20] = rotate_left_hi(kb, 60);
+    subkeys[21] = rotate_left_lo(kb, 60); // these two lines are correct according to the test vectors
+    subkeys[22] = rotate_left_lo(kl, 77); // however the specification shows the hi/lo pattern continue
     subkeys[23] = rotate_left_hi(kl, 77);
+
     subkeys[24] = rotate_left_lo(ka, 77);
     subkeys[25] = rotate_left_hi(ka, 77);
 
@@ -266,138 +267,19 @@ fn key_schedule_34(
     subkeys[27] = rotate_left_hi(kr, 94);
     subkeys[28] = rotate_left_lo(ka, 94);
     subkeys[29] = rotate_left_hi(ka, 94);
-
     subkeys[30] = rotate_left_lo(kl, 111);
     subkeys[31] = rotate_left_hi(kl, 111);
+
     subkeys[32] = rotate_left_lo(kb, 111);
     subkeys[33] = rotate_left_hi(kb, 111);
 }
 
-macro_rules! camellia_block_cipher {
-    ($name: ident, $subkeys: literal) => {
-        impl BlockCipher<16> for $name {
-            fn encrypt_block(&self, bytes: &mut [u8]) {
-                let mut v = [0, 0];
-                utils::byte_formatting::fill_u64s_be(&mut v, bytes);
-
-                let k = self.subkeys;
-
-                // Prewhitening
-                v[0] ^= k[0];
-                v[1] ^= k[1];
-
-                for i in (2..$subkeys - 2).step_by(2) {
-                    if i % 8 == 0 {
-                        v[0] = fl(v[0], k[i]);
-                        v[1] = fl_inv(v[1], k[i + 1]);
-                    } else {
-                        v[1] ^= f(v[0], k[i]);
-                        v[0] ^= f(v[1], k[i + 1]);
-                    }
-                }
-
-                // Postwhitening
-                v[1] ^= k[24];
-                v[0] ^= k[25];
-
-                v.swap(0, 1);
-                utils::byte_formatting::u64s_to_bytes_be(bytes, &v);
-            }
-
-            fn decrypt_block(&self, bytes: &mut [u8]) {
-                let mut v = [0, 0];
-                utils::byte_formatting::fill_u64s_be(&mut v, bytes);
-
-                let k = self.subkeys;
-
-                // Prewhitening
-                v[0] ^= k[24];
-                v[1] ^= k[25];
-
-                for i in (2..$subkeys - 2).rev().step_by(2) {
-                    if (i - 1) % 8 == 0 {
-                        v[0] = fl(v[0], k[i]);
-                        v[1] = fl_inv(v[1], k[i - 1]);
-                    } else {
-                        v[1] ^= f(v[0], k[i]);
-                        v[0] ^= f(v[1], k[i - 1]);
-                    }
-                }
-
-                // Postwhitening
-                v[1] ^= k[0];
-                v[0] ^= k[1];
-
-                v.swap(0, 1);
-                utils::byte_formatting::u64s_to_bytes_be(bytes, &v);
-            }
-        }
-    };
-}
-
-// Different key schedule for Camellia128 makes it hard to implement with the other
-pub struct Camellia128 {
-    pub input_format: utils::byte_formatting::ByteFormat,
-    pub output_format: utils::byte_formatting::ByteFormat,
-    pub subkeys: [u64; 26],
-    pub iv: u128,
-    pub mode: BCMode,
-    pub padding: BCPadding,
-}
-
-impl Default for Camellia128 {
-    fn default() -> Self {
-        Self {
-            input_format: utils::byte_formatting::ByteFormat::Hex,
-            output_format: utils::byte_formatting::ByteFormat::Hex,
-            subkeys: [0; 26],
-            iv: 0,
-            mode: Default::default(),
-            padding: Default::default(),
-        }
-    }
-}
-
-impl Camellia128 {
-    pub fn input(mut self, input: utils::byte_formatting::ByteFormat) -> Self {
-        self.input_format = input;
-        self
-    }
-    pub fn output(mut self, output: utils::byte_formatting::ByteFormat) -> Self {
-        self.output_format = output;
-        self
-    }
-    pub fn padding(mut self, padding: super::block_cipher::BCPadding) -> Self {
-        self.padding = padding;
-        self
-    }
-    pub fn mode(mut self, mode: super::block_cipher::BCMode) -> Self {
-        self.mode = mode;
-        self
-    }
-    pub fn ksa(&mut self, bytes: [u8; 16]) {
-        let kl = (
-            u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
-            u64::from_be_bytes(bytes[8..16].try_into().unwrap()),
-        );
-        let ka = create_ka(kl, (0, 0));
-        key_schedule_26(&mut self.subkeys, kl, ka);
-    }
-
-    pub fn with_key(mut self, bytes: [u8; 16]) -> Self {
-        self.ksa(bytes);
-        self
-    }
-}
-
-camellia_block_cipher!(Camellia128, 26);
-
 macro_rules! build_camellia {
-    ($name: ident, $subkeys: literal, $key_bytes: literal) => {
+    ($name: ident, $rounds: literal) => {
         pub struct $name {
             pub input_format: utils::byte_formatting::ByteFormat,
             pub output_format: utils::byte_formatting::ByteFormat,
-            pub subkeys: [u64; $subkeys],
+            pub subkeys: [u64; $rounds],
             pub iv: u128,
             pub mode: BCMode,
             pub padding: BCPadding,
@@ -408,7 +290,7 @@ macro_rules! build_camellia {
                 Self {
                     input_format: utils::byte_formatting::ByteFormat::Hex,
                     output_format: utils::byte_formatting::ByteFormat::Hex,
-                    subkeys: [0; $subkeys],
+                    subkeys: [0; $rounds],
                     iv: 0,
                     mode: Default::default(),
                     padding: Default::default(),
@@ -436,53 +318,145 @@ macro_rules! build_camellia {
                 self.mode = mode;
                 self
             }
-
-            pub fn ksa(&mut self, bytes: [u8; $key_bytes]) {
-                if $key_bytes == 24 {
-                    let kl = (
-                        u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
-                        u64::from_be_bytes(bytes[8..16].try_into().unwrap()),
-                    );
-                    let kr = (u64::from_be_bytes(bytes[16..24].try_into().unwrap()), 0);
-                    let ka = create_ka(kl, kr);
-                    let kb = create_kb(kr, ka);
-                    key_schedule_34(&mut self.subkeys, kl, kr, ka, kb);
-                } else if $key_bytes == 32 {
-                    let kl = (
-                        u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
-                        u64::from_be_bytes(bytes[8..16].try_into().unwrap()),
-                    );
-                    let kr = (
-                        u64::from_be_bytes(bytes[16..24].try_into().unwrap()),
-                        u64::from_be_bytes(bytes[24..32].try_into().unwrap()),
-                    );
-                    let ka = create_ka(kl, kr);
-                    let kb = create_kb(kr, ka);
-                    key_schedule_34(&mut self.subkeys, kl, kr, ka, kb);
-                } else {
-                    unreachable!("invalid key size")
-                }
-            }
-
-            pub fn with_key(mut self, bytes: [u8; $key_bytes]) -> Self {
-                self.ksa(bytes);
-                self
-            }
         }
 
-        camellia_block_cipher!($name, $subkeys);
+        impl BlockCipher<16> for $name {
+            fn encrypt_block(&self, bytes: &mut [u8]) {
+                let mut v = [0, 0];
+                utils::byte_formatting::fill_u64s_be(&mut v, bytes);
+
+                let k = self.subkeys;
+
+                // Prewhitening
+                v[0] ^= k[0];
+                v[1] ^= k[1];
+
+                for i in (2..$rounds - 2).step_by(2) {
+                    if i % 8 == 0 {
+                        v[0] = fl(v[0], k[i]);
+                        v[1] = fl_inv(v[1], k[i + 1]);
+                    } else {
+                        v[1] ^= f(v[0], k[i]);
+                        v[0] ^= f(v[1], k[i + 1]);
+                    }
+                }
+
+                // Postwhitening
+                v[1] ^= k[$rounds - 2];
+                v[0] ^= k[$rounds - 1];
+
+                v.swap(0, 1);
+                utils::byte_formatting::u64s_to_bytes_be(bytes, &v);
+            }
+
+            fn decrypt_block(&self, bytes: &mut [u8]) {
+                let mut v = [0, 0];
+                utils::byte_formatting::fill_u64s_be(&mut v, bytes);
+
+                let k = self.subkeys;
+
+                // Prewhitening
+                v[0] ^= k[$rounds - 2];
+                v[1] ^= k[$rounds - 1];
+
+                for i in (2..$rounds - 2).rev().step_by(2) {
+                    if (i - 1) % 8 == 0 {
+                        v[0] = fl(v[0], k[i]);
+                        v[1] = fl_inv(v[1], k[i - 1]);
+                    } else {
+                        v[1] ^= f(v[0], k[i]);
+                        v[0] ^= f(v[1], k[i - 1]);
+                    }
+                }
+
+                // Postwhitening
+                v[1] ^= k[0];
+                v[0] ^= k[1];
+
+                v.swap(0, 1);
+                utils::byte_formatting::u64s_to_bytes_be(bytes, &v);
+            }
+        }
     };
 }
 
-build_camellia!(Camellia192, 34, 24);
+build_camellia!(Camellia128, 26);
+impl Camellia128 {
+    pub fn ksa(&mut self, bytes: [u8; 16]) {
+        let kl = (
+            u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
+            u64::from_be_bytes(bytes[8..16].try_into().unwrap()),
+        );
+        let ka = create_ka(kl, (0, 0));
+        key_schedule_26(&mut self.subkeys, kl, ka);
+    }
+
+    pub fn with_key(mut self, bytes: [u8; 16]) -> Self {
+        self.ksa(bytes);
+        self
+    }
+}
+crate::impl_cipher_for_block_cipher!(Camellia128, 16);
+build_camellia!(Camellia192, 34);
+impl Camellia192 {
+    pub fn ksa(&mut self, bytes: [u8; 24]) {
+        let kl = (
+            u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
+            u64::from_be_bytes(bytes[8..16].try_into().unwrap()),
+        );
+        let r = u64::from_be_bytes(bytes[16..24].try_into().unwrap());
+        let kr = (r, !r);
+        let ka = create_ka(kl, kr);
+        let kb = create_kb(kr, ka);
+        key_schedule_34(&mut self.subkeys, kl, kr, ka, kb);
+    }
+
+    pub fn with_key(mut self, bytes: [u8; 24]) -> Self {
+        self.ksa(bytes);
+        self
+    }
+}
 crate::impl_cipher_for_block_cipher!(Camellia192, 16);
-build_camellia!(Camellia256, 34, 32);
+build_camellia!(Camellia256, 34);
+impl Camellia256 {
+    pub fn ksa(&mut self, bytes: [u8; 32]) {
+        let kl = (
+            u64::from_be_bytes(bytes[0..8].try_into().unwrap()),
+            u64::from_be_bytes(bytes[8..16].try_into().unwrap()),
+        );
+        let kr = (
+            u64::from_be_bytes(bytes[16..24].try_into().unwrap()),
+            u64::from_be_bytes(bytes[24..32].try_into().unwrap()),
+        );
+        let ka = create_ka(kl, kr);
+        let kb = create_kb(kr, ka);
+        key_schedule_34(&mut self.subkeys, kl, kr, ka, kb);
+    }
+
+    pub fn with_key(mut self, bytes: [u8; 32]) -> Self {
+        self.ksa(bytes);
+        self
+    }
+}
 crate::impl_cipher_for_block_cipher!(Camellia256, 16);
 
+// test vectors from https://datatracker.ietf.org/doc/rfc3713/
 crate::test_block_cipher!(
     Camellia128::default().with_key(
         [0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10]
-    ), test_1,
+    ), test_128,
     [0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10],
     [0x67, 0x67, 0x31, 0x38, 0x54, 0x96, 0x69, 0x73, 0x08, 0x57, 0x06, 0x56, 0x48, 0xea, 0xbe, 0x43];
+
+    Camellia192::default().with_key(
+        [0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10, 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77]
+    ), test_192,
+    [0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10],
+    [0xb4, 0x99, 0x34, 0x01, 0xb3, 0xe9, 0x96, 0xf8, 0x4e, 0xe5, 0xce, 0xe7, 0xd7, 0x9b, 0x09, 0xb9];
+
+    Camellia256::default().with_key(
+        [0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10, 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff]
+    ), test_256,
+    [0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10],
+    [0x9a, 0xcc, 0x23, 0x7d, 0xff, 0x16, 0xd7, 0x6c, 0x20, 0xef, 0x7c, 0x91, 0x9e, 0x3a, 0x75, 0x09];
 );
