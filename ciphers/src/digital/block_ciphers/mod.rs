@@ -15,6 +15,7 @@ pub mod simon;
 pub mod sm4;
 pub mod speck;
 pub mod tea;
+pub mod twofish;
 
 // This Big Scary Macro is just avoiding a lot of boilerplate since all block ciphers have essentially the same
 // implementation for the Cipher trait. Fully qualified names are used to avoid import conflicts.

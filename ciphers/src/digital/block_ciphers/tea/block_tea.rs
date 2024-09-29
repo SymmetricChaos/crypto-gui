@@ -1,5 +1,9 @@
 use crate::digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher};
-use utils::byte_formatting::{u32_pair_to_u8_array, ByteFormat};
+use utils::byte_formatting::ByteFormat;
+
+pub fn mx(y: u32, z: u32, sum: u32, p: u32, e: u32, k: &[u32; 4]) -> u32 {
+    (z >> 5 ^ y << 2) + (y >> 3 ^ z << 4) ^ (sum ^ y) + (k[(p & 3 ^ e) as usize] ^ z)
+}
 
 pub struct Btea {
     pub input_format: ByteFormat,
@@ -26,14 +30,43 @@ impl Default for Btea {
 }
 
 impl Btea {
-    pub fn mx(y: u32, z: u32, sum: u32, p: u32, e: u32, k: &[u32; 4]) -> u32 {
-        (z >> 5 ^ y << 2) + (y >> 3 ^ z << 4) ^ (sum ^ y) + (k[(p & 3 ^ e) as usize] ^ z)
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
     }
 
-    pub fn encrypt_bytes(&self, bytes: &mut [u8]) {
-        todo!()
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
     }
+
+    pub fn padding(mut self, padding: BCPadding) -> Self {
+        self.padding = padding;
+        self
+    }
+
+    pub fn mode(mut self, mode: BCMode) -> Self {
+        self.mode = mode;
+        self
+    }
+
+    // pub fn ksa(&mut self, bytes: [u8; 16]) {
+    //     fill_u32s_be(&mut self.subkeys, &bytes);
+    // }
+
+    // pub fn with_key(mut self, bytes: [u8; 16]) -> Self {
+    //     self.ksa(bytes);
+    //     self
+    // }
 }
+
+// impl BlockCipher<8> for Btea {
+//     fn encrypt_block(&self, bytes: &mut [u8]) {}
+
+//     fn decrypt_block(&self, bytes: &mut [u8]) {}
+// }
+
+// crate::impl_cipher_for_block_cipher!(Btea, 8);
 
 // #[cfg(test)]
 // mod block_tea_tests {
