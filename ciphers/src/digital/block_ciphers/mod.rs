@@ -58,7 +58,9 @@ macro_rules! impl_cipher_for_block_cipher {
                     }
                     crate::digital::block_ciphers::block_cipher::BCMode::Cfb => {
                         self.encrypt_cfb(&mut bytes, self.iv.to_be_bytes())
-                    }
+                    } // crate::digital::block_ciphers::block_cipher::BCMode::Gcm => {
+                      //     self.encrypt_gcm(&mut bytes, self.iv.to_be_bytes())
+                      // }
                 };
 
                 Ok(self.output_format.byte_slice_to_text(&bytes))
@@ -104,7 +106,9 @@ macro_rules! impl_cipher_for_block_cipher {
                     }
                     crate::digital::block_ciphers::block_cipher::BCMode::Cfb => {
                         self.decrypt_cfb(&mut bytes, self.iv.to_be_bytes())
-                    }
+                    } // crate::digital::block_ciphers::block_cipher::BCMode::Gcm => {
+                      //     self.decrypt_gcm(&mut bytes, self.iv.to_be_bytes())
+                      // }
                 };
 
                 // Remove the appropriate kind and amount of padding

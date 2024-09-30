@@ -47,6 +47,7 @@ pub trait BlockCipher<const N: usize> {
     fn encrypt_block(&self, bytes: &mut [u8]);
     fn decrypt_block(&self, bytes: &mut [u8]);
 
+    /// Electronic Code Book Mode
     fn encrypt_ecb(&self, bytes: &mut [u8]) {
         assert!(bytes.len() % N == 0);
 
@@ -54,6 +55,7 @@ pub trait BlockCipher<const N: usize> {
             self.encrypt_block(ptext);
         }
     }
+    /// Electronic Code Book Mode
     fn decrypt_ecb(&self, bytes: &mut [u8]) {
         assert!(bytes.len() % N == 0);
 
@@ -62,6 +64,7 @@ pub trait BlockCipher<const N: usize> {
         }
     }
 
+    /// Counter Mode
     fn encrypt_ctr(&self, bytes: &mut [u8], ctr: [u8; N]) {
         let mut ctr = ctr;
 
@@ -77,11 +80,12 @@ pub trait BlockCipher<const N: usize> {
         }
     }
 
-    // CTR mode is reciprocal
+    /// Counter Mode
     fn decrypt_ctr(&self, bytes: &mut [u8], ctr: [u8; N]) {
         self.encrypt_ctr(bytes, ctr)
     }
 
+    /// Cipher Block Chaining Mode
     fn encrypt_cbc(&self, bytes: &mut [u8], iv: [u8; N]) {
         assert!(bytes.len() % N == 0);
 
@@ -100,6 +104,7 @@ pub trait BlockCipher<const N: usize> {
         }
     }
 
+    /// Cipher Block Chaining Mode
     fn decrypt_cbc(&self, bytes: &mut [u8], iv: [u8; N]) {
         assert!(bytes.len() % N == 0);
 
@@ -122,6 +127,7 @@ pub trait BlockCipher<const N: usize> {
         }
     }
 
+    /// Propogating Cipher Block Chaining Mode
     fn encrypt_pcbc(&self, bytes: &mut [u8], iv: [u8; N]) {
         assert!(bytes.len() % N == 0);
 
@@ -146,6 +152,7 @@ pub trait BlockCipher<const N: usize> {
         }
     }
 
+    /// Propogating Cipher Block Chaining Mode
     fn decrypt_pcbc(&self, bytes: &mut [u8], iv: [u8; N]) {
         assert!(bytes.len() % N == 0);
 
@@ -174,6 +181,7 @@ pub trait BlockCipher<const N: usize> {
         }
     }
 
+    /// Output Feedback Mode
     fn encrypt_ofb(&self, bytes: &mut [u8], iv: [u8; N]) {
         let mut chain = iv;
 
@@ -186,11 +194,12 @@ pub trait BlockCipher<const N: usize> {
         }
     }
 
-    // OFB is reciprocal
+    /// Output Feedback Mode
     fn decrypt_ofb(&self, bytes: &mut [u8], iv: [u8; N]) {
         self.encrypt_ofb(bytes, iv)
     }
 
+    /// Cipher Feedback Mode
     fn encrypt_cfb(&self, bytes: &mut [u8], iv: [u8; N]) {
         let mut chain = iv;
 
@@ -206,10 +215,16 @@ pub trait BlockCipher<const N: usize> {
         }
     }
 
-    // CFB is reciprocal
+    /// Cipher Feedback Mode
     fn decrypt_cfb(&self, bytes: &mut [u8], iv: [u8; N]) {
         self.encrypt_cfb(bytes, iv)
     }
+
+    /// Galois/Counter Mode
+    fn encrypt_gcm(&self, bytes: &mut [u8], iv: [u8; N]) {}
+
+    /// Galois/Counter Mode
+    fn decrypt_gcm(&self, bytes: &mut [u8], iv: [u8; N]) {}
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, EnumIter)]
@@ -220,6 +235,7 @@ pub enum BCMode {
     Pcbc,
     Ofb,
     Cfb,
+    //Gcm
 }
 
 impl BCMode {
@@ -232,6 +248,7 @@ impl BCMode {
             BCMode::Pcbc => true,
             BCMode::Ofb => false,
             BCMode::Cfb => false,
+            //BCMode::Gcm => false
         }
     }
 
@@ -243,17 +260,19 @@ impl BCMode {
             BCMode::Pcbc => true,
             BCMode::Ofb => true,
             BCMode::Cfb => true,
+            //BCMode::Gcm => true
         }
     }
 
     pub fn info(&self) -> &'static str {
         match self {
-            BCMode::Cbc => "Cipher Block Chaining XORs information from the ciphertext into the plaintext of the block that comes after it before encryption with the block function. This ensures that even identical blocks of plaintext are encrypted differently. The first block requires an initialization vector that should not be repeated for different messages with the same key. Encryption in inherently sequential but decryption can be performed parallel.",
-            BCMode::Ctr => "Counter mode operates the block cipher as if it were a stream cipher or secure PRNG. Rather than encrypting the plaintext directly the cipher is used to encrypt a sequence of numbers and the result is XORed with the plaintext. The it is important that the counter never repeat for two messages with the same key so steps must be taken to carefully select its initial value. Encryption and decryption can be performed in parallel.",
-            BCMode::Ecb => "Eelectronic Code Book mode encrypts each block of plaintext directly with the cipher. This is the simplest but least secure way to operate a block cipher and not recommended for use in any circumstance. If two blocks are the same they will be encrypted exactly the same way, exposing information about the plaintext. Encryption and decryption can be performed in parallel.",
-            BCMode::Pcbc => "Propogating Cipher Block Chaining is similar to CBC but XORs the plaintext into the chain value both before and after encryption. This means that both encryption and decryption are inherently serial and that corruption in any block corrupts all following blocks.",
-            BCMode::Ofb => "Output Feedback mode iteratively encrypts the initialization vector and XORs the chain of blocks created into the plaintext. This is similar to CTR mode but cannot be encrypted or decrypted in parallel.",
-            BCMode::Cfb => "Cipher Feedback mode encrypts the previous ciphertext block and XORs that into the plaintext. Encryption cannot be parallelized but decryption can be.",
+            BCMode::Cbc => "Cipher Block Chaining Mode works by XORing information from the ciphertext into the plaintext of the block that comes after it, before encryption with the block function. This ensures that even identical blocks of plaintext are encrypted differently. The first block requires an initialization vector that should not be repeated for different messages with the same key. Encryption in inherently sequential but decryption can be performed parallel.",
+            BCMode::Ctr => "Counter Mode operates the block cipher as if it were a stream cipher or secure PRNG. Rather than encrypting the plaintext directly the cipher is used to encrypt a sequence of numbers and the result is XORed with the plaintext. The it is important that the counter never repeat for two messages with the same key so steps must be taken to carefully select its initial value. Encryption and decryption can be performed in parallel.",
+            BCMode::Ecb => "Eelectronic Code Book Mode encrypts each block of plaintext directly with the cipher. This is the simplest but least secure way to operate a block cipher and not recommended for use in any circumstance. If two blocks are the same they will be encrypted exactly the same way, exposing information about the plaintext. Encryption and decryption can be performed in parallel.",
+            BCMode::Pcbc => "Propogating Cipher Block Chaining Mode is similar to CBC but XORs the plaintext into the chain value both before and after encryption. This means that both encryption and decryption are inherently serial and that corruption in any block corrupts all following blocks.",
+            BCMode::Ofb => "Output Feedback Mode iteratively encrypts the initialization vector and XORs the chain of blocks created into the plaintext. This is similar to CTR mode but cannot be encrypted or decrypted in parallel.",
+            BCMode::Cfb => "Cipher Feedback Mode encrypts the previous ciphertext block and XORs that into the plaintext. Encryption cannot be parallelized but decryption can be.",
+            //BCMode::Gcm => "Galois/Counter Mode operated the block cipher as a stream cipher like Counter mode but also prodvides authentication by computing a tag value. The it is important that the counter never repeat for two messages with the same key so steps must be taken to carefully select its initial value. Encryption and decryption can be performed in parallel."
         }
     }
 }
@@ -273,6 +292,7 @@ impl Display for BCMode {
             BCMode::Pcbc => write!(f, "PCBC"),
             BCMode::Ofb => write!(f, "OFB"),
             BCMode::Cfb => write!(f, "CFB"),
+            //BCMode::Gcm => write!(f, "GCM"),
         }
     }
 }
