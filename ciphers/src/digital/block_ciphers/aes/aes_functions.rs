@@ -157,7 +157,7 @@ macro_rules! aes_methods {
             }
         }
 
-        crate::block_cipher_builders! {$name}
+        crate::block_cipher_builders! {$name, u128}
 
         impl $name {
             /// Number of 32-bit words in key.

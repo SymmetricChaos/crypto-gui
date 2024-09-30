@@ -29,7 +29,7 @@ impl Default for Des {
     }
 }
 
-crate::block_cipher_builders! {Des}
+crate::block_cipher_builders! {Des, u64}
 
 impl Des {
     // Key Scheduling Algorithm (key generation)

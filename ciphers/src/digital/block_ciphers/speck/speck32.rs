@@ -24,7 +24,7 @@ impl Default for Speck32_64 {
     }
 }
 
-crate::block_cipher_builders! {Speck32_64}
+crate::block_cipher_builders! {Speck32_64, u32}
 
 impl Speck32_64 {
     const ROUNDS: u16 = 22;
@@ -46,11 +46,6 @@ impl Speck32_64 {
 
     pub fn with_key_16(mut self, key: [u16; 4]) -> Self {
         self.ksa_16(key);
-        self
-    }
-
-    pub fn iv(mut self, iv: u32) -> Self {
-        self.iv = iv;
         self
     }
 

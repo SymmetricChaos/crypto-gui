@@ -30,7 +30,7 @@ impl Default for Simon32_64 {
     }
 }
 
-crate::block_cipher_builders! {Simon32_64}
+crate::block_cipher_builders! {Simon32_64, u32}
 
 impl Simon32_64 {
     pub fn ksa(&mut self, bytes: [u8; KEY_WORDS * 2]) {
@@ -50,11 +50,6 @@ impl Simon32_64 {
 
     pub fn with_key_16(mut self, key: [u16; KEY_WORDS]) -> Self {
         self.ksa_16(key);
-        self
-    }
-
-    pub fn iv(mut self, iv: u32) -> Self {
-        self.iv = iv;
         self
     }
 

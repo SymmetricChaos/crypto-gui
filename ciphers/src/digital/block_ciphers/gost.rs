@@ -47,7 +47,7 @@ impl Default for Gost {
     }
 }
 
-crate::block_cipher_builders! {Gost}
+crate::block_cipher_builders! {Gost, u64}
 
 impl Gost {
     const ROUND_KEY_IDX: [usize; 32] = [

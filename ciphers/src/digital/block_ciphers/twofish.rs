@@ -36,7 +36,7 @@ impl Default for TwoFish128 {
     }
 }
 
-crate::block_cipher_builders! {TwoFish128}
+crate::block_cipher_builders! {TwoFish128, u128}
 
 impl TwoFish128 {
     pub fn sbox(&self, n: u32, i: usize) -> u32 {

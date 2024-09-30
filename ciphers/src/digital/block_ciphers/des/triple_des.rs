@@ -29,7 +29,7 @@ impl Default for TripleDes {
     }
 }
 
-crate::block_cipher_builders! {TripleDes}
+crate::block_cipher_builders! {TripleDes, u64}
 
 impl TripleDes {
     pub fn ksa(&mut self, keys: [u64; 3]) -> Result<(), CipherError> {

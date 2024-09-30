@@ -45,7 +45,7 @@ macro_rules! lea_struct {
             }
         }
 
-        crate::block_cipher_builders! {$name}
+        crate::block_cipher_builders! {$name, u128}
 
         impl $name {
             pub fn ksa(&mut self, bytes: [u8; $key_words * 4]) {

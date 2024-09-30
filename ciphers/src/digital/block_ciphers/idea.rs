@@ -36,7 +36,7 @@ impl Default for Idea {
     }
 }
 
-crate::block_cipher_builders! {Idea}
+crate::block_cipher_builders! {Idea, u64}
 
 impl Idea {
     pub fn subkeys_enc(&self) -> &[u16; N_SUBKEYS] {

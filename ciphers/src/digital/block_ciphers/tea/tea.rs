@@ -30,7 +30,7 @@ impl Default for Tea {
     }
 }
 
-crate::block_cipher_builders! {Tea}
+crate::block_cipher_builders! {Tea, u64}
 
 impl Tea {
     pub fn ksa(&mut self, bytes: [u8; 16]) {

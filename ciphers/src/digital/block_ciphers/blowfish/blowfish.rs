@@ -32,7 +32,7 @@ impl Default for Blowfish {
     }
 }
 
-crate::block_cipher_builders! {Blowfish}
+crate::block_cipher_builders! {Blowfish, u64}
 
 impl Blowfish {
     pub fn parray_string(&self) -> String {

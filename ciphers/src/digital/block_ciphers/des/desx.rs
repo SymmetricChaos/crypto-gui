@@ -31,7 +31,7 @@ impl Default for DesX {
     }
 }
 
-crate::block_cipher_builders! {DesX}
+crate::block_cipher_builders! {DesX, u64}
 
 impl DesX {
     // Key Scheduling Algorithm (key generation)

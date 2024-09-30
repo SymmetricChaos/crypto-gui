@@ -80,7 +80,7 @@ impl Default for Sm4 {
     }
 }
 
-crate::block_cipher_builders! {Sm4}
+crate::block_cipher_builders! {Sm4, u128}
 
 impl Sm4 {
     pub fn ksa_32(&mut self, key: [u32; 4]) {

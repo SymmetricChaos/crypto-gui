@@ -28,7 +28,7 @@ macro_rules! simon64 {
             }
         }
 
-        crate::block_cipher_builders! {$name}
+        crate::block_cipher_builders! {$name, u64}
 
         impl $name {
             pub fn ksa(&mut self, bytes: [u8; $key_words * 4]) {
@@ -48,11 +48,6 @@ macro_rules! simon64 {
 
             pub fn with_key_16(mut self, key: [u32; $key_words]) -> Self {
                 self.ksa_16(key);
-                self
-            }
-
-            pub fn iv(mut self, iv: u64) -> Self {
-                self.iv = iv;
                 self
             }
 

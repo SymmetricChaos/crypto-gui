@@ -30,7 +30,7 @@ impl Default for Xtea {
     }
 }
 
-crate::block_cipher_builders! {Xtea}
+crate::block_cipher_builders! {Xtea, u64}
 
 impl Xtea {
     pub fn ksa(&mut self, bytes: [u8; 16]) {

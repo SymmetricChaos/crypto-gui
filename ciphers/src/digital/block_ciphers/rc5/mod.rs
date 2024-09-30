@@ -31,7 +31,7 @@ macro_rules! impl_rc5 {
             }
         }
 
-        crate::block_cipher_builders! {$name}
+        crate::block_cipher_builders! {$name, $iv_word}
 
         impl $name {
             pub fn bytes_to_words(s: &[u8]) -> [$word; 2] {

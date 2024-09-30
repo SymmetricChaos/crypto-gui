@@ -12,7 +12,7 @@ use utils::{
 
 #[macro_export]
 macro_rules! block_cipher_builders {
-    ($name: ident) => {
+    ($name: ident, $iv_type: ty) => {
         impl $name {
             pub fn input(mut self, input: utils::byte_formatting::ByteFormat) -> Self {
                 self.input_format = input;
@@ -37,6 +37,11 @@ macro_rules! block_cipher_builders {
                 mode: crate::digital::block_ciphers::block_cipher::BCMode,
             ) -> Self {
                 self.mode = mode;
+                self
+            }
+
+            pub fn iv(mut self, iv: $iv_type) -> Self {
+                self.iv = iv;
                 self
             }
         }
@@ -221,10 +226,10 @@ pub trait BlockCipher<const N: usize> {
     }
 
     /// Galois/Counter Mode
-    fn encrypt_gcm(&self, bytes: &mut [u8], iv: [u8; N]) {}
+    fn encrypt_gcm(&self, bytes: &mut [u8], iv: [u8; N], ad: &[u8]) {}
 
     /// Galois/Counter Mode
-    fn decrypt_gcm(&self, bytes: &mut [u8], iv: [u8; N]) {}
+    fn decrypt_gcm(&self, bytes: &mut [u8], iv: [u8; N], ad: &[u8]) {}
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, EnumIter)]

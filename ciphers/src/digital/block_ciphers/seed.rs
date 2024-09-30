@@ -188,7 +188,7 @@ impl Default for Seed {
     }
 }
 
-crate::block_cipher_builders! {Seed}
+crate::block_cipher_builders! {Seed, u128}
 
 impl Seed {
     pub fn ksa(&mut self, bytes: [u8; 16]) {

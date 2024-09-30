@@ -298,7 +298,7 @@ macro_rules! build_camellia {
             }
         }
 
-        crate::block_cipher_builders! {$name}
+        crate::block_cipher_builders! {$name, u128}
 
         impl BlockCipher<16> for $name {
             fn encrypt_block(&self, bytes: &mut [u8]) {
