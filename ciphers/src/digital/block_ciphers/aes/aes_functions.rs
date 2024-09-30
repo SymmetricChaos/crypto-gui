@@ -157,6 +157,8 @@ macro_rules! aes_methods {
             }
         }
 
+        crate::block_cipher_builders! {$name}
+
         impl $name {
             /// Number of 32-bit words in key.
             const NK: usize = $nk;
@@ -164,32 +166,6 @@ macro_rules! aes_methods {
             const NR: usize = $nr;
             /// Number of columns in the state. Fixed at 4 for all NIST versions.
             const NB: usize = 4;
-
-            pub fn input(mut self, input: utils::byte_formatting::ByteFormat) -> Self {
-                self.input_format = input;
-                self
-            }
-
-            pub fn output(mut self, output: utils::byte_formatting::ByteFormat) -> Self {
-                self.output_format = output;
-                self
-            }
-
-            pub fn padding(
-                mut self,
-                padding: crate::digital::block_ciphers::block_cipher::BCPadding,
-            ) -> Self {
-                self.padding = padding;
-                self
-            }
-
-            pub fn mode(
-                mut self,
-                mode: crate::digital::block_ciphers::block_cipher::BCMode,
-            ) -> Self {
-                self.mode = mode;
-                self
-            }
 
             // Create the round keys
             pub fn ksa_u32(&mut self, key: [u32; Self::NK]) {

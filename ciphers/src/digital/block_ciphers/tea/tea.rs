@@ -30,27 +30,9 @@ impl Default for Tea {
     }
 }
 
+crate::block_cipher_builders! {Tea}
+
 impl Tea {
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
-    }
-
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
-    }
-
-    pub fn padding(mut self, padding: BCPadding) -> Self {
-        self.padding = padding;
-        self
-    }
-
-    pub fn mode(mut self, mode: BCMode) -> Self {
-        self.mode = mode;
-        self
-    }
-
     pub fn ksa(&mut self, bytes: [u8; 16]) {
         fill_u32s_be(&mut self.subkeys, &bytes);
     }

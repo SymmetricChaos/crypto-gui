@@ -80,27 +80,9 @@ impl Default for Sm4 {
     }
 }
 
+crate::block_cipher_builders! {Sm4}
+
 impl Sm4 {
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
-    }
-
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
-    }
-
-    pub fn padding(mut self, padding: BCPadding) -> Self {
-        self.padding = padding;
-        self
-    }
-
-    pub fn mode(mut self, mode: BCMode) -> Self {
-        self.mode = mode;
-        self
-    }
-
     pub fn ksa_32(&mut self, key: [u32; 4]) {
         let mut k = key;
         for i in 0..4 {

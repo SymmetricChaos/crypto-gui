@@ -29,6 +29,8 @@ impl Default for Des {
     }
 }
 
+crate::block_cipher_builders! {Des}
+
 impl Des {
     // Key Scheduling Algorithm (key generation)
     pub fn ksa(&mut self, key: u64) -> Result<(), CipherError> {

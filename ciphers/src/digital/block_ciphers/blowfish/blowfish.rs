@@ -32,6 +32,8 @@ impl Default for Blowfish {
     }
 }
 
+crate::block_cipher_builders! {Blowfish}
+
 impl Blowfish {
     pub fn parray_string(&self) -> String {
         format!("{:08x?}", self.parray)

@@ -31,33 +31,9 @@ macro_rules! impl_rc5 {
             }
         }
 
+        crate::block_cipher_builders! {$name}
+
         impl $name {
-            pub fn input(mut self, input: utils::byte_formatting::ByteFormat) -> Self {
-                self.input_format = input;
-                self
-            }
-
-            pub fn output(mut self, output: utils::byte_formatting::ByteFormat) -> Self {
-                self.output_format = output;
-                self
-            }
-
-            pub fn padding(
-                mut self,
-                padding: crate::digital::block_ciphers::block_cipher::BCPadding,
-            ) -> Self {
-                self.padding = padding;
-                self
-            }
-
-            pub fn mode(
-                mut self,
-                mode: crate::digital::block_ciphers::block_cipher::BCMode,
-            ) -> Self {
-                self.mode = mode;
-                self
-            }
-
             pub fn bytes_to_words(s: &[u8]) -> [$word; 2] {
                 [
                     <$word>::from_le_bytes(s[..$bytes_in_word].try_into().unwrap()),

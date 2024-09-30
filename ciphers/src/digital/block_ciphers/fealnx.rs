@@ -71,6 +71,8 @@ impl Default for FealNx {
     }
 }
 
+crate::block_cipher_builders! {FealNx}
+
 impl FealNx {
     pub fn ksa(&mut self, bytes: [u8; 16]) {
         let mut key = [0; 4];

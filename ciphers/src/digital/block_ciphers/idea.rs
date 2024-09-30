@@ -36,27 +36,9 @@ impl Default for Idea {
     }
 }
 
+crate::block_cipher_builders! {Idea}
+
 impl Idea {
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
-    }
-
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
-    }
-
-    pub fn padding(mut self, padding: BCPadding) -> Self {
-        self.padding = padding;
-        self
-    }
-
-    pub fn mode(mut self, mode: BCMode) -> Self {
-        self.mode = mode;
-        self
-    }
-
     pub fn subkeys_enc(&self) -> &[u16; N_SUBKEYS] {
         &self.subkeys_enc
     }

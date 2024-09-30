@@ -29,6 +29,8 @@ impl Default for TripleDes {
     }
 }
 
+crate::block_cipher_builders! {TripleDes}
+
 impl TripleDes {
     pub fn ksa(&mut self, keys: [u64; 3]) -> Result<(), CipherError> {
         let mut temp = [[0u64; 16]; 3];

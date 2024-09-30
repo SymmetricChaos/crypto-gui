@@ -298,27 +298,7 @@ macro_rules! build_camellia {
             }
         }
 
-        impl $name {
-            pub fn input(mut self, input: utils::byte_formatting::ByteFormat) -> Self {
-                self.input_format = input;
-                self
-            }
-
-            pub fn output(mut self, output: utils::byte_formatting::ByteFormat) -> Self {
-                self.output_format = output;
-                self
-            }
-
-            pub fn padding(mut self, padding: super::block_cipher::BCPadding) -> Self {
-                self.padding = padding;
-                self
-            }
-
-            pub fn mode(mut self, mode: super::block_cipher::BCMode) -> Self {
-                self.mode = mode;
-                self
-            }
-        }
+        crate::block_cipher_builders! {$name}
 
         impl BlockCipher<16> for $name {
             fn encrypt_block(&self, bytes: &mut [u8]) {

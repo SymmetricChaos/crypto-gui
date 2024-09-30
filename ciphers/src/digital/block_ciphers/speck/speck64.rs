@@ -26,6 +26,8 @@ macro_rules! speck64 {
             }
         }
 
+        crate::block_cipher_builders! {$name}
+
         impl $name {
             pub fn ksa(&mut self, bytes: [u8; $key_words * 4]) {
                 let mut key = [0u32; $key_words];
@@ -44,26 +46,6 @@ macro_rules! speck64 {
 
             pub fn with_key_32(mut self, key: [u32; $key_words]) -> Self {
                 self.ksa_32(key);
-                self
-            }
-
-            pub fn input(mut self, input: ByteFormat) -> Self {
-                self.input_format = input;
-                self
-            }
-
-            pub fn output(mut self, output: ByteFormat) -> Self {
-                self.output_format = output;
-                self
-            }
-
-            pub fn padding(mut self, padding: BCPadding) -> Self {
-                self.padding = padding;
-                self
-            }
-
-            pub fn mode(mut self, mode: BCMode) -> Self {
-                self.mode = mode;
                 self
             }
 
