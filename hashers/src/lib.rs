@@ -7,6 +7,7 @@ pub mod crypt;
 pub mod errors;
 pub mod fnv;
 pub mod fxhash;
+pub mod ghash;
 pub mod gost;
 pub mod haval;
 pub mod hmac;
