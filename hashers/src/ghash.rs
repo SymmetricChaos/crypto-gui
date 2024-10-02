@@ -85,7 +85,8 @@ impl ClassicHasher for Ghash {
         let mut acc: u128 = 0;
         for block in bytes.chunks_exact(16) {
             let b = u128::from_be_bytes(block.try_into().unwrap());
-            acc ^= mult_gf(b, self.key);
+            acc ^= b;
+            acc ^= mult_gf(acc, self.key);
         }
         acc ^= self.padded_iv();
         acc.to_be_bytes().into()
