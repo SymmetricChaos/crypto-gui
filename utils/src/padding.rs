@@ -132,6 +132,9 @@ pub fn strip_ansi923_padding(bytes: &mut Vec<u8>) -> Result<(), PaddingError> {
 
 /// Pad with the 0x00 byte until the block size is reached. If the input already has a length equal to the block size no padding is added. Zero padding is not reversible.
 pub fn zero_padding(bytes: &mut Vec<u8>, block_size: u32) {
+    if bytes.len() == 0 {
+        bytes.push(0)
+    }
     while bytes.len() % block_size as usize != 0 {
         bytes.push(0)
     }
