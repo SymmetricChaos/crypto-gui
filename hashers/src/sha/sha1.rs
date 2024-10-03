@@ -132,12 +132,12 @@ impl ClassicHasher for Sha1 {
 }
 
 crate::basic_hash_tests!(
-    Sha1::default(), test1, "",
+    test1, Sha1::default(), "",
     "da39a3ee5e6b4b0d3255bfef95601890afd80709";
-    Sha1::default(), test2, "abc",
+    test2, Sha1::default(), "abc",
     "a9993e364706816aba3e25717850c26c9cd0d89d";
-    Sha1::default(), test3, "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
+    test3, Sha1::default(), "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
     "84983e441c3bd26ebaae4aa1f95129e5e54670f1";
-    Sha1::default(), test4, "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
+    test4, Sha1::default(), "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
     "a49b2446a02c645bf419f995b67091253a04a259";
 );

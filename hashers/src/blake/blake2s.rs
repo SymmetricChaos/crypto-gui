@@ -150,15 +150,14 @@ impl ClassicHasher for Blake2s {
 }
 
 crate::basic_hash_tests!(
-    Blake2s::default().hash_len(32), empty_hash_len_32, "",
+    empty_hash_len_32, Blake2s::default().hash_len(32), "",
     "69217a3079908094e11121d042354a7c1f55b6482ca1a51e1b250dfd1ed0eef9";
-    Blake2s::default().hash_len(32).input(ByteFormat::Hex), hash_8_len_32, "0001020304050607",
+    hash_8_len_32, Blake2s::default().hash_len(32).input(ByteFormat::Hex), "0001020304050607",
     "c7e887b546623635e93e0495598f1726821996c2377705b93a1f636f872bfa2d";
-    Blake2s::default()
+    keyed_hash_len_32,Blake2s::default()
         .input(ByteFormat::Hex)
         .hash_len(32)
         .key(ByteFormat::Hex.text_to_bytes("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f").unwrap()),
-        keyed_hash_len_32,
         "000102030405060708090a0b0c0d0e0f",
     "19ba234f0a4f38637d1839f9d9f76ad91c8522307143c97d5f93f69274cec9a7";
 );

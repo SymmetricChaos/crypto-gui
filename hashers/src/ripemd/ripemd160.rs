@@ -104,13 +104,13 @@ impl ClassicHasher for RipeMd160 {
 }
 
 crate::basic_hash_tests!(
-    RipeMd160::default(), test_160_1, "",
+    test_160_1, RipeMd160::default(), "",
     "9c1185a5c5e9fc54612808977ee8f548b2258d31";
-    RipeMd160::default(), test_160_2, "a",
+    test_160_2, RipeMd160::default(), "a",
     "0bdc9d2d256b3ee9daae347be6f4dc835a467ffe";
-    RipeMd160::default(), test_160_3, "abc",
+    test_160_3, RipeMd160::default(), "abc",
     "8eb208f7e05d987a9b044a8e98c6b087f15a0bfc";
-    RipeMd160::default(), test_160_4, "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
+    test_160_4, RipeMd160::default(), "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
     "9b752e45573d4b39f4dbd3323cab82bf63326bfb";
 
 );

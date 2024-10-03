@@ -88,13 +88,12 @@ impl ClassicHasher for RipeMd256 {
 }
 
 crate::basic_hash_tests!(
-
-    RipeMd256::default(), test_256_1, "",
+    test_256_1, RipeMd256::default(), "",
     "02ba4c4e5f8ecd1877fc52d64d30e37a2d9774fb1e5d026380ae0168e3c5522d";
-    RipeMd256::default(), test_256_2, "a",
+    test_256_2, RipeMd256::default(), "a",
     "f9333e45d857f5d90a91bab70a1eba0cfb1be4b0783c9acfcd883a9134692925";
-    RipeMd256::default(), test_256_3, "abc",
+    test_256_3, RipeMd256::default(), "abc",
     "afbd6e228b9d8cbbcef5ca2d03e6dba10ac0bc7dcbe4680e1e42d2e975459b65";
-    RipeMd256::default(), test_256_4, "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
+    test_256_4, RipeMd256::default(), "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
     "06fdcc7a409548aaf91368c06a6275b553e3f099bf0ea4edfd6778df89a890dd";
 );

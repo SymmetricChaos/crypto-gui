@@ -1,4 +1,4 @@
-use utils::{byte_formatting::ByteFormat, padding::zero_padding};
+use utils::byte_formatting::ByteFormat;
 
 use crate::traits::ClassicHasher;
 
@@ -28,8 +28,9 @@ pub fn mult_gf(x: u128, y: u128) -> u128 {
 // Add the bytes of block to the accumulator (this is XOR in the Galois Field) then multiply by the value h
 // This is used to implement Horner's Rule for evaluating a polynomial
 pub fn add_mul(acc: &mut u128, block: &[u8], h: u128) {
-    let b = u128::from_be_bytes(block.try_into().unwrap());
-    *acc ^= b;
+    for (i, byte) in block.iter().enumerate() {
+        *acc ^= (*byte as u128) << (15 - i) * 8
+    }
     *acc = mult_gf(*acc, h);
 }
 
@@ -84,25 +85,14 @@ impl ClassicHasher for Ghash {
         let mut acc: u128 = 0;
 
         // Process the addition data
-        let ad_chunks = self.ad.chunks_exact(16);
-        let mut last_block = ad_chunks.remainder().to_vec();
-        for block in ad_chunks {
-            add_mul(&mut acc, block, self.h)
-        }
-        if last_block.len() != 0 {
-            zero_padding(&mut last_block, 16);
-            add_mul(&mut acc, &last_block, self.h)
+        for block in self.ad.chunks(16) {
+            add_mul(&mut acc, block, self.h);
+            println!("!")
         }
 
         // Process the ciphertext
-        let ct_chunks = bytes.chunks_exact(16);
-        let mut last_block = ct_chunks.remainder().to_vec();
-        for block in ct_chunks {
+        for block in bytes.chunks(16) {
             add_mul(&mut acc, block, self.h)
-        }
-        if last_block.len() != 0 {
-            zero_padding(&mut last_block, 16);
-            add_mul(&mut acc, &last_block, self.h)
         }
 
         // XOR in the length of the addition data and the length of the ciphertext
@@ -132,23 +122,23 @@ mod ghash_tests {
 }
 
 crate::basic_hash_tests!(
-    Ghash::default().h(0x66e94bd4ef8a2c3b884cfa59ca342b2e),
     test1,
+    Ghash::default().h(0x66e94bd4ef8a2c3b884cfa59ca342b2e),
     "",
     "00000000000000000000000000000000";
 
-    Ghash::default().input(ByteFormat::Hex).h(0x66e94bd4ef8a2c3b884cfa59ca342b2e),
     test2,
+    Ghash::default().input(ByteFormat::Hex).h(0x66e94bd4ef8a2c3b884cfa59ca342b2e),
     "0388dace60b6a392f328c2b971b2fe78",
     "f38cbb1ad69223dcc3457ae5b6b0f885";
 
-    Ghash::default().input(ByteFormat::Hex).h(0xb83b533708bf535d0aa6e52980d53b78),
     test3,
+    Ghash::default().input(ByteFormat::Hex).h(0xb83b533708bf535d0aa6e52980d53b78),
     "42831ec2217774244b7221b784d0d49ce3aa212f2c02a4e035c17e2329aca12e21d514b25466931c7d8f6a5aac84aa051ba30b396a0aac973d58e091473f5985",
     "7f1b32b81b820d02614f8895ac1d4eac";
 
-    Ghash::default().input(ByteFormat::Hex).h(0xb83b533708bf535d0aa6e52980d53b78).ad(ByteFormat::Hex.text_to_bytes("feedfacedeadbeeffeedfacedeadbeefabaddad2").unwrap()),
     test4,
+    Ghash::default().input(ByteFormat::Hex).h(0xb83b533708bf535d0aa6e52980d53b78).ad(ByteFormat::Hex.text_to_bytes("feedfacedeadbeeffeedfacedeadbeefabaddad2").unwrap()),
     "42831ec2217774244b7221b784d0d49ce3aa212f2c02a4e035c17e2329aca12e21d514b25466931c7d8f6a5aac84aa051ba30b396a0aac973d58e091",
     "698e57f70e6ecc7fd9463b7260a9ae5f";
 );

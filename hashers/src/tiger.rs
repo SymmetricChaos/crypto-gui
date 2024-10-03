@@ -166,14 +166,14 @@ impl ClassicHasher for Tiger {
 }
 
 crate::basic_hash_tests!(
-    Tiger::v1(), test_v1_1, "The quick brown fox jumps over the lazy dog",
+    test_v1_1, Tiger::v1(), "The quick brown fox jumps over the lazy dog",
     "6d12a41e72e644f017b6f0e2f7b44c6285f06dd5d2c5b075";
-    Tiger::v1(), test_v1_2, "",
+    test_v1_2, Tiger::v1(), "",
     "3293ac630c13f0245f92bbb1766e16167a4e58492dde73f3";
-    Tiger::v1(), test_v1_3, "a",
+    test_v1_3, Tiger::v1(), "a",
     "77befbef2e7ef8ab2ec8f93bf587a7fc613e247f5f247809";
-    Tiger::v2(), test_v2_1, "The quick brown fox jumps over the lazy dog",
+    test_v2_1, Tiger::v2(), "The quick brown fox jumps over the lazy dog",
     "976abff8062a2e9dcea3a1ace966ed9c19cb85558b4976d8";
-    Tiger::v2(), test_v2_2, "",
+    test_v2_2, Tiger::v2(),  "",
     "4441be75f6018773c206c22745374b924aa8313fef919f41";
 );

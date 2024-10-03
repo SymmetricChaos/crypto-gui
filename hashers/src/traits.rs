@@ -21,7 +21,7 @@ macro_rules! hash_bytes_from_string {
 
 #[macro_export]
 macro_rules! basic_hash_tests {
-    ($($hasher: expr, $test_name: ident, $input: expr, $output: expr);+ $(;)?) => {
+    ($($test_name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
         #[cfg(test)]
         mod basic_tests {
         use super::*;

@@ -79,11 +79,6 @@ impl ClassicHasher for Lm {
     }
 }
 
-#[cfg(test)]
-mod lm_tests {
-    use super::*;
-
-    crate::basic_hash_tests!(
-        Lm::default(), test1, "PassWord", "e52cac67419a9a224a3b108f3fa6cb6d";
-    );
-}
+crate::basic_hash_tests!(
+    test1, Lm::default(), "PassWord", "e52cac67419a9a224a3b108f3fa6cb6d";
+);

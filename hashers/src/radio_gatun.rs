@@ -175,6 +175,6 @@ radio_gatun!(
 );
 
 crate::basic_hash_tests!(
-    RadioGatun32::default(), test1, "1234", "9ebdd24f469993796c4aac6a821735a65a3cdef8a359944ce71f34e7a08e1182";
-    RadioGatun64::default(), test2, "1234", "733e2b49a53fb166b6f3bd341919578b8c931880f8b8bd7c0fbbee1a538e7307";
+    test1, RadioGatun32::default(), "1234", "9ebdd24f469993796c4aac6a821735a65a3cdef8a359944ce71f34e7a08e1182";
+    test2, RadioGatun64::default(), "1234", "733e2b49a53fb166b6f3bd341919578b8c931880f8b8bd7c0fbbee1a538e7307";
 );

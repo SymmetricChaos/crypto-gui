@@ -125,6 +125,6 @@ impl ClassicHasher for Md4 {
 }
 
 crate::basic_hash_tests!(
-    Md4::default(), test1, "", "31d6cfe0d16ae931b73c59d7e0c089c0";
-    Md4::default(), test2, "a","bde52cb31de33e46245e05fbdbd6fb24";
+    test1, Md4::default(), "", "31d6cfe0d16ae931b73c59d7e0c089c0";
+    test2, Md4::default(), "a","bde52cb31de33e46245e05fbdbd6fb24";
 );

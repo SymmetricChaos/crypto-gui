@@ -111,12 +111,12 @@ impl ClassicHasher for RipeMd0 {
 }
 
 crate::basic_hash_tests!(
-    RipeMd0::default(), test_0_1, "",
+    test_0_1, RipeMd0::default(),"",
     "9f73aa9b372a9dacfb86a6108852e2d9";
-    RipeMd0::default(), test_0_2, "a",
+    test_0_2, RipeMd0::default(), "a",
     "486f74f790bc95ef7963cd2382b4bbc9";
-    RipeMd0::default(), test_0_3, "abc",
+    test_0_3, RipeMd0::default(), "abc",
     "3f14bad4c2f9b0ea805e5485d3d6882d";
-    RipeMd0::default(), test_0_4, "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
+    test_0_4, RipeMd0::default(), "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
     "dfd6b45f60fe79bbbde87c6bfc6580a5";
 );

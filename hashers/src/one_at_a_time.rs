@@ -47,6 +47,6 @@ impl ClassicHasher for OneAtATime {
 }
 
 crate::basic_hash_tests!(
-    OneAtATime::default(), test1, "a", "ca2e9442";
-    OneAtATime::default(), test2, "The quick brown fox jumps over the lazy dog", "519e91f5";
+    test1, OneAtATime::default(), "a", "ca2e9442";
+    test2, OneAtATime::default(), "The quick brown fox jumps over the lazy dog", "519e91f5";
 );

@@ -96,12 +96,9 @@ impl ClassicHasher for Md2 {
     crate::hash_bytes_from_string! {}
 }
 
-#[cfg(test)]
-mod md2_tests {
-    use super::*;
-
-    crate::basic_hash_tests!(
-        Md2::default(), test1, "",                                           "8350e5a3e24c153df2275c9f80692773";
-        Md2::default(), test2, "The quick brown fox jumps over the lazy dog", "03d85a0d629d2c442e987525319fc471";
-    );
-}
+crate::basic_hash_tests!(
+    test1, Md2::default(), "",
+    "8350e5a3e24c153df2275c9f80692773";
+    test2, Md2::default(), "The quick brown fox jumps over the lazy dog",
+    "03d85a0d629d2c442e987525319fc471";
+);
