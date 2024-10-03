@@ -34,7 +34,7 @@ macro_rules! basic_hash_tests {
         }
     };
     // Optional variant with module name for seperation
-    (($mod_name: ident)?; $($hasher: expr, $name: ident, $input: expr, $output: expr);+ $(;)?) => {
+    (($mod_name: ident)?; $($name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
         #[cfg(test)]
         mod $mod_name {
         use super::*;

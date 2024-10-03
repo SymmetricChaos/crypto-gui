@@ -224,12 +224,6 @@ pub trait BlockCipher<const N: usize> {
     fn decrypt_cfb(&self, bytes: &mut [u8], iv: [u8; N]) {
         self.encrypt_cfb(bytes, iv)
     }
-
-    /// Galois/Counter Mode
-    fn encrypt_gcm(&self, bytes: &mut [u8], iv: [u8; N], ad: &[u8]) {}
-
-    /// Galois/Counter Mode
-    fn decrypt_gcm(&self, bytes: &mut [u8], iv: [u8; N], ad: &[u8]) {}
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, EnumIter)]

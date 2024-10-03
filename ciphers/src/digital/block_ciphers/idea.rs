@@ -251,7 +251,7 @@ mod idea_tests {
 }
 
 crate::test_block_cipher!(
-    Idea::default().with_key_u16([1, 2, 3, 4, 5, 6, 7, 8]), test_1,
+    test_1, Idea::default().with_key_u16([1, 2, 3, 4, 5, 6, 7, 8]),
     [0x00, 0x00, 0x00, 0x01, 0x00, 0x02, 0x00, 0x03,],
     [0x3f, 0xfb, 0x31, 0x1b, 0x0a, 0x44, 0x06, 0x7b,];
 );
