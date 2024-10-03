@@ -38,8 +38,8 @@ pub fn add_mul(acc: &mut u128, block: &[u8], h: u128) {
 pub struct Ghash {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    pub h: u128, // usually determined by a cipher
-    pub ad: Vec<u8>,
+    pub h: u128,     // usually determined by a cipher
+    pub ad_len: u64, // how many bytes of input to treat as additional data
 }
 
 impl Default for Ghash {
@@ -48,7 +48,7 @@ impl Default for Ghash {
             input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             h: 0,
-            ad: Vec::new(),
+            ad_len: 0,
         }
     }
 }
@@ -74,8 +74,8 @@ impl Ghash {
         self
     }
 
-    pub fn ad(mut self, ad: Vec<u8>) -> Self {
-        self.ad = ad;
+    pub fn ad_len(mut self, ad_len: u64) -> Self {
+        self.ad_len = ad_len;
         self
     }
 }
@@ -84,20 +84,20 @@ impl ClassicHasher for Ghash {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut acc: u128 = 0;
 
-        // Process the addition data
-        for block in self.ad.chunks(16) {
+        // In an AEAD cipher the input would be treated as Addition Data and Ciphertext
+        let (ad, ctext) = bytes.split_at(self.ad_len as usize);
+
+        for block in ad.chunks(16) {
             add_mul(&mut acc, block, self.h);
-            println!("!")
         }
 
-        // Process the ciphertext
-        for block in bytes.chunks(16) {
-            add_mul(&mut acc, block, self.h)
+        for block in ctext.chunks(16) {
+            add_mul(&mut acc, block, self.h);
         }
 
         // XOR in the length of the addition data and the length of the ciphertext
-        acc ^= ((self.ad.len() * 8) as u128) << 64;
-        acc ^= (bytes.len() * 8) as u128;
+        acc ^= ((self.ad_len * 8) as u128) << 64;
+        acc ^= (ctext.len() * 8) as u128;
         // One more multiplication
         acc = mult_gf(acc, self.h);
 
@@ -138,7 +138,7 @@ crate::basic_hash_tests!(
     "7f1b32b81b820d02614f8895ac1d4eac";
 
     test4,
-    Ghash::default().input(ByteFormat::Hex).h(0xb83b533708bf535d0aa6e52980d53b78).ad(ByteFormat::Hex.text_to_bytes("feedfacedeadbeeffeedfacedeadbeefabaddad2").unwrap()),
-    "42831ec2217774244b7221b784d0d49ce3aa212f2c02a4e035c17e2329aca12e21d514b25466931c7d8f6a5aac84aa051ba30b396a0aac973d58e091",
+    Ghash::default().input(ByteFormat::Hex).h(0xb83b533708bf535d0aa6e52980d53b78).ad_len(20),
+    "feedfacedeadbeeffeedfacedeadbeefabaddad242831ec2217774244b7221b784d0d49ce3aa212f2c02a4e035c17e2329aca12e21d514b25466931c7d8f6a5aac84aa051ba30b396a0aac973d58e091",
     "698e57f70e6ecc7fd9463b7260a9ae5f";
 );
