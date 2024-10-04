@@ -39,7 +39,8 @@ pub struct Ghash {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
     pub h: u128,     // usually determined by a cipher
-    pub ad_len: u64, // how many bytes of input to treat as additional data
+    pub c: u128,     // constant term, usually determined by a cipher
+    pub ad_len: u64, // how many bytes of input to treat as the additional data
 }
 
 impl Default for Ghash {
@@ -48,6 +49,7 @@ impl Default for Ghash {
             input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             h: 0,
+            c: 0,
             ad_len: 0,
         }
     }
@@ -74,6 +76,16 @@ impl Ghash {
         self
     }
 
+    pub fn c(mut self, c: u128) -> Self {
+        self.c = c;
+        self
+    }
+
+    pub fn c_bytes(mut self, c: [u8; 16]) -> Self {
+        self.c = u128::from_be_bytes(c);
+        self
+    }
+
     pub fn ad_len(mut self, ad_len: u64) -> Self {
         self.ad_len = ad_len;
         self
@@ -87,19 +99,23 @@ impl ClassicHasher for Ghash {
         // In an AEAD cipher the input would be treated as Addition Data and Ciphertext
         let (ad, ctext) = bytes.split_at(self.ad_len as usize);
 
+        // Process each AD block
         for block in ad.chunks(16) {
             add_mul(&mut acc, block, self.h);
         }
 
+        // Process each CT block
         for block in ctext.chunks(16) {
             add_mul(&mut acc, block, self.h);
         }
 
-        // XOR in the length of the addition data and the length of the ciphertext
-        acc ^= ((self.ad_len * 8) as u128) << 64;
+        // The length of the AD and CT form the term x^1
+        acc ^= ((ad.len() * 8) as u128) << 64;
         acc ^= (ctext.len() * 8) as u128;
-        // One more multiplication
         acc = mult_gf(acc, self.h);
+
+        // XOR in the constant term, x^0, this is the key when used securely
+        acc ^= self.c;
 
         acc.to_be_bytes().into()
     }

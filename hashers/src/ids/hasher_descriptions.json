@@ -6,7 +6,8 @@
     "Hash Length": null,
     "Traits": [
       "Sponge",
-      "XOF"
+      "XOF",
+      "Crytographic"
     ]
   },
   "Ascon-MAC": {
@@ -16,7 +17,8 @@
     "Hash Length": null,
     "Traits": [
       "Sponge",
-      "XOF"
+      "XOF",
+      "Crytographic"
     ]
   },
   "BLAKE": {
@@ -29,7 +31,9 @@
       384,
       512
     ],
-    "Traits": null
+    "Traits": [
+      "Crytographic"
+    ]
   },
   "BLAKE2": {
     "Description": "The BLAKE2 family of hash functions are closely related to the original BLAKE family of hash functions. To improve speed the BLAKE2 hashers have fewer compression rounds and pad the input in a simpler way. They are designed to work as drop in replacements to broken hash functions such as SHA-1 and MD5, offering both superior security and supere speed.",
@@ -42,7 +46,8 @@
       512
     ],
     "Traits": [
-      "XOF"
+      "XOF",
+      "Crytographic"
     ]
   },
   "BLAKE3": {
@@ -51,7 +56,8 @@
     "Publication": "2020",
     "Hash Length": null,
     "Traits": [
-      "XOF"
+      "XOF",
+      "Crytographic"
     ]
   },
   "FNV Hash": {
@@ -79,14 +85,15 @@
     "Traits": null
   },
   "GHASH": {
-    "Description": "GHASH is a universal hash function created for use in Galois/Counter Mode for 128-bit block ciphers.",
+    "Description": "GHASH is a universal hash function created for use in Galois/Counter Mode forblock ciphers with a 128-bit block size. It treats the data as a coefficients of a polynomial, then evaluates that polynomial at a chosen point. This polynomial calculated over a Galois field for efficiency to avoid leaking information if used securely. The constant term of the polynomial is the key.",
     "Authors": null,
     "Publication": null,
     "Hash Length": [
       128
     ],
     "Traits": [
-      "Universal"
+      "Universal",
+      "Crytographic"
     ]
   },
   "GOST R 34.11-94": {
@@ -94,21 +101,27 @@
     "Authors": "FAPSI",
     "Publication": "1994",
     "Hash Length": null,
-    "Traits": null
+    "Traits": [
+      "Crytographic"
+    ]
   },
   "HAVAL": {
     "Description": "Haval (Hash Algorithm VAriable Length)",
     "Authors": "Zheng, Pieprzyk, and Seberry",
     "Publication": "1993",
     "Hash Length": null,
-    "Traits": null
+    "Traits": [
+      "Crytographic"
+    ]
   },
   "HMAC": {
     "Description": "HMAC (Hash-based Message Authentication Code) is a technique for created a keyed hash function from any hash function. Once a shared secret is established a keyed hash function allows the reciever to determine that a message has not been altered or replaced in transit. HMAC specifially addresses the length extension weakness of Merkle-Damgård based hash functions but can be used with any hash function. Some unkeyed hash functions such as SHA3 can be used as keyed hash functions without HMAC simply by making the key part of the message.",
     "Authors": "Krawczyk, Bellare, and Canetti",
     "Publication": "1997",
     "Hash Length": null,
-    "Traits": null
+    "Traits": [
+      "Crytographic"
+    ]
   },
   "OneAtATime": {
     "Description": "The \"one_at_a_time\" hash function is an extremely simple hash function that processes an input one byte at a time using just addition, XOR, and shifts. It operates on a 32-bit state that is returned as the hash.",
@@ -126,7 +139,9 @@
     "Hash Length": [
       128
     ],
-    "Traits": null
+    "Traits": [
+      "Crytographic"
+    ]
   },
   "MD4": {
     "Description": "The MD4 hash function is an obsolete hash algorithm that influenced the design of later hash functions. It produces a 128 bit hash.",
@@ -135,7 +150,9 @@
     "Hash Length": [
       128
     ],
-    "Traits": null
+    "Traits": [
+      "Crytographic"
+    ]
   },
   "MD5": {
     "Description": "The MD5 hash function is among the best known and most widely used in history. It produces a 128 bit hash. Weaknesses were discovered in the algorithm within a few years that resulted in its deprecation for secure purposes. It wasn't until 2004, however, that collisions were discovered. Today MD5 is used to verify message integrity against accidental changes.",
@@ -144,7 +161,10 @@
     "Hash Length": [
       128
     ],
-    "Traits": null
+    "Traits": [
+      "Crytographic",
+      "Broken"
+    ]
   },
   "MD6": {
     "Description": "The MD6 hash function was a competitor in the SHA-3 compeition. A tree structure was chosen to allow highly parallel computation.",
@@ -153,7 +173,9 @@
     "Hash Length": [
       512
     ],
-    "Traits": null
+    "Traits": [
+      "Crytographic"
+    ]
   },
   "MGF1": {
     "Description": "MGF1 (Mask Generating Fuction 1) is a function designed to use a hash function to generate a pseudorandom sequence of bytes with length of up to 2^32. It simply appends a 32-bit counter to a key and hashes that input, counting up by one each time. It is defined as part of the RSA standard for use in generating padding. While any hash function can be used as the basis for MGF1 here just the family of SHA-2 hash functions are provided.",
@@ -169,21 +191,28 @@
     "Hash Length": [
       112
     ],
-    "Traits": null
+    "Traits": [
+      "Crytographic",
+      "Broken"
+    ]
   },
   "PBKDF1": {
     "Description": "PBKDF1 (Password Based Key Derivation Function 1) is a now obsolete key derivation function with an adjustable work factor. It operates simply by applying a chosen hash function (MD2, MD5, or SHA-1) numerous times.",
     "Authors": null,
     "Publication": null,
     "Hash Length": null,
-    "Traits": null
+    "Traits": [
+      "Crytographic"
+    ]
   },
   "PBKDF2": {
     "Description": "PBKDF2 (Password Based Key Derivation Function 2) is a key derivation function with an adjustable work factor. It uses an HMAC iternally and applies it numerous times to increase the computation cost of calculating the key.",
     "Authors": null,
     "Publication": null,
     "Hash Length": null,
-    "Traits": null
+    "Traits": [
+      "Crytographic"
+    ]
   },
   "Pearson": {
     "Description": "The Pearson hash function is one of the simplest hashing algorithms. It produces an 8 bit hash. While it runs quickly it has almost no collision resistance and was designed to create hashes for small numbers of short inputs.",
@@ -202,7 +231,8 @@
       128
     ],
     "Traits": [
-      "Universal"
+      "Universal",
+      "Crytographic"
     ]
   },
   "RadioGatún": {
@@ -210,7 +240,9 @@
     "Authors": "Bertoni, Daemen, Peeters, Van Assche",
     "Publication": "2006",
     "Hash Length": null,
-    "Traits": null
+    "Traits": [
+      "Crytographic"
+    ]
   },
   "RIPEMD": {
     "Description": "RIPEMD is a family of five hash functions. The original RIPEMD is 128-bit hash function with three rounds which was found to have a low security margin. Four improved versions were proposed. RIPEMD-128 and the extended RIPEMD-256 have four rounds. RIPEMD-160 and the extended RIPEMD-320 have five rounds. The extended versions do not claim any increased security.",
@@ -222,7 +254,9 @@
       256,
       320
     ],
-    "Traits": null
+    "Traits": [
+      "Crytographic"
+    ]
   },
   "SHA-1": {
     "Description": "SHA-1 is a cryptographic hash function designed by the US National Security Agency. It produces a 160 bit hash. Practical attacks on SHA-1 have been publicly known since 2017. It it based on the similar SHA-0, released in 1993, which different only in lacking a one bit rotation during the expansion step. Practical attacks on SHA-0 have been publicly known since 2004.",
@@ -232,7 +266,9 @@
       160
     ],
     "Traits": [
-      "Merkle-Damgård"
+      "Merkle-Damgård",
+      "Crytographic",
+      "Broken"
     ]
   },
   "SHA-2": {
@@ -246,7 +282,8 @@
       512
     ],
     "Traits": [
-      "Merkle-Damgård"
+      "Merkle-Damgård",
+      "Crytographic"
     ]
   },
   "SHA-3 (Keccak)": {
@@ -261,7 +298,8 @@
     ],
     "Traits": [
       "XOF",
-      "Sponge"
+      "Sponge",
+      "Crytographic"
     ]
   },
   "SipHash": {
@@ -282,6 +320,8 @@
       128,
       160
     ],
-    "Traits": null
+    "Traits": [
+      "Crytographic"
+    ]
   }
 }
