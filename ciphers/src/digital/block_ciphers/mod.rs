@@ -11,6 +11,7 @@ pub mod lea;
 pub mod rc5;
 pub mod rc6;
 pub mod seed;
+pub mod serpent;
 pub mod simon;
 pub mod sm4;
 pub mod speck;

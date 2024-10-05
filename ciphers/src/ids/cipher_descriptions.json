@@ -37,7 +37,7 @@
       "Composite"
     ]
   },
-  "AES ": {
+  "AES": {
     "Names": [
       "AES",
       "Rijndael",
@@ -740,6 +740,18 @@
     "Traits": [
       "Playfair",
       "Substitution"
+    ]
+  },
+  "Serpent": {
+    "Names": [
+      "Serpent"
+    ],
+    "Description": "Serpent was a finalist in the AES competition in 1998 to replace DES where it was ranked second. Like the ultimate winner (Rijnael) it uses a substitution-permutation network. Like DES it applies a non-cryptographic permutation before and after encryption for optimization in hardware.",
+    "Authors": "Ross Anderson, Eli Biham, and Lars Knudsen",
+    "Publication": "1998",
+    "Traits": [
+      "Block Cipher",
+      "SP-network"
     ]
   },
   "Shamir's Secret Sharing": {
