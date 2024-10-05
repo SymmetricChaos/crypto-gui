@@ -1,6 +1,6 @@
 use std::ops::{Shl, Shr};
 
-use utils::byte_formatting::{fill_u32s_le, ByteFormat};
+use utils::byte_formatting::{fill_u32s_le, u32s_to_bytes_le, ByteFormat};
 
 use super::block_cipher::{BCMode, BCPadding, BlockCipher};
 
@@ -50,13 +50,13 @@ pub fn sbox_bitslice(idx: usize, words: [u32; 4]) -> [u32; 4] {
     let mut out: [u32; 4] = [0; 4];
     for i in 0..32 {
         // Take bits across the words
-        let slice = get_bit(words[0], i)
+        let nibble = get_bit(words[0], i)
             | get_bit(words[1], i) << 1
             | get_bit(words[2], i) << 2
-            | get_bit(words[3], i) << 4;
+            | get_bit(words[3], i) << 3;
 
         // Apply the sbox to the bits
-        let s = sbox(idx, slice);
+        let s = sbox(idx % 8, nibble);
 
         // Push the transformed bits into the output
         for pos in 0..4 {
@@ -70,13 +70,13 @@ pub fn sbox_bitslice_inv(idx: usize, words: [u32; 4]) -> [u32; 4] {
     let mut out: [u32; 4] = [0; 4];
     for i in 0..32 {
         // Take bits across the words
-        let slice = get_bit(words[0], i)
+        let nibble = get_bit(words[0], i)
             | get_bit(words[1], i) << 1
             | get_bit(words[2], i) << 2
-            | get_bit(words[3], i) << 4;
+            | get_bit(words[3], i) << 3;
 
         // Apply the sbox to the bits
-        let s = sbox_inv(idx, slice);
+        let s = sbox_inv(idx % 8, nibble);
 
         // Push the transformed bits into the output
         for pos in 0..4 {
@@ -87,7 +87,7 @@ pub fn sbox_bitslice_inv(idx: usize, words: [u32; 4]) -> [u32; 4] {
 }
 
 // Serpent's Linear Transformation and its inverse
-pub fn lt(x: &mut [u32; 4]) {
+pub fn lt(mut x: [u32; 4]) -> [u32; 4] {
     x[0] = x[0].rotate_left(13);
     x[2] = x[2].rotate_left(3);
     x[1] = x[1] ^ x[0] ^ x[2];
@@ -98,9 +98,10 @@ pub fn lt(x: &mut [u32; 4]) {
     x[2] = x[2] ^ x[3] ^ x[1].shl(7);
     x[0] = x[0].rotate_left(5);
     x[2] = x[2].rotate_left(22);
+    x
 }
 
-pub fn lt_inv(x: &mut [u32; 4]) {
+pub fn lt_inv(mut x: [u32; 4]) -> [u32; 4] {
     x[2] = x[2].rotate_right(22);
     x[0] = x[0].rotate_right(5);
     x[2] = x[2] ^ x[3] ^ x[1].shr(7);
@@ -111,11 +112,12 @@ pub fn lt_inv(x: &mut [u32; 4]) {
     x[1] = x[1] ^ x[0] ^ x[2];
     x[2] = x[2].rotate_right(3);
     x[0] = x[0].rotate_right(13);
+    x
 }
 
 // Expand a key to 256 bits.
 // Serpent accepts keys of any bit length from 0 to 256 bits.
-// I will not bother keys not given in bytes are rare.
+// I will not bother since keys not given in bytes are rare.
 pub fn expand_key(bytes: &[u8]) -> [u8; 32] {
     let mut ex = [0; 32];
     ex[..bytes.len()].copy_from_slice(bytes);
@@ -125,15 +127,12 @@ pub fn expand_key(bytes: &[u8]) -> [u8; 32] {
     ex
 }
 
-// Generate the prekeys that are used to generate the round keys
+// Generate the pre_keys that are used to generate the round keys
 pub fn pre_keys(bytes: &[u8]) -> [u32; 132] {
-    // Created the expanded list of words
-    let mut ex_words = [0u32; 8];
-    fill_u32s_le(&mut ex_words, &expand_key(bytes));
-    // Copy that list into the start of the pre_key
+    // Copy the expanded key into the start of the pre_key
     let mut pre_key: [u32; 140] = [0; 140];
+    fill_u32s_le(&mut pre_key[0..8], &expand_key(bytes));
     // Fill the entire pre_key
-    pre_key[..8].copy_from_slice(&ex_words);
     for i in 0..132 {
         pre_key[i + 8] =
             (pre_key[i] ^ pre_key[i + 3] ^ pre_key[i + 5] ^ pre_key[i + 7] ^ FRAC ^ i as u32)
@@ -143,6 +142,7 @@ pub fn pre_keys(bytes: &[u8]) -> [u32; 132] {
     pre_key[8..].try_into().unwrap()
 }
 
+// Convert the pre_keys into the actual round keys using the sboxes
 pub fn round_keys(pre_keys: [u32; 132]) -> [[u32; 4]; ROUNDS + 1] {
     let mut out = [[0; 4]; ROUNDS + 1];
     for (i, chunk) in pre_keys.chunks_exact(4).enumerate() {
@@ -152,7 +152,15 @@ pub fn round_keys(pre_keys: [u32; 132]) -> [[u32; 4]; ROUNDS + 1] {
     out
 }
 
-pub struct Serpent128 {
+fn xor_words(a: [u32; 4], b: [u32; 4]) -> [u32; 4] {
+    let mut out = [0; 4];
+    for i in 0..4 {
+        out[i] = a[i] ^ b[i]
+    }
+    out
+}
+
+pub struct Serpent {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
     pub round_keys: [[u32; 4]; ROUNDS + 1],
@@ -161,7 +169,7 @@ pub struct Serpent128 {
     pub padding: BCPadding,
 }
 
-impl Default for Serpent128 {
+impl Default for Serpent {
     fn default() -> Self {
         Self {
             input_format: ByteFormat::Hex,
@@ -174,31 +182,110 @@ impl Default for Serpent128 {
     }
 }
 
-crate::block_cipher_builders! {Serpent128, u128}
+crate::block_cipher_builders! {Serpent, u128}
 
-impl Serpent128 {
-    pub fn ksa(&mut self, bytes: [u8; 16]) {
+impl Serpent {
+    pub fn ksa_128(&mut self, bytes: [u8; 16]) {
         self.round_keys = round_keys(pre_keys(&bytes));
     }
 
-    pub fn with_key(mut self, bytes: [u8; 16]) -> Self {
-        self.ksa(bytes);
+    pub fn with_key_128(mut self, bytes: [u8; 16]) -> Self {
+        self.ksa_128(bytes);
+        self
+    }
+
+    pub fn ksa_192(&mut self, bytes: [u8; 24]) {
+        self.round_keys = round_keys(pre_keys(&bytes));
+    }
+
+    pub fn with_key_192(mut self, bytes: [u8; 24]) -> Self {
+        self.ksa_192(bytes);
+        self
+    }
+
+    pub fn ksa_256(&mut self, bytes: [u8; 32]) {
+        self.round_keys = round_keys(pre_keys(&bytes));
+    }
+
+    pub fn with_key_256(mut self, bytes: [u8; 32]) -> Self {
+        self.ksa_256(bytes);
         self
     }
 }
 
-impl BlockCipher<16> for Serpent128 {
+impl BlockCipher<16> for Serpent {
     fn encrypt_block(&self, bytes: &mut [u8]) {
-        // let mut block = [0; 4];
-        // fill_u32s_le(&mut block, bytes);
+        let mut block = [0; 4];
+        fill_u32s_le(&mut block, bytes);
 
-        // u32s_to_bytes_le(bytes, &block);
+        for i in 0..ROUNDS - 1 {
+            let t = xor_words(block, self.round_keys[i]);
+            let s = sbox_bitslice(i, t);
+            block = lt(s);
+        }
+
+        let t = xor_words(block, self.round_keys[ROUNDS - 1]);
+        let s = sbox_bitslice(ROUNDS - 1, t);
+        block = xor_words(s, self.round_keys[ROUNDS]);
+
+        u32s_to_bytes_le(bytes, &block);
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
-        // let mut block = [0; 4];
-        // fill_u32s_le(&mut block, bytes);
+        let mut block = [0; 4];
+        fill_u32s_le(&mut block, bytes);
 
-        // u32s_to_bytes_le(bytes, &block);
+        let s = xor_words(block, self.round_keys[ROUNDS]);
+        let t = sbox_bitslice_inv(ROUNDS - 1, s);
+        block = xor_words(t, self.round_keys[ROUNDS - 1]);
+
+        for i in (0..ROUNDS - 1).rev() {
+            let s = lt_inv(block);
+            let t = sbox_bitslice_inv(i, s);
+            block = xor_words(t, self.round_keys[i])
+        }
+
+        u32s_to_bytes_le(bytes, &block);
     }
 }
+
+crate::impl_cipher_for_block_cipher!(Serpent, 16);
+
+// https://web.archive.org/web/20140617083036/http://www.cs.technion.ac.il/~biham/Reports/Serpent/
+crate::test_block_cipher!(
+    test_128_1, Serpent::default().with_key_128(ByteFormat::Hex.text_to_bytes("80000000000000000000000000000000").unwrap().try_into().unwrap()),
+    ByteFormat::Hex.text_to_bytes("00000000000000000000000000000000").unwrap(),
+    ByteFormat::Hex.text_to_bytes("264E5481EFF42A4606ABDA06C0BFDA3D").unwrap();
+
+    test_128_2, Serpent::default().with_key_128(ByteFormat::Hex.text_to_bytes("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF").unwrap().try_into().unwrap()),
+    ByteFormat::Hex.text_to_bytes("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF").unwrap(),
+    ByteFormat::Hex.text_to_bytes("AF39614E747B9331C38B797F527EBEA6").unwrap();
+
+    test_128_3, Serpent::default().with_key_128(ByteFormat::Hex.text_to_bytes("2BD6459F82C5B300952C49104881FF48").unwrap().try_into().unwrap()),
+    ByteFormat::Hex.text_to_bytes("EA024714AD5C4D84EA024714AD5C4D84").unwrap(),
+    ByteFormat::Hex.text_to_bytes("92D7F8EF2C36C53409F275902F06539F").unwrap();
+
+    test_192_1, Serpent::default().with_key_192(ByteFormat::Hex.text_to_bytes("800000000000000000000000000000000000000000000000").unwrap().try_into().unwrap()),
+    ByteFormat::Hex.text_to_bytes("00000000000000000000000000000000").unwrap(),
+    ByteFormat::Hex.text_to_bytes("9E274EAD9B737BB21EFCFCA548602689").unwrap();
+
+    test_192_2, Serpent::default().with_key_192(ByteFormat::Hex.text_to_bytes("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF").unwrap().try_into().unwrap()),
+    ByteFormat::Hex.text_to_bytes("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF").unwrap(),
+    ByteFormat::Hex.text_to_bytes("B91C5A6582A87D13A17E3B17842F3FCC").unwrap();
+
+    test_192_3, Serpent::default().with_key_192(ByteFormat::Hex.text_to_bytes("2BD6459F82C5B300952C49104881FF482BD6459F82C5B300").unwrap().try_into().unwrap()),
+    ByteFormat::Hex.text_to_bytes("EA024714AD5C4D84EA024714AD5C4D84").unwrap(),
+    ByteFormat::Hex.text_to_bytes("EA024714AD5C4D84EA024714AD5C4D84").unwrap();
+
+    test_256_1, Serpent::default().with_key_256(ByteFormat::Hex.text_to_bytes("8000000000000000000000000000000000000000000000000000000000000000").unwrap().try_into().unwrap()),
+    ByteFormat::Hex.text_to_bytes("00000000000000000000000000000000").unwrap(),
+    ByteFormat::Hex.text_to_bytes("A223AA1288463C0E2BE38EBD825616C0").unwrap();
+
+    test_256_2, Serpent::default().with_key_256(ByteFormat::Hex.text_to_bytes("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF").unwrap().try_into().unwrap()),
+    ByteFormat::Hex.text_to_bytes("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF").unwrap(),
+    ByteFormat::Hex.text_to_bytes("052BD61DFCCEBF17FDDBA5BBEB947613").unwrap();
+
+    test_256_3, Serpent::default().with_key_256(ByteFormat::Hex.text_to_bytes("2BD6459F82C5B300952C49104881FF482BD6459F82C5B300952C49104881FF48").unwrap().try_into().unwrap()),
+    ByteFormat::Hex.text_to_bytes("EA024714AD5C4D84EA024714AD5C4D84").unwrap(),
+    ByteFormat::Hex.text_to_bytes("3E507730776B93FDEA661235E1DD99F0").unwrap();
+);

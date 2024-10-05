@@ -125,7 +125,7 @@ macro_rules! impl_cipher_for_block_cipher {
 
 #[macro_export]
 macro_rules! test_block_cipher {
-    ($( $name: ident, $cipher: expr,$ptext: expr, $ctext: expr);+ $(;)?) => {
+    ($( $name: ident, $cipher: expr, $ptext: expr, $ctext: expr);+ $(;)?) => {
         #[cfg(test)]
         mod tests {
             use super::*;
