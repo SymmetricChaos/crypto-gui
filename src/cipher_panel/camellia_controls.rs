@@ -88,7 +88,7 @@ impl CipherFrame for CamelliaFrame {
                         self.cipher128.ksa_u64(self.key128);
                     }
                 });
-                ui.label("Camellia128 uses a 128-bit key presented here as two 64-bit words.");
+                ui.label("Camellia128 uses a 128-bit key, presented here as two 64-bit words.");
                 for i in 0..4 {
                     if ui.u64_hex_edit(&mut self.key128[i]).changed() {
                         self.cipher128.ksa_u64(self.key128);
@@ -121,7 +121,7 @@ impl CipherFrame for CamelliaFrame {
                         self.cipher192.ksa_u64(self.key192);
                     }
                 });
-                ui.label("Camellia192 uses a 192-bit key presented here as three 64-bit words.");
+                ui.label("Camellia192 uses a 192-bit key, presented here as three 64-bit words.");
                 for i in 0..3 {
                     if ui.u64_hex_edit(&mut self.key192[i]).changed() {
                         self.cipher192.ksa_u64(self.key192);
@@ -153,7 +153,7 @@ impl CipherFrame for CamelliaFrame {
                         self.cipher256.ksa_u64(self.key256);
                     }
                 });
-                ui.label("Camellia256 uses a 256-bit key presented here as four 64-bit words.");
+                ui.label("Camellia256 uses a 256-bit key, presented here as four 64-bit words.");
                 for i in 0..8 {
                     if ui.u64_hex_edit(&mut self.key256[i]).changed() {
                         self.cipher256.ksa_u64(self.key256);

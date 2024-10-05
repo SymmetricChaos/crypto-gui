@@ -63,6 +63,8 @@ impl ClassicHasher for Md5 {
         let mut c = 0x98badcfe_u32;
         let mut d = 0x10325476_u32;
 
+        let mut x = [0u32; 16];
+
         // Step 4. Process message in 16-word blocks
         for block in input.chunks_exact(64) {
             let mut ta = a;
@@ -70,7 +72,6 @@ impl ClassicHasher for Md5 {
             let mut tc = c;
             let mut td = d;
 
-            let mut x = [0u32; 16];
             fill_u32s_le(&mut x, &block);
 
             for i in 0..64 {

@@ -15,6 +15,11 @@ pub struct TigerFrame {
 
 impl HasherFrame for TigerFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/hashers/src/tiger.rs",
+        );
+
         ui.subheading("Version");
         ui.label("In V1 the first padding byte is 0x01 and in V2 the first padding byte is 0x80. There is no other difference.");
         ui.selectable_value(&mut self.hasher.version, TigerVersion::One, "V1");
