@@ -23,6 +23,11 @@ impl Default for Pbkdf1Frame {
 
 impl HasherFrame for Pbkdf1Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/hashers/src/pbkdf1.rs",
+        );
+
         ui.byte_io_mode_hasher(
             &mut self.hasher.input_format,
             &mut self.hasher.output_format,

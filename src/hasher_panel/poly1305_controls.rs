@@ -73,7 +73,10 @@ impl Poly1305Frame {
 
 impl HasherFrame for Poly1305Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        ui.add_space(16.0);
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/hashers/src/poly3015.rs",
+        );
 
         ui.byte_io_mode_hasher(
             &mut self.hasher.input_format,
