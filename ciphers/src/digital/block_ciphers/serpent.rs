@@ -4,11 +4,11 @@ use utils::byte_formatting::{fill_u32s_le, u32s_to_bytes_le, ByteFormat};
 
 use super::block_cipher::{BCMode, BCPadding, BlockCipher};
 
-const ROUNDS: usize = 32;
-const FRAC: u32 = 0x9e3779b9;
+pub const ROUNDS: usize = 32;
+pub const FRAC: u32 = 0x9e3779b9;
 
 // Serpents eight 4-bit sboxes and their inverses
-const SBOX: [[u8; 16]; 8] = [
+pub const SBOX: [[u8; 16]; 8] = [
     [3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 4, 2, 7, 0, 9, 12],
     [15, 12, 2, 7, 9, 0, 5, 10, 1, 11, 14, 8, 6, 13, 3, 4],
     [8, 6, 7, 9, 3, 12, 10, 15, 13, 1, 14, 4, 0, 11, 5, 2],
@@ -19,7 +19,7 @@ const SBOX: [[u8; 16]; 8] = [
     [1, 13, 15, 0, 14, 8, 2, 11, 7, 4, 12, 10, 9, 3, 5, 6],
 ];
 
-const SBOX_INV: [[u8; 16]; 8] = [
+pub const SBOX_INV: [[u8; 16]; 8] = [
     [13, 3, 11, 0, 10, 6, 5, 12, 1, 14, 4, 7, 15, 9, 8, 2],
     [5, 8, 2, 14, 15, 6, 12, 3, 11, 4, 7, 9, 1, 13, 10, 0],
     [12, 9, 15, 4, 11, 14, 1, 2, 0, 3, 6, 13, 5, 8, 10, 7],
@@ -31,12 +31,12 @@ const SBOX_INV: [[u8; 16]; 8] = [
 ];
 
 // Apply a specific SBOX, u8 should only use the lower 4 bits
-pub fn sbox(i: usize, nibble: u8) -> u8 {
+fn sbox(i: usize, nibble: u8) -> u8 {
     SBOX[i][nibble as usize]
 }
 
 // Apply a specific SBOX_INV, u8 should only use the lower 4 bits
-pub fn sbox_inv(i: usize, nibble: u8) -> u8 {
+fn sbox_inv(i: usize, nibble: u8) -> u8 {
     SBOX_INV[i][nibble as usize]
 }
 
@@ -46,7 +46,7 @@ fn get_bit(x: u32, i: usize) -> u8 {
 }
 
 // Apply a sbox across the bits of four 32-bit words
-pub fn sbox_bitslice(idx: usize, words: [u32; 4]) -> [u32; 4] {
+fn sbox_bitslice(idx: usize, words: [u32; 4]) -> [u32; 4] {
     let mut out: [u32; 4] = [0; 4];
     for i in 0..32 {
         // Take bits across the words
@@ -66,7 +66,7 @@ pub fn sbox_bitslice(idx: usize, words: [u32; 4]) -> [u32; 4] {
     out
 }
 
-pub fn sbox_bitslice_inv(idx: usize, words: [u32; 4]) -> [u32; 4] {
+fn sbox_bitslice_inv(idx: usize, words: [u32; 4]) -> [u32; 4] {
     let mut out: [u32; 4] = [0; 4];
     for i in 0..32 {
         // Take bits across the words
@@ -87,7 +87,7 @@ pub fn sbox_bitslice_inv(idx: usize, words: [u32; 4]) -> [u32; 4] {
 }
 
 // Serpent's Linear Transformation and its inverse
-pub fn lt(mut x: [u32; 4]) -> [u32; 4] {
+fn lt(mut x: [u32; 4]) -> [u32; 4] {
     x[0] = x[0].rotate_left(13);
     x[2] = x[2].rotate_left(3);
     x[1] = x[1] ^ x[0] ^ x[2];
@@ -101,7 +101,7 @@ pub fn lt(mut x: [u32; 4]) -> [u32; 4] {
     x
 }
 
-pub fn lt_inv(mut x: [u32; 4]) -> [u32; 4] {
+fn lt_inv(mut x: [u32; 4]) -> [u32; 4] {
     x[2] = x[2].rotate_right(22);
     x[0] = x[0].rotate_right(5);
     x[2] = x[2] ^ x[3] ^ x[1].shr(7);
@@ -118,7 +118,7 @@ pub fn lt_inv(mut x: [u32; 4]) -> [u32; 4] {
 // Expand a key to 256 bits.
 // Serpent accepts keys of any bit length from 0 to 256 bits.
 // I will not bother since keys not given in bytes are rare.
-pub fn expand_key(bytes: &[u8]) -> [u8; 32] {
+fn expand_key(bytes: &[u8]) -> [u8; 32] {
     let mut ex = [0; 32];
     ex[..bytes.len()].copy_from_slice(bytes);
     if bytes.len() < 32 {
@@ -128,7 +128,7 @@ pub fn expand_key(bytes: &[u8]) -> [u8; 32] {
 }
 
 // Generate the pre_keys that are used to generate the round keys
-pub fn pre_keys(bytes: &[u8]) -> [u32; 132] {
+fn pre_keys(bytes: &[u8]) -> [u32; 132] {
     // Copy the expanded key into the start of the pre_key
     let mut pre_key: [u32; 140] = [0; 140];
     fill_u32s_le(&mut pre_key[0..8], &expand_key(bytes));
@@ -143,7 +143,7 @@ pub fn pre_keys(bytes: &[u8]) -> [u32; 132] {
 }
 
 // Convert the pre_keys into the actual round keys using the sboxes
-pub fn round_keys(pre_keys: [u32; 132]) -> [[u32; 4]; ROUNDS + 1] {
+fn round_keys(pre_keys: [u32; 132]) -> [[u32; 4]; ROUNDS + 1] {
     let mut out = [[0; 4]; ROUNDS + 1];
     for (i, chunk) in pre_keys.chunks_exact(4).enumerate() {
         let words: [u32; 4] = chunk.try_into().unwrap();
@@ -251,41 +251,45 @@ impl BlockCipher<16> for Serpent {
 
 crate::impl_cipher_for_block_cipher!(Serpent, 16);
 
+pub fn ttb(s: &str) -> Vec<u8> {
+    ByteFormat::Hex.text_to_bytes(s).unwrap()
+}
+
 // https://web.archive.org/web/20140617083036/http://www.cs.technion.ac.il/~biham/Reports/Serpent/
 crate::test_block_cipher!(
-    test_128_1, Serpent::default().with_key_128(ByteFormat::Hex.text_to_bytes("80000000000000000000000000000000").unwrap().try_into().unwrap()),
-    ByteFormat::Hex.text_to_bytes("00000000000000000000000000000000").unwrap(),
-    ByteFormat::Hex.text_to_bytes("264E5481EFF42A4606ABDA06C0BFDA3D").unwrap();
+    test_128_1, Serpent::default().with_key_128(ttb("80000000000000000000000000000000").try_into().unwrap()),
+    ttb("00000000000000000000000000000000"),
+    ttb("264E5481EFF42A4606ABDA06C0BFDA3D");
 
-    test_128_2, Serpent::default().with_key_128(ByteFormat::Hex.text_to_bytes("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF").unwrap().try_into().unwrap()),
-    ByteFormat::Hex.text_to_bytes("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF").unwrap(),
-    ByteFormat::Hex.text_to_bytes("AF39614E747B9331C38B797F527EBEA6").unwrap();
+    test_128_2, Serpent::default().with_key_128(ttb("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF").try_into().unwrap()),
+    ttb("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF"),
+    ttb("AF39614E747B9331C38B797F527EBEA6");
 
-    test_128_3, Serpent::default().with_key_128(ByteFormat::Hex.text_to_bytes("2BD6459F82C5B300952C49104881FF48").unwrap().try_into().unwrap()),
-    ByteFormat::Hex.text_to_bytes("EA024714AD5C4D84EA024714AD5C4D84").unwrap(),
-    ByteFormat::Hex.text_to_bytes("92D7F8EF2C36C53409F275902F06539F").unwrap();
+    test_128_3, Serpent::default().with_key_128(ttb("2BD6459F82C5B300952C49104881FF48").try_into().unwrap()),
+    ttb("EA024714AD5C4D84EA024714AD5C4D84"),
+    ttb("92D7F8EF2C36C53409F275902F06539F");
 
-    test_192_1, Serpent::default().with_key_192(ByteFormat::Hex.text_to_bytes("800000000000000000000000000000000000000000000000").unwrap().try_into().unwrap()),
-    ByteFormat::Hex.text_to_bytes("00000000000000000000000000000000").unwrap(),
-    ByteFormat::Hex.text_to_bytes("9E274EAD9B737BB21EFCFCA548602689").unwrap();
+    test_192_1, Serpent::default().with_key_192(ttb("800000000000000000000000000000000000000000000000").try_into().unwrap()),
+    ttb("00000000000000000000000000000000"),
+    ttb("9E274EAD9B737BB21EFCFCA548602689");
 
-    test_192_2, Serpent::default().with_key_192(ByteFormat::Hex.text_to_bytes("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF").unwrap().try_into().unwrap()),
-    ByteFormat::Hex.text_to_bytes("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF").unwrap(),
-    ByteFormat::Hex.text_to_bytes("B91C5A6582A87D13A17E3B17842F3FCC").unwrap();
+    test_192_2, Serpent::default().with_key_192(ttb("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF").try_into().unwrap()),
+    ttb("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF"),
+    ttb("B91C5A6582A87D13A17E3B17842F3FCC");
 
-    test_192_3, Serpent::default().with_key_192(ByteFormat::Hex.text_to_bytes("2BD6459F82C5B300952C49104881FF482BD6459F82C5B300").unwrap().try_into().unwrap()),
-    ByteFormat::Hex.text_to_bytes("EA024714AD5C4D84EA024714AD5C4D84").unwrap(),
-    ByteFormat::Hex.text_to_bytes("EA024714AD5C4D84EA024714AD5C4D84").unwrap();
+    test_192_3, Serpent::default().with_key_192(ttb("2BD6459F82C5B300952C49104881FF482BD6459F82C5B300").try_into().unwrap()),
+    ttb("EA024714AD5C4D84EA024714AD5C4D84"),
+    ttb("EA024714AD5C4D84EA024714AD5C4D84");
 
-    test_256_1, Serpent::default().with_key_256(ByteFormat::Hex.text_to_bytes("8000000000000000000000000000000000000000000000000000000000000000").unwrap().try_into().unwrap()),
-    ByteFormat::Hex.text_to_bytes("00000000000000000000000000000000").unwrap(),
-    ByteFormat::Hex.text_to_bytes("A223AA1288463C0E2BE38EBD825616C0").unwrap();
+    test_256_1, Serpent::default().with_key_256(ttb("8000000000000000000000000000000000000000000000000000000000000000").try_into().unwrap()),
+    ttb("00000000000000000000000000000000"),
+    ttb("A223AA1288463C0E2BE38EBD825616C0");
 
-    test_256_2, Serpent::default().with_key_256(ByteFormat::Hex.text_to_bytes("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF").unwrap().try_into().unwrap()),
-    ByteFormat::Hex.text_to_bytes("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF").unwrap(),
-    ByteFormat::Hex.text_to_bytes("052BD61DFCCEBF17FDDBA5BBEB947613").unwrap();
+    test_256_2, Serpent::default().with_key_256(ttb("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF").try_into().unwrap()),
+    ttb("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF"),
+    ttb("052BD61DFCCEBF17FDDBA5BBEB947613");
 
-    test_256_3, Serpent::default().with_key_256(ByteFormat::Hex.text_to_bytes("2BD6459F82C5B300952C49104881FF482BD6459F82C5B300952C49104881FF48").unwrap().try_into().unwrap()),
-    ByteFormat::Hex.text_to_bytes("EA024714AD5C4D84EA024714AD5C4D84").unwrap(),
-    ByteFormat::Hex.text_to_bytes("3E507730776B93FDEA661235E1DD99F0").unwrap();
+    test_256_3, Serpent::default().with_key_256(ttb("2BD6459F82C5B300952C49104881FF482BD6459F82C5B300952C49104881FF48").try_into().unwrap()),
+    ttb("EA024714AD5C4D84EA024714AD5C4D84"),
+    ttb("3E507730776B93FDEA661235E1DD99F0");
 );
