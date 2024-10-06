@@ -501,6 +501,10 @@ impl ClassicCryptoApp {
                         "https://github.com/emilk/egui/tree/master/crates/eframe",
                     );
                     ui.label(".");
+                    ui.add_space(4.0);
+                    ui.label("With credit to ");
+                    ui.hyperlink_to("RustCrypto", "https://github.com/RustCrypto");
+                    ui.label(" for reference implementions of modern ciphers.")
                 });
             });
         CentralPanel::default().show(ctx, |ui| {
