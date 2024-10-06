@@ -122,7 +122,7 @@ fn expand_key(bytes: &[u8]) -> [u8; 32] {
     let mut ex = [0; 32];
     ex[..bytes.len()].copy_from_slice(bytes);
     if bytes.len() < 32 {
-        ex[bytes.len()] = 0x01 // this is correct per test vectors, probably because of little endian view
+        ex[bytes.len()] = 0x01 // this is correct per test vectors, probably because of little endian view of the bytes
     }
     ex
 }
@@ -233,6 +233,12 @@ impl Serpent {
     pub fn with_key_256(mut self, bytes: [u8; 32]) -> Self {
         self.ksa_256(bytes);
         self
+    }
+
+    pub fn ksa_u32(&mut self, words: &[u32]) {
+        assert!(words.len() >= 4 && words.len() <= 8);
+        let bytes: Vec<u8> = words.iter().flat_map(|w| w.to_le_bytes()).collect();
+        self.round_keys = round_keys(pre_keys(&bytes));
     }
 }
 
