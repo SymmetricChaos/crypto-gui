@@ -295,52 +295,13 @@ mod bit_function_tests {
     }
 }
 
-pub fn u64_to_u32_pair(n: u64) -> [u32; 2] {
-    [(n >> 32) as u32, n as u32]
-}
+// pub fn u64_to_u32_pair(n: u64) -> [u32; 2] {
+//     [(n >> 32) as u32, n as u32]
+// }
 
-pub fn u32_pair_to_u64(n: [u32; 2]) -> u64 {
-    (n[0] as u64) << 32 | n[1] as u64
-}
-
-pub fn u32_pair_to_u8_array(s: [u32; 2]) -> [u8; 8] {
-    let a = s[0].to_be_bytes();
-    let b = s[1].to_be_bytes();
-    let mut out = [0; 8];
-    for i in 0..4 {
-        out[i] = a[i];
-        out[i + 4] = b[i];
-    }
-
-    out
-}
-
-pub fn u64_pair_to_u8_array(s: [u64; 2]) -> [u8; 16] {
-    let a = s[0].to_be_bytes();
-    let b = s[1].to_be_bytes();
-    let mut out = [0; 16];
-    for i in 0..8 {
-        out[i] = a[i];
-        out[i + 8] = b[i];
-    }
-
-    out
-}
-
-pub fn u32_4_to_u8_16(s: [u32; 4]) -> [u8; 16] {
-    let a = s[0].to_be_bytes();
-    let b = s[1].to_be_bytes();
-    let c = s[2].to_be_bytes();
-    let d = s[3].to_be_bytes();
-    let mut out = [0; 16];
-    for i in 0..4 {
-        out[i] = a[i];
-        out[i + 4] = b[i];
-        out[i + 8] = c[i];
-        out[i + 12] = d[i];
-    }
-    out
-}
+// pub fn u32_pair_to_u64(n: [u32; 2]) -> u64 {
+//     (n[0] as u64) << 32 | n[1] as u64
+// }
 
 pub fn fill_u16s_be(target: &mut [u16], bytes: &[u8]) {
     for (elem, chunk) in target.iter_mut().zip_eq(bytes.chunks_exact(2)) {
@@ -379,56 +340,38 @@ pub fn fill_u64s_le(target: &mut [u64], bytes: &[u8]) {
 }
 
 pub fn u16s_to_bytes_be(target: &mut [u8], words: &[u16]) {
-    for i in 0..words.len() {
-        let bytes = words[i].to_be_bytes();
-        for j in 0..2 {
-            target[(i * 2) + j] = bytes[j];
-        }
+    for (chunk, word) in target.chunks_exact_mut(2).zip_eq(words) {
+        chunk.copy_from_slice(&word.to_be_bytes());
     }
 }
 
 pub fn u16s_to_bytes_le(target: &mut [u8], words: &[u16]) {
-    for i in 0..words.len() {
-        let bytes = words[i].to_le_bytes();
-        for j in 0..2 {
-            target[(i * 2) + j] = bytes[j];
-        }
+    for (chunk, word) in target.chunks_exact_mut(2).zip_eq(words) {
+        chunk.copy_from_slice(&word.to_le_bytes());
     }
 }
 
 pub fn u32s_to_bytes_be(target: &mut [u8], words: &[u32]) {
-    for i in 0..words.len() {
-        let bytes = words[i].to_be_bytes();
-        for j in 0..4 {
-            target[(i * 4) + j] = bytes[j];
-        }
+    for (chunk, word) in target.chunks_exact_mut(4).zip_eq(words) {
+        chunk.copy_from_slice(&word.to_be_bytes());
     }
 }
 
 pub fn u32s_to_bytes_le(target: &mut [u8], words: &[u32]) {
-    for i in 0..words.len() {
-        let bytes = words[i].to_le_bytes();
-        for j in 0..4 {
-            target[(i * 4) + j] = bytes[j];
-        }
+    for (chunk, word) in target.chunks_exact_mut(4).zip_eq(words) {
+        chunk.copy_from_slice(&word.to_le_bytes());
     }
 }
 
 pub fn u64s_to_bytes_be(target: &mut [u8], words: &[u64]) {
-    for i in 0..words.len() {
-        let bytes = words[i].to_be_bytes();
-        for j in 0..8 {
-            target[(i * 8) + j] = bytes[j];
-        }
+    for (chunk, word) in target.chunks_exact_mut(8).zip_eq(words) {
+        chunk.copy_from_slice(&word.to_be_bytes());
     }
 }
 
 pub fn u64s_to_bytes_le(target: &mut [u8], words: &[u64]) {
-    for i in 0..words.len() {
-        let bytes = words[i].to_le_bytes();
-        for j in 0..8 {
-            target[(i * 8) + j] = bytes[j];
-        }
+    for (chunk, word) in target.chunks_exact_mut(8).zip_eq(words) {
+        chunk.copy_from_slice(&word.to_le_bytes());
     }
 }
 

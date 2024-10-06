@@ -1,5 +1,5 @@
 use crate::digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher};
-use utils::byte_formatting::{u32_pair_to_u8_array, ByteFormat};
+use utils::byte_formatting::ByteFormat;
 
 pub struct Xxtea {
     pub input_format: ByteFormat,
