@@ -75,7 +75,7 @@ fn sbox_bitslice_inv(idx: usize, words: [u32; 4]) -> [u32; 4] {
             | get_bit(words[2], i) << 2
             | get_bit(words[3], i) << 3;
 
-        // Apply the sbox to the bits
+        // Apply the sbox_inv to the bits
         let s = sbox_inv(idx % 8, nibble);
 
         // Push the transformed bits into the output
@@ -91,7 +91,7 @@ fn lt(mut x: [u32; 4]) -> [u32; 4] {
     x[0] = x[0].rotate_left(13);
     x[2] = x[2].rotate_left(3);
     x[1] = x[1] ^ x[0] ^ x[2];
-    x[3] = x[3] ^ x[3] ^ x[0].shl(3);
+    x[3] = x[3] ^ x[2] ^ x[0].shl(3);
     x[1] = x[1].rotate_left(1);
     x[3] = x[3].rotate_left(7);
     x[0] = x[0] ^ x[1] ^ x[3];
@@ -108,7 +108,7 @@ fn lt_inv(mut x: [u32; 4]) -> [u32; 4] {
     x[0] = x[0] ^ x[1] ^ x[3];
     x[3] = x[3].rotate_right(7);
     x[1] = x[1].rotate_right(1);
-    x[3] = x[3] ^ x[3] ^ x[0].shr(3);
+    x[3] = x[3] ^ x[2] ^ x[0].shr(3);
     x[1] = x[1] ^ x[0] ^ x[2];
     x[2] = x[2].rotate_right(3);
     x[0] = x[0].rotate_right(13);
@@ -122,7 +122,7 @@ fn expand_key(bytes: &[u8]) -> [u8; 32] {
     let mut ex = [0; 32];
     ex[..bytes.len()].copy_from_slice(bytes);
     if bytes.len() < 32 {
-        ex[bytes.len()] = 0x80
+        ex[bytes.len()] = 0x01 // this is correct per test vectors, probably because of little endian view
     }
     ex
 }
@@ -134,9 +134,14 @@ fn pre_keys(bytes: &[u8]) -> [u32; 132] {
     fill_u32s_le(&mut pre_key[0..8], &expand_key(bytes));
     // Fill the entire pre_key
     for i in 0..132 {
-        pre_key[i + 8] =
-            (pre_key[i] ^ pre_key[i + 3] ^ pre_key[i + 5] ^ pre_key[i + 7] ^ FRAC ^ i as u32)
-                .rotate_left(11);
+        let pos = i + 8;
+        pre_key[pos] = (pre_key[pos - 8]
+            ^ pre_key[pos - 5]
+            ^ pre_key[pos - 3]
+            ^ pre_key[pos - 1]
+            ^ FRAC
+            ^ i as u32)
+            .rotate_left(11);
     }
     // Discard the first eight words
     pre_key[8..].try_into().unwrap()
@@ -144,10 +149,28 @@ fn pre_keys(bytes: &[u8]) -> [u32; 132] {
 
 // Convert the pre_keys into the actual round keys using the sboxes
 fn round_keys(pre_keys: [u32; 132]) -> [[u32; 4]; ROUNDS + 1] {
+    let mut t = [0; 132];
+    for (idx, chunk) in pre_keys.chunks_exact(4).enumerate() {
+        let s_idx = (ROUNDS + 3 - idx) % ROUNDS;
+        for i in 0..32 {
+            // Take bits across the words
+            let nibble = get_bit(chunk[0], i)
+                | get_bit(chunk[1], i) << 1
+                | get_bit(chunk[2], i) << 2
+                | get_bit(chunk[3], i) << 3;
+
+            // Apply the sbox to the bits
+            let s = sbox(s_idx % 8, nibble);
+
+            // Modified schedule for where to push the bits
+            for pos in 0..4 {
+                t[4 * idx + pos] |= u32::from(get_bit(s as u32, pos)) << i;
+            }
+        }
+    }
     let mut out = [[0; 4]; ROUNDS + 1];
-    for (i, chunk) in pre_keys.chunks_exact(4).enumerate() {
-        let words: [u32; 4] = chunk.try_into().unwrap();
-        out[i] = sbox_bitslice((ROUNDS + 3 - i) % ROUNDS, words);
+    for (i, chunk) in t.chunks_exact(4).enumerate() {
+        out[i].copy_from_slice(chunk);
     }
     out
 }
