@@ -1,4 +1,4 @@
-use std::ops::{Shl, Shr};
+use std::ops::Shl;
 
 use utils::byte_formatting::{fill_u32s_le, u32s_to_bytes_le, ByteFormat};
 
@@ -104,11 +104,11 @@ fn lt(mut x: [u32; 4]) -> [u32; 4] {
 fn lt_inv(mut x: [u32; 4]) -> [u32; 4] {
     x[2] = x[2].rotate_right(22);
     x[0] = x[0].rotate_right(5);
-    x[2] = x[2] ^ x[3] ^ x[1].shr(7);
+    x[2] = x[2] ^ x[3] ^ x[1].shl(7); // note that this is still shift left
     x[0] = x[0] ^ x[1] ^ x[3];
     x[3] = x[3].rotate_right(7);
     x[1] = x[1].rotate_right(1);
-    x[3] = x[3] ^ x[2] ^ x[0].shr(3);
+    x[3] = x[3] ^ x[2] ^ x[0].shl(3); // note that this is still shift left
     x[1] = x[1] ^ x[0] ^ x[2];
     x[2] = x[2].rotate_right(3);
     x[0] = x[0].rotate_right(13);
@@ -116,7 +116,7 @@ fn lt_inv(mut x: [u32; 4]) -> [u32; 4] {
 }
 
 // Expand a key to 256 bits.
-// Serpent accepts keys of any bit length from 0 to 256 bits.
+// Serpent accepts keys of any bit length from 128 to 256 bits.
 // I will not bother since keys not given in bytes are rare.
 fn expand_key(bytes: &[u8]) -> [u8; 32] {
     let mut ex = [0; 32];
@@ -162,7 +162,7 @@ fn round_keys(pre_keys: [u32; 132]) -> [[u32; 4]; ROUNDS + 1] {
             // Apply the sbox to the bits
             let s = sbox(s_idx % 8, nibble);
 
-            // Modified schedule for where to push the bits
+            // Modified schedule for where to push the bits, not the same as the bit sliced sbox
             for pos in 0..4 {
                 t[4 * idx + pos] |= u32::from(get_bit(s as u32, pos)) << i;
             }
@@ -308,7 +308,7 @@ crate::test_block_cipher!(
 
     test_192_3, Serpent::default().with_key_192(ttb("2BD6459F82C5B300952C49104881FF482BD6459F82C5B300").try_into().unwrap()),
     ttb("EA024714AD5C4D84EA024714AD5C4D84"),
-    ttb("EA024714AD5C4D84EA024714AD5C4D84");
+    ttb("827B18C2678A239DFC5512842000E204");
 
     test_256_1, Serpent::default().with_key_256(ttb("8000000000000000000000000000000000000000000000000000000000000000").try_into().unwrap()),
     ttb("00000000000000000000000000000000"),
