@@ -57,18 +57,21 @@ impl CipherFrame for SerpentFrame {
             .clicked()
         {
             self.key_range = 4;
+            self.cipher.ksa_u32(&self.key[0..self.key_range]);
         }
         if ui
             .selectable_value(&mut self.key_size, SerpentKeySize::B192, "Serpent192")
             .clicked()
         {
             self.key_range = 6;
+            self.cipher.ksa_u32(&self.key[0..self.key_range]);
         }
         if ui
             .selectable_value(&mut self.key_size, SerpentKeySize::B256, "Serpent256")
             .clicked()
         {
             self.key_range = 8;
+            self.cipher.ksa_u32(&self.key[0..self.key_range]);
         }
 
         for i in 0..self.key_range {
@@ -77,12 +80,18 @@ impl CipherFrame for SerpentFrame {
             }
         }
 
-        // ui.add_space(8.0);
+        ui.add_space(8.0);
 
-        // ui.collapsing("Expanded Key", |ui| {
-        //     ui.subheading("Round Keys");
-        //     ui.label(self.cipher.round_keys);
-        // });
+        ui.collapsing("Round Keys", |ui| {
+            let mut out = String::new();
+            for line in self.cipher.round_keys {
+                out.clear();
+                for word in line {
+                    out.push_str(&format!("{:08x?}  ", word))
+                }
+                ui.monospace(&out);
+            }
+        });
 
         ui.add_space(8.0);
 
