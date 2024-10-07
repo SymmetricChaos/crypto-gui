@@ -63,6 +63,7 @@ mod salsa20_controls;
 mod scytale_controls;
 mod seed_controls;
 mod seriated_playfair_controls;
+mod serpent_controls;
 mod shamir_controls;
 mod sigaba_controls;
 mod simon_controls;
