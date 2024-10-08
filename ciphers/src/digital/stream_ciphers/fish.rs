@@ -2,12 +2,12 @@ use crate::{Cipher, CipherError};
 use num::Integer;
 use std::collections::VecDeque;
 
-pub struct Fish {
+pub struct FishRng {
     lfg_a: VecDeque<u32>,
     lfg_b: VecDeque<u32>,
 }
 
-impl Default for Fish {
+impl Default for FishRng {
     fn default() -> Self {
         Self {
             lfg_a: VecDeque::from_iter(0..55),
@@ -16,7 +16,7 @@ impl Default for Fish {
     }
 }
 
-impl Fish {
+impl FishRng {
     pub fn step(&mut self) -> Option<(u32, u32)> {
         // This is roughly correct but the exact taps and lengths are needed
         let a = self.lfg_a[0].wrapping_add(self.lfg_a[24]);
@@ -53,14 +53,26 @@ impl Fish {
         n |= (k1 as u64) << 32;
         n.to_be_bytes()
     }
-}
 
-impl Cipher for Fish {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        todo!()
-    }
-
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        todo!()
+    pub fn keystream(&mut self, n_bytes: usize) -> Vec<u8> {
+        let mut bytes = vec![0; n_bytes];
+        while bytes.len() < n_bytes {
+            bytes.extend(self.next_output())
+        }
+        bytes.truncate(n_bytes)
     }
 }
+
+pub struct FishCipher {
+    rng: FishRng,
+}
+
+impl FishCipher {
+    pub fn encrypt_bytes(&self, bytes: &mut [u8]) {
+        let mut rng = self.rng.clone();
+        let keystream = rng.keystream(bytes.len());
+        xor_into_bytes(bytes, &keystream);
+    }
+}
+
+crate::impl_cipher_for_stream_cipher!(FishCipher);
