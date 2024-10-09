@@ -88,35 +88,31 @@ impl Ghash {
         self.ad_len = ad_len;
         self
     }
+
+    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
+        let mut acc: u128 = 0;
+
+        // In an AEAD cipher the input would be treated as Addition Data and Ciphertext
+        let (ad, ctext) = bytes.split_at(self.ad_len as usize);
+
+        // Process each AD block
+        for block in ad.chunks(16) {
+            add_mul(&mut acc, block, self.h);
+        }
+
+        // Process each CT block
+        for block in ctext.chunks(16) {
+            add_mul(&mut acc, block, self.h);
+        }
+
+        // The length of the AD and CT form the term x^1
+        acc ^= ((ad.len() * 8) as u128) << 64;
+        acc ^= (ctext.len() * 8) as u128;
+        acc = mult_gf(acc, self.h);
+
+        // XOR in the constant term, x^0, this is the key when used securely
+        acc ^= self.c;
+
+        acc.to_be_bytes().into()
+    }
 }
-
-// impl ClassicHasher for Ghash {
-//     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-//         let mut acc: u128 = 0;
-
-//         // In an AEAD cipher the input would be treated as Addition Data and Ciphertext
-//         let (ad, ctext) = bytes.split_at(self.ad_len as usize);
-
-//         // Process each AD block
-//         for block in ad.chunks(16) {
-//             add_mul(&mut acc, block, self.h);
-//         }
-
-//         // Process each CT block
-//         for block in ctext.chunks(16) {
-//             add_mul(&mut acc, block, self.h);
-//         }
-
-//         // The length of the AD and CT form the term x^1
-//         acc ^= ((ad.len() * 8) as u128) << 64;
-//         acc ^= (ctext.len() * 8) as u128;
-//         acc = mult_gf(acc, self.h);
-
-//         // XOR in the constant term, x^0, this is the key when used securely
-//         acc ^= self.c;
-
-//         acc.to_be_bytes().into()
-//     }
-
-//     crate::hash_bytes_from_string! {}
-// }

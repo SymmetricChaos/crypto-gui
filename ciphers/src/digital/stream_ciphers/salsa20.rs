@@ -1,4 +1,3 @@
-use crate::{Cipher, CipherError};
 use utils::byte_formatting::ByteFormat;
 
 // https://cr.yp.to/snuffle/salsafamily-20071225.pdf
@@ -139,6 +138,8 @@ crate::impl_cipher_for_stream_cipher!(Salsa20);
 mod salsa20_tests {
 
     use super::*;
+
+    use crate::Cipher;
 
     #[test]
     fn encrypt_decrypt_test() {

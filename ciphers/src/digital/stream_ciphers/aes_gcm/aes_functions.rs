@@ -260,6 +260,53 @@ macro_rules! aes_gcm_methods {
             pub fn decrypt_ctr(&self, bytes: &mut [u8], ctr: [u8; 16]) {
                 self.encrypt_ctr(bytes, ctr)
             }
+
+            pub fn tag(&self) {}
+
+            pub fn encrypt_bytes(&self) {}
+        }
+
+        impl crate::Cipher for $name {
+            fn encrypt(&self, text: &str) -> Result<String, crate::CipherError> {
+                // Create encrypted bytes
+                let bytes = self
+                    .cipher
+                    .input_format
+                    .text_to_bytes(text)
+                    .map_err(|_| crate::CipherError::input("byte format error"))?;
+                let encrypted_bytes = self.cipher.encrypt_bytes_with_ctr(&bytes, self.ctr + 1);
+
+                // The r key is restricted within the hash invocation
+                // Put the tag first for simplicity when decoding
+                let mut tag = self.create_tag(&encrypted_bytes);
+                tag.extend_from_slice(&encrypted_bytes);
+
+                Ok(self.cipher.output_format.byte_slice_to_text(&tag))
+            }
+
+            fn decrypt(&self, text: &str) -> Result<String, crate::CipherError> {
+                let message = self
+                    .cipher
+                    .input_format
+                    .text_to_bytes(text)
+                    .map_err(|_| crate::CipherError::input("byte format error"))?;
+
+                // Split the tag and the encrypted message
+                let (message_tag, encrypted_bytes) = message.split_at(16);
+
+                if message_tag != self.create_tag(&encrypted_bytes) {
+                    return Err(crate::CipherError::input("message failed authentication"));
+                }
+
+                // ChaCha is reciprocal
+                let decrypted_bytes = self
+                    .cipher
+                    .encrypt_bytes_with_ctr(&encrypted_bytes, self.ctr + 1);
+                Ok(self
+                    .cipher
+                    .output_format
+                    .byte_slice_to_text(&decrypted_bytes))
+            }
         }
     };
 }

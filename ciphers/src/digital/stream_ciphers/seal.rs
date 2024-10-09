@@ -1,8 +1,6 @@
 use num::Integer;
 use utils::byte_formatting::ByteFormat;
 
-use crate::{Cipher, CipherError};
-
 // https://www.cs.ucdavis.edu/~rogaway/papers/seal.pdf
 pub struct Seal3 {
     pub input_format: ByteFormat,

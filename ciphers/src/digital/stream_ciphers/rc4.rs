@@ -1,7 +1,5 @@
 use utils::byte_formatting::ByteFormat;
 
-use crate::{Cipher, CipherError};
-
 pub struct Rc4 {
     pub arr: [u8; 256],
     pub i: u8,
@@ -88,6 +86,7 @@ crate::impl_cipher_for_stream_cipher!(Rc4);
 mod rc4_tests {
 
     use super::*;
+    use crate::Cipher;
 
     const PLAINTEXT: &'static str = "Attack at dawn";
     const CIPHERTEXT: &'static str = "45a01f645fc35b383552544b9bf5";

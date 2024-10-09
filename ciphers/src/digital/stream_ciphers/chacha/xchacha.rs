@@ -1,4 +1,3 @@
-use crate::{Cipher, CipherError};
 use utils::byte_formatting::{fill_u32s_le, ByteFormat};
 
 use super::ChaChaState;

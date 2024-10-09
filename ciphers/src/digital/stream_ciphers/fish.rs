@@ -1,7 +1,8 @@
-use crate::{Cipher, CipherError};
 use num::Integer;
 use std::collections::VecDeque;
+use utils::byte_formatting::{xor_into_bytes, ByteFormat};
 
+#[derive(Debug, Clone)]
 pub struct FishRng {
     lfg_a: VecDeque<u32>,
     lfg_b: VecDeque<u32>,
@@ -59,12 +60,26 @@ impl FishRng {
         while bytes.len() < n_bytes {
             bytes.extend(self.next_output())
         }
-        bytes.truncate(n_bytes)
+        bytes.truncate(n_bytes);
+        bytes
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct FishCipher {
-    rng: FishRng,
+    pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
+    pub rng: FishRng,
+}
+
+impl Default for FishCipher {
+    fn default() -> Self {
+        Self {
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
+            rng: Default::default(),
+        }
+    }
 }
 
 impl FishCipher {

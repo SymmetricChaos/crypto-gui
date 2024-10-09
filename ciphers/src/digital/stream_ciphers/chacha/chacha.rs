@@ -1,4 +1,3 @@
-use crate::{Cipher, CipherError};
 use utils::byte_formatting::{fill_u32s_le, ByteFormat};
 
 use super::ChaChaState;
@@ -157,6 +156,7 @@ crate::impl_cipher_for_stream_cipher!(ChaCha);
 mod chacha_tests {
 
     use super::*;
+    use crate::Cipher;
 
     #[test]
     fn encrypt_decrypt_test() {

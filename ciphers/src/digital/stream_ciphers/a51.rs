@@ -1,5 +1,4 @@
 use super::lfsr_copy::Lfsr32;
-use crate::{Cipher, CipherError};
 use utils::byte_formatting::{xor_into_bytes, ByteFormat};
 
 #[derive(Debug, Clone)]
