@@ -1,5 +1,6 @@
 pub mod a51;
 pub mod a52;
+pub mod aes_gcm;
 pub mod chacha;
 pub mod fish;
 pub mod lfsr_copy;
