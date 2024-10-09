@@ -1,6 +1,6 @@
 use super::{
-    multiplication::{mul11, mul13, mul14, mul2, mul3, mul9},
-    sbox::{inv_sbox, sbox},
+    multiplication::{mul2, mul3},
+    sbox::sbox,
 };
 use itertools::Itertools;
 
@@ -44,25 +44,11 @@ pub fn sub_bytes(state: &mut [u8]) {
     }
 }
 
-// Inverse of above
-pub fn inv_sub_bytes(state: &mut [u8]) {
-    for byte in state {
-        *byte = inv_sbox(*byte)
-    }
-}
-
 // Shift each row the state
 pub fn shift_rows(state: &mut [u8]) {
     state[4..8].rotate_left(1);
     state[8..12].rotate_left(2);
     state[12..16].rotate_left(3);
-}
-
-// Inverse of above
-pub fn inv_shift_rows(state: &mut [u8]) {
-    state[4..8].rotate_right(1);
-    state[8..12].rotate_right(2);
-    state[12..16].rotate_right(3);
 }
 
 // Mix each column using an invertible matrix multiplication
@@ -72,15 +58,6 @@ pub fn mix_columns(state: &mut [u8]) {
     mix_column(state, [2, 6, 10, 14]);
     mix_column(state, [3, 7, 11, 15]);
 }
-
-// Inverse of above
-pub fn inv_mix_columns(state: &mut [u8]) {
-    inv_mix_column(state, [0, 4, 8, 12]);
-    inv_mix_column(state, [1, 5, 9, 13]);
-    inv_mix_column(state, [2, 6, 10, 14]);
-    inv_mix_column(state, [3, 7, 11, 15]);
-}
-
 // Perform the matrix multiplication.
 // The scalar additions are XOR
 // The scalar multiplications looked up from tables
@@ -93,18 +70,6 @@ pub fn mix_column(state: &mut [u8], idxs: [usize; 4]) {
     state[idxs[1]] = a ^ mul2(b) ^ mul3(c) ^ d;
     state[idxs[2]] = a ^ b ^ mul2(c) ^ mul3(d);
     state[idxs[3]] = mul3(a) ^ b ^ c ^ mul2(d);
-}
-
-// Inverse of above
-pub fn inv_mix_column(state: &mut [u8], idxs: [usize; 4]) {
-    let a = state[idxs[0]];
-    let b = state[idxs[1]];
-    let c = state[idxs[2]];
-    let d = state[idxs[3]];
-    state[idxs[0]] = mul14(a) ^ mul11(b) ^ mul13(c) ^ mul9(d);
-    state[idxs[1]] = mul9(a) ^ mul14(b) ^ mul11(c) ^ mul13(d);
-    state[idxs[2]] = mul13(a) ^ mul9(b) ^ mul14(c) ^ mul11(d);
-    state[idxs[3]] = mul11(a) ^ mul13(b) ^ mul9(c) ^ mul14(d);
 }
 
 // XOR the round key into the state column by column
@@ -220,26 +185,6 @@ macro_rules! aes_gcm_methods {
                 transpose_state(bytes);
             }
 
-            pub fn decrypt_block(&self, bytes: &mut [u8]) {
-                transpose_state(bytes);
-                // Initial round key
-                add_round_key(bytes, &self.round_keys[Self::NR]);
-
-                // Main NR
-                for i in (1..Self::NR).rev() {
-                    inv_shift_rows(bytes);
-                    inv_sub_bytes(bytes);
-                    add_round_key(bytes, &self.round_keys[i]);
-                    inv_mix_columns(bytes);
-                }
-
-                // Finalization round
-                inv_shift_rows(bytes);
-                inv_sub_bytes(bytes);
-                add_round_key(bytes, &self.round_keys[0]);
-                transpose_state(bytes);
-            }
-
             /// Counter Mode
             pub fn encrypt_ctr(&self, bytes: &mut [u8], ctr: [u8; 16]) {
                 let mut ctr = ctr;
@@ -252,6 +197,7 @@ macro_rules! aes_gcm_methods {
                     // XOR the mask into the plaintext at the source, creating ciphertext
                     utils::byte_formatting::xor_into_bytes(ptext, &mask);
 
+                    // Step the counter
                     utils::math_functions::incr_array_ctr(&mut ctr);
                 }
             }
@@ -261,51 +207,47 @@ macro_rules! aes_gcm_methods {
                 self.encrypt_ctr(bytes, ctr)
             }
 
-            pub fn tag(&self) {}
-
-            pub fn encrypt_bytes(&self) {}
+            pub fn create_tag(&self, bytes: &[u8]) -> [u8; 16] {
+                let mut final_mask = self.iv.to_be_bytes();
+                self.encrypt_block(&mut final_mask);
+                todo!()
+            }
         }
 
         impl crate::Cipher for $name {
             fn encrypt(&self, text: &str) -> Result<String, crate::CipherError> {
-                // Create encrypted bytes
-                let bytes = self
-                    .cipher
+                let mut bytes = self
                     .input_format
                     .text_to_bytes(text)
                     .map_err(|_| crate::CipherError::input("byte format error"))?;
-                let encrypted_bytes = self.cipher.encrypt_bytes_with_ctr(&bytes, self.ctr + 1);
 
-                // The r key is restricted within the hash invocation
-                // Put the tag first for simplicity when decoding
-                let mut tag = self.create_tag(&encrypted_bytes);
-                tag.extend_from_slice(&encrypted_bytes);
+                self.encrypt_ctr(&mut bytes, (self.iv + 1).to_be_bytes());
 
-                Ok(self.cipher.output_format.byte_slice_to_text(&tag))
+                let tag = self.create_tag(&bytes);
+
+                bytes.extend_from_slice(&tag);
+
+                Ok(self.output_format.byte_slice_to_text(&bytes))
             }
 
             fn decrypt(&self, text: &str) -> Result<String, crate::CipherError> {
-                let message = self
-                    .cipher
+                let mut bytes = self
                     .input_format
                     .text_to_bytes(text)
                     .map_err(|_| crate::CipherError::input("byte format error"))?;
 
                 // Split the tag and the encrypted message
-                let (message_tag, encrypted_bytes) = message.split_at(16);
+                let l = bytes.len() - 16;
+                let (mut message_bytes, tag) = bytes.split_at_mut(l);
 
-                if message_tag != self.create_tag(&encrypted_bytes) {
+                if tag != self.create_tag(&message_bytes) {
                     return Err(crate::CipherError::input("message failed authentication"));
                 }
 
                 // ChaCha is reciprocal
-                let decrypted_bytes = self
-                    .cipher
-                    .encrypt_bytes_with_ctr(&encrypted_bytes, self.ctr + 1);
-                Ok(self
-                    .cipher
-                    .output_format
-                    .byte_slice_to_text(&decrypted_bytes))
+                self.decrypt_ctr(&mut message_bytes, (self.iv + 1).to_be_bytes());
+
+                Ok(self.output_format.byte_slice_to_text(&message_bytes))
             }
         }
     };

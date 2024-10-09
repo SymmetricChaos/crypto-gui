@@ -89,7 +89,7 @@ impl Ghash {
         self
     }
 
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
+    pub fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut acc: u128 = 0;
 
         // In an AEAD cipher the input would be treated as Addition Data and Ciphertext
