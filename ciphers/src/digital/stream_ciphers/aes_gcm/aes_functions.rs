@@ -1,6 +1,7 @@
 use super::{
+    ghash::Ghash,
     multiplication::{mul2, mul3},
-    sbox::sbox,
+    sbox::{sbox, sub_word},
 };
 use itertools::Itertools;
 
@@ -99,19 +100,21 @@ pub const RC: [u32; 10] = [
 macro_rules! aes_gcm_methods {
     ($name: ident, $nk: literal, $nr: literal) => {
         pub struct $name {
-            pub input_format: ByteFormat,
-            pub output_format: ByteFormat,
+            pub input_format: utils::byte_formatting::ByteFormat,
+            pub output_format: utils::byte_formatting::ByteFormat,
             round_keys: [[u8; 16]; Self::NR + 1],
+            pub ad: Vec<u8>,
             pub iv: u128,
         }
 
         impl Default for $name {
             fn default() -> Self {
                 Self {
-                    input_format: ByteFormat::Hex,
-                    output_format: ByteFormat::Hex,
+                    input_format: utils::byte_formatting::ByteFormat::Hex,
+                    output_format: utils::byte_formatting::ByteFormat::Hex,
                     // key: [0; Self::NK],
                     round_keys: [[0u8; 16]; Self::NR + 1],
+                    ad: Vec::new(),
                     iv: 0,
                 }
             }
@@ -185,7 +188,6 @@ macro_rules! aes_gcm_methods {
                 transpose_state(bytes);
             }
 
-            /// Counter Mode
             pub fn encrypt_ctr(&self, bytes: &mut [u8], ctr: [u8; 16]) {
                 let mut ctr = ctr;
 
@@ -202,15 +204,24 @@ macro_rules! aes_gcm_methods {
                 }
             }
 
-            /// Counter Mode
             pub fn decrypt_ctr(&self, bytes: &mut [u8], ctr: [u8; 16]) {
                 self.encrypt_ctr(bytes, ctr)
             }
 
             pub fn create_tag(&self, bytes: &[u8]) -> [u8; 16] {
-                let mut final_mask = self.iv.to_be_bytes();
-                self.encrypt_block(&mut final_mask);
-                todo!()
+                let mut c = self.iv.to_be_bytes();
+                self.encrypt_block(&mut c);
+                let mut h = [0; 16];
+                self.encrypt_block(&mut h);
+
+                let hasher = Ghash::default()
+                    .c_bytes(c)
+                    .h_bytes(h)
+                    .ad_len(self.ad.len() as u64);
+
+                let mut input = self.ad.clone();
+                input.extend_from_slice(&bytes);
+                hasher.hash(&input).try_into().unwrap()
             }
         }
 
@@ -244,7 +255,6 @@ macro_rules! aes_gcm_methods {
                     return Err(crate::CipherError::input("message failed authentication"));
                 }
 
-                // ChaCha is reciprocal
                 self.decrypt_ctr(&mut message_bytes, (self.iv + 1).to_be_bytes());
 
                 Ok(self.output_format.byte_slice_to_text(&message_bytes))
@@ -252,3 +262,7 @@ macro_rules! aes_gcm_methods {
         }
     };
 }
+
+aes_gcm_methods!(AesGcm128, 4, 10);
+aes_gcm_methods!(AesGcm192, 6, 12);
+aes_gcm_methods!(AesGcm256, 8, 14);

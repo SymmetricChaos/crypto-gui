@@ -1,5 +1,3 @@
-use utils::byte_formatting::ByteFormat;
-
 const R: u128 = 0xE1000000000000000000000000000000;
 
 // Multiplication in the Galois field used for GHASH. Addition in the same is XOR.
@@ -34,8 +32,6 @@ pub fn add_mul(acc: &mut u128, block: &[u8], h: u128) {
 
 #[derive(Debug, Clone)]
 pub struct Ghash {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
     pub h: u128,     // usually determined by a cipher
     pub c: u128,     // constant term, usually determined by a cipher
     pub ad_len: u64, // how many bytes of input to treat as the additional data
@@ -44,8 +40,6 @@ pub struct Ghash {
 impl Default for Ghash {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
             h: 0,
             c: 0,
             ad_len: 0,
@@ -54,16 +48,6 @@ impl Default for Ghash {
 }
 
 impl Ghash {
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
-    }
-
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
-    }
-
     pub fn h(mut self, h: u128) -> Self {
         self.h = h;
         self
