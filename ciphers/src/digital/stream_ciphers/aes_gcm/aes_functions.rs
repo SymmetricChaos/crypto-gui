@@ -168,6 +168,23 @@ macro_rules! aes_gcm_methods {
                 self
             }
 
+            pub fn with_iv(mut self, bytes: Vec<u8>) -> Self {
+                // Recommended 96-bit IV
+                if bytes.len() == 12 {
+                    let mut iv = 1;
+                    for i in 0..12 {
+                        iv |= (bytes[i] as u128) << (120 - i * 8)
+                    }
+                    self.iv = iv;
+                } else {
+                    let mut h = [0; 16];
+                    self.encrypt_block(&mut h);
+                    let hasher = Ghash::default().h_bytes(h);
+                    self.iv = u128::from_be_bytes(hasher.hash(&bytes).try_into().unwrap());
+                }
+                self
+            }
+
             pub fn encrypt_block(&self, bytes: &mut [u8]) {
                 transpose_state(bytes);
                 // Initial round key
@@ -266,3 +283,50 @@ macro_rules! aes_gcm_methods {
 aes_gcm_methods!(AesGcm128, 4, 10);
 aes_gcm_methods!(AesGcm192, 6, 12);
 aes_gcm_methods!(AesGcm256, 8, 14);
+
+#[cfg(test)]
+mod aes_gcm_tests {
+
+    use crate::Cipher;
+
+    use super::*;
+
+    fn ttb(s: &str) -> Vec<u8> {
+        utils::byte_formatting::ByteFormat::Hex
+            .text_to_bytes(s)
+            .unwrap()
+    }
+
+    #[test]
+    fn test_case_1() {
+        let cipher = AesGcm128::default()
+            .with_key(ttb("00000000000000000000000000000000").try_into().unwrap())
+            .with_iv(vec![0; 12]);
+        assert_eq!(
+            "58e2fccefa7e3061367f1d57a4e7455a",
+            cipher.encrypt("").unwrap()
+        );
+    }
+
+    #[test]
+    fn test_case_2() {
+        let cipher = AesGcm128::default()
+            .with_key(ttb("00000000000000000000000000000000").try_into().unwrap())
+            .with_iv(vec![0; 12]);
+        assert_eq!(
+            "0388dace60b6a392f328c2b971b2fe78ab6e47d42cec13bdf53a67b21257bddf",
+            cipher.encrypt("00000000000000000000000000000000").unwrap()
+        );
+    }
+
+    #[test]
+    fn test_case_3() {
+        let cipher = AesGcm128::default()
+            .with_key(ttb("feffe9928665731c6d6a8f9467308308").try_into().unwrap())
+            .with_iv(ttb("cafebabefacedbaddecaf888"));
+        assert_eq!(
+            "42831ec2217774244b7221b784d0d49ce3aa212f2c02a4e035c17e2329aca12e21d514b25466931c7d8f6a5aac84aa051ba30b396a0aac973d58e091473f59854d5c2af327cd64a62cf35abd2ba6fab4",
+            cipher.encrypt("d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b391aafd255").unwrap()
+        );
+    }
+}
