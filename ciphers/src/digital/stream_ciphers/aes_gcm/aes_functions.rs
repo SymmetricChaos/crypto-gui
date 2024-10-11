@@ -102,7 +102,7 @@ macro_rules! aes_gcm_methods {
         pub struct $name {
             pub input_format: utils::byte_formatting::ByteFormat,
             pub output_format: utils::byte_formatting::ByteFormat,
-            round_keys: [[u8; 16]; Self::NR + 1],
+            pub round_keys: [[u8; 16]; Self::NR + 1],
             pub ad: Vec<u8>,
             pub iv: u128,
         }
@@ -210,7 +210,7 @@ macro_rules! aes_gcm_methods {
                 transpose_state(bytes);
             }
 
-            pub fn encrypt_ctr(&self, bytes: &mut [u8], ctr: [u8; 16]) {
+            pub fn encrypt_decrypt_ctr(&self, bytes: &mut [u8], ctr: [u8; 16]) {
                 let mut ctr = ctr;
 
                 for ptext in bytes.chunks_mut(16) {
@@ -226,24 +226,39 @@ macro_rules! aes_gcm_methods {
                 }
             }
 
-            pub fn decrypt_ctr(&self, bytes: &mut [u8], ctr: [u8; 16]) {
-                self.encrypt_ctr(bytes, ctr)
+            pub fn c(&self) -> [u8; 16] {
+                let mut c = self.iv.to_be_bytes();
+                self.encrypt_block(&mut c);
+                c
+            }
+
+            pub fn h(&self) -> [u8; 16] {
+                let mut h = [0; 16];
+                self.encrypt_block(&mut h);
+                h
             }
 
             pub fn create_tag(&self, bytes: &[u8]) -> [u8; 16] {
-                let mut c = self.iv.to_be_bytes();
-                self.encrypt_block(&mut c);
-                let mut h = [0; 16];
-                self.encrypt_block(&mut h);
-
                 let hasher = Ghash::default()
-                    .c_bytes(c)
-                    .h_bytes(h)
+                    .c_bytes(self.c())
+                    .h_bytes(self.h())
                     .ad_len(self.ad.len() as u64);
 
                 let mut input = self.ad.clone();
                 input.extend_from_slice(&bytes);
                 hasher.hash(&input).try_into().unwrap()
+            }
+
+            pub fn check_tag(
+                &self,
+                tag: &[u8],
+                message_bytes: &[u8],
+            ) -> Result<(), crate::CipherError> {
+                if tag != self.create_tag(&message_bytes) {
+                    return Err(crate::CipherError::input("message failed authentication"));
+                } else {
+                    Ok(())
+                }
             }
         }
 
@@ -254,7 +269,7 @@ macro_rules! aes_gcm_methods {
                     .text_to_bytes(text)
                     .map_err(|_| crate::CipherError::input("byte format error"))?;
 
-                self.encrypt_ctr(&mut bytes, (self.iv + 1).to_be_bytes());
+                self.encrypt_decrypt_ctr(&mut bytes, (self.iv + 1).to_be_bytes());
 
                 let tag = self.create_tag(&bytes);
 
@@ -273,11 +288,9 @@ macro_rules! aes_gcm_methods {
                 let l = bytes.len() - 16;
                 let (mut message_bytes, tag) = bytes.split_at_mut(l);
 
-                if tag != self.create_tag(&message_bytes) {
-                    return Err(crate::CipherError::input("message failed authentication"));
-                }
+                self.check_tag(tag, message_bytes)?;
 
-                self.decrypt_ctr(&mut message_bytes, (self.iv + 1).to_be_bytes());
+                self.encrypt_decrypt_ctr(&mut message_bytes, (self.iv + 1).to_be_bytes());
 
                 Ok(self.output_format.byte_slice_to_text(&message_bytes))
             }
