@@ -6,6 +6,7 @@ use std::fmt::Display;
 pub enum CipherId {
     Adfgvx,
     Aes,
+    AesGcm,
     Affine,
     Alberti,
     Amsco,
@@ -118,6 +119,7 @@ impl Display for CipherId {
             CipherId::A53 => "A5/3",
             CipherId::Adfgvx => "ADFGVX",
             CipherId::Aes => "AES",
+            CipherId::AesGcm => "AES-GCM",
             CipherId::Affine => "Affine",
             CipherId::Alberti => "Alberti Cipher Disk",
             CipherId::Amsco => "AMSCO",

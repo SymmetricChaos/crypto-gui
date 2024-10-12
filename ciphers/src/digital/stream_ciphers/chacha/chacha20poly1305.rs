@@ -118,14 +118,17 @@ impl Cipher for ChaCha20Poly1305 {
             .input_format
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
-        let encrypted_bytes = self.cipher.encrypt_bytes_with_ctr(&bytes, self.ctr + 1);
+        let mut encrypted_bytes = self.cipher.encrypt_bytes_with_ctr(&bytes, self.ctr + 1);
 
         // The r key is restricted within the hash invocation
         // Put the tag first for simplicity when decoding
-        let mut tag = self.create_tag(&encrypted_bytes);
-        tag.extend_from_slice(&encrypted_bytes);
+        let tag = self.create_tag(&encrypted_bytes);
+        encrypted_bytes.extend_from_slice(&tag);
 
-        Ok(self.cipher.output_format.byte_slice_to_text(&tag))
+        Ok(self
+            .cipher
+            .output_format
+            .byte_slice_to_text(&encrypted_bytes))
     }
 
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
@@ -135,8 +138,12 @@ impl Cipher for ChaCha20Poly1305 {
             .text_to_bytes(text)
             .map_err(|_| CipherError::input("byte format error"))?;
 
+        if message.len() < 16 {
+            return Err(CipherError::input("authentication tag is missing"));
+        }
+
         // Split the tag and the encrypted message
-        let (message_tag, encrypted_bytes) = message.split_at(16);
+        let (encrypted_bytes, message_tag) = message.split_at(message.len() - 16);
 
         if message_tag != self.create_tag(&encrypted_bytes) {
             return Err(CipherError::input("message failed authentication"));
@@ -238,7 +245,7 @@ mod chacha20_poly1305_tests {
         cipher.ctr = 0;
 
         let ctext = cipher.encrypt(PTEXT).unwrap();
-        let (tag, ctext) = ctext.split_at(32);
+        let (ctext, tag) = ctext.split_at(228);
 
         // Remaining errors are caused by the second block of ciphertext not encrypting the same as in the test vector
 

@@ -284,6 +284,10 @@ macro_rules! aes_gcm_methods {
                     .text_to_bytes(text)
                     .map_err(|_| crate::CipherError::input("byte format error"))?;
 
+                if bytes.len() < 16 {
+                    return Err(crate::CipherError::input("authentication tag is missing"));
+                }
+
                 // Split the tag and the encrypted message
                 let l = bytes.len() - 16;
                 let (mut message_bytes, tag) = bytes.split_at_mut(l);
