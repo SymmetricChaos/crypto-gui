@@ -168,6 +168,22 @@ macro_rules! aes_gcm_methods {
                 self
             }
 
+            pub fn set_iv(&mut self, bytes: Vec<u8>) {
+                // Recommended 96-bit IV
+                if bytes.len() == 12 {
+                    let mut iv = 1;
+                    for i in 0..12 {
+                        iv |= (bytes[i] as u128) << (120 - i * 8)
+                    }
+                    self.iv = iv;
+                } else {
+                    let mut h = [0; 16];
+                    self.encrypt_block(&mut h);
+                    let hasher = Ghash::default().h_bytes(h);
+                    self.iv = u128::from_be_bytes(hasher.hash(&bytes).try_into().unwrap());
+                }
+            }
+
             pub fn with_iv(mut self, bytes: Vec<u8>) -> Self {
                 // Recommended 96-bit IV
                 if bytes.len() == 12 {

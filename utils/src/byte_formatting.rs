@@ -295,14 +295,6 @@ mod bit_function_tests {
     }
 }
 
-// pub fn u64_to_u32_pair(n: u64) -> [u32; 2] {
-//     [(n >> 32) as u32, n as u32]
-// }
-
-// pub fn u32_pair_to_u64(n: [u32; 2]) -> u64 {
-//     (n[0] as u64) << 32 | n[1] as u64
-// }
-
 pub fn fill_u16s_be(target: &mut [u16], bytes: &[u8]) {
     for (elem, chunk) in target.iter_mut().zip_eq(bytes.chunks_exact(2)) {
         *elem = u16::from_be_bytes(chunk.try_into().unwrap());

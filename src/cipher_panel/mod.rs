@@ -9,6 +9,7 @@ mod a51_controls;
 mod a52_controls;
 mod adfgvx_controls;
 mod aes_controls;
+mod aes_gcm_controls;
 mod affine_controls;
 mod alberti_controls;
 mod amsco_controls;
@@ -199,6 +200,7 @@ pub struct CipherInterface {
     // Stream
     a51: a51_controls::A51Frame,
     a52: a52_controls::A52Frame,
+    aes_gcm: aes_gcm_controls::AesGcmFrame,
     chacha: chacha_controls::ChaChaFrame,
     chacha20poly1305: chacha20_poly1305_controls::ChaCha20Poly1305Frame,
     rc4: rc4_controls::Rc4Frame,
@@ -357,6 +359,7 @@ impl CipherInterface {
             &[
                 CipherId::A51,
                 CipherId::A52,
+                CipherId::AesGcm,
                 CipherId::ChaCha,
                 CipherId::ChaCha20Poly1305,
                 CipherId::Rc4,
@@ -388,6 +391,7 @@ impl CipherInterface {
             CipherId::A51 => &mut self.a51,
             CipherId::A52 => &mut self.a52,
             CipherId::Aes => &mut self.aes,
+            CipherId::AesGcm => &mut self.aes_gcm,
             CipherId::Adfgvx => &mut self.adfgvx,
             CipherId::Affine => &mut self.affine,
             CipherId::Alberti => &mut self.alberti,
