@@ -434,6 +434,18 @@
       "Substitution"
     ]
   },
+  "GIFT": {
+    "Names": [
+      "GIFT"
+    ],
+    "Description": "GIFT is a lightweight block cipher designed for extreme low energy applications based on PRESENT. Two variants exist both with a 128-bit key. GIFT-64 has a 64-bit block size and uses 28 rounds. GIFT-128 has a 128-bit block size and uses 40 rounds.",
+    "Authors": "Subhadeep Banik, Sumit Kumar Pandey, Thomas Peyrin, Yu Sasaki, Siang Meng Sim, Yosuke Todo",
+    "Publication": "2017",
+    "Traits": [
+      "Block Cipher",
+      "SP-network"
+    ]
+  },
   "GOST 28147-89": {
     "Names": [
       "GOST",

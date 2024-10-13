@@ -5,6 +5,7 @@ pub mod blowfish;
 pub mod camellia;
 pub mod des;
 pub mod fealnx;
+pub mod gift;
 pub mod gost;
 pub mod idea;
 pub mod lea;
