@@ -2,90 +2,116 @@ use json::JsonValue;
 use lazy_static::lazy_static;
 use std::fmt::Display;
 
-#[derive(PartialEq, Eq, Debug, Clone, Copy)]
-pub enum CipherId {
-    Adfgvx,
-    Aes,
-    AesGcm,
-    Affine,
-    Alberti,
-    Amsco,
-    Ascon128,
-    Ascon80pq,
-    A51,
-    A52,
-    A53,
-    B64,
-    Batco,
-    Bazeries,
-    Beaufort,
-    Bifid,
-    Blowfish,
-    Caesar,
-    Camellia,
-    ChaCha,
-    ChaCha20Poly1305,
-    Chaocipher,
-    Checkerboard,
-    Columnar,
-    Decoder,
-    Des,
-    DesX,
-    DiagonalColumnar,
-    DiffieHellman,
-    Dryad,
-    ElGamal,
-    Enigma,
-    FealNx,
-    Fialka,
-    FourSquare,
-    Gost,
-    Grille,
-    Hebern,
-    Hutton,
-    Idea,
-    Lea,
-    M94,
-    M209,
-    Nihilist,
-    Playfair,
-    Plugboard,
-    Polybius,
-    PolybiusCube,
-    Porta,
-    Purple,
-    Quagmire,
-    RailFence,
-    Rc4,
-    Rc5,
-    Rsa,
-    Rs44,
-    Salsa20,
-    Scytale,
-    Seal3,
-    Seed,
-    SeriatedPlayfair,
-    Serpent,
-    Shamir,
-    Sigaba,
-    Simon,
-    Slidefair,
-    Sm4,
-    Speck,
-    Substitution,
-    Tea,
-    Trifid,
-    TripleDes,
-    TurningGrille,
-    Twofish,
-    TwoSquare,
-    Vic,
-    Vigenere,
-    XChaCha,
-    XorSplitting,
-    Xtea,
-    Xxtea,
+// Macro to make it easier to add new ciphers without writing it out three times.
+macro_rules! cipher_ids_and_names {
+    ($( $id: ident, $name: expr);+ $(;)?) => {
+
+        #[derive(PartialEq, Eq, Debug, Clone, Copy)]
+        pub enum CipherId {
+            $(
+                $id,
+            )+
+        }
+
+        impl Display for CipherId {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                let name = match self {
+                    $(
+                        CipherId::$id => $name,
+                    )+
+                };
+                write!(f, "{}", name)
+            }
+        }
+
+    }
 }
+
+cipher_ids_and_names!(
+    Adfgvx, "ADFGVX";
+    Aes, "AES";
+    AesGcm, "AES-GCM";
+    Affine, "Affine";
+    Alberti, "Alberti Cipher Disk";
+    Amsco, "AMSCO";
+    Ascon128, "ASCON-128";
+    Ascon80pq, "ASCON-80pq";
+    A51, "A5/1";
+    A52, "A5/2";
+    A53, "A5/3";
+    B64, "B64";
+    Batco, "BATCO";
+    Bazeries, "Bazeries";
+    Beaufort, "Beaufort";
+    Bifid, "Bifid";
+    Blowfish, "Blowfish";
+    Caesar, "Caesar";
+    Camellia, "Camellia";
+    ChaCha, "ChaCha";
+    ChaCha20Poly1305, "ChaCha20-Poly1305";
+    Chaocipher, "Chaocipher";
+    Checkerboard, "Straddling Checkerboard";
+    Columnar, "Columnar Transposition";
+    Decoder, "Decoder Ring";
+    Des, "DES";
+    DesX, "DES-X";
+    DiagonalColumnar, "Diagonal Columnar";
+    DiffieHellman, "Diffie-Hellman";
+    Dryad, "DRYAD";
+    ElGamal, "ElGamal";
+    Enigma, "Enigma";
+    FealNx, "FEAL-NX";
+    Fialka, "Fialka";
+    FourSquare, "Four-Square";
+    Gift, "GIFT";
+    Gost, "GOST 28147-89";
+    Grille, "Grille";
+    Hebern, "Hebern";
+    Hutton, "Hutton";
+    Idea, "IDEA";
+    Lea, "LEA";
+    M94, "M-94";
+    M209, "M-209";
+    Nihilist, "Nihilist";
+    Playfair, "Playfair";
+    Plugboard, "Plugboard";
+    Present, "PRESENT";
+    Polybius, "Polybius Square";
+    PolybiusCube, "Polybius Cube";
+    Porta, "Porta";
+    Purple, "Purple";
+    Quagmire, "Quagmire";
+    RailFence, "Rail Fence";
+    Rc4, "RC4";
+    Rc5, "RC5";
+    Rsa, "RSA";
+    Rs44, "RS44";
+    Salsa20, "Salsa20";
+    Scytale, "Scytale";
+    Seal3, "SEAL 3.0";
+    Seed, "SEED";
+    SeriatedPlayfair, "Seriated Playfair";
+    Serpent, "Serpent";
+    Shamir, "Shamir's Secret Sharing";
+    Sigaba, "SIGABA";
+    Simon, "Simon";
+    Slidefair, "Slidefair";
+    Sm4, "SM4";
+    Speck, "Speck";
+    Substitution, "Substitution";
+    Tea, "TEA";
+    Trifid, "Trifid";
+    TripleDes, "Triple DES";
+    TurningGrille, "Turning Grille";
+    Twofish, "Twofish";
+    TwoSquare, "Two-Square";
+    Vic, "VIC";
+    Vigenere, "Vigenère";
+    XChaCha, "XChaCha";
+    XorSplitting, "XOR Secret Splitting";
+    Xtea, "XTEA";
+    Xxtea, "XXTEA";
+);
 
 impl Default for CipherId {
     fn default() -> Self {
@@ -108,95 +134,6 @@ impl CipherId {
 
     pub fn traits(&self) -> Option<&'static str> {
         CIPHER_INFORMATION[self.to_string()]["Traits"].as_str()
-    }
-}
-
-impl Display for CipherId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let name = match self {
-            CipherId::A51 => "A5/1",
-            CipherId::A52 => "A5/2",
-            CipherId::A53 => "A5/3",
-            CipherId::Adfgvx => "ADFGVX",
-            CipherId::Aes => "AES",
-            CipherId::AesGcm => "AES-GCM",
-            CipherId::Affine => "Affine",
-            CipherId::Alberti => "Alberti Cipher Disk",
-            CipherId::Amsco => "AMSCO",
-            CipherId::Ascon128 => "Ascon-128",
-            CipherId::Ascon80pq => "Ascon-80pq",
-            CipherId::B64 => "B64",
-            CipherId::Batco => "BATCO",
-            CipherId::Bazeries => "Bazeries",
-            CipherId::Beaufort => "Beaufort",
-            CipherId::Bifid => "Bifid",
-            CipherId::Blowfish => "Blowfish",
-            CipherId::Caesar => "Caesar",
-            CipherId::Camellia => "Camellia",
-            CipherId::ChaCha20Poly1305 => "ChaCha20-Poly1305",
-            CipherId::ChaCha => "ChaCha",
-            CipherId::Chaocipher => "Chaocipher",
-            CipherId::Checkerboard => "Straddling Checkerboard",
-            CipherId::Columnar => "Columnar Transposition",
-            CipherId::Decoder => "Decoder Ring",
-            CipherId::Des => "DES",
-            CipherId::DesX => "DES-X",
-            CipherId::DiagonalColumnar => "Diagonal Columnar",
-            CipherId::DiffieHellman => "Diffie-Hellman",
-            CipherId::Dryad => "DRYAD",
-            CipherId::ElGamal => "ElGamal",
-            CipherId::Enigma => "Enigma",
-            CipherId::FealNx => "FEAL-NX",
-            CipherId::Fialka => "Fialka",
-            CipherId::FourSquare => "Four-Square",
-            CipherId::Gost => "GOST 28147-89",
-            CipherId::Grille => "Grille",
-            CipherId::Hebern => "Hebern",
-            CipherId::Hutton => "Hutton",
-            CipherId::Idea => "IDEA",
-            CipherId::Lea => "LEA",
-            CipherId::M94 => "M-94",
-            CipherId::M209 => "M-209",
-            CipherId::Nihilist => "Nihilist",
-            CipherId::Playfair => "Playfair",
-            CipherId::Plugboard => "Plugboard",
-            CipherId::Polybius => "Polybius Square",
-            CipherId::PolybiusCube => "Polybius Cube",
-            CipherId::Porta => "Porta",
-            CipherId::Purple => "Purple",
-            CipherId::Quagmire => "Quagmire",
-            CipherId::RailFence => "Rail Fence",
-            CipherId::Rc4 => "RC4",
-            CipherId::Rc5 => "RC5",
-            CipherId::Rs44 => "RS44",
-            CipherId::Rsa => "RSA",
-            CipherId::Salsa20 => "Salsa20",
-            CipherId::Scytale => "Scytale",
-            CipherId::Seal3 => "SEAL 3.0",
-            CipherId::Seed => "SEED",
-            CipherId::SeriatedPlayfair => "Seriated Playfair",
-            CipherId::Serpent => "Serpent",
-            CipherId::Shamir => "Shamir's Secret Sharing",
-            CipherId::Sigaba => "SIGABA",
-            CipherId::Simon => "Simon",
-            CipherId::Slidefair => "Slidefair",
-            CipherId::Sm4 => "SM4",
-            CipherId::Speck => "Speck",
-            CipherId::Substitution => "Substitution",
-            CipherId::Tea => "TEA",
-            CipherId::Trifid => "Trifid",
-            CipherId::TripleDes => "Triple-DES",
-            CipherId::TurningGrille => "Turning Grille",
-            CipherId::Twofish => "Twofish",
-            CipherId::TwoSquare => "Two-Square",
-            CipherId::Vic => "VIC",
-            CipherId::Vigenere => "Vigenère",
-            CipherId::XorSplitting => "XOR Secret Splitting",
-            CipherId::XChaCha => "XChaCha",
-            CipherId::Xtea => "XTEA",
-            CipherId::Xxtea => "XXTEA",
-        };
-        write!(f, "{}", name)
     }
 }
 
