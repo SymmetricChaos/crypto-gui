@@ -69,6 +69,8 @@ cipher_ids_and_names!(
     Hebern, "Hebern";
     Hutton, "Hutton";
     Idea, "IDEA";
+    Khufu, "Khufu";
+    Khafre, "Khafre";
     Lea, "LEA";
     M94, "M-94";
     M209, "M-209";

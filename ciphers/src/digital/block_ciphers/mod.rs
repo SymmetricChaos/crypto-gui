@@ -9,6 +9,7 @@ pub mod gift;
 pub mod gost;
 pub mod idea;
 pub mod lea;
+pub mod present;
 pub mod rc5;
 pub mod rc6;
 pub mod seed;

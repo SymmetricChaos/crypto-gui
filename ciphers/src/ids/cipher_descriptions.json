@@ -48,7 +48,7 @@
     "Publication": "1998",
     "Traits": [
       "Block Cipher",
-      "SP-network"
+      "SPN"
     ]
   },
   "AES-GCM": {
@@ -61,7 +61,7 @@
     "Publication": null,
     "Traits": [
       "Stream Cipher",
-      "SP-network",
+      "SPN",
       "AEAD"
     ]
   },
@@ -452,7 +452,7 @@
     "Publication": "2017",
     "Traits": [
       "Block Cipher",
-      "SP-network"
+      "SPN"
     ]
   },
   "GOST 28147-89": {
@@ -519,6 +519,30 @@
     "Traits": [
       "Block Cipher",
       "Lai-Massey"
+    ]
+  },
+  "Khufu": {
+    "Names": [
+      "Khufu"
+    ],
+    "Description": "Khufu is",
+    "Authors": "Ralph Merkle",
+    "Publication": "1989",
+    "Traits": [
+      "Block Cipher",
+      "Feistel"
+    ]
+  },
+  "Khafre": {
+    "Names": [
+      "Khafre"
+    ],
+    "Description": "Khafre is ",
+    "Authors": "Ralph Merkle",
+    "Publication": "1989",
+    "Traits": [
+      "Block Cipher",
+      "Feistel"
     ]
   },
   "LEA": {
@@ -638,6 +662,18 @@
       "Polyalphabetic"
     ]
   },
+  "PRESENT": {
+    "Names": [
+      "PRESENT"
+    ],
+    "Description": "PRESENT is ",
+    "Authors": "Andrey Bogdanov, Lars R. Knudsen, Gregor Leander, Christof Paar, Axel Poschmann, Matthew J. B. Robshaw, Yannick Seurin, and C. Vikkelsoe",
+    "Publication": "2007",
+    "Traits": [
+      "Block Cipher",
+      "SPN"
+    ]
+  },
   "Purple": {
     "Names": [
       "Purple",
@@ -671,7 +707,7 @@
       "ARCFOUR",
       "Alleged RC4"
     ],
-    "Description": "The RC4 (Rivest Cipher 4) is an early digital stream cipher created by Ronald Rivest in 1987 that is now considered insecure. Internally it contains a list of every possible byte and as it runs the list is permuted by swapping positions of bytes. The key is a sequence of between 1 and 256 bytes that used to permute the list initially.",
+    "Description": "RC4 (Rivest Cipher 4) is an early digital stream cipher created by Ronald Rivest in 1987 that is now considered insecure. Internally it contains a list of every possible byte and as it runs the list is permuted by swapping positions of bytes. The key is a sequence of between 1 and 256 bytes that used to permute the list initially.",
     "Authors": "Ronald Rivest",
     "Publication": "1987",
     "Traits": [
@@ -683,7 +719,7 @@
       "RC5",
       "Rivest Cipher 5"
     ],
-    "Description": "The RC5 (Rivest Cipher 5) is an early digital block cipher created by Ronald Rivest in 1994 that is now considered insecure. Its round function is simple while the key schedule is complex. The cipher was designed to be parameterized by its word size, number of rounds, and key size. Here three versions with different block sizes are presented with adjustable rounds and key size. The 16-bit is intended for academic purposes only. The 32-bit version was originally recommended for computers with the matching word size but is likely vulnerable to modern attacks. The 64-bit version was made for, then uncommon, hardware with a matching word size and is likely best on modern computers.",
+    "Description": "RC5 (Rivest Cipher 5) is an early digital block cipher created by Ronald Rivest in 1994 that is now considered insecure. Its round function is simple while the key schedule is complex. The cipher was designed to be parameterized by its word size, number of rounds, and key size. Here three versions with different block sizes are presented with adjustable rounds and key size. The 16-bit is intended for academic purposes only. The 32-bit version was originally recommended for computers with the matching word size but is likely vulnerable to modern attacks. The 64-bit version was made for, then uncommon, hardware with a matching word size and is likely best on modern computers.",
     "Authors": "Ronald Rivest",
     "Publication": "1994",
     "Traits": [
@@ -799,7 +835,7 @@
     "Publication": "1998",
     "Traits": [
       "Block Cipher",
-      "SP-network"
+      "SPN"
     ]
   },
   "Shamir's Secret Sharing": {
