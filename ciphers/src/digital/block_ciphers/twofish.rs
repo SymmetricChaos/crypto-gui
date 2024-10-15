@@ -18,21 +18,6 @@ const Q1: [[u8; 16]; 4] = [
     [0xB, 0x9, 0x5, 0x1, 0xC, 0x3, 0xD, 0xE, 0x6, 0x4, 0x7, 0xF, 0x2, 0x0, 0x8, 0xA],
 ];
 
-fn f(a: u32, b: u32, round: usize, subkeys: &[u32;40]) -> (u32,u32) {
-    let t0 = g(a);
-    let t1 = g(b.rotate_left(8));
-    (
-     t0.wrapping_add(t1).wrapping_add(subkeys[2*round+8]),    
-     t0.wrapping_add(t1.wrapping_mul(2)).wrapping_add(subkeys[2*round+9])
-    )
-}
-
-fn g(n: u32) {
-    let mut x = n.to_le_bytes();
-
-    todo!()
-}
-
 // Each 4-bit nibble is rotated one bit toward the LSB (to the right)
 fn nibble_ror_1(x: u8) -> u8 {
     (((x) >> 1) & 0x77) | (((x) & 0x11) << 3)
@@ -65,6 +50,31 @@ fn q1() {
     let b4 = Q1[3][b3 as usize];
     (b4 << 4) | a4
 }
+
+// Pseudo-Hadamard Transform
+fn pht(a: u32, b: u32) -> (u32,u32) {
+    (
+        a.wrapping_add(b)
+        a.wrapping_add(b << 1)
+    )
+}
+
+fn f(a: u32, b: u32, round: usize, subkeys: &[u32;40]) -> (u32,u32) {
+    let t0 = g(a);
+    let t1 = g(b.rotate_left(8));
+    let mut o = pht(t0, t1);
+    o.0 = o.0.wrapping_add(subkeys[2*round+8]);
+    o.1 = o.1.wrapping_add(subkeys[2*round+9])
+    o
+}
+
+fn g(n: u32) -> u32 {
+    let mut x = n.to_le_bytes();
+
+    todo!()
+}
+
+
 
 pub struct TwoFish128 {
     pub input_format: ByteFormat,
