@@ -523,7 +523,7 @@
   },
   "Khufu": {
     "Names": [
-      "Khufu"
+      "Khufu is a block cipher created by Ralph Merkle for Xerox along with the Khafre block cipher. It has an usually large 512-bit key. The substitution boxes are derived from the key. Khufu was an early block cipher to use key whitening."
     ],
     "Description": "Khufu is",
     "Authors": "Ralph Merkle",
@@ -537,7 +537,7 @@
     "Names": [
       "Khafre"
     ],
-    "Description": "Khafre is ",
+    "Description": "Khafre is a block cipher created by Ralph Merkle for Xerox along with the Khufu block cipher. It has an usually large 512-bit key. The substitution boxes are fixed and derived from the RAND tables. Khafre was an early block cipher to use key whitening.",
     "Authors": "Ralph Merkle",
     "Publication": "1989",
     "Traits": [
