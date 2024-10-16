@@ -84,6 +84,7 @@ cipher_ids_and_names!(
     Purple, "Purple";
     Quagmire, "Quagmire";
     RailFence, "Rail Fence";
+    Rc2, "RC2";
     Rc4, "RC4";
     Rc5, "RC5";
     Rsa, "RSA";

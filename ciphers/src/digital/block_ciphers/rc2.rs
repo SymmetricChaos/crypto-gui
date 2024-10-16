@@ -1,4 +1,4 @@
-use utils::byte_formatting::ByteFormat;
+use utils::byte_formatting::{overwrite_bytes, ByteFormat};
 
 use super::block_cipher::{BCMode, BCPadding, BlockCipher};
 
@@ -121,9 +121,25 @@ impl Default for Rc2 {
 }
 
 impl Rc2 {
-    pub fn ksa(&mut self, bytes: [u8; 16]) {}
+    const T: usize = 8;
+    const T1: usize = 64;
+    const T8: usize = (Self::T1 + 7) / 8; // 8
+    const TM: usize = 8 - (8 * Self::T8 - Self::T1); // 0xff
 
-    pub fn with_key(mut self, bytes: [u8; 16]) -> Self {
+    pub fn ksa(&mut self, bytes: [u8; Self::T8]) {
+        let mut l = [0_u8; 128];
+        overwrite_bytes(&mut l[0..Self::T8], &bytes);
+        for i in Self::T..128 {
+            l[i] = PI[l[i - 1] as usize].wrapping_add(l[i - Self::T])
+        }
+        l[128 - Self::T] = PI[l[128 - Self::T] as usize & Self::TM];
+        for i in (0..128 - Self::T8).rev() {
+            l[i] = PI[(l[i + 1] ^ l[i + Self::T8]) as usize]
+        }
+        utils::byte_formatting::fill_u16s_be(&mut self.round_keys, &l);
+    }
+
+    pub fn with_key(mut self, bytes: [u8; Self::T8]) -> Self {
         self.ksa(bytes);
         self
     }
@@ -199,7 +215,7 @@ impl BlockCipher<8> for Rc2 {
     }
 }
 
-// crate::impl_cipher_for_block_cipher!(Rc2, 8);
+crate::impl_cipher_for_block_cipher!(Rc2, 8);
 
 // #[cfg(test)]
 // mod rc2_tests {
