@@ -83,17 +83,17 @@ fn mix_round_inv(state: &mut [u16; 4], key: &[u16], j: &mut usize) {
 }
 
 fn mash_round(state: &mut [u16; 4], key: &[u16]) {
-    state[0] = state[0].wrapping_add(key[state[3] as usize] & 63);
-    state[1] = state[1].wrapping_add(key[state[0] as usize] & 63);
-    state[2] = state[2].wrapping_add(key[state[1] as usize] & 63);
-    state[3] = state[3].wrapping_add(key[state[2] as usize] & 63);
+    state[0] = state[0].wrapping_add(key[state[3] as usize & 63]);
+    state[1] = state[1].wrapping_add(key[state[0] as usize & 63]);
+    state[2] = state[2].wrapping_add(key[state[1] as usize & 63]);
+    state[3] = state[3].wrapping_add(key[state[2] as usize & 63]);
 }
 
 fn mash_round_inv(state: &mut [u16; 4], key: &[u16]) {
-    state[3] = state[3].wrapping_add(key[state[2] as usize] & 63);
-    state[2] = state[2].wrapping_add(key[state[1] as usize] & 63);
-    state[1] = state[1].wrapping_add(key[state[0] as usize] & 63);
-    state[0] = state[0].wrapping_add(key[state[3] as usize] & 63);
+    state[3] = state[3].wrapping_add(key[state[2] as usize & 63]);
+    state[2] = state[2].wrapping_add(key[state[1] as usize & 63]);
+    state[1] = state[1].wrapping_add(key[state[0] as usize & 63]);
+    state[0] = state[0].wrapping_add(key[state[3] as usize & 63]);
 }
 
 pub struct Rc2 {
@@ -224,7 +224,8 @@ crate::impl_cipher_for_block_cipher!(Rc2, 8);
 
 // }
 
-// crate::test_block_cipher!(
-//     test_1, Rc2::default(),
-
-// );
+crate::test_block_cipher!(
+    test_1, Rc2::default().with_key([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
+    [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+    [0xeb, 0xb7, 0x73, 0xf9, 0x93, 0x27, 0x8e, 0xff];
+);

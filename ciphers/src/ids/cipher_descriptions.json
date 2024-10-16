@@ -699,6 +699,22 @@
       "Polyalphabetic"
     ]
   },
+  "RC2": {
+    "Names": [
+      "RC2",
+      "Rivest Cipher 2",
+      "ARC2",
+      "ARCTWO",
+      "Alleged RC2"
+    ],
+    "Description": "RC2 (Rivest Cipher 2) is an early digital block cipher created by Ronald Rivest in 1987.",
+    "Authors": "Ronald Rivest",
+    "Publication": "1987",
+    "Traits": [
+      "Block Cipher",
+      "Feistel"
+    ]
+  },
   "RC4": {
     "Names": [
       "RC4",
