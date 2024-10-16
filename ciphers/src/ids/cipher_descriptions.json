@@ -707,7 +707,7 @@
       "ARCTWO",
       "Alleged RC2"
     ],
-    "Description": "RC2 (Rivest Cipher 2) is an early digital block cipher created by Ronald Rivest in 1987.",
+    "Description": "RC2 (Rivest Cipher 2) is an early digital block cipher created by Ronald Rivest in 1987 with a key size of between 1 and 128 bytes. It was reverse egnineered before being official published in 1994 and sometimes appears as ARC2 (Alleged RC2) in literature. RC2 includs an unusual effective key size parameter which limits the security of the cipher regardless of the size of the key used. The published recommendation was for the actual and effective key size to both be 64 bits, so that is the default here.",
     "Authors": "Ronald Rivest",
     "Publication": "1987",
     "Traits": [
@@ -723,7 +723,7 @@
       "ARCFOUR",
       "Alleged RC4"
     ],
-    "Description": "RC4 (Rivest Cipher 4) is an early digital stream cipher created by Ronald Rivest in 1987 that is now considered insecure. Internally it contains a list of every possible byte and as it runs the list is permuted by swapping positions of bytes. The key is a sequence of between 1 and 256 bytes that used to permute the list initially.",
+    "Description": "RC4 (Rivest Cipher 4) is an early digital stream cipher created by Ronald Rivest in 1987 that is now considered insecure. Internally it contains a list of every possible byte and as it runs the list is permuted by swapping positions of bytes. The key is a sequence of between 1 and 256 bytes that are used to permute the list initially. It was reverse egnineered before being official published and sometimes appears as ARC4 (Alleged RC4) in literature.",
     "Authors": "Ronald Rivest",
     "Publication": "1987",
     "Traits": [
@@ -748,7 +748,7 @@
       "RS44",
       "Rasterschlüssel 44"
     ],
-    "Description": "The RS44 is a WWII tactical cipher that operates by transposition. Its very complex operation made the cipher prone to communication failures. A stencil and a square of letters defined the key for a day. Every row and column of the stencil was assigned a two letter code which could be encrypted using the square. Columns were also assigned numbers. Before encryption the message needed to be padded to at least 60 characters. The operator then picked a random open cell in the stencil, its row and column were encrypted as part of the message key. After writing the message into the stencil, wrapping around to the beginning as needed, the operator then selected a random column. The code for that column was also encrypted and formed the rest of the key. The operator then read off the columns in numerical order, starting with the number of the column selected and wrapping around after reaching the highest number. Finally the message key, the length of the message, and encrypted message itself were transmitted.",
+    "Description": "The RS44 (Rasterschlüssel 44) is a WWII tactical cipher that operates by transposition. Its very complex operation made the cipher prone to communication failures. A stencil and a square of letters defined the key for a day. Every row and column of the stencil was assigned a two letter code which could be encrypted using the square. Columns were also assigned numbers. Before encryption the message needed to be padded to at least 60 characters. The operator then picked a random open cell in the stencil, its row and column were encrypted as part of the message key. After writing the message into the stencil, wrapping around to the beginning as needed, the operator then selected a random column. The code for that column was also encrypted and formed the rest of the key. The operator then read off the columns in numerical order, starting with the number of the column selected and wrapping around after reaching the highest number. Finally the message key, the length of the message, and encrypted message itself were transmitted.",
     "Authors": "Walter Fricke",
     "Publication": "1944",
     "Traits": [

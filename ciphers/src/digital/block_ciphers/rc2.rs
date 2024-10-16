@@ -54,32 +54,32 @@ fn mix_round(state: &mut [u16; 4], key: &[u16], j: &mut usize) {
 fn mix_round_inv(state: &mut [u16; 4], key: &[u16], j: &mut usize) {
     // We subtract first because we will start with j = 64
     *j -= 1;
-    state[3] = state[3].rotate_left(5);
+    state[3] = state[3].rotate_right(5);
     state[3] = state[3]
-        .wrapping_add(key[*j])
-        .wrapping_add(state[2] & state[1])
-        .wrapping_add(!state[2] & state[0]);
+        .wrapping_sub(key[*j])
+        .wrapping_sub(state[2] & state[1])
+        .wrapping_sub(!state[2] & state[0]);
 
     *j -= 1;
-    state[2] = state[2].rotate_left(3);
+    state[2] = state[2].rotate_right(3);
     state[2] = state[2]
-        .wrapping_add(key[*j])
-        .wrapping_add(state[1] & state[0])
-        .wrapping_add(!state[1] & state[3]);
+        .wrapping_sub(key[*j])
+        .wrapping_sub(state[1] & state[0])
+        .wrapping_sub(!state[1] & state[3]);
 
     *j -= 1;
-    state[1] = state[1].rotate_left(2);
+    state[1] = state[1].rotate_right(2);
     state[1] = state[1]
-        .wrapping_add(key[*j])
-        .wrapping_add(state[0] & state[3])
-        .wrapping_add(!state[0] & state[2]);
+        .wrapping_sub(key[*j])
+        .wrapping_sub(state[0] & state[3])
+        .wrapping_sub(!state[0] & state[2]);
 
     *j -= 1;
-    state[0] = state[0].rotate_left(1);
+    state[0] = state[0].rotate_right(1);
     state[0] = state[0]
-        .wrapping_add(key[*j])
-        .wrapping_add(state[3] & state[2])
-        .wrapping_add(!state[3] & state[1]);
+        .wrapping_sub(key[*j])
+        .wrapping_sub(state[3] & state[2])
+        .wrapping_sub(!state[3] & state[1]);
 }
 
 fn mash_round(state: &mut [u16; 4], key: &[u16]) {
@@ -90,16 +90,17 @@ fn mash_round(state: &mut [u16; 4], key: &[u16]) {
 }
 
 fn mash_round_inv(state: &mut [u16; 4], key: &[u16]) {
-    state[3] = state[3].wrapping_add(key[state[2] as usize & 63]);
-    state[2] = state[2].wrapping_add(key[state[1] as usize & 63]);
-    state[1] = state[1].wrapping_add(key[state[0] as usize & 63]);
-    state[0] = state[0].wrapping_add(key[state[3] as usize & 63]);
+    state[3] = state[3].wrapping_sub(key[state[2] as usize & 63]);
+    state[2] = state[2].wrapping_sub(key[state[1] as usize & 63]);
+    state[1] = state[1].wrapping_sub(key[state[0] as usize & 63]);
+    state[0] = state[0].wrapping_sub(key[state[3] as usize & 63]);
 }
 
 pub struct Rc2 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
     pub iv: u64,
+    pub effective_bits: usize,
     pub round_keys: [u16; 64],
     pub mode: BCMode,
     pub padding: BCPadding,
@@ -113,6 +114,7 @@ impl Default for Rc2 {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
             iv: 0,
+            effective_bits: 64,
             round_keys: [0; 64],
             mode: Default::default(),
             padding: Default::default(),
@@ -121,25 +123,38 @@ impl Default for Rc2 {
 }
 
 impl Rc2 {
-    const T: usize = 8;
-    const T1: usize = 64;
-    const T8: usize = (Self::T1 + 7) / 8; // 8
-    const TM: usize = 8 - (8 * Self::T8 - Self::T1); // 0xff
-
-    pub fn ksa(&mut self, bytes: [u8; Self::T8]) {
-        let mut l = [0_u8; 128];
-        overwrite_bytes(&mut l[0..Self::T8], &bytes);
-        for i in Self::T..128 {
-            l[i] = PI[l[i - 1] as usize].wrapping_add(l[i - Self::T])
-        }
-        l[128 - Self::T] = PI[l[128 - Self::T] as usize & Self::TM];
-        for i in (0..128 - Self::T8).rev() {
-            l[i] = PI[(l[i + 1] ^ l[i + Self::T8]) as usize]
-        }
-        utils::byte_formatting::fill_u16s_be(&mut self.round_keys, &l);
+    // Must be invoked before the key schedule to change it
+    pub fn with_effective_bits(mut self, effective_bits: usize) -> Self {
+        self.effective_bits = effective_bits;
+        self
     }
 
-    pub fn with_key(mut self, bytes: [u8; Self::T8]) -> Self {
+    pub fn effective_bytes(&self) -> usize {
+        (self.effective_bits + 7) / 8
+    }
+
+    pub fn mask(&self) -> usize {
+        let t8 = self.effective_bytes();
+        255 % 2_usize.pow((8 + self.effective_bits - 8 * t8) as u32)
+    }
+
+    pub fn ksa(&mut self, bytes: &[u8]) {
+        let t = bytes.len();
+        let t8 = self.effective_bytes();
+        let tm = self.mask();
+        let mut l = [0_u8; 128];
+        overwrite_bytes(&mut l[0..t], &bytes);
+        for i in t..128 {
+            l[i] = PI[l[i - 1].wrapping_add(l[i - t]) as usize]
+        }
+        l[128 - t8] = PI[l[128 - t8] as usize & tm];
+        for i in (0..128 - t8).rev() {
+            l[i] = PI[(l[i + 1] ^ l[i + t8]) as usize]
+        }
+        utils::byte_formatting::fill_u16s_le(&mut self.round_keys, &l);
+    }
+
+    pub fn with_key(mut self, bytes: &[u8]) -> Self {
         self.ksa(bytes);
         self
     }
@@ -148,7 +163,7 @@ impl Rc2 {
 impl BlockCipher<8> for Rc2 {
     fn encrypt_block(&self, bytes: &mut [u8]) {
         let mut v = [0u16; 4];
-        utils::byte_formatting::fill_u16s_be(&mut v, bytes);
+        utils::byte_formatting::fill_u16s_le(&mut v, bytes);
 
         let mut j = 0;
         // Five rounds
@@ -177,12 +192,12 @@ impl BlockCipher<8> for Rc2 {
         mix_round(&mut v, &self.round_keys, &mut j);
         mix_round(&mut v, &self.round_keys, &mut j);
 
-        utils::byte_formatting::u16s_to_bytes_be(bytes, &v);
+        utils::byte_formatting::u16s_to_bytes_le(bytes, &v);
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
         let mut v = [0u16; 4];
-        utils::byte_formatting::fill_u16s_be(&mut v, bytes);
+        utils::byte_formatting::fill_u16s_le(&mut v, bytes);
 
         let mut j = 64;
         // Five rounds
@@ -211,7 +226,7 @@ impl BlockCipher<8> for Rc2 {
         mix_round_inv(&mut v, &self.round_keys, &mut j);
         mix_round_inv(&mut v, &self.round_keys, &mut j);
 
-        utils::byte_formatting::u16s_to_bytes_be(bytes, &v);
+        utils::byte_formatting::u16s_to_bytes_le(bytes, &v);
     }
 }
 
@@ -225,7 +240,31 @@ crate::impl_cipher_for_block_cipher!(Rc2, 8);
 // }
 
 crate::test_block_cipher!(
-    test_1, Rc2::default().with_key([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
+    test_1, Rc2::default().with_key(&[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
     [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
     [0xeb, 0xb7, 0x73, 0xf9, 0x93, 0x27, 0x8e, 0xff];
+
+    test_2, Rc2::default().with_key(&[0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
+    [0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff],
+    [0x27, 0x8b, 0x27, 0xe4, 0x2e, 0x2f, 0x0d, 0x49];
+
+    test_3, Rc2::default().with_key(&[0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
+    [0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01],
+    [0x30, 0x64, 0x9e, 0xdf, 0x9b, 0xe7, 0xd2, 0xc2];
+
+    test_4, Rc2::default().with_key(&[0x88]),
+    [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+    [0x61, 0xa8, 0xa2, 0x44, 0xad, 0xac, 0xcc, 0xf0];
+
+    test_5, Rc2::default().with_key(&[0x88, 0xbc, 0xa9, 0x0e, 0x90, 0x87, 0x5a, 0x7f, 0x0f, 0x79, 0xc3, 0x84, 0x62, 0x7b, 0xaf, 0xb2]),
+    [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+    [0x1a, 0x80, 0x7d, 0x27, 0x2b, 0xbe, 0x5d, 0xb1];
+
+    test_6, Rc2::default().with_effective_bits(128).with_key(&[0x88, 0xbc, 0xa9, 0x0e, 0x90, 0x87, 0x5a, 0x7f, 0x0f, 0x79, 0xc3, 0x84, 0x62, 0x7b, 0xaf, 0xb2]),
+    [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+    [0x22, 0x69, 0x55, 0x2a, 0xb0, 0xf8, 0x5c, 0xa6];
+
+    test_7, Rc2::default().with_effective_bits(129).with_key(&[0x88, 0xbc, 0xa9, 0x0e, 0x90, 0x87, 0x5a, 0x7f, 0x0f, 0x79, 0xc3, 0x84, 0x62, 0x7b, 0xaf, 0xb2, 0x16, 0xf8, 0x0a, 0x6f, 0x85, 0x92, 0x05, 0x84, 0xc4, 0x2f, 0xce, 0xb0, 0xbe, 0x25, 0x5d, 0xaf, 0x1e]),
+    [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+    [0x5b, 0x78, 0xd3, 0xa4, 0x3d, 0xff, 0xf1, 0xf1];
 );
