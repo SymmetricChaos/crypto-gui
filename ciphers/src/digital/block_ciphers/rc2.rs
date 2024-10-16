@@ -52,6 +52,7 @@ fn mix_round(state: &mut [u16; 4], key: &[u16], j: &mut usize) {
 }
 
 fn mix_round_inv(state: &mut [u16; 4], key: &[u16], j: &mut usize) {
+    // We subtract first because we will start with j = 64
     *j -= 1;
     state[3] = state[3].rotate_left(5);
     state[3] = state[3]
@@ -134,6 +135,7 @@ impl BlockCipher<8> for Rc2 {
         utils::byte_formatting::fill_u16s_be(&mut v, bytes);
 
         let mut j = 0;
+        // Five rounds
         mix_round(&mut v, &self.round_keys, &mut j);
         mix_round(&mut v, &self.round_keys, &mut j);
         mix_round(&mut v, &self.round_keys, &mut j);
@@ -142,6 +144,7 @@ impl BlockCipher<8> for Rc2 {
 
         mash_round(&mut v, &self.round_keys);
 
+        // Six rounds
         mix_round(&mut v, &self.round_keys, &mut j);
         mix_round(&mut v, &self.round_keys, &mut j);
         mix_round(&mut v, &self.round_keys, &mut j);
@@ -151,6 +154,7 @@ impl BlockCipher<8> for Rc2 {
 
         mash_round(&mut v, &self.round_keys);
 
+        // Five rounds
         mix_round(&mut v, &self.round_keys, &mut j);
         mix_round(&mut v, &self.round_keys, &mut j);
         mix_round(&mut v, &self.round_keys, &mut j);
@@ -165,6 +169,7 @@ impl BlockCipher<8> for Rc2 {
         utils::byte_formatting::fill_u16s_be(&mut v, bytes);
 
         let mut j = 64;
+        // Five rounds
         mix_round_inv(&mut v, &self.round_keys, &mut j);
         mix_round_inv(&mut v, &self.round_keys, &mut j);
         mix_round_inv(&mut v, &self.round_keys, &mut j);
@@ -173,6 +178,8 @@ impl BlockCipher<8> for Rc2 {
 
         mash_round_inv(&mut v, &self.round_keys);
 
+        // Six rounds
+        mix_round_inv(&mut v, &self.round_keys, &mut j);
         mix_round_inv(&mut v, &self.round_keys, &mut j);
         mix_round_inv(&mut v, &self.round_keys, &mut j);
         mix_round_inv(&mut v, &self.round_keys, &mut j);
@@ -181,6 +188,7 @@ impl BlockCipher<8> for Rc2 {
 
         mash_round_inv(&mut v, &self.round_keys);
 
+        // Five rounds
         mix_round_inv(&mut v, &self.round_keys, &mut j);
         mix_round_inv(&mut v, &self.round_keys, &mut j);
         mix_round_inv(&mut v, &self.round_keys, &mut j);
