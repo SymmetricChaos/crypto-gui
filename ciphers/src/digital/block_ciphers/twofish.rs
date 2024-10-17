@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use utils::byte_formatting::{fill_u32s_le, u32s_to_bytes_le, ByteFormat};
 
 use super::block_cipher::{BCMode, BCPadding, BlockCipher};
@@ -113,31 +114,39 @@ impl Default for TwoFish128 {
 
 crate::block_cipher_builders! {TwoFish128, u128}
 
-impl TwoFish128 {
-    const K: u32 = 2; // Keylength in bits divided by 64
 
+const KEY_BYTES: usize = 16;
+const KEY_WORDS: usize = KEY_BYTES/4;
+const K: usize = 2; // Keylength in bits divided by 64
+
+impl TwoFish128 {
     pub fn sbox(&self, n: u32, i: usize) -> u32 {
         self.sboxes[i][n as usize]
     }
 
-    pub fn ksa(&mut self, bytes: [u8; 16]) {
+    pub fn ksa(&mut self, bytes: [u8; KEY_BYTES]) {
         let mut words = [0_u32; 4];
         fill_u32s_le(&mut words, &bytes);
+        let rho = 0x1010101_u32;
+
+        // Tale the even and odd words respectively
+        let m_e = words.into_iter().step_by(2).collect_vec();
+        let m_o = words.into_iter().skip(1).step_by(2).collect_vec();;
     }
 
-    pub fn ksa_u32(&mut self, key: [u32; 4]) {}
+    pub fn ksa_u32(&mut self, key: [u32; KEY_WORDS]) {}
 
-    pub fn with_key(mut self, bytes: [u8; 16]) -> Self {
+    pub fn with_key(mut self, bytes: [u8; KEY_BYTES]) -> Self {
         self.ksa(bytes);
         self
     }
 
-    pub fn with_key_u32(mut self, bytes: [u32; 4]) -> Self {
+    pub fn with_key_u32(mut self, bytes: [u32; KEY_WORDS]) -> Self {
         self.ksa_u32(bytes);
         self
     }
 
-    fn h(x: u32, list: [u32; Self::K as usize]) -> u32 {
+    fn h(x: u32, list: [u32; K]) -> u32 {
         todo!()
     }
 }
@@ -157,3 +166,7 @@ impl BlockCipher<16> for TwoFish128 {
         u32s_to_bytes_le(bytes, &block);
     }
 }
+
+// crate::test_block_cipher!(
+
+// )
