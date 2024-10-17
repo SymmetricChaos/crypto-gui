@@ -56,6 +56,7 @@ mod porta_controls;
 mod purple_controls;
 mod quagmire_controls;
 mod rail_fence_controls;
+mod rc2_controls;
 mod rc4_controls;
 mod rc5_controls;
 mod rs44_controls;
@@ -187,6 +188,7 @@ pub struct CipherInterface {
     gost: gost_controls::GostFrame,
     idea: idea_controls::IdeaFrame,
     lea: lea_controls::LeaFrame,
+    rc2: rc2_controls::Rc2Frame,
     rc5: rc5_controls::Rc5Frame,
     seed: seed_controls::SeedFrame,
     serpent: serpent_controls::SerpentFrame,
@@ -340,6 +342,7 @@ impl CipherInterface {
                 CipherId::Gost,
                 CipherId::Idea,
                 CipherId::Lea,
+                CipherId::Rc2,
                 CipherId::Rc5,
                 CipherId::Seed,
                 CipherId::Serpent,
@@ -436,6 +439,7 @@ impl CipherInterface {
             CipherId::Purple => &mut self.purple,
             CipherId::Quagmire => &mut self.quagmire,
             CipherId::RailFence => &mut self.rail_fence,
+            CipherId::Rc2 => &mut self.rc2,
             CipherId::Rc4 => &mut self.rc4,
             CipherId::Rc5 => &mut self.rc5,
             CipherId::Rsa => &mut self.rsa,

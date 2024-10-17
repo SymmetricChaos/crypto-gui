@@ -1,10 +1,9 @@
-use std::num::ParseIntError;
-
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
 use ciphers::{digital::stream_ciphers::rc4::Rc4, Cipher};
 use egui::{DragValue, FontId, RichText, Ui};
 use rand::{thread_rng, Rng};
+use utils::byte_formatting::ByteFormat;
 
 #[derive(Default)]
 pub struct Rc4Frame {
@@ -14,10 +13,7 @@ pub struct Rc4Frame {
 
 impl Rc4Frame {
     fn run_ksa(&mut self) {
-        let key_vec: Result<Vec<u8>, ParseIntError> = (0..self.key.len())
-            .step_by(2)
-            .map(|i| u8::from_str_radix(&self.key[i..i + 2], 16))
-            .collect();
+        let key_vec = ByteFormat::Hex.text_to_bytes(&self.key);
         if let Ok(vec) = key_vec {
             self.cipher.ksa(&vec)
         } else {
@@ -47,7 +43,12 @@ impl CipherFrame for Rc4Frame {
         ui.subheading("Key");
         ui.label("Key should be provided as a string of hexadecimal digits representing between 1 and 256 bytes.");
         if ui.text_edit_multiline(&mut self.key).changed() {
-            self.key = self.key.chars().filter(|c| c.is_ascii_hexdigit()).collect();
+            self.key = self
+                .key
+                .chars()
+                .filter(|c| c.is_ascii_hexdigit())
+                .take(512)
+                .collect();
         }
         if ui.button("Set Byte Array from Key").clicked() {
             if self.key.len() % 2 == 1 {
