@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{block_cipher_mode_and_padding, UiElements};
+use crate::ui_elements::{block_cipher_iv_64, block_cipher_mode_and_padding, UiElements};
 use ciphers::{digital::block_ciphers::rc2::Rc2, Cipher};
 use egui::{DragValue, FontId, RichText, Ui};
 use rand::{thread_rng, Rng};
@@ -65,11 +65,23 @@ impl CipherFrame for Rc2Frame {
             self.run_ksa()
         }
 
+        block_cipher_iv_64(ui, &mut self.cipher.iv, self.cipher.mode);
+
+        ui.add_space(16.0);
+
+        ui.subheading("Effective Key Bytes (T8)");
+        ui.label(format!("{}", self.cipher.effective_bytes()));
+
+        ui.add_space(4.0);
+
+        ui.subheading("Key Mask (TM)");
+        ui.monospace(format!("{:02x}", self.cipher.mask()));
+
         ui.add_space(16.0);
 
         ui.subheading("Round Keys");
         ui.collapsing("Array of 16-bit Words", |ui| {
-            egui::Grid::new("rc2_16_array")
+            egui::Grid::new("rc2_array")
                 .num_columns(8)
                 .striped(true)
                 .show(ui, |ui| {
@@ -78,7 +90,7 @@ impl CipherFrame for Rc2Frame {
                             ui.end_row()
                         }
                         ui.label(
-                            RichText::from(format!("{:04X}", b)).font(FontId::monospace(15.0)),
+                            RichText::from(format!("{:04x}", b)).font(FontId::monospace(15.0)),
                         );
                     }
                 });
