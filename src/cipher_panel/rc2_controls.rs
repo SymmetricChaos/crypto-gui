@@ -46,7 +46,17 @@ impl CipherFrame for Rc2Frame {
         ui.subheading("Effective Key Length (T1)");
         ui.label("The T1 parameter limits the effective size of the key (in bits) regardless of how many bytes are actually given.");
         ui.add(DragValue::new(&mut self.cipher.effective_bits).range(1..=1024));
-        ui.add_space(8.0);
+        ui.add_space(4.0);
+
+        ui.subheading("Effective Key Bytes (T8)");
+        ui.label("Number of bytes needed to hold the effective key length.");
+        ui.label(format!("{}", self.cipher.effective_bytes()));
+        ui.add_space(4.0);
+
+        ui.subheading("Key Mask (TM)");
+        ui.monospace(format!("{:02x}", self.cipher.mask()));
+
+        ui.add_space(16.0);
 
         ui.subheading("Key");
         ui.label("Key should be provided as a string of hexadecimal digits representing between 1 and 128 bytes.");
@@ -66,16 +76,6 @@ impl CipherFrame for Rc2Frame {
         }
 
         block_cipher_iv_64(ui, &mut self.cipher.iv, self.cipher.mode);
-
-        ui.add_space(16.0);
-
-        ui.subheading("Effective Key Bytes (T8)");
-        ui.label(format!("{}", self.cipher.effective_bytes()));
-
-        ui.add_space(4.0);
-
-        ui.subheading("Key Mask (TM)");
-        ui.monospace(format!("{:02x}", self.cipher.mask()));
 
         ui.add_space(16.0);
 
