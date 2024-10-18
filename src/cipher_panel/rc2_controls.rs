@@ -45,7 +45,12 @@ impl CipherFrame for Rc2Frame {
 
         ui.subheading("Effective Key Length (T1)");
         ui.label("The T1 parameter limits the effective size of the key (in bits) regardless of how many bytes are actually given.");
-        ui.add(DragValue::new(&mut self.cipher.effective_bits).range(1..=1024));
+        if ui
+            .add(DragValue::new(&mut self.cipher.effective_bits).range(1..=1024))
+            .changed()
+        {
+            self.run_ksa();
+        };
         ui.add_space(4.0);
 
         ui.subheading("Effective Key Bytes (T8)");
