@@ -1,0 +1,126 @@
+// 4-bit SBOX for q0 function
+const Q0: [[u8; 16]; 4] = [
+    [
+        0x8, 0x1, 0x7, 0xD, 0x6, 0xF, 0x3, 0x2, 0x0, 0xB, 0x5, 0x9, 0xE, 0xC, 0xA, 0x4,
+    ],
+    [
+        0xE, 0xC, 0xB, 0x8, 0x1, 0x2, 0x3, 0x5, 0xF, 0x4, 0xA, 0x6, 0x7, 0x0, 0x9, 0xD,
+    ],
+    [
+        0xB, 0xA, 0x5, 0xE, 0x6, 0xD, 0x9, 0x0, 0xC, 0x8, 0xF, 0x3, 0x2, 0x4, 0x7, 0x1,
+    ],
+    [
+        0xD, 0x7, 0xF, 0x4, 0x1, 0x2, 0x6, 0xE, 0x9, 0xB, 0x3, 0x0, 0x8, 0x5, 0xC, 0xA,
+    ],
+];
+
+// 4-bit SBOX for q1 function
+const Q1: [[u8; 16]; 4] = [
+    [
+        0x2, 0x8, 0xB, 0xD, 0xF, 0x7, 0x6, 0xE, 0x3, 0x1, 0x9, 0x4, 0x0, 0xA, 0xC, 0x5,
+    ],
+    [
+        0x1, 0xE, 0x2, 0xB, 0x4, 0xC, 0x3, 0x7, 0x6, 0xD, 0xA, 0x5, 0xF, 0x9, 0x0, 0x8,
+    ],
+    [
+        0x4, 0xC, 0x7, 0x5, 0x1, 0x6, 0x9, 0xA, 0x0, 0xE, 0xD, 0x8, 0x2, 0xB, 0x3, 0xF,
+    ],
+    [
+        0xB, 0x9, 0x5, 0x1, 0xC, 0x3, 0xD, 0xE, 0x6, 0x4, 0x7, 0xF, 0x2, 0x0, 0x8, 0xA,
+    ],
+];
+
+pub const QORD: [[usize; 5]; 4] = [
+    [1, 1, 0, 0, 1],
+    [0, 1, 1, 0, 0],
+    [0, 0, 0, 1, 1],
+    [1, 0, 1, 1, 0],
+];
+
+pub(super) fn q0(n: u8) -> u8 {
+    let a0 = (n >> 4) & 15;
+    let b0 = n & 15;
+    let a1 = a0 ^ b0;
+    let b1 = a0 ^ ((b0 << 3) | (b0 >> 1)) ^ ((a0 << 3) & 15); // Because the upper 4 bits will be empty the rotation of the lower 4 bits of b0 is always correct
+    let a2 = Q0[0][a1 as usize];
+    let b2 = Q0[1][b1 as usize];
+    let a3 = a2 ^ b2;
+    let b3 = a2 ^ ((b2 << 3) | (b2 >> 1)) ^ ((a2 << 3) & 15); // As for b0
+    let a4 = Q0[2][a3 as usize];
+    let b4 = Q0[3][b3 as usize];
+    (b4 << 4) | a4
+}
+
+pub(super) fn q1(n: u8) -> u8 {
+    let a0 = (n >> 4) & 15;
+    let b0 = n & 15;
+    let a1 = a0 ^ b0;
+    let b1 = a0 ^ ((b0 << 3) | (b0 >> 1)) ^ ((8 * a0) & 15);
+    let a2 = Q1[0][a1 as usize];
+    let b2 = Q1[1][b1 as usize];
+    let a3 = a2 ^ b2;
+    let b3 = a2 ^ ((b2 << 3) | (b2 >> 1)) ^ ((8 * a2) & 15);
+    let a4 = Q1[2][a3 as usize];
+    let b4 = Q1[3][b3 as usize];
+    (b4 << 4) | a4
+}
+
+// Maximum Distance Separable Operations
+pub(super) fn gf_mult(mut a: u8, mut b: u8, p: u8) -> u8 {
+    let mut result = 0;
+    while a > 0 {
+        if a & 1 == 1 {
+            result ^= b;
+        }
+        a >>= 1;
+        if b & 0x80 == 0x80 {
+            b = (b << 1) ^ p;
+        } else {
+            b <<= 1;
+        }
+    }
+    result
+}
+
+pub(super) fn mds_column_mult(x: u8, column: usize) -> u32 {
+    let x5b = gf_mult(x, 0x5b, 0x69);
+    let xef = gf_mult(x, 0xef, 0x69);
+
+    let v = match column {
+        0 => [x, x5b, xef, xef],
+        1 => [xef, xef, x5b, x],
+        2 => [x5b, xef, x, xef],
+        3 => [x5b, x, xef, x5b],
+        _ => unreachable!(),
+    };
+    u32::from_le_bytes(v)
+}
+
+pub(super) fn mds_mult(y: [u8; 4]) -> u32 {
+    let mut z = 0;
+    for i in 0..4 {
+        z ^= mds_column_mult(y[i], i);
+    }
+    z
+}
+
+const RS: [[u8; 8]; 4] = [
+    [0x01, 0xa4, 0x55, 0x87, 0x5a, 0x58, 0xdb, 0x9e],
+    [0xa4, 0x56, 0x82, 0xf3, 0x1e, 0xc6, 0x68, 0xe5],
+    [0x02, 0xa1, 0xfc, 0xc1, 0x47, 0xae, 0x3d, 0x19],
+    [0xa4, 0x55, 0x87, 0x5a, 0x58, 0xdb, 0x9e, 0x03],
+];
+
+pub(super) fn rs_mult(m: &[u8], out: &mut [u8]) {
+    for i in 0..4 {
+        out[i] = 0;
+        for j in 0..8 {
+            out[i] ^= gf_mult(m[j], RS[i][j], 0x4d);
+        }
+    }
+}
+
+// Pseudo-Hadamard Transform
+pub(super) fn pht(a: u32, b: u32) -> (u32, u32) {
+    (a.wrapping_add(b), a.wrapping_add(b << 1))
+}
