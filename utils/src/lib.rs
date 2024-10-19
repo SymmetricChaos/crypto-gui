@@ -8,3 +8,4 @@ pub mod polynomial_interpolation;
 pub mod preset_alphabet;
 pub mod text_functions;
 pub mod vecstring;
+pub mod byte_quality_check;

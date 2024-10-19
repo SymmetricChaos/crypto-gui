@@ -70,7 +70,7 @@ macro_rules! twofish {
             }
 
             fn g(&self, x: u32) -> u32 {
-                let mut out: u32 = 0;
+                let mut out = 0;
                 for y in 0..4 {
                     let mut g = q(QORD[y][Self::START], (x >> (8 * y)) as u8);
 
@@ -85,8 +85,9 @@ macro_rules! twofish {
             }
 
             pub fn ksa(&mut self, bytes: [u8; Self::KEY_BYTES]) {
-                let rho = 0x01010101_u32;
+                let rho = 0x01010101;
 
+                // Subkeys
                 for x in 0..20 {
                     let a = self.h(rho * (2 * x), &bytes, 0);
                     let b = self.h(rho * (2 * x + 1), &bytes, 1).rotate_left(8);
@@ -95,6 +96,7 @@ macro_rules! twofish {
                     self.subkeys[(2 * x + 1) as usize] = (v.wrapping_add(b)).rotate_left(9);
                 }
 
+                // Sbox keys
                 for i in 0..Self::K {
                     rs_mult(
                         &bytes[i * 8..i * 8 + 8],
@@ -204,6 +206,8 @@ twofish!(TwoFish256, 32);
 #[cfg(test)]
 mod twofish_tests {
 
+    use utils::byte_quality_check::{assert_eq_u32s, assert_eq_u8s};
+
     use super::*;
 
     fn ttb(s: &str) -> Vec<u8> {
@@ -211,10 +215,74 @@ mod twofish_tests {
     }
 
     #[test]
-    fn ksa() {
+    fn ksa_128() {
         let cipher = TwoFish128::default()
             .with_key(ttb("00000000000000000000000000000000").try_into().unwrap());
-        println!("{:08x?}", cipher.subkeys);
+        assert_eq_u8s(&[0; 8][..], &cipher.sbox_key[0..8]);
+        assert_eq_u32s(
+            [
+                0x52C54DDE, 0x11F0626D, 0x7CAC9D4A, 0x4D1B4AAA, 0xB7B83A10, 0x1E7D0BEB, 0xEE9C341F,
+                0xCFE14BE4, 0xF98FFEF9, 0x9C5B3C17, 0x15A48310, 0x342A4D81, 0x424D89FE, 0xC14724A7,
+                0x311B834C, 0xFDE87320, 0x3302778F, 0x26CD67B4, 0x7A6C6362, 0xC2BAF60E, 0x3411B994,
+                0xD972C87F, 0x84ADB1EA, 0xA7DEE434, 0x54D2960F, 0xA2F7CAA8, 0xA6B8FF8C, 0x8014C425,
+                0x6A748D1C, 0xEDBAF720, 0x928EF78C, 0x0338EE13, 0x9949D6BE, 0xC8314176, 0x07C07D68,
+                0xECAE7EA7, 0x1FE71844, 0x85C05C89, 0xF298311E, 0x696EA67,
+            ],
+            cipher.subkeys,
+        );
+    }
+
+    #[test]
+    fn ksa_192() {
+        let cipher = TwoFish192::default().with_key(
+            ttb("0123456789ABCDEFFEDCBA98765432100011223344556677")
+                .try_into()
+                .unwrap(),
+        );
+        assert_eq_u8s(
+            &[
+                0xf2, 0xf6, 0x9f, 0xb8, 0x4b, 0xbc, 0x55, 0xb2, 0x61, 0x10, 0x66, 0x45,
+            ][..],
+            &cipher.sbox_key[0..12],
+        );
+        assert_eq_u32s(
+            [
+                0x38394A24, 0xC36D1175, 0xE802528F, 0x219BFEB4, 0xB9141AB4, 0xBD3E70CD, 0xAF609383,
+                0xFD36908A, 0x03EFB931, 0x1D2EE7EC, 0xA7489D55, 0x6E44B6E8, 0x714AD667, 0x653AD51F,
+                0xB6315B66, 0xB27C05AF, 0xA06C8140, 0x9853D419, 0x4016E346, 0x8D1C0DD4, 0xF05480BE,
+                0xB6AF816F, 0x2D7DC789, 0x45B7BD3A, 0x57F8A163, 0x2BEFDA69, 0x26AE7271, 0xC2900D79,
+                0xED323794, 0x3D3FFD80, 0x5DE68E49, 0x9C3D2478, 0xDF326FE3, 0x5911F70D, 0xC229F13B,
+                0xB1364772, 0x4235364D, 0x0CEC363A, 0x57C8DD1F, 0x6A1AD61E,
+            ],
+            cipher.subkeys,
+        );
+    }
+
+    #[test]
+    fn ksa_256() {
+        let cipher = TwoFish256::default().with_key(
+            ttb("0123456789ABCDEFFEDCBA987654321000112233445566778899AABBCCDDEEFF")
+                .try_into()
+                .unwrap(),
+        );
+        assert_eq_u8s(
+            &[
+                0xf2, 0xf6, 0x9f, 0xb8, 0x4b, 0xbc, 0x55, 0xb2, 0x61, 0x10, 0x66, 0x45, 0xf7, 0x47,
+                0x44, 0x8e,
+            ][..],
+            &cipher.sbox_key[0..16],
+        );
+        assert_eq_u32s(
+            [
+                0x5EC769BF, 0x44D13C60, 0x76CD39B1, 0x16750474, 0x349C294B, 0xEC21F6D6, 0x4FBD10B4,
+                0x578DA0ED, 0xC3479695, 0x9B6958FB, 0x6A7FBC4E, 0x0BF1830B, 0x61B5E0FB, 0xD78D9730,
+                0x7C6CF0C4, 0x2F9109C8, 0xE69EA8D1, 0xED99BDFF, 0x35DC0BBD, 0xA03E5018, 0xFB18EA0B,
+                0x38BD43D3, 0x76191781, 0x37A9A0D3, 0x72427BEA, 0x911CC0B8, 0xF1689449, 0x71009CA9,
+                0xB6363E89, 0x494D9855, 0x590BBC63, 0xF95A28B5, 0xFB72B4E1, 0x2A43505C, 0xBFD34176,
+                0x5C133D12, 0x3A9247F7, 0x9A3331DD, 0xEE7515E6, 0xF0D54DCD,
+            ],
+            cipher.subkeys,
+        );
     }
 
     crate::test_block_cipher!(

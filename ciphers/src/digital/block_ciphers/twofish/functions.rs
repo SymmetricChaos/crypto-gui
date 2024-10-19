@@ -50,14 +50,26 @@ pub(super) fn q(v: usize, n: u8) -> u8 {
     let a3 = a2 ^ b2;
     let b3 = (a2 ^ ((b2 << 3) | (b2 >> 1)) ^ (a2 << 3)) % 15; // As for b0
     let (a4, b4) = if v == 0 {
-        (Q0[0][a3 as usize], Q0[1][b3 as usize])
+        (Q0[2][a3 as usize], Q0[3][b3 as usize])
     } else {
-        (Q1[0][a3 as usize], Q1[1][b3 as usize])
+        (Q1[2][a3 as usize], Q1[3][b3 as usize])
     };
     (b4 << 4) | a4
 }
 
 // Maximum Distance Separable Operations
+// 0x169 (x⁸ + x⁶ + x⁵ + x³ + 1)
+pub const MDS_POLY: u8 = 0x69;
+// 0x14d (x⁸ + x⁶ + x³ + x² + 1)
+pub const RS_POLY: u8 = 0x4d;
+
+const RS: [[u8; 8]; 4] = [
+    [0x01, 0xa4, 0x55, 0x87, 0x5a, 0x58, 0xdb, 0x9e],
+    [0xa4, 0x56, 0x82, 0xf3, 0x1e, 0xc6, 0x68, 0xe5],
+    [0x02, 0xa1, 0xfc, 0xc1, 0x47, 0xae, 0x3d, 0x19],
+    [0xa4, 0x55, 0x87, 0x5a, 0x58, 0xdb, 0x9e, 0x03],
+];
+
 pub(super) fn gf_mult(mut a: u8, mut b: u8, p: u8) -> u8 {
     let mut result = 0;
     while a > 0 {
@@ -75,8 +87,8 @@ pub(super) fn gf_mult(mut a: u8, mut b: u8, p: u8) -> u8 {
 }
 
 pub(super) fn mds_column_mult(x: u8, column: usize) -> u32 {
-    let x5b = gf_mult(x, 0x5b, 0x69);
-    let xef = gf_mult(x, 0xef, 0x69);
+    let x5b = gf_mult(x, 0x5b, MDS_POLY);
+    let xef = gf_mult(x, 0xef, MDS_POLY);
 
     let v = match column {
         0 => [x, x5b, xef, xef],
@@ -96,23 +108,11 @@ pub(super) fn mds_mult(y: [u8; 4]) -> u32 {
     z
 }
 
-const RS: [[u8; 8]; 4] = [
-    [0x01, 0xa4, 0x55, 0x87, 0x5a, 0x58, 0xdb, 0x9e],
-    [0xa4, 0x56, 0x82, 0xf3, 0x1e, 0xc6, 0x68, 0xe5],
-    [0x02, 0xa1, 0xfc, 0xc1, 0x47, 0xae, 0x3d, 0x19],
-    [0xa4, 0x55, 0x87, 0x5a, 0x58, 0xdb, 0x9e, 0x03],
-];
-
 pub(super) fn rs_mult(m: &[u8], out: &mut [u8]) {
     for i in 0..4 {
         out[i] = 0;
         for j in 0..8 {
-            out[i] ^= gf_mult(m[j], RS[i][j], 0x4d);
+            out[i] ^= gf_mult(m[j], RS[i][j], RS_POLY);
         }
     }
 }
-
-// Pseudo-Hadamard Transform
-// pub(super) fn pht(a: u32, b: u32) -> (u32, u32) {
-//     (a.wrapping_add(b), a.wrapping_add(b << 1))
-// }
