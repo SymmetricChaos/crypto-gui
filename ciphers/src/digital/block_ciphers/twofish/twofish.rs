@@ -37,31 +37,34 @@ macro_rules! twofish {
             const KEY_BYTES: usize = $key_bytes;
             const KEY_WORDS: usize = Self::KEY_BYTES / 4;
             const K: usize = Self::KEY_BYTES / 8;
-            const START: usize = (Self::K + 2) - 4;
+            const START: usize = 4 - Self::K;
 
-            fn h(&self, x: u32, list: &[u8], offset: usize) -> u32 {
+            fn h(&self, x: u32, key_bytes: &[u8], offset: usize) -> u32 {
                 let mut y = x.to_le_bytes();
+                // For 256-bit keys
                 if Self::K == 4 {
-                    y[0] = q(1, y[0]) ^ list[4 * (6 + offset + 0)];
-                    y[1] = q(0, y[1]) ^ list[4 * (6 + offset + 1)];
-                    y[2] = q(0, y[2]) ^ list[4 * (6 + offset + 2)];
-                    y[3] = q(1, y[3]) ^ list[4 * (6 + offset + 3)];
+                    y[0] = q(1, y[0]) ^ key_bytes[4 * (6 + offset) + 0];
+                    y[1] = q(0, y[1]) ^ key_bytes[4 * (6 + offset) + 1];
+                    y[2] = q(0, y[2]) ^ key_bytes[4 * (6 + offset) + 2];
+                    y[3] = q(1, y[3]) ^ key_bytes[4 * (6 + offset) + 3];
                 }
 
+                // For both 192-bit and 256-bit keys
                 if Self::K >= 3 {
-                    y[0] = q(1, y[0]) ^ list[4 * (4 + offset + 0)];
-                    y[1] = q(1, y[1]) ^ list[4 * (4 + offset + 1)];
-                    y[2] = q(0, y[2]) ^ list[4 * (4 + offset + 2)];
-                    y[3] = q(0, y[3]) ^ list[4 * (4 + offset + 3)];
+                    y[0] = q(1, y[0]) ^ key_bytes[4 * (4 + offset) + 0];
+                    y[1] = q(1, y[1]) ^ key_bytes[4 * (4 + offset) + 1];
+                    y[2] = q(0, y[2]) ^ key_bytes[4 * (4 + offset) + 2];
+                    y[3] = q(0, y[3]) ^ key_bytes[4 * (4 + offset) + 3];
                 }
 
+                // For all keys
                 let a = 4 * (2 + offset);
                 let b = 4 * offset;
 
-                y[0] = q(1, q(0, q(0, y[0]) ^ list[a + 0]) ^ list[b + 0]);
-                y[1] = q(0, q(1, q(1, y[1]) ^ list[a + 1]) ^ list[b + 1]);
-                y[2] = q(1, q(1, q(0, y[2]) ^ list[a + 2]) ^ list[b + 2]);
-                y[3] = q(0, q(1, q(1, y[3]) ^ list[a + 3]) ^ list[b + 3]);
+                y[0] = q(1, q(0, q(0, y[0]) ^ key_bytes[a + 0]) ^ key_bytes[b + 0]);
+                y[1] = q(0, q(0, q(1, y[1]) ^ key_bytes[a + 1]) ^ key_bytes[b + 1]);
+                y[2] = q(1, q(1, q(0, y[2]) ^ key_bytes[a + 2]) ^ key_bytes[b + 2]);
+                y[3] = q(0, q(1, q(1, y[3]) ^ key_bytes[a + 3]) ^ key_bytes[b + 3]);
 
                 mds_mult(y)
             }
@@ -111,8 +114,8 @@ macro_rules! twofish {
                 self
             }
 
-            pub fn with_key_u32(mut self, bytes: [u32; Self::KEY_WORDS]) -> Self {
-                self.ksa_u32(bytes);
+            pub fn with_key_u32(mut self, key: [u32; Self::KEY_WORDS]) -> Self {
+                self.ksa_u32(key);
                 self
             }
         }
@@ -198,6 +201,70 @@ twofish!(TwoFish128, 16);
 twofish!(TwoFish192, 24);
 twofish!(TwoFish256, 32);
 
-// crate::test_block_cipher!(
+#[cfg(test)]
+mod twofish_tests {
 
-// )
+    use super::*;
+
+    fn ttb(s: &str) -> Vec<u8> {
+        ByteFormat::Hex.text_to_bytes(s).unwrap()
+    }
+
+    #[test]
+    fn ksa() {
+        let cipher = TwoFish128::default()
+            .with_key(ttb("00000000000000000000000000000000").try_into().unwrap());
+        println!("{:08x?}", cipher.subkeys);
+    }
+
+    crate::test_block_cipher!(
+        // 128-bit keys
+        test1_128, TwoFish128::default().with_key(ttb("00000000000000000000000000000000").try_into().unwrap()),
+        ttb("00000000000000000000000000000000"),
+        ttb("9F589F5CF6122C32B6BFEC2F2AE8C35A");
+
+        test2_128, TwoFish128::default().with_key(ttb("00000000000000000000000000000000").try_into().unwrap()),
+        ttb("9F589F5CF6122C32B6BFEC2F2AE8C35A"),
+        ttb("D491DB16E7B1C39E86CB086B789F5419");
+
+        test3_128, TwoFish128::default().with_key(ttb("9F589F5CF6122C32B6BFEC2F2AE8C35A").try_into().unwrap()),
+        ttb("D491DB16E7B1C39E86CB086B789F5419"),
+        ttb("019F9809DE1711858FAAC3A3BA20FBC3");
+
+
+        // 192-bit keys
+        test1_192, TwoFish192::default().with_key(ttb("000000000000000000000000000000000000000000000000").try_into().unwrap()),
+        ttb("00000000000000000000000000000000"),
+        ttb("EFA71F788965BD4453F860178FC19101");
+
+        test2_192, TwoFish192::default().with_key(ttb("000000000000000000000000000000000000000000000000").try_into().unwrap()),
+        ttb("EFA71F788965BD4453F860178FC19101"),
+        ttb("88B2B2706B105E36B446BB6D731A1E88");
+
+        test3_192, TwoFish192::default().with_key(ttb("EFA71F788965BD4453F860178FC191010000000000000000").try_into().unwrap()),
+        ttb("88B2B2706B105E36B446BB6D731A1E88"),
+        ttb("39DA69D6BA4997D585B6DC073CA341B2");
+
+        test4_194, TwoFish192::default().with_key(ttb("88B2B2706B105E36B446BB6D731A1E88EFA71F788965BD44").try_into().unwrap()),
+        ttb("39DA69D6BA4997D585B6DC073CA341B2"),
+        ttb("182B02D81497EA45F9DAACDC29193A65");
+
+
+        // 256-bit keys
+        test1_256, TwoFish256::default().with_key(ttb("0000000000000000000000000000000000000000000000000000000000000000").try_into().unwrap()),
+        ttb("00000000000000000000000000000000"),
+        ttb("57FF739D4DC92C1BD7FC01700CC8216F");
+
+        test2_256, TwoFish256::default().with_key(ttb("0000000000000000000000000000000000000000000000000000000000000000").try_into().unwrap()),
+        ttb("57FF739D4DC92C1BD7FC01700CC8216F"),
+        ttb("D43BB7556EA32E46F2A282B7D45B4E0D");
+
+        test3_256, TwoFish256::default().with_key(ttb("57FF739D4DC92C1BD7FC01700CC8216F00000000000000000000000000000000").try_into().unwrap()),
+        ttb("D43BB7556EA32E46F2A282B7D45B4E0D"),
+        ttb("90AFE91BB288544F2C32DC239B2635E6");
+
+        test4_256, TwoFish256::default().with_key(ttb("D43BB7556EA32E46F2A282B7D45B4E0D57FF739D4DC92C1BD7FC01700CC8216F").try_into().unwrap()),
+        ttb("90AFE91BB288544F2C32DC239B2635E6"),
+        ttb("6CB4561C40BF0A9705931CB6D408E7FA");
+    );
+}
