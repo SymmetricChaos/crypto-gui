@@ -1,4 +1,4 @@
-use utils::byte_formatting::{fill_u32s_be, u32s_to_bytes_be, ByteFormat};
+use utils::byte_formatting::{fill_u32s_be, make_u32s_be, u32s_to_bytes_be, ByteFormat};
 
 use super::block_cipher::{BCMode, BCPadding, BlockCipher};
 
@@ -120,8 +120,7 @@ impl Sm4 {
 
 impl BlockCipher<16> for Sm4 {
     fn encrypt_block(&self, bytes: &mut [u8]) {
-        let mut block = [0; 4];
-        fill_u32s_be(&mut block, bytes);
+        let mut block = make_u32s_be::<4>(bytes);
 
         for key in self.subkeys {
             let x = f(&block, key);
@@ -135,8 +134,7 @@ impl BlockCipher<16> for Sm4 {
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
-        let mut block = [0; 4];
-        fill_u32s_be(&mut block, bytes);
+        let mut block = make_u32s_be::<4>(bytes);
 
         for key in self.subkeys.into_iter().rev() {
             let x = f(&block, key);

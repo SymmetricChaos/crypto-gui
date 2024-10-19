@@ -1,5 +1,5 @@
 use super::block_cipher::{BCMode, BCPadding, BlockCipher};
-use utils::byte_formatting::{fill_u32s_be, u32s_to_bytes_be, ByteFormat};
+use utils::byte_formatting::{fill_u32s_be, make_u32s_be, u32s_to_bytes_be, ByteFormat};
 
 const DEBUG: bool = false;
 macro_rules! debug_state {
@@ -120,8 +120,7 @@ impl FealNx {
 
 impl BlockCipher<8> for FealNx {
     fn encrypt_block(&self, bytes: &mut [u8]) {
-        let mut v = [0u32; 2];
-        fill_u32s_be(&mut v, bytes);
+        let mut v = make_u32s_be::<2>(bytes);
         debug_state!("e input:", v);
 
         // Preprocessing stage
@@ -152,8 +151,7 @@ impl BlockCipher<8> for FealNx {
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
-        let mut v = [0u32; 2];
-        fill_u32s_be(&mut v, bytes);
+        let mut v = make_u32s_be::<2>(bytes);
         debug_state!("d input:", v);
 
         // Preprocessing stage

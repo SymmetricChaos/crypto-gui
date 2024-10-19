@@ -162,8 +162,7 @@ impl Rc2 {
 
 impl BlockCipher<8> for Rc2 {
     fn encrypt_block(&self, bytes: &mut [u8]) {
-        let mut v = [0u16; 4];
-        utils::byte_formatting::fill_u16s_le(&mut v, bytes);
+        let mut v = utils::byte_formatting::make_u16s_le::<4>(bytes);
 
         let mut j = 0;
         // Five rounds
@@ -196,8 +195,7 @@ impl BlockCipher<8> for Rc2 {
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
-        let mut v = [0u16; 4];
-        utils::byte_formatting::fill_u16s_le(&mut v, bytes);
+        let mut v = utils::byte_formatting::make_u16s_le::<4>(bytes);
 
         let mut j = 64;
         // Five rounds

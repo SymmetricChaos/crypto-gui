@@ -302,8 +302,7 @@ macro_rules! build_camellia {
 
         impl BlockCipher<16> for $name {
             fn encrypt_block(&self, bytes: &mut [u8]) {
-                let mut v = [0, 0];
-                utils::byte_formatting::fill_u64s_be(&mut v, bytes);
+                let mut v = utils::byte_formatting::make_u64s_be::<2>(bytes);
 
                 let k = self.subkeys;
 
@@ -330,8 +329,7 @@ macro_rules! build_camellia {
             }
 
             fn decrypt_block(&self, bytes: &mut [u8]) {
-                let mut v = [0, 0];
-                utils::byte_formatting::fill_u64s_be(&mut v, bytes);
+                let mut v = utils::byte_formatting::make_u64s_be::<2>(bytes);
 
                 let k = self.subkeys;
 
@@ -361,6 +359,7 @@ macro_rules! build_camellia {
 }
 
 build_camellia!(Camellia128, 26);
+
 impl Camellia128 {
     pub fn ksa(&mut self, bytes: [u8; 16]) {
         let kl = (
@@ -382,8 +381,11 @@ impl Camellia128 {
         key_schedule_26(&mut self.subkeys, kl, ka);
     }
 }
+
 crate::impl_cipher_for_block_cipher!(Camellia128, 16);
+
 build_camellia!(Camellia192, 34);
+
 impl Camellia192 {
     pub fn ksa(&mut self, bytes: [u8; 24]) {
         let kl = (
@@ -411,8 +413,11 @@ impl Camellia192 {
         key_schedule_34(&mut self.subkeys, kl, kr, ka, kb);
     }
 }
+
 crate::impl_cipher_for_block_cipher!(Camellia192, 16);
+
 build_camellia!(Camellia256, 34);
+
 impl Camellia256 {
     pub fn ksa(&mut self, bytes: [u8; 32]) {
         let kl = (

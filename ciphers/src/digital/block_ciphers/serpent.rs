@@ -1,6 +1,6 @@
 use std::ops::Shl;
 
-use utils::byte_formatting::{fill_u32s_le, u32s_to_bytes_le, ByteFormat};
+use utils::byte_formatting::{fill_u32s_le, make_u32s_le, u32s_to_bytes_le, ByteFormat};
 
 use super::block_cipher::{BCMode, BCPadding, BlockCipher};
 
@@ -244,8 +244,7 @@ impl Serpent {
 
 impl BlockCipher<16> for Serpent {
     fn encrypt_block(&self, bytes: &mut [u8]) {
-        let mut block = [0; 4];
-        fill_u32s_le(&mut block, bytes);
+        let mut block = make_u32s_le::<4>(bytes);
 
         for i in 0..ROUNDS - 1 {
             let t = xor_words(block, self.round_keys[i]);
@@ -261,8 +260,7 @@ impl BlockCipher<16> for Serpent {
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
-        let mut block = [0; 4];
-        fill_u32s_le(&mut block, bytes);
+        let mut block = make_u32s_le::<4>(bytes);
 
         let s = xor_words(block, self.round_keys[ROUNDS]);
         let t = sbox_bitslice_inv(ROUNDS - 1, s);

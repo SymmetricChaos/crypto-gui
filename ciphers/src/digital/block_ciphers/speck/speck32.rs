@@ -1,4 +1,4 @@
-use utils::byte_formatting::{fill_u16s_be, u16s_to_bytes_be, ByteFormat};
+use utils::byte_formatting::{fill_u16s_be, make_u16s_be, u16s_to_bytes_be, ByteFormat};
 
 use crate::digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher};
 
@@ -30,8 +30,7 @@ impl Speck32_64 {
     const ROUNDS: u16 = 22;
 
     pub fn ksa(&mut self, bytes: [u8; 8]) {
-        let mut key = [0u16; 4];
-        fill_u16s_be(&mut key, &bytes);
+        let key = make_u16s_be::<4>(&bytes);
         self.generate_subkeys(key)
     }
 

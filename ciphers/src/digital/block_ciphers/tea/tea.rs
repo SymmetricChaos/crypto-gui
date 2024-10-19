@@ -1,5 +1,5 @@
 use crate::digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher};
-use utils::byte_formatting::{fill_u32s_be, u32s_to_bytes_be, ByteFormat};
+use utils::byte_formatting::{fill_u32s_be, make_u32s_be, u32s_to_bytes_be, ByteFormat};
 
 pub fn mx_e(a: u32, b: u32, sum: u32, k1: u32, k2: u32) -> u32 {
     b.wrapping_add((a << 4).wrapping_add(k1) ^ (a.wrapping_add(sum)) ^ (a >> 5).wrapping_add(k2))
@@ -45,8 +45,7 @@ impl Tea {
 
 impl BlockCipher<8> for Tea {
     fn encrypt_block(&self, bytes: &mut [u8]) {
-        let mut v = [0u32; 2];
-        fill_u32s_be(&mut v, bytes);
+        let mut v = make_u32s_be::<2>(bytes);
         let mut sum: u32 = 0;
         for _ in 0..32 {
             sum = sum.wrapping_add(super::DELTA);
@@ -57,8 +56,7 @@ impl BlockCipher<8> for Tea {
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
-        let mut v = [0u32; 2];
-        fill_u32s_be(&mut v, bytes);
+        let mut v = make_u32s_be::<2>(bytes);
         let mut sum: u32 = 0xC6EF3720;
 
         for _ in 0..32 {

@@ -1,4 +1,4 @@
-use utils::byte_formatting::{fill_u64s_be, u64s_to_bytes_be, ByteFormat};
+use utils::byte_formatting::{make_u64s_be, u64s_to_bytes_be, ByteFormat};
 
 use crate::digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher};
 
@@ -32,8 +32,7 @@ macro_rules! simon128 {
 
         impl $name {
             pub fn ksa(&mut self, bytes: [u8; $key_words * 8]) {
-                let mut key = [0; $key_words];
-                fill_u64s_be(&mut key, &bytes);
+                let key = make_u64s_be::<$key_words>(&bytes);
                 self.generate_subkeys(key);
             }
 
@@ -80,9 +79,7 @@ macro_rules! simon128 {
         impl BlockCipher<16> for $name {
             fn encrypt_block(&self, bytes: &mut [u8]) {
                 // Make mutable variables from the working vector
-                let mut v = [0u64; 2];
-                fill_u64s_be(&mut v, bytes);
-                let [mut x, mut y] = v;
+                let [mut x, mut y] = make_u64s_be::<2>(bytes);
 
                 for k in self.subkeys {
                     let t = y;
@@ -98,9 +95,7 @@ macro_rules! simon128 {
 
             fn decrypt_block(&self, bytes: &mut [u8]) {
                 // Make mutable variables from the working vector
-                let mut v = [0u64; 2];
-                fill_u64s_be(&mut v, bytes);
-                let [mut x, mut y] = v;
+                let [mut x, mut y] = make_u64s_be::<2>(bytes);
 
                 for k in self.subkeys.into_iter().rev() {
                     let t = x;

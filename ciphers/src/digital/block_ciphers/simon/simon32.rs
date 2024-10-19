@@ -1,4 +1,4 @@
-use utils::byte_formatting::{fill_u16s_be, u16s_to_bytes_be, ByteFormat};
+use utils::byte_formatting::{make_u16s_be, u16s_to_bytes_be, ByteFormat};
 
 use crate::digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher};
 
@@ -34,8 +34,7 @@ crate::block_cipher_builders! {Simon32_64, u32}
 
 impl Simon32_64 {
     pub fn ksa(&mut self, bytes: [u8; KEY_WORDS * 2]) {
-        let mut key = [0; KEY_WORDS];
-        fill_u16s_be(&mut key, &bytes);
+        let key = make_u16s_be::<KEY_WORDS>(&bytes);
         self.generate_subkeys(key);
     }
 
@@ -79,9 +78,7 @@ impl Simon32_64 {
 impl BlockCipher<4> for Simon32_64 {
     fn encrypt_block(&self, bytes: &mut [u8]) {
         // Make mutable variables from the working vector
-        let mut v = [0u16; 2];
-        fill_u16s_be(&mut v, bytes);
-        let [mut x, mut y] = v;
+        let [mut x, mut y] = make_u16s_be::<2>(bytes);
 
         for k in self.subkeys {
             let t = y;
@@ -97,9 +94,7 @@ impl BlockCipher<4> for Simon32_64 {
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
         // Make mutable variables from the working vector
-        let mut v = [0u16; 2];
-        fill_u16s_be(&mut v, bytes);
-        let [mut x, mut y] = v;
+        let [mut x, mut y] = make_u16s_be::<2>(bytes);
 
         for k in self.subkeys.into_iter().rev() {
             let t = x;

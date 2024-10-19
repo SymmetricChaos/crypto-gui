@@ -140,8 +140,7 @@ macro_rules! lea_struct {
 
         impl BlockCipher<16> for $name {
             fn encrypt_block(&self, bytes: &mut [u8]) {
-                let mut v = [0u32; 4];
-                utils::byte_formatting::fill_u32s_le(&mut v, bytes);
+                let mut v = utils::byte_formatting::make_u32s_le::<4>(bytes);
 
                 for s in self.subkeys {
                     let t = v;
@@ -154,8 +153,7 @@ macro_rules! lea_struct {
             }
 
             fn decrypt_block(&self, bytes: &mut [u8]) {
-                let mut v = [0u32; 4];
-                utils::byte_formatting::fill_u32s_le(&mut v, bytes);
+                let mut v = utils::byte_formatting::make_u32s_le::<4>(bytes);
 
                 for s in self.subkeys.into_iter().rev() {
                     let t = v;
