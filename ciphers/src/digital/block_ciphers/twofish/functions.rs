@@ -37,31 +37,23 @@ pub const QORD: [[usize; 5]; 4] = [
     [1, 0, 1, 1, 0],
 ];
 
-pub(super) fn q0(n: u8) -> u8 {
+pub(super) fn q(v: usize, n: u8) -> u8 {
     let a0 = (n >> 4) & 15;
     let b0 = n & 15;
     let a1 = a0 ^ b0;
     let b1 = a0 ^ ((b0 << 3) | (b0 >> 1)) ^ ((a0 << 3) & 15); // Because the upper 4 bits will be empty the rotation of the lower 4 bits of b0 is always correct
-    let a2 = Q0[0][a1 as usize];
-    let b2 = Q0[1][b1 as usize];
+    let (a2, b2) = if v == 0 {
+        (Q0[0][a1 as usize], Q0[1][b1 as usize])
+    } else {
+        (Q1[0][a1 as usize], Q1[1][b1 as usize])
+    };
     let a3 = a2 ^ b2;
     let b3 = a2 ^ ((b2 << 3) | (b2 >> 1)) ^ ((a2 << 3) & 15); // As for b0
-    let a4 = Q0[2][a3 as usize];
-    let b4 = Q0[3][b3 as usize];
-    (b4 << 4) | a4
-}
-
-pub(super) fn q1(n: u8) -> u8 {
-    let a0 = (n >> 4) & 15;
-    let b0 = n & 15;
-    let a1 = a0 ^ b0;
-    let b1 = a0 ^ ((b0 << 3) | (b0 >> 1)) ^ ((8 * a0) & 15);
-    let a2 = Q1[0][a1 as usize];
-    let b2 = Q1[1][b1 as usize];
-    let a3 = a2 ^ b2;
-    let b3 = a2 ^ ((b2 << 3) | (b2 >> 1)) ^ ((8 * a2) & 15);
-    let a4 = Q1[2][a3 as usize];
-    let b4 = Q1[3][b3 as usize];
+    let (a4, b4) = if v == 0 {
+        (Q0[0][a3 as usize], Q0[1][b3 as usize])
+    } else {
+        (Q1[0][a3 as usize], Q1[1][b3 as usize])
+    };
     (b4 << 4) | a4
 }
 
