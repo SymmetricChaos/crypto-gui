@@ -113,6 +113,6 @@ pub(super) fn rs_mult(m: &[u8], out: &mut [u8]) {
 }
 
 // Pseudo-Hadamard Transform
-pub(super) fn pht(a: u32, b: u32) -> (u32, u32) {
-    (a.wrapping_add(b), a.wrapping_add(b << 1))
-}
+// pub(super) fn pht(a: u32, b: u32) -> (u32, u32) {
+//     (a.wrapping_add(b), a.wrapping_add(b << 1))
+// }
