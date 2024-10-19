@@ -295,77 +295,93 @@ mod bit_function_tests {
     }
 }
 
-pub fn fill_u16s_be(target: &mut [u16], bytes: &[u8]) {
-    for (elem, chunk) in target.iter_mut().zip_eq(bytes.chunks_exact(2)) {
-        *elem = u16::from_be_bytes(chunk.try_into().unwrap());
-    }
+macro_rules! filler_and_maker {
+    ($n1: ident, $n2: ident, $n3: ident, $n4: ident,  $n5: ident,  $n6: ident, $t: ty, $w: literal) => {
+        pub fn $n1(target: &mut [$t], bytes: &[u8]) {
+            for (elem, chunk) in target.iter_mut().zip_eq(bytes.chunks_exact($w)) {
+                *elem = <$t>::from_be_bytes(chunk.try_into().unwrap());
+            }
+        }
+
+        pub fn $n2<const N: usize>(bytes: &[u8]) -> [$t; N] {
+            let mut out = [0; N];
+            for (elem, chunk) in out.iter_mut().zip_eq(bytes.chunks_exact($w)) {
+                *elem = <$t>::from_be_bytes(chunk.try_into().unwrap());
+            }
+            out
+        }
+
+        pub fn $n3(target: &mut [u8], words: &[$t]) {
+            for (chunk, word) in target.chunks_exact_mut($w).zip_eq(words) {
+                chunk.copy_from_slice(&word.to_be_bytes());
+            }
+        }
+
+        pub fn $n4(target: &mut [$t], bytes: &[u8]) {
+            for (elem, chunk) in target.iter_mut().zip_eq(bytes.chunks_exact($w)) {
+                *elem = <$t>::from_le_bytes(chunk.try_into().unwrap());
+            }
+        }
+
+        pub fn $n5<const N: usize>(bytes: &[u8]) -> [$t; N] {
+            let mut out = [0; N];
+            for (elem, chunk) in out.iter_mut().zip_eq(bytes.chunks_exact($w)) {
+                *elem = <$t>::from_le_bytes(chunk.try_into().unwrap());
+            }
+            out
+        }
+
+        pub fn $n6(target: &mut [u8], words: &[$t]) {
+            for (chunk, word) in target.chunks_exact_mut($w).zip_eq(words) {
+                chunk.copy_from_slice(&word.to_le_bytes());
+            }
+        }
+    };
 }
 
-pub fn fill_u16s_le(target: &mut [u16], bytes: &[u8]) {
-    for (elem, chunk) in target.iter_mut().zip_eq(bytes.chunks_exact(2)) {
-        *elem = u16::from_le_bytes(chunk.try_into().unwrap());
-    }
-}
+filler_and_maker!(
+    fill_u16s_be,
+    make_u16s_be,
+    u16s_to_bytes_be,
+    fill_u16s_le,
+    make_u16s_le,
+    u16s_to_bytes_le,
+    u16,
+    2
+);
 
-pub fn fill_u32s_be(target: &mut [u32], bytes: &[u8]) {
-    for (elem, chunk) in target.iter_mut().zip_eq(bytes.chunks_exact(4)) {
-        *elem = u32::from_be_bytes(chunk.try_into().unwrap());
-    }
-}
+filler_and_maker!(
+    fill_u32s_be,
+    make_u32s_be,
+    u32s_to_bytes_be,
+    fill_u32s_le,
+    make_u32s_le,
+    u32s_to_bytes_le,
+    u32,
+    4
+);
 
-pub fn fill_u32s_le(target: &mut [u32], bytes: &[u8]) {
-    for (elem, chunk) in target.iter_mut().zip_eq(bytes.chunks_exact(4)) {
-        *elem = u32::from_le_bytes(chunk.try_into().unwrap());
-    }
-}
+filler_and_maker!(
+    fill_u64s_be,
+    make_u64s_be,
+    u64s_to_bytes_be,
+    fill_u64s_le,
+    make_u64s_le,
+    u64s_to_bytes_le,
+    u64,
+    8
+);
 
-pub fn fill_u64s_be(target: &mut [u64], bytes: &[u8]) {
-    for (elem, chunk) in target.iter_mut().zip_eq(bytes.chunks_exact(8)) {
-        *elem = u64::from_be_bytes(chunk.try_into().unwrap());
-    }
-}
-
-pub fn fill_u64s_le(target: &mut [u64], bytes: &[u8]) {
-    for (elem, chunk) in target.iter_mut().zip_eq(bytes.chunks_exact(8)) {
-        *elem = u64::from_le_bytes(chunk.try_into().unwrap());
-    }
-}
-
-pub fn u16s_to_bytes_be(target: &mut [u8], words: &[u16]) {
-    for (chunk, word) in target.chunks_exact_mut(2).zip_eq(words) {
-        chunk.copy_from_slice(&word.to_be_bytes());
-    }
-}
-
-pub fn u16s_to_bytes_le(target: &mut [u8], words: &[u16]) {
-    for (chunk, word) in target.chunks_exact_mut(2).zip_eq(words) {
-        chunk.copy_from_slice(&word.to_le_bytes());
-    }
-}
-
-pub fn u32s_to_bytes_be(target: &mut [u8], words: &[u32]) {
-    for (chunk, word) in target.chunks_exact_mut(4).zip_eq(words) {
-        chunk.copy_from_slice(&word.to_be_bytes());
-    }
-}
-
-pub fn u32s_to_bytes_le(target: &mut [u8], words: &[u32]) {
-    for (chunk, word) in target.chunks_exact_mut(4).zip_eq(words) {
-        chunk.copy_from_slice(&word.to_le_bytes());
-    }
-}
-
-pub fn u64s_to_bytes_be(target: &mut [u8], words: &[u64]) {
-    for (chunk, word) in target.chunks_exact_mut(8).zip_eq(words) {
-        chunk.copy_from_slice(&word.to_be_bytes());
-    }
-}
-
-pub fn u64s_to_bytes_le(target: &mut [u8], words: &[u64]) {
-    for (chunk, word) in target.chunks_exact_mut(8).zip_eq(words) {
-        chunk.copy_from_slice(&word.to_le_bytes());
-    }
-}
+filler_and_maker!(
+    fill_u128s_be,
+    make_u128s_be,
+    u128s_to_bytes_be,
+    fill_u128s_le,
+    make_u128s_le,
+    u128s_to_bytes_le,
+    u128,
+    16
+);
 
 /// If target is longer it is only partially overwritten. If target is shorter the extra source is ignored.
 pub fn overwrite_bytes(target: &mut [u8], source: &[u8]) {
