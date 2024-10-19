@@ -52,7 +52,7 @@ pub trait BlockCipher<const N: usize> {
     fn encrypt_block(&self, bytes: &mut [u8]);
     fn decrypt_block(&self, bytes: &mut [u8]);
 
-    /// Electronic Code Book Mode
+    /// Encrypt in Electronic Code Book Mode
     fn encrypt_ecb(&self, bytes: &mut [u8]) {
         assert!(bytes.len() % N == 0);
 
@@ -60,7 +60,7 @@ pub trait BlockCipher<const N: usize> {
             self.encrypt_block(ptext);
         }
     }
-    /// Electronic Code Book Mode
+    /// Decrypt in Electronic Code Book Mode
     fn decrypt_ecb(&self, bytes: &mut [u8]) {
         assert!(bytes.len() % N == 0);
 
@@ -69,7 +69,7 @@ pub trait BlockCipher<const N: usize> {
         }
     }
 
-    /// Counter Mode
+    /// Encrypt in Counter Mode
     fn encrypt_ctr(&self, bytes: &mut [u8], ctr: [u8; N]) {
         let mut ctr = ctr;
 
@@ -85,12 +85,12 @@ pub trait BlockCipher<const N: usize> {
         }
     }
 
-    /// Counter Mode
+    /// Decrypt in Counter Mode (equivalent to encrypt)
     fn decrypt_ctr(&self, bytes: &mut [u8], ctr: [u8; N]) {
         self.encrypt_ctr(bytes, ctr)
     }
 
-    /// Cipher Block Chaining Mode
+    /// Encrypt in Cipher Block Chaining Mode
     fn encrypt_cbc(&self, bytes: &mut [u8], iv: [u8; N]) {
         assert!(bytes.len() % N == 0);
 
@@ -109,7 +109,7 @@ pub trait BlockCipher<const N: usize> {
         }
     }
 
-    /// Cipher Block Chaining Mode
+    /// Decrypt in Cipher Block Chaining Mode
     fn decrypt_cbc(&self, bytes: &mut [u8], iv: [u8; N]) {
         assert!(bytes.len() % N == 0);
 
@@ -132,7 +132,7 @@ pub trait BlockCipher<const N: usize> {
         }
     }
 
-    /// Propogating Cipher Block Chaining Mode
+    /// Encrypt in Propogating Cipher Block Chaining Mode
     fn encrypt_pcbc(&self, bytes: &mut [u8], iv: [u8; N]) {
         assert!(bytes.len() % N == 0);
 
@@ -157,7 +157,7 @@ pub trait BlockCipher<const N: usize> {
         }
     }
 
-    /// Propogating Cipher Block Chaining Mode
+    /// Decrypt in Propogating Cipher Block Chaining Mode
     fn decrypt_pcbc(&self, bytes: &mut [u8], iv: [u8; N]) {
         assert!(bytes.len() % N == 0);
 
@@ -186,7 +186,7 @@ pub trait BlockCipher<const N: usize> {
         }
     }
 
-    /// Output Feedback Mode
+    /// Encrypt in Output Feedback Mode
     fn encrypt_ofb(&self, bytes: &mut [u8], iv: [u8; N]) {
         let mut chain = iv;
 
@@ -199,12 +199,12 @@ pub trait BlockCipher<const N: usize> {
         }
     }
 
-    /// Output Feedback Mode
+    /// Decrypt in Output Feedback Mode (equvalent to encrypt)
     fn decrypt_ofb(&self, bytes: &mut [u8], iv: [u8; N]) {
         self.encrypt_ofb(bytes, iv)
     }
 
-    /// Cipher Feedback Mode
+    /// Encrypt in Cipher Feedback Mode
     fn encrypt_cfb(&self, bytes: &mut [u8], iv: [u8; N]) {
         let mut chain = iv;
 
@@ -220,7 +220,7 @@ pub trait BlockCipher<const N: usize> {
         }
     }
 
-    /// Cipher Feedback Mode
+    /// Decrypt in Cipher Feedback Mode (equivalent to encrypt)
     fn decrypt_cfb(&self, bytes: &mut [u8], iv: [u8; N]) {
         self.encrypt_cfb(bytes, iv)
     }
@@ -234,7 +234,6 @@ pub enum BCMode {
     Pcbc,
     Ofb,
     Cfb,
-    //Gcm
 }
 
 impl BCMode {
@@ -247,7 +246,6 @@ impl BCMode {
             BCMode::Pcbc => true,
             BCMode::Ofb => false,
             BCMode::Cfb => false,
-            //BCMode::Gcm => false
         }
     }
 
@@ -259,7 +257,6 @@ impl BCMode {
             BCMode::Pcbc => true,
             BCMode::Ofb => true,
             BCMode::Cfb => true,
-            //BCMode::Gcm => true
         }
     }
 
@@ -271,7 +268,6 @@ impl BCMode {
             BCMode::Pcbc => "Propogating Cipher Block Chaining Mode is similar to CBC but XORs the plaintext into the chain value both before and after encryption. This means that both encryption and decryption are inherently serial and that corruption in any block corrupts all following blocks.",
             BCMode::Ofb => "Output Feedback Mode iteratively encrypts the initialization vector and XORs the chain of blocks created into the plaintext. This is similar to CTR mode but cannot be encrypted or decrypted in parallel.",
             BCMode::Cfb => "Cipher Feedback Mode encrypts the previous ciphertext block and XORs that into the plaintext. Encryption cannot be parallelized but decryption can be.",
-            //BCMode::Gcm => "Galois/Counter Mode operated the block cipher as a stream cipher like Counter mode but also prodvides authentication by computing a tag value. The it is important that the counter never repeat for two messages with the same key so steps must be taken to carefully select its initial value. Encryption and decryption can be performed in parallel."
         }
     }
 }
@@ -291,7 +287,6 @@ impl Display for BCMode {
             BCMode::Pcbc => write!(f, "PCBC"),
             BCMode::Ofb => write!(f, "OFB"),
             BCMode::Cfb => write!(f, "CFB"),
-            //BCMode::Gcm => write!(f, "GCM"),
         }
     }
 }
@@ -334,7 +329,7 @@ impl BCPadding {
     pub fn info(&self) -> &'static str {
         match self {
             BCPadding::None => "If no padding is used the length of the input to the cipher must be a multiple of the block size.",
-            BCPadding::Bit => "Bit padding adds the byte 0b10000000 (or 0x80) to the end of the input and then fills the rest with null bytes to reach a multiple of the block size.",
+            BCPadding::Bit => "Bit padding adds the byte 0x80 (0b10000000) to the end of the input and then fills the rest with null bytes to reach a multiple of the block size.",
             BCPadding::Pkcs => "PKCS5 padding adds n bytes each with value n to reach a multiple of the block size.",
             BCPadding::Ansi923 => "ANSI X9.23 padding adds n-1 null bytes and then a final byte with a value of n to reach a multiple of the block size.",
         }
