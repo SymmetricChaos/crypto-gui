@@ -218,15 +218,15 @@ mod twofish_tests {
     fn ksa_128() {
         let cipher = TwoFish128::default()
             .with_key(ttb("00000000000000000000000000000000").try_into().unwrap());
-        assert_eq_u8s(&[0; 8][..], &cipher.sbox_key[0..8]);
-        assert_eq_u32s(
+        assert_eq!(&[0; 8][..], &cipher.sbox_key[0..8]);
+        assert_eq!(
             [
                 0x52C54DDE, 0x11F0626D, 0x7CAC9D4A, 0x4D1B4AAA, 0xB7B83A10, 0x1E7D0BEB, 0xEE9C341F,
                 0xCFE14BE4, 0xF98FFEF9, 0x9C5B3C17, 0x15A48310, 0x342A4D81, 0x424D89FE, 0xC14724A7,
                 0x311B834C, 0xFDE87320, 0x3302778F, 0x26CD67B4, 0x7A6C6362, 0xC2BAF60E, 0x3411B994,
                 0xD972C87F, 0x84ADB1EA, 0xA7DEE434, 0x54D2960F, 0xA2F7CAA8, 0xA6B8FF8C, 0x8014C425,
                 0x6A748D1C, 0xEDBAF720, 0x928EF78C, 0x0338EE13, 0x9949D6BE, 0xC8314176, 0x07C07D68,
-                0xECAE7EA7, 0x1FE71844, 0x85C05C89, 0xF298311E, 0x696EA67,
+                0xECAE7EA7, 0x1FE71844, 0x85C05C89, 0xF298311E, 0x696EA672,
             ],
             cipher.subkeys,
         );
@@ -239,13 +239,11 @@ mod twofish_tests {
                 .try_into()
                 .unwrap(),
         );
-        assert_eq_u8s(
-            &[
-                0xf2, 0xf6, 0x9f, 0xb8, 0x4b, 0xbc, 0x55, 0xb2, 0x61, 0x10, 0x66, 0x45,
-            ][..],
+        assert_eq!(
+            &[0xf2, 0xf6, 0x9f, 0xb8, 0x4b, 0xbc, 0x55, 0xb2, 0x61, 0x10, 0x66, 0x45,][..],
             &cipher.sbox_key[0..12],
         );
-        assert_eq_u32s(
+        assert_eq!(
             [
                 0x38394A24, 0xC36D1175, 0xE802528F, 0x219BFEB4, 0xB9141AB4, 0xBD3E70CD, 0xAF609383,
                 0xFD36908A, 0x03EFB931, 0x1D2EE7EC, 0xA7489D55, 0x6E44B6E8, 0x714AD667, 0x653AD51F,
@@ -265,14 +263,14 @@ mod twofish_tests {
                 .try_into()
                 .unwrap(),
         );
-        assert_eq_u8s(
+        assert_eq!(
             &[
                 0xf2, 0xf6, 0x9f, 0xb8, 0x4b, 0xbc, 0x55, 0xb2, 0x61, 0x10, 0x66, 0x45, 0xf7, 0x47,
                 0x44, 0x8e,
             ][..],
             &cipher.sbox_key[0..16],
         );
-        assert_eq_u32s(
+        assert_eq!(
             [
                 0x5EC769BF, 0x44D13C60, 0x76CD39B1, 0x16750474, 0x349C294B, 0xEC21F6D6, 0x4FBD10B4,
                 0x578DA0ED, 0xC3479695, 0x9B6958FB, 0x6A7FBC4E, 0x0BF1830B, 0x61B5E0FB, 0xD78D9730,

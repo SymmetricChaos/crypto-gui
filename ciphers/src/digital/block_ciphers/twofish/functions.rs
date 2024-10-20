@@ -48,7 +48,7 @@ pub(super) fn q(v: usize, n: u8) -> u8 {
         (Q1[0][a1 as usize], Q1[1][b1 as usize])
     };
     let a3 = a2 ^ b2;
-    let b3 = (a2 ^ ((b2 << 3) | (b2 >> 1)) ^ (a2 << 3)) % 15; // As for b0
+    let b3 = (a2 ^ ((b2 << 3) | (b2 >> 1)) ^ (a2 << 3)) & 15; // As for b0
     let (a4, b4) = if v == 0 {
         (Q0[2][a3 as usize], Q0[3][b3 as usize])
     } else {
