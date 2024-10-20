@@ -72,6 +72,7 @@ cipher_ids_and_names!(
     Khufu, "Khufu";
     Khafre, "Khafre";
     Lea, "LEA";
+    Lucifer, "Lucifer";
     M94, "M-94";
     M209, "M-209";
     Nihilist, "Nihilist";

@@ -77,6 +77,7 @@ mod trifid_controls;
 mod triple_des_controls;
 mod turning_grille_controls;
 mod two_square_controls;
+mod twofish_controls;
 mod vic_controls;
 mod vigenere_controls;
 mod xchacha_controls;
@@ -197,6 +198,7 @@ pub struct CipherInterface {
     speck: speck_controls::SpeckFrame,
     tea: tea_controls::TeaFrame,
     triple_des: triple_des_controls::TripleDesFrame,
+    twofish: twofish_controls::TwofishFrame,
     xtea: xtea_controls::XteaFrame,
 
     // Stream
@@ -351,6 +353,7 @@ impl CipherInterface {
                 CipherId::Speck,
                 CipherId::Tea,
                 CipherId::TripleDes,
+                CipherId::Twofish,
                 CipherId::Xtea,
             ],
             active_cipher,
@@ -460,6 +463,7 @@ impl CipherInterface {
             CipherId::Trifid => &mut self.trifid,
             CipherId::TripleDes => &mut self.triple_des,
             CipherId::TurningGrille => &mut self.turning_grille,
+            CipherId::Twofish => &mut self.twofish,
             CipherId::TwoSquare => &mut self.two_square,
             CipherId::Vic => &mut self.vic,
             CipherId::Vigenere => &mut self.vigenere,

@@ -38,17 +38,17 @@ pub const QORD: [[usize; 5]; 4] = [
 ];
 
 pub(super) fn q(v: usize, n: u8) -> u8 {
-    let a0 = (n >> 4) & 15;
-    let b0 = n & 15;
+    let a0 = (n >> 4) & 0xf;
+    let b0 = n & 0x0f;
     let a1 = a0 ^ b0;
-    let b1 = (a0 ^ ((b0 << 3) | (b0 >> 1)) ^ (a0 << 3)) & 15; // Because the upper 4 bits will be empty the rotation of the lower 4 bits of b0 is always correct
+    let b1 = (a0 ^ ((b0 << 3) | (b0 >> 1)) ^ (a0 << 3)) & 0xf; // Because the upper 4 bits will be empty the rotation of the lower 4 bits of b0 is always correct
     let (a2, b2) = if v == 0 {
         (Q0[0][a1 as usize], Q0[1][b1 as usize])
     } else {
         (Q1[0][a1 as usize], Q1[1][b1 as usize])
     };
     let a3 = a2 ^ b2;
-    let b3 = (a2 ^ ((b2 << 3) | (b2 >> 1)) ^ (a2 << 3)) & 15; // As for b0
+    let b3 = (a2 ^ ((b2 << 3) | (b2 >> 1)) ^ (a2 << 3)) & 0xf; // As for b0
     let (a4, b4) = if v == 0 {
         (Q0[2][a3 as usize], Q0[3][b3 as usize])
     } else {

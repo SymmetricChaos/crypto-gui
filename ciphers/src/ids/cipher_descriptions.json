@@ -558,6 +558,19 @@
       "Block Cipher"
     ]
   },
+  "Lucifer": {
+    "Names": [
+      "Lucifer",
+      "LUCIFER"
+    ],
+    "Description": "Lucifer is among the most influential ciphers of the digital age. It introduced the very notion of a block cipher of the Feistel network and of substitution boxes as a method of creating nonlinearity.",
+    "Authors": "Horst Feistel, J. L. Smith, et al.",
+    "Publication": "1971",
+    "Traits": [
+      "Block Cipher",
+      "Feistel"
+    ]
+  },
   "M-209": {
     "Names": [
       "M-209",
@@ -1024,6 +1037,18 @@
     "Publication": null,
     "Traits": [
       "Transposition"
+    ]
+  },
+  "Twofish": {
+    "Names": [
+      "Twofish"
+    ],
+    "Description": "Twofish is block cipher that was a finalist for the AES competition. It is related to Blowfish, also due to Schneier, but with several improvements including a 128-bit block size and the addition of key whitening.",
+    "Authors": "Bruce Schneier, John Kelsey, Doug Whiting, David Wagner, Chris Hall, Niels Ferguson",
+    "Publication": "1998",
+    "Traits": [
+      "Feistel",
+      "Block Cipher"
     ]
   },
   "Two-Square": {

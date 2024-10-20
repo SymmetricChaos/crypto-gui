@@ -5,7 +5,7 @@ use super::{
     functions::{mds_column_mult, mds_mult, q, rs_mult, QORD},
 };
 
-macro_rules! twofish {
+macro_rules! Twofish {
     ($name: ident, $key_bytes: literal) => {
         pub struct $name {
             pub input_format: ByteFormat,
@@ -205,9 +205,9 @@ macro_rules! twofish {
     };
 }
 
-twofish!(TwoFish128, 16);
-twofish!(TwoFish192, 24);
-twofish!(TwoFish256, 32);
+Twofish!(Twofish128, 16);
+Twofish!(Twofish192, 24);
+Twofish!(Twofish256, 32);
 
 #[cfg(test)]
 mod twofish_tests {
@@ -220,7 +220,7 @@ mod twofish_tests {
 
     #[test]
     fn ksa_128() {
-        let cipher = TwoFish128::default()
+        let cipher = Twofish128::default()
             .with_key(ttb("00000000000000000000000000000000").try_into().unwrap());
         assert_eq!(&[0; 8][..], &cipher.sbox_key[0..8]);
         assert_eq!(
@@ -238,7 +238,7 @@ mod twofish_tests {
 
     #[test]
     fn ksa_192() {
-        let cipher = TwoFish192::default().with_key(
+        let cipher = Twofish192::default().with_key(
             ttb("0123456789ABCDEFFEDCBA98765432100011223344556677")
                 .try_into()
                 .unwrap(),
@@ -262,7 +262,7 @@ mod twofish_tests {
 
     #[test]
     fn ksa_256() {
-        let cipher = TwoFish256::default().with_key(
+        let cipher = Twofish256::default().with_key(
             ttb("0123456789ABCDEFFEDCBA987654321000112233445566778899AABBCCDDEEFF")
                 .try_into()
                 .unwrap(),
@@ -289,51 +289,51 @@ mod twofish_tests {
 
     crate::test_block_cipher!(
         // 128-bit keys
-        test1_128, TwoFish128::default().with_key(ttb("00000000000000000000000000000000").try_into().unwrap()),
+        test1_128, Twofish128::default().with_key(ttb("00000000000000000000000000000000").try_into().unwrap()),
         ttb("00000000000000000000000000000000"),
         ttb("9F589F5CF6122C32B6BFEC2F2AE8C35A");
 
-        test2_128, TwoFish128::default().with_key(ttb("00000000000000000000000000000000").try_into().unwrap()),
+        test2_128, Twofish128::default().with_key(ttb("00000000000000000000000000000000").try_into().unwrap()),
         ttb("9F589F5CF6122C32B6BFEC2F2AE8C35A"),
         ttb("D491DB16E7B1C39E86CB086B789F5419");
 
-        test3_128, TwoFish128::default().with_key(ttb("9F589F5CF6122C32B6BFEC2F2AE8C35A").try_into().unwrap()),
+        test3_128, Twofish128::default().with_key(ttb("9F589F5CF6122C32B6BFEC2F2AE8C35A").try_into().unwrap()),
         ttb("D491DB16E7B1C39E86CB086B789F5419"),
         ttb("019F9809DE1711858FAAC3A3BA20FBC3");
 
 
         // 192-bit keys
-        test1_192, TwoFish192::default().with_key(ttb("000000000000000000000000000000000000000000000000").try_into().unwrap()),
+        test1_192, Twofish192::default().with_key(ttb("000000000000000000000000000000000000000000000000").try_into().unwrap()),
         ttb("00000000000000000000000000000000"),
         ttb("EFA71F788965BD4453F860178FC19101");
 
-        test2_192, TwoFish192::default().with_key(ttb("000000000000000000000000000000000000000000000000").try_into().unwrap()),
+        test2_192, Twofish192::default().with_key(ttb("000000000000000000000000000000000000000000000000").try_into().unwrap()),
         ttb("EFA71F788965BD4453F860178FC19101"),
         ttb("88B2B2706B105E36B446BB6D731A1E88");
 
-        test3_192, TwoFish192::default().with_key(ttb("EFA71F788965BD4453F860178FC191010000000000000000").try_into().unwrap()),
+        test3_192, Twofish192::default().with_key(ttb("EFA71F788965BD4453F860178FC191010000000000000000").try_into().unwrap()),
         ttb("88B2B2706B105E36B446BB6D731A1E88"),
         ttb("39DA69D6BA4997D585B6DC073CA341B2");
 
-        test4_194, TwoFish192::default().with_key(ttb("88B2B2706B105E36B446BB6D731A1E88EFA71F788965BD44").try_into().unwrap()),
+        test4_194, Twofish192::default().with_key(ttb("88B2B2706B105E36B446BB6D731A1E88EFA71F788965BD44").try_into().unwrap()),
         ttb("39DA69D6BA4997D585B6DC073CA341B2"),
         ttb("182B02D81497EA45F9DAACDC29193A65");
 
 
         // 256-bit keys
-        test1_256, TwoFish256::default().with_key(ttb("0000000000000000000000000000000000000000000000000000000000000000").try_into().unwrap()),
+        test1_256, Twofish256::default().with_key(ttb("0000000000000000000000000000000000000000000000000000000000000000").try_into().unwrap()),
         ttb("00000000000000000000000000000000"),
         ttb("57FF739D4DC92C1BD7FC01700CC8216F");
 
-        test2_256, TwoFish256::default().with_key(ttb("0000000000000000000000000000000000000000000000000000000000000000").try_into().unwrap()),
+        test2_256, Twofish256::default().with_key(ttb("0000000000000000000000000000000000000000000000000000000000000000").try_into().unwrap()),
         ttb("57FF739D4DC92C1BD7FC01700CC8216F"),
         ttb("D43BB7556EA32E46F2A282B7D45B4E0D");
 
-        test3_256, TwoFish256::default().with_key(ttb("57FF739D4DC92C1BD7FC01700CC8216F00000000000000000000000000000000").try_into().unwrap()),
+        test3_256, Twofish256::default().with_key(ttb("57FF739D4DC92C1BD7FC01700CC8216F00000000000000000000000000000000").try_into().unwrap()),
         ttb("D43BB7556EA32E46F2A282B7D45B4E0D"),
         ttb("90AFE91BB288544F2C32DC239B2635E6");
 
-        test4_256, TwoFish256::default().with_key(ttb("D43BB7556EA32E46F2A282B7D45B4E0D57FF739D4DC92C1BD7FC01700CC8216F").try_into().unwrap()),
+        test4_256, Twofish256::default().with_key(ttb("D43BB7556EA32E46F2A282B7D45B4E0D57FF739D4DC92C1BD7FC01700CC8216F").try_into().unwrap()),
         ttb("90AFE91BB288544F2C32DC239B2635E6"),
         ttb("6CB4561C40BF0A9705931CB6D408E7FA");
     );
