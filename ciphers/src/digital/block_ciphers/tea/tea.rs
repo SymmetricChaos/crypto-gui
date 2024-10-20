@@ -20,9 +20,9 @@ pub struct Tea {
 impl Default for Tea {
     fn default() -> Self {
         Self {
-            subkeys: [0, 0, 0, 0],
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
+            subkeys: [0, 0, 0, 0],
             iv: 0,
             mode: BCMode::default(),
             padding: BCPadding::default(),

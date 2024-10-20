@@ -191,14 +191,14 @@ impl ClassicCryptoApp {
                     match self.active_code {
                         Some(code) => {
                             ui.label(RichText::from(code.to_string()).heading());
-                            match code.description() {
+                            match code.description().as_str() {
                                 Some(s) => ui.label(RichText::new(s).size(12.0)),
                                 None => ui.label(RichText::new("<<<MISSING DESCRIPTION>>>").size(12.0)),
                             };
-                            if let Some(s) = code.authors() {
+                            if let Some(s) = code.authors().as_str() {
                                 ui.label(RichText::new(format!("Authors: {}", s)).size(12.0));
                             };
-                            if let Some(s) = code.publication_date() {
+                            if let Some(s) = code.publication_date().as_str() {
                                 ui.label(RichText::new(format!("Published: {}", s)).size(12.0));
                             };
                             ui.add_space(16.0);
@@ -269,14 +269,14 @@ impl ClassicCryptoApp {
                     match self.active_cipher {
                         Some(cipher) => {
                             ui.label(RichText::from(cipher.to_string()).heading());
-                            match cipher.description() {
+                            match cipher.description().as_str() {
                                 Some(s) => ui.label(RichText::new(s).size(12.0)),
                                 None => ui.label(RichText::new("<<<MISSING DESCRIPTION>>>").size(12.0)),
                             };
-                            if let Some(s) = cipher.authors() {
+                            if let Some(s) = cipher.authors().as_str() {
                                 ui.label(RichText::new(format!("Authors: {}", s)).size(12.0));
                             };
-                            if let Some(s) = cipher.publication_date() {
+                            if let Some(s) = cipher.publication_date().as_str() {
                                 ui.label(RichText::new(format!("Published: {}", s)).size(12.0));
                             };
                             ui.add_space(16.0);
@@ -427,14 +427,14 @@ impl ClassicCryptoApp {
                     match self.active_hasher {
                         Some(hasher) => {
                             ui.label(RichText::from(hasher.to_string()).heading());
-                            match hasher.description() {
+                            match hasher.description().as_str() {
                                 Some(s) => ui.label(RichText::new(s).size(12.0)),
                                 None => ui.label(RichText::new("<<<MISSING DESCRIPTION>>>").size(12.0)),
                             };
-                            if let Some(s) = hasher.authors() {
+                            if let Some(s) = hasher.authors().as_str() {
                                 ui.label(RichText::new(format!("Authors: {}", s)).size(12.0));
                             };
-                            if let Some(s) = hasher.publication_date() {
+                            if let Some(s) = hasher.publication_date().as_str() {
                                 ui.label(RichText::new(format!("Published: {}", s)).size(12.0));
                             };
                             ui.add_space(16.0);

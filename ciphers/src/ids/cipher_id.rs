@@ -1,4 +1,4 @@
-use json::JsonValue;
+use json::{iterators::Members, JsonValue};
 use lazy_static::lazy_static;
 use std::fmt::Display;
 
@@ -124,20 +124,24 @@ impl Default for CipherId {
 }
 
 impl CipherId {
-    pub fn description(&self) -> Option<&'static str> {
-        CIPHER_INFORMATION[self.to_string()]["Description"].as_str()
+    pub fn description(&self) -> &JsonValue {
+        &CIPHER_INFORMATION[self.to_string()]["Description"]
     }
 
-    pub fn authors(&self) -> Option<&'static str> {
-        CIPHER_INFORMATION[self.to_string()]["Authors"].as_str()
+    pub fn authors(&self) -> &JsonValue {
+        &CIPHER_INFORMATION[self.to_string()]["Authors"]
     }
 
-    pub fn publication_date(&self) -> Option<&'static str> {
-        CIPHER_INFORMATION[self.to_string()]["Publication"].as_str()
+    pub fn publication_date(&self) -> &JsonValue {
+        &CIPHER_INFORMATION[self.to_string()]["Publication"]
     }
 
-    pub fn traits(&self) -> Option<&'static str> {
-        CIPHER_INFORMATION[self.to_string()]["Traits"].as_str()
+    pub fn traits(&self) -> Members {
+        CIPHER_INFORMATION[self.to_string()]["Traits"].members()
+    }
+
+    pub fn names(&self) -> Members {
+        CIPHER_INFORMATION[self.to_string()]["Names"].members()
     }
 }
 

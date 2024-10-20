@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use json::JsonValue;
+use json::{iterators::Members, JsonValue};
 use lazy_static::lazy_static;
 
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
@@ -69,20 +69,20 @@ impl Default for CodeId {
 }
 
 impl CodeId {
-    pub fn description(&self) -> Option<&'static str> {
-        CODE_INFORMATION[self.to_string()]["Description"].as_str()
+    pub fn description(&self) -> &JsonValue {
+        &CODE_INFORMATION[self.to_string()]["Description"]
     }
 
-    pub fn authors(&self) -> Option<&'static str> {
-        CODE_INFORMATION[self.to_string()]["Authors"].as_str()
+    pub fn authors(&self) -> &JsonValue {
+        &CODE_INFORMATION[self.to_string()]["Authors"]
     }
 
-    pub fn publication_date(&self) -> Option<&'static str> {
-        CODE_INFORMATION[self.to_string()]["Publication"].as_str()
+    pub fn publication_date(&self) -> &JsonValue {
+        &CODE_INFORMATION[self.to_string()]["Publication"]
     }
 
-    pub fn traits(&self) -> Option<&'static str> {
-        CODE_INFORMATION[self.to_string()]["Traits"].as_str()
+    pub fn traits(&self) -> Members {
+        CODE_INFORMATION[self.to_string()]["Traits"].members()
     }
 }
 

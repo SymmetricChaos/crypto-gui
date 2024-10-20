@@ -2,39 +2,63 @@ use json::JsonValue;
 use lazy_static::lazy_static;
 use std::fmt::Display;
 
-#[derive(PartialEq, Eq, Debug, Clone, Copy)]
-pub enum HasherId {
-    Argon2,
-    AsconHash,
-    AsconMac,
-    Blake,
-    Blake2,
-    Blake3,
-    Fnv,
-    Ghash,
-    Gost,
-    Haval,
-    Hmac,
-    Lm,
-    Md2,
-    Md4,
-    Md5,
-    Md6,
-    Mgf1,
-    OneAtATime,
-    Pbkdf1,
-    Pbkdf2,
-    Pearson,
-    Poly1305,
-    RipeMd,
-    Sha0,
-    Sha1,
-    Sha2,
-    Sha3,
-    SipHash,
-    Streebog,
-    Tiger,
+// Macro to make it easier to add new hasers without writing it out three times.
+macro_rules! hasher_ids_and_names {
+    ($( $id: ident, $name: expr);+ $(;)?) => {
+
+        #[derive(PartialEq, Eq, Debug, Clone, Copy)]
+        pub enum HasherId {
+            $(
+                $id,
+            )+
+        }
+
+        impl Display for HasherId {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                let name = match self {
+                    $(
+                        HasherId::$id => $name,
+                    )+
+                };
+                write!(f, "{}", name)
+            }
+        }
+
+    }
 }
+
+hasher_ids_and_names!(
+    Argon2, "Argon2";
+    AsconHash, "Ascon-Hash";
+    AsconMac, "Ascon-MAC";
+    Blake, "BLAKE";
+    Blake2, "BLAKE2";
+    Blake3, "BLAKE3";
+    Fnv, "FNV Hash";
+    Ghash, "GHASH";
+    Gost, "GOST R 34.11-94";
+    Haval, "HAVAL";
+    Hmac, "HMAC";
+    Lm, "LM";
+    Md2,"MD2";
+    Md4, "MD4";
+    Md5, "MD5";
+    Md6, "MD6";
+    Mgf1, "MGF1";
+    OneAtATime,"OneAtATime";
+    Pbkdf1, "PBKDF1";
+    Pbkdf2, "PBKDF2";
+    Pearson, "Pearson";
+    Poly1305, "Poly1305";
+    RipeMd, "RIPEMD";
+    Sha0, "SHA-0";
+    Sha1, "SHA-1";
+    Sha2, "SHA-2";
+    Sha3, "SHA-3 (Keccak)";
+    SipHash, "SipHash";
+    Streebog, "Streebog";
+    Tiger, "Tiger";
+);
 
 impl Default for HasherId {
     fn default() -> Self {
@@ -43,54 +67,20 @@ impl Default for HasherId {
 }
 
 impl HasherId {
-    pub fn description(&self) -> Option<&'static str> {
-        HASHER_INFORMATION[self.to_string()]["Description"].as_str()
+    pub fn description(&self) -> &JsonValue {
+        &HASHER_INFORMATION[self.to_string()]["Description"]
     }
 
-    pub fn authors(&self) -> Option<&'static str> {
-        HASHER_INFORMATION[self.to_string()]["Authors"].as_str()
+    pub fn authors(&self) -> &JsonValue {
+        &HASHER_INFORMATION[self.to_string()]["Authors"]
     }
 
-    pub fn publication_date(&self) -> Option<&'static str> {
-        HASHER_INFORMATION[self.to_string()]["Publication"].as_str()
+    pub fn publication_date(&self) -> &JsonValue {
+        &HASHER_INFORMATION[self.to_string()]["Publication"]
     }
-}
 
-impl Display for HasherId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let name = match self {
-            Self::Argon2 => "Argon2",
-            Self::AsconHash => "Ascon-Hash",
-            Self::AsconMac => "Ascon-Hash",
-            Self::Blake => "BLAKE",
-            Self::Blake2 => "BLAKE2",
-            Self::Blake3 => "BLAKE3",
-            Self::Fnv => "FNV Hash",
-            Self::Ghash => "GHASH",
-            Self::Gost => "GOST R 34.11-94",
-            Self::Haval => "HAVAL",
-            Self::Hmac => "HMAC",
-            Self::Lm => "LM",
-            Self::Md2 => "MD2",
-            Self::Md4 => "MD4",
-            Self::Md5 => "MD5",
-            Self::Md6 => "MD6",
-            Self::Mgf1 => "MGF1",
-            Self::OneAtATime => "OneAtATime",
-            Self::Pbkdf1 => "PBKDF1",
-            Self::Pbkdf2 => "PBKDF2",
-            Self::Pearson => "Pearson",
-            Self::Poly1305 => "Poly1305",
-            Self::RipeMd => "RIPEMD",
-            Self::Sha0 => "SHA-0",
-            Self::Sha1 => "SHA-1",
-            Self::Sha2 => "SHA-2",
-            Self::Sha3 => "SHA-3 (Keccak)",
-            Self::SipHash => "SipHash",
-            Self::Streebog => "Streebog",
-            Self::Tiger => "Tiger",
-        };
-        write!(f, "{}", name)
+    pub fn traits(&self) -> &JsonValue {
+        &HASHER_INFORMATION[self.to_string()]["Traits"]
     }
 }
 

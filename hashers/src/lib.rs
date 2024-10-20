@@ -29,3 +29,4 @@ pub mod sha;
 pub mod siphash;
 pub mod tiger;
 pub mod traits;
+pub mod vsh;

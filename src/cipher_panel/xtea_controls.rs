@@ -39,11 +39,11 @@ impl CipherFrame for XteaFrame {
 
         ui.horizontal(|ui| {
             ui.subheading("Key");
-            ui.random_bytes_button(&mut self.cipher.key)
+            ui.random_bytes_button(&mut self.cipher.subkeys)
         });
         ui.label("XTEA uses a 128-bit key, here controlled as four 32-bit keys.");
         for i in 0..4 {
-            ui.u32_hex_edit(&mut self.cipher.key[i]);
+            ui.u32_hex_edit(&mut self.cipher.subkeys[i]);
         }
 
         ui.add_space(8.0);
@@ -59,10 +59,10 @@ impl CipherFrame for XteaFrame {
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        self.cipher.key[0] = rng.gen();
-        self.cipher.key[1] = rng.gen();
-        self.cipher.key[2] = rng.gen();
-        self.cipher.key[3] = rng.gen();
+        self.cipher.subkeys[0] = rng.gen();
+        self.cipher.subkeys[1] = rng.gen();
+        self.cipher.subkeys[2] = rng.gen();
+        self.cipher.subkeys[3] = rng.gen();
 
         if self.cipher.mode.iv_needed() {
             self.cipher.iv = rng.gen();
