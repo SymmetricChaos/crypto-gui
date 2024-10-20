@@ -157,17 +157,23 @@ macro_rules! twofish {
                 block[0] ^= self.subkeys[6];
                 block[1] ^= self.subkeys[7];
 
+                block.swap(2, 0);
+                block.swap(3, 1);
+
                 u32s_to_bytes_le(bytes, &block);
             }
 
             fn decrypt_block(&self, bytes: &mut [u8]) {
                 let mut block = make_u32s_le::<4>(bytes);
 
+                block.swap(2, 0);
+                block.swap(3, 1);
+
                 // Input Whitening
-                block[2] ^= self.subkeys[4];
-                block[3] ^= self.subkeys[5];
                 block[0] ^= self.subkeys[6];
                 block[1] ^= self.subkeys[7];
+                block[2] ^= self.subkeys[4];
+                block[3] ^= self.subkeys[5];
 
                 for i in (0..8).rev() {
                     let k = 4 * i + 8;
@@ -175,15 +181,15 @@ macro_rules! twofish {
                     // Pseudo-Hadamard Transform is used here
                     let t1 = self.g(block[3].rotate_left(8));
                     let t0 = self.g(block[2]).wrapping_add(t1);
-                    block[0] = (block[0] ^ (t0.wrapping_add(self.subkeys[k]))).rotate_right(1);
-                    let t2 = t1.wrapping_add(t0).wrapping_add(self.subkeys[k + 1]);
-                    block[1] = block[1].rotate_left(1) ^ t2;
+                    block[0] = block[0].rotate_left(1) ^ (t0.wrapping_add(self.subkeys[k + 2]));
+                    let t2 = t1.wrapping_add(t0).wrapping_add(self.subkeys[k + 3]);
+                    block[1] = (block[1] ^ t2).rotate_right(1);
 
                     let t1 = self.g(block[1].rotate_left(8));
                     let t0 = self.g(block[0]).wrapping_add(t1);
-                    block[2] = (block[2] ^ (t0.wrapping_add(self.subkeys[k + 2]))).rotate_right(1);
-                    let t2 = t1.wrapping_add(t0).wrapping_add(self.subkeys[k + 3]);
-                    block[3] = (block[3].rotate_left(1)) ^ t2;
+                    block[2] = block[2].rotate_left(1) ^ (t0.wrapping_add(self.subkeys[k]));
+                    let t2 = t1.wrapping_add(t0).wrapping_add(self.subkeys[k + 1]);
+                    block[3] = (block[3] ^ t2).rotate_right(1);
                 }
 
                 // Output Whitening
@@ -205,8 +211,6 @@ twofish!(TwoFish256, 32);
 
 #[cfg(test)]
 mod twofish_tests {
-
-    use utils::byte_quality_check::{assert_eq_u32s, assert_eq_u8s};
 
     use super::*;
 
