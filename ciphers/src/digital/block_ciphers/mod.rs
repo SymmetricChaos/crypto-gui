@@ -10,6 +10,7 @@ pub mod gost;
 pub mod idea;
 pub mod khufu_khafre;
 pub mod lea;
+pub mod lucifer;
 pub mod present;
 pub mod rc2;
 pub mod rc5;
