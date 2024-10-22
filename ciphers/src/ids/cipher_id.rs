@@ -69,12 +69,14 @@ cipher_ids_and_names!(
     Hebern, "Hebern";
     Hutton, "Hutton";
     Idea, "IDEA";
+    Kasumi, "KASUMI";
     Khufu, "Khufu";
     Khafre, "Khafre";
     Lea, "LEA";
     Lucifer, "Lucifer";
     M94, "M-94";
     M209, "M-209";
+    Misty1, "MISTY1";
     Nihilist, "Nihilist";
     Playfair, "Playfair";
     Plugboard, "Plugboard";
@@ -104,6 +106,7 @@ cipher_ids_and_names!(
     Speck, "Speck";
     Substitution, "Substitution";
     Tea, "TEA";
+    Threefish, "Threefish";
     Trifid, "Trifid";
     TripleDes, "Triple DES";
     TurningGrille, "Turning Grille";

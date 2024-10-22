@@ -146,3 +146,57 @@ impl BlockCipher<16> for Lucifer {
 }
 
 crate::impl_cipher_for_block_cipher!(Lucifer, 16);
+
+#[cfg(test)]
+mod idea_tests {
+
+    use crate::Cipher;
+
+    use super::*;
+
+    #[test]
+    fn encrypt_decrypt() {
+        let cipher = Lucifer::default();
+        let ptext = "0123456789abcdeffedcba9876543210";
+        let ctext = cipher.encrypt(ptext).unwrap();
+        let dtext = cipher.decrypt(&ctext).unwrap();
+        assert_eq!(ptext, dtext)
+    }
+}
+
+fn ttb(s: &str) -> Vec<u8> {
+    ByteFormat::Hex.text_to_bytes(s).unwrap()
+}
+
+// https://github.com/scorpiochn/Applied-Cryptography/blob/master/lucifer-outerbridge-5.0/tests
+crate::test_block_cipher!(
+    test_1,
+    Lucifer::default().with_key(ttb("0123456789abcdeffedcba9876543210").try_into().unwrap()),
+    ttb("00000000000000000000000000000000"),
+    ttb("a201fc18d62c85ef5965a58295bbf609");
+
+    test_2,
+    Lucifer::default().with_key(ttb("00000000000000000000000000000000").try_into().unwrap()),
+    ttb("0123456789abcdeffedcba9876543210"),
+    ttb("9d14fe4377aa87dd07cc8a14522c21ed");
+
+    test_3,
+    Lucifer::default().with_key(ttb("0123456789abcdeffedcba9876543210").try_into().unwrap()),
+    ttb("ffffffffffffffffffffffffffffffff"),
+    ttb("97f1c104b0f120d194c07024f14815ed");
+
+    test_4,
+    Lucifer::default().with_key(ttb("ffffffffffffffffffffffffffffffff").try_into().unwrap()),
+    ttb("0123456789abcdeffedcba9876543210"),
+    ttb("d442a34dd70e2b4156eb0f2a8aded1a7");
+
+    test_5,
+    Lucifer::default().with_key(ttb("0123456789abcdeffedcba9876543210").try_into().unwrap()),
+    ttb("0123456789abcdeffedcba9876543210"),
+    ttb("cf46622fa98546bb9a5bc00239eb0c92");
+
+    test_6,
+    Lucifer::default().with_key(ttb("fedcba98765432100123456789abcdef").try_into().unwrap()),
+    ttb("0123456789abcdeffedcba9876543210"),
+    ttb("7faf65bfc5458fd2dc9cc2266012ef44");
+);

@@ -8,9 +8,11 @@ pub mod fealnx;
 pub mod gift;
 pub mod gost;
 pub mod idea;
+pub mod kasumi;
 pub mod khufu_khafre;
 pub mod lea;
 pub mod lucifer;
+pub mod misty1;
 pub mod present;
 pub mod rc2;
 pub mod rc5;
@@ -21,6 +23,7 @@ pub mod simon;
 pub mod sm4;
 pub mod speck;
 pub mod tea;
+pub mod threefish;
 pub mod twofish;
 
 // This Big Scary Macro is just avoiding a lot of boilerplate since all block ciphers have essentially the same

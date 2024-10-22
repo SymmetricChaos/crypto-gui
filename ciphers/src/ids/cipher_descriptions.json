@@ -564,7 +564,7 @@
       "LUCIFER"
     ],
     "Description": "Lucifer is among the most influential ciphers of the digital age. It introduced the very notion of a block cipher of the Feistel network and of substitution boxes as a method of creating nonlinearity.",
-    "Authors": "Horst Feistel, J. L. Smith, et al.",
+    "Authors": "Horst Feistel, Don Coppersmith, J. L. Smith",
     "Publication": "1971",
     "Traits": [
       "Block Cipher",
