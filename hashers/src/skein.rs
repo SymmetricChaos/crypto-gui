@@ -10,13 +10,44 @@ macro_rules! mix {
     };
 }
 
+fn four_rounds(
+    mut a: u64,
+    mut b: u64,
+    mut c: u64,
+    mut d: u64,
+    keys: [u64; 4],
+) -> (u64, u64, u64, u64) {
+    mix!(a, b, 14);
+    mix!(c, d, 16);
+    (b, d) = (d, b);
+
+    mix!(a, b, 52);
+    mix!(c, d, 57);
+    (b, d) = (d, b);
+
+    mix!(a, b, 23);
+    mix!(c, d, 40);
+    (b, d) = (d, b);
+
+    mix!(a, b, 5);
+    mix!(c, d, 37);
+    (b, d) = (d, b);
+
+    a = a.wrapping_add(keys[0]);
+    b = b.wrapping_add(keys[1]);
+    c = c.wrapping_add(keys[2]);
+    d = d.wrapping_add(keys[3]);
+
+    (a, b, c, d)
+}
+
 // The number 240 encrypted with AES with an all zero key
 const C240: u64 = 0x1BD11BDAA9FC1A22;
 
 pub struct Skein256 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    pub key: [u64; 4],
+    pub key: [u64; Self::WORDS],
     pub tweak: [u64; 2],
 }
 
@@ -25,7 +56,7 @@ impl Default for Skein256 {
         Self {
             input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
-            key: [0; 4],
+            key: [0; Self::WORDS],
             tweak: [0; 2],
         }
     }
@@ -35,101 +66,52 @@ impl Skein256 {
     const WORDS: usize = 4;
     const ROUNDS: usize = 72;
 
-    fn key(&mut self, bytes: [u8; Self::WORDS * 8]) {
+    pub fn key(&mut self, bytes: [u8; Self::WORDS * 8]) {
         fill_u64s_le(&mut self.key, &bytes);
     }
 
-    fn with_key(mut self, bytes: [u8; Self::WORDS * 8]) -> Self {
+    pub fn with_key(mut self, bytes: [u8; Self::WORDS * 8]) -> Self {
         self.key(bytes);
         self
     }
 
-    fn tweak(&mut self, bytes: [u8; 16]) {
+    pub fn tweak(&mut self, bytes: [u8; 16]) {
         fill_u64s_le(&mut self.tweak, &bytes);
     }
 
-    fn with_tweak(mut self, bytes: [u8; 16]) -> Self {
+    pub fn with_tweak(mut self, bytes: [u8; 16]) -> Self {
         self.tweak(bytes);
         self
     }
 
-    fn eight_rounds(mut a: u64, mut b: u64, mut c: u64, mut d: u64) -> (u64, u64, u64, u64) {
-        mix!(a, b, 14);
-        mix!(c, d, 16);
-        (b, d) = (d, b);
+    fn ksa(&self) -> [[u64; 4]; 19] {
+        // XOR together all the key words and the C240 constant
+        let knw = self.key.into_iter().fold(C240, |acc, w| acc ^ w);
+        let t2 = self.tweak[0] ^ self.tweak[1];
+        todo!()
+    }
 
-        mix!(a, b, 52);
-        mix!(c, d, 57);
-        (b, d) = (d, b);
+    fn encrypt_block(
+        mut a: u64,
+        mut b: u64,
+        mut c: u64,
+        mut d: u64,
+        round_keys: [[u64; 4]; 19],
+    ) -> (u64, u64, u64, u64) {
+        // First round key
+        a = a.wrapping_add(round_keys[0][0]);
+        b = b.wrapping_add(round_keys[0][1]);
+        c = c.wrapping_add(round_keys[0][2]);
+        d = d.wrapping_add(round_keys[0][3]);
 
-        mix!(a, b, 23);
-        mix!(c, d, 40);
-        (b, d) = (d, b);
-
-        mix!(a, b, 5);
-        mix!(c, d, 37);
-        (b, d) = (d, b);
-
-        mix!(a, b, 25);
-        mix!(c, d, 33);
-        (b, d) = (d, b);
-
-        mix!(a, b, 46);
-        mix!(c, d, 12);
-        (b, d) = (d, b);
-
-        mix!(a, b, 58);
-        mix!(c, d, 22);
-        (b, d) = (d, b);
-
-        mix!(a, b, 32);
-        mix!(c, d, 32);
-        (b, d) = (d, b);
+        for i in 1..19 {
+            (a, b, c, d) = four_rounds(a, b, c, d, round_keys[i]);
+        }
 
         (a, b, c, d)
     }
 
-    fn encrypt_block(mut a: u64, mut b: u64, mut c: u64, mut d: u64) -> (u64, u64, u64, u64) {
-        // TODO: ROUND KEY
-
-        // 8
-        (a, b, c, d) = Self::eight_rounds(a, b, c, d);
-        // TODO: ROUND KEY
-
-        // 16
-        (a, b, c, d) = Self::eight_rounds(a, b, c, d);
-        // TODO: ROUND KEY
-
-        // 24
-        (a, b, c, d) = Self::eight_rounds(a, b, c, d);
-        // TODO: ROUND KEY
-
-        // 32
-        (a, b, c, d) = Self::eight_rounds(a, b, c, d);
-        // TODO: ROUND KEY
-
-        // 40
-        (a, b, c, d) = Self::eight_rounds(a, b, c, d);
-        // TODO: ROUND KEY
-
-        // 48
-        (a, b, c, d) = Self::eight_rounds(a, b, c, d);
-        // TODO: ROUND KEY
-
-        // 56
-        (a, b, c, d) = Self::eight_rounds(a, b, c, d);
-        // TODO: ROUND KEY
-
-        // 64
-        (a, b, c, d) = Self::eight_rounds(a, b, c, d);
-        // TODO: ROUND KEY
-
-        // 72
-        (a, b, c, d) = Self::eight_rounds(a, b, c, d);
-        // TODO: ROUND KEY
-
-        (a, b, c, d)
-    }
+    fn ubi() {}
 }
 
 impl ClassicHasher for Skein256 {
