@@ -3,6 +3,7 @@ pub mod a52;
 pub mod alternating_step;
 pub mod blumblumshub;
 pub mod chacha;
+pub mod dual_ec_drbg;
 pub mod errors;
 pub mod geffe;
 pub mod halton;

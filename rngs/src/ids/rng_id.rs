@@ -2,33 +2,58 @@ use json::JsonValue;
 use lazy_static::lazy_static;
 use std::fmt::Display;
 
-#[derive(PartialEq, Eq, Debug, Clone, Copy)]
-pub enum RngId {
-    A51,
-    A52,
-    AlternatingStep,
-    BlumBlumShub,
-    ChaCha,
-    Geffe,
-    Halton,
-    Jsf,
-    Lcg,
-    Lfg,
-    Lfsr,
-    MersenneTwister,
-    MiddleSquare,
-    MiddleSquareBinary,
-    Pcg,
-    Rc4,
-    Salsa20,
-    SelfShrinkingGenerator,
-    ShrinkingGenerator,
-    Splitmix,
-    Vmpcr,
-    Weyl,
-    Xorshift,
-    Xoshiro,
+// Macro to make it easier to add new RNGs without writing it out three times.
+macro_rules! rng_ids_and_names {
+    ($( $id: ident, $name: expr);+ $(;)?) => {
+
+        #[derive(PartialEq, Eq, Debug, Clone, Copy)]
+        pub enum RngId {
+            $(
+                $id,
+            )+
+        }
+
+        impl Display for RngId {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                let name = match self {
+                    $(
+                        RngId::$id => $name,
+                    )+
+                };
+                write!(f, "{}", name)
+            }
+        }
+
+    }
 }
+
+rng_ids_and_names!(
+    A51, "A5/1";
+    A52, "A5/2";
+    AlternatingStep, "Alternating Step Generator";
+    BlumBlumShub, "Blum-Blum-Shub";
+    ChaCha, "ChaCha";
+    DualEcDrbg, "Dual_EC_DRBG";
+    Geffe, "Geffe";
+    Halton, "Halton";
+    Jsf, "JSF";
+    Lcg, "Linear Congruential Generator";
+    Lfg, "Lagged Fibonacci Generator";
+    Lfsr, "Linear Feedback Shift Register";
+    MersenneTwister, "Mersenne Twister";
+    MiddleSquare, "Middle Square";
+    MiddleSquareBinary, "Middle Square Binary";
+    Pcg, "Permuted Congruential Generator";
+    Rc4, "RC4";
+    Salsa20, "Salsa20";
+    SelfShrinkingGenerator, "Self Shrinking Generator";
+    ShrinkingGenerator, "Shrinking Generator";
+    Splitmix, "Splitmix64";
+    Vmpcr, "VMPC-R";
+    Weyl, "Weyl";
+    Xorshift, "Xorshift";
+    Xoshiro, "Xoshiro";
+);
 
 impl Default for RngId {
     fn default() -> Self {
@@ -51,39 +76,6 @@ impl RngId {
 
     pub fn traits(&self) -> Option<&'static str> {
         RNG_INFORMATION[self.to_string()]["Traits"].as_str()
-    }
-}
-
-impl Display for RngId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let name = match self {
-            RngId::A51 => "A5/1",
-            RngId::A52 => "A5/2",
-            RngId::AlternatingStep => "Alternating Step Generator",
-            RngId::BlumBlumShub => "Blum-Blum-Shub",
-            RngId::ChaCha => "ChaCha",
-            RngId::Geffe => "Geffe",
-            RngId::Halton => "Halton Sequence",
-            RngId::Jsf => "JSF",
-            RngId::Lcg => "Linear Congruential Generator",
-            RngId::Lfg => "Lagged Fibonacci Generator",
-            RngId::Lfsr => "Linear Feedback Shift Register",
-            RngId::MersenneTwister => "Mersenne Twister",
-            RngId::MiddleSquare => "Middle Square",
-            RngId::MiddleSquareBinary => "Middle Square Binary",
-            RngId::Pcg => "Permuted Congruential Generator",
-            RngId::Rc4 => "RC4",
-            RngId::Salsa20 => "Salsa20",
-            RngId::SelfShrinkingGenerator => "Self Shrinking Generator",
-            RngId::ShrinkingGenerator => "Shrinking Generator",
-            RngId::Splitmix => "Splitmix64",
-            RngId::Vmpcr => "VMPC-R",
-            RngId::Weyl => "Weyl Sequence",
-            RngId::Xorshift => "Xorshift",
-            RngId::Xoshiro => "Xoshiro",
-            // _ => "<<<MISSING NAME>>>",
-        };
-        write!(f, "{}", name)
     }
 }
 

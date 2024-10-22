@@ -162,7 +162,7 @@ impl RngInterface {
             RngId::Weyl => &mut self.weyl,
             RngId::Xorshift => &mut self.xorshift,
             RngId::Xoshiro => &mut self.xoshiro,
-            // _ => todo!("<<<RNG NOT FOUND>>>"),
+            _ => todo!("<<<RNG NOT FOUND>>>"),
         }
     }
 }
