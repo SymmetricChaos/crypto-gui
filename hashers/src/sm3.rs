@@ -1,10 +1,7 @@
-use utils::byte_formatting::ByteFormat;
+use itertools::Itertools;
+use utils::byte_formatting::{fill_u32s_be, ByteFormat};
 
 use crate::traits::ClassicHasher;
-
-const IV: [u32; 8] = [
-    0x7380166f, 0x4914b2b9, 0x172442d7, 0xda8a0600, 0xa96f30bc, 0x163138aa, 0xe38dee4d, 0xb0fb0e4e,
-];
 
 const TJ15: u32 = 0x79cc4519;
 const TJ63: u32 = 0x7a879d8a;
@@ -33,6 +30,26 @@ fn p1(x: u32) -> u32 {
     x ^ x.rotate_left(15) ^ x.rotate_left(23)
 }
 
+// Message expansion
+fn me(block: &[u8]) -> [u32; 132] {
+    let mut out = [0; 132];
+    fill_u32s_be(&mut out[0..16], block);
+    for j in 16..68 {
+        out[j] = p1(out[j - 16] ^ out[j - 9] ^ out[j - 3].rotate_left(15))
+            ^ out[j - 13].rotate_left(7)
+            ^ out[j - 6];
+    }
+    for j in 0..64 {
+        out[j + 68] = out[j] ^ out[j + 4];
+    }
+    out
+}
+
+// Compression function
+fn cf(state: &mut [u32; 8], e: [u32; 132]) {
+    todo!()
+}
+
 pub struct Sm3 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
@@ -55,7 +72,6 @@ impl ClassicHasher for Sm3 {
         // Length in bits before padding
         let b_len = (input.len().wrapping_mul(8)) as u64;
 
-        // Step 1.Padding
         // push a byte with a leading 1 to the bytes
         input.push(0x80);
         // push zeros until the length in bits is 448 mod 512
@@ -64,12 +80,22 @@ impl ClassicHasher for Sm3 {
             input.push(0)
         }
 
-        // Step 2. Append length
+        // append length
         for b in b_len.to_be_bytes() {
             input.push(b)
         }
 
-        todo!()
+        // Initialization Vector
+        let mut v: [u32; 8] = [
+            0x7380166f, 0x4914b2b9, 0x172442d7, 0xda8a0600, 0xa96f30bc, 0x163138aa, 0xe38dee4d,
+            0xb0fb0e4e,
+        ];
+        for block in input.chunks_exact(64) {
+            let e = me(block);
+            cf(&mut v, e);
+        }
+
+        v.iter().map(|x| x.to_be_bytes()).flatten().collect_vec()
     }
 
     crate::hash_bytes_from_string! {}
