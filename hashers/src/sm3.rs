@@ -1,10 +1,15 @@
+// https://datatracker.ietf.org/doc/html/draft-sca-cfrg-sm3
+use crate::traits::ClassicHasher;
 use itertools::Itertools;
 use utils::byte_formatting::{fill_u32s_be, ByteFormat};
 
-use crate::traits::ClassicHasher;
-
-const TJ15: u32 = 0x79cc4519;
-const TJ63: u32 = 0x7a879d8a;
+fn tj(i: usize) -> u32 {
+    if i < 16 {
+        0x79cc4519
+    } else {
+        0x7a879d8a
+    }
+}
 
 fn ff(j: usize, x: u32, y: u32, z: u32) -> u32 {
     if j < 16 {
@@ -47,7 +52,36 @@ fn me(block: &[u8]) -> [u32; 132] {
 
 // Compression function
 fn cf(state: &mut [u32; 8], e: [u32; 132]) {
-    todo!()
+    let mut s = state.clone();
+
+    for i in 0..64 {
+        let ss1 = (s[0]
+            .rotate_left(12)
+            .wrapping_add(s[4])
+            .wrapping_add(tj(i).rotate_left(i as u32 % 32)))
+        .rotate_left(7);
+        let ss2 = ss1 ^ s[0].rotate_left(12);
+        let tt1 = ff(i, s[0], s[1], s[2])
+            .wrapping_add(s[3])
+            .wrapping_add(ss2)
+            .wrapping_add(e[i + 68]);
+        let tt2 = gg(i, s[4], s[5], s[6])
+            .wrapping_add(s[7])
+            .wrapping_add(ss1)
+            .wrapping_add(e[i]);
+        s[3] = s[2];
+        s[2] = s[1].rotate_left(9);
+        s[1] = s[0];
+        s[0] = tt1;
+        s[7] = s[6];
+        s[6] = s[5].rotate_left(19);
+        s[5] = s[4];
+        s[4] = p0(tt2);
+    }
+
+    for i in 0..8 {
+        state[i] ^= s[i]
+    }
 }
 
 pub struct Sm3 {
@@ -100,3 +134,12 @@ impl ClassicHasher for Sm3 {
 
     crate::hash_bytes_from_string! {}
 }
+
+crate::basic_hash_tests!(
+    test1, Sm3::default(),
+    "abc",
+    "66c7f0f462eeedd9d1f2d46bdc10e4e24167c4875cf2f7a2297da02b8f4ba8e0";
+    test2, Sm3::default(),
+    "abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd",
+    "debe9ff92275b8a138604889c18e5a4d6fdb70e5387e5765293dcba39c0c5732";
+);
