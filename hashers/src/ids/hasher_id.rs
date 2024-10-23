@@ -2,7 +2,7 @@ use json::JsonValue;
 use lazy_static::lazy_static;
 use std::fmt::Display;
 
-// Macro to make it easier to add new hasers without writing it out three times.
+// Macro to make it easier to add new hashers without writing it out three times.
 macro_rules! hasher_ids_and_names {
     ($( $id: ident, $name: expr);+ $(;)?) => {
 
@@ -56,6 +56,8 @@ hasher_ids_and_names!(
     Sha2, "SHA-2";
     Sha3, "SHA-3 (Keccak)";
     SipHash, "SipHash";
+    Sm3, "SM3";
+    Snefru, "Snefru";
     Streebog, "Streebog";
     Tiger, "Tiger";
 );

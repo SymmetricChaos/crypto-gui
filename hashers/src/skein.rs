@@ -75,15 +75,6 @@ impl Skein256 {
         self
     }
 
-    pub fn tweak(&mut self, bytes: [u8; 16]) {
-        fill_u64s_le(&mut self.tweak, &bytes);
-    }
-
-    pub fn with_tweak(mut self, bytes: [u8; 16]) -> Self {
-        self.tweak(bytes);
-        self
-    }
-
     fn ksa(&self) -> [[u64; 4]; 19] {
         // XOR together all the key words and the C240 constant
         let knw = self.key.into_iter().fold(C240, |acc, w| acc ^ w);
@@ -104,13 +95,15 @@ impl Skein256 {
         c = c.wrapping_add(round_keys[0][2]);
         d = d.wrapping_add(round_keys[0][3]);
 
-        for i in 1..19 {
+        for i in 1..(Self::ROUNDS / 4 + 1) {
             (a, b, c, d) = four_rounds(a, b, c, d, round_keys[i]);
         }
 
         (a, b, c, d)
     }
 
+    // Unique Block Iteration
+    // Incorporates the tweak information for each block to make each block and each mode unique
     fn ubi() {}
 }
 

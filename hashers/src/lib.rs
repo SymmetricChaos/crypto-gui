@@ -28,6 +28,7 @@ pub mod ripemd;
 pub mod sha;
 pub mod siphash;
 pub mod skein;
+pub mod sm3;
 pub mod tiger;
 pub mod traits;
 pub mod vsh;
