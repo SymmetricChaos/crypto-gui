@@ -28,6 +28,7 @@ mod sha1_controls;
 mod sha2_controls;
 mod sha3_controls;
 mod siphash_controls;
+mod sm3_controls;
 mod tiger_controls;
 
 pub trait HasherFrame {
@@ -89,6 +90,7 @@ pub struct HasherInterface {
     sha1: sha1_controls::Sha1Frame,
     sha2: sha2_controls::Sha2Frame,
     sha3: sha3_controls::Sha3Frame,
+    sm3: sm3_controls::Sm3Frame,
     tiger: tiger_controls::TigerFrame,
 }
 
@@ -113,6 +115,7 @@ impl HasherInterface {
                 HasherId::RipeMd,
                 HasherId::Sha1,
                 HasherId::Sha2,
+                HasherId::Sha3,
                 HasherId::Sha3,
                 HasherId::Tiger,
             ],
@@ -159,6 +162,7 @@ impl HasherInterface {
             HasherId::Sha1 => &mut self.sha1,
             HasherId::Sha2 => &mut self.sha2,
             HasherId::Sha3 => &mut self.sha3,
+            HasherId::Sm3 => &mut self.sm3,
             HasherId::SipHash => &mut self.siphash,
             HasherId::Tiger => &mut self.tiger,
             _ => todo!("<<<NOT IMPLEMENTED>>>"),
