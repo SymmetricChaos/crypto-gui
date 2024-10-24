@@ -34,6 +34,7 @@ hasher_ids_and_names!(
     Blake, "BLAKE";
     Blake2, "BLAKE2";
     Blake3, "BLAKE3";
+    CityHash, "CityHash";
     Fnv, "FNV Hash";
     Ghash, "GHASH";
     Gost, "GOST R 34.11-94";
@@ -45,6 +46,7 @@ hasher_ids_and_names!(
     Md5, "MD5";
     Md6, "MD6";
     Mgf1, "MGF1";
+    MurmurHash, "MurmurHash";
     OneAtATime,"OneAtATime";
     Pbkdf1, "PBKDF1";
     Pbkdf2, "PBKDF2";
