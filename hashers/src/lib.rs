@@ -19,7 +19,7 @@ pub mod md4;
 pub mod md5;
 pub mod md6;
 pub mod mgf1;
-pub mod murmurhash;
+pub mod murmurhash3;
 pub mod one_at_a_time;
 pub mod pbkdf1;
 pub mod pbkdf2;

@@ -1,8 +1,7 @@
 use crate::traits::ClassicHasher;
 use utils::byte_formatting::ByteFormat;
 
-// Final mix of the state
-fn fmix(mut x: u32) -> u32 {
+fn final_mix(mut x: u32) -> u32 {
     x ^= x >> 16;
     x = x.wrapping_mul(0x85ebca6b);
     x ^= x >> 13;
@@ -11,11 +10,16 @@ fn fmix(mut x: u32) -> u32 {
     x
 }
 
-// Mixing of the block
-fn bmix(mut x: u32) -> u32 {
+fn block_mix(mut x: u32) -> u32 {
     x = x.wrapping_mul(0xcc9e2d51);
     x = x.rotate_left(15);
     x = x.wrapping_mul(0x1b873593);
+    x
+}
+
+fn state_mix(mut x: u32) -> u32 {
+    x = x.rotate_left(13);
+    x = x.wrapping_mul(5).wrapping_add(0xe6546b64);
     x
 }
 
@@ -62,9 +66,8 @@ impl ClassicHasher for Murmur3_32 {
         // For each full chunk mix it into the state and then mix the state
         for block in chunks {
             let k = u32::from_le_bytes(block.try_into().unwrap());
-            state ^= bmix(k);
-            state = state.rotate_left(13);
-            state = state.wrapping_mul(5).wrapping_add(0xe6546b64);
+            state ^= block_mix(k);
+            state = state_mix(state);
         }
         // Load any bytes in the remainder and mix them
         let mut final_block = 0_u32;
@@ -72,12 +75,12 @@ impl ClassicHasher for Murmur3_32 {
             final_block = final_block << 8;
             final_block |= *byte as u32;
         }
-        state ^= bmix(final_block);
+        state ^= block_mix(final_block);
 
         // XOR in the length in bytes
         state ^= bytes.len() as u32;
-        // Final mix
-        state = fmix(state);
+
+        state = final_mix(state);
         state.to_be_bytes().to_vec()
     }
 
