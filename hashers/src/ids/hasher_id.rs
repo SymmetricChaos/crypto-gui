@@ -46,7 +46,7 @@ hasher_ids_and_names!(
     Md5, "MD5";
     Md6, "MD6";
     Mgf1, "MGF1";
-    MurmurHash, "MurmurHash";
+    MurmurHash3, "MurmurHash3";
     OneAtATime,"OneAtATime";
     Pbkdf1, "PBKDF1";
     Pbkdf2, "PBKDF2";
