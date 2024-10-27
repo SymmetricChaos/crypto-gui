@@ -17,6 +17,7 @@ mod md2_controls;
 mod md4_controls;
 mod md5_controls;
 mod mgf1_controls;
+mod murmur3_controls;
 mod one_at_a_time_controls;
 mod pbkdf1_controls;
 mod pbkdf2_controls;
@@ -81,6 +82,7 @@ pub struct HasherInterface {
     md4: md4_controls::Md4Frame,
     md5: md5_controls::Md5Frame,
     mgf1: mgf1_controls::Mgf1Frame,
+    murmur3: murmur3_controls::Murmur3Frame,
     one_at_a_time: one_at_a_time_controls::OaatFrame,
     pbkdf1: pbkdf1_controls::Pbkdf1Frame,
     pbkdf2: pbkdf2_controls::Pbkdf2Frame,
@@ -116,7 +118,7 @@ impl HasherInterface {
                 HasherId::Sha1,
                 HasherId::Sha2,
                 HasherId::Sha3,
-                HasherId::Sha3,
+                HasherId::Sm3,
                 HasherId::Tiger,
             ],
             active_hasher,
@@ -128,6 +130,7 @@ impl HasherInterface {
             &[
                 HasherId::Fnv,
                 HasherId::Lm,
+                HasherId::MurmurHash3,
                 HasherId::OneAtATime,
                 HasherId::Pearson,
                 HasherId::SipHash,
@@ -154,6 +157,7 @@ impl HasherInterface {
             HasherId::Md4 => &mut self.md4,
             HasherId::Md5 => &mut self.md5,
             HasherId::Mgf1 => &mut self.mgf1,
+            HasherId::MurmurHash3 => &mut self.murmur3,
             HasherId::OneAtATime => &mut self.one_at_a_time,
             HasherId::Pbkdf1 => &mut self.pbkdf1,
             HasherId::Pbkdf2 => &mut self.pbkdf2,
