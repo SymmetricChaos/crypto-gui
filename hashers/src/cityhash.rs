@@ -26,10 +26,10 @@ fn final_mix(mut x: u32) -> u32 {
 
 fn compress(mut x: u32, mut y: u32) -> u32 {
     x = x.wrapping_mul(C0);
-    x = x.rotate_left(17);
+    x = x.rotate_right(17);
     x = x.wrapping_mul(C1);
     y ^= x;
-    y = y.rotate_left(19);
+    y = y.rotate_right(19);
     y.wrapping_mul(5).wrapping_add(C2)
 }
 
@@ -82,66 +82,66 @@ fn hash32_25(bytes: &[u8]) -> u32 {
     let mut f = g;
     let a0 = fetch_u32(bytes, l - 4)
         .wrapping_mul(C0)
-        .rotate_left(17)
+        .rotate_right(17)
         .wrapping_mul(C1);
     let a1 = fetch_u32(bytes, l - 8)
         .wrapping_mul(C0)
-        .rotate_left(17)
+        .rotate_right(17)
         .wrapping_mul(C1);
     let a2 = fetch_u32(bytes, l - 16)
         .wrapping_mul(C0)
-        .rotate_left(17)
+        .rotate_right(17)
         .wrapping_mul(C1);
     let a3 = fetch_u32(bytes, l - 12)
         .wrapping_mul(C0)
-        .rotate_left(17)
+        .rotate_right(17)
         .wrapping_mul(C1);
     let a4 = fetch_u32(bytes, l - 20)
         .wrapping_mul(C0)
-        .rotate_left(17)
+        .rotate_right(17)
         .wrapping_mul(C1);
     h ^= a0;
-    h = h.rotate_left(19).wrapping_mul(5).wrapping_add(C2);
+    h = h.rotate_right(19).wrapping_mul(5).wrapping_add(C2);
     h ^= a2;
-    h = h.rotate_left(19).wrapping_mul(5).wrapping_add(C2);
+    h = h.rotate_right(19).wrapping_mul(5).wrapping_add(C2);
     g ^= a1;
-    g = g.rotate_left(19).wrapping_mul(5).wrapping_add(C2);
+    g = g.rotate_right(19).wrapping_mul(5).wrapping_add(C2);
     g ^= a3;
-    g = g.rotate_left(19).wrapping_mul(5).wrapping_add(C2);
+    g = g.rotate_right(19).wrapping_mul(5).wrapping_add(C2);
     f ^= a4;
-    f = f.rotate_left(19).wrapping_mul(5).wrapping_add(C2);
+    f = f.rotate_right(19).wrapping_mul(5).wrapping_add(C2);
 
     let mut offset = 0;
 
     for _ in 0..((l - 1) / 20) {
         let a0 = fetch_u32(bytes, offset)
             .wrapping_mul(C0)
-            .rotate_left(17)
+            .rotate_right(17)
             .wrapping_mul(C1);
         let a1 = fetch_u32(bytes, offset + 4);
         let a2 = fetch_u32(bytes, 8)
             .wrapping_mul(C0)
-            .rotate_left(17)
+            .rotate_right(17)
             .wrapping_mul(C1);
         let a3 = fetch_u32(bytes, offset + 12)
             .wrapping_mul(C0)
-            .rotate_left(17)
+            .rotate_right(17)
             .wrapping_mul(C1);
         let a4 = fetch_u32(bytes, offset + 16);
 
         h ^= a0;
-        h = h.rotate_left(18).wrapping_mul(5).wrapping_add(C2);
+        h = h.rotate_right(18).wrapping_mul(5).wrapping_add(C2);
 
-        f = f.wrapping_add(a1).rotate_left(19).wrapping_mul(C0);
+        f = f.wrapping_add(a1).rotate_right(19).wrapping_mul(C0);
 
         g = g
             .wrapping_add(a2)
-            .rotate_left(18)
+            .rotate_right(18)
             .wrapping_mul(5)
             .wrapping_add(C2);
 
         h ^= a3.wrapping_add(a1);
-        h = h.rotate_left(19).wrapping_mul(5).wrapping_add(C2);
+        h = h.rotate_right(19).wrapping_mul(5).wrapping_add(C2);
 
         g ^= a4;
         g = g.swap_bytes().wrapping_mul(5);
@@ -158,27 +158,27 @@ fn hash32_25(bytes: &[u8]) -> u32 {
     }
 
     g = g
-        .rotate_left(11)
+        .rotate_right(11)
         .wrapping_mul(C0)
-        .rotate_left(17)
+        .rotate_right(17)
         .wrapping_mul(C0);
     f = f
-        .rotate_left(11)
+        .rotate_right(11)
         .wrapping_mul(C0)
-        .rotate_left(17)
+        .rotate_right(17)
         .wrapping_mul(C0);
 
     h.wrapping_add(g)
-        .rotate_left(19)
+        .rotate_right(19)
         .wrapping_mul(5)
         .wrapping_add(C2)
-        .rotate_left(17)
+        .rotate_right(17)
         .wrapping_mul(C0)
         .wrapping_add(f)
-        .rotate_left(19)
+        .rotate_right(19)
         .wrapping_mul(5)
         .wrapping_add(C2)
-        .rotate_left(17)
+        .rotate_right(17)
         .wrapping_mul(C0)
 }
 
@@ -210,7 +210,7 @@ impl ClassicHasher for CityHash32 {
 }
 
 #[cfg(test)]
-mod ghash_tests {
+mod cityhash_tests {
     use super::*;
 
     #[test]
@@ -230,3 +230,7 @@ mod ghash_tests {
         }
     }
 }
+
+crate::basic_hash_tests!(
+    test1, CityHash32::default(), "", "dc56d17a";
+);
