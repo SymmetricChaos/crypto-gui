@@ -3,6 +3,7 @@ mod cityhash_tests {
     use super::super::*;
     use crate::traits::ClassicHasher;
     use cityhash32::CityHash32;
+    use cityhash64::CityHash64;
     use utils::byte_formatting::ByteFormat;
 
     const P0: u64 = 0xc3a5c85c97cb3127;
@@ -25,7 +26,25 @@ mod cityhash_tests {
         // be, b4, ae, 38, ee, e8, 84, 54, 99, 9e, c6, 63, f0, c3, 37, 6d,
         // c3, f8, 59, f1, 67, 27, 4d, c2, 15, 4f, 80, 19, ed, 8c, cd, d1
 
-        let hasher32 = CityHash32::default().input(ByteFormat::Hex);
+        // let hasher32 = CityHash32::default().input(ByteFormat::Hex);
+
+        // for i in 0..300 {
+        //     let s = i * i;
+        //     let e = s + i;
+        //     let input = &data[s..e];
+        //     // Sequence of test inputs begins
+        //     // [empty], e4, 3be7, aab0ce, 3b30a72c, 64fcf28f05
+        //     let output_word = u32::from_be_bytes(hasher32.hash(input).try_into().unwrap());
+        //     if output_word != TEST_DATA[i].15 {
+        //         let err = format!(
+        //             "first failure occured at\ninput #{i}: {:02x?}\nlen:{}\noutput:  {:08x}\ncorrect: {:08x}",
+        //             input, input.len(), output_word, TEST_DATA[i].15
+        //         );
+        //         panic!("{}", err)
+        //     }
+        // }
+
+        let hasher64 = CityHash64::default().input(ByteFormat::Hex);
 
         for i in 0..300 {
             let s = i * i;
@@ -33,11 +52,11 @@ mod cityhash_tests {
             let input = &data[s..e];
             // Sequence of test inputs begins
             // [empty], e4, 3be7, aab0ce, 3b30a72c, 64fcf28f05
-            let output_word = u32::from_be_bytes(hasher32.hash(input).try_into().unwrap());
-            if output_word != TEST_DATA[i].15 {
+            let output_word = u64::from_be_bytes(hasher64.hash(input).try_into().unwrap());
+            if output_word != TEST_DATA[i].0 {
                 let err = format!(
                     "first failure occured at\ninput #{i}: {:02x?}\nlen:{}\noutput:  {:08x}\ncorrect: {:08x}",
-                    input, input.len(), output_word, TEST_DATA[i].15
+                    input, input.len(), output_word, TEST_DATA[i].0
                 );
                 panic!("{}", err)
             }

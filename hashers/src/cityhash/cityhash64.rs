@@ -2,6 +2,7 @@
 
 use std::ops::BitXor;
 use crate::traits::ClassicHasher;
+use num::Integer;
 use utils::byte_formatting::ByteFormat;
 
 // 64-bit primes
@@ -16,6 +17,10 @@ fn fetch_u32(bytes: &[u8], p: usize) -> u32 {
 
 fn fetch_u64(bytes: &[u8], p: usize) -> u64 {
     u64::from_le_bytes(bytes[p..p + 8].try_into().unwrap())
+}
+
+fn shift_mix(a: u64) -> u64 {
+    a ^ (a >> 47)
 }
 
 fn hash64_0_to_16(bytes: &[u8]) -> u64 {
@@ -62,7 +67,7 @@ fn hash64_17_to_32(bytes: &[u8]) -> u64 {
 
 fn hash64_33_to_64(bytes: &[u8]) -> u64 {
     let l = bytes.len();
-    let mul= P2.wrapping_mul((l as u64)*2);
+    let mul= P2.wrapping_add((l as u64)*2);
     let mut a = fetch_u64(bytes, 0).wrapping_mul(P2);
     let mut b = fetch_u64(bytes, 8);
     let c = fetch_u64(bytes, l-24);
@@ -71,13 +76,13 @@ fn hash64_33_to_64(bytes: &[u8]) -> u64 {
     let f = fetch_u64(bytes, 24).wrapping_mul(9);
     let g = fetch_u64(bytes, l-8);
     let h = fetch_u64(bytes, l-16).wrapping_mul(mul);
-    let u = a.wrapping_add(g).rotate_right(42).wrapping_add(b.rotate_right(30).wrapping_add(c).wrapping_mul(9));
+    let u = a.wrapping_add(g).rotate_right(43).wrapping_add(b.rotate_right(30).wrapping_add(c).wrapping_mul(9));
     let v = a.wrapping_add(g).bitxor(d).wrapping_add(f).wrapping_add(1);
     let w = u.wrapping_add(v).wrapping_mul(mul).swap_bytes().wrapping_add(h);
     let x = e.wrapping_add(f).rotate_right(42).wrapping_add(c);
     let y = v.wrapping_add(w).wrapping_mul(mul).swap_bytes().wrapping_add(g).wrapping_mul(mul);
     let z = e.wrapping_add(f).wrapping_add(c);
-    a = x.wrapping_add(z).wrapping_mul(y).swap_bytes().wrapping_add(b);
+    a = x.wrapping_add(z).wrapping_mul(mul).wrapping_add(y).swap_bytes().wrapping_add(b);
     b = shift_mix(z.wrapping_add(a).wrapping_mul(mul).wrapping_add(d).wrapping_add(h)).wrapping_mul(mul);
     b.wrapping_add(x)
 }
@@ -113,9 +118,7 @@ fn weak_hash_32_with_seeds(bytes: &[u8], mut a: u64, mut b: u64) -> (u64, u64) {
     (a.wrapping_add(z), b.wrapping_add(c))
 }
 
-fn shift_mix(a: u64) -> u64 {
-    a ^ (a >> 47)
-}
+
 
 fn hash64_65(bytes: &[u8]) -> u64 {
     let l = bytes.len();
@@ -130,9 +133,12 @@ fn hash64_65(bytes: &[u8]) -> u64 {
     let (mut v1, mut v2) = weak_hash_32_with_seeds(&bytes[l - 64..], l as u64, z);
     let (mut w1, mut w2) = weak_hash_32_with_seeds(&bytes[l - 32..], y.wrapping_add(P1), x);
 
-    x = x.wrapping_add(P1).wrapping_add(fetch_u64(bytes, 0));
+    x = x.wrapping_mul(P1).wrapping_add(fetch_u64(bytes, 0));
 
-    for block in bytes.chunks_exact(64) {
+    let mut n = l.prev_multiple_of(&64);
+    let mut offset = 0;
+    loop {
+        let block = &bytes[offset..];
         x = x
             .wrapping_add(y)
             .wrapping_add(v1)
@@ -159,6 +165,11 @@ fn hash64_65(bytes: &[u8]) -> u64 {
         );
 
         (z, x) = (x, z);
+        n -= 64;
+        offset += 64;
+        if n == 0 {
+            break
+        }
     }
 
     hash64_16(
