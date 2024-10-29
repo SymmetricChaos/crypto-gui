@@ -1,6 +1,9 @@
-use utils::byte_formatting::ByteFormat;
+// based on: https://github.com/creachadair/cityhash/blob/v0.1.1/cityhash.go
+
+use std::ops::BitXor;
 
 use crate::traits::ClassicHasher;
+use utils::byte_formatting::ByteFormat;
 
 // 64-bit primes
 const P0: u64 = 0xc3a5c85c97cb3127;
@@ -77,9 +80,11 @@ fn hash32_13_to_24(bytes: &[u8]) -> u32 {
 
 fn hash32_25(bytes: &[u8]) -> u32 {
     let l = bytes.len();
+
     let mut h = l as u32;
     let mut g = C0.wrapping_mul(h);
     let mut f = g;
+
     let a0 = fetch_u32(bytes, l - 4)
         .wrapping_mul(C0)
         .rotate_right(17)
@@ -100,16 +105,32 @@ fn hash32_25(bytes: &[u8]) -> u32 {
         .wrapping_mul(C0)
         .rotate_right(17)
         .wrapping_mul(C1);
-    h ^= a0;
-    h = h.rotate_right(19).wrapping_mul(5).wrapping_add(C2);
-    h ^= a2;
-    h = h.rotate_right(19).wrapping_mul(5).wrapping_add(C2);
-    g ^= a1;
-    g = g.rotate_right(19).wrapping_mul(5).wrapping_add(C2);
-    g ^= a3;
-    g = g.rotate_right(19).wrapping_mul(5).wrapping_add(C2);
-    f ^= a4;
-    f = f.rotate_right(19).wrapping_mul(5).wrapping_add(C2);
+
+    h = h
+        .bitxor(a0)
+        .rotate_right(19)
+        .wrapping_mul(5)
+        .wrapping_add(C2);
+    h = h
+        .bitxor(a2)
+        .rotate_right(19)
+        .wrapping_mul(5)
+        .wrapping_add(C2);
+    g = g
+        .bitxor(a1)
+        .rotate_right(19)
+        .wrapping_mul(5)
+        .wrapping_add(C2);
+    g = g
+        .bitxor(a3)
+        .rotate_right(19)
+        .wrapping_mul(5)
+        .wrapping_add(C2);
+    f = f
+        .wrapping_add(a4)
+        .rotate_right(19)
+        .wrapping_mul(5)
+        .wrapping_add(C2);
 
     let mut offset = 0;
 
@@ -119,7 +140,7 @@ fn hash32_25(bytes: &[u8]) -> u32 {
             .rotate_right(17)
             .wrapping_mul(C1);
         let a1 = fetch_u32(bytes, offset + 4);
-        let a2 = fetch_u32(bytes, 8)
+        let a2 = fetch_u32(bytes, offset + 8)
             .wrapping_mul(C0)
             .rotate_right(17)
             .wrapping_mul(C1);
@@ -129,8 +150,11 @@ fn hash32_25(bytes: &[u8]) -> u32 {
             .wrapping_mul(C1);
         let a4 = fetch_u32(bytes, offset + 16);
 
-        h ^= a0;
-        h = h.rotate_right(18).wrapping_mul(5).wrapping_add(C2);
+        h = h
+            .bitxor(a0)
+            .rotate_right(18)
+            .wrapping_mul(5)
+            .wrapping_add(C2);
 
         f = f.wrapping_add(a1).rotate_right(19).wrapping_mul(C0);
 
@@ -143,16 +167,13 @@ fn hash32_25(bytes: &[u8]) -> u32 {
         h ^= a3.wrapping_add(a1);
         h = h.rotate_right(19).wrapping_mul(5).wrapping_add(C2);
 
-        g ^= a4;
-        g = g.swap_bytes().wrapping_mul(5);
+        g = g.bitxor(a4).swap_bytes().wrapping_mul(5);
 
-        h = h.wrapping_add(a4.wrapping_mul(5));
-        h = h.swap_bytes();
+        h = h.wrapping_add(a4.wrapping_mul(5)).swap_bytes();
 
         f = f.wrapping_add(a0);
 
-        std::mem::swap(&mut f, &mut h);
-        std::mem::swap(&mut f, &mut g);
+        (f, g, h) = (g, h, f);
 
         offset += 20
     }
