@@ -1,34 +1,101 @@
 // based on: https://github.com/creachadair/cityhash/blob/v0.1.1/cityhash.go
 
 use std::ops::BitXor;
-
 use crate::traits::ClassicHasher;
-use num::Integer;
 use utils::byte_formatting::ByteFormat;
 
 // 64-bit primes
 const P0: u64 = 0xc3a5c85c97cb3127;
 const P1: u64 = 0xb492b66fbe98f273;
 const P2: u64 = 0x9ae16a3b2f90404f;
+const P3: u64 = 0x9ddfea08eb382d69;
+
+fn fetch_u32(bytes: &[u8], p: usize) -> u32 {
+    u32::from_le_bytes(bytes[p..p + 4].try_into().unwrap())
+}
 
 fn fetch_u64(bytes: &[u8], p: usize) -> u64 {
     u64::from_le_bytes(bytes[p..p + 8].try_into().unwrap())
 }
 
 fn hash64_0_to_16(bytes: &[u8]) -> u64 {
-    todo!()
+    let l = bytes.len();
+    match l {
+        0 => P2,
+        1..=3 => {
+            let a = bytes[0] as u32;
+            let b = bytes[l>>1] as u32;
+            let c = bytes[l-1] as u32;
+            let y = a.wrapping_add(b << 8) as u64;
+            let z = (l as u32).wrapping_add(c << 2) as u64;
+            shift_mix(y.wrapping_mul(P2) ^ z.wrapping_mul(P0)).wrapping_mul(P2)
+        }
+        4..=7 => {
+            let mul = P2.wrapping_add((l as u64)*2); // no change that l will overflow so no point in wrapping mul, but should make no difference
+            let a = fetch_u32(bytes, 0) as u64;
+            let u = (l as u64).wrapping_add(a << 3);
+            let v = fetch_u32(bytes, l-4) as u64;
+            hash64_16_mul(u, v, mul)
+        },
+        _ => {
+            let mul = P2.wrapping_add((l as u64)*2);
+            let a = fetch_u64(bytes, 0).wrapping_add(P2);
+            let b = fetch_u64(bytes, l-8);
+            let u = b.rotate_right(37).wrapping_mul(mul).wrapping_add(a);
+            let v = a.rotate_right(25).wrapping_add(b).wrapping_mul(mul);
+            hash64_16_mul(u, v, mul)
+        }
+    }
 }
 
 fn hash64_17_to_32(bytes: &[u8]) -> u64 {
-    todo!()
+    let l = bytes.len();
+    let mul = P2.wrapping_add((l as u64)*2);
+    let a = fetch_u64(bytes, 0).wrapping_mul(P1);
+    let b = fetch_u64(bytes, 8);
+    let c = fetch_u64(bytes, l-8).wrapping_mul(mul);
+    let d = fetch_u64(bytes, l-16).wrapping_mul(P2);
+    let u = a.wrapping_add(b).rotate_right(43).wrapping_add(c.rotate_right(30)).wrapping_add(d);
+    let v = a.wrapping_add(b.wrapping_add(P2).rotate_right(18)).wrapping_add(c);
+    hash64_16_mul(u, v, mul)
 }
 
 fn hash64_33_to_64(bytes: &[u8]) -> u64 {
-    todo!()
+    let l = bytes.len();
+    let mul= P2.wrapping_mul((l as u64)*2);
+    let mut a = fetch_u64(bytes, 0).wrapping_mul(P2);
+    let mut b = fetch_u64(bytes, 8);
+    let c = fetch_u64(bytes, l-24);
+    let d = fetch_u64(bytes, l-32);
+    let e = fetch_u64(bytes, 16).wrapping_mul(P2);
+    let f = fetch_u64(bytes, 24).wrapping_mul(9);
+    let g = fetch_u64(bytes, l-8);
+    let h = fetch_u64(bytes, l-16).wrapping_mul(mul);
+    let u = a.wrapping_add(g).rotate_right(42).wrapping_add(b.rotate_right(30).wrapping_add(c).wrapping_mul(9));
+    let v = a.wrapping_add(g).bitxor(d).wrapping_add(f).wrapping_add(1);
+    let w = u.wrapping_add(v).wrapping_mul(mul).swap_bytes().wrapping_add(h);
+    let x = e.wrapping_add(f).rotate_right(42).wrapping_add(c);
+    let y = v.wrapping_add(w).wrapping_mul(mul).swap_bytes().wrapping_add(g).wrapping_mul(mul);
+    let z = e.wrapping_add(f).wrapping_add(c);
+    a = x.wrapping_add(z).wrapping_mul(y).swap_bytes().wrapping_add(b);
+    b = shift_mix(z.wrapping_add(a).wrapping_mul(mul).wrapping_add(d).wrapping_add(h)).wrapping_mul(mul);
+    b.wrapping_add(x)
 }
 
-fn hash64_16(a: u64, b: u64) -> u64 {
-    todo!()
+fn hash64_16_mul(u: u64, v: u64, mul: u64) -> u64 {
+    let mut a = (u ^ v).wrapping_mul(mul);
+    a ^= a >> 47;
+    let mut b = (v ^ a).wrapping_mul(mul);
+    b ^= b >> 47;
+    b.wrapping_mul(mul)
+}
+
+// TODO: assure that x_high and x_low are the high and low bits of a u128
+fn hash64_16(x_high: u64, x_low: u64) -> u64 {
+    let mut a = x_high.bitxor(x_low).wrapping_mul(P3); 
+    a ^= a >> 47;
+    let b = x_high.bitxor(a).wrapping_mul(P3);
+    b.bitxor(b >> 47).wrapping_mul(P3)
 }
 
 fn weak_hash_32_with_seeds(bytes: &[u8], mut a: u64, mut b: u64) -> (u64, u64) {
@@ -41,7 +108,7 @@ fn weak_hash_32_with_seeds(bytes: &[u8], mut a: u64, mut b: u64) -> (u64, u64) {
     b = b.wrapping_add(a).wrapping_add(z).rotate_right(21);
     let c = a;
     a = a.wrapping_add(x).wrapping_add(y);
-    b = a.rotate_right(44);
+    b = b.wrapping_add(a.rotate_right(44));
 
     (a.wrapping_add(z), b.wrapping_add(c))
 }
