@@ -33,7 +33,7 @@ macro_rules! basic_hash_tests {
         )+
         }
     };
-    // Optional variant with module name for seperation
+    // Optional variant with module name for separation
     (($mod_name: ident)?; $($name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
         #[cfg(test)]
         mod $mod_name {

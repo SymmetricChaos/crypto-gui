@@ -41,8 +41,9 @@ fn hash32_0_to_4(bytes: &[u8]) -> u32 {
     let l = bytes.len() as u32;
     let mut b: u32 = 0;
     let mut c: u32 = 9;
+    dbg!(bytes);
     for byte in bytes {
-        b = b.wrapping_mul(C0).wrapping_add(*byte as u32);
+        b = b.wrapping_mul(C0).wrapping_add(*byte as i8 as u32); // yes really, conversion to i8 then to u32 is the intended transformation
         c ^= b;
     }
     final_mix(compress(b, compress(l, c)))
@@ -196,14 +197,28 @@ impl Default for CityHash32 {
     }
 }
 
+impl CityHash32 {
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+}
+
 impl ClassicHasher for CityHash32 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         match bytes.len() {
-            0..=4 => hash32_0_to_4(bytes).to_le_bytes().to_vec(),
-            5..=12 => hash32_5_to_12(bytes).to_le_bytes().to_vec(),
-            13..=24 => hash32_13_to_24(bytes).to_le_bytes().to_vec(),
-            _ => hash32_25(bytes).to_le_bytes().to_vec(),
+            0..=4 => hash32_0_to_4(bytes),
+            5..=12 => hash32_5_to_12(bytes),
+            13..=24 => hash32_13_to_24(bytes),
+            _ => hash32_25(bytes),
         }
+        .to_be_bytes()
+        .to_vec()
     }
 
     crate::hash_bytes_from_string! {}
@@ -229,8 +244,41 @@ mod cityhash_tests {
             v.push(i);
         }
     }
+
+    #[test]
+    fn generate_test_inputs() {
+        const N: usize = 1 << 12;
+        let mut data = [0_u8; N];
+        let mut a: u64 = 9;
+        let mut b: u64 = 777;
+        for i in 0..N {
+            a = a.wrapping_add(b);
+            b = b.wrapping_add(a);
+            a = (a ^ (a >> 41)).wrapping_mul(P0);
+            b = (b ^ (b >> 41)).wrapping_mul(P0).wrapping_add(i as u64);
+            data[i] = (b >> 37) as u8;
+        }
+        // Confirmed from a REPL that this matches the goland data
+        // println!("{:02x?}", data);
+        // Again confirmed from a REPL that this matches the goland data
+        for i in 0..60 {
+            let s = i * i;
+            let e = s + i;
+            let mut st = String::new();
+            for byte in &data[s..e] {
+                st.push_str(&format!("{:02x}", byte));
+            }
+            println!("{st}");
+        }
+        // 6a, e4, 4a, 82, 3b, e7, aa, 66, 42, aa, b0, ce, 6a, 47, ea, 25,
+        // 3b, 30, a7, 2c, 53, d8, 1f, c5, a8, 64, fc, f2, 8f, 05, 91, 42,
+        // be, b4, ae, 38, ee, e8, 84, 54, 99, 9e, c6, 63, f0, c3, 37, 6d,
+        // c3, f8, 59, f1, 67, 27, 4d, c2, 15, 4f, 80, 19, ed, 8c, cd, d1
+    }
 }
 
 crate::basic_hash_tests!(
-    test1, CityHash32::default(), "", "dc56d17a";
+    test1, CityHash32::default().input(ByteFormat::Hex), "", "dc56d17a";
+    test2, CityHash32::default().input(ByteFormat::Hex), "e4", "99929334";
+    test3, CityHash32::default().input(ByteFormat::Hex), "3be7", "4252edb7";
 );
