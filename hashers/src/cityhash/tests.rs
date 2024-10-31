@@ -2,11 +2,10 @@
 mod cityhash_tests {
     use super::super::*;
     use crate::traits::ClassicHasher;
-    use cityhash32::CityHash32;
-    use cityhash64::CityHash64;
-    use utils::byte_formatting::ByteFormat;
 
-    const P0: u64 = 0xc3a5c85c97cb3127;
+    use helpers::P0;
+    use utils::byte_formatting::{make_u64s_be, ByteFormat};
+
     #[test]
     fn test_inputs() {
         const N: usize = 1 << 20;
@@ -26,8 +25,11 @@ mod cityhash_tests {
         // be, b4, ae, 38, ee, e8, 84, 54, 99, 9e, c6, 63, f0, c3, 37, 6d,
         // c3, f8, 59, f1, 67, 27, 4d, c2, 15, 4f, 80, 19, ed, 8c, cd, d1
 
-        // let hasher32 = CityHash32::default().input(ByteFormat::Hex);
+        // Sequence of test inputs begins
+        // [empty], e4, 3be7, aab0ce, 3b30a72c, 64fcf28f05
 
+        // use cityhash32::CityHash32;
+        // let hasher32 = CityHash32::default();
         // for i in 0..300 {
         //     let s = i * i;
         //     let e = s + i;
@@ -44,19 +46,65 @@ mod cityhash_tests {
         //     }
         // }
 
-        let hasher64 = CityHash64::default().input(ByteFormat::Hex);
+        // use cityhash64::CityHash64;
+        // let hasher64 = CityHash64::default();
+        // for i in 0..300 {
+        //     let s = i * i;
+        //     let e = s + i;
+        //     let input = &data[s..e];
+        //     let output_word = u64::from_be_bytes(hasher64.hash(input).try_into().unwrap());
+        //     if output_word != TEST_DATA[i].0 {
+        //         let err = format!(
+        //             "first failure occured at\ninput #{i}: {:02x?}\nlen:{}\noutput:  {:08x}\ncorrect: {:08x}",
+        //             input, input.len(), output_word, TEST_DATA[i].0
+        //         );
+        //         panic!("{}", err)
+        //     }
+        // }
 
+        // let hasher64 = CityHash64::default()
+        //     .with_seed(1234567);
+        // for i in 0..300 {
+        //     let s = i * i;
+        //     let e = s + i;
+        //     let input = &data[s..e];
+        //     let output_word = u64::from_be_bytes(hasher64.hash(input).try_into().unwrap());
+        //     if output_word != TEST_DATA[i].1 {
+        //         let err = format!(
+        //             "first failure occured at\ninput #{i}: {:02x?}\nlen:{}\noutput:  {:08x}\ncorrect: {:08x}",
+        //             input, input.len(), output_word, TEST_DATA[i].2
+        //         );
+        //         panic!("{}", err)
+        //     }
+        // }
+
+        // let hasher64 = CityHash64::default()
+        //     .with_seeds(1234567, P0);
+        // for i in 0..300 {
+        //     let s = i * i;
+        //     let e = s + i;
+        //     let input = &data[s..e];
+        //     let output_word = u64::from_be_bytes(hasher64.hash(input).try_into().unwrap());
+        //     if output_word != TEST_DATA[i].2 {
+        //         let err = format!(
+        //             "first failure occured at\ninput #{i}: {:02x?}\nlen:{}\noutput:  {:08x}\ncorrect: {:08x}",
+        //             input, input.len(), output_word, TEST_DATA[i].2
+        //         );
+        //         panic!("{}", err)
+        //     }
+        // }
+
+        use cityhash128::CityHash128;
+        let hasher128 = CityHash128::default();
         for i in 0..300 {
             let s = i * i;
             let e = s + i;
             let input = &data[s..e];
-            // Sequence of test inputs begins
-            // [empty], e4, 3be7, aab0ce, 3b30a72c, 64fcf28f05
-            let output_word = u64::from_be_bytes(hasher64.hash(input).try_into().unwrap());
-            if output_word != TEST_DATA[i].0 {
+            let output_word = make_u64s_be::<2>(&hasher128.hash(input));
+            if output_word != [TEST_DATA[i].3, TEST_DATA[i].4] {
                 let err = format!(
-                    "first failure occured at\ninput #{i}: {:02x?}\nlen:{}\noutput:  {:08x}\ncorrect: {:08x}",
-                    input, input.len(), output_word, TEST_DATA[i].0
+                    "first failure occured at\ninput #{i}: {:02x?}\nlen:{}\noutput:  {:08x?} {:08x?}\ncorrect: {:08x?} {:08x?}",
+                    input, input.len(), output_word[0], output_word[1], TEST_DATA[i].3, TEST_DATA[i].4
                 );
                 panic!("{}", err)
             }
