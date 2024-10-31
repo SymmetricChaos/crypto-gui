@@ -40,7 +40,7 @@ fn hash64_0_to_16(bytes: &[u8]) -> u64 {
             let a = fetch_u32(bytes, 0) as u64;
             let u = (l as u64).wrapping_add(a << 3);
             let v = fetch_u32(bytes, l - 4) as u64;
-            hash64_16_mul(u, v, mul)
+            hash128_64_mul(u, v, mul)
         }
         _ => {
             let mul = P2.wrapping_add((l as u64) * 2);
@@ -48,7 +48,7 @@ fn hash64_0_to_16(bytes: &[u8]) -> u64 {
             let b = fetch_u64(bytes, l - 8);
             let u = b.rotate_right(37).wrapping_mul(mul).wrapping_add(a);
             let v = a.rotate_right(25).wrapping_add(b).wrapping_mul(mul);
-            hash64_16_mul(u, v, mul)
+            hash128_64_mul(u, v, mul)
         }
     }
 }
@@ -68,7 +68,7 @@ fn hash64_17_to_32(bytes: &[u8]) -> u64 {
     let v = a
         .wrapping_add(b.wrapping_add(P2).rotate_right(18))
         .wrapping_add(c);
-    hash64_16_mul(u, v, mul)
+    hash128_64_mul(u, v, mul)
 }
 
 fn hash64_33_to_64(bytes: &[u8]) -> u64 {
@@ -116,19 +116,16 @@ fn hash64_33_to_64(bytes: &[u8]) -> u64 {
     b.wrapping_add(x)
 }
 
-fn hash64_16_mul(u: u64, v: u64, mul: u64) -> u64 {
-    let mut a = (u ^ v).wrapping_mul(mul);
-    a ^= a >> 47;
-    let mut b = (v ^ a).wrapping_mul(mul);
-    b ^= b >> 47;
-    b.wrapping_mul(mul)
+// Hash 128 bits down to 64 with a variable multiplier
+fn hash128_64_mul(u: u64, v: u64, mul: u64) -> u64 {
+    let a = u.bitxor(v).wrapping_mul(mul);
+    let b = (v ^ shift_mix(a)).wrapping_mul(mul);
+    shift_mix(b).wrapping_mul(mul)
 }
 
-fn hash64_16(x_low: u64, x_high: u64) -> u64 {
-    let mut a = x_high.bitxor(x_low).wrapping_mul(P3);
-    a ^= a >> 47;
-    let b = x_high.bitxor(a).wrapping_mul(P3);
-    b.bitxor(b >> 47).wrapping_mul(P3)
+// Hash 128 bits down to 64 with a fixed multiplier
+fn hash128_64(u: u64, v: u64) -> u64 {
+    hash128_64_mul(u, v, P3)
 }
 
 fn weak_hash_128_with_seeds(bytes: &[u8], mut a: u64, mut b: u64) -> (u64, u64) {
@@ -151,7 +148,7 @@ fn hash64_65(bytes: &[u8]) -> u64 {
 
     let mut x = fetch_u64(bytes, l - 40);
     let mut y = fetch_u64(bytes, l - 16).wrapping_add(fetch_u64(bytes, l - 56));
-    let mut z = hash64_16(
+    let mut z = hash128_64(
         fetch_u64(bytes, l - 48).wrapping_add(l as u64),
         fetch_u64(bytes, l - 24),
     );
@@ -199,11 +196,11 @@ fn hash64_65(bytes: &[u8]) -> u64 {
         }
     }
 
-    hash64_16(
-        hash64_16(v1, w1)
+    hash128_64(
+        hash128_64(v1, w1)
             .wrapping_add(shift_mix(y).wrapping_mul(P1))
             .wrapping_add(z),
-        hash64_16(v2, w2).wrapping_add(x),
+        hash128_64(v2, w2).wrapping_add(x),
     )
 }
 
@@ -254,7 +251,7 @@ impl ClassicHasher for CityHash64 {
             _ => hash64_65(bytes),
         };
         if let Some([s0, s1]) = self.seeds {
-            hash64_16(h.wrapping_sub(s0), s1)
+            hash128_64(h.wrapping_sub(s0), s1)
         } else {
             h
         }
