@@ -124,8 +124,7 @@ fn hash64_16_mul(u: u64, v: u64, mul: u64) -> u64 {
     b.wrapping_mul(mul)
 }
 
-// TODO: assure that x_high and x_low are the high and low bits of a u128
-fn hash64_16(x_high: u64, x_low: u64) -> u64 {
+fn hash64_16(x_low: u64, x_high: u64) -> u64 {
     let mut a = x_high.bitxor(x_low).wrapping_mul(P3);
     a ^= a >> 47;
     let b = x_high.bitxor(a).wrapping_mul(P3);
@@ -162,7 +161,8 @@ fn hash64_65(bytes: &[u8]) -> u64 {
 
     x = x.wrapping_mul(P1).wrapping_add(fetch_u64(bytes, 0));
 
-    let mut n = l.prev_multiple_of(&64);
+    let mut n = (l - 1).prev_multiple_of(&64);
+
     let mut offset = 0;
     loop {
         let block = &bytes[offset..];
@@ -247,24 +247,19 @@ impl CityHash64 {
 
 impl ClassicHasher for CityHash64 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
+        let h = match bytes.len() {
+            0..=16 => hash64_0_to_16(bytes),
+            17..=32 => hash64_17_to_32(bytes),
+            33..=64 => hash64_33_to_64(bytes),
+            _ => hash64_65(bytes),
+        };
         if let Some([s0, s1]) = self.seeds {
-            let h = match bytes.len() {
-                0..=16 => hash64_0_to_16(bytes),
-                17..=32 => hash64_17_to_32(bytes),
-                33..=64 => hash64_33_to_64(bytes),
-                _ => hash64_65(bytes),
-            };
-            hash64_16(h.wrapping_sub(s0), s1).to_be_bytes().to_vec()
+            hash64_16(h.wrapping_sub(s0), s1)
         } else {
-            match bytes.len() {
-                0..=16 => hash64_0_to_16(bytes),
-                17..=32 => hash64_17_to_32(bytes),
-                33..=64 => hash64_33_to_64(bytes),
-                _ => hash64_65(bytes),
-            }
-            .to_be_bytes()
-            .to_vec()
+            h
         }
+        .to_be_bytes()
+        .to_vec()
     }
 
     crate::hash_bytes_from_string! {}

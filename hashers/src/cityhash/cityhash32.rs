@@ -130,10 +130,6 @@ fn hash32_25(bytes: &[u8]) -> u32 {
     let mut offset = 0;
 
     for _ in 0..((l - 1) / 20) {
-        if l == 299 {
-            println!("{:02x} {:02x} {:02x}", h, g, f);
-        }
-
         let a0 = fetch_u32(bytes, offset)
             .wrapping_mul(C0)
             .rotate_right(17)
