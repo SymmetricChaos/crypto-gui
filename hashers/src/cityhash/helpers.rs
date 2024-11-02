@@ -8,11 +8,11 @@ pub(super) const P2: u64 = 0x9ae16a3b2f90404f;
 pub(super) const P3: u64 = 0x9ddfea08eb382d69;
 
 // 32-bit constants from Murmur3
-pub(super) const C0: u32 = 0xcc9e2d51;
-pub(super) const C1: u32 = 0x1b873593;
-pub(super) const C2: u32 = 0xe6546b64;
-pub(super) const C3: u32 = 0x85ebca6b;
-pub(super) const C4: u32 = 0xc2b2ae35;
+pub(super) const C1: u32 = 0xcc9e2d51;
+pub(super) const C2: u32 = 0x1b873593;
+pub(super) const C3: u32 = 0xe6546b64;
+pub(super) const C4: u32 = 0x85ebca6b;
+pub(super) const C5: u32 = 0xc2b2ae35;
 
 pub(super) fn fetch_u32(bytes: &[u8], p: usize) -> u32 {
     u32::from_le_bytes(bytes[p..p + 4].try_into().unwrap())
@@ -28,20 +28,20 @@ pub(super) fn shift_mix(a: u64) -> u64 {
 
 pub(super) fn final_mix(mut x: u32) -> u32 {
     x ^= x >> 16;
-    x = x.wrapping_mul(C3);
-    x ^= x >> 13;
     x = x.wrapping_mul(C4);
+    x ^= x >> 13;
+    x = x.wrapping_mul(C5);
     x ^= x >> 16;
     x
 }
 
 pub(super) fn compress(mut x: u32, mut y: u32) -> u32 {
-    x = x.wrapping_mul(C0);
-    x = x.rotate_right(17);
     x = x.wrapping_mul(C1);
+    x = x.rotate_right(17);
+    x = x.wrapping_mul(C2);
     y ^= x;
     y = y.rotate_right(19);
-    y.wrapping_mul(5).wrapping_add(C2)
+    y.wrapping_mul(5).wrapping_add(C3)
 }
 
 pub(super) fn hash32_0_to_4(bytes: &[u8]) -> u32 {
@@ -49,7 +49,7 @@ pub(super) fn hash32_0_to_4(bytes: &[u8]) -> u32 {
     let mut b: u32 = 0;
     let mut c: u32 = 9;
     for byte in bytes {
-        b = b.wrapping_mul(C0).wrapping_add(*byte as i8 as u32); // yes really, conversion to i8 then to u32 is the intended transformation
+        b = b.wrapping_mul(C1).wrapping_add(*byte as i8 as u32); // yes really, conversion to i8 then to u32 is the intended transformation
         c ^= b;
     }
     final_mix(compress(b, compress(l, c)))
@@ -86,90 +86,90 @@ pub(super) fn hash32_25(bytes: &[u8]) -> u32 {
     let l = bytes.len();
 
     let mut h = l as u32;
-    let mut g = C0.wrapping_mul(h);
+    let mut g = C1.wrapping_mul(h);
     let mut f = g;
 
     let a0 = fetch_u32(bytes, l - 4)
-        .wrapping_mul(C0)
+        .wrapping_mul(C1)
         .rotate_right(17)
-        .wrapping_mul(C1);
+        .wrapping_mul(C2);
     let a1 = fetch_u32(bytes, l - 8)
-        .wrapping_mul(C0)
+        .wrapping_mul(C1)
         .rotate_right(17)
-        .wrapping_mul(C1);
+        .wrapping_mul(C2);
     let a2 = fetch_u32(bytes, l - 16)
-        .wrapping_mul(C0)
+        .wrapping_mul(C1)
         .rotate_right(17)
-        .wrapping_mul(C1);
+        .wrapping_mul(C2);
     let a3 = fetch_u32(bytes, l - 12)
-        .wrapping_mul(C0)
+        .wrapping_mul(C1)
         .rotate_right(17)
-        .wrapping_mul(C1);
+        .wrapping_mul(C2);
     let a4 = fetch_u32(bytes, l - 20)
-        .wrapping_mul(C0)
+        .wrapping_mul(C1)
         .rotate_right(17)
-        .wrapping_mul(C1);
+        .wrapping_mul(C2);
 
     h = h
         .bitxor(a0)
         .rotate_right(19)
         .wrapping_mul(5)
-        .wrapping_add(C2);
+        .wrapping_add(C3);
     h = h
         .bitxor(a2)
         .rotate_right(19)
         .wrapping_mul(5)
-        .wrapping_add(C2);
+        .wrapping_add(C3);
     g = g
         .bitxor(a1)
         .rotate_right(19)
         .wrapping_mul(5)
-        .wrapping_add(C2);
+        .wrapping_add(C3);
     g = g
         .bitxor(a3)
         .rotate_right(19)
         .wrapping_mul(5)
-        .wrapping_add(C2);
+        .wrapping_add(C3);
     f = f
         .wrapping_add(a4)
         .rotate_right(19)
         .wrapping_mul(5)
-        .wrapping_add(C2);
+        .wrapping_add(C3);
 
     let mut offset = 0;
 
     for _ in 0..((l - 1) / 20) {
         let a0 = fetch_u32(bytes, offset)
-            .wrapping_mul(C0)
+            .wrapping_mul(C1)
             .rotate_right(17)
-            .wrapping_mul(C1);
+            .wrapping_mul(C2);
         let a1 = fetch_u32(bytes, offset + 4);
         let a2 = fetch_u32(bytes, offset + 8)
-            .wrapping_mul(C0)
+            .wrapping_mul(C1)
             .rotate_right(17)
-            .wrapping_mul(C1);
+            .wrapping_mul(C2);
         let a3 = fetch_u32(bytes, offset + 12)
-            .wrapping_mul(C0)
+            .wrapping_mul(C1)
             .rotate_right(17)
-            .wrapping_mul(C1);
+            .wrapping_mul(C2);
         let a4 = fetch_u32(bytes, offset + 16);
 
         h = h
             .bitxor(a0)
             .rotate_right(18)
             .wrapping_mul(5)
-            .wrapping_add(C2);
+            .wrapping_add(C3);
 
-        f = f.wrapping_add(a1).rotate_right(19).wrapping_mul(C0);
+        f = f.wrapping_add(a1).rotate_right(19).wrapping_mul(C1);
 
         g = g
             .wrapping_add(a2)
             .rotate_right(18)
             .wrapping_mul(5)
-            .wrapping_add(C2);
+            .wrapping_add(C3);
 
         h ^= a3.wrapping_add(a1);
-        h = h.rotate_right(19).wrapping_mul(5).wrapping_add(C2);
+        h = h.rotate_right(19).wrapping_mul(5).wrapping_add(C3);
 
         g = g.bitxor(a4).swap_bytes().wrapping_mul(5);
 
@@ -184,27 +184,27 @@ pub(super) fn hash32_25(bytes: &[u8]) -> u32 {
 
     g = g
         .rotate_right(11)
-        .wrapping_mul(C0)
+        .wrapping_mul(C1)
         .rotate_right(17)
-        .wrapping_mul(C0);
+        .wrapping_mul(C1);
     f = f
         .rotate_right(11)
-        .wrapping_mul(C0)
+        .wrapping_mul(C1)
         .rotate_right(17)
-        .wrapping_mul(C0);
+        .wrapping_mul(C1);
 
     h.wrapping_add(g)
         .rotate_right(19)
         .wrapping_mul(5)
-        .wrapping_add(C2)
+        .wrapping_add(C3)
         .rotate_right(17)
-        .wrapping_mul(C0)
+        .wrapping_mul(C1)
         .wrapping_add(f)
         .rotate_right(19)
         .wrapping_mul(5)
-        .wrapping_add(C2)
+        .wrapping_add(C3)
         .rotate_right(17)
-        .wrapping_mul(C0)
+        .wrapping_mul(C1)
 }
 
 pub(super) fn hash64_0_to_16(bytes: &[u8]) -> u64 {
@@ -399,11 +399,14 @@ pub(super) fn city_mur(bytes: &[u8], seed0: u64, seed1: u64) -> Vec<u8> {
         a = shift_mix(a.wrapping_mul(P1)).wrapping_mul(P1);
         c = b.wrapping_mul(P1).wrapping_add(hash64_0_to_16(bytes));
         if l >= 8 {
+            println!(">= 8");
             d = shift_mix(a.wrapping_add(fetch_u64(bytes, 0)))
         } else {
+            println!("< 8");
             d = shift_mix(a.wrapping_add(c))
         }
     } else {
+        println!("> 16");
         c = hash128_64(fetch_u64(bytes, l - 8).wrapping_add(P1), a);
         d = hash128_64(
             b.wrapping_add(l as u64),
