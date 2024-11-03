@@ -423,7 +423,7 @@ pub(super) fn city_mur(bytes: &[u8], seed0: u64, seed1: u64) -> Vec<u8> {
         a = a.wrapping_add(d);
         let mut n = l - 16;
         let mut offset = 0;
-        while n > 0 {
+        while n >= 16 {
             a ^= shift_mix(fetch_u64(bytes, offset + 0).wrapping_mul(P1)).wrapping_mul(P1);
             a = a.wrapping_mul(P1);
             b ^= a;

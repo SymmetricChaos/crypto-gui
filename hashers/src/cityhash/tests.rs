@@ -14,7 +14,7 @@ mod cityhash_tests {
         let mut rng = thread_rng();
         let hasher32 = CityHash32::default();
 
-        for _ in 0..1_000_000 {
+        for _ in 0..2_000_000 {
             let l: usize = rng.gen_range(0..400);
             let mut data = vec![0_u8; l];
             rng.fill_bytes(&mut data);

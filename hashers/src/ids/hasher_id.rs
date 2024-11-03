@@ -32,6 +32,7 @@ hasher_ids_and_names!(
     Argon2, "Argon2";
     AsconHash, "Ascon-Hash";
     AsconMac, "Ascon-MAC";
+    Bcrypt, "bcrypt";
     Blake, "BLAKE";
     Blake2, "BLAKE2";
     Blake3, "BLAKE3";
@@ -55,6 +56,7 @@ hasher_ids_and_names!(
     Pearson, "Pearson";
     Poly1305, "Poly1305";
     RipeMd, "RIPEMD";
+    Scrypt, "scrypt";
     Sha0, "SHA-0";
     Sha1, "SHA-1";
     Sha2, "SHA-2";

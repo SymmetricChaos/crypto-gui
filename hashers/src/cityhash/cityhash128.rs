@@ -110,23 +110,23 @@ impl ClassicHasher for CityHash128 {
             w1 = w1.wrapping_add(9);
             v1 = v1.wrapping_mul(P0);
 
-            let tail = &bytes[(l - 128)..];
-            for pos in (0..l).step_by(32) {
-                let offset = tail.len() - pos - 32;
-                let block = &tail[offset..];
-
-                y = x
-                    .wrapping_add(y)
-                    .rotate_right(42)
-                    .wrapping_mul(P0)
-                    .wrapping_add(v2);
-                w1 = fetch_u64(block, 16);
-                x = x.wrapping_mul(P0).wrapping_add(w1);
-                z = z.wrapping_add(w2).wrapping_add(fetch_u64(bytes, 0));
-                w2 = w2.wrapping_add(v1);
-                (v1, v2) = weak_hash_128_with_seeds(bytes, v1.wrapping_add(z), v2);
-                v1 = v1.wrapping_mul(P0);
-            }
+            // let mut pos = 0;
+            // while pos < l {
+            //     pos += 32;
+            //     y = x
+            //         .wrapping_add(y)
+            //         .rotate_right(42)
+            //         .wrapping_mul(P0)
+            //         .wrapping_add(v2);
+            //     w1 = fetch_u64(bytes, l - pos + offset + 16);
+            //     x = x.wrapping_mul(P0).wrapping_add(w1);
+            //     z = z
+            //         .wrapping_add(w2)
+            //         .wrapping_add(fetch_u64(bytes, l - pos + offset));
+            //     w2 = w2.wrapping_add(v1);
+            //     (v1, v2) = weak_hash_128_with_seeds(bytes, v1.wrapping_add(z), v2);
+            //     v1 = v1.wrapping_mul(P0);
+            // }
 
             x = hash128_64(x, v1);
             y = hash128_64(y.wrapping_add(z), w1);
