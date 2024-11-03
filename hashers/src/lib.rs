@@ -1,3 +1,4 @@
+pub mod adler;
 pub mod argon2;
 pub mod ascon;
 pub mod auxiliary;
@@ -6,6 +7,7 @@ pub mod checksum;
 pub mod cityhash;
 pub mod crypt;
 pub mod errors;
+pub mod fletcher;
 pub mod fnv;
 pub mod fxhash;
 pub mod ghash;
@@ -59,3 +61,10 @@ pub mod vsh;
 
 //     crate::hash_bytes_from_string! {}
 // }
+
+// crate::basic_hash_tests!(
+//     test1,
+//     HASHERNAME::default(),
+//     "INPUT",
+//     "OUTPUT";
+// );
