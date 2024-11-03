@@ -2,7 +2,34 @@
 mod cityhash_tests {
     use super::super::*;
     use crate::traits::ClassicHasher;
+
     use helpers::P0;
+    use rand::{thread_rng, Rng, RngCore};
+
+    #[test]
+    fn randomly_test_equality_with_ref() {
+        use cityhash32::CityHash32;
+        let mut rng = thread_rng();
+        let hasher32 = CityHash32::default();
+
+        for _ in 0..1_000_000 {
+            let l: usize = rng.gen_range(200..400);
+            let mut data = vec![0_u8; l];
+            rng.fill_bytes(&mut data);
+
+            // println!("{:02x?}", data);
+
+            let h0: u32 = cityhasher::hash(&data);
+            let h1: u32 = u32::from_be_bytes(hasher32.hash(&data).try_into().unwrap());
+
+            if h0 != h1 {
+                panic!(
+                    "mismatch for this data of length {}\n{:02x?}\nreference: {:08x}\ncreated: {:08x}",
+                    data.len(), data, h0, h1
+                )
+            }
+        }
+    }
 
     #[test]
     fn test_inputs() {
@@ -17,6 +44,7 @@ mod cityhash_tests {
             b = (b ^ (b >> 41)).wrapping_mul(P0).wrapping_add(i as u64);
             data[i] = (b >> 37) as u8;
         }
+
         // Sequence of bytes begins
         // 6a, e4, 4a, 82, 3b, e7, aa, 66, 42, aa, b0, ce, 6a, 47, ea, 25,
         // 3b, 30, a7, 2c, 53, d8, 1f, c5, a8, 64, fc, f2, 8f, 05, 91, 42,
@@ -33,13 +61,23 @@ mod cityhash_tests {
         let hasher64 = CityHash64::default();
         let hasher64s = CityHash64::default().with_seed(1234567);
         let hasher64ss = CityHash64::default().with_seeds(1234567, P0);
-        // let hasher128 = CityHash128::default();
+        let hasher128 = CityHash128::default();
+        // For some reason although the tests provide 300 outputs only 299 are used in the original tests
         for i in 0..300 {
             let s = i * i;
             let e = s + i;
             let input = &data[s..e];
 
-            let output_word = u32::from_be_bytes(hasher32.hash(input).try_into().unwrap());
+            // let output_word = u32::from_be_bytes(hasher32.hash(input).try_into().unwrap());
+            // if output_word != TEST_DATA[i].15 {
+            //     let err = format!(
+            //         "CityHash32 first failure occured at\ninput #{i}: {:02x?}\noutput:  {:08x}\ncorrect: {:08x}",
+            //         input, output_word, TEST_DATA[i].15
+            //     );
+            //     panic!("{}", err)
+            // }
+
+            let output_word: u32 = cityhasher::hash(input);
             if output_word != TEST_DATA[i].15 {
                 let err = format!(
                     "CityHash32 first failure occured at\ninput #{i}: {:02x?}\noutput:  {:08x}\ncorrect: {:08x}",

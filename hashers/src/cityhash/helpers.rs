@@ -15,11 +15,11 @@ pub(super) const C4: u32 = 0x85ebca6b;
 pub(super) const C5: u32 = 0xc2b2ae35;
 
 pub(super) fn fetch_u32(bytes: &[u8], p: usize) -> u32 {
-    u32::from_le_bytes(bytes[p..p + 4].try_into().unwrap())
+    unsafe { u32::from_le_bytes(bytes[p..p + 4].try_into().unwrap_unchecked()) }
 }
 
 pub(super) fn fetch_u64(bytes: &[u8], p: usize) -> u64 {
-    u64::from_le_bytes(bytes[p..p + 8].try_into().unwrap())
+    unsafe { u64::from_le_bytes(bytes[p..p + 8].try_into().unwrap_unchecked()) }
 }
 
 pub(super) fn shift_mix(a: u64) -> u64 {
@@ -399,14 +399,14 @@ pub(super) fn city_mur(bytes: &[u8], seed0: u64, seed1: u64) -> Vec<u8> {
         a = shift_mix(a.wrapping_mul(P1)).wrapping_mul(P1);
         c = b.wrapping_mul(P1).wrapping_add(hash64_0_to_16(bytes));
         if l >= 8 {
-            println!(">= 8");
+            println!("{l} >= 8");
             d = shift_mix(a.wrapping_add(fetch_u64(bytes, 0)))
         } else {
-            println!("< 8");
+            println!("{l} < 8");
             d = shift_mix(a.wrapping_add(c))
         }
     } else {
-        println!("> 16");
+        println!("{l} > 16");
         c = hash128_64(fetch_u64(bytes, l - 8).wrapping_add(P1), a);
         d = hash128_64(
             b.wrapping_add(l as u64),
