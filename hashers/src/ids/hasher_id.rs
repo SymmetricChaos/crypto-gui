@@ -28,6 +28,7 @@ macro_rules! hasher_ids_and_names {
 }
 
 hasher_ids_and_names!(
+    Adler32, "Adler-32";
     Argon2, "Argon2";
     AsconHash, "Ascon-Hash";
     AsconMac, "Ascon-MAC";
@@ -35,6 +36,7 @@ hasher_ids_and_names!(
     Blake2, "BLAKE2";
     Blake3, "BLAKE3";
     CityHash, "CityHash";
+    Fletcher, "Fletcher";
     Fnv, "FNV Hash";
     Ghash, "GHASH";
     Gost, "GOST R 34.11-94";

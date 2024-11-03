@@ -15,11 +15,19 @@ pub(super) const C4: u32 = 0x85ebca6b;
 pub(super) const C5: u32 = 0xc2b2ae35;
 
 pub(super) fn fetch_u32(bytes: &[u8], p: usize) -> u32 {
-    unsafe { u32::from_le_bytes(bytes[p..p + 4].try_into().unwrap_unchecked()) }
+    u32::from_le_bytes(
+        bytes[p..p + 4]
+            .try_into()
+            .expect("u32 must be exactly 4 bytes"),
+    )
 }
 
 pub(super) fn fetch_u64(bytes: &[u8], p: usize) -> u64 {
-    unsafe { u64::from_le_bytes(bytes[p..p + 8].try_into().unwrap_unchecked()) }
+    u64::from_le_bytes(
+        bytes[p..p + 8]
+            .try_into()
+            .expect("u64 must be exactly 8 bytes"),
+    )
 }
 
 pub(super) fn shift_mix(a: u64) -> u64 {

@@ -1,4 +1,11 @@
 ﻿{
+  "Adler-32": {
+    "Description": "Adler-32 is a very fast an simple hash, usually classified as a checksum. It produces a 32-bit hash by concatenating two 16-bit counters.",
+    "Authors": "Mark Adler",
+    "Publication": "1995",
+    "Hash Length": 32,
+    "Traits": []
+  },
   "Ascon-Hash": {
     "Description": "Ascon-Hash and Ascon-XOF are a hash functions derived from the Ascon sponge function. The sponge construction is similar to Keccak, though with a smaller state and simpler round. Two faster variants are also defined that use eight rounds during the absorbing steps.",
     "Authors": "Dobraunig, Eichlseder, Mendel, and Schläffer",
@@ -59,6 +66,30 @@
       "XOF",
       "Crytographic"
     ]
+  },
+  "CityHash": {
+    "Description": "CityHash is a family of hash functions based on Murmur which are optimized for speed when hashing small inputs, such as strings representing single words. This is done both by efficient design and by switching to simpler methods for shorter inputs.",
+    "Authors": "Jyrki Alakuijala",
+    "Publication": "2011",
+    "Hash Length": [
+      32,
+      64,
+      128
+    ],
+    "Traits": [
+      "Keyed"
+    ]
+  },
+  "Fletcher": {
+    "Description": "The Fletcher family of hash algoritms (often considered checksums) are fast non-cryprographic hashers designed to run more quickly than cyclic redundancy checks.",
+    "Authors": "John G. Fletcher",
+    "Publication": "1970s",
+    "Hash Length": [
+      16,
+      32,
+      64
+    ],
+    "Traits": []
   },
   "FNV Hash": {
     "Description": "The FNV hash family is meant to run very quickly while avoiding collisions but not to provide cryptographic security. Its compression function consits of a single multiplication and a single XOR operation for each byte. ",
