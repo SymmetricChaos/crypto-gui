@@ -3,13 +3,14 @@
 
 use std::usize;
 
+use itertools::Itertools;
 use utils::byte_formatting::{make_u32s_le, u32s_to_bytes_le, ByteFormat};
 
 use crate::{pbkdf2, traits::ClassicHasher};
 
 fn xor_blocks(a: &[u8], b: &[u8]) -> Vec<u8> {
     let mut out = Vec::new();
-    for (l, r) in a.iter().zip(b.iter()) {
+    for (l, r) in a.iter().zip_eq(b.iter()) {
         out.push(*l ^ *r)
     }
     out
@@ -66,14 +67,14 @@ fn salsa20_8(a: [u8; 64]) -> [u8; 64] {
     out
 }
 
-fn block_mix(in_block: &[u8]) -> Vec<u8> {
+fn block_mix(block: &mut [u8]) {
     let mut y = Vec::new();
 
     let mut x = [0u8; 64];
-    x.copy_from_slice(&in_block[in_block.len() - 64..]);
+    x.copy_from_slice(&block[block.len() - 64..]);
 
-    for chunk in in_block.chunks(64) {
-        let t = xor_blocks(&x, chunk.try_into().unwrap());
+    for chunk in block.chunks(64) {
+        let t = xor_blocks(&x, chunk);
         x = salsa20_8(t.try_into().unwrap());
         y.push(x);
     }
@@ -85,7 +86,7 @@ fn block_mix(in_block: &[u8]) -> Vec<u8> {
     for odd in y.iter().skip(1).step_by(2) {
         out.extend_from_slice(odd);
     }
-    out
+    block.copy_from_slice(&out);
 }
 
 // weird operation
@@ -97,43 +98,115 @@ fn integerify(x: &[u8], n: usize) -> usize {
     (t as usize) & mask
 }
 
-fn ro_mix(block: &[u8], n: usize) -> Vec<u8> {
+fn ro_mix(block: &mut [u8], n: usize) {
     let mut x = block.to_vec();
     let mut v = Vec::with_capacity(n);
     for _ in 0..n {
         v.push(x.clone());
-        x = block_mix(&x);
+        block_mix(&mut x);
     }
 
     for _ in 0..n {
         let j = integerify(&x, n);
-        let t = xor_blocks(&x[..], &v[j]);
-        x = block_mix(&t);
+        let mut t = xor_blocks(&x[..], &v[j]);
+        block_mix(&mut t);
+        x.copy_from_slice(&t);
     }
-    x
+    block.copy_from_slice(&x);
 }
 
 pub struct Scrypt {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
     pub salt: Vec<u8>,
-    pub cost: u32,
-    pub blocksize_factor: u32,
-    pub paralleism: u32,
-    pub key_len: u32,
-    pub h_len: u32,
-    pub mf_len: u32,
+    pub cost: u32,             // N
+    pub blocksize_factor: u32, // r
+    pub paralleism: u32,       // p
+    pub key_len: u32,          // dkLen
+}
+
+impl Default for Scrypt {
+    fn default() -> Self {
+        Self {
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
+            salt: Vec::new(),
+            cost: 2,
+            blocksize_factor: 1,
+            paralleism: 1,
+            key_len: 64,
+        }
+    }
+}
+
+impl Scrypt {
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+
+    pub fn salt(mut self, salt: &[u8]) -> Self {
+        self.salt = salt.to_vec();
+        self
+    }
+
+    pub fn cost(mut self, cost: u32) -> Self {
+        self.cost = cost;
+        self
+    }
+
+    pub fn blocksize_factor(mut self, blocksize_factor: u32) -> Self {
+        self.blocksize_factor = blocksize_factor;
+        self
+    }
+
+    pub fn paralleism(mut self, paralleism: u32) -> Self {
+        self.paralleism = paralleism;
+        self
+    }
+
+    pub fn key_len(mut self, key_len: u32) -> Self {
+        self.key_len = key_len;
+        self
+    }
+
+    pub fn direct(passphrase: &[u8], s: &[u8], n: u32, r: u32, p: u32, dklen: u32) -> Vec<u8> {
+        Scrypt {
+            input_format: ByteFormat::Hex,
+            output_format: ByteFormat::Hex,
+            salt: s.to_vec(),
+            cost: n,
+            blocksize_factor: r,
+            paralleism: p,
+            key_len: dklen,
+        }
+        .hash(passphrase)
+    }
 }
 
 impl ClassicHasher for Scrypt {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let pbkdf = pbkdf2::Pbkdf2::default()
-            .variant(crate::hmac::HmacVariant::Sha256)
+        let blocksize = 128 * self.blocksize_factor;
+        let mut p = pbkdf2::Pbkdf2::sha256()
             .salt(self.salt.clone())
             .iterations(1)
-            .hash_len(128 * self.blocksize_factor * self.paralleism);
-        let p = pbkdf.hash(bytes);
-        todo!()
+            .hash_len(blocksize * self.paralleism)
+            .hash(bytes);
+
+        for block in p.chunks_mut(blocksize as usize) {
+            ro_mix(block, self.cost as usize)
+        }
+
+        pbkdf2::Pbkdf2::sha256()
+            .salt(p)
+            .iterations(1)
+            .hash_len(self.key_len)
+            .hash(bytes)
     }
 
     crate::hash_bytes_from_string! {}
@@ -164,7 +237,7 @@ mod scrypt_tests {
 
     #[test]
     fn blockmix_function() {
-        let input = [
+        let mut input = [
             0xf7, 0xce, 0x0b, 0x65, 0x3d, 0x2d, 0x72, 0xa4, 0x10, 0x8c, 0xf5, 0xab, 0xe9, 0x12,
             0xff, 0xdd, 0x77, 0x76, 0x16, 0xdb, 0xbb, 0x27, 0xa7, 0x0e, 0x82, 0x04, 0xf3, 0xae,
             0x2d, 0x0f, 0x6f, 0xad, 0x89, 0xf6, 0x8f, 0x48, 0x11, 0xd1, 0xe8, 0x7b, 0xcc, 0x3b,
@@ -188,12 +261,13 @@ mod scrypt_tests {
             0x5d, 0x2a, 0x22, 0x58, 0x77, 0xd5, 0xed, 0xf5, 0x84, 0x2c, 0xb9, 0xf1, 0x4e, 0xef,
             0xe4, 0x25,
         ];
-        assert_eq!(&output, &block_mix(&input[..])[..])
+        block_mix(&mut input);
+        assert_eq!(input, output);
     }
 
     #[test]
     fn romix_function() {
-        let input = [
+        let mut input: [u8; 128] = [
             0xf7, 0xce, 0x0b, 0x65, 0x3d, 0x2d, 0x72, 0xa4, 0x10, 0x8c, 0xf5, 0xab, 0xe9, 0x12,
             0xff, 0xdd, 0x77, 0x76, 0x16, 0xdb, 0xbb, 0x27, 0xa7, 0x0e, 0x82, 0x04, 0xf3, 0xae,
             0x2d, 0x0f, 0x6f, 0xad, 0x89, 0xf6, 0x8f, 0x48, 0x11, 0xd1, 0xe8, 0x7b, 0xcc, 0x3b,
@@ -205,7 +279,7 @@ mod scrypt_tests {
             0x7f, 0x4d, 0x1c, 0xad, 0x6a, 0x52, 0x3c, 0xda, 0x77, 0x0e, 0x67, 0xbc, 0xea, 0xaf,
             0x7e, 0x89,
         ];
-        let output = [
+        let output: [u8; 128] = [
             0x79, 0xcc, 0xc1, 0x93, 0x62, 0x9d, 0xeb, 0xca, 0x04, 0x7f, 0x0b, 0x70, 0x60, 0x4b,
             0xf6, 0xb6, 0x2c, 0xe3, 0xdd, 0x4a, 0x96, 0x26, 0xe3, 0x55, 0xfa, 0xfc, 0x61, 0x98,
             0xe6, 0xea, 0x2b, 0x46, 0xd5, 0x84, 0x13, 0x67, 0x3b, 0x99, 0xb0, 0x29, 0xd6, 0x65,
@@ -217,6 +291,12 @@ mod scrypt_tests {
             0x4e, 0x90, 0x87, 0xcb, 0x33, 0x39, 0x6a, 0x68, 0x73, 0xe8, 0xf9, 0xd2, 0x53, 0x9a,
             0x4b, 0x8e,
         ];
-        assert_eq!(&output, &ro_mix(&input[..], 16)[..])
+        ro_mix(&mut input, 16);
+        assert_eq!(input, output);
     }
 }
+
+crate::basic_hash_tests!(
+    test1, Scrypt::default().cost(16), "", "77d6576238657b203b19ca42c18a0497f16b4844e3074ae8dfdffa3fede21442fcd0069ded0948f8326a753a0fc81f17e8d3e0fb2e0d3628cf35e20c38d18906";
+    test2, Scrypt::default().salt(b"NaCl").cost(1024).blocksize_factor(8).paralleism(16), "password", "fdbabe1c9d3472007856e7190d01e9fe7c6ad7cbc8237830e77376634b3731622eaf30d92e22a3886ff109279d9830dac727afb94a83ee6d8360cbdfa2cc0640";
+);

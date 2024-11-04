@@ -45,6 +45,48 @@ impl Pbkdf2 {
         self
     }
 
+    pub fn sha0() -> Self {
+        Self {
+            variant: HmacVariant::Sha0,
+            ..Default::default()
+        }
+    }
+
+    pub fn sha1() -> Self {
+        Self {
+            variant: HmacVariant::Sha1,
+            ..Default::default()
+        }
+    }
+
+    pub fn sha224() -> Self {
+        Self {
+            variant: HmacVariant::Sha224,
+            ..Default::default()
+        }
+    }
+
+    pub fn sha256() -> Self {
+        Self {
+            variant: HmacVariant::Sha256,
+            ..Default::default()
+        }
+    }
+
+    pub fn sha384() -> Self {
+        Self {
+            variant: HmacVariant::Sha384,
+            ..Default::default()
+        }
+    }
+
+    pub fn sha512() -> Self {
+        Self {
+            variant: HmacVariant::Sha512,
+            ..Default::default()
+        }
+    }
+
     pub fn salt(mut self, salt: Vec<u8>) -> Self {
         self.salt = salt;
         self
@@ -136,9 +178,9 @@ impl ClassicHasher for Pbkdf2 {
 }
 
 crate::basic_hash_tests!(
-    test1, Pbkdf2::default().variant(HmacVariant::Sha1).iterations(1).hash_len(20).salt_from_str(ByteFormat::Utf8, "salt"), "password", "0c60c80f961f0e71f3a9b524af6012062fe037a6";
-    test2, Pbkdf2::default().variant(HmacVariant::Sha1).iterations(2).hash_len(20).salt_from_str(ByteFormat::Utf8, "salt"), "password", "ea6c014dc72d6f8ccd1ed92ace1d41f0d8de8957";
-    test3, Pbkdf2::default().variant(HmacVariant::Sha1).iterations(4096).hash_len(20).salt_from_str(ByteFormat::Utf8, "salt"), "password", "4b007901b765489abead49d926f721d065a429c1";
-    test4, Pbkdf2::default().variant(HmacVariant::Sha1).iterations(4096).hash_len(25).salt_from_str(ByteFormat::Utf8, "saltSALTsaltSALTsaltSALTsaltSALTsalt"), "passwordPASSWORDpassword", "3d2eec4fe41c849b80c8d83662c0e44a8b291a964cf2f07038";
-    test5, Pbkdf2::default().variant(HmacVariant::Sha1).iterations(4096).hash_len(16).salt_from_str(ByteFormat::Utf8, "sa\0lt"), "pass\0word", "56fa6aa75548099dcc37d7f03425e0c3";
+    test1, Pbkdf2::sha1().iterations(1).hash_len(20).salt_from_str(ByteFormat::Utf8, "salt"), "password", "0c60c80f961f0e71f3a9b524af6012062fe037a6";
+    test2, Pbkdf2::sha1().iterations(2).hash_len(20).salt_from_str(ByteFormat::Utf8, "salt"), "password", "ea6c014dc72d6f8ccd1ed92ace1d41f0d8de8957";
+    test3, Pbkdf2::sha1().iterations(4096).hash_len(20).salt_from_str(ByteFormat::Utf8, "salt"), "password", "4b007901b765489abead49d926f721d065a429c1";
+    test4, Pbkdf2::sha1().iterations(4096).hash_len(25).salt_from_str(ByteFormat::Utf8, "saltSALTsaltSALTsaltSALTsaltSALTsalt"), "passwordPASSWORDpassword", "3d2eec4fe41c849b80c8d83662c0e44a8b291a964cf2f07038";
+    test5, Pbkdf2::sha1().iterations(4096).hash_len(16).salt_from_str(ByteFormat::Utf8, "sa\0lt"), "pass\0word", "56fa6aa75548099dcc37d7f03425e0c3";
 );
