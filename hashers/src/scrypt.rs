@@ -121,7 +121,7 @@ pub struct Scrypt {
     pub salt: Vec<u8>,
     pub cost: u32,             // N
     pub blocksize_factor: u32, // r
-    pub paralleism: u32,       // p
+    pub parallelism: u32,      // p
     pub key_len: u32,          // dkLen
 }
 
@@ -133,7 +133,7 @@ impl Default for Scrypt {
             salt: Vec::new(),
             cost: 2,
             blocksize_factor: 1,
-            paralleism: 1,
+            parallelism: 1,
             key_len: 64,
         }
     }
@@ -165,8 +165,8 @@ impl Scrypt {
         self
     }
 
-    pub fn paralleism(mut self, paralleism: u32) -> Self {
-        self.paralleism = paralleism;
+    pub fn parallelism(mut self, parallelism: u32) -> Self {
+        self.parallelism = parallelism;
         self
     }
 
@@ -182,7 +182,7 @@ impl Scrypt {
             salt: s.to_vec(),
             cost: n,
             blocksize_factor: r,
-            paralleism: p,
+            parallelism: p,
             key_len: dklen,
         }
         .hash(passphrase)
@@ -195,7 +195,7 @@ impl ClassicHasher for Scrypt {
         let mut p = pbkdf2::Pbkdf2::sha256()
             .salt(self.salt.clone())
             .iterations(1)
-            .hash_len(blocksize * self.paralleism)
+            .hash_len(blocksize * self.parallelism)
             .hash(bytes);
 
         for block in p.chunks_mut(blocksize as usize) {
@@ -298,5 +298,5 @@ mod scrypt_tests {
 
 crate::basic_hash_tests!(
     test1, Scrypt::default().cost(16), "", "77d6576238657b203b19ca42c18a0497f16b4844e3074ae8dfdffa3fede21442fcd0069ded0948f8326a753a0fc81f17e8d3e0fb2e0d3628cf35e20c38d18906";
-    test2, Scrypt::default().salt(b"NaCl").cost(1024).blocksize_factor(8).paralleism(16), "password", "fdbabe1c9d3472007856e7190d01e9fe7c6ad7cbc8237830e77376634b3731622eaf30d92e22a3886ff109279d9830dac727afb94a83ee6d8360cbdfa2cc0640";
+    test2, Scrypt::default().salt(b"NaCl").cost(1024).blocksize_factor(8).parallelism(16), "password", "fdbabe1c9d3472007856e7190d01e9fe7c6ad7cbc8237830e77376634b3731622eaf30d92e22a3886ff109279d9830dac727afb94a83ee6d8360cbdfa2cc0640";
 );
