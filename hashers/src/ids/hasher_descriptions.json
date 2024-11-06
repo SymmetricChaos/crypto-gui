@@ -28,6 +28,15 @@
       "Crytographic"
     ]
   },
+  "bcrypt": {
+    "Description": "The bcrypt (bee-crypt) hash function is a key derivation function.",
+    "Authors": "Niels Provos, David Mazières",
+    "Publication": "1999",
+    "Hash Length": [],
+    "Traits": [
+      "KDF"
+    ]
+  },
   "BLAKE": {
     "Description": "BLAKE was a competitor and finalist for the SHA-3 competition. It uses many of the same constants as SHA-2 but a different internal structure, a hash iterative framework, that eliminates SHA-2's vulernability to length extension attacks. The mixing round of BLAKE is a modified version of the ChaCha cipher.",
     "Authors": "Aumasson, Henzen, Meier, and Phan",
@@ -54,7 +63,8 @@
     ],
     "Traits": [
       "XOF",
-      "Crytographic"
+      "Crytographic",
+      "KDF"
     ]
   },
   "BLAKE3": {
@@ -243,7 +253,7 @@
     "Publication": null,
     "Hash Length": null,
     "Traits": [
-      "Crytographic"
+      "KDF"
     ]
   },
   "PBKDF2": {
@@ -252,7 +262,7 @@
     "Publication": null,
     "Hash Length": null,
     "Traits": [
-      "Crytographic"
+      "KDF"
     ]
   },
   "Pearson": {
@@ -297,6 +307,16 @@
     ],
     "Traits": [
       "Crytographic"
+    ]
+  },
+  "scrypt": {
+    "Description": "The scrypt (ess-crypt) hash function is used to derive passwords using PBKDF2 (with HMAC-SHA256) and the Salsa20/8 block function internally. It accepts a salt of arbitrary length and can be adjusted to increase difficulty and change the length of the derived key.",
+    "Authors": "Colin Percival",
+    "Publication": "2009",
+    "Hash Length": [],
+    "Traits": [
+      "XOF",
+      "KDF"
     ]
   },
   "SHA-1": {

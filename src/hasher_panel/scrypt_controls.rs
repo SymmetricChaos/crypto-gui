@@ -21,7 +21,7 @@ impl Default for ScryptFrame {
             salt: Vec::new(),
             salt_string: String::new(),
             salt_format: ByteFormat::Utf8,
-            salt_valid: true
+            salt_valid: true,
         }
     }
 }
@@ -44,30 +44,39 @@ impl HasherFrame for ScryptFrame {
             "see the code",
             "https://github.com/SymmetricChaos/crypto-gui/blob/master/hashers/src/scrypt",
         );
+        ui.add_space(8.0);
 
         ui.byte_io_mode_hasher(
             &mut self.hasher.input_format,
             &mut self.hasher.output_format,
         );
-        ui.add_space(16.0);
+        ui.add_space(8.0);
+
+        ui.subheading("Output Length (bytes)");
+        ui.add(DragValue::new(&mut self.hasher.key_len));
+        ui.add_space(8.0);
 
         ui.subheading("Cost Factor");
+        ui.label("Adjust the number of iterations performed.");
         ui.add(DragValue::new(&mut self.hasher.cost));
         ui.add_space(4.0);
         ui.subheading("Block Size Factor");
+        ui.label("Adjust the amount of memory needed.");
         ui.add(DragValue::new(&mut self.hasher.blocksize_factor));
         ui.add_space(4.0);
         ui.subheading("Parallelism");
+        ui.label("Adjust the number of independent threads that can be used.");
         ui.add(DragValue::new(&mut self.hasher.parallelism));
-        ui.add_space(4.0);
-        ui.subheading("Output Length");
-        ui.add(DragValue::new(&mut self.hasher.key_len));
-
         ui.add_space(8.0);
 
+        ui.subheading("Salt");
+        ui.label("Arbitray additional data incorporated into the function.");
         ui.horizontal(|ui| {
             for variant in ByteFormat::iter() {
-                if ui.selectable_value(&mut self.salt_format, variant, variant.to_string()).changed() {
+                if ui
+                    .selectable_value(&mut self.salt_format, variant, variant.to_string())
+                    .changed()
+                {
                     self.set_salt();
                 }
             }
