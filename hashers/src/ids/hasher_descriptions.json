@@ -29,7 +29,7 @@
     ]
   },
   "bcrypt": {
-    "Description": "The bcrypt (bee-crypt) is a hash function designed for password hashing.",
+    "Description": "The bcrypt (bee-crypt) is a hash function designed for password hashing. It uses a modified version of the key schedule from the Blowfish cipher.",
     "Authors": "Niels Provos, David Mazières",
     "Publication": "1999",
     "Hash Length": [

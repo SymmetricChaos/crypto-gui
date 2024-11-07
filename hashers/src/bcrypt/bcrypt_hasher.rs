@@ -2,7 +2,7 @@ use crate::{
     auxiliary::blowfish_arrays::{PARRAY, SBOXES},
     traits::ClassicHasher,
 };
-use utils::byte_formatting::{make_u32s_be, u32s_to_bytes_be, ByteFormat};
+use utils::byte_formatting::{make_u32s_be, ByteFormat};
 
 pub fn encrypt_u64(n: &mut u64, parray: &[u32; 18], sboxes: &[[u32; 256]; 4]) {
     let mut lr = make_u32s_be::<2>(&n.to_be_bytes());
@@ -17,8 +17,7 @@ pub fn encrypt_u64(n: &mut u64, parray: &[u32; 18], sboxes: &[[u32; 256]; 4]) {
     *n = (lr[0] as u64) << 32 | lr[1] as u64;
 }
 
-pub fn encrypt_bytes(n: &mut [u8; 16], parray: &[u32; 18], sboxes: &[[u32; 256]; 4]) {
-    let mut lr = make_u32s_be::<2>(&n[0..16]);
+pub fn encrypt_u32s(lr: &mut [u32], parray: &[u32; 18], sboxes: &[[u32; 256]; 4]) {
     for i in 0..16 {
         lr[0] ^= parray[i];
         lr[1] ^= f(lr[0], sboxes);
@@ -27,7 +26,6 @@ pub fn encrypt_bytes(n: &mut [u8; 16], parray: &[u32; 18], sboxes: &[[u32; 256];
     lr.swap(0, 1);
     lr[1] ^= parray[16];
     lr[0] ^= parray[17];
-    u32s_to_bytes_be(&mut n[0..16], &lr);
 }
 
 pub fn f(x: u32, sboxes: &[[u32; 256]; 4]) -> u32 {
@@ -75,27 +73,31 @@ pub fn expand_key(
     }
 
     let salt_halves = [
-        u64::from_le_bytes(salt[0..8].try_into().unwrap()),
-        u64::from_le_bytes(salt[8..16].try_into().unwrap()),
+        u32::from_le_bytes(salt[0..4].try_into().unwrap()),
+        u32::from_le_bytes(salt[4..8].try_into().unwrap()),
+        u32::from_le_bytes(salt[8..12].try_into().unwrap()),
+        u32::from_le_bytes(salt[12..16].try_into().unwrap()),
     ];
 
-    let mut block: u64 = 0;
+    let mut block: [u32; 2] = [0, 0];
 
     // Create the parray
     for i in 0..9 {
-        block ^= salt_halves[i % 2];
-        encrypt_u64(&mut block, parray, sboxes);
-        parray[2 * i] = (block >> 32) as u32;
-        parray[2 * i + 1] = block as u32;
+        block[0] ^= salt_halves[2 * (i % 2)];
+        block[1] ^= salt_halves[2 * (i % 2) + 1];
+        encrypt_u32s(&mut block, parray, sboxes);
+        parray[2 * i] = block[0];
+        parray[2 * i + 1] = block[1];
     }
 
     // Create the sboxes
     for i in 0..4 {
         for j in 0..128 {
-            block ^= salt_halves[i % 2];
-            encrypt_u64(&mut block, parray, sboxes);
-            sboxes[i][j * 2] = (block >> 32) as u32;
-            sboxes[i][j * 2 + 1] = block as u32;
+            block[0] ^= salt_halves[2 * (i % 2)];
+            block[1] ^= salt_halves[2 * (i % 2) + 1];
+            encrypt_u32s(&mut block, parray, sboxes);
+            sboxes[i][j * 2] = block[0];
+            sboxes[i][j * 2 + 1] = block[1];
         }
     }
 }
@@ -105,6 +107,7 @@ pub struct Bcrypt {
     pub output_format: ByteFormat,
     pub cost: usize,
     pub salt: [u8; 16],
+    pub full_len: bool,
 }
 
 impl Default for Bcrypt {
@@ -114,20 +117,51 @@ impl Default for Bcrypt {
             output_format: ByteFormat::Hex,
             cost: 12,
             salt: [0; 16],
+            full_len: false,
         }
     }
 }
 
-impl Bcrypt {}
-
 impl ClassicHasher for Bcrypt {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut parry = PARRAY;
-        let mut sboxes = SBOXES;
-        eks_blowfish_setup(&bytes[0..72], self.salt, &mut parry, &mut sboxes, self.cost);
+        assert!(self.cost < 32);
+        assert!(bytes.len() > 0 && bytes.len() <= 72);
 
-        for _ in 0..64 {}
-        todo!()
+        let mut parray = PARRAY;
+        let mut sboxes = SBOXES;
+        eks_blowfish_setup(
+            &bytes[0..72], // truncate long inputs
+            self.salt,
+            &mut parray,
+            &mut sboxes,
+            self.cost,
+        );
+
+        // The string "OrpheanBeholderScryDoubt" as u32s
+        let mut ctext: [u32; 6] = [
+            0x4f727068, 0x65616e42, 0x65686f6c, 0x64657253, 0x63727944, 0x6f756274,
+        ];
+
+        // Official implementations discard the last byte
+        let mut out = [0; 24];
+
+        for i in 0..3 {
+            // Each 8 byte block is encrypted 64 times then copied into the output
+            let a = 2 * i;
+            let b = 2 * i + 1;
+            for _ in 0..64 {
+                encrypt_u32s(&mut ctext[a..b], &parray, &sboxes);
+            }
+
+            out[4 * a..][..4].copy_from_slice(&ctext[a].to_be_bytes());
+            out[4 * b..][..4].copy_from_slice(&ctext[b].to_be_bytes());
+        }
+
+        if self.full_len {
+            out.to_vec()
+        } else {
+            out[0..23].to_vec()
+        }
     }
 
     crate::hash_bytes_from_string! {}
