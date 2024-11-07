@@ -29,13 +29,13 @@
     ]
   },
   "bcrypt": {
-    "Description": "The bcrypt (bee-crypt) hash function is a key derivation function.",
+    "Description": "The bcrypt (bee-crypt) is a hash function designed for password hashing.",
     "Authors": "Niels Provos, David Mazières",
     "Publication": "1999",
-    "Hash Length": [],
-    "Traits": [
-      "KDF"
-    ]
+    "Hash Length": [
+      184
+    ],
+    "Traits": []
   },
   "BLAKE": {
     "Description": "BLAKE was a competitor and finalist for the SHA-3 competition. It uses many of the same constants as SHA-2 but a different internal structure, a hash iterative framework, that eliminates SHA-2's vulernability to length extension attacks. The mixing round of BLAKE is a modified version of the ChaCha cipher.",
