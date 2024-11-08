@@ -33,17 +33,21 @@ impl ClassicHasher for Lm {
     /// This should not be called directly as LM is not meant to encrypt arbitrary bytes
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         if !bytes.is_ascii() {
-            panic!("LM hash accepts only ASCII characters")
+            panic!("LM accepts only ASCII characters")
         }
-        if bytes.len() != 14 {
-            panic!("LM only accept an input of exactly 14 bytes")
+        if bytes.len() > 14 {
+            panic!("LM only accepts inputs of up to 14 bytes")
         }
 
+        let mut input = bytes.to_vec();
+        while input.len() < 14 {
+            input.push(0);
+        }
         let mut cipher = Des::default();
         let mut out = Vec::with_capacity(14);
 
-        let k1 = expand_56_to_64(bytes[0..7].try_into().unwrap());
-        let k2 = expand_56_to_64(bytes[7..14].try_into().unwrap());
+        let k1 = expand_56_to_64(input[0..7].try_into().unwrap());
+        let k2 = expand_56_to_64(input[7..14].try_into().unwrap());
 
         cipher.ksa(k1);
         out.extend(cipher.encrypt_block(LM_WORD).to_be_bytes());
@@ -55,16 +59,8 @@ impl ClassicHasher for Lm {
 
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
         if !text.is_ascii() {
-            return Err(HasherError::general(
-                "LM hash accepts only ASCII characters",
-            ));
+            return Err(HasherError::general("LM accepts only ASCII characters"));
         }
-
-        if text.chars().count() > 14 {
-            return Err(HasherError::general(
-                "LM hash cannot accept a password longer than 14 characters",
-            ));
-        };
 
         let mut input = text.to_uppercase();
         while input.len() < 14 {
