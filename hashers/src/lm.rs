@@ -36,7 +36,7 @@ impl ClassicHasher for Lm {
             panic!("LM hash accepts only ASCII characters")
         }
         if bytes.len() != 14 {
-            panic!("LM must hash exactly 14 bytes")
+            panic!("LM only accept an input of exactly 14 bytes")
         }
 
         let mut cipher = Des::default();
@@ -45,9 +45,9 @@ impl ClassicHasher for Lm {
         let k1 = expand_56_to_64(bytes[0..7].try_into().unwrap());
         let k2 = expand_56_to_64(bytes[7..14].try_into().unwrap());
 
-        cipher.ksa(k1).unwrap();
+        cipher.ksa(k1);
         out.extend(cipher.encrypt_block(LM_WORD).to_be_bytes());
-        cipher.ksa(k2).unwrap();
+        cipher.ksa(k2);
         out.extend(cipher.encrypt_block(LM_WORD).to_be_bytes());
 
         out

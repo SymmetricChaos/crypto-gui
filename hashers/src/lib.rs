@@ -6,6 +6,7 @@ pub mod bcrypt;
 pub mod blake;
 pub mod checksum;
 pub mod cityhash;
+pub mod crypt;
 pub mod errors;
 pub mod fletcher;
 pub mod fnv;
@@ -52,6 +53,18 @@ pub mod vsh;
 //             input_format: ByteFormat::Utf8,
 //             output_format: ByteFormat::Hex,
 //         }
+//     }
+// }
+
+// impl HASHERNAME {
+//     pub fn input(mut self, input: ByteFormat) -> Self {
+//         self.input_format = input;
+//         self
+//     }
+
+//     pub fn output(mut self, output: ByteFormat) -> Self {
+//         self.output_format = output;
+//         self
 //     }
 // }
 

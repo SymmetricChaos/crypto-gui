@@ -149,7 +149,7 @@ pub fn des_ksa(key: u64) -> Result<[u64; 16], CipherError> {
 }
 
 pub fn test_des_key(key: u64) -> Result<(), CipherError> {
-    for byte in key.to_le_bytes() {
+    for byte in key.to_be_bytes() {
         if byte.count_ones() % 2 == 0 {
             return Err(CipherError::key(
                 "all bytes of a DES key must have odd parity, the eighth bit is the parity bit",
@@ -160,13 +160,13 @@ pub fn test_des_key(key: u64) -> Result<(), CipherError> {
 }
 
 pub fn set_des_key_parity(key: u64) -> u64 {
-    let mut bytes = key.to_le_bytes();
+    let mut bytes = key.to_be_bytes();
     for byte in bytes.iter_mut() {
         if byte.count_ones() % 2 != 1 {
             *byte ^= 0x01;
         }
     }
-    u64::from_le_bytes(bytes)
+    u64::from_be_bytes(bytes)
 }
 
 pub fn expand_56_to_64(bytes_56: [u8; 7]) -> u64 {

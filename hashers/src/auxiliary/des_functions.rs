@@ -132,40 +132,27 @@ pub fn round(input: u64, key: u64) -> u64 {
     r | ((f(r, key) ^ l) >> 32)
 }
 
-pub fn des_ksa(key: u64) -> Result<[u64; 16], HasherError> {
-    // test_des_key(key)?;
+pub fn des_ksa(key: u64) -> [u64; 16] {
     let mut subkeys = [0; 16];
     let key = pc1(key) >> 8;
     let mut left: u64 = key.shr(28) & 0x0fff_ffff_u64;
-    let mut right = key & 0x0fff_ffff;
+    let mut right: u64 = key & 0x0fff_ffff;
     for i in 0..16 {
         left = rotate_28(left, KEYSHIFT[i]);
         right = rotate_28(right, KEYSHIFT[i]);
-        // Overwrite the old state
         subkeys[i] = pc2(((left << 28) | right) << 8);
     }
-    Ok(subkeys)
-}
-
-pub fn test_des_key(key: u64) -> Result<(), HasherError> {
-    for byte in key.to_le_bytes() {
-        if byte.count_ones() % 2 == 0 {
-            return Err(HasherError::key(
-                "all bytes of a DES key must have odd parity, the eighth bit is the parity bit",
-            ));
-        }
-    }
-    Ok(())
+    subkeys
 }
 
 pub fn set_des_key_parity(key: u64) -> u64 {
-    let mut bytes = key.to_le_bytes();
+    let mut bytes = key.to_be_bytes();
     for byte in bytes.iter_mut() {
         if byte.count_ones() % 2 != 1 {
             *byte ^= 0x01;
         }
     }
-    u64::from_le_bytes(bytes)
+    u64::from_be_bytes(bytes)
 }
 
 pub fn expand_56_to_64(bytes_56: [u8; 7]) -> u64 {
@@ -212,9 +199,8 @@ impl Default for Des {
 
 impl Des {
     // Key Scheduling Algorithm (key generation)
-    pub fn ksa(&mut self, key: u64) -> Result<(), HasherError> {
-        self.subkeys = des_ksa(key)?;
-        Ok(())
+    pub fn ksa(&mut self, key: u64) {
+        self.subkeys = des_ksa(key);
     }
 
     pub fn encrypt_block(&self, block: u64) -> u64 {
@@ -222,6 +208,6 @@ impl Des {
         for key in self.subkeys.iter() {
             b = round(b, *key);
         }
-        final_permutation((b << 32) | (b >> 32))
+        final_permutation(b.rotate_left(32))
     }
 }

@@ -46,7 +46,7 @@ impl BlockCipher<8> for Des {
         for key in self.subkeys.iter() {
             b = round(b, *key);
         }
-        let f = final_permutation((b << 32) | (b >> 32));
+        let f = final_permutation(b.rotate_left(32));
 
         overwrite_bytes(bytes, &f.to_be_bytes());
     }
@@ -57,7 +57,7 @@ impl BlockCipher<8> for Des {
         for key in self.subkeys.iter().rev() {
             b = round(b, *key);
         }
-        let f = final_permutation((b << 32) | (b >> 32));
+        let f = final_permutation(b.rotate_left(32));
         overwrite_bytes(bytes, &f.to_be_bytes());
     }
 }
