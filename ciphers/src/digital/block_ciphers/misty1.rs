@@ -110,7 +110,7 @@ pub struct Misty1 {
     pub iv: u64,
     pub mode: BCMode,
     pub padding: BCPadding,
-    pub subkeys: [u16; 32],
+    pub subkeys: [u16; 16],
 }
 
 impl Default for Misty1 {
@@ -121,23 +121,24 @@ impl Default for Misty1 {
             iv: 0,
             mode: Default::default(),
             padding: Default::default(),
-            subkeys: [0u16; 32],
+            subkeys: [0u16; 16],
         }
     }
 }
 
 crate::block_cipher_builders! {Misty1, u64}
 
-// impl Misty1 {
 impl Misty1 {
     pub fn ksa(&mut self, bytes: [u8; 16]) {
+        self.subkeys = [0; 16];
         for i in 0..8 {
             self.subkeys[i] = ((bytes[i * 2] as u16) << 8) | bytes[i * 2 + 1] as u16
         }
         for i in 0..8 {
             self.subkeys[i + 8] = fi(self.subkeys[i], self.subkeys[(i + 1) % 8]);
-            self.subkeys[i + 16] = self.subkeys[i + 8] & 0x01ff;
-            self.subkeys[i + 24] = self.subkeys[i + 8] >> 9;
+            // These seem to be for hypothetical extended round variants
+            // self.subkeys[i + 16] = self.subkeys[i + 8] & 0x01ff;
+            // self.subkeys[i + 24] = self.subkeys[i + 8] >> 9;
         }
     }
 
@@ -151,28 +152,30 @@ impl BlockCipher<8> for Misty1 {
     fn encrypt_block(&self, bytes: &mut [u8]) {
         let mut v = utils::byte_formatting::make_u32s_be::<2>(bytes);
 
-        v[0] = fl(v[0], &self.subkeys, 0);
-        v[1] = fl(v[1], &self.subkeys, 1);
-        v[1] ^= fo(v[0], &self.subkeys, 0);
-        v[0] ^= fo(v[1], &self.subkeys, 1);
+        let ek = self.subkeys;
 
-        v[0] = fl(v[0], &self.subkeys, 2);
-        v[1] = fl(v[1], &self.subkeys, 3);
-        v[1] ^= fo(v[0], &self.subkeys, 2);
-        v[0] ^= fo(v[1], &self.subkeys, 3);
+        v[0] = fl(v[0], &ek, 0);
+        v[1] = fl(v[1], &ek, 1);
+        v[1] ^= fo(v[0], &ek, 0);
+        v[0] ^= fo(v[1], &ek, 1);
 
-        v[0] = fl(v[0], &self.subkeys, 4);
-        v[1] = fl(v[1], &self.subkeys, 5);
-        v[1] ^= fo(v[0], &self.subkeys, 4);
-        v[0] ^= fo(v[1], &self.subkeys, 5);
+        v[0] = fl(v[0], &ek, 2);
+        v[1] = fl(v[1], &ek, 3);
+        v[1] ^= fo(v[0], &ek, 2);
+        v[0] ^= fo(v[1], &ek, 3);
 
-        v[0] = fl(v[0], &self.subkeys, 6);
-        v[1] = fl(v[1], &self.subkeys, 7);
-        v[1] ^= fo(v[0], &self.subkeys, 6);
-        v[0] ^= fo(v[1], &self.subkeys, 7);
+        v[0] = fl(v[0], &ek, 4);
+        v[1] = fl(v[1], &ek, 5);
+        v[1] ^= fo(v[0], &ek, 4);
+        v[0] ^= fo(v[1], &ek, 5);
 
-        v[0] = fl(v[0], &self.subkeys, 8);
-        v[1] = fl(v[1], &self.subkeys, 9);
+        v[0] = fl(v[0], &ek, 6);
+        v[1] = fl(v[1], &ek, 7);
+        v[1] ^= fo(v[0], &ek, 6);
+        v[0] ^= fo(v[1], &ek, 7);
+
+        v[0] = fl(v[0], &ek, 8);
+        v[1] = fl(v[1], &ek, 9);
 
         v.swap(0, 1);
 
@@ -182,33 +185,44 @@ impl BlockCipher<8> for Misty1 {
     fn decrypt_block(&self, bytes: &mut [u8]) {
         let mut v = utils::byte_formatting::make_u32s_be::<2>(bytes);
 
+        let ek = self.subkeys;
+
         v.swap(0, 1);
 
-        v[0] = fl_inv(v[0], &self.subkeys, 8);
-        v[1] = fl_inv(v[1], &self.subkeys, 9);
+        v[0] = fl_inv(v[0], &ek, 8);
+        v[1] = fl_inv(v[1], &ek, 9);
 
-        v[1] ^= fo(v[0], &self.subkeys, 7);
-        v[0] ^= fo(v[1], &self.subkeys, 6);
-        v[0] = fl_inv(v[0], &self.subkeys, 6);
-        v[1] = fl_inv(v[1], &self.subkeys, 7);
+        v[0] ^= fo(v[1], &ek, 7);
+        v[1] ^= fo(v[0], &ek, 6);
+        v[0] = fl_inv(v[0], &ek, 6);
+        v[1] = fl_inv(v[1], &ek, 7);
 
-        v[1] ^= fo(v[0], &self.subkeys, 5);
-        v[0] ^= fo(v[1], &self.subkeys, 4);
-        v[0] = fl_inv(v[0], &self.subkeys, 4);
-        v[1] = fl_inv(v[1], &self.subkeys, 5);
+        v[0] ^= fo(v[1], &ek, 5);
+        v[1] ^= fo(v[0], &ek, 4);
+        v[0] = fl_inv(v[0], &ek, 4);
+        v[1] = fl_inv(v[1], &ek, 5);
 
-        v[1] ^= fo(v[0], &self.subkeys, 3);
-        v[0] ^= fo(v[1], &self.subkeys, 2);
-        v[0] = fl_inv(v[0], &self.subkeys, 2);
-        v[1] = fl_inv(v[1], &self.subkeys, 3);
+        v[0] ^= fo(v[1], &ek, 3);
+        v[1] ^= fo(v[0], &ek, 2);
+        v[0] = fl_inv(v[0], &ek, 2);
+        v[1] = fl_inv(v[1], &ek, 3);
 
-        v[1] ^= fo(v[0], &self.subkeys, 1);
-        v[0] ^= fo(v[1], &self.subkeys, 0);
-        v[0] = fl_inv(v[0], &self.subkeys, 0);
-        v[1] = fl_inv(v[1], &self.subkeys, 1);
+        v[0] ^= fo(v[1], &ek, 1);
+        v[1] ^= fo(v[0], &ek, 0);
+        v[0] = fl_inv(v[0], &ek, 0);
+        v[1] = fl_inv(v[1], &ek, 1);
 
         utils::byte_formatting::u32s_to_bytes_be(bytes, &v);
     }
 }
 
 crate::impl_cipher_for_block_cipher!(Misty1, 8);
+
+crate::test_block_cipher!(
+    test_1, Misty1::default().with_key([0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff]),
+    [0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef],
+    [0x8b, 0x1d, 0xa5, 0xf5, 0x6a, 0xb3, 0xd0, 0x7c];
+    test_2, Misty1::default().with_key([0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff]),
+    [0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10],
+    [0x04, 0xb6, 0x82, 0x40, 0xb1, 0x3b, 0xe9, 0x5d];
+);

@@ -601,6 +601,18 @@
       "Tactical"
     ]
   },
+  "MISTY1": {
+    "Names": [
+      "MISTY-1"
+    ],
+    "Description": "MISTY1 ",
+    "Authors": "Mitsuru Matsui, Tetsuya Ichikawa, Toru Sorimachi, Toshio Tokita, Atsuhiro Yamagishi",
+    "Publication": "1995",
+    "Traits": [
+      "Block Cipher",
+      "Feistel"
+    ]
+  },
   "Nihilist": {
     "Names": [
       "Nihilist"
