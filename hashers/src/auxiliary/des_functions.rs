@@ -1,4 +1,3 @@
-use crate::errors::HasherError;
 use std::ops::Shr;
 
 use super::des_arrays::{KEYSHIFT, SBOXES};
@@ -88,6 +87,37 @@ pub fn e(block: u64) -> u64 {
     b1 | b2 | b3 | b4 | b5 | b6 | b7 | b8 | b9 | b10
 }
 
+/// Swap bits using the expansion table with a salt
+/// Used in DES based crypt
+pub fn e_salt(block: u64, salt: [bool; 12]) -> u64 {
+    const BLOCK_LEN: usize = 32;
+    const RESULT_LEN: usize = 48;
+
+    let b1 = (block << (BLOCK_LEN - 1)) & 0x8000000000000000;
+    let b2 = (block >> 1) & 0x7c00000000000000;
+    let b3 = (block >> 3) & 0x03f0000000000000;
+    let b4 = (block >> 5) & 0x000fc00000000000;
+    let b5 = (block >> 7) & 0x00003f0000000000;
+    let b6 = (block >> 9) & 0x000000fc00000000;
+    let b7 = (block >> 11) & 0x00000003f0000000;
+    let b8 = (block >> 13) & 0x000000000fc00000;
+    let b9 = (block >> 15) & 0x00000000003e0000;
+    let b10 = (block >> (RESULT_LEN - 1)) & 0x0000000000010000;
+    let mut value = b1 | b2 | b3 | b4 | b5 | b6 | b7 | b8 | b9 | b10;
+
+    // The salt is used to swap bits of the output
+    for (i, b) in salt.into_iter().enumerate() {
+        if b {
+            let lo = (value >> i) & 1;
+            let hi = (value >> (i + 24)) & 1;
+            let x = lo ^ hi;
+            value ^= (x << i) | (x << (i + 24));
+        }
+    }
+
+    value
+}
+
 /// Swap bits using the P table
 pub fn p(block: u64) -> u64 {
     let block = block.rotate_left(44);
@@ -112,6 +142,13 @@ pub fn f(block: u64, key: u64) -> u64 {
     p(v)
 }
 
+pub fn f_salt(block: u64, key: u64, salt: [bool; 12]) -> u64 {
+    let mut v = e_salt(block, salt);
+    v ^= key;
+    v = sboxes(v);
+    p(v)
+}
+
 /// Take an input of 48 bits (in a u64), then take it as eight 6-bit chunks, feed each into a sbox that returns 4-bit value, and stitch those together into a 32-bit value (in a u64)
 /// The data is stored and saved in the upper bits of the u64s, this is the reason for the initial shift values below
 pub fn sboxes(input: u64) -> u64 {
@@ -130,6 +167,13 @@ pub fn round(input: u64, key: u64) -> u64 {
     let r = input << 32;
 
     r | ((f(r, key) ^ l) >> 32)
+}
+
+pub fn round_salt(input: u64, key: u64, salt: [bool; 12]) -> u64 {
+    let l = input & (0xffff_ffff << 32);
+    let r = input << 32;
+
+    r | ((f_salt(r, key, salt) ^ l) >> 32)
 }
 
 pub fn des_ksa(key: u64) -> [u64; 16] {
@@ -207,6 +251,14 @@ impl Des {
         let mut b = initial_permutation(block);
         for key in self.subkeys.iter() {
             b = round(b, *key);
+        }
+        final_permutation(b.rotate_left(32))
+    }
+
+    pub fn encrypt_block_salt(&self, block: u64, salt: [bool; 12]) -> u64 {
+        let mut b = initial_permutation(block);
+        for key in self.subkeys.iter() {
+            b = round_salt(b, *key, salt);
         }
         final_permutation(b.rotate_left(32))
     }
