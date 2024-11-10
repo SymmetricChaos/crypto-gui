@@ -227,6 +227,19 @@ macro_rules! aria {
                 self
             }
 
+            pub fn ksa_u32(&mut self, key: [u32; $key_bytes / 4]) {
+                let mut bytes = [0u8; $key_bytes];
+                for i in 0..($key_bytes / 4) {
+                    bytes[i..i + 4].copy_from_slice(&key[i].to_be_bytes());
+                }
+                self.ksa(bytes)
+            }
+
+            pub fn with_key_u32(mut self, key: [u32; $key_bytes / 4]) -> Self {
+                self.ksa_u32(key);
+                self
+            }
+
             fn double_round_encrypt(&self, mut v: u128, i: usize) -> u128 {
                 v = fo(v, self.subkeys[i]);
                 v = fe(v, self.subkeys[i + 1]);
@@ -280,6 +293,8 @@ macro_rules! aria {
         }
 
         crate::block_cipher_builders! {$name, u128}
+
+        crate::impl_cipher_for_block_cipher!($name, 16);
     };
 }
 

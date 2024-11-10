@@ -13,6 +13,7 @@ mod aes_gcm_controls;
 mod affine_controls;
 mod alberti_controls;
 mod amsco_controls;
+mod aria_controls;
 mod ascon128_controls;
 mod ascon80pq_controls;
 mod b64_controls;
@@ -180,6 +181,7 @@ pub struct CipherInterface {
 
     // Block
     aes: aes_controls::AesFrame,
+    aria: aria_controls::AriaFrame,
     ascon128: ascon128_controls::Ascon128Frame,
     ascon80pq: ascon80pq_controls::Ascon80pqFrame,
     blowfish: blowfish_controls::BlowfishFrame,
@@ -335,6 +337,7 @@ impl CipherInterface {
         combox_box(
             &[
                 CipherId::Aes,
+                CipherId::Aria,
                 CipherId::Ascon128,
                 CipherId::Ascon80pq,
                 CipherId::Blowfish,
@@ -396,6 +399,7 @@ impl CipherInterface {
         match active_cipher {
             CipherId::A51 => &mut self.a51,
             CipherId::A52 => &mut self.a52,
+            CipherId::Aria => &mut self.aria,
             CipherId::Aes => &mut self.aes,
             CipherId::AesGcm => &mut self.aes_gcm,
             CipherId::Adfgvx => &mut self.adfgvx,

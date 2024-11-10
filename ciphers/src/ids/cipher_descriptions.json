@@ -92,6 +92,18 @@
       "Substitution"
     ]
   },
+  "ARIA": {
+    "Names": [
+      "ARIA"
+    ],
+    "Description": "ARIA is a block cipher created in South Korea inspired by AES, accepting the sake options for key sizes and even using the Rijndael S-box for one of its substitution steps.",
+    "Authors": "Kwon, Daesung; Kim, Jaesung; Park, Sangwoo; Sung, Soo Hak; Sohn, Yaekwon; Song, Jung Hwan; Yeom, Yongjin; Yoon, E-Joong; Lee, Sangjin; Lee, Jaewon; Chee, Seongtaek; Han, Daewan; Hong, Jin",
+    "Publication": "2003",
+    "Traits": [
+      "Block Cipher",
+      "SPN"
+    ]
+  },
   "AMSCO": {
     "Names": [
       "AMSCO"
