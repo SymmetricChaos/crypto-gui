@@ -36,6 +36,7 @@ cipher_ids_and_names!(
     Amsco, "AMSCO";
     Ascon128, "ASCON-128";
     Ascon80pq, "ASCON-80pq";
+    Aria, "ARIA";
     A51, "A5/1";
     A52, "A5/2";
     A53, "A5/3";
@@ -58,6 +59,7 @@ cipher_ids_and_names!(
     DiagonalColumnar, "Diagonal Columnar";
     DiffieHellman, "Diffie-Hellman";
     Dryad, "DRYAD";
+    E2, "E2";
     ElGamal, "ElGamal";
     Enigma, "Enigma";
     FealNx, "FEAL-NX";

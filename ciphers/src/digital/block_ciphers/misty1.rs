@@ -158,23 +158,23 @@ impl BlockCipher<8> for Misty1 {
 
         let ek = self.subkeys;
 
-        v[0] = fl(v[0], &ek, 0);
         v[1] = fl(v[1], &ek, 1);
+        v[0] = fl(v[0], &ek, 0);
         v[1] ^= fo(v[0], &ek, 0);
         v[0] ^= fo(v[1], &ek, 1);
 
-        v[0] = fl(v[0], &ek, 2);
         v[1] = fl(v[1], &ek, 3);
+        v[0] = fl(v[0], &ek, 2);
         v[1] ^= fo(v[0], &ek, 2);
         v[0] ^= fo(v[1], &ek, 3);
 
-        v[0] = fl(v[0], &ek, 4);
         v[1] = fl(v[1], &ek, 5);
+        v[0] = fl(v[0], &ek, 4);
         v[1] ^= fo(v[0], &ek, 4);
         v[0] ^= fo(v[1], &ek, 5);
 
-        v[0] = fl(v[0], &ek, 6);
         v[1] = fl(v[1], &ek, 7);
+        v[0] = fl(v[0], &ek, 6);
         v[1] ^= fo(v[0], &ek, 6);
         v[0] ^= fo(v[1], &ek, 7);
 

@@ -605,7 +605,7 @@
     "Names": [
       "MISTY-1"
     ],
-    "Description": "MISTY1 ",
+    "Description": "MISTY1 is a block cipher created at the Mistubishi Electric Corportion. It has a 128-bit key and operates on 64-bit blocks. The round function of the eight round Feistel network is itself a smaller three round Feistel network. It was eventually suceeded by KASUMI and Camellia.",
     "Authors": "Mitsuru Matsui, Tetsuya Ichikawa, Toru Sorimachi, Toshio Tokita, Atsuhiro Yamagishi",
     "Publication": "1995",
     "Traits": [
