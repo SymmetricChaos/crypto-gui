@@ -76,12 +76,12 @@ impl HasherFrame for LmFrame {
                     .unwrap(),
             );
 
-            self.des.ksa(k1).unwrap();
+            self.des.ksa(k1);
             self.h1 = self
                 .hasher
                 .output_format
                 .byte_slice_to_text(&self.des.encrypt_block(LM_WORD).to_be_bytes());
-            self.des.ksa(k2).unwrap();
+            self.des.ksa(k2);
             self.h2 = self
                 .hasher
                 .output_format
