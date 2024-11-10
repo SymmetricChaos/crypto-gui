@@ -1,4 +1,5 @@
 pub mod aes;
+pub mod aria;
 pub mod ascon;
 pub mod block_cipher;
 pub mod blowfish;
