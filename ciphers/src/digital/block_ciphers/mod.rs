@@ -5,6 +5,7 @@ pub mod block_cipher;
 pub mod blowfish;
 pub mod camellia;
 pub mod des;
+pub mod e2;
 pub mod fealnx;
 pub mod gift;
 pub mod gost;
@@ -21,6 +22,7 @@ pub mod rc6;
 pub mod seed;
 pub mod serpent;
 pub mod simon;
+pub mod skipjack;
 pub mod sm4;
 pub mod speck;
 pub mod tea;
@@ -49,7 +51,7 @@ pub mod twofish;
 //     }
 // }
 // crate::block_cipher_builders! {CIPHERNAME, IV_TYPE}
-// impl Misty1 {
+// impl CIPHERNAME {
 //     pub fn ksa(&mut self, bytes: [u8; KEYBYTES]) {}
 //     pub fn with_key(mut self, bytes: [u8; KEYBYTES]) -> Self {
 //         self.ksa(bytes);

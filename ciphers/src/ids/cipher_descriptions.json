@@ -402,6 +402,18 @@
       "Stream Cipher"
     ]
   },
+  "E2": {
+    "Names": [
+      "E2"
+    ],
+    "Description": "The E0 block cipher was an AES candidate produced by Japan's NTT. It has since been replaced by Camellia.",
+    "Authors": null,
+    "Publication": "1998",
+    "Traits": [
+      "Block Cipher",
+      "Feistel"
+    ]
+  },
   "ElGamal": {
     "Names": [
       "ElGamal"
@@ -936,6 +948,18 @@
       "Feistel"
     ]
   },
+  "Skipjack": {
+    "Names": [
+      "Skipjack"
+    ],
+    "Description": "Skipjack is a block cipher developed by the US National Security Agency as part of the Clipper chip program. Although Skipjack's small 80-bit key makes it inherently vulnerable the design has not otherwise been found to have serious flaws. However the design of the Clipper chip program was severely flawed regardless of the strength of the cipher used.",
+    "Authors": "US National Security Agency",
+    "Publication": "c1993",
+    "Traits": [
+      "Block Cipher",
+      "Feistel"
+    ]
+  },
   "Slidefair": {
     "Names": [
       "Slidefair"
@@ -957,7 +981,7 @@
     ],
     "Description": "SM4 (Chinese: 商密4, English: ShāngMì 4) is a block cipher published by the Chinese Academy of Sciences which was approved as an ISO/IEC standard named SM4 in 2021. It uses a 32 Feistel network",
     "Authors": "Chinese Academy of Sciences",
-    "Publication": 2006,
+    "Publication": "2006",
     "Traits": [
       "Block Cipher",
       "Feistel"

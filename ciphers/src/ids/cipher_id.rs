@@ -104,6 +104,7 @@ cipher_ids_and_names!(
     Sigaba, "SIGABA";
     Simon, "Simon";
     Slidefair, "Slidefair";
+    Skipjack, "Skipjack";
     Sm4, "SM4";
     Speck, "Speck";
     Substitution, "Substitution";
