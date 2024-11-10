@@ -1,5 +1,5 @@
 use super::CipherFrame;
-use crate::ui_elements::{block_cipher_iv_128, block_cipher_mode_and_padding, UiElements};
+use crate::ui_elements::{block_cipher_iv_64, block_cipher_mode_and_padding, UiElements};
 
 use ciphers::{digital::block_ciphers::misty1::Misty1, Cipher};
 use egui::Ui;
@@ -55,48 +55,23 @@ impl CipherFrame for Misty1Frame {
 
         ui.add_space(8.0);
 
-        block_cipher_iv_128(ui, &mut self.cipher128.iv, self.cipher128.mode);
+        block_cipher_iv_64(ui, &mut self.cipher.iv, self.cipher.mode);
         ui.add_space(16.0);
     }
 
     fn cipher(&self) -> &dyn Cipher {
-        match self.selector {
-            AesSelect::Aes128 => &self.cipher128,
-            AesSelect::Aes192 => &self.cipher192,
-            AesSelect::Aes256 => &self.cipher256,
-        }
+        &self.cipher
     }
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        match self.selector {
-            AesSelect::Aes128 => {
-                for k in self.key128.iter_mut() {
-                    *k = rng.gen()
-                }
-                self.cipher128.ksa_u32(self.key128);
-                if self.cipher128.mode.iv_needed() {
-                    self.cipher128.iv = rng.gen();
-                }
-            }
-            AesSelect::Aes192 => {
-                for k in self.key192.iter_mut() {
-                    *k = rng.gen()
-                }
-                self.cipher192.ksa_u32(self.key192);
-                if self.cipher192.mode.iv_needed() {
-                    self.cipher192.iv = rng.gen();
-                }
-            }
-            AesSelect::Aes256 => {
-                for k in self.key256.iter_mut() {
-                    *k = rng.gen()
-                }
-                self.cipher256.ksa_u32(self.key256);
-                if self.cipher256.mode.iv_needed() {
-                    self.cipher256.iv = rng.gen();
-                }
-            }
+
+        for k in self.key.iter_mut() {
+            *k = rng.gen()
+        }
+        self.cipher.ksa_u32(self.key);
+        if self.cipher.mode.iv_needed() {
+            self.cipher.iv = rng.gen();
         }
     }
 
