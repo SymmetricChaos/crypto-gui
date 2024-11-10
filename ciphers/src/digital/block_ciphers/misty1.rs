@@ -150,6 +150,19 @@ impl Misty1 {
         self.ksa(bytes);
         self
     }
+
+    pub fn ksa_u32(&mut self, key: [u32; 4]) {
+        let mut bytes = [0u8; 16];
+        for i in 0..4 {
+            bytes[i..i + 4].copy_from_slice(&key[i].to_be_bytes());
+        }
+        self.ksa(bytes)
+    }
+
+    pub fn with_key_u32(mut self, key: [u32; 4]) -> Self {
+        self.ksa_u32(key);
+        self
+    }
 }
 
 impl BlockCipher<8> for Misty1 {

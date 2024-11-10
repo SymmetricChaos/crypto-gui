@@ -48,6 +48,7 @@ mod idea_controls;
 mod lea_controls;
 mod m209_controls;
 mod m94_controls;
+mod misty1_controls;
 mod nihilist_controls;
 mod playfair_controls;
 mod plugboard_controls;
