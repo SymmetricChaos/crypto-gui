@@ -60,11 +60,15 @@ fn fo(x: u32, ek: &[u16], k: usize) -> u32 {
     a ^= ek[k];
     a = fi(a, ek[(k + 5) % 8 + 8]);
     a ^= b;
+
     b ^= ek[(k + 2) % 8];
     b = fi(b, ek[(k + 1) % 8 + 8]);
     b ^= a;
+
     a ^= ek[(k + 7) % 8];
+    a = fi(a, ek[(k + 3) % 8 + 8]);
     a ^= b;
+
     b ^= ek[(k + 4) % 8];
     ((b as u32) << 16) | a as u32
 }
@@ -74,8 +78,8 @@ fn fi(x: u16, key: u16) -> u16 {
     let mut d7 = x & 0x7f; // seven bits used
     d9 = S9[d9 as usize] ^ d7;
     d7 = (S7[d7 as usize] ^ d9) & 0x7f;
-    d7 ^= key >> 9;
-    d9 ^= key & 0x1ff;
+    d7 ^= key >> 9; // these keys can be pre-calculated
+    d9 ^= key & 0x1ff; // these keys can be pre-calculated
     d9 = S9[d9 as usize] ^ d7;
     (d7 << 9) | d9
 }
@@ -121,7 +125,7 @@ impl Default for Misty1 {
             iv: 0,
             mode: Default::default(),
             padding: Default::default(),
-            subkeys: [0u16; 16],
+            subkeys: [0; 16],
         }
     }
 }
@@ -131,14 +135,14 @@ crate::block_cipher_builders! {Misty1, u64}
 impl Misty1 {
     pub fn ksa(&mut self, bytes: [u8; 16]) {
         self.subkeys = [0; 16];
+        // This creates the keys called K in the paper
         for i in 0..8 {
             self.subkeys[i] = ((bytes[i * 2] as u16) << 8) | bytes[i * 2 + 1] as u16
         }
+        // This creates the keys called K' in the paper
+        // Some versions generate a total of 32 keys but this implementation derives those keys during encryption as only shifts and AND masks are used
         for i in 0..8 {
             self.subkeys[i + 8] = fi(self.subkeys[i], self.subkeys[(i + 1) % 8]);
-            // These seem to be for hypothetical extended round variants
-            // self.subkeys[i + 16] = self.subkeys[i + 8] & 0x01ff;
-            // self.subkeys[i + 24] = self.subkeys[i + 8] >> 9;
         }
     }
 
