@@ -81,6 +81,7 @@ pub trait BlockCipher<const N: usize> {
             // XOR the mask into the plaintext at the source, creating ciphertext
             xor_into_bytes(ptext, &mask);
 
+            // Step the counter
             incr_array_ctr(&mut ctr);
         }
     }
@@ -143,8 +144,8 @@ pub trait BlockCipher<const N: usize> {
             // Save the plaintext
             let saved_ptext = ptext.to_vec();
 
-            // XOR the plaintext into the previous ciphertext (or the IV), creating a mixed array
-            xor_into_bytes(&mut chain, &saved_ptext);
+            // XOR the plaintext into the chain, creating a mixed array
+            xor_into_bytes(&mut chain, &ptext);
 
             // Encrypt the mixed value, producing ciphertext
             self.encrypt_block(&mut chain);

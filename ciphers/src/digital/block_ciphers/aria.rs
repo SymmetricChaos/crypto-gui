@@ -240,6 +240,19 @@ macro_rules! aria {
                 self
             }
 
+            pub fn ksa_u64(&mut self, key: [u64; $key_bytes / 8]) {
+                let mut bytes = [0u8; $key_bytes];
+                for i in 0..($key_bytes / 8) {
+                    bytes[i..i + 8].copy_from_slice(&key[i].to_be_bytes());
+                }
+                self.ksa(bytes)
+            }
+
+            pub fn with_key_u64(mut self, key: [u64; $key_bytes / 8]) -> Self {
+                self.ksa_u64(key);
+                self
+            }
+
             fn double_round_encrypt(&self, mut v: u128, i: usize) -> u128 {
                 v = fo(v, self.subkeys[i]);
                 v = fe(v, self.subkeys[i + 1]);
