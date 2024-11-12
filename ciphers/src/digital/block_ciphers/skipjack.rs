@@ -145,10 +145,12 @@ impl BlockCipher<8> for Skipjack {
 
         v.reverse();
 
-        u16s_to_bytes_be(bytes, &v);
+        u16s_to_bytes_le(bytes, &v);
     }
     fn decrypt_block(&self, bytes: &mut [u8]) {
-        let mut v = make_u16s_be::<4>(bytes);
+        let mut v = make_u16s_le::<4>(bytes);
+
+        v.reverse();
 
         v = b_inv(v, 32, &self.key);
         v = b_inv(v, 31, &self.key);
