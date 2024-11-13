@@ -1,6 +1,8 @@
+use super::block_cipher::{BCMode, BCPadding, BlockCipher};
 use utils::byte_formatting::ByteFormat;
 
-use super::block_cipher::{BCMode, BCPadding, BlockCipher};
+// https://github.com/RustCrypto/block-ciphers/tree/master/gift/src
+// https://eprint.iacr.org/2020/412.pdf
 
 // const SBOX: [u8; 16] = [
 //     0x1, 0xa, 0x4, 0xc, 0x6, 0xf, 0x3, 0x9, 0x2, 0xd, 0xb, 0x7, 0x5, 0x0, 0x8, 0xe,
@@ -10,31 +12,59 @@ use super::block_cipher::{BCMode, BCPadding, BlockCipher};
 //     0xd, 0x0, 0x8, 0x6, 0x2, 0xc, 0x4, 0xb, 0xe, 0x7, 0x1, 0xa, 0x3, 0x9, 0xf, 0x5,
 // ];
 
-const RC: [u8; 48] = [
-    0x01, 0x03, 0x07, 0x0F, 0x1F, 0x3E, 0x3D, 0x3B, 0x37, 0x2F, 0x1E, 0x3C, 0x39, 0x33, 0x27, 0x0E,
-    0x1D, 0x3A, 0x35, 0x2B, 0x16, 0x2C, 0x18, 0x30, 0x21, 0x02, 0x05, 0x0B, 0x17, 0x2E, 0x1C, 0x38,
-    0x31, 0x23, 0x06, 0x0D, 0x1B, 0x36, 0x2D, 0x1A, 0x34, 0x29, 0x12, 0x24, 0x08, 0x11, 0x22, 0x04,
+// const PERM64: [[usize; 16]; 4] = [
+//     [0, 12, 8, 4, 1, 13, 9, 5, 2, 14, 10, 6, 3, 15, 11, 7],
+//     [4, 0, 12, 8, 5, 1, 13, 9, 6, 2, 14, 10, 7, 3, 15, 11],
+//     [8, 4, 0, 12, 9, 5, 1, 13, 10, 6, 2, 14, 11, 7, 3, 15],
+//     [12, 8, 4, 0, 13, 9, 5, 1, 14, 10, 6, 2, 15, 11, 7, 3],
+// ];
+
+// const PERM128: [[usize; 32]; 4] = [
+//     [
+//         0, 24, 16, 8, 1, 25, 17, 9, 2, 26, 18, 10, 3, 27, 19, 11, 4, 28, 20, 12, 5, 29, 21, 13, 6,
+//         30, 22, 14, 7, 31, 23, 15,
+//     ],
+//     [
+//         8, 0, 24, 16, 9, 1, 25, 17, 10, 2, 26, 18, 11, 3, 27, 19, 12, 4, 28, 20, 13, 5, 29, 21, 14,
+//         6, 30, 22, 15, 7, 31, 23,
+//     ],
+//     [
+//         16, 8, 0, 24, 17, 9, 1, 25, 18, 10, 2, 26, 19, 11, 3, 27, 20, 12, 4, 28, 21, 13, 5, 29, 22,
+//         14, 6, 30, 23, 15, 7, 31,
+//     ],
+//     [
+//         24, 16, 8, 0, 25, 17, 9, 1, 26, 18, 10, 2, 27, 19, 11, 3, 28, 20, 12, 4, 29, 21, 13, 5, 30,
+//         22, 14, 6, 31, 23, 15, 7,
+//     ],
+// ];
+
+const RC: [u32; 40] = [
+    0x10000008, 0x80018000, 0x54000002, 0x01010181, 0x8000001f, 0x10888880, 0x6001e000, 0x51500002,
+    0x03030180, 0x8000002f, 0x10088880, 0x60016000, 0x41500002, 0x03030080, 0x80000027, 0x10008880,
+    0x4001e000, 0x11500002, 0x03020180, 0x8000002b, 0x10080880, 0x60014000, 0x01400002, 0x02020080,
+    0x80000021, 0x10000080, 0x0001c000, 0x51000002, 0x03010180, 0x8000002e, 0x10088800, 0x60012000,
+    0x40500002, 0x01030080, 0x80000006, 0x10008808, 0xc001a000, 0x14500002, 0x01020181, 0x8000001a,
 ];
 
 // Software optimized implementation of the GIFT-128 SBOX from the original paper
-fn sbox(x: &mut [u32; 4]) {
-    x[1] ^= x[0] & x[2];
-    x[0] ^= x[1] & x[3];
-    x[2] ^= x[0] | x[1];
-    x[3] ^= x[2];
-    x[1] ^= x[3];
-    x[3] ^= 0xffffffff;
-    x[2] ^= x[0] & x[1];
+fn sbox(s0: &mut u32, s1: &mut u32, s2: &mut u32, s3: &mut u32) {
+    *s1 ^= *s0 & *s2;
+    *s0 ^= *s1 & *s3;
+    *s2 ^= *s0 | *s1;
+    *s3 ^= *s2;
+    *s1 ^= *s3;
+    *s3 ^= 0xffffffff;
+    *s2 ^= *s0 & *s1;
 }
 
-fn sbox_inv(x: &mut [u32; 4]) {
-    x[2] ^= x[3] & x[1];
-    x[0] ^= 0xffffffff;
-    x[1] ^= x[0];
-    x[0] ^= x[2];
-    x[2] ^= x[3] | x[1];
-    x[3] ^= x[1] & x[0];
-    x[1] ^= x[3] & x[2];
+fn sbox_inv(s0: &mut u32, s1: &mut u32, s2: &mut u32, s3: &mut u32) {
+    *s2 ^= *s3 & *s1;
+    *s0 ^= 0xffffffff;
+    *s1 ^= *s0;
+    *s0 ^= *s2;
+    *s2 ^= *s3 | *s1;
+    *s3 ^= *s1 & *s0;
+    *s1 ^= *s3 & *s2;
 }
 
 // Each 4-bit nibble is rotated one bit toward the LSB (to the right)
@@ -83,8 +113,8 @@ fn swapmove(a: &mut u32, b: &mut u32, mask: u32, n: u8) {
     *a ^= tmp << n;
 }
 
-// swap the bits in the word masked by M, with the bits in of the word masked by (M << N)
-// In the paper this is just swampmode with a == b but that's not feasible in Rust
+// swap the bits in the word masked by M, with the bits of the word masked by (M << N)
+// In the paper this is just swampmove with a == b but that's not feasible in Rust
 fn swapmove_single(a: &mut u32, mask: u32, n: u8) {
     let tmp = (*a ^ (*a >> n)) & mask;
     *a ^= tmp;
@@ -154,9 +184,99 @@ fn unpack(block: &[u32; 4], bytes: &mut [u8]) {
     bytes[15] = (s0 & 0xff) as u8;
 }
 
-fn sub_cells() {}
+pub fn quintuple_round(x: &mut [u32; 4], round_keys: &[u32], index: usize) {
+    let [s0, s1, s2, s3] = x;
+    sbox(s0, s1, s2, s3);
+    *s3 = nibble_ror_1(s3);
+    *s1 = nibble_ror_2(s1);
+    *s2 = nibble_ror_3(s2);
+    *s1 ^= round_keys[index + 0];
+    *s2 ^= round_keys[index + 1];
+    *s0 ^= RC[index + 0];
 
-fn perm_bits() {}
+    sbox(s3, s1, s2, s0);
+    *s3 = half_ror_4(s3);
+    *s1 = half_ror_8(s1);
+    *s2 = half_ror_12(s2);
+    *s1 ^= round_keys[index + 2];
+    *s2 ^= round_keys[index + 3];
+    *s3 ^= RC[index + 1];
+
+    sbox(s0, s1, s2, s3);
+    *s2 = s2.rotate_right(16);
+    *s3 = s3.rotate_right(16);
+    swapmove_single(s1, 0x55555555, 1);
+    swapmove_single(s2, 0x00005555, 1);
+    swapmove_single(s3, 0x55550000, 1);
+    *s1 ^= round_keys[index + 4];
+    *s2 ^= round_keys[index + 5];
+    *s0 ^= RC[index + 2];
+
+    sbox(s3, s1, s2, s0);
+    *s2 = byte_ror_2(s2);
+    *s1 = byte_ror_4(s1);
+    *s0 = byte_ror_6(s0);
+    *s1 ^= round_keys[index + 6];
+    *s2 ^= round_keys[index + 7];
+    *s3 ^= RC[index + 3];
+
+    sbox(s0, s1, s2, s3);
+    *s2 = s2.rotate_right(8);
+    *s1 = s1.rotate_right(16);
+    *s3 = s3.rotate_right(24);
+    *s1 ^= round_keys[index + 8];
+    *s2 ^= round_keys[index + 9];
+    *s3 ^= RC[index + 4];
+
+    std::mem::swap(s0, s3);
+}
+
+pub fn quintuple_round_inv(x: &mut [u32; 4], round_keys: &[u32], index: usize) {
+    let [s0, s1, s2, s3] = x;
+    std::mem::swap(s0, s3);
+
+    *s1 ^= round_keys[index + 8];
+    *s2 ^= round_keys[index + 9];
+    *s3 ^= RC[index + 4];
+    *s3 = s3.rotate_right(8);
+    *s1 = s1.rotate_right(16);
+    *s2 = s2.rotate_right(24);
+    sbox_inv(s3, s1, s2, s0);
+
+    *s1 ^= round_keys[index + 6];
+    *s2 ^= round_keys[index + 7];
+    *s3 ^= RC[index + 3];
+    *s0 = byte_ror_2(s0);
+    *s1 = byte_ror_4(s1);
+    *s2 = byte_ror_6(s2);
+    sbox_inv(s0, s1, s2, s3);
+
+    *s1 ^= round_keys[index + 4];
+    *s2 ^= round_keys[index + 5];
+    *s0 ^= RC[index + 2];
+    swapmove_single(s1, 0x55555555, 1);
+    swapmove_single(s2, 0x00005555, 1);
+    swapmove_single(s3, 0x55550000, 1);
+    *s2 = s2.rotate_right(16);
+    *s3 = s3.rotate_right(16);
+    sbox_inv(s3, s1, s2, s0);
+
+    *s1 ^= round_keys[index + 2];
+    *s2 ^= round_keys[index + 3];
+    *s3 ^= RC[index + 1];
+    *s2 = half_ror_4(s2);
+    *s1 = half_ror_8(s1);
+    *s3 = half_ror_12(s3);
+    sbox_inv(s0, s1, s2, s3);
+
+    *s1 ^= round_keys[index + 0];
+    *s2 ^= round_keys[index + 1];
+    *s0 ^= RC[index + 0];
+    *s3 = nibble_ror_1(s3);
+    *s1 = nibble_ror_2(s1);
+    *s2 = nibble_ror_3(s2);
+    sbox_inv(s3, s1, s2, s0);
+}
 
 // pub struct Gift64 {
 //     pub input_format: ByteFormat,
@@ -207,9 +327,9 @@ pub struct Gift128 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
     pub iv: u128,
-    pub round_keys: [u32; 80],
     pub mode: BCMode,
     pub padding: BCPadding,
+    pub round_keys: [u32; 80],
 }
 
 crate::block_cipher_builders! {Gift128, u128}
@@ -220,9 +340,9 @@ impl Default for Gift128 {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
             iv: 0,
-            round_keys: [0; 80],
             mode: Default::default(),
             padding: Default::default(),
+            round_keys: [0; 80],
         }
     }
 }
@@ -240,27 +360,15 @@ impl Gift128 {
         self.ksa(bytes);
         self
     }
-
-    pub fn round(x: &mut [u32; 4], rk: [u32; 2], rc: u32) {
-        sbox(x);
-        x[3] = nibble_ror_1(&x[3]);
-        x[1] = nibble_ror_2(&x[1]);
-        x[2] = nibble_ror_3(&x[2]);
-        x[1] ^= rk[0];
-        x[2] ^= rk[1];
-        x[0] ^= rc;
-    }
-
-    pub fn round_inv(x: &mut [u32; 4], rk: [u32; 2], rc: u32) {
-        sbox_inv(x);
-    }
 }
 
 impl BlockCipher<16> for Gift128 {
     fn encrypt_block(&self, bytes: &mut [u8]) {
         let mut v = [0u32; 4];
         pack(&mut v, bytes);
-        for i in 0..40 {}
+        for i in (0..40).step_by(5) {
+            quintuple_round(&mut v, &self.round_keys, i);
+        }
         unpack(&v, bytes);
     }
 
