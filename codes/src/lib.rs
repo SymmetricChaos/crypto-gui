@@ -12,3 +12,4 @@ pub mod errors;
 pub mod ids;
 pub mod letter_word_code;
 pub mod traits;
+pub mod compression;

@@ -16,3 +16,4 @@ pub mod roman_numeral;
 pub mod symmetric_unary;
 pub mod twos_complement;
 pub mod unary;
+pub mod arithmetic;
