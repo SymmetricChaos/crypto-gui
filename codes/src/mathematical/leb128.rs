@@ -5,7 +5,7 @@ use crate::{errors::CodeError, traits::Code};
 const MASK: u8 = 0b01111111;
 const HIGH_BIT: u8 = 0b10000000;
 
-pub fn i64_leb128(n: i64) -> Vec<u8> {
+pub fn i128_leb128(n: i128) -> Vec<u8> {
     if n == 0 {
         return vec![0];
     }
@@ -14,7 +14,7 @@ pub fn i64_leb128(n: i64) -> Vec<u8> {
     let mut out = Vec::with_capacity(8);
     while more {
         let mut b = (n as u8) & MASK;
-        n = n >> 7; // for i64 Rust makes this an arithmetic shift
+        n = n >> 7; // for i128 Rust makes this an arithmetic shift
         let sign_clear = ((b >> 6) & 1) == 0;
         if (n == 0 && sign_clear) || (n == -1 && !sign_clear) {
             more = false;
@@ -28,15 +28,15 @@ pub fn i64_leb128(n: i64) -> Vec<u8> {
     out
 }
 
-pub fn leb128_to_i64<T: AsRef<[u8]>>(v: T) -> i64 {
+pub fn leb128_to_i128<T: AsRef<[u8]>>(v: T) -> i128 {
     let mut out = 0;
     let mut shift = 0;
-    let size = 64;
+    let size = 128;
     let mut bytes = v.as_ref().iter();
     let mut b: u8;
     loop {
         b = *bytes.next().unwrap();
-        out |= ((b & MASK) as i64) << shift;
+        out |= ((b & MASK) as i128) << shift;
         shift += 7;
         if ((b >> 7) & 1) == 0 {
             break;
@@ -49,7 +49,7 @@ pub fn leb128_to_i64<T: AsRef<[u8]>>(v: T) -> i64 {
     out
 }
 
-pub fn u64_leb128(n: u64) -> Vec<u8> {
+pub fn u128_leb128(n: u128) -> Vec<u8> {
     if n == 0 {
         return vec![0];
     }
@@ -57,7 +57,7 @@ pub fn u64_leb128(n: u64) -> Vec<u8> {
     let mut out = Vec::with_capacity(8);
     while n != 0 {
         let mut b = (n as u8) & MASK;
-        n = n >> 7; // for u64 Rust makes this a logical shift
+        n = n >> 7; // for u128 Rust makes this a logical shift
         if n != 0 {
             b |= HIGH_BIT;
         }
@@ -66,11 +66,11 @@ pub fn u64_leb128(n: u64) -> Vec<u8> {
     out
 }
 
-pub fn leb128_to_u64<T: AsRef<[u8]>>(v: T) -> u64 {
+pub fn leb128_to_u128<T: AsRef<[u8]>>(v: T) -> u128 {
     let mut out = 0;
     let mut shift = 0;
     for byte in v.as_ref() {
-        out |= ((byte & MASK) as u64) << shift;
+        out |= ((byte & MASK) as u128) << shift;
         shift += 7;
     }
     out
@@ -98,13 +98,15 @@ impl Code for Leb128 {
         let mut v = Vec::new();
         if self.signed {
             for s in strs {
-                let n = i64::from_str_radix(s, 10).map_err(|e| CodeError::input("invalid i64"))?;
-                v.push(self.mode.byte_slice_to_text(i64_leb128(n)));
+                let n = i128::from_str_radix(s, 10)
+                    .map_err(|_| CodeError::input("invalid i128 encountered"))?;
+                v.push(self.mode.byte_slice_to_text(i128_leb128(n)));
             }
         } else {
             for s in strs {
-                let n = u64::from_str_radix(s, 10).map_err(|e| CodeError::input("invalid u64"))?;
-                v.push(self.mode.byte_slice_to_text(u64_leb128(n)));
+                let n = u128::from_str_radix(s, 10)
+                    .map_err(|_| CodeError::input("invalid u128 encountered"))?;
+                v.push(self.mode.byte_slice_to_text(u128_leb128(n)));
             }
         }
         let out = v.join(", ");
@@ -120,7 +122,7 @@ impl Code for Leb128 {
                     .mode
                     .text_to_bytes(s)
                     .map_err(|_| CodeError::input("invalid bytes"))?;
-                v.push(leb128_to_i64(&bytes).to_string());
+                v.push(leb128_to_i128(&bytes).to_string());
             }
         } else {
             for s in strs {
@@ -128,7 +130,7 @@ impl Code for Leb128 {
                     .mode
                     .text_to_bytes(s)
                     .map_err(|_| CodeError::input("invalid bytes"))?;
-                v.push(leb128_to_u64(&bytes).to_string());
+                v.push(leb128_to_u128(&bytes).to_string());
             }
         }
         let out = v.join(", ");
@@ -142,13 +144,13 @@ mod leb128_tests {
 
     #[test]
     fn test_unsigned() {
-        assert_eq!(vec![0xe5, 0x8e, 0x26], u64_leb128(624485));
-        assert_eq!(624485, leb128_to_u64([0xe5, 0x8e, 0x26]));
+        assert_eq!(vec![0xe5, 0x8e, 0x26], u128_leb128(624485));
+        assert_eq!(624485, leb128_to_u128([0xe5, 0x8e, 0x26]));
     }
 
     #[test]
     fn test_signed() {
-        assert_eq!(vec![0xc0, 0xbb, 0x78], i64_leb128(-123456));
-        assert_eq!(-123456, leb128_to_i64([0xc0, 0xbb, 0x78]))
+        assert_eq!(vec![0xc0, 0xbb, 0x78], i128_leb128(-123456));
+        assert_eq!(-123456, leb128_to_i128([0xc0, 0xbb, 0x78]))
     }
 }
