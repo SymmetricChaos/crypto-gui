@@ -9,19 +9,22 @@ pub fn i128_leb128(n: i128) -> Vec<u8> {
     if n == 0 {
         return vec![0];
     }
+    // let neg = n < 0;
     let mut more = true;
     let mut n = n;
     let mut out = Vec::with_capacity(8);
     while more {
         let mut b = (n as u8) & MASK;
         n = n >> 7; // for i128 Rust makes this an arithmetic shift
+
+        // if neg {
+        //     n |= !0 << (128 - 7)
+        // }
         let sign_clear = ((b >> 6) & 1) == 0;
         if (n == 0 && sign_clear) || (n == -1 && !sign_clear) {
             more = false;
         } else {
-            if n != 0 {
-                b |= HIGH_BIT;
-            }
+            b |= HIGH_BIT;
         }
         out.push(b);
     }
@@ -31,7 +34,6 @@ pub fn i128_leb128(n: i128) -> Vec<u8> {
 pub fn leb128_to_i128<T: AsRef<[u8]>>(v: T) -> i128 {
     let mut out = 0;
     let mut shift = 0;
-    let size = 128;
     let mut bytes = v.as_ref().iter();
     let mut b: u8;
     loop {
@@ -43,7 +45,7 @@ pub fn leb128_to_i128<T: AsRef<[u8]>>(v: T) -> i128 {
         }
     }
     let sign_set = ((b >> 6) & 1) == 1;
-    if (shift < size) && sign_set {
+    if (shift < 128) && sign_set {
         out |= !0 << shift
     }
     out
@@ -90,7 +92,17 @@ impl Default for Leb128 {
     }
 }
 
-impl Leb128 {}
+impl Leb128 {
+    pub fn mode(mut self, mode: ByteFormat) -> Self {
+        self.mode = mode;
+        self
+    }
+
+    pub fn signed(mut self, signed: bool) -> Self {
+        self.signed = signed;
+        self
+    }
+}
 
 impl Code for Leb128 {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
@@ -145,12 +157,26 @@ mod leb128_tests {
     #[test]
     fn test_unsigned() {
         assert_eq!(vec![0xe5, 0x8e, 0x26], u128_leb128(624485));
-        assert_eq!(624485, leb128_to_u128([0xe5, 0x8e, 0x26]));
+        assert_eq!(624485, leb128_to_u128([0xe5, 0x8e, 0x26]))
     }
 
     #[test]
     fn test_signed() {
         assert_eq!(vec![0xc0, 0xbb, 0x78], i128_leb128(-123456));
         assert_eq!(-123456, leb128_to_i128([0xc0, 0xbb, 0x78]))
+    }
+
+    #[test]
+    fn encode_decode_unsigned() {
+        let x = "0, 12, 345, 6789, 10111, 213141, 5161718, 19202122, 232425262, 7282930313";
+        let code = Leb128::default();
+        assert_eq!(x, &code.decode(&code.encode(x).unwrap()).unwrap());
+    }
+
+    #[test]
+    fn encode_decode_signed() {
+        let x = "0, -12, 345, -6789, 10111, -213141, 5161718, -19202122, 232425262, -7282930313";
+        let code = Leb128::default().signed(true);
+        assert_eq!(x, &code.decode(&code.encode(x).unwrap()).unwrap());
     }
 }
