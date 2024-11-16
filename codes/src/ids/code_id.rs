@@ -47,6 +47,7 @@ code_ids_and_names!(
     Bytewords, "Bytewords";
     Ccsid, "CCSID";
     CcsidBinary, "CCSID";
+    Combinadic, "Combinadic";
     CyclicRedundancyCheck, "Cyclic Redundancy Check";
     Damm, "Damm";
     Elias, "Elias";
@@ -69,6 +70,7 @@ code_ids_and_names!(
     Needle, "Needle";
     ParityBit, "Parity Bit";
     Pgp, "PGP Words";
+    Primorial, "Primorial";
     Punycode, "Punycode";
     Repetition, "Repetition";
     Romaji, "Romaji";

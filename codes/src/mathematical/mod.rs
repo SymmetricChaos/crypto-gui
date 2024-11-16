@@ -14,6 +14,7 @@ pub mod gray;
 pub mod leb128;
 pub mod levenshtein;
 pub mod levenshtein_integers;
+pub mod primorial;
 pub mod roman_numeral;
 pub mod symmetric_unary;
 pub mod twos_complement;
