@@ -336,7 +336,7 @@ impl CodeInterface {
             CodeId::Upc => &mut self.upc,
             CodeId::Verhoeff => &mut self.verhoeff,
             CodeId::Wabun => &mut self.wabun,
-            _ => panic!("unknown code selected"),
+            // _ => panic!("unknown code selected"),
         }
     }
 }

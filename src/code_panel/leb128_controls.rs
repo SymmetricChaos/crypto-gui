@@ -1,7 +1,6 @@
 use super::CodeFrame;
-use crate::ui_elements::{integer_letter_code_controls, integer_word_code_controls, UiElements};
-use codes::{letter_word_code::IOMode, mathematical::leb128::Leb128, traits::Code};
-use strum::IntoEnumIterator;
+use crate::ui_elements::UiElements;
+use codes::{mathematical::leb128::Leb128, traits::Code};
 use utils::byte_formatting::ByteFormat;
 
 pub struct Leb128Frame {
