@@ -122,6 +122,7 @@ fn swapmove_single(a: &mut u32, mask: u32, n: u8) {
 }
 
 // load the bytes of input into the block that will be operated on
+// The purpose here is to arrange the bits so that the fixed-slice operations can be applied by the quintuple round
 fn pack(block: &mut [u32; 4], bytes: &[u8]) {
     let mut s0 = u32::from_be_bytes([bytes[6], bytes[7], bytes[14], bytes[15]]);
     let mut s1 = u32::from_be_bytes([bytes[4], bytes[5], bytes[12], bytes[13]]);
@@ -184,6 +185,7 @@ fn unpack(block: &[u32; 4], bytes: &mut [u8]) {
     bytes[15] = (s0 & 0xff) as u8;
 }
 
+// GIFT-128 has 40 total rounds
 pub fn quintuple_round(x: &mut [u32; 4], round_keys: &[u32], index: usize) {
     let [s0, s1, s2, s3] = x;
     sbox(s0, s1, s2, s3);
@@ -349,11 +351,11 @@ impl Default for Gift128 {
 
 impl Gift128 {
     pub fn ksa(&mut self, bytes: [u8; 16]) {
-        let mut rk = [0; 80];
-        rk[0] = u32::from_be_bytes(bytes[12..16].try_into().unwrap());
-        rk[1] = u32::from_be_bytes(bytes[4..8].try_into().unwrap());
-        rk[2] = u32::from_be_bytes(bytes[8..12].try_into().unwrap());
-        rk[3] = u32::from_be_bytes(bytes[0..4].try_into().unwrap());
+        self.round_keys = [0; 80];
+        self.round_keys[0] = u32::from_be_bytes(bytes[12..16].try_into().unwrap());
+        self.round_keys[1] = u32::from_be_bytes(bytes[4..8].try_into().unwrap());
+        self.round_keys[2] = u32::from_be_bytes(bytes[8..12].try_into().unwrap());
+        self.round_keys[3] = u32::from_be_bytes(bytes[0..4].try_into().unwrap());
     }
 
     pub fn with_key(mut self, bytes: [u8; 16]) -> Self {
