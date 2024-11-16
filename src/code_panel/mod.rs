@@ -35,6 +35,7 @@ mod hamming_controls;
 mod ics_flags_controls;
 mod isbn_contols;
 mod itf_controls;
+mod leb128_controls;
 mod levenshtein_controls;
 mod linotype_controls;
 mod luhn_controls;
@@ -153,6 +154,7 @@ pub struct CodeInterface {
     twos_complement: twos_complement_controls::TwosComplementFrame,
     factoradic: factoradic_controls::FactoradicFrame,
     biquinary: biquinary_controls::BiquinaryDecimalFrame,
+    leb128: leb128_controls::Leb128Frame,
 
     // Prefix
     fixed_width: block_controls::BlockCodeFrame,
@@ -220,6 +222,7 @@ impl CodeInterface {
                 CodeId::Fibonacci,
                 CodeId::Godel,
                 CodeId::Gray,
+                CodeId::Leb128,
                 CodeId::Levenshtein,
                 CodeId::RomanNumeral,
                 CodeId::TwosComplement,
@@ -309,6 +312,7 @@ impl CodeInterface {
             CodeId::IcsFlags => &mut self.ics_flags,
             CodeId::Isbn => &mut self.isbn,
             CodeId::Itf => &mut self.itf,
+            CodeId::Leb128 => &mut self.leb128,
             CodeId::Levenshtein => &mut self.levenshtein,
             CodeId::Linotype => &mut self.linotype,
             CodeId::Luhn => &mut self.luhn,
@@ -332,7 +336,7 @@ impl CodeInterface {
             CodeId::Upc => &mut self.upc,
             CodeId::Verhoeff => &mut self.verhoeff,
             CodeId::Wabun => &mut self.wabun,
-            // _ => panic!("unknown code selected"),
+            _ => panic!("unknown code selected"),
         }
     }
 }

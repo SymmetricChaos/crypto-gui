@@ -211,6 +211,14 @@
       "Error Correction"
     ]
   },
+  "LEB128": {
+    "Description": "LEB128 (Little Endian Base 128) is a pair of variable length integer encodings. The unsigned version encodes all non-negative numbers while the signed version encodes all integers. Each byte of the encoding contains seven bits of information about the number, with the eigth bit indicating if there are additional bytes in the code. This allows a sequence of numbers to be encoded as a single stream of bytes.",
+    "Authors": null,
+    "Publication": null,
+    "Traits": [
+      "Integer"
+    ]
+  },
   "Levenshtein": {
     "Description": "The Levenshtein coding is a prefix code that assigns a binary sequence to each non-negative intger. The encoding a universal code, meaning so long as large numbers are less probable than small ones the code is within a constant multiple of the best possible prefix code represent the numbers.",
     "Authors": null,
