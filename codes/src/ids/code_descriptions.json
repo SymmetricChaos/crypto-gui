@@ -3,7 +3,9 @@
     "Description": "The American Standard Code for Information Interchange (ASCII) was created in the 1960s and consists of 128 characters sufficient to write essentially all English text and to control the printing device. Originally a 7-bit code it is now most often seen as an 8-bit code with the leading bit always set to zero. Although it became a defacto standard the limited character set eventually lead to its replacement by Unicode, indeed the common UTF-8 standard contains the 8-bit ASCII codes.\nThere are 34 ASCII control codes. This page accepts both literal control characters and their Unicode control pictures.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Prefix"
+    ]
   },
   "Ascii85": {
     "Description": "Ascii85 is binary-to-text encoding that uses 85 ASCII characters. It works by taking a 32 bit chunk of data and dividing it by 85 until zero is reached, keeping track of remainders. The remainders are then encoded as ASCII characters.",
@@ -42,7 +44,7 @@
     ]
   },
   "Bijective Base-N": {
-    "Description": "In bijective notation every sequence of digits corresponds to exactly one integer. Conversely, in the ordinary representation numbers may have the digit 0 added any number of times on the left without changing the value. Bijective numerals remove the digit 0 entirely, adds an additional numeral with value equal to the base, and keeps the same system for positional values. So in bijective base-10 the number the smallest digit is 1 and the largest digit is A, which has a value of 10. The bijective base-10 number 5A3 thus represents: 5 × 10^2 + A × 10^1 + 3 × 10^0 = 500 + 100 + 3 = 603\n\nThe simple tally or unary representation of numbers (where 1 = 1, 2 = 11, 3 = 111, etc) is the simplest bijective numeral system. Bujective numerals take slightly fewer symbols to write than the ordinary counterparts but cannot represent the number zero at all as it must be a blank space.",
+    "Description": "In bijective notation every sequence of digits corresponds to exactly one integer. Conversely, in the ordinary representation numbers may have the digit 0 added any number of times on the left without changing the value. Bijective numerals remove the digit 0 entirely, add an additional numeral with value equal to the base, and keep the same system for positional values. So in bijective base-10 the smallest digit is 1 and the largest digit is A, which has a value of 10. The bijective base-10 number 5A3 thus represents: 5 × 10^2 + A × 10^1 + 3 × 10^0 = 500 + 100 + 3 = 603\n\nThe simple tally or unary representation of numbers (where 1 = 1, 2 = 11, 3 = 111, etc) is the simplest bijective numeral system. Bujective numerals take slightly fewer symbols to write than the ordinary counterparts but cannot represent the number zero at all as it must be a blank space.",
     "Authors": null,
     "Publication": null,
     "Traits": [
@@ -142,7 +144,8 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
-      "Integer"
+      "Integer",
+      "Prefix"
     ]
   },
   "Factoradic": {
@@ -158,14 +161,17 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
-      "Integer"
+      "Integer",
+      "Prefix"
     ]
   },
   "Fixed-Width": {
     "Description": "In fixed-width codes every code group contains the same number of symbols. Because codes are the same length they can never appear inside of each other and thus are always prefix codes. Specific block codes include: ASCCI, UTF-32, M-of-N codes, and Baudot.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Prefix"
+    ]
   },
   "Gödel": {
     "Description": "Gödel's encoding was designed to allow statements of mathematical logic to be encoded as numbers so that mathematical logic could be applied to itself. The technique is simple: A positive integer is assigned to each word or symbol, then a finite sequence of integers is encoded as the sequence of primes raised to the power of each value and that is multiplied together. The original sequence is recovered by factoring. For example: the sequence of numbers (1, 2, 3) would be encoded as 2^1 × 3^2 × 5^3 = 2 × 9 × 125 = 2250.",
@@ -224,7 +230,8 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
-      "Integer"
+      "Integer",
+      "Prefix"
     ]
   },
   "Linotype": {
@@ -246,7 +253,8 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
-      "Error Correction"
+      "Error Correction",
+      "Prefix"
     ]
   },
   "Morse": {
@@ -283,6 +291,14 @@
       "Binary-to-Text"
     ]
   },
+  "Primorial": {
+    "Description": "The primorial number system is similar to the factorial number system but uses the sequence of primorals, the cumulative product of the primes. Like the factoradics is includes only non-negative integers.",
+    "Authors": null,
+    "Publication": null,
+    "Traits": [
+      "Integer"
+    ]
+  },
   "Punycode": {
     "Description": "Punycode is a method for re-encoding short Unicode strings using only ASCII characters, originally created for use with Internationalized Domain Names. The characters which are not ASCII are stripped out of the string, a delimeter character is placed after the remaining characters, then the non-ASCII characters are encoded onto the end using a method that records their position and Unicode codepoint. For example the sentence \"TạisaohọkhôngthểchỉnóitiếngViệt\" is encoded as \"TisaohkhngthchnitingVit-kjcr8268qyxafd2f1b9g\".",
     "Authors": null,
@@ -304,13 +320,13 @@
     "Traits": null
   },
   "Roman Numeral": {
-    "Description": "Roman Numerals are a now obsolete numeral system derived from an older Etruscan system. Their familiar form was arrived at about 2000 years ago. The symbols I, V, X, L, C, D, M stand for values of 1, 5, 10, 50, 100, 500, and 1000. The simplest use of these symbols is to just add up the values, for readability they are written from largest to smallest going left to right. However this can result is very long representations for numbers that are just under the value of a symbol. To correct for this a symbol with a small value may be placed to the left of one with a large value to indicate the small value should be subtracted. Thus 9 is written IX rather than VIIII. The Romans were not consistent about the use of this rule but modern standardized Roman numerals enforce it by allowed no more than three of a symbol to appear consecutively which also limnits them to numbers less than 4000.",
+    "Description": "Roman Numerals are a now obsolete numeral system derived from an older Etruscan system. Their familiar form was arrived at about 2000 years ago. The symbols I, V, X, L, C, D, M stand for values of 1, 5, 10, 50, 100, 500, and 1000. The simplest use of these symbols is to just add up the values, for readability they are written from largest to smallest going left to right. However this can result is very long representations for numbers that are just under the value of a symbol. To correct for this a symbol with a small value may be placed to the left of one with a large value to indicate the small value should be subtracted. Thus 9 is written IX rather than VIIII. The Romans themselves were not consistent about the use of this rule but modern standardized Roman numerals enforce it by allowing no more than three of a symbol to appear consecutively. The modern system limnits \"correct\" Roman Numerals to being less than 4000. The Romans did occasionally use additional symbols to represent larger values.",
     "Authors": null,
     "Publication": null,
     "Traits": null
   },
   "S\/KEY": {
-    "Description": "The S\/KEY standard covers a system for human readable use of one time passwords. Here is recreated just the binary-to-text encoding used for the 64-bit passwords. Each password is converted into six words representing 11 bits each for a total of 66 bits, the bits of the password followed by a two bit error check.",
+    "Description": "The full S\/KEY standard covers a system for human readable use of one time passwords. Here is recreated just the binary-to-text encoding used for the 64-bit passwords. Each password is converted into six words representing 11 bits each for a total of 66 bits, the bits of the password followed by a two bit error check.",
     "Authors": null,
     "Publication": null,
     "Traits": [
@@ -340,7 +356,8 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
-      "Integer"
+      "Integer",
+      "Prefix"
     ]
   },
   "Tap": {
@@ -360,14 +377,17 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
-      "Integer"
+      "Integer",
+      "Prefix"
     ]
   },
   "Unicode": {
     "Description": "Unicode is the dominant international standard for encoding of text using in most of the world's writing systems with over 100,000 code points defined. There are three major encodings used called UTF-8, UTF-16, and UTF-32.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Prefix"
+    ]
   },
   "Unified English Braille": {
     "Description": "Unified English Braille the form of Braille used internationally for writing in English, though it is not the only form of English Braille in usage. Unlike early Braille UEB is a complete writing system with unique syntax. Most commonly UEB is written in Grade 2 with extensive use of contractions and abbreviations. Here only Grade 1 UEB without those is presented as correct transliteration of Grade 2 UEB is much more complex.",

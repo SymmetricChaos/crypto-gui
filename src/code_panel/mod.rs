@@ -45,6 +45,7 @@ mod needle_controls;
 mod numeric_controls;
 mod parity_check_controls;
 mod pgp_controls;
+mod primoral_controls;
 mod punycode_controls;
 mod repetition_controls;
 mod romaji_controls;
@@ -153,6 +154,7 @@ pub struct CodeInterface {
     roman: roman_numeral_controls::RomanNumeralFrame,
     twos_complement: twos_complement_controls::TwosComplementFrame,
     factoradic: factoradic_controls::FactoradicFrame,
+    primorial: primoral_controls::PrimorialFrame,
     biquinary: biquinary_controls::BiquinaryDecimalFrame,
     leb128: leb128_controls::Leb128Frame,
 
@@ -224,6 +226,7 @@ impl CodeInterface {
                 CodeId::Gray,
                 CodeId::Leb128,
                 CodeId::Levenshtein,
+                CodeId::Primorial,
                 CodeId::RomanNumeral,
                 CodeId::TwosComplement,
                 CodeId::Unary,
@@ -236,9 +239,9 @@ impl CodeInterface {
         combox_box(
             &[
                 CodeId::Ascii,
-                CodeId::FixedWidth,
                 CodeId::Elias,
                 CodeId::Fibonacci,
+                CodeId::FixedWidth,
                 CodeId::Levenshtein,
                 CodeId::MofN,
                 CodeId::Unary,
@@ -321,6 +324,7 @@ impl CodeInterface {
             CodeId::Needle => &mut self.needle,
             CodeId::ParityBit => &mut self.parity_bit,
             CodeId::Pgp => &mut self.pgp,
+            CodeId::Primorial => &mut self.primorial,
             CodeId::Punycode => &mut self.punycode,
             CodeId::Repetition => &mut self.repetition,
             CodeId::Romaji => &mut self.romaji,
