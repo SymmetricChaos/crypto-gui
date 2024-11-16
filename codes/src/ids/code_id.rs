@@ -3,65 +3,88 @@ use std::fmt::Display;
 use json::{iterators::Members, JsonValue};
 use lazy_static::lazy_static;
 
-#[derive(PartialEq, Eq, Debug, Clone, Copy)]
-pub enum CodeId {
-    Ascii,
-    Ascii85,
-    Bacon,
-    BalancedTernary,
-    Barbier,
-    BaseN,
-    BaseNBijective,
-    BaseX,
-    Base16,
-    Base32,
-    Base64,
-    Baudot,
-    BiquinaryDecimal,
-    Braille,
-    BrailleEncoding,
-    ByteAsNum,
-    Bytewords,
-    Ccsid,
-    CcsidBinary,
-    CyclicRedundancyCheck,
-    Damm,
-    Elias,
-    Factoradic,
-    Fibonacci,
-    FixedWidth,
-    FlagSemaphore,
-    Godel,
-    Gray,
-    Hamming,
-    IcsFlags,
-    Isbn,
-    Itf,
-    Leb128,
-    Levenshtein,
-    Linotype,
-    Luhn,
-    MofN,
-    Morse,
-    Needle,
-    ParityBit,
-    Pgp,
-    Punycode,
-    Repetition,
-    Romaji,
-    RomanNumeral,
-    Skey,
-    SpellingAlphabet,
-    Tap,
-    TwosComplement,
-    Ueb,
-    Unary,
-    UnarySymmetric,
-    Unicode,
-    Upc,
-    Verhoeff,
-    Wabun,
+macro_rules! code_ids_and_names {
+    ($( $id: ident, $name: expr);+ $(;)?) => {
+
+        #[derive(PartialEq, Eq, Debug, Clone, Copy)]
+        pub enum CodeId {
+            $(
+                $id,
+            )+
+        }
+
+        impl Display for CodeId {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                let name = match self {
+                    $(
+                        CodeId::$id => $name,
+                    )+
+                };
+                write!(f, "{}", name)
+            }
+        }
+
+    }
 }
+
+code_ids_and_names!(
+    Ascii, "ASCII";
+    Ascii85, "Ascii85";
+    Bacon, "Bacon";
+    BalancedTernary, "Balanced Ternary";
+    Barbier, "Barbier";
+    BaseN, "Base-N";
+    BaseNBijective, "Bijective Base-N";
+    BaseX, "BaseX";
+    Base16, "Base16";
+    Base32, "Base32";
+    Base64, "Base64";
+    Baudot, "Baudot";
+    BiquinaryDecimal, "Biquinary Coded Decimal";
+    Braille, "Simplified Braille";
+    BrailleEncoding, "Braille Encodings";
+    ByteAsNum, "Bytes as Numbers";
+    Bytewords, "Bytewords";
+    Ccsid, "CCSID";
+    CcsidBinary, "CCSID";
+    CyclicRedundancyCheck, "Cyclic Redundancy Check";
+    Damm, "Damm";
+    Elias, "Elias";
+    Factoradic, "Factoradic";
+    Fibonacci, "Fibonacci";
+    FixedWidth, "Fixed-Width";
+    FlagSemaphore, "Flag Semaphore";
+    Godel, "Gödel";
+    Gray, "Gray Code";
+    Hamming, "Hamming Code";
+    IcsFlags, "ICS Flags";
+    Isbn, "ISBN";
+    Itf, "ITF";
+    Leb128, "LEB128";
+    Levenshtein, "Levenshtein";
+    Linotype, "Linotype";
+    Luhn, "Luhn's Algorithm";
+    MofN, "M-of-N";
+    Morse, "Morse";
+    Needle, "Needle";
+    ParityBit, "Parity Bit";
+    Pgp, "PGP Words";
+    Punycode, "Punycode";
+    Repetition, "Repetition";
+    Romaji, "Romaji";
+    RomanNumeral, "Roman Numeral";
+    Skey, "S/KEY";
+    SpellingAlphabet, "Spelling Alphabet";
+    Tap, "Tap";
+    TwosComplement, "Two's Complement";
+    Ueb, "Unified English Braille";
+    Unary, "Unary";
+    UnarySymmetric, "Symmetric Unary";
+    Unicode, "Unicode";
+    Upc, "UPC";
+    Verhoeff, "Verhoeff";
+    Wabun, "Wabun";
+);
 
 impl Default for CodeId {
     fn default() -> Self {
@@ -84,70 +107,6 @@ impl CodeId {
 
     pub fn traits(&self) -> Members {
         CODE_INFORMATION[self.to_string()]["Traits"].members()
-    }
-}
-
-impl Display for CodeId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let name = match self {
-            CodeId::Ascii => "ASCII",
-            CodeId::Ascii85 => "Ascii85",
-            CodeId::Bacon => "Bacon",
-            CodeId::BalancedTernary => "Balanced Ternary",
-            CodeId::Barbier => "Barbier",
-            CodeId::BaseN => "Base-N",
-            CodeId::BaseNBijective => "Bijective Base-N",
-            CodeId::BaseX => "BaseX",
-            CodeId::Base16 => "Base16/Hexcode",
-            CodeId::Base32 => "Base32",
-            CodeId::Base64 => "Base64",
-            CodeId::Baudot => "Baudot",
-            CodeId::BiquinaryDecimal => "Biquinary Coded Decimal",
-            CodeId::Braille => "Simplified Braille",
-            CodeId::BrailleEncoding => "Braille Encodings",
-            CodeId::ByteAsNum => "Bytes as Numbers",
-            CodeId::Bytewords => "Bytewords",
-            CodeId::Ccsid => "CCSID",
-            CodeId::CcsidBinary => "CCSID",
-            CodeId::CyclicRedundancyCheck => "Cyclic Redundancy Check",
-            CodeId::Damm => "Damm",
-            CodeId::Elias => "Elias",
-            CodeId::Factoradic => "Factoradic",
-            CodeId::Fibonacci => "Fibonacci",
-            CodeId::FixedWidth => "Fixed-Width",
-            CodeId::FlagSemaphore => "Flag Semaphore",
-            CodeId::Godel => "Gödel",
-            CodeId::Gray => "Gray Code",
-            CodeId::Hamming => "Hamming Code",
-            CodeId::IcsFlags => "ICS Flags",
-            CodeId::Isbn => "ISBN",
-            CodeId::Itf => "ITF",
-            CodeId::Leb128 => "LEB128",
-            CodeId::Levenshtein => "Levenshtein",
-            CodeId::Linotype => "Linotype",
-            CodeId::Luhn => "Luhn's Algorithm",
-            CodeId::MofN => "M-of-N",
-            CodeId::Morse => "Morse",
-            CodeId::Needle => "Needle",
-            CodeId::ParityBit => "Parity Bit",
-            CodeId::Pgp => "PGP Words",
-            CodeId::Punycode => "Punycode",
-            CodeId::Repetition => "Repetition",
-            CodeId::Romaji => "Romaji",
-            CodeId::RomanNumeral => "Roman Numeral",
-            CodeId::Skey => "S/KEY",
-            CodeId::SpellingAlphabet => "Spelling Alphabet",
-            CodeId::Tap => "Tap",
-            CodeId::TwosComplement => "Two's Complement",
-            CodeId::Ueb => "Unified English Braille",
-            CodeId::Unary => "Unary",
-            CodeId::UnarySymmetric => "Symmetric Unary",
-            CodeId::Unicode => "Unicode",
-            CodeId::Upc => "UPC",
-            CodeId::Verhoeff => "Verhoeff",
-            CodeId::Wabun => "Wabun",
-        };
-        write!(f, "{}", name)
     }
 }
 
