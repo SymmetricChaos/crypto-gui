@@ -57,7 +57,7 @@
       "Binary-to-Text"
     ]
   },
-  "Base16/Hexcode": {
+  "Base16": {
     "Description": "Hexcode (also called Base16) is one of the most common ways to display bytes of binary data using the digits 0 through 9 and the letters A through F, ignoring case, to convert them to hexadecimal numbers. Each byte is encoded as exactly two hexadecimal digits. This is inefficient for storage and transmission but is easy for a human reader to interpret. Because of how ubiqutous it is there are no variation on hexcode like there are for its relatives Base32 and Base64. Some software or hardware will use a phrase in hexcode to mark it as important, most famously when early IBM computers freed a region of memory it would be overwritten with DEADBEEF to indicate to a programmer observing the memory that whatever had been there was gone.",
     "Authors": null,
     "Publication": null,

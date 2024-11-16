@@ -4,8 +4,6 @@
 // When compiling natively:
 #[cfg(not(target_arch = "wasm32"))]
 fn main() -> eframe::Result {
-    use crypto_gui::app::ClassicCryptoApp;
-
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_inner_size([1200.0, 600.0])
@@ -20,33 +18,42 @@ fn main() -> eframe::Result {
     eframe::run_native(
         "Classic Crypto",
         native_options,
-        Box::new(|cc| Ok(Box::new(ClassicCryptoApp::new(cc)))),
+        Box::new(|cc| Ok(Box::new(crypto_gui::app::ClassicCryptoApp::new(cc)))),
     )
 }
 
 // When compiling to web using trunk:
 #[cfg(target_arch = "wasm32")]
 fn main() {
-    use crypto_gui::app::ClassicCryptoApp;
+    use eframe::wasm_bindgen::JsCast as _;
+
     // Redirect `log` message to `console.log` and friends:
     // eframe::WebLogger::init(log::LevelFilter::Debug).ok();
 
     let web_options = eframe::WebOptions::default();
 
     wasm_bindgen_futures::spawn_local(async {
+        let document = web_sys::window()
+            .expect("No window")
+            .document()
+            .expect("No document");
+
+        let canvas = document
+            .get_element_by_id("the_canvas_id")
+            .expect("Failed to find the_canvas_id")
+            .dyn_into::<web_sys::HtmlCanvasElement>()
+            .expect("the_canvas_id was not a HtmlCanvasElement");
+
         let start_result = eframe::WebRunner::new()
             .start(
-                "the_canvas_id",
+                canvas,
                 web_options,
-                Box::new(|cc| Ok(Box::new(ClassicCryptoApp::new(cc)))),
+                Box::new(|cc| Ok(Box::new(crypto_gui::app::ClassicCryptoApp::new(cc)))),
             )
             .await;
 
         // Remove the loading text and spinner:
-        let loading_text = web_sys::window()
-            .and_then(|w| w.document())
-            .and_then(|d| d.get_element_by_id("loading_text"));
-        if let Some(loading_text) = loading_text {
+        if let Some(loading_text) = document.get_element_by_id("loading_text") {
             match start_result {
                 Ok(_) => {
                     loading_text.remove();
