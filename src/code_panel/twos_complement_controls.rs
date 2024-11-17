@@ -1,4 +1,5 @@
 use codes::mathematical::twos_complement::TwosComplement;
+use utils::byte_formatting::ByteFormat;
 
 use super::CodeFrame;
 use crate::ui_elements::UiElements;
@@ -23,9 +24,18 @@ impl CodeFrame for TwosComplementFrame {
         );
         ui.add_space(8.0);
 
-        // ui.add_space(8.0);
-        // ui.checkbox(&mut self.code.spaced, "Use Spaces");
-        // ui.add_space(8.0);
+        ui.add_space(8.0);
+        ui.checkbox(&mut self.code.spaced, "Use Spaces");
+        ui.add_space(8.0);
+
+        ui.group(|ui| {
+            ui.subheading("Representation");
+            ui.horizontal(|ui| {
+                ui.selectable_value(&mut self.code.byte_format, ByteFormat::Binary, "Binary");
+                ui.selectable_value(&mut self.code.byte_format, ByteFormat::Hex, "Hexadecimal");
+                ui.selectable_value(&mut self.code.byte_format, ByteFormat::Base64, "Base64");
+            });
+        });
 
         ui.subheading("Example of Finding the Negative (8-bits)");
         ui.label("The additive inverse (negative) of a number in two's complement is found by inverting all of the bits and then adding one to the result.");
@@ -42,7 +52,7 @@ impl CodeFrame for TwosComplementFrame {
         ui.add_space(16.0);
 
         ui.label("Convert between \"standard\" base-10 numbers and their representation as two's complement. Encoding is done uses 32-bits but could be done with any number of bits.");
-        let pairs = (-15..=16).map(|n| (n.to_string(), TwosComplement::encode_i32(n)));
+        let pairs = (-15..=16).map(|n| (n.to_string(), format!("{n:0>32b}")));
         ui.fill_code_columns(16, 5, Box::new(pairs));
 
         ui.add_space(16.0);
