@@ -38,14 +38,14 @@ impl Khafre {
 impl BlockCipher<8> for Khafre {
     fn encrypt_block(&self, bytes: &mut [u8]) {
         let mut v = [0u32; 2];
-        utils::byte_formatting::fill_u32s_be(&mut v, bytes);
+        utils::byte_formatting::fill_u32s_be(&mut v, &bytes);
         for key in self.round_keys {}
         utils::byte_formatting::u32s_to_bytes_be(bytes, &v);
     }
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
         let mut v = [0u32; 2];
-        utils::byte_formatting::fill_u32s_be(&mut v, bytes);
+        utils::byte_formatting::fill_u32s_be(&mut v, &bytes);
         for key in self.round_keys {}
         utils::byte_formatting::u32s_to_bytes_be(bytes, &v);
     }

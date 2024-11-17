@@ -68,7 +68,7 @@ impl BlockCipher<4> for Speck32_64 {
     fn encrypt_block(&self, bytes: &mut [u8]) {
         // Make mutable variables from the working vector
         let mut v = [0u16; 2];
-        fill_u16s_be(&mut v, bytes);
+        fill_u16s_be(&mut v, &bytes);
         let [mut x, mut y] = v;
 
         for k in self.subkeys {
@@ -81,7 +81,7 @@ impl BlockCipher<4> for Speck32_64 {
     fn decrypt_block(&self, bytes: &mut [u8]) {
         // Make mutable variables from the working vector
         let mut v = [0u16; 2];
-        fill_u16s_be(&mut v, bytes);
+        fill_u16s_be(&mut v, &bytes);
         let [mut x, mut y] = v;
 
         for k in self.subkeys.into_iter().rev() {
