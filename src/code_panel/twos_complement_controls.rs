@@ -27,6 +27,9 @@ impl CodeFrame for TwosComplementFrame {
         ui.checkbox(&mut self.code.spaced, "Use Spaces");
         ui.add_space(8.0);
 
+        ui.checkbox(&mut self.code.big_endian, "Big-Endian Byte Order");
+        ui.add_space(8.0);
+
         ui.group(|ui| {
             ui.subheading("Representation");
             ui.horizontal(|ui| {
