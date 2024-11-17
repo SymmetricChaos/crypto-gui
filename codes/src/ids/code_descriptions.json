@@ -367,10 +367,12 @@
     "Traits": null
   },
   "Two's Complement": {
-    "Description": "Two's complement is a way of encoding positive and negative integers as bits that is widely used in computers. Non-negative integers are encoded in the usual way except that the highest bit is always left as zero. The negative (or additive inverse) of each positive integer is found by inverting all the bits and then adding one. When using two's complement addition, subtraction, and multiplication can be implemented using the same procedure as for standard binary integers but extended to negatives.",
+    "Description": "Two's complement is a way of encoding integers that is widely used in computers. It requires that numbers be of fixed width usually 8, 16, 32, or 64 bits and so covers only a finite subset of the integers. Non-negative integers are encoded in the standard way for binary values using all except the highest bit. The negative (or additive inverse) of each positive integer is found by inverting all the bits and then adding one. This scheme for chosing negatives means that addition can be extended to negative values using the same algorithms as for standard binary numbers. It also allows simple implementation of subtraction and multiplication.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Prefix"
+    ]
   },
   "Unary": {
     "Description": "The unary encoding is the simplest useful encoding of the non-negative integers. The number n is encoded as n '1's followed by a single '0', though any two distinct symbols can be used. Representing numbers this way creates a prefix code and so allows a sequence to be represented without spaces. In practice unary codes are extremely inefficient.",

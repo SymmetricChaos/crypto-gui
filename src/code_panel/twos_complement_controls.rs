@@ -24,7 +24,6 @@ impl CodeFrame for TwosComplementFrame {
         );
         ui.add_space(8.0);
 
-        ui.add_space(8.0);
         ui.checkbox(&mut self.code.spaced, "Use Spaces");
         ui.add_space(8.0);
 
@@ -63,7 +62,7 @@ impl CodeFrame for TwosComplementFrame {
         ui.label("because of this programs usually assume either that the most negaative number will never be inverted or crash if it is.");
         ui.add_space(16.0);
 
-        ui.label("Example of conversion between \"standard\" base-10 numbers and their representation as two's complement. Encoding is done uses 32-bits but could be done with any number of bits.");
+        ui.label("Example of conversion between \"standard\" base-10 numbers and their representation as 32-bit two's complement.");
         let pairs = (-15..=16).map(|n| (n.to_string(), format!("{n:0>32b}")));
         ui.fill_code_columns(16, 5, Box::new(pairs));
 
