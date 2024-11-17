@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use utils::text_functions::{u16_to_string, u32_to_string, u8_to_string, NumRep};
+use utils::byte_formatting::ByteFormat;
 
 use crate::{errors::CodeError, traits::Code};
 
@@ -12,99 +12,52 @@ pub enum UnicodeEncoding {
 
 pub struct Unicode {
     pub encoding: UnicodeEncoding,
-    pub mode: NumRep,
+    pub mode: ByteFormat,
 }
 
 impl Unicode {
     fn utf8_encode(&self, text: &str) -> Result<String, CodeError> {
-        Ok(text.bytes().map(|n| u8_to_string(n, self.mode)).join(" "))
+        Ok(self.mode.byte_iter_to_text(text.bytes()))
     }
 
     fn utf16_encode(&self, text: &str) -> Result<String, CodeError> {
-        Ok(text
-            .encode_utf16()
-            .map(|n| u16_to_string(n, self.mode))
-            .join(" "))
+        Ok(self
+            .mode
+            .u16_slice_to_text_be(text.encode_utf16().collect_vec()))
     }
 
     fn utf32_encode(&self, text: &str) -> Result<String, CodeError> {
-        Ok(text
-            .chars()
-            .map(|c| u32::from(c))
-            .map(|n| u32_to_string(n, self.mode))
-            .join(" "))
+        Ok(self
+            .mode
+            .u32_slice_to_text_be(text.chars().map(|c| u32::from(c)).collect_vec()))
     }
 
     fn utf8_decode(&self, text: &str) -> Result<String, CodeError> {
-        let chunks = text.split(" ");
-        let radix = self.mode.radix();
-        let mut vec = Vec::with_capacity(chunks.clone().count());
+        let v = self
+            .mode
+            .text_to_bytes(text)
+            .map_err(|e| CodeError::Input(e.to_string()))?;
 
-        for chunk in chunks {
-            match u8::from_str_radix(chunk, radix) {
-                Ok(n) => vec.push(n),
-                Err(_) => {
-                    return Err(CodeError::Input(format!(
-                        "CodeError decoding UTF-8, unable to parse string: {}",
-                        chunk
-                    )))
-                }
-            }
-        }
-
-        String::from_utf8(vec).map_err(|e| CodeError::Input(e.to_string()))
+        String::from_utf8(v).map_err(|e| CodeError::Input(e.to_string()))
     }
 
     fn utf16_decode(&self, text: &str) -> Result<String, CodeError> {
-        let chunks = text.split(" ");
-        let radix = self.mode.radix();
-        let mut vec = Vec::with_capacity(chunks.clone().count());
+        let v = self
+            .mode
+            .text_to_u16_be(text)
+            .map_err(|e| CodeError::Input(e.to_string()))?;
 
-        for chunk in chunks {
-            match u16::from_str_radix(chunk, radix) {
-                Ok(n) => vec.push(n),
-                Err(_) => {
-                    return Err(CodeError::Input(format!(
-                        "CodeError decoding UTF-16, unable to parse string: {}",
-                        chunk
-                    )))
-                }
-            }
-        }
-
-        String::from_utf16(&vec).map_err(|e| CodeError::Input(e.to_string()))
+        String::from_utf16(&v).map_err(|e| CodeError::Input(e.to_string()))
     }
 
     fn utf32_decode(&self, text: &str) -> Result<String, CodeError> {
-        let chunks = text.split(" ");
-
-        let mut out = String::with_capacity(chunks.clone().count());
-
-        let radix = self.mode.radix();
-
-        for chunk in chunks {
-            match u32::from_str_radix(chunk, radix) {
-                Ok(n) => {
-                    match char::from_u32(n) {
-                        Some(c) => out.push(c),
-                        None => {
-                            return Err(CodeError::Input(format!(
-                                "UTF-32 decoding CodeError, invalid input string: {}",
-                                chunk
-                            )))
-                        }
-                    };
-                }
-                Err(_) => {
-                    return Err(CodeError::Input(format!(
-                        "CodeError decoding UTF-32 unable to parse string: {}",
-                        chunk
-                    )))
-                }
-            }
-        }
-
-        Ok(out)
+        Ok(self
+            .mode
+            .text_to_u32_be(text)
+            .map_err(|e| CodeError::Input(e.to_string()))?
+            .into_iter()
+            .map(|n| char::from_u32(n).unwrap_or('�'))
+            .collect())
     }
 }
 
@@ -112,7 +65,7 @@ impl Default for Unicode {
     fn default() -> Self {
         Unicode {
             encoding: UnicodeEncoding::Utf8,
-            mode: NumRep::Binary,
+            mode: ByteFormat::Binary,
         }
     }
 }
@@ -152,12 +105,7 @@ mod unicode_tests {
         ] {
             code.encoding = encoding;
 
-            for mode in [
-                NumRep::Binary,
-                NumRep::Octal,
-                NumRep::Decimal,
-                NumRep::HexLower,
-            ] {
+            for mode in [ByteFormat::Binary, ByteFormat::Hex, ByteFormat::Base64] {
                 code.mode = mode;
                 let encoded = code
                     .encode(PLAINTEXT)
