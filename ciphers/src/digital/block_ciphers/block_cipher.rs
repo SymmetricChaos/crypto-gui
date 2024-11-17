@@ -209,12 +209,12 @@ pub trait BlockCipher<const N: usize> {
     fn encrypt_cfb(&self, bytes: &mut [u8], iv: [u8; N]) {
         let mut chain = iv;
 
-        for ptext in bytes.chunks_mut(N) {
+        for mut ptext in bytes.chunks_mut(N) {
             // Encrypt the chain to create a mask
             self.encrypt_block(&mut chain);
 
             // XOR the mask into the plaintext at the source, creating ciphertext
-            xor_into_bytes(ptext, &chain);
+            xor_into_bytes(&mut ptext, &chain);
 
             // The ptext has had the keystream XORed into it and is now the ciphertext
             overwrite_bytes(&mut chain, &ptext)

@@ -441,8 +441,8 @@ macro_rules! fillers_and_makers {
                 }
 
                 /// Take a slice of the type and filled the target with bytes. Panics if the target cannot be exactly filled. Big-endian.
-                pub fn [<$t s_to_bytes_be>]<T: AsRef<[$t]>>(target: &mut [u8], words: T) {
-                    for (chunk, word) in target.chunks_exact_mut($w).zip_eq(words.as_ref()) {
+                pub fn [<$t s_to_bytes_be>]<T: AsRef<[$t]>, S: AsMut<[u8]>>(mut target: S, words: T) {
+                    for (chunk, word) in target.as_mut().chunks_exact_mut($w).zip_eq(words.as_ref()) {
                         chunk.copy_from_slice(&word.to_be_bytes());
                     }
                 }
@@ -464,8 +464,8 @@ macro_rules! fillers_and_makers {
                 }
 
                 /// Take a slice of the type and filled the target with bytes. Panics if the target cannot be exactly filled. Little-endian.
-                pub fn [<$t s_to_bytes_le>]<T: AsRef<[$t]>>(target: &mut [u8], words: T) {
-                    for (chunk, word) in target.chunks_exact_mut($w).zip_eq(words.as_ref()) {
+                pub fn [<$t s_to_bytes_le>]<T: AsRef<[$t]>, S: AsMut<[u8]>>(mut target: S, words: T) {
+                    for (chunk, word) in target.as_mut().chunks_exact_mut($w).zip_eq(words.as_ref()) {
                         chunk.copy_from_slice(&word.to_le_bytes());
                     }
                 }
@@ -474,12 +474,12 @@ macro_rules! fillers_and_makers {
 }
 
 // Creates these functions
-// fill_TYPEs_be()
-// make_TYPEs_be()
-// TYPESs_to_bytes_be()
-// fill_TYPEs_le()
-// make_TYPEs_le()
-// TYPESs_to_bytes_le()
+// fill_Ns_be()
+// make_Ns_be()
+// Ns_to_bytes_be()
+// fill_Ns_le()
+// make_Ns_le()
+// Ns_to_bytes_le()
 
 fillers_and_makers!(u16, 2);
 fillers_and_makers!(i16, 2);
@@ -491,15 +491,15 @@ fillers_and_makers!(u128, 16);
 fillers_and_makers!(i128, 16);
 
 /// If target is longer it is only partially overwritten. If target is shorter the extra source is ignored.
-pub fn overwrite_bytes<T: AsRef<[u8]>>(target: &mut [u8], source: T) {
-    for (t, s) in target.iter_mut().zip(source.as_ref().iter()) {
+pub fn overwrite_bytes<T: AsRef<[u8]>, S: AsMut<[u8]>>(mut target: S, source: T) {
+    for (t, s) in target.as_mut().iter_mut().zip(source.as_ref().iter()) {
         *t = *s
     }
 }
 
 /// If target is longer it is only partially XORed. If target is shorter the extra source is ignored.
-pub fn xor_into_bytes<T: AsRef<[u8]>>(target: &mut [u8], source: T) {
-    for (t, s) in target.iter_mut().zip(source.as_ref().iter()) {
+pub fn xor_into_bytes<T: AsRef<[u8]>, S: AsMut<[u8]>>(mut target: S, source: T) {
+    for (t, s) in target.as_mut().iter_mut().zip(source.as_ref().iter()) {
         *t ^= *s
     }
 }

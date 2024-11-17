@@ -1,5 +1,6 @@
 pub mod bit_polynomial;
 pub mod bits;
+pub mod byte_equality_check;
 pub mod byte_formatting;
 pub mod grid;
 pub mod math_functions;
@@ -8,4 +9,3 @@ pub mod polynomial_interpolation;
 pub mod preset_alphabet;
 pub mod text_functions;
 pub mod vecstring;
-pub mod byte_quality_check;
