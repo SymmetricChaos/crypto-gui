@@ -347,3 +347,71 @@ impl Display for BCPadding {
         }
     }
 }
+
+#[cfg(test)]
+#[test]
+fn aes_test_modes() {
+    use utils::byte_formatting::ByteFormat;
+
+    use crate::digital::block_ciphers::aes::aes::Aes256;
+
+    fn stb(text: &str) -> Vec<u8> {
+        ByteFormat::Hex
+            .text_to_bytes(text)
+            .unwrap()
+            .try_into()
+            .unwrap()
+    }
+
+    // Multiblock ECB test
+    let cipher = Aes256::default().with_key(
+        stb("ba42b760bb5a5de21acb9aba214c9783cd71ea841ada018580abc4e1be3b76dd")
+            .try_into()
+            .unwrap(),
+    );
+    let mut ptext = stb("4b4b12d6ee6fc0bf987eaafe2634aad464781ff4c83d3f8a61a6af7c0a6d51f0e3855d0e02feb307652a6f562bfebe4604baf1b4e7cdd01603f231bcf7a0c95645a141b704008cd8d62979201a4c84e2");
+    let ctext = stb("fa18d25e37ea0ce94f0949efc0edecc6a40fada8f007fd8e760afed0a83ebb350c82b03baaa6ee19f791bb9bd1b44d27a76fc6eb0e1c0017d68776ed69a541851a732e46ef328def064baf6a0a755588");
+    cipher.encrypt_ecb(&mut ptext);
+    assert_eq!(ctext, ptext);
+
+    // Multiblock OFB test
+    let cipher = Aes256::default()
+        .iv(0x0e28bd0603b31c26250345a118408ffc)
+        .with_key(
+            stb("318aa7c73006ff95840f17f2b9cf01fe7f031105ff01daa66ff95834e47b6f5c")
+                .try_into()
+                .unwrap(),
+        );
+    let mut ptext = stb("257f3fc84537158b68c8af111b1e9eb41f8841686ab1e94c6fd13a7f9f24d535309c340a1dd3d4966e439a41b9b97058e9072f613ef9c1ac958b872bea59f8831b578b63eec2d7155657f953f2c2375b");
+    let ctext = stb("ba4ebcdc894e6de54f8f1d7ccbb19e13d2ae0ca66c05c10e2f90bad2e9b8db94ee7770c3557927029d49fd2b3f80a01025af0e7a343237fb625dbdee85367ddfbd7f6664b511cdc7e832b2c4d91f1c0e");
+    cipher.encrypt_ofb(&mut ptext, cipher.iv.to_be_bytes());
+    assert_eq!(ctext, ptext);
+
+    // Multiblock CBC test
+    let cipher = Aes256::default()
+        .iv(0x11958dc6ab81e1c7f01631e9944e620f)
+        .with_key(
+            stb("9adc8fbd506e032af7fa20cf5343719de6d1288c158c63d6878aaf64ce26ca85")
+                .try_into()
+                .unwrap(),
+        );
+    let mut ptext = stb("c7917f84f747cd8c4b4fedc2219bdbc5f4d07588389d8248854cf2c2f89667a2d7bcf53e73d32684535f42318e24cd45793950b3825e5d5c5c8fcd3e5dda4ce9246d18337ef3052d8b21c5561c8b660e");
+    let ctext = stb("9c99e68236bb2e929db1089c7750f1b356d39ab9d0c40c3e2f05108ae9d0c30b04832ccdbdc08ebfa426b7f5efde986ed05784ce368193bb3699bc691065ac62e258b9aa4cc557e2b45b49ce05511e65");
+    cipher.encrypt_cbc(&mut ptext, cipher.iv.to_be_bytes());
+    assert_eq!(ctext, ptext);
+
+    // Multiblock CTR test
+    let cipher = Aes256::default()
+        .iv(0xf0f1f2f3f4f5f6f7f8f9fafbfcfdfeff)
+        .with_key(
+            stb("603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4")
+                .try_into()
+                .unwrap(),
+        );
+    let mut ptext = stb("6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c46a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710");
+    let ctext = stb("601ec313775789a5b7a7f504bbf3d228f443e3ca4d62b59aca84e990cacaf5c52b0930daa23de94ce87017ba2d84988ddfc9c58db67aada613c2dd08457941a6");
+    cipher.encrypt_ctr(&mut ptext, cipher.iv.to_be_bytes());
+    assert_eq!(ctext, ptext);
+
+    todo!("need to find test vectors for PCBC and CFB")
+}
