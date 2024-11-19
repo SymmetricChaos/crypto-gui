@@ -413,5 +413,5 @@ fn aes_test_modes() {
     cipher.encrypt_ctr(&mut ptext, cipher.iv.to_be_bytes());
     assert_eq!(ctext, ptext);
 
-    todo!("need to find test vectors for PCBC and CFB")
+    todo!("need to find test vectors for PCBC and CFB but all others are passing")
 }
