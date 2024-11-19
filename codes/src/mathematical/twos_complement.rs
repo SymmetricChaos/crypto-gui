@@ -2,6 +2,30 @@ use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use utils::byte_formatting::ByteFormat;
 
+macro_rules! encode_tc_be {
+    ($t:ty, $g:ident, $v:ident, $b: expr) => {
+        $v.push(
+            $b.byte_slice_to_text(
+                &<$t>::from_str_radix($g.trim(), 10)
+                    .map_err(|_| CodeError::invalid_input_group($g.trim()))?
+                    .to_be_bytes(),
+            ),
+        )
+    };
+}
+
+macro_rules! encode_tc_le {
+    ($t:ty, $g:ident, $v:ident, $b: expr) => {
+        $v.push(
+            $b.byte_slice_to_text(
+                &<$t>::from_str_radix($g.trim(), 10)
+                    .map_err(|_| CodeError::invalid_input_group($g.trim()))?
+                    .to_le_bytes(),
+            ),
+        )
+    };
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Width {
     W8,
@@ -39,49 +63,17 @@ impl Code for TwosComplement {
 
             if self.big_endian {
                 match self.width {
-                    Width::W8 => {
-                        let n = i8::from_str_radix(group.trim(), 10)
-                            .map_err(|_| CodeError::invalid_input_group(group.trim()))?;
-                        v.push(self.byte_format.byte_slice_to_text(&n.to_be_bytes()));
-                    }
-                    Width::W16 => {
-                        let n = i16::from_str_radix(group.trim(), 10)
-                            .map_err(|_| CodeError::invalid_input_group(group.trim()))?;
-                        v.push(self.byte_format.byte_slice_to_text(&n.to_be_bytes()));
-                    }
-                    Width::W32 => {
-                        let n = i32::from_str_radix(group.trim(), 10)
-                            .map_err(|_| CodeError::invalid_input_group(group.trim()))?;
-                        v.push(self.byte_format.byte_slice_to_text(&n.to_be_bytes()));
-                    }
-                    Width::W64 => {
-                        let n = i64::from_str_radix(group.trim(), 10)
-                            .map_err(|_| CodeError::invalid_input_group(group.trim()))?;
-                        v.push(self.byte_format.byte_slice_to_text(&n.to_be_bytes()));
-                    }
+                    Width::W8 => encode_tc_be!(i8, group, v, self.byte_format),
+                    Width::W16 => encode_tc_be!(i16, group, v, self.byte_format),
+                    Width::W32 => encode_tc_be!(i32, group, v, self.byte_format),
+                    Width::W64 => encode_tc_be!(i64, group, v, self.byte_format),
                 };
             } else {
                 match self.width {
-                    Width::W8 => {
-                        let n = i8::from_str_radix(group.trim(), 10)
-                            .map_err(|_| CodeError::invalid_input_group(group.trim()))?;
-                        v.push(self.byte_format.byte_slice_to_text(&n.to_le_bytes()));
-                    }
-                    Width::W16 => {
-                        let n = i16::from_str_radix(group.trim(), 10)
-                            .map_err(|_| CodeError::invalid_input_group(group.trim()))?;
-                        v.push(self.byte_format.byte_slice_to_text(&n.to_le_bytes()));
-                    }
-                    Width::W32 => {
-                        let n = i32::from_str_radix(group.trim(), 10)
-                            .map_err(|_| CodeError::invalid_input_group(group.trim()))?;
-                        v.push(self.byte_format.byte_slice_to_text(&n.to_le_bytes()));
-                    }
-                    Width::W64 => {
-                        let n = i64::from_str_radix(group.trim(), 10)
-                            .map_err(|_| CodeError::invalid_input_group(group.trim()))?;
-                        v.push(self.byte_format.byte_slice_to_text(&n.to_le_bytes()));
-                    }
+                    Width::W8 => encode_tc_le!(i8, group, v, self.byte_format),
+                    Width::W16 => encode_tc_le!(i16, group, v, self.byte_format),
+                    Width::W32 => encode_tc_le!(i32, group, v, self.byte_format),
+                    Width::W64 => encode_tc_le!(i64, group, v, self.byte_format),
                 };
             }
         }
