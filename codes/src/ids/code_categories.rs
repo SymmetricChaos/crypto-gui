@@ -12,6 +12,7 @@ pub enum CodeCategory {
     Commercial,
     Prefix,
     Other,
+    Compression,
 }
 
 impl Default for CodeCategory {
@@ -39,6 +40,7 @@ impl Display for CodeCategory {
             CodeCategory::Commercial => "Commercial",
             CodeCategory::Other => "Other",
             CodeCategory::Prefix => "Prefix",
+            CodeCategory::Compression => "Compression",
         };
         write!(f, "{}", name)
     }

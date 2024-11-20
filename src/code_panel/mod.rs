@@ -48,6 +48,7 @@ mod pgp_controls;
 mod primoral_controls;
 mod punycode_controls;
 mod repetition_controls;
+mod rle_controls;
 mod romaji_controls;
 mod roman_numeral_controls;
 mod semaphore_controls;
@@ -144,6 +145,9 @@ pub struct CodeInterface {
     isbn: isbn_contols::IsbnFrame,
     itf: itf_controls::ItfFrame,
     upc: upc_controls::UpcFrame,
+
+    // Compression
+    rle: rle_controls::RleFrame,
 
     // Integer
     base_n: base_n_controls::BaseNFrame,
@@ -271,6 +275,12 @@ impl CodeInterface {
             &[CodeId::Isbn, CodeId::Itf, CodeId::Upc],
             active_code,
             CodeCategory::Commercial,
+            ui,
+        );
+        combox_box(
+            &[CodeId::RunLengthEncoding],
+            active_code,
+            CodeCategory::Compression,
             ui,
         );
         combox_box(

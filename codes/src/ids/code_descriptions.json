@@ -325,6 +325,12 @@
     "Publication": null,
     "Traits": null
   },
+  "Run Length Encoding": {
+    "Description": "Run Length Encoding (RLE) compresses data contains long strings of identical information by replacing them with one instance of the symbol followed by a count of how many should occur (the length of the run). Efficient RLE requires both that the data to be compressed have sufficient repetition and that the encoding not waste too much space on short runs. The version of RLE presented here encodes text but for general compression the encoding works on bytes.",
+    "Authors": null,
+    "Publication": null,
+    "Traits": null
+  },
   "S\/KEY": {
     "Description": "The full S\/KEY standard covers a system for human readable use of one time passwords. Here is recreated just the binary-to-text encoding used for the 64-bit passwords. Each password is converted into six words representing 11 bits each for a total of 66 bits, the bits of the password followed by a two bit error check.",
     "Authors": null,
