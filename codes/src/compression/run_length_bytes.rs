@@ -70,6 +70,10 @@ impl Code for RunLengthEncoding {
             .text_to_bytes(text)
             .map_err(|_| CodeError::input("invalid input bytes"))?;
 
+        if !bytes.len().is_even() {
+            return Err(CodeError::input("the rle must be an even number of bytes"));
+        }
+
         Ok(self.output_format.byte_slice_to_text(&rle_to_bytes(&bytes)))
     }
 }
