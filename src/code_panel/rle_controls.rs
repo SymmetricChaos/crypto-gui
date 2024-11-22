@@ -1,7 +1,5 @@
-use crate::ui_elements::UiElements;
-
 use super::CodeFrame;
-use codes::compression::{run_length::RunLengthEncoding, run_length_bytes::RunLengthEncodingBytes};
+use codes::compression::run_length::RunLengthEncoding;
 
 pub struct RleFrame {
     text_code: RunLengthEncoding,
@@ -20,7 +18,7 @@ impl CodeFrame for RleFrame {
         ui.hyperlink_to(
             "see the code",
             "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/compression/run_length.rs",
-        );        
+        );
         ui.add_space(16.0);
     }
 

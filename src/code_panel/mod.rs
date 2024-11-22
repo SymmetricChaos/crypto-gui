@@ -48,6 +48,7 @@ mod pgp_controls;
 mod primoral_controls;
 mod punycode_controls;
 mod repetition_controls;
+mod rle_byte_controls;
 mod rle_controls;
 mod romaji_controls;
 mod roman_numeral_controls;

@@ -1,16 +1,15 @@
-use crate::ui_elements::UiElements;
-
 use super::CodeFrame;
-use codes::compression::{run_length::RunLengthEncoding, run_length_bytes::RunLengthEncodingBytes};
+use crate::ui_elements::UiElements;
+use codes::compression::run_length_bytes::{RleMethod, RunLengthEncodingBytes};
 
 pub struct RleFrame {
-    byte_code: RunLengthEncodingBytes,
+    code: RunLengthEncodingBytes,
 }
 
 impl Default for RleFrame {
     fn default() -> Self {
         Self {
-            byte_code: Default::default(),
+            code: Default::default(),
         }
     }
 }
@@ -22,54 +21,20 @@ impl CodeFrame for RleFrame {
             "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/compression/run_length_bytes.rs",
         );
 
+        ui.group(|ui| {
+            ui.subheading("Mode");
+            ui.horizontal(|ui| {
+                ui.selectable_value(&mut self.code.method, RleMethod::OneByte, "One Byte");
+                ui.selectable_value(&mut self.code.method, RleMethod::Leb128, "LEB128");
+            });
+        });
 
-        // {
-        //     let this = &mut *ui;
-        //     let mut changed = false;
-        //     egui::CollapsingHeader::new("Input Format")
-        //         .default_open(true)
-        //         .show(this, |ui| {
-        //             ui.label(
-        //                 "Input can be text, hexadecimal, Base64, or binary. All interpreted as bytes.",
-        //             );
-        //             ui.horizontal(|ui| {
-        //                 for variant in ByteFormat::iter() {
-        //                     if ui
-        //                         .selectable_value(&mut self.byte_code., variant, variant.to_string())
-        //                         .clicked()
-        //                     {
-        //                         changed = true;
-        //                     }
-        //                 }
-        //             });
-        //         });
-
-        //     this.add_space(8.0);
-
-        //     egui::CollapsingHeader::new("Output Format")
-        //         .default_open(true)
-        //         .show(this, |ui| {
-        //             ui.label(
-        //                 "Output can be text, hexadecimal, Base64, or binary. All interpreted as bytes.",
-        //             );
-        //             ui.horizontal(|ui| {
-        //                 for variant in ByteFormat::iter() {
-        //                     if ui
-        //                         .selectable_value(output, variant, variant.to_string())
-        //                         .clicked()
-        //                     {
-        //                         changed = true;
-        //                     }
-        //                 }
-        //             });
-        //         });
-        //     changed
-        // };
+        ui.byte_io_mode_cipher(&mut self.code.input_format, &mut self.code.output_format);
 
         ui.add_space(16.0);
     }
 
     fn code(&self) -> &dyn codes::traits::Code {
-        &self.text_code
+        &self.code
     }
 }
