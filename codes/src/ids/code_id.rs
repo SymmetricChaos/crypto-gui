@@ -76,6 +76,7 @@ code_ids_and_names!(
     Romaji, "Romaji";
     RomanNumeral, "Roman Numeral";
     RunLengthEncoding, "Run Length Encoding";
+    RunLengthEncodingBytes, "Run Length Encoding Bytes";
     Skey, "S/KEY";
     SpellingAlphabet, "Spelling Alphabet";
     Tap, "Tap";

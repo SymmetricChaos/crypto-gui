@@ -326,7 +326,13 @@
     "Traits": null
   },
   "Run Length Encoding": {
-    "Description": "Run Length Encoding (RLE) compresses data contains long strings of identical information by replacing them with one instance of the symbol followed by a count of how many should occur (the length of the run). Efficient RLE requires both that the data to be compressed have sufficient repetition and that the encoding not waste too much space on short runs. The version of RLE presented here encodes text but for general compression the encoding works on bytes.",
+    "Description": "Run Length Encoding (RLE) compresses data contains long strings of identical information by replacing them with one instance of the symbol followed by a count of how many should occur (the length of the run). Efficient RLE requires both that the data to be compressed have sufficient repetition and that the encoding not waste too much space on short runs. The version of RLE presented here encodes text as text (both UTF-8) but this usage is rare in practice. The Run Length Encoding Bytes page shows encoding that operates on arbitrary bytes.",
+    "Authors": null,
+    "Publication": null,
+    "Traits": null
+  },
+  "Run Length Encoding Bytes": {
+    "Description": "Run Length Encoding (RLE) compresses data contains long strings of identical information by replacing them with one instance of the symbol followed by a count of how many should occur (the length of the run). Efficient RLE requires both that the data to be compressed have sufficient repetition and that the encoding not waste too much space on short runs. The simple encoding scheme here converts a sequence of bytes into a sequence of pairs of bytes. In these pairs the first byte is the one to be repeated and the second byte is the number of times to be repeated. If a byte is repeated more than 255 times the additional repetitions are encoded more pairs. If bytes are not repeated more than 255 times this is reasonably efficient. However if there are very long runs it performs relatively poorly. The complex encoding works similarly but the count is a variable length integer (LEB-128) which allows runs of enormous length to be compressed.",
     "Authors": null,
     "Publication": null,
     "Traits": null
