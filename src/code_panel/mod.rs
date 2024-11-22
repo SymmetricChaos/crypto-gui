@@ -149,6 +149,7 @@ pub struct CodeInterface {
 
     // Compression
     rle: rle_controls::RleFrame,
+    rle_bytes: rle_byte_controls::RleFrame,
 
     // Integer
     base_n: base_n_controls::BaseNFrame,
@@ -279,7 +280,7 @@ impl CodeInterface {
             ui,
         );
         combox_box(
-            &[CodeId::RunLengthEncoding],
+            &[CodeId::RunLengthEncoding, CodeId::RunLengthEncodingBytes],
             active_code,
             CodeCategory::Compression,
             ui,
@@ -340,6 +341,8 @@ impl CodeInterface {
             CodeId::Repetition => &mut self.repetition,
             CodeId::Romaji => &mut self.romaji,
             CodeId::RomanNumeral => &mut self.roman,
+            CodeId::RunLengthEncoding => &mut self.rle,
+            CodeId::RunLengthEncodingBytes => &mut self.rle_bytes,
             CodeId::Skey => &mut self.skey,
             CodeId::SpellingAlphabet => &mut self.spelling,
             CodeId::Tap => &mut self.tap,
