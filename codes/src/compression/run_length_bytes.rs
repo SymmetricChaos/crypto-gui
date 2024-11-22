@@ -5,32 +5,22 @@ use utils::byte_formatting::ByteFormat;
 // To be used in a more complex encoding scheme.
 // u64 allows recording a single repetition that takes up 18 exabytes and thus should
 // avoid ever overflowing
-// pub fn u64_leb128(n: u64) -> Vec<u8> {
-//     if n == 0 {
-//         return vec![0];
-//     }
-//     let mut n = n;
-//     let mut out = Vec::with_capacity(8);
-//     while n != 0 {
-//         let mut b = (n as u8) & 0x7f;
-//         n = n >> 7; 
-//         if n != 0 {
-//             b |= 0x80;
-//         }
-//         out.push(b);
-//     }
-//     out
-// }
-
-// pub fn leb128_to_u64<T: AsRef<[u8]>>(v: T) -> u64 {
-//     let mut out = 0;
-//     let mut shift = 0;
-//     for byte in v.as_ref() {
-//         out |= ((byte & 0x7f) as u64) << shift;
-//         shift += 7;
-//     }
-//     out
-// }
+fn u64_leb128(n: u64) -> Vec<u8> {
+    if n == 0 {
+        return vec![0];
+    }
+    let mut n = n;
+    let mut out = Vec::with_capacity(8);
+    while n != 0 {
+        let mut b = (n as u8) & 0x7f;
+        n = n >> 7;
+        if n != 0 {
+            b |= 0x80;
+        }
+        out.push(b);
+    }
+    out
+}
 
 fn bytes_to_rle_one_byte(bytes: &[u8]) -> Vec<u8> {
     let mut out = Vec::new();
@@ -70,6 +60,55 @@ fn rle_to_bytes_one_byte(bytes: &[u8]) -> Vec<u8> {
     out
 }
 
+fn bytes_to_rle_leb128(bytes: &[u8]) -> Vec<u8> {
+    let mut out = Vec::new();
+    let mut cur = bytes[0];
+    let mut ctr = 0_u64;
+    for byte in bytes {
+        if *byte != cur {
+            out.push(cur);
+            out.extend_from_slice(&u64_leb128(ctr));
+            cur = *byte;
+            ctr = 0;
+        }
+        ctr += 1;
+    }
+    out.push(cur);
+    out.extend_from_slice(&u64_leb128(ctr));
+
+    out
+}
+
+fn rle_to_bytes_leb128(bytes: &[u8]) -> Vec<u8> {
+    let mut out = Vec::new();
+    let mut bytes = bytes.into_iter();
+    loop {
+        if let Some(byte) = bytes.next() {
+            let mut ctr = 0;
+            let mut shift = 0;
+
+            loop {
+                if let Some(leb) = bytes.next() {
+                    ctr |= ((*leb & 0x7f) as u64) << shift;
+                    shift += 7;
+                    if leb >> 7 == 0 {
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            }
+
+            for _ in 0..ctr {
+                out.push(*byte);
+            }
+        } else {
+            break;
+        }
+    }
+    out
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RleMethod {
     OneByte,
@@ -93,21 +132,19 @@ impl Default for RunLengthEncodingBytes {
 }
 
 impl RunLengthEncodingBytes {
-
     fn compress(&self, bytes: &[u8]) -> Vec<u8> {
         match self.method {
             RleMethod::OneByte => bytes_to_rle_one_byte(bytes),
-            RleMethod::Leb128 => todo!(),
+            RleMethod::Leb128 => bytes_to_rle_leb128(bytes),
         }
     }
 
     fn decompress(&self, bytes: &[u8]) -> Vec<u8> {
         match self.method {
             RleMethod::OneByte => rle_to_bytes_one_byte(bytes),
-            RleMethod::Leb128 => todo!(),
+            RleMethod::Leb128 => rle_to_bytes_leb128(bytes),
         }
     }
-
 }
 
 impl Code for RunLengthEncodingBytes {
@@ -117,7 +154,9 @@ impl Code for RunLengthEncodingBytes {
             .text_to_bytes(text)
             .map_err(|_| CodeError::input("invalid input bytes"))?;
 
-        Ok(self.output_format.byte_slice_to_text(&self.compress(&bytes)))
+        Ok(self
+            .output_format
+            .byte_slice_to_text(&self.compress(&bytes)))
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
@@ -126,11 +165,15 @@ impl Code for RunLengthEncodingBytes {
             .text_to_bytes(text)
             .map_err(|_| CodeError::input("invalid input bytes"))?;
 
-        if !bytes.len().is_even() {
-            return Err(CodeError::input("the rle must be an even number of bytes"));
+        if self.method == RleMethod::OneByte {
+            if !bytes.len().is_even() {
+                return Err(CodeError::input("the rle must be an even number of bytes"));
+            }
         }
 
-        Ok(self.output_format.byte_slice_to_text(&self.decompress(&bytes)))
+        Ok(self
+            .output_format
+            .byte_slice_to_text(&self.decompress(&bytes)))
     }
 }
 
@@ -147,6 +190,25 @@ mod rle_tests {
         let rle = vec![0, 255, 0, 45];
         assert_eq!(rle, bytes_to_rle_one_byte(&bytes));
         assert_eq!(bytes, rle_to_bytes_one_byte(&rle));
+    }
+
+    #[test]
+    fn check_multibyte_leb128() {
+        let bytes = vec![0_u8; 300];
+        let rle = vec![0, 172, 2];
+        assert_eq!(rle, bytes_to_rle_leb128(&bytes));
+        assert_eq!(bytes, rle_to_bytes_leb128(&rle));
+    }
+
+    #[test]
+    fn check_leb_switching() {
+        let mut bytes = Vec::new();
+        bytes.extend_from_slice(&[0; 9557]);
+        bytes.extend_from_slice(&[1; 50]);
+        bytes.extend_from_slice(&[2; 300]);
+        let rle = vec![0, 213, 74, 1, 50, 2, 172, 2];
+        assert_eq!(rle, bytes_to_rle_leb128(&bytes));
+        assert_eq!(bytes, rle_to_bytes_leb128(&rle));
     }
 
     #[test]
