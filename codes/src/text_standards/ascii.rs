@@ -368,7 +368,7 @@ mod ascii_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "0\0␀A ␠";
-    const CIPHERTEXT: &'static str = "001100000000000000000000010000010010000000100000";
+    const CODETEXT: &'static str = "001100000000000000000000010000010010000000100000";
 
     #[test]
     fn encode_test() {
@@ -376,7 +376,7 @@ mod ascii_tests {
         code.mode = DisplayMode::SevenBit;
         code.upper_bit = UpperBit::Set;
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT);
     }
 
     #[test]

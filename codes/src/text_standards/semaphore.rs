@@ -167,17 +167,17 @@ mod semaphore_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "ABready123WORD";
-    const CIPHERTEXT: &'static str = "down/low down/out low/low high/up down/low down/out down/high out/up out/across-high across-high/out out/out down/up";
+    const CODETEXT: &'static str = "down/low down/out low/low high/up down/low down/out down/high out/up out/across-high across-high/out out/out down/up";
 
     #[test]
     fn encrypt_test() {
         let code = Semaphore::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let code = Semaphore::default();
-        assert_eq!(code.decode(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(CODETEXT).unwrap(), PLAINTEXT);
     }
 }

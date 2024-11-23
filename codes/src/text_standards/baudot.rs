@@ -204,7 +204,7 @@ mod baudot_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "THEQUICKBROWNFOXCOSTS␎£572␏WHILEONSALE";
-    const CIPHERTEXT: &'static str = "1000010100000011011100111001100111001111110010101011000100110110001101110001110101110110000010110000001011101110100100000011110011111111001110100001101001000001110000110000101000111001000001";
+    const CODETEXT: &'static str = "1000010100000011011100111001100111001111110010101011000100110110001101110001110101110110000010110000001011101110100100000011110011111111001110100001101001000001110000110000101000111001000001";
 
     #[test]
     #[ignore = "visual correctness check"]
@@ -217,12 +217,12 @@ mod baudot_tests {
     #[test]
     fn encode_test() {
         let code = Baudot::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT);
     }
 
     #[test]
     fn decode_test() {
         let code = Baudot::default();
-        assert_eq!(code.decode(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(CODETEXT).unwrap(), PLAINTEXT);
     }
 }

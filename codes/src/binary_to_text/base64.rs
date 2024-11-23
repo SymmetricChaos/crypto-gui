@@ -199,44 +199,44 @@ mod base64_tests {
     const PLAINTEXT1: &'static str = "Many hands make light work";
     const PLAINTEXT2: &'static str = "Many hands make light woA";
 
-    const CIPHERTEXT0: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcmsu";
-    const CIPHERTEXT1: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcms=";
-    const CIPHERTEXT2: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvQQ==";
+    const CODETEXT0: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcmsu";
+    const CODETEXT1: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcms=";
+    const CODETEXT2: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvQQ==";
 
-    const CIPHERTEXT0_NOPAD: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcmsu";
-    const CIPHERTEXT1_NOPAD: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcms";
-    const CIPHERTEXT2_NOPAD: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvQQ";
+    const CODETEXT0_NOPAD: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcmsu";
+    const CODETEXT1_NOPAD: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcms";
+    const CODETEXT2_NOPAD: &'static str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvQQ";
 
     #[test]
     fn encode_test() {
         let code = Base64::default();
-        assert_eq!(code.encode(PLAINTEXT0).unwrap(), CIPHERTEXT0);
-        assert_eq!(code.encode(PLAINTEXT1).unwrap(), CIPHERTEXT1);
-        assert_eq!(code.encode(PLAINTEXT2).unwrap(), CIPHERTEXT2);
+        assert_eq!(code.encode(PLAINTEXT0).unwrap(), CODETEXT0);
+        assert_eq!(code.encode(PLAINTEXT1).unwrap(), CODETEXT1);
+        assert_eq!(code.encode(PLAINTEXT2).unwrap(), CODETEXT2);
     }
 
     #[test]
     fn encode_test_nopad() {
         let mut code = Base64::default();
         code.use_padding = false;
-        assert_eq!(code.encode(PLAINTEXT0).unwrap(), CIPHERTEXT0_NOPAD);
-        assert_eq!(code.encode(PLAINTEXT1).unwrap(), CIPHERTEXT1_NOPAD);
-        assert_eq!(code.encode(PLAINTEXT2).unwrap(), CIPHERTEXT2_NOPAD);
+        assert_eq!(code.encode(PLAINTEXT0).unwrap(), CODETEXT0_NOPAD);
+        assert_eq!(code.encode(PLAINTEXT1).unwrap(), CODETEXT1_NOPAD);
+        assert_eq!(code.encode(PLAINTEXT2).unwrap(), CODETEXT2_NOPAD);
     }
 
     #[test]
     fn decode_test() {
         let code = Base64::default();
-        assert_eq!(code.decode(CIPHERTEXT0).unwrap(), PLAINTEXT0);
-        assert_eq!(code.decode(CIPHERTEXT1).unwrap(), PLAINTEXT1);
-        assert_eq!(code.decode(CIPHERTEXT2).unwrap(), PLAINTEXT2);
+        assert_eq!(code.decode(CODETEXT0).unwrap(), PLAINTEXT0);
+        assert_eq!(code.decode(CODETEXT1).unwrap(), PLAINTEXT1);
+        assert_eq!(code.decode(CODETEXT2).unwrap(), PLAINTEXT2);
     }
 
     #[test]
     fn decode_test_nopad() {
         let code = Base64::default();
-        assert_eq!(code.decode(CIPHERTEXT0_NOPAD).unwrap(), PLAINTEXT0);
-        assert_eq!(code.decode(CIPHERTEXT1_NOPAD).unwrap(), PLAINTEXT1);
-        assert_eq!(code.decode(CIPHERTEXT2_NOPAD).unwrap(), PLAINTEXT2);
+        assert_eq!(code.decode(CODETEXT0_NOPAD).unwrap(), PLAINTEXT0);
+        assert_eq!(code.decode(CODETEXT1_NOPAD).unwrap(), PLAINTEXT1);
+        assert_eq!(code.decode(CODETEXT2_NOPAD).unwrap(), PLAINTEXT2);
     }
 }

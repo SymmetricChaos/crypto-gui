@@ -113,18 +113,18 @@ mod bacon_tests {
 
     const PLAINTEXT: &'static str = "ATTACKAAA";
     const FALSETEXT: &'static str = "There is nothing at all suspicious about this message.";
-    const CIPHERTEXT: &'static str = "there Is nOtHinG at all suspIciOus About this message.";
+    const CODETEXT: &'static str = "there Is nOtHinG at all suspIciOus About this message.";
 
     #[test]
     fn encrypt_test() {
         let mut code = Bacon::default();
         code.false_text = FALSETEXT.into();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let code = Bacon::default();
-        assert_eq!(code.decode(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(CODETEXT).unwrap(), PLAINTEXT);
     }
 }

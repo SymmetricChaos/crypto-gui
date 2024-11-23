@@ -91,17 +91,17 @@ mod barbier_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "é ou ien";
-    const CIPHERTEXT: &'static str = ". .....  .. ......  ...... ....";
+    const CODETEXT: &'static str = ". .....  .. ......  ...... ....";
 
     #[test]
     fn encode_test() {
         let cipher = BarbierCode::default();
-        assert_eq!(cipher.encode(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(cipher.encode(PLAINTEXT).unwrap(), CODETEXT);
     }
 
     #[test]
     fn decode_test() {
         let cipher = BarbierCode::default();
-        assert_eq!(cipher.decode(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(cipher.decode(CODETEXT).unwrap(), PLAINTEXT);
     }
 }

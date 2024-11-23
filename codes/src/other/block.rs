@@ -135,19 +135,19 @@ mod block_code_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "ABC";
-    const CIPHERTEXT_01: &'static str = "000000000100010";
-    const CIPHERTEXT_XYZ: &'static str = "XXXYXZ";
+    const CODETEXT_01: &'static str = "000000000100010";
+    const CODETEXT_XYZ: &'static str = "XXXYXZ";
 
     #[test]
     fn encode_test_default() {
         let code = BlockCode::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT_01);
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT_01);
     }
 
     #[test]
     fn decode_test_default() {
         let code = BlockCode::default();
-        assert_eq!(code.decode(CIPHERTEXT_01).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(CODETEXT_01).unwrap(), PLAINTEXT);
     }
 
     #[test]
@@ -155,7 +155,7 @@ mod block_code_tests {
         let mut code = BlockCode::default();
         code.symbols = "XYZ".chars().collect();
         code.width = 2;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT_XYZ);
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT_XYZ);
     }
 
     #[test]
@@ -163,6 +163,6 @@ mod block_code_tests {
         let mut code = BlockCode::default();
         code.symbols = "XYZ".chars().collect();
         code.width = 2;
-        assert_eq!(code.decode(CIPHERTEXT_XYZ).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(CODETEXT_XYZ).unwrap(), PLAINTEXT);
     }
 }

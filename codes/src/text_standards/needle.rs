@@ -64,17 +64,17 @@ mod needle_code_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "ABDE";
-    const CIPHERTEXT: &'static str = r"/|||\ /||\| |/||\ /|\||";
+    const CODETEXT: &'static str = r"/|||\ /||\| |/||\ /|\||";
 
     #[test]
     fn encrypt_test() {
         let code = Needle::default();
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CIPHERTEXT);
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT);
     }
 
     #[test]
     fn decrypt_test() {
         let code = Needle::default();
-        assert_eq!(code.decode(CIPHERTEXT).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(CODETEXT).unwrap(), PLAINTEXT);
     }
 }
