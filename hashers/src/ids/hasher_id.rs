@@ -33,6 +33,7 @@ hasher_ids_and_names!(
     AsconHash, "Ascon-Hash";
     AsconMac, "Ascon-MAC";
     Bcrypt, "bcrypt";
+    Belt, "BelT";
     Blake, "BLAKE";
     Blake2, "BLAKE2";
     Blake3, "BLAKE3";
@@ -61,6 +62,7 @@ hasher_ids_and_names!(
     Sha1, "SHA-1";
     Sha2, "SHA-2";
     Sha3, "SHA-3 (Keccak)";
+    Shabal, "Shabal";
     SipHash, "SipHash";
     Sm3, "SM3";
     Snefru, "Snefru";
