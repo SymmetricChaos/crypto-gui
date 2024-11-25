@@ -1,7 +1,7 @@
 use crate::traits::ClassicHasher;
 use utils::{
-    byte_formatting::{make_u32s_le, ByteFormat},
-    padding::md_strengthening_64_le,
+    byte_formatting::{make_u32s_be, make_u32s_le, ByteFormat},
+    padding::{md_strengthening_64_be, md_strengthening_64_le},
 };
 
 // https://www.cs.rit.edu/~ark/20090927/Round2Candidates/Shabal.pdf
@@ -86,9 +86,7 @@ const O2: usize = 9;
 const O3: usize = 6;
 
 fn keyed_permutation(m: [u32; 16], a: &mut [u32; 12], b: &mut [u32; 16], c: [u32; 16]) {
-    for i in 0..16 {
-        b[i] = b[i].rotate_left(17);
-    }
+    b.iter_mut().for_each(|b| *b = b.rotate_left(17));
 
     for j in 0..P {
         for i in 0..16 {
@@ -143,7 +141,7 @@ impl ClassicHasher for Shabal256 {
         let mut b = IV256B;
         let mut c = IV256C;
 
-        let mut ctr: [u32; 2] = [1, 0];
+        let mut ctr: u64 = 0;
 
         for block in input.chunks_exact(64) {
             let m = make_u32s_le::<16>(block);
@@ -154,8 +152,8 @@ impl ClassicHasher for Shabal256 {
             }
 
             // XOR the counter in A[0] and A[1]
-            a[0] ^= ctr[0];
-            a[1] ^= ctr[1];
+            a[0] ^= ctr as u32;
+            a[1] ^= (ctr >> 32) as u32;
 
             // Apply the keyed permutation
             keyed_permutation(m, &mut a, &mut b, c);
@@ -168,13 +166,35 @@ impl ClassicHasher for Shabal256 {
             // Swap B and C
             std::mem::swap(&mut b, &mut c);
 
-            ctr[0] = ctr[0].wrapping_add(1);
-            if ctr[0] == 0 {
-                ctr[1] = ctr[0].wrapping_add(1);
-            }
+            ctr = ctr.wrapping_add(1);
         }
 
-        todo!()
+        // Finalization rounds
+        let final_block = make_u32s_le::<16>(input.chunks_exact(64).last().unwrap());
+        for _ in 0..3 {
+            let m = final_block;
+
+            for i in 0..16 {
+                b[i] = b[i].wrapping_add(m[i]);
+            }
+
+            a[0] ^= ctr as u32;
+            a[1] ^= (ctr >> 32) as u32;
+
+            keyed_permutation(m, &mut a, &mut b, c);
+
+            for i in 0..16 {
+                c[i] = c[i].wrapping_sub(m[i]);
+            }
+
+            std::mem::swap(&mut b, &mut c);
+        }
+
+        let mut out = Vec::with_capacity(32);
+        for word in c[8..16].into_iter() {
+            out.extend(word.to_le_bytes())
+        }
+        out
     }
 
     crate::hash_bytes_from_string! {}
@@ -183,6 +203,6 @@ impl ClassicHasher for Shabal256 {
 crate::basic_hash_tests!(
     test1,
     Shabal256::default(),
-    "INPUT",
-    "OUTPUT";
+    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "da8f08c02a67ba9a56bdd0798e48ae0714215e093b5b850649a37718993f54a2";
 );
