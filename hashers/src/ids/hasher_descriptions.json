@@ -363,6 +363,22 @@
       "Crytographic"
     ]
   },
+  "Shabal": {
+    "Description": "Shabal is a hash function developed with funding from the French government by a range of pubic and private security organziations. It was submitted as a contestant for the NIST SHA-3 competition.",
+    "Authors": "Emmanuel Bresson, Christophe Clavier, Thomas Fuhr, Thomas Icart, Jean François Misarsky, María Naya-Plasencia, Jean-René Reinhard, Céline Thuillet, Marion Videau",
+    "Publication": "2008",
+    "Hash Length": [
+      192,
+      224,
+      256,
+      384,
+      512
+    ],
+    "Traits": [
+      "Crytographic"
+    ]
+  },
+  
   "SM3": {
     "Description": "SM3 (商密3, ShāngMì 3) is the Chinese national standard hash function. It uses an expand and compress design infalting the input to 132 words then compressing it into the 16 word state.",
     "Authors": "Chinese Academy of Sciences",
