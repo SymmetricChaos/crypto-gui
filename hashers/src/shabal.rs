@@ -1,7 +1,7 @@
 use crate::traits::ClassicHasher;
 use utils::{
     byte_formatting::{make_u32s_be, make_u32s_le, ByteFormat},
-    padding::{md_strengthening_64_be, md_strengthening_64_le},
+    padding::{bit_padding, md_strengthening_64_be, md_strengthening_64_le},
 };
 
 // https://www.cs.rit.edu/~ark/20090927/Round2Candidates/Shabal.pdf
@@ -85,20 +85,43 @@ const O1: usize = 13;
 const O2: usize = 9;
 const O3: usize = 6;
 
-fn keyed_permutation(m: [u32; 16], a: &mut [u32; 12], b: &mut [u32; 16], c: [u32; 16]) {
+// fn single_permutation(m: &[u32; 16], a: &mut [u32; 12], b: &mut [u32; 16], c: &[u32; 16]) {
+//     for i in 0..16 {
+//         let p = i + (16 * j);
+//         let t0 = a[p % R];
+//         let t1 = a[((i + 15) + (16 * j)) % R].rotate_left(15).wrapping_mul(5);
+//         let t2 = c[(24 - i) % 16];
+//         a[p % R] = (t0 ^ t1 ^ t2).wrapping_mul(3)
+//             ^ b[(i + O1) % 16]
+//             ^ (b[(i + O2) % 16] & !b[(i + O3) % 16])
+//             ^ m[i];
+//         b[i] = b[i].rotate_left(1) ^ !a[p % R];
+//     }
+// }
+
+fn keyed_permutation(m: &[u32; 16], a: &mut [u32; 12], b: &mut [u32; 16], c: &[u32; 16]) {
     b.iter_mut().for_each(|b| *b = b.rotate_left(17));
+    // println!("rotate B");
+    // println!("{:08x?}", a);
+    // println!("{:08x?}", b);
+    // println!("{:08x?}", c);
 
     for j in 0..P {
         for i in 0..16 {
-            let t0 = a[(i + 16 * j) % R];
-            let t1 = a[((i + 15) + 16 * j) % R].rotate_left(15).wrapping_mul(5);
+            let p = i + (16 * j);
+            let t0 = a[p % R];
+            let t1 = a[((i + 11) + (16 * j)) % R].rotate_left(15).wrapping_mul(5);
             let t2 = c[(24 - i) % 16];
-            a[(i + 16 * j) % R] = (t0 ^ t1 ^ t2).wrapping_mul(3)
+            a[p % R] = (t0 ^ t1 ^ t2).wrapping_mul(3)
                 ^ b[(i + O1) % 16]
                 ^ (b[(i + O2) % 16] & !b[(i + O3) % 16])
                 ^ m[i];
-            b[i] = b[i].rotate_left(1) ^ !a[(i + 16 * j) % R];
+            b[i] = b[i].rotate_left(1) ^ !a[p % R];
         }
+        // println!("permutation j = {}", j);
+        // println!("{:08x?}", a);
+        // println!("{:08x?}", b);
+        // println!("{:08x?}", c);
     }
 
     for j in 0..36 {
@@ -135,44 +158,68 @@ impl Shabal256 {
 impl ClassicHasher for Shabal256 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut input = bytes.to_vec();
-        md_strengthening_64_le(&mut input, 64);
+        bit_padding(&mut input, 64).unwrap();
 
         let mut a = IV256A;
         let mut b = IV256B;
         let mut c = IV256C;
 
-        let mut ctr: u64 = 0;
+        // let mut a = [0_u32; 12];
+        // let mut b = [0_u32; 16];
+        // let mut c = [0_u32; 16];
+
+        let mut ctr: u64 = 0xffffffffffffffff;
 
         for block in input.chunks_exact(64) {
+            ctr = ctr.wrapping_add(1);
             let m = make_u32s_le::<16>(block);
+            // println!("M");
+            // println!("{:08x?}", m);
 
             // Insert the message into b by addition
             for i in 0..16 {
                 b[i] = b[i].wrapping_add(m[i]);
             }
+            println!("add M to B");
+            println!("{:08x?}", a);
+            println!("{:08x?}", b);
+            println!("{:08x?}", c);
 
             // XOR the counter in A[0] and A[1]
             a[0] ^= ctr as u32;
             a[1] ^= (ctr >> 32) as u32;
+            println!("xor Counter W into A");
+            println!("{:08x?}", a);
+            println!("{:08x?}", b);
+            println!("{:08x?}", c);
 
             // Apply the keyed permutation
-            keyed_permutation(m, &mut a, &mut b, c);
+            keyed_permutation(&m, &mut a, &mut b, &c);
 
             // Insert the message into c by subtraction
             for i in 0..16 {
                 c[i] = c[i].wrapping_sub(m[i]);
             }
+            println!("subtract M from C");
+            println!("{:08x?}", a);
+            println!("{:08x?}", b);
+            println!("{:08x?}", c);
 
             // Swap B and C
             std::mem::swap(&mut b, &mut c);
-
-            ctr = ctr.wrapping_add(1);
+            println!("Swap B and C");
+            println!("{:08x?}", a);
+            println!("{:08x?}", b);
+            println!("{:08x?}", c);
         }
 
+        println!("\n\nStart Finalization\n\n");
         // Finalization rounds
         let final_block = make_u32s_le::<16>(input.chunks_exact(64).last().unwrap());
         for _ in 0..3 {
             let m = final_block;
+            println!("M");
+            println!("{:08x?}", m);
 
             for i in 0..16 {
                 b[i] = b[i].wrapping_add(m[i]);
@@ -181,13 +228,18 @@ impl ClassicHasher for Shabal256 {
             a[0] ^= ctr as u32;
             a[1] ^= (ctr >> 32) as u32;
 
-            keyed_permutation(m, &mut a, &mut b, c);
+            keyed_permutation(&m, &mut a, &mut b, &c);
 
             for i in 0..16 {
                 c[i] = c[i].wrapping_sub(m[i]);
             }
 
             std::mem::swap(&mut b, &mut c);
+
+            println!("Swap B and C");
+            println!("{:08x?}", a);
+            println!("{:08x?}", b);
+            println!("{:08x?}", c);
         }
 
         let mut out = Vec::with_capacity(32);
@@ -202,7 +254,12 @@ impl ClassicHasher for Shabal256 {
 
 crate::basic_hash_tests!(
     test1,
-    Shabal256::default(),
+    Shabal256::default().input(ByteFormat::Hex),
+    "000100000101000002010000030100000401000005010000060100000701000008010000090100000a0100000b0100000c0100000d0100000e0100000f010000100100001101000012010000130100001401000015010000160100001701000018010000190100001a0100001b0100001c0100001d0100001e0100001f01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "da8f08c02a67ba9a56bdd0798e48ae0714215e093b5b850649a37718993f54a2";
+
+    test2,
+    Shabal256::default().input(ByteFormat::Hex),
     "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
     "da8f08c02a67ba9a56bdd0798e48ae0714215e093b5b850649a37718993f54a2";
 );
