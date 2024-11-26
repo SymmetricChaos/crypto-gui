@@ -6,33 +6,33 @@ use utils::{
 
 // https://www.cs.rit.edu/~ark/20090927/Round2Candidates/Shabal.pdf
 
-// // 192
-// const IV192A: [u32; 12] = [
-//     0xFD749ED4, 0xB798E530, 0x33904B6F, 0x46BDA85E, 0x076934B4, 0x454B4058, 0x77F74527, 0xFB4CF465,
-//     0x62931DA9, 0xE778C8DB, 0x22B3998E, 0xAC15CFB9,
-// ];
-// const IV192B: [u32; 16] = [
-//     0x58BCBAC4, 0xEC47A08E, 0xAEE933B2, 0xDFCBC824, 0xA7944804, 0xBF65BDB0, 0x5A9D4502, 0x59979AF7,
-//     0xC5CEA54E, 0x4B6B8150, 0x16E71909, 0x7D632319, 0x930573A0, 0xF34C63D1, 0xCAF914B4, 0xFDD6612C,
-// ];
-// const IV192C: [u32; 16] = [
-//     0x61550878, 0x89EF2B75, 0xA1660C46, 0x7EF3855B, 0x7297B58C, 0x1BC67793, 0x7FB1C723, 0xB66FC640,
-//     0x1A48B71C, 0xF0976D17, 0x088CE80A, 0xA454EDF3, 0x1C096BF4, 0xAC76224B, 0x5215781C, 0xCD5D2669,
-// ];
+// 192
+const IV192A: [u32; 12] = [
+    0xFD749ED4, 0xB798E530, 0x33904B6F, 0x46BDA85E, 0x076934B4, 0x454B4058, 0x77F74527, 0xFB4CF465,
+    0x62931DA9, 0xE778C8DB, 0x22B3998E, 0xAC15CFB9,
+];
+const IV192B: [u32; 16] = [
+    0x58BCBAC4, 0xEC47A08E, 0xAEE933B2, 0xDFCBC824, 0xA7944804, 0xBF65BDB0, 0x5A9D4502, 0x59979AF7,
+    0xC5CEA54E, 0x4B6B8150, 0x16E71909, 0x7D632319, 0x930573A0, 0xF34C63D1, 0xCAF914B4, 0xFDD6612C,
+];
+const IV192C: [u32; 16] = [
+    0x61550878, 0x89EF2B75, 0xA1660C46, 0x7EF3855B, 0x7297B58C, 0x1BC67793, 0x7FB1C723, 0xB66FC640,
+    0x1A48B71C, 0xF0976D17, 0x088CE80A, 0xA454EDF3, 0x1C096BF4, 0xAC76224B, 0x5215781C, 0xCD5D2669,
+];
 
-// // 224
-// const IV224A: [u32; 12] = [
-//     0xA5201467, 0xA9B8D94A, 0xD4CED997, 0x68379D7B, 0xA7FC73BA, 0xF1A2546B, 0x606782BF, 0xE0BCFD0F,
-//     0x2F25374E, 0x069A149F, 0x5E2DFF25, 0xFAECF061,
-// ];
-// const IV224B: [u32; 16] = [
-//     0xEC9905D8, 0xF21850CF, 0xC0A746C8, 0x21DAD498, 0x35156EEB, 0x088C97F2, 0x26303E40, 0x8A2D4FB5,
-//     0xFEEE44B6, 0x8A1E9573, 0x7B81111A, 0xCBC139F0, 0xA3513861, 0x1D2C362E, 0x918C580E, 0xB58E1B9C,
-// ];
-// const IV224C: [u32; 16] = [
-//     0xE4B573A1, 0x4C1A0880, 0x1E907C51, 0x04807EFD, 0x3AD8CDE5, 0x16B21302, 0x02512C53, 0x2204CB18,
-//     0x99405F2D, 0xE5B648A1, 0x70AB1D43, 0xA10C25C2, 0x16F1AC05, 0x38BBEB56, 0x9B01DC60, 0xB1096D83,
-// ];
+// 224
+const IV224A: [u32; 12] = [
+    0xA5201467, 0xA9B8D94A, 0xD4CED997, 0x68379D7B, 0xA7FC73BA, 0xF1A2546B, 0x606782BF, 0xE0BCFD0F,
+    0x2F25374E, 0x069A149F, 0x5E2DFF25, 0xFAECF061,
+];
+const IV224B: [u32; 16] = [
+    0xEC9905D8, 0xF21850CF, 0xC0A746C8, 0x21DAD498, 0x35156EEB, 0x088C97F2, 0x26303E40, 0x8A2D4FB5,
+    0xFEEE44B6, 0x8A1E9573, 0x7B81111A, 0xCBC139F0, 0xA3513861, 0x1D2C362E, 0x918C580E, 0xB58E1B9C,
+];
+const IV224C: [u32; 16] = [
+    0xE4B573A1, 0x4C1A0880, 0x1E907C51, 0x04807EFD, 0x3AD8CDE5, 0x16B21302, 0x02512C53, 0x2204CB18,
+    0x99405F2D, 0xE5B648A1, 0x70AB1D43, 0xA10C25C2, 0x16F1AC05, 0x38BBEB56, 0x9B01DC60, 0xB1096D83,
+];
 
 // 256
 const IV256A: [u32; 12] = [
@@ -48,33 +48,33 @@ const IV256C: [u32; 16] = [
     0x88B59D60, 0x60E2CEBA, 0x758B4B8B, 0x83E82A7F, 0xBC968828, 0xE6E00BF7, 0xBA839E55, 0x9B491C60,
 ];
 
-// // 384
-// const IV384A: [u32; 12] = [
-//     0xC8FCA331, 0xE55C504E, 0x003EBF26, 0xBB6B8D83, 0x7B0448C1, 0x41B82789, 0x0A7C9601, 0x8D659CFF,
-//     0xB6E2673E, 0xCA54C77B, 0x1460FD7E, 0x3FCB8F2D,
-// ];
-// const IV384B: [u32; 16] = [
-//     0x527291FC, 0x2A16455F, 0x78E627E5, 0x944F169F, 0x1CA6F016, 0xA854EA25, 0x8DB98ABE, 0xF2C62641,
-//     0x30117DCB, 0xCF5C4309, 0x93711A25, 0xF9F671B8, 0xB01D2116, 0x333F4B89, 0xB285D165, 0x86829B36,
-// ];
-// const IV384C: [u32; 16] = [
-//     0xF764B11A, 0x76172146, 0xCEF6934D, 0xC6D28399, 0xFE095F61, 0x5E6018B4, 0x5048ECF5, 0x51353261,
-//     0x6E6E36DC, 0x63130DAD, 0xA9C69BD6, 0x1E90EA0C, 0x7C35073B, 0x28D95E6D, 0xAA340E0D, 0xCB3DEE70,
-// ];
+// 384
+const IV384A: [u32; 12] = [
+    0xC8FCA331, 0xE55C504E, 0x003EBF26, 0xBB6B8D83, 0x7B0448C1, 0x41B82789, 0x0A7C9601, 0x8D659CFF,
+    0xB6E2673E, 0xCA54C77B, 0x1460FD7E, 0x3FCB8F2D,
+];
+const IV384B: [u32; 16] = [
+    0x527291FC, 0x2A16455F, 0x78E627E5, 0x944F169F, 0x1CA6F016, 0xA854EA25, 0x8DB98ABE, 0xF2C62641,
+    0x30117DCB, 0xCF5C4309, 0x93711A25, 0xF9F671B8, 0xB01D2116, 0x333F4B89, 0xB285D165, 0x86829B36,
+];
+const IV384C: [u32; 16] = [
+    0xF764B11A, 0x76172146, 0xCEF6934D, 0xC6D28399, 0xFE095F61, 0x5E6018B4, 0x5048ECF5, 0x51353261,
+    0x6E6E36DC, 0x63130DAD, 0xA9C69BD6, 0x1E90EA0C, 0x7C35073B, 0x28D95E6D, 0xAA340E0D, 0xCB3DEE70,
+];
 
-// // 512
-// const IV512A: [u32; 12] = [
-//     0x20728DFD, 0x46C0BD53, 0xE782B699, 0x55304632, 0x71B4EF90, 0x0EA9E82C, 0xDBB930F1, 0xFAD06B8B,
-//     0xBE0CAE40, 0x8BD14410, 0x76D2ADAC, 0x28ACAB7F,
-// ];
-// const IV512B: [u32; 16] = [
-//     0xC1099CB7, 0x07B385F3, 0xE7442C26, 0xCC8AD640, 0xEB6F56C7, 0x1EA81AA9, 0x73B9D314, 0x1DE85D08,
-//     0x48910A5A, 0x893B22DB, 0xC5A0DF44, 0xBBC4324E, 0x72D2F240, 0x75941D99, 0x6D8BDE82, 0xA1A7502B,
-// ];
-// const IV512C: [u32; 16] = [
-//     0xD9BF68D1, 0x58BAD750, 0x56028CB2, 0x8134F359, 0xB5D469D8, 0x941A8CC2, 0x418B2A6E, 0x04052780,
-//     0x7F07D787, 0x5194358F, 0x3C60D665, 0xBE97D79A, 0x950C3434, 0xAED9A06D, 0x2537DC8D, 0x7CDB5969,
-// ];
+// 512
+const IV512A: [u32; 12] = [
+    0x20728DFD, 0x46C0BD53, 0xE782B699, 0x55304632, 0x71B4EF90, 0x0EA9E82C, 0xDBB930F1, 0xFAD06B8B,
+    0xBE0CAE40, 0x8BD14410, 0x76D2ADAC, 0x28ACAB7F,
+];
+const IV512B: [u32; 16] = [
+    0xC1099CB7, 0x07B385F3, 0xE7442C26, 0xCC8AD640, 0xEB6F56C7, 0x1EA81AA9, 0x73B9D314, 0x1DE85D08,
+    0x48910A5A, 0x893B22DB, 0xC5A0DF44, 0xBBC4324E, 0x72D2F240, 0x75941D99, 0x6D8BDE82, 0xA1A7502B,
+];
+const IV512C: [u32; 16] = [
+    0xD9BF68D1, 0x58BAD750, 0x56028CB2, 0x8134F359, 0xB5D469D8, 0x941A8CC2, 0x418B2A6E, 0x04052780,
+    0x7F07D787, 0x5194358F, 0x3C60D665, 0xBE97D79A, 0x950C3434, 0xAED9A06D, 0x2537DC8D, 0x7CDB5969,
+];
 
 // These security parameter could be varied but Shabal only uses the values shown
 const P: usize = 3;
@@ -107,113 +107,157 @@ fn keyed_permutation(m: &[u32; 16], a: &mut [u32; 12], b: &mut [u32; 16], c: &[u
     }
 }
 
-pub struct Shabal256 {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-}
-
-impl Default for Shabal256 {
-    fn default() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-        }
-    }
-}
-
-impl Shabal256 {
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
-    }
-
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
-    }
-}
-
-impl ClassicHasher for Shabal256 {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut input = bytes.to_vec();
-        bit_padding(&mut input, 64).unwrap();
-
-        let mut a = IV256A;
-        let mut b = IV256B;
-        let mut c = IV256C;
-
-        let mut ctr: u64 = 0;
-
-        for block in input.chunks_exact(64) {
-            ctr = ctr.wrapping_add(1);
-            let m = make_u32s_le::<16>(block);
-
-            // Insert the message into b by addition
-            for i in 0..16 {
-                b[i] = b[i].wrapping_add(m[i]);
-            }
-
-            // XOR the counter in A[0] and A[1]
-            a[0] ^= ctr as u32;
-            a[1] ^= (ctr >> 32) as u32;
-
-            // Apply the keyed permutation
-            keyed_permutation(&m, &mut a, &mut b, &c);
-
-            // Insert the message into c by subtraction
-            for i in 0..16 {
-                c[i] = c[i].wrapping_sub(m[i]);
-            }
-
-            // Swap B and C
-            std::mem::swap(&mut b, &mut c);
+macro_rules! shabal {
+    ($name:ident, $a: ident, $b: ident, $c: ident, $hlen: literal) => {
+        pub struct $name {
+            pub input_format: ByteFormat,
+            pub output_format: ByteFormat,
         }
 
-        // Finalization rounds
-        let final_block = make_u32s_le::<16>(input.chunks_exact(64).last().unwrap());
-        for _ in 0..3 {
-            let m = final_block;
-
-            for i in 0..16 {
-                b[i] = b[i].wrapping_add(m[i]);
+        impl Default for $name {
+            fn default() -> Self {
+                Self {
+                    input_format: ByteFormat::Utf8,
+                    output_format: ByteFormat::Hex,
+                }
             }
-
-            a[0] ^= ctr as u32;
-            a[1] ^= (ctr >> 32) as u32;
-
-            keyed_permutation(&m, &mut a, &mut b, &c);
-
-            for i in 0..16 {
-                c[i] = c[i].wrapping_sub(m[i]);
-            }
-
-            std::mem::swap(&mut b, &mut c);
         }
 
-        let mut out = Vec::with_capacity(32);
-        for word in c[8..16].into_iter() {
-            out.extend(word.to_le_bytes())
-        }
-        out
-    }
+        impl $name {
+            pub fn input(mut self, input: ByteFormat) -> Self {
+                self.input_format = input;
+                self
+            }
 
-    crate::hash_bytes_from_string! {}
+            pub fn output(mut self, output: ByteFormat) -> Self {
+                self.output_format = output;
+                self
+            }
+        }
+
+        impl ClassicHasher for $name {
+            fn hash(&self, bytes: &[u8]) -> Vec<u8> {
+                let mut input = bytes.to_vec();
+                bit_padding(&mut input, 64).unwrap();
+
+                let mut a = $a;
+                let mut b = $b;
+                let mut c = $c;
+
+                let mut ctr: u64 = 0;
+
+                for block in input.chunks_exact(64) {
+                    ctr = ctr.wrapping_add(1);
+                    let m = make_u32s_le::<16>(block);
+
+                    // Insert the message into b by addition
+                    for i in 0..16 {
+                        b[i] = b[i].wrapping_add(m[i]);
+                    }
+
+                    // XOR the counter in A[0] and A[1]
+                    a[0] ^= ctr as u32;
+                    a[1] ^= (ctr >> 32) as u32;
+
+                    // Apply the keyed permutation
+                    keyed_permutation(&m, &mut a, &mut b, &c);
+
+                    // Insert the message into c by subtraction
+                    for i in 0..16 {
+                        c[i] = c[i].wrapping_sub(m[i]);
+                    }
+
+                    // Swap B and C
+                    std::mem::swap(&mut b, &mut c);
+                }
+
+                // Finalization rounds
+                let final_block = make_u32s_le::<16>(input.chunks_exact(64).last().unwrap());
+                for _ in 0..3 {
+                    let m = final_block;
+
+                    for i in 0..16 {
+                        b[i] = b[i].wrapping_add(m[i]);
+                    }
+
+                    a[0] ^= ctr as u32;
+                    a[1] ^= (ctr >> 32) as u32;
+
+                    keyed_permutation(&m, &mut a, &mut b, &c);
+
+                    for i in 0..16 {
+                        c[i] = c[i].wrapping_sub(m[i]);
+                    }
+
+                    std::mem::swap(&mut b, &mut c);
+                }
+
+                let mut out = Vec::with_capacity(32);
+                for word in c[(16-$hlen)..].into_iter() {
+                    out.extend(word.to_le_bytes())
+                }
+                out
+            }
+
+            crate::hash_bytes_from_string! {}
+        }
+    };
 }
+
+shabal!(Shabal192, IV192A, IV192B, IV192C, 6);
+shabal!(Shabal224, IV224A, IV224B, IV224C, 7);
+shabal!(Shabal256, IV256A, IV256B, IV256C, 8);
+shabal!(Shabal384, IV384A, IV384B, IV384C, 12);
+shabal!(Shabal512, IV512A, IV512B, IV512C, 16);
 
 crate::basic_hash_tests!(
-    //
-    // test_a_zeroed_ivs,
-    // Shabal256::default().input(ByteFormat::Hex),
-    // "000100000101000002010000030100000401000005010000060100000701000008010000090100000a0100000b0100000c0100000d0100000e0100000f010000100100001101000012010000130100001401000015010000160100001701000018010000190100001a0100001b0100001c0100001d0100001e0100001f01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-    // "da8f08c02a67ba9a56bdd0798e48ae0714215e093b5b850649a37718993f54a2";
+    test_a_192,
+    Shabal192::default().input(ByteFormat::Hex),
+    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "0f706ecb97cf4dce00bfbbd2fb64530c32870cb44839730d";
 
-    test_a,
+    test_b_192,
+    Shabal192::default().input(ByteFormat::Hex),
+    "6162636465666768696A6B6C6D6E6F707172737475767778797A2D303132333435363738392D4142434445464748494A4B4C4D4E4F505152535455565758595A2D303132333435363738392D6162636465666768696A6B6C6D6E6F707172737475767778797A",
+    "690fae79226d95760ae8fdb4f58c0537111756557d307b15";
+
+    test_a_224,
+    Shabal224::default().input(ByteFormat::Hex),
+    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "99dda614f907d2e8817618f730696f3200aeca8b5f85f42543ba2031";
+
+    test_b_224,
+    Shabal224::default().input(ByteFormat::Hex),
+    "6162636465666768696A6B6C6D6E6F707172737475767778797A2D303132333435363738392D4142434445464748494A4B4C4D4E4F505152535455565758595A2D303132333435363738392D6162636465666768696A6B6C6D6E6F707172737475767778797A",
+    "c7d62d8d2a3474b4f4a9d11a52db3d435bf158cf454c5d561d7125f5";
+
+    test_a_256,
     Shabal256::default().input(ByteFormat::Hex),
     "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
     "da8f08c02a67ba9a56bdd0798e48ae0714215e093b5b850649a37718993f54a2";
 
-    test_b,
+    test_b_256,
     Shabal256::default().input(ByteFormat::Hex),
     "6162636465666768696A6B6C6D6E6F707172737475767778797A2D303132333435363738392D4142434445464748494A4B4C4D4E4F505152535455565758595A2D303132333435363738392D6162636465666768696A6B6C6D6E6F707172737475767778797A",
     "b49f34bf51864c30533cc46cc2542bdec2f96fd06f5c539aff6ead5883f7327a";
+
+    test_a_384,
+    Shabal384::default().input(ByteFormat::Hex),
+    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "9dde1233910d85da3a5c780312b111c6fcca1b5dd25537035ee08e3b4e1e25154f726a6384e5a8f0afeaab4ac4c02f12";
+
+    test_b_384,
+    Shabal384::default().input(ByteFormat::Hex),
+    "6162636465666768696A6B6C6D6E6F707172737475767778797A2D303132333435363738392D4142434445464748494A4B4C4D4E4F505152535455565758595A2D303132333435363738392D6162636465666768696A6B6C6D6E6F707172737475767778797A",
+    "30012c0e3edc460bd78627c2c30944d2a189669afa2d7a9713ef2f774c4474a43af1cbcec5fab4248c0873f038fbeba0";
+
+    test_a_512,
+    Shabal512::default().input(ByteFormat::Hex),
+    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "158016c6c81f3f0a52d98d68ed2f9e8e7895ef23cba7e2bc6109d8a532e6c9e6a6a501979fb837f04ec4c620e73179dc82abb52b32cdadb35650e29c985e3022";
+
+    test_b_512,
+    Shabal512::default().input(ByteFormat::Hex),
+    "6162636465666768696A6B6C6D6E6F707172737475767778797A2D303132333435363738392D4142434445464748494A4B4C4D4E4F505152535455565758595A2D303132333435363738392D6162636465666768696A6B6C6D6E6F707172737475767778797A",
+    "677e6f7f12d70af0b335662f59b56851f3653e66647d3386dfda0143254cc8a5db3e2194068c6f71597d7b60984d22b47a1f60d91ca8dfcb175d65b97359cecf";
 );
