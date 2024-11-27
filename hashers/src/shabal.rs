@@ -210,6 +210,72 @@ shabal!(Shabal256, IV256A, IV256B, IV256C, 8);
 shabal!(Shabal384, IV384A, IV384B, IV384C, 12);
 shabal!(Shabal512, IV512A, IV512B, IV512C, 16);
 
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub enum ShabalVariant {
+    Shabal192,
+    Shabal224,
+    Shabal256,
+    Shabal384,
+    Shabal512,
+}
+
+pub struct Shabal {
+    pub variant: ShabalVariant,
+    pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
+}
+
+impl Default for Shabal {
+    fn default() -> Self {
+        Self {
+            variant: ShabalVariant::Shabal256,
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
+        }
+    }
+}
+
+impl Shabal {
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+}
+
+impl ClassicHasher for Shabal {
+    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
+        match self.variant {
+            ShabalVariant::Shabal192 => Shabal192::default()
+                .input(self.input_format)
+                .output(self.output_format)
+                .hash(bytes),
+            ShabalVariant::Shabal224 => Shabal224::default()
+                .input(self.input_format)
+                .output(self.output_format)
+                .hash(bytes),
+            ShabalVariant::Shabal256 => Shabal256::default()
+                .input(self.input_format)
+                .output(self.output_format)
+                .hash(bytes),
+            ShabalVariant::Shabal384 => Shabal384::default()
+                .input(self.input_format)
+                .output(self.output_format)
+                .hash(bytes),
+            ShabalVariant::Shabal512 => Shabal512::default()
+                .input(self.input_format)
+                .output(self.output_format)
+                .hash(bytes),
+        }
+    }
+
+    crate::hash_bytes_from_string! {}
+}
+
 crate::basic_hash_tests!(
     test_a_192,
     Shabal192::default().input(ByteFormat::Hex),
