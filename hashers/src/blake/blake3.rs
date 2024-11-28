@@ -1,6 +1,6 @@
 use crate::{blake_double_round, traits::ClassicHasher};
 use std::cmp::min;
-use utils::byte_formatting::ByteFormat;
+use utils::byte_formatting::{make_u32s_le, ByteFormat};
 
 // https://github.com/BLAKE3-team/BLAKE3
 // https://github.com/BLAKE3-team/BLAKE3-specs/blob/master/blake3.pdf
@@ -8,9 +8,13 @@ use utils::byte_formatting::ByteFormat;
 
 const OUT_LEN: usize = 32;
 const KEY_LEN: usize = 32;
+
+// Each chunk of 1024 bytes (256 words) is divided up into blocks of 64 bytes (16 words).
+// Chunks are arranged into a tree structure while blocks are a simple array within each chunk
 const BLOCK_LEN: usize = 64;
 const CHUNK_LEN: usize = 1024;
 
+// Bitflags that can be set for chunks
 const CHUNK_START: u32 = 1 << 0;
 const CHUNK_END: u32 = 1 << 1;
 const PARENT: u32 = 1 << 2;
@@ -19,6 +23,7 @@ const KEYED_HASH: u32 = 1 << 4;
 const DERIVE_KEY_CONTEXT: u32 = 1 << 5;
 const DERIVE_KEY_MATERIAL: u32 = 1 << 6;
 
+// Same IV as BLAKE2s, sqrt of the first eight primes
 const IV: [u32; 8] = [
     0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
 ];
@@ -36,6 +41,8 @@ fn permute(m: &mut [u32; 16]) {
     *m = permuted;
 }
 
+// The compression function.
+// Compresses a block into a chaining value.
 fn compress(
     chaining_value: &[u32; 8],
     block_words: &[u32; 16],
@@ -86,13 +93,6 @@ fn compress(
 
 fn first_8_words(compression_output: [u32; 16]) -> [u32; 8] {
     compression_output[0..8].try_into().unwrap()
-}
-
-fn words_from_little_endian_bytes(bytes: &[u8], words: &mut [u32]) {
-    debug_assert_eq!(bytes.len(), 4 * words.len());
-    for (four_bytes, word) in bytes.chunks_exact(4).zip(words) {
-        *word = u32::from_le_bytes(four_bytes.try_into().unwrap());
-    }
 }
 
 // Each chunk or parent node can produce either an 8-word chaining value or, by
@@ -174,8 +174,7 @@ impl ChunkState {
             // If the block buffer is full, compress it and clear it. More
             // input is coming, so this compression is not CHUNK_END.
             if self.block_len as usize == BLOCK_LEN {
-                let mut block_words = [0; 16];
-                words_from_little_endian_bytes(&self.block, &mut block_words);
+                let block_words = make_u32s_le::<16>(&self.block);
                 self.chaining_value = first_8_words(compress(
                     &self.chaining_value,
                     &block_words,
@@ -198,8 +197,7 @@ impl ChunkState {
     }
 
     fn output(&self) -> Output {
-        let mut block_words = [0; 16];
-        words_from_little_endian_bytes(&self.block, &mut block_words);
+        let block_words = make_u32s_le::<16>(&self.block);
         Output {
             input_chaining_value: self.chaining_value,
             block_words,
@@ -247,6 +245,8 @@ pub struct Blake3Hasher {
 }
 
 impl Blake3Hasher {
+    // Create a new instance directly
+    // The key_words are
     fn new_internal(key_words: [u32; 8], flags: u32) -> Self {
         Self {
             chunk_state: ChunkState::new(key_words, 0, flags),
@@ -259,26 +259,26 @@ impl Blake3Hasher {
 
     /// Construct a new `Hasher` for the regular hash function.
     pub fn new() -> Self {
+        // The default IV and no modes set
         Self::new_internal(IV, 0)
     }
 
     /// Construct a new `Hasher` for the keyed hash function.
     pub fn new_keyed(key: &[u8; KEY_LEN]) -> Self {
-        let mut key_words = [0; 8];
-        words_from_little_endian_bytes(key, &mut key_words);
-        Self::new_internal(key_words, KEYED_HASH)
+        // The same as .new() but with the key material instead of the default IV and they KEYED_HASH mode set
+        Self::new_internal(make_u32s_le::<8>(key), KEYED_HASH)
     }
 
     /// Construct a new `Hasher` for the key derivation function. The context
     /// string should be hardcoded, globally unique, and application-specific.
     pub fn new_derive_key(context: &str) -> Self {
+        // The context is converted into a IV by hashing it in the DERIVE_KEY_CONTEXT mode
         let mut context_hasher = Self::new_internal(IV, DERIVE_KEY_CONTEXT);
         context_hasher.update(context.as_bytes());
         let mut context_key = [0; KEY_LEN];
         context_hasher.finalize(&mut context_key);
-        let mut context_key_words = [0; 8];
-        words_from_little_endian_bytes(&context_key, &mut context_key_words);
-        Self::new_internal(context_key_words, DERIVE_KEY_MATERIAL)
+        // The hasher used in DERIVE_KEY_MATERIAL mode
+        Self::new_internal(make_u32s_le::<8>(&context_key), DERIVE_KEY_MATERIAL)
     }
 
     fn push_stack(&mut self, cv: [u32; 8]) {

@@ -34,6 +34,7 @@ code_ids_and_names!(
     BalancedTernary, "Balanced Ternary";
     Barbier, "Barbier";
     BaseN, "Base-N";
+    BaseNegativeTwo, "Base Negative 2";
     BaseNBijective, "Bijective Base-N";
     BaseX, "BaseX";
     Base16, "Base16";
@@ -68,6 +69,7 @@ code_ids_and_names!(
     MofN, "M-of-N";
     Morse, "Morse";
     Needle, "Needle";
+    NegativeBase, "Negative Base";
     ParityBit, "Parity Bit";
     Pgp, "PGP Words";
     Primorial, "Primorial";

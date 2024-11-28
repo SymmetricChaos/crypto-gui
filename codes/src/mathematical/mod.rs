@@ -1,6 +1,8 @@
+pub mod arithmetic;
 pub mod balanced_ternary;
 pub mod base_n;
 pub mod base_n_bijective;
+pub mod base_negative_two;
 pub mod biquinary_decimal;
 pub mod combinadic;
 pub mod elias;
@@ -10,13 +12,12 @@ pub mod fibonacci;
 pub mod fibonacci_integers;
 pub mod godel;
 pub mod gray;
+pub mod leb128;
 pub mod levenshtein;
 pub mod levenshtein_integers;
+pub mod negative_base;
+pub mod primorial;
 pub mod roman_numeral;
 pub mod symmetric_unary;
 pub mod twos_complement;
 pub mod unary;
-pub mod arithmetic;
-pub mod leb128;
-pub mod primorial;
-
