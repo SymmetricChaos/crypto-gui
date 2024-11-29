@@ -3,12 +3,12 @@ use itertools::Itertools;
 use num::{Integer, Zero};
 use utils::text_functions::num_to_digit;
 
-pub struct BaseN {
+pub struct NegativeBaseN {
     pub radix: i32,
     pub little_endian: bool,
 }
 
-impl Default for BaseN {
+impl Default for NegativeBaseN {
     fn default() -> Self {
         Self {
             radix: -2,
@@ -17,7 +17,7 @@ impl Default for BaseN {
     }
 }
 
-impl BaseN {
+impl NegativeBaseN {
     pub fn validate(&self) -> Result<(), CodeError> {
         if self.radix > -2 || self.radix < -36 {
             return Err(CodeError::state(
@@ -35,9 +35,16 @@ impl BaseN {
         let mut s = Vec::new();
         while n != 0 {
             let (q, r) = n.div_rem(&self.radix);
-            s.push(num_to_digit(-r as u32).expect("remainder should always be less than 36"));
-
-            n = q;
+            if r < 0 {
+                s.push(
+                    num_to_digit((r - self.radix) as u32)
+                        .expect("remainder should always be less than 36"),
+                );
+                n = q + 1;
+            } else {
+                s.push(num_to_digit(r as u32).expect("remainder should always be less than 36"));
+                n = q;
+            }
         }
         if self.little_endian {
             Ok(s.iter().rev().collect())
@@ -47,17 +54,33 @@ impl BaseN {
     }
 
     pub fn decode_to_i32(&self, s: &str) -> Result<i32, CodeError> {
-        let word: String = if self.little_endian {
-            s.chars().collect()
+        let mut out = 0;
+        let mut base = 1;
+        if self.little_endian {
+            for c in s.chars().rev() {
+                if let Some(n) = c.to_digit(-self.radix as u32) {
+                    out += (n as i32) * base;
+                } else {
+                    return Err(CodeError::invalid_input_char(c));
+                }
+                base *= self.radix;
+            }
         } else {
-            s.chars().rev().collect()
+            for c in s.chars() {
+                if let Some(n) = c.to_digit(-self.radix as u32) {
+                    out += (n as i32) * base;
+                } else {
+                    return Err(CodeError::invalid_input_char(c));
+                }
+                base *= self.radix;
+            }
         };
 
-        i32::from_str_radix(&word, -self.radix as u32).map_err(|e| CodeError::Input(e.to_string()))
+        Ok(out)
     }
 }
 
-impl Code for BaseN {
+impl Code for NegativeBaseN {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         self.validate()?;
         let mut output = Vec::new();
@@ -94,9 +117,18 @@ impl Code for BaseN {
 mod negative_base_n_tests {
     use super::*;
 
-    const PLAINTEXT_INT: &'static str = "0 1 2 3 4 5";
-    const ENCODEDTEXT: &'static str = "0 1 10 11 100 101";
+    const PLAINTEXT: &'static str = "-5 -4 -3 -2 -1 0 1 2 3 4 5";
+    const ENCODEDTEXT: &'static str = "1111 1100 1101 10 11 0 1 110 111 100 101";
 
-    const PLAINTEXT_INT_BE: &'static str = "0 1 2 3 4 5";
-    const ENCODEDTEXT_BE: &'static str = "0 1 01 11 001 101";
+    #[test]
+    fn encode_test() {
+        let code = NegativeBaseN::default();
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
+    }
+
+    #[test]
+    fn decode_test() {
+        let code = NegativeBaseN::default();
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
+    }
 }
