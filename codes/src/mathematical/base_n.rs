@@ -3,6 +3,8 @@ use itertools::Itertools;
 use num::{Integer, Zero};
 use utils::text_functions::num_to_digit;
 
+use super::string_to_u32s;
+
 pub struct BaseN {
     pub radix: u32,
     pub little_endian: bool,
@@ -64,12 +66,7 @@ impl Code for BaseN {
         self.validate()?;
         let mut output = Vec::new();
 
-        for group in text.split(&self.sep) {
-            if group.is_empty() {
-                continue;
-            }
-            let n = u32::from_str_radix(group, 10)
-                .map_err(|_| CodeError::invalid_input_group(group))?;
+        for n in string_to_u32s(text, &self.sep)? {
             output.push(self.encode_u32(n)?);
         }
 

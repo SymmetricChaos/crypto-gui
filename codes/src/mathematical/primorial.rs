@@ -5,6 +5,8 @@ use regex::Regex;
 
 use crate::{errors::CodeError, traits::Code};
 
+use super::string_to_u64s;
+
 // All the primorials that fit in a u64 (1 excluded)
 const PRIMORIALS: [u64; 16] = [
     1,
@@ -78,11 +80,15 @@ pub fn extract_code_groups(text: &str) -> Vec<Option<u64>> {
     output
 }
 
-pub struct Primorial {}
+pub struct Primorial {
+    pub sep: String,
+}
 
 impl Default for Primorial {
     fn default() -> Self {
-        Primorial {}
+        Primorial {
+            sep: String::from(", "),
+        }
     }
 }
 
@@ -92,13 +98,11 @@ impl Code for Primorial {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut v = Vec::new();
 
-        for w in text.split(",") {
-            let n =
-                u64::from_str_radix(w.trim(), 10).map_err(|e| CodeError::Input(e.to_string()))?;
+        for n in string_to_u64s(text, &self.sep)? {
             v.push(encode_u64(n));
         }
 
-        Ok(v.join(", "))
+        Ok(v.join(&self.sep))
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
@@ -112,7 +116,7 @@ impl Code for Primorial {
             }
         }
 
-        Ok(v.join(", "))
+        Ok(v.join(&self.sep))
     }
 }
 

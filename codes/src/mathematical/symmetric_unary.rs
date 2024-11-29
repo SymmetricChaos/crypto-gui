@@ -108,8 +108,8 @@ impl Code for SymmetricUnaryCode {
 mod symmetric_unary_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "ETAO";
-    const ENCODEDTEXT: &'static str = "1000100110";
+    const PLAINTEXT: &'static str = "0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17";
+    const ENCODEDTEXT: &'static str = "100010011001110011110011111001111110011111110011111111001111111110011111111110011111111111001111111111110011111111111110011111111111111001111111111111110011111111111111110";
 
     #[test]
     fn encode_test() {

@@ -3,6 +3,8 @@ use itertools::Itertools;
 use num::{Integer, Zero};
 use utils::text_functions::num_to_digit;
 
+use super::string_to_i32s;
+
 pub struct NegativeBaseN {
     pub radix: i32,
     pub little_endian: bool,
@@ -87,12 +89,7 @@ impl Code for NegativeBaseN {
         self.validate()?;
         let mut output = Vec::new();
 
-        for group in text.split(&self.sep) {
-            if group.is_empty() {
-                continue;
-            }
-            let n = i32::from_str_radix(group, 10)
-                .map_err(|_| CodeError::invalid_input_group(group))?;
+        for n in string_to_i32s(text, &self.sep)? {
             output.push(self.encode_i32(n)?);
         }
 

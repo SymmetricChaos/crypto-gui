@@ -1,4 +1,4 @@
-use super::elias_integers::EliasCodeIntegers;
+use super::{elias_integers::EliasCodeIntegers, string_to_u32s};
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use std::cell::RefCell;
@@ -54,9 +54,7 @@ impl Code for EliasCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = Vec::new();
 
-        for group in text.split(&self.sep) {
-            let n = u32::from_str_radix(group, 10)
-                .map_err(|_| CodeError::invalid_input_group(group))?;
+        for n in string_to_u32s(text, &self.sep)? {
             self.integer_code.borrow_mut().extend_all(n);
             out.push(self.integer_code.borrow().encode_u32(n).unwrap().clone());
         }

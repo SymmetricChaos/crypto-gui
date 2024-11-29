@@ -3,6 +3,8 @@ use itertools::Itertools;
 use lazy_static::lazy_static;
 use regex::Regex;
 
+use super::string_to_u32s;
+
 const ROMAN_PV: [[&'static str; 10]; 3] = [
     ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"],
     ["", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"],
@@ -42,7 +44,8 @@ impl RomanNumeral {
         })
     }
 
-    pub fn encode_int(n: usize) -> Result<String, CodeError> {
+    pub fn encode_int(n: u32) -> Result<String, CodeError> {
+        let n = n as usize;
         if n > 3999 {
             return Err(CodeError::input(
                 "standard Roman Numerals cannot be greater than 3999",
@@ -60,7 +63,7 @@ impl RomanNumeral {
         Ok(out)
     }
 
-    fn decode_to_int(numeral: &str) -> Result<usize, CodeError> {
+    fn decode_to_int(numeral: &str) -> Result<u32, CodeError> {
         if !RELAXED_ROMAN.is_match(numeral) {
             return Err(CodeError::Input(format!(
                 "the Roman Numeral `{}` contains invalid characters and cannot be decoded",
@@ -85,7 +88,7 @@ impl RomanNumeral {
                 numeral
             )));
         }
-        Ok(n as usize)
+        Ok(n as u32)
     }
 }
 
@@ -93,12 +96,7 @@ impl Code for RomanNumeral {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut output = Vec::new();
 
-        for group in text.split(&self.sep) {
-            if group.is_empty() {
-                continue;
-            }
-            let n = usize::from_str_radix(group, 10)
-                .map_err(|_| CodeError::invalid_input_group(group))?;
+        for n in string_to_u32s(text, &self.sep)? {
             output.push(Self::encode_int(n)?);
         }
 

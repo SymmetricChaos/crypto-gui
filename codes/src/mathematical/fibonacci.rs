@@ -2,13 +2,14 @@ use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use std::cell::RefCell;
 
-use super::fibonacci_integers::FibonacciCodeIntegers;
+use super::{fibonacci_integers::FibonacciCodeIntegers, string_to_u32s};
 
 // https://en.wikipedia.org/wiki/Fibonacci_coding
 
 pub struct FibonacciCode {
     pub integer_code: RefCell<FibonacciCodeIntegers>,
     pub spaced: bool,
+    pub sep: String,
 }
 
 impl Default for FibonacciCode {
@@ -17,33 +18,31 @@ impl Default for FibonacciCode {
         FibonacciCode {
             integer_code: RefCell::new(codes),
             spaced: false,
+            sep: String::from(" "),
         }
     }
 }
 
 impl Code for FibonacciCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        let mut output = String::new();
+        let mut output = Vec::new();
 
-        for s in text.split(" ") {
-            let n = u32::from_str_radix(s, 10).map_err(|_| CodeError::invalid_input_group(s))?;
-            output.push_str(&self.integer_code.borrow_mut().encode_u32(n));
-            if self.spaced {
-                output.push(' ');
-            }
+        for n in string_to_u32s(text, &self.sep)? {
+            output.push(self.integer_code.borrow_mut().encode_u32(n).clone());
         }
 
         if self.spaced {
-            output.pop();
+            Ok(output.join(&self.sep))
+        } else {
+            Ok(output.join(""))
         }
-        Ok(output)
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        let text = text.replace(" ", "");
+        let text = text.replace(&self.sep, "");
         let nums = self.integer_code.borrow_mut().decode_to_u32(&text)?;
 
-        Ok(nums.into_iter().map(|n| n.to_string()).join(" "))
+        Ok(nums.into_iter().map(|n| n.to_string()).join(&self.sep))
     }
 }
 

@@ -1,25 +1,21 @@
-use crate::{
-    errors::CodeError,
-    letter_word_code::{IOMode, IntegerCodeMaps},
-    traits::Code,
-};
+use itertools::Itertools;
+
+use crate::{errors::CodeError, traits::Code};
+
+use super::string_to_usizes;
 
 pub struct UnaryCode {
-    pub maps: IntegerCodeMaps,
-    pub mode: IOMode,
     pub invert: bool,
     pub spaced: bool,
+    pub sep: String,
 }
 
 impl Default for UnaryCode {
     fn default() -> Self {
-        let mut maps = IntegerCodeMaps::new();
-        maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
         UnaryCode {
-            maps,
-            mode: IOMode::Integer,
             invert: false,
             spaced: false,
+            sep: String::from(" "),
         }
     }
 }
@@ -62,81 +58,31 @@ impl UnaryCode {
 
 impl Code for UnaryCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        let mut output = String::new();
+        let mut output = Vec::new();
 
-        if self.mode == IOMode::Letter {
-            for c in text.chars() {
-                let n = self.maps.char_to_int(c)?;
-                output.push_str(&self.encode_usize(n));
-                if self.spaced {
-                    output.push(' ');
-                }
-            }
-        } else if self.mode == IOMode::Word {
-            for w in text.split(" ") {
-                let n = self.maps.word_to_int(w)?;
-                output.push_str(&self.encode_usize(n));
-                if self.spaced {
-                    output.push(' ');
-                }
-            }
-        } else {
-            for w in text.split(" ") {
-                let n =
-                    usize::from_str_radix(w, 10).map_err(|e| CodeError::Input(e.to_string()))?;
-                output.push_str(&self.encode_usize(n));
-                if self.spaced {
-                    output.push(' ');
-                }
-            }
+        for n in string_to_usizes(text, &self.sep)? {
+            output.push(self.encode_usize(n));
         }
+
         if self.spaced {
-            output.pop();
+            Ok(output.into_iter().join(&self.sep))
+        } else {
+            Ok(output.into_iter().join(""))
         }
-        Ok(output)
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        let mut output = String::new();
+        let mut output = Vec::new();
 
-        if self.mode == IOMode::Letter {
-            for section in self.recognize_code(&text.replace(" ", "")) {
-                if let Some(code) = section {
-                    if let Ok(c) = self.maps.int_to_char(code) {
-                        output.push(c);
-                    } else {
-                        output.push('�');
-                    }
-                } else {
-                    output.push('�');
-                }
-            }
-        } else if self.mode == IOMode::Word {
-            for section in self.recognize_code(&text) {
-                if let Some(code) = section {
-                    if let Ok(s) = self.maps.int_to_word(code) {
-                        output.push_str(s);
-                        output.push(' ');
-                    } else {
-                        output.push_str("� ");
-                    }
-                } else {
-                    output.push_str("� ");
-                }
-            }
-            output.pop();
-        } else {
-            for section in self.recognize_code(&text) {
-                if let Some(code) = section {
-                    output.push_str(&code.to_string());
-                    output.push(' ');
-                } else {
-                    output.push_str("� ");
-                }
+        for section in self.recognize_code(&text) {
+            if let Some(code) = section {
+                output.push(code.to_string());
+            } else {
+                output.push(String::from("�"));
             }
         }
 
-        Ok(output)
+        Ok(output.into_iter().join(&self.sep))
     }
 }
 
@@ -144,20 +90,18 @@ impl Code for UnaryCode {
 mod unary_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG";
-    const ENCODEDTEXT: &'static str = "1011111110011111111111111111111111101111111111110111101111111111101111111111111111111110111111111111111111101111111101110111111111111110111110111111111111111011101111111111111111111111101111111111111111111111011111111111101111111111111011111111111111111101111110111011111111111111111111001111111101011111110011111111110110111111111111111111111111101111111111111111101111111110111011111111111111110";
+    const PLAINTEXT: &'static str = "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17";
+    const ENCODEDTEXT: &'static str = "10110111011110111110111111011111110111111110111111111011111111110111111111110111111111111011111111111110111111111111110111111111111111011111111111111110111111111111111110";
 
     #[test]
     fn encode_test() {
-        let mut code = UnaryCode::default();
-        code.mode = IOMode::Letter;
+        let code = UnaryCode::default();
         assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
     }
 
     #[test]
     fn decode_test() {
-        let mut code = UnaryCode::default();
-        code.mode = IOMode::Letter;
+        let code = UnaryCode::default();
         assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
     }
 }

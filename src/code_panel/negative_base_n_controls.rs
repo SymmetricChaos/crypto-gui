@@ -24,7 +24,18 @@ impl CodeFrame for NegativeBaseNFrame {
         ui.add(Slider::new(&mut self.code.radix, -2..=-36));
         ui.add_space(16.0);
 
-        ui.label("Convert between \"standard\" base-10 numbers and their representation in a negative base. The first 32 encodings appear below.");
+        ui.subheading("Seperator");
+        if ui.control_string(&mut self.code.sep).changed() {
+            if self.code.sep.is_empty() {
+                self.code.sep = String::from(" ")
+            }
+        }
+        ui.add_space(8.0);
+
+        ui.label(format!(
+            "Convert between \"standard\" base-10 numbers and their representation in a base-{}.",
+            self.code.radix
+        ));
         let pairs = (0..32).map(|n| (n.to_string(), self.code.encode_i32(n).unwrap()));
         ui.fill_code_columns(16, 5, Box::new(pairs));
 

@@ -23,7 +23,7 @@ impl CodeFrame for RomanNumeralFrame {
         ui.add_space(8.0);
 
         ui.label("Convert between standard numbers and their representation as Roman Numerals. The first 16 encodings appear below.");
-        let pairs = (1..17).map(|n| (n.to_string(), RomanNumeral::encode_int(n as usize).unwrap()));
+        let pairs = (1..17).map(|n| (n.to_string(), RomanNumeral::encode_int(n as u32).unwrap()));
         ui.fill_code_columns(16, 5, Box::new(pairs));
 
         ui.add_space(16.0);

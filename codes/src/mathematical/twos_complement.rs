@@ -39,6 +39,7 @@ pub struct TwosComplement {
     pub spaced: bool,
     pub big_endian: bool,
     pub width: Width,
+    pub sep: String,
 }
 
 impl Default for TwosComplement {
@@ -48,6 +49,7 @@ impl Default for TwosComplement {
             spaced: false,
             big_endian: true,
             width: Width::W32,
+            sep: String::from(", "),
         }
     }
 }
@@ -56,7 +58,7 @@ impl Code for TwosComplement {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut v = Vec::new();
 
-        for group in text.split(",") {
+        for group in text.split(&self.sep.trim()) {
             if group.trim().is_empty() {
                 continue;
             }
@@ -79,7 +81,7 @@ impl Code for TwosComplement {
         }
 
         if self.spaced {
-            Ok(v.join(", "))
+            Ok(v.join(&self.sep))
         } else {
             Ok(v.join(""))
         }
@@ -89,7 +91,7 @@ impl Code for TwosComplement {
         let mut v = Vec::new();
 
         if self.spaced {
-            for group in text.split(",") {
+            for group in text.split(&self.sep.trim()) {
                 if self.big_endian {
                     match self.width {
                         Width::W8 => {
@@ -244,7 +246,7 @@ impl Code for TwosComplement {
             }
         }
 
-        Ok(v.iter().map(|n| n.to_string()).join(", "))
+        Ok(v.iter().map(|n| n.to_string()).join(&self.sep))
     }
 }
 

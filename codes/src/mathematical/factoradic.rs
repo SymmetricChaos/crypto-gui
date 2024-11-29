@@ -5,6 +5,8 @@ use regex::Regex;
 
 use crate::{errors::CodeError, traits::Code};
 
+use super::string_to_u64s;
+
 lazy_static! {
     pub static ref TUPLE: Regex = Regex::new(r"(([0-9]+:)*[0-9]+)").unwrap();
 }
@@ -76,9 +78,7 @@ impl Code for Factoradic {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut v = Vec::new();
 
-        for w in text.split(&self.sep) {
-            let n =
-                u64::from_str_radix(w.trim(), 10).map_err(|e| CodeError::Input(e.to_string()))?;
+        for n in string_to_u64s(text, &self.sep)? {
             v.push(encode_u64(n));
         }
 

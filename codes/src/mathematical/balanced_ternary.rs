@@ -1,11 +1,17 @@
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 
-pub struct BalancedTernary {}
+use super::string_to_i32s;
+
+pub struct BalancedTernary {
+    pub sep: String,
+}
 
 impl Default for BalancedTernary {
     fn default() -> Self {
-        Self {}
+        Self {
+            sep: String::from(" "),
+        }
     }
 }
 
@@ -78,32 +84,25 @@ impl Code for BalancedTernary {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut output = Vec::new();
 
-        for group in text.split(" ") {
-            if group.is_empty() {
-                continue;
-            }
-            let n = i32::from_str_radix(group, 10)
-                .map_err(|_| CodeError::invalid_input_group(group))?;
+        for n in string_to_i32s(text, &self.sep)? {
             output.push(Self::encode_i32(n)?);
         }
 
-        Ok(output.into_iter().join(" "))
+        Ok(output.into_iter().join(&self.sep))
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        let mut output = String::new();
+        let mut output = Vec::new();
 
         for section in Self::recognize_code(&text) {
             if let Some(code) = section {
-                output.push_str(&code.to_string());
-                output.push(' ');
+                output.push(code.to_string());
             } else {
-                output.push_str("� ");
+                output.push(String::from("�"));
             }
         }
-        output.pop();
 
-        Ok(output)
+        Ok(output.into_iter().join(&self.sep))
     }
 }
 
