@@ -15,7 +15,7 @@ pub mod gray;
 pub mod leb128;
 pub mod levenshtein;
 pub mod levenshtein_integers;
-pub mod negative_base;
+pub mod negative_base_n;
 pub mod primorial;
 pub mod roman_numeral;
 pub mod symmetric_unary;

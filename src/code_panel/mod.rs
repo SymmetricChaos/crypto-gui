@@ -42,6 +42,7 @@ mod luhn_controls;
 mod m_of_n_controls;
 mod morse_controls;
 mod needle_controls;
+mod negative_base_n_controls;
 mod numeric_controls;
 mod parity_check_controls;
 mod pgp_controls;

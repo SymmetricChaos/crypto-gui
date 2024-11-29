@@ -6,6 +6,7 @@ use utils::text_functions::num_to_digit;
 pub struct NegativeBaseN {
     pub radix: i32,
     pub little_endian: bool,
+    pub sep: String,
 }
 
 impl Default for NegativeBaseN {
@@ -13,6 +14,7 @@ impl Default for NegativeBaseN {
         Self {
             radix: -2,
             little_endian: true,
+            sep: String::from(" "),
         }
     }
 }
@@ -85,7 +87,7 @@ impl Code for NegativeBaseN {
         self.validate()?;
         let mut output = Vec::new();
 
-        for group in text.split(" ") {
+        for group in text.split(&self.sep) {
             if group.is_empty() {
                 continue;
             }
@@ -94,22 +96,21 @@ impl Code for NegativeBaseN {
             output.push(self.encode_i32(n)?);
         }
 
-        Ok(output.into_iter().join(" "))
+        Ok(output.into_iter().join(&self.sep))
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         self.validate()?;
-        let mut output = String::new();
+        let mut output = Vec::new();
 
-        for s in text.split(" ") {
+        for s in text.split(&self.sep) {
             if s.is_empty() {
                 continue;
             }
-            output.push_str(&format!("{} ", self.decode_to_i32(s)?))
+            output.push(self.decode_to_i32(s)?.to_string())
         }
-        output.pop();
 
-        Ok(output)
+        Ok(output.into_iter().join(&self.sep))
     }
 }
 

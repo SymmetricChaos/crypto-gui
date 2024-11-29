@@ -1,15 +1,19 @@
+use crate::{errors::CodeError, traits::Code};
+use itertools::Itertools;
 use utils::text_functions::swap_ab;
 
-use crate::{
-    errors::CodeError,
-    letter_word_code::{IOMode, IntegerCodeMaps},
-    traits::Code,
-};
-
 pub struct SymmetricUnaryCode {
-    pub maps: IntegerCodeMaps,
-    pub mode: IOMode,
     pub invert: bool,
+    pub sep: String,
+}
+
+impl Default for SymmetricUnaryCode {
+    fn default() -> Self {
+        SymmetricUnaryCode {
+            invert: false,
+            sep: String::from(" "),
+        }
+    }
 }
 
 impl SymmetricUnaryCode {
@@ -23,7 +27,7 @@ impl SymmetricUnaryCode {
 
     pub fn recognize_code(&self, text: &str) -> Vec<Option<usize>> {
         let mut output = Vec::new();
-        let mut buffer = String::with_capacity(self.maps.alphabet.chars().count());
+        let mut buffer = String::new();
 
         for b in text.chars() {
             // Invalid characters immediatly give '?' response and restart
@@ -59,44 +63,19 @@ impl SymmetricUnaryCode {
     }
 }
 
-impl Default for SymmetricUnaryCode {
-    fn default() -> Self {
-        let mut maps = IntegerCodeMaps::new();
-        maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
-
-        SymmetricUnaryCode {
-            maps,
-            mode: IOMode::Integer,
-            invert: false,
-        }
-    }
-}
-
 impl Code for SymmetricUnaryCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut output = String::new();
 
-        if self.mode == IOMode::Letter {
-            for c in text.chars() {
-                let n = self.maps.char_to_int(c)?;
-                output.push_str(&self.encode_usize(n))
-            }
-        } else if self.mode == IOMode::Word {
-            for w in text.split(" ") {
-                let n = self.maps.word_to_int(w)?;
-                output.push_str(&self.encode_usize(n))
-            }
-        } else {
-            for w in text.split(" ") {
-                let n =
-                    usize::from_str_radix(w, 10).map_err(|e| CodeError::Input(e.to_string()))?;
-                if n == 0 {
-                    output.push('1');
-                } else {
-                    output.push_str(&format!("0{}0", "1".repeat(n - 1)))
-                }
+        for w in text.split(" ") {
+            let n = usize::from_str_radix(w, 10).map_err(|e| CodeError::Input(e.to_string()))?;
+            if n == 0 {
+                output.push('1');
+            } else {
+                output.push_str(&format!("0{}0", "1".repeat(n - 1)))
             }
         }
+
         if self.invert {
             Ok(swap_ab('0', '1', &output))
         } else {
@@ -105,50 +84,23 @@ impl Code for SymmetricUnaryCode {
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        let mut output = String::new();
+        let mut output = Vec::new();
+
         let text = if self.invert {
             swap_ab('0', '1', text)
         } else {
             text.to_string()
         };
-        if self.mode == IOMode::Letter {
-            for section in self.recognize_code(&text) {
-                if let Some(code) = section {
-                    if let Ok(c) = self.maps.int_to_char(code) {
-                        output.push(c);
-                    } else {
-                        output.push('�');
-                    }
-                } else {
-                    output.push('�');
-                }
-            }
-        } else if self.mode == IOMode::Word {
-            for section in self.recognize_code(&text) {
-                if let Some(code) = section {
-                    if let Ok(s) = self.maps.int_to_word(code) {
-                        output.push_str(s);
-                        output.push(' ');
-                    } else {
-                        output.push_str("� ");
-                    }
-                } else {
-                    output.push_str("� ");
-                }
-            }
-            output.pop();
-        } else {
-            for section in self.recognize_code(&text) {
-                if let Some(code) = section {
-                    output.push_str(&code.to_string());
-                    output.push(' ');
-                } else {
-                    output.push_str("� ");
-                }
+
+        for section in self.recognize_code(&text) {
+            if let Some(code) = section {
+                output.push(code.to_string());
+            } else {
+                output.push(String::from("�"));
             }
         }
 
-        Ok(output)
+        Ok(output.into_iter().join(&self.sep))
     }
 }
 

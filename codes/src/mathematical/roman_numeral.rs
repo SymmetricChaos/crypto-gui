@@ -1,8 +1,4 @@
-use crate::{
-    errors::CodeError,
-    letter_word_code::{IOMode, IntegerCodeMaps},
-    traits::Code,
-};
+use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -20,19 +16,14 @@ lazy_static! {
 }
 
 pub struct RomanNumeral {
-    pub maps: IntegerCodeMaps,
-    pub mode: IOMode,
     // pub apostrophus: bool,
+    pub sep: String,
 }
 
 impl Default for RomanNumeral {
     fn default() -> Self {
-        let mut maps = IntegerCodeMaps::new();
-        maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
-
         Self {
-            maps,
-            mode: IOMode::Integer,
+            sep: String::from(" "),
         }
     }
 }
@@ -100,68 +91,31 @@ impl RomanNumeral {
 
 impl Code for RomanNumeral {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        let mut output = String::new();
-        if self.mode == IOMode::Integer {
-            for group in text.split(" ") {
-                if group.is_empty() {
-                    continue;
-                }
-                let n = usize::from_str_radix(group, 10)
-                    .map_err(|_| CodeError::invalid_input_group(group))?;
-                output.push_str(&Self::encode_int(n)?);
-                output.push(' ')
+        let mut output = Vec::new();
+
+        for group in text.split(&self.sep) {
+            if group.is_empty() {
+                continue;
             }
-        } else if self.mode == IOMode::Letter {
-            for c in text.chars() {
-                let n = self.maps.char_to_int(c)?;
-                output.push_str(&Self::encode_int(n + 1)?);
-                output.push(' ')
-            }
-        } else {
-            for w in text.split(" ") {
-                if w.is_empty() {
-                    continue;
-                }
-                let n = self.maps.word_to_int(w)?;
-                output.push_str(&Self::encode_int(n + 1)?);
-                output.push(' ')
-            }
+            let n = usize::from_str_radix(group, 10)
+                .map_err(|_| CodeError::invalid_input_group(group))?;
+            output.push(Self::encode_int(n)?);
         }
-        output.pop();
-        Ok(output)
+
+        Ok(output.into_iter().join(&self.sep))
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        let mut output = String::new();
-        if self.mode == IOMode::Integer {
-            for s in text.split(" ") {
-                if s.is_empty() {
-                    continue;
-                }
-                output.push_str(&format!("{} ", Self::decode_to_int(s)?))
+        let mut output = Vec::new();
+
+        for s in text.split(&self.sep) {
+            if s.is_empty() {
+                continue;
             }
-            output.pop();
-        } else if self.mode == IOMode::Letter {
-            for s in text.split(" ") {
-                if s.is_empty() {
-                    continue;
-                }
-                let n = Self::decode_to_int(s)?;
-                output.push(self.maps.int_to_char(n - 1)?);
-            }
-        } else {
-            for s in text.split(" ") {
-                if s.is_empty() {
-                    continue;
-                }
-                let n = Self::decode_to_int(s)?;
-                output.push_str(self.maps.int_to_word(n - 1)?);
-                output.push(' ');
-            }
-            output.pop();
+            output.push(Self::decode_to_int(s)?.to_string())
         }
 
-        Ok(output)
+        Ok(output.into_iter().join(&self.sep))
     }
 }
 
@@ -170,9 +124,7 @@ mod roman_numeral_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "39 246 789 2421 9";
-    const PLAINTEXT_LTR: &'static str = "ETAOI";
     const ENCODEDTEXT: &'static str = "XXXIX CCXLVI DCCLXXXIX MMCDXXI IX";
-    const ENCODEDTEXT_LTR: &'static str = "I II III IV V";
 
     #[test]
     fn encode_test() {
@@ -184,19 +136,5 @@ mod roman_numeral_tests {
     fn decode_test() {
         let code = RomanNumeral::default();
         assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
-    }
-
-    #[test]
-    fn encode_test_letter() {
-        let mut code = RomanNumeral::default();
-        code.mode = IOMode::Letter;
-        assert_eq!(code.encode(PLAINTEXT_LTR).unwrap(), ENCODEDTEXT_LTR);
-    }
-
-    #[test]
-    fn decode_test_letter() {
-        let mut code = RomanNumeral::default();
-        code.mode = IOMode::Letter;
-        assert_eq!(code.decode(ENCODEDTEXT_LTR).unwrap(), PLAINTEXT_LTR);
     }
 }

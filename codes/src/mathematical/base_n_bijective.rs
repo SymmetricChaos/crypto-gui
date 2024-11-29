@@ -1,28 +1,19 @@
-use crate::{
-    errors::CodeError,
-    letter_word_code::{IOMode, IntegerCodeMaps},
-    traits::Code,
-};
+use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use utils::text_functions::num_to_digit;
 
 pub struct BaseNBijective {
-    pub maps: IntegerCodeMaps,
     pub radix: u32,
-    pub mode: IOMode,
     pub little_endian: bool,
+    pub sep: String,
 }
 
 impl Default for BaseNBijective {
     fn default() -> Self {
-        let mut maps = IntegerCodeMaps::new();
-        maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
-
         Self {
-            mode: IOMode::Integer,
-            maps,
             radix: 2,
             little_endian: true,
+            sep: String::from(" "),
         }
     }
 }
@@ -91,64 +82,30 @@ impl Code for BaseNBijective {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         self.validate()?;
         let mut output = Vec::new();
-        if self.mode == IOMode::Integer {
-            for group in text.split(" ") {
-                if group.is_empty() {
-                    continue;
-                }
-                let n = u32::from_str_radix(group, 10)
-                    .map_err(|_| CodeError::invalid_input_group(group))?;
-                output.push(self.encode_u32(n)?);
+
+        for group in text.split(&self.sep) {
+            if group.is_empty() {
+                continue;
             }
-        } else if self.mode == IOMode::Letter {
-            for c in text.chars() {
-                let n = self.maps.char_to_int(c)?;
-                output.push(self.encode_u32((n + 1) as u32)?);
-            }
-        } else {
-            for w in text.split(" ") {
-                if w.is_empty() {
-                    continue;
-                }
-                let n = self.maps.word_to_int(w)?;
-                output.push(self.encode_u32((n + 1) as u32)?);
-            }
+            let n = u32::from_str_radix(group, 10)
+                .map_err(|_| CodeError::invalid_input_group(group))?;
+            output.push(self.encode_u32(n)?);
         }
-        Ok(output.into_iter().join(" "))
+
+        Ok(output.into_iter().join(&self.sep))
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         self.validate()?;
-        let mut output = String::new();
-        if self.mode == IOMode::Integer {
-            for s in text.split(" ") {
-                if s.is_empty() {
-                    continue;
-                }
-                output.push_str(&format!("{} ", self.decode_to_u32(s)?))
-            }
-            output.pop();
-        } else if self.mode == IOMode::Letter {
-            for s in text.split(" ") {
-                if s.is_empty() {
-                    continue;
-                }
-                let n = self.decode_to_u32(s)?;
-                output.push(self.maps.int_to_char((n - 1) as usize)?)
-            }
-        } else {
-            for s in text.split(" ") {
-                if s.is_empty() {
-                    continue;
-                }
-                let n = self.decode_to_u32(s)?;
-                output.push(self.maps.int_to_char((n - 1) as usize)?);
-                output.push(' ');
-            }
-            output.pop();
-        }
+        let mut output = Vec::new();
 
-        Ok(output)
+        for s in text.split(&self.sep) {
+            if s.is_empty() {
+                continue;
+            }
+            output.push(self.decode_to_u32(s)?.to_string())
+        }
+        Ok(output.into_iter().join(&self.sep))
     }
 }
 
@@ -156,23 +113,18 @@ impl Code for BaseNBijective {
 mod base_n_tests {
     use super::*;
 
-    const PLAINTEXT_INT_BIJ: &'static str = "1 2 3 4 5 6";
-    const PLAINTEXT_LET_BIJ: &'static str = "ETAOIN";
-    const ENCODEDTEXT_BIJ: &'static str = "1 2 11 12 21 22";
+    const PLAINTEXT: &'static str = "1 2 3 4 5 6";
+    const ENCODEDTEXT: &'static str = "1 2 11 12 21 22";
 
     #[test]
     fn encode_test_bijective() {
-        let mut code = BaseNBijective::default();
-        assert_eq!(code.encode(PLAINTEXT_INT_BIJ).unwrap(), ENCODEDTEXT_BIJ);
-        code.mode = IOMode::Letter;
-        assert_eq!(code.encode(PLAINTEXT_LET_BIJ).unwrap(), ENCODEDTEXT_BIJ);
+        let code = BaseNBijective::default();
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
     }
 
     #[test]
     fn decode_test_bijective() {
-        let mut code = BaseNBijective::default();
-        assert_eq!(code.decode(ENCODEDTEXT_BIJ).unwrap(), PLAINTEXT_INT_BIJ);
-        code.mode = IOMode::Letter;
-        assert_eq!(code.decode(ENCODEDTEXT_BIJ).unwrap(), PLAINTEXT_LET_BIJ);
+        let code = BaseNBijective::default();
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
     }
 }
