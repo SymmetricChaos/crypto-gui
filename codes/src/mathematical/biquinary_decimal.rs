@@ -28,15 +28,15 @@ lazy_static! {
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum BiQuinaryMode {
-    Normal,
-    InvertedLower,
+    TwoOfSeven,
+    Abacus,
 }
 
 impl BiQuinaryMode {
     fn map(&self) -> &BiMap<char, &'static str> {
         match self {
-            BiQuinaryMode::Normal => &BIQUINARY_MAP,
-            BiQuinaryMode::InvertedLower => &BIQUINARY_MAP_INV_LOWER,
+            BiQuinaryMode::TwoOfSeven => &BIQUINARY_MAP,
+            BiQuinaryMode::Abacus => &BIQUINARY_MAP_INV_LOWER,
         }
     }
 
@@ -56,7 +56,7 @@ pub struct BiquinaryDecimal {
 impl Default for BiquinaryDecimal {
     fn default() -> Self {
         Self {
-            mode: BiQuinaryMode::InvertedLower,
+            mode: BiQuinaryMode::Abacus,
         }
     }
 }

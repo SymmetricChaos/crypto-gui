@@ -25,14 +25,18 @@ impl CodeFrame for BiquinaryDecimalFrame {
         ui.group(|ui| {
             ui.subheading("Mode");
             ui.horizontal(|ui| {
-                ui.selectable_value(&mut self.code.mode, BiQuinaryMode::Normal, "Two-of-Seven");
-                ui.selectable_value(&mut self.code.mode, BiQuinaryMode::InvertedLower, "Abacus");
+                ui.selectable_value(
+                    &mut self.code.mode,
+                    BiQuinaryMode::TwoOfSeven,
+                    "Two-of-Seven",
+                );
+                ui.selectable_value(&mut self.code.mode, BiQuinaryMode::Abacus, "Abacus");
             });
         });
 
         match self.code.mode {
-            BiQuinaryMode::Normal => ui.label("The simplest way to represent biquinary decimal digitally is with a two-of-seven code. Every valid number has exactly two bits set. This is equivalent to inverting the lower bits of the abacus representation."),
-            BiQuinaryMode::InvertedLower => ui.label("Typically a physical abacus encoded the ones digit as the number of beads above the gap. Here the number of one bits to the right of the zero bit define the ones place."),
+            BiQuinaryMode::TwoOfSeven => ui.label("The simplest way to represent biquinary decimal digitally is with a two-of-seven code. Every valid number has exactly two bits set. This is equivalent to inverting the lower bits of the abacus representation."),
+            BiQuinaryMode::Abacus => ui.label("Typically a physical abacus encoded the ones digit as the number of beads above the gap. Here the number of one bits to the right of the zero bit define the ones place."),
         };
 
         ui.add_space(16.0);

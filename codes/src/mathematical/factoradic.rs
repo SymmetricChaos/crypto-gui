@@ -58,11 +58,15 @@ pub fn extract_code_groups(text: &str) -> Vec<Option<u64>> {
     output
 }
 
-pub struct Factoradic {}
+pub struct Factoradic {
+    pub sep: String,
+}
 
 impl Default for Factoradic {
     fn default() -> Self {
-        Factoradic {}
+        Factoradic {
+            sep: String::from(", "),
+        }
     }
 }
 
@@ -72,13 +76,13 @@ impl Code for Factoradic {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut v = Vec::new();
 
-        for w in text.split(",") {
+        for w in text.split(&self.sep) {
             let n =
                 u64::from_str_radix(w.trim(), 10).map_err(|e| CodeError::Input(e.to_string()))?;
             v.push(encode_u64(n));
         }
 
-        Ok(v.join(", "))
+        Ok(v.join(&self.sep))
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
@@ -92,7 +96,7 @@ impl Code for Factoradic {
             }
         }
 
-        Ok(v.join(", "))
+        Ok(v.join(&self.sep))
     }
 }
 
