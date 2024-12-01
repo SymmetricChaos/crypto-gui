@@ -1,6 +1,8 @@
 pub mod speck128;
 pub mod speck32;
+pub mod speck48;
 pub mod speck64;
+pub mod speck96;
 
 // These macros make it straightforward to implement speck for the various word sizes
 // The name are short and generic so `pub(self) use foo;` is used to make them only accessible in this module
