@@ -4,6 +4,7 @@ pub mod byte_equality_check;
 pub mod byte_formatting;
 pub mod grid;
 pub mod math_functions;
+pub mod other_word_sizes;
 pub mod padding;
 pub mod polynomial_interpolation;
 pub mod preset_alphabet;
