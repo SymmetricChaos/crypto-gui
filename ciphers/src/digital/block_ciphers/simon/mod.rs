@@ -1,10 +1,8 @@
-// pub mod simon128;
 pub mod simon128;
 pub mod simon32;
-pub mod simon48;
+// pub mod simon48;
 pub mod simon64;
-pub mod simon96;
-// pub mod simon64;
+// pub mod simon96;
 
 // These are the five Z sequences as u64s
 // Only the lower 62 bits are used

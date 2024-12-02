@@ -71,6 +71,10 @@ impl SpeckFrame {
                 SpeckVariant::Speck128_256 => self
                     .cipher_128_256
                     .ksa(vec.try_into().expect("wrong key size")),
+                SpeckVariant::Speck48_72 => todo!(),
+                SpeckVariant::Speck48_96 => todo!(),
+                SpeckVariant::Speck96_96 => todo!(),
+                SpeckVariant::Speck96_144 => todo!(),
             }
         } else {
             unreachable!("speck key should be forced to valid hex digits by filtering")
@@ -147,6 +151,10 @@ impl CipherFrame for SpeckFrame {
                 &mut self.cipher_128_256.mode,
                 &mut self.cipher_128_256.padding,
             ),
+            SpeckVariant::Speck48_72 => todo!(),
+            SpeckVariant::Speck48_96 => todo!(),
+            SpeckVariant::Speck96_96 => todo!(),
+            SpeckVariant::Speck96_144 => todo!(),
         };
 
         ui.add_space(16.0);
@@ -264,6 +272,10 @@ impl CipherFrame for SpeckFrame {
                         }
                     });
             }
+            SpeckVariant::Speck48_72 => todo!(),
+            SpeckVariant::Speck48_96 => todo!(),
+            SpeckVariant::Speck96_96 => todo!(),
+            SpeckVariant::Speck96_144 => todo!(),
         });
 
         ui.add_space(16.0);
@@ -287,6 +299,10 @@ impl CipherFrame for SpeckFrame {
             SpeckVariant::Speck128_256 => {
                 block_cipher_iv_128(ui, &mut self.cipher_128_256.iv, self.cipher_128_256.mode)
             }
+            SpeckVariant::Speck48_72 => todo!(),
+            SpeckVariant::Speck48_96 => todo!(),
+            SpeckVariant::Speck96_96 => todo!(),
+            SpeckVariant::Speck96_144 => todo!(),
         }
 
         ui.add_space(16.0);
@@ -300,6 +316,10 @@ impl CipherFrame for SpeckFrame {
             SpeckVariant::Speck128_128 => &self.cipher_128_128,
             SpeckVariant::Speck128_192 => &self.cipher_128_192,
             SpeckVariant::Speck128_256 => &self.cipher_128_256,
+            SpeckVariant::Speck48_72 => todo!(),
+            SpeckVariant::Speck48_96 => todo!(),
+            SpeckVariant::Speck96_96 => todo!(),
+            SpeckVariant::Speck96_144 => todo!(),
         }
     }
 

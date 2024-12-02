@@ -1,10 +1,13 @@
 use itertools::Itertools;
 use num::{
-    traits::{FromBytes, ToBytes},
+    traits::{FromBytes, ToBytes, WrappingAdd, WrappingSub},
     One, Zero,
 };
 use paste::paste;
-use std::ops::{Add, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Mul};
+use std::{
+    fmt::Display,
+    ops::{Add, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Mul, Sub},
+};
 
 macro_rules! new_word {
     ($name: ident, $low_name: ident, $inner: ty, $inner_bytes: literal, $mask: literal, $bytes: literal, $bits: literal) => {
@@ -17,6 +20,13 @@ macro_rules! new_word {
             }
         }
 
+        impl Display for $name {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                write!(f, "{}", self.0)
+            }
+        }
+
+
         impl $name {
             pub const MASK: $inner = $mask;
             pub const BYTES: $inner = $bytes;
@@ -24,6 +34,10 @@ macro_rules! new_word {
 
             pub fn new(n: $inner) -> $name {
                 $name(n & $mask)
+            }
+
+            pub fn inner(&self) -> $inner {
+                self.0
             }
 
             pub fn rotate_left(mut self, d: $inner) -> $name {
@@ -81,7 +95,27 @@ macro_rules! new_word {
             type Output = Self;
 
             fn add(self, rhs: Self) -> Self::Output {
-                $name((self.0 + rhs.0) & $mask)
+                $name((self.0.wrapping_add(rhs.0)) & $mask)
+            }
+        }
+
+        impl WrappingAdd for $name {
+            fn wrapping_add(&self, v: &Self) -> Self {
+                $name((self.0.wrapping_add(v.0)) & $mask)
+            }
+        }
+
+        impl Sub for $name {
+            type Output = Self;
+
+            fn sub(self, rhs: Self) -> Self::Output {
+                $name(self.0.wrapping_sub(rhs.0) & $mask)
+            }
+        }
+
+        impl WrappingSub for $name {
+            fn wrapping_sub(&self, v: &Self) -> Self {
+                $name(self.0.wrapping_sub(v.0) & $mask)
             }
         }
 
@@ -89,7 +123,7 @@ macro_rules! new_word {
             type Output = Self;
 
             fn mul(self, rhs: Self) -> Self::Output {
-                $name((self.0 * rhs.0) & $mask)
+                $name((self.0.wrapping_mul(rhs.0)) & $mask)
             }
         }
 
@@ -202,6 +236,32 @@ macro_rules! new_word {
     };
 }
 
-new_word!(U24, u24, u32, 4, 0x00ffffff, 3, 24);
-new_word!(U48, u48, u64, 8, 0x0000ffffffffffff, 6, 48);
+new_word!(U24, u24, u32, 4, 0xffffff, 3, 24);
+new_word!(U48, u48, u64, 8, 0xffffffffffff, 6, 48);
 new_word!(U96, u96, u128, 16, 0xffffffffffffffffffffffff, 12, 96);
+
+#[cfg(test)]
+mod u24_tests {
+    use super::*;
+
+    #[test]
+    #[ignore = ""]
+    fn check_operations() {
+        let a = U24::new(!0);
+        println!("{:08x?}", a);
+        let b = U24::new(0x23232323);
+        println!("{:08x?}", b);
+        let c = a ^ b;
+        println!("{:08x?}", c);
+        let d = a & b;
+        println!("{:08x?}", d);
+        let e = U24::from_be_bytes(&[0x01, 0x23, 0x45]);
+        println!("{:08x?}", e);
+        let f = U24::from_le_bytes(&[0x01, 0x23, 0x45]);
+        println!("{:08x?}", f);
+        println!("{:02x?}", U24::new(0x012345).to_be_bytes());
+        println!("{:02x?}", U24::new(0x012345).to_le_bytes());
+        println!("{:08x?}", U24::new(0x012345).rotate_left(8));
+        println!("{:08x?}", U24::new(0x012345).rotate_right(8));
+    }
+}
