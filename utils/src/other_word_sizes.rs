@@ -12,7 +12,7 @@ use std::{
 macro_rules! new_word {
     ($name: ident, $low_name: ident, $inner: ty, $inner_bytes: literal, $mask: literal, $bytes: literal, $bits: literal) => {
         #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-        pub struct $name($inner);
+        pub struct $name(pub $inner);
 
         impl Default for $name {
             fn default() -> Self {

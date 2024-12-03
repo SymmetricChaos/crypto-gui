@@ -16,8 +16,7 @@ use rngs::{
 use std::fmt::Display;
 use strum::IntoEnumIterator;
 use utils::{
-    byte_formatting::ByteFormat,
-    text_functions::{filter_string, unique_string},
+    byte_formatting::ByteFormat, other_word_sizes::{U24, U48, U96}, text_functions::{filter_string, unique_string}
 };
 
 pub trait UiElements {
@@ -57,8 +56,11 @@ pub trait UiElements {
     fn byte_io_mode_hasher(&mut self, input: &mut ByteFormat, output: &mut ByteFormat);
     fn u8_hex_edit(&mut self, n: &mut u8) -> Response;
     fn u16_hex_edit(&mut self, n: &mut u16) -> Response;
+    fn u24_hex_edit(&mut self, n: &mut U24) -> Response;
     fn u32_hex_edit(&mut self, n: &mut u32) -> Response;
+    fn u48_hex_edit(&mut self, n: &mut U48) -> Response;
     fn u64_hex_edit(&mut self, n: &mut u64) -> Response;
+    fn u96_hex_edit(&mut self, n: &mut U96) -> Response;
     fn u128_hex_edit(&mut self, n: &mut u128) -> Response;
     fn u8_drag_value_dec(&mut self, n: &mut u8) -> Response;
     fn u16_drag_value_dec(&mut self, n: &mut u16) -> Response;
@@ -285,12 +287,24 @@ impl UiElements for Ui {
         self.add(EditU16::new(n))
     }
 
+    fn u24_hex_edit(&mut self, n: &mut U24) -> Response {
+        self.add(EditU32::new(&mut n.0).range(0..=0x7fffff))
+    }
+
     fn u32_hex_edit(&mut self, n: &mut u32) -> Response {
         self.add(EditU32::new(n))
     }
 
+    fn u48_hex_edit(&mut self, n: &mut U48) -> Response {
+        self.add(EditU64::new(&mut n.0).range(0..=0x7fffffffffff))
+    }
+
     fn u64_hex_edit(&mut self, n: &mut u64) -> Response {
         self.add(EditU64::new(n))
+    }
+
+    fn u96_hex_edit(&mut self, n: &mut U96) -> Response {
+        self.add(EditU128::new(&mut n.0).range(0..=0x7fffffffffffffffffffffff))
     }
 
     fn u128_hex_edit(&mut self, n: &mut u128) -> Response {
