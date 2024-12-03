@@ -1,8 +1,8 @@
+use super::select_z_bit;
 use crate::digital::block_ciphers::block_cipher::{BCMode, BCPadding, BlockCipher};
+use num::traits::ToBytes;
 use utils::byte_formatting::ByteFormat;
 use utils::other_word_sizes::{make_u48s_be, u48s_to_bytes_be, U48, U96};
-
-use super::select_z_bit;
 
 macro_rules! simon96 {
     ($name:ident, $key_words:literal, $rounds:literal, $z_string:literal) => {
