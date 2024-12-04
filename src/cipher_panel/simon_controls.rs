@@ -1,32 +1,32 @@
 use super::CipherFrame;
 use crate::ui_elements::{
-    block_cipher_iv_128, block_cipher_iv_32, block_cipher_iv_64, block_cipher_mode_and_padding,
-    UiElements,
+    block_cipher_iv_128, block_cipher_iv_32, block_cipher_iv_48, block_cipher_iv_64,
+    block_cipher_iv_96, block_cipher_mode_and_padding, UiElements,
 };
 use ciphers::{
     digital::block_ciphers::simon::{
         simon128::{Simon128_128, Simon128_192, Simon128_256},
         simon32::Simon32_64,
-        // simon48::{Simon48_72, Simon48_96},
+        simon48::{Simon48_72, Simon48_96},
         simon64::{Simon64_128, Simon64_96},
-        // simon96::{Simon96_144, Simon96_96},
+        simon96::{Simon96_144, Simon96_96},
         SimonVariant,
     },
     Cipher,
 };
-use egui::{FontId, RichText, Ui};
+use egui::Ui;
 use rand::{thread_rng, Rng};
 use strum::IntoEnumIterator;
 use utils::byte_formatting::ByteFormat;
 
 pub struct SimonFrame {
     cipher_32_64: Simon32_64,
-    // cipher_48_72: Simon48_72,
-    // cipher_48_96: Simon48_96,
+    cipher_48_72: Simon48_72,
+    cipher_48_96: Simon48_96,
     cipher_64_96: Simon64_96,
     cipher_64_128: Simon64_128,
-    // cipher_96_96: Simon96_96,
-    // cipher_96_144: Simon96_144,
+    cipher_96_96: Simon96_96,
+    cipher_96_144: Simon96_144,
     cipher_128_128: Simon128_128,
     cipher_128_192: Simon128_192,
     cipher_128_256: Simon128_256,
@@ -40,12 +40,12 @@ impl Default for SimonFrame {
     fn default() -> Self {
         Self {
             cipher_32_64: Default::default(),
-            // cipher_48_72: Default::default(),
-            // cipher_48_96: Default::default(),
+            cipher_48_72: Default::default(),
+            cipher_48_96: Default::default(),
             cipher_64_96: Default::default(),
             cipher_64_128: Default::default(),
-            // cipher_96_96: Default::default(),
-            // cipher_96_144: Default::default(),
+            cipher_96_96: Default::default(),
+            cipher_96_144: Default::default(),
             cipher_128_128: Default::default(),
             cipher_128_192: Default::default(),
             cipher_128_256: Default::default(),
@@ -66,16 +66,24 @@ impl SimonFrame {
                 SimonVariant::Simon32_64 => self
                     .cipher_32_64
                     .ksa(vec.try_into().expect("wrong key size")),
-                SimonVariant::Simon48_72 => todo!(),
-                SimonVariant::Simon48_96 => todo!(),
+                SimonVariant::Simon48_72 => self
+                    .cipher_48_72
+                    .ksa(vec.try_into().expect("wrong key size")),
+                SimonVariant::Simon48_96 => self
+                    .cipher_48_96
+                    .ksa(vec.try_into().expect("wrong key size")),
                 SimonVariant::Simon64_96 => self
                     .cipher_64_96
                     .ksa(vec.try_into().expect("wrong key size")),
                 SimonVariant::Simon64_128 => self
                     .cipher_64_128
                     .ksa(vec.try_into().expect("wrong key size")),
-                SimonVariant::Simon96_96 => todo!(),
-                SimonVariant::Simon96_144 => todo!(),
+                SimonVariant::Simon96_96 => self
+                    .cipher_96_96
+                    .ksa(vec.try_into().expect("wrong key size")),
+                SimonVariant::Simon96_144 => self
+                    .cipher_96_144
+                    .ksa(vec.try_into().expect("wrong key size")),
                 SimonVariant::Simon128_128 => self
                     .cipher_128_128
                     .ksa(vec.try_into().expect("wrong key size")),
@@ -113,11 +121,11 @@ impl CipherFrame for SimonFrame {
             self.cipher_32_64.input_format = self.input_format;
             self.cipher_32_64.output_format = self.output_format;
 
-            // self.cipher_48_72.input_format = self.input_format;
-            // self.cipher_48_72.output_format = self.output_format;
+            self.cipher_48_72.input_format = self.input_format;
+            self.cipher_48_72.output_format = self.output_format;
 
-            // self.cipher_48_96.input_format = self.input_format;
-            // self.cipher_48_96.output_format = self.output_format;
+            self.cipher_48_96.input_format = self.input_format;
+            self.cipher_48_96.output_format = self.output_format;
 
             self.cipher_64_96.input_format = self.input_format;
             self.cipher_64_96.output_format = self.output_format;
@@ -125,11 +133,11 @@ impl CipherFrame for SimonFrame {
             self.cipher_64_128.input_format = self.input_format;
             self.cipher_64_128.output_format = self.output_format;
 
-            // self.cipher_96_96.input_format = self.input_format;
-            // self.cipher_96_96.output_format = self.output_format;
+            self.cipher_96_96.input_format = self.input_format;
+            self.cipher_96_96.output_format = self.output_format;
 
-            // self.cipher_96_144.input_format = self.input_format;
-            // self.cipher_96_144.output_format = self.output_format;
+            self.cipher_96_144.input_format = self.input_format;
+            self.cipher_96_144.output_format = self.output_format;
 
             self.cipher_128_128.input_format = self.input_format;
             self.cipher_128_128.output_format = self.output_format;
@@ -173,10 +181,26 @@ impl CipherFrame for SimonFrame {
                 &mut self.cipher_128_256.mode,
                 &mut self.cipher_128_256.padding,
             ),
-            SimonVariant::Simon48_72 => todo!(),
-            SimonVariant::Simon48_96 => todo!(),
-            SimonVariant::Simon96_96 => todo!(),
-            SimonVariant::Simon96_144 => todo!(),
+            SimonVariant::Simon48_72 => block_cipher_mode_and_padding(
+                ui,
+                &mut self.cipher_48_72.mode,
+                &mut self.cipher_48_72.padding,
+            ),
+            SimonVariant::Simon48_96 => block_cipher_mode_and_padding(
+                ui,
+                &mut self.cipher_48_96.mode,
+                &mut self.cipher_48_96.padding,
+            ),
+            SimonVariant::Simon96_96 => block_cipher_mode_and_padding(
+                ui,
+                &mut self.cipher_96_96.mode,
+                &mut self.cipher_96_96.padding,
+            ),
+            SimonVariant::Simon96_144 => block_cipher_mode_and_padding(
+                ui,
+                &mut self.cipher_96_144.mode,
+                &mut self.cipher_96_144.padding,
+            ),
         };
 
         ui.add_space(16.0);
@@ -201,104 +225,6 @@ impl CipherFrame for SimonFrame {
             }
             self.run_ksa()
         }
-        ui.add_space(8.0);
-
-        ui.collapsing("Subkeys", |ui| match self.selector {
-            SimonVariant::Simon32_64 => {
-                egui::Grid::new("Simon32_64_array")
-                    .num_columns(4)
-                    .striped(true)
-                    .show(ui, |ui| {
-                        for (n, b) in self.cipher_32_64.subkeys.iter().enumerate() {
-                            if n % 4 == 0 && n != 0 {
-                                ui.end_row()
-                            }
-                            ui.label(
-                                RichText::from(format!("{:04X}", b)).font(FontId::monospace(15.0)),
-                            );
-                        }
-                    });
-            }
-            SimonVariant::Simon64_96 => {
-                egui::Grid::new("Simon64_96_array")
-                    .num_columns(4)
-                    .striped(true)
-                    .show(ui, |ui| {
-                        for (n, b) in self.cipher_64_96.subkeys.iter().enumerate() {
-                            if n % 4 == 0 && n != 0 {
-                                ui.end_row()
-                            }
-                            ui.label(
-                                RichText::from(format!("{:08X}", b)).font(FontId::monospace(15.0)),
-                            );
-                        }
-                    });
-            }
-            SimonVariant::Simon64_128 => {
-                egui::Grid::new("Simon64_128_array")
-                    .num_columns(4)
-                    .striped(true)
-                    .show(ui, |ui| {
-                        for (n, b) in self.cipher_64_128.subkeys.iter().enumerate() {
-                            if n % 4 == 0 && n != 0 {
-                                ui.end_row()
-                            }
-                            ui.label(
-                                RichText::from(format!("{:08X}", b)).font(FontId::monospace(15.0)),
-                            );
-                        }
-                    });
-            }
-            SimonVariant::Simon128_128 => {
-                egui::Grid::new("Simon128_128_array")
-                    .num_columns(4)
-                    .striped(true)
-                    .show(ui, |ui| {
-                        for (n, b) in self.cipher_128_128.subkeys.iter().enumerate() {
-                            if n % 4 == 0 && n != 0 {
-                                ui.end_row()
-                            }
-                            ui.label(
-                                RichText::from(format!("{:016X}", b)).font(FontId::monospace(15.0)),
-                            );
-                        }
-                    });
-            }
-            SimonVariant::Simon128_192 => {
-                egui::Grid::new("Simon128_192_array")
-                    .num_columns(4)
-                    .striped(true)
-                    .show(ui, |ui| {
-                        for (n, b) in self.cipher_128_192.subkeys.iter().enumerate() {
-                            if n % 4 == 0 && n != 0 {
-                                ui.end_row()
-                            }
-                            ui.label(
-                                RichText::from(format!("{:016X}", b)).font(FontId::monospace(15.0)),
-                            );
-                        }
-                    });
-            }
-            SimonVariant::Simon128_256 => {
-                egui::Grid::new("Simon128_256_array")
-                    .num_columns(4)
-                    .striped(true)
-                    .show(ui, |ui| {
-                        for (n, b) in self.cipher_128_256.subkeys.iter().enumerate() {
-                            if n % 4 == 0 && n != 0 {
-                                ui.end_row()
-                            }
-                            ui.label(
-                                RichText::from(format!("{:016X}", b)).font(FontId::monospace(15.0)),
-                            );
-                        }
-                    });
-            }
-            SimonVariant::Simon48_72 => todo!(),
-            SimonVariant::Simon48_96 => todo!(),
-            SimonVariant::Simon96_96 => todo!(),
-            SimonVariant::Simon96_144 => todo!(),
-        });
 
         ui.add_space(16.0);
 
@@ -321,10 +247,18 @@ impl CipherFrame for SimonFrame {
             SimonVariant::Simon128_256 => {
                 block_cipher_iv_128(ui, &mut self.cipher_128_256.iv, self.cipher_128_256.mode)
             }
-            SimonVariant::Simon48_72 => todo!(),
-            SimonVariant::Simon48_96 => todo!(),
-            SimonVariant::Simon96_96 => todo!(),
-            SimonVariant::Simon96_144 => todo!(),
+            SimonVariant::Simon48_72 => {
+                block_cipher_iv_48(ui, &mut self.cipher_48_72.iv, self.cipher_48_72.mode)
+            }
+            SimonVariant::Simon48_96 => {
+                block_cipher_iv_48(ui, &mut self.cipher_48_96.iv, self.cipher_48_96.mode)
+            }
+            SimonVariant::Simon96_96 => {
+                block_cipher_iv_96(ui, &mut self.cipher_96_96.iv, self.cipher_96_96.mode)
+            }
+            SimonVariant::Simon96_144 => {
+                block_cipher_iv_96(ui, &mut self.cipher_96_144.iv, self.cipher_96_144.mode)
+            }
         }
 
         ui.add_space(16.0);
@@ -333,12 +267,12 @@ impl CipherFrame for SimonFrame {
     fn cipher(&self) -> &dyn Cipher {
         match self.selector {
             SimonVariant::Simon32_64 => &self.cipher_32_64,
-            SimonVariant::Simon48_72 => todo!(),
-            SimonVariant::Simon48_96 => todo!(),
+            SimonVariant::Simon48_72 => &self.cipher_48_72,
+            SimonVariant::Simon48_96 => &self.cipher_48_96,
             SimonVariant::Simon64_96 => &self.cipher_64_96,
             SimonVariant::Simon64_128 => &self.cipher_64_128,
-            SimonVariant::Simon96_96 => todo!(),
-            SimonVariant::Simon96_144 => todo!(),
+            SimonVariant::Simon96_96 => &self.cipher_96_96,
+            SimonVariant::Simon96_144 => &self.cipher_96_144,
             SimonVariant::Simon128_128 => &self.cipher_128_128,
             SimonVariant::Simon128_192 => &self.cipher_128_192,
             SimonVariant::Simon128_256 => &self.cipher_128_256,

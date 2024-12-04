@@ -16,7 +16,9 @@ use rngs::{
 use std::fmt::Display;
 use strum::IntoEnumIterator;
 use utils::{
-    byte_formatting::ByteFormat, other_word_sizes::{U24, U48, U96}, text_functions::{filter_string, unique_string}
+    byte_formatting::ByteFormat,
+    other_word_sizes::{U24, U48, U96},
+    text_functions::{filter_string, unique_string},
 };
 
 pub trait UiElements {
@@ -628,6 +630,19 @@ pub fn integer_word_code_controls(
     ui.add_space(16.0);
 }
 
+pub fn block_cipher_iv_24(ui: &mut Ui, iv: &mut U24, mode: BCMode) {
+    ui.add_enabled_ui(mode.iv_needed(), |ui| {
+        ui.horizontal(|ui| {
+            ui.subheading("IV/Counter");
+            if ui.random_num_button(&mut iv.0).clicked() {
+                iv.0 &= 0xffffff
+            }
+        });
+        ui.label("In the selected mode the cipher must have a 64-bit initial value provided.");
+        ui.u24_hex_edit(iv);
+    });
+}
+
 pub fn block_cipher_iv_32(ui: &mut Ui, iv: &mut u32, mode: BCMode) {
     ui.add_enabled_ui(mode.iv_needed(), |ui| {
         ui.horizontal(|ui| {
@@ -639,6 +654,19 @@ pub fn block_cipher_iv_32(ui: &mut Ui, iv: &mut u32, mode: BCMode) {
     });
 }
 
+pub fn block_cipher_iv_48(ui: &mut Ui, iv: &mut U48, mode: BCMode) {
+    ui.add_enabled_ui(mode.iv_needed(), |ui| {
+        ui.horizontal(|ui| {
+            ui.subheading("IV/Counter");
+            if ui.random_num_button(&mut iv.0).clicked() {
+                iv.0 &= 0xffffffffffff
+            }
+        });
+        ui.label("In the selected mode the cipher must have a 64-bit initial value provided.");
+        ui.u48_hex_edit(iv);
+    });
+}
+
 pub fn block_cipher_iv_64(ui: &mut Ui, iv: &mut u64, mode: BCMode) {
     ui.add_enabled_ui(mode.iv_needed(), |ui| {
         ui.horizontal(|ui| {
@@ -647,6 +675,19 @@ pub fn block_cipher_iv_64(ui: &mut Ui, iv: &mut u64, mode: BCMode) {
         });
         ui.label("In the selected mode the cipher must have a 64-bit initial value provided.");
         ui.u64_hex_edit(iv);
+    });
+}
+
+pub fn block_cipher_iv_96(ui: &mut Ui, iv: &mut U96, mode: BCMode) {
+    ui.add_enabled_ui(mode.iv_needed(), |ui| {
+        ui.horizontal(|ui| {
+            ui.subheading("IV/Counter");
+            if ui.random_num_button(&mut iv.0).clicked() {
+                iv.0 &= 0xffffffffffffffffffffffff
+            }
+        });
+        ui.label("In the selected mode the cipher must have a 64-bit initial value provided.");
+        ui.u96_hex_edit(iv);
     });
 }
 
