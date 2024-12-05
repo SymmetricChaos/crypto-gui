@@ -149,7 +149,7 @@ impl ClassicHasher for Argon2 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         assert!(self.parallelism > 0, "parallelism cannot be 0");
         assert!(
-            self.parallelism < 0x1000000,
+            self.parallelism < (1 << 24),
             "parallelism must be less than 2^24"
         );
         assert!(self.iterations > 0, "iterations cannot be 0");
