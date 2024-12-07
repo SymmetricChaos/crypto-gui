@@ -95,33 +95,30 @@ const C: [[u8; 32]; 3] = [
     [0; 32],
 ];
 
-fn a(y: [u8; 32]) -> [u8; 32] {
-    let mut out = y;
-    out.rotate_right(8);
+fn a(mut y: [u8; 32]) -> [u8; 32] {
+    y.rotate_right(8);
     for i in 0..8 {
-        out[i] = y[16 + i] ^ y[24 + i]
+        y[i] ^= y[24 + i]
     }
-    out
+    y
 }
 
 fn p(y: [u8; 32]) -> [u8; 32] {
     let mut out = [0; 32];
     for i in 0..4 {
         for k in 1..9 {
-            out[i] = (8 * i + k) as u8
+            out[i] = y[8 * i + k]
         }
     }
     out
 }
-
-fn e() {}
 
 fn key_gen(h: [u8; 32], m: [u8; 32]) -> [[u8; 32]; 4] {
     let mut u = h;
     let mut v = m;
     let mut w = u.clone();
     xor_into_bytes(w, v);
-    let mut k = [[0; 32]; 4];
+    let mut ks = [[0; 32]; 4];
 
     for i in 2..5 {
         u = a(u);
@@ -133,14 +130,47 @@ fn key_gen(h: [u8; 32], m: [u8; 32]) -> [[u8; 32]; 4] {
         for i in 0..32 {
             w[i] ^= v[i]
         }
-        k[i] = p(w)
+        ks[i] = p(w)
     }
 
-    todo!()
+    ks
 }
 
-fn compress(h: [u8; 32], m: [u8; 32]) -> [u8; 32] {
-    todo!()
+fn e(mut h: [u8; 32], ks: [[u8; 32]; 4], cipher: &mut GostCipher) -> [u8; 32] {
+    for i in 0..4 {
+        cipher.ksa(ks[i]);
+        cipher.encrypt_block(&mut h[(i * 8)..(i * 8 + 8)]);
+    }
+    h
+}
+
+fn shuffling(mut h: [u8; 32]) -> [u8; 32] {
+    let t0 = h[31] ^ h[29] ^ h[27] ^ h[25] ^ h[7] ^ h[1];
+    let t1 = h[30] ^ h[28] ^ h[26] ^ h[24] ^ h[6] ^ h[0];
+    h.rotate_right(2);
+    h[0] = t0;
+    h[1] = t1;
+    h
+}
+
+fn shuffling_transform(h: [u8; 32], s: [u8; 32], m: [u8; 32]) -> [u8; 32] {
+    let mut t = s.clone();
+    for _ in 0..12 {
+        t = shuffling(t)
+    }
+    xor_into_bytes(t, m);
+    t = shuffling(t);
+    xor_into_bytes(t, h);
+    for _ in 0..61 {
+        t = shuffling(t)
+    }
+    t
+}
+
+fn compress(h: [u8; 32], m: [u8; 32], cipher: &mut GostCipher) -> [u8; 32] {
+    let ks = key_gen(h, m);
+    let s = e(h, ks, cipher);
+    shuffling_transform(h, s, m)
 }
 
 #[derive(Debug, Clone)]
@@ -179,18 +209,18 @@ impl ClassicHasher for Gost {
             for i in 0..32 {
                 ctrl[i] ^= block[i]
             }
-            h = compress(h, block.try_into().unwrap())
+            h = compress(h, block.try_into().unwrap(), &mut cipher)
         }
 
         // Compress in the length of the input
         let mut l = [0; 32];
-        for (i, b) in (bytes.len() as u64).to_be_bytes().iter().enumerate() {
+        for (i, b) in ((bytes.len() * 8) as u64).to_be_bytes().iter().enumerate() {
             l[i + 23] = *b
         }
-        h = compress(h, l);
+        h = compress(h, l, &mut cipher);
 
         // Compress in the check value
-        compress(h, ctrl).to_vec()
+        compress(h, ctrl, &mut cipher).to_vec()
     }
 
     crate::hash_bytes_from_string! {}
