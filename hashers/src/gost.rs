@@ -1,5 +1,5 @@
 use crate::traits::ClassicHasher;
-use utils::byte_formatting::{fill_u32s_be, u32s_to_bytes_be};
+use utils::byte_formatting::{fill_u32s_be, u32s_to_bytes_be, xor_into_bytes};
 use utils::{byte_formatting::ByteFormat, padding::zero_padding};
 
 pub const GOST_R_34_12_2015: [u64; 8] = [
@@ -13,21 +13,9 @@ pub const GOST_R_34_12_2015: [u64; 8] = [
     0x17ED05834FA69CB2,
 ];
 
-pub const TEST_SBOX: [u64; 8] = [
-    0x4a92d80e6b1c7f53,
-    0xeb4c6dfa23810759,
-    0x581da342efc7609b,
-    0x7da1089fe46cb253,
-    0x6c715fd84a9e03b2,
-    0x4ba0721d36859cfe,
-    0xdb413f590ae7682c,
-    0x1fd057a4923e6b8c,
-];
-
 pub struct GostCipher {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    pub iv: u64,
     pub sboxes: [u64; 8],
     pub subkeys: [u32; 8],
 }
@@ -37,7 +25,6 @@ impl Default for GostCipher {
         Self {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
-            iv: 0,
             sboxes: GOST_R_34_12_2015.clone(),
             subkeys: [0; 8],
         }
@@ -50,7 +37,7 @@ impl GostCipher {
         1, 0,
     ];
 
-    pub fn sbox(&self, n: u32) -> u32 {
+    fn sbox(&self, n: u32) -> u32 {
         let mut out = 0;
 
         for i in 0..8 {
@@ -63,7 +50,7 @@ impl GostCipher {
         out
     }
 
-    pub fn f(&self, n: u32, subkey: u32) -> u32 {
+    fn f(&self, n: u32, subkey: u32) -> u32 {
         let x = n.wrapping_add(subkey);
         let x = self.sbox(x);
         x.rotate_left(11)
@@ -98,13 +85,59 @@ impl GostCipher {
     }
 }
 
-fn a(y: [u64; 4]) -> [u64; 4] {
-    [y[0] ^ y[1], y[3], y[2], y[1]]
+const C: [[u8; 32]; 3] = [
+    [0; 32],
+    [
+        0xff, 0x00, 0xff, 0xff, 0x00, 0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0xff, 0x00, 0xff, 0xff,
+        0x00, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00,
+        0xff, 0x00,
+    ],
+    [0; 32],
+];
+
+fn a(y: [u8; 32]) -> [u8; 32] {
+    let mut out = y;
+    out.rotate_right(8);
+    for i in 0..8 {
+        out[i] = y[16 + i] ^ y[24 + i]
+    }
+    out
 }
 
-fn p() {}
+fn p(y: [u8; 32]) -> [u8; 32] {
+    let mut out = [0; 32];
+    for i in 0..4 {
+        for k in 1..9 {
+            out[i] = (8 * i + k) as u8
+        }
+    }
+    out
+}
 
 fn e() {}
+
+fn key_gen(h: [u8; 32], m: [u8; 32]) -> [[u8; 32]; 4] {
+    let mut u = h;
+    let mut v = m;
+    let mut w = u.clone();
+    xor_into_bytes(w, v);
+    let mut k = [[0; 32]; 4];
+
+    for i in 2..5 {
+        u = a(u);
+        for j in 0..32 {
+            u[i] ^= C[i][j]
+        }
+        v = a(a(v));
+        w = u.clone();
+        for i in 0..32 {
+            w[i] ^= v[i]
+        }
+        k[i] = p(w)
+    }
+
+    todo!()
+}
 
 fn compress(h: [u8; 32], m: [u8; 32]) -> [u8; 32] {
     todo!()
@@ -114,7 +147,8 @@ fn compress(h: [u8; 32], m: [u8; 32]) -> [u8; 32] {
 pub struct Gost {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    pub h1: [u8; 32],
+    pub iv: [u8; 32],
+    pub sboxes: [u64; 8],
 }
 
 impl Default for Gost {
@@ -122,7 +156,8 @@ impl Default for Gost {
         Self {
             input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
-            h1: [0; 32],
+            iv: [0; 32],
+            sboxes: GOST_R_34_12_2015.clone(),
         }
     }
 }
@@ -134,10 +169,10 @@ impl ClassicHasher for Gost {
         // Final block is padded with zeroes
         zero_padding(&mut input, 32);
 
-        let mut h = self.h1;
+        let mut h = self.iv;
         let mut ctrl = [0; 32];
 
-        let mut cipher = GostCipher::default();
+        let mut cipher = GostCipher::default().with_sboxes(self.sboxes);
 
         // Take input in 256-bit blocks
         for block in input.chunks_exact(32) {
