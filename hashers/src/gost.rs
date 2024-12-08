@@ -3,14 +3,36 @@ use utils::byte_formatting::{fill_u32s_be, u32s_to_bytes_be, xor_into_bytes};
 use utils::{byte_formatting::ByteFormat, padding::zero_padding};
 
 pub const GOST_R_34_12_2015: [u64; 8] = [
-    0xC462A5B9E8D703F1,
-    0x68239A5C1E47BD0F,
-    0xB3582FADE174C960,
-    0xC821D4F670A53E9B,
-    0x7F5A816D093EB42C,
-    0x5DF692CAB78143E0,
-    0x8E25691CF4B0DA37,
-    0x17ED05834FA69CB2,
+    0xc462a5b9e8d703f1,
+    0x68239a5c1e47bd0f,
+    0xb3582fade174c960,
+    0xc821d4f670a53e9b,
+    0x7f5a816d093eb42c,
+    0x5df692cab78143e0,
+    0x8e25691cf4b0da37,
+    0x17ed05834fa69cb2,
+];
+
+pub const GOST_R_CRYPTO_PRO: [u64; 8] = [
+    0xa4568137dce092bf,
+    0x5f402db91763cea8,
+    0x7fce94103b526a8d,
+    0x4a7c0f28e165db93,
+    0x764b9c2a180efd35,
+    0x7624d9f0a15b8ec3,
+    0xde41705a3c8f629b,
+    0x13a95b4f867ed02c,
+];
+
+pub const GOST_R_TEST: [u64; 8] = [
+    0x4a92d80e6b1c7f53,
+    0xeb4c6dfa23810759,
+    0x581da342efc7609b,
+    0x7da1089fe46cb253,
+    0x6c715fd84a9e03b2,
+    0x4ba0721d36859cfe,
+    0xdb413f590ae7682c,
+    0x1fd057a4923e6b8c,
 ];
 
 pub struct GostCipher {
@@ -107,7 +129,7 @@ fn p(y: [u8; 32]) -> [u8; 32] {
     let mut out = [0; 32];
     for i in 0..4 {
         for k in 0..8 {
-            out[i] = y[8 * i + k]
+            out[i + 4 * k] = y[8 * i + k]
         }
     }
     out
@@ -137,10 +159,14 @@ fn key_gen(h: [u8; 32], m: [u8; 32]) -> [[u8; 32]; 4] {
 }
 
 fn e(mut h: [u8; 32], ks: [[u8; 32]; 4], cipher: &mut GostCipher) -> [u8; 32] {
-    for i in 0..4 {
-        cipher.ksa(ks[i]);
-        cipher.encrypt_block(&mut h[(i * 8)..(i * 8 + 8)]);
-    }
+    cipher.ksa(ks[0]);
+    cipher.encrypt_block(&mut h[0..8]);
+    cipher.ksa(ks[1]);
+    cipher.encrypt_block(&mut h[8..16]);
+    cipher.ksa(ks[2]);
+    cipher.encrypt_block(&mut h[16..24]);
+    cipher.ksa(ks[3]);
+    cipher.encrypt_block(&mut h[24..32]);
     h
 }
 
