@@ -1,17 +1,17 @@
-use hashers::sha::Sha1;
+use hashers::sha::Sha0;
 use utils::{byte_formatting::ByteFormat, padding::md_strengthening_64_be};
 
 use crate::ui_elements::UiElements;
 
 use super::HasherFrame;
 
-pub struct Sha1Frame {
-    hasher: Sha1,
+pub struct Sha0Frame {
+    hasher: Sha0,
     example: String,
     example_padded: String,
 }
 
-impl Default for Sha1Frame {
+impl Default for Sha0Frame {
     fn default() -> Self {
         Self {
             hasher: Default::default(),
@@ -21,7 +21,7 @@ impl Default for Sha1Frame {
     }
 }
 
-impl Sha1Frame {
+impl Sha0Frame {
     fn padding(&mut self) {
         let mut bytes = self.example.as_bytes().to_vec();
         md_strengthening_64_be(&mut bytes, 64);
@@ -29,11 +29,11 @@ impl Sha1Frame {
     }
 }
 
-impl HasherFrame for Sha1Frame {
+impl HasherFrame for Sha0Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
-            "https://github.com/SymmetricChaos/crypto-gui/blob/master/hashers/src/sha/sha1.rs",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/hashers/src/sha/sha0.rs",
         );
 
         ui.byte_io_mode_hasher(

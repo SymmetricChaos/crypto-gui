@@ -6,12 +6,12 @@ use utils::{
 use crate::traits::ClassicHasher;
 
 #[derive(Debug, Clone)]
-pub struct Sha1 {
+pub struct Sha0 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
 }
 
-impl Default for Sha1 {
+impl Default for Sha0 {
     fn default() -> Self {
         Self {
             input_format: ByteFormat::Utf8,
@@ -20,7 +20,7 @@ impl Default for Sha1 {
     }
 }
 
-impl Sha1 {
+impl Sha0 {
     pub fn input(mut self, input: ByteFormat) -> Self {
         self.input_format = input;
         self
@@ -40,7 +40,7 @@ impl Sha1 {
 
         // Extend the 16 words to 80 words
         for i in 16..80 {
-            x[i] = (x[i - 3] ^ x[i - 8] ^ x[i - 14] ^ x[i - 16]).rotate_left(1)
+            x[i] = x[i - 3] ^ x[i - 8] ^ x[i - 14] ^ x[i - 16]
         }
 
         // Apply 80 rounds of mixing
@@ -84,7 +84,7 @@ impl Sha1 {
     }
 }
 
-impl ClassicHasher for Sha1 {
+impl ClassicHasher for Sha0 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         let mut input = bytes.to_vec();
 
@@ -108,13 +108,13 @@ impl ClassicHasher for Sha1 {
     crate::hash_bytes_from_string! {}
 }
 
-crate::basic_hash_tests!(
-    test1, Sha1::default(), "",
-    "da39a3ee5e6b4b0d3255bfef95601890afd80709";
-    test2, Sha1::default(), "abc",
-    "a9993e364706816aba3e25717850c26c9cd0d89d";
-    test3, Sha1::default(), "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
-    "84983e441c3bd26ebaae4aa1f95129e5e54670f1";
-    test4, Sha1::default(), "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
-    "a49b2446a02c645bf419f995b67091253a04a259";
-);
+// crate::basic_hash_tests!(
+//     test1, Sha0::default(), "",
+//     "";
+//     test2, Sha0::default(), "abc",
+//     "";
+//     test3, Sha0::default(), "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
+//     "";
+//     test4, Sha0::default(), "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
+//     "";
+// );

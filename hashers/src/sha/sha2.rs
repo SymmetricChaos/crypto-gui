@@ -33,6 +33,36 @@ impl Default for Sha2 {
 }
 
 impl Sha2 {
+    pub fn sha224(mut self) -> Self {
+        self.variant = Sha2Variant::Sha224;
+        self
+    }
+
+    pub fn sha256(mut self) -> Self {
+        self.variant = Sha2Variant::Sha256;
+        self
+    }
+
+    pub fn sha384(mut self) -> Self {
+        self.variant = Sha2Variant::Sha384;
+        self
+    }
+
+    pub fn sha512(mut self) -> Self {
+        self.variant = Sha2Variant::Sha512;
+        self
+    }
+
+    pub fn sha512_224(mut self) -> Self {
+        self.variant = Sha2Variant::Sha512_224;
+        self
+    }
+
+    pub fn sha512_256(mut self) -> Self {
+        self.variant = Sha2Variant::Sha512_256;
+        self
+    }
+
     pub fn variant(mut self, variant: Sha2Variant) -> Self {
         self.variant = variant;
         self

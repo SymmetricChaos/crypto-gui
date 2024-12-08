@@ -319,8 +319,21 @@
       "KDF"
     ]
   },
+  "SHA-0": {
+    "Description": "SHA-0 is a cryptographic hash function designed by the US National Security Agency. Shortly after its release in 1993 it was replaced with SHA-1, which differed only in making a one bit rotation during the expansion step. Practical attacks on SHA-0 have been publicly known since 2004.",
+    "Authors": "NSA",
+    "Publication": "1993",
+    "Hash Length": [
+      160
+    ],
+    "Traits": [
+      "Merkle-Damgård",
+      "Crytographic",
+      "Broken"
+    ]
+  },
   "SHA-1": {
-    "Description": "SHA-1 is a cryptographic hash function designed by the US National Security Agency. It produces a 160 bit hash. Practical attacks on SHA-1 have been publicly known since 2017. It it based on the similar SHA-0, released in 1993, which different only in lacking a one bit rotation during the expansion step. Practical attacks on SHA-0 have been publicly known since 2004.",
+    "Description": "SHA-1 is a cryptographic hash function designed by the US National Security Agency. It is an improved version of the SHA-0 hash function also published by the NSA. Practical attacks on SHA-1 have been publicly known since 2017.",
     "Authors": "NSA",
     "Publication": "1995",
     "Hash Length": [
@@ -378,7 +391,6 @@
       "Crytographic"
     ]
   },
-  
   "SM3": {
     "Description": "SM3 (商密3, ShāngMì 3) is the Chinese national standard hash function. It uses an expand and compress design infalting the input to 132 words then compressing it into the 16 word state.",
     "Authors": "Chinese Academy of Sciences",

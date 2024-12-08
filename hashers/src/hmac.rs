@@ -3,11 +3,9 @@ use crate::{
     md4::Md4,
     md5::Md5,
     sha::{
+        sha0::Sha0,
         sha256::{Sha2_224, Sha2_256},
-        // sha512::{Sha2_384, Sha2_512},
-        Sha1,
-        Sha2_384,
-        Sha2_512,
+        Sha1, Sha2_384, Sha2_512,
     },
     traits::ClassicHasher,
 };
@@ -43,8 +41,8 @@ impl HmacVariant {
 
     pub fn hasher(&self) -> Box<dyn ClassicHasher> {
         match self {
-            Self::Sha0 => Box::new(Sha1::sha0()),
-            Self::Sha1 => Box::new(Sha1::sha1()),
+            Self::Sha0 => Box::new(Sha0::default()),
+            Self::Sha1 => Box::new(Sha1::default()),
             Self::Md4 => Box::new(Md4::default()),
             Self::Md5 => Box::new(Md5::default()),
             Self::Sha224 => Box::new(Sha2_224::default()),

@@ -1,3 +1,5 @@
+pub mod sha0;
+pub use sha0::Sha0;
 pub mod sha3;
 pub use sha3::{Keccack, KeccackState};
 pub mod sha1;
