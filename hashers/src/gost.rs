@@ -106,7 +106,7 @@ fn a(mut y: [u8; 32]) -> [u8; 32] {
 fn p(y: [u8; 32]) -> [u8; 32] {
     let mut out = [0; 32];
     for i in 0..4 {
-        for k in 1..9 {
+        for k in 0..8 {
             out[i] = y[8 * i + k]
         }
     }
@@ -120,15 +120,15 @@ fn key_gen(h: [u8; 32], m: [u8; 32]) -> [[u8; 32]; 4] {
     xor_into_bytes(w, v);
     let mut ks = [[0; 32]; 4];
 
-    for i in 2..5 {
+    for i in 1..4 {
         u = a(u);
         for j in 0..32 {
-            u[i] ^= C[i][j]
+            u[j] ^= C[i - 1][j]
         }
         v = a(a(v));
         w = u.clone();
-        for i in 0..32 {
-            w[i] ^= v[i]
+        for j in 0..32 {
+            w[j] ^= v[j]
         }
         ks[i] = p(w)
     }
