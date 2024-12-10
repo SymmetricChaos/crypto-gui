@@ -6,12 +6,15 @@ use utils::byte_formatting::ByteFormat;
 
 use crate::{blake::Blake2b, errors::HasherError, traits::ClassicHasher};
 
+const BLOCK_WORDS: usize = 128;
+const BLOCK_BYTES: usize = 1024;
+
 #[derive(Clone, Debug)]
-pub struct Argon2Block([u64; 16]);
+pub struct Argon2Block([u64; BLOCK_WORDS]);
 
 impl Default for Argon2Block {
     fn default() -> Self {
-        Self([0u64; 16])
+        Self([0u64; BLOCK_WORDS])
     }
 }
 
@@ -29,9 +32,26 @@ impl IndexMut<usize> for Argon2Block {
     }
 }
 
-impl From<[u64; 16]> for Argon2Block {
-    fn from(value: [u64; 16]) -> Self {
+impl From<[u64; BLOCK_WORDS]> for Argon2Block {
+    fn from(value: [u64; BLOCK_WORDS]) -> Self {
         Self(value)
+    }
+}
+
+impl TryFrom<&[u8]> for Argon2Block {
+    type Error = HasherError;
+
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        if value.len() != 1024 {
+            return Err(HasherError::general(
+                "Argon2Block must be exactly 1024 bytes",
+            ));
+        };
+        let mut block = [0u64; BLOCK_WORDS];
+        for (i, chunk) in value.chunks_exact(8).enumerate() {
+            block[i] = u64::from_le_bytes(chunk.try_into().unwrap());
+        }
+        Ok(Self(block))
     }
 }
 
@@ -44,7 +64,7 @@ impl TryFrom<Vec<u8>> for Argon2Block {
                 "Argon2Block must be exactly 1024 bytes",
             ));
         };
-        let mut block = [0u64; 16];
+        let mut block = [0u64; BLOCK_WORDS];
         for (i, chunk) in value.chunks_exact(8).enumerate() {
             block[i] = u64::from_le_bytes(chunk.try_into().unwrap());
         }
@@ -88,6 +108,8 @@ macro_rules! permute {
         permute_step!($v3, $v4, $v9, $v14);
     };
 }
+
+const MAX_PAR: u32 = 1 << 24;
 
 #[derive(Debug, Clone)]
 pub struct Argon2 {
@@ -149,7 +171,7 @@ impl ClassicHasher for Argon2 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         assert!(self.parallelism > 0, "parallelism cannot be 0");
         assert!(
-            self.parallelism < (1 << 24),
+            self.parallelism < MAX_PAR,
             "parallelism must be less than 2^24"
         );
         assert!(self.iterations > 0, "iterations cannot be 0");
@@ -174,7 +196,7 @@ impl ClassicHasher for Argon2 {
             vec![vec![Argon2Block::default(); block_count as usize]; self.parallelism as usize];
 
         // Initialize the blocks
-        hasher.hash_len = 1024;
+        hasher.hash_len = BLOCK_BYTES;
         for i in 0..self.parallelism {
             let mut h = h0.clone();
             h.extend(0_u32.to_le_bytes());
@@ -201,7 +223,7 @@ impl ClassicHasher for Argon2 {
         if self.parallelism == 0 {
             return Err(HasherError::general("parallelism cannot be 0"));
         }
-        if self.parallelism >= 0x1000000 {
+        if self.parallelism > MAX_PAR {
             return Err(HasherError::general("parallelism must be less than 2^24"));
         }
         if self.salt.len() == 0 {

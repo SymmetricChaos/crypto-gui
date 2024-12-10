@@ -31,8 +31,10 @@ impl KeccackState {
         }
     }
 
-    const _L: usize = 6;
-    const _W: usize = 64; // word size, 2**L
+    // Unused word size constants with W = 2^L
+    // const L: usize = 6;
+    // const W: usize = 64;
+
     const ROUNDS: usize = 24; // 12 + 2L
 
     const ROTATION_CONSTANTS: [[u32; 5]; 5] = [
