@@ -1,15 +1,17 @@
-use std::ops::{Index, IndexMut};
+use std::{
+    num::Wrapping,
+    ops::{BitXor, BitXorAssign, Index, IndexMut},
+};
 
-use itertools::Itertools;
 use num::Integer;
 use utils::byte_formatting::ByteFormat;
 
 use crate::{blake::Blake2b, errors::HasherError, traits::ClassicHasher};
 
-const BLOCK_WORDS: usize = 128;
 const BLOCK_BYTES: usize = 1024;
+const BLOCK_WORDS: usize = BLOCK_BYTES / 8;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Argon2Block([u64; BLOCK_WORDS]);
 
 impl Default for Argon2Block {
@@ -72,6 +74,23 @@ impl TryFrom<Vec<u8>> for Argon2Block {
     }
 }
 
+impl BitXor<&Argon2Block> for Argon2Block {
+    type Output = Argon2Block;
+
+    fn bitxor(mut self, rhs: &Argon2Block) -> Self::Output {
+        for (s, r) in self.0.iter_mut().zip(rhs.0.iter()) {
+            *s ^= r;
+        }
+        self
+    }
+}
+
+impl BitXorAssign<&Argon2Block> for Argon2Block {
+    fn bitxor_assign(&mut self, rhs: &Argon2Block) {
+        *self = *self ^ rhs
+    }
+}
+
 // https://docs.rs/argon2/latest/src/argon2/block.rs.html
 
 const TRUNC: u64 = u32::MAX as u64;
@@ -109,6 +128,43 @@ macro_rules! permute {
     };
 }
 
+pub fn compress(rhs: &Argon2Block, lhs: &Argon2Block) -> Argon2Block {
+    let r = *rhs ^ lhs;
+    let mut q = r;
+
+    // Row by row
+    for chunk in q.0.chunks_exact_mut(16) {
+        permute!(
+            chunk[0], chunk[1], chunk[2], chunk[3], chunk[4], chunk[5], chunk[6], chunk[7],
+            chunk[8], chunk[9], chunk[10], chunk[11], chunk[12], chunk[13], chunk[14], chunk[15],
+        );
+    }
+
+    // Column by column
+    for i in (0..16).step_by(2) {
+        permute!(
+            q[i],
+            q[i + 1],
+            q[i + 16],
+            q[i + 17],
+            q[i + 32],
+            q[i + 33],
+            q[i + 48],
+            q[i + 49],
+            q[i + 64],
+            q[i + 65],
+            q[i + 80],
+            q[i + 81],
+            q[i + 96],
+            q[i + 97],
+            q[i + 112],
+            q[i + 113],
+        );
+    }
+
+    q ^ &r
+}
+
 const MAX_PAR: u32 = 1 << 24;
 
 #[derive(Debug, Clone)]
@@ -139,7 +195,7 @@ impl Default for Argon2 {
             memory: Default::default(),
             iterations: Default::default(),
             version: 0x13,
-            mode: Default::default(),
+            mode: 2, // default to Argon2id (recommended)
         }
     }
 }
