@@ -95,6 +95,7 @@ impl BitXorAssign<&Argon2Block> for Argon2Block {
 
 const TRUNC: u64 = u32::MAX as u64;
 
+// Notice that this is nearly identical to the BLAKE and BLAKE2 mixing function.
 #[rustfmt::skip]
 macro_rules! permute_step {
     ($a:expr, $b:expr, $c:expr, $d:expr) => {
@@ -221,6 +222,19 @@ impl Argon2 {
 
         buffer
     }
+
+    // Exact order to indicies depends on mode
+    fn block_indicies(&self, a: usize, b: usize) -> (usize, usize) {
+        if self.mode == 0 {
+            todo!()
+        } else if self.mode == 1 {
+            todo!()
+        } else if self.mode == 2 {
+            todo!()
+        } else {
+            panic!("invalid mode choice")
+        }
+    }
 }
 
 impl ClassicHasher for Argon2 {
@@ -251,7 +265,7 @@ impl ClassicHasher for Argon2 {
         let mut blocks =
             vec![vec![Argon2Block::default(); block_count as usize]; self.parallelism as usize];
 
-        // Initialize the blocks
+        // Initialize the columns with the first two blocks of each
         hasher.hash_len = BLOCK_BYTES;
         for i in 0..self.parallelism {
             let mut h = h0.clone();
@@ -272,6 +286,36 @@ impl ClassicHasher for Argon2 {
                 .expect("blocks should be 1024-bytes");
             blocks[i as usize][1] = block;
         }
+
+        // Fill each column forcing a large amount of memory to be allocated
+        for i in 0..self.parallelism {
+            for j in 2..column_count {
+                let (a, b) = self.block_indicies(i as usize, j as usize);
+                blocks[i as usize][j as usize] = todo!();
+            }
+        }
+
+        // Additional passes over the columns
+        for iterations in 2..self.iterations {
+            for i in 0..self.parallelism {
+                for j in 0..column_count {
+                    let (a, b) = self.block_indicies(i as usize, j as usize);
+                    if j == 0 {
+                        todo!()
+                    } else {
+                        todo!()
+                    }
+                }
+            }
+        }
+
+        // XOR together the final block of each column
+        let mut c = Argon2Block::default();
+        for i in 0..self.parallelism {
+            c ^= &blocks[i as usize][(column_count - 1) as usize];
+        }
+
+        // Hash the final value
         todo!()
     }
 
