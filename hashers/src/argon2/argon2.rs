@@ -260,7 +260,7 @@ impl ClassicHasher for Argon2 {
         let h0 = hasher.hash(&buffer);
 
         let block_count = self.memory.prev_multiple_of(&(4 * self.parallelism));
-        let column_count = block_count / self.parallelism;
+        let column_count = (block_count / self.parallelism) as usize;
 
         let mut blocks =
             vec![vec![Argon2Block::default(); block_count as usize]; self.parallelism as usize];
@@ -287,36 +287,44 @@ impl ClassicHasher for Argon2 {
             blocks[i as usize][1] = block;
         }
 
-        // Fill each column forcing a large amount of memory to be allocated
+        // Fill each lane forcing a large amount of memory to be allocated
         for i in 0..self.parallelism {
             for j in 2..column_count {
-                let (a, b) = self.block_indicies(i as usize, j as usize);
-                blocks[i as usize][j as usize] = todo!();
+                let i = i as usize;
+                let j = j as usize;
+                let (a, b) = self.block_indicies(i, j);
+                blocks[i][j] = compress(&blocks[i][j - 1], &blocks[a][b]);
             }
         }
 
-        // Additional passes over the columns
-        for iterations in 2..self.iterations {
+        // Additional passes over the lanes
+        for _iterations in 2..self.iterations {
             for i in 0..self.parallelism {
                 for j in 0..column_count {
-                    let (a, b) = self.block_indicies(i as usize, j as usize);
+                    let i = i as usize;
+                    let j = j as usize;
+                    let (a, b) = self.block_indicies(i, j);
                     if j == 0 {
-                        todo!()
+                        let c = compress(&blocks[i][column_count - 1], &blocks[a][b]);
+                        blocks[i][0] ^= &c;
                     } else {
-                        todo!()
+                        let c = compress(&blocks[i][j - 1], &blocks[a][b]);
+                        blocks[i][j] ^= &c;
                     }
                 }
             }
         }
 
-        // XOR together the final block of each column
+        // XOR together the final block of each lane
         let mut c = Argon2Block::default();
         for i in 0..self.parallelism {
-            c ^= &blocks[i as usize][(column_count - 1) as usize];
+            c ^= &blocks[i as usize][(column_count - 1)];
         }
+        let out_bytes: Vec<u8> = c.0.iter().flat_map(|x| x.to_be_bytes()).collect();
 
         // Hash the final value
-        todo!()
+        hasher.hash_len = self.tag_len as usize;
+        hasher.hash(&out_bytes)
     }
 
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
