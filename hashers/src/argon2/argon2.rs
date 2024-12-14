@@ -1,3 +1,8 @@
+// reference implementation
+// https://docs.rs/argon2/latest/src/argon2/block.rs.html
+// specs
+// https://github.com/P-H-C/phc-winner-argon2/blob/master/argon2-specs.pdf
+
 use std::{
     num::Wrapping,
     ops::{BitXor, BitXorAssign, Index, IndexMut},
@@ -11,7 +16,7 @@ use crate::{
     traits::ClassicHasher,
 };
 use num::{traits::ToBytes, Integer};
-use utils::byte_formatting::ByteFormat;
+use utils::{byte_formatting::ByteFormat, math_functions::incr_array_ctr};
 
 #[derive(Clone, Copy, Debug)]
 pub struct Block([u64; BLOCK_WORDS]);
@@ -104,8 +109,6 @@ impl BitXorAssign<&Block> for Block {
         *self = *self ^ rhs
     }
 }
-
-// https://docs.rs/argon2/latest/src/argon2/block.rs.html
 
 const TRUNC: u64 = u32::MAX as u64;
 
@@ -235,7 +238,33 @@ impl Argon2 {
         buffer
     }
 
-    // Exact order to indicies depends on mode
+    // Calculate an address block using the Argon2i method
+    fn argon2i_addr(
+        &self,
+        pass: u32,
+        lane: u32,
+        slice: u32,
+        memory_blocks: u32,
+        total_passes: u32,
+        ctr: &mut [u8; 968],
+    ) -> Block {
+        // The counter is incrementated before every call
+        incr_array_ctr(&mut ctr[0..968]);
+
+        let mut input = Vec::new();
+        input.extend(pass.to_be_bytes());
+        input.extend(lane.to_be_bytes());
+        input.extend(slice.to_be_bytes());
+        input.extend(memory_blocks.to_be_bytes());
+        input.extend(total_passes.to_be_bytes());
+        input.extend_from_slice(ctr);
+        let zero = Block::default();
+        let input_block = Block::try_from(input).expect("input block not constructed correctly");
+        // Compress the input block with the zero block twice
+        compress(&zero, &compress(&zero, &input_block))
+    }
+
+    // Exact order of indicies depends on mode
     fn block_indicies(&self, i: usize, j: usize) -> (usize, usize) {
         match self.mode {
             Mode::I => todo!(),

@@ -10,7 +10,7 @@ pub(crate) const MAX_SALT: usize = 0xffffffff;
 pub(crate) const MAX_KEY: usize = 0xffffffff;
 
 // Number of synchronization points between lanes per pass
-// TODO: wtf is this? find it in the standard or explain it
+// TODO: Is this S, the number of slices, in the spec?
 pub(crate) const SYNC_POINTS: usize = 4;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
