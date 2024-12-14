@@ -3,24 +3,38 @@ use std::{
     ops::{BitXor, BitXorAssign, Index, IndexMut},
 };
 
-use num::Integer;
+use super::consts::{Mode, BLOCK_WORDS, MIN_SALT};
+use crate::{
+    argon2::consts::{BLOCK_BYTES, MAX_KEY, MAX_PAR, MAX_PASS, MAX_SALT},
+    blake::Blake2b,
+    errors::HasherError,
+    traits::ClassicHasher,
+};
+use num::{traits::ToBytes, Integer};
 use utils::byte_formatting::ByteFormat;
 
-use crate::{blake::Blake2b, errors::HasherError, traits::ClassicHasher};
-
-const BLOCK_BYTES: usize = 1024;
-const BLOCK_WORDS: usize = BLOCK_BYTES / 8;
-
 #[derive(Clone, Copy, Debug)]
-pub struct Argon2Block([u64; BLOCK_WORDS]);
+pub struct Block([u64; BLOCK_WORDS]);
 
-impl Default for Argon2Block {
+impl Default for Block {
     fn default() -> Self {
         Self([0u64; BLOCK_WORDS])
     }
 }
 
-impl Index<usize> for Argon2Block {
+impl ToBytes for Block {
+    type Bytes = Vec<u8>;
+
+    fn to_be_bytes(&self) -> Self::Bytes {
+        self.0.iter().flat_map(|x| x.to_be_bytes()).collect()
+    }
+
+    fn to_le_bytes(&self) -> Self::Bytes {
+        self.0.iter().flat_map(|x| x.to_le_bytes()).collect()
+    }
+}
+
+impl Index<usize> for Block {
     type Output = u64;
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -28,19 +42,19 @@ impl Index<usize> for Argon2Block {
     }
 }
 
-impl IndexMut<usize> for Argon2Block {
+impl IndexMut<usize> for Block {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         self.0.index_mut(index)
     }
 }
 
-impl From<[u64; BLOCK_WORDS]> for Argon2Block {
+impl From<[u64; BLOCK_WORDS]> for Block {
     fn from(value: [u64; BLOCK_WORDS]) -> Self {
         Self(value)
     }
 }
 
-impl TryFrom<&[u8]> for Argon2Block {
+impl TryFrom<&[u8]> for Block {
     type Error = HasherError;
 
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
@@ -57,7 +71,7 @@ impl TryFrom<&[u8]> for Argon2Block {
     }
 }
 
-impl TryFrom<Vec<u8>> for Argon2Block {
+impl TryFrom<Vec<u8>> for Block {
     type Error = HasherError;
 
     fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
@@ -74,10 +88,10 @@ impl TryFrom<Vec<u8>> for Argon2Block {
     }
 }
 
-impl BitXor<&Argon2Block> for Argon2Block {
-    type Output = Argon2Block;
+impl BitXor<&Block> for Block {
+    type Output = Block;
 
-    fn bitxor(mut self, rhs: &Argon2Block) -> Self::Output {
+    fn bitxor(mut self, rhs: &Block) -> Self::Output {
         for (s, r) in self.0.iter_mut().zip(rhs.0.iter()) {
             *s ^= r;
         }
@@ -85,8 +99,8 @@ impl BitXor<&Argon2Block> for Argon2Block {
     }
 }
 
-impl BitXorAssign<&Argon2Block> for Argon2Block {
-    fn bitxor_assign(&mut self, rhs: &Argon2Block) {
+impl BitXorAssign<&Block> for Block {
+    fn bitxor_assign(&mut self, rhs: &Block) {
         *self = *self ^ rhs
     }
 }
@@ -129,7 +143,7 @@ macro_rules! permute {
     };
 }
 
-pub fn compress(rhs: &Argon2Block, lhs: &Argon2Block) -> Argon2Block {
+pub fn compress(rhs: &Block, lhs: &Block) -> Block {
     let r = *rhs ^ lhs;
     let mut q = r;
 
@@ -166,8 +180,6 @@ pub fn compress(rhs: &Argon2Block, lhs: &Argon2Block) -> Argon2Block {
     q ^ &r
 }
 
-const MAX_PAR: u32 = 1 << 24;
-
 #[derive(Debug, Clone)]
 pub struct Argon2 {
     input_format: ByteFormat,
@@ -180,7 +192,7 @@ pub struct Argon2 {
     memory: u32,      // memory requirement in kibibytes (1024 bytes)
     iterations: u32,  // number of iterations run
     version: u32,     // currently 0x13
-    mode: u32,        // 0 for Argon2d, 1 for Argon2i, 2 for Argon2id
+    mode: Mode,       // 0 for Argon2d, 1 for Argon2i, 2 for Argon2id
 }
 
 impl Default for Argon2 {
@@ -196,7 +208,7 @@ impl Default for Argon2 {
             memory: Default::default(),
             iterations: Default::default(),
             version: 0x13,
-            mode: 2, // default to Argon2id (recommended)
+            mode: Mode::ID, // default to Argon2id (recommended)
         }
     }
 }
@@ -210,7 +222,7 @@ impl Argon2 {
         buffer.extend(self.memory.to_le_bytes());
         buffer.extend(self.iterations.to_le_bytes());
         buffer.extend(self.version.to_le_bytes());
-        buffer.extend(self.mode.to_le_bytes());
+        buffer.extend(self.mode.to_u32().to_le_bytes());
         buffer.extend((password.len() as u32).to_le_bytes());
         buffer.extend_from_slice(password);
         buffer.extend((self.salt.len() as u32).to_le_bytes());
@@ -224,15 +236,11 @@ impl Argon2 {
     }
 
     // Exact order to indicies depends on mode
-    fn block_indicies(&self, a: usize, b: usize) -> (usize, usize) {
-        if self.mode == 0 {
-            todo!()
-        } else if self.mode == 1 {
-            todo!()
-        } else if self.mode == 2 {
-            todo!()
-        } else {
-            panic!("invalid mode choice")
+    fn block_indicies(&self, i: usize, j: usize) -> (usize, usize) {
+        match self.mode {
+            Mode::I => todo!(),
+            Mode::D => todo!(),
+            Mode::ID => todo!(),
         }
     }
 }
@@ -244,13 +252,32 @@ impl ClassicHasher for Argon2 {
             self.parallelism < MAX_PAR,
             "parallelism must be less than 2^24"
         );
-        assert!(self.iterations > 0, "iterations cannot be 0");
-        assert!(self.tag_len >= 4, "tag_len must be at least 4 bytes");
         assert!(
             self.memory >= 8 * self.parallelism,
             "memory must be at least 8 times parallelism"
         );
-        assert!(self.salt.len() >= 8, "salt length must be at least 8 bytes");
+
+        assert!(self.iterations > 0, "iterations cannot be 0");
+        assert!(self.tag_len >= 4, "tag_len must be at least 4 bytes");
+
+        assert!(
+            self.salt.len() >= MIN_SALT,
+            "salt length must be at least 8 bytes"
+        );
+        assert!(
+            self.salt.len() <= MAX_SALT,
+            "salt length cannot be more than 2^32 bytes"
+        );
+
+        assert!(
+            self.key.len() <= MAX_KEY,
+            "key length cannot be more than 2^32 bytes"
+        );
+
+        assert!(
+            bytes.len() <= MAX_PASS,
+            "password length cannot be more than 2^32 bytes"
+        );
 
         let mut hasher = Blake2b::default();
         hasher.hash_len = 64;
@@ -263,7 +290,7 @@ impl ClassicHasher for Argon2 {
         let column_count = (block_count / self.parallelism) as usize;
 
         let mut blocks =
-            vec![vec![Argon2Block::default(); block_count as usize]; self.parallelism as usize];
+            vec![vec![Block::default(); block_count as usize]; self.parallelism as usize];
 
         // Initialize the columns with the first two blocks of each
         hasher.hash_len = BLOCK_BYTES;
@@ -292,8 +319,8 @@ impl ClassicHasher for Argon2 {
             for j in 2..column_count {
                 let i = i as usize;
                 let j = j as usize;
-                let (a, b) = self.block_indicies(i, j);
-                blocks[i][j] = compress(&blocks[i][j - 1], &blocks[a][b]);
+                let (ipr, jpr) = self.block_indicies(i, j);
+                blocks[i][j] = compress(&blocks[i][j - 1], &blocks[ipr][jpr]);
             }
         }
 
@@ -303,12 +330,12 @@ impl ClassicHasher for Argon2 {
                 for j in 0..column_count {
                     let i = i as usize;
                     let j = j as usize;
-                    let (a, b) = self.block_indicies(i, j);
+                    let (ipr, jpr) = self.block_indicies(i, j);
                     if j == 0 {
-                        let c = compress(&blocks[i][column_count - 1], &blocks[a][b]);
+                        let c = compress(&blocks[i][column_count - 1], &blocks[ipr][jpr]);
                         blocks[i][0] ^= &c;
                     } else {
-                        let c = compress(&blocks[i][j - 1], &blocks[a][b]);
+                        let c = compress(&blocks[i][j - 1], &blocks[ipr][jpr]);
                         blocks[i][j] ^= &c;
                     }
                 }
@@ -316,15 +343,14 @@ impl ClassicHasher for Argon2 {
         }
 
         // XOR together the final block of each lane
-        let mut c = Argon2Block::default();
+        let mut c = Block::default();
         for i in 0..self.parallelism {
-            c ^= &blocks[i as usize][(column_count - 1)];
+            c ^= &blocks[i as usize][column_count - 1];
         }
-        let out_bytes: Vec<u8> = c.0.iter().flat_map(|x| x.to_be_bytes()).collect();
 
         // Hash the final value
         hasher.hash_len = self.tag_len as usize;
-        hasher.hash(&out_bytes)
+        hasher.hash(&c.to_be_bytes())
     }
 
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
@@ -334,28 +360,45 @@ impl ClassicHasher for Argon2 {
         if self.parallelism > MAX_PAR {
             return Err(HasherError::general("parallelism must be less than 2^24"));
         }
-        if self.salt.len() == 0 {
-            return Err(HasherError::general("salt length must be at least 8 bytes"));
+        if self.memory < 8 * self.parallelism {
+            return Err(HasherError::general(
+                "memory must be at least 8 times parallelism",
+            ));
         }
+
         if self.iterations == 0 {
             return Err(HasherError::general("iterations cannot be 0"));
         }
         if self.tag_len < 4 {
             return Err(HasherError::general("tag_len must be at least 4 bytes"));
         }
-        if self.memory < 8 * self.parallelism {
+
+        if self.salt.len() < MIN_SALT {
+            return Err(HasherError::general("salt length must be at least 8 bytes"));
+        }
+        if self.salt.len() > MAX_SALT {
             return Err(HasherError::general(
-                "memory must be at least 8 times parallelism",
+                "salt length cannot be more than 2^32 bytes",
             ));
         }
-        if self.salt.len() < 8 {
-            return Err(HasherError::general("salt length must be at least 8 bytes"));
+
+        if self.key.len() > MAX_KEY {
+            return Err(HasherError::general(
+                "key length cannot be more than 2^32 bytes",
+            ));
         }
 
         let mut bytes = self
             .input_format
             .text_to_bytes(text)
             .map_err(|_| HasherError::general("byte format error"))?;
+
+        if bytes.len() > MAX_KEY {
+            return Err(HasherError::general(
+                "password length cannot be more than 2^32 bytes",
+            ));
+        }
+
         let out = self.hash(&mut bytes);
         Ok(self.output_format.byte_slice_to_text(&out))
     }
