@@ -10,12 +10,12 @@ use std::{
 
 use super::consts::{Mode, BLOCK_WORDS, MIN_SALT};
 use crate::{
-    argon2::consts::{BLOCK_BYTES, MAX_KEY, MAX_PAR, MAX_PASS, MAX_SALT},
+    argon2::consts::{BLOCK_BYTES, MAX_KEY, MAX_PAR, MAX_PASS, MAX_SALT, SYNC_POINTS},
     blake::Blake2b,
     errors::HasherError,
     traits::ClassicHasher,
 };
-use num::{traits::ToBytes, Integer};
+use num::traits::ToBytes;
 use utils::{byte_formatting::ByteFormat, math_functions::incr_array_ctr_be};
 
 #[derive(Clone, Copy, Debug)]
@@ -183,6 +183,33 @@ pub fn compress(rhs: &Block, lhs: &Block) -> Block {
     q ^ &r
 }
 
+// Calculate an address block using the Argon2i method
+fn argon2i_addr(
+    pass: u64,
+    lane: u64,
+    slice: u64,
+    memory_blocks: u64,
+    total_passes: u64,
+    mode: u64,
+    ctr: &mut [u8; 968],
+) -> Block {
+    // The counter is incrementated before every call
+    incr_array_ctr_be(&mut ctr[0..968]);
+
+    let mut input = Vec::new();
+    input.extend(pass.to_le_bytes());
+    input.extend(lane.to_le_bytes());
+    input.extend(slice.to_le_bytes());
+    input.extend(memory_blocks.to_le_bytes());
+    input.extend(total_passes.to_le_bytes());
+    input.extend(mode.to_le_bytes());
+    input.extend_from_slice(ctr);
+    let zero = Block::default();
+    let input_block = Block::try_from(input).expect("input block not constructed correctly");
+    // Compress the input block with the zero block twice
+    compress(&zero, &compress(&zero, &input_block))
+}
+
 #[derive(Debug, Clone)]
 pub struct Argon2 {
     input_format: ByteFormat,
@@ -190,12 +217,12 @@ pub struct Argon2 {
     salt: Vec<u8>,
     key: Vec<u8>,
     associated_data: Vec<u8>,
-    parallelism: u32, // this will always be 1 unless I figure out something clever
-    tag_len: u32,     // tag length in bytes
-    memory: u32,      // memory requirement in kibibytes (1024 bytes)
-    iterations: u32,  // number of iterations run
-    version: u32,     // currently 0x13
-    mode: Mode,       // 0 for Argon2d, 1 for Argon2i, 2 for Argon2id
+    tag_len: u32,    // tag length in bytes
+    par_cost: u32,   // this will always be 1 unless I figure out something clever
+    mem_cost: u32,   // memory requirement in kibibytes (1024 bytes)
+    iterations: u32, // number of iterations run
+    version: u32,    // currently 0x13
+    mode: Mode,      // 0 for Argon2d, 1 for Argon2i, 2 for Argon2id
 }
 
 impl Default for Argon2 {
@@ -206,9 +233,9 @@ impl Default for Argon2 {
             salt: Default::default(),
             key: Default::default(),
             associated_data: Default::default(),
-            parallelism: Default::default(),
             tag_len: Default::default(),
-            memory: Default::default(),
+            par_cost: Default::default(),
+            mem_cost: Default::default(),
             iterations: Default::default(),
             version: 0x13,
             mode: Mode::ID, // default to Argon2id (recommended)
@@ -220,9 +247,9 @@ impl Argon2 {
     pub fn buffer(&self, password: &[u8]) -> Vec<u8> {
         let mut buffer = Vec::new();
 
-        buffer.extend(self.parallelism.to_le_bytes());
+        buffer.extend(self.par_cost.to_le_bytes());
         buffer.extend(self.tag_len.to_le_bytes());
-        buffer.extend(self.memory.to_le_bytes());
+        buffer.extend(self.mem_cost.to_le_bytes());
         buffer.extend(self.iterations.to_le_bytes());
         buffer.extend(self.version.to_le_bytes());
         buffer.extend(self.mode.to_u32().to_le_bytes());
@@ -238,51 +265,40 @@ impl Argon2 {
         buffer
     }
 
-    // Calculate an address block using the Argon2i method
-    fn argon2i_addr(
-        &self,
-        pass: u32,
-        lane: u32,
-        slice: u32,
-        memory_blocks: u32,
-        total_passes: u32,
-        ctr: &mut [u8; 968],
-    ) -> Block {
-        // The counter is incrementated before every call
-        incr_array_ctr_be(&mut ctr[0..968]);
-
-        let mut input = Vec::new();
-        input.extend(pass.to_le_bytes());
-        input.extend(lane.to_le_bytes());
-        input.extend(slice.to_le_bytes());
-        input.extend(memory_blocks.to_le_bytes());
-        input.extend(total_passes.to_le_bytes());
-        input.extend_from_slice(ctr);
-        let zero = Block::default();
-        let input_block = Block::try_from(input).expect("input block not constructed correctly");
-        // Compress the input block with the zero block twice
-        compress(&zero, &compress(&zero, &input_block))
+    fn num_lanes(&self) -> usize {
+        self.par_cost as usize
     }
 
-    // Exact order of indicies depends on mode
-    fn block_indicies(&self, i: usize, j: usize) -> (usize, usize) {
-        match self.mode {
-            Mode::I => todo!(),
-            Mode::D => todo!(),
-            Mode::ID => todo!(),
-        }
+    fn lane_length(&self) -> usize {
+        self.segment_length() * SYNC_POINTS
+    }
+
+    fn segment_length(&self) -> usize {
+        let m_cost = self.mem_cost as usize;
+
+        let memory_blocks = if m_cost < 2 * SYNC_POINTS * self.num_lanes() {
+            2 * SYNC_POINTS * self.num_lanes()
+        } else {
+            m_cost
+        };
+
+        memory_blocks / (self.num_lanes() * SYNC_POINTS)
+    }
+
+    fn num_blocks(&self) -> usize {
+        self.segment_length() * self.num_lanes() * SYNC_POINTS
     }
 }
 
 impl ClassicHasher for Argon2 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        assert!(self.parallelism > 0, "parallelism cannot be 0");
+        assert!(self.par_cost > 0, "parallelism cannot be 0");
         assert!(
-            self.parallelism < MAX_PAR,
+            self.par_cost < MAX_PAR,
             "parallelism must be less than 2^24"
         );
         assert!(
-            self.memory >= 8 * self.parallelism,
+            self.mem_cost >= 8 * self.par_cost,
             "memory must be at least 8 times parallelism"
         );
 
@@ -315,64 +331,94 @@ impl ClassicHasher for Argon2 {
         // Initialization block
         let h0 = hasher.hash(&buffer);
 
-        let block_count = self.memory.prev_multiple_of(&(4 * self.parallelism));
-        let column_count = (block_count / self.parallelism) as usize;
+        let num_blocks = self.num_blocks();
+        let segment_length = self.segment_length();
+        let iterations = self.iterations as usize;
+        let lane_length = self.lane_length();
+        let num_lanes = self.num_lanes();
 
-        let mut blocks =
-            vec![vec![Block::default(); block_count as usize]; self.parallelism as usize];
+        let mut mem_blocks = vec![Block::default(); num_blocks];
 
-        // Initialize the columns with the first two blocks of each
+        // Initialize the first two block of each lane
         hasher.hash_len = BLOCK_BYTES;
-        for i in 0..self.parallelism {
+        for lane in (0..num_blocks).step_by(lane_length) {
+            // G(h|0|lane)
             let mut h = h0.clone();
             h.extend(0_u32.to_le_bytes());
-            h.extend(i.to_le_bytes());
+            h.extend(lane.to_le_bytes());
             let block = hasher
                 .hash(&h)
                 .try_into()
                 .expect("blocks should be 1024-bytes");
-            blocks[i as usize][0] = block;
+            mem_blocks[lane] = block;
 
+            // G(h|1|lane)
             let mut h = h0.clone();
             h.extend(1_u32.to_le_bytes());
-            h.extend(i.to_le_bytes());
+            h.extend(lane.to_le_bytes());
             let block = hasher
                 .hash(&h)
                 .try_into()
                 .expect("blocks should be 1024-bytes");
-            blocks[i as usize][1] = block;
+            mem_blocks[lane + 1] = block;
         }
 
-        let mut pass: u32 = 0;
-        let mut lane: u32 = 0;
-        let mut slice: u32 = 0;
-        let mut memory_blocks: u32 = 0;
-        let mut total_passes: u32 = 0;
         let mut ctr = [0u8; 968];
-
-        // Fill each lane forcing a large amount of memory to be allocated
-        for i in 0..self.parallelism {
-            for j in 2..column_count {
-                let i = i as usize;
-                let j = j as usize;
-                let (ipr, jpr) = self.block_indicies(i, j);
-                blocks[i][j] = compress(&blocks[i][j - 1], &blocks[ipr][jpr]);
-            }
-        }
-
         // Additional passes over the lanes
-        for _iterations in 2..self.iterations {
-            for i in 0..self.parallelism {
-                for j in 0..column_count {
-                    let i = i as usize;
-                    let j = j as usize;
-                    let (ipr, jpr) = self.block_indicies(i, j);
-                    if j == 0 {
-                        let c = compress(&blocks[i][column_count - 1], &blocks[ipr][jpr]);
-                        blocks[i][0] ^= &c;
+        for pass in 2..iterations {
+            for slice in 0..SYNC_POINTS {
+                // Determine if addressing in data dependent on independent for this slice
+                let data_independent_addressing = self.mode == Mode::I
+                    || (self.mode == Mode::ID && pass == 0 && slice < SYNC_POINTS / 2);
+                let mut addr_block = Block::default();
+
+                for lane in 0..(self.par_cost as usize) {
+                    let first_block = if pass == 0 && slice == 0 {
+                        if data_independent_addressing {
+                            addr_block = argon2i_addr(
+                                pass as u64,
+                                lane as u64,
+                                slice as u64,
+                                num_blocks as u64,
+                                self.iterations as u64,
+                                self.mode.to_u64() as u64,
+                                &mut ctr,
+                            );
+                        }
+                        2
                     } else {
-                        let c = compress(&blocks[i][j - 1], &blocks[ipr][jpr]);
-                        blocks[i][j] ^= &c;
+                        0
+                    };
+
+                    let mut cur_idx = lane * lane_length + slice * segment_length + first_block;
+                    let mut prev_index = if slice == 0 && first_block == 0 {
+                        // Last block in current lane
+                        cur_idx + lane_length - 1
+                    } else {
+                        // Previous block
+                        cur_idx - 1
+                    };
+
+                    for block in first_block..segment_length {
+                        let r = if data_independent_addressing {
+                            let addr_index = block % 128;
+
+                            if addr_index == 0 {
+                                addr_block = argon2i_addr(
+                                    pass as u64,
+                                    lane as u64,
+                                    slice as u64,
+                                    num_blocks as u64,
+                                    self.iterations as u64,
+                                    self.mode.to_u64() as u64,
+                                    &mut ctr,
+                                );
+                            }
+
+                            addr_block[addr_index]
+                        } else {
+                            mem_blocks[prev_index][0]
+                        };
                     }
                 }
             }
@@ -380,8 +426,8 @@ impl ClassicHasher for Argon2 {
 
         // XOR together the final block of each lane
         let mut c = Block::default();
-        for i in 0..self.parallelism {
-            c ^= &blocks[i as usize][column_count - 1];
+        for lane in (0..num_blocks).step_by(lane_length) {
+            c ^= &mem_blocks[lane + lane_length - 1];
         }
 
         // Hash the final value
@@ -390,13 +436,13 @@ impl ClassicHasher for Argon2 {
     }
 
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        if self.parallelism == 0 {
+        if self.par_cost == 0 {
             return Err(HasherError::general("parallelism cannot be 0"));
         }
-        if self.parallelism > MAX_PAR {
+        if self.par_cost > MAX_PAR {
             return Err(HasherError::general("parallelism must be less than 2^24"));
         }
-        if self.memory < 8 * self.parallelism {
+        if self.mem_cost < 8 * self.par_cost {
             return Err(HasherError::general(
                 "memory must be at least 8 times parallelism",
             ));
