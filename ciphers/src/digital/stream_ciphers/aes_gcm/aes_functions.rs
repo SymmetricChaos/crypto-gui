@@ -238,7 +238,7 @@ macro_rules! aes_gcm_methods {
                     utils::byte_formatting::xor_into_bytes(ptext, &mask);
 
                     // Step the counter
-                    utils::math_functions::incr_array_ctr(&mut ctr);
+                    utils::math_functions::incr_array_ctr_be(&mut ctr);
                 }
             }
 

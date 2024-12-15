@@ -16,7 +16,7 @@ use crate::{
     traits::ClassicHasher,
 };
 use num::{traits::ToBytes, Integer};
-use utils::{byte_formatting::ByteFormat, math_functions::incr_array_ctr};
+use utils::{byte_formatting::ByteFormat, math_functions::incr_array_ctr_be};
 
 #[derive(Clone, Copy, Debug)]
 pub struct Block([u64; BLOCK_WORDS]);
@@ -249,14 +249,14 @@ impl Argon2 {
         ctr: &mut [u8; 968],
     ) -> Block {
         // The counter is incrementated before every call
-        incr_array_ctr(&mut ctr[0..968]);
+        incr_array_ctr_be(&mut ctr[0..968]);
 
         let mut input = Vec::new();
-        input.extend(pass.to_be_bytes());
-        input.extend(lane.to_be_bytes());
-        input.extend(slice.to_be_bytes());
-        input.extend(memory_blocks.to_be_bytes());
-        input.extend(total_passes.to_be_bytes());
+        input.extend(pass.to_le_bytes());
+        input.extend(lane.to_le_bytes());
+        input.extend(slice.to_le_bytes());
+        input.extend(memory_blocks.to_le_bytes());
+        input.extend(total_passes.to_le_bytes());
         input.extend_from_slice(ctr);
         let zero = Block::default();
         let input_block = Block::try_from(input).expect("input block not constructed correctly");
@@ -342,6 +342,13 @@ impl ClassicHasher for Argon2 {
                 .expect("blocks should be 1024-bytes");
             blocks[i as usize][1] = block;
         }
+
+        let mut pass: u32 = 0;
+        let mut lane: u32 = 0;
+        let mut slice: u32 = 0;
+        let mut memory_blocks: u32 = 0;
+        let mut total_passes: u32 = 0;
+        let mut ctr = [0u8; 968];
 
         // Fill each lane forcing a large amount of memory to be allocated
         for i in 0..self.parallelism {

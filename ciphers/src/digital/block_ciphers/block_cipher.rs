@@ -3,7 +3,7 @@ use std::fmt::Display;
 use strum::EnumIter;
 use utils::{
     byte_formatting::{overwrite_bytes, xor_into_bytes},
-    math_functions::incr_array_ctr,
+    math_functions::incr_array_ctr_be,
     padding::{
         ansi923_padding, bit_padding, none_padding, pkcs5_padding, strip_ansi923_padding,
         strip_bit_padding, strip_none_padding, strip_pkcs5_padding,
@@ -82,7 +82,7 @@ pub trait BlockCipher<const N: usize> {
             xor_into_bytes(ptext, &mask);
 
             // Step the counter
-            incr_array_ctr(&mut ctr);
+            incr_array_ctr_be(&mut ctr);
         }
     }
 

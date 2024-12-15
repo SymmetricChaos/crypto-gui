@@ -252,8 +252,23 @@ pub fn modular_pow(base: u32, pow: u32, modulus: u32) -> u32 {
     out as u32
 }
 
-pub fn incr_array_ctr(ctr: &mut [u8]) {
+pub fn incr_array_ctr_be(ctr: &mut [u8]) {
     for byte in ctr.iter_mut().rev() {
+        match byte.checked_add(1) {
+            Some(n) => {
+                *byte = n;
+                return ();
+            }
+
+            None => {
+                *byte = 0;
+            }
+        }
+    }
+}
+
+pub fn incr_array_ctr_le(ctr: &mut [u8]) {
+    for byte in ctr.iter_mut() {
         match byte.checked_add(1) {
             Some(n) => {
                 *byte = n;
@@ -283,9 +298,15 @@ mod math_tests {
     #[test]
     fn test_incr_array_ctr() {
         let mut ctr = [0x00, 0x00, 0xfe, 0xff, 0xff];
-        incr_array_ctr(&mut ctr);
+        incr_array_ctr_be(&mut ctr);
         assert_eq!([0x00, 0x00, 0xff, 0x00, 0x00], ctr);
-        incr_array_ctr(&mut ctr);
+        incr_array_ctr_be(&mut ctr);
         assert_eq!([0x00, 0x00, 0xff, 0x00, 0x01], ctr);
+
+        let mut ctr = [0xff, 0xff, 0xfe, 0x00, 0x00];
+        incr_array_ctr_le(&mut ctr);
+        assert_eq!([0x00, 0x00, 0xff, 0x00, 0x00], ctr);
+        incr_array_ctr_le(&mut ctr);
+        assert_eq!([0x01, 0x00, 0xff, 0x00, 0x00], ctr);
     }
 }
