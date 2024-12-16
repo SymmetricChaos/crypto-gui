@@ -210,17 +210,17 @@ fn argon2i_addr(
 
 #[derive(Debug, Clone)]
 pub struct Argon2 {
-    input_format: ByteFormat,
-    output_format: ByteFormat,
+    pub input_format: ByteFormat,
+    pub output_format: ByteFormat,
     salt: Vec<u8>,
     key: Vec<u8>,
     associated_data: Vec<u8>,
-    tag_len: u32,     // tag length in bytes
-    par_cost: u32,    // this will always be 1 unless I figure out something clever
-    mem_cost: u32,    // memory requirement in kibibytes (1024 bytes)
-    iterations: u32,  // number of iterations run
-    version: Version, // currently 0x13
-    mode: Mode,       // 0 for Argon2d, 1 for Argon2i, 2 for Argon2id
+    tag_len: u32,         // tag length in bytes
+    par_cost: u32,        // this will always be 1 unless I figure out something clever
+    mem_cost: u32,        // memory requirement in kibibytes (1024 bytes)
+    iterations: u32,      // number of iterations run
+    pub version: Version, // currently 0x13
+    pub mode: Mode,       // 0 for Argon2d, 1 for Argon2i, 2 for Argon2id
 }
 
 impl Default for Argon2 {
@@ -228,13 +228,13 @@ impl Default for Argon2 {
         Self {
             input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
-            salt: Default::default(),
+            salt: vec![0, 0, 0, 0],
             key: Default::default(),
             associated_data: Default::default(),
-            tag_len: Default::default(),
-            par_cost: Default::default(),
-            mem_cost: Default::default(),
-            iterations: Default::default(),
+            tag_len: 4,            // minimum
+            par_cost: 1,           // minimum
+            mem_cost: 8,           // minimum
+            iterations: 1,         // minimum
             version: Version::V13, // current corrected version
             mode: Mode::ID,        // default to Argon2id (recommended)
         }
@@ -261,6 +261,50 @@ impl Argon2 {
         buffer.extend_from_slice(&self.associated_data);
 
         buffer
+    }
+
+    pub fn with_salt(mut self, salt: &[u8]) -> Self {
+        assert!(
+            salt.len() >= MIN_SALT,
+            "salt length must be at least 8 bytes"
+        );
+        assert!(
+            salt.len() <= MAX_SALT,
+            "salt length cannot be more than 2^32 bytes"
+        );
+        self.salt = salt.to_vec();
+        self
+    }
+
+    pub fn with_key(mut self, key: &[u8]) -> Self {
+        assert!(
+            key.len() <= MAX_KEY,
+            "key length cannot be more than 2^32 bytes"
+        );
+        self.key = key.to_vec();
+        self
+    }
+
+    pub fn with_iterations(mut self, iterations: u32) -> Self {
+        assert!(iterations == 0, "iterations cannot be 0");
+        self.iterations = iterations;
+        self
+    }
+
+    pub fn with_par_cost(mut self, par_cost: u32) -> Self {
+        assert!(self.par_cost > 0, "parallelism cannot be 0");
+        assert!(
+            self.par_cost < MAX_PAR,
+            "parallelism must be less than 2^24"
+        );
+        self.par_cost = par_cost;
+        self.mem_cost = std::cmp::max(self.mem_cost, 8 * self.par_cost); // increase mem_cost to the minimum allowed value if required
+        self
+    }
+
+    pub fn with_mem_cost(mut self, mem_cost: u32) -> Self {
+        self.mem_cost = std::cmp::max(mem_cost, 8 * self.par_cost);
+        self
     }
 
     fn num_lanes(&self) -> usize {
@@ -290,32 +334,7 @@ impl Argon2 {
 
 impl ClassicHasher for Argon2 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        assert!(self.par_cost > 0, "parallelism cannot be 0");
-        assert!(
-            self.par_cost < MAX_PAR,
-            "parallelism must be less than 2^24"
-        );
-        assert!(
-            self.mem_cost >= 8 * self.par_cost,
-            "memory must be at least 8 times parallelism"
-        );
-
-        assert!(self.iterations > 0, "iterations cannot be 0");
         assert!(self.tag_len >= 4, "tag_len must be at least 4 bytes");
-
-        assert!(
-            self.salt.len() >= MIN_SALT,
-            "salt length must be at least 8 bytes"
-        );
-        assert!(
-            self.salt.len() <= MAX_SALT,
-            "salt length cannot be more than 2^32 bytes"
-        );
-
-        assert!(
-            self.key.len() <= MAX_KEY,
-            "key length cannot be more than 2^32 bytes"
-        );
 
         assert!(
             bytes.len() <= MAX_PASS,
@@ -497,38 +516,14 @@ impl ClassicHasher for Argon2 {
     }
 
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        if self.par_cost == 0 {
-            return Err(HasherError::general("parallelism cannot be 0"));
-        }
-        if self.par_cost > MAX_PAR {
-            return Err(HasherError::general("parallelism must be less than 2^24"));
-        }
         if self.mem_cost < 8 * self.par_cost {
             return Err(HasherError::general(
                 "memory must be at least 8 times parallelism",
             ));
         }
 
-        if self.iterations == 0 {
-            return Err(HasherError::general("iterations cannot be 0"));
-        }
         if self.tag_len < 4 {
             return Err(HasherError::general("tag_len must be at least 4 bytes"));
-        }
-
-        if self.salt.len() < MIN_SALT {
-            return Err(HasherError::general("salt length must be at least 8 bytes"));
-        }
-        if self.salt.len() > MAX_SALT {
-            return Err(HasherError::general(
-                "salt length cannot be more than 2^32 bytes",
-            ));
-        }
-
-        if self.key.len() > MAX_KEY {
-            return Err(HasherError::general(
-                "key length cannot be more than 2^32 bytes",
-            ));
         }
 
         let mut bytes = self
@@ -536,7 +531,7 @@ impl ClassicHasher for Argon2 {
             .text_to_bytes(text)
             .map_err(|_| HasherError::general("byte format error"))?;
 
-        if bytes.len() > MAX_KEY {
+        if bytes.len() > MAX_PASS {
             return Err(HasherError::general(
                 "password length cannot be more than 2^32 bytes",
             ));
@@ -546,3 +541,5 @@ impl ClassicHasher for Argon2 {
         Ok(self.output_format.byte_slice_to_text(&out))
     }
 }
+
+crate::basic_hash_tests!(test1, Argon2::default(), "", "");
