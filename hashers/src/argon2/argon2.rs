@@ -8,13 +8,11 @@ use std::{
     ops::{BitXor, BitXorAssign, Index, IndexMut},
 };
 
-use super::consts::{Mode, BLOCK_WORDS, MIN_SALT};
-use crate::{
-    argon2::consts::{BLOCK_BYTES, MAX_KEY, MAX_PAR, MAX_PASS, MAX_SALT, SYNC_POINTS},
-    blake::Blake2b,
-    errors::HasherError,
-    traits::ClassicHasher,
+use super::consts::{
+    Mode, Version, BLOCK_BYTES, BLOCK_WORDS, MAX_KEY, MAX_PAR, MAX_PASS, MAX_SALT, MIN_SALT,
+    SYNC_POINTS,
 };
+use crate::{blake::Blake2b, errors::HasherError, traits::ClassicHasher};
 use num::traits::ToBytes;
 use utils::{byte_formatting::ByteFormat, math_functions::incr_array_ctr_be};
 
@@ -217,12 +215,12 @@ pub struct Argon2 {
     salt: Vec<u8>,
     key: Vec<u8>,
     associated_data: Vec<u8>,
-    tag_len: u32,    // tag length in bytes
-    par_cost: u32,   // this will always be 1 unless I figure out something clever
-    mem_cost: u32,   // memory requirement in kibibytes (1024 bytes)
-    iterations: u32, // number of iterations run
-    version: u32,    // currently 0x13
-    mode: Mode,      // 0 for Argon2d, 1 for Argon2i, 2 for Argon2id
+    tag_len: u32,     // tag length in bytes
+    par_cost: u32,    // this will always be 1 unless I figure out something clever
+    mem_cost: u32,    // memory requirement in kibibytes (1024 bytes)
+    iterations: u32,  // number of iterations run
+    version: Version, // currently 0x13
+    mode: Mode,       // 0 for Argon2d, 1 for Argon2i, 2 for Argon2id
 }
 
 impl Default for Argon2 {
@@ -237,8 +235,8 @@ impl Default for Argon2 {
             par_cost: Default::default(),
             mem_cost: Default::default(),
             iterations: Default::default(),
-            version: 0x13,
-            mode: Mode::ID, // default to Argon2id (recommended)
+            version: Version::V13, // current corrected version
+            mode: Mode::ID,        // default to Argon2id (recommended)
         }
     }
 }
@@ -251,7 +249,7 @@ impl Argon2 {
         buffer.extend(self.tag_len.to_le_bytes());
         buffer.extend(self.mem_cost.to_le_bytes());
         buffer.extend(self.iterations.to_le_bytes());
-        buffer.extend(self.version.to_le_bytes());
+        buffer.extend(self.version.to_u32().to_le_bytes());
         buffer.extend(self.mode.to_u32().to_le_bytes());
         buffer.extend((password.len() as u32).to_le_bytes());
         buffer.extend_from_slice(password);
@@ -331,11 +329,11 @@ impl ClassicHasher for Argon2 {
         // Initialization block
         let h0 = hasher.hash(&buffer);
 
-        let num_blocks = self.num_blocks();
-        let segment_length = self.segment_length();
-        let iterations = self.iterations as usize;
-        let lane_length = self.lane_length();
-        let num_lanes = self.num_lanes();
+        let num_blocks = self.num_blocks(); // total number of blocks in the memory grid
+        let num_lanes = self.num_lanes(); // number of "rows" in the memory grid (there are always four "columns"), each lane can be computed independently
+        let lane_length = self.lane_length(); // the length of each "row" of the memory grid
+        let segment_length = self.segment_length(); // number of blocks in each cell of the memory grid
+        let iterations = self.iterations as usize; // number of passes over the blocks
 
         let mut mem_blocks = vec![Block::default(); num_blocks];
 
@@ -370,9 +368,12 @@ impl ClassicHasher for Argon2 {
                 // Determine if addressing in data dependent on independent for this slice
                 let data_independent_addressing = self.mode == Mode::I
                     || (self.mode == Mode::ID && pass == 0 && slice < SYNC_POINTS / 2);
+
+                // For data dependent addressing this is simply ignored
                 let mut addr_block = Block::default();
 
                 for lane in 0..(self.par_cost as usize) {
+                    // for the first pass on each slice the address block is reset for Mode::I and the first two blocks are skipped
                     let first_block = if pass == 0 && slice == 0 {
                         if data_independent_addressing {
                             addr_block = argon2i_addr(
@@ -391,7 +392,7 @@ impl ClassicHasher for Argon2 {
                     };
 
                     let mut cur_idx = lane * lane_length + slice * segment_length + first_block;
-                    let mut prev_index = if slice == 0 && first_block == 0 {
+                    let mut prev_idx = if slice == 0 && first_block == 0 {
                         // Last block in current lane
                         cur_idx + lane_length - 1
                     } else {
@@ -403,6 +404,7 @@ impl ClassicHasher for Argon2 {
                         let r = if data_independent_addressing {
                             let addr_index = block % 128;
 
+                            // If the address index rolls over create a new block
                             if addr_index == 0 {
                                 addr_block = argon2i_addr(
                                     pass as u64,
@@ -417,8 +419,67 @@ impl ClassicHasher for Argon2 {
 
                             addr_block[addr_index]
                         } else {
-                            mem_blocks[prev_index][0]
+                            mem_blocks[prev_idx][0]
                         };
+
+                        let ref_lane = if pass == 0 && slice == 0 {
+                            // Cannot reference other lanes yet
+                            lane
+                        } else {
+                            (r >> 32) as usize % num_lanes
+                        };
+
+                        // Determine the number of blocks that can be used
+                        let reference_area_size = if pass == 0 {
+                            // First pass
+                            if slice == 0 {
+                                // First slice
+                                block - 1 // all but the previous
+                            } else if ref_lane == lane {
+                                // The same lane => add current segment
+                                slice * segment_length + block - 1
+                            } else {
+                                slice * segment_length - if block == 0 { 1 } else { 0 }
+                            }
+                        } else {
+                            // Second pass
+                            if ref_lane == lane {
+                                lane_length - segment_length + block - 1
+                            } else {
+                                lane_length - segment_length - if block == 0 { 1 } else { 0 }
+                            }
+                        };
+
+                        // 1.2.4. Mapping r to 0..<reference_area_size-1> and produce
+                        // relative position
+                        let mut map = r & 0xFFFFFFFF;
+                        map = (map * map) >> 32;
+                        let relative_position = reference_area_size
+                            - 1
+                            - ((reference_area_size as u64 * map) >> 32) as usize;
+
+                        // 1.2.5 Computing starting position
+                        let start_position = if pass != 0 && slice != SYNC_POINTS - 1 {
+                            (slice + 1) * segment_length
+                        } else {
+                            0
+                        };
+
+                        let lane_idx = (start_position + relative_position) % lane_length;
+                        let ref_idx = ref_lane * lane_length + lane_idx;
+
+                        let result = compress(&mem_blocks[prev_idx], &mem_blocks[ref_idx]);
+
+                        // The original 1.0 version simply overwrites the block
+                        // The 1.3 version XORs the result into the block
+                        if self.version == Version::V10 || pass == 0 {
+                            mem_blocks[cur_idx] = result;
+                        } else {
+                            mem_blocks[cur_idx] ^= &result;
+                        };
+
+                        prev_idx = cur_idx;
+                        cur_idx += 1;
                     }
                 }
             }

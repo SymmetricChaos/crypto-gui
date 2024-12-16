@@ -37,3 +37,25 @@ impl Mode {
         }
     }
 }
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum Version {
+    V10,
+    V13,
+}
+
+impl Version {
+    pub fn to_u64(&self) -> u64 {
+        match self {
+            Version::V10 => 0x10,
+            Version::V13 => 0x13,
+        }
+    }
+
+    pub fn to_u32(&self) -> u32 {
+        match self {
+            Version::V10 => 0x10,
+            Version::V13 => 0x13,
+        }
+    }
+}
