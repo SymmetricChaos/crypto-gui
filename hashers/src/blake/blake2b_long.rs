@@ -69,6 +69,8 @@ impl ClassicHasher for Blake2bLong {
         let mut out = Vec::with_capacity(self.hash_len);
 
         while out.len() < self.hash_len {
+            // Take 32 bytes of the temporary value then hash the whole vector
+            // By using only half of the output length extension is as difficult as a preimage attack
             out.extend_from_slice(&temp[0..32]);
             temp = hasher.hash(&temp);
         }
