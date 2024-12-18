@@ -231,7 +231,7 @@ impl Default for Argon2 {
             salt: vec![0, 0, 0, 0],
             key: Default::default(),
             associated_data: Default::default(),
-            tag_len: 32,            // minimum
+            tag_len: 32,           // minimum
             par_cost: 1,           // minimum
             mem_cost: 8,           // minimum
             iterations: 1,         // minimum
@@ -242,6 +242,92 @@ impl Default for Argon2 {
 }
 
 impl Argon2 {
+    pub fn argon2i() -> Self {
+        Argon2::default().with_mode(Mode::I)
+    }
+
+    pub fn argon2d() -> Self {
+        Argon2::default().with_mode(Mode::D)
+    }
+
+    pub fn argon2id() -> Self {
+        Argon2::default().with_mode(Mode::ID)
+    }
+
+    pub fn with_tag_len(mut self, tag_len: u32) -> Self {
+        assert!(tag_len > 1);
+        self.tag_len = tag_len;
+        self
+    }
+
+    pub fn with_mode(mut self, mode: Mode) -> Self {
+        self.mode = mode;
+        self
+    }
+
+    pub fn with_salt<T: AsRef<[u8]>>(mut self, salt: T) -> Self {
+        assert!(
+            salt.as_ref().len() >= MIN_SALT,
+            "salt length must be at least 8 bytes"
+        );
+        assert!(
+            salt.as_ref().len() <= MAX_SALT,
+            "salt length cannot be more than 2^32 bytes"
+        );
+        self.salt = salt.as_ref().to_vec();
+        self
+    }
+
+    pub fn with_key<T: AsRef<[u8]>>(mut self, key: T) -> Self {
+        assert!(
+            key.as_ref().len() <= MAX_KEY,
+            "key length cannot be more than 2^32 bytes"
+        );
+        self.key = key.as_ref().to_vec();
+        self
+    }
+
+    pub fn with_ad<T: AsRef<[u8]>>(mut self, ad: T) -> Self {
+        assert!(
+            ad.as_ref().len() <= MAX_KEY,
+            "associated data length cannot be more than 2^32 bytes"
+        );
+        self.associated_data = ad.as_ref().to_vec();
+        self
+    }
+
+    pub fn with_iterations(mut self, iterations: u32) -> Self {
+        assert!(iterations != 0, "iterations cannot be 0");
+        self.iterations = iterations;
+        self
+    }
+
+    pub fn with_par_cost(mut self, par_cost: u32) -> Self {
+        assert!(self.par_cost > 0, "parallelism cannot be 0");
+        assert!(
+            self.par_cost < MAX_PAR,
+            "parallelism must be less than 2^24"
+        );
+        self.par_cost = par_cost;
+        self.mem_cost = std::cmp::max(self.mem_cost, 8 * self.par_cost); // increase mem_cost to the minimum allowed value if required
+        self
+    }
+
+    pub fn with_mem_cost(mut self, mem_cost: u32) -> Self {
+        self.mem_cost = std::cmp::max(mem_cost, 8 * self.par_cost);
+        self
+    }
+
+    pub fn input(mut self, input: ByteFormat) -> Self {
+        self.input_format = input;
+        self
+    }
+
+    pub fn output(mut self, output: ByteFormat) -> Self {
+        self.output_format = output;
+        self
+    }
+
     pub fn buffer(&self, password: &[u8]) -> Vec<u8> {
         let mut buffer = Vec::new();
 
@@ -261,50 +347,6 @@ impl Argon2 {
         buffer.extend_from_slice(&self.associated_data);
 
         buffer
-    }
-
-    pub fn with_salt(mut self, salt: &[u8]) -> Self {
-        assert!(
-            salt.len() >= MIN_SALT,
-            "salt length must be at least 8 bytes"
-        );
-        assert!(
-            salt.len() <= MAX_SALT,
-            "salt length cannot be more than 2^32 bytes"
-        );
-        self.salt = salt.to_vec();
-        self
-    }
-
-    pub fn with_key(mut self, key: &[u8]) -> Self {
-        assert!(
-            key.len() <= MAX_KEY,
-            "key length cannot be more than 2^32 bytes"
-        );
-        self.key = key.to_vec();
-        self
-    }
-
-    pub fn with_iterations(mut self, iterations: u32) -> Self {
-        assert!(iterations == 0, "iterations cannot be 0");
-        self.iterations = iterations;
-        self
-    }
-
-    pub fn with_par_cost(mut self, par_cost: u32) -> Self {
-        assert!(self.par_cost > 0, "parallelism cannot be 0");
-        assert!(
-            self.par_cost < MAX_PAR,
-            "parallelism must be less than 2^24"
-        );
-        self.par_cost = par_cost;
-        self.mem_cost = std::cmp::max(self.mem_cost, 8 * self.par_cost); // increase mem_cost to the minimum allowed value if required
-        self
-    }
-
-    pub fn with_mem_cost(mut self, mem_cost: u32) -> Self {
-        self.mem_cost = std::cmp::max(mem_cost, 8 * self.par_cost);
-        self
     }
 
     fn num_lanes(&self) -> usize {
@@ -348,6 +390,8 @@ impl ClassicHasher for Argon2 {
         // Initialization block
         let h0 = hasher.hash(&buffer);
 
+        println!("{:02x?}", h0);
+
         let num_blocks = self.num_blocks(); // total number of blocks in the memory grid
         let num_lanes = self.num_lanes(); // number of "rows" in the memory grid (there are always four "columns"), each lane can be computed independently
         let lane_length = self.lane_length(); // the length of each "row" of the memory grid
@@ -363,7 +407,6 @@ impl ClassicHasher for Argon2 {
             let mut h = h0.clone();
             h.extend(0_u32.to_le_bytes());
             h.extend(lane.to_le_bytes());
-            println!("{:?}", hasher.hash(&h).len());
 
             let block = hasher
                 .hash(&h)
@@ -545,4 +588,11 @@ impl ClassicHasher for Argon2 {
     }
 }
 
-crate::basic_hash_tests!(test1, Argon2::default(), "", "");
+crate::basic_hash_tests!(
+    test_argon2d, Argon2::argon2d().with_iterations(3).with_par_cost(4).with_mem_cost(32).with_tag_len(32).with_salt([0x02; 16]).with_key([0x03; 8]).with_ad([0x04; 12]),
+    "01010101010101010101010101010101010101010101010101010101010101010101010101010101",
+    "512b391b6f1162975371d30919734294f868e3be3984f3c1a13a4db9fabe4acb";
+    test_argon2i, Argon2::argon2i().with_iterations(3).with_par_cost(4).with_mem_cost(32).with_tag_len(32).with_salt([0x02; 16]).with_key([0x03; 8]).with_ad([0x04; 12]),
+    "01010101010101010101010101010101010101010101010101010101010101010101010101010101",
+    "c814d9d1dc7f37aa13f0d77f2494bda1c8de6b016dd388d29952a4c4672b6ce8";
+);
