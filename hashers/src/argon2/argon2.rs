@@ -12,7 +12,7 @@ use super::consts::{
     Mode, Version, BLOCK_BYTES, BLOCK_WORDS, MAX_KEY, MAX_PAR, MAX_PASS, MAX_SALT, MIN_SALT,
     SYNC_POINTS,
 };
-use crate::{blake::Blake2b, errors::HasherError, traits::ClassicHasher};
+use crate::{blake::Blake2bLong, errors::HasherError, traits::ClassicHasher};
 use num::traits::ToBytes;
 use utils::{byte_formatting::ByteFormat, math_functions::incr_array_ctr_be};
 
@@ -231,7 +231,7 @@ impl Default for Argon2 {
             salt: vec![0, 0, 0, 0],
             key: Default::default(),
             associated_data: Default::default(),
-            tag_len: 4,            // minimum
+            tag_len: 32,            // minimum
             par_cost: 1,           // minimum
             mem_cost: 8,           // minimum
             iterations: 1,         // minimum
@@ -341,7 +341,7 @@ impl ClassicHasher for Argon2 {
             "password length cannot be more than 2^32 bytes"
         );
 
-        let mut hasher = Blake2b::default();
+        let mut hasher = Blake2bLong::default();
         hasher.hash_len = 64;
         let buffer = self.buffer(bytes);
 
@@ -363,10 +363,13 @@ impl ClassicHasher for Argon2 {
             let mut h = h0.clone();
             h.extend(0_u32.to_le_bytes());
             h.extend(lane.to_le_bytes());
+            println!("{:?}", hasher.hash(&h).len());
+
             let block = hasher
                 .hash(&h)
                 .try_into()
                 .expect("blocks should be 1024-bytes");
+
             mem_blocks[lane] = block;
 
             // G(h|1|lane)

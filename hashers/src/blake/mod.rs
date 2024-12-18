@@ -1,9 +1,10 @@
 pub mod blake256;
 pub mod blake2b;
+pub mod blake2b_long;
 pub mod blake3;
 pub mod blake512;
 pub use blake2b::Blake2b;
-
+pub use blake2b_long::Blake2bLong;
 pub mod blake2s;
 pub use blake2s::Blake2s;
 

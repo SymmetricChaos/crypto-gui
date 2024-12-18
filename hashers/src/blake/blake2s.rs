@@ -38,9 +38,9 @@ impl Blake2s {
         self
     }
 
-    pub fn key(mut self, key: Vec<u8>) -> Self {
-        assert!(key.len() <= 32);
-        self.key = key;
+    pub fn key<T: AsRef<[u8]>>(mut self, key: T) -> Self {
+        assert!(key.as_ref().len() <= 32);
+        self.key = key.as_ref().to_vec();
         self
     }
 
