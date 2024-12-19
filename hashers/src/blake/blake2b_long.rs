@@ -56,10 +56,11 @@ impl ClassicHasher for Blake2bLong {
             "the length of the key cannot be more than 64 bytes"
         );
 
+        let mut msg = (self.hash_len as u32).to_le_bytes().to_vec();
+        msg.extend_from_slice(bytes);
+
         // For short output the length is concatenated with the message and then hashed directly with Blake2b
         if self.hash_len <= 64 {
-            let mut msg = (self.hash_len as u32).to_le_bytes().to_vec();
-            msg.extend_from_slice(bytes);
             return Blake2b::default()
                 .hash_len(self.hash_len)
                 .key(&self.key)
@@ -67,22 +68,22 @@ impl ClassicHasher for Blake2bLong {
         }
 
         let mut hasher = Blake2b::default().hash_len(64).key(&self.key);
-        let mut temp = Vec::with_capacity(64);
+        let mut v = hasher.hash(&msg);
         let mut out = Vec::with_capacity(self.hash_len);
         let mut ctr = self.hash_len;
 
         while ctr > 32 {
             // Take 32 bytes of the temporary value then hash the whole vector
-            // By using only half of the output length extension is as difficult as a preimage attack
-            temp = hasher.hash(&temp);
-            out.extend_from_slice(&temp[0..32]);
+            // This is presumably related to length extension type attacks
+            out.extend_from_slice(&v[0..32]);
             ctr -= 32;
+            v = hasher.hash(&v);
         }
 
         // Final bytes change the hash length of Blake2b, which alters its state, so truncation is not used
         hasher.hash_len = ctr;
-        temp = hasher.hash(&temp);
-        out.extend_from_slice(&temp);
+        v = hasher.hash(&v);
+        out.extend_from_slice(&v);
 
         out
     }

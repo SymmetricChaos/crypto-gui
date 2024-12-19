@@ -346,6 +346,8 @@ impl Argon2 {
         initial.extend((self.associated_data.len() as u32).to_le_bytes());
         initial.extend_from_slice(&self.associated_data);
 
+        // println!("{:02x?}", initial);
+
         Blake2bLong::default().hash_len(64).hash(&initial)
     }
 
@@ -584,9 +586,9 @@ impl ClassicHasher for Argon2 {
 
 crate::basic_hash_tests!(
     test_argon2d, Argon2::argon2d().input(ByteFormat::Hex).with_iterations(3).with_par_cost(4).with_mem_cost(32).with_tag_len(32).with_salt([0x02; 16]).with_key([0x03; 8]).with_ad([0x04; 12]),
-    "01010101010101010101010101010101010101010101010101010101010101010101010101010101",
+    "0101010101010101010101010101010101010101010101010101010101010101",
     "512b391b6f1162975371d30919734294f868e3be3984f3c1a13a4db9fabe4acb";
     test_argon2i, Argon2::argon2i().input(ByteFormat::Hex).with_iterations(3).with_par_cost(4).with_mem_cost(32).with_tag_len(32).with_salt([0x02; 16]).with_key([0x03; 8]).with_ad([0x04; 12]),
-    "01010101010101010101010101010101010101010101010101010101010101010101010101010101",
+    "0101010101010101010101010101010101010101010101010101010101010101",
     "c814d9d1dc7f37aa13f0d77f2494bda1c8de6b016dd388d29952a4c4672b6ce8";
 );
