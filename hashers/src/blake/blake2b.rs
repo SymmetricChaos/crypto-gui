@@ -62,7 +62,6 @@ impl Blake2b {
 
     // https://datatracker.ietf.org/doc/html/rfc7693.html#appendix-A
     pub fn compress(state: &mut [u64; 8], chunk: &[u64; 16], bytes_taken: u128, last_chunk: bool) {
-        // println!("Original Chunk:\n{chunk:016x?}\n");
         // create a working vector
         let mut work = [0_u64; 16];
         for i in 0..8 {
@@ -70,7 +69,7 @@ impl Blake2b {
             work[i + 8] = Self::IV[i]
         }
 
-        // Mix the bytes taken counter into the working vector
+        // Mix the bytes from the counter into the working vector
         work[12] ^= bytes_taken as u64; // low bytes
         work[13] ^= (bytes_taken >> 64) as u64; // high bytes
 

@@ -328,25 +328,25 @@ impl Argon2 {
         self
     }
 
-    pub fn buffer(&self, password: &[u8]) -> Vec<u8> {
-        let mut buffer = Vec::new();
+    pub fn initial_hash(&self, password: &[u8]) -> Vec<u8> {
+        let mut initial = Vec::new();
 
-        buffer.extend(self.par_cost.to_le_bytes());
-        buffer.extend(self.tag_len.to_le_bytes());
-        buffer.extend(self.mem_cost.to_le_bytes());
-        buffer.extend(self.iterations.to_le_bytes());
-        buffer.extend(self.version.to_u32().to_le_bytes());
-        buffer.extend(self.mode.to_u32().to_le_bytes());
-        buffer.extend((password.len() as u32).to_le_bytes());
-        buffer.extend_from_slice(password);
-        buffer.extend((self.salt.len() as u32).to_le_bytes());
-        buffer.extend_from_slice(&self.salt);
-        buffer.extend((self.key.len() as u32).to_le_bytes());
-        buffer.extend_from_slice(&self.key);
-        buffer.extend((self.associated_data.len() as u32).to_le_bytes());
-        buffer.extend_from_slice(&self.associated_data);
+        initial.extend(self.par_cost.to_le_bytes());
+        initial.extend(self.tag_len.to_le_bytes());
+        initial.extend(self.mem_cost.to_le_bytes());
+        initial.extend(self.iterations.to_le_bytes());
+        initial.extend(self.version.to_u32().to_le_bytes());
+        initial.extend(self.mode.to_u32().to_le_bytes());
+        initial.extend((password.len() as u32).to_le_bytes());
+        initial.extend_from_slice(password);
+        initial.extend((self.salt.len() as u32).to_le_bytes());
+        initial.extend_from_slice(&self.salt);
+        initial.extend((self.key.len() as u32).to_le_bytes());
+        initial.extend_from_slice(&self.key);
+        initial.extend((self.associated_data.len() as u32).to_le_bytes());
+        initial.extend_from_slice(&self.associated_data);
 
-        buffer
+        Blake2bLong::default().hash_len(64).hash(&initial)
     }
 
     fn num_lanes(&self) -> usize {
@@ -383,12 +383,8 @@ impl ClassicHasher for Argon2 {
             "password length cannot be more than 2^32 bytes"
         );
 
-        let mut hasher = Blake2bLong::default();
-        hasher.hash_len = 64;
-        let buffer = self.buffer(bytes);
-
         // Initialization block
-        let h0 = hasher.hash(&buffer);
+        let h0 = self.initial_hash(bytes);
 
         println!("{:02x?}", h0);
 
@@ -400,13 +396,13 @@ impl ClassicHasher for Argon2 {
 
         let mut mem_blocks = vec![Block::default(); num_blocks];
 
+        let mut hasher = Blake2bLong::default().hash_len(BLOCK_BYTES);
         // Initialize the first two block of each lane
-        hasher.hash_len = BLOCK_BYTES;
         for lane in (0..num_blocks).step_by(lane_length) {
             // G(h|0|lane)
             let mut h = h0.clone();
             h.extend(0_u32.to_le_bytes());
-            h.extend(lane.to_le_bytes());
+            h.extend((lane as u32).to_le_bytes());
             let block = hasher
                 .hash(&h)
                 .try_into()
@@ -416,7 +412,7 @@ impl ClassicHasher for Argon2 {
             // G(h|1|lane)
             let mut h = h0.clone();
             h.extend(1_u32.to_le_bytes());
-            h.extend(lane.to_le_bytes());
+            h.extend((lane as u32).to_le_bytes());
             let block = hasher
                 .hash(&h)
                 .try_into()

@@ -56,12 +56,14 @@ impl ClassicHasher for Blake2bLong {
             "the length of the key cannot be more than 64 bytes"
         );
 
-        // Short circuit for short output lengths
+        // For short output the length is concatenated with the message and then hashed directly with Blake2b
         if self.hash_len <= 64 {
+            let mut msg = (self.hash_len as u32).to_le_bytes().to_vec();
+            msg.extend_from_slice(bytes);
             return Blake2b::default()
                 .hash_len(self.hash_len)
                 .key(&self.key)
-                .hash(bytes);
+                .hash(&msg);
         }
 
         let mut hasher = Blake2b::default().hash_len(64).key(&self.key);
