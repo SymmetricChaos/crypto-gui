@@ -106,6 +106,21 @@ impl Blake2bStateful {
         hasher
     }
 
+    pub fn init256() -> Self {
+        let mut hasher = Self {
+            state: IV,
+            hash_len: 32,
+            bytes_taken: 0,
+            buffer: Vec::new(),
+        };
+
+        // The key length and hash length are mixed into the state
+        let mixer: u64 = 0x01010000 ^ 32;
+        hasher.state[0] ^= mixer;
+
+        hasher
+    }
+
     pub fn hash_len(&self) -> u64 {
         self.hash_len
     }
@@ -121,6 +136,18 @@ impl Blake2bStateful {
             .flatten()
             .take(self.hash_len as usize)
             .collect_vec()
+    }
+
+    pub fn hash_256(bytes: &[u8]) -> Vec<u8> {
+        let mut h = Self::init256();
+        h.update(bytes);
+        h.finalize()
+    }
+
+    pub fn hash_512(bytes: &[u8]) -> Vec<u8> {
+        let mut h = Self::init512();
+        h.update(bytes);
+        h.finalize()
     }
 }
 

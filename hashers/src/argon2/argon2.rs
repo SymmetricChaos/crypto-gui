@@ -193,10 +193,10 @@ fn argon2i_addr(
     memory_blocks: u64,
     total_passes: u64,
     mode: u64,
-    ctr: &mut [u8; 968],
+    ctr: &mut [u8; 976],
 ) -> Block {
     // The counter is incrementated before every call
-    incr_array_ctr_be(&mut ctr[0..968]);
+    incr_array_ctr_be(&mut ctr[0..976]);
 
     let mut input = Vec::new();
     input.extend(pass.to_le_bytes());
@@ -206,8 +206,11 @@ fn argon2i_addr(
     input.extend(total_passes.to_le_bytes());
     input.extend(mode.to_le_bytes());
     input.extend_from_slice(ctr);
+    // println!("input len {}", input.len());
+    // println!("{:02x?}", input);
     let zero = Block::default();
     let input_block = Block::try_from(input).expect("input block not constructed correctly");
+
     // Compress the input block with the zero block twice
     compress(&zero, &compress(&zero, &input_block))
 }
@@ -424,7 +427,21 @@ impl ClassicHasher for Argon2 {
             mem_blocks[lane + 1] = block;
         }
 
-        let mut ctr = [0u8; 968];
+        println!("Lane 0 (first four words)");
+        println!("{:016x?}", mem_blocks[0][0]);
+        println!("{:016x?}", mem_blocks[0][1]);
+        println!("{:016x?}", mem_blocks[0][2]);
+        println!("{:016x?}", mem_blocks[0][3]);
+        println!("");
+
+        println!("Lane 31 (last four words)");
+        println!("{:016x?}", mem_blocks[31][124]);
+        println!("{:016x?}", mem_blocks[31][125]);
+        println!("{:016x?}", mem_blocks[31][126]);
+        println!("{:016x?}", mem_blocks[31][127]);
+        println!("");
+
+        let mut ctr = [0u8; 976];
         // Additional passes over the lanes
         for pass in 2..iterations {
             for slice in 0..SYNC_POINTS {
@@ -546,6 +563,19 @@ impl ClassicHasher for Argon2 {
                     }
                 }
             }
+            println!("Lane 0 (first four words)");
+            println!("{:016x?}", mem_blocks[0][0]);
+            println!("{:016x?}", mem_blocks[0][1]);
+            println!("{:016x?}", mem_blocks[0][2]);
+            println!("{:016x?}", mem_blocks[0][3]);
+            println!("");
+
+            println!("Lane 31 (last four words)");
+            println!("{:016x?}", mem_blocks[31][124]);
+            println!("{:016x?}", mem_blocks[31][125]);
+            println!("{:016x?}", mem_blocks[31][126]);
+            println!("{:016x?}", mem_blocks[31][127]);
+            println!("");
         }
 
         // XOR together the final block of each lane

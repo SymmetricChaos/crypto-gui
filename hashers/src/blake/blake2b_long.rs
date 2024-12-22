@@ -53,22 +53,24 @@ impl Blake2bLong {
 
 impl ClassicHasher for Blake2bLong {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        assert!(self.hash_len > 1, "hash_len cannot be 0 bytes");
         assert!(
             self.key.len() <= 64,
             "the length of the key cannot be more than 64 bytes"
         );
 
         // Incorporate the length of the output and the bytes
-        let mut h = Blake2bStateful::init(&self.key, self.hash_len as u64);
-        h.update(&(self.hash_len as u32).to_le_bytes());
-        h.update(bytes);
 
         // For short output just finalize and return the bytes
         if self.hash_len <= 64 {
+            let mut h = Blake2bStateful::init(&self.key, self.hash_len as u64);
+            h.update(&(self.hash_len as u32).to_le_bytes());
+            h.update(bytes);
             return h.finalize();
         }
 
+        let mut h = Blake2bStateful::init(&self.key, 64);
+        h.update(&(self.hash_len as u32).to_le_bytes());
+        h.update(bytes);
         let mut out = Vec::with_capacity(self.hash_len);
         let mut ctr = self.hash_len;
         let mut v = h.finalize();
@@ -78,14 +80,13 @@ impl ClassicHasher for Blake2bLong {
             // This is presumably related to length extension type attacks
             out.extend_from_slice(&v[0..32]);
             ctr -= 32;
-            h.update(&v);
-            v = h.state_bytes();
+            v = Blake2bStateful::hash_512(&v)
         }
 
-        // // Final bytes change the hash length of Blake2b, which alters its state, so truncation is not used
-        // hasher.hash_len = ctr;
-        // v = hasher.hash(&v);
-        // out.extend_from_slice(&v);
+        // Final bytes change the hash length of Blake2b, which alters its state, so truncation is not used
+        let mut h = Blake2bStateful::init(&[], ctr as u64);
+        h.update(&v);
+        out.extend_from_slice(&h.finalize());
 
         out
     }

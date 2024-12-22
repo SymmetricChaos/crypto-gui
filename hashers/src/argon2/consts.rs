@@ -23,16 +23,17 @@ pub enum Mode {
 impl Mode {
     pub fn to_u64(&self) -> u64 {
         match self {
-            Mode::I => 0,
-            Mode::D => 1,
+            Mode::D => 0,
+            Mode::I => 1,
+
             Mode::ID => 2,
         }
     }
 
     pub fn to_u32(&self) -> u32 {
         match self {
-            Mode::I => 0,
-            Mode::D => 1,
+            Mode::I => 1,
+            Mode::D => 0,
             Mode::ID => 2,
         }
     }
