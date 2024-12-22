@@ -25,15 +25,14 @@ impl Mode {
         match self {
             Mode::D => 0,
             Mode::I => 1,
-
             Mode::ID => 2,
         }
     }
 
     pub fn to_u32(&self) -> u32 {
         match self {
-            Mode::I => 1,
             Mode::D => 0,
+            Mode::I => 1,
             Mode::ID => 2,
         }
     }
