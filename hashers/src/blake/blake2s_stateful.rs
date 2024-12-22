@@ -131,7 +131,7 @@ impl StatefulHasher for Blake2bStateful {
 #[cfg(test)]
 mod blake2b_stateful_tests {
 
-    use utils::byte_formatting::ByteFormat;
+    use utils::byte_formatting::hex_to_bytes_ltr;
 
     use super::*;
 
@@ -140,8 +140,7 @@ mod blake2b_stateful_tests {
         let mut hasher = Blake2bStateful::init(&[], 32);
         assert_eq!(
             hasher.finalize(),
-            ByteFormat::Hex
-                .text_to_bytes("69217a3079908094e11121d042354a7c1f55b6482ca1a51e1b250dfd1ed0eef9")
+            hex_to_bytes_ltr("69217a3079908094e11121d042354a7c1f55b6482ca1a51e1b250dfd1ed0eef9")
                 .unwrap()
         );
     }
@@ -152,8 +151,7 @@ mod blake2b_stateful_tests {
         hasher.update(&[0, 1, 2, 3, 4, 5, 6, 7]);
         assert_eq!(
             hasher.finalize(),
-            ByteFormat::Hex
-                .text_to_bytes("c7e887b546623635e93e0495598f1726821996c2377705b93a1f636f872bfa2d")
+            hex_to_bytes_ltr("c7e887b546623635e93e0495598f1726821996c2377705b93a1f636f872bfa2d")
                 .unwrap()
         );
     }
@@ -161,20 +159,14 @@ mod blake2b_stateful_tests {
     #[test]
     fn test_with_key() {
         let mut hasher = Blake2bStateful::init(
-            ByteFormat::Hex
-                .text_to_bytes("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f")
+            hex_to_bytes_ltr("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f")
                 .unwrap(),
             32,
         );
-        hasher.update(
-            &ByteFormat::Hex
-                .text_to_bytes("000102030405060708090a0b0c0d0e0f")
-                .unwrap(),
-        );
+        hasher.update(&hex_to_bytes_ltr("000102030405060708090a0b0c0d0e0f").unwrap());
         assert_eq!(
             hasher.finalize(),
-            ByteFormat::Hex
-                .text_to_bytes("19ba234f0a4f38637d1839f9d9f76ad91c8522307143c97d5f93f69274cec9a7")
+            hex_to_bytes_ltr("19ba234f0a4f38637d1839f9d9f76ad91c8522307143c97d5f93f69274cec9a7")
                 .unwrap()
         );
     }
