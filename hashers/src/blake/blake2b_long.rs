@@ -1,6 +1,9 @@
 use utils::byte_formatting::ByteFormat;
 
-use crate::{blake::Blake2b, traits::ClassicHasher};
+use crate::{
+    blake::{Blake2b, Blake2bStateful},
+    traits::{ClassicHasher, StatefulHasher},
+};
 
 // https://eprint.iacr.org/2012/351.pdf
 
@@ -61,10 +64,9 @@ impl ClassicHasher for Blake2bLong {
 
         // For short output the length is concatenated with the message and then hashed directly with Blake2b
         if self.hash_len <= 64 {
-            return Blake2b::default()
-                .hash_len(self.hash_len)
-                .key(&self.key)
-                .hash(&msg);
+            let mut h = Blake2bStateful::init(&self.key, self.hash_len as u64);
+            h.update(bytes);
+            return h.finalize();
         }
 
         let mut hasher = Blake2b::default().hash_len(64).key(&self.key);

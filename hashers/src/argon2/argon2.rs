@@ -12,7 +12,11 @@ use super::consts::{
     Mode, Version, BLOCK_BYTES, BLOCK_WORDS, MAX_KEY, MAX_PAR, MAX_PASS, MAX_SALT, MIN_SALT,
     SYNC_POINTS,
 };
-use crate::{blake::Blake2bLong, errors::HasherError, traits::ClassicHasher};
+use crate::{
+    blake::{Blake2bLong, Blake2bStateful},
+    errors::HasherError,
+    traits::{ClassicHasher, StatefulHasher},
+};
 use num::traits::ToBytes;
 use utils::{byte_formatting::ByteFormat, math_functions::incr_array_ctr_be};
 
@@ -329,26 +333,24 @@ impl Argon2 {
     }
 
     pub fn initial_hash(&self, password: &[u8]) -> Vec<u8> {
-        let mut initial = Vec::new();
+        let mut h = Blake2bStateful::init(&[], 64);
 
-        initial.extend(self.par_cost.to_le_bytes());
-        initial.extend(self.tag_len.to_le_bytes());
-        initial.extend(self.mem_cost.to_le_bytes());
-        initial.extend(self.iterations.to_le_bytes());
-        initial.extend(self.version.to_u32().to_le_bytes());
-        initial.extend(self.mode.to_u32().to_le_bytes());
-        initial.extend((password.len() as u32).to_le_bytes());
-        initial.extend_from_slice(password);
-        initial.extend((self.salt.len() as u32).to_le_bytes());
-        initial.extend_from_slice(&self.salt);
-        initial.extend((self.key.len() as u32).to_le_bytes());
-        initial.extend_from_slice(&self.key);
-        initial.extend((self.associated_data.len() as u32).to_le_bytes());
-        initial.extend_from_slice(&self.associated_data);
+        h.update(&self.par_cost.to_le_bytes());
+        h.update(&self.tag_len.to_le_bytes());
+        h.update(&self.mem_cost.to_le_bytes());
+        h.update(&self.iterations.to_le_bytes());
+        h.update(&self.version.to_u32().to_le_bytes());
+        h.update(&self.mode.to_u32().to_le_bytes());
+        h.update(&(password.len() as u32).to_le_bytes());
+        h.update(password);
+        h.update(&(self.salt.len() as u32).to_le_bytes());
+        h.update(&self.salt);
+        h.update(&(self.key.len() as u32).to_le_bytes());
+        h.update(&self.key);
+        h.update(&(self.associated_data.len() as u32).to_le_bytes());
+        h.update(&self.associated_data);
 
-        // println!("{:02x?}", initial);
-
-        Blake2bLong::default().hash_len(64).hash(&initial)
+        h.finalize()
     }
 
     fn num_lanes(&self) -> usize {

@@ -2,6 +2,8 @@ pub mod blake256;
 pub mod blake2b;
 pub mod blake2b_long;
 pub mod blake2b_stateful;
+pub mod blake2s_stateful;
+pub use blake2b_stateful::Blake2bStateful;
 pub mod blake3;
 pub mod blake512;
 pub use blake2b::Blake2b;
