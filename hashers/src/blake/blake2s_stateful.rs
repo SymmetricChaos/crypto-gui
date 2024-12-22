@@ -96,16 +96,16 @@ impl Blake2bStateful {
 impl StatefulHasher for Blake2bStateful {
     fn update(&mut self, bytes: &[u8]) {
         self.buffer.extend_from_slice(bytes);
-        let chunks = bytes.chunks_exact(128);
-        let last = chunks.remainder().to_vec();
-
-        for chunk in chunks {
-            let c = create_chunk(chunk);
-            self.bytes_taken += 128;
-            compress(&mut self.state, &c, self.bytes_taken, false);
+        if self.buffer.len() >= 64 {
+            let chunks = self.buffer.chunks_exact(64);
+            let last = chunks.remainder().to_vec();
+            for chunk in chunks {
+                let c = create_chunk(chunk);
+                self.bytes_taken += 64;
+                compress(&mut self.state, &c, self.bytes_taken, false);
+            }
+            self.buffer = last;
         }
-
-        self.buffer = last;
     }
 
     fn finalize(&mut self) -> Vec<u8> {

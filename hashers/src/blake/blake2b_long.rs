@@ -1,7 +1,7 @@
 use utils::byte_formatting::ByteFormat;
 
 use crate::{
-    blake::{Blake2b, Blake2bStateful},
+    blake::Blake2bStateful,
     traits::{ClassicHasher, StatefulHasher},
 };
 
@@ -59,33 +59,33 @@ impl ClassicHasher for Blake2bLong {
             "the length of the key cannot be more than 64 bytes"
         );
 
-        let mut msg = (self.hash_len as u32).to_le_bytes().to_vec();
-        msg.extend_from_slice(bytes);
+        // Incorporate the length of the output and the bytes
+        let mut h = Blake2bStateful::init(&self.key, self.hash_len as u64);
+        h.update(&(self.hash_len as u32).to_le_bytes());
+        h.update(bytes);
 
-        // For short output the length is concatenated with the message and then hashed directly with Blake2b
+        // For short output just finalize and return the bytes
         if self.hash_len <= 64 {
-            let mut h = Blake2bStateful::init(&self.key, self.hash_len as u64);
-            h.update(bytes);
             return h.finalize();
         }
 
-        let mut hasher = Blake2b::default().hash_len(64).key(&self.key);
-        let mut v = hasher.hash(&msg);
         let mut out = Vec::with_capacity(self.hash_len);
         let mut ctr = self.hash_len;
+        let mut v = h.finalize();
 
         while ctr > 32 {
             // Take 32 bytes of the temporary value then hash the whole vector
             // This is presumably related to length extension type attacks
             out.extend_from_slice(&v[0..32]);
             ctr -= 32;
-            v = hasher.hash(&v);
+            h.update(&v);
+            v = h.state_bytes();
         }
 
-        // Final bytes change the hash length of Blake2b, which alters its state, so truncation is not used
-        hasher.hash_len = ctr;
-        v = hasher.hash(&v);
-        out.extend_from_slice(&v);
+        // // Final bytes change the hash length of Blake2b, which alters its state, so truncation is not used
+        // hasher.hash_len = ctr;
+        // v = hasher.hash(&v);
+        // out.extend_from_slice(&v);
 
         out
     }

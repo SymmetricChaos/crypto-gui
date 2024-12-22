@@ -91,6 +91,21 @@ impl Blake2bStateful {
         hasher
     }
 
+    pub fn init512() -> Self {
+        let mut hasher = Self {
+            state: IV,
+            hash_len: 64,
+            bytes_taken: 0,
+            buffer: Vec::new(),
+        };
+
+        // The key length and hash length are mixed into the state
+        let mixer: u64 = 0x01010000 ^ 64;
+        hasher.state[0] ^= mixer;
+
+        hasher
+    }
+
     pub fn hash_len(&self) -> u64 {
         self.hash_len
     }
@@ -98,21 +113,30 @@ impl Blake2bStateful {
     pub fn state(&self) -> &[u64; 8] {
         &self.state
     }
+
+    pub fn state_bytes(&self) -> Vec<u8> {
+        self.state
+            .iter()
+            .map(|x| x.to_le_bytes())
+            .flatten()
+            .take(self.hash_len as usize)
+            .collect_vec()
+    }
 }
 
 impl StatefulHasher for Blake2bStateful {
     fn update(&mut self, bytes: &[u8]) {
         self.buffer.extend_from_slice(bytes);
-        let chunks = bytes.chunks_exact(128);
-        let last = chunks.remainder().to_vec();
-
-        for chunk in chunks {
-            let c = create_chunk(chunk);
-            self.bytes_taken += 128;
-            compress(&mut self.state, &c, self.bytes_taken, false);
+        if self.buffer.len() >= 128 {
+            let chunks = self.buffer.chunks_exact(128);
+            let last = chunks.remainder().to_vec();
+            for chunk in chunks {
+                let c = create_chunk(chunk);
+                self.bytes_taken += 128;
+                compress(&mut self.state, &c, self.bytes_taken, false);
+            }
+            self.buffer = last;
         }
-
-        self.buffer = last;
     }
 
     fn finalize(&mut self) -> Vec<u8> {
@@ -144,14 +168,23 @@ mod blake2b_stateful_tests {
 
     #[test]
     fn test_empty() {
-        let mut hasher = Blake2bStateful::init(&[], 64);
+        let mut hasher = Blake2bStateful::init512();
         assert_eq!(hasher.finalize(), hex_to_bytes_ltr("786a02f742015903c6c6fd852552d272912f4740e15847618a86e217f71f5419d25e1031afee585313896444934eb04b903a685b1448b755d56f701afe9be2ce").unwrap());
     }
 
     #[test]
     fn test_abc() {
-        let mut hasher = Blake2bStateful::init(&[], 64);
+        let mut hasher = Blake2bStateful::init512();
         hasher.update(&[0x61, 0x62, 0x63]);
+        assert_eq!(hasher.finalize(), hex_to_bytes_ltr("ba80a53f981c4d0d6a2797b69f12f6e94c212f14685ac4b74b12bb6fdbffa2d17d87c5392aab792dc252d5de4533cc9518d38aa8dbf1925ab92386edd4009923").unwrap());
+    }
+
+    #[test]
+    fn test_abc_partial() {
+        let mut hasher = Blake2bStateful::init512();
+        hasher.update(&[0x61]);
+        hasher.update(&[0x62]);
+        hasher.update(&[0x63]);
         assert_eq!(hasher.finalize(), hex_to_bytes_ltr("ba80a53f981c4d0d6a2797b69f12f6e94c212f14685ac4b74b12bb6fdbffa2d17d87c5392aab792dc252d5de4533cc9518d38aa8dbf1925ab92386edd4009923").unwrap());
     }
 
@@ -161,6 +194,17 @@ mod blake2b_stateful_tests {
             hex_to_bytes_ltr("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f").unwrap(), 
             64);
         hasher.update(&hex_to_bytes_ltr("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfe").unwrap());
+        assert_eq!(hasher.finalize(), hex_to_bytes_ltr("142709d62e28fcccd0af97fad0f8465b971e82201dc51070faa0372aa43e92484be1c1e73ba10906d5d1853db6a4106e0a7bf9800d373d6dee2d46d62ef2a461").unwrap());
+    }
+
+    #[test]
+    fn test_with_key_partial() {
+        let mut hasher = Blake2bStateful::init(
+            hex_to_bytes_ltr("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f").unwrap(), 
+            64);
+        hasher.update(&hex_to_bytes_ltr("000102030405060708090a0b0c").unwrap());
+        hasher.update(&hex_to_bytes_ltr("0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f90919293").unwrap());
+        hasher.update(&hex_to_bytes_ltr("9495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfe").unwrap());
         assert_eq!(hasher.finalize(), hex_to_bytes_ltr("142709d62e28fcccd0af97fad0f8465b971e82201dc51070faa0372aa43e92484be1c1e73ba10906d5d1853db6a4106e0a7bf9800d373d6dee2d46d62ef2a461").unwrap());
     }
 }
