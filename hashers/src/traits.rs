@@ -5,6 +5,11 @@ pub trait ClassicHasher {
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError>;
 }
 
+pub trait StatefulHasher {
+    fn update(&mut self, bytes: &[u8]);
+    fn finalize(&mut self) -> Vec<u8>;
+}
+
 #[macro_export]
 macro_rules! hash_bytes_from_string {
     () => {
