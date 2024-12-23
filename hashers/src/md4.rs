@@ -3,7 +3,7 @@ use utils::{
     padding::md_strengthening_64_le,
 };
 
-use crate::traits::ClassicHasher;
+use crate::traits::{ClassicHasher, StatefulHasher};
 
 #[derive(Debug, Clone)]
 pub struct Md4 {
@@ -63,6 +63,16 @@ impl Md4 {
         .rotate_left(s)
     }
 }
+
+// impl StatefulHasher for Md4 {
+//     fn update(&mut self, bytes: &[u8]) {
+//         todo!()
+//     }
+
+//     fn finalize(&mut self) -> Vec<u8> {
+//         todo!()
+//     }
+// }
 
 impl ClassicHasher for Md4 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {

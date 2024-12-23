@@ -91,34 +91,20 @@ impl Blake2bStateful {
         hasher
     }
 
-    pub fn init512() -> Self {
-        let mut hasher = Self {
-            state: IV,
-            hash_len: 64,
-            bytes_taken: 0,
-            buffer: Vec::new(),
-        };
-
-        // The key length and hash length are mixed into the state
-        let mixer: u64 = 0x01010000 ^ 64;
-        hasher.state[0] ^= mixer;
-
-        hasher
+    pub fn init_hash256() -> Self {
+        Self::init(&[], 32)
     }
 
-    pub fn init256() -> Self {
-        let mut hasher = Self {
-            state: IV,
-            hash_len: 32,
-            bytes_taken: 0,
-            buffer: Vec::new(),
-        };
+    pub fn init_hash512() -> Self {
+        Self::init(&[], 64)
+    }
 
-        // The key length and hash length are mixed into the state
-        let mixer: u64 = 0x01010000 ^ 32;
-        hasher.state[0] ^= mixer;
+    pub fn init_mac256<T: AsRef<[u8]>>(key: T) -> Self {
+        Self::init(key, 32)
+    }
 
-        hasher
+    pub fn init_mac512<T: AsRef<[u8]>>(key: T) -> Self {
+        Self::init(key, 64)
     }
 
     pub fn hash_len(&self) -> u64 {
@@ -139,13 +125,13 @@ impl Blake2bStateful {
     }
 
     pub fn hash_256(bytes: &[u8]) -> Vec<u8> {
-        let mut h = Self::init256();
+        let mut h = Self::init_hash256();
         h.update(bytes);
         h.finalize()
     }
 
     pub fn hash_512(bytes: &[u8]) -> Vec<u8> {
-        let mut h = Self::init512();
+        let mut h = Self::init_hash512();
         h.update(bytes);
         h.finalize()
     }
@@ -154,19 +140,18 @@ impl Blake2bStateful {
 impl StatefulHasher for Blake2bStateful {
     fn update(&mut self, bytes: &[u8]) {
         self.buffer.extend_from_slice(bytes);
-        if self.buffer.len() >= 128 {
-            let chunks = self.buffer.chunks_exact(128);
-            let last = chunks.remainder().to_vec();
-            for chunk in chunks {
-                let c = create_chunk(chunk);
-                self.bytes_taken += 128;
-                compress(&mut self.state, &c, self.bytes_taken, false);
-            }
-            self.buffer = last;
+
+        let chunks = self.buffer.chunks_exact(128);
+        let last = chunks.remainder().to_vec();
+        for chunk in chunks {
+            let c = create_chunk(chunk);
+            self.bytes_taken += 128;
+            compress(&mut self.state, &c, self.bytes_taken, false);
         }
+        self.buffer = last;
     }
 
-    fn finalize(&mut self) -> Vec<u8> {
+    fn finalize(mut self) -> Vec<u8> {
         self.bytes_taken += self.buffer.len() as u128;
         while self.buffer.len() < 128 {
             self.buffer.push(0);
@@ -195,20 +180,20 @@ mod blake2b_stateful_tests {
 
     #[test]
     fn test_empty() {
-        let mut hasher = Blake2bStateful::init512();
+        let hasher = Blake2bStateful::init_hash512();
         assert_eq!(hasher.finalize(), hex_to_bytes_ltr("786a02f742015903c6c6fd852552d272912f4740e15847618a86e217f71f5419d25e1031afee585313896444934eb04b903a685b1448b755d56f701afe9be2ce").unwrap());
     }
 
     #[test]
     fn test_abc() {
-        let mut hasher = Blake2bStateful::init512();
+        let mut hasher = Blake2bStateful::init_hash512();
         hasher.update(&[0x61, 0x62, 0x63]);
         assert_eq!(hasher.finalize(), hex_to_bytes_ltr("ba80a53f981c4d0d6a2797b69f12f6e94c212f14685ac4b74b12bb6fdbffa2d17d87c5392aab792dc252d5de4533cc9518d38aa8dbf1925ab92386edd4009923").unwrap());
     }
 
     #[test]
     fn test_abc_partial() {
-        let mut hasher = Blake2bStateful::init512();
+        let mut hasher = Blake2bStateful::init_hash512();
         hasher.update(&[0x61]);
         hasher.update(&[0x62]);
         hasher.update(&[0x63]);

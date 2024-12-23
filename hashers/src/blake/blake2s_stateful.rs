@@ -13,7 +13,7 @@ pub fn compress(state: &mut [u32; 8], chunk: &[u32; 16], bytes_taken: u64, last_
         work[i + 8] = IV[i]
     }
 
-    // Mix the bytes taken counter into the working vector
+    // Mix the bytes from the counter into the working vector
     work[12] ^= bytes_taken as u32; // low bytes
     work[13] ^= (bytes_taken >> 32) as u32; // high bytes
 
@@ -44,14 +44,14 @@ const IV: [u32; 8] = [
 ];
 
 #[derive(Debug, Clone)]
-pub struct Blake2bStateful {
+pub struct Blake2sStateful {
     state: [u32; 8],
-    hash_len: u32, // length of output in bytes, 1 to 64
+    hash_len: u32, // length of output in bytes, 1 to 32
     bytes_taken: u64,
     buffer: Vec<u8>,
 }
 
-impl Blake2bStateful {
+impl Blake2sStateful {
     pub fn init<T: AsRef<[u8]>>(key: T, hash_len: u32) -> Self {
         assert!(key.as_ref().len() <= 32);
         assert!(hash_len > 1 && hash_len <= 32);
@@ -83,6 +83,21 @@ impl Blake2bStateful {
 
         hasher
     }
+    pub fn init_hash128() -> Self {
+        Self::init(&[], 32)
+    }
+
+    pub fn init_hash256() -> Self {
+        Self::init(&[], 32)
+    }
+
+    pub fn init_mac128<T: AsRef<[u8]>>(key: T) -> Self {
+        Self::init(key, 32)
+    }
+
+    pub fn init_mac256<T: AsRef<[u8]>>(key: T) -> Self {
+        Self::init(key, 32)
+    }
 
     pub fn hash_len(&self) -> u32 {
         self.hash_len
@@ -91,26 +106,46 @@ impl Blake2bStateful {
     pub fn state(&self) -> &[u32; 8] {
         &self.state
     }
-}
 
-impl StatefulHasher for Blake2bStateful {
-    fn update(&mut self, bytes: &[u8]) {
-        self.buffer.extend_from_slice(bytes);
-        if self.buffer.len() >= 64 {
-            let chunks = self.buffer.chunks_exact(64);
-            let last = chunks.remainder().to_vec();
-            for chunk in chunks {
-                let c = create_chunk(chunk);
-                self.bytes_taken += 64;
-                compress(&mut self.state, &c, self.bytes_taken, false);
-            }
-            self.buffer = last;
-        }
+    pub fn state_bytes(&self) -> Vec<u8> {
+        self.state
+            .iter()
+            .map(|x| x.to_le_bytes())
+            .flatten()
+            .take(self.hash_len as usize)
+            .collect_vec()
     }
 
-    fn finalize(&mut self) -> Vec<u8> {
+    pub fn hash_128(bytes: &[u8]) -> Vec<u8> {
+        let mut h = Self::init_hash128();
+        h.update(bytes);
+        h.finalize()
+    }
+
+    pub fn hash_256(bytes: &[u8]) -> Vec<u8> {
+        let mut h = Self::init_hash256();
+        h.update(bytes);
+        h.finalize()
+    }
+}
+
+impl StatefulHasher for Blake2sStateful {
+    fn update(&mut self, bytes: &[u8]) {
+        self.buffer.extend_from_slice(bytes);
+
+        let chunks = self.buffer.chunks_exact(64);
+        let last = chunks.remainder().to_vec();
+        for chunk in chunks {
+            let c = create_chunk(chunk);
+            self.bytes_taken += 64;
+            compress(&mut self.state, &c, self.bytes_taken, false);
+        }
+        self.buffer = last;
+    }
+
+    fn finalize(mut self) -> Vec<u8> {
         self.bytes_taken += self.buffer.len() as u64;
-        while self.buffer.len() < 128 {
+        while self.buffer.len() < 64 {
             self.buffer.push(0);
         }
         compress(
@@ -137,7 +172,7 @@ mod blake2b_stateful_tests {
 
     #[test]
     fn test_empty() {
-        let mut hasher = Blake2bStateful::init(&[], 32);
+        let hasher = Blake2sStateful::init(&[], 32);
         assert_eq!(
             hasher.finalize(),
             hex_to_bytes_ltr("69217a3079908094e11121d042354a7c1f55b6482ca1a51e1b250dfd1ed0eef9")
@@ -147,7 +182,7 @@ mod blake2b_stateful_tests {
 
     #[test]
     fn test_digits() {
-        let mut hasher = Blake2bStateful::init(&[], 32);
+        let mut hasher = Blake2sStateful::init(&[], 32);
         hasher.update(&[0, 1, 2, 3, 4, 5, 6, 7]);
         assert_eq!(
             hasher.finalize(),
@@ -158,7 +193,7 @@ mod blake2b_stateful_tests {
 
     #[test]
     fn test_with_key() {
-        let mut hasher = Blake2bStateful::init(
+        let mut hasher = Blake2sStateful::init(
             hex_to_bytes_ltr("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f")
                 .unwrap(),
             32,

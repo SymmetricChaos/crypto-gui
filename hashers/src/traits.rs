@@ -7,7 +7,7 @@ pub trait ClassicHasher {
 
 pub trait StatefulHasher {
     fn update(&mut self, bytes: &[u8]);
-    fn finalize(&mut self) -> Vec<u8>;
+    fn finalize(self) -> Vec<u8>;
 }
 
 #[macro_export]

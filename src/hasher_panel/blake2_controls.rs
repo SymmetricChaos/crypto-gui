@@ -10,6 +10,46 @@ use hashers::{
 use rand::{thread_rng, RngCore};
 use utils::byte_formatting::ByteFormat;
 
+fn key_control(
+    ui: &mut egui::Ui,
+    hasher_key: &mut Vec<u8>,
+    key_string: &mut String,
+    valid: &mut bool,
+    length: usize,
+) {
+    ui.horizontal(|ui| {
+        if ui.control_string(key_string).changed() {
+            *key_string = key_string
+                .chars()
+                .filter(|c| c.is_ascii_hexdigit())
+                .take(length) // 64 characters is 32 bytes
+                .collect();
+            *valid = key_string.len() % 2 != 0;
+            if *valid {
+                if let Ok(new) = ByteFormat::Hex.text_to_bytes(key_string) {
+                    match new.try_into() {
+                        Ok(key) => *hasher_key = key,
+                        Err(_) => unreachable!(),
+                    }
+                } else {
+                    unreachable!("unable to parse input");
+                }
+            }
+        };
+        if ui.button("🎲").on_hover_text("randomize").clicked() {
+            let mut rng = thread_rng();
+            rng.fill_bytes(hasher_key);
+            *key_string = ByteFormat::Hex.byte_slice_to_text(hasher_key)
+        };
+    });
+
+    if !*valid {
+        ui.error_text("invalid key");
+    } else {
+        ui.error_text("");
+    }
+}
+
 #[derive(Debug, PartialEq, Eq)]
 enum Blake2Variant {
     Big,
@@ -43,113 +83,6 @@ impl Default for Blake2Frame {
             valid_key_b_long: true,
             key_string_s: String::new(),
             valid_key_s: true,
-        }
-    }
-}
-
-impl Blake2Frame {
-    fn key_control_b(&mut self, ui: &mut egui::Ui) {
-        let string = &mut self.key_string_b;
-        ui.horizontal(|ui| {
-            if ui.control_string(string).changed() {
-                *string = string
-                    .chars()
-                    .filter(|c| c.is_ascii_hexdigit())
-                    .take(128) // 128 characters is 64 bytes
-                    .collect();
-                self.valid_key_b = string.len() % 2 != 0;
-                if self.valid_key_b {
-                    if let Ok(new) = ByteFormat::Hex.text_to_bytes(string) {
-                        match new.try_into() {
-                            Ok(key) => self.hasher_b.key = key,
-                            Err(_) => unreachable!(),
-                        }
-                    } else {
-                        unreachable!("unable to parse input");
-                    }
-                }
-            };
-            if ui.button("🎲").on_hover_text("randomize").clicked() {
-                let mut rng = thread_rng();
-                rng.fill_bytes(&mut self.hasher_b.key);
-                *string = ByteFormat::Hex.byte_slice_to_text(&self.hasher_b.key)
-            };
-        });
-
-        if !self.valid_key_b {
-            ui.error_text("invalid key");
-        } else {
-            ui.error_text("");
-        }
-    }
-
-    fn key_control_b_long(&mut self, ui: &mut egui::Ui) {
-        let string = &mut self.key_string_b_long;
-        ui.horizontal(|ui| {
-            if ui.control_string(string).changed() {
-                *string = string
-                    .chars()
-                    .filter(|c| c.is_ascii_hexdigit())
-                    .take(128) // 128 characters is 64 bytes
-                    .collect();
-                self.valid_key_b_long = string.len() % 2 != 0;
-                if self.valid_key_b_long {
-                    if let Ok(new) = ByteFormat::Hex.text_to_bytes(string) {
-                        match new.try_into() {
-                            Ok(key) => self.hasher_b_long.key = key,
-                            Err(_) => unreachable!(),
-                        }
-                    } else {
-                        unreachable!("unable to parse input");
-                    }
-                }
-            };
-            if ui.button("🎲").on_hover_text("randomize").clicked() {
-                let mut rng = thread_rng();
-                rng.fill_bytes(&mut self.hasher_b_long.key);
-                *string = ByteFormat::Hex.byte_slice_to_text(&self.hasher_b_long.key)
-            };
-        });
-
-        if !self.valid_key_b_long {
-            ui.error_text("invalid key");
-        } else {
-            ui.error_text("");
-        }
-    }
-
-    fn key_control_s(&mut self, ui: &mut egui::Ui) {
-        let string = &mut self.key_string_s;
-        ui.horizontal(|ui| {
-            if ui.control_string(string).changed() {
-                *string = string
-                    .chars()
-                    .filter(|c| c.is_ascii_hexdigit())
-                    .take(64) // 64 characters is 32 bytes
-                    .collect();
-                self.valid_key_s = string.len() % 2 != 0;
-                if self.valid_key_s {
-                    if let Ok(new) = ByteFormat::Hex.text_to_bytes(string) {
-                        match new.try_into() {
-                            Ok(key) => self.hasher_s.key = key,
-                            Err(_) => unreachable!(),
-                        }
-                    } else {
-                        unreachable!("unable to parse input");
-                    }
-                }
-            };
-            if ui.button("🎲").on_hover_text("randomize").clicked() {
-                let mut rng = thread_rng();
-                rng.fill_bytes(&mut self.hasher_s.key);
-                *string = ByteFormat::Hex.byte_slice_to_text(&self.hasher_s.key)
-            };
-        });
-
-        if !self.valid_key_s {
-            ui.error_text("invalid key");
-        } else {
-            ui.error_text("");
         }
     }
 }
@@ -209,19 +142,37 @@ impl HasherFrame for Blake2Frame {
 
         ui.add_space(16.0);
         ui.subheading("Key (provide as hexadecimal)");
-        ui.label("The BLAKE2 functions allow a key to be included.");
+        ui.label("The BLAKE2 functions allow a key to be included to they function as a MAC.");
         match self.variant {
             Blake2Variant::Big => {
                 ui.label("BLAKE2b has a maximum key size of of 64 bytes (512 bits).");
-                self.key_control_b(ui);
+                key_control(
+                    ui,
+                    &mut self.hasher_b.key,
+                    &mut self.key_string_b,
+                    &mut self.valid_key_b,
+                    64,
+                );
             }
             Blake2Variant::BigLong => {
                 ui.label("BLAKE2b-Long has a maximum key size of of 64 bytes (512 bits).");
-                self.key_control_b_long(ui);
+                key_control(
+                    ui,
+                    &mut self.hasher_b_long.key,
+                    &mut self.key_string_b_long,
+                    &mut self.valid_key_b_long,
+                    64,
+                );
             }
             Blake2Variant::Small => {
                 ui.label("BLAKE2s has a maximum key size of of 32 bytes (256 bits).");
-                self.key_control_s(ui);
+                key_control(
+                    ui,
+                    &mut self.hasher_s.key,
+                    &mut self.key_string_s,
+                    &mut self.valid_key_s,
+                    32,
+                );
             }
         };
 
