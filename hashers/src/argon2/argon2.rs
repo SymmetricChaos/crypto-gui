@@ -403,7 +403,7 @@ impl ClassicHasher for Argon2 {
 
         let mut mem_blocks = vec![Block::default(); num_blocks];
 
-        let mut hasher = Blake2bLong::default().hash_len(BLOCK_BYTES);
+        let mut hasher = Blake2bLong::default().with_hash_len(BLOCK_BYTES as u64);
         // Initialize the first two block of each lane
         for lane in (0..num_blocks).step_by(lane_length) {
             // G(h|0|lane)
@@ -585,7 +585,7 @@ impl ClassicHasher for Argon2 {
         }
 
         // Hash the final value
-        hasher.hash_len = self.tag_len as usize;
+        hasher.hash_len = self.tag_len as u64;
         hasher.hash(&c.to_be_bytes())
     }
 

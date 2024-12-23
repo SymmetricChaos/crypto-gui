@@ -161,6 +161,11 @@ impl StatefulHasher for Blake2sStateful {
             .take(self.hash_len as usize)
             .collect_vec()
     }
+
+    fn hash(mut self, bytes: &[u8]) -> Vec<u8> {
+        self.update(bytes);
+        self.finalize()
+    }
 }
 
 #[cfg(test)]

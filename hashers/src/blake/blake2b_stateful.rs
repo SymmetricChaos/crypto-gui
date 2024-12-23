@@ -91,20 +91,36 @@ impl Blake2bStateful {
         hasher
     }
 
-    pub fn init_hash256() -> Self {
+    pub fn init_hash_256() -> Self {
         Self::init(&[], 32)
     }
 
-    pub fn init_hash512() -> Self {
+    pub fn init_hash_384() -> Self {
+        Self::init(&[], 48)
+    }
+
+    pub fn init_hash_512() -> Self {
         Self::init(&[], 64)
     }
 
-    pub fn init_mac256<T: AsRef<[u8]>>(key: T) -> Self {
+    pub fn init_hash_var(hash_len: u64) -> Self {
+        Self::init(&[], hash_len)
+    }
+
+    pub fn init_mac_256<T: AsRef<[u8]>>(key: T) -> Self {
         Self::init(key, 32)
     }
 
-    pub fn init_mac512<T: AsRef<[u8]>>(key: T) -> Self {
+    pub fn init_mac_384<T: AsRef<[u8]>>(key: T) -> Self {
+        Self::init(key, 48)
+    }
+
+    pub fn init_mac_512<T: AsRef<[u8]>>(key: T) -> Self {
         Self::init(key, 64)
+    }
+
+    pub fn init_mac_var<T: AsRef<[u8]>>(key: T, hash_len: u64) -> Self {
+        Self::init(key, hash_len)
     }
 
     pub fn hash_len(&self) -> u64 {
@@ -125,13 +141,19 @@ impl Blake2bStateful {
     }
 
     pub fn hash_256(bytes: &[u8]) -> Vec<u8> {
-        let mut h = Self::init_hash256();
+        let mut h = Self::init_hash_256();
+        h.update(bytes);
+        h.finalize()
+    }
+
+    pub fn hash_384(bytes: &[u8]) -> Vec<u8> {
+        let mut h = Self::init_hash_384();
         h.update(bytes);
         h.finalize()
     }
 
     pub fn hash_512(bytes: &[u8]) -> Vec<u8> {
-        let mut h = Self::init_hash512();
+        let mut h = Self::init_hash_512();
         h.update(bytes);
         h.finalize()
     }
@@ -169,6 +191,11 @@ impl StatefulHasher for Blake2bStateful {
             .take(self.hash_len as usize)
             .collect_vec()
     }
+
+    fn hash(mut self, bytes: &[u8]) -> Vec<u8> {
+        self.update(bytes);
+        self.finalize()
+    }
 }
 
 #[cfg(test)]
@@ -180,20 +207,20 @@ mod blake2b_stateful_tests {
 
     #[test]
     fn test_empty() {
-        let hasher = Blake2bStateful::init_hash512();
+        let hasher = Blake2bStateful::init_hash_512();
         assert_eq!(hasher.finalize(), hex_to_bytes_ltr("786a02f742015903c6c6fd852552d272912f4740e15847618a86e217f71f5419d25e1031afee585313896444934eb04b903a685b1448b755d56f701afe9be2ce").unwrap());
     }
 
     #[test]
     fn test_abc() {
-        let mut hasher = Blake2bStateful::init_hash512();
+        let mut hasher = Blake2bStateful::init_hash_512();
         hasher.update(&[0x61, 0x62, 0x63]);
         assert_eq!(hasher.finalize(), hex_to_bytes_ltr("ba80a53f981c4d0d6a2797b69f12f6e94c212f14685ac4b74b12bb6fdbffa2d17d87c5392aab792dc252d5de4533cc9518d38aa8dbf1925ab92386edd4009923").unwrap());
     }
 
     #[test]
     fn test_abc_partial() {
-        let mut hasher = Blake2bStateful::init_hash512();
+        let mut hasher = Blake2bStateful::init_hash_512();
         hasher.update(&[0x61]);
         hasher.update(&[0x62]);
         hasher.update(&[0x63]);

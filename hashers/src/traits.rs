@@ -6,8 +6,14 @@ pub trait ClassicHasher {
 }
 
 pub trait StatefulHasher {
+    // Update the hasher's state with some bytes.
     fn update(&mut self, bytes: &[u8]);
+
+    // Finalize the hash with any padding and processing of final blocks then output bytes. Consumes the hasher so it cannot be reused.
     fn finalize(self) -> Vec<u8>;
+
+    // Simultaneously update and finalize.
+    fn hash(self, bytes: &[u8]) -> Vec<u8>;
 }
 
 #[macro_export]

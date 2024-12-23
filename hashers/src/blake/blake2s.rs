@@ -10,8 +10,8 @@ use super::Blake2sStateful;
 pub struct Blake2s {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    pub key: Vec<u8>,    // optional key, length from 0 to 32 bytes
-    pub hash_len: usize, // length of output in bytes, 1 to 32
+    pub key: Vec<u8>,  // optional key, length from 0 to 32 bytes
+    pub hash_len: u32, // length of output in bytes, 1 to 32
 }
 
 impl Default for Blake2s {
@@ -26,7 +26,7 @@ impl Default for Blake2s {
 }
 
 impl Blake2s {
-    pub fn with_hash_len(mut self, hash_len: usize) -> Self {
+    pub fn with_hash_len(mut self, hash_len: u32) -> Self {
         assert!(hash_len > 1 && hash_len <= 32);
         self.hash_len = hash_len;
         self
@@ -51,7 +51,7 @@ impl Blake2s {
 
 impl ClassicHasher for Blake2s {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut h = Blake2sStateful::init(&self.key, self.hash_len as u32);
+        let mut h = Blake2sStateful::init(&self.key, self.hash_len);
         h.update(bytes);
         h.finalize()
     }
