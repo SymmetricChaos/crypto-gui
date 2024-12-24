@@ -1,9 +1,6 @@
+use crate::traits::StatefulHasher;
 use itertools::Itertools;
-use utils::byte_formatting::{fill_u64s_be, ByteFormat};
-
-use crate::{errors::HasherError, traits::ClassicHasher};
-
-// https://eprint.iacr.org/2012/351.pdf
+use utils::byte_formatting::fill_u64s_be;
 
 // Constants for compression function, beginning digits of pi
 const C: [u64; 16] = [
@@ -25,199 +22,274 @@ const C: [u64; 16] = [
     0x636920d871574e69,
 ];
 
-#[derive(Debug, Clone)]
-pub struct Blake512 {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-    pub salt: [u64; 4], // optional salt
-    truncated: bool,
+const IV_384: [u64; 8] = [
+    0xcbbb9d5dc1059ed8,
+    0x629a292a367cd507,
+    0x9159015a3070dd17,
+    0x152fecd8f70e5939,
+    0x67332667ffc00b31,
+    0x8eb44a8768581511,
+    0xdb0c2e0d64f98fa7,
+    0x47b5481dbefa4fa4,
+];
+
+const IV_512: [u64; 8] = [
+    0x6a09e667f3bcc908,
+    0xbb67ae8584caa73b,
+    0x3c6ef372fe94f82b,
+    0xa54ff53a5f1d36f1,
+    0x510e527fade682d1,
+    0x9b05688c2b3e6c1f,
+    0x1f83d9abfb41bd6b,
+    0x5be0cd19137e2179,
+];
+
+// https://decred.org/research/aumasson2010.pdf
+pub fn compress(state: &mut [u64; 8], chunk: &[u64; 16], counter: u128, salt: &[u64; 4]) {
+    // create a working vector starting with the current state and then following it with C xored with the salt, then C xored with the counter
+    let mut work = [0_u64; 16];
+    for i in 0..8 {
+        work[i] = state[i];
+    }
+    for i in 0..4 {
+        work[i + 8] = C[i] ^ salt[i]
+    }
+    work[12] = C[4] ^ (counter as u64); // Lower bits
+    work[13] = C[5] ^ (counter as u64);
+    work[14] = C[6] ^ (counter >> 64) as u64; // Upper bits
+    work[15] = C[7] ^ (counter >> 64) as u64;
+
+    crate::blake_compress!(&mut work, chunk, [32, 25, 16, 11], C, 16);
+
+    for i in 0..8 {
+        state[i] ^= salt[i % 4] ^ work[i] ^ work[i + 8];
+    }
 }
 
-impl Default for Blake512 {
-    fn default() -> Self {
-        Blake512::blake512()
+fn create_chunk(bytes: &[u8]) -> [u64; 16] {
+    let mut k = [0u64; 16];
+    fill_u64s_be(&mut k, &bytes);
+    k
+}
+
+#[derive(Debug, Clone)]
+pub struct Blake384 {
+    state: [u64; 8],
+    salt: [u64; 4],
+    bits_taken: u128,
+    buffer: Vec<u8>,
+}
+
+impl Blake384 {
+    pub fn init() -> Self {
+        let hasher = Self {
+            state: IV_384,
+            salt: [0; 4],
+            bits_taken: 0,
+            buffer: Vec::new(),
+        };
+
+        hasher
     }
+
+    pub fn init_mac(salt: [u64; 4]) -> Self {
+        let hasher = Self {
+            state: IV_384,
+            salt,
+            bits_taken: 0,
+            buffer: Vec::new(),
+        };
+
+        hasher
+    }
+}
+
+impl StatefulHasher for Blake384 {
+    fn update(&mut self, bytes: &[u8]) {
+        self.buffer.extend_from_slice(bytes);
+
+        let chunks = self.buffer.chunks_exact(128);
+        let last = chunks.remainder().to_vec();
+        for chunk in chunks {
+            self.bits_taken += 1024;
+            let c = create_chunk(chunk);
+            compress(&mut self.state, &c, self.bits_taken, &self.salt);
+        }
+        self.buffer = last;
+    }
+
+    fn finalize(mut self) -> Vec<u8> {
+        // Padding
+        let total_bits = self.bits_taken + (self.buffer.len() * 8) as u128;
+
+        // Push a 1 bit followed by zeroes until and then a 1 bit again to reach 896 bits (112 bytes)
+        if self.buffer.len() == 111 {
+            self.buffer.push(0x81);
+        } else {
+            self.buffer.push(0x80);
+            while self.buffer.len() % 128 != 111 {
+                self.buffer.push(0x00);
+            }
+            self.buffer.push(0x00); // different from BLAKE512
+        }
+        // Then push the total input length onto the buffer at the last 128 bits
+        for b in total_bits.to_be_bytes() {
+            self.buffer.push(b);
+        }
+
+        // There could be either one or two blocks to finalize
+        if self.buffer.len() > 128 {
+            let c = create_chunk(&self.buffer[0..128]);
+            compress(&mut self.state, &c, total_bits, &self.salt);
+            let c = create_chunk(&self.buffer[128..256]);
+            compress(&mut self.state, &c, 0, &self.salt); // in the two final block case the last block has its counter set to zero
+        } else {
+            let c = create_chunk(&self.buffer);
+            compress(&mut self.state, &c, total_bits, &self.salt);
+        }
+
+        self.state
+            .iter()
+            .take(6)
+            .map(|x| x.to_be_bytes())
+            .flatten()
+            .collect_vec()
+    }
+
+    fn hash(mut self, bytes: &[u8]) -> Vec<u8> {
+        self.update(bytes);
+        self.finalize()
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Blake512 {
+    state: [u64; 8],
+    salt: [u64; 4],
+    bits_taken: u128,
+    buffer: Vec<u8>,
 }
 
 impl Blake512 {
-    // Initialization vector, sqrt of the first eight primes
-    const IV_512: [u64; 8] = [
-        0x6a09e667f3bcc908,
-        0xbb67ae8584caa73b,
-        0x3c6ef372fe94f82b,
-        0xa54ff53a5f1d36f1,
-        0x510e527fade682d1,
-        0x9b05688c2b3e6c1f,
-        0x1f83d9abfb41bd6b,
-        0x5be0cd19137e2179,
-    ];
+    pub fn init() -> Self {
+        let hasher = Self {
+            state: IV_512,
+            salt: [0; 4],
+            bits_taken: 0,
+            buffer: Vec::new(),
+        };
 
-    const IV_384: [u64; 8] = [
-        0xcbbb9d5dc1059ed8,
-        0x629a292a367cd507,
-        0x9159015a3070dd17,
-        0x152fecd8f70e5939,
-        0x67332667ffc00b31,
-        0x8eb44a8768581511,
-        0xdb0c2e0d64f98fa7,
-        0x47b5481dbefa4fa4,
-    ];
-
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
+        hasher
     }
 
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
-    }
+    pub fn init_mac(salt: [u64; 4]) -> Self {
+        let hasher = Self {
+            state: IV_512,
+            salt,
+            bits_taken: 0,
+            buffer: Vec::new(),
+        };
 
-    pub fn salt(mut self, salt: [u64; 4]) -> Self {
-        self.salt = salt;
-        self
-    }
-
-    pub fn salt_from_string(&mut self, text: &str) -> Result<(), HasherError> {
-        if text.len() != 64 {
-            return Err(HasherError::key(
-                "key must be given as exactly 64 hex digits",
-            ));
-        }
-        let v = ByteFormat::Hex
-            .text_to_u64_be(text)
-            .expect("salt text did not have exactly 64 digits");
-        self.salt = v
-            .try_into()
-            .expect("failed to convert Vec<u64> to [u64; 4]");
-
-        Ok(())
-    }
-
-    pub fn blake512() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-            salt: [0, 0, 0, 0],
-            truncated: false,
-        }
-    }
-
-    pub fn blake384() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-            salt: [0, 0, 0, 0],
-            truncated: true,
-        }
-    }
-
-    // https://decred.org/research/aumasson2010.pdf
-    pub fn compress(state: &mut [u64; 8], chunk: &[u64; 16], counter: u128, salt: &[u64; 4]) {
-        // create a working vector starting with the current state and then following it with C xored with the salt, then C xored with the counter
-        // println!("chunk: {:016x?}\n", chunk);
-        let mut work = [0_u64; 16];
-        for i in 0..8 {
-            work[i] = state[i];
-        }
-        for i in 0..4 {
-            work[i + 8] = C[i] ^ salt[i]
-        }
-        work[12] = C[4] ^ (counter as u64); // Lower bits
-        work[13] = C[5] ^ (counter as u64);
-        work[14] = C[6] ^ (counter >> 64) as u64; // Upper bits
-        work[15] = C[7] ^ (counter >> 64) as u64;
-
-        crate::blake_compress!(&mut work, chunk, [32, 25, 16, 11], C, 16);
-
-        for i in 0..8 {
-            state[i] ^= salt[i % 4] ^ work[i] ^ work[i + 8];
-        }
-        // println!("intermediate: {:016x?}\n", state);
-    }
-
-    fn create_chunk(bytes: &[u8]) -> [u64; 16] {
-        let mut k = [0u64; 16];
-        fill_u64s_be(&mut k, &bytes);
-        k
+        hasher
     }
 }
 
-impl ClassicHasher for Blake512 {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut input = bytes.to_vec();
+impl StatefulHasher for Blake512 {
+    fn update(&mut self, bytes: &[u8]) {
+        self.buffer.extend_from_slice(bytes);
 
-        // Length in bits before padding
-        let b_len = (bytes.len().wrapping_mul(8)) as u128;
-
-        // Padding
-        // push a byte with a leading 1 to the bytes
-        input.push(0x80);
-        // push zeros until the length in bits is 888 mod 1024
-        // equivalently until the length in bytes is 111 mod 128
-        while (input.len() % 128) != 111 {
-            input.push(0x00)
+        let chunks = self.buffer.chunks_exact(128);
+        let last = chunks.remainder().to_vec();
+        for chunk in chunks {
+            self.bits_taken += 1024;
+            let c = create_chunk(chunk);
+            compress(&mut self.state, &c, self.bits_taken, &self.salt);
         }
-
-        // Final byte before length is 0x01 for BLAKE512 and is 0x00 for BLAKE384
-        if self.truncated {
-            input.push(0x00);
-        } else {
-            input.push(0x01);
-        }
-
-        // Append length
-        for b in b_len.to_be_bytes() {
-            input.push(b)
-        }
-
-        let mut bytes_remaining = input.len();
-        let mut counter = 0;
-        let mut state = match self.truncated {
-            true => Self::IV_384.clone(),
-            false => Self::IV_512.clone(),
-        };
-        let mut message = input.chunks_exact(128).peekable();
-
-        while bytes_remaining >= 128 {
-            let chunk = Self::create_chunk(message.next().unwrap());
-            if message.peek().is_none() {
-                counter = b_len;
-            } else {
-                counter += 128;
-            }
-            bytes_remaining -= 128;
-            Self::compress(&mut state, &chunk, counter, &self.salt)
-        }
-
-        if self.truncated {
-            state
-                .iter()
-                .take(6)
-                .map(|x| x.to_be_bytes())
-                .flatten()
-                .collect_vec()
-        } else {
-            state
-                .iter()
-                .map(|x| x.to_be_bytes())
-                .flatten()
-                .collect_vec()
-        }
+        self.buffer = last;
     }
 
-    crate::hash_bytes_from_string! {}
+    fn finalize(mut self) -> Vec<u8> {
+        // Padding
+        let total_bits = self.bits_taken + (self.buffer.len() * 8) as u128;
+
+        // Push a 1 bit followed by zeroes until and then a 1 bit again to reach 896 bits (112 bytes)
+        if self.buffer.len() == 111 {
+            self.buffer.push(0x81);
+        } else {
+            self.buffer.push(0x80);
+            while self.buffer.len() % 128 != 111 {
+                self.buffer.push(0x00);
+            }
+            self.buffer.push(0x01);
+        }
+        // Then push the total input length onto the buffer at the last 128 bits
+        for b in total_bits.to_be_bytes() {
+            self.buffer.push(b);
+        }
+
+        // There could be either one or two blocks to finalize
+        if self.buffer.len() > 128 {
+            let c = create_chunk(&self.buffer[0..128]);
+            compress(&mut self.state, &c, total_bits, &self.salt);
+            let c = create_chunk(&self.buffer[128..256]);
+            compress(&mut self.state, &c, 0, &self.salt); // in the two final block case the last block has its counter set to zero
+        } else {
+            let c = create_chunk(&self.buffer);
+            compress(&mut self.state, &c, total_bits, &self.salt);
+        }
+
+        self.state
+            .iter()
+            .map(|x| x.to_be_bytes())
+            .flatten()
+            .collect_vec()
+    }
+
+    fn hash(mut self, bytes: &[u8]) -> Vec<u8> {
+        self.update(bytes);
+        self.finalize()
+    }
 }
 
 #[cfg(test)]
 mod blake512_tests {
+    use utils::byte_formatting::hex_to_bytes_ltr;
+
     use super::*;
 
     #[test]
-    fn test_empty() {
-        let mut hasher = Blake512::default();
-        hasher.input_format = ByteFormat::Hex;
-        hasher.output_format = ByteFormat::Hex;
-        assert_eq!("97961587f6d970faba6d2478045de6d1fabd09b61ae50932054d52bc29d31be4ff9102b9f69e2bbdb83be13d4b9c06091e5fa0b48bd081b634058be0ec49beb3", hasher.hash_bytes_from_string("00").unwrap());
+    fn test_512_one_byte() {
+        let mut h = Blake512::init();
+        h.update(&[0x00]);
+        assert_eq!(
+            hex_to_bytes_ltr("97961587f6d970faba6d2478045de6d1fabd09b61ae50932054d52bc29d31be4ff9102b9f69e2bbdb83be13d4b9c06091e5fa0b48bd081b634058be0ec49beb3").unwrap(), 
+            h.finalize());
+    }
+
+    #[test]
+    fn test_512_pangram() {
+        let mut h = Blake512::init();
+        h.update(b"The quick brown fox jumps over the lazy dog");
+        assert_eq!(
+            hex_to_bytes_ltr("1f7e26f63b6ad25a0896fd978fd050a1766391d2fd0471a77afb975e5034b7ad2d9ccf8dfb47abbbe656e1b82fbc634ba42ce186e8dc5e1ce09a885d41f43451").unwrap(), 
+            h.finalize());
+    }
+
+    #[test]
+    fn test_384_letters() {
+        let mut h = Blake384::init();
+        h.update(b"abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu");
+        assert_eq!(
+            hex_to_bytes_ltr("3b21598562da076378b2b8794e919172502d8a6661a503a6b846457376ce2ba546f4d4a7df2c4d8a875a89b0b4647e10").unwrap(), 
+            h.finalize());
+    }
+
+    #[test]
+    fn test_384_pangram() {
+        let mut h = Blake384::init();
+        h.update(b"The quick brown fox jumps over the lazy dog");
+        assert_eq!(
+            hex_to_bytes_ltr("67c9e8ef665d11b5b57a1d99c96adffb3034d8768c0827d1c6e60b54871e8673651767a2c6c43d0ba2a9bb2500227406").unwrap(), 
+            h.finalize());
     }
 }
