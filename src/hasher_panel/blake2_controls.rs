@@ -54,6 +54,8 @@ impl Blake2Frame {
             };
             if ui.button("🎲").on_hover_text("randomize").clicked() {
                 let mut rng = thread_rng();
+                self.key.clear();
+                self.key.shrink_to(256);
                 rng.fill_bytes(&mut self.key);
                 self.key_string = ByteFormat::Hex.byte_slice_to_text(&self.key)
             };

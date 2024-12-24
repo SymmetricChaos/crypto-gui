@@ -1,6 +1,5 @@
-use crate::ui_elements::UiElements;
-
 use super::HasherFrame;
+use crate::ui_elements::UiElements;
 use hashers::{
     blake::{blake256::Blake256, blake512::Blake512, Blake224, Blake384},
     errors::HasherError,
@@ -41,17 +40,27 @@ impl Default for BlakeFrame {
 
 impl BlakeFrame {
     fn salt_control_32(&mut self, ui: &mut egui::Ui) {
-        ui.u32_hex_edit(&mut self.salt_32[0]);
-        ui.u32_hex_edit(&mut self.salt_32[1]);
-        ui.u32_hex_edit(&mut self.salt_32[2]);
-        ui.u32_hex_edit(&mut self.salt_32[3]);
+        if ui.button("🎲").on_hover_text("randomize").clicked() {
+            let mut rng = thread_rng();
+            for i in 0..4 {
+                self.salt_32[i] = rng.gen();
+            }
+        }
+        for i in 0..4 {
+            ui.u32_hex_edit(&mut self.salt_32[i]);
+        }
     }
 
     fn salt_control_64(&mut self, ui: &mut egui::Ui) {
-        ui.u64_hex_edit(&mut self.salt_64[0]);
-        ui.u64_hex_edit(&mut self.salt_64[1]);
-        ui.u64_hex_edit(&mut self.salt_64[2]);
-        ui.u64_hex_edit(&mut self.salt_64[3]);
+        if ui.button("🎲").on_hover_text("randomize").clicked() {
+            let mut rng = thread_rng();
+            for i in 0..4 {
+                self.salt_64[i] = rng.gen();
+            }
+        }
+        for i in 0..4 {
+            ui.u64_hex_edit(&mut self.salt_64[i]);
+        }
     }
 }
 

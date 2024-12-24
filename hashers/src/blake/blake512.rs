@@ -251,45 +251,20 @@ impl StatefulHasher for Blake512 {
     }
 }
 
-#[cfg(test)]
-mod blake512_tests {
-    use utils::byte_formatting::hex_to_bytes_ltr;
+crate::stateful_hash_tests!(
+    test_512_one_byte, Blake512::init(),
+    &[0x00],
+    "97961587f6d970faba6d2478045de6d1fabd09b61ae50932054d52bc29d31be4ff9102b9f69e2bbdb83be13d4b9c06091e5fa0b48bd081b634058be0ec49beb3";
 
-    use super::*;
+    test_512_pangram, Blake512::init(),
+    b"The quick brown fox jumps over the lazy dog",
+    "1f7e26f63b6ad25a0896fd978fd050a1766391d2fd0471a77afb975e5034b7ad2d9ccf8dfb47abbbe656e1b82fbc634ba42ce186e8dc5e1ce09a885d41f43451";
 
-    #[test]
-    fn test_512_one_byte() {
-        let mut h = Blake512::init();
-        h.update(&[0x00]);
-        assert_eq!(
-            hex_to_bytes_ltr("97961587f6d970faba6d2478045de6d1fabd09b61ae50932054d52bc29d31be4ff9102b9f69e2bbdb83be13d4b9c06091e5fa0b48bd081b634058be0ec49beb3").unwrap(), 
-            h.finalize());
-    }
+    test_384_letters, Blake384::init(),
+    b"abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
+    "3b21598562da076378b2b8794e919172502d8a6661a503a6b846457376ce2ba546f4d4a7df2c4d8a875a89b0b4647e10";
 
-    #[test]
-    fn test_512_pangram() {
-        let mut h = Blake512::init();
-        h.update(b"The quick brown fox jumps over the lazy dog");
-        assert_eq!(
-            hex_to_bytes_ltr("1f7e26f63b6ad25a0896fd978fd050a1766391d2fd0471a77afb975e5034b7ad2d9ccf8dfb47abbbe656e1b82fbc634ba42ce186e8dc5e1ce09a885d41f43451").unwrap(), 
-            h.finalize());
-    }
-
-    #[test]
-    fn test_384_letters() {
-        let mut h = Blake384::init();
-        h.update(b"abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu");
-        assert_eq!(
-            hex_to_bytes_ltr("3b21598562da076378b2b8794e919172502d8a6661a503a6b846457376ce2ba546f4d4a7df2c4d8a875a89b0b4647e10").unwrap(), 
-            h.finalize());
-    }
-
-    #[test]
-    fn test_384_pangram() {
-        let mut h = Blake384::init();
-        h.update(b"The quick brown fox jumps over the lazy dog");
-        assert_eq!(
-            hex_to_bytes_ltr("67c9e8ef665d11b5b57a1d99c96adffb3034d8768c0827d1c6e60b54871e8673651767a2c6c43d0ba2a9bb2500227406").unwrap(), 
-            h.finalize());
-    }
-}
+    test_384_pangram, Blake384::init(),
+    b"The quick brown fox jumps over the lazy dog",
+    "67c9e8ef665d11b5b57a1d99c96adffb3034d8768c0827d1c6e60b54871e8673651767a2c6c43d0ba2a9bb2500227406";
+);

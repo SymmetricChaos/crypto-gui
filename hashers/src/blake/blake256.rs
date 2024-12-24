@@ -223,31 +223,12 @@ impl StatefulHasher for Blake256 {
     }
 }
 
-#[cfg(test)]
-mod blake512_tests {
-    use utils::byte_formatting::hex_to_bytes_ltr;
+crate::stateful_hash_tests!(
+    test_256_one_byte, Blake256::init(),
+    &[0x00],
+    "0ce8d4ef4dd7cd8d62dfded9d4edb0a774ae6a41929a74da23109e8f11139c87";
 
-    use super::*;
-
-    #[test]
-    fn test_256_one_byte() {
-        let mut h = Blake256::init();
-        h.update(&[0x00]);
-        assert_eq!(
-            hex_to_bytes_ltr("0ce8d4ef4dd7cd8d62dfded9d4edb0a774ae6a41929a74da23109e8f11139c87")
-                .unwrap(),
-            h.finalize()
-        );
-    }
-
-    #[test]
-    fn test_256_72_byte() {
-        let mut h = Blake256::init();
-        h.update(&[0x00; 72]);
-        assert_eq!(
-            hex_to_bytes_ltr("d419bad32d504fb7d44d460c42c5593fe544fa4c135dec31e21bd9abdcc22d41")
-                .unwrap(),
-            h.finalize()
-        );
-    }
-}
+    test_512_pangram, Blake256::init(),
+    &[0x00; 72],
+    "d419bad32d504fb7d44d460c42c5593fe544fa4c135dec31e21bd9abdcc22d41";
+);
