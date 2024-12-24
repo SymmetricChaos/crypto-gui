@@ -1,64 +1,72 @@
-use utils::byte_formatting::ByteFormat;
-
-use crate::{
-    blake::Blake2bStateful,
-    traits::{ClassicHasher, StatefulHasher},
-};
-
-use super::blake2b_long_stateful::Blake2bLongStatful;
-
-// https://eprint.iacr.org/2012/351.pdf
+use crate::{blake::Blake2b, traits::StatefulHasher};
 
 // Identical to Blake2b but allowing a hash of any length. This variant is specific to Argon2.
 #[derive(Debug, Clone)]
 pub struct Blake2bLong {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-    pub key: Vec<u8>,  // optional key, length from 0 to 64 bytes
-    pub hash_len: u64, // length of output in bytes, greater than 1
-}
-
-impl Default for Blake2bLong {
-    fn default() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-            key: Vec::new(),
-            hash_len: 32, // default to 256 bits
-        }
-    }
+    state: Blake2b,
+    hash_len: u64, // length of output in bytes, 1 to 64
 }
 
 impl Blake2bLong {
-    pub fn with_hash_len(mut self, hash_len: u64) -> Self {
-        assert!(hash_len > 1);
-        self.hash_len = hash_len;
-        self
+    pub fn init<T: AsRef<[u8]>>(key: T, hash_len: u64) -> Self {
+        let mut h = if hash_len <= 64 {
+            Blake2b::init(key, hash_len)
+        } else {
+            Blake2b::init(key, 64)
+        };
+
+        h.update(&(hash_len as u32).to_le_bytes());
+        Self { state: h, hash_len }
     }
 
-    pub fn with_key<T: AsRef<[u8]>>(mut self, key: T) -> Self {
-        assert!(key.as_ref().len() <= 64);
-        self.key = key.as_ref().to_vec();
-        self
+    pub fn init_hash(hash_len: u64) -> Self {
+        let mut h = if hash_len <= 64 {
+            Blake2b::init(&[], hash_len)
+        } else {
+            Blake2b::init(&[], 64)
+        };
+
+        h.update(&(hash_len as u32).to_le_bytes());
+        Self { state: h, hash_len }
     }
 
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
-    }
-
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
+    pub fn hash_len(&self) -> u64 {
+        self.hash_len
     }
 }
 
-impl ClassicHasher for Blake2bLong {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut h = Blake2bLongStatful::init(&self.key, self.hash_len);
-        h.update(bytes);
-        h.finalize()
+impl StatefulHasher for Blake2bLong {
+    fn update(&mut self, bytes: &[u8]) {
+        self.state.update(bytes);
     }
 
-    crate::hash_bytes_from_string! {}
+    fn finalize(self) -> Vec<u8> {
+        if self.hash_len <= 64 {
+            return self.state.finalize();
+        } else {
+            let mut out = Vec::with_capacity(self.hash_len as usize);
+            let mut ctr = self.hash_len;
+            let mut v = self.state.finalize();
+
+            while ctr > 32 {
+                // Take 32 bytes of the temporary value then hash the whole vector
+                // This is presumably related to length extension type attacks
+                out.extend_from_slice(&v[0..32]);
+                ctr -= 32;
+                v = Blake2b::hash_512(&v)
+            }
+
+            // Final bytes change the hash length of Blake2b, which alters its state, so truncation is not used
+            let mut h = Blake2b::init(&[], ctr as u64);
+            h.update(&v);
+            out.extend_from_slice(&h.finalize());
+
+            out
+        }
+    }
+
+    fn hash(mut self, bytes: &[u8]) -> Vec<u8> {
+        self.update(bytes);
+        self.finalize()
+    }
 }

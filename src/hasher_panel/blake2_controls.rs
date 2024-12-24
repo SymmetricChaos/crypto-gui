@@ -1,54 +1,13 @@
-use crate::ui_elements::UiElements;
-
 use super::HasherFrame;
+use crate::ui_elements::UiElements;
 use egui::DragValue;
 use hashers::{
-    blake::{Blake2b, Blake2bLong, Blake2s},
+    blake::{Blake2b, Blake2s},
     errors::HasherError,
-    traits::ClassicHasher,
+    traits::StatefulHasher,
 };
 use rand::{thread_rng, RngCore};
 use utils::byte_formatting::ByteFormat;
-
-fn key_control(
-    ui: &mut egui::Ui,
-    hasher_key: &mut Vec<u8>,
-    key_string: &mut String,
-    valid: &mut bool,
-    length: usize,
-) {
-    ui.horizontal(|ui| {
-        if ui.control_string(key_string).changed() {
-            *key_string = key_string
-                .chars()
-                .filter(|c| c.is_ascii_hexdigit())
-                .take(length) // 64 characters is 32 bytes
-                .collect();
-            *valid = key_string.len() % 2 != 0;
-            if *valid {
-                if let Ok(new) = ByteFormat::Hex.text_to_bytes(key_string) {
-                    match new.try_into() {
-                        Ok(key) => *hasher_key = key,
-                        Err(_) => unreachable!(),
-                    }
-                } else {
-                    unreachable!("unable to parse input");
-                }
-            }
-        };
-        if ui.button("🎲").on_hover_text("randomize").clicked() {
-            let mut rng = thread_rng();
-            rng.fill_bytes(hasher_key);
-            *key_string = ByteFormat::Hex.byte_slice_to_text(hasher_key)
-        };
-    });
-
-    if !*valid {
-        ui.error_text("invalid key");
-    } else {
-        ui.error_text("");
-    }
-}
 
 #[derive(Debug, PartialEq, Eq)]
 enum Blake2Variant {
@@ -59,30 +18,65 @@ enum Blake2Variant {
 
 pub struct Blake2Frame {
     variant: Blake2Variant,
-    hasher_b_long: Blake2bLong,
-    hasher_b: Blake2b,
-    hasher_s: Blake2s,
-    key_string_b: String,
-    valid_key_b: bool,
-    key_string_b_long: String,
-    valid_key_b_long: bool,
-    key_string_s: String,
-    valid_key_s: bool,
+    input_format: ByteFormat,
+    output_format: ByteFormat,
+    key: Vec<u8>,
+    key_string: String,
+    hash_len: u64,
+    valid_key: bool,
+}
+
+impl Blake2Frame {
+    fn validate_key(&mut self, length: usize) {
+        self.key_string = self
+            .key_string
+            .chars()
+            .filter(|c| c.is_ascii_hexdigit())
+            .take(length) // 64 characters is 32 bytes
+            .collect();
+        self.valid_key = self.key_string.len() % 2 != 0;
+        if self.valid_key {
+            if let Ok(new) = ByteFormat::Hex.text_to_bytes(&self.key_string) {
+                match new.try_into() {
+                    Ok(key) => self.key = key,
+                    Err(_) => unreachable!(),
+                }
+            } else {
+                unreachable!("unable to parse input");
+            }
+        }
+    }
+
+    fn key_control(&mut self, ui: &mut egui::Ui, length: usize) {
+        ui.horizontal(|ui| {
+            if ui.control_string(&mut self.key_string).changed() {
+                self.validate_key(length);
+            };
+            if ui.button("🎲").on_hover_text("randomize").clicked() {
+                let mut rng = thread_rng();
+                rng.fill_bytes(&mut self.key);
+                self.key_string = ByteFormat::Hex.byte_slice_to_text(&self.key)
+            };
+        });
+
+        if !self.valid_key {
+            ui.error_text("invalid key");
+        } else {
+            ui.error_text("");
+        }
+    }
 }
 
 impl Default for Blake2Frame {
     fn default() -> Self {
         Self {
             variant: Blake2Variant::Big,
-            hasher_b_long: Default::default(),
-            hasher_b: Default::default(),
-            hasher_s: Default::default(),
-            key_string_b: String::new(),
-            valid_key_b: true,
-            key_string_b_long: String::new(),
-            valid_key_b_long: true,
-            key_string_s: String::new(),
-            valid_key_s: true,
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
+            key: Vec::new(),
+            key_string: String::new(),
+            hash_len: 32,
+            valid_key: true,
         }
     }
 }
@@ -96,10 +90,29 @@ impl HasherFrame for Blake2Frame {
         ui.add_space(8.0);
 
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.variant, Blake2Variant::Big, "BLAKE2b");
-            ui.selectable_value(&mut self.variant, Blake2Variant::BigLong, "BLAKE2b-Long");
-            ui.selectable_value(&mut self.variant, Blake2Variant::Small, "BLAKE2bs");
+            if ui
+                .selectable_value(&mut self.variant, Blake2Variant::Big, "BLAKE2b")
+                .clicked()
+            {
+                self.hash_len = self.hash_len.clamp(1, 64);
+                self.validate_key(64);
+            };
+            if ui
+                .selectable_value(&mut self.variant, Blake2Variant::BigLong, "BLAKE2b-Long")
+                .clicked()
+            {
+                self.hash_len = self.hash_len.clamp(1, 1024);
+                self.validate_key(64);
+            };
+            if ui
+                .selectable_value(&mut self.variant, Blake2Variant::Small, "BLAKE2bs")
+                .clicked()
+            {
+                self.hash_len = self.hash_len.clamp(1, 32);
+                self.validate_key(32);
+            }
         });
+        ui.add_space(8.0);
 
         match self.variant {
             Blake2Variant::BigLong => ui.label("BLAKE2b-Long is designed for 64-bit hardware."),
@@ -108,35 +121,22 @@ impl HasherFrame for Blake2Frame {
         };
 
         ui.add_space(16.0);
-        match self.variant {
-            Blake2Variant::Big => ui.byte_io_mode_hasher(
-                &mut self.hasher_b.input_format,
-                &mut self.hasher_b.output_format,
-            ),
-            Blake2Variant::BigLong => ui.byte_io_mode_hasher(
-                &mut self.hasher_b_long.input_format,
-                &mut self.hasher_b_long.output_format,
-            ),
-            Blake2Variant::Small => ui.byte_io_mode_hasher(
-                &mut self.hasher_s.input_format,
-                &mut self.hasher_s.output_format,
-            ),
-        }
+        ui.byte_io_mode_hasher(&mut self.input_format, &mut self.output_format);
 
         ui.subheading("Hash Length");
         ui.label("The BLAKE2 functions allow a variety of output lengths specified by how many bytes of the internal state are returned.");
         match self.variant {
             Blake2Variant::Big => {
                 ui.label("BLAKE2b has a maximum output of 64 bytes (512 bits).");
-                ui.add(DragValue::new(&mut self.hasher_b.hash_len).range(1..=64));
+                ui.add(DragValue::new(&mut self.hash_len).range(1..=64));
             }
             Blake2Variant::BigLong => {
                 ui.label("BLAKE2b-Long has no maximum output length but here is limited to 1024 bytes (8192 bits, 1 kilobyte). For output lengths of 64 bytes or less it is identical to BLAKE2b.");
-                ui.add(DragValue::new(&mut self.hasher_b_long.hash_len).range(1..=1024));
+                ui.add(DragValue::new(&mut self.hash_len).range(1..=1024));
             }
             Blake2Variant::Small => {
                 ui.label("BLAKE2s has a maximum output of 32 bytes (256 bits).");
-                ui.add(DragValue::new(&mut self.hasher_s.hash_len).range(1..=32));
+                ui.add(DragValue::new(&mut self.hash_len).range(1..=32));
             }
         }
 
@@ -146,33 +146,15 @@ impl HasherFrame for Blake2Frame {
         match self.variant {
             Blake2Variant::Big => {
                 ui.label("BLAKE2b has a maximum key size of of 64 bytes (512 bits).");
-                key_control(
-                    ui,
-                    &mut self.hasher_b.key,
-                    &mut self.key_string_b,
-                    &mut self.valid_key_b,
-                    64,
-                );
+                self.key_control(ui, 64);
             }
             Blake2Variant::BigLong => {
                 ui.label("BLAKE2b-Long has a maximum key size of of 64 bytes (512 bits).");
-                key_control(
-                    ui,
-                    &mut self.hasher_b_long.key,
-                    &mut self.key_string_b_long,
-                    &mut self.valid_key_b_long,
-                    64,
-                );
+                self.key_control(ui, 64);
             }
             Blake2Variant::Small => {
                 ui.label("BLAKE2s has a maximum key size of of 32 bytes (256 bits).");
-                key_control(
-                    ui,
-                    &mut self.hasher_s.key,
-                    &mut self.key_string_s,
-                    &mut self.valid_key_s,
-                    32,
-                );
+                self.key_control(ui, 32);
             }
         };
 
@@ -182,10 +164,21 @@ impl HasherFrame for Blake2Frame {
     }
 
     fn hash_string(&self, text: &str) -> Result<String, HasherError> {
-        match self.variant {
-            Blake2Variant::Big => self.hasher_b.hash_bytes_from_string(text),
-            Blake2Variant::Small => self.hasher_s.hash_bytes_from_string(text),
-            Blake2Variant::BigLong => self.hasher_b_long.hash_bytes_from_string(text),
+        if !self.valid_key {
+            return Err(hashers::errors::HasherError::key("invalid key"));
         }
+
+        let bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
+
+        let h = match self.variant {
+            Blake2Variant::Big => Blake2b::init(&self.key, self.hash_len).hash(&bytes),
+            Blake2Variant::Small => Blake2s::init(&self.key, self.hash_len as u32).hash(&bytes),
+            Blake2Variant::BigLong => Blake2b::init(&self.key, self.hash_len).hash(&bytes),
+        };
+
+        Ok(self.output_format.byte_slice_to_text(&h))
     }
 }

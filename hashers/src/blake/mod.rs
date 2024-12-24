@@ -1,18 +1,13 @@
 pub mod blake256;
-pub mod blake2b;
 pub mod blake2b_long;
-mod blake2b_long_stateful;
-pub mod blake2b_stateful;
-pub mod blake2s_stateful;
-pub use blake2s_stateful::Blake2sStateful;
-pub mod blake512_stateful;
-pub use blake2b_stateful::Blake2bStateful;
-pub mod blake3;
-pub mod blake512;
-pub use blake2b::Blake2b;
 pub use blake2b_long::Blake2bLong;
+pub mod blake2b;
 pub mod blake2s;
 pub use blake2s::Blake2s;
+pub mod blake512_stateful;
+pub use blake2b::Blake2b;
+pub mod blake3;
+pub mod blake512;
 
 // Message permutation schedule shared by BLAKE and BLAKE2
 const SIGMA: [[usize; 16]; 10] = [

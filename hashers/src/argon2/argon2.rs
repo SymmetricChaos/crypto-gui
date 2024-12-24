@@ -13,7 +13,6 @@ use super::consts::{
     SYNC_POINTS,
 };
 use crate::{
-    blake::{Blake2bLong, Blake2bStateful},
     errors::HasherError,
     traits::{ClassicHasher, StatefulHasher},
 };
@@ -427,14 +426,14 @@ impl ClassicHasher for Argon2 {
             mem_blocks[lane + 1] = block;
         }
 
-        println!("Lane 0 (first four words)");
+        println!("Block 0 (first four words)");
         println!("{:016x?}", mem_blocks[0][0]);
         println!("{:016x?}", mem_blocks[0][1]);
         println!("{:016x?}", mem_blocks[0][2]);
         println!("{:016x?}", mem_blocks[0][3]);
         println!("");
 
-        println!("Lane 31 (last four words)");
+        println!("Block 31 (last four words)");
         println!("{:016x?}", mem_blocks[31][124]);
         println!("{:016x?}", mem_blocks[31][125]);
         println!("{:016x?}", mem_blocks[31][126]);
@@ -563,14 +562,14 @@ impl ClassicHasher for Argon2 {
                     }
                 }
             }
-            println!("Lane 0 (first four words)");
+            println!("Block 0 (first four words)");
             println!("{:016x?}", mem_blocks[0][0]);
             println!("{:016x?}", mem_blocks[0][1]);
             println!("{:016x?}", mem_blocks[0][2]);
             println!("{:016x?}", mem_blocks[0][3]);
             println!("");
 
-            println!("Lane 31 (last four words)");
+            println!("Block 31 (last four words)");
             println!("{:016x?}", mem_blocks[31][124]);
             println!("{:016x?}", mem_blocks[31][125]);
             println!("{:016x?}", mem_blocks[31][126]);
