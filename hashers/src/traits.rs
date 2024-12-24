@@ -14,6 +14,26 @@ pub trait StatefulHasher {
 
     // Simultaneously update and finalize.
     fn hash(self, bytes: &[u8]) -> Vec<u8>;
+
+    // Hash multiple inputs
+    fn hash_multiple(self, bytes: &[&[u8]]) -> Vec<u8>;
+}
+
+#[macro_export]
+macro_rules! stateful_hash_helpers {
+    () => {
+        fn hash(mut self, bytes: &[u8]) -> Vec<u8> {
+            self.update(bytes);
+            self.finalize()
+        }
+
+        fn hash_multiple(mut self, bytes: &[&[u8]]) -> Vec<u8> {
+            for b in bytes {
+                self.update(b)
+            }
+            self.finalize()
+        }
+    };
 }
 
 #[macro_export]
@@ -88,39 +108,32 @@ macro_rules! stateful_hash_tests {
     };
 }
 
-// The update doesn't work for some reason
-// #[macro_export]
-// macro_rules! incremental_hash_tests {
-//     ($($test_name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
-//         #[cfg(test)]
-//         mod stateful_incremental_tests {
-//         use super::*;
-//         $(
-//             #[test]
-//             fn $test_name() {
-//                 for partial in $input {
-//                     $hasher.update(&partial);
-//                     println!("state {:02x?}", $hasher.state_bytes());
-//                 }
-//                 assert_eq!(utils::byte_formatting::hex_to_bytes_ltr($output).unwrap(), $hasher.finalize());
-//             }
-//         )+
-//         }
-//     };
-//     // Optional variant with module name for separation
-//     (($mod_name: ident)?; $($name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
-//         #[cfg(test)]
-//         mod $mod_name {
-//         use super::*;
-//         $(
-//             #[test]
-//             fn $test_name() {
-//                 for partial in input {
-//                     $hasher.update(partial)
-//                 }
-//                 assert_eq!(utils::byte_formatting::hex_to_bytes_ltr($output).unwrap(), $hasher.finalize());
-//             }
-//         )+
-//         }
-//     };
-// }
+#[macro_export]
+macro_rules! incremental_hash_tests {
+    ($($test_name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
+        #[cfg(test)]
+        mod stateful_incremental_tests {
+        use super::*;
+        $(
+            #[test]
+            fn $test_name() {
+                assert_eq!(utils::byte_formatting::hex_to_bytes_ltr($output).unwrap(), $hasher.hash_multiple($input));
+            }
+        )+
+        }
+    };
+    // Optional variant with module name for separation
+    (($mod_name: ident)?; $($name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
+        #[cfg(test)]
+        mod $mod_name {
+        use super::*;
+        $(
+            #[test]
+            fn $test_name() {
+                $hasher.hash_multiple($input);
+                assert_eq!(utils::byte_formatting::hex_to_bytes_ltr($output).unwrap(), $hasher.hash_multiple($input));
+            }
+        )+
+        }
+    };
+}

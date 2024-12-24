@@ -104,10 +104,7 @@ impl StatefulHasher for Sha0Stateful {
         out
     }
 
-    fn hash(mut self, bytes: &[u8]) -> Vec<u8> {
-        self.update(bytes);
-        self.finalize()
-    }
+    crate::stateful_hash_helpers!();
 }
 
 impl Sha0Stateful {

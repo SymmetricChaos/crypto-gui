@@ -156,10 +156,7 @@ impl StatefulHasher for Blake384 {
             .collect_vec()
     }
 
-    fn hash(mut self, bytes: &[u8]) -> Vec<u8> {
-        self.update(bytes);
-        self.finalize()
-    }
+    crate::stateful_hash_helpers!();
 }
 
 #[derive(Debug, Clone)]
@@ -245,10 +242,7 @@ impl StatefulHasher for Blake512 {
             .collect_vec()
     }
 
-    fn hash(mut self, bytes: &[u8]) -> Vec<u8> {
-        self.update(bytes);
-        self.finalize()
-    }
+    crate::stateful_hash_helpers!();
 }
 
 crate::stateful_hash_tests!(
