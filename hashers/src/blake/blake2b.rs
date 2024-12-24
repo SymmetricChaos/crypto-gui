@@ -196,7 +196,7 @@ impl StatefulHasher for Blake2b {
 }
 
 #[cfg(test)]
-mod blake2b_stests {
+mod blake2b_tests {
     use super::*;
 
     const KEY: &[u8] = &[
@@ -227,6 +227,12 @@ mod blake2b_stests {
         0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe,
     ];
 
+    crate::stateful_hash_tests!(
+        empty, Blake2b::init_hash_512(), &[], "786a02f742015903c6c6fd852552d272912f4740e15847618a86e217f71f5419d25e1031afee585313896444934eb04b903a685b1448b755d56f701afe9be2ce";
+        abc, Blake2b::init_hash_512(), &[0x61, 0x62, 0x63], "ba80a53f981c4d0d6a2797b69f12f6e94c212f14685ac4b74b12bb6fdbffa2d17d87c5392aab792dc252d5de4533cc9518d38aa8dbf1925ab92386edd4009923";
+        with_key, Blake2b::init(KEY, 64), &MSG, "142709d62e28fcccd0af97fad0f8465b971e82201dc51070faa0372aa43e92484be1c1e73ba10906d5d1853db6a4106e0a7bf9800d373d6dee2d46d62ef2a461";
+    );
+
     crate::incremental_hash_tests!(
         with_key, Blake2b::init(KEY, 64),
         &[
@@ -243,11 +249,5 @@ mod blake2b_stests {
             &[0x63],
         ],
         "ba80a53f981c4d0d6a2797b69f12f6e94c212f14685ac4b74b12bb6fdbffa2d17d87c5392aab792dc252d5de4533cc9518d38aa8dbf1925ab92386edd4009923";
-    );
-
-    crate::stateful_hash_tests!(
-        empty, Blake2b::init_hash_512(), &[], "786a02f742015903c6c6fd852552d272912f4740e15847618a86e217f71f5419d25e1031afee585313896444934eb04b903a685b1448b755d56f701afe9be2ce";
-        abc, Blake2b::init_hash_512(), &[0x61, 0x62, 0x63], "ba80a53f981c4d0d6a2797b69f12f6e94c212f14685ac4b74b12bb6fdbffa2d17d87c5392aab792dc252d5de4533cc9518d38aa8dbf1925ab92386edd4009923";
-        with_key, Blake2b::init(KEY, 64), &MSG, "142709d62e28fcccd0af97fad0f8465b971e82201dc51070faa0372aa43e92484be1c1e73ba10906d5d1853db6a4106e0a7bf9800d373d6dee2d46d62ef2a461";
     );
 }

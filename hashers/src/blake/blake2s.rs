@@ -83,20 +83,28 @@ impl Blake2s {
 
         hasher
     }
-    pub fn init_hash128() -> Self {
+    pub fn init_hash_128() -> Self {
         Self::init(&[], 32)
     }
 
-    pub fn init_hash256() -> Self {
+    pub fn init_hash_256() -> Self {
         Self::init(&[], 32)
     }
 
-    pub fn init_mac128<T: AsRef<[u8]>>(key: T) -> Self {
+    pub fn init_hash_var(hash_len: u32) -> Self {
+        Self::init(&[], hash_len)
+    }
+
+    pub fn init_mac_128<T: AsRef<[u8]>>(key: T) -> Self {
         Self::init(key, 32)
     }
 
-    pub fn init_mac256<T: AsRef<[u8]>>(key: T) -> Self {
+    pub fn init_mac_256<T: AsRef<[u8]>>(key: T) -> Self {
         Self::init(key, 32)
+    }
+
+    pub fn init_mac_var<T: AsRef<[u8]>>(key: T, hash_len: u32) -> Self {
+        Self::init(key, hash_len)
     }
 
     pub fn hash_len(&self) -> u32 {
@@ -117,13 +125,13 @@ impl Blake2s {
     }
 
     pub fn hash_128(bytes: &[u8]) -> Vec<u8> {
-        let mut h = Self::init_hash128();
+        let mut h = Self::init_hash_128();
         h.update(bytes);
         h.finalize()
     }
 
     pub fn hash_256(bytes: &[u8]) -> Vec<u8> {
-        let mut h = Self::init_hash256();
+        let mut h = Self::init_hash_256();
         h.update(bytes);
         h.finalize()
     }
@@ -166,45 +174,12 @@ impl StatefulHasher for Blake2s {
 }
 
 #[cfg(test)]
-mod blake2b_stateful_tests {
-
-    use utils::byte_formatting::hex_to_bytes_ltr;
-
+mod blake2s_tests {
     use super::*;
 
-    #[test]
-    fn test_empty() {
-        let hasher = Blake2s::init(&[], 32);
-        assert_eq!(
-            hasher.finalize(),
-            hex_to_bytes_ltr("69217a3079908094e11121d042354a7c1f55b6482ca1a51e1b250dfd1ed0eef9")
-                .unwrap()
-        );
-    }
-
-    #[test]
-    fn test_digits() {
-        let mut hasher = Blake2s::init(&[], 32);
-        hasher.update(&[0, 1, 2, 3, 4, 5, 6, 7]);
-        assert_eq!(
-            hasher.finalize(),
-            hex_to_bytes_ltr("c7e887b546623635e93e0495598f1726821996c2377705b93a1f636f872bfa2d")
-                .unwrap()
-        );
-    }
-
-    #[test]
-    fn test_with_key() {
-        let mut hasher = Blake2s::init(
-            hex_to_bytes_ltr("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f")
-                .unwrap(),
-            32,
-        );
-        hasher.update(&hex_to_bytes_ltr("000102030405060708090a0b0c0d0e0f").unwrap());
-        assert_eq!(
-            hasher.finalize(),
-            hex_to_bytes_ltr("19ba234f0a4f38637d1839f9d9f76ad91c8522307143c97d5f93f69274cec9a7")
-                .unwrap()
-        );
-    }
+    crate::stateful_hash_tests!(
+        empty, Blake2s::init_hash_256(), &[], "69217a3079908094e11121d042354a7c1f55b6482ca1a51e1b250dfd1ed0eef9";
+        digits, Blake2s::init_hash_256(), &[0, 1, 2, 3, 4, 5, 6, 7], "c7e887b546623635e93e0495598f1726821996c2377705b93a1f636f872bfa2d";
+        with_key, Blake2s::init([0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f], 32),&[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], "19ba234f0a4f38637d1839f9d9f76ad91c8522307143c97d5f93f69274cec9a7";
+    );
 }
