@@ -1,7 +1,6 @@
 pub(crate) const BLOCK_BYTES: usize = 1024;
 pub(crate) const BLOCK_WORDS: usize = BLOCK_BYTES / 8;
 
-pub(crate) const MIN_PAR: u32 = 1;
 pub(crate) const MAX_PAR: u32 = 1 << 24;
 
 pub(crate) const MAX_PASS: usize = 0xffffffff;
