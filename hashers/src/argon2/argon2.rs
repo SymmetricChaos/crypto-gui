@@ -384,7 +384,7 @@ impl ClassicHasher for Argon2 {
         }
 
         // Hash the final value
-        Blake2bLong::init_hash(64).hash(&c.to_be_bytes())
+        Blake2bLong::init_hash(self.tag_len as u64).hash(&c.to_be_bytes())
     }
 
     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {

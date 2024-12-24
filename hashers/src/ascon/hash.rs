@@ -1,187 +1,349 @@
-use crate::traits::ClassicHasher;
-use strum::EnumIter;
-use utils::byte_formatting::ByteFormat;
+use utils::byte_formatting::make_u64s_be;
 
-use super::AsconState;
+use crate::traits::StatefulHasher;
 
-#[derive(Debug, PartialEq, Eq, Copy, Clone, EnumIter)]
-pub enum Variant {
-    AsconHash,
-    AsconHasha,
-    AsconXof,
-    AsconXofa,
+use super::{padded_bytes_256, padded_bytes_320, padded_bytes_64, Variant, C, ROTS};
+
+pub struct Ascon {
+    hash_len: usize,
+    state: [u64; 5],
+    buffer: Vec<u8>,
+    variant: Variant,
 }
 
-impl std::fmt::Display for Variant {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AsconHash => write!(f, "Ascon-Hash"),
-            Self::AsconHasha => write!(f, "Ascon-Hasha"),
-            Self::AsconXof => write!(f, "Ascon-XOF"),
-            Self::AsconXofa => write!(f, "Ascon-XOFa"),
-        }
-    }
-}
-
-impl Variant {
-    pub fn initialize(&self) -> AsconState {
-        match self {
-            Variant::AsconHash => AsconState([
+impl Ascon {
+    // 256-bit hash
+    pub fn init_hash() -> Self {
+        Self {
+            hash_len: 32,
+            state: [
                 0xee9398aadb67f03d,
                 0x8bb21831c60f1002,
                 0xb48a92db98d5da62,
                 0x43189921b8f8e3e8,
                 0x348fa5c9d525e140,
-            ]),
-            Variant::AsconHasha => AsconState([
+            ],
+            buffer: Vec::new(),
+            variant: Variant::Hash,
+        }
+    }
+
+    // 256-bit hash
+    pub fn init_hasha() -> Self {
+        Self {
+            hash_len: 32,
+            state: [
                 0x01470194fc6528a6,
                 0x738ec38ac0adffa7,
                 0x2ec8e3296c76384c,
                 0xd6f6a54d7f52377d,
                 0xa13c42a223be8d87,
-            ]),
-            Variant::AsconXof => AsconState([
+            ],
+            buffer: Vec::new(),
+            variant: Variant::Hasha,
+        }
+    }
+
+    // 128-bit MAC
+    pub fn init_mac(key: [u8; 16]) -> Self {
+        let key: [u64; 2] = make_u64s_be(&key);
+        let mut h = Self {
+            hash_len: 16,
+            state: [0x80808c0000000080, key[0], key[1], 0, 0],
+            buffer: Vec::new(),
+            variant: Variant::Mac,
+        };
+        h.rounds_12();
+        h
+    }
+
+    // 128-bit MAC
+    pub fn init_maca(key: [u8; 16]) -> Self {
+        let key: [u64; 2] = make_u64s_be(&key);
+        let mut h = Self {
+            hash_len: 16,
+            state: [0x80808c0400000080, key[0], key[1], 0, 0],
+            buffer: Vec::new(),
+            variant: Variant::Maca,
+        };
+        h.rounds_12();
+        h
+    }
+
+    // Arbitrary length PRF
+    pub fn init_prf(key: [u8; 16], hash_len: usize) -> Self {
+        let key: [u64; 2] = make_u64s_be(&key);
+        let mut h = Self {
+            hash_len,
+            state: [0x80808c0000000000, key[0], key[1], 0, 0],
+            buffer: Vec::new(),
+            variant: Variant::Prf,
+        };
+        h.rounds_12();
+        h
+    }
+
+    // Arbitrary length PRF
+    pub fn init_prfa(key: [u8; 16], hash_len: usize) -> Self {
+        let key: [u64; 2] = make_u64s_be(&key);
+        let mut h = Self {
+            hash_len,
+            state: [0x80808c0400000000, key[0], key[1], 0, 0],
+            buffer: Vec::new(),
+            variant: Variant::Prfa,
+        };
+        h.rounds_12();
+        h
+    }
+
+    // Arbitrary length XOF
+    pub fn init_xof(hash_len: usize) -> Self {
+        Self {
+            hash_len,
+            state: [
                 0xb57e273b814cd416,
                 0x2b51042562ae2420,
                 0x66a3a7768ddf2218,
                 0x5aad0a7a8153650c,
                 0x4f3e0e32539493b6,
-            ]),
-            Variant::AsconXofa => AsconState([
+            ],
+            buffer: Vec::new(),
+            variant: Variant::Xof,
+        }
+    }
+
+    // Arbitrary length XOF
+    pub fn init_xofa(hash_len: usize) -> Self {
+        Self {
+            hash_len,
+            state: [
                 0x44906568b77b9832,
                 0xcd8d6cae53455532,
                 0xf7b5212756422129,
                 0x246885e1de0d225b,
                 0xa8cb5ce33449973f,
-            ]),
+            ],
+            buffer: Vec::new(),
+            variant: Variant::Xofa,
         }
     }
-}
 
-pub struct AsconMac {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-    pub hash_len: usize,
-    pub variant: Variant,
-}
+    pub fn hash(bytes: &[u8]) -> Vec<u8> {
+        let mut h = Self::init_hash();
+        h.update(bytes);
+        h.finalize()
+    }
 
-impl Default for AsconMac {
-    fn default() -> Self {
-        Self {
-            input_format: ByteFormat::Hex,
-            output_format: ByteFormat::Hex,
-            hash_len: 32,
-            variant: Variant::AsconHash,
-        }
+    pub fn hasha(bytes: &[u8]) -> Vec<u8> {
+        let mut h = Self::init_hasha();
+        h.update(bytes);
+        h.finalize()
     }
-}
 
-impl AsconMac {
-    pub fn ascon_hash() -> Self {
-        Self {
-            input_format: ByteFormat::Hex,
-            output_format: ByteFormat::Hex,
-            hash_len: 32,
-            variant: Variant::AsconHash,
-        }
+    pub fn mac(bytes: &[u8], key: [u8; 16]) -> Vec<u8> {
+        let mut h = Self::init_mac(key);
+        h.update(bytes);
+        h.finalize()
     }
-    pub fn ascon_hasha() -> Self {
-        Self {
-            input_format: ByteFormat::Hex,
-            output_format: ByteFormat::Hex,
-            hash_len: 32,
-            variant: Variant::AsconHasha,
-        }
-    }
-    pub fn ascon_xof(hash_len: usize) -> Self {
-        Self {
-            input_format: ByteFormat::Hex,
-            output_format: ByteFormat::Hex,
-            hash_len,
-            variant: Variant::AsconXof,
-        }
-    }
-    pub fn ascon_xofa(hash_len: usize) -> Self {
-        Self {
-            input_format: ByteFormat::Hex,
-            output_format: ByteFormat::Hex,
-            hash_len,
-            variant: Variant::AsconXofa,
-        }
-    }
-}
 
-impl ClassicHasher for AsconMac {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut state = self.variant.initialize();
+    pub fn maca(bytes: &[u8], key: [u8; 16]) -> Vec<u8> {
+        let mut h = Self::init_maca(key);
+        h.update(bytes);
+        h.finalize()
+    }
+
+    pub fn xof(bytes: &[u8], hash_len: usize) -> Vec<u8> {
+        let mut h = Self::init_xof(hash_len);
+        h.update(bytes);
+        h.finalize()
+    }
+
+    pub fn xofa(bytes: &[u8], hash_len: usize) -> Vec<u8> {
+        let mut h = Self::init_xofa(hash_len);
+        h.update(bytes);
+        h.finalize()
+    }
+
+    pub fn prf(bytes: &[u8], key: [u8; 16], hash_len: usize) -> Vec<u8> {
+        let mut h = Self::init_prf(key, hash_len);
+        h.update(bytes);
+        h.finalize()
+    }
+
+    pub fn prfa(bytes: &[u8], key: [u8; 16], hash_len: usize) -> Vec<u8> {
+        let mut h = Self::init_prfa(key, hash_len);
+        h.update(bytes);
+        h.finalize()
+    }
+
+    pub fn rounds_12(&mut self) {
+        for i in 0..12 {
+            self.transform(i as usize);
+        }
+    }
+
+    pub fn rounds_8(&mut self) {
+        for i in 0..8 {
+            self.transform((i + 4) as usize);
+        }
+    }
+
+    pub fn rounds_6(&mut self) {
+        for i in 0..6 {
+            self.transform((i + 6) as usize);
+        }
+    }
+
+    pub fn rounds(&mut self, n: usize) {
+        match n {
+            6 => self.rounds_6(),
+            8 => self.rounds_8(),
+            12 => self.rounds_12(),
+            _ => unreachable!("only 6, 8, and 12 should be possible"),
+        }
+    }
+
+    pub fn transform(&mut self, i: usize) {
+        // round constant
+        self.state[2] ^= C[i];
+        // substitution
+        self.sbox();
+        // linear diffusion
+        self.linear_diffusor();
+    }
+
+    // The sbox works across words
+    // It effectively take the nth bit of each word, interprets it as a 5-bit word, then substitutes it
+    pub fn sbox(&mut self) {
+        self.state[0] ^= self.state[4];
+        self.state[4] ^= self.state[3];
+        self.state[2] ^= self.state[1];
+
+        let mut t = self.state.clone();
+        for i in 0..5 {
+            t[i] ^= !self.state[(i + 1) % 5] & self.state[(i + 2) % 5];
+        }
+
+        t[1] ^= t[0];
+        t[0] ^= t[4];
+        t[3] ^= t[2];
+        t[2] = !t[2];
+
+        self.state = t;
+    }
+
+    // This diffuses bits within each word of state
+    pub fn linear_diffusor(&mut self) {
+        for i in 0..5 {
+            self.state[i] ^=
+                self.state[i].rotate_right(ROTS[i].0) ^ self.state[i].rotate_right(ROTS[i].1);
+        }
+    }
+
+    pub fn absorb(&mut self) {
+        let rate = self.variant.rate();
+        let mut mlen = self.buffer.len();
+        let mut ptr = 0;
         match self.variant {
-            Variant::AsconHash | Variant::AsconXof => {
-                state.absorb_64_hash(&bytes, 12);
-                state.squeeze_64_hash(self.hash_len, 12)
+            Variant::Hash | Variant::Hasha | Variant::Xof | Variant::Xofa => {
+                while mlen >= rate {
+                    self.state[0] ^= padded_bytes_64(&self.buffer[ptr..ptr + rate]);
+                    self.rounds(self.variant.a());
+                    ptr += rate;
+                    mlen -= rate;
+                }
             }
-            Variant::AsconHasha | Variant::AsconXofa => {
-                state.absorb_64_hash(&bytes, 8);
-                state.squeeze_64_hash(self.hash_len, 8)
+
+            Variant::Mac | Variant::Prf => {
+                while mlen >= rate {
+                    let [x0, x1, x2, x3] = padded_bytes_256(&self.buffer[ptr..ptr + rate]);
+                    self.state[0] ^= x0;
+                    self.state[1] ^= x1;
+                    self.state[2] ^= x2;
+                    self.state[3] ^= x3;
+                    self.rounds(self.variant.a());
+                    ptr += rate;
+                    mlen -= rate;
+                }
+            }
+            Variant::Maca | Variant::Prfa => {
+                while mlen >= rate {
+                    let [x0, x1, x2, x3, x4] = padded_bytes_320(&self.buffer[ptr..ptr + rate]);
+                    self.state[0] ^= x0;
+                    self.state[1] ^= x1;
+                    self.state[2] ^= x2;
+                    self.state[3] ^= x3;
+                    self.state[4] ^= x4;
+                    self.rounds(self.variant.a());
+                    ptr += rate;
+                    mlen -= rate;
+                }
+            }
+        }
+        self.buffer = self.buffer[ptr..].to_vec();
+    }
+
+    pub fn absorb_final_chunk(&mut self) {
+        match self.variant {
+            Variant::Hash | Variant::Hasha | Variant::Xof | Variant::Xofa => {
+                self.state[0] ^= padded_bytes_64(&self.buffer);
+                self.rounds_12();
+            }
+
+            Variant::Mac | Variant::Prf => {
+                let [x0, x1, x2, x3] = padded_bytes_256(&self.buffer);
+                self.state[0] ^= x0;
+                self.state[1] ^= x1;
+                self.state[2] ^= x2;
+                self.state[3] ^= x3;
+                self.state[4] ^= 1;
+            }
+
+            Variant::Maca | Variant::Prfa => {
+                let [x0, x1, x2, x3, x4] = padded_bytes_320(&self.buffer);
+                self.state[0] ^= x0;
+                self.state[1] ^= x1;
+                self.state[2] ^= x2;
+                self.state[3] ^= x3;
+                self.state[4] ^= x4;
+                self.state[5] ^= 1;
             }
         }
     }
 
-    crate::hash_bytes_from_string! {}
-}
-
-#[cfg(test)]
-mod ascon_tests {
-    use super::*;
-
-    #[test]
-    fn test_initialization_hash() {
-        assert_eq!(
-            AsconState::initialize(0x00400c0000000100).0,
-            Variant::AsconHash.initialize().0
-        )
-    }
-
-    #[test]
-    fn test_initialization_xof() {
-        assert_eq!(
-            AsconState::initialize(0x00400c0000000000).0,
-            Variant::AsconXof.initialize().0
-        )
+    fn squeeze(&mut self, output: &mut Vec<u8>) {
+        match self.variant {
+            Variant::Hash | Variant::Hasha | Variant::Xof | Variant::Xofa => {
+                output.extend(self.state[0].to_be_bytes());
+                self.rounds(self.variant.b());
+            }
+            Variant::Mac | Variant::Maca | Variant::Prf | Variant::Prfa => {
+                output.extend(self.state[0].to_be_bytes());
+                output.extend(self.state[1].to_be_bytes());
+                self.rounds(self.variant.b());
+            }
+        }
     }
 }
 
-pub const INPUT_1: &'static str = "";
-pub const INPUT_2: &'static str = "00";
-pub const INPUT_9: &'static str = "0001020304050607";
-pub const INPUT_1025: &'static str = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff";
+impl StatefulHasher for Ascon {
+    fn update(&mut self, bytes: &[u8]) {
+        self.buffer.extend_from_slice(bytes);
+        self.absorb();
+    }
 
-crate::basic_hash_tests!(
-    ascon_hash_1, AsconMac::ascon_hash(), INPUT_1,
-    "7346bc14f036e87ae03d0997913088f5f68411434b3cf8b54fa796a80d251f91";
-    ascon_hash_2, AsconMac::ascon_hash(), INPUT_2,
-    "8dd446ada58a7740ecf56eb638ef775f7d5c0fd5f0c2bbbdfdec29609d3c43a2";
-    ascon_hash_9, AsconMac::ascon_hash(), INPUT_9,
-    "f4c6a44b29915d3d57cf928a18ec6226bb8dd6c1136acd24965f7e7780cd69cf";
-    ascon_hash_1025, AsconMac::ascon_hash(), INPUT_1025,
-    "2eb89744de7f9a6f47d53db756bb2f67b127da96762a1c47a5d7bfc1f7273f5c";
+    // Absorb the last block and squeeze the output
+    fn finalize(mut self) -> Vec<u8> {
+        self.absorb_final_chunk();
+        let mut output = Vec::with_capacity(self.hash_len);
 
-    ascon_xof_1, AsconMac::ascon_xof(32), INPUT_1,
-    "5d4cbde6350ea4c174bd65b5b332f8408f99740b81aa02735eaefbcf0ba0339e";
-    ascon_xof_2, AsconMac::ascon_xof(32), INPUT_2,
-    "b2edbb27ac8397a55bc83d137c151de9ede048338fe907f0d3629e717846fedc";
-    ascon_xof_1025, AsconMac::ascon_xof(32), INPUT_1025,
-    "675b6da0d02ddd65042b7487bdefce06a4be090662ed39a703ad802c977a4b3b";
+        while output.len() < self.hash_len {
+            self.squeeze(&mut output);
+        }
 
+        output.truncate(self.hash_len);
+        output
+    }
 
-    ascon_hasha_1, AsconMac::ascon_hasha(), INPUT_1,
-    "aecd027026d0675f9de7a8ad8ccf512db64b1edcf0b20c388a0c7cc617aaa2c4";
-    ascon_hasha_2, AsconMac::ascon_hasha(), INPUT_2,
-    "5a55f0367763d334a3174f9c17fa476eb9196a22f10daf29505633572e7756e4";
-    ascon_hasha_1025, AsconMac::ascon_hasha(), INPUT_1025,
-    "14f6a0c1e5751733955b820ca67bc89bb7eb7014c88caeb5f380d75eed484fe9";
-
-    ascon_xofa_1, AsconMac::ascon_xofa(32), INPUT_1,
-    "7c10dffd6bb03be262d72fbe1b0f530013c6c4eadaabde278d6f29d579e3908d";
-    ascon_xofa_1025, AsconMac::ascon_xofa(32), INPUT_1025,
-    "8096e9bb573ea6b2c1d7acac7fb9d9f8f6c89e52a63b1b129037fd4fcc913ffb";
-);
+    crate::stateful_hash_helpers!();
+}

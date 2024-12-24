@@ -159,7 +159,7 @@ impl ClassicHasher for AsconMac {
         let mut state = self.variant.initialize(self.key, self.hash_len, bytes);
         match self.variant {
             Variant::AsconMac | Variant::AsconPrf => {
-                state.absorb_256_prf(&bytes, 12);
+                state.absorb_256_prf(&bytes, 8);
                 state.squeeze_128_prf(self.hash_len as usize, 12)
             }
             Variant::AsconMaca | Variant::AsconPrfa => {

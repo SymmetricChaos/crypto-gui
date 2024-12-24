@@ -127,18 +127,18 @@ impl Blake2b {
         self.hash_len
     }
 
-    pub fn state(&self) -> &[u64; 8] {
-        &self.state
-    }
+    // pub fn state(&self) -> &[u64; 8] {
+    //     &self.state
+    // }
 
-    pub fn state_bytes(&self) -> Vec<u8> {
-        self.state
-            .iter()
-            .map(|x| x.to_le_bytes())
-            .flatten()
-            .take(self.hash_len as usize)
-            .collect_vec()
-    }
+    // pub fn state_bytes(&self) -> Vec<u8> {
+    //     self.state
+    //         .iter()
+    //         .map(|x| x.to_le_bytes())
+    //         .flatten()
+    //         .take(self.hash_len as usize)
+    //         .collect_vec()
+    // }
 
     pub fn hash_256(bytes: &[u8]) -> Vec<u8> {
         let mut h = Self::init_hash_256();

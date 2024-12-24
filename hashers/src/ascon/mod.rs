@@ -1,7 +1,78 @@
+use strum::EnumIter;
+
 pub mod hash;
 pub mod mac;
+pub mod tests;
 
 const DEBUG: bool = false;
+
+#[derive(Debug, PartialEq, Eq, Copy, Clone, EnumIter)]
+pub enum Variant {
+    Hash,
+    Hasha,
+    Xof,
+    Xofa,
+    Mac,
+    Maca,
+    Prf,
+    Prfa,
+}
+
+impl std::fmt::Display for Variant {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Hash => write!(f, "Ascon-Hash"),
+            Self::Hasha => write!(f, "Ascon-Hasha"),
+            Self::Xof => write!(f, "Ascon-XOF"),
+            Self::Xofa => write!(f, "Ascon-XOFa"),
+            Self::Mac => write!(f, "Ascon-MAC"),
+            Self::Maca => write!(f, "Ascon-MACa"),
+            Self::Prf => write!(f, "Ascon-XOF"),
+            Self::Prfa => write!(f, "Ascon-XOFa"),
+        }
+    }
+}
+
+impl Variant {
+    pub fn a(&self) -> usize {
+        match self {
+            Variant::Hash => 12,
+            Variant::Hasha => 8,
+            Variant::Xof => 12,
+            Variant::Xofa => 8,
+            Variant::Mac => 12,
+            Variant::Maca => 8,
+            Variant::Prf => 12,
+            Variant::Prfa => 8,
+        }
+    }
+
+    pub fn b(&self) -> usize {
+        match self {
+            Variant::Hash => 12,
+            Variant::Hasha => 8,
+            Variant::Xof => 12,
+            Variant::Xofa => 8,
+            Variant::Mac => 12,
+            Variant::Maca => 12,
+            Variant::Prf => 12,
+            Variant::Prfa => 12,
+        }
+    }
+
+    pub fn rate(&self) -> usize {
+        match self {
+            Variant::Hash => 8,
+            Variant::Hasha => 8,
+            Variant::Xof => 8,
+            Variant::Xofa => 8,
+            Variant::Mac => 32,
+            Variant::Maca => 40,
+            Variant::Prf => 32,
+            Variant::Prfa => 40,
+        }
+    }
+}
 
 fn padded_bytes_64(bytes: &[u8]) -> u64 {
     assert!(bytes.len() <= 8);
@@ -150,7 +221,7 @@ const C: [u64; 12] = [
 ];
 
 const ROTS: [(u32, u32); 5] = [(19, 28), (61, 39), (1, 6), (10, 17), (7, 41)];
-
+const RATE: usize = 8; // number of bytes absorbed at a time
 #[derive(Debug, Clone)]
 pub struct AsconState([u64; 5]);
 
@@ -170,8 +241,6 @@ impl std::ops::IndexMut<usize> for AsconState {
 }
 
 impl AsconState {
-    const RATE: usize = 8; // number of bytes absorbed at a time
-
     // Initial state for Ascon-Hash
     pub fn initialize(iv: u64) -> Self {
         let mut out = Self([iv, 0, 0, 0, 0]);
@@ -261,16 +330,14 @@ impl AsconState {
     }
 
     pub fn absorb_64_hash(&mut self, message: &[u8], a: usize) {
-        let rate = Self::RATE;
-
         // Encrypt the plaintext treating the last block specially
         let mut mlen = message.len();
         let mut ptr = 0;
         // Absorb full blocks
-        while mlen >= rate {
-            self[0] ^= padded_bytes_64(&message[ptr..ptr + rate]);
-            ptr += rate;
-            mlen -= rate;
+        while mlen >= RATE {
+            self[0] ^= padded_bytes_64(&message[ptr..ptr + RATE]);
+            ptr += RATE;
+            mlen -= RATE;
             self.rounds(a);
 
             if DEBUG {
@@ -293,7 +360,7 @@ impl AsconState {
         let mut ptr = 0;
         // Absorb full blocks
         while mlen >= rate {
-            let [x0, x1, x2, x3] = padded_bytes_256(&message[ptr..ptr + rate]);
+            let [x0, x1, x2, x3] = padded_bytes_256(&message[ptr..ptr + RATE]);
             self[0] ^= x0;
             self[1] ^= x1;
             self[2] ^= x2;
