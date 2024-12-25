@@ -30,8 +30,7 @@ macro_rules! hasher_ids_and_names {
 hasher_ids_and_names!(
     Adler32, "Adler-32";
     Argon2, "Argon2";
-    AsconHash, "Ascon-Hash";
-    AsconMac, "Ascon-MAC";
+    AsconHash, "Ascon";
     Bcrypt, "bcrypt";
     Belt, "BelT";
     Blake, "BLAKE";

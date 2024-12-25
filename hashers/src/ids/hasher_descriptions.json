@@ -6,30 +6,21 @@
     "Hash Length": 32,
     "Traits": []
   },
-  "Ascon-Hash": {
-    "Description": "Ascon-Hash and Ascon-XOF are a hash functions derived from the Ascon sponge function. The sponge construction is similar to Keccak, though with a smaller state and simpler round. Two faster variants are also defined that use eight rounds during the absorbing steps.",
+  "Ascon": {
+    "Description": "A variety of cryptographic tools are derived from the Ascon sponge function. Ascon-Hash is a ordinary hash function. Ascon-XOF is an Extensible Output Function. Ascon-MAC is a keyed hash that can produce a Message Authentication Hash. Ascon-PRF is a Pseudorandom Function. Each has version that runs more quickly in exchange for a lower security margin. The sponge construction is similar to Keccak, though with a smaller state and simpler round.",
     "Authors": "Dobraunig, Eichlseder, Mendel, and Schläffer",
     "Publication": "2014",
     "Hash Length": null,
     "Traits": [
       "Sponge",
       "XOF",
-      "Crytographic"
-    ]
-  },
-  "Ascon-MAC": {
-    "Description": "Ascon-MAC and Ascon-PRF are secure pseudorandom function families derived from the Ascon sponge function. By using a 128-bit key these can create message authentication codes or simulate a true mathematical PRF. Two faster variants are also defined which absorb 320-bits at a time and use only eight rounds during the absorbing steps.",
-    "Authors": "Dobraunig, Eichlseder, Mendel, and Schläffer",
-    "Publication": "2014",
-    "Hash Length": null,
-    "Traits": [
-      "Sponge",
-      "XOF",
+      "MAC",
+      "PRF",
       "Crytographic"
     ]
   },
   "bcrypt": {
-    "Description": "The bcrypt (bee-crypt) is a hash function designed for password hashing. It uses a modified version of the key schedule from the Blowfish cipher.",
+    "Description": "Bcrypt (bee-crypt) is a hash function designed for password hashing. It uses a modified version of the key schedule from the Blowfish cipher.",
     "Authors": "Niels Provos, David Mazières",
     "Publication": "1999",
     "Hash Length": [
@@ -52,7 +43,7 @@
     ]
   },
   "BLAKE2": {
-    "Description": "The BLAKE2 family of hash functions are closely related to the original BLAKE family of hash functions. To improve speed the BLAKE2 hashers have fewer compression rounds and pad the input in a simpler way. They are designed to work as drop in replacements to broken hash functions such as SHA-1 and MD5, offering both superior security and supere speed.",
+    "Description": "The BLAKE2 family of hash functions are closely related to the original BLAKE family of hash functions. To improve speed the BLAKE2 hashers have fewer compression rounds and pad the input in a simpler way. They are designed to work as drop in replacements to broken hash functions such as SHA-1 and MD5, offering both superior security and superior speed.",
     "Authors": "Aumasson, Neves, Wilcox-O'Hearn, and Winnerlein",
     "Publication": "2012",
     "Hash Length": [
@@ -63,6 +54,7 @@
     ],
     "Traits": [
       "XOF",
+      "MAC",
       "Crytographic",
       "KDF"
     ]

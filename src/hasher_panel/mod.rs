@@ -5,8 +5,7 @@ use hashers::{
 };
 
 mod adler32_controls;
-mod ascon_hash_controls;
-mod ascon_mac_controls;
+mod ascon_controls;
 mod blake2_controls;
 mod blake3_controls;
 mod blake_controls;
@@ -75,8 +74,7 @@ fn combox_box(
 #[derive(Default)]
 pub struct HasherInterface {
     adler32: adler32_controls::Adler32Frame,
-    ascon_hash: ascon_hash_controls::AsconHashFrame,
-    ascon_mac: ascon_mac_controls::AsconMacFrame,
+    ascon: ascon_controls::AsconFrame,
     blake: blake_controls::BlakeFrame,
     blake2: blake2_controls::Blake2Frame,
     // blake3: blake3_controls::Blake3Frame,
@@ -157,8 +155,7 @@ impl HasherInterface {
     pub fn get_active_hasher(&mut self, active_hasher: &HasherId) -> &mut dyn HasherFrame {
         match active_hasher {
             HasherId::Adler32 => &mut self.adler32,
-            HasherId::AsconHash => &mut self.ascon_hash,
-            HasherId::AsconMac => &mut self.ascon_mac,
+            HasherId::AsconHash => &mut self.ascon,
             HasherId::Blake => &mut self.blake,
             HasherId::Blake2 => &mut self.blake2,
             // HasherId::Blake3 => &mut self.blake3,
