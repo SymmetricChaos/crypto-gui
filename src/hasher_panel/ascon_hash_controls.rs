@@ -77,8 +77,8 @@ impl HasherFrame for AsconHashFrame {
         let h = match self.variant {
             Variant::Hash => Ascon::hash(&bytes),
             Variant::Hasha => Ascon::hasha(&bytes),
-            Variant::Xof => Ascon::xof(self.hash_len, &bytes),
-            Variant::Xofa => Ascon::xofa(self.hash_len, &bytes),
+            Variant::Xof => Ascon::xof(&bytes, self.hash_len),
+            Variant::Xofa => Ascon::xofa(&bytes, self.hash_len),
             _ => panic!("VARIANT NOT COVERED"),
         };
 

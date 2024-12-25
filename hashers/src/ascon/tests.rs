@@ -92,7 +92,6 @@ crate::stateful_hash_tests!(
     ascon_xof_1025, Ascon::init_xof(32), INPUT_1025,
     "675b6da0d02ddd65042b7487bdefce06a4be090662ed39a703ad802c977a4b3b";
 
-
     ascon_hasha_1, Ascon::init_hasha(), INPUT_1,
     "aecd027026d0675f9de7a8ad8ccf512db64b1edcf0b20c388a0c7cc617aaa2c4";
     ascon_hasha_2, Ascon::init_hasha(), INPUT_2,
@@ -105,6 +104,26 @@ crate::stateful_hash_tests!(
     ascon_xofa_1025, Ascon::init_xofa(32), INPUT_1025,
     "8096e9bb573ea6b2c1d7acac7fb9d9f8f6c89e52a63b1b129037fd4fcc913ffb";
 
+    ascon_mac_1, Ascon::init_mac(TEST_KEY), INPUT_1,
+    "eb1af688825d66bf2d53e135f9323315";
+    ascon_mac_2, Ascon::init_mac(TEST_KEY), INPUT_2,
+    "81f3c3537c5595aaa0d5780b9f88a043";
+    ascon_mac_9, Ascon::init_mac(TEST_KEY), INPUT_9,
+    "e38a60a450275707bc69ddade9c2fb92";
+    ascon_mac_1025, Ascon::init_mac(TEST_KEY), INPUT_1025,
+    "3f090d832d95322df4128e0e53a8ecbd";
+
+
+    ascon_maca_1, Ascon::init_maca(TEST_KEY), INPUT_1,
+    "fddc38ec2e93f8b8524d88f6c5983d13";
+    ascon_maca_2, Ascon::init_maca(TEST_KEY), INPUT_2,
+    "628a3773caae20b059fe89280e674735";
+    ascon_maca_9, Ascon::init_maca(TEST_KEY), INPUT_9,
+    "c932830ced1ce26ffb53c061b26372ec";
+    ascon_maca_1025, Ascon::init_maca(TEST_KEY), INPUT_1025,
+    "40962a720050d59e3ac61641d98733b3";
+
+
     ascon_prf_1, Ascon::init_prf(TEST_KEY, 16), INPUT_1,
     "2a766fe9a4894073bc811b19d54ac33d";
     ascon_prf_2, Ascon::init_prf(TEST_KEY, 16), INPUT_2,
@@ -113,7 +132,6 @@ crate::stateful_hash_tests!(
     "25d813eea510ddef67d0152153c35bb8";
     ascon_prf_1025, Ascon::init_prf(TEST_KEY, 16), INPUT_1025,
     "3003aba5ab23b18d5ae5230b0c8d6af7";
-
 
     ascon_prfa_1, Ascon::init_prfa(TEST_KEY, 16), INPUT_1,
     "99fdc07ca98af6e6d282e84094cd79cf";
