@@ -107,8 +107,7 @@ impl HasherInterface {
     pub fn combo_boxes(&mut self, ui: &mut Ui, active_hasher: &mut Option<HasherId>) {
         combox_box(
             &[
-                HasherId::AsconHash,
-                HasherId::AsconMac,
+                HasherId::Ascon,
                 HasherId::Blake,
                 HasherId::Blake2,
                 // HasherId::Blake3,
@@ -155,7 +154,7 @@ impl HasherInterface {
     pub fn get_active_hasher(&mut self, active_hasher: &HasherId) -> &mut dyn HasherFrame {
         match active_hasher {
             HasherId::Adler32 => &mut self.adler32,
-            HasherId::AsconHash => &mut self.ascon,
+            HasherId::Ascon => &mut self.ascon,
             HasherId::Blake => &mut self.blake,
             HasherId::Blake2 => &mut self.blake2,
             // HasherId::Blake3 => &mut self.blake3,

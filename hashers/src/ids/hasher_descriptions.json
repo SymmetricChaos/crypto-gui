@@ -7,7 +7,7 @@
     "Traits": []
   },
   "Ascon": {
-    "Description": "A variety of cryptographic tools are derived from the Ascon sponge function. Ascon-Hash is a ordinary hash function. Ascon-XOF is an Extensible Output Function. Ascon-MAC is a keyed hash that can produce a Message Authentication Hash. Ascon-PRF is a Pseudorandom Function. Each has version that runs more quickly in exchange for a lower security margin. The sponge construction is similar to Keccak, though with a smaller state and simpler round.",
+    "Description": "A variety of cryptographic tools are derived from the Ascon sponge function. Ascon-Hash is a ordinary hash function. Ascon-XOF is an Extensible Output Function. Ascon-MAC is a keyed hash that can produce a Message Authentication Hash. Ascon-PRF is a Pseudorandom Function. Each has version that runs more quickly in exchange for a lower security margin. The sponge construction is similar to Keccak, though with a smaller state and simpler round. The same primitive is also used in the ASCON cipher.",
     "Authors": "Dobraunig, Eichlseder, Mendel, and Schläffer",
     "Publication": "2014",
     "Hash Length": null,

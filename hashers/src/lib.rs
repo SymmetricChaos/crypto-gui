@@ -84,3 +84,35 @@ pub mod vsh;
 //     "INPUT",
 //     "OUTPUT";
 // );
+
+// Template
+// use utils::byte_formatting::ByteFormat;
+// use crate::traits::StatefulHasher;
+// pub struct HASHERNAME {
+//     state: []
+//     buffer: Vec<u8>
+// }
+// impl Default for HASHERNAME {
+//     fn default() -> Self {
+//         Self {
+//             state: [],
+//             buffer: Vec::new(),
+//         }
+//     }
+// }
+// impl HASHERNAME {
+// }
+// impl StatefulHasher for HASHERNAME {
+//     fn update(&mut self, bytes: &[u8]) {
+//         self.buffer.extend_from_slice(bytes);
+//     }
+//     fn finalize(mut self) -> Vec<u8> {
+//     }
+//     crate::stateful_hash_helpers!();
+// }
+// crate:stateful_hash_tests!(
+//     test1,
+//     HASHERNAME::init(),
+//     "INPUT",
+//     "OUTPUT";
+// );
