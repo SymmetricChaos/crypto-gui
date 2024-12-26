@@ -1,4 +1,4 @@
-use hashers::sha::Sha0;
+use hashers::sha::sha0_stateful::Sha0Stateful;
 use utils::{byte_formatting::ByteFormat, padding::md_strengthening_64_be};
 
 use crate::ui_elements::UiElements;
@@ -6,7 +6,8 @@ use crate::ui_elements::UiElements;
 use super::HasherFrame;
 
 pub struct Sha0Frame {
-    hasher: Sha0,
+    input_format: ByteFormat,
+    output_format: ByteFormat,
     example: String,
     example_padded: String,
 }
@@ -14,7 +15,8 @@ pub struct Sha0Frame {
 impl Default for Sha0Frame {
     fn default() -> Self {
         Self {
-            hasher: Default::default(),
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
             example: String::from("Woolworth Employee SSN: 078-05-1120"),
             example_padded: String::from("576f6f6c776f72746820456d706c6f7965652053534e3a203037382d30352d313132308000000000000000000000000000000000000000000000000000000118"),
         }
@@ -36,10 +38,7 @@ impl HasherFrame for Sha0Frame {
             "https://github.com/SymmetricChaos/crypto-gui/blob/master/hashers/src/sha/sha0.rs",
         );
 
-        ui.byte_io_mode_hasher(
-            &mut self.hasher.input_format,
-            &mut self.hasher.output_format,
-        );
+        ui.byte_io_mode_hasher(&mut self.input_format, &mut self.output_format);
         ui.add_space(16.0);
 
         ui.subheading("Demonstration of Padding");
@@ -53,5 +52,14 @@ impl HasherFrame for Sha0Frame {
 
         ui.add_space(16.0);
     }
-    crate::hash_string! {}
+
+    fn hash_string(&self, text: &str) -> Result<String, hashers::errors::HasherError> {
+        let bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
+        Ok(self
+            .output_format
+            .byte_slice_to_text(Sha0Stateful::hash(&bytes)))
+    }
 }

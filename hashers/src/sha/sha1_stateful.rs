@@ -119,41 +119,24 @@ impl Sha1Stateful {
     }
 }
 
-#[cfg(test)]
-mod sha1_stateful_tests {
+crate::stateful_hash_tests!(
+    empty,
+    Sha1Stateful::init(),
+    b"",
+    "da39a3ee5e6b4b0d3255bfef95601890afd80709";
 
-    use utils::byte_formatting::hex_to_bytes_ltr;
+    abc,
+    Sha1Stateful::init(),
+    b"abc",
+    "a9993e364706816aba3e25717850c26c9cd0d89d";
 
-    use super::*;
+    test3,
+    Sha1Stateful::init(),
+    b"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
+    "84983e441c3bd26ebaae4aa1f95129e5e54670f1";
 
-    #[test]
-    fn test_empty() {
-        assert_eq!(
-            Sha1Stateful::hash(b""),
-            hex_to_bytes_ltr("da39a3ee5e6b4b0d3255bfef95601890afd80709").unwrap()
-        );
-    }
-
-    #[test]
-    fn test_abc() {
-        assert_eq!(
-            Sha1Stateful::hash(b"abc"),
-            hex_to_bytes_ltr("a9993e364706816aba3e25717850c26c9cd0d89d").unwrap()
-        );
-    }
-
-    #[test]
-    fn test_3() {
-        assert_eq!(
-            Sha1Stateful::hash(b"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"),
-            hex_to_bytes_ltr("84983e441c3bd26ebaae4aa1f95129e5e54670f1").unwrap()
-        );
-    }
-    #[test]
-    fn test_4() {
-        assert_eq!(
-            Sha1Stateful::hash(b"abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu"),
-            hex_to_bytes_ltr("a49b2446a02c645bf419f995b67091253a04a259").unwrap()
-        );
-    }
-}
+    test4,
+    Sha1Stateful::init(),
+    b"abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
+    "a49b2446a02c645bf419f995b67091253a04a259"
+);

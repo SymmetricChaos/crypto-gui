@@ -107,14 +107,3 @@ impl ClassicHasher for Sha0 {
 
     crate::hash_bytes_from_string! {}
 }
-
-// crate::basic_hash_tests!(
-//     test1, Sha0::default(), "",
-//     "";
-//     test2, Sha0::default(), "abc",
-//     "";
-//     test3, Sha0::default(), "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
-//     "";
-//     test4, Sha0::default(), "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
-//     "";
-// );
