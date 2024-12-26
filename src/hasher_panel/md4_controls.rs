@@ -1,16 +1,18 @@
-use crate::ui_elements::UiElements;
-
 use super::HasherFrame;
-use hashers::md4::Md4;
+use crate::ui_elements::UiElements;
+use hashers::{md4::Md4, traits::StatefulHasher};
+use utils::byte_formatting::ByteFormat;
 
 pub struct Md4Frame {
-    hasher: Md4,
+    input_format: ByteFormat,
+    output_format: ByteFormat,
 }
 
 impl Default for Md4Frame {
     fn default() -> Self {
         Self {
-            hasher: Default::default(),
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
         }
     }
 }
@@ -25,14 +27,20 @@ impl HasherFrame for Md4Frame {
         );
         ui.add_space(8.0);
 
-        ui.byte_io_mode_hasher(
-            &mut self.hasher.input_format,
-            &mut self.hasher.output_format,
-        );
+        ui.byte_io_mode_hasher(&mut self.input_format, &mut self.output_format);
 
         ui.label("<<<EXPLANATION OF HASH FUNCTION CODE>>>");
 
         ui.add_space(16.0);
     }
-    crate::hash_string! {}
+
+    fn hash_string(&self, text: &str) -> Result<String, hashers::errors::HasherError> {
+        let bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
+        Ok(self
+            .output_format
+            .byte_slice_to_text(Md4::init().hash(&bytes)))
+    }
 }
