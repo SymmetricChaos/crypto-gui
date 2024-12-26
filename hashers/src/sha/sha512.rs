@@ -1,33 +1,6 @@
-use std::ops::Shr;
-
+use crate::traits::StatefulHasher;
 use itertools::Itertools;
-use utils::byte_formatting::ByteFormat;
-
-use crate::traits::ClassicHasher;
-
-pub fn sigma_0(a: u64) -> u64 {
-    (a.rotate_right(1)) ^ (a.rotate_right(8)) ^ (a.shr(7))
-}
-
-pub fn sigma_1(a: u64) -> u64 {
-    (a.rotate_right(19)) ^ (a.rotate_right(61)) ^ (a.shr(6))
-}
-
-pub fn sum_0(a: u64) -> u64 {
-    (a.rotate_right(28)) ^ (a.rotate_right(34)) ^ (a.rotate_right(39))
-}
-
-pub fn sum_1(a: u64) -> u64 {
-    (a.rotate_right(14)) ^ (a.rotate_right(18)) ^ (a.rotate_right(41))
-}
-
-pub fn choice(a: u64, b: u64, c: u64) -> u64 {
-    (a & b) ^ (!a & c)
-}
-
-pub fn majority(a: u64, b: u64, c: u64) -> u64 {
-    (a & b) ^ (a & c) ^ (b & c)
-}
+use std::ops::Shr;
 
 #[rustfmt::skip] 
 pub const K: [u64; 80] = [
@@ -53,124 +26,150 @@ pub const K: [u64; 80] = [
     0x4cc5d4becb3e42b6, 0x597f299cfc657e2a, 0x5fcb6fab3ad6faec, 0x6c44198c4a475817,
 ];
 
-macro_rules! sha512 {
+pub fn sigma_0(a: u64) -> u64 {
+    (a.rotate_right(1)) ^ (a.rotate_right(8)) ^ (a.shr(7))
+}
+
+pub fn sigma_1(a: u64) -> u64 {
+    (a.rotate_right(19)) ^ (a.rotate_right(61)) ^ (a.shr(6))
+}
+
+pub fn sum_0(a: u64) -> u64 {
+    (a.rotate_right(28)) ^ (a.rotate_right(34)) ^ (a.rotate_right(39))
+}
+
+pub fn sum_1(a: u64) -> u64 {
+    (a.rotate_right(14)) ^ (a.rotate_right(18)) ^ (a.rotate_right(41))
+}
+
+pub fn choice(a: u64, b: u64, c: u64) -> u64 {
+    (a & b) ^ (!a & c)
+}
+
+pub fn majority(a: u64, b: u64, c: u64) -> u64 {
+    (a & b) ^ (a & c) ^ (b & c)
+}
+
+fn compress(state: &mut [u64; 8], chunk: &[u8]) {
+    // Copy variable values into working variables
+    let mut a = state[0];
+    let mut b = state[1];
+    let mut c = state[2];
+    let mut d = state[3];
+    let mut e = state[4];
+    let mut f = state[5];
+    let mut g = state[6];
+    let mut h = state[7];
+
+    // Array of 64 words
+    let mut x = [0u64; 80];
+
+    // Copy the first words into the array
+    // Each word is 4 bytes and 16 are taken in total
+    utils::byte_formatting::fill_u64s_be(&mut x[0..16], &chunk);
+
+    // Extend the 16 words already in the array into a total of 64 words
+    for i in 16..80 {
+        x[i] = x[i - 16]
+            .wrapping_add(sigma_0(x[i - 15]))
+            .wrapping_add(x[i - 7])
+            .wrapping_add(sigma_1(x[i - 2]));
+    }
+
+    for i in 0..80 {
+        let temp1 = h
+            .wrapping_add(sum_1(e))
+            .wrapping_add(choice(e, f, g))
+            .wrapping_add(K[i])
+            .wrapping_add(x[i]);
+        let temp2 = sum_0(a).wrapping_add(majority(a, b, c));
+
+        h = g;
+        g = f;
+        f = e;
+        e = d.wrapping_add(temp1);
+        d = c;
+        c = b;
+        b = a;
+        a = temp1.wrapping_add(temp2);
+    }
+    state[0] = state[0].wrapping_add(a);
+    state[1] = state[1].wrapping_add(b);
+    state[2] = state[2].wrapping_add(c);
+    state[3] = state[3].wrapping_add(d);
+    state[4] = state[4].wrapping_add(e);
+    state[5] = state[5].wrapping_add(f);
+    state[6] = state[6].wrapping_add(g);
+    state[7] = state[7].wrapping_add(h);
+}
+
+macro_rules! sha2_512 {
     ($name: ident, $iv: expr, $output_len: literal) => {
-        #[derive(Debug, Clone)]
         pub struct $name {
-            pub input_format: ByteFormat,
-            pub output_format: ByteFormat,
+            state: [u64; 8],
+            buffer: Vec<u8>,
+            bits_taken: u128,
         }
 
         impl Default for $name {
             fn default() -> Self {
                 Self {
-                    input_format: ByteFormat::Utf8,
-                    output_format: ByteFormat::Hex,
+                    state: $iv,
+                    buffer: Vec::new(),
+                    bits_taken: 0,
                 }
             }
         }
 
         impl $name {
-            pub fn input(mut self, input: ByteFormat) -> Self {
-                self.input_format = input;
-                self
-            }
-
-            pub fn output(mut self, output: ByteFormat) -> Self {
-                self.output_format = output;
-                self
+            pub fn init() -> Self {
+                Self::default()
             }
         }
 
-        impl ClassicHasher for $name {
-            fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-                let mut input = bytes.to_vec();
+        impl StatefulHasher for $name {
+            fn update(&mut self, bytes: &[u8]) {
+                self.buffer.extend_from_slice(bytes);
+                let chunks = self.buffer.chunks_exact(128);
+                let rem = chunks.remainder().to_vec();
+                for chunk in chunks {
+                    self.bits_taken += 512;
+                    compress(&mut self.state, chunk);
+                }
+                self.buffer = rem;
+            }
 
-                // Length in bits before padding as 128 bit number
-                let b_len = (input.len().wrapping_mul(8)) as u128;
-
-                // Step 1.Padding
-                // push a byte with a leading 1 to the bytes
-                input.push(0x80);
-                // push zeros until the length in bits is 896 mod 1024
-                // equivalently until the length in bytes is 112 mod 128
-                while (input.len() % 128) != 112 {
-                    input.push(0)
+            fn finalize(mut self) -> Vec<u8> {
+                self.bits_taken += self.buffer.len() as u128 * 8;
+                self.buffer.push(0x80);
+                while (self.buffer.len() % 128) != 112 {
+                    self.buffer.push(0x00)
+                }
+                for b in self.bits_taken.to_be_bytes() {
+                    self.buffer.push(b)
                 }
 
-                // Step 2. Append length
-                for b in b_len.to_be_bytes() {
-                    input.push(b)
+                // There can be multiple final blocks after padding
+                for chunk in self.buffer.chunks_exact(128) {
+                    compress(&mut self.state, &chunk);
                 }
 
-                // Step 3. Initialize variables
-                let mut v: [u64; 8] = $iv;
-
-                // Step 4. Process message in chunks of 128 bytes (1024 bits)
-                for block in input.chunks_exact(128) {
-                    // Copy variable values into working variables
-                    let mut a = v[0];
-                    let mut b = v[1];
-                    let mut c = v[2];
-                    let mut d = v[3];
-                    let mut e = v[4];
-                    let mut f = v[5];
-                    let mut g = v[6];
-                    let mut h = v[7];
-
-                    // Array of 64 words
-                    let mut x = [0u64; 80];
-
-                    // Copy the first words into the array
-                    // Each word is 8 bytes and 16 are taken in total
-                    utils::byte_formatting::fill_u64s_be(&mut x[0..16], &block);
-
-                    // Extend the 16 words already in the array into a total of 64 words
-                    for i in 16..80 {
-                        x[i] = x[i - 16]
-                            .wrapping_add(sigma_0(x[i - 15]))
-                            .wrapping_add(x[i - 7])
-                            .wrapping_add(sigma_1(x[i - 2]));
-                    }
-
-                    for i in 0..80 {
-                        let temp1 = h
-                            .wrapping_add(sum_1(e))
-                            .wrapping_add(choice(e, f, g))
-                            .wrapping_add(K[i])
-                            .wrapping_add(x[i]);
-                        let temp2 = sum_0(a).wrapping_add(majority(a, b, c));
-
-                        h = g;
-                        g = f;
-                        f = e;
-                        e = d.wrapping_add(temp1);
-                        d = c;
-                        c = b;
-                        b = a;
-                        a = temp1.wrapping_add(temp2);
-                    }
-                    v[0] = v[0].wrapping_add(a);
-                    v[1] = v[1].wrapping_add(b);
-                    v[2] = v[2].wrapping_add(c);
-                    v[3] = v[3].wrapping_add(d);
-                    v[4] = v[4].wrapping_add(e);
-                    v[5] = v[5].wrapping_add(f);
-                    v[6] = v[6].wrapping_add(g);
-                    v[7] = v[7].wrapping_add(h);
-                }
-
-                let mut out = v.iter().map(|x| x.to_be_bytes()).flatten().collect_vec();
+                let mut out = self
+                    .state
+                    .iter()
+                    .map(|x| x.to_be_bytes())
+                    .flatten()
+                    .collect_vec();
                 out.truncate($output_len);
                 out
             }
 
-            crate::hash_bytes_from_string! {}
+            crate::stateful_hash_helpers!();
         }
     };
 }
 
-sha512!(
+sha2_512!(
     Sha2_384,
     [
         0xcbbb9d5dc1059ed8,
@@ -185,7 +184,7 @@ sha512!(
     48
 );
 
-sha512!(
+sha2_512!(
     Sha2_512,
     [
         0x6a09e667f3bcc908,
@@ -200,7 +199,7 @@ sha512!(
     64
 );
 
-sha512!(
+sha2_512!(
     Sha2_512_224,
     [
         0x8c3d37c819544da2,
@@ -215,7 +214,7 @@ sha512!(
     28
 );
 
-sha512!(
+sha2_512!(
     Sha2_512_256,
     [
         0x22312194fc2bf72c,

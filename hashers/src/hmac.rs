@@ -2,12 +2,8 @@ use crate::{
     errors::HasherError,
     md4::Md4,
     md5::Md5,
-    sha::{
-        sha0::Sha0,
-        sha256::{Sha2_224, Sha2_256},
-        Sha1, Sha2_384, Sha2_512,
-    },
-    traits::ClassicHasher,
+    sha::{Sha0, Sha1, Sha2_224, Sha2_256, Sha2_384, Sha2_512},
+    traits::{ClassicHasher, StatefulHasher},
 };
 use strum::{Display, EnumIter, VariantNames};
 use utils::byte_formatting::ByteFormat;
@@ -39,16 +35,16 @@ impl HmacVariant {
         }
     }
 
-    pub fn hasher(&self) -> Box<dyn ClassicHasher> {
+    pub fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         match self {
-            Self::Sha0 => Box::new(Sha0::default()),
-            Self::Sha1 => Box::new(Sha1::default()),
-            Self::Md4 => Box::new(Md4::default()),
-            Self::Md5 => Box::new(Md5::default()),
-            Self::Sha224 => Box::new(Sha2_224::default()),
-            Self::Sha256 => Box::new(Sha2_256::default()),
-            Self::Sha384 => Box::new(Sha2_384::default()),
-            Self::Sha512 => Box::new(Sha2_512::default()),
+            Self::Sha0 => Sha0::default().hash(bytes),
+            Self::Sha1 => Sha1::default().hash(bytes),
+            Self::Md4 => Md4::default().hash(bytes),
+            Self::Md5 => Md5::default().hash(bytes),
+            Self::Sha224 => Sha2_224::default().hash(bytes),
+            Self::Sha256 => Sha2_256::default().hash(bytes),
+            Self::Sha384 => Sha2_384::default().hash(bytes),
+            Self::Sha512 => Sha2_512::default().hash(bytes),
         }
     }
 }
@@ -117,11 +113,10 @@ impl Hmac {
 
 impl ClassicHasher for Hmac {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let hasher = self.variant.hasher();
         let block_size = self.variant.block_size();
 
         let k = if self.key.len() > block_size {
-            let mut k = hasher.hash(&self.key);
+            let mut k = self.variant.hash(&self.key);
             k.truncate(block_size);
             k
         } else {
@@ -133,9 +128,9 @@ impl ClassicHasher for Hmac {
         let mut i_key: Vec<u8> = vec![0x36; block_size];
         utils::byte_formatting::xor_into_bytes(&mut i_key, &k);
         i_key.extend_from_slice(bytes);
-        let inner = hasher.hash(&i_key);
+        let inner = self.variant.hash(&i_key);
         o_key.extend_from_slice(&inner);
-        hasher.hash(&o_key)
+        self.variant.hash(&o_key)
     }
 
     crate::hash_bytes_from_string! {}

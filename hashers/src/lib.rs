@@ -20,6 +20,7 @@ pub mod ids;
 pub mod lm;
 pub mod md2;
 pub mod md4;
+pub mod md4_stateful;
 pub mod md5;
 pub mod md6;
 pub mod mgf1;
@@ -40,6 +41,7 @@ pub mod sm3;
 pub mod tiger;
 pub mod traits;
 pub mod vsh;
+pub mod md5_stateful;
 
 // Template
 // use utils::byte_formatting::ByteFormat;

@@ -1,4 +1,10 @@
-use crate::{errors::HasherError, md2::Md2, md5::Md5, sha::Sha1, traits::ClassicHasher};
+use crate::{
+    errors::HasherError,
+    md2::Md2,
+    md5::Md5,
+    sha::Sha1,
+    traits::{ClassicHasher, StatefulHasher},
+};
 use strum::{Display, EnumIter, VariantNames};
 use utils::byte_formatting::ByteFormat;
 
@@ -110,17 +116,11 @@ impl ClassicHasher for Pbkdf1 {
         assert!(self.iterations > 0);
         assert!(self.hash_len > 0);
 
-        let h: Box<dyn ClassicHasher> = match self.variant {
-            Pbkdf1Variant::Sha1 => Box::new(Sha1::default()),
-            Pbkdf1Variant::Md2 => Box::new(Md2::default()),
-            Pbkdf1Variant::Md5 => Box::new(Md5::default()),
-        };
-
         let mut working_vector = bytes.to_vec();
         working_vector.extend(self.salt);
 
         for _ in 0..self.iterations {
-            working_vector = h.hash(&working_vector);
+            working_vector = self.inner_hash(&working_vector);
         }
 
         working_vector.truncate(self.hash_len as usize);

@@ -13,6 +13,9 @@ pub trait StatefulHasher {
     fn finalize(self) -> Vec<u8>;
 
     // Simultaneously update and finalize.
+    fn update_multiple(&mut self, bytes: &[&[u8]]);
+
+    // Simultaneously update and finalize.
     fn hash(self, bytes: &[u8]) -> Vec<u8>;
 
     // Hash multiple inputs
@@ -22,6 +25,12 @@ pub trait StatefulHasher {
 #[macro_export]
 macro_rules! stateful_hash_helpers {
     () => {
+        fn update_multiple(&mut self, bytes: &[&[u8]]) {
+            for b in bytes {
+                self.update(b);
+            }
+        }
+
         fn hash(mut self, bytes: &[u8]) -> Vec<u8> {
             self.update(bytes);
             self.finalize()

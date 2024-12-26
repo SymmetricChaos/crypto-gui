@@ -1,4 +1,4 @@
-use hashers::sha::Sha1Stateful;
+use hashers::{sha::Sha1, traits::StatefulHasher};
 use utils::{byte_formatting::ByteFormat, padding::md_strengthening_64_be};
 
 use crate::ui_elements::UiElements;
@@ -60,6 +60,6 @@ impl HasherFrame for Sha1Frame {
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
         Ok(self
             .output_format
-            .byte_slice_to_text(Sha1Stateful::hash(&bytes)))
+            .byte_slice_to_text(Sha1::init().hash(&bytes)))
     }
 }
