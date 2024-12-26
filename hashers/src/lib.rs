@@ -86,7 +86,6 @@ pub mod vsh;
 // );
 
 // Template
-// use utils::byte_formatting::ByteFormat;
 // use crate::traits::StatefulHasher;
 // pub struct HASHERNAME {
 //     state: []

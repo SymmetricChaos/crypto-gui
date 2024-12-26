@@ -41,7 +41,7 @@ impl HasherFrame for Sha0Frame {
         ui.byte_io_mode_hasher(&mut self.input_format, &mut self.output_format);
         ui.add_space(16.0);
 
-        ui.subheading("Demonstration of Padding");
+        ui.subheading("Demonstration of Padding (UTF-8)");
         ui.label("Notice that that message is padded out to a multiple of 64-bytes with two special features. First the byte 0x80 (0b10000000) is always included after the message. Then zeroes are added as needed. Finally the original message length in bits is appended to the end, reaching the block size.");
         ui.add_space(2.0);
         if ui.control_string(&mut self.example).changed() {

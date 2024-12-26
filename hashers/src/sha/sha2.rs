@@ -1,9 +1,10 @@
 use crate::traits::ClassicHasher;
 use utils::byte_formatting::ByteFormat;
 
-use super::sha256::Sha2_224;
-use super::sha256::Sha2_256;
-use super::sha512::{Sha2_384, Sha2_512, Sha2_512_224, Sha2_512_256};
+use super::{
+    sha256_stateful::{Sha2_224, Sha2_256},
+    sha512_stateful::{Sha2_384, Sha2_512, Sha2_512_224, Sha2_512_256},
+};
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Sha2Variant {
@@ -95,12 +96,12 @@ impl Sha2 {
 impl ClassicHasher for Sha2 {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         match self.variant {
-            Sha2Variant::Sha224 => Sha2_224::default().hash(bytes),
-            Sha2Variant::Sha256 => Sha2_256::default().hash(bytes),
-            Sha2Variant::Sha384 => Sha2_384::default().hash(bytes),
-            Sha2Variant::Sha512 => Sha2_512::default().hash(bytes),
-            Sha2Variant::Sha512_224 => Sha2_512_224::default().hash(bytes),
-            Sha2Variant::Sha512_256 => Sha2_512_256::default().hash(bytes),
+            Sha2Variant::Sha224 => Sha2_224::hash(bytes),
+            Sha2Variant::Sha256 => Sha2_256::hash(bytes),
+            Sha2Variant::Sha384 => Sha2_384::hash(bytes),
+            Sha2Variant::Sha512 => Sha2_512::hash(bytes),
+            Sha2Variant::Sha512_224 => Sha2_512_224::hash(bytes),
+            Sha2Variant::Sha512_256 => Sha2_512_256::hash(bytes),
         }
     }
 
