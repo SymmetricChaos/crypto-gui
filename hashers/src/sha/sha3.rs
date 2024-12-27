@@ -2,32 +2,45 @@ use crate::traits::StatefulHasher;
 
 use super::KeccackState;
 
-/// There are four domain separation values possible. Each starts with a different padding byte.
-pub enum Domain {
+pub(crate) fn left_encode(val: u64, b: &mut [u8; 9]) -> &[u8] {
+    b[1..].copy_from_slice(&val.to_be_bytes());
+    let i = b[1..8].iter().take_while(|&&a| a == 0).count();
+    b[i] = (8 - i) as u8;
+    &b[i..]
+}
+
+pub(crate) fn right_encode(val: u64, b: &mut [u8; 9]) -> &[u8] {
+    todo!()
+}
+
+pub enum KeccackMode {
     Keccak,
     Sha3,
     Shake,
     Cshake,
+    Kmac,
 }
 
-impl Domain {
+impl KeccackMode {
     /// Domain separation value
     pub fn pad(&self) -> u8 {
         match self {
-            Domain::Keccak => 0x01,
-            Domain::Sha3 => 0x06,
-            Domain::Shake => 0x1f,
-            Domain::Cshake => 0x04,
+            KeccackMode::Keccak => 0x01,
+            KeccackMode::Sha3 => 0x06,
+            KeccackMode::Shake => 0x1f,
+            KeccackMode::Cshake => 0x04,
+            KeccackMode::Kmac => 0x04,
         }
     }
 
     /// Domain separation value combined with with 0x80 byte
     pub fn pad_one(&self) -> u8 {
         match self {
-            Domain::Keccak => 0x81,
-            Domain::Sha3 => 0x86,
-            Domain::Shake => 0x9f,
-            Domain::Cshake => 0x84,
+            KeccackMode::Keccak => 0x81,
+            KeccackMode::Sha3 => 0x86,
+            KeccackMode::Shake => 0x9f,
+            KeccackMode::Cshake => 0x84,
+            KeccackMode::Kmac => 0x84,
         }
     }
 }
@@ -38,9 +51,7 @@ pub struct Keccack {
     buffer: Vec<u8>,
     rate: usize,     // rate in bytes, block size
     hash_len: usize, // output length in bytes, recommended to be half the capacity
-    // pub function_name: Vec<u8>,
-    // pub customization: Vec<u8>,
-    domain: Domain,
+    domain: KeccackMode,
 }
 
 impl Keccack {
@@ -57,51 +68,43 @@ impl Keccack {
         self
     }
 
-    pub fn sha3() -> Self {
+    fn sha3() -> Self {
         Self {
             state: KeccackState::new(),
             buffer: Vec::new(),
             rate: 0,
             hash_len: 0,
-            // function_name: Vec::new(),
-            // customization: Vec::new(),
-            domain: Domain::Sha3,
+            domain: KeccackMode::Sha3,
         }
     }
 
-    pub fn shake() -> Self {
+    fn shake() -> Self {
         Self {
             state: KeccackState::new(),
             buffer: Vec::new(),
             rate: 0,
             hash_len: 0,
-            // function_name: Vec::new(),
-            // customization: Vec::new(),
-            domain: Domain::Shake,
+            domain: KeccackMode::Shake,
         }
     }
 
-    pub fn cshake() -> Self {
+    fn cshake() -> Self {
         Self {
             state: KeccackState::new(),
             buffer: Vec::new(),
             rate: 0,
             hash_len: 0,
-            // function_name: Vec::new(),
-            // customization: Vec::new(),
-            domain: Domain::Cshake,
+            domain: KeccackMode::Cshake,
         }
     }
 
-    pub fn keccak() -> Self {
+    pub fn keccak(rate: usize, hash_len: usize) -> Self {
         Self {
             state: KeccackState::new(),
             buffer: Vec::new(),
-            rate: 0,
-            hash_len: 0,
-            // function_name: Vec::new(),
-            // customization: Vec::new(),
-            domain: Domain::Keccak,
+            rate,
+            hash_len,
+            domain: KeccackMode::Keccak,
         }
     }
 
@@ -137,17 +140,45 @@ impl Keccack {
     }
 
     /// cSHAKE128; rate of 1344 bits
-    pub fn cshake_128(hash_len: usize) -> Self {
-        Keccack::cshake()
+    /// This function is intended to be defined by NIST and not used directly
+    pub fn cshake_128(hash_len: usize, function_name: &[u8], customization: &[u8]) -> Self {
+        if function_name.is_empty() && customization.is_empty() {
+            return Keccack::shake_128(hash_len);
+        }
+        let mut k = Keccack::cshake()
             .with_rate(1344 / 8)
-            .with_hash_len(hash_len)
+            .with_hash_len(hash_len);
+        let mut b = [0u8; 9];
+        // Rate in bits
+        k.update(left_encode(k.rate as u64, &mut b));
+        // Length of the function name in bits followed by the function name
+        k.update(left_encode((function_name.len() * 8) as u64, &mut b));
+        k.update(function_name);
+        // Length of the customization string in bits followed by the customization string
+        k.update(left_encode((customization.len() * 8) as u64, &mut b));
+        k.update(customization);
+        k
     }
 
     /// cSHAKE256; rate of 1088 bits
-    pub fn cshake_256(hash_len: usize) -> Self {
-        Keccack::cshake()
+    /// This function is intended to be defined by NIST and not used directly
+    pub fn cshake_256(hash_len: usize, function_name: &[u8], customization: &[u8]) -> Self {
+        if function_name.is_empty() && customization.is_empty() {
+            return Keccack::shake_256(hash_len);
+        }
+        let mut k = Keccack::cshake()
             .with_rate(1088 / 8)
-            .with_hash_len(hash_len)
+            .with_hash_len(hash_len);
+        let mut b = [0u8; 9];
+        // Rate in bits
+        k.update(left_encode(k.rate as u64, &mut b));
+        // Length of the function name in bits followed by the function name
+        k.update(left_encode((function_name.len() * 8) as u64, &mut b));
+        k.update(function_name);
+        // Length of the customization string in bits followed by the customization string
+        k.update(left_encode((customization.len() * 8) as u64, &mut b));
+        k.update(customization);
+        k
     }
 }
 
