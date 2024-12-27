@@ -1,5 +1,4 @@
 pub mod keccak_state;
-pub mod sha3_stateful;
 pub use keccak_state::KeccackState;
 pub mod sha0;
 pub mod sha512;

@@ -1,5 +1,10 @@
 use egui::DragValue;
-use hashers::sha::{Keccack, KeccackState};
+use hashers::{
+    errors::HasherError,
+    sha::{Keccack, KeccackState},
+    traits::StatefulHasher,
+};
+use utils::byte_formatting::ByteFormat;
 
 use crate::ui_elements::UiElements;
 
@@ -22,7 +27,8 @@ pub enum Sha3Variant {
 }
 
 pub struct Sha3Frame {
-    hasher: Keccack,
+    input_format: ByteFormat,
+    output_format: ByteFormat,
     variant: Sha3Variant,
     shake_hash_len: usize,
     example_state: KeccackState,
@@ -32,25 +38,12 @@ pub struct Sha3Frame {
 impl Default for Sha3Frame {
     fn default() -> Self {
         Self {
-            hasher: Default::default(),
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
             variant: Sha3Variant::Sha3_256,
             shake_hash_len: 128,
-
             example_state: KeccackState::new(),
             example_round: 0,
-        }
-    }
-}
-
-impl Sha3Frame {
-    fn set_hasher(&mut self) {
-        match self.variant {
-            Sha3Variant::Sha3_224 => self.hasher = Keccack::sha3_224(),
-            Sha3Variant::Sha3_256 => self.hasher = Keccack::sha3_256(),
-            Sha3Variant::Sha3_384 => self.hasher = Keccack::sha3_384(),
-            Sha3Variant::Sha3_512 => self.hasher = Keccack::sha3_512(),
-            Sha3Variant::Shake128 => self.hasher = Keccack::shake_128(self.shake_hash_len),
-            Sha3Variant::Shake256 => self.hasher = Keccack::shake_256(self.shake_hash_len),
         }
     }
 }
@@ -62,55 +55,29 @@ impl HasherFrame for Sha3Frame {
             "https://github.com/SymmetricChaos/crypto-gui/blob/master/hashers/src/sha/sha3.rs",
         );
 
-        ui.byte_io_mode_hasher(
-            &mut self.hasher.input_format,
-            &mut self.hasher.output_format,
-        );
+        ui.byte_io_mode_hasher(&mut self.input_format, &mut self.output_format);
 
         ui.add_space(16.0);
         ui.subheading("SHA-3 Hash Algorithms");
         ui.horizontal(|ui| {
-            if ui
-                .selectable_value(&mut self.variant, Sha3Variant::Sha3_224, "SHA3-224")
-                .changed()
-                || ui
-                    .selectable_value(&mut self.variant, Sha3Variant::Sha3_256, "SHA3-256")
-                    .changed()
-                || ui
-                    .selectable_value(&mut self.variant, Sha3Variant::Sha3_384, "SHA3-384")
-                    .changed()
-                || ui
-                    .selectable_value(&mut self.variant, Sha3Variant::Sha3_512, "SHA3-512")
-                    .changed()
-            {
-                self.set_hasher()
-            }
+            ui.selectable_value(&mut self.variant, Sha3Variant::Sha3_224, "SHA3-224");
+            ui.selectable_value(&mut self.variant, Sha3Variant::Sha3_256, "SHA3-256");
+            ui.selectable_value(&mut self.variant, Sha3Variant::Sha3_384, "SHA3-384");
+            ui.selectable_value(&mut self.variant, Sha3Variant::Sha3_512, "SHA3-512");
         });
         ui.add_space(8.0);
         ui.subheading("SHA-3 Extensible Output Functions");
         ui.horizontal(|ui| {
-            if ui
-                .selectable_value(&mut self.variant, Sha3Variant::Shake128, "SHAKE128")
-                .changed()
-                || ui
-                    .selectable_value(&mut self.variant, Sha3Variant::Shake256, "SHAKE256")
-                    .changed()
-            {
-                self.set_hasher()
-            }
+            ui.selectable_value(&mut self.variant, Sha3Variant::Shake128, "SHAKE128");
+            ui.selectable_value(&mut self.variant, Sha3Variant::Shake256, "SHAKE256");
         });
 
         ui.add_space(8.0);
         ui.subheading("SHAKE Output Length (in bytes)");
-        if ui
-            .add_enabled(
-                self.variant == Sha3Variant::Shake128 || self.variant == Sha3Variant::Shake256,
-                DragValue::new(&mut self.shake_hash_len).range(1..=512),
-            )
-            .changed()
-        {
-            self.hasher.hash_len = self.shake_hash_len;
-        }
+        ui.add_enabled(
+            self.variant == Sha3Variant::Shake128 || self.variant == Sha3Variant::Shake256,
+            DragValue::new(&mut self.shake_hash_len).range(1..=512),
+        );
 
         ui.add_space(16.0);
         ui.subheading("Discussion");
@@ -132,11 +99,6 @@ impl HasherFrame for Sha3Frame {
                 ui.horizontal(|ui| {
                     for x in 0..5 {
                         ui.u64_hex_edit(&mut self.example_state[x][y]);
-                        // control_hex_u64(
-                        //     ui,
-                        //     &mut self.example_state_strings[x][y],
-                        //     &mut self.example_state[x][y],
-                        // );
                     }
                 });
             }
@@ -176,5 +138,21 @@ impl HasherFrame for Sha3Frame {
         ui.add_space(16.0);
     }
 
-    crate::hash_string! {}
+    fn hash_string(&self, text: &str) -> Result<String, HasherError> {
+        let bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
+
+        let h = match self.variant {
+            Sha3Variant::Sha3_224 => Keccack::sha3_224().hash(&bytes),
+            Sha3Variant::Sha3_256 => Keccack::sha3_256().hash(&bytes),
+            Sha3Variant::Sha3_384 => Keccack::sha3_384().hash(&bytes),
+            Sha3Variant::Sha3_512 => Keccack::sha3_512().hash(&bytes),
+            Sha3Variant::Shake128 => Keccack::shake_128(self.shake_hash_len).hash(&bytes),
+            Sha3Variant::Shake256 => Keccack::shake_256(self.shake_hash_len).hash(&bytes),
+        };
+
+        Ok(self.output_format.byte_slice_to_text(&h))
+    }
 }
