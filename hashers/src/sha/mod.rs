@@ -1,9 +1,12 @@
+pub mod keccak_state;
+pub mod sha3_stateful;
+pub use keccak_state::KeccackState;
 pub mod sha0;
 pub mod sha512;
 pub use sha0::Sha0;
 pub use sha1::Sha1;
 pub mod sha3;
-pub use sha3::{Keccack, KeccackState};
+pub use sha3::Keccack;
 pub mod sha1;
 pub mod sha2;
 pub use sha2::{Sha2, Sha2Variant};

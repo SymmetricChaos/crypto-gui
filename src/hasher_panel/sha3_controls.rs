@@ -169,7 +169,7 @@ impl HasherFrame for Sha3Frame {
             }
             ui.add_space(8.0);
             if ui.button("Full Permutation (24 Rounds)").clicked() {
-                self.example_state.keccak_f()
+                self.example_state.keccak_f_1600()
             }
         });
 
