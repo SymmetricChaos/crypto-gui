@@ -4,6 +4,7 @@ use hashers::{
     sha::{Keccack, KeccackState},
     traits::StatefulHasher,
 };
+use rand::{thread_rng, RngCore};
 use utils::byte_formatting::ByteFormat;
 
 use crate::ui_elements::{control_string, UiElements};
@@ -20,8 +21,8 @@ pub enum Variant {
     Shake256,
     CShake128,
     CShake256,
-    // Kmac_128,
-    // Kmac_256,
+    Kmac128,
+    Kmac256,
     // TupleHash_128,
     // TupleHash_256,
 }
@@ -37,10 +38,12 @@ impl Variant {
             Variant::Shake256 => true,
             Variant::CShake128 => true,
             Variant::CShake256 => true,
+            Variant::Kmac128 => true,
+            Variant::Kmac256 => true,
         }
     }
 
-    fn cshake(&self) -> bool {
+    fn function_name(&self) -> bool {
         match self {
             Variant::Sha3_224 => false,
             Variant::Sha3_256 => false,
@@ -50,6 +53,38 @@ impl Variant {
             Variant::Shake256 => false,
             Variant::CShake128 => true,
             Variant::CShake256 => true,
+            Variant::Kmac128 => false,
+            Variant::Kmac256 => false,
+        }
+    }
+
+    fn customization(&self) -> bool {
+        match self {
+            Variant::Sha3_224 => false,
+            Variant::Sha3_256 => false,
+            Variant::Sha3_384 => false,
+            Variant::Sha3_512 => false,
+            Variant::Shake128 => false,
+            Variant::Shake256 => false,
+            Variant::CShake128 => true,
+            Variant::CShake256 => true,
+            Variant::Kmac128 => true,
+            Variant::Kmac256 => true,
+        }
+    }
+
+    fn keyed(&self) -> bool {
+        match self {
+            Variant::Sha3_224 => false,
+            Variant::Sha3_256 => false,
+            Variant::Sha3_384 => false,
+            Variant::Sha3_512 => false,
+            Variant::Shake128 => false,
+            Variant::Shake256 => false,
+            Variant::CShake128 => false,
+            Variant::CShake256 => false,
+            Variant::Kmac128 => true,
+            Variant::Kmac256 => true,
         }
     }
 }
@@ -58,11 +93,13 @@ pub struct Sha3Frame {
     input_format: ByteFormat,
     output_format: ByteFormat,
     variant: Variant,
-    shake_hash_len: u64,
+    hash_len: u64,
     example_state: KeccackState,
     example_round: usize,
     function_name: String,
     customization: String,
+    key: Vec<u8>,
+    key_string: String,
 }
 
 impl Default for Sha3Frame {
@@ -71,12 +108,49 @@ impl Default for Sha3Frame {
             input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             variant: Variant::Sha3_256,
-            shake_hash_len: 128,
+            hash_len: 128,
             example_state: KeccackState::new(),
             example_round: 0,
             function_name: String::new(),
             customization: String::new(),
+            key: Vec::new(),
+            key_string: String::new(),
         }
+    }
+}
+
+impl Sha3Frame {
+    fn validate_key(&mut self) {
+        self.key_string = self
+            .key_string
+            .chars()
+            .filter(|c| c.is_ascii_hexdigit())
+            .collect();
+        if self.key_string.len() % 2 != 0 {
+            self.key_string.insert(0, '0');
+        }
+        if let Ok(new) = ByteFormat::Hex.text_to_bytes(&self.key_string) {
+            match new.try_into() {
+                Ok(key) => self.key = key,
+                Err(_) => unreachable!(),
+            }
+        } else {
+            unreachable!("unable to parse input");
+        }
+    }
+
+    fn key_control(&mut self, ui: &mut egui::Ui) {
+        ui.horizontal(|ui| {
+            if ui.control_string(&mut self.key_string).lost_focus() {
+                self.validate_key();
+            };
+            if ui.button("🎲").on_hover_text("randomize").clicked() {
+                let mut rng = thread_rng();
+                self.key = vec![0; 32];
+                rng.fill_bytes(&mut self.key);
+                self.key_string = ByteFormat::Hex.byte_slice_to_text(&self.key)
+            };
+        });
     }
 }
 
@@ -109,33 +183,50 @@ impl HasherFrame for Sha3Frame {
             ui.selectable_value(&mut self.variant, Variant::CShake128, "cSHAKE128");
             ui.selectable_value(&mut self.variant, Variant::CShake256, "cSHAKE256");
         });
+        ui.add_space(8.0);
+        ui.subheading("Message Authentication Codes");
+        ui.horizontal(|ui| {
+            ui.selectable_value(&mut self.variant, Variant::Kmac128, "KMAC128");
+            ui.selectable_value(&mut self.variant, Variant::Kmac256, "KMAC256");
+        });
 
         ui.add_space(16.0);
         ui.subheading("Discussion");
         match self.variant {
-            Variant::Sha3_224 => ui.label("SHA3-224 keeps 448 bits of state reserved and absorbs 1152 bits at a time. It returns a 224 bit hash."),
-            Variant::Sha3_256 => ui.label("SHA3-256 keeps 512 bits of state reserved and absorbs 1088 bits at a time. It returns a 256 bit hash."),
-            Variant::Sha3_384 => ui.label("SHA3-384 keeps 768 bits of state reserved and absorbs 832 bits at a time. It returns a 384 bit hash."),
-            Variant::Sha3_512 => ui.label("SHA3-512 keeps 1024 bits of state reserved and absorbs 576 bits at a time. It returns a 512 bit hash."),
-            Variant::Shake128 => ui.label("SHAKE128 keeps 256 bits of state reserved and absorbs 1344 bits at a time. It can be set to return any number of bits."),
-            Variant::Shake256 => ui.label("SHAKE256 keeps 512 bits of state reserved and absorbs 1088 bits at a time. It can be set to return any number of bits."),
+            Variant::Sha3_224 => ui.label("SHA3-224 absorbs 1152 bits at a time."),
+            Variant::Sha3_256 => ui.label("SHA3-256 absorbs 1088 bits at a time."),
+            Variant::Sha3_384 => ui.label("SHA3-384 absorbs 832 bits at a time."),
+            Variant::Sha3_512 => ui.label("SHA3-512 absorbs 576 bits at a time."),
+            Variant::Shake128 => ui.label("SHAKE128 absorbs 1344 bits at a time. It can be set to return any number of bits."),
+            Variant::Shake256 => ui.label("SHAKE256 absorbs 1088 bits at a time. It can be set to return any number of bits."),
             Variant::CShake128 => ui.label("cSHAKE128 is similar to SHAKE128 but allows both a function name and customization string."),
             Variant::CShake256 => ui.label("cSHAKE256 is similar to SHAKE256 but allows both a function name and customization string."),
+            Variant::Kmac128 => ui.label("KMAC128 is a cSHAKE128 derived Message Authemtical Code. It accepts a key and customization string and can return any number of bits. In order to meet the security claim the output length and key must both be sufficient."),
+            Variant::Kmac256 => ui.label("KMAC128 is a cSHAKE128 derived Message Authemtical Code. It accepts a key and customization string and can return any number of bits. In order to meet the security claim the output length and key must both be sufficient."),
         };
 
         ui.add_space(8.0);
         ui.subheading("Output Length (in bytes)");
         ui.add_enabled(
             self.variant.adjustable_length(),
-            DragValue::new(&mut self.shake_hash_len).range(1..=1024),
+            DragValue::new(&mut self.hash_len).range(1..=1024),
         );
 
         ui.add_space(12.0);
-        ui.subheading("cSHAKE Function Name");
-        control_string(ui, &mut self.function_name, self.variant.cshake());
-        ui.add_space(4.0);
-        ui.subheading("cSHAKE Customization String");
-        control_string(ui, &mut self.customization, self.variant.cshake());
+        if self.variant.function_name() {
+            ui.subheading("cSHAKE Function Name (UTF-8)");
+            ui.control_string(&mut self.function_name);
+        }
+        if self.variant.customization() {
+            ui.add_space(4.0);
+            ui.subheading("Customization String (UTF-8)");
+            ui.control_string(&mut self.customization);
+        }
+        if self.variant.keyed() {
+            ui.add_space(4.0);
+            ui.subheading("Key (Hexadecimal)");
+            self.key_control(ui);
+        }
 
         ui.add_space(16.0);
         ui.collapsing("Interactive State", |ui| {
@@ -192,25 +283,30 @@ impl HasherFrame for Sha3Frame {
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
 
         let h = match self.variant {
-            Variant::Sha3_224 => Keccack::sha3_224().hash(&bytes),
-            Variant::Sha3_256 => Keccack::sha3_256().hash(&bytes),
-            Variant::Sha3_384 => Keccack::sha3_384().hash(&bytes),
-            Variant::Sha3_512 => Keccack::sha3_512().hash(&bytes),
-            Variant::Shake128 => Keccack::shake_128(self.shake_hash_len).hash(&bytes),
-            Variant::Shake256 => Keccack::shake_256(self.shake_hash_len).hash(&bytes),
+            Variant::Sha3_224 => Keccack::sha3_224(),
+            Variant::Sha3_256 => Keccack::sha3_256(),
+            Variant::Sha3_384 => Keccack::sha3_384(),
+            Variant::Sha3_512 => Keccack::sha3_512(),
+            Variant::Shake128 => Keccack::shake_128(self.hash_len),
+            Variant::Shake256 => Keccack::shake_256(self.hash_len),
             Variant::CShake128 => Keccack::cshake_128(
-                self.shake_hash_len,
+                self.hash_len,
                 self.function_name.as_bytes(),
                 self.customization.as_bytes(),
-            )
-            .hash(&bytes),
+            ),
             Variant::CShake256 => Keccack::cshake_256(
-                self.shake_hash_len,
+                self.hash_len,
                 self.function_name.as_bytes(),
                 self.customization.as_bytes(),
-            )
-            .hash(&bytes),
-        };
+            ),
+            Variant::Kmac128 => {
+                Keccack::kmac_128(&self.key, self.hash_len, self.customization.as_bytes())
+            }
+            Variant::Kmac256 => {
+                Keccack::kmac_256(&self.key, self.hash_len, self.customization.as_bytes())
+            }
+        }
+        .hash(&bytes);
 
         Ok(self.output_format.byte_slice_to_text(&h))
     }
