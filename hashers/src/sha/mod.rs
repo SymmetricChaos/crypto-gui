@@ -1,5 +1,6 @@
-pub mod keccak_state;
-pub use keccak_state::KeccackState;
+pub mod keccack_state;
+pub mod keccack_tests;
+pub use keccack_state::KeccackState;
 pub mod sha0;
 pub mod sha512;
 pub use sha0::Sha0;
