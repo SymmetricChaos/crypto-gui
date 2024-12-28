@@ -58,7 +58,7 @@ pub struct Sha3Frame {
     input_format: ByteFormat,
     output_format: ByteFormat,
     variant: Variant,
-    shake_hash_len: usize,
+    shake_hash_len: u64,
     example_state: KeccackState,
     example_round: usize,
     function_name: String,
