@@ -24,6 +24,7 @@ fn test_encoding() {
     let mut b = [0; 9];
     assert_eq!(&[0x01, 0x00], left_encode(x, &mut b));
     assert_eq!(&[0x00, 0x01], right_encode(x, &mut b));
+    assert_eq!(&[0x01, 0x00, 0x02], right_encode(256, &mut b));
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -69,17 +70,17 @@ pub struct Keccack {
     rate: u64,     // rate in bytes, block size
     hash_len: u64, // output length in bytes, recommended to be half the capacity
     domain: KeccackMode,
-    bits_taken: u64,
 }
 
 impl Keccack {
     /// Keccack can be squeezed repeatedly to produce additional bits.
     /// No additional data should be absorbed after squeezing.
-    pub fn squeeze(&mut self, n_bytes: usize) -> Vec<u8> {
+    pub fn squeeze(&mut self) -> Vec<u8> {
         if !self.buffer.is_empty() {
             self.pad_and_absorb();
         }
-        self.state.squeeze(self.rate as usize, n_bytes)
+        self.state
+            .squeeze(self.rate as usize, self.hash_len as usize)
     }
 
     // Rate in bytes. Less than or equal to 200.
@@ -102,7 +103,6 @@ impl Keccack {
             rate: 0,
             hash_len: 0,
             domain: KeccackMode::Sha3,
-            bits_taken: 0,
         }
     }
 
@@ -113,7 +113,6 @@ impl Keccack {
             rate: 0,
             hash_len: 0,
             domain: KeccackMode::Shake,
-            bits_taken: 0,
         }
     }
 
@@ -124,7 +123,6 @@ impl Keccack {
             rate: 0,
             hash_len: 0,
             domain: KeccackMode::Cshake,
-            bits_taken: 0,
         }
     }
 
@@ -135,7 +133,6 @@ impl Keccack {
             rate,
             hash_len,
             domain: KeccackMode::Keccak,
-            bits_taken: 0,
         }
     }
 
@@ -170,6 +167,14 @@ impl Keccack {
         Keccack::shake().with_rate(1088 / 8).with_hash_len(hash_len)
     }
 
+    fn pad_buffer_to_rate(&mut self) {
+        self.update(&vec![
+            0x00;
+            self.buffer.len().next_multiple_of(self.rate as usize)
+                - self.buffer.len()
+        ]);
+    }
+
     /// cSHAKE128; rate of 1344 bits
     /// This function is intended to be defined by NIST and not used directly
     pub fn cshake_128(hash_len: u64, function_name: &[u8], customization: &[u8]) -> Self {
@@ -188,7 +193,7 @@ impl Keccack {
         // Length of the customization string in bits followed by the customization string
         k.update(left_encode((customization.len() * 8) as u64, &mut b));
         k.update(customization);
-        k.update(&vec![0x00; k.rate as usize - k.buffer.len()]);
+        k.pad_buffer_to_rate();
         k
     }
 
@@ -210,12 +215,52 @@ impl Keccack {
         // Length of the customization string in bits followed by the customization string
         k.update(left_encode((customization.len() * 8) as u64, &mut b));
         k.update(customization);
-        k.update(&vec![0x00; k.rate as usize - k.buffer.len()]);
+        k.pad_buffer_to_rate();
+        k
+    }
+
+    /// KMAC128; rate of 1344 bits
+    /// This function is intended to be defined by NIST and not used directly
+    pub fn kmac_128(key: &[u8], hash_len: u64, customization: &[u8]) -> Self {
+        let mut k = Self::cshake_128(hash_len, b"KMAC", customization);
+
+        // Needed for particular padding
+        k.domain = KeccackMode::Kmac;
+
+        let mut b = [0u8; 9];
+        // Rate in bits
+        k.update(left_encode(k.rate as u64, &mut b));
+        k.update(left_encode((key.len() * 8) as u64, &mut b));
+        k.update(key);
+        k.pad_buffer_to_rate();
+
+        k
+    }
+
+    /// KMAC128; rate of 1088 bits
+    /// This function is intended to be defined by NIST and not used directly
+    pub fn kmac_256(key: &[u8], hash_len: u64, customization: &[u8]) -> Self {
+        let mut k = Self::cshake_256(hash_len, b"KMAC", customization);
+
+        // Needed for particular padding
+        k.domain = KeccackMode::Kmac;
+
+        let mut b = [0u8; 9];
+        // Rate in bits
+        k.update(left_encode(k.rate as u64, &mut b));
+        k.update(left_encode((key.len() * 8) as u64, &mut b));
+        k.update(key);
+        k.pad_buffer_to_rate();
+
         k
     }
 
     fn pad_and_absorb(&mut self) {
-        self.bits_taken += (self.buffer.len() * 8) as u64;
+        if self.domain == KeccackMode::Kmac {
+            self.buffer
+                .extend_from_slice(right_encode(self.hash_len * 8, &mut [0; 9]));
+        }
+
         let padding_len = self.rate as usize - (self.buffer.len() % self.rate as usize);
 
         if padding_len == 1 {
@@ -226,10 +271,6 @@ impl Keccack {
             self.buffer.push(self.domain.pad());
             self.buffer.extend(vec![0x00; padding_len - 2]);
             self.buffer.push(0x80)
-        }
-
-        if self.domain == KeccackMode::Kmac {
-            todo!("KMAC extra padding")
         }
 
         self.state.absorb(&self.buffer, self.rate as usize);
@@ -243,7 +284,6 @@ impl StatefulHasher for Keccack {
         let rem = chunks.remainder().to_vec();
         for chunk in chunks {
             self.state.absorb(chunk, self.rate as usize);
-            self.bits_taken += self.rate * 8;
         }
         self.buffer = rem;
     }

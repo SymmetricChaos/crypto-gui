@@ -83,7 +83,7 @@ impl std::fmt::Display for KeccackState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for x in 0..5 {
             for y in 0..5 {
-                write!(f, "{:016x?} ", self.array[y][x]).unwrap();
+                write!(f, "{:016x?} ", self.array[y][x].to_be()).unwrap();
             }
             write!(f, "\n").unwrap();
         }

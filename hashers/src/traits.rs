@@ -97,7 +97,11 @@ macro_rules! stateful_hash_tests {
         $(
             #[test]
             fn $test_name() {
-                assert_eq!(utils::byte_formatting::hex_to_bytes_ltr($output).unwrap(), $hasher.hash($input));
+                let a = utils::byte_formatting::hex_to_bytes_ltr($output).unwrap();
+                let b = $hasher.hash($input);
+                if a != b {
+                    panic!("hash did not match test value\nexpected:   {:02x?}\ncalculated  {:02x?}", a,b)
+                }
             }
         )+
         }
@@ -110,7 +114,11 @@ macro_rules! stateful_hash_tests {
         $(
             #[test]
             fn $name() {
-                assert_eq!(utils::byte_formatting::hex_to_bytes_ltr($output).unwrap(), $hasher.hash($input));
+                let a = utils::byte_formatting::hex_to_bytes_ltr($output).unwrap();
+                let b = $hasher.hash($input);
+                if a != b {
+                    panic!("hash did not match test value\nexpected:   {:02x?}\ncalculated  {:02x?}", a,b)
+                }
             }
         )+
         }

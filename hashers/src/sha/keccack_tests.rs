@@ -5,8 +5,8 @@ const EMPTY: &[u8; 0] = b"";
 const ABC: &[u8; 3] = b"abc";
 const A_1MIL: &[u8; 1_000_000] = &[0x61; 1_000_000];
 const LETTERS_112: &[u8; 112] = b"abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu";
-const CSHAKE_32: &[u8; 4] = &[0, 1, 2, 3];
-const CSHAKE_1600: &[u8; 200] = &[
+const DATA_4: &[u8; 4] = &[0, 1, 2, 3];
+const DATA_200: &[u8; 200] = &[
     0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
     0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F,
     0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F,
@@ -20,6 +20,10 @@ const CSHAKE_1600: &[u8; 200] = &[
     0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, 0xA7, 0xA8, 0xA9, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF,
     0xB0, 0xB1, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6, 0xB7, 0xB8, 0xB9, 0xBA, 0xBB, 0xBC, 0xBD, 0xBE, 0xBF,
     0xC0, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7,
+];
+const KEY_32: &[u8; 32] = &[
+    0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F,
+    0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5A, 0x5B, 0x5C, 0x5D, 0x5E, 0x5F,
 ];
 
 crate::stateful_hash_tests!(
@@ -64,13 +68,27 @@ crate::stateful_hash_tests!(
     empty_shake256, Keccack::shake_256(200), EMPTY,
     "46b9dd2b0ba88d13233b3feb743eeb243fcd52ea62b81b82b50c27646ed5762fd75dc4ddd8c0f200cb05019d67b592f6fc821c49479ab48640292eacb3b7c4be141e96616fb13957692cc7edd0b45ae3dc07223c8e92937bef84bc0eab862853349ec75546f58fb7c2775c38462c5010d846c185c15111e595522a6bcd16cf86f3d122109e3b1fdd943b6aec468a2d621a7c06c6a957c62b54dafc3be87567d677231395f6147293b68ceab7a9e0c58d864e8efde4e1b9a46cbe854713672f5caaae314ed9083dab";
 
-    nist_test_32_cshake128, Keccack::cshake_128(32, b"", b"Email Signature"), CSHAKE_32,
+    nist_test_32_cshake128, Keccack::cshake_128(32, b"", b"Email Signature"), DATA_4,
     "c1c36925b6409a04f1b504fcbca9d82b4017277cb5ed2b2065fc1d3814d5aaf5";
-    nist_test_1600_cshake128, Keccack::cshake_128(32, b"", b"Email Signature"), CSHAKE_1600,
+    nist_test_1600_cshake128, Keccack::cshake_128(32, b"", b"Email Signature"), DATA_200,
     "c5221d50e4f822d96a2e8881a961420f294b7b24fe3d2094baed2c6524cc166b";
 
-    nist_test_32_cshake256, Keccack::cshake_256(64, b"", b"Email Signature"), CSHAKE_32,
+    nist_test_32_cshake256, Keccack::cshake_256(64, b"", b"Email Signature"), DATA_4,
     "d008828e2b80ac9d2218ffee1d070c48b8e4c87bff32c9699d5b6896eee0edd164020e2be0560858d9c00c037e34a96937c561a74c412bb4c746469527281c8c";
-    nist_test_1600_cshake256, Keccack::cshake_256(64, b"", b"Email Signature"), CSHAKE_1600,
+    nist_test_1600_cshake256, Keccack::cshake_256(64, b"", b"Email Signature"), DATA_200,
     "07dc27b11e51fbac75bc7b3c1d983e8b4b85fb1defaf218912ac86430273091727f42b17ed1df63e8ec118f04b23633c1dfb1574c8fb55cb45da8e25afb092bb";
+
+    nist_test_32_kmac128, Keccack::kmac_128(KEY_32, 32, b""), DATA_4,
+    "e5780b0d3ea6f7d3a429c5706aa43a00fadbd7d49628839e3187243f456ee14e";
+    nist_test_32_custom_kmac128, Keccack::kmac_128(KEY_32, 32, b"My Tagged Application"), DATA_4,
+    "3b1fba963cd8b0b59e8c1a6d71888b7143651af8ba0a7070c0979e2811324aa5";
+    nist_test_1600_custom_kmac128, Keccack::kmac_128(KEY_32, 32, b"My Tagged Application"), DATA_200,
+    "1f5b4e6cca02209e0dcb5ca635b89a15e271ecc760071dfd805faa38f9729230";
+
+    nist_test_32_custom_kmac256, Keccack::kmac_256(KEY_32, 64, b"My Tagged Application"), DATA_4,
+    "20c570c31346f703c9ac36c61c03cb64c3970d0cfc787e9b79599d273a68d2f7f69d4cc3de9d104a351689f27cf6f5951f0103f33f4f24871024d9c27773a8dd";
+    nist_test_1600_kmac256, Keccack::kmac_256(KEY_32, 64, b""), DATA_200,
+    "75358cf39e41494e949707927cee0af20a3ff553904c86b08f21cc414bcfd691589d27cf5e15369cbbff8b9a4c2eb17800855d0235ff635da82533ec6b759b69";
+    nist_test_1600_custom_kmac256, Keccack::kmac_256(KEY_32, 64, b"My Tagged Application"), DATA_200,
+    "b58618f71f92e1d56c1b8c55ddd7cd188b97b4ca4d99831eb2699a837da2e4d970fbacfde50033aea585f1a2708510c32d07880801bd182898fe476876fc8965";
 );
