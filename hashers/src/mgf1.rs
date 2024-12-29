@@ -1,71 +1,68 @@
-use utils::byte_formatting::ByteFormat;
-
-use crate::{sha::Sha2, traits::ClassicHasher};
+use crate::{
+    sha::{sha2::Variant, Sha2_224, Sha2_256, Sha2_384, Sha2_512, Sha2_512_224, Sha2_512_256},
+    traits::StatefulHasher,
+};
 
 #[derive(Debug, Clone)]
 pub struct Mgf1 {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-    pub hash_len: u32,
-    pub hasher: Sha2,
+    buffer: Vec<u8>,
+    hash_len: u32,
+    variant: Variant,
 }
 
 impl Default for Mgf1 {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
+            buffer: Vec::new(),
             hash_len: 32,
-            hasher: Sha2::default(),
+            variant: Variant::Sha256,
         }
     }
 }
 
 impl Mgf1 {
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
+    pub fn init(hash_len: u32, variant: Variant) -> Self {
+        Self {
+            buffer: Vec::new(),
+            hash_len,
+            variant,
+        }
     }
 
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
-    }
-
-    pub fn hash_len(mut self, hash_len: u32) -> Self {
-        self.hash_len = hash_len;
-        self
+    fn inner_hash(&self, bytes: &[u8]) -> Vec<u8> {
+        match self.variant {
+            Variant::Sha224 => Sha2_224::init().hash(&bytes),
+            Variant::Sha256 => Sha2_256::init().hash(&bytes),
+            Variant::Sha384 => Sha2_384::init().hash(&bytes),
+            Variant::Sha512 => Sha2_512::init().hash(&bytes),
+            Variant::Sha512_224 => Sha2_512_224::init().hash(&bytes),
+            Variant::Sha512_256 => Sha2_512_256::init().hash(&bytes),
+        }
     }
 }
 
-impl ClassicHasher for Mgf1 {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
+impl StatefulHasher for Mgf1 {
+    fn update(&mut self, bytes: &[u8]) {
+        self.buffer.extend_from_slice(bytes);
+    }
+
+    fn finalize(self) -> Vec<u8> {
         let mut out = Vec::with_capacity(self.hash_len as usize);
         let mut ctr = 0_u32;
 
-        loop {
-            let mut t_key = bytes.to_vec();
-            t_key.extend_from_slice(&ctr.to_be_bytes());
-            out.extend_from_slice(&self.hasher.hash(&t_key));
-            if out.len() >= self.hash_len as usize {
-                break;
-            }
+        while out.len() < self.hash_len as usize {
+            let mut seed = self.buffer.clone();
+            seed.extend_from_slice(&ctr.to_be_bytes());
+            out.extend_from_slice(&self.inner_hash(&seed));
             ctr += 1;
         }
 
         out[0..self.hash_len as usize].to_vec()
     }
 
-    crate::hash_bytes_from_string! {}
+    crate::stateful_hash_helpers!();
 }
 
-#[cfg(test)]
-mod mgf1_tests {
-    use super::*;
-
-    #[test]
-    fn test_suite() {
-        let hasher = Mgf1::default().hash_len(50);
-        assert_eq!("382576a7841021cc28fc4c0948753fb8312090cea942ea4c4e735d10dc724b155f9f6069f289d61daca0cb814502ef04eae1", hasher.hash_bytes_from_string("bar").unwrap());
-    }
-}
+crate::stateful_hash_tests!(
+    test1,  Mgf1::init(50, Variant::Sha256), b"bar", "382576a7841021cc28fc4c0948753fb8312090cea942ea4c4e735d10dc724b155f9f6069f289d61daca0cb814502ef04eae1";
+);

@@ -1,5 +1,6 @@
 pub mod keccack_state;
 pub mod keccack_tests;
+pub mod sha2;
 pub use keccack_state::KeccackState;
 pub mod sha0;
 pub mod sha512;
@@ -8,8 +9,6 @@ pub use sha1::Sha1;
 pub mod sha3;
 pub use sha3::Keccack;
 pub mod sha1;
-pub mod sha2;
-pub use sha2::{Sha2, Sha2Variant};
 pub mod sha256;
 pub use sha256::{Sha2_224, Sha2_256};
 pub use sha512::{Sha2_384, Sha2_512, Sha2_512_224, Sha2_512_256};
