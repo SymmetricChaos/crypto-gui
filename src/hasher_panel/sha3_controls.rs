@@ -7,7 +7,7 @@ use hashers::{
 use rand::{thread_rng, RngCore};
 use utils::byte_formatting::ByteFormat;
 
-use crate::ui_elements::{control_string, UiElements};
+use crate::ui_elements::UiElements;
 
 use super::HasherFrame;
 
@@ -108,7 +108,7 @@ impl Default for Sha3Frame {
             input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
             variant: Variant::Sha3_256,
-            hash_len: 128,
+            hash_len: 32,
             example_state: KeccackState::new(),
             example_round: 0,
             function_name: String::new(),
@@ -199,21 +199,20 @@ impl HasherFrame for Sha3Frame {
             Variant::Sha3_512 => ui.label("SHA3-512 absorbs 576 bits at a time."),
             Variant::Shake128 => ui.label("SHAKE128 absorbs 1344 bits at a time. It can be set to return any number of bits."),
             Variant::Shake256 => ui.label("SHAKE256 absorbs 1088 bits at a time. It can be set to return any number of bits."),
-            Variant::CShake128 => ui.label("cSHAKE128 is similar to SHAKE128 but allows both a function name and customization string."),
-            Variant::CShake256 => ui.label("cSHAKE256 is similar to SHAKE256 but allows both a function name and customization string."),
-            Variant::Kmac128 => ui.label("KMAC128 is a cSHAKE128 derived Message Authemtical Code. It accepts a key and customization string and can return any number of bits. In order to meet the security claim the output length and key must both be sufficient."),
-            Variant::Kmac256 => ui.label("KMAC128 is a cSHAKE128 derived Message Authemtical Code. It accepts a key and customization string and can return any number of bits. In order to meet the security claim the output length and key must both be sufficient."),
+            Variant::CShake128 => ui.label("cSHAKE128 is similar to SHAKE128 but allows both a function name and customization string. This functions is intended to be used by NIST in the creation of addition Keccack based functions."),
+            Variant::CShake256 => ui.label("cSHAKE256 is similar to SHAKE256 but allows both a function name and customization string. This functions is intended to be used by NIST in the creation of addition Keccack based functions."),
+            Variant::Kmac128 => ui.label("KMAC128 is a cSHAKE128 derived Message Authentical Code. It accepts a key and customization string and can return any number of bits. In order to meet the security claim the output length and key must both be sufficient."),
+            Variant::Kmac256 => ui.label("KMAC256 is a cSHAKE256 derived Message Authentical Code. It accepts a key and customization string and can return any number of bits. In order to meet the security claim the output length and key must both be sufficient."),
         };
 
-        ui.add_space(8.0);
-        ui.subheading("Output Length (in bytes)");
-        ui.add_enabled(
-            self.variant.adjustable_length(),
-            DragValue::new(&mut self.hash_len).range(1..=1024),
-        );
-
         ui.add_space(12.0);
+        if self.variant.adjustable_length() {
+            ui.add_space(4.0);
+            ui.subheading("Output Length (bytes)");
+            ui.add(DragValue::new(&mut self.hash_len).range(1..=1024));
+        }
         if self.variant.function_name() {
+            ui.add_space(4.0);
             ui.subheading("cSHAKE Function Name (UTF-8)");
             ui.control_string(&mut self.function_name);
         }
