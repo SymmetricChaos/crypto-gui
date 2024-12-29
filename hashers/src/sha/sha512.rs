@@ -133,7 +133,7 @@ macro_rules! sha2_512 {
                 let chunks = self.buffer.chunks_exact(128);
                 let rem = chunks.remainder().to_vec();
                 for chunk in chunks {
-                    self.bits_taken += 512;
+                    self.bits_taken += 1024;
                     compress(&mut self.state, chunk);
                 }
                 self.buffer = rem;
