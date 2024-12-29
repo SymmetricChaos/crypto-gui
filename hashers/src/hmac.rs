@@ -1,12 +1,10 @@
 use crate::{
-    errors::HasherError,
     md4::Md4,
     md5::Md5,
     sha::{Sha0, Sha1, Sha2_224, Sha2_256, Sha2_384, Sha2_512},
-    traits::{ClassicHasher, StatefulHasher},
+    traits::StatefulHasher,
 };
 use strum::{Display, EnumIter, VariantNames};
-use utils::byte_formatting::ByteFormat;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, Display, VariantNames)]
 #[strum(serialize_all = "UPPERCASE")]
@@ -50,92 +48,67 @@ impl HmacVariant {
 }
 
 pub struct Hmac {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-    pub key: Vec<u8>,
-    pub variant: HmacVariant,
+    i_key: Vec<u8>,
+    o_key: Vec<u8>,
+    variant: HmacVariant,
 }
-impl Default for Hmac {
-    fn default() -> Self {
+
+impl Hmac {
+    pub fn init(key: &[u8], variant: HmacVariant) -> Self {
+        let block_size = variant.block_size();
+
+        let k = if key.len() > block_size {
+            variant.hash(&key)
+        } else {
+            key.to_vec()
+        };
+
+        let mut i_key: Vec<u8> = vec![0x36; block_size];
+        utils::byte_formatting::xor_into_bytes(&mut i_key, &k);
+        let mut o_key: Vec<u8> = vec![0x5c; block_size];
+        utils::byte_formatting::xor_into_bytes(&mut o_key, &k);
+
         Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-            key: Vec::new(),
-            variant: HmacVariant::Sha256,
+            i_key,
+            o_key,
+            variant,
         }
     }
 }
-impl Hmac {
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
+
+impl StatefulHasher for Hmac {
+    fn update(&mut self, bytes: &[u8]) {
+        self.i_key.extend_from_slice(bytes);
     }
 
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
+    fn finalize(mut self) -> Vec<u8> {
+        let inner = self.variant.hash(&self.i_key);
+        self.o_key.extend_from_slice(&inner);
+        self.variant.hash(&self.o_key)
     }
 
-    pub fn variant(mut self, variant: HmacVariant) -> Self {
-        self.variant = variant;
-        self
-    }
-
-    pub fn key(mut self, key: Vec<u8>) -> Self {
-        self.key = key;
-        self
-    }
-
-    pub fn key_from_str(mut self, format: ByteFormat, key_str: &str) -> Self {
-        let bytes = format.text_to_bytes(key_str).expect("invalid key string");
-        self.key = bytes;
-        self
-    }
-
-    // For changing the key interactively
-    pub fn set_key(&mut self, key: &[u8]) {
-        self.key = key.to_vec();
-    }
-
-    // Falliable method for changing the key from a string interactively
-    pub fn set_key_from_str(
-        &mut self,
-        format: ByteFormat,
-        key_str: &str,
-    ) -> Result<(), HasherError> {
-        let bytes = format
-            .text_to_bytes(key_str)
-            .map_err(|_| HasherError::general("byte format error"))?;
-        self.key = bytes;
-        Ok(())
-    }
+    crate::stateful_hash_helpers!();
 }
 
-impl ClassicHasher for Hmac {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let block_size = self.variant.block_size();
+// https://datatracker.ietf.org/doc/html/rfc4231
+crate::stateful_hash_tests!(
+    test1_sha256, Hmac::init(&[0x0b; 20], HmacVariant::Sha256),
+    b"Hi There",
+    "b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7";
 
-        let k = if self.key.len() > block_size {
-            let mut k = self.variant.hash(&self.key);
-            k.truncate(block_size);
-            k
-        } else {
-            self.key.clone()
-        };
+    test2_sha256, Hmac::init(b"Jefe", HmacVariant::Sha256),
+    b"what do ya want for nothing?",
+    "5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843";
 
-        let mut o_key: Vec<u8> = vec![0x5c; block_size];
-        utils::byte_formatting::xor_into_bytes(&mut o_key, &k);
-        let mut i_key: Vec<u8> = vec![0x36; block_size];
-        utils::byte_formatting::xor_into_bytes(&mut i_key, &k);
-        i_key.extend_from_slice(bytes);
-        let inner = self.variant.hash(&i_key);
-        o_key.extend_from_slice(&inner);
-        self.variant.hash(&o_key)
-    }
+    test3_sha256, Hmac::init(&[0xaa; 20], HmacVariant::Sha256),
+    &[0xdd; 50],
+    "773ea91e36800e46854db8ebd09181a72959098b3ef8c122d9635514ced565fe";
 
-    crate::hash_bytes_from_string! {}
-}
+    test6_sha256, Hmac::init(&[0xaa; 131], HmacVariant::Sha256),
+    b"Test Using Larger Than Block-Size Key - Hash Key First",
+    "60e431591ee0b67f0d8a26aacbf5b77f8e0bc6213728c5140546040f0ee37f54";
 
-crate::basic_hash_tests!(
-    test1, Hmac::default().key_from_str(ByteFormat::Utf8, "key"), "The quick brown fox jumps over the lazy dog", "f7bc83f430538424b13298e6aa6fb143ef4d59a14946175997479dbc2d1a3cd8";
+    test7_sha256, Hmac::init(&[0xaa; 131], HmacVariant::Sha256),
+    b"This is a test using a larger than block-size key and a larger than block-size data. The key needs to be hashed before being used by the HMAC algorithm.",
+    "9b09ffa71b942fcb27635fbcd5b0e944bfdc63644f0713938a7f51535c3a35e2";
 );
