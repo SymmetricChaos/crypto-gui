@@ -129,14 +129,9 @@ impl Sha3Frame {
         if self.key_string.len() % 2 != 0 {
             self.key_string.insert(0, '0');
         }
-        if let Ok(new) = ByteFormat::Hex.text_to_bytes(&self.key_string) {
-            match new.try_into() {
-                Ok(key) => self.key = key,
-                Err(_) => unreachable!(),
-            }
-        } else {
-            unreachable!("unable to parse input");
-        }
+        self.key = ByteFormat::Hex
+            .text_to_bytes(&self.key_string)
+            .expect("unable to parse key input");
     }
 
     fn key_control(&mut self, ui: &mut egui::Ui) {

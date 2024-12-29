@@ -6,10 +6,8 @@ use crate::{
     },
     traits::StatefulHasher,
 };
-use strum::{Display, EnumIter, VariantNames};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, Display, VariantNames)]
-#[strum(serialize_all = "UPPERCASE")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HmacVariant {
     Sha0,
     Sha1,
@@ -68,16 +66,16 @@ impl HmacVariant {
 
     pub fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         match self {
-            Self::Sha0 => Sha0::default().hash(bytes),
-            Self::Sha1 => Sha1::default().hash(bytes),
-            Self::Md4 => Md4::default().hash(bytes),
-            Self::Md5 => Md5::default().hash(bytes),
-            Self::Sha224 => Sha2_224::default().hash(bytes),
-            Self::Sha256 => Sha2_256::default().hash(bytes),
-            Self::Sha384 => Sha2_384::default().hash(bytes),
-            Self::Sha512 => Sha2_512::default().hash(bytes),
-            Self::Sha512_224 => Sha2_512_224::default().hash(bytes),
-            Self::Sha512_256 => Sha2_512_256::default().hash(bytes),
+            Self::Sha0 => Sha0::init().hash(bytes),
+            Self::Sha1 => Sha1::init().hash(bytes),
+            Self::Md4 => Md4::init().hash(bytes),
+            Self::Md5 => Md5::init().hash(bytes),
+            Self::Sha224 => Sha2_224::init().hash(bytes),
+            Self::Sha256 => Sha2_256::init().hash(bytes),
+            Self::Sha384 => Sha2_384::init().hash(bytes),
+            Self::Sha512 => Sha2_512::init().hash(bytes),
+            Self::Sha512_224 => Sha2_512_224::init().hash(bytes),
+            Self::Sha512_256 => Sha2_512_256::init().hash(bytes),
             Self::Sha3_224 => Keccack::sha3_224().hash(bytes),
             Self::Sha3_256 => Keccack::sha3_256().hash(bytes),
             Self::Sha3_384 => Keccack::sha3_384().hash(bytes),
@@ -141,6 +139,23 @@ impl Hmac {
             hash_len,
         }
     }
+
+    pub fn finalize_and_reset(&mut self) -> Vec<u8> {
+        let save_i_key = self.i_key[..self.variant.block_size() as usize].to_vec();
+        let save_o_key = self.o_key.clone();
+        self.o_key
+            .extend_from_slice(&self.variant.hash(&self.i_key));
+        let mut h = self.variant.hash(&self.o_key);
+        h.truncate(self.hash_len as usize);
+        self.i_key = save_i_key;
+        self.o_key = save_o_key;
+        h
+    }
+
+    pub fn hash_and_reset(&mut self, bytes: &[u8]) -> Vec<u8> {
+        self.update(bytes);
+        self.finalize_and_reset()
+    }
 }
 
 impl StatefulHasher for Hmac {
@@ -161,8 +176,6 @@ impl StatefulHasher for Hmac {
 
 // https://datatracker.ietf.org/doc/html/rfc4231
 crate::stateful_hash_tests!(
-
-
     test2_sha256, Hmac::init(HmacVariant::Sha256, b"Jefe"),
     b"what do ya want for nothing?",
     "5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843";

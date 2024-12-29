@@ -1,16 +1,19 @@
 use crate::ui_elements::UiElements;
 
 use super::HasherFrame;
-use hashers::md2::Md2;
+use hashers::{md2::Md2, traits::StatefulHasher};
+use utils::byte_formatting::ByteFormat;
 
 pub struct Md2Frame {
-    hasher: Md2,
+    input_format: ByteFormat,
+    output_format: ByteFormat,
 }
 
 impl Default for Md2Frame {
     fn default() -> Self {
         Self {
-            hasher: Default::default(),
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
         }
     }
 }
@@ -25,10 +28,7 @@ impl HasherFrame for Md2Frame {
         );
         ui.add_space(8.0);
 
-        ui.byte_io_mode_hasher(
-            &mut self.hasher.input_format,
-            &mut self.hasher.output_format,
-        );
+        ui.byte_io_mode_hasher(&mut self.input_format, &mut self.output_format);
 
         ui.add_space(16.0);
         ui.subheading("Example Initialization");
@@ -41,5 +41,14 @@ impl HasherFrame for Md2Frame {
 
         ui.add_space(16.0);
     }
-    crate::hash_string! {}
+
+    fn hash_string(&self, text: &str) -> Result<String, hashers::errors::HasherError> {
+        let bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
+        Ok(self
+            .output_format
+            .byte_slice_to_text(Md2::init().hash(&bytes)))
+    }
 }

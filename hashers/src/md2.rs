@@ -1,5 +1,5 @@
-use crate::traits::ClassicHasher;
-use utils::{byte_formatting::ByteFormat, padding::pkcs5_padding};
+use crate::traits::StatefulHasher;
+use utils::padding::pkcs5_padding;
 
 const MD2_S_TABLE: [u8; 256] = [
     0x29, 0x2E, 0x43, 0xC9, 0xA2, 0xD8, 0x7C, 0x01, 0x3D, 0x36, 0x54, 0xA1, 0xEC, 0xF0, 0x06, 0x13,
@@ -22,83 +22,100 @@ const MD2_S_TABLE: [u8; 256] = [
 
 #[derive(Debug, Clone)]
 pub struct Md2 {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-}
-
-impl Default for Md2 {
-    fn default() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-        }
-    }
+    buffer: Vec<u8>,
+    state: [u8; 48],
+    checksum: [u8; 16],
+    l: u8,
+    cs_cursor: usize,
+    state_cursor: usize,
 }
 
 impl Md2 {
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
-    }
-
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
+    pub fn init() -> Self {
+        Self {
+            buffer: Vec::new(),
+            state: [0; 48],
+            checksum: [0; 16],
+            l: 0,
+            cs_cursor: 0,
+            state_cursor: 0,
+        }
     }
 }
 
-impl ClassicHasher for Md2 {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut input = bytes.to_vec();
-        pkcs5_padding(&mut input, 16).unwrap();
+impl StatefulHasher for Md2 {
+    fn update(&mut self, bytes: &[u8]) {
+        self.buffer.extend_from_slice(bytes);
 
-        // Calculate a checksum and append it to the padded input
-        // This checksum probably serves to either ensure that the
-        // hashing routine makes two passes on short input or as a
-        // guard against length extension attacks.
-        let mut c = [0u8; 16];
-        let mut l = 0u8;
-        let mut i = 0;
+        let chunks = self.buffer.chunks_exact(16);
+        let rem = chunks.remainder().to_vec();
+        for chunk in chunks {
+            // This checksum probably serves to either ensure that the
+            // hashing routine makes two passes on short input or as a
+            // guard against length extension attacks.
+            for byte in chunk.iter() {
+                self.checksum[self.cs_cursor] ^= MD2_S_TABLE[(byte ^ self.l) as usize];
+                self.l = self.checksum[self.cs_cursor];
+                self.cs_cursor = (self.cs_cursor + 1) % 16;
+            }
 
-        for byte in input.iter() {
-            c[i] ^= MD2_S_TABLE[(byte ^ l) as usize];
-            l = c[i];
-            i = (i + 1) % 16;
-        }
+            for byte in chunk.into_iter() {
+                self.state[16 + self.state_cursor] = *byte;
+                self.state[32 + self.state_cursor] = byte ^ self.state[self.state_cursor];
 
-        input.extend_from_slice(&c);
-
-        // Compute the hash value
-        let mut d = [0u8; 48];
-        let mut i = 0;
-
-        for byte in input.into_iter() {
-            d[16 + i] = byte;
-            d[32 + i] = byte ^ d[i];
-
-            i = (i + 1) % 16;
-            if i == 0 {
-                let mut t = 0u8;
-                for j in 0..18 {
-                    for k in 0..48 {
-                        t = d[k] ^ MD2_S_TABLE[t as usize];
-                        d[k] = t;
+                self.state_cursor = (self.state_cursor + 1) % 16;
+                if self.state_cursor == 0 {
+                    let mut t = 0u8;
+                    for j in 0..18 {
+                        for k in 0..48 {
+                            t = self.state[k] ^ MD2_S_TABLE[t as usize];
+                            self.state[k] = t;
+                        }
+                        t = t.wrapping_add(j);
                     }
-                    t = t.wrapping_add(j);
                 }
             }
         }
-
-        // Take just the first 16 bytes
-        d[0..16].to_vec()
+        self.buffer = rem;
     }
 
-    crate::hash_bytes_from_string! {}
+    fn finalize(mut self) -> Vec<u8> {
+        pkcs5_padding(&mut self.buffer, 16).unwrap();
+        for byte in self.buffer.iter() {
+            self.checksum[self.cs_cursor] ^= MD2_S_TABLE[(byte ^ self.l) as usize];
+            self.l = self.checksum[self.cs_cursor];
+            self.cs_cursor = (self.cs_cursor + 1) % 16;
+        }
+        self.buffer.extend_from_slice(&self.checksum);
+
+        let chunks = self.buffer.chunks_exact(16);
+        for chunk in chunks {
+            for byte in chunk.into_iter() {
+                self.state[16 + self.state_cursor] = *byte;
+                self.state[32 + self.state_cursor] = byte ^ self.state[self.state_cursor];
+
+                self.state_cursor = (self.state_cursor + 1) % 16;
+                if self.state_cursor == 0 {
+                    let mut t = 0u8;
+                    for j in 0..18 {
+                        for k in 0..48 {
+                            t = self.state[k] ^ MD2_S_TABLE[t as usize];
+                            self.state[k] = t;
+                        }
+                        t = t.wrapping_add(j);
+                    }
+                }
+            }
+        }
+        self.state[0..16].to_vec()
+    }
+
+    crate::stateful_hash_helpers!();
 }
 
-crate::basic_hash_tests!(
-    test1, Md2::default(), "",
+crate::stateful_hash_tests!(
+    test1, Md2::init(), b"",
     "8350e5a3e24c153df2275c9f80692773";
-    test2, Md2::default(), "The quick brown fox jumps over the lazy dog",
+    test2, Md2::init(), b"The quick brown fox jumps over the lazy dog",
     "03d85a0d629d2c442e987525319fc471";
 );

@@ -48,7 +48,7 @@ mod sha2_tests {
         "916f6061fe879741ca6469b43971dfdb28b1a32dc36cb3254e812be27aad1d18";
         very_long_sha3_256, Keccack::sha3_256(), A_1MIL,
         "5c8875ae474a3634ba4fd55ec85bffd661f32aca75c6d699d0cdcb6c115891c1";
-        sha3_256_1600_bits, Keccack::sha3_256(), &utils::byte_formatting::ByteFormat::Hex.text_to_bytes("a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3").unwrap(),
+        sha3_256_1600_bits, Keccack::sha3_256(), &[0xa3;200],
         "79f38adec5c20307a98ef76e8324afbfd46cfd81b22e3973c65fa1bd9de31787";
         sha3_256_2008_bits, Keccack::sha3_256(), &utils::byte_formatting::ByteFormat::Hex.text_to_bytes("83af34279ccb5430febec07a81950d30f4b66f484826afee7456f0071a51e1bbc55570b5cc7ec6f9309c17bf5befdd7c6ba6e968cf218a2b34bd5cf927ab846e38a40bbd81759e9e33381016a755f699df35d660007b5eadf292feefb735207ebf70b5bd17834f7bfa0e16cb219ad4af524ab1ea37334aa66435e5d397fc0a065c411ebbce32c240b90476d307ce802ec82c1c49bc1bec48c0675ec2a6c6f3ed3e5b741d13437095707c565e10d8a20b8c20468ff9514fcf31b4249cd82dcee58c0a2af538b291a87e3390d737191a07484a5d3f3fb8c8f15ce056e5e5f8febe5e1fb59d6740980aa06ca8a0c20f5712b4cde5d032e92ab89f0ae1").unwrap(),
         "3298a95cfe59b9d6cab99c36dc1324194c09f97f08944a02d9574bbca3186b41";
@@ -72,6 +72,7 @@ mod sha2_tests {
         empty_shake256, Keccack::shake_256(200), EMPTY,
         "46b9dd2b0ba88d13233b3feb743eeb243fcd52ea62b81b82b50c27646ed5762fd75dc4ddd8c0f200cb05019d67b592f6fc821c49479ab48640292eacb3b7c4be141e96616fb13957692cc7edd0b45ae3dc07223c8e92937bef84bc0eab862853349ec75546f58fb7c2775c38462c5010d846c185c15111e595522a6bcd16cf86f3d122109e3b1fdd943b6aec468a2d621a7c06c6a957c62b54dafc3be87567d677231395f6147293b68ceab7a9e0c58d864e8efde4e1b9a46cbe854713672f5caaae314ed9083dab";
 
+        // https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/cSHAKE_samples.pdf
         nist_test_32_cshake128, Keccack::cshake_128(32, b"", b"Email Signature"), DATA_4,
         "c1c36925b6409a04f1b504fcbca9d82b4017277cb5ed2b2065fc1d3814d5aaf5";
         nist_test_1600_cshake128, Keccack::cshake_128(32, b"", b"Email Signature"), DATA_200,
@@ -82,6 +83,8 @@ mod sha2_tests {
         nist_test_1600_cshake256, Keccack::cshake_256(64, b"", b"Email Signature"), DATA_200,
         "07dc27b11e51fbac75bc7b3c1d983e8b4b85fb1defaf218912ac86430273091727f42b17ed1df63e8ec118f04b23633c1dfb1574c8fb55cb45da8e25afb092bb";
 
+
+        // https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/KMAC_samples.pdf
         nist_test_32_kmac128, Keccack::kmac_128(KEY_32, 32, b""), DATA_4,
         "e5780b0d3ea6f7d3a429c5706aa43a00fadbd7d49628839e3187243f456ee14e";
         nist_test_32_custom_kmac128, Keccack::kmac_128(KEY_32, 32, b"My Tagged Application"), DATA_4,

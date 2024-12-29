@@ -63,8 +63,8 @@ pub struct Md5 {
     bits_taken: u64,
 }
 
-impl Default for Md5 {
-    fn default() -> Self {
+impl Md5 {
+    pub fn init() -> Self {
         Self {
             state: [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476],
             buffer: Vec::new(),
@@ -111,9 +111,9 @@ impl StatefulHasher for Md5 {
 }
 
 crate::stateful_hash_tests!(
-    test1, Md5::default(), b"",                                             "d41d8cd98f00b204e9800998ecf8427e";
-    test2, Md5::default(), b"The quick brown fox jumps over the lazy dog",  "9e107d9d372bb6826bd81d3542a419d6";
-    test3, Md5::default(), b"The quick brown fox jumps over the lazy dog.", "e4d909c290d0fb1ca068ffaddf22cbd0";
-    test4, Md5::default(), b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", "d174ab98d277d9f5a5611c2c9f419d9f";
-    test5, Md5::default(), b"12345678901234567890123456789012345678901234567890123456789012345678901234567890", "57edf4a22be3c955ac49da2e2107b67a";
+    test1, Md5::init(), b"",                                             "d41d8cd98f00b204e9800998ecf8427e";
+    test2, Md5::init(), b"The quick brown fox jumps over the lazy dog",  "9e107d9d372bb6826bd81d3542a419d6";
+    test3, Md5::init(), b"The quick brown fox jumps over the lazy dog.", "e4d909c290d0fb1ca068ffaddf22cbd0";
+    test4, Md5::init(), b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", "d174ab98d277d9f5a5611c2c9f419d9f";
+    test5, Md5::init(), b"12345678901234567890123456789012345678901234567890123456789012345678901234567890", "57edf4a22be3c955ac49da2e2107b67a";
 );
