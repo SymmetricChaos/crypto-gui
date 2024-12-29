@@ -1,13 +1,28 @@
 use crate::traits::StatefulHasher;
 
+use super::{Sha2_224, Sha2_256, Sha2_384, Sha2_512, Sha2_512_224, Sha2_512_256};
+
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
-pub enum Variant {
+pub enum Sha2Variant {
     Sha224,
     Sha256,
     Sha384,
     Sha512,
     Sha512_224,
     Sha512_256,
+}
+
+impl Sha2Variant {
+    pub fn hash(&self, bytes: &[u8]) -> Vec<u8> {
+        match self {
+            Sha2Variant::Sha224 => Sha2_224::init().hash(&bytes),
+            Sha2Variant::Sha256 => Sha2_256::init().hash(&bytes),
+            Sha2Variant::Sha384 => Sha2_384::init().hash(&bytes),
+            Sha2Variant::Sha512 => Sha2_512::init().hash(&bytes),
+            Sha2Variant::Sha512_224 => Sha2_512_224::init().hash(&bytes),
+            Sha2Variant::Sha512_256 => Sha2_512_256::init().hash(&bytes),
+        }
+    }
 }
 
 crate::stateful_hash_tests!(

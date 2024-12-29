@@ -201,8 +201,8 @@ impl HasherFrame for Sha3Frame {
             Variant::Shake256 => ui.label("SHAKE256 absorbs 1088 bits at a time. It can be set to return any number of bits."),
             Variant::CShake128 => ui.label("cSHAKE128 is similar to SHAKE128 but allows both a function name and customization string. This functions is intended to be used by NIST in the creation of addition Keccack based functions."),
             Variant::CShake256 => ui.label("cSHAKE256 is similar to SHAKE256 but allows both a function name and customization string. This functions is intended to be used by NIST in the creation of addition Keccack based functions."),
-            Variant::Kmac128 => ui.label("KMAC128 is a cSHAKE128 derived Message Authentical Code. It accepts a key and customization string and can return any number of bits. In order to meet the security claim the output length and key must both be sufficient."),
-            Variant::Kmac256 => ui.label("KMAC256 is a cSHAKE256 derived Message Authentical Code. It accepts a key and customization string and can return any number of bits. In order to meet the security claim the output length and key must both be sufficient."),
+            Variant::Kmac128 => ui.label("KMAC128 is a cSHAKE128 derived Message Authentical Code. It accepts a key and customization string. In order to meet the security claim the output length and key must both be sufficient."),
+            Variant::Kmac256 => ui.label("KMAC256 is a cSHAKE256 derived Message Authentical Code. It accepts a key and customization string. In order to meet the security claim the output length and key must both be sufficient."),
         };
 
         ui.add_space(12.0);

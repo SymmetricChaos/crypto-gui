@@ -1,12 +1,12 @@
 use super::HasherFrame;
 use crate::ui_elements::UiElements;
-use hashers::{mgf1::Mgf1, sha::sha2::Variant, traits::StatefulHasher};
+use hashers::{mgf1::Mgf1, sha::sha2::Sha2Variant, traits::StatefulHasher};
 use utils::byte_formatting::ByteFormat;
 
 pub struct Mgf1Frame {
     input_format: ByteFormat,
     output_format: ByteFormat,
-    variant: Variant,
+    variant: Sha2Variant,
     hash_len: u32,
 }
 
@@ -15,7 +15,7 @@ impl Default for Mgf1Frame {
         Self {
             input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
-            variant: Variant::Sha256,
+            variant: Sha2Variant::Sha256,
             hash_len: 64,
         }
     }
@@ -35,15 +35,15 @@ impl HasherFrame for Mgf1Frame {
         ui.add_space(16.0);
         ui.subheading("Hash Function");
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.variant, Variant::Sha256, "SHA-256");
-            ui.selectable_value(&mut self.variant, Variant::Sha224, "SHA-224");
+            ui.selectable_value(&mut self.variant, Sha2Variant::Sha256, "SHA-256");
+            ui.selectable_value(&mut self.variant, Sha2Variant::Sha224, "SHA-224");
         });
         ui.add_space(8.0);
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut self.variant, Variant::Sha512, "SHA-512");
-            ui.selectable_value(&mut self.variant, Variant::Sha384, "SHA-384");
-            ui.selectable_value(&mut self.variant, Variant::Sha512_224, "SHA-512/224");
-            ui.selectable_value(&mut self.variant, Variant::Sha512_256, "SHA-512/256");
+            ui.selectable_value(&mut self.variant, Sha2Variant::Sha512, "SHA-512");
+            ui.selectable_value(&mut self.variant, Sha2Variant::Sha384, "SHA-384");
+            ui.selectable_value(&mut self.variant, Sha2Variant::Sha512_224, "SHA-512/224");
+            ui.selectable_value(&mut self.variant, Sha2Variant::Sha512_256, "SHA-512/256");
         });
 
         ui.subheading("Output Length (Bytes)");
@@ -60,6 +60,6 @@ impl HasherFrame for Mgf1Frame {
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
         Ok(self
             .output_format
-            .byte_slice_to_text(Mgf1::default().hash(&bytes)))
+            .byte_slice_to_text(Mgf1::init(self.hash_len, self.variant).hash(&bytes)))
     }
 }
