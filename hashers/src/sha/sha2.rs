@@ -23,6 +23,17 @@ impl Sha2Variant {
             Sha2Variant::Sha512_256 => Sha2_512_256::init().hash(&bytes),
         }
     }
+
+    pub fn hasher(&self) -> Box<dyn StatefulHasher> {
+        match self {
+            Sha2Variant::Sha224 => Box::new(Sha2_224::init()),
+            Sha2Variant::Sha256 => Box::new(Sha2_256::init()),
+            Sha2Variant::Sha384 => Box::new(Sha2_384::init()),
+            Sha2Variant::Sha512 => Box::new(Sha2_512::init()),
+            Sha2Variant::Sha512_224 => Box::new(Sha2_512_224::init()),
+            Sha2Variant::Sha512_256 => Box::new(Sha2_512_256::init()),
+        }
+    }
 }
 
 crate::stateful_hash_tests!(
