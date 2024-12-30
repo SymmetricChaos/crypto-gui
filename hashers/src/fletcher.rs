@@ -1,5 +1,4 @@
-use crate::traits::ClassicHasher;
-use utils::byte_formatting::ByteFormat;
+use crate::traits::StatefulHasher;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FletcherhWidth {
@@ -9,67 +8,33 @@ pub enum FletcherhWidth {
 }
 
 pub struct Fletcher {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-    pub width: FletcherhWidth,
-}
-
-impl Default for Fletcher {
-    fn default() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-            width: FletcherhWidth::W32,
-        }
-    }
+    state: [u32; 2],
+    width: FletcherhWidth,
 }
 
 impl Fletcher {
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
-    }
-
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
-    }
-
-    pub fn width(mut self, width: FletcherhWidth) -> Self {
-        self.width = width;
-        self
+    pub fn init(width: FletcherhWidth) -> Self {
+        Self {
+            state: [0; 2],
+            width,
+        }
     }
 
     pub fn w16() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-            width: FletcherhWidth::W16,
-        }
+        Self::init(FletcherhWidth::W16)
     }
 
     pub fn w32() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-            width: FletcherhWidth::W32,
-        }
+        Self::init(FletcherhWidth::W32)
     }
 
     pub fn w64() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-            width: FletcherhWidth::W64,
-        }
+        Self::init(FletcherhWidth::W64)
     }
 }
 
-impl ClassicHasher for Fletcher {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut c0: u32 = 0;
-        let mut c1: u32 = 0;
-
+impl StatefulHasher for Fletcher {
+    fn update(&mut self, bytes: &[u8]) {
         let m = match self.width {
             FletcherhWidth::W16 => u8::MAX as u32,
             FletcherhWidth::W32 => u16::MAX as u32,
@@ -77,36 +42,44 @@ impl ClassicHasher for Fletcher {
         };
 
         for byte in bytes {
-            c0 = (c0 + *byte as u32) % m;
-            c1 = (c1 + c0 as u32) % m;
+            self.state[0] = self.state[0].wrapping_add(*byte as u32);
+            self.state[1] = self.state[1].wrapping_add(self.state[0]);
         }
 
+        self.state[0] = self.state[0] % m;
+        self.state[1] = self.state[1] % m;
+    }
+
+    fn finalize(self) -> Vec<u8> {
         match self.width {
-            FletcherhWidth::W16 => vec![c1 as u8, c0 as u8],
-            FletcherhWidth::W32 => [c1 as u16, c0 as u16]
+            FletcherhWidth::W16 => vec![self.state[1] as u8, self.state[0] as u8],
+            FletcherhWidth::W32 => [self.state[1] as u16, self.state[0] as u16]
                 .iter()
                 .flat_map(|w| w.to_be_bytes())
                 .collect(),
-            FletcherhWidth::W64 => [c1, c0].iter().flat_map(|w| w.to_be_bytes()).collect(),
+            FletcherhWidth::W64 => [self.state[1], self.state[0]]
+                .iter()
+                .flat_map(|w| w.to_be_bytes())
+                .collect(),
         }
     }
 
-    crate::hash_bytes_from_string! {}
+    crate::stateful_hash_helpers!();
 }
 
-crate::basic_hash_tests!(
+crate::stateful_hash_tests!(
     test1,
     Fletcher::w16(),
-    "abcde",
+    b"abcde",
     "c8f0";
 
     test2,
     Fletcher::w16(),
-    "abcdef",
+    b"abcdef",
     "2057";
 
     test3,
     Fletcher::w16(),
-    "abcdefgh",
+    b"abcdefgh",
     "0627";
 );
