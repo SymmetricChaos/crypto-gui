@@ -1,5 +1,5 @@
 use super::HasherFrame;
-use crate::ui_elements::UiElements;
+use crate::ui_elements::{validate_string_hex_bytes, UiElements};
 use egui::DragValue;
 use hashers::{
     pbkdf1::{Pbkdf1, Pbkdf1Variant},
@@ -35,15 +35,7 @@ impl Default for Pbkdf1Frame {
 
 impl Pbkdf1Frame {
     fn validate_salt(&mut self) {
-        self.salt_string = self
-            .salt_string
-            .chars()
-            .filter(|c| c.is_ascii_hexdigit())
-            .take(16)
-            .collect();
-        if self.salt_string.len() % 2 != 0 {
-            self.salt_string.insert(0, '0');
-        }
+        validate_string_hex_bytes(&mut self.salt_string, Some(16));
         self.salt = ByteFormat::Hex
             .text_to_bytes(&self.salt_string)
             .expect("unable to parse salt input");

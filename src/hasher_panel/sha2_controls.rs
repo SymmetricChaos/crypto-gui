@@ -62,8 +62,6 @@ impl HasherFrame for Sha2Frame {
             Sha2Variant::Sha512_256 => ui.label("SHA-512/256 has the same compression function as SHA-512 but a different initialization vector and an output that is truncated to 256 bits (32 bytes) to make it resistant to length extension attacks. This truncation length makes it a drop in replacement for SHA-256 if needed."),
         };
 
-        ui.label("<<<EXPLANATION OF HASH FUNCTION CODE>>>");
-
         ui.add_space(16.0);
     }
 

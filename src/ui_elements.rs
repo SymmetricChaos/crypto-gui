@@ -701,3 +701,18 @@ pub fn block_cipher_iv_128(ui: &mut Ui, iv: &mut u128, mode: BCMode) {
         ui.u128_hex_edit(iv);
     });
 }
+
+pub fn validate_string_hex_bytes(text: &mut String, length: Option<usize>) {
+    if let Some(l) = length {
+        *text = text
+            .chars()
+            .filter(|c| c.is_ascii_hexdigit())
+            .take(l)
+            .collect();
+    } else {
+        *text = text.chars().filter(|c| c.is_ascii_hexdigit()).collect();
+    }
+    if text.len() % 2 != 0 {
+        text.insert(0, '0');
+    }
+}

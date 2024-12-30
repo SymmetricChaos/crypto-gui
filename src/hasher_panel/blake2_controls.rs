@@ -1,5 +1,5 @@
 use super::HasherFrame;
-use crate::ui_elements::UiElements;
+use crate::ui_elements::{validate_string_hex_bytes, UiElements};
 use egui::DragValue;
 use hashers::{
     blake::{Blake2b, Blake2s},
@@ -23,50 +23,6 @@ pub struct Blake2Frame {
     key: Vec<u8>,
     key_string: String,
     hash_len: u64,
-    valid_key: bool,
-}
-
-impl Blake2Frame {
-    fn validate_key(&mut self, length: usize) {
-        self.key_string = self
-            .key_string
-            .chars()
-            .filter(|c| c.is_ascii_hexdigit())
-            .take(length) // 64 characters is 32 bytes
-            .collect();
-        self.valid_key = self.key_string.len() % 2 != 0;
-        if self.valid_key {
-            if let Ok(new) = ByteFormat::Hex.text_to_bytes(&self.key_string) {
-                match new.try_into() {
-                    Ok(key) => self.key = key,
-                    Err(_) => unreachable!(),
-                }
-            } else {
-                unreachable!("unable to parse input");
-            }
-        }
-    }
-
-    fn key_control(&mut self, ui: &mut egui::Ui, length: usize) {
-        ui.horizontal(|ui| {
-            if ui.control_string(&mut self.key_string).changed() {
-                self.validate_key(length);
-            };
-            if ui.button("🎲").on_hover_text("randomize").clicked() {
-                let mut rng = thread_rng();
-                self.key.clear();
-                self.key.shrink_to(256);
-                rng.fill_bytes(&mut self.key);
-                self.key_string = ByteFormat::Hex.byte_slice_to_text(&self.key)
-            };
-        });
-
-        if !self.valid_key {
-            ui.error_text("invalid key");
-        } else {
-            ui.error_text("");
-        }
-    }
 }
 
 impl Default for Blake2Frame {
@@ -78,8 +34,31 @@ impl Default for Blake2Frame {
             key: Vec::new(),
             key_string: String::new(),
             hash_len: 32,
-            valid_key: true,
         }
+    }
+}
+
+impl Blake2Frame {
+    fn validate_key(&mut self, length: usize) {
+        validate_string_hex_bytes(&mut self.key_string, Some(length));
+        self.key = ByteFormat::Hex
+            .text_to_bytes(&self.key_string)
+            .expect("unable to parse key")
+    }
+
+    fn key_control(&mut self, ui: &mut egui::Ui, length: usize) {
+        ui.horizontal(|ui| {
+            if ui.control_string(&mut self.key_string).lost_focus() {
+                self.validate_key(length);
+            };
+            if ui.button("🎲").on_hover_text("randomize").clicked() {
+                let mut rng = thread_rng();
+                self.key.clear();
+                self.key.shrink_to(256);
+                rng.fill_bytes(&mut self.key);
+                self.key_string = ByteFormat::Hex.byte_slice_to_text(&self.key)
+            };
+        });
     }
 }
 
@@ -143,7 +122,7 @@ impl HasherFrame for Blake2Frame {
         }
 
         ui.add_space(16.0);
-        ui.subheading("Key (provide as hexadecimal)");
+        ui.subheading("Key (Hexadecimal)");
         ui.label("The BLAKE2 functions allow a key to be included to they function as a MAC.");
         match self.variant {
             Blake2Variant::Big => {
@@ -166,10 +145,6 @@ impl HasherFrame for Blake2Frame {
     }
 
     fn hash_string(&self, text: &str) -> Result<String, HasherError> {
-        if !self.valid_key {
-            return Err(hashers::errors::HasherError::key("invalid key"));
-        }
-
         let bytes = self
             .input_format
             .text_to_bytes(text)

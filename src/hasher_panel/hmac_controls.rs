@@ -1,4 +1,4 @@
-use crate::ui_elements::UiElements;
+use crate::ui_elements::{validate_string_hex_bytes, UiElements};
 
 use super::HasherFrame;
 use hashers::{
@@ -31,17 +31,10 @@ impl Default for HmacFrame {
 
 impl HmacFrame {
     fn validate_key(&mut self) {
-        self.key_string = self
-            .key_string
-            .chars()
-            .filter(|c| c.is_ascii_hexdigit())
-            .collect();
-        if self.key_string.len() % 2 != 0 {
-            self.key_string.insert(0, '0');
-        }
+        validate_string_hex_bytes(&mut self.key_string, None);
         self.key = ByteFormat::Hex
             .text_to_bytes(&self.key_string)
-            .expect("unable to parse key input");
+            .expect("unable to parse key")
     }
 
     fn key_control(&mut self, ui: &mut egui::Ui) {
