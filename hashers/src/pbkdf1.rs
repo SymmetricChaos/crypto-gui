@@ -1,12 +1,5 @@
-use crate::{
-    errors::HasherError,
-    md2::Md2,
-    md5::Md5,
-    sha::Sha1,
-    traits::{ClassicHasher, StatefulHasher},
-};
+use crate::{md2::Md2, md5::Md5, sha::Sha1, traits::StatefulHasher};
 use strum::{Display, EnumIter, VariantNames};
-use utils::byte_formatting::ByteFormat;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, Display, VariantNames)]
 #[strum(serialize_all = "UPPERCASE")]
@@ -17,89 +10,25 @@ pub enum Pbkdf1Variant {
 }
 
 pub struct Pbkdf1 {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-    pub variant: Pbkdf1Variant,
-    pub salt: [u8; 8],
-    pub iterations: u32,
-    pub hash_len: u32, // size of the output in bytes
-}
-
-impl Default for Pbkdf1 {
-    fn default() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-            salt: [0; 8],
-            variant: Pbkdf1Variant::Md5,
-            iterations: 4096,
-            hash_len: 32,
-        }
-    }
+    buffer: Vec<u8>,
+    variant: Pbkdf1Variant,
+    salt: [u8; 8],
+    iterations: u32,
+    hash_len: u32, // size of the output in bytes
 }
 
 impl Pbkdf1 {
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
-    }
-
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
-    }
-
-    pub fn variant(mut self, variant: Pbkdf1Variant) -> Self {
-        self.variant = variant;
-        self
-    }
-
-    pub fn salt(mut self, salt: [u8; 8]) -> Self {
-        self.salt = salt;
-        self
-    }
-
-    pub fn iterations(mut self, iterations: u32) -> Self {
-        assert!(self.iterations > 0);
-        self.iterations = iterations;
-        self
-    }
-
-    /// For MD2 and MD5 hash_len is limited to 16. For SHA-1 hash_len is limited to 20.
-    pub fn hash_len(mut self, hash_len: u32) -> Self {
-        assert!(hash_len > 0);
-        self.hash_len = hash_len;
-        self
-    }
-
-    pub fn salt_from_str(mut self, format: ByteFormat, salt_str: &str) -> Self {
-        let bytes = format
-            .text_to_bytes(salt_str)
-            .expect("byte format error")
-            .try_into()
-            .expect("could not convert to [u8; 8]");
-        self.salt = bytes;
-        self
-    }
-
-    // For changing the key interactively
-    pub fn set_salt(&mut self, salt: [u8; 8]) {
-        self.salt = salt;
-    }
-
-    // Falliable method for changing the salt from a string interactively
-    pub fn set_salt_from_str(
-        &mut self,
-        format: ByteFormat,
-        salt_str: &str,
-    ) -> Result<(), HasherError> {
-        let bytes = format
-            .text_to_bytes(salt_str)
-            .map_err(|_| HasherError::general("byte format error"))?
-            .try_into()
-            .map_err(|_| HasherError::general("could not convert to [u8; 8]"))?;
-        self.salt = bytes;
-        Ok(())
+    pub fn init(variant: Pbkdf1Variant, iterations: u32, hash_len: u32, salt: &[u8]) -> Self {
+        assert!(iterations >= 1);
+        assert!(hash_len >= 1);
+        assert!(salt.len() == 8);
+        Self {
+            buffer: Vec::new(),
+            salt: salt.try_into().unwrap(),
+            variant,
+            iterations,
+            hash_len,
+        }
     }
 
     pub fn inner_hash(&self, bytes: &[u8]) -> Vec<u8> {
@@ -111,26 +40,25 @@ impl Pbkdf1 {
     }
 }
 
-impl ClassicHasher for Pbkdf1 {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        assert!(self.iterations > 0);
-        assert!(self.hash_len > 0);
-
-        let mut working_vector = bytes.to_vec();
-        working_vector.extend(self.salt);
-
-        for _ in 0..self.iterations {
-            working_vector = self.inner_hash(&working_vector);
-        }
-
-        working_vector.truncate(self.hash_len as usize);
-        working_vector
+impl StatefulHasher for Pbkdf1 {
+    fn update(&mut self, bytes: &[u8]) {
+        self.buffer.extend_from_slice(bytes);
     }
 
-    crate::hash_bytes_from_string! {}
+    fn finalize(mut self) -> Vec<u8> {
+        self.buffer.extend(self.salt);
+
+        for _ in 0..self.iterations {
+            self.buffer = self.inner_hash(&self.buffer);
+        }
+
+        self.buffer[..self.hash_len as usize].to_vec()
+    }
+
+    crate::stateful_hash_helpers!();
 }
 
 // Wasn't able to find any test vectors for PBKDF1
-// crate::basic_hash_tests!(
-//     Pbkdf1::default().variant(Pbkdf1Variant::Md5).iterations(1).hash_len(16).salt_from_str(ByteFormat::Utf8, "salt"), test1, "password", "";
+// crate::stateful_hash_tests!(
+//     test1, Pbkdf1::init(Pbkdf1Variant::Md5, 1, 20, b"salt"), b"password", "";
 // );

@@ -1,15 +1,18 @@
-use hashers::adler::Adler32;
+use hashers::{adler::Adler32, errors::HasherError, traits::StatefulHasher};
+use utils::byte_formatting::ByteFormat;
 
 use super::HasherFrame;
 
 pub struct Adler32Frame {
-    hasher: Adler32,
+    input_format: ByteFormat,
+    output_format: ByteFormat,
 }
 
 impl Default for Adler32Frame {
     fn default() -> Self {
         Self {
-            hasher: Default::default(),
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
         }
     }
 }
@@ -29,5 +32,14 @@ impl HasherFrame for Adler32Frame {
         ui.add_space(16.0);
     }
 
-    crate::hash_string! {}
+    fn hash_string(&self, text: &str) -> Result<String, HasherError> {
+        let bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
+
+        let h = Adler32::init().hash(&bytes);
+
+        Ok(self.output_format.byte_slice_to_text(&h))
+    }
 }

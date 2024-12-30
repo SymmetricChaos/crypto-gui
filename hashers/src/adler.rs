@@ -1,39 +1,37 @@
-use crate::traits::ClassicHasher;
-use utils::byte_formatting::ByteFormat;
+use crate::traits::StatefulHasher;
 
 pub struct Adler32 {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
+    a: u16,
+    b: u16,
 }
 
-impl Default for Adler32 {
-    fn default() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-        }
+impl Adler32 {
+    pub fn init() -> Self {
+        Self { a: 1, b: 0 }
     }
 }
 
-impl ClassicHasher for Adler32 {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut a: u16 = 1;
-        let mut b: u16 = 0;
-
+impl StatefulHasher for Adler32 {
+    fn update(&mut self, bytes: &[u8]) {
         for byte in bytes {
-            a = a.wrapping_add(*byte as u16);
-            b = b.wrapping_add(a);
+            self.a = self.a.wrapping_add(*byte as u16);
+            self.b = self.b.wrapping_add(self.a);
         }
-
-        [b, a].into_iter().flat_map(|w| w.to_be_bytes()).collect()
     }
 
-    crate::hash_bytes_from_string! {}
+    fn finalize(self) -> Vec<u8> {
+        [self.b, self.a]
+            .into_iter()
+            .flat_map(|w| w.to_be_bytes())
+            .collect()
+    }
+
+    crate::stateful_hash_helpers!();
 }
 
-crate::basic_hash_tests!(
+crate::stateful_hash_tests!(
     test1,
-    Adler32::default(),
-    "Wikipedia",
+    Adler32::init(),
+    b"Wikipedia",
     "11e60398";
 );
