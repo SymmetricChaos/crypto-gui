@@ -1,43 +1,46 @@
-use crate::traits::ClassicHasher;
+use crate::traits::StatefulHasher;
 use std::ops::BitXor;
-use utils::byte_formatting::ByteFormat;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum WordSize {
+pub enum FxHashVariant {
     W32,
     W64,
 }
 
 pub struct FxHash {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-    pub word_size: WordSize,
+    variant: FxHashVariant,
+    buffer: Vec<u8>,
+    state64: u64,
+    state32: u32,
 }
 
 impl Default for FxHash {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-            word_size: WordSize::W64,
+            variant: FxHashVariant::W64,
+            buffer: Vec::new(),
+            state64: 0,
+            state32: 0,
         }
     }
 }
 
 impl FxHash {
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
+    pub fn init(variant: FxHashVariant) -> Self {
+        Self {
+            variant,
+            buffer: Vec::new(),
+            state64: 0,
+            state32: 0,
+        }
     }
 
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
+    pub fn init_32() -> Self {
+        Self::init(FxHashVariant::W32)
     }
 
-    pub fn word_size(mut self, word_size: WordSize) -> Self {
-        self.word_size = word_size;
-        self
+    pub fn init_64() -> Self {
+        Self::init(FxHashVariant::W64)
     }
 
     pub fn hash_word_64(state: &mut u64, word: u64) {
@@ -52,60 +55,53 @@ impl FxHash {
     }
 }
 
-impl ClassicHasher for FxHash {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut bytes = bytes;
-        if self.word_size == WordSize::W64 {
-            let mut hash = 0_u64;
-            while bytes.len() >= 8 {
-                let n = u64::from_be_bytes(bytes[0..8].try_into().unwrap());
-                Self::hash_word_64(&mut hash, n);
-                bytes = bytes.split_at(8).1;
+impl StatefulHasher for FxHash {
+    fn update(&mut self, bytes: &[u8]) {
+        self.buffer.extend_from_slice(bytes);
+        match self.variant {
+            FxHashVariant::W32 => {
+                let chunks = self.buffer.chunks_exact(4);
+                let rem = chunks.remainder().to_vec();
+                for chunk in chunks {
+                    let n = u32::from_be_bytes(chunk.try_into().unwrap());
+                    Self::hash_word_32(&mut self.state32, n);
+                }
+                self.buffer = rem;
             }
-
-            if bytes.len() >= 4 {
-                let n = u64::from_be_bytes(bytes[0..4].try_into().unwrap());
-                Self::hash_word_64(&mut hash, n);
-                bytes = bytes.split_at(4).1;
+            FxHashVariant::W64 => {
+                let chunks = self.buffer.chunks_exact(8);
+                let rem = chunks.remainder().to_vec();
+                for chunk in chunks {
+                    let n = u64::from_be_bytes(chunk.try_into().unwrap());
+                    Self::hash_word_64(&mut self.state64, n);
+                }
+                self.buffer = rem;
             }
-
-            for byte in bytes {
-                Self::hash_word_64(&mut hash, *byte as u64);
-            }
-            hash.to_be_bytes().to_vec()
-        } else {
-            let mut hash = 0_u32;
-
-            if bytes.len() >= 4 {
-                let n = u32::from_be_bytes(bytes[0..4].try_into().unwrap());
-                Self::hash_word_32(&mut hash, n);
-                bytes = bytes.split_at(4).1;
-            }
-
-            for byte in bytes {
-                Self::hash_word_32(&mut hash, *byte as u32);
-            }
-            hash.to_be_bytes().to_vec()
         }
     }
 
-    crate::hash_bytes_from_string! {}
-}
-
-#[cfg(test)]
-mod fxhash_tests {
-    use super::*;
-
-    #[test]
-    fn test_suite() {
-        let mut hasher = FxHash::default();
-        hasher.input_format = ByteFormat::Hex;
-        hasher.output_format = ByteFormat::Hex;
-        // assert_eq!(
-        //     "",
-        //     hasher
-        //         .hash_bytes_from_string("")
-        //         .unwrap()
-        // );
+    fn finalize(mut self) -> Vec<u8> {
+        match self.variant {
+            FxHashVariant::W32 => {
+                for byte in self.buffer {
+                    Self::hash_word_32(&mut self.state32, byte as u32);
+                }
+                self.state32.to_be_bytes().to_vec()
+            }
+            FxHashVariant::W64 => {
+                let chunks = self.buffer.chunks_exact(4);
+                let rem = chunks.remainder();
+                for chunk in chunks {
+                    let n = u64::from_be_bytes(chunk.try_into().unwrap());
+                    Self::hash_word_64(&mut self.state64, n);
+                }
+                for byte in rem {
+                    Self::hash_word_64(&mut self.state64, *byte as u64);
+                }
+                self.state64.to_be_bytes().to_vec()
+            }
+        }
     }
+
+    crate::stateful_hash_helpers!();
 }
