@@ -167,7 +167,7 @@ impl Code for Base64 {
         let mut bytes = text
             .bytes()
             .take_while(|n| n != &PAD)
-            .filter(|b| b.is_ascii_whitespace())
+            .filter(|b| !b.is_ascii_whitespace())
             .map(|n| {
                 map.get_by_right(&n)
                     .ok_or_else(|| CodeError::invalid_input_char(n as char))
