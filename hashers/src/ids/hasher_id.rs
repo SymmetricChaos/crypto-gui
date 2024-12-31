@@ -39,6 +39,7 @@ hasher_ids_and_names!(
     CityHash, "CityHash";
     Fletcher, "Fletcher";
     Fnv, "FNV Hash";
+    FxHash, "FxHash";
     Ghash, "GHASH";
     Gost, "GOST R 34.11-94";
     Haval, "HAVAL";

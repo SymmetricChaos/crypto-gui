@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 
-use crate::traits::ClassicHasher;
-use utils::{byte_formatting::ByteFormat, padding::zero_padding};
+use crate::traits::{ClassicHasher, StatefulHasher};
+use utils::padding::zero_padding;
 
 /// 960 bits of √6
 const MD6_Q: [u64; 15] = [
@@ -27,95 +27,58 @@ const TAPS: [usize; 5] = [17, 18, 21, 31, 67];
 const RSHIFT: [u32; 16] = [10, 5, 13, 10, 11, 12, 2, 7, 14, 15, 7, 13, 11, 7, 6, 12];
 const LSHIFT: [u32; 16] = [11, 24, 9, 16, 15, 9, 27, 15, 6, 2, 29, 8, 15, 5, 31, 9];
 
-#[derive(Debug, Clone)]
-pub struct Md6 {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-    pub hash_len: u32,       // output length in bits
-    pub key: Vec<u8>,        // key of up to 64 bytes
-    pub mode: u32, // mode of operation parameter, if less than 27 some processing is done sequentially with lower memory overhead
-    pub rounds: Option<u32>, // Rounds can be specified manually or derived from the output length
+fn n_rounds(hash_len: u32, keyed: bool) -> u32 {
+    if keyed {
+        // If a key is given the minimum number of rounds is 80
+        80.max(40 + hash_len / 4)
+    } else {
+        40 + hash_len / 4
+    }
 }
 
-impl Default for Md6 {
-    fn default() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-            hash_len: 256,
-            key: Vec::new(),
-            mode: 64,
-            rounds: None,
-        }
-    }
+#[derive(Debug, Clone)]
+pub struct Md6 {
+    state: [u64; 16],
+    buffer: Vec<u8>,
+    hash_len: u32, // output length in bits
+    key: [u64; 8], // key of up to 64 bytes
+    mode: u32, // mode of operation parameter, if less than 27 some processing is done sequentially with lower memory overhead
+    rounds: u32, // Rounds can be specified manually or derived from the output length
 }
 
 impl Md6 {
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
-    }
-
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
-    }
-
-    pub fn hash_len(mut self, hash_len: u32) -> Self {
-        self.hash_len = hash_len;
-        self
-    }
-
-    pub fn md6_224() -> Self {
+    pub fn init(hash_len: u32, mode: u32, rounds: u32, key: &[u8]) -> Self {
+        assert!(key.len() <= 64, "key cannot be longer than 64 bytes");
+        assert!(hash_len <= 512, "hash_len cannot be more than 512 bytes");
+        assert!(mode <= 64, "mode cannot be greater than 64");
+        let mut k = [0u64; 8];
+        for (i, byte) in key.iter().enumerate() {
+            k[i / 8] |= (*byte as u64) << (7 - (i % 8)) * 8
+        }
         Self {
-            hash_len: 224,
-            ..Default::default()
+            state: [0; 16],
+            buffer: Vec::new(),
+            hash_len,
+            key: k,
+            mode,
+            rounds,
         }
     }
 
-    pub fn md6_256() -> Self {
-        Self {
-            hash_len: 256,
-            ..Default::default()
-        }
+    pub fn init_224(mode: u32, key: &[u8]) -> Self {
+        Self::init(224, mode, 96, key)
     }
 
-    pub fn md6_384() -> Self {
-        Self {
-            hash_len: 384,
-            ..Default::default()
-        }
+    pub fn init_256(mode: u32, key: &[u8]) -> Self {
+        Self::init(256, mode, 104, key)
     }
 
-    pub fn md6_512() -> Self {
-        Self {
-            hash_len: 512,
-            ..Default::default()
-        }
+    pub fn init_384(mode: u32, key: &[u8]) -> Self {
+        Self::init(384, mode, 136, key)
     }
 
-    /// Rounds can be a specified parameter or derived from the number of output bits with a minimum of 80 rounds for a keyed hash
-    pub fn n_rounds(&self) -> u32 {
-        if let Some(n) = self.rounds {
-            return n;
-        }
-        if self.key.is_empty() {
-            40 + self.hash_len / 4
-        } else {
-            // If a key is given the minimum number of rounds is 80
-            80.max(40 + self.hash_len / 4)
-        }
-    }
-
-    /// Key used in compression function derived by padding user key with 0x00
-    pub fn key(&self) -> [u64; 8] {
-        let mut out = [0u64; 8];
-
-        for (i, byte) in self.key.iter().enumerate() {
-            out[i / 8] |= (*byte as u64) << (7 - (i % 8)) * 8
-        }
-
-        out
+    pub fn init_512(mode: u32, key: &[u8]) -> Self {
+        Self::init(512, mode, 168, key)
     }
 
     pub fn next_round_key(round_key: u64) -> u64 {
@@ -136,7 +99,7 @@ impl Md6 {
         let mut a = VecDeque::from(input.to_vec());
         let mut round_key: u64 = 0x0123456789abcdef;
 
-        for _round in 0..self.n_rounds() {
+        for _round in 0..self.rounds {
             for step in 0..16 {
                 let mut x = round_key ^ a[0] ^ a[n - t0];
                 x ^= (a[n - t1] & a[n - t2]) ^ (a[n - t3] & a[n - t4]);
@@ -153,21 +116,17 @@ impl Md6 {
     }
 }
 
-impl ClassicHasher for Md6 {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        assert!(self.hash_len <= 512);
-        assert!(self.key.len() <= 64);
-        assert!(self.mode <= 64);
-
-        let k = self.key();
-        let level = 0;
-        let mut input = bytes.to_vec();
-        zero_padding(&mut input, 512);
-
+impl StatefulHasher for Md6 {
+    fn update(&mut self, bytes: &[u8]) {
+        self.buffer.extend_from_slice(bytes);
         todo!()
     }
 
-    crate::hash_bytes_from_string! {}
+    fn finalize(self) -> Vec<u8> {
+        todo!()
+    }
+
+    crate::stateful_hash_helpers!();
 }
 
 #[cfg(test)]
@@ -176,13 +135,17 @@ mod md6_tests {
 
     #[test]
     fn test_key() {
-        let mut hasher = Md6::default();
-        hasher.key = vec![
-            0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e,
-        ];
+        let hasher = Md6::init(
+            256,
+            12,
+            100,
+            &[
+                0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e,
+            ],
+        );
         assert_eq!(
             [0x0a0b0c0d0e0f1a1b, 0x1c1d1e0000000000, 0, 0, 0, 0, 0, 0],
-            hasher.key()
+            hasher.key
         );
     }
 
@@ -211,8 +174,7 @@ mod md6_tests {
 
     #[test]
     fn test_abc_compression() {
-        let mut hasher = Md6::default();
-        hasher.rounds = Some(5);
+        let hasher = Md6::init(256, 12, 5, &[0]);
         let input: [u64; 89] = [
             0x7311c2812425cfa0,
             0x6432286434aac8e7,
@@ -324,14 +286,5 @@ mod md6_tests {
         ];
 
         assert_eq!(output, hasher.compress(&input));
-    }
-
-    #[test]
-    fn test_suite() {
-        let mut hasher = Md6::default();
-        hasher.input_format = ByteFormat::Utf8;
-        hasher.output_format = ByteFormat::Hex;
-        assert_eq!("", hasher.hash_bytes_from_string("").unwrap());
-        assert_eq!("", hasher.hash_bytes_from_string("a").unwrap());
     }
 }

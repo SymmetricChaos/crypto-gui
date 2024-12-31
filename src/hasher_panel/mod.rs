@@ -11,6 +11,7 @@ mod blake3_controls;
 mod blake_controls;
 mod fletcher_controls;
 mod fnv_controls;
+pub mod fxhash_controls;
 mod ghash_controls;
 mod hmac_controls;
 mod lm_controls;
