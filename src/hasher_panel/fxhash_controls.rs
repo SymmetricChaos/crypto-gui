@@ -1,12 +1,10 @@
+use super::HasherFrame;
 use hashers::{
-    adler::Adler32,
     errors::HasherError,
     fxhash::{FxHash, FxHashVariant},
     traits::StatefulHasher,
 };
 use utils::byte_formatting::ByteFormat;
-
-use super::HasherFrame;
 
 pub struct FxHashFrame {
     input_format: ByteFormat,
@@ -34,12 +32,12 @@ impl HasherFrame for FxHashFrame {
         );
         ui.add_space(8.0);
 
-        ui.add_space(16.0);
         ui.horizontal(|ui| {
             ui.selectable_value(&mut self.variant, FxHashVariant::W32, "32-bit");
             ui.selectable_value(&mut self.variant, FxHashVariant::W64, "64-bit");
         });
 
+        ui.add_space(8.0);
         ui.label("<<<EXPLANATION OF HASH FUNCTION CODE>>>");
 
         ui.add_space(16.0);
