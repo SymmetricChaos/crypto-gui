@@ -30,9 +30,10 @@ impl HasherFrame for FletcherFrame {
             "see the code",
             "https://github.com/SymmetricChaos/crypto-gui/blob/master/hashers/src/fletcher.rs",
         );
-        ui.add_space(16.0);
+        ui.add_space(8.0);
         ui.byte_io_mode_hasher(&mut self.input_format, &mut self.output_format);
 
+        ui.add_space(8.0);
         ui.selectable_value(&mut self.width, FletcherhWidth::W16, "Fletcher-16");
         ui.selectable_value(&mut self.width, FletcherhWidth::W32, "Fletcher-32");
         ui.selectable_value(&mut self.width, FletcherhWidth::W64, "Fletcher-64");

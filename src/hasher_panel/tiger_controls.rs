@@ -26,7 +26,7 @@ impl HasherFrame for TigerFrame {
         ui.selectable_value(&mut self.hasher.version, TigerVersion::Two, "V2");
         ui.add_space(16.0);
 
-        ui.subheading("Tiger SBOXes (very large)");
+        ui.subheading("Tiger S-boxes (very large)");
         for (i, sbox) in [T1, T2, T3, T4].iter().enumerate() {
             ui.collapsing(format!("T{}", i + 1), |ui| {
                 egui::Grid::new(format!("tiger_array{i}"))

@@ -70,6 +70,8 @@ impl HasherFrame for Blake2Frame {
         );
         ui.add_space(8.0);
 
+        ui.byte_io_mode_hasher(&mut self.input_format, &mut self.output_format);
+
         ui.horizontal(|ui| {
             if ui
                 .selectable_value(&mut self.variant, Blake2Variant::Big, "BLAKE2b")
@@ -101,8 +103,7 @@ impl HasherFrame for Blake2Frame {
             Blake2Variant::Small => ui.label("BLAKE2s is designed for 32-bit hardware."),
         };
 
-        ui.add_space(16.0);
-        ui.byte_io_mode_hasher(&mut self.input_format, &mut self.output_format);
+        ui.add_space(8.0);
 
         ui.subheading("Hash Length");
         ui.label("The BLAKE2 functions allow a variety of output lengths specified by how many bytes of the internal state are returned.");

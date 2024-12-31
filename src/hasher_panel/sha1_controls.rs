@@ -38,6 +38,7 @@ impl HasherFrame for Sha1Frame {
             "https://github.com/SymmetricChaos/crypto-gui/blob/master/hashers/src/sha/sha1.rs",
         );
 
+        ui.add_space(8.0);
         ui.byte_io_mode_hasher(&mut self.input_format, &mut self.output_format);
         ui.add_space(16.0);
 

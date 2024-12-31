@@ -29,6 +29,8 @@ impl HasherFrame for Md4Frame {
 
         ui.byte_io_mode_hasher(&mut self.input_format, &mut self.output_format);
 
+        ui.add_space(8.0);
+
         ui.label("<<<EXPLANATION OF HASH FUNCTION CODE>>>");
 
         ui.add_space(16.0);
