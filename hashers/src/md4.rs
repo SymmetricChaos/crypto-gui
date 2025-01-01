@@ -112,9 +112,7 @@ impl StatefulHasher for Md4 {
         while (self.buffer.len() % 64) != 56 {
             self.buffer.push(0x00)
         }
-        for b in self.bits_taken.to_le_bytes() {
-            self.buffer.push(b)
-        }
+        self.buffer.extend(self.bits_taken.to_le_bytes());
 
         // There can be multiple final blocks after padding
         for chunk in self.buffer.chunks_exact(64) {

@@ -145,9 +145,7 @@ macro_rules! sha2_512 {
                 while (self.buffer.len() % 128) != 112 {
                     self.buffer.push(0x00)
                 }
-                for b in self.bits_taken.to_be_bytes() {
-                    self.buffer.push(b)
-                }
+                self.buffer.extend(self.bits_taken.to_be_bytes());
 
                 // There can be multiple final blocks after padding
                 for chunk in self.buffer.chunks_exact(128) {

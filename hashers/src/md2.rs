@@ -86,7 +86,7 @@ impl StatefulHasher for Md2 {
             self.l = self.checksum[self.cs_cursor];
             self.cs_cursor = (self.cs_cursor + 1) % 16;
         }
-        self.buffer.extend_from_slice(&self.checksum);
+        self.buffer.extend(self.checksum);
 
         let chunks = self.buffer.chunks_exact(16);
         for chunk in chunks {

@@ -133,9 +133,7 @@ impl StatefulHasher for Blake384 {
             self.buffer.push(0x00); // different from BLAKE512
         }
         // Then push the total input length onto the buffer at the last 128 bits
-        for b in total_bits.to_be_bytes() {
-            self.buffer.push(b);
-        }
+        self.buffer.extend(total_bits.to_be_bytes());
 
         // There could be either one or two blocks to finalize
         if self.buffer.len() > 128 {
@@ -219,10 +217,9 @@ impl StatefulHasher for Blake512 {
             }
             self.buffer.push(0x01);
         }
+        
         // Then push the total input length onto the buffer at the last 128 bits
-        for b in total_bits.to_be_bytes() {
-            self.buffer.push(b);
-        }
+        self.buffer.extend(total_bits.to_be_bytes());
 
         // There could be either one or two blocks to finalize
         if self.buffer.len() > 128 {

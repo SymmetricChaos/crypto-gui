@@ -106,9 +106,7 @@ impl StatefulHasher for Blake224 {
             self.buffer.push(0x00); // different from BLAKE256
         }
 
-        for b in total_bits.to_be_bytes() {
-            self.buffer.push(b);
-        }
+        self.buffer.extend(total_bits.to_be_bytes());
 
         // There could be either one or two blocks to finalize
         if self.buffer.len() > 64 {
@@ -192,9 +190,7 @@ impl StatefulHasher for Blake256 {
             self.buffer.push(0x01);
         }
 
-        for b in total_bits.to_be_bytes() {
-            self.buffer.push(b);
-        }
+        self.buffer.extend(total_bits.to_be_bytes());
 
         // There could be either one or two blocks to finalize
         if self.buffer.len() > 64 {
