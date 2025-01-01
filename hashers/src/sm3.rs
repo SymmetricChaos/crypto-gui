@@ -1,7 +1,7 @@
 // https://datatracker.ietf.org/doc/html/draft-sca-cfrg-sm3
-use crate::traits::ClassicHasher;
+use crate::traits::StatefulHasher;
 use itertools::Itertools;
-use utils::byte_formatting::{fill_u32s_be, ByteFormat};
+use utils::byte_formatting::fill_u32s_be;
 
 fn tj(i: usize) -> u32 {
     if i < 16 {
@@ -85,61 +85,61 @@ fn cf(state: &mut [u32; 8], e: [u32; 132]) {
 }
 
 pub struct Sm3 {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
+    state: [u32; 8],
+    buffer: Vec<u8>,
+    bits_taken: u64,
 }
 
-impl Default for Sm3 {
-    fn default() -> Self {
+impl Sm3 {
+    pub fn init() -> Self {
         Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
+            state: [
+                0x7380166f, 0x4914b2b9, 0x172442d7, 0xda8a0600, 0xa96f30bc, 0x163138aa, 0xe38dee4d,
+                0xb0fb0e4e,
+            ],
+            buffer: Vec::new(),
+            bits_taken: 0,
         }
     }
 }
 
-impl ClassicHasher for Sm3 {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut input = bytes.to_vec();
-
-        // Padding and appending length is identical to MD4 and MD5
-        // Length in bits before padding
-        let b_len = (input.len().wrapping_mul(8)) as u64;
-
-        // push a byte with a leading 1 to the bytes
-        input.push(0x80);
-        // push zeros until the length in bits is 448 mod 512
-        // equivalently until the length in bytes is 56 mod 64
-        while (input.len() % 64) != 56 {
-            input.push(0)
+impl StatefulHasher for Sm3 {
+    fn update(&mut self, bytes: &[u8]) {
+        self.buffer.extend_from_slice(bytes);
+        let chunks = self.buffer.chunks_exact(64);
+        let rem = chunks.remainder().to_vec();
+        for chunk in chunks {
+            self.bits_taken += 512;
+            cf(&mut self.state, me(chunk));
         }
-
-        // append length
-        for b in b_len.to_be_bytes() {
-            input.push(b)
-        }
-
-        // Initialization Vector
-        let mut v: [u32; 8] = [
-            0x7380166f, 0x4914b2b9, 0x172442d7, 0xda8a0600, 0xa96f30bc, 0x163138aa, 0xe38dee4d,
-            0xb0fb0e4e,
-        ];
-        for block in input.chunks_exact(64) {
-            let e = me(block);
-            cf(&mut v, e);
-        }
-
-        v.iter().map(|x| x.to_be_bytes()).flatten().collect_vec()
+        self.buffer = rem;
     }
 
-    crate::hash_bytes_from_string! {}
+    fn finalize(mut self) -> Vec<u8> {
+        self.bits_taken += self.buffer.len() as u64 * 8;
+        self.buffer.push(0x80);
+        while (self.buffer.len() % 64) != 56 {
+            self.buffer.push(0x00)
+        }
+        self.buffer.extend(self.bits_taken.to_be_bytes());
+        for chunk in self.buffer.chunks_exact(64) {
+            cf(&mut self.state, me(chunk));
+        }
+        self.state
+            .iter()
+            .map(|x| x.to_be_bytes())
+            .flatten()
+            .collect_vec()
+    }
+
+    crate::stateful_hash_helpers!();
 }
 
-crate::basic_hash_tests!(
-    test1, Sm3::default(),
-    "abc",
+crate::stateful_hash_tests!(
+    test1, Sm3::init(),
+    b"abc",
     "66c7f0f462eeedd9d1f2d46bdc10e4e24167c4875cf2f7a2297da02b8f4ba8e0";
-    test2, Sm3::default(),
-    "abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd",
+    test2, Sm3::init(),
+    b"abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd",
     "debe9ff92275b8a138604889c18e5a4d6fdb70e5387e5765293dcba39c0c5732";
 );
