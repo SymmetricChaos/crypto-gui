@@ -22,7 +22,7 @@ use utils::byte_formatting::ByteFormat;
 // }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]
-pub enum FnvSize {
+pub enum FnvVariant {
     L32,
     L64,
     L128,
@@ -31,15 +31,15 @@ pub enum FnvSize {
     L1024,
 }
 
-impl Display for FnvSize {
+impl Display for FnvVariant {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            FnvSize::L32 => write!(f, "32-bit"),
-            FnvSize::L64 => write!(f, "64-bit"),
-            FnvSize::L128 => write!(f, "128-bit"),
-            FnvSize::L256 => write!(f, "256-bit"),
-            FnvSize::L512 => write!(f, "512-bit"),
-            FnvSize::L1024 => write!(f, "1024-bit"),
+            FnvVariant::L32 => write!(f, "32-bit"),
+            FnvVariant::L64 => write!(f, "64-bit"),
+            FnvVariant::L128 => write!(f, "128-bit"),
+            FnvVariant::L256 => write!(f, "256-bit"),
+            FnvVariant::L512 => write!(f, "512-bit"),
+            FnvVariant::L1024 => write!(f, "1024-bit"),
         }
     }
 }
@@ -89,7 +89,7 @@ macro_rules! hash_bytes_crypto_bigint {
 pub struct Fnv {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
-    pub size: FnvSize,
+    pub variant: FnvVariant,
     pub alternate: bool,
     pub zero_basis: bool,
 }
@@ -99,7 +99,7 @@ impl Default for Fnv {
         Self {
             input_format: ByteFormat::Utf8,
             output_format: ByteFormat::Hex,
-            size: FnvSize::L64,
+            variant: FnvVariant::L64,
             alternate: true,
             zero_basis: false,
         }
@@ -117,8 +117,8 @@ impl Fnv {
         self
     }
 
-    pub fn size(mut self, size: FnvSize) -> Self {
-        self.size = size;
+    pub fn size(mut self, size: FnvVariant) -> Self {
+        self.variant = size;
         self
     }
 
@@ -169,13 +169,13 @@ impl Fnv {
 
 impl ClassicHasher for Fnv {
     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        match self.size {
-            FnvSize::L32 => self.hash_bytes_32(bytes),
-            FnvSize::L64 => self.hash_bytes_64(bytes),
-            FnvSize::L128 => self.hash_bytes_128(bytes),
-            FnvSize::L256 => self.hash_bytes_256(bytes),
-            FnvSize::L512 => self.hash_bytes_512(bytes),
-            FnvSize::L1024 => self.hash_bytes_1024(bytes),
+        match self.variant {
+            FnvVariant::L32 => self.hash_bytes_32(bytes),
+            FnvVariant::L64 => self.hash_bytes_64(bytes),
+            FnvVariant::L128 => self.hash_bytes_128(bytes),
+            FnvVariant::L256 => self.hash_bytes_256(bytes),
+            FnvVariant::L512 => self.hash_bytes_512(bytes),
+            FnvVariant::L1024 => self.hash_bytes_1024(bytes),
         }
     }
 
@@ -195,17 +195,17 @@ mod fnvhash_tests {
         hasher.input_format = ByteFormat::Utf8;
         hasher.output_format = ByteFormat::Hex;
 
-        hasher.size = FnvSize::L32;
+        hasher.variant = FnvVariant::L32;
         assert_eq!("e40c292c", hasher.hash_bytes_from_string("a").unwrap());
 
-        hasher.size = FnvSize::L64;
+        hasher.variant = FnvVariant::L64;
         assert_eq!(
             "af63dc4c8601ec8c",
             hasher.hash_bytes_from_string("a").unwrap()
         );
 
-        for h in FnvSize::iter() {
-            hasher.size = h;
+        for h in FnvVariant::iter() {
+            hasher.variant = h;
             let v = hasher.hash_bytes_from_string("a").unwrap();
             assert!(v.len() != 0)
         }
