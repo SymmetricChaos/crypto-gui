@@ -2,15 +2,28 @@ use egui::{FontId, RichText};
 use hashers::{
     auxiliary::tiger_arrays::*,
     tiger::{Tiger, TigerVersion},
+    traits::StatefulHasher,
 };
+use utils::byte_formatting::ByteFormat;
 
 use crate::ui_elements::UiElements;
 
 use super::HasherFrame;
 
-#[derive(Default)]
 pub struct TigerFrame {
-    hasher: Tiger,
+    input_format: ByteFormat,
+    output_format: ByteFormat,
+    version: TigerVersion,
+}
+
+impl Default for TigerFrame {
+    fn default() -> Self {
+        Self {
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
+            version: TigerVersion::One,
+        }
+    }
 }
 
 impl HasherFrame for TigerFrame {
@@ -22,8 +35,8 @@ impl HasherFrame for TigerFrame {
 
         ui.subheading("Version");
         ui.label("In V1 the first padding byte is 0x01 and in V2 the first padding byte is 0x80. There is no other difference.");
-        ui.selectable_value(&mut self.hasher.version, TigerVersion::One, "V1");
-        ui.selectable_value(&mut self.hasher.version, TigerVersion::Two, "V2");
+        ui.selectable_value(&mut self.version, TigerVersion::One, "V1");
+        ui.selectable_value(&mut self.version, TigerVersion::Two, "V2");
         ui.add_space(16.0);
 
         ui.subheading("Tiger S-boxes (very large)");
@@ -47,5 +60,14 @@ impl HasherFrame for TigerFrame {
         }
     }
 
-    crate::hash_string! {}
+    fn hash_string(&self, text: &str) -> Result<String, hashers::errors::HasherError> {
+        let bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
+
+        Ok(self
+            .output_format
+            .byte_slice_to_text(&Tiger::init(self.version).hash(&bytes)))
+    }
 }
