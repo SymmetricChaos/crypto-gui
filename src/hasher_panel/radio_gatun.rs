@@ -4,21 +4,24 @@ use egui::DragValue;
 use hashers::{
     errors::HasherError,
     radio_gatun::{RadioGatun32, RadioGatun64},
-    traits::ClassicHasher,
+    traits::StatefulHasher,
 };
+use utils::byte_formatting::ByteFormat;
 
 pub struct RadioGatunFrame {
-    hasher32: RadioGatun32,
-    hasher64: RadioGatun64,
+    input_format: ByteFormat,
+    output_format: ByteFormat,
     wide: bool,
+    hash_len: u32,
 }
 
 impl Default for RadioGatunFrame {
     fn default() -> Self {
         Self {
-            hasher32: Default::default(),
-            hasher64: Default::default(),
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
             wide: false,
+            hash_len: 32,
         }
     }
 }
@@ -30,12 +33,7 @@ impl RadioGatunFrame {
             "https://github.com/SymmetricChaos/crypto-gui/blob/master/hashers/src/radio_gatun.rs",
         );
 
-        ui.byte_io_mode_hasher(
-            &mut self.hasher32.input_format,
-            &mut self.hasher32.output_format,
-        );
-        self.hasher64.input_format = self.hasher32.input_format;
-        self.hasher64.output_format = self.hasher32.output_format;
+        ui.byte_io_mode_hasher(&mut self.input_format, &mut self.output_format);
     }
 }
 
@@ -48,22 +46,24 @@ impl HasherFrame for RadioGatunFrame {
 
         self.byte_formatting(ui);
         ui.add_space(8.0);
-        ui.subheading("Hash Length (bytes)");
-        if ui
-            .add(DragValue::new(&mut self.hasher32.hash_len).range(1..=512))
-            .changed()
-        {
-            self.hasher64.hash_len = self.hasher32.hash_len as u64;
-        }
+        ui.subheading("Hash Length (Bytes)");
+        ui.add(DragValue::new(&mut self.hash_len).range(1..=512));
 
         ui.add_space(16.0);
     }
 
     fn hash_string(&self, text: &str) -> Result<String, HasherError> {
-        if self.wide {
-            self.hasher64.hash_bytes_from_string(text)
+        let bytes: Vec<u8> = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
+
+        let h = if self.wide {
+            RadioGatun64::init(self.hash_len as u64).hash(&bytes)
         } else {
-            self.hasher32.hash_bytes_from_string(text)
-        }
+            RadioGatun32::init(self.hash_len).hash(&bytes)
+        };
+
+        Ok(self.output_format.byte_slice_to_text(&h))
     }
 }

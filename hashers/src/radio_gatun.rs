@@ -1,6 +1,5 @@
-use crate::traits::ClassicHasher;
+use crate::traits::StatefulHasher;
 use itertools::Itertools;
-use utils::byte_formatting::ByteFormat;
 
 // https://radiogatun.noekeon.org/
 // https://en.wikibooks.org/wiki/Cryptography/RadioGat%C3%BAn
@@ -9,38 +8,23 @@ macro_rules! radio_gatun {
     ($word_size: ty, $name: ident, $rotations: expr) => {
         #[derive(Debug, Clone)]
         pub struct $name {
-            pub input_format: ByteFormat,
-            pub output_format: ByteFormat,
-            pub hash_len: $word_size,
-        }
-
-        impl Default for $name {
-            fn default() -> Self {
-                Self {
-                    input_format: ByteFormat::Utf8,
-                    output_format: ByteFormat::Hex,
-                    hash_len: 32,
-                }
-            }
+            hash_len: $word_size,
+            belt: [$word_size; 39],
+            mill: [$word_size; 19],
+            buffer: Vec<u8>,
         }
 
         impl $name {
             const ROTATION: [u32; 19] = $rotations;
             const BYTES_PER_WORD: usize = (<$word_size>::BITS / 8) as usize;
 
-            pub fn input(mut self, input: ByteFormat) -> Self {
-                self.input_format = input;
-                self
-            }
-
-            pub fn output(mut self, output: ByteFormat) -> Self {
-                self.output_format = output;
-                self
-            }
-
-            pub fn hash_len(mut self, hash_len: $word_size) -> Self {
-                self.hash_len = hash_len;
-                self
+            pub fn init(hash_len: $word_size) -> Self {
+                Self {
+                    hash_len,
+                    belt: [0; 39],
+                    mill: [0; 19],
+                    buffer: Vec::new(),
+                }
             }
 
             // XOR words from the mill into the belt
@@ -100,66 +84,119 @@ macro_rules! radio_gatun {
             }
         }
 
-        impl ClassicHasher for $name {
-            fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-                let mut input = bytes.to_vec();
-                input.push(0x01);
-                while input.len() % (Self::BYTES_PER_WORD * 3) != 0 {
-                    input.push(0x00)
+        impl StatefulHasher for $name {
+            fn update(&mut self, bytes: &[u8]) {
+                self.buffer.extend_from_slice(bytes);
+                let chunks = self.buffer.chunks_exact(Self::BYTES_PER_WORD * 3);
+                let rem = chunks.remainder().to_vec();
+                for chunk in chunks {
+                    let words = chunk
+                        .chunks_exact(Self::BYTES_PER_WORD)
+                        .map(|c| <$word_size>::from_le_bytes(c.try_into().unwrap()))
+                        .collect_vec();
+                    for words in words.chunks_exact(3) {
+                        self.belt[0] ^= words[0];
+                        self.mill[16] ^= words[0];
+
+                        self.belt[13] ^= words[1];
+                        self.mill[17] ^= words[1];
+
+                        self.belt[26] ^= words[2];
+                        self.belt[18] ^= words[2];
+
+                        for _ in 0..18 {
+                            Self::beltmill(&mut self.belt, &mut self.mill);
+                        }
+                    }
+                }
+                self.buffer = rem;
+            }
+
+            fn finalize(mut self) -> Vec<u8> {
+                self.buffer.push(0x01);
+                while self.buffer.len() % (Self::BYTES_PER_WORD * 3) != 0 {
+                    self.buffer.push(0x00)
                 }
 
-                let words = input
-                    .chunks_exact(Self::BYTES_PER_WORD)
-                    .map(|c| <$word_size>::from_le_bytes(c.try_into().unwrap()))
-                    .collect_vec();
+                let chunks = self.buffer.chunks_exact(Self::BYTES_PER_WORD * 3);
+                for chunk in chunks {
+                    let words = chunk
+                        .chunks_exact(Self::BYTES_PER_WORD)
+                        .map(|c| <$word_size>::from_le_bytes(c.try_into().unwrap()))
+                        .collect_vec();
+                    for words in words.chunks_exact(3) {
+                        self.belt[0] ^= words[0];
+                        self.mill[16] ^= words[0];
 
-                let mut belt: [$word_size; 39] = [0; 39]; // three rows of 13 words
-                let mut mill: [$word_size; 19] = [0; 19]; // one row of 19 words
+                        self.belt[13] ^= words[1];
+                        self.mill[17] ^= words[1];
 
-                for words in words.chunks_exact(3) {
-                    belt[0] ^= words[0];
-                    mill[16] ^= words[0];
+                        self.belt[26] ^= words[2];
+                        self.belt[18] ^= words[2];
 
-                    belt[13] ^= words[1];
-                    mill[17] ^= words[1];
-
-                    belt[26] ^= words[2];
-                    belt[18] ^= words[2];
-
-                    for _ in 0..18 {
-                        Self::beltmill(&mut belt, &mut mill);
+                        for _ in 0..18 {
+                            Self::beltmill(&mut self.belt, &mut self.mill);
+                        }
                     }
                 }
 
                 let mut out = Vec::new();
                 while out.len() < self.hash_len as usize {
-                    out.extend_from_slice(&mill[1].to_le_bytes());
-                    out.extend_from_slice(&mill[2].to_le_bytes());
-                    Self::beltmill(&mut belt, &mut mill);
+                    out.extend_from_slice(&self.mill[1].to_le_bytes());
+                    out.extend_from_slice(&self.mill[2].to_le_bytes());
+                    Self::beltmill(&mut self.belt, &mut self.mill);
                 }
                 out.truncate(self.hash_len as usize);
                 out
             }
 
-            crate::hash_bytes_from_string! {}
+            crate::stateful_hash_helpers!();
         }
+
+        // impl ClassicHasher for $name {
+        //     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
+        //         let mut input = bytes.to_vec();
+        //         input.push(0x01);
+        //         while input.len() % (Self::BYTES_PER_WORD * 3) != 0 {
+        //             input.push(0x00)
+        //         }
+
+        //         let words = input
+        //             .chunks_exact(Self::BYTES_PER_WORD)
+        //             .map(|c| <$word_size>::from_le_bytes(c.try_into().unwrap()))
+        //             .collect_vec();
+
+        //         let mut belt: [$word_size; 39] = [0; 39]; // three rows of 13 words
+        //         let mut mill: [$word_size; 19] = [0; 19]; // one row of 19 words
+
+        //         for words in words.chunks_exact(3) {
+        //             belt[0] ^= words[0];
+        //             mill[16] ^= words[0];
+
+        //             belt[13] ^= words[1];
+        //             mill[17] ^= words[1];
+
+        //             belt[26] ^= words[2];
+        //             belt[18] ^= words[2];
+
+        //             for _ in 0..18 {
+        //                 Self::beltmill(&mut belt, &mut mill);
+        //             }
+        //         }
+
+        //         let mut out = Vec::new();
+        //         while out.len() < self.hash_len as usize {
+        //             out.extend_from_slice(&mill[1].to_le_bytes());
+        //             out.extend_from_slice(&mill[2].to_le_bytes());
+        //             Self::beltmill(&mut belt, &mut mill);
+        //         }
+        //         out.truncate(self.hash_len as usize);
+        //         out
+        //     }
+
+        //     crate::hash_bytes_from_string! {}
+        // }
     };
-}
-
-pub struct RadioGatun {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-    pub hash_len: u32,
-}
-
-impl Default for RadioGatun {
-    fn default() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-            hash_len: 32,
-        }
-    }
 }
 
 radio_gatun!(
@@ -174,7 +211,7 @@ radio_gatun!(
     [0, 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 2, 14, 27, 41, 56, 8, 25, 43,]
 );
 
-crate::basic_hash_tests!(
-    test1, RadioGatun32::default(), "1234", "9ebdd24f469993796c4aac6a821735a65a3cdef8a359944ce71f34e7a08e1182";
-    test2, RadioGatun64::default(), "1234", "733e2b49a53fb166b6f3bd341919578b8c931880f8b8bd7c0fbbee1a538e7307";
+crate::stateful_hash_tests!(
+    test1, RadioGatun32::init(32), b"1234", "9ebdd24f469993796c4aac6a821735a65a3cdef8a359944ce71f34e7a08e1182";
+    test2, RadioGatun64::init(32), b"1234", "733e2b49a53fb166b6f3bd341919578b8c931880f8b8bd7c0fbbee1a538e7307";
 );
