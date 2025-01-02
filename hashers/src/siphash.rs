@@ -1,156 +1,110 @@
-use utils::byte_formatting::ByteFormat;
-
-use crate::traits::ClassicHasher;
+use crate::traits::StatefulHasher;
 
 // https://eprint.iacr.org/2012/351.pdf
 
-#[derive(Debug, Clone)]
-
-pub struct SipHash {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-    pub k0: u64,
-    pub k1: u64,
-    pub compression_rounds: usize,
-    pub finalization_rounds: usize,
+pub fn sip_round(mut v: [u64; 4]) -> [u64; 4] {
+    v[0] = v[0].wrapping_add(v[1]);
+    v[2] = v[2].wrapping_add(v[3]);
+    v[1] = v[1].rotate_left(13);
+    v[3] = v[3].rotate_left(16);
+    v[1] ^= v[0];
+    v[3] ^= v[2];
+    v[0] = v[0].rotate_left(32);
+    v[2] = v[2].wrapping_add(v[1]);
+    v[0] = v[0].wrapping_add(v[3]);
+    v[1] = v[1].rotate_left(17);
+    v[3] = v[3].rotate_left(21);
+    v[1] ^= v[2];
+    v[3] ^= v[0];
+    v[2] = v[2].rotate_left(32);
+    v
 }
 
-impl Default for SipHash {
-    fn default() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-            k0: 0,
-            k1: 0,
-            compression_rounds: 2,
-            finalization_rounds: 4,
-        }
-    }
+#[derive(Debug, Clone)]
+pub struct SipHash {
+    compression_rounds: usize,
+    finalization_rounds: usize,
+    state: [u64; 4],
+    buffer: Vec<u8>,
+    final_byte: u8,
 }
 
 impl SipHash {
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
+    pub fn init(key: [u64; 2], compression_rounds: usize, finalization_rounds: usize) -> Self {
+        let state: [u64; 4] = [
+            key[0].to_be() ^ 0x736f6d6570736575,
+            key[1].to_be() ^ 0x646f72616e646f6d,
+            key[0].to_be() ^ 0x6c7967656e657261,
+            key[1].to_be() ^ 0x7465646279746573,
+        ];
+
+        Self {
+            compression_rounds,
+            finalization_rounds,
+            state,
+            buffer: Vec::new(),
+            final_byte: 0,
+        }
     }
 
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
+    pub fn init_2_4(key: [u64; 2]) -> Self {
+        Self::init(key, 2, 4)
     }
 
-    pub fn compression(mut self, compression_rounds: usize) -> Self {
-        self.compression_rounds = compression_rounds;
-        self
-    }
-
-    pub fn finalization(mut self, finalization_rounds: usize) -> Self {
-        self.finalization_rounds = finalization_rounds;
-        self
-    }
-
-    pub fn keys(mut self, k0: u64, k1: u64) -> Self {
-        self.k0 = k0.to_be();
-        self.k1 = k1.to_be();
-        self
-    }
-
-    pub fn k0(mut self, k0: u64) -> Self {
-        self.k0 = k0.to_be();
-        self
-    }
-
-    pub fn k1(mut self, k1: u64) -> Self {
-        self.k1 = k1.to_be();
-        self
-    }
-
-    pub fn set_keys(&mut self, k0: u64, k1: u64) {
-        self.k0 = k0.to_be();
-        self.k1 = k1.to_be();
-    }
-
-    pub fn sip_round(mut v: [u64; 4]) -> [u64; 4] {
-        v[0] = v[0].wrapping_add(v[1]);
-        v[2] = v[2].wrapping_add(v[3]);
-        v[1] = v[1].rotate_left(13);
-        v[3] = v[3].rotate_left(16);
-        v[1] ^= v[0];
-        v[3] ^= v[2];
-        v[0] = v[0].rotate_left(32);
-        v[2] = v[2].wrapping_add(v[1]);
-        v[0] = v[0].wrapping_add(v[3]);
-        v[1] = v[1].rotate_left(17);
-        v[3] = v[3].rotate_left(21);
-        v[1] ^= v[2];
-        v[3] ^= v[0];
-        v[2] = v[2].rotate_left(32);
-        v
+    pub fn init_1_3(key: [u64; 2]) -> Self {
+        Self::init(key, 1, 3)
     }
 }
 
-impl ClassicHasher for SipHash {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut input = bytes.to_vec();
-
-        // Initialization is four 64-bit words XORed with each half of the 128-bit key
-        let mut state: [u64; 4] = [
-            self.k0 ^ 0x736f6d6570736575,
-            self.k1 ^ 0x646f72616e646f6d,
-            self.k0 ^ 0x6c7967656e657261,
-            self.k1 ^ 0x7465646279746573,
-        ];
-
-        // Padding
-        let final_byte = (input.len() % 256) as u8;
-        let total_len = (input.len() + 1).div_ceil(8) * 8;
-        while input.len() < total_len - 1 {
-            input.push(0);
-        }
-        input.push(final_byte);
-
-        // Compression
-        for block in input.chunks(8) {
-            let mi: u64 = u64::from_le_bytes(block.try_into().unwrap());
-
-            state[3] ^= mi;
-
+impl StatefulHasher for SipHash {
+    fn update(&mut self, bytes: &[u8]) {
+        self.buffer.extend_from_slice(bytes);
+        let chunks = self.buffer.chunks_exact(8);
+        let rem = chunks.remainder().to_vec();
+        for chunk in chunks {
+            let mi: u64 = u64::from_le_bytes(chunk.try_into().unwrap());
+            self.state[3] ^= mi;
             for _ in 0..self.compression_rounds {
-                state = Self::sip_round(state);
+                self.state = sip_round(self.state);
             }
+            self.state[0] ^= mi;
+            self.final_byte = self.final_byte.wrapping_add(8);
+        }
+        self.buffer = rem;
+    }
 
-            state[0] ^= mi;
+    fn finalize(mut self) -> Vec<u8> {
+        self.final_byte = self.final_byte.wrapping_add(self.buffer.len() as u8);
+        while self.buffer.len() % 8 != 7 {
+            self.buffer.push(0x00);
+        }
+        self.buffer.push(self.final_byte);
+
+        for chunk in self.buffer.chunks_exact(8) {
+            let mi: u64 = u64::from_le_bytes(chunk.try_into().unwrap());
+            self.state[3] ^= mi;
+            for _ in 0..self.compression_rounds {
+                self.state = sip_round(self.state);
+            }
+            self.state[0] ^= mi;
+            self.final_byte = self.final_byte.wrapping_add(8);
         }
 
-        // Finalization
-        state[2] ^= 0xff;
+        self.state[2] ^= 0xff;
 
         for _ in 0..self.finalization_rounds {
-            state = Self::sip_round(state);
+            self.state = sip_round(self.state);
         }
 
-        (state[0] ^ state[1] ^ state[2] ^ state[3])
+        (self.state[0] ^ self.state[1] ^ self.state[2] ^ self.state[3])
             .to_be_bytes()
             .to_vec()
     }
 
-    crate::hash_bytes_from_string! {}
+    crate::stateful_hash_helpers!();
 }
 
-#[cfg(test)]
-mod siphash_tests {
-    use super::*;
-
-    #[test]
-    fn test_suite() {
-        let hasher = SipHash::default()
-            .input(ByteFormat::Hex)
-            .keys(0x0001020304050607, 0x08090a0b0c0d0e0f);
-        assert_eq!(
-            "a129ca6149be45e5",
-            hasher
-                .hash_bytes_from_string("000102030405060708090a0b0c0d0e")
-                .unwrap()
-        );
-    }
-}
+crate::stateful_hash_tests!(
+    test_1, SipHash::init_2_4([0x0001020304050607, 0x08090a0b0c0d0e0f]), &[0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e],
+    "a129ca6149be45e5";
+);

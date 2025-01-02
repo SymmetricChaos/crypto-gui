@@ -1,49 +1,27 @@
-use crate::ui_elements::UiElements;
-
 use super::HasherFrame;
+use crate::ui_elements::UiElements;
 use egui::DragValue;
-use hashers::siphash::SipHash;
+use hashers::{siphash::SipHash, traits::StatefulHasher};
 use rand::{thread_rng, Rng};
+use utils::byte_formatting::ByteFormat;
 
 pub struct SipHashFrame {
-    hasher: SipHash,
-    k0_string: String,
-    k1_string: String,
+    input_format: ByteFormat,
+    output_format: ByteFormat,
+    key: [u64; 2],
+    compression_rounds: usize,
+    finalization_rounds: usize,
 }
 
 impl Default for SipHashFrame {
     fn default() -> Self {
         Self {
-            hasher: Default::default(),
-            k0_string: String::new(),
-            k1_string: String::new(),
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
+            key: [0; 2],
+            compression_rounds: 2,
+            finalization_rounds: 4,
         }
-    }
-}
-
-impl SipHashFrame {
-    fn key_control(ui: &mut egui::Ui, string: &mut String, key: &mut u64) {
-        ui.horizontal(|ui| {
-            if ui.control_string(string).changed() {
-                *string = string
-                    .chars()
-                    .filter(|c| c.is_ascii_hexdigit())
-                    .take(16)
-                    .collect();
-
-                if ui.button("🎲").on_hover_text("randomize").clicked() {
-                    let mut rng = thread_rng();
-                    *key = rng.gen();
-                    *string = format!("{:016x}", key);
-                }
-                match u64::from_str_radix(string, 16) {
-                    Ok(new) => *key = new.to_be(),
-                    Err(_) => {
-                        ui.error_text("unable to parse key");
-                    }
-                };
-            }
-        });
     }
 }
 
@@ -54,28 +32,40 @@ impl HasherFrame for SipHashFrame {
             "https://github.com/SymmetricChaos/crypto-gui/blob/master/hashers/src/siphash.rs",
         );
 
-        ui.byte_io_mode_hasher(
-            &mut self.hasher.input_format,
-            &mut self.hasher.output_format,
-        );
+        ui.add_space(8.0);
+        ui.byte_io_mode_hasher(&mut self.input_format, &mut self.output_format);
 
         ui.add_space(16.0);
-        ui.subheading("Key0 (hexadecimal)");
-        Self::key_control(ui, &mut self.k0_string, &mut self.hasher.k0);
-        ui.add_space(8.0);
-        ui.subheading("Key1 (hexadecimal)");
-        Self::key_control(ui, &mut self.k1_string, &mut self.hasher.k1);
+        ui.horizontal(|ui| {
+            ui.subheading("Key");
+            if ui.button("🎲").on_hover_text("randomize").clicked() {
+                let mut rng = thread_rng();
+                self.key[0] = rng.gen();
+                self.key[1] = rng.gen();
+            };
+        });
+        ui.u64_hex_edit(&mut self.key[0]);
+        ui.u64_hex_edit(&mut self.key[1]);
 
         ui.add_space(16.0);
         ui.subheading("Compression Rounds");
-        ui.add(DragValue::new(&mut self.hasher.compression_rounds).range(0..=8));
+        ui.add(DragValue::new(&mut self.compression_rounds).range(0..=8));
 
         ui.add_space(8.0);
         ui.subheading("Finalization Rounds");
-        ui.add(DragValue::new(&mut self.hasher.finalization_rounds).range(1..=10));
+        ui.add(DragValue::new(&mut self.finalization_rounds).range(1..=10));
 
         ui.add_space(16.0);
     }
 
-    crate::hash_string! {}
+    fn hash_string(&self, text: &str) -> Result<String, hashers::errors::HasherError> {
+        let bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
+
+        Ok(self.output_format.byte_slice_to_text(
+            SipHash::init(self.key, self.compression_rounds, self.finalization_rounds).hash(&bytes),
+        ))
+    }
 }
