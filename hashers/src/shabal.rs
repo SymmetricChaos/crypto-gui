@@ -1,8 +1,5 @@
-use crate::traits::ClassicHasher;
-use utils::{
-    byte_formatting::{make_u32s_le, ByteFormat},
-    padding::bit_padding,
-};
+use crate::traits::StatefulHasher;
+use utils::{byte_formatting::make_u32s_le, padding::bit_padding};
 
 // https://www.cs.rit.edu/~ark/20090927/Round2Candidates/Shabal.pdf
 
@@ -110,96 +107,106 @@ fn keyed_permutation(m: &[u32; 16], a: &mut [u32; 12], b: &mut [u32; 16], c: &[u
 macro_rules! shabal {
     ($name:ident, $a: ident, $b: ident, $c: ident, $hlen: literal) => {
         pub struct $name {
-            pub input_format: ByteFormat,
-            pub output_format: ByteFormat,
+            a: [u32; 12],
+            b: [u32; 16],
+            c: [u32; 16],
+            ctr: u64,
+            buffer: Vec<u8>,
         }
 
-        impl Default for $name {
-            fn default() -> Self {
+
+        impl $name {
+            pub fn init() -> Self {
                 Self {
-                    input_format: ByteFormat::Utf8,
-                    output_format: ByteFormat::Hex,
+                    a: $a,
+                    b: $b,
+                    c: $c,
+                    ctr: 0,
+                    buffer: Vec::new()
                 }
             }
         }
 
-        impl $name {
-            pub fn input(mut self, input: ByteFormat) -> Self {
-                self.input_format = input;
-                self
-            }
+        impl StatefulHasher for $name {
+            fn update(&mut self, bytes: &[u8]) {
+                self.buffer.extend_from_slice(bytes);
+                let chunks = self.buffer.chunks_exact(64);
+                let rem = chunks.remainder().to_vec();
 
-            pub fn output(mut self, output: ByteFormat) -> Self {
-                self.output_format = output;
-                self
-            }
-        }
-
-        impl ClassicHasher for $name {
-            fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-                let mut input = bytes.to_vec();
-                bit_padding(&mut input, 64).unwrap();
-
-                let mut a = $a;
-                let mut b = $b;
-                let mut c = $c;
-
-                let mut ctr: u64 = 0;
-
-                for block in input.chunks_exact(64) {
-                    ctr = ctr.wrapping_add(1);
-                    let m = make_u32s_le::<16>(block);
+                for chunk in chunks {
+                    self.ctr = self.ctr.wrapping_add(1);
+                    let m = make_u32s_le::<16>(chunk);
 
                     // Insert the message into b by addition
                     for i in 0..16 {
-                        b[i] = b[i].wrapping_add(m[i]);
+                        self.b[i] = self.b[i].wrapping_add(m[i]);
                     }
 
                     // XOR the counter in A[0] and A[1]
-                    a[0] ^= ctr as u32;
-                    a[1] ^= (ctr >> 32) as u32;
+                    self.a[0] ^= self.ctr as u32;
+                    self.a[1] ^= (self.ctr >> 32) as u32;
 
                     // Apply the keyed permutation
-                    keyed_permutation(&m, &mut a, &mut b, &c);
+                    keyed_permutation(&m, &mut self.a, &mut self.b, &self.c);
 
                     // Insert the message into c by subtraction
                     for i in 0..16 {
-                        c[i] = c[i].wrapping_sub(m[i]);
+                        self.c[i] = self.c[i].wrapping_sub(m[i]);
                     }
 
                     // Swap B and C
-                    std::mem::swap(&mut b, &mut c);
+                    std::mem::swap(&mut self.b, &mut self.c);
                 }
 
+                self.buffer = rem;
+            }
+
+            fn finalize(mut self) -> Vec<u8> {
+                // Create the final block.
+                bit_padding(&mut self.buffer, 64).unwrap();
+                let final_block = make_u32s_le::<16>(&self.buffer);
+
+                // One compression round on the final block.
+                self.ctr = self.ctr.wrapping_add(1);
+                for i in 0..16 {
+                    self.b[i] = self.b[i].wrapping_add(final_block[i]);
+                }
+                self.a[0] ^= self.ctr as u32;
+                self.a[1] ^= (self.ctr >> 32) as u32;
+                keyed_permutation(&final_block, &mut self.a, &mut self.b, &self.c);
+                for i in 0..16 {
+                    self.c[i] = self.c[i].wrapping_sub(final_block[i]);
+                }
+                std::mem::swap(&mut self.b, &mut self.c);
+
                 // Finalization rounds
-                let final_block = make_u32s_le::<16>(input.chunks_exact(64).last().unwrap());
                 for _ in 0..3 {
                     let m = final_block;
 
                     for i in 0..16 {
-                        b[i] = b[i].wrapping_add(m[i]);
+                        self.b[i] = self.b[i].wrapping_add(m[i]);
                     }
 
-                    a[0] ^= ctr as u32;
-                    a[1] ^= (ctr >> 32) as u32;
+                    self.a[0] ^= self.ctr as u32;
+                    self.a[1] ^= (self.ctr >> 32) as u32;
 
-                    keyed_permutation(&m, &mut a, &mut b, &c);
+                    keyed_permutation(&m, &mut self.a, &mut self.b, &self.c);
 
                     for i in 0..16 {
-                        c[i] = c[i].wrapping_sub(m[i]);
+                        self.c[i] = self.c[i].wrapping_sub(m[i]);
                     }
 
-                    std::mem::swap(&mut b, &mut c);
+                    std::mem::swap(&mut self.b, &mut self.c);
                 }
 
                 let mut out = Vec::with_capacity(32);
-                for word in c[(16-$hlen)..].into_iter() {
+                for word in self.c[(16-$hlen)..].into_iter() {
                     out.extend(word.to_le_bytes())
                 }
                 out
             }
 
-            crate::hash_bytes_from_string! {}
+            crate::stateful_hash_helpers!();
         }
     };
 }
@@ -219,111 +226,50 @@ pub enum ShabalVariant {
     Shabal512,
 }
 
-pub struct Shabal {
-    pub variant: ShabalVariant,
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-}
+const TESTA: &[u8] = &[
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+];
+const TESTB: &[u8] = &[
+    0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0x70,
+    0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78, 0x79, 0x7a, 0x2d, 0x30, 0x31, 0x32, 0x33, 0x34,
+    0x35, 0x36, 0x37, 0x38, 0x39, 0x2d, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a,
+    0x4b, 0x4c, 0x4d, 0x4e, 0x4f, 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5a,
+    0x2d, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x2d, 0x61, 0x62, 0x63, 0x64,
+    0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0x70, 0x71, 0x72, 0x73, 0x74,
+    0x75, 0x76, 0x77, 0x78, 0x79, 0x7a,
+];
 
-impl Default for Shabal {
-    fn default() -> Self {
-        Self {
-            variant: ShabalVariant::Shabal256,
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-        }
-    }
-}
-
-impl Shabal {
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
-    }
-
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
-    }
-}
-
-impl ClassicHasher for Shabal {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        match self.variant {
-            ShabalVariant::Shabal192 => Shabal192::default()
-                .input(self.input_format)
-                .output(self.output_format)
-                .hash(bytes),
-            ShabalVariant::Shabal224 => Shabal224::default()
-                .input(self.input_format)
-                .output(self.output_format)
-                .hash(bytes),
-            ShabalVariant::Shabal256 => Shabal256::default()
-                .input(self.input_format)
-                .output(self.output_format)
-                .hash(bytes),
-            ShabalVariant::Shabal384 => Shabal384::default()
-                .input(self.input_format)
-                .output(self.output_format)
-                .hash(bytes),
-            ShabalVariant::Shabal512 => Shabal512::default()
-                .input(self.input_format)
-                .output(self.output_format)
-                .hash(bytes),
-        }
-    }
-
-    crate::hash_bytes_from_string! {}
-}
-
-crate::basic_hash_tests!(
-    test_a_192,
-    Shabal192::default().input(ByteFormat::Hex),
-    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+crate::stateful_hash_tests!(
+    test_a_192, Shabal192::init(), TESTA,
     "0f706ecb97cf4dce00bfbbd2fb64530c32870cb44839730d";
 
-    test_b_192,
-    Shabal192::default().input(ByteFormat::Hex),
-    "6162636465666768696A6B6C6D6E6F707172737475767778797A2D303132333435363738392D4142434445464748494A4B4C4D4E4F505152535455565758595A2D303132333435363738392D6162636465666768696A6B6C6D6E6F707172737475767778797A",
+    test_b_192, Shabal192::init(), TESTB,
     "690fae79226d95760ae8fdb4f58c0537111756557d307b15";
 
-    test_a_224,
-    Shabal224::default().input(ByteFormat::Hex),
-    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    test_a_224, Shabal224::init(), TESTA,
     "99dda614f907d2e8817618f730696f3200aeca8b5f85f42543ba2031";
 
-    test_b_224,
-    Shabal224::default().input(ByteFormat::Hex),
-    "6162636465666768696A6B6C6D6E6F707172737475767778797A2D303132333435363738392D4142434445464748494A4B4C4D4E4F505152535455565758595A2D303132333435363738392D6162636465666768696A6B6C6D6E6F707172737475767778797A",
+    test_b_224, Shabal224::init(), TESTB,
     "c7d62d8d2a3474b4f4a9d11a52db3d435bf158cf454c5d561d7125f5";
 
-    test_a_256,
-    Shabal256::default().input(ByteFormat::Hex),
-    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    test_a_256, Shabal256::init(), TESTA,
     "da8f08c02a67ba9a56bdd0798e48ae0714215e093b5b850649a37718993f54a2";
 
-    test_b_256,
-    Shabal256::default().input(ByteFormat::Hex),
-    "6162636465666768696A6B6C6D6E6F707172737475767778797A2D303132333435363738392D4142434445464748494A4B4C4D4E4F505152535455565758595A2D303132333435363738392D6162636465666768696A6B6C6D6E6F707172737475767778797A",
+    test_b_256, Shabal256::init(), TESTB,
     "b49f34bf51864c30533cc46cc2542bdec2f96fd06f5c539aff6ead5883f7327a";
 
-    test_a_384,
-    Shabal384::default().input(ByteFormat::Hex),
-    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    test_a_384, Shabal384::init(), TESTA,
     "9dde1233910d85da3a5c780312b111c6fcca1b5dd25537035ee08e3b4e1e25154f726a6384e5a8f0afeaab4ac4c02f12";
 
-    test_b_384,
-    Shabal384::default().input(ByteFormat::Hex),
-    "6162636465666768696A6B6C6D6E6F707172737475767778797A2D303132333435363738392D4142434445464748494A4B4C4D4E4F505152535455565758595A2D303132333435363738392D6162636465666768696A6B6C6D6E6F707172737475767778797A",
+    test_b_384, Shabal384::init(), TESTB,
     "30012c0e3edc460bd78627c2c30944d2a189669afa2d7a9713ef2f774c4474a43af1cbcec5fab4248c0873f038fbeba0";
 
-    test_a_512,
-    Shabal512::default().input(ByteFormat::Hex),
-    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    test_a_512, Shabal512::init(), TESTA,
     "158016c6c81f3f0a52d98d68ed2f9e8e7895ef23cba7e2bc6109d8a532e6c9e6a6a501979fb837f04ec4c620e73179dc82abb52b32cdadb35650e29c985e3022";
 
-    test_b_512,
-    Shabal512::default().input(ByteFormat::Hex),
-    "6162636465666768696A6B6C6D6E6F707172737475767778797A2D303132333435363738392D4142434445464748494A4B4C4D4E4F505152535455565758595A2D303132333435363738392D6162636465666768696A6B6C6D6E6F707172737475767778797A",
+    test_b_512, Shabal512::init(), TESTB,
     "677e6f7f12d70af0b335662f59b56851f3653e66647d3386dfda0143254cc8a5db3e2194068c6f71597d7b60984d22b47a1f60d91ca8dfcb175d65b97359cecf";
 );
