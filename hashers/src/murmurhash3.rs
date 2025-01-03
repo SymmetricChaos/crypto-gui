@@ -1,5 +1,5 @@
-use crate::traits::ClassicHasher;
-use utils::byte_formatting::{make_u64s_le, ByteFormat};
+use crate::traits::StatefulHasher;
+use utils::byte_formatting::make_u64s_le;
 
 fn final_mix(mut x: u32) -> u32 {
     x ^= x >> 16;
@@ -47,192 +47,176 @@ fn state_mix(mut x: u32) -> u32 {
 }
 
 pub struct Murmur3_32 {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-    pub seed: u32,
-}
-
-impl Default for Murmur3_32 {
-    fn default() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-            seed: 0,
-        }
-    }
+    state: u32,
+    buffer: Vec<u8>,
+    bytes_taken: u32,
 }
 
 impl Murmur3_32 {
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
+    pub fn init(seed: &[u8]) -> Self {
+        Self {
+            state: u32::from_le_bytes(seed.try_into().expect("seed must be exactly four bytes")),
+            buffer: Vec::new(),
+            bytes_taken: 0,
+        }
     }
 
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
-    }
-
-    pub fn with_seed(mut self, bytes: [u8; 4]) -> Self {
-        self.seed = u32::from_le_bytes(bytes);
-        self
-    }
-
-    pub fn with_seed_u32(mut self, seed: u32) -> Self {
-        self.seed = seed;
-        self
+    /// Initialize with state set to zero
+    pub fn init_zero() -> Self {
+        Self {
+            state: 0,
+            buffer: Vec::new(),
+            bytes_taken: 0,
+        }
     }
 }
 
-impl ClassicHasher for Murmur3_32 {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut state = self.seed;
-
-        // Divide the input into 32-bit chunks and save the remainder
-        let chunks = bytes.chunks_exact(4);
-        let rem = chunks.remainder();
+impl StatefulHasher for Murmur3_32 {
+    fn update(&mut self, bytes: &[u8]) {
+        self.buffer.extend_from_slice(bytes);
+        let chunks = self.buffer.chunks_exact(4);
+        let rem = chunks.remainder().to_vec();
         // For each full chunk mix it into the state and then mix the state
-        for block in chunks {
-            let k = u32::from_le_bytes(block.try_into().unwrap());
-            state ^= block_mix(k);
-            state = state_mix(state);
+        for chunk in chunks {
+            self.bytes_taken += 4;
+            let k = u32::from_le_bytes(chunk.try_into().unwrap());
+            self.state ^= block_mix(k);
+            self.state = state_mix(self.state);
         }
-        // Load any bytes in the remainder and mix them
-        let mut k = 0_u32;
-        for byte in rem {
-            k = k << 8;
-            k |= *byte as u32;
-        }
-        state ^= block_mix(k);
-
-        // XOR in the length in bytes
-        state ^= bytes.len() as u32;
-
-        state = final_mix(state);
-        state.to_be_bytes().to_vec()
+        self.buffer = rem;
     }
 
-    crate::hash_bytes_from_string! {}
+    fn finalize(mut self) -> Vec<u8> {
+        self.bytes_taken += self.buffer.len() as u32;
+        // Load any bytes in the remainder and mix them
+        let mut k = 0_u32;
+        for byte in self.buffer {
+            k = k << 8;
+            k |= byte as u32;
+        }
+        self.state ^= block_mix(k);
+        // XOR in the length in bytes
+        self.state ^= self.bytes_taken;
+
+        self.state = final_mix(self.state);
+        self.state.to_be_bytes().to_vec()
+    }
+
+    crate::stateful_hash_helpers!();
 }
 
 pub struct Murmur3_128 {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-    pub seed: u32,
-}
-
-impl Default for Murmur3_128 {
-    fn default() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-            seed: 0,
-        }
-    }
+    state: [u64; 2],
+    buffer: Vec<u8>,
+    bytes_taken: u64,
 }
 
 impl Murmur3_128 {
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
+    pub fn init(seed: &[u8]) -> Self {
+        let s = u32::from_le_bytes(seed.try_into().expect("seed must be exactly four bytes"));
+        Self {
+            state: [s as u64; 2],
+            buffer: Vec::new(),
+            bytes_taken: 0,
+        }
     }
 
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
-    }
-
-    pub fn with_seed(mut self, bytes: [u8; 4]) -> Self {
-        self.seed = u32::from_le_bytes(bytes);
-        self
-    }
-
-    pub fn with_seed_u32(mut self, seed: u32) -> Self {
-        self.seed = seed;
-        self
+    /// Initialize with state set to zero
+    pub fn init_zero() -> Self {
+        Self {
+            state: [0; 2],
+            buffer: Vec::new(),
+            bytes_taken: 0,
+        }
     }
 }
 
-impl ClassicHasher for Murmur3_128 {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut state = [self.seed as u64, self.seed as u64];
-
-        // Divide the input into 32-bit chunks and save the remainder
-        let chunks = bytes.chunks_exact(16);
-        let rem = chunks.remainder();
+impl StatefulHasher for Murmur3_128 {
+    fn update(&mut self, bytes: &[u8]) {
+        self.buffer.extend_from_slice(bytes);
+        let chunks = self.buffer.chunks_exact(16);
+        let rem = chunks.remainder().to_vec();
         // For each full chunk mix it into the state and then mix the state
-        for block in chunks {
-            let k = make_u64s_le::<2>(block);
+        for chunk in chunks {
+            self.bytes_taken += 16;
+            let k = make_u64s_le::<2>(chunk);
 
-            state[0] ^= block_mix_64_0(k[0]);
-            state[0] = state[0].rotate_left(27);
-            state[0] = state[0].wrapping_add(state[1]);
-            state[0] = state[0].wrapping_mul(5).wrapping_add(0x52dce729);
+            self.state[0] ^= block_mix_64_0(k[0]);
+            self.state[0] = self.state[0].rotate_left(27);
+            self.state[0] = self.state[0].wrapping_add(self.state[1]);
+            self.state[0] = self.state[0].wrapping_mul(5).wrapping_add(0x52dce729);
 
-            state[1] ^= block_mix_64_1(k[1]);
-            state[1] = state[1].rotate_left(31);
-            state[1] = state[1].wrapping_add(state[0]);
-            state[1] = state[1].wrapping_mul(5).wrapping_add(0x38495ab5);
+            self.state[1] ^= block_mix_64_1(k[1]);
+            self.state[1] = self.state[1].rotate_left(31);
+            self.state[1] = self.state[1].wrapping_add(self.state[0]);
+            self.state[1] = self.state[1].wrapping_mul(5).wrapping_add(0x38495ab5);
         }
+        self.buffer = rem;
+    }
+
+    fn finalize(mut self) -> Vec<u8> {
+        self.bytes_taken += self.buffer.len() as u64;
 
         // Load any bytes in the remainder and mix them
-
         let mut k = 0_u64;
-        for byte in rem.into_iter().skip(8).take(8).rev() {
+        for byte in self.buffer.iter().skip(8).take(8).rev() {
             k = k << 8;
             k |= *byte as u64;
         }
-        state[1] ^= block_mix_64_1(k);
+        self.state[1] ^= block_mix_64_1(k);
 
         k = 0;
-        for byte in rem.into_iter().take(8).rev() {
+        for byte in self.buffer.iter().take(8).rev() {
             k = k << 8;
             k |= *byte as u64;
         }
-        state[0] ^= block_mix_64_0(k);
+        self.state[0] ^= block_mix_64_0(k);
 
         // XOR in the length in bytes
-        state[0] ^= bytes.len() as u64;
-        state[1] ^= bytes.len() as u64;
+        self.state[0] ^= self.bytes_taken;
+        self.state[1] ^= self.bytes_taken;
 
         // Final mix
-        state[0] = state[0].wrapping_add(state[1]);
-        state[1] = state[1].wrapping_add(state[0]);
-        state[0] = final_mix_64(state[0]);
-        state[1] = final_mix_64(state[1]);
-        state[0] = state[0].wrapping_add(state[1]);
-        state[1] = state[1].wrapping_add(state[0]);
+        self.state[0] = self.state[0].wrapping_add(self.state[1]);
+        self.state[1] = self.state[1].wrapping_add(self.state[0]);
+        self.state[0] = final_mix_64(self.state[0]);
+        self.state[1] = final_mix_64(self.state[1]);
+        self.state[0] = self.state[0].wrapping_add(self.state[1]);
+        self.state[1] = self.state[1].wrapping_add(self.state[0]);
 
-        state.into_iter().flat_map(|w| w.to_be_bytes()).collect()
+        self.state
+            .into_iter()
+            .flat_map(|w| w.to_be_bytes())
+            .collect()
     }
 
-    crate::hash_bytes_from_string! {}
+    crate::stateful_hash_helpers!();
 }
 
-crate::basic_hash_tests!(
-    test1, Murmur3_32::default(), "",
+crate::stateful_hash_tests!(
+    test1, Murmur3_32::init_zero(), b"",
     "00000000";
-    test2, Murmur3_32::default().with_seed_u32(0x01), "",
+    test2, Murmur3_32::init(&[1,0,0,0]), b"",
     "514e28b7";
-    test3, Murmur3_32::default(), "hello",
+    test3, Murmur3_32::init_zero(), b"hello",
     "248bfa47";
-    test4, Murmur3_32::default().with_seed_u32(0x01), "hello",
+    test4, Murmur3_32::init(&[1,0,0,0]), b"hello",
     "bb4abcad";
-    test5, Murmur3_32::default(), "The quick brown fox jumps over the lazy dog.",
+    test5, Murmur3_32::init_zero(), b"The quick brown fox jumps over the lazy dog.",
     "d5c48bfc";
-    test6, Murmur3_32::default().with_seed_u32(0x01), "The quick brown fox jumps over the lazy dog.",
+    test6, Murmur3_32::init(&[1,0,0,0]), b"The quick brown fox jumps over the lazy dog.",
     "846f6a36";
 
-    test7, Murmur3_128::default(), "",
+    test7, Murmur3_128::init_zero(), b"",
     "00000000000000000000000000000000";
-    test8, Murmur3_128::default().with_seed_u32(0x01), "",
+    test8, Murmur3_128::init(&[1,0,0,0]), b"",
     "4610abe56eff5cb551622daa78f83583";
-    test9, Murmur3_128::default(), "hello",
+    test9, Murmur3_128::init_zero(), b"hello",
     "cbd8a7b341bd9b025b1e906a48ae1d19";
-    test10, Murmur3_128::default().with_seed_u32(0x01), "hello",
+    test10, Murmur3_128::init(&[1,0,0,0]), b"hello",
     "a78ddff5adae8d10128900ef20900135";
-    test11, Murmur3_128::default(), "The quick brown fox jumps over the lazy dog.",
+    test11, Murmur3_128::init_zero(), b"The quick brown fox jumps over the lazy dog.",
     "cd99481f9ee902c9695da1a38987b6e7";
-    test12, Murmur3_128::default().with_seed_u32(0x01), "The quick brown fox jumps over the lazy dog.",
+    test12, Murmur3_128::init(&[1,0,0,0]), b"The quick brown fox jumps over the lazy dog.",
     "fb3325171f9744daaaf8b92a5f722952";
 );
