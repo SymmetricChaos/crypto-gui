@@ -1,31 +1,22 @@
 use super::ripemd128::RipeMd128;
-use crate::traits::ClassicHasher;
-use utils::{byte_formatting::ByteFormat, padding::md_strengthening_64_le};
+use crate::traits::StatefulHasher;
 
 #[derive(Clone)]
 pub struct RipeMd256 {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-}
-
-impl Default for RipeMd256 {
-    fn default() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-        }
-    }
+    state_l: [u32; 4],
+    state_r: [u32; 4],
+    buffer: Vec<u8>,
+    bits_taken: u64,
 }
 
 impl RipeMd256 {
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
-    }
-
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
+    pub fn init() -> Self {
+        Self {
+            state_l: [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476],
+            state_r: [0x76543210, 0xfedcba98, 0x89abcdef, 0x01234567],
+            buffer: Vec::new(),
+            bits_taken: 0,
+        }
     }
 
     pub fn compress(state_l: &mut [u32; 4], state_r: &mut [u32; 4], block: [u32; 16]) {
@@ -59,41 +50,57 @@ impl RipeMd256 {
     }
 }
 
-impl ClassicHasher for RipeMd256 {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut input = bytes.to_vec();
-
-        md_strengthening_64_le(&mut input, 64);
-
-        let mut state_l: [u32; 4] = [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476];
-        let mut state_r: [u32; 4] = [0x76543210, 0xfedcba98, 0x89abcdef, 0x01234567];
-
-        for chunk in input.chunks_exact(64) {
-            let mut block = [0u32; 16];
+impl StatefulHasher for RipeMd256 {
+    fn update(&mut self, bytes: &[u8]) {
+        self.buffer.extend_from_slice(bytes);
+        let chunks = self.buffer.chunks_exact(64);
+        let rem = chunks.remainder().to_vec();
+        let mut block = [0u32; 16];
+        for chunk in chunks {
+            self.bits_taken += 512;
             utils::byte_formatting::fill_u32s_le(&mut block, &chunk);
-            Self::compress(&mut state_l, &mut state_r, block)
+            Self::compress(&mut self.state_l, &mut self.state_r, block)
+        }
+        self.buffer = rem;
+    }
+
+    fn finalize(mut self) -> Vec<u8> {
+        // MD Padding
+        self.bits_taken += self.buffer.len() as u64 * 8;
+        self.buffer.push(0x80);
+        while (self.buffer.len() % 64) != 56 {
+            self.buffer.push(0)
+        }
+        self.buffer.extend(self.bits_taken.to_le_bytes());
+
+        let chunks = self.buffer.chunks_exact(64);
+        let mut block = [0u32; 16];
+        for chunk in chunks {
+            self.bits_taken += 512;
+            utils::byte_formatting::fill_u32s_le(&mut block, &chunk);
+            Self::compress(&mut self.state_l, &mut self.state_r, block)
         }
 
         let mut out = Vec::with_capacity(32);
-        for word in state_l {
+        for word in self.state_l {
             out.extend(word.to_le_bytes())
         }
-        for word in state_r {
+        for word in self.state_r {
             out.extend(word.to_le_bytes())
         }
         out
     }
 
-    crate::hash_bytes_from_string! {}
+    crate::stateful_hash_helpers!();
 }
 
-crate::basic_hash_tests!(
-    test_256_1, RipeMd256::default(), "",
+crate::stateful_hash_tests!(
+    test_256_1, RipeMd256::init(), b"",
     "02ba4c4e5f8ecd1877fc52d64d30e37a2d9774fb1e5d026380ae0168e3c5522d";
-    test_256_2, RipeMd256::default(), "a",
+    test_256_2, RipeMd256::init(), b"a",
     "f9333e45d857f5d90a91bab70a1eba0cfb1be4b0783c9acfcd883a9134692925";
-    test_256_3, RipeMd256::default(), "abc",
+    test_256_3, RipeMd256::init(), b"abc",
     "afbd6e228b9d8cbbcef5ca2d03e6dba10ac0bc7dcbe4680e1e42d2e975459b65";
-    test_256_4, RipeMd256::default(), "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
+    test_256_4, RipeMd256::init(), b"12345678901234567890123456789012345678901234567890123456789012345678901234567890",
     "06fdcc7a409548aaf91368c06a6275b553e3f099bf0ea4edfd6778df89a890dd";
 );

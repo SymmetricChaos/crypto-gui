@@ -1,9 +1,8 @@
-pub mod ripemd;
+pub mod ripemd0;
 pub mod ripemd128;
 pub mod ripemd160;
 pub mod ripemd256;
 pub mod ripemd320;
-pub mod ripemd0;
 
 pub const PERM: [usize; 80] = [
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 7, 4, 13, 1, 10, 6, 15, 3, 12, 0, 9, 5,
@@ -37,5 +36,30 @@ fn f(j: usize, x: u32, y: u32, z: u32) -> u32 {
         3 => (x & z) | (y & !z),
         4 => x ^ (y | !z),
         _ => unreachable!(),
+    }
+}
+
+use std::fmt::Display;
+
+use strum::EnumIter;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]
+pub enum RipeMdVariant {
+    Md0,
+    Md128,
+    Md160,
+    Md256,
+    Md320,
+}
+
+impl Display for RipeMdVariant {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RipeMdVariant::Md0 => write!(f, "RIPEMD (original)"),
+            RipeMdVariant::Md128 => write!(f, "RIPEMD-128"),
+            RipeMdVariant::Md160 => write!(f, "RIPEMD-160"),
+            RipeMdVariant::Md256 => write!(f, "RIPEMD-256"),
+            RipeMdVariant::Md320 => write!(f, "RIPEMD-320"),
+        }
     }
 }

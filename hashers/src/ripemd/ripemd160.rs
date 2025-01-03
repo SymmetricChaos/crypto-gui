@@ -1,21 +1,12 @@
-use crate::traits::ClassicHasher;
-use utils::{byte_formatting::ByteFormat, padding::md_strengthening_64_le};
+use crate::traits::StatefulHasher;
 
 use super::{f, PERM, PERM_PRIME, ROL, ROL_PRIME};
 
 #[derive(Clone)]
 pub struct RipeMd160 {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-}
-
-impl Default for RipeMd160 {
-    fn default() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-        }
-    }
+    state: [u32; 5],
+    buffer: Vec<u8>,
+    bits_taken: u64,
 }
 
 impl RipeMd160 {
@@ -23,14 +14,12 @@ impl RipeMd160 {
 
     pub const K_PRIME: [u32; 5] = [0x50a28be6, 0x5c4dd124, 0x6d703ef3, 0x7a6d76e9, 0x00000000];
 
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
-    }
-
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
+    pub fn init() -> Self {
+        Self {
+            state: [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0],
+            buffer: Vec::new(),
+            bits_taken: 0,
+        }
     }
 
     pub(super) fn left_chain(j: usize, s: &mut [u32; 5], block: [u32; 16]) {
@@ -79,38 +68,54 @@ impl RipeMd160 {
     }
 }
 
-impl ClassicHasher for RipeMd160 {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut input = bytes.to_vec();
-
-        md_strengthening_64_le(&mut input, 64);
-
-        let mut state: [u32; 5] = [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0];
-
-        for chunk in input.chunks_exact(64) {
-            let mut block = [0u32; 16];
+impl StatefulHasher for RipeMd160 {
+    fn update(&mut self, bytes: &[u8]) {
+        self.buffer.extend_from_slice(bytes);
+        let chunks = self.buffer.chunks_exact(64);
+        let rem = chunks.remainder().to_vec();
+        let mut block = [0u32; 16];
+        for chunk in chunks {
+            self.bits_taken += 512;
             utils::byte_formatting::fill_u32s_le(&mut block, &chunk);
-            Self::compress(&mut state, block)
+            Self::compress(&mut self.state, block)
+        }
+        self.buffer = rem;
+    }
+
+    fn finalize(mut self) -> Vec<u8> {
+        // MD Padding
+        self.bits_taken += self.buffer.len() as u64 * 8;
+        self.buffer.push(0x80);
+        while (self.buffer.len() % 64) != 56 {
+            self.buffer.push(0)
+        }
+        self.buffer.extend(self.bits_taken.to_le_bytes());
+
+        let chunks = self.buffer.chunks_exact(64);
+        let mut block = [0u32; 16];
+        for chunk in chunks {
+            self.bits_taken += 512;
+            utils::byte_formatting::fill_u32s_le(&mut block, &chunk);
+            Self::compress(&mut self.state, block)
         }
 
-        let mut out = Vec::with_capacity(20);
-        for word in state {
+        let mut out = Vec::with_capacity(16);
+        for word in self.state {
             out.extend(word.to_le_bytes())
         }
         out
     }
 
-    crate::hash_bytes_from_string! {}
+    crate::stateful_hash_helpers!();
 }
 
-crate::basic_hash_tests!(
-    test_160_1, RipeMd160::default(), "",
+crate::stateful_hash_tests!(
+    test_160_1, RipeMd160::init(), b"",
     "9c1185a5c5e9fc54612808977ee8f548b2258d31";
-    test_160_2, RipeMd160::default(), "a",
+    test_160_2, RipeMd160::init(), b"a",
     "0bdc9d2d256b3ee9daae347be6f4dc835a467ffe";
-    test_160_3, RipeMd160::default(), "abc",
+    test_160_3, RipeMd160::init(), b"abc",
     "8eb208f7e05d987a9b044a8e98c6b087f15a0bfc";
-    test_160_4, RipeMd160::default(), "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
+    test_160_4, RipeMd160::init(), b"12345678901234567890123456789012345678901234567890123456789012345678901234567890",
     "9b752e45573d4b39f4dbd3323cab82bf63326bfb";
-
 );

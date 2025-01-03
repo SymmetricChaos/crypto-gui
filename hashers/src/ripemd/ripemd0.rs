@@ -1,5 +1,4 @@
-use crate::traits::ClassicHasher;
-use utils::{byte_formatting::ByteFormat, padding::md_strengthening_64_le};
+use crate::traits::StatefulHasher;
 
 // Similiar but not identical to the strengthened versions
 pub const PERM: [usize; 48] = [
@@ -35,30 +34,20 @@ fn ff(j: usize, s: &mut [u32; 4], block: [u32; 16], k: u32) {
 // It is just convenient to distinguish it from the
 // selectable RIPEMD function
 pub struct RipeMd0 {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-}
-
-impl Default for RipeMd0 {
-    fn default() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-        }
-    }
+    state: [u32; 4],
+    buffer: Vec<u8>,
+    bits_taken: u64,
 }
 
 impl RipeMd0 {
     pub const K: [u32; 4] = [0x50a28be6, 0x5a827999, 0x6ed9eba1, 0x5c4dd124];
 
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
-    }
-
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
+    pub fn init() -> Self {
+        Self {
+            state: [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476],
+            buffer: Vec::new(),
+            bits_taken: 0,
+        }
     }
 
     pub fn compress(state: &mut [u32; 4], block: [u32; 16]) {
@@ -86,37 +75,78 @@ impl RipeMd0 {
     }
 }
 
-impl ClassicHasher for RipeMd0 {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut input = bytes.to_vec();
-
-        md_strengthening_64_le(&mut input, 64);
-
-        let mut state: [u32; 4] = [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476];
-
-        for chunk in input.chunks_exact(64) {
-            let mut block = [0u32; 16];
+impl StatefulHasher for RipeMd0 {
+    fn update(&mut self, bytes: &[u8]) {
+        self.buffer.extend_from_slice(bytes);
+        let chunks = self.buffer.chunks_exact(64);
+        let rem = chunks.remainder().to_vec();
+        let mut block = [0u32; 16];
+        for chunk in chunks {
+            self.bits_taken += 512;
             utils::byte_formatting::fill_u32s_le(&mut block, &chunk);
-            Self::compress(&mut state, block)
+            Self::compress(&mut self.state, block)
+        }
+        self.buffer = rem;
+    }
+
+    fn finalize(mut self) -> Vec<u8> {
+        // MD Padding
+        self.bits_taken += self.buffer.len() as u64 * 8;
+        self.buffer.push(0x80);
+        while (self.buffer.len() % 64) != 56 {
+            self.buffer.push(0)
+        }
+        self.buffer.extend(self.bits_taken.to_le_bytes());
+
+        let chunks = self.buffer.chunks_exact(64);
+        let mut block = [0u32; 16];
+        for chunk in chunks {
+            self.bits_taken += 512;
+            utils::byte_formatting::fill_u32s_le(&mut block, &chunk);
+            Self::compress(&mut self.state, block)
         }
 
         let mut out = Vec::with_capacity(16);
-        for word in state {
+        for word in self.state {
             out.extend(word.to_le_bytes())
         }
         out
     }
 
-    crate::hash_bytes_from_string! {}
+    crate::stateful_hash_helpers!();
 }
 
-crate::basic_hash_tests!(
-    test_0_1, RipeMd0::default(),"",
+// impl ClassicHasher for RipeMd0 {
+//     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
+//         let mut input = bytes.to_vec();
+
+//         md_strengthening_64_le(&mut input, 64);
+
+//         let mut state: [u32; 4] = [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476];
+
+//         for chunk in input.chunks_exact(64) {
+//             let mut block = [0u32; 16];
+//             utils::byte_formatting::fill_u32s_le(&mut block, &chunk);
+//             Self::compress(&mut state, block)
+//         }
+
+//         let mut out = Vec::with_capacity(16);
+//         for word in state {
+//             out.extend(word.to_le_bytes())
+//         }
+//         out
+//     }
+
+//     crate::hash_bytes_from_string! {}
+// }
+
+crate::stateful_hash_tests!(
+    test_0_1, RipeMd0::init(), b"",
     "9f73aa9b372a9dacfb86a6108852e2d9";
-    test_0_2, RipeMd0::default(), "a",
+    test_0_2, RipeMd0::init(), b"a",
     "486f74f790bc95ef7963cd2382b4bbc9";
-    test_0_3, RipeMd0::default(), "abc",
+    test_0_3, RipeMd0::init(), b"abc",
     "3f14bad4c2f9b0ea805e5485d3d6882d";
-    test_0_4, RipeMd0::default(), "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
+    test_0_4, RipeMd0::init(), b"12345678901234567890123456789012345678901234567890123456789012345678901234567890",
     "dfd6b45f60fe79bbbde87c6bfc6580a5";
 );
