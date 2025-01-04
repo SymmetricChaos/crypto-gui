@@ -1,6 +1,4 @@
-use utils::byte_formatting::ByteFormat;
-
-use crate::traits::ClassicHasher;
+use crate::traits::StatefulHasher;
 
 const R: u128 = 0xE1000000000000000000000000000000;
 
@@ -36,91 +34,77 @@ pub fn add_mul(acc: &mut u128, block: &[u8], h: u128) {
 
 #[derive(Debug, Clone)]
 pub struct Ghash {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-    pub h: u128,     // usually determined by a cipher
-    pub c: u128,     // constant term, usually determined by a cipher
-    pub ad_len: u64, // how many bytes of input to treat as the additional data
+    h: u128,     // usually determined by a cipher
+    c: u128,     // constant term, usually determined by a cipher
+    ad_len: u64, // how many bytes of input to treat as the additional data
+    accumulator: u128,
+    bits_taken: u64,
+    buffer: Vec<u8>,
 }
 
 impl Default for Ghash {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
             h: 0,
             c: 0,
             ad_len: 0,
+            accumulator: 0,
+            bits_taken: 0,
+            buffer: Vec::new(),
         }
     }
 }
 
 impl Ghash {
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
-    }
-
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
-    }
-
-    pub fn h(mut self, h: u128) -> Self {
-        self.h = h;
-        self
-    }
-
-    pub fn h_bytes(mut self, h: [u8; 16]) -> Self {
-        self.h = u128::from_be_bytes(h);
-        self
-    }
-
-    pub fn c(mut self, c: u128) -> Self {
-        self.c = c;
-        self
-    }
-
-    pub fn c_bytes(mut self, c: [u8; 16]) -> Self {
-        self.c = u128::from_be_bytes(c);
-        self
-    }
-
-    pub fn ad_len(mut self, ad_len: u64) -> Self {
-        self.ad_len = ad_len;
-        self
+    pub fn init(h: &[u8], c: &[u8], ad: &[u8]) -> Self {
+        let h = u128::from_be_bytes(h.try_into().expect("h must be exactly 16 bytes"));
+        let ad_len = (ad.len() as u64) * 8;
+        let mut accumulator = 0;
+        for block in ad.chunks(16) {
+            add_mul(&mut accumulator, block, h);
+        }
+        Self {
+            h,
+            c: u128::from_be_bytes(c.try_into().expect("c must be exactly 16 bytes")),
+            ad_len,
+            accumulator,
+            bits_taken: 0,
+            buffer: Vec::new(),
+        }
     }
 }
 
-impl ClassicHasher for Ghash {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut acc: u128 = 0;
-
-        // In an AEAD cipher the input would be treated as Addition Data and Ciphertext
-        let (ad, ctext) = bytes.split_at(self.ad_len as usize);
-
-        // Process each AD block
-        for block in ad.chunks(16) {
-            add_mul(&mut acc, block, self.h);
+impl StatefulHasher for Ghash {
+    fn update(&mut self, bytes: &[u8]) {
+        self.buffer.extend_from_slice(bytes);
+        let chunks = self.buffer.chunks_exact(16);
+        let rem = chunks.remainder().to_vec();
+        for chunk in chunks {
+            self.bits_taken += 128;
+            add_mul(&mut self.accumulator, chunk, self.h);
         }
+        self.buffer = rem;
+    }
 
-        // Process each CT block
-        for block in ctext.chunks(16) {
-            add_mul(&mut acc, block, self.h);
+    fn finalize(mut self) -> Vec<u8> {
+        // Final block
+        if !self.buffer.is_empty() {
+            self.bits_taken += (self.buffer.len() * 8) as u64;
+            add_mul(&mut self.accumulator, &self.buffer, self.h);
         }
 
         // The length of the AD and CT form the term x^1
-        acc ^= ((ad.len() * 8) as u128) << 64;
-        acc ^= (ctext.len() * 8) as u128;
-        acc = mult_gf(acc, self.h);
+        self.accumulator ^= (self.ad_len as u128) << 64;
+        self.accumulator ^= self.bits_taken as u128;
+        self.accumulator = mult_gf(self.accumulator, self.h);
 
         // XOR in the constant term, x^0, this is the key when used securely
-        acc ^= self.c;
+        self.accumulator ^= self.c;
 
-        acc.to_be_bytes().into()
+        self.accumulator.to_be_bytes().into()
     }
 
-    crate::hash_bytes_from_string! {}
+    crate::stateful_hash_helpers!();
 }
 
 #[cfg(test)]
@@ -137,24 +121,40 @@ mod ghash_tests {
     }
 }
 
-crate::basic_hash_tests!(
+crate::stateful_hash_tests!(
     test1,
-    Ghash::default().h(0x66e94bd4ef8a2c3b884cfa59ca342b2e),
-    "",
+    Ghash::init(
+        &[0x66, 0xe9, 0x4b, 0xd4, 0xef, 0x8a, 0x2c, 0x3b, 0x88, 0x4c, 0xfa, 0x59, 0xca, 0x34, 0x2b, 0x2e],
+        &[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+        &[]
+    ),
+    &[],
     "00000000000000000000000000000000";
 
     test2,
-    Ghash::default().input(ByteFormat::Hex).h(0x66e94bd4ef8a2c3b884cfa59ca342b2e),
-    "0388dace60b6a392f328c2b971b2fe78",
+    Ghash::init(
+        &[0x66, 0xe9, 0x4b, 0xd4, 0xef, 0x8a, 0x2c, 0x3b, 0x88, 0x4c, 0xfa, 0x59, 0xca, 0x34, 0x2b, 0x2e],
+        &[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+        &[]
+    ),
+    &[0x03, 0x88, 0xda, 0xce, 0x60, 0xb6, 0xa3, 0x92, 0xf3, 0x28, 0xc2, 0xb9, 0x71, 0xb2, 0xfe, 0x78],
     "f38cbb1ad69223dcc3457ae5b6b0f885";
 
     test3,
-    Ghash::default().input(ByteFormat::Hex).h(0xb83b533708bf535d0aa6e52980d53b78),
-    "42831ec2217774244b7221b784d0d49ce3aa212f2c02a4e035c17e2329aca12e21d514b25466931c7d8f6a5aac84aa051ba30b396a0aac973d58e091473f5985",
+    Ghash::init(
+        &[0xb8, 0x3b, 0x53, 0x37, 0x08, 0xbf, 0x53, 0x5d, 0x0a, 0xa6, 0xe5, 0x29, 0x80, 0xd5, 0x3b, 0x78],
+        &[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+        &[]
+    ),
+    &[0x42, 0x83, 0x1e, 0xc2, 0x21, 0x77, 0x74, 0x24, 0x4b, 0x72, 0x21, 0xb7, 0x84, 0xd0, 0xd4, 0x9c, 0xe3, 0xaa, 0x21, 0x2f, 0x2c, 0x02, 0xa4, 0xe0, 0x35, 0xc1, 0x7e, 0x23, 0x29, 0xac, 0xa1, 0x2e, 0x21, 0xd5, 0x14, 0xb2, 0x54, 0x66, 0x93, 0x1c, 0x7d, 0x8f, 0x6a, 0x5a, 0xac, 0x84, 0xaa, 0x05, 0x1b, 0xa3, 0x0b, 0x39, 0x6a, 0x0a, 0xac, 0x97, 0x3d, 0x58, 0xe0, 0x91, 0x47, 0x3f, 0x59, 0x85],
     "7f1b32b81b820d02614f8895ac1d4eac";
 
     test4,
-    Ghash::default().input(ByteFormat::Hex).h(0xb83b533708bf535d0aa6e52980d53b78).ad_len(20),
-    "feedfacedeadbeeffeedfacedeadbeefabaddad242831ec2217774244b7221b784d0d49ce3aa212f2c02a4e035c17e2329aca12e21d514b25466931c7d8f6a5aac84aa051ba30b396a0aac973d58e091",
+    Ghash::init(
+        &[0xb8, 0x3b, 0x53, 0x37, 0x08, 0xbf, 0x53, 0x5d, 0x0a, 0xa6, 0xe5, 0x29, 0x80, 0xd5, 0x3b, 0x78],
+        &[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+        &[0xfe, 0xed, 0xfa, 0xce, 0xde, 0xad, 0xbe, 0xef, 0xfe, 0xed, 0xfa, 0xce, 0xde, 0xad, 0xbe, 0xef, 0xab, 0xad, 0xda, 0xd2]
+    ),
+    &[0x42, 0x83, 0x1e, 0xc2, 0x21, 0x77, 0x74, 0x24, 0x4b, 0x72, 0x21, 0xb7, 0x84, 0xd0, 0xd4, 0x9c, 0xe3, 0xaa, 0x21, 0x2f, 0x2c, 0x02, 0xa4, 0xe0, 0x35, 0xc1, 0x7e, 0x23, 0x29, 0xac, 0xa1, 0x2e, 0x21, 0xd5, 0x14, 0xb2, 0x54, 0x66, 0x93, 0x1c, 0x7d, 0x8f, 0x6a, 0x5a, 0xac, 0x84, 0xaa, 0x05, 0x1b, 0xa3, 0x0b, 0x39, 0x6a, 0x0a, 0xac, 0x97, 0x3d, 0x58, 0xe0, 0x91],
     "698e57f70e6ecc7fd9463b7260a9ae5f";
 );

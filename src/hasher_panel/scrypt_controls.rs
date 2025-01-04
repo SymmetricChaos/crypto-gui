@@ -1,40 +1,56 @@
-use crate::ui_elements::UiElements;
-
 use super::HasherFrame;
+use crate::ui_elements::{validate_string_hex_bytes, UiElements};
 use egui::DragValue;
-use hashers::scrypt::Scrypt;
-use strum::IntoEnumIterator;
+use hashers::{scrypt::Scrypt, traits::StatefulHasher};
+use rand::{thread_rng, RngCore};
 use utils::byte_formatting::ByteFormat;
 
 pub struct ScryptFrame {
-    hasher: Scrypt,
+    input_format: ByteFormat,
+    output_format: ByteFormat,
     salt: Vec<u8>,
     salt_string: String,
-    salt_format: ByteFormat,
-    salt_valid: bool,
+    cost: u32,
+    blocksize_factor: u32,
+    parallelism: u32,
+    key_len: u32,
 }
 
 impl Default for ScryptFrame {
     fn default() -> Self {
         Self {
-            hasher: Default::default(),
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
             salt: Vec::new(),
             salt_string: String::new(),
-            salt_format: ByteFormat::Utf8,
-            salt_valid: true,
+            cost: 0,
+            blocksize_factor: 0,
+            parallelism: 0,
+            key_len: 0,
         }
     }
 }
 
 impl ScryptFrame {
-    fn set_salt(&mut self) {
-        if let Ok(salt) = self.salt_format.text_to_bytes(&self.salt_string) {
-            self.salt = salt;
-            self.salt_valid = true;
-        } else {
-            self.salt.clear();
-            self.salt_valid = false;
-        };
+    fn validate_salt(&mut self) {
+        validate_string_hex_bytes(&mut self.salt_string, None);
+        self.salt = ByteFormat::Hex
+            .text_to_bytes(&self.salt_string)
+            .expect("unable to parse salt input");
+    }
+
+    fn salt_control(&mut self, ui: &mut egui::Ui) {
+        ui.horizontal(|ui| {
+            if ui.control_string(&mut self.salt_string).lost_focus() {
+                self.validate_salt();
+            };
+            if ui.button("🎲").on_hover_text("randomize").clicked() {
+                let mut rng = thread_rng();
+                self.salt = vec![0; 32];
+                rng.fill_bytes(&mut self.salt);
+                self.salt_string = ByteFormat::Hex.byte_slice_to_text(&self.salt)
+            };
+        });
     }
 }
 
@@ -46,48 +62,45 @@ impl HasherFrame for ScryptFrame {
         );
         ui.add_space(8.0);
 
-        ui.byte_io_mode_hasher(
-            &mut self.hasher.input_format,
-            &mut self.hasher.output_format,
-        );
+        ui.byte_io_mode_hasher(&mut self.input_format, &mut self.output_format);
         ui.add_space(8.0);
 
         ui.subheading("Output Length (bytes)");
-        ui.add(DragValue::new(&mut self.hasher.key_len));
+        ui.add(DragValue::new(&mut self.key_len));
         ui.add_space(8.0);
-
         ui.subheading("Cost Factor");
-        ui.label("Adjust the number of iterations performed.");
-        ui.add(DragValue::new(&mut self.hasher.cost));
+        ui.label("Number of iterations performed.");
+        ui.add(DragValue::new(&mut self.cost));
         ui.add_space(4.0);
         ui.subheading("Block Size Factor");
-        ui.label("Adjust the amount of memory needed.");
-        ui.add(DragValue::new(&mut self.hasher.blocksize_factor));
+        ui.label("Amount of memory needed.");
+        ui.add(DragValue::new(&mut self.blocksize_factor));
         ui.add_space(4.0);
         ui.subheading("Parallelism");
-        ui.label("Adjust the number of independent threads that can be used.");
-        ui.add(DragValue::new(&mut self.hasher.parallelism));
+        ui.label("Nnumber of independent threads that can be used.");
+        ui.add(DragValue::new(&mut self.parallelism));
         ui.add_space(8.0);
 
         ui.subheading("Salt");
         ui.label("Arbitray additional data incorporated into the function.");
-        ui.horizontal(|ui| {
-            for variant in ByteFormat::iter() {
-                if ui
-                    .selectable_value(&mut self.salt_format, variant, variant.to_string())
-                    .changed()
-                {
-                    self.set_salt();
-                }
-            }
-        });
-        if ui.control_string(&mut self.salt_string).changed() {
-            self.set_salt();
-        }
-        if !self.salt_valid {
-            ui.error_text("SALT INVALID, CURRENTLY SET TO EMPTY");
-        }
+        self.salt_control(ui);
     }
 
-    crate::hash_string! {}
+    fn hash_string(&self, text: &str) -> Result<String, hashers::errors::HasherError> {
+        let bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
+
+        let h = Scrypt::init(
+            self.cost,
+            self.blocksize_factor,
+            self.parallelism,
+            self.key_len,
+            &self.salt,
+        )
+        .hash(&bytes);
+
+        Ok(self.output_format.byte_slice_to_text(&h))
+    }
 }

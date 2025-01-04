@@ -1,16 +1,9 @@
 // based on
 // https://datatracker.ietf.org/doc/html/rfc7914.html#section-3
 
-use std::usize;
-
+use crate::{hmac::HmacVariant, pbkdf2, traits::StatefulHasher};
 use itertools::Itertools;
-use utils::byte_formatting::{make_u32s_le, u32s_to_bytes_le, ByteFormat};
-
-use crate::{
-    hmac::HmacVariant,
-    pbkdf2,
-    traits::{ClassicHasher, StatefulHasher},
-};
+use utils::byte_formatting::{make_u32s_le, u32s_to_bytes_le};
 
 fn xor_blocks(a: &[u8], b: &[u8]) -> Vec<u8> {
     let mut out = Vec::new();
@@ -120,81 +113,51 @@ fn ro_mix(block: &mut [u8], n: usize) {
 }
 
 pub struct Scrypt {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-    pub salt: Vec<u8>,
-    pub cost: u32,             // N
-    pub blocksize_factor: u32, // r
-    pub parallelism: u32,      // p
-    pub key_len: u32,          // dkLen
+    salt: Vec<u8>,
+    cost: u32,             // N
+    blocksize_factor: u32, // r
+    parallelism: u32,      // p
+    key_len: u32,          // dkLen
+    buffer: Vec<u8>,
 }
 
-impl Default for Scrypt {
-    fn default() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-            salt: Vec::new(),
-            cost: 2,
-            blocksize_factor: 1,
-            parallelism: 1,
-            key_len: 64,
-        }
-    }
-}
+// impl Default for Scrypt {
+//     fn default() -> Self {
+//         Self {
+//             salt: Vec::new(),
+//             cost: 2,
+//             blocksize_factor: 1,
+//             parallelism: 1,
+//             key_len: 64,
+//         }
+//     }
+// }
 
 impl Scrypt {
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
-    }
-
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
-    }
-
-    pub fn salt(mut self, salt: &[u8]) -> Self {
-        self.salt = salt.to_vec();
-        self
-    }
-
-    pub fn cost(mut self, cost: u32) -> Self {
-        self.cost = cost;
-        self
-    }
-
-    pub fn blocksize_factor(mut self, blocksize_factor: u32) -> Self {
-        self.blocksize_factor = blocksize_factor;
-        self
-    }
-
-    pub fn parallelism(mut self, parallelism: u32) -> Self {
-        self.parallelism = parallelism;
-        self
-    }
-
-    pub fn key_len(mut self, key_len: u32) -> Self {
-        self.key_len = key_len;
-        self
-    }
-
-    pub fn direct(passphrase: &[u8], s: &[u8], n: u32, r: u32, p: u32, dklen: u32) -> Vec<u8> {
-        Scrypt {
-            input_format: ByteFormat::Hex,
-            output_format: ByteFormat::Hex,
-            salt: s.to_vec(),
-            cost: n,
-            blocksize_factor: r,
-            parallelism: p,
-            key_len: dklen,
+    pub fn init(
+        cost: u32,
+        blocksize_factor: u32,
+        parallelism: u32,
+        key_len: u32,
+        salt: &[u8],
+    ) -> Self {
+        Self {
+            salt: salt.to_vec(),
+            cost,
+            blocksize_factor,
+            parallelism,
+            key_len,
+            buffer: Vec::new(),
         }
-        .hash(passphrase)
     }
 }
 
-impl ClassicHasher for Scrypt {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
+impl StatefulHasher for Scrypt {
+    fn update(&mut self, bytes: &[u8]) {
+        self.buffer.extend_from_slice(bytes);
+    }
+
+    fn finalize(self) -> Vec<u8> {
         let blocksize = 128 * self.blocksize_factor;
         let mut p = pbkdf2::Pbkdf2::init(
             HmacVariant::Sha256,
@@ -202,17 +165,37 @@ impl ClassicHasher for Scrypt {
             blocksize * self.parallelism,
             &self.salt,
         )
-        .hash(bytes);
+        .hash(&self.buffer);
 
         for block in p.chunks_mut(blocksize as usize) {
             ro_mix(block, self.cost as usize)
         }
 
-        pbkdf2::Pbkdf2::init(HmacVariant::Sha256, 1, self.key_len, &p).hash(bytes)
+        pbkdf2::Pbkdf2::init(HmacVariant::Sha256, 1, self.key_len, &p).hash(&self.buffer)
     }
-
-    crate::hash_bytes_from_string! {}
+    crate::stateful_hash_helpers!();
 }
+
+// impl ClassicHasher for Scrypt {
+//     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
+//         let blocksize = 128 * self.blocksize_factor;
+//         let mut p = pbkdf2::Pbkdf2::init(
+//             HmacVariant::Sha256,
+//             1,
+//             blocksize * self.parallelism,
+//             &self.salt,
+//         )
+//         .hash(bytes);
+
+//         for block in p.chunks_mut(blocksize as usize) {
+//             ro_mix(block, self.cost as usize)
+//         }
+
+//         pbkdf2::Pbkdf2::init(HmacVariant::Sha256, 1, self.key_len, &p).hash(bytes)
+//     }
+
+//     crate::hash_bytes_from_string! {}
+// }
 
 #[cfg(test)]
 mod scrypt_tests {
@@ -298,7 +281,7 @@ mod scrypt_tests {
     }
 }
 
-crate::basic_hash_tests!(
-    test1, Scrypt::default().cost(16), "", "77d6576238657b203b19ca42c18a0497f16b4844e3074ae8dfdffa3fede21442fcd0069ded0948f8326a753a0fc81f17e8d3e0fb2e0d3628cf35e20c38d18906";
-    test2, Scrypt::default().salt(b"NaCl").cost(1024).blocksize_factor(8).parallelism(16), "password", "fdbabe1c9d3472007856e7190d01e9fe7c6ad7cbc8237830e77376634b3731622eaf30d92e22a3886ff109279d9830dac727afb94a83ee6d8360cbdfa2cc0640";
+crate::stateful_hash_tests!(
+    test1, Scrypt::init(16, 1, 1, 64, &[]), b"", "77d6576238657b203b19ca42c18a0497f16b4844e3074ae8dfdffa3fede21442fcd0069ded0948f8326a753a0fc81f17e8d3e0fb2e0d3628cf35e20c38d18906";
+    test2, Scrypt::init(1024, 8, 16, 64, b"NaCl"), b"password", "fdbabe1c9d3472007856e7190d01e9fe7c6ad7cbc8237830e77376634b3731622eaf30d92e22a3886ff109279d9830dac727afb94a83ee6d8360cbdfa2cc0640";
 );
