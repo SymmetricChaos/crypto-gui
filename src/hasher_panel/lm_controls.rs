@@ -5,13 +5,14 @@ use super::HasherFrame;
 use hashers::{
     auxiliary::des_functions::{expand_56_to_64, Des},
     lm::{Lm, LM_WORD},
+    traits::StatefulHasher,
 };
 use utils::{
     byte_formatting::ByteFormat, preset_alphabet::Alphabet, text_functions::filter_string,
 };
 
 pub struct LmFrame {
-    hasher: Lm,
+    output_format: ByteFormat,
     example_pass: String,
     example_pass_processed: String,
     h1: String,
@@ -22,7 +23,7 @@ pub struct LmFrame {
 impl Default for LmFrame {
     fn default() -> Self {
         Self {
-            hasher: Default::default(),
+            output_format: ByteFormat::Hex,
             example_pass: String::from("PassWord"),
             example_pass_processed: String::from("PASSWORD\0\0\0\0\0\0"),
             h1: String::from("e52cac67419a9a22"),
@@ -45,12 +46,8 @@ impl HasherFrame for LmFrame {
         ui.collapsing("Output Format", |ui| {
             ui.label("Output can be hexadecimal representing bytes or Base64 representing bytes.");
             ui.horizontal(|ui| {
-                ui.selectable_value(
-                    &mut self.hasher.output_format,
-                    ByteFormat::Hex,
-                    "Hexadecimal",
-                );
-                ui.selectable_value(&mut self.hasher.output_format, ByteFormat::Base64, "Base64");
+                ui.selectable_value(&mut self.output_format, ByteFormat::Hex, "Hexadecimal");
+                ui.selectable_value(&mut self.output_format, ByteFormat::Base64, "Base64");
             });
         });
 
@@ -78,12 +75,10 @@ impl HasherFrame for LmFrame {
 
             self.des.ksa(k1);
             self.h1 = self
-                .hasher
                 .output_format
                 .byte_slice_to_text(&self.des.encrypt_block(LM_WORD).to_be_bytes());
             self.des.ksa(k2);
             self.h2 = self
-                .hasher
                 .output_format
                 .byte_slice_to_text(&self.des.encrypt_block(LM_WORD).to_be_bytes());
         }
@@ -110,5 +105,20 @@ impl HasherFrame for LmFrame {
 
         ui.add_space(16.0);
     }
-    crate::hash_string! {}
+
+    fn hash_string(&self, text: &str) -> Result<String, hashers::errors::HasherError> {
+        let bytes = ByteFormat::Utf8
+            .text_to_bytes(text)
+            .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
+
+        if !bytes.is_ascii() {
+            return Err(hashers::errors::HasherError::general(
+                "LM only accepts ASCII characters",
+            ));
+        }
+
+        let h = Lm::init().hash(&bytes);
+
+        Ok(self.output_format.byte_slice_to_text(&h))
+    }
 }
