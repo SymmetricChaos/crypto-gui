@@ -3,136 +3,148 @@
 // specs
 // https://github.com/P-H-C/phc-winner-argon2/blob/master/argon2-specs.pdf
 
-use super::consts::{
-    Mode, Version, BLOCK_BYTES, MAX_KEY, MAX_PAR, MAX_PASS, MAX_SALT, MIN_SALT, SYNC_POINTS,
-};
+use super::consts::{Mode, Version, BLOCK_BYTES, MAX_PAR, MIN_SALT, SYNC_POINTS};
 use crate::{
     argon2::block::{argon2i_addr, compress, Block},
     blake::{Blake2b, Blake2bLong},
-    errors::HasherError,
-    traits::{ClassicHasher, StatefulHasher},
+    traits::StatefulHasher,
 };
 use num::traits::ToBytes;
-use utils::byte_formatting::ByteFormat;
 
 #[derive(Debug, Clone)]
 pub struct Argon2 {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-    salt: Vec<u8>,
-    key: Vec<u8>,
-    associated_data: Vec<u8>,
-    tag_len: u32,         // tag length in bytes
-    par_cost: u32,        // this will always be 1 unless I figure out something clever
-    mem_cost: u32,        // memory requirement in kibibytes (1024 bytes)
-    iterations: u32,      // number of iterations run
-    pub version: Version, // currently 0x13
-    pub mode: Mode,       // 0 for Argon2d, 1 for Argon2i, 2 for Argon2id
+    salt: Vec<u8>,    // salt
+    key: Vec<u8>,     // key
+    ad: Vec<u8>,      // associated data
+    tag_len: u32,     // tag length in bytes
+    par_cost: u32,    // this will always be 1 unless I figure out something clever
+    mem_cost: u32,    // memory requirement in kibibytes (1024 bytes)
+    iterations: u32,  // number of iterations run
+    version: Version, // currently 0x13
+    mode: Mode,       // 0 for Argon2d, 1 for Argon2i, 2 for Argon2id
+    buffer: Vec<u8>,
 }
 
 impl Default for Argon2 {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
             salt: vec![0, 0, 0, 0],
             key: Default::default(),
-            associated_data: Default::default(),
+            ad: Default::default(),
             tag_len: 32,           // minimum
             par_cost: 1,           // minimum
             mem_cost: 8,           // minimum
             iterations: 1,         // minimum
             version: Version::V13, // current corrected version
             mode: Mode::ID,        // default to Argon2id (recommended)
+            buffer: Vec::new(),
         }
     }
 }
 
 impl Argon2 {
-    pub fn argon2i() -> Self {
-        Argon2::default().with_mode(Mode::I)
-    }
-
-    pub fn argon2d() -> Self {
-        Argon2::default().with_mode(Mode::D)
-    }
-
-    pub fn argon2id() -> Self {
-        Argon2::default().with_mode(Mode::ID)
-    }
-
-    pub fn with_tag_len(mut self, tag_len: u32) -> Self {
-        assert!(tag_len > 1);
-        self.tag_len = tag_len;
-        self
-    }
-
-    pub fn with_mode(mut self, mode: Mode) -> Self {
-        self.mode = mode;
-        self
-    }
-
-    pub fn with_salt<T: AsRef<[u8]>>(mut self, salt: T) -> Self {
+    pub fn init(
+        tag_len: u32,
+        par_cost: u32,
+        mem_cost: u32,
+        iterations: u32,
+        version: Version,
+        mode: Mode,
+        salt: &[u8],
+        key: &[u8],
+        ad: &[u8],
+    ) -> Self {
+        assert!(tag_len >= 4, "tag_len must be at least 4 bytes");
         assert!(
-            salt.as_ref().len() >= MIN_SALT,
+            salt.len() >= MIN_SALT,
             "salt length must be at least 8 bytes"
         );
-        assert!(
-            salt.as_ref().len() <= MAX_SALT,
-            "salt length cannot be more than 2^32 bytes"
-        );
-        self.salt = salt.as_ref().to_vec();
-        self
-    }
-
-    pub fn with_key<T: AsRef<[u8]>>(mut self, key: T) -> Self {
-        assert!(
-            key.as_ref().len() <= MAX_KEY,
-            "key length cannot be more than 2^32 bytes"
-        );
-        self.key = key.as_ref().to_vec();
-        self
-    }
-
-    pub fn with_ad<T: AsRef<[u8]>>(mut self, ad: T) -> Self {
-        assert!(
-            ad.as_ref().len() <= MAX_KEY,
-            "associated data length cannot be more than 2^32 bytes"
-        );
-        self.associated_data = ad.as_ref().to_vec();
-        self
-    }
-
-    pub fn with_iterations(mut self, iterations: u32) -> Self {
         assert!(iterations != 0, "iterations cannot be 0");
-        self.iterations = iterations;
-        self
+        assert!(par_cost > 0, "parallelism cannot be 0");
+        assert!(par_cost < MAX_PAR, "parallelism must be less than 2^24");
+        assert!(salt.len() <= u32::MAX as usize);
+        assert!(key.len() <= u32::MAX as usize);
+        Self {
+            salt: salt.to_vec(),
+            key: key.to_vec(),
+            ad: ad.to_vec(),
+            tag_len,
+            par_cost,
+            mem_cost: std::cmp::max(mem_cost, 8 * par_cost),
+            iterations,
+            version,
+            mode,
+            buffer: Vec::new(),
+        }
     }
 
-    pub fn with_par_cost(mut self, par_cost: u32) -> Self {
-        assert!(self.par_cost > 0, "parallelism cannot be 0");
-        assert!(
-            self.par_cost < MAX_PAR,
-            "parallelism must be less than 2^24"
-        );
-        self.par_cost = par_cost;
-        self.mem_cost = std::cmp::max(self.mem_cost, 8 * self.par_cost); // increase mem_cost to the minimum allowed value if required
-        self
+    // Initialize Argon2i v1.3
+    pub fn init_argon2i(
+        tag_len: u32,
+        par_cost: u32,
+        mem_cost: u32,
+        iterations: u32,
+        salt: &[u8],
+        key: &[u8],
+        ad: &[u8],
+    ) -> Self {
+        Self::init(
+            tag_len,
+            par_cost,
+            mem_cost,
+            iterations,
+            Version::V13,
+            Mode::I,
+            salt,
+            key,
+            ad,
+        )
     }
 
-    pub fn with_mem_cost(mut self, mem_cost: u32) -> Self {
-        self.mem_cost = std::cmp::max(mem_cost, 8 * self.par_cost);
-        self
+    // Initialize Argon2d v1.3
+    pub fn init_argon2d(
+        tag_len: u32,
+        par_cost: u32,
+        mem_cost: u32,
+        iterations: u32,
+        salt: &[u8],
+        key: &[u8],
+        ad: &[u8],
+    ) -> Self {
+        Self::init(
+            tag_len,
+            par_cost,
+            mem_cost,
+            iterations,
+            Version::V13,
+            Mode::D,
+            salt,
+            key,
+            ad,
+        )
     }
 
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
-    }
-
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
+    // Initialize Argon2id v1.3
+    pub fn init_argon2id(
+        tag_len: u32,
+        par_cost: u32,
+        mem_cost: u32,
+        iterations: u32,
+        salt: &[u8],
+        key: &[u8],
+        ad: &[u8],
+    ) -> Self {
+        Self::init(
+            tag_len,
+            par_cost,
+            mem_cost,
+            iterations,
+            Version::V13,
+            Mode::ID,
+            salt,
+            key,
+            ad,
+        )
     }
 
     pub fn initial_hash(&self, password: &[u8]) -> Vec<u8> {
@@ -150,8 +162,8 @@ impl Argon2 {
         h.update(&self.salt);
         h.update(&(self.key.len() as u32).to_le_bytes());
         h.update(&self.key);
-        h.update(&(self.associated_data.len() as u32).to_le_bytes());
-        h.update(&self.associated_data);
+        h.update(&(self.ad.len() as u32).to_le_bytes());
+        h.update(&self.ad);
 
         h.finalize()
     }
@@ -181,17 +193,16 @@ impl Argon2 {
     }
 }
 
-impl ClassicHasher for Argon2 {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        assert!(self.tag_len >= 4, "tag_len must be at least 4 bytes");
+impl StatefulHasher for Argon2 {
+    fn update(&mut self, bytes: &[u8]) {
+        self.buffer.extend_from_slice(bytes);
+    }
 
-        assert!(
-            bytes.len() <= MAX_PASS,
-            "password length cannot be more than 2^32 bytes"
-        );
+    fn finalize(self) -> Vec<u8> {
+        assert!(self.buffer.len() <= u32::MAX as usize);
 
         // Initialization block
-        let h0 = self.initial_hash(bytes);
+        let h0 = self.initial_hash(&self.buffer);
 
         println!("{:02x?}", h0);
 
@@ -387,29 +398,5 @@ impl ClassicHasher for Argon2 {
         Blake2bLong::init_hash(self.tag_len as u64).hash(&c.to_be_bytes())
     }
 
-    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        if self.mem_cost < 8 * self.par_cost {
-            return Err(HasherError::general(
-                "memory must be at least 8 times parallelism",
-            ));
-        }
-
-        if self.tag_len < 4 {
-            return Err(HasherError::general("tag_len must be at least 4 bytes"));
-        }
-
-        let mut bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| HasherError::general("byte format error"))?;
-
-        if bytes.len() > MAX_PASS {
-            return Err(HasherError::general(
-                "password length cannot be more than 2^32 bytes",
-            ));
-        }
-
-        let out = self.hash(&mut bytes);
-        Ok(self.output_format.byte_slice_to_text(&out))
-    }
+    crate::stateful_hash_helpers!();
 }

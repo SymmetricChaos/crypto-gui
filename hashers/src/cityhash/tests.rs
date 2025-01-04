@@ -59,7 +59,6 @@ mod cityhash_tests {
         use cityhash128::CityHash128;
         use cityhash32::CityHash32;
         use cityhash64::CityHash64;
-        // let hasher128 = CityHash128::default();
         // An off by one error means that only 299 of the tests are used in the reference tests
         // Oddly I can pass the first 299 but fail on the 300th
         for i in 0..NTESTS {

@@ -1,5 +1,3 @@
-use crate::traits::ClassicHasher;
-
 // https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-argon2-01#section-4
 
 // =======================================
@@ -122,11 +120,14 @@ use crate::traits::ClassicHasher;
 //      c8 de 6b 01 6d d3 88 d2
 //      99 52 a4 c4 67 2b 6c e8
 
-crate::basic_hash_tests!(
-    test_argon2d, crate::argon2::argon2::Argon2::argon2d().input(utils::byte_formatting::ByteFormat::Hex).with_iterations(3).with_par_cost(4).with_mem_cost(32).with_tag_len(32).with_salt([0x02; 16]).with_key([0x03; 8]).with_ad([0x04; 12]),
-    "0101010101010101010101010101010101010101010101010101010101010101",
+use super::argon2::Argon2;
+use crate::traits::StatefulHasher;
+
+crate::stateful_hash_tests!(
+    test_argon2d, Argon2::init_argon2d(32, 4, 32, 3, &[0x02; 16], &[0x03; 8], &[0x04; 12]),
+    &[0x01; 32],
     "512b391b6f1162975371d30919734294f868e3be3984f3c1a13a4db9fabe4acb";
-    test_argon2i, crate::argon2::argon2::Argon2::argon2i().input(utils::byte_formatting::ByteFormat::Hex).with_iterations(3).with_par_cost(4).with_mem_cost(32).with_tag_len(32).with_salt([0x02; 16]).with_key([0x03; 8]).with_ad([0x04; 12]),
-    "0101010101010101010101010101010101010101010101010101010101010101",
+    test_argon2i, Argon2::init_argon2i(32, 4, 32, 3, &[0x02; 16], &[0x03; 8], &[0x04; 12]),
+    &[0x01; 32],
     "c814d9d1dc7f37aa13f0d77f2494bda1c8de6b016dd388d29952a4c4672b6ce8";
 );

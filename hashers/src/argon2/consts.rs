@@ -3,10 +3,7 @@ pub(crate) const BLOCK_WORDS: usize = BLOCK_BYTES / 8;
 
 pub(crate) const MAX_PAR: u32 = 1 << 24;
 
-pub(crate) const MAX_PASS: usize = 0xffffffff;
 pub(crate) const MIN_SALT: usize = 0x08;
-pub(crate) const MAX_SALT: usize = 0xffffffff;
-pub(crate) const MAX_KEY: usize = 0xffffffff;
 
 // Number of synchronization points between lanes per pass
 // TODO: Is this S, the number of slices, in the spec?
