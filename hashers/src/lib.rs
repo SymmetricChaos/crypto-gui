@@ -40,6 +40,7 @@ pub mod sm3;
 pub mod tiger;
 pub mod traits;
 pub mod vsh;
+pub mod poseidon;
 
 // Template
 // use utils::byte_formatting::ByteFormat;

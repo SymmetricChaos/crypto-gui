@@ -278,6 +278,20 @@
       "Crytographic"
     ]
   },
+  "Poseidon": {
+    "Description": "Poseidon is a hasher created using a sponge function using the Hades design strategy.",
+    "Authors": "Lorenzo Grassi, Dmitry Khovratovich, Christian Rechberger, Arnab Roy, and Markus Schofnegger",
+    "Publication": "2019",
+    "Hash Length": [
+      80,
+      128,
+      256
+    ],
+    "Traits": [
+      "Sponge",
+      "Crytographic"
+    ]
+  },
   "RadioGatún": {
     "Description": "The RadioGatún hash function was created by the same team that would eventually develop Keccak used a heavily revised version of RadioGatún. The output length is variable, here limited to 512 bits. It is authors advise against directly using it as a cryptographic hash function.",
     "Authors": "Bertoni, Daemen, Peeters, Van Assche",

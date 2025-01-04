@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod cityhash_tests {
     use super::super::*;
-    use crate::traits::ClassicHasher;
+    use crate::traits::StatefulHasher;
 
     use helpers::P0;
     use rand::{thread_rng, Rng, RngCore};
@@ -12,7 +12,6 @@ mod cityhash_tests {
     fn randomly_test_equality_with_ref() {
         use cityhash32::CityHash32;
         let mut rng = thread_rng();
-        let hasher32 = CityHash32::default();
 
         for _ in 0..2_000_000 {
             let l: usize = rng.gen_range(0..400);
@@ -22,7 +21,7 @@ mod cityhash_tests {
             // println!("{:02x?}", data);
 
             let h0: u32 = cityhasher::hash(&data);
-            let h1: u32 = u32::from_be_bytes(hasher32.hash(&data).try_into().unwrap());
+            let h1: u32 = u32::from_be_bytes(CityHash32::init().hash(&data).try_into().unwrap());
 
             if h0 != h1 {
                 println!(
@@ -60,36 +59,25 @@ mod cityhash_tests {
         use cityhash128::CityHash128;
         use cityhash32::CityHash32;
         use cityhash64::CityHash64;
-        let hasher32 = CityHash32::default();
-        let hasher64 = CityHash64::default();
-        let hasher64s = CityHash64::default().with_seed(1234567);
-        let hasher64ss = CityHash64::default().with_seeds(1234567, P0);
-        let hasher128 = CityHash128::default();
-        // For some reason although the tests provide 300 outputs only 299 are used in the original tests
-        for i in 0..NTESTS - 1 {
+        // let hasher128 = CityHash128::default();
+        // An off by one error means that only 299 of the tests are used in the reference tests
+        // Oddly I can pass the first 299 but fail on the 300th
+        for i in 0..NTESTS {
             let s = i * i;
             let e = s + i;
             let input = &data[s..e];
 
-            let output_word = u32::from_be_bytes(hasher32.hash(input).try_into().unwrap());
+            let output_word =
+                u32::from_be_bytes(CityHash32::init().hash(input).try_into().unwrap());
             if output_word != TEST_DATA[i].15 {
-                let err = format!(
+                panic!("{}", format!(
                     "CityHash32 first failure occured at\ninput #{i}: {:02x?}\noutput:  {:08x}\ncorrect: {:08x}",
                     input, output_word, TEST_DATA[i].15
-                );
-                panic!("{}", err)
+                ));
             }
 
-            let output_word: u32 = cityhasher::hash(input);
-            if output_word != TEST_DATA[i].15 {
-                let err = format!(
-                    "CityHash32 first failure occured at\ninput #{i}: {:02x?}\noutput:  {:08x}\ncorrect: {:08x}",
-                    input, output_word, TEST_DATA[i].15
-                );
-                panic!("{}", err)
-            }
-
-            let output_word = u64::from_be_bytes(hasher64.hash(input).try_into().unwrap());
+            let output_word =
+                u64::from_be_bytes(CityHash64::init(None).hash(input).try_into().unwrap());
             if output_word != TEST_DATA[i].0 {
                 let err = format!(
                     "CityHash64 first failure occured at\ninput #{i}: {:02x?}\noutput:  {:08x}\ncorrect: {:08x}",
@@ -98,7 +86,12 @@ mod cityhash_tests {
                 panic!("{}", err)
             }
 
-            let output_word = u64::from_be_bytes(hasher64s.hash(input).try_into().unwrap());
+            let output_word = u64::from_be_bytes(
+                CityHash64::init_with_seed(1234567)
+                    .hash(input)
+                    .try_into()
+                    .unwrap(),
+            );
             if output_word != TEST_DATA[i].1 {
                 let err = format!(
                     "CityHash64 (seeded) failure occured at\ninput #{i}: {:02x?}\noutput:  {:08x}\ncorrect: {:08x}",
@@ -107,7 +100,12 @@ mod cityhash_tests {
                 panic!("{}", err)
             }
 
-            let output_word = u64::from_be_bytes(hasher64ss.hash(input).try_into().unwrap());
+            let output_word = u64::from_be_bytes(
+                CityHash64::init(Some([1234567, P0]))
+                    .hash(input)
+                    .try_into()
+                    .unwrap(),
+            );
             if output_word != TEST_DATA[i].2 {
                 let err = format!(
                     "CityHash64 (multiple seeds) failure occured at\ninput #{i}: {:02x?}\noutput:  {:08x}\ncorrect: {:08x}",
@@ -116,7 +114,9 @@ mod cityhash_tests {
                 panic!("{}", err)
             }
 
-            let output_word = utils::byte_formatting::make_u64s_be::<2>(&hasher128.hash(input));
+            let output_word = utils::byte_formatting::make_u64s_be::<2>(
+                &CityHash128::init_unseeded().hash(input),
+            );
             if output_word != [TEST_DATA[i].3, TEST_DATA[i].4] {
                 let err = format!(
                     "CityHash128 failure occured at\ninput #{i}: {:02x?}\noutput:  {:08x?} {:08x?}\ncorrect: {:08x?} {:08x?}",

@@ -1,47 +1,33 @@
 // based on: https://github.com/creachadair/cityhash/blob/v0.1.1/cityhash.go
 
-use crate::traits::ClassicHasher;
-use utils::byte_formatting::ByteFormat;
-
 use super::helpers::{hash32_0_to_4, hash32_13_to_24, hash32_25, hash32_5_to_12};
+use crate::traits::StatefulHasher;
 
 pub struct CityHash32 {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-}
-
-impl Default for CityHash32 {
-    fn default() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-        }
-    }
+    buffer: Vec<u8>,
 }
 
 impl CityHash32 {
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
-    }
-
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
+    pub fn init() -> Self {
+        Self { buffer: Vec::new() }
     }
 }
 
-impl ClassicHasher for CityHash32 {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        match bytes.len() {
-            0..=4 => hash32_0_to_4(bytes),
-            5..=12 => hash32_5_to_12(bytes),
-            13..=24 => hash32_13_to_24(bytes),
-            _ => hash32_25(bytes),
+impl StatefulHasher for CityHash32 {
+    fn update(&mut self, bytes: &[u8]) {
+        self.buffer.extend_from_slice(bytes);
+    }
+
+    fn finalize(self) -> Vec<u8> {
+        match self.buffer.len() {
+            0..=4 => hash32_0_to_4(&self.buffer),
+            5..=12 => hash32_5_to_12(&self.buffer),
+            13..=24 => hash32_13_to_24(&self.buffer),
+            _ => hash32_25(&self.buffer),
         }
         .to_be_bytes()
         .to_vec()
     }
 
-    crate::hash_bytes_from_string! {}
+    crate::stateful_hash_helpers!();
 }
