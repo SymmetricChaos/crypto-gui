@@ -1,17 +1,28 @@
-use crate::ui_elements::UiElements;
-
 use super::HasherFrame;
-use hashers::fnv::{Fnv, FnvVariant};
+use crate::ui_elements::UiElements;
+use hashers::{
+    fnv::{Fnv1024, Fnv128, Fnv256, Fnv32, Fnv512, Fnv64, FnvVariant},
+    traits::StatefulHasher,
+};
 use strum::IntoEnumIterator;
+use utils::byte_formatting::ByteFormat;
 
 pub struct FnvFrame {
-    hasher: Fnv,
+    input_format: ByteFormat,
+    output_format: ByteFormat,
+    variant: FnvVariant,
+    alternate: bool,
+    zero_basis: bool,
 }
 
 impl Default for FnvFrame {
     fn default() -> Self {
         Self {
-            hasher: Default::default(),
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
+            variant: FnvVariant::L256,
+            alternate: true,
+            zero_basis: false,
         }
     }
 }
@@ -24,37 +35,31 @@ impl HasherFrame for FnvFrame {
         );
         ui.add_space(8.0);
 
-        ui.byte_io_mode_hasher(
-            &mut self.hasher.input_format,
-            &mut self.hasher.output_format,
-        );
+        ui.byte_io_mode_hasher(&mut self.input_format, &mut self.output_format);
 
         ui.add_space(16.0);
         ui.horizontal(|ui| {
             for variant in FnvVariant::iter() {
-                ui.selectable_value(&mut self.hasher.variant, variant, variant.to_string());
+                ui.selectable_value(&mut self.variant, variant, variant.to_string());
             }
         });
 
         ui.add_space(16.0);
         ui.label("In the original FNV-1 algorithm the multiplication was performed before the XOR but better results were found when using the XOR first. The algorithms with this alternate order are known as FNV-1a.");
-        ui.checkbox(
-            &mut self.hasher.alternate,
-            "Use Alternate Mode (recommended)",
-        );
+        ui.checkbox(&mut self.alternate, "Use Alternate Mode (recommended)");
 
-        ui.add_space(16.0);
+        ui.add_space(8.0);
         ui.label("Zero basis mode initializes the hash with all zeroes and when used this way the hasher is called FNV-0. The usual initialization value for FNV-1 and (FNV-1a) was created by hashing the ASCII string \"chongo <Landon Curt Noll> /\\../\\\" in zero basis mode.");
         ui.checkbox(
-            &mut self.hasher.zero_basis,
+            &mut self.zero_basis,
             "Use Zero Basis Mode (not recommended)",
         );
 
         ui.add_space(16.0);
         ui.subheading("Hash Size");
-        ui.label("The FNV primes are of a specific form, close to a power of 256, which the developers found to be highly effective at dispersing the bits of the input throughout the state. Four FNV variants are provided here but the original FNV paper also defines constants for 512 and 1024 versions of the algorithm. However these run more slowly, take more space to store, and offer no practical increase in collision resistance.");
+        ui.label("The FNV primes are of a specific form, close to a power of 256, which the developers found to be highly effective at dispersing the bits of the input throughout the state.");
         ui.add_space(4.0);
-        match self.hasher.variant {
+        match self.variant {
             FnvVariant::L32 => ui.mono_strong("32-bit FNV prime: 16777619\n Initial Value: 2166136261"),
             FnvVariant::L64 => ui.mono_strong("64-bit FNV prime: 1099511628211\n Initial Value: 14695981039346656037"),
             FnvVariant::L128 => ui.mono_strong("128-bit FNV prime: 309485009821345068724781371\n Initial Value: 144066263297769815596495629667062367629"),
@@ -71,5 +76,22 @@ impl HasherFrame for FnvFrame {
 
         ui.add_space(16.0);
     }
-    crate::hash_string! {}
+
+    fn hash_string(&self, text: &str) -> Result<String, hashers::errors::HasherError> {
+        let bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
+
+        let h = match self.variant {
+            FnvVariant::L32 => Fnv32::init(self.alternate, self.zero_basis).hash(&bytes),
+            FnvVariant::L64 => Fnv64::init(self.alternate, self.zero_basis).hash(&bytes),
+            FnvVariant::L128 => Fnv128::init(self.alternate, self.zero_basis).hash(&bytes),
+            FnvVariant::L256 => Fnv256::init(self.alternate, self.zero_basis).hash(&bytes),
+            FnvVariant::L512 => Fnv512::init(self.alternate, self.zero_basis).hash(&bytes),
+            FnvVariant::L1024 => Fnv1024::init(self.alternate, self.zero_basis).hash(&bytes),
+        };
+
+        Ok(self.output_format.byte_slice_to_text(&h))
+    }
 }

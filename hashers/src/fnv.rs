@@ -1,10 +1,9 @@
-use crate::traits::ClassicHasher;
+use crate::traits::StatefulHasher;
 use crypto_bigint::{ArrayEncoding, U1024, U256, U512};
 use std::fmt::Display;
 // use lazy_static::lazy_static;
 use num::FromPrimitive;
 use strum::EnumIter;
-use utils::byte_formatting::ByteFormat;
 
 // lazy_static! {
 //     pub static ref P32: BigUint = BigUint::from_str("16777619").unwrap();
@@ -44,187 +43,120 @@ impl Display for FnvVariant {
     }
 }
 
-macro_rules! hash_bytes {
+macro_rules! fnv_prim_int {
     ($name: ident, $type: ty, $prime: expr, $offset: expr) => {
-        pub fn $name(&self, bytes: &[u8]) -> Vec<u8> {
-            let mut state = match self.zero_basis {
-                true => 0,
-                false => $offset,
-            };
-            for byte in bytes {
-                if self.alternate {
-                    state ^= <$type>::from_u8(*byte).unwrap();
-                    state = state.wrapping_mul($prime)
-                } else {
-                    state = state.wrapping_mul($prime);
-                    state ^= <$type>::from_u8(*byte).unwrap();
+        pub struct $name {
+            alternate: bool,
+            state: $type,
+        }
+
+        impl $name {
+            pub fn init(alternate: bool, zero_basis: bool) -> Self {
+                let state = if zero_basis { 0 } else { $offset };
+                Self { alternate, state }
+            }
+
+            pub fn init_default() -> Self {
+                Self {
+                    alternate: true,
+                    state: $offset,
                 }
             }
-            state.to_be_bytes().to_vec()
+        }
+
+        impl StatefulHasher for $name {
+            fn update(&mut self, bytes: &[u8]) {
+                for byte in bytes {
+                    if self.alternate {
+                        self.state ^= <$type>::from_u8(*byte).unwrap();
+                        self.state = self.state.wrapping_mul($prime)
+                    } else {
+                        self.state = self.state.wrapping_mul($prime);
+                        self.state ^= <$type>::from_u8(*byte).unwrap();
+                    }
+                }
+            }
+
+            fn finalize(self) -> Vec<u8> {
+                self.state.to_be_bytes().to_vec()
+            }
+
+            crate::stateful_hash_helpers!();
         }
     };
 }
 
-macro_rules! hash_bytes_crypto_bigint {
+macro_rules! fnv_big_int {
     ($name: ident, $type: ty, $prime: expr, $offset: expr) => {
-        pub fn $name(&self, bytes: &[u8]) -> Vec<u8> {
-            let mut state = match self.zero_basis {
-                true => <$type>::ZERO,
-                false => $offset,
-            };
-            for byte in bytes {
-                if self.alternate {
-                    state ^= <$type>::from_u8(*byte);
-                    state = state.wrapping_mul(&$prime)
-                } else {
-                    state = state.wrapping_mul(&$prime);
-                    state ^= <$type>::from_u8(*byte);
+        pub struct $name {
+            alternate: bool,
+            state: $type,
+        }
+
+        impl $name {
+            pub fn init(alternate: bool, zero_basis: bool) -> Self {
+                let state = if zero_basis { <$type>::ZERO } else { $offset };
+                Self { alternate, state }
+            }
+
+            pub fn init_default() -> Self {
+                Self {
+                    alternate: true,
+                    state: $offset,
                 }
             }
-            state.to_be_byte_array().to_vec()
+        }
+
+        impl StatefulHasher for $name {
+            fn update(&mut self, bytes: &[u8]) {
+                for byte in bytes {
+                    if self.alternate {
+                        self.state ^= <$type>::from_u8(*byte);
+                        self.state = self.state.wrapping_mul(&$prime)
+                    } else {
+                        self.state = self.state.wrapping_mul(&$prime);
+                        self.state ^= <$type>::from_u8(*byte);
+                    }
+                }
+            }
+
+            fn finalize(self) -> Vec<u8> {
+                self.state.to_be_byte_array().to_vec()
+            }
+
+            crate::stateful_hash_helpers!();
         }
     };
 }
 
-pub struct Fnv {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-    pub variant: FnvVariant,
-    pub alternate: bool,
-    pub zero_basis: bool,
-}
-
-impl Default for Fnv {
-    fn default() -> Self {
-        Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
-            variant: FnvVariant::L64,
-            alternate: true,
-            zero_basis: false,
-        }
-    }
-}
-
-impl Fnv {
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
-    }
-
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
-    }
-
-    pub fn size(mut self, size: FnvVariant) -> Self {
-        self.variant = size;
-        self
-    }
-
-    pub fn alternate(mut self, alternate: bool) -> Self {
-        self.alternate = alternate;
-        self
-    }
-
-    pub fn zero_basis(mut self, zero_basis: bool) -> Self {
-        self.zero_basis = zero_basis;
-        self
-    }
-
-    hash_bytes!(hash_bytes_32, u32, 16777619_u32, 2166136261_u32);
-    hash_bytes!(
-        hash_bytes_64,
-        u64,
-        1099511628211_u64,
-        14695981039346656037_u64
-    );
-    hash_bytes!(
-        hash_bytes_128,
-        u128,
-        309485009821345068724781371_u128,
-        144066263297769815596495629667062367629_u128
-    );
-    hash_bytes_crypto_bigint!(
-        hash_bytes_256,
-        U256,
-        U256::from_be_hex("0000000000000000000001000000000000000000000000000000000000000163"),
-        U256::from_be_hex("DD268DBCAAC550362D98C384C4E576CCC8B1536847B6BBB31023B4C8CAEE0535")
-    );
-
-    hash_bytes_crypto_bigint!(
-        hash_bytes_512,
-        U512,
-        U512::from_be_hex("00000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000157"),
-        U512::from_be_hex("b86db0b1171f4416dca1e50f309990acac87d059c90000000000000000000d21e948f68a34c192f62ea79bc942dbe7ce182036415f56e34bac982aac4afe9fd9")
-    );
-
-    hash_bytes_crypto_bigint!(
-        hash_bytes_1024,
-        U1024,
+fnv_prim_int!(Fnv32, u32, 16777619_u32, 2166136261_u32);
+fnv_prim_int!(Fnv64, u64, 1099511628211_u64, 14695981039346656037_u64);
+fnv_prim_int!(
+    Fnv128,
+    u128,
+    309485009821345068724781371_u128,
+    144066263297769815596495629667062367629_u128
+);
+fnv_big_int!(
+    Fnv256,
+    U256,
+    U256::from_be_hex("0000000000000000000001000000000000000000000000000000000000000163"),
+    U256::from_be_hex("DD268DBCAAC550362D98C384C4E576CCC8B1536847B6BBB31023B4C8CAEE0535")
+);
+fnv_big_int!(
+    Fnv512,
+    U512,
+    U512::from_be_hex("00000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000157"),
+    U512::from_be_hex("b86db0b1171f4416dca1e50f309990acac87d059c90000000000000000000d21e948f68a34c192f62ea79bc942dbe7ce182036415f56e34bac982aac4afe9fd9")
+);
+fnv_big_int!(
+    Fnv1024,
+    U1024,
         U1024::from_be_hex("000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000018d"),
         U1024::from_be_hex("0000000000000000005f7a76758ecc4d32e56d5a591028b74b29fc4223fdada16c3bf34eda3674da9a21d9000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004c6d7eb6e73802734510a555f256cc005ae556bde8cc9c6a93b21aff4b16c71ee90b3")
-    );
-}
+);
 
-impl ClassicHasher for Fnv {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        match self.variant {
-            FnvVariant::L32 => self.hash_bytes_32(bytes),
-            FnvVariant::L64 => self.hash_bytes_64(bytes),
-            FnvVariant::L128 => self.hash_bytes_128(bytes),
-            FnvVariant::L256 => self.hash_bytes_256(bytes),
-            FnvVariant::L512 => self.hash_bytes_512(bytes),
-            FnvVariant::L1024 => self.hash_bytes_1024(bytes),
-        }
-    }
-
-    crate::hash_bytes_from_string! {}
-}
-
-#[cfg(test)]
-mod fnvhash_tests {
-    use strum::IntoEnumIterator;
-
-    use super::*;
-
-    #[test]
-    fn test_suite() {
-        let mut hasher = Fnv::default();
-
-        hasher.input_format = ByteFormat::Utf8;
-        hasher.output_format = ByteFormat::Hex;
-
-        hasher.variant = FnvVariant::L32;
-        assert_eq!("e40c292c", hasher.hash_bytes_from_string("a").unwrap());
-
-        hasher.variant = FnvVariant::L64;
-        assert_eq!(
-            "af63dc4c8601ec8c",
-            hasher.hash_bytes_from_string("a").unwrap()
-        );
-
-        for h in FnvVariant::iter() {
-            hasher.variant = h;
-            let v = hasher.hash_bytes_from_string("a").unwrap();
-            assert!(v.len() != 0)
-        }
-    }
-
-    // #[test]
-    // fn test_hex() {
-    //     println!("{:02x?}", P32.to_bytes_be());
-    //     println!("{:02x?}", P64.to_bytes_be());
-    //     println!("{:02x?}", P128.to_bytes_be());
-    //     println!("{:02x?}", P256.to_bytes_be());
-    //     println!("{:02x?}", P512.to_bytes_be());
-    //     println!("{:02x?}", P1024.to_bytes_be());
-
-    //     println!("{:02x?}", O32.to_bytes_be());
-    //     println!("{:02x?}", O64.to_bytes_be());
-    //     println!("{:02x?}", O128.to_bytes_be());
-    //     println!("{:02x?}", O256.to_bytes_be());
-    //     println!("{:02x?}", O512.to_bytes_be());
-    //     println!("{:02x?}", O1024.to_bytes_be());
-    // }
-}
+crate::stateful_hash_tests!(
+    test_32, Fnv32::init_default(), b"a", "e40c292c";
+    test_64, Fnv64::init_default(), b"a", "af63dc4c8601ec8c";
+);
