@@ -112,6 +112,32 @@ macro_rules! sha2_256 {
             pub fn init() -> Self {
                 Self::default()
             }
+
+            pub fn finalize_and_reset(&mut self) -> Vec<u8> {
+                self.bits_taken += self.buffer.len() as u64 * 8;
+                self.buffer.push(0x80);
+                while (self.buffer.len() % 64) != 56 {
+                    self.buffer.push(0x00)
+                }
+                self.buffer.extend(self.bits_taken.to_be_bytes());
+
+                // There can be multiple final blocks after padding
+                for chunk in self.buffer.chunks_exact(64) {
+                    compress(&mut self.state, &chunk);
+                }
+
+                let mut out = self
+                    .state
+                    .iter()
+                    .map(|x| x.to_be_bytes())
+                    .flatten()
+                    .collect_vec();
+                out.truncate($output_len);
+
+                *self = Self::init();
+
+                out
+            }
         }
 
         impl StatefulHasher for $name {

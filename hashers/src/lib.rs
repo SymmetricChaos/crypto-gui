@@ -2,6 +2,7 @@ pub mod adler;
 pub mod argon2;
 pub mod ascon;
 pub mod auxiliary;
+pub mod balloon;
 pub mod bcrypt;
 pub mod belt;
 pub mod blake;
@@ -29,6 +30,7 @@ pub mod pbkdf1;
 pub mod pbkdf2;
 pub mod pearson;
 pub mod poly1305;
+pub mod poseidon;
 pub mod radio_gatun;
 pub mod ripemd;
 pub mod scrypt;
@@ -40,7 +42,6 @@ pub mod sm3;
 pub mod tiger;
 pub mod traits;
 pub mod vsh;
-pub mod poseidon;
 
 // Template
 // use utils::byte_formatting::ByteFormat;
