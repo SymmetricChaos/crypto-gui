@@ -1,6 +1,5 @@
-use crate::traits::ClassicHasher;
 use utils::byte_formatting::{fill_u32s_be, u32s_to_bytes_be, xor_into_bytes};
-use utils::{byte_formatting::ByteFormat, padding::zero_padding};
+use utils::padding::zero_padding;
 
 pub const GOST_R_34_12_2015: [u64; 8] = [
     0xc462a5b9e8d703f1,
@@ -36,8 +35,6 @@ pub const GOST_R_TEST: [u64; 8] = [
 ];
 
 pub struct GostCipher {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
     pub sboxes: [u64; 8],
     pub subkeys: [u32; 8],
 }
@@ -45,8 +42,6 @@ pub struct GostCipher {
 impl Default for GostCipher {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
-            output_format: ByteFormat::Hex,
             sboxes: GOST_R_34_12_2015.clone(),
             subkeys: [0; 8],
         }
@@ -201,67 +196,63 @@ fn compress(h: [u8; 32], m: [u8; 32], cipher: &mut GostCipher) -> [u8; 32] {
 
 #[derive(Debug, Clone)]
 pub struct Gost {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-    pub iv: [u8; 32],
-    pub sboxes: [u64; 8],
+    iv: [u8; 32],
+    sboxes: [u64; 8],
 }
 
 impl Default for Gost {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
             iv: [0; 32],
             sboxes: GOST_R_34_12_2015.clone(),
         }
     }
 }
 
-impl ClassicHasher for Gost {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut input = bytes.to_vec();
+// impl ClassicHasher for Gost {
+//     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
+//         let mut input = bytes.to_vec();
 
-        // Final block is padded with zeroes
-        zero_padding(&mut input, 32);
+//         // Final block is padded with zeroes
+//         zero_padding(&mut input, 32);
 
-        let mut h = self.iv;
-        let mut ctrl = [0; 32];
+//         let mut h = self.iv;
+//         let mut ctrl = [0; 32];
 
-        let mut cipher = GostCipher::default().with_sboxes(self.sboxes);
+//         let mut cipher = GostCipher::default().with_sboxes(self.sboxes);
 
-        // Take input in 256-bit blocks
-        for block in input.chunks_exact(32) {
-            for i in 0..32 {
-                ctrl[i] ^= block[i]
-            }
-            h = compress(h, block.try_into().unwrap(), &mut cipher)
-        }
+//         // Take input in 256-bit blocks
+//         for block in input.chunks_exact(32) {
+//             for i in 0..32 {
+//                 ctrl[i] ^= block[i]
+//             }
+//             h = compress(h, block.try_into().unwrap(), &mut cipher)
+//         }
 
-        // Compress in the length of the input
-        let mut l = [0; 32];
-        for (i, b) in ((bytes.len() * 8) as u64).to_be_bytes().iter().enumerate() {
-            l[i + 23] = *b
-        }
-        h = compress(h, l, &mut cipher);
+//         // Compress in the length of the input
+//         let mut l = [0; 32];
+//         for (i, b) in ((bytes.len() * 8) as u64).to_be_bytes().iter().enumerate() {
+//             l[i + 23] = *b
+//         }
+//         h = compress(h, l, &mut cipher);
 
-        // Compress in the check value
-        compress(h, ctrl, &mut cipher).to_vec()
-    }
+//         // Compress in the check value
+//         compress(h, ctrl, &mut cipher).to_vec()
+//     }
 
-    crate::hash_bytes_from_string! {}
-}
+//     crate::hash_bytes_from_string! {}
+// }
 
-crate::basic_hash_tests!(
-    test1, Gost::default(),
-    "The quick brown fox jumps over the lazy dog",
-    "77b7fa410c9ac58a25f49bca7d0468c9296529315eaca76bd1a10f376d1f4294";
+// crate::basic_hash_tests!(
+//     test1, Gost::default(),
+//     "The quick brown fox jumps over the lazy dog",
+//     "77b7fa410c9ac58a25f49bca7d0468c9296529315eaca76bd1a10f376d1f4294";
 
-    test2, Gost::default(),
-    "This is message, length=32 bytes",
-    "b1c466d37519b82e8319819ff32595e047a28cb6f83eff1c6916a815a637fffa";
+//     test2, Gost::default(),
+//     "This is message, length=32 bytes",
+//     "b1c466d37519b82e8319819ff32595e047a28cb6f83eff1c6916a815a637fffa";
 
-    test3, Gost::default(),
-    "Suppose the original message has length = 50 bytes",
-    "471aba57a60a770d3a76130635c1fbea4ef14de51f78b4ae57dd893b62f55208";
-);
+//     test3, Gost::default(),
+//     "Suppose the original message has length = 50 bytes",
+//     "471aba57a60a770d3a76130635c1fbea4ef14de51f78b4ae57dd893b62f55208";
+// );

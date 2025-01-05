@@ -5,7 +5,6 @@ use egui::Button;
 use hashers::{
     blake::blake3::{Blake3, Blake3Mode},
     errors::HasherError,
-    traits::ClassicHasher,
 };
 use rand::{thread_rng, RngCore};
 use utils::byte_formatting::ByteFormat;
@@ -129,10 +128,6 @@ impl HasherFrame for Blake3Frame {
     }
 
     fn hash_string(&self, text: &str) -> Result<String, HasherError> {
-        if self.hasher.mode == Blake3Mode::Keyed && !self.valid_key {
-            Err(HasherError::key("BLAKE3 keyed hash can only be called when exactly 64 hexadecimal digits (256 bits) of key are given"))
-        } else {
-            self.hasher.hash_bytes_from_string(text)
-        }
+        todo!()
     }
 }

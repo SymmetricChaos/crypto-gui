@@ -1,9 +1,9 @@
 use crate::errors::HasherError;
 
-pub trait ClassicHasher {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8>;
-    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError>;
-}
+// pub trait ClassicHasher {
+//     fn hash(&self, bytes: &[u8]) -> Vec<u8>;
+//     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError>;
+// }
 
 pub trait StatefulHasher {
     // Update the hasher's state with some bytes.
@@ -20,6 +20,11 @@ pub trait StatefulHasher {
 
     // Hash multiple inputs
     fn hash_multiple(self, bytes: &[&[u8]]) -> Vec<u8>;
+}
+
+pub trait ResettableHasher {
+    // Finalize the hash with any padding and processing of final blocks then output bytes. Resets the hasher to its starting state, allowing it to be reused.
+    fn finalize_and_reset(&mut self, bytes: &[u8]) -> Vec<u8>;
 }
 
 #[macro_export]
@@ -59,34 +64,34 @@ macro_rules! hash_bytes_from_string {
     };
 }
 
-#[macro_export]
-macro_rules! basic_hash_tests {
-    ($($test_name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
-        #[cfg(test)]
-        mod basic_tests {
-        use super::*;
-        $(
-            #[test]
-            fn $test_name() {
-                assert_eq!($output, $hasher.hash_bytes_from_string($input).unwrap());
-            }
-        )+
-        }
-    };
-    // Optional variant with module name for separation
-    (($mod_name: ident)?; $($name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
-        #[cfg(test)]
-        mod $mod_name {
-        use super::*;
-        $(
-            #[test]
-            fn $name() {
-                assert_eq!($output, $hasher.hash_bytes_from_string($input).unwrap());
-            }
-        )+
-        }
-    };
-}
+// #[macro_export]
+// macro_rules! basic_hash_tests {
+//     ($($test_name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
+//         #[cfg(test)]
+//         mod basic_tests {
+//         use super::*;
+//         $(
+//             #[test]
+//             fn $test_name() {
+//                 assert_eq!($output, $hasher.hash_bytes_from_string($input).unwrap());
+//             }
+//         )+
+//         }
+//     };
+//     // Optional variant with module name for separation
+//     (($mod_name: ident)?; $($name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
+//         #[cfg(test)]
+//         mod $mod_name {
+//         use super::*;
+//         $(
+//             #[test]
+//             fn $name() {
+//                 assert_eq!($output, $hasher.hash_bytes_from_string($input).unwrap());
+//             }
+//         )+
+//         }
+//     };
+// }
 
 #[macro_export]
 macro_rules! stateful_hash_tests {

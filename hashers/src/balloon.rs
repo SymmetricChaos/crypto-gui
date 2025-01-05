@@ -1,6 +1,8 @@
 // https://eprint.iacr.org/2016/027.pdf
 
-use std::ops::Range;
+use std::{mem, ops::Range};
+
+use num::{BigUint, FromPrimitive};
 
 use crate::{
     sha::{Sha2_256, Sha2_512},
@@ -40,14 +42,6 @@ impl Balloon {
     const BLOCKSIZE: usize = 32; // for SHA256
     const DELTA: u64 = 3;
 
-    fn extract_block(n: usize, blocks: &[u8]) -> &[u8] {
-        &blocks[n * Self::BLOCKSIZE..][..Self::BLOCKSIZE]
-    }
-
-    fn extract_block_mut(n: usize, blocks: &mut [u8]) -> &mut [u8] {
-        &mut blocks[n * Self::BLOCKSIZE..][..Self::BLOCKSIZE]
-    }
-
     fn extract_range(n: usize) -> Range<usize> {
         (n * Self::BLOCKSIZE)..(n * Self::BLOCKSIZE + Self::BLOCKSIZE)
     }
@@ -73,6 +67,7 @@ impl StatefulHasher for Balloon {
     }
 
     fn finalize(self) -> Vec<u8> {
+        let m_cost_big_int = BigUint::from_u64(self.m_cost).unwrap();
         let mut ctr: u64 = 0;
         let mut blocks: Vec<u8> = Vec::with_capacity(self.total_memory());
         // Step 1. Expand input into buffer
@@ -86,7 +81,7 @@ impl StatefulHasher for Balloon {
         for i in 1..self.m_cost as usize {
             h.update(&ctr.to_le_bytes());
             ctr += 1;
-            h.update(&Self::extract_block(i, &blocks));
+            h.update(&blocks[Self::extract_range(i)]);
             blocks.extend(h.finalize_and_reset());
         }
 
@@ -116,8 +111,12 @@ impl StatefulHasher for Balloon {
                     ctr += 1;
                     h.update(&self.salt);
                     h.update(&idx_block);
-                    let other = h.finalize_and_reset(); // convert to an integer
-                    let other: usize = todo!();
+                    let other = BigUint::from_bytes_le(&h.finalize_and_reset()) % &m_cost_big_int; // convert to an integer
+                    let other = usize::from_le_bytes(
+                        other.to_bytes_le()[..mem::size_of::<usize>()]
+                            .try_into()
+                            .unwrap(),
+                    );
 
                     h.update(&ctr.to_le_bytes());
                     ctr += 1;

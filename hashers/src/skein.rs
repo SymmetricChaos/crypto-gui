@@ -1,7 +1,5 @@
 use utils::byte_formatting::{fill_u64s_le, ByteFormat};
 
-use crate::traits::ClassicHasher;
-
 macro_rules! mix {
     ($a: ident, $b: ident, $r: literal) => {
         $a = $a.wrapping_add($b);
@@ -45,8 +43,6 @@ fn four_rounds(
 const C240: u64 = 0x1BD11BDAA9FC1A22;
 
 pub struct Skein256 {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
     pub key: [u64; Self::WORDS],
     pub tweak: [u64; 2],
 }
@@ -54,8 +50,6 @@ pub struct Skein256 {
 impl Default for Skein256 {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Utf8,
-            output_format: ByteFormat::Hex,
             key: [0; Self::WORDS],
             tweak: [0; 2],
         }
@@ -105,12 +99,4 @@ impl Skein256 {
     // Unique Block Iteration
     // Incorporates the tweak information for each block to make each block and each mode unique
     fn ubi() {}
-}
-
-impl ClassicHasher for Skein256 {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        todo!()
-    }
-
-    crate::hash_bytes_from_string! {}
 }

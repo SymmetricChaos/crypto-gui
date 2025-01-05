@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use crate::traits::{ClassicHasher, StatefulHasher};
+use crate::traits::StatefulHasher;
 use utils::padding::zero_padding;
 
 /// 960 bits of √6

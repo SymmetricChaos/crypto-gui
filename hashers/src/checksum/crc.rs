@@ -1,10 +1,9 @@
-use crate::{errors::HasherError, traits::ClassicHasher};
+use crate::errors::HasherError;
 
 use num::Zero;
 use utils::{
     bit_polynomial::BitPolynomial,
     bits::{bit_string, Bit},
-    byte_formatting::ByteFormat,
 };
 
 pub enum CrcAlgorithm {
@@ -34,16 +33,12 @@ impl CrcAlgorithm {
 
 // https://www.ghsi.de/pages/subpages/Online%20CRC%20Calculation/indexDetails.php?Polynom=111011011011100010000011001000001&Message=E100CAFE
 pub struct CyclicRedundancyCheckHash {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
     pub mode: CrcAlgorithm,
 }
 
 impl Default for CyclicRedundancyCheckHash {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
-            output_format: ByteFormat::Hex,
             mode: CrcAlgorithm::Crc32,
         }
     }
@@ -51,69 +46,69 @@ impl Default for CyclicRedundancyCheckHash {
 
 impl CyclicRedundancyCheckHash {}
 
-impl ClassicHasher for CyclicRedundancyCheckHash {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        // Convert the bytes to a vector of Bits and treat it as a polynomial
-        let data = BitPolynomial::from_bytes(bytes).coef;
-        let mut state = vec![Bit::zero(); 32];
+// impl ClassicHasher for CyclicRedundancyCheckHash {
+//     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
+//         // Convert the bytes to a vector of Bits and treat it as a polynomial
+//         let data = BitPolynomial::from_bytes(bytes).coef;
+//         let mut state = vec![Bit::zero(); 32];
 
-        println!("data: {:?}", bit_string(&data));
+//         println!("data: {:?}", bit_string(&data));
 
-        println!("init: {:?}", bit_string(&state));
-        for data_bit in data {
-            let inv = data_bit ^ state[31];
-            state[31] = state[30] ^ inv;
-            state[30] = state[29] ^ inv;
-            state[29] = state[28];
-            state[28] = state[27] ^ inv;
-            state[27] = state[26] ^ inv;
-            state[26] = state[25];
-            state[25] = state[24] ^ inv;
-            state[24] = state[23] ^ inv;
-            state[23] = state[22];
-            state[22] = state[21] ^ inv;
-            state[21] = state[20] ^ inv;
-            state[20] = state[19] ^ inv;
-            state[19] = state[18];
-            state[18] = state[17];
-            state[17] = state[16];
-            state[16] = state[15] ^ inv;
-            state[15] = state[14];
-            state[14] = state[13];
-            state[13] = state[12];
-            state[12] = state[11];
-            state[11] = state[10];
-            state[10] = state[09] ^ inv;
-            state[09] = state[08] ^ inv;
-            state[08] = state[07];
-            state[07] = state[06];
-            state[06] = state[05] ^ inv;
-            state[05] = state[04];
-            state[04] = state[03];
-            state[03] = state[02];
-            state[02] = state[01];
-            state[01] = state[00];
-            state[00] ^= inv;
-            println!("{data_bit} {:?}", bit_string(&state));
-        }
+//         println!("init: {:?}", bit_string(&state));
+//         for data_bit in data {
+//             let inv = data_bit ^ state[31];
+//             state[31] = state[30] ^ inv;
+//             state[30] = state[29] ^ inv;
+//             state[29] = state[28];
+//             state[28] = state[27] ^ inv;
+//             state[27] = state[26] ^ inv;
+//             state[26] = state[25];
+//             state[25] = state[24] ^ inv;
+//             state[24] = state[23] ^ inv;
+//             state[23] = state[22];
+//             state[22] = state[21] ^ inv;
+//             state[21] = state[20] ^ inv;
+//             state[20] = state[19] ^ inv;
+//             state[19] = state[18];
+//             state[18] = state[17];
+//             state[17] = state[16];
+//             state[16] = state[15] ^ inv;
+//             state[15] = state[14];
+//             state[14] = state[13];
+//             state[13] = state[12];
+//             state[12] = state[11];
+//             state[11] = state[10];
+//             state[10] = state[09] ^ inv;
+//             state[09] = state[08] ^ inv;
+//             state[08] = state[07];
+//             state[07] = state[06];
+//             state[06] = state[05] ^ inv;
+//             state[05] = state[04];
+//             state[04] = state[03];
+//             state[03] = state[02];
+//             state[02] = state[01];
+//             state[01] = state[00];
+//             state[00] ^= inv;
+//             println!("{data_bit} {:?}", bit_string(&state));
+//         }
 
-        // let s: String = r.bit_string().chars().rev().collect();
-        // println!("{s}");
+//         // let s: String = r.bit_string().chars().rev().collect();
+//         // println!("{s}");
 
-        // Convert the CRC syndrome into bytes for output
-        // ByteFormat::Bit.text_to_bytes(&r.bit_string()).unwrap()
-        todo!()
-    }
+//         // Convert the CRC syndrome into bytes for output
+//         // ByteFormat::Bit.text_to_bytes(&r.bit_string()).unwrap()
+//         todo!()
+//     }
 
-    fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
-        let mut bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| HasherError::general("byte format error"))?;
-        let out = self.hash(&mut bytes);
-        Ok(self.output_format.byte_slice_to_text(&out))
-    }
-}
+//     fn hash_bytes_from_string(&self, text: &str) -> Result<String, HasherError> {
+//         let mut bytes = self
+//             .input_format
+//             .text_to_bytes(text)
+//             .map_err(|_| HasherError::general("byte format error"))?;
+//         let out = self.hash(&mut bytes);
+//         Ok(self.output_format.byte_slice_to_text(&out))
+//     }
+// }
 
 #[cfg(test)]
 mod crc_hasher_tests {
@@ -135,14 +130,14 @@ mod crc_hasher_tests {
     //     }
     // }
 
-    #[test]
-    fn test() {
-        let hasher = CyclicRedundancyCheckHash::default();
+    // #[test]
+    // fn test() {
+    //     let hasher = CyclicRedundancyCheckHash::default();
 
-        hasher.hash_bytes_from_string("E100CAFE").unwrap();
-        // assert_eq!(
-        //     "ef1a85f0",
-        //     hasher.hash_bytes_from_string("E100CAFE").unwrap()
-        // );
-    }
+    //     hasher.hash_bytes_from_string("E100CAFE").unwrap();
+    // assert_eq!(
+    //     "ef1a85f0",
+    //     hasher.hash_bytes_from_string("E100CAFE").unwrap()
+    // );
+    // }
 }
