@@ -4,7 +4,7 @@ use crate::{
     sha::{
         Keccack, Sha0, Sha1, Sha2_224, Sha2_256, Sha2_384, Sha2_512, Sha2_512_224, Sha2_512_256,
     },
-    traits::StatefulHasher,
+    traits::{ResettableHasher, StatefulHasher},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -139,8 +139,10 @@ impl Hmac {
             hash_len,
         }
     }
+}
 
-    pub fn finalize_and_reset(&mut self) -> Vec<u8> {
+impl ResettableHasher for Hmac {
+    fn finalize_and_reset(&mut self) -> Vec<u8> {
         let save_i_key = self.i_key[..self.variant.block_size() as usize].to_vec();
         let save_o_key = self.o_key.clone();
         self.o_key
@@ -152,7 +154,7 @@ impl Hmac {
         h
     }
 
-    pub fn hash_and_reset(&mut self, bytes: &[u8]) -> Vec<u8> {
+    fn hash_and_reset(&mut self, bytes: &[u8]) -> Vec<u8> {
         self.update(bytes);
         self.finalize_and_reset()
     }

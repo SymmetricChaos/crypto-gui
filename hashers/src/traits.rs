@@ -24,7 +24,10 @@ pub trait StatefulHasher {
 
 pub trait ResettableHasher {
     // Finalize the hash with any padding and processing of final blocks then output bytes. Resets the hasher to its starting state, allowing it to be reused.
-    fn finalize_and_reset(&mut self, bytes: &[u8]) -> Vec<u8>;
+    fn finalize_and_reset(&mut self) -> Vec<u8>;
+
+    // Simultaneously update and finalize. Resets the hasher to its starting state, allowing it to be reused.
+    fn hash_and_reset(&mut self, bytes: &[u8]) -> Vec<u8>;
 }
 
 #[macro_export]

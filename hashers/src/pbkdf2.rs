@@ -1,6 +1,6 @@
 use crate::{
     hmac::{Hmac, HmacVariant},
-    traits::StatefulHasher,
+    traits::{ResettableHasher, StatefulHasher},
 };
 use itertools::Itertools;
 

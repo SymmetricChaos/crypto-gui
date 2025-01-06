@@ -16,6 +16,7 @@ pub mod fxhash;
 pub mod ghash;
 pub mod gost;
 pub mod haval;
+pub mod hkdf;
 pub mod hmac;
 pub mod ids;
 pub mod lm;
