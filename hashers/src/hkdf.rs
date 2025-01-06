@@ -22,8 +22,7 @@ fn hkdf_expand(prk: &[u8], info: &[u8], length: usize) -> Vec<u8> {
     let mut hmac = Hmac::init(HmacVariant::Sha256, &prk);
     while okm.len() < length {
         i = i.wrapping_add(1);
-        hmac.update_multiple(&[prk, &t, info, &[i]]);
-        t = hmac.finalize_and_reset();
+        t = hmac.hash_multiple_and_reset(&[&t, info, &[i]]);
         okm.extend_from_slice(&t);
     }
     okm[..length].to_vec()
