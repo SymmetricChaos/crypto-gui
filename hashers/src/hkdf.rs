@@ -18,11 +18,11 @@ fn hkdf_extract(salt: &[u8], ikm: &[u8]) -> Vec<u8> {
 fn hkdf_expand(prk: &[u8], info: &[u8], length: usize) -> Vec<u8> {
     let mut t = Vec::new();
     let mut okm = Vec::new();
-    let mut i = 0;
+    let mut i: u8 = 0;
     let mut hmac = Hmac::init(HmacVariant::Sha256, &prk);
     while okm.len() < length {
-        i += 1;
-        hmac.update_multiple(&[prk, &t, &info, &[i as u8]]);
+        i = i.wrapping_add(1);
+        hmac.update_multiple(&[prk, &t, info, &[i]]);
         t = hmac.finalize_and_reset();
         okm.extend_from_slice(&t);
     }
