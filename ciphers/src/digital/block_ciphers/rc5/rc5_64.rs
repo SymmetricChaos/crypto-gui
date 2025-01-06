@@ -15,7 +15,7 @@ crate::impl_rc5!(
 #[cfg(test)]
 mod rc5_tests {
 
-    use utils::byte_formatting::hex_to_bytes_ltr;
+    use utils::byte_formatting::hex_to_bytes;
 
     use crate::{
         digital::block_ciphers::block_cipher::{BCMode, BCPadding},
@@ -35,7 +35,7 @@ mod rc5_tests {
         cipher.rounds = 24;
         cipher.mode = BCMode::Ecb;
         cipher.padding = BCPadding::None;
-        cipher.ksa(&hex_to_bytes_ltr(KEY).unwrap());
+        cipher.ksa(&hex_to_bytes(KEY).unwrap());
         assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
@@ -48,7 +48,7 @@ mod rc5_tests {
         cipher.rounds = 24;
         cipher.mode = BCMode::Ecb;
         cipher.padding = BCPadding::None;
-        cipher.ksa(&hex_to_bytes_ltr(KEY).unwrap());
+        cipher.ksa(&hex_to_bytes(KEY).unwrap());
         assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 }

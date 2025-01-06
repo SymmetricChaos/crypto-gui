@@ -153,11 +153,6 @@ impl ResettableHasher for Hmac {
         self.o_key = save_o_key;
         h
     }
-
-    fn hash_and_reset(&mut self, bytes: &[u8]) -> Vec<u8> {
-        self.update(bytes);
-        self.finalize_and_reset()
-    }
 }
 
 impl StatefulHasher for Hmac {

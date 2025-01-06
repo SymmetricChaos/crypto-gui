@@ -16,7 +16,7 @@ pub struct HexToBytesError;
 // A string containing hex characters converted into bytes
 // Bytes are read as pairs of characters from left to right, only an even number of characters are accepted
 // "DEADBEEF" -> [222, 173, 190, 239]
-pub fn hex_to_bytes_ltr(hex: &str) -> Result<Vec<u8>, HexToBytesError> {
+pub fn hex_to_bytes(hex: &str) -> Result<Vec<u8>, HexToBytesError> {
     let mut text: String = hex.lines().collect();
     text = text.to_ascii_lowercase();
     if !IS_HEX_BYTES.is_match(&text) {
@@ -24,24 +24,6 @@ pub fn hex_to_bytes_ltr(hex: &str) -> Result<Vec<u8>, HexToBytesError> {
     } else {
         let mut out = Vec::new();
         for i in 0..(text.len() / 2) {
-            let lo = i * 2;
-            out.push(u8::from_str_radix(&text[lo..lo + 2], 16).unwrap())
-        }
-        Ok(out)
-    }
-}
-
-// A string containing hex characters converted into bytes
-// Bytes are read as pairs of characters from right to left, only an even number of characters are accepted
-// "DEADBEEF" -> [239, 190, 173, 222]
-pub fn hex_to_bytes_rtl(hex: &str) -> Result<Vec<u8>, HexToBytesError> {
-    let mut text: String = hex.lines().collect();
-    text = text.to_ascii_lowercase();
-    if !IS_HEX_BYTES.is_match(&text) {
-        return Err(HexToBytesError);
-    } else {
-        let mut out = Vec::new();
-        for i in (0..(text.len() / 2)).rev() {
             let lo = i * 2;
             out.push(u8::from_str_radix(&text[lo..lo + 2], 16).unwrap())
         }
@@ -102,7 +84,7 @@ impl ByteFormat {
         }
         match self {
             ByteFormat::Hex => {
-                hex_to_bytes_ltr(text).map_err(|_| ByteFormatError("expected hexadecimal"))
+                hex_to_bytes(text).map_err(|_| ByteFormatError("expected hexadecimal"))
             }
             ByteFormat::Utf8 => Ok(text.as_bytes().to_owned()),
             ByteFormat::Base64 => BASE64_STANDARD

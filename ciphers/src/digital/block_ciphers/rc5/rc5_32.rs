@@ -5,7 +5,7 @@ crate::impl_rc5!(Rc5_32, u32, 4, 32, 8, 0xb7e15163, 0x9e3779b9, u64, 12);
 #[cfg(test)]
 mod rc5_tests {
 
-    use utils::byte_formatting::hex_to_bytes_ltr;
+    use utils::byte_formatting::hex_to_bytes;
 
     use crate::{
         digital::block_ciphers::block_cipher::{BCMode, BCPadding},
@@ -23,7 +23,7 @@ mod rc5_tests {
         let mut cipher = Rc5_32::default();
         cipher.mode = BCMode::Ecb;
         cipher.padding = BCPadding::None;
-        cipher.ksa(&hex_to_bytes_ltr(KEY).unwrap());
+        cipher.ksa(&hex_to_bytes(KEY).unwrap());
         assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
@@ -35,7 +35,7 @@ mod rc5_tests {
         let mut cipher = Rc5_32::default();
         cipher.mode = BCMode::Ecb;
         cipher.padding = BCPadding::None;
-        cipher.ksa(&hex_to_bytes_ltr(KEY).unwrap());
+        cipher.ksa(&hex_to_bytes(KEY).unwrap());
         assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 
@@ -46,7 +46,7 @@ mod rc5_tests {
         let mut cipher = Rc5_32::default();
         cipher.mode = BCMode::Ecb;
         cipher.padding = BCPadding::None;
-        cipher.ksa(&hex_to_bytes_ltr(KEY).unwrap());
+        cipher.ksa(&hex_to_bytes(KEY).unwrap());
         let ctext = cipher.encrypt(PTEXT).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), PTEXT);
     }
@@ -59,7 +59,7 @@ mod rc5_tests {
         let mut cipher = Rc5_32::default();
         cipher.mode = BCMode::Ecb;
         cipher.padding = BCPadding::None;
-        cipher.ksa(&hex_to_bytes_ltr(KEY).unwrap());
+        cipher.ksa(&hex_to_bytes(KEY).unwrap());
         assert_eq!(cipher.encrypt(PTEXT).unwrap(), CTEXT);
     }
 
@@ -71,7 +71,7 @@ mod rc5_tests {
         let mut cipher = Rc5_32::default();
         cipher.mode = BCMode::Ecb;
         cipher.padding = BCPadding::None;
-        cipher.ksa(&hex_to_bytes_ltr(KEY).unwrap());
+        cipher.ksa(&hex_to_bytes(KEY).unwrap());
         assert_eq!(cipher.decrypt(CTEXT).unwrap(), PTEXT);
     }
 
@@ -82,7 +82,7 @@ mod rc5_tests {
         let mut cipher = Rc5_32::default();
         cipher.mode = BCMode::Ecb;
         cipher.padding = BCPadding::None;
-        cipher.ksa(&hex_to_bytes_ltr(KEY).unwrap());
+        cipher.ksa(&hex_to_bytes(KEY).unwrap());
         let ctext = cipher.encrypt(PTEXT).unwrap();
         assert_eq!(cipher.decrypt(&ctext).unwrap(), PTEXT);
     }

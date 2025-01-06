@@ -10,7 +10,7 @@ pub mod skey;
 
 use std::{fs::read, path::PathBuf};
 
-use utils::byte_formatting::{hex_to_bytes_ltr, ByteFormat};
+use utils::byte_formatting::{hex_to_bytes, ByteFormat};
 
 use crate::errors::CodeError;
 
@@ -20,7 +20,7 @@ pub trait BinaryToText {
 
     // Take a hex string, convert it to bytes, and then encode it
     fn encode_hex(&self, hex: &str) -> Result<String, CodeError> {
-        let bytes = hex_to_bytes_ltr(hex).map_err(|_| CodeError::input("not valid hexcode"))?;
+        let bytes = hex_to_bytes(hex).map_err(|_| CodeError::input("not valid hexcode"))?;
         self.encode_bytes(&bytes)
     }
 

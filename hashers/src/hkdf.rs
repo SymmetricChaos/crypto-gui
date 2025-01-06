@@ -32,7 +32,7 @@ fn hkdf_expand(prk: &[u8], info: &[u8], length: usize) -> Vec<u8> {
 pub struct Hkdf {
     prk: Vec<u8>,
     length: usize,
-    buffer: Vec<u8>,
+    info: Vec<u8>,
 }
 
 impl Hkdf {
@@ -40,19 +40,30 @@ impl Hkdf {
         Self {
             prk: hkdf_extract(salt, ikm),
             length,
-            buffer: Vec::new(),
+            info: Vec::new(),
         }
     }
 }
 
 impl StatefulHasher for Hkdf {
     fn update(&mut self, bytes: &[u8]) {
-        self.buffer.extend_from_slice(bytes);
+        self.info.extend_from_slice(bytes);
     }
 
     fn finalize(self) -> Vec<u8> {
-        hkdf_expand(&self.prk, &self.buffer, self.length)
+        hkdf_expand(&self.prk, &self.info, self.length)
     }
 
     crate::stateful_hash_helpers!();
 }
+
+// https://datatracker.ietf.org/doc/html/rfc4231
+crate::stateful_hash_tests!(
+    test1_sha256, Hkdf::init(42,
+        &[0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c],
+        &[0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b]
+    ),
+    &[0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9],
+    "3cb25f25faacd57a90434f64d0362f2a2d2d0a90cf1a5a4c5db02d56ecc4c5bf34007208d5b887185865";
+
+);

@@ -1,4 +1,4 @@
-use crate::traits::StatefulHasher;
+use crate::traits::{ResettableHasher, StatefulHasher};
 use utils::byte_formatting::fill_u32s_be;
 
 fn compress(state: &mut [u32; 5], chunk: &[u8]) {
@@ -69,6 +69,12 @@ impl Default for Sha1 {
     }
 }
 
+impl Sha1 {
+    pub fn init() -> Self {
+        Self::default()
+    }
+}
+
 impl StatefulHasher for Sha1 {
     fn update(&mut self, bytes: &[u8]) {
         self.buffer.extend_from_slice(bytes);
@@ -105,9 +111,39 @@ impl StatefulHasher for Sha1 {
     crate::stateful_hash_helpers!();
 }
 
-impl Sha1 {
-    pub fn init() -> Self {
-        Self::default()
+impl ResettableHasher for Sha1 {
+    fn finalize_and_reset(&mut self) -> Vec<u8> {
+        // Padding
+        self.bits_taken += self.buffer.len() as u64 * 8;
+        self.buffer.push(0x80);
+        while (self.buffer.len() % 64) != 56 {
+            self.buffer.push(0)
+        }
+        self.buffer.extend(self.bits_taken.to_be_bytes());
+
+        // There can be multiple final blocks after padding
+        for chunk in self.buffer.chunks_exact(64) {
+            compress(&mut self.state, &chunk);
+        }
+
+        let mut out = Vec::with_capacity(20);
+        for word in self.state {
+            out.extend(word.to_be_bytes())
+        }
+
+        *self = Self::init();
+
+        out
+    }
+
+    fn hash_and_reset(&mut self, bytes: &[u8]) -> Vec<u8> {
+        self.update(bytes);
+        self.finalize_and_reset()
+    }
+
+    fn hash_multiple_and_reset(&mut self, bytes: &[&[u8]]) -> Vec<u8> {
+        self.update_multiple(bytes);
+        self.finalize_and_reset()
     }
 }
 
