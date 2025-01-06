@@ -17,7 +17,7 @@ pub struct HexToBytesError;
 // Bytes are read as pairs of characters from left to right, only an even number of characters are accepted
 // "DEADBEEF" -> [222, 173, 190, 239]
 pub fn hex_to_bytes(hex: &str) -> Result<Vec<u8>, HexToBytesError> {
-    let mut text: String = hex.lines().collect();
+    let mut text: String = hex.split_ascii_whitespace().collect();
     text = text.to_ascii_lowercase();
     if !IS_HEX_BYTES.is_match(&text) {
         return Err(HexToBytesError);

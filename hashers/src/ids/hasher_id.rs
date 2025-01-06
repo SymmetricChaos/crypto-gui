@@ -43,6 +43,7 @@ hasher_ids_and_names!(
     Ghash, "GHASH";
     Gost, "GOST R 34.11-94";
     Haval, "HAVAL";
+    Hkdf, "HKDF";
     Hmac, "HMAC";
     Lm, "LM";
     Md2,"MD2";

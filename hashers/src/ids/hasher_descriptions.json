@@ -147,13 +147,26 @@
       "Crytographic"
     ]
   },
+  "HKDF": {
+    "Description": "HKDF (HMAC-based Extract-and-Expand Key Derivation Function) is a method for creating a Key Derivation Function from any hash function. Given some initial key material it produces outputs that are uniformly random regardless of non-uniformity of the input.",
+    "Authors": "H. Krawczyk and P. Eronen",
+    "Publication": "2010",
+    "Hash Length": null,
+    "Traits": [
+      "Crytographic",
+      "KDF",
+      "Keyed"
+    ]
+  },
   "HMAC": {
     "Description": "HMAC (Hash-based Message Authentication Code) is a technique for created a keyed hash function from any hash function. Once a shared secret is established a keyed hash function allows the reciever to determine that a message has not been altered or replaced in transit. HMAC specifially addresses the length extension weakness of Merkle-Damgård based hash functions but can be used with any hash function. Some unkeyed hash functions such as SHA3 can be used as keyed hash functions without HMAC simply by making the key part of the message.",
     "Authors": "Krawczyk, Bellare, and Canetti",
     "Publication": "1997",
     "Hash Length": null,
     "Traits": [
-      "Crytographic"
+      "Crytographic",
+      "Keyed",
+      "MAC"
     ]
   },
   "OneAtATime": {
