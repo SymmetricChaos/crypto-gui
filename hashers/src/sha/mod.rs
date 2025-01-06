@@ -10,5 +10,5 @@ pub mod sha3;
 pub use sha3::Keccack;
 pub mod sha1;
 pub mod sha256;
-pub use sha256::{Sha2_224, Sha2_256};
-pub use sha512::{Sha2_384, Sha2_512, Sha2_512_224, Sha2_512_256};
+pub use sha256::{Sha224, Sha256};
+pub use sha512::{Sha384, Sha512, Sha512_224, Sha512_256};

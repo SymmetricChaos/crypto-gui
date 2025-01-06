@@ -1,9 +1,7 @@
 use crate::{
     md4::Md4,
     md5::Md5,
-    sha::{
-        Keccack, Sha0, Sha1, Sha2_224, Sha2_256, Sha2_384, Sha2_512, Sha2_512_224, Sha2_512_256,
-    },
+    sha::{Keccack, Sha0, Sha1, Sha224, Sha256, Sha384, Sha512, Sha512_224, Sha512_256},
     traits::{ResettableHasher, StatefulHasher},
 };
 
@@ -70,12 +68,12 @@ impl HmacVariant {
             Self::Sha1 => Sha1::init().hash(bytes),
             Self::Md4 => Md4::init().hash(bytes),
             Self::Md5 => Md5::init().hash(bytes),
-            Self::Sha224 => Sha2_224::init().hash(bytes),
-            Self::Sha256 => Sha2_256::init().hash(bytes),
-            Self::Sha384 => Sha2_384::init().hash(bytes),
-            Self::Sha512 => Sha2_512::init().hash(bytes),
-            Self::Sha512_224 => Sha2_512_224::init().hash(bytes),
-            Self::Sha512_256 => Sha2_512_256::init().hash(bytes),
+            Self::Sha224 => Sha224::init().hash(bytes),
+            Self::Sha256 => Sha256::init().hash(bytes),
+            Self::Sha384 => Sha384::init().hash(bytes),
+            Self::Sha512 => Sha512::init().hash(bytes),
+            Self::Sha512_224 => Sha512_224::init().hash(bytes),
+            Self::Sha512_256 => Sha512_256::init().hash(bytes),
             Self::Sha3_224 => Keccack::sha3_224().hash(bytes),
             Self::Sha3_256 => Keccack::sha3_256().hash(bytes),
             Self::Sha3_384 => Keccack::sha3_384().hash(bytes),

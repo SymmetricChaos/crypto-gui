@@ -246,7 +246,6 @@ pub struct Blake3Hasher {
 
 impl Blake3Hasher {
     // Create a new instance directly
-    // The key_words are
     fn new_internal(key_words: [u32; 8], flags: u32) -> Self {
         Self {
             chunk_state: ChunkState::new(key_words, 0, flags),

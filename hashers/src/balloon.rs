@@ -5,7 +5,7 @@ use std::{mem, ops::Range};
 use num::{BigUint, FromPrimitive};
 
 use crate::{
-    sha::{Sha2_256, Sha2_512},
+    sha::{Sha256, Sha512},
     traits::StatefulHasher,
 };
 
@@ -71,7 +71,7 @@ impl StatefulHasher for Balloon {
         let mut ctr: u64 = 0;
         let mut blocks: Vec<u8> = Vec::with_capacity(self.total_memory());
         // Step 1. Expand input into buffer
-        let mut h = Sha2_256::init();
+        let mut h = Sha256::init();
         h.update(&ctr.to_le_bytes());
         ctr += 1;
         h.update(&self.buffer);
