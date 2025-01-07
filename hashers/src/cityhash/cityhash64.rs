@@ -54,23 +54,3 @@ impl StatefulHasher for CityHash64 {
 
     crate::stateful_hash_helpers!();
 }
-
-// impl ClassicHasher for CityHash64 {
-//     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-//         let h = match bytes.len() {
-//             0..=16 => hash64_0_to_16(bytes),
-//             17..=32 => hash64_17_to_32(bytes),
-//             33..=64 => hash64_33_to_64(bytes),
-//             _ => hash64_65(bytes),
-//         };
-//         if let Some([s0, s1]) = self.seeds {
-//             hash128_64(h.wrapping_sub(s0), s1)
-//         } else {
-//             h
-//         }
-//         .to_be_bytes()
-//         .to_vec()
-//     }
-
-//     crate::hash_bytes_from_string! {}
-// }

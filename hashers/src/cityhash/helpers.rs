@@ -96,7 +96,6 @@ pub(super) fn hash32_25(bytes: &[u8]) -> u32 {
     let mut h = l as u32;
     let mut g = C1.wrapping_mul(h);
     let mut f = g;
-
     let a0 = fetch_u32(bytes, l - 4)
         .wrapping_mul(C1)
         .rotate_right(17)
@@ -167,22 +166,16 @@ pub(super) fn hash32_25(bytes: &[u8]) -> u32 {
             .rotate_right(18)
             .wrapping_mul(5)
             .wrapping_add(C3);
-
         f = f.wrapping_add(a1).rotate_right(19).wrapping_mul(C1);
-
         g = g
             .wrapping_add(a2)
             .rotate_right(18)
             .wrapping_mul(5)
             .wrapping_add(C3);
-
         h ^= a3.wrapping_add(a1);
         h = h.rotate_right(19).wrapping_mul(5).wrapping_add(C3);
-
         g = g.bitxor(a4).swap_bytes().wrapping_mul(5);
-
         h = h.wrapping_add(a4.wrapping_mul(5)).swap_bytes();
-
         f = f.wrapping_add(a0);
 
         (f, g, h) = (g, h, f);

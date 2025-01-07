@@ -41,6 +41,7 @@ impl Hkdf {
         }
     }
 
+    // This is the better way to use HKDF as info input (the context string) is used otherwise the hash input which is confusing
     pub fn derive_key(
         variant: HmacVariant,
         length: usize,

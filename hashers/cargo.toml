@@ -15,5 +15,4 @@ json = "0.12.4"
 csv = "1.2.1"
 crypto-bigint = { version = "0.5.5", features = ["generic-array"] } 
 strum = { version = "0.26", features = ["derive"] }
-cityhasher = "0.1.0"
 rand = "0.8.3"
