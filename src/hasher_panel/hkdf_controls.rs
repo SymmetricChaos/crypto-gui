@@ -2,7 +2,7 @@ use crate::ui_elements::{validate_string_hex_bytes, UiElements};
 
 use super::HasherFrame;
 use egui::DragValue;
-use hashers::{errors::HasherError, hkdf::Hkdf, hmac::HmacVariant, traits::StatefulHasher};
+use hashers::{errors::HasherError, hkdf::Hkdf, hmac::HmacVariant};
 use rand::{thread_rng, RngCore};
 use utils::byte_formatting::ByteFormat;
 
@@ -13,8 +13,8 @@ pub struct HkdfFrame {
     length: usize,
     salt: Vec<u8>,
     salt_string: String,
-    ikm: Vec<u8>,
-    ikm_string: String,
+    info: Vec<u8>,
+    info_string: String,
 }
 
 impl Default for HkdfFrame {
@@ -26,8 +26,8 @@ impl Default for HkdfFrame {
             length: 32,
             salt: Vec::new(),
             salt_string: String::new(),
-            ikm: Vec::new(),
-            ikm_string: String::new(),
+            info: Vec::new(),
+            info_string: String::new(),
         }
     }
 }
@@ -42,7 +42,7 @@ impl HkdfFrame {
 
     fn salt_control(&mut self, ui: &mut egui::Ui) {
         ui.horizontal(|ui| {
-            ui.subheading("Option Salt (Hexadecimal)");
+            ui.subheading("Salt (Hexadecimal)");
             if ui.button("🎲").on_hover_text("randomize").clicked() {
                 let mut rng = thread_rng();
                 self.salt = vec![0; 32];
@@ -50,30 +50,32 @@ impl HkdfFrame {
                 self.salt_string = ByteFormat::Hex.byte_slice_to_text(&self.salt)
             };
         });
+        ui.label("Optional salt.");
         if ui.control_string(&mut self.salt_string).lost_focus() {
             self.validate_salt();
         };
     }
 
-    fn validate_ikm(&mut self) {
-        validate_string_hex_bytes(&mut self.ikm_string, None);
-        self.ikm = ByteFormat::Hex
-            .text_to_bytes(&self.ikm_string)
-            .expect("unable to parse ikm")
+    fn validate_info(&mut self) {
+        validate_string_hex_bytes(&mut self.info_string, None);
+        self.info = ByteFormat::Hex
+            .text_to_bytes(&self.info_string)
+            .expect("unable to parse info")
     }
 
-    fn ikm_control(&mut self, ui: &mut egui::Ui) {
+    fn info_control(&mut self, ui: &mut egui::Ui) {
         ui.horizontal(|ui| {
-            ui.subheading("Key Material (Hexadecimal)");
+            ui.subheading("Info (Hexadecimal)");
             if ui.button("🎲").on_hover_text("randomize").clicked() {
                 let mut rng = thread_rng();
-                self.ikm = vec![0; 32];
-                rng.fill_bytes(&mut self.ikm);
-                self.ikm_string = ByteFormat::Hex.byte_slice_to_text(&self.ikm)
+                self.info = vec![0; 32];
+                rng.fill_bytes(&mut self.info);
+                self.info_string = ByteFormat::Hex.byte_slice_to_text(&self.info)
             };
         });
-        if ui.control_string(&mut self.ikm_string).lost_focus() {
-            self.validate_ikm();
+        ui.label("Optional context string.");
+        if ui.control_string(&mut self.info_string).lost_focus() {
+            self.validate_info();
         };
     }
 }
@@ -125,7 +127,7 @@ impl HasherFrame for HkdfFrame {
         self.salt_control(ui);
 
         ui.add_space(8.0);
-        self.ikm_control(ui);
+        self.info_control(ui);
 
         ui.add_space(8.0);
         ui.subheading("Output Length (bytes)");
@@ -135,12 +137,12 @@ impl HasherFrame for HkdfFrame {
     }
 
     fn hash_string(&self, text: &str) -> Result<String, HasherError> {
-        let bytes = self
+        let ikm = self
             .input_format
             .text_to_bytes(text)
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
 
-        let h = Hkdf::init(self.variant, self.length, &self.salt, &self.ikm).hash(&bytes);
+        let h = Hkdf::derive_key(self.variant, self.length, &ikm, &self.salt, &self.info);
 
         Ok(self.output_format.byte_slice_to_text(&h))
     }
