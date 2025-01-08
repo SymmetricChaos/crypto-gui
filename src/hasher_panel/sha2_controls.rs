@@ -1,6 +1,6 @@
 use hashers::{
     errors::HasherError,
-    sha::{sha2::Sha2Variant, Sha224, Sha384, Sha512, Sha512_224, Sha512_256},
+    sha::{sha2::Sha2Variant, Sha224, Sha256, Sha384, Sha512, Sha512_224, Sha512_256},
     traits::StatefulHasher,
 };
 use utils::byte_formatting::ByteFormat;
@@ -74,7 +74,7 @@ impl HasherFrame for Sha2Frame {
 
         let h = match self.variant {
             Sha2Variant::Sha224 => Sha224::init().hash(&bytes),
-            Sha2Variant::Sha256 => Sha224::init().hash(&bytes),
+            Sha2Variant::Sha256 => Sha256::init().hash(&bytes),
             Sha2Variant::Sha384 => Sha384::init().hash(&bytes),
             Sha2Variant::Sha512 => Sha512::init().hash(&bytes),
             Sha2Variant::Sha512_224 => Sha512_224::init().hash(&bytes),

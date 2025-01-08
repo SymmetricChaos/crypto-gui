@@ -684,12 +684,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cityhasher"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ceab37c9e94f42414cccae77e930232c517f1bb190947018cffb0ab41fc40992"
-
-[[package]]
 name = "clipboard-win"
 version = "5.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1641,7 +1635,6 @@ dependencies = [
 name = "hashers"
 version = "0.1.0"
 dependencies = [
- "cityhasher",
  "crypto-bigint",
  "csv",
  "itertools 0.10.5",

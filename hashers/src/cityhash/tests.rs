@@ -40,12 +40,18 @@ mod cityhash_tests {
             )
         );
 
-        // assert_eq!(
-        //     [TEST_DATA[i].3, TEST_DATA[i].4],
-        //     utils::byte_formatting::make_u64s_be::<2>(&CityHash128::init_unseeded().hash(input)),
-        //     "failed at test {}",
-        //     i
-        // );
+        let words =
+            utils::byte_formatting::make_u64s_be::<2>(&CityHash128::init_unseeded().hash(input));
+        assert_eq!(
+            [TEST_DATA[i].3, TEST_DATA[i].4],
+            words,
+            "failed at test {}\ncorrect    {:016x?} {:016x?}\ncalculated {:016x?} {:016x?}",
+            i,
+            TEST_DATA[i].3,
+            TEST_DATA[i].4,
+            words[0],
+            words[1]
+        );
     }
 
     #[test]

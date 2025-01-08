@@ -9,6 +9,7 @@ mod ascon_controls;
 mod blake2_controls;
 mod blake3_controls;
 mod blake_controls;
+pub mod city_hash_controls;
 mod fletcher_controls;
 mod fnv_controls;
 mod fxhash_controls;
@@ -80,6 +81,7 @@ pub struct HasherInterface {
     blake: blake_controls::BlakeFrame,
     blake2: blake2_controls::Blake2Frame,
     // blake3: blake3_controls::Blake3Frame,
+    cityhash: city_hash_controls::CityHashFrame,
     fletcher: fletcher_controls::FletcherFrame,
     fnv: fnv_controls::FnvFrame,
     fxhash: fxhash_controls::FxHashFrame,
@@ -142,6 +144,7 @@ impl HasherInterface {
         combox_box(
             &[
                 HasherId::Adler32,
+                HasherId::CityHash,
                 HasherId::Fletcher,
                 HasherId::Fnv,
                 HasherId::FxHash,
@@ -163,6 +166,7 @@ impl HasherInterface {
             HasherId::Ascon => &mut self.ascon,
             HasherId::Blake => &mut self.blake,
             HasherId::Blake2 => &mut self.blake2,
+            HasherId::CityHash => &mut self.cityhash,
             // HasherId::Blake3 => &mut self.blake3,
             HasherId::Ghash => &mut self.ghash,
             HasherId::Fletcher => &mut self.fletcher,

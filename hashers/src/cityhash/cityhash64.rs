@@ -1,7 +1,7 @@
 // based on: https://github.com/creachadair/cityhash/blob/v0.1.1/cityhash.go
 
 use super::helpers::{hash128_64, hash64_0_to_16, hash64_17_to_32, hash64_33_to_64, hash64_65, P2};
-use crate::traits::StatefulHasher;
+use crate::traits::{ResettableHasher, StatefulHasher};
 
 pub struct CityHash64 {
     buffer: Vec<u8>,
@@ -53,4 +53,26 @@ impl StatefulHasher for CityHash64 {
     }
 
     crate::stateful_hash_helpers!();
+}
+
+impl ResettableHasher for CityHash64 {
+    fn finalize_and_reset(&mut self) -> Vec<u8> {
+        let out = {
+            let h = match self.buffer.len() {
+                0..=16 => hash64_0_to_16(&self.buffer),
+                17..=32 => hash64_17_to_32(&self.buffer),
+                33..=64 => hash64_33_to_64(&self.buffer),
+                _ => hash64_65(&self.buffer),
+            };
+            if let Some([s0, s1]) = self.seeds {
+                hash128_64(h.wrapping_sub(s0), s1)
+            } else {
+                h
+            }
+            .to_be_bytes()
+            .to_vec()
+        };
+        self.buffer.clear();
+        out
+    }
 }
