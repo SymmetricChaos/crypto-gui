@@ -84,12 +84,12 @@ impl HasherFrame for FnvFrame {
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
 
         let h = match self.variant {
-            FnvVariant::L32 => Fnv32::init(self.alternate, self.zero_basis).hash(&bytes),
-            FnvVariant::L64 => Fnv64::init(self.alternate, self.zero_basis).hash(&bytes),
-            FnvVariant::L128 => Fnv128::init(self.alternate, self.zero_basis).hash(&bytes),
-            FnvVariant::L256 => Fnv256::init(self.alternate, self.zero_basis).hash(&bytes),
-            FnvVariant::L512 => Fnv512::init(self.alternate, self.zero_basis).hash(&bytes),
-            FnvVariant::L1024 => Fnv1024::init(self.alternate, self.zero_basis).hash(&bytes),
+            FnvVariant::L32 => Fnv32::init(self.alternate, self.zero_basis).update_and_finalize(&bytes),
+            FnvVariant::L64 => Fnv64::init(self.alternate, self.zero_basis).update_and_finalize(&bytes),
+            FnvVariant::L128 => Fnv128::init(self.alternate, self.zero_basis).update_and_finalize(&bytes),
+            FnvVariant::L256 => Fnv256::init(self.alternate, self.zero_basis).update_and_finalize(&bytes),
+            FnvVariant::L512 => Fnv512::init(self.alternate, self.zero_basis).update_and_finalize(&bytes),
+            FnvVariant::L1024 => Fnv1024::init(self.alternate, self.zero_basis).update_and_finalize(&bytes),
         };
 
         Ok(self.output_format.byte_slice_to_text(&h))

@@ -68,6 +68,6 @@ impl HasherFrame for TigerFrame {
 
         Ok(self
             .output_format
-            .byte_slice_to_text(&Tiger::init(self.version).hash(&bytes)))
+            .byte_slice_to_text(&Tiger::init(self.version).update_and_finalize(&bytes)))
     }
 }

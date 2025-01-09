@@ -53,11 +53,11 @@ impl HasherFrame for RipeMdFrame {
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
 
         let h = match self.variant {
-            RipeMdVariant::Md0 => RipeMd0::init().hash(&bytes),
-            RipeMdVariant::Md128 => RipeMd128::init().hash(&bytes),
-            RipeMdVariant::Md160 => RipeMd160::init().hash(&bytes),
-            RipeMdVariant::Md256 => RipeMd256::init().hash(&bytes),
-            RipeMdVariant::Md320 => RipeMd320::init().hash(&bytes),
+            RipeMdVariant::Md0 => RipeMd0::init().update_and_finalize(&bytes),
+            RipeMdVariant::Md128 => RipeMd128::init().update_and_finalize(&bytes),
+            RipeMdVariant::Md160 => RipeMd160::init().update_and_finalize(&bytes),
+            RipeMdVariant::Md256 => RipeMd256::init().update_and_finalize(&bytes),
+            RipeMdVariant::Md320 => RipeMd320::init().update_and_finalize(&bytes),
         };
 
         Ok(self.output_format.byte_slice_to_text(&h))

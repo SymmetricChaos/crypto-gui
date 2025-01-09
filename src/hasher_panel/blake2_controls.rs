@@ -152,9 +152,15 @@ impl HasherFrame for Blake2Frame {
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
 
         let h = match self.variant {
-            Blake2Variant::Big => Blake2b::init(&self.key, self.hash_len).hash(&bytes),
-            Blake2Variant::Small => Blake2s::init(&self.key, self.hash_len as u32).hash(&bytes),
-            Blake2Variant::BigLong => Blake2b::init(&self.key, self.hash_len).hash(&bytes),
+            Blake2Variant::Big => {
+                Blake2b::init(&self.key, self.hash_len).update_and_finalize(&bytes)
+            }
+            Blake2Variant::Small => {
+                Blake2s::init(&self.key, self.hash_len as u32).update_and_finalize(&bytes)
+            }
+            Blake2Variant::BigLong => {
+                Blake2b::init(&self.key, self.hash_len).update_and_finalize(&bytes)
+            }
         };
 
         Ok(self.output_format.byte_slice_to_text(&h))

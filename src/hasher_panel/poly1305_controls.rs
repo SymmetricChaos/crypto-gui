@@ -112,7 +112,7 @@ impl HasherFrame for Poly1305Frame {
             .text_to_bytes(text)
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
 
-        let h = Poly1305::init(&self.key_r, &self.key_s).hash(&bytes);
+        let h = Poly1305::init(&self.key_r, &self.key_s).update_and_finalize(&bytes);
 
         Ok(self.output_format.byte_slice_to_text(&h))
     }

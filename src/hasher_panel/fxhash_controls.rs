@@ -49,7 +49,7 @@ impl HasherFrame for FxHashFrame {
             .text_to_bytes(text)
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
 
-        let h = FxHash::init(self.variant).hash(&bytes);
+        let h = FxHash::init(self.variant).update_and_finalize(&bytes);
 
         Ok(self.output_format.byte_slice_to_text(&h))
     }

@@ -68,8 +68,8 @@ impl HasherFrame for CityHashFrame {
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
 
         let h = match self.variant {
-            CityHashVariant::V32 => CityHash32::init().hash(&bytes),
-            CityHashVariant::V64 => CityHash64::init(None).hash(&bytes),
+            CityHashVariant::V32 => CityHash32::init().update_and_finalize(&bytes),
+            CityHashVariant::V64 => CityHash64::init(None).update_and_finalize(&bytes),
         };
 
         Ok(self.output_format.byte_slice_to_text(&h))

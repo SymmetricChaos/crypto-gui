@@ -64,20 +64,20 @@ impl HmacVariant {
 
     pub fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         match self {
-            Self::Sha0 => Sha0::init().hash(bytes),
-            Self::Sha1 => Sha1::init().hash(bytes),
-            Self::Md4 => Md4::init().hash(bytes),
-            Self::Md5 => Md5::init().hash(bytes),
-            Self::Sha224 => Sha224::init().hash(bytes),
-            Self::Sha256 => Sha256::init().hash(bytes),
-            Self::Sha384 => Sha384::init().hash(bytes),
-            Self::Sha512 => Sha512::init().hash(bytes),
-            Self::Sha512_224 => Sha512_224::init().hash(bytes),
-            Self::Sha512_256 => Sha512_256::init().hash(bytes),
-            Self::Sha3_224 => Keccack::sha3_224().hash(bytes),
-            Self::Sha3_256 => Keccack::sha3_256().hash(bytes),
-            Self::Sha3_384 => Keccack::sha3_384().hash(bytes),
-            Self::Sha3_512 => Keccack::sha3_512().hash(bytes),
+            Self::Sha0 => Sha0::init().update_and_finalize(bytes),
+            Self::Sha1 => Sha1::init().update_and_finalize(bytes),
+            Self::Md4 => Md4::init().update_and_finalize(bytes),
+            Self::Md5 => Md5::init().update_and_finalize(bytes),
+            Self::Sha224 => Sha224::init().update_and_finalize(bytes),
+            Self::Sha256 => Sha256::init().update_and_finalize(bytes),
+            Self::Sha384 => Sha384::init().update_and_finalize(bytes),
+            Self::Sha512 => Sha512::init().update_and_finalize(bytes),
+            Self::Sha512_224 => Sha512_224::init().update_and_finalize(bytes),
+            Self::Sha512_256 => Sha512_256::init().update_and_finalize(bytes),
+            Self::Sha3_224 => Keccack::sha3_224().update_and_finalize(bytes),
+            Self::Sha3_256 => Keccack::sha3_256().update_and_finalize(bytes),
+            Self::Sha3_384 => Keccack::sha3_384().update_and_finalize(bytes),
+            Self::Sha3_512 => Keccack::sha3_512().update_and_finalize(bytes),
         }
     }
 }

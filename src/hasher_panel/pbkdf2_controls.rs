@@ -114,7 +114,7 @@ impl HasherFrame for Pbkdf2Frame {
             .text_to_bytes(text)
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
 
-        let h = Pbkdf2::init(self.variant, self.iterations, self.hash_len, &self.salt).hash(&bytes);
+        let h = Pbkdf2::init(self.variant, self.iterations, self.hash_len, &self.salt).update_and_finalize(&bytes);
 
         Ok(self.output_format.byte_slice_to_text(&h))
     }

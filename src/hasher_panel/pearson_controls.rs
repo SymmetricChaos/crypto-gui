@@ -66,7 +66,7 @@ impl HasherFrame for PearsonFrame {
             .text_to_bytes(text)
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
 
-        let h = Pearson::init(self.array).hash(&bytes);
+        let h = Pearson::init(self.array).update_and_finalize(&bytes);
 
         Ok(self.output_format.byte_slice_to_text(&h))
     }

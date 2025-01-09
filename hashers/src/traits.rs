@@ -1,3 +1,8 @@
+pub trait SimpleHasher {
+    // Hash some sequence of bytes
+    fn hash(&self, bytes: &[u8]) -> Vec<u8>;
+}
+
 pub trait StatefulHasher {
     // Update the hasher's state with some bytes.
     fn update(&mut self, bytes: &[u8]);
@@ -8,11 +13,11 @@ pub trait StatefulHasher {
     // Update with multiple inputs in the given order.
     fn update_multiple(&mut self, bytes: &[&[u8]]);
 
-    // Update and then immediately finalize.
-    fn hash(self, bytes: &[u8]) -> Vec<u8>;
+    // Update and then immediately finalize. Consumes the hasher so it cannot be reused.
+    fn update_and_finalize(self, bytes: &[u8]) -> Vec<u8>;
 
-    // Update with multiple inputs in the given order and then finalize.
-    fn hash_multiple(self, bytes: &[&[u8]]) -> Vec<u8>;
+    // Update with multiple inputs in the given order and then finalize.  Consumes the hasher so it cannot be reused.
+    fn update_multiple_and_finalize(self, bytes: &[&[u8]]) -> Vec<u8>;
 }
 
 pub trait ResettableHasher: StatefulHasher {
@@ -41,12 +46,12 @@ macro_rules! stateful_hash_helpers {
             }
         }
 
-        fn hash(mut self, bytes: &[u8]) -> Vec<u8> {
+        fn update_and_finalize(mut self, bytes: &[u8]) -> Vec<u8> {
             self.update(bytes);
             self.finalize()
         }
 
-        fn hash_multiple(mut self, bytes: &[&[u8]]) -> Vec<u8> {
+        fn update_multiple_and_finalize(mut self, bytes: &[&[u8]]) -> Vec<u8> {
             for b in bytes {
                 self.update(b)
             }
@@ -56,7 +61,7 @@ macro_rules! stateful_hash_helpers {
 }
 
 #[macro_export]
-macro_rules! stateful_hash_tests {
+macro_rules! simple_hash_tests {
     ($($test_name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
         #[cfg(test)]
         mod stateful_tests {
@@ -93,6 +98,43 @@ macro_rules! stateful_hash_tests {
 }
 
 #[macro_export]
+macro_rules! stateful_hash_tests {
+    ($($test_name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
+        #[cfg(test)]
+        mod stateful_tests {
+        use super::*;
+        $(
+            #[test]
+            fn $test_name() {
+                let a = utils::byte_formatting::hex_to_bytes($output).unwrap();
+                let b = $hasher.update_and_finalize($input);
+                if a != b {
+                    panic!("hash did not match test value\nexpected:   {:02x?}\ncalculated  {:02x?}", a,b)
+                }
+            }
+        )+
+        }
+    };
+    // Optional variant with module name for separation
+    (($mod_name: ident)?; $($name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
+        #[cfg(test)]
+        mod $mod_name {
+        use super::*;
+        $(
+            #[test]
+            fn $name() {
+                let a = utils::byte_formatting::hex_to_bytes($output).unwrap();
+                let b = $hasher.update_and_finalize($input);
+                if a != b {
+                    panic!("hash did not match test value\nexpected:   {:02x?}\ncalculated  {:02x?}", a,b)
+                }
+            }
+        )+
+        }
+    };
+}
+
+#[macro_export]
 macro_rules! incremental_hash_tests {
     ($($test_name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
         #[cfg(test)]
@@ -102,7 +144,7 @@ macro_rules! incremental_hash_tests {
             #[test]
             fn $test_name() {
                 let a = utils::byte_formatting::hex_to_bytes($output).unwrap();
-                let b = $hasher.hash_multiple($input);
+                let b = $hasher.update_multiple_and_finalize($input);
                 if a != b {
                     panic!("hash did not match test value\nexpected:   {:02x?}\ncalculated  {:02x?}", a,b)
                 }
@@ -119,7 +161,7 @@ macro_rules! incremental_hash_tests {
             #[test]
             fn $test_name() {
                 let a = utils::byte_formatting::hex_to_bytes($output).unwrap();
-                let b = $hasher.hash_multiple($input);
+                let b = $hasher.update_multiple_and_finalize($input);
                 if a != b {
                     panic!("hash did not match test value\nexpected:   {:02x?}\ncalculated  {:02x?}", a,b)
                 }

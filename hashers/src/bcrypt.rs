@@ -145,7 +145,7 @@ impl Bcrypt {
                 "cost cannot be less than 4 or greater than 31",
             ));
         }
-        Ok(Bcrypt::init(cost, salt).hash(password))
+        Ok(Bcrypt::init(cost, salt).update_and_finalize(password))
     }
 
     pub fn direct_crypt_format(

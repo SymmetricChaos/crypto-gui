@@ -73,12 +73,12 @@ impl HasherFrame for Sha2Frame {
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
 
         let h = match self.variant {
-            Sha2Variant::Sha224 => Sha224::init().hash(&bytes),
-            Sha2Variant::Sha256 => Sha256::init().hash(&bytes),
-            Sha2Variant::Sha384 => Sha384::init().hash(&bytes),
-            Sha2Variant::Sha512 => Sha512::init().hash(&bytes),
-            Sha2Variant::Sha512_224 => Sha512_224::init().hash(&bytes),
-            Sha2Variant::Sha512_256 => Sha512_256::init().hash(&bytes),
+            Sha2Variant::Sha224 => Sha224::init().update_and_finalize(&bytes),
+            Sha2Variant::Sha256 => Sha256::init().update_and_finalize(&bytes),
+            Sha2Variant::Sha384 => Sha384::init().update_and_finalize(&bytes),
+            Sha2Variant::Sha512 => Sha512::init().update_and_finalize(&bytes),
+            Sha2Variant::Sha512_224 => Sha512_224::init().update_and_finalize(&bytes),
+            Sha2Variant::Sha512_256 => Sha512_256::init().update_and_finalize(&bytes),
         };
 
         Ok(self.output_format.byte_slice_to_text(&h))

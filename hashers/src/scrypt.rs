@@ -165,13 +165,13 @@ impl StatefulHasher for Scrypt {
             blocksize * self.parallelism,
             &self.salt,
         )
-        .hash(&self.buffer);
+        .update_and_finalize(&self.buffer);
 
         for block in p.chunks_mut(blocksize as usize) {
             ro_mix(block, self.cost as usize)
         }
 
-        pbkdf2::Pbkdf2::init(HmacVariant::Sha256, 1, self.key_len, &p).hash(&self.buffer)
+        pbkdf2::Pbkdf2::init(HmacVariant::Sha256, 1, self.key_len, &p).update_and_finalize(&self.buffer)
     }
     crate::stateful_hash_helpers!();
 }

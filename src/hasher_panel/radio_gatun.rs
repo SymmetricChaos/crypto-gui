@@ -59,9 +59,9 @@ impl HasherFrame for RadioGatunFrame {
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
 
         let h = if self.wide {
-            RadioGatun64::init(self.hash_len as u64).hash(&bytes)
+            RadioGatun64::init(self.hash_len as u64).update_and_finalize(&bytes)
         } else {
-            RadioGatun32::init(self.hash_len).hash(&bytes)
+            RadioGatun32::init(self.hash_len).update_and_finalize(&bytes)
         };
 
         Ok(self.output_format.byte_slice_to_text(&h))

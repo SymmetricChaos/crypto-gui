@@ -137,10 +137,10 @@ impl HasherFrame for BlakeFrame {
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
 
         let h = match self.variant {
-            BlakeVariant::B224 => Blake224::init_mac(self.salt_32).hash(&bytes),
-            BlakeVariant::B256 => Blake256::init_mac(self.salt_32).hash(&bytes),
-            BlakeVariant::B384 => Blake384::init_mac(self.salt_64).hash(&bytes),
-            BlakeVariant::B512 => Blake512::init_mac(self.salt_64).hash(&bytes),
+            BlakeVariant::B224 => Blake224::init_mac(self.salt_32).update_and_finalize(&bytes),
+            BlakeVariant::B256 => Blake256::init_mac(self.salt_32).update_and_finalize(&bytes),
+            BlakeVariant::B384 => Blake384::init_mac(self.salt_64).update_and_finalize(&bytes),
+            BlakeVariant::B512 => Blake512::init_mac(self.salt_64).update_and_finalize(&bytes),
         };
 
         Ok(self.output_format.byte_slice_to_text(&h))

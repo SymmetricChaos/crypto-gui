@@ -65,7 +65,7 @@ impl HasherFrame for SipHashFrame {
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
 
         Ok(self.output_format.byte_slice_to_text(
-            SipHash::init(self.key, self.compression_rounds, self.finalization_rounds).hash(&bytes),
+            SipHash::init(self.key, self.compression_rounds, self.finalization_rounds).update_and_finalize(&bytes),
         ))
     }
 }

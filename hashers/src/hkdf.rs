@@ -5,9 +5,9 @@ use crate::{
 
 fn hkdf_extract(variant: HmacVariant, salt: &[u8], ikm: &[u8]) -> Vec<u8> {
     if salt.is_empty() {
-        Hmac::init(variant, &vec![0; variant.block_size() as usize]).hash(ikm)
+        Hmac::init(variant, &vec![0; variant.block_size() as usize]).update_and_finalize(ikm)
     } else {
-        Hmac::init(variant, salt).hash(ikm)
+        Hmac::init(variant, salt).update_and_finalize(ikm)
     }
 }
 

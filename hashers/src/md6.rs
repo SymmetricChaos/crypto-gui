@@ -1,7 +1,15 @@
 use std::collections::VecDeque;
 
 use crate::traits::StatefulHasher;
-use utils::padding::zero_padding;
+use utils::byte_formatting::fill_u64s_be;
+
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub enum Md6Variant {
+    Md6224,
+    Md6256,
+    Md6384,
+    Md6512,
+}
 
 /// 960 bits of √6
 const MD6_Q: [u64; 15] = [
@@ -27,6 +35,33 @@ const TAPS: [usize; 5] = [17, 18, 21, 31, 67];
 const RSHIFT: [u32; 16] = [10, 5, 13, 10, 11, 12, 2, 7, 14, 15, 7, 13, 11, 7, 6, 12];
 const LSHIFT: [u32; 16] = [11, 24, 9, 16, 15, 9, 27, 15, 6, 2, 29, 8, 15, 5, 31, 9];
 
+// U
+fn node_id(l: u8, i: u64) -> u64 {
+    i | ((l as u64) << 56)
+}
+
+// V
+fn control_word(r: u32, l: u32, z: u32, p: u32, k: u32, d: u32) -> u64 {
+    let mut word = 0;
+    word |= (r as u64 & 0b111111111111) << 48;
+    word |= (l as u64 & 0b11111111) << 40;
+    word |= (z as u64 & 0b1111) << 36;
+    word |= (p as u64 & 0b1111111111111111) << 20;
+    word |= (k as u64 & 0b11111111) << 12;
+    word |= d as u64 & 0b111111111111;
+    word
+}
+
+fn create_input_block(block: &mut Vec<u64>, k: &[u64; 8], u: u64, v: u64, bytes: &[u8]) {
+    assert!(bytes.len() == 1024);
+    block.clear();
+    block.extend_from_slice(&MD6_Q); // technically skippable
+    block.extend_from_slice(k); // technically skippable
+    block.push(u);
+    block.push(v);
+    fill_u64s_be(&mut block[25..], bytes);
+}
+
 fn n_rounds(hash_len: u32, keyed: bool) -> u32 {
     if keyed {
         // If a key is given the minimum number of rounds is 80
@@ -42,6 +77,7 @@ pub struct Md6 {
     buffer: Vec<u8>,
     hash_len: u32, // output length in bits
     key: [u64; 8], // key of up to 64 bytes
+    key_len: u32,  // number of bytes provided for the key, it is always padded to 64 bytes
     mode: u32, // mode of operation parameter, if less than 27 some processing is done sequentially with lower memory overhead
     rounds: u32, // Rounds can be specified manually or derived from the output length
 }
@@ -60,6 +96,7 @@ impl Md6 {
             buffer: Vec::new(),
             hash_len,
             key: k,
+            key_len: key.len() as u32,
             mode,
             rounds,
         }
@@ -119,7 +156,10 @@ impl Md6 {
 impl StatefulHasher for Md6 {
     fn update(&mut self, bytes: &[u8]) {
         self.buffer.extend_from_slice(bytes);
-        todo!()
+        let chunks = self.buffer.chunks_exact(1024);
+        let rem = chunks.remainder().to_vec();
+        for chunk in chunks {}
+        self.buffer = rem;
     }
 
     fn finalize(self) -> Vec<u8> {

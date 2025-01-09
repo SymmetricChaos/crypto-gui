@@ -58,11 +58,11 @@ impl HasherFrame for ShabalFrame {
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
 
         let h = match self.variant {
-            ShabalVariant::Shabal192 => Shabal192::init().hash(&bytes),
-            ShabalVariant::Shabal224 => Shabal224::init().hash(&bytes),
-            ShabalVariant::Shabal256 => Shabal256::init().hash(&bytes),
-            ShabalVariant::Shabal384 => Shabal384::init().hash(&bytes),
-            ShabalVariant::Shabal512 => Shabal512::init().hash(&bytes),
+            ShabalVariant::Shabal192 => Shabal192::init().update_and_finalize(&bytes),
+            ShabalVariant::Shabal224 => Shabal224::init().update_and_finalize(&bytes),
+            ShabalVariant::Shabal256 => Shabal256::init().update_and_finalize(&bytes),
+            ShabalVariant::Shabal384 => Shabal384::init().update_and_finalize(&bytes),
+            ShabalVariant::Shabal512 => Shabal512::init().update_and_finalize(&bytes),
         };
 
         Ok(self.output_format.byte_slice_to_text(&h))

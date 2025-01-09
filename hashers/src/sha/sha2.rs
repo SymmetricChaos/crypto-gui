@@ -15,12 +15,12 @@ pub enum Sha2Variant {
 impl Sha2Variant {
     pub fn hash(&self, bytes: &[u8]) -> Vec<u8> {
         match self {
-            Sha2Variant::Sha224 => Sha224::init().hash(&bytes),
-            Sha2Variant::Sha256 => Sha256::init().hash(&bytes),
-            Sha2Variant::Sha384 => Sha384::init().hash(&bytes),
-            Sha2Variant::Sha512 => Sha512::init().hash(&bytes),
-            Sha2Variant::Sha512_224 => Sha512_224::init().hash(&bytes),
-            Sha2Variant::Sha512_256 => Sha512_256::init().hash(&bytes),
+            Sha2Variant::Sha224 => Sha224::init().update_and_finalize(&bytes),
+            Sha2Variant::Sha256 => Sha256::init().update_and_finalize(&bytes),
+            Sha2Variant::Sha384 => Sha384::init().update_and_finalize(&bytes),
+            Sha2Variant::Sha512 => Sha512::init().update_and_finalize(&bytes),
+            Sha2Variant::Sha512_224 => Sha512_224::init().update_and_finalize(&bytes),
+            Sha2Variant::Sha512_256 => Sha512_256::init().update_and_finalize(&bytes),
         }
     }
 
