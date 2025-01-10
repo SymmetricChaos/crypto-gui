@@ -4,6 +4,7 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
+      "Fixed-Width",
       "Prefix"
     ]
   },
@@ -19,7 +20,10 @@
     "Description": "Fancis Bacon developed this fixed width code (though he called it a cipher) in 1605, assigning each letter of the classical Latin alphabet a five bit code. The intended use was to hide one text in another by writing letters of the larger text in two different ways to represent the bits of the hidden message.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Fixed-Width",
+      "Prefix"
+    ]
   },
   "Balanced Ternary": {
     "Description": "The balanced ternary representation of integers uses three digits with the values +1, 0, and -1. In this representation the additive inverse of a number is produced by inverting each digit. Some early computers, such as the Soviet Setun, used balanced ternary interally instead of binary bits. In fact a mechanical calculator produced by Thomas Fowler in 1840 as built using this system to simplify its design.",
@@ -40,6 +44,7 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
+      "Variable Width",
       "Integer"
     ]
   },
@@ -48,6 +53,7 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
+      "Variable Width",
       "Integer"
     ]
   },
@@ -56,6 +62,7 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
+      "Variable Width",
       "Binary-to-Text"
     ]
   },
@@ -87,13 +94,18 @@
     "Description": "The Baudot Code is a five bit telegraphy code developed by Emile Baudot of France that extended its character set by being able to switch modes from letters to figures. The original ITA1 code included several undefined characters to be selected my national telegraph authorities and lead to various divergent standards. It was succeeded by a variant, called ITA2, created by Donald Murray of New Zealand would become the major international standard for text communication until the rise of ASCII (which was itself adopted as ITA5). The data rate 'baud' which measures symbols per second is named after the Baudot code.\n\nAn important part of the Baudot codes is control characters. These are represented here by Unicode control pictures.\n␀: The null character, nothing transmitted.\n␍: Carriage Return, place the printing head at the start of a line.\n␊: Line Feed, move to the next line\n␎: Figure Shift (Shift Out), change to the number and symbols mode\n␏: Letter Shift (Shift In), change to the letter mode\n␅: Enqiry, test for an automatic response from the receiving station\n␇: Bell, ring a bell at the receiving station",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Fixed-Width",
+      "Prefix"
+    ]
   },
   "Biquinary Coded Decimal": {
     "Description": "Biquinary coded decimal is a method frequently used to represent number on an abacus. The top two values represent a bead in one of two positions, standing for 0 or 5. The lower five bits represent beads that count the ones digits.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Fixed-Width"
+    ]
   },
   "Braille Encodings": {
     "Description": "There are several one-to-one encodings used to describe the 64 possible Braille cells when the characters themselved cannot be used.",
@@ -144,6 +156,7 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
+      "Variable Width",
       "Integer",
       "Prefix"
     ]
@@ -153,6 +166,7 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
+      "Variable Width",
       "Integer"
     ]
   },
@@ -161,6 +175,7 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
+      "Variable Width",
       "Integer",
       "Prefix"
     ]
@@ -170,6 +185,7 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
+      "Fixed-Width",
       "Prefix"
     ]
   },
@@ -178,6 +194,7 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
+      "Variable Width",
       "Integer"
     ]
   },
@@ -185,7 +202,9 @@
     "Description": "The Gray code or reflected binary code that represents non-negative integers so that in order they differ only in a single bit. Originally this kind of ordering was useful for mechanical switches as they can be moved through every possible setting while avoiding the issue of switches not moving with perfect synchronization.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Prefix"
+    ]
   },
   "Hamming Code": {
     "Description": "The family of Hamming Codes are widely used for detecting and correcting errors. They automatically correct single bit errors, with an extra parity bit two bit errors can be detected. No code that corrects single bit errors can do so using fewer check bits than a Hamming code. The Hamming(4,7) code is about 57% efficient using three bits check digits for four data bits. Additional check digits become very efficient, 8 check bits are sufficient to cover 247 data bits for 97% efficiency. Despite this the higher efficiency sending a larger number of bits at a time increases probability of errors.",
@@ -205,7 +224,10 @@
     "Description": "Intel hex encodes bytes of data into ASCII text with light error detection. The data is broken up into chunks of up to 255 bytes (though smaller values were more common) and recorded as uppercase hexadecimal. The record includes auxiliary data indicating length, location in memory, and record type are along with a one byte checksum.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Variable Width",
+      "Error Correction"
+    ]
   },
   "ISBN": {
     "Description": "The International Standard Book Number (ISBN) is a standard identifier assigned to each edition and variant of a registered publication. From 1953 to 2007 the standard was ten digits until it was updated to match the 13-digit EAN product standard. To catch simple transcrption errors a check digit is calculated and included at the end.",
@@ -228,6 +250,7 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
+      "Variable Width",
       "Integer"
     ]
   },
@@ -236,6 +259,7 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
+      "Variable Width",
       "Integer",
       "Prefix"
     ]
@@ -267,7 +291,9 @@
     "Description": "The best known version of Morse Code is the ITU Standard. It uses two kind of signals the 'dit' and 'dah' with the dah defined as three times the length of the dit. Morse code also requires periods with no signal, called spaces, in order to differentiate characters. The subset of ITU Morse below covers all the printing characters. Additional control signals and prosigns are not yet supported. The space between dits and dahs is the same length as a dit, between characters is a space of three dits. The older American Morse standard is slightly different, still using dits and dahs of the same size but also including a double length space within come characters.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Variable Width"
+    ]
   },
   "MTK2": {
     "Description": "MTK2 is the Russian variant of the ITA2 Baudot Code. Due to the larger Cyrillic alphabet additional space was needed to transmit all characters. To this end MTK2 has an extra control character that shifts to Cyrillic Mode.",
@@ -302,6 +328,7 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
+      "Variable Width",
       "Integer"
     ]
   },
@@ -374,6 +401,7 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
+      "Variable Width",
       "Integer",
       "Prefix"
     ]
@@ -397,6 +425,7 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
+      "Variable Width",
       "Integer",
       "Prefix"
     ]
@@ -406,6 +435,8 @@
     "Authors": null,
     "Publication": null,
     "Traits": [
+      "Variable Width",
+      "Fixed-Width",
       "Prefix"
     ]
   },
