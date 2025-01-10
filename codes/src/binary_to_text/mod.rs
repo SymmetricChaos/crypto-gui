@@ -7,6 +7,7 @@ pub mod bytewords;
 pub mod intel_hex;
 pub mod numeric;
 pub mod pgp_words;
+pub mod quoted_printable;
 pub mod skey;
 
 use std::{fs::read, path::PathBuf};
