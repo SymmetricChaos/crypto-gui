@@ -16,13 +16,13 @@ impl Default for Base64Frame {
 
 impl CodeFrame for Base64Frame {
     fn ui(&mut self, ui: &mut egui::Ui) {
-        ui.group(|ui| {
-            ui.hyperlink_to(
-                "see the code",
-                "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/binary_to_text/base64.rs",
-            );
-            ui.add_space(8.0);
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/binary_to_text/base64.rs",
+        );
 
+        ui.add_space(8.0);
+        ui.group(|ui| {
             ui.subheading("Variant");
             ui.horizontal(|ui| {
                 ui.selectable_value(&mut self.code.variant, B64Variant::Standard, "Standard");
@@ -31,11 +31,7 @@ impl CodeFrame for Base64Frame {
                     B64Variant::UrlSafe,
                     "URL and Filename Safe",
                 );
-                ui.selectable_value(
-                    &mut self.code.variant,
-                    B64Variant::Crypt,
-                    "crypt",
-                );
+                ui.selectable_value(&mut self.code.variant, B64Variant::Crypt, "crypt");
             });
         });
 

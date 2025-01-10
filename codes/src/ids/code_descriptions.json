@@ -201,6 +201,12 @@
     "Publication": null,
     "Traits": null
   },
+  "Intel Hex": {
+    "Description": "Intel hex encodes bytes of data into ASCII text with light error detection. The data is broken up into chunks of up to 255 bytes (though smaller values were more common) and recorded as uppercase hexadecimal. The record includes auxiliary data indicating length, location in memory, and record type are along with a one byte checksum.",
+    "Authors": null,
+    "Publication": null,
+    "Traits": null
+  },
   "ISBN": {
     "Description": "The International Standard Book Number (ISBN) is a standard identifier assigned to each edition and variant of a registered publication. From 1953 to 2007 the standard was ten digits until it was updated to match the 13-digit EAN product standard. To catch simple transcrption errors a check digit is calculated and included at the end.",
     "Authors": null,

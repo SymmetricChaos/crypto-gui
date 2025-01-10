@@ -60,6 +60,7 @@ code_ids_and_names!(
     Gray, "Gray Code";
     Hamming, "Hamming Code";
     IcsFlags, "ICS Flags";
+    IntelHex, "IntelHex";
     Isbn, "ISBN";
     Itf, "ITF";
     Leb128, "LEB128";

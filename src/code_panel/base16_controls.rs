@@ -21,7 +21,9 @@ impl CodeFrame for Base16Frame {
             "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/binary_to_text/base16.rs",
         );
         ui.add_space(8.0);
+        ui.binary_to_text_input_mode(&mut self.code.mode);
 
+        ui.add_space(8.0);
         ui.checkbox(&mut self.code.upper, "Uppercase");
 
         if self.code.upper {

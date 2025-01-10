@@ -33,6 +33,7 @@ mod godel_controls;
 mod gray_controls;
 mod hamming_controls;
 mod ics_flags_controls;
+mod intel_hex_controls;
 mod isbn_contols;
 mod itf_controls;
 mod leb128_controls;
@@ -129,6 +130,7 @@ pub struct CodeInterface {
     basex: basex_controls::BaseXFrame,
     bytewords: bytewords_controls::BytewordsFrame,
     ccsid_binary: ccsid_controls::CcsidBinaryFrame,
+    intel_hex: intel_hex_controls::IntelHexFrame,
     numeric: numeric_controls::BytesAsNumbersFrame,
     pgp: pgp_controls::PgpWordsFrame,
     skey: skey_controls::SKeyWordsFrame,
@@ -213,6 +215,7 @@ impl CodeInterface {
                 CodeId::ByteAsNum,
                 CodeId::Bytewords,
                 CodeId::CcsidBinary,
+                CodeId::IntelHex,
                 CodeId::Pgp,
                 CodeId::Skey,
             ],
@@ -326,6 +329,7 @@ impl CodeInterface {
             CodeId::Gray => &mut self.gray,
             CodeId::Hamming => &mut self.hamming,
             CodeId::IcsFlags => &mut self.ics_flags,
+            CodeId::IntelHex => &mut self.intel_hex,
             CodeId::Isbn => &mut self.isbn,
             CodeId::Itf => &mut self.itf,
             CodeId::Leb128 => &mut self.leb128,
