@@ -1,4 +1,4 @@
-use crate::traits::StatefulHasher;
+use crate::traits::{ResettableHasher, StatefulHasher};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FletcherhWidth {
@@ -65,6 +65,24 @@ impl StatefulHasher for Fletcher {
     }
 
     crate::stateful_hash_helpers!();
+}
+
+impl ResettableHasher for Fletcher {
+    fn finalize_and_reset(&mut self) -> Vec<u8> {
+        let out = match self.width {
+            FletcherhWidth::W16 => vec![self.state[1] as u8, self.state[0] as u8],
+            FletcherhWidth::W32 => [self.state[1] as u16, self.state[0] as u16]
+                .iter()
+                .flat_map(|w| w.to_be_bytes())
+                .collect(),
+            FletcherhWidth::W64 => [self.state[1], self.state[0]]
+                .iter()
+                .flat_map(|w| w.to_be_bytes())
+                .collect(),
+        };
+        self.state = [0; 2];
+        out
+    }
 }
 
 crate::stateful_hash_tests!(
