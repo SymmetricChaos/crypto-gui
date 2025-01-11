@@ -1,5 +1,3 @@
-use std::fmt::Write;
-
 use super::BinaryToText;
 use crate::{errors::CodeError, traits::Code};
 use utils::byte_formatting::ByteFormat;
@@ -32,14 +30,14 @@ impl BinaryToText for QuotedPrintable {
                 _ => {
                     if row.len() > 72 {
                         out.extend(row.drain(..));
-                        out.push_str("=\n");
+                        out.push_str("=\r\n");
                     }
                     push_quote_byte(*byte, &mut row);
                 }
             }
-            if row.len() == 75 {
-                out.extend(row.drain(..));
-                out.push_str("=\n");
+            if row.len() >= 75 {
+                out.extend(row.drain(..75));
+                out.push_str("=\r\n");
             }
         }
         out.push_str(&row);
@@ -58,6 +56,8 @@ impl Code for QuotedPrintable {
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
+        for line in text.split("=\r\n") {}
+
         todo!()
     }
 }
@@ -84,10 +84,10 @@ mod quoted_printable_tests {
     fn encode_mulitline() {
         let code = QuotedPrintable::default();
         assert_eq!(
-            "J'interdis aux marchands de vanter trop leurs marchandises. Car ils se font=
- vite p=C3=A9dagogues et t'enseignent comme but ce qui n'est par essence qu=
-'un moyen, et te trompant ainsi sur la route =C3=A0 suivre les voil=C3=A0 b=
-ient=C3=B4t qui te d=C3=A9gradent, car si leur musique est vulgaire ils te =
+            "J'interdis aux marchands de vanter trop leurs marchandises. Car ils se font=\r
+ vite p=C3=A9dagogues et t'enseignent comme but ce qui n'est par essence qu=\r
+'un moyen, et te trompant ainsi sur la route =C3=A0 suivre les voil=C3=A0 b=\r
+ient=C3=B4t qui te d=C3=A9gradent, car si leur musique est vulgaire ils te =\r
 fabriquent pour te la vendre une =C3=A2me vulgaire.",
             code.encode_bytes(&ByteFormat::Utf8.text_to_bytes(LONG_TEXT).unwrap())
                 .unwrap()
