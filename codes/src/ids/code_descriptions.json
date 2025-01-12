@@ -57,6 +57,14 @@
       "Integer"
     ]
   },
+  "Binary-Coded Decimal": {
+    "Description": "Binary-Coded Decimal (BCD) represents decimal digits as four bits of binary data. Because four bits allow 16 values (not just 10) there are numerous possible encodings.",
+    "Authors": null,
+    "Publication": null,
+    "Traits": [
+      "Integer"
+    ]
+  },
   "BaseX": {
     "Description": "Originally created as Base58 for usage in Bitcoin this binary-to-text standard encodes data as text characters without padding. The reduced alphabet is used to avoid characters that might be confused while read or transcribed by a human but this variation allows arbitrary characters and alphabet sizes. Although similar to Base64 and Base32 the BaseX encodings are not identical to them even when an identical alphabet.",
     "Authors": null,
@@ -221,7 +229,7 @@
     "Traits": null
   },
   "Intel Hex": {
-    "Description": "Intel hex encodes bytes of data into ASCII text with light error detection. The data is broken up into chunks of up to 255 bytes (though smaller values were more common) and recorded as uppercase hexadecimal. The record includes auxiliary data indicating length, location in memory, and record type are along with a one byte checksum.",
+    "Description": "Intel hex encodes bytes of data into ASCII text with light error detection. The data is broken up into chunks of up to 255 bytes (though smaller values were more common) and recorded as uppercase hexadecimal. The record includes auxiliary data indicating length, location in memory, and record type are along with a one byte checksum. To check a line all of the bytes are added together, ignoring overflow, and should result in zero. Although several record types are defined this implementation uses only 00 (data) and 01 (end of file).",
     "Authors": null,
     "Publication": null,
     "Traits": [

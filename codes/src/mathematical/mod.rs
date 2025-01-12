@@ -5,6 +5,7 @@ pub mod balanced_ternary;
 pub mod base_n;
 pub mod base_n_bijective;
 pub mod base_negative_two;
+pub mod binary_coded_decimal;
 pub mod biquinary_decimal;
 pub mod combinadic;
 pub mod elias;
