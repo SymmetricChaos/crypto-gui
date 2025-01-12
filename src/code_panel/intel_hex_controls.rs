@@ -26,11 +26,17 @@ impl CodeFrame for IntelHexFrame {
 
         ui.add_space(8.0);
         ui.subheading("Starting Address");
-        ui.add(DragValue::new(&mut self.code.address));
+        ui.u16_hex_edit(&mut self.code.address);
 
         ui.add_space(8.0);
         ui.subheading("Maximum Line Length");
         ui.add(DragValue::new(&mut self.code.line_length).range(1..=255));
+
+        ui.add_space(8.0);
+        ui.subheading("Example");
+        ui.label("An IntelHex line divided up by sections.");
+        ui.monospace(": 0B 0010 00 6164647265737320676170 A7");
+        ui.label("The line starts with `:` after which is the data length `0B` (12 bytes), the address is `0010` (offset by 16 bytes), the record type is `00` (data), the data consists of 12 bytes, finally the checksum of `A7` ends the line.");
 
         ui.add_space(16.0);
     }
