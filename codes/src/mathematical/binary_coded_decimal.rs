@@ -1,10 +1,11 @@
+use itertools::Itertools;
 use utils::byte_formatting::ByteFormat;
 
 use crate::{errors::CodeError, traits::Code};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BcdVariant {
-    V8421,
+    Simple,
     V7421,
     Aiken,
     Excess3,
@@ -14,7 +15,7 @@ pub enum BcdVariant {
 impl BcdVariant {
     fn array(&self) -> [u8; 10] {
         match self {
-            BcdVariant::V8421 => [0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9],
+            BcdVariant::Simple => [0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9],
             BcdVariant::V7421 => [0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x8, 0x9, 0xA],
             BcdVariant::Aiken => [0x0, 0x1, 0x2, 0x3, 0x4, 0xB, 0xC, 0xD, 0xE, 0xF],
             BcdVariant::Excess3 => [0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC],
@@ -46,7 +47,7 @@ pub struct BinaryCodedDecimal {
 impl Default for BinaryCodedDecimal {
     fn default() -> Self {
         Self {
-            variant: BcdVariant::V8421,
+            variant: BcdVariant::Simple,
             signed: true,
             formatting: ByteFormat::Hex,
             width: WordWidth::W32,
@@ -103,6 +104,21 @@ impl BinaryCodedDecimal {
         Ok(words)
     }
 
+    fn decode_u32_to_signed(&self, values: &[u32]) -> Vec<String> {
+        let mut arr = self.variant.array();
+        let mut out = Vec::with_capacity(values.len());
+
+        for value in values {
+            let mut s = String::new();
+            for i in 0..8 {
+                let nibble = (value >> (4 * i)) & 0x0f;
+            }
+            out.push(s);
+        }
+
+        todo!()
+    }
+
     fn encode_signed_to_u64(&self, text: &str) -> Result<Vec<u64>, CodeError> {
         let arr = self.variant.array();
         let mut words = Vec::new();
@@ -145,7 +161,16 @@ impl BinaryCodedDecimal {
 
 impl Code for BinaryCodedDecimal {
     fn encode(&self, text: &str) -> Result<String, crate::errors::CodeError> {
-        todo!()
+        match self.width {
+            WordWidth::W32 => {
+                let v = self.encode_signed_to_u32(text)?;
+                Ok(self.formatting.u32_slice_to_text_be(&v))
+            }
+            WordWidth::W64 => {
+                let v = self.encode_signed_to_u64(text)?;
+                Ok(self.formatting.u64_slice_to_text_be(&v))
+            }
+        }
     }
 
     fn decode(&self, text: &str) -> Result<String, crate::errors::CodeError> {
@@ -161,12 +186,18 @@ mod bcd_tests {
     const ENCODEDTEXT: &'static str = "";
 
     #[test]
-    fn encode_test() {
+    fn encode_u32_test() {
         let code = BinaryCodedDecimal::default();
         assert_eq!(
             vec![0x0045541c, 0x2321111d],
             code.encode_signed_to_u32(PLAINTEXT).unwrap(),
         );
+    }
+
+    #[test]
+    fn encode_width_u32_test() {
+        let code = BinaryCodedDecimal::default();
+        println!("{}", code.encode(PLAINTEXT).unwrap())
     }
 
     #[test]
