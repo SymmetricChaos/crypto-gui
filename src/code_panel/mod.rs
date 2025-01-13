@@ -27,6 +27,7 @@ mod ccsid_controls;
 mod crc_controls;
 mod damm_controls;
 // mod elias_controls;
+mod bcd_controls;
 mod factoradic_controls;
 mod fibonacci_controls;
 mod godel_controls;
@@ -166,6 +167,7 @@ pub struct CodeInterface {
     primorial: primoral_controls::PrimorialFrame,
     biquinary: biquinary_controls::BiquinaryDecimalFrame,
     leb128: leb128_controls::Leb128Frame,
+    bcd: bcd_controls::BcdFrame,
 
     // Prefix
     fixed_width: block_controls::BlockCodeFrame,
@@ -228,6 +230,7 @@ impl CodeInterface {
                 CodeId::BalancedTernary,
                 CodeId::BaseN,
                 CodeId::BaseNBijective,
+                CodeId::BinaryCodedDecimal,
                 CodeId::BiquinaryDecimal,
                 CodeId::Elias,
                 CodeId::Factoradic,
@@ -311,6 +314,7 @@ impl CodeInterface {
             CodeId::Base32 => &mut self.base32,
             CodeId::Base64 => &mut self.base64,
             CodeId::Baudot => &mut self.baudot,
+            CodeId::BinaryCodedDecimal => &mut self.bcd,
             CodeId::BiquinaryDecimal => &mut self.biquinary,
             CodeId::Braille => &mut self.braille,
             CodeId::BrailleEncoding => &mut self.braille_encoding,

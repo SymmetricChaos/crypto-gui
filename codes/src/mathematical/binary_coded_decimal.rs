@@ -39,8 +39,8 @@ fn digit_to_nibble(digit: char, arr: &[u8; 10]) -> Result<u8, CodeError> {
 
 pub struct BinaryCodedDecimal {
     // variant: BcdVariant,
-    formatting: ByteFormat,
-    width: WordWidth,
+    pub formatting: ByteFormat,
+    pub width: WordWidth,
 }
 
 impl Default for BinaryCodedDecimal {

@@ -41,6 +41,7 @@ code_ids_and_names!(
     Base32, "Base32";
     Base64, "Base64";
     Baudot, "Baudot";
+    BinaryCodedDecimal, "Binary-Coded Decimal";
     BiquinaryDecimal, "Biquinary Coded Decimal";
     Braille, "Simplified Braille";
     BrailleEncoding, "Braille Encodings";
