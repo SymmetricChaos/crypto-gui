@@ -182,27 +182,30 @@ impl Code for BinaryCodedDecimal {
 mod bcd_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "45541, -2321111";
-    const ENCODEDTEXT: &'static str = "";
+    const PLAINTEXT32: &'static str = "45541, -2321111";
+    const ENCODEDTEXT32_SIMPLE: &'static str = "0045541c2321111d";
+    const ENCODEDTEXT32_EXCESS3: &'static str = "0078874c5654444d";
+
+    const PLAINTEXT64: &'static str = "1234567890, -876543211000";
+    const ENCODEDTEXT64_SIMPLE: &'static str = "000001234567890c000876543211000d";
 
     #[test]
-    fn encode_u32_test() {
+    fn encode_u32_simple_test() {
         let code = BinaryCodedDecimal::default();
-        assert_eq!(
-            vec![0x0045541c, 0x2321111d],
-            code.encode_signed_to_u32(PLAINTEXT).unwrap(),
-        );
+        assert_eq!(ENCODEDTEXT32_SIMPLE, code.encode(PLAINTEXT32).unwrap())
     }
 
     #[test]
-    fn encode_width_u32_test() {
-        let code = BinaryCodedDecimal::default();
-        println!("{}", code.encode(PLAINTEXT).unwrap())
+    fn encode_u32_excess3_test() {
+        let mut code = BinaryCodedDecimal::default();
+        code.variant = BcdVariant::Excess3;
+        assert_eq!(ENCODEDTEXT32_EXCESS3, code.encode(PLAINTEXT32).unwrap())
     }
 
     #[test]
-    fn decode_test() {
-        let code = BinaryCodedDecimal::default();
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
+    fn encode_u64_simple_test() {
+        let mut code = BinaryCodedDecimal::default();
+        code.width = WordWidth::W64;
+        assert_eq!(ENCODEDTEXT64_SIMPLE, code.encode(PLAINTEXT64).unwrap())
     }
 }
