@@ -705,6 +705,7 @@ dependencies = [
  "lazy_static",
  "nalgebra",
  "num 0.4.3",
+ "paste",
  "pest",
  "pest_derive",
  "primal",
