@@ -57,6 +57,58 @@ pub fn bytes_to_bitstring<T: AsRef<[u8]>>(bytes: T) -> String {
     bytes.as_ref().iter().map(|b| format!("{:08b}", b)).join("")
 }
 
+macro_rules! text_to_and_slice_to {
+    ($($t:ty),+ $(,)?) => {
+        paste! {
+            $(
+            pub fn [<text_to_ $t _be>](&self, text: &str) -> Result<Vec<$t>, ByteFormatError> {
+                let bytes = self.text_to_bytes(text)?;
+                let n = (<$t>::BITS / 8) as usize;
+                if bytes.len() % n != 0 {
+                    Err(ByteFormatError("number of bytes must be a muliple of the type size in bytes"))
+                } else {
+                    Ok(bytes
+                        .chunks_exact(n )
+                        .map(|p| $t::from_be_bytes(p.try_into().unwrap()))
+                        .collect_vec())
+                }
+            }
+
+            pub fn [<text_to_ $t _le>](&self, text: &str) -> Result<Vec<$t>, ByteFormatError> {
+                let bytes = self.text_to_bytes(text)?;
+                let n = (<$t>::BITS / 8) as usize;
+                if bytes.len() % n != 0 {
+                    Err(ByteFormatError("number of bytes must be a muliple of the type size in bytes"))
+                } else {
+                    Ok(bytes
+                        .chunks_exact(n)
+                        .map(|p| $t::from_le_bytes(p.try_into().unwrap()))
+                        .collect_vec())
+                }
+            }
+
+            pub fn [<$t _slice_to_text_be>]<T: AsRef<[$t]>>(&self, nums: T) -> String {
+                self.byte_slice_to_text(
+                    nums.as_ref()
+                        .iter()
+                        .flat_map(|n| n.to_be_bytes())
+                        .collect_vec(),
+                )
+            }
+
+            pub fn[<$t _slice_to_text_le>]<T: AsRef<[$t]>>(&self, nums: T) -> String {
+                self.byte_slice_to_text(
+                    nums.as_ref()
+                        .iter()
+                        .flat_map(|n| n.to_le_bytes())
+                        .collect_vec(),
+                )
+            }
+        )+
+        }
+    };
+}
+
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct ByteFormatError(&'static str);
 
@@ -96,6 +148,8 @@ impl ByteFormat {
         }
     }
 
+    text_to_and_slice_to!(u16, i16, u32, i32, u64, i64, u128, i128);
+
     pub fn text_to_u8(&self, text: &str) -> Result<Vec<u8>, ByteFormatError> {
         self.text_to_bytes(text)
     }
@@ -103,214 +157,6 @@ impl ByteFormat {
     pub fn text_to_i8(&self, text: &str) -> Result<Vec<i8>, ByteFormatError> {
         self.text_to_bytes(text)
             .map(|v| v.into_iter().map(|n| n as i8).collect_vec())
-    }
-
-    pub fn text_to_u16_be(&self, text: &str) -> Result<Vec<u16>, ByteFormatError> {
-        let bytes = self.text_to_bytes(text)?;
-
-        if bytes.len() % 2 != 0 {
-            Err(ByteFormatError("data must be in blocks of two bytes"))
-        } else {
-            Ok(bytes
-                .chunks_exact(2)
-                .map(|p| u16::from_be_bytes(p.try_into().unwrap()))
-                .collect_vec())
-        }
-    }
-
-    pub fn text_to_u16_le(&self, text: &str) -> Result<Vec<u16>, ByteFormatError> {
-        let bytes = self.text_to_bytes(text)?;
-
-        if bytes.len() % 2 != 0 {
-            Err(ByteFormatError("data must be in blocks of two bytes"))
-        } else {
-            Ok(bytes
-                .chunks_exact(2)
-                .map(|p| u16::from_le_bytes(p.try_into().unwrap()))
-                .collect_vec())
-        }
-    }
-
-    pub fn text_to_i16_be(&self, text: &str) -> Result<Vec<i16>, ByteFormatError> {
-        let bytes = self.text_to_bytes(text)?;
-
-        if bytes.len() % 2 != 0 {
-            Err(ByteFormatError("data must be in blocks of two bytes"))
-        } else {
-            Ok(bytes
-                .chunks_exact(2)
-                .map(|p| i16::from_be_bytes(p.try_into().unwrap()))
-                .collect_vec())
-        }
-    }
-
-    pub fn text_to_i16_le(&self, text: &str) -> Result<Vec<i16>, ByteFormatError> {
-        let bytes = self.text_to_bytes(text)?;
-
-        if bytes.len() % 2 != 0 {
-            Err(ByteFormatError("data must be in blocks of two bytes"))
-        } else {
-            Ok(bytes
-                .chunks_exact(2)
-                .map(|p| i16::from_le_bytes(p.try_into().unwrap()))
-                .collect_vec())
-        }
-    }
-
-    pub fn text_to_u32_be(&self, text: &str) -> Result<Vec<u32>, ByteFormatError> {
-        let bytes = self.text_to_bytes(text)?;
-
-        if bytes.len() % 4 != 0 {
-            Err(ByteFormatError("data must be in blocks of four bytes"))
-        } else {
-            Ok(bytes
-                .chunks_exact(4)
-                .map(|p| u32::from_be_bytes(p.try_into().unwrap()))
-                .collect_vec())
-        }
-    }
-
-    pub fn text_to_u32_le(&self, text: &str) -> Result<Vec<u32>, ByteFormatError> {
-        let bytes = self.text_to_bytes(text)?;
-
-        if bytes.len() % 4 != 0 {
-            Err(ByteFormatError("data must be in blocks of four bytes"))
-        } else {
-            Ok(bytes
-                .chunks_exact(4)
-                .map(|p| u32::from_le_bytes(p.try_into().unwrap()))
-                .collect_vec())
-        }
-    }
-
-    pub fn text_to_i32_be(&self, text: &str) -> Result<Vec<i32>, ByteFormatError> {
-        let bytes = self.text_to_bytes(text)?;
-
-        if bytes.len() % 4 != 0 {
-            Err(ByteFormatError("data must be in blocks of four bytes"))
-        } else {
-            Ok(bytes
-                .chunks_exact(4)
-                .map(|p| i32::from_be_bytes(p.try_into().unwrap()))
-                .collect_vec())
-        }
-    }
-
-    pub fn text_to_i32_le(&self, text: &str) -> Result<Vec<i32>, ByteFormatError> {
-        let bytes = self.text_to_bytes(text)?;
-
-        if bytes.len() % 4 != 0 {
-            Err(ByteFormatError("data must be in blocks of four bytes"))
-        } else {
-            Ok(bytes
-                .chunks_exact(4)
-                .map(|p| i32::from_le_bytes(p.try_into().unwrap()))
-                .collect_vec())
-        }
-    }
-
-    pub fn text_to_u64_be(&self, text: &str) -> Result<Vec<u64>, ByteFormatError> {
-        let bytes = self.text_to_bytes(text)?;
-
-        if bytes.len() % 8 != 0 {
-            Err(ByteFormatError("data must be in blocks of eight bytes"))
-        } else {
-            Ok(bytes
-                .chunks_exact(8)
-                .map(|p| u64::from_be_bytes(p.try_into().unwrap()))
-                .collect_vec())
-        }
-    }
-
-    pub fn text_to_u64_le(&self, text: &str) -> Result<Vec<u64>, ByteFormatError> {
-        let bytes = self.text_to_bytes(text)?;
-
-        if bytes.len() % 8 != 0 {
-            Err(ByteFormatError("data must be in blocks of eight bytes"))
-        } else {
-            Ok(bytes
-                .chunks_exact(8)
-                .map(|p| u64::from_le_bytes(p.try_into().unwrap()))
-                .collect_vec())
-        }
-    }
-
-    pub fn text_to_i64_be(&self, text: &str) -> Result<Vec<i64>, ByteFormatError> {
-        let bytes = self.text_to_bytes(text)?;
-
-        if bytes.len() % 8 != 0 {
-            Err(ByteFormatError("data must be in blocks of eight bytes"))
-        } else {
-            Ok(bytes
-                .chunks_exact(8)
-                .map(|p| i64::from_be_bytes(p.try_into().unwrap()))
-                .collect_vec())
-        }
-    }
-
-    pub fn text_to_i64_le(&self, text: &str) -> Result<Vec<i64>, ByteFormatError> {
-        let bytes = self.text_to_bytes(text)?;
-
-        if bytes.len() % 8 != 0 {
-            Err(ByteFormatError("data must be in blocks of eight bytes"))
-        } else {
-            Ok(bytes
-                .chunks_exact(8)
-                .map(|p| i64::from_le_bytes(p.try_into().unwrap()))
-                .collect_vec())
-        }
-    }
-
-    pub fn text_to_u128_be(&self, text: &str) -> Result<Vec<u128>, ByteFormatError> {
-        let bytes = self.text_to_bytes(text)?;
-
-        if bytes.len() % 16 != 0 {
-            Err(ByteFormatError("data must be in blocks of eight bytes"))
-        } else {
-            Ok(bytes
-                .chunks_exact(16)
-                .map(|p| u128::from_be_bytes(p.try_into().unwrap()))
-                .collect_vec())
-        }
-    }
-
-    pub fn text_to_u128_le(&self, text: &str) -> Result<Vec<u128>, ByteFormatError> {
-        let bytes = self.text_to_bytes(text)?;
-
-        if bytes.len() % 16 != 0 {
-            Err(ByteFormatError("data must be in blocks of eight bytes"))
-        } else {
-            Ok(bytes
-                .chunks_exact(16)
-                .map(|p| u128::from_le_bytes(p.try_into().unwrap()))
-                .collect_vec())
-        }
-    }
-
-    pub fn text_to_i128_be(&self, text: &str) -> Result<Vec<i128>, ByteFormatError> {
-        let bytes = self.text_to_bytes(text)?;
-
-        if bytes.len() % 16 != 0 {
-            Err(ByteFormatError("data must be in blocks of eight bytes"))
-        } else {
-            Ok(bytes
-                .chunks_exact(16)
-                .map(|p| i128::from_be_bytes(p.try_into().unwrap()))
-                .collect_vec())
-        }
-    }
-
-    pub fn text_to_i128_le(&self, text: &str) -> Result<Vec<i128>, ByteFormatError> {
-        let bytes = self.text_to_bytes(text)?;
-
-        if bytes.len() % 16 != 0 {
-            Err(ByteFormatError("data must be in blocks of eight bytes"))
-        } else {
-            Ok(bytes
-                .chunks_exact(16)
-                .map(|p| i128::from_le_bytes(p.try_into().unwrap()))
-                .collect_vec())
-        }
     }
 
     pub fn byte_slice_to_text<T: AsRef<[u8]>>(&self, bytes: T) -> String {
@@ -333,132 +179,6 @@ impl ByteFormat {
             ByteFormat::Base64 => BASE64_STANDARD.encode(&bytes.collect_vec()),
             ByteFormat::Binary => bytes.map(|byte| format!("{:08b}", byte)).collect(),
         }
-    }
-
-    pub fn u16_slice_to_text_be<T: AsRef<[u16]>>(&self, nums: T) -> String {
-        self.byte_slice_to_text(
-            nums.as_ref()
-                .iter()
-                .flat_map(|n| n.to_be_bytes())
-                .collect_vec(),
-        )
-    }
-
-    pub fn u16_slice_to_text_le<T: AsRef<[u16]>>(&self, nums: T) -> String {
-        self.byte_slice_to_text(
-            nums.as_ref()
-                .iter()
-                .flat_map(|n| n.to_le_bytes())
-                .collect_vec(),
-        )
-    }
-
-    pub fn u32_slice_to_text_be<T: AsRef<[u32]>>(&self, nums: T) -> String {
-        self.byte_slice_to_text(
-            nums.as_ref()
-                .iter()
-                .flat_map(|n| n.to_be_bytes())
-                .collect_vec(),
-        )
-    }
-
-    pub fn u32_slice_to_text_le<T: AsRef<[u32]>>(&self, nums: T) -> String {
-        self.byte_slice_to_text(
-            nums.as_ref()
-                .iter()
-                .flat_map(|n| n.to_le_bytes())
-                .collect_vec(),
-        )
-    }
-
-    pub fn i32_slice_to_text_be<T: AsRef<[i32]>>(&self, nums: T) -> String {
-        self.byte_slice_to_text(
-            nums.as_ref()
-                .iter()
-                .flat_map(|n| n.to_be_bytes())
-                .collect_vec(),
-        )
-    }
-
-    pub fn i32_slice_to_text_le<T: AsRef<[i32]>>(&self, nums: T) -> String {
-        self.byte_slice_to_text(
-            nums.as_ref()
-                .iter()
-                .flat_map(|n| n.to_le_bytes())
-                .collect_vec(),
-        )
-    }
-
-    pub fn u64_slice_to_text_be<T: AsRef<[u64]>>(&self, nums: T) -> String {
-        self.byte_slice_to_text(
-            nums.as_ref()
-                .iter()
-                .flat_map(|n| n.to_be_bytes())
-                .collect_vec(),
-        )
-    }
-
-    pub fn u64_slice_to_text_le<T: AsRef<[u64]>>(&self, nums: T) -> String {
-        self.byte_slice_to_text(
-            nums.as_ref()
-                .iter()
-                .flat_map(|n| n.to_le_bytes())
-                .collect_vec(),
-        )
-    }
-
-    pub fn i64_slice_to_text_be<T: AsRef<[i64]>>(&self, nums: T) -> String {
-        self.byte_slice_to_text(
-            nums.as_ref()
-                .iter()
-                .flat_map(|n| n.to_be_bytes())
-                .collect_vec(),
-        )
-    }
-
-    pub fn i64_slice_to_text_le<T: AsRef<[i64]>>(&self, nums: T) -> String {
-        self.byte_slice_to_text(
-            nums.as_ref()
-                .iter()
-                .flat_map(|n| n.to_le_bytes())
-                .collect_vec(),
-        )
-    }
-
-    pub fn u128_slice_to_text_be<T: AsRef<[u128]>>(&self, nums: T) -> String {
-        self.byte_slice_to_text(
-            nums.as_ref()
-                .iter()
-                .flat_map(|n| n.to_be_bytes())
-                .collect_vec(),
-        )
-    }
-
-    pub fn u128_slice_to_text_le<T: AsRef<[u128]>>(&self, nums: T) -> String {
-        self.byte_slice_to_text(
-            nums.as_ref()
-                .iter()
-                .flat_map(|n| n.to_le_bytes())
-                .collect_vec(),
-        )
-    }
-
-    pub fn i128_slice_to_text_be<T: AsRef<[i128]>>(&self, nums: T) -> String {
-        self.byte_slice_to_text(
-            nums.as_ref()
-                .iter()
-                .flat_map(|n| n.to_be_bytes())
-                .collect_vec(),
-        )
-    }
-
-    pub fn i128_slice_to_text_le<T: AsRef<[i128]>>(&self, nums: T) -> String {
-        self.byte_slice_to_text(
-            nums.as_ref()
-                .iter()
-                .flat_map(|n| n.to_le_bytes())
-                .collect_vec(),
-        )
     }
 }
 
