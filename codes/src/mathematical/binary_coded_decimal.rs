@@ -52,23 +52,12 @@ impl BinaryCodedDecimal {
                     "the range of 32-bit BCD is -9999999..=9999999",
                 ));
             }
-
             let t = value.abs() as u32;
             let mut word = 0_u32;
-            word |= t / 1000000;
-            word <<= 4;
-            word |= (t / 100000) % 10;
-            word <<= 4;
-            word |= (t / 10000) % 10;
-            word <<= 4;
-            word |= (t / 1000) % 10;
-            word <<= 4;
-            word |= (t / 100) % 10;
-            word <<= 4;
-            word |= (t / 10) % 10;
-            word <<= 4;
-            word |= t % 10;
-            word <<= 4;
+            for i in (0..7).rev() {
+                word |= (t / (10_u32.pow(i))) % 10;
+                word <<= 4;
+            }
             if value.is_negative() {
                 word |= NEG as u32;
             } else {
@@ -162,38 +151,10 @@ impl BinaryCodedDecimal {
 
             let t = value.abs() as u64;
             let mut word = 0_u64;
-            word |= (t / 100000000000000) % 10;
-            word <<= 4;
-            word |= (t / 10000000000000) % 10;
-            word <<= 4;
-            word |= (t / 1000000000000) % 10;
-            word <<= 4;
-            word |= (t / 100000000000) % 10;
-            word <<= 4;
-            word |= (t / 10000000000) % 10;
-            word <<= 4;
-            word |= (t / 1000000000) % 10;
-            word <<= 4;
-            word |= (t / 100000000) % 10;
-            word <<= 4;
-            word |= (t / 100000000) % 10;
-            word <<= 4;
-            word |= (t / 10000000) % 10;
-            word <<= 4;
-            word |= (t / 1000000) % 10;
-            word <<= 4;
-            word |= (t / 100000) % 10;
-            word <<= 4;
-            word |= (t / 10000) % 10;
-            word <<= 4;
-            word |= (t / 1000) % 10;
-            word <<= 4;
-            word |= (t / 100) % 10;
-            word <<= 4;
-            word |= (t / 10) % 10;
-            word <<= 4;
-            word |= t % 10;
-            word <<= 4;
+            for i in (0..15).rev() {
+                word |= (t / (10_u64.pow(i))) % 10;
+                word <<= 4;
+            }
             if value.is_negative() {
                 word |= NEG as u64;
             } else {
@@ -251,7 +212,7 @@ impl BinaryCodedDecimal {
                 false
             } else {
                 return Err(CodeError::Input(format!(
-                    "invalid sign nibble in value {:016x?}, only 0xC and 0xD are allowed",
+                    "invalid sign nibble in value {:016X?}, only 0xC and 0xD are allowed",
                     value
                 )));
             };
@@ -263,7 +224,7 @@ impl BinaryCodedDecimal {
                     n += nibble as i64;
                 } else {
                     return Err(CodeError::Input(format!(
-                        "invalid digit nibble `0x{:01x?}` in value {:016x?}",
+                        "invalid digit nibble `0x{:01X?}` in value {:016X?}",
                         nibble, value
                     )));
                 }
@@ -317,39 +278,58 @@ mod bcd_tests {
     use super::*;
 
     const PLAINTEXT32: &'static str = "12345, -9876543";
-    const ENCODEDTEXT32_SIMPLE: &'static str = "0012345c9876543d";
+    const ENCODEDTEXT32: &'static str = "0012345c9876543d";
 
     const PLAINTEXT64: &'static str = "1234567890, -876543211000, 567567567567567";
-    const ENCODEDTEXT64_SIMPLE: &'static str = "000001234567890c000876543211000d567567567567567c";
+    const ENCODEDTEXT64: &'static str = "000001234567890c000876543211000d567567567567567c";
 
     #[test]
-    fn encode_u32_simple_test() {
+    fn encode_test_32() {
         let code = BinaryCodedDecimal::default();
-        assert_eq!(ENCODEDTEXT32_SIMPLE, code.encode(PLAINTEXT32).unwrap());
-        // println!("{:08x?}", code.encode_i32_to_u32(&[12345, -9876543]));
+        assert_eq!(ENCODEDTEXT32, code.encode(PLAINTEXT32).unwrap());
     }
 
     #[test]
-    fn decode_u32_simple_test() {
-        let code = BinaryCodedDecimal::default();
-        assert_eq!(PLAINTEXT32, code.decode(ENCODEDTEXT32_SIMPLE).unwrap())
+    fn encode_i32() {
+        assert_eq!(
+            vec![0x0012345c_u32, 0x9876543d],
+            BinaryCodedDecimal::default()
+                .encode_i32_to_u32(&[12345_i32, -9876543])
+                .unwrap()
+        );
     }
 
     #[test]
-    fn encode_u64_simple_test() {
+    fn decode_test_32() {
+        let code = BinaryCodedDecimal::default();
+        assert_eq!(PLAINTEXT32, code.decode(ENCODEDTEXT32).unwrap())
+    }
+
+    #[test]
+    fn encode_test_64() {
         let mut code = BinaryCodedDecimal::default();
         code.width = WordWidth::W64;
-        assert_eq!(ENCODEDTEXT64_SIMPLE, code.encode(PLAINTEXT64).unwrap());
-        // println!(
-        //     "{:016x?}",
-        //     code.encode_i64_to_u64(&[1234567890, -876543211000, 567567567567567])
-        // );
+        assert_eq!(ENCODEDTEXT64, code.encode(PLAINTEXT64).unwrap());
     }
 
     #[test]
-    fn decode_u64_simple_test() {
+    fn encode_i64() {
+        assert_eq!(
+            vec![
+                0x000001234567890c_u64,
+                0x000876543211000d,
+                0x567567567567567c
+            ],
+            BinaryCodedDecimal::default()
+                .encode_i64_to_u64(&[1234567890_i64, -876543211000, 567567567567567])
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn decode_test_64() {
         let mut code = BinaryCodedDecimal::default();
         code.width = WordWidth::W64;
-        assert_eq!(PLAINTEXT64, code.decode(ENCODEDTEXT64_SIMPLE).unwrap())
+        assert_eq!(PLAINTEXT64, code.decode(ENCODEDTEXT64).unwrap())
     }
 }
