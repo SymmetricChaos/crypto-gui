@@ -261,6 +261,58 @@ impl ByteFormat {
         }
     }
 
+    pub fn text_to_u128_be(&self, text: &str) -> Result<Vec<u128>, ByteFormatError> {
+        let bytes = self.text_to_bytes(text)?;
+
+        if bytes.len() % 16 != 0 {
+            Err(ByteFormatError("data must be in blocks of eight bytes"))
+        } else {
+            Ok(bytes
+                .chunks_exact(16)
+                .map(|p| u128::from_be_bytes(p.try_into().unwrap()))
+                .collect_vec())
+        }
+    }
+
+    pub fn text_to_u128_le(&self, text: &str) -> Result<Vec<u128>, ByteFormatError> {
+        let bytes = self.text_to_bytes(text)?;
+
+        if bytes.len() % 16 != 0 {
+            Err(ByteFormatError("data must be in blocks of eight bytes"))
+        } else {
+            Ok(bytes
+                .chunks_exact(16)
+                .map(|p| u128::from_le_bytes(p.try_into().unwrap()))
+                .collect_vec())
+        }
+    }
+
+    pub fn text_to_i128_be(&self, text: &str) -> Result<Vec<i128>, ByteFormatError> {
+        let bytes = self.text_to_bytes(text)?;
+
+        if bytes.len() % 16 != 0 {
+            Err(ByteFormatError("data must be in blocks of eight bytes"))
+        } else {
+            Ok(bytes
+                .chunks_exact(16)
+                .map(|p| i128::from_be_bytes(p.try_into().unwrap()))
+                .collect_vec())
+        }
+    }
+
+    pub fn text_to_i128_le(&self, text: &str) -> Result<Vec<i128>, ByteFormatError> {
+        let bytes = self.text_to_bytes(text)?;
+
+        if bytes.len() % 16 != 0 {
+            Err(ByteFormatError("data must be in blocks of eight bytes"))
+        } else {
+            Ok(bytes
+                .chunks_exact(16)
+                .map(|p| i128::from_le_bytes(p.try_into().unwrap()))
+                .collect_vec())
+        }
+    }
+
     pub fn byte_slice_to_text<T: AsRef<[u8]>>(&self, bytes: T) -> String {
         match self {
             ByteFormat::Hex => bytes_to_hex(bytes),
@@ -365,6 +417,42 @@ impl ByteFormat {
     }
 
     pub fn i64_slice_to_text_le<T: AsRef<[i64]>>(&self, nums: T) -> String {
+        self.byte_slice_to_text(
+            nums.as_ref()
+                .iter()
+                .flat_map(|n| n.to_le_bytes())
+                .collect_vec(),
+        )
+    }
+
+    pub fn u128_slice_to_text_be<T: AsRef<[u128]>>(&self, nums: T) -> String {
+        self.byte_slice_to_text(
+            nums.as_ref()
+                .iter()
+                .flat_map(|n| n.to_be_bytes())
+                .collect_vec(),
+        )
+    }
+
+    pub fn u128_slice_to_text_le<T: AsRef<[u128]>>(&self, nums: T) -> String {
+        self.byte_slice_to_text(
+            nums.as_ref()
+                .iter()
+                .flat_map(|n| n.to_le_bytes())
+                .collect_vec(),
+        )
+    }
+
+    pub fn i128_slice_to_text_be<T: AsRef<[i128]>>(&self, nums: T) -> String {
+        self.byte_slice_to_text(
+            nums.as_ref()
+                .iter()
+                .flat_map(|n| n.to_be_bytes())
+                .collect_vec(),
+        )
+    }
+
+    pub fn i128_slice_to_text_le<T: AsRef<[i128]>>(&self, nums: T) -> String {
         self.byte_slice_to_text(
             nums.as_ref()
                 .iter()
