@@ -2,27 +2,12 @@ use crate::{errors::CodeError, traits::Code};
 use utils::byte_formatting::ByteFormat;
 
 const ARR: [u8; 10] = [0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9];
-
-// #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-// pub enum BcdVariant {
-//     Simple,
-//     V7421,
-//     Aiken,
-//     Excess3,
-//     Gray,
-// }
-
-// impl BcdVariant {
-//     fn array(&self) -> [u8; 10] {
-//         match self {
-//             BcdVariant::Simple => [0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9],
-//             BcdVariant::V7421 => [0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x8, 0x9, 0xA],
-//             BcdVariant::Aiken => [0x0, 0x1, 0x2, 0x3, 0x4, 0xB, 0xC, 0xD, 0xE, 0xF],
-//             BcdVariant::Excess3 => [0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC],
-//             BcdVariant::Gray => [0x0, 0x1, 0x3, 0x2, 0x7, 0x6, 0x4, 0x5, 0xC, 0xD],
-//         }
-//     }
-// }
+const POS: u8 = 0xC;
+const NEG: u8 = 0xD;
+const R32MIN: i32 = -9999999;
+const R32MAX: i32 = 9999999;
+const R64MIN: i64 = -999999999999999;
+const R64MAX: i64 = 999999999999999;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum WordWidth {
@@ -30,15 +15,21 @@ pub enum WordWidth {
     W64,
 }
 
-fn digit_to_nibble(digit: char, arr: &[u8; 10]) -> Result<u8, CodeError> {
+fn digit_to_nibble_32(digit: char) -> Result<u32, CodeError> {
     match digit {
-        '0'..='9' => Ok(arr[(digit as u32 - 48) as usize]),
+        '0'..='9' => Ok(digit as u32 - 48),
+        _ => return Err(CodeError::invalid_input_char(digit)),
+    }
+}
+
+fn digit_to_nibble_64(digit: char) -> Result<u64, CodeError> {
+    match digit {
+        '0'..='9' => Ok((digit as u32 - 48) as u64),
         _ => return Err(CodeError::invalid_input_char(digit)),
     }
 }
 
 pub struct BinaryCodedDecimal {
-    // variant: BcdVariant,
     pub formatting: ByteFormat,
     pub width: WordWidth,
 }
@@ -46,7 +37,6 @@ pub struct BinaryCodedDecimal {
 impl Default for BinaryCodedDecimal {
     fn default() -> Self {
         Self {
-            // variant: BcdVariant::Simple,
             formatting: ByteFormat::Hex,
             width: WordWidth::W32,
         }
@@ -54,14 +44,40 @@ impl Default for BinaryCodedDecimal {
 }
 
 impl BinaryCodedDecimal {
-    // fn range(&self) -> (i64, i64) {
-    //     match (self.signed, self.width) {
-    //         (true, WordWidth::W32) => (-9999999, 9999999),
-    //         (true, WordWidth::W64) => (-999999999999999, 999999999999999),
-    //         (false, WordWidth::W32) => (0, 99999999),
-    //         (false, WordWidth::W64) => (0, 9999999999999999),
-    //     }
-    // }
+    pub fn encode_i32_to_u32(&self, values: &[i32]) -> Result<Vec<u32>, CodeError> {
+        let mut out = Vec::with_capacity(values.len());
+        for &value in values {
+            if value < R32MIN || value > R32MAX {
+                return Err(CodeError::input(
+                    "the range of 32-bit BCD is -9999999..=9999999",
+                ));
+            }
+
+            let t = value.abs() as u32;
+            let mut word = 0_u32;
+            word |= t / 1000000;
+            word <<= 4;
+            word |= (t / 100000) % 10;
+            word <<= 4;
+            word |= (t / 10000) % 10;
+            word <<= 4;
+            word |= (t / 1000) % 10;
+            word <<= 4;
+            word |= (t / 100) % 10;
+            word <<= 4;
+            word |= (t / 10) % 10;
+            word <<= 4;
+            word |= t % 10;
+            word <<= 4;
+            if value.is_negative() {
+                word |= NEG as u32;
+            } else {
+                word |= POS as u32;
+            }
+            out.push(word);
+        }
+        Ok(out)
+    }
 
     fn encode_signed_to_u32(&self, text: &str) -> Result<Vec<u32>, CodeError> {
         let mut words = Vec::new();
@@ -80,20 +96,19 @@ impl BinaryCodedDecimal {
             if negative {
                 for digit in number.chars().skip(1) {
                     word <<= 4;
-                    word |= digit_to_nibble(digit, &ARR)? as u32;
+                    word |= digit_to_nibble_32(digit)?;
                 }
             } else {
                 for digit in number.chars() {
                     word <<= 4;
-                    word |= digit_to_nibble(digit, &ARR)? as u32;
+                    word |= digit_to_nibble_32(digit)?;
                 }
             }
+            word <<= 4;
             if negative {
-                word <<= 4;
-                word |= 0xD
+                word |= NEG as u32;
             } else {
-                word <<= 4;
-                word |= 0xC
+                word |= POS as u32;
             }
             words.push(word);
         }
@@ -104,9 +119,9 @@ impl BinaryCodedDecimal {
     fn decode_u32_to_signed(&self, values: &[u32]) -> Result<Vec<String>, CodeError> {
         let mut out = Vec::with_capacity(values.len());
         for value in values {
-            let negative = if value & 0xF == 0xD {
+            let negative = if value & 0xF == NEG as u32 {
                 true
-            } else if value & 0xF == 0xC {
+            } else if value & 0xF == POS as u32 {
                 false
             } else {
                 return Err(CodeError::Input(format!(
@@ -136,6 +151,59 @@ impl BinaryCodedDecimal {
         Ok(out)
     }
 
+    pub fn encode_i64_to_u64(&self, values: &[i64]) -> Result<Vec<u64>, CodeError> {
+        let mut out = Vec::with_capacity(values.len());
+        for &value in values {
+            if value < R64MIN || value > R64MAX {
+                return Err(CodeError::input(
+                    "the range of 64-bit BCD is -999999999999999..=999999999999999",
+                ));
+            }
+
+            let t = value.abs() as u64;
+            let mut word = 0_u64;
+            word |= (t / 100000000000000) % 10;
+            word <<= 4;
+            word |= (t / 10000000000000) % 10;
+            word <<= 4;
+            word |= (t / 1000000000000) % 10;
+            word <<= 4;
+            word |= (t / 100000000000) % 10;
+            word <<= 4;
+            word |= (t / 10000000000) % 10;
+            word <<= 4;
+            word |= (t / 1000000000) % 10;
+            word <<= 4;
+            word |= (t / 100000000) % 10;
+            word <<= 4;
+            word |= (t / 100000000) % 10;
+            word <<= 4;
+            word |= (t / 10000000) % 10;
+            word <<= 4;
+            word |= (t / 1000000) % 10;
+            word <<= 4;
+            word |= (t / 100000) % 10;
+            word <<= 4;
+            word |= (t / 10000) % 10;
+            word <<= 4;
+            word |= (t / 1000) % 10;
+            word <<= 4;
+            word |= (t / 100) % 10;
+            word <<= 4;
+            word |= (t / 10) % 10;
+            word <<= 4;
+            word |= t % 10;
+            word <<= 4;
+            if value.is_negative() {
+                word |= NEG as u64;
+            } else {
+                word |= POS as u64;
+            }
+            out.push(word);
+        }
+        Ok(out)
+    }
+
     fn encode_signed_to_u64(&self, text: &str) -> Result<Vec<u64>, CodeError> {
         let mut words = Vec::new();
         for number in text.split(',').map(|s| s.trim()) {
@@ -153,20 +221,19 @@ impl BinaryCodedDecimal {
             if negative {
                 for digit in number.chars().skip(1) {
                     word <<= 4;
-                    word |= digit_to_nibble(digit, &ARR)? as u64;
+                    word |= digit_to_nibble_64(digit)?;
                 }
             } else {
                 for digit in number.chars() {
                     word <<= 4;
-                    word |= digit_to_nibble(digit, &ARR)? as u64;
+                    word |= digit_to_nibble_64(digit)?;
                 }
             }
+            word <<= 4;
             if negative {
-                word <<= 4;
-                word |= 0xD
+                word |= NEG as u64;
             } else {
-                word <<= 4;
-                word |= 0xC
+                word |= POS as u64;
             }
             words.push(word);
         }
@@ -178,9 +245,9 @@ impl BinaryCodedDecimal {
         let mut out = Vec::with_capacity(values.len());
         // Most of this loop works only for the BcdVariant::Simple
         for value in values {
-            let negative = if value & 0xF == 0xD {
+            let negative = if value & 0xF == NEG as u64 {
                 true
-            } else if value & 0xF == 0xC {
+            } else if value & 0xF == POS as u64 {
                 false
             } else {
                 return Err(CodeError::Input(format!(
@@ -252,13 +319,14 @@ mod bcd_tests {
     const PLAINTEXT32: &'static str = "12345, -9876543";
     const ENCODEDTEXT32_SIMPLE: &'static str = "0012345c9876543d";
 
-    const PLAINTEXT64: &'static str = "1234567890, -876543211000";
-    const ENCODEDTEXT64_SIMPLE: &'static str = "000001234567890c000876543211000d";
+    const PLAINTEXT64: &'static str = "1234567890, -876543211000, 567567567567567";
+    const ENCODEDTEXT64_SIMPLE: &'static str = "000001234567890c000876543211000d567567567567567c";
 
     #[test]
     fn encode_u32_simple_test() {
         let code = BinaryCodedDecimal::default();
-        assert_eq!(ENCODEDTEXT32_SIMPLE, code.encode(PLAINTEXT32).unwrap())
+        assert_eq!(ENCODEDTEXT32_SIMPLE, code.encode(PLAINTEXT32).unwrap());
+        // println!("{:08x?}", code.encode_i32_to_u32(&[12345, -9876543]));
     }
 
     #[test]
@@ -271,7 +339,11 @@ mod bcd_tests {
     fn encode_u64_simple_test() {
         let mut code = BinaryCodedDecimal::default();
         code.width = WordWidth::W64;
-        assert_eq!(ENCODEDTEXT64_SIMPLE, code.encode(PLAINTEXT64).unwrap())
+        assert_eq!(ENCODEDTEXT64_SIMPLE, code.encode(PLAINTEXT64).unwrap());
+        // println!(
+        //     "{:016x?}",
+        //     code.encode_i64_to_u64(&[1234567890, -876543211000, 567567567567567])
+        // );
     }
 
     #[test]
