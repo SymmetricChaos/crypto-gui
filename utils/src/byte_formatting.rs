@@ -2,6 +2,7 @@ use base64::prelude::*;
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use num::traits::ToBytes;
+use paste::paste;
 use regex::Regex;
 use strum::{Display, EnumIter};
 
@@ -193,23 +194,13 @@ mod bit_function_tests {
             vec![222, 173, 190, 239],
             ByteFormat::Hex.text_to_bytes("DEADBEEF").unwrap()
         );
-        // assert_eq!(
-        //     vec![239, 190, 173, 222],
-        //     ByteFormat::HexLe.text_to_bytes("DEADBEEF").unwrap()
-        // );
 
         assert_eq!(
             "deadbeef",
             ByteFormat::Hex.byte_slice_to_text(&[222, 173, 190, 239])
         );
-        // assert_eq!(
-        //     "deadbeef",
-        //     ByteFormat::HexLe.byte_slice_to_text(&[239, 190, 173, 222])
-        // );
     }
 }
-
-use paste::paste;
 
 macro_rules! fillers_and_makers {
     ($t: ty, $w: literal) => {
@@ -281,15 +272,29 @@ fillers_and_makers!(u128, 16);
 fillers_and_makers!(i128, 16);
 
 /// If target is longer it is only partially overwritten. If target is shorter the extra source is ignored.
-pub fn overwrite_bytes<T: AsRef<[u8]>, S: AsMut<[u8]>>(mut target: S, source: T) {
-    for (t, s) in target.as_mut().iter_mut().zip(source.as_ref().iter()) {
+pub fn overwrite_bytes<T: AsMut<[u8]>, S: AsRef<[u8]>>(mut target: T, source: S) {
+    for (t, s) in target.as_mut().iter_mut().zip(source.as_ref()) {
+        *t = *s
+    }
+}
+
+// Overwrites target with source and panic if lengths are not equal.
+pub fn overwrite_bytes_strict<T: AsMut<[u8]>, S: AsRef<[u8]>>(mut target: T, source: S) {
+    for (t, s) in target.as_mut().iter_mut().zip_eq(source.as_ref()) {
         *t = *s
     }
 }
 
 /// If target is longer it is only partially XORed. If target is shorter the extra source is ignored.
-pub fn xor_into_bytes<T: AsRef<[u8]>, S: AsMut<[u8]>>(mut target: S, source: T) {
-    for (t, s) in target.as_mut().iter_mut().zip(source.as_ref().iter()) {
+pub fn xor_into_bytes<T: AsMut<[u8]>, S: AsRef<[u8]>>(mut target: T, source: S) {
+    for (t, s) in target.as_mut().iter_mut().zip(source.as_ref()) {
+        *t ^= *s
+    }
+}
+
+// XORs source into target panics if lengths are not equal.
+pub fn xor_into_bytes_strict<T: AsMut<[u8]>, S: AsRef<[u8]>>(mut target: T, source: S) {
+    for (t, s) in target.as_mut().iter_mut().zip_eq(source.as_ref()) {
         *t ^= *s
     }
 }
