@@ -58,7 +58,7 @@
     ]
   },
   "Binary-Coded Decimal": {
-    "Description": "Binary-Coded Decimal (BCD) represents decimal digits as groups of four bits (called a nibble or tetrade) with an addition group to represent the sign. These values are then packed into a machine word, usually 32 or 64 bits. In the simplest encoding this means that when displayed as hexadecimal they show the decimal value they are interpreted as. BCD is quite inefficient as only 12 symbols are needed but four bits allow 16. ",
+    "Description": "Binary-Coded Decimal (BCD) represents decimal digits as groups of four bits (called a nibble or tetrade) with an addition group to represent the sign. These values are then packed into a machine word, usually 32 or 64 bits. In the simplest encoding (provided here) this means that when displayed as hexadecimal they show the decimal value they are interpreted as with the final character being C or D to denote the sign. BCD is quite inefficient as only 12 symbols are needed but four bits allow 16.",
     "Authors": null,
     "Publication": null,
     "Traits": [

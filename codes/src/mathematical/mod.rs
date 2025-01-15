@@ -6,7 +6,6 @@ pub mod base_n;
 pub mod base_n_bijective;
 pub mod base_negative_two;
 pub mod binary_coded_decimal;
-pub mod binary_coded_decimal_unsigned;
 pub mod biquinary_decimal;
 pub mod combinadic;
 pub mod elias;
