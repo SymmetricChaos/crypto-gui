@@ -1,3 +1,5 @@
+// https://en.wikipedia.org/wiki/Elias_delta_coding
+
 use crate::errors::CodeError;
 use num::Zero;
 use utils::bits::{bits_to_u32_lower, Bit};
