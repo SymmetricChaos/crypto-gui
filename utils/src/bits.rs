@@ -1,5 +1,6 @@
 use lazy_static::lazy_static;
 use num::{Integer, One, Zero};
+use paste::paste;
 use regex::Regex;
 use std::{
     fmt::Display,
@@ -51,12 +52,13 @@ pub fn bit_vec_from_bytes(bytes: &[u8]) -> Vec<Bit> {
 }
 
 macro_rules! bit_conversions {
-    ($name1: ident, $name2: ident, $name3: ident,$type: ty, $width: literal) => {
-        /// Convert bits in to integer type such that the bit at index 0 is the MSB
-        /// Panics if the bits argument is too long to fit the type
+    ($type: ty, $width: literal) => {
+        paste!(
+        /// Convert bits in to integer type such that the bit at index 0 is the MSB of the integer.
+        /// example: bits_to_u8(\[Zero, One, One, Zero\]) == 0b01100000
         /// Inverse of the <int>_to_bits() functions.
-        /// bits_to_u8(\[Zero, One, One, Zero\]) == 0b01100000
-        pub fn $name1<T: AsRef<[Bit]>>(bits: T) -> $type {
+        /// Panics if the bits argument is too long to fit the type.
+        pub fn [<bits_to_ $type>]<T: AsRef<[Bit]>>(bits: T) -> $type {
             assert!(bits.as_ref().len() <= $width);
             let mut out = 0 as $type;
             for (i, b) in bits.as_ref().into_iter().enumerate() {
@@ -65,10 +67,23 @@ macro_rules! bit_conversions {
             out
         }
 
-        /// Convert an integer to an array of bits of equal width with the MSB at index 0
+        /// Convert bits in to integer type such that the last bit of input is the LSB of the integer.
+        /// example: bits_to_u8_lower(\[Zero, One, One, Zero\]) == 0b00000110
+        /// Panics if the bits argument is too long to fit the type
+        pub fn [<bits_to_ $type _lower>]<T: AsRef<[Bit]>>(bits: T) -> $type {
+            assert!(bits.as_ref().len() <= $width);
+            let mut out = 0 as $type;
+            for b in bits.as_ref().into_iter() {
+                out <<= 1;
+                out |= *b as $type;
+            }
+            out
+        }
+
+        /// Convert an integer to an array of bits of equal width with the MSB at index 0.
+        /// example: u8_to_bits(0b0110) == \[Zero, Zero, Zero, Zero, Zero, One, One, Zero\])
         /// Inverse of bits_to_<int>() functions.
-        /// u8_to_bits(0b0110) == \[Zero, Zero, Zero, Zero, Zero, One, One, Zero\])
-        pub fn $name2(n: $type) -> [Bit; $width] {
+        pub fn [<$type _to_bits>](n: $type) -> [Bit; $width] {
             let mut bits = [Bit::Zero; $width];
             for i in 0..$width {
                 let shifted_num = n >> i;
@@ -83,9 +98,9 @@ macro_rules! bit_conversions {
             bits
         }
 
-        /// Convert an integer to a vector of bits with LSB at index 0 and high null bits ignored
+        /// Convert an integer to a vector of bits with LSB at index 0 and high null bits ignored.
         /// example: u8_to_bit_vec(0b01101) == vec!\[One, Zero, One, One\]
-        pub fn $name3(num: $type) -> Vec<Bit> {
+        pub fn [<$type _to_bit_vec>](num: $type) -> Vec<Bit> {
             let mut bits = Vec::new();
             let mut n = num;
             while !n.is_zero() {
@@ -99,13 +114,14 @@ macro_rules! bit_conversions {
             }
             bits
         }
+        );
     };
 }
 
-bit_conversions!(bits_to_u8, u8_to_bits, u8_to_bit_vec, u8, 8);
-bit_conversions!(bits_to_u16, u16_to_bits, u16_to_bit_vec, u16, 16);
-bit_conversions!(bits_to_u32, u32_to_bits, u32_to_bit_vec, u32, 32);
-bit_conversions!(bits_to_u64, u64_to_bits, u64_to_bit_vec, u64, 64);
+bit_conversions!(u8, 8);
+bit_conversions!(u16, 16);
+bit_conversions!(u32, 32);
+bit_conversions!(u64, 64);
 
 pub fn to_bit_array<T: Copy, const N: usize>(arr: [T; N]) -> Result<[Bit; N], IntToBitError>
 where

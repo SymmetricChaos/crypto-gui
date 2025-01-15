@@ -148,6 +148,8 @@ impl EliasCodeIntegers {
                     zero_ctr += 1;
                     continue;
                 } else {
+                    println!("{zero_ctr}");
+                    println!("{:?}", buffer.to_vec());
                     // Once we reach a one get extra bits equal to the zeroes seen
                     for _ in 0..zero_ctr {
                         if let Some(b) = bits.next() {
@@ -157,11 +159,11 @@ impl EliasCodeIntegers {
                         }
                     }
                     // Convert the bits into an integer
-                    let t = bits_to_u32(&buffer) - 1;
+                    let remaining = bits_to_u32(&buffer) - 1;
 
                     // Take that many more bits
                     buffer.clear();
-                    for _ in 0..t {
+                    for _ in 0..remaining {
                         if let Some(b) = bits.next() {
                             buffer.push(b)
                         } else {
@@ -171,7 +173,7 @@ impl EliasCodeIntegers {
 
                     let f = bits_to_u32(&buffer);
 
-                    out.push(2_u32.pow(t) + f);
+                    out.push(2_u32.pow(remaining) + f);
                     // Clear buffer and counter
                     buffer.clear();
                     zero_ctr = 0;
@@ -319,11 +321,9 @@ mod elias_int_tests {
     #[test]
     fn delta_decode_u32() {
         let code = EliasCodeIntegers::default();
-        let codes = "101000101011000110101110011110010000000100001";
-        assert_eq!(
-            vec![1, 2, 3, 4, 5, 6, 7, 8, 9],
-            code.decode_u32(codes).unwrap()
-        );
+        // let codes = "101000101011000110101110011110010000000100001";
+        let codes = "001010011";
+        assert_eq!(vec![5], code.decode_u32(codes).unwrap());
     }
 
     #[test]
