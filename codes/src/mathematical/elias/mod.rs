@@ -1,4 +1,5 @@
 pub mod delta;
+pub mod elias;
 pub mod gamma;
 pub mod omega;
 

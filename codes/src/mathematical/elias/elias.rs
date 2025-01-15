@@ -1,51 +1,64 @@
-use super::{elias_integers::EliasCodeIntegers, string_to_u32s};
-use crate::{errors::CodeError, traits::Code};
+use crate::{errors::CodeError, mathematical::string_to_u32s, traits::Code};
 use itertools::Itertools;
-use std::cell::RefCell;
+use std::{cell::RefCell, collections::BTreeMap};
+use utils::bits::bits_from_str;
+
+use super::{
+    delta::{decode_to_u32_delta, DeltaGen},
+    gamma::{decode_to_u32_gamma, GammaGen},
+    omega::{decode_to_u32_omega, OmegaGen},
+    EliasVariant,
+};
 
 pub struct EliasCode {
-    pub integer_code: RefCell<EliasCodeIntegers>,
-    pub spaced: bool,
+    pub variant: EliasVariant,
     pub sep: String,
+    current_max: RefCell<u32>,
+    delta: RefCell<DeltaGen>,
+    delta_cache: RefCell<BTreeMap<u32, String>>,
+    gamma: RefCell<GammaGen>,
+    gamma_cache: RefCell<BTreeMap<u32, String>>,
+    omega: RefCell<OmegaGen>,
+    omega_cache: RefCell<BTreeMap<u32, String>>,
 }
 
 impl Default for EliasCode {
     fn default() -> Self {
-        let mut codes = EliasCodeIntegers::default();
-        codes.extend_all(33);
-
         Self {
-            integer_code: RefCell::new(codes),
-            spaced: false,
-            sep: String::from(" "),
+            variant: EliasVariant::Delta,
+            current_max: RefCell::new(0),
+            sep: String::from(""),
+            delta: RefCell::new(DeltaGen::new()),
+            delta_cache: Default::default(),
+            gamma: RefCell::new(GammaGen::new()),
+            gamma_cache: Default::default(),
+            omega: RefCell::new(OmegaGen::new()),
+            omega_cache: Default::default(),
         }
     }
 }
 
 impl EliasCode {
     pub fn values(&self) -> Vec<String> {
-        match self.integer_code.borrow().variant {
-            super::elias_integers::EliasVariant::Delta => self
-                .integer_code
-                .borrow()
-                .delta_cache
-                .values()
-                .cloned()
-                .collect_vec(),
-            super::elias_integers::EliasVariant::Gamma => self
-                .integer_code
-                .borrow()
-                .gamma_cache
-                .values()
-                .cloned()
-                .collect_vec(),
-            super::elias_integers::EliasVariant::Omega => self
-                .integer_code
-                .borrow()
-                .omega_cache
-                .values()
-                .cloned()
-                .collect_vec(),
+        match self.variant {
+            EliasVariant::Delta => self.delta_cache.borrow().values().cloned().collect_vec(),
+            EliasVariant::Gamma => self.gamma_cache.borrow().values().cloned().collect_vec(),
+            EliasVariant::Omega => self.omega_cache.borrow().values().cloned().collect_vec(),
+        }
+    }
+
+    pub fn extend_all(&self, value: u32) {
+        while value > *self.current_max.borrow() {
+            let (n, c) = self.delta.borrow_mut().next().unwrap();
+            self.delta_cache.borrow_mut().insert(n, c);
+
+            let (n, c) = self.gamma.borrow_mut().next().unwrap();
+            self.gamma_cache.borrow_mut().insert(n, c);
+
+            let (n, c) = self.omega.borrow_mut().next().unwrap();
+            self.omega_cache.borrow_mut().insert(n, c);
+
+            *self.current_max.borrow_mut() += 1;
         }
     }
 }
@@ -55,31 +68,33 @@ impl Code for EliasCode {
         let mut out = Vec::new();
 
         for n in string_to_u32s(text, &self.sep)? {
-            self.integer_code.borrow_mut().extend_all(n);
-            out.push(self.integer_code.borrow().encode_u32(n).unwrap().clone());
+            self.extend_all(n);
+            match self.variant {
+                EliasVariant::Delta => out.push(self.delta_cache.borrow().get(&n).unwrap().clone()),
+                EliasVariant::Gamma => out.push(self.gamma_cache.borrow().get(&n).unwrap().clone()),
+                EliasVariant::Omega => out.push(self.omega_cache.borrow().get(&n).unwrap().clone()),
+            }
         }
 
-        if self.spaced {
-            Ok(out.into_iter().join(&self.sep))
-        } else {
-            Ok(out.into_iter().join(""))
-        }
+        Ok(out.into_iter().join(&self.sep))
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        let text = text.replace(&self.sep, "");
-        Ok(self
-            .integer_code
-            .borrow()
-            .decode_u32(&text)?
-            .into_iter()
-            .join(&self.sep))
+        let t = text.replace(&self.sep, "");
+        let mut text = bits_from_str(&t).unwrap();
+        Ok(match self.variant {
+            EliasVariant::Delta => decode_to_u32_delta(&mut text)?,
+            EliasVariant::Gamma => decode_to_u32_gamma(&mut text)?,
+            EliasVariant::Omega => decode_to_u32_omega(&mut text)?,
+        }
+        .into_iter()
+        .map(|f| f.to_string())
+        .join(" "))
     }
 }
 
 #[cfg(test)]
 mod elias_tests {
-    use crate::mathematical::elias_integers::EliasVariant;
 
     use super::*;
 
@@ -90,21 +105,21 @@ mod elias_tests {
 
     #[test]
     fn encode_test_int() {
-        let code = EliasCode::default();
+        let mut code = EliasCode::default();
         assert_eq!(code.encode(PLAINTEXT_INT).unwrap(), ENCODEDTEXT_DELTA);
-        code.integer_code.borrow_mut().variant = EliasVariant::Gamma;
+        code.variant = EliasVariant::Gamma;
         assert_eq!(code.encode(PLAINTEXT_INT).unwrap(), ENCODEDTEXT_GAMMA);
-        code.integer_code.borrow_mut().variant = EliasVariant::Omega;
+        code.variant = EliasVariant::Omega;
         assert_eq!(code.encode(PLAINTEXT_INT).unwrap(), ENCODEDTEXT_OMEGA);
     }
 
     #[test]
     fn decode_test_int() {
-        let code = EliasCode::default();
+        let mut code = EliasCode::default();
         assert_eq!(code.decode(ENCODEDTEXT_DELTA).unwrap(), PLAINTEXT_INT);
-        // code.integer_code.borrow_mut().variant = EliasVariant::Gamma;
-        // assert_eq!(code.decode(ENCODEDTEXT_GAMMA).unwrap(), PLAINTEXT_INT);
-        // code.integer_code.borrow_mut().variant = EliasVariant::Omega;
-        // assert_eq!(code.decode(ENCODEDTEXT_OMEGA).unwrap(), PLAINTEXT_INT);
+        code.variant = EliasVariant::Gamma;
+        assert_eq!(code.decode(ENCODEDTEXT_GAMMA).unwrap(), PLAINTEXT_INT);
+        code.variant = EliasVariant::Omega;
+        assert_eq!(code.decode(ENCODEDTEXT_OMEGA).unwrap(), PLAINTEXT_INT);
     }
 }
