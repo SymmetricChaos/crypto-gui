@@ -19,6 +19,7 @@ mod base_n_bijective_controls;
 mod base_n_controls;
 mod basex_controls;
 mod baudot_controls;
+mod bcd_controls;
 mod biquinary_controls;
 mod block_controls;
 mod braille_encoding_controls;
@@ -26,8 +27,7 @@ mod bytewords_controls;
 mod ccsid_controls;
 mod crc_controls;
 mod damm_controls;
-// mod elias_controls;
-mod bcd_controls;
+mod elias_controls;
 mod factoradic_controls;
 mod fibonacci_controls;
 mod godel_controls;
@@ -156,23 +156,23 @@ pub struct CodeInterface {
     rle_bytes: rle_byte_controls::RleFrame,
 
     // Integer
+    balanced_ternary: balanced_ternary_controls::BalancedTernaryFrame,
     base_n: base_n_controls::BaseNFrame,
     base_n_bij: base_n_bijective_controls::BaseNBijectiveFrame,
-    balanced_ternary: balanced_ternary_controls::BalancedTernaryFrame,
+    bcd: bcd_controls::BcdFrame,
+    biquinary: biquinary_controls::BiquinaryDecimalFrame,
+    factoradic: factoradic_controls::FactoradicFrame,
     godel: godel_controls::GodelFrame,
     gray: gray_controls::GrayCodeFrame,
+    leb128: leb128_controls::Leb128Frame,
+    primorial: primoral_controls::PrimorialFrame,
     roman: roman_numeral_controls::RomanNumeralFrame,
     twos_complement: twos_complement_controls::TwosComplementFrame,
-    factoradic: factoradic_controls::FactoradicFrame,
-    primorial: primoral_controls::PrimorialFrame,
-    biquinary: biquinary_controls::BiquinaryDecimalFrame,
-    leb128: leb128_controls::Leb128Frame,
-    bcd: bcd_controls::BcdFrame,
 
     // Prefix
-    fixed_width: block_controls::BlockCodeFrame,
-    // elias: elias_controls::EliasCodeFrame,
+    elias: elias_controls::EliasCodeFrame,
     fibonacci: fibonacci_controls::FibonacciCodeFrame,
+    fixed_width: block_controls::BlockCodeFrame,
     levenshtein: levenshtein_controls::LevenshteinCodeFrame,
     unary: unary_controls::UnaryCodeFrame,
     unary_symmetric: symmetric_unary_controls::SymUnaryCodeFrame,
@@ -324,7 +324,7 @@ impl CodeInterface {
             CodeId::CcsidBinary => &mut self.ccsid_binary,
             CodeId::CyclicRedundancyCheck => &mut self.crc,
             CodeId::Damm => &mut self.damm,
-            // CodeId::Elias => &mut self.elias,
+            CodeId::Elias => &mut self.elias,
             CodeId::Factoradic => &mut self.factoradic,
             CodeId::Fibonacci => &mut self.fibonacci,
             CodeId::FixedWidth => &mut self.fixed_width,

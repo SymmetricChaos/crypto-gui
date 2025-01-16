@@ -160,13 +160,14 @@
     ]
   },
   "Elias": {
-    "Description": "The Elias codes are a family of universal codes meaning they are prefix codes which share the property that so long as large numbers are less probable than small ones the code is within a constant multiple of the best possible prefix code for the real distribution. Elias codes cover only the positive integers.",
+    "Description": "The Elias codes are a family of universal codes meaning they are prefix codes which share the property that so long as large numbers are less probable than small ones the code is within a constant multiple of the best possible prefix code for the real distribution. By default Elias codes cover all the positive integers but can be adapted to represent all integers.",
     "Authors": null,
     "Publication": null,
     "Traits": [
       "Variable Width",
       "Integer",
-      "Prefix"
+      "Prefix",
+      "Univeral"
     ]
   },
   "Factoradic": {
@@ -185,7 +186,8 @@
     "Traits": [
       "Variable Width",
       "Integer",
-      "Prefix"
+      "Prefix",
+      "Universal"
     ]
   },
   "Fixed-Width": {

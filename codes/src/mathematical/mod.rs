@@ -30,8 +30,8 @@ pub(crate) fn string_to_u32s(s: &str, sep: &str) -> Result<Vec<u32>, CodeError> 
         if group.is_empty() {
             continue;
         }
-        let n = u32::from_str_radix(group.trim(), 10)
-            .map_err(|_| CodeError::invalid_input_group(group))?;
+        let n =
+            u32::from_str_radix(group, 10).map_err(|_| CodeError::invalid_input_group(group))?;
         out.push(n);
     }
     Ok(out)
@@ -43,8 +43,8 @@ pub(crate) fn string_to_i32s(s: &str, sep: &str) -> Result<Vec<i32>, CodeError> 
         if group.is_empty() {
             continue;
         }
-        let n = i32::from_str_radix(group.trim(), 10)
-            .map_err(|_| CodeError::invalid_input_group(group))?;
+        let n =
+            i32::from_str_radix(group, 10).map_err(|_| CodeError::invalid_input_group(group))?;
         out.push(n);
     }
     Ok(out)
@@ -56,8 +56,8 @@ pub(crate) fn string_to_u64s(s: &str, sep: &str) -> Result<Vec<u64>, CodeError> 
         if group.is_empty() {
             continue;
         }
-        let n = u64::from_str_radix(group.trim(), 10)
-            .map_err(|_| CodeError::invalid_input_group(group))?;
+        let n =
+            u64::from_str_radix(group, 10).map_err(|_| CodeError::invalid_input_group(group))?;
         out.push(n);
     }
     Ok(out)
@@ -69,8 +69,8 @@ pub(crate) fn string_to_usizes(s: &str, sep: &str) -> Result<Vec<usize>, CodeErr
         if group.is_empty() {
             continue;
         }
-        let n = usize::from_str_radix(group.trim(), 10)
-            .map_err(|_| CodeError::invalid_input_group(group))?;
+        let n =
+            usize::from_str_radix(group, 10).map_err(|_| CodeError::invalid_input_group(group))?;
         out.push(n);
     }
     Ok(out)
