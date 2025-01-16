@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use num::Zero;
-use utils::bits::{bits_from_str, bits_to_u32, bools_from_str, Bit};
+use utils::bits::{bits_from_str, bits_to_u32_upper, bools_from_str, Bit};
 
 use crate::traits::ClassicRng;
 
@@ -116,7 +116,7 @@ impl ClassicRng for Lfsr {
         if !self.ltr {
             output_bits.reverse();
         }
-        bits_to_u32(&output_bits)
+        bits_to_u32_upper(&output_bits)
     }
 }
 

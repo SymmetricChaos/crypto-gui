@@ -1,5 +1,5 @@
 use utils::bits::{
-    bits_to_u32,
+    bits_to_u32_upper,
     Bit::{self, One, Zero},
 };
 
@@ -50,6 +50,6 @@ impl ClassicRng for SelfShrinkingGenerator {
         if !self.ltr {
             output_bits.reverse();
         }
-        bits_to_u32(&output_bits)
+        bits_to_u32_upper(&output_bits)
     }
 }

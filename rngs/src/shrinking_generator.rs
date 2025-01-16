@@ -1,4 +1,4 @@
-use utils::bits::{bits_to_u32, Bit};
+use utils::bits::{bits_to_u32_upper, Bit};
 
 use crate::{lfsr::Lfsr, ClassicRng};
 
@@ -47,6 +47,6 @@ impl ClassicRng for ShrinkingGenerator {
         if !self.ltr {
             output_bits.reverse();
         }
-        bits_to_u32(&output_bits)
+        bits_to_u32_upper(&output_bits)
     }
 }

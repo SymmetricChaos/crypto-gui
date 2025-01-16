@@ -58,7 +58,7 @@ macro_rules! bit_conversions {
         /// example: bits_to_u8(\[Zero, One, One, Zero\]) == 0b01100000
         /// Inverse of the <int>_to_bits() functions.
         /// Panics if the bits argument is too long to fit the type.
-        pub fn [<bits_to_ $type>]<T: AsRef<[Bit]>>(bits: T) -> $type {
+        pub fn [<bits_to_ $type _upper>]<T: AsRef<[Bit]>>(bits: T) -> $type {
             assert!(bits.as_ref().len() <= $width);
             let mut out = 0 as $type;
             for (i, b) in bits.as_ref().into_iter().enumerate() {
@@ -82,7 +82,7 @@ macro_rules! bit_conversions {
 
         /// Convert an integer to an array of bits of equal width with the MSB at index 0.
         /// example: u8_to_bits(0b0110) == \[Zero, Zero, Zero, Zero, Zero, One, One, Zero\])
-        /// Inverse of bits_to_<int>() functions.
+        /// Inverse of bits_to_<int>_upper() functions.
         pub fn [<$type _to_bits>](n: $type) -> [Bit; $width] {
             let mut bits = [Bit::Zero; $width];
             for i in 0..$width {
@@ -613,7 +613,7 @@ mod bit_function_tests {
     #[test]
     fn bits_to_u8_test() {
         assert_eq!(
-            bits_to_u8(&[Bit::One, Bit::Zero, Bit::One, Bit::One]),
+            bits_to_u8_upper(&[Bit::One, Bit::Zero, Bit::One, Bit::One]),
             0b10110000
         );
     }
@@ -639,7 +639,7 @@ mod bit_function_tests {
     fn bits_to_u8_and_back_test() {
         for n in 0..=255 {
             let bits = u8_to_bits(n);
-            assert_eq!(n, bits_to_u8(&bits));
+            assert_eq!(n, bits_to_u8_upper(&bits));
         }
     }
 
