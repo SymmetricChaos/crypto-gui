@@ -59,7 +59,6 @@ mod semaphore_controls;
 mod simple_braille_controls;
 mod skey_controls;
 mod spelling_alphabet_controls;
-mod symmetric_unary_controls;
 mod tap_code_controls;
 mod truncated_binary_controls;
 mod twos_complement_controls;
@@ -175,8 +174,8 @@ pub struct CodeInterface {
     fibonacci: fibonacci_controls::FibonacciCodeFrame,
     fixed_width: block_controls::BlockCodeFrame,
     levenshtein: levenshtein_controls::LevenshteinCodeFrame,
+    truncated_binary: truncated_binary_controls::TruncatedBinaryFrame,
     unary: unary_controls::UnaryCodeFrame,
-    unary_symmetric: symmetric_unary_controls::SymUnaryCodeFrame,
 
     // Other Codes
     bacon: bacon_contols::BaconFrame,
@@ -258,6 +257,7 @@ impl CodeInterface {
                 CodeId::FixedWidth,
                 CodeId::Levenshtein,
                 CodeId::MofN,
+                CodeId::TruncatedBinary,
                 CodeId::Unary,
                 CodeId::UnarySymmetric,
                 CodeId::Unicode,
@@ -356,10 +356,10 @@ impl CodeInterface {
             CodeId::Skey => &mut self.skey,
             CodeId::SpellingAlphabet => &mut self.spelling,
             CodeId::Tap => &mut self.tap,
+            CodeId::TruncatedBinary => &mut self.truncated_binary,
             CodeId::TwosComplement => &mut self.twos_complement,
             CodeId::Ueb => &mut self.ueb,
             CodeId::Unary => &mut self.unary,
-            CodeId::UnarySymmetric => &mut self.unary_symmetric,
             CodeId::Unicode => &mut self.unicode,
             CodeId::Upc => &mut self.upc,
             CodeId::Verhoeff => &mut self.verhoeff,

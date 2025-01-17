@@ -14,15 +14,7 @@ impl Default for UnaryCodeFrame {
     }
 }
 
-impl UnaryCodeFrame {
-    pub fn usize_to_unary(&self, n: usize) -> String {
-        if self.code.invert {
-            "0".repeat(n) + "1"
-        } else {
-            "1".repeat(n) + "0"
-        }
-    }
-}
+impl UnaryCodeFrame {}
 
 impl CodeFrame for UnaryCodeFrame {
     fn ui(&mut self, ui: &mut egui::Ui) {
@@ -32,21 +24,27 @@ impl CodeFrame for UnaryCodeFrame {
         );
         ui.add_space(8.0);
 
+        ui.subheading("Symmetric");
+        ui.label("The symmetric unary code is a variation that can be read in either direction.");
+        ui.checkbox(&mut self.code.symmetric, "Use Symmetric");
         ui.add_space(8.0);
-        ui.checkbox(&mut self.code.spaced, "Use Spaces");
+
+        ui.subheading("Seperated");
+        ui.label("Unary code is a prefix code so by default a sequence can be read without inserting spaces or commas. With this set the output will be comma separated.");
+        ui.checkbox(&mut self.code.spaced, "Use Seperator");
         ui.add_space(8.0);
 
         ui.subheading("Invert Bits");
-        ui.label("The 0 and 1 bits can be switched to create an equivalent code.");
-        ui.checkbox(&mut self.code.invert, "");
+        ui.label("The 0 and 1 bits can be inverted.");
+        ui.checkbox(&mut self.code.invert, "Use Inverted");
         ui.add_space(8.0);
 
-        ui.label("Convert between numbers and their unary encodings. When decoding the '�' symbol appears when an invalid code is encountered.");
-        ui.add_space(16.0);
+        ui.label("A sample list of encodings:");
+        ui.add_space(4.0);
         ui.two_column_table(
             "Integer",
             "Code",
-            Box::new((0..6).into_iter().map(|n| (n, self.usize_to_unary(n)))),
+            Box::new((0..=9).into_iter().map(|n| (n, self.code.encode_usize(n)))),
         );
 
         ui.add_space(16.0);

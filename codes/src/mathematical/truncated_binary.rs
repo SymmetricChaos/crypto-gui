@@ -69,11 +69,10 @@ impl Code for TruncatedBinary {
 
         for x in string_to_u32s(text, ",")? {
             if x > self.n {
-                return Err(CodeError::input(
-                    "truncated binary cannot encode values greater than the total size",
-                ));
+                out.push(String::from("�"));
+            } else {
+                out.push(self.u32_to_bits(x))
             }
-            out.push(self.u32_to_bits(x))
         }
 
         if self.spaced {

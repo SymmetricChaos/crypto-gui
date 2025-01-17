@@ -42,12 +42,12 @@ impl CodeFrame for TruncatedBinaryFrame {
             "cutoff (u): = {}",
             (1 << (self.alphabet_size.ilog2() + 1)) - self.alphabet_size
         ));
-
         ui.add_space(8.0);
+
         ui.checkbox(&mut self.code.spaced, "Use Spaces");
         ui.add_space(8.0);
 
-        ui.label("A sample list of encodings");
+        ui.label("A sample list of encodings:");
         ui.two_column_table(
             "Code",
             "Integer",
