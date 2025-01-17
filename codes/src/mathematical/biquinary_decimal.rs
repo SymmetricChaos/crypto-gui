@@ -1,11 +1,9 @@
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use lazy_static::lazy_static;
-// use regex::Regex;
 use utils::text_functions::bimap_from_iter;
 
 lazy_static! {
-    // pub static ref BIQUINARY: Regex = Regex::new(r"([01]{2}-[01]{5})").unwrap();
     pub static ref BIQUINARY_MAP: BiMap<char, &'static str> = bimap_from_iter(
         "0123456789".chars().zip(
             [
@@ -72,12 +70,12 @@ impl BiquinaryDecimal {
 impl Code for BiquinaryDecimal {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::new();
-        for c in text.chars() {
-            match self.mode.encode(c) {
+        for c in text.split(",").map(|s| s.trim()) {
+            match self.mode.encode(c.chars().next().unwrap()) {
                 Some(s) => {
                     out.push_str(s);
                 }
-                None => out.push(c),
+                None => out.push(c.chars().next().unwrap()),
             }
         }
         Ok(out)
@@ -85,15 +83,16 @@ impl Code for BiquinaryDecimal {
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::new();
-        for s in text.split(" ") {
+        for s in text.split(",").map(|s| s.trim()) {
             match self.mode.decode(s) {
                 Some(c) => {
                     out.push(c);
                 }
                 None => out.push_str(s),
             }
-            out.push(' ');
+            out.push_str(", ");
         }
+        out.pop();
         out.pop();
         Ok(out)
     }
@@ -103,8 +102,8 @@ impl Code for BiquinaryDecimal {
 mod balanced_ternary_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "0 9 1 8 2";
-    const ENCODEDTEXT: &'static str = "01-11110 10-01111 01-11101 10-10111 01-11011";
+    const PLAINTEXT: &'static str = "0, 9, 1, 8, 2";
+    const ENCODEDTEXT: &'static str = "01-11110, 10-01111, 01-11101, 10-10111, 01-11011";
 
     #[test]
     fn encode_test() {

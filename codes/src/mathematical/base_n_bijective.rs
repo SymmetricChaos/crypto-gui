@@ -7,7 +7,6 @@ use super::string_to_u32s;
 pub struct BaseNBijective {
     pub radix: u32,
     pub little_endian: bool,
-    pub sep: String,
 }
 
 impl Default for BaseNBijective {
@@ -15,7 +14,6 @@ impl Default for BaseNBijective {
         Self {
             radix: 2,
             little_endian: true,
-            sep: String::from(" "),
         }
     }
 }
@@ -85,33 +83,33 @@ impl Code for BaseNBijective {
         self.validate()?;
         let mut output = Vec::new();
 
-        for n in string_to_u32s(text, &self.sep)? {
+        for n in string_to_u32s(text, ",")? {
             output.push(self.encode_u32(n)?);
         }
 
-        Ok(output.into_iter().join(&self.sep))
+        Ok(output.into_iter().join(", "))
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         self.validate()?;
         let mut output = Vec::new();
 
-        for s in text.split(&self.sep) {
+        for s in text.split(",").map(|s| s.trim()) {
             if s.is_empty() {
                 continue;
             }
             output.push(self.decode_to_u32(s)?.to_string())
         }
-        Ok(output.into_iter().join(&self.sep))
+        Ok(output.into_iter().join(", "))
     }
 }
 
 #[cfg(test)]
-mod base_n_tests {
+mod base_n_bijective_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "1 2 3 4 5 6";
-    const ENCODEDTEXT: &'static str = "1 2 11 12 21 22";
+    const PLAINTEXT: &'static str = "1, 2, 3, 4, 5, 6";
+    const ENCODEDTEXT: &'static str = "1, 2, 11, 12, 21, 22";
 
     #[test]
     fn encode_test_bijective() {

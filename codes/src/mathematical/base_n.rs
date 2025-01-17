@@ -8,7 +8,6 @@ use super::string_to_u32s;
 pub struct BaseN {
     pub radix: u32,
     pub little_endian: bool,
-    pub sep: String,
 }
 
 impl Default for BaseN {
@@ -16,7 +15,6 @@ impl Default for BaseN {
         Self {
             radix: 2,
             little_endian: true,
-            sep: String::from(" "),
         }
     }
 }
@@ -66,24 +64,24 @@ impl Code for BaseN {
         self.validate()?;
         let mut output = Vec::new();
 
-        for n in string_to_u32s(text, &self.sep)? {
+        for n in string_to_u32s(text, ",")? {
             output.push(self.encode_u32(n)?);
         }
 
-        Ok(output.into_iter().join(&self.sep))
+        Ok(output.into_iter().join(", "))
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         self.validate()?;
         let mut output = Vec::new();
 
-        for s in text.split(&self.sep) {
+        for s in text.split(",").map(|s| s.trim()) {
             if s.is_empty() {
                 continue;
             }
             output.push(self.decode_to_u32(s)?.to_string())
         }
-        Ok(output.into_iter().join(&self.sep))
+        Ok(output.into_iter().join(", "))
     }
 }
 
@@ -91,11 +89,11 @@ impl Code for BaseN {
 mod base_n_tests {
     use super::*;
 
-    const PLAINTEXT_INT: &'static str = "0 1 2 3 4 5";
-    const ENCODEDTEXT: &'static str = "0 1 10 11 100 101";
+    const PLAINTEXT_INT: &'static str = "0, 1, 2, 3, 4, 5";
+    const ENCODEDTEXT: &'static str = "0, 1, 10, 11, 100, 101";
 
-    const PLAINTEXT_INT_BE: &'static str = "0 1 2 3 4 5";
-    const ENCODEDTEXT_BE: &'static str = "0 1 01 11 001 101";
+    const PLAINTEXT_INT_BE: &'static str = "0, 1, 2, 3, 4, 5";
+    const ENCODEDTEXT_BE: &'static str = "0, 1, 01, 11, 001, 101";
 
     #[test]
     fn encode_test() {

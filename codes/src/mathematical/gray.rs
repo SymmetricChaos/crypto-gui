@@ -7,7 +7,6 @@ pub struct GrayCode {
     pub width: usize,
     pub fixed_width: bool,
     pub spaced: bool,
-    pub sep: String,
 }
 
 impl Default for GrayCode {
@@ -16,7 +15,6 @@ impl Default for GrayCode {
             width: 5,
             fixed_width: true,
             spaced: false,
-            sep: String::from(" "),
         }
     }
 }
@@ -47,7 +45,7 @@ impl Code for GrayCode {
         let m = 2_u32.pow(self.width as u32);
         let mut out = Vec::new();
 
-        for w in text.split(&self.sep) {
+        for w in text.split(",") {
             let n =
                 u32::from_str_radix(w.trim(), 10).map_err(|e| CodeError::Input(e.to_string()))?;
             if n >= m && self.fixed_width {
@@ -60,7 +58,7 @@ impl Code for GrayCode {
         }
 
         if !self.fixed_width || self.spaced {
-            Ok(out.join(&self.sep))
+            Ok(out.join(", "))
         } else {
             Ok(out.join(""))
         }
@@ -69,8 +67,17 @@ impl Code for GrayCode {
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = Vec::new();
         let chunks = match self.fixed_width {
-            true => string_chunks(&text.replace(&self.sep, ""), self.width),
-            false => text.split(&self.sep).map(|st| st.to_string()).collect_vec(),
+            true => string_chunks(
+                &text
+                    .chars()
+                    .filter(|c| *c == '0' || *c == '1')
+                    .collect::<String>(),
+                self.width,
+            ),
+            false => text
+                .split(",")
+                .map(|st| st.trim().to_string())
+                .collect_vec(),
         };
         for s in chunks {
             if !IS_BITS.is_match(&s) || (self.fixed_width && s.chars().count() != self.width) {
@@ -82,7 +89,7 @@ impl Code for GrayCode {
             out.push(code.to_string());
         }
 
-        Ok(out.join(&self.sep))
+        Ok(out.join(", "))
     }
 }
 
@@ -90,10 +97,10 @@ impl Code for GrayCode {
 mod gray_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "1 2 3 4 5 14 15";
+    const PLAINTEXT: &'static str = "1, 2, 3, 4, 5, 14, 15";
     const ENCODEDTEXT: &'static str = "00001000110001000110001110100101000";
-    const ENCODEDTEXT_SPACED: &'static str = "00001 00011 00010 00110 00111 01001 01000";
-    const ENCODEDTEXT_VAR: &'static str = "1 11 10 110 111 1001 1000";
+    const ENCODEDTEXT_SPACED: &'static str = "00001, 00011, 00010, 00110, 00111, 01001, 01000";
+    const ENCODEDTEXT_VAR: &'static str = "1, 11, 10, 110, 111, 1001, 1000";
 
     #[test]
     fn encode_test() {
