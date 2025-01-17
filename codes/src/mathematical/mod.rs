@@ -13,6 +13,7 @@ pub mod factoradic;
 pub mod fibonacci;
 pub mod fibonacci_integers;
 pub mod godel;
+pub mod golomb;
 pub mod gray;
 pub mod leb128;
 pub mod levenshtein;
@@ -21,6 +22,7 @@ pub mod negative_base_n;
 pub mod primorial;
 pub mod roman_numeral;
 pub mod symmetric_unary;
+pub mod truncated_binary;
 pub mod twos_complement;
 pub mod unary;
 

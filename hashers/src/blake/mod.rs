@@ -1,4 +1,5 @@
 pub mod blake256;
+pub mod blake3_self;
 pub use blake256::{Blake224, Blake256};
 pub mod blake2b_long;
 pub use blake2b_long::Blake2bLong;
