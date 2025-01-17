@@ -22,14 +22,6 @@ impl CodeFrame for FactoradicFrame {
         );
         ui.add_space(8.0);
 
-        ui.subheading("Seperator");
-        if ui.control_string(&mut self.code.sep).changed() {
-            if self.code.sep.is_empty() {
-                self.code.sep = String::from(" ")
-            }
-        }
-        ui.add_space(8.0);
-
         ui.subheading("Example Calculation");
         ui.mono(
             "factoradic number     3:4:2:2:1:0\n\ndigits                3   4  2  2  1  0\nplace values       ×120 ×24 ×6 ×2 ×1 ×1\ndigit values        360  96 12  4  1  0\n\ntheir sum is 473",

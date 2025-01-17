@@ -61,6 +61,7 @@ mod skey_controls;
 mod spelling_alphabet_controls;
 mod symmetric_unary_controls;
 mod tap_code_controls;
+mod truncated_binary_controls;
 mod twos_complement_controls;
 mod ueb_controls;
 mod unary_controls;

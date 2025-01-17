@@ -32,8 +32,11 @@ impl CodeFrame for EliasCodeFrame {
             ui.selectable_value(&mut self.code.variant, EliasVariant::Omega, "Omega ω");
         });
 
-        ui.label("A sample list of encodings is provided below.");
-        ui.add_space(16.0);
+        ui.add_space(8.0);
+        ui.checkbox(&mut self.code.spaced, "Use Spaces");
+        ui.add_space(8.0);
+
+        ui.label("A sample list of encodings:");
         ui.two_column_table(
             "Integer",
             "Code",

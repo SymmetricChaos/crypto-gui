@@ -4,20 +4,32 @@ use utils::text_functions::swap_ab;
 
 pub struct SymmetricUnaryCode {
     pub invert: bool,
+    pub spaced: bool,
 }
 
 impl Default for SymmetricUnaryCode {
     fn default() -> Self {
-        SymmetricUnaryCode { invert: false }
+        SymmetricUnaryCode {
+            invert: false,
+            spaced: false,
+        }
     }
 }
 
 impl SymmetricUnaryCode {
     pub fn encode_usize(&self, n: usize) -> String {
-        if n == 0 {
-            return String::from("1");
+        if self.invert {
+            if n == 0 {
+                return String::from("0");
+            } else {
+                format!("1{}1", "0".repeat(n - 1))
+            }
         } else {
-            format!("0{}0", "1".repeat(n - 1))
+            if n == 0 {
+                return String::from("1");
+            } else {
+                format!("0{}0", "1".repeat(n - 1))
+            }
         }
     }
 
@@ -61,21 +73,17 @@ impl SymmetricUnaryCode {
 
 impl Code for SymmetricUnaryCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        let mut output = String::new();
+        let mut out = Vec::new();
 
         for w in text.split(",").map(|s| s.trim()) {
             let n = usize::from_str_radix(w, 10).map_err(|e| CodeError::Input(e.to_string()))?;
-            if n == 0 {
-                output.push('1');
-            } else {
-                output.push_str(&format!("0{}0", "1".repeat(n - 1)))
-            }
+            out.push(self.encode_usize(n));
         }
 
-        if self.invert {
-            Ok(swap_ab('0', '1', &output))
+        if self.spaced {
+            Ok(out.join(", "))
         } else {
-            Ok(output)
+            Ok(out.join(""))
         }
     }
 

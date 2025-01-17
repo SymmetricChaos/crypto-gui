@@ -40,9 +40,9 @@ impl CodeFrame for SymUnaryCodeFrame {
         );
         ui.add_space(8.0);
 
-        // ui.add_space(8.0);
-        // ui.checkbox(&mut self.code.spaced, "Use Spaces");
-        // ui.add_space(8.0);
+        ui.add_space(8.0);
+        ui.checkbox(&mut self.code.spaced, "Use Spaces");
+        ui.add_space(8.0);
 
         ui.subheading("Invert Bits");
         ui.label("The 0 and 1 bits can be switched to create an equivalent code.");

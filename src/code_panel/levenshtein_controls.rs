@@ -25,15 +25,7 @@ impl CodeFrame for LevenshteinCodeFrame {
         ui.checkbox(&mut self.code.spaced, "Use Spaces");
         ui.add_space(8.0);
 
-        ui.subheading("Seperator");
-        if ui.control_string(&mut self.code.sep).changed() {
-            if self.code.sep.is_empty() {
-                self.code.sep = String::from(" ")
-            }
-        }
-        ui.add_space(8.0);
-
-        ui.label("Get the Levenshtein coding for any list of non-negative integers or decode any string of 0s and 1s into a list of non-negative integers. A sample list of encodings it provided below.");
+        ui.label("A sample list of encodings:");
         let pairs = (0..32).map(|n| (n.to_string(), self.code.integer_code.encode_u32(n)));
         ui.add_space(16.0);
         ui.two_column_table("Integer", "Code", Box::new(pairs));

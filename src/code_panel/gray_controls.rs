@@ -30,14 +30,6 @@ impl CodeFrame for GrayCodeFrame {
         ui.add_space(8.0);
         ui.checkbox(&mut self.code.spaced, "Use Spaces");
 
-        ui.subheading("Seperator");
-        if ui.control_string(&mut self.code.sep).changed() {
-            if self.code.sep.is_empty() && self.code.spaced {
-                self.code.sep = String::from(" ")
-            }
-        }
-        ui.add_space(8.0);
-
         ui.add_space(16.0);
         let chars_codes =
             (0..2_u32.pow(self.code.width as u32)).map(|n| (n, self.code.encode_u32(n)));

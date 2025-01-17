@@ -84,6 +84,7 @@ code_ids_and_names!(
     Skey, "S/KEY";
     SpellingAlphabet, "Spelling Alphabet";
     Tap, "Tap";
+    TruncatedBinary, "Truncated Binary";
     TwosComplement, "Two's Complement";
     Ueb, "Unified English Braille";
     Unary, "Unary";

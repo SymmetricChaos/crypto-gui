@@ -25,7 +25,7 @@ impl CodeFrame for FibonacciCodeFrame {
         ui.checkbox(&mut self.code.spaced, "Use Spaces");
         ui.add_space(8.0);
 
-        ui.label("Get the Fibonacci coding for any list of positive integers or decode any string of 0s and 1s into a list of positive integers. A sample list of encodings is provided below.");
+        ui.label("A sample list of encodings:");
         let pairs = (1..=64).map(|n| {
             (
                 n.to_string(),

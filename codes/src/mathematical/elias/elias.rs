@@ -15,6 +15,7 @@ use super::{
 
 pub struct EliasCode {
     pub variant: EliasVariant,
+    pub spaced: bool,
     current_max: RefCell<u32>,
     delta: RefCell<DeltaGen>,
     delta_cache: RefCell<BTreeMap<u32, String>>,
@@ -28,6 +29,7 @@ impl Default for EliasCode {
     fn default() -> Self {
         Self {
             variant: EliasVariant::Delta,
+            spaced: false,
             current_max: RefCell::new(0),
             delta: RefCell::new(DeltaGen::new()),
             delta_cache: Default::default(),
@@ -89,7 +91,7 @@ impl Code for EliasCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = Vec::new();
 
-        for n in string_to_u32s(text, " ")? {
+        for n in string_to_u32s(text, ",")? {
             self.extend_all(n);
             match self.variant {
                 EliasVariant::Delta => out.push(self.delta_cache.borrow().get(&n).unwrap().clone()),
@@ -98,7 +100,11 @@ impl Code for EliasCode {
             }
         }
 
-        Ok(out.into_iter().join(""))
+        if self.spaced {
+            Ok(out.join(", "))
+        } else {
+            Ok(out.join(""))
+        }
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
@@ -111,7 +117,7 @@ impl Code for EliasCode {
         }
         .into_iter()
         .map(|f| f.to_string())
-        .join(" "))
+        .join(", "))
     }
 }
 

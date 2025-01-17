@@ -24,14 +24,6 @@ impl CodeFrame for NegativeBaseNFrame {
         ui.add(Slider::new(&mut self.code.radix, -2..=-36));
         ui.add_space(16.0);
 
-        ui.subheading("Seperator");
-        if ui.control_string(&mut self.code.sep).changed() {
-            if self.code.sep.is_empty() {
-                self.code.sep = String::from(" ")
-            }
-        }
-        ui.add_space(8.0);
-
         ui.label(format!(
             "Convert between \"standard\" base-10 numbers and their representation in a base-{}.",
             self.code.radix
