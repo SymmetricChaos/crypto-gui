@@ -8,7 +8,6 @@ use super::string_to_i32s;
 pub struct NegativeBaseN {
     pub radix: i32,
     pub little_endian: bool,
-    pub sep: String,
 }
 
 impl Default for NegativeBaseN {
@@ -16,7 +15,6 @@ impl Default for NegativeBaseN {
         Self {
             radix: -2,
             little_endian: true,
-            sep: String::from(" "),
         }
     }
 }
@@ -89,25 +87,25 @@ impl Code for NegativeBaseN {
         self.validate()?;
         let mut output = Vec::new();
 
-        for n in string_to_i32s(text, &self.sep)? {
+        for n in string_to_i32s(text, ",")? {
             output.push(self.encode_i32(n)?);
         }
 
-        Ok(output.into_iter().join(&self.sep))
+        Ok(output.into_iter().join(", "))
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         self.validate()?;
         let mut output = Vec::new();
 
-        for s in text.split(&self.sep) {
+        for s in text.split(",").map(|s| s.trim()) {
             if s.is_empty() {
                 continue;
             }
             output.push(self.decode_to_i32(s)?.to_string())
         }
 
-        Ok(output.into_iter().join(&self.sep))
+        Ok(output.into_iter().join(", "))
     }
 }
 
@@ -115,8 +113,8 @@ impl Code for NegativeBaseN {
 mod negative_base_n_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "-5 -4 -3 -2 -1 0 1 2 3 4 5";
-    const ENCODEDTEXT: &'static str = "1111 1100 1101 10 11 0 1 110 111 100 101";
+    const PLAINTEXT: &'static str = "-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5";
+    const ENCODEDTEXT: &'static str = "1111, 1100, 1101, 10, 11, 0, 1, 110, 111, 100, 101";
 
     #[test]
     fn encode_test() {

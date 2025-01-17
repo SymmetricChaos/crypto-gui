@@ -4,15 +4,11 @@ use utils::text_functions::swap_ab;
 
 pub struct SymmetricUnaryCode {
     pub invert: bool,
-    pub sep: String,
 }
 
 impl Default for SymmetricUnaryCode {
     fn default() -> Self {
-        SymmetricUnaryCode {
-            invert: false,
-            sep: String::from(" "),
-        }
+        SymmetricUnaryCode { invert: false }
     }
 }
 
@@ -67,7 +63,7 @@ impl Code for SymmetricUnaryCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut output = String::new();
 
-        for w in text.split(" ") {
+        for w in text.split(",").map(|s| s.trim()) {
             let n = usize::from_str_radix(w, 10).map_err(|e| CodeError::Input(e.to_string()))?;
             if n == 0 {
                 output.push('1');
@@ -100,7 +96,7 @@ impl Code for SymmetricUnaryCode {
             }
         }
 
-        Ok(output.into_iter().join(&self.sep))
+        Ok(output.into_iter().join(", "))
     }
 }
 
@@ -108,7 +104,7 @@ impl Code for SymmetricUnaryCode {
 mod symmetric_unary_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17";
+    const PLAINTEXT: &'static str = "0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17";
     const ENCODEDTEXT: &'static str = "100010011001110011110011111001111110011111110011111111001111111110011111111110011111111111001111111111110011111111111110011111111111111001111111111111110011111111111111110";
 
     #[test]

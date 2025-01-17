@@ -7,7 +7,6 @@ use super::string_to_usizes;
 pub struct UnaryCode {
     pub invert: bool,
     pub spaced: bool,
-    pub sep: String,
 }
 
 impl Default for UnaryCode {
@@ -15,7 +14,6 @@ impl Default for UnaryCode {
         UnaryCode {
             invert: false,
             spaced: false,
-            sep: String::from(" "),
         }
     }
 }
@@ -60,12 +58,12 @@ impl Code for UnaryCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut output = Vec::new();
 
-        for n in string_to_usizes(text, &self.sep)? {
+        for n in string_to_usizes(text, ",")? {
             output.push(self.encode_usize(n));
         }
 
         if self.spaced {
-            Ok(output.into_iter().join(&self.sep))
+            Ok(output.into_iter().join(", "))
         } else {
             Ok(output.into_iter().join(""))
         }
@@ -82,7 +80,7 @@ impl Code for UnaryCode {
             }
         }
 
-        Ok(output.into_iter().join(&self.sep))
+        Ok(output.into_iter().join(", "))
     }
 }
 
@@ -90,7 +88,7 @@ impl Code for UnaryCode {
 mod unary_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17";
+    const PLAINTEXT: &'static str = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17";
     const ENCODEDTEXT: &'static str = "10110111011110111110111111011111110111111110111111111011111111110111111111110111111111111011111111111110111111111111110111111111111111011111111111111110111111111111111110";
 
     #[test]

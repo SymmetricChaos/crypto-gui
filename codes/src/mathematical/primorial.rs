@@ -80,15 +80,11 @@ pub fn extract_code_groups(text: &str) -> Vec<Option<u64>> {
     output
 }
 
-pub struct Primorial {
-    pub sep: String,
-}
+pub struct Primorial {}
 
 impl Default for Primorial {
     fn default() -> Self {
-        Primorial {
-            sep: String::from(", "),
-        }
+        Primorial {}
     }
 }
 
@@ -98,11 +94,11 @@ impl Code for Primorial {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut v = Vec::new();
 
-        for n in string_to_u64s(text, &self.sep)? {
+        for n in string_to_u64s(text, ",")? {
             v.push(encode_u64(n));
         }
 
-        Ok(v.join(&self.sep))
+        Ok(v.join(", "))
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
@@ -116,7 +112,7 @@ impl Code for Primorial {
             }
         }
 
-        Ok(v.join(&self.sep))
+        Ok(v.join(", "))
     }
 }
 

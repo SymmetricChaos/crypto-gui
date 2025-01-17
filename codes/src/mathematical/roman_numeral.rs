@@ -19,14 +19,11 @@ lazy_static! {
 
 pub struct RomanNumeral {
     // pub apostrophus: bool,
-    pub sep: String,
 }
 
 impl Default for RomanNumeral {
     fn default() -> Self {
-        Self {
-            sep: String::from(" "),
-        }
+        Self {}
     }
 }
 
@@ -96,24 +93,24 @@ impl Code for RomanNumeral {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut output = Vec::new();
 
-        for n in string_to_u32s(text, &self.sep)? {
+        for n in string_to_u32s(text, ",")? {
             output.push(Self::encode_int(n)?);
         }
 
-        Ok(output.into_iter().join(&self.sep))
+        Ok(output.into_iter().join(", "))
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut output = Vec::new();
 
-        for s in text.split(&self.sep) {
+        for s in text.split(",").map(|s| s.trim()) {
             if s.is_empty() {
                 continue;
             }
             output.push(Self::decode_to_int(s)?.to_string())
         }
 
-        Ok(output.into_iter().join(&self.sep))
+        Ok(output.into_iter().join(", "))
     }
 }
 
@@ -121,8 +118,8 @@ impl Code for RomanNumeral {
 mod roman_numeral_tests {
     use super::*;
 
-    const PLAINTEXT: &'static str = "39 246 789 2421 9";
-    const ENCODEDTEXT: &'static str = "XXXIX CCXLVI DCCLXXXIX MMCDXXI IX";
+    const PLAINTEXT: &'static str = "39, 246, 789, 2421, 9";
+    const ENCODEDTEXT: &'static str = "XXXIX, CCXLVI, DCCLXXXIX, MMCDXXI, IX";
 
     #[test]
     fn encode_test() {
