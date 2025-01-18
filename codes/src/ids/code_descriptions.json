@@ -208,6 +208,16 @@
       "Integer"
     ]
   },
+  "Golomb": {
+    "Description": "The Golomb code extends the idea of truncated binary codes to cover all natural numbers. Each number is divided by a chosen value, the unary encoding is used quotient followed by the remainder encoded with truncated binary.",
+    "Authors": null,
+    "Publication": null,
+    "Traits": [
+      "Variable Width",
+      "Integer",
+      "Prefix"
+    ]
+  },
   "Gray Code": {
     "Description": "The Gray code or reflected binary code that represents non-negative integers so that in order they differ only in a single bit. Originally this kind of ordering was useful for mechanical switches as they can be moved through every possible setting while avoiding the issue of switches not moving with perfect synchronization.",
     "Authors": null,
