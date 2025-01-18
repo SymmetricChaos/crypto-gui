@@ -47,6 +47,14 @@ impl TruncatedBinary {
         }
     }
 
+    pub fn k(&self) -> u32 {
+        self.k
+    }
+
+    pub fn u(&self) -> u32 {
+        self.u
+    }
+
     pub fn set_consts(&mut self, n: u32) {
         self.n = n;
         self.k = self.n.ilog2();
@@ -59,6 +67,22 @@ impl TruncatedBinary {
             to_binary(x, self.k)
         } else {
             to_binary(x + self.u, self.k + 1)
+        }
+    }
+
+    pub fn recognize_code(&self, text: &str) -> Option<u32> {
+        if text.len() == self.k as usize {
+            let n = u32::from_str_radix(text, 2).unwrap();
+            if n < self.u {
+                return Some(n);
+            } else {
+                return None;
+            }
+        } else if text.len() == (self.k + 1) as usize {
+            let n = u32::from_str_radix(text, 2).unwrap() - self.u;
+            return Some(n);
+        } else {
+            None
         }
     }
 }
@@ -87,16 +111,8 @@ impl Code for TruncatedBinary {
         let mut buffer = String::with_capacity((self.k + 1) as usize);
         for c in text.chars().filter(|c| *c == '0' || *c == '1') {
             buffer.push(c);
-            if buffer.len() == self.k as usize {
-                let n = u32::from_str_radix(&buffer, 2).unwrap();
-                if n < self.u {
-                    out.push(n);
-                    buffer.clear();
-                }
-            }
-            if buffer.len() == (self.k + 1) as usize {
-                let n = u32::from_str_radix(&buffer, 2).unwrap() - self.u;
-                out.push(n);
+            if let Some(n) = self.recognize_code(&buffer) {
+                out.push(n.to_string());
                 buffer.clear();
             }
         }

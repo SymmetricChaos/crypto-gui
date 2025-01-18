@@ -420,10 +420,12 @@
     "Description": "Tap codes work on the same principle as the Polybius square cipher but simplified for ease of use. Characters are specified by pairs of tap sequences. The first sequence of taps selects a row and the second sequence of taps a column in that row. This very slow way of encoding text is said to be common among prisoners as it is easy to learn and requires no special tools.",
     "Authors": null,
     "Publication": null,
-    "Traits": null
+    "Traits": [
+      "Variable Width"
+    ]
   },
   "Truncated Binary": {
-    "Description": "Truncated binary encodes integers slightly more efficiently than the ordinary fixed-width binary representation. Given an alphabet size `n` there are `k = ⌊log_2(n)⌋+1` bits needed to encode the `n`. For fixed width binary that means `k` bits are needed for all of the values. In truncated binary the value `u = (2^k)-n` is chosen as a cutoff. All values less than `u` are encoded using `k-1` bits by removing the highest bit from the usual representation. All values greater than or equal to `u` have `u` added to them and are encoded in `k` bits.",
+    "Description": "Truncated binary encodes a range of integers slightly more efficiently than the ordinary fixed-width binary representation. Given an alphabet size `n` there are `k = ⌊log_2(n)⌋+1` bits needed to encode the `n`. For fixed width binary that means `k` bits are needed for all of the values. In truncated binary the value `u = (2^k)-n` is chosen as a cutoff. All values less than `u` are encoded using `k-1` bits by removing the highest bit from the usual representation. All values greater than or equal to `u` have `u` added to them and are encoded in `k` bits.",
     "Authors": null,
     "Publication": null,
     "Traits": [
