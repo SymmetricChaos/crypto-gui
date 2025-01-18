@@ -9,6 +9,7 @@ pub mod binary_coded_decimal;
 pub mod biquinary_decimal;
 pub mod combinadic;
 pub mod elias;
+pub mod exp_golomb;
 pub mod factoradic;
 pub mod fibonacci;
 pub mod fibonacci_integers;
