@@ -92,7 +92,7 @@ impl Code for BlockCode {
             out.push(self.num_to_string(n));
         }
         if self.spaced {
-            Ok(out.join(" "))
+            Ok(out.join(", "))
         } else {
             Ok(out.join(""))
         }
@@ -100,10 +100,13 @@ impl Code for BlockCode {
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = String::new();
-        let text = text.replace(" ", "");
         let pows = (0..self.width).rev().cycle();
         let mut val = 0;
-        for (c, p) in text.chars().zip(pows) {
+        for (c, p) in text
+            .chars()
+            .filter(|c| !c.is_whitespace() && *c != ',')
+            .zip(pows)
+        {
             let n = self
                 .symbols
                 .iter()
@@ -137,17 +140,22 @@ mod block_code_tests {
     const PLAINTEXT: &'static str = "ABC";
     const CODETEXT_01: &'static str = "000000000100010";
     const CODETEXT_XYZ: &'static str = "XXXYXZ";
+    const CODETEXT_01_SP: &'static str = "00000, 00001, 00010";
+    const CODETEXT_XYZ_SP: &'static str = "XX, XY, XZ";
 
     #[test]
     fn encode_test_default() {
-        let code = BlockCode::default();
+        let mut code = BlockCode::default();
         assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT_01);
+        code.spaced = true;
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT_01_SP);
     }
 
     #[test]
     fn decode_test_default() {
         let code = BlockCode::default();
         assert_eq!(code.decode(CODETEXT_01).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(CODETEXT_01_SP).unwrap(), PLAINTEXT);
     }
 
     #[test]
@@ -156,6 +164,8 @@ mod block_code_tests {
         code.symbols = "XYZ".chars().collect();
         code.width = 2;
         assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT_XYZ);
+        code.spaced = true;
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT_XYZ_SP);
     }
 
     #[test]
@@ -164,5 +174,6 @@ mod block_code_tests {
         code.symbols = "XYZ".chars().collect();
         code.width = 2;
         assert_eq!(code.decode(CODETEXT_XYZ).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(CODETEXT_XYZ_SP).unwrap(), PLAINTEXT);
     }
 }

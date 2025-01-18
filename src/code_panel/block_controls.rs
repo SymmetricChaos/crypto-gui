@@ -3,7 +3,7 @@ use crate::ui_elements::UiElements;
 use codes::other::block::BlockCode;
 use egui::Slider;
 use itertools::Itertools;
-use utils::{preset_alphabet::Alphabet, text_functions::unique_string};
+use utils::preset_alphabet::Alphabet;
 
 pub struct BlockCodeFrame {
     code: BlockCode,
@@ -39,10 +39,17 @@ impl CodeFrame for BlockCodeFrame {
         ui.subheading("Code Symbols");
         ui.label("The symbols to be used in the code.");
         if ui.control_string(&mut self.symbol_string).changed() {
-            unique_string(&mut self.symbol_string);
-            while self.symbol_string.chars().count() > 5 {
-                self.symbol_string.pop();
-            }
+            // Restrinct the symbols in the code to be
+            //    not whitespace or the comma (which are both restricted)
+            //    unique
+            //    no more than five
+            self.symbol_string = self
+                .symbol_string
+                .chars()
+                .filter(|c| !c.is_whitespace() && *c != ',')
+                .unique()
+                .take(5)
+                .collect();
             self.code.symbols = self.symbol_string.chars().collect_vec()
         }
         ui.add_space(16.0);
@@ -53,6 +60,11 @@ impl CodeFrame for BlockCodeFrame {
             self.code.width = self.code.min_code_width();
         }
         ui.add_space(16.0);
+
+        ui.subheading("Separated");
+        ui.label("A fixed-width code can be read without inserting spaces or commas. With this set the output will be comma separated.");
+        ui.checkbox(&mut self.code.spaced, "Use Separator");
+        ui.add_space(8.0);
 
         ui.label(format!("There are {} codes.", self.code.total_codes()));
 

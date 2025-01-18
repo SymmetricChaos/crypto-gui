@@ -31,9 +31,11 @@ impl CodeFrame for EliasCodeFrame {
             ui.selectable_value(&mut self.code.variant, EliasVariant::Gamma, "Gamma γ");
             ui.selectable_value(&mut self.code.variant, EliasVariant::Omega, "Omega ω");
         });
-
         ui.add_space(8.0);
-        ui.checkbox(&mut self.code.spaced, "Use Spaces");
+
+        ui.subheading("Separated");
+        ui.label("A prefix code can be read without inserting spaces or commas. With this set the output will be comma separated.");
+        ui.checkbox(&mut self.code.spaced, "Use Separator");
         ui.add_space(8.0);
 
         ui.label("A sample list of encodings:");

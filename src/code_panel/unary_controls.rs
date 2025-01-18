@@ -29,9 +29,9 @@ impl CodeFrame for UnaryCodeFrame {
         ui.checkbox(&mut self.code.symmetric, "Use Symmetric");
         ui.add_space(8.0);
 
-        ui.subheading("Seperated");
-        ui.label("Unary code is a prefix code so by default a sequence can be read without inserting spaces or commas. With this set the output will be comma separated.");
-        ui.checkbox(&mut self.code.spaced, "Use Seperator");
+        ui.subheading("Separated");
+        ui.label("A prefix code can be read without inserting spaces or commas. With this set the output will be comma separated.");
+        ui.checkbox(&mut self.code.spaced, "Use Separator");
         ui.add_space(8.0);
 
         ui.subheading("Invert Bits");
