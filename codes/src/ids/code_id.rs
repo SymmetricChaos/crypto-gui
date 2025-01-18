@@ -58,6 +58,7 @@ code_ids_and_names!(
     FixedWidth, "Fixed-Width";
     FlagSemaphore, "Flag Semaphore";
     Godel, "Gödel";
+    Golomb, "Golomb";
     Gray, "Gray Code";
     Hamming, "Hamming Code";
     IcsFlags, "ICS Flags";

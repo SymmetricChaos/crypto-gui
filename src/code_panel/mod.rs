@@ -31,6 +31,7 @@ mod elias_controls;
 mod factoradic_controls;
 mod fibonacci_controls;
 mod godel_controls;
+mod golomb_controls;
 mod gray_controls;
 mod hamming_controls;
 mod ics_flags_controls;
@@ -173,6 +174,7 @@ pub struct CodeInterface {
     elias: elias_controls::EliasCodeFrame,
     fibonacci: fibonacci_controls::FibonacciCodeFrame,
     fixed_width: block_controls::BlockCodeFrame,
+    golomb: golomb_controls::GolombFrame,
     levenshtein: levenshtein_controls::LevenshteinCodeFrame,
     truncated_binary: truncated_binary_controls::TruncatedBinaryFrame,
     unary: unary_controls::UnaryCodeFrame,
@@ -255,6 +257,7 @@ impl CodeInterface {
                 CodeId::Elias,
                 CodeId::Fibonacci,
                 CodeId::FixedWidth,
+                CodeId::Golomb,
                 CodeId::Levenshtein,
                 CodeId::MofN,
                 CodeId::TruncatedBinary,
@@ -331,6 +334,7 @@ impl CodeInterface {
             CodeId::FixedWidth => &mut self.fixed_width,
             CodeId::FlagSemaphore => &mut self.flag_semaphore,
             CodeId::Godel => &mut self.godel,
+            CodeId::Golomb => &mut self.golomb,
             CodeId::Gray => &mut self.gray,
             CodeId::Hamming => &mut self.hamming,
             CodeId::IcsFlags => &mut self.ics_flags,
