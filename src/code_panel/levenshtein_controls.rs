@@ -1,6 +1,9 @@
 use super::CodeFrame;
 use crate::ui_elements::UiElements;
-use codes::{mathematical::levenshtein::LevenshteinCode, traits::Code};
+use codes::{
+    mathematical::levenshtein::{u32_to_levenshtein, LevenshteinCode},
+    traits::Code,
+};
 
 pub struct LevenshteinCodeFrame {
     code: LevenshteinCode,
@@ -28,7 +31,7 @@ impl CodeFrame for LevenshteinCodeFrame {
         ui.add_space(8.0);
 
         ui.label("A sample list of encodings:");
-        let pairs = (0..32).map(|n| (n.to_string(), self.code.integer_code.encode_u32(n)));
+        let pairs = (0..32).map(|n| (n.to_string(), u32_to_levenshtein(n)));
         ui.add_space(16.0);
         ui.two_column_table("Integer", "Code", Box::new(pairs));
 

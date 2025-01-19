@@ -18,7 +18,6 @@ pub mod golomb;
 pub mod gray;
 pub mod leb128;
 pub mod levenshtein;
-pub mod levenshtein_integers;
 pub mod negative_base_n;
 pub mod primorial;
 pub mod roman_numeral;
@@ -26,7 +25,7 @@ pub mod truncated_binary;
 pub mod twos_complement;
 pub mod unary;
 
-pub(crate) fn string_to_u32s(s: &str, sep: &str) -> Result<Vec<u32>, CodeError> {
+pub(super) fn string_to_u32s(s: &str, sep: &str) -> Result<Vec<u32>, CodeError> {
     let mut out = Vec::new();
     for group in s.split(sep).map(|x| x.trim()) {
         if group.is_empty() {
@@ -39,7 +38,7 @@ pub(crate) fn string_to_u32s(s: &str, sep: &str) -> Result<Vec<u32>, CodeError> 
     Ok(out)
 }
 
-pub(crate) fn string_to_i32s(s: &str, sep: &str) -> Result<Vec<i32>, CodeError> {
+pub(super) fn string_to_i32s(s: &str, sep: &str) -> Result<Vec<i32>, CodeError> {
     let mut out = Vec::new();
     for group in s.split(sep).map(|x| x.trim()) {
         if group.is_empty() {
@@ -52,7 +51,7 @@ pub(crate) fn string_to_i32s(s: &str, sep: &str) -> Result<Vec<i32>, CodeError> 
     Ok(out)
 }
 
-pub(crate) fn string_to_u64s(s: &str, sep: &str) -> Result<Vec<u64>, CodeError> {
+pub(super) fn string_to_u64s(s: &str, sep: &str) -> Result<Vec<u64>, CodeError> {
     let mut out = Vec::new();
     for group in s.split(sep).map(|x| x.trim()) {
         if group.is_empty() {
@@ -65,7 +64,7 @@ pub(crate) fn string_to_u64s(s: &str, sep: &str) -> Result<Vec<u64>, CodeError> 
     Ok(out)
 }
 
-pub(crate) fn string_to_usizes(s: &str, sep: &str) -> Result<Vec<usize>, CodeError> {
+pub(super) fn string_to_usizes(s: &str, sep: &str) -> Result<Vec<usize>, CodeError> {
     let mut out = Vec::new();
     for group in s.split(sep).map(|x| x.trim()) {
         if group.is_empty() {
