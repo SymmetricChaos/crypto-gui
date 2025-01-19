@@ -14,7 +14,7 @@ pub fn u32_to_exp_golomb(n: u32) -> String {
     }
 }
 
-// This will fail to decode u32::MAX
+// TODO: This will fail to decode u32::MAX
 pub fn recognize_exp_golomb(s: &str) -> Vec<Option<u32>> {
     let mut out = Vec::new();
     let mut ctr = 0;

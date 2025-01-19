@@ -23,12 +23,14 @@ impl CodeFrame for Leb128Frame {
             "see the code",
             "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/mathematical/leb128.rs",
         );
-
         ui.add_space(8.0);
+
         ui.checkbox(&mut self.code.signed, "Signed (Include Negative Integers)");
         ui.add_space(8.0);
 
-        ui.checkbox(&mut self.code.spaced, "Encode Each Group Seperately");
+        ui.subheading("Separated");
+        ui.label("A prefix code can be read without inserting spaces or commas. With this set the output will be comma separated.");
+        ui.checkbox(&mut self.code.spaced, "Use Separator");
         ui.add_space(8.0);
 
         ui.group(|ui| {
