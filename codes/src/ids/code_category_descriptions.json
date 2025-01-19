@@ -4,7 +4,7 @@
   "Integer": "These codes share the property of being able to encode all non-negative integers, defining a permutation of the entire infinite set. Adjusting them to cover all integers or some other subset is generally trivial.",
   "Other": "I couldn't think of a category to put these codes into. Feel free to make a suggestion!",
   "Text Standards": "Text standards are encodings of text characters in something other than their ordinary form. Most commonly when working with text electronically it must be turned into a form that can be transmitted or stored as a sequence of bits. Morse Code is one of the oldest ways of transforming text for this purpose while the modern UTF-8 encoding used across the internet efficiently encodes over a million characters.",
-  "Prefix": "Prefix codes are a category of codes that share the property that no code every appears as the prefix of another code. This allows a sequence of codes to be presented without separately indicating where one code end and the next begins.\n\nThe simplest kind of prefix codes are block codes where all codes are the same length.\n\nFor very large collections more complex prefix codes are useful.",
+  "Prefix": "Prefix codes are a category of codes that share the property that no code every appears as the prefix of another code. This allows a sequence of codes to be presented without separately indicating where one code end and the next begins. Fixed-width codes are examples of trivial prefix codes but are not included here.",
   "Commercial": "These codes are used for commercial purposes such as barcodes.",
   "Compression": "Compression is a way of encoding data in less space by exploiting structure in it, often repetition."
 }

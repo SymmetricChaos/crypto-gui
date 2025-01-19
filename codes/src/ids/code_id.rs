@@ -53,6 +53,7 @@ code_ids_and_names!(
     CyclicRedundancyCheck, "Cyclic Redundancy Check";
     Damm, "Damm";
     Elias, "Elias";
+    ExpGolomb, "Exponential Golomb";
     Factoradic, "Factoradic";
     Fibonacci, "Fibonacci";
     FixedWidth, "Fixed-Width";

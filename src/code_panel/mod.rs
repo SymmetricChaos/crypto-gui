@@ -28,6 +28,7 @@ mod ccsid_controls;
 mod crc_controls;
 mod damm_controls;
 mod elias_controls;
+mod exp_golomb_controls;
 mod factoradic_controls;
 mod fibonacci_controls;
 mod godel_controls;
@@ -172,6 +173,7 @@ pub struct CodeInterface {
 
     // Prefix
     elias: elias_controls::EliasCodeFrame,
+    exp_golomb: exp_golomb_controls::ExpGolombFrame,
     fibonacci: fibonacci_controls::FibonacciCodeFrame,
     fixed_width: block_controls::BlockCodeFrame,
     golomb: golomb_controls::GolombFrame,
@@ -235,9 +237,11 @@ impl CodeInterface {
                 CodeId::BinaryCodedDecimal,
                 CodeId::BiquinaryDecimal,
                 CodeId::Elias,
+                CodeId::ExpGolomb,
                 CodeId::Factoradic,
                 CodeId::Fibonacci,
                 CodeId::Godel,
+                CodeId::Golomb,
                 CodeId::Gray,
                 CodeId::Leb128,
                 CodeId::Levenshtein,
@@ -253,13 +257,12 @@ impl CodeInterface {
         );
         combox_box(
             &[
-                CodeId::Ascii,
                 CodeId::Elias,
                 CodeId::Fibonacci,
-                CodeId::FixedWidth,
                 CodeId::Golomb,
+                CodeId::ExpGolomb,
+                CodeId::Leb128,
                 CodeId::Levenshtein,
-                CodeId::MofN,
                 CodeId::TruncatedBinary,
                 CodeId::Unary,
                 CodeId::UnarySymmetric,
@@ -329,6 +332,7 @@ impl CodeInterface {
             CodeId::CyclicRedundancyCheck => &mut self.crc,
             CodeId::Damm => &mut self.damm,
             CodeId::Elias => &mut self.elias,
+            CodeId::ExpGolomb => &mut self.exp_golomb,
             CodeId::Factoradic => &mut self.factoradic,
             CodeId::Fibonacci => &mut self.fibonacci,
             CodeId::FixedWidth => &mut self.fixed_width,

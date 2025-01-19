@@ -170,6 +170,17 @@
       "Univeral"
     ]
   },
+  "Exponential Golomb": {
+    "Description": "The Exponential Golomb coding is a relatively simple prefix code. For a non-negative integer `n` it is encoded by writing `⌊log_2(n + 1)⌋ + 1` zeroes followed by the usual binary representation of `n + 1`.",
+    "Authors": null,
+    "Publication": null,
+    "Traits": [
+      "Variable Width",
+      "Integer",
+      "Prefix",
+      "Univeral"
+    ]
+  },
   "Factoradic": {
     "Description": "The factoradic numeral system represents non-negative integers using positional notation where each digit must be less than its index and its value is the factorial of its index. This encoding allows straightfoward calculation of permutations.",
     "Authors": null,
@@ -271,7 +282,8 @@
     "Publication": null,
     "Traits": [
       "Variable Width",
-      "Integer"
+      "Integer",
+      "Prefix"
     ]
   },
   "Levenshtein": {
@@ -385,7 +397,7 @@
     "Traits": null
   },
   "Run Length Encoding Bytes": {
-    "Description": "Run Length Encoding (RLE) compresses data contains long strings of identical information by replacing them with one instance of the symbol followed by a count of how many should occur (the length of the run). Efficient RLE requires both that the data to be compressed have sufficient repetition and that the encoding not waste too much space on short runs. The simple encoding scheme here converts a sequence of bytes into a sequence of pairs of bytes. In these pairs the first byte is the one to be repeated and the second byte is the number of times to be repeated. If a byte is repeated more than 255 times the additional repetitions are encoded more pairs. If bytes are not repeated more than 255 times this is reasonably efficient. However if there are very long runs it performs relatively poorly. The complex encoding works similarly but the count is a variable length integer (LEB-128) which allows runs of enormous length to be compressed.",
+    "Description": "Run Length Encoding (RLE) compresses data contains long strings of identical information by replacing them with one instance of the symbol followed by a count of how many should occur (the length of the run). Efficient RLE requires both that the data to be compressed have sufficient repetition and that the encoding not waste too much space on short runs if they occur. The simple encoding scheme here converts a sequence of bytes into a sequence of pairs of bytes. In these pairs the first byte is the one to be repeated and the second byte is the number of times to be repeated. If a byte is repeated more than 255 times the additional repetitions are encoded more pairs. If bytes are not repeated more than 255 times this is reasonably efficient. However if there are very long runs it performs relatively poorly. The complex encoding works similarly but the count is a variable length integer (LEB-128) which allows runs of enormous length to be compressed.",
     "Authors": null,
     "Publication": null,
     "Traits": null
