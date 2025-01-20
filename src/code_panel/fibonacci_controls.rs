@@ -27,6 +27,11 @@ impl CodeFrame for FibonacciCodeFrame {
         ui.checkbox(&mut self.code.spaced, "Use Separator");
         ui.add_space(8.0);
 
+        ui.subheading("Invert Bits");
+        ui.label("The 0 and 1 bits can be inverted.");
+        ui.checkbox(&mut self.code.invert, "Use Inverted");
+        ui.add_space(8.0);
+
         ui.label("A sample list of encodings:");
         let pairs = (1..=64).map(|n| {
             (
