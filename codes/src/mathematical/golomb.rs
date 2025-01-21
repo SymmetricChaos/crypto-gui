@@ -1,9 +1,11 @@
 use super::string_to_u32s;
 use crate::{errors::CodeError, mathematical::truncated_binary::TruncatedBinary, traits::Code};
 use num::Integer;
+use utils::text_functions::swap_ab;
 
 pub struct Golomb {
     pub spaced: bool,
+    pub invert: bool,
     m: u32,
     rem_enconder: TruncatedBinary,
 }
@@ -12,6 +14,7 @@ impl Default for Golomb {
     fn default() -> Self {
         Self {
             spaced: false,
+            invert: false,
             m: 3,
             rem_enconder: TruncatedBinary::new(3),
         }
@@ -32,6 +35,9 @@ impl Golomb {
 
         // Encode the remainder with truncated binary
         out.push_str(&self.rem_enconder.u32_to_bits(r));
+        if self.invert {
+            out = swap_ab('0', '1', &out);
+        }
         out
     }
 }
@@ -53,7 +59,11 @@ impl Code for Golomb {
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut out: Vec<String> = Vec::new();
-
+        let text = if self.invert {
+            swap_ab('0', '1', &text)
+        } else {
+            text.to_string()
+        };
         let mut mul: u32 = 0;
         let mut buffer = String::new();
         let mut rem = false;
@@ -97,6 +107,9 @@ mod golomb_tests {
     const PLAINTEXT: &'static str = "0, 1, 2, 3, 4, 5, 6, 7, 8, 9";
     const ENCODEDTEXT: &'static str = "00010011100101010111100110101101111100";
     const ENCODEDTEXT_SP: &'static str = "00, 010, 011, 100, 1010, 1011, 1100, 11010, 11011, 11100";
+    const ENCODEDTEXT_INV: &'static str = "11101100011010101000011001010010000011";
+    const ENCODEDTEXT_INV_SP: &'static str =
+        "11, 101, 100, 011, 0101, 0100, 0011, 00101, 00100, 00011";
 
     #[test]
     fn encode_test() {
@@ -104,12 +117,20 @@ mod golomb_tests {
         assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
         code.spaced = true;
         assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_SP);
+        code.spaced = false;
+        code.invert = true;
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_INV);
+        code.spaced = true;
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_INV_SP);
     }
 
     #[test]
     fn decode_test() {
-        let code = Golomb::default();
+        let mut code = Golomb::default();
         assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
         assert_eq!(code.decode(ENCODEDTEXT_SP).unwrap(), PLAINTEXT);
+        code.invert = true;
+        assert_eq!(code.decode(ENCODEDTEXT_INV).unwrap(), PLAINTEXT);
+        assert_eq!(code.decode(ENCODEDTEXT_INV_SP).unwrap(), PLAINTEXT);
     }
 }
