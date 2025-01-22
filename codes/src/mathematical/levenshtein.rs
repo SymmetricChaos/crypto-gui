@@ -1,9 +1,14 @@
-use super::string_to_u32s;
+use num::Integer;
+
+use super::{string_to_i32s, string_to_u32s};
 use crate::{errors::CodeError, traits::Code};
 
 // https://en.wikipedia.org/wiki/Levenshtein_coding
 
 pub fn u32_to_levenshtein(n: u32) -> String {
+    if n == 0 {
+        return String::from("0");
+    }
     let mut bits = String::new();
     let mut t = n;
     // Start counter a 1
@@ -72,11 +77,15 @@ pub fn levenshtein_to_u32(text: &str) -> Vec<Option<u32>> {
 
 pub struct LevenshteinCode {
     pub spaced: bool,
+    pub signed: bool,
 }
 
 impl Default for LevenshteinCode {
     fn default() -> Self {
-        LevenshteinCode { spaced: false }
+        LevenshteinCode {
+            spaced: false,
+            signed: false,
+        }
     }
 }
 
@@ -84,8 +93,18 @@ impl Code for LevenshteinCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = Vec::new();
 
-        for n in string_to_u32s(text, ",")? {
-            out.push(u32_to_levenshtein(n));
+        if self.signed {
+            for n in string_to_i32s(text, ",")? {
+                if n.is_negative() {
+                    out.push(u32_to_levenshtein((n.abs() * 2 - 1) as u32));
+                } else {
+                    out.push(u32_to_levenshtein((n.abs() * 2) as u32))
+                }
+            }
+        } else {
+            for n in string_to_u32s(text, ",")? {
+                out.push(u32_to_levenshtein(n));
+            }
         }
 
         if self.spaced {
@@ -100,7 +119,21 @@ impl Code for LevenshteinCode {
 
         for n in levenshtein_to_u32(text).into_iter() {
             if let Some(val) = n {
-                out.push(val.to_string())
+                if self.signed {
+                    let v: i32 = match val.try_into() {
+                        Ok(v) => v,
+                        Err(_) => {
+                            return Err(CodeError::input("encountered code group out of i32 range"))
+                        }
+                    };
+                    if val.is_even() {
+                        out.push((v / 2).to_string());
+                    } else {
+                        out.push(((-v - 1) / 2).to_string());
+                    }
+                } else {
+                    out.push(val.to_string())
+                }
             } else {
                 out.push(String::from("�"))
             }
@@ -114,32 +147,36 @@ impl Code for LevenshteinCode {
 mod levenshtein_int_tests {
     use super::*;
 
-    const PLAINTEXT_INT: &'static str = "0, 1, 2, 3";
+    const PLAINTEXT: &'static str = "0, 1, 2, 3";
+    const PLAINTEXT_SIGNED: &'static str = "0, -1, 1, -2";
     const ENCODEDTEXT: &'static str = "01011001101";
     const ENCODEDTEXT_SP: &'static str = "0, 10, 1100, 1101";
 
     #[test]
     fn encode_test() {
-        let code = LevenshteinCode::default();
-        assert_eq!(code.encode(PLAINTEXT_INT).unwrap(), ENCODEDTEXT);
+        let mut code = LevenshteinCode::default();
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
+        code.signed = true;
+        code.spaced = true;
+        assert_eq!(code.encode(PLAINTEXT_SIGNED).unwrap(), ENCODEDTEXT_SP);
     }
 
     #[test]
     fn encode_sp_test() {
         let mut code = LevenshteinCode::default();
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT_INT).unwrap(), ENCODEDTEXT_SP);
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_SP);
     }
 
     #[test]
     fn decode_test() {
         let code = LevenshteinCode::default();
-        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT_INT);
+        assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
     }
 
     #[test]
     fn decode_sp_test() {
         let code = LevenshteinCode::default();
-        assert_eq!(code.decode(ENCODEDTEXT_SP).unwrap(), PLAINTEXT_INT);
+        assert_eq!(code.decode(ENCODEDTEXT_SP).unwrap(), PLAINTEXT);
     }
 }

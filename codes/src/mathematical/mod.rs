@@ -64,15 +64,28 @@ pub(super) fn string_to_u64s(s: &str, sep: &str) -> Result<Vec<u64>, CodeError> 
     Ok(out)
 }
 
-pub(super) fn string_to_usizes(s: &str, sep: &str) -> Result<Vec<usize>, CodeError> {
-    let mut out = Vec::new();
-    for group in s.split(sep).map(|x| x.trim()) {
-        if group.is_empty() {
-            continue;
-        }
-        let n =
-            usize::from_str_radix(group, 10).map_err(|_| CodeError::invalid_input_group(group))?;
-        out.push(n);
-    }
-    Ok(out)
-}
+// pub(super) fn string_to_i64s(s: &str, sep: &str) -> Result<Vec<i64>, CodeError> {
+//     let mut out = Vec::new();
+//     for group in s.split(sep).map(|x| x.trim()) {
+//         if group.is_empty() {
+//             continue;
+//         }
+//         let n =
+//             i64::from_str_radix(group, 10).map_err(|_| CodeError::invalid_input_group(group))?;
+//         out.push(n);
+//     }
+//     Ok(out)
+// }
+
+// pub(super) fn string_to_usizes(s: &str, sep: &str) -> Result<Vec<usize>, CodeError> {
+//     let mut out = Vec::new();
+//     for group in s.split(sep).map(|x| x.trim()) {
+//         if group.is_empty() {
+//             continue;
+//         }
+//         let n =
+//             usize::from_str_radix(group, 10).map_err(|_| CodeError::invalid_input_group(group))?;
+//         out.push(n);
+//     }
+//     Ok(out)
+// }

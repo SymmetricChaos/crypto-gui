@@ -81,70 +81,38 @@ impl UnaryCode {
         output
     }
 
-    pub fn recognize_code_signed(&self, text: &str) -> Vec<Option<i32>> {
-        let mut output = Vec::new();
-
-        let (z0, z1) = if self.invert { ('0', '1') } else { ('1', '0') };
-
-        let mut ctr = 0;
-        for c in text.chars() {
-            if c.is_whitespace() {
-                continue;
-            }
-            if c == z0 {
-                ctr += 1
-            } else if c == z1 {
-                if ctr.is_even() {
-                    output.push(Some(ctr / 2));
-                } else {
-                    output.push(Some((-ctr - 1) / 2));
-                }
-
-                ctr = 0;
-            } else {
-                output.push(None);
-                ctr = 0;
-            }
-        }
-        if ctr != 0 {
-            output.push(None)
-        }
-        output
-    }
-
     pub fn recognize_code_symmetric(&self, text: &str) -> Vec<Option<u32>> {
         let mut output = Vec::new();
-        let mut buffer = String::new();
-        let (z0, z1) = if self.invert { ('0', '1') } else { ('1', '0') };
+        let mut ctr = 0;
+        let (z0, z1) = if self.invert { ('1', '0') } else { ('0', '1') };
 
         for b in text.chars() {
             // Invalid characters immediatly give '?' response and restart
             if b != z0 && b != z1 {
                 output.push(None);
-                buffer.clear();
+                ctr = 0;
                 continue;
             }
             // The '1' bit on its own is a valid code
-            if buffer.is_empty() && b == z1 {
+            if ctr == 0 && b == z1 {
                 output.push(Some(0));
-                buffer.clear();
                 continue;
             }
             // If the starting bit is '0' push it and continue
-            if buffer.is_empty() && b == z0 {
-                buffer.push(b);
+            if ctr == 0 && b == z0 {
+                ctr += 1;
             // Otherwise push the next bit on
             } else {
                 if b == z0 {
-                    output.push(Some(buffer.chars().count() as u32));
-                    buffer.clear();
+                    output.push(Some(ctr));
+                    ctr = 0;
                 } else {
-                    buffer.push(z1)
+                    ctr += 1;
                 }
             }
         }
         // If anything remains in the buffer it is invalid
-        if !buffer.is_empty() {
+        if ctr != 0 {
             output.push(None)
         }
         output
@@ -179,10 +147,14 @@ impl Code for UnaryCode {
             if self.symmetric {
                 for section in self.recognize_code_symmetric(&text) {
                     if let Some(code) = section {
-                        if code.is_even() {
-                            output.push((code as i32 / 2).to_string());
+                        if let Ok(n) = TryInto::<i32>::try_into(code) {
+                            if n.is_even() {
+                                output.push((n / 2).to_string());
+                            } else {
+                                output.push(((-(n) - 1) / 2).to_string());
+                            }
                         } else {
-                            output.push(((-(code as i32) - 1) / 2).to_string());
+                            output.push(String::from("�"));
                         }
                     } else {
                         output.push(String::from("�"));
@@ -191,10 +163,14 @@ impl Code for UnaryCode {
             } else {
                 for section in self.recognize_code(&text) {
                     if let Some(code) = section {
-                        if code.is_even() {
-                            output.push((code as i32 / 2).to_string());
+                        if let Ok(n) = TryInto::<i32>::try_into(code) {
+                            if n.is_even() {
+                                output.push((n / 2).to_string());
+                            } else {
+                                output.push(((-(n) - 1) / 2).to_string());
+                            }
                         } else {
-                            output.push(((-(code as i32) - 1) / 2).to_string());
+                            output.push(String::from("�"));
                         }
                     } else {
                         output.push(String::from("�"));
