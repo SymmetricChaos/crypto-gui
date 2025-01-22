@@ -115,30 +115,31 @@ impl UnaryCode {
     pub fn recognize_code_symmetric(&self, text: &str) -> Vec<Option<u32>> {
         let mut output = Vec::new();
         let mut buffer = String::new();
+        let (z0, z1) = if self.invert { ('0', '1') } else { ('1', '0') };
 
         for b in text.chars() {
             // Invalid characters immediatly give '?' response and restart
-            if b != '0' && b != '1' {
+            if b != z0 && b != z1 {
                 output.push(None);
                 buffer.clear();
                 continue;
             }
             // The '1' bit on its own is a valid code
-            if buffer.is_empty() && b == '1' {
+            if buffer.is_empty() && b == z1 {
                 output.push(Some(0));
                 buffer.clear();
                 continue;
             }
             // If the starting bit is '0' push it and continue
-            if buffer.is_empty() && b == '0' {
+            if buffer.is_empty() && b == z0 {
                 buffer.push(b);
             // Otherwise push the next bit on
             } else {
-                if b == '0' {
+                if b == z0 {
                     output.push(Some(buffer.chars().count() as u32));
                     buffer.clear();
                 } else {
-                    buffer.push('1')
+                    buffer.push(z1)
                 }
             }
         }
@@ -232,6 +233,10 @@ mod unary_tests {
     const PLAINTEXT_SIGNED: &'static str = "0, -1, 1, -2, 2, -3, 3, -4, 4, -5";
     const ENCODEDTEXT: &'static str = "0101101110111101111101111110111111101111111101111111110";
     const ENCODEDTEXT_SYM: &'static str = "1000100110011100111100111110011111100111111100111111110";
+    const ENCODEDTEXT_SP: &'static str =
+        "0, 10, 110, 1110, 11110, 111110, 1111110, 11111110, 111111110, 1111111110";
+    const ENCODEDTEXT_SP_SYM: &'static str =
+        "1, 00, 010, 0110, 01110, 011110, 0111110, 01111110, 011111110, 0111111110";
 
     #[test]
     fn encode_test() {
@@ -239,6 +244,11 @@ mod unary_tests {
         assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
         code.symmetric = true;
         assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_SYM);
+        code.symmetric = false;
+        code.spaced = true;
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_SP);
+        code.symmetric = true;
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_SP_SYM);
     }
 
     #[test]
