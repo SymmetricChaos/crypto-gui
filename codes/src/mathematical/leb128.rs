@@ -5,7 +5,7 @@ use crate::{errors::CodeError, traits::Code};
 const MASK: u8 = 0b01111111;
 const HIGH_BIT: u8 = 0b10000000;
 
-// Rust signed typs are twos-complement
+// Rust signed types are twos-complement
 pub fn i128_leb128(n: i128) -> Vec<u8> {
     if n == 0 {
         return vec![0];

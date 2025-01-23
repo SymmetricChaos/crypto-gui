@@ -1,6 +1,4 @@
-use num::Integer;
-
-use super::{string_to_i32s, string_to_u32s};
+use super::{i32_to_u32_zigzag, string_to_i32s, string_to_u32s, u32_to_i32_zigzag};
 use crate::{errors::CodeError, traits::Code};
 
 // https://en.wikipedia.org/wiki/Levenshtein_coding
@@ -89,21 +87,31 @@ impl Default for LevenshteinCode {
     }
 }
 
+impl LevenshteinCode {
+    fn encode_u32(&self, n: u32) -> String {
+        u32_to_levenshtein(n)
+    }
+
+    fn encode_i32(&self, n: i32) -> String {
+        if let Some(x) = i32_to_u32_zigzag(n) {
+            self.encode_u32(x)
+        } else {
+            String::from("�")
+        }
+    }
+}
+
 impl Code for LevenshteinCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = Vec::new();
 
         if self.signed {
             for n in string_to_i32s(text, ",")? {
-                if n.is_negative() {
-                    out.push(u32_to_levenshtein((n.abs() * 2 - 1) as u32));
-                } else {
-                    out.push(u32_to_levenshtein((n.abs() * 2) as u32))
-                }
+                out.push(self.encode_i32(n))
             }
         } else {
             for n in string_to_u32s(text, ",")? {
-                out.push(u32_to_levenshtein(n));
+                out.push(self.encode_u32(n))
             }
         }
 
@@ -120,16 +128,9 @@ impl Code for LevenshteinCode {
         for n in levenshtein_to_u32(text).into_iter() {
             if let Some(val) = n {
                 if self.signed {
-                    let v: i32 = match val.try_into() {
-                        Ok(v) => v,
-                        Err(_) => {
-                            return Err(CodeError::input("encountered code group out of i32 range"))
-                        }
-                    };
-                    if val.is_even() {
-                        out.push((v / 2).to_string());
-                    } else {
-                        out.push(((-v - 1) / 2).to_string());
+                    match u32_to_i32_zigzag(val) {
+                        Some(n) => out.push(n.to_string()),
+                        None => out.push(String::from("�")),
                     }
                 } else {
                     out.push(val.to_string())
