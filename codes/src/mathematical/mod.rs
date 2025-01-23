@@ -25,16 +25,15 @@ pub mod truncated_binary;
 pub mod twos_complement;
 pub mod unary;
 
-/// TODO: This should be improvable to a single point of failure like its inverse
 pub fn u32_to_i32_zigzag(n: u32) -> Option<i32> {
-    if let Ok(x) = TryInto::<i32>::try_into(n) {
-        if x % 2 == 0 {
-            Some(x / 2)
-        } else {
-            Some((-(x) - 1) / 2)
-        }
+    if n % 2 == 0 {
+        Some((n / 2) as i32)
     } else {
-        None
+        if let Ok(x) = TryInto::<i32>::try_into(n / 2) {
+            Some(-(x) - 1)
+        } else {
+            None
+        }
     }
 }
 
@@ -116,19 +115,21 @@ pub(super) fn string_to_u64s(s: &str, sep: &str) -> Result<Vec<u64>, CodeError> 
 
 #[cfg(test)]
 mod zig_zag_tests {
+    use std::i32;
+
     use super::*;
 
     #[test]
-    fn to_u32() {
-        for i in i32::MIN..=i32::MAX {
-            i32_to_u32_zigzag(i);
-        }
-    }
-
-    #[test]
-    fn to_i32() {
-        for i in u32::MIN..=u32::MAX {
-            u32_to_i32_zigzag(i);
+    fn test() {
+        for n in i32::MIN..=i32::MAX {
+            let inv = i32_to_u32_zigzag(n);
+            if inv.is_none() {
+                continue;
+            }
+            if u32_to_i32_zigzag(inv.unwrap()).unwrap() != n {
+                println!("{n}");
+                break;
+            }
         }
     }
 }

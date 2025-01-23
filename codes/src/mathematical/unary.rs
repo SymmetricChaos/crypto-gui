@@ -1,4 +1,4 @@
-use super::{string_to_i32s, string_to_u32s, u32_to_i32_zigzag};
+use super::{i32_to_u32_zigzag, string_to_i32s, string_to_u32s, u32_to_i32_zigzag};
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 
@@ -46,11 +46,11 @@ impl UnaryCode {
         }
     }
 
-    pub fn encode_i32(&self, n: i32) -> String {
-        if n.is_negative() {
-            self.encode_u32((n.abs() * 2 - 1) as u32)
+    pub fn encode_i32(&self, n: i32) -> Option<String> {
+        if let Some(x) = i32_to_u32_zigzag(n) {
+            Some(self.encode_u32(x))
         } else {
-            self.encode_u32((n.abs() * 2) as u32)
+            None
         }
     }
 
@@ -124,7 +124,11 @@ impl Code for UnaryCode {
 
         if self.signed {
             for n in string_to_i32s(text, ",")? {
-                out.push(self.encode_i32(n));
+                if let Some(s) = self.encode_i32(n) {
+                    out.push(s);
+                } else {
+                    out.push(String::from("�"));
+                }
             }
         } else {
             for n in string_to_u32s(text, ",")? {
