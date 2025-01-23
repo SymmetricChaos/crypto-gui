@@ -1,19 +1,6 @@
-use super::{string_to_i32s, string_to_u32s};
+use super::{string_to_i32s, string_to_u32s, u32_to_i32_zigzag};
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
-use num::Integer;
-
-pub fn u32_to_i32_zigzag(n: u32) -> Option<i32> {
-    if let Ok(x) = TryInto::<i32>::try_into(n) {
-        if x.is_even() {
-            Some(x / 2)
-        } else {
-            Some((-(x) - 1) / 2)
-        }
-    } else {
-        None
-    }
-}
 
 pub struct UnaryCode {
     pub invert: bool,
