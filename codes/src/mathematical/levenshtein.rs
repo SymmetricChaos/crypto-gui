@@ -88,11 +88,11 @@ impl Default for LevenshteinCode {
 }
 
 impl LevenshteinCode {
-    fn encode_u32(&self, n: u32) -> String {
+    pub fn encode_u32(&self, n: u32) -> String {
         u32_to_levenshtein(n)
     }
 
-    fn encode_i32(&self, n: i32) -> String {
+    pub fn encode_i32(&self, n: i32) -> String {
         if let Some(x) = i32_to_u32_zigzag(n) {
             self.encode_u32(x)
         } else {

@@ -1,4 +1,4 @@
-use super::string_to_u32s;
+use super::{i32_to_u32_zigzag, string_to_i32s, string_to_u32s, u32_to_i32_zigzag};
 use crate::{errors::CodeError, mathematical::truncated_binary::TruncatedBinary, traits::Code};
 use num::Integer;
 use utils::text_functions::swap_ab;
@@ -6,6 +6,7 @@ use utils::text_functions::swap_ab;
 pub struct Golomb {
     pub spaced: bool,
     pub invert: bool,
+    pub signed: bool,
     m: u32,
     rem_enconder: TruncatedBinary,
 }
@@ -15,6 +16,7 @@ impl Default for Golomb {
         Self {
             spaced: false,
             invert: false,
+            signed: false,
             m: 3,
             rem_enconder: TruncatedBinary::new(3),
         }
@@ -27,7 +29,7 @@ impl Golomb {
         self.rem_enconder.set_consts(m);
     }
 
-    pub fn u32_to_bits(&self, x: u32) -> String {
+    pub fn u32_to_golomb(&self, x: u32) -> String {
         let (q, r) = x.div_rem(&self.m);
         // Encode the q portion in unary
         let mut out = "1".repeat(q as usize);
@@ -40,14 +42,28 @@ impl Golomb {
         }
         out
     }
+
+    pub fn i32_to_golomb(&self, x: i32) -> String {
+        if let Some(n) = i32_to_u32_zigzag(x) {
+            self.u32_to_golomb(n)
+        } else {
+            String::from("�")
+        }
+    }
 }
 
 impl Code for Golomb {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = Vec::new();
 
-        for x in string_to_u32s(text, ",")? {
-            out.push(self.u32_to_bits(x))
+        if self.signed {
+            for n in string_to_i32s(text, ",")? {
+                out.push(self.i32_to_golomb(n))
+            }
+        } else {
+            for n in string_to_u32s(text, ",")? {
+                out.push(self.u32_to_golomb(n))
+            }
         }
 
         if self.spaced {
@@ -87,7 +103,16 @@ impl Code for Golomb {
                     return Err(CodeError::input("impossible remainder found"));
                 }
                 if let Some(x) = self.rem_enconder.recognize_code(&buffer) {
-                    out.push((x + n).to_string());
+                    if self.signed {
+                        if let Some(n) = u32_to_i32_zigzag(x + n) {
+                            out.push(n.to_string());
+                        } else {
+                            out.push(String::from("�"));
+                        }
+                    } else {
+                        out.push((x + n).to_string());
+                    }
+
                     mul = 0;
                     buffer.clear();
                     rem = false;
