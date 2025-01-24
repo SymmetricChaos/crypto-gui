@@ -1,9 +1,6 @@
 use super::CodeFrame;
 use crate::ui_elements::UiElements;
-use codes::{
-    mathematical::levenshtein::{u32_to_levenshtein, LevenshteinCode},
-    traits::Code,
-};
+use codes::{mathematical::levenshtein::LevenshteinCode, traits::Code};
 
 pub struct LevenshteinCodeFrame {
     code: LevenshteinCode,

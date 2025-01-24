@@ -1,7 +1,6 @@
-use super::{i32_to_u32_zigzag, string_to_i32s, string_to_u32s, u32_to_i32_zigzag};
+use super::{i32_to_u32_zigzag, string_to_i32s, string_to_u32s, swap_01, u32_to_i32_zigzag};
 use crate::{errors::CodeError, mathematical::truncated_binary::TruncatedBinary, traits::Code};
 use num::Integer;
-use utils::text_functions::swap_ab;
 
 pub struct Golomb {
     pub spaced: bool,
@@ -38,7 +37,7 @@ impl Golomb {
         // Encode the remainder with truncated binary
         out.push_str(&self.rem_enconder.u32_to_bits(r));
         if self.invert {
-            out = swap_ab('0', '1', &out);
+            out = swap_01(out);
         }
         out
     }
@@ -76,7 +75,7 @@ impl Code for Golomb {
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut out: Vec<String> = Vec::new();
         let text = if self.invert {
-            swap_ab('0', '1', &text)
+            swap_01(text.to_string())
         } else {
             text.to_string()
         };

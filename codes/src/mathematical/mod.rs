@@ -25,6 +25,20 @@ pub mod truncated_binary;
 pub mod twos_complement;
 pub mod unary;
 
+pub fn swap_01(text: String) -> String {
+    text.chars()
+        .map(|c| {
+            if c == '0' {
+                '1'
+            } else if c == '1' {
+                '0'
+            } else {
+                c
+            }
+        })
+        .collect()
+}
+
 pub fn u32_to_i32_zigzag(n: u32) -> Option<i32> {
     if n % 2 == 0 {
         Some((n / 2) as i32)

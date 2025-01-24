@@ -50,11 +50,7 @@ impl CodeFrame for UnaryCodeFrame {
             ui.two_column_table(
                 "Integer",
                 "Code",
-                Box::new(
-                    (-5..=5)
-                        .into_iter()
-                        .map(|n| (n, self.code.encode_i32(n).unwrap())),
-                ),
+                Box::new((-5..=5).into_iter().map(|n| (n, self.code.encode_i32(n)))),
             );
         } else {
             ui.two_column_table(

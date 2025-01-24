@@ -32,7 +32,7 @@ impl Iterator for DeltaGen {
     }
 }
 
-pub fn decode_to_u32_delta(bits: &mut dyn Iterator<Item = Bit>) -> Result<Vec<u32>, CodeError> {
+pub fn delta_to_u32(bits: &mut dyn Iterator<Item = Bit>) -> Result<Vec<u32>, CodeError> {
     let mut out = Vec::new();
     let mut buffer = Vec::new();
     let mut zero_ctr = 0;
@@ -98,11 +98,11 @@ mod tests {
     fn delta_decode_u32() {
         assert_eq!(
             vec![19],
-            decode_to_u32_delta(&mut bits_from_str("001010011").unwrap()).unwrap()
+            delta_to_u32(&mut bits_from_str("001010011").unwrap()).unwrap()
         );
         assert_eq!(
             vec![1, 2, 3, 4, 5, 6, 7, 8, 9],
-            decode_to_u32_delta(
+            delta_to_u32(
                 &mut bits_from_str("101000101011000110101110011110010000000100001").unwrap()
             )
             .unwrap()

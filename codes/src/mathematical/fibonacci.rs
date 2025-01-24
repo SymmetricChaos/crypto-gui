@@ -1,9 +1,8 @@
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use std::cell::RefCell;
-use utils::text_functions::swap_ab;
 
-use super::{fibonacci_integers::FibonacciCodeIntegers, string_to_u32s};
+use super::{fibonacci_integers::FibonacciCodeIntegers, string_to_u32s, swap_01};
 
 // https://en.wikipedia.org/wiki/Fibonacci_coding
 
@@ -39,7 +38,7 @@ impl Code for FibonacciCode {
         };
 
         if self.invert {
-            Ok(swap_ab('0', '1', &s))
+            Ok(swap_01(s))
         } else {
             Ok(s)
         }
@@ -47,11 +46,8 @@ impl Code for FibonacciCode {
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let text: String = if self.invert {
-            swap_ab(
-                '0',
-                '1',
-                &text
-                    .chars()
+            swap_01(
+                text.chars()
                     .filter(|c| *c == '0' || *c == '1')
                     .collect::<String>(),
             )

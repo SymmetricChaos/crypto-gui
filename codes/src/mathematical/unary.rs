@@ -46,11 +46,11 @@ impl UnaryCode {
         }
     }
 
-    pub fn encode_i32(&self, n: i32) -> Option<String> {
+    pub fn encode_i32(&self, n: i32) -> String {
         if let Some(x) = i32_to_u32_zigzag(n) {
-            Some(self.encode_u32(x))
+            self.encode_u32(x)
         } else {
-            None
+            String::from("�")
         }
     }
 
@@ -124,11 +124,7 @@ impl Code for UnaryCode {
 
         if self.signed {
             for n in string_to_i32s(text, ",")? {
-                if let Some(s) = self.encode_i32(n) {
-                    out.push(s);
-                } else {
-                    out.push(String::from("�"));
-                }
+                out.push(self.encode_i32(n));
             }
         } else {
             for n in string_to_u32s(text, ",")? {

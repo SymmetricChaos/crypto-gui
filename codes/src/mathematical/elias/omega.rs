@@ -29,7 +29,7 @@ impl Iterator for OmegaGen {
     }
 }
 
-pub fn decode_to_u32_omega(bits: &mut dyn Iterator<Item = Bit>) -> Result<Vec<u32>, CodeError> {
+pub fn omega_to_u32(bits: &mut dyn Iterator<Item = Bit>) -> Result<Vec<u32>, CodeError> {
     let mut out = Vec::new();
     let mut buffer = Vec::new();
     let mut n = 1;
@@ -80,7 +80,7 @@ mod tests {
     fn gamma_decode_u32() {
         assert_eq!(
             vec![1, 2, 3, 4, 5, 6, 7, 8, 9],
-            decode_to_u32_omega(
+            omega_to_u32(
                 &mut bits_from_str("010011010100010101010110010111011100001110010").unwrap()
             )
             .unwrap()

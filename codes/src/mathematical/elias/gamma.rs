@@ -35,7 +35,7 @@ impl Iterator for GammaGen {
     }
 }
 
-pub fn decode_to_u32_gamma(bits: &mut dyn Iterator<Item = Bit>) -> Result<Vec<u32>, CodeError> {
+pub fn gamma_to_u32(bits: &mut dyn Iterator<Item = Bit>) -> Result<Vec<u32>, CodeError> {
     let mut out = Vec::new();
     let mut buffer = Vec::new();
     let mut zero_ctr = 0;
@@ -91,10 +91,8 @@ mod tests {
     fn gamma_decode_u32() {
         assert_eq!(
             vec![1, 2, 3, 4, 5, 6, 7, 8, 9],
-            decode_to_u32_gamma(
-                &mut bits_from_str("10100110010000101001100011100010000001001").unwrap()
-            )
-            .unwrap()
+            gamma_to_u32(&mut bits_from_str("10100110010000101001100011100010000001001").unwrap())
+                .unwrap()
         );
     }
 }
