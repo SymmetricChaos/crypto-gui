@@ -1,8 +1,7 @@
+use super::{fibonacci_integers::FibonacciCodeIntegers, string_to_u32s, swap_01};
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use std::cell::RefCell;
-
-use super::{fibonacci_integers::FibonacciCodeIntegers, string_to_u32s, swap_01};
 
 // https://en.wikipedia.org/wiki/Fibonacci_coding
 
@@ -25,16 +24,19 @@ impl Default for FibonacciCode {
 
 impl Code for FibonacciCode {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
-        let mut output = Vec::new();
+        let mut out = Vec::new();
 
         for n in string_to_u32s(text, ",")? {
-            output.push(self.integer_code.borrow_mut().encode_u32(n).clone());
+            match self.integer_code.borrow_mut().encode_u32(n) {
+                Some(code) => out.push(code.clone()),
+                None => out.push(String::from("�")),
+            }
         }
 
         let s = if self.spaced {
-            output.join(", ")
+            out.join(", ")
         } else {
-            output.join("")
+            out.join("")
         };
 
         if self.invert {
@@ -95,5 +97,17 @@ mod fibonacci_tests {
         assert_eq!(code.decode(ENCODEDTEXT_INV).unwrap(), PLAINTEXT);
         code.spaced = true;
         assert_eq!(code.decode(ENCODEDTEXT_SP_INV).unwrap(), PLAINTEXT);
+    }
+
+    #[test]
+    fn error_tests() {
+        let code = FibonacciCode::default();
+        assert_eq!("��", code.encode("0, 4000000000").unwrap());
+        // for i in 1830000000..u32::MAX {
+        //     if &code.encode(&format!("{i}")).unwrap() == "�" {
+        //         println!("{i}");
+        //         break;
+        //     }
+        // }
     }
 }

@@ -19,11 +19,13 @@ impl Iterator for FibSeq {
     type Item = u32;
 
     fn next(&mut self) -> Option<u32> {
-        let t = self.a + self.b;
-        self.a = self.b;
-        self.b = t;
-
-        Some(self.a)
+        if let Some(t) = self.a.checked_add(self.b) {
+            self.a = self.b;
+            self.b = t;
+            Some(self.a)
+        } else {
+            None
+        }
     }
 }
 
@@ -34,14 +36,19 @@ pub struct FibonacciCodeIntegers {
 }
 
 impl FibonacciCodeIntegers {
-    pub fn encode_u32(&mut self, n: u32) -> &String {
+    pub fn encode_u32(&mut self, n: u32) -> Option<&String> {
+        if n == 0 {
+            return None;
+        }
         // Quickly check if the number has been encoded before
         if self.cached_codes.contains_key(&n) {
-            return self.cached_codes.get(&n).unwrap();
+            return self.cached_codes.get(&n);
         } else {
             // Extend the cached list of fibonnaci numbers if needed
             while self.cached_fib_seq.last().unwrap() < &n {
-                self.extend_seq()
+                if self.extend_seq().is_none() {
+                    return None;
+                }
             }
 
             let mut bits = String::new();
@@ -60,7 +67,7 @@ impl FibonacciCodeIntegers {
                 .insert(n, bits.chars().rev().collect::<String>());
 
             // Reverse the bits, collect them into a String
-            self.cached_codes.get(&n).unwrap()
+            Some(self.cached_codes.get(&n).unwrap())
         }
     }
 
@@ -79,7 +86,7 @@ impl FibonacciCodeIntegers {
             }
             match bit {
                 '0' => (),
-                '1' => n += self.get_nth_fib(ctr),
+                '1' => n += self.get_nth_fib(ctr).unwrap(),
                 _ => return Err(CodeError::invalid_input_char(bit)),
             }
 
@@ -92,20 +99,26 @@ impl FibonacciCodeIntegers {
         Ok(output)
     }
 
-    fn get_nth_fib(&mut self, index: usize) -> u32 {
+    fn get_nth_fib(&mut self, index: usize) -> Option<u32> {
         if let Some(n) = self.cached_fib_seq.get(index) {
-            return *n;
+            return Some(*n);
         }
 
         while self.cached_fib_seq.len() <= index {
-            self.extend_seq()
+            if self.extend_seq().is_none() {
+                return None;
+            }
         }
-        self.cached_fib_seq[index]
+        Some(self.cached_fib_seq[index])
     }
 
-    fn extend_seq(&mut self) {
-        let new = self.fib_gen.next().unwrap();
-        self.cached_fib_seq.push(new);
+    fn extend_seq(&mut self) -> Option<u32> {
+        if let Some(new) = self.fib_gen.next() {
+            self.cached_fib_seq.push(new);
+            Some(new)
+        } else {
+            None
+        }
     }
 }
 
