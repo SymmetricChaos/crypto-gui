@@ -716,3 +716,24 @@ pub fn validate_string_hex_bytes(text: &mut String, length: Option<usize>) {
         text.insert(0, '0');
     }
 }
+
+pub fn prefix_code_sep(ui: &mut Ui, sep: &mut bool) {
+    ui.subheading("Separated");
+    ui.label("A prefix code can be read without inserting spaces or commas. With this set the output will be comma separated.");
+    ui.checkbox(sep, "Use Separator");
+    ui.add_space(8.0);
+}
+
+pub fn invert_bits(ui: &mut Ui, check: &mut bool) {
+    ui.subheading("Invert Bits");
+    ui.label("The 0 and 1 bits can be inverted.");
+    ui.checkbox(check, "Use Inverted");
+    ui.add_space(8.0);
+}
+
+pub fn signed(ui: &mut Ui, check: &mut bool) {
+    ui.subheading("Signed");
+    ui.label("Extend to negative numbers by assigning negative integers to odd values and all others to even values.");
+    ui.checkbox(check, "Use Signed");
+    ui.add_space(8.0);
+}

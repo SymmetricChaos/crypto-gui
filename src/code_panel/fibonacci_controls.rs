@@ -1,5 +1,5 @@
 use super::CodeFrame;
-use crate::ui_elements::UiElements;
+use crate::ui_elements::{invert_bits, prefix_code_sep, UiElements};
 use codes::mathematical::fibonacci::FibonacciCode;
 
 pub struct FibonacciCodeFrame {
@@ -22,21 +22,20 @@ impl CodeFrame for FibonacciCodeFrame {
         );
         ui.add_space(8.0);
 
-        ui.subheading("Separated");
-        ui.label("A prefix code can be read without inserting spaces or commas. With this set the output will be comma separated.");
-        ui.checkbox(&mut self.code.spaced, "Use Separator");
-        ui.add_space(8.0);
+        prefix_code_sep(ui, &mut self.code.spaced);
 
-        ui.subheading("Invert Bits");
-        ui.label("The 0 and 1 bits can be inverted.");
-        ui.checkbox(&mut self.code.invert, "Use Inverted");
-        ui.add_space(8.0);
+        invert_bits(ui, &mut self.code.invert);
 
         ui.label("A sample list of encodings:");
-        let pairs = (1..=64).map(|n| {
+        let pairs = (1..=32).map(|n| {
             (
                 n.to_string(),
-                self.code.integer_code.borrow_mut().encode_u32(n).to_owned(),
+                self.code
+                    .integer_code
+                    .borrow_mut()
+                    .encode_u32(n)
+                    .unwrap()
+                    .to_owned(),
             )
         });
         ui.add_space(16.0);

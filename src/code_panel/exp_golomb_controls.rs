@@ -1,6 +1,6 @@
 use super::CodeFrame;
-use crate::ui_elements::UiElements;
-use codes::mathematical::exp_golomb::{u32_to_exp_golomb, ExpGolomb};
+use crate::ui_elements::{invert_bits, prefix_code_sep, signed, UiElements};
+use codes::mathematical::exp_golomb::{i32_to_exp_golomb, u32_to_exp_golomb, ExpGolomb};
 
 pub struct ExpGolombFrame {
     code: ExpGolomb,
@@ -24,17 +24,26 @@ impl CodeFrame for ExpGolombFrame {
         );
         ui.add_space(8.0);
 
-        ui.subheading("Separated");
-        ui.label("A prefix code can be read without inserting spaces or commas. With this set the output will be comma separated.");
-        ui.checkbox(&mut self.code.spaced, "Use Separator");
-        ui.add_space(8.0);
+        prefix_code_sep(ui, &mut self.code.spaced);
+
+        signed(ui, &mut self.code.signed);
+
+        invert_bits(ui, &mut self.code.invert);
 
         ui.label("A sample list of encodings:");
-        ui.two_column_table(
-            "Code",
-            "Integer",
-            Box::new((0..=16).into_iter().map(|n| (n, u32_to_exp_golomb(n)))),
-        );
+        if self.code.signed {
+            ui.two_column_table(
+                "Code",
+                "Integer",
+                Box::new((-8..=8).into_iter().map(|n| (n, i32_to_exp_golomb(n)))),
+            );
+        } else {
+            ui.two_column_table(
+                "Code",
+                "Integer",
+                Box::new((0..=16).into_iter().map(|n| (n, u32_to_exp_golomb(n)))),
+            );
+        }
 
         ui.add_space(16.0);
     }

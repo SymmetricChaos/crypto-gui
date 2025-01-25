@@ -1,5 +1,5 @@
 use super::CodeFrame;
-use crate::ui_elements::UiElements;
+use crate::ui_elements::{prefix_code_sep, signed, UiElements};
 use codes::mathematical::golomb::Golomb;
 use egui::DragValue;
 
@@ -36,15 +36,9 @@ impl CodeFrame for GolombFrame {
         }
         ui.add_space(8.0);
 
-        ui.subheading("Signed");
-        ui.label("The Golomb codes can be extended to all integers by assigning negative integer to odd values and all others to even values.");
-        ui.checkbox(&mut self.code.signed, "Use Signed");
-        ui.add_space(8.0);
+        signed(ui, &mut self.code.signed);
 
-        ui.subheading("Separated");
-        ui.label("A prefix code can be read without inserting spaces or commas. With this set the output will be comma separated.");
-        ui.checkbox(&mut self.code.spaced, "Use Separator");
-        ui.add_space(8.0);
+        prefix_code_sep(ui, &mut self.code.spaced);
 
         ui.label("A sample list of encodings:");
         ui.add_space(4.0);

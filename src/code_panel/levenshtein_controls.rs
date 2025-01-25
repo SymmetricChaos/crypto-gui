@@ -1,5 +1,5 @@
 use super::CodeFrame;
-use crate::ui_elements::UiElements;
+use crate::ui_elements::{prefix_code_sep, signed, UiElements};
 use codes::{mathematical::levenshtein::LevenshteinCode, traits::Code};
 
 pub struct LevenshteinCodeFrame {
@@ -27,10 +27,11 @@ impl CodeFrame for LevenshteinCodeFrame {
         ui.checkbox(&mut self.code.signed, "Use Signed");
         ui.add_space(8.0);
 
-        ui.subheading("Separated");
-        ui.label("A prefix code can be read without inserting spaces or commas. With this set the output will be comma separated.");
-        ui.checkbox(&mut self.code.spaced, "Use Separator");
-        ui.add_space(8.0);
+        prefix_code_sep(ui, &mut self.code.spaced);
+
+        signed(ui, &mut self.code.signed);
+
+        // invert_bits(ui, &mut self.code.invert);
 
         ui.label("A sample list of encodings:");
         ui.add_space(4.0);

@@ -1,5 +1,5 @@
 use super::CodeFrame;
-use crate::ui_elements::UiElements;
+use crate::ui_elements::{prefix_code_sep, UiElements};
 use codes::mathematical::truncated_binary::TruncatedBinary;
 use egui::DragValue;
 
@@ -44,10 +44,7 @@ impl CodeFrame for TruncatedBinaryFrame {
         ));
         ui.add_space(8.0);
 
-        ui.subheading("Separated");
-        ui.label("A prefix code can be read without inserting spaces or commas. With this set the output will be comma separated.");
-        ui.checkbox(&mut self.code.spaced, "Use Separator");
-        ui.add_space(8.0);
+        prefix_code_sep(ui, &mut self.code.spaced);
 
         ui.label("A sample list of encodings:");
         ui.two_column_table(
