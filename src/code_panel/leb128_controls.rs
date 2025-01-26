@@ -5,14 +5,12 @@ use utils::byte_formatting::ByteFormat;
 
 pub struct Leb128Frame {
     code: Leb128,
-    // words_string: String,
 }
 
 impl Default for Leb128Frame {
     fn default() -> Self {
         Self {
             code: Default::default(),
-            // words_string: String::new(),
         }
     }
 }

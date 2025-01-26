@@ -724,6 +724,13 @@ pub fn prefix_code_sep(ui: &mut Ui, sep: &mut bool) {
     ui.add_space(8.0);
 }
 
+pub fn fixed_width_code_sep(ui: &mut Ui, sep: &mut bool) {
+    ui.subheading("Separated");
+    ui.label("A fixed-width code can be read without inserting spaces or commas. With this set the output will be comma separated.");
+    ui.checkbox(sep, "Use Separator");
+    ui.add_space(8.0);
+}
+
 pub fn invert_bits(ui: &mut Ui, check: &mut bool) {
     ui.subheading("Invert Bits");
     ui.label("The 0 and 1 bits can be inverted.");

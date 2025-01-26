@@ -2,7 +2,7 @@ use codes::mathematical::twos_complement::{TwosComplement, Width};
 use utils::byte_formatting::ByteFormat;
 
 use super::CodeFrame;
-use crate::ui_elements::UiElements;
+use crate::ui_elements::{fixed_width_code_sep, UiElements};
 
 pub struct TwosComplementFrame {
     code: TwosComplement,
@@ -24,8 +24,7 @@ impl CodeFrame for TwosComplementFrame {
         );
         ui.add_space(8.0);
 
-        ui.checkbox(&mut self.code.spaced, "Use Spaces");
-        ui.add_space(8.0);
+        fixed_width_code_sep(ui, &mut self.code.spaced);
 
         ui.checkbox(&mut self.code.big_endian, "Big-Endian Byte Order");
         ui.add_space(8.0);
