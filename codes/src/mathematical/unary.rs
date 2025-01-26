@@ -57,21 +57,50 @@ impl UnaryCode {
     pub fn recognize_code(&self, text: &str) -> Vec<Option<u32>> {
         let mut out = Vec::new();
 
-        let (z0, z1) = if self.invert { ('0', '1') } else { ('1', '0') };
-
         let mut ctr = 0;
-        for c in text.chars() {
-            if c.is_whitespace() {
-                continue;
+        if self.symmetric {
+            let (z0, z1) = if self.invert { ('1', '0') } else { ('0', '1') };
+
+            for b in text.chars() {
+                // Invalid characters immediatly give '?' response and restart
+                if b != z0 && b != z1 {
+                    out.push(None);
+                    ctr = 0;
+                    continue;
+                }
+                // The '1' bit on its own is a valid code
+                if ctr == 0 && b == z1 {
+                    out.push(Some(0));
+                    continue;
+                }
+                // If the starting bit is '0' push it and continue
+                if ctr == 0 && b == z0 {
+                    ctr += 1;
+                // Otherwise push the next bit on
+                } else {
+                    if b == z0 {
+                        out.push(Some(ctr));
+                        ctr = 0;
+                    } else {
+                        ctr += 1;
+                    }
+                }
             }
-            if c == z0 {
-                ctr += 1
-            } else if c == z1 {
-                out.push(Some(ctr));
-                ctr = 0;
-            } else {
-                out.push(None);
-                ctr = 0;
+        } else {
+            let (z0, z1) = if self.invert { ('0', '1') } else { ('1', '0') };
+            for c in text.chars() {
+                if c.is_whitespace() {
+                    continue;
+                }
+                if c == z0 {
+                    ctr += 1
+                } else if c == z1 {
+                    out.push(Some(ctr));
+                    ctr = 0;
+                } else {
+                    out.push(None);
+                    ctr = 0;
+                }
             }
         }
         if ctr != 0 {
@@ -80,41 +109,13 @@ impl UnaryCode {
         out
     }
 
-    pub fn recognize_code_symmetric(&self, text: &str) -> Vec<Option<u32>> {
-        let mut out = Vec::new();
-        let mut ctr = 0;
-        let (z0, z1) = if self.invert { ('1', '0') } else { ('0', '1') };
-
-        for b in text.chars() {
-            // Invalid characters immediatly give '?' response and restart
-            if b != z0 && b != z1 {
-                out.push(None);
-                ctr = 0;
-                continue;
-            }
-            // The '1' bit on its own is a valid code
-            if ctr == 0 && b == z1 {
-                out.push(Some(0));
-                continue;
-            }
-            // If the starting bit is '0' push it and continue
-            if ctr == 0 && b == z0 {
-                ctr += 1;
-            // Otherwise push the next bit on
-            } else {
-                if b == z0 {
-                    out.push(Some(ctr));
-                    ctr = 0;
-                } else {
-                    ctr += 1;
-                }
-            }
+    pub fn recognize_code_single(&self, text: &str) -> Option<u32> {
+        let o = self.recognize_code(text);
+        if o.len() != 1 {
+            return None;
+        } else {
+            return o[0];
         }
-        // If anything remains in the buffer it is invalid
-        if ctr != 0 {
-            out.push(None)
-        }
-        out
     }
 }
 
@@ -142,9 +143,9 @@ impl Code for UnaryCode {
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = Vec::new();
 
-        if self.symmetric {
-            for section in self.recognize_code_symmetric(&text) {
-                if let Some(code) = section {
+        if self.spaced {
+            for section in text.split(",").map(|s| s.trim()) {
+                if let Some(code) = self.recognize_code_single(section) {
                     if self.signed {
                         match u32_to_i32_zigzag(code) {
                             Some(n) => out.push(n.to_string()),
