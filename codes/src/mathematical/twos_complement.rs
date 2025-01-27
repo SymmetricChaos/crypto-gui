@@ -254,16 +254,21 @@ mod twos_complement_tests {
 
     const PLAINTEXT: &'static str = "-3, -2, -1, 0, 1, 2, 3";
     const ENCODEDTEXT: &'static str = "11111111111111111111111111111101111111111111111111111111111111101111111111111111111111111111111100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000001000000000000000000000000000000011";
+    const ENCODEDTEXT_SP: &'static str = "11111111111111111111111111111101, 11111111111111111111111111111110, 11111111111111111111111111111111, 00000000000000000000000000000000, 00000000000000000000000000000001, 00000000000000000000000000000010, 00000000000000000000000000000011";
 
     #[test]
     fn encode_test() {
-        let code = TwosComplement::default();
+        let mut code = TwosComplement::default();
         assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT);
+        code.spaced = true;
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), ENCODEDTEXT_SP);
     }
 
     #[test]
     fn decode_test() {
-        let code = TwosComplement::default();
+        let mut code = TwosComplement::default();
         assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
+        code.spaced = true;
+        assert_eq!(code.decode(ENCODEDTEXT_SP).unwrap(), PLAINTEXT);
     }
 }

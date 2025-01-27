@@ -108,19 +108,29 @@ impl Code for TruncatedBinary {
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = Vec::new();
-        let mut buffer = String::with_capacity((self.k + 1) as usize);
-        for c in text.chars().filter(|c| *c == '0' || *c == '1') {
-            buffer.push(c);
-            if let Some(n) = self.recognize_code(&buffer) {
-                out.push(n.to_string());
-                buffer.clear();
+        if self.spaced {
+            for word in text.split(",").map(|s| s.trim()) {
+                if let Some(n) = self.recognize_code(word) {
+                    out.push(n.to_string());
+                } else {
+                    out.push(String::from("�"));
+                }
+            }
+        } else {
+            let mut buffer = String::with_capacity((self.k + 1) as usize);
+            for c in text.chars().filter(|c| *c == '0' || *c == '1') {
+                buffer.push(c);
+                if let Some(n) = self.recognize_code(&buffer) {
+                    out.push(n.to_string());
+                    buffer.clear();
+                }
+            }
+            if !buffer.is_empty() {
+                out.push(String::from("�"));
             }
         }
-        let mut t = out.into_iter().map(|n| n.to_string()).join(", ");
-        if !buffer.is_empty() {
-            t.push_str(", �");
-        }
-        Ok(t)
+
+        Ok(out.iter().into_iter().join(", "))
     }
 }
 

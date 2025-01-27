@@ -237,6 +237,11 @@ mod unary_tests {
         assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT);
         code.symmetric = true;
         assert_eq!(code.decode(ENCODEDTEXT_SYM).unwrap(), PLAINTEXT);
+        code.symmetric = false;
+        code.spaced = true;
+        assert_eq!(code.decode(ENCODEDTEXT_SP).unwrap(), PLAINTEXT);
+        code.symmetric = true;
+        assert_eq!(code.decode(ENCODEDTEXT_SP_SYM).unwrap(), PLAINTEXT);
     }
 
     #[test]
@@ -246,5 +251,10 @@ mod unary_tests {
         assert_eq!(code.decode(ENCODEDTEXT).unwrap(), PLAINTEXT_SIGNED);
         code.symmetric = true;
         assert_eq!(code.decode(ENCODEDTEXT_SYM).unwrap(), PLAINTEXT_SIGNED);
+        code.symmetric = false;
+        code.spaced = true;
+        assert_eq!(code.decode(ENCODEDTEXT_SP).unwrap(), PLAINTEXT_SIGNED);
+        code.symmetric = true;
+        assert_eq!(code.decode(ENCODEDTEXT_SP_SYM).unwrap(), PLAINTEXT_SIGNED);
     }
 }
