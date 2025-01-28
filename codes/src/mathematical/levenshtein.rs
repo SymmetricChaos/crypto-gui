@@ -73,6 +73,15 @@ pub fn levenshtein_to_u32(text: &str) -> Vec<Option<u32>> {
     vec
 }
 
+fn levenshtein_to_u32_single(text: &str) -> Option<u32> {
+    let o = levenshtein_to_u32(text);
+    if o.len() != 1 {
+        return None;
+    } else {
+        return o[0];
+    }
+}
+
 pub struct LevenshteinCode {
     pub spaced: bool,
     pub signed: bool,
@@ -125,18 +134,35 @@ impl Code for LevenshteinCode {
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = Vec::new();
 
-        for n in levenshtein_to_u32(text).into_iter() {
-            if let Some(val) = n {
-                if self.signed {
-                    match u32_to_i32_zigzag(val) {
-                        Some(n) => out.push(n.to_string()),
-                        None => out.push(String::from("�")),
+        if self.spaced {
+            for section in text.split(",").map(|s| s.trim()) {
+                if let Some(code) = levenshtein_to_u32_single(section) {
+                    if self.signed {
+                        match u32_to_i32_zigzag(code) {
+                            Some(n) => out.push(n.to_string()),
+                            None => out.push(String::from("�")),
+                        }
+                    } else {
+                        out.push(code.to_string());
                     }
                 } else {
-                    out.push(val.to_string())
+                    out.push(String::from("�"));
                 }
-            } else {
-                out.push(String::from("�"))
+            }
+        } else {
+            for n in levenshtein_to_u32(text).into_iter() {
+                if let Some(val) = n {
+                    if self.signed {
+                        match u32_to_i32_zigzag(val) {
+                            Some(n) => out.push(n.to_string()),
+                            None => out.push(String::from("�")),
+                        }
+                    } else {
+                        out.push(val.to_string())
+                    }
+                } else {
+                    out.push(String::from("�"))
+                }
             }
         }
 
