@@ -1,4 +1,4 @@
-use super::{i32_to_u32_zigzag, string_to_i32s, string_to_u32s, u32_to_i32_zigzag};
+use super::{decode_prefix_to_strings, i32_to_u32_zigzag, string_to_i32s, string_to_u32s};
 use crate::{errors::CodeError, traits::Code};
 
 // https://en.wikipedia.org/wiki/Levenshtein_coding
@@ -136,33 +136,11 @@ impl Code for LevenshteinCode {
 
         if self.spaced {
             for section in text.split(",").map(|s| s.trim()) {
-                if let Some(code) = levenshtein_to_u32_single(section) {
-                    if self.signed {
-                        match u32_to_i32_zigzag(code) {
-                            Some(n) => out.push(n.to_string()),
-                            None => out.push(String::from("�")),
-                        }
-                    } else {
-                        out.push(code.to_string());
-                    }
-                } else {
-                    out.push(String::from("�"));
-                }
+                decode_prefix_to_strings(levenshtein_to_u32_single(section), self.signed, &mut out);
             }
         } else {
-            for n in levenshtein_to_u32(text).into_iter() {
-                if let Some(val) = n {
-                    if self.signed {
-                        match u32_to_i32_zigzag(val) {
-                            Some(n) => out.push(n.to_string()),
-                            None => out.push(String::from("�")),
-                        }
-                    } else {
-                        out.push(val.to_string())
-                    }
-                } else {
-                    out.push(String::from("�"))
-                }
+            for section in levenshtein_to_u32(&text) {
+                decode_prefix_to_strings(section, self.signed, &mut out);
             }
         }
 

@@ -1,4 +1,4 @@
-use super::{i32_to_u32_zigzag, string_to_i32s, string_to_u32s, u32_to_i32_zigzag};
+use super::{decode_prefix_to_strings, i32_to_u32_zigzag, string_to_i32s, string_to_u32s};
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 
@@ -145,33 +145,15 @@ impl Code for UnaryCode {
 
         if self.spaced {
             for section in text.split(",").map(|s| s.trim()) {
-                if let Some(code) = self.recognize_code_single(section) {
-                    if self.signed {
-                        match u32_to_i32_zigzag(code) {
-                            Some(n) => out.push(n.to_string()),
-                            None => out.push(String::from("�")),
-                        }
-                    } else {
-                        out.push(code.to_string());
-                    }
-                } else {
-                    out.push(String::from("�"));
-                }
+                decode_prefix_to_strings(
+                    self.recognize_code_single(section),
+                    self.signed,
+                    &mut out,
+                );
             }
         } else {
             for section in self.recognize_code(&text) {
-                if let Some(code) = section {
-                    if self.signed {
-                        match u32_to_i32_zigzag(code) {
-                            Some(n) => out.push(n.to_string()),
-                            None => out.push(String::from("�")),
-                        }
-                    } else {
-                        out.push(code.to_string());
-                    }
-                } else {
-                    out.push(String::from("�"));
-                }
+                decode_prefix_to_strings(section, self.signed, &mut out);
             }
         }
 

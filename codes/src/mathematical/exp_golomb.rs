@@ -1,4 +1,4 @@
-use super::{i32_to_u32_zigzag, string_to_i32s, string_to_u32s, swap_01, u32_to_i32_zigzag};
+use super::{decode_prefix_to_strings, i32_to_u32_zigzag, string_to_i32s, string_to_u32s, swap_01};
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use std::u32;
@@ -22,52 +22,6 @@ pub fn i32_to_exp_golomb(n: i32) -> String {
     }
 }
 
-pub fn recognize_exp_golomb(s: &str, invert: bool) -> Vec<Option<u32>> {
-    let mut out = Vec::new();
-    let mut ctr = 0;
-    let mut counting_up = true;
-    let mut buffer = String::new();
-    let (z0, z1) = if invert { ('1', '0') } else { ('0', '1') };
-    for b in s.chars().filter(|c| *c == z0 || *c == z1) {
-        if counting_up {
-            if b == z0 {
-                ctr += 1;
-            }
-            if b == z1 {
-                if ctr == 0 {
-                    out.push(Some(0));
-                    continue;
-                }
-                buffer.push(b);
-                counting_up = false;
-            }
-        } else {
-            buffer.push(b);
-            ctr -= 1;
-            if ctr <= 0 {
-                if invert {
-                    buffer = swap_01(buffer);
-                }
-
-                if buffer == "100000000000000000000000000000000" {
-                    out.push(Some(u32::MAX));
-                } else {
-                    if let Ok(n) = u32::from_str_radix(&buffer, 2) {
-                        out.push(Some(n - 1));
-                    } else {
-                        out.push(None);
-                    }
-                }
-                counting_up = true;
-                buffer.clear();
-                ctr = 0;
-                continue;
-            }
-        }
-    }
-    out
-}
-
 pub struct ExpGolomb {
     pub spaced: bool,
     pub invert: bool,
@@ -84,7 +38,62 @@ impl Default for ExpGolomb {
     }
 }
 
-impl ExpGolomb {}
+impl ExpGolomb {
+    pub fn recognize_code(&self, s: &str) -> Vec<Option<u32>> {
+        let mut out = Vec::new();
+        let mut ctr = 0;
+        let mut counting_up = true;
+        let mut buffer = String::new();
+        let (z0, z1) = if self.invert { ('1', '0') } else { ('0', '1') };
+        for b in s.chars().filter(|c| *c == z0 || *c == z1) {
+            if counting_up {
+                if b == z0 {
+                    ctr += 1;
+                }
+                if b == z1 {
+                    if ctr == 0 {
+                        out.push(Some(0));
+                        continue;
+                    }
+                    buffer.push(b);
+                    counting_up = false;
+                }
+            } else {
+                buffer.push(b);
+                ctr -= 1;
+                if ctr <= 0 {
+                    if self.invert {
+                        buffer = swap_01(buffer);
+                    }
+
+                    if buffer == "100000000000000000000000000000000" {
+                        out.push(Some(u32::MAX));
+                    } else {
+                        if let Ok(n) = u32::from_str_radix(&buffer, 2) {
+                            out.push(Some(n - 1));
+                        } else {
+                            out.push(None);
+                        }
+                    }
+                    counting_up = true;
+                    buffer.clear();
+                    ctr = 0;
+                    continue;
+                }
+            }
+        }
+        out
+    }
+
+    pub fn recognize_code_single(&self, text: &str) -> Option<u32> {
+        let o = self.recognize_code(text);
+        if o.len() != 1 {
+            return None;
+        } else {
+            return o[0];
+        }
+    }
+}
 
 impl Code for ExpGolomb {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
@@ -111,20 +120,20 @@ impl Code for ExpGolomb {
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = Vec::new();
 
-        for section in recognize_exp_golomb(text, self.invert) {
-            if let Some(code) = section {
-                if self.signed {
-                    match u32_to_i32_zigzag(code) {
-                        Some(n) => out.push(n.to_string()),
-                        None => out.push(String::from("�")),
-                    }
-                } else {
-                    out.push(code.to_string());
-                }
-            } else {
-                out.push(String::from("�"));
+        if self.spaced {
+            for section in text.split(",").map(|s| s.trim()) {
+                decode_prefix_to_strings(
+                    self.recognize_code_single(section),
+                    self.signed,
+                    &mut out,
+                );
+            }
+        } else {
+            for section in self.recognize_code(text) {
+                decode_prefix_to_strings(section, self.signed, &mut out);
             }
         }
+
         Ok(out.into_iter().join(", "))
     }
 }
