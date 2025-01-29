@@ -160,7 +160,7 @@
     ]
   },
   "Elias": {
-    "Description": "The Elias codes are a family of universal codes meaning they are prefix codes which share the property that so long as large numbers are less probable than small ones the code is within a constant multiple of the best possible prefix code for the real distribution. By default Elias codes cover all the positive integers but can be adapted to represent all integers.",
+    "Description": "The Elias codes are a family of universal codes, meaning they are prefix codes which share the property that so long as large numbers are less probable than small ones the code is within a constant multiple of the best possible prefix code for the real distribution. By default Elias codes cover all the positive integers but can be adapted to represent all integers.",
     "Authors": null,
     "Publication": null,
     "Traits": [
@@ -191,7 +191,7 @@
     ]
   },
   "Fibonacci": {
-    "Description": "The Fibonacci code is a prefix code that assigns a binary sequence to each positive integer. So long as larger integers appear less frequently than smaller ones this encoding is within a constant factor of an optimal encoding. More importantly the Fibonacci code is self-synchronizing. Alterting a single bit will either incorrectly split a single code or incorrectly merge two codes but following codes will not be affected.",
+    "Description": "The Fibonacci code is a prefix code that assigns a binary sequence to each positive integer. So long as larger integers appear less frequently than smaller ones this encoding is within a constant factor of an optimal encoding. More importantly the Fibonacci code is self-synchronizing. Alterting a single bit will either incorrectly split a single code or incorrectly merge two codes but following codes will not be affected. By default it represents all positive integers.",
     "Authors": null,
     "Publication": null,
     "Traits": [

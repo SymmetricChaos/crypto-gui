@@ -150,7 +150,7 @@ impl Code for Leb128 {
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut v = Vec::new();
 
-        let out = if self.spaced {
+        if self.spaced {
             let strs = text.split(',').map(|s| s.trim());
             if self.signed {
                 for s in strs {
@@ -169,7 +169,6 @@ impl Code for Leb128 {
                     v.push(leb128_to_u128(&bytes).to_string());
                 }
             }
-            v.join(", ")
         } else {
             let bytes = self
                 .byte_format
@@ -187,10 +186,9 @@ impl Code for Leb128 {
                     v.push(leb128_to_u128(&group).to_string());
                 }
             }
-            v.join(", ")
         };
 
-        Ok(out)
+        Ok(v.join(", "))
     }
 }
 
