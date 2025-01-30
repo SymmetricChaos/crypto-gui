@@ -27,17 +27,7 @@ impl CodeFrame for FibonacciCodeFrame {
         invert_bits(ui, &mut self.code.invert);
 
         ui.label("A sample list of encodings:");
-        let pairs = (1..=32).map(|n| {
-            (
-                n.to_string(),
-                self.code
-                    .integer_code
-                    .borrow_mut()
-                    .encode_u32(n)
-                    .unwrap()
-                    .to_owned(),
-            )
-        });
+        let pairs = (1..=32).map(|n| (n.to_string(), self.code.encode_u32(n).unwrap().to_owned()));
         ui.add_space(16.0);
         ui.two_column_table("Integer", "Code", Box::new(pairs));
 

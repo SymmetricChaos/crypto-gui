@@ -134,7 +134,7 @@ impl Code for ExpGolomb {
             }
         }
 
-        Ok(out.into_iter().join(", "))
+        Ok(out.join(", "))
     }
 }
 

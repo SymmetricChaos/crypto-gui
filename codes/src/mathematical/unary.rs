@@ -1,6 +1,5 @@
 use super::{decode_prefix_to_strings, i32_to_u32_zigzag, string_to_i32s, string_to_u32s};
 use crate::{errors::CodeError, traits::Code};
-use itertools::Itertools;
 
 pub struct UnaryCode {
     pub invert: bool,
@@ -134,9 +133,9 @@ impl Code for UnaryCode {
         }
 
         if self.spaced {
-            Ok(out.into_iter().join(", "))
+            Ok(out.join(", "))
         } else {
-            Ok(out.into_iter().join(""))
+            Ok(out.join(""))
         }
     }
 
@@ -157,7 +156,7 @@ impl Code for UnaryCode {
             }
         }
 
-        Ok(out.into_iter().join(", "))
+        Ok(out.join(", "))
     }
 }
 

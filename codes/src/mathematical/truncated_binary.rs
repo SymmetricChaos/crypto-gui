@@ -1,9 +1,6 @@
-use itertools::Itertools;
-use num::Integer;
-
-use crate::{errors::CodeError, traits::Code};
-
 use super::string_to_u32s;
+use crate::{errors::CodeError, traits::Code};
+use num::Integer;
 
 pub fn to_binary(mut n: u32, k: u32) -> String {
     let mut s = Vec::with_capacity(k as usize);
@@ -130,7 +127,7 @@ impl Code for TruncatedBinary {
             }
         }
 
-        Ok(out.iter().into_iter().join(", "))
+        Ok(out.join(", "))
     }
 }
 

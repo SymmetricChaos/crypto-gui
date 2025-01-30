@@ -1,8 +1,6 @@
-use itertools::Itertools;
-use num::CheckedAdd;
-
-use super::{decode_prefix_to_strings, string_to_u32s, swap_01};
+use super::{decode_prefix_to_strings, string_to_u32s};
 use crate::{errors::CodeError, traits::Code};
+use num::CheckedAdd;
 
 // First 46 Fibonacci numbers (skipping the initial 0 and 1), all the ones that fit in u32
 pub const FIBS: [u32; 46] = [
@@ -35,16 +33,16 @@ impl FibonacciCode {
         if n == 0 {
             return None;
         }
-
-        let mut bits = String::from("1");
+        let (z0, z1) = if self.invert { ('1', '0') } else { ('0', '1') };
+        let mut bits = String::from(z1);
 
         let mut val = n;
         for f in FIBS.into_iter().filter(|x| x <= &n).rev() {
             if f <= val {
-                bits.push('1');
+                bits.push(z1);
                 val -= f;
             } else {
-                bits.push('0')
+                bits.push(z0)
             }
         }
 
@@ -118,16 +116,10 @@ impl Code for FibonacciCode {
             }
         }
 
-        let s = if self.spaced {
-            out.join(", ")
+        if self.spaced {
+            Ok(out.join(", "))
         } else {
-            out.join("")
-        };
-
-        if self.invert {
-            Ok(swap_01(s))
-        } else {
-            Ok(s)
+            Ok(out.join(""))
         }
     }
 
@@ -148,7 +140,7 @@ impl Code for FibonacciCode {
             }
         }
 
-        Ok(out.into_iter().join(", "))
+        Ok(out.join(", "))
     }
 }
 
