@@ -12,7 +12,6 @@ pub mod elias;
 pub mod exp_golomb;
 pub mod factoradic;
 pub mod fibonacci;
-pub mod fibonacci_integers;
 pub mod godel;
 pub mod golomb;
 pub mod gray;
@@ -126,43 +125,6 @@ pub(super) fn string_to_u64s(s: &str, sep: &str) -> Result<Vec<u64>, CodeError> 
 //     }
 //     Ok(out)
 // }
-
-#[macro_export]
-macro_rules! handle_prefix_decoding {
-    ($out: ident, $text: ident, $spaced: expr, $signed: expr, $recognize: expr, $recognize_single: expr) => {
-        if $spaced {
-            for section in $text.split(",").map(|s| s.trim()) {
-                if let Some(code) = $recognize_single(section) {
-                    if $signed {
-                        match u32_to_i32_zigzag(code) {
-                            Some(n) => $out.push(n.to_string()),
-                            None => $out.push(String::from("�")),
-                        }
-                    } else {
-                        $out.push(code.to_string());
-                    }
-                } else {
-                    $out.push(String::from("�"));
-                }
-            }
-        } else {
-            for n in $recognize($text).into_iter() {
-                if let Some(val) = n {
-                    if $signed {
-                        match u32_to_i32_zigzag(val) {
-                            Some(n) => $out.push(n.to_string()),
-                            None => $out.push(String::from("�")),
-                        }
-                    } else {
-                        $out.push(val.to_string())
-                    }
-                } else {
-                    $out.push(String::from("�"))
-                }
-            }
-        }
-    };
-}
 
 pub(super) fn decode_prefix_to_strings(val: Option<u32>, signed: bool, out: &mut Vec<String>) {
     if let Some(code) = val {

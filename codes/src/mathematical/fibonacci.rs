@@ -1,23 +1,108 @@
-use super::{fibonacci_integers::FibonacciCodeIntegers, string_to_u32s, swap_01};
-use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
-use std::cell::RefCell;
+use num::CheckedAdd;
+
+use super::{decode_prefix_to_strings, string_to_u32s, swap_01};
+use crate::{errors::CodeError, traits::Code};
+
+// First 46 Fibonacci numbers (skipping the initial 0 and 1), all the ones that fit in u32
+pub const FIBS: [u32; 46] = [
+    1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765, 10946,
+    17711, 28657, 46368, 75025, 121393, 196418, 317811, 514229, 832040, 1346269, 2178309, 3524578,
+    5702887, 9227465, 14930352, 24157817, 39088169, 63245986, 102334155, 165580141, 267914296,
+    433494437, 701408733, 1134903170, 1836311903, 2971215073,
+];
 
 // https://en.wikipedia.org/wiki/Fibonacci_coding
 
 pub struct FibonacciCode {
-    pub integer_code: RefCell<FibonacciCodeIntegers>,
     pub spaced: bool,
     pub invert: bool,
+    pub signed: bool,
 }
 
 impl Default for FibonacciCode {
     fn default() -> Self {
-        let codes = FibonacciCodeIntegers::default();
         FibonacciCode {
-            integer_code: RefCell::new(codes),
             spaced: false,
             invert: false,
+            signed: false,
+        }
+    }
+}
+
+impl FibonacciCode {
+    pub fn encode_u32(&self, n: u32) -> Option<String> {
+        if n == 0 {
+            return None;
+        }
+
+        let mut bits = String::from("1");
+
+        let mut val = n;
+        for f in FIBS.into_iter().filter(|x| x <= &n).rev() {
+            if f <= val {
+                bits.push('1');
+                val -= f;
+            } else {
+                bits.push('0')
+            }
+        }
+
+        // Reverse the bits, collect them into a String
+        Some(bits.chars().rev().collect::<String>())
+    }
+
+    pub fn decode_to_u32(&self, text: &str) -> Vec<Option<u32>> {
+        let (z0, z1) = if self.invert { ('1', '0') } else { ('0', '1') };
+        let mut output = Vec::new();
+        let mut prev = z0;
+        let mut ctr = 0;
+        let mut n = 0;
+        let mut valid = true;
+        for bit in text.chars() {
+            if prev == z1 && bit == z1 {
+                if valid {
+                    output.push(Some(n));
+                } else {
+                    output.push(None);
+                }
+                prev = z0;
+                ctr = 0;
+                n = 0;
+                valid = true;
+                continue;
+            }
+            if bit == z0 {
+                ()
+            } else if bit == z1 {
+                if let Some(f) = FIBS.get(ctr) {
+                    if let Some(sum) = n.checked_add(f) {
+                        n = sum;
+                    } else {
+                        valid = false
+                    }
+                } else {
+                    valid = false
+                };
+            } else {
+                valid = false
+            }
+
+            ctr += 1;
+            prev = bit;
+        }
+        if n != 0 {
+            output.push(Some(n));
+        }
+        output
+    }
+
+    fn decode_to_u32_single(&self, text: &str) -> Option<u32> {
+        let o = self.decode_to_u32(text);
+        if o.len() != 1 {
+            return None;
+        } else {
+            return o[0];
         }
     }
 }
@@ -27,7 +112,7 @@ impl Code for FibonacciCode {
         let mut out = Vec::new();
 
         for n in string_to_u32s(text, ",")? {
-            match self.integer_code.borrow_mut().encode_u32(n) {
+            match self.encode_u32(n) {
                 Some(code) => out.push(code.clone()),
                 None => out.push(String::from("�")),
             }
@@ -47,19 +132,23 @@ impl Code for FibonacciCode {
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        let text: String = if self.invert {
-            swap_01(
-                text.chars()
-                    .filter(|c| *c == '0' || *c == '1')
-                    .collect::<String>(),
-            )
+        let mut out = Vec::new();
+
+        if self.spaced {
+            for section in text.split(",").map(|s| s.trim()) {
+                decode_prefix_to_strings(
+                    self.decode_to_u32_single(&section),
+                    self.signed,
+                    &mut out,
+                );
+            }
         } else {
-            text.chars().filter(|c| *c == '0' || *c == '1').collect()
-        };
+            for section in self.decode_to_u32(&text) {
+                decode_prefix_to_strings(section, self.signed, &mut out);
+            }
+        }
 
-        let nums = self.integer_code.borrow_mut().decode_to_u32(&text)?;
-
-        Ok(nums.into_iter().map(|n| n.to_string()).join(", "))
+        Ok(out.into_iter().join(", "))
     }
 }
 
