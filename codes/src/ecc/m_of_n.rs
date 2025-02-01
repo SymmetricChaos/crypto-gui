@@ -1,12 +1,45 @@
 use itertools::Itertools;
-use num::integer::binomial;
+use num::{integer::binomial, Integer};
 use utils::bits::{bits_from_str, Bit};
 
 use crate::{errors::CodeError, traits::Code};
 
+pub fn u32_to_m_of_n(n: u32, w: usize, l: usize) -> Option<String> {
+    let mut n = n;
+    let mut s = Vec::with_capacity(l);
+    let mut counted_weight = 0;
+    while n != 0 {
+        let (q, r) = n.div_rem(&2);
+        if r == 0 {
+            s.push('0');
+        } else if r == 1 {
+            counted_weight += 1;
+            s.push('1');
+        } else {
+            unreachable!("remainder after division by 2 is always 0 or 1")
+        }
+        n = q;
+    }
+    if counted_weight > w || s.len() >= l {
+        return None;
+    }
+    while s.len() < l - w {
+        s.push('0');
+    }
+    s.reverse();
+    for _ in 0..(w - counted_weight) {
+        s.push('1');
+    }
+    while s.len() < l {
+        s.push('0')
+    }
+    Some(s.into_iter().join(""))
+}
+
 pub struct MofNCode {
     pub weight: usize,
     pub length: usize,
+    pub spaced: bool,
 }
 
 impl MofNCode {
@@ -36,6 +69,7 @@ impl Default for MofNCode {
         Self {
             weight: 2,
             length: 5,
+            spaced: false,
         }
     }
 }
@@ -57,9 +91,9 @@ impl Code for MofNCode {
             )));
         };
 
-        let bits = bits_from_str(text).map_err(|e| CodeError::input(&e.to_string()))?;
+        let bits = bits_from_str(text).map_err(|e| CodeError::Input(e.to_string()))?;
 
-        let mut out = String::new();
+        let mut out = Vec::new();
         let mut counted_weight = 0;
         let mut buffer = String::new();
         for chunk in &bits.chunks(n_data_bits) {
@@ -79,12 +113,13 @@ impl Code for MofNCode {
             while buffer.len() < self.length {
                 buffer.push('0')
             }
-            out.push_str(&buffer);
+            out.push(buffer.clone());
 
             counted_weight = 0;
             buffer.clear();
         }
-        Ok(out)
+
+        Ok(out.join(if self.spaced { ", " } else { "" }))
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
@@ -131,6 +166,13 @@ impl Code for MofNCode {
 mod m_of_n_tests {
     use super::*;
     const PLAINTEXT: &'static str = "011110000";
+
+    // #[test]
+    // fn encode_int_test() {
+    //     for i in 0..20 {
+    //         println!("{:?}", u32_to_m_of_n(i, 2, 5))
+    //     }
+    // }
 
     #[test]
     fn encode_test() {

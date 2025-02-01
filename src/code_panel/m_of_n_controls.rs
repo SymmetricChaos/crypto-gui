@@ -1,7 +1,7 @@
 use codes::ecc::m_of_n::MofNCode;
 use egui::Slider;
 
-use crate::ui_elements::UiElements;
+use crate::ui_elements::{fixed_width_code_sep, UiElements};
 
 use super::CodeFrame;
 
@@ -24,6 +24,8 @@ impl CodeFrame for MofNCodeFrame {
             "https://github.com/SymmetricChaos/crypto-gui/blob/master/codes/src/ecc/m_of_n.rs",
         );
         ui.add_space(8.0);
+
+        fixed_width_code_sep(ui, &mut self.code.spaced);
 
         ui.subheading("Length");
         ui.label("Total number of bits in each code.");
