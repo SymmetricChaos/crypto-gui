@@ -3,31 +3,19 @@ use lazy_static::lazy_static;
 use num::integer::binomial;
 use regex::Regex;
 
-use crate::{
-    errors::CodeError,
-    letter_word_code::{IOMode, IntegerCodeMaps},
-    traits::Code,
-};
+use crate::{errors::CodeError, traits::Code};
 
 lazy_static! {
     pub static ref TUPLE: Regex = Regex::new(r"(([0-9]+:)*[0-9]+)").unwrap();
 }
 
 pub struct Combinadic {
-    pub maps: IntegerCodeMaps,
-    pub mode: IOMode,
     pub k: u64,
 }
 
 impl Default for Combinadic {
     fn default() -> Self {
-        let mut maps = IntegerCodeMaps::new();
-        maps.alphabet = String::from("ETAOINSHRDLCUMWFGYPBVKJXQZ");
-        Self {
-            maps,
-            mode: IOMode::Letter,
-            k: 5,
-        }
+        Self { k: 5 }
     }
 }
 
@@ -94,70 +82,31 @@ impl Code for Combinadic {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut output = String::new();
 
-        if self.mode == IOMode::Letter {
-            for c in text.chars() {
-                let n = self.maps.char_to_int(c)?;
-                output.push_str(&self.encode_u64(n as u64));
-                output.push(' ');
-            }
-        } else if self.mode == IOMode::Word {
-            for w in text.split(" ") {
-                let n = self.maps.word_to_int(w)?;
-                output.push_str(&self.encode_u64(n as u64));
-                output.push(' ');
-            }
-        } else {
-            for w in text.split(" ") {
-                let n = u64::from_str_radix(w, 10).map_err(|e| CodeError::Input(e.to_string()))?;
-                output.push_str(&self.encode_u64(n));
-                output.push(' ');
-            }
+        for w in text.split(" ") {
+            let n = u64::from_str_radix(w, 10).map_err(|e| CodeError::Input(e.to_string()))?;
+            output.push_str(&self.encode_u64(n));
+            output.push(' ');
         }
+
         output.pop();
         Ok(output)
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {
-        let mut output = String::new();
+        // let mut output = String::new();
 
-        if self.mode == IOMode::Letter {
-            for section in Self::recognize_code(&text) {
-                if let Some(code) = section {
-                    if let Ok(c) = self.maps.int_to_char(code as usize) {
-                        output.push(c);
-                    } else {
-                        output.push('�');
-                    }
-                } else {
-                    output.push('�');
-                }
-            }
-        } else if self.mode == IOMode::Word {
-            for section in Self::recognize_code(&text) {
-                if let Some(code) = section {
-                    if let Ok(s) = self.maps.int_to_word(code as usize) {
-                        output.push_str(s);
-                        output.push(' ');
-                    } else {
-                        output.push_str("� ");
-                    }
-                } else {
-                    output.push_str("� ");
-                }
-            }
-            output.pop();
-        } else {
-            for section in Self::recognize_code(&text) {
-                if let Some(code) = section {
-                    output.push_str(&code.to_string());
-                    output.push(' ');
-                } else {
-                    output.push_str("� ");
-                }
-            }
-        }
+        //     for section in Self::recognize_code(&text) {
+        //         if let Some(code) = section {
+        //             output.push_str(&code.to_string());
+        //             output.push(' ');
+        //         } else {
+        //             output.push_str("� ");
+        //         }
+        //     }
+        // }
 
-        Ok(output)
+        // Ok(output)
+        todo!()
     }
 }
 

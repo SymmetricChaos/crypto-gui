@@ -1,6 +1,7 @@
 use super::CodeFrame;
-use crate::ui_elements::{integer_letter_code_controls, integer_word_code_controls, UiElements};
-use codes::{letter_word_code::IOMode, mathematical::godel::Godel};
+use codes::mathematical::godel::Godel;
+use egui::TextEdit;
+use itertools::Itertools;
 
 pub struct GodelFrame {
     code: Godel,
@@ -9,10 +10,9 @@ pub struct GodelFrame {
 
 impl Default for GodelFrame {
     fn default() -> Self {
-        Self {
-            code: Default::default(),
-            words_string: String::from("0, s, +, ×, =, (, ), implies, not, forall, exists, and, or, x1, P1, x2, P2, x3, P3, x4, P4, x5, P5")
-        }
+        let code = Godel::default();
+        let words_string = code.words.join(", ");
+        Self { code, words_string }
     }
 }
 
@@ -24,26 +24,17 @@ impl CodeFrame for GodelFrame {
         );
         ui.add_space(8.0);
 
-        ui.group(|ui| {
-            ui.subheading("Mode");
-            ui.selectable_value(&mut self.code.mode, IOMode::Letter, "Letter");
-            ui.selectable_value(&mut self.code.mode, IOMode::Word, "Word");
-        });
-        ui.add_space(8.0);
-
-        match self.code.mode {
-            IOMode::Letter => {
-                integer_letter_code_controls(ui, &mut self.code.maps.alphabet);
-                // ui.two_column_table("Code", "Character", Box::new(self.code.maps.codes_chars()));
-            }
-            IOMode::Word => {
-                integer_word_code_controls(ui, &mut self.words_string, &mut self.code.maps);
-                // ui.two_column_table("Code", "Word", Box::new(self.code.maps.codes_words()));
-            }
-            IOMode::Integer => {
-                ui.label("<<<ERROR INTEGER MODE IS NOT DEFINED FOR GODEL CODE>>>");
-            }
-        }
+        ui.label("Provide any number of symbols or words separated by commas. Each is assigned a sequential numeric value starting from 1. When decoding the '�' symbol is used for codes with an assigned meaning.");
+        if ui
+            .add(TextEdit::singleline(&mut self.words_string))
+            .lost_focus()
+        {
+            self.code.words = self
+                .words_string
+                .split(',')
+                .map(|s| s.trim().to_string())
+                .collect_vec();
+        };
         ui.add_space(16.0);
     }
 

@@ -3,9 +3,8 @@ use crate::{
     integer_drag_value::{EditU128, EditU16, EditU32, EditU64, EditU8},
 };
 use ciphers::digital::block_ciphers::block_cipher::{BCMode, BCPadding};
-use codes::letter_word_code::IntegerCodeMaps;
 use eframe::egui::RichText;
-use egui::{Color32, DragValue, Response, TextEdit, TextStyle, Ui};
+use egui::{Color32, DragValue, Response, TextStyle, Ui};
 use egui_extras::{Column, TableBuilder};
 use num::ToPrimitive;
 use rand::{distributions::Standard, prelude::Distribution, thread_rng, Fill, Rng};
@@ -614,18 +613,6 @@ pub fn integer_letter_code_controls(ui: &mut Ui, alphabet: &mut String) {
     if ui.control_string(alphabet).changed() {
         unique_string(alphabet);
         alphabet.retain(|x| x != '�');
-    };
-    ui.add_space(16.0);
-}
-
-pub fn integer_word_code_controls(
-    ui: &mut Ui,
-    words_string: &mut String,
-    maps: &mut IntegerCodeMaps,
-) {
-    ui.label("Provide any number of words or phrases separated by commas. Codes will be assigned to each word or phrase in ascending order. When decoding the '�' symbol is used for codes with an assigned meaning.");
-    if ui.add(TextEdit::singleline(words_string)).changed() {
-        maps.set_words(words_string);
     };
     ui.add_space(16.0);
 }
