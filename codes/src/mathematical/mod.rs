@@ -23,6 +23,7 @@ pub mod roman_numeral;
 pub mod truncated_binary;
 pub mod twos_complement;
 pub mod unary;
+pub mod von_neumann_ordinals;
 
 pub fn swap_01(text: String) -> String {
     text.chars()

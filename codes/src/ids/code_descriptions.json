@@ -505,6 +505,14 @@
       "Error Correction"
     ]
   },
+  "Von Neumann Ordinals": {
+    "Description": "The von Neumann definition of the ordinals construct each ordinal as \"the well-ordered set of all smaller ordinals\" so that 0 = {} (the empty set, as there are no smaller ordinals), 1 = {0} = {{}} (the set containing zero), 2 = {0,1} = {{},{{}}} (the set containing zero and one) and so on. This definition is sufficient for all finite ordinals (or equivalently the natural numbers) and can be continued for transfinite ordinals. The smallest infinite ordinal is the set that contains all finite ordinals. Mathematicians rarely refer to specific values, instead relying on the properties of ordinals. This is in part because as an encoding the von Neumann ordinals are extraordinarily inefficient. To represent the ordinal 20 about a million symbol are needed. Due to this inefficiency this page limits the size of ordiansls represented, for arbitrary sizes see the linked code.",
+    "Authors": "John von Neumann",
+    "Publication": null,
+    "Traits": [
+      "Mathematical"
+    ]
+  },
   "Wabun": {
     "Description": "The Wabun code (和文 meaning 'Japanese Text') is a variation on Morse Code used for Japanese. Each kana is assigned a code point as are the two Japanese diacritical marks and several punctuation symbols. When mixed with ITU Morse code the prosigns DO and SN used to indicate the start and end of Wabun encoding.\n\nThe small yōon and sokuon kana use the same code as their larger versions. When decoding this site will create the yōon after an 'i' kana but does not create sokuon at all.",
     "Authors": null,

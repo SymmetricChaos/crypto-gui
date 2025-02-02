@@ -44,6 +44,9 @@ impl Code for Godel {
         let mut out = BigUint::one();
 
         for (s, prime) in text.split(" ").map(|s| s.trim()).zip(self.primes.iter()) {
+            if s.is_empty() {
+                continue;
+            }
             match self
                 .words
                 .iter()
