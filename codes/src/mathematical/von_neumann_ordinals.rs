@@ -44,7 +44,15 @@ impl Code for VonNeumann {
     }
 
     fn decode(&self, text: &str) -> Result<String, crate::errors::CodeError> {
-        todo!()
+        let mut out = Vec::new();
+        for value in text.split(",").map(|s| s.trim()) {
+            if value == "INPUT TOO LARGE" || value == "INVALID INPUT" {
+                out.push(String::from("�"));
+            } else {
+                todo!()
+            }
+        }
+        Ok(out.join(", "))
     }
 }
 
