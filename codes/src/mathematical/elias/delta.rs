@@ -79,6 +79,73 @@ pub fn delta_to_u32(bits: &mut dyn Iterator<Item = Bit>) -> Result<Vec<u32>, Cod
     Ok(out)
 }
 
+// pub fn recognize_code(text: &str) -> Vec<Option<u32>> {
+//     let mut out = Vec::new();
+//     let mut buffer = Vec::new();
+//     let mut zero_ctr = 0;
+//     let c = text.chars().filter(|c| !c.is_whitespace());
+//     loop {
+//         if let Some(b) = c.next() {
+//             if b == '0' || b == '1' {
+//                 buffer.push(b);
+//             } else {
+//                 // If we get an invalid symbol interrupt and restart
+//                 out.push(None);
+//                 buffer.clear();
+//                 zero_ctr = 0;
+//                 continue;
+//             }
+
+//             // Count up zeroes until a one is reached
+//             if b == '0' {
+//                 zero_ctr += 1;
+//                 continue;
+//             } else {
+//                 // Once we reach a one get extra bits equal to the zeroes seen
+//                 for _ in 0..zero_ctr {
+//                     if let Some(b) = c.next() {
+//                         if b == '0' || b == '1' {
+//                             buffer.push(b);
+//                         } else {
+//                             // If we get an invalid symbol interrupt and restart
+//                             out.push(None);
+//                             buffer.clear();
+//                             zero_ctr = 0;
+//                             continue;
+//                         }
+//                     } else {
+//                         out.push(None);
+//                         buffer.clear();
+//                         zero_ctr = 0;
+//                     }
+//                 }
+//                 // Convert the bits into an integer
+//                 let remaining = bits_to_u32_lower(&buffer) - 1;
+
+//                 // Take that many more bits
+//                 buffer.clear();
+//                 for _ in 0..remaining {
+//                     if let Some(b) = bits.next() {
+//                         buffer.push(b)
+//                     } else {
+//                         return Err(CodeError::input("partial or malformed input"));
+//                     }
+//                 }
+
+//                 let f = bits_to_u32_lower(&buffer);
+
+//                 out.push(2_u32.pow(remaining) + f);
+//                 // Clear buffer and counter
+//                 buffer.clear();
+//                 zero_ctr = 0;
+//             }
+//         } else {
+//             break;
+//         }
+//     }
+//     Ok(out)
+// }
+
 #[cfg(test)]
 mod tests {
     use utils::bits::bits_from_str;
