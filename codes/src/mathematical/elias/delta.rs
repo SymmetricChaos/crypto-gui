@@ -79,75 +79,97 @@ pub fn delta_to_u32(bits: &mut dyn Iterator<Item = Bit>) -> Result<Vec<u32>, Cod
     Ok(out)
 }
 
-// pub fn recognize_code(text: &str) -> Vec<Option<u32>> {
-//     let mut out = Vec::new();
-//     let mut buffer = Vec::new();
-//     let mut zero_ctr = 0;
-//     let c = text.chars().filter(|c| !c.is_whitespace());
-//     loop {
-//         if let Some(b) = c.next() {
-//             if b == '0' || b == '1' {
-//                 buffer.push(b);
-//             } else {
-//                 // If we get an invalid symbol interrupt and restart
-//                 out.push(None);
-//                 buffer.clear();
-//                 zero_ctr = 0;
-//                 continue;
-//             }
+macro_rules! next_bit_or {
+    ($bits: ident, $buffer: ident, $out: ident, $zero_ctr: ident, $outer: tt) => {
+        if let Some(bit) = $bits.next() {
+            if let Some(b) = bit {
+                $buffer.push(b);
+            } else {
+                // If we get an invalid symbol interrupt and reset
+                $out.push(None);
+                $buffer.clear();
+                $zero_ctr = 0;
+                continue $outer;
+            };
+        } else {
+            $out.push(None);
+            continue $outer;
+        }
+    };
+}
 
-//             // Count up zeroes until a one is reached
-//             if b == '0' {
-//                 zero_ctr += 1;
-//                 continue;
-//             } else {
-//                 // Once we reach a one get extra bits equal to the zeroes seen
-//                 for _ in 0..zero_ctr {
-//                     if let Some(b) = c.next() {
-//                         if b == '0' || b == '1' {
-//                             buffer.push(b);
-//                         } else {
-//                             // If we get an invalid symbol interrupt and restart
-//                             out.push(None);
-//                             buffer.clear();
-//                             zero_ctr = 0;
-//                             continue;
-//                         }
-//                     } else {
-//                         out.push(None);
-//                         buffer.clear();
-//                         zero_ctr = 0;
-//                     }
-//                 }
-//                 // Convert the bits into an integer
-//                 let remaining = bits_to_u32_lower(&buffer) - 1;
+pub fn recognize_code(text: &str) -> Vec<Option<u32>> {
+    let mut out = Vec::new();
+    let mut buffer = Vec::new();
+    let mut zero_ctr = 0;
+    let mut bits = text.chars().filter(|c| !c.is_whitespace()).map(|c| {
+        if c == '0' {
+            Some(Bit::Zero)
+        } else if c == '1' {
+            Some(Bit::One)
+        } else {
+            None
+        }
+    });
+    'outer: loop {
+        if let Some(bit) = bits.next() {
+            let b = if let Some(b) = bit {
+                buffer.push(b);
+                b
+            } else {
+                // If we get an invalid symbol interrupt and restart
+                out.push(None);
+                buffer.clear();
+                zero_ctr = 0;
+                continue;
+            };
 
-//                 // Take that many more bits
-//                 buffer.clear();
-//                 for _ in 0..remaining {
-//                     if let Some(b) = bits.next() {
-//                         buffer.push(b)
-//                     } else {
-//                         return Err(CodeError::input("partial or malformed input"));
-//                     }
-//                 }
+            // Count up zeroes until a one is reached
+            if b.is_zero() {
+                zero_ctr += 1;
+            } else {
+                // Once we reach a one get extra bits equal to the zeroes seen
+                for _ in 0..zero_ctr {
+                    next_bit_or!(bits, buffer, out, zero_ctr, 'outer);
+                }
+                // Convert the bits into an integer
+                let remaining = bits_to_u32_lower(&buffer) - 1;
 
-//                 let f = bits_to_u32_lower(&buffer);
+                // Take that many more bits
+                buffer.clear();
+                for _ in 0..remaining {
+                    next_bit_or!(bits, buffer, out, zero_ctr, 'outer);
+                }
 
-//                 out.push(2_u32.pow(remaining) + f);
-//                 // Clear buffer and counter
-//                 buffer.clear();
-//                 zero_ctr = 0;
-//             }
-//         } else {
-//             break;
-//         }
-//     }
-//     Ok(out)
-// }
+                let f = bits_to_u32_lower(&buffer);
+
+                out.push(Some(2_u32.pow(remaining) + f));
+                // Reset
+                buffer.clear();
+                zero_ctr = 0;
+            }
+        } else {
+            break;
+        }
+    }
+    if !buffer.is_empty() {
+        out.push(None);
+    }
+    out
+}
+
+pub fn recognize_code_single(text: &str) -> Option<u32> {
+    let o = recognize_code(text);
+    if o.len() != 1 {
+        return None;
+    } else {
+        return o[0];
+    }
+}
 
 #[cfg(test)]
 mod tests {
+    use itertools::Itertools;
     use utils::bits::bits_from_str;
 
     use super::*;
@@ -173,6 +195,13 @@ mod tests {
                 &mut bits_from_str("101000101011000110101110011110010000000100001").unwrap()
             )
             .unwrap()
+        );
+        assert_eq!(
+            vec![1, 2, 3, 4, 5, 6, 7, 8, 9],
+            recognize_code("101000101011000110101110011110010000000100001")
+                .iter()
+                .map(|x| x.unwrap())
+                .collect_vec(),
         );
     }
 }
