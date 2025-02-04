@@ -117,6 +117,15 @@ pub fn recognize_omega(text: &str) -> Vec<Option<u32>> {
     out
 }
 
+pub fn recognize_omega_single(text: &str) -> Option<u32> {
+    let o = recognize_omega(text);
+    if o.len() != 1 {
+        return None;
+    } else {
+        return o[0];
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use utils::bits::bits_from_str;

@@ -1,3 +1,9 @@
+use super::{
+    delta::{recognize_delta, recognize_delta_single, DeltaGen},
+    gamma::{recognize_gamma, recognize_gamma_single, GammaGen},
+    omega::{recognize_omega, recognize_omega_single, OmegaGen},
+    EliasVariant,
+};
 use crate::{
     errors::CodeError,
     mathematical::{string_to_u32s, swap_01},
@@ -7,14 +13,6 @@ use itertools::Itertools;
 use std::{
     cell::{Ref, RefCell, RefMut},
     collections::BTreeMap,
-};
-use utils::bits::bits_from_str;
-
-use super::{
-    delta::{delta_to_u32, DeltaGen},
-    gamma::{gamma_to_u32, GammaGen},
-    omega::{omega_to_u32, OmegaGen},
-    EliasVariant,
 };
 
 pub struct EliasCode {
@@ -123,29 +121,33 @@ impl Code for EliasCode {
         if self.spaced {
             let mut out: Vec<String> = Vec::new();
             for section in t.split(",").map(|s| s.trim()) {
-                let mut bits = bits_from_str(&section).unwrap();
                 let c = match self.variant {
-                    EliasVariant::Delta => delta_to_u32(&mut bits)?,
-                    EliasVariant::Gamma => gamma_to_u32(&mut bits)?,
-                    EliasVariant::Omega => omega_to_u32(&mut bits)?,
+                    EliasVariant::Delta => recognize_delta_single(section),
+                    EliasVariant::Gamma => recognize_gamma_single(section),
+                    EliasVariant::Omega => recognize_omega_single(section),
                 };
-                if c.len() == 1 {
-                    out.push(c[0].to_string());
+                if let Some(n) = c {
+                    out.push(n.to_string());
                 } else {
                     out.push(String::from("�"))
                 }
             }
             Ok(out.join(", "))
         } else {
-            let mut bits = bits_from_str(&t).unwrap();
-            Ok(match self.variant {
-                EliasVariant::Delta => delta_to_u32(&mut bits)?,
-                EliasVariant::Gamma => gamma_to_u32(&mut bits)?,
-                EliasVariant::Omega => omega_to_u32(&mut bits)?,
+            let ns = match self.variant {
+                EliasVariant::Delta => recognize_delta(&t),
+                EliasVariant::Gamma => recognize_gamma(&t),
+                EliasVariant::Omega => recognize_omega(&t),
+            };
+            let mut out = Vec::with_capacity(ns.len());
+            for n in ns {
+                if let Some(v) = n {
+                    out.push(v.to_string());
+                } else {
+                    out.push(String::from("�"));
+                }
             }
-            .into_iter()
-            .map(|f| f.to_string())
-            .join(", "))
+            Ok(out.join(", "))
         }
     }
 }
