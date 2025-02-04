@@ -4,7 +4,7 @@ use hashers::{
 };
 use strum::IntoEnumIterator;
 use utils::byte_formatting::{u64s_to_bytes_be, ByteFormat};
-
+use rand::{thread_rng, RngCore};
 use super::HasherFrame;
 use crate::ui_elements::UiElements;
 
@@ -80,10 +80,16 @@ impl HasherFrame for AsconFrame {
         }
 
         if [Variant::Mac, Variant::Maca, Variant::Prf, Variant::Prfa].contains(&self.variant) {
-            ui.label(format!(
-                "{} requires a 128-bit key which is treated as a pair of 64-bit words.",
-                self.variant.to_string()
-            ));
+            ui.horizontal(|ui| {
+                ui.label(format!(
+                    "{} requires a 128-bit key which is treated as a pair of 64-bit words.",
+                    self.variant.to_string()
+                ));
+                if ui.button("🎲").on_hover_text("randomize").clicked() {
+                    let mut rng = thread_rng();
+                    *self.key = rng.random();
+                };
+            });
             ui.u64_hex_edit(&mut self.key[0]);
             ui.u64_hex_edit(&mut self.key[1]);
         }
