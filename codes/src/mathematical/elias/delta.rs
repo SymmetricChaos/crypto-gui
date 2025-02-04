@@ -1,6 +1,6 @@
 // https://en.wikipedia.org/wiki/Elias_delta_coding
 
-use crate::errors::CodeError;
+use crate::{errors::CodeError, next_bit_or_reset};
 use num::Zero;
 use utils::bits::{bits_to_u32_lower, Bit};
 
@@ -79,26 +79,7 @@ pub fn delta_to_u32(bits: &mut dyn Iterator<Item = Bit>) -> Result<Vec<u32>, Cod
     Ok(out)
 }
 
-macro_rules! next_bit_or {
-    ($bits: ident, $buffer: ident, $out: ident, $zero_ctr: ident, $outer: tt) => {
-        if let Some(bit) = $bits.next() {
-            if let Some(b) = bit {
-                $buffer.push(b);
-            } else {
-                // If we get an invalid symbol interrupt and reset
-                $out.push(None);
-                $buffer.clear();
-                $zero_ctr = 0;
-                continue $outer;
-            };
-        } else {
-            $out.push(None);
-            continue $outer;
-        }
-    };
-}
-
-pub fn recognize_code(text: &str) -> Vec<Option<u32>> {
+pub fn recognize_delta(text: &str) -> Vec<Option<u32>> {
     let mut out = Vec::new();
     let mut buffer = Vec::new();
     let mut zero_ctr = 0;
@@ -130,7 +111,7 @@ pub fn recognize_code(text: &str) -> Vec<Option<u32>> {
             } else {
                 // Once we reach a one get extra bits equal to the zeroes seen
                 for _ in 0..zero_ctr {
-                    next_bit_or!(bits, buffer, out, zero_ctr, 'outer);
+                    next_bit_or_reset!(bits, buffer, out, zero_ctr, 'outer);
                 }
                 // Convert the bits into an integer
                 let remaining = bits_to_u32_lower(&buffer) - 1;
@@ -138,7 +119,7 @@ pub fn recognize_code(text: &str) -> Vec<Option<u32>> {
                 // Take that many more bits
                 buffer.clear();
                 for _ in 0..remaining {
-                    next_bit_or!(bits, buffer, out, zero_ctr, 'outer);
+                    next_bit_or_reset!(bits, buffer, out, zero_ctr, 'outer);
                 }
 
                 let f = bits_to_u32_lower(&buffer);
@@ -158,8 +139,8 @@ pub fn recognize_code(text: &str) -> Vec<Option<u32>> {
     out
 }
 
-pub fn recognize_code_single(text: &str) -> Option<u32> {
-    let o = recognize_code(text);
+pub fn recognize_delta_single(text: &str) -> Option<u32> {
+    let o = recognize_delta(text);
     if o.len() != 1 {
         return None;
     } else {
@@ -198,7 +179,7 @@ mod tests {
         );
         assert_eq!(
             vec![1, 2, 3, 4, 5, 6, 7, 8, 9],
-            recognize_code("101000101011000110101110011110010000000100001")
+            recognize_delta("101000101011000110101110011110010000000100001")
                 .iter()
                 .map(|x| x.unwrap())
                 .collect_vec(),

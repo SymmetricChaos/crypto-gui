@@ -60,6 +60,63 @@ pub fn omega_to_u32(bits: &mut dyn Iterator<Item = Bit>) -> Result<Vec<u32>, Cod
     Ok(out)
 }
 
+pub fn recognize_omega(text: &str) -> Vec<Option<u32>> {
+    let mut out = Vec::new();
+    let mut buffer = Vec::new();
+    let mut n = 1;
+    let mut bits = text.chars().filter(|c| !c.is_whitespace()).map(|c| {
+        if c == '0' {
+            Some(Bit::Zero)
+        } else if c == '1' {
+            Some(Bit::One)
+        } else {
+            None
+        }
+    });
+    'outer: loop {
+        if let Some(bit) = bits.next() {
+            let b = if let Some(b) = bit {
+                buffer.push(b);
+                b
+            } else {
+                // If we get an invalid symbol interrupt and restart
+                out.push(None);
+                buffer.clear();
+                n = 1;
+                continue;
+            };
+
+            // If we reach a zero stop and return n
+            if b.is_zero() {
+                out.push(Some(n));
+                n = 1;
+            } else {
+                // If we reached a 1 take the next n bits as a number and make them the new value of n
+                for _ in 0..n {
+                    if let Some(bit) = bits.next() {
+                        if let Some(b) = bit {
+                            buffer.push(b);
+                        } else {
+                            out.push(None);
+                            buffer.clear();
+                            n = 1;
+                            continue 'outer;
+                        };
+                    } else {
+                        out.push(None);
+                        continue 'outer;
+                    };
+                }
+                n = bits_to_u32_lower(&buffer);
+                buffer.clear();
+            }
+        } else {
+            break;
+        }
+    }
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use utils::bits::bits_from_str;
@@ -77,7 +134,7 @@ mod tests {
     }
 
     #[test]
-    fn gamma_decode_u32() {
+    fn omega_decode_u32() {
         assert_eq!(
             vec![1, 2, 3, 4, 5, 6, 7, 8, 9],
             omega_to_u32(
@@ -86,4 +143,12 @@ mod tests {
             .unwrap()
         );
     }
+
+    // #[test]
+    // fn omega_decode_u32_str() {
+    //     println!(
+    //         "{:?}",
+    //         recognize_omega("01001101010x0010101010110010111011100001110010")
+    //     );
+    // }
 }

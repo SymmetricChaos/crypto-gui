@@ -1,6 +1,6 @@
 // https://en.wikipedia.org/wiki/Elias_gamma_coding
 
-use crate::errors::CodeError;
+use crate::{errors::CodeError, next_bit_or_reset};
 use num::Zero;
 use utils::bits::{bits_to_u32_lower, Bit};
 
@@ -71,6 +71,66 @@ pub fn gamma_to_u32(bits: &mut dyn Iterator<Item = Bit>) -> Result<Vec<u32>, Cod
     Ok(out)
 }
 
+pub fn recognize_gamma(text: &str) -> Vec<Option<u32>> {
+    let mut out = Vec::new();
+    let mut buffer = Vec::new();
+    let mut zero_ctr = 0;
+    let mut bits = text.chars().filter(|c| !c.is_whitespace()).map(|c| {
+        if c == '0' {
+            Some(Bit::Zero)
+        } else if c == '1' {
+            Some(Bit::One)
+        } else {
+            None
+        }
+    });
+    'outer: loop {
+        if let Some(bit) = bits.next() {
+            let b = if let Some(b) = bit {
+                buffer.push(b);
+                b
+            } else {
+                // If we get an invalid symbol interrupt and restart
+                out.push(None);
+                buffer.clear();
+                zero_ctr = 0;
+                continue;
+            };
+
+            // Count up zeroes until a one is reached
+            if b.is_zero() {
+                zero_ctr += 1;
+                continue;
+            } else {
+                // Once we reach a one clear everything but the one from the buffer and get bits for the zeroes counted
+                buffer.clear();
+                buffer.push(Bit::One);
+                for _ in 0..zero_ctr {
+                    next_bit_or_reset!(bits, buffer, out, zero_ctr, 'outer);
+                }
+                // Convert the bits into an integer
+
+                out.push(Some(bits_to_u32_lower(&buffer)));
+                // Clear buffer and counter
+                buffer.clear();
+                zero_ctr = 0;
+            }
+        } else {
+            break;
+        }
+    }
+    out
+}
+
+pub fn recognize_gamma_single(text: &str) -> Option<u32> {
+    let o = recognize_gamma(text);
+    if o.len() != 1 {
+        return None;
+    } else {
+        return o[0];
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use utils::bits::bits_from_str;
@@ -95,4 +155,12 @@ mod tests {
                 .unwrap()
         );
     }
+
+    // #[test]
+    // fn gamma_decode_u32_str() {
+    //     println!(
+    //         "{:?}",
+    //         recognize_gamma("1010011001000010x1001100011100010000001001")
+    //     );
+    // }
 }
