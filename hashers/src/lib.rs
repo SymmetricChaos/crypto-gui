@@ -40,6 +40,7 @@ pub mod shabal;
 pub mod siphash;
 pub mod skein;
 pub mod sm3;
+pub mod snefru;
 pub mod tiger;
 pub mod traits;
 pub mod vsh;
