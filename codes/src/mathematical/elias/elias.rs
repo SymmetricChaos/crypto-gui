@@ -68,11 +68,19 @@ impl EliasCode {
 
     pub fn n_pairs(&self, n: u32) -> Vec<(u32, String)> {
         self.extend_all(n);
-        self.cache()
-            .iter()
-            .take(n as usize)
-            .map(|(a, b)| (a.clone(), b.clone()))
-            .collect()
+        let mut out = Vec::new();
+        for i in 1..=n {
+            let mut code = match self.variant {
+                EliasVariant::Delta => self.delta_cache.borrow().get(&n).unwrap().clone(),
+                EliasVariant::Gamma => self.gamma_cache.borrow().get(&n).unwrap().clone(),
+                EliasVariant::Omega => self.omega_cache.borrow().get(&n).unwrap().clone(),
+            };
+            if self.invert {
+                code = swap_01(code)
+            }
+            out.push((i, code));
+        }
+        out
     }
 
     pub fn extend_all(&self, value: u32) {
