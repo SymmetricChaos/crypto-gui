@@ -107,9 +107,9 @@ impl StatefulHasher for Tiger {
         self.buffer.extend_from_slice(bytes);
         let chunks = self.buffer.chunks_exact(64);
         let rem = chunks.remainder().to_vec();
+        let mut x = [0; 8];
         for chunk in chunks {
             self.bits_taken += 512;
-            let mut x = [0; 8];
             fill_u64s_le(&mut x, &chunk);
             let mut x = x.map(|n| Wrapping(n));
             compress(&mut self.state, &mut x)
