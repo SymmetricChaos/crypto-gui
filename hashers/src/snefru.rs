@@ -1,3 +1,5 @@
+use utils::byte_formatting::{fill_u32s_le, make_u32s_le};
+
 use crate::traits::StatefulHasher;
 
 // https://link.springer.com/article/10.1007/BF00203968
@@ -630,19 +632,37 @@ const SBOXES: [[u32; 256]; 16] = [
     ],
 ];
 
-const ROTATE: [u32; 4] = [16, 8, 16, 24];
-const BLOCK_SIZE_BITS: u32 = 512;
-const BLOCK_SIZE_BYTES: u32 = 64;
-const BLOCK_SIZE_WORDS: u32 = 16;
+// Output length in bits
+pub enum SnefruOutputSize {
+    W256,
+    W512,
+}
+
+impl SnefruOutputSize {
+    pub fn output_block_size(&self) -> u32 {
+        match self {
+            SnefruOutputSize::W256 => 4,
+            SnefruOutputSize::W512 => 8,
+        }
+    }
+
+    pub fn chunk_size(&self) -> u32 {
+        INPUT_BLOCK_SIZE - self.output_block_size()
+    }
+}
+
+const INPUT_BLOCK_SIZE: u32 = 16;
+const INPUT_BLOCK_SIZE_BYTES: u32 = 64;
 const MASK: u32 = 0xff;
+const ROTATE: [u32; 4] = [16, 8, 16, 24];
+const MAX_SECURITY: u32 = 16;
 
 // The compression function is based on a block cipher created for purpose
-pub fn e512(x: &[u8], security_level: u32) {
-    // todo!("convert input to u32s, zero filled");
-    let mut block: [u32; 16] = [0; BLOCK_SIZE_WORDS as usize];
+pub fn compress(input: &[u32], output: &mut [u32], security_level: u32, output_size: usize) {
+    let mut block = input.to_owned();
     for index in 0..security_level {
-        for byte_in_word in 1..=4 {
-            for i in 0..BLOCK_SIZE_WORDS {
+        for byte_in_word in 0..4 {
+            for i in 0..INPUT_BLOCK_SIZE {
                 let next = (i + 1) & MASK;
                 let last = (i + MASK) & MASK;
                 let entry = (2 * index + ((i / 2) & 1)) as usize;
@@ -650,32 +670,45 @@ pub fn e512(x: &[u8], security_level: u32) {
                 block[next as usize] ^= sbox_entry;
                 block[last as usize] ^= sbox_entry;
             }
+            let shift = ROTATE[byte_in_word];
+            for word in block.iter_mut() {
+                *word = word.rotate_right(shift);
+            }
         }
+    }
+    for i in 0..output_size {
+        output[i] = input[i] ^ block[MASK as usize - i];
     }
 }
 
 pub struct Snefru {
-    state: [u8; BLOCK_SIZE_BYTES as usize],
+    state: [u32; 8],
     buffer: Vec<u8>,
-    security_level: u32,
+    bits_taken: u64,
+    security_level: u32, // maximum of 16
+    variant: SnefruOutputSize,
 }
 
 impl Default for Snefru {
     fn default() -> Self {
         Self {
-            state: [0; BLOCK_SIZE_BYTES as usize],
+            state: [0; 8],
             buffer: Vec::new(),
+            bits_taken: 0,
             security_level: 8,
+            variant: SnefruOutputSize::W256,
         }
     }
 }
 
 impl Snefru {
-    pub fn init(security_level: u32) -> Self {
+    pub fn init(security_level: u32, variant: SnefruOutputSize) -> Self {
         Self {
-            state: [0; BLOCK_SIZE_BYTES as usize],
+            state: [0; 8],
             buffer: Vec::new(),
+            bits_taken: 0,
             security_level,
+            variant,
         }
     }
 }
@@ -683,18 +716,49 @@ impl Snefru {
 impl StatefulHasher for Snefru {
     fn update(&mut self, bytes: &[u8]) {
         self.buffer.extend_from_slice(bytes);
-        todo!("process block")
+        let chunks = self.buffer.chunks_exact(INPUT_BLOCK_SIZE_BYTES as usize);
+        let rem = chunks.remainder().to_vec();
+        let mut input = [0; INPUT_BLOCK_SIZE as usize];
+        for chunk in chunks {
+            self.bits_taken += 512;
+            fill_u32s_le(&mut input, chunk);
+            compress(
+                &input,
+                &mut self.state,
+                self.security_level,
+                self.variant.output_block_size() as usize,
+            );
+        }
+        self.buffer = rem;
     }
 
     fn finalize(mut self) -> Vec<u8> {
-        if self.buffer.is_empty() {
-            todo!("immediately return")
-        } else {
+        if !self.buffer.is_empty() {
+            self.bits_taken += (self.buffer.len() * 8) as u64;
             while (self.buffer.len() % 64) != 0 {
                 self.buffer.push(0x00)
             }
-            todo!("process final block")
+
+            compress(
+                &make_u32s_le::<16>(&self.buffer),
+                &mut self.state,
+                self.security_level,
+                self.variant.output_block_size() as usize,
+            );
         }
+
+        let mut final_block = [0; 16];
+        final_block[15] = (self.bits_taken >> 32) as u32;
+        final_block[14] = self.bits_taken as u32;
+
+        compress(
+            &final_block,
+            &mut self.state,
+            self.security_level,
+            self.variant.output_block_size() as usize,
+        );
+
+        todo!("process final block")
     }
 
     crate::stateful_hash_helpers!();
@@ -702,7 +766,7 @@ impl StatefulHasher for Snefru {
 
 crate::stateful_hash_tests!(
     test1,
-    Snefru::init(8),
+    Snefru::init(8, SnefruOutputSize::W256),
     b"INPUT",
     "OUTPUT";
 );
