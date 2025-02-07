@@ -1,12 +1,12 @@
+use super::HasherFrame;
+use crate::ui_elements::UiElements;
 use hashers::{
     ascon::{hash::Ascon, Variant},
     errors::HasherError,
 };
+use rand::{thread_rng, Rng};
 use strum::IntoEnumIterator;
 use utils::byte_formatting::{u64s_to_bytes_be, ByteFormat};
-use rand::{thread_rng, RngCore};
-use super::HasherFrame;
-use crate::ui_elements::UiElements;
 
 pub struct AsconFrame {
     input_format: ByteFormat,
@@ -87,7 +87,7 @@ impl HasherFrame for AsconFrame {
                 ));
                 if ui.button("🎲").on_hover_text("randomize").clicked() {
                     let mut rng = thread_rng();
-                    *self.key = rng.random();
+                    rng.fill(&mut self.key);
                 };
             });
             ui.u64_hex_edit(&mut self.key[0]);
