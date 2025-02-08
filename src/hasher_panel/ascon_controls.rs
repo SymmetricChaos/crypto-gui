@@ -61,7 +61,7 @@ impl HasherFrame for AsconFrame {
                 ui.add(egui::DragValue::new(&mut self.hash_len).range(1..=1024));
             }
             Variant::Mac => {
-                ui.label("Ascon-PRF returns a 128-bit Message Authentication Code on the key and message. It applies 12 rounds for initialization, absorbing, and squeezing. It absorbs 256-bits at a time.");
+                ui.label("Ascon-MAC returns a 128-bit Message Authentication Code on the key and message. It applies 12 rounds for initialization, absorbing, and squeezing. It absorbs 256-bits at a time.");
             }
             Variant::Maca => {
                 ui.label("Ascon-MACa returns a 128-bit Message Authentication Code based on the key and message. It applies 12 initialization rounds but only 8 rounds for absorbing and squeezing. It absorbs 320-bits at a time.");
@@ -78,6 +78,8 @@ impl HasherFrame for AsconFrame {
               //     self.hasher.hash_len = self.hasher.hash_len.clamp(1, 16);
               // }
         }
+
+        ui.add_space(8.0);
 
         if [Variant::Mac, Variant::Maca, Variant::Prf, Variant::Prfa].contains(&self.variant) {
             ui.horizontal(|ui| {
