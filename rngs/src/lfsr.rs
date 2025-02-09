@@ -55,8 +55,8 @@ impl Lfsr {
         for t in taps {
             tap_vec[t - 1] = true
         }
-        let bit_vec = vec![Bit::Zero; len];
-
+        let mut bit_vec = vec![Bit::Zero; len];
+        bit_vec[len - 1] = Bit::One;
         Self {
             bits: bit_vec,
             taps: tap_vec,
@@ -143,7 +143,6 @@ mod lfsr_tests {
     #[test]
     fn small_test_alt_positions() {
         let mut rng = Lfsr::from_tap_positions(&[3, 5]);
-        rng.set_bits_from_str("00001");
         for (i, test) in [
             "00001", "10000", "01000", "00100", "10010", "01001", "10100", "11010", "01101",
             "00110", "10011", "11001", "11100", "11110", "11111", "01111", "00111", "00011",

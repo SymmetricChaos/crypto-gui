@@ -1,7 +1,8 @@
 use super::ClassicRngFrame;
-use crate::ui_elements::{generate_random_u32s_box, lfsr_grid_controls, UiElements};
+use crate::ui_elements::{lfsr_grid_controls, UiElements};
+use egui::DragValue;
 use rand::{thread_rng, Rng};
-use rngs::shrinking_generator::ShrinkingGenerator;
+use rngs::{shrinking_generator::ShrinkingGenerator, ClassicRng};
 use utils::bits::Bit::{self};
 
 pub struct ShrinkingGeneratorFrame {
@@ -10,16 +11,18 @@ pub struct ShrinkingGeneratorFrame {
     vector_length_s: usize,
     randoms: String,
     n_random: usize,
+    err: bool,
 }
 
 impl Default for ShrinkingGeneratorFrame {
     fn default() -> Self {
         Self {
             rng: Default::default(),
-            vector_length_a: 16,
-            vector_length_s: 16,
+            vector_length_a: 32,
+            vector_length_s: 29,
             randoms: String::new(),
             n_random: 5,
+            err: false,
         }
     }
 }
@@ -36,7 +39,7 @@ impl ClassicRngFrame for ShrinkingGeneratorFrame {
             "lfsr_grid_a",
         );
 
-        ui.add_space(8.0);
+        ui.add_space(32.0);
         ui.subheading("Generator S");
         lfsr_grid_controls(
             ui,
@@ -45,16 +48,45 @@ impl ClassicRngFrame for ShrinkingGeneratorFrame {
             "lfsr_grid_s",
         );
 
-        ui.add_space(8.0);
-        if ui.button("next bit").clicked() {
-            self.rng.next_bit();
-        }
-        if ui.button("step").clicked() {
+        ui.add_space(32.0);
+
+        if ui.button("step together").clicked() {
             self.rng.step();
         }
 
-        ui.add_space(16.0);
-        generate_random_u32s_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
+        ui.add_space(32.0);
+
+        let n_random: &mut usize = &mut self.n_random;
+        let randoms: &mut String = &mut self.randoms;
+        ui.horizontal(|ui| {
+            if ui.button("Random Numbers").clicked() {
+                self.err = false;
+                if !self.rng.a.bits.contains(&Bit::One)
+                    || !self.rng.a.taps.contains(&true)
+                    || !self.rng.s.bits.contains(&Bit::One)
+                    || !self.rng.s.taps.contains(&true)
+                {
+                    self.err = true;
+                }
+                if !self.err {
+                    for _ in 0..*n_random {
+                        if !randoms.is_empty() {
+                            randoms.push_str(", ");
+                        }
+                        randoms.push_str(&self.rng.next_u32().to_string());
+                    }
+                }
+            }
+            ui.add(DragValue::new(n_random).range(1..=100))
+        });
+
+        ui.text_edit_multiline(randoms);
+        ui.add_space(8.0);
+        if self.err {
+            ui.error_text(
+                "Both generators must have at least one tap selected and at least one bit set.",
+            );
+        }
     }
 
     fn rng(&self) -> &dyn rngs::ClassicRng {

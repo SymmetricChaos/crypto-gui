@@ -15,8 +15,8 @@ mod middle_square_controls;
 mod pcg_controls;
 mod rc4_controls;
 mod salsa20_controls;
-mod self_shrinking_generator;
-mod shrinking_generator;
+mod self_shrinking_generator_controls;
+mod shrinking_generator_controls;
 mod splitmix_controls;
 mod vmpcr_controls;
 mod weyl_controls;
@@ -77,8 +77,8 @@ pub struct RngInterface {
     pcg: pcg_controls::PcgFrame,
     rc4: rc4_controls::Rc4Frame,
     salsa20: salsa20_controls::Salsa20Frame,
-    self_shrinking_generator: self_shrinking_generator::SelfShrinkingGeneratorFrame,
-    shrinking_generator: shrinking_generator::ShrinkingGeneratorFrame,
+    self_shrinking_generator: self_shrinking_generator_controls::SelfShrinkingGeneratorFrame,
+    shrinking_generator: shrinking_generator_controls::ShrinkingGeneratorFrame,
     splitmix: splitmix_controls::SplitmixFrame,
     vmpcr: vmpcr_controls::VmpcrFrame,
     weyl: weyl_controls::WeylSequenceFrame,

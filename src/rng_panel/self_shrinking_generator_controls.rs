@@ -27,9 +27,6 @@ impl SelfShrinkingGeneratorFrame {}
 impl ClassicRngFrame for SelfShrinkingGeneratorFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.add_space(8.0);
-        if ui.button("next bit").clicked() {
-            self.rng.next_bit();
-        }
         if ui.button("step").clicked() {
             self.rng.step();
         }
