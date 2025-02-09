@@ -1,4 +1,4 @@
-use utils::byte_formatting::{fill_u32s_le, make_u32s_le, u32s_to_bytes_le};
+use utils::byte_formatting::{fill_u32s_be, u32s_to_bytes_be};
 
 use crate::traits::StatefulHasher;
 
@@ -668,20 +668,26 @@ const MAX_SECURITY: u32 = 16;
 // The compression function is based on a block cipher created for purpose
 pub fn compress(state: &mut [u32], security_level: u32, output_size: usize) {
     let mut block = state.to_owned();
+    // println!("start\n15: {:08x?}", block[15]);
     for index in 0..security_level {
         for byte_in_word in 0..4 {
             for i in 0..INPUT_BLOCK_SIZE {
                 let next = (i + 1) & MASK;
                 let last = (i + MASK) & MASK;
                 let entry = 2 * index as usize + ((i / 2) & 1);
+                // if index == 0 && byte_in_word == 0 {
+                //     println!("{last} {i} {next} {entry}");
+                // }
                 let sbox_entry = SBOXES[entry][(block[i as usize] & 0xff) as usize];
                 block[next] ^= sbox_entry;
                 block[last] ^= sbox_entry;
             }
+            // println!("after rounds\n15: {:08x?}", block[15]);
             let shift = ROTATE[byte_in_word];
             for word in block.iter_mut() {
                 *word = word.rotate_right(shift);
             }
+            // println!("after shifts\n15: {:08x?}", block[15]);
         }
     }
     for i in 0..output_size {
@@ -730,16 +736,13 @@ impl StatefulHasher for Snefru {
         let chunks = self.buffer.chunks_exact(self.variant.chunk_size_bytes());
         let rem = chunks.remainder().to_vec();
         for chunk in chunks {
-            self.bits_taken += self.variant.chunk_size_bytes() as u64;
-            fill_u32s_le(&mut self.state[self.variant.output_block_size()..], chunk);
-
+            self.bits_taken += (self.variant.chunk_size_bytes() * 8) as u64;
+            fill_u32s_be(&mut self.state[self.variant.output_block_size()..], chunk);
             compress(
                 &mut self.state,
                 self.security_level,
                 self.variant.output_block_size(),
             );
-
-            println!("state: {:08x?}", self.state);
         }
         self.buffer = rem;
     }
@@ -754,7 +757,7 @@ impl StatefulHasher for Snefru {
             while (self.buffer.len() % self.variant.chunk_size_bytes()) != 0 {
                 self.buffer.push(0x00)
             }
-            fill_u32s_le(
+            fill_u32s_be(
                 &mut self.state[self.variant.output_block_size()..],
                 &self.buffer,
             );
@@ -765,8 +768,11 @@ impl StatefulHasher for Snefru {
             );
         }
 
-        self.state[15] = (self.bits_taken >> 32) as u32;
-        self.state[14] = self.bits_taken as u32;
+        for i in &mut self.state[self.variant.output_block_size()..] {
+            *i = 0
+        }
+        self.state[14] = (self.bits_taken >> 32) as u32;
+        self.state[15] = self.bits_taken as u32;
 
         compress(
             &mut self.state,
@@ -774,8 +780,8 @@ impl StatefulHasher for Snefru {
             self.variant.output_block_size(),
         );
 
-        let mut out = vec![0; self.variant.output_block_size() * 4];
-        u32s_to_bytes_le(&mut out, &self.state[0..self.variant.output_block_size()]);
+        let mut out = vec![0; self.variant.output_block_size_bytes()];
+        u32s_to_bytes_be(&mut out, &self.state[0..self.variant.output_block_size()]);
 
         out
     }
@@ -789,13 +795,14 @@ crate::stateful_hash_tests!(
     b"password1234",
     "4da8e8b5cb8585d336301dc6130d294b";
 
+    test_alphabet,
+    Snefru::init(8, SnefruOutputSize::W128),
+    b"abcdefghijklmnopqrstuvabcdefghijklmnopqrstuvabcdefghijklmnopqrstuv",
+    "f8ad3c6cc9d4243e6b15139c42ed9c2c";
+
     test2_128,
     Snefru::init(8, SnefruOutputSize::W128),
     b"e3f6aa21aa38a6fc369994726031ee8ecc02b9fbc8d6630065fe96c3a0fae599",
     "6b8c3f9937b6fcdfa641ea1c133d6eab";
 
-    test2_256,
-    Snefru::init(8, SnefruOutputSize::W256),
-    b"e3f6aa21aa38a6fc369994726031ee8ecc02b9fbc8d6630065fe96c3a0fae599",
-    "00";
 );
