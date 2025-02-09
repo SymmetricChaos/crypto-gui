@@ -9,7 +9,7 @@ mod ascon_controls;
 mod blake2_controls;
 mod blake3_controls;
 mod blake_controls;
-pub mod city_hash_controls;
+mod city_hash_controls;
 mod fletcher_controls;
 mod fnv_controls;
 mod fxhash_controls;
@@ -37,6 +37,7 @@ mod sha3_controls;
 mod shabal_controls;
 mod siphash_controls;
 mod sm3_controls;
+mod snefru_controls;
 mod tiger_controls;
 
 pub trait HasherFrame {
@@ -107,6 +108,7 @@ pub struct HasherInterface {
     sha3: sha3_controls::Sha3Frame,
     shabal: shabal_controls::ShabalFrame,
     sm3: sm3_controls::Sm3Frame,
+    snefru: snefru_controls::SnefruFrame,
     tiger: tiger_controls::TigerFrame,
 }
 
@@ -135,6 +137,7 @@ impl HasherInterface {
                 HasherId::Sha3,
                 HasherId::Shabal,
                 HasherId::Sm3,
+                HasherId::Snefru,
                 HasherId::Tiger,
             ],
             active_hasher,
@@ -192,8 +195,9 @@ impl HasherInterface {
             HasherId::Sha2 => &mut self.sha2,
             HasherId::Sha3 => &mut self.sha3,
             HasherId::Shabal => &mut self.shabal,
-            HasherId::Sm3 => &mut self.sm3,
             HasherId::SipHash => &mut self.siphash,
+            HasherId::Sm3 => &mut self.sm3,
+            HasherId::Snefru => &mut self.snefru,
             HasherId::Tiger => &mut self.tiger,
             _ => todo!("<<<NOT IMPLEMENTED>>>"),
         }

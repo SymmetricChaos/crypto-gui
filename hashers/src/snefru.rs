@@ -633,6 +633,7 @@ const SBOXES: [[u32; 256]; 16] = [
 ];
 
 // Output length in bits
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SnefruOutputSize {
     W128,
     W256,

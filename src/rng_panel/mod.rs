@@ -90,6 +90,7 @@ impl RngInterface {
     pub fn combo_boxes(&mut self, ui: &mut Ui, active_rng: &mut Option<RngId>) {
         combox_box(
             &[
+                RngId::AlternatingStep,
                 RngId::Jsf,
                 RngId::Lcg,
                 RngId::Lfg,
@@ -98,6 +99,8 @@ impl RngInterface {
                 RngId::MiddleSquare,
                 RngId::MiddleSquareBinary,
                 RngId::Rc4,
+                RngId::SelfShrinkingGenerator,
+                RngId::ShrinkingGenerator,
                 RngId::Splitmix,
                 RngId::Vmpcr,
                 RngId::Xorshift,
@@ -119,14 +122,11 @@ impl RngInterface {
             &[
                 RngId::A51,
                 RngId::A52,
-                RngId::AlternatingStep,
                 RngId::BlumBlumShub,
                 RngId::ChaCha,
                 RngId::Geffe,
                 RngId::Pcg,
                 RngId::Salsa20,
-                RngId::SelfShrinkingGenerator,
-                RngId::ShrinkingGenerator,
             ],
             active_rng,
             RngCategory::CSPRNG,
