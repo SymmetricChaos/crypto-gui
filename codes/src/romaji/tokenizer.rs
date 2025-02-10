@@ -126,6 +126,11 @@ impl Node {
         }
     }
 
+    pub fn sorted(mut self) -> Self {
+        self.sort();
+        self
+    }
+
     pub fn num_output_paths(&self) -> usize {
         match &self.transitions {
             Some(v) => {
