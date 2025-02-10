@@ -1,6 +1,5 @@
 use json::JsonValue;
-use lazy_static::lazy_static;
-use std::fmt::Display;
+use std::{fmt::Display, sync::LazyLock};
 
 // Macro to make it easier to add new hashers without writing it out three times.
 macro_rules! hasher_ids_and_names {
@@ -103,9 +102,7 @@ impl From<HasherId> for String {
 
 const JSON_HASHER_INFORMATION: &'static str = include_str!("hasher_descriptions.json");
 
-lazy_static! {
-    pub static ref HASHER_INFORMATION: JsonValue = {
-        json::parse(&JSON_HASHER_INFORMATION.replace('\u{feff}', ""))
-            .expect("unable to parse hasher_descriptions")
-    };
-}
+pub static HASHER_INFORMATION: LazyLock<JsonValue> = LazyLock::new(|| {
+    json::parse(&JSON_HASHER_INFORMATION.replace('\u{feff}', ""))
+        .expect("unable to parse hasher_descriptions.json")
+});

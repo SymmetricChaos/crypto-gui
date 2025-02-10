@@ -1,7 +1,5 @@
-use lazy_static::lazy_static;
 use num::{Integer, One, Zero};
 use paste::paste;
-use regex::Regex;
 use std::{
     fmt::Display,
     iter::{Product, Sum},
@@ -11,9 +9,8 @@ use std::{
     },
 };
 
-lazy_static! {
-    pub static ref IS_BITS: Regex = Regex::new(r"^[01\s]*$").unwrap();
-}
+pub const IS_BITS: std::cell::LazyCell<regex::Regex> =
+    std::cell::LazyCell::new(|| regex::Regex::new(r"^[01\s]*$").unwrap());
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct CharToBitError;

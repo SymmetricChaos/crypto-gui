@@ -1,15 +1,13 @@
 use base64::prelude::*;
 use itertools::Itertools;
-use lazy_static::lazy_static;
 use num::traits::ToBytes;
 use paste::paste;
-use regex::Regex;
 use strum::{Display, EnumIter};
 
-lazy_static! {
-    pub static ref IS_HEX_BYTES: Regex = Regex::new(r"^(?:[0-9a-fA-F]{2})+$").unwrap();
-    pub static ref IS_BINARY_BYTES: Regex = Regex::new(r"^(?:[0-1]{8})+$").unwrap();
-}
+pub const IS_HEX_BYTES: std::cell::LazyCell<regex::Regex> =
+    std::cell::LazyCell::new(|| regex::Regex::new(r"^(?:[0-9a-fA-F]{2})+$").unwrap());
+pub const IS_BINARY_BYTES: std::cell::LazyCell<regex::Regex> =
+    std::cell::LazyCell::new(|| regex::Regex::new(r"^(?:[0-1]{8})+$").unwrap());
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct HexToBytesError;

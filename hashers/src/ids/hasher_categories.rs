@@ -1,6 +1,5 @@
 use json::JsonValue;
-use lazy_static::lazy_static;
-use std::fmt::Display;
+use std::{fmt::Display, sync::LazyLock};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum HasherCategory {
@@ -42,9 +41,7 @@ impl From<HasherCategory> for String {
 const JSON_HASHER_CATEGORY_INFORMATION: &'static str =
     include_str!("hasher_category_descriptions.json");
 
-lazy_static! {
-    pub static ref HASHER_CATEGORY_INFORMATION: JsonValue = {
-        json::parse(&JSON_HASHER_CATEGORY_INFORMATION.replace('\u{feff}', ""))
-            .expect("unable to parse hasher_category_descriptions.json")
-    };
-}
+pub static HASHER_CATEGORY_INFORMATION: LazyLock<JsonValue> = LazyLock::new(|| {
+    json::parse(&JSON_HASHER_CATEGORY_INFORMATION.replace('\u{feff}', ""))
+        .expect("unable to parse hasher_category_descriptions.json")
+});

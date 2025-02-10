@@ -1,18 +1,15 @@
 use bimap::BiMap;
 use itertools::Itertools;
-use lazy_static::lazy_static;
 use num::Integer;
 use rand::{
     prelude::{IteratorRandom, SliceRandom},
     Rng,
 };
-use regex::Regex;
 use std::{hash::Hash, num::ParseIntError};
 use strsim::damerau_levenshtein;
 
-lazy_static! {
-    static ref DIGITS: Regex = Regex::new(r"\d+").unwrap();
-}
+pub const DIGITS: std::cell::LazyCell<regex::Regex> =
+    std::cell::LazyCell::new(|| regex::Regex::new(r"\d+").unwrap());
 
 // Mutate a string so that it contains only characters in a provided alphabet
 pub fn filter_string<S: AsRef<str>>(string: &mut String, alphabet: &S) {
