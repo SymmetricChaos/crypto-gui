@@ -1,12 +1,12 @@
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
-use lazy_static::lazy_static;
 use nalgebra::{ArrayStorage, SMatrix, Vector, Vector3};
+use std::sync::LazyLock;
 use utils::bits::{bits_from_str, to_bit_array, Bit};
 
-lazy_static! {
-    // Generator matrix with systemtic order
-    pub static ref GEN_4_7_SYS: SMatrix<Bit, 4, 7> = SMatrix::from_array_storage(ArrayStorage(
+// Generator matrix with systemtic order
+pub static GEN_4_7_SYS: LazyLock<SMatrix<Bit, 4, 7>> = LazyLock::new(|| {
+    SMatrix::from_array_storage(ArrayStorage(
         [
             [1, 0, 0, 0],
             [0, 1, 0, 0],
@@ -17,10 +17,12 @@ lazy_static! {
             [1, 1, 0, 1],
         ]
         .map(|i| to_bit_array(i).unwrap()),
-    ));
+    ))
+});
 
-    // Generator with the commonn mixed bit order
-    pub static ref GEN_4_7_MIX: SMatrix<Bit, 4, 7> = SMatrix::from_array_storage(ArrayStorage(
+// Generator with the commonn mixed bit order
+pub static GEN_4_7_MIX: LazyLock<SMatrix<Bit, 4, 7>> = LazyLock::new(|| {
+    SMatrix::from_array_storage(ArrayStorage(
         [
             [1, 1, 0, 1],
             [1, 0, 1, 1],
@@ -31,9 +33,11 @@ lazy_static! {
             [0, 0, 0, 1],
         ]
         .map(|i| to_bit_array(i).unwrap()),
-    ));
+    ))
+});
 
-    pub static ref CHK_4_7_SYS: SMatrix<Bit, 3, 7> = SMatrix::from_array_storage(ArrayStorage(
+pub static CHK_4_7_SYS: LazyLock<SMatrix<Bit, 3, 7>> = LazyLock::new(|| {
+    SMatrix::from_array_storage(ArrayStorage(
         [
             [1, 1, 0],
             [1, 0, 1],
@@ -44,9 +48,11 @@ lazy_static! {
             [0, 0, 1],
         ]
         .map(|i| to_bit_array(i).unwrap()),
-    ));
+    ))
+});
 
-    pub static ref CHK_4_7_MIX: SMatrix<Bit, 3, 7> = SMatrix::from_array_storage(ArrayStorage(
+pub static CHK_4_7_MIX: LazyLock<SMatrix<Bit, 3, 7>> = LazyLock::new(|| {
+    SMatrix::from_array_storage(ArrayStorage(
         [
             [1, 0, 0],
             [0, 1, 0],
@@ -57,9 +63,11 @@ lazy_static! {
             [1, 1, 1],
         ]
         .map(|i| to_bit_array(i).unwrap()),
-    ));
+    ))
+});
 
-    pub static ref GEN_4_8_SYS: SMatrix<Bit, 4, 8> = SMatrix::from_array_storage(ArrayStorage(
+pub static GEN_4_8_SYS: LazyLock<SMatrix<Bit, 4, 8>> = LazyLock::new(|| {
+    SMatrix::from_array_storage(ArrayStorage(
         [
             [1, 0, 0, 0],
             [0, 1, 0, 0],
@@ -71,9 +79,11 @@ lazy_static! {
             [1, 1, 1, 0],
         ]
         .map(|i| to_bit_array(i).unwrap()),
-    ));
+    ))
+});
 
-    pub static ref GEN_4_8_MIX: SMatrix<Bit, 4, 8> = SMatrix::from_array_storage(ArrayStorage(
+pub static GEN_4_8_MIX: LazyLock<SMatrix<Bit, 4, 8>> = LazyLock::new(|| {
+    SMatrix::from_array_storage(ArrayStorage(
         [
             [1, 1, 0, 1],
             [1, 0, 1, 1],
@@ -85,36 +95,8 @@ lazy_static! {
             [1, 1, 1, 0],
         ]
         .map(|i| to_bit_array(i).unwrap()),
-    ));
-
-    // pub static ref CHK_4_8_SYS: SMatrix<Bit, 4, 8> = SMatrix::from_array_storage(ArrayStorage(
-    //     [
-    //         [1, 0, 0, 1],
-    //         [0, 1, 0, 1],
-    //         [1, 1, 0, 1],
-    //         [0, 0, 1, 1],
-    //         [1, 0, 1, 1],
-    //         [0, 1, 1, 1],
-    //         [1, 1, 1, 1],
-    //         [1, 0, 0, 0],
-    //     ]
-    // .map(|i| to_bit_array(i).unwrap()),
-    // ));
-
-    // pub static ref CHK_4_8_MIX: SMatrix<Bit, 4, 8> = SMatrix::from_array_storage(ArrayStorage(
-    //     [
-    //         [1, 1, 1, 0],
-    //         [1, 1, 0, 1],
-    //         [1, 0, 1, 1],
-    //         [0, 1, 1, 1],
-    //         [0, 0, 0, 1],
-    //         [0, 0, 1, 0],
-    //         [0, 1, 0, 0],
-    //         [1, 0, 0, 0],
-    //     ]
-    // .map(|i| to_bit_array(i).unwrap()),
-    // ));
-}
+    ))
+});
 
 pub struct HammingCode {
     pub extra_bit: bool,

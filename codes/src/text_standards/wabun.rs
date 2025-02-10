@@ -3,27 +3,16 @@ use super::wabun_encoding::{
     WABUN_ASCII, WABUN_HALFBLOCK, WABUN_WORD, WORD_TO_HIRA,
 };
 use crate::{errors::CodeError, traits::Code};
-use lazy_static::lazy_static;
-use regex::Regex;
 use std::collections::HashMap;
 
-lazy_static! {
+crate::lazy_regex!(
     // Just a list of all kana combinations, Japanese punctuation, and two spaces commonly used
-    pub static ref WABUN_KANA_REGEX: Regex = Regex::new(r"(っ|ッ|キャ|キュ|キョ|シャ|シュ|ショ|チャ|チュ|チョ|ニャ|ニュ|ニョ|ヒャ|ヒュ|ヒョ|ミャ|ミュ|ミョ|リャ|リュ|リョ|ギャ|ギュ|ギョ|ジャ|ジュ|ジョ|ヂャ|ヂュ|ヂョ|ビャ|ビュ|ビョ|ピャ|ピュ|ピョ|ア|イ|ウ|エ|オ|カ|キ|ク|ケ|コ|サ|シ|ス|セ|ソ|タ|チ|ツ|テ|ト|ナ|ニ|ヌ|ネ|ノ|ハ|ヒ|フ|ヘ|ホ|マ|ミ|ム|メ|モ|ヤ|ユ|ヨ|ラ|リ|ル|レ|ロ|ワ|ヰ|ヱ|ヲ|ン|ガ|ギ|グ|ゲ|ゴ|ザ|ジ|ズ|ゼ|ゾ|ダ|ヂ|ヅ|デ|ド|バ|ビ|ブ|ベ|ボ|パ|ピ|プ|ペ|ポ|きゃ|きゅ|きょ|しゃ|しゅ|しょ|ちゃ|ちゅ|ちょ|にゃ|にゅ|にょ|ひゃ|ひゅ|ひょ|みゃ|みゅ|みょ|りゃ|りゅ|りょ|ぎゃ|ぎゅ|ぎょ|じゃ|じゅ|じょ|ぢゃ|ぢゅ|ぢょ|びゃ|びゅ|びょ|ぴゃ|ぴゅ|ぴょ|あ|い|う|え|お|か|き|く|け|こ|さ|し|す|せ|そ|た|ち|つ|て|と|な|に|ぬ|ね|の|は|ひ|ふ|へ|ほ|ま|み|む|め|も|や|ゆ|よ|ら|り|る|れ|ろ|わ|ゐ|ゑ|を|ん|が|ぎ|ぐ|げ|ご|ざ|じ|ず|ぜ|ぞ|だ|ぢ|づ|で|ど|ば|び|ぶ|べ|ぼ|ぱ|ぴ|ぷ|ぺ|ぽ|、|。|ー|（|）|゛|゜)| |　|.").unwrap();
+    WABUN_KANA_REGEX, r"(っ|ッ|キャ|キュ|キョ|シャ|シュ|ショ|チャ|チュ|チョ|ニャ|ニュ|ニョ|ヒャ|ヒュ|ヒョ|ミャ|ミュ|ミョ|リャ|リュ|リョ|ギャ|ギュ|ギョ|ジャ|ジュ|ジョ|ヂャ|ヂュ|ヂョ|ビャ|ビュ|ビョ|ピャ|ピュ|ピョ|ア|イ|ウ|エ|オ|カ|キ|ク|ケ|コ|サ|シ|ス|セ|ソ|タ|チ|ツ|テ|ト|ナ|ニ|ヌ|ネ|ノ|ハ|ヒ|フ|ヘ|ホ|マ|ミ|ム|メ|モ|ヤ|ユ|ヨ|ラ|リ|ル|レ|ロ|ワ|ヰ|ヱ|ヲ|ン|ガ|ギ|グ|ゲ|ゴ|ザ|ジ|ズ|ゼ|ゾ|ダ|ヂ|ヅ|デ|ド|バ|ビ|ブ|ベ|ボ|パ|ピ|プ|ペ|ポ|きゃ|きゅ|きょ|しゃ|しゅ|しょ|ちゃ|ちゅ|ちょ|にゃ|にゅ|にょ|ひゃ|ひゅ|ひょ|みゃ|みゅ|みょ|りゃ|りゅ|りょ|ぎゃ|ぎゅ|ぎょ|じゃ|じゅ|じょ|ぢゃ|ぢゅ|ぢょ|びゃ|びゅ|びょ|ぴゃ|ぴゅ|ぴょ|あ|い|う|え|お|か|き|く|け|こ|さ|し|す|せ|そ|た|ち|つ|て|と|な|に|ぬ|ね|の|は|ひ|ふ|へ|ほ|ま|み|む|め|も|や|ゆ|よ|ら|り|る|れ|ろ|わ|ゐ|ゑ|を|ん|が|ぎ|ぐ|げ|ご|ざ|じ|ず|ぜ|ぞ|だ|ぢ|づ|で|ど|ば|び|ぶ|べ|ぼ|ぱ|ぴ|ぷ|ぺ|ぽ|、|。|ー|（|）|゛|゜)| |　|.";
     // A valid Wabun code is a kana, followed by optionally one of two diacritic codes, followed optionally by one of three small kana codes, followed by a space of end of input
-    pub static ref WABUN_ASCII_REGEX: Regex =
-        Regex::new(r"([-\.]+( \.--| -\.\.--| --)?( \.\.| \.\.--\.)?)( |$)").unwrap();
-    pub static ref WABUN_HALFBLOCK_REGEX: Regex = Regex::new(
-        r"((▄ ▄▄▄ ▄ ▄▄▄ ▄|▄▄▄ ▄ ▄▄▄ ▄ ▄▄▄|▄▄▄ ▄ ▄ ▄ ▄▄▄|▄▄▄ ▄ ▄ ▄▄▄ ▄|▄▄▄ ▄ ▄ ▄▄▄ ▄▄▄|▄▄▄ ▄▄▄ ▄▄▄ ▄ ▄▄▄|▄ ▄ ▄▄▄ ▄ ▄▄▄|▄ ▄ ▄▄▄ ▄ ▄|▄ ▄▄▄ ▄ ▄▄▄ ▄▄▄|▄▄▄ ▄▄▄ ▄ ▄ ▄▄▄|▄ ▄▄▄ ▄▄▄ ▄▄▄ ▄|▄▄▄ ▄▄▄ ▄ ▄▄▄ ▄|▄ ▄▄▄ ▄▄▄ ▄ ▄|▄ ▄▄▄ ▄ ▄ ▄▄▄|▄▄▄ ▄ ▄▄▄ ▄ ▄|▄▄▄ ▄ ▄▄▄ ▄▄▄ ▄|▄▄▄ ▄ ▄▄▄ ▄▄▄ ▄▄▄|▄ ▄▄▄ ▄ ▄ ▄|▄ ▄▄▄ ▄▄▄ ▄|▄ ▄ ▄▄▄ ▄|▄▄▄ ▄▄▄ ▄▄▄ ▄|▄▄▄ ▄▄▄ ▄▄▄ ▄▄▄|▄▄▄ ▄ ▄▄▄ ▄▄▄|▄▄▄ ▄ ▄▄▄ ▄|▄ ▄ ▄ ▄▄▄|▄ ▄▄▄ ▄ ▄|▄▄▄ ▄▄▄ ▄ ▄▄▄|▄▄▄ ▄ ▄ ▄▄▄|▄ ▄▄▄ ▄▄▄ ▄▄▄|▄ ▄ ▄ ▄|▄ ▄▄▄ ▄ ▄▄▄|▄ ▄▄▄ ▄ ▄▄▄ ▄|▄▄▄ ▄▄▄ ▄ ▄|▄ ▄ ▄▄▄ ▄▄▄|▄▄▄ ▄ ▄ ▄|▄▄▄ ▄▄▄ ▄ ▄▄▄ ▄▄▄|▄▄▄ ▄▄▄ ▄▄▄|▄▄▄ ▄▄▄ ▄|▄▄▄ ▄ ▄▄▄|▄ ▄▄▄ ▄|▄ ▄ ▄|▄ ▄ ▄▄▄|▄▄▄ ▄ ▄|▄ ▄▄▄ ▄▄▄|▄ ▄▄▄|▄▄▄ ▄▄▄|▄▄▄ ▄|▄|▄▄▄)(   ▄ ▄▄▄ ▄▄▄|   ▄▄▄ ▄ ▄ ▄▄▄ ▄▄▄|   ▄▄▄ ▄▄▄)?(   ▄ ▄|   ▄ ▄ ▄▄▄ ▄▄▄ ▄)?)(   |$)"
-    )
-    .unwrap();
-    pub static ref WABUN_WORD_REGEX: Regex = Regex::new(
-        r"((di dah di dah dit|dah di dah di dah|dah di di di dah|dah di di dah dit|dah di di dah dah|dah dah dah di dah|di di dah di dah|di di dah di dit|di dah di dah dah|dah dah di di dah|di dah dah dah dit|dah dah di dah dit|di dah dah di dit|di dah di di dah|dah di dah di dit|dah di dah dah dit|dah di dah dah dah|di dah di di dit|di dah dah dit|di di
-        dah dit|dah dah dah dit|dah dah dah dah|dah di dah dah|dah di dah dit|di di di dah|di dah di dit|dah dah di dah|dah di di dah|di dah dah dah|di di di dit|di dah di dah|di dah di dah dit|dah dah di dit|di di dah dah|dah di di dit|dah dah di dah dah|dah dah dah|dah dah dit|dah di dah|di dah dit|di di dit|di di dah|dah di dit|di dah 
-        dah|di dah|dah dah|dah dit|dit|dah)(   di dah dah|   dah di di dah dah|   dah dah)?(   di dit|   di di dah dah dit)?)(   |$)"
-    )
-    .unwrap();
-}
+    WABUN_ASCII_REGEX, r"([-\.]+( \.--| -\.\.--| --)?( \.\.| \.\.--\.)?)( |$)";
+    WABUN_HALFBLOCK_REGEX, r"((▄ ▄▄▄ ▄ ▄▄▄ ▄|▄▄▄ ▄ ▄▄▄ ▄ ▄▄▄|▄▄▄ ▄ ▄ ▄ ▄▄▄|▄▄▄ ▄ ▄ ▄▄▄ ▄|▄▄▄ ▄ ▄ ▄▄▄ ▄▄▄|▄▄▄ ▄▄▄ ▄▄▄ ▄ ▄▄▄|▄ ▄ ▄▄▄ ▄ ▄▄▄|▄ ▄ ▄▄▄ ▄ ▄|▄ ▄▄▄ ▄ ▄▄▄ ▄▄▄|▄▄▄ ▄▄▄ ▄ ▄ ▄▄▄|▄ ▄▄▄ ▄▄▄ ▄▄▄ ▄|▄▄▄ ▄▄▄ ▄ ▄▄▄ ▄|▄ ▄▄▄ ▄▄▄ ▄ ▄|▄ ▄▄▄ ▄ ▄ ▄▄▄|▄▄▄ ▄ ▄▄▄ ▄ ▄|▄▄▄ ▄ ▄▄▄ ▄▄▄ ▄|▄▄▄ ▄ ▄▄▄ ▄▄▄ ▄▄▄|▄ ▄▄▄ ▄ ▄ ▄|▄ ▄▄▄ ▄▄▄ ▄|▄ ▄ ▄▄▄ ▄|▄▄▄ ▄▄▄ ▄▄▄ ▄|▄▄▄ ▄▄▄ ▄▄▄ ▄▄▄|▄▄▄ ▄ ▄▄▄ ▄▄▄|▄▄▄ ▄ ▄▄▄ ▄|▄ ▄ ▄ ▄▄▄|▄ ▄▄▄ ▄ ▄|▄▄▄ ▄▄▄ ▄ ▄▄▄|▄▄▄ ▄ ▄ ▄▄▄|▄ ▄▄▄ ▄▄▄ ▄▄▄|▄ ▄ ▄ ▄|▄ ▄▄▄ ▄ ▄▄▄|▄ ▄▄▄ ▄ ▄▄▄ ▄|▄▄▄ ▄▄▄ ▄ ▄|▄ ▄ ▄▄▄ ▄▄▄|▄▄▄ ▄ ▄ ▄|▄▄▄ ▄▄▄ ▄ ▄▄▄ ▄▄▄|▄▄▄ ▄▄▄ ▄▄▄|▄▄▄ ▄▄▄ ▄|▄▄▄ ▄ ▄▄▄|▄ ▄▄▄ ▄|▄ ▄ ▄|▄ ▄ ▄▄▄|▄▄▄ ▄ ▄|▄ ▄▄▄ ▄▄▄|▄ ▄▄▄|▄▄▄ ▄▄▄|▄▄▄ ▄|▄|▄▄▄)(   ▄ ▄▄▄ ▄▄▄|   ▄▄▄ ▄ ▄ ▄▄▄ ▄▄▄|   ▄▄▄ ▄▄▄)?(   ▄ ▄|   ▄ ▄ ▄▄▄ ▄▄▄ ▄)?)(   |$)";
+    WABUN_WORD_REGEX, r"((di dah di dah dit|dah di dah di dah|dah di di di dah|dah di di dah dit|dah di di dah dah|dah dah dah di dah|di di dah di dah|di di dah di dit|di dah di dah dah|dah dah di di dah|di dah dah dah dit|dah dah di dah dit|di dah dah di dit|di dah di di dah|dah di dah di dit|dah di dah dah dit|dah di dah dah dah|di dah di di dit|di dah dah dit|di di dah dit|dah dah dah dit|dah dah dah dah|dah di dah dah|dah di dah dit|di di di dah|di dah di dit|dah dah di dah|dah di di dah|di dah dah dah|di di di dit|di dah di dah|di dah di dah dit|dah dah di dit|di di dah dah|dah di di dit|dah dah di dah dah|dah dah dah|dah dah dit|dah di dah|di dah dit|di di dit|di di dah|dah di dit|di dah dah|di dah|dah dah|dah dit|dit|dah)(   di dah dah|   dah di di dah dah|   dah dah)?(   di dit|   di di dah dah dit)?)(   |$)";
+);
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum WabunRep {
@@ -112,10 +101,10 @@ impl Code for Wabun {
     fn decode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = Vec::new();
         let map = self.representation.code_to_kana();
-        let regex: &Regex = match self.representation {
-            WabunRep::HalfBlock => &WABUN_HALFBLOCK_REGEX,
-            WabunRep::Ascii => &WABUN_ASCII_REGEX,
-            WabunRep::Word => &WABUN_WORD_REGEX,
+        let regex = match self.representation {
+            WabunRep::HalfBlock => WABUN_HALFBLOCK_REGEX,
+            WabunRep::Ascii => WABUN_ASCII_REGEX,
+            WabunRep::Word => WABUN_WORD_REGEX,
         };
         let mut word_buffer = String::new();
         for word in text.split(self.representation.word_sep()) {

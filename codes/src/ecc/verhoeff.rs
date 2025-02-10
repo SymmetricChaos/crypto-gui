@@ -1,8 +1,8 @@
 use crate::{errors::CodeError, traits::Code};
-use lazy_static::lazy_static;
+use std::cell::LazyCell;
 
-lazy_static! {
-    pub static ref VERHOEFF_PERM_TABLE: [[u8; 10]; 8] = [
+pub const VERHOEFF_PERM_TABLE: LazyCell<[[u8; 10]; 8]> = LazyCell::new(|| {
+    [
         [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
         [1, 5, 7, 6, 2, 8, 3, 0, 9, 4],
         [5, 8, 0, 3, 7, 9, 6, 1, 4, 2],
@@ -10,9 +10,12 @@ lazy_static! {
         [9, 4, 5, 3, 1, 2, 6, 8, 7, 0],
         [4, 2, 8, 6, 5, 7, 3, 9, 0, 1],
         [2, 7, 9, 3, 8, 0, 6, 4, 1, 5],
-        [7, 0, 4, 6, 9, 1, 3, 2, 5, 8]
-    ];
-    pub static ref VERHOEFF_MUL_TABLE: [[u8; 10]; 10] = [
+        [7, 0, 4, 6, 9, 1, 3, 2, 5, 8],
+    ]
+});
+
+pub const VERHOEFF_MUL_TABLE: LazyCell<[[u8; 10]; 10]> = LazyCell::new(|| {
+    [
         [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
         [1, 2, 3, 4, 0, 6, 7, 8, 9, 5],
         [2, 3, 4, 0, 1, 7, 8, 9, 5, 6],
@@ -23,8 +26,8 @@ lazy_static! {
         [7, 6, 5, 9, 8, 2, 1, 0, 4, 3],
         [8, 7, 6, 5, 9, 3, 2, 1, 0, 4],
         [9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
-    ];
-}
+    ]
+});
 
 pub struct VerhoeffAlgorithm {}
 

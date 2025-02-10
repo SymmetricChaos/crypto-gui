@@ -1,15 +1,13 @@
-use itertools::izip;
-
+use super::{
+    unified_english_braille_parser::decode_g1_braille,
+    unified_english_braille_parser_inv::encode_g1_braille,
+};
 use crate::{
     braille::unified_english_braille_maps::{LETTERS, LETTERS_BRAILLE, LETTERS_UPPER},
     errors::CodeError,
     traits::Code,
 };
-
-use super::{
-    unified_english_braille_parser::decode_g1_braille,
-    unified_english_braille_parser_inv::encode_g1_braille,
-};
+use itertools::izip;
 
 pub struct UnifiedEnglishBraille {}
 

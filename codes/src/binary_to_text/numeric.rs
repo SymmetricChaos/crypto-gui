@@ -6,7 +6,6 @@ use utils::{
     text_functions::{u8_to_string_with_radix, u8_to_string_with_radix_and_width},
 };
 
-// Make it possible to encode an aribtrary file
 pub struct BytesAsNumbers {
     pub mode: ByteFormat,
     pub fixed_width: bool,

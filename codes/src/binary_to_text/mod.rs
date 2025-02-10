@@ -9,12 +9,8 @@ pub mod numeric;
 pub mod pgp_words;
 pub mod quoted_printable;
 pub mod skey;
-
-use std::{fs::read, path::PathBuf};
-
-use utils::byte_formatting::{hex_to_bytes, ByteFormat};
-
 use crate::errors::CodeError;
+use utils::byte_formatting::{hex_to_bytes, ByteFormat};
 
 pub trait BinaryToText {
     // Encode some literal bytes
@@ -44,13 +40,5 @@ pub trait BinaryToText {
             .text_to_bytes(text)
             .map_err(|_| CodeError::input("not valid binary"))?;
         self.encode_bytes(&bytes)
-    }
-
-    fn encode_file(&self, path: Option<PathBuf>) -> Result<String, CodeError> {
-        if path.is_none() {
-            return Err(CodeError::input("no file stored"));
-        }
-        let bytes = &read(path.as_ref().unwrap()).unwrap()[..];
-        self.encode_bytes(bytes)
     }
 }

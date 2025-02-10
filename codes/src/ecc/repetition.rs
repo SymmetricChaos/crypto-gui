@@ -5,13 +5,13 @@ pub struct Repetition {
     pub block_size: usize,
 }
 
-impl Repetition {}
-
 impl Default for Repetition {
     fn default() -> Self {
         Self { block_size: 3 }
     }
 }
+
+impl Repetition {}
 
 impl Code for Repetition {
     fn encode(&self, text: &str) -> Result<String, CodeError> {

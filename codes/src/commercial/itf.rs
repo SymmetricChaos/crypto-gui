@@ -1,23 +1,20 @@
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use itertools::Itertools;
-use lazy_static::lazy_static;
 use utils::text_functions::bimap_from_iter;
 
 crate::lazy_regex!(ITF_PATTERN, r"^1010([01]{14})*1101$");
 
-lazy_static! {
-    pub static ref ITF_LEFT: BiMap<char, &'static str> =
-        bimap_from_iter("0123456789".chars().zip([
+crate::lazy_bimap!(
+    ITF_LEFT: BiMap<char, &'static str> =
+        "0123456789".chars().zip([
             "1011001", "1101011", "1001011", "1100101", "1011011", "1101101", "1001101", "1010011",
-            "1101001", "1001001"
-        ]));
-    pub static ref ITF_RIGHT: BiMap<char, &'static str> =
-        bimap_from_iter("0123456789".chars().zip([
+            "1101001", "1001001"]);
+    ITF_RIGHT: BiMap<char, &'static str> =
+        "0123456789".chars().zip([
             "0100110", "0010100", "0110100", "0011010", "0100100", "0010010", "0110010", "0101100",
-            "0010110", "0110110"
-        ]));
-}
+            "0010110", "0110110"]);
+);
 
 const START: &'static str = "1010";
 const END: &'static str = "1101";

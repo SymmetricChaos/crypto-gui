@@ -1,28 +1,25 @@
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
-use lazy_static::lazy_static;
-use utils::text_functions::bimap_from_iter;
+use utils::text_functions::{bimap_from_iter, string_chunks};
 
-lazy_static! {
-    pub static ref BIQUINARY_MAP: BiMap<char, &'static str> = bimap_from_iter(
+crate::lazy_bimap!(
+    BIQUINARY_MAP: BiMap<char, &str> =
         "0123456789".chars().zip(
             [
                 "01-00001", "01-00010", "01-00100", "01-01000", "01-10000", "10-00001", "10-00010",
                 "10-00100", "10-01000", "10-10000"
             ]
             .into_iter()
-        )
-    );
-    pub static ref BIQUINARY_MAP_INV_LOWER: BiMap<char, &'static str> = bimap_from_iter(
+        );
+    BIQUINARY_MAP_INV_LOWER: BiMap<char, &str> =
         "0123456789".chars().zip(
             [
                 "01-11110", "01-11101", "01-11011", "01-10111", "01-01111", "10-11110", "10-11101",
                 "10-11011", "10-10111", "10-01111"
             ]
             .into_iter()
-        )
-    );
-}
+        );
+);
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum BiQuinaryMode {
@@ -78,7 +75,7 @@ impl Code for BiquinaryDecimal {
                 None => out.push(c.chars().next().unwrap()),
             }
         }
-        Ok(out)
+        Ok(string_chunks(&out, 8).join(", "))
     }
 
     fn decode(&self, text: &str) -> Result<String, CodeError> {

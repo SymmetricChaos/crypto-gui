@@ -1,10 +1,9 @@
-use pest::iterators::Pairs;
-use pest_derive::Parser;
-use unicode_normalization::UnicodeNormalization;
-
 use super::unified_english_braille_maps::{
     DIACRITIC_MAP, LETTER_MAP, LETTER_UPPER_MAP, NUMERIC_MAP, PUNCTUATION_MAP, SYMBOL_MAP,
 };
+use pest::iterators::Pairs;
+use pest_derive::Parser;
+use unicode_normalization::UnicodeNormalization;
 
 #[derive(Parser)]
 #[grammar = "braille/ueb_inv.pest"] // relative to src

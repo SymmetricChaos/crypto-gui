@@ -1,26 +1,27 @@
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
-use lazy_static::lazy_static;
-use regex::Regex;
 use utils::text_functions::bimap_from_iter;
 
 const GUARD: &'static str = "101"; // Start and End guard pattern
 const MIDDLE: &'static str = "01010";
 
-lazy_static! {
-    pub static ref UPCA_PATTERN: Regex = Regex::new(r"^101[01]{42}01010[01]{42}101$").unwrap();
-    pub static ref UPCA_DIGITS: Regex = Regex::new(r"^[0-9]{12}$").unwrap();
-    pub static ref UPCA_LEFT: BiMap<char, &'static str> =
-        bimap_from_iter("0123456789".chars().zip([
+crate::lazy_regex!(
+    UPCA_PATTERN, r"^101[01]{42}01010[01]{42}101$";
+    UPCA_DIGITS, r"^[0-9]{12}$";
+);
+
+crate::lazy_bimap!(
+    UPCA_LEFT: BiMap<char, &'static str> =
+        "0123456789".chars().zip([
             "0001101", "0011001", "0010011", "0111101", "0100011", "0110001", "0101111", "0111011",
             "0110111", "0001011"
-        ]));
-    pub static ref UPCA_RIGHT: BiMap<char, &'static str> =
-        bimap_from_iter("0123456789".chars().zip([
+        ]);
+    UPCA_RIGHT: BiMap<char, &'static str> =
+        "0123456789".chars().zip([
             "1110010", "1100110", "1101100", "1000010", "1011100", "1001110", "1010000", "1000100",
             "1001000", "1110100"
-        ]));
-}
+        ])
+);
 
 pub struct Upc {}
 

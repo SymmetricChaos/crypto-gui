@@ -1,10 +1,8 @@
+use super::braille_data::{ASCII_ORDER, UNICODE_ORDER};
+use crate::{braille::braille_data::UEB_ORDER, errors::CodeError, traits::Code};
 use bimap::BiMap;
 use lazy_static::lazy_static;
-
-use crate::{braille::braille_data::UEB_ORDER, errors::CodeError, traits::Code};
 use utils::text_functions::bimap_from_iter;
-
-use super::braille_data::{ASCII_ORDER, UNICODE_ORDER};
 
 // All of these are in UEB order
 const BRAILLE_DOTS: [&'static str; 64] = [

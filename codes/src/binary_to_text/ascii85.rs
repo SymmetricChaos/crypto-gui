@@ -1,40 +1,25 @@
 use super::BinaryToText;
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
-use lazy_static::lazy_static;
 use num::Integer;
 use utils::byte_formatting::ByteFormat;
 use utils::text_functions::bimap_from_iter;
 
 const ASCII85_BTOA: &'static str =
     "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstu";
-
 const ASCII85_IPV6: &'static str =
     "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$%&()*+-;<=>?@^_`{|}~";
-
 const ASCII85_ZEROQM: &'static str =
     "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-:+=^!/*?&<>()[]{}@%$#";
 
-lazy_static! {
-    pub static ref ASCII85_BTOA_MAP: BiMap<u8, u8> = bimap_from_iter(
-        ASCII85_BTOA
-            .chars()
-            .enumerate()
-            .map(|(n, c)| (n as u8, c as u8))
-    );
-    pub static ref ASCII85_IPV6_MAP: BiMap<u8, u8> = bimap_from_iter(
-        ASCII85_IPV6
-            .chars()
-            .enumerate()
-            .map(|(n, c)| (n as u8, c as u8))
-    );
-    pub static ref ASCII85_ZEROQM_MAP: BiMap<u8, u8> = bimap_from_iter(
-        ASCII85_ZEROQM
-            .chars()
-            .enumerate()
-            .map(|(n, c)| (n as u8, c as u8))
-    );
-}
+crate::lazy_bimap!(
+    ASCII85_BTOA_MAP: BiMap<u8, u8> =
+        ASCII85_BTOA.chars().enumerate().map(|(n, c)| (n as u8, c as u8));
+    ASCII85_IPV6_MAP: BiMap<u8, u8> =
+        ASCII85_IPV6.chars().enumerate().map(|(n, c)| (n as u8, c as u8));
+    ASCII85_ZEROQM_MAP: BiMap<u8, u8> =
+        ASCII85_ZEROQM.chars().enumerate().map(|(n, c)| (n as u8, c as u8));
+);
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Ascii85Variant {

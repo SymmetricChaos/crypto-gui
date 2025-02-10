@@ -1,9 +1,8 @@
-use crate::{errors::CodeError, traits::Code};
-
 use super::{
     tokenizer::{Node, TransitionError},
     HEPBERN_SHIKI, HIRAGANA, KUNREI_SHIKI, NIHON_SHIKI, ROMAJI_TO_KANA,
 };
+use crate::{errors::CodeError, traits::Code};
 
 pub fn to_romaji(orig: &str, tree: &Node) -> Result<String, TransitionError> {
     let tokens = tree.extract_tokens(orig)?;

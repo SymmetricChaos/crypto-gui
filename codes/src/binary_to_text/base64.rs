@@ -2,13 +2,25 @@ use super::BinaryToText;
 use crate::errors::CodeError;
 use crate::traits::Code;
 use bimap::BiMap;
-use lazy_static::lazy_static;
 use utils::byte_formatting::ByteFormat;
-use utils::preset_alphabet::Alphabet;
 use utils::text_functions::bimap_from_iter;
 
 const MASK: u8 = 0b00111111;
 const PAD: u8 = '=' as u8;
+
+const WORD_SAFE_BASE64: &'static str =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+const CRYPT_BASE64: &'static str =
+    "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+crate::lazy_bimap!(
+    B64_MAP: BiMap<u8, u8> =
+    utils::preset_alphabet::Alphabet::Base64.chars().enumerate().map(|(n, c)| (n as u8, c as u8));
+    B64_URLSAFE_MAP: BiMap<u8, u8> =
+        WORD_SAFE_BASE64.chars().enumerate().map(|(n, c)| (n as u8, c as u8));
+    B64_CRYPT_MAP: BiMap<u8, u8> =
+        CRYPT_BASE64.chars().enumerate().map(|(n, c)| (n as u8, c as u8));
+);
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum B64Variant {
@@ -17,29 +29,7 @@ pub enum B64Variant {
     Crypt,
 }
 
-lazy_static! {
-    pub static ref B64_MAP: BiMap<u8, u8> = bimap_from_iter(
-        Alphabet::Base64
-            .chars()
-            .enumerate()
-            .map(|(n, c)| (n as u8, c as u8))
-    );
-    pub static ref B64_URLSAFE_MAP: BiMap<u8, u8> = bimap_from_iter(
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
-            .chars()
-            .enumerate()
-            .map(|(n, c)| (n as u8, c as u8))
-    );
-    pub static ref B64_CRYPT_MAP: BiMap<u8, u8> = bimap_from_iter(
-        "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-            .chars()
-            .enumerate()
-            .map(|(n, c)| (n as u8, c as u8))
-    );
-}
-
 pub struct Base64 {
-    // pub file: Option<PathBuf>,
     pub use_padding: bool,
     pub mode: ByteFormat,
     pub variant: B64Variant,
@@ -48,7 +38,6 @@ pub struct Base64 {
 impl Default for Base64 {
     fn default() -> Self {
         Self {
-            // file: None,
             use_padding: true,
             mode: ByteFormat::Utf8,
             variant: B64Variant::Standard,
@@ -73,14 +62,6 @@ impl Base64 {
             )
         })
     }
-
-    // pub fn encode_file(&self) -> Result<String, CodeError> {
-    //     if self.file.is_none() {
-    //         return Err(CodeError::input("no file stored"));
-    //     }
-    //     let bytes = &read(self.file.as_ref().unwrap()).unwrap()[..];
-    //     self.encode_bytes(bytes)
-    // }
 }
 
 impl BinaryToText for Base64 {

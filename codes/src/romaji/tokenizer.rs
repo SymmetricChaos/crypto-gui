@@ -1,6 +1,5 @@
-use std::{collections::HashMap, fmt};
-
 use itertools::Itertools;
+use std::{collections::HashMap, fmt};
 
 #[derive(Clone)]
 pub struct TransitionError(String, Option<char>);

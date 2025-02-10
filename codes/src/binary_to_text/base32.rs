@@ -1,10 +1,7 @@
-use bimap::BiMap;
-use lazy_static::lazy_static;
-use utils::{byte_formatting::ByteFormat, text_functions::bimap_from_iter};
-
-use crate::{errors::CodeError, traits::Code};
-
 use super::BinaryToText;
+use crate::{errors::CodeError, traits::Code};
+use bimap::BiMap;
+use utils::{byte_formatting::ByteFormat, text_functions::bimap_from_iter};
 
 // Mask to set top three bits to zero
 const MASK: u8 = 0b00011111;
@@ -14,26 +11,14 @@ const BASE32_ALPHA: &'static str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 const WORD_SAFE_BASE32: &'static str = "23456789CFGHJMPQRVWXcfghjmpqrvwx";
 const BASE32_HEX: &'static str = "0123456789ABCDEFGHIJKLMNOPQRSTUV";
 
-lazy_static! {
-    pub static ref B32_MAP: BiMap<u8, u8> = bimap_from_iter(
-        BASE32_ALPHA
-            .chars()
-            .enumerate()
-            .map(|(n, c)| (n as u8, c as u8))
-    );
-    pub static ref B32_WORD_SAFE_MAP: BiMap<u8, u8> = bimap_from_iter(
-        WORD_SAFE_BASE32
-            .chars()
-            .enumerate()
-            .map(|(n, c)| (n as u8, c as u8))
-    );
-    pub static ref B32_HEX: BiMap<u8, u8> = bimap_from_iter(
-        BASE32_HEX
-            .chars()
-            .enumerate()
-            .map(|(n, c)| (n as u8, c as u8))
-    );
-}
+crate::lazy_bimap!(
+    B32_MAP: BiMap<u8, u8> =
+        BASE32_ALPHA.chars().enumerate().map(|(n, c)| (n as u8, c as u8));
+    B32_WORD_SAFE_MAP: BiMap<u8, u8> =
+        WORD_SAFE_BASE32.chars().enumerate().map(|(n, c)| (n as u8, c as u8));
+    B32_HEX: BiMap<u8, u8> =
+        BASE32_HEX.chars().enumerate().map(|(n, c)| (n as u8, c as u8));
+);
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum B32Variant {

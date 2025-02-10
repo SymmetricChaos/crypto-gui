@@ -9,8 +9,6 @@ pub struct ParityBit {
     pub parity: Bit,
 }
 
-impl ParityBit {}
-
 impl Default for ParityBit {
     fn default() -> Self {
         Self {
@@ -20,6 +18,8 @@ impl Default for ParityBit {
         }
     }
 }
+
+impl ParityBit {}
 
 impl Code for ParityBit {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
