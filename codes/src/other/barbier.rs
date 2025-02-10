@@ -1,6 +1,5 @@
-use itertools::Itertools;
-
 use crate::{errors::CodeError, traits::Code};
+use itertools::Itertools;
 
 pub struct BarbierCode {
     pub symbol: char,

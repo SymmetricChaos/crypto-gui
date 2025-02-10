@@ -1,10 +1,10 @@
+use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use itertools::Itertools;
 use lazy_static::lazy_static;
-use regex::Regex;
 use utils::text_functions::bimap_from_iter;
 
-use crate::{errors::CodeError, traits::Code};
+crate::lazy_regex!(ITF_PATTERN, r"^1010([01]{14})*1101$");
 
 lazy_static! {
     pub static ref ITF_LEFT: BiMap<char, &'static str> =
@@ -17,7 +17,6 @@ lazy_static! {
             "0100110", "0010100", "0110100", "0011010", "0100100", "0010010", "0110010", "0101100",
             "0010110", "0110110"
         ]));
-    pub static ref ITF_PATTERN: Regex = Regex::new(r"^1010([01]{14})*1101$").unwrap();
 }
 
 const START: &'static str = "1010";

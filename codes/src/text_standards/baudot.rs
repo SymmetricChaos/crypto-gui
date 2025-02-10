@@ -1,6 +1,6 @@
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
-use std::cell::LazyCell;
+use std::sync::LazyLock;
 use utils::text_functions::{bimap_from_iter, chunk_and_join, string_chunks};
 
 // pub const ITA1_EU_LETTERS: &'static str = "␀AEÉYUIO␎JGHBCFD -XZSTWV␡KMLRQNP";
@@ -16,12 +16,11 @@ pub const CODES: [&'static str; 32] = [
     "11110", "11111",
 ];
 
-pub const ITA2_LETTER_MAP: LazyCell<BiMap<char, &'static str>> =
-    LazyCell::new(|| bimap_from_iter(ITA2_LETTERS.chars().zip(CODES.into_iter())));
-pub const ITA2_FIGURE_MAP: LazyCell<BiMap<char, &'static str>> =
-    LazyCell::new(|| bimap_from_iter(ITA2_FIGURES.chars().zip(CODES.into_iter())));
-pub const US_TTY_FIGURE_MAP: LazyCell<BiMap<char, &'static str>> =
-    LazyCell::new(|| bimap_from_iter(US_TTY_FIGURES.chars().zip(CODES.into_iter())));
+crate::lazy_bimap!(
+    ITA2_LETTER_MAP: BiMap<char, &'static str> = ITA2_LETTERS.chars().zip(CODES.into_iter());
+    ITA2_FIGURE_MAP: BiMap<char, &'static str> = ITA2_FIGURES.chars().zip(CODES.into_iter());
+    US_TTY_FIGURE_MAP: BiMap<char, &'static str> = US_TTY_FIGURES.chars().zip(CODES.into_iter());
+);
 
 // pub const GRAY_CODES: [&'static str; 32] = [
 //     "00000", "00001", "00011", "00010", "00110", "00111", "00101", "00100", "01100", "01101",
@@ -81,19 +80,19 @@ impl Baudot {
         }))
     }
 
-    pub fn figure_map(&self) -> LazyCell<BiMap<char, &'static str>> {
+    pub fn figure_map(&self) -> &LazyLock<BiMap<char, &'static str>> {
         match self.version {
             // BaudotVersion::Ita1 => &ITA1_FIGURE_MAP,
-            BaudotVersion::Ita2 => ITA2_FIGURE_MAP,
-            BaudotVersion::UsTty => US_TTY_FIGURE_MAP,
+            BaudotVersion::Ita2 => &ITA2_FIGURE_MAP,
+            BaudotVersion::UsTty => &US_TTY_FIGURE_MAP,
         }
     }
 
-    pub fn letter_map(&self) -> LazyCell<BiMap<char, &'static str>> {
+    pub fn letter_map(&self) -> &LazyLock<BiMap<char, &'static str>> {
         match self.version {
             // BaudotVersion::Ita1 => &ITA1_LETTER_MAP,
-            BaudotVersion::Ita2 => ITA2_LETTER_MAP,
-            BaudotVersion::UsTty => ITA2_LETTER_MAP,
+            BaudotVersion::Ita2 => &ITA2_LETTER_MAP,
+            BaudotVersion::UsTty => &ITA2_LETTER_MAP,
         }
     }
 

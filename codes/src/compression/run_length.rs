@@ -1,7 +1,5 @@
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
-use lazy_static::lazy_static;
-use regex::Regex;
 
 fn utf8_to_rle(text: &str) -> Vec<(char, u32)> {
     let mut out = Vec::new();
@@ -28,11 +26,8 @@ fn rle_to_utf8(arr: &Vec<(char, u32)>) -> String {
     }
     out
 }
-
-lazy_static! {
-    // Any single codepoint (captured), followed by a space, followed by a sequence of digits (captured), followed by either a space of EOF
-    pub static ref RLE_FORMAT: Regex = Regex::new(r"(.) ([0-9]+)(?: |$)").unwrap();
-}
+// Any single codepoint (captured), followed by a space, followed by a sequence of digits (captured), followed by either a space of EOF
+crate::lazy_regex!(RLE_FORMAT, r"(.) ([0-9]+)(?: |$)");
 
 #[derive(Default)]
 pub struct RunLengthEncoding {}

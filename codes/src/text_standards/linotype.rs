@@ -1,21 +1,17 @@
+use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use itertools::Itertools;
-use std::{cell::Cell, sync::LazyLock};
+use std::cell::Cell;
 use utils::text_functions::{bimap_from_iter, chunk_and_join};
-
-use crate::{errors::CodeError, traits::Code};
 
 //http://www.linotype.org/OnLineDocs/LinotypeMachinePrinciples-1940/LMP-chapter20.pdf
 const LINOTYPE_90_MAG: &'static str =
     "taoinshrdlucmfwypvbgkqjxz\u{FB01}\u{FB02}\u{FB00}\u{FB03}\u{FB04}\u{2003},.:;?\u{2007}(|\"!-\u{2009})\u{2024}'*1234567890$\u{2025}ETAOINSHRDLUCMFWYPVBGKQJXZ@\u{00E6}&\u{2014}";
 
-pub static LINO_90_MAP: LazyLock<BiMap<char, String>> = LazyLock::new(|| {
-    bimap_from_iter(
-        LINOTYPE_90_MAG
-            .chars()
-            .zip((4..93).map(|n| format!("{:07b}", n))),
-    )
-});
+crate::lazy_bimap!(
+    LINO_90_MAP: BiMap<char, String> =
+        LINOTYPE_90_MAG.chars().zip((4..93).map(|n| format!("{:07b}", n)))
+);
 
 pub struct Linotype {
     first_e_channel: Cell<bool>,

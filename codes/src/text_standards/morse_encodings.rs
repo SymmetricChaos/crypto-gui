@@ -420,35 +420,40 @@ pub const RUSSIAN_HALFBLOCK: [&'static str; 31] = [
     "▄ ▄▄▄ ▄ ▄▄▄",
 ];
 
-lazy_static! {
-    // These have only one possible representation.
-    pub static ref AMERICAN_HALFBLOCK_MAP: BiMap<&'static str, &'static str> = bimap_from_iter(
-        AMERICAN_LETTERS
-            .into_iter()
-            .zip(AMERICAN_HALFBLOCK.into_iter())
-    );
-    pub static ref GERKE_HALFBLOCK_MAP: BiMap<&'static str, &'static str> =
-        bimap_from_iter(GERKE_LETTERS.into_iter().zip(GERKE_HALFBLOCK.into_iter()));
-    // These all have three representations.
-    pub static ref ITU_ASCII_MAP: BiMap<&'static str, &'static str> =
-        bimap_from_iter(ITU_SIGNS.into_iter().zip(ITU_ASCII.into_iter()));
-    pub static ref ITU_WORD_MAP: BiMap<&'static str, &'static str> =
-        bimap_from_iter(ITU_SIGNS.into_iter().zip(ITU_WORD.into_iter()));
-    pub static ref ITU_HALFBLOCK_MAP: BiMap<&'static str, &'static str> =
-        bimap_from_iter(ITU_SIGNS.into_iter().zip(ITU_HALFBLOCK.into_iter()));
-    pub static ref GREEK_ASCII_MAP: BiMap<&'static str, &'static str> =
-        bimap_from_iter(GREEK_SIGNS.into_iter().zip(GREEK_ASCII.into_iter()));
-    pub static ref GREEK_WORD_MAP: BiMap<&'static str, &'static str> =
-        bimap_from_iter(GREEK_SIGNS.into_iter().zip(GREEK_WORD.into_iter()));
-    pub static ref GREEK_HALFBLOCK_MAP: BiMap<&'static str, &'static str> =
-        bimap_from_iter(GREEK_SIGNS.into_iter().zip(GREEK_HALFBLOCK.into_iter()));
-    pub static ref RUSSIAN_ASCII_MAP: BiMap<&'static str, &'static str> =
-        bimap_from_iter(RUSSIAN_LETTERS.into_iter().zip(RUSSIAN_ASCII.into_iter()));
-    pub static ref RUSSIAN_WORD_MAP: BiMap<&'static str, &'static str> =
-        bimap_from_iter(RUSSIAN_LETTERS.into_iter().zip(RUSSIAN_WORD.into_iter()));
-    pub static ref RUSSIAN_HALFBLOCK_MAP: BiMap<&'static str, &'static str> =
-        bimap_from_iter(RUSSIAN_LETTERS.into_iter().zip(RUSSIAN_HALFBLOCK.into_iter()));
-}
+crate::lazy_bimap!(
+    AMERICAN_HALFBLOCK_MAP: BiMap<&'static str, &'static str> =
+        AMERICAN_LETTERS.into_iter().zip(AMERICAN_HALFBLOCK.into_iter());
+
+    GERKE_HALFBLOCK_MAP: BiMap<&'static str, &'static str> =
+        GERKE_LETTERS.into_iter().zip(GERKE_HALFBLOCK.into_iter());
+
+    ITU_ASCII_MAP: BiMap<&'static str, &'static str> =
+        ITU_SIGNS.into_iter().zip(ITU_ASCII.into_iter());
+
+    ITU_WORD_MAP: BiMap<&'static str, &'static str> =
+        ITU_SIGNS.into_iter().zip(ITU_WORD.into_iter());
+
+    ITU_HALFBLOCK_MAP: BiMap<&'static str, &'static str> =
+        ITU_SIGNS.into_iter().zip(ITU_HALFBLOCK.into_iter());
+
+    GREEK_ASCII_MAP: BiMap<&'static str, &'static str> =
+        GREEK_SIGNS.into_iter().zip(GREEK_ASCII.into_iter());
+
+    GREEK_WORD_MAP: BiMap<&str, &'static str> =
+        GREEK_SIGNS.into_iter().zip(GREEK_WORD.into_iter());
+
+    GREEK_HALFBLOCK_MAP: BiMap<&'static str, &'static str> =
+        GREEK_SIGNS.into_iter().zip(GREEK_HALFBLOCK.into_iter());
+
+    RUSSIAN_ASCII_MAP: BiMap<&'static str, &'static str> =
+        RUSSIAN_LETTERS.into_iter().zip(RUSSIAN_ASCII.into_iter());
+
+    RUSSIAN_WORD_MAP: BiMap<&'static str, &'static str> =
+        RUSSIAN_LETTERS.into_iter().zip(RUSSIAN_WORD.into_iter());
+
+    RUSSIAN_HALFBLOCK_MAP: BiMap<&'static str, &'static str> =
+        RUSSIAN_LETTERS.into_iter().zip(RUSSIAN_HALFBLOCK.into_iter());
+);
 
 #[cfg(test)]
 mod morseitu_tests {

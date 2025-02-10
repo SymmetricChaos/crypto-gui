@@ -1,5 +1,4 @@
 use crate::{errors::CodeError, traits::Code};
-
 use utils::{
     bit_polynomial::BitPolynomial,
     bits::{bits_from_str, Bit},

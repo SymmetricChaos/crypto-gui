@@ -1,6 +1,5 @@
-use crate::{errors::CodeError, traits::Code};
-
 use super::BinaryToText;
+use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use utils::{
     byte_formatting::ByteFormat,

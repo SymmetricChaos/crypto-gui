@@ -1,7 +1,5 @@
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
-use lazy_static::lazy_static;
-use regex::Regex;
 use utils::text_functions::bimap_from_iter;
 
 const ICS_MEANING: [&'static str; 26] = [
@@ -38,12 +36,14 @@ const ICS_FLAG_BLAZON: [&'static str; 26] = [
     "Per saltire or, sable, gules and azure.",
 ];
 
-lazy_static! {
-    pub static ref ICS_MAP: BiMap<&'static str, &'static str> =
-        bimap_from_iter(ICS_MEANING.into_iter().zip(ICS_FLAG_BLAZON.into_iter()));
-    pub static ref ICS_REGEX: Regex = Regex::new(r"[A-Z]| |.").unwrap();
-    pub static ref ICS_BLAZON_REGEX: Regex = Regex::new(r"[A-Z][a-z ,]+\.").unwrap();
-}
+crate::lazy_regex!(
+    ICS_BLAZON_REGEX, r"[A-Z][a-z ,]+\.";
+    ICS_REGEX, r"[A-Z]| |.";
+);
+
+crate::lazy_bimap!(
+    ICS_MAP: BiMap<&'static str, &'static str> = ICS_MEANING.into_iter().zip(ICS_FLAG_BLAZON.into_iter())
+);
 
 pub struct IcsFlags {}
 

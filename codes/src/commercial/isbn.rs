@@ -1,12 +1,9 @@
-use lazy_static::lazy_static;
-use regex::Regex;
-
 use crate::{errors::CodeError, traits::Code};
 
-lazy_static! {
-    pub static ref ISBN_10: Regex = Regex::new(r"^([0-9]{9}[0-9X])$").unwrap();
-    pub static ref ISBN_13: Regex = Regex::new(r"^([0-9]{13})$").unwrap();
-}
+crate::lazy_regex!(
+    ISBN_10, r"^([0-9]{9}[0-9X])$";
+    ISBN_13, r"^([0-9]{13})$";
+);
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum IsbnVariant {

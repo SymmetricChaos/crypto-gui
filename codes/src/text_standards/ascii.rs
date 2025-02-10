@@ -1,5 +1,3 @@
-use std::sync::LazyLock;
-
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use itertools::Itertools;
@@ -139,6 +137,11 @@ const CHARACTER_DESCRIPTIONS: [&'static str; 128] = [
     "␡  delete",
 ];
 
+crate::lazy_bimap!(
+    CONTROL_PICTURE_MAP: BiMap<u8, char> =
+        (0..33).chain(std::iter::once(127)).zip("␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟␠␡".chars())
+);
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UpperBit {
     Unset,
@@ -188,13 +191,13 @@ impl DisplayMode {
     }
 }
 
-pub static CONTROL_PICTURE_MAP: LazyLock<BiMap<u8, char>> = LazyLock::new(|| {
-    bimap_from_iter(
-        (0..33)
-            .chain(std::iter::once(127))
-            .zip("␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟␠␡".chars()),
-    )
-});
+// pub static CONTROL_PICTURE_MAP: LazyLock<BiMap<u8, char>> = LazyLock::new(|| {
+//     bimap_from_iter(
+//         (0..33)
+//             .chain(std::iter::once(127))
+//             .zip("␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟␠␡".chars()),
+//     )
+// });
 
 // lazy_static! {
 //     pub static ref CONTROL_PICTURE_MAP: BiMap<u8, char> = bimap_from_iter(

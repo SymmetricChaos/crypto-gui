@@ -1,9 +1,6 @@
+use super::string_to_u32s;
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
-use lazy_static::lazy_static;
-use regex::Regex;
-
-use super::string_to_u32s;
 
 const ROMAN_PV: [[&'static str; 10]; 3] = [
     ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"],
@@ -11,11 +8,10 @@ const ROMAN_PV: [[&'static str; 10]; 3] = [
     ["", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"],
 ];
 
-lazy_static! {
-    // pub static ref STRICT_ROMAN: Regex =
-    //     Regex::new(r"^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$").unwrap();
-    pub static ref RELAXED_ROMAN: Regex = Regex::new(r"^[IVXLCDM]+$").unwrap();
-}
+crate::lazy_regex!(
+    RELAXED_ROMAN, r"^[IVXLCDM]+$";
+    STRICT_ROMAN, r"^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$";
+);
 
 pub struct RomanNumeral {
     // pub apostrophus: bool,

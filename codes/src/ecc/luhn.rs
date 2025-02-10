@@ -1,7 +1,6 @@
+use crate::{errors::CodeError, traits::Code};
 use num::Integer;
 use utils::text_functions::num_to_digit;
-
-use crate::{errors::CodeError, traits::Code};
 
 pub struct LuhnAlgorithm {
     pub modulus: u32,

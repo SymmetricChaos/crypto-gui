@@ -1,6 +1,5 @@
-use utils::byte_formatting::ByteFormat;
-
 use crate::{errors::CodeError, traits::Code};
+use utils::byte_formatting::ByteFormat;
 
 const MASK: u8 = 0b01111111;
 const HIGH_BIT: u8 = 0b10000000;

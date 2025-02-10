@@ -1,13 +1,10 @@
+use super::BinaryToText;
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use lazy_static::lazy_static;
 use num::Integer;
-use std::fs::read;
-use std::path::PathBuf;
 use utils::byte_formatting::ByteFormat;
 use utils::text_functions::bimap_from_iter;
-
-use super::BinaryToText;
 
 const ASCII85_BTOA: &'static str =
     "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstu";
@@ -49,7 +46,6 @@ pub enum Ascii85Variant {
 
 // Make it possible to encode an aribtrary file
 pub struct Ascii85 {
-    pub file: Option<PathBuf>,
     pub variant: Ascii85Variant,
     pub mode: ByteFormat,
 }
@@ -57,7 +53,6 @@ pub struct Ascii85 {
 impl Default for Ascii85 {
     fn default() -> Self {
         Self {
-            file: None,
             variant: Ascii85Variant::Btoa,
             mode: ByteFormat::Utf8,
         }
@@ -81,14 +76,6 @@ impl Ascii85 {
                 *self.map().get_by_left(&x).unwrap() as char,
             )
         })
-    }
-
-    pub fn encode_file(&self) -> Result<String, CodeError> {
-        if self.file.is_none() {
-            return Err(CodeError::input("no file stored"));
-        }
-        let bytes = &read(self.file.as_ref().unwrap()).unwrap()[..];
-        self.encode_bytes(bytes)
     }
 }
 

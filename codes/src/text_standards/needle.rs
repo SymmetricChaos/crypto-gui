@@ -1,7 +1,6 @@
+use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use utils::text_functions::bimap_from_iter;
-
-use crate::{errors::CodeError, traits::Code};
 
 const FIVE_NEEDLE_CODES: [&'static str; 20] = [
     r"/|||\", r"/||\|", r"|/||\", r"/|\||", r"|/|\|", r"||/|\", r"/\|||", r"|/\||", r"||/\|",

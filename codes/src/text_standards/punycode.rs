@@ -1,8 +1,7 @@
-// https://datatracker.ietf.org/doc/html/rfc3492
-
+use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 
-use crate::{errors::CodeError, traits::Code};
+// https://datatracker.ietf.org/doc/html/rfc3492
 
 pub struct Punycode {
     pub tmin: u32,

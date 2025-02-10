@@ -1,13 +1,9 @@
 use super::BinaryToText;
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
-use lazy_static::lazy_static;
-use regex::Regex;
 use utils::byte_formatting::ByteFormat;
 
-lazy_static! {
-    pub static ref IS_BASE16: Regex = Regex::new(r"^([0-9A-F][0-9A-F])*$").unwrap();
-}
+crate::lazy_regex!(IS_BASE16, r"^([0-9A-F][0-9A-F])*$");
 
 pub struct Base16 {
     pub mode: ByteFormat,

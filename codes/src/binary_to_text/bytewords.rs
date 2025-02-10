@@ -1,11 +1,10 @@
+use super::BinaryToText;
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use utils::{
     byte_formatting::ByteFormat,
     text_functions::{closest_match, string_pairs},
 };
-
-use super::BinaryToText;
 
 const BYTEWORD_WORDS: [&'static str; 256] = [
     "able", "acid", "also", "apex", "aqua", "arch", "atom", "aunt", "away", "axis", "back", "bald",
@@ -67,10 +66,8 @@ fn byte_to_word(byte: &u8) -> &'static str {
 fn word_to_byte(word: &str) -> Result<u8, CodeError> {
     let (idx, dist) = closest_match(word, &BYTEWORD_WORDS);
     if dist >= 2 {
-        // println!("{dist}");
         Err(CodeError::Input(format!("invalid word `{}` found", word)))
     } else {
-        // println!("{dist}");
         Ok(idx as u8)
     }
 }

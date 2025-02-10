@@ -1,11 +1,10 @@
+use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use num::Zero;
 use utils::{
     bit_polynomial::BitPolynomial,
     bits::{bits_from_str, u32_to_bits, Bit},
 };
-
-use crate::{errors::CodeError, traits::Code};
 
 pub struct PolynomialCode {
     block_size: usize,

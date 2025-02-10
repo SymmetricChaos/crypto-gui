@@ -1,8 +1,7 @@
+use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use num::{BigUint, Integer, Num, One};
 use primal::Primes;
-
-use crate::{errors::CodeError, traits::Code};
 
 const MESSAGE_LIMIT: usize = 100;
 

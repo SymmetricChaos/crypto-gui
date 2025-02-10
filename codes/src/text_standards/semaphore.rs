@@ -1,7 +1,5 @@
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
-use lazy_static::lazy_static;
-use regex::Regex;
 use utils::text_functions::bimap_from_iter;
 
 const SEMAPHORE_MEANING: [&'static str; 30] = [
@@ -42,15 +40,11 @@ const SEMAPHORE_POSITIONS: [&'static str; 30] = [
     "low/low",
 ];
 
-lazy_static! {
-    pub static ref SEMAPHORE_MAP: BiMap<&'static str, &'static str> = bimap_from_iter(
-        SEMAPHORE_MEANING
-            .into_iter()
-            .zip(SEMAPHORE_POSITIONS.into_iter())
-    );
-    pub static ref SEMAPHORE_REGEX: Regex =
-        Regex::new(r"[A-Z0-9 ]|numeric|cancel|error|ready|.").unwrap();
-}
+crate::lazy_regex!(SEMAPHORE_REGEX, r"[A-Z0-9 ]|numeric|cancel|error|ready|.");
+
+crate::lazy_bimap!(SEMAPHORE_MAP: BiMap<&'static str, &'static str> =
+        SEMAPHORE_MEANING.into_iter().zip(SEMAPHORE_POSITIONS.into_iter()
+));
 
 pub struct Semaphore {}
 

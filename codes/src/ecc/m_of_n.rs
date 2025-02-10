@@ -1,8 +1,7 @@
+use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use num::{integer::binomial, Integer};
 use utils::bits::{bits_from_str, Bit};
-
-use crate::{errors::CodeError, traits::Code};
 
 pub fn u32_to_m_of_n(n: u32, w: usize, l: usize) -> Option<String> {
     let mut n = n;

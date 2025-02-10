@@ -1,7 +1,6 @@
+use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use utils::preset_alphabet::Alphabet;
-
-use crate::{errors::CodeError, traits::Code};
 
 pub struct TapCode {
     pub grid: Vec<char>,

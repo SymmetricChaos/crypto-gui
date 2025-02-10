@@ -1,8 +1,8 @@
+use super::BinaryToText;
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use utils::byte_formatting::ByteFormat;
 
-use super::BinaryToText;
 // rfc2289
 
 const SKEY_WORDS: [&'static str; 2048] = [

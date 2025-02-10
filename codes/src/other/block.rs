@@ -1,8 +1,7 @@
+use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use num::{Integer, Zero};
 use utils::preset_alphabet::Alphabet;
-
-use crate::{errors::CodeError, traits::Code};
 
 fn to_str_radix(n: usize, radix: usize, width: usize, symbols: &Vec<char>) -> String {
     if n.is_zero() {

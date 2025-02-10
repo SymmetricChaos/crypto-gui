@@ -1,9 +1,7 @@
+use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use itertools::izip;
-use lazy_static::lazy_static;
 use utils::text_functions::{bimap_from_iter, chunk_and_join, string_chunks};
-
-use crate::{errors::CodeError, traits::Code};
 
 pub const MTK_LETTERS: &'static str = "␑␍␊ QWERTYUIOPASDFGHJKLZXCVBNM␒␓";
 pub const MTK_FIGURES: &'static str = "␑␍␊ 1234567890-'ЧЭШЩЮ()+/:=?,.␒␓";
@@ -16,20 +14,20 @@ pub const CODES: [&'static str; 32] = [
     "11011", "11111",
 ];
 
+crate::lazy_bimap!(
+    LETTER_MAP: BiMap<char, &'static str> =
+        MTK_LETTERS.chars().zip(CODES.into_iter());
+    FIGURE_MAP: BiMap<char, &'static str> =
+        MTK_FIGURES.chars().zip(CODES.into_iter());
+    CYRILLIC_MAP: BiMap<char, &'static str> =
+        MTK_CYRILLIC.chars().zip(CODES.into_iter());
+);
+
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Mtk2Mode {
     Letters,
     Figures,
     Cyrillic,
-}
-
-lazy_static! {
-    pub static ref LETTER_MAP: BiMap<char, &'static str> =
-        bimap_from_iter(MTK_LETTERS.chars().zip(CODES.into_iter()));
-    pub static ref FIGURE_MAP: BiMap<char, &'static str> =
-        bimap_from_iter(MTK_FIGURES.chars().zip(CODES.into_iter()));
-    pub static ref CYRILLIC_MAP: BiMap<char, &'static str> =
-        bimap_from_iter(MTK_CYRILLIC.chars().zip(CODES.into_iter()));
 }
 
 pub struct Mtk2 {

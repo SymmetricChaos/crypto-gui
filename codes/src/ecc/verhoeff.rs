@@ -1,6 +1,5 @@
-use lazy_static::lazy_static;
-
 use crate::{errors::CodeError, traits::Code};
+use lazy_static::lazy_static;
 
 lazy_static! {
     pub static ref VERHOEFF_PERM_TABLE: [[u8; 10]; 8] = [

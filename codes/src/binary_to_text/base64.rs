@@ -4,8 +4,6 @@ use crate::traits::Code;
 use bimap::BiMap;
 use lazy_static::lazy_static;
 use utils::byte_formatting::ByteFormat;
-// use std::fs::read;
-// use std::path::PathBuf;
 use utils::preset_alphabet::Alphabet;
 use utils::text_functions::bimap_from_iter;
 

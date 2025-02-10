@@ -1,9 +1,8 @@
+use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use lazy_static::lazy_static;
 use regex::Regex;
 use utils::text_functions::bimap_from_iter;
-
-use crate::{errors::CodeError, traits::Code};
 
 const GUARD: &'static str = "101"; // Start and End guard pattern
 const MIDDLE: &'static str = "01010";

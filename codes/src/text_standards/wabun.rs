@@ -1,14 +1,11 @@
-use std::collections::HashMap;
-
-use crate::{errors::CodeError, traits::Code};
-
-use lazy_static::lazy_static;
-use regex::Regex;
-
 use super::wabun_encoding::{
     ASCII_TO_HIRA, HALFBLOCK_TO_HIRA, HIRAGANA, KANA_TO_ASCII, KANA_TO_HALFBLOCK, KANA_TO_WORD,
     WABUN_ASCII, WABUN_HALFBLOCK, WABUN_WORD, WORD_TO_HIRA,
 };
+use crate::{errors::CodeError, traits::Code};
+use lazy_static::lazy_static;
+use regex::Regex;
+use std::collections::HashMap;
 
 lazy_static! {
     // Just a list of all kana combinations, Japanese punctuation, and two spaces commonly used

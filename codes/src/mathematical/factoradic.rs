@@ -1,15 +1,9 @@
-use itertools::Itertools;
-use lazy_static::lazy_static;
-use num::Integer;
-use regex::Regex;
-
-use crate::{errors::CodeError, traits::Code};
-
 use super::string_to_u64s;
+use crate::{errors::CodeError, traits::Code};
+use itertools::Itertools;
+use num::Integer;
 
-lazy_static! {
-    pub static ref TUPLE: Regex = Regex::new(r"(([0-9]+:)*[0-9]+)").unwrap();
-}
+crate::lazy_regex!(TUPLE, r"(([0-9]+:)*[0-9]+)");
 
 pub fn encode_u64(mut n: u64) -> String {
     if n == 0 {

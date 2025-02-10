@@ -1,7 +1,6 @@
+use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use utils::byte_formatting::ByteFormat;
-
-use crate::{errors::CodeError, traits::Code};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UnicodeEncoding {

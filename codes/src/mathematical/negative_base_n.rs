@@ -1,9 +1,8 @@
+use super::string_to_i32s;
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use num::{Integer, Zero};
 use utils::text_functions::num_to_digit;
-
-use super::string_to_i32s;
 
 pub struct NegativeBaseN {
     pub radix: i32,

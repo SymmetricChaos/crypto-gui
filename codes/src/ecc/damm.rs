@@ -1,6 +1,5 @@
-use lazy_static::lazy_static;
-
 use crate::{errors::CodeError, traits::Code};
+use lazy_static::lazy_static;
 
 lazy_static! {
     pub static ref DAMM_TABLE: [[usize; 10]; 10] = [

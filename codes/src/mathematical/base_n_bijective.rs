@@ -1,8 +1,7 @@
+use super::string_to_u32s;
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use utils::text_functions::num_to_digit;
-
-use super::string_to_u32s;
 
 pub struct BaseNBijective {
     pub radix: u32,

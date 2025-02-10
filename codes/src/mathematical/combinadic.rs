@@ -1,13 +1,8 @@
+use crate::{errors::CodeError, lazy_regex, traits::Code};
 use itertools::Itertools;
-use lazy_static::lazy_static;
 use num::integer::binomial;
-use regex::Regex;
 
-use crate::{errors::CodeError, traits::Code};
-
-lazy_static! {
-    pub static ref TUPLE: Regex = Regex::new(r"(([0-9]+:)*[0-9]+)").unwrap();
-}
+lazy_regex!(TUPLE, r"(([0-9]+:)*[0-9]+)");
 
 pub struct Combinadic {
     pub k: u64,

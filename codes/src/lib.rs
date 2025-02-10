@@ -12,3 +12,23 @@ pub mod compression;
 pub mod errors;
 pub mod ids;
 pub mod traits;
+
+#[macro_export]
+macro_rules! lazy_regex {
+    ($($name: ident, $regex: literal);+ $(;)?) => {
+        $(
+        pub const $name: std::cell::LazyCell<regex::Regex> =
+            std::cell::LazyCell::new(|| regex::Regex::new($regex).unwrap());
+        )+
+    };
+}
+
+#[macro_export]
+macro_rules! lazy_bimap {
+    ($($name: ident : $type: ty = $iter: expr);+ $(;)?) => {
+        $(
+        pub static $name: std::sync::LazyLock<$type> =
+            std::sync::LazyLock::new(|| bimap_from_iter($iter));
+        )+
+    };
+}

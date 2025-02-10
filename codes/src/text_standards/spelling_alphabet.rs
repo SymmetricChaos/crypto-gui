@@ -1,87 +1,67 @@
+use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
-use lazy_static::lazy_static;
 use utils::{preset_alphabet::Alphabet, text_functions::bimap_from_iter};
 
-use crate::{errors::CodeError, traits::Code};
-
-lazy_static! {
+crate::lazy_bimap!(
     // Yes, ALFA and JULIETT are meant to be spelled that way
     // Yes, the spelling of the numerals is correct even though the pronunciation is different
-    pub static ref NATO: BiMap<char,&'static str> = bimap_from_iter(
+    NATO: BiMap<char,&str> =
         Alphabet::BasicLatin.chars().zip([
             "ALFA", "BRAVO", "CHARLIE", "DELTA", "ECHO", "FOXTROT",
             "GOLF", "HOTEL", "INDIA", "JULIETT", "KILO", "LIMA",
             "MIKE", "NOVEMBER", "OSCAR", "PAPA", "QUEBEC", "ROMEO",
             "SIERRA", "TANGO", "UNIFORM", "VICTOR", "WHISKEY",
-            "XRAY", "YANKEE", "ZULU"].into_iter())
-    );
+            "XRAY", "YANKEE", "ZULU"].into_iter());
 
-
-    pub static ref CCB: BiMap<char,&'static str> = bimap_from_iter(
+    CCB: BiMap<char,&str> =
         Alphabet::BasicLatin.chars().zip([
             "ABLE", "BAKER", "CHARLIE", "DOG", "EASY", "FOX",
             "GEORGE", "HOW", "ITEM", "JIG", "KING", "LOVE",
             "MIKE", "NAN", "OBOE", "PETER", "QUEEN", "ROGER",
             "SUGAR", "TARE", "UNCLE", "VICTOR", "WILLIAM",
-            "XRAY", "YOKE", "ZEBRA"].into_iter())
+            "XRAY", "YOKE", "ZEBRA"].into_iter());
 
-    );
-
-    pub static ref WESTERN_UNION_1912: BiMap<char,&'static str> = bimap_from_iter(
+    WESTERN_UNION_1912: BiMap<char,&str> =
         Alphabet::BasicLatin.chars().zip([
             "ADAMS", "BOSTON", "CHICAGO", "DENVER", "EASY", "FRANK",
             "GEORGE", "HENRY", "IDA", "JERSEY", "KING", "LINCOLN",
             "MARY", "NEWARK", "OCEAN", "PETER", "QUEEN", "ROGER",
             "SUGAR", "TEXAS", "UNION", "VIOLET", "WILLIAM",
-            "XRAY", "YALE", "ZERO"].into_iter())
-    );
+            "XRAY", "YALE", "ZERO"].into_iter());
 
-    pub static ref WESTERN_UNION_1942: BiMap<char,&'static str> = bimap_from_iter(
+    WESTERN_UNION_1942: BiMap<char,&str> =
         Alphabet::BasicLatin.chars().zip([
             "ADAMS", "BOSTON", "CHICAGO", "DENVER", "EASY", "FRANK",
             "GEORGE", "HENRY", "IDA", "JOHN", "KING", "LINCOLN",
             "MARY", "NEWYORK", "OCEAN", "PETER", "QUEEN", "ROGER",
             "SUGAR", "THOMAS", "UNION", "VICTORY", "WILLIAM",
-            "XRAY", "YOUNG", "ZERO"].into_iter())
-    );
+            "XRAY", "YOUNG", "ZERO"].into_iter());
 
-    pub static ref US_NAVY_1908: BiMap<char,&'static str> = bimap_from_iter(
+    US_NAVY_1908: BiMap<char, &str> =
         Alphabet::BasicLatin.chars().zip([
-            "ACTOR", "BAKER", "CANTEEN", "DIVER", "EAGLE", "FISHER",
-            "GANGWAY", "HALLIARD", "INSECT", "JOKCEY", "KNAPSACK", "LUGGER",
-            "MUSKET", "NEPTUNE", "OYSTER", "PISTOL", "QUADRANT", "REEFER",
-            "SHIPMATE", "TOPSAIL", "UNLOAD", "VESSEL", "WINDAGE",
-            "XRAY", "YEOMAN", "ZEBRA"].into_iter())
-    );
+            "ACTOR", "BAKER", "CANTEEN", "DIVER", "EAGLE", "FISHER", "GANGWAY", "HALLIARD",
+            "INSECT", "JOKCEY", "KNAPSACK", "LUGGER", "MUSKET", "NEPTUNE", "OYSTER", "PISTOL",
+            "QUADRANT", "REEFER", "SHIPMATE", "TOPSAIL", "UNLOAD", "VESSEL", "WINDAGE", "XRAY",
+            "YEOMAN", "ZEBRA"].into_iter());
 
-
-    pub static ref US_NAVY_1908_SHORT: BiMap<char,&'static str> = bimap_from_iter(
+    US_NAVY_1908_SHORT: BiMap<char, &str> =
         Alphabet::BasicLatin.chars().zip([
-            "ASH", "BACK", "CHAIN", "DOG", "EGG", "FOX",
-            "GIG", "HORSE", "ICE", "JAKE", "KING", "LASH",
-            "MULE", "NET", "OAK", "PAGE", "QUAIL", "RAFT",
-            "SCOUT", "TIDE", "USE", "VAST", "WINCH",
-            "XRAY", "YACHT", "ZOO"].into_iter())
-    );
+            "ASH", "BACK", "CHAIN", "DOG", "EGG", "FOX", "GIG", "HORSE", "ICE", "JAKE", "KING",
+            "LASH", "MULE", "NET", "OAK", "PAGE", "QUAIL", "RAFT", "SCOUT", "TIDE", "USE",
+            "VAST", "WINCH", "XRAY", "YACHT", "ZOO"].into_iter());
 
-    pub static ref US_MILITARY_1941: BiMap<char,&'static str> = bimap_from_iter(
+    US_MILITARY_1941: BiMap<char, &str> =
         Alphabet::BasicLatin.chars().zip([
-            "ABLE", "BAKER", "CHARLIE", "DOG", "EASY", "FOX",
-            "GEORGE", "HOW", "ITEM", "JIG", "KING", "LOVE",
-            "MIKE", "NAN", "OBOE", "PETER", "QUEEN", "ROGER",
-            "SAIL", "TARE", "UNCLE", "VICTOR", "WILLIAM",
-            "XRAY", "YOKE", "ZEBRA"].into_iter())
-    );
+            "ABLE", "BAKER", "CHARLIE", "DOG", "EASY", "FOX", "GEORGE", "HOW", "ITEM", "JIG",
+            "KING", "LOVE", "MIKE", "NAN", "OBOE", "PETER", "QUEEN", "ROGER", "SAIL", "TARE",
+            "UNCLE", "VICTOR", "WILLIAM", "XRAY", "YOKE", "ZEBRA"].into_iter());
 
-    pub static ref UK_ARMY_1904: BiMap<char,&'static str> = bimap_from_iter(
+    UK_ARMY_1904: BiMap<char, &'static str> =
         Alphabet::BasicLatin.chars().zip([
-            "ACK", "BEER", "CORK", "DON", "EDDY", "FREDDY",
-            "GEORGE", "HARRY", "INK", "JUB", "KING", "LONDON",
-            "EMMA", "NUTS", "ORANGE", "PIP", "QUAD", "ROBERT",
-            "ESSES", "TOC", "UNCLE", "VIC", "WILLIAM",
-            "XERXES", "YELLOW", "ZEBRA"].into_iter())
-    );
-}
+            "ACK", "BEER", "CORK", "DON", "EDDY", "FREDDY", "GEORGE", "HARRY", "INK", "JUB",
+            "KING", "LONDON", "EMMA", "NUTS", "ORANGE", "PIP", "QUAD", "ROBERT", "ESSES",
+            "TOC", "UNCLE", "VIC", "WILLIAM", "XERXES", "YELLOW", "ZEBRA"].into_iter());
+);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SpellingAlphabetMode {

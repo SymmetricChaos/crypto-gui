@@ -1,11 +1,7 @@
-use itertools::Itertools;
-use lazy_static::lazy_static;
-use num::Integer;
-use regex::Regex;
-
-use crate::{errors::CodeError, traits::Code};
-
 use super::string_to_u64s;
+use crate::{errors::CodeError, traits::Code};
+use itertools::Itertools;
+use num::Integer;
 
 // All the primorials that fit in a u64 (1 excluded)
 const PRIMORIALS: [u64; 16] = [
@@ -29,9 +25,7 @@ const PRIMORIALS: [u64; 16] = [
 
 const PRIMES: [u64; 15] = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47];
 
-lazy_static! {
-    pub static ref TUPLE: Regex = Regex::new(r"(([0-9]+:)*[0-9]+)").unwrap();
-}
+crate::lazy_regex!(TUPLE, r"(([0-9]+:)*[0-9]+)");
 
 pub fn encode_u64(mut n: u64) -> String {
     if n == 0 {

@@ -1,7 +1,6 @@
+use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use utils::{bits::IS_BITS, text_functions::string_chunks};
-
-use crate::{errors::CodeError, traits::Code};
 
 pub struct GrayCode {
     pub width: usize,

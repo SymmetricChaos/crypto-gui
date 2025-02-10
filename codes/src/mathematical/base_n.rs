@@ -1,9 +1,8 @@
+use super::string_to_u32s;
 use crate::{errors::CodeError, traits::Code};
 use itertools::Itertools;
 use num::{Integer, Zero};
 use utils::text_functions::num_to_digit;
-
-use super::string_to_u32s;
 
 pub struct BaseN {
     pub radix: u32,
