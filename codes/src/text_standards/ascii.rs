@@ -1,7 +1,8 @@
+use std::sync::LazyLock;
+
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use itertools::Itertools;
-use lazy_static::lazy_static;
 use utils::{
     preset_alphabet::Alphabet,
     text_functions::{bimap_from_iter, string_chunks},
@@ -187,31 +188,49 @@ impl DisplayMode {
     }
 }
 
-lazy_static! {
-    pub static ref CONTROL_PICTURE_MAP: BiMap<u8, char> = bimap_from_iter(
+pub static CONTROL_PICTURE_MAP: LazyLock<BiMap<u8, char>> = LazyLock::new(|| {
+    bimap_from_iter(
         (0..33)
             .chain(std::iter::once(127))
-            .zip("␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟␠␡".chars())
-    );
-    // pub static ref SEVEN_BIT: Vec<String> = (0..128).map(|n| format!("{:07b}", n)).collect_vec();
-    // pub static ref EIGHT_BIT: Vec<String> = (0..128).map(|n| format!("{:08b}", n)).collect_vec();
-    // pub static ref OCTAL: Vec<String> = (0..128).map(|n| format!("{:03o}", n)).collect_vec();
-    // pub static ref DECIMAL: Vec<String> = (0..128).map(|n| format!("{:03}", n)).collect_vec();
-    // pub static ref HEX: Vec<String> = (0..128).map(|n| format!("{:02x}", n)).collect_vec();
-    // pub static ref ASCII_U8: Vec<u8> = (0..128).collect_vec();
-    // pub static ref ASCII_U8_HIGH_BIT_SET: Vec<u8> = (128..=255).collect_vec();
-    // pub static ref ASCII_U8_EVEN_PARITY: Vec<u8> = (0..128_u8)
-    //     .map(|n| if n.count_ones() % 2 == 1 { n } else { n + 128 })
-    //     .collect_vec();
-    // pub static ref ASCII_U8_ODD_PARITY: Vec<u8> = (0..128_u8)
-    //     .map(|n| if n.count_ones() % 2 == 0 { n } else { n + 128 })
-    //     .collect_vec();
-}
+            .zip("␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟␠␡".chars()),
+    )
+});
+
+// lazy_static! {
+//     pub static ref CONTROL_PICTURE_MAP: BiMap<u8, char> = bimap_from_iter(
+//         (0..33)
+//             .chain(std::iter::once(127))
+//             .zip("␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟␠␡".chars()),
+//     );
+//     pub static ref SEVEN_BIT: Vec<String> = (0..128).map(|n| format!("{:07b}", n)).collect_vec();
+//     pub static ref EIGHT_BIT: Vec<String> = (0..128).map(|n| format!("{:08b}", n)).collect_vec();
+//     pub static ref OCTAL: Vec<String> = (0..128).map(|n| format!("{:03o}", n)).collect_vec();
+//     pub static ref DECIMAL: Vec<String> = (0..128).map(|n| format!("{:03}", n)).collect_vec();
+//     pub static ref HEX: Vec<String> = (0..128).map(|n| format!("{:02x}", n)).collect_vec();
+//     pub static ref ASCII_U8: Vec<u8> = (0..128).collect_vec();
+//     pub static ref ASCII_U8_HIGH_BIT_SET: Vec<u8> = (128..=255).collect_vec();
+//     pub static ref ASCII_U8_EVEN_PARITY: Vec<u8> = (0..128_u8)
+//         .map(|n| if n.count_ones() % 2 == 1 { n } else { n + 128 })
+//         .collect_vec();
+//     pub static ref ASCII_U8_ODD_PARITY: Vec<u8> = (0..128_u8)
+//         .map(|n| if n.count_ones() % 2 == 0 { n } else { n + 128 })
+//         .collect_vec();
+// }
 
 pub struct Ascii {
     pub mode: DisplayMode,
     pub spaced: bool,
     pub upper_bit: UpperBit,
+}
+
+impl Default for Ascii {
+    fn default() -> Self {
+        Ascii {
+            mode: DisplayMode::EightBit,
+            spaced: false,
+            upper_bit: UpperBit::Unset,
+        }
+    }
 }
 
 impl Ascii {
@@ -328,16 +347,6 @@ impl Ascii {
     }
 }
 
-impl Default for Ascii {
-    fn default() -> Self {
-        Ascii {
-            mode: DisplayMode::EightBit,
-            spaced: false,
-            upper_bit: UpperBit::Unset,
-        }
-    }
-}
-
 impl Code for Ascii {
     fn encode(&self, text: &str) -> Result<String, CodeError> {
         let mut out = Vec::new();
@@ -368,15 +377,23 @@ mod ascii_tests {
     use super::*;
 
     const PLAINTEXT: &'static str = "0\0␀A ␠";
-    const CODETEXT: &'static str = "001100000000000000000000010000010010000000100000";
+    const CODETEXT_SEVEN_SP: &'static str = "0110000 0000000 0000000 1000001 0100000 0100000";
+    const CODETEXT_EIGHT_SP_EVEN: &'static str =
+        "00110000 00000000 00000000 01000001 10100000 10100000";
+    const CODETEXT_EIGHT_SP_ODD: &'static str =
+        "10110000 10000000 10000000 11000001 00100000 00100000";
 
     #[test]
     fn encode_test() {
         let mut code = Ascii::default();
         code.mode = DisplayMode::SevenBit;
-        code.upper_bit = UpperBit::Set;
         code.spaced = true;
-        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT);
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT_SEVEN_SP);
+        code.mode = DisplayMode::EightBit;
+        code.upper_bit = UpperBit::Even;
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT_EIGHT_SP_EVEN);
+        code.upper_bit = UpperBit::Odd;
+        assert_eq!(code.encode(PLAINTEXT).unwrap(), CODETEXT_EIGHT_SP_ODD);
     }
 
     #[test]

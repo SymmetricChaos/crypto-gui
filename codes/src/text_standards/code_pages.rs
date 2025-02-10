@@ -1,9 +1,6 @@
-use std::str::Chars;
-
-use itertools::Itertools;
-use lazy_static::lazy_static;
-
 use crate::{binary_to_text::BinaryToText, errors::CodeError, traits::Code};
+use itertools::Itertools;
+use std::{str::Chars, sync::LazyLock};
 use utils::{
     byte_formatting::{bytes_to_hex, ByteFormat},
     text_functions::string_chunks,
@@ -13,13 +10,14 @@ use utils::{
 pub const CP1252: &'static str = "␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␐␑␒␓␔␕␖␗␘␙␚␛␜␝␞␟ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~␡€�‚ƒ„…†‡ˆ‰Š‹Œ�Ž��‘’“”•–—˜™š›œ�žŸ\u{00A0}¡¢£¤¥¦§¨©ª«¬\u{00AD}®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ";
 pub const CP437: &'static str = "␀☺☻♥♦♣♠•◘○◙♂♀♪♫☼►◄↕‼¶§▬↨↑↓→←∟↔▲▼ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~⌂ÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜ¢£¥₧ƒáíóúñÑªº¿⌐¬½¼¡«»░▒▓│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀αßΓπΣσµτΦΘΩδ∞φε∩≡±≥≤⌠⌡÷≈°∙·√ⁿ²■\u{00A0}";
 
-lazy_static! {
-    // pub static ref BYTES: Vec<u8> = (0..=255u8).collect_vec();
-    pub static ref BINARY: Vec<String> = (0..256).map(|n| format!("{:08b}", n)).collect_vec();
-    pub static ref OCTAL: Vec<String> = (0..256).map(|n| format!("{:03o}", n)).collect_vec();
-    pub static ref DECIMAL: Vec<String> = (0..256).map(|n| format!("{:03}", n)).collect_vec();
-    pub static ref HEX: Vec<String> = (0..256).map(|n| format!("{:02x}", n)).collect_vec();
-}
+pub static BINARY: LazyLock<Vec<String>> =
+    LazyLock::new(|| (0..256).map(|n| format!("{:08b}", n)).collect_vec());
+pub static OCTAL: LazyLock<Vec<String>> =
+    LazyLock::new(|| (0..256).map(|n| format!("{:03o}", n)).collect_vec());
+pub static DECIMAL: LazyLock<Vec<String>> =
+    LazyLock::new(|| (0..256).map(|n| format!("{:03}", n)).collect_vec());
+pub static HEX: LazyLock<Vec<String>> =
+    LazyLock::new(|| (0..256).map(|n| format!("{:02x}", n)).collect_vec());
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum CodePage {
@@ -71,6 +69,17 @@ pub struct Ccsid {
     pub b2t_mode: Option<ByteFormat>,
 }
 
+impl Default for Ccsid {
+    fn default() -> Self {
+        Self {
+            mode: DisplayMode::Binary,
+            page: CodePage::CP1252,
+            spaced: false,
+            b2t_mode: None,
+        }
+    }
+}
+
 impl BinaryToText for Ccsid {
     fn encode_bytes(&self, bytes: &[u8]) -> Result<String, CodeError> {
         Ok(bytes
@@ -81,7 +90,7 @@ impl BinaryToText for Ccsid {
 }
 
 impl Ccsid {
-    pub fn map(&self, c: char) -> Result<&String, CodeError> {
+    pub fn map(&self, c: char) -> Result<String, CodeError> {
         if c == '�' {
             return Err(CodeError::invalid_input_char(c));
         };
@@ -91,10 +100,10 @@ impl Ccsid {
             .position(|x| x == c)
             .ok_or(CodeError::invalid_input_char(c))?;
         match self.mode {
-            DisplayMode::Binary => Ok(BINARY.get(n).unwrap()),
-            DisplayMode::Octal => Ok(OCTAL.get(n).unwrap()),
-            DisplayMode::Decimal => Ok(DECIMAL.get(n).unwrap()),
-            DisplayMode::Hex => Ok(HEX.get(n).unwrap()),
+            DisplayMode::Binary => Ok(BINARY.get(n).unwrap().to_string()),
+            DisplayMode::Octal => Ok(OCTAL.get(n).unwrap().to_string()),
+            DisplayMode::Decimal => Ok(DECIMAL.get(n).unwrap().to_string()),
+            DisplayMode::Hex => Ok(HEX.get(n).unwrap().to_string()),
         }
     }
 
@@ -133,17 +142,6 @@ impl Ccsid {
             Some(ByteFormat::Base64) => todo!(),
             Some(ByteFormat::Binary) => todo!(),
             None => Err(CodeError::state("Binary to Text Mode is not set")),
-        }
-    }
-}
-
-impl Default for Ccsid {
-    fn default() -> Self {
-        Self {
-            mode: DisplayMode::Binary,
-            page: CodePage::CP1252,
-            spaced: false,
-            b2t_mode: None,
         }
     }
 }
