@@ -1,7 +1,7 @@
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use std::sync::LazyLock;
-use utils::text_functions::{bimap_from_iter, chunk_and_join, string_chunks};
+use utils::text_functions::{chunk_and_join, string_chunks};
 
 // pub const ITA1_EU_LETTERS: &'static str = "␀AEÉYUIO␎JGHBCFD -XZSTWV␡KMLRQNP";
 // pub const ITA1_EU_FIGURES: &'static str = "␀12⅟34";

@@ -1,7 +1,6 @@
 use super::braille_data::{ASCII_ORDER, UNICODE_ORDER};
-use crate::{braille::braille_data::UEB_ORDER, errors::CodeError, traits::Code};
+use crate::{braille::braille_data::UEB_ORDER, errors::CodeError, lazy_bimap, traits::Code};
 use bimap::BiMap;
-use lazy_static::lazy_static;
 use utils::text_functions::bimap_from_iter;
 
 // All of these are in UEB order
@@ -46,18 +45,12 @@ const BRAILLE_ASCII: [&'static str; 64] = [
     "@", "^", "_", "\"", ".", ";", ",",
 ];
 
-lazy_static! {
-    pub static ref BRAILLE_DOTS_MAP: BiMap<char, &'static str> =
-        bimap_from_iter(UEB_ORDER.chars().zip(BRAILLE_DOTS.into_iter()));
-    pub static ref BRAILLE_BITS_MAP: BiMap<char, &'static str> =
-        bimap_from_iter(UEB_ORDER.chars().zip(BRAILLE_BITS.into_iter()));
-    pub static ref BRAILLE_HEX_MAP: BiMap<char, &'static str> =
-        bimap_from_iter(UEB_ORDER.chars().zip(BRAILLE_HEX.into_iter()));
-    // pub static ref BRAILLE_OFFSET_MAP: BiMap<char, u32> =
-    //     bimap_from_iter(UEB_ORDER.chars().zip(BRAILLE_OFFSETS.into_iter()));
-    pub static ref BRAILLE_ASCII_MAP: BiMap<char, &'static str> =
-        bimap_from_iter(UEB_ORDER.chars().zip(BRAILLE_ASCII.into_iter()));
-}
+lazy_bimap!(
+    BRAILLE_DOTS_MAP: BiMap<char, &'static str> = UEB_ORDER.chars().zip(BRAILLE_DOTS.into_iter());
+    BRAILLE_BITS_MAP: BiMap<char, &'static str> = UEB_ORDER.chars().zip(BRAILLE_BITS.into_iter());
+    BRAILLE_HEX_MAP: BiMap<char, &'static str> = UEB_ORDER.chars().zip(BRAILLE_HEX.into_iter());
+    BRAILLE_ASCII_MAP: BiMap<char, &'static str> = UEB_ORDER.chars().zip(BRAILLE_ASCII.into_iter());
+);
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum BrailleEncodingType {

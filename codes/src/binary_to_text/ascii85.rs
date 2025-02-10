@@ -3,7 +3,6 @@ use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use num::Integer;
 use utils::byte_formatting::ByteFormat;
-use utils::text_functions::bimap_from_iter;
 
 const ASCII85_BTOA: &'static str =
     "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstu";

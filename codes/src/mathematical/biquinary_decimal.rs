@@ -1,6 +1,6 @@
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
-use utils::text_functions::{bimap_from_iter, string_chunks};
+use utils::text_functions::string_chunks;
 
 crate::lazy_bimap!(
     BIQUINARY_MAP: BiMap<char, &str> =

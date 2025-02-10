@@ -1,10 +1,7 @@
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use itertools::Itertools;
-use utils::{
-    preset_alphabet::Alphabet,
-    text_functions::{bimap_from_iter, string_chunks},
-};
+use utils::{preset_alphabet::Alphabet, text_functions::string_chunks};
 
 const CHARACTER_DESCRIPTIONS: [&'static str; 128] = [
     "␀  null",

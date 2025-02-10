@@ -1,7 +1,7 @@
 use super::BinaryToText;
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
-use utils::{byte_formatting::ByteFormat, text_functions::bimap_from_iter};
+use utils::byte_formatting::ByteFormat;
 
 // Mask to set top three bits to zero
 const MASK: u8 = 0b00011111;

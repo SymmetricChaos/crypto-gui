@@ -1,6 +1,5 @@
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
-use utils::text_functions::bimap_from_iter;
 
 const ICS_MEANING: [&'static str; 26] = [
     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S",

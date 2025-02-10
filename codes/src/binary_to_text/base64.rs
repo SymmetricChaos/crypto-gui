@@ -3,7 +3,6 @@ use crate::errors::CodeError;
 use crate::traits::Code;
 use bimap::BiMap;
 use utils::byte_formatting::ByteFormat;
-use utils::text_functions::bimap_from_iter;
 
 const MASK: u8 = 0b00111111;
 const PAD: u8 = '=' as u8;

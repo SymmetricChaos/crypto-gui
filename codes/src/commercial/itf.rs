@@ -1,7 +1,6 @@
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use itertools::Itertools;
-use utils::text_functions::bimap_from_iter;
 
 crate::lazy_regex!(ITF_PATTERN, r"^1010([01]{14})*1101$");
 

@@ -1,7 +1,5 @@
-use std::fmt::Display;
-
 use json::JsonValue;
-use lazy_static::lazy_static;
+use std::{fmt::Display, sync::LazyLock};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum CodeCategory {
@@ -55,9 +53,7 @@ impl From<CodeCategory> for String {
 const JSON_CODE_CATEGORY_INFORMATION: &'static str =
     include_str!("code_category_descriptions.json");
 
-lazy_static! {
-    pub static ref CODE_CATEGORY_INFORMATION: JsonValue = {
-        json::parse(&JSON_CODE_CATEGORY_INFORMATION.replace('\u{feff}', ""))
-            .expect("unable to parse code_descriptions")
-    };
-}
+pub static CODE_CATEGORY_INFORMATION: LazyLock<JsonValue> = LazyLock::new(|| {
+    json::parse(&JSON_CODE_CATEGORY_INFORMATION.replace('\u{feff}', ""))
+        .expect("unable to parse code_descriptions")
+});

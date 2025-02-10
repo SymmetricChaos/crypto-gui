@@ -1,6 +1,5 @@
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
-use utils::text_functions::bimap_from_iter;
 
 const GUARD: &'static str = "101"; // Start and End guard pattern
 const MIDDLE: &'static str = "01010";

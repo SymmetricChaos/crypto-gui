@@ -2,7 +2,7 @@ use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use itertools::Itertools;
 use std::cell::Cell;
-use utils::text_functions::{bimap_from_iter, chunk_and_join};
+use utils::text_functions::chunk_and_join;
 
 //http://www.linotype.org/OnLineDocs/LinotypeMachinePrinciples-1940/LMP-chapter20.pdf
 const LINOTYPE_90_MAG: &'static str =

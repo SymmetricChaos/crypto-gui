@@ -28,7 +28,7 @@ macro_rules! lazy_bimap {
     ($($name: ident : $type: ty = $iter: expr);+ $(;)?) => {
         $(
         pub static $name: std::sync::LazyLock<$type> =
-            std::sync::LazyLock::new(|| bimap_from_iter($iter));
+            std::sync::LazyLock::new(|| utils::text_functions::bimap_from_iter($iter));
         )+
     };
 }

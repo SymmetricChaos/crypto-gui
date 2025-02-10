@@ -1,7 +1,5 @@
-use std::fmt::Display;
-
 use json::{iterators::Members, JsonValue};
-use lazy_static::lazy_static;
+use std::{fmt::Display, sync::LazyLock};
 
 macro_rules! code_ids_and_names {
     ($( $id: ident, $name: expr);+ $(;)?) => {
@@ -129,9 +127,7 @@ impl From<CodeId> for String {
 
 const JSON_CODE_INFORMATION: &'static str = include_str!("code_descriptions.json");
 
-lazy_static! {
-    pub static ref CODE_INFORMATION: JsonValue = {
-        json::parse(&JSON_CODE_INFORMATION.replace('\u{feff}', ""))
-            .expect("unable to parse code_descriptions")
-    };
-}
+pub static CODE_INFORMATION: LazyLock<JsonValue> = LazyLock::new(|| {
+    json::parse(&JSON_CODE_INFORMATION.replace('\u{feff}', ""))
+        .expect("unable to parse code_descriptions")
+});

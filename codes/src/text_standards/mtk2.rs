@@ -1,7 +1,7 @@
 use crate::{errors::CodeError, traits::Code};
 use bimap::BiMap;
 use itertools::izip;
-use utils::text_functions::{bimap_from_iter, chunk_and_join, string_chunks};
+use utils::text_functions::{chunk_and_join, string_chunks};
 
 pub const MTK_LETTERS: &'static str = "␑␍␊ QWERTYUIOPASDFGHJKLZXCVBNM␒␓";
 pub const MTK_FIGURES: &'static str = "␑␍␊ 1234567890-'ЧЭШЩЮ()+/:=?,.␒␓";
