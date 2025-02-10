@@ -1,8 +1,5 @@
-use bimap::BiMap;
-use lazy_static::lazy_static;
-use utils::text_functions::bimap_from_iter;
-
 use crate::{errors::CodeError, traits::Code};
+use bimap::BiMap;
 
 const AMERICAN_LETTERS: &'static str = "abcdefghijklmnopqrstuvwxyz!'-,;:?\"";
 const AMERICAN_BRAILLE: &'static str = "⠁⠣⠚⠙⠂⠋⠛⠓⠊⠽⠗⠇⠍⠬⠑⠩⠟⠉⠅⠃⠥⠧⠺⠷⠜⠻⠾⠈⠒⠄⠆⠴⠲⠦";
@@ -11,20 +8,11 @@ const ENGLISH_BRAILLE: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍�
 const FRENCH_LETTERS: &'static str = "abcdefghijklmnopqrstuvxyzçéàèùâêîôûëïüœw!'-,;:.?";
 const FRENCH_BRAILLE: &'static str = "⠁⠃⠉⠙⠑⠋⠛⠓⠊⠚⠅⠇⠍⠝⠕⠏⠟⠗⠎⠞⠥⠧⠭⠽⠵⠯⠿⠷⠮⠾⠡⠣⠩⠹⠱⠫⠻⠳⠪⠺⠖⠄⠤⠂⠆⠒⠲⠢";
 
-lazy_static! {
-    pub static ref ENGLISH_MAP: BiMap<char, char> =
-        bimap_from_iter(ENGLISH_LETTERS.chars().zip(ENGLISH_BRAILLE.chars()));
-    pub static ref FRENCH_MAP: BiMap<char, char> = bimap_from_iter(
-        FRENCH_LETTERS // These are all normalized single character symbols so .chars() can be used
-            .chars()
-            .zip(FRENCH_BRAILLE.chars())
-    );
-    pub static ref AMERICAN_MAP: BiMap<char, char> = bimap_from_iter(
-        AMERICAN_LETTERS
-            .chars()
-            .zip(AMERICAN_BRAILLE.chars())
-    );
-}
+crate::lazy_bimap!(
+    ENGLISH_MAP: BiMap<char, char> = ENGLISH_LETTERS.chars().zip(ENGLISH_BRAILLE.chars());
+    FRENCH_MAP: BiMap<char, char> = FRENCH_LETTERS.chars().zip(FRENCH_BRAILLE.chars()); // These are all normalized single character symbols so .chars() can be used
+    AMERICAN_MAP: BiMap<char, char> = AMERICAN_LETTERS.chars().zip(AMERICAN_BRAILLE.chars());
+);
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum BrailleLanguage {

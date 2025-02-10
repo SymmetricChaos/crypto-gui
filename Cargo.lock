@@ -702,7 +702,6 @@ dependencies = [
  "getrandom",
  "itertools 0.10.5",
  "json",
- "lazy_static",
  "nalgebra",
  "num 0.4.3",
  "paste",

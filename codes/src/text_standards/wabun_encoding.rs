@@ -1,5 +1,4 @@
-use lazy_static::lazy_static;
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::LazyLock};
 
 // the organization of the array should be preserved for legibility
 #[rustfmt::skip]
@@ -306,29 +305,41 @@ pub const WABUN_WORD: [&str; 119] = [
     "di di di dah dit",
 ];
 
-lazy_static! {
-    pub static ref KANA_TO_ASCII: HashMap<&'static str, &'static str> = {
-        let mut h = HashMap::from_iter(HIRAGANA.into_iter().zip(WABUN_ASCII.into_iter()));
-        h.extend(KATAKANA.into_iter().zip(WABUN_ASCII.into_iter()));
-        h
-    };
-    pub static ref KANA_TO_HALFBLOCK: HashMap<&'static str, &'static str> = {
-        let mut h = HashMap::from_iter(HIRAGANA.into_iter().zip(WABUN_HALFBLOCK.into_iter()));
-        h.extend(KATAKANA.into_iter().zip(WABUN_HALFBLOCK.into_iter()));
-        h
-    };
-    pub static ref KANA_TO_WORD: HashMap<&'static str, &'static str> = {
-        let mut h = HashMap::from_iter(HIRAGANA.into_iter().zip(WABUN_WORD.into_iter()));
-        h.extend(KATAKANA.into_iter().zip(WABUN_WORD.into_iter()));
-        h
-    };
-    pub static ref ASCII_TO_HIRA: HashMap<&'static str, &'static str> =
-        HashMap::from_iter(WABUN_ASCII.into_iter().zip(HIRAGANA.into_iter()));
-    pub static ref HALFBLOCK_TO_HIRA: HashMap<&'static str, &'static str> =
-        HashMap::from_iter(WABUN_HALFBLOCK.into_iter().zip(HIRAGANA.into_iter()));
-    pub static ref WORD_TO_HIRA: HashMap<&'static str, &'static str> =
-        HashMap::from_iter(WABUN_WORD.into_iter().zip(HIRAGANA.into_iter()));
-}
+pub static KANA_TO_ASCII: LazyLock<HashMap<&str, &str>> = LazyLock::new(|| {
+    HashMap::from_iter(
+        HIRAGANA
+            .into_iter()
+            .chain(KATAKANA.into_iter())
+            .zip(WABUN_ASCII.into_iter().cycle()),
+    )
+});
+
+pub static KANA_TO_HALFBLOCK: LazyLock<HashMap<&str, &str>> = LazyLock::new(|| {
+    HashMap::from_iter(
+        HIRAGANA
+            .into_iter()
+            .chain(KATAKANA.into_iter())
+            .zip(WABUN_HALFBLOCK.into_iter().cycle()),
+    )
+});
+
+pub static KANA_TO_WORD: LazyLock<HashMap<&str, &str>> = LazyLock::new(|| {
+    HashMap::from_iter(
+        HIRAGANA
+            .into_iter()
+            .chain(KATAKANA.into_iter())
+            .zip(WABUN_WORD.into_iter().cycle()),
+    )
+});
+
+pub static ASCII_TO_HIRA: LazyLock<HashMap<&str, &str>> =
+    LazyLock::new(|| HashMap::from_iter(WABUN_ASCII.into_iter().zip(HIRAGANA.into_iter())));
+
+pub static HALFBLOCK_TO_HIRA: LazyLock<HashMap<&str, &str>> =
+    LazyLock::new(|| HashMap::from_iter(WABUN_HALFBLOCK.into_iter().zip(HIRAGANA.into_iter())));
+
+pub static WORD_TO_HIRA: LazyLock<HashMap<&str, &str>> =
+    LazyLock::new(|| HashMap::from_iter(WABUN_WORD.into_iter().zip(HIRAGANA.into_iter())));
 
 #[cfg(test)]
 mod wabun_tests {

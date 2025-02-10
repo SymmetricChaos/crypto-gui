@@ -1,6 +1,4 @@
 use bimap::BiMap;
-use lazy_static::lazy_static;
-use utils::text_functions::bimap_from_iter;
 
 pub const LETTERS: [&'static str; 52] = [
     "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s",
@@ -326,25 +324,22 @@ pub const SHORTFORMS: [&'static str; 75] = [
     "oneself",
 ];
 
-lazy_static! {
-    pub static ref LETTER_MAP: BiMap<&'static str, &'static str> =
-        bimap_from_iter(LETTERS.into_iter().zip(LETTERS_BRAILLE.into_iter()));
-    pub static ref LETTER_UPPER_MAP: BiMap<&'static str, &'static str> =
-        bimap_from_iter(LETTERS_UPPER.into_iter().zip(LETTERS_BRAILLE.into_iter()));
-    pub static ref SYMBOL_MAP: BiMap<&'static str, &'static str> =
-        bimap_from_iter(SYMBOLS.into_iter().zip(SYMBOLS_BRAILLE.into_iter()));
-    pub static ref PUNCTUATION_MAP: BiMap<&'static str, &'static str> =
-        bimap_from_iter(PUNCTUATION.into_iter().zip(PUNCTUATION_BRAILLE.into_iter()));
-    pub static ref DIACRITIC_MAP: BiMap<&'static str, &'static str> =
-        bimap_from_iter(DIACRITIC.into_iter().zip(DIACRITIC_BRAILLE.into_iter()));
-    pub static ref NUMERIC_MAP: BiMap<&'static str, &'static str> =
-        bimap_from_iter(NUMERIC.into_iter().zip(NUMERIC_BRAILLE.into_iter()));
-    pub static ref ALPHABETIC_WORDSIGNS_MAP: BiMap<&'static str, &'static str> = bimap_from_iter(
-        ALPHABETIC_WORDSIGNS
-            .into_iter()
-            .zip(ALPHABETIC_WORDSIGNS_BRAILLE.into_iter())
-    );
-}
+crate::lazy_bimap!(
+    LETTER_MAP: BiMap<&'static str, &'static str> =
+        LETTERS.into_iter().zip(LETTERS_BRAILLE.into_iter());
+    LETTER_UPPER_MAP: BiMap<&'static str, &'static str> =
+        LETTERS_UPPER.into_iter().zip(LETTERS_BRAILLE.into_iter());
+    SYMBOL_MAP: BiMap<&'static str, &'static str> =
+        SYMBOLS.into_iter().zip(SYMBOLS_BRAILLE.into_iter());
+    PUNCTUATION_MAP: BiMap<&'static str, &'static str> =
+        PUNCTUATION.into_iter().zip(PUNCTUATION_BRAILLE.into_iter());
+    DIACRITIC_MAP: BiMap<&'static str, &'static str> =
+        DIACRITIC.into_iter().zip(DIACRITIC_BRAILLE.into_iter());
+    NUMERIC_MAP: BiMap<&'static str, &'static str> =
+        NUMERIC.into_iter().zip(NUMERIC_BRAILLE.into_iter());
+    LPHABETIC_WORDSIGNS_MAP: BiMap<&'static str, &'static str> =
+        ALPHABETIC_WORDSIGNS.into_iter().zip(ALPHABETIC_WORDSIGNS_BRAILLE.into_iter());
+);
 
 #[cfg(test)]
 mod ueb_pairing_tests {

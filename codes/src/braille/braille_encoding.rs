@@ -1,7 +1,6 @@
 use super::braille_data::{ASCII_ORDER, UNICODE_ORDER};
-use crate::{braille::braille_data::UEB_ORDER, errors::CodeError, lazy_bimap, traits::Code};
+use crate::{braille::braille_data::UEB_ORDER, errors::CodeError, traits::Code};
 use bimap::BiMap;
-use utils::text_functions::bimap_from_iter;
 
 // All of these are in UEB order
 const BRAILLE_DOTS: [&'static str; 64] = [
@@ -45,7 +44,7 @@ const BRAILLE_ASCII: [&'static str; 64] = [
     "@", "^", "_", "\"", ".", ";", ",",
 ];
 
-lazy_bimap!(
+crate::lazy_bimap!(
     BRAILLE_DOTS_MAP: BiMap<char, &'static str> = UEB_ORDER.chars().zip(BRAILLE_DOTS.into_iter());
     BRAILLE_BITS_MAP: BiMap<char, &'static str> = UEB_ORDER.chars().zip(BRAILLE_BITS.into_iter());
     BRAILLE_HEX_MAP: BiMap<char, &'static str> = UEB_ORDER.chars().zip(BRAILLE_HEX.into_iter());
