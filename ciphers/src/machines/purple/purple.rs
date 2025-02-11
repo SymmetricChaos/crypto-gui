@@ -1,12 +1,10 @@
 use super::switch::Switches;
 use crate::{Cipher, CipherError};
-use lazy_static::lazy_static;
-use std::collections::HashMap;
+use std::{cell::LazyCell, collections::HashMap};
 use utils::vecstring::VecString;
 
-lazy_static! {
-    pub static ref PURPLE_ALPHABET: VecString = VecString::from("AEIOUYBCDFGHJKLMNPQRSTVWXZ");
-}
+pub const PURPLE_ALPHABET: LazyCell<VecString> =
+    LazyCell::new(|| VecString::from("AEIOUYBCDFGHJKLMNPQRSTVWXZ"));
 
 pub struct Purple {
     pub switches: Switches, // this will be cloned during execution and then mutated

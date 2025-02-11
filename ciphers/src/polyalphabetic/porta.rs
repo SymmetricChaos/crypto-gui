@@ -1,26 +1,23 @@
 use crate::{errors::CipherError, traits::Cipher};
-use lazy_static::lazy_static;
 use utils::preset_alphabet::Alphabet;
 use utils::vecstring::VecString;
 
 // Porta Cipher uses a sequence of 13 alphabets to encrypt characters. The visible pattern ensures the cipher is reciprocal.
-lazy_static! {
-    pub static ref PORTA_TABLEAUX: [&'static str; 13] = [
-        "NOPQRSTUVWXYZABCDEFGHIJKLM",
-        "OPQRSTUVWXYZNMABCDEFGHIJKL",
-        "PQRSTUVWXYZNOLMABCDEFGHIJK",
-        "QRSTUVWXYZNOPKLMABCDEFGHIJ",
-        "RSTUVWXYZNOPQJKLMABCDEFGHI",
-        "STUVWXYZNOPQRIJKLMABCDEFGH",
-        "TUVWXYZNOPQRSHIJKLMABCDEFG",
-        "UVWXYZNOPQRSTGHIJKLMABCDEF",
-        "VWXYZNOPQRSTUFGHIJKLMABCDE",
-        "WXYZNOPQRSTUVEFGHIJKLMABCD",
-        "XYZNOPQRSTUVWDEFGHIJKLMABC",
-        "YZNOPQRSTUVWXCDEFGHIJKLMAB",
-        "ZNOPQRSTUVWXYBCDEFGHIJKLMA"
-    ];
-}
+pub const PORTA_TABLEAUX: [&'static str; 13] = [
+    "NOPQRSTUVWXYZABCDEFGHIJKLM",
+    "OPQRSTUVWXYZNMABCDEFGHIJKL",
+    "PQRSTUVWXYZNOLMABCDEFGHIJK",
+    "QRSTUVWXYZNOPKLMABCDEFGHIJ",
+    "RSTUVWXYZNOPQJKLMABCDEFGHI",
+    "STUVWXYZNOPQRIJKLMABCDEFGH",
+    "TUVWXYZNOPQRSHIJKLMABCDEFG",
+    "UVWXYZNOPQRSTGHIJKLMABCDEF",
+    "VWXYZNOPQRSTUFGHIJKLMABCDE",
+    "WXYZNOPQRSTUVEFGHIJKLMABCD",
+    "XYZNOPQRSTUVWDEFGHIJKLMABC",
+    "YZNOPQRSTUVWXCDEFGHIJKLMAB",
+    "ZNOPQRSTUVWXYBCDEFGHIJKLMA",
+];
 
 pub struct Porta {
     key_vals: Vec<usize>,

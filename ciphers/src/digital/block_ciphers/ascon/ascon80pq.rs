@@ -1,7 +1,6 @@
+use super::{padded_bytes_to_u64_be, AsconState};
 use crate::{digital::block_ciphers::block_cipher::BCMode, errors::CipherError, Cipher};
 use utils::byte_formatting::ByteFormat;
-
-use super::{padded_bytes_to_u64_be, AsconState};
 
 pub struct Ascon80pq {
     pub input_format: ByteFormat,

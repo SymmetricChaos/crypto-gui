@@ -1,6 +1,5 @@
 use json::{iterators::Members, JsonValue};
-use lazy_static::lazy_static;
-use std::fmt::Display;
+use std::{fmt::Display, sync::LazyLock};
 
 // Macro to make it easier to add new ciphers without writing it out three times.
 macro_rules! cipher_ids_and_names {
@@ -159,9 +158,7 @@ impl From<CipherId> for String {
 
 const JSON_CIPHER_INFORMATION: &'static str = include_str!("cipher_descriptions.json");
 
-lazy_static! {
-    pub static ref CIPHER_INFORMATION: JsonValue = {
-        json::parse(&JSON_CIPHER_INFORMATION.replace('\u{feff}', ""))
-            .expect("unable to parse cipher_descriptions")
-    };
-}
+pub static CIPHER_INFORMATION: LazyLock<JsonValue> = LazyLock::new(|| {
+    json::parse(&JSON_CIPHER_INFORMATION.replace('\u{feff}', ""))
+        .expect("unable to parse cipher_descriptions.json")
+});

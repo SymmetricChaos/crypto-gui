@@ -1,7 +1,6 @@
+use super::{padded_bytes_to_u64_be, padded_bytes_to_u64s_be, Ascon128Variant, AsconState};
 use crate::{digital::block_ciphers::block_cipher::BCMode, errors::CipherError, Cipher};
 use utils::byte_formatting::ByteFormat;
-
-use super::{padded_bytes_to_u64_be, padded_bytes_to_u64s_be, Ascon128Variant, AsconState};
 
 pub struct Ascon128 {
     pub input_format: ByteFormat,

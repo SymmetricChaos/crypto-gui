@@ -1,9 +1,7 @@
 use crate::{Cipher, CipherError};
 use itertools::Itertools;
-use lazy_static::lazy_static;
 use num::Zero;
 use rand::{thread_rng, Rng};
-use regex::Regex;
 use std::num::ParseIntError;
 use utils::{
     math_functions::is_prime64,
@@ -12,10 +10,10 @@ use utils::{
 
 // https://en.wikipedia.org/wiki/Shamir%27s_secret_sharing
 
-lazy_static! {
-    pub static ref PAIRS: Regex = Regex::new(r"\((\d+),\s*(\d+)\)+").unwrap();
-    pub static ref NUMBER: Regex = Regex::new(r"(\d+)").unwrap();
-}
+crate::lazy_regex!(
+    PAIRS, r"\((\d+),\s*(\d+)\)+";
+    NUMBER, r"(\d+)";
+);
 
 pub struct ShamirSecretSharing {
     pub shares: u64,

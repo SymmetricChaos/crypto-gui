@@ -14,3 +14,13 @@ pub mod ids;
 pub mod rotors;
 pub mod traits;
 pub use traits::Cipher;
+
+#[macro_export]
+macro_rules! lazy_regex {
+    ($($name: ident, $regex: literal);+ $(;)?) => {
+        $(
+        pub const $name: std::cell::LazyCell<regex::Regex> =
+            std::cell::LazyCell::new(|| regex::Regex::new($regex).unwrap());
+        )+
+    };
+}

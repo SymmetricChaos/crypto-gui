@@ -6,7 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-lazy_static = "1.4.0"
 num = "0.4.0"
 itertools = "0.10.0"
 rand = "0.8.3"
@@ -18,7 +17,6 @@ unicode-normalization = "0.1.19"
 unicode-segmentation = "1.9.0"
 bimap = "0.6.3"
 regex = "1"
-rfd = "0.11.3"
 mod_exp = "1.0.1"
 base64 = "0.21.7"
 strsim = "0.11.0"

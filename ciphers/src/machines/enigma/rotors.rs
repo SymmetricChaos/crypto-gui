@@ -1,8 +1,8 @@
 use super::char_to_usize;
-use lazy_static::lazy_static;
 use std::{
     collections::HashMap,
     fmt::{self, Formatter},
+    sync::LazyLock,
 };
 
 // Specifically the Enigma rotor
@@ -114,42 +114,38 @@ impl fmt::Display for Reflector {
     }
 }
 
-lazy_static! {
-    pub static ref ROTOR_VEC: Vec<Rotor> = {
-        let mut v = Vec::new();
-        v.push(Rotor::new("I", "EKMFLGDQVZNTOWYHXUSPAIBRCJ", (16, 16)));
-        v.push(Rotor::new("II", "AJDKSIRUXBLHWTMCQGZNPYFVOE", (4, 4)));
-        v.push(Rotor::new("III", "BDFHJLCPRTXVZNYEIWGAKMUSQO", (21, 21)));
-        v.push(Rotor::new("IV", "ESOVPZJAYQUIRHXLNFTGKDCMWB", (9, 9)));
-        v.push(Rotor::new("V", "VZBRGITYUPSDNHLXAWMJQOFECK", (25, 25)));
-        v.push(Rotor::new("VI", "JPGVOUMFYQBENHZRDKASXLICTW", (12, 25)));
-        v.push(Rotor::new("VII", "NZJHGRCXMYSWBOUFAIVLPEKQDT", (12, 25)));
-        v.push(Rotor::new("VIII", "FKQHTLXOCBJSPDZRAMEWNIUYGV", (12, 25)));
-        v
-    };
-    pub static ref ROTOR_MAP: HashMap<&'static str, Rotor> = {
-        let mut m = HashMap::new();
-        for rtr in ROTOR_VEC.iter() {
-            m.insert(rtr.name, rtr.clone());
-        }
-        m
-    };
-    pub static ref REFLECTOR_VEC: Vec<Reflector> = {
-        let mut v = Vec::new();
-        v.push(Reflector::new("Alpha", "LEYJVCNIXWPBQMDRTAKZGFUHOS"));
-        v.push(Reflector::new("Beta", "FSOKANUERHMBTIYCWLQPZXVGJD"));
-        v.push(Reflector::new("A", "EJMZALYXVBWFCRQUONTSPIKHGD"));
-        v.push(Reflector::new("B", "YRUHQSLDPXNGOKMIEBFZCWVJAT"));
-        v.push(Reflector::new("C", "FVPJIAOYEDRZXWGCTKUQSBNMHL"));
-        v.push(Reflector::new("B-thin", "ENKQAUYWJICOPBLMDXZVFTHRGS"));
-        v.push(Reflector::new("C-thin", "RDOBJNTKVEHMLFCWZAXGYIPSUQ"));
-        v
-    };
-    pub static ref REFLECTOR_MAP: HashMap<&'static str, Reflector> = {
-        let mut m = HashMap::new();
-        for rfl in REFLECTOR_VEC.iter() {
-            m.insert(rfl.name, rfl.clone());
-        }
-        m
-    };
-}
+pub static ROTOR_VEC: LazyLock<Vec<Rotor>> = LazyLock::new(|| {
+    vec![
+        Rotor::new("I", "EKMFLGDQVZNTOWYHXUSPAIBRCJ", (16, 16)),
+        Rotor::new("II", "AJDKSIRUXBLHWTMCQGZNPYFVOE", (4, 4)),
+        Rotor::new("III", "BDFHJLCPRTXVZNYEIWGAKMUSQO", (21, 21)),
+        Rotor::new("IV", "ESOVPZJAYQUIRHXLNFTGKDCMWB", (9, 9)),
+        Rotor::new("V", "VZBRGITYUPSDNHLXAWMJQOFECK", (25, 25)),
+        Rotor::new("VI", "JPGVOUMFYQBENHZRDKASXLICTW", (12, 25)),
+        Rotor::new("VII", "NZJHGRCXMYSWBOUFAIVLPEKQDT", (12, 25)),
+        Rotor::new("VIII", "FKQHTLXOCBJSPDZRAMEWNIUYGV", (12, 25)),
+    ]
+});
+
+pub static ROTOR_MAP: LazyLock<HashMap<&'static str, Rotor>> =
+    LazyLock::new(|| HashMap::from_iter(ROTOR_VEC.iter().map(|rotor| (rotor.name, rotor.clone()))));
+
+pub static REFLECTOR_VEC: LazyLock<Vec<Reflector>> = LazyLock::new(|| {
+    vec![
+        Reflector::new("Alpha", "LEYJVCNIXWPBQMDRTAKZGFUHOS"),
+        Reflector::new("Beta", "FSOKANUERHMBTIYCWLQPZXVGJD"),
+        Reflector::new("A", "EJMZALYXVBWFCRQUONTSPIKHGD"),
+        Reflector::new("B", "YRUHQSLDPXNGOKMIEBFZCWVJAT"),
+        Reflector::new("C", "FVPJIAOYEDRZXWGCTKUQSBNMHL"),
+        Reflector::new("B-thin", "ENKQAUYWJICOPBLMDXZVFTHRGS"),
+        Reflector::new("C-thin", "RDOBJNTKVEHMLFCWZAXGYIPSUQ"),
+    ]
+});
+
+pub static REFLECTOR_MAP: LazyLock<HashMap<&'static str, Reflector>> = LazyLock::new(|| {
+    HashMap::from_iter(
+        REFLECTOR_VEC
+            .iter()
+            .map(|rotor| (rotor.name, rotor.clone())),
+    )
+});

@@ -1,7 +1,9 @@
 use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
-use lazy_static::lazy_static;
-use std::fmt::{self, Formatter};
+use std::{
+    fmt::{self, Formatter},
+    sync::LazyLock,
+};
 use utils::vecstring::VecString;
 
 #[derive(Copy, Clone, Debug)]
@@ -121,26 +123,25 @@ impl fmt::Display for Rotor {
 }
 
 //The rotor alphabets all have coprime lengths
-lazy_static! {
-    pub static ref M209_ROTORS: [Rotor; 6] = {
-        [
-            Rotor::new("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 15),
-            Rotor::new("ABCDEFGHIJKLMNOPQRSTUVXYZ", 14),
-            Rotor::new("ABCDEFGHIJKLMNOPQRSTUVX", 13),
-            Rotor::new("ABCDEFGHIJKLMNOPQRSTU", 12),
-            Rotor::new("ABCDEFGHIJKLMNOPQRS", 11),
-            Rotor::new("ABCDEFGHIJKLMNOPQ", 10),
-        ]
-    };
-    pub static ref M209_ALPHABETS: [&'static str; 6] = [
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        "ABCDEFGHIJKLMNOPQRSTUVXYZ",
-        "ABCDEFGHIJKLMNOPQRSTUVX",
-        "ABCDEFGHIJKLMNOPQRSTU",
-        "ABCDEFGHIJKLMNOPQRS",
-        "ABCDEFGHIJKLMNOPQ"
-    ];
-}
+pub static M209_ROTORS: LazyLock<[Rotor; 6]> = LazyLock::new(|| {
+    [
+        Rotor::new("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 15),
+        Rotor::new("ABCDEFGHIJKLMNOPQRSTUVXYZ", 14),
+        Rotor::new("ABCDEFGHIJKLMNOPQRSTUVX", 13),
+        Rotor::new("ABCDEFGHIJKLMNOPQRSTU", 12),
+        Rotor::new("ABCDEFGHIJKLMNOPQRS", 11),
+        Rotor::new("ABCDEFGHIJKLMNOPQ", 10),
+    ]
+});
+
+pub const M209_ALPHABETS: [&'static str; 6] = [
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    "ABCDEFGHIJKLMNOPQRSTUVXYZ",
+    "ABCDEFGHIJKLMNOPQRSTUVX",
+    "ABCDEFGHIJKLMNOPQRSTU",
+    "ABCDEFGHIJKLMNOPQRS",
+    "ABCDEFGHIJKLMNOPQ",
+];
 
 fn char_to_usize(c: char) -> usize {
     (c as u8 as usize) - 65
