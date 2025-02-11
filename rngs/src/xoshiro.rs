@@ -1,6 +1,5 @@
-use strum::{Display, EnumIter};
-
 use crate::traits::ClassicRng;
+use strum::{Display, EnumIter};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, Display)]
 pub enum Scrambler {

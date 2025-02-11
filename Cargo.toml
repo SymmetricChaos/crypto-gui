@@ -46,7 +46,6 @@ unicode-normalization = "0.1.19"
 unicode-segmentation = "1.9.0"
 bimap = "0.6.3"
 regex = "1"
-rfd = "0.11.3"
 strsim = "0.11.0"
 strum = { version = "0.26", features = ["derive"] }
 

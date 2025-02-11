@@ -1,6 +1,5 @@
-use strum::{Display, EnumIter};
-
 use crate::traits::ClassicRng;
+use strum::{Display, EnumIter};
 
 #[derive(Debug, PartialEq, Eq, EnumIter, Display, Clone, Copy)]
 pub enum PcgTransform {

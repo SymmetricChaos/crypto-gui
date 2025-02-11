@@ -54,7 +54,7 @@ impl<A: Hash + Eq + Clone> Plugboard<A> {
         Ok(())
     }
 
-    pub fn swap<'a>(&'a self, input: &A) -> Option<&A> {
+    pub fn swap(&self, input: &A) -> Option<&A> {
         self.wiring.get(input)
     }
 }

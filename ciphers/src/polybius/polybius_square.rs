@@ -1,6 +1,6 @@
 use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
-use num::{integer::Roots, Integer};
+use num::integer::Roots;
 use std::fmt::{self, Formatter};
 use utils::{math_functions::is_square, preset_alphabet::Alphabet, vecstring::VecString};
 
@@ -137,6 +137,10 @@ impl Cipher for PolybiusSquare {
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         self.check_settings()?;
 
+        if text.is_empty() {
+            return Ok(String::new());
+        }
+
         if self.spaced {
             let mut out = String::with_capacity(text.chars().count() / 3);
             for pair in text.split(' ') {
@@ -153,7 +157,7 @@ impl Cipher for PolybiusSquare {
             }
             Ok(out)
         } else {
-            if !text.chars().count().is_multiple_of(&2) {
+            if text.chars().count() % 2 != 0 {
                 return Err(CipherError::input(
                     "Input text must have a length that is a multiple of two.",
                 ));

@@ -1,6 +1,5 @@
 use json::JsonValue;
-use lazy_static::lazy_static;
-use std::fmt::Display;
+use std::{fmt::Display, sync::LazyLock};
 
 // Macro to make it easier to add new RNGs without writing it out three times.
 macro_rules! rng_ids_and_names {
@@ -87,9 +86,7 @@ impl From<RngId> for String {
 
 const JSON_RNG_INFORMATION: &'static str = include_str!("rng_descriptions.json");
 
-lazy_static! {
-    pub static ref RNG_INFORMATION: JsonValue = {
-        json::parse(&JSON_RNG_INFORMATION.replace('\u{feff}', ""))
-            .expect("unable to parse rng_descriptions")
-    };
-}
+pub static RNG_INFORMATION: LazyLock<JsonValue> = LazyLock::new(|| {
+    json::parse(&JSON_RNG_INFORMATION.replace('\u{feff}', ""))
+        .expect("unable to parse rng_descriptions.json")
+});

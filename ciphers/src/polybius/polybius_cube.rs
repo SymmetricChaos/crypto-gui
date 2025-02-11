@@ -1,6 +1,5 @@
 use crate::{errors::CipherError, traits::Cipher};
 use itertools::Itertools;
-use num::Integer;
 use utils::vecstring::VecString;
 
 pub struct PolybiusCube {
@@ -168,7 +167,11 @@ impl Cipher for PolybiusCube {
     fn decrypt(&self, text: &str) -> Result<String, CipherError> {
         self.check_labels()?;
 
-        if !text.chars().count().is_multiple_of(&3) {
+        if text.len() == 0 {
+            return Ok(String::new());
+        }
+
+        if text.chars().count() % 3 != 0 {
             return Err(CipherError::input(
                 "Input text must have a length that is a multiple of three.",
             ));

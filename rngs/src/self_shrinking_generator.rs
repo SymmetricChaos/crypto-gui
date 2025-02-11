@@ -1,9 +1,8 @@
+use crate::{lfsr::Lfsr, ClassicRng};
 use utils::bits::{
     bits_to_u32_upper,
     Bit::{self, One, Zero},
 };
-
-use crate::{lfsr::Lfsr, ClassicRng};
 
 pub struct SelfShrinkingGenerator {
     pub a: Lfsr,

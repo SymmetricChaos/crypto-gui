@@ -1,6 +1,5 @@
-use utils::bits::{bits_to_u32_upper, Bit};
-
 use crate::{lfsr::Lfsr, ClassicRng};
+use utils::bits::{bits_to_u32_upper, Bit};
 
 pub struct ShrinkingGenerator {
     pub a: Lfsr,
