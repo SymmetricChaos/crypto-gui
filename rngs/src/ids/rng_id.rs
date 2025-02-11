@@ -84,9 +84,7 @@ impl From<RngId> for String {
     }
 }
 
-const JSON_RNG_INFORMATION: &'static str = include_str!("rng_descriptions.json");
-
 pub static RNG_INFORMATION: LazyLock<JsonValue> = LazyLock::new(|| {
-    json::parse(&JSON_RNG_INFORMATION.replace('\u{feff}', ""))
+    json::parse(&include_str!("rng_descriptions.json").replace('\u{feff}', ""))
         .expect("unable to parse rng_descriptions.json")
 });

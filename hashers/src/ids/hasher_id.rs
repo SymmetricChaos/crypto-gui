@@ -100,9 +100,7 @@ impl From<HasherId> for String {
     }
 }
 
-const JSON_HASHER_INFORMATION: &'static str = include_str!("hasher_descriptions.json");
-
 pub static HASHER_INFORMATION: LazyLock<JsonValue> = LazyLock::new(|| {
-    json::parse(&JSON_HASHER_INFORMATION.replace('\u{feff}', ""))
+    json::parse(&include_str!("hasher_descriptions.json").replace('\u{feff}', ""))
         .expect("unable to parse hasher_descriptions.json")
 });

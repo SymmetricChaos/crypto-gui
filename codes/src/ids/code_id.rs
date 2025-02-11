@@ -125,9 +125,7 @@ impl From<CodeId> for String {
     }
 }
 
-const JSON_CODE_INFORMATION: &'static str = include_str!("code_descriptions.json");
-
 pub static CODE_INFORMATION: LazyLock<JsonValue> = LazyLock::new(|| {
-    json::parse(&JSON_CODE_INFORMATION.replace('\u{feff}', ""))
+    json::parse(&include_str!("code_descriptions.json").replace('\u{feff}', ""))
         .expect("unable to parse code_descriptions")
 });

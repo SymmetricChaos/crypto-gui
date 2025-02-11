@@ -38,10 +38,7 @@ impl From<HasherCategory> for String {
     }
 }
 
-const JSON_HASHER_CATEGORY_INFORMATION: &'static str =
-    include_str!("hasher_category_descriptions.json");
-
 pub static HASHER_CATEGORY_INFORMATION: LazyLock<JsonValue> = LazyLock::new(|| {
-    json::parse(&JSON_HASHER_CATEGORY_INFORMATION.replace('\u{feff}', ""))
+    json::parse(&include_str!("hasher_category_descriptions.json").replace('\u{feff}', ""))
         .expect("unable to parse hasher_category_descriptions.json")
 });

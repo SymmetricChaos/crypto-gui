@@ -50,10 +50,7 @@ impl From<CodeCategory> for String {
     }
 }
 
-const JSON_CODE_CATEGORY_INFORMATION: &'static str =
-    include_str!("code_category_descriptions.json");
-
 pub static CODE_CATEGORY_INFORMATION: LazyLock<JsonValue> = LazyLock::new(|| {
-    json::parse(&JSON_CODE_CATEGORY_INFORMATION.replace('\u{feff}', ""))
+    json::parse(&include_str!("code_category_descriptions.json").replace('\u{feff}', ""))
         .expect("unable to parse code_descriptions")
 });

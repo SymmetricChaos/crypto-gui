@@ -156,9 +156,7 @@ impl From<CipherId> for String {
     }
 }
 
-const JSON_CIPHER_INFORMATION: &'static str = include_str!("cipher_descriptions.json");
-
 pub static CIPHER_INFORMATION: LazyLock<JsonValue> = LazyLock::new(|| {
-    json::parse(&JSON_CIPHER_INFORMATION.replace('\u{feff}', ""))
+    json::parse(&include_str!("cipher_descriptions.json").replace('\u{feff}', ""))
         .expect("unable to parse cipher_descriptions.json")
 });
