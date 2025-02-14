@@ -1,5 +1,9 @@
+use std::cmp::min;
+
 use crate::traits::StatefulHasher;
 use utils::byte_formatting::fill_u32s_le;
+
+pub const BLOCK_LEN: usize = 64;
 
 pub const K: [u32; 64] = [
     0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee, 0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
@@ -74,15 +78,17 @@ impl Md5 {
 }
 
 impl StatefulHasher for Md5 {
-    fn update(&mut self, bytes: &[u8]) {
-        self.buffer.extend_from_slice(bytes);
-        let chunks = self.buffer.chunks_exact(64);
-        let rem = chunks.remainder().to_vec();
-        for chunk in chunks {
-            self.bits_taken += 512;
-            compress(&mut self.state, chunk);
+    fn update(&mut self, mut bytes: &[u8]) {
+        while !bytes.is_empty() {
+            if self.buffer.len() == BLOCK_LEN {
+                self.bits_taken += 512;
+                compress(&mut self.state, &self.buffer);
+            }
+            let want = BLOCK_LEN - self.buffer.len();
+            let take = min(want, bytes.len());
+            self.buffer = bytes[0..take].to_vec();
+            bytes = &bytes[take..]
         }
-        self.buffer = rem;
     }
 
     fn finalize(mut self) -> Vec<u8> {

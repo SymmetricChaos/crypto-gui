@@ -1,6 +1,8 @@
+use crate::traits::StatefulHasher;
+use std::cmp::min;
 use utils::byte_formatting::fill_u32s_le;
 
-use crate::traits::StatefulHasher;
+pub const BLOCK_LEN: usize = 64;
 
 pub fn f(x: u32, y: u32, z: u32) -> u32 {
     (x & y) | (!x & z)
@@ -95,15 +97,17 @@ impl Md4 {
 }
 
 impl StatefulHasher for Md4 {
-    fn update(&mut self, bytes: &[u8]) {
-        self.buffer.extend_from_slice(bytes);
-        let chunks = self.buffer.chunks_exact(64);
-        let rem = chunks.remainder().to_vec();
-        for chunk in chunks {
-            self.bits_taken += 512;
-            compress(&mut self.state, chunk);
+    fn update(&mut self, mut bytes: &[u8]) {
+        while !bytes.is_empty() {
+            if self.buffer.len() == BLOCK_LEN {
+                self.bits_taken += 512;
+                compress(&mut self.state, &self.buffer);
+            }
+            let want = BLOCK_LEN - self.buffer.len();
+            let take = min(want, bytes.len());
+            self.buffer = bytes[0..take].to_vec();
+            bytes = &bytes[take..]
         }
-        self.buffer = rem;
     }
 
     fn finalize(mut self) -> Vec<u8> {

@@ -97,7 +97,73 @@ fn first_8_words(compression_output: [u32; 16]) -> [u32; 8] {
     compression_output[0..8].try_into().unwrap()
 }
 
-pub struct Chunk {}
+// A Chunk is similar to Blake2
+// Each chunk is made of up to 1024 bytes divided into blocks of 64 butes
+// The last block may be shorter than 64 bytes but can only be empty if the whole input is empty
+// If the last block is less than 64 bytes it is padded with zeroes
+
+pub struct Chunk {
+    chaining_value: [u32; 8],
+    chunk_counter: u64,
+    flags: u32,
+    blocks_compressed: u8,
+}
+
+impl Chunk {
+    fn new(key_words: [u32; 8], chunk_counter: u64, flags: u32) -> Self {
+        Self {
+            chaining_value: key_words,
+            chunk_counter,
+            flags,
+            blocks_compressed: 0,
+        }
+    }
+
+    // Create the flag with CHUNK_START set if on the first block
+    fn start_flag(&self) -> u32 {
+        if self.blocks_compressed == 0 {
+            CHUNK_START
+        } else {
+            0
+        }
+    }
+}
+
+impl StatefulHasher for Chunk {
+    fn update(&mut self, bytes: &[u8]) {
+        // while !input.is_empty() {
+        //     // If the block buffer is full, compress it and clear it. More
+        //     // input is coming, so this compression is not CHUNK_END.
+        //     if self.block_len as usize == BLOCK_LEN {
+        //         let block_words = make_u32s_le::<16>(&self.block);
+        //         self.chaining_value = first_8_words(compress(
+        //             &self.chaining_value,
+        //             &block_words,
+        //             self.chunk_counter,
+        //             BLOCK_LEN as u32,
+        //             self.flags | self.start_flag(), // if this is the first block the start flag if set for compress
+        //         ));
+        //         self.blocks_compressed += 1;
+        //         self.block = [0; BLOCK_LEN];
+        //         self.block_len = 0;
+        //     }
+
+        //     // Copy input bytes into the block buffer.
+        //     let want = BLOCK_LEN - self.block_len as usize;
+        //     let take = min(want, input.len());
+        //     self.block[self.block_len as usize..][..take].copy_from_slice(&input[..take]);
+        //     self.block_len += take as u8;
+        //     input = &input[take..];
+        // }
+        todo!()
+    }
+
+    fn finalize(self) -> Vec<u8> {
+        todo!()
+    }
+
+    crate::stateful_hash_helpers!();
+}
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Blake3Mode {

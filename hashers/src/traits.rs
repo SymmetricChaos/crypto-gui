@@ -61,43 +61,6 @@ macro_rules! stateful_hash_helpers {
 }
 
 #[macro_export]
-macro_rules! simple_hash_tests {
-    ($($test_name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
-        #[cfg(test)]
-        mod stateful_tests {
-        use super::*;
-        $(
-            #[test]
-            fn $test_name() {
-                let a = utils::byte_formatting::hex_to_bytes($output).unwrap();
-                let b = $hasher.hash($input);
-                if a != b {
-                    panic!("hash did not match test value\nexpected:   {:02x?}\ncalculated  {:02x?}", a,b)
-                }
-            }
-        )+
-        }
-    };
-    // Optional variant with module name for separation
-    (($mod_name: ident)?; $($name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
-        #[cfg(test)]
-        mod $mod_name {
-        use super::*;
-        $(
-            #[test]
-            fn $name() {
-                let a = utils::byte_formatting::hex_to_bytes($output).unwrap();
-                let b = $hasher.hash($input);
-                if a != b {
-                    panic!("hash did not match test value\nexpected:   {:02x?}\ncalculated  {:02x?}", a,b)
-                }
-            }
-        )+
-        }
-    };
-}
-
-#[macro_export]
 macro_rules! stateful_hash_tests {
     ($($test_name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
         #[cfg(test)]
