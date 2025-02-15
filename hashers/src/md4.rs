@@ -1,8 +1,7 @@
 use crate::traits::StatefulHasher;
-use std::cmp::min;
 use utils::byte_formatting::fill_u32s_le;
 
-pub const BLOCK_LEN: usize = 64;
+const BLOCK_LEN: usize = 64;
 
 pub fn f(x: u32, y: u32, z: u32) -> u32 {
     (x & y) | (!x & z)
@@ -103,10 +102,7 @@ impl StatefulHasher for Md4 {
                 self.bits_taken += 512;
                 compress(&mut self.state, &self.buffer);
             }
-            let want = BLOCK_LEN - self.buffer.len();
-            let take = min(want, bytes.len());
-            self.buffer = bytes[0..take].to_vec();
-            bytes = &bytes[take..]
+            crate::take_bytes!(self.buffer, bytes, BLOCK_LEN);
         }
     }
 

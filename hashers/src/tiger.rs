@@ -1,7 +1,9 @@
 use super::auxiliary::tiger_arrays::{T1, T2, T3, T4};
 use crate::traits::StatefulHasher;
 use std::num::Wrapping;
-use utils::byte_formatting::fill_u64s_le;
+use utils::byte_formatting::{fill_u64s_le, make_u64s_le};
+
+const BLOCK_LEN: usize = 64;
 
 pub fn round(
     a: &mut Wrapping<u64>,
@@ -83,7 +85,7 @@ impl Tiger {
     pub fn init(variant: TigerVersion) -> Self {
         Self {
             version: variant,
-            buffer: Vec::new(),
+            buffer: Vec::with_capacity(BLOCK_LEN),
             state: [
                 Wrapping(0x0123456789ABCDEF),
                 Wrapping(0xFEDCBA9876543210),
@@ -94,6 +96,7 @@ impl Tiger {
     }
 
     pub fn init_v1() -> Self {
+        println!("init");
         Self::init(TigerVersion::One)
     }
 
@@ -103,18 +106,17 @@ impl Tiger {
 }
 
 impl StatefulHasher for Tiger {
-    fn update(&mut self, bytes: &[u8]) {
-        self.buffer.extend_from_slice(bytes);
-        let chunks = self.buffer.chunks_exact(64);
-        let rem = chunks.remainder().to_vec();
-        let mut x = [0; 8];
-        for chunk in chunks {
-            self.bits_taken += 512;
-            fill_u64s_le(&mut x, &chunk);
-            let mut x = x.map(|n| Wrapping(n));
-            compress(&mut self.state, &mut x)
+    fn update(&mut self, mut bytes: &[u8]) {
+        while !bytes.is_empty() {
+            if self.buffer.len() == BLOCK_LEN {
+                self.bits_taken += 512;
+                let x = make_u64s_le(&self.buffer);
+                let mut x = x.map(|n| Wrapping(n));
+                compress(&mut self.state, &mut x);
+                self.buffer.clear();
+            }
+            crate::take_bytes!(self.buffer, bytes, BLOCK_LEN);
         }
-        self.buffer = rem;
     }
 
     fn finalize(mut self) -> Vec<u8> {
@@ -157,7 +159,7 @@ crate::stateful_hash_tests!(
     test_v1_a, Tiger::init_v1(), b"a",
     "77befbef2e7ef8ab2ec8f93bf587a7fc613e247f5f247809";
     test_v1_long, Tiger::init_v1(), b"This input is long enough to force the compression function to be called multiple times.",
-    "9F94AF52C7DFD86AF83EA99B65B0912695AB32B8A93F2E9C";
+    "9f94af52c7dfd86af83ea99b65b0912695ab32b8a93f2e9c";
     test_v2_pangram, Tiger::init_v2(), b"The quick brown fox jumps over the lazy dog",
     "976abff8062a2e9dcea3a1ace966ed9c19cb85558b4976d8";
     test_v2_empty, Tiger::init_v2(), b"",

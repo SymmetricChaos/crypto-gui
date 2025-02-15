@@ -1,40 +1,51 @@
 pub trait SimpleHasher {
-    // Hash some sequence of bytes
+    /// Hash some sequence of bytes
     fn hash(&self, bytes: &[u8]) -> Vec<u8>;
 }
 
 pub trait StatefulHasher {
-    // Update the hasher's state with some bytes.
+    /// Update the hasher's state with some bytes.
     fn update(&mut self, bytes: &[u8]);
 
-    // Finalize the hash with any padding and processing of final blocks then output bytes. Consumes the hasher so it cannot be reused.
+    /// Finalize the hash with any padding and processing of final blocks then output bytes. Consumes the hasher so it cannot be reused.
     fn finalize(self) -> Vec<u8>;
 
-    // Update with multiple inputs in the given order.
+    /// Update with multiple inputs in the given order.
     fn update_multiple(&mut self, bytes: &[&[u8]]);
 
-    // Update and then immediately finalize. Consumes the hasher so it cannot be reused.
+    /// Update and then immediately finalize. Consumes the hasher so it cannot be reused.
     fn update_and_finalize(self, bytes: &[u8]) -> Vec<u8>;
 
-    // Update with multiple inputs in the given order and then finalize.  Consumes the hasher so it cannot be reused.
+    /// Update with multiple inputs in the given order and then finalize.  Consumes the hasher so it cannot be reused.
     fn update_multiple_and_finalize(self, bytes: &[&[u8]]) -> Vec<u8>;
 }
 
 pub trait ResettableHasher: StatefulHasher {
-    // Finalize the hash with any padding and processing of final blocks then output bytes. Resets the hasher to its starting state, allowing it to be reused.
+    /// Finalize the hash with any padding and processing of final blocks then output bytes. Resets the hasher to its starting state, allowing it to be reused.
     fn finalize_and_reset(&mut self) -> Vec<u8>;
 
-    // Update then finalize and reset.
+    /// Update, then finalize and reset.
     fn hash_and_reset(&mut self, bytes: &[u8]) -> Vec<u8> {
         self.update(bytes);
         self.finalize_and_reset()
     }
 
-    // Update with multiple inputs in the given order, then finalize and reset.
+    /// Update with multiple inputs in the given order, then finalize and reset.
     fn hash_multiple_and_reset(&mut self, bytes: &[&[u8]]) -> Vec<u8> {
         self.update_multiple(bytes);
         self.finalize_and_reset()
     }
+}
+
+// Use arithmetic to advance reading the input bytes into a buffer
+#[macro_export]
+macro_rules! take_bytes {
+    ($buffer: expr, $bytes: expr, $block_len: expr) => {
+        let want = $block_len - $buffer.len();
+        let take = std::cmp::min(want, $bytes.len());
+        $buffer.extend(&$bytes[..take]);
+        $bytes = &$bytes[take..]
+    };
 }
 
 #[macro_export]
@@ -47,14 +58,14 @@ macro_rules! stateful_hash_helpers {
         }
 
         fn update_and_finalize(mut self, bytes: &[u8]) -> Vec<u8> {
+            println!("invoke update");
             self.update(bytes);
+            println!("invoke finalize");
             self.finalize()
         }
 
         fn update_multiple_and_finalize(mut self, bytes: &[&[u8]]) -> Vec<u8> {
-            for b in bytes {
-                self.update(b)
-            }
+            self.update_multiple(bytes);
             self.finalize()
         }
     };
@@ -69,8 +80,11 @@ macro_rules! stateful_hash_tests {
         $(
             #[test]
             fn $test_name() {
+                println!("start_test");
                 let a = utils::byte_formatting::hex_to_bytes($output).unwrap();
+                println!("hex_to_bytes");
                 let b = $hasher.update_and_finalize($input);
+                println!("update_and_finalize");
                 if a != b {
                     panic!("hash did not match test value\nexpected:   {:02x?}\ncalculated  {:02x?}", a,b)
                 }
@@ -79,13 +93,13 @@ macro_rules! stateful_hash_tests {
         }
     };
     // Optional variant with module name for separation
-    (($mod_name: ident)?; $($name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
+    (($mod_name: ident)?; $($test_name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
         #[cfg(test)]
         mod $mod_name {
         use super::*;
         $(
             #[test]
-            fn $name() {
+            fn $test_name() {
                 let a = utils::byte_formatting::hex_to_bytes($output).unwrap();
                 let b = $hasher.update_and_finalize($input);
                 if a != b {
@@ -101,7 +115,7 @@ macro_rules! stateful_hash_tests {
 macro_rules! incremental_hash_tests {
     ($($test_name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
         #[cfg(test)]
-        mod stateful_incremental_tests {
+        mod incremental_tests {
         use super::*;
         $(
             #[test]

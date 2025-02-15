@@ -2,6 +2,8 @@ use crate::traits::StatefulHasher;
 use itertools::Itertools;
 use utils::byte_formatting::fill_u64s_be;
 
+const BLOCK_LEN: usize = 128;
+
 // Constants for compression function, beginning digits of pi
 const C: [u64; 16] = [
     0x243f6a8885a308d3,
@@ -105,17 +107,16 @@ impl Blake384 {
 }
 
 impl StatefulHasher for Blake384 {
-    fn update(&mut self, bytes: &[u8]) {
-        self.buffer.extend_from_slice(bytes);
-
-        let chunks = self.buffer.chunks_exact(128);
-        let last = chunks.remainder().to_vec();
-        for chunk in chunks {
-            self.bits_taken += 1024;
-            let c = create_chunk(chunk);
-            compress(&mut self.state, &c, self.bits_taken, &self.salt);
+    fn update(&mut self, mut bytes: &[u8]) {
+        while !bytes.is_empty() {
+            if self.buffer.len() == BLOCK_LEN {
+                let c = create_chunk(&self.buffer);
+                self.bits_taken += 1024;
+                compress(&mut self.state, &c, self.bits_taken, &self.salt);
+                self.buffer.clear();
+            }
+            crate::take_bytes!(self.buffer, bytes, BLOCK_LEN);
         }
-        self.buffer = last;
     }
 
     fn finalize(mut self) -> Vec<u8> {
@@ -190,17 +191,16 @@ impl Blake512 {
 }
 
 impl StatefulHasher for Blake512 {
-    fn update(&mut self, bytes: &[u8]) {
-        self.buffer.extend_from_slice(bytes);
-
-        let chunks = self.buffer.chunks_exact(128);
-        let last = chunks.remainder().to_vec();
-        for chunk in chunks {
-            self.bits_taken += 1024;
-            let c = create_chunk(chunk);
-            compress(&mut self.state, &c, self.bits_taken, &self.salt);
+    fn update(&mut self, mut bytes: &[u8]) {
+        while !bytes.is_empty() {
+            if self.buffer.len() == BLOCK_LEN {
+                let c = create_chunk(&self.buffer);
+                self.bits_taken += 1024;
+                compress(&mut self.state, &c, self.bits_taken, &self.salt);
+                self.buffer.clear();
+            }
+            crate::take_bytes!(self.buffer, bytes, BLOCK_LEN);
         }
-        self.buffer = last;
     }
 
     fn finalize(mut self) -> Vec<u8> {
@@ -217,7 +217,7 @@ impl StatefulHasher for Blake512 {
             }
             self.buffer.push(0x01);
         }
-        
+
         // Then push the total input length onto the buffer at the last 128 bits
         self.buffer.extend(total_bits.to_be_bytes());
 

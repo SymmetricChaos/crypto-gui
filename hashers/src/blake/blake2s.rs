@@ -1,8 +1,9 @@
+use crate::traits::StatefulHasher;
 use itertools::Itertools;
 
-use crate::traits::StatefulHasher;
-
 // https://eprint.iacr.org/2012/351.pdf
+
+const BLOCK_LEN: usize = 64;
 
 // https://datatracker.ietf.org/doc/html/rfc7693.html#appendix-A
 pub fn compress(state: &mut [u32; 8], chunk: &[u32; 16], bytes_taken: u64, last_chunk: bool) {
@@ -59,7 +60,7 @@ impl Blake2s {
             state: IV,
             hash_len,
             bytes_taken: 0,
-            buffer: Vec::new(),
+            buffer: Vec::with_capacity(BLOCK_LEN),
         };
 
         // The key length and hash length are mixed into the state
@@ -125,35 +126,31 @@ impl Blake2s {
     }
 
     pub fn hash_128(bytes: &[u8]) -> Vec<u8> {
-        let mut h = Self::init_hash_128();
-        h.update(bytes);
-        h.finalize()
+        Self::init_hash_128().update_and_finalize(bytes)
     }
 
     pub fn hash_256(bytes: &[u8]) -> Vec<u8> {
-        let mut h = Self::init_hash_256();
-        h.update(bytes);
-        h.finalize()
+        Self::init_hash_256().update_and_finalize(bytes)
     }
 }
 
 impl StatefulHasher for Blake2s {
-    fn update(&mut self, bytes: &[u8]) {
-        self.buffer.extend_from_slice(bytes);
-
-        let chunks = self.buffer.chunks_exact(64);
-        let last = chunks.remainder().to_vec();
-        for chunk in chunks {
-            let c = create_chunk(chunk);
-            self.bytes_taken += 64;
-            compress(&mut self.state, &c, self.bytes_taken, false);
+    fn update(&mut self, mut bytes: &[u8]) {
+        while !bytes.is_empty() {
+            if self.buffer.len() == BLOCK_LEN {
+                let c = create_chunk(&self.buffer);
+                self.bytes_taken += 64;
+                compress(&mut self.state, &c, self.bytes_taken, false);
+                self.buffer.clear();
+            }
+            crate::take_bytes!(self.buffer, bytes, BLOCK_LEN);
         }
-        self.buffer = last;
     }
 
     fn finalize(mut self) -> Vec<u8> {
         self.bytes_taken += self.buffer.len() as u64;
-        while self.buffer.len() < 64 {
+        println!("{}", self.bytes_taken);
+        while self.buffer.len() < BLOCK_LEN {
             self.buffer.push(0);
         }
         compress(
@@ -173,13 +170,18 @@ impl StatefulHasher for Blake2s {
     crate::stateful_hash_helpers!();
 }
 
-#[cfg(test)]
-mod blake2s_tests {
-    use super::*;
+crate::stateful_hash_tests!(
+    empty, Blake2s::init_hash_256(), &[], "69217a3079908094e11121d042354a7c1f55b6482ca1a51e1b250dfd1ed0eef9";
+    digits, Blake2s::init_hash_256(), &[0, 1, 2, 3, 4, 5, 6, 7], "c7e887b546623635e93e0495598f1726821996c2377705b93a1f636f872bfa2d";
+    with_key, Blake2s::init([0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f], 32),&[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], "19ba234f0a4f38637d1839f9d9f76ad91c8522307143c97d5f93f69274cec9a7";
+);
 
-    crate::stateful_hash_tests!(
-        empty, Blake2s::init_hash_256(), &[], "69217a3079908094e11121d042354a7c1f55b6482ca1a51e1b250dfd1ed0eef9";
-        digits, Blake2s::init_hash_256(), &[0, 1, 2, 3, 4, 5, 6, 7], "c7e887b546623635e93e0495598f1726821996c2377705b93a1f636f872bfa2d";
-        with_key, Blake2s::init([0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f], 32),&[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], "19ba234f0a4f38637d1839f9d9f76ad91c8522307143c97d5f93f69274cec9a7";
-    );
-}
+crate::incremental_hash_tests!(
+
+    digits, Blake2s::init_hash_256(),
+    &[
+        &[0, 1, 2, 3],
+        &[4, 5, 6, 7],
+    ],
+    "c7e887b546623635e93e0495598f1726821996c2377705b93a1f636f872bfa2d";
+);

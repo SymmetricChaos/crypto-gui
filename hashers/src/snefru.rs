@@ -1,8 +1,13 @@
+use crate::{auxiliary::snefru_arrays::SBOXES, traits::StatefulHasher};
 use utils::byte_formatting::{fill_u32s_be, u32s_to_bytes_be};
 
-use crate::{auxiliary::snefru_arrays::SBOXES, traits::StatefulHasher};
-
 // https://link.springer.com/article/10.1007/BF00203968
+
+const INPUT_BLOCK_SIZE: usize = 16;
+const MASK: usize = INPUT_BLOCK_SIZE - 1;
+const ROTATE: [u32; 4] = [16, 8, 16, 24];
+const MIN_SECURITY: u32 = 2;
+const MAX_SECURITY: u32 = 16;
 
 // Output length in bits
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -31,12 +36,6 @@ impl SnefruOutputSize {
         self.chunk_size() * 4
     }
 }
-
-const INPUT_BLOCK_SIZE: usize = 16;
-const MASK: usize = INPUT_BLOCK_SIZE - 1;
-const ROTATE: [u32; 4] = [16, 8, 16, 24];
-const MIN_SECURITY: u32 = 2;
-const MAX_SECURITY: u32 = 16;
 
 // The compression function is based on a block cipher created for purpose
 pub fn compress(state: &mut [u32], security_level: u32, output_size: usize) {
@@ -80,7 +79,7 @@ impl Default for Snefru {
     fn default() -> Self {
         Self {
             state: [0; 16],
-            buffer: Vec::new(),
+            buffer: Vec::with_capacity(48),
             bits_taken: 0,
             security_level: 8,
             variant: SnefruOutputSize::W128,
@@ -92,7 +91,7 @@ impl Snefru {
     pub fn init(security_level: u32, variant: SnefruOutputSize) -> Self {
         Self {
             state: [0; 16],
-            buffer: Vec::new(),
+            buffer: Vec::with_capacity(variant.chunk_size_bytes()),
             bits_taken: 0,
             security_level,
             variant,
@@ -101,23 +100,26 @@ impl Snefru {
 }
 
 impl StatefulHasher for Snefru {
-    fn update(&mut self, bytes: &[u8]) {
+    fn update(&mut self, mut bytes: &[u8]) {
         if self.security_level > MAX_SECURITY || self.security_level < MIN_SECURITY {
             panic!("invalid security level")
         }
-        self.buffer.extend_from_slice(bytes);
-        let chunks = self.buffer.chunks_exact(self.variant.chunk_size_bytes());
-        let rem = chunks.remainder().to_vec();
-        for chunk in chunks {
-            self.bits_taken += (self.variant.chunk_size_bytes() * 8) as u64;
-            fill_u32s_be(&mut self.state[self.variant.output_block_size()..], chunk);
-            compress(
-                &mut self.state,
-                self.security_level,
-                self.variant.output_block_size(),
-            );
+        while !bytes.is_empty() {
+            if self.buffer.len() == self.variant.chunk_size_bytes() {
+                self.bits_taken += (self.variant.chunk_size_bytes() * 8) as u64;
+                fill_u32s_be(
+                    &mut self.state[self.variant.output_block_size()..],
+                    &self.buffer,
+                );
+                compress(
+                    &mut self.state,
+                    self.security_level,
+                    self.variant.output_block_size(),
+                );
+                self.buffer.clear();
+            }
+            crate::take_bytes!(self.buffer, bytes, self.variant.chunk_size_bytes());
         }
-        self.buffer = rem;
     }
 
     fn finalize(mut self) -> Vec<u8> {

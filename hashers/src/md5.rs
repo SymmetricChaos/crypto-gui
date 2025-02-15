@@ -1,9 +1,7 @@
-use std::cmp::min;
-
 use crate::traits::StatefulHasher;
 use utils::byte_formatting::fill_u32s_le;
 
-pub const BLOCK_LEN: usize = 64;
+const BLOCK_LEN: usize = 64;
 
 pub const K: [u32; 64] = [
     0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee, 0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
@@ -84,10 +82,7 @@ impl StatefulHasher for Md5 {
                 self.bits_taken += 512;
                 compress(&mut self.state, &self.buffer);
             }
-            let want = BLOCK_LEN - self.buffer.len();
-            let take = min(want, bytes.len());
-            self.buffer = bytes[0..take].to_vec();
-            bytes = &bytes[take..]
+            crate::take_bytes!(self.buffer, bytes, BLOCK_LEN);
         }
     }
 
