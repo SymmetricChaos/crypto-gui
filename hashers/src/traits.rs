@@ -37,18 +37,8 @@ pub trait ResettableHasher: StatefulHasher {
     }
 }
 
-// Use arithmetic to advance reading the input bytes into a buffer
-#[macro_export]
-macro_rules! take_bytes {
-    ($buffer: expr, $bytes: expr, $block_len: expr) => {
-        let want = $block_len - $buffer.len();
-        let take = std::cmp::min(want, $bytes.len());
-        $buffer.extend(&$bytes[..take]);
-        $bytes = &$bytes[take..]
-    };
-}
-
-// Given a buffer, input bytes, a block length, and how to compress
+// Given a buffer, input bytes, a block length, and how to compress performs the most common routine
+// Use arithmetic to advance reading the input bytes into a buffer (avoids having to allocate all of the input at once)
 #[macro_export]
 macro_rules! compression_routine {
     ($buffer: expr, $bytes: expr, $block_len: expr, $compress: tt) => {
@@ -97,7 +87,6 @@ macro_rules! stateful_hash_tests {
             fn $test_name() {
                 let a = utils::byte_formatting::hex_to_bytes($output).unwrap();
                 let b = $hasher.update_and_finalize($input);
-                println!("update_and_finalize");
                 if a != b {
                     panic!("hash did not match test value\nexpected:   {:02x?}\ncalculated  {:02x?}", a,b)
                 }

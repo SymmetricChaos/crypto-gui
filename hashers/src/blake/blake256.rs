@@ -77,15 +77,11 @@ impl Blake224 {
 
 impl StatefulHasher for Blake224 {
     fn update(&mut self, mut bytes: &[u8]) {
-        while !bytes.is_empty() {
-            if self.buffer.len() == BLOCK_LEN {
-                let c = create_chunk(&self.buffer);
-                self.bits_taken += 512;
-                compress(&mut self.state, &c, self.bits_taken, &self.salt);
-                self.buffer.clear();
-            }
-            crate::take_bytes!(self.buffer, bytes, BLOCK_LEN);
-        }
+        crate::compression_routine!(self.buffer, bytes, BLOCK_LEN, {
+            let c = create_chunk(&self.buffer);
+            self.bits_taken += 512;
+            compress(&mut self.state, &c, self.bits_taken, &self.salt);
+        });
     }
 
     fn finalize(mut self) -> Vec<u8> {
@@ -160,15 +156,11 @@ impl Blake256 {
 
 impl StatefulHasher for Blake256 {
     fn update(&mut self, mut bytes: &[u8]) {
-        while !bytes.is_empty() {
-            if self.buffer.len() == BLOCK_LEN {
-                let c = create_chunk(&self.buffer);
-                self.bits_taken += 512;
-                compress(&mut self.state, &c, self.bits_taken, &self.salt);
-                self.buffer.clear();
-            }
-            crate::take_bytes!(self.buffer, bytes, BLOCK_LEN);
-        }
+        crate::compression_routine!(self.buffer, bytes, BLOCK_LEN, {
+            let c = create_chunk(&self.buffer);
+            self.bits_taken += 512;
+            compress(&mut self.state, &c, self.bits_taken, &self.salt);
+        });
     }
 
     fn finalize(mut self) -> Vec<u8> {

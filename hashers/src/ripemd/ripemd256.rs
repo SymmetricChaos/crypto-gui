@@ -1,6 +1,8 @@
 use super::ripemd128::RipeMd128;
 use crate::traits::StatefulHasher;
 
+const BLOCK_LEN: usize = 64;
+
 #[derive(Clone)]
 pub struct RipeMd256 {
     state_l: [u32; 4],
@@ -51,17 +53,13 @@ impl RipeMd256 {
 }
 
 impl StatefulHasher for RipeMd256 {
-    fn update(&mut self, bytes: &[u8]) {
-        self.buffer.extend_from_slice(bytes);
-        let chunks = self.buffer.chunks_exact(64);
-        let rem = chunks.remainder().to_vec();
+    fn update(&mut self, mut bytes: &[u8]) {
         let mut block = [0u32; 16];
-        for chunk in chunks {
+        crate::compression_routine!(self.buffer, bytes, BLOCK_LEN, {
             self.bits_taken += 512;
-            utils::byte_formatting::fill_u32s_le(&mut block, &chunk);
+            utils::byte_formatting::fill_u32s_le(&mut block, &self.buffer);
             Self::compress(&mut self.state_l, &mut self.state_r, block)
-        }
-        self.buffer = rem;
+        });
     }
 
     fn finalize(mut self) -> Vec<u8> {

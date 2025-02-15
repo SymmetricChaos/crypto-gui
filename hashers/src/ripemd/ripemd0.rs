@@ -1,5 +1,7 @@
 use crate::traits::StatefulHasher;
 
+const BLOCK_LEN: usize = 64;
+
 // Similiar but not identical to the strengthened versions
 pub const PERM: [usize; 48] = [
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 7, 4, 13, 1, 10, 6, 15, 3, 12, 0, 9, 5,
@@ -45,7 +47,7 @@ impl RipeMd0 {
     pub fn init() -> Self {
         Self {
             state: [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476],
-            buffer: Vec::new(),
+            buffer: Vec::with_capacity(BLOCK_LEN),
             bits_taken: 0,
         }
     }
@@ -76,17 +78,13 @@ impl RipeMd0 {
 }
 
 impl StatefulHasher for RipeMd0 {
-    fn update(&mut self, bytes: &[u8]) {
-        self.buffer.extend_from_slice(bytes);
-        let chunks = self.buffer.chunks_exact(64);
-        let rem = chunks.remainder().to_vec();
+    fn update(&mut self, mut bytes: &[u8]) {
         let mut block = [0u32; 16];
-        for chunk in chunks {
+        crate::compression_routine!(self.buffer, bytes, BLOCK_LEN, {
             self.bits_taken += 512;
-            utils::byte_formatting::fill_u32s_le(&mut block, &chunk);
+            utils::byte_formatting::fill_u32s_le(&mut block, &self.buffer);
             Self::compress(&mut self.state, block)
-        }
-        self.buffer = rem;
+        });
     }
 
     fn finalize(mut self) -> Vec<u8> {
@@ -115,30 +113,6 @@ impl StatefulHasher for RipeMd0 {
 
     crate::stateful_hash_helpers!();
 }
-
-// impl ClassicHasher for RipeMd0 {
-//     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-//         let mut input = bytes.to_vec();
-
-//         md_strengthening_64_le(&mut input, 64);
-
-//         let mut state: [u32; 4] = [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476];
-
-//         for chunk in input.chunks_exact(64) {
-//             let mut block = [0u32; 16];
-//             utils::byte_formatting::fill_u32s_le(&mut block, &chunk);
-//             Self::compress(&mut state, block)
-//         }
-
-//         let mut out = Vec::with_capacity(16);
-//         for word in state {
-//             out.extend(word.to_le_bytes())
-//         }
-//         out
-//     }
-
-//     crate::hash_bytes_from_string! {}
-// }
 
 crate::stateful_hash_tests!(
     test_0_1, RipeMd0::init(), b"",

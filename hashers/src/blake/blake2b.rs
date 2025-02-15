@@ -143,15 +143,11 @@ impl Blake2b {
 
 impl StatefulHasher for Blake2b {
     fn update(&mut self, mut bytes: &[u8]) {
-        while !bytes.is_empty() {
-            if self.buffer.len() == BLOCK_LEN {
-                let c = create_chunk(&self.buffer);
-                self.bytes_taken += 128;
-                compress(&mut self.state, &c, self.bytes_taken, false);
-                self.buffer.clear();
-            }
-            crate::take_bytes!(self.buffer, bytes, BLOCK_LEN);
-        }
+        crate::compression_routine!(self.buffer, bytes, BLOCK_LEN, {
+            let c = create_chunk(&self.buffer);
+            self.bytes_taken += 128;
+            compress(&mut self.state, &c, self.bytes_taken, false);
+        });
     }
 
     fn finalize(mut self) -> Vec<u8> {

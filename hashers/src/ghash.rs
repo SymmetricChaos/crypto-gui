@@ -1,6 +1,7 @@
 use crate::traits::StatefulHasher;
 
 const R: u128 = 0xE1000000000000000000000000000000;
+const BLOCK_LEN: usize = 16;
 
 // Multiplication in the Galois field used for GHASH. Addition in the same is XOR.
 // This implementation is not optimized at all because this project seeks clarity not real world use.
@@ -50,7 +51,7 @@ impl Default for Ghash {
             ad_len: 0,
             accumulator: 0,
             bits_taken: 0,
-            buffer: Vec::new(),
+            buffer: Vec::with_capacity(BLOCK_LEN),
         }
     }
 }
@@ -69,21 +70,17 @@ impl Ghash {
             ad_len,
             accumulator,
             bits_taken: 0,
-            buffer: Vec::new(),
+            buffer: Vec::with_capacity(BLOCK_LEN),
         }
     }
 }
 
 impl StatefulHasher for Ghash {
-    fn update(&mut self, bytes: &[u8]) {
-        self.buffer.extend_from_slice(bytes);
-        let chunks = self.buffer.chunks_exact(16);
-        let rem = chunks.remainder().to_vec();
-        for chunk in chunks {
+    fn update(&mut self, mut bytes: &[u8]) {
+        crate::compression_routine!(self.buffer, bytes, BLOCK_LEN, {
             self.bits_taken += 128;
-            add_mul(&mut self.accumulator, chunk, self.h);
-        }
-        self.buffer = rem;
+            add_mul(&mut self.accumulator, &self.buffer, self.h);
+        });
     }
 
     fn finalize(mut self) -> Vec<u8> {
