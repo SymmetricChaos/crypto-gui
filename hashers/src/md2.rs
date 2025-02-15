@@ -1,6 +1,8 @@
 use crate::traits::StatefulHasher;
 use utils::padding::pkcs5_padding;
 
+const BLOCK_LEN: usize = 16;
+
 const MD2_S_TABLE: [u8; 256] = [
     0x29, 0x2E, 0x43, 0xC9, 0xA2, 0xD8, 0x7C, 0x01, 0x3D, 0x36, 0x54, 0xA1, 0xEC, 0xF0, 0x06, 0x13,
     0x62, 0xA7, 0x05, 0xF3, 0xC0, 0xC7, 0x73, 0x8C, 0x98, 0x93, 0x2B, 0xD9, 0xBC, 0x4C, 0x82, 0xCA,
@@ -44,22 +46,18 @@ impl Md2 {
 }
 
 impl StatefulHasher for Md2 {
-    fn update(&mut self, bytes: &[u8]) {
-        self.buffer.extend_from_slice(bytes);
-
-        let chunks = self.buffer.chunks_exact(16);
-        let rem = chunks.remainder().to_vec();
-        for chunk in chunks {
+    fn update(&mut self, mut bytes: &[u8]) {
+        crate::compression_routine!(self.buffer, bytes, BLOCK_LEN, {
             // This checksum probably serves to either ensure that the
             // hashing routine makes two passes on short input or as a
             // guard against length extension attacks.
-            for byte in chunk.iter() {
+            for byte in self.buffer.iter() {
                 self.checksum[self.cs_cursor] ^= MD2_S_TABLE[(byte ^ self.l) as usize];
                 self.l = self.checksum[self.cs_cursor];
                 self.cs_cursor = (self.cs_cursor + 1) % 16;
             }
 
-            for byte in chunk.into_iter() {
+            for byte in self.buffer.iter() {
                 self.state[16 + self.state_cursor] = *byte;
                 self.state[32 + self.state_cursor] = byte ^ self.state[self.state_cursor];
 
@@ -75,8 +73,7 @@ impl StatefulHasher for Md2 {
                     }
                 }
             }
-        }
-        self.buffer = rem;
+        });
     }
 
     fn finalize(mut self) -> Vec<u8> {

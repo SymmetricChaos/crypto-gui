@@ -3,6 +3,8 @@ use utils::{byte_formatting::make_u32s_le, padding::bit_padding};
 
 // https://www.cs.rit.edu/~ark/20090927/Round2Candidates/Shabal.pdf
 
+const BLOCK_LEN: usize = 64;
+
 // 192
 const IV192A: [u32; 12] = [
     0xFD749ED4, 0xB798E530, 0x33904B6F, 0x46BDA85E, 0x076934B4, 0x454B4058, 0x77F74527, 0xFB4CF465,
@@ -122,7 +124,7 @@ macro_rules! shabal {
                     b: $b,
                     c: $c,
                     ctr: 0,
-                    buffer: Vec::new()
+                    buffer: Vec::with_capacity(BLOCK_LEN)
                 }
             }
         }

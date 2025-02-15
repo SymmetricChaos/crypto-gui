@@ -3,6 +3,8 @@ use crate::traits::StatefulHasher;
 use itertools::Itertools;
 use utils::byte_formatting::fill_u32s_be;
 
+const BLOCK_LEN: usize = 64;
+
 fn tj(i: usize) -> u32 {
     if i < 16 {
         0x79cc4519
@@ -97,22 +99,18 @@ impl Sm3 {
                 0x7380166f, 0x4914b2b9, 0x172442d7, 0xda8a0600, 0xa96f30bc, 0x163138aa, 0xe38dee4d,
                 0xb0fb0e4e,
             ],
-            buffer: Vec::new(),
+            buffer: Vec::with_capacity(BLOCK_LEN),
             bits_taken: 0,
         }
     }
 }
 
 impl StatefulHasher for Sm3 {
-    fn update(&mut self, bytes: &[u8]) {
-        self.buffer.extend_from_slice(bytes);
-        let chunks = self.buffer.chunks_exact(64);
-        let rem = chunks.remainder().to_vec();
-        for chunk in chunks {
+    fn update(&mut self, mut bytes: &[u8]) {
+        crate::compression_routine!(self.buffer, bytes, BLOCK_LEN, {
             self.bits_taken += 512;
-            cf(&mut self.state, me(chunk));
-        }
-        self.buffer = rem;
+            cf(&mut self.state, me(&self.buffer));
+        });
     }
 
     fn finalize(mut self) -> Vec<u8> {

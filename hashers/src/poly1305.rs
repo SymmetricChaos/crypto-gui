@@ -1,6 +1,8 @@
 use crate::{stateful_hash_tests, traits::StatefulHasher};
 use num::{BigUint, Zero};
 
+const BLOCK_LEN: usize = 16;
+
 #[derive(Debug, Clone)]
 pub struct Poly1305 {
     key_r: BigUint, // point at which the polynomial is evaluated
@@ -33,7 +35,7 @@ impl Poly1305 {
             key_s: BigUint::from_bytes_le(&key_s),
             modulus,
             accumulator: BigUint::zero(),
-            buffer: Vec::new(),
+            buffer: Vec::with_capacity(BLOCK_LEN),
         }
     }
 }
@@ -41,7 +43,7 @@ impl Poly1305 {
 impl StatefulHasher for Poly1305 {
     fn update(&mut self, bytes: &[u8]) {
         self.buffer.extend_from_slice(bytes);
-        let chunks = self.buffer.chunks_exact(16);
+        let chunks = self.buffer.chunks_exact(BLOCK_LEN);
         let rem = chunks.remainder().to_vec();
 
         for chunk in chunks {

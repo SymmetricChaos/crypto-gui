@@ -1,6 +1,8 @@
 use crate::traits::StatefulHasher;
 use utils::byte_formatting::make_u64s_le;
 
+const BLOCK_LEN: usize = 4;
+
 fn final_mix(mut x: u32) -> u32 {
     x ^= x >> 16;
     x = x.wrapping_mul(0x85ebca6b);
@@ -56,7 +58,7 @@ impl Murmur3_32 {
     pub fn init(seed: &[u8]) -> Self {
         Self {
             state: u32::from_le_bytes(seed.try_into().expect("seed must be exactly four bytes")),
-            buffer: Vec::new(),
+            buffer: Vec::with_capacity(BLOCK_LEN),
             bytes_taken: 0,
         }
     }
@@ -65,7 +67,7 @@ impl Murmur3_32 {
     pub fn init_zero() -> Self {
         Self {
             state: 0,
-            buffer: Vec::new(),
+            buffer: Vec::with_capacity(BLOCK_LEN),
             bytes_taken: 0,
         }
     }
@@ -74,7 +76,7 @@ impl Murmur3_32 {
 impl StatefulHasher for Murmur3_32 {
     fn update(&mut self, bytes: &[u8]) {
         self.buffer.extend_from_slice(bytes);
-        let chunks = self.buffer.chunks_exact(4);
+        let chunks = self.buffer.chunks_exact(BLOCK_LEN);
         let rem = chunks.remainder().to_vec();
         // For each full chunk mix it into the state and then mix the state
         for chunk in chunks {

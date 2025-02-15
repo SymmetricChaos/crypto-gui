@@ -2,6 +2,8 @@ use crate::traits::StatefulHasher;
 
 // https://eprint.iacr.org/2012/351.pdf
 
+const BLOCK_LEN: usize = 8;
+
 pub fn sip_round(mut v: [u64; 4]) -> [u64; 4] {
     v[0] = v[0].wrapping_add(v[1]);
     v[2] = v[2].wrapping_add(v[3]);
@@ -42,7 +44,7 @@ impl SipHash {
             compression_rounds,
             finalization_rounds,
             state,
-            buffer: Vec::new(),
+            buffer: Vec::with_capacity(BLOCK_LEN),
             final_byte: 0,
         }
     }
@@ -57,20 +59,16 @@ impl SipHash {
 }
 
 impl StatefulHasher for SipHash {
-    fn update(&mut self, bytes: &[u8]) {
-        self.buffer.extend_from_slice(bytes);
-        let chunks = self.buffer.chunks_exact(8);
-        let rem = chunks.remainder().to_vec();
-        for chunk in chunks {
-            let mi: u64 = u64::from_le_bytes(chunk.try_into().unwrap());
+    fn update(&mut self, mut bytes: &[u8]) {
+        crate::compression_routine!(self.buffer, bytes, BLOCK_LEN, {
+            let mi: u64 = u64::from_le_bytes(self.buffer.clone().try_into().unwrap());
             self.state[3] ^= mi;
             for _ in 0..self.compression_rounds {
                 self.state = sip_round(self.state);
             }
             self.state[0] ^= mi;
             self.final_byte = self.final_byte.wrapping_add(8);
-        }
-        self.buffer = rem;
+        });
     }
 
     fn finalize(mut self) -> Vec<u8> {

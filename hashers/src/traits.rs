@@ -48,6 +48,23 @@ macro_rules! take_bytes {
     };
 }
 
+// Given a buffer, input bytes, a block length, and how to compress
+#[macro_export]
+macro_rules! compression_routine {
+    ($buffer: expr, $bytes: expr, $block_len: expr, $compress: tt) => {
+        while !$bytes.is_empty() {
+            if $buffer.len() == $block_len {
+                $compress
+                $buffer.clear();
+            }
+            let want = $block_len - $buffer.len();
+            let take = std::cmp::min(want, $bytes.len());
+            $buffer.extend(&$bytes[..take]);
+            $bytes = &$bytes[take..]
+        }
+    };
+}
+
 #[macro_export]
 macro_rules! stateful_hash_helpers {
     () => {
@@ -58,9 +75,7 @@ macro_rules! stateful_hash_helpers {
         }
 
         fn update_and_finalize(mut self, bytes: &[u8]) -> Vec<u8> {
-            println!("invoke update");
             self.update(bytes);
-            println!("invoke finalize");
             self.finalize()
         }
 
@@ -80,9 +95,7 @@ macro_rules! stateful_hash_tests {
         $(
             #[test]
             fn $test_name() {
-                println!("start_test");
                 let a = utils::byte_formatting::hex_to_bytes($output).unwrap();
-                println!("hex_to_bytes");
                 let b = $hasher.update_and_finalize($input);
                 println!("update_and_finalize");
                 if a != b {

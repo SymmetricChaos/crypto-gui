@@ -104,22 +104,18 @@ impl StatefulHasher for Snefru {
         if self.security_level > MAX_SECURITY || self.security_level < MIN_SECURITY {
             panic!("invalid security level")
         }
-        while !bytes.is_empty() {
-            if self.buffer.len() == self.variant.chunk_size_bytes() {
-                self.bits_taken += (self.variant.chunk_size_bytes() * 8) as u64;
-                fill_u32s_be(
-                    &mut self.state[self.variant.output_block_size()..],
-                    &self.buffer,
-                );
-                compress(
-                    &mut self.state,
-                    self.security_level,
-                    self.variant.output_block_size(),
-                );
-                self.buffer.clear();
-            }
-            crate::take_bytes!(self.buffer, bytes, self.variant.chunk_size_bytes());
-        }
+        crate::compression_routine!(self.buffer, bytes, self.variant.chunk_size_bytes(), {
+            self.bits_taken += (self.variant.chunk_size_bytes() * 8) as u64;
+            fill_u32s_be(
+                &mut self.state[self.variant.output_block_size()..],
+                &self.buffer,
+            );
+            compress(
+                &mut self.state,
+                self.security_level,
+                self.variant.output_block_size(),
+            );
+        });
     }
 
     fn finalize(mut self) -> Vec<u8> {

@@ -107,16 +107,12 @@ impl Tiger {
 
 impl StatefulHasher for Tiger {
     fn update(&mut self, mut bytes: &[u8]) {
-        while !bytes.is_empty() {
-            if self.buffer.len() == BLOCK_LEN {
-                self.bits_taken += 512;
-                let x = make_u64s_le(&self.buffer);
-                let mut x = x.map(|n| Wrapping(n));
-                compress(&mut self.state, &mut x);
-                self.buffer.clear();
-            }
-            crate::take_bytes!(self.buffer, bytes, BLOCK_LEN);
-        }
+        crate::compression_routine!(self.buffer, bytes, BLOCK_LEN, {
+            self.bits_taken += 512;
+            let x = make_u64s_le(&self.buffer);
+            let mut x = x.map(|n| Wrapping(n));
+            compress(&mut self.state, &mut x);
+        });
     }
 
     fn finalize(mut self) -> Vec<u8> {
