@@ -1,6 +1,8 @@
 use crate::traits::{ResettableHasher, StatefulHasher};
 use utils::byte_formatting::fill_u32s_be;
 
+const BLOCK_LEN: usize = 64;
+
 fn compress(state: &mut [u32; 5], chunk: &[u8]) {
     let mut v = state.clone();
     // Extract 16 words from the block and make them the first 16 values of the array
@@ -63,7 +65,7 @@ impl Default for Sha0 {
     fn default() -> Self {
         Self {
             state: [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0],
-            buffer: Vec::new(),
+            buffer: Vec::with_capacity(BLOCK_LEN),
             bits_taken: 0,
         }
     }
@@ -76,28 +78,24 @@ impl Sha0 {
 }
 
 impl StatefulHasher for Sha0 {
-    fn update(&mut self, bytes: &[u8]) {
-        self.buffer.extend_from_slice(bytes);
-        let chunks = self.buffer.chunks_exact(64);
-        let rem = chunks.remainder().to_vec();
-        for chunk in chunks {
+    fn update(&mut self, mut bytes: &[u8]) {
+        crate::compression_routine!(self.buffer, bytes, BLOCK_LEN, {
             self.bits_taken += 512;
-            compress(&mut self.state, chunk);
-        }
-        self.buffer = rem;
+            compress(&mut self.state, &self.buffer);
+        });
     }
 
     fn finalize(mut self) -> Vec<u8> {
         // Padding
         self.bits_taken += self.buffer.len() as u64 * 8;
         self.buffer.push(0x80);
-        while (self.buffer.len() % 64) != 56 {
+        while (self.buffer.len() % BLOCK_LEN) != 56 {
             self.buffer.push(0)
         }
         self.buffer.extend(self.bits_taken.to_be_bytes());
 
         // There can be multiple final blocks after padding
-        for chunk in self.buffer.chunks_exact(64) {
+        for chunk in self.buffer.chunks_exact(BLOCK_LEN) {
             compress(&mut self.state, &chunk);
         }
 
@@ -116,13 +114,13 @@ impl ResettableHasher for Sha0 {
         // Padding
         self.bits_taken += self.buffer.len() as u64 * 8;
         self.buffer.push(0x80);
-        while (self.buffer.len() % 64) != 56 {
+        while (self.buffer.len() % BLOCK_LEN) != 56 {
             self.buffer.push(0)
         }
         self.buffer.extend(self.bits_taken.to_be_bytes());
 
         // There can be multiple final blocks after padding
-        for chunk in self.buffer.chunks_exact(64) {
+        for chunk in self.buffer.chunks_exact(BLOCK_LEN) {
             compress(&mut self.state, &chunk);
         }
 

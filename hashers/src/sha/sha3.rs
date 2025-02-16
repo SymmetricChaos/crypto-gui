@@ -1,6 +1,5 @@
-use crate::traits::StatefulHasher;
-
 use super::KeccackState;
+use crate::traits::StatefulHasher;
 
 // This encode functions are defined as encoding n: 0 <= n < 2^2040
 // but values of n: 0 <= n < 2^64 cover all real world cases for the forseeable future
@@ -278,14 +277,10 @@ impl Keccack {
 }
 
 impl StatefulHasher for Keccack {
-    fn update(&mut self, bytes: &[u8]) {
-        self.buffer.extend_from_slice(bytes);
-        let chunks = self.buffer.chunks_exact(self.rate as usize);
-        let rem = chunks.remainder().to_vec();
-        for chunk in chunks {
-            self.state.absorb(chunk, self.rate as usize);
-        }
-        self.buffer = rem;
+    fn update(&mut self, mut bytes: &[u8]) {
+        crate::compression_routine!(self.buffer, bytes, self.rate as usize, {
+            self.state.absorb(&self.buffer, self.rate as usize);
+        });
     }
 
     fn finalize(mut self) -> Vec<u8> {

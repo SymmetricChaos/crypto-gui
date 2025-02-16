@@ -1,6 +1,5 @@
-use crate::traits::StatefulHasher;
-
 use super::{Sha224, Sha256, Sha384, Sha512, Sha512_224, Sha512_256};
+use crate::traits::StatefulHasher;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Sha2Variant {

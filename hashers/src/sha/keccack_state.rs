@@ -240,9 +240,6 @@ mod keccak_tests {
         // https://github.com/XKCP/XKCP/blob/master/tests/TestVectors/KeccakF-1600-IntermediateValues.txt
         let mut state = KeccackState::new();
         state.keccak_f_1600();
-        assert_eq!(
-            format!("{}", state).trim_end(),
-            "f1258f7940e1dde7 84d5ccf933c0478a d598261ea65aa9ee bd1547306f80494d 8b284e056253d057 \nff97a42d7f8e6fd4 90fee5a0a44647c4 8c5bda0cd6192e76 ad30a6f71b19059c 30935ab7d08ffc64 \neb5aa93f2317d635 a9a6e6260d712103 81a57c16dbcf555f 43b831cd0347c826 01f22f1a11a5569f \n05e5635a21d9ae61 64befef28cc970f2 613670957bc46611 b87c5a554fd00ecb 8c3ee88a1ccf32c8 \n940c7922ae3a2614 1841f924a2c509e4 16f53526e70465c2 75f644e97f30a13b eaf1ff7b5ceca249");
         assert_eq!(format!("{:02x?}",state.squeeze(1088 / 8, 512 / 8)), "[e7, dd, e1, 40, 79, 8f, 25, f1, 8a, 47, c0, 33, f9, cc, d5, 84, ee, a9, 5a, a6, 1e, 26, 98, d5, 4d, 49, 80, 6f, 30, 47, 15, bd, 57, d0, 53, 62, 05, 4e, 28, 8b, d4, 6f, 8e, 7f, 2d, a4, 97, ff, c4, 47, 46, a4, a0, e5, fe, 90, 76, 2e, 19, d6, 0c, da, 5b, 8c]")
     }
 

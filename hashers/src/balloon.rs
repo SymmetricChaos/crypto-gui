@@ -6,7 +6,7 @@ use num::{BigUint, FromPrimitive};
 
 use crate::{
     sha::{Sha256, Sha512},
-    traits::StatefulHasher,
+    traits::{ResettableHasher, StatefulHasher},
 };
 
 // pub enum BalloonVariant {

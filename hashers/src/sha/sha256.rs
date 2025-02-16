@@ -2,6 +2,8 @@ use crate::traits::{ResettableHasher, StatefulHasher};
 use itertools::Itertools;
 use std::ops::Shr;
 
+const BLOCK_LEN: usize = 64;
+
 pub const K: [u32; 64] = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
     0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
@@ -102,7 +104,7 @@ macro_rules! sha2_256 {
             fn default() -> Self {
                 Self {
                     state: $iv,
-                    buffer: Vec::new(),
+                    buffer: Vec::with_capacity(BLOCK_LEN),
                     bits_taken: 0,
                 }
             }
@@ -113,66 +115,38 @@ macro_rules! sha2_256 {
                 Self::default()
             }
 
-            pub fn finalize_and_reset(&mut self) -> Vec<u8> {
-                self.bits_taken += self.buffer.len() as u64 * 8;
-                self.buffer.push(0x80);
-                while (self.buffer.len() % 64) != 56 {
-                    self.buffer.push(0x00)
-                }
-                self.buffer.extend(self.bits_taken.to_be_bytes());
-
-                // There can be multiple final blocks after padding
-                for chunk in self.buffer.chunks_exact(64) {
-                    compress(&mut self.state, &chunk);
-                }
-
-                let mut out = self
-                    .state
-                    .iter()
-                    .map(|x| x.to_be_bytes())
-                    .flatten()
-                    .collect_vec();
-                out.truncate($output_len);
-
-                *self = Self::init();
-
-                out
+            pub fn hash(bytes: &[u8]) -> Vec<u8> {
+                Self::init().update_and_finalize(bytes)
             }
         }
 
         impl StatefulHasher for $name {
-            fn update(&mut self, bytes: &[u8]) {
-                self.buffer.extend_from_slice(bytes);
-                let chunks = self.buffer.chunks_exact(64);
-                let rem = chunks.remainder().to_vec();
-                for chunk in chunks {
+            fn update(&mut self, mut bytes: &[u8]) {
+                crate::compression_routine!(self.buffer, bytes, BLOCK_LEN, {
                     self.bits_taken += 512;
-                    compress(&mut self.state, chunk);
-                }
-                self.buffer = rem;
+                    compress(&mut self.state, &self.buffer);
+                });
             }
 
             fn finalize(mut self) -> Vec<u8> {
                 self.bits_taken += self.buffer.len() as u64 * 8;
                 self.buffer.push(0x80);
-                while (self.buffer.len() % 64) != 56 {
+                while (self.buffer.len() % BLOCK_LEN) != 56 {
                     self.buffer.push(0x00)
                 }
                 self.buffer.extend(self.bits_taken.to_be_bytes());
 
                 // There can be multiple final blocks after padding
-                for chunk in self.buffer.chunks_exact(64) {
+                for chunk in self.buffer.chunks_exact(BLOCK_LEN) {
                     compress(&mut self.state, &chunk);
                 }
 
-                let mut out = self
-                    .state
+                self.state
                     .iter()
                     .map(|x| x.to_be_bytes())
                     .flatten()
-                    .collect_vec();
-                out.truncate($output_len);
-                out
+                    .take($output_len)
+                    .collect_vec()
             }
 
             crate::stateful_hash_helpers!();
@@ -182,23 +156,23 @@ macro_rules! sha2_256 {
             fn finalize_and_reset(&mut self) -> Vec<u8> {
                 self.bits_taken += self.buffer.len() as u64 * 8;
                 self.buffer.push(0x80);
-                while (self.buffer.len() % 64) != 56 {
+                while (self.buffer.len() % BLOCK_LEN) != 56 {
                     self.buffer.push(0x00)
                 }
                 self.buffer.extend(self.bits_taken.to_be_bytes());
 
                 // There can be multiple final blocks after padding
-                for chunk in self.buffer.chunks_exact(64) {
+                for chunk in self.buffer.chunks_exact(BLOCK_LEN) {
                     compress(&mut self.state, &chunk);
                 }
 
-                let mut out = self
+                let out = self
                     .state
                     .iter()
                     .map(|x| x.to_be_bytes())
                     .flatten()
+                    .take($output_len)
                     .collect_vec();
-                out.truncate($output_len);
 
                 *self = Self::init();
 
