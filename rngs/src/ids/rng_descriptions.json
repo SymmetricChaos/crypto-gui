@@ -53,9 +53,15 @@
     "Publication": null,
     "Traits": null
   },
+  "ISAAC": {
+    "Description": "ISAAC (Indirection, Shift, Accumulate, Add, and Count) is a cryptographic PRNG probably best known for its used in the classic roguelike game NetHack.",
+    "Authors": "Robert Jenkins",
+    "Publication": "1993",
+    "Traits": null
+  },
   "JSF": {
     "Description": "The Jenkins Small Fast PRNG is a small, simple, and fast running algorithm that performs well on statistical tests of randomness but is not believed to be secure.",
-    "Authors": "Jenkins",
+    "Authors": "Robert Jenkins",
     "Publication": null,
     "Traits": null
   },

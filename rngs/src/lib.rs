@@ -8,6 +8,7 @@ pub mod errors;
 pub mod geffe;
 pub mod halton;
 pub mod ids;
+pub mod isaac;
 pub mod jsf;
 pub mod lcg;
 pub mod lfg;
