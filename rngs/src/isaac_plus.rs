@@ -1,8 +1,6 @@
 use crate::ClassicRng;
 use std::num::Wrapping;
 
-const SIZE: usize = 256;
-
 macro_rules! mix(
     ($a:expr) => (
     {
@@ -17,45 +15,46 @@ macro_rules! mix(
     } );
 );
 
-pub struct Isaac {
-    array: [Wrapping<u32>; SIZE],
+pub struct IsaacPlus {
+    array: [Wrapping<u32>; 256],
     a: Wrapping<u32>,
     b: Wrapping<u32>,
     c: Wrapping<u32>,
-    rand_rsl: [Wrapping<u32>; SIZE], // effectively the output state (I do not know why it is called this)
-    ctr: usize,                      // point to the current position in rand_rsl
+    rand_rsl: [Wrapping<u32>; 256], // effectively the output state (I do not know why it is called this)
+    ctr: usize,                     // point to the current position in rand_rsl
 }
 
-impl Default for Isaac {
+impl Default for IsaacPlus {
     fn default() -> Self {
         Self {
-            array: [Wrapping(0); SIZE],
+            array: [Wrapping(0); 256],
             a: Wrapping(0),
             b: Wrapping(0),
             c: Wrapping(0),
-            rand_rsl: [Wrapping(0); SIZE],
+            rand_rsl: [Wrapping(0); 256],
             ctr: 0,
         }
     }
 }
 
-impl Isaac {
+impl IsaacPlus {
+    // Modification by Aumasson
     fn isaac(&mut self) {
         self.c += Wrapping(1);
         self.b += self.c;
-        for i in 0..SIZE {
+        for i in 0..256 {
             let x = self.array[i];
             match i % 4 {
-                0 => self.a ^= self.a << 13,
-                1 => self.a ^= self.a >> 6,
-                2 => self.a ^= self.a << 2,
-                3 => self.a ^= self.a >> 16,
+                0 => self.a ^= Wrapping(self.a.0.rotate_left(13)),
+                1 => self.a ^= Wrapping(self.a.0.rotate_right(6)),
+                2 => self.a ^= Wrapping(self.a.0.rotate_left(2)),
+                3 => self.a ^= Wrapping(self.a.0.rotate_right(16)),
                 _ => unreachable!(),
             }
-            self.a += self.array[(i + 128) % SIZE];
-            self.array[i] = self.array[(x.0 as usize >> 2) % SIZE] + self.a + self.b;
+            self.a += self.array[(i + 128) % 256];
+            self.array[i] = (self.a ^ self.b) + self.array[(x.0.rotate_right(2) as usize) % 256];
             let y = self.array[i].0 as usize;
-            self.b = self.array[(y >> 10) % SIZE] + x;
+            self.b = x + self.a ^ self.array[y.rotate_right(10) % 256];
             self.rand_rsl[i] = self.b;
         }
         self.ctr = 0;
@@ -73,7 +72,7 @@ impl Isaac {
             mix!(arr)
         }
 
-        for i in (0..SIZE).step_by(8) {
+        for i in (0..256).step_by(8) {
             if extra_pass {
                 for j in 0..8 {
                     arr[j] += self.rand_rsl[i + j];
@@ -86,7 +85,7 @@ impl Isaac {
         }
 
         if extra_pass {
-            for i in (0..SIZE).step_by(8) {
+            for i in (0..256).step_by(8) {
                 for j in 0..8 {
                     arr[j] += self.array[i + j];
                 }
@@ -101,9 +100,9 @@ impl Isaac {
     }
 
     pub fn seed(&mut self, seed: &[u8], extra_pass: bool) {
-        assert!(seed.len() <= SIZE, "seed cannot have more than 256 bytes");
-        self.array = [Wrapping(0); SIZE];
-        self.rand_rsl = [Wrapping(0); SIZE];
+        assert!(seed.len() <= 256, "seed cannot have more than 256 bytes");
+        self.array = [Wrapping(0); 256];
+        self.rand_rsl = [Wrapping(0); 256];
         for i in 0..seed.len() {
             self.rand_rsl[i] = Wrapping(u32::from(seed[i]));
         }
@@ -121,30 +120,13 @@ impl Isaac {
     }
 }
 
-impl ClassicRng for Isaac {
+impl ClassicRng for IsaacPlus {
     fn next_u32(&mut self) -> u32 {
-        if self.ctr >= SIZE {
+        if self.ctr > 255 {
             self.isaac();
         }
         let n = self.rand_rsl[self.ctr].0;
         self.ctr += 1;
         n
-    }
-}
-
-#[cfg(test)]
-mod tests {
-
-    use itertools::Itertools;
-
-    use super::*;
-
-    #[test]
-    fn rosetta_test() {
-        let msg = b"a Top Secret secret";
-        let key = b"this is my secret key";
-        let mut rng = Isaac::init_with_seed(key, true);
-        let enc = msg.iter().map(|&b| (rng.next_ascii() ^ b)).collect_vec();
-        println!("{:02x?}", enc);
     }
 }

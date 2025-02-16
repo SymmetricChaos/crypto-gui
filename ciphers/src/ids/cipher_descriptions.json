@@ -545,11 +545,22 @@
       "Lai-Massey"
     ]
   },
+  "ISAAC": {
+    "Names": [
+      "ISAAC"
+    ],
+    "Description": "ISAAC (Indirection, Shift, Accumulate, Add, and Count) is a stream cipher based on the cryptographic PRNG of the same name.",
+    "Authors": "Robert Jenkins",
+    "Publication": "1993",
+    "Traits": [
+      "Stream Cipher"
+    ]
+  },
   "Khufu": {
     "Names": [
-      "Khufu is a block cipher created by Ralph Merkle for Xerox along with the Khafre block cipher. It has an usually large 512-bit key. The substitution boxes are derived from the key. Khufu was an early block cipher to use key whitening."
+      "Khufu"
     ],
-    "Description": "Khufu is",
+    "Description": "Khufu is a block cipher created by Ralph Merkle for Xerox along with the Khafre block cipher. It has an usually large 512-bit key. The substitution boxes are derived from the key. Khufu was an early block cipher to use key whitening.",
     "Authors": "Ralph Merkle",
     "Publication": "1989",
     "Traits": [
