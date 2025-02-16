@@ -75,6 +75,10 @@ impl Sha1 {
     pub fn init() -> Self {
         Self::default()
     }
+
+    pub fn hash(bytes: &[u8]) -> Vec<u8> {
+        Self::init().update_and_finalize(bytes)
+    }
 }
 
 impl StatefulHasher for Sha1 {

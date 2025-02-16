@@ -234,6 +234,11 @@ impl StatefulHasher for Ascon {
     fn update(&mut self, bytes: &[u8]) {
         self.buffer.extend_from_slice(bytes);
         self.absorb();
+        fn update(&mut self, mut bytes: &[u8]) {
+            crate::compression_routine!(self.buffer, bytes, BLOCK_LEN, {
+                self.absorb();
+            });
+        }
     }
 
     // Absorb the last block and squeeze the output
