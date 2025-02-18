@@ -1,122 +1,43 @@
 use std::collections::HashMap;
-
 use crate::ui_elements::UiElements;
-
 use super::CodeFrame;
 use codes::text_standards::ics_flags::IcsFlags;
 use egui::Image;
-use lazy_static::lazy_static;
 
-lazy_static! {
-    pub static ref ICS_IMAGES: HashMap<&'static str, Image<'static>> = {
-        let mut map = HashMap::with_capacity(30);
-        map.insert(
-            "A",
-            egui::Image::new(egui::include_image!("ics_flags/Alfa.png")),
-        );
-        map.insert(
-            "B",
-            egui::Image::new(egui::include_image!("ics_flags/Bravo.png")),
-        );
-        map.insert(
-            "C",
-            egui::Image::new(egui::include_image!("ics_flags/Charlie.png")),
-        );
-        map.insert(
-            "D",
-            egui::Image::new(egui::include_image!("ics_flags/Delta.png")),
-        );
-        map.insert(
-            "E",
-            egui::Image::new(egui::include_image!("ics_flags/Echo.png")),
-        );
-        map.insert(
-            "F",
-            egui::Image::new(egui::include_image!("ics_flags/Foxtrot.png")),
-        );
-        map.insert(
-            "G",
-            egui::Image::new(egui::include_image!("ics_flags/Golf.png")),
-        );
-        map.insert(
-            "H",
-            egui::Image::new(egui::include_image!("ics_flags/Hotel.png")),
-        );
-        map.insert(
-            "I",
-            egui::Image::new(egui::include_image!("ics_flags/India.png")),
-        );
-        map.insert(
-            "J",
-            egui::Image::new(egui::include_image!("ics_flags/Juliett.png")),
-        );
-        map.insert(
-            "K",
-            egui::Image::new(egui::include_image!("ics_flags/Kilo.png")),
-        );
-        map.insert(
-            "L",
-            egui::Image::new(egui::include_image!("ics_flags/Lima.png")),
-        );
-        map.insert(
-            "M",
-            egui::Image::new(egui::include_image!("ics_flags/Mike.png")),
-        );
-        map.insert(
-            "N",
-            egui::Image::new(egui::include_image!("ics_flags/November.png")),
-        );
-        map.insert(
-            "O",
-            egui::Image::new(egui::include_image!("ics_flags/Oscar.png")),
-        );
-        map.insert(
-            "P",
-            egui::Image::new(egui::include_image!("ics_flags/Papa.png")),
-        );
-        map.insert(
-            "Q",
-            egui::Image::new(egui::include_image!("ics_flags/Quebec.png")),
-        );
-        map.insert(
-            "R",
-            egui::Image::new(egui::include_image!("ics_flags/Romeo.png")),
-        );
-        map.insert(
-            "S",
-            egui::Image::new(egui::include_image!("ics_flags/Sierra.png")),
-        );
-        map.insert(
-            "T",
-            egui::Image::new(egui::include_image!("ics_flags/Tango.png")),
-        );
-        map.insert(
-            "U",
-            egui::Image::new(egui::include_image!("ics_flags/Uniform.png")),
-        );
-        map.insert(
-            "V",
-            egui::Image::new(egui::include_image!("ics_flags/Victor.png")),
-        );
-        map.insert(
-            "W",
-            egui::Image::new(egui::include_image!("ics_flags/Whiskey.png")),
-        );
-        map.insert(
-            "X",
-            egui::Image::new(egui::include_image!("ics_flags/X-ray.png")),
-        );
-        map.insert(
-            "Y",
-            egui::Image::new(egui::include_image!("ics_flags/Yankee.png")),
-        );
-        map.insert(
-            "Z",
-            egui::Image::new(egui::include_image!("ics_flags/Zulu.png")),
-        );
-        map
-    };
-}
+static FLAG_IMAGES: [ImageSource<'_>; 26] = [
+    egui::include_image!("ics_flags/Alfa.png"),
+    egui::include_image!("ics_flags/Bravo.png"),
+    egui::include_image!("ics_flags/Charlie.png"),
+    egui::include_image!("ics_flags/Delta.png"),
+    egui::include_image!("ics_flags/Echo.png"),
+    egui::include_image!("ics_flags/Foxtrot.png"),
+    egui::include_image!("ics_flags/Golf.png"),
+    egui::include_image!("ics_flags/Hotel.png"),
+    egui::include_image!("ics_flags/India.png"),
+    egui::include_image!("ics_flags/Juliett.png"),
+    egui::include_image!("ics_flags/Kilo.png"),
+    egui::include_image!("ics_flags/Lima.png"),
+    egui::include_image!("ics_flags/Mike.png"),
+    egui::include_image!("ics_flags/November.png"),
+    egui::include_image!("ics_flags/Oscar.png"),
+    egui::include_image!("ics_flags/Papa.png"),
+    egui::include_image!("ics_flags/Quebec.png"),
+    egui::include_image!("ics_flags/Romeo.png"),
+    egui::include_image!("ics_flags/Sierra.png"),
+    egui::include_image!("ics_flags/Tango.png"),
+    egui::include_image!("ics_flags/Uniform.png"),
+    egui::include_image!("ics_flags/Victor.png"),
+    egui::include_image!("ics_flags/Whiskey.png"),
+    egui::include_image!("ics_flags/X-ray.png"),
+    egui::include_image!("ics_flags/Yankee.png"),
+    egui::include_image!("ics_flags/Zulu.png"),
+];
+
+static FLAG_MAP: std::sync::LazyLock<HashMap<char, egui::Image<'static>>> = std::sync::LazyLock::new(
+    ||
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ".chars().zip(FLAG_IMAGES.iter().map(|i| egui::Image::new(i)))
+);
+
 
 pub struct IcsFlagsFrame {
     code: IcsFlags,
@@ -146,7 +67,7 @@ impl CodeFrame for IcsFlagsFrame {
                 for (a, b) in self.code.chars_codes() {
                     ui.mono_strong(a);
                     ui.mono_strong(b);
-                    if let Some(img) = ICS_IMAGES.get(a) {
+                    if let Some(img) = FLAG_MAP.get(a) {
                         ui.add(img.clone());
                     }
                     ui.end_row()
