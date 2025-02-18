@@ -38,7 +38,7 @@ impl Default for IsaacPlus {
 }
 
 impl IsaacPlus {
-    // Modification by Aumasson
+    // Modification by Aumasson, the rotations in the match are implied by the paper
     fn isaac(&mut self) {
         self.c += Wrapping(1);
         self.b += self.c;

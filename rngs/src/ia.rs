@@ -1,6 +1,8 @@
 use crate::ClassicRng;
 use std::num::Wrapping;
 
+// https://burtleburtle.net/bob/rand/isaac.html
+
 const ALPHA: u32 = 8;
 const SIZE: usize = 1 << ALPHA;
 const MASK: u32 = (SIZE - 1) as u32;

@@ -10,6 +10,7 @@ pub mod halton;
 pub mod ia;
 pub mod ids;
 pub mod isaac;
+pub mod isaac64;
 pub mod isaac_plus;
 pub mod jsf;
 pub mod lcg;

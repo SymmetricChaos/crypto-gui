@@ -105,6 +105,8 @@ impl Isaac {
         self.isaac();
     }
 
+    // This seeding methos is suggested by the Rosetta code page
+    // Jenkins did not define a seeding method (other than specifying all words of the starting array)
     pub fn seed(&mut self, seed: &[u8], extra_pass: bool) {
         assert!(seed.len() <= 256, "seed cannot have more than 256 bytes");
         self.array = [Wrapping(0); 256];
