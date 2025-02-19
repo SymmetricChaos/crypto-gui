@@ -5,6 +5,7 @@ mod blumblumshub_controls;
 mod chacha_controls;
 mod geffe_controls;
 mod halton_controls;
+pub mod isaac_controls;
 mod jsf_controls;
 mod lcg_controls;
 mod lfg_controls;

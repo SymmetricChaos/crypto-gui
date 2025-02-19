@@ -20,7 +20,7 @@ impl Default for Rc4Frame {
         let mut rng = Rc4::default();
         rng.ksa(&[0xDE_u8, 0xAD, 0xBE, 0xEF, 0x42]);
         Self {
-            rng: Default::default(),
+            rng,
             key: String::from("DEADBEEF42"),
             random_bytes: String::new(),
             randoms: String::new(),

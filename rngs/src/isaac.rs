@@ -18,12 +18,12 @@ macro_rules! mix(
 );
 
 pub struct Isaac {
-    array: [Wrapping<u32>; SIZE],
-    a: Wrapping<u32>,
-    b: Wrapping<u32>,
-    c: Wrapping<u32>,
-    rand_rsl: [Wrapping<u32>; SIZE], // effectively the output state (I do not know why it is called this)
-    ctr: usize,                      // point to the current position in rand_rsl
+    pub array: [Wrapping<u32>; SIZE],
+    pub a: Wrapping<u32>,
+    pub b: Wrapping<u32>,
+    pub c: Wrapping<u32>,
+    pub rand_rsl: [Wrapping<u32>; SIZE], // effectively the output state (I do not know why it is called this)
+    pub ctr: usize,                      // point to the current position in rand_rsl
 }
 
 impl Default for Isaac {
