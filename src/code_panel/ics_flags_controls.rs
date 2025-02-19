@@ -1,8 +1,8 @@
-use std::collections::HashMap;
-use crate::ui_elements::UiElements;
 use super::CodeFrame;
+use crate::ui_elements::UiElements;
 use codes::text_standards::ics_flags::IcsFlags;
-use egui::Image;
+use egui::ImageSource;
+use std::collections::HashMap;
 
 static FLAG_IMAGES: [ImageSource<'_>; 26] = [
     egui::include_image!("ics_flags/Alfa.png"),
@@ -33,11 +33,13 @@ static FLAG_IMAGES: [ImageSource<'_>; 26] = [
     egui::include_image!("ics_flags/Zulu.png"),
 ];
 
-static FLAG_MAP: std::sync::LazyLock<HashMap<char, egui::Image<'static>>> = std::sync::LazyLock::new(
-    ||
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ".chars().zip(FLAG_IMAGES.iter().map(|i| egui::Image::new(i)))
-);
-
+static FLAG_MAP: std::sync::LazyLock<HashMap<char, egui::Image<'static>>> =
+    std::sync::LazyLock::new(|| {
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            .chars()
+            .zip(FLAG_IMAGES.iter().map(|i| egui::Image::new(i.clone())))
+            .collect()
+    });
 
 pub struct IcsFlagsFrame {
     code: IcsFlags,
@@ -67,7 +69,7 @@ impl CodeFrame for IcsFlagsFrame {
                 for (a, b) in self.code.chars_codes() {
                     ui.mono_strong(a);
                     ui.mono_strong(b);
-                    if let Some(img) = FLAG_MAP.get(a) {
+                    if let Some(img) = FLAG_MAP.get(&a.chars().next().unwrap()) {
                         ui.add(img.clone());
                     }
                     ui.end_row()
