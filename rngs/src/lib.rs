@@ -8,6 +8,7 @@ pub mod errors;
 pub mod geffe;
 pub mod halton;
 pub mod ia;
+pub mod ibaa;
 pub mod ids;
 pub mod isaac;
 pub mod isaac64;

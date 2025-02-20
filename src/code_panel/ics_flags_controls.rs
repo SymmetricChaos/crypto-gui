@@ -4,7 +4,7 @@ use codes::text_standards::ics_flags::IcsFlags;
 use egui::ImageSource;
 use std::collections::HashMap;
 
-static FLAG_IMAGES: [ImageSource<'_>; 26] = [
+const FLAG_IMAGES: [ImageSource<'_>; 26] = [
     egui::include_image!("ics_flags/Alfa.png"),
     egui::include_image!("ics_flags/Bravo.png"),
     egui::include_image!("ics_flags/Charlie.png"),
