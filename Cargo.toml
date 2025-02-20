@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Alexander"]
 edition = "2021"
 include = ["LICENSE-APACHE", "LICENSE-MIT", "**/*.rs", "Cargo.toml"]
-rust-version = "1.84.1"
+rust-version = "1.85"
 
 [package.metadata.docs.rs]
 all-features = true
@@ -33,7 +33,6 @@ utils = {path = "utils"}
 rngs = {path = "rngs"}
 hashers = {path = "hashers"}
 
-lazy_static = "1.4.0"
 num = "0.4.1"
 num-prime = "0.4.3"
 itertools = "0.10.0"
