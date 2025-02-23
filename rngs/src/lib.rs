@@ -22,6 +22,7 @@ pub mod middle_square;
 pub mod middle_square_binary;
 pub mod mt19937_32;
 pub mod mt19937_64;
+pub mod naor_reingold;
 pub mod pcg;
 pub mod rc4;
 pub mod salsa20;

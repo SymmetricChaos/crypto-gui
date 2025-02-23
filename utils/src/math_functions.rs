@@ -240,7 +240,7 @@ pub fn is_prime64<N: Into<u64>>(n: N) -> bool {
     true
 }
 
-pub fn modular_pow(base: u32, pow: u32, modulus: u32) -> u32 {
+pub fn mod_pow_32(base: u32, pow: u32, modulus: u32) -> u32 {
     let mut out = 1;
 
     for _ in 0..pow {
@@ -250,6 +250,26 @@ pub fn modular_pow(base: u32, pow: u32, modulus: u32) -> u32 {
 
     // This truncation is always valid because it has been reduced by the modulus which starts as u32
     out as u32
+}
+
+pub fn mod_pow_64(base: u64, pow: u64, modulus: u64) -> u64 {
+    let mut out = 1;
+
+    for _ in 0..pow {
+        out *= u128::from(base);
+        out %= u128::from(modulus);
+    }
+
+    // This truncation is always valid because it has been reduced by the modulus which starts as u64
+    out as u64
+}
+
+pub fn mod_mul_32(lhs: u32, rhs: u32, modulus: u32) -> u32 {
+    (u64::from(lhs) * u64::from(rhs) % u64::from(modulus)) as u32
+}
+
+pub fn mod_mul_64(lhs: u64, rhs: u64, modulus: u64) -> u64 {
+    (u128::from(lhs) * u128::from(rhs) % u128::from(modulus)) as u64
 }
 
 pub fn incr_array_ctr_be(ctr: &mut [u8]) {
@@ -289,9 +309,9 @@ mod math_tests {
 
     #[test]
     fn test_mod_pow() {
-        let x = modular_pow(4, 5, 23);
+        let x = mod_pow_32(4, 5, 23);
         assert_eq!(4, x);
-        let x = modular_pow(3, 5, 23);
+        let x = mod_pow_32(3, 5, 23);
         assert_eq!(10, x);
     }
 

@@ -1,5 +1,5 @@
 use num::integer::gcd;
-use utils::math_functions::modular_pow;
+use utils::math_functions::mod_pow_32;
 
 use crate::Cipher;
 
@@ -31,8 +31,8 @@ impl DiffieHellmanTriple {
         let mut out = Vec::with_capacity(self.private_keys.len());
         for i in 0..self.private_keys.len() {
             out.push((
-                modular_pow(self.generator, self.private_keys[i], self.modulus),
-                modular_pow(self.generator, self.ephemeral_keys[i], self.modulus),
+                mod_pow_32(self.generator, self.private_keys[i], self.modulus),
+                mod_pow_32(self.generator, self.ephemeral_keys[i], self.modulus),
             ))
         }
         out
@@ -41,7 +41,7 @@ impl DiffieHellmanTriple {
     pub fn shared_key(&self) -> u32 {
         let mut b = self.generator;
         for k in self.private_keys.iter() {
-            b = modular_pow(b, *k, self.modulus);
+            b = mod_pow_32(b, *k, self.modulus);
         }
         b
     }

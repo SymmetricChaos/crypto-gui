@@ -1,5 +1,5 @@
 use num::integer::gcd;
-use utils::math_functions::modular_pow;
+use utils::math_functions::mod_pow_32;
 
 use crate::Cipher;
 
@@ -29,14 +29,14 @@ impl DiffieHellman {
         Vec::from_iter(
             self.private_keys
                 .iter()
-                .map(|p| modular_pow(self.generator, *p, self.modulus)),
+                .map(|p| mod_pow_32(self.generator, *p, self.modulus)),
         )
     }
 
     pub fn shared_key(&self) -> u32 {
         let mut b = self.generator;
         for k in self.private_keys.iter() {
-            b = modular_pow(b, *k, self.modulus);
+            b = mod_pow_32(b, *k, self.modulus);
         }
         b
     }
