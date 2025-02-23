@@ -15,7 +15,8 @@ pub struct NaorReingold {
 
 impl NaorReingold {
     pub fn valid_constants(&self) -> bool {
-        is_prime64(self.p)
+        self.p > self.q
+            && is_prime64(self.p)
             && is_prime64(self.q)
             && (self.p - 1) % self.q == 0
             && mod_pow_64(self.g, self.q, self.p) == 1
@@ -33,6 +34,7 @@ impl ClassicRng for NaorReingold {
             .fold(1, |acc, (a, _)| mod_mul_64(acc, *a, self.p));
         let out = mod_pow_64(self.g, e, self.p);
         self.x += 1;
+        self.x %= self.p;
         out as u32
     }
 }
