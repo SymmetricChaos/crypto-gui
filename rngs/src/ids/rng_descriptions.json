@@ -125,7 +125,7 @@
     "Traits": null
   },
   "Naor-Reingold": {
-    "Description": "The Naor-Reingold psuedorandom function is a family of cryprographic PRNGs with hardness reducible to the discrete logarithm problem. Because computing each value requires several multiplication and divisions it is very slow compared to stream cipher based PRNGs.",
+    "Description": "The Naor-Reingold psuedorandom function is a family of cryprographic PRNGs with hardness reducible to the discrete logarithm problem. A prime (p) is chosen to be the size of the group. Then another prime (q) is chosen which must be a factor of p-1. A third number (g) is chosen to be a generating element that has order q in the ring F_p, meaning that g^q = p+1. Finally an arbitrary array of integers is chosen. In order to generate values the bits of a counter are used, starting at one, to select values in the array. These are multiplied together to get a value (e) and then g^e is calculated and the remainder taken after divided by p. Because computing each value requires several multiplication and divisions it is very slow compared to stream cipher based PRNGs that are used to generate cryptographic random numbers in practice. This implementation uses 64-bit integers for simplicity but a secure version requires at least a few hundred bits to make computing the hidden values impractical for all attackers.",
     "Authors": "Moni Naor and Omer Reingold",
     "Publication": "1997",
     "Traits": [
