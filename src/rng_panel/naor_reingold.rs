@@ -12,7 +12,7 @@ pub struct NaorReingoldFrame {
     randoms: String,
     p: u64,
     q: u64,
-    g: u64,
+    generator: u64,
     arr: Vec<u64>,
     arr_string: String,
     arr_error: bool,
@@ -27,7 +27,7 @@ impl Default for NaorReingoldFrame {
             randoms: String::new(),
             p: 1223,
             q: 47,
-            g: 27,
+            generator: 27,
             arr: vec![7, 6, 5, 4, 3, 2],
             arr_string: String::from("7, 6, 5, 4, 3, 2"),
             arr_error: false,
@@ -36,16 +36,36 @@ impl Default for NaorReingoldFrame {
     }
 }
 
+impl NaorReingoldFrame {
+    fn set_rng_verbose(&mut self, errors: &mut String) {
+        match NaorReingold::init_verbose(self.p, self.q, self.generator, self.arr, self.ctr) {
+            Ok(rng) => {
+                errors.clear();
+                self.rng = rng;
+            },
+            Err(errs) => {
+                errors.clear();
+                for e in errs {
+                    errors.push(e);
+                }
+            },
+        }
+    }
+}
+
 impl ClassicRngFrame for NaorReingoldFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
         ui.horizontal(|ui| {
             ui.subheading("p (prime)");
             if ui.button("🎲").on_hover_text("random prime").clicked() {
                 let mut rng = thread_rng();
                 self.p = rng.gen_prime(32, None);
+                self.set_rng_verbose(errors);
             }
         });
-        ui.add(DragValue::new(&mut self.p).range(3..=(u32::MAX as usize)));
+        if ui.add(DragValue::new(&mut self.p).range(3..=(u32::MAX as usize))).lost_focus() {
+            self.set_rng_verbose(errors);
+        }
         ui.add_space(8.0);
 
         ui.horizontal(|ui| {
@@ -57,18 +77,25 @@ impl ClassicRngFrame for NaorReingoldFrame {
             {
                 let mut rng = thread_rng();
                 let f = prime_factors(self.p - 1);
-                self.q = f[rng.gen_range(0..f.len())]
+                self.q = f[rng.gen_range(0..f.len())];
+                self.set_rng_verbose(errors);
             }
         });
-        ui.add(DragValue::new(&mut self.q).range(3..=((self.p - 1) as usize)));
+        if ui.add(DragValue::new(&mut self.q).range(3..=((self.p - 1) as usize))).lost_focus() {
+            self.set_rng_verbose(errors);
+        }
         ui.add_space(8.0);
 
         ui.subheading("g (Generator)");
-        ui.add(DragValue::new(&mut self.g));
+        if ui.add(DragValue::new(&mut self.g)).lost_focus() {
+            self.set_rng_verbose(errors);
+        }
         ui.add_space(8.0);
 
         ui.subheading("Counter");
-        ui.add(DragValue::new(&mut self.ctr));
+        if ui.add(DragValue::new(&mut self.ctr)).lost_focus() {
+            self.set_rng_verbose(errors);
+        }
         ui.add_space(8.0);
 
         ui.subheading("Array");
@@ -83,6 +110,9 @@ impl ClassicRngFrame for NaorReingoldFrame {
                     self.arr_error = true;
                     break;
                 }
+            }
+            if !self.arr_error {
+                self.set_rng_verbose(errors);
             }
         };
         if self.arr_error {
