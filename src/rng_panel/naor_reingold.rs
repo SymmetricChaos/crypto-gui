@@ -38,17 +38,19 @@ impl Default for NaorReingoldFrame {
 
 impl NaorReingoldFrame {
     fn set_rng_verbose(&mut self, errors: &mut String) {
-        match NaorReingold::init_verbose(self.p, self.q, self.generator, self.arr, self.ctr) {
+        match NaorReingold::init_verbose(self.p, self.q, self.generator, self.arr.clone(), self.ctr)
+        {
             Ok(rng) => {
                 errors.clear();
                 self.rng = rng;
-            },
+            }
             Err(errs) => {
                 errors.clear();
                 for e in errs {
-                    errors.push(e);
+                    errors.push_str(e);
+                    errors.push('\n');
                 }
-            },
+            }
         }
     }
 }
@@ -63,7 +65,10 @@ impl ClassicRngFrame for NaorReingoldFrame {
                 self.set_rng_verbose(errors);
             }
         });
-        if ui.add(DragValue::new(&mut self.p).range(3..=(u32::MAX as usize))).lost_focus() {
+        if ui
+            .add(DragValue::new(&mut self.p).range(3..=(u32::MAX as usize)))
+            .lost_focus()
+        {
             self.set_rng_verbose(errors);
         }
         ui.add_space(8.0);
@@ -81,13 +86,16 @@ impl ClassicRngFrame for NaorReingoldFrame {
                 self.set_rng_verbose(errors);
             }
         });
-        if ui.add(DragValue::new(&mut self.q).range(3..=((self.p - 1) as usize))).lost_focus() {
+        if ui
+            .add(DragValue::new(&mut self.q).range(3..=((self.p - 1) as usize)))
+            .lost_focus()
+        {
             self.set_rng_verbose(errors);
         }
         ui.add_space(8.0);
 
         ui.subheading("g (Generator)");
-        if ui.add(DragValue::new(&mut self.g)).lost_focus() {
+        if ui.add(DragValue::new(&mut self.generator)).lost_focus() {
             self.set_rng_verbose(errors);
         }
         ui.add_space(8.0);
@@ -128,7 +136,8 @@ impl ClassicRngFrame for NaorReingoldFrame {
     }
 
     fn randomize(&mut self) {
-        let mut rng = thread_rng();
+        // let mut rng = thread_rng();
+        todo!()
     }
 
     fn reset(&mut self) {
