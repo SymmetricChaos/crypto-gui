@@ -1,6 +1,7 @@
 use super::ClassicRngFrame;
 use crate::ui_elements::{generate_random_u32s_box, UiElements};
 use egui::DragValue;
+use itertools::Itertools;
 use num_prime::RandPrime;
 use rand::{thread_rng, Rng};
 use rngs::naor_reingold::NaorReingold;
@@ -59,7 +60,7 @@ impl ClassicRngFrame for NaorReingoldFrame {
     fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
         ui.horizontal(|ui| {
             ui.subheading("p (prime)");
-            if ui.button("🎲").on_hover_text("random prime").clicked() {
+            if ui.button("🎲").on_hover_text("random 32-bit prime").clicked() {
                 let mut rng = thread_rng();
                 self.p = rng.gen_prime(32, None);
                 self.set_rng_verbose(errors);
@@ -82,7 +83,7 @@ impl ClassicRngFrame for NaorReingoldFrame {
             {
                 let mut rng = thread_rng();
                 let f = prime_factors(self.p - 1);
-                self.q = f[rng.gen_range(0..f.len())];
+                self.q = f[rng.gen_range(1..f.len())];
                 self.set_rng_verbose(errors);
             }
         });
@@ -136,8 +137,30 @@ impl ClassicRngFrame for NaorReingoldFrame {
     }
 
     fn randomize(&mut self) {
-        // let mut rng = thread_rng();
-        todo!()
+        let mut rng = thread_rng();
+        self.p = rng.gen_prime(32, None);
+        self.set_rng_verbose(errors);
+
+        let f = prime_factors(self.p - 1);
+        self.q = f[rng.gen_range(1..f.len())];
+
+        for i in 2..self.q {
+            if mod_pow_64(i, self.q, self.p) == 1 {
+                self.generator = i;
+                break
+            }
+        }
+
+        self.arr.clear();
+        self.arr_error = false;
+        for _ in 0..rng.gen_range(10..=20) {
+            self.arr.push(rng.gen_range(1..self.p));
+        }
+        self.arr_string = self.arr.iter().map(|n| n.to_string()).join(", ");
+
+        self.ctr = 1;
+
+        self.rng = NaorReingold::init(self.p, self.q, self.generator, self.arr, self.ctr).unwrap();
     }
 
     fn reset(&mut self) {
