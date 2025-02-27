@@ -13,7 +13,7 @@ mod lfsr_controls;
 mod mersenne_twister_controls;
 mod middle_square_binary_controls;
 mod middle_square_controls;
-mod naor_reingold;
+mod naor_reingold_controls;
 mod pcg_controls;
 mod rc4_controls;
 mod salsa20_controls;
@@ -76,6 +76,7 @@ pub struct RngInterface {
     mersenne_twister: mersenne_twister_controls::MTFrame,
     middle_square: middle_square_controls::MiddleSquareFrame,
     middle_square_binary: middle_square_binary_controls::MiddleSquareBinaryFrame,
+    naor_reingold: naor_reingold_controls::NaorReingoldFrame,
     pcg: pcg_controls::PcgFrame,
     rc4: rc4_controls::Rc4Frame,
     salsa20: salsa20_controls::Salsa20Frame,
@@ -127,6 +128,7 @@ impl RngInterface {
                 RngId::BlumBlumShub,
                 RngId::ChaCha,
                 RngId::Geffe,
+                RngId::NaorReingold,
                 RngId::Pcg,
                 RngId::Salsa20,
             ],
@@ -154,6 +156,7 @@ impl RngInterface {
             RngId::MersenneTwister => &mut self.mersenne_twister,
             RngId::MiddleSquare => &mut self.middle_square,
             RngId::MiddleSquareBinary => &mut self.middle_square_binary,
+            RngId::NaorReingold => &mut self.naor_reingold,
             RngId::Pcg => &mut self.pcg,
             RngId::Rc4 => &mut self.rc4,
             RngId::Salsa20 => &mut self.salsa20,

@@ -70,7 +70,7 @@ pub static BIG_ROTOR_MAP: LazyLock<HashMap<&'static str, CipherRotor>> = LazyLoc
 pub const INDEX_ROTOR_VEC: LazyCell<Vec<IndexRotor>> = LazyCell::new(|| {
     std::iter::zip(INDEX_ROTOR_NAMES, INDEX_ROTOR_WIRINGS)
         .map(|(name, wiring)| {
-            IndexRotor::new(name, wiring, &|c: char| (c as u8 as usize) - 65).unwrap()
+            IndexRotor::new(name, wiring, &|c: char| (c as u8 as usize) - 48).unwrap()
         })
         .collect_vec()
 });

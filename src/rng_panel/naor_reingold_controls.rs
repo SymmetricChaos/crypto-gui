@@ -5,7 +5,7 @@ use itertools::Itertools;
 use num_prime::RandPrime;
 use rand::{thread_rng, Rng};
 use rngs::naor_reingold::NaorReingold;
-use utils::math_functions::prime_factors;
+use utils::math_functions::{mod_pow_64, prime_factors};
 
 pub struct NaorReingoldFrame {
     rng: NaorReingold,
@@ -14,6 +14,7 @@ pub struct NaorReingoldFrame {
     p: u64,
     q: u64,
     generator: u64,
+    generator_err: bool,
     arr: Vec<u64>,
     arr_string: String,
     arr_error: bool,
@@ -29,6 +30,7 @@ impl Default for NaorReingoldFrame {
             p: 1223,
             q: 47,
             generator: 27,
+            generator_err: false,
             arr: vec![7, 6, 5, 4, 3, 2],
             arr_string: String::from("7, 6, 5, 4, 3, 2"),
             arr_error: false,
@@ -58,11 +60,23 @@ impl NaorReingoldFrame {
 
 impl ClassicRngFrame for NaorReingoldFrame {
     fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
+        if ui
+            .button("Random Function")
+            .on_hover_text("choose values for a random PRNG")
+            .clicked()
+        {
+            self.randomize();
+        }
+
         ui.horizontal(|ui| {
             ui.subheading("p (prime)");
-            if ui.button("🎲").on_hover_text("random 32-bit prime").clicked() {
+            if ui
+                .button("🎲")
+                .on_hover_text("random 16-bit prime")
+                .clicked()
+            {
                 let mut rng = thread_rng();
-                self.p = rng.gen_prime(32, None);
+                self.p = rng.gen_prime(16, None);
                 self.set_rng_verbose(errors);
             }
         });
@@ -95,20 +109,59 @@ impl ClassicRngFrame for NaorReingoldFrame {
         }
         ui.add_space(8.0);
 
-        ui.subheading("g (Generator)");
+        ui.horizontal(|ui| {
+            ui.subheading("g (Generator)");
+            if ui
+                .button("🎲")
+                .on_hover_text("random generating element")
+                .clicked()
+            {
+                self.generator = 0;
+                self.generator_err = true;
+                let mut rng = thread_rng();
+                for _ in 0..10_000 {
+                    let i = rng.gen_range(2..self.p);
+                    if mod_pow_64(i, self.q, self.p) == 1 {
+                        self.generator = i;
+                        self.generator_err = false;
+                        break;
+                    }
+                }
+                self.set_rng_verbose(errors);
+            }
+        });
         if ui.add(DragValue::new(&mut self.generator)).lost_focus() {
             self.set_rng_verbose(errors);
         }
-        ui.add_space(8.0);
-
-        ui.subheading("Counter");
-        if ui.add(DragValue::new(&mut self.ctr)).lost_focus() {
-            self.set_rng_verbose(errors);
+        if self.generator_err {
+            ui.error_text("unable to find a generator, try again");
         }
         ui.add_space(8.0);
 
-        ui.subheading("Array");
-        if ui.text_edit_singleline(&mut self.arr_string).lost_focus() {
+        ui.horizontal(|ui| {
+            ui.subheading("Counter");
+            if ui.add(DragValue::new(&mut self.ctr)).lost_focus() {
+                self.set_rng_verbose(errors);
+            }
+            ui.subheading(format!("({})", self.rng.ctr));
+        });
+
+        ui.add_space(8.0);
+
+        ui.horizontal(|ui| {
+            ui.subheading("Array");
+            if ui.button("🎲").on_hover_text("random array").clicked() {
+                let mut rng = thread_rng();
+                self.arr.clear();
+                self.arr_error = false;
+                for _ in 0..rng.gen_range(10..=20) {
+                    self.arr.push(rng.gen_range(1..self.q));
+                }
+                self.arr_string = self.arr.iter().map(|n| n.to_string()).join(", ");
+                self.set_rng_verbose(errors);
+            }
+        });
+        if ui.text_edit_multiline(&mut self.arr_string).lost_focus() {
             self.arr.clear();
             self.arr_error = false;
             for s in self.arr_string.split(",").map(|s| s.trim()) {
@@ -138,29 +191,29 @@ impl ClassicRngFrame for NaorReingoldFrame {
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        self.p = rng.gen_prime(32, None);
-        self.set_rng_verbose(errors);
+        self.p = rng.gen_prime(16, None);
 
         let f = prime_factors(self.p - 1);
         self.q = f[rng.gen_range(1..f.len())];
 
-        for i in 2..self.q {
+        for i in 2..self.p {
             if mod_pow_64(i, self.q, self.p) == 1 {
                 self.generator = i;
-                break
+                break;
             }
         }
 
         self.arr.clear();
         self.arr_error = false;
         for _ in 0..rng.gen_range(10..=20) {
-            self.arr.push(rng.gen_range(1..self.p));
+            self.arr.push(rng.gen_range(1..self.q));
         }
         self.arr_string = self.arr.iter().map(|n| n.to_string()).join(", ");
 
         self.ctr = 1;
 
-        self.rng = NaorReingold::init(self.p, self.q, self.generator, self.arr, self.ctr).unwrap();
+        self.rng =
+            NaorReingold::init(self.p, self.q, self.generator, self.arr.clone(), self.ctr).unwrap();
     }
 
     fn reset(&mut self) {

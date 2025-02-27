@@ -142,46 +142,48 @@ impl IOPanel {
             ui.add(TextEdit::multiline(output).font(TextStyle::Monospace));
         }
 
-        if active_page == &mut Page::Cipher {
-            if let Some(cipher) = active_cipher {
-                encrypt_decrypt(
-                    ui,
-                    cipher_interface.get_active_cipher(cipher),
-                    input,
-                    output,
-                    errors,
-                );
-            } else {
-                // ui.label("<<<CIPHER HOMEPAGE>>>");
+        match active_page {
+            Page::Cipher => {
+                if let Some(cipher) = active_cipher {
+                    encrypt_decrypt(
+                        ui,
+                        cipher_interface.get_active_cipher(cipher),
+                        input,
+                        output,
+                        errors,
+                    );
+                } else {
+                    ui.label("<<<GO TO CIPHER HOMEPAGE>>>");
+                }
             }
+            Page::Code => {
+                if let Some(code) = active_code {
+                    encode_decode(
+                        ui,
+                        code_interface.get_active_code(code),
+                        input,
+                        output,
+                        errors,
+                    );
+                } else {
+                    ui.label("<<<GO TO CODE HOMEPAGE>>>");
+                }
+            }
+            Page::Hash => {
+                if let Some(hasher) = active_hasher {
+                    hash(
+                        ui,
+                        hasher_interface.get_active_hasher(hasher),
+                        input,
+                        output,
+                        errors,
+                    );
+                }
+            }
+            _ => (),
         }
 
-        if active_page == &mut Page::Code {
-            if let Some(code) = active_code {
-                encode_decode(
-                    ui,
-                    code_interface.get_active_code(code),
-                    input,
-                    output,
-                    errors,
-                );
-            } else {
-                // ui.label("<<<CODE HOMEPAGE>>>");
-            }
-        }
-
-        if active_page == &mut Page::Hash {
-            if let Some(hasher) = active_hasher {
-                hash(
-                    ui,
-                    hasher_interface.get_active_hasher(hasher),
-                    input,
-                    output,
-                    errors,
-                );
-            }
-        }
-
+        // Cipher, Code, and Hash all use clear and swap
         if active_page == &mut Page::Cipher
             || active_page == &mut Page::Code
             || active_page == &mut Page::Hash
@@ -197,11 +199,12 @@ impl IOPanel {
             if ui.button("swap input/output").clicked() {
                 std::mem::swap(input, output)
             }
+        }
 
-            if !errors.is_empty() {
-                ui.add_space(24.0);
-                ui.error_text(errors);
-            }
+        // Everything uses errors
+        if !errors.is_empty() {
+            ui.add_space(24.0);
+            ui.error_text(errors);
         }
     }
 }

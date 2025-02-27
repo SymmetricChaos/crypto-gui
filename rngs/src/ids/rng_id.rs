@@ -42,6 +42,7 @@ rng_ids_and_names!(
     MersenneTwister, "Mersenne Twister";
     MiddleSquare, "Middle Square";
     MiddleSquareBinary, "Middle Square Binary";
+    NaorReingold, "Naor-Reingold";
     Pcg, "Permuted Congruential Generator";
     Rc4, "RC4";
     Salsa20, "Salsa20";

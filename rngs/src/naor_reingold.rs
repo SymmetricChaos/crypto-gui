@@ -51,7 +51,7 @@ pub struct NaorReingold {
     p: u64,
     generator: u64,
     arr: Vec<u64>,
-    ctr: u64,
+    pub ctr: u64,
 }
 
 impl Default for NaorReingold {
