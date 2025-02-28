@@ -39,17 +39,13 @@ impl ChaChaFrame {
 
 impl ClassicRngFrame for ChaChaFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        // ui.hyperlink_to(
-        //     "see the code",
-        //     "https://github.com/SymmetricChaos/crypto-gui/blob/master/ciphers/src/digital/chacha.rs",
-        // );
-        // ui.add_space(8.0);
-
-        ui.add_space(16.0);
-
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/rngs/src/chacha.rs",
+        );
         ui.add_space(8.0);
-        ui.subheading("Key");
 
+        ui.subheading("Key");
         for i in 0..4 {
             if ui.u32_hex_edit(&mut self.rng.key[i]).changed() {
                 self.rng.saved_keystream.clear();
@@ -68,7 +64,7 @@ impl ClassicRngFrame for ChaChaFrame {
 
         ui.add_space(8.0);
         ui.subheading("Counter");
-        ui.label("The counter ensures that each block of the keystream is different. It can usually be left to start at zero.");
+        ui.label("The counter ensures that each block of the keystream is different. It is usually left to start at zero.");
         if ui.u64_hex_edit(&mut self.rng.ctr).changed() {
             self.rng.saved_keystream.clear();
         }

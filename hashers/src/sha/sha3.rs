@@ -19,10 +19,9 @@ pub(crate) fn right_encode(val: u64, b: &mut [u8; 9]) -> &[u8] {
 
 #[test]
 fn test_encoding() {
-    let x = 0;
     let mut b = [0; 9];
-    assert_eq!(&[0x01, 0x00], left_encode(x, &mut b));
-    assert_eq!(&[0x00, 0x01], right_encode(x, &mut b));
+    assert_eq!(&[0x01, 0x00], left_encode(0, &mut b));
+    assert_eq!(&[0x00, 0x01], right_encode(0, &mut b));
     assert_eq!(&[0x01, 0x00, 0x02], right_encode(256, &mut b));
 }
 
@@ -219,7 +218,6 @@ impl Keccack {
     }
 
     /// KMAC128; rate of 1344 bits
-    /// This function is intended to be defined by NIST and not used directly
     pub fn kmac_128(key: &[u8], hash_len: u64, customization: &[u8]) -> Self {
         let mut k = Self::cshake_128(hash_len, b"KMAC", customization);
 
@@ -237,7 +235,6 @@ impl Keccack {
     }
 
     /// KMAC128; rate of 1088 bits
-    /// This function is intended to be defined by NIST and not used directly
     pub fn kmac_256(key: &[u8], hash_len: u64, customization: &[u8]) -> Self {
         let mut k = Self::cshake_256(hash_len, b"KMAC", customization);
 

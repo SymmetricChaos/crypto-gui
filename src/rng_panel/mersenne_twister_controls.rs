@@ -99,7 +99,15 @@ impl MTFrame {
 
 impl ClassicRngFrame for MTFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        ui.add_space(16.0);
+        ui.hyperlink_to(
+            "see the MT32 code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/rngs/src/mt19937_32.rs",
+        );
+        ui.hyperlink_to(
+            "see the MT64 code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/rngs/src/mt19937_64.rs",
+        );
+        ui.add_space(8.0);
 
         ui.horizontal(|ui| {
             ui.selectable_value(&mut self.mt64, false, "MT32");
@@ -108,7 +116,12 @@ impl ClassicRngFrame for MTFrame {
 
         ui.horizontal(|ui| {
             ui.subheading("Key");
-            if ui.button("🎲").on_hover_text("randomize").clicked() {
+            if ui
+                .button("🎲")
+                .on_hover_text("randomize")
+                .on_hover_text("initialize from a 64-bit integer")
+                .clicked()
+            {
                 self.randomize();
             }
         });

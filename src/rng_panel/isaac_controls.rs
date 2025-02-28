@@ -72,7 +72,19 @@ impl IsaacFrame {
 
 impl ClassicRngFrame for IsaacFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
-        ui.add_space(16.0);
+        ui.hyperlink_to(
+            "see the IA code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/rngs/src/ia.rs",
+        );
+        ui.hyperlink_to(
+            "see the IBAA code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/rngs/src/ibaa.rs",
+        );
+        ui.hyperlink_to(
+            "see the ISAAC code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/rngs/src/isaac.rs",
+        );
+        ui.add_space(8.0);
 
         ui.selectable_value(&mut self.selector, IsaacSelector::Ia, "IA");
         ui.selectable_value(&mut self.selector, IsaacSelector::Ibaa, "IBAA");
@@ -81,9 +93,11 @@ impl ClassicRngFrame for IsaacFrame {
 
         ui.subheading("Discussion");
         match self.selector {
-            IsaacSelector::Isaac => ui.label("ISAAC is the final PRNG designed in the sequence."),
-            IsaacSelector::Ia => ui.label("ISAAC is the final PRNG designed in the sequence."),
-            IsaacSelector::Ibaa => ui.label("ISAAC is the final PRNG designed in the sequence."),
+            IsaacSelector::Isaac => ui.label("ISAAC is the final PRNG designed in the sequence. It uses Indirection, Shifting, Accumulation, Addition, and Counting. The design is faster than IBAA and should have no bad seeds or short cycles."),
+            IsaacSelector::Ia => ui.label(
+                "IA is the first PRNG designed in the sequence. It uses Indirection and Addition. There is a slight bias in the outputs.",
+            ),
+            IsaacSelector::Ibaa => ui.label("IBAA is the second PRNG designed in the sequence. It uses Indirection, Barrelshifting (Rotation), Accumulation, and Addition. The design eliminates the bias in IA."),
         };
         ui.add_space(16.0);
 

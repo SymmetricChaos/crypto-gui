@@ -1,7 +1,7 @@
 mod a51_controls;
 mod a52_controls;
 mod alternating_step_controls;
-mod blumblumshub_controls;
+mod blum_blum_shub_controls;
 mod chacha_controls;
 mod geffe_controls;
 mod halton_controls;
@@ -65,7 +65,7 @@ pub struct RngInterface {
     a51: a51_controls::A51Frame,
     a52: a52_controls::A52Frame,
     alternating_step: alternating_step_controls::AlternatingStepFrame,
-    blumblumshub: blumblumshub_controls::BlumBlumShubFrame,
+    blumblumshub: blum_blum_shub_controls::BlumBlumShubFrame,
     chacha: chacha_controls::ChaChaFrame,
     geffe: geffe_controls::GeffeFrame,
     halton: halton_controls::HaltonFrame,

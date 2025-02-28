@@ -26,6 +26,12 @@ impl AlternatingStepFrame {}
 
 impl ClassicRngFrame for AlternatingStepFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/rngs/src/alternating_step.rs",
+        );
+        ui.add_space(8.0);
+
         for i in 0..3 {
             let lfsr = &mut self.rng.lfsrs[i];
             lfsr_grid_controls(
