@@ -60,6 +60,12 @@ impl NaorReingoldFrame {
 
 impl ClassicRngFrame for NaorReingoldFrame {
     fn ui(&mut self, ui: &mut egui::Ui, errors: &mut String) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/rngs/src/naor_reingold.rs",
+        );
+        ui.add_space(8.0);
+
         if ui
             .button("Random Function")
             .on_hover_text("choose values for a random PRNG")
@@ -67,6 +73,7 @@ impl ClassicRngFrame for NaorReingoldFrame {
         {
             self.randomize();
         }
+        ui.add_space(8.0);
 
         ui.horizontal(|ui| {
             ui.subheading("p (prime)");

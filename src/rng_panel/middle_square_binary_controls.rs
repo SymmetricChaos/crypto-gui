@@ -22,6 +22,12 @@ impl Default for MiddleSquareBinaryFrame {
 
 impl ClassicRngFrame for MiddleSquareBinaryFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/rngs/src/middle_square_binary.rs",
+        );
+        ui.add_space(8.0);
+
         ui.subheading("Size");
         ui.label("Modern desktop and server computer architecture generally has registers of size 32-bits and 64-bits so all of these can be performed exceptionally quickly. The 16-bit and 8-bit versions are mainly of academic interest as they fall into short repeating sequences very quickly.");
         // ui.selectable_value(&mut self.rng.width, MSBSize::B64, "64-Bit");

@@ -26,6 +26,12 @@ impl SelfShrinkingGeneratorFrame {}
 
 impl ClassicRngFrame for SelfShrinkingGeneratorFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
+        ui.hyperlink_to(
+            "see the code",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/rngs/src/self_shrinking_generator.rs",
+        );
+        ui.add_space(8.0);
+
         ui.add_space(8.0);
         if ui.button("step").clicked() {
             self.rng.step();
