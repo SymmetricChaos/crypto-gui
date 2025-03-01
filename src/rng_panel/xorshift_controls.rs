@@ -5,7 +5,6 @@ use rngs::{xorshift::Xorshift64, ClassicRng};
 
 pub struct XorshiftFrame {
     rng: Xorshift64,
-    key: String,
     randoms: String,
     n_random: usize,
 }
@@ -14,7 +13,6 @@ impl Default for XorshiftFrame {
     fn default() -> Self {
         Self {
             rng: Default::default(),
-            key: String::from("0BAD5EED0BAD5EED"),
             randoms: String::new(),
             n_random: 5,
         }
@@ -37,23 +35,7 @@ impl ClassicRngFrame for XorshiftFrame {
                 self.randomize();
             }
         });
-        ui.horizontal(|ui| {
-            ui.label("Seed should be provided as a string of hexadecimal digits.");
-            if ui.button("set").clicked() {
-                self.rng.state = u64::from_str_radix(&self.key, 16)
-                    .expect("filtering should force this to be valid");
-            }
-        });
-        if ui.text_edit_singleline(&mut self.key).changed() {
-            self.key = self
-                .key
-                .chars()
-                .filter(|c| c.is_ascii_hexdigit())
-                .take(16)
-                .collect();
-            self.rng.state = u64::from_str_radix(&self.key, 16)
-                .expect("filtering should force this to be valid");
-        }
+        ui.u64_hex_edit(&mut self.rng.state);
 
         ui.add_space(16.0);
         ui.subheading("Internal State");
@@ -103,7 +85,6 @@ impl ClassicRngFrame for XorshiftFrame {
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         self.rng.state = rng.gen::<u64>();
-        self.key = format!("{:016X}", self.rng.state);
     }
 
     fn reset(&mut self) {

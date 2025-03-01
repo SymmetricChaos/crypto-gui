@@ -1,5 +1,5 @@
 use super::ClassicRngFrame;
-use crate::ui_elements::{filter_and_parse_u32, generate_random_u32s_box, UiElements};
+use crate::ui_elements::{generate_random_u32s_box, UiElements};
 use egui::RichText;
 use num::Integer;
 use rand::{thread_rng, Rng};
@@ -7,24 +7,16 @@ use rngs::{weyl::WeylSequence, ClassicRng};
 
 pub struct WeylSequenceFrame {
     rng: WeylSequence,
-    state_string: String,
-    modulus_string: String,
-    increment_string: String,
+    incr_err: bool,
     randoms: String,
     n_random: usize,
 }
 
 impl Default for WeylSequenceFrame {
     fn default() -> Self {
-        let rng = WeylSequence::default();
-        let state_string = rng.state.to_string();
-        let modulus_string = rng.modulus.to_string();
-        let increment_string = rng.increment.to_string();
         Self {
-            rng,
-            state_string,
-            modulus_string,
-            increment_string,
+            rng: WeylSequence::default(),
+            incr_err: false,
             randoms: String::new(),
             n_random: 5,
         }
@@ -45,26 +37,36 @@ impl ClassicRngFrame for WeylSequenceFrame {
             self.randomize();
         }
 
-        ui.subheading("State");
-        let state = ui.control_string(&mut self.state_string);
-        if state.changed() || state.lost_focus() {
-            filter_and_parse_u32(&mut self.rng.state, &mut self.state_string);
-        }
+        ui.horizontal(|ui| {
+            ui.subheading("State");
+            if ui.button("🎲").on_hover_text("randomize").clicked() {
+                let mut rng = thread_rng();
+                self.rng.state = rng.gen_range(0..(1 << 20));
+            }
+        });
+        ui.u32_drag_value_dec(&mut self.rng.state);
+
+        ui.add_space(8.0);
+        ui.horizontal(|ui| {
+            ui.subheading("Modulus");
+            if ui.button("🎲").on_hover_text("randomize").clicked() {
+                let mut rng = thread_rng();
+                self.rng.state = rng.gen_range(0..(1 << 20));
+            }
+        });
+        ui.u32_drag_value_dec(&mut self.rng.modulus);
+
         ui.add_space(8.0);
         ui.subheading("Increment");
-        if ui.control_string(&mut self.increment_string).changed() {
-            filter_and_parse_u32(&mut self.rng.increment, &mut self.increment_string);
+        if ui.u32_drag_value_dec(&mut self.rng.increment).lost_focus() {
+            self.incr_err = self.rng.increment.gcd(&self.rng.modulus) == 1;
         }
-        ui.add_space(8.0);
-        ui.subheading("Modulus");
-        if ui.control_string(&mut self.modulus_string).changed() {
-            filter_and_parse_u32(&mut self.rng.modulus, &mut self.modulus_string);
-        }
-        if self.rng.increment.gcd(&self.rng.modulus) == 1 {
+        if self.incr_err {
             ui.error_text("");
         } else {
             ui.error_text("Increment must be co-prime to the Modulus.");
         }
+
         ui.add_space(8.0);
         ui.subheading("Calculation");
         let calc = format!(
@@ -82,7 +84,6 @@ impl ClassicRngFrame for WeylSequenceFrame {
         }
         ui.add_space(16.0);
         generate_random_u32s_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
-        self.state_string = self.rng.state.to_string();
     }
 
     fn rng(&self) -> &dyn rngs::ClassicRng {
@@ -91,11 +92,15 @@ impl ClassicRngFrame for WeylSequenceFrame {
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        for _ in 0..100 {
+
+        self.rng.state = rng.gen_range(0..(1 << 20));
+        self.rng.modulus = rng.gen_range(0..(1 << 20));
+
+        for _ in 0..1000 {
             let n = rng.gen_range(0..self.rng.modulus);
             if n.gcd(&self.rng.modulus) == 1 {
-                self.rng.state;
-                return;
+                self.rng.increment = n;
+                break;
             }
         }
     }
