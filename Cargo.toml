@@ -47,6 +47,7 @@ bimap = "0.6.3"
 regex = "1"
 strsim = "0.11.0"
 strum = { version = "0.26", features = ["derive"] }
+paste = "1.0.15"
 
 # You only need serde if you want app persistence:
 # serde = { version = "1", features = ["derive"] }

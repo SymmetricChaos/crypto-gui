@@ -805,6 +805,7 @@ dependencies = [
  "log",
  "num 0.4.3",
  "num-prime",
+ "paste",
  "primal",
  "rand",
  "regex",

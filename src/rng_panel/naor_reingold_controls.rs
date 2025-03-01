@@ -147,11 +147,11 @@ impl ClassicRngFrame for NaorReingoldFrame {
 
         ui.horizontal(|ui| {
             ui.subheading("Counter");
-            if ui.add(DragValue::new(&mut self.ctr)).lost_focus() {
-                self.set_rng_verbose(errors);
-            }
-            ui.subheading(format!("({})", self.rng.ctr));
         });
+        if ui.add(DragValue::new(&mut self.ctr)).lost_focus() {
+            self.set_rng_verbose(errors);
+        }
+        ui.subheading(format!("({})", self.rng.ctr));
 
         ui.add_space(8.0);
 
