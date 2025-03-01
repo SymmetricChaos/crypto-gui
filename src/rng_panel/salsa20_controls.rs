@@ -43,13 +43,9 @@ impl ClassicRngFrame for Salsa20Frame {
             "see the code",
             "https://github.com/SymmetricChaos/crypto-gui/blob/master/rngs/src/salsa20.rs",
         );
-        ui.add_space(8.0);
-
-        ui.add_space(16.0);
 
         ui.add_space(8.0);
         ui.subheading("Key");
-
         for i in 0..4 {
             if ui.u32_hex_edit(&mut self.rng.key[i]).changed() {
                 self.rng.saved_keystream.clear();
@@ -59,7 +55,6 @@ impl ClassicRngFrame for Salsa20Frame {
         ui.add_space(8.0);
         ui.subheading("Nonce");
         ui.label("A nonce should never be reused with the same key.");
-
         for i in 0..2 {
             if ui.u32_hex_edit(&mut self.rng.key[i]).changed() {
                 self.rng.saved_keystream.clear();

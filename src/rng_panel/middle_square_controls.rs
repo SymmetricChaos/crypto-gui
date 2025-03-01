@@ -72,9 +72,7 @@ impl ClassicRngFrame for MiddleSquareFrame {
         }
 
         ui.subheading("Seed Value");
-        if ui.control_string(&mut self.state_string).changed() {
-            filter_string(&mut self.state_string, &"0123456789");
-            self.rng.state = self.state_string.parse().unwrap_or(0);
+        if ui.u64_drag_value_dec(&mut self.rng.state).lost_focus() {
             self.rng.state = self.rng.state % (10_u64.pow((self.rng.width) as u32));
         }
 

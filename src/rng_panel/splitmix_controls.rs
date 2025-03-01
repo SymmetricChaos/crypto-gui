@@ -6,7 +6,6 @@ use rngs::splitmix::Splitmix;
 
 pub struct SplitmixFrame {
     rng: Splitmix,
-    key: String,
     randoms: String,
     n_random: usize,
 }
@@ -15,7 +14,6 @@ impl Default for SplitmixFrame {
     fn default() -> Self {
         Self {
             rng: Default::default(),
-            key: String::from("DEADBEEF42"),
             randoms: String::new(),
             n_random: 5,
         }
@@ -38,17 +36,7 @@ impl ClassicRngFrame for SplitmixFrame {
                 self.randomize();
             }
         });
-        ui.label("Seed should be provided as a string of hexadecimal digits.");
-        if ui.text_edit_multiline(&mut self.key).changed() {
-            self.key = self
-                .key
-                .chars()
-                .filter(|c| c.is_ascii_hexdigit())
-                .take(16)
-                .collect();
-            self.rng.state = u64::from_str_radix(&self.key, 16)
-                .expect("filtering should force Splitmix64 seed to be valid");
-        }
+        ui.u64_hex_edit(&mut self.rng.state);
 
         ui.add_space(16.0);
         ui.subheading("Internal State");
@@ -121,7 +109,6 @@ impl ClassicRngFrame for SplitmixFrame {
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         self.rng.state = rng.gen::<u64>();
-        self.key = format!("{:016X}", self.rng.state);
     }
 
     fn reset(&mut self) {

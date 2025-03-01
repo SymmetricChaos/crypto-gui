@@ -66,6 +66,7 @@ pub trait UiElements {
     fn u8_drag_value_dec(&mut self, n: &mut u8) -> Response;
     fn u16_drag_value_dec(&mut self, n: &mut u16) -> Response;
     fn u32_drag_value_dec(&mut self, n: &mut u32) -> Response;
+    fn u64_drag_value_dec(&mut self, n: &mut u64) -> Response;
     fn random_bytes_button<T: Fill>(&mut self, item: &mut T) -> Response;
     fn random_num_button<T>(&mut self, item: &mut T) -> Response
     where
@@ -321,6 +322,10 @@ impl UiElements for Ui {
     }
 
     fn u32_drag_value_dec(&mut self, n: &mut u32) -> Response {
+        self.add(DragValue::new(n))
+    }
+
+    fn u64_drag_value_dec(&mut self, n: &mut u64) -> Response {
         self.add(DragValue::new(n))
     }
 
