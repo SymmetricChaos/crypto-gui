@@ -1,10 +1,5 @@
 use crate::traits::ClassicRng;
 
-// macro_rules! lfsr {
-//     ($name: ident, $integer: ty, $width: literal) => {
-
-//     };
-
 #[derive(Debug, Clone)]
 pub struct Lfsr32 {
     pub register: u32,

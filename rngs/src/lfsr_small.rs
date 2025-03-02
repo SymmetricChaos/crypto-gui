@@ -1,79 +1,81 @@
 #[macro_export]
-/// Create an LFSR that keeps just a single u64 as state and inlines the taps
-macro_rules! small_lfsr64 {
-    ($name: ident, $($tap: literal),+ $(,)?) => {
-        pub struct $name {
-            state: u64
-        }
-
-        impl $name {
-            pub fn shift(&mut self) {
-                let mut new_bit = 0;
-                $(
-                    new_bit ^= (self.state >> $tap) & 1;
-                )+
-                self.state = (self.state << 1) | new_bit;
-            }
-
-            pub fn next_bit(&mut self) -> u64 {
-                let mut new_bit = 0;
-                $(
-                    new_bit ^= (self.state >> $tap) & 1;
-                )+
-                self.state = (self.state << 1) | new_bit;
-                new_bit
-            }
-        }
-
-        impl ClassicRng for $name {
-            fn next_u32(&mut self) -> u32 {
-                let mut out = 0;
-                for _ in 0..32 {
-                    out <<= 1;
-                    out |= next_bit;
-                }
-                out as u32
-            }
+/// Create a Fibonacci LFSR function with inlined taps, will not compile with invalid taps
+macro_rules! lfsr64 {
+    ($name: ident, $($tap: literal),+) => {
+        pub fn $name(mut state: u64) -> u64 {
+            let mut new_bit = 0;
+            $(
+                new_bit ^= (state >> $tap) & 1;
+            )+
+            state = (state << 1) | new_bit;
+            state
         }
     };
 }
 
 #[macro_export]
-/// Create an LFSR that keeps just a single u32 as state and inlines the taps
-macro_rules! small_lfsr32 {
-    ($name: ident, $($tap: literal),+ $(,)?) => {
-        pub struct $name {
-            state: u32
-        }
-
-        impl $name {
-            pub fn shift(&mut self) {
-                let mut new_bit = 0;
-                $(
-                    new_bit ^= (self.state >> $tap) & 1;
-                )+
-                self.state = (self.state << 1) | new_bit;
-            }
-
-            pub fn next_bit(&mut self) -> u64 {
-                let mut new_bit = 0;
-                $(
-                    new_bit ^= (self.state >> $tap) & 1;
-                )+
-                self.state = (self.state << 1) | new_bit;
-                new_bit
-            }
-        }
-
-        impl ClassicRng for $name {
-            fn next_u32(&mut self) -> u32 {
-                let mut out = 0;
-                for _ in 0..32 {
-                    out <<= 1;
-                    out |= next_bit;
-                }
-                out as u32
-            }
+/// Create a Galois LFSR function with inlined taps, will not compile with invalid taps
+macro_rules! glfsr64 {
+    ($name: ident, $taps: literal) => {
+        pub fn $name(mut state: u64) -> u64 {
+            let new_bit = state & 1;
+            state >>= 1;
+            state ^= (taps * new_bit);
+            state
         }
     };
+}
+
+#[macro_export]
+/// Create a Fibonacci LFSR function with inlined taps, will not compile with invalid taps
+macro_rules! lfsr32 {
+    ($name: ident, $($tap: literal),+) => {
+        pub fn $name(mut state: u32) -> u32 {
+            let mut new_bit = 0;
+            $(
+                new_bit ^= (state >> $tap) & 1;
+            )+
+            state = (state << 1) | new_bit;
+            state
+        }
+    };
+}
+
+#[macro_export]
+/// Create a Galois LFSR function with inlined taps, will not compile with invalid taps
+macro_rules! glfsr32 {
+    ($name: ident, $taps: literal) => {
+        pub fn $name(mut state: u32) -> u32 {
+            let new_bit = state & 1;
+            state >>= 1;
+            state ^= (taps * new_bit);
+            state
+        }
+    };
+}
+
+#[inline]
+pub fn get_bit_64(state: u64, idx: u64) -> u64 {
+    assert!(idx < 64);
+    (state >> idx) & 1
+}
+
+#[inline]
+pub fn get_bit_32(state: u32, idx: u32) -> u32 {
+    assert!(idx < 32);
+    (state >> idx) & 1
+}
+
+#[cfg(test)]
+mod test {
+
+    #[test]
+    fn example() {
+        lfsr64!(my_lfsr, 6, 9, 13, 19, 63);
+        let mut x = 123456789;
+        for _ in 0..40 {
+            x = my_lfsr(x);
+            println!("{x}")
+        }
+    }
 }
