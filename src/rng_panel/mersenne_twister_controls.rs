@@ -118,7 +118,11 @@ impl ClassicRngFrame for MTFrame {
             ui.subheading("Key");
             if ui
                 .button("🎲")
-                .on_hover_text("initialize from a random 64-bit integer")
+                .on_hover_text(if self.mt64 {
+                    "initialize from a random 64-bit integer"
+                } else {
+                    "initialize from a random 32-bit integer"
+                })
                 .clicked()
             {
                 self.randomize();
@@ -199,8 +203,6 @@ impl ClassicRngFrame for MTFrame {
                     });
             });
         }
-
-        //ui.collapsing("explain", |ui| ui.label(""));
 
         ui.add_space(16.0);
         generate_random_u32s_box(ui, &mut self.rng_32, &mut self.n_random, &mut self.randoms);

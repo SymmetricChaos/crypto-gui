@@ -15,3 +15,4 @@ json = "0.12.4"
 primal = "0.3.0"
 num-prime = "0.4.3"
 strum = { version = "0.26", features = ["derive"] }
+paste = "1.0.15"
