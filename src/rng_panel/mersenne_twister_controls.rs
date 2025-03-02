@@ -118,8 +118,7 @@ impl ClassicRngFrame for MTFrame {
             ui.subheading("Key");
             if ui
                 .button("🎲")
-                .on_hover_text("randomize")
-                .on_hover_text("initialize from a 64-bit integer")
+                .on_hover_text("initialize from a random 64-bit integer")
                 .clicked()
             {
                 self.randomize();

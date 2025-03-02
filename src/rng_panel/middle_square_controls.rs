@@ -3,11 +3,9 @@ use crate::ui_elements::{generate_random_u32s_box, UiElements};
 use egui::{Button, DragValue, RichText};
 use rand::{thread_rng, Rng};
 use rngs::{middle_square::MiddleSquare, ClassicRng};
-use utils::text_functions::filter_string;
 
 pub struct MiddleSquareFrame {
     rng: MiddleSquare,
-    state_string: String,
     position: usize,
     randoms: String,
     n_random: usize,
@@ -15,11 +13,8 @@ pub struct MiddleSquareFrame {
 
 impl Default for MiddleSquareFrame {
     fn default() -> Self {
-        let rng = MiddleSquare::default();
-        let state_string = rng.state.to_string();
         Self {
-            rng,
-            state_string,
+            rng: MiddleSquare::default(),
             position: 3,
             randoms: String::new(),
             n_random: 5,
