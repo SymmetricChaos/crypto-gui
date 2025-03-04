@@ -1,8 +1,7 @@
 #[macro_export]
-/// Create a Fibonacci LFSR function that shifts the state to the right (toward the least significant bit). The state is a u64;
-/// Example: for the 16-bit LFSR defined by the feedback polynomial x^16 + x^14 + x^13 + x^11 + 1 use lfsr64_r(my_lfsr, 16; 14, 13, 11)
+/// Create a Fibonacci LFSR function that shifts the state to the right (toward the least significant bit). The state is a u64.
+/// Example: for the LFSR defined by the feedback polynomial x^16 + x^14 + x^13 + x^11 + 1 use lfsr64_r(my_lfsr, 16; 14, 13, 11)
 macro_rules! lfsr64_r {
-
     ($name: ident, $bits: literal; $($tap: literal),+) => {
         /// Advance the state.
         pub fn $name(state: u64) -> u64 {
@@ -18,19 +17,55 @@ macro_rules! lfsr64_r {
 }
 
 #[macro_export]
-/// Create a Fibonacci LFSR function that shifts the state to the right (toward the least significant bit). The state is a u64;
-/// Example: for the 16-bit LFSR defined by the feedback polynomial x^16 + x^14 + x^13 + x^11 + 1 use lfsr32_r(my_lfsr, 16; 14, 13, 11)
+/// Create a Fibonacci LFSR function that shifts the state to the left (toward the most significant bit). The state is a u64.
+/// Example: for the LFSR defined by the feedback polynomial x^16 + x^14 + x^13 + x^11 + 1 use lfsr64_r(my_lfsr, 16; 14, 13, 11)
+macro_rules! lfsr64_l {
+    ($name: ident, $bits: literal; $($tap: literal),+) => {
+        /// Advance the state.
+        pub fn $name(state: u64) -> u64 {
+            assert!($bits < 64);
+            let mut new_bit = state >> ($bits - 1);
+            $(
+                assert!($bits >= $tap);
+                new_bit ^= state >> ($tap - 1);
+            )+
+            ((state << 1) | (new_bit & 1 )) & (!0_u64 >> (64 - $bits))
+        }
+    };
+}
+
+#[macro_export]
+/// Create a Fibonacci LFSR function that shifts the state to the right (toward the least significant bit). The state is a u32.
+/// Example: for the LFSR defined by the feedback polynomial x^16 + x^14 + x^13 + x^11 + 1 use lfsr32_r(my_lfsr, 16; 14, 13, 11)
 macro_rules! lfsr32_r {
     ($name: ident, $bits: literal; $($tap: literal),+) => {
         /// Advance the state.
         pub fn $name(state: u32) -> u32 {
-            assert!($bits <= 32);
+            assert!($bits < 32);
             let mut new_bit = state;
             $(
                 assert!($bits >= $tap);
                 new_bit ^= state >> ($bits - $tap);
             )+
             ((state >> 1) | (new_bit << ($bits - 1)) ) & (!0_u32 >> (32 - $bits))
+        }
+    };
+}
+
+#[macro_export]
+/// Create a Fibonacci LFSR function that shifts the state to the left (toward the most significant bit). The state is a u32.
+/// Example: for the LFSR defined by the feedback polynomial x^16 + x^14 + x^13 + x^11 + 1 use lfsr64_r(my_lfsr, 16; 14, 13, 11)
+macro_rules! lfsr32_l {
+    ($name: ident, $bits: literal; $($tap: literal),+) => {
+        /// Advance the state.
+        pub fn $name(state: u32) -> u32 {
+            assert!($bits < 32);
+            let mut new_bit = state >> ($bits - 1);
+            $(
+                assert!($bits >= $tap);
+                new_bit ^= state >> ($tap - 1);
+            )+
+            ((state << 1) | (new_bit & 1 )) & (!0_u32 >> (32 - $bits))
         }
     };
 }
@@ -78,6 +113,16 @@ mod test {
         }
         // Five bits should give (2^5)-1 = 31 states
         assert_eq!(31, states.len());
+
+        lfsr64_l!(my_lfsr64_l, 5; 2,3,4);
+        let mut states = Vec::new();
+        let mut s = 1;
+        while !states.contains(&s) {
+            states.push(s);
+            s = my_lfsr64_l(s);
+        }
+        // Five bits should give (2^5)-1 = 31 states
+        assert_eq!(31, states.len());
     }
 
     #[test]
@@ -88,6 +133,16 @@ mod test {
         while !states.contains(&s) {
             states.push(s);
             s = my_lfsr32_r(s);
+        }
+        // 16 bits should give (2^16)-1 = 65535 states
+        assert_eq!(65535, states.len());
+
+        lfsr32_l!(my_lfsr32_l, 16; 11, 13, 14);
+        let mut states = Vec::new();
+        let mut s = 1;
+        while !states.contains(&s) {
+            states.push(s);
+            s = my_lfsr32_l(s);
         }
         // 16 bits should give (2^16)-1 = 65535 states
         assert_eq!(65535, states.len());
