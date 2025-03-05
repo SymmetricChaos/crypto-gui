@@ -18,7 +18,7 @@ macro_rules! lfsr64_r {
 
 #[macro_export]
 /// Create a Fibonacci LFSR function that shifts the state to the left (toward the most significant bit). The state is a u64.
-/// Example: for the LFSR defined by the feedback polynomial x^16 + x^14 + x^13 + x^11 + 1 use lfsr64_r(my_lfsr, 16; 14, 13, 11)
+/// Example: for the LFSR defined by the feedback polynomial x^16 + x^14 + x^13 + x^11 + 1 use lfsr64_l(my_lfsr, 16; 14, 13, 11)
 macro_rules! lfsr64_l {
     ($name: ident, $bits: literal; $($tap: literal),+) => {
         /// Advance the state.

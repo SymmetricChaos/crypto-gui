@@ -1,6 +1,6 @@
 use strum::{Display, EnumIter};
 
-use crate::{lfsr32::Lfsr32, ClassicRng};
+use crate::{lfsr64_l, ClassicRng};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, Display)]
 pub enum ReKeyRule {
@@ -22,9 +22,18 @@ impl ReKeyRule {
     }
 }
 
+lfsr64_l!(rng0, 19; 18, 17, 14); // 0x072000
+lfsr64_l!(rng1, 22; 21); // 0x300000
+lfsr64_l!(rng2, 23; 22, 21, 8); // 0x700080
+
+fn get_bit(n: u32, idx: usize) -> u32 {
+    assert!(idx < 32);
+    (n >> (idx - 1)) & 1
+}
+
 #[derive(Debug, Clone)]
 pub struct A51Rng {
-    pub lfsrs: [Lfsr32; 3],
+    pub lfsrs: [u32; 3],
     pub key: [u8; 8],
     pub frame_number: u32,
     pub rekey: ReKeyRule,
@@ -33,11 +42,7 @@ pub struct A51Rng {
 impl Default for A51Rng {
     fn default() -> Self {
         let mut out = Self {
-            lfsrs: [
-                Lfsr32::from_taps(0x072000), // 18, 17, 16, 13
-                Lfsr32::from_taps(0x300000), // 21, 20
-                Lfsr32::from_taps(0x700080), // 22, 21, 20, 7
-            ],
+            lfsrs: [1, 1, 1],
             key: [0, 0, 0, 0, 0, 0, 0, 1], // avoid starting with an empty array
             frame_number: 0,
             rekey: ReKeyRule::K114,
@@ -54,25 +59,25 @@ impl A51Rng {
 
         // Zero out the registers
         for rng in self.lfsrs.iter_mut() {
-            rng.register = 0
+            *rng = 0
         }
 
         // Mix in the key bits one byte at a time, LSB first
         for i in 0..64 {
             self.step_all();
             let b = ((self.key[i / 8] >> (i & 7)) & 1) as u32;
-            self.lfsrs[0].register ^= b;
-            self.lfsrs[1].register ^= b;
-            self.lfsrs[2].register ^= b;
+            self.lfsrs[0] ^= b;
+            self.lfsrs[1] ^= b;
+            self.lfsrs[2] ^= b;
         }
 
         // Mix in the frame bits LSB first
         for i in 0..22 {
             self.step_all();
             let b = (self.frame_number >> i) & 1;
-            self.lfsrs[0].register ^= b;
-            self.lfsrs[1].register ^= b;
-            self.lfsrs[2].register ^= b;
+            self.lfsrs[0] ^= b;
+            self.lfsrs[1] ^= b;
+            self.lfsrs[2] ^= b;
         }
 
         // Mix for 100 steps with normal clocking
@@ -81,29 +86,38 @@ impl A51Rng {
         }
     }
 
-    pub fn step_all(&mut self) {
-        for lfsr in self.lfsrs.iter_mut() {
-            lfsr.next_bit();
+    fn step_lfsr(&mut self, n: usize) {
+        match n {
+            0 => self.lfsrs[0] = rng0(self.lfsrs[0] as u64) as u32,
+            1 => self.lfsrs[1] = rng1(self.lfsrs[1] as u64) as u32,
+            2 => self.lfsrs[2] = rng2(self.lfsrs[2] as u64) as u32,
+            _ => unreachable!("there are only three lfsrs"),
         }
+    }
+
+    pub fn step_all(&mut self) {
+        self.step_lfsr(0);
+        self.step_lfsr(1);
+        self.step_lfsr(2);
     }
 
     // https://cryptome.org/jya/a51-pi.htm
     pub fn next_bit(&mut self) -> u32 {
         let (a, b, c) = (
-            self.lfsrs[0].get_bit(8),
-            self.lfsrs[1].get_bit(10),
-            self.lfsrs[2].get_bit(10),
+            get_bit(self.lfsrs[0], 9),
+            get_bit(self.lfsrs[1], 11),
+            get_bit(self.lfsrs[2], 11),
         );
 
         // Calculate majority bit
         let majority = (a & b) | (a & c) | (b & c);
 
         let mut out = 0;
-        for (clock, idx, msb) in [(a, 0, 18), (b, 1, 21), (c, 2, 22)] {
+        for (clock, idx, msb) in [(a, 0, 19), (b, 1, 22), (c, 2, 23)] {
             if clock == majority {
-                self.lfsrs[idx].next_bit();
+                self.step_lfsr(idx);
             }
-            out ^= self.lfsrs[idx].get_bit(msb);
+            out ^= get_bit(self.lfsrs[idx], msb);
         }
 
         out
@@ -183,13 +197,13 @@ mod a51rng_tests {
         assert_eq!(correct_bytes_ba, bytes_ba);
     }
 
-    #[test]
-    fn test_masks() {
-        let rng = A51Rng::default();
-        assert_eq!(rng.lfsrs[0].mask, 0x07FFFF);
-        assert_eq!(rng.lfsrs[1].mask, 0x3FFFFF);
-        assert_eq!(rng.lfsrs[2].mask, 0x7FFFFF);
-    }
+    // #[test]
+    // fn test_masks() {
+    //     let rng = A51Rng::default();
+    //     assert_eq!(rng.lfsrs[0].mask, 0x07FFFF);
+    //     assert_eq!(rng.lfsrs[1].mask, 0x3FFFFF);
+    //     assert_eq!(rng.lfsrs[2].mask, 0x7FFFFF);
+    // }
 
     // #[test]
     // fn test_majority() {
