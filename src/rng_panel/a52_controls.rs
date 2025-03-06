@@ -56,17 +56,17 @@ impl ClassicRngFrame for A52Frame {
         });
 
         ui.subheading("LFSRs");
-        ui.monospace(format!("{:019b}", self.rng.lfsrs[0].register));
+        ui.monospace(format!("{:019b}", self.rng.lfsrs[0]));
         ui.monospace("^^^  ^             ");
         ui.add_space(4.0);
-        ui.monospace(format!("{:022b}", self.rng.lfsrs[1].register));
+        ui.monospace(format!("{:022b}", self.rng.lfsrs[1]));
         ui.monospace("^^                    ");
         ui.add_space(4.0);
-        ui.monospace(format!("{:023b}", self.rng.lfsrs[2].register));
+        ui.monospace(format!("{:023b}", self.rng.lfsrs[2]));
         ui.monospace("^^^            ^       ");
         ui.add_space(4.0);
         ui.subheading("Clock Control LFSR");
-        ui.label(format!("{:017b}", self.rng.lfsrs[3].register));
+        ui.label(format!("{:017b}", self.rng.lfsrs[3]));
         ui.monospace("^    ^           ");
         ui.add_space(16.0);
 

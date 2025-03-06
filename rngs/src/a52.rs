@@ -1,6 +1,6 @@
 use strum::{Display, EnumIter};
 
-use crate::{lfsr32::Lfsr32, ClassicRng};
+use crate::{lfsr64_l, lfsr_small::get_bit, ClassicRng};
 
 fn majority(a: u32, b: u32, c: u32) -> u32 {
     (a & b) | (a & c) | (b & c)
@@ -26,9 +26,14 @@ impl ReKeyRule {
     }
 }
 
+lfsr64_l!(rng0, 19; 18, 17, 14); // 0x072000
+lfsr64_l!(rng1, 22; 21); // 0x300000
+lfsr64_l!(rng2, 23; 22, 21, 8); // 0x700080
+lfsr64_l!(rng3, 17; 12); // 0x010800
+
 #[derive(Debug, Clone)]
 pub struct A52Rng {
-    pub lfsrs: [Lfsr32; 4],
+    pub lfsrs: [u32; 4],
     pub key: [u8; 8],
     pub frame_number: u32,
     pub rekey: ReKeyRule,
@@ -37,12 +42,7 @@ pub struct A52Rng {
 impl Default for A52Rng {
     fn default() -> Self {
         let mut out = Self {
-            lfsrs: [
-                Lfsr32::from_taps(0x072000), // 18, 17, 16, 13
-                Lfsr32::from_taps(0x300000), // 21, 20
-                Lfsr32::from_taps(0x700080), // 22, 21, 20, 7
-                Lfsr32::from_taps(0x010800), // 16, 11
-            ],
+            lfsrs: [1, 1, 1, 1],
             key: [0, 0, 0, 0, 0, 0, 0, 1], // avoid starting with an empty array
             frame_number: 0,
             rekey: ReKeyRule::K114,
@@ -57,22 +57,24 @@ impl A52Rng {
     const MSB: [u32; 4] = [18, 21, 22, 16];
 
     pub fn ksa(&mut self) {
-        // Frame number limited to 22 bits
-        assert!(self.frame_number < 0x00400000);
+        assert!(
+            self.frame_number < 0x00400000,
+            "frame number is limited to 22 bits"
+        );
 
         // Zero out the registers
-        for rng in self.lfsrs.iter_mut() {
-            rng.register = 0
+        for i in 0..4 {
+            self.lfsrs[i] = 0
         }
 
         // Mix in the key bits one byte at a time, LSB first
         for i in 0..64 {
             self.step_all(false);
             let b = ((self.key[i / 8] >> (i & 7)) & 1) as u32;
-            self.lfsrs[0].register ^= b;
-            self.lfsrs[1].register ^= b;
-            self.lfsrs[2].register ^= b;
-            self.lfsrs[3].register ^= b;
+            self.lfsrs[0] ^= b;
+            self.lfsrs[1] ^= b;
+            self.lfsrs[2] ^= b;
+            self.lfsrs[3] ^= b;
         }
 
         // Mix in the frame bits LSB first
@@ -80,10 +82,10 @@ impl A52Rng {
             // For the last bit of the frame number several bits are loaded when the LFSRs are stepped
             self.step_all(i == 21);
             let b = (self.frame_number >> i) & 1;
-            self.lfsrs[0].register ^= b;
-            self.lfsrs[1].register ^= b;
-            self.lfsrs[2].register ^= b;
-            self.lfsrs[3].register ^= b;
+            self.lfsrs[0] ^= b;
+            self.lfsrs[1] ^= b;
+            self.lfsrs[2] ^= b;
+            self.lfsrs[3] ^= b;
         }
 
         // Mix for 99 steps with normal clocking
@@ -92,22 +94,31 @@ impl A52Rng {
         }
     }
 
+    pub fn step_rng(&mut self, n: usize) {
+        match n {
+            0 => self.lfsrs[0] = rng0(self.lfsrs[0] as u64) as u32,
+            1 => self.lfsrs[1] = rng1(self.lfsrs[1] as u64) as u32,
+            2 => self.lfsrs[2] = rng2(self.lfsrs[2] as u64) as u32,
+            3 => self.lfsrs[3] = rng3(self.lfsrs[3] as u64) as u32,
+            _ => unreachable!("there are only four lfsrs"),
+        }
+    }
+
     pub fn step_all(&mut self, load: bool) {
-        for (i, lfsr) in self.lfsrs.iter_mut().enumerate() {
-            lfsr.next_bit();
+        for i in 0..4 {
+            self.step_rng(i);
             if load {
-                lfsr.register |= 1 << Self::LOADED[i];
+                self.lfsrs[i] |= 1 << Self::LOADED[i];
             }
         }
     }
 
     // https://archive.ph/20130120032216/http://www.cryptodox.com/A5/2
     pub fn next_bit(&mut self) -> u32 {
-        // The fourth (and shortest) LFSR controls the stepping of all the others
         let (a, b, c) = (
-            self.lfsrs[3].get_bit(10),
-            self.lfsrs[3].get_bit(3),
-            self.lfsrs[3].get_bit(7),
+            get_bit(self.lfsrs[3] as u64, 10) as u32,
+            get_bit(self.lfsrs[3] as u64, 3) as u32,
+            get_bit(self.lfsrs[3] as u64, 7) as u32,
         );
 
         // Calculate majority bit from the fourth register
@@ -116,35 +127,35 @@ impl A52Rng {
         // Clock everything
         for (clock, idx) in [(a, 0), (b, 1), (c, 2)] {
             if clock == m {
-                self.lfsrs[idx].next_bit();
+                self.step_rng(idx);
             }
         }
-        self.lfsrs[3].next_bit();
+        self.step_rng(3);
 
         // Determine the output bit
         let mut out = 0;
 
         // XOR in the MSB
-        out ^= self.lfsrs[0].get_bit(Self::MSB[0]);
+        out ^= get_bit(self.lfsrs[0] as u64, Self::MSB[0] as usize) as u32;
         // XOR in the majority of three chosen bits, with one inverted
         out ^= majority(
-            self.lfsrs[0].get_bit(15),
-            self.lfsrs[0].get_bit(14) ^ 1,
-            self.lfsrs[0].get_bit(12),
+            get_bit(self.lfsrs[0] as u64, 15) as u32,
+            get_bit(self.lfsrs[0] as u64, 14) as u32 ^ 1,
+            get_bit(self.lfsrs[0] as u64, 12) as u32,
         );
 
-        out ^= self.lfsrs[1].get_bit(Self::MSB[1]);
+        out ^= get_bit(self.lfsrs[1] as u64, Self::MSB[1] as usize) as u32;
         out ^= majority(
-            self.lfsrs[1].get_bit(16) ^ 1,
-            self.lfsrs[1].get_bit(13),
-            self.lfsrs[1].get_bit(9),
+            get_bit(self.lfsrs[1] as u64, 16) as u32 ^ 1,
+            get_bit(self.lfsrs[1] as u64, 13) as u32,
+            get_bit(self.lfsrs[1] as u64, 9) as u32,
         );
 
-        out ^= self.lfsrs[2].get_bit(Self::MSB[2]);
+        out ^= get_bit(self.lfsrs[2] as u64, Self::MSB[2] as usize) as u32;
         out ^= majority(
-            self.lfsrs[2].get_bit(18),
-            self.lfsrs[2].get_bit(16),
-            self.lfsrs[2].get_bit(13) ^ 1,
+            get_bit(self.lfsrs[2] as u64, 18) as u32,
+            get_bit(self.lfsrs[2] as u64, 16) as u32,
+            get_bit(self.lfsrs[2] as u64, 13) as u32 ^ 1,
         );
 
         out

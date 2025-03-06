@@ -17,7 +17,7 @@ pub mod jsf;
 pub mod lcg;
 pub mod lfg;
 pub mod lfsr;
-pub mod lfsr32;
+// pub mod lfsr32;
 pub mod lfsr_small;
 pub mod middle_square;
 pub mod middle_square_binary;
