@@ -1,6 +1,6 @@
 use strum::{Display, EnumIter};
 
-use crate::{lfsr64_l, lfsr_small::get_bit32, ClassicRng};
+use crate::{lfsr_l, lfsr_small::get_bit32, ClassicRng};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, Display)]
 pub enum ReKeyRule {
@@ -22,9 +22,9 @@ impl ReKeyRule {
     }
 }
 
-lfsr64_l!(rng0, u32, 19; 18, 17, 14); // 0x072000
-lfsr64_l!(rng1, u32, 22; 21); // 0x300000
-lfsr64_l!(rng2, u32, 23; 22, 21, 8); // 0x700080
+lfsr_l!(rng0, u32, 19; 18, 17, 14); // 0x072000
+lfsr_l!(rng1, u32, 22; 21); // 0x300000
+lfsr_l!(rng2, u32, 23; 22, 21, 8); // 0x700080
 
 #[derive(Debug, Clone)]
 pub struct A51Rng {

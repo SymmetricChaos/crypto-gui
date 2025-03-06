@@ -1,7 +1,7 @@
 #[macro_export]
-/// Create a Fibonacci LFSR function that shifts the state to the right (toward the least significant bit). The state is a u64 unless specified.
-/// Example: for the LFSR defined by the feedback polynomial x^16 + x^14 + x^13 + x^11 + 1 use lfsr64_r(my_lfsr, 16; 14, 13, 11)
-macro_rules! lfsr64_r {
+/// Create a Fibonacci LFSR function that shifts the state to the right (toward the least significant bit).
+/// Example: for the LFSR defined by the feedback polynomial x^16 + x^14 + x^13 + x^11 + 1 use lfsr_r(my_lfsr, u32, 16; 14, 13, 11)
+macro_rules! lfsr_r {
     ($name: ident, $t: ty, $bits: literal; $($tap: literal),+) => {
         /// Advance the state.
         pub const fn $name(state: $t) -> $t {
@@ -14,24 +14,12 @@ macro_rules! lfsr64_r {
             ((state >> 1) | (new_bit << ($bits - 1)) ) & (!0 >> (<$t>::BITS - $bits))
         }
     };
-    ($name: ident, $bits: literal; $($tap: literal),+) => {
-        /// Advance the state.
-        pub const fn $name(state: u64) -> u64 {
-            assert!($bits < 64);
-            let mut new_bit = state;
-            $(
-                assert!($bits >= $tap);
-                new_bit ^= state >> ($bits - $tap);
-            )+
-            ((state >> 1) | (new_bit << ($bits - 1)) ) & (!0 >> (64 - $bits))
-        }
-    };
 }
 
 #[macro_export]
-/// Create a Fibonacci LFSR function that shifts the state to the left (toward the most significant bit). The state is a u64 unless specified.
-/// Example: for the LFSR defined by the feedback polynomial x^16 + x^14 + x^13 + x^11 + 1 use lfsr64_l(my_lfsr, 16; 14, 13, 11)
-macro_rules! lfsr64_l {
+/// Create a Fibonacci LFSR function that shifts the state to the left (toward the most significant bit).
+/// Example: for the LFSR defined by the feedback polynomial x^16 + x^14 + x^13 + x^11 + 1 use lfsr_l(my_lfsr, u32, 16; 14, 13, 11)
+macro_rules! lfsr_l {
     ($name: ident, $t: ty, $bits: literal; $($tap: literal),+) => {
         /// Advance the state.
         pub const fn $name(state: $t) -> $t {
@@ -44,24 +32,12 @@ macro_rules! lfsr64_l {
             ((state << 1) | (new_bit & 1 )) & (!0 >> (<$t>::BITS - $bits))
         }
     };
-    ($name: ident, $bits: literal; $($tap: literal),+) => {
-        /// Advance the state.
-        pub const fn $name(state: u64) -> u64 {
-            assert!($bits < 64);
-            let mut new_bit = state >> ($bits - 1);
-            $(
-                assert!($bits >= $tap);
-                new_bit ^= state >> ($tap - 1);
-            )+
-            ((state << 1) | (new_bit & 1 )) & (!0 >> (64 - $bits))
-        }
-    };
 }
 
 #[macro_export]
-/// Create a Galois LFSR function that shifts the state to the right (toward the least significant bit). The state is a u64 unless specified.
-/// Example: for the LFSR defined by the feedback polynomial x^16 + x^14 + x^13 + x^11 + 1 use glfsr64_r(my_glfsr, 16; 14, 13, 11)
-macro_rules! glfsr64_r {
+/// Create a Galois LFSR function that shifts the state to the right (toward the least significant bit).
+/// Example: for the LFSR defined by the feedback polynomial x^16 + x^14 + x^13 + x^11 + 1 use glfsr_r(my_glfsr, u32, 16; 14, 13, 11)
+macro_rules! glfsr_r {
     ($name: ident, $t: ty, $bits: literal; $($tap: literal),+) => {
         /// Advance the state.
         pub const fn $name(state: $t) -> $t {
@@ -75,44 +51,19 @@ macro_rules! glfsr64_r {
             }
         }
     };
-    ($name: ident, $bits: literal; $($tap: literal),+) => {
-        /// Advance the state.
-        pub const fn $name(state: u64) -> u64 {
-            assert!($bits < 64);
-            const TOGGLE: u64 = 0 $(| (1 << $tap - 1))+ | (1 << $bits - 1);
-            const MASK: u64 = (!0 >> (64 - $bits));
-            if state & 1 == 1 {
-                ((state >> 1) ^ TOGGLE) & MASK
-            } else {
-                (state >> 1) & MASK
-            }
-        }
-    };
+
 }
 
 #[macro_export]
 /// Create a Galois LFSR function that shifts the state to the right (toward the least significant bit). The state is a u64 unless specified.
-/// Example: for the LFSR defined by the feedback polynomial x^16 + x^14 + x^13 + x^11 + 1 use glfsr64_l(my_glfsr, 16; 14, 13, 11)
-macro_rules! glfsr64_l {
+/// Example: for the LFSR defined by the feedback polynomial x^16 + x^14 + x^13 + x^11 + 1 use glfsr_l(my_glfsr, u32, 16; 14, 13, 11)
+macro_rules! glfsr_l {
     ($name: ident, $t: ty, $bits: literal; $($tap: literal),+) => {
         /// Advance the state.
         pub const fn $name(state: $t) -> $t {
             assert!($bits < <$t>::BITS);
             const TOGGLE: $t = 1 $(| (1 << $bits - $tap))+;
             const MASK: $t = (!0 >> (<$t>::BITS - $bits));
-            if state >> ($bits - 1) == 1 {
-                ((state << 1) ^ TOGGLE) & MASK
-            } else {
-                (state << 1) & MASK
-            }
-        }
-    };
-    ($name: ident, $bits: literal; $($tap: literal),+) => {
-        /// Advance the state.
-        pub const fn $name(state: u64) -> u64 {
-            assert!($bits < 64);
-            const TOGGLE: u64 = 1 $(| (1 << $bits - $tap))+;
-            const MASK: u64 = (!0 >> (64 - $bits));
             if state >> ($bits - 1) == 1 {
                 ((state << 1) ^ TOGGLE) & MASK
             } else {
@@ -161,7 +112,7 @@ mod test {
 
     #[test]
     fn one_step_fib() {
-        lfsr64_r!(my_lfsr64_r, 16; 11, 13, 14);
+        lfsr_r!(my_lfsr64_r, u64, 16; 11, 13, 14);
         assert_eq!(my_lfsr64_r(0xACE1), 0x5670);
     }
 
@@ -172,7 +123,7 @@ mod test {
             0b00110, 0b10011, 0b11001, 0b11100, 0b11110, 0b11111, 0b01111, 0b00111, 0b00011,
         ];
         let mut s = 0b00001;
-        lfsr64_r!(my_lfsr64, 5; 3);
+        lfsr_r!(my_lfsr64, u64, 5; 3);
         for (i, test) in sequence.into_iter().enumerate() {
             assert_eq!(test, s, "{}", i);
             s = my_lfsr64(s);
@@ -181,32 +132,32 @@ mod test {
 
     #[test]
     fn cycle_length_short() {
-        lfsr64_r!(my_lfsr64_r, 5; 2,3,4);
+        lfsr_r!(my_lfsr64_r, u64, 5; 2,3,4);
         cycle_length!(my_lfsr64_r, 5);
 
-        lfsr64_l!(my_lfsr64_l, 5; 2,3,4);
+        lfsr_l!(my_lfsr64_l, u64, 5; 2,3,4);
         cycle_length!(my_lfsr64_l, 5);
 
-        glfsr64_r!(my_glfsr64_r, 5; 2,3,4);
+        glfsr_r!(my_glfsr64_r, u64, 5; 2,3,4);
         cycle_length!(my_glfsr64_r, 5);
 
-        glfsr64_l!(my_glfsr64_l, 5; 2,3,4);
+        glfsr_l!(my_glfsr64_l, u64, 5; 2,3,4);
         cycle_length!(my_glfsr64_l, 5);
     }
 
     #[ignore = "long run time for cycle detection"]
     #[test]
     fn cycle_length_long() {
-        lfsr64_r!(my_lfsr64_r, 16; 11, 13, 14);
+        lfsr_r!(my_lfsr64_r, u64, 16; 11, 13, 14);
         cycle_length!(my_lfsr64_r, 16);
 
-        lfsr64_l!(my_lfsr64_l, 16; 11, 13, 14);
+        lfsr_l!(my_lfsr64_l, u64, 16; 11, 13, 14);
         cycle_length!(my_lfsr64_l, 16);
 
-        glfsr64_r!(my_glfsr64_r, 16; 11, 13, 14);
+        glfsr_r!(my_glfsr64_r,u64,  16; 11, 13, 14);
         cycle_length!(my_glfsr64_r, 16);
 
-        glfsr64_l!(my_glfsr64_l, 16; 11, 13, 14);
+        glfsr_l!(my_glfsr64_l, u64, 16; 11, 13, 14);
         cycle_length!(my_glfsr64_l, 16);
     }
 }

@@ -1,6 +1,6 @@
 use strum::{Display, EnumIter};
 
-use crate::{lfsr64_l, lfsr_small::get_bit32, ClassicRng};
+use crate::{lfsr_l, lfsr_small::get_bit32, ClassicRng};
 
 fn majority(a: u32, b: u32, c: u32) -> u32 {
     (a & b) | (a & c) | (b & c)
@@ -26,10 +26,10 @@ impl ReKeyRule {
     }
 }
 
-lfsr64_l!(rng0, u32, 19; 18, 17, 14); // 0x072000
-lfsr64_l!(rng1, u32, 22; 21); // 0x300000
-lfsr64_l!(rng2, u32, 23; 22, 21, 8); // 0x700080
-lfsr64_l!(rng3, u32, 17; 12); // 0x010800
+lfsr_l!(rng0, u32, 19; 18, 17, 14); // 0x072000
+lfsr_l!(rng1, u32, 22; 21); // 0x300000
+lfsr_l!(rng2, u32, 23; 22, 21, 8); // 0x700080
+lfsr_l!(rng3, u32, 17; 12); // 0x010800
 
 #[derive(Debug, Clone)]
 pub struct A52Rng {
