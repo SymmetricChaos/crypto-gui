@@ -72,6 +72,12 @@ macro_rules! glfsr64_l {
     };
 }
 
+/// Get the nth bit from the right. Setting idx = 0 gives the LSB.
+pub const fn get_bit(n: u64, idx: usize) -> u64 {
+    assert!(idx < 32);
+    (n >> idx) & 1
+}
+
 #[cfg(test)]
 mod test {
 

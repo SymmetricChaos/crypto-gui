@@ -1,6 +1,6 @@
 use strum::{Display, EnumIter};
 
-use crate::{lfsr64_l, ClassicRng};
+use crate::{lfsr64_l, lfsr_small::get_bit, ClassicRng};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, Display)]
 pub enum ReKeyRule {
@@ -26,10 +26,10 @@ lfsr64_l!(rng0, 19; 18, 17, 14); // 0x072000
 lfsr64_l!(rng1, 22; 21); // 0x300000
 lfsr64_l!(rng2, 23; 22, 21, 8); // 0x700080
 
-fn get_bit(n: u32, idx: usize) -> u32 {
-    assert!(idx < 32);
-    (n >> (idx - 1)) & 1
-}
+// fn get_bit(n: u32, idx: usize) -> u32 {
+//     assert!(idx < 32);
+//     (n >> (idx - 1)) & 1
+// }
 
 #[derive(Debug, Clone)]
 pub struct A51Rng {
@@ -104,20 +104,20 @@ impl A51Rng {
     // https://cryptome.org/jya/a51-pi.htm
     pub fn next_bit(&mut self) -> u32 {
         let (a, b, c) = (
-            get_bit(self.lfsrs[0], 9),
-            get_bit(self.lfsrs[1], 11),
-            get_bit(self.lfsrs[2], 11),
+            get_bit(self.lfsrs[0] as u64, 8) as u32,
+            get_bit(self.lfsrs[1] as u64, 10) as u32,
+            get_bit(self.lfsrs[2] as u64, 10) as u32,
         );
 
         // Calculate majority bit
         let majority = (a & b) | (a & c) | (b & c);
 
         let mut out = 0;
-        for (clock, idx, msb) in [(a, 0, 19), (b, 1, 22), (c, 2, 23)] {
+        for (clock, idx, msb) in [(a, 0, 18), (b, 1, 21), (c, 2, 22)] {
             if clock == majority {
                 self.step_lfsr(idx);
             }
-            out ^= get_bit(self.lfsrs[idx], msb);
+            out ^= get_bit(self.lfsrs[idx] as u64, msb) as u32;
         }
 
         out
