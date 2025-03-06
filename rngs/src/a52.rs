@@ -1,6 +1,6 @@
 use strum::{Display, EnumIter};
 
-use crate::{lfsr64_l, lfsr_small::get_bit, ClassicRng};
+use crate::{lfsr64_l, lfsr_small::get_bit32, ClassicRng};
 
 fn majority(a: u32, b: u32, c: u32) -> u32 {
     (a & b) | (a & c) | (b & c)
@@ -26,10 +26,10 @@ impl ReKeyRule {
     }
 }
 
-lfsr64_l!(rng0, 19; 18, 17, 14); // 0x072000
-lfsr64_l!(rng1, 22; 21); // 0x300000
-lfsr64_l!(rng2, 23; 22, 21, 8); // 0x700080
-lfsr64_l!(rng3, 17; 12); // 0x010800
+lfsr64_l!(rng0, u32, 19; 18, 17, 14); // 0x072000
+lfsr64_l!(rng1, u32, 22; 21); // 0x300000
+lfsr64_l!(rng2, u32, 23; 22, 21, 8); // 0x700080
+lfsr64_l!(rng3, u32, 17; 12); // 0x010800
 
 #[derive(Debug, Clone)]
 pub struct A52Rng {
@@ -96,10 +96,10 @@ impl A52Rng {
 
     pub fn step_rng(&mut self, n: usize) {
         match n {
-            0 => self.lfsrs[0] = rng0(self.lfsrs[0] as u64) as u32,
-            1 => self.lfsrs[1] = rng1(self.lfsrs[1] as u64) as u32,
-            2 => self.lfsrs[2] = rng2(self.lfsrs[2] as u64) as u32,
-            3 => self.lfsrs[3] = rng3(self.lfsrs[3] as u64) as u32,
+            0 => self.lfsrs[0] = rng0(self.lfsrs[0]),
+            1 => self.lfsrs[1] = rng1(self.lfsrs[1]),
+            2 => self.lfsrs[2] = rng2(self.lfsrs[2]),
+            3 => self.lfsrs[3] = rng3(self.lfsrs[3]),
             _ => unreachable!("there are only four lfsrs"),
         }
     }
@@ -116,9 +116,9 @@ impl A52Rng {
     // https://archive.ph/20130120032216/http://www.cryptodox.com/A5/2
     pub fn next_bit(&mut self) -> u32 {
         let (a, b, c) = (
-            get_bit(self.lfsrs[3] as u64, 10) as u32,
-            get_bit(self.lfsrs[3] as u64, 3) as u32,
-            get_bit(self.lfsrs[3] as u64, 7) as u32,
+            get_bit32(self.lfsrs[3], 10),
+            get_bit32(self.lfsrs[3], 3),
+            get_bit32(self.lfsrs[3], 7),
         );
 
         // Calculate majority bit from the fourth register
@@ -136,26 +136,26 @@ impl A52Rng {
         let mut out = 0;
 
         // XOR in the MSB
-        out ^= get_bit(self.lfsrs[0] as u64, Self::MSB[0] as usize) as u32;
+        out ^= get_bit32(self.lfsrs[0], Self::MSB[0] as usize);
         // XOR in the majority of three chosen bits, with one inverted
         out ^= majority(
-            get_bit(self.lfsrs[0] as u64, 15) as u32,
-            get_bit(self.lfsrs[0] as u64, 14) as u32 ^ 1,
-            get_bit(self.lfsrs[0] as u64, 12) as u32,
+            get_bit32(self.lfsrs[0], 15),
+            get_bit32(self.lfsrs[0], 14) ^ 1,
+            get_bit32(self.lfsrs[0], 12),
         );
 
-        out ^= get_bit(self.lfsrs[1] as u64, Self::MSB[1] as usize) as u32;
+        out ^= get_bit32(self.lfsrs[1], Self::MSB[1] as usize);
         out ^= majority(
-            get_bit(self.lfsrs[1] as u64, 16) as u32 ^ 1,
-            get_bit(self.lfsrs[1] as u64, 13) as u32,
-            get_bit(self.lfsrs[1] as u64, 9) as u32,
+            get_bit32(self.lfsrs[1], 16) ^ 1,
+            get_bit32(self.lfsrs[1], 13),
+            get_bit32(self.lfsrs[1], 9),
         );
 
-        out ^= get_bit(self.lfsrs[2] as u64, Self::MSB[2] as usize) as u32;
+        out ^= get_bit32(self.lfsrs[2], Self::MSB[2] as usize);
         out ^= majority(
-            get_bit(self.lfsrs[2] as u64, 18) as u32,
-            get_bit(self.lfsrs[2] as u64, 16) as u32,
-            get_bit(self.lfsrs[2] as u64, 13) as u32 ^ 1,
+            get_bit32(self.lfsrs[2], 18),
+            get_bit32(self.lfsrs[2], 16),
+            get_bit32(self.lfsrs[2], 13) ^ 1,
         );
 
         out

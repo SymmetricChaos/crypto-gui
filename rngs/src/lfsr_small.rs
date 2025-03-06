@@ -1,7 +1,19 @@
 #[macro_export]
-/// Create a Fibonacci LFSR function that shifts the state to the right (toward the least significant bit). The state is a u64.
+/// Create a Fibonacci LFSR function that shifts the state to the right (toward the least significant bit). The state is a u64 unless specified.
 /// Example: for the LFSR defined by the feedback polynomial x^16 + x^14 + x^13 + x^11 + 1 use lfsr64_r(my_lfsr, 16; 14, 13, 11)
 macro_rules! lfsr64_r {
+    ($name: ident, $t: ty, $bits: literal; $($tap: literal),+) => {
+        /// Advance the state.
+        pub const fn $name(state: $t) -> $t {
+            assert!($bits < <$t>::BITS);
+            let mut new_bit = state;
+            $(
+                assert!($bits >= $tap);
+                new_bit ^= state >> ($bits - $tap);
+            )+
+            ((state >> 1) | (new_bit << ($bits - 1)) ) & (!0 >> (<$t>::BITS - $bits))
+        }
+    };
     ($name: ident, $bits: literal; $($tap: literal),+) => {
         /// Advance the state.
         pub const fn $name(state: u64) -> u64 {
@@ -11,15 +23,27 @@ macro_rules! lfsr64_r {
                 assert!($bits >= $tap);
                 new_bit ^= state >> ($bits - $tap);
             )+
-            ((state >> 1) | (new_bit << ($bits - 1)) ) & (!0_u64 >> (64 - $bits))
+            ((state >> 1) | (new_bit << ($bits - 1)) ) & (!0 >> (64 - $bits))
         }
     };
 }
 
 #[macro_export]
-/// Create a Fibonacci LFSR function that shifts the state to the left (toward the most significant bit). The state is a u64.
+/// Create a Fibonacci LFSR function that shifts the state to the left (toward the most significant bit). The state is a u64 unless specified.
 /// Example: for the LFSR defined by the feedback polynomial x^16 + x^14 + x^13 + x^11 + 1 use lfsr64_l(my_lfsr, 16; 14, 13, 11)
 macro_rules! lfsr64_l {
+    ($name: ident, $t: ty, $bits: literal; $($tap: literal),+) => {
+        /// Advance the state.
+        pub const fn $name(state: $t) -> $t {
+            assert!($bits < <$t>::BITS);
+            let mut new_bit = state >> ($bits - 1);
+            $(
+                assert!($bits >= $tap);
+                new_bit ^= state >> ($tap - 1);
+            )+
+            ((state << 1) | (new_bit & 1 )) & (!0 >> (<$t>::BITS - $bits))
+        }
+    };
     ($name: ident, $bits: literal; $($tap: literal),+) => {
         /// Advance the state.
         pub const fn $name(state: u64) -> u64 {
@@ -29,21 +53,34 @@ macro_rules! lfsr64_l {
                 assert!($bits >= $tap);
                 new_bit ^= state >> ($tap - 1);
             )+
-            ((state << 1) | (new_bit & 1 )) & (!0_u64 >> (64 - $bits))
+            ((state << 1) | (new_bit & 1 )) & (!0 >> (64 - $bits))
         }
     };
 }
 
 #[macro_export]
-/// Create a Galois LFSR function that shifts the state to the right (toward the least significant bit). The state is a u64.
+/// Create a Galois LFSR function that shifts the state to the right (toward the least significant bit). The state is a u64 unless specified.
 /// Example: for the LFSR defined by the feedback polynomial x^16 + x^14 + x^13 + x^11 + 1 use glfsr64_r(my_glfsr, 16; 14, 13, 11)
 macro_rules! glfsr64_r {
+    ($name: ident, $t: ty, $bits: literal; $($tap: literal),+) => {
+        /// Advance the state.
+        pub const fn $name(state: $t) -> $t {
+            assert!($bits < <$t>::BITS);
+            const TOGGLE: $t = 0 $(| (1 << $tap - 1))+ | (1 << $bits - 1);
+            const MASK: $t = (!0 >> (<$t>::BITS - $bits));
+            if state & 1 == 1 {
+                ((state >> 1) ^ TOGGLE) & MASK
+            } else {
+                (state >> 1) & MASK
+            }
+        }
+    };
     ($name: ident, $bits: literal; $($tap: literal),+) => {
         /// Advance the state.
         pub const fn $name(state: u64) -> u64 {
             assert!($bits < 64);
             const TOGGLE: u64 = 0 $(| (1 << $tap - 1))+ | (1 << $bits - 1);
-            const MASK: u64 = (!0_u64 >> (64 - $bits));
+            const MASK: u64 = (!0 >> (64 - $bits));
             if state & 1 == 1 {
                 ((state >> 1) ^ TOGGLE) & MASK
             } else {
@@ -54,15 +91,28 @@ macro_rules! glfsr64_r {
 }
 
 #[macro_export]
-/// Create a Galois LFSR function that shifts the state to the right (toward the least significant bit). The state is a u64.
+/// Create a Galois LFSR function that shifts the state to the right (toward the least significant bit). The state is a u64 unless specified.
 /// Example: for the LFSR defined by the feedback polynomial x^16 + x^14 + x^13 + x^11 + 1 use glfsr64_l(my_glfsr, 16; 14, 13, 11)
 macro_rules! glfsr64_l {
+    ($name: ident, $t: ty, $bits: literal; $($tap: literal),+) => {
+        /// Advance the state.
+        pub const fn $name(state: $t) -> $t {
+            assert!($bits < <$t>::BITS);
+            const TOGGLE: $t = 1 $(| (1 << $bits - $tap))+;
+            const MASK: $t = (!0 >> (<$t>::BITS - $bits));
+            if state >> ($bits - 1) == 1 {
+                ((state << 1) ^ TOGGLE) & MASK
+            } else {
+                (state << 1) & MASK
+            }
+        }
+    };
     ($name: ident, $bits: literal; $($tap: literal),+) => {
         /// Advance the state.
         pub const fn $name(state: u64) -> u64 {
             assert!($bits < 64);
             const TOGGLE: u64 = 1 $(| (1 << $bits - $tap))+;
-            const MASK: u64 = (!0_u64 >> (64 - $bits));
+            const MASK: u64 = (!0 >> (64 - $bits));
             if state >> ($bits - 1) == 1 {
                 ((state << 1) ^ TOGGLE) & MASK
             } else {
@@ -73,7 +123,13 @@ macro_rules! glfsr64_l {
 }
 
 /// Get the nth bit from the right. Setting idx = 0 gives the LSB.
-pub const fn get_bit(n: u64, idx: usize) -> u64 {
+pub const fn get_bit64(n: u64, idx: usize) -> u64 {
+    assert!(idx < 64);
+    (n >> idx) & 1
+}
+
+/// Get the nth bit from the right. Setting idx = 0 gives the LSB.
+pub const fn get_bit32(n: u32, idx: usize) -> u32 {
     assert!(idx < 32);
     (n >> idx) & 1
 }

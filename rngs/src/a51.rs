@@ -1,6 +1,6 @@
 use strum::{Display, EnumIter};
 
-use crate::{lfsr64_l, lfsr_small::get_bit, ClassicRng};
+use crate::{lfsr64_l, lfsr_small::get_bit32, ClassicRng};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, Display)]
 pub enum ReKeyRule {
@@ -22,14 +22,9 @@ impl ReKeyRule {
     }
 }
 
-lfsr64_l!(rng0, 19; 18, 17, 14); // 0x072000
-lfsr64_l!(rng1, 22; 21); // 0x300000
-lfsr64_l!(rng2, 23; 22, 21, 8); // 0x700080
-
-// fn get_bit(n: u32, idx: usize) -> u32 {
-//     assert!(idx < 32);
-//     (n >> (idx - 1)) & 1
-// }
+lfsr64_l!(rng0, u32, 19; 18, 17, 14); // 0x072000
+lfsr64_l!(rng1, u32, 22; 21); // 0x300000
+lfsr64_l!(rng2, u32, 23; 22, 21, 8); // 0x700080
 
 #[derive(Debug, Clone)]
 pub struct A51Rng {
@@ -88,9 +83,9 @@ impl A51Rng {
 
     fn step_lfsr(&mut self, n: usize) {
         match n {
-            0 => self.lfsrs[0] = rng0(self.lfsrs[0] as u64) as u32,
-            1 => self.lfsrs[1] = rng1(self.lfsrs[1] as u64) as u32,
-            2 => self.lfsrs[2] = rng2(self.lfsrs[2] as u64) as u32,
+            0 => self.lfsrs[0] = rng0(self.lfsrs[0]),
+            1 => self.lfsrs[1] = rng1(self.lfsrs[1]),
+            2 => self.lfsrs[2] = rng2(self.lfsrs[2]),
             _ => unreachable!("there are only three lfsrs"),
         }
     }
@@ -104,9 +99,9 @@ impl A51Rng {
     // https://cryptome.org/jya/a51-pi.htm
     pub fn next_bit(&mut self) -> u32 {
         let (a, b, c) = (
-            get_bit(self.lfsrs[0] as u64, 8) as u32,
-            get_bit(self.lfsrs[1] as u64, 10) as u32,
-            get_bit(self.lfsrs[2] as u64, 10) as u32,
+            get_bit32(self.lfsrs[0], 8),
+            get_bit32(self.lfsrs[1], 10),
+            get_bit32(self.lfsrs[2], 10),
         );
 
         // Calculate majority bit
@@ -117,7 +112,7 @@ impl A51Rng {
             if clock == majority {
                 self.step_lfsr(idx);
             }
-            out ^= get_bit(self.lfsrs[idx] as u64, msb) as u32;
+            out ^= get_bit32(self.lfsrs[idx], msb);
         }
 
         out
