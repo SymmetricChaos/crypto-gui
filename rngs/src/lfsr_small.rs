@@ -55,7 +55,7 @@ macro_rules! glfsr_r {
 }
 
 #[macro_export]
-/// Create a Galois LFSR function that shifts the state to the right (toward the least significant bit). The state is a u64 unless specified.
+/// Create a Galois LFSR function that shifts the state to the right (toward the most significant bit).
 /// Example: for the LFSR defined by the feedback polynomial x^16 + x^14 + x^13 + x^11 + 1 use glfsr_l(my_glfsr, u32, 16; 14, 13, 11)
 macro_rules! glfsr_l {
     ($name: ident, $t: ty, $bits: literal; $($tap: literal),+) => {
@@ -145,7 +145,6 @@ mod test {
         cycle_length!(my_glfsr64_l, 5);
     }
 
-    #[ignore = "long run time for cycle detection"]
     #[test]
     fn cycle_length_long() {
         lfsr_r!(my_lfsr64_r, u64, 16; 11, 13, 14);
