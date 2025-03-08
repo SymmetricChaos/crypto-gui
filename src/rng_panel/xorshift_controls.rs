@@ -1,7 +1,7 @@
 use super::ClassicRngFrame;
 use crate::ui_elements::{generate_random_u32s_box, UiElements};
 use rand::{thread_rng, Rng};
-use rngs::{xorshift::Xorshift64, ClassicRng};
+use rngs::{xorshift::xorshift::Xorshift64, ClassicRng};
 
 pub struct XorshiftFrame {
     rng: Xorshift64,

@@ -1,7 +1,10 @@
 use super::ClassicRngFrame;
 use crate::ui_elements::{generate_random_u32s_box, UiElements};
 use rand::{thread_rng, Rng};
-use rngs::xoshiro::{Scrambler, Xoshiro256};
+use rngs::{
+    xorshift::xoshiro256::{Scrambler, Xoshiro256},
+    ClassicRng,
+};
 use strum::IntoEnumIterator;
 
 pub struct XoshiroFrame {
@@ -49,12 +52,13 @@ impl ClassicRngFrame for XoshiroFrame {
         ui.collapsing("scrambler function", |ui| match self.rng.scrambler {
             Scrambler::PlusPlus => ui.label("rotate_left_23(state[0] + state[3]) + state[0]"),
             Scrambler::StarStar => ui.label("rotate_left_7(state[1] × 5) × 9"),
+            Scrambler::Plus => ui.label("state[0] + state[3"),
         });
 
         ui.add_space(16.0);
         ui.horizontal(|ui| {
             if ui.button("step").clicked() {
-                self.rng.step();
+                self.rng.next_u32();
             }
             if ui
                 .button("jump")
