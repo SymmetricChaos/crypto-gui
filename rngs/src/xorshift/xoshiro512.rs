@@ -1,17 +1,26 @@
 use crate::traits::ClassicRng;
 
-use super::Scrambler;
+use super::XoshiroScrambler;
 
 pub struct Xoshiro512 {
     pub state: [u64; 8],
-    pub scrambler: Scrambler,
+    pub scrambler: XoshiroScrambler,
 }
 
 impl Default for Xoshiro512 {
     fn default() -> Self {
         Self {
-            state: [0, 0, 0, 0, 0, 0, 0, 0],
-            scrambler: Scrambler::PlusPlus,
+            state: [
+                0x0BAD_5EED0BAD_5EED,
+                0x0BAD_5EED0BAD_5EED,
+                0x0BAD_5EED0BAD_5EED,
+                0x0BAD_5EED0BAD_5EED,
+                0x0BAD_5EED0BAD_5EED,
+                0x0BAD_5EED0BAD_5EED,
+                0x0BAD_5EED0BAD_5EED,
+                0x0BAD_5EED0BAD_5EED,
+            ],
+            scrambler: XoshiroScrambler::PlusPlus,
         }
     }
 }
@@ -54,13 +63,13 @@ impl Xoshiro512 {
 
     pub fn next_u64(&mut self) -> u64 {
         let out = match self.scrambler {
-            Scrambler::PlusPlus => (self.state[0].wrapping_add(self.state[2]))
+            XoshiroScrambler::PlusPlus => (self.state[0].wrapping_add(self.state[2]))
                 .rotate_left(17)
                 .wrapping_add(self.state[2]),
-            Scrambler::StarStar => (self.state[1].wrapping_mul(5))
+            XoshiroScrambler::StarStar => (self.state[1].wrapping_mul(5))
                 .rotate_left(7)
                 .wrapping_mul(9),
-            Scrambler::Plus => self.state[0].wrapping_add(self.state[2]),
+            XoshiroScrambler::Plus => self.state[0].wrapping_add(self.state[2]),
         };
         self.step();
         out
@@ -120,7 +129,7 @@ mod tests {
     fn reference_plus() {
         let mut rng = Xoshiro512 {
             state: [1, 2, 3, 4, 5, 6, 7, 8],
-            scrambler: Scrambler::Plus,
+            scrambler: XoshiroScrambler::Plus,
         };
         let expected = [
             4,
@@ -144,7 +153,7 @@ mod tests {
     fn reference_plusplus() {
         let mut rng = Xoshiro512 {
             state: [1, 2, 3, 4, 5, 6, 7, 8],
-            scrambler: Scrambler::PlusPlus,
+            scrambler: XoshiroScrambler::PlusPlus,
         };
         let expected = [
             524291,
@@ -168,7 +177,7 @@ mod tests {
     fn reference_starstart() {
         let mut rng = Xoshiro512 {
             state: [1, 2, 3, 4, 5, 6, 7, 8],
-            scrambler: Scrambler::StarStar,
+            scrambler: XoshiroScrambler::StarStar,
         };
         let expected = [
             11520,
