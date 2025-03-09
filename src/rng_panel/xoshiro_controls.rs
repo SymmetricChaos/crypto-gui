@@ -1,11 +1,7 @@
 use super::ClassicRngFrame;
 use crate::ui_elements::{generate_random_u32s_box, UiElements};
 use rand::{thread_rng, Rng};
-use rngs::{
-    xorshift::xoshiro256::{Scrambler, Xoshiro256},
-    ClassicRng,
-};
-use strum::IntoEnumIterator;
+use rngs::{xorshift::xoshiro256::Xoshiro256, ClassicRng};
 
 pub struct XoshiroFrame {
     rng: Xoshiro256,
@@ -43,17 +39,17 @@ impl ClassicRngFrame for XoshiroFrame {
             ui.u64_hex_edit(&mut self.rng.state[i]);
         }
 
-        ui.add_space(16.0);
-        ui.subheading("Scrambler");
-        for variant in Scrambler::iter() {
-            ui.selectable_value(&mut self.rng.scrambler, variant, variant.to_string());
-        }
+        // ui.add_space(16.0);
+        // ui.subheading("Scrambler");
+        // for variant in Scrambler::iter() {
+        //     ui.selectable_value(&mut self.rng.scrambler, variant, variant.to_string());
+        // }
 
-        ui.collapsing("scrambler function", |ui| match self.rng.scrambler {
-            Scrambler::PlusPlus => ui.label("rotate_left_23(state[0] + state[3]) + state[0]"),
-            Scrambler::StarStar => ui.label("rotate_left_7(state[1] × 5) × 9"),
-            Scrambler::Plus => ui.label("state[0] + state[3"),
-        });
+        // ui.collapsing("scrambler function", |ui| match self.rng.scrambler {
+        //     Scrambler::PlusPlus => ui.label("rotate_left_23(state[0] + state[3]) + state[0]"),
+        //     Scrambler::StarStar => ui.label("rotate_left_7(state[1] × 5) × 9"),
+        //     Scrambler::Plus => ui.label("state[0] + state[3"),
+        // });
 
         ui.add_space(16.0);
         ui.horizontal(|ui| {

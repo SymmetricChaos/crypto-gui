@@ -1,7 +1,7 @@
 use super::ClassicRngFrame;
 use crate::ui_elements::{generate_random_u32s_box, UiElements};
 use rand::{thread_rng, Rng};
-use rngs::{xorshift::xorshift64::Xorshift64, ClassicRng};
+use rngs::xorshift::xorshift64_generic::Xorshift64;
 
 pub struct XorshiftFrame {
     rng: Xorshift64,
@@ -25,7 +25,7 @@ impl ClassicRngFrame for XorshiftFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
-            "https://github.com/SymmetricChaos/crypto-gui/blob/master/rngs/src/xorshift.rs",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/rngs/src/xorshift",
         );
         ui.add_space(8.0);
 
