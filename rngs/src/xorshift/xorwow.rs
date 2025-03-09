@@ -1,11 +1,11 @@
 use crate::traits::ClassicRng;
 
-pub struct Xorshift64 {
+pub struct Xorwow {
     pub state: [u32; 5],
     pub ctr: u32,
 }
 
-impl Default for Xorshift64 {
+impl Default for Xorwow {
     fn default() -> Self {
         Self {
             state: [
@@ -20,7 +20,7 @@ impl Default for Xorshift64 {
     }
 }
 
-impl ClassicRng for Xorshift64 {
+impl ClassicRng for Xorwow {
     fn next_u32(&mut self) -> u32 {
         let t = self.state[0] ^ (self.state[0] >> 2);
 

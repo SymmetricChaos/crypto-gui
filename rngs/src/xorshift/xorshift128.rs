@@ -1,17 +1,17 @@
 use crate::traits::ClassicRng;
 
-use super::XorshiftScrambler;
+// use super::XorshiftScrambler;
 
 pub struct Xorshift128 {
     pub state: [u32; 4],
-    pub scrambler: XorshiftScrambler,
+    // pub scrambler: XorshiftScrambler,
 }
 
 impl Default for Xorshift128 {
     fn default() -> Self {
         Self {
             state: [0x0BAD_5EED, 0x0BAD_5EED, 0x0BAD_5EED, 0x0BAD_5EED],
-            scrambler: XorshiftScrambler::None,
+            // scrambler: XorshiftScrambler::None,
         }
     }
 }
