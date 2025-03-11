@@ -63,6 +63,11 @@ impl ClassicRng for Jsf64 {
         self.step();
         self.state[3] as u32
     }
+
+    fn next_u64(&mut self) -> u64 {
+        self.step();
+        self.state[3]
+    }
 }
 
 #[cfg(test)]

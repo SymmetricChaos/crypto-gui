@@ -10,8 +10,13 @@ impl Default for Splitmix {
     }
 }
 
-impl Splitmix {
-    pub fn next_u64(&mut self) -> u64 {
+impl ClassicRng for Splitmix {
+    // Only the lower 32 bits are used
+    fn next_u32(&mut self) -> u32 {
+        self.next_u64() as u32
+    }
+
+    fn next_u64(&mut self) -> u64 {
         self.state = self.state.wrapping_add(0x9e3779b97f4a7c15);
         let mut t = self.state;
         t ^= t >> 30;
@@ -19,13 +24,6 @@ impl Splitmix {
         t ^= t >> 27;
         t = t.wrapping_mul(0x94d049bb133111eb);
         t ^ (t >> 31)
-    }
-}
-
-impl ClassicRng for Splitmix {
-    // Only the lower 32 bits are used
-    fn next_u32(&mut self) -> u32 {
-        self.next_u64() as u32
     }
 }
 

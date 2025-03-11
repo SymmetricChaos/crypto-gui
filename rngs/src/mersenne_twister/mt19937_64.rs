@@ -108,14 +108,11 @@ impl Mt19937_64 {
     }
 
     pub fn next_u64(&mut self) -> u64 {
-        if self.index == 0 {
-            self.ksa_default()
-        }
         if self.index >= N {
             self.twist();
         }
         let y = self.arr[self.index];
-        self.index += 1;
+        self.index = (self.index + 1) % N;
         Self::temper(y)
     }
 }
@@ -123,6 +120,10 @@ impl Mt19937_64 {
 impl ClassicRng for Mt19937_64 {
     fn next_u32(&mut self) -> u32 {
         self.next_u64() as u32
+    }
+
+    fn next_u64(&mut self) -> u64 {
+        self.next_u64()
     }
 }
 

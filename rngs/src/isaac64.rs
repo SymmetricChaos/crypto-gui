@@ -139,6 +139,15 @@ impl ClassicRng for Isaac64 {
         self.ctr += 1;
         n as u32
     }
+
+    fn next_u64(&mut self) -> u64 {
+        if self.ctr >= SIZE {
+            self.isaac();
+        }
+        let n = self.rand_rsl[self.ctr].0;
+        self.ctr += 1;
+        n
+    }
 }
 
 #[cfg(test)]

@@ -21,7 +21,7 @@ impl Default for Salsa20 {
             ctr: 0,
             rounds: 20,
             big_endian: true,
-            saved_keystream: Vec::new(),
+            saved_keystream: Vec::with_capacity(16),
         }
     }
 }

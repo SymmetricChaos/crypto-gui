@@ -27,15 +27,15 @@ impl ClassicRng for Xorwow {
         // 32-bit rotation of the whole state
         self.state[0] = self.state[1];
         self.state[1] = self.state[2];
+        self.state[2] = self.state[3];
         self.state[3] = self.state[4];
-        self.state[4] = self.state[5];
 
-        self.state[5] ^= (self.state[5] << 4) ^ (t ^ (t << 1));
+        self.state[4] ^= (self.state[4] << 4) ^ (t ^ (t << 1));
 
         // any odd constant will produce the necessary Weyl sequence
         // Marsaglia also notes that XOR can replace addition here
         self.ctr = self.ctr.wrapping_add(362437);
 
-        self.state[5].wrapping_add(self.ctr)
+        self.state[4].wrapping_add(self.ctr)
     }
 }

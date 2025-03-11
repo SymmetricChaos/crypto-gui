@@ -2,7 +2,7 @@ use super::ClassicRngFrame;
 use crate::ui_elements::{generate_random_u32s_box, UiElements};
 use egui::{FontId, RichText, Ui};
 use rand::{thread_rng, Rng};
-use rngs::{mt19937_32::Mt19937_32, mt19937_64::Mt19937_64};
+use rngs::mersenne_twister::{mt19937_32::Mt19937_32, mt19937_64::Mt19937_64};
 use utils::byte_formatting::ByteFormat;
 
 pub struct MTFrame {

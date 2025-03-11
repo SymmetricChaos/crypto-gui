@@ -198,6 +198,10 @@ impl ClassicRng for A52Rng {
     fn next_u32(&mut self) -> u32 {
         u32::from_be_bytes(self.keystream(4).try_into().unwrap())
     }
+
+    fn next_u64(&mut self) -> u64 {
+        u64::from_be_bytes(self.keystream(8).try_into().unwrap())
+    }
 }
 
 #[cfg(test)]

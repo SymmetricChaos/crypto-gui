@@ -27,13 +27,17 @@ impl PcgTransform {
         }
     }
 
-    pub fn transform(&self, n: u64) -> u32 {
-        (match self {
+    pub fn transform64(&self, n: u64) -> u64 {
+        match self {
             Self::Rs => n >> (29 - (n >> 61)),
             Self::Rr => n.rotate_right(29 - (n >> 61) as u32),
             Self::XshRr => u64::rotate_right((n ^ (n >> 18)) >> 27, (n >> 59) as u32),
             Self::XshRs => (n ^ (n >> 22)) >> (22 + (n >> 61)),
-        }) as u32 // truncate the transformed u64 to a u32
+        }
+    }
+
+    pub fn transform32(&self, n: u64) -> u32 {
+        self.transform64(n) as u32 // truncate the transformed u64 to a u32
     }
 }
 
@@ -55,17 +59,18 @@ impl Default for Pcg {
     }
 }
 
-impl Pcg {
-    pub fn transform(&self, n: u64) -> u32 {
-        self.transform.transform(n)
-    }
-}
-
 impl ClassicRng for Pcg {
     fn next_u32(&mut self) -> u32 {
         self.state = (self.state)
             .wrapping_mul(self.multiplier)
             .wrapping_add(self.increment);
-        self.transform(self.state)
+        self.transform.transform32(self.state)
+    }
+
+    fn next_u64(&mut self) -> u64 {
+        self.state = (self.state)
+            .wrapping_mul(self.multiplier)
+            .wrapping_add(self.increment);
+        self.transform.transform64(self.state)
     }
 }

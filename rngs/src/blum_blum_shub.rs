@@ -56,4 +56,14 @@ impl ClassicRng for BlumBlumShub {
         }
         out
     }
+
+    fn next_u64(&mut self) -> u64 {
+        let mut out = 0;
+        // Extract 64 bits using the parity of 64 consecutive states
+        for i in 0..64 {
+            self.state = (&self.state * &self.state) % &self.m;
+            out |= ((self.state.count_ones() % 2) as u64) << i;
+        }
+        out
+    }
 }

@@ -35,6 +35,7 @@ rng_ids_and_names!(
     DualEcDrbg, "Dual_EC_DRBG";
     Geffe, "Geffe";
     Halton, "Halton";
+    Isaac, "ISAAC";
     Jsf, "JSF";
     Lcg, "Linear Congruential Generator";
     Lfg, "Lagged Fibonacci Generator";
@@ -42,6 +43,7 @@ rng_ids_and_names!(
     MersenneTwister, "Mersenne Twister";
     MiddleSquare, "Middle Square";
     MiddleSquareBinary, "Middle Square Binary";
+    Mwc, "Multiply-with-Carry";
     NaorReingold, "Naor-Reingold";
     Pcg, "Permuted Congruential Generator";
     Rc4, "RC4";
@@ -52,6 +54,7 @@ rng_ids_and_names!(
     Vmpcr, "VMPC-R";
     Weyl, "Weyl";
     Xorshift, "Xorshift";
+    Xoroshiro, "Xoroshiro";
     Xoshiro, "Xoshiro";
 );
 

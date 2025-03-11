@@ -1,5 +1,5 @@
 use crate::{lfsr::Lfsr, ClassicRng};
-use utils::bits::{bits_to_u32_upper, Bit};
+use utils::bits::{bits_to_u32_upper, bits_to_u64_upper, Bit};
 
 pub struct AlternatingStep {
     pub lfsrs: [Lfsr; 3],
@@ -39,5 +39,16 @@ impl ClassicRng for AlternatingStep {
             output_bits.reverse();
         }
         bits_to_u32_upper(&output_bits)
+    }
+
+    fn next_u64(&mut self) -> u64 {
+        let mut output_bits = Vec::with_capacity(64);
+        for _ in 0..64 {
+            output_bits.push(self.next_bit())
+        }
+        if !self.ltr {
+            output_bits.reverse();
+        }
+        bits_to_u64_upper(&output_bits)
     }
 }

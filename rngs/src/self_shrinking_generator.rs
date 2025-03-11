@@ -1,6 +1,6 @@
 use crate::{lfsr::Lfsr, ClassicRng};
 use utils::bits::{
-    bits_to_u32_upper,
+    bits_to_u32_upper, bits_to_u64_upper,
     Bit::{self, One, Zero},
 };
 
@@ -50,5 +50,16 @@ impl ClassicRng for SelfShrinkingGenerator {
             output_bits.reverse();
         }
         bits_to_u32_upper(&output_bits)
+    }
+
+    fn next_u64(&mut self) -> u64 {
+        let mut output_bits = Vec::with_capacity(64);
+        for _ in 0..64 {
+            output_bits.push(self.next_bit())
+        }
+        if !self.ltr {
+            output_bits.reverse();
+        }
+        bits_to_u64_upper(&output_bits)
     }
 }

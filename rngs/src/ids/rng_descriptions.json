@@ -110,7 +110,9 @@
     "Description": "The Mersenne Twister (MT19937) algorithm was created in 1997 by Makoto Matsumoto and Takuji Nishimura with the goal of correcting the shortcomings of then popular PRNGs and was quickly achieved widespread adoption. In particular it is equidistributed in 623 dimensions and has a period of 2^19937-1. The major limitation of MT19937 is its enormous state of 8448 bits, modern PRNGs of comprable quality commonly use 256 bits or less of state. This huge state means that MT19937 cannot be run on small devices and is more difficult to run in parallel. The state size also makes initialization difficult, requiring either a complex key scheduling algorithm to make a key from a single word or a few words or providing 8448 bits. Because the tempering function applied on output (used to achieve equidistribution in high dimensions) is invertible and fixed it is trivial to recover the entire state, making MT19937 inappropriate for cryptographic purposes. A variant MT19937-64 was created for 64-bit computers, it uses the same structure but with slightly different constants.",
     "Authors": "Matsumoto and Nishimura",
     "Publication": "1997",
-    "Traits": null
+    "Traits": [
+      "LFSR-based"
+    ]
   },
   "Middle Square": {
     "Description": "The middle square method produces random numbers of a given width, padded on the left with zeroes, by squaring a value and then taking the middle digits as the next value. The quality of these sequences is very low and often falls quickly into short repeating sequences.",
@@ -121,6 +123,12 @@
   "Middle Square Binary": {
     "Description": "While the middle square method can be calculated by hand it is also a possible computer PRNG. When doing this on on modern computer hardware performance is much increased by specifiying the state size in bits (as this allows the middle bits to be extracted with a shift and mask) and to choose a state not more than half the size of the CPU register (as this prevents overflow when squaring). Mathematically these is no difference between these PRNGs and the other middle square PRNG defined on this site so quality is low and depends almost entirely on the size of the state space.",
     "Authors": null,
+    "Publication": null,
+    "Traits": null
+  },
+  "Multiply-with-Carry": {
+    "Description": ".",
+    "Authors": "George Marsaglia",
     "Publication": null,
     "Traits": null
   },
@@ -204,6 +212,14 @@
   "Xoshiro": {
     "Description": "The xoshiro family of PRNGs are inspired by the xorshift family but add an improving step to the output. Calculation by the authors also allows these generators to be jumped ahead in order to get another sequence that doesn't overlap.",
     "Authors": "Vigna",
+    "Publication": null,
+    "Traits": [
+      "LFSR-based"
+    ]
+  },
+  "Xoroshiro": {
+    "Description": "The xoroshiro family of PRNGs",
+    "Authors": "",
     "Publication": null,
     "Traits": [
       "LFSR-based"

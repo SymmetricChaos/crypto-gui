@@ -1,5 +1,5 @@
 use crate::{lfsr::Lfsr, ClassicRng};
-use utils::bits::{bits_to_u32_upper, Bit};
+use utils::bits::Bit;
 
 pub struct Geffe {
     pub rngs: [Lfsr; 3],
@@ -37,13 +37,20 @@ impl Geffe {
 
 impl ClassicRng for Geffe {
     fn next_u32(&mut self) -> u32 {
-        let mut output_bits = Vec::with_capacity(32);
+        let mut out = 0;
         for _ in 0..32 {
-            output_bits.push(self.next_bit())
+            out <<= 1;
+            out |= self.next_bit() as u32;
         }
-        if !self.ltr {
-            output_bits.reverse();
+        out
+    }
+
+    fn next_u64(&mut self) -> u64 {
+        let mut out = 0;
+        for _ in 0..64 {
+            out <<= 1;
+            out |= self.next_bit() as u64;
         }
-        bits_to_u32_upper(&output_bits)
+        out
     }
 }

@@ -66,6 +66,17 @@ impl ClassicRng for Rc4 {
             false => u32::from_le_bytes(bytes),
         }
     }
+
+    fn next_u64(&mut self) -> u64 {
+        let mut bytes = [0u8; 8];
+        for i in 0..8 {
+            bytes[i] = self.next_byte();
+        }
+        match self.big_endian {
+            true => u64::from_be_bytes(bytes),
+            false => u64::from_le_bytes(bytes),
+        }
+    }
 }
 
 #[cfg(test)]

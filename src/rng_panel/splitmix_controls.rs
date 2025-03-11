@@ -2,7 +2,7 @@ use super::ClassicRngFrame;
 use crate::ui_elements::{generate_random_u32s_box, UiElements};
 
 use rand::{thread_rng, Rng};
-use rngs::splitmix::Splitmix;
+use rngs::{splitmix::Splitmix, ClassicRng};
 
 pub struct SplitmixFrame {
     rng: Splitmix,

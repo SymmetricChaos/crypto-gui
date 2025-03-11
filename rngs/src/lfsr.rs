@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use num::Zero;
-use utils::bits::{bits_from_str, bits_to_u32_upper, bools_from_str, Bit};
+use utils::bits::{bits_from_str, bits_to_u32_upper, bits_to_u64_upper, bools_from_str, Bit};
 
 use crate::traits::ClassicRng;
 
@@ -117,6 +117,17 @@ impl ClassicRng for Lfsr {
             output_bits.reverse();
         }
         bits_to_u32_upper(&output_bits)
+    }
+
+    fn next_u64(&mut self) -> u64 {
+        let mut output_bits = Vec::with_capacity(64);
+        for _ in 0..64 {
+            output_bits.push(self.next_bit())
+        }
+        if !self.ltr {
+            output_bits.reverse();
+        }
+        bits_to_u64_upper(&output_bits)
     }
 }
 
