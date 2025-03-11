@@ -23,6 +23,21 @@ impl Default for Rc4 {
 }
 
 impl Rc4 {
+    pub fn from_bytes(key: &[u8]) -> Self {
+        let mut arr = [0; 256];
+        // Set array to identity permutation
+        for n in 0..256 {
+            arr[n] = n as u8;
+        }
+        // Perform 256 swaps
+        let mut j: u8 = 0;
+        for (i, k) in (0..256).zip(key.iter().cycle()) {
+            j = j.wrapping_add(arr[i]).wrapping_add(*k);
+            arr.swap(i, j as usize)
+        }
+        Self { arr, i: 0, j: 0, big_endian: true }
+    }
+
     pub fn ksa(&mut self, key: &[u8]) {
         // Set array to identity permutation
         for n in 0..256 {
@@ -86,8 +101,7 @@ mod rc4_tests {
 
     #[test]
     fn keystream_test() {
-        let mut rng = Rc4::default();
-        rng.ksa(&0x0102030405060708_u64.to_be_bytes());
+        let mut rng = Rc4::from_bytes(&0x0102030405060708_u64.to_be_bytes());
 
         println!("First 32 Bytes of Keystream for 0x0102030405060708");
         for byte in [
@@ -96,13 +110,14 @@ mod rc4_tests {
             0xb1, 0x9e, 0x5b, 0x09,
         ] {
             let b = rng.next_byte();
+            assert_eq!(b, byte);
 
-            print!("{:02x} {:02x}", byte, b);
-            if b != byte {
-                println!(" ERROR")
-            } else {
-                println!("")
-            }
+            // print!("{:02x} {:02x}", byte, b);
+            // if b != byte {
+            //     println!(" ERROR")
+            // } else {
+            //     println!("")
+            // }
         }
 
         rng.ksa(&0x641910833222772a_u64.to_be_bytes());
@@ -113,13 +128,13 @@ mod rc4_tests {
             0xe9, 0x36, 0x04, 0xa9,
         ] {
             let b = rng.next_byte();
-
-            print!("{:02x} {:02x}", byte, b);
-            if b != byte {
-                println!(" ERROR")
-            } else {
-                println!("")
-            }
+            assert_eq!(b,byte);
+            // print!("{:02x} {:02x}", byte, b);
+            // if b != byte {
+            //     println!(" ERROR")
+            // } else {
+            //     println!("")
+            // }
         }
     }
 }
