@@ -30,7 +30,7 @@ impl ClassicRngFrame for XoshiroFrame {
         ui.add_space(8.0);
 
         ui.horizontal(|ui| {
-            ui.subheading("Seed Values");
+            ui.subheading("State");
             if ui.button("🎲").on_hover_text("randomize").clicked() {
                 self.randomize();
             }
@@ -71,13 +71,6 @@ impl ClassicRngFrame for XoshiroFrame {
                 self.rng.long_jump();
             }
         });
-
-        ui.add_space(16.0);
-        ui.subheading("Internal State");
-        ui.monospace(format!(
-            "{:016X} {:016X} {:016X} {:016X}",
-            self.rng.state[0], self.rng.state[1], self.rng.state[2], self.rng.state[3],
-        ));
 
         // ui.collapsing("calculations", |ui| {
         //     ui.label(

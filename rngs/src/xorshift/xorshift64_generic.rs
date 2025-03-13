@@ -1,5 +1,11 @@
 use crate::ClassicRng;
 
+// From Vigna: An experimental exploration of Marsaglia’s xorshift generators, scrambled
+
+const M32: u64 = 0x2545F4914F6CDD1D;
+const M8: u64 = 0x106689D45497FDB5;
+const M2: u64 = 0x74321163EEC4A005;
+
 // This file creates an interactive (but inefficient) xorshift PRNG.
 // Practical xorshift uses just a single choice of triple and matrix and hardcode it.
 // See xorshift_transitions for macros that can automatically create hardcoded values.
@@ -78,7 +84,7 @@ impl ClassicRng for Xorshift64 {
         let out = match self.scrambler {
             XorshiftScrambler::None => (self.state >> 32) as u32,
             XorshiftScrambler::Plus => (self.state >> 32).wrapping_add(self.state << 32) as u32,
-            XorshiftScrambler::Star => (self.state >> 32).wrapping_mul(0x2545F4914F6CDD1) as u32,
+            XorshiftScrambler::Star => (self.state >> 32).wrapping_mul(M32) as u32, // in principle any odd constant other than 1 is valid here, value chosen empirically by Vigna
         };
         self.step();
         out
