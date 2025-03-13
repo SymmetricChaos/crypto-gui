@@ -3,7 +3,7 @@ use crate::ui_elements::{generate_random_u32s_box, UiElements};
 use rand::{thread_rng, Rng};
 use rngs::{
     xorshift::{
-        xorshift64_generic::{Xorshift64, XorshiftMatrix, XorshiftScrambler},
+        xorshift64_generic::{Xorshift64, XorshiftRule, XorshiftScrambler},
         TRIPLES_64,
     },
     ClassicRng,
@@ -43,6 +43,7 @@ impl ClassicRngFrame for XorshiftFrame {
                 self.rng.state = rng.gen::<u64>();
             }
         });
+        ui.label("Any value other than zero is a valid state.");
         ui.u64_hex_edit(&mut self.rng.state);
 
         ui.add_space(8.0);
@@ -60,6 +61,9 @@ impl ClassicRngFrame for XorshiftFrame {
                 self.rng.triple.2 = t.2 as u64;
             }
         });
+        ui.add_space(4.0);
+        ui.label("There are 275 triples that produce a maximum length sequence of 2^64-1 values.");
+        ui.add_space(4.0);
         ui.horizontal(|ui| {
             ui.label("(");
             ui.u64_drag_value_dec(&mut self.rng.triple.0);
@@ -72,21 +76,32 @@ impl ClassicRngFrame for XorshiftFrame {
 
         ui.add_space(8.0);
         ui.horizontal(|ui| {
-            ui.subheading("Matrix");
+            ui.subheading("Rule");
             if ui.button("🎲").on_hover_text("randomize").clicked() {
                 let mut rng = thread_rng();
-                match rng.gen_range(0..4) {
-                    0 => self.rng.matrix = XorshiftMatrix::A0,
-                    1 => self.rng.matrix = XorshiftMatrix::A1,
-                    2 => self.rng.matrix = XorshiftMatrix::A4,
-                    3 => self.rng.matrix = XorshiftMatrix::A5,
-                    _ => unreachable!("invalid integer generated"),
+                match rng.gen_range(0..8) {
+                    0 => self.rng.rule = XorshiftRule::A0,
+                    1 => self.rng.rule = XorshiftRule::A1,
+                    2 => self.rng.rule = XorshiftRule::A2,
+                    3 => self.rng.rule = XorshiftRule::A3,
+                    4 => self.rng.rule = XorshiftRule::A4,
+                    5 => self.rng.rule = XorshiftRule::A5,
+                    6 => self.rng.rule = XorshiftRule::A6,
+                    7 => self.rng.rule = XorshiftRule::A7,
+                    _ => unreachable!("integer not in range 0..8 was generated"),
                 }
             }
         });
-        for variant in XorshiftMatrix::iter() {
-            ui.selectable_value(&mut self.rng.matrix, variant, variant.to_string());
-        }
+        ui.add_space(4.0);
+        ui.label("There are eight shift rules that can be used. These are named follwing Vigna (2016) and the shifts used can be seen below.");
+        ui.add_space(4.0);
+        ui.horizontal(|ui| {
+            for variant in XorshiftRule::iter() {
+                ui.selectable_value(&mut self.rng.rule, variant, variant.to_string());
+            }
+        });
+        ui.add_space(4.0);
+        ui.monospace(self.rng.rule.rule());
 
         ui.add_space(8.0);
         ui.horizontal(|ui| {
@@ -97,44 +112,33 @@ impl ClassicRngFrame for XorshiftFrame {
                     0 => self.rng.scrambler = XorshiftScrambler::None,
                     1 => self.rng.scrambler = XorshiftScrambler::Plus,
                     2 => self.rng.scrambler = XorshiftScrambler::Star32,
-                    _ => unreachable!("invalid integer generated"),
+                    3 => self.rng.scrambler = XorshiftScrambler::Star8,
+                    4 => self.rng.scrambler = XorshiftScrambler::Star2,
+                    _ => unreachable!("integer not in range 0..4 was generated"),
                 }
             }
         });
-        for variant in XorshiftScrambler::iter() {
-            ui.selectable_value(&mut self.rng.scrambler, variant, variant.to_string());
-        }
+        ui.add_space(4.0);
+        ui.label("The raw outputs of an xorshift generator have easily detectable patterns. A scrambling step improves the output.");
+        ui.add_space(4.0);
+        ui.horizontal(|ui| {
+            for variant in XorshiftScrambler::iter() {
+                ui.selectable_value(&mut self.rng.scrambler, variant, variant.to_string());
+            }
+        });
+        ui.add_space(4.0);
+        match self.rng.scrambler {
+            XorshiftScrambler::None => ui.label("No scrambling step."),
+            XorshiftScrambler::Plus => ui.label("No scrambling step."),
+            XorshiftScrambler::Star32 => ui.label("Performs multiplication by 2685821657736338717. This is invertible so equidistribution is preserved."),
+            XorshiftScrambler::Star8 =>  ui.label("Performs multiplication by 1181783497276652981. This is invertible so equidistribution is preserved."),
+            XorshiftScrambler::Star2 =>  ui.label("Performs multiplication by 8372773778140471301. This is invertible so equidistribution is preserved."),
+        };
 
         ui.add_space(16.0);
         if ui.button("step").clicked() {
             self.rng.next_u32();
         }
-        // ui.collapsing("calculations", |ui| {
-
-        //     let mut t = self.rng.state;
-        //     ui.monospace(format!(
-        //         "{:016X}  ⊕  {:016X}  =  {:016X}    (XOR the state with itself shifted left by 13 bits)",
-        //         t,
-        //         t << 13,
-        //         t ^ (t << 13)
-        //     ));
-        //     t ^= t << 13;
-
-        //     ui.monospace(format!(
-        //         "{:016X}  ⊕  {:016X}  =  {:016X}    (XOR the state with itself shifted right by 17 bits)",
-        //         t,
-        //         t >> 7,
-        //         t ^ (t >> 7)
-        //     ));
-        //     t ^= t >> 7;
-
-        //     ui.monospace(format!(
-        //         "{:016X}  ⊕  {:016X}  =  {:016X}    (XOR the state with itself shifted left by 5 bits)",
-        //         t,
-        //         t << 13,
-        //         t ^ (t << 13)
-        //     ));
-        // });
 
         ui.add_space(16.0);
         generate_random_u32s_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);

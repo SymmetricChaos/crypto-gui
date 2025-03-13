@@ -22,7 +22,7 @@ mod shrinking_generator_controls;
 mod splitmix_controls;
 mod vmpcr_controls;
 mod weyl_controls;
-mod xorshift_controls;
+mod xorshift64_controls;
 mod xoshiro_controls;
 
 use egui::Ui;
@@ -85,7 +85,7 @@ pub struct RngInterface {
     splitmix: splitmix_controls::SplitmixFrame,
     vmpcr: vmpcr_controls::VmpcrFrame,
     weyl: weyl_controls::WeylSequenceFrame,
-    xorshift: xorshift_controls::XorshiftFrame,
+    xorshift: xorshift64_controls::XorshiftFrame,
     xoshiro: xoshiro_controls::XoshiroFrame,
 }
 

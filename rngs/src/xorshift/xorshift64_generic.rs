@@ -20,7 +20,7 @@ pub enum XorshiftScrambler {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, strum::EnumIter, strum::Display)]
-pub enum XorshiftMatrix {
+pub enum XorshiftRule {
     A0,
     A1,
     A2,
@@ -31,48 +31,48 @@ pub enum XorshiftMatrix {
     A7,
 }
 
-impl XorshiftMatrix {
+impl XorshiftRule {
     pub fn rule(&self) -> &'static str {
         match self {
-            XorshiftMatrix::A0 => "x ^= x << a;\nx ^= x >> b;\nx ^= x << c;\n",
-            XorshiftMatrix::A1 => "x ^= x >> a;\nx ^= x << b;\nx ^= x >> c;\n",
-            XorshiftMatrix::A2 => "x ^= x << c;\nx ^= x >> b;\nx ^= x << a;\n",
-            XorshiftMatrix::A3 => "x ^= x >> c;\nx ^= x << b;\nx ^= x >> a;\n",
-            XorshiftMatrix::A4 => "x ^= x << a;\nx ^= x << c;\nx ^= x >> b;\n",
-            XorshiftMatrix::A5 => "x ^= x >> a;\nx ^= x >> c;\nx ^= x << b;\n",
-            XorshiftMatrix::A6 => "x ^= x >> b;\nx ^= x << a;\nx ^= x << c;\n",
-            XorshiftMatrix::A7 => "x ^= x << b;\nx ^= x >> c;\nx ^= x >> a;\n",
+            XorshiftRule::A0 => "x ^= x << a;\nx ^= x >> b;\nx ^= x << c;\n",
+            XorshiftRule::A1 => "x ^= x >> a;\nx ^= x << b;\nx ^= x >> c;\n",
+            XorshiftRule::A2 => "x ^= x << c;\nx ^= x >> b;\nx ^= x << a;\n",
+            XorshiftRule::A3 => "x ^= x >> c;\nx ^= x << b;\nx ^= x >> a;\n",
+            XorshiftRule::A4 => "x ^= x << a;\nx ^= x << c;\nx ^= x >> b;\n",
+            XorshiftRule::A5 => "x ^= x >> a;\nx ^= x >> c;\nx ^= x << b;\n",
+            XorshiftRule::A6 => "x ^= x >> b;\nx ^= x << a;\nx ^= x << c;\n",
+            XorshiftRule::A7 => "x ^= x << b;\nx ^= x >> c;\nx ^= x >> a;\n",
         }
     }
 }
 
 /// Given a valid triple from super::TRIPLES_64 perform a maximum length transition on the state.
 /// Triples retain the maximum length property when reversed.
-pub fn xorshift_transition(mut state: u64, triple: (u64, u64, u64), matrix: XorshiftMatrix) -> u64 {
+pub fn xorshift_transition(mut state: u64, triple: (u64, u64, u64), matrix: XorshiftRule) -> u64 {
     let (a, b, c) = triple;
     match matrix {
-        XorshiftMatrix::A0 => {
+        XorshiftRule::A0 => {
             crate::xorshift_a0!(state, a, b, c);
         }
-        XorshiftMatrix::A1 => {
+        XorshiftRule::A1 => {
             crate::xorshift_a1!(state, a, b, c);
         }
-        XorshiftMatrix::A2 => {
+        XorshiftRule::A2 => {
             crate::xorshift_a2!(state, a, b, c);
         }
-        XorshiftMatrix::A3 => {
+        XorshiftRule::A3 => {
             crate::xorshift_a3!(state, a, b, c);
         }
-        XorshiftMatrix::A4 => {
+        XorshiftRule::A4 => {
             crate::xorshift_a4!(state, a, b, c);
         }
-        XorshiftMatrix::A5 => {
+        XorshiftRule::A5 => {
             crate::xorshift_a5!(state, a, b, c);
         }
-        XorshiftMatrix::A6 => {
+        XorshiftRule::A6 => {
             crate::xorshift_a6!(state, a, b, c);
         }
-        XorshiftMatrix::A7 => {
+        XorshiftRule::A7 => {
             crate::xorshift_a7!(state, a, b, c);
         }
     }
@@ -82,8 +82,9 @@ pub fn xorshift_transition(mut state: u64, triple: (u64, u64, u64), matrix: Xors
 pub struct Xorshift64 {
     pub state: u64,
     pub triple: (u64, u64, u64),
-    pub matrix: XorshiftMatrix,
+    pub rule: XorshiftRule,
     pub scrambler: XorshiftScrambler,
+    pub reverse_bits: bool,
 }
 
 impl Default for Xorshift64 {
@@ -91,8 +92,9 @@ impl Default for Xorshift64 {
         Self {
             state: 0x139408DCBBF7A44,
             triple: (13, 7, 17),
-            matrix: XorshiftMatrix::A0,
+            rule: XorshiftRule::A0,
             scrambler: XorshiftScrambler::None,
+            reverse_bits: false,
         }
     }
 }
@@ -108,7 +110,7 @@ impl Xorshift64 {
     }
 
     pub fn step(&mut self) {
-        self.state = xorshift_transition(self.state, self.triple, self.matrix)
+        self.state = xorshift_transition(self.state, self.triple, self.rule)
     }
 }
 
@@ -122,7 +124,11 @@ impl ClassicRng for Xorshift64 {
             XorshiftScrambler::Star2 => (self.state >> 32).wrapping_mul(M2) as u32,
         };
         self.step();
-        out
+        if self.reverse_bits {
+            out.reverse_bits()
+        } else {
+            out
+        }
     }
 
     fn next_u64(&mut self) -> u64 {
@@ -139,6 +145,10 @@ impl ClassicRng for Xorshift64 {
             XorshiftScrambler::Star2 => self.state.wrapping_mul(M2),
         };
         self.step();
-        out
+        if self.reverse_bits {
+            out.reverse_bits()
+        } else {
+            out
+        }
     }
 }
