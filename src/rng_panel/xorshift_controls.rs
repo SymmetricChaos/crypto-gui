@@ -76,10 +76,10 @@ impl ClassicRngFrame for XorshiftFrame {
             if ui.button("🎲").on_hover_text("randomize").clicked() {
                 let mut rng = thread_rng();
                 match rng.gen_range(0..4) {
-                    0 => self.rng.matrix = XorshiftMatrix::LRL,
-                    1 => self.rng.matrix = XorshiftMatrix::RLR,
-                    2 => self.rng.matrix = XorshiftMatrix::LLR,
-                    3 => self.rng.matrix = XorshiftMatrix::RRL,
+                    0 => self.rng.matrix = XorshiftMatrix::A0,
+                    1 => self.rng.matrix = XorshiftMatrix::A1,
+                    2 => self.rng.matrix = XorshiftMatrix::A4,
+                    3 => self.rng.matrix = XorshiftMatrix::A5,
                     _ => unreachable!("invalid integer generated"),
                 }
             }
@@ -96,7 +96,7 @@ impl ClassicRngFrame for XorshiftFrame {
                 match rng.gen_range(0..3) {
                     0 => self.rng.scrambler = XorshiftScrambler::None,
                     1 => self.rng.scrambler = XorshiftScrambler::Plus,
-                    2 => self.rng.scrambler = XorshiftScrambler::Star,
+                    2 => self.rng.scrambler = XorshiftScrambler::Star32,
                     _ => unreachable!("invalid integer generated"),
                 }
             }
