@@ -196,14 +196,14 @@
     "Traits": null
   },
   "Weyl Sequence": {
-    "Description": "The original Weyl sequence produces real numbers distributed between 0 and 1 by repeatedly adding an irrational number to the current state and taking the fractional part. For the purpose of improving the output of his PRNGs George Marsaglia defined Weyl sequences as incrementing the state by a value and then taking the remainder when divided by some value coprime to the increment.",
-    "Authors": "Marsaglia",
+    "Description": "The original Weyl sequence produces real numbers distributed between 0 and 1 by repeatedly adding an irrational number to the current state and taking the fractional part. For the purpose of improving the output of his PRNGs George Marsaglia defined Weyl sequences as incrementing the state by a value and then taking the remainder when divided by some value coprime to the increment. In practice this is done with machine words of 32 or 64 bits so any odd number is accptable.",
+    "Authors": "Hermann Weyl and George Marsaglia",
     "Publication": null,
     "Traits": null
   },
-  "Xorshift": {
-    "Description": "The xorshift family of PRNGs are among the simplest and fastest useful random number generators. They use only the operations of bitwise XOR and bitshifting. The model xorshift here has just 64 bits of state which makes it much easier to examine but practical versions require additional state. Because it uses only shifts and XOR operations if the state of an xorshift generator is zero it will produce only zeroes.",
-    "Authors": "Marsaglia",
+  "Xorshift64": {
+    "Description": "The xorshift family of PRNGs are among the simplest and fastest useful random number generators, created by George Marsaglia with some extensions explored by Sebastiano Vigna. They produce the next state by XORing the state with a shifted version of itself three times, performing multiple steps of a LFSR. With properly chosen shifts an xorshift PRNG can guarantee that it visits every possible state except zero excactly once before repeating and like an LFSR never enters the zero state unless started there. The model xorshift here has just 64 bits of state and outputs a 32-bit integer.",
+    "Authors": "George Marsaglia and Sebastiano Vigna",
     "Publication": "2003",
     "Traits": [
       "LFSR-based"
@@ -211,7 +211,7 @@
   },
   "Xoshiro": {
     "Description": "The xoshiro family of PRNGs are inspired by the xorshift family but add an improving step to the output. Calculation by the authors also allows these generators to be jumped ahead in order to get another sequence that doesn't overlap.",
-    "Authors": "Vigna",
+    "Authors": "Sebastiano Vigna",
     "Publication": null,
     "Traits": [
       "LFSR-based"
