@@ -17,6 +17,8 @@ pub enum XorshiftScrambler {
     Star32,
     Star8,
     Star2,
+    WowPlus,
+    WowXor,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, strum::EnumIter, strum::Display)]
@@ -83,7 +85,10 @@ pub struct Xorshift64 {
     pub state: u64,
     pub triple: (u64, u64, u64),
     pub rule: XorshiftRule,
+    pub ctr: u32,
+    pub weyl: u32,
     pub scrambler: XorshiftScrambler,
+
     pub reverse_bits: bool,
 }
 
@@ -93,6 +98,8 @@ impl Default for Xorshift64 {
             state: 0x139408DCBBF7A44,
             triple: (13, 7, 17),
             rule: XorshiftRule::A0,
+            ctr: 0,
+            weyl: 362437,
             scrambler: XorshiftScrambler::None,
             reverse_bits: false,
         }
@@ -122,27 +129,14 @@ impl ClassicRng for Xorshift64 {
             XorshiftScrambler::Star32 => (self.state >> 32).wrapping_mul(M32) as u32,
             XorshiftScrambler::Star8 => (self.state >> 32).wrapping_mul(M8) as u32,
             XorshiftScrambler::Star2 => (self.state >> 32).wrapping_mul(M2) as u32,
-        };
-        self.step();
-        if self.reverse_bits {
-            out.reverse_bits()
-        } else {
-            out
-        }
-    }
-
-    fn next_u64(&mut self) -> u64 {
-        let out = match self.scrambler {
-            XorshiftScrambler::None => self.state,
-            XorshiftScrambler::Plus => {
-                let a = self.state;
-                self.step();
-                let b = self.state;
-                a.wrapping_add(b)
+            XorshiftScrambler::WowPlus => {
+                self.ctr = self.ctr.wrapping_add(self.weyl);
+                ((self.state >> 32) as u32).wrapping_add(self.ctr)
             }
-            XorshiftScrambler::Star32 => self.state.wrapping_mul(M32),
-            XorshiftScrambler::Star8 => self.state.wrapping_mul(M8),
-            XorshiftScrambler::Star2 => self.state.wrapping_mul(M2),
+            XorshiftScrambler::WowXor => {
+                self.ctr = self.ctr.wrapping_add(self.weyl);
+                ((self.state >> 32) as u32) ^ self.ctr
+            }
         };
         self.step();
         if self.reverse_bits {

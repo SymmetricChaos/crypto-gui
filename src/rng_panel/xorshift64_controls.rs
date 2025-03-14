@@ -1,5 +1,9 @@
 use super::ClassicRngFrame;
-use crate::ui_elements::{generate_random_u32s_box, UiElements};
+use crate::{
+    integer_drag_value::EditU32,
+    ui_elements::{generate_random_u32s_box, UiElements},
+};
+use egui::Label;
 use rand::{thread_rng, Rng};
 use rngs::{
     xorshift::{
@@ -119,7 +123,7 @@ impl ClassicRngFrame for XorshiftFrame {
             }
         });
         ui.add_space(4.0);
-        ui.label("The raw outputs of an xorshift generator have easily detectable patterns. A scrambling step improves the output.");
+        ui.label("The raw outputs of an xorshift generator have easily detectable patterns. Many forms of scrambling are used to alter the output (not the state).");
         ui.add_space(4.0);
         ui.horizontal(|ui| {
             for variant in XorshiftScrambler::iter() {
@@ -127,12 +131,21 @@ impl ClassicRngFrame for XorshiftFrame {
             }
         });
         ui.add_space(4.0);
+        let is_wow = self.rng.scrambler == XorshiftScrambler::WowPlus
+            || self.rng.scrambler == XorshiftScrambler::WowXor;
+        ui.add_visible(is_wow, Label::new("Counter"));
+        ui.add_visible(is_wow, EditU32::new(&mut self.rng.ctr));
+        ui.add_visible(is_wow, Label::new("Weyl Constant"));
+        ui.add_visible(is_wow, EditU32::new(&mut self.rng.weyl));
+        ui.add_space(4.0);
         match self.rng.scrambler {
-            XorshiftScrambler::None => ui.label("No scrambling step."),
-            XorshiftScrambler::Plus => ui.label("For a 32-bit output the top and bottom half of the state are added together. For a 64-bit output two consecutive values are added together."),
-            XorshiftScrambler::Star32 => ui.label("Performs multiplication by 2685821657736338717. This is invertible so equidistribution is preserved."),
-            XorshiftScrambler::Star8 =>  ui.label("Performs multiplication by 1181783497276652981. This is invertible so equidistribution is preserved."),
-            XorshiftScrambler::Star2 =>  ui.label("Performs multiplication by 8372773778140471301. This is invertible so equidistribution is preserved."),
+            XorshiftScrambler::None =>    ui.label("No scrambling step."),
+            XorshiftScrambler::Plus =>    ui.label("The top and bottom half of the state are added together."),
+            XorshiftScrambler::Star32 =>  ui.label("Performs multiplication by 2685821657736338717. This is invertible so equidistribution and period are preserved"),
+            XorshiftScrambler::Star8 =>   ui.label("Performs multiplication by 1181783497276652981. This is invertible so equidistribution and period are preserved."),
+            XorshiftScrambler::Star2 =>   ui.label("Performs multiplication by 8372773778140471301. This is invertible so equidistribution and period are preserved."),
+            XorshiftScrambler::WowPlus => ui.label("Adds a counter value to the output. The counter is stepped by a constant each time, producing a Weyl sequence so long as the constant is odd. This results in a longer period."),
+            XorshiftScrambler::WowXor =>  ui.label("XORs a counter value into the output. The counter is stepped by a constant each time, producing a Weyl sequence so long as the constant is odd. This results in a longer period."),
         };
 
         ui.add_space(16.0);

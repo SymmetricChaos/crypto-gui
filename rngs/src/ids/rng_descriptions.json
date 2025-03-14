@@ -209,6 +209,14 @@
       "LFSR-based"
     ]
   },
+  "Xorwow": {
+    "Description": "Xorwow combines a xorshift PRNG with a Weyl sequence.",
+    "Authors": "George Marsaglia",
+    "Publication": "2003",
+    "Traits": [
+      "LFSR-based"
+    ]
+  },
   "Xoshiro": {
     "Description": "The xoshiro family of PRNGs are inspired by the xorshift family but add an improving step to the output. Calculation by the authors also allows these generators to be jumped ahead in order to get another sequence that doesn't overlap.",
     "Authors": "Sebastiano Vigna",
