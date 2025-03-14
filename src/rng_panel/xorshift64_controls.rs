@@ -114,7 +114,7 @@ impl ClassicRngFrame for XorshiftFrame {
                     2 => self.rng.scrambler = XorshiftScrambler::Star32,
                     3 => self.rng.scrambler = XorshiftScrambler::Star8,
                     4 => self.rng.scrambler = XorshiftScrambler::Star2,
-                    _ => unreachable!("integer not in range 0..4 was generated"),
+                    _ => unreachable!("integer not in range 0..5 was generated"),
                 }
             }
         });
@@ -129,7 +129,7 @@ impl ClassicRngFrame for XorshiftFrame {
         ui.add_space(4.0);
         match self.rng.scrambler {
             XorshiftScrambler::None => ui.label("No scrambling step."),
-            XorshiftScrambler::Plus => ui.label("No scrambling step."),
+            XorshiftScrambler::Plus => ui.label("For a 32-bit output the top and bottom half of the state are added together. For a 64-bit output two consecutive values are added together."),
             XorshiftScrambler::Star32 => ui.label("Performs multiplication by 2685821657736338717. This is invertible so equidistribution is preserved."),
             XorshiftScrambler::Star8 =>  ui.label("Performs multiplication by 1181783497276652981. This is invertible so equidistribution is preserved."),
             XorshiftScrambler::Star2 =>  ui.label("Performs multiplication by 8372773778140471301. This is invertible so equidistribution is preserved."),
