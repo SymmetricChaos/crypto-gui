@@ -112,13 +112,15 @@ impl ClassicRngFrame for XorshiftFrame {
             ui.subheading("Scrambler");
             if ui.button("🎲").on_hover_text("randomize").clicked() {
                 let mut rng = thread_rng();
-                match rng.gen_range(0..3) {
+                match rng.gen_range(0..7) {
                     0 => self.rng.scrambler = XorshiftScrambler::None,
                     1 => self.rng.scrambler = XorshiftScrambler::Plus,
                     2 => self.rng.scrambler = XorshiftScrambler::Star32,
                     3 => self.rng.scrambler = XorshiftScrambler::Star8,
                     4 => self.rng.scrambler = XorshiftScrambler::Star2,
-                    _ => unreachable!("integer not in range 0..5 was generated"),
+                    5 => self.rng.scrambler = XorshiftScrambler::WowPlus,
+                    6 => self.rng.scrambler = XorshiftScrambler::WowXor,
+                    _ => unreachable!("integer not in range 0..7 was generated"),
                 }
             }
         });
