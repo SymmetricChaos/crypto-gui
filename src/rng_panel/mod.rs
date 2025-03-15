@@ -85,7 +85,7 @@ pub struct RngInterface {
     splitmix: splitmix_controls::SplitmixFrame,
     vmpcr: vmpcr_controls::VmpcrFrame,
     weyl: weyl_controls::WeylSequenceFrame,
-    xorshift: xorshift64_controls::XorshiftFrame,
+    xorshift64: xorshift64_controls::Xorshift64Frame,
     xoshiro: xoshiro_controls::XoshiroFrame,
 }
 
@@ -106,7 +106,7 @@ impl RngInterface {
                 RngId::ShrinkingGenerator,
                 RngId::Splitmix,
                 RngId::Vmpcr,
-                RngId::Xorshift,
+                RngId::Xorshift64,
                 RngId::Xoshiro,
             ],
             active_rng,
@@ -165,7 +165,7 @@ impl RngInterface {
             RngId::Splitmix => &mut self.splitmix,
             RngId::Vmpcr => &mut self.vmpcr,
             RngId::Weyl => &mut self.weyl,
-            RngId::Xorshift => &mut self.xorshift,
+            RngId::Xorshift64 => &mut self.xorshift64,
             RngId::Xoshiro => &mut self.xoshiro,
             _ => todo!("<<<RNG NOT FOUND>>>"),
         }

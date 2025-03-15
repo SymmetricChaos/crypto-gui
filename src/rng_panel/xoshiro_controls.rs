@@ -4,7 +4,7 @@ use rand::{thread_rng, Rng};
 use rngs::{xorshift::xoshiro256::Xoshiro256, ClassicRng};
 
 pub struct XoshiroFrame {
-    rng: Xoshiro256,
+    rng256: Xoshiro256,
     randoms: String,
     n_random: usize,
 }
@@ -12,7 +12,7 @@ pub struct XoshiroFrame {
 impl Default for XoshiroFrame {
     fn default() -> Self {
         Self {
-            rng: Default::default(),
+            rng256: Default::default(),
             randoms: String::new(),
             n_random: 5,
         }
@@ -36,7 +36,7 @@ impl ClassicRngFrame for XoshiroFrame {
             }
         });
         for i in 0..4 {
-            ui.u64_hex_edit(&mut self.rng.state[i]);
+            ui.u64_hex_edit(&mut self.rng256.state[i]);
         }
 
         // ui.add_space(16.0);
@@ -54,21 +54,21 @@ impl ClassicRngFrame for XoshiroFrame {
         ui.add_space(16.0);
         ui.horizontal(|ui| {
             if ui.button("step").clicked() {
-                self.rng.next_u32();
+                self.rng256.next_u32();
             }
             if ui
                 .button("jump")
                 .on_hover_text("move forward by 2^128 steps")
                 .clicked()
             {
-                self.rng.jump();
+                self.rng256.jump();
             }
             if ui
                 .button("long jump")
                 .on_hover_text("move forward by 2^192 steps")
                 .clicked()
             {
-                self.rng.long_jump();
+                self.rng256.long_jump();
             }
         });
 
@@ -79,17 +79,17 @@ impl ClassicRngFrame for XoshiroFrame {
         // });
 
         ui.add_space(16.0);
-        generate_random_u32s_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
+        generate_random_u32s_box(ui, &mut self.rng256, &mut self.n_random, &mut self.randoms);
         ui.add_space(16.0);
     }
 
     fn rng(&self) -> &dyn rngs::ClassicRng {
-        &self.rng
+        &self.rng256
     }
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        for word in self.rng.state.iter_mut() {
+        for word in self.rng256.state.iter_mut() {
             *word = rng.gen()
         }
     }

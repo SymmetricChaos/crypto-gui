@@ -53,7 +53,7 @@ rng_ids_and_names!(
     Splitmix, "Splitmix64";
     Vmpcr, "VMPC-R";
     Weyl, "Weyl";
-    Xorshift, "Xorshift";
+    Xorshift64, "Xorshift64";
     Xoroshiro, "Xoroshiro";
     Xoshiro, "Xoshiro";
 );

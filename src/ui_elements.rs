@@ -426,7 +426,11 @@ pub fn generate_random_u32s_box(
     randoms: &mut String,
 ) {
     ui.horizontal(|ui| {
-        if ui.button("Random Numbers").clicked() {
+        if ui
+            .button("Random Numbers")
+            .on_hover_text("produce random 32-bit integers")
+            .clicked()
+        {
             for _ in 0..*n_random {
                 if !randoms.is_empty() {
                     randoms.push_str(", ");
@@ -447,7 +451,11 @@ pub fn generate_random_f32s_box(
     randoms: &mut String,
 ) {
     ui.horizontal(|ui| {
-        if ui.button("Random Numbers").clicked() {
+        if ui
+            .button("Random Numbers")
+            .on_hover_text("produce random 32-bit floats in the range [0,1]")
+            .clicked()
+        {
             for _ in 0..*n_random {
                 if !randoms.is_empty() {
                     randoms.push_str(", ");

@@ -202,7 +202,15 @@
     "Traits": null
   },
   "Xorshift64": {
-    "Description": "The xorshift family of PRNGs are among the simplest and fastest useful random number generators, created by George Marsaglia with some extensions explored by Sebastiano Vigna. They produce the next state by XORing the state with a shifted version of itself three times, performing multiple steps of a LFSR. With properly chosen shifts an xorshift PRNG can guarantee that it visits every possible state except zero excactly once before repeating and like an LFSR never enters the zero state unless started there. The model xorshift here has just 64 bits of state and outputs a 32-bit integer.",
+    "Description": "The xorshift family of PRNGs are among the simplest and fastest useful random number generators, created by George Marsaglia with some extensions explored by Sebastiano Vigna. They produce the next state by XORing the state with a shifted version of itself three times, performing multiple steps of a LFSR. With properly chosen shifts an xorshift PRNG can guarantee that it visits every possible state except zero excactly once before repeating and like an LFSR never enters the zero state unless started there. The model xorshift here has just 64 bits of state for simplicity, larger state is needed for most purposes.",
+    "Authors": "George Marsaglia and Sebastiano Vigna",
+    "Publication": "2003",
+    "Traits": [
+      "LFSR-based"
+    ]
+  },
+  "Xorshift": {
+    "Description": "The xorshift family of PRNGs are among the simplest and fastest useful random number generators, created by George Marsaglia with some extensions explored by Sebastiano Vigna. They produce the next state by XORing the state with a shifted version of itself three times, performing multiple steps of a LFSR. With properly chosen shifts an xorshift PRNG can guarantee that it visits every possible state except zero excactly once before repeating and like an LFSR never enters the zero state unless started there.",
     "Authors": "George Marsaglia and Sebastiano Vigna",
     "Publication": "2003",
     "Traits": [
@@ -218,7 +226,7 @@
     ]
   },
   "Xoshiro": {
-    "Description": "The xoshiro family of PRNGs are inspired by the xorshift family but add an improving step to the output. Calculation by the authors also allows these generators to be jumped ahead in order to get another sequence that doesn't overlap.",
+    "Description": "The xoshiro family of PRNGs are inspired by the xorshift family but add an improving step to the output. Calculation by the authors also allows these generators to be jumped ahead in order to quickly produce a large number of indepedent sequences.",
     "Authors": "Sebastiano Vigna",
     "Publication": null,
     "Traits": [

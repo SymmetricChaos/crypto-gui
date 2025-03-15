@@ -14,13 +14,13 @@ use rngs::{
 };
 use strum::IntoEnumIterator;
 
-pub struct XorshiftFrame {
+pub struct Xorshift64Frame {
     rng: Xorshift64,
     randoms: String,
     n_random: usize,
 }
 
-impl Default for XorshiftFrame {
+impl Default for Xorshift64Frame {
     fn default() -> Self {
         Self {
             rng: Default::default(),
@@ -30,9 +30,9 @@ impl Default for XorshiftFrame {
     }
 }
 
-impl XorshiftFrame {}
+impl Xorshift64Frame {}
 
-impl ClassicRngFrame for XorshiftFrame {
+impl ClassicRngFrame for Xorshift64Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
