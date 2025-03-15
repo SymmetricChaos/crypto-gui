@@ -48,6 +48,9 @@ impl ClassicRngFrame for VmpcrFrame {
         );
         ui.add_space(8.0);
 
+        ui.randomize_reset_rng(self);
+        ui.add_space(8.0);
+
         ui.horizontal(|ui| {
             ui.subheading("Key");
             if ui.button("🎲").on_hover_text("randomize").clicked() {

@@ -37,6 +37,9 @@ impl ClassicRngFrame for ShrinkingGeneratorFrame {
         );
         ui.add_space(8.0);
 
+        ui.randomize_reset_rng(self);
+        ui.add_space(8.0);
+
         ui.subheading("Generator A");
         lfsr_grid_controls(
             ui,

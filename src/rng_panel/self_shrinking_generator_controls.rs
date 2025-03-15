@@ -1,5 +1,5 @@
 use super::ClassicRngFrame;
-use crate::ui_elements::{generate_random_u32s_box, lfsr_grid_controls};
+use crate::ui_elements::{generate_random_u32s_box, lfsr_grid_controls, UiElements};
 use rand::{thread_rng, Rng};
 use rngs::self_shrinking_generator::SelfShrinkingGenerator;
 use utils::bits::Bit::{self};
@@ -32,7 +32,9 @@ impl ClassicRngFrame for SelfShrinkingGeneratorFrame {
         );
         ui.add_space(8.0);
 
+        ui.randomize_reset_rng(self);
         ui.add_space(8.0);
+
         if ui.button("step").clicked() {
             self.rng.step();
         }

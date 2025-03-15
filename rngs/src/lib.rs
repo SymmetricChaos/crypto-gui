@@ -31,6 +31,7 @@ pub mod shrinking_generator;
 pub mod splitmix;
 pub mod traits;
 pub mod vmpcr;
+pub mod well;
 pub mod weyl;
 pub mod xorshift;
 pub use traits::ClassicRng;

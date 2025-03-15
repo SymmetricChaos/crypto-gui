@@ -33,9 +33,8 @@ impl ClassicRngFrame for WeylSequenceFrame {
         );
         ui.add_space(8.0);
 
-        if ui.button("Randomize").clicked() {
-            self.randomize();
-        }
+        ui.randomize_reset_rng(self);
+        ui.add_space(8.0);
 
         ui.horizontal(|ui| {
             ui.subheading("State");

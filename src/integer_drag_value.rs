@@ -184,31 +184,9 @@ macro_rules! integer_edit_box {
                             );
                         }
 
-                        #[cfg(feature = "accesskit")]
-                        {
-                            use accesskit::Action;
-                            change = change.wrapping_add(
-                                input.num_accesskit_action_requests(id, Action::Increment) as $t,
-                            );
-                            change = change.wrapping_add(
-                                input.num_accesskit_action_requests(id, Action::Decrement) as $t,
-                            );
-                        }
-
                         change
                     });
 
-                    #[cfg(feature = "accesskit")]
-                    {
-                        use accesskit::{Action, ActionData};
-                        ui.input(|input| {
-                            for request in input.accesskit_action_requests(id, Action::SetValue) {
-                                if let Some(ActionData::NumericValue(new_value)) = request.data {
-                                    value = new_value;
-                                }
-                            }
-                        });
-                    }
 
                     ui.input_mut(|input| {
                         if is_kb_editing {
@@ -331,55 +309,6 @@ macro_rules! integer_edit_box {
                     };
 
                     response.changed = [<get_ $t >](&mut get_set_value) != old_value;
-
-                    // response.widget_info(|| WidgetInfo::drag_value(ui.is_enabled(), value));
-
-                    #[cfg(feature = "accesskit")]
-                    ui.ctx().accesskit_node_builder(response.id, |builder| {
-                        use accesskit::Action;
-                        // If either end of the range is unbounded, it's better
-                        // to leave the corresponding AccessKit field set to None,
-                        // to allow for platform-specific default behavior.
-                        if range.start().is_finite() {
-                            builder.set_min_numeric_value(*range.start());
-                        }
-                        if range.end().is_finite() {
-                            builder.set_max_numeric_value(*range.end());
-                        }
-                        builder.set_numeric_value_step(speed);
-                        builder.add_action(Action::SetValue);
-                        if value < *range.end() {
-                            builder.add_action(Action::Increment);
-                        }
-                        if value > *range.start() {
-                            builder.add_action(Action::Decrement);
-                        }
-                        // The name field is set to the current value by the button,
-                        // but we don't want it set that way on this widget type.
-                        builder.clear_name();
-                        // Always expose the value as a string. This makes the widget
-                        // more stable to accessibility users as it switches
-                        // between edit and button modes. This is particularly important
-                        // for VoiceOver on macOS; if the value is not exposed as a string
-                        // when the widget is in button mode, then VoiceOver speaks
-                        // the value (or a percentage if the widget has a clamp range)
-                        // when the widget loses focus, overriding the announcement
-                        // of the newly focused widget. This is certainly a VoiceOver bug,
-                        // but it's good to make our software work as well as possible
-                        // with existing assistive technology. However, if the widget
-                        // has a prefix and/or suffix, expose those when in button mode,
-                        // just as they're exposed on the screen. This triggers the
-                        // VoiceOver bug just described, but exposing all information
-                        // is more important, and at least we can avoid the bug
-                        // for instances of the widget with no prefix or suffix.
-                        //
-                        // The value is exposed as a string by the text edit widget
-                        // when in edit mode.
-                        if !is_kb_editing {
-                            let value_text = format!("{prefix}{value_text}{suffix}");
-                            builder.set_value(value_text);
-                        }
-                    });
 
                     response
                 }

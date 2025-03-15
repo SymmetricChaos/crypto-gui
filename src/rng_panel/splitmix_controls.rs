@@ -30,6 +30,9 @@ impl ClassicRngFrame for SplitmixFrame {
         );
         ui.add_space(8.0);
 
+        ui.randomize_reset_rng(self);
+        ui.add_space(8.0);
+
         ui.horizontal(|ui| {
             ui.subheading("Seed Value");
             if ui.button("🎲").on_hover_text("randomize").clicked() {

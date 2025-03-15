@@ -30,7 +30,44 @@ impl Default for Xorshift64Frame {
     }
 }
 
-impl Xorshift64Frame {}
+impl Xorshift64Frame {
+    fn random_triple(&mut self) {
+        let mut rng = thread_rng();
+        let t = TRIPLES_64[rng.gen_range(0..TRIPLES_64.len())];
+        self.rng.triple.0 = t.0 as u64;
+        self.rng.triple.1 = t.1 as u64;
+        self.rng.triple.2 = t.2 as u64;
+    }
+
+    fn random_rule(&mut self) {
+        let mut rng = thread_rng();
+        match rng.gen_range(0..8) {
+            0 => self.rng.rule = XorshiftRule::A0,
+            1 => self.rng.rule = XorshiftRule::A1,
+            2 => self.rng.rule = XorshiftRule::A2,
+            3 => self.rng.rule = XorshiftRule::A3,
+            4 => self.rng.rule = XorshiftRule::A4,
+            5 => self.rng.rule = XorshiftRule::A5,
+            6 => self.rng.rule = XorshiftRule::A6,
+            7 => self.rng.rule = XorshiftRule::A7,
+            _ => unreachable!("integer not in range 0..8 was generated"),
+        }
+    }
+
+    fn random_scrambler(&mut self) {
+        let mut rng = thread_rng();
+        match rng.gen_range(0..7) {
+            0 => self.rng.scrambler = XorshiftScrambler::None,
+            1 => self.rng.scrambler = XorshiftScrambler::Plus,
+            2 => self.rng.scrambler = XorshiftScrambler::Star32,
+            3 => self.rng.scrambler = XorshiftScrambler::Star8,
+            4 => self.rng.scrambler = XorshiftScrambler::Star2,
+            5 => self.rng.scrambler = XorshiftScrambler::WowPlus,
+            6 => self.rng.scrambler = XorshiftScrambler::WowXor,
+            _ => unreachable!("integer not in range 0..7 was generated"),
+        }
+    }
+}
 
 impl ClassicRngFrame for Xorshift64Frame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
@@ -38,6 +75,8 @@ impl ClassicRngFrame for Xorshift64Frame {
             "see the code",
             "https://github.com/SymmetricChaos/crypto-gui/blob/master/rngs/src/xorshift/xorshift64_generic.rs",
         );
+
+        ui.randomize_reset_rng(self);
 
         ui.add_space(8.0);
         ui.horizontal(|ui| {
@@ -58,11 +97,7 @@ impl ClassicRngFrame for Xorshift64Frame {
                 .on_hover_text("random maximum length triple")
                 .clicked()
             {
-                let mut rng = thread_rng();
-                let t = TRIPLES_64[rng.gen_range(0..TRIPLES_64.len())];
-                self.rng.triple.0 = t.0 as u64;
-                self.rng.triple.1 = t.1 as u64;
-                self.rng.triple.2 = t.2 as u64;
+                self.random_triple();
             }
         });
         ui.add_space(4.0);
@@ -82,18 +117,7 @@ impl ClassicRngFrame for Xorshift64Frame {
         ui.horizontal(|ui| {
             ui.subheading("Rule");
             if ui.button("🎲").on_hover_text("randomize").clicked() {
-                let mut rng = thread_rng();
-                match rng.gen_range(0..8) {
-                    0 => self.rng.rule = XorshiftRule::A0,
-                    1 => self.rng.rule = XorshiftRule::A1,
-                    2 => self.rng.rule = XorshiftRule::A2,
-                    3 => self.rng.rule = XorshiftRule::A3,
-                    4 => self.rng.rule = XorshiftRule::A4,
-                    5 => self.rng.rule = XorshiftRule::A5,
-                    6 => self.rng.rule = XorshiftRule::A6,
-                    7 => self.rng.rule = XorshiftRule::A7,
-                    _ => unreachable!("integer not in range 0..8 was generated"),
-                }
+                self.random_rule();
             }
         });
         ui.add_space(4.0);
@@ -111,17 +135,7 @@ impl ClassicRngFrame for Xorshift64Frame {
         ui.horizontal(|ui| {
             ui.subheading("Scrambler");
             if ui.button("🎲").on_hover_text("randomize").clicked() {
-                let mut rng = thread_rng();
-                match rng.gen_range(0..7) {
-                    0 => self.rng.scrambler = XorshiftScrambler::None,
-                    1 => self.rng.scrambler = XorshiftScrambler::Plus,
-                    2 => self.rng.scrambler = XorshiftScrambler::Star32,
-                    3 => self.rng.scrambler = XorshiftScrambler::Star8,
-                    4 => self.rng.scrambler = XorshiftScrambler::Star2,
-                    5 => self.rng.scrambler = XorshiftScrambler::WowPlus,
-                    6 => self.rng.scrambler = XorshiftScrambler::WowXor,
-                    _ => unreachable!("integer not in range 0..7 was generated"),
-                }
+                self.random_scrambler();
             }
         });
         ui.add_space(4.0);
@@ -167,6 +181,9 @@ impl ClassicRngFrame for Xorshift64Frame {
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         self.rng.state = rng.gen::<u64>();
+        self.random_rule();
+        self.random_scrambler();
+        self.random_triple();
     }
 
     fn reset(&mut self) {

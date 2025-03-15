@@ -52,6 +52,7 @@ rng_ids_and_names!(
     ShrinkingGenerator, "Shrinking Generator";
     Splitmix, "Splitmix64";
     Vmpcr, "VMPC-R";
+    Well, "WELL";
     Weyl, "Weyl";
     Xorshift64, "Xorshift64";
     Xoroshiro, "Xoroshiro";

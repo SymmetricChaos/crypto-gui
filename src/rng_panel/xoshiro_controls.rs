@@ -1,10 +1,36 @@
 use super::ClassicRngFrame;
 use crate::ui_elements::{generate_random_u32s_box, UiElements};
 use rand::{thread_rng, Rng};
-use rngs::{xorshift::xoshiro256::Xoshiro256, ClassicRng};
+use rngs::{
+    xorshift::{
+        xoshiro128::Xoshiro128, xoshiro256::Xoshiro256, xoshiro512::Xoshiro512, XoshiroScrambler,
+    },
+    ClassicRng,
+};
+use strum::IntoEnumIterator;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, strum::EnumIter)]
+enum XoshiroSize {
+    W128,
+    W256,
+    W512,
+}
+
+impl XoshiroSize {
+    fn _string(&self) -> &str {
+        match self {
+            XoshiroSize::W128 => "Xoshiro128",
+            XoshiroSize::W256 => "Xoshiro256",
+            XoshiroSize::W512 => "Xoshiro512",
+        }
+    }
+}
 
 pub struct XoshiroFrame {
+    _rng128: Xoshiro128,
     rng256: Xoshiro256,
+    _rng512: Xoshiro512,
+    _state_size: XoshiroSize,
     randoms: String,
     n_random: usize,
 }
@@ -12,7 +38,10 @@ pub struct XoshiroFrame {
 impl Default for XoshiroFrame {
     fn default() -> Self {
         Self {
+            _rng128: Default::default(),
             rng256: Default::default(),
+            _rng512: Default::default(),
+            _state_size: XoshiroSize::W256,
             randoms: String::new(),
             n_random: 5,
         }
@@ -27,8 +56,16 @@ impl ClassicRngFrame for XoshiroFrame {
             "see the code",
             "https://github.com/SymmetricChaos/crypto-gui/blob/master/rngs/src/xoshiro.rs",
         );
-        ui.add_space(8.0);
+        ui.add_space(16.0);
 
+        ui.randomize_reset_rng(self);
+
+        // ui.subheading("State Size");
+        // for variant in XoshiroSize::iter() {
+        //     ui.selectable_value(&mut self.state_size, variant, variant.string());
+        // }
+
+        ui.add_space(16.0);
         ui.horizontal(|ui| {
             ui.subheading("State");
             if ui.button("🎲").on_hover_text("randomize").clicked() {
@@ -39,17 +76,19 @@ impl ClassicRngFrame for XoshiroFrame {
             ui.u64_hex_edit(&mut self.rng256.state[i]);
         }
 
-        // ui.add_space(16.0);
-        // ui.subheading("Scrambler");
-        // for variant in Scrambler::iter() {
-        //     ui.selectable_value(&mut self.rng.scrambler, variant, variant.to_string());
-        // }
+        ui.add_space(16.0);
+        ui.subheading("Scrambler");
+        for variant in XoshiroScrambler::iter() {
+            ui.selectable_value(&mut self.rng256.scrambler, variant, variant.to_string());
+        }
 
-        // ui.collapsing("scrambler function", |ui| match self.rng.scrambler {
-        //     Scrambler::PlusPlus => ui.label("rotate_left_23(state[0] + state[3]) + state[0]"),
-        //     Scrambler::StarStar => ui.label("rotate_left_7(state[1] × 5) × 9"),
-        //     Scrambler::Plus => ui.label("state[0] + state[3"),
-        // });
+        ui.collapsing("scrambler function", |ui| match self.rng256.scrambler {
+            XoshiroScrambler::PlusPlus => {
+                ui.label("rotate_left_23(state[0] + state[3]) + state[0]")
+            }
+            XoshiroScrambler::StarStar => ui.label("rotate_left_7(state[1] × 5) × 9"),
+            XoshiroScrambler::Plus => ui.label("state[0] + state[3"),
+        });
 
         ui.add_space(16.0);
         ui.horizontal(|ui| {
@@ -71,12 +110,6 @@ impl ClassicRngFrame for XoshiroFrame {
                 self.rng256.long_jump();
             }
         });
-
-        // ui.collapsing("calculations", |ui| {
-        //     ui.label(
-        //         "let output = scrambler_function(state)\nlet t = shift_left_17(state[1])\nstate[2] ^= state[0]\nstate[3] ^= state[1]\nstate[1] ^= state[2]\nstate[0] ^= state[3]\nstate[2] ^= t\nstate[3] = rotate_left_45(state[3])\nreturn output",
-        //     );
-        // });
 
         ui.add_space(16.0);
         generate_random_u32s_box(ui, &mut self.rng256, &mut self.n_random, &mut self.randoms);

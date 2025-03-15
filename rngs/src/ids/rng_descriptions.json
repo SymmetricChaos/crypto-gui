@@ -195,6 +195,14 @@
     "Publication": null,
     "Traits": null
   },
+  "WELL": {
+    "Description": "The Well Equidistributed Long-period Linear (WELL) family of PRNGs",
+    "Authors": "François Panneton, Pierre L'Ecuyer, and Makoto Matsumoto",
+    "Publication": 2006,
+    "Traits": [
+      "LFSR-based"
+    ]
+  },
   "Weyl Sequence": {
     "Description": "The original Weyl sequence produces real numbers distributed between 0 and 1 by repeatedly adding an irrational number to the current state and taking the fractional part. For the purpose of improving the output of his PRNGs George Marsaglia defined Weyl sequences as incrementing the state by a value and then taking the remainder when divided by some value coprime to the increment. In practice this is done with machine words of 32 or 64 bits so any odd number is accptable.",
     "Authors": "Hermann Weyl and George Marsaglia",
