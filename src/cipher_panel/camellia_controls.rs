@@ -63,7 +63,7 @@ impl CipherFrame for CamelliaFrame {
             "Camellia256",
         );
 
-        ui.randomize_reset(self);
+        ui.randomize_reset_cipher(self);
         ui.add_space(16.0);
 
         match self.selector {

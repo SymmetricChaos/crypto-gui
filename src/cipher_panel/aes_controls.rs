@@ -51,7 +51,7 @@ impl CipherFrame for AesFrame {
         ui.selectable_value(&mut self.selector, AesSelect::Aes192, "AES192");
         ui.selectable_value(&mut self.selector, AesSelect::Aes256, "AES256");
 
-        ui.randomize_reset(self);
+        ui.randomize_reset_cipher(self);
         ui.add_space(16.0);
 
         match self.selector {

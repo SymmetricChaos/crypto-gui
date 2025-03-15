@@ -51,7 +51,7 @@ impl CipherFrame for AriaFrame {
         ui.selectable_value(&mut self.selector, AriaSelect::Aria192, "Aria192");
         ui.selectable_value(&mut self.selector, AriaSelect::Aria256, "Aria256");
 
-        ui.randomize_reset(self);
+        ui.randomize_reset_cipher(self);
         ui.add_space(16.0);
 
         match self.selector {

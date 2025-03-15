@@ -51,7 +51,7 @@ impl CipherFrame for TwofishFrame {
         ui.selectable_value(&mut self.selector, TwofishSelect::Twofish192, "Twofish-192");
         ui.selectable_value(&mut self.selector, TwofishSelect::Twofish256, "Twofish-256");
 
-        ui.randomize_reset(self);
+        ui.randomize_reset_cipher(self);
         ui.add_space(16.0);
 
         match self.selector {

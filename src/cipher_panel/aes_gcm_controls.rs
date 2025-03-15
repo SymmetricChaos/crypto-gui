@@ -113,7 +113,7 @@ impl CipherFrame for AesGcmFrame {
         ui.selectable_value(&mut self.selector, AesGcmSelect::AesGcm192, "AES-GCM-192");
         ui.selectable_value(&mut self.selector, AesGcmSelect::AesGcm256, "AES-GCM-256");
 
-        ui.randomize_reset(self);
+        ui.randomize_reset_cipher(self);
         ui.add_space(16.0);
 
         self.iv_controls(ui);

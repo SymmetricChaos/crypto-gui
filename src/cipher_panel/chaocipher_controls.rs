@@ -47,7 +47,7 @@ impl CipherFrame for ChaocipherFrame {
         );
         ui.add_space(8.0);
 
-        ui.randomize_reset(self);
+        ui.randomize_reset_cipher(self);
         ui.add_space(16.0);
 
         ui.subheading("Left Alphabet");

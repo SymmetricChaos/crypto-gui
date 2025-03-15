@@ -30,7 +30,7 @@ impl CipherFrame for StraddlingCheckerboardFrame {
         );
         ui.add_space(8.0);
 
-        ui.randomize_reset(self);
+        ui.randomize_reset_cipher(self);
 
         ui.subheading("Alphabet");
         if ui.control_string(&mut self.alphabet_string).changed() {

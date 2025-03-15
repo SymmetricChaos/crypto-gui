@@ -1,6 +1,7 @@
 use crate::{
     cipher_panel::CipherFrame,
     integer_drag_value::{EditU128, EditU16, EditU32, EditU64, EditU8},
+    rng_panel::ClassicRngFrame,
 };
 use ciphers::digital::block_ciphers::block_cipher::{BCMode, BCPadding};
 use eframe::egui::RichText;
@@ -34,7 +35,9 @@ pub trait UiElements {
     // Label with monospaced text and a black background, looks similar to control_string
     fn false_control_string<T: ToString>(&mut self, text: T) -> Response;
     // Buttons for Randomize and Reset
-    fn randomize_reset(&mut self, cipher_frame: &mut dyn CipherFrame);
+    fn randomize_reset_cipher(&mut self, cipher_frame: &mut dyn CipherFrame);
+    // Buttons for Randomize and Reset
+    fn randomize_reset_rng(&mut self, rng_frame: &mut dyn ClassicRngFrame);
     // Slider variant that has a position at some character index of a &str
     fn string_slider(&mut self, string: &str, position: &mut usize) -> Response;
     // Button showing a clipboard that copies some text to the clipboard
@@ -112,12 +115,21 @@ impl UiElements for Ui {
         )
     }
 
-    fn randomize_reset(&mut self, cipher_frame: &mut dyn CipherFrame) {
+    fn randomize_reset_cipher(&mut self, cipher_frame: &mut dyn CipherFrame) {
         if self.button("Randomize").clicked() {
             cipher_frame.randomize()
         }
         if self.button("Reset").clicked() {
             cipher_frame.reset()
+        }
+    }
+
+    fn randomize_reset_rng(&mut self, rng_frame: &mut dyn ClassicRngFrame) {
+        if self.button("Randomize").clicked() {
+            rng_frame.randomize()
+        }
+        if self.button("Reset").clicked() {
+            rng_frame.reset()
         }
     }
 
