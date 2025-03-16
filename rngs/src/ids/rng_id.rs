@@ -51,6 +51,7 @@ rng_ids_and_names!(
     SelfShrinkingGenerator, "Self Shrinking Generator";
     ShrinkingGenerator, "Shrinking Generator";
     Splitmix, "Splitmix64";
+    Tt800, "TT800";
     Vmpcr, "VMPC-R";
     Well, "WELL";
     Weyl, "Weyl";

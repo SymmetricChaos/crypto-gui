@@ -439,8 +439,8 @@ pub fn generate_random_u32s_box(
 ) {
     ui.horizontal(|ui| {
         if ui
-            .button("Random Numbers")
-            .on_hover_text("produce random 32-bit integers")
+            .button("Unsigned Integers")
+            .on_hover_text("produce random 32-bit unsigned integers")
             .clicked()
         {
             for _ in 0..*n_random {
@@ -450,21 +450,21 @@ pub fn generate_random_u32s_box(
                 randoms.push_str(&rng.next_u32().to_string());
             }
         }
-        ui.add(DragValue::new(n_random).range(1..=100))
-    });
-
-    ui.text_edit_multiline(randoms);
-}
-
-pub fn generate_random_f32s_box(
-    ui: &mut Ui,
-    rng: &mut dyn ClassicRng,
-    n_random: &mut usize,
-    randoms: &mut String,
-) {
-    ui.horizontal(|ui| {
         if ui
-            .button("Random Numbers")
+            .button("Signed Integers")
+            .on_hover_text("produce random 32-bit signed integers")
+            .clicked()
+        {
+            for _ in 0..*n_random {
+                if !randoms.is_empty() {
+                    randoms.push_str(", ");
+                }
+                let int = rng.next_u32() as i32;
+                randoms.push_str(&int.to_string());
+            }
+        }
+        if ui
+            .button("Fractions")
             .on_hover_text("produce random 32-bit floats in the range [0,1]")
             .clicked()
         {
@@ -476,9 +476,10 @@ pub fn generate_random_f32s_box(
                 randoms.push_str(&next_float.to_string());
             }
         }
-        ui.add(DragValue::new(n_random).range(1..=100))
     });
 
+    ui.add(DragValue::new(n_random).range(1..=100));
+    ui.add_space(4.0);
     ui.text_edit_multiline(randoms);
 }
 

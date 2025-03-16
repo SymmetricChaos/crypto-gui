@@ -189,6 +189,12 @@
     "Publication": null,
     "Traits": null
   },
+  "TT800": {
+    "Description": "TT800 is a prececessor the Mersenne Twister algorithm.",
+    "Authors": " Makoto Matsumoto",
+    "Publication": 1994,
+    "Traits": null
+  },
   "VMPC-R": {
     "Description": "The Variably Modified Permutation Composition RNG is based on RC4 cipher but with a more complex key schedule and an output based on the permutation composition function it is named for.",
     "Authors": null,
