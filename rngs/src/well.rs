@@ -59,13 +59,13 @@ impl Well512a {
     }
 }
 
-impl ClassicRng for Well512a {
-    fn next_u32(&mut self) -> u32 {
-        let v0 = self.state[(self.idx + 15) % 0xf];
-        let v1 = self.state[];
-        let v2 = self.state[];
+// impl ClassicRng for Well512a {
+//     fn next_u32(&mut self) -> u32 {
+//         let v0 = self.state[(self.idx + 15) % 0xf];
+//         let v1 = self.state[];
+//         let v2 = self.state[];
 
-        self.idx = (self.idx + 15) % 0xf;
-        self.state[self.idx]
-    }
-}
+//         self.idx = (self.idx + 15) % 0xf;
+//         self.state[self.idx]
+//     }
+// }

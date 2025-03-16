@@ -78,7 +78,7 @@ impl MTFrame {
         let key_vec = ByteFormat::Hex.text_to_u32_be(&self.key_32);
 
         if let Ok(vec) = key_vec {
-            self.rng_32.ksa_from_array(&vec)
+            self.rng_32 = Mt19937_32::from_array(&vec)
         } else {
             unreachable!("Mersenne Twister key should be forced to valid hex digits by filtering")
         }
@@ -90,7 +90,7 @@ impl MTFrame {
         }
         let key_vec = ByteFormat::Hex.text_to_u64_be(&self.key_64);
         if let Ok(vec) = key_vec {
-            self.rng_64.ksa_from_array(&vec)
+            self.rng_64 = Mt19937_64::from_array(&vec);
         } else {
             unreachable!("Mersenne Twister key should be forced to valid hex digits by filtering")
         }

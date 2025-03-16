@@ -21,7 +21,7 @@ impl Default for Mt19937_64 {
 
 impl Mt19937_64 {
     pub fn ksa_default(&mut self) {
-        self.ksa_from_u64(5489)
+        *self = Self::from_u64(5489)
     }
 
     pub fn from_u64(key: u64) -> Self {
@@ -34,17 +34,6 @@ impl Mt19937_64 {
                 .wrapping_add(i as u64)
         }
         Self { index, arr }
-    }
-
-    pub fn ksa_from_u64(&mut self, key: u64) {
-        self.arr = [0u64; N];
-        self.index = N;
-        self.arr[0] = key;
-        for i in 1..N {
-            self.arr[i] = 6364136223846793005_u64
-                .wrapping_mul(self.arr[i - 1] ^ (self.arr[i - 1] >> 62))
-                .wrapping_add(i as u64)
-        }
     }
 
     pub fn from_array(key: &[u64]) -> Self {
@@ -78,38 +67,6 @@ impl Mt19937_64 {
         }
         rng.arr[0] = 1 << 63;
         rng
-    }
-
-    pub fn ksa_from_array(&mut self, key: &[u64]) {
-        self.ksa_from_u64(19650218);
-        let mut i = 1;
-        let mut j = 0;
-        for _ in 0..max(N, key.len()) {
-            self.arr[i] = (self.arr[i]
-                ^ ((self.arr[i - 1] ^ (self.arr[i - 1] >> 62)).wrapping_mul(3935559000370003845)))
-            .wrapping_add(key[j])
-            .wrapping_add(j as u64);
-            i += 1;
-            if i >= N {
-                self.arr[0] = self.arr[N - 1];
-                i = 1;
-            }
-            j += 1;
-            if j >= key.len() {
-                j = 0;
-            }
-        }
-        for _ in 0..N - 1 {
-            self.arr[i] = (self.arr[i]
-                ^ ((self.arr[i - 1] ^ (self.arr[i - 1] >> 62)).wrapping_mul(2862933555777941757)))
-            .wrapping_sub(i as u64);
-            i += 1;
-            if i >= N {
-                self.arr[0] = self.arr[N - 1];
-                i = 1;
-            }
-        }
-        self.arr[0] = 1 << 63;
     }
 
     pub fn twist(&mut self) {
@@ -156,8 +113,7 @@ impl ClassicRng for Mt19937_64 {
     }
 
     fn next_u64(&mut self) -> u64 {
-        // index should never be zero here
-        // if it is set default value
+        // index should never be zero here but if it is use the default key schedule
         if self.index == 0 {
             self.ksa_default()
         }
