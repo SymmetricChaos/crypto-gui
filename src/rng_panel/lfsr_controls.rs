@@ -1,5 +1,5 @@
 use super::ClassicRngFrame;
-use crate::ui_elements::{generate_random_u32s_box, lfsr_grid_controls};
+use crate::ui_elements::{generate_randoms_box, lfsr_grid_controls};
 use rand::{thread_rng, Rng};
 use rngs::lfsr::Lfsr;
 use utils::bits::Bit::{self};
@@ -40,7 +40,7 @@ impl ClassicRngFrame for LfsrFrame {
         lfsr_grid_controls(ui, &mut self.rng, &mut self.vector_length, "lfsr_grid");
 
         ui.add_space(16.0);
-        generate_random_u32s_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
+        generate_randoms_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
     }
 
     fn rng(&self) -> &dyn rngs::ClassicRng {

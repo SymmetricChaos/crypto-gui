@@ -431,7 +431,7 @@ macro_rules! filter_and_parse_int {
 filter_and_parse_int!(filter_and_parse_u32, u32);
 filter_and_parse_int!(filter_and_parse_u64, u64);
 
-pub fn generate_random_u32s_box(
+pub fn generate_randoms_box(
     ui: &mut Ui,
     rng: &mut dyn ClassicRng,
     n_random: &mut usize,
@@ -472,7 +472,7 @@ pub fn generate_random_u32s_box(
                 if !randoms.is_empty() {
                     randoms.push_str(", ");
                 }
-                let next_float = rng.next_u32().to_f32().unwrap() / u32::MAX.to_f32().unwrap(); // TODO: this does always work, right?
+                let next_float = (rng.next_u32() >> 9).to_f32().unwrap() * 2.0_f32.powf(-23.0);
                 randoms.push_str(&next_float.to_string());
             }
         }

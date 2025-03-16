@@ -1,5 +1,5 @@
 use super::ClassicRngFrame;
-use crate::ui_elements::{generate_random_u32s_box, UiElements};
+use crate::ui_elements::{generate_randoms_box, UiElements};
 use egui::DragValue;
 use rand::{thread_rng, Rng};
 use rngs::jsf::{Jsf32, Jsf64};
@@ -44,9 +44,9 @@ impl ClassicRngFrame for JsfFrame {
         }
         ui.add_space(8.0);
         if self.big {
-            generate_random_u32s_box(ui, &mut self.rng64, &mut self.n_random, &mut self.randoms);
+            generate_randoms_box(ui, &mut self.rng64, &mut self.n_random, &mut self.randoms);
         } else {
-            generate_random_u32s_box(ui, &mut self.rng32, &mut self.n_random, &mut self.randoms);
+            generate_randoms_box(ui, &mut self.rng32, &mut self.n_random, &mut self.randoms);
         }
     }
 

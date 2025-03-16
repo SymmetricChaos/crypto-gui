@@ -1,5 +1,5 @@
 use super::ClassicRngFrame;
-use crate::ui_elements::{generate_random_u32s_box, UiElements};
+use crate::ui_elements::{generate_randoms_box, UiElements};
 use egui::{FontId, RichText};
 use rand::{thread_rng, Rng};
 use rngs::{ia::Ia, ibaa::Ibaa, isaac::Isaac, ClassicRng};
@@ -281,7 +281,7 @@ impl ClassicRngFrame for IsaacFrame {
         }
 
         ui.add_space(16.0);
-        generate_random_u32s_box(ui, &mut self.isaac, &mut self.n_random, &mut self.randoms);
+        generate_randoms_box(ui, &mut self.isaac, &mut self.n_random, &mut self.randoms);
         ui.add_space(16.0);
     }
 

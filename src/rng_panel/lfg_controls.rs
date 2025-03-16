@@ -6,7 +6,7 @@ use rngs::{
     ClassicRng,
 };
 
-use crate::ui_elements::{filter_and_parse_u32, generate_random_u32s_box, UiElements};
+use crate::ui_elements::{filter_and_parse_u32, generate_randoms_box, UiElements};
 
 use super::ClassicRngFrame;
 
@@ -115,7 +115,7 @@ impl ClassicRngFrame for LfgFrame {
         ui.selectable_value(&mut self.rng.op, FibOp::Xor, "Bitwise XOR");
 
         ui.add_space(8.0);
-        generate_random_u32s_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
+        generate_randoms_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
         self.set_state_strings();
     }
 

@@ -1,5 +1,5 @@
 use super::ClassicRngFrame;
-use crate::ui_elements::{generate_random_u32s_box, UiElements};
+use crate::ui_elements::{generate_randoms_box, UiElements};
 use egui::DragValue;
 use itertools::Itertools;
 use num_prime::RandPrime;
@@ -189,7 +189,7 @@ impl ClassicRngFrame for NaorReingoldFrame {
         }
         ui.add_space(8.0);
 
-        generate_random_u32s_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
+        generate_randoms_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
     }
 
     fn rng(&self) -> &dyn rngs::ClassicRng {
