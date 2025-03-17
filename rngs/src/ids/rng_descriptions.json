@@ -158,8 +158,8 @@
       "Broken"
     ]
   },
-  "Rule3 0": {
-    "Description": "Rule 30 is a one dimensional cellular automata that evolves chaotically and . It is named for the Wolfram Code that describes it and several rules are equivalent for use a PRNG. Rule 86 produces the mirror image. Rule 135 inverts the bits. Rule 149 produces the mirror image with inverted bits. In practice Rule 30 and its related automata are not particularly fast or high quality compared to algorithms made for the purpose..",
+  "Rule 30": {
+    "Description": "Rule 30 is a one dimensional cellular automata that evolves chaotically. It is named for the Wolfram Code that describes it and several rules are equivalent for use a PRNG. Rule 86 produces the mirror image. Rule 135 inverts the bits. Rule 149 produces the mirror image with inverted bits. In practice using Rule 30 and its related automata as PRNGs is slow and not of very high quality compared to algorithms made for the purpose. This Rule 30 based PRNG has a 128 bit state that is set from the bits of a integer. Any column can be \"tapped\" to draw bits from.",
     "Authors": "Stephen Wolfram",
     "Publication": "1983",
     "Traits": null
