@@ -7,7 +7,6 @@ use ciphers::digital::block_ciphers::block_cipher::{BCMode, BCPadding};
 use eframe::egui::RichText;
 use egui::{Color32, DragValue, Response, TextStyle, Ui};
 use egui_extras::{Column, TableBuilder};
-use num::ToPrimitive;
 use rand::{distributions::Standard, prelude::Distribution, thread_rng, Fill, Rng};
 use rngs::{
     lfsr::{Lfsr, LfsrMode},
@@ -440,7 +439,7 @@ pub fn generate_randoms_box(
     ui.horizontal(|ui| {
         if ui
             .button("Unsigned Integers")
-            .on_hover_text("produce random 32-bit unsigned integers")
+            .on_hover_text("random 32-bit unsigned integers")
             .clicked()
         {
             for _ in 0..*n_random {
@@ -452,7 +451,7 @@ pub fn generate_randoms_box(
         }
         if ui
             .button("Signed Integers")
-            .on_hover_text("produce random 32-bit signed integers")
+            .on_hover_text("random 32-bit signed integers")
             .clicked()
         {
             for _ in 0..*n_random {
@@ -465,7 +464,7 @@ pub fn generate_randoms_box(
         }
         if ui
             .button("Fractions")
-            .on_hover_text("produce random 32-bit floats in the range [0,1]")
+            .on_hover_text("random 32-bit floats in the range [0,1]")
             .clicked()
         {
             for _ in 0..*n_random {

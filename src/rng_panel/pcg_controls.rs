@@ -62,9 +62,7 @@ impl ClassicRngFrame for PcgFrame {
         });
 
         ui.add_space(16.0);
-
         ui.subheading("Permutation Function");
-
         ui.horizontal(|ui| {
             for variant in PcgTransform::iter() {
                 ui.selectable_value(&mut self.rng.transform, variant, variant.to_string());
@@ -72,7 +70,6 @@ impl ClassicRngFrame for PcgFrame {
         });
 
         ui.add_space(8.0);
-
         if ui.button("step").clicked() {
             self.rng.next_u32();
         }

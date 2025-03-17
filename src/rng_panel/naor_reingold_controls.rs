@@ -152,7 +152,6 @@ impl ClassicRngFrame for NaorReingoldFrame {
             self.set_rng_verbose(errors);
         }
         ui.subheading(format!("({})", self.rng.ctr));
-
         ui.add_space(8.0);
 
         ui.horizontal(|ui| {
@@ -190,6 +189,7 @@ impl ClassicRngFrame for NaorReingoldFrame {
         ui.add_space(8.0);
 
         generate_randoms_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
+        ui.add_space(16.0);
     }
 
     fn rng(&self) -> &dyn rngs::ClassicRng {

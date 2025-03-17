@@ -121,7 +121,7 @@ impl ClassicRngFrame for Xorshift64Frame {
             }
         });
         ui.add_space(4.0);
-        ui.label("There are eight shift rules that can be used. These are named follwing Vigna (2016) and the shifts used can be seen below.");
+        ui.label("There are eight shift rules that can be used. These are named follwing Vigna (2016) and the shifts can be seen below.");
         ui.add_space(4.0);
         ui.horizontal(|ui| {
             for variant in XorshiftRule::iter() {
