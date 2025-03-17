@@ -472,8 +472,10 @@ pub fn generate_randoms_box(
                 if !randoms.is_empty() {
                     randoms.push_str(", ");
                 }
-                let next_float = (rng.next_u32() >> 9).to_f32().unwrap() * 2.0_f32.powf(-23.0);
-                randoms.push_str(&next_float.to_string());
+
+                let n = rng.next_u32() >> 9; // discarding the lower bits is better for some weaker RNGs
+                let f = f32::from_bits(0x3f80_0000 | n) - 1.0; // set the sign and exponent then read in the 22 bits of n and subtract 1
+                randoms.push_str(&f.to_string());
             }
         }
     });
