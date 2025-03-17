@@ -20,6 +20,7 @@ mod salsa20_controls;
 mod self_shrinking_generator_controls;
 mod shrinking_generator_controls;
 mod splitmix_controls;
+mod tt800_controls;
 mod vmpcr_controls;
 mod weyl_controls;
 mod xorshift64_controls;
@@ -83,6 +84,7 @@ pub struct RngInterface {
     self_shrinking_generator: self_shrinking_generator_controls::SelfShrinkingGeneratorFrame,
     shrinking_generator: shrinking_generator_controls::ShrinkingGeneratorFrame,
     splitmix: splitmix_controls::SplitmixFrame,
+    tt800: tt800_controls::Tt800Frame,
     vmpcr: vmpcr_controls::VmpcrFrame,
     weyl: weyl_controls::WeylSequenceFrame,
     xorshift64: xorshift64_controls::Xorshift64Frame,
@@ -106,6 +108,7 @@ impl RngInterface {
                 RngId::SelfShrinkingGenerator,
                 RngId::ShrinkingGenerator,
                 RngId::Splitmix,
+                RngId::Tt800,
                 RngId::Vmpcr,
                 RngId::Xorshift64,
                 RngId::Xoshiro,
@@ -163,6 +166,7 @@ impl RngInterface {
             RngId::SelfShrinkingGenerator => &mut self.self_shrinking_generator,
             RngId::ShrinkingGenerator => &mut self.shrinking_generator,
             RngId::Splitmix => &mut self.splitmix,
+            RngId::Tt800 => &mut self.tt800,
             RngId::Vmpcr => &mut self.vmpcr,
             RngId::Weyl => &mut self.weyl,
             RngId::Xorshift64 => &mut self.xorshift64,

@@ -1,6 +1,6 @@
 use super::ClassicRngFrame;
 use crate::ui_elements::{generate_randoms_box, UiElements};
-use egui::{FontId, RichText, Ui};
+use egui::Ui;
 use rand::{thread_rng, Rng};
 use rngs::mersenne_twister::{mt19937_32::Mt19937_32, mt19937_64::Mt19937_64};
 use utils::byte_formatting::ByteFormat;
@@ -101,11 +101,11 @@ impl ClassicRngFrame for MTFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.hyperlink_to(
             "see the MT32 code",
-            "https://github.com/SymmetricChaos/crypto-gui/blob/master/rngs/src/mt19937_32.rs",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/rngs/src/mersenne_twister/mt19937_32.rs",
         );
         ui.hyperlink_to(
             "see the MT64 code",
-            "https://github.com/SymmetricChaos/crypto-gui/blob/master/rngs/src/mt19937_64.rs",
+            "https://github.com/SymmetricChaos/crypto-gui/blob/master/rngs/src/mersenne_twister/mt19937_64.rs",
         );
         ui.add_space(8.0);
 
@@ -113,6 +113,7 @@ impl ClassicRngFrame for MTFrame {
             ui.selectable_value(&mut self.mt64, false, "MT32");
             ui.selectable_value(&mut self.mt64, true, "MT64");
         });
+        ui.add_space(8.0);
 
         ui.horizontal(|ui| {
             ui.subheading("Key");
@@ -128,12 +129,14 @@ impl ClassicRngFrame for MTFrame {
                 self.randomize();
             }
         });
-
         ui.label("Key should be provided as a string of hexadecimal digits representing any number of bytes.");
         self.filter_key_string(ui);
+        ui.add_space(8.0);
 
         ui.subheading("Key Scheduling Algorithm");
-        ui.label("The state of the internal Mersenne Twister array is build from the key using a Key Scheduling Algorithm.");
+        ui.label(
+            "The state of the internal Mersenne Twister array is built from the key using the KSA.",
+        );
         if ui.button("Run KSA").clicked() {
             self.run_ksa()
         }
@@ -158,22 +161,11 @@ impl ClassicRngFrame for MTFrame {
                     .num_columns(26)
                     .striped(true)
                     .show(ui, |ui| {
-                        for (n, b) in self.rng_64.arr.into_iter().enumerate() {
+                        for (n, b) in self.rng_64.arr.iter_mut().enumerate() {
                             if n % 24 == 0 && n != 0 {
                                 ui.end_row()
                             }
-                            if n == self.rng_32.index as usize {
-                                ui.label(
-                                    RichText::from(format!("{:016X}", b))
-                                        .font(FontId::monospace(15.0))
-                                        .strong(),
-                                );
-                            } else {
-                                ui.label(
-                                    RichText::from(format!("{:016X}", b))
-                                        .font(FontId::monospace(15.0)),
-                                );
-                            }
+                            ui.u64_hex_edit(b);
                         }
                     });
             });
@@ -183,29 +175,23 @@ impl ClassicRngFrame for MTFrame {
                     .num_columns(26)
                     .striped(true)
                     .show(ui, |ui| {
-                        for (n, b) in self.rng_32.arr.into_iter().enumerate() {
+                        for (n, b) in self.rng_32.arr.iter_mut().enumerate() {
                             if n % 24 == 0 && n != 0 {
                                 ui.end_row()
                             }
-                            if n == self.rng_32.index as usize {
-                                ui.label(
-                                    RichText::from(format!("{:08X}", b))
-                                        .font(FontId::monospace(15.0))
-                                        .strong(),
-                                );
-                            } else {
-                                ui.label(
-                                    RichText::from(format!("{:08X}", b))
-                                        .font(FontId::monospace(15.0)),
-                                );
-                            }
+                            ui.u32_hex_edit(b);
                         }
                     });
             });
         }
 
         ui.add_space(16.0);
-        generate_randoms_box(ui, &mut self.rng_32, &mut self.n_random, &mut self.randoms);
+        if self.mt64 {
+            generate_randoms_box(ui, &mut self.rng_64, &mut self.n_random, &mut self.randoms);
+        } else {
+            generate_randoms_box(ui, &mut self.rng_32, &mut self.n_random, &mut self.randoms);
+        }
+
         ui.add_space(16.0);
     }
 
