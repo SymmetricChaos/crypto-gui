@@ -29,6 +29,7 @@ macro_rules! rng_ids_and_names {
 rng_ids_and_names!(
     A51, "A5/1";
     A52, "A5/2";
+    Acorn, "ACORN";
     AlternatingStep, "Alternating Step Generator";
     BlumBlumShub, "Blum-Blum-Shub";
     ChaCha, "ChaCha";
@@ -47,6 +48,7 @@ rng_ids_and_names!(
     NaorReingold, "Naor-Reingold";
     Pcg, "Permuted Congruential Generator";
     Rc4, "RC4";
+    Rule30, "Rule 30";
     Salsa20, "Salsa20";
     SelfShrinkingGenerator, "Self Shrinking Generator";
     ShrinkingGenerator, "Shrinking Generator";

@@ -158,6 +158,12 @@
       "Broken"
     ]
   },
+  "Rule3 0": {
+    "Description": "Rule 30 is a one dimensional cellular automata that evolves chaotically and . It is named for the Wolfram Code that describes it and several rules are equivalent for use a PRNG. Rule 86 produces the mirror image. Rule 135 inverts the bits. Rule 149 produces the mirror image with inverted bits. In practice Rule 30 and its related automata are not particularly fast or high quality compared to algorithms made for the purpose..",
+    "Authors": "Stephen Wolfram",
+    "Publication": "1983",
+    "Traits": null
+  },
   "Salsa20": {
     "Description": "Salsa20 is a family of stream ciphers. The recommended variant is Salsa20/20 which uses 20 rounds, though Salsa20/12 and Salsa20/8 using fewer rounds are also believed to be secure while running much faster. This implementation allows Salsa20 to be run with other round counts as well. Currently Salsa20 has been obsoleted by the ChaCha family of stream ciphers.",
     "Authors": "Bernstein",

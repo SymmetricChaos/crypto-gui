@@ -1,5 +1,6 @@
 pub mod a51;
 pub mod a52;
+pub mod acorn;
 pub mod alternating_step;
 pub mod blum_blum_shub;
 pub mod chacha;
@@ -25,6 +26,7 @@ pub mod mwc;
 pub mod naor_reingold;
 pub mod pcg;
 pub mod rc4;
+pub mod rule30;
 pub mod salsa20;
 pub mod self_shrinking_generator;
 pub mod shrinking_generator;
