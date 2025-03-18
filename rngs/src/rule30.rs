@@ -1,10 +1,15 @@
 use crate::ClassicRng;
 use num::Integer;
 
+#[derive(Debug, PartialEq, Eq, Clone, Copy, strum::EnumIter, strum::Display)]
 pub enum WolframCode {
+    #[strum(to_string = "Rule 30")]
     R30,
+    #[strum(to_string = "Rule 86")]
     R86,
+    #[strum(to_string = "Rule 135")]
     R135,
+    #[strum(to_string = "Rule 149")]
     R149,
 }
 
@@ -68,6 +73,12 @@ pub struct Rule30 {
     pub rule: WolframCode,
     pub state: [bool; 128],
     pub tap: usize,
+}
+
+impl Default for Rule30 {
+    fn default() -> Self {
+        Self::init_30(12345, 127)
+    }
 }
 
 impl Rule30 {

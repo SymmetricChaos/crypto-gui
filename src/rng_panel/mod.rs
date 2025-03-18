@@ -16,6 +16,7 @@ mod middle_square_controls;
 mod naor_reingold_controls;
 mod pcg_controls;
 mod rc4_controls;
+mod rule30_controls;
 mod salsa20_controls;
 mod self_shrinking_generator_controls;
 mod shrinking_generator_controls;
@@ -80,6 +81,7 @@ pub struct RngInterface {
     naor_reingold: naor_reingold_controls::NaorReingoldFrame,
     pcg: pcg_controls::PcgFrame,
     rc4: rc4_controls::Rc4Frame,
+    rule30: rule30_controls::Rule30Frame,
     salsa20: salsa20_controls::Salsa20Frame,
     self_shrinking_generator: self_shrinking_generator_controls::SelfShrinkingGeneratorFrame,
     shrinking_generator: shrinking_generator_controls::ShrinkingGeneratorFrame,
@@ -105,6 +107,7 @@ impl RngInterface {
                 RngId::MiddleSquareBinary,
                 RngId::Pcg,
                 RngId::Rc4,
+                RngId::Rule30,
                 RngId::SelfShrinkingGenerator,
                 RngId::ShrinkingGenerator,
                 RngId::Splitmix,
@@ -162,6 +165,7 @@ impl RngInterface {
             RngId::NaorReingold => &mut self.naor_reingold,
             RngId::Pcg => &mut self.pcg,
             RngId::Rc4 => &mut self.rc4,
+            RngId::Rule30 => &mut self.rule30,
             RngId::Salsa20 => &mut self.salsa20,
             RngId::SelfShrinkingGenerator => &mut self.self_shrinking_generator,
             RngId::ShrinkingGenerator => &mut self.shrinking_generator,
