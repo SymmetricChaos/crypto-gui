@@ -1,6 +1,8 @@
 use crate::ClassicRng;
 use num::Integer;
 
+const W: usize = 128;
+
 #[derive(Debug, PartialEq, Eq, Clone, Copy, strum::EnumIter, strum::Display)]
 pub enum WolframCode {
     #[strum(to_string = "Rule 30")]
@@ -71,22 +73,22 @@ fn rule149(triple: &[bool]) -> bool {
 
 pub struct Rule30 {
     pub rule: WolframCode,
-    pub state: [bool; 128],
+    pub state: [bool; W],
     pub tap: usize,
 }
 
 impl Default for Rule30 {
     fn default() -> Self {
-        Self::init_30(12345, 127)
+        Self::init_30(12345, W - 1)
     }
 }
 
 impl Rule30 {
     pub fn init(seed: u64, rule: WolframCode, tap: usize) -> Self {
-        let mut state = [false; 128];
+        let mut state = [false; W];
         for i in 0..64 {
             if (seed >> i).is_odd() {
-                state[127 - i] = true
+                state[W - 1 - i] = true
             }
         }
         Self { rule, state, tap }
@@ -115,12 +117,12 @@ impl Rule30 {
             WolframCode::R135 => rule135,
             WolframCode::R149 => rule149,
         };
-        let mut new_state = [false; 128];
+        let mut new_state = [false; W];
         for (i, triple) in self.state.windows(3).enumerate() {
-            new_state[i + 1] = rule30(triple)
+            new_state[i + 1] = rule(triple)
         }
-        new_state[0] = rule(&[self.state[127], self.state[0], self.state[1]]);
-        new_state[127] = rule(&[self.state[126], self.state[127], self.state[0]]);
+        new_state[0] = rule(&[self.state[W - 1], self.state[0], self.state[1]]);
+        new_state[W - 1] = rule(&[self.state[W - 2], self.state[W - 1], self.state[0]]);
         self.state = new_state;
     }
 
@@ -163,8 +165,8 @@ mod tests {
     #[ignore = "visual test"]
     #[test]
     fn visual_test_of_state() {
-        let mut rng = Rule30::init_30(1 + 2 + 256, 127);
-        for _ in 0..50 {
+        let mut rng = Rule30::init_86(1 << 40, 127);
+        for _ in 0..30 {
             println!("{}", rng.print_state(' ', '#'));
             rng.step();
         }

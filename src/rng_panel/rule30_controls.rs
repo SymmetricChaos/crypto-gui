@@ -1,5 +1,6 @@
 use super::ClassicRngFrame;
 use crate::ui_elements::{generate_randoms_box, UiElements};
+use egui::RichText;
 use rand::{thread_rng, Rng};
 use rngs::rule30::{Rule30, WolframCode};
 use strum::IntoEnumIterator;
@@ -55,13 +56,27 @@ impl ClassicRngFrame for Rule30Frame {
         ui.horizontal(|ui| {
             for variant in WolframCode::iter() {
                 if ui
-                    .selectable_value(&mut self.rng.rule, variant, variant.to_string())
+                    .selectable_value(&mut self.rule, variant, variant.to_string())
                     .clicked()
                 {
                     self.rng = Rule30::init(self.seed, self.rule, self.tap)
                 }
             }
         });
+
+        ui.add_space(8.0);
+        ui.subheading("Current State (128-bits)");
+        ui.label(
+            // RichText::new(self.rng.print_state('▁', '█')) // looks better, IMO  but not as compatible
+            RichText::new(self.rng.print_state('0', '1'))
+                .size(10.0)
+                .monospace(),
+        );
+
+        ui.add_space(8.0);
+        if ui.button("Step").clicked() {
+            self.rng.step();
+        }
 
         ui.add_space(16.0);
         generate_randoms_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
