@@ -128,4 +128,17 @@ mod test {
             assert_eq!(fifty[i], rng.next_u32(), "{}", i)
         }
     }
+
+    #[ignore = "long test, determines that default setting is not a u32"]
+    #[test]
+    fn derive_default_from_u32() {
+        for i in 0..=u32::MAX {
+            let a = Tt800::from_u32(i).arr;
+            if a == DEFAULT_ARRAY {
+                println!("default key is {i}");
+                return;
+            }
+        }
+        println!("default key is not a u32");
+    }
 }

@@ -63,12 +63,12 @@ impl ClassicRngFrame for Rule30Frame {
                 }
             }
         });
-
         ui.add_space(8.0);
+
         ui.subheading("Current State (128-bits)");
         ui.label(
-            // RichText::new(self.rng.print_state('▁', '█')) // looks better, IMO  but not as compatible
-            RichText::new(self.rng.print_state('0', '1'))
+            // RichText::new(self.rng.print_state('▁', '█')) // looks better, IMO but not as compatible
+            RichText::new(self.rng.print_state('_', '#'))
                 .size(10.0)
                 .monospace(),
         );
