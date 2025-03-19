@@ -88,7 +88,6 @@ pub struct Xorshift64 {
     pub ctr: u32,
     pub weyl: u32,
     pub scrambler: XorshiftScrambler,
-
     pub reverse_bits: bool,
 }
 

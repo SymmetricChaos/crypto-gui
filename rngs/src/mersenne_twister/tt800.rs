@@ -31,11 +31,11 @@ impl Tt800 {
         self.arr = DEFAULT_ARRAY;
     }
 
-    // Not defined by Matsumoto but copied from MT19937-32
+    // Not defined by Matsumoto but copied from MT19937-32, makes the state unlikely to be almost all zero
     pub fn from_u32(key: u32) -> Self {
         let mut arr = [0u32; N];
         let index = 0;
-        arr[0] = key; // default key
+        arr[0] = key;
         for i in 1..N {
             arr[i] = 1812433253_u32
                 .wrapping_mul(arr[i - 1] ^ (arr[i - 1] >> 30))
@@ -129,7 +129,7 @@ mod test {
         }
     }
 
-    #[ignore = "long test, determines that default setting is not a u32"]
+    #[ignore = "long test, not for correctness"]
     #[test]
     fn derive_default_from_u32() {
         for i in 0..=u32::MAX {

@@ -11,7 +11,6 @@ impl Default for Splitmix {
 }
 
 impl ClassicRng for Splitmix {
-    // Only the lower 32 bits are used
     fn next_u32(&mut self) -> u32 {
         self.next_u64() as u32
     }

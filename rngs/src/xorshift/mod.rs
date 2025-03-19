@@ -1,7 +1,6 @@
 use strum::EnumIter;
 
 pub mod xoroshiro128;
-pub mod xorshift128;
 pub mod xorshift64_generic;
 pub mod xorshift_transitions;
 pub mod xorwow;

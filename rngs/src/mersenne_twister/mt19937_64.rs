@@ -80,7 +80,6 @@ impl Mt19937_64 {
         }
         let x = (self.arr[N - 1] & UPPER_MASK) | (self.arr[0] & LOWER_MASK);
         self.arr[N - 1] = self.arr[M - 1] ^ (x >> 1) ^ ((x & 1).wrapping_mul(A));
-        self.index = 0;
     }
 
     pub fn temper(mut x: u64) -> u64 {
@@ -118,7 +117,8 @@ impl ClassicRng for Mt19937_64 {
             self.ksa_default()
         }
         if self.index >= N {
-            self.twist(); // this sets self.index to zero
+            self.twist();
+            self.index = 0;
         }
         let y = self.arr[self.index];
         self.index += 1;
