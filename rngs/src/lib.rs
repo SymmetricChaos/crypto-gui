@@ -7,6 +7,7 @@ pub mod chacha;
 pub mod dual_ec_drbg;
 pub mod errors;
 pub mod geffe;
+pub mod gmwc;
 pub mod halton;
 pub mod ia;
 pub mod ibaa;

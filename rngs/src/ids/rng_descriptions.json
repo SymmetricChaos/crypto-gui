@@ -62,6 +62,14 @@
       "LFSR-based"
     ]
   },
+  "Generalized Multiply-with-Carry": {
+    "Description": ".",
+    "Authors": "Mark Goresky and Andrew Klapper",
+    "Publication": 2003,
+    "Traits": [
+      "LCG-based"
+    ]
+  },
   "Halton Sequence": {
     "Description": "The Halton sequence produces tuples of rational numbers between 0 and 1 distributed across any number of dimensions.",
     "Authors": null,

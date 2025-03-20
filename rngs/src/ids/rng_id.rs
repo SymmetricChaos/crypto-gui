@@ -35,6 +35,7 @@ rng_ids_and_names!(
     ChaCha, "ChaCha";
     DualEcDrbg, "Dual_EC_DRBG";
     Geffe, "Geffe";
+    Gmwc, "Generalized Multiply-with-Carry";
     Halton, "Halton";
     Isaac, "ISAAC";
     Jsf, "JSF";
