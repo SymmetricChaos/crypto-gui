@@ -16,3 +16,4 @@ primal = "0.3.0"
 num-prime = "0.4.3"
 strum = { version = "0.26", features = ["derive"] }
 paste = "1.0.15"
+crypto-bigint = { version = "0.6.1" }

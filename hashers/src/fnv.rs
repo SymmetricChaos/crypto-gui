@@ -1,5 +1,5 @@
 use crate::traits::StatefulHasher;
-use crypto_bigint::{ArrayEncoding, U1024, U256, U512};
+use crypto_bigint::{U1024, U256, U512};
 use std::fmt::Display;
 // use lazy_static::lazy_static;
 use num::FromPrimitive;
@@ -121,7 +121,7 @@ macro_rules! fnv_big_int {
             }
 
             fn finalize(self) -> Vec<u8> {
-                self.state.to_be_byte_array().to_vec()
+                self.state.to_be_bytes().to_vec()
             }
 
             crate::stateful_hash_helpers!();

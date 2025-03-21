@@ -767,11 +767,11 @@ dependencies = [
 
 [[package]]
 name = "crypto-bigint"
-version = "0.5.5"
+version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0dc92fb57ca44df6db8059111ab3af99a63d5d0f8375d9972e319a379c6bab76"
+checksum = "96272c2ff28b807e09250b180ad1fb7889a3258f7455759b5c3c58b719467130"
 dependencies = [
- "generic-array",
+ "num-traits",
  "rand_core",
  "subtle",
 ]
@@ -2738,6 +2738,7 @@ dependencies = [
 name = "rngs"
 version = "0.1.0"
 dependencies = [
+ "crypto-bigint",
  "getrandom",
  "itertools 0.10.5",
  "json",
@@ -3398,6 +3399,7 @@ version = "0.1.0"
 dependencies = [
  "base64 0.21.7",
  "bimap",
+ "crypto-bigint",
  "csv",
  "getrandom",
  "itertools 0.10.5",

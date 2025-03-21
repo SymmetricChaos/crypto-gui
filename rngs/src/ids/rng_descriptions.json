@@ -44,6 +44,15 @@
       "Cryptographic"
     ]
   },
+  "Dual_EC_DRBG": {
+    "Description": "Dual Elliptic Curve Deterministic Random Bit Generator is a CSPRNG most famous for being likely compromised by the NSA.",
+    "Authors": "Bernstein",
+    "Publication": "2005",
+    "Traits": [
+      "Stream Cipher",
+      "Cryptographic"
+    ]
+  },
   "Geffe": {
     "Description": "The Geffe generator is a (now broken) cryptographic PRNG that works by linking three LFSRs together via a multiplexer. All three are stepped together, and thus should be a coprime lengths, then the output bit of LFSR-1 selects which of the other two will give the output.",
     "Authors": null,
