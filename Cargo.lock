@@ -793,6 +793,7 @@ dependencies = [
  "bimap",
  "ciphers",
  "codes",
+ "crypto-bigint",
  "csv",
  "eframe",
  "egui",

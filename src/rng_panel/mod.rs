@@ -3,6 +3,7 @@ mod a52_controls;
 mod alternating_step_controls;
 mod blum_blum_shub_controls;
 mod chacha_controls;
+mod dual_ec_drbg;
 mod geffe_controls;
 mod halton_controls;
 mod isaac_controls;

@@ -78,9 +78,9 @@ impl Display for EcPoint {
 /// Elliptic curve of the form y^2 = x^3 + ax + b (mod m)
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FiniteEllipticCurve {
-    a: U256,
-    b: U256,
-    m: NonZero<U256>,
+    pub a: U256,
+    pub b: U256,
+    pub m: NonZero<U256>,
 }
 
 impl FiniteEllipticCurve {
