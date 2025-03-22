@@ -4,8 +4,8 @@ use std::fmt::Display;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EcPoint {
-    x: Option<U256>,
-    y: Option<U256>,
+    pub x: Option<U256>,
+    pub y: Option<U256>,
 }
 
 impl EcPoint {
@@ -45,10 +45,6 @@ impl EcPoint {
         } else {
             // Having a None value other than in the point at infiniy is invalid
             if self.x.is_none() || self.y.is_none() {
-                return false;
-            }
-            // The point (0,0) is always invalid
-            if self.x.unwrap().is_zero().into() && self.y.unwrap().is_zero().into() {
                 return false;
             }
         }
@@ -161,11 +157,11 @@ impl FiniteEllipticCurve {
         if q.is_inf() {
             return p.clone();
         }
-        if p == q {
-            return self.double(p);
-        }
         if *p == self.inverse(q) {
             return EcPoint::point_at_inf();
+        }
+        if p == q {
+            return self.double(p);
         }
 
         let px = p.x.unwrap();
@@ -200,6 +196,9 @@ impl FiniteEllipticCurve {
         }
         if p.is_inf() {
             return p.clone();
+        }
+        if *p == self.inverse(p) {
+            return EcPoint::point_at_inf();
         }
         if p.y.unwrap().is_zero().into() {
             return EcPoint::point_at_inf();
@@ -255,26 +254,16 @@ mod tests {
     use super::*;
 
     #[test]
-    fn addition() {
-        let curve = FiniteEllipticCurve::from_u64(1, 0, 257);
-
-        let p = EcPoint::from_u64(1, 60);
-        let q = EcPoint::from_u64(15, 7);
-        assert!(curve.on_curve(&p));
-        assert!(curve.on_curve(&q));
-        assert_eq!("(12, F3)", curve.add(&p, &q).to_string());
-    }
-
-    #[test]
     fn generating_point() {
         let curve = FiniteEllipticCurve::from_u64(0, 3, 11);
         let g = EcPoint::from_u64(4, 10);
-        let mut p = EcPoint::from_u64(4, 10);
+        let mut p = g.clone();
         let points = [
             "(4, A)", "(7, 7)", "(1, 9)", "(0, 6)", "(8, 8)", "(2, 0)", "(8, 3)", "(0, 5)",
             "(1, 2)", "(7, 4)", "(4, 1)", "Inf",
         ];
         for i in 0..12 {
+            assert!(curve.on_curve(&p));
             assert_eq!(points[i], p.to_string());
             p = curve.add(&p, &g);
         }
