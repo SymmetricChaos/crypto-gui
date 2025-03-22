@@ -1,67 +1,84 @@
-use crypto_bigint::{NonZero, U256};
-// use paste::paste;
+use crypto_bigint::{NonZero, Zero, U256};
+use std::fmt::Display;
 
-// macro_rules! large_point {
-//     ($t:ty, $n:ident) => {
-//         paste! {
-//             #[derive(Debug)]
-//             pub struct  [<Point $t >] {
-//                 x: $t,
-//                 y: $t,
-//             }
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct EcPoint {
+    x: Option<U256>,
+    y: Option<U256>,
+}
 
-//             impl [<Point $t >] {
-//                 pub const fn from_be_hex(x: &str, y: &str) -> Self {
-//                     Self {
-//                         x: <$t>::from_be_hex(x),
-//                         y: <$t>::from_be_hex(y),
-//                     }
-//                 }
+impl EcPoint {
+    pub const fn from_be_hex(x: &str, y: &str) -> Self {
+        Self {
+            x: Some(<U256>::from_be_hex(x)),
+            y: Some(<U256>::from_be_hex(y)),
+        }
+    }
 
-//                 pub const fn from_u64(x: u64, y: u64) -> Self {
-//                     Self {
-//                         x: <$t>::from_u64(x),
-//                         y: <$t>::from_u64(y),
-//                     }
-//                 }
+    pub const fn from_u256(x: U256, y: U256) -> Self {
+        Self {
+            x: Some(x),
+            y: Some(y),
+        }
+    }
 
-//                 pub fn to_string(&self) -> String {
-//                     format!(
-//                         "({},{})",
-//                         self.x.to_string().trim_matches('0'),
-//                         self.y.to_string().trim_matches('0')
-//                     )
-//                 }
-//             }
-//             pub fn [< on_curve_ $n >] (n: &[<Point $t >], a: &$t, b: &$t, m: &$t) -> bool {
-//                 let p = NonZero::new(*m).unwrap();
-//                 let x3 = n.x.mul_mod(&n.x, &p).mul_mod(&n.x, &p);
-//                 x3.add_mod(&n.x.mul_mod(&a, &p), &p).add_mod(&b, &p) == n.y.mul_mod(&n.y, &p)
-//             }
+    pub const fn from_u64(x: u64, y: u64) -> Self {
+        Self {
+            x: Some(<U256>::from_u64(x)),
+            y: Some(<U256>::from_u64(y)),
+        }
+    }
 
-//             pub fn [< ec_add_ $n >](lhs: &[<Point $t >], rhs: &[<Point $t >], m: &$t) -> [<Point $t >] {
-//                 let modulus = NonZero::new(*m).unwrap();
-//                 let dx = rhs.x.sub_mod(&lhs.x, &modulus);
-//                 let dy = rhs.y.sub_mod(&lhs.y, &modulus);
-//                 let s: $t = dy.mul_mod(&dx.inv_mod(&modulus).unwrap(), &modulus);
-//                 let x = s
-//                     .mul_mod(&s, &modulus)
-//                     .sub_mod(&lhs.x.add_mod(&rhs.x, &modulus), &modulus);
-//                 let y = s
-//                     .mul_mod(&lhs.x.sub_mod(&x, &modulus), &modulus)
-//                     .sub_mod(&lhs.y, &modulus);
-//                 [<Point $t >] { x, y }
-//             }
+    pub const fn point_at_inf() -> Self {
+        Self { x: None, y: None }
+    }
 
-//             pub fn [< ec_mul_ $n >](lhs: &[<Point $t >], rhs: &[<Point $t >], m: &$t) -> [<Point $t >] {
-//                 let modulus = NonZero::new(*m).unwrap();
-//                 let bits = lhs.bits();
-//                 [<Point $t >] { x, y }
-//             }
-//         }
-//     };
-// }
+    pub fn is_inf(&self) -> bool {
+        self.x == None && self.y == None
+    }
 
+    pub fn is_valid(&self) -> bool {
+        // Point at infinity is always valid
+        if self.is_inf() {
+            return true;
+        } else {
+            // Having a None value other than in the point at infiniy is invalid
+            if self.x.is_none() || self.y.is_none() {
+                return false;
+            }
+            // The point (0,0) is always invalid
+            if self.x.unwrap().is_zero().into() && self.y.unwrap().is_zero().into() {
+                return false;
+            }
+        }
+        true
+    }
+}
+
+impl Display for EcPoint {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if self.is_inf() {
+            write!(f, "Inf")
+        } else if self.x.is_some() && self.y.is_some() {
+            let x = if self.x.unwrap().is_zero().into() {
+                "0".to_string()
+            } else {
+                self.x.unwrap().to_string().trim_matches('0').to_string()
+            };
+            let y = if self.y.unwrap().is_zero().into() {
+                "0".to_string()
+            } else {
+                self.y.unwrap().to_string().trim_matches('0').to_string()
+            };
+
+            write!(f, "({}, {})", x, y)
+        } else {
+            write!(f, "ERROR")
+        }
+    }
+}
+
+/// Elliptic curve of the form y^2 = x^3 + ax + b (mod m)
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FiniteEllipticCurve {
     a: U256,
@@ -70,92 +87,147 @@ pub struct FiniteEllipticCurve {
 }
 
 impl FiniteEllipticCurve {
-    pub fn on_curve(&self, n: &PointU256) -> bool {
-        let x3 = n.x.mul_mod(&n.x, &self.m).mul_mod(&n.x, &self.m);
-        x3.add_mod(&n.x.mul_mod(&self.a, &self.m), &self.m)
-            .add_mod(&self.b, &self.m)
-            == n.y.mul_mod(&n.y, &self.m)
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct PointU256 {
-    x: U256,
-    y: U256,
-}
-impl PointU256 {
-    pub const fn from_be_hex(x: &str, y: &str) -> Self {
+    pub fn from_be_hex(a: &str, b: &str, m: &str) -> Self {
         Self {
-            x: <U256>::from_be_hex(x),
-            y: <U256>::from_be_hex(y),
+            a: U256::from_be_hex(a),
+            b: U256::from_be_hex(b),
+            m: NonZero::new(U256::from_be_hex(m)).expect("zero modulus"),
         }
     }
-    pub const fn from_u64(x: u64, y: u64) -> Self {
+
+    pub fn from_u256(a: U256, b: U256, m: U256) -> Self {
         Self {
-            x: <U256>::from_u64(x),
-            y: <U256>::from_u64(y),
+            a,
+            b,
+            m: NonZero::new(m).expect("zero modulus"),
         }
     }
-    pub fn to_string(&self) -> String {
-        format!(
-            "({},{})",
-            self.x.to_string().trim_matches('0'),
-            self.y.to_string().trim_matches('0')
-        )
-    }
-}
 
-pub fn ec_add_u256(lhs: &PointU256, rhs: &PointU256, m: &U256) -> PointU256 {
-    if lhs == rhs {
-        panic!("lhs and rhs must not be the same, use ec_double_u256 instead")
-    }
-    let modulus = NonZero::new(*m).expect("modulus was zero");
-    let dx = rhs.x.sub_mod(&lhs.x, &modulus);
-    let dy = rhs.y.sub_mod(&lhs.y, &modulus);
-    let s: U256 = dy.mul_mod(
-        &dx.inv_mod(&modulus)
-            .expect("unable to find modular multiplicative inverse"),
-        &modulus,
-    );
-    let x = s
-        .mul_mod(&s, &modulus)
-        .sub_mod(&lhs.x.add_mod(&rhs.x, &modulus), &modulus);
-    let y = s
-        .mul_mod(&lhs.x.sub_mod(&x, &modulus), &modulus)
-        .sub_mod(&lhs.y, &modulus);
-    PointU256 { x, y }
-}
-
-pub fn ec_double_u256(n: &PointU256, a: &U256, m: &U256) -> PointU256 {
-    let modulus = NonZero::new(*m).expect("modulus was zero");
-    let num =
-        n.x.mul_mod(&n.x, &modulus)
-            .mul_mod(&U256::from_u64(3), &modulus)
-            .add_mod(&a, &modulus);
-    let den =
-        n.y.add_mod(&n.y, &modulus)
-            .inv_mod(&modulus)
-            .expect("unable to find modular multiplicative inverse");
-    let s = num.mul_mod(&den, &modulus);
-    let x = s
-        .mul_mod(&s, &modulus)
-        .sub_mod(&n.x.add_mod(&n.x, &modulus), &modulus);
-    let y = s
-        .mul_mod(&n.x.sub_mod(&x, &modulus), &modulus)
-        .sub_mod(&n.y, &modulus);
-    PointU256 { x, y }
-}
-
-pub fn ec_scalar_mul_u256(lhs: &PointU256, rhs: &U256, a: &U256, m: &U256) -> PointU256 {
-    let mut out = PointU256::from_u64(0, 0);
-    let mut temp = lhs.clone();
-    for i in 0..256 {
-        if rhs.bit(i).into() {
-            out = ec_add_u256(&out, &temp, &m);
+    pub fn from_u64(a: u64, b: u64, m: u64) -> Self {
+        Self {
+            a: U256::from_u64(a),
+            b: U256::from_u64(b),
+            m: NonZero::new(U256::from_u64(m)).expect("zero modulus"),
         }
-        temp = ec_double_u256(&temp, &a, &m)
     }
-    out
+
+    pub fn on_curve(&self, p: &EcPoint) -> bool {
+        if !p.is_valid() {
+            panic!("invalid EcPoint encountered")
+        }
+        if p.is_inf() {
+            return true;
+        } else {
+            let x = p.x.unwrap();
+            let y = p.y.unwrap();
+            let x3 = x.mul_mod(&x, &self.m).mul_mod(&x, &self.m);
+            x3.add_mod(&x.mul_mod(&self.a, &self.m), &self.m)
+                .add_mod(&self.b, &self.m)
+                == y.mul_mod(&y, &self.m)
+        }
+    }
+
+    pub fn inverse(&self, p: &EcPoint) -> EcPoint {
+        if !p.is_valid() {
+            panic!("invalid EcPoint encountered")
+        }
+        if p.is_inf() {
+            return EcPoint::point_at_inf();
+        } else {
+            EcPoint {
+                x: p.x,
+                y: Some(p.y.unwrap().neg_mod(&self.m)),
+            }
+        }
+    }
+
+    pub fn add(&self, p: &EcPoint, q: &EcPoint) -> EcPoint {
+        if !p.is_valid() || !q.is_valid() {
+            panic!("invalid EcPoint encountered")
+        }
+        if p.is_inf() {
+            return q.clone();
+        }
+        if q.is_inf() {
+            return p.clone();
+        }
+        if p == q {
+            return self.double(p);
+        }
+        if *p == self.inverse(q) {
+            return EcPoint::point_at_inf();
+        }
+
+        let px = p.x.unwrap();
+        let py = p.y.unwrap();
+
+        let qx = q.x.unwrap();
+        let qy = q.y.unwrap();
+
+        // (q_x - p_x)
+        let dx = qx.sub_mod(&px, &self.m);
+        // (q_y - p_y)
+        let dy = qy.sub_mod(&py, &self.m);
+        let s: U256 = dy.mul_mod(
+            &dx.inv_mod(&self.m)
+                .expect("unable to find modular multiplicative inverse when adding"),
+            &self.m,
+        );
+        let x = s
+            .mul_mod(&s, &self.m)
+            .sub_mod(&px.add_mod(&qx, &self.m), &self.m);
+        let y = s
+            .mul_mod(&px.sub_mod(&x, &self.m), &self.m)
+            .sub_mod(&py, &self.m);
+        EcPoint::from_u256(x, y)
+    }
+
+    pub fn double(&self, p: &EcPoint) -> EcPoint {
+        if !p.is_valid() {
+            panic!("invalid EcPoint encountered")
+        }
+        if p.is_inf() {
+            return p.clone();
+        }
+        if p.y.unwrap().is_zero().into() {
+            return EcPoint::point_at_inf();
+        }
+
+        let px = p.x.unwrap();
+        let py = p.y.unwrap();
+
+        // 3x^3 + a
+        let num = px
+            .mul_mod(&px, &self.m)
+            .mul_mod(&U256::from_u64(3), &self.m)
+            .add_mod(&self.a, &self.m);
+        // 2y
+        let den = py
+            .add_mod(&py, &self.m)
+            .inv_mod(&self.m)
+            .expect("unable to find modular multiplicative inverse when doubling");
+        // (2x^3 + a) / 2y
+        let s = num.mul_mod(&den, &self.m);
+        let x = s
+            .mul_mod(&s, &self.m)
+            .sub_mod(&px.add_mod(&px, &self.m), &self.m);
+        let y = s
+            .mul_mod(&px.sub_mod(&x, &self.m), &self.m)
+            .sub_mod(&py, &self.m);
+        EcPoint::from_u256(x, y)
+    }
+
+    pub fn scalar_mul(&self, p: &EcPoint, s: &U256) -> EcPoint {
+        let mut out = EcPoint::from_u64(0, 0);
+        let mut temp = p.clone();
+        for i in 0..256 {
+            if s.bit(i).into() {
+                out = self.add(&out, &temp);
+            }
+            temp = self.double(&temp)
+        }
+        out
+    }
 }
 
 #[cfg(test)]
@@ -164,29 +236,49 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_addition() {
-        let curve = FiniteEllipticCurve {
-            a: U256::ONE,
-            b: U256::ZERO,
-            m: NonZero::new(U256::from_u64(257)).unwrap(),
-        };
+    fn addition() {
+        let curve = FiniteEllipticCurve::from_u64(1, 0, 257);
 
-        let p = PointU256::from_u64(1, 60);
-        let q = PointU256::from_u64(15, 7);
+        let p = EcPoint::from_u64(1, 60);
+        let q = EcPoint::from_u64(15, 7);
         assert!(curve.on_curve(&p));
         assert!(curve.on_curve(&q));
-        // assert_eq!("(12,F3)", ec_add_u256(&p, &q, &modulus).to_string());
+        assert_eq!("(12, F3)", curve.add(&p, &q).to_string());
     }
 
     #[test]
-    fn test_multiplication() {
-        let a = U256::ONE;
-        let b = U256::ZERO;
-        let p = PointU256::from_u64(1, 60);
-        let modulus = U256::from_u64(257);
-        // let p2 = ec_scalar_mul_u256(&p, &U256::from_u64(2), &a, &modulus);
-        let double = ec_double_u256(&p, &a, &modulus);
-        // println!("{}\n{}", a.to_string(), b.to_string());
-        // assert!(a == b);
+    fn generating_point() {
+        let curve = FiniteEllipticCurve::from_u64(0, 3, 11);
+        let g = EcPoint::from_u64(4, 10);
+        let mut p = EcPoint::from_u64(4, 10);
+        let points = [
+            "(7, 7)", "(1, 9)", "(0, 6)", "(8, 8)", "(2, 0)", "(8, 3)", "(0, 5)", "(1, 2)",
+            "(7, 4)", "(4, 1)", "Inf", "(4, A)",
+        ];
+        for i in 0..12 {
+            p = curve.add(&p, &g);
+            assert_eq!(points[i], p.to_string())
+        }
+    }
+
+    #[test]
+    fn doubling() {
+        let curve = FiniteEllipticCurve::from_u64(1, 0, 257);
+
+        let p = EcPoint::from_u64(1, 60);
+        let q = EcPoint::from_u64(15, 7);
+
+        println!("{}\n{}", curve.add(&p, &p), curve.double(&p));
+        println!("{}\n{}", curve.add(&q, &q), curve.double(&q));
+    }
+
+    #[test]
+    fn multiplication() {
+        let curve = FiniteEllipticCurve::from_u64(1, 0, 257);
+
+        let p = EcPoint::from_u64(1, 60);
+        let q = EcPoint::from_u64(15, 7);
+
+        println!("{}", curve.scalar_mul(&p, &U256::from_u64(3)));
     }
 }
