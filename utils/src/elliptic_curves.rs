@@ -1,4 +1,5 @@
 use crypto_bigint::{NonZero, Zero, U256};
+use num::One;
 use std::fmt::Display;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -87,6 +88,15 @@ pub struct FiniteEllipticCurve {
 }
 
 impl FiniteEllipticCurve {
+    /// NIST P256
+    pub fn p256() -> Self {
+        Self::from_be_hex(
+            "ffffffff00000001000000000000000000000000fffffffffffffffffffffffc",
+            "5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b",
+            "ffffffff00000001000000000000000000000000ffffffffffffffffffffffff",
+        )
+    }
+
     pub fn from_be_hex(a: &str, b: &str, m: &str) -> Self {
         Self {
             a: U256::from_be_hex(a),
@@ -168,6 +178,7 @@ impl FiniteEllipticCurve {
         let dx = qx.sub_mod(&px, &self.m);
         // (q_y - p_y)
         let dy = qy.sub_mod(&py, &self.m);
+        // (q_y - p_y) / (q_x - p_x)
         let s: U256 = dy.mul_mod(
             &dx.inv_mod(&self.m)
                 .expect("unable to find modular multiplicative inverse when adding"),
@@ -179,6 +190,7 @@ impl FiniteEllipticCurve {
         let y = s
             .mul_mod(&px.sub_mod(&x, &self.m), &self.m)
             .sub_mod(&py, &self.m);
+
         EcPoint::from_u256(x, y)
     }
 
@@ -201,7 +213,7 @@ impl FiniteEllipticCurve {
             .mul_mod(&px, &self.m)
             .mul_mod(&U256::from_u64(3), &self.m)
             .add_mod(&self.a, &self.m);
-        // 2y
+        // 1 / 2y
         let den = py
             .add_mod(&py, &self.m)
             .inv_mod(&self.m)
@@ -214,11 +226,18 @@ impl FiniteEllipticCurve {
         let y = s
             .mul_mod(&px.sub_mod(&x, &self.m), &self.m)
             .sub_mod(&py, &self.m);
+
         EcPoint::from_u256(x, y)
     }
 
     pub fn scalar_mul(&self, p: &EcPoint, s: &U256) -> EcPoint {
-        let mut out = EcPoint::from_u64(0, 0);
+        if s.is_zero().into() {
+            return EcPoint::point_at_inf();
+        }
+        if s.is_one() {
+            return p.clone();
+        }
+        let mut out = EcPoint::point_at_inf();
         let mut temp = p.clone();
         for i in 0..256 {
             if s.bit(i).into() {
@@ -252,33 +271,30 @@ mod tests {
         let g = EcPoint::from_u64(4, 10);
         let mut p = EcPoint::from_u64(4, 10);
         let points = [
-            "(7, 7)", "(1, 9)", "(0, 6)", "(8, 8)", "(2, 0)", "(8, 3)", "(0, 5)", "(1, 2)",
-            "(7, 4)", "(4, 1)", "Inf", "(4, A)",
+            "(4, A)", "(7, 7)", "(1, 9)", "(0, 6)", "(8, 8)", "(2, 0)", "(8, 3)", "(0, 5)",
+            "(1, 2)", "(7, 4)", "(4, 1)", "Inf",
         ];
         for i in 0..12 {
+            assert_eq!(points[i], p.to_string());
             p = curve.add(&p, &g);
-            assert_eq!(points[i], p.to_string())
         }
     }
 
     #[test]
-    fn doubling() {
-        let curve = FiniteEllipticCurve::from_u64(1, 0, 257);
-
-        let p = EcPoint::from_u64(1, 60);
-        let q = EcPoint::from_u64(15, 7);
-
-        println!("{}\n{}", curve.add(&p, &p), curve.double(&p));
-        println!("{}\n{}", curve.add(&q, &q), curve.double(&q));
-    }
-
-    #[test]
     fn multiplication() {
-        let curve = FiniteEllipticCurve::from_u64(1, 0, 257);
-
-        let p = EcPoint::from_u64(1, 60);
-        let q = EcPoint::from_u64(15, 7);
-
-        println!("{}", curve.scalar_mul(&p, &U256::from_u64(3)));
+        let curve = FiniteEllipticCurve::from_u64(0, 3, 11);
+        let g = EcPoint::from_u64(4, 10);
+        let points = [
+            "(4, A)", "(7, 7)", "(1, 9)", "(0, 6)", "(8, 8)", "(2, 0)", "(8, 3)", "(0, 5)",
+            "(1, 2)", "(7, 4)", "(4, 1)", "Inf",
+        ];
+        for i in 0..12 {
+            assert_eq!(
+                points[i],
+                curve
+                    .scalar_mul(&g, &U256::from_u64((i + 1) as u64))
+                    .to_string()
+            );
+        }
     }
 }
