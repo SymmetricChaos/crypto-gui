@@ -53,7 +53,7 @@ impl ClassicRngFrame for DualEcFrame {
         ui.collapsing("Constants", |ui| {
             ui.subheading("Elliptic Curve");
             ui.label("y² = x³ + ax + b (mod m)");
-            ui.add_space(4.0);
+            ui.add_space(8.0);
 
             ui.subheading("Base Field Size (m)");
             ui.label(P256.m.to_string());
@@ -73,23 +73,27 @@ impl ClassicRngFrame for DualEcFrame {
             ui.label(format!("x: {}", Q.x.unwrap().to_string()));
             ui.label(format!("y: {}", Q.y.unwrap().to_string()));
         });
+        ui.add_space(8.0);
 
         ui.subheading("Current State");
         ui.label(self.rng.state.to_string());
-
         ui.add_space(8.0);
+
         generate_randoms_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
     }
 
     fn rng(&self) -> &dyn ClassicRng {
-        todo!()
+        &self.rng
     }
 
     fn randomize(&mut self) {
-        todo!()
+        let mut rng = thread_rng();
+        let mut t_state = [0u64; 4];
+        rng.fill(&mut t_state);
+        self.seed = U256::from_words(t_state);
     }
 
     fn reset(&mut self) {
-        todo!()
+        *self = Self::default()
     }
 }
