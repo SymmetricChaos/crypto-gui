@@ -36,20 +36,6 @@ impl Default for DualEcDrbgP256 {
 }
 
 impl DualEcDrbgP256 {
-    // pub fn instantiate(entropy: &[u8], nonce: &[u8], personalization: &[u8]) -> Self {
-    //     let mut hasher = todo!();
-    //     hasher.update(&[1_u8]);
-    //     hasher.update(256_u32.to_be_bytes());
-    //     hasher.update(entropy);
-    //     hasher.update(nonce);
-    //     hasher.update(personalization);
-    //     let bytes: Vec<u8> = hasher.finalize();
-    //     Self {
-    //         state: U256::from_be_slice(&bytes),
-    //         ctr: 0,
-    //     }
-    // }
-
     pub fn step(&mut self) {
         self.state = P256.scalar_mul(&P, &self.state).x.unwrap();
     }
@@ -57,13 +43,19 @@ impl DualEcDrbgP256 {
 
 impl ClassicRng for DualEcDrbgP256 {
     fn next_u32(&mut self) -> u32 {
-        self.step();
-        P256.scalar_mul(&Q, &self.state).x.unwrap().as_words()[3] as u32
+        self.ctr += 1;
+        if self.ctr % 3 == 0 {
+            self.step();
+        }
+        P256.scalar_mul(&Q, &self.state).x.unwrap().as_words()[(self.ctr as usize) % 3 + 1] as u32
     }
 
     fn next_u64(&mut self) -> u64 {
-        self.step();
-        P256.scalar_mul(&Q, &self.state).x.unwrap().as_words()[3] as u64
+        self.ctr += 1;
+        if self.ctr % 3 == 0 {
+            self.step();
+        }
+        P256.scalar_mul(&Q, &self.state).x.unwrap().as_words()[(self.ctr as usize) % 3 + 1] as u64
     }
 }
 

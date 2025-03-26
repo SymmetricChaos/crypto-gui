@@ -68,17 +68,20 @@ impl ClassicRngFrame for DualEcFrame {
                 self.instantiate();
             }
         });
-        ui.label(self.entropy.to_string());
+        ui.label("Random data from an entropy source. Here always 256 bits.");
+        for limb in self.entropy.as_words_mut() {
+            ui.u64_hex_edit(limb);
+        }
 
         ui.subheading("Nonce");
-        ui.label("Unique value for each instantiation.");
+        ui.label("Unique value for each instantiation. Here always 128 bits.");
         if ui.u128_hex_edit(&mut self.nonce).lost_focus() {
             self.instantiate();
         }
         ui.add_space(8.0);
 
         ui.subheading("Personalization String");
-        ui.label("Static globally unique value.");
+        ui.label("Static globally unique value. Arbitrary length.");
         if ui.control_string(&mut self.personalization).lost_focus() {
             self.instantiate();
         }
@@ -123,11 +126,7 @@ impl ClassicRngFrame for DualEcFrame {
     }
 
     fn randomize(&mut self) {
-        let mut rng = thread_rng();
-        let mut t_state = [0u64; 4];
-        rng.fill(&mut t_state);
-        // self.entropy = U256::from_words(t_state).rem(&P256.m);
-        // self.rng.state = self.seed;
+        todo!()
     }
 
     fn reset(&mut self) {
