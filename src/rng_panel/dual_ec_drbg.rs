@@ -1,6 +1,7 @@
 use super::ClassicRngFrame;
 use crate::ui_elements::{generate_randoms_box, UiElements};
 use crypto_bigint::U256;
+use hashers::{sha::Sha256, traits::StatefulHasher};
 use rand::{thread_rng, Rng};
 use rngs::{
     dual_ec_drbg::{DualEcDrbgP256, P, P256, Q},
@@ -9,7 +10,9 @@ use rngs::{
 
 pub struct DualEcFrame {
     rng: DualEcDrbgP256,
-    seed: U256,
+    entropy: U256,
+    personalization: String,
+    nonce: u128,
     n_random: usize,
     randoms: String,
 }
@@ -18,14 +21,30 @@ impl Default for DualEcFrame {
     fn default() -> Self {
         Self {
             rng: Default::default(),
-            seed: U256::from_u64(1),
+            entropy: U256::from_u64(1),
+            personalization: String::new(),
+            nonce: 0,
             n_random: 5,
             randoms: String::new(),
         }
     }
 }
 
-impl DualEcFrame {}
+impl DualEcFrame {
+    pub fn instantiate(&mut self) {
+        let mut hasher = Sha256::init();
+        hasher.update(&[1_u8]);
+        hasher.update(&256_u32.to_be_bytes());
+        hasher.update(&self.entropy.to_be_bytes());
+        hasher.update(&self.nonce.to_be_bytes());
+        hasher.update(self.personalization.as_bytes());
+        let bytes: Vec<u8> = hasher.finalize();
+        self.rng = DualEcDrbgP256 {
+            state: U256::from_be_slice(&bytes),
+            ctr: 0,
+        }
+    }
+}
 
 impl ClassicRngFrame for DualEcFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
@@ -35,20 +54,35 @@ impl ClassicRngFrame for DualEcFrame {
         );
         ui.add_space(8.0);
 
+        ui.subheading("Instantiation");
+        ui.label("NIST instantiation procedures are flexible. This implementation uses SHA-256 to produce the state from the input below, where || is concatenation.\n0x01 || 0x00000001 || Entropy || Nonce || PersonalizationString");
+        ui.add_space(8.0);
+
         ui.horizontal(|ui| {
-            ui.subheading("Seed");
-            if ui
-                .button("🎲")
-                .on_hover_text("random 256-bit state")
-                .clicked()
-            {
+            ui.subheading("Entropy");
+            if ui.button("🎲").on_hover_text("256 random bits").clicked() {
                 let mut rng = thread_rng();
                 let mut t_state = [0u64; 4];
                 rng.fill(&mut t_state);
-                self.seed = U256::from_words(t_state);
+                self.entropy = U256::from_words(t_state).rem(&P256.m);
+                self.instantiate();
             }
         });
-        ui.label(self.seed.to_string());
+        ui.label(self.entropy.to_string());
+
+        ui.subheading("Nonce");
+        ui.label("Unique value for each instantiation.");
+        if ui.u128_hex_edit(&mut self.nonce).changed() {
+            self.instantiate();
+        }
+        ui.add_space(8.0);
+
+        ui.subheading("Personalization String");
+        ui.label("Static globally unique value.");
+        if ui.control_string(&mut self.personalization).changed() {
+            self.instantiate();
+        }
+        ui.add_space(8.0);
 
         ui.collapsing("Constants", |ui| {
             ui.subheading("Elliptic Curve");
@@ -90,7 +124,8 @@ impl ClassicRngFrame for DualEcFrame {
         let mut rng = thread_rng();
         let mut t_state = [0u64; 4];
         rng.fill(&mut t_state);
-        self.seed = U256::from_words(t_state);
+        // self.entropy = U256::from_words(t_state).rem(&P256.m);
+        // self.rng.state = self.seed;
     }
 
     fn reset(&mut self) {

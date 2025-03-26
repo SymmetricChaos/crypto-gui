@@ -23,17 +23,33 @@ pub static P256: LazyLock<FiniteEllipticCurve> = LazyLock::new(|| FiniteElliptic
 
 pub struct DualEcDrbgP256 {
     pub state: U256,
+    pub ctr: u64,
 }
 
 impl Default for DualEcDrbgP256 {
     fn default() -> Self {
         Self {
             state: U256::from_u64(1),
+            ctr: 0,
         }
     }
 }
 
 impl DualEcDrbgP256 {
+    // pub fn instantiate(entropy: &[u8], nonce: &[u8], personalization: &[u8]) -> Self {
+    //     let mut hasher = todo!();
+    //     hasher.update(&[1_u8]);
+    //     hasher.update(256_u32.to_be_bytes());
+    //     hasher.update(entropy);
+    //     hasher.update(nonce);
+    //     hasher.update(personalization);
+    //     let bytes: Vec<u8> = hasher.finalize();
+    //     Self {
+    //         state: U256::from_be_slice(&bytes),
+    //         ctr: 0,
+    //     }
+    // }
+
     pub fn step(&mut self) {
         self.state = P256.scalar_mul(&P, &self.state).x.unwrap();
     }
