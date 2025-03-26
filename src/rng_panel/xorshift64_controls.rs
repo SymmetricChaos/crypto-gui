@@ -1,6 +1,6 @@
 use super::ClassicRngFrame;
 use crate::{
-    integer_drag_value::EditU32,
+    integer_edit::EditU32,
     ui_elements::{generate_randoms_box, UiElements},
 };
 use egui::Label;

@@ -1,6 +1,6 @@
 use crate::{
     cipher_panel::CipherFrame,
-    integer_drag_value::{EditU128, EditU16, EditU32, EditU64, EditU8},
+    integer_edit::{EditU128, EditU16, EditU32, EditU64, EditU8},
     rng_panel::ClassicRngFrame,
 };
 use ciphers::digital::block_ciphers::block_cipher::{BCMode, BCPadding};
@@ -338,11 +338,11 @@ impl UiElements for Ui {
     }
 
     fn u64_drag_value_dec(&mut self, n: &mut u64) -> Response {
-        self.add(EditU64::new(n).format_type(crate::integer_drag_value::IntegerFormatType::Dec))
+        self.add(EditU64::new(n).format_type(crate::integer_edit::IntegerFormatType::Dec))
     }
 
     fn u128_drag_value_dec(&mut self, n: &mut u128) -> Response {
-        self.add(EditU128::new(n).format_type(crate::integer_drag_value::IntegerFormatType::Dec))
+        self.add(EditU128::new(n).format_type(crate::integer_edit::IntegerFormatType::Dec))
     }
 
     // This won't work with the normal DragValue

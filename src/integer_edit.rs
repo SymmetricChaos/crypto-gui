@@ -4,6 +4,7 @@ use egui::{
     text, Button, CursorIcon, Key, Modifiers, Response, RichText, Sense, TextEdit, TextWrapMode,
     Ui, Widget,
 };
+use num::Zero;
 use paste::paste;
 use std::{cmp::Ordering, ops::RangeInclusive};
 
@@ -204,7 +205,7 @@ macro_rules! integer_edit_box {
                         value = [<clamp $t >](value, range.clone());
                     }
 
-                    if change != 0 {
+                    if change.is_zero() {
                         value = value.wrapping_add(change.wrapping_mul(speed));
                     }
 

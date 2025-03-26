@@ -72,17 +72,22 @@ impl ClassicRngFrame for DualEcFrame {
 
         ui.subheading("Nonce");
         ui.label("Unique value for each instantiation.");
-        if ui.u128_hex_edit(&mut self.nonce).changed() {
+        if ui.u128_hex_edit(&mut self.nonce).lost_focus() {
             self.instantiate();
         }
         ui.add_space(8.0);
 
         ui.subheading("Personalization String");
         ui.label("Static globally unique value.");
-        if ui.control_string(&mut self.personalization).changed() {
+        if ui.control_string(&mut self.personalization).lost_focus() {
             self.instantiate();
         }
         ui.add_space(8.0);
+
+        ui.subheading("Current State");
+        for limb in self.rng.state.as_words_mut() {
+            ui.u64_hex_edit(limb);
+        }
 
         ui.collapsing("Constants", |ui| {
             ui.subheading("Elliptic Curve");
@@ -109,11 +114,8 @@ impl ClassicRngFrame for DualEcFrame {
         });
         ui.add_space(8.0);
 
-        ui.subheading("Current State");
-        ui.label(self.rng.state.to_string());
-        ui.add_space(8.0);
-
         generate_randoms_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
+        ui.add_space(16.0);
     }
 
     fn rng(&self) -> &dyn ClassicRng {

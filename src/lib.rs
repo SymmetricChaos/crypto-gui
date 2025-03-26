@@ -7,5 +7,6 @@ pub mod rng_panel;
 
 pub mod pages;
 
-pub mod integer_drag_value;
+pub mod integer_edit;
 pub mod ui_elements;
+// pub mod integer_edit_big;
