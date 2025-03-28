@@ -23,6 +23,7 @@ pub static P256: LazyLock<FiniteEllipticCurve> = LazyLock::new(|| FiniteElliptic
 
 pub struct DualEcDrbgP256 {
     pub state: U256,
+    pub t_state: [u64; 3],
     pub ctr: u64,
 }
 
@@ -30,6 +31,7 @@ impl Default for DualEcDrbgP256 {
     fn default() -> Self {
         Self {
             state: U256::from_u64(1),
+            t_state: [0; 3],
             ctr: 0,
         }
     }
@@ -43,19 +45,27 @@ impl DualEcDrbgP256 {
 
 impl ClassicRng for DualEcDrbgP256 {
     fn next_u32(&mut self) -> u32 {
-        self.ctr += 1;
-        if self.ctr % 3 == 0 {
+        if self.ctr % 6 == 0 {
             self.step();
+            self.t_state = P256.scalar_mul(&Q, &self.state).x.unwrap().as_words()[1..4]
+                .try_into()
+                .unwrap();
         }
-        P256.scalar_mul(&Q, &self.state).x.unwrap().as_words()[(self.ctr as usize) % 3 + 1] as u32
+        let out = (self.t_state[(self.ctr as usize) % 3] >> (32 * self.ctr % 2)) as u32;
+        self.ctr += 1;
+        out
     }
 
     fn next_u64(&mut self) -> u64 {
-        self.ctr += 1;
         if self.ctr % 3 == 0 {
             self.step();
+            self.t_state = P256.scalar_mul(&Q, &self.state).x.unwrap().as_words()[1..4]
+                .try_into()
+                .unwrap();
         }
-        P256.scalar_mul(&Q, &self.state).x.unwrap().as_words()[(self.ctr as usize) % 3 + 1] as u64
+        let out = self.t_state[(self.ctr as usize) % 3];
+        self.ctr += 1;
+        out
     }
 }
 

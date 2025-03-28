@@ -41,6 +41,7 @@ impl DualEcFrame {
         let bytes: Vec<u8> = hasher.finalize();
         self.rng = DualEcDrbgP256 {
             state: U256::from_be_slice(&bytes),
+            t_state: [0; 3],
             ctr: 0,
         }
     }
