@@ -40,6 +40,8 @@ impl Default for DualEcDrbgP256 {
 impl DualEcDrbgP256 {
     pub fn step(&mut self) {
         self.state = P256.scalar_mul(&P, &self.state).x.unwrap();
+        self.t_state
+            .copy_from_slice(&P256.scalar_mul(&Q, &self.state).x.unwrap().as_words()[1..4]);
     }
 }
 
@@ -47,9 +49,6 @@ impl ClassicRng for DualEcDrbgP256 {
     fn next_u32(&mut self) -> u32 {
         if self.ctr % 6 == 0 {
             self.step();
-            self.t_state = P256.scalar_mul(&Q, &self.state).x.unwrap().as_words()[1..4]
-                .try_into()
-                .unwrap();
         }
         let out = (self.t_state[(self.ctr as usize) % 3] >> (32 * self.ctr % 2)) as u32;
         self.ctr += 1;
@@ -59,9 +58,6 @@ impl ClassicRng for DualEcDrbgP256 {
     fn next_u64(&mut self) -> u64 {
         if self.ctr % 3 == 0 {
             self.step();
-            self.t_state = P256.scalar_mul(&Q, &self.state).x.unwrap().as_words()[1..4]
-                .try_into()
-                .unwrap();
         }
         let out = self.t_state[(self.ctr as usize) % 3];
         self.ctr += 1;

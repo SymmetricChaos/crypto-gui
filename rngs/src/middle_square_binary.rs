@@ -1,58 +1,17 @@
 use crate::traits::ClassicRng;
 
-// macro_rules! middle_square_binary {
-//     ($name: ident, $state_type: ty, $square_type: ty, $shift: literal) => {
-//         pub struct $name {
-//             pub state: $state_type,
-//         }
-
-//         impl Default for $name {
-//             fn default() -> Self {
-//                 Self { state: 255 }
-//             }
-//         }
-
-//         impl $name {
-//             /// Step the RNG forward
-//             pub fn next(&mut self) -> $state_type {
-//                 let sq = self.state as $square_type * self.state as $square_type;
-//                 let mid = (sq >> $shift) as $state_type;
-//                 self.state = mid;
-//                 mid
-//             }
-
-//             /// Nonadvancing version of next
-//             pub fn peek_next(&self) -> $state_type {
-//                 let sq = self.state as $square_type * self.state as $square_type;
-//                 (sq >> $shift) as $state_type
-//             }
-//         }
-
-//         impl ClassicRng for $name {
-//             fn next_u32(&mut self) -> u32 {
-//                 self.next() as u32
-//             }
-//         }
-//     };
-// }
-
-// middle_square_binary!(MiddleSquareBinary64, u64, u128, 16);
-// middle_square_binary!(MiddleSquareBinary32, u32, u64, 8);
-// middle_square_binary!(MiddleSquareBinary16, u16, u32, 4);
-// middle_square_binary!(MiddleSquareBinary8, u8, u16, 2);
-
 #[derive(Debug, PartialEq, Eq)]
 pub enum MSBSize {
-    // B64,
+    B64,
     B32,
     B16,
     B8,
 }
 
 impl MSBSize {
-    pub fn mask(&self) -> u64 {
+    pub fn mask(&self) -> u128 {
         match self {
-            // MSBSize::B64 => 0xFFFFFFFFFFFFFFFF,
+            MSBSize::B64 => 0xFFFFFFFFFFFFFFFF,
             MSBSize::B32 => 0xFFFFFFFF,
             MSBSize::B16 => 0xFFFF,
             MSBSize::B8 => 0xFF,
@@ -60,18 +19,26 @@ impl MSBSize {
     }
 
     pub fn quarter_size(&self) -> usize {
+        self.size() / 4
+    }
+
+    pub fn half_size(&self) -> usize {
+        self.size() / 2
+    }
+
+    pub fn size(&self) -> usize {
         match self {
-            // MSBSize::B64 => 16,
-            MSBSize::B32 => 8,
-            MSBSize::B16 => 4,
-            MSBSize::B8 => 2,
+            MSBSize::B64 => 64,
+            MSBSize::B32 => 32,
+            MSBSize::B16 => 16,
+            MSBSize::B8 => 8,
         }
     }
 }
 
 pub struct MiddleSquareBinary {
     pub width: MSBSize,
-    pub state: u64,
+    pub state: u128,
 }
 
 impl Default for MiddleSquareBinary {
@@ -84,23 +51,111 @@ impl Default for MiddleSquareBinary {
 }
 
 impl MiddleSquareBinary {
-    /// Step the RNG forward
-    pub fn next(&mut self) -> u64 {
+    pub fn step(&mut self) {
         let sq = self.state * self.state;
-        let mid = (sq >> self.width.quarter_size()) & self.width.mask();
-        self.state = mid;
-        mid
+        self.state = (sq >> self.width.half_size()) & self.width.mask();
     }
 
     /// Nonadvancing version of next
-    pub fn peek_next(&self) -> u64 {
+    pub fn peek_next(&self) -> u128 {
         let sq = self.state * self.state;
-        (sq >> self.width.quarter_size()) & self.width.mask()
+        (sq >> self.width.half_size()) & self.width.mask()
     }
 }
 
 impl ClassicRng for MiddleSquareBinary {
     fn next_u32(&mut self) -> u32 {
-        self.next() as u32
+        let mut out = 0;
+        match self.width {
+            MSBSize::B64 => {
+                self.step();
+                out = self.state as u32;
+            }
+            MSBSize::B32 => {
+                self.step();
+                out = self.state as u32;
+            }
+            MSBSize::B16 => {
+                self.step();
+                out <<= 16;
+                out |= self.state as u32;
+                self.step();
+                out <<= 16;
+                out |= self.state as u32;
+            }
+            MSBSize::B8 => {
+                self.step();
+                out <<= 8;
+                out |= self.state as u32;
+                self.step();
+                out <<= 8;
+                out |= self.state as u32;
+                self.step();
+                out <<= 8;
+                out |= self.state as u32;
+                self.step();
+                out <<= 8;
+                out |= self.state as u32;
+            }
+        }
+        out
+    }
+
+    fn next_u64(&mut self) -> u64 {
+        let mut out = 0;
+        match self.width {
+            MSBSize::B64 => {
+                self.step();
+                out = self.state as u64;
+            }
+            MSBSize::B32 => {
+                self.step();
+                out |= self.state as u64;
+                self.step();
+                out <<= 32;
+                out |= self.state as u64;
+            }
+            MSBSize::B16 => {
+                self.step();
+                out <<= 16;
+                out |= self.state as u64;
+                self.step();
+                out <<= 16;
+                out |= self.state as u64;
+                self.step();
+                out <<= 16;
+                out |= self.state as u64;
+                self.step();
+                out <<= 16;
+                out |= self.state as u64;
+            }
+            MSBSize::B8 => {
+                self.step();
+                out <<= 8;
+                out |= self.state as u64;
+                self.step();
+                out <<= 8;
+                out |= self.state as u64;
+                self.step();
+                out <<= 8;
+                out |= self.state as u64;
+                self.step();
+                out <<= 8;
+                out |= self.state as u64;
+                self.step();
+                out <<= 8;
+                out |= self.state as u64;
+                self.step();
+                out <<= 8;
+                out |= self.state as u64;
+                self.step();
+                out <<= 8;
+                out |= self.state as u64;
+                self.step();
+                out <<= 8;
+                out |= self.state as u64;
+            }
+        }
+        out
     }
 }

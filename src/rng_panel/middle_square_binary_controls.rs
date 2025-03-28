@@ -1,11 +1,12 @@
 use super::ClassicRngFrame;
 use crate::ui_elements::{generate_randoms_box, UiElements};
+use egui::RichText;
 use rand::{thread_rng, Rng};
 use rngs::middle_square_binary::{MSBSize, MiddleSquareBinary};
 
 pub struct MiddleSquareBinaryFrame {
     rng: MiddleSquareBinary,
-    state: u32,
+    seed_state: u64,
     randoms: String,
     n_random: usize,
 }
@@ -14,10 +15,53 @@ impl Default for MiddleSquareBinaryFrame {
     fn default() -> Self {
         Self {
             rng: MiddleSquareBinary::default(),
-            state: 255,
+            seed_state: 255,
             randoms: String::new(),
             n_random: 5,
         }
+    }
+}
+
+impl MiddleSquareBinaryFrame {
+    fn show_method(&self, ui: &mut egui::Ui) {
+        let mut current_state = String::from("State:  ");
+        current_state.push_str(&" ".repeat(self.rng.width.quarter_size() / 2));
+        match self.rng.width {
+            MSBSize::B64 => {
+                current_state.push_str(&format!("{:016x}", self.rng.state));
+            }
+            MSBSize::B32 => {
+                current_state.push_str(&format!("{:08x}", self.rng.state));
+            }
+            MSBSize::B16 => {
+                current_state.push_str(&format!("{:04x}", self.rng.state));
+            }
+            MSBSize::B8 => {
+                current_state.push_str(&format!("{:02x}", self.rng.state));
+            }
+        }
+        ui.label(RichText::from(current_state).monospace().size(14.0));
+        let mut square_string = String::from("Square: ");
+        let next_state = self.rng.state * self.rng.state;
+        let digit_string = match self.rng.width {
+            MSBSize::B64 => format!("{:032x}", next_state),
+            MSBSize::B32 => format!("{:016x}", next_state),
+            MSBSize::B16 => format!("{:08x}", next_state),
+            MSBSize::B8 => format!("{:04x}", next_state),
+        };
+        square_string.push_str(&digit_string);
+        ui.label(RichText::from(&square_string).monospace().size(14.0));
+        let mut next_string = String::from("Next:   ");
+        next_string.push_str(&" ".repeat(self.rng.width.quarter_size() / 2));
+        let next_val = self.rng.peek_next();
+        let next = match self.rng.width {
+            MSBSize::B64 => format!("{:016x}", next_val),
+            MSBSize::B32 => format!("{:08x}", next_val),
+            MSBSize::B16 => format!("{:04x}", next_val),
+            MSBSize::B8 => format!("{:02x}", next_val),
+        };
+        next_string.push_str(&next);
+        ui.label(RichText::from(next_string).monospace().size(14.0));
     }
 }
 
@@ -30,10 +74,13 @@ impl ClassicRngFrame for MiddleSquareBinaryFrame {
         ui.add_space(8.0);
 
         ui.subheading("Size");
-        ui.label("Modern desktop and server computer architecture generally has registers of size 32-bits and 64-bits so all of these can be performed exceptionally quickly. The 16-bit and 8-bit versions are mainly of academic interest as they fall into short repeating sequences very quickly.");
+        ui.label("Each routine uses a state of twice as many bits as the output. The 8-bit and 16-bit versions fall into repeating sequences almost immedaitely and are only of academic interest. The 32-bit version can be optimized to run extremely on modern hardware. Although the 64-bit version often has a very long period it is still a very weak PRNG.");
         if ui
-            .selectable_value(&mut self.rng.width, MSBSize::B32, "32-Bit")
+            .selectable_value(&mut self.rng.width, MSBSize::B64, "64-Bit")
             .clicked()
+            || ui
+                .selectable_value(&mut self.rng.width, MSBSize::B32, "32-Bit")
+                .clicked()
             || ui
                 .selectable_value(&mut self.rng.width, MSBSize::B16, "16-Bit")
                 .clicked()
@@ -50,11 +97,13 @@ impl ClassicRngFrame for MiddleSquareBinaryFrame {
                 self.randomize();
             }
         });
-        if ui.u32_hex_edit(&mut self.state).lost_focus() {
-            self.rng.state = self.state as u64;
+        if ui.u64_hex_edit(&mut self.seed_state).lost_focus() {
+            self.rng.state = self.seed_state as u128;
             self.rng.state &= self.rng.width.mask();
         }
 
+        ui.add_space(16.0);
+        self.show_method(ui);
         ui.add_space(16.0);
 
         generate_randoms_box(ui, &mut self.rng, &mut self.n_random, &mut self.randoms);
@@ -66,8 +115,8 @@ impl ClassicRngFrame for MiddleSquareBinaryFrame {
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
-        self.state = rng.gen();
-        self.rng.state = self.state as u64;
+        self.seed_state = rng.gen();
+        self.rng.state = self.seed_state as u128;
         self.rng.state &= self.rng.width.mask();
     }
 
