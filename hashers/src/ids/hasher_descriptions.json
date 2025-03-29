@@ -252,6 +252,21 @@
       "Broken"
     ]
   },
+  "LSH": {
+    "Description": "LSH is a family of cryptographic hash functions developed and standardized in South Korea. They correspond to the American SHA-2 family of functions and were created as a more secure alternative while also being more efficient in software than SHA-3.",
+    "Authors": "Dong-Chan Kim, Deukjo Hong, Jung-Keun Lee, Woo-Hwan Kim, and Daesung Kwon",
+    "Publication": "2015",
+    "Hash Length": [
+      224,
+      256,
+      384,
+      512
+    ],
+    "Traits": [
+      "Crytographic",
+      "Merkle-Damgård"
+    ]
+  },
   "PBKDF1": {
     "Description": "PBKDF1 (Password Based Key Derivation Function 1) is a now obsolete key derivation function with an adjustable work factor. It operates simply by applying a chosen hash function (MD2, MD5, or SHA-1) numerous times.",
     "Authors": null,

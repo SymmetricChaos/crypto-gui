@@ -34,6 +34,10 @@ impl MSBSize {
             MSBSize::B8 => 8,
         }
     }
+
+    pub fn state_size(&self) -> usize {
+        self.size() * 2
+    }
 }
 
 pub struct MiddleSquareBinary {
