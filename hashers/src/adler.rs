@@ -1,8 +1,10 @@
 use crate::traits::StatefulHasher;
 
+const MODULUS: u32 = 65521;
+
 pub struct Adler32 {
-    a: u16,
-    b: u16,
+    a: u32,
+    b: u32,
 }
 
 impl Adler32 {
@@ -13,17 +15,15 @@ impl Adler32 {
 
 impl StatefulHasher for Adler32 {
     fn update(&mut self, bytes: &[u8]) {
+        // The modulo operation can be deferred for 5552 bytes (after which b overflows a u32) if optimizing for speed
         for byte in bytes {
-            self.a = self.a.wrapping_add(*byte as u16);
-            self.b = self.b.wrapping_add(self.a);
+            self.a = self.a.wrapping_add(*byte as u32) % MODULUS;
+            self.b = self.b.wrapping_add(self.a) % MODULUS;
         }
     }
 
     fn finalize(self) -> Vec<u8> {
-        [self.b, self.a]
-            .into_iter()
-            .flat_map(|w| w.to_be_bytes())
-            .collect()
+        (self.b << 16 | self.a).to_be_bytes().into()
     }
 
     crate::stateful_hash_helpers!();

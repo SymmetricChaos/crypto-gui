@@ -1,5 +1,17 @@
-use super::lsh256_consts::{ALPHA, BETA, LSH_256_256_IV, STATE_WORDS};
+use super::lsh256_consts::{ALPHA, BETA, GAMMA, LSH_256_256_IV, SC, STATE_WORDS};
 use crate::traits::StatefulHasher;
+
+macro_rules! mix {
+    (x: ident, y: ident, j: ident, l: ident) => {
+        x = x.wrapping_add(y);
+        x = x.rotate_left(ALPHA[j % 2]);
+        x = x.wrapping_add(SC[STATE_WORDS * j + l]);
+        y = y.wrapping_add(x);
+        y = y.rotate_left(BETA[j % 2]);
+        x = x.wrapping_add(y);
+        y = y.rotate_left(GAMMA[l]);
+    };
+}
 
 pub struct Lsh256_256 {
     state: [u32; STATE_WORDS],
@@ -10,6 +22,12 @@ impl Default for Lsh256_256 {
         Self {
             state: LSH_256_256_IV,
         }
+    }
+}
+
+impl Lsh256_256 {
+    pub fn init() -> Self {
+        Self::default()
     }
 }
 
@@ -38,3 +56,8 @@ impl StatefulHasher for Lsh256_256 {
         todo!()
     }
 }
+
+crate::stateful_hash_tests!(
+    test_256_256, Lsh256_256::init(), b"abc",
+    "f7c53ba4034e708e74fba42e55997ca5126bb7623688f85342f73732";
+);
