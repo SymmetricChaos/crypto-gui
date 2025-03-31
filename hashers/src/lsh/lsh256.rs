@@ -1,4 +1,6 @@
-use super::lsh256_consts::{ALPHA, BETA, CV_WORDS, GAMMA, LSH_256_256_IV, MB_WORDS, SC};
+use super::lsh256_consts::{
+    ALPHA, BETA, CV_WORDS, GAMMA, LSH_256_256_IV, MB_WORDS, PERM_SIGMA, SC,
+};
 use crate::traits::StatefulHasher;
 
 macro_rules! mix {
@@ -17,12 +19,20 @@ macro_rules! message_expand {
     () => {};
 }
 
-macro_rules! message_add {
-    () => {};
+fn message_perm(x: [u32; CV_WORDS]) -> [u32; CV_WORDS] {
+    let mut out = [0; CV_WORDS];
+    for (i, sigma) in PERM_SIGMA.into_iter().enumerate() {
+        out[i] = x[sigma]
+    }
+    out
 }
 
-macro_rules! word_perm {
-    () => {};
+fn message_add(x: [u32; CV_WORDS], y: [u32; CV_WORDS]) -> [u32; CV_WORDS] {
+    let mut out = [0; CV_WORDS];
+    for i in 0..CV_WORDS {
+        out[i] = x[i] ^ y[i]
+    }
+    out
 }
 
 fn compress(cv: &mut [u32; CV_WORDS], mb: &Vec<u8>) -> [u32; CV_WORDS] {
