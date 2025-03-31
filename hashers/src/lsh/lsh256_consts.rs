@@ -1,16 +1,18 @@
 pub const STEPS: usize = 26;
-pub const STATE_WORDS: usize = 16;
+pub const CV_WORDS: usize = 16; // chaining variable
+pub const MB_WORDS: usize = 32; // message block
+pub const CN_WORDS: usize = 8; // step constant
 
 pub const ALPHA: [usize; 2] = [29, 5];
 pub const BETA: [usize; 2] = [1, 17];
 pub const GAMMA: [usize; 8] = [0, 8, 16, 24, 24, 16, 8, 0];
 
-pub const LSH_256_256_IV: [u32; STATE_WORDS] = [
+pub const LSH_256_256_IV: [u32; CV_WORDS] = [
     0x46a10f1f, 0xfddce486, 0xb41443a8, 0x198e6b9d, 0x3304388d, 0xb0f5a3c7, 0xb36061c4, 0x7adbd553,
     0x105d5378, 0x2f74de54, 0x5c2f2d95, 0xf2553fbe, 0x8051357a, 0x138668c8, 0x47aa4484, 0xe01afb41,
 ];
 
-pub static SC: [u32; 208] = [
+pub static SC: [u32; 8 * STEPS] = [
     0x917caf90, 0x6c1b10a2, 0x6f352943, 0xcf778243, 0x2ceb7472, 0x29e96ff2, 0x8a9ba428, 0x2eeb2642,
     0x0e2c4021, 0x872bb30e, 0xa45e6cb2, 0x46f9c612, 0x185fe69e, 0x1359621b, 0x263fccb2, 0x1a116870,
     0x3a6c612f, 0xb2dec195, 0x02cb1f56, 0x40bfd858, 0x784684b6, 0x6cbb7d2e, 0x660c7ed8, 0x2b79d88a,
