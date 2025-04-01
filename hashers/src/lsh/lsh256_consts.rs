@@ -1,6 +1,8 @@
+pub const WORD_BYTES: usize = 4;
 pub const STEPS: usize = 26;
 pub const CV_WORDS: usize = 16; // chaining variable
 pub const MB_WORDS: usize = 32; // message block
+pub const MB_BYTES: usize = MB_WORDS * WORD_BYTES;
 pub const CN_WORDS: usize = 8; // step constant
 
 pub const ALPHA: [u32; 2] = [29, 5];
