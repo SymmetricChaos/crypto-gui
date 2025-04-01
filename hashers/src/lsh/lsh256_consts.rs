@@ -3,9 +3,9 @@ pub const CV_WORDS: usize = 16; // chaining variable
 pub const MB_WORDS: usize = 32; // message block
 pub const CN_WORDS: usize = 8; // step constant
 
-pub const ALPHA: [usize; 2] = [29, 5];
-pub const BETA: [usize; 2] = [1, 17];
-pub const GAMMA: [usize; CN_WORDS] = [0, 8, 16, 24, 24, 16, 8, 0];
+pub const ALPHA: [u32; 2] = [29, 5];
+pub const BETA: [u32; 2] = [1, 17];
+pub const GAMMA: [u32; CN_WORDS] = [0, 8, 16, 24, 24, 16, 8, 0];
 
 pub const PERM_TAU: [usize; 16] = [3, 2, 0, 1, 7, 4, 5, 6, 11, 10, 8, 9, 15, 12, 13, 14];
 pub const PERM_SIGMA: [usize; 16] = [6, 4, 5, 6, 12, 15, 14, 13, 2, 0, 1, 3, 8, 11, 10, 9];

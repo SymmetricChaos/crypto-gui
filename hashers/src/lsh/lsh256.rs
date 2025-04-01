@@ -1,22 +1,18 @@
+use utils::byte_formatting::fill_u32s_be;
+
 use super::lsh256_consts::{
-    ALPHA, BETA, CV_WORDS, GAMMA, LSH_256_256_IV, MB_WORDS, PERM_SIGMA, SC,
+    ALPHA, BETA, CV_WORDS, GAMMA, LSH_256_256_IV, MB_WORDS, PERM_SIGMA, PERM_TAU, SC, STEPS,
 };
 use crate::traits::StatefulHasher;
 
-macro_rules! mix {
-    (x: ident, y: ident, j: ident, l: ident) => {
-        x = x.wrapping_add(y);
-        x = x.rotate_left(ALPHA[j % 2]);
-        x = x.wrapping_add(SC[CV_WORDS * j + l]);
-        y = y.wrapping_add(x);
-        y = y.rotate_left(BETA[j % 2]);
-        x = x.wrapping_add(y);
-        y = y.rotate_left(GAMMA[l]);
-    };
-}
-
-macro_rules! message_expand {
-    () => {};
+fn message_expand(mb: &[u32; MB_WORDS], arr: &mut [[u32; CV_WORDS]; STEPS + 1]) {
+    arr[0].copy_from_slice(&mb[0..16]);
+    arr[1].copy_from_slice(&mb[16..32]);
+    for i in 2..STEPS {
+        for l in 0..16 {
+            arr[i][l] = arr[i - 1][l].wrapping_add(arr[i - 2][PERM_TAU[l]])
+        }
+    }
 }
 
 fn message_perm(x: [u32; CV_WORDS]) -> [u32; CV_WORDS] {
@@ -35,7 +31,30 @@ fn message_add(x: [u32; CV_WORDS], y: [u32; CV_WORDS]) -> [u32; CV_WORDS] {
     out
 }
 
-fn compress(cv: &mut [u32; CV_WORDS], mb: &Vec<u8>) -> [u32; CV_WORDS] {
+fn step(t: &mut [u32; CV_WORDS], m: [u32; CV_WORDS], j: usize) {
+    *t = message_add(*t, m);
+    for l in 0..CV_WORDS {
+        t[l] = t[l].wrapping_add(t[l + 8]);
+        t[l] = t[l].rotate_left(ALPHA[j % 2]);
+        t[l] = t[l].wrapping_add(SC[CV_WORDS * j + l]);
+        t[l + 8] = t[l + 8].wrapping_add(t[l]);
+        t[l + 8] = t[l + 8].rotate_left(BETA[j % 2]);
+        t[l] = t[l].wrapping_add(t[l + 8]);
+        t[l + 8] = t[l + 8].rotate_left(GAMMA[l]);
+    }
+    *t = message_perm(*t);
+}
+
+fn compress(
+    cv: &mut [u32; CV_WORDS],
+    mb: &[u32; MB_WORDS],
+    arr: &mut [[u32; CV_WORDS]; STEPS + 1],
+) -> [u32; CV_WORDS] {
+    message_expand(mb, arr);
+    let mut t = cv.clone();
+    for j in 0..STEPS {
+        step(&mut t, arr[j], j);
+    }
     todo!()
 }
 
@@ -63,9 +82,12 @@ impl Lsh256_256 {
 
 impl StatefulHasher for Lsh256_256 {
     fn update(&mut self, mut bytes: &[u8]) {
+        let mut arr = [[0_u32; CV_WORDS]; STEPS + 1];
+        let mut mb = [0; 32];
         crate::compression_routine!(self.buffer, bytes, MB_WORDS * 4, {
-            self.bits_taken += 512;
-            compress(&mut self.chain_value, &self.buffer);
+            self.bits_taken += (MB_WORDS * 8) as u64;
+            fill_u32s_be(&mut mb, &self.buffer);
+            compress(&mut self.chain_value, &mb, &mut arr);
         });
     }
 
