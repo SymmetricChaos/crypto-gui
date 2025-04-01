@@ -1,4 +1,4 @@
-use utils::byte_formatting::fill_u32s_be;
+use utils::byte_formatting::{fill_u32s_be, fill_u32s_le};
 
 use super::lsh256_consts::{
     ALPHA, BETA, CV_WORDS, GAMMA, LSH_256_256_IV, MB_WORDS, PERM_SIGMA, PERM_TAU, SC, STEPS,
@@ -86,7 +86,7 @@ impl StatefulHasher for Lsh256_256 {
         let mut mb = [0; 32];
         crate::compression_routine!(self.buffer, bytes, MB_WORDS * 4, {
             self.bits_taken += (MB_WORDS * 8) as u64;
-            fill_u32s_be(&mut mb, &self.buffer);
+            fill_u32s_le(&mut mb, &self.buffer);
             compress(&mut self.chain_value, &mb, &mut arr);
         });
     }
@@ -96,7 +96,11 @@ impl StatefulHasher for Lsh256_256 {
         for i in 0..8 {
             h[i] = self.chain_value[i] ^ self.chain_value[i + 8];
         }
-        todo!()
+        let mut out = Vec::with_capacity(32 * 8);
+        for word in h {
+            out.extend(word.to_le_bytes())
+        }
+        out
     }
 
     crate::stateful_hash_helpers!();
@@ -104,5 +108,5 @@ impl StatefulHasher for Lsh256_256 {
 
 crate::stateful_hash_tests!(
     test_256_256, Lsh256_256::init(), b"abc",
-    "f7c53ba4034e708e74fba42e55997ca5126bb7623688f85342f73732";
+    "5fbf365daea5446a7053c52b57404d77a07a5f48a1f7c1963a0898ba1b714741";
 );

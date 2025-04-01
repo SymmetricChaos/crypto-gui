@@ -88,7 +88,7 @@ macro_rules! stateful_hash_tests {
                 let a = utils::byte_formatting::hex_to_bytes($output).unwrap();
                 let b = $hasher.update_and_finalize($input);
                 if a != b {
-                    panic!("hash did not match test value\nexpected:   {:02x?}\ncalculated  {:02x?}", a,b)
+                    panic!("hash did not match test value\nexpected:   {:02x?}\ncalculated: {:02x?}", a,b)
                 }
             }
         )+
@@ -105,7 +105,7 @@ macro_rules! stateful_hash_tests {
                 let a = utils::byte_formatting::hex_to_bytes($output).unwrap();
                 let b = $hasher.update_and_finalize($input);
                 if a != b {
-                    panic!("hash did not match test value\nexpected:   {:02x?}\ncalculated  {:02x?}", a,b)
+                    panic!("hash did not match test value\nexpected:   {:02x?}\ncalculated: {:02x?}", a,b)
                 }
             }
         )+
