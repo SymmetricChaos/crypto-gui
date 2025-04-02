@@ -113,11 +113,10 @@ macro_rules! radio_gatun {
             }
 
             fn finalize(mut self) -> Vec<u8> {
-                self.buffer.push(0x01);
+                self.buffer.push(0x01); // This is correct based on the reference code
                 while self.buffer.len() % (Self::BYTES_PER_WORD * 3) != 0 {
                     self.buffer.push(0x00)
                 }
-
                 let chunks = self.buffer.chunks_exact(Self::BYTES_PER_WORD * 3);
                 for chunk in chunks {
                     let words = chunk
@@ -152,50 +151,6 @@ macro_rules! radio_gatun {
 
             crate::stateful_hash_helpers!();
         }
-
-        // impl ClassicHasher for $name {
-        //     fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        //         let mut input = bytes.to_vec();
-        //         input.push(0x01);
-        //         while input.len() % (Self::BYTES_PER_WORD * 3) != 0 {
-        //             input.push(0x00)
-        //         }
-
-        //         let words = input
-        //             .chunks_exact(Self::BYTES_PER_WORD)
-        //             .map(|c| <$word_size>::from_le_bytes(c.try_into().unwrap()))
-        //             .collect_vec();
-
-        //         let mut belt: [$word_size; 39] = [0; 39]; // three rows of 13 words
-        //         let mut mill: [$word_size; 19] = [0; 19]; // one row of 19 words
-
-        //         for words in words.chunks_exact(3) {
-        //             belt[0] ^= words[0];
-        //             mill[16] ^= words[0];
-
-        //             belt[13] ^= words[1];
-        //             mill[17] ^= words[1];
-
-        //             belt[26] ^= words[2];
-        //             belt[18] ^= words[2];
-
-        //             for _ in 0..18 {
-        //                 Self::beltmill(&mut belt, &mut mill);
-        //             }
-        //         }
-
-        //         let mut out = Vec::new();
-        //         while out.len() < self.hash_len as usize {
-        //             out.extend_from_slice(&mill[1].to_le_bytes());
-        //             out.extend_from_slice(&mill[2].to_le_bytes());
-        //             Self::beltmill(&mut belt, &mut mill);
-        //         }
-        //         out.truncate(self.hash_len as usize);
-        //         out
-        //     }
-
-        //     crate::hash_bytes_from_string! {}
-        // }
     };
 }
 
@@ -212,6 +167,25 @@ radio_gatun!(
 );
 
 crate::stateful_hash_tests!(
-    test1, RadioGatun32::init(32), b"1234", "9ebdd24f469993796c4aac6a821735a65a3cdef8a359944ce71f34e7a08e1182";
-    test2, RadioGatun64::init(32), b"1234", "733e2b49a53fb166b6f3bd341919578b8c931880f8b8bd7c0fbbee1a538e7307";
+    test32_0, RadioGatun32::init(32), b"",
+    "f30028b54afab6b3e55355d277711109a19beda7091067e9a492fb5ed9f20117";
+    test32_1, RadioGatun32::init(32), b"1234",
+    "9ebdd24f469993796c4aac6a821735a65a3cdef8a359944ce71f34e7a08e1182";
+    test32_2, RadioGatun32::init(32), b"The quick brown fox jumps over the lazy dog",
+    "191589005fec1f2a248f96a16e9553bf38d0aee1648ffa036655ce29c2e229ae";
+    test32_3, RadioGatun32::init(32), b"The quick brown fox jumps over the lazy cog",
+    "ebdc1c8dcd54deb47eeefc33ca0809ad23cd9ffc0b5254be0fdabb713477f2bd";
+    test32_4, RadioGatun32::init(32), b"In response to the SHA-1 vulnerability that was announced in Feb. 2005, NIST held a Cryptographic Hash Workshop on Oct. 31-Nov. 1, 2005 to solicit public input on its cryptographic hash function policy and standards. NIST continues to recommend a transition from SHA-1 to the larger approved hash functions (SHA-224, SHA-256, SHA-384, and SHA-512). In response to the workshop, NIST has also decided that it would be prudent in the long-term to develop an additional hash function through a public competition, similar to the development process for the block cipher in the Advanced Encryption Standard (AES).",
+    "4311d3cdc46efe38fdb5c3023a160c3069b26a2af0ce0ccaaffa3f3c61629ad6";
+
+    test64_0, RadioGatun64::init(32), b"",
+    "64a9a7fa139905b57bdab35d33aa216370d5eae13e77bfcdd85513408311a584";
+    test64_1, RadioGatun64::init(32), b"1234",
+    "733e2b49a53fb166b6f3bd341919578b8c931880f8b8bd7c0fbbee1a538e7307";
+    test64_2, RadioGatun64::init(32), b"The quick brown fox jumps over the lazy dog",
+    "6219fb8dad92ebe5b2f7d18318f8da13cecbf13289d79f5abf4d253c6904c807";
+    test64_3, RadioGatun64::init(32), b"The quick brown fox jumps over the lazy cog",
+    "c06265cac961ea74912695ebf20f1c256a338bc0e980853a3eef188d4b06fce5";
+    test64_4, RadioGatun64::init(32), b"In response to the SHA-1 vulnerability that was announced in Feb. 2005, NIST held a Cryptographic Hash Workshop on Oct. 31-Nov. 1, 2005 to solicit public input on its cryptographic hash function policy and standards. NIST continues to recommend a transition from SHA-1 to the larger approved hash functions (SHA-224, SHA-256, SHA-384, and SHA-512). In response to the workshop, NIST has also decided that it would be prudent in the long-term to develop an additional hash function through a public competition, similar to the development process for the block cipher in the Advanced Encryption Standard (AES).",
+    "2c9ec1efc5d2feeffc2817cd571f394328111db8068fc79e2fb84a42416bf5d3";
 );

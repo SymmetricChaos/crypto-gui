@@ -30,12 +30,14 @@ hasher_ids_and_names!(
     Adler32, "Adler-32";
     Argon2, "Argon2";
     Ascon, "Ascon";
+    Balloon, "BalloonHash";
     Bcrypt, "bcrypt";
     Belt, "BelT";
     Blake, "BLAKE";
     Blake2, "BLAKE2";
     Blake3, "BLAKE3";
     CityHash, "CityHash";
+    Crypt, "crypt";
     Fletcher, "Fletcher";
     Fnv, "FNV Hash";
     FxHash, "FxHash";
@@ -45,6 +47,7 @@ hasher_ids_and_names!(
     Hkdf, "HKDF";
     Hmac, "HMAC";
     Lm, "LM";
+    Lsh, "LSH";
     Md2,"MD2";
     Md4, "MD4";
     Md5, "MD5";
@@ -56,6 +59,7 @@ hasher_ids_and_names!(
     Pbkdf2, "PBKDF2";
     Pearson, "Pearson";
     Poly1305, "Poly1305";
+    RadioGatun, "RadioGatún";
     RipeMd, "RIPEMD";
     Scrypt, "scrypt";
     Sha0, "SHA-0";
@@ -64,10 +68,12 @@ hasher_ids_and_names!(
     Sha3, "SHA-3 (Keccak)";
     Shabal, "Shabal";
     SipHash, "SipHash";
+    Skein, "Skein";
     Sm3, "SM3";
     Snefru, "Snefru";
     Streebog, "Streebog";
     Tiger, "Tiger";
+    Vsh, "VSH";
 );
 
 impl Default for HasherId {
