@@ -1,11 +1,37 @@
+pub const WORD_BYTES: usize = 8;
 pub const STEPS: usize = 28;
-pub const STATE_WORDS: usize = 16;
+pub const CV_WORDS: usize = 16; // chaining variable
+pub const MB_WORDS: usize = 32; // message block
+pub const MB_BYTES: usize = MB_WORDS * WORD_BYTES;
+pub const CN_WORDS: usize = 8; // step constant
 
 pub const ALPHA: [usize; 2] = [23, 7];
 pub const BETA: [usize; 2] = [59, 3];
-pub const GAMMA: [usize; 8] = [0, 16, 32, 48, 8, 24, 40, 56];
+pub const GAMMA: [usize; CN_WORDS] = [0, 16, 32, 48, 8, 24, 40, 56];
 
-pub const LSH_512_512_IV: [u64; STATE_WORDS] = [
+pub const PERM_TAU: [usize; CV_WORDS] = [3, 2, 0, 1, 7, 4, 5, 6, 11, 10, 8, 9, 15, 12, 13, 14];
+pub const PERM_SIGMA: [usize; CV_WORDS] = [6, 4, 5, 6, 12, 15, 14, 13, 2, 0, 1, 3, 8, 11, 10, 9];
+
+pub const LSH_512_256_IV: [u64; CV_WORDS] = [
+    0x6dc57c33df989423,
+    0xd8ea7f6e8342c199,
+    0x76df8356f8603ac4,
+    0x40f1b44de838223a,
+    0x39ffe7cfc31484cd,
+    0x39c4326cc5281548,
+    0x8a2ff85a346045d8,
+    0xff202aa46dbdd61e,
+    0xcf785b3cd5fcdb8b,
+    0x1f0323b64a8150bf,
+    0xff75d972f29ea355,
+    0x2e567f30bf1ca9e1,
+    0xb596875bf8ff6dba,
+    0xfcca39b089ef4615,
+    0xecff4017d020b4b6,
+    0x7e77384c772ed802,
+];
+
+pub const LSH_512_512_IV: [u64; CV_WORDS] = [
     0xadd50f3c7f07094e,
     0xe3f3cee8f9418a4f,
     0xb527ecde5b3d0ae9,
@@ -24,7 +50,7 @@ pub const LSH_512_512_IV: [u64; STATE_WORDS] = [
     0x894085e2edb2d819,
 ];
 
-pub static SC: [u64; 224] = [
+pub static SC: [u64; CN_WORDS * STEPS] = [
     0x97884283c938982a,
     0xba1fca93533e2355,
     0xc519a2e87aeb1c03,
