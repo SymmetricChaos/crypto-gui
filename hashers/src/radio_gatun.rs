@@ -1,5 +1,4 @@
 use crate::traits::StatefulHasher;
-use itertools::Itertools;
 
 // https://radiogatun.noekeon.org/
 // https://en.wikibooks.org/wiki/Cryptography/RadioGat%C3%BAn
@@ -17,6 +16,7 @@ macro_rules! radio_gatun {
         impl $name {
             const ROTATION: [u32; 19] = $rotations;
             const BYTES_PER_WORD: usize = (<$word_size>::BITS / 8) as usize;
+            const BYTES_PER_INPUT: usize = Self::BYTES_PER_WORD * 3;
 
             pub fn init(hash_len: $word_size) -> Self {
                 Self {
@@ -68,12 +68,39 @@ macro_rules! radio_gatun {
                 mill_words[15] ^= belt_words[26];
             }
 
-            pub fn beltmill(belt_words: &mut [$word_size], mill_words: &mut [$word_size]) {
+            fn beltmill(belt_words: &mut [$word_size], mill_words: &mut [$word_size]) {
                 Self::belt_to_mill_feedforward(belt_words, mill_words);
                 Self::rotate_belt(belt_words);
                 Self::mill(mill_words);
                 Self::iota(mill_words);
                 Self::belt_to_mill(belt_words, mill_words);
+            }
+
+            fn compress(&mut self, input: [$word_size; 3]) {
+                self.belt[0] ^= input[0];
+                self.belt[13] ^= input[1];
+                self.belt[26] ^= input[2];
+
+                self.mill[16] ^= input[0];
+                self.mill[17] ^= input[1];
+                self.mill[18] ^= input[2];
+
+                for _ in 0..18 {
+                    Self::beltmill(&mut self.belt, &mut self.mill);
+                }
+            }
+
+            // This will panic if self.buffer is too small but we're not invoking it in that case
+            fn make_input(&self) -> [$word_size; 3] {
+                let bpw: usize = Self::BYTES_PER_WORD;
+                println!("{:02x?}", self.buffer);
+                [
+                    <$word_size>::from_le_bytes(self.buffer[0..bpw].try_into().unwrap()),
+                    <$word_size>::from_le_bytes(self.buffer[bpw..(bpw * 2)].try_into().unwrap()),
+                    <$word_size>::from_le_bytes(
+                        self.buffer[(bpw * 2)..(bpw * 3)].try_into().unwrap(),
+                    ),
+                ]
             }
 
             pub fn print_state(belt_words: &[$word_size], mill_words: &[$word_size]) {
@@ -85,58 +112,23 @@ macro_rules! radio_gatun {
         }
 
         impl StatefulHasher for $name {
-            fn update(&mut self, bytes: &[u8]) {
-                self.buffer.extend_from_slice(bytes);
-                let chunks = self.buffer.chunks_exact(Self::BYTES_PER_WORD * 3);
-                let rem = chunks.remainder().to_vec();
-                for chunk in chunks {
-                    let words = chunk
-                        .chunks_exact(Self::BYTES_PER_WORD)
-                        .map(|c| <$word_size>::from_le_bytes(c.try_into().unwrap()))
-                        .collect_vec();
-                    for words in words.chunks_exact(3) {
-                        self.belt[0] ^= words[0];
-                        self.mill[16] ^= words[0];
-
-                        self.belt[13] ^= words[1];
-                        self.mill[17] ^= words[1];
-
-                        self.belt[26] ^= words[2];
-                        self.belt[18] ^= words[2];
-
-                        for _ in 0..18 {
-                            Self::beltmill(&mut self.belt, &mut self.mill);
-                        }
-                    }
-                }
-                self.buffer = rem;
+            fn update(&mut self, mut bytes: &[u8]) {
+                crate::compression_routine!(self.buffer, bytes, Self::BYTES_PER_INPUT, {
+                    let words = self.make_input();
+                    self.compress(words);
+                });
             }
 
             fn finalize(mut self) -> Vec<u8> {
                 self.buffer.push(0x01); // This is correct based on the reference code
-                while self.buffer.len() % (Self::BYTES_PER_WORD * 3) != 0 {
+                while self.buffer.len() % Self::BYTES_PER_INPUT != 0 {
                     self.buffer.push(0x00)
                 }
-                let chunks = self.buffer.chunks_exact(Self::BYTES_PER_WORD * 3);
-                for chunk in chunks {
-                    let words = chunk
-                        .chunks_exact(Self::BYTES_PER_WORD)
-                        .map(|c| <$word_size>::from_le_bytes(c.try_into().unwrap()))
-                        .collect_vec();
-                    for words in words.chunks_exact(3) {
-                        self.belt[0] ^= words[0];
-                        self.mill[16] ^= words[0];
 
-                        self.belt[13] ^= words[1];
-                        self.mill[17] ^= words[1];
-
-                        self.belt[26] ^= words[2];
-                        self.belt[18] ^= words[2];
-
-                        for _ in 0..18 {
-                            Self::beltmill(&mut self.belt, &mut self.mill);
-                        }
-                    }
+                while !self.buffer.is_empty() {
+                    let words = self.make_input();
+                    self.compress(words);
+                    self.buffer = self.buffer[(Self::BYTES_PER_INPUT)..].to_vec();
                 }
 
                 let mut out = Vec::new();
@@ -177,6 +169,10 @@ crate::stateful_hash_tests!(
     "ebdc1c8dcd54deb47eeefc33ca0809ad23cd9ffc0b5254be0fdabb713477f2bd";
     test32_4, RadioGatun32::init(32), b"In response to the SHA-1 vulnerability that was announced in Feb. 2005, NIST held a Cryptographic Hash Workshop on Oct. 31-Nov. 1, 2005 to solicit public input on its cryptographic hash function policy and standards. NIST continues to recommend a transition from SHA-1 to the larger approved hash functions (SHA-224, SHA-256, SHA-384, and SHA-512). In response to the workshop, NIST has also decided that it would be prudent in the long-term to develop an additional hash function through a public competition, similar to the development process for the block cipher in the Advanced Encryption Standard (AES).",
     "4311d3cdc46efe38fdb5c3023a160c3069b26a2af0ce0ccaaffa3f3c61629ad6";
+    test32_5, RadioGatun32::init(32), b"12345678", // correct loading into the belt and mill
+    "e69e29ba139c20846116d8ad406e6197f1701d8243cc53bb86f2b72c62320a39";
+    test32_6, RadioGatun32::init(32), b"1234567890123",
+    "99F13E01DBF89E6BBF60C87E99F4F18C851D3385D9B5A1678C705E8F31F70B84";
 
     test64_0, RadioGatun64::init(32), b"",
     "64a9a7fa139905b57bdab35d33aa216370d5eae13e77bfcdd85513408311a584";
