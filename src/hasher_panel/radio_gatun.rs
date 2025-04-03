@@ -26,25 +26,18 @@ impl Default for RadioGatunFrame {
     }
 }
 
-impl RadioGatunFrame {
-    fn byte_formatting(&mut self, ui: &mut egui::Ui) {
+impl HasherFrame for RadioGatunFrame {
+    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
             "https://github.com/SymmetricChaos/crypto-gui/blob/master/hashers/src/radio_gatun.rs",
         );
-
-        ui.byte_io_mode_hasher(&mut self.input_format, &mut self.output_format);
-    }
-}
-
-impl HasherFrame for RadioGatunFrame {
-    fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.add_space(16.0);
 
         ui.checkbox(&mut self.wide, "Use 64-Bit Version");
         ui.add_space(8.0);
 
-        self.byte_formatting(ui);
+        ui.byte_io_mode_hasher(&mut self.input_format, &mut self.output_format);
         ui.add_space(8.0);
         ui.subheading("Hash Length (Bytes)");
         ui.add(DragValue::new(&mut self.hash_len).range(1..=512));

@@ -326,7 +326,8 @@
     "Publication": "2006",
     "Hash Length": null,
     "Traits": [
-      "Crytographic"
+      "Crytographic",
+      "XOF"
     ]
   },
   "RIPEMD": {
