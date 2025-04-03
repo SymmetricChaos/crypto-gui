@@ -85,15 +85,12 @@ macro_rules! radio_gatun {
                 self.mill[17] ^= input[1];
                 self.mill[18] ^= input[2];
 
-                for _ in 0..18 {
-                    Self::beltmill(&mut self.belt, &mut self.mill);
-                }
+                Self::beltmill(&mut self.belt, &mut self.mill);
             }
 
             // This will panic if self.buffer is too small but we're not invoking it in that case
             fn make_input(&self) -> [$word_size; 3] {
                 let bpw: usize = Self::BYTES_PER_WORD;
-                println!("{:02x?}", self.buffer);
                 [
                     <$word_size>::from_le_bytes(self.buffer[0..bpw].try_into().unwrap()),
                     <$word_size>::from_le_bytes(self.buffer[bpw..(bpw * 2)].try_into().unwrap()),
@@ -129,6 +126,10 @@ macro_rules! radio_gatun {
                     let words = self.make_input();
                     self.compress(words);
                     self.buffer = self.buffer[(Self::BYTES_PER_INPUT)..].to_vec();
+                }
+
+                for _ in 0..17 {
+                    Self::beltmill(&mut self.belt, &mut self.mill);
                 }
 
                 let mut out = Vec::new();
@@ -172,7 +173,7 @@ crate::stateful_hash_tests!(
     test32_5, RadioGatun32::init(32), b"12345678", // correct loading into the belt and mill
     "e69e29ba139c20846116d8ad406e6197f1701d8243cc53bb86f2b72c62320a39";
     test32_6, RadioGatun32::init(32), b"1234567890123",
-    "99F13E01DBF89E6BBF60C87E99F4F18C851D3385D9B5A1678C705E8F31F70B84";
+    "99f13e01dbf89e6bbf60c87e99f4f18c851d3385d9b5a1678c705e8f31f70b84";
 
     test64_0, RadioGatun64::init(32), b"",
     "64a9a7fa139905b57bdab35d33aa216370d5eae13e77bfcdd85513408311a584";
