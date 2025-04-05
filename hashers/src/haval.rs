@@ -7,9 +7,29 @@ use crate::{
     traits::StatefulHasher,
 };
 
+pub fn compress(state: &mut [u32; 8], block: &[u32; 32], rounds: u32) {
+    // Save the state before compressing
+    let saved_state = state.clone();
+    // Mix for the specified number of rounds
+    h1(state, block, rounds);
+    h2(state, block, rounds);
+    h3(state, block, rounds);
+    if rounds >= 4 {
+        h4(state, block, rounds);
+    }
+    if rounds == 5 {
+        h5(state, block, rounds);
+    }
+    // Add the saved state to the current state
+    for (current_word, saved_word) in state.iter_mut().zip(saved_state.iter()) {
+        *current_word = current_word.wrapping_add(*saved_word)
+    }
+}
+
 pub struct Haval {
-    rounds: u32,
-    hash_len: u32,
+    pub rounds: u32,
+    pub hash_len: u32,
+    pub state: [u32; 8],
     buffer: Vec<u8>,
 }
 
@@ -18,65 +38,60 @@ impl Default for Haval {
         Self {
             rounds: 5,
             hash_len: 32,
+            state: D,
             buffer: Vec::new(),
         }
     }
 }
 
 impl Haval {
-    pub fn rounds(mut self, rounds: u32) -> Self {
+    pub fn init(hash_len: u32, rounds: u32) -> Self {
+        assert!([3, 4, 5].contains(&rounds), "rounds must be 3, 4, or 5");
         assert!(
-            rounds == 3 || rounds == 4 || rounds == 5,
-            "rounds must be 3, 4, or 5"
-        );
-        self.rounds = rounds;
-        self
-    }
-
-    pub fn hash_len(mut self, hash_len: u32) -> Self {
-        assert!(
-            self.hash_len % 4 == 0 && self.hash_len >= 16 && self.hash_len <= 32,
+            [32, 28, 24, 20, 16].contains(&hash_len),
             "output length is in bytes and must be 16, 20, 24, 28, or 32"
         );
-        self.hash_len = hash_len;
-        self
+        Self {
+            rounds,
+            hash_len,
+            state: D,
+            buffer: Vec::new(),
+        }
     }
 
-    pub fn compress(&self, state: &mut [u32; 8], block: &[u32; 32]) {
-        // Save the state before compressing
-        let saved_state = state.clone();
-        // Mix for the specified number of rounds
-        h1(state, block, self.rounds);
-        h2(state, block, self.rounds);
-        h3(state, block, self.rounds);
-        if self.rounds > 3 {
-            h4(state, block, self.rounds);
-        }
-        if self.rounds > 4 {
-            h5(state, block, self.rounds);
-        }
-        // Add the saved state to the current state
-        for (current_word, saved_word) in state.iter_mut().zip(saved_state.iter()) {
-            *current_word = current_word.wrapping_add(*saved_word)
-        }
+    pub fn init_256(rounds: u32) -> Self {
+        Self::init(32, rounds)
+    }
+
+    pub fn init_224(rounds: u32) -> Self {
+        Self::init(28, rounds)
+    }
+
+    pub fn init_192(rounds: u32) -> Self {
+        Self::init(24, rounds)
+    }
+
+    pub fn init_160(rounds: u32) -> Self {
+        Self::init(20, rounds)
+    }
+
+    pub fn init_128(rounds: u32) -> Self {
+        Self::init(16, rounds)
     }
 }
 
 impl StatefulHasher for Haval {
-    fn update(&mut self, bytes: &[u8]) {
-        todo!()
+    fn update(&mut self, mut bytes: &[u8]) {
+        let mut x = [0u32; 32];
+        crate::compression_routine!(self.buffer, bytes, 1024, {
+            for (elem, chunk) in x.iter_mut().zip(self.buffer.chunks_exact(4)) {
+                *elem = u32::from_le_bytes(chunk.try_into().unwrap());
+            }
+            compress(&mut self.state, &mut x, self.rounds);
+        });
     }
 
     fn finalize(mut self) -> Vec<u8> {
-        assert!(
-            self.rounds == 3 || self.rounds == 4 || self.rounds == 5,
-            "rounds must be 3, 4, or 5"
-        );
-        assert!(
-            self.hash_len % 4 == 0 && self.hash_len >= 16 && self.hash_len <= 32,
-            "output length is in bytes and must be 16, 20, 24, 28, or 32"
-        );
-
         haval_padding(&mut self.buffer, self.hash_len as u8, self.rounds as u8);
 
         let mut state = D;
@@ -86,7 +101,7 @@ impl StatefulHasher for Haval {
             for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)) {
                 *elem = u32::from_le_bytes(chunk.try_into().unwrap());
             }
-            self.compress(&mut state, &x)
+            compress(&mut state, &x, self.rounds)
         }
 
         if self.hash_len == 32 {
@@ -106,25 +121,10 @@ impl StatefulHasher for Haval {
     crate::stateful_hash_helpers!();
 }
 
-// #[cfg(test)]
-// mod haval_tests {
-//     use super::*;
+crate::stateful_hash_tests!(
+    haval_256_5_empty, Haval::init_256(5), b"",
+    "be417bb4dd5cfb76c7126f4f8eeb1553a449039307b1a3cd451dbfdc0fbbe330";
 
-//     #[test]
-//     fn test_haval_256_5() {
-//         let hasher = Haval::default().rounds(5).hash_len(32);
-//         assert_eq!(
-//             "be417bb4dd5cfb76c7126f4f8eeb1553a449039307b1a3cd451dbfdc0fbbe330",
-//             hasher.hash_bytes_from_string("").unwrap()
-//         );
-//     }
-
-//     #[test]
-//     fn test_haval_128_3() {
-//         let hasher = Haval::default().rounds(3).hash_len(16);
-//         assert_eq!(
-//             "c68f39913f901f3ddf44c707357a7d70",
-//             hasher.hash_bytes_from_string("").unwrap()
-//         );
-//     }
-// }
+    haval_128_3_empty, Haval::init_128(3), b"",
+    "c68f39913f901f3ddf44c707357a7d70";
+);
