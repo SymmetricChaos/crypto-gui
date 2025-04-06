@@ -5,14 +5,14 @@ use egui::Slider;
 use hashers::{errors::HasherError, haval::Haval, traits::StatefulHasher};
 use utils::byte_formatting::ByteFormat;
 
-pub struct FxHashFrame {
+pub struct HavalFrame {
     input_format: ByteFormat,
     output_format: ByteFormat,
     rounds: u32,
     hash_len: u32,
 }
 
-impl Default for FxHashFrame {
+impl Default for HavalFrame {
     fn default() -> Self {
         Self {
             input_format: ByteFormat::Utf8,
@@ -23,9 +23,9 @@ impl Default for FxHashFrame {
     }
 }
 
-impl FxHashFrame {}
+impl HavalFrame {}
 
-impl HasherFrame for FxHashFrame {
+impl HasherFrame for HavalFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
