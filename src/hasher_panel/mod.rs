@@ -14,6 +14,7 @@ mod fletcher_controls;
 mod fnv_controls;
 mod fxhash_controls;
 mod ghash_controls;
+mod haval_controls;
 mod hkdf_controls;
 mod hmac_controls;
 mod lm_controls;
