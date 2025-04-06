@@ -1,3 +1,5 @@
+// https://github.com/bitbandi/all-hash-python/blob/master/sph/panama.c
+
 use std::ops::Deref;
 
 use crate::traits::StatefulHasher;

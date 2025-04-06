@@ -121,6 +121,9 @@ crate::stateful_hash_tests!(
     haval_256_5_empty, Haval::init_256(5), b"",
     "be417bb4dd5cfb76c7126f4f8eeb1553a449039307b1a3cd451dbfdc0fbbe330";
 
+    haval_256_5_pangram, Haval::init_256(5), b"The quick brown fox jumps over the lazy dog",
+    "b89c551cdfe2e06dbd4cea2be1bc7d557416c58ebb4d07cbc94e49f710c55be4";
+
     haval_128_3_empty, Haval::init_128(3), b"",
     "c68f39913f901f3ddf44c707357a7d70";
 );
