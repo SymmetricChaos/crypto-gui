@@ -123,19 +123,19 @@ pub fn finalize_128(s: &[u32; 8]) -> Vec<u8> {
     let mut out = Vec::with_capacity(128);
     out.extend(
         s[0].wrapping_add(mix_128(s[7], s[4], s[5], s[6], 24))
-            .to_be_bytes(),
+            .to_le_bytes(),
     );
     out.extend(
         s[1].wrapping_add(mix_128(s[6], s[7], s[4], s[5], 16))
-            .to_be_bytes(),
+            .to_le_bytes(),
     );
     out.extend(
         s[2].wrapping_add(mix_128(s[5], s[6], s[7], s[4], 8))
-            .to_be_bytes(),
+            .to_le_bytes(),
     );
     out.extend(
         s[3].wrapping_add(mix_128(s[4], s[5], s[6], s[7], 0))
-            .to_be_bytes(),
+            .to_le_bytes(),
     );
     out
 }
@@ -162,11 +162,11 @@ fn mix_160_4(a: u32, b: u32, c: u32) -> u32 {
 
 pub fn finalize_160(s: &[u32; 8]) -> Vec<u8> {
     let mut out = Vec::with_capacity(160);
-    out.extend(s[0].wrapping_add(mix_160_0(s[5], s[6], s[7])).to_be_bytes());
-    out.extend(s[1].wrapping_add(mix_160_1(s[5], s[6], s[7])).to_be_bytes());
-    out.extend(s[2].wrapping_add(mix_160_2(s[5], s[6], s[7])).to_be_bytes());
-    out.extend(s[3].wrapping_add(mix_160_3(s[5], s[6], s[7])).to_be_bytes());
-    out.extend(s[4].wrapping_add(mix_160_4(s[5], s[6], s[7])).to_be_bytes());
+    out.extend(s[0].wrapping_add(mix_160_0(s[5], s[6], s[7])).to_le_bytes());
+    out.extend(s[1].wrapping_add(mix_160_1(s[5], s[6], s[7])).to_le_bytes());
+    out.extend(s[2].wrapping_add(mix_160_2(s[5], s[6], s[7])).to_le_bytes());
+    out.extend(s[3].wrapping_add(mix_160_3(s[5], s[6], s[7])).to_le_bytes());
+    out.extend(s[4].wrapping_add(mix_160_4(s[5], s[6], s[7])).to_le_bytes());
     out
 }
 
@@ -196,31 +196,31 @@ fn mix_192_5(a: u32, b: u32) -> u32 {
 
 pub fn finalize_192(s: &[u32; 8]) -> Vec<u8> {
     let mut out = Vec::with_capacity(192);
-    out.extend(s[0].wrapping_add(mix_192_0(s[6], s[7])).to_be_bytes());
-    out.extend(s[1].wrapping_add(mix_192_1(s[6], s[7])).to_be_bytes());
-    out.extend(s[2].wrapping_add(mix_192_2(s[6], s[7])).to_be_bytes());
-    out.extend(s[3].wrapping_add(mix_192_3(s[6], s[7])).to_be_bytes());
-    out.extend(s[4].wrapping_add(mix_192_4(s[6], s[7])).to_be_bytes());
-    out.extend(s[5].wrapping_add(mix_192_5(s[6], s[7])).to_be_bytes());
+    out.extend(s[0].wrapping_add(mix_192_0(s[6], s[7])).to_le_bytes());
+    out.extend(s[1].wrapping_add(mix_192_1(s[6], s[7])).to_le_bytes());
+    out.extend(s[2].wrapping_add(mix_192_2(s[6], s[7])).to_le_bytes());
+    out.extend(s[3].wrapping_add(mix_192_3(s[6], s[7])).to_le_bytes());
+    out.extend(s[4].wrapping_add(mix_192_4(s[6], s[7])).to_le_bytes());
+    out.extend(s[5].wrapping_add(mix_192_5(s[6], s[7])).to_le_bytes());
     out
 }
 
 pub fn finalize_224(s: &[u32; 8]) -> Vec<u8> {
     let mut out = Vec::with_capacity(224);
-    out.extend(s[0].wrapping_add((s[7] >> 27) & 0x1f).to_be_bytes());
-    out.extend(s[1].wrapping_add((s[7] >> 22) & 0x1f).to_be_bytes());
-    out.extend(s[2].wrapping_add((s[7] >> 18) & 0x0f).to_be_bytes());
-    out.extend(s[3].wrapping_add((s[7] >> 13) & 0x1f).to_be_bytes());
-    out.extend(s[4].wrapping_add((s[7] >> 9) & 0x0f).to_be_bytes());
-    out.extend(s[5].wrapping_add((s[7] >> 4) & 0x1f).to_be_bytes());
-    out.extend(s[6].wrapping_add((s[7] >> 0) & 0x0f).to_be_bytes());
+    out.extend(s[0].wrapping_add((s[7] >> 27) & 0x1f).to_le_bytes());
+    out.extend(s[1].wrapping_add((s[7] >> 22) & 0x1f).to_le_bytes());
+    out.extend(s[2].wrapping_add((s[7] >> 18) & 0x0f).to_le_bytes());
+    out.extend(s[3].wrapping_add((s[7] >> 13) & 0x1f).to_le_bytes());
+    out.extend(s[4].wrapping_add((s[7] >> 9) & 0x0f).to_le_bytes());
+    out.extend(s[5].wrapping_add((s[7] >> 4) & 0x1f).to_le_bytes());
+    out.extend(s[6].wrapping_add((s[7] >> 0) & 0x0f).to_le_bytes());
     out
 }
 
 pub fn finalize_256(s: &[u32; 8]) -> Vec<u8> {
     let mut out = Vec::with_capacity(256);
     for i in 0..8 {
-        out.extend(s[i].to_be_bytes());
+        out.extend(s[i].to_le_bytes());
     }
     out
 }

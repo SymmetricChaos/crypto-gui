@@ -1,3 +1,5 @@
+use utils::byte_formatting::fill_u32s_le;
+
 use super::auxiliary::haval_arrays::D;
 use crate::{
     auxiliary::haval_functions::{
@@ -21,8 +23,8 @@ pub fn compress(state: &mut [u32; 8], block: &[u32; 32], rounds: u32) {
         h5(state, block, rounds);
     }
     // Add the saved state to the current state
-    for (current_word, saved_word) in state.iter_mut().zip(saved_state.iter()) {
-        *current_word = current_word.wrapping_add(*saved_word)
+    for (current_word, saved_word) in state.iter_mut().zip(saved_state.into_iter()) {
+        *current_word = current_word.wrapping_add(saved_word)
     }
 }
 
@@ -49,7 +51,7 @@ impl Haval {
         assert!([3, 4, 5].contains(&rounds), "rounds must be 3, 4, or 5");
         assert!(
             [32, 28, 24, 20, 16].contains(&hash_len),
-            "output length is in bytes and must be 16, 20, 24, 28, or 32"
+            "hash_len must be 16, 20, 24, 28, or 32"
         );
         Self {
             rounds,
@@ -84,36 +86,30 @@ impl StatefulHasher for Haval {
     fn update(&mut self, mut bytes: &[u8]) {
         let mut x = [0u32; 32];
         crate::compression_routine!(self.buffer, bytes, 1024, {
-            for (elem, chunk) in x.iter_mut().zip(self.buffer.chunks_exact(4)) {
-                *elem = u32::from_le_bytes(chunk.try_into().unwrap());
-            }
-            compress(&mut self.state, &mut x, self.rounds);
+            fill_u32s_le(&mut x, &self.buffer);
+            compress(&mut self.state, &x, self.rounds);
         });
     }
 
     fn finalize(mut self) -> Vec<u8> {
         haval_padding(&mut self.buffer, self.hash_len as u8, self.rounds as u8);
 
-        let mut state = D;
-
+        let mut x = [0u32; 32];
         for block in self.buffer.chunks_exact(128) {
-            let mut x = [0u32; 32];
-            for (elem, chunk) in x.iter_mut().zip(block.chunks_exact(4)) {
-                *elem = u32::from_le_bytes(chunk.try_into().unwrap());
-            }
-            compress(&mut state, &x, self.rounds)
+            fill_u32s_le(&mut x, &block);
+            compress(&mut self.state, &x, self.rounds)
         }
 
         if self.hash_len == 32 {
-            finalize_256(&state)
+            finalize_256(&self.state)
         } else if self.hash_len == 28 {
-            finalize_224(&state)
+            finalize_224(&self.state)
         } else if self.hash_len == 24 {
-            finalize_192(&state)
+            finalize_192(&self.state)
         } else if self.hash_len == 20 {
-            finalize_160(&state)
+            finalize_160(&self.state)
         } else if self.hash_len == 16 {
-            finalize_128(&state)
+            finalize_128(&self.state)
         } else {
             unreachable!("output length is in bytes and must be 16, 20, 24, 28, or 32")
         }
