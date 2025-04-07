@@ -1,12 +1,10 @@
+use super::HasherFrame;
+use crate::ui_elements::UiElements;
 use hashers::{
     shabal::{Shabal192, Shabal224, Shabal256, Shabal384, Shabal512, ShabalVariant},
     traits::StatefulHasher,
 };
 use utils::byte_formatting::ByteFormat;
-
-use crate::ui_elements::UiElements;
-
-use super::HasherFrame;
 
 pub struct ShabalFrame {
     input_format: ByteFormat,

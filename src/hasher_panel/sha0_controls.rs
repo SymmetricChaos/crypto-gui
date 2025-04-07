@@ -1,9 +1,7 @@
+use super::HasherFrame;
+use crate::ui_elements::UiElements;
 use hashers::{sha::Sha0, traits::StatefulHasher};
 use utils::{byte_formatting::ByteFormat, padding::md_strengthening_64_be};
-
-use crate::ui_elements::UiElements;
-
-use super::HasherFrame;
 
 pub struct Sha0Frame {
     input_format: ByteFormat,

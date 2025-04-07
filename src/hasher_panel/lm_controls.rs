@@ -1,7 +1,5 @@
-use crate::ui_elements::UiElements;
-
 use super::HasherFrame;
-
+use crate::ui_elements::UiElements;
 use hashers::{
     auxiliary::des_functions::{expand_56_to_64, Des},
     lm::{Lm, LM_WORD},

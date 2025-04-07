@@ -1,11 +1,9 @@
+use super::HasherFrame;
+use crate::ui_elements::{validate_string_hex_bytes, UiElements};
 use egui::DragValue;
 use hashers::{hmac::HmacVariant, pbkdf2::Pbkdf2, traits::StatefulHasher};
 use rand::{thread_rng, RngCore};
 use utils::byte_formatting::ByteFormat;
-
-use crate::ui_elements::{validate_string_hex_bytes, UiElements};
-
-use super::HasherFrame;
 
 pub struct Pbkdf2Frame {
     input_format: ByteFormat,
@@ -114,7 +112,8 @@ impl HasherFrame for Pbkdf2Frame {
             .text_to_bytes(text)
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
 
-        let h = Pbkdf2::init(self.variant, self.iterations, self.hash_len, &self.salt).update_and_finalize(&bytes);
+        let h = Pbkdf2::init(self.variant, self.iterations, self.hash_len, &self.salt)
+            .update_and_finalize(&bytes);
 
         Ok(self.output_format.byte_slice_to_text(&h))
     }

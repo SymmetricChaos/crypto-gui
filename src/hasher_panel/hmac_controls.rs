@@ -1,6 +1,5 @@
-use crate::ui_elements::{validate_string_hex_bytes, UiElements};
-
 use super::HasherFrame;
+use crate::ui_elements::{validate_string_hex_bytes, UiElements};
 use hashers::{
     errors::HasherError,
     hmac::{Hmac, HmacVariant},

@@ -239,8 +239,8 @@ pub fn haval_padding(bytes: &mut Vec<u8>, hash_len: u8, rounds: u8) {
     let hash_len_bits = (hash_len as u16) * 8;
 
     // version number, number of rounds, hash length
-    // Unclear why the HAVAL document 
-    bytes.push(0x001 | rounds << 3 | ((hash_len_bits & 0x3) as u8) << 6);
+    // Unclear why the HAVAL document
+    bytes.push(((hash_len_bits & 0x3) as u8) << 6 | rounds << 3 | 0x001);
     bytes.push((hash_len_bits >> 2) as u8);
 
     // Append the eight bytes of length

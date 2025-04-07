@@ -1,3 +1,4 @@
+use crate::ui_elements::UiElements;
 use super::HasherFrame;
 use hashers::{
     errors::HasherError,
@@ -31,6 +32,9 @@ impl HasherFrame for FxHashFrame {
             "https://github.com/SymmetricChaos/crypto-gui/blob/master/hashers/src/fxhash.rs",
         );
         ui.add_space(8.0);
+
+        ui.byte_io_mode_hasher(&mut self.input_format, &mut self.output_format);
+        ui.add_space(4.0);
 
         ui.horizontal(|ui| {
             ui.selectable_value(&mut self.variant, FxHashVariant::W32, "32-bit");

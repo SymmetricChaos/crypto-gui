@@ -1,6 +1,5 @@
-use crate::ui_elements::UiElements;
-
 use super::HasherFrame;
+use crate::ui_elements::UiElements;
 use hashers::{md5::Md5, traits::StatefulHasher};
 use utils::byte_formatting::ByteFormat;
 

@@ -1,13 +1,11 @@
+use super::HasherFrame;
+use crate::ui_elements::UiElements;
 use hashers::{
     errors::HasherError,
     sha::{sha2::Sha2Variant, Sha224, Sha256, Sha384, Sha512, Sha512_224, Sha512_256},
     traits::StatefulHasher,
 };
 use utils::byte_formatting::ByteFormat;
-
-use crate::ui_elements::UiElements;
-
-use super::HasherFrame;
 
 pub struct Sha2Frame {
     input_format: ByteFormat,

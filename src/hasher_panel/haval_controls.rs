@@ -1,6 +1,5 @@
-use crate::ui_elements::UiElements;
-
 use super::HasherFrame;
+use crate::ui_elements::UiElements;
 use egui::Slider;
 use hashers::{errors::HasherError, haval::Haval, traits::StatefulHasher};
 use utils::byte_formatting::ByteFormat;
@@ -32,6 +31,9 @@ impl HasherFrame for HavalFrame {
             "https://github.com/SymmetricChaos/crypto-gui/blob/master/hashers/src/haval.rs",
         );
         ui.add_space(8.0);
+
+        ui.byte_io_mode_hasher(&mut self.input_format, &mut self.output_format);
+        ui.add_space(4.0);
 
         ui.subheading("Rounds");
         ui.add(Slider::new(&mut self.rounds, 3..=5));

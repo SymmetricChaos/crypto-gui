@@ -1,6 +1,5 @@
-use crate::ui_elements::{validate_string_hex_bytes, UiElements};
-
 use super::HasherFrame;
+use crate::ui_elements::{validate_string_hex_bytes, UiElements};
 use egui::DragValue;
 use hashers::{errors::HasherError, hkdf::Hkdf, hmac::HmacVariant};
 use rand::{thread_rng, RngCore};

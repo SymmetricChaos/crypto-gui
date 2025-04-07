@@ -1,3 +1,5 @@
+use super::HasherFrame;
+use crate::ui_elements::{validate_string_hex_bytes, UiElements};
 use egui::DragValue;
 use hashers::{
     errors::HasherError,
@@ -6,10 +8,6 @@ use hashers::{
 };
 use rand::{thread_rng, RngCore};
 use utils::byte_formatting::ByteFormat;
-
-use crate::ui_elements::{validate_string_hex_bytes, UiElements};
-
-use super::HasherFrame;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Variant {

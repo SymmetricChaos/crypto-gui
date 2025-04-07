@@ -1,9 +1,7 @@
+use super::HasherFrame;
+use crate::ui_elements::UiElements;
 use hashers::{adler::Adler32, errors::HasherError, traits::StatefulHasher};
 use utils::byte_formatting::ByteFormat;
-
-use crate::ui_elements::UiElements;
-
-use super::HasherFrame;
 
 pub struct Adler32Frame {
     input_format: ByteFormat,

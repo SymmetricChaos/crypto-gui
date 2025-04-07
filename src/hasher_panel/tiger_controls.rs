@@ -1,3 +1,5 @@
+use super::HasherFrame;
+use crate::ui_elements::UiElements;
 use egui::{FontId, RichText};
 use hashers::{
     auxiliary::tiger_arrays::*,
@@ -5,10 +7,6 @@ use hashers::{
     traits::StatefulHasher,
 };
 use utils::byte_formatting::ByteFormat;
-
-use crate::ui_elements::UiElements;
-
-use super::HasherFrame;
 
 pub struct TigerFrame {
     input_format: ByteFormat,
@@ -32,6 +30,11 @@ impl HasherFrame for TigerFrame {
             "see the code",
             "https://github.com/SymmetricChaos/crypto-gui/blob/master/hashers/src/tiger.rs",
         );
+
+        ui.add_space(8.0);
+
+        ui.byte_io_mode_hasher(&mut self.input_format, &mut self.output_format);
+        ui.add_space(4.0);
 
         ui.subheading("Version");
         ui.label("In V1 the first padding byte is 0x01 and in V2 the first padding byte is 0x80. There is no other difference.");

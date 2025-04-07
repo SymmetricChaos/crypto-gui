@@ -1,13 +1,11 @@
+use super::HasherFrame;
+use crate::ui_elements::UiElements;
 use hashers::{
     cityhash::{cityhash32::CityHash32, cityhash64::CityHash64},
     errors::HasherError,
     traits::StatefulHasher,
 };
 use utils::byte_formatting::ByteFormat;
-
-use crate::ui_elements::UiElements;
-
-use super::HasherFrame;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum CityHashVariant {

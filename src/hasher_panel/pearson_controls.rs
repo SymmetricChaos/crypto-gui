@@ -1,6 +1,5 @@
-use crate::ui_elements::UiElements;
-
 use super::HasherFrame;
+use crate::ui_elements::UiElements;
 use egui::{FontId, RichText};
 use hashers::{
     pearson::{Pearson, PEARSON_ARRAY},
