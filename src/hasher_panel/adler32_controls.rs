@@ -28,10 +28,23 @@ impl HasherFrame for Adler32Frame {
         ui.add_space(8.0);
 
         ui.byte_io_mode_hasher(&mut self.input_format, &mut self.output_format);
-
         ui.add_space(8.0);
 
-        ui.label("<<<EXPLANATION OF HASH FUNCTION CODE>>>");
+        ui.subheading("Example");
+        ui.label("Input: \"Adler\"");
+        ui.add_space(2.0);
+        ui.monospace("inital         b: 0    a: 1     state 00000001");
+        ui.monospace("\"A\" =  65    b: 66   a: 66    state 00420042");
+        ui.monospace("\"d\" = 100    b: 232  a: 166   state 00e800a6");
+        ui.monospace("\"l\" = 108    b: 506  a: 274   state 01fa0112");
+        ui.monospace("\"e\" = 101    b: 881  a: 375   state 03710177");
+        ui.monospace("\"r\" = 114    b: 1370 a: 489   state 055a01e9");
+        ui.add_space(2.0);
+        ui.monospace("Output: 055a01e9");
+        ui.add_space(4.0);
+        ui.label(
+            "Notice that because the input is very short the upper bits of both words are zero.",
+        );
 
         ui.add_space(16.0);
     }

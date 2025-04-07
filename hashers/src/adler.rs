@@ -15,7 +15,7 @@ impl Adler32 {
 
 impl StatefulHasher for Adler32 {
     fn update(&mut self, bytes: &[u8]) {
-        // The modulo operation can be deferred for 5552 bytes (after which b overflows a u32) if optimizing for speed
+        // The modulo operation can be deferred for 5552 bytes (after which b may overflow a u32) if optimizing for speed
         for byte in bytes {
             self.a = self.a.wrapping_add(*byte as u32) % MODULUS;
             self.b = self.b.wrapping_add(self.a) % MODULUS;
@@ -34,4 +34,8 @@ crate::stateful_hash_tests!(
     Adler32::init(),
     b"Wikipedia",
     "11e60398";
+    test2, // From an online calculator
+    Adler32::init(),
+    b"RelativelyLongTextInputInOrderToReachTheModulus",
+    "c36712ca";
 );
