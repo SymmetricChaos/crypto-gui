@@ -44,7 +44,7 @@ impl HasherFrame for AsconFrame {
         }
         ui.add_space(4.0);
 
-        ui.subheading("Hash Length");
+        ui.subheading("Variant");
         match self.variant {
             Variant::Hash => {
                 ui.label("Ascon-Hash absorbs 64 bits of input at a time and returns a 256-bit hash. There are 12 rounds for initialization, absorbing, and squeezing.");

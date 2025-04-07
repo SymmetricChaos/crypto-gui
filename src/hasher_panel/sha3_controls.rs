@@ -180,16 +180,16 @@ impl HasherFrame for Sha3Frame {
         ui.add_space(16.0);
         ui.subheading("Discussion");
         match self.variant {
-            Variant::Sha3_224 => ui.label("SHA3-224 absorbs 1152 bits at a time."),
-            Variant::Sha3_256 => ui.label("SHA3-256 absorbs 1088 bits at a time."),
-            Variant::Sha3_384 => ui.label("SHA3-384 absorbs 832 bits at a time."),
-            Variant::Sha3_512 => ui.label("SHA3-512 absorbs 576 bits at a time."),
-            Variant::Shake128 => ui.label("SHAKE128 absorbs 1344 bits at a time. It can be set to return any number of bits."),
-            Variant::Shake256 => ui.label("SHAKE256 absorbs 1088 bits at a time. It can be set to return any number of bits."),
-            Variant::CShake128 => ui.label("cSHAKE128 is similar to SHAKE128 but allows both a function name and customization string. This functions is intended to be used by NIST in the creation of addition Keccack based functions."),
-            Variant::CShake256 => ui.label("cSHAKE256 is similar to SHAKE256 but allows both a function name and customization string. This functions is intended to be used by NIST in the creation of addition Keccack based functions."),
-            Variant::Kmac128 => ui.label("KMAC128 is a cSHAKE128 derived Message Authentical Code. It accepts a key and customization string. In order to meet the security claim the output length and key must both be sufficient."),
-            Variant::Kmac256 => ui.label("KMAC256 is a cSHAKE256 derived Message Authentical Code. It accepts a key and customization string. In order to meet the security claim the output length and key must both be sufficient."),
+            Variant::Sha3_224 => ui.label("SHA3-224 absorbs 1152 bits at a time and returns a 224-bit hash."),
+            Variant::Sha3_256 => ui.label("SHA3-256 absorbs 1088 bits at a time and returns a 256-bit hash."),
+            Variant::Sha3_384 => ui.label("SHA3-384 absorbs 832 bits at a time and returns a 384-bit hash."),
+            Variant::Sha3_512 => ui.label("SHA3-512 absorbs 576 bits at a time. and returns a 512-bit hash"),
+            Variant::Shake128 => ui.label("SHAKE128 absorbs 1344 bits at a time. It can be set to return any number of bits but only claims 128 bits of security."),
+            Variant::Shake256 => ui.label("SHAKE256 absorbs 1088 bits at a time. It can be set to return any number of bits but only claims 256 bits of security.."),
+            Variant::CShake128 => ui.label("cSHAKE128 is similar to SHAKE128 but allows both a function name and customization string. This functions is intended to be used by NIST in the creation of new Keccack based functions. It absorbs 1344 bits at a time and offers 128-bit security."),
+            Variant::CShake256 => ui.label("cSHAKE256 is similar to SHAKE256 but allows both a function name and customization string. This functions is intended to be used by NIST in the creation of new Keccack based functions. It absorbs 1088 bits at a time and offers 256-bit security."),
+            Variant::Kmac128 => ui.label("KMAC128 is a cSHAKE128 derived Message Authentical Code. It accepts a key and customization string. Output length is adjustsable but in order to meet the security claim the output length and key must both be sufficient."),
+            Variant::Kmac256 => ui.label("KMAC256 is a cSHAKE256 derived Message Authentical Code. It accepts a key and customization string. Output length is adjustsable but in order to meet the security claim the output length and key must both be sufficient."),
         };
 
         ui.add_space(12.0);
@@ -251,7 +251,7 @@ impl HasherFrame for Sha3Frame {
             ui.add_space(8.0);
             if ui.button("Single Round").clicked() {
                 self.example_state.round(self.example_round);
-                self.example_round += 1;
+                self.example_round = (self.example_round + 1) % 24;
             }
             ui.add_space(8.0);
             if ui.button("Full Permutation (24 Rounds)").clicked() {
