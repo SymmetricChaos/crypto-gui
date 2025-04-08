@@ -19,6 +19,7 @@ pub mod haval;
 pub mod hkdf;
 pub mod hmac;
 pub mod ids;
+pub mod jh;
 pub mod lm;
 pub mod lsh;
 pub mod md2;
