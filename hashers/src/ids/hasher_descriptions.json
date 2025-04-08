@@ -142,14 +142,20 @@
     "Description": "Haval (Hash Algorithm VAriable Length)",
     "Authors": "Zheng, Pieprzyk, and Seberry",
     "Publication": "1993",
-    "Hash Length": null,
+    "Hash Length": [
+      128,
+      160,
+      192,
+      224,
+      256
+    ],
     "Traits": [
       "Crytographic"
     ]
   },
   "HKDF": {
     "Description": "HKDF (HMAC-based Extract-and-Expand Key Derivation Function) is a method for creating a Key Derivation Function from any hash function. Given some initial key material it produces outputs that are uniformly random regardless of non-uniformity of the input.",
-    "Authors": "H. Krawczyk and P. Eronen",
+    "Authors": "Krawczyk and Eronen",
     "Publication": "2010",
     "Hash Length": null,
     "Traits": [
