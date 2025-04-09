@@ -1,3 +1,5 @@
+use utils::byte_formatting::xor_into_bytes_strict;
+
 use crate::traits::StatefulHasher;
 
 const BLOCK_LEN: usize = 64;
@@ -77,25 +79,59 @@ pub fn next_rc(round_constant: &mut [u8; 64]) {
 
 // Group bits into nibbles
 fn grouping(state: &[u8; 128], nibbles: &mut [u8; 256]) {
+    let mut t = [0; 256];
     for i in 0..256 {
         let t0 = ((state[i / 8] >> (7 - (i & 7))) & 1) as u8;
         let t1 = ((state[(i + 256) / 8] >> (7 - (i & 7))) & 1) as u8;
         let t2 = ((state[(i + 512) / 8] >> (7 - (i & 7))) & 1) as u8;
         let t3 = ((state[(i + 768) / 8] >> (7 - (i & 7))) & 1) as u8;
-        nibbles[i] = (t0 << 3) | (t1 << 2) | (t2 << 1) | (t3 << 0);
+        t[i] = (t0 << 3) | (t1 << 2) | (t2 << 1) | (t3 << 0);
+    }
+    // Direct translation of reference but this shouldn't need an extra step
+    for i in 0..128 {
+        nibbles[i * 2] = t[i];
+        nibbles[(i * 2) + 1] = t[i + 128];
+    }
+}
+
+// Degroup the nibbles into bytes
+fn degrouping(state: &mut [u8; 128], nibbles: &[u8; 256]) {
+    let mut t = [0; 256];
+
+    for i in 0..128 {
+        t[i] = nibbles[i * 2];
+        t[i + 128] = nibbles[(i * 2) + 1];
+    }
+    for i in 0..256 {
+        let t0 = (t[i] >> 3) & 1;
+        let t1 = (t[i] >> 2) & 1;
+        let t2 = (t[i] >> 1) & 1;
+        let t3 = (t[i] >> 0) & 1;
+        state[i * 8] |= t0 << (7 - (i & 7));
+        state[(i + 256) * 8] |= t1 << (7 - (i & 7));
+        state[(i + 512) * 8] |= t2 << (7 - (i & 7));
+        state[(i + 768) * 8] |= t3 << (7 - (i & 7));
     }
 }
 
 // E8
-fn bijective_function() {
+fn bijective_function(state: &mut [u8; 128]) {
     let mut rc = RC0;
-    for i in 0..41 {
+    let mut nibbles = [0; 256];
+    grouping(&state, &mut nibbles);
+    for _ in 0..41 {
+        round(&mut nibbles, rc);
         next_rc(&mut rc);
     }
+    degrouping(state, &nibbles);
 }
 
 // F8
-fn compress(state: &mut [u8; 128], input: &[u8]) {}
+fn compress(state: &mut [u8; 128], input: &[u8]) {
+    xor_into_bytes_strict(&mut state[..64], &input);
+    bijective_function(state);
+    xor_into_bytes_strict(&mut state[64..], &input);
+}
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum JhHashLen {
