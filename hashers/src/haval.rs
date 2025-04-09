@@ -61,24 +61,24 @@ impl Haval {
         }
     }
 
-    pub fn init_256(rounds: u32) -> Self {
-        Self::init(32, rounds)
-    }
-
-    pub fn init_224(rounds: u32) -> Self {
-        Self::init(28, rounds)
-    }
-
-    pub fn init_192(rounds: u32) -> Self {
-        Self::init(24, rounds)
+    pub fn init_128(rounds: u32) -> Self {
+        Self::init(16, rounds)
     }
 
     pub fn init_160(rounds: u32) -> Self {
         Self::init(20, rounds)
     }
 
-    pub fn init_128(rounds: u32) -> Self {
-        Self::init(16, rounds)
+    pub fn init_192(rounds: u32) -> Self {
+        Self::init(24, rounds)
+    }
+
+    pub fn init_224(rounds: u32) -> Self {
+        Self::init(28, rounds)
+    }
+
+    pub fn init_256(rounds: u32) -> Self {
+        Self::init(32, rounds)
     }
 }
 

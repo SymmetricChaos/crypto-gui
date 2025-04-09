@@ -15,6 +15,7 @@ const SBOXES: [[u8; 16]; 2] = [
 ];
 
 // Round function
+// R8
 pub fn round(nibbles: &mut [u8; 256], round_constant: [u8; 64]) {
     let mut t = [0u8; 256];
     for i in 0..256 {
@@ -35,8 +36,8 @@ pub fn round(nibbles: &mut [u8; 256], round_constant: [u8; 64]) {
 
     // Permutation P'8
     for i in 0..128 {
-        nibbles[i] = t[i << 1];
-        nibbles[i + 128] = t[(i << 1) + 1];
+        nibbles[i] = t[2 * i];
+        nibbles[i + 128] = t[(2 * i) + 1];
     }
 
     // Permutation Phi8
@@ -64,8 +65,8 @@ pub fn next_rc(round_constant: &mut [u8; 64]) {
 
     // Permutation P'6
     for i in 0..32 {
-        round_constant[i] = t[i << 1];
-        round_constant[i + 32] = t[(i << 1) + 1];
+        round_constant[i] = t[2 * i];
+        round_constant[i + 32] = t[(2 * i) + 1];
     }
 
     // Permutation Phi6
@@ -74,9 +75,39 @@ pub fn next_rc(round_constant: &mut [u8; 64]) {
     }
 }
 
+// Group bits into nibbles
+fn grouping(state: &[u8; 128], nibbles: &mut [u8; 256]) {
+    for i in 0..256 {
+        let t0 = ((state[i / 8] >> (7 - (i & 7))) & 1) as u8;
+        let t1 = ((state[(i + 256) / 8] >> (7 - (i & 7))) & 1) as u8;
+        let t2 = ((state[(i + 512) / 8] >> (7 - (i & 7))) & 1) as u8;
+        let t3 = ((state[(i + 768) / 8] >> (7 - (i & 7))) & 1) as u8;
+        nibbles[i] = (t0 << 3) | (t1 << 2) | (t2 << 1) | (t3 << 0);
+    }
+}
+
+// E8
+fn bijective_function() {
+    let mut rc = RC0;
+    for i in 0..41 {
+        next_rc(&mut rc);
+    }
+}
+
+// F8
+fn compress(state: &mut [u8; 128], input: &[u8]) {}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum JhHashLen {
+    L224,
+    L256,
+    L384,
+    L512,
+}
+
 pub struct Jh {
-    state: [u64; 16],
-    hash_len: usize,
+    state: [u8; 128],
+    hash_len: JhHashLen,
     buffer: Vec<u8>,
     bits_taken: u128,
 }
@@ -88,7 +119,7 @@ impl Default for Jh {
 }
 
 impl Jh {
-    fn init(hash_len: usize) -> Self {
+    fn init(hash_len: JhHashLen) -> Self {
         Self {
             state: todo!(),
             hash_len,
@@ -98,19 +129,19 @@ impl Jh {
     }
 
     pub fn init_224() -> Self {
-        Self::init(224)
+        Self::init(JhHashLen::L224)
     }
 
     pub fn init_256() -> Self {
-        Self::init(256)
+        Self::init(JhHashLen::L256)
     }
 
     pub fn init_384() -> Self {
-        Self::init(384)
+        Self::init(JhHashLen::L384)
     }
 
     pub fn init_512() -> Self {
-        Self::init(512)
+        Self::init(JhHashLen::L512)
     }
 }
 
@@ -118,7 +149,7 @@ impl StatefulHasher for Jh {
     fn update(&mut self, mut bytes: &[u8]) {
         crate::compression_routine!(self.buffer, bytes, BLOCK_LEN, {
             self.bits_taken += 512;
-            todo!()
+            compress(&mut self.state, &self.buffer);
         });
     }
 
@@ -129,7 +160,18 @@ impl StatefulHasher for Jh {
             self.buffer.push(0x00)
         }
         self.buffer.extend(self.bits_taken.to_be_bytes());
-        todo!()
+
+        // There can be multiple final blocks after padding
+        for chunk in self.buffer.chunks_exact(64) {
+            compress(&mut self.state, &chunk);
+        }
+
+        match self.hash_len {
+            JhHashLen::L224 => self.state[100..].to_vec(),
+            JhHashLen::L256 => self.state[96..].to_vec(),
+            JhHashLen::L384 => self.state[80..].to_vec(),
+            JhHashLen::L512 => self.state[64..].to_vec(),
+        }
     }
 
     crate::stateful_hash_helpers!();
@@ -159,5 +201,8 @@ mod tests {
 
 crate::stateful_hash_tests!(
     test_1, Jh::init_256(), b"",
-    "";
+    "46e64619c18bb0a92a5e87185a47eef83ca747b8fcc8e1412921357e326df434";
+    test_2, Jh::init_256(), b"The quick brown fox jumps over the lazy dog",
+    "6a049fed5fc6874acfdc4a08b568a4f8cbac27de933496f031015b38961608a0";
+
 );
