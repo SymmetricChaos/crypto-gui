@@ -107,10 +107,10 @@ fn degrouping(state: &mut [u8; 128], nibbles: &[u8; 256]) {
         let t1 = (t[i] >> 2) & 1;
         let t2 = (t[i] >> 1) & 1;
         let t3 = (t[i] >> 0) & 1;
-        state[i * 8] |= t0 << (7 - (i & 7));
-        state[(i + 256) * 8] |= t1 << (7 - (i & 7));
-        state[(i + 512) * 8] |= t2 << (7 - (i & 7));
-        state[(i + 768) * 8] |= t3 << (7 - (i & 7));
+        state[i / 8] |= t0 << (7 - (i & 7));
+        state[(i + 256) / 8] |= t1 << (7 - (i & 7));
+        state[(i + 512) / 8] |= t2 << (7 - (i & 7));
+        state[(i + 768) / 8] |= t3 << (7 - (i & 7));
     }
 }
 
@@ -232,6 +232,33 @@ mod tests {
             ],
             rc
         )
+    }
+
+    #[ignore = "calculation"]
+    #[test]
+    fn iv_generation() {
+        let mut init = [0_u8; 128];
+        let m = [0; 64];
+        // 224
+        init[0] = 0x00;
+        init[1] = 0xe0;
+        compress(&mut init, &m);
+        println!("224: {:02x?}\n", init);
+        // 256
+        init[0] = 0x01;
+        init[1] = 0x00;
+        compress(&mut init, &m);
+        println!("256: {:02x?}\n", init);
+        // 384
+        init[0] = 0x01;
+        init[1] = 0x80;
+        compress(&mut init, &m);
+        println!("384: {:02x?}\n", init);
+        // 512
+        init[0] = 0x02;
+        init[1] = 0x00;
+        compress(&mut init, &m);
+        println!("512: {:02x?}", init);
     }
 }
 
