@@ -1,6 +1,5 @@
-use utils::byte_formatting::xor_into_bytes_strict;
-
 use crate::traits::StatefulHasher;
+use utils::byte_formatting::xor_into_bytes_strict;
 
 const JHIV_224: [u8; 128] = [
     0x2d, 0xfe, 0xdd, 0x62, 0xf9, 0x9a, 0x98, 0xac, 0xae, 0x7c, 0xac, 0xd6, 0x19, 0xd6, 0x34, 0xe7,
@@ -64,6 +63,7 @@ const SBOXES: [[u8; 16]; 2] = [
 // R8
 pub fn round(nibbles: &mut [u8; 256], round_constant: [u8; 64]) {
     let mut t = [0u8; 256];
+    // Apply sboxes
     for i in 0..256 {
         let select = ((round_constant[i >> 2] >> (3 - (i & 3))) & 1) as usize;
         t[i] = SBOXES[select][nibbles[i] as usize];
@@ -95,10 +95,12 @@ pub fn round(nibbles: &mut [u8; 256], round_constant: [u8; 64]) {
 // Generate the next round constant
 pub fn next_rc(round_constant: &mut [u8; 64]) {
     let mut t = [0; 64];
+    // Apply sboxes
     for i in 0..64 {
         t[i] = SBOXES[0][round_constant[i] as usize];
     }
 
+    // Apply MDS matrix
     for i in (0..64).step_by(2) {
         t[i + 1] ^= (((t[i]) << 1) ^ ((t[i]) >> 3) ^ (((t[i]) >> 2) & 2)) & 0xf;
         t[i] ^= (((t[i + 1]) << 1) ^ ((t[i + 1]) >> 3) ^ (((t[i + 1]) >> 2) & 2)) & 0xf;
@@ -125,7 +127,7 @@ pub fn next_rc(round_constant: &mut [u8; 64]) {
 fn grouping(state: &[u8; 128], nibbles: &mut [u8; 256]) {
     let mut t = [0; 256];
     for i in 0..256 {
-        let t0 = ((state[i / 8] >> (7 - (i & 7))) & 1) as u8;
+        let t0 = ((state[(i + 000) / 8] >> (7 - (i & 7))) & 1) as u8;
         let t1 = ((state[(i + 256) / 8] >> (7 - (i & 7))) & 1) as u8;
         let t2 = ((state[(i + 512) / 8] >> (7 - (i & 7))) & 1) as u8;
         let t3 = ((state[(i + 768) / 8] >> (7 - (i & 7))) & 1) as u8;
@@ -146,12 +148,15 @@ fn degrouping(state: &mut [u8; 128], nibbles: &[u8; 256]) {
         t[i] = nibbles[i * 2];
         t[i + 128] = nibbles[(i * 2) + 1];
     }
+    for i in 0..128 {
+        state[i] = 0;
+    }
     for i in 0..256 {
         let t0 = (t[i] >> 3) & 1;
         let t1 = (t[i] >> 2) & 1;
         let t2 = (t[i] >> 1) & 1;
         let t3 = (t[i] >> 0) & 1;
-        state[i / 8] |= t0 << (7 - (i & 7));
+        state[(i + 000) / 8] |= t0 << (7 - (i & 7));
         state[(i + 256) / 8] |= t1 << (7 - (i & 7));
         state[(i + 512) / 8] |= t2 << (7 - (i & 7));
         state[(i + 768) / 8] |= t3 << (7 - (i & 7));
@@ -163,6 +168,7 @@ fn bijective_function(state: &mut [u8; 128]) {
     let mut rc = RC0;
     let mut nibbles = [0; 256];
     grouping(&state, &mut nibbles);
+
     for _ in 0..42 {
         round(&mut nibbles, rc);
         next_rc(&mut rc);
@@ -245,12 +251,24 @@ impl StatefulHasher for Jh {
     }
 
     fn finalize(mut self) -> Vec<u8> {
-        self.bits_taken += self.buffer.len() as u128 * 8;
-        self.buffer.push(0x80);
-        while (self.buffer.len() % BLOCK_LEN) != 48 {
-            self.buffer.push(0x00)
+        if self.buffer.is_empty() {
+            self.bits_taken += self.buffer.len() as u128 * 8;
+            self.buffer.push(0x80);
+            while (self.buffer.len() % BLOCK_LEN) != 48 {
+                self.buffer.push(0x00)
+            }
+            self.buffer.extend(self.bits_taken.to_be_bytes());
+        } else {
+            self.bits_taken += self.buffer.len() as u128 * 8;
+            self.buffer.push(0x80);
+            while (self.buffer.len() % BLOCK_LEN) != 0 {
+                self.buffer.push(0x00)
+            }
+            while (self.buffer.len() % BLOCK_LEN) != 48 {
+                self.buffer.push(0x00)
+            }
+            self.buffer.extend(self.bits_taken.to_be_bytes());
         }
-        self.buffer.extend(self.bits_taken.to_be_bytes());
 
         // There can be multiple final blocks after padding
         for chunk in self.buffer.chunks_exact(BLOCK_LEN) {
@@ -325,5 +343,4 @@ crate::stateful_hash_tests!(
     "46e64619c18bb0a92a5e87185a47eef83ca747b8fcc8e1412921357e326df434";
     test_2, Jh::init_256(), b"The quick brown fox jumps over the lazy dog",
     "6a049fed5fc6874acfdc4a08b568a4f8cbac27de933496f031015b38961608a0";
-
 );
