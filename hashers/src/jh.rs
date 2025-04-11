@@ -251,15 +251,13 @@ impl StatefulHasher for Jh {
     }
 
     fn finalize(mut self) -> Vec<u8> {
+        self.bits_taken += self.buffer.len() as u128 * 8;
         if self.buffer.is_empty() {
-            self.bits_taken += self.buffer.len() as u128 * 8;
             self.buffer.push(0x80);
             while (self.buffer.len() % BLOCK_LEN) != 48 {
                 self.buffer.push(0x00)
             }
-            self.buffer.extend(self.bits_taken.to_be_bytes());
         } else {
-            self.bits_taken += self.buffer.len() as u128 * 8;
             self.buffer.push(0x80);
             while (self.buffer.len() % BLOCK_LEN) != 0 {
                 self.buffer.push(0x00)
@@ -267,8 +265,8 @@ impl StatefulHasher for Jh {
             while (self.buffer.len() % BLOCK_LEN) != 48 {
                 self.buffer.push(0x00)
             }
-            self.buffer.extend(self.bits_taken.to_be_bytes());
         }
+        self.buffer.extend(self.bits_taken.to_be_bytes());
 
         // There can be multiple final blocks after padding
         for chunk in self.buffer.chunks_exact(BLOCK_LEN) {
