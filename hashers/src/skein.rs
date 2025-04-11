@@ -1,4 +1,6 @@
-use utils::byte_formatting::{fill_u64s_le, ByteFormat};
+use utils::byte_formatting::fill_u64s_le;
+
+use crate::traits::StatefulHasher;
 
 macro_rules! mix {
     ($a: ident, $b: ident, $r: literal) => {
@@ -99,4 +101,16 @@ impl Skein256 {
     // Unique Block Iteration
     // Incorporates the tweak information for each block to make each block and each mode unique
     fn ubi() {}
+}
+
+impl StatefulHasher for Skein256 {
+    fn update(&mut self, bytes: &[u8]) {
+        todo!()
+    }
+
+    fn finalize(self) -> Vec<u8> {
+        todo!()
+    }
+
+    crate::stateful_hash_helpers!();
 }

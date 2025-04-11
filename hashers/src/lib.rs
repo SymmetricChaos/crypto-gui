@@ -15,6 +15,7 @@ pub mod fnv;
 pub mod fxhash;
 pub mod ghash;
 pub mod gost;
+pub mod grostl;
 pub mod haval;
 pub mod hkdf;
 pub mod hmac;
