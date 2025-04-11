@@ -46,6 +46,7 @@ hasher_ids_and_names!(
     Haval, "HAVAL";
     Hkdf, "HKDF";
     Hmac, "HMAC";
+    Jh, "JH";
     Lm, "LM";
     Lsh, "LSH";
     Md2,"MD2";

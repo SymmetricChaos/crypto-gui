@@ -305,7 +305,7 @@ mod tests {
         )
     }
 
-    #[ignore = "calculation"]
+    #[ignore = "calculation of IVs"]
     #[test]
     fn iv_generation() {
         let m = [0; 64];
