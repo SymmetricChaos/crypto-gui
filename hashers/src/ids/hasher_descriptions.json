@@ -12,11 +12,11 @@
     "Publication": "2014",
     "Hash Length": null,
     "Traits": [
-      "Sponge",
-      "XOF",
+      "Crytographic",
       "MAC",
       "PRF",
-      "Crytographic"
+      "Sponge",
+      "XOF"
     ]
   },
   "bcrypt": {
@@ -26,7 +26,10 @@
     "Hash Length": [
       184
     ],
-    "Traits": []
+    "Traits": [
+      "Crytographic",
+      "KDF"
+    ]
   },
   "BLAKE": {
     "Description": "BLAKE was a competitor and finalist for the SHA-3 competition. It uses many of the same constants as SHA-2 but a different internal structure, a hash iterative framework, that eliminates SHA-2's vulernability to length extension attacks. The mixing round of BLAKE is a modified version of the ChaCha cipher.",
@@ -39,7 +42,8 @@
       512
     ],
     "Traits": [
-      "Crytographic"
+      "Crytographic",
+      "Keyed"
     ]
   },
   "BLAKE2": {
@@ -53,10 +57,10 @@
       512
     ],
     "Traits": [
-      "XOF",
-      "MAC",
       "Crytographic",
-      "KDF"
+      "KDF",
+      "MAC",
+      "XOF"
     ]
   },
   "BLAKE3": {
@@ -65,8 +69,10 @@
     "Publication": "2020",
     "Hash Length": null,
     "Traits": [
-      "XOF",
-      "Crytographic"
+      "Crytographic",
+      "KDF",
+      "MAC",
+      "XOF"
     ]
   },
   "CityHash": {
@@ -125,8 +131,8 @@
       128
     ],
     "Traits": [
-      "Universal",
-      "Crytographic"
+      "Crytographic",
+      "Universal"
     ]
   },
   "GOST R 34.11-94": {
@@ -228,8 +234,8 @@
       128
     ],
     "Traits": [
-      "Crytographic",
-      "Broken"
+      "Broken",
+      "Crytographic"
     ]
   },
   "MD6": {
@@ -268,8 +274,8 @@
       112
     ],
     "Traits": [
-      "Crytographic",
-      "Broken"
+      "Broken",
+      "Crytographic"
     ]
   },
   "LSH": {
@@ -293,6 +299,7 @@
     "Publication": null,
     "Hash Length": null,
     "Traits": [
+      "Crytographic",
       "KDF"
     ]
   },
@@ -302,6 +309,7 @@
     "Publication": null,
     "Hash Length": null,
     "Traits": [
+      "Crytographic",
       "KDF"
     ]
   },
@@ -322,8 +330,8 @@
       128
     ],
     "Traits": [
-      "Universal",
-      "Crytographic"
+      "Crytographic",
+      "Universal"
     ]
   },
   "Poseidon": {
@@ -336,8 +344,8 @@
       256
     ],
     "Traits": [
-      "Sponge",
-      "Crytographic"
+      "Crytographic",
+      "Sponge"
     ]
   },
   "RadioGatún": {
@@ -370,8 +378,8 @@
     "Publication": "2009",
     "Hash Length": [],
     "Traits": [
-      "XOF",
-      "KDF"
+      "KDF",
+      "XOF"
     ]
   },
   "SHA-0": {
@@ -382,9 +390,9 @@
       160
     ],
     "Traits": [
-      "Merkle-Damgård",
+      "Broken",
       "Crytographic",
-      "Broken"
+      "Merkle-Damgård"
     ]
   },
   "SHA-1": {
@@ -395,9 +403,9 @@
       160
     ],
     "Traits": [
-      "Merkle-Damgård",
+      "Broken",
       "Crytographic",
-      "Broken"
+      "Merkle-Damgård"
     ]
   },
   "SHA-2": {
@@ -411,8 +419,8 @@
       512
     ],
     "Traits": [
-      "Merkle-Damgård",
-      "Crytographic"
+      "Crytographic",
+      "Merkle-Damgård"
     ]
   },
   "SHA-3 (Keccak)": {
@@ -426,9 +434,9 @@
       512
     ],
     "Traits": [
-      "XOF",
+      "Crytographic",
       "Sponge",
-      "Crytographic"
+      "XOF"
     ]
   },
   "Shabal": {
@@ -471,21 +479,23 @@
   },
   "SipHash": {
     "Description": "SipHash is a family of keyed hash functions all of which take a 128 bit key and produce a 64 bit hash. The small hash size is appropriate for use in hash tables but, as a result, carries a higher risk of collisions. While these collisions are unlikely to occur randomly malicious inputs could feasibly produce hundreds of collisions which would cause the hashmap to have severely degraded performance, causing a denial of service attack. The key prevents an attacker from being able to know what the hashes will be making this kind of attack impractical. Each SipHash version is referred to has SipHash-c-d where c is the number of compression rounds and d is the number of finalization rounds. SipHash-2-4 is recommended while the slower SipHash-4-8 is more secure. The faster SipHash-1-3 is not kown to be broken but provides little security margin. Although it uses cryptographic principles to secure again hash-flooding its small hash size means SipHash is not considered a cryptographic hash.",
-    "Authors": "Jean-Philippe Aumasson,  Daniel Bernstein",
+    "Authors": "Jean-Philippe Aumasson and Daniel Bernstein",
     "Publication": "2012",
     "Hash Length": [
       64
     ],
-    "Traits": []
+    "Traits": [
+      "Keyed"
+    ]
   },
   "Tiger": {
     "Description": "Tiger is a hash function best known for its use in Merkel trees and for its very large sboxes that require 8 kilobytes of storage.",
     "Authors": "Anderson and Biham",
     "Publication": "1996",
     "Hash Length": [
-      192,
       128,
-      160
+      160,
+      192
     ],
     "Traits": [
       "Crytographic"
