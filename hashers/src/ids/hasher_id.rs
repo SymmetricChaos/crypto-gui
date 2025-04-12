@@ -43,7 +43,7 @@ hasher_ids_and_names!(
     FxHash, "FxHash";
     Ghash, "GHASH";
     Gost, "GOST R 34.11-94";
-    Grostl, "Grøstl";
+    Groestl, "Grøstl";
     Haval, "HAVAL";
     Hkdf, "HKDF";
     Hmac, "HMAC";
