@@ -1,3 +1,4 @@
+use num::traits::ToBytes;
 use utils::byte_formatting::xor_into_bytes;
 
 use crate::traits::StatefulHasher;
@@ -149,6 +150,7 @@ fn compress(state: &mut [u8; 64], message: &mut [u8; 64]) {
 
 pub struct Groestl256 {
     hash_len: usize,
+    blocks_taken: u64,
     state: [u8; 64],
     buffer: Vec<u8>,
 }
@@ -165,6 +167,7 @@ impl Groestl256 {
         state[62] = 0x00;
         state[63] = 0xe0;
         Self {
+            blocks_taken: 0,
             hash_len: 28,
             state,
             buffer: Vec::new(),
@@ -176,6 +179,7 @@ impl Groestl256 {
         state[62] = 0x01;
         state[63] = 0x00;
         Self {
+            blocks_taken: 0,
             hash_len: 32,
             state,
             buffer: Vec::new(),
@@ -185,11 +189,19 @@ impl Groestl256 {
 
 impl StatefulHasher for Groestl256 {
     fn update(&mut self, mut bytes: &[u8]) {
-        todo!()
+        crate::compression_routine!(self.buffer, bytes, 128, {
+            self.blocks_taken += 1;
+        });
     }
 
     fn finalize(mut self) -> Vec<u8> {
         self.buffer.push(0x80);
+        while self.buffer.len() % 128 != 120 {
+            self.buffer.push(0x00);
+        }
+        self.blocks_taken += (self.buffer.len() / 128) as u64;
+        self.buffer
+            .extend_from_slice(&self.blocks_taken.to_be_bytes());
 
         xor_into_bytes(self.state, p(&self.state));
         todo!()
