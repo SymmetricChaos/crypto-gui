@@ -116,7 +116,7 @@
   "FxHash": {
     "Description": "FxHash is inspired by the FNV family of hash functions in its goal of extreme speed. Unlike FNV it takes the message in larger chunks rather than one byte at a time and uses a rotation rather than an XOR.",
     "Authors": "Mozilla Foundation",
-    "Publication": "Unknown",
+    "Publication": null,
     "Hash Length": [
       32,
       64
@@ -146,10 +146,17 @@
   },
   "Grøstl": {
     "Description": "Grøstl (or Groestl) was a finalist in the SHA-3 competition.",
-    "Authors": null,
-    "Publication": null,
-    "Hash Length": null,
-    "Traits": []
+    "Authors": "Praveen Gauravaram, Lars Knudsen, Krystian Matusiewicz, Florian Mendel, Christian Rechberger, Martin Schläffer, and Søren S. Thomsen",
+    "Publication": "2011",
+    "Hash Length": [
+      224,
+      256,
+      384,
+      512
+    ],
+    "Traits": [
+      "Crytographic"
+    ]
   },
   "HAVAL": {
     "Description": "Haval (Hash Algorithm VAriable Length)",
