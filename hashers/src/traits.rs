@@ -52,6 +52,12 @@ macro_rules! compression_routine {
             $buffer.extend(&$bytes[..take]);
             $bytes = &$bytes[take..]
         }
+        // One last check before ending the routine.
+        // It might be the case that the input was an example multiple of block_len and this will catch that.
+        if $buffer.len() == $block_len {
+            $compress
+            $buffer.clear();
+        }
     };
 }
 

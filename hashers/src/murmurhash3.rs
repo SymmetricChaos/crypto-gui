@@ -73,28 +73,14 @@ impl Murmur3_32 {
 }
 
 impl StatefulHasher for Murmur3_32 {
-    fn update(&mut self, bytes: &[u8]) {
-        self.buffer.extend_from_slice(bytes);
-        let chunks = self.buffer.chunks_exact(BLOCK_LEN_32);
-        let rem = chunks.remainder().to_vec();
-        // For each full chunk mix it into the state and then mix the state
-        for chunk in chunks {
+    fn update(&mut self, mut bytes: &[u8]) {
+        crate::compression_routine!(self.buffer, bytes, BLOCK_LEN_32, {
             self.bytes_taken += 4;
-            let k = u32::from_le_bytes(chunk.try_into().unwrap());
+            let k = u32::from_le_bytes(self.buffer.clone().try_into().unwrap());
             self.state ^= block_mix(k);
             self.state = state_mix(self.state);
-        }
-        self.buffer = rem;
+        });
     }
-
-    // fn update(&mut self, mut bytes: &[u8]) {
-    //     crate::compression_routine!(self.buffer, bytes, BLOCK_LEN_32, {
-    //         self.bytes_taken += 4;
-    //         let k = u32::from_le_bytes(self.buffer.clone().try_into().unwrap());
-    //         self.state ^= block_mix(k);
-    //         self.state = state_mix(self.state);
-    //     });
-    // }
 
     fn finalize(mut self) -> Vec<u8> {
         self.bytes_taken += self.buffer.len() as u32;

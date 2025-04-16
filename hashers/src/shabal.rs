@@ -130,21 +130,17 @@ macro_rules! shabal {
         }
 
         impl StatefulHasher for $name {
-            fn update(&mut self, bytes: &[u8]) {
-                self.buffer.extend_from_slice(bytes);
-                let chunks = self.buffer.chunks_exact(64);
-                let rem = chunks.remainder().to_vec();
-
-                for chunk in chunks {
+            fn update(&mut self, mut bytes: &[u8]) {
+                crate::compression_routine!(self.buffer, bytes, BLOCK_LEN, {
                     self.ctr = self.ctr.wrapping_add(1);
-                    let m = make_u32s_le::<16>(chunk);
+                    let m = make_u32s_le::<16>(&self.buffer);
 
                     // Insert the message into b by addition
                     for i in 0..16 {
                         self.b[i] = self.b[i].wrapping_add(m[i]);
                     }
 
-                    // XOR the counter in A[0] and A[1]
+                    // XOR the counter into A[0] and A[1]
                     self.a[0] ^= self.ctr as u32;
                     self.a[1] ^= (self.ctr >> 32) as u32;
 
@@ -158,9 +154,7 @@ macro_rules! shabal {
 
                     // Swap B and C
                     std::mem::swap(&mut self.b, &mut self.c);
-                }
-
-                self.buffer = rem;
+                });
             }
 
             fn finalize(mut self) -> Vec<u8> {
