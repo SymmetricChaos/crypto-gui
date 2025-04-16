@@ -72,21 +72,21 @@ impl Default for Lsh256 {
 }
 
 impl Lsh256 {
-    /// Initialize LSH-256-256
-    pub fn init_256() -> Self {
-        Self {
-            chain_value: LSH_256_256_IV,
-            buffer: Vec::new(),
-            outlen: 32,
-        }
-    }
-
     /// Initialize LSH-256-224
     pub fn init_224() -> Self {
         Self {
             chain_value: LSH_256_224_IV,
             buffer: Vec::new(),
             outlen: 28,
+        }
+    }
+
+    /// Initialize LSH-256-256
+    pub fn init_256() -> Self {
+        Self {
+            chain_value: LSH_256_256_IV,
+            buffer: Vec::new(),
+            outlen: 32,
         }
     }
 }
