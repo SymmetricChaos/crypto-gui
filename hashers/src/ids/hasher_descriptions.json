@@ -483,11 +483,18 @@
     "Description": "Skein was a finalist in the SHA-3 competition.",
     "Authors": null,
     "Publication": null,
-    "Hash Length": null,
-    "Traits": []
+    "Hash Length": [
+      224,
+      256,
+      384,
+      512
+    ],
+    "Traits": [
+      "Crytographic"
+    ]
   },
   "SM3": {
-    "Description": "SM3 (商密3, ShāngMì 3) is the Chinese national standard hash function. It uses an expand and compress design infalting the input to 132 words then compressing it into the 16 word state.",
+    "Description": "SM3 (商密3, ShāngMì 3) is a Chinese national standard hash function. It uses an expand and compress design infalting the input to 132 words then compressing it into the 16 word state.",
     "Authors": "Chinese Academy of Sciences",
     "Publication": "2010",
     "Hash Length": [

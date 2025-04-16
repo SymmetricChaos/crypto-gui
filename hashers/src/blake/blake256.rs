@@ -205,7 +205,7 @@ crate::stateful_hash_tests!(
     &[0x00],
     "0ce8d4ef4dd7cd8d62dfded9d4edb0a774ae6a41929a74da23109e8f11139c87";
 
-    test_512_pangram, Blake256::init(),
+    test_256_seventy_two, Blake256::init(),
     &[0x00; 72],
     "d419bad32d504fb7d44d460c42c5593fe544fa4c135dec31e21bd9abdcc22d41";
 );
