@@ -7,72 +7,6 @@ const COLS_1024: usize = 16;
 const ROUNDS_512: usize = 10;
 const ROUNDS_1024: usize = 14;
 
-#[derive(Clone, Debug)]
-pub struct State512([[u8; COLS_512]; ROWS]);
-impl State512 {
-    pub fn row_mut(&mut self, row: usize) -> Option<&mut [u8; COLS_512]> {
-        self.0.get_mut(row)
-    }
-
-    pub fn row(&mut self, row: usize) -> Option<&[u8; COLS_512]> {
-        self.0.get(row)
-    }
-
-    pub fn from_array(arr: &[u8]) -> Self {
-        assert!(arr.len() == 64);
-        let mut s = [[0_u8; COLS_512]; ROWS];
-        for i in 0..8 {
-            for j in 0..8 {
-                s[j][i] = arr[i * 8 + j];
-            }
-        }
-        State512(s)
-    }
-
-    pub fn to_array(self) -> [u8; ROWS * COLS_512] {
-        let mut s = [0_u8; ROWS * COLS_512];
-        for i in 0..8 {
-            for j in 0..8 {
-                s[i * 8 + j] = self.0[j][i];
-            }
-        }
-        s
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct State1024([[u8; COLS_1024]; ROWS]);
-impl State1024 {
-    pub fn row_mut(&mut self, row: usize) -> Option<&mut [u8; COLS_1024]> {
-        self.0.get_mut(row)
-    }
-
-    pub fn row(&mut self, row: usize) -> Option<&[u8; COLS_1024]> {
-        self.0.get(row)
-    }
-
-    pub fn from_array(arr: &[u8]) -> Self {
-        assert!(arr.len() == 128);
-        let mut s = [[0_u8; COLS_1024]; ROWS];
-        for i in 0..8 {
-            for j in 0..8 {
-                s[j][i] = arr[i * 8 + j];
-            }
-        }
-        State1024(s)
-    }
-
-    pub fn to_array(self) -> [u8; ROWS * COLS_1024] {
-        let mut s = [0_u8; ROWS * COLS_1024];
-        for i in 0..8 {
-            for j in 0..8 {
-                s[i * 8 + j] = self.0[j][i];
-            }
-        }
-        s
-    }
-}
-
 pub const S_BOX: [u8; 256] = [
     0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
     0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
@@ -91,68 +25,6 @@ pub const S_BOX: [u8; 256] = [
     0xe1, 0xf8, 0x98, 0x11, 0x69, 0xd9, 0x8e, 0x94, 0x9b, 0x1e, 0x87, 0xe9, 0xce, 0x55, 0x28, 0xdf,
     0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16,
 ];
-
-fn add_rc_p_512(state: &mut State512, round: u8) {
-    for i in 0..COLS_512 {
-        state.0[0][i] ^= ((i as u8) << 4) ^ round;
-    }
-}
-
-fn add_rc_q_512(state: &mut State512, round: u8) {
-    for i in 0..COLS_512 {
-        for j in 0..ROWS {
-            state.0[j][i] ^= 0xff
-        }
-        state.0[ROWS - 1][i] ^= ((i as u8) << 4) ^ round;
-    }
-}
-
-fn sub_bytes_512(state: &mut State512) {
-    for row in 0..ROWS {
-        for byte in state.row_mut(row).unwrap() {
-            *byte = S_BOX[*byte as usize]
-        }
-    }
-}
-
-fn shift_bytes_p_512(state: &mut State512) {
-    for i in 0..8 {
-        state.0[i].rotate_left(i);
-    }
-}
-
-fn shift_bytes_q_512(state: &mut State512) {
-    state.0[0].rotate_left(1);
-    state.0[1].rotate_left(3);
-    state.0[2].rotate_left(5);
-    state.0[3].rotate_left(7);
-    state.0[4].rotate_left(0);
-    state.0[5].rotate_left(2);
-    state.0[6].rotate_left(4);
-    state.0[7].rotate_left(6);
-}
-
-// fn shift_bytes_p_1024(state: &mut State1024) {
-//     state.0[0].rotate_left(0);
-//     state.0[1].rotate_left(1);
-//     state.0[2].rotate_left(2);
-//     state.0[3].rotate_left(3);
-//     state.0[4].rotate_left(4);
-//     state.0[5].rotate_left(5);
-//     state.0[6].rotate_left(6);
-//     state.0[7].rotate_left(11);
-// }
-
-// fn shift_bytes_q_1024(state: &mut State1024) {
-//     state.0[0].rotate_left(1);
-//     state.0[1].rotate_left(3);
-//     state.0[2].rotate_left(5);
-//     state.0[3].rotate_left(11);
-//     state.0[4].rotate_left(0);
-//     state.0[5].rotate_left(2);
-//     state.0[6].rotate_left(4);
-//     state.0[7].rotate_left(6);
-// }
 
 // #define mul1(b) ((u8)(b))
 #[inline(always)]
@@ -188,69 +60,270 @@ fn mul5(byte: u8) -> u8 {
     mul4(byte) ^ mul1(byte)
 }
 
-// #define mul6(b) (mul4(b)^mul2(b))
-// #[inline(always)]
-// fn mul6(byte: u8) -> u8 {
-//     mul4(byte) ^ mul2(byte)
-// }
-
 // #define mul7(b) (mul4(b)^mul2(b)^mul1(b))
 #[inline(always)]
 fn mul7(byte: u8) -> u8 {
     mul4(byte) ^ mul2(byte) ^ mul1(byte)
 }
 
-fn mix_bytes_512(array: &mut State512) {
-    let mut t = [0; ROWS];
-    for i in 0..COLS_512 {
-        for j in 0..ROWS {
-            t[j] = mul2(array.0[(j + 0) % ROWS][i])
-                ^ mul2(array.0[(j + 1) % ROWS][i])
-                ^ mul3(array.0[(j + 2) % ROWS][i])
-                ^ mul4(array.0[(j + 3) % ROWS][i])
-                ^ mul5(array.0[(j + 4) % ROWS][i])
-                ^ mul3(array.0[(j + 5) % ROWS][i])
-                ^ mul5(array.0[(j + 6) % ROWS][i])
-                ^ mul7(array.0[(j + 7) % ROWS][i]);
+#[derive(Clone, Debug)]
+pub struct State512([[u8; COLS_512]; ROWS]);
+impl State512 {
+    pub fn row_mut(&mut self, row: usize) -> Option<&mut [u8; COLS_512]> {
+        self.0.get_mut(row)
+    }
+
+    pub fn row(&mut self, row: usize) -> Option<&[u8; COLS_512]> {
+        self.0.get(row)
+    }
+
+    pub fn from_array(arr: &[u8]) -> Self {
+        assert!(arr.len() == 64);
+        let mut s = [[0_u8; COLS_512]; ROWS];
+        for i in 0..8 {
+            for j in 0..8 {
+                s[j][i] = arr[i * 8 + j];
+            }
         }
-        for j in 0..ROWS {
-            array.0[j][i] = t[j]
+        State512(s)
+    }
+
+    pub fn to_array(self) -> [u8; ROWS * COLS_512] {
+        let mut s = [0_u8; ROWS * COLS_512];
+        for i in 0..8 {
+            for j in 0..8 {
+                s[i * 8 + j] = self.0[j][i];
+            }
         }
+        s
+    }
+
+    fn add_rc_p(&mut self, round: u8) {
+        for i in 0..COLS_512 {
+            self.0[0][i] ^= ((i as u8) << 4) ^ round;
+        }
+    }
+
+    fn add_rc_q(&mut self, round: u8) {
+        for i in 0..COLS_512 {
+            for j in 0..ROWS {
+                self.0[j][i] ^= 0xff
+            }
+            self.0[ROWS - 1][i] ^= ((i as u8) << 4) ^ round;
+        }
+    }
+
+    fn sub_bytes(&mut self) {
+        for row in 0..ROWS {
+            for byte in self.row_mut(row).unwrap() {
+                *byte = S_BOX[*byte as usize]
+            }
+        }
+    }
+
+    fn shift_bytes_p(&mut self) {
+        for i in 0..8 {
+            self.0[i].rotate_left(i);
+        }
+    }
+
+    fn shift_bytes_q(&mut self) {
+        self.0[0].rotate_left(1);
+        self.0[1].rotate_left(3);
+        self.0[2].rotate_left(5);
+        self.0[3].rotate_left(7);
+        self.0[4].rotate_left(0);
+        self.0[5].rotate_left(2);
+        self.0[6].rotate_left(4);
+        self.0[7].rotate_left(6);
+    }
+
+    fn mix_bytes(&mut self) {
+        let mut t = [0; ROWS];
+        for i in 0..COLS_512 {
+            for j in 0..ROWS {
+                t[j] = mul2(self.0[(j + 0) % ROWS][i])
+                    ^ mul2(self.0[(j + 1) % ROWS][i])
+                    ^ mul3(self.0[(j + 2) % ROWS][i])
+                    ^ mul4(self.0[(j + 3) % ROWS][i])
+                    ^ mul5(self.0[(j + 4) % ROWS][i])
+                    ^ mul3(self.0[(j + 5) % ROWS][i])
+                    ^ mul5(self.0[(j + 6) % ROWS][i])
+                    ^ mul7(self.0[(j + 7) % ROWS][i]);
+            }
+            for j in 0..ROWS {
+                self.0[j][i] = t[j]
+            }
+        }
+    }
+
+    fn p(&mut self) -> Self {
+        let mut x = self.clone();
+        for i in 0..ROUNDS_512 {
+            x.add_rc_p(i as u8);
+            x.sub_bytes();
+            x.shift_bytes_p();
+            x.mix_bytes();
+        }
+        x
+    }
+
+    fn q(&mut self) -> Self {
+        let mut x = self.clone();
+        for i in 0..ROUNDS_512 {
+            x.add_rc_q(i as u8);
+            x.sub_bytes();
+            x.shift_bytes_q();
+            x.mix_bytes();
+        }
+        x
     }
 }
 
-fn p_512(input: &State512) -> State512 {
-    let mut s = input.clone();
-    for i in 0..ROUNDS_512 {
-        add_rc_p_512(&mut s, i as u8);
-        sub_bytes_512(&mut s);
-        shift_bytes_p_512(&mut s);
-        mix_bytes_512(&mut s);
+#[derive(Clone, Debug)]
+pub struct State1024([[u8; COLS_1024]; ROWS]);
+impl State1024 {
+    pub fn row_mut(&mut self, row: usize) -> Option<&mut [u8; COLS_1024]> {
+        self.0.get_mut(row)
     }
-    s
-}
 
-fn q_512(input: &State512) -> State512 {
-    let mut s = input.clone();
-    for i in 0..ROUNDS_512 {
-        add_rc_q_512(&mut s, i as u8);
-        sub_bytes_512(&mut s);
-        shift_bytes_q_512(&mut s);
-        mix_bytes_512(&mut s);
+    pub fn row(&mut self, row: usize) -> Option<&[u8; COLS_1024]> {
+        self.0.get(row)
     }
-    s
+
+    pub fn from_array(arr: &[u8]) -> Self {
+        assert!(arr.len() == 128);
+        let mut s = [[0_u8; COLS_1024]; ROWS];
+        for i in 0..8 {
+            for j in 0..8 {
+                s[j][i] = arr[i * 8 + j];
+            }
+        }
+        State1024(s)
+    }
+
+    pub fn to_array(self) -> [u8; ROWS * COLS_1024] {
+        let mut s = [0_u8; ROWS * COLS_1024];
+        for i in 0..8 {
+            for j in 0..8 {
+                s[i * 8 + j] = self.0[j][i];
+            }
+        }
+        s
+    }
+
+    fn add_rc_p(&mut self, round: u8) {
+        for i in 0..COLS_1024 {
+            self.0[0][i] ^= ((i as u8) << 4) ^ round;
+        }
+    }
+
+    fn add_rc_q(&mut self, round: u8) {
+        for i in 0..COLS_1024 {
+            for j in 0..ROWS {
+                self.0[j][i] ^= 0xff
+            }
+            self.0[ROWS - 1][i] ^= ((i as u8) << 4) ^ round;
+        }
+    }
+
+    fn sub_bytes(&mut self) {
+        for row in 0..ROWS {
+            for byte in self.row_mut(row).unwrap() {
+                *byte = S_BOX[*byte as usize]
+            }
+        }
+    }
+
+    fn shift_bytes_p(&mut self) {
+        self.0[0].rotate_left(0);
+        self.0[1].rotate_left(1);
+        self.0[2].rotate_left(2);
+        self.0[3].rotate_left(3);
+        self.0[4].rotate_left(4);
+        self.0[5].rotate_left(5);
+        self.0[6].rotate_left(6);
+        self.0[7].rotate_left(11);
+    }
+
+    fn shift_bytes_q(&mut self) {
+        self.0[0].rotate_left(1);
+        self.0[1].rotate_left(3);
+        self.0[2].rotate_left(5);
+        self.0[3].rotate_left(11);
+        self.0[4].rotate_left(0);
+        self.0[5].rotate_left(2);
+        self.0[6].rotate_left(4);
+        self.0[7].rotate_left(6);
+    }
+
+    fn mix_bytes(&mut self) {
+        let mut t = [0; ROWS];
+        for i in 0..COLS_1024 {
+            for j in 0..ROWS {
+                t[j] = mul2(self.0[(j + 0) % ROWS][i])
+                    ^ mul2(self.0[(j + 1) % ROWS][i])
+                    ^ mul3(self.0[(j + 2) % ROWS][i])
+                    ^ mul4(self.0[(j + 3) % ROWS][i])
+                    ^ mul5(self.0[(j + 4) % ROWS][i])
+                    ^ mul3(self.0[(j + 5) % ROWS][i])
+                    ^ mul5(self.0[(j + 6) % ROWS][i])
+                    ^ mul7(self.0[(j + 7) % ROWS][i]);
+            }
+            for j in 0..ROWS {
+                self.0[j][i] = t[j]
+            }
+        }
+    }
+
+    fn p(&mut self) -> Self {
+        let mut x = self.clone();
+        for i in 0..ROUNDS_1024 {
+            x.add_rc_p(i as u8);
+            x.sub_bytes();
+            x.shift_bytes_p();
+            x.mix_bytes();
+        }
+        x
+    }
+
+    fn q(&mut self) -> Self {
+        let mut x = self.clone();
+        for i in 0..ROUNDS_1024 {
+            x.add_rc_q(i as u8);
+            x.sub_bytes();
+            x.shift_bytes_q();
+            x.mix_bytes();
+        }
+        x
+    }
 }
 
 pub fn compress_512(state: &mut State512, message: &[u8]) {
-    let t = State512::from_array(message);
-
-    let mut q = q_512(&t);
+    let mut t = State512::from_array(message);
+    let mut q = t.q();
 
     for i in 0..ROWS {
         xor_into_bytes(t.0[i], state.0[i]);
     }
 
-    let mut p = p_512(&t);
+    let mut p = t.p();
+
+    for i in 0..ROWS {
+        xor_into_bytes(state.row_mut(i).unwrap(), p.row(i).unwrap());
+        xor_into_bytes(state.row_mut(i).unwrap(), q.row(i).unwrap());
+    }
+}
+
+pub fn compress_1024(state: &mut State1024, message: &[u8]) {
+    let mut t = State1024::from_array(message);
+    let mut q = t.q();
+
+    for i in 0..ROWS {
+        xor_into_bytes(t.row_mut(i).unwrap(), state.row(i).unwrap());
+    }
+
+    let mut p = t.p();
 
     for i in 0..ROWS {
         xor_into_bytes(state.row_mut(i).unwrap(), p.row(i).unwrap());
@@ -319,7 +392,78 @@ impl StatefulHasher for Groestl256 {
             compress_512(&mut self.state, block)
         }
 
-        let p = p_512(&self.state);
+        let p = self.state.p();
+        for i in 0..ROWS {
+            xor_into_bytes(self.state.0[i], p.0[i]);
+        }
+        self.state.to_array()[0..self.hash_len].to_vec()
+    }
+
+    crate::stateful_hash_helpers!();
+}
+
+pub struct Groestl512 {
+    hash_len: usize,
+    blocks_taken: u64,
+    state: State1024,
+    buffer: Vec<u8>,
+}
+
+impl Default for Groestl512 {
+    fn default() -> Self {
+        Self::init512()
+    }
+}
+
+impl Groestl512 {
+    pub fn init384() -> Self {
+        let mut s = [0; 128];
+        s[126] = 0x10;
+        s[127] = 0x80;
+        let state = State1024::from_array(&s);
+        Self {
+            blocks_taken: 0,
+            hash_len: 48,
+            state,
+            buffer: Vec::new(),
+        }
+    }
+
+    pub fn init512() -> Self {
+        let mut s = [0; 128];
+        s[126] = 0x02;
+        s[127] = 0x00;
+        let state = State1024::from_array(&s);
+        Self {
+            blocks_taken: 0,
+            hash_len: 64,
+            state,
+            buffer: Vec::new(),
+        }
+    }
+}
+
+impl StatefulHasher for Groestl512 {
+    fn update(&mut self, mut bytes: &[u8]) {
+        crate::compression_routine!(self.buffer, bytes, 256, {
+            self.blocks_taken += 1;
+            compress_1024(&mut self.state, &self.buffer);
+        });
+    }
+
+    fn finalize(mut self) -> Vec<u8> {
+        self.buffer.push(0x80);
+        while self.buffer.len() % 256 != 248 {
+            self.buffer.push(0x00);
+        }
+        self.blocks_taken += (self.buffer.len() / 256) as u64;
+        self.buffer.extend(self.blocks_taken.to_be_bytes());
+
+        for block in self.buffer.chunks_exact(256) {
+            compress_1024(&mut self.state, block)
+        }
+
+        let p = self.state.p();
         for i in 0..ROWS {
             xor_into_bytes(self.state.0[i], p.0[i]);
         }
@@ -352,9 +496,9 @@ mod tests {
             [0x06, 0x1e, 0x36, 0x2e, 0x66, 0x7e, 0x56, 0x4e],
             [0x05, 0x1d, 0x35, 0x2d, 0x65, 0x7d, 0x55, 0x4d],
         ]);
-        mix_bytes_512(&mut array);
+        array.mix_bytes();
         assert_eq!(reference_output1.0, array.0);
-        add_rc_p_512(&mut array, 3);
+        array.add_rc_p(3);
         let reference_output2 = State512([
             [0x1b, 0x13, 0x0b, 0x03, 0x3b, 0x33, 0x2b, 0x23],
             [0x13, 0x0b, 0x23, 0x3b, 0x73, 0x6b, 0x43, 0x5b],
@@ -366,7 +510,7 @@ mod tests {
             [0x05, 0x1d, 0x35, 0x2d, 0x65, 0x7d, 0x55, 0x4d],
         ]);
         assert_eq!(reference_output2.0, array.0);
-        add_rc_q_512(&mut array, 3);
+        array.add_rc_q(3);
         let reference_output3 = State512([
             [0xe4, 0xec, 0xf4, 0xfc, 0xc4, 0xcc, 0xd4, 0xdc],
             [0xec, 0xf4, 0xdc, 0xc4, 0x8c, 0x94, 0xbc, 0xa4],
