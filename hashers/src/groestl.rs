@@ -1,5 +1,4 @@
 use crate::traits::StatefulHasher;
-use utils::byte_formatting::xor_into_bytes;
 
 const ROWS: usize = 8;
 const COLS_512: usize = 8;
@@ -69,6 +68,16 @@ fn mul7(byte: u8) -> u8 {
 #[derive(Clone, Debug)]
 pub struct State512([[u8; COLS_512]; ROWS]);
 impl State512 {
+    pub fn print(&self) {
+        for i in 0..8 {
+            for j in 0..8 {
+                print!("{:02x?} ", self.0[i][j])
+            }
+            println!()
+        }
+        println!();
+    }
+
     pub fn row_mut(&mut self, row: usize) -> Option<&mut [u8; COLS_512]> {
         self.0.get_mut(row)
     }
@@ -178,175 +187,181 @@ impl State512 {
         }
         x
     }
-}
 
-#[derive(Clone, Debug)]
-pub struct State1024([[u8; COLS_1024]; ROWS]);
-impl State1024 {
-    pub fn row_mut(&mut self, row: usize) -> Option<&mut [u8; COLS_1024]> {
-        self.0.get_mut(row)
-    }
+    pub fn compress(&mut self, message: &[u8]) {
+        let mut t1 = State512::from_array(message);
+        let mut t2 = State512::from_array(message);
 
-    pub fn row(&mut self, row: usize) -> Option<&[u8; COLS_1024]> {
-        self.0.get(row)
-    }
-
-    pub fn from_array(arr: &[u8]) -> Self {
-        assert!(arr.len() == 128);
-        let mut s = [[0_u8; COLS_1024]; ROWS];
-        for i in 0..8 {
-            for j in 0..8 {
-                s[j][i] = arr[i * 8 + j];
+        for i in 0..ROWS {
+            for j in 0..COLS_512 {
+                t1.0[i][j] ^= self.0[i][j];
             }
         }
-        State1024(s)
-    }
 
-    pub fn to_array(self) -> [u8; ROWS * COLS_1024] {
-        let mut s = [0_u8; ROWS * COLS_1024];
-        for i in 0..8 {
-            for j in 0..8 {
-                s[i * 8 + j] = self.0[j][i];
+        let p = t1.p();
+        let q = t2.q();
+
+        for i in 0..ROWS {
+            for j in 0..COLS_512 {
+                self.0[i][j] ^= p.0[i][j] ^ q.0[i][j];
             }
         }
-        s
-    }
-
-    fn add_rc_p(&mut self, round: u8) {
-        for i in 0..COLS_1024 {
-            self.0[0][i] ^= ((i as u8) << 4) ^ round;
-        }
-    }
-
-    fn add_rc_q(&mut self, round: u8) {
-        for i in 0..COLS_1024 {
-            for j in 0..ROWS {
-                self.0[j][i] ^= 0xff
-            }
-            self.0[ROWS - 1][i] ^= ((i as u8) << 4) ^ round;
-        }
-    }
-
-    fn sub_bytes(&mut self) {
-        for row in 0..ROWS {
-            for byte in self.row_mut(row).unwrap() {
-                *byte = S_BOX[*byte as usize]
-            }
-        }
-    }
-
-    fn shift_bytes_p(&mut self) {
-        self.0[0].rotate_left(0);
-        self.0[1].rotate_left(1);
-        self.0[2].rotate_left(2);
-        self.0[3].rotate_left(3);
-        self.0[4].rotate_left(4);
-        self.0[5].rotate_left(5);
-        self.0[6].rotate_left(6);
-        self.0[7].rotate_left(11);
-    }
-
-    fn shift_bytes_q(&mut self) {
-        self.0[0].rotate_left(1);
-        self.0[1].rotate_left(3);
-        self.0[2].rotate_left(5);
-        self.0[3].rotate_left(11);
-        self.0[4].rotate_left(0);
-        self.0[5].rotate_left(2);
-        self.0[6].rotate_left(4);
-        self.0[7].rotate_left(6);
-    }
-
-    fn mix_bytes(&mut self) {
-        let mut t = [0; ROWS];
-        for i in 0..COLS_1024 {
-            for j in 0..ROWS {
-                t[j] = mul2(self.0[(j + 0) % ROWS][i])
-                    ^ mul2(self.0[(j + 1) % ROWS][i])
-                    ^ mul3(self.0[(j + 2) % ROWS][i])
-                    ^ mul4(self.0[(j + 3) % ROWS][i])
-                    ^ mul5(self.0[(j + 4) % ROWS][i])
-                    ^ mul3(self.0[(j + 5) % ROWS][i])
-                    ^ mul5(self.0[(j + 6) % ROWS][i])
-                    ^ mul7(self.0[(j + 7) % ROWS][i]);
-            }
-            for j in 0..ROWS {
-                self.0[j][i] = t[j]
-            }
-        }
-    }
-
-    fn p(&mut self) -> Self {
-        let mut x = self.clone();
-        for i in 0..ROUNDS_1024 {
-            x.add_rc_p(i as u8);
-            x.sub_bytes();
-            x.shift_bytes_p();
-            x.mix_bytes();
-        }
-        x
-    }
-
-    fn q(&mut self) -> Self {
-        let mut x = self.clone();
-        for i in 0..ROUNDS_1024 {
-            x.add_rc_q(i as u8);
-            x.sub_bytes();
-            x.shift_bytes_q();
-            x.mix_bytes();
-        }
-        x
     }
 }
 
-pub fn compress_512(state: &mut State512, message: &[u8]) {
-    let mut t = State512::from_array(message);
-    let mut q = t.q();
+// #[derive(Clone, Debug)]
+// pub struct State1024([[u8; COLS_1024]; ROWS]);
+// impl State1024 {
+//     pub fn row_mut(&mut self, row: usize) -> Option<&mut [u8; COLS_1024]> {
+//         self.0.get_mut(row)
+//     }
 
-    for i in 0..ROWS {
-        xor_into_bytes(t.0[i], state.0[i]);
-    }
+//     pub fn row(&mut self, row: usize) -> Option<&[u8; COLS_1024]> {
+//         self.0.get(row)
+//     }
 
-    let mut p = t.p();
+//     pub fn from_array(arr: &[u8]) -> Self {
+//         assert!(arr.len() == 128);
+//         let mut s = [[0_u8; COLS_1024]; ROWS];
+//         for i in 0..8 {
+//             for j in 0..8 {
+//                 s[j][i] = arr[i * 8 + j];
+//             }
+//         }
+//         State1024(s)
+//     }
 
-    for i in 0..ROWS {
-        xor_into_bytes(state.row_mut(i).unwrap(), p.row(i).unwrap());
-        xor_into_bytes(state.row_mut(i).unwrap(), q.row(i).unwrap());
-    }
-}
+//     pub fn to_array(self) -> [u8; ROWS * COLS_1024] {
+//         let mut s = [0_u8; ROWS * COLS_1024];
+//         for i in 0..8 {
+//             for j in 0..8 {
+//                 s[i * 8 + j] = self.0[j][i];
+//             }
+//         }
+//         s
+//     }
 
-pub fn compress_1024(state: &mut State1024, message: &[u8]) {
-    let mut t = State1024::from_array(message);
-    let mut q = t.q();
+//     fn add_rc_p(&mut self, round: u8) {
+//         for i in 0..COLS_1024 {
+//             self.0[0][i] ^= ((i as u8) << 4) ^ round;
+//         }
+//     }
 
-    for i in 0..ROWS {
-        xor_into_bytes(t.row_mut(i).unwrap(), state.row(i).unwrap());
-    }
+//     fn add_rc_q(&mut self, round: u8) {
+//         for i in 0..COLS_1024 {
+//             for j in 0..ROWS {
+//                 self.0[j][i] ^= 0xff
+//             }
+//             self.0[ROWS - 1][i] ^= ((i as u8) << 4) ^ round;
+//         }
+//     }
 
-    let mut p = t.p();
+//     fn sub_bytes(&mut self) {
+//         for row in 0..ROWS {
+//             for byte in self.row_mut(row).unwrap() {
+//                 *byte = S_BOX[*byte as usize]
+//             }
+//         }
+//     }
 
-    for i in 0..ROWS {
-        xor_into_bytes(state.row_mut(i).unwrap(), p.row(i).unwrap());
-        xor_into_bytes(state.row_mut(i).unwrap(), q.row(i).unwrap());
-    }
-}
+//     fn shift_bytes_p(&mut self) {
+//         self.0[0].rotate_left(0);
+//         self.0[1].rotate_left(1);
+//         self.0[2].rotate_left(2);
+//         self.0[3].rotate_left(3);
+//         self.0[4].rotate_left(4);
+//         self.0[5].rotate_left(5);
+//         self.0[6].rotate_left(6);
+//         self.0[7].rotate_left(11);
+//     }
 
-pub struct Groestl256 {
+//     fn shift_bytes_q(&mut self) {
+//         self.0[0].rotate_left(1);
+//         self.0[1].rotate_left(3);
+//         self.0[2].rotate_left(5);
+//         self.0[3].rotate_left(11);
+//         self.0[4].rotate_left(0);
+//         self.0[5].rotate_left(2);
+//         self.0[6].rotate_left(4);
+//         self.0[7].rotate_left(6);
+//     }
+
+//     fn mix_bytes(&mut self) {
+//         let mut t = [0; ROWS];
+//         for i in 0..COLS_1024 {
+//             for j in 0..ROWS {
+//                 t[j] = mul2(self.0[(j + 0) % ROWS][i])
+//                     ^ mul2(self.0[(j + 1) % ROWS][i])
+//                     ^ mul3(self.0[(j + 2) % ROWS][i])
+//                     ^ mul4(self.0[(j + 3) % ROWS][i])
+//                     ^ mul5(self.0[(j + 4) % ROWS][i])
+//                     ^ mul3(self.0[(j + 5) % ROWS][i])
+//                     ^ mul5(self.0[(j + 6) % ROWS][i])
+//                     ^ mul7(self.0[(j + 7) % ROWS][i]);
+//             }
+//             for j in 0..ROWS {
+//                 self.0[j][i] = t[j]
+//             }
+//         }
+//     }
+
+//     fn p(&mut self) -> Self {
+//         let mut x = self.clone();
+//         for i in 0..ROUNDS_1024 {
+//             x.add_rc_p(i as u8);
+//             x.sub_bytes();
+//             x.shift_bytes_p();
+//             x.mix_bytes();
+//         }
+//         x
+//     }
+
+//     fn q(&mut self) -> Self {
+//         let mut x = self.clone();
+//         for i in 0..ROUNDS_1024 {
+//             x.add_rc_q(i as u8);
+//             x.sub_bytes();
+//             x.shift_bytes_q();
+//             x.mix_bytes();
+//         }
+//         x
+//     }
+// }
+
+// pub fn compress_1024(state: &mut State1024, message: &[u8]) {
+//     let mut t = State1024::from_array(message);
+//     let mut q = t.q();
+
+//     for i in 0..ROWS {
+//         xor_into_bytes(t.row_mut(i).unwrap(), state.row(i).unwrap());
+//     }
+
+//     let mut p = t.p();
+
+//     for i in 0..ROWS {
+//         xor_into_bytes(state.row_mut(i).unwrap(), p.row(i).unwrap());
+//         xor_into_bytes(state.row_mut(i).unwrap(), q.row(i).unwrap());
+//     }
+// }
+
+pub struct Groestl512 {
     hash_len: usize,
     blocks_taken: u64,
     state: State512,
     buffer: Vec<u8>,
 }
 
-impl Default for Groestl256 {
+impl Default for Groestl512 {
     fn default() -> Self {
         Self::init256()
     }
 }
 
-impl Groestl256 {
+impl Groestl512 {
+    const L_BYTES: usize = 64;
+
     pub fn init224() -> Self {
-        let mut s = [0; 64];
+        let mut s = [0; Self::L_BYTES];
         s[62] = 0x00;
         s[63] = 0xe0;
         let state = State512::from_array(&s);
@@ -359,7 +374,7 @@ impl Groestl256 {
     }
 
     pub fn init256() -> Self {
-        let mut s = [0; 64];
+        let mut s = [0; Self::L_BYTES];
         s[62] = 0x01;
         s[63] = 0x00;
         let state = State512::from_array(&s);
@@ -372,106 +387,112 @@ impl Groestl256 {
     }
 }
 
-impl StatefulHasher for Groestl256 {
-    fn update(&mut self, mut bytes: &[u8]) {
-        crate::compression_routine!(self.buffer, bytes, 128, {
-            self.blocks_taken += 1;
-            compress_512(&mut self.state, &self.buffer);
-        });
-    }
-
-    fn finalize(mut self) -> Vec<u8> {
-        self.buffer.push(0x80);
-        while self.buffer.len() % 128 != 120 {
-            self.buffer.push(0x00);
-        }
-        self.blocks_taken += (self.buffer.len() / 128) as u64;
-        self.buffer.extend(self.blocks_taken.to_be_bytes());
-
-        for block in self.buffer.chunks_exact(128) {
-            compress_512(&mut self.state, block)
-        }
-
-        let p = self.state.p();
-        for i in 0..ROWS {
-            xor_into_bytes(self.state.0[i], p.0[i]);
-        }
-        self.state.to_array()[0..self.hash_len].to_vec()
-    }
-
-    crate::stateful_hash_helpers!();
-}
-
-pub struct Groestl512 {
-    hash_len: usize,
-    blocks_taken: u64,
-    state: State1024,
-    buffer: Vec<u8>,
-}
-
-impl Default for Groestl512 {
-    fn default() -> Self {
-        Self::init512()
-    }
-}
-
-impl Groestl512 {
-    pub fn init384() -> Self {
-        let mut s = [0; 128];
-        s[126] = 0x10;
-        s[127] = 0x80;
-        let state = State1024::from_array(&s);
-        Self {
-            blocks_taken: 0,
-            hash_len: 48,
-            state,
-            buffer: Vec::new(),
-        }
-    }
-
-    pub fn init512() -> Self {
-        let mut s = [0; 128];
-        s[126] = 0x02;
-        s[127] = 0x00;
-        let state = State1024::from_array(&s);
-        Self {
-            blocks_taken: 0,
-            hash_len: 64,
-            state,
-            buffer: Vec::new(),
-        }
-    }
-}
-
 impl StatefulHasher for Groestl512 {
     fn update(&mut self, mut bytes: &[u8]) {
-        crate::compression_routine!(self.buffer, bytes, 256, {
+        crate::compression_routine!(self.buffer, bytes, Self::L_BYTES, {
             self.blocks_taken += 1;
-            compress_1024(&mut self.state, &self.buffer);
+            self.state.compress(&self.buffer);
         });
     }
 
     fn finalize(mut self) -> Vec<u8> {
         self.buffer.push(0x80);
-        while self.buffer.len() % 256 != 248 {
+        while self.buffer.len() % Self::L_BYTES != 56 {
             self.buffer.push(0x00);
         }
-        self.blocks_taken += (self.buffer.len() / 256) as u64;
+        self.blocks_taken += ((8 + self.buffer.len()) / Self::L_BYTES) as u64;
         self.buffer.extend(self.blocks_taken.to_be_bytes());
 
-        for block in self.buffer.chunks_exact(256) {
-            compress_1024(&mut self.state, block)
+        for block in self.buffer.chunks_exact(Self::L_BYTES) {
+            self.state.compress(block);
         }
 
         let p = self.state.p();
         for i in 0..ROWS {
-            xor_into_bytes(self.state.0[i], p.0[i]);
+            for j in 0..COLS_512 {
+                self.state.0[i][j] ^= p.0[i][j];
+            }
         }
-        self.state.to_array()[0..self.hash_len].to_vec()
+
+        self.state.to_array()[(Self::L_BYTES - self.hash_len)..].to_vec()
     }
 
     crate::stateful_hash_helpers!();
 }
+
+// pub struct Groestl1024 {
+//     hash_len: usize,
+//     bits_taken: u64,
+//     state: State1024,
+//     buffer: Vec<u8>,
+// }
+
+// impl Default for Groestl1024 {
+//     fn default() -> Self {
+//         Self::init512()
+//     }
+// }
+
+// impl Groestl1024 {
+//     const L_BITS: u32 = 1024;
+//     const L_BYTES: u32 = 128;
+
+//     pub fn init384() -> Self {
+//         let mut s = [0; 128];
+//         s[126] = 0x10;
+//         s[127] = 0x80;
+//         let state = State1024::from_array(&s);
+//         Self {
+//             bits_taken: 0,
+//             hash_len: 48,
+//             state,
+//             buffer: Vec::new(),
+//         }
+//     }
+
+//     pub fn init512() -> Self {
+//         let mut s = [0; 128];
+//         s[126] = 0x02;
+//         s[127] = 0x00;
+//         let state = State1024::from_array(&s);
+//         Self {
+//             bits_taken: 0,
+//             hash_len: 64,
+//             state,
+//             buffer: Vec::new(),
+//         }
+//     }
+// }
+
+// impl StatefulHasher for Groestl1024 {
+//     fn update(&mut self, mut bytes: &[u8]) {
+//         crate::compression_routine!(self.buffer, bytes, 256, {
+//             self.bits_taken += 1024;
+//             compress_1024(&mut self.state, &self.buffer);
+//         });
+//     }
+
+//     fn finalize(mut self) -> Vec<u8> {
+//         self.buffer.push(0x80);
+//         while self.buffer.len() % 256 != 248 {
+//             self.buffer.push(0x00);
+//         }
+//         self.bits_taken += (self.buffer.len() / 256) as u64;
+//         self.buffer.extend(self.bits_taken.to_be_bytes());
+
+//         for block in self.buffer.chunks_exact(256) {
+//             compress_1024(&mut self.state, block)
+//         }
+
+//         let p = self.state.p();
+//         for i in 0..ROWS {
+//             xor_into_bytes(self.state.0[i], p.0[i]);
+//         }
+//         self.state.to_array()[0..self.hash_len].to_vec()
+//     }
+
+//     crate::stateful_hash_helpers!();
+// }
 
 #[cfg(test)]
 mod tests {
@@ -526,6 +547,12 @@ mod tests {
 }
 
 crate::stateful_hash_tests!(
-    groestl_test1, Groestl256::init256(), b"",
+    groest256_test_0, Groestl512::init256(), b"",
     "1a52d11d550039be16107f9c58db9ebcc417f16f736adb2502567119f0083467";
+    groest256_test_62, Groestl512::init256(), b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "ceadc17a34a70964739a7096639bed6e0fe8d63b1642d5c046f7efa630b84c15";
+    groest224_test_0, Groestl512::init224(), b"",
+    "f2e180fb5947be964cd584e22e496242c6a329c577fc4ce8c36d34c3";
+    groest224_test_62, Groestl512::init224(), b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "a79200b1e7067102128d66b3b364772117ffed049f8c902992d6768b";
 );
