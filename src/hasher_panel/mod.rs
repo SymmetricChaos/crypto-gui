@@ -14,6 +14,7 @@ mod fletcher_controls;
 mod fnv_controls;
 mod fxhash_controls;
 mod ghash_controls;
+mod groestl_controls;
 mod haval_controls;
 mod hkdf_controls;
 mod hmac_controls;
@@ -89,6 +90,7 @@ pub struct HasherInterface {
     fnv: fnv_controls::FnvFrame,
     fxhash: fxhash_controls::FxHashFrame,
     ghash: ghash_controls::GhashFrame,
+    groestl: groestl_controls::GroestlFrame,
     haval: haval_controls::HavalFrame,
     hkdf: hkdf_controls::HkdfFrame,
     hmac: hmac_controls::HmacFrame,
@@ -126,6 +128,7 @@ impl HasherInterface {
                 HasherId::Blake2,
                 // HasherId::Blake3,
                 HasherId::Ghash,
+                HasherId::Groestl,
                 HasherId::Haval,
                 HasherId::Hkdf,
                 HasherId::Hmac,
@@ -180,11 +183,12 @@ impl HasherInterface {
             HasherId::Blake2 => &mut self.blake2,
             // HasherId::Blake3 => &mut self.blake3,
             HasherId::CityHash => &mut self.cityhash,
-            HasherId::Ghash => &mut self.ghash,
             HasherId::Fletcher => &mut self.fletcher,
-            HasherId::Haval => &mut self.haval,
             HasherId::Fnv => &mut self.fnv,
             HasherId::FxHash => &mut self.fxhash,
+            HasherId::Ghash => &mut self.ghash,
+            HasherId::Groestl => &mut self.groestl,
+            HasherId::Haval => &mut self.haval,
             HasherId::Hkdf => &mut self.hkdf,
             HasherId::Hmac => &mut self.hmac,
             HasherId::Jh => &mut self.jh,
