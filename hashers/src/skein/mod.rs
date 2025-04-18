@@ -12,8 +12,7 @@ pub const PERM_1024: [usize; 16] = [0, 9, 2, 13, 6, 11, 4, 15, 10, 7, 12, 3, 14,
 macro_rules! skein_mix {
     ($a: expr, $b: expr, $r: literal) => {
         $a = $a.wrapping_add($b);
-        $b = $b.rotate_left($r);
-        $b ^= $a;
+        $b = $b.rotate_left($r) ^ $a;
     };
 }
 
