@@ -5,9 +5,13 @@ pub mod skein512;
 // The number 240 encrypted with AES with an all zero key
 pub const C240: u64 = 0x1BD11BDAA9FC1A22;
 
-pub const PERM_256: [usize; 4] = [0, 3, 2, 1];
-pub const PERM_512: [usize; 8] = [2, 1, 4, 7, 6, 5, 0, 3];
-pub const PERM_1024: [usize; 16] = [0, 9, 2, 13, 6, 11, 4, 15, 10, 7, 12, 3, 14, 5, 8, 1];
+// pub const PERM_256: [usize; 4] = [0, 3, 2, 1];
+// pub const PERM_512: [usize; 8] = [2, 1, 4, 7, 6, 5, 0, 3];
+// pub const PERM_1024: [usize; 16] = [0, 9, 2, 13, 6, 11, 4, 15, 10, 7, 12, 3, 14, 5, 8, 1];
+
+pub struct Tweak([u8; 16]);
+
+pub fn key_schedule() {}
 
 macro_rules! skein_mix {
     ($a: expr, $b: expr, $r: literal) => {

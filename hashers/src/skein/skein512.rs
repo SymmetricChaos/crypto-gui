@@ -7,6 +7,7 @@ pub struct Skein512 {
     state: [u64; WORDS],
     key: [u64; WORDS],
     tweak: [u64; 2],
+    bytes_taken: u64,
 }
 
 impl Default for Skein512 {
@@ -21,6 +22,7 @@ impl Skein512 {
             state: iv,
             key: todo!(),
             tweak: todo!(),
+            bytes_taken: 0,
         }
     }
 
