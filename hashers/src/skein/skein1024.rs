@@ -2,6 +2,7 @@ use crate::traits::StatefulHasher;
 
 const WORDS: usize = 16;
 const ROUNDS: usize = 80;
+const SUBKEYS: usize = ROUNDS / 4 + 1;
 
 pub struct Skein1024 {
     state: [u64; WORDS],
