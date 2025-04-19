@@ -1,4 +1,5 @@
 use crate::traits::StatefulHasher;
+use std::ops::{Index, IndexMut};
 
 const ROWS: usize = 8;
 const COLS_512: usize = 8;
@@ -25,12 +26,6 @@ pub const S_BOX: [u8; 256] = [
     0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16,
 ];
 
-// #define mul1(b) ((u8)(b))
-#[inline(always)]
-fn mul1(byte: u8) -> u8 {
-    byte
-}
-
 // #define mul2(b) ((u8)((b)>>7?((b)<<1)^0x1b:((b)<<1)))
 #[inline(always)]
 fn mul2(byte: u8) -> u8 {
@@ -44,7 +39,7 @@ fn mul2(byte: u8) -> u8 {
 // #define mul3(b) (mul2(b)^mul1(b))
 #[inline(always)]
 fn mul3(byte: u8) -> u8 {
-    mul2(byte) ^ mul1(byte)
+    mul2(byte) ^ byte
 }
 
 // #define mul4(b) mul2(mul2(b))
@@ -56,13 +51,13 @@ fn mul4(byte: u8) -> u8 {
 // #define mul5(b) (mul4(b)^mul1(b))
 #[inline(always)]
 fn mul5(byte: u8) -> u8 {
-    mul4(byte) ^ mul1(byte)
+    mul4(byte) ^ byte
 }
 
 // #define mul7(b) (mul4(b)^mul2(b)^mul1(b))
 #[inline(always)]
 fn mul7(byte: u8) -> u8 {
-    mul4(byte) ^ mul2(byte) ^ mul1(byte)
+    mul4(byte) ^ mul2(byte) ^ byte
 }
 
 macro_rules! groestl_state {
@@ -76,7 +71,7 @@ macro_rules! groestl_state {
             pub fn print(&self) {
                 for i in 0..ROWS {
                     for j in 0..$cols {
-                        print!("{:02x?} ", self.0[i][j])
+                        print!("{:02x?} ", self[i][j])
                     }
                     println!()
                 }
@@ -98,7 +93,7 @@ macro_rules! groestl_state {
                 let mut s = [0_u8; ROWS * $cols];
                 for i in 0..$cols {
                     for j in 0..ROWS {
-                        s[i * 8 + j] = self.0[j][i];
+                        s[i * 8 + j] = self[j][i];
                     }
                 }
                 s
@@ -106,7 +101,7 @@ macro_rules! groestl_state {
 
             fn add_rc_p(&mut self, round: u8) {
                 for i in 0..$cols {
-                    self.0[0][i] ^= ((i as u8) << 4) ^ round;
+                    self[0][i] ^= ((i as u8) << 4) ^ round;
                 }
             }
 
@@ -115,27 +110,27 @@ macro_rules! groestl_state {
                     for j in 0..ROWS {
                         self.0[j][i] ^= 0xff
                     }
-                    self.0[ROWS - 1][i] ^= ((i as u8) << 4) ^ round;
+                    self[ROWS - 1][i] ^= ((i as u8) << 4) ^ round;
                 }
             }
 
             fn sub_bytes(&mut self) {
                 for i in 0..ROWS {
                     for j in 0..$cols {
-                        self.0[i][j] = S_BOX[self.0[i][j] as usize]
+                        self[i][j] = S_BOX[self[i][j] as usize]
                     }
                 }
             }
 
             fn shift_bytes_p(&mut self) {
                 for (i, s) in $p_shifts.into_iter().enumerate() {
-                    self.0[i].rotate_left(s);
+                    self[i].rotate_left(s);
                 }
             }
 
             fn shift_bytes_q(&mut self) {
                 for (i, s) in $q_shifts.into_iter().enumerate() {
-                    self.0[i].rotate_left(s);
+                    self[i].rotate_left(s);
                 }
             }
 
@@ -143,17 +138,17 @@ macro_rules! groestl_state {
                 let mut t = [0; ROWS];
                 for i in 0..$cols {
                     for j in 0..ROWS {
-                        t[j] = mul2(self.0[(j + 0) % ROWS][i])
-                            ^ mul2(self.0[(j + 1) % ROWS][i])
-                            ^ mul3(self.0[(j + 2) % ROWS][i])
-                            ^ mul4(self.0[(j + 3) % ROWS][i])
-                            ^ mul5(self.0[(j + 4) % ROWS][i])
-                            ^ mul3(self.0[(j + 5) % ROWS][i])
-                            ^ mul5(self.0[(j + 6) % ROWS][i])
-                            ^ mul7(self.0[(j + 7) % ROWS][i]);
+                        t[j] = mul2(self[(j + 0) % ROWS][i])
+                            ^ mul2(self[(j + 1) % ROWS][i])
+                            ^ mul3(self[(j + 2) % ROWS][i])
+                            ^ mul4(self[(j + 3) % ROWS][i])
+                            ^ mul5(self[(j + 4) % ROWS][i])
+                            ^ mul3(self[(j + 5) % ROWS][i])
+                            ^ mul5(self[(j + 6) % ROWS][i])
+                            ^ mul7(self[(j + 7) % ROWS][i]);
                     }
                     for j in 0..ROWS {
-                        self.0[j][i] = t[j]
+                        self[j][i] = t[j]
                     }
                 }
             }
@@ -186,7 +181,7 @@ macro_rules! groestl_state {
 
                 for i in 0..ROWS {
                     for j in 0..$cols {
-                        t1.0[i][j] ^= self.0[i][j];
+                        t1[i][j] ^= self[i][j];
                     }
                 }
 
@@ -195,9 +190,24 @@ macro_rules! groestl_state {
 
                 for i in 0..ROWS {
                     for j in 0..$cols {
-                        self.0[i][j] ^= p.0[i][j] ^ q.0[i][j];
+                        self[i][j] ^= p[i][j] ^ q[i][j];
                     }
                 }
+            }
+        }
+
+        // These traits make reading the rest of the code a little easier by removing the need for the .0 when indexing the array
+        impl Index<usize> for $name {
+            type Output = [u8; $cols];
+
+            fn index(&self, index: usize) -> &Self::Output {
+                &self.0[index]
+            }
+        }
+
+        impl IndexMut<usize> for $name {
+            fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+                &mut self.0[index]
             }
         }
     };
@@ -220,7 +230,7 @@ groestl_state!(
     128
 );
 
-macro_rules! groest_hash_trait {
+macro_rules! groestl_hash_trait {
     ($name: ident, $cols: expr, $bytes: expr) => {
         impl StatefulHasher for $name {
             fn update(&mut self, mut bytes: &[u8]) {
@@ -245,7 +255,7 @@ macro_rules! groest_hash_trait {
                 let p = self.state.p();
                 for i in 0..ROWS {
                     for j in 0..$cols {
-                        self.state.0[i][j] ^= p.0[i][j];
+                        self.state[i][j] ^= p[i][j];
                     }
                 }
 
@@ -298,7 +308,7 @@ impl Groestl512 {
     }
 }
 
-groest_hash_trait!(Groestl512, COLS_512, State512::BYTES);
+groestl_hash_trait!(Groestl512, COLS_512, State512::BYTES);
 
 pub struct Groestl1024 {
     hash_len: usize,
@@ -341,24 +351,28 @@ impl Groestl1024 {
     }
 }
 
-groest_hash_trait!(Groestl1024, COLS_1024, State1024::BYTES);
+groestl_hash_trait!(Groestl1024, COLS_1024, State1024::BYTES);
 
 crate::stateful_hash_tests!(
-    groest256_test_0, Groestl512::init256(), b"",
+    groestl256_test_0, Groestl512::init256(), b"",
     "1a52d11d550039be16107f9c58db9ebcc417f16f736adb2502567119f0083467";
-    groest256_test_62, Groestl512::init256(), b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    groestl256_test_62, Groestl512::init256(), b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     "ceadc17a34a70964739a7096639bed6e0fe8d63b1642d5c046f7efa630b84c15";
-    groest224_test_0, Groestl512::init224(), b"",
+    groestl256_test_200, Groestl512::init256(), b"01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789",
+    "81c522a187abd181d26117865d53361cabf4bb892648c5eba2a760e2fedc4cd6";
+    groestl224_test_0, Groestl512::init224(), b"",
     "f2e180fb5947be964cd584e22e496242c6a329c577fc4ce8c36d34c3";
-    groest224_test_62, Groestl512::init224(), b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    groestl224_test_62, Groestl512::init224(), b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     "a79200b1e7067102128d66b3b364772117ffed049f8c902992d6768b";
 
-    groest512_test_0, Groestl1024::init512(), b"",
+    groestl512_test_0, Groestl1024::init512(), b"",
     "6d3ad29d279110eef3adbd66de2a0345a77baede1557f5d099fce0c03d6dc2ba8e6d4a6633dfbd66053c20faa87d1a11f39a7fbe4a6c2f009801370308fc4ad8";
-    groest512_test_124, Groestl1024::init512(), b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    groestl512_test_124, Groestl1024::init512(), b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     "3dd126365a4613719194d1cff41e7cbf4b33fbea5d969b94b9b4c1e33e6011f5d2684931f9fdd396f07eab1a81bfb26f4c70220676ff29953e4cd9b459bdcb21";
-    groest384_test_0, Groestl1024::init384(), b"",
+    groestl512_test_200, Groestl1024::init512(), b"01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789",
+    "bb6352370ec0fad27679eb01bd6fced4ff86e53213319c5132d7f525da462ec86b00394f0c00ae32f67aae0a14faa5bd57de0f81e543cb1dd9bbe90f748343bc";
+    groestl384_test_0, Groestl1024::init384(), b"",
     "ac353c1095ace21439251007862d6c62f829ddbe6de4f78e68d310a9205a736d8b11d99bffe448f57a1cfa2934f044a5";
-    groest384_test_124, Groestl1024::init384(), b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    groestl384_test_124, Groestl1024::init384(), b"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     "cabfeac9351ef14c63402236978a2771422d6625ae3c0dd625c304850d5e45fb80c4e4817f2a43c96800dd699e4c0cfe";
 );
