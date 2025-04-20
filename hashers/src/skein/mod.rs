@@ -1,15 +1,15 @@
 use std::num::Wrapping as W;
 use std::ops::{Index, IndexMut};
+use utils::byte_formatting::make_u64s_le;
+
 // pub mod skein1024;
 pub mod skein256;
 // pub mod skein512;
 
 // The number 240 encrypted with AES with an all zero key
-pub const C240: u64 = 0x1BD11BDAA9FC1A22;
-
-// pub const PERM_256: [usize; 4] = [0, 3, 2, 1];
-// pub const PERM_512: [usize; 8] = [2, 1, 4, 7, 6, 5, 0, 3];
-// pub const PERM_1024: [usize; 16] = [0, 9, 2, 13, 6, 11, 4, 15, 10, 7, 12, 3, 14, 5, 8, 1];
+const C240: u64 = 0x1BD11BDAA9FC1A22;
+pub const SCHEMA_VERSION: u64 = 0x0000000133414853; // schema string "SHA3" and version number 1
+pub const TREE_INFO: u64 = 0x0000000000000000; // only sequential hashing is supported so this is all zero
 
 #[derive(Debug, Copy, Clone)]
 pub struct Tweak([W<u64>; 2]);
@@ -66,6 +66,7 @@ macro_rules! skein_mix {
 }
 
 pub fn octo_round_256(w: &mut [W<u64>; 4], key: &[W<u64>; 5], tweak: &[W<u64>; 3], round: u64) {
+    // pub const PERM_256: [usize; 4] = [0, 3, 2, 1];
     skein_subkey_add!(w[0], w[1], w[2], w[3], key, tweak, round);
 
     skein_mix!(w[0], w[1], 14);
@@ -96,6 +97,7 @@ pub fn octo_round_256(w: &mut [W<u64>; 4], key: &[W<u64>; 5], tweak: &[W<u64>; 3
 }
 
 // pub fn octo_round_512(w: &mut [u64; 8], subkeys0: [u64; 8], subkeys1: [u64; 8]) {
+//    // pub const PERM_512: [usize; 8] = [2, 1, 4, 7, 6, 5, 0, 3];
 //     for i in 0..8 {
 //         w[i] = w[i].wrapping_add(subkeys0[i])
 //     }
@@ -146,6 +148,7 @@ pub fn octo_round_256(w: &mut [W<u64>; 4], key: &[W<u64>; 5], tweak: &[W<u64>; 3
 // }
 
 // pub fn octo_round_1024(w: &mut [u64; 16], subkeys0: [u64; 16], subkeys1: [u64; 16]) {
+//     // pub const PERM_1024: [usize; 16] = [0, 9, 2, 13, 6, 11, 4, 15, 10, 7, 12, 3, 14, 5, 8, 1];
 //     for i in 0..16 {
 //         w[i] = w[i].wrapping_add(subkeys0[i])
 //     }

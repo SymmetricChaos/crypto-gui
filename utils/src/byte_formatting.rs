@@ -296,3 +296,21 @@ pub fn xor_into_bytes_strict<T: AsMut<[u8]>, S: AsRef<[u8]>>(mut target: T, sour
         *t ^= *s
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn work_with_u64s() {
+        let b = b"SHA3\0\0\0\0";
+        let n: [u64; 1] = make_u64s_le(b);
+        println!("{:02x?}", b);
+        println!("{:016x?}", n);
+
+        let b: [u8; 8] = [0, 0, 0, 0, 0, 0, 1, 0];
+        let n: [u64; 1] = make_u64s_le(&b);
+        println!("{:02x?}", b);
+        println!("{:016x?}", n);
+    }
+}
