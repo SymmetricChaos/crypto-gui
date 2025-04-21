@@ -1,5 +1,6 @@
 use super::block_cipher::{BCMode, BCPadding, BlockCipher};
 use crypto_bigint::U256;
+use hex_literal::hex;
 use std::ops::{Index, IndexMut};
 use utils::byte_formatting::{fill_u64s_le, make_u64s_le, u64s_to_bytes_le, ByteFormat};
 
@@ -26,17 +27,6 @@ impl Tweak {
         ])
     }
 
-    /// Increment the 96-bit counter
-    pub fn increment(&mut self, n: u64) {
-        match self[0].overflowing_add(n) {
-            (x, false) => self[0] = x,
-            (x, true) => {
-                self[0] = x;
-                self[1] = (self[1] + 1) & 0x00000000FFFFFFFF;
-            }
-        }
-    }
-
     // Created the extended three word array
     pub fn extended(&self) -> [u64; 3] {
         [self[0], self[1], self[0] ^ self[1]]
@@ -57,21 +47,21 @@ impl IndexMut<usize> for Tweak {
     }
 }
 
-// macro_rules! skein_subkey_add {
-//     ($a: expr, $b: expr, $c: expr, $d: expr, $k: expr, $t: expr, $r: expr) => {
-//         $a = $a + $k[($r + 0) as usize % 5];
-//         $b = $b + $k[($r + 1) as usize % 5] + $t[($r + 0) as usize % 3];
-//         $c = $c + $k[($r + 2) as usize % 5] + $t[($r + 1) as usize % 3];
-//         $d = $d + $k[($r + 3) as usize % 5] + $r;
-//     };
-// }
-
 macro_rules! threefish_subkey_add {
     ($a: expr, $b: expr, $c: expr, $d: expr, $k: expr) => {
-        $a = $a + $k[0];
-        $b = $b + $k[1];
-        $c = $c + $k[2];
-        $d = $d + $k[3];
+        $a = $a.wrapping_add($k[0]);
+        $b = $b.wrapping_add($k[1]);
+        $c = $c.wrapping_add($k[2]);
+        $d = $d.wrapping_add($k[3]);
+    };
+}
+
+macro_rules! threefish_subkey_sub {
+    ($a: expr, $b: expr, $c: expr, $d: expr, $k: expr) => {
+        $a = $a.wrapping_sub($k[0]);
+        $b = $b.wrapping_sub($k[1]);
+        $c = $c.wrapping_sub($k[2]);
+        $d = $d.wrapping_sub($k[3]);
     };
 }
 
@@ -167,7 +157,7 @@ impl Default for Threefish256 {
 }
 
 impl Threefish256 {
-    pub fn new(key: &[u8; KEY_BYTES], tweak: &[u8; 16]) -> Self {
+    pub fn with_key_and_tweak(key: &[u8; KEY_BYTES], tweak: &[u8; 16]) -> Self {
         Self {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
@@ -186,9 +176,10 @@ impl BlockCipher<BLOCK_BYTES> for Threefish256 {
         let mut block: [u64; BLOCK_WORDS] = make_u64s_le(bytes);
 
         for r in 0..((SUBKEYS - 1) / 2) {
-            octo_round_256(&mut block, &self.subkeys[2 * r..2 * r + 1]);
+            octo_round_256(&mut block, &self.subkeys[(2 * r)..][..2]);
         }
 
+        // Final addition
         for i in 0..4 {
             block[i] = block[i].wrapping_add(self.subkeys[SUBKEYS - 1][i])
         }
@@ -204,3 +195,21 @@ impl BlockCipher<BLOCK_BYTES> for Threefish256 {
 }
 
 crate::impl_cipher_for_block_cipher!(Threefish256, 32);
+
+crate::test_block_cipher!(
+    test_1, Threefish256::with_key_and_tweak(&hex!(
+        "1011121314151617 18191A1B1C1D1E1F 2021222324252627 28292A2B2C2D2E2F"
+    ), &hex!(
+        "0001020304050607 08090A0B0C0D0E0F"
+    )),
+    hex!(
+        "FFFEFDFCFBFAF9F8 F7F6F5F4F3F2F1F0"
+        "EFEEEDECEBEAE9E8 E7E6E5E4E3E2E1E0"
+    ),
+    hex!(
+        "E0D091FF0EEA8FDF C98192E62ED80AD5"
+        "9D865D08588DF476 657056B5955E97DF"
+    );
+
+
+);

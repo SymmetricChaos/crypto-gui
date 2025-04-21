@@ -1,8 +1,7 @@
-use std::ops::Shl;
-
-use utils::byte_formatting::{fill_u32s_le, make_u32s_le, u32s_to_bytes_le, ByteFormat};
-
 use super::block_cipher::{BCMode, BCPadding, BlockCipher};
+use hex_literal::hex;
+use std::ops::Shl;
+use utils::byte_formatting::{fill_u32s_le, make_u32s_le, u32s_to_bytes_le, ByteFormat};
 
 pub const ROUNDS: usize = 32;
 pub const FRAC: u32 = 0x9e3779b9;
@@ -278,45 +277,41 @@ impl BlockCipher<16> for Serpent {
 
 crate::impl_cipher_for_block_cipher!(Serpent, 16);
 
-pub fn ttb(s: &str) -> Vec<u8> {
-    ByteFormat::Hex.text_to_bytes(s).unwrap()
-}
-
 // https://web.archive.org/web/20140617083036/http://www.cs.technion.ac.il/~biham/Reports/Serpent/
 crate::test_block_cipher!(
-    test_128_1, Serpent::default().with_key_128(ttb("80000000000000000000000000000000").try_into().unwrap()),
-    ttb("00000000000000000000000000000000"),
-    ttb("264E5481EFF42A4606ABDA06C0BFDA3D");
+    test_128_1, Serpent::default().with_key_128(hex!("80000000000000000000000000000000")),
+    hex!("00000000000000000000000000000000"),
+    hex!("264E5481EFF42A4606ABDA06C0BFDA3D");
 
-    test_128_2, Serpent::default().with_key_128(ttb("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF").try_into().unwrap()),
-    ttb("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF"),
-    ttb("AF39614E747B9331C38B797F527EBEA6");
+    test_128_2, Serpent::default().with_key_128(hex!("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF")),
+    hex!("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF"),
+    hex!("AF39614E747B9331C38B797F527EBEA6");
 
-    test_128_3, Serpent::default().with_key_128(ttb("2BD6459F82C5B300952C49104881FF48").try_into().unwrap()),
-    ttb("EA024714AD5C4D84EA024714AD5C4D84"),
-    ttb("92D7F8EF2C36C53409F275902F06539F");
+    test_128_3, Serpent::default().with_key_128(hex!("2BD6459F82C5B300952C49104881FF48")),
+    hex!("EA024714AD5C4D84EA024714AD5C4D84"),
+    hex!("92D7F8EF2C36C53409F275902F06539F");
 
-    test_192_1, Serpent::default().with_key_192(ttb("800000000000000000000000000000000000000000000000").try_into().unwrap()),
-    ttb("00000000000000000000000000000000"),
-    ttb("9E274EAD9B737BB21EFCFCA548602689");
+    test_192_1, Serpent::default().with_key_192(hex!("800000000000000000000000000000000000000000000000")),
+    hex!("00000000000000000000000000000000"),
+    hex!("9E274EAD9B737BB21EFCFCA548602689");
 
-    test_192_2, Serpent::default().with_key_192(ttb("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF").try_into().unwrap()),
-    ttb("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF"),
-    ttb("B91C5A6582A87D13A17E3B17842F3FCC");
+    test_192_2, Serpent::default().with_key_192(hex!("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF")),
+    hex!("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF"),
+    hex!("B91C5A6582A87D13A17E3B17842F3FCC");
 
-    test_192_3, Serpent::default().with_key_192(ttb("2BD6459F82C5B300952C49104881FF482BD6459F82C5B300").try_into().unwrap()),
-    ttb("EA024714AD5C4D84EA024714AD5C4D84"),
-    ttb("827B18C2678A239DFC5512842000E204");
+    test_192_3, Serpent::default().with_key_192(hex!("2BD6459F82C5B300952C49104881FF482BD6459F82C5B300")),
+    hex!("EA024714AD5C4D84EA024714AD5C4D84"),
+    hex!("827B18C2678A239DFC5512842000E204");
 
-    test_256_1, Serpent::default().with_key_256(ttb("8000000000000000000000000000000000000000000000000000000000000000").try_into().unwrap()),
-    ttb("00000000000000000000000000000000"),
-    ttb("A223AA1288463C0E2BE38EBD825616C0");
+    test_256_1, Serpent::default().with_key_256(hex!("8000000000000000000000000000000000000000000000000000000000000000")),
+    hex!("00000000000000000000000000000000"),
+    hex!("A223AA1288463C0E2BE38EBD825616C0");
 
-    test_256_2, Serpent::default().with_key_256(ttb("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF").try_into().unwrap()),
-    ttb("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF"),
-    ttb("052BD61DFCCEBF17FDDBA5BBEB947613");
+    test_256_2, Serpent::default().with_key_256(hex!("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF")),
+    hex!("BFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBF"),
+    hex!("052BD61DFCCEBF17FDDBA5BBEB947613");
 
-    test_256_3, Serpent::default().with_key_256(ttb("2BD6459F82C5B300952C49104881FF482BD6459F82C5B300952C49104881FF48").try_into().unwrap()),
-    ttb("EA024714AD5C4D84EA024714AD5C4D84"),
-    ttb("3E507730776B93FDEA661235E1DD99F0");
+    test_256_3, Serpent::default().with_key_256(hex!("2BD6459F82C5B300952C49104881FF482BD6459F82C5B300952C49104881FF48")),
+    hex!("EA024714AD5C4D84EA024714AD5C4D84"),
+    hex!("3E507730776B93FDEA661235E1DD99F0");
 );

@@ -16,7 +16,15 @@ pub struct Tweak([W<u64>; 2]);
 
 impl Tweak {
     pub fn new() -> Self {
-        Tweak([W(0); 2])
+        Self([W(0); 2])
+    }
+
+    pub fn from_bytes(bytes: &[u8]) -> Self {
+        assert!(bytes.len() == 16);
+        Self([
+            W(u64::from_le_bytes(bytes[..8].try_into().unwrap())),
+            W(u64::from_le_bytes(bytes[8..].try_into().unwrap())),
+        ])
     }
 
     // Increment the 96-bit counter

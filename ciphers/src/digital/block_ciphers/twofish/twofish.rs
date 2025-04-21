@@ -213,15 +213,11 @@ Twofish!(Twofish256, 32);
 mod twofish_tests {
 
     use super::*;
-
-    fn ttb(s: &str) -> Vec<u8> {
-        ByteFormat::Hex.text_to_bytes(s).unwrap()
-    }
+    use hex_literal::hex;
 
     #[test]
     fn ksa_128() {
-        let cipher = Twofish128::default()
-            .with_key(ttb("00000000000000000000000000000000").try_into().unwrap());
+        let cipher = Twofish128::default().with_key(hex!("00000000000000000000000000000000"));
         assert_eq!(&[0; 8][..], &cipher.sbox_key[0..8]);
         assert_eq!(
             [
@@ -238,11 +234,8 @@ mod twofish_tests {
 
     #[test]
     fn ksa_192() {
-        let cipher = Twofish192::default().with_key(
-            ttb("0123456789ABCDEFFEDCBA98765432100011223344556677")
-                .try_into()
-                .unwrap(),
-        );
+        let cipher = Twofish192::default()
+            .with_key(hex!("0123456789ABCDEFFEDCBA98765432100011223344556677"));
         assert_eq!(
             &[0xf2, 0xf6, 0x9f, 0xb8, 0x4b, 0xbc, 0x55, 0xb2, 0x61, 0x10, 0x66, 0x45,][..],
             &cipher.sbox_key[0..12],
@@ -262,11 +255,9 @@ mod twofish_tests {
 
     #[test]
     fn ksa_256() {
-        let cipher = Twofish256::default().with_key(
-            ttb("0123456789ABCDEFFEDCBA987654321000112233445566778899AABBCCDDEEFF")
-                .try_into()
-                .unwrap(),
-        );
+        let cipher = Twofish256::default().with_key(hex!(
+            "0123456789ABCDEFFEDCBA987654321000112233445566778899AABBCCDDEEFF"
+        ));
         assert_eq!(
             &[
                 0xf2, 0xf6, 0x9f, 0xb8, 0x4b, 0xbc, 0x55, 0xb2, 0x61, 0x10, 0x66, 0x45, 0xf7, 0x47,
@@ -289,52 +280,52 @@ mod twofish_tests {
 
     crate::test_block_cipher!(
         // 128-bit keys
-        test1_128, Twofish128::default().with_key(ttb("00000000000000000000000000000000").try_into().unwrap()),
-        ttb("00000000000000000000000000000000"),
-        ttb("9F589F5CF6122C32B6BFEC2F2AE8C35A");
+        test1_128, Twofish128::default().with_key(hex!("00000000000000000000000000000000")),
+        hex!("00000000000000000000000000000000"),
+        hex!("9F589F5CF6122C32B6BFEC2F2AE8C35A");
 
-        test2_128, Twofish128::default().with_key(ttb("00000000000000000000000000000000").try_into().unwrap()),
-        ttb("9F589F5CF6122C32B6BFEC2F2AE8C35A"),
-        ttb("D491DB16E7B1C39E86CB086B789F5419");
+        test2_128, Twofish128::default().with_key(hex!("00000000000000000000000000000000")),
+        hex!("9F589F5CF6122C32B6BFEC2F2AE8C35A"),
+        hex!("D491DB16E7B1C39E86CB086B789F5419");
 
-        test3_128, Twofish128::default().with_key(ttb("9F589F5CF6122C32B6BFEC2F2AE8C35A").try_into().unwrap()),
-        ttb("D491DB16E7B1C39E86CB086B789F5419"),
-        ttb("019F9809DE1711858FAAC3A3BA20FBC3");
+        test3_128, Twofish128::default().with_key(hex!("9F589F5CF6122C32B6BFEC2F2AE8C35A")),
+        hex!("D491DB16E7B1C39E86CB086B789F5419"),
+        hex!("019F9809DE1711858FAAC3A3BA20FBC3");
 
 
         // 192-bit keys
-        test1_192, Twofish192::default().with_key(ttb("000000000000000000000000000000000000000000000000").try_into().unwrap()),
-        ttb("00000000000000000000000000000000"),
-        ttb("EFA71F788965BD4453F860178FC19101");
+        test1_192, Twofish192::default().with_key(hex!("000000000000000000000000000000000000000000000000")),
+        hex!("00000000000000000000000000000000"),
+        hex!("EFA71F788965BD4453F860178FC19101");
 
-        test2_192, Twofish192::default().with_key(ttb("000000000000000000000000000000000000000000000000").try_into().unwrap()),
-        ttb("EFA71F788965BD4453F860178FC19101"),
-        ttb("88B2B2706B105E36B446BB6D731A1E88");
+        test2_192, Twofish192::default().with_key(hex!("000000000000000000000000000000000000000000000000")),
+        hex!("EFA71F788965BD4453F860178FC19101"),
+        hex!("88B2B2706B105E36B446BB6D731A1E88");
 
-        test3_192, Twofish192::default().with_key(ttb("EFA71F788965BD4453F860178FC191010000000000000000").try_into().unwrap()),
-        ttb("88B2B2706B105E36B446BB6D731A1E88"),
-        ttb("39DA69D6BA4997D585B6DC073CA341B2");
+        test3_192, Twofish192::default().with_key(hex!("EFA71F788965BD4453F860178FC191010000000000000000")),
+        hex!("88B2B2706B105E36B446BB6D731A1E88"),
+        hex!("39DA69D6BA4997D585B6DC073CA341B2");
 
-        test4_194, Twofish192::default().with_key(ttb("88B2B2706B105E36B446BB6D731A1E88EFA71F788965BD44").try_into().unwrap()),
-        ttb("39DA69D6BA4997D585B6DC073CA341B2"),
-        ttb("182B02D81497EA45F9DAACDC29193A65");
+        test4_194, Twofish192::default().with_key(hex!("88B2B2706B105E36B446BB6D731A1E88EFA71F788965BD44")),
+        hex!("39DA69D6BA4997D585B6DC073CA341B2"),
+        hex!("182B02D81497EA45F9DAACDC29193A65");
 
 
         // 256-bit keys
-        test1_256, Twofish256::default().with_key(ttb("0000000000000000000000000000000000000000000000000000000000000000").try_into().unwrap()),
-        ttb("00000000000000000000000000000000"),
-        ttb("57FF739D4DC92C1BD7FC01700CC8216F");
+        test1_256, Twofish256::default().with_key(hex!("0000000000000000000000000000000000000000000000000000000000000000")),
+        hex!("00000000000000000000000000000000"),
+        hex!("57FF739D4DC92C1BD7FC01700CC8216F");
 
-        test2_256, Twofish256::default().with_key(ttb("0000000000000000000000000000000000000000000000000000000000000000").try_into().unwrap()),
-        ttb("57FF739D4DC92C1BD7FC01700CC8216F"),
-        ttb("D43BB7556EA32E46F2A282B7D45B4E0D");
+        test2_256, Twofish256::default().with_key(hex!("0000000000000000000000000000000000000000000000000000000000000000")),
+        hex!("57FF739D4DC92C1BD7FC01700CC8216F"),
+        hex!("D43BB7556EA32E46F2A282B7D45B4E0D");
 
-        test3_256, Twofish256::default().with_key(ttb("57FF739D4DC92C1BD7FC01700CC8216F00000000000000000000000000000000").try_into().unwrap()),
-        ttb("D43BB7556EA32E46F2A282B7D45B4E0D"),
-        ttb("90AFE91BB288544F2C32DC239B2635E6");
+        test3_256, Twofish256::default().with_key(hex!("57FF739D4DC92C1BD7FC01700CC8216F00000000000000000000000000000000")),
+        hex!("D43BB7556EA32E46F2A282B7D45B4E0D"),
+        hex!("90AFE91BB288544F2C32DC239B2635E6");
 
-        test4_256, Twofish256::default().with_key(ttb("D43BB7556EA32E46F2A282B7D45B4E0D57FF739D4DC92C1BD7FC01700CC8216F").try_into().unwrap()),
-        ttb("90AFE91BB288544F2C32DC239B2635E6"),
-        ttb("6CB4561C40BF0A9705931CB6D408E7FA");
+        test4_256, Twofish256::default().with_key(hex!("D43BB7556EA32E46F2A282B7D45B4E0D57FF739D4DC92C1BD7FC01700CC8216F")),
+        hex!("90AFE91BB288544F2C32DC239B2635E6"),
+        hex!("6CB4561C40BF0A9705931CB6D408E7FA");
     );
 }
