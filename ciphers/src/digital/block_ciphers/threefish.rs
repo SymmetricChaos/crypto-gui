@@ -10,6 +10,8 @@ const BLOCK_BYTES: usize = BLOCK_WORDS * 8;
 const KEY_WORDS: usize = 4;
 const KEY_BYTES: usize = KEY_WORDS * 8;
 
+const TWEAK_BYTES: usize = 16;
+
 const ROUNDS: usize = 72;
 const SUBKEYS: usize = ROUNDS / 4 + 1;
 
@@ -74,7 +76,7 @@ macro_rules! threefish_mix {
 
 macro_rules! threefish_unmix {
     ($a: expr, $b: expr, $r: literal) => {
-        $b = ($a ^ $b).rotate_right($r)
+        $b = ($a ^ $b).rotate_right($r);
         $a = $a.wrapping_sub($b);
     };
 }
@@ -109,20 +111,53 @@ pub fn octo_round_256(w: &mut [u64; 4], subkey: &[[u64; 4]]) {
     threefish_mix!(w[2], w[1], 32);
 }
 
-pub fn create_subkeys(key: &[u8; KEY_BYTES], tweak: &[u8; 16]) -> [[u64; KEY_WORDS]; SUBKEYS] {
+pub fn octo_round_256_inv(w: &mut [u64; 4], subkey: &[[u64; 4]]) {
+    threefish_unmix!(w[2], w[1], 32);
+    threefish_unmix!(w[0], w[3], 32);
+
+    threefish_unmix!(w[2], w[3], 22);
+    threefish_unmix!(w[0], w[1], 58);
+
+    threefish_unmix!(w[2], w[1], 12);
+    threefish_unmix!(w[0], w[3], 46);
+
+    threefish_unmix!(w[2], w[3], 33);
+    threefish_unmix!(w[0], w[1], 25);
+
+    threefish_subkey_sub!(w[0], w[1], w[2], w[3], subkey[1]);
+
+    threefish_unmix!(w[2], w[1], 37);
+    threefish_unmix!(w[0], w[3], 5);
+
+    threefish_unmix!(w[2], w[3], 40);
+    threefish_unmix!(w[0], w[1], 23);
+
+    threefish_unmix!(w[2], w[1], 57);
+    threefish_unmix!(w[0], w[3], 52);
+
+    threefish_unmix!(w[2], w[3], 16);
+    threefish_unmix!(w[0], w[1], 14);
+
+    threefish_subkey_sub!(w[0], w[1], w[2], w[3], subkey[0]);
+}
+
+pub fn create_subkeys(
+    key: &[u8; KEY_BYTES],
+    tweak: &[u8; TWEAK_BYTES],
+) -> [[u64; KEY_WORDS]; SUBKEYS] {
     let ex_tweak = Tweak::from_bytes(tweak).extended();
-    let mut ex_key = [0_u64; BLOCK_WORDS + 1];
-    fill_u64s_le(&mut ex_key[0..4], key);
+    let mut ex_key = [0_u64; KEY_WORDS + 1];
+    fill_u64s_le(&mut ex_key[0..KEY_WORDS], key);
     ex_key[KEY_WORDS] = ex_key.iter().fold(C240, core::ops::BitXor::bitxor);
 
     let mut subkeys = [[0u64; KEY_WORDS]; SUBKEYS];
 
     // The inner loop allows this to be reused for other key sizes
-    for k in 0..(SUBKEYS - 1) {
+    for k in 0..SUBKEYS {
         for i in 0..KEY_WORDS {
-            subkeys[k][0] = ex_key[(k + i) % (KEY_WORDS + 1)];
+            subkeys[k][i] = ex_key[(k + i) % (KEY_WORDS + 1)];
             if i == KEY_WORDS - 3 {
-                subkeys[k][1] = subkeys[k][1].wrapping_add(ex_tweak[k % 3]);
+                subkeys[k][i] = subkeys[k][i].wrapping_add(ex_tweak[k % 3]);
             } else if i == KEY_WORDS - 2 {
                 subkeys[k][i] = subkeys[k][i].wrapping_add(ex_tweak[(k + 1) % 3]);
             } else if i == KEY_WORDS - 1 {
@@ -130,7 +165,6 @@ pub fn create_subkeys(key: &[u8; KEY_BYTES], tweak: &[u8; 16]) -> [[u64; KEY_WOR
             }
         }
     }
-
     subkeys
 }
 
@@ -179,7 +213,6 @@ impl BlockCipher<BLOCK_BYTES> for Threefish256 {
             octo_round_256(&mut block, &self.subkeys[(2 * r)..][..2]);
         }
 
-        // Final addition
         for i in 0..4 {
             block[i] = block[i].wrapping_add(self.subkeys[SUBKEYS - 1][i])
         }
@@ -189,6 +222,14 @@ impl BlockCipher<BLOCK_BYTES> for Threefish256 {
 
     fn decrypt_block(&self, bytes: &mut [u8]) {
         let mut block: [u64; BLOCK_WORDS] = make_u64s_le(bytes);
+
+        for i in 0..4 {
+            block[i] = block[i].wrapping_sub(self.subkeys[SUBKEYS - 1][i])
+        }
+
+        for r in (0..((SUBKEYS - 1) / 2)).rev() {
+            octo_round_256_inv(&mut block, &self.subkeys[(2 * r)..][..2]);
+        }
 
         u64s_to_bytes_le(bytes, &block.map(|n| n));
     }
@@ -203,12 +244,10 @@ crate::test_block_cipher!(
         "0001020304050607 08090A0B0C0D0E0F"
     )),
     hex!(
-        "FFFEFDFCFBFAF9F8 F7F6F5F4F3F2F1F0"
-        "EFEEEDECEBEAE9E8 E7E6E5E4E3E2E1E0"
+        "FFFEFDFCFBFAF9F8 F7F6F5F4F3F2F1F0 EFEEEDECEBEAE9E8 E7E6E5E4E3E2E1E0"
     ),
     hex!(
-        "E0D091FF0EEA8FDF C98192E62ED80AD5"
-        "9D865D08588DF476 657056B5955E97DF"
+        "E0D091FF0EEA8FDF C98192E62ED80AD5 9D865D08588DF476 657056B5955E97DF"
     );
 
 
