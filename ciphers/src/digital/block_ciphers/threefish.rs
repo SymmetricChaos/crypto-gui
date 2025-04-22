@@ -49,22 +49,18 @@ impl IndexMut<usize> for Tweak {
     }
 }
 
-macro_rules! threefish_subkey_add {
-    ($a: expr, $b: expr, $c: expr, $d: expr, $k: expr) => {
-        $a = $a.wrapping_add($k[0]);
-        $b = $b.wrapping_add($k[1]);
-        $c = $c.wrapping_add($k[2]);
-        $d = $d.wrapping_add($k[3]);
-    };
+#[inline]
+fn subkey_add(state: &mut [u64], key: &[u64]) {
+    for (s, k) in state.iter_mut().zip(key.iter()) {
+        *s = s.wrapping_add(*k)
+    }
 }
 
-macro_rules! threefish_subkey_sub {
-    ($a: expr, $b: expr, $c: expr, $d: expr, $k: expr) => {
-        $a = $a.wrapping_sub($k[0]);
-        $b = $b.wrapping_sub($k[1]);
-        $c = $c.wrapping_sub($k[2]);
-        $d = $d.wrapping_sub($k[3]);
-    };
+#[inline]
+fn subkey_sub(state: &mut [u64], key: &[u64]) {
+    for (s, k) in state.iter_mut().zip(key.iter()) {
+        *s = s.wrapping_sub(*k)
+    }
 }
 
 macro_rules! threefish_mix {
@@ -82,7 +78,7 @@ macro_rules! threefish_unmix {
 }
 
 pub fn octo_round_256(w: &mut [u64; 4], subkey: &[[u64; 4]]) {
-    threefish_subkey_add!(w[0], w[1], w[2], w[3], subkey[0]);
+    subkey_add(w, &subkey[0]);
 
     threefish_mix!(w[0], w[1], 14);
     threefish_mix!(w[2], w[3], 16);
@@ -96,7 +92,7 @@ pub fn octo_round_256(w: &mut [u64; 4], subkey: &[[u64; 4]]) {
     threefish_mix!(w[0], w[3], 5);
     threefish_mix!(w[2], w[1], 37);
 
-    threefish_subkey_add!(w[0], w[1], w[2], w[3], subkey[1]);
+    subkey_add(w, &subkey[1]);
 
     threefish_mix!(w[0], w[1], 25);
     threefish_mix!(w[2], w[3], 33);
@@ -124,7 +120,7 @@ pub fn octo_round_256_inv(w: &mut [u64; 4], subkey: &[[u64; 4]]) {
     threefish_unmix!(w[2], w[3], 33);
     threefish_unmix!(w[0], w[1], 25);
 
-    threefish_subkey_sub!(w[0], w[1], w[2], w[3], subkey[1]);
+    subkey_sub(w, &subkey[1]);
 
     threefish_unmix!(w[2], w[1], 37);
     threefish_unmix!(w[0], w[3], 5);
@@ -138,7 +134,7 @@ pub fn octo_round_256_inv(w: &mut [u64; 4], subkey: &[[u64; 4]]) {
     threefish_unmix!(w[2], w[3], 16);
     threefish_unmix!(w[0], w[1], 14);
 
-    threefish_subkey_sub!(w[0], w[1], w[2], w[3], subkey[0]);
+    subkey_sub(w, &subkey[0]);
 }
 
 pub fn create_subkeys(
@@ -238,17 +234,10 @@ impl BlockCipher<BLOCK_BYTES> for Threefish256 {
 crate::impl_cipher_for_block_cipher!(Threefish256, 32);
 
 crate::test_block_cipher!(
-    test_1, Threefish256::with_key_and_tweak(&hex!(
-        "1011121314151617 18191A1B1C1D1E1F 2021222324252627 28292A2B2C2D2E2F"
-    ), &hex!(
-        "0001020304050607 08090A0B0C0D0E0F"
-    )),
-    hex!(
-        "FFFEFDFCFBFAF9F8 F7F6F5F4F3F2F1F0 EFEEEDECEBEAE9E8 E7E6E5E4E3E2E1E0"
+    test_1, Threefish256::with_key_and_tweak(
+        &hex!("1011121314151617 18191A1B1C1D1E1F 2021222324252627 28292A2B2C2D2E2F"),
+        &hex!("0001020304050607 08090A0B0C0D0E0F")
     ),
-    hex!(
-        "E0D091FF0EEA8FDF C98192E62ED80AD5 9D865D08588DF476 657056B5955E97DF"
-    );
-
-
+    hex!("FFFEFDFCFBFAF9F8 F7F6F5F4F3F2F1F0 EFEEEDECEBEAE9E8 E7E6E5E4E3E2E1E0"),
+    hex!("E0D091FF0EEA8FDF C98192E62ED80AD5 9D865D08588DF476 657056B5955E97DF");
 );
