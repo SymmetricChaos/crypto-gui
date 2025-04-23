@@ -9,20 +9,18 @@ const C240: u64 = 0x1BD11BDAA9FC1A22;
 pub const SCHEMA_VERSION: u64 = 0x0000000133414853; // schema string "SHA3" and version number 1
 pub const TREE_INFO: u64 = 0x0000000000000000; // only sequential hashing is supported so this is all zero
 
+const FIRST: u64 = 1 << 62;
+const FINAL: u64 = 1 << 63;
+const CFG: u64 = 4 << 56;
+const MSG: u64 = 48 << 56;
+const OUT: u64 = 63 << 56;
+
 #[derive(Debug, Copy, Clone)]
 pub struct Tweak([u64; 2]);
 
 impl Tweak {
     pub fn new() -> Self {
         Self([0; 2])
-    }
-
-    pub fn from_bytes(bytes: &[u8]) -> Self {
-        assert!(bytes.len() == 16);
-        Self([
-            u64::from_le_bytes(bytes[..8].try_into().unwrap()),
-            u64::from_le_bytes(bytes[8..].try_into().unwrap()),
-        ])
     }
 
     // Increment the 96-bit counter
