@@ -137,33 +137,6 @@ pub fn octo_round_256_inv(w: &mut [u64; 4], subkey: &[[u64; 4]]) {
     subkey_sub(w, &subkey[0]);
 }
 
-pub fn create_subkeys(
-    key: &[u8; KEY_BYTES],
-    tweak: &[u8; TWEAK_BYTES],
-) -> [[u64; KEY_WORDS]; SUBKEYS] {
-    let ex_tweak = Tweak::from_bytes(tweak).extended();
-    let mut ex_key = [0_u64; KEY_WORDS + 1];
-    fill_u64s_le(&mut ex_key[0..KEY_WORDS], key);
-    ex_key[KEY_WORDS] = ex_key.iter().fold(C240, core::ops::BitXor::bitxor);
-
-    let mut subkeys = [[0u64; KEY_WORDS]; SUBKEYS];
-
-    // The inner loop allows this to be reused for other key sizes
-    for k in 0..SUBKEYS {
-        for i in 0..KEY_WORDS {
-            subkeys[k][i] = ex_key[(k + i) % (KEY_WORDS + 1)];
-            if i == KEY_WORDS - 3 {
-                subkeys[k][i] = subkeys[k][i].wrapping_add(ex_tweak[k % 3]);
-            } else if i == KEY_WORDS - 2 {
-                subkeys[k][i] = subkeys[k][i].wrapping_add(ex_tweak[(k + 1) % 3]);
-            } else if i == KEY_WORDS - 1 {
-                subkeys[k][i] = subkeys[k][i].wrapping_add(k as u64);
-            }
-        }
-    }
-    subkeys
-}
-
 pub struct Threefish256 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
@@ -187,12 +160,39 @@ impl Default for Threefish256 {
 }
 
 impl Threefish256 {
+    pub fn create_subkeys(
+        key: &[u8; KEY_BYTES],
+        tweak: &[u8; TWEAK_BYTES],
+    ) -> [[u64; KEY_WORDS]; SUBKEYS] {
+        let ex_tweak = Tweak::from_bytes(tweak).extended();
+        let mut ex_key = [0_u64; KEY_WORDS + 1];
+        fill_u64s_le(&mut ex_key[0..KEY_WORDS], key);
+        ex_key[KEY_WORDS] = ex_key.iter().fold(C240, core::ops::BitXor::bitxor);
+
+        let mut subkeys = [[0u64; KEY_WORDS]; SUBKEYS];
+
+        // The inner loop allows this to be reused for other key sizes
+        for k in 0..SUBKEYS {
+            for i in 0..KEY_WORDS {
+                subkeys[k][i] = ex_key[(k + i) % (KEY_WORDS + 1)];
+                if i == KEY_WORDS - 3 {
+                    subkeys[k][i] = subkeys[k][i].wrapping_add(ex_tweak[k % 3]);
+                } else if i == KEY_WORDS - 2 {
+                    subkeys[k][i] = subkeys[k][i].wrapping_add(ex_tweak[(k + 1) % 3]);
+                } else if i == KEY_WORDS - 1 {
+                    subkeys[k][i] = subkeys[k][i].wrapping_add(k as u64);
+                }
+            }
+        }
+        subkeys
+    }
+
     pub fn with_key_and_tweak(key: &[u8; KEY_BYTES], tweak: &[u8; 16]) -> Self {
         Self {
             input_format: ByteFormat::Hex,
             output_format: ByteFormat::Hex,
             iv: U256::ZERO,
-            subkeys: create_subkeys(key, tweak),
+            subkeys: Self::create_subkeys(key, tweak),
             mode: Default::default(),
             padding: Default::default(),
         }

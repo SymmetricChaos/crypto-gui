@@ -69,6 +69,7 @@ macro_rules! skein_mix {
     };
 }
 
+#[inline]
 pub fn octo_round_256(w: &mut [u64; 4], subkey: &[[u64; 4]]) {
     subkey_add(w, &subkey[0]);
 
@@ -99,6 +100,7 @@ pub fn octo_round_256(w: &mut [u64; 4], subkey: &[[u64; 4]]) {
     skein_mix!(w[2], w[1], 32);
 }
 
+#[inline]
 pub fn octo_round_512(w: &mut [u64; 8], subkey: &[[u64; 8]]) {
     subkey_add(w, &subkey[0]);
 
@@ -145,6 +147,7 @@ pub fn octo_round_512(w: &mut [u64; 8], subkey: &[[u64; 8]]) {
     skein_mix!(w[4], w[3], 22);
 }
 
+#[inline]
 pub fn octo_round_1024(w: &mut [u64; 16], subkey: &[[u64; 16]]) {
     subkey_add(w, &subkey[0]);
 
