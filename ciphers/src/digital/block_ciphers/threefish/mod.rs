@@ -57,12 +57,52 @@ macro_rules! threefish {
                 subkeys
             }
 
+            pub fn create_subkeys_u64(
+                key: &[u64; $block_words],
+                tweak: &[u64; 2],
+            ) -> [[u64; $block_words]; ($rounds / 4 + 1)] {
+                let mut ex_tweak = [0_u64; 3];
+                ex_tweak[0..2].copy_from_slice(tweak);
+                ex_tweak[2] = ex_tweak[0] ^ ex_tweak[1];
+                let mut ex_key = [0_u64; $block_words + 1];
+                ex_key[0..$block_words].copy_from_slice(key);
+                ex_key[$block_words] = ex_key.iter().fold(C240, core::ops::BitXor::bitxor);
+
+                let mut subkeys = [[0u64; $block_words]; ($rounds / 4 + 1)];
+
+                // The inner loop allows this to be reused for other key sizes
+                for k in 0..($rounds / 4 + 1) {
+                    for i in 0..$block_words {
+                        subkeys[k][i] = ex_key[(k + i) % ($block_words + 1)];
+                        if i == $block_words - 3 {
+                            subkeys[k][i] = subkeys[k][i].wrapping_add(ex_tweak[k % 3]);
+                        } else if i == $block_words - 2 {
+                            subkeys[k][i] = subkeys[k][i].wrapping_add(ex_tweak[(k + 1) % 3]);
+                        } else if i == $block_words - 1 {
+                            subkeys[k][i] = subkeys[k][i].wrapping_add(k as u64);
+                        }
+                    }
+                }
+                subkeys
+            }
+
             pub fn with_key_and_tweak(key: &[u8; $block_bytes], tweak: &[u8; 16]) -> Self {
                 Self {
                     input_format: utils::byte_formatting::ByteFormat::Hex,
                     output_format: utils::byte_formatting::ByteFormat::Hex,
                     iv: <$iv>::ZERO,
                     subkeys: Self::create_subkeys(key, tweak),
+                    mode: Default::default(),
+                    padding: Default::default(),
+                }
+            }
+
+            pub fn with_key_and_tweak_u64(key: &[u64; $block_words], tweak: &[u64; 2]) -> Self {
+                Self {
+                    input_format: utils::byte_formatting::ByteFormat::Hex,
+                    output_format: utils::byte_formatting::ByteFormat::Hex,
+                    iv: <$iv>::ZERO,
+                    subkeys: Self::create_subkeys_u64(key, tweak),
                     mode: Default::default(),
                     padding: Default::default(),
                 }

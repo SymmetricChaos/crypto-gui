@@ -75,6 +75,7 @@ mod slidefair_controls;
 mod sm4_controls;
 mod speck_controls;
 mod tea_controls;
+mod threefish_controls;
 mod trifid_controls;
 mod triple_des_controls;
 mod turning_grille_controls;
