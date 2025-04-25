@@ -107,6 +107,14 @@ macro_rules! threefish {
                     padding: Default::default(),
                 }
             }
+
+            pub fn ksa(&mut self, key: &[u8; $block_bytes], tweak: &[u8; 16]) {
+                self.subkeys = Self::create_subkeys(key, tweak);
+            }
+
+            pub fn ksa_u64(&mut self, key: &[u64; $block_words], tweak: &[u64; 2]) {
+                self.subkeys = Self::create_subkeys_u64(key, tweak);
+            }
         }
 
         crate::block_cipher_builders!($name, $iv);

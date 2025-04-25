@@ -41,6 +41,16 @@ impl Default for ThreefishFrame {
     }
 }
 
+impl ThreefishFrame {
+    fn set_cipher(&mut self) {
+        match self.selector {
+            ThreefishSelect::Threefish256 => self.cipher256.ksa_u64(&self.key256, &self.tweak),
+            ThreefishSelect::Threefish512 => self.cipher512.ksa_u64(&self.key512, &self.tweak),
+            ThreefishSelect::Threefish1024 => self.cipher1024.ksa_u64(&self.key1024, &self.tweak),
+        }
+    }
+}
+
 impl CipherFrame for ThreefishFrame {
     fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
         ui.hyperlink_to(
@@ -68,11 +78,16 @@ impl CipherFrame for ThreefishFrame {
         ui.randomize_reset_cipher(self);
         ui.add_space(16.0);
 
-        ui.subheading("Tweak");
+        ui.horizontal(|ui| {
+            ui.subheading("Tweak");
+            if ui.random_bytes_button(&mut self.tweak).clicked() {
+                self.set_cipher();
+            }
+        });
         ui.label("All versions of Threefish use a 128-bit \"tweak\" value to adjust the key schedule, presented here as two 64-bit words.");
-        for i in 0..4 {
-            if ui.u64_hex_edit(&mut self.key256[i]).changed() {
-                self.cipher256 = Threefish256::with_key_and_tweak_u64(&self.key256, &self.tweak);
+        for i in 0..2 {
+            if ui.u64_hex_edit(&mut self.tweak[i]).lost_focus() {
+                self.set_cipher();
             }
         }
 
@@ -97,23 +112,23 @@ impl CipherFrame for ThreefishFrame {
                 ui.horizontal(|ui| {
                     ui.subheading("Key");
                     if ui.random_bytes_button(&mut self.key256).clicked() {
-                        self.cipher256 =
-                            Threefish256::with_key_and_tweak_u64(&self.key256, &self.tweak);
+                        self.set_cipher();
                     }
                 });
                 ui.label("Threefish256 uses a 256-bit key presented here as four 64-bit words.");
                 for i in 0..4 {
-                    if ui.u64_hex_edit(&mut self.key256[i]).changed() {
-                        self.cipher256 =
-                            Threefish256::with_key_and_tweak_u64(&self.key256, &self.tweak);
+                    if ui.u64_hex_edit(&mut self.key256[i]).lost_focus() {
+                        self.set_cipher();
                     }
                 }
 
                 ui.add_space(8.0);
 
-                ui.label("Threefish256 uses a 256-bit IV presented here as four 64-bit words.");
-                for i in self.cipher256.iv.as_words_mut() {
-                    ui.u64_hex_edit(i);
+                if self.cipher256.mode.iv_needed() {
+                    ui.label("Threefish256 uses a 256-bit initialization vector.");
+                    for i in self.cipher256.iv.as_words_mut() {
+                        ui.u64_hex_edit(i);
+                    }
                 }
 
                 ui.add_space(16.0);
@@ -136,24 +151,24 @@ impl CipherFrame for ThreefishFrame {
                 ui.horizontal(|ui| {
                     ui.subheading("Key");
                     if ui.random_bytes_button(&mut self.key512).clicked() {
-                        self.cipher512 =
-                            Threefish512::with_key_and_tweak_u64(&self.key512, &self.tweak);
+                        self.set_cipher();
                     }
                 });
                 ui.label("Threefish512 uses a 512-bit key presented here as eight 64-bit words.");
                 for i in 0..8 {
-                    if ui.u64_hex_edit(&mut self.key512[i]).changed() {
-                        self.cipher512 =
-                            Threefish512::with_key_and_tweak_u64(&self.key512, &self.tweak);
+                    if ui.u64_hex_edit(&mut self.key512[i]).lost_focus() {
+                        self.set_cipher();
                     }
                 }
 
                 ui.add_space(8.0);
-
-                ui.label("Threefish512 uses a 512-bit IV presented here as eight 64-bit words.");
-                for i in self.cipher512.iv.as_words_mut() {
-                    ui.u64_hex_edit(i);
+                if self.cipher512.mode.iv_needed() {
+                    ui.label("Threefish512 uses a 512-bit initialization vector.");
+                    for i in self.cipher512.iv.as_words_mut() {
+                        ui.u64_hex_edit(i);
+                    }
                 }
+                ui.add_space(16.0);
             }
             ThreefishSelect::Threefish1024 => {
                 ui.byte_io_mode_cipher(
@@ -173,28 +188,27 @@ impl CipherFrame for ThreefishFrame {
                 ui.horizontal(|ui| {
                     ui.subheading("Key");
                     if ui.random_bytes_button(&mut self.key1024).clicked() {
-                        self.cipher1024 =
-                            Threefish1024::with_key_and_tweak_u64(&self.key1024, &self.tweak);
+                        self.set_cipher();
                     }
                 });
                 ui.label(
                     "Threefish1024 uses a 1024-bit key presented here as sixteen 64-bit words.",
                 );
                 for i in 0..16 {
-                    if ui.u64_hex_edit(&mut self.key1024[i]).changed() {
-                        self.cipher1024 =
-                            Threefish1024::with_key_and_tweak_u64(&self.key1024, &self.tweak);
+                    if ui.u64_hex_edit(&mut self.key1024[i]).lost_focus() {
+                        self.set_cipher();
                     }
                 }
 
                 ui.add_space(8.0);
 
-                ui.label(
-                    "Threefish1024 uses a 1024-bit IV presented here as sixteen 64-bit words.",
-                );
-                for i in self.cipher1024.iv.as_words_mut() {
-                    ui.u64_hex_edit(i);
+                if self.cipher1024.mode.iv_needed() {
+                    ui.label("Threefish1024 uses a 1024-bit initialization vector.");
+                    for i in self.cipher1024.iv.as_words_mut() {
+                        ui.u64_hex_edit(i);
+                    }
                 }
+                ui.add_space(16.0);
             }
         }
     }
@@ -214,7 +228,6 @@ impl CipherFrame for ThreefishFrame {
                 for k in self.key256.iter_mut() {
                     *k = rng.gen()
                 }
-                self.cipher256 = Threefish256::with_key_and_tweak_u64(&self.key256, &self.tweak);
                 if self.cipher256.mode.iv_needed() {
                     self.cipher256.iv = U256::from_words(rng.gen());
                 }
@@ -223,7 +236,6 @@ impl CipherFrame for ThreefishFrame {
                 for k in self.key512.iter_mut() {
                     *k = rng.gen()
                 }
-                self.cipher512 = Threefish512::with_key_and_tweak_u64(&self.key512, &self.tweak);
                 if self.cipher512.mode.iv_needed() {
                     self.cipher512.iv = U512::from_words(rng.gen());
                 }
@@ -232,12 +244,12 @@ impl CipherFrame for ThreefishFrame {
                 for k in self.key1024.iter_mut() {
                     *k = rng.gen()
                 }
-                self.cipher1024 = Threefish1024::with_key_and_tweak_u64(&self.key1024, &self.tweak);
                 if self.cipher1024.mode.iv_needed() {
                     self.cipher1024.iv = U1024::from_words(rng.gen());
                 }
             }
         }
+        self.set_cipher();
     }
 
     fn reset(&mut self) {
