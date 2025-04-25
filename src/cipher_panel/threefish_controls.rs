@@ -4,6 +4,7 @@ use ciphers::{
     digital::block_ciphers::threefish::{Threefish1024, Threefish256, Threefish512},
     Cipher,
 };
+use crypto_bigint::{U1024, U256, U512};
 use egui::Ui;
 use rand::{thread_rng, Rng};
 
@@ -67,6 +68,16 @@ impl CipherFrame for ThreefishFrame {
         ui.randomize_reset_cipher(self);
         ui.add_space(16.0);
 
+        ui.subheading("Tweak");
+        ui.label("All versions of Threefish use a 128-bit \"tweak\" value to adjust the key schedule, presented here as two 64-bit words.");
+        for i in 0..4 {
+            if ui.u64_hex_edit(&mut self.key256[i]).changed() {
+                self.cipher256 = Threefish256::with_key_and_tweak_u64(&self.key256, &self.tweak);
+            }
+        }
+
+        ui.add_space(16.0);
+
         match self.selector {
             ThreefishSelect::Threefish256 => {
                 ui.byte_io_mode_cipher(
@@ -100,7 +111,11 @@ impl CipherFrame for ThreefishFrame {
 
                 ui.add_space(8.0);
 
-                block_cipher_iv_256(ui, &mut self.cipher256.iv, self.cipher256.mode);
+                ui.label("Threefish256 uses a 256-bit IV presented here as four 64-bit words.");
+                for i in self.cipher256.iv.as_words_mut() {
+                    ui.u64_hex_edit(i);
+                }
+
                 ui.add_space(16.0);
             }
             ThreefishSelect::Threefish512 => {
@@ -126,7 +141,7 @@ impl CipherFrame for ThreefishFrame {
                     }
                 });
                 ui.label("Threefish512 uses a 512-bit key presented here as eight 64-bit words.");
-                for i in 0..6 {
+                for i in 0..8 {
                     if ui.u64_hex_edit(&mut self.key512[i]).changed() {
                         self.cipher512 =
                             Threefish512::with_key_and_tweak_u64(&self.key512, &self.tweak);
@@ -135,7 +150,10 @@ impl CipherFrame for ThreefishFrame {
 
                 ui.add_space(8.0);
 
-                block_cipher_iv_512(ui, &mut self.cipher512.iv, self.cipher512.mode);
+                ui.label("Threefish512 uses a 512-bit IV presented here as eight 64-bit words.");
+                for i in self.cipher512.iv.as_words_mut() {
+                    ui.u64_hex_edit(i);
+                }
             }
             ThreefishSelect::Threefish1024 => {
                 ui.byte_io_mode_cipher(
@@ -162,7 +180,7 @@ impl CipherFrame for ThreefishFrame {
                 ui.label(
                     "Threefish1024 uses a 1024-bit key presented here as sixteen 64-bit words.",
                 );
-                for i in 0..8 {
+                for i in 0..16 {
                     if ui.u64_hex_edit(&mut self.key1024[i]).changed() {
                         self.cipher1024 =
                             Threefish1024::with_key_and_tweak_u64(&self.key1024, &self.tweak);
@@ -171,7 +189,12 @@ impl CipherFrame for ThreefishFrame {
 
                 ui.add_space(8.0);
 
-                block_cipher_iv_1024(ui, &mut self.cipher256.iv, self.cipher256.mode);
+                ui.label(
+                    "Threefish1024 uses a 1024-bit IV presented here as sixteen 64-bit words.",
+                );
+                for i in self.cipher1024.iv.as_words_mut() {
+                    ui.u64_hex_edit(i);
+                }
             }
         }
     }
@@ -193,7 +216,7 @@ impl CipherFrame for ThreefishFrame {
                 }
                 self.cipher256 = Threefish256::with_key_and_tweak_u64(&self.key256, &self.tweak);
                 if self.cipher256.mode.iv_needed() {
-                    self.cipher256.iv = rng.gen();
+                    self.cipher256.iv = U256::from_words(rng.gen());
                 }
             }
             ThreefishSelect::Threefish512 => {
@@ -202,7 +225,7 @@ impl CipherFrame for ThreefishFrame {
                 }
                 self.cipher512 = Threefish512::with_key_and_tweak_u64(&self.key512, &self.tweak);
                 if self.cipher512.mode.iv_needed() {
-                    self.cipher512.iv = rng.gen();
+                    self.cipher512.iv = U512::from_words(rng.gen());
                 }
             }
             ThreefishSelect::Threefish1024 => {
@@ -211,7 +234,7 @@ impl CipherFrame for ThreefishFrame {
                 }
                 self.cipher1024 = Threefish1024::with_key_and_tweak_u64(&self.key1024, &self.tweak);
                 if self.cipher1024.mode.iv_needed() {
-                    self.cipher1024.iv = rng.gen();
+                    self.cipher1024.iv = U1024::from_words(rng.gen());
                 }
             }
         }
