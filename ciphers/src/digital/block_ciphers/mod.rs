@@ -80,6 +80,7 @@ macro_rules! impl_cipher_for_block_cipher {
     ($cipher: ty, $blocksize: literal) => {
         impl crate::traits::Cipher for $cipher {
             fn encrypt(&self, text: &str) -> Result<String, crate::errors::CipherError> {
+                use crate::digital::block_ciphers::block_cipher::BlockCipher;
                 // Interpret the input
                 let mut bytes = self
                     .input_format
@@ -121,6 +122,7 @@ macro_rules! impl_cipher_for_block_cipher {
             }
 
             fn decrypt(&self, text: &str) -> Result<String, crate::errors::CipherError> {
+                use crate::digital::block_ciphers::block_cipher::BlockCipher;
                 // Interpret the input
                 let mut bytes = self
                     .input_format
@@ -180,6 +182,7 @@ macro_rules! test_block_cipher {
         #[cfg(test)]
         mod tests {
             use super::*;
+            use crate::digital::block_ciphers::block_cipher::BlockCipher;
             $(
                 #[test]
                 fn $name() {
@@ -188,6 +191,27 @@ macro_rules! test_block_cipher {
                     assert!($ctext == msg, "encrypt failed:\n correct: {:02x?}\n   ctext: {:02x?}", $ctext, msg);
                     $cipher.decrypt_block(&mut msg);
                     assert!($ptext == msg, "decrypt failed:\n correct: {:02x?}\n   ptext: {:02x?}", $ptext, msg);
+                }
+            )+
+        }
+    }
+}
+
+#[macro_export]
+macro_rules! test_block_cipher_str {
+    ($( $name: ident, $cipher: expr, $ptext: expr, $ctext: expr);+ $(;)?) => {
+        #[cfg(test)]
+        mod tests {
+            use super::*;
+            use crate::digital::block_ciphers::block_cipher::BlockCipher;
+            $(
+                #[test]
+                fn $name() {
+                    let mut msg = hex_literal::hex!($ptext);
+                    $cipher.encrypt_block(&mut msg);
+                    assert!(hex_literal::hex!($ctext) == msg, "encrypt failed:\n correct: {:02x?}\n   ctext: {:02x?}", hex_literal::hex!($ctext), msg);
+                    $cipher.decrypt_block(&mut msg);
+                    assert!(hex_literal::hex!($ptext) == msg, "decrypt failed:\n correct: {:02x?}\n   ptext: {:02x?}", hex_literal::hex!($ptext), msg);
                 }
             )+
         }
