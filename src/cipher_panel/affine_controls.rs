@@ -54,7 +54,7 @@ impl CipherFrame for AffineFrame {
         ui.add_space(8.0);
 
         ui.subheading("Alphabet");
-        if ui.control_string(&mut self.alphabet_string).changed() {
+        if ui.control_string(&mut self.alphabet_string).lost_focus() {
             self.cipher.assign_alphabet(&self.alphabet_string)
         }
         ui.add_space(8.0);

@@ -1,12 +1,40 @@
 use super::CipherFrame;
 use crate::ui_elements::{block_cipher_iv_128, block_cipher_mode_and_padding, UiElements};
-
 use ciphers::{
     digital::block_ciphers::camellia::{Camellia128, Camellia192, Camellia256},
     Cipher,
 };
 use egui::Ui;
 use rand::{thread_rng, Rng};
+
+macro_rules! interface {
+    ($ui: ident, $cipher: expr, $key: expr, $bits: literal, $words: literal) => {
+        $ui.byte_io_mode_cipher(&mut $cipher.input_format, &mut $cipher.output_format);
+
+        $ui.add_space(16.0);
+
+        block_cipher_mode_and_padding($ui, &mut $cipher.mode, &mut $cipher.padding);
+        $ui.add_space(8.0);
+
+        $ui.horizontal(|ui| {
+            ui.subheading("Key");
+            if ui.random_bytes_button(&mut $key).clicked() {
+                $cipher.ksa_u64($key);
+            }
+        });
+        $ui.label("Camellia-128 uses a 128-bit key.");
+        for i in 0..$words {
+            if $ui.u64_hex_edit(&mut $key[i]).lost_focus() {
+                $cipher.ksa_u64($key);
+            }
+        }
+
+        $ui.add_space(8.0);
+
+        block_cipher_iv_128($ui, &mut $cipher.iv, $cipher.mode);
+        $ui.add_space(16.0);
+    };
+}
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 enum CamelliaSelect {
@@ -68,101 +96,13 @@ impl CipherFrame for CamelliaFrame {
 
         match self.selector {
             CamelliaSelect::Camellia128 => {
-                ui.byte_io_mode_cipher(
-                    &mut self.cipher128.input_format,
-                    &mut self.cipher128.output_format,
-                );
-
-                ui.add_space(16.0);
-
-                block_cipher_mode_and_padding(
-                    ui,
-                    &mut self.cipher128.mode,
-                    &mut self.cipher128.padding,
-                );
-                ui.add_space(8.0);
-
-                ui.horizontal(|ui| {
-                    ui.subheading("Key");
-                    if ui.random_bytes_button(&mut self.key128).clicked() {
-                        self.cipher128.ksa_u64(self.key128);
-                    }
-                });
-                ui.label("Camellia128 uses a 128-bit key, presented here as two 64-bit words.");
-                for i in 0..4 {
-                    if ui.u64_hex_edit(&mut self.key128[i]).changed() {
-                        self.cipher128.ksa_u64(self.key128);
-                    }
-                }
-
-                ui.add_space(8.0);
-
-                block_cipher_iv_128(ui, &mut self.cipher128.iv, self.cipher128.mode);
-                ui.add_space(16.0);
+                interface!(ui, self.cipher128, self.key128, "128", 4);
             }
             CamelliaSelect::Camellia192 => {
-                ui.byte_io_mode_cipher(
-                    &mut self.cipher192.input_format,
-                    &mut self.cipher192.output_format,
-                );
-
-                ui.add_space(16.0);
-
-                block_cipher_mode_and_padding(
-                    ui,
-                    &mut self.cipher192.mode,
-                    &mut self.cipher192.padding,
-                );
-                ui.add_space(8.0);
-
-                ui.horizontal(|ui| {
-                    ui.subheading("Key");
-                    if ui.random_bytes_button(&mut self.key192).clicked() {
-                        self.cipher192.ksa_u64(self.key192);
-                    }
-                });
-                ui.label("Camellia192 uses a 192-bit key, presented here as three 64-bit words.");
-                for i in 0..3 {
-                    if ui.u64_hex_edit(&mut self.key192[i]).changed() {
-                        self.cipher192.ksa_u64(self.key192);
-                    }
-                }
-
-                ui.add_space(8.0);
-
-                block_cipher_iv_128(ui, &mut self.cipher192.iv, self.cipher192.mode);
+                interface!(ui, self.cipher192, self.key192, "192", 6);
             }
             CamelliaSelect::Camellia256 => {
-                ui.byte_io_mode_cipher(
-                    &mut self.cipher256.input_format,
-                    &mut self.cipher256.output_format,
-                );
-
-                ui.add_space(16.0);
-
-                block_cipher_mode_and_padding(
-                    ui,
-                    &mut self.cipher256.mode,
-                    &mut self.cipher256.padding,
-                );
-                ui.add_space(8.0);
-
-                ui.horizontal(|ui| {
-                    ui.subheading("Key");
-                    if ui.random_bytes_button(&mut self.key256).clicked() {
-                        self.cipher256.ksa_u64(self.key256);
-                    }
-                });
-                ui.label("Camellia256 uses a 256-bit key, presented here as four 64-bit words.");
-                for i in 0..8 {
-                    if ui.u64_hex_edit(&mut self.key256[i]).changed() {
-                        self.cipher256.ksa_u64(self.key256);
-                    }
-                }
-
-                ui.add_space(8.0);
-
-                block_cipher_iv_128(ui, &mut self.cipher256.iv, self.cipher256.mode);
+                interface!(ui, self.cipher256, self.key256, "256", 8);
             }
         }
     }

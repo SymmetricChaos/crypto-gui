@@ -125,7 +125,10 @@ impl CipherFrame for ThreefishFrame {
                 ui.add_space(8.0);
 
                 if self.cipher256.mode.iv_needed() {
-                    ui.label("Threefish256 uses a 256-bit initialization vector.");
+                    ui.horizontal(|ui| {
+                        ui.label("In this mode a 256-bit initialization vector is needed.");
+                        ui.random_bytes_button(self.cipher256.iv.as_words_mut())
+                    });
                     for i in self.cipher256.iv.as_words_mut() {
                         ui.u64_hex_edit(i);
                     }
@@ -162,8 +165,12 @@ impl CipherFrame for ThreefishFrame {
                 }
 
                 ui.add_space(8.0);
+
                 if self.cipher512.mode.iv_needed() {
-                    ui.label("Threefish512 uses a 512-bit initialization vector.");
+                    ui.horizontal(|ui| {
+                        ui.label("In this mode a 512-bit initialization vector is needed.");
+                        ui.random_bytes_button(self.cipher512.iv.as_words_mut())
+                    });
                     for i in self.cipher512.iv.as_words_mut() {
                         ui.u64_hex_edit(i);
                     }
@@ -203,7 +210,10 @@ impl CipherFrame for ThreefishFrame {
                 ui.add_space(8.0);
 
                 if self.cipher1024.mode.iv_needed() {
-                    ui.label("Threefish1024 uses a 1024-bit initialization vector.");
+                    ui.horizontal(|ui| {
+                        ui.label("In this mode a 1024-bit initialization vector is needed.");
+                        ui.random_bytes_button(self.cipher1024.iv.as_words_mut())
+                    });
                     for i in self.cipher1024.iv.as_words_mut() {
                         ui.u64_hex_edit(i);
                     }
@@ -223,6 +233,9 @@ impl CipherFrame for ThreefishFrame {
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();
+        for t in self.tweak.iter_mut() {
+            *t = rng.gen()
+        }
         match self.selector {
             ThreefishSelect::Threefish256 => {
                 for k in self.key256.iter_mut() {

@@ -10,6 +10,7 @@ use ciphers::{
 };
 use egui::Ui;
 use rand::{thread_rng, Rng};
+use strum::IntoEnumIterator;
 use utils::byte_formatting::{ByteFormat, ByteFormatError};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -17,6 +18,57 @@ enum AesGcmSelect {
     AesGcm128,
     AesGcm192,
     AesGcm256,
+}
+
+macro_rules! interface {
+    ($ui: ident, $cipher: expr, $key: expr, $bits: literal, $words: literal, $ad_mode: expr, $ad: expr, $errors: expr) => {
+        $ui.byte_io_mode_cipher(&mut $cipher.input_format, &mut $cipher.output_format);
+
+        $ui.add_space(8.0);
+
+        $ui.horizontal(|ui| {
+            ui.subheading("Key");
+            if ui.random_bytes_button(&mut $key).clicked() {
+                $cipher.ksa_u32($key);
+            }
+        });
+        $ui.label(format!("AES-GCM-{0} uses a {0}-bit key.", $bits));
+        for i in 0..$words {
+            if $ui.u32_hex_edit(&mut $key[i]).lost_focus() {
+                $cipher.ksa_u32($key);
+            }
+        }
+
+        $ui.add_space(8.0);
+
+        block_cipher_iv_128($ui, &mut $cipher.iv, Ctr);
+        $ui.add_space(16.0);
+
+        $ui.subheading("Associated Data");
+        $ui.label("Arbitrary data can be associated with the message. This is usually data that cannot be encrypted such as routing information. The tag authenticates this data as well as the ciphertext.");
+        $ui.horizontal(|ui| {
+            for variant in ByteFormat::iter() {
+                if ui
+                    .selectable_value(&mut $ad_mode, variant, variant.to_string())
+                    .clicked()
+                {
+                    match $ad_mode.text_to_bytes(&$ad) {
+                        Ok(v) => $cipher.ad = v,
+                        Err(_) => $errors.push_str("Error formatting associated data as bytes"),
+                    }
+                }
+            }
+        });
+        if $ui.control_string(&mut $ad).lost_focus() {
+            match $ad_mode.text_to_bytes(&$ad) {
+                Ok(v) => $cipher.ad = v,
+                Err(_) => {
+                    $errors.push_str("Error formatting associated data as bytes");
+                    $cipher.ad.clear();
+                }
+            }
+        };
+    };
 }
 
 pub struct AesGcmFrame {
@@ -30,6 +82,8 @@ pub struct AesGcmFrame {
     iv_input: ByteFormat,
     iv_string: String,
     iv_bytes: Result<Vec<u8>, ByteFormatError>,
+    ad: String,
+    ad_mode: ByteFormat,
 }
 
 impl Default for AesGcmFrame {
@@ -47,13 +101,15 @@ impl Default for AesGcmFrame {
             iv_bytes: Ok(vec![
                 0xa1, 0xb2, 0xc3, 0xd4, 0xe5, 0xf6, 0xa7, 0xb8, 0xc9, 0xd0, 0xea, 0xfb,
             ]),
+            ad: String::new(),
+            ad_mode: ByteFormat::Hex,
         }
     }
 }
 
 impl AesGcmFrame {
     fn iv_controls(&mut self, ui: &mut Ui) {
-        if ui.control_string(&mut self.iv_string).changed() {
+        if ui.control_string(&mut self.iv_string).lost_focus() {
             self.iv_string = self
                 .iv_string
                 .chars()
@@ -102,7 +158,7 @@ impl AesGcmFrame {
 }
 
 impl CipherFrame for AesGcmFrame {
-    fn ui(&mut self, ui: &mut Ui, _errors: &mut String) {
+    fn ui(&mut self, ui: &mut Ui, errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
             "https://github.com/SymmetricChaos/crypto-gui/tree/master/ciphers/src/digital/block_ciphers/aes",
@@ -124,80 +180,40 @@ impl CipherFrame for AesGcmFrame {
 
         match self.selector {
             AesGcmSelect::AesGcm128 => {
-                ui.byte_io_mode_cipher(
-                    &mut self.cipher128.input_format,
-                    &mut self.cipher128.output_format,
+                interface!(
+                    ui,
+                    self.cipher128,
+                    self.key128,
+                    "128",
+                    4,
+                    self.ad_mode,
+                    self.ad,
+                    errors
                 );
-
-                ui.add_space(8.0);
-
-                ui.horizontal(|ui| {
-                    ui.subheading("Key");
-                    if ui.random_bytes_button(&mut self.key128).clicked() {
-                        self.cipher128.ksa_u32(self.key128);
-                    }
-                });
-                ui.label("AES-GCM-128 uses a 128-bit key presented here as four 32-bit words.");
-                for i in 0..4 {
-                    if ui.u32_hex_edit(&mut self.key128[i]).changed() {
-                        self.cipher128.ksa_u32(self.key128);
-                    }
-                }
-
-                ui.add_space(8.0);
-
-                block_cipher_iv_128(ui, &mut self.cipher128.iv, Ctr);
-                ui.add_space(16.0);
             }
             AesGcmSelect::AesGcm192 => {
-                ui.byte_io_mode_cipher(
-                    &mut self.cipher192.input_format,
-                    &mut self.cipher192.output_format,
+                interface!(
+                    ui,
+                    self.cipher192,
+                    self.key192,
+                    "192",
+                    6,
+                    self.ad_mode,
+                    self.ad,
+                    errors
                 );
-
-                ui.add_space(8.0);
-
-                ui.horizontal(|ui| {
-                    ui.subheading("Key");
-                    if ui.random_bytes_button(&mut self.key192).clicked() {
-                        self.cipher192.ksa_u32(self.key192);
-                    }
-                });
-                ui.label("AES-GCM-192 uses a 192-bit key presented here as six 32-bit words.");
-                for i in 0..6 {
-                    if ui.u32_hex_edit(&mut self.key192[i]).changed() {
-                        self.cipher192.ksa_u32(self.key192);
-                    }
-                }
-
-                ui.add_space(8.0);
-
-                block_cipher_iv_128(ui, &mut self.cipher192.iv, Ctr);
             }
             AesGcmSelect::AesGcm256 => {
-                ui.byte_io_mode_cipher(
-                    &mut self.cipher256.input_format,
-                    &mut self.cipher256.output_format,
+                interface!(
+                    ui,
+                    self.cipher256,
+                    self.key256,
+                    "256",
+                    8,
+                    self.ad_mode,
+                    self.ad,
+                    errors
                 );
-
-                ui.add_space(8.0);
-
-                ui.horizontal(|ui| {
-                    ui.subheading("Key");
-                    if ui.random_bytes_button(&mut self.key256).clicked() {
-                        self.cipher256.ksa_u32(self.key256);
-                    }
-                });
-                ui.label("AES-GCM-256 uses a 256-bit key presented here as eight 32-bit words.");
-                for i in 0..8 {
-                    if ui.u32_hex_edit(&mut self.key256[i]).changed() {
-                        self.cipher256.ksa_u32(self.key256);
-                    }
-                }
-
-                ui.add_space(8.0);
-
-                block_cipher_iv_128(ui, &mut self.cipher256.iv, Ctr);
             }
         }
     }

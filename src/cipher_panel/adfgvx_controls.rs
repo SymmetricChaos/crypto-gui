@@ -69,7 +69,10 @@ impl CipherFrame for AdfgvxFrame {
         ui.add_space(16.0);
 
         ui.subheading("Polybius Keyword");
-        if ui.control_string(&mut self.polybius_key_string).changed() {
+        if ui
+            .control_string(&mut self.polybius_key_string)
+            .lost_focus()
+        {
             filter_string(&mut self.polybius_key_string, &self.cipher.alphabet());
             self.cipher.assign_polybius_key(&self.polybius_key_string)
         }
@@ -83,7 +86,10 @@ impl CipherFrame for AdfgvxFrame {
         ui.add_space(8.0);
 
         ui.subheading("Columnar Keyword");
-        if ui.control_string(&mut self.columnar_key_string).changed() {
+        if ui
+            .control_string(&mut self.columnar_key_string)
+            .lost_focus()
+        {
             self.assign_columnar_key()
         }
         ui.add_space(16.0);

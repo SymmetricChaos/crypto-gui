@@ -47,9 +47,9 @@ impl CipherFrame for AriaFrame {
         );
         ui.add_space(8.0);
 
-        ui.selectable_value(&mut self.selector, AriaSelect::Aria128, "Aria128");
-        ui.selectable_value(&mut self.selector, AriaSelect::Aria192, "Aria192");
-        ui.selectable_value(&mut self.selector, AriaSelect::Aria256, "Aria256");
+        ui.selectable_value(&mut self.selector, AriaSelect::Aria128, "Aria-128");
+        ui.selectable_value(&mut self.selector, AriaSelect::Aria192, "Aria-192");
+        ui.selectable_value(&mut self.selector, AriaSelect::Aria256, "Aria-256");
 
         ui.randomize_reset_cipher(self);
         ui.add_space(16.0);
@@ -76,9 +76,9 @@ impl CipherFrame for AriaFrame {
                         self.cipher128.ksa_u32(self.key128);
                     }
                 });
-                ui.label("Aria128 uses a 128-bit key presented here as four 32-bit words.");
+                ui.label("Aria-128 uses a 128-bit key presented here as four 32-bit words.");
                 for i in 0..4 {
-                    if ui.u32_hex_edit(&mut self.key128[i]).changed() {
+                    if ui.u32_hex_edit(&mut self.key128[i]).lost_focus() {
                         self.cipher128.ksa_u32(self.key128);
                     }
                 }
@@ -109,9 +109,9 @@ impl CipherFrame for AriaFrame {
                         self.cipher192.ksa_u32(self.key192);
                     }
                 });
-                ui.label("Aria192 uses a 192-bit key presented here as six 32-bit words.");
+                ui.label("Aria-192 uses a 192-bit key presented here as six 32-bit words.");
                 for i in 0..6 {
-                    if ui.u32_hex_edit(&mut self.key192[i]).changed() {
+                    if ui.u32_hex_edit(&mut self.key192[i]).lost_focus() {
                         self.cipher192.ksa_u32(self.key192);
                     }
                 }
@@ -141,9 +141,9 @@ impl CipherFrame for AriaFrame {
                         self.cipher256.ksa_u32(self.key256);
                     }
                 });
-                ui.label("Aria256 uses a 256-bit key presented here as eight 32-bit words.");
+                ui.label("Aria-256 uses a 256-bit key presented here as eight 32-bit words.");
                 for i in 0..8 {
-                    if ui.u32_hex_edit(&mut self.key256[i]).changed() {
+                    if ui.u32_hex_edit(&mut self.key256[i]).lost_focus() {
                         self.cipher256.ksa_u32(self.key256);
                     }
                 }

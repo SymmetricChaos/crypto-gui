@@ -89,7 +89,7 @@ impl CipherFrame for Ascon80pqFrame {
                 }
             }
         });
-        if ui.control_string(&mut self.ad).changed() {
+        if ui.control_string(&mut self.ad).lost_focus() {
             match self.ad_mode.text_to_bytes(&self.ad) {
                 Ok(v) => self.cipher.associated_data = v,
                 Err(_) => {

@@ -27,7 +27,10 @@ impl CipherFrame for AlbertiFrame {
         ui.add_space(16.0);
 
         ui.subheading("Fixed Alphabet");
-        if ui.control_string(&mut self.fixed_alphabet_string).changed() {
+        if ui
+            .control_string(&mut self.fixed_alphabet_string)
+            .lost_focus()
+        {
             self.cipher
                 .assign_fixed_alphabet(&self.fixed_alphabet_string)
         }
