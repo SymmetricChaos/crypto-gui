@@ -1,12 +1,39 @@
 use super::CipherFrame;
 use crate::ui_elements::{block_cipher_iv_128, block_cipher_mode_and_padding, UiElements};
-
 use ciphers::{
     digital::block_ciphers::lea::{Lea128, Lea192, Lea256},
     Cipher,
 };
 use egui::Ui;
 use rand::{thread_rng, Rng};
+
+macro_rules! interface {
+    ($ui: ident, $cipher: expr, $key: expr, $bits: literal, $words: literal) => {
+        $ui.byte_io_mode_cipher(&mut $cipher.input_format, &mut $cipher.output_format);
+        $ui.add_space(8.0);
+
+        block_cipher_mode_and_padding($ui, &mut $cipher.mode, &mut $cipher.padding);
+        $ui.add_space(8.0);
+
+        $ui.horizontal(|ui| {
+            ui.subheading("Key");
+            if ui.random_bytes_button(&mut $key).clicked() {
+                $cipher.ksa_u32($key);
+            }
+        });
+        $ui.label(format!("LEA-{0} uses a {0}-bit key.", $bits));
+        for i in 0..$words {
+            if $ui.u32_hex_edit(&mut $key[i]).lost_focus() {
+                $cipher.ksa_u32($key);
+            }
+        }
+
+        $ui.add_space(8.0);
+
+        block_cipher_iv_128($ui, &mut $cipher.iv, $cipher.mode);
+        $ui.add_space(16.0);
+    };
+}
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 enum LeaSelect {
@@ -47,110 +74,22 @@ impl CipherFrame for LeaFrame {
         );
         ui.add_space(8.0);
 
-        ui.selectable_value(&mut self.selector, LeaSelect::Lea128, "Lea128");
-        ui.selectable_value(&mut self.selector, LeaSelect::Lea192, "Lea192");
-        ui.selectable_value(&mut self.selector, LeaSelect::Lea256, "Lea256");
+        ui.selectable_value(&mut self.selector, LeaSelect::Lea128, "Lea-128");
+        ui.selectable_value(&mut self.selector, LeaSelect::Lea192, "Lea-192");
+        ui.selectable_value(&mut self.selector, LeaSelect::Lea256, "Lea-256");
 
         ui.randomize_reset_cipher(self);
         ui.add_space(16.0);
 
         match self.selector {
             LeaSelect::Lea128 => {
-                ui.byte_io_mode_cipher(
-                    &mut self.cipher128.input_format,
-                    &mut self.cipher128.output_format,
-                );
-
-                ui.add_space(16.0);
-
-                block_cipher_mode_and_padding(
-                    ui,
-                    &mut self.cipher128.mode,
-                    &mut self.cipher128.padding,
-                );
-                ui.add_space(8.0);
-
-                ui.horizontal(|ui| {
-                    ui.subheading("Key");
-                    if ui.random_bytes_button(&mut self.key128).clicked() {
-                        self.cipher128.ksa_u32(self.key128);
-                    }
-                });
-                ui.label("LEA-128 uses a 128-bit key presented here as four 32-bit words.");
-                for i in 0..4 {
-                    if ui.u32_hex_edit(&mut self.key128[i]).changed() {
-                        self.cipher128.ksa_u32(self.key128);
-                    }
-                }
-
-                ui.add_space(8.0);
-
-                block_cipher_iv_128(ui, &mut self.cipher128.iv, self.cipher128.mode);
-                ui.add_space(16.0);
+                interface!(ui, self.cipher128, self.key128, "128", 4);
             }
             LeaSelect::Lea192 => {
-                ui.byte_io_mode_cipher(
-                    &mut self.cipher192.input_format,
-                    &mut self.cipher192.output_format,
-                );
-
-                ui.add_space(16.0);
-
-                block_cipher_mode_and_padding(
-                    ui,
-                    &mut self.cipher192.mode,
-                    &mut self.cipher192.padding,
-                );
-                ui.add_space(8.0);
-
-                ui.horizontal(|ui| {
-                    ui.subheading("Key");
-                    if ui.random_bytes_button(&mut self.key192).clicked() {
-                        self.cipher192.ksa_u32(self.key192);
-                    }
-                });
-                ui.label("LEA-192 uses a 192-bit key presented here as six 32-bit words.");
-                for i in 0..6 {
-                    if ui.u32_hex_edit(&mut self.key192[i]).changed() {
-                        self.cipher192.ksa_u32(self.key192);
-                    }
-                }
-
-                ui.add_space(8.0);
-
-                block_cipher_iv_128(ui, &mut self.cipher192.iv, self.cipher192.mode);
+                interface!(ui, self.cipher192, self.key192, "192", 6);
             }
             LeaSelect::Lea256 => {
-                ui.byte_io_mode_cipher(
-                    &mut self.cipher256.input_format,
-                    &mut self.cipher256.output_format,
-                );
-
-                ui.add_space(16.0);
-
-                block_cipher_mode_and_padding(
-                    ui,
-                    &mut self.cipher256.mode,
-                    &mut self.cipher256.padding,
-                );
-                ui.add_space(8.0);
-
-                ui.horizontal(|ui| {
-                    ui.subheading("Key");
-                    if ui.random_bytes_button(&mut self.key256).clicked() {
-                        self.cipher256.ksa_u32(self.key256);
-                    }
-                });
-                ui.label("LEA-256 uses a 256-bit key presented here as eight 32-bit words.");
-                for i in 0..8 {
-                    if ui.u32_hex_edit(&mut self.key256[i]).changed() {
-                        self.cipher256.ksa_u32(self.key256);
-                    }
-                }
-
-                ui.add_space(8.0);
-
-                block_cipher_iv_128(ui, &mut self.cipher256.iv, self.cipher256.mode);
+                interface!(ui, self.cipher256, self.key256, "256", 8);
             }
         }
     }

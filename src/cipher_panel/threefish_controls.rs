@@ -8,6 +8,46 @@ use crypto_bigint::{U1024, U256, U512};
 use egui::Ui;
 use rand::{thread_rng, Rng};
 
+macro_rules! interface {
+    ($ui: ident, $cipher: expr, $key: expr, $tweak: expr, $bits: literal, $words: literal) => {
+        $ui.byte_io_mode_cipher(&mut $cipher.input_format, &mut $cipher.output_format);
+
+        $ui.add_space(16.0);
+
+        block_cipher_mode_and_padding($ui, &mut $cipher.mode, &mut $cipher.padding);
+        $ui.add_space(8.0);
+
+        $ui.horizontal(|ui| {
+            ui.subheading("Key");
+            if ui.random_bytes_button(&mut $key).clicked() {
+                $cipher.ksa_u64(&$key, &$tweak);
+            }
+        });
+        $ui.label(format!("Threefish-{0} uses a {0}-bit key.", $bits));
+        for i in 0..8 {
+            if $ui.u64_hex_edit(&mut $key[i]).lost_focus() {
+                $cipher.ksa_u64(&$key, &$tweak);
+            }
+        }
+
+        $ui.add_space(8.0);
+
+        if $cipher.mode.iv_needed() {
+            $ui.horizontal(|ui| {
+                ui.label(format!(
+                    "In this mode a {}-bit initialization vector is needed.",
+                    $bits
+                ));
+                ui.random_bytes_button($cipher.iv.as_words_mut())
+            });
+            for i in $cipher.iv.as_words_mut() {
+                $ui.u64_hex_edit(i);
+            }
+        }
+        $ui.add_space(16.0);
+    };
+}
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 enum ThreefishSelect {
     Threefish256,
@@ -62,18 +102,19 @@ impl CipherFrame for ThreefishFrame {
         ui.selectable_value(
             &mut self.selector,
             ThreefishSelect::Threefish256,
-            "Threefish256",
+            "Threefish-256",
         );
         ui.selectable_value(
             &mut self.selector,
             ThreefishSelect::Threefish512,
-            "Threefish512",
+            "Threefish-512",
         );
         ui.selectable_value(
             &mut self.selector,
             ThreefishSelect::Threefish1024,
-            "Threefish1024",
+            "Threefish-1024",
         );
+        ui.add_space(8.0);
 
         ui.randomize_reset_cipher(self);
         ui.add_space(16.0);
@@ -95,130 +136,13 @@ impl CipherFrame for ThreefishFrame {
 
         match self.selector {
             ThreefishSelect::Threefish256 => {
-                ui.byte_io_mode_cipher(
-                    &mut self.cipher256.input_format,
-                    &mut self.cipher256.output_format,
-                );
-
-                ui.add_space(16.0);
-
-                block_cipher_mode_and_padding(
-                    ui,
-                    &mut self.cipher256.mode,
-                    &mut self.cipher256.padding,
-                );
-                ui.add_space(8.0);
-
-                ui.horizontal(|ui| {
-                    ui.subheading("Key");
-                    if ui.random_bytes_button(&mut self.key256).clicked() {
-                        self.set_cipher();
-                    }
-                });
-                ui.label("Threefish256 uses a 256-bit key presented here as four 64-bit words.");
-                for i in 0..4 {
-                    if ui.u64_hex_edit(&mut self.key256[i]).lost_focus() {
-                        self.set_cipher();
-                    }
-                }
-
-                ui.add_space(8.0);
-
-                if self.cipher256.mode.iv_needed() {
-                    ui.horizontal(|ui| {
-                        ui.label("In this mode a 256-bit initialization vector is needed.");
-                        ui.random_bytes_button(self.cipher256.iv.as_words_mut())
-                    });
-                    for i in self.cipher256.iv.as_words_mut() {
-                        ui.u64_hex_edit(i);
-                    }
-                }
-
-                ui.add_space(16.0);
+                interface!(ui, self.cipher256, self.key256, self.tweak, "256", 4);
             }
             ThreefishSelect::Threefish512 => {
-                ui.byte_io_mode_cipher(
-                    &mut self.cipher512.input_format,
-                    &mut self.cipher512.output_format,
-                );
-
-                ui.add_space(16.0);
-
-                block_cipher_mode_and_padding(
-                    ui,
-                    &mut self.cipher512.mode,
-                    &mut self.cipher512.padding,
-                );
-                ui.add_space(8.0);
-
-                ui.horizontal(|ui| {
-                    ui.subheading("Key");
-                    if ui.random_bytes_button(&mut self.key512).clicked() {
-                        self.set_cipher();
-                    }
-                });
-                ui.label("Threefish512 uses a 512-bit key presented here as eight 64-bit words.");
-                for i in 0..8 {
-                    if ui.u64_hex_edit(&mut self.key512[i]).lost_focus() {
-                        self.set_cipher();
-                    }
-                }
-
-                ui.add_space(8.0);
-
-                if self.cipher512.mode.iv_needed() {
-                    ui.horizontal(|ui| {
-                        ui.label("In this mode a 512-bit initialization vector is needed.");
-                        ui.random_bytes_button(self.cipher512.iv.as_words_mut())
-                    });
-                    for i in self.cipher512.iv.as_words_mut() {
-                        ui.u64_hex_edit(i);
-                    }
-                }
-                ui.add_space(16.0);
+                interface!(ui, self.cipher512, self.key512, self.tweak, "512", 8);
             }
             ThreefishSelect::Threefish1024 => {
-                ui.byte_io_mode_cipher(
-                    &mut self.cipher1024.input_format,
-                    &mut self.cipher1024.output_format,
-                );
-
-                ui.add_space(16.0);
-
-                block_cipher_mode_and_padding(
-                    ui,
-                    &mut self.cipher1024.mode,
-                    &mut self.cipher1024.padding,
-                );
-                ui.add_space(8.0);
-
-                ui.horizontal(|ui| {
-                    ui.subheading("Key");
-                    if ui.random_bytes_button(&mut self.key1024).clicked() {
-                        self.set_cipher();
-                    }
-                });
-                ui.label(
-                    "Threefish1024 uses a 1024-bit key presented here as sixteen 64-bit words.",
-                );
-                for i in 0..16 {
-                    if ui.u64_hex_edit(&mut self.key1024[i]).lost_focus() {
-                        self.set_cipher();
-                    }
-                }
-
-                ui.add_space(8.0);
-
-                if self.cipher1024.mode.iv_needed() {
-                    ui.horizontal(|ui| {
-                        ui.label("In this mode a 1024-bit initialization vector is needed.");
-                        ui.random_bytes_button(self.cipher1024.iv.as_words_mut())
-                    });
-                    for i in self.cipher1024.iv.as_words_mut() {
-                        ui.u64_hex_edit(i);
-                    }
-                }
-                ui.add_space(16.0);
+                interface!(ui, self.cipher1024, self.key1024, self.tweak, "1024", 16);
             }
         }
     }

@@ -21,7 +21,7 @@ macro_rules! interface {
                 $cipher.ksa_u32($key);
             }
         });
-        $ui.label(format!("AES-GCM-{0} uses a {0}-bit key.", $bits));
+        $ui.label(format!("AES-{0} uses a {0}-bit key.", $bits));
         for i in 0..$words {
             if $ui.u32_hex_edit(&mut $key[i]).lost_focus() {
                 $cipher.ksa_u32($key);
