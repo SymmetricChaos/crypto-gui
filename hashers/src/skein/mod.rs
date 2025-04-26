@@ -9,10 +9,15 @@ const C240: u64 = 0x1BD11BDAA9FC1A22;
 pub const SCHEMA_VERSION: u64 = 0x0000000133414853; // schema string "SHA3" and version number 1
 pub const TREE_INFO: u64 = 0x0000000000000000; // only sequential hashing is supported so this is all zero
 
+/// Processing the first block
 const FIRST: u64 = 1 << 62;
+/// Processing the last block
 const FINAL: u64 = 1 << 63;
+/// Processing the configuration block
 const CFG: u64 = 4 << 56;
+/// Processing a message block
 const MSG: u64 = 48 << 56;
+/// Processing an output block
 const OUT: u64 = 63 << 56;
 
 #[derive(Debug, Copy, Clone)]
@@ -21,6 +26,10 @@ pub struct Tweak([u64; 2]);
 impl Tweak {
     pub fn new() -> Self {
         Self([0; 2])
+    }
+
+    pub fn blank_with_flags(flags: u64) -> Self {
+        Self([0, flags])
     }
 
     // Increment the 96-bit counter
