@@ -10,7 +10,6 @@ const BLOCK_BYTES: usize = BLOCK_WORDS * 8;
 const KEY_WORDS: usize = 4;
 const ROUNDS: usize = 72;
 const SUBKEYS: usize = ROUNDS / 4 + 1;
-const N_OCTO_ROUNDS: usize = ROUNDS / 4;
 
 pub fn create_subkeys(
     subkeys: &mut [[u64; KEY_WORDS]; SUBKEYS],
@@ -35,12 +34,12 @@ pub fn create_subkeys(
 }
 
 fn encrypt_block(block: &mut [u64; BLOCK_WORDS], subkeys: &[[u64; KEY_WORDS]; SUBKEYS]) {
-    for r in 0..((N_OCTO_ROUNDS) / 2) {
+    for r in 0..(ROUNDS / 8) {
         octo_round_256(block, &subkeys[(2 * r)..][..2]);
     }
 
-    for i in 0..4 {
-        block[i] = block[i].wrapping_add(subkeys[N_OCTO_ROUNDS][i])
+    for i in 0..BLOCK_WORDS {
+        block[i] = block[i].wrapping_add(subkeys[ROUNDS / 4][i])
     }
 }
 
@@ -55,10 +54,10 @@ fn compress(
     debug_assert!(bytes.len() == BLOCK_BYTES);
 
     let mut ex_key = [0; KEY_WORDS + 1];
-    ex_key[4] = crate::skein::C240;
+    ex_key[KEY_WORDS] = crate::skein::C240;
     for i in 0..KEY_WORDS {
         ex_key[i] = chain[i];
-        ex_key[4] ^= chain[i];
+        ex_key[KEY_WORDS] ^= chain[i];
     }
 
     tweak.increment(len);

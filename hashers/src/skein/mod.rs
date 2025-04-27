@@ -1,9 +1,9 @@
 use std::ops::{Index, IndexMut};
 
-// pub mod skein1024;
+pub mod skein1024;
 pub mod skein256;
+pub mod skein512;
 mod tests;
-// pub mod skein512;
 
 // The number 240 encrypted with AES with an all zero key
 const C240: u64 = 0x1BD11BDAA9FC1A22;
