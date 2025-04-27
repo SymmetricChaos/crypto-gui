@@ -2,6 +2,7 @@ use std::ops::{Index, IndexMut};
 
 // pub mod skein1024;
 pub mod skein256;
+mod tests;
 // pub mod skein512;
 
 // The number 240 encrypted with AES with an all zero key

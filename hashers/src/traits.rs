@@ -101,7 +101,7 @@ macro_rules! stateful_hash_tests {
         }
     };
     // Optional variant with module name for separation
-    (($mod_name: ident)?; $($test_name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
+    ($mod_name: ident; $($test_name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
         #[cfg(test)]
         mod $mod_name {
         use super::*;

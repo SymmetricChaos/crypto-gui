@@ -255,12 +255,3 @@ impl StatefulHasher for Skein256 {
 
     crate::stateful_hash_helpers!();
 }
-
-crate::stateful_hash_tests!(
-    test_256_256_empty, Skein256::init_256(), b"",
-    "c8877087da56e072870daa843f176e9453115929094c3a40c463a196c29bf7ba";
-    test_256_256_hello, Skein256::init_256(), b"hello",
-    "8b467f67dd324c9c9fe9aff562ee0e3746d88abcb2879e4e1b4fbd06a5061f89";
-    test_256_128_hello, Skein256::init_128(), b"hello",
-    "225ab2deb375c40d320f5ea1379e87e9";
-);
