@@ -1,18 +1,13 @@
-use utils::byte_formatting::{fill_u64s_le, make_u64s_le};
-
-use super::{octo_round_256, Tweak, CFG, MSG};
+use super::{octo_round_256, Tweak, CFG, CFG_LEN, MSG};
 use crate::{
     skein::{FINAL, FIRST, OUT},
     traits::StatefulHasher,
 };
+use utils::byte_formatting::fill_u64s_le;
 
 const BLOCK_WORDS: usize = 4;
 const BLOCK_BYTES: usize = BLOCK_WORDS * 8;
-const STATE_WORDS: usize = 4;
-const STATE_BYTES: usize = STATE_WORDS * 8;
 const KEY_WORDS: usize = 4;
-const KEY_BYTES: usize = KEY_WORDS * 8;
-
 const ROUNDS: usize = 72;
 const SUBKEYS: usize = ROUNDS / 4 + 1;
 const N_OCTO_ROUNDS: usize = ROUNDS / 4;
@@ -39,51 +34,103 @@ pub fn create_subkeys(
     }
 }
 
+fn encrypt_block(block: &mut [u64; BLOCK_WORDS], subkeys: &[[u64; KEY_WORDS]; SUBKEYS]) {
+    for r in 0..((N_OCTO_ROUNDS) / 2) {
+        octo_round_256(block, &subkeys[(2 * r)..][..2]);
+    }
+
+    for i in 0..4 {
+        block[i] = block[i].wrapping_add(subkeys[N_OCTO_ROUNDS][i])
+    }
+}
+
+fn compress(
+    bytes: &[u8],
+    len: u64, // needed when a block is padded
+    tweak: &mut Tweak,
+    block: &mut [u64; BLOCK_WORDS],
+    subkeys: &mut [[u64; KEY_WORDS]; SUBKEYS],
+    chain: &mut [u64; BLOCK_WORDS],
+) {
+    debug_assert!(bytes.len() == BLOCK_BYTES);
+
+    let mut ex_key = [0; KEY_WORDS + 1];
+    ex_key[4] = crate::skein::C240;
+    for i in 0..KEY_WORDS {
+        ex_key[i] = chain[i];
+        ex_key[4] ^= chain[i];
+    }
+
+    tweak.increment(len);
+    create_subkeys(subkeys, &ex_key, &tweak);
+    fill_u64s_le(block, &bytes);
+
+    let mut temp = block.clone();
+
+    encrypt_block(&mut temp, &subkeys);
+
+    // Compress into the chain value
+    for i in 0..BLOCK_WORDS {
+        chain[i] = block[i] ^ temp[i];
+    }
+
+    // Turn off the first block identifier
+    // Easier to do this each round than detect the first round
+    tweak[1] &= !FIRST;
+}
+
 pub struct Skein256 {
-    chain: [u64; STATE_WORDS],
+    chain: [u64; BLOCK_WORDS],
     ex_key: [u64; KEY_WORDS + 1],
     tweak: Tweak,
     buffer: Vec<u8>,
+    hash_len: usize,
 }
 
 impl Default for Skein256 {
     fn default() -> Self {
-        Self::init_128([0; KEY_BYTES])
+        Self::init_128()
     }
 }
 
 impl Skein256 {
-    fn init(iv: [u64; KEY_WORDS], key: [u8; KEY_BYTES]) -> Self {
-        let key: [u64; KEY_WORDS] = make_u64s_le(&key);
+    fn init(iv: [u64; KEY_WORDS], hash_len: u64) -> Self {
         let mut ex_key = [0; KEY_WORDS + 1];
         ex_key[4] = crate::skein::C240;
         for i in 0..KEY_WORDS {
-            ex_key[i] = key[i];
-            ex_key[4] ^= key[i];
+            ex_key[i] = iv[i];
+            ex_key[4] ^= iv[i];
         }
 
         let mut cfg = [0; BLOCK_BYTES];
         cfg[..8].copy_from_slice(&crate::skein::SCHEMA_VERSION.to_le_bytes());
-        cfg[8..16].copy_from_slice(&128_u64.to_le_bytes());
+        cfg[8..16].copy_from_slice(&hash_len.to_le_bytes());
         cfg[16..24].copy_from_slice(&crate::skein::TREE_INFO.to_le_bytes());
 
         let mut state = Self {
-            chain: iv,
+            chain: [0u64; BLOCK_WORDS],
             ex_key,
             tweak: Tweak::blank_with_flags(FIRST | CFG | FINAL),
             buffer: Vec::new(),
+            hash_len: (hash_len / 8) as usize,
         };
 
-        // Create the initial chain value from the IV, config, key, and tweak
-        state.update(&cfg);
+        compress(
+            &cfg,
+            CFG_LEN,
+            &mut state.tweak,
+            &mut [0; BLOCK_WORDS],
+            &mut [[0u64; KEY_WORDS]; SUBKEYS],
+            &mut state.chain,
+        );
 
-        // Reset the tweak to be read for processing the message
+        // Reset the tweak for processing the message
         state.tweak = Tweak::blank_with_flags(FIRST | MSG);
 
         state
     }
 
-    pub fn init_128(key: [u8; KEY_BYTES]) -> Self {
+    pub fn init_128() -> Self {
         Self::init(
             [
                 0xE1111906964D7260,
@@ -91,11 +138,11 @@ impl Skein256 {
                 0x10080DF491960F7A,
                 0xCCF7DDE5B45BC1C2,
             ],
-            key,
+            128,
         )
     }
 
-    pub fn init_160(key: [u8; KEY_BYTES]) -> Self {
+    pub fn init_160() -> Self {
         Self::init(
             [
                 0x1420231472825E98,
@@ -103,11 +150,11 @@ impl Skein256 {
                 0xD47A58568838D63E,
                 0x2DD2E4968586AB7D,
             ],
-            key,
+            160,
         )
     }
 
-    pub fn init_224(key: [u8; KEY_BYTES]) -> Self {
+    pub fn init_224() -> Self {
         Self::init(
             [
                 0xC6098A8C9AE5EA0B,
@@ -115,11 +162,11 @@ impl Skein256 {
                 0x99CB88D7D7F53884,
                 0x384BDDB1AEDDB5DE,
             ],
-            key,
+            224,
         )
     }
 
-    pub fn init_256(key: [u8; KEY_BYTES]) -> Self {
+    pub fn init_256() -> Self {
         Self::init(
             [
                 0xFC9DA860D048B449,
@@ -127,18 +174,8 @@ impl Skein256 {
                 0xB33BC3896656840F,
                 0x6A54E920FDE8DA69,
             ],
-            key,
+            256,
         )
-    }
-
-    fn encrypt_block(&self, block: &mut [u64; BLOCK_WORDS], subkeys: &[[u64; KEY_WORDS]; SUBKEYS]) {
-        for r in 0..((N_OCTO_ROUNDS) / 2) {
-            octo_round_256(block, &subkeys[(2 * r)..][..2]);
-        }
-
-        for i in 0..4 {
-            block[i] = block[i].wrapping_add(subkeys[N_OCTO_ROUNDS][i])
-        }
     }
 }
 
@@ -147,20 +184,14 @@ impl StatefulHasher for Skein256 {
         let mut block = [0; BLOCK_WORDS];
         let mut subkeys = [[0u64; KEY_WORDS]; SUBKEYS];
         crate::compression_routine!(self.buffer, bytes, BLOCK_BYTES, {
-            self.tweak.increment(BLOCK_BYTES as u64);
-
-            create_subkeys(&mut subkeys, &self.ex_key, &self.tweak);
-            fill_u64s_le(&mut block, &self.buffer);
-
-            self.encrypt_block(&mut block, &subkeys);
-
-            for i in 0..STATE_WORDS {
-                self.chain[i] ^= block[i];
-            }
-
-            // Turn off the first block identifier
-            // Easier to do this each round than detect the first round
-            self.tweak[1] &= !FIRST;
+            compress(
+                &self.buffer,
+                BLOCK_BYTES as u64,
+                &mut self.tweak,
+                &mut block,
+                &mut subkeys,
+                &mut self.chain,
+            );
         });
     }
 
@@ -177,36 +208,45 @@ impl StatefulHasher for Skein256 {
             self.buffer.push(0x00);
         }
 
-        // Compression routine for final block
+        // Compress the final block
         let mut block = [0; BLOCK_WORDS];
         let mut subkeys = [[0u64; KEY_WORDS]; SUBKEYS];
-        self.tweak.increment(f_len as u64);
-        create_subkeys(&mut subkeys, &self.ex_key, &self.tweak);
-        fill_u64s_le(&mut block, &self.buffer);
-        self.encrypt_block(&mut block, &subkeys);
-        for i in 0..STATE_WORDS {
-            self.chain[i] ^= block[i];
-        }
+        compress(
+            &self.buffer,
+            f_len as u64,
+            &mut self.tweak,
+            &mut block,
+            &mut subkeys,
+            &mut self.chain,
+        );
 
         // Now the Threefish cipher is run in CTR mode to produce the output
-        // Notice that the flags are the same for each block, characteristic of Threefish
+        // Notice that the flags and chain value are the same for each block
         let flags = FIRST | OUT | FINAL;
 
-        let mut block = [0; BLOCK_WORDS];
-        let mut subkeys = [[0u64; KEY_WORDS]; SUBKEYS];
+        block = [0; BLOCK_WORDS];
+        subkeys = [[0u64; KEY_WORDS]; SUBKEYS];
         create_subkeys(&mut subkeys, &self.ex_key, &self.tweak);
         let chain = self.chain;
+        let mut ctr = [0_u8; BLOCK_BYTES];
 
-        let mut out = [0_u8; BLOCK_BYTES];
-        // This should be adjustable for XOF usage
+        let mut out = vec![0; self.hash_len];
+
         for (i, chunk) in out.chunks_mut(BLOCK_BYTES).enumerate() {
             self.chain = chain;
-            self.tweak = Tweak::blank_with_flags(flags);
-            block[0] = i as u64;
-            self.encrypt_block(&mut block, &subkeys);
+            ctr[..8].copy_from_slice(&(i as u64).to_le_bytes());
 
-            for (src, dst) in self.chain.iter().zip(chunk.chunks_exact_mut(8)) {
-                dst.copy_from_slice(&src.to_le_bytes());
+            compress(
+                &ctr,
+                8 as u64,
+                &mut Tweak::blank_with_flags(flags),
+                &mut block,
+                &mut subkeys,
+                &mut self.chain,
+            );
+
+            for (source, target) in self.chain.iter().zip(chunk.chunks_exact_mut(8)) {
+                target.copy_from_slice(&source.to_le_bytes());
             }
         }
 
@@ -217,6 +257,10 @@ impl StatefulHasher for Skein256 {
 }
 
 crate::stateful_hash_tests!(
-    test_256_empty, Skein256::init_256([0; KEY_BYTES]), b"",
+    test_256_256_empty, Skein256::init_256(), b"",
     "c8877087da56e072870daa843f176e9453115929094c3a40c463a196c29bf7ba";
+    test_256_256_hello, Skein256::init_256(), b"hello",
+    "8b467f67dd324c9c9fe9aff562ee0e3746d88abcb2879e4e1b4fbd06a5061f89";
+    test_256_128_hello, Skein256::init_128(), b"hello",
+    "225ab2deb375c40d320f5ea1379e87e9";
 );

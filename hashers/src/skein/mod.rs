@@ -19,6 +19,8 @@ const CFG: u64 = 4 << 56;
 const MSG: u64 = 48 << 56;
 /// Processing an output block
 const OUT: u64 = 63 << 56;
+/// Length of the Config string
+const CFG_LEN: u64 = 4 * 8;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Tweak([u64; 2]);
