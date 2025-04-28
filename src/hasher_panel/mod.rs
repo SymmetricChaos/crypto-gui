@@ -39,6 +39,7 @@ mod sha2_controls;
 mod sha3_controls;
 mod shabal_controls;
 mod siphash_controls;
+mod skein_controls;
 mod sm3_controls;
 mod snefru_controls;
 mod tiger_controls;
@@ -114,6 +115,7 @@ pub struct HasherInterface {
     sha2: sha2_controls::Sha2Frame,
     sha3: sha3_controls::Sha3Frame,
     shabal: shabal_controls::ShabalFrame,
+    skein: skein_controls::SkeinFrame,
     sm3: sm3_controls::Sm3Frame,
     snefru: snefru_controls::SnefruFrame,
     tiger: tiger_controls::TigerFrame,
@@ -147,6 +149,7 @@ impl HasherInterface {
                 HasherId::Sha2,
                 HasherId::Sha3,
                 HasherId::Shabal,
+                HasherId::Skein,
                 HasherId::Sm3,
                 HasherId::Snefru,
                 HasherId::Tiger,
@@ -211,6 +214,7 @@ impl HasherInterface {
             HasherId::Sha3 => &mut self.sha3,
             HasherId::Shabal => &mut self.shabal,
             HasherId::SipHash => &mut self.siphash,
+            HasherId::Skein => &mut self.skein,
             HasherId::Sm3 => &mut self.sm3,
             HasherId::Snefru => &mut self.snefru,
             HasherId::Tiger => &mut self.tiger,
