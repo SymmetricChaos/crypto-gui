@@ -480,7 +480,7 @@
     ]
   },
   "Skein": {
-    "Description": "Skein was a finalist in the SHA-3 competition.",
+    "Description": "Skein was a finalist in the SHA-3 competition. Its compression function is based on the Threefish cipher, which was created to serve this role in Skein. Compression uses the current chain value as a key for Threefish then encrypts each block of input and XORs the block with its encrypted form to get the new chain value. A tweak value ensures that each block is processed differently even when blocks are identical. Three versions of Skein were designed with different internal state sizes. For compatibility with hash functions older than SHA-2 output sizes of 128- and 160-bits were defined for Skein while a 1024-bit output size is defined for extremely conservative security requirements.",
     "Authors": "Niels Ferguson, Stefan Lucks, Bruce Schneier, Doug Whiting, Mihir Bellare, Tadayoshi Kohno,Jon Callas, Jesse Walker",
     "Publication": "2010",
     "Hash Length": [
