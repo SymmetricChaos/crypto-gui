@@ -2,7 +2,7 @@
 
 use crate::{blake_double_round, traits::StatefulHasher};
 use std::cmp::min;
-use utils::byte_formatting::make_u32s_le;
+use utils::byte_formatting::{make_u32s_le, u32s_to_bytes_le};
 
 // https://github.com/BLAKE3-team/BLAKE3
 // https://github.com/BLAKE3-team/BLAKE3-specs/blob/master/blake3.pdf
@@ -55,12 +55,12 @@ fn permute(m: &mut [u32; BLOCK_WORDS]) {
 // The compression function.
 // Compresses a block into a chaining value.
 fn compress(
-    chaining_value: &[u32; CHAIN_WORDS],
+    chaining_value: &mut [u32; CHAIN_WORDS],
     block_words: &[u32; BLOCK_WORDS],
     counter: u64,
     block_len: u32,
     flags: u32,
-) -> [u32; BLOCK_WORDS] {
+) {
     let mut state = [
         chaining_value[0],
         chaining_value[1],
@@ -96,10 +96,71 @@ fn compress(
     blake_double_round!(&mut state, &block, ROTS, WORD_ORDER);
 
     for i in 0..CHAIN_WORDS {
-        state[i] ^= state[i + CHAIN_WORDS];
-        state[i + CHAIN_WORDS] ^= chaining_value[i];
+        chaining_value[i] = state[i] ^ state[i + 8]
     }
-    state
+}
+
+fn compress_xof(
+    chaining_value: &[u32; CHAIN_WORDS],
+    block_words: &[u32; BLOCK_WORDS],
+    counter: u64,
+    block_len: u32,
+    flags: u32,
+) -> [u8; BLOCK_BYTES] {
+    let mut state = [
+        chaining_value[0],
+        chaining_value[1],
+        chaining_value[2],
+        chaining_value[3],
+        chaining_value[4],
+        chaining_value[5],
+        chaining_value[6],
+        chaining_value[7],
+        IV[0],
+        IV[1],
+        IV[2],
+        IV[3],
+        counter as u32,
+        (counter >> 32) as u32,
+        block_len,
+        flags,
+    ];
+    let mut block = *block_words;
+
+    blake_double_round!(&mut state, &block, ROTS, WORD_ORDER);
+    permute(&mut block);
+    blake_double_round!(&mut state, &block, ROTS, WORD_ORDER);
+    permute(&mut block);
+    blake_double_round!(&mut state, &block, ROTS, WORD_ORDER);
+    permute(&mut block);
+    blake_double_round!(&mut state, &block, ROTS, WORD_ORDER);
+    permute(&mut block);
+    blake_double_round!(&mut state, &block, ROTS, WORD_ORDER);
+    permute(&mut block);
+    blake_double_round!(&mut state, &block, ROTS, WORD_ORDER);
+    permute(&mut block);
+    blake_double_round!(&mut state, &block, ROTS, WORD_ORDER);
+
+    state[0] ^= state[8];
+    state[1] ^= state[9];
+    state[2] ^= state[10];
+    state[3] ^= state[11];
+    state[4] ^= state[12];
+    state[5] ^= state[13];
+    state[6] ^= state[14];
+    state[7] ^= state[15];
+    state[8] ^= chaining_value[0];
+    state[9] ^= chaining_value[1];
+    state[10] ^= chaining_value[2];
+    state[11] ^= chaining_value[3];
+    state[12] ^= chaining_value[4];
+    state[13] ^= chaining_value[5];
+    state[14] ^= chaining_value[6];
+    state[15] ^= chaining_value[7];
+
+    let mut out = [0; BLOCK_BYTES];
+    u32s_to_bytes_le(&mut out, &state);
+    out
 }
 
 fn first_8_words(compression_output: [u32; CHAIN_WORDS]) -> [u32; CHAIN_WORDS] {
@@ -116,15 +177,17 @@ pub struct Chunk {
     chunk_counter: u64,
     flags: u32,
     blocks_compressed: u8,
+    buffer: Vec<u8>,
 }
 
 impl Chunk {
-    fn new(key_words: [u32; 8], chunk_counter: u64, flags: u32) -> Self {
+    fn new(key_words: [u32; KEY_WORDS], chunk_counter: u64, flags: u32) -> Self {
         Self {
             chaining_value: key_words,
             chunk_counter,
             flags,
             blocks_compressed: 0,
+            buffer: Vec::new(),
         }
     }
 
@@ -136,35 +199,26 @@ impl Chunk {
             0
         }
     }
+
+    fn count(&self) -> usize {
+        BLOCK_BYTES * self.blocks_compressed as usize + self.buffer.len() as usize
+    }
 }
 
 impl StatefulHasher for Chunk {
-    fn update(&mut self, bytes: &[u8]) {
-        // while !input.is_empty() {
-        //     // If the block buffer is full, compress it and clear it. More
-        //     // input is coming, so this compression is not CHUNK_END.
-        //     if self.block_len as usize == BLOCK_LEN {
-        //         let block_words = make_u32s_le::<16>(&self.block);
-        //         self.chaining_value = first_8_words(compress(
-        //             &self.chaining_value,
-        //             &block_words,
-        //             self.chunk_counter,
-        //             BLOCK_LEN as u32,
-        //             self.flags | self.start_flag(), // if this is the first block the start flag if set for compress
-        //         ));
-        //         self.blocks_compressed += 1;
-        //         self.block = [0; BLOCK_LEN];
-        //         self.block_len = 0;
-        //     }
-
-        //     // Copy input bytes into the block buffer.
-        //     let want = BLOCK_LEN - self.block_len as usize;
-        //     let take = min(want, input.len());
-        //     self.block[self.block_len as usize..][..take].copy_from_slice(&input[..take]);
-        //     self.block_len += take as u8;
-        //     input = &input[take..];
-        // }
-        todo!()
+    fn update(&mut self, mut bytes: &[u8]) {
+        crate::compression_routine!(self.buffer, bytes, BLOCK_BYTES, {
+            let block: [u32; BLOCK_WORDS] = make_u32s_le(&self.buffer);
+            let flags = self.flags | self.start_flag();
+            compress(
+                &mut self.chaining_value,
+                &block,
+                self.chunk_counter,
+                BLOCK_BYTES as u32,
+                flags,
+            );
+            self.blocks_compressed += 1;
+        });
     }
 
     fn finalize(self) -> Vec<u8> {
@@ -222,7 +276,7 @@ impl Blake3 {
 
 impl StatefulHasher for Blake3 {
     fn update(&mut self, bytes: &[u8]) {
-        // while !input.is_empty() {
+        // while !bytes.is_empty() {
         //     // If the current chunk is complete, finalize it and reset the
         //     // chunk state. More input is coming, so this chunk is not ROOT.
         //     if self.chunk_state.len() == CHUNK_LEN {
