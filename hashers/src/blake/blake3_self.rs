@@ -8,13 +8,21 @@ use utils::byte_formatting::make_u32s_le;
 // https://github.com/BLAKE3-team/BLAKE3-specs/blob/master/blake3.pdf
 // https://github.com/BLAKE3-team/BLAKE3/blob/master/reference_impl/reference_impl.rs
 
-const OUT_LEN: usize = 32;
-const KEY_LEN: usize = 32;
+// Words are u32
+const WORD_BYTES: usize = 4;
+
+const OUT_BYTES: usize = 32;
 
 // Each chunk of 1024 bytes (256 words) is divided up into blocks of 64 bytes (16 words).
 // Chunks are arranged into a tree structure while blocks are a simple array within each chunk
-const BLOCK_LEN: usize = 64;
-const CHUNK_LEN: usize = 1024;
+const BLOCK_WORDS: usize = 16;
+const BLOCK_BYTES: usize = BLOCK_WORDS * WORD_BYTES;
+const CHUNK_WORDS: usize = 256;
+const CHUNK_BYTES: usize = CHUNK_WORDS * WORD_BYTES;
+const CHAIN_WORDS: usize = 8;
+const CHAIN_BYTES: usize = CHAIN_WORDS * WORD_BYTES;
+const KEY_WORDS: usize = 8;
+const KEY_BYTES: usize = CHAIN_WORDS * WORD_BYTES;
 
 // Bitflags that can be set for chunks
 const CHUNK_START: u32 = 1 << 0;
@@ -26,18 +34,19 @@ const DERIVE_KEY_CONTEXT: u32 = 1 << 5;
 const DERIVE_KEY_MATERIAL: u32 = 1 << 6;
 
 // Same IV as BLAKE2s, sqrt of the first eight primes
-const IV: [u32; 8] = [
+const IV: [u32; CHAIN_WORDS] = [
     0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
 ];
 
-const MSG_PERMUTATION: [usize; 16] = [2, 6, 3, 10, 7, 0, 4, 13, 1, 11, 12, 5, 9, 14, 15, 8];
+const MSG_PERMUTATION: [usize; BLOCK_WORDS] =
+    [2, 6, 3, 10, 7, 0, 4, 13, 1, 11, 12, 5, 9, 14, 15, 8];
 
 const ROTS: [u32; 4] = [16, 12, 8, 7];
-const WORD_ORDER: [usize; 16] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+const WORD_ORDER: [usize; BLOCK_WORDS] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 
-fn permute(m: &mut [u32; 16]) {
-    let mut permuted = [0; 16];
-    for i in 0..16 {
+fn permute(m: &mut [u32; BLOCK_WORDS]) {
+    let mut permuted = [0; BLOCK_WORDS];
+    for i in 0..BLOCK_WORDS {
         permuted[i] = m[MSG_PERMUTATION[i]];
     }
     *m = permuted;
@@ -46,12 +55,12 @@ fn permute(m: &mut [u32; 16]) {
 // The compression function.
 // Compresses a block into a chaining value.
 fn compress(
-    chaining_value: &[u32; 8],
-    block_words: &[u32; 16],
+    chaining_value: &[u32; CHAIN_WORDS],
+    block_words: &[u32; BLOCK_WORDS],
     counter: u64,
     block_len: u32,
     flags: u32,
-) -> [u32; 16] {
+) -> [u32; BLOCK_WORDS] {
     let mut state = [
         chaining_value[0],
         chaining_value[1],
@@ -86,24 +95,24 @@ fn compress(
     permute(&mut block);
     blake_double_round!(&mut state, &block, ROTS, WORD_ORDER);
 
-    for i in 0..8 {
-        state[i] ^= state[i + 8];
-        state[i + 8] ^= chaining_value[i];
+    for i in 0..CHAIN_WORDS {
+        state[i] ^= state[i + CHAIN_WORDS];
+        state[i + CHAIN_WORDS] ^= chaining_value[i];
     }
     state
 }
 
-fn first_8_words(compression_output: [u32; 16]) -> [u32; 8] {
-    compression_output[0..8].try_into().unwrap()
+fn first_8_words(compression_output: [u32; CHAIN_WORDS]) -> [u32; CHAIN_WORDS] {
+    compression_output[..8].try_into().unwrap()
 }
 
 // A Chunk is similar to Blake2
-// Each chunk is made of up to 1024 bytes divided into blocks of 64 butes
+// Each chunk is made of up to 1024 bytes divided into blocks of 64 bytes
 // The last block may be shorter than 64 bytes but can only be empty if the whole input is empty
 // If the last block is less than 64 bytes it is padded with zeroes
 
 pub struct Chunk {
-    chaining_value: [u32; 8],
+    chaining_value: [u32; CHAIN_WORDS],
     chunk_counter: u64,
     flags: u32,
     blocks_compressed: u8,
@@ -173,25 +182,25 @@ pub enum Blake3Mode {
 }
 
 pub struct Blake3 {
-    key_words: [u32; 8],
+    key_words: [u32; KEY_WORDS],
     flags: u32,
 }
 
 impl Blake3 {
-    fn new_internal(key_words: [u32; 8], flags: u32) -> Self {
+    fn new_internal(key_words: [u32; KEY_WORDS], flags: u32) -> Self {
         Self { key_words, flags }
     }
 
     /// Construct a new Hasher for the regular hash function.
     pub fn new() -> Self {
         Self {
-            key_words: [0u32; 8],
+            key_words: [0u32; KEY_WORDS],
             flags: 0,
         }
     }
 
     /// Construct a new Hasher for the keyed hash function.
-    pub fn new_keyed(key: &[u8; KEY_LEN]) -> Self {
+    pub fn new_keyed(key: &[u8; KEY_BYTES]) -> Self {
         // The same as Self::new() but with the key material instead of the default IV and they KEYED_HASH mode set
         Self {
             key_words: make_u32s_le(key),
