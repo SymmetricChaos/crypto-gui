@@ -1,5 +1,5 @@
 use crate::ClassicRng;
-use crypto_bigint::U256;
+use crypto_bigint::{Word, U256};
 use std::sync::LazyLock;
 use utils::elliptic_curves::{EcPoint, FiniteEllipticCurve};
 
@@ -23,7 +23,7 @@ pub static P256: LazyLock<FiniteEllipticCurve> = LazyLock::new(|| FiniteElliptic
 
 pub struct DualEcDrbgP256 {
     pub state: U256,
-    pub t_state: [u64; 3],
+    pub t_state: [Word; 3],
     pub ctr: u64,
 }
 
@@ -50,9 +50,9 @@ impl ClassicRng for DualEcDrbgP256 {
         if self.ctr % 6 == 0 {
             self.step();
         }
-        let out = (self.t_state[(self.ctr as usize) % 3] >> (32 * self.ctr % 2)) as u32;
+        let out = self.t_state[(self.ctr as usize) % 3];
         self.ctr += 1;
-        out
+        out as u32
     }
 
     fn next_u64(&mut self) -> u64 {
@@ -61,7 +61,7 @@ impl ClassicRng for DualEcDrbgP256 {
         }
         let out = self.t_state[(self.ctr as usize) % 3];
         self.ctr += 1;
-        out
+        out as u64
     }
 }
 

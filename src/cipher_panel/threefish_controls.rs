@@ -41,7 +41,10 @@ macro_rules! interface {
                 ui.random_bytes_button($cipher.iv.as_words_mut())
             });
             for i in $cipher.iv.as_words_mut() {
+                #[cfg(target_pointer_width = "64")]
                 $ui.u64_hex_edit(i);
+                #[cfg(target_pointer_width = "32")]
+                $ui.u32_hex_edit(i);
             }
         }
         $ui.add_space(16.0);

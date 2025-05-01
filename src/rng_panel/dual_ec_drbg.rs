@@ -63,7 +63,10 @@ impl ClassicRngFrame for DualEcFrame {
             ui.subheading("Entropy");
             if ui.button("🎲").on_hover_text("256 random bits").clicked() {
                 let mut rng = thread_rng();
+                #[cfg(target_pointer_width = "64")]
                 let mut t_state = [0u64; 4];
+                #[cfg(target_pointer_width = "32")]
+                let mut t_state = [0u32; 8];
                 rng.fill(&mut t_state);
                 self.entropy = U256::from_words(t_state).rem(&P256.m);
                 self.instantiate();
@@ -71,7 +74,10 @@ impl ClassicRngFrame for DualEcFrame {
         });
         ui.label("Random data from an entropy source. Here always 256 bits.");
         for limb in self.entropy.as_words_mut() {
+            #[cfg(target_pointer_width = "64")]
             ui.u64_hex_edit(limb);
+            #[cfg(target_pointer_width = "32")]
+            ui.u32_hex_edit(limb);
         }
 
         ui.subheading("Nonce");
@@ -90,7 +96,10 @@ impl ClassicRngFrame for DualEcFrame {
 
         ui.subheading("Current State");
         for limb in self.rng.state.as_words_mut() {
+            #[cfg(target_pointer_width = "64")]
             ui.u64_hex_edit(limb);
+            #[cfg(target_pointer_width = "32")]
+            ui.u32_hex_edit(limb);
         }
 
         ui.collapsing("Constants", |ui| {
