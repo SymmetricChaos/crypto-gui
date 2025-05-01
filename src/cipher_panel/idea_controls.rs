@@ -41,12 +41,11 @@ impl CipherFrame for IdeaFrame {
         ui.add_space(8.0);
 
         ui.horizontal(|ui| {
-            ui.subheading("Key");
+            ui.subheading("Key (128 bits)");
             if ui.random_bytes_button(&mut self.key).clicked() {
                 self.cipher.ksa_u16(self.key);
             }
         });
-        ui.label("IDEA uses a 128-bit key which is treated as eight 16-bit words.");
         ui.horizontal(|ui| {
             for w in self.key.iter_mut() {
                 if ui.u16_hex_edit(w).changed() {

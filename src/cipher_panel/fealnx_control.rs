@@ -30,7 +30,7 @@ impl CipherFrame for FealNxFrame {
         block_cipher_mode_and_padding(ui, &mut self.cipher.mode, &mut self.cipher.padding);
         ui.add_space(8.0);
 
-        ui.label("FEAL-NX uses a 128-bit key presented here as four 32-bit words.");
+        ui.label("Key (128 bits)");
         for i in 0..4 {
             if ui.u32_hex_edit(&mut self.key[i]).changed() {
                 self.cipher.ksa_u32(self.key);

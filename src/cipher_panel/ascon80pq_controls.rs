@@ -69,7 +69,7 @@ impl CipherFrame for Ascon80pqFrame {
                 self.cipher.nonce[1] = rng.gen();
             }
         });
-        ui.label("Ascon-80pq uses a 128-bit nonce presented here as two 64-bit words.");
+        ui.label("Ascon-80pq uses a 128-bit nonce.");
         for i in 0..2 {
             ui.u64_hex_edit(&mut self.cipher.nonce[i]);
         }

@@ -213,7 +213,7 @@ impl CipherFrame for SpeckFrame {
             self.selector.key_size() * 2,
             self.selector.rounds(),
         ));
-        if ui.text_edit_multiline(&mut self.key).changed() {
+        if ui.text_edit_multiline(&mut self.key).lost_focus() {
             self.key = self.key.chars().filter(|c| c.is_ascii_hexdigit()).collect();
         }
         if ui.button("Generate Subkeys").clicked() {

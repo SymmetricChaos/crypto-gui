@@ -41,12 +41,11 @@ impl CipherFrame for Misty1Frame {
         ui.add_space(8.0);
 
         ui.horizontal(|ui| {
-            ui.subheading("Key");
+            ui.subheading("Key (128-bits)");
             if ui.random_bytes_button(&mut self.key).clicked() {
                 self.cipher.ksa_u32(self.key);
             }
         });
-        ui.label("MISTY1 uses a 128-bit key presented here as four 32-bit words.");
         for i in 0..4 {
             if ui.u32_hex_edit(&mut self.key[i]).changed() {
                 self.cipher.ksa_u32(self.key);

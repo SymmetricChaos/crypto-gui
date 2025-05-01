@@ -16,12 +16,11 @@ macro_rules! interface {
         $ui.add_space(8.0);
 
         $ui.horizontal(|ui| {
-            ui.subheading("Key");
+            ui.subheading(format!("Key ({} bits)", $bits));
             if ui.random_bytes_button(&mut $key).clicked() {
                 $cipher.ksa_u32($key);
             }
         });
-        $ui.label(format!("LEA-{0} uses a {0}-bit key.", $bits));
         for i in 0..$words {
             if $ui.u32_hex_edit(&mut $key[i]).lost_focus() {
                 $cipher.ksa_u32($key);

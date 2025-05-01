@@ -38,10 +38,9 @@ impl CipherFrame for XteaFrame {
         ui.add_space(8.0);
 
         ui.horizontal(|ui| {
-            ui.subheading("Key");
+            ui.subheading("Key (128 bits)");
             ui.random_bytes_button(&mut self.cipher.subkeys)
         });
-        ui.label("XTEA uses a 128-bit key, here controlled as four 32-bit keys.");
         for i in 0..4 {
             ui.u32_hex_edit(&mut self.cipher.subkeys[i]);
         }

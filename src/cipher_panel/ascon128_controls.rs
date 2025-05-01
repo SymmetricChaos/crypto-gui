@@ -63,10 +63,7 @@ impl CipherFrame for Ascon128Frame {
                 self.cipher.subkeys[1] = rng.gen();
             }
         });
-        ui.label(format!(
-            "{} uses a 128-bit key presented here as two 64-bit words.",
-            self.cipher.variant
-        ));
+        ui.label(format!("{} uses a 128-bit key.", self.cipher.variant));
         for i in 0..2 {
             ui.u64_hex_edit(&mut self.cipher.subkeys[i]);
         }
@@ -80,10 +77,7 @@ impl CipherFrame for Ascon128Frame {
                 self.cipher.nonce[1] = rng.gen();
             }
         });
-        ui.label(format!(
-            "{} uses a 128-bit nonce presented here as two 64-bit words.",
-            self.cipher.variant
-        ));
+        ui.label(format!("{} uses a 128-bit nonce.", self.cipher.variant));
         for i in 0..2 {
             ui.u64_hex_edit(&mut self.cipher.nonce[i]);
         }

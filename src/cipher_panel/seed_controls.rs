@@ -45,6 +45,7 @@ impl CipherFrame for SeedFrame {
         block_cipher_padding(ui, &mut self.cipher.padding);
         ui.add_space(8.0);
 
+        ui.subheading("Key (128 bits)");
         for i in 0..4 {
             if ui.u32_hex_edit(&mut self.key[i]).changed() {
                 u32s_to_bytes_le(&mut self.key_bytes, &self.key);

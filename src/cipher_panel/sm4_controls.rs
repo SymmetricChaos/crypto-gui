@@ -43,12 +43,11 @@ impl CipherFrame for Sm4Frame {
         ui.add_space(8.0);
 
         ui.horizontal(|ui| {
-            ui.subheading("Key");
+            ui.subheading("Key (128 bits)");
             if ui.random_bytes_button(&mut self.key).clicked() {
                 self.cipher.ksa_32(self.key);
             }
         });
-        ui.label("SM4 uses a 128-bit key which is treated as four 32-bit words.");
         ui.horizontal(|ui| {
             for i in 0..4 {
                 if ui.u32_hex_edit(&mut self.key[i]).changed() {

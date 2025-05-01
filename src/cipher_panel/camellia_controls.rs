@@ -17,12 +17,11 @@ macro_rules! interface {
         $ui.add_space(8.0);
 
         $ui.horizontal(|ui| {
-            ui.subheading("Key");
+            ui.subheading(format!("Key ({} bits)", $bits));
             if ui.random_bytes_button(&mut $key).clicked() {
                 $cipher.ksa_u64($key);
             }
         });
-        $ui.label("Camellia-128 uses a 128-bit key.");
         for i in 0..$words {
             if $ui.u64_hex_edit(&mut $key[i]).lost_focus() {
                 $cipher.ksa_u64($key);

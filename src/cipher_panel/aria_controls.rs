@@ -71,12 +71,11 @@ impl CipherFrame for AriaFrame {
                 ui.add_space(8.0);
 
                 ui.horizontal(|ui| {
-                    ui.subheading("Key");
+                    ui.subheading("Key (128-bits)");
                     if ui.random_bytes_button(&mut self.key128).clicked() {
                         self.cipher128.ksa_u32(self.key128);
                     }
                 });
-                ui.label("Aria-128 uses a 128-bit key presented here as four 32-bit words.");
                 for i in 0..4 {
                     if ui.u32_hex_edit(&mut self.key128[i]).lost_focus() {
                         self.cipher128.ksa_u32(self.key128);
@@ -104,12 +103,11 @@ impl CipherFrame for AriaFrame {
                 ui.add_space(8.0);
 
                 ui.horizontal(|ui| {
-                    ui.subheading("Key");
+                    ui.subheading("Key (192-bits)");
                     if ui.random_bytes_button(&mut self.key192).clicked() {
                         self.cipher192.ksa_u32(self.key192);
                     }
                 });
-                ui.label("Aria-192 uses a 192-bit key presented here as six 32-bit words.");
                 for i in 0..6 {
                     if ui.u32_hex_edit(&mut self.key192[i]).lost_focus() {
                         self.cipher192.ksa_u32(self.key192);
@@ -136,12 +134,11 @@ impl CipherFrame for AriaFrame {
                 ui.add_space(8.0);
 
                 ui.horizontal(|ui| {
-                    ui.subheading("Key");
+                    ui.subheading("Key (256-bits)");
                     if ui.random_bytes_button(&mut self.key256).clicked() {
                         self.cipher256.ksa_u32(self.key256);
                     }
                 });
-                ui.label("Aria-256 uses a 256-bit key presented here as eight 32-bit words.");
                 for i in 0..8 {
                     if ui.u32_hex_edit(&mut self.key256[i]).lost_focus() {
                         self.cipher256.ksa_u32(self.key256);

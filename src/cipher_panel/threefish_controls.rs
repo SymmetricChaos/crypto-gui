@@ -18,12 +18,11 @@ macro_rules! interface {
         $ui.add_space(8.0);
 
         $ui.horizontal(|ui| {
-            ui.subheading("Key");
+            ui.subheading(format!("Key ({} bits)", $bits));
             if ui.random_bytes_button(&mut $key).clicked() {
                 $cipher.ksa_u64(&$key, &$tweak);
             }
         });
-        $ui.label(format!("Threefish-{0} uses a {0}-bit key.", $bits));
         for i in 0..8 {
             if $ui.u64_hex_edit(&mut $key[i]).lost_focus() {
                 $cipher.ksa_u64(&$key, &$tweak);
@@ -128,7 +127,9 @@ impl CipherFrame for ThreefishFrame {
                 self.set_cipher();
             }
         });
-        ui.label("All versions of Threefish use a 128-bit \"tweak\" value to adjust the key schedule, presented here as two 64-bit words.");
+        ui.label(
+            "All versions of Threefish use a 128-bit \"tweak\" value to adjust the key schedule.",
+        );
         for i in 0..2 {
             if ui.u64_hex_edit(&mut self.tweak[i]).lost_focus() {
                 self.set_cipher();
