@@ -3,20 +3,6 @@ use std::num::Wrapping;
 
 // https://burtleburtle.net/bob/rand/isaac.html
 
-macro_rules! mix(
-    ($a:expr) => (
-    {
-        $a[0] ^= $a[1] << 11; $a[3] += $a[0]; $a[1] += $a[2];
-        $a[1] ^= $a[2] >> 2;  $a[4] += $a[1]; $a[2] += $a[3];
-        $a[2] ^= $a[3] << 8;  $a[5] += $a[2]; $a[3] += $a[4];
-        $a[3] ^= $a[4] >> 16; $a[6] += $a[3]; $a[4] += $a[5];
-        $a[4] ^= $a[5] << 10; $a[7] += $a[4]; $a[5] += $a[6];
-        $a[5] ^= $a[6] >> 4;  $a[0] += $a[5]; $a[6] += $a[7];
-        $a[6] ^= $a[7] << 8;  $a[1] += $a[6]; $a[7] += $a[0];
-        $a[7] ^= $a[0] >> 9;  $a[2] += $a[7]; $a[0] += $a[1];
-    } );
-);
-
 const ALPHA: u32 = 8;
 const SIZE: usize = 1 << ALPHA;
 const MASK: u32 = (SIZE - 1) as u32;
@@ -60,7 +46,7 @@ impl Ia {
         let mut arr = [Wrapping(0x9e3779b9_u32); 8];
 
         for _ in 0..4 {
-            mix!(arr)
+            crate::isaac_mix!(arr)
         }
 
         for i in (0..SIZE).step_by(8) {
@@ -69,7 +55,7 @@ impl Ia {
                     arr[j] += self.rand_rsl[i + j];
                 }
             }
-            mix!(arr);
+            crate::isaac_mix!(arr);
             for j in 0..8 {
                 self.array[i + j] = arr[j]
             }
@@ -80,7 +66,7 @@ impl Ia {
                 for j in 0..8 {
                     arr[j] += self.array[i + j];
                 }
-                mix!(arr);
+                crate::isaac_mix!(arr);
                 for j in 0..8 {
                     self.array[i + j] = arr[j]
                 }

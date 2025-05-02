@@ -3,6 +3,7 @@ use std::num::Wrapping;
 
 const SIZE: usize = 256;
 
+// not the same as the other ISAAC function
 macro_rules! mix(
     ($a:expr) => (
     {

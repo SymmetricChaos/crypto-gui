@@ -2,7 +2,7 @@ use super::ClassicRngFrame;
 use crate::ui_elements::{generate_randoms_box, UiElements};
 use egui::{FontId, RichText};
 use rand::{thread_rng, Rng};
-use rngs::{ia::Ia, ibaa::Ibaa, isaac::Isaac, ClassicRng};
+use rngs::{isaac::ia::Ia, isaac::ibaa::Ibaa, isaac::isaac::Isaac, ClassicRng};
 use std::num::ParseIntError;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
