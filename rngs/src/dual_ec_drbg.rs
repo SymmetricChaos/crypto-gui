@@ -1,5 +1,5 @@
 use crate::ClassicRng;
-use crypto_bigint::{Word, U256};
+use crypto_bigint::U256;
 use std::sync::LazyLock;
 use utils::elliptic_curves::{EcPoint, FiniteEllipticCurve};
 
@@ -23,7 +23,7 @@ pub static P256: LazyLock<FiniteEllipticCurve> = LazyLock::new(|| FiniteElliptic
 
 pub struct DualEcDrbgP256 {
     pub state: U256,
-    pub t_state: [Word; 3],
+    pub buffer: Vec<u8>,
     pub ctr: u64,
 }
 
@@ -31,7 +31,7 @@ impl Default for DualEcDrbgP256 {
     fn default() -> Self {
         Self {
             state: U256::from_u64(1),
-            t_state: [0; 3],
+            buffer: Vec::new(),
             ctr: 0,
         }
     }
@@ -40,33 +40,44 @@ impl Default for DualEcDrbgP256 {
 impl DualEcDrbgP256 {
     pub fn step(&mut self) {
         self.state = P256.scalar_mul(&P, &self.state).x.unwrap();
-        self.t_state
-            .copy_from_slice(&P256.scalar_mul(&Q, &self.state).x.unwrap().as_words()[1..4]);
+        // Only 30 bytes (240 bits) can be extracted at a time
+        self.buffer
+            .extend_from_slice(&P256.scalar_mul(&Q, &self.state).x.unwrap().to_le_bytes()[..30]);
     }
 }
 
 impl ClassicRng for DualEcDrbgP256 {
     fn next_u32(&mut self) -> u32 {
-        if self.ctr % 6 == 0 {
+        if self.buffer.len() < 4 {
             self.step();
-        }
-        let out = self.t_state[(self.ctr as usize) % 3];
-        self.ctr += 1;
-        out as u32
+        };
+        let out = u32::from_le_bytes(self.buffer[..4].try_into().unwrap());
+        self.buffer = self.buffer[4..].to_vec();
+        out
     }
 
     fn next_u64(&mut self) -> u64 {
-        if self.ctr % 3 == 0 {
+        if self.buffer.len() < 8 {
             self.step();
-        }
-        let out = self.t_state[(self.ctr as usize) % 3];
-        self.ctr += 1;
-        out as u64
+        };
+        let out = u64::from_le_bytes(self.buffer[..8].try_into().unwrap());
+        self.buffer = self.buffer[8..].to_vec();
+        out
     }
 }
 
-// #[cfg(test)]
-// mod tests {
+#[cfg(test)]
+mod tests {
 
-//     use super::*;
-// }
+    use super::*;
+    #[ignore]
+    #[test]
+    fn view_words() {
+        let mut rng = DualEcDrbgP256::default();
+
+        for i in 0..30 {
+            println!("{:016x}", rng.next_u64());
+        }
+
+    }
+}
