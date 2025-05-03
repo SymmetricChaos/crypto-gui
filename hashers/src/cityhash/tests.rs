@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod cityhash_tests {
     use super::super::*;
-    use crate::traits::SimpleHasher;
+    use crate::traits::StatefulHasher;
 
     use helpers::P0;
     const NTESTS: usize = 300;

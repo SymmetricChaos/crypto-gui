@@ -1,8 +1,3 @@
-pub trait SimpleHasher {
-    /// Hash some sequence of bytes
-    fn hash(&self, bytes: &[u8]) -> Vec<u8>;
-}
-
 pub trait StatefulHasher {
     /// Update the hasher's state with some bytes.
     fn update(&mut self, bytes: &[u8]);
@@ -55,16 +50,6 @@ macro_rules! compression_routine {
             $compress
             $buffer.clear();
         }
-    };
-}
-
-#[macro_export]
-macro_rules! stateful_hash_helpers {
-    () => {
-        // fn hash(mut self, bytes: &[u8]) -> Vec<u8> {
-        //     self.update(bytes);
-        //     self.finalize()
-        // }
     };
 }
 

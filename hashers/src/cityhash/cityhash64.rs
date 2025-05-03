@@ -1,7 +1,7 @@
 // based on: https://github.com/creachadair/cityhash/blob/v0.1.1/cityhash.go
 
 use super::helpers::{hash128_64, hash64_0_to_16, hash64_17_to_32, hash64_33_to_64, hash64_65, P2};
-use crate::traits::{ResettableHasher, SimpleHasher, StatefulHasher};
+use crate::traits::{ResettableHasher, StatefulHasher};
 
 pub struct CityHash64 {
     buffer: Vec<u8>,
@@ -28,24 +28,6 @@ impl CityHash64 {
             seeds: None,
             buffer: Vec::new(),
         }
-    }
-}
-
-impl SimpleHasher for CityHash64 {
-    fn hash(&self, bytes: &[u8]) -> Vec<u8> {
-        let h = match bytes.len() {
-            0..=16 => hash64_0_to_16(bytes),
-            17..=32 => hash64_17_to_32(bytes),
-            33..=64 => hash64_33_to_64(bytes),
-            _ => hash64_65(bytes),
-        };
-        if let Some([s0, s1]) = self.seeds {
-            hash128_64(h.wrapping_sub(s0), s1)
-        } else {
-            h
-        }
-        .to_be_bytes()
-        .to_vec()
     }
 }
 

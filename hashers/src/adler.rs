@@ -25,8 +25,6 @@ impl StatefulHasher for Adler32 {
     fn finalize(self) -> Vec<u8> {
         (self.b << 16 | self.a).to_be_bytes().into()
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 crate::stateful_hash_tests!(
