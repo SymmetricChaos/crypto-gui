@@ -36,6 +36,6 @@ impl HasherFrame for Sm3Frame {
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
         Ok(self
             .output_format
-            .byte_slice_to_text(Sm3::init().update_and_finalize(&bytes)))
+            .byte_slice_to_text(Sm3::init().hash(&bytes)))
     }
 }

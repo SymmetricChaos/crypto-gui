@@ -110,8 +110,6 @@ impl StatefulHasher for RipeMd0 {
         }
         out
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 crate::stateful_hash_tests!(

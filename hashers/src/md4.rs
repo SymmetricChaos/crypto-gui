@@ -122,8 +122,6 @@ impl StatefulHasher for Md4 {
         }
         out
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 crate::stateful_hash_tests!(

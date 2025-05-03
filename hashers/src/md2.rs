@@ -106,8 +106,6 @@ impl StatefulHasher for Md2 {
         }
         self.state[0..16].to_vec()
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 crate::stateful_hash_tests!(

@@ -88,8 +88,6 @@ impl StatefulHasher for RipeMd256 {
         }
         out
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 crate::stateful_hash_tests!(

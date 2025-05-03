@@ -22,5 +22,5 @@ impl StatefulHasher for Poseidon {
         todo!()
     }
 
-    crate::stateful_hash_helpers!();
+    
 }

@@ -116,5 +116,5 @@ impl StatefulHasher for Panama {
         todo!()
     }
 
-    crate::stateful_hash_helpers!();
+    
 }

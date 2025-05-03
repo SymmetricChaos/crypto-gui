@@ -292,7 +292,7 @@ impl HasherFrame for Sha3Frame {
                 Keccack::kmac_256(&self.key, self.hash_len, self.customization.as_bytes())
             }
         }
-        .update_and_finalize(&bytes);
+        .hash(&bytes);
 
         Ok(self.output_format.byte_slice_to_text(&h))
     }

@@ -1,6 +1,5 @@
 use super::PolybiusCube;
 use crate::{errors::CipherError, traits::Cipher};
-use num::Integer;
 
 fn is_power_of_three(a: usize) -> bool {
     let mut p = 1;
@@ -39,7 +38,7 @@ impl Cipher for Trifid {
 
         let vector: Vec<char> = text.chars().collect();
         let len = vector.len();
-        if !len.is_multiple_of(&self.block_size) {
+        if !(len % self.block_size == 0) {
             return Err(CipherError::input(
                 "input length must be a multiple of the block size",
             ));
@@ -78,7 +77,7 @@ impl Cipher for Trifid {
 
         // turn text into a vector and prepare a string to fill with the output
         let vector: Vec<char> = text.chars().collect();
-        if !vector.len().is_multiple_of(&self.block_size) {
+        if !(vector.len() % self.block_size == 0) {
             return Err(CipherError::input(
                 "Input length must be a multiple of the block size",
             ));

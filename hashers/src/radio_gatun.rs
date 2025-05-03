@@ -141,8 +141,6 @@ macro_rules! radio_gatun {
                 out.truncate(self.hash_len as usize);
                 out
             }
-
-            crate::stateful_hash_helpers!();
         }
     };
 }

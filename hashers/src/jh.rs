@@ -280,8 +280,6 @@ impl StatefulHasher for Jh {
             JhHashLen::L512 => self.state[64..].to_vec(),
         }
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 #[cfg(test)]

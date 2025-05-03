@@ -106,7 +106,7 @@ impl HasherFrame for HmacFrame {
             .text_to_bytes(text)
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
 
-        let h = Hmac::init(self.variant, &self.key).update_and_finalize(&bytes);
+        let h = Hmac::init(self.variant, &self.key).hash(&bytes);
 
         Ok(self.output_format.byte_slice_to_text(&h))
     }

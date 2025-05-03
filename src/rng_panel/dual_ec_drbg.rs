@@ -79,6 +79,7 @@ impl ClassicRngFrame for DualEcFrame {
             #[cfg(target_pointer_width = "32")]
             ui.u32_hex_edit(limb);
         }
+        ui.add_space(8.0);
 
         ui.subheading("Nonce");
         ui.label("Unique value for each instantiation. Here always 128 bits.");

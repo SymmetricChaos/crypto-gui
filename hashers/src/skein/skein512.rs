@@ -302,6 +302,4 @@ impl StatefulHasher for Skein512 {
 
         out.to_vec()
     }
-
-    crate::stateful_hash_helpers!();
 }

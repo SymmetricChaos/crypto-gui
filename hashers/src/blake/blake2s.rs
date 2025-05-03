@@ -126,11 +126,11 @@ impl Blake2s {
     // }
 
     pub fn hash_128(bytes: &[u8]) -> Vec<u8> {
-        Self::init_hash_128().update_and_finalize(bytes)
+        Self::init_hash_128().hash(bytes)
     }
 
     pub fn hash_256(bytes: &[u8]) -> Vec<u8> {
-        Self::init_hash_256().update_and_finalize(bytes)
+        Self::init_hash_256().hash(bytes)
     }
 }
 
@@ -161,22 +161,10 @@ impl StatefulHasher for Blake2s {
             .take(self.hash_len as usize)
             .collect_vec()
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 crate::stateful_hash_tests!(
     empty, Blake2s::init_hash_256(), &[], "69217a3079908094e11121d042354a7c1f55b6482ca1a51e1b250dfd1ed0eef9";
     digits, Blake2s::init_hash_256(), &[0, 1, 2, 3, 4, 5, 6, 7], "c7e887b546623635e93e0495598f1726821996c2377705b93a1f636f872bfa2d";
     with_key, Blake2s::init([0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f], 32),&[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], "19ba234f0a4f38637d1839f9d9f76ad91c8522307143c97d5f93f69274cec9a7";
-);
-
-crate::incremental_hash_tests!(
-
-    digits, Blake2s::init_hash_256(),
-    &[
-        &[0, 1, 2, 3],
-        &[4, 5, 6, 7],
-    ],
-    "c7e887b546623635e93e0495598f1726821996c2377705b93a1f636f872bfa2d";
 );

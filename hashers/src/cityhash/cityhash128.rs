@@ -126,6 +126,4 @@ impl StatefulHasher for CityHash128 {
             .collect()
         }
     }
-
-    crate::stateful_hash_helpers!();
 }

@@ -242,6 +242,4 @@ impl StatefulHasher for Ascon {
         self.squeeze(&mut output);
         output
     }
-
-    crate::stateful_hash_helpers!();
 }

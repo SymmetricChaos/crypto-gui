@@ -221,7 +221,7 @@ impl StatefulHasher for Argon2 {
             h.extend(0_u32.to_le_bytes());
             h.extend((lane as u32).to_le_bytes());
             let block = Blake2bLong::init_hash(BLOCK_BYTES as u64)
-                .update_and_finalize(&h)
+                .hash(&h)
                 .try_into()
                 .expect("blocks should be 1024-bytes");
             mem_blocks[lane] = block;
@@ -231,7 +231,7 @@ impl StatefulHasher for Argon2 {
             h.extend(1_u32.to_le_bytes());
             h.extend((lane as u32).to_le_bytes());
             let block = Blake2bLong::init_hash(BLOCK_BYTES as u64)
-                .update_and_finalize(&h)
+                .hash(&h)
                 .try_into()
                 .expect("blocks should be 1024-bytes");
             mem_blocks[lane + 1] = block;
@@ -395,8 +395,6 @@ impl StatefulHasher for Argon2 {
         }
 
         // Hash the final value
-        Blake2bLong::init_hash(self.tag_len as u64).update_and_finalize(&c.to_be_bytes())
+        Blake2bLong::init_hash(self.tag_len as u64).hash(&c.to_be_bytes())
     }
-
-    crate::stateful_hash_helpers!();
 }

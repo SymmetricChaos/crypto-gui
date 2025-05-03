@@ -64,6 +64,4 @@ impl StatefulHasher for Blake2bLong {
             out
         }
     }
-
-    crate::stateful_hash_helpers!();
 }

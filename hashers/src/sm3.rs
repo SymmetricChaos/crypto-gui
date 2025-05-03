@@ -129,8 +129,6 @@ impl StatefulHasher for Sm3 {
             .flatten()
             .collect_vec()
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 crate::stateful_hash_tests!(

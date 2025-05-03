@@ -99,7 +99,7 @@ impl HasherFrame for ScryptFrame {
             self.key_len,
             &self.salt,
         )
-        .update_and_finalize(&bytes);
+        .hash(&bytes);
 
         Ok(self.output_format.byte_slice_to_text(&h))
     }

@@ -225,7 +225,7 @@ impl StatefulHasher for Chunk {
         todo!()
     }
 
-    crate::stateful_hash_helpers!();
+    
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -314,5 +314,5 @@ impl StatefulHasher for Blake3 {
         todo!()
     }
 
-    crate::stateful_hash_helpers!();
+    
 }

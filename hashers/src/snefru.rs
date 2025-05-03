@@ -156,8 +156,6 @@ impl StatefulHasher for Snefru {
 
         out
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 crate::stateful_hash_tests!(

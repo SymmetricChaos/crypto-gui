@@ -283,8 +283,6 @@ impl StatefulHasher for Gost {
 
         self.state.to_vec()
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 crate::stateful_hash_tests!(

@@ -102,8 +102,6 @@ impl StatefulHasher for RipeMd160 {
         }
         out
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 crate::stateful_hash_tests!(

@@ -114,7 +114,6 @@ impl StatefulHasher for Haval {
             unreachable!("output length is in bytes and must be 16, 20, 24, 28, or 32")
         }
     }
-    crate::stateful_hash_helpers!();
 }
 
 crate::stateful_hash_tests!(

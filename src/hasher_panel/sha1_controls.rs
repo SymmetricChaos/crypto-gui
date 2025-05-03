@@ -59,6 +59,6 @@ impl HasherFrame for Sha1Frame {
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
         Ok(self
             .output_format
-            .byte_slice_to_text(Sha1::init().update_and_finalize(&bytes)))
+            .byte_slice_to_text(Sha1::init().hash(&bytes)))
     }
 }

@@ -98,8 +98,6 @@ impl StatefulHasher for SipHash {
             .to_be_bytes()
             .to_vec()
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 crate::stateful_hash_tests!(

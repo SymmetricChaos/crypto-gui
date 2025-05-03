@@ -52,8 +52,8 @@ impl HasherFrame for SnefruFrame {
             .input_format
             .text_to_bytes(text)
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
-        Ok(self.output_format.byte_slice_to_text(
-            Snefru::init(self.security_level, self.variant).update_and_finalize(&bytes),
-        ))
+        Ok(self
+            .output_format
+            .byte_slice_to_text(Snefru::init(self.security_level, self.variant).hash(&bytes)))
     }
 }

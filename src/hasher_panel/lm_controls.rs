@@ -115,7 +115,7 @@ impl HasherFrame for LmFrame {
             ));
         }
 
-        let h = Lm::init().update_and_finalize(&bytes);
+        let h = Lm::init().hash(&bytes);
 
         Ok(self.output_format.byte_slice_to_text(&h))
     }

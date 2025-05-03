@@ -261,8 +261,6 @@ macro_rules! groestl_hash_trait {
 
                 self.state.to_array()[($bytes - self.hash_len)..].to_vec()
             }
-
-            crate::stateful_hash_helpers!();
         }
     };
 }

@@ -5,9 +5,9 @@ use crate::{
 
 fn hkdf_extract(variant: HmacVariant, salt: &[u8], ikm: &[u8]) -> Vec<u8> {
     if salt.is_empty() {
-        Hmac::init(variant, &vec![0; variant.block_size() as usize]).update_and_finalize(ikm)
+        Hmac::init(variant, &vec![0; variant.block_size() as usize]).hash(ikm)
     } else {
-        Hmac::init(variant, salt).update_and_finalize(ikm)
+        Hmac::init(variant, salt).hash(ikm)
     }
 }
 
@@ -18,7 +18,10 @@ fn hkdf_expand(variant: HmacVariant, prk: &[u8], info: &[u8], length: usize) -> 
     let mut hmac = Hmac::init(variant, &prk);
     while okm.len() < length {
         i = i.wrapping_add(1);
-        t = hmac.hash_multiple_and_reset(&[&t, info, &[i]]);
+        hmac.update(&t);
+        hmac.update(info);
+        hmac.update(&[i]);
+        t = hmac.finalize_and_reset();
         okm.extend_from_slice(&t);
     }
     okm[..length].to_vec()
@@ -61,8 +64,6 @@ impl StatefulHasher for Hkdf {
     fn finalize(self) -> Vec<u8> {
         hkdf_expand(self.variant, &self.prk, &self.info, self.length)
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 // https://datatracker.ietf.org/doc/html/rfc4231

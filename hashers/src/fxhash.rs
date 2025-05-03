@@ -102,6 +102,4 @@ impl StatefulHasher for FxHash {
             }
         }
     }
-
-    crate::stateful_hash_helpers!();
 }

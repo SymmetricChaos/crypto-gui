@@ -45,8 +45,6 @@ impl StatefulHasher for Pearson {
     fn finalize(self) -> Vec<u8> {
         vec![self.state]
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 crate::stateful_hash_tests!(

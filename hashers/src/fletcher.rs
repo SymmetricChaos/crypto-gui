@@ -63,8 +63,6 @@ impl StatefulHasher for Fletcher {
                 .collect(),
         }
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 impl ResettableHasher for Fletcher {

@@ -51,16 +51,16 @@ impl HasherFrame for JhFrame {
         match self.hash_len {
             JhHashLen::L224 => Ok(self
                 .output_format
-                .byte_slice_to_text(Jh::init_224().update_and_finalize(&bytes))),
+                .byte_slice_to_text(Jh::init_224().hash(&bytes))),
             JhHashLen::L256 => Ok(self
                 .output_format
-                .byte_slice_to_text(Jh::init_256().update_and_finalize(&bytes))),
+                .byte_slice_to_text(Jh::init_256().hash(&bytes))),
             JhHashLen::L384 => Ok(self
                 .output_format
-                .byte_slice_to_text(Jh::init_384().update_and_finalize(&bytes))),
+                .byte_slice_to_text(Jh::init_384().hash(&bytes))),
             JhHashLen::L512 => Ok(self
                 .output_format
-                .byte_slice_to_text(Jh::init_512().update_and_finalize(&bytes))),
+                .byte_slice_to_text(Jh::init_512().hash(&bytes))),
         }
     }
 }

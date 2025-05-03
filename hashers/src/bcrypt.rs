@@ -145,7 +145,7 @@ impl Bcrypt {
                 "cost cannot be less than 4 or greater than 31",
             ));
         }
-        Ok(Bcrypt::init(cost, salt).update_and_finalize(password))
+        Ok(Bcrypt::init(cost, salt).hash(password))
     }
 
     pub fn direct_crypt_format(
@@ -193,8 +193,6 @@ impl StatefulHasher for Bcrypt {
         // Official implementations discard the last byte and this is the defacto standard
         out[0..23].to_vec()
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 crate::stateful_hash_tests!(

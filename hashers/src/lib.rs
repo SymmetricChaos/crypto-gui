@@ -115,7 +115,7 @@ pub mod vsh;
 //     }
 //     fn finalize(mut self) -> Vec<u8> {
 //     }
-//     crate::stateful_hash_helpers!();
+//     
 // }
 // crate:stateful_hash_tests!(
 //     test1,

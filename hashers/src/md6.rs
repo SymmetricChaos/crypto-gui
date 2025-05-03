@@ -165,8 +165,6 @@ impl StatefulHasher for Md6 {
     fn finalize(self) -> Vec<u8> {
         todo!()
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 #[cfg(test)]

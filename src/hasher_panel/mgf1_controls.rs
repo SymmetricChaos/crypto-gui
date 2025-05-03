@@ -60,6 +60,6 @@ impl HasherFrame for Mgf1Frame {
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
         Ok(self
             .output_format
-            .byte_slice_to_text(Mgf1::init(self.hash_len, self.variant).update_and_finalize(&bytes)))
+            .byte_slice_to_text(Mgf1::init(self.hash_len, self.variant).hash(&bytes)))
     }
 }

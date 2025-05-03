@@ -41,8 +41,6 @@ impl StatefulHasher for CityHash32 {
         .to_be_bytes()
         .to_vec()
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 impl ResettableHasher for CityHash32 {

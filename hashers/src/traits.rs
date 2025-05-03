@@ -10,14 +10,14 @@ pub trait StatefulHasher {
     /// Finalize the hash with any padding and processing of final blocks then output bytes. Consumes the hasher so it cannot be reused.
     fn finalize(self) -> Vec<u8>;
 
-    /// Update with multiple inputs in the given order.
-    fn update_multiple(&mut self, bytes: &[&[u8]]);
-
     /// Update and then immediately finalize. Consumes the hasher so it cannot be reused.
-    fn update_and_finalize(self, bytes: &[u8]) -> Vec<u8>;
-
-    /// Update with multiple inputs in the given order and then finalize.  Consumes the hasher so it cannot be reused.
-    fn update_multiple_and_finalize(self, bytes: &[&[u8]]) -> Vec<u8>;
+    fn hash(mut self, bytes: &[u8]) -> Vec<u8>
+    where
+        Self: Sized,
+    {
+        self.update(bytes);
+        self.finalize()
+    }
 }
 
 pub trait ResettableHasher: StatefulHasher {
@@ -29,12 +29,6 @@ pub trait ResettableHasher: StatefulHasher {
         self.update(bytes);
         self.finalize_and_reset()
     }
-
-    /// Update with multiple inputs in the given order, then finalize and reset.
-    fn hash_multiple_and_reset(&mut self, bytes: &[&[u8]]) -> Vec<u8> {
-        self.update_multiple(bytes);
-        self.finalize_and_reset()
-    }
 }
 
 // Given a buffer, input bytes, a block length, and how to compress performs the most common routine
@@ -42,11 +36,14 @@ pub trait ResettableHasher: StatefulHasher {
 #[macro_export]
 macro_rules! compression_routine {
     ($buffer: expr, $bytes: expr, $block_len: expr, $compress: tt) => {
+        // Check if there are more bytes
         while !$bytes.is_empty() {
+            // If the buffer is full then compress and clear it
             if $buffer.len() == $block_len {
                 $compress
                 $buffer.clear();
             }
+            // Take the next block or as much as possible
             let want = $block_len - $buffer.len();
             let take = std::cmp::min(want, $bytes.len());
             $buffer.extend(&$bytes[..take]);
@@ -64,21 +61,10 @@ macro_rules! compression_routine {
 #[macro_export]
 macro_rules! stateful_hash_helpers {
     () => {
-        fn update_multiple(&mut self, bytes: &[&[u8]]) {
-            for b in bytes {
-                self.update(b);
-            }
-        }
-
-        fn update_and_finalize(mut self, bytes: &[u8]) -> Vec<u8> {
-            self.update(bytes);
-            self.finalize()
-        }
-
-        fn update_multiple_and_finalize(mut self, bytes: &[&[u8]]) -> Vec<u8> {
-            self.update_multiple(bytes);
-            self.finalize()
-        }
+        // fn hash(mut self, bytes: &[u8]) -> Vec<u8> {
+        //     self.update(bytes);
+        //     self.finalize()
+        // }
     };
 }
 
@@ -92,7 +78,7 @@ macro_rules! stateful_hash_tests {
             #[test]
             fn $test_name() {
                 let a = utils::byte_formatting::hex_to_bytes($output).unwrap();
-                let b = $hasher.update_and_finalize($input);
+                let b = $hasher.hash($input);
                 if a != b {
                     panic!("hash did not match test value\nexpected:   {:02x?}\ncalculated: {:02x?}", a,b)
                 }
@@ -109,46 +95,9 @@ macro_rules! stateful_hash_tests {
             #[test]
             fn $test_name() {
                 let a = utils::byte_formatting::hex_to_bytes($output).unwrap();
-                let b = $hasher.update_and_finalize($input);
+                let b = $hasher.hash($input);
                 if a != b {
                     panic!("hash did not match test value\nexpected:   {:02x?}\ncalculated: {:02x?}", a,b)
-                }
-            }
-        )+
-        }
-    };
-}
-
-#[macro_export]
-macro_rules! incremental_hash_tests {
-    ($($test_name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
-        #[cfg(test)]
-        mod incremental_tests {
-        use super::*;
-        $(
-            #[test]
-            fn $test_name() {
-                let a = utils::byte_formatting::hex_to_bytes($output).unwrap();
-                let b = $hasher.update_multiple_and_finalize($input);
-                if a != b {
-                    panic!("hash did not match test value\nexpected:   {:02x?}\ncalculated  {:02x?}", a,b)
-                }
-            }
-        )+
-        }
-    };
-    // Optional variant with module name for separation
-    (($mod_name: ident)?; $($name: ident, $hasher: expr, $input: expr, $output: expr);+ $(;)?) => {
-        #[cfg(test)]
-        mod $mod_name {
-        use super::*;
-        $(
-            #[test]
-            fn $test_name() {
-                let a = utils::byte_formatting::hex_to_bytes($output).unwrap();
-                let b = $hasher.update_multiple_and_finalize($input);
-                if a != b {
-                    panic!("hash did not match test value\nexpected:   {:02x?}\ncalculated  {:02x?}", a,b)
                 }
             }
         )+

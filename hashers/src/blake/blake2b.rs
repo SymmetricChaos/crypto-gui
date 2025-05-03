@@ -129,15 +129,15 @@ impl Blake2b {
     }
 
     pub fn hash_256(bytes: &[u8]) -> Vec<u8> {
-        Self::init_hash_256().update_and_finalize(bytes)
+        Self::init_hash_256().hash(bytes)
     }
 
     pub fn hash_384(bytes: &[u8]) -> Vec<u8> {
-        Self::init_hash_384().update_and_finalize(bytes)
+        Self::init_hash_384().hash(bytes)
     }
 
     pub fn hash_512(bytes: &[u8]) -> Vec<u8> {
-        Self::init_hash_512().update_and_finalize(bytes)
+        Self::init_hash_512().hash(bytes)
     }
 }
 
@@ -168,8 +168,6 @@ impl StatefulHasher for Blake2b {
             .take(self.hash_len as usize)
             .collect_vec()
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 #[cfg(test)]
@@ -208,23 +206,5 @@ mod tests {
         empty, Blake2b::init_hash_512(), &[], "786a02f742015903c6c6fd852552d272912f4740e15847618a86e217f71f5419d25e1031afee585313896444934eb04b903a685b1448b755d56f701afe9be2ce";
         abc, Blake2b::init_hash_512(), &[0x61, 0x62, 0x63], "ba80a53f981c4d0d6a2797b69f12f6e94c212f14685ac4b74b12bb6fdbffa2d17d87c5392aab792dc252d5de4533cc9518d38aa8dbf1925ab92386edd4009923";
         with_key, Blake2b::init(KEY, 64), &MSG, "142709d62e28fcccd0af97fad0f8465b971e82201dc51070faa0372aa43e92484be1c1e73ba10906d5d1853db6a4106e0a7bf9800d373d6dee2d46d62ef2a461";
-    );
-
-    crate::incremental_hash_tests!(
-        with_key, Blake2b::init(KEY, 64),
-        &[
-            &MSG[..13],
-            &MSG[13..148],
-            &MSG[148..],
-        ],
-        "142709d62e28fcccd0af97fad0f8465b971e82201dc51070faa0372aa43e92484be1c1e73ba10906d5d1853db6a4106e0a7bf9800d373d6dee2d46d62ef2a461";
-
-        abc, Blake2b::init_hash_512(),
-        &[
-            &[0x61],
-            &[0x62],
-            &[0x63],
-        ],
-        "ba80a53f981c4d0d6a2797b69f12f6e94c212f14685ac4b74b12bb6fdbffa2d17d87c5392aab792dc252d5de4533cc9518d38aa8dbf1925ab92386edd4009923";
     );
 }

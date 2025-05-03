@@ -90,6 +90,6 @@ impl HasherFrame for OaatFrame {
 
         Ok(self
             .output_format
-            .byte_slice_to_text(&OneAtATime::init().update_and_finalize(&bytes)))
+            .byte_slice_to_text(&OneAtATime::init().hash(&bytes)))
     }
 }

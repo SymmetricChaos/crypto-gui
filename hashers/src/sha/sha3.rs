@@ -285,6 +285,4 @@ impl StatefulHasher for Keccack {
         self.state
             .squeeze(self.rate as usize, self.hash_len as usize)
     }
-
-    crate::stateful_hash_helpers!();
 }

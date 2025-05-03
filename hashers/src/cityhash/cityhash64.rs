@@ -69,8 +69,6 @@ impl StatefulHasher for CityHash64 {
         .to_be_bytes()
         .to_vec()
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 impl ResettableHasher for CityHash64 {

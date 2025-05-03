@@ -65,10 +65,10 @@ impl HasherFrame for Murmur3Frame {
 
         let h = match self.selector {
             Murmur3Selector::M32 => {
-                Murmur3_32::init(&self.seed.to_be_bytes()).update_and_finalize(&bytes)
+                Murmur3_32::init(&self.seed.to_be_bytes()).hash(&bytes)
             }
             Murmur3Selector::M128 => {
-                Murmur3_128::init(&self.seed.to_be_bytes()).update_and_finalize(&bytes)
+                Murmur3_128::init(&self.seed.to_be_bytes()).hash(&bytes)
             }
         };
 

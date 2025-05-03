@@ -47,8 +47,6 @@ impl StatefulHasher for Mgf1 {
 
         out[0..self.hash_len as usize].to_vec()
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 crate::stateful_hash_tests!(

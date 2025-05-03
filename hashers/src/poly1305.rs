@@ -81,8 +81,6 @@ impl StatefulHasher for Poly1305 {
         }
         out[0..16].to_vec()
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 stateful_hash_tests!(

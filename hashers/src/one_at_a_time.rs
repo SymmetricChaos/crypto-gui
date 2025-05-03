@@ -27,8 +27,6 @@ impl StatefulHasher for OneAtATime {
         self.state += self.state << 15;
         self.state.0.to_be_bytes().to_vec()
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 crate::stateful_hash_tests!(

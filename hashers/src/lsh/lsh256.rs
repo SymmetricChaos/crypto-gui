@@ -126,8 +126,6 @@ impl StatefulHasher for Lsh256 {
         out.truncate(self.outlen);
         out
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 crate::stateful_hash_tests!(

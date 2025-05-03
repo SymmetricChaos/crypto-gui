@@ -89,7 +89,7 @@ impl HasherFrame for GhashFrame {
             .text_to_bytes(text)
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
 
-        let h = Ghash::init(&self.h.to_be_bytes(), &self.c.to_be_bytes(), &self.ad).update_and_finalize(&bytes);
+        let h = Ghash::init(&self.h.to_be_bytes(), &self.c.to_be_bytes(), &self.ad).hash(&bytes);
 
         Ok(self.output_format.byte_slice_to_text(&h))
     }

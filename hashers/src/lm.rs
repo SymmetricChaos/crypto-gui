@@ -46,8 +46,6 @@ impl StatefulHasher for Lm {
 
         out
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 crate::stateful_hash_tests!(

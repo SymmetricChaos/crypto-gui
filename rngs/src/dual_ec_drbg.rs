@@ -66,18 +66,18 @@ impl ClassicRng for DualEcDrbgP256 {
     }
 }
 
-#[cfg(test)]
-mod tests {
+// #[cfg(test)]
+// mod tests {
 
-    use super::*;
-    #[ignore]
-    #[test]
-    fn view_words() {
-        let mut rng = DualEcDrbgP256::default();
+//     use super::*;
+//     #[ignore]
+//     #[test]
+//     fn view_words() {
+//         let mut rng = DualEcDrbgP256::default();
 
-        for i in 0..30 {
-            println!("{:016x}", rng.next_u64());
-        }
+//         for i in 0..30 {
+//             println!("{:016x}", rng.next_u64());
+//         }
 
-    }
-}
+//     }
+// }

@@ -100,8 +100,6 @@ impl StatefulHasher for Ghash {
 
         self.accumulator.to_be_bytes().into()
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 #[cfg(test)]

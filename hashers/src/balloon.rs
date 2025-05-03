@@ -131,5 +131,5 @@ impl StatefulHasher for Balloon {
         blocks[Self::extract_range((self.m_cost - 1) as usize)].to_vec()
     }
 
-    crate::stateful_hash_helpers!();
+    
 }

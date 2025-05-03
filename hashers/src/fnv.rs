@@ -80,8 +80,6 @@ macro_rules! fnv_prim_int {
             fn finalize(self) -> Vec<u8> {
                 self.state.to_be_bytes().to_vec()
             }
-
-            crate::stateful_hash_helpers!();
         }
     };
 }
@@ -123,8 +121,6 @@ macro_rules! fnv_big_int {
             fn finalize(self) -> Vec<u8> {
                 self.state.to_be_bytes().to_vec()
             }
-
-            crate::stateful_hash_helpers!();
         }
     };
 }

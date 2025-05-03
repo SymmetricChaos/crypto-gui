@@ -251,6 +251,4 @@ impl StatefulHasher for Skein256 {
 
         out.to_vec()
     }
-
-    crate::stateful_hash_helpers!();
 }

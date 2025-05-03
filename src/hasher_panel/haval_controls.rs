@@ -54,7 +54,7 @@ impl HasherFrame for HavalFrame {
             .text_to_bytes(text)
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
 
-        let h = Haval::init(self.hash_len, self.rounds).update_and_finalize(&bytes);
+        let h = Haval::init(self.hash_len, self.rounds).hash(&bytes);
 
         Ok(self.output_format.byte_slice_to_text(&h))
     }

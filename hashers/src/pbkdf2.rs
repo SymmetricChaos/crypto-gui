@@ -71,8 +71,6 @@ impl StatefulHasher for Pbkdf2 {
         out.truncate(self.hash_len as usize);
         out
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 crate::stateful_hash_tests!(

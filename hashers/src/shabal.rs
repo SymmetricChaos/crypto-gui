@@ -202,7 +202,7 @@ macro_rules! shabal {
                 out
             }
 
-            crate::stateful_hash_helpers!();
+
         }
     };
 }

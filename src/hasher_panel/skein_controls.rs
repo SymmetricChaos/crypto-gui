@@ -84,19 +84,19 @@ impl HasherFrame for SkeinFrame {
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
 
         let h = match self.variant {
-            SkeinVariant::S256_128 => Skein256::init_128().update_and_finalize(&bytes),
-            SkeinVariant::S256_160 => Skein256::init_160().update_and_finalize(&bytes),
-            SkeinVariant::S256_224 => Skein256::init_224().update_and_finalize(&bytes),
-            SkeinVariant::S256_256 => Skein256::init_256().update_and_finalize(&bytes),
-            SkeinVariant::S512_128 => Skein512::init_128().update_and_finalize(&bytes),
-            SkeinVariant::S512_160 => Skein512::init_160().update_and_finalize(&bytes),
-            SkeinVariant::S512_224 => Skein512::init_224().update_and_finalize(&bytes),
-            SkeinVariant::S512_256 => Skein512::init_256().update_and_finalize(&bytes),
-            SkeinVariant::S512_384 => Skein512::init_384().update_and_finalize(&bytes),
-            SkeinVariant::S512_512 => Skein512::init_512().update_and_finalize(&bytes),
-            SkeinVariant::S1024_384 => Skein1024::init_384().update_and_finalize(&bytes),
-            SkeinVariant::S1024_512 => Skein1024::init_512().update_and_finalize(&bytes),
-            SkeinVariant::S1024_1024 => Skein1024::init_1024().update_and_finalize(&bytes),
+            SkeinVariant::S256_128 => Skein256::init_128().hash(&bytes),
+            SkeinVariant::S256_160 => Skein256::init_160().hash(&bytes),
+            SkeinVariant::S256_224 => Skein256::init_224().hash(&bytes),
+            SkeinVariant::S256_256 => Skein256::init_256().hash(&bytes),
+            SkeinVariant::S512_128 => Skein512::init_128().hash(&bytes),
+            SkeinVariant::S512_160 => Skein512::init_160().hash(&bytes),
+            SkeinVariant::S512_224 => Skein512::init_224().hash(&bytes),
+            SkeinVariant::S512_256 => Skein512::init_256().hash(&bytes),
+            SkeinVariant::S512_384 => Skein512::init_384().hash(&bytes),
+            SkeinVariant::S512_512 => Skein512::init_512().hash(&bytes),
+            SkeinVariant::S1024_384 => Skein1024::init_384().hash(&bytes),
+            SkeinVariant::S1024_512 => Skein1024::init_512().hash(&bytes),
+            SkeinVariant::S1024_1024 => Skein1024::init_1024().hash(&bytes),
         };
 
         Ok(self.output_format.byte_slice_to_text(&h))

@@ -129,7 +129,7 @@ macro_rules! sha2_512 {
             }
 
             pub fn hash(bytes: &[u8]) -> Vec<u8> {
-                Self::init().update_and_finalize(bytes)
+                Self::init().hash(bytes)
             }
         }
 
@@ -161,8 +161,6 @@ macro_rules! sha2_512 {
                     .take($output_len)
                     .collect_vec()
             }
-
-            crate::stateful_hash_helpers!();
         }
 
         impl ResettableHasher for $name {

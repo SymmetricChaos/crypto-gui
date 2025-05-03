@@ -118,8 +118,6 @@ impl StatefulHasher for Blake224 {
             .flatten()
             .collect_vec()
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 #[derive(Debug, Clone)]
@@ -196,8 +194,6 @@ impl StatefulHasher for Blake256 {
             .flatten()
             .collect_vec()
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 crate::stateful_hash_tests!(

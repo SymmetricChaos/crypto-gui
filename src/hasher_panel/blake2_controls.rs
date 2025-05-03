@@ -153,13 +153,13 @@ impl HasherFrame for Blake2Frame {
 
         let h = match self.variant {
             Blake2Variant::Big => {
-                Blake2b::init(&self.key, self.hash_len).update_and_finalize(&bytes)
+                Blake2b::init(&self.key, self.hash_len).hash(&bytes)
             }
             Blake2Variant::Small => {
-                Blake2s::init(&self.key, self.hash_len as u32).update_and_finalize(&bytes)
+                Blake2s::init(&self.key, self.hash_len as u32).hash(&bytes)
             }
             Blake2Variant::BigLong => {
-                Blake2b::init(&self.key, self.hash_len).update_and_finalize(&bytes)
+                Blake2b::init(&self.key, self.hash_len).hash(&bytes)
             }
         };
 

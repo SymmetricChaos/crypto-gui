@@ -63,10 +63,10 @@ impl HasherFrame for GroestlFrame {
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
 
         let h = match self.variant {
-            GroestlVariant::L224 => Groestl512::init224().update_and_finalize(&bytes),
-            GroestlVariant::L256 => Groestl512::init256().update_and_finalize(&bytes),
-            GroestlVariant::L384 => Groestl1024::init384().update_and_finalize(&bytes),
-            GroestlVariant::L512 => Groestl1024::init512().update_and_finalize(&bytes),
+            GroestlVariant::L224 => Groestl512::init224().hash(&bytes),
+            GroestlVariant::L256 => Groestl512::init256().hash(&bytes),
+            GroestlVariant::L384 => Groestl1024::init384().hash(&bytes),
+            GroestlVariant::L512 => Groestl1024::init512().hash(&bytes),
         };
 
         Ok(self.output_format.byte_slice_to_text(&h))

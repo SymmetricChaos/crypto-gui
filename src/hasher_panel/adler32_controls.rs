@@ -55,7 +55,7 @@ impl HasherFrame for Adler32Frame {
             .text_to_bytes(text)
             .map_err(|_| hashers::errors::HasherError::general("byte format error"))?;
 
-        let h = Adler32::init().update_and_finalize(&bytes);
+        let h = Adler32::init().hash(&bytes);
 
         Ok(self.output_format.byte_slice_to_text(&h))
     }

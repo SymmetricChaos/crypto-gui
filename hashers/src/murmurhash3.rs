@@ -97,8 +97,6 @@ impl StatefulHasher for Murmur3_32 {
         self.state = final_mix(self.state);
         self.state.to_be_bytes().to_vec()
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 const BLOCK_LEN_128: usize = 16;
@@ -187,8 +185,6 @@ impl StatefulHasher for Murmur3_128 {
             .flat_map(|w| w.to_be_bytes())
             .collect()
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 crate::stateful_hash_tests!(

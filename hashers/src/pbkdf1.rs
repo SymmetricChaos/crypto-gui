@@ -33,9 +33,9 @@ impl Pbkdf1 {
 
     pub fn inner_hash(&self, bytes: &[u8]) -> Vec<u8> {
         match self.variant {
-            Pbkdf1Variant::Sha1 => Sha1::init().update_and_finalize(bytes),
-            Pbkdf1Variant::Md2 => Md2::init().update_and_finalize(bytes),
-            Pbkdf1Variant::Md5 => Md5::init().update_and_finalize(bytes),
+            Pbkdf1Variant::Sha1 => Sha1::init().hash(bytes),
+            Pbkdf1Variant::Md2 => Md2::init().hash(bytes),
+            Pbkdf1Variant::Md5 => Md5::init().hash(bytes),
         }
     }
 }
@@ -54,8 +54,6 @@ impl StatefulHasher for Pbkdf1 {
 
         self.buffer[..self.hash_len as usize].to_vec()
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 // Wasn't able to find any test vectors for PBKDF1

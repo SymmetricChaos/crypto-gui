@@ -77,7 +77,7 @@ impl Sha0 {
     }
 
     pub fn hash(bytes: &[u8]) -> Vec<u8> {
-        Self::init().update_and_finalize(bytes)
+        Self::init().hash(bytes)
     }
 }
 
@@ -109,8 +109,6 @@ impl StatefulHasher for Sha0 {
         }
         out
     }
-
-    crate::stateful_hash_helpers!();
 }
 
 impl ResettableHasher for Sha0 {
@@ -140,11 +138,6 @@ impl ResettableHasher for Sha0 {
 
     fn hash_and_reset(&mut self, bytes: &[u8]) -> Vec<u8> {
         self.update(bytes);
-        self.finalize_and_reset()
-    }
-
-    fn hash_multiple_and_reset(&mut self, bytes: &[&[u8]]) -> Vec<u8> {
-        self.update_multiple(bytes);
         self.finalize_and_reset()
     }
 }
