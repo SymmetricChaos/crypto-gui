@@ -19,7 +19,7 @@ pub trait ResettableHasher: StatefulHasher {
     /// Finalize the hash with any padding and processing of final blocks then output bytes. Resets the hasher to its starting state, allowing it to be reused.
     fn finalize_and_reset(&mut self) -> Vec<u8>;
 
-    /// Update, then finalize and reset.
+    /// Update then immediately finalize. Resets the hasher to its starting state, allowing it to be reused.
     fn hash_and_reset(&mut self, bytes: &[u8]) -> Vec<u8> {
         self.update(bytes);
         self.finalize_and_reset()
@@ -27,7 +27,7 @@ pub trait ResettableHasher: StatefulHasher {
 }
 
 // Given a buffer, input bytes, a block length, and how to compress performs the most common routine
-// Use arithmetic to advance reading the input bytes into a buffer (avoids having to allocate all of the input at once)
+// Uses arithmetic to advance reading the input bytes into a buffer (avoids having to allocate all of the input at once)
 #[macro_export]
 macro_rules! compression_routine {
     ($buffer: expr, $bytes: expr, $block_len: expr, $compress: tt) => {

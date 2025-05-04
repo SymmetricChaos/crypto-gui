@@ -1,18 +1,20 @@
 pub const WORD_BYTES: usize = 8;
 pub const STEPS: usize = 28;
-pub const CV_WORDS: usize = 16; // chaining variable
-pub const MB_WORDS: usize = 32; // message block
-pub const MB_BYTES: usize = MB_WORDS * WORD_BYTES;
-pub const CN_WORDS: usize = 8; // step constant
 
-pub const ALPHA: [usize; 2] = [23, 7];
-pub const BETA: [usize; 2] = [59, 3];
-pub const GAMMA: [usize; CN_WORDS] = [0, 16, 32, 48, 8, 24, 40, 56];
+pub const CHAIN_WORDS: usize = 16; // chaining variable
+pub const CHAIN_BYTES: usize = CHAIN_WORDS * WORD_BYTES;
+pub const BLOCK_WORDS: usize = 32; // message block
+pub const BLOCK_BYTES: usize = BLOCK_WORDS * WORD_BYTES;
+pub const CN_WORDS: usize = 8; // step con
 
-pub const PERM_TAU: [usize; CV_WORDS] = [3, 2, 0, 1, 7, 4, 5, 6, 11, 10, 8, 9, 15, 12, 13, 14];
-pub const PERM_SIGMA: [usize; CV_WORDS] = [6, 4, 5, 6, 12, 15, 14, 13, 2, 0, 1, 3, 8, 11, 10, 9];
+pub const ALPHA: [u64; 2] = [23, 7];
+pub const BETA: [u64; 2] = [59, 3];
+pub const GAMMA: [u64; CN_WORDS] = [0, 16, 32, 48, 8, 24, 40, 56];
 
-pub const LSH_512_256_IV: [u64; CV_WORDS] = [
+pub const PERM_TAU: [usize; CHAIN_WORDS] = [3, 2, 0, 1, 7, 4, 5, 6, 11, 10, 8, 9, 15, 12, 13, 14];
+pub const PERM_SIGMA: [usize; CHAIN_WORDS] = [6, 4, 5, 6, 12, 15, 14, 13, 2, 0, 1, 3, 8, 11, 10, 9];
+
+pub static LSH_512_256_IV: [u64; CHAIN_WORDS] = [
     0x6dc57c33df989423,
     0xd8ea7f6e8342c199,
     0x76df8356f8603ac4,
@@ -31,7 +33,7 @@ pub const LSH_512_256_IV: [u64; CV_WORDS] = [
     0x7e77384c772ed802,
 ];
 
-pub const LSH_512_512_IV: [u64; CV_WORDS] = [
+pub static LSH_512_512_IV: [u64; CHAIN_WORDS] = [
     0xadd50f3c7f07094e,
     0xe3f3cee8f9418a4f,
     0xb527ecde5b3d0ae9,
