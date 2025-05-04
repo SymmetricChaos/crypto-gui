@@ -1,12 +1,12 @@
-use super::lsh256_consts::{
-    ALPHA, BETA, BLOCK_BYTES, BLOCK_WORDS, CHAIN_WORDS, CN_WORDS, GAMMA, LSH_256_224_IV,
-    LSH_256_256_IV, PERM_SIGMA, PERM_TAU, SC, STEPS,
+use super::lsh512_consts::{
+    ALPHA, BETA, BLOCK_BYTES, BLOCK_WORDS, CHAIN_WORDS, CN_WORDS, GAMMA, LSH_512_224_IV,
+    LSH_512_256_IV, LSH_512_384_IV, LSH_512_512_IV, PERM_SIGMA, PERM_TAU, SC, STEPS,
 };
 use crate::traits::StatefulHasher;
-use utils::byte_formatting::fill_u32s_le;
+use utils::byte_formatting::fill_u64s_le;
 
 // Probably more efficient to calculate this on the fly
-fn message_expand(mb: &[u32; BLOCK_WORDS], arr: &mut [[u32; CHAIN_WORDS]; STEPS + 1]) {
+fn message_expand(mb: &[u64; BLOCK_WORDS], arr: &mut [[u64; CHAIN_WORDS]; STEPS + 1]) {
     arr[0].copy_from_slice(&mb[0..16]);
     arr[1].copy_from_slice(&mb[16..32]);
     for j in 2..(STEPS + 1) {
@@ -16,7 +16,7 @@ fn message_expand(mb: &[u32; BLOCK_WORDS], arr: &mut [[u32; CHAIN_WORDS]; STEPS 
     }
 }
 
-fn message_perm(x: [u32; CHAIN_WORDS]) -> [u32; CHAIN_WORDS] {
+fn message_perm(x: [u64; CHAIN_WORDS]) -> [u64; CHAIN_WORDS] {
     let mut out = [0; CHAIN_WORDS];
     for (i, sigma) in PERM_SIGMA.into_iter().enumerate() {
         out[i] = x[sigma]
@@ -24,7 +24,7 @@ fn message_perm(x: [u32; CHAIN_WORDS]) -> [u32; CHAIN_WORDS] {
     out
 }
 
-fn message_add(x: [u32; CHAIN_WORDS], y: [u32; CHAIN_WORDS]) -> [u32; CHAIN_WORDS] {
+fn message_add(x: [u64; CHAIN_WORDS], y: [u64; CHAIN_WORDS]) -> [u64; CHAIN_WORDS] {
     let mut out = [0; CHAIN_WORDS];
     for i in 0..CHAIN_WORDS {
         out[i] = x[i] ^ y[i]
@@ -32,9 +32,9 @@ fn message_add(x: [u32; CHAIN_WORDS], y: [u32; CHAIN_WORDS]) -> [u32; CHAIN_WORD
     out
 }
 
-fn step(cv: &mut [u32; CHAIN_WORDS], m: [u32; CHAIN_WORDS], j: usize) {
-    let mut vl: u32;
-    let mut vr: u32;
+fn step(cv: &mut [u64; CHAIN_WORDS], m: [u64; CHAIN_WORDS], j: usize) {
+    let mut vl: u64;
+    let mut vr: u64;
 
     for l in 0..(CHAIN_WORDS / 2) {
         vl = cv[l] ^ m[l];
@@ -48,9 +48,9 @@ fn step(cv: &mut [u32; CHAIN_WORDS], m: [u32; CHAIN_WORDS], j: usize) {
 }
 
 fn compress(
-    cv: &mut [u32; CHAIN_WORDS],
-    mb: &[u32; BLOCK_WORDS],
-    arr: &mut [[u32; CHAIN_WORDS]; STEPS + 1],
+    cv: &mut [u64; CHAIN_WORDS],
+    mb: &[u64; BLOCK_WORDS],
+    arr: &mut [[u64; CHAIN_WORDS]; STEPS + 1],
 ) {
     message_expand(mb, arr);
     for j in 0..STEPS {
@@ -59,44 +59,62 @@ fn compress(
     *cv = message_add(*cv, arr[STEPS]);
 }
 
-pub struct Lsh256 {
-    pub chain_value: [u32; CHAIN_WORDS],
+pub struct Lsh512 {
+    pub chain_value: [u64; CHAIN_WORDS],
     pub buffer: Vec<u8>,
     outlen: usize,
 }
 
-impl Default for Lsh256 {
+impl Default for Lsh512 {
     fn default() -> Self {
         Self::init_256()
     }
 }
 
-impl Lsh256 {
-    /// Initialize LSH-256-224
+impl Lsh512 {
+    /// Initialize LSH-512-224
     pub fn init_224() -> Self {
         Self {
-            chain_value: LSH_256_224_IV,
+            chain_value: LSH_512_224_IV,
             buffer: Vec::new(),
             outlen: 28,
         }
     }
 
-    /// Initialize LSH-256-256
+    /// Initialize LSH-512-256
     pub fn init_256() -> Self {
         Self {
-            chain_value: LSH_256_256_IV,
+            chain_value: LSH_512_256_IV,
             buffer: Vec::new(),
             outlen: 32,
         }
     }
+
+    /// Initialize LSH-512-384
+    pub fn init_384() -> Self {
+        Self {
+            chain_value: LSH_512_384_IV,
+            buffer: Vec::new(),
+            outlen: 48,
+        }
+    }
+
+    /// Initialize LSH-512-512
+    pub fn init_512() -> Self {
+        Self {
+            chain_value: LSH_512_512_IV,
+            buffer: Vec::new(),
+            outlen: 64,
+        }
+    }
 }
 
-impl StatefulHasher for Lsh256 {
+impl StatefulHasher for Lsh512 {
     fn update(&mut self, mut bytes: &[u8]) {
-        let mut arr = [[0_u32; CHAIN_WORDS]; STEPS + 1];
+        let mut arr = [[0_u64; CHAIN_WORDS]; STEPS + 1];
         let mut mb = [0; 32];
         crate::compression_routine!(self.buffer, bytes, BLOCK_BYTES, {
-            fill_u32s_le(&mut mb, &self.buffer);
+            fill_u64s_le(&mut mb, &self.buffer);
             compress(&mut self.chain_value, &mb, &mut arr);
         });
     }
@@ -109,9 +127,9 @@ impl StatefulHasher for Lsh256 {
         }
 
         // Final compressions
-        let mut arr = [[0_u32; CHAIN_WORDS]; STEPS + 1];
+        let mut arr = [[0_u64; CHAIN_WORDS]; STEPS + 1];
         let mut mb = [0; 32];
-        fill_u32s_le(&mut mb, &self.buffer);
+        fill_u64s_le(&mut mb, &self.buffer);
         compress(&mut self.chain_value, &mb, &mut arr);
 
         // Final output
@@ -119,7 +137,7 @@ impl StatefulHasher for Lsh256 {
         for i in 0..8 {
             h[i] = self.chain_value[i] ^ self.chain_value[i + 8];
         }
-        let mut out = Vec::with_capacity(32);
+        let mut out = Vec::with_capacity(64);
         for word in h {
             out.extend(word.to_le_bytes())
         }
@@ -129,8 +147,12 @@ impl StatefulHasher for Lsh256 {
 }
 
 crate::stateful_hash_tests!(
-    test_256_224, Lsh256::init_224(), b"abc",
-    "f7c53ba4034e708e74fba42e55997ca5126bb7623688f85342f73732";
-    test_256_256, Lsh256::init_256(), b"abc",
-    "5fbf365daea5446a7053c52b57404d77a07a5f48a1f7c1963a0898ba1b714741";
+    test_512_224, Lsh512::init_224(), b"abc",
+    "d1683234513ec5698394571ead128a8cd5373e97661ba20dcf89e489";
+    test_512_256, Lsh512::init_256(), b"abc",
+    "cd892310532602332b613f1ec11a6962fca61ea09ecffcd4bcf75858d802edec";
+    test_512_384, Lsh512::init_384(), b"abc",
+    "5f344efaa0e43ccd2e5e194d6039794b4fb431f10fb4b65fd45e9da4ecde0f27b66e8dbdfa47252e0d0b741bfd91f9fe";
+    test_512_512, Lsh512::init_512(), b"abc",
+    "a3d93cfe60dc1aacdd3bd4bef0a6985381a396c7d49d9fd177795697c3535208b5c57224bef21084d42083e95a4bd8eb33e869812b65031c428819a1e7ce596d";
 );

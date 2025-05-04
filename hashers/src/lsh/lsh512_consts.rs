@@ -7,14 +7,33 @@ pub const BLOCK_WORDS: usize = 32; // message block
 pub const BLOCK_BYTES: usize = BLOCK_WORDS * WORD_BYTES;
 pub const CN_WORDS: usize = 8; // step con
 
-pub const ALPHA: [u64; 2] = [23, 7];
-pub const BETA: [u64; 2] = [59, 3];
-pub const GAMMA: [u64; CN_WORDS] = [0, 16, 32, 48, 8, 24, 40, 56];
+pub const ALPHA: [u32; 2] = [23, 7];
+pub const BETA: [u32; 2] = [59, 3];
+pub const GAMMA: [u32; CN_WORDS] = [0, 16, 32, 48, 8, 24, 40, 56];
 
 pub const PERM_TAU: [usize; CHAIN_WORDS] = [3, 2, 0, 1, 7, 4, 5, 6, 11, 10, 8, 9, 15, 12, 13, 14];
-pub const PERM_SIGMA: [usize; CHAIN_WORDS] = [6, 4, 5, 6, 12, 15, 14, 13, 2, 0, 1, 3, 8, 11, 10, 9];
+pub const PERM_SIGMA: [usize; CHAIN_WORDS] = [6, 4, 5, 7, 12, 15, 14, 13, 2, 0, 1, 3, 8, 11, 10, 9];
 
-pub static LSH_512_256_IV: [u64; CHAIN_WORDS] = [
+pub const LSH_512_224_IV: [u64; CHAIN_WORDS] = [
+    0x0c401e9fe8813a55,
+    0x4a5f446268fd3d35,
+    0xff13e452334f612a,
+    0xf8227661037e354a,
+    0xa5f223723c9ca29d,
+    0x95d965a11aed3979,
+    0x01e23835b9ab02cc,
+    0x52d49cbad5b30616,
+    0x9e5c2027773f4ed3,
+    0x66a5c8801925b701,
+    0x22bbc85b4c6779d9,
+    0xc13171a42c559c23,
+    0x31e2b67d25be3813,
+    0xd522c4deed8e4d83,
+    0xa79f5509b43fbafe,
+    0xe00d2cd88b4b6c6a,
+];
+
+pub const LSH_512_256_IV: [u64; CHAIN_WORDS] = [
     0x6dc57c33df989423,
     0xd8ea7f6e8342c199,
     0x76df8356f8603ac4,
@@ -33,7 +52,26 @@ pub static LSH_512_256_IV: [u64; CHAIN_WORDS] = [
     0x7e77384c772ed802,
 ];
 
-pub static LSH_512_512_IV: [u64; CHAIN_WORDS] = [
+pub const LSH_512_384_IV: [u64; CHAIN_WORDS] = [
+    0x53156a66292808f6,
+    0xb2c4f362b204c2bc,
+    0xb84b7213bfa05c4e,
+    0x976ceb7c1b299f73,
+    0xdf0cc63c0570ae97,
+    0xda4441baa486ce3f,
+    0x6559f5d9b5f2acc2,
+    0x22dacf19b4b52a16,
+    0xbbcdacefde80953a,
+    0xc9891a2879725b3e,
+    0x7c9fe6330237e440,
+    0xa30ba550553f7431,
+    0xbb08043fb34e3e30,
+    0xa0dec48d54618ead,
+    0x150317267464bc57,
+    0x32d1501fde63dc93,
+];
+
+pub const LSH_512_512_IV: [u64; CHAIN_WORDS] = [
     0xadd50f3c7f07094e,
     0xe3f3cee8f9418a4f,
     0xb527ecde5b3d0ae9,

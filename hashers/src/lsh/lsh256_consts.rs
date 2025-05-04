@@ -12,14 +12,14 @@ pub const BETA: [u32; 2] = [1, 17];
 pub const GAMMA: [u32; CN_WORDS] = [0, 8, 16, 24, 24, 16, 8, 0];
 
 pub const PERM_TAU: [usize; CHAIN_WORDS] = [3, 2, 0, 1, 7, 4, 5, 6, 11, 10, 8, 9, 15, 12, 13, 14];
-pub const PERM_SIGMA: [usize; CHAIN_WORDS] = [6, 4, 5, 6, 12, 15, 14, 13, 2, 0, 1, 3, 8, 11, 10, 9];
+pub const PERM_SIGMA: [usize; CHAIN_WORDS] = [6, 4, 5, 7, 12, 15, 14, 13, 2, 0, 1, 3, 8, 11, 10, 9];
 
-pub static LSH_256_224_IV: [u32; CHAIN_WORDS] = [
+pub const LSH_256_224_IV: [u32; CHAIN_WORDS] = [
     0x068608d3, 0x62d8f7a7, 0xd76652ab, 0x4c600a43, 0xbdc40aa8, 0x1eca0b68, 0xda1a89be, 0x3147d354,
     0x707eb4f9, 0xf65b3862, 0x6b0b2abe, 0x56b8ec0a, 0xcf237286, 0xee0d1727, 0x33636595, 0x8bb8d05f,
 ];
 
-pub static LSH_256_256_IV: [u32; CHAIN_WORDS] = [
+pub const LSH_256_256_IV: [u32; CHAIN_WORDS] = [
     0x46a10f1f, 0xfddce486, 0xb41443a8, 0x198e6b9d, 0x3304388d, 0xb0f5a3c7, 0xb36061c4, 0x7adbd553,
     0x105d5378, 0x2f74de54, 0x5c2f2d95, 0xf2553fbe, 0x8051357a, 0x138668c8, 0x47aa4484, 0xe01afb41,
 ];
