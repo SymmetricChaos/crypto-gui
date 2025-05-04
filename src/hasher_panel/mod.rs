@@ -20,6 +20,7 @@ mod hkdf_controls;
 mod hmac_controls;
 mod jh_controls;
 mod lm_controls;
+mod lsh_controls;
 mod md2_controls;
 mod md4_controls;
 mod md5_controls;
@@ -97,6 +98,7 @@ pub struct HasherInterface {
     hmac: hmac_controls::HmacFrame,
     jh: jh_controls::JhFrame,
     lm: lm_controls::LmFrame,
+    lsh: lsh_controls::LshFrame,
     md2: md2_controls::Md2Frame,
     md4: md4_controls::Md4Frame,
     md5: md5_controls::Md5Frame,
@@ -135,6 +137,7 @@ impl HasherInterface {
                 HasherId::Hkdf,
                 HasherId::Hmac,
                 HasherId::Jh,
+                HasherId::Lsh,
                 HasherId::Md2,
                 HasherId::Md4,
                 HasherId::Md5,
@@ -196,6 +199,7 @@ impl HasherInterface {
             HasherId::Hmac => &mut self.hmac,
             HasherId::Jh => &mut self.jh,
             HasherId::Lm => &mut self.lm,
+            HasherId::Lsh => &mut self.lsh,
             HasherId::Md2 => &mut self.md2,
             HasherId::Md4 => &mut self.md4,
             HasherId::Md5 => &mut self.md5,

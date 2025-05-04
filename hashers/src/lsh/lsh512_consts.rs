@@ -5,7 +5,7 @@ pub const CHAIN_WORDS: usize = 16; // chaining variable
 pub const CHAIN_BYTES: usize = CHAIN_WORDS * WORD_BYTES;
 pub const BLOCK_WORDS: usize = 32; // message block
 pub const BLOCK_BYTES: usize = BLOCK_WORDS * WORD_BYTES;
-pub const CN_WORDS: usize = 8; // step con
+pub const CN_WORDS: usize = 8; // step constant
 
 pub const ALPHA: [u32; 2] = [23, 7];
 pub const BETA: [u32; 2] = [59, 3];

@@ -40,7 +40,6 @@ impl HasherFrame for JhFrame {
             ui.selectable_value(&mut self.hash_len, JhHashLen::L384, "JH-384");
             ui.selectable_value(&mut self.hash_len, JhHashLen::L512, "JH-512");
         });
-        todo!()
     }
 
     fn hash_string(&self, text: &str) -> Result<String, hashers::errors::HasherError> {

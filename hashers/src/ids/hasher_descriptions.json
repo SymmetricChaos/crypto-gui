@@ -209,14 +209,32 @@
       "Crytographic"
     ]
   },
-  "OneAtATime": {
-    "Description": "The \"one_at_a_time\" hash function is an extremely simple hash function that processes an input one byte at a time using just addition, XOR, and shifts. It operates on a 32-bit state that is returned as the hash.",
-    "Authors": "Jenkins",
-    "Publication": "1997",
+  "LM": {
+    "Description": "LM is a legacy password hashing function sometimes used by the Windows operating system. The password can be no more than 14 characters and converts letters to upper case before hashing. It is considered extremely vulnerable to attack has been disabled by default on versions of Windows released since around 2008. LM has been replaced by the NT hash function which is MD4.",
+    "Authors": "Microsoft",
+    "Publication": "1987",
     "Hash Length": [
-      32
+      112
     ],
-    "Traits": []
+    "Traits": [
+      "Broken",
+      "Crytographic"
+    ]
+  },
+  "LSH": {
+    "Description": "LSH is a family of cryptographic hash functions developed and standardized in South Korea. They correspond to the American SHA-2 family of functions and were created as a more secure alternative while also being more efficient in software than SHA-3.",
+    "Authors": "Dong-Chan Kim, Deukjo Hong, Jung-Keun Lee, Woo-Hwan Kim, and Daesung Kwon",
+    "Publication": "2015",
+    "Hash Length": [
+      224,
+      256,
+      384,
+      512
+    ],
+    "Traits": [
+      "Crytographic",
+      "Merkle-Damgård"
+    ]
   },
   "MD2": {
     "Description": "The MD2 hash function is an obsolete hash algorithm. Although MD2 has never been publicly broken it is much slower than other algorithms and attacks on it are known. Unusually MD2 appends a checksum after the padded input, without which its main compression function is insecure.",
@@ -280,32 +298,14 @@
     ],
     "Traits": []
   },
-  "LM": {
-    "Description": "LM is a legacy password hashing function sometimes used by the Windows operating system. The password can be no more than 14 characters and converts letters to upper case before hashing. It is considered extremely vulnerable to attack has been disabled by default on versions of Windows released since around 2008. LM has been replaced by the NT hash function which is MD4.",
-    "Authors": "Microsoft",
-    "Publication": "1987",
+  "OneAtATime": {
+    "Description": "The \"one_at_a_time\" hash function is an extremely simple hash function that processes an input one byte at a time using just addition, XOR, and shifts. It operates on a 32-bit state that is returned as the hash.",
+    "Authors": "Jenkins",
+    "Publication": "1997",
     "Hash Length": [
-      112
+      32
     ],
-    "Traits": [
-      "Broken",
-      "Crytographic"
-    ]
-  },
-  "LSH": {
-    "Description": "LSH is a family of cryptographic hash functions developed and standardized in South Korea. They correspond to the American SHA-2 family of functions and were created as a more secure alternative while also being more efficient in software than SHA-3.",
-    "Authors": "Dong-Chan Kim, Deukjo Hong, Jung-Keun Lee, Woo-Hwan Kim, and Daesung Kwon",
-    "Publication": "2015",
-    "Hash Length": [
-      224,
-      256,
-      384,
-      512
-    ],
-    "Traits": [
-      "Crytographic",
-      "Merkle-Damgård"
-    ]
+    "Traits": []
   },
   "PBKDF1": {
     "Description": "PBKDF1 (Password Based Key Derivation Function 1) is a now obsolete key derivation function with an adjustable work factor. It operates simply by applying a chosen hash function (MD2, MD5, or SHA-1) numerous times.",
