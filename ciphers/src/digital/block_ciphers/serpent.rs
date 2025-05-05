@@ -273,6 +273,8 @@ impl BlockCipher<16> for Serpent {
 
         u32s_to_bytes_le(bytes, &block);
     }
+
+    crate::block_cipher_getters!();
 }
 
 crate::impl_cipher_for_block_cipher!(Serpent, 16);

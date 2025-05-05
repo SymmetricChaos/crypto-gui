@@ -145,6 +145,8 @@ impl BlockCipher<8> for Blowfish {
         self.decrypt_u32_pair(&mut lr);
         u32s_to_bytes_be(bytes, &lr);
     }
+
+    crate::block_cipher_getters!();
 }
 
 impl_cipher_for_block_cipher!(Blowfish, 8);

@@ -74,6 +74,8 @@ impl BlockCipher<8> for TripleDes {
         let b = self.decrypt_with_subkey(b, 2);
         overwrite_bytes(bytes, &b.to_be_bytes());
     }
+
+    crate::block_cipher_getters!();
 }
 
 impl_cipher_for_block_cipher!(TripleDes, 8);

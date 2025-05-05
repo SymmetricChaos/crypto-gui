@@ -147,6 +147,8 @@ macro_rules! threefish {
 
                 utils::byte_formatting::u64s_to_bytes_le(bytes, &block.map(|n| n));
             }
+
+            crate::block_cipher_getters!();
         }
 
         crate::impl_cipher_for_block_cipher!($name, $block_bytes);

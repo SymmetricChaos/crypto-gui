@@ -164,6 +164,8 @@ macro_rules! lea_struct {
                 }
                 utils::byte_formatting::u32s_to_bytes_le(bytes, &v);
             }
+
+            crate::block_cipher_getters!();
         }
     };
 }

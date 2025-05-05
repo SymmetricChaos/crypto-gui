@@ -1,5 +1,3 @@
-use crate::digital::block_ciphers::block_cipher::BlockCipher;
-
 crate::impl_rc5!(
     Rc5_64,
     u64,

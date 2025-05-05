@@ -65,6 +65,8 @@ impl BlockCipher<8> for DesX {
         f ^= self.extra_keys[0];
         overwrite_bytes(bytes, &f.to_be_bytes());
     }
+
+    crate::block_cipher_getters!();
 }
 
 impl_cipher_for_block_cipher!(DesX, 8);

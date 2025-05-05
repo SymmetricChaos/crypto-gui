@@ -231,6 +231,8 @@ impl BlockCipher<8> for Misty1 {
 
         utils::byte_formatting::u32s_to_bytes_be(bytes, &v);
     }
+
+    crate::block_cipher_getters!();
 }
 
 crate::impl_cipher_for_block_cipher!(Misty1, 8);

@@ -143,6 +143,7 @@ impl BlockCipher<16> for Lucifer {
         // Final unswap
         (block.0, block.1) = (block.1, block.0)
     }
+    crate::block_cipher_getters!();
 }
 
 crate::impl_cipher_for_block_cipher!(Lucifer, 16);

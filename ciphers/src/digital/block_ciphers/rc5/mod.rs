@@ -128,6 +128,8 @@ macro_rules! impl_rc5 {
                 block[1] = block[1].wrapping_sub(self.state[1]);
                 utils::byte_formatting::overwrite_bytes(bytes, &Self::words_to_bytes(&block));
             }
+
+            crate::block_cipher_getters!();
         }
 
         crate::impl_cipher_for_block_cipher!($name, $bytes_in_block);

@@ -106,7 +106,7 @@ pub fn ansi923_padding(bytes: &mut Vec<u8>, block_size: u32) -> Result<(), Paddi
     Ok(())
 }
 
-// Remove ANSI X9.23 padding.
+/// Remove ANSI X9.23 padding.
 pub fn strip_ansi923_padding(bytes: &mut Vec<u8>) -> Result<(), PaddingError> {
     let n_padding = bytes.pop().ok_or(PaddingError(String::from(
         "ANSI X9.23 padded ciphertext cannot have zero length",

@@ -354,6 +354,8 @@ macro_rules! build_camellia {
                 v.swap(0, 1);
                 utils::byte_formatting::u64s_to_bytes_be(bytes, &v);
             }
+
+            crate::block_cipher_getters!();
         }
     };
 }

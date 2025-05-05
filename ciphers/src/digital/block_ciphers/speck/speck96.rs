@@ -129,6 +129,8 @@ macro_rules! speck96 {
 
                 u48s_to_bytes_be(bytes, &[x, y]);
             }
+
+            crate::block_cipher_getters!();
         }
     };
 }

@@ -51,6 +51,8 @@ impl BlockCipher<8> for Khufu {
         for key in self.round_keys {}
         utils::byte_formatting::u32s_to_bytes_be(bytes, &v);
     }
+
+    crate::block_cipher_getters!();
 }
 
 // crate::impl_cipher_for_block_cipher!(Khufu, 8);

@@ -146,6 +146,8 @@ impl BlockCipher<16> for Sm4 {
 
         u32s_to_bytes_be(bytes, &block);
     }
+
+    crate::block_cipher_getters!();
 }
 
 crate::impl_cipher_for_block_cipher!(Sm4, 16);

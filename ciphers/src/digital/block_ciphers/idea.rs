@@ -215,6 +215,8 @@ impl BlockCipher<8> for Idea {
             *ciphertext = *plaintext
         }
     }
+
+    crate::block_cipher_getters!();
 }
 
 crate::impl_cipher_for_block_cipher!(Idea, 8);

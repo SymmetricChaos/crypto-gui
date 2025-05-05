@@ -88,6 +88,7 @@ macro_rules! speck64 {
 
                 u32s_to_bytes_be(bytes, &[x, y]);
             }
+            crate::block_cipher_getters!();
         }
     };
 }

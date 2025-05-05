@@ -303,6 +303,7 @@ macro_rules! aria {
 
                 bytes.copy_from_slice(&v.to_be_bytes());
             }
+            crate::block_cipher_getters!();
         }
 
         crate::block_cipher_builders! {$name, u128}

@@ -45,6 +45,7 @@ impl BlockCipher<16> for E2_128 {
     fn decrypt_block(&self, bytes: &mut [u8]) {
         todo!()
     }
+    crate::block_cipher_getters!();
 }
 
 crate::impl_cipher_for_block_cipher!(E2_128, 16);

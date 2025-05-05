@@ -60,6 +60,8 @@ impl BlockCipher<8> for Des {
         let f = final_permutation(b.rotate_left(32));
         overwrite_bytes(bytes, &f.to_be_bytes());
     }
+
+    crate::block_cipher_getters!();
 }
 
 impl_cipher_for_block_cipher!(Des, 8);

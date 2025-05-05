@@ -380,6 +380,7 @@ impl BlockCipher<16> for Gift128 {
         for i in 0..40 {}
         unpack(&v, bytes);
     }
+    crate::block_cipher_getters!();
 }
 
 crate::impl_cipher_for_block_cipher!(Gift128, 16);

@@ -47,6 +47,8 @@ impl BlockCipher<16> for Present {
 
         for i in 0..31 {}
     }
+
+    crate::block_cipher_getters!();
 }
 
 // crate::impl_cipher_for_block_cipher!(Present, 8);

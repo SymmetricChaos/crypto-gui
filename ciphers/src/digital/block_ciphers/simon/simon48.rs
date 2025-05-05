@@ -137,6 +137,8 @@ macro_rules! simon48 {
 
                 u24s_to_bytes_be(bytes, &[x, y]);
             }
+
+            crate::block_cipher_getters!();
         }
     };
 }

@@ -66,6 +66,8 @@ impl BlockCipher<8> for Tea {
         }
         u32s_to_bytes_be(bytes, &v);
     }
+
+    crate::block_cipher_getters!();
 }
 
 crate::impl_cipher_for_block_cipher!(Tea, 8);

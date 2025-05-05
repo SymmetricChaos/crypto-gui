@@ -1,5 +1,3 @@
-use crate::digital::block_ciphers::block_cipher::BlockCipher;
-
 crate::impl_rc5!(Rc5_16, u16, 2, 16, 4, 0xb7e1, 0x9e37, u32, 12);
 
 #[cfg(test)]

@@ -248,6 +248,8 @@ macro_rules! aes_methods {
                 add_round_key(bytes, &self.round_keys[0]);
                 transpose_state(bytes);
             }
+
+            crate::block_cipher_getters!();
         }
     };
 }

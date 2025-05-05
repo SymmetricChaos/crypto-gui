@@ -190,6 +190,8 @@ impl BlockCipher<8> for Skipjack {
 
         u16s_to_bytes_be(bytes, &v);
     }
+
+    crate::block_cipher_getters!();
 }
 
 crate::impl_cipher_for_block_cipher!(Skipjack, 8);

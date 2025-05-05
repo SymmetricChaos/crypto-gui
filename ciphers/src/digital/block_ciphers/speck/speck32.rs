@@ -90,6 +90,8 @@ impl BlockCipher<4> for Speck32_64 {
 
         u16s_to_bytes_be(bytes, &[x, y]);
     }
+
+    crate::block_cipher_getters!();
 }
 
 crate::impl_cipher_for_block_cipher!(Speck32_64, 4);

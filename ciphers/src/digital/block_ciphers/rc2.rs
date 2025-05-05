@@ -226,6 +226,8 @@ impl BlockCipher<8> for Rc2 {
 
         utils::byte_formatting::u16s_to_bytes_le(bytes, &v);
     }
+
+    crate::block_cipher_getters!();
 }
 
 crate::impl_cipher_for_block_cipher!(Rc2, 8);
