@@ -325,20 +325,16 @@ aes_gcm_methods!(AesGcm256, 8, 14);
 #[cfg(test)]
 mod aes_gcm_tests {
 
+    use hex_literal::hex;
+
     use crate::Cipher;
 
     use super::*;
 
-    fn ttb(s: &str) -> Vec<u8> {
-        utils::byte_formatting::ByteFormat::Hex
-            .text_to_bytes(s)
-            .unwrap()
-    }
-
     #[test]
     fn test_case_1() {
         let cipher = AesGcm128::default()
-            .with_key(ttb("00000000000000000000000000000000").try_into().unwrap())
+            .with_key(hex!("00000000000000000000000000000000"))
             .with_iv(vec![0; 12]);
         assert_eq!(
             "58e2fccefa7e3061367f1d57a4e7455a",
@@ -349,7 +345,7 @@ mod aes_gcm_tests {
     #[test]
     fn test_case_2() {
         let cipher = AesGcm128::default()
-            .with_key(ttb("00000000000000000000000000000000").try_into().unwrap())
+            .with_key(hex!("00000000000000000000000000000000"))
             .with_iv(vec![0; 12]);
         assert_eq!(
             "0388dace60b6a392f328c2b971b2fe78ab6e47d42cec13bdf53a67b21257bddf",
@@ -360,8 +356,8 @@ mod aes_gcm_tests {
     #[test]
     fn test_case_3() {
         let cipher = AesGcm128::default()
-            .with_key(ttb("feffe9928665731c6d6a8f9467308308").try_into().unwrap())
-            .with_iv(ttb("cafebabefacedbaddecaf888"));
+            .with_key(hex!("feffe9928665731c6d6a8f9467308308"))
+            .with_iv(hex!("cafebabefacedbaddecaf888").to_vec());
         assert_eq!(
             "42831ec2217774244b7221b784d0d49ce3aa212f2c02a4e035c17e2329aca12e21d514b25466931c7d8f6a5aac84aa051ba30b396a0aac973d58e091473f59854d5c2af327cd64a62cf35abd2ba6fab4",
             cipher.encrypt("d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b391aafd255").unwrap()
@@ -371,9 +367,9 @@ mod aes_gcm_tests {
     #[test]
     fn test_case_4() {
         let cipher = AesGcm128::default()
-            .with_key(ttb("feffe9928665731c6d6a8f9467308308").try_into().unwrap())
-            .with_iv(ttb("cafebabefacedbaddecaf888"))
-            .with_ad(ttb("feedfacedeadbeeffeedfacedeadbeefabaddad2"));
+            .with_key(hex!("feffe9928665731c6d6a8f9467308308"))
+            .with_iv(hex!("cafebabefacedbaddecaf888").to_vec())
+            .with_ad(hex!("feedfacedeadbeeffeedfacedeadbeefabaddad2").to_vec());
         assert_eq!(
             "42831ec2217774244b7221b784d0d49ce3aa212f2c02a4e035c17e2329aca12e21d514b25466931c7d8f6a5aac84aa051ba30b396a0aac973d58e0915bc94fbc3221a5db94fae95ae7121a47",
             cipher.encrypt("d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b39").unwrap()
@@ -383,9 +379,9 @@ mod aes_gcm_tests {
     #[test]
     fn test_case_5() {
         let cipher = AesGcm128::default()
-            .with_key(ttb("feffe9928665731c6d6a8f9467308308").try_into().unwrap())
-            .with_iv(ttb("cafebabefacedbad"))
-            .with_ad(ttb("feedfacedeadbeeffeedfacedeadbeefabaddad2"));
+            .with_key(hex!("feffe9928665731c6d6a8f9467308308"))
+            .with_iv(hex!("cafebabefacedbad").to_vec())
+            .with_ad(hex!("feedfacedeadbeeffeedfacedeadbeefabaddad2").to_vec());
         assert_eq!(
             "61353b4c2806934a777ff51fa22a4755699b2a714fcdc6f83766e5f97b6c742373806900e49f24b22b097544d4896b424989b5e1ebac0f07c23f45983612d2e79e3b0785561be14aaca2fccb",
             cipher.encrypt("d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b39").unwrap()
@@ -395,9 +391,9 @@ mod aes_gcm_tests {
     #[test]
     fn test_case_6() {
         let cipher = AesGcm128::default()
-            .with_key(ttb("feffe9928665731c6d6a8f9467308308").try_into().unwrap())
-            .with_iv(ttb("9313225df88406e555909c5aff5269aa6a7a9538534f7da1e4c303d2a318a728c3c0c95156809539fcf0e2429a6b525416aedbf5a0de6a57a637b39b"))
-            .with_ad(ttb("feedfacedeadbeeffeedfacedeadbeefabaddad2"));
+            .with_key(hex!("feffe9928665731c6d6a8f9467308308"))
+            .with_iv(hex!("9313225df88406e555909c5aff5269aa6a7a9538534f7da1e4c303d2a318a728c3c0c95156809539fcf0e2429a6b525416aedbf5a0de6a57a637b39b").to_vec())
+            .with_ad(hex!("feedfacedeadbeeffeedfacedeadbeefabaddad2").to_vec());
         assert_eq!(
             "8ce24998625615b603a033aca13fb894be9112a5c3a211a8ba262a3cca7e2ca701e4a9a4fba43c90ccdcb281d48c7c6fd62875d2aca417034c34aee5619cc5aefffe0bfa462af43c1699d050",
             cipher.encrypt("d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b39").unwrap()

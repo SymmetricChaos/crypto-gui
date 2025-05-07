@@ -14,15 +14,15 @@ use utils::{
 macro_rules! block_cipher_builders {
     ($name: ident, $iv_type: ty) => {
         impl $name {
-            // pub fn input(mut self, input: utils::byte_formatting::ByteFormat) -> Self {
-            //     self.input_format = input;
-            //     self
-            // }
+            pub fn input(mut self, input: utils::byte_formatting::ByteFormat) -> Self {
+                self.input_format = input;
+                self
+            }
 
-            // pub fn output(mut self, output: utils::byte_formatting::ByteFormat) -> Self {
-            //     self.output_format = output;
-            //     self
-            // }
+            pub fn output(mut self, output: utils::byte_formatting::ByteFormat) -> Self {
+                self.output_format = output;
+                self
+            }
 
             pub fn padding(
                 mut self,
@@ -58,6 +58,14 @@ macro_rules! block_cipher_getters {
         fn get_mode(&self) -> crate::digital::block_ciphers::block_cipher::BCMode {
             self.mode
         }
+
+        fn get_iv_be(&self) -> Vec<u8> {
+            self.iv.to_be_bytes().to_vec()
+        }
+
+        fn get_iv_le(&self) -> Vec<u8> {
+            self.iv.to_le_bytes().to_vec()
+        }
     };
 }
 
@@ -67,6 +75,8 @@ pub trait BlockCipher<const N: usize> {
 
     fn get_padding(&self) -> BCPadding;
     fn get_mode(&self) -> BCMode;
+    fn get_iv_be(&self) -> Vec<u8>;
+    fn get_iv_le(&self) -> Vec<u8>;
 
     /// Encrypt in Electronic Code Book Mode
     fn encrypt_ecb(&self, bytes: &mut [u8]) {

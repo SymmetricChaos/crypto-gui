@@ -31,13 +31,13 @@ pub fn add_mul(acc: &mut u128, block: &[u8], h: u128) {
 }
 
 #[derive(Debug, Clone)]
-pub struct Ghash {
+pub struct Polyval {
     pub h: u128,     // usually determined by a cipher
     pub c: u128,     // constant term, usually determined by a cipher
     pub ad_len: u64, // how many bytes of input to treat as the additional data
 }
 
-impl Default for Ghash {
+impl Default for Polyval {
     fn default() -> Self {
         Self {
             h: 0,
@@ -47,7 +47,7 @@ impl Default for Ghash {
     }
 }
 
-impl Ghash {
+impl Polyval {
     pub fn h(mut self, h: u128) -> Self {
         self.h = h;
         self
