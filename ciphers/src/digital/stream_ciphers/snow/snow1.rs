@@ -276,6 +276,3 @@ impl Snow1 {
 }
 
 crate::impl_cipher_for_stream_cipher!(Snow1);
-
-#[test]
-fn test_keystream() {}
