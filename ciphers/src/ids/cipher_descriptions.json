@@ -998,6 +998,20 @@
       "Feistel"
     ]
   },
+  "Snow3G": {
+    "Names": [
+      "Snow3G",
+      "Snow 3G",
+      "f8",
+      "UEA2"
+    ],
+    "Description": "Snow 3G is the third published version of the SNOW cipher. The majority of the state is a 512-bit LFSR (expressed as sixteen 32-bit words). The output of the LFSR is transformed by a simple state machine before output. It was standardized by 3GPP as UEA2 for use in encrypting 3G wireless communications.",
+    "Authors": "Thomas Johansson and Patrik Ekdahl",
+    "Publication": "2006",
+    "Traits": [
+      "Stream Cipher"
+    ]
+  },
   "Speck": {
     "Names": [
       "Speck",

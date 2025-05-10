@@ -1,4 +1,4 @@
-use utils::byte_formatting::ByteFormat;
+use utils::byte_formatting::{xor_into_bytes, ByteFormat};
 
 // https://www.gsma.com/about-us/wp-content/uploads/2014/12/snow3gspec.pdf
 
@@ -90,6 +90,7 @@ fn sbox2(n: u32) -> u32 {
     u32::from_be_bytes([r0, r1, r2, r3])
 }
 
+#[derive(Debug, Clone)]
 pub struct Snow3G {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
@@ -182,7 +183,26 @@ impl Snow3G {
     pub fn next_u32(&mut self) -> u32 {
         self.clock_k()
     }
+
+    pub fn encrypt_bytes_mut(&mut self, bytes: &mut [u8]) {
+        let mut keystream = Vec::new();
+        for _ in 0..(bytes.len() / 4) {
+            keystream.extend(self.clock_k().to_be_bytes());
+        }
+        xor_into_bytes(bytes, &keystream);
+    }
+
+    pub fn encrypt_bytes(&self, bytes: &mut [u8]) {
+        let mut rng = self.clone();
+        let mut keystream = Vec::new();
+        for _ in 0..(bytes.len() / 4) {
+            keystream.extend(rng.clock_k().to_be_bytes());
+        }
+        xor_into_bytes(bytes, &keystream);
+    }
 }
+
+crate::impl_cipher_for_stream_cipher!(Snow3G);
 
 #[cfg(test)]
 mod tests {
