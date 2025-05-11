@@ -180,10 +180,6 @@ impl Snow3G {
         out
     }
 
-    pub fn next_u32(&mut self) -> u32 {
-        self.clock_k()
-    }
-
     pub fn encrypt_bytes_mut(&mut self, bytes: &mut [u8]) {
         let mut keystream = Vec::new();
         for _ in 0..(bytes.len() / 4) {
@@ -193,12 +189,7 @@ impl Snow3G {
     }
 
     pub fn encrypt_bytes(&self, bytes: &mut [u8]) {
-        let mut rng = self.clone();
-        let mut keystream = Vec::new();
-        for _ in 0..(bytes.len() / 4) {
-            keystream.extend(rng.clock_k().to_be_bytes());
-        }
-        xor_into_bytes(bytes, &keystream);
+        self.clone().encrypt_bytes_mut(bytes);
     }
 }
 

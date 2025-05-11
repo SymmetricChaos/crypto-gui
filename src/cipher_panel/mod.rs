@@ -73,6 +73,7 @@ mod sigaba_controls;
 mod simon_controls;
 mod slidefair_controls;
 mod sm4_controls;
+pub mod snow_controls;
 mod speck_controls;
 mod tea_controls;
 mod threefish_controls;
