@@ -73,7 +73,7 @@ mod sigaba_controls;
 mod simon_controls;
 mod slidefair_controls;
 mod sm4_controls;
-pub mod snow_controls;
+pub mod snow3g_controls;
 mod speck_controls;
 mod tea_controls;
 mod threefish_controls;
@@ -216,6 +216,7 @@ pub struct CipherInterface {
     chacha20poly1305: chacha20_poly1305_controls::ChaCha20Poly1305Frame,
     rc4: rc4_controls::Rc4Frame,
     salsa20: salsa20_controls::Salsa20Frame,
+    snow3g: snow3g_controls::Snow3GFrame,
     xchacha: xchacha_controls::XChaChaFrame,
 
     // Public Key
@@ -380,6 +381,7 @@ impl CipherInterface {
                 CipherId::ChaCha20Poly1305,
                 CipherId::Rc4,
                 CipherId::Salsa20,
+                CipherId::Snow3G,
                 CipherId::XChaCha,
             ],
             active_cipher,
@@ -469,6 +471,7 @@ impl CipherInterface {
             CipherId::Simon => &mut self.simon,
             CipherId::Slidefair => &mut self.slidefair,
             CipherId::Sm4 => &mut self.sm4,
+            CipherId::Snow3G => &mut self.snow3g,
             CipherId::Speck => &mut self.speck,
             CipherId::Substitution => &mut self.gen_sub,
             CipherId::Tea => &mut self.tea,

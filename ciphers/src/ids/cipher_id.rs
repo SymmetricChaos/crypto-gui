@@ -102,9 +102,10 @@ cipher_ids_and_names!(
     Shamir, "Shamir's Secret Sharing";
     Sigaba, "SIGABA";
     Simon, "Simon";
-    Slidefair, "Slidefair";
     Skipjack, "Skipjack";
+    Slidefair, "Slidefair";
     Sm4, "SM4";
+    Snow3G, "Snow 3G";
     Speck, "Speck";
     Substitution, "Substitution";
     Tea, "TEA";

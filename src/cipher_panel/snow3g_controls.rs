@@ -3,13 +3,13 @@ use crate::ui_elements::UiElements;
 use ciphers::digital::stream_ciphers::snow::snow3g::Snow3G;
 use rand::{thread_rng, Rng};
 
-pub struct SnowFrame {
+pub struct Snow3GFrame {
     cipher: Snow3G,
     key: [u32; 4],
     iv: [u32; 4],
 }
 
-impl Default for SnowFrame {
+impl Default for Snow3GFrame {
     fn default() -> Self {
         Self {
             cipher: Default::default(),
@@ -19,9 +19,9 @@ impl Default for SnowFrame {
     }
 }
 
-impl SnowFrame {}
+impl Snow3GFrame {}
 
-impl CipherFrame for SnowFrame {
+impl CipherFrame for Snow3GFrame {
     fn ui(&mut self, ui: &mut egui::Ui, _errors: &mut String) {
         ui.hyperlink_to(
             "see the code",
