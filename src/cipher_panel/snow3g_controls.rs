@@ -2,8 +2,11 @@ use super::CipherFrame;
 use crate::ui_elements::UiElements;
 use ciphers::digital::stream_ciphers::snow::snow3g::Snow3G;
 use rand::{thread_rng, Rng};
+use utils::byte_formatting::ByteFormat;
 
 pub struct Snow3GFrame {
+    input_format: ByteFormat,
+    output_format: ByteFormat,
     cipher: Snow3G,
     key: [u32; 4],
     iv: [u32; 4],
@@ -12,6 +15,8 @@ pub struct Snow3GFrame {
 impl Default for Snow3GFrame {
     fn default() -> Self {
         Self {
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
             cipher: Default::default(),
             key: [0; 4],
             iv: [0; 4],
@@ -71,5 +76,20 @@ impl CipherFrame for Snow3GFrame {
         self.cipher = Snow3G::with_key_and_iv(self.key, self.iv);
     }
 
-    crate::simple_cipher! {}
+    fn reset(&mut self) {
+        *self = Self::default()
+    }
+
+    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        let mut bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|e| ciphers::CipherError::Input(e.to_string()))?;
+        self.cipher.encrypt_bytes(&mut bytes);
+        Ok(self.output_format.byte_slice_to_text(&bytes))
+    }
+
+    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        self.encrypt_string(text)
+    }
 }

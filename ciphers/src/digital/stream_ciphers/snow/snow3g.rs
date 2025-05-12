@@ -92,8 +92,6 @@ fn sbox2(n: u32) -> u32 {
 
 #[derive(Debug, Clone)]
 pub struct Snow3G {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
     words: [u32; 16],
     r1: u32,
     r2: u32,
@@ -103,8 +101,6 @@ pub struct Snow3G {
 impl Default for Snow3G {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
-            output_format: ByteFormat::Hex,
             words: [0; 16],
             r1: 0,
             r2: 0,
@@ -192,8 +188,6 @@ impl Snow3G {
         self.clone().encrypt_bytes_mut(bytes);
     }
 }
-
-crate::impl_cipher_for_stream_cipher!(Snow3G);
 
 #[cfg(test)]
 mod tests {
