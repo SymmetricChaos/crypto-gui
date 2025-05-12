@@ -1,7 +1,6 @@
 use ciphers::{
     errors::CipherError,
     ids::{cipher_categories::CipherCategory, CipherId},
-    traits::Cipher,
 };
 use egui::Ui;
 
@@ -88,17 +87,29 @@ mod xchacha_controls;
 mod xor_splitting_controls;
 mod xtea_controls;
 
+#[macro_export]
+macro_rules! simple_cipher {
+    () => {
+        fn reset(&mut self) {
+            *self = Self::default()
+        }
+
+        fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+            ciphers::Cipher::encrypt(&self.cipher, text)
+        }
+
+        fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+            ciphers::Cipher::decrypt(&self.cipher, text)
+        }
+    };
+}
+
 pub trait CipherFrame {
     fn ui(&mut self, ui: &mut Ui, errors: &mut String);
-    fn cipher(&self) -> &dyn Cipher;
     fn randomize(&mut self);
     fn reset(&mut self);
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        self.cipher().encrypt(text)
-    }
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        self.cipher().decrypt(text)
-    }
+    fn encrypt_string(&self, text: &str) -> Result<String, CipherError>;
+    fn decrypt_string(&self, text: &str) -> Result<String, CipherError>;
 }
 
 // Quick simple combo box builder

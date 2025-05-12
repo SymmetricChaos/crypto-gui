@@ -1,9 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{
-    machines::m209::{M209, M209_ALPHABETS},
-    Cipher,
-};
+use ciphers::machines::m209::{M209, M209_ALPHABETS};
 use egui::Ui;
 use rand::{thread_rng, Fill};
 use utils::{
@@ -86,10 +83,6 @@ impl CipherFrame for M209Frame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         // Fill up an array with random bytes. Then map that to pairs of usize.
         // Unwrap here is justified by the fixed sizes of everything involved.
@@ -116,7 +109,5 @@ impl CipherFrame for M209Frame {
         }
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

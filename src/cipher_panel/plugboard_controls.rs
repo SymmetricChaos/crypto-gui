@@ -1,10 +1,9 @@
-use std::cmp::max;
-
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{substitution::Plugboard, Cipher};
+use ciphers::substitution::Plugboard;
 use egui::Ui;
 use rand::{thread_rng, Rng};
+use std::cmp::max;
 use utils::{preset_alphabet::Alphabet, text_functions::shuffled_str};
 
 pub struct PlugboardFrame {
@@ -80,10 +79,6 @@ impl CipherFrame for PlugboardFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         let alpha = shuffled_str(&self.alphabet, &mut rng);
@@ -99,7 +94,5 @@ impl CipherFrame for PlugboardFrame {
         self.pairs.pop();
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

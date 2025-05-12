@@ -1,10 +1,9 @@
+use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{polybius::StraddlingCheckerboard, vic::Vic, Cipher};
+use ciphers::{polybius::StraddlingCheckerboard, vic::Vic};
 use egui::{DragValue, Ui};
 use rand::{thread_rng, Rng};
 use utils::{preset_alphabet::Alphabet, text_functions::random_string_sample_replace};
-
-use super::CipherFrame;
 
 pub struct VicFrame {
     cipher: Vic,
@@ -112,10 +111,6 @@ impl CipherFrame for VicFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         self.cipher.key_group = random_string_sample_replace("0123456789", 5, &mut rng);
@@ -138,7 +133,5 @@ impl CipherFrame for VicFrame {
         };
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

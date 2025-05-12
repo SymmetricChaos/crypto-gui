@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{polybius::Trifid, Cipher};
+use ciphers::polybius::Trifid;
 use egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
 use utils::text_functions::shuffled_str;
@@ -62,10 +62,6 @@ impl CipherFrame for TrifidFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         self.cipher.block_size = thread_rng().gen_range(3..=30);
         self.key_string = shuffled_str(&self.alphabet_string, &mut thread_rng());
@@ -74,7 +70,5 @@ impl CipherFrame for TrifidFrame {
             .assign_grid(&self.alphabet_string, &self.key_string);
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

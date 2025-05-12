@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{polybius::nihilist::Nihilist, Cipher};
+use ciphers::polybius::nihilist::Nihilist;
 use eframe::egui::Ui;
 use rand::{thread_rng, Rng};
 use utils::{
@@ -102,10 +102,6 @@ impl CipherFrame for NihilistFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         self.polybius_key_string = shuffled_str(&self.alphabet_string, &mut rng);
@@ -114,7 +110,5 @@ impl CipherFrame for NihilistFrame {
         self.assign_keys();
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

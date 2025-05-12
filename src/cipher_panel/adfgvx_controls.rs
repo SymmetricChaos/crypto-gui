@@ -1,9 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{
-    polybius::{adfgvx::AdfgvxMode, Adfgvx},
-    traits::Cipher,
-};
+use ciphers::polybius::{adfgvx::AdfgvxMode, Adfgvx};
 use rand::{thread_rng, Rng};
 use utils::{
     preset_alphabet::Alphabet,
@@ -95,10 +92,6 @@ impl CipherFrame for AdfgvxFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         self.polybius_key_string = shuffled_str(self.cipher.alphabet(), &mut thread_rng());
         self.cipher.assign_polybius_key(&self.polybius_key_string);
@@ -118,7 +111,5 @@ impl CipherFrame for AdfgvxFrame {
         self.assign_columnar_key();
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

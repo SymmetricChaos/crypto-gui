@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{playfair::seriated_playfair::SeriatedPlayfair, Cipher};
+use ciphers::playfair::seriated_playfair::SeriatedPlayfair;
 use egui::{Slider, Ui};
 use rand::{rngs::StdRng, SeedableRng};
 use utils::{
@@ -94,10 +94,6 @@ impl CipherFrame for SeriatedPlayfairFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         self.key_string = shuffled_str(&self.cipher.playfair.square, &mut StdRng::from_entropy());
         self.cipher
@@ -105,7 +101,5 @@ impl CipherFrame for SeriatedPlayfairFrame {
             .assign_key(&self.key_string, &self.alphabet_string);
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

@@ -1,9 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{
-    polyalphabetic::{Quagmire, QuagmireVersion},
-    Cipher,
-};
+use ciphers::polyalphabetic::{Quagmire, QuagmireVersion};
 use egui::Ui;
 use rand::thread_rng;
 use utils::{preset_alphabet::Alphabet, text_functions::random_string_sample_replace};
@@ -95,10 +92,6 @@ impl CipherFrame for QuagmireFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         self.ct_key_string = random_string_sample_replace(&self.alphabet_string, 9, &mut rng);
@@ -111,7 +104,5 @@ impl CipherFrame for QuagmireFrame {
             .expect("error assigning indicator");
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

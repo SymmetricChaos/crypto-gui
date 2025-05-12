@@ -1,18 +1,13 @@
-use ciphers::{
-    tactical::{
-        rs44::{HEIGHT, LABELS, WIDTH},
-        Rs44,
-    },
-    Cipher,
+use super::CipherFrame;
+use crate::ui_elements::UiElements;
+use ciphers::tactical::{
+    rs44::{HEIGHT, LABELS, WIDTH},
+    Rs44,
 };
 use egui::{Button, Color32, DragValue, RichText, TextStyle, Ui, Vec2};
 use itertools::Itertools;
 use rand::{seq::SliceRandom, thread_rng};
 use utils::grid::{Grid, Symbol};
-
-use crate::ui_elements::UiElements;
-
-use super::CipherFrame;
 
 #[derive(Default)]
 pub struct Rs44Frame {
@@ -192,10 +187,6 @@ impl CipherFrame for Rs44Frame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
 
@@ -230,7 +221,5 @@ impl CipherFrame for Rs44Frame {
         self.cipher.set_full_message_key();
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

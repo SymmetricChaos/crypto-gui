@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{polybius::B64, Cipher};
+use ciphers::polybius::B64;
 use egui::Ui;
 use rand::{thread_rng, Rng};
 use utils::{
@@ -76,10 +76,6 @@ impl CipherFrame for B64Frame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
 
@@ -104,7 +100,5 @@ impl CipherFrame for B64Frame {
             .unwrap(); // unwrap justified by pulling from BasicLatin alphabet
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

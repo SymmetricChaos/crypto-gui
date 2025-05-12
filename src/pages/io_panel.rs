@@ -26,7 +26,7 @@ pub fn encrypt_decrypt(
             .clicked()
         {
             errors.clear();
-            match cipher.encrypt(input) {
+            match cipher.encrypt_string(input) {
                 Ok(text) => *output = text,
                 Err(e) => *errors = e.to_string(),
             }
@@ -36,7 +36,7 @@ pub fn encrypt_decrypt(
             .clicked()
         {
             errors.clear();
-            match cipher.decrypt(input) {
+            match cipher.decrypt_string(input) {
                 Ok(text) => *output = text,
                 Err(e) => *errors = e.to_string(),
             }

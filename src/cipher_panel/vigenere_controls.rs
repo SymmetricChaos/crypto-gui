@@ -1,9 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{
-    polyalphabetic::{PolyMode, Vigenere},
-    Cipher,
-};
+use ciphers::polyalphabetic::{PolyMode, Vigenere};
 use egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
 use strum::IntoEnumIterator;
@@ -120,10 +117,6 @@ impl CipherFrame for VigenereFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         for keyword in self.cipher.keywords.iter_mut() {
@@ -132,7 +125,5 @@ impl CipherFrame for VigenereFrame {
         }
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

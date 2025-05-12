@@ -1,9 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{
-    polyalphabetic::{porta::PORTA_TABLEAUX, Porta},
-    Cipher,
-};
+use ciphers::polyalphabetic::{porta::PORTA_TABLEAUX, Porta};
 use egui::Ui;
 use rand::{thread_rng, Rng};
 use utils::{
@@ -94,10 +91,6 @@ impl CipherFrame for PortaFrame {
         // }
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         let n_chars = rng.gen_range(6..10);
@@ -108,7 +101,5 @@ impl CipherFrame for PortaFrame {
             .expect("randomizer picked invalid characters")
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

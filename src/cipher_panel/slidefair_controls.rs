@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{playfair::Slidefair, Cipher};
+use ciphers::playfair::Slidefair;
 use egui::Ui;
 use rand::thread_rng;
 use utils::{preset_alphabet::Alphabet, text_functions::shuffled_str};
@@ -68,16 +68,10 @@ impl CipherFrame for SlidefairFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         self.keyword_string = shuffled_str(&self.alphabet_string, &mut thread_rng());
         self.cipher.assign_key(&self.keyword_string)
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{polyalphabetic::Alberti, Cipher};
+use ciphers::polyalphabetic::Alberti;
 use eframe::egui::Ui;
 use rand::thread_rng;
 use utils::{preset_alphabet::Alphabet, text_functions::shuffled_str};
@@ -55,10 +55,6 @@ impl CipherFrame for AlbertiFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let s = shuffled_str(&self.moving_alphabet_string, &mut thread_rng());
         self.moving_alphabet_string = s;
@@ -66,7 +62,5 @@ impl CipherFrame for AlbertiFrame {
             .assign_moving_alphabet(&self.moving_alphabet_string)
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

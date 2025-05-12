@@ -1,9 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{
-    machines::enigma::{rotors::REFLECTOR_VEC, EnigmaM3, REFLECTOR_MAP, ROTOR_VEC},
-    Cipher,
-};
+use ciphers::machines::enigma::{rotors::REFLECTOR_VEC, EnigmaM3, REFLECTOR_MAP, ROTOR_VEC};
 use egui::{ComboBox, Slider, SliderClamping::Always, Ui};
 use rand::{thread_rng, Rng};
 use utils::{preset_alphabet::Alphabet, text_functions::shuffled_str};
@@ -163,10 +160,6 @@ impl CipherFrame for EnigmaM3Frame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         self.randomize_plugboard();
         self.randomize_rotors();
@@ -175,7 +168,5 @@ impl CipherFrame for EnigmaM3Frame {
         self.randomize_reflector();
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

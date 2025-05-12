@@ -1,9 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{
-    polyalphabetic::{Hutton, HuttonVersion},
-    Cipher,
-};
+use ciphers::polyalphabetic::{Hutton, HuttonVersion};
 use egui::Ui;
 use rand::thread_rng;
 use utils::{
@@ -172,10 +169,6 @@ impl CipherFrame for HuttonFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         self.password_string = shuffled_str(&self.alphabet_string, &mut rng);
@@ -185,7 +178,5 @@ impl CipherFrame for HuttonFrame {
             .assign_key(&self.keyword_string, &self.alphabet_string);
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

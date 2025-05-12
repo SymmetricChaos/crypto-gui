@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{playfair::TwoSquare, Cipher};
+use ciphers::playfair::TwoSquare;
 use egui::Ui;
 use rand::{rngs::StdRng, SeedableRng};
 use utils::{
@@ -113,10 +113,6 @@ impl CipherFrame for TwoSquareFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         self.keyword_1 = shuffled_str(&self.alphabet_string, &mut StdRng::from_entropy());
         self.keyword_2 = shuffled_str(&self.alphabet_string, &mut StdRng::from_entropy());
@@ -124,7 +120,5 @@ impl CipherFrame for TwoSquareFrame {
             .assign_keys(&self.keyword_1, &self.keyword_2, &self.alphabet_string)
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

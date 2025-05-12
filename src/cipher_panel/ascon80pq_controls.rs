@@ -100,9 +100,6 @@ impl CipherFrame for Ascon80pqFrame {
         }
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();

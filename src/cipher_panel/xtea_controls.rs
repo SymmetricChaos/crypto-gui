@@ -52,9 +52,6 @@ impl CipherFrame for XteaFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();

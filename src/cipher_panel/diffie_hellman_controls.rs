@@ -86,10 +86,6 @@ impl CipherFrame for DiffieHellmanFrame {
         ui.add_space(8.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         for p in self.cipher.private_keys.iter_mut() {

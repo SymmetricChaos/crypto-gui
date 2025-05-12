@@ -1,9 +1,7 @@
+use super::CipherFrame;
+use crate::ui_elements::UiElements;
 use ciphers::{digital::stream_ciphers::a51::A51, Cipher};
 use rand::{thread_rng, Rng};
-
-use crate::ui_elements::UiElements;
-
-use super::CipherFrame;
 
 pub struct A51Frame {
     cipher: A51,
@@ -66,10 +64,6 @@ impl CipherFrame for A51Frame {
         }
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         self.key = rng.gen();
@@ -82,5 +76,13 @@ impl CipherFrame for A51Frame {
 
     fn reset(&mut self) {
         *self = Self::default()
+    }
+
+    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        self.cipher.encrypt(text)
+    }
+
+    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        self.cipher.decrypt(text)
     }
 }

@@ -4,7 +4,6 @@ use super::CipherFrame;
 use ciphers::{
     machines::sigaba::{Sigaba, BIG_ROTOR_VEC},
     rotors::Rotor,
-    Cipher,
 };
 use egui::{ComboBox, RichText, Slider, Ui};
 
@@ -113,13 +112,7 @@ impl CipherFrame for SigabaFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {}
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

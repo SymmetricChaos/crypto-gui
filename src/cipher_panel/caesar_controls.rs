@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{substitution::Caesar, Cipher};
+use ciphers::substitution::Caesar;
 use egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
 use utils::preset_alphabet::Alphabet;
@@ -95,15 +95,9 @@ impl CipherFrame for CaesarFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         self.cipher.shift = thread_rng().gen_range(0..self.cipher.alphabet.len()) as i32;
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

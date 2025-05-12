@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{polyalphabetic::M94, Cipher};
+use ciphers::polyalphabetic::M94;
 use egui::{FontFamily, RichText, Slider, Ui};
 use rand::{seq::SliceRandom, thread_rng, Rng};
 use utils::preset_alphabet::Alphabet;
@@ -52,17 +52,11 @@ impl CipherFrame for M94Frame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         self.cipher.wheels.shuffle(&mut rng);
         self.cipher.offset = rng.gen_range(1..25);
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

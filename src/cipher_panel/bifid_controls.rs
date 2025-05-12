@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{polybius::Bifid, Cipher};
+use ciphers::polybius::Bifid;
 use egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
 use utils::{
@@ -86,10 +86,6 @@ impl CipherFrame for BifidFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         self.cipher.block_size = rng.gen_range(3..=30);
@@ -99,7 +95,5 @@ impl CipherFrame for BifidFrame {
             .assign_key(&self.key_string, &self.alphabet_string);
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

@@ -73,10 +73,6 @@ impl CipherFrame for AffineFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn ciphers::Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         let length = self.cipher.alphabet_len();
@@ -90,7 +86,5 @@ impl CipherFrame for AffineFrame {
         }
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

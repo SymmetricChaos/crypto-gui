@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{polybius::PolybiusCube, Cipher};
+use ciphers::polybius::PolybiusCube;
 use egui::Ui;
 use rand::thread_rng;
 use utils::text_functions::{filter_string, shuffled_str};
@@ -65,17 +65,11 @@ impl CipherFrame for PolybiusCubeFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         self.key_string = shuffled_str(&self.alphabet_string, &mut thread_rng());
         self.cipher
             .assign_grid(&self.alphabet_string, &self.key_string);
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{tactical::Dryad, Cipher};
+use ciphers::tactical::Dryad;
 use egui::Ui;
 use rand::thread_rng;
 use utils::{preset_alphabet::Alphabet, text_functions::shuffled_str};
@@ -34,10 +34,6 @@ impl CipherFrame for DryadFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         let alpha = Alphabet::BasicLatin.slice();
@@ -46,7 +42,5 @@ impl CipherFrame for DryadFrame {
         }
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

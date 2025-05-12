@@ -1,11 +1,8 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{
-    polyalphabetic::{
-        chaocipher::{left_permute, right_permute},
-        Chaocipher,
-    },
-    Cipher,
+use ciphers::polyalphabetic::{
+    chaocipher::{left_permute, right_permute},
+    Chaocipher,
 };
 use egui::Ui;
 use rand::thread_rng;
@@ -91,10 +88,6 @@ impl CipherFrame for ChaocipherFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         self.left_string = shuffled_str(Alphabet::BasicLatin.into(), &mut rng);
@@ -104,7 +97,5 @@ impl CipherFrame for ChaocipherFrame {
         self.cipher.assign_right(&self.right_string);
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

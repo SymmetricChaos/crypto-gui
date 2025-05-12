@@ -125,10 +125,6 @@ impl CipherFrame for ColumnarFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         let n_chars = rng.gen_range(6..10);
@@ -139,7 +135,5 @@ impl CipherFrame for ColumnarFrame {
         self.set_example();
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

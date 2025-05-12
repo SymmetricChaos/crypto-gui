@@ -1,10 +1,8 @@
+use super::CipherFrame;
+use crate::ui_elements::UiElements;
 use ciphers::{transposition::Scytale, Cipher};
 use egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
-
-use crate::ui_elements::UiElements;
-
-use super::CipherFrame;
 
 pub struct ScytaleFrame {
     cipher: Scytale,
@@ -74,15 +72,9 @@ impl CipherFrame for ScytaleFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         self.cipher.num_rails = thread_rng().gen_range(2..12);
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

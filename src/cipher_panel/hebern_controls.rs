@@ -1,7 +1,6 @@
-use crate::ui_elements::UiElements;
-
 use super::CipherFrame;
-use ciphers::{machines::hebern::Hebern, Cipher};
+use crate::ui_elements::UiElements;
+use ciphers::machines::hebern::Hebern;
 use egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
 use utils::{
@@ -98,10 +97,6 @@ impl CipherFrame for HebernFrame {
         }
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         let max = self.alphabet_string.chars().count() - 1;
@@ -111,7 +106,5 @@ impl CipherFrame for HebernFrame {
         }
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

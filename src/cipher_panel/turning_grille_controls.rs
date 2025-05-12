@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{transposition::TurningGrille, Cipher};
+use ciphers::transposition::TurningGrille;
 use egui::Ui;
 use itertools::Itertools;
 use rand::{seq::SliceRandom, thread_rng};
@@ -114,10 +114,6 @@ impl CipherFrame for TurningGrilleFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         let mut nums = (0..self.cipher.subgrille_size()).collect_vec();
@@ -141,7 +137,5 @@ impl CipherFrame for TurningGrilleFrame {
         self.cipher.build_grid().unwrap();
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

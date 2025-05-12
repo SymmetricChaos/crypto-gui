@@ -110,15 +110,9 @@ impl CipherFrame for PurpleFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn ciphers::Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         todo!()
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

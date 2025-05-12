@@ -108,9 +108,6 @@ impl CipherFrame for Ascon128Frame {
         }
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();

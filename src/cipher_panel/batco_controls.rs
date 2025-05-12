@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{tactical::Batco, Cipher};
+use ciphers::tactical::Batco;
 use egui::{Slider, SliderClamping::Always, Ui};
 use rand::{rngs::StdRng, SeedableRng};
 use utils::{preset_alphabet::Alphabet, text_functions::shuffled_str};
@@ -50,10 +50,6 @@ impl CipherFrame for BatcoFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = StdRng::from_entropy();
         let alpha = Alphabet::BasicLatin.slice();
@@ -65,7 +61,5 @@ impl CipherFrame for BatcoFrame {
         }
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{substitution::GeneralSubstitution, Cipher};
+use ciphers::substitution::GeneralSubstitution;
 use egui::Ui;
 use rand::thread_rng;
 use utils::{preset_alphabet::Alphabet, text_functions::shuffled_str};
@@ -62,16 +62,10 @@ impl CipherFrame for GeneralSubstitutionFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         self.ct_alphabet_string = shuffled_str(&self.pt_alphabet_string, &mut thread_rng());
         self.cipher.assign_ct_alphabet(&self.ct_alphabet_string);
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

@@ -101,19 +101,11 @@ impl CipherFrame for Rc4Frame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         self.key = format!("{:08X}", rng.gen::<u64>());
         self.cipher.i = 0;
         self.cipher.j = 0;
         self.run_ksa();
-    }
-
-    fn reset(&mut self) {
-        *self = Self::default()
     }
 }

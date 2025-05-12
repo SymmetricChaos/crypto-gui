@@ -70,9 +70,6 @@ impl CipherFrame for A52Frame {
         }
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
 
     fn randomize(&mut self) {
         let mut rng = thread_rng();

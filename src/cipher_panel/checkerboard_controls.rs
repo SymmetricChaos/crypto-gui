@@ -1,10 +1,9 @@
+use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{polybius::StraddlingCheckerboard, Cipher};
+use ciphers::polybius::StraddlingCheckerboard;
 use egui::{DragValue, Ui};
 use rand::thread_rng;
 use utils::text_functions::shuffled_str;
-
-use super::CipherFrame;
 
 pub struct StraddlingCheckerboardFrame {
     cipher: StraddlingCheckerboard,
@@ -65,10 +64,6 @@ impl CipherFrame for StraddlingCheckerboardFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         self.alphabet_string = shuffled_str(&self.alphabet_string, &mut thread_rng());
         self.cipher.assign_alphabet(&self.alphabet_string);
@@ -76,7 +71,5 @@ impl CipherFrame for StraddlingCheckerboardFrame {
         self.cipher.assign_top_row(&self.top_row);
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

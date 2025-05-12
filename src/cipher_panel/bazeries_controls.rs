@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{polyalphabetic::Bazeries, Cipher};
+use ciphers::polyalphabetic::Bazeries;
 use egui::{Slider, Ui};
 use rand::thread_rng;
 use utils::{
@@ -84,10 +84,6 @@ impl CipherFrame for BazeriesFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         for wheel in self.cipher.wheels.iter_mut() {
@@ -95,7 +91,5 @@ impl CipherFrame for BazeriesFrame {
         }
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

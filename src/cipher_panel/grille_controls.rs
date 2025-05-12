@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{transposition::Grille, Cipher};
+use ciphers::transposition::Grille;
 use egui::{TextStyle, Ui};
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use utils::{grid::Symbol, preset_alphabet::Alphabet};
@@ -90,10 +90,6 @@ impl CipherFrame for GrilleFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = StdRng::from_entropy();
         for cell in self.cipher.grid.get_rows_mut() {
@@ -105,7 +101,5 @@ impl CipherFrame for GrilleFrame {
         }
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

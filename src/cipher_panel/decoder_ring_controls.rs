@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{substitution::DecoderRing, Cipher};
+use ciphers::substitution::DecoderRing;
 use egui::{Slider, Ui};
 use rand::{thread_rng, Rng};
 
@@ -53,15 +53,9 @@ impl CipherFrame for DecoderRingFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         self.cipher.index = thread_rng().gen_range(0..self.alphabet_string.chars().count());
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

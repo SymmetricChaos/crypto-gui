@@ -119,17 +119,11 @@ impl CipherFrame for RailFenceFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         self.cipher.num_rails = thread_rng().gen_range(2..12);
         self.cipher.start_rail = thread_rng().gen_range(0..self.cipher.num_rails - 1);
         self.cipher.falling = thread_rng().gen_bool(0.5);
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

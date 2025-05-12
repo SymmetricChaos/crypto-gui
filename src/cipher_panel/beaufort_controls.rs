@@ -117,10 +117,6 @@ impl CipherFrame for BeaufortFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         for keyword in self.cipher.keywords.iter_mut() {
@@ -131,5 +127,13 @@ impl CipherFrame for BeaufortFrame {
 
     fn reset(&mut self) {
         *self = Self::default()
+    }
+
+    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        self.cipher.encrypt(text)
+    }
+
+    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        self.cipher.decrypt(text)
     }
 }

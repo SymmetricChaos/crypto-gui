@@ -1,12 +1,13 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::traits::Cipher;
 use ciphers::transposition::Amsco;
 use eframe::egui::Ui;
 use rand::{thread_rng, Rng};
-use utils::grid::Grid;
-use utils::preset_alphabet::Alphabet;
-use utils::text_functions::{filter_string, random_string_sample_replace};
+use utils::{
+    grid::Grid,
+    preset_alphabet::Alphabet,
+    text_functions::{filter_string, random_string_sample_replace},
+};
 
 pub struct AmscoFrame {
     cipher: Amsco,
@@ -124,10 +125,6 @@ impl CipherFrame for AmscoFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         let n_chars = rng.gen_range(6..10);
@@ -137,7 +134,5 @@ impl CipherFrame for AmscoFrame {
         self.assign_key()
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }
