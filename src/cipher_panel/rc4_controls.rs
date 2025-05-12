@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{digital::stream_ciphers::rc4::Rc4, Cipher};
+use ciphers::digital::stream_ciphers::rc4::Rc4;
 use egui::{DragValue, FontId, RichText, Ui};
 use rand::{thread_rng, Rng};
 use utils::byte_formatting::ByteFormat;
@@ -108,4 +108,6 @@ impl CipherFrame for Rc4Frame {
         self.cipher.j = 0;
         self.run_ksa();
     }
+
+    crate::simple_cipher! {}
 }

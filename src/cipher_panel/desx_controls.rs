@@ -1,9 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::{block_cipher_iv_64, block_cipher_mode_and_padding, UiElements};
-use ciphers::{
-    digital::block_ciphers::des::{des_functions::set_des_key_parity, desx::DesX},
-    Cipher,
-};
+use ciphers::digital::block_ciphers::des::{des_functions::set_des_key_parity, desx::DesX};
 use egui::Ui;
 use rand::{thread_rng, Rng};
 
@@ -72,7 +69,6 @@ impl CipherFrame for DesXFrame {
         ui.add_space(16.0);
     }
 
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         self.key = rng.gen();
@@ -86,7 +82,5 @@ impl CipherFrame for DesXFrame {
         }
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

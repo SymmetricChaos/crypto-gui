@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::{block_cipher_iv_64, block_cipher_mode_and_padding, UiElements};
-use ciphers::{digital::block_ciphers::tea::xtea::Xtea, Cipher};
+use ciphers::digital::block_ciphers::tea::xtea::Xtea;
 use egui::Ui;
 use rand::{thread_rng, Rng};
 
@@ -52,7 +52,6 @@ impl CipherFrame for XteaFrame {
         ui.add_space(16.0);
     }
 
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         self.cipher.subkeys[0] = rng.gen();
@@ -65,7 +64,5 @@ impl CipherFrame for XteaFrame {
         }
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

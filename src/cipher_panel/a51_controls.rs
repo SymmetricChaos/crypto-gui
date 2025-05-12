@@ -1,9 +1,12 @@
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{digital::stream_ciphers::a51::A51, Cipher};
+use ciphers::digital::stream_ciphers::a51::A51;
 use rand::{thread_rng, Rng};
+use utils::byte_formatting::ByteFormat;
 
 pub struct A51Frame {
+    input_format: ByteFormat,
+    output_format: ByteFormat,
     cipher: A51,
     key: u64,
     frame_number: u32,
@@ -12,6 +15,8 @@ pub struct A51Frame {
 impl Default for A51Frame {
     fn default() -> Self {
         Self {
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
             cipher: Default::default(),
             key: 0,
             frame_number: 0,
@@ -30,10 +35,7 @@ impl CipherFrame for A51Frame {
         ui.randomize_reset_cipher(self);
         ui.add_space(16.0);
 
-        ui.byte_io_mode_cipher(
-            &mut self.cipher.input_format,
-            &mut self.cipher.output_format,
-        );
+        ui.byte_io_mode_cipher(&mut self.input_format, &mut self.output_format);
         ui.add_space(16.0);
 
         ui.subheading("LFSRs (Starting States)");
@@ -79,10 +81,24 @@ impl CipherFrame for A51Frame {
     }
 
     fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
-        self.cipher.encrypt(text)
+        let mut bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| ciphers::CipherError::general("byte format error"))?;
+
+        self.cipher.encrypt_bytes(&mut bytes);
+
+        Ok(self.output_format.byte_slice_to_text(&bytes))
     }
 
     fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
-        self.cipher.decrypt(text)
+        let mut bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| ciphers::CipherError::general("byte format error"))?;
+
+        self.cipher.decrypt_bytes(&mut bytes);
+
+        Ok(self.output_format.byte_slice_to_text(&bytes))
     }
 }

@@ -416,7 +416,7 @@ impl Camellia192 {
     }
 }
 
-crate::impl_cipher_for_block_cipher!(Camellia192, 16);
+// crate::impl_cipher_for_block_cipher!(Camellia192, 16);
 
 build_camellia!(Camellia256, 34);
 

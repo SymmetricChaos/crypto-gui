@@ -93,14 +93,6 @@ impl CipherFrame for LeaFrame {
         }
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        match self.selector {
-            LeaSelect::Lea128 => &self.cipher128,
-            LeaSelect::Lea192 => &self.cipher192,
-            LeaSelect::Lea256 => &self.cipher256,
-        }
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         match self.selector {
@@ -136,5 +128,21 @@ impl CipherFrame for LeaFrame {
 
     fn reset(&mut self) {
         *self = Self::default()
+    }
+
+    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        match self.selector {
+            LeaSelect::Lea128 => self.cipher128.encrypt(text),
+            LeaSelect::Lea192 => self.cipher192.encrypt(text),
+            LeaSelect::Lea256 => self.cipher256.encrypt(text),
+        }
+    }
+
+    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        match self.selector {
+            LeaSelect::Lea128 => self.cipher128.decrypt(text),
+            LeaSelect::Lea192 => self.cipher192.decrypt(text),
+            LeaSelect::Lea256 => self.cipher256.decrypt(text),
+        }
     }
 }

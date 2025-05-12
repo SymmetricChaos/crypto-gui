@@ -98,6 +98,21 @@ impl SpeckFrame {
             unreachable!("speck key should be forced to valid hex digits by filtering")
         }
     }
+
+    fn cipher(&self) -> &dyn Cipher {
+        match self.selector {
+            SpeckVariant::Speck32_64 => &self.cipher_32_64,
+            SpeckVariant::Speck48_72 => &self.cipher_48_72,
+            SpeckVariant::Speck48_96 => &self.cipher_48_96,
+            SpeckVariant::Speck64_96 => &self.cipher_64_96,
+            SpeckVariant::Speck64_128 => &self.cipher_64_128,
+            SpeckVariant::Speck96_96 => &self.cipher_96_96,
+            SpeckVariant::Speck96_144 => &self.cipher_96_144,
+            SpeckVariant::Speck128_128 => &self.cipher_128_128,
+            SpeckVariant::Speck128_192 => &self.cipher_128_192,
+            SpeckVariant::Speck128_256 => &self.cipher_128_256,
+        }
+    }
 }
 
 impl CipherFrame for SpeckFrame {
@@ -264,21 +279,6 @@ impl CipherFrame for SpeckFrame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        match self.selector {
-            SpeckVariant::Speck32_64 => &self.cipher_32_64,
-            SpeckVariant::Speck48_72 => &self.cipher_48_72,
-            SpeckVariant::Speck48_96 => &self.cipher_48_96,
-            SpeckVariant::Speck64_96 => &self.cipher_64_96,
-            SpeckVariant::Speck64_128 => &self.cipher_64_128,
-            SpeckVariant::Speck96_96 => &self.cipher_96_96,
-            SpeckVariant::Speck96_144 => &self.cipher_96_144,
-            SpeckVariant::Speck128_128 => &self.cipher_128_128,
-            SpeckVariant::Speck128_192 => &self.cipher_128_192,
-            SpeckVariant::Speck128_256 => &self.cipher_128_256,
-        }
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         self.key = format!("{:08X}", rng.gen::<u64>());
@@ -287,5 +287,13 @@ impl CipherFrame for SpeckFrame {
 
     fn reset(&mut self) {
         *self = Self::default()
+    }
+
+    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        ciphers::Cipher::encrypt(self.cipher(), text)
+    }
+
+    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        ciphers::Cipher::decrypt(self.cipher(), text)
     }
 }

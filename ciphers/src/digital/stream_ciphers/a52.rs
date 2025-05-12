@@ -156,9 +156,6 @@ impl A52Rng {
 }
 
 pub struct A52 {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
-
     pub rng: A52Rng,
     pub key: [u8; 8],
     pub frame_number: u32,
@@ -167,9 +164,6 @@ pub struct A52 {
 impl Default for A52 {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
-            output_format: ByteFormat::Hex,
-
             rng: Default::default(),
             key: [0u8; 8],
             frame_number: 0u32,
@@ -185,8 +179,6 @@ impl A52 {
         keystream
     }
 }
-
-crate::impl_cipher_for_stream_cipher!(A52);
 
 #[cfg(test)]
 mod a52_tests {

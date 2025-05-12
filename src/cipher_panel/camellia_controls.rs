@@ -106,14 +106,6 @@ impl CipherFrame for CamelliaFrame {
         }
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        match self.selector {
-            CamelliaSelect::Camellia128 => &self.cipher128,
-            CamelliaSelect::Camellia192 => &self.cipher192,
-            CamelliaSelect::Camellia256 => &self.cipher256,
-        }
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         match self.selector {
@@ -149,5 +141,21 @@ impl CipherFrame for CamelliaFrame {
 
     fn reset(&mut self) {
         *self = Self::default()
+    }
+
+    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        match self.selector {
+            CamelliaSelect::Camellia128 => self.cipher128.encrypt(text),
+            CamelliaSelect::Camellia192 => self.cipher192.encrypt(text),
+            CamelliaSelect::Camellia256 => self.cipher256.encrypt(text),
+        }
+    }
+
+    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        match self.selector {
+            CamelliaSelect::Camellia128 => self.cipher128.decrypt(text),
+            CamelliaSelect::Camellia192 => self.cipher192.decrypt(text),
+            CamelliaSelect::Camellia256 => self.cipher256.decrypt(text),
+        }
     }
 }

@@ -183,14 +183,6 @@ impl CipherFrame for Rc5Frame {
         ui.add_space(16.0);
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        match self.selector {
-            SizeSelector::R16 => &self.cipher_16,
-            SizeSelector::R32 => &self.cipher_32,
-            SizeSelector::R64 => &self.cipher_64,
-        }
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         self.key = format!("{:08X}", rng.gen::<u64>());
@@ -199,5 +191,21 @@ impl CipherFrame for Rc5Frame {
 
     fn reset(&mut self) {
         *self = Self::default()
+    }
+
+    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        match self.selector {
+            SizeSelector::R16 => self.cipher_16.encrypt(text),
+            SizeSelector::R32 => self.cipher_32.encrypt(text),
+            SizeSelector::R64 => self.cipher_64.encrypt(text),
+        }
+    }
+
+    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        match self.selector {
+            SizeSelector::R16 => self.cipher_16.decrypt(text),
+            SizeSelector::R32 => self.cipher_32.decrypt(text),
+            SizeSelector::R64 => self.cipher_64.decrypt(text),
+        }
     }
 }

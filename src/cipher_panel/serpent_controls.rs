@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::{block_cipher_iv_128, block_cipher_mode_and_padding, UiElements};
-use ciphers::{digital::block_ciphers::serpent::Serpent, Cipher};
+use ciphers::digital::block_ciphers::serpent::Serpent;
 use rand::{thread_rng, Rng};
 
 #[derive(Debug, PartialEq, Eq)]
@@ -100,7 +100,6 @@ impl CipherFrame for SerpentFrame {
         ui.add_space(16.0);
     }
 
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         self.key = [0; 8];
@@ -114,7 +113,5 @@ impl CipherFrame for SerpentFrame {
         }
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

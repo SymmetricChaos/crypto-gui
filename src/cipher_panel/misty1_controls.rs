@@ -1,7 +1,7 @@
 use super::CipherFrame;
 use crate::ui_elements::{block_cipher_iv_64, block_cipher_mode_and_padding, UiElements};
 
-use ciphers::{digital::block_ciphers::misty1::Misty1, Cipher};
+use ciphers::digital::block_ciphers::misty1::Misty1;
 use egui::Ui;
 use rand::{thread_rng, Rng};
 
@@ -70,7 +70,5 @@ impl CipherFrame for Misty1Frame {
         }
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

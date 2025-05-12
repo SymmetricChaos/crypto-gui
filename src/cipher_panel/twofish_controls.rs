@@ -93,14 +93,6 @@ impl CipherFrame for TwofishFrame {
         }
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        match self.selector {
-            TwofishSelect::Twofish128 => &self.cipher128,
-            TwofishSelect::Twofish192 => &self.cipher192,
-            TwofishSelect::Twofish256 => &self.cipher256,
-        }
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         match self.selector {
@@ -136,5 +128,21 @@ impl CipherFrame for TwofishFrame {
 
     fn reset(&mut self) {
         *self = Self::default()
+    }
+
+    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        match self.selector {
+            TwofishSelect::Twofish128 => self.cipher128.encrypt(text),
+            TwofishSelect::Twofish192 => self.cipher192.encrypt(text),
+            TwofishSelect::Twofish256 => self.cipher256.encrypt(text),
+        }
+    }
+
+    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        match self.selector {
+            TwofishSelect::Twofish128 => self.cipher128.decrypt(text),
+            TwofishSelect::Twofish192 => self.cipher192.decrypt(text),
+            TwofishSelect::Twofish256 => self.cipher256.decrypt(text),
+        }
     }
 }

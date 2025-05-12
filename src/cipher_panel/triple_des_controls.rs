@@ -1,8 +1,7 @@
 use super::CipherFrame;
 use crate::ui_elements::{block_cipher_iv_64, block_cipher_mode_and_padding, UiElements};
-use ciphers::{
-    digital::block_ciphers::des::{des_functions::set_des_key_parity, triple_des::TripleDes},
-    Cipher,
+use ciphers::digital::block_ciphers::des::{
+    des_functions::set_des_key_parity, triple_des::TripleDes,
 };
 use egui::Ui;
 use rand::{thread_rng, Rng};
@@ -71,7 +70,6 @@ impl CipherFrame for TripleDesFrame {
         ui.add_space(16.0);
     }
 
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         for key in self.keys.iter_mut() {
@@ -88,7 +86,5 @@ impl CipherFrame for TripleDesFrame {
         }
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

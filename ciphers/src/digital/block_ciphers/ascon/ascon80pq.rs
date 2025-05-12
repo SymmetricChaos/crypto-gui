@@ -1,10 +1,8 @@
 use super::{padded_bytes_to_u64_be, AsconState};
-use crate::{digital::block_ciphers::block_cipher::BCMode, errors::CipherError, Cipher};
+use crate::{digital::block_ciphers::block_cipher::BCMode, errors::CipherError};
 use utils::byte_formatting::ByteFormat;
 
 pub struct Ascon80pq {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
     pub mode: BCMode,
     pub associated_data: Vec<u8>,
     pub subkeys: [u64; 3],
@@ -14,8 +12,6 @@ pub struct Ascon80pq {
 impl Default for Ascon80pq {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
-            output_format: ByteFormat::Hex,
             mode: Default::default(),
             associated_data: Default::default(),
             subkeys: Default::default(),
@@ -25,16 +21,6 @@ impl Default for Ascon80pq {
 }
 
 impl Ascon80pq {
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
-    }
-
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
-    }
-
     pub fn mode(mut self, mode: BCMode) -> Self {
         self.mode = mode;
         self
@@ -209,36 +195,14 @@ impl Ascon80pq {
     }
 }
 
-impl Cipher for Ascon80pq {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
-
-        Ok(self
-            .output_format
-            .byte_slice_to_text(&self.encrypt_bytes(&bytes)))
-    }
-
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        let bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
-
-        Ok(self
-            .output_format
-            .byte_slice_to_text(&self.decrypt_bytes(&bytes)?))
-    }
-}
-
 #[cfg(test)]
 mod ascon_tests {
 
+    use hex_literal::hex;
+
     use super::*;
 
-    fn ascon80pq_test(ptext: &str, ad: &str, ctext: &str) {
+    fn ascon80pq_test(ptext: &[u8], ad: &[u8], ctext: &[u8]) {
         let cipher = Ascon80pq::default()
             .with_key([
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
@@ -248,47 +212,63 @@ mod ascon_tests {
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
                 0x0E, 0x0F,
             ])
-            .with_ad_str(ad);
-        let otext = cipher.encrypt(ptext).unwrap();
+            .with_ad(ad);
+        let otext = cipher.encrypt_bytes(ptext);
         assert_eq!(ctext, otext, "encrypt failed");
-        let otext = cipher.decrypt(ctext).unwrap();
+        let otext = cipher.decrypt_bytes(ctext).unwrap();
         assert_eq!(ptext, otext, "decrypt failed");
     }
 
     #[test]
     fn ascon80pd_0_0() {
-        ascon80pq_test("", "", "abb688efa0b9d56b33277a2c97d2146b")
+        ascon80pq_test(
+            &hex!(""),
+            &hex!(""),
+            &hex!("abb688efa0b9d56b33277a2c97d2146b"),
+        )
     }
 
     #[test]
     fn ascon80pd_2_0() {
-        ascon80pq_test("0001", "", "2846798d04b1e591cbcdf30dbf58d268a69a")
+        ascon80pq_test(
+            &hex!("0001"),
+            &hex!(""),
+            &hex!("2846798d04b1e591cbcdf30dbf58d268a69a"),
+        )
     }
 
     #[test]
     fn ascon80pd_8_0() {
         ascon80pq_test(
-            "0001020304050607",
-            "",
-            "2846418067ce93861a484e22565f161146fb6f47913803f9",
+            &hex!("0001020304050607"),
+            &hex!(""),
+            &hex!("2846418067ce93861a484e22565f161146fb6f47913803f9"),
         )
     }
 
     #[test]
     fn ascon80pd_0_8() {
-        ascon80pq_test("", "0001020304050607", "d80b5c5c8fa97ee33d916c61772b2e23")
+        ascon80pq_test(
+            &hex!(""),
+            &hex!("0001020304050607"),
+            &hex!("d80b5c5c8fa97ee33d916c61772b2e23"),
+        )
     }
 
     #[test]
     fn ascon80pd_2_2() {
-        ascon80pq_test("0001", "0001", "623fff2c0fb416236e91c36d37e4f0a8f2bc")
+        ascon80pq_test(
+            &hex!("0001"),
+            &hex!("0001"),
+            &hex!("623fff2c0fb416236e91c36d37e4f0a8f2bc"),
+        )
     }
 
     #[test]
     fn ascon80pd_64_64() {
         ascon80pq_test(
-            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f", "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
-            "cc4e07e5fb13426effd17b0f51a6a830bf484c9651d77679971e8eb4a8edb5a00782a94c72b2b02d87dcf4af75db6996"
+            &hex!("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"), &hex!("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"),
+            &hex!("cc4e07e5fb13426effd17b0f51a6a830bf484c9651d77679971e8eb4a8edb5a00782a94c72b2b02d87dcf4af75db6996")
         )
     }
 }

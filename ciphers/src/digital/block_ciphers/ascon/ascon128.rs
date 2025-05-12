@@ -1,12 +1,9 @@
 use super::{padded_bytes_to_u64_be, padded_bytes_to_u64s_be, Ascon128Variant, AsconState};
-use crate::{digital::block_ciphers::block_cipher::BCMode, errors::CipherError, Cipher};
+use crate::{digital::block_ciphers::block_cipher::BCMode, errors::CipherError};
 use utils::byte_formatting::ByteFormat;
 
 pub struct Ascon128 {
-    pub input_format: ByteFormat,
-    pub output_format: ByteFormat,
     pub mode: BCMode,
-    // pub padding: BCPadding, // only bit padding is allowed
     pub associated_data: Vec<u8>,
     pub subkeys: [u64; 2],
     pub nonce: [u64; 2],
@@ -16,8 +13,6 @@ pub struct Ascon128 {
 impl Default for Ascon128 {
     fn default() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
-            output_format: ByteFormat::Hex,
             mode: Default::default(),
             associated_data: Default::default(),
             subkeys: Default::default(),
@@ -28,16 +23,6 @@ impl Default for Ascon128 {
 }
 
 impl Ascon128 {
-    pub fn input(mut self, input: ByteFormat) -> Self {
-        self.input_format = input;
-        self
-    }
-
-    pub fn output(mut self, output: ByteFormat) -> Self {
-        self.output_format = output;
-        self
-    }
-
     pub fn mode(mut self, mode: BCMode) -> Self {
         self.mode = mode;
         self
@@ -45,8 +30,6 @@ impl Ascon128 {
 
     pub fn ascon128() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
-            output_format: ByteFormat::Hex,
             mode: Default::default(),
             associated_data: Default::default(),
             subkeys: Default::default(),
@@ -57,8 +40,6 @@ impl Ascon128 {
 
     pub fn ascon128a() -> Self {
         Self {
-            input_format: ByteFormat::Hex,
-            output_format: ByteFormat::Hex,
             mode: Default::default(),
             associated_data: Default::default(),
             subkeys: Default::default(),
@@ -300,36 +281,14 @@ impl Ascon128 {
     }
 }
 
-impl Cipher for Ascon128 {
-    fn encrypt(&self, text: &str) -> Result<String, CipherError> {
-        let bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
-
-        Ok(self
-            .output_format
-            .byte_slice_to_text(&self.encrypt_bytes(&bytes)))
-    }
-
-    fn decrypt(&self, text: &str) -> Result<String, CipherError> {
-        let bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|_| CipherError::input("byte format error"))?;
-
-        Ok(self
-            .output_format
-            .byte_slice_to_text(&self.decrypt_bytes(&bytes)?))
-    }
-}
-
 #[cfg(test)]
 mod ascon_tests {
 
+    use hex_literal::hex;
+
     use super::*;
 
-    fn ascon128_test(ptext: &str, ad: &str, ctext: &str) {
+    fn ascon128_test(ptext: &[u8], ad: &[u8], ctext: &[u8]) {
         let cipher = Ascon128::ascon128()
             .with_key([
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
@@ -339,14 +298,14 @@ mod ascon_tests {
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
                 0x0E, 0x0F,
             ])
-            .with_ad_str(ad);
-        let otext = cipher.encrypt(ptext).unwrap();
+            .with_ad(ad);
+        let otext = cipher.encrypt_bytes(ptext);
         assert_eq!(ctext, otext, "encrypt failed");
-        let otext = cipher.decrypt(ctext).unwrap();
+        let otext = cipher.decrypt_bytes(ctext).unwrap();
         assert_eq!(ptext, otext, "decrypt failed");
     }
 
-    fn ascon128a_test(ptext: &str, ad: &str, ctext: &str) {
+    fn ascon128a_test(ptext: &[u8], ad: &[u8], ctext: &[u8]) {
         let cipher = Ascon128::ascon128a()
             .with_key([
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
@@ -356,128 +315,168 @@ mod ascon_tests {
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
                 0x0E, 0x0F,
             ])
-            .with_ad_str(ad);
-        let otext = cipher.encrypt(ptext).unwrap();
+            .with_ad(ad);
+        let otext = cipher.encrypt_bytes(ptext);
         assert_eq!(ctext, otext, "encrypt failed");
-        let otext = cipher.decrypt(ctext).unwrap();
+        let otext = cipher.decrypt_bytes(ctext).unwrap();
         assert_eq!(ptext, otext, "decrypt failed");
     }
 
     #[test]
     fn ascon128_0_0() {
-        ascon128_test("", "", "e355159f292911f794cb1432a0103a8a")
+        ascon128_test(
+            &hex!(""),
+            &hex!(""),
+            &hex!("e355159f292911f794cb1432a0103a8a"),
+        )
     }
 
     #[test]
     fn ascon128_2_0() {
-        ascon128_test("0001", "", "bc82d5bde868f7494f57d81e06facbf70ce1")
+        ascon128_test(
+            &hex!("0001"),
+            &hex!(""),
+            &hex!("bc82d5bde868f7494f57d81e06facbf70ce1"),
+        )
     }
 
     #[test]
     fn ascon128_7_0() {
         ascon128_test(
-            "00010203040506",
-            "",
-            "bc820dbdf7a463ce9985966c40bc56a9c5180e23f7086c",
+            &hex!("00010203040506"),
+            &hex!(""),
+            &hex!("bc820dbdf7a463ce9985966c40bc56a9c5180e23f7086c"),
         )
     }
 
     #[test]
     fn ascon128_8_0() {
         ascon128_test(
-            "0001020304050607",
-            "",
-            "bc820dbdf7a4631c01a8807a44254b42ac6bb490da1e000a",
+            &hex!("0001020304050607"),
+            &hex!(""),
+            &hex!("bc820dbdf7a4631c01a8807a44254b42ac6bb490da1e000a"),
         )
     }
 
     #[test]
     fn ascon128_12_0() {
         ascon128_test(
-            "000102030405060708090a0b",
-            "",
-            "bc820dbdf7a4631c5b29884a7d1c07dc8d0d5ed48e64d7dcb25c325f",
+            &hex!("000102030405060708090a0b"),
+            &hex!(""),
+            &hex!("bc820dbdf7a4631c5b29884a7d1c07dc8d0d5ed48e64d7dcb25c325f"),
         )
     }
 
     #[test]
     fn ascon128_0_1() {
-        ascon128_test("", "00", "944df887cd4901614c5dedbc42fc0da0")
+        ascon128_test(
+            &hex!(""),
+            &hex!("00"),
+            &hex!("944df887cd4901614c5dedbc42fc0da0"),
+        )
     }
 
     #[test]
     fn ascon128_0_8() {
-        ascon128_test("", "0001020304050607", "e3dcf95f869752f61cd7a2db895f918e")
+        ascon128_test(
+            &hex!(""),
+            &hex!("0001020304050607"),
+            &hex!("e3dcf95f869752f61cd7a2db895f918e"),
+        )
     }
 
     #[test]
     fn ascon128_2_2() {
-        ascon128_test("0001", "0001", "6e9f373c0b74264c1ce4d705d995915fcccd")
+        ascon128_test(
+            &hex!("0001"),
+            &hex!("0001"),
+            &hex!("6e9f373c0b74264c1ce4d705d995915fcccd"),
+        )
     }
 
     #[test]
     fn ascon128_64_64() {
         ascon128_test(
-            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f", "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f", "b96c78651b6246b0c3b1a5d373b0d5168dca4a96734cf0ddf5f92f8d15e30270279bf6a6cc3f2fc9350b915c292bdb8d"
+            &hex!("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"), &hex!("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"), &hex!("b96c78651b6246b0c3b1a5d373b0d5168dca4a96734cf0ddf5f92f8d15e30270279bf6a6cc3f2fc9350b915c292bdb8d")
         )
     }
 
     #[test]
     fn ascon128a_0_0() {
-        ascon128a_test("", "", "7a834e6f09210957067b10fd831f0078")
+        ascon128a_test(
+            &hex!(""),
+            &hex!(""),
+            &hex!("7a834e6f09210957067b10fd831f0078"),
+        )
     }
 
     #[test]
     fn ascon128a_2_0() {
-        ascon128a_test("0001", "", "6e490868e32cb041a71ca5e41b615ce11c4e")
+        ascon128a_test(
+            &hex!("0001"),
+            &hex!(""),
+            &hex!("6e490868e32cb041a71ca5e41b615ce11c4e"),
+        )
     }
 
     #[test]
     fn ascon128a_7_0() {
         ascon128a_test(
-            "00010203040506",
-            "",
-            "6e490cfed5b35449f1bd8ab58546aa5ffa2fee5afe13a4",
+            &hex!("00010203040506"),
+            &hex!(""),
+            &hex!("6e490cfed5b35449f1bd8ab58546aa5ffa2fee5afe13a4"),
         )
     }
 
     #[test]
     fn ascon128a_8_0() {
         ascon128a_test(
-            "0001020304050607",
-            "",
-            "6e490cfed5b35467b89c7e12863ce5f76afc808fff786b9e",
+            &hex!("0001020304050607"),
+            &hex!(""),
+            &hex!("6e490cfed5b35467b89c7e12863ce5f76afc808fff786b9e"),
         )
     }
 
     #[test]
     fn ascon128a_12_0() {
         ascon128a_test(
-            "000102030405060708090a0b",
-            "",
-            "6e490cfed5b3546767350cd83e9b1bfeb72dd5bacf71810b946fbe03",
+            &hex!("000102030405060708090a0b"),
+            &hex!(""),
+            &hex!("6e490cfed5b3546767350cd83e9b1bfeb72dd5bacf71810b946fbe03"),
         )
     }
 
     #[test]
     fn ascon128a_0_1() {
-        ascon128a_test("", "00", "af3031b07b129ec84153373ddcaba528")
+        ascon128a_test(
+            &hex!(""),
+            &hex!("00"),
+            &hex!("af3031b07b129ec84153373ddcaba528"),
+        )
     }
 
     #[test]
     fn ascon128a_0_8() {
-        ascon128a_test("", "0001020304050607", "d60e199ffd3f9b694713dabc6d89f46f")
+        ascon128a_test(
+            &hex!(""),
+            &hex!("0001020304050607"),
+            &hex!("d60e199ffd3f9b694713dabc6d89f46f"),
+        )
     }
 
     #[test]
     fn ascon128a_2_2() {
-        ascon128a_test("0001", "0001", "abe4c55426e24a56bb77f8e0bd9212fe8d29")
+        ascon128a_test(
+            &hex!("0001"),
+            &hex!("0001"),
+            &hex!("abe4c55426e24a56bb77f8e0bd9212fe8d29"),
+        )
     }
 
     #[test]
     fn ascon128a_64_64() {
         ascon128a_test(
-            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f", "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f", "a55236ac020dbda74ce6ccd10c68c4d8514450a382bc87c68946d86a921dd88e2adddfbbe77d4112830e01960b9d38d5",
+            &hex!("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"), &hex!("000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"), &hex!("a55236ac020dbda74ce6ccd10c68c4d8514450a382bc87c68946d86a921dd88e2adddfbbe77d4112830e01960b9d38d5"),
         )
     }
 }

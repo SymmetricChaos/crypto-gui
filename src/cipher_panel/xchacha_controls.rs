@@ -241,14 +241,6 @@ impl CipherFrame for XChaChaFrame {
         ui.mono(self.start_state());
     }
 
-    fn cipher(&self) -> &dyn ciphers::Cipher {
-        if self.ietf {
-            &self.cipher_ietf
-        } else {
-            &self.cipher
-        }
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         if self.ietf {
@@ -262,5 +254,19 @@ impl CipherFrame for XChaChaFrame {
 
     fn reset(&mut self) {
         *self = Self::default()
+    }
+
+    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        match self.ietf {
+            true => ciphers::Cipher::encrypt(&self.cipher_ietf, text),
+            false => ciphers::Cipher::encrypt(&self.cipher, text),
+        }
+    }
+
+    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        match self.ietf {
+            true => ciphers::Cipher::decrypt(&self.cipher_ietf, text),
+            false => ciphers::Cipher::decrypt(&self.cipher, text),
+        }
     }
 }

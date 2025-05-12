@@ -6,12 +6,10 @@ use ciphers::{
 };
 use egui::Ui;
 use rand::{thread_rng, Rng};
+use utils::byte_formatting::ByteFormat;
 
 macro_rules! interface {
     ($ui: ident, $cipher: expr, $key: expr, $bits: literal, $words: literal) => {
-        $ui.byte_io_mode_cipher(&mut $cipher.input_format, &mut $cipher.output_format);
-        $ui.add_space(8.0);
-
         block_cipher_mode_and_padding($ui, &mut $cipher.mode, &mut $cipher.padding);
         $ui.add_space(8.0);
 
@@ -42,6 +40,8 @@ enum AesSelect {
 }
 
 pub struct AesFrame {
+    input_format: ByteFormat,
+    output_format: ByteFormat,
     cipher128: Aes128,
     cipher192: Aes192,
     cipher256: Aes256,
@@ -54,6 +54,8 @@ pub struct AesFrame {
 impl Default for AesFrame {
     fn default() -> Self {
         Self {
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
             cipher128: Default::default(),
             cipher192: Default::default(),
             cipher256: Default::default(),
@@ -80,6 +82,9 @@ impl CipherFrame for AesFrame {
         ui.randomize_reset_cipher(self);
         ui.add_space(16.0);
 
+        ui.byte_io_mode_cipher(&mut self.input_format, &mut self.output_format);
+        ui.add_space(8.0);
+
         match self.selector {
             AesSelect::Aes128 => {
                 interface!(ui, self.cipher128, self.key128, "128", 4);
@@ -90,14 +95,6 @@ impl CipherFrame for AesFrame {
             AesSelect::Aes256 => {
                 interface!(ui, self.cipher256, self.key256, "256", 8);
             }
-        }
-    }
-
-    fn cipher(&self) -> &dyn Cipher {
-        match self.selector {
-            AesSelect::Aes128 => &self.cipher128,
-            AesSelect::Aes192 => &self.cipher192,
-            AesSelect::Aes256 => &self.cipher256,
         }
     }
 
@@ -136,5 +133,21 @@ impl CipherFrame for AesFrame {
 
     fn reset(&mut self) {
         *self = Self::default()
+    }
+
+    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        match self.selector {
+            AesSelect::Aes128 => self.cipher128.encrypt(text),
+            AesSelect::Aes192 => self.cipher192.encrypt(text),
+            AesSelect::Aes256 => self.cipher256.encrypt(text),
+        }
+    }
+
+    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        match self.selector {
+            AesSelect::Aes128 => self.cipher128.decrypt(text),
+            AesSelect::Aes192 => self.cipher192.decrypt(text),
+            AesSelect::Aes256 => self.cipher256.decrypt(text),
+        }
     }
 }

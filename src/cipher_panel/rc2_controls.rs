@@ -1,6 +1,6 @@
 use super::CipherFrame;
 use crate::ui_elements::{block_cipher_iv_64, block_cipher_mode_and_padding, UiElements};
-use ciphers::{digital::block_ciphers::rc2::Rc2, Cipher};
+use ciphers::digital::block_ciphers::rc2::Rc2;
 use egui::{DragValue, FontId, RichText, Ui};
 use rand::{thread_rng, Rng};
 use utils::byte_formatting::ByteFormat;
@@ -108,4 +108,6 @@ impl CipherFrame for Rc2Frame {
         self.key = format!("{:08X}", rng.gen::<u64>());
         self.run_ksa();
     }
+
+    crate::simple_cipher! {}
 }

@@ -22,10 +22,6 @@ enum AesGcmSelect {
 
 macro_rules! interface {
     ($ui: ident, $cipher: expr, $key: expr, $bits: literal, $words: literal, $ad_mode: expr, $ad: expr, $errors: expr) => {
-        $ui.byte_io_mode_cipher(&mut $cipher.input_format, &mut $cipher.output_format);
-
-        $ui.add_space(8.0);
-
         $ui.horizontal(|ui| {
             ui.subheading(format!("Key ({} bits)", $bits));
             if ui.random_bytes_button(&mut $key).clicked() {
@@ -71,6 +67,8 @@ macro_rules! interface {
 }
 
 pub struct AesGcmFrame {
+    input_format: ByteFormat,
+    output_format: ByteFormat,
     cipher128: AesGcm128,
     cipher192: AesGcm192,
     cipher256: AesGcm256,
@@ -88,6 +86,8 @@ pub struct AesGcmFrame {
 impl Default for AesGcmFrame {
     fn default() -> Self {
         Self {
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
             cipher128: Default::default(),
             cipher192: Default::default(),
             cipher256: Default::default(),
@@ -177,6 +177,9 @@ impl CipherFrame for AesGcmFrame {
 
         self.ghash_display(ui);
 
+        ui.byte_io_mode_cipher(&mut self.input_format, &mut self.output_format);
+        ui.add_space(8.0);
+
         match self.selector {
             AesGcmSelect::AesGcm128 => {
                 interface!(
@@ -217,14 +220,6 @@ impl CipherFrame for AesGcmFrame {
         }
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        match self.selector {
-            AesGcmSelect::AesGcm128 => &self.cipher128,
-            AesGcmSelect::AesGcm192 => &self.cipher192,
-            AesGcmSelect::AesGcm256 => &self.cipher256,
-        }
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         match self.selector {
@@ -256,5 +251,21 @@ impl CipherFrame for AesGcmFrame {
 
     fn reset(&mut self) {
         *self = Self::default()
+    }
+
+    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        match self.selector {
+            AesGcmSelect::AesGcm128 => self.cipher128.encrypt(text),
+            AesGcmSelect::AesGcm192 => self.cipher192.encrypt(text),
+            AesGcmSelect::AesGcm256 => self.cipher256.encrypt(text),
+        }
+    }
+
+    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        match self.selector {
+            AesGcmSelect::AesGcm128 => self.cipher128.decrypt(text),
+            AesGcmSelect::AesGcm192 => self.cipher192.decrypt(text),
+            AesGcmSelect::AesGcm256 => self.cipher256.decrypt(text),
+        }
     }
 }

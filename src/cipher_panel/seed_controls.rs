@@ -56,15 +56,9 @@ impl CipherFrame for SeedFrame {
         block_cipher_iv_128(ui, &mut self.cipher.iv, self.cipher.mode);
     }
 
-    fn cipher(&self) -> &dyn ciphers::Cipher {
-        todo!()
-    }
-
     fn randomize(&mut self) {
         todo!()
     }
 
-    fn reset(&mut self) {
-        todo!()
-    }
+    crate::simple_cipher! {}
 }

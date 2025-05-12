@@ -78,17 +78,11 @@ impl CipherFrame for Salsa20Frame {
         ui.mono(self.start_state());
     }
 
-    fn cipher(&self) -> &dyn ciphers::Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         rng.fill(&mut self.cipher.key);
         rng.fill(&mut self.cipher.nonce);
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

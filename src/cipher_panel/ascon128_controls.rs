@@ -1,16 +1,16 @@
+use super::CipherFrame;
+use crate::ui_elements::UiElements;
 use ciphers::{
     digital::block_ciphers::ascon::{ascon128::Ascon128, Ascon128Variant},
-    Cipher,
+    CipherError,
 };
 use rand::{thread_rng, Rng};
 use strum::IntoEnumIterator;
 use utils::byte_formatting::ByteFormat;
 
-use crate::ui_elements::UiElements;
-
-use super::CipherFrame;
-
 pub struct Ascon128Frame {
+    input_format: ByteFormat,
+    output_format: ByteFormat,
     cipher: Ascon128,
     ad: String,
     ad_mode: ByteFormat,
@@ -19,6 +19,8 @@ pub struct Ascon128Frame {
 impl Default for Ascon128Frame {
     fn default() -> Self {
         Self {
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
             cipher: Default::default(),
             ad: Default::default(),
             ad_mode: ByteFormat::Hex,
@@ -108,7 +110,6 @@ impl CipherFrame for Ascon128Frame {
         }
     }
 
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         self.cipher.subkeys[0] = rng.gen();
@@ -119,5 +120,27 @@ impl CipherFrame for Ascon128Frame {
 
     fn reset(&mut self) {
         *self = Self::default()
+    }
+
+    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        let bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| CipherError::input("byte format error"))?;
+
+        Ok(self
+            .output_format
+            .byte_slice_to_text(&self.cipher.encrypt_bytes(&bytes)))
+    }
+
+    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        let bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| CipherError::input("byte format error"))?;
+
+        Ok(self
+            .output_format
+            .byte_slice_to_text(&self.cipher.decrypt_bytes(&bytes)?))
     }
 }

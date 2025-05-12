@@ -173,10 +173,6 @@ impl CipherFrame for ChaChaFrame {
         ui.mono(self.start_state());
     }
 
-    fn cipher(&self) -> &dyn ciphers::Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         if self.ietf {
@@ -188,7 +184,5 @@ impl CipherFrame for ChaChaFrame {
         }
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

@@ -1,7 +1,6 @@
 use super::CipherFrame;
-
 use crate::ui_elements::UiElements;
-use ciphers::{digital::public_key_ciphers::diffie_hellman::DiffieHellman, traits::Cipher};
+use ciphers::digital::public_key_ciphers::diffie_hellman::DiffieHellman;
 use eframe::egui::Ui;
 use rand::{thread_rng, Rng};
 use utils::math_functions::is_prime32;
@@ -93,7 +92,5 @@ impl CipherFrame for DiffieHellmanFrame {
         }
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

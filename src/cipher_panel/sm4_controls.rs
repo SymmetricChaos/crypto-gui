@@ -2,7 +2,7 @@ use super::CipherFrame;
 use crate::ui_elements::{
     block_cipher_iv_128, block_cipher_mode, block_cipher_padding, UiElements,
 };
-use ciphers::{digital::block_ciphers::sm4::Sm4, Cipher};
+use ciphers::digital::block_ciphers::sm4::Sm4;
 use egui::{FontId, RichText, Ui};
 use rand::{thread_rng, Rng};
 
@@ -79,14 +79,11 @@ impl CipherFrame for Sm4Frame {
         ui.add_space(16.0);
     }
 
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         rng.fill(&mut self.key);
         self.cipher.ksa_32(self.key);
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

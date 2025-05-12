@@ -64,10 +64,6 @@ impl CipherFrame for Snow3GFrame {
         });
     }
 
-    fn cipher(&self) -> &dyn ciphers::Cipher {
-        &self.cipher
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         rng.fill(&mut self.key);
@@ -75,7 +71,5 @@ impl CipherFrame for Snow3GFrame {
         self.cipher = Snow3G::with_key_and_iv(self.key, self.iv);
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

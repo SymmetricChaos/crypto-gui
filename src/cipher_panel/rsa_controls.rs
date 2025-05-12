@@ -1,12 +1,11 @@
-use std::str::FromStr;
-
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{digital::public_key_ciphers::rsa::Rsa, Cipher};
+use ciphers::digital::public_key_ciphers::rsa::Rsa;
 use egui::Ui;
 use num::BigUint;
 use num_prime::{nt_funcs::is_prime, PrimalityTestConfig, RandPrime};
 use rand::thread_rng;
+use std::str::FromStr;
 
 fn prime_string(ui: &mut Ui, s: &mut String, n: &mut BigUint) {
     let mut primality_test = PrimalityTestConfig::strict();
@@ -97,7 +96,6 @@ impl CipherFrame for RsaFrame {
         ui.add_space(16.0);
     }
 
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
 
@@ -110,7 +108,5 @@ impl CipherFrame for RsaFrame {
         self.run_ksa();
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

@@ -1,12 +1,11 @@
-use std::str::FromStr;
-
 use super::CipherFrame;
 use crate::ui_elements::UiElements;
-use ciphers::{digital::public_key_ciphers::elgamal::ElGamal, Cipher};
+use ciphers::digital::public_key_ciphers::elgamal::ElGamal;
 use egui::Ui;
 use num::BigUint;
 use num_prime::{nt_funcs::is_prime, RandPrime};
 use rand::{thread_rng, Rng};
+use std::str::FromStr;
 
 fn prime_string(ui: &mut Ui, s: &mut String, n: &mut BigUint) {
     ui.horizontal(|ui| {
@@ -120,7 +119,6 @@ impl CipherFrame for ElGamalFrame {
         ui.add_space(16.0);
     }
 
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
 
@@ -141,7 +139,5 @@ impl CipherFrame for ElGamalFrame {
         self.run_ksa();
     }
 
-    fn reset(&mut self) {
-        *self = Self::default()
-    }
+    crate::simple_cipher! {}
 }

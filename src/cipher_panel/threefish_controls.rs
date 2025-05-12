@@ -151,14 +151,6 @@ impl CipherFrame for ThreefishFrame {
         }
     }
 
-    fn cipher(&self) -> &dyn Cipher {
-        match self.selector {
-            ThreefishSelect::Threefish256 => &self.cipher256,
-            ThreefishSelect::Threefish512 => &self.cipher512,
-            ThreefishSelect::Threefish1024 => &self.cipher1024,
-        }
-    }
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         for t in self.tweak.iter_mut() {
@@ -195,5 +187,21 @@ impl CipherFrame for ThreefishFrame {
 
     fn reset(&mut self) {
         *self = Self::default()
+    }
+
+    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        match self.selector {
+            ThreefishSelect::Threefish256 => self.cipher256.encrypt(text),
+            ThreefishSelect::Threefish512 => self.cipher512.encrypt(text),
+            ThreefishSelect::Threefish1024 => self.cipher1024.encrypt(text),
+        }
+    }
+
+    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        match self.selector {
+            ThreefishSelect::Threefish256 => self.cipher256.decrypt(text),
+            ThreefishSelect::Threefish512 => self.cipher512.decrypt(text),
+            ThreefishSelect::Threefish1024 => self.cipher1024.decrypt(text),
+        }
     }
 }

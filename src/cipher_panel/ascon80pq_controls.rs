@@ -1,4 +1,4 @@
-use ciphers::{digital::block_ciphers::ascon::ascon80pq::Ascon80pq, Cipher};
+use ciphers::{digital::block_ciphers::ascon::ascon80pq::Ascon80pq, CipherError};
 use rand::{thread_rng, Rng};
 use strum::IntoEnumIterator;
 use utils::byte_formatting::ByteFormat;
@@ -8,6 +8,8 @@ use crate::ui_elements::UiElements;
 use super::CipherFrame;
 
 pub struct Ascon80pqFrame {
+    input_format: ByteFormat,
+    output_format: ByteFormat,
     cipher: Ascon80pq,
     ad: String,
     ad_mode: ByteFormat,
@@ -16,6 +18,8 @@ pub struct Ascon80pqFrame {
 impl Default for Ascon80pqFrame {
     fn default() -> Self {
         Self {
+            input_format: ByteFormat::Utf8,
+            output_format: ByteFormat::Hex,
             cipher: Default::default(),
             ad: Default::default(),
             ad_mode: ByteFormat::Hex,
@@ -31,10 +35,7 @@ impl CipherFrame for Ascon80pqFrame {
         );
         ui.add_space(8.0);
 
-        ui.byte_io_mode_cipher(
-            &mut self.cipher.input_format,
-            &mut self.cipher.output_format,
-        );
+        ui.byte_io_mode_cipher(&mut self.input_format, &mut self.output_format);
         ui.add_space(8.0);
 
         ui.randomize_reset_cipher(self);
@@ -100,7 +101,6 @@ impl CipherFrame for Ascon80pqFrame {
         }
     }
 
-
     fn randomize(&mut self) {
         let mut rng = thread_rng();
         self.cipher.subkeys[0] = rng.gen();
@@ -113,5 +113,27 @@ impl CipherFrame for Ascon80pqFrame {
 
     fn reset(&mut self) {
         *self = Self::default()
+    }
+
+    fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        let bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| CipherError::input("byte format error"))?;
+
+        Ok(self
+            .output_format
+            .byte_slice_to_text(&self.cipher.encrypt_bytes(&bytes)))
+    }
+
+    fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
+        let bytes = self
+            .input_format
+            .text_to_bytes(text)
+            .map_err(|_| CipherError::input("byte format error"))?;
+
+        Ok(self
+            .output_format
+            .byte_slice_to_text(&self.cipher.decrypt_bytes(&bytes)?))
     }
 }
