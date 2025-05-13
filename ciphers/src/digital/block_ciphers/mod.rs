@@ -43,36 +43,7 @@ macro_rules! impl_cipher_for_block_cipher {
                     .text_to_bytes(text)
                     .map_err(|e| crate::errors::CipherError::Input(e.to_string()))?;
 
-                // Provide the necessary kind and amount of padding
-                if self.mode.padded() {
-                    self.padding.add_padding(&mut bytes, $blocksize)?;
-                }
-
-                // Select the correct mode. Since block ciphers all implement the BlockCipher
-                // trait these are available for free. The fully qualified names for each of
-                // the encrypt and decrypt functions are too messy and avoiding them is a pain
-                // so when this macro is called the file must have the BlockCipher trait
-                // imported.
-                match self.mode {
-                    crate::digital::block_ciphers::block_cipher::BCMode::Ecb => {
-                        self.encrypt_ecb(&mut bytes)
-                    }
-                    crate::digital::block_ciphers::block_cipher::BCMode::Ctr => {
-                        self.encrypt_ctr(&mut bytes, self.iv.to_be_bytes())
-                    }
-                    crate::digital::block_ciphers::block_cipher::BCMode::Cbc => {
-                        self.encrypt_cbc(&mut bytes, self.iv.to_be_bytes())
-                    }
-                    crate::digital::block_ciphers::block_cipher::BCMode::Pcbc => {
-                        self.encrypt_pcbc(&mut bytes, self.iv.to_be_bytes())
-                    }
-                    crate::digital::block_ciphers::block_cipher::BCMode::Ofb => {
-                        self.encrypt_ofb(&mut bytes, self.iv.to_be_bytes())
-                    }
-                    crate::digital::block_ciphers::block_cipher::BCMode::Cfb => {
-                        self.encrypt_cfb(&mut bytes, self.iv.to_be_bytes())
-                    }
-                };
+                self.encrypt_bytes(&mut bytes);
 
                 Ok(self.output_format.byte_slice_to_text(&bytes))
             }
@@ -100,31 +71,7 @@ macro_rules! impl_cipher_for_block_cipher {
                 // the encrypt and decrypt functions are too messy and avoiding them is a pain
                 // so when this macro is called the file must have the BlockCipher trait
                 // imported.
-                match self.mode {
-                    crate::digital::block_ciphers::block_cipher::BCMode::Ecb => {
-                        self.decrypt_ecb(&mut bytes)
-                    }
-                    crate::digital::block_ciphers::block_cipher::BCMode::Ctr => {
-                        self.decrypt_ctr(&mut bytes, self.iv.to_be_bytes())
-                    }
-                    crate::digital::block_ciphers::block_cipher::BCMode::Cbc => {
-                        self.decrypt_cbc(&mut bytes, self.iv.to_be_bytes())
-                    }
-                    crate::digital::block_ciphers::block_cipher::BCMode::Pcbc => {
-                        self.decrypt_pcbc(&mut bytes, self.iv.to_be_bytes())
-                    }
-                    crate::digital::block_ciphers::block_cipher::BCMode::Ofb => {
-                        self.decrypt_ofb(&mut bytes, self.iv.to_be_bytes())
-                    }
-                    crate::digital::block_ciphers::block_cipher::BCMode::Cfb => {
-                        self.decrypt_cfb(&mut bytes, self.iv.to_be_bytes())
-                    }
-                };
-
-                // Remove the appropriate kind and amount of padding
-                if self.mode.padded() {
-                    self.padding.strip_padding(&mut bytes, $blocksize)?;
-                }
+                self.decrypt_bytes(&mut bytes);
 
                 Ok(self.output_format.byte_slice_to_text(&bytes))
             }

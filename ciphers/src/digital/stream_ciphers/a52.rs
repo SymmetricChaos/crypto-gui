@@ -1,5 +1,5 @@
 use super::lfsr_copy::Lfsr32;
-use utils::byte_formatting::{xor_into_bytes, ByteFormat};
+use utils::byte_formatting::xor_into_bytes;
 
 fn majority(a: u32, b: u32, c: u32) -> u32 {
     (a & b) | (a & c) | (b & c)
@@ -177,6 +177,10 @@ impl A52 {
         let mut keystream = rng.keystream(bytes.len(), self.key, self.frame_number);
         xor_into_bytes(&mut keystream, &bytes);
         keystream
+    }
+
+    pub fn decrypt_bytes(&self, bytes: &mut [u8]) {
+        self.encrypt_bytes(bytes);
     }
 }
 

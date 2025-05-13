@@ -37,10 +37,7 @@ impl CipherFrame for Snow3GFrame {
         ui.randomize_reset_cipher(self);
         ui.add_space(16.0);
 
-        ui.byte_io_mode_cipher(
-            &mut self.cipher.input_format,
-            &mut self.cipher.output_format,
-        );
+        ui.byte_io_mode_cipher(&mut self.input_format, &mut self.output_format);
 
         ui.add_space(8.0);
         ui.horizontal(|ui| {

@@ -60,13 +60,70 @@ macro_rules! block_cipher_getters {
 }
 
 pub trait BlockCipher<const N: usize> {
+    /// Use the block function to encrypt a single block of bytes.
     fn encrypt_block(&self, bytes: &mut [u8]);
+
+    /// Use the block function to decrypt a single block of bytes.
     fn decrypt_block(&self, bytes: &mut [u8]);
 
     fn get_padding(&self) -> BCPadding;
     fn get_mode(&self) -> BCMode;
     fn get_iv_be(&self) -> Vec<u8>;
     fn get_iv_le(&self) -> Vec<u8>;
+
+    /// Given some bytes apply padding and encrypt
+    fn encrypt_bytes(&self, bytes: &mut Vec<u8>) {
+        if self.get_mode().padded() {
+            self.get_padding()
+                .add_padding(bytes, N as u32)
+                .expect("error applying padding");
+        }
+        match self.get_mode() {
+            crate::digital::block_ciphers::block_cipher::BCMode::Ecb => self.encrypt_ecb(bytes),
+            crate::digital::block_ciphers::block_cipher::BCMode::Ctr => {
+                self.encrypt_ctr(bytes, self.get_iv_be().try_into().unwrap())
+            }
+            crate::digital::block_ciphers::block_cipher::BCMode::Cbc => {
+                self.encrypt_cbc(bytes, self.get_iv_be().try_into().unwrap())
+            }
+            crate::digital::block_ciphers::block_cipher::BCMode::Pcbc => {
+                self.encrypt_pcbc(bytes, self.get_iv_be().try_into().unwrap())
+            }
+            crate::digital::block_ciphers::block_cipher::BCMode::Ofb => {
+                self.encrypt_ofb(bytes, self.get_iv_be().try_into().unwrap())
+            }
+            crate::digital::block_ciphers::block_cipher::BCMode::Cfb => {
+                self.encrypt_cfb(bytes, self.get_iv_be().try_into().unwrap())
+            }
+        };
+    }
+
+    /// Given bytes decrypt them in-place, removing padding
+    fn decrypt_bytes(&self, bytes: &mut Vec<u8>) {
+        match self.get_mode() {
+            crate::digital::block_ciphers::block_cipher::BCMode::Ecb => self.decrypt_ecb(bytes),
+            crate::digital::block_ciphers::block_cipher::BCMode::Ctr => {
+                self.decrypt_ctr(bytes, self.get_iv_be().try_into().unwrap())
+            }
+            crate::digital::block_ciphers::block_cipher::BCMode::Cbc => {
+                self.decrypt_cbc(bytes, self.get_iv_be().try_into().unwrap())
+            }
+            crate::digital::block_ciphers::block_cipher::BCMode::Pcbc => {
+                self.decrypt_pcbc(bytes, self.get_iv_be().try_into().unwrap())
+            }
+            crate::digital::block_ciphers::block_cipher::BCMode::Ofb => {
+                self.decrypt_ofb(bytes, self.get_iv_be().try_into().unwrap())
+            }
+            crate::digital::block_ciphers::block_cipher::BCMode::Cfb => {
+                self.decrypt_cfb(bytes, self.get_iv_be().try_into().unwrap())
+            }
+        };
+        if self.get_mode().padded() {
+            self.get_padding()
+                .strip_padding(bytes, N as u32)
+                .expect("error removing padding");
+        }
+    }
 
     /// Encrypt in Electronic Code Book Mode
     fn encrypt_ecb(&self, bytes: &mut [u8]) {

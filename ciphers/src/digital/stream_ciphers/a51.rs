@@ -1,5 +1,5 @@
 use super::lfsr_copy::Lfsr32;
-use utils::byte_formatting::{xor_into_bytes, ByteFormat};
+use utils::byte_formatting::xor_into_bytes;
 
 #[derive(Debug, Clone)]
 pub struct A51Rng {
