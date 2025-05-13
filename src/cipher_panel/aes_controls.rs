@@ -1,8 +1,8 @@
 use super::CipherFrame;
 use crate::ui_elements::{block_cipher_iv_128, block_cipher_mode_and_padding, UiElements};
-use ciphers::digital::block_ciphers::{
-    aes::aes::{Aes128, Aes192, Aes256},
-    block_cipher::BlockCipher,
+use ciphers::{
+    digital::block_ciphers::aes::aes::{Aes128, Aes192, Aes256},
+    Cipher,
 };
 use egui::Ui;
 use rand::{thread_rng, Rng};
@@ -136,32 +136,18 @@ impl CipherFrame for AesFrame {
     }
 
     fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
-        let mut bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|e| ciphers::errors::CipherError::Input(e.to_string()))?;
-
         match self.selector {
-            AesSelect::Aes128 => self.cipher128.encrypt_bytes(&mut bytes),
-            AesSelect::Aes192 => self.cipher192.encrypt_bytes(&mut bytes),
-            AesSelect::Aes256 => self.cipher256.encrypt_bytes(&mut bytes),
+            AesSelect::Aes128 => self.cipher128.encrypt(text),
+            AesSelect::Aes192 => self.cipher192.encrypt(text),
+            AesSelect::Aes256 => self.cipher256.encrypt(text),
         }
-
-        Ok(self.output_format.byte_slice_to_text(&bytes))
     }
 
     fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
-        let mut bytes = self
-            .input_format
-            .text_to_bytes(text)
-            .map_err(|e| ciphers::errors::CipherError::Input(e.to_string()))?;
-
         match self.selector {
-            AesSelect::Aes128 => self.cipher128.decrypt_bytes(&mut bytes),
-            AesSelect::Aes192 => self.cipher192.decrypt_bytes(&mut bytes),
-            AesSelect::Aes256 => self.cipher256.decrypt_bytes(&mut bytes),
+            AesSelect::Aes128 => self.cipher128.decrypt(text),
+            AesSelect::Aes192 => self.cipher192.decrypt(text),
+            AesSelect::Aes256 => self.cipher256.decrypt(text),
         }
-
-        Ok(self.output_format.byte_slice_to_text(&bytes))
     }
 }

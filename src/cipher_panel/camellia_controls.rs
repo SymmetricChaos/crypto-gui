@@ -144,20 +144,18 @@ impl CipherFrame for CamelliaFrame {
     }
 
     fn encrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
-        // match self.selector {
-        //     CamelliaSelect::Camellia128 => self.cipher128.encrypt(text),
-        //     CamelliaSelect::Camellia192 => self.cipher192.encrypt(text),
-        //     CamelliaSelect::Camellia256 => self.cipher256.encrypt(text),
-        // }
-        todo!()
+        match self.selector {
+            CamelliaSelect::Camellia128 => self.cipher128.encrypt(text),
+            CamelliaSelect::Camellia192 => self.cipher192.encrypt(text),
+            CamelliaSelect::Camellia256 => self.cipher256.encrypt(text),
+        }
     }
 
     fn decrypt_string(&self, text: &str) -> Result<String, ciphers::CipherError> {
-        // match self.selector {
-        //     CamelliaSelect::Camellia128 => self.cipher128.decrypt(text),
-        //     CamelliaSelect::Camellia192 => self.cipher192.decrypt(text),
-        //     CamelliaSelect::Camellia256 => self.cipher256.decrypt(text),
-        // }
-        todo!()
+        match self.selector {
+            CamelliaSelect::Camellia128 => self.cipher128.decrypt(text),
+            CamelliaSelect::Camellia192 => self.cipher192.decrypt(text),
+            CamelliaSelect::Camellia256 => self.cipher256.decrypt(text),
+        }
     }
 }
