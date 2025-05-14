@@ -246,20 +246,16 @@ impl Default for Snow2 {
 }
 
 impl Snow2 {
-    pub fn with_key_128(key: [u8; 16]) -> Self {
-        Snow2::with_key_and_iv_128(key, [0; 4])
-    }
-
     pub fn with_key_and_iv_128(key: [u8; 16], iv: [u32; 4]) -> Self {
         let mut s = Snow2::default();
-        s.words[0] = u32::from_be_bytes([key[0], key[1], key[2], key[3]]) ^ iv[3];
+        s.words[0] = u32::from_be_bytes([key[0], key[1], key[2], key[3]]);
         s.words[1] = u32::from_be_bytes([key[4], key[5], key[6], key[7]]);
         s.words[2] = u32::from_be_bytes([key[8], key[9], key[10], key[11]]);
-        s.words[3] = u32::from_be_bytes([key[12], key[13], key[14], key[15]]) ^ iv[2];
+        s.words[3] = u32::from_be_bytes([key[12], key[13], key[14], key[15]]);
 
         s.words[4] = !s.words[0];
-        s.words[5] = !(s.words[1] ^ iv[1]);
-        s.words[6] = !(s.words[2] ^ iv[0]);
+        s.words[5] = !s.words[1];
+        s.words[6] = !s.words[2];
         s.words[7] = !s.words[3];
 
         s.words[8] = s.words[0];
@@ -272,17 +268,56 @@ impl Snow2 {
         s.words[14] = !s.words[2];
         s.words[15] = !s.words[3];
 
-        s.r1 = 0;
-        s.r2 = 0;
+        // XOR the IV in after setting all the words so that the first set can be copied
+        s.words[0] ^= iv[3];
+        s.words[3] ^= iv[2];
+        s.words[5] ^= iv[1];
+        s.words[6] ^= iv[0];
 
-        s.clock_16();
-        s.clock_16();
+        s.clock_iv_16();
+        s.clock_iv_16();
+        s.next();
 
         s
     }
 
-    // Step 16 times
-    fn clock_16(&mut self) {
+    pub fn with_key_and_iv_256(key: [u8; 32], iv: [u32; 4]) -> Self {
+        let mut s = Snow2::default();
+        s.words[0] = u32::from_be_bytes([key[0], key[1], key[2], key[3]]);
+        s.words[1] = u32::from_be_bytes([key[4], key[5], key[6], key[7]]);
+        s.words[2] = u32::from_be_bytes([key[8], key[9], key[10], key[11]]);
+        s.words[3] = u32::from_be_bytes([key[12], key[13], key[14], key[15]]);
+
+        s.words[4] = u32::from_be_bytes([key[16], key[17], key[18], key[19]]);
+        s.words[5] = u32::from_be_bytes([key[20], key[21], key[22], key[23]]);
+        s.words[6] = u32::from_be_bytes([key[24], key[25], key[26], key[27]]);
+        s.words[7] = u32::from_be_bytes([key[28], key[29], key[30], key[31]]);
+
+        s.words[8] = !s.words[0];
+        s.words[9] = !s.words[1];
+        s.words[10] = !s.words[2];
+        s.words[11] = !s.words[3];
+
+        s.words[12] = !s.words[4];
+        s.words[13] = !s.words[5];
+        s.words[14] = !s.words[6];
+        s.words[15] = !s.words[7];
+
+        // XOR the IV in after setting all the words so that the first set can be copied
+        s.words[0] ^= iv[3];
+        s.words[3] ^= iv[2];
+        s.words[5] ^= iv[1];
+        s.words[6] ^= iv[0];
+
+        s.clock_iv_16();
+        s.clock_iv_16();
+        s.next();
+
+        s
+    }
+
+    // Step 16 times in initialization mode
+    fn clock_iv_16(&mut self) {
         for i in 0..16 {
             let fsm = self.r1.wrapping_add(self.words[i]) ^ self.r2;
             self.words[(i + 15) % 16] = alpha_inv(self.words[(i + 4) % 16])
@@ -295,8 +330,8 @@ impl Snow2 {
         }
     }
 
-    // Output 16 times
-    fn next_16(&mut self) -> [u32; 16] {
+    // Output 16 times in keystream mode, outputting the values
+    fn clock_k_16(&mut self) -> [u32; 16] {
         let mut out = [0; 16];
         for i in 0..16 {
             self.words[(i + 15) % 16] = alpha_inv(self.words[(i + 4) % 16])
@@ -312,7 +347,8 @@ impl Snow2 {
         out
     }
 
-    fn next(&mut self) -> u32 {
+    /// Clock once in keystream mode, outputting the value
+    fn clock_k(&mut self) -> u32 {
         self.words[15] = alpha_inv(self.words[4])
             ^ self.words[13]
             ^ alpha(self.words[15])
@@ -346,21 +382,23 @@ mod tests {
 
     #[test]
     fn test_keystream_80() {
-        let mut cipher = Snow2::with_key_128(hex!("80000000000000000000000000000000"));
+        let mut cipher =
+            Snow2::with_key_and_iv_128(hex!("80000000000000000000000000000000"), [0; 4]);
         // let stream = cipher.next_16();
         // println!("{:08x?}", stream);
 
         for _ in 0..5 {
-            println!("{:08x?}", cipher.next())
+            println!("{:08x?}", cipher.clock_k())
         }
     }
 
     #[test]
     fn test_keystream_aa() {
-        let mut cipher = Snow2::with_key_128(hex!("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
+        let mut cipher =
+            Snow2::with_key_and_iv_128(hex!("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"), [0; 4]);
         let stream: [u32; 5] = [0xE00982F5, 0x25F02054, 0x214992D8, 0x706F2B20, 0xDA585E5B];
         for i in 0..5 {
-            let n = cipher.next();
+            let n = cipher.clock_k();
             // assert_eq!(stream[i], n);
             println!("{:08x?} {:08x?}", stream[i], n);
         }
@@ -374,7 +412,7 @@ mod tests {
         // println!("{:08x?}", stream);
 
         for _ in 0..5 {
-            println!("{:08x?}", cipher.next())
+            println!("{:08x?}", cipher.clock_k())
         }
     }
 
@@ -386,7 +424,7 @@ mod tests {
         // println!("{:08x?}", stream);
 
         for _ in 0..5 {
-            println!("{:08x?}", cipher.next())
+            println!("{:08x?}", cipher.clock_k())
         }
     }
 }
