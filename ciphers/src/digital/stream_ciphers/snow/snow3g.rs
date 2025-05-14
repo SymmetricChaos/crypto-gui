@@ -1,4 +1,4 @@
-use utils::byte_formatting::{xor_into_bytes, ByteFormat};
+use utils::byte_formatting::xor_into_bytes;
 
 // https://www.gsma.com/about-us/wp-content/uploads/2014/12/snow3gspec.pdf
 

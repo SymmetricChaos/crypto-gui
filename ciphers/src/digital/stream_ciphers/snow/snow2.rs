@@ -358,12 +358,12 @@ mod tests {
     #[test]
     fn test_keystream_aa() {
         let mut cipher = Snow2::with_key_128(hex!("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
-        let stream = cipher.next_16();
-        println!("{:08x?}", stream);
-
-        // for _ in 0..5 {
-        //     println!("{:08x?}", cipher.next())
-        // }
+        let stream: [u32; 5] = [0xE00982F5, 0x25F02054, 0x214992D8, 0x706F2B20, 0xDA585E5B];
+        for i in 0..5 {
+            let n = cipher.next();
+            // assert_eq!(stream[i], n);
+            println!("{:08x?} {:08x?}", stream[i], n);
+        }
     }
 
     #[test]

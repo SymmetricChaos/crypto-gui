@@ -71,6 +71,28 @@ pub trait BlockCipher<const N: usize> {
     fn get_iv_be(&self) -> Vec<u8>;
     fn get_iv_le(&self) -> Vec<u8>;
 
+    fn encrypt_bytes(&self, bytes: &mut [u8]) {
+        match self.get_mode() {
+            BCMode::Cbc => self.encrypt_cbc(bytes, self.get_iv_be().try_into().unwrap()),
+            BCMode::Ctr => self.encrypt_ctr(bytes, self.get_iv_be().try_into().unwrap()),
+            BCMode::Ecb => self.encrypt_ecb(bytes),
+            BCMode::Pcbc => self.encrypt_pcbc(bytes, self.get_iv_be().try_into().unwrap()),
+            BCMode::Ofb => self.encrypt_ofb(bytes, self.get_iv_be().try_into().unwrap()),
+            BCMode::Cfb => self.encrypt_cfb(bytes, self.get_iv_be().try_into().unwrap()),
+        }
+    }
+
+    fn decrypt_bytes(&self, bytes: &mut [u8]) {
+        match self.get_mode() {
+            BCMode::Cbc => self.decrypt_cbc(bytes, self.get_iv_be().try_into().unwrap()),
+            BCMode::Ctr => self.decrypt_ctr(bytes, self.get_iv_be().try_into().unwrap()),
+            BCMode::Ecb => self.decrypt_ecb(bytes),
+            BCMode::Pcbc => self.decrypt_pcbc(bytes, self.get_iv_be().try_into().unwrap()),
+            BCMode::Ofb => self.decrypt_ofb(bytes, self.get_iv_be().try_into().unwrap()),
+            BCMode::Cfb => self.decrypt_cfb(bytes, self.get_iv_be().try_into().unwrap()),
+        }
+    }
+
     /// Encrypt in Electronic Code Book Mode
     fn encrypt_ecb(&self, bytes: &mut [u8]) {
         assert!(bytes.len() % N == 0);
