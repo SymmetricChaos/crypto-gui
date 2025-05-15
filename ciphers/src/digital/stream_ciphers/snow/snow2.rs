@@ -1,4 +1,4 @@
-use utils::byte_formatting::ByteFormat;
+use utils::byte_formatting::{xor_into_bytes, ByteFormat};
 
 const ALPHA_MUL: [u32; 256] = [
     0x0, 0xE19FCF13, 0x6B973726, 0x8A08F835, 0xD6876E4C, 0x3718A15F, 0xBD10596A, 0x5C8F9679,
@@ -225,6 +225,7 @@ fn alpha_inv(n: u32) -> u32 {
     (n >> 8) ^ ALPHA_INV_MUL[(n & 0xff) as usize]
 }
 
+#[derive(Debug, Clone)]
 pub struct Snow2 {
     pub input_format: ByteFormat,
     pub output_format: ByteFormat,
@@ -274,8 +275,9 @@ impl Snow2 {
         s.words[5] ^= iv[1];
         s.words[6] ^= iv[0];
 
-        s.clock_iv_16();
-        s.clock_iv_16();
+        for _ in 0..32 {
+            s.clock_iv();
+        }
         s.clock_k();
 
         s
@@ -309,65 +311,48 @@ impl Snow2 {
         s.words[5] ^= iv[1];
         s.words[6] ^= iv[0];
 
-        s.clock_iv_16();
-        s.clock_iv_16();
+        for _ in 0..32 {
+            s.clock_iv();
+        }
         s.clock_k();
 
         s
     }
 
-    // Step 16 times in initialization mode
-    fn clock_iv_16(&mut self) {
-        for i in 0..16 {
-            let fsm = self.r1.wrapping_add(self.words[i]) ^ self.r2;
-            self.words[(i + 15) % 16] = alpha_inv(self.words[(i + 4) % 16])
-                ^ self.words[(i + 13) % 16]
-                ^ alpha(self.words[(i + 15) % 16])
-                ^ fsm;
-            let temp = self.r2.wrapping_add(self.words[(i + 10) % 16]);
-            self.r2 = sbox(self.r1);
-            self.r1 = temp;
-        }
-    }
-
-    // Output 16 times in keystream mode, outputting the values
-    fn clock_k_16(&mut self) -> [u32; 16] {
-        let mut out = [0; 16];
-        for i in 0..16 {
-            self.words[(i + 15) % 16] = alpha_inv(self.words[(i + 4) % 16])
-                ^ self.words[(i + 13) % 16]
-                ^ alpha(self.words[(i + 15) % 16])
-                ^ self.r1.wrapping_add(self.words[i])
-                ^ self.r2;
-            let temp = self.r2.wrapping_add(self.words[(i + 10) % 16]);
-            self.r2 = sbox(self.r1);
-            self.r1 = temp;
-            out[i] = self.r1.wrapping_add(self.words[15]) ^ self.r2 ^ self.words[14];
-        }
-        out
-    }
-
-    /// Clock once in keystream mode, outputting the value
-    fn clock_k(&mut self) -> u32 {
-        self.words[15] = alpha_inv(self.words[4])
-            ^ self.words[13]
-            ^ alpha(self.words[15])
-            ^ self.r1.wrapping_add(self.words[0])
-            ^ self.r2;
+    pub fn fsm(&mut self) -> u32 {
+        let out = self.words[0].wrapping_add(self.r1) ^ self.r2;
         let temp = self.r2.wrapping_add(self.words[10]);
         self.r2 = sbox(self.r1);
         self.r1 = temp;
-        let out = self.r1.wrapping_add(self.words[15]) ^ self.r2 ^ self.words[14];
-        self.words.rotate_left(1);
         out
     }
 
-    pub fn encrypt_bytes(&self, bytes: &mut [u8]) {
-        todo!()
+    /// Clock once in IV mode
+    pub fn clock_iv(&mut self) {
+        let v = alpha_inv(self.words[4]) ^ self.words[13] ^ alpha(self.words[15]) ^ self.fsm();
+        self.words.rotate_left(1);
+        self.words[15] = v;
+    }
+
+    /// Clock once in keystream mode, outputting the value
+    pub fn clock_k(&mut self) -> u32 {
+        let out = self.fsm() ^ self.words[15];
+        let v = alpha_inv(self.words[4]) ^ self.words[13] ^ alpha(self.words[15]);
+        self.words.rotate_left(1);
+        self.words[15] = v;
+        out
     }
 
     pub fn encrypt_bytes_mut(&mut self, bytes: &mut [u8]) {
-        todo!()
+        let mut keystream = Vec::new();
+        for _ in 0..(bytes.len() / 4) {
+            keystream.extend(self.clock_k().to_be_bytes());
+        }
+        xor_into_bytes(bytes, &keystream);
+    }
+
+    pub fn encrypt_bytes(&self, bytes: &mut [u8]) {
+        self.clone().encrypt_bytes_mut(bytes);
     }
 }
 
@@ -380,17 +365,17 @@ mod tests {
 
     use super::*;
 
-    #[test]
-    fn test_keystream_80() {
-        let mut cipher =
-            Snow2::with_key_and_iv_128(hex!("80000000000000000000000000000000"), [0; 4]);
-        // let stream = cipher.next_16();
-        // println!("{:08x?}", stream);
+    // #[test]
+    // fn test_keystream_80() {
+    //     let mut cipher =
+    //         Snow2::with_key_and_iv_128(hex!("80000000000000000000000000000000"), [0; 4]);
+    //     // let stream = cipher.next_16();
+    //     // println!("{:08x?}", stream);
 
-        for _ in 0..5 {
-            println!("{:08x?}", cipher.clock_k())
-        }
-    }
+    //     for _ in 0..5 {
+    //         println!("{:08x?}", cipher.clock_k())
+    //     }
+    // }
 
     #[test]
     fn test_keystream_aa() {
@@ -404,27 +389,27 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_keystream_80_iv() {
-        let mut cipher =
-            Snow2::with_key_and_iv_128(hex!("80000000000000000000000000000000"), [4, 3, 2, 1]);
-        // let stream = cipher.next_16();
-        // println!("{:08x?}", stream);
+    // #[test]
+    // fn test_keystream_80_iv() {
+    //     let mut cipher =
+    //         Snow2::with_key_and_iv_128(hex!("80000000000000000000000000000000"), [4, 3, 2, 1]);
+    //     // let stream = cipher.next_16();
+    //     // println!("{:08x?}", stream);
 
-        for _ in 0..5 {
-            println!("{:08x?}", cipher.clock_k())
-        }
-    }
+    //     for _ in 0..5 {
+    //         println!("{:08x?}", cipher.clock_k())
+    //     }
+    // }
 
-    #[test]
-    fn test_keystream_aa_iv() {
-        let mut cipher =
-            Snow2::with_key_and_iv_128(hex!("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"), [4, 3, 2, 1]);
-        // let stream = cipher.next_16();
-        // println!("{:08x?}", stream);
+    // #[test]
+    // fn test_keystream_aa_iv() {
+    //     let mut cipher =
+    //         Snow2::with_key_and_iv_128(hex!("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"), [4, 3, 2, 1]);
+    //     // let stream = cipher.next_16();
+    //     // println!("{:08x?}", stream);
 
-        for _ in 0..5 {
-            println!("{:08x?}", cipher.clock_k())
-        }
-    }
+    //     for _ in 0..5 {
+    //         println!("{:08x?}", cipher.clock_k())
+    //     }
+    // }
 }
