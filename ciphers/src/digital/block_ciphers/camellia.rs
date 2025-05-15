@@ -361,7 +361,6 @@ macro_rules! build_camellia {
 }
 
 build_camellia!(Camellia128, 26);
-
 impl Camellia128 {
     pub fn ksa(&mut self, bytes: [u8; 16]) {
         let kl = (
@@ -383,11 +382,9 @@ impl Camellia128 {
         key_schedule_26(&mut self.subkeys, kl, ka);
     }
 }
-
 crate::impl_cipher_for_block_cipher!(Camellia128, 16);
 
 build_camellia!(Camellia192, 34);
-
 impl Camellia192 {
     pub fn ksa(&mut self, bytes: [u8; 24]) {
         let kl = (
@@ -415,11 +412,9 @@ impl Camellia192 {
         key_schedule_34(&mut self.subkeys, kl, kr, ka, kb);
     }
 }
-
-// crate::impl_cipher_for_block_cipher!(Camellia192, 16);
+crate::impl_cipher_for_block_cipher!(Camellia192, 16);
 
 build_camellia!(Camellia256, 34);
-
 impl Camellia256 {
     pub fn ksa(&mut self, bytes: [u8; 32]) {
         let kl = (

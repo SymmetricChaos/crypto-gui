@@ -276,7 +276,7 @@ impl Snow2 {
 
         s.clock_iv_16();
         s.clock_iv_16();
-        s.next();
+        s.clock_k();
 
         s
     }
@@ -311,7 +311,7 @@ impl Snow2 {
 
         s.clock_iv_16();
         s.clock_iv_16();
-        s.next();
+        s.clock_k();
 
         s
     }

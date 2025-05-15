@@ -196,7 +196,7 @@ mod tests {
 
     #[test]
     fn mul() {
-        assert_eq!(mul_x(0x69, 0x1b), 0xd2); // pretty sure the reference example is wrong
+        assert_eq!(mul_x(0x69, 0x1b), 0xd2); // the reference example is wrong
         assert_eq!(mul_x(0x96, 0x1b), 0x37);
     }
 
