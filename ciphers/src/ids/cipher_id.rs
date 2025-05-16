@@ -70,6 +70,7 @@ cipher_ids_and_names!(
     Hebern, "Hebern";
     Hutton, "Hutton";
     Idea, "IDEA";
+    Isaac, "ISAAC";
     Kasumi, "KASUMI";
     Khufu, "Khufu";
     Khafre, "Khafre";

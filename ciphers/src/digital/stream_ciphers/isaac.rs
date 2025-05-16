@@ -1,7 +1,6 @@
-use std::num::Wrapping;
-
 use itertools::Itertools;
-use utils::byte_formatting::ByteFormat;
+use std::num::Wrapping;
+use utils::byte_formatting::{xor_into_bytes, ByteFormat};
 
 macro_rules! mix(
     ($a:expr) => (
@@ -19,10 +18,10 @@ macro_rules! mix(
 
 #[derive(Clone)]
 pub struct Isaac {
-    array: [Wrapping<u32>; 256],
-    a: Wrapping<u32>,
-    b: Wrapping<u32>,
-    c: Wrapping<u32>,
+    pub array: [Wrapping<u32>; 256],
+    pub a: Wrapping<u32>,
+    pub b: Wrapping<u32>,
+    pub c: Wrapping<u32>,
     rand_rsl: [Wrapping<u32>; 256], // effectively the output state (I do not know why it is called this)
     ctr: usize,                     // point to the current position in rand_rsl
     pub input_format: ByteFormat,
@@ -66,7 +65,7 @@ impl Isaac {
         self.ctr = 0;
     }
 
-    fn init(&mut self, extra_pass: bool) {
+    pub fn init(&mut self, extra_pass: bool) {
         self.a = Wrapping(0);
         self.b = Wrapping(0);
         self.c = Wrapping(0);
@@ -137,12 +136,16 @@ impl Isaac {
         (self.next_u32() % 95 + 32) as u8
     }
 
-    pub fn encrypt_bytes(&self, bytes: &[u8]) -> Vec<u8> {
-        let mut rng = self.clone();
-        bytes
-            .into_iter()
-            .map(|b| (rng.next_u32() as u8 ^ b))
-            .collect_vec()
+    pub fn encrypt_bytes_mut(&mut self, bytes: &mut [u8]) {
+        let mut keystream = Vec::new();
+        for _ in 0..(bytes.len() / 4) {
+            keystream.extend(self.next_u32().to_be_bytes());
+        }
+        xor_into_bytes(bytes, &keystream);
+    }
+
+    pub fn encrypt_bytes(&self, bytes: &mut [u8]) {
+        self.clone().encrypt_bytes_mut(bytes);
     }
 
     // Used by Rosetta code but not recommended as it severely reduces security

@@ -549,7 +549,7 @@
     "Names": [
       "ISAAC"
     ],
-    "Description": "ISAAC (Indirection, Shift, Accumulate, Add, and Count) is a stream cipher based on the cryptographic PRNG of the same name.",
+    "Description": "ISAAC (Indirection, Shift, Accumulate, Add, and Count) is a stream cipher based on the cryptographic PRNG of the same name. Jenkins does not suggest a method for keying ISAAC other than defining the entire state array.",
     "Authors": "Robert Jenkins",
     "Publication": "1993",
     "Traits": [

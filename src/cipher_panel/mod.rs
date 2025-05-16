@@ -44,6 +44,7 @@ mod grille_controls;
 mod hebern_controls;
 mod hutton_controls;
 mod idea_controls;
+mod isaac_controls;
 mod lea_controls;
 mod m209_controls;
 mod m94_controls;
@@ -328,6 +329,7 @@ pub struct CipherInterface {
     aes_gcm: aes_gcm_controls::AesGcmFrame,
     chacha: chacha_controls::ChaChaFrame,
     chacha20poly1305: chacha20_poly1305_controls::ChaCha20Poly1305Frame,
+    isaac: isaac_controls::IsaacFrame,
     rc4: rc4_controls::Rc4Frame,
     salsa20: salsa20_controls::Salsa20Frame,
     snow3g: snow3g_controls::Snow3GFrame,
@@ -493,6 +495,7 @@ impl CipherInterface {
                 CipherId::AesGcm,
                 CipherId::ChaCha,
                 CipherId::ChaCha20Poly1305,
+                CipherId::Isaac,
                 CipherId::Rc4,
                 CipherId::Salsa20,
                 CipherId::Snow3G,
@@ -557,6 +560,7 @@ impl CipherInterface {
             CipherId::Hebern => &mut self.hebern,
             CipherId::Hutton => &mut self.hutton,
             CipherId::Idea => &mut self.idea,
+            CipherId::Isaac => &mut self.isaac,
             CipherId::Lea => &mut self.lea,
             CipherId::M209 => &mut self.m209,
             CipherId::M94 => &mut self.m94,
