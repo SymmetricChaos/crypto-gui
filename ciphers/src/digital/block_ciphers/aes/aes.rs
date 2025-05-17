@@ -27,6 +27,8 @@ impl_cipher_for_block_cipher!(Aes256, 16);
 #[cfg(test)]
 mod aes128_tests {
 
+    use utils::byte_formatting::make_u32s_be;
+
     use crate::Cipher;
 
     use super::*;
@@ -62,7 +64,6 @@ mod aes128_tests {
     }
 
     #[test]
-    #[ignore]
     fn test_key_schedule_128_1() {
         let mut cipher = Aes128::default();
 
@@ -75,13 +76,18 @@ mod aes128_tests {
         ];
         let sub_keys = cipher.round_keys;
 
-        println!("{:08x?} {:02x?}", test_sub_keys[0], sub_keys[0]);
-        println!("{:08x?} {:02x?}", test_sub_keys[1], sub_keys[1]);
-        println!("{:08x?} {:02x?}", test_sub_keys[2], sub_keys[2]);
+        let sub_key_word: [[u32; 4]; 3] = [
+            make_u32s_be(&sub_keys[0]),
+            make_u32s_be(&sub_keys[1]),
+            make_u32s_be(&sub_keys[2]),
+        ];
+
+        assert_eq!(test_sub_keys[0], sub_key_word[0]);
+        assert_eq!(test_sub_keys[1], sub_key_word[1]);
+        assert_eq!(test_sub_keys[2], sub_key_word[2]);
     }
 
     #[test]
-    #[ignore]
     fn test_key_schedule_128_2() {
         let mut cipher = Aes128::default();
 
@@ -94,13 +100,18 @@ mod aes128_tests {
         ];
         let sub_keys = cipher.round_keys;
 
-        println!("{:08x?} {:02x?}", test_sub_keys[0], sub_keys[0]);
-        println!("{:08x?} {:02x?}", test_sub_keys[1], sub_keys[1]);
-        println!("{:08x?} {:02x?}", test_sub_keys[2], sub_keys[2]);
+        let sub_key_word: [[u32; 4]; 3] = [
+            make_u32s_be(&sub_keys[0]),
+            make_u32s_be(&sub_keys[1]),
+            make_u32s_be(&sub_keys[2]),
+        ];
+
+        assert_eq!(test_sub_keys[0], sub_key_word[0]);
+        assert_eq!(test_sub_keys[1], sub_key_word[1]);
+        assert_eq!(test_sub_keys[2], sub_key_word[2]);
     }
 
     #[test]
-    #[ignore]
     fn test_key_schedule_192() {
         let mut cipher = Aes192::default();
 
@@ -115,13 +126,18 @@ mod aes128_tests {
         ];
         let sub_keys = cipher.round_keys;
 
-        println!("{:08x?} {:02x?}", test_sub_keys[0], sub_keys[0]);
-        println!("{:08x?} {:02x?}", test_sub_keys[1], sub_keys[1]);
-        println!("{:08x?} {:02x?}", test_sub_keys[2], sub_keys[2]);
+        let sub_key_word: [[u32; 4]; 3] = [
+            make_u32s_be(&sub_keys[0]),
+            make_u32s_be(&sub_keys[1]),
+            make_u32s_be(&sub_keys[2]),
+        ];
+
+        assert_eq!(test_sub_keys[0], sub_key_word[0]);
+        assert_eq!(test_sub_keys[1], sub_key_word[1]);
+        assert_eq!(test_sub_keys[2], sub_key_word[2]);
     }
 
     #[test]
-    #[ignore]
     fn test_key_schedule_256() {
         let mut cipher = Aes256::default();
 
@@ -137,9 +153,15 @@ mod aes128_tests {
         ];
         let sub_keys = cipher.round_keys;
 
-        println!("{:08x?} {:02x?}", test_sub_keys[0], sub_keys[0]);
-        println!("{:08x?} {:02x?}", test_sub_keys[1], sub_keys[1]);
-        println!("{:08x?} {:02x?}", test_sub_keys[2], sub_keys[2]);
+        let sub_key_word: [[u32; 4]; 3] = [
+            make_u32s_be(&sub_keys[0]),
+            make_u32s_be(&sub_keys[1]),
+            make_u32s_be(&sub_keys[2]),
+        ];
+
+        assert_eq!(test_sub_keys[0], sub_key_word[0]);
+        assert_eq!(test_sub_keys[1], sub_key_word[1]);
+        assert_eq!(test_sub_keys[2], sub_key_word[2]);
     }
 
     #[test]
