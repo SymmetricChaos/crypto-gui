@@ -1,6 +1,6 @@
 use super::{
     ghash::Ghash,
-    multiplication::{mul2, mul3},
+    aes_multiplication::{mul2, mul3},
     sbox::{sbox, sub_word},
 };
 use itertools::Itertools;

@@ -1490,6 +1490,7 @@ name = "hashers"
 version = "0.1.0"
 dependencies = [
  "crypto-bigint",
+ "hex-literal",
  "itertools 0.10.5",
  "json",
  "num 0.4.3",

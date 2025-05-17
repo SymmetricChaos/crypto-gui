@@ -381,11 +381,11 @@ mod tests {
     fn test_keystream_aa() {
         let mut cipher =
             Snow2::with_key_and_iv_128(hex!("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"), [0; 4]);
-        let stream: [u32; 5] = [0xE00982F5, 0x25F02054, 0x214992D8, 0x706F2B20, 0xDA585E5B];
+        let correct_stream: [u32; 5] = [0xE00982F5, 0x25F02054, 0x214992D8, 0x706F2B20, 0xDA585E5B];
         for i in 0..5 {
             let n = cipher.clock_k();
-            // assert_eq!(stream[i], n);
-            println!("{:08x?} {:08x?}", stream[i], n);
+            // assert_eq!(correct_stream[i], n);
+            println!("{:08x?} {:08x?}", correct_stream[i], n);
         }
     }
 

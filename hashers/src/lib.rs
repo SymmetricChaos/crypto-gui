@@ -35,6 +35,7 @@ pub mod pbkdf1;
 pub mod pbkdf2;
 pub mod pearson;
 pub mod poly1305;
+pub mod polyval;
 pub mod poseidon;
 pub mod radio_gatun;
 pub mod ripemd;
@@ -115,7 +116,7 @@ pub mod vsh;
 //     }
 //     fn finalize(mut self) -> Vec<u8> {
 //     }
-//     
+//
 // }
 // crate:stateful_hash_tests!(
 //     test1,
